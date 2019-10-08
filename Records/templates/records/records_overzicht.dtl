@@ -1,0 +1,31 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2019 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+{% block extrastyle %}<link rel="stylesheet" type="text/css" href="{% static 'records/style.css' %}">{% endblock %}
+
+{% block title %}Welkom bij het RECORDS{% endblock %}
+
+{% block pagina %}
+
+<p>Nederlandse Handboogsport Records (overzicht)</p>
+
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="records_overzicht" %}
+
+<ul>
+<li><a href="{% url 'Records:indiv' %}">Individuele records</a></li>
+<li>Team records</li>
+<li><a href="{% url 'Records:zoek' %}">Zoek in de records</a></li>
+</ul>
+
+<p>De nieuwste records:</p>
+<ul>
+{% for obj in object_list %}
+<li><a href="{{ obj.url }}"}>{{ obj.volg_nr }}</a>: {{ obj.datum }} - {{ obj.naam }} - {{ obj.discipline }} - {{ obj.soort_record }} - {{ obj.score }}</li>
+{% endfor %}
+</ul>
+
+{% endblock %}

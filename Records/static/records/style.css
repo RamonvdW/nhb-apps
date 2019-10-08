@@ -1,0 +1,12 @@
+tbody.gerelateerd tr:nth-child(odd) {
+    background-color: #ccc;
+}
+
+table.record {
+    border-collapse: collapse;
+}
+
+tbody.record td {
+    border-top: 1px solid black;
+    border-bottom: 1px solid black;
+}

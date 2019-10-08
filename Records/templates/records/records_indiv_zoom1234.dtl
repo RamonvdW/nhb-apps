@@ -1,0 +1,23 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2019 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+{% block extrastyle %}<link rel="stylesheet" type="text/css" href="{% static 'records/style.css' %}">{% endblock %}
+
+{% block title %}Welkom bij de RECORDS{% endblock %}
+
+{% block pagina %}
+<p>Nederlandse Handboogsport Records (Zoom1234)</p>
+
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="records_indiv_zoom1234" %}
+
+<ul>
+{% for obj in object_list %}
+    <li><a href="{{ obj.sel_url }}">{{ obj.sel_str}}</a></li>
+{% endfor %}
+</ul>
+
+{% endblock %}
