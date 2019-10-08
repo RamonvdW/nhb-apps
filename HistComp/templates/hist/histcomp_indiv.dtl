@@ -1,0 +1,77 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2019 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block extrastyle %}<link rel="stylesheet" type="text/css" href="{% static 'histcomp/indiv.css' %}">{% endblock %}
+
+{% block title %}Welkom in de INDIVIDUELE geschiedenis{% endblock %}
+
+{% block pagina %}
+
+<p>Uitslag van de {{ comp_type_str }} individuele competitie, seizoen {{ jaar }}, klasse {{ klasse }}.</p>
+
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="histcomp_indiv" %}
+
+{% if is_paginated %}
+<p>Pagina {{ page_obj.number }} van de {{ paginator.num_pages }}</p>
+<p>Spring naar een andere pagina:{% for linkname, url in page_links %} [<a href="{{ url }}">{{ linkname }}</a>]{% endfor %}</p>
+{% endif %}
+
+<form method="get" action="{{ filter_url }}">
+{{ form.filter.label_tag }} {{ form.filter }}
+&nbsp;<input type="submit" value="Filter">
+{% if unfiltered_url %}&nbsp;<a href="{{ unfiltered_url }}">Clear</a>{% endif %}
+</form>
+
+&nbsp;
+
+{% if object_list.all %}
+<table>
+<thead class="table-header">
+ <tr>
+  <th class="rank-nr">Nr</th>
+  <th colspan="2">Schutter</th>
+  <th colspan="2">Vereniging</th>
+  <th colspan="7">Scores</th>
+  <th>Totale score</th>
+  <th>Gemiddelde pijl</th>
+ </tr>
+</thead>
+
+{% for obj in object_list %}
+<tr>
+ <td class="rank-nr">{{ obj.rank }}</td>
+ <td>[{{ obj.schutter_nr }}]</td>
+ <td>{{ obj.schutter_naam }}</td>
+ <td>[{{ obj.vereniging_nr }}]</td>
+ <td>{{ obj.vereniging_naam }}</td>
+ <td class="score">{{ obj.score1 }}</td>
+ <td class="score">{{ obj.score2 }}</td>
+ <td class="score">{{ obj.score3 }}</td>
+ <td class="score">{{ obj.score4 }}</td>
+ <td class="score">{{ obj.score5 }}</td>
+ <td class="score">{{ obj.score6 }}</td>
+ <td class="score">{{ obj.score7 }}</td>
+ <td class="score">{{ obj.totaal }}</td>
+ <td class="gemiddelde-pijl">{{ obj.gemiddelde }}</td>
+</tr>
+{% endfor %}
+</table>
+
+{% if is_paginated %}
+<p>Spring naar een andere pagina:{% for linkname, url in page_links %} [<a href="{{ url }}">{{ linkname }}</a>]{% endfor %}</p>
+{% endif %}
+
+{% if all_url and not unfiltered_url %}
+<p>Laad <a href="{{ all_url }}">alle {{ all_count }}</a> regels.</p>
+{% endif %}
+
+{% else %}
+Geen resultaten gevonden.
+{% endif %}
+
+{% endblock %}

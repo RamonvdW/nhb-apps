@@ -1,0 +1,63 @@
+.table-header {
+    font-weight: bold;
+}
+
+.rank-nr {
+    text-align: right;
+}
+
+.score {
+    text-align: right;
+}
+
+.gemiddelde-pijl {
+    text-align: right;
+}
+
+tbody tr:nth-child(odd) {
+    background-color: #ccc;
+}
+
+@media only screen and (max-width: 800px) {
+    table, thead, tbody, th, td, tr {
+        display: block;
+    }
+
+    thead tr {
+        display: none;
+    }
+
+    tr {
+        border: none;
+    }
+
+    td {
+        border: none;
+        border-bottom: 1px solid gray;
+        position: relative;
+        padding-left: 45%;
+        white-space: nowrap;
+    }
+
+    .rank-nr, .score, .gemiddelde-pijl {
+        text-align: left;
+    }
+
+    td:before {
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        padding-right: 10px;
+        white-space: nowrap;
+    }
+
+    td:nth-of-type(2) { rowspan=2; }
+
+    td:nth-of-type(1):before { font-weight: bold; content: "Nr"; }
+    td:nth-of-type(2):before { font-weight: bold; content: "Schutter"; }
+    td:nth-of-type(4):before { font-weight: bold; content: "Vereniging"; }
+    td:nth-of-type(6):before { font-weight: bold; content: "Scores"; }
+    td:nth-of-type(13):before { font-weight: bold; content: "Totale score"; }
+    td:nth-of-type(14):before { font-weight: bold; content: "Gemiddelde pijl"; }
+}
+
