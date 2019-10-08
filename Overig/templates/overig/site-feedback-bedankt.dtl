@@ -1,0 +1,27 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2019 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block extrastyle %}<!--
+  ~ Copyright (c) 2019 Ramon van der Winkel.
+  ~ All rights reserved.
+  ~ Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+  -->
+
+<link rel="stylesheet" type="text/css" href="{% static 'overig/style.css' %}">{% endblock %}
+
+{% block title %}Welkom op het site-feedback FORMULIER{% endblock %}
+
+{% block pagina %}
+
+<p>Dit is het site-feedback BEDANKT bericht</p>
+
+<p>Bedankt voor het delen van je mening. Voel je vrij om deze functie vaker te gebruiken. We staan open voor alle tips en tops!</p>
+
+<p><a href="{% url 'Plein:plein' %}">Terug naar het plein</a></p>
+
+{% endblock %}

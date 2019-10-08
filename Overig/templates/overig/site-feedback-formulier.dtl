@@ -1,0 +1,56 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2019 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block extrastyle %}<link rel="stylesheet" type="text/css" href="{% static 'overig/style.css' %}">{% endblock %}
+
+{% block title %}Welkom op het site-feedback FORMULIER{% endblock %}
+
+{% block pagina %}
+
+<p>Dit is het site-feedback FORMULIER</p>
+
+<form method="post" action="{{ formulier_url }}">
+{% csrf_token %}
+<table class="formulier-tabel">
+    <tr>
+        <td>Jouw naam:</td>
+        <td>{{ gebruiker_naam }}</td>
+    </tr>
+    <tr>
+        <td class="spacing">&nbsp;</td>
+    </tr>
+    <tr>
+        <td colspan="2" valign="top">{{ form.bevinding.label_tag }}</td>
+    </tr>
+    <tr>
+        <td class="spacing">&nbsp;</td>
+        <td>{{ form.bevinding }}</td>
+    </tr>
+    <tr>
+        <td colspan="2">&nbsp;</td>
+    </tr>
+    <tr>
+        <td colspan="2" valign="top">{{ form.feedback.label_tag }}</td>
+    </tr>
+    <tr>
+        <td class="spacing">&nbsp;</td>
+        <td>{{ form.feedback }}</td>
+    </tr>
+    <tr>
+        <td class="spacing">&nbsp;</td>
+        <td align="left"><input class="site-button formulier-button-verstuur" type="submit" value="Verstuur"></td>
+    </tr>
+</table>
+
+{% if form.errors %}
+<p>Fout:</p>{% for error in form.non_field_errors %}<p>{{ error|escape }}</p>{% endfor %}
+{% endif %}
+
+</form>
+
+{% endblock %}

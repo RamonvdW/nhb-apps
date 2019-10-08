@@ -1,0 +1,14 @@
+{% comment %}
+                Copyright (c) 2019 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+
+{% load static %}
+<div class="site-sidebar-rechts">
+<div class="site-feedback">Wat vind je van deze pagina?
+<a href="{% url 'Overig:feedback-bevinding' bevinding='plus' op_pagina=op_pagina %}"><img src="{% static 'overig/smiley4_plus.png' %}" width=50 height=50 alt="min"></a>
+<a href="{% url 'Overig:feedback-bevinding' bevinding='nul'  op_pagina=op_pagina %}"><img src="{% static 'overig/smiley4_nul.png'  %}" width=50 height=50 style="padding-left:10px; padding-right:10px;" alt="nul"></a>
+<a href="{% url 'Overig:feedback-bevinding' bevinding='min'  op_pagina=op_pagina %}"><img src="{% static 'overig/smiley4_min.png'  %}" width=50 height=50 alt="plus"></a>
+</div>
+</div>
