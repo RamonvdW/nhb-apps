@@ -1,0 +1,47 @@
+{% comment %}
+                Copyright (c) 2019 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}{% endblock %}</title>
+  <link rel="stylesheet" type="text/css" href="{% static "plein/site_layout.css" %}">
+  {% block extrastyle %}{% endblock %}
+</head>
+<body>
+<ul class="site-header">
+  <img class="site-header-logo" src="/static/plein/logo_small_metal-teal.png" alt="site logo">
+  <p class="site-header-title">James Test Site</p>
+{% block wiebenik %}
+  {% if user.is_authenticated %}
+    <div class="site-header-account-dropdown">
+      <p class="site-header-account-dropdown-button">{{ user.get_first_name }}</p>
+      <div class="site-header-account-dropdown-content">
+        <a href="{% url 'Account:logout' %}">Uitloggen</a>
+      </div>
+    </div>
+  {% else %}
+    <li class="site-header-noaccount">
+      <a href="{% url 'Account:login' %}">LOG IN</a>
+    </li>
+  {% endif %}
+{% endblock %}
+</ul>
+
+<div class="site-broodkruimels">
+  <div class="site-broodkruimels-tekst">
+  {% block broodkruimels %}
+    {% for tekst,url in broodkruimels %}
+      {% if not forloop.first %}&nbsp;>&nbsp;{% endif %}<a class="site-broodkruimels-link" href="{{ url }}">{{ tekst }}</a>
+    {% endfor %}
+  {% endblock %}
+  </div>
+</div>
+<div class="site-pagina">
+{% block pagina %}Pagina{% endblock %}
+</div>
+</body>
+</html>

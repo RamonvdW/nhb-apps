@@ -1,0 +1,29 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2019 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+{% block extrastyle %}<link rel="stylesheet" type="text/css" href="{% static 'plein/style.css' %}">{% endblock %}
+
+{% block title %}Welkom op het PLEIN{% endblock %}
+
+{% block pagina %}
+
+<p>Welkom bij James. Dit wordt het PLEIN.</p>
+<p>Boven in de hoek zit een knop om in te loggen.</p>
+
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="plein" %}
+
+<ul>
+    <li><a href="{% url 'HistComp:allejaren' %}">Competitie uitslagen</a></li>
+    <li><a href="{% url 'Records:overzicht' %}">Nederlandse Records</a></li>
+    <li><a href="{% url 'Plein:privacy' %}">Informatie over Privacy</a></li>
+    <li><a href="{% url 'Account:login' %}">Log hier in</a> met je account of <a href="{% url 'Account:registreer' %}">maak een account aan</a></li>
+    {% if allow_admin %}
+    <li><a href="/admin/">Admin site</a></li>
+    {% endif %}
+</ul>
+
+{% endblock %}

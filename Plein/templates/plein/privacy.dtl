@@ -1,0 +1,60 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2019 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+{% block extrastyle %}
+
+<link rel="stylesheet" type="text/css" href="{% static 'plein/style.css' %}">{% endblock %}
+
+{% block title %}Welkom op d PRIVACYMELDING{% endblock %}
+
+{% block pagina %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="privacy" %}
+
+<h1>Over privacy</h1>
+
+<p>Deze pagina beschrijft hoe deze website omgaat met jouw privacy.</p>
+
+<h2>Cookies</h2>
+
+<p>Tijdens een bezoek aan deze website kunnen wij 'cookies' naar jouw browser sturen.
+Dit zijn kleine bestanden die op jouw apparaat opgeslagen kunnen worden
+en op een later moment weer naar de website worden gestuurd.</p>
+
+<p>De cookies worden gebruikt om je inlog bij te houden en om onze website te beschermen.
+Dit zijn puur functionele cookies en bevatten geen persoonsgegevens.</p>
+
+<p>Deze website gebruikt geen tracking cookies waarvoor we je toestemming nodig hebben.
+Daarom krijg je bij deze website geen vraag of je cookies wilt accepteren.</p>
+
+<h2>Persoonsgegevens</h2>
+
+<p>Een groot deel van deze website is gemaakt om informatie te tonen die voor jou interessant is.</p>
+
+<p>Als je een account aanmaakt en inlogt dan weten we wie je bent en kunnen we deze informatie tonen.</p>
+
+<p>Om je te kunnen identificeren gebruiken we persoonsgegevens die bekend zijn bij de NHB,
+waaronder je NHB nummer, volledig naam en e-mail adres.</p>
+
+<p>Andere gegevens die verzameld worden zijn het IP adres wat je gebruikt om deze website te benaderen,
+informatie over je browser, het tijdstip waarop je de website gebruikt en wanneer je inlogt.</p>
+
+<h2>Publicaties</h2>
+
+<p>Wedstrijden en competities hebben openbare deelnemerslijsten en uitslagen.</p>
+
+<p>Als je meedoet aan een wedstrijd of competitie dan worden de volgende persoonsgegevens openbaar gemaakt:
+je volledige naam, de vereniging waar je lid bent en je wedstrijdklasse (bijvoorbeeld 'Heren Recuve Senioren').
+Ook je behaalde scores en ranking (bijvoorbeeld "21e plaats") worden gepubliceerd.</p>
+
+<p>Als je een Nederlands Record behaald hebt dan worden dezelfde persoonsgegevens openbaar gemaakt.</p>
+
+<h2>Contact NHB</h2>
+
+<p>Alle vragen en verzoeken over privacy kunnen gericht worden aan de Nederlandse Handboog Bond
+via info@handboogsport.nl.</p>
+
+{% endblock %}

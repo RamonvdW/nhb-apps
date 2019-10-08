@@ -1,0 +1,213 @@
+:root {
+    --site-background-color: rgba(255,200,200,1);
+    --hover-transition-duration: 0.5s;
+
+    --button-color: #3498dd;
+    --button-text-color: white;
+    --button-border: 1px solid var(--button-color);
+    --button-border-radius: 5px;
+    --button-font: bold 16px sans-serif;
+    --button-hover-color: var(--button-text-color);
+    --button-hover-text-color: var(--button-color);
+
+    --secondary-button-color: white;
+    --secondary-button-text-color: #3498dd;
+    --secondary-button-border: 1px solid var(--button-color);
+    --secondary-button-border-radius: 5px;
+    --secondary-button-font: bold 14px sans-serif;
+    --secondary-button-hover-color: var(--secondary-button-text-color);
+    --secondary-button-hover-text-color: var(--secondary-button-color);
+
+    --input-field-background-color:
+    --input-field-text-color: black;
+    --input-field-border: 1px solid black;
+    --input-field-border-radius: 4px;
+    --input-field-font: 16px;
+
+    --dialog-box-border: 2px solid gray;
+    --dialog-box-border-radius: 5px;
+    --dialog-background-color: white;
+    --dialog-text-color: black;
+    --dialog-box-shadow: 6px 6px 6px rgba(0,0,0,0.35);
+    --dialog-box-font: 16px;
+}
+
+a:link, a:visited {
+    text-decoration: none;
+}
+
+body {
+    background-color: var(--site-background-color);
+    font-family: sans-serif;
+    margin: 0;
+    padding: 0;
+    display: block;
+}
+
+.site-header {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: lightblue;
+    height: 37px;
+}
+
+.site-header-logo {
+    position: absolute;
+    left: 1px;
+    top: 1px;
+    height: 35px;
+}
+
+.site-header-title {
+    color: black;
+    margin: 0;
+    text-align: center;
+    font-size: 30px;
+    margin-top: 2px;
+}
+
+.site-header-noaccount {
+    position: absolute;
+    right: 0px;
+    top: 0px;
+    display: inline-block;
+    border-left: 2px solid black;
+    padding-top: 12px;
+    padding-bottom: 7px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.site-header-noaccount a {
+    text-decoration: none;
+    color: black;
+}
+
+.site-header-noaccount:hover {
+    background-color: Gray;
+    transition-duration: 0.5s;
+}
+
+.site-header-account-dropdown {
+    position: absolute;
+    right: 2px;
+    top: 0px;
+    display: inline-block;
+    height: 37px;
+    border-left: 2px solid black;
+}
+
+.site-header-account-dropdown-button {
+    display: inline-block;
+    margin: 0;
+    line-height: 1.5em;
+    vertical-align: middle;
+    padding-top: 12px;
+    padding-bottom: 7px;
+    padding-left: 10px;
+    padding-right: 10px;
+    cursor: pointer;
+}
+
+.site-header-account-dropdown-content {
+    display: none;
+    position: absolute;
+    right: 0px;
+    background-color: lightblue;
+    min-width: 100px;
+    padding: 10px 10px 10px 10px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0,2);
+    z-index: 1;
+}
+
+.site-header-account-dropdown-content a {
+    display: block;
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    border-radius: 5px;
+}
+
+.site-header-account-dropdown-content a:hover {
+    background-color: #f1f1f1;
+    transition-duration: 0.5s;
+}
+
+.site-header-account-dropdown:hover .site-header-account-dropdown-content {
+    display: block;
+}
+
+.site-broodkruimels {
+    margin-top: 1px;
+    background-color: gray;
+    padding-left: 10px;
+    text-align: left;
+}
+
+.site-broodkruimels-tekst {
+    padding-top: 0.25em;
+    color: white;
+}
+
+.site-broodkruimels-link {
+    text-decoration: none;
+    color: white;
+    cursor: pointer;
+}
+
+.site-broodkruimels-link:hover {
+    text-decoration: underline;
+    color: blue;
+}
+
+.site-pagina {
+    margin-top: 10px;
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+.site-sidebar-rechts {
+    width: 230px;
+    float: right;
+    background-color: red;
+    border: var(--dialog-box-border);
+    border-radius: var(--dialog-box-border-radius);
+    box-shadow: var(--dialog-box-shadow);
+    background-color: var(--dialog-background-color);
+    text-align: center;
+    margin: 10px;
+}
+
+.site-feedback {
+    display: inline-block;
+}
+
+input[type=submit] {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
+.site-button {
+    padding: 10px;
+    background-color: var(--button-color);
+    color: var(--button-text-color);
+    font: var(--button-font);
+    border: var(--button-border);
+    border-radius: var(--button-border-radius);
+    cursor: pointer;
+}
+
+@media only screen and (max-width: 400px) {
+    .site-header-logo {
+        display: none;
+    }
+    .site-header-title {
+        display: none;
+    }
+    .site-sidebar-rechts {
+        display: none;
+    }
+}
