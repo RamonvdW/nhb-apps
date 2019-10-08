@@ -1,0 +1,71 @@
+# -*- coding: utf-8 -*-
+
+#  Copyright (c) 2019 Ramon van der Winkel.
+#  All rights reserved.
+#  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+
+from django import forms
+
+
+class LoginForm(forms.Form):
+    """
+        Dit formulier wordt gebruikt om in te loggen
+    """
+    login_naam = forms.CharField(
+                        label='Inlog naam',
+                        max_length=50,
+                        required=False,
+                        widget=forms.TextInput(attrs={'autofocus': True}))
+    wachtwoord = forms.CharField(
+                        max_length=50,
+                        required=False,
+                        widget=forms.PasswordInput())
+
+    def is_valid(self):
+        """
+            Deze methode wordt gebruikt door views::login om de input
+            velden te controleren als op de Log In button gedrukt is.
+
+            Bij problemen met de input wordt een error toegevoegd
+            die door login.dtl in het formulier getoond worden aan de gebruiker.
+        """
+        valid = super(forms.Form, self).is_valid()
+        if valid:
+            login_naam = self.cleaned_data.get("login_naam")
+            wachtwoord = self.cleaned_data.get("wachtwoord")
+            # print("cleaned_data: %s" % repr(self.cleaned_data))
+            if login_naam == "" or wachtwoord == "":
+                self.add_error(None, 'Niet alle velden zijn ingevuld')
+                valid = False
+        return valid
+
+
+class RegistreerForm(forms.Form):
+    """
+        Dit formulier wordt gebruikt om een nieuw account aan te maken
+        met een NHB nummer.
+    """
+    nhb_nummer = forms.CharField(
+                        label='NHB nummer',
+                        min_length=6,
+                        max_length=6,
+                        required=False,
+                        widget=forms.TextInput(attrs={'autofocus': True}))
+    nieuw_wachtwoord = forms.CharField(
+                        label='Kies een wachtwoord',
+                        max_length=50,
+                        required=False,
+                        widget=forms.PasswordInput())
+
+    def is_valid(self):
+        valid = super(forms.Form, self).is_valid()
+        if valid:
+            nhb_nummer = self.cleaned_data.get("nhb_nummer")
+            nieuw_wachtwoord = self.cleaned_data.get("nieuw_wachtwoord")
+            if nhb_nummer == "" or nieuw_wachtwoord == "":
+                self.add_error(None, 'Niet alle velden zijn ingevuld')
+                valid = False
+        return valid
+
+
+# end of file

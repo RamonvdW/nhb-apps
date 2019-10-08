@@ -1,0 +1,49 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2019 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+{% block extrastyle %}<link rel="stylesheet" type="text/css" href="{% static 'account/style.css' %}">{% endblock %}
+
+{% block title %}Inloggen bij JAMES{% endblock %}
+{% block wiebenik %}{% endblock %}
+
+{% block pagina %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="login" %}
+Heb je al een account, log dan in:
+
+<form action="{% url 'Account:login' %}" method="post">
+{% csrf_token %}
+    <div class="account-dialog">
+        <div class="account-header">
+            Inloggen
+        </div>
+        <div class="account-box-fields">
+            <div class="account-box-field">
+                {{ form.login_naam.label_tag }}<br>{{ form.login_naam }}</br>
+            </div>
+            <div class="account-box-field">
+                {{ form.wachtwoord.label_tag }}<br>{{ form.wachtwoord }}</br>
+            </div>
+            {% if form.errors %}
+            <table>
+                <tr class="error-message-table">
+                    <td>Fout:</td>
+                    <td>{% for error in form.non_field_errors %}{{ error|escape }}{% endfor %}</td>
+                </tr>
+            </table>
+            {% endif %}
+            <div class="account-button-balk">
+                <input class="account-button-inner" name="button_login" type="submit" value="Log in">
+            </div>
+        </div>
+        <div class="account-footers">
+            <a href="{% url 'Account:registreer' %}">Nog geen account?</a>
+            <a href="{% url 'Account:wachtwoord-vergeten' %}">Wachtwoord vergeten?</a>
+        </div>
+    </div>
+</form>
+
+{% endblock %}

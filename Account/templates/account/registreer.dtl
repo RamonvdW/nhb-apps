@@ -1,0 +1,48 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2019 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+{% block extrastyle %}<link rel="stylesheet" type="text/css" href="{% static 'account/style.css' %}">{% endblock %}
+
+{% block title %}Registreren bij JAMES{% endblock %}
+{% block wiebenik %}{% endblock %}
+
+{% block pagina %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="registreer" %}
+
+<p>Op deze pagina maak je een nieuw account aan. Dit hoef je maar één keer te doen.</p>
+<p>Je kan alleen een account aanmaken als je een NHB nummer hebt en je e-mail adres bekend is bij de bond.</p>
+
+<form action="{% url 'Account:registreer' %}" method="post">
+{% csrf_token %}
+    <div class="account-dialog">
+        <div class="account-header">
+            Registreren
+        </div>
+        <div class="account-box-fields">
+            <div class="account-box-field">
+                {{ form.nhb_nummer.label_tag }}<br>{{ form.nhb_nummer }}</br>
+            </div>
+            <div class="account-box-field">
+                {{ form.nieuw_wachtwoord.label_tag }}<br>{{ form.nieuw_wachtwoord }}</br>
+            </div>
+            {% if form.errors %}
+            <table>
+                <tr class="error-message-table">
+                    <td>Fout:</td>
+                    <td>{% for error in form.non_field_errors %}{{ error|escape }}{% endfor %}</td>
+                </tr>
+            </table>
+            {% endif %}
+            <div class="account-button-balk">
+                <input class="account-button-inner" name="button_registreer" type="submit" value="Registreer">
+            </div>
+        </div>
+        <div class="account-footers">&nbsp;</div>
+    </div>
+</form>
+
+{% endblock %}

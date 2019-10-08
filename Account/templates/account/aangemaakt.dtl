@@ -1,0 +1,26 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2019 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+{% block extrastyle %}<link rel="stylesheet" type="text/css" href="{% static 'account/style.css' %}">{% endblock %}
+
+{% block title %}Nieuw account AANGEMAAKT{% endblock %}
+
+{% block pagina %}
+<p>Het account voor NHB nummer {{ login_naam }} is aangemaakt, maar kan nog niet gebruikt worden.</p>
+
+<p>Om deze website volledig te kunnen gebruiken vragen we je de volgende stappen te doorlopen:</p>
+<ol>
+<li class="gray-out">Bevestig je email<br>
+    <p>We hebben een email gestuurd naar <b>{{ partial_email }}</b>.</p>
+    <p>Klik op de link in de e-mail om te bevestigen dat je toegang hebt tot de e-mail.</p>
+</li>
+<li>Daarna vragen we je eenmalig een aantal vragen, om te bevestigen dat het jouw NHB nummer is.</li>
+</ol>
+
+<p>Keer terug naar het <a href="{% url 'Plein:plein' %}">PLEIN</a>.</p>
+
+{% endblock %}
