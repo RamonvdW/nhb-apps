@@ -1,0 +1,86 @@
+{% comment %}
+                Copyright (c) 2019 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+
+{% comment %}
+
+    Deze file bevat het menu dat aan de linker kant van het scherm staat,
+    volgens Materialize Sidenav.
+    Deze template wordt apart verwerkt. Het resultaat komt in site_layout.dtl
+
+{% endcomment %}
+
+{% load static %}
+
+<div class="grey lighten-4" style="padding: 10px">
+    <a href="{% url 'Plein:plein' %}"><img src="{% static 'plein/logo_with_text_nhb.png' %}" width="100%"></a>
+
+    <!-- informatie over ingelogde gebruiker -->
+    {% if user.is_authenticated %}
+        <div class="divider"></div>
+        <h5>{{ user.get_first_name|escape }}</h5>
+        <h6>Hier komt je rol</h6>
+    {% endif %}
+</div>
+
+<!-- inlog knop als gebruiker niet ingelogd is -->
+{% if menu_show_login %}
+<li {% if menu_actief == "inloggen" %}class="actief"{% endif %}>
+    <a href="{% url 'Account:login' %}" class="white-text">
+    <i class="material-icons-round white-text">person</i>Inloggen</a>
+</li>
+{% endif %}
+
+<li>
+    <a href="#" class="white-text">
+    <i class="material-icons-round white-text">account_balance</i>Eerdere competities</a>
+</li>
+
+<li>
+    <a href="#" class="white-text">
+    <i class="material-icons-round white-text">star</i>Records</a>
+</li>
+
+<li {% if menu_actief == "privacy" %}class="actief"{% endif %}>
+    <a href="{% url 'Plein:privacy' %}" class="white-text">
+    <i class="material-icons-round white-text">security</i>Privacy</a>
+</li>
+
+{% if menu_show_admin %}
+<li>
+    <a href="/admin/" class="white-text">
+    <i class="material-icons-round red-text">build</i>Admin site</a>
+</li>
+{% endif %}
+
+<!-- uitlog knop als gebruiker ingelogd is -->
+{% if menu_show_logout %}
+<li>
+    <a href="{% url 'Account:logout' %}" class="white-text">
+    <i class="material-icons-round white-text">exit_to_app</i>Uitloggen</a>
+</li>
+{% endif %}
+
+<!-- uitklapbaar menu om een andere rol te kiezen -->
+{% if menu_show_logout %}
+<li class="no-padding no-select">   <!-- 'no-select' voorkomt het markeren van tekst in het menu -->
+    <ul class="collapsible collapsible-accordion">
+        <li>
+            <!-- gebruik van lokaal style= omdat dit de hoogste hierarchy is en important! kan overriden -->
+            <a class="collapsible-header white-text" style="background-color: var(--mdc-theme-primary2)">
+                <i class="material-icons-round white-text">arrow_drop_down_circle</i>Andere rollen</a>
+            <div class="collapsible-body white-text" style="background-color: var(--mdc-theme-primary2)">
+                <ul>
+                    <li><a href="#!" class="white-text">Schutter</a></li>
+                    <li><a href="#!" class="white-text">CWZ (vereniging)</a></li>
+                    <li><a href="#!" class="white-text">RCL (regio)</a></li>
+                    <li><a href="#!" class="white-text">RKO (rayon)</a></li>
+                    <li><a href="#!" class="white-text">BKO (bond)</a></li>
+                </ul>
+            </div>
+        </li>
+    </ul>
+</li>
+{% endif %}
