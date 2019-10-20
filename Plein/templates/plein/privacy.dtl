@@ -5,56 +5,61 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
-{% block extrastyle %}
 
-<link rel="stylesheet" type="text/css" href="{% static 'plein/style.css' %}">{% endblock %}
-
-{% block title %}Welkom op d PRIVACYMELDING{% endblock %}
+{% block title %}Privacy{% endblock %}
 
 {% block pagina %}
+
 {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="privacy" %}
 
-<h1>Over privacy</h1>
+<h1>Privacy</h1>
 
-<p>Deze pagina beschrijft hoe deze website omgaat met jouw privacy.</p>
+<p>Deze pagina beschrijft hoe we omgaan met jouw privacy.</p>
 
 <h2>Cookies</h2>
 
 <p>Tijdens een bezoek aan deze website kunnen wij 'cookies' naar jouw browser sturen.
-Dit zijn kleine bestanden die op jouw apparaat opgeslagen kunnen worden
-en op een later moment weer naar de website worden gestuurd.</p>
+Dit zijn kleine bestanden die op jouw apparaat kunnen worden opgeslagen en op een
+later moment weer naar onze website worden gestuurd.</p>
 
-<p>De cookies worden gebruikt om je inlog bij te houden en om onze website te beschermen.
-Dit zijn puur functionele cookies en bevatten geen persoonsgegevens.</p>
+<p>Deze 'cookies' worden gebruikt om je inlog te onthouden en om onze website te beschermen.
+Dit zijn puur functionele cookies (meer uitleg hier) en bevatten geen persoonsgegevens.</p>
 
-<p>Deze website gebruikt geen tracking cookies waarvoor we je toestemming nodig hebben.
+<p>We gebruiken geen tracking cookies waarvoor we je toestemming nodig hebben.
 Daarom krijg je bij deze website geen vraag of je cookies wilt accepteren.</p>
+
+<p>Hier kan je <a href="https://www.rijksoverheid.nl/onderwerpen/telecommunicatie/vraag-en-antwoord/mag-een-website-ongevraagd-cookies-plaatsen">meer informatie over cookies</a> vinden.</p>
 
 <h2>Persoonsgegevens</h2>
 
 <p>Een groot deel van deze website is gemaakt om informatie te tonen die voor jou interessant is.</p>
 
-<p>Als je een account aanmaakt en inlogt dan weten we wie je bent en kunnen we deze informatie tonen.</p>
+<p>Als je een account aanmaakt en inlogt dan tonen we deze informatie.</p>
 
 <p>Om je te kunnen identificeren gebruiken we persoonsgegevens die bekend zijn bij de NHB,
 waaronder je NHB nummer, volledig naam en e-mail adres.</p>
 
-<p>Andere gegevens die verzameld worden zijn het IP adres wat je gebruikt om deze website te benaderen,
-informatie over je browser, het tijdstip waarop je de website gebruikt en wanneer je inlogt.</p>
+<p>Andere gegevens die we verzamelen om de website te beschermen zijn je internet IP-adres,
+informatie over je browser, het tijdstip waarop je de website benadert en welke inlog je gebruikt.</p>
 
 <h2>Publicaties</h2>
 
 <p>Wedstrijden en competities hebben openbare deelnemerslijsten en uitslagen.</p>
 
 <p>Als je meedoet aan een wedstrijd of competitie dan worden de volgende persoonsgegevens openbaar gemaakt:
-je volledige naam, de vereniging waar je lid bent en je wedstrijdklasse (bijvoorbeeld 'Heren Recuve Senioren').
-Ook je behaalde scores en ranking (bijvoorbeeld "21e plaats") worden gepubliceerd.</p>
+<ul class="browser-default">
+    <li>je volledige naam</li>
+    <li>de vereniging waar je lid bent</li>
+    <li>wedstrijdklasse, bijvoorbeeld 'Heren Recurve Senioren'</li>
+    <li>behaalde score(s)</li>
+    <li>ranking (bijvoorbeeld "21e plaats")</li>
+</ul>
 
 <p>Als je een Nederlands Record behaald hebt dan worden dezelfde persoonsgegevens openbaar gemaakt.</p>
 
-<h2>Contact NHB</h2>
+<h2>Contact</h2>
 
 <p>Alle vragen en verzoeken over privacy kunnen gericht worden aan de Nederlandse Handboog Bond
-via info@handboogsport.nl.</p>
+via <a href="mailto:info@handboogsport.nl">info@handboogsport.nl</a>.</p>
 
 {% endblock %}

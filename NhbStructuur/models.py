@@ -75,7 +75,7 @@ def validate_geboorte_datum(datum):
     global maximum_geboortejaar
     if datum.year < 1900 or datum.year > maximum_geboortejaar:
         raise ValidationError(
-                "geboortejaar %(jaar)s is niet valide (min=1900, max=%(max)s)",
+                'geboortejaar %(jaar)s is niet valide (min=1900, max=%(max)s)',
                 params={'jaar': datum.year,
                         'max': maximum_geboortejaar}
                 )
@@ -92,7 +92,7 @@ def validate_sinds_datum(datum):
     now = datetime.datetime.now()
     date_now = datetime.date(year=now.year, month=now.month, day=now.day)
     if datum > date_now:
-        raise ValidationError("datum van lidmaatschap mag niet in de toekomst liggen")
+        raise ValidationError('datum van lidmaatschap mag niet in de toekomst liggen')
 
 
 class NhbLid(models.Model):
@@ -118,7 +118,7 @@ class NhbLid(models.Model):
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
         # selectie in de admin interface gaat op deze string, dus nhb_nr eerst
-        return "%s %s %s [%s, %s]" % (self.nhb_nr, self.voornaam, self.achternaam, self.geslacht, self.geboorte_datum.year)
+        return '%s %s %s [%s, %s]' % (self.nhb_nr, self.voornaam, self.achternaam, self.geslacht, self.geboorte_datum.year)
 
     def clean(self):
         """ controleer of alle velden een redelijke combinatie zijn
@@ -127,12 +127,12 @@ class NhbLid(models.Model):
         """
         # sinds_datum moet 5 jaar ná het geboortejaar liggen
         if self.sinds_datum.year - self.geboorte_datum.year < 5:
-            raise ValidationError("datum van lidmaatschap moet minimaal 5 jaar na geboortejaar zijn")
+            raise ValidationError('datum van lidmaatschap moet minimaal 5 jaar na geboortejaar zijn')
 
     class Meta:
         """ meta data voor de admin interface """
-        verbose_name = "Nhb lid"
-        verbose_name_plural = "Nhb leden"
+        verbose_name = 'Nhb lid'
+        verbose_name_plural = 'Nhb leden'
 
 
 # end of file

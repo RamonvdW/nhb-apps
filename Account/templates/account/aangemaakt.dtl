@@ -5,22 +5,24 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
-{% block extrastyle %}<link rel="stylesheet" type="text/css" href="{% static 'account/style.css' %}">{% endblock %}
 
-{% block title %}Nieuw account AANGEMAAKT{% endblock %}
+{% block title %}Account aangemaakt{% endblock %}
 
 {% block pagina %}
-<p>Het account voor NHB nummer {{ login_naam }} is aangemaakt, maar kan nog niet gebruikt worden.</p>
 
-<p>Om deze website volledig te kunnen gebruiken vragen we je de volgende stappen te doorlopen:</p>
-<ol>
-<li class="gray-out">Bevestig je email<br>
-    <p>We hebben een email gestuurd naar <b>{{ partial_email }}</b>.</p>
-    <p>Klik op de link in de e-mail om te bevestigen dat je toegang hebt tot de e-mail.</p>
-</li>
-<li>Daarna vragen we je eenmalig een aantal vragen, om te bevestigen dat het jouw NHB nummer is.</li>
-</ol>
+<h1>E-mail bevestigen</h1>
+
+<p>Het account voor NHB nummer <b>{{ login_naam }}</b> is aangemaakt. Dit nummer is je inlog naam.</p>
+
+<p>We hebben een email gestuurd naar <b>{{ partial_email }}</b> om zeker te zijn dat we je kunnen bereiken.</p>
+
+<p>Volg de instructies in de e-mail om het aanmaken van je account af te ronden. Daarna kan je inloggen.</p>
 
 <p>Keer terug naar het <a href="{% url 'Plein:plein' %}">PLEIN</a>.</p>
+
+{% if temp_ack_url %}
+    <p class="divider"></p>
+    <p class="red-text">We kunnen nu nog geen email sturen. Klik voorlopig even op <a href="{{ temp_ack_url }}">deze link</a>.</p>
+{% endif %}
 
 {% endblock %}

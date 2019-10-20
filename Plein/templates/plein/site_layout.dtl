@@ -1,47 +1,78 @@
+<!DOCTYPE html>
 {% comment %}
                 Copyright (c) 2019 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
-{% load static %}<!DOCTYPE html>
-<html lang="nl">
-<head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% block title %}{% endblock %}</title>
-  <link rel="stylesheet" type="text/css" href="{% static "plein/site_layout.css" %}">
-  {% block extrastyle %}{% endblock %}
-</head>
-<body>
-<ul class="site-header">
-  <img class="site-header-logo" src="/static/plein/logo_small_metal-teal.png" alt="site logo">
-  <p class="site-header-title">James Test Site</p>
-{% block wiebenik %}
-  {% if user.is_authenticated %}
-    <div class="site-header-account-dropdown">
-      <p class="site-header-account-dropdown-button">{{ user.get_first_name }}</p>
-      <div class="site-header-account-dropdown-content">
-        <a href="{% url 'Account:logout' %}">Uitloggen</a>
-      </div>
-    </div>
-  {% else %}
-    <li class="site-header-noaccount">
-      <a href="{% url 'Account:login' %}">LOG IN</a>
-    </li>
-  {% endif %}
-{% endblock %}
-</ul>
 
-<div class="site-broodkruimels">
-  <div class="site-broodkruimels-tekst">
-  {% block broodkruimels %}
-    {% for tekst,url in broodkruimels %}
-      {% if not forloop.first %}&nbsp;>&nbsp;{% endif %}<a class="site-broodkruimels-link" href="{{ url }}">{{ tekst }}</a>
-    {% endfor %}
-  {% endblock %}
-  </div>
-</div>
-<div class="site-pagina">
-{% block pagina %}Pagina{% endblock %}
-</div>
-</body>
+{% comment %}
+
+    Dit document is de blauwdruk voor alle pagina's van de site.
+    Andere template's beginnen met een 'extends' op deze template
+    en kunnen de volgende block tags gebruiken om delen te vervangen:
+        extrastyle    extra stijlsheets (komen in de header)
+        title         pagina titel instellen
+        pagina        de body van de pagina
+
+{% endcomment %}
+
+{% load static %}
+
+<html lang="nl">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{% block title %}{% endblock %}</title>
+        <link rel="icon" href="{% static 'plein/logo_nhb_192x192.png' %}" sizes="192x192">
+        <link rel="stylesheet" href="{% static 'normalize/normalize.css' %}">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu&display=swap">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Round">
+        <link rel="stylesheet" href="{% static 'materialize/materialize.min.css' %}">
+        <link rel="stylesheet" href="{% static 'plein/site_layout.css' %}"> <!-- moet ná materialize css -->
+        {% block extrastyle %}{% endblock %}
+<style>
+
+</style>
+    </head>
+
+    <body class="grey lighten-4">
+        <div id="container">        <!-- css manipulates this to make space for the menu -->
+
+            <!-- sidenav -->
+            <div id="menu">
+                <ul id="slide-out" class="sidenav sidenav-fixed" style="background-color: var(--mdc-theme-primary2)">
+                    {% include 'plein/menu.dtl' %}
+                </ul>
+            </div>
+
+            <!-- main contents -->
+            <div id="content">      <!-- css manipulates this -->
+                <!-- button to call-up the sidenav; hidden when not needed -->
+                <a href="#" data-target="slide-out" class="sidenav-trigger hide-on-large-only"><i class="material-icons-round">menu</i></a>
+                {% block pagina %}{% endblock %}
+            </div>
+        </div>
+
+        <script src="{% static 'materialize/materialize.min.js' %}"></script>
+
+        <!-- configure the sidenav after everything has loaded and instantiated -->
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                var elems = document.querySelectorAll('.sidenav')
+                options = { menuWidth: 250,       // Default is 300
+                            edge: 'left',         // Choose the horizontal origin
+                            closeOnClick: false,  // Closes side-nav on <a> clicks, useful for Angular/Meteor
+                            draggable: true       // Choose whether you can drag to open on touch screens,
+                          };
+                var insts = M.Sidenav.init(elems, options)
+
+                var elems = document.querySelectorAll('.collapsible')
+                options = { inDuration: 100,    // default is 300
+                            outDuration: 100    // default is 300
+                          };
+                var insts = M.Collapsible.init(elems, options)
+
+            })
+        </script>
+    </body>
 </html>

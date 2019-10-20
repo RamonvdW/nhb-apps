@@ -49,8 +49,13 @@ class RegistreerForm(forms.Form):
                         label='NHB nummer',
                         min_length=6,
                         max_length=6,
-                        required=False,
+                        required=True,
                         widget=forms.TextInput(attrs={'autofocus': True}))
+
+    email = forms.EmailField(
+                        label='E-mail adres zoals bekend bij de NHB',
+                        required=True)
+
     nieuw_wachtwoord = forms.CharField(
                         label='Kies een wachtwoord',
                         max_length=50,
@@ -59,12 +64,17 @@ class RegistreerForm(forms.Form):
 
     def is_valid(self):
         valid = super(forms.Form, self).is_valid()
+        print("RegistreerForm.is_valid: %s" % repr(valid))
         if valid:
-            nhb_nummer = self.cleaned_data.get("nhb_nummer")
-            nieuw_wachtwoord = self.cleaned_data.get("nieuw_wachtwoord")
-            if nhb_nummer == "" or nieuw_wachtwoord == "":
+            nhb_nummer = self.cleaned_data.get('nhb_nummer')
+            email = self.cleaned_data.get('email')
+            nieuw_wachtwoord = self.cleaned_data.get('nieuw_wachtwoord')
+            if nhb_nummer == "" or email == "" or nieuw_wachtwoord == "":
                 self.add_error(None, 'Niet alle velden zijn ingevuld')
                 valid = False
+        else:
+            self.add_error(None, 'De gegevens worden niet geaccepteerd')
+
         return valid
 
 

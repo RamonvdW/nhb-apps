@@ -6,7 +6,6 @@
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
-from .kruimels import make_context_broodkruimels, KRUIMEL2LABEL
 
 
 def assert_html_ok(testcase, response):
@@ -17,7 +16,7 @@ def assert_html_ok(testcase, response):
     testcase.assertIn("</html>", html)
     testcase.assertIn("<head>", html)
     testcase.assertIn("</head>", html)
-    testcase.assertIn("<body>", html)
+    testcase.assertIn("<body ", html)
     testcase.assertIn("</body>", html)
     testcase.assertIn("<!DOCTYPE html>", html)
 
@@ -62,26 +61,6 @@ class PleinTest(TestCase):
         usermodel = get_user_model()
         usermodel.objects.create_user('normaal', 'normaal@test.com', 'wachtwoord')
         usermodel.objects.create_superuser('admin', 'admin@test.com', 'wachtwoord')
-
-    def test_broodkruimels(self):
-        unknown_label = 'Account:logout'       # niet in KRUIMEL2LABEL
-        self.assertNotIn(unknown_label, KRUIMEL2LABEL)
-
-        context = dict()
-        kruimels = list()
-        make_context_broodkruimels(context, 'Plein:plein', ('abc', 'def'), unknown_label)
-        self.assertIn('broodkruimels', context)
-        self.assertEqual(len(context['broodkruimels']), 3)
-        # print("context['broodkruimels'] = %s" % repr(context['broodkruimels']))
-
-        tup = context['broodkruimels'][0]
-        self.assertEqual(tup[0], 'Home')
-
-        tup = context['broodkruimels'][1]
-        self.assertEqual(tup[1], 'def')
-
-        tup = context['broodkruimels'][2]
-        self.assertEqual(tup[0], '?label?')
 
     def test_root_redirect(self):
         rsp = self.client.get('/')

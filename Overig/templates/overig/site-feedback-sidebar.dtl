@@ -4,11 +4,28 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 
+{% comment %}
+
+    Deze template kan door middel van een include opgenomen worden in andere templates
+    en levert de drie smiley's waarmee feedback op een pagina gegeven kan worden.
+
+    de context variabele 'op_pagina' moet een unieke verwijzing zijn naar de pagina
+    waarop de feedback gaat. Deze string wordt as-is opgeslagen als referentie.
+
+    voorbeeld: {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="plein" %}
+
+    de stijlen zijn onderdeel van de globale site stijlen.
+
+{% endcomment %}
+
 {% load static %}
-<div class="site-sidebar-rechts">
-<div class="site-feedback">Wat vind je van deze pagina?
-<a href="{% url 'Overig:feedback-bevinding' bevinding='plus' op_pagina=op_pagina %}"><img src="{% static 'overig/smiley4_plus.png' %}" width=50 height=50 alt="min"></a>
-<a href="{% url 'Overig:feedback-bevinding' bevinding='nul'  op_pagina=op_pagina %}"><img src="{% static 'overig/smiley4_nul.png'  %}" width=50 height=50 style="padding-left:10px; padding-right:10px;" alt="nul"></a>
-<a href="{% url 'Overig:feedback-bevinding' bevinding='min'  op_pagina=op_pagina %}"><img src="{% static 'overig/smiley4_min.png'  %}" width=50 height=50 alt="plus"></a>
-</div>
+<div class="site-sidebar-rechts z-depth-1">
+    <div class="site-feedback">Wat vind je van deze pagina?
+        <a href="{% url 'Overig:feedback-bevinding' bevinding='plus' op_pagina=op_pagina %}">
+            <img src="{% static 'overig/smiley4_plus.png' %}" width=50 height=50 alt="min"></a>
+        <a href="{% url 'Overig:feedback-bevinding' bevinding='nul'  op_pagina=op_pagina %}">
+            <img src="{% static 'overig/smiley4_nul.png'  %}" width=50 height=50 alt="nul" style="margin: 0px 25px 0px 25px"></a>
+        <a href="{% url 'Overig:feedback-bevinding' bevinding='min'  op_pagina=op_pagina %}">
+            <img src="{% static 'overig/smiley4_min.png'  %}" width=50 height=50 alt="plus"></a>
+    </div>
 </div>

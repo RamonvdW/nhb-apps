@@ -5,14 +5,6 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
-{% block extrastyle %}
-<link rel="stylesheet" type="text/css" href="{% static 'account/style.css' %}">
-<script>
-    setTimeout(function redirect(){
-            window.location.href = "{% url 'Plein:plein' %}";
-        }, 5000);
-</script>
-{% endblock %}
 
 {% block title %}Uitgelogd{% endblock %}
 
@@ -22,5 +14,11 @@
 <p>Binnen 5 seconden keer je terug naar Het Plein.</p>
 
 <p>Gebeurt dat niet, klik dan op <a href="{% url 'Plein:plein' %}">deze link</a>.</p>
+
+<script>
+    setTimeout(function redirect(){
+            window.location.href = "{% url 'Plein:plein' %}";
+        }, 5000);
+</script>
 
 {% endblock %}

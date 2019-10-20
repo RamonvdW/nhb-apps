@@ -5,44 +5,51 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
-{% block extrastyle %}<link rel="stylesheet" type="text/css" href="{% static 'account/style.css' %}">{% endblock %}
 
-{% block title %}Registreren bij JAMES{% endblock %}
-{% block wiebenik %}{% endblock %}
+{% block title %}Registreren{% endblock %}
 
 {% block pagina %}
 {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="registreer" %}
 
+<h1>Registreren</h1>
+
 <p>Op deze pagina maak je een nieuw account aan. Dit hoef je maar één keer te doen.</p>
 <p>Je kan alleen een account aanmaken als je een NHB nummer hebt en je e-mail adres bekend is bij de bond.</p>
 
-<form action="{% url 'Account:registreer' %}" method="post">
-{% csrf_token %}
-    <div class="account-dialog">
-        <div class="account-header">
-            Registreren
-        </div>
-        <div class="account-box-fields">
-            <div class="account-box-field">
-                {{ form.nhb_nummer.label_tag }}<br>{{ form.nhb_nummer }}</br>
-            </div>
-            <div class="account-box-field">
-                {{ form.nieuw_wachtwoord.label_tag }}<br>{{ form.nieuw_wachtwoord }}</br>
-            </div>
+<div class="container z-depth-2">
+    <div class="row">
+        <form class="col s12" action="{% url 'Account:registreer' %}" method="post">
+            {% csrf_token %}
+            <div class="row"><div class="input-field col s12">
+                {{ form.nhb_nummer.label_tag }}{{ form.nhb_nummer }}
+            </div></div>
+            <div class="row"><div class="input-field col s12">
+                {{ form.email.label_tag }}{{ form.email }}
+            </div></div>
+            <div class="row"><div class="input-field col s12">
+                {{ form.nieuw_wachtwoord.label_tag }}{{ form.nieuw_wachtwoord }}
+            </div></div>
+
             {% if form.errors %}
-            <table>
-                <tr class="error-message-table">
-                    <td>Fout:</td>
-                    <td>{% for error in form.non_field_errors %}{{ error|escape }}{% endfor %}</td>
-                </tr>
-            </table>
-            {% endif %}
-            <div class="account-button-balk">
-                <input class="account-button-inner" name="button_registreer" type="submit" value="Registreer">
+            <div class="row">
+                <div class="col s1 red-text">Fout:</div>
+                {% for error in form.non_field_errors %}
+                <div class="row"><div class="col s10 red-text">{{ error|escape }}</div></div>
+                {% endfor %}
             </div>
-        </div>
-        <div class="account-footers">&nbsp;</div>
+            {% endif %}
+
+            <div class="row"><div class="col s12"></div>
+                <div class="center-align">
+                    <input class="btn blue" name="button_registreer" type="submit" value="Registreren">
+                </div>
+            </div>
+        </form>
     </div>
-</form>
+</div>
+
+<h3>Wat is mijn e-mail?</h3>
+<p>Om veiligheidsredenen is er geen manier om je e-mail adres op te vragen.<p>
+<p>De secretaris van je boogschietvereniging kan het e-mail inzien en aanpassen.</p>
 
 {% endblock %}

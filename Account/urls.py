@@ -23,12 +23,16 @@ urlpatterns = [
          name='uitgelogd'),
 
     path('registreer/',
-         views.RegistreerView.as_view(),
+         views.RegistreerNhbNummerView.as_view(),
          name='registreer'),
 
     path('aangemaakt/',
-         views.aangemaakt,
+         views.AangemaaktView.as_view(),
          name='aangemaakt'),
+
+    path('bevestigd/',
+         views.BevestigdView.as_view(),
+         name='bevestigd'),
 
     path('wachtwoord-vergeten/',
          views.WachtwoordVergetenView.as_view(),

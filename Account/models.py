@@ -55,7 +55,10 @@ class Account(AbstractUser):
         verbose_name_plural = "Accounts"
 
     def get_first_name(self):
-        print("Hallo")
+        """ Deze functie wordt aangeroepen als user.get_first_name
+            gebruikt wordt in een template
+        """
+        # TODO: werkt dit ook nog goed voor niet-NHB leden die een email als username hebben?
         return self.first_name or self.username
 
 
@@ -150,7 +153,7 @@ def account_create_username_wachtwoord_email(username, wachtwoord, email):
     """
 
     if not is_email_valide(email):
-        raise AccountCreateError("Dat is geen valide email")
+        raise AccountCreateError('Dat is geen valide email')
 
     # maak het account aan
     account = Account()
@@ -167,28 +170,36 @@ def account_create_username_wachtwoord_email(username, wachtwoord, email):
     mail.save()
 
 
-def account_create_nhb(nhb_nummer, nieuw_wachtwoord):
+def account_create_nhb(nhb_nummer, email, nieuw_wachtwoord):
     """ Maak een nieuw account aan voor een NHB lid
-        raises AccountError als er al een account bestaat
+        raises AccountError als:
+            - er al een account bestaat
+            - het nhb nummer niet valide is
+            - het email adres niet bekend is bij de nhb
+            - het email adres niet overeen komt
         geeft de url terug die in de email verstuurd moet worden
     """
     if Account.objects.filter(username=nhb_nummer).count() != 0:
-        raise AccountCreateError("Account met die naam bestaat al")
+        raise AccountCreateError('Account bestaat al')
 
     # zoek het email adres van dit NHB lid erbij
     try:
         nhb_nr = int(nhb_nummer)
     except ValueError:
-        raise AccountCreateError('Geen valide NHB nummmer')
+        raise AccountCreateError('Onbekend NHB nummmer')
 
     try:
         nhblid = NhbLid.objects.get(nhb_nr=nhb_nr)
     except NhbLid.DoesNotExist:
-        raise AccountCreateError("Onbekend NHB nummer")
+        raise AccountCreateError('Onbekend NHB nummer')
 
-    email = nhblid.email
-    if not is_email_valide(email):
-        raise AccountCreateError("Account heeft geen valide email adres")
+    if not is_email_valide(nhblid.email):
+        raise AccountCreateError('Account heeft geen email adres. Neem contact op met de secretaris van je vereniging.')
+        # TODO: dit moeten gaan loggen
+        # TODO: redirect naar de secretaris?
+
+    if email != nhblid.email:
+        raise AccountCreateError('De combinatie van NHB nummer en email worden niet herkend. Probeer het nog eens.')
 
     # maak het account aan
     account = Account()
@@ -206,15 +217,15 @@ def account_create_nhb(nhb_nummer, nieuw_wachtwoord):
 
     # maak de url aan om het emailadres te bevestigen
     url = maak_tijdelijke_url_accountemail(mail, nhb_nummer=nhb_nummer, email=email)
-    return email, url
+    return url
 
 
-def receive_bevestiging_accountemail(obj):
-    """ deze functie wordt aangeroepen als een tijdelijke url gevolgt wordt
-        om een email adres te bevestigen
+def account_email_is_bevestigd(mail):
+    """ Deze functie wordt vanuit de tijdelijke url receiver functie (zie view)
+        aanroepen met mail = AccountEmail object waar dit op van toepassing is
     """
-    print("receive_bevestiging_accountemail: obj=%s" % repr(obj))
-
-set_tijdelijke_url_receiver(RECEIVER_ACCOUNTEMAIL, receive_bevestiging_accountemail)
+    mail.bevestigde_email = mail.nieuwe_email
+    mail.email_is_bevestigd = True
+    mail.save()
 
 # end of file

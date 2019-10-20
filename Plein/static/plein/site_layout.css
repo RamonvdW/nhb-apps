@@ -1,213 +1,97 @@
+
+/*
+                Copyright (c) 2019 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+*/
+
+/* colors */
 :root {
-    --site-background-color: rgba(255,200,200,1);
-    --hover-transition-duration: 0.5s;
-
-    --button-color: #3498dd;
-    --button-text-color: white;
-    --button-border: 1px solid var(--button-color);
-    --button-border-radius: 5px;
-    --button-font: bold 16px sans-serif;
-    --button-hover-color: var(--button-text-color);
-    --button-hover-text-color: var(--button-color);
-
-    --secondary-button-color: white;
-    --secondary-button-text-color: #3498dd;
-    --secondary-button-border: 1px solid var(--button-color);
-    --secondary-button-border-radius: 5px;
-    --secondary-button-font: bold 14px sans-serif;
-    --secondary-button-hover-color: var(--secondary-button-text-color);
-    --secondary-button-hover-text-color: var(--secondary-button-color);
-
-    --input-field-background-color:
-    --input-field-text-color: black;
-    --input-field-border: 1px solid black;
-    --input-field-border-radius: 4px;
-    --input-field-font: 16px;
-
-    --dialog-box-border: 2px solid gray;
-    --dialog-box-border-radius: 5px;
-    --dialog-background-color: white;
-    --dialog-text-color: black;
-    --dialog-box-shadow: 6px 6px 6px rgba(0,0,0,0.35);
-    --dialog-box-font: 16px;
+    --mdc-theme-primary: #0aa0e1;    /* medium blauw */
+    --mdc-theme-primary2: #03628c;   /* donker blauw */
+    --mdc-theme-secondary: #f94137;  /* medium rood */
+    --mdc-theme-secondary2: #ae0b03; /* donker rood */
+    --mdc-theme-surface: #f5f5f5;    /* licht grijs (lichter dan pallet) */
+    --mdc-theme-background: #fff;    /* white */
+    --mdc-theme-error: #b00020;      /* blood red */
+    --mdc-theme-on-primary: #fff;    /* white */
+    --mdc-theme-on-secondary: #fff;  /* white */
+    --mdc-theme-on-surface: #000;    /* black */
+    --mdc-theme-on-error: #fff;      /* white */
+    --mdc-theme-text-primary-on-background: rgba(255, 255, 255, 0.87);    /* soft white, voor mdc-list subheader */
+    --mdc-theme-text-secondary-on-background: rgba(255, 255, 255, 0.54);  /* thin white, voor mdc-list secondary text */
+    --site-font-body: 'Open Sans', sans-serif;
+    --site-font-headers: 'Ubuntu', sans-serif;
 }
 
-a:link, a:visited {
-    text-decoration: none;
-}
-
+/* fonts */
 body {
-    background-color: var(--site-background-color);
-    font-family: sans-serif;
-    margin: 0;
-    padding: 0;
-    display: block;
+    font-family: var(--site-font-body);
 }
 
-.site-header {
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-    background-color: lightblue;
-    height: 37px;
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--site-font-headers);
 }
 
-.site-header-logo {
-    position: absolute;
-    left: 1px;
-    top: 1px;
-    height: 35px;
+/* colors */
+.blue {
+    background-color: var(--mdc-theme-primary) important!;
 }
 
-.site-header-title {
-    color: black;
-    margin: 0;
-    text-align: center;
-    font-size: 30px;
-    margin-top: 2px;
+/* achtergrondkleur van het menu */
+.blue2 {
+    background-color: var(--mdc-theme-primary2) important!;
 }
 
-.site-header-noaccount {
-    position: absolute;
-    right: 0px;
-    top: 0px;
-    display: inline-block;
-    border-left: 2px solid black;
-    padding-top: 12px;
-    padding-bottom: 7px;
-    padding-left: 10px;
-    padding-right: 10px;
+/* actieve menu item in rood */
+.actief  {
+    background-color: var(--mdc-theme-secondary);
 }
 
-.site-header-noaccount a {
-    text-decoration: none;
-    color: black;
+/* streep onder invoerveld formulier */
+input:not([type]):focus:not([readonly]),
+input[type=text]:not(.browser-default):focus:not([readonly]),
+input[type=password]:not(.browser-default):focus:not([readonly]),
+input[type=email]:not(.browser-default):focus:not([readonly]),
+input[type=url]:not(.browser-default):focus:not([readonly]),
+input[type=time]:not(.browser-default):focus:not([readonly]),
+input[type=date]:not(.browser-default):focus:not([readonly]),
+input[type=datetime]:not(.browser-default):focus:not([readonly]),
+input[type=datetime-local]:not(.browser-default):focus:not([readonly]),
+input[type=tel]:not(.browser-default):focus:not([readonly]),
+input[type=number]:not(.browser-default):focus:not([readonly]),
+input[type=search]:not(.browser-default):focus:not([readonly]),
+textarea.materialize-textarea:focus:not([readonly]) {
+  border-bottom: 1px solid var(--mdc-theme-primary);
+  -webkit-box-shadow: 0 1px 0 0 var(--mdc-theme-primary);
+          box-shadow: 0 1px 0 0 var(--mdc-theme-primary);
 }
 
-.site-header-noaccount:hover {
-    background-color: Gray;
-    transition-duration: 0.5s;
-}
 
-.site-header-account-dropdown {
-    position: absolute;
-    right: 2px;
-    top: 0px;
-    display: inline-block;
-    height: 37px;
-    border-left: 2px solid black;
-}
-
-.site-header-account-dropdown-button {
-    display: inline-block;
-    margin: 0;
-    line-height: 1.5em;
-    vertical-align: middle;
-    padding-top: 12px;
-    padding-bottom: 7px;
-    padding-left: 10px;
-    padding-right: 10px;
-    cursor: pointer;
-}
-
-.site-header-account-dropdown-content {
-    display: none;
-    position: absolute;
-    right: 0px;
-    background-color: lightblue;
-    min-width: 100px;
-    padding: 10px 10px 10px 10px;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0,2);
-    z-index: 1;
-}
-
-.site-header-account-dropdown-content a {
-    display: block;
-    color: black;
-    padding: 12px 16px;
-    text-decoration: none;
-    border-radius: 5px;
-}
-
-.site-header-account-dropdown-content a:hover {
-    background-color: #f1f1f1;
-    transition-duration: 0.5s;
-}
-
-.site-header-account-dropdown:hover .site-header-account-dropdown-content {
-    display: block;
-}
-
-.site-broodkruimels {
-    margin-top: 1px;
-    background-color: gray;
-    padding-left: 10px;
-    text-align: left;
-}
-
-.site-broodkruimels-tekst {
-    padding-top: 0.25em;
-    color: white;
-}
-
-.site-broodkruimels-link {
-    text-decoration: none;
-    color: white;
-    cursor: pointer;
-}
-
-.site-broodkruimels-link:hover {
-    text-decoration: underline;
-    color: blue;
-}
-
-.site-pagina {
-    margin-top: 10px;
-    margin-left: 5px;
-    margin-right: 5px;
-}
-
+/* site feedback floater */
 .site-sidebar-rechts {
     width: 230px;
     float: right;
-    background-color: red;
-    border: var(--dialog-box-border);
-    border-radius: var(--dialog-box-border-radius);
-    box-shadow: var(--dialog-box-shadow);
-    background-color: var(--dialog-background-color);
     text-align: center;
-    margin: 10px;
+    margin-top: 10px;
+    background-color: var(--mdc-theme-background)
 }
 
 .site-feedback {
     display: inline-block;
 }
 
-input[type=submit] {
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
+/* sidenav zichtbaar / verstopt */
+#container {
+    padding-left: 300px;
 }
 
-.site-button {
-    padding: 10px;
-    background-color: var(--button-color);
-    color: var(--button-text-color);
-    font: var(--button-font);
-    border: var(--button-border);
-    border-radius: var(--button-border-radius);
-    cursor: pointer;
+#content {
+    padding: 20px;
 }
 
-@media only screen and (max-width: 400px) {
-    .site-header-logo {
-        display: none;
-    }
-    .site-header-title {
-        display: none;
-    }
-    .site-sidebar-rechts {
-        display: none;
+@media only screen and (max-width : 992px) {
+    #container {
+        padding-left: 0px;
     }
 }

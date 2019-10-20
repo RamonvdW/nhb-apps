@@ -8,6 +8,7 @@
 from django.views.generic import TemplateView
 from django import forms
 from Plein.kruimels import make_context_broodkruimels
+from Plein.menu import menu_dynamics
 from django.shortcuts import redirect
 
 TEMPLATE_PLEIN = 'plein/plein.dtl'
@@ -28,12 +29,7 @@ class PleinView(TemplateView):
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
-
-        # zet context variabele om aan te geven of de link naar de Admin site erbij mag
-        # TODO: blijven doen met django authentication system?
-        if self.request.user.is_authenticated and self.request.user.is_superuser:
-            context['allow_admin'] = True
-        make_context_broodkruimels(context, 'Plein:plein')
+        menu_dynamics(self.request, context)
         return context
 
 
@@ -47,8 +43,7 @@ class PrivacyView(TemplateView):
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
-
-        make_context_broodkruimels(context, 'Plein:plein', 'Plein:privacy')
+        menu_dynamics(self.request, context, actief='privacy')
         return context
 
 

@@ -15,16 +15,16 @@ class SiteFeedbackForm(forms.Form):
     gebruiker = forms.CharField(
                     max_length=50,
                     required=False,
-                    widget=forms.HiddenInput())
+                    widget=forms.HiddenInput)
 
     op_pagina = forms.CharField(
                     max_length=50,
                     required=False,
-                    widget=forms.HiddenInput())
+                    widget=forms.HiddenInput)
 
     bevinding = forms.ChoiceField(
                     choices=SiteFeedback.FEEDBACK,
-                    label='Je mening over deze site pagina',
+                    label='Je mening over de website pagina',
                     widget=forms.RadioSelect)
 
     feedback = forms.CharField(
@@ -32,9 +32,8 @@ class SiteFeedbackForm(forms.Form):
                     max_length=2500,
                     required=True,
                     widget=forms.Textarea(
-                        attrs={'rows':10,
-                               #'cols':60,
-                               'placeholder':"Tik je bericht hier in en druk dan op Verstuur",
-                               'class': 'formulier-textarea'} ))
+                        attrs={'placeholder': 'Tik hier je bericht',
+                               'data-length': 2500,
+                               'class': 'materialize-textarea'}))
 
 # end of file

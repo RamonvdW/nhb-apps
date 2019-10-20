@@ -8,9 +8,11 @@ from django.views import View
 from django.views.generic import TemplateView
 from django.shortcuts import render, redirect
 from django.urls import Resolver404, reverse
-from Plein.kruimels import make_context_broodkruimels
+from django.http import HttpResponseRedirect
+from Plein.menu import menu_dynamics
 from .forms import SiteFeedbackForm
 from .models import SiteFeedback, store_feedback, SiteTijdelijkeUrl
+from .tijdelijke_url import do_dispatch
 
 TEMPLATE_FEEDBACK_FORMULIER = 'overig/site-feedback-formulier.dtl'
 TEMPLATE_FEEDBACK_BEDANKT = 'overig/site-feedback-bedankt.dtl'
@@ -40,7 +42,7 @@ class SiteFeedbackView(View):
         except KeyError:
             # rare waarde
             initial_bevinding = SiteFeedback.url2bev['nul']
-        gebruiker_naam = request.user.username
+        gebruiker_naam = request.user.username      # TODO: gebruik volledige naam uit account
         if not gebruiker_naam:
             gebruiker_naam = 'Niet bekend (anoniem)'
 
@@ -53,7 +55,7 @@ class SiteFeedbackView(View):
         context = {'form': form,
                    'formulier_url': reverse('Overig:feedback-formulier'),     # URL voor de POST
                    'gebruiker_naam': gebruiker_naam}
-        make_context_broodkruimels(context, 'Plein:plein', 'Overig:feedback-formulier')
+        menu_dynamics(request, context)
         return render(request, self.template_name, context)
 
     def post(self, request, *args, **kwargs):
@@ -77,7 +79,7 @@ class SiteFeedbackView(View):
 
         context = {'form': form,
                    'formulier_url': reverse('Overig:feedback-formulier')}  # URL voor de POST
-        make_context_broodkruimels(context, 'Plein:plein', 'Overig:feedback-formulier')
+        menu_dynamics(request, context)
         return render(request, self.template_name, context)
 
 
@@ -93,7 +95,7 @@ class SiteFeedbackBedanktView(TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        make_context_broodkruimels(context, 'Plein:plein', 'Overig:feedback-formulier', 'Overig:feedback-bedankt')
+        menu_dynamics(self.request, context)
         return context
 
 
@@ -104,8 +106,27 @@ class SiteTijdelijkeUrlView(View):
 
     def get(self, request, *args, **kwargs):
         url_code = kwargs['code']
-        print("get: url_code=%s" % repr(url_code))
-        obj = SiteTijdelijkeUrl.objects.get(url_code=url_code)
-        print("get: obj=%s" % repr(obj))
+        print("SiteTijdelijkeUrlView: url_code=%s" % repr(url_code))
+
+        try:
+            obj = SiteTijdelijkeUrl.objects.get(url_code=url_code)
+        except SiteTijdelijkeUrl.DoesNotExist:
+            # onbekende url code
+            raise Resolver404()
+
+        print("SiteTijdelijkeUrlView: obj=%s" % repr(obj))
+        # TODO: check obj.geldig_tot
+
+        # dispatch naar de juiste applicatie waar deze bij hoort
+        # de callbacks staan in de dispatcher
+        redirect = do_dispatch(request, obj.hoortbij_accountemail)
+
+        if redirect:
+            print("redirect: %s" % repr(redirect))
+            return HttpResponseRedirect(redirect)
+
+        print("SiteTijdelijkeUrlView: No valid redirect")
+        raise Resolver404()
+
 
 # end of file

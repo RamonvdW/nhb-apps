@@ -16,8 +16,8 @@ urlpatterns = [
     path('',         site_root_view),
     path('account/', include('Account.urls')),
     path('plein/',   include('Plein.urls')),
-    path('hist/',    include('HistComp.urls')),
-    path('records/', include('Records.urls')),
+    #path('hist/',    include('HistComp.urls')),
+    #path('records/', include('Records.urls')),
     path('overig/',  include('Overig.urls')),
     path('admin/',   admin.site.urls),
 ]

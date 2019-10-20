@@ -6,51 +6,69 @@
 {% endcomment %}
 {% load static %}
 
-{% block extrastyle %}<link rel="stylesheet" type="text/css" href="{% static 'overig/style.css' %}">{% endblock %}
-
-{% block title %}Welkom op het site-feedback FORMULIER{% endblock %}
+{% block title %}Feedback{% endblock %}
 
 {% block pagina %}
 
-<p>Dit is het site-feedback FORMULIER</p>
+<h1>Feedback</h1>
 
-<form method="post" action="{{ formulier_url }}">
-{% csrf_token %}
-<table class="formulier-tabel">
-    <tr>
-        <td>Jouw naam:</td>
-        <td>{{ gebruiker_naam }}</td>
-    </tr>
-    <tr>
-        <td class="spacing">&nbsp;</td>
-    </tr>
-    <tr>
-        <td colspan="2" valign="top">{{ form.bevinding.label_tag }}</td>
-    </tr>
-    <tr>
-        <td class="spacing">&nbsp;</td>
-        <td>{{ form.bevinding }}</td>
-    </tr>
-    <tr>
-        <td colspan="2">&nbsp;</td>
-    </tr>
-    <tr>
-        <td colspan="2" valign="top">{{ form.feedback.label_tag }}</td>
-    </tr>
-    <tr>
-        <td class="spacing">&nbsp;</td>
-        <td>{{ form.feedback }}</td>
-    </tr>
-    <tr>
-        <td class="spacing">&nbsp;</td>
-        <td align="left"><input class="site-button formulier-button-verstuur" type="submit" value="Verstuur"></td>
-    </tr>
-</table>
+<div class="container z-depth-2">
+    <div class="row">
+        <form class="col s12" method="post" action="{{ formulier_url }}">
+            {% csrf_token %}
 
-{% if form.errors %}
-<p>Fout:</p>{% for error in form.non_field_errors %}<p>{{ error|escape }}</p>{% endfor %}
-{% endif %}
+            <div class="row"><div class="col s12">
+                {{ form.bevinding.label_tag }}
+                <!-- between Django and MaterializeCSS, radiobuttons do not work
+                     because of the way Django generates the html (label before input tag) -->
+                <!-- workaround: manual deployment of the radio buttons -->
+                <!-- {{ form.bevinding }} -->
+                <ul id="id_bevinding">
+                    <li>
+                        <label for="id_bevinding_0">
+                            <input class="with-gap" type="radio" name="bevinding" value="8" required id="id_bevinding_0" checked>
+                            <span>Tevreden</span>
+                        </label>
+                    </li>
+                    <li>
+                        <label for="id_bevinding_1">
+                            <input class="with-gap" type="radio" name="bevinding" value="6" required id="id_bevinding_1">
+                            <span>Bruikbaar</span>
+                        </label>
+                    </li>
+                    <li>
+                        <label for="id_bevinding_2">
+                            <input class="with-gap" type="radio" name="bevinding" value="4" required id="id_bevinding_2">
+                            <span>Moet beter</span>
+                        </label>
+                    </li>
+                </ul>
+            </div></div>
 
-</form>
+            <div class="row"><div class="input-text col s12">
+                {{ form.feedback.label_tag }}{{ form.feedback }}
+            </div></div>
+
+            <div class="row"><div class="input-field col s12">
+                Jouw login naam: {{ gebruiker_naam }}
+            </div></div>
+
+            {% if form.errors %}
+            <div class="row">
+                <div class="col s1 red-text">Fout:</div>
+                {% for error in form.non_field_errors %}
+                <div class="row"><div class="col s10 red-text">{{ error|escape }}</div></div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="row"><div class="col s12"></div>
+                <div class="center-align">
+                    <input class="btn blue" name="button_login" type="submit" value="Verstuur">
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
 
 {% endblock %}

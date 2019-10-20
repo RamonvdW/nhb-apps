@@ -14,14 +14,19 @@
 
 <link rel="stylesheet" type="text/css" href="{% static 'overig/style.css' %}">{% endblock %}
 
-{% block title %}Welkom op het site-feedback FORMULIER{% endblock %}
+{% block title %}Feedback{% endblock %}
 
 {% block pagina %}
 
-<p>Dit is het site-feedback BEDANKT bericht</p>
 
-<p>Bedankt voor het delen van je mening. Voel je vrij om deze functie vaker te gebruiken. We staan open voor alle tips en tops!</p>
+<h1>Bedankt!</h1>
 
-<p><a href="{% url 'Plein:plein' %}">Terug naar het plein</a></p>
+<p>Bedankt voor het delen van je mening.</p>
+
+<p><i class="material-icons-round" style="font-size: 6rem">record_voice_over</i></p>
+
+<p>Voel je vrij om deze functie vaker te gebruiken. We staan open voor alle tips en tops!</p>
+
+<p><a class="btn-flat" href="{% url 'Plein:plein' %}">Terug</a></p>
 
 {% endblock %}

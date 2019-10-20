@@ -21,7 +21,10 @@ dispatcher = dict()
 def set_tijdelijke_url_receiver(topic, func):
     """ gebruikers van de tijdelijke url service kunnen hier hun ontvanger functie
         registreren die aangeroepen wordt als de url gebruikt wordt
-        De functie moet 1 argument accepteren: het object waar de url op van toepassing is
+        De functie moet 2 argument accepteren:
+            een request object en
+            het object waar de url op van toepassing is
+        De functie moet de url terug geven voor een http-redirect
     """
     if topic != SAVER:
         dispatcher[topic] = func
@@ -48,5 +51,18 @@ def maak_tijdelijke_url_accountemail(accountemail, **kwargs):
     url_code = _maak_url_code(**kwargs)
     dispatcher[SAVER](url_code, geldig_dagen=7, accountemail=accountemail)
     return reverse('Overig:tijdelijke-url', args=[url_code])
+
+
+def do_dispatch(request, accountemail):
+    """ Deze functie wordt aangeroepen vanuit de view die de ontvangen url_code
+        opgezocht heeft in de database.
+        Deze functie zoekt de callback van de juiste ontvanger op en roept deze aan.
+    """
+    if accountemail:
+        func = dispatcher[RECEIVER_ACCOUNTEMAIL]
+        redirect = func(request, accountemail)
+        return redirect
+
+    return None
 
 # end of file
