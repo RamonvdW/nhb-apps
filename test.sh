@@ -7,7 +7,7 @@
 RED="\e[31m"
 RESET="\e[0m"
 
-OMIT="--omit=data1/wsgi.py"
+OMIT="--omit=data3/wsgi.py,/usr/lib/python3.6/site-packages/*"
 ARGS="$*"
 
 coverage erase
