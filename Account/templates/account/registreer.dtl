@@ -16,7 +16,7 @@
 <p>Op deze pagina maak je een nieuw account aan. Dit hoef je maar één keer te doen.</p>
 <p>Je kan alleen een account aanmaken als je een NHB nummer hebt en je e-mail adres bekend is bij de bond.</p>
 
-<div class="container z-depth-2">
+<div class="container z-depth-2 white">
     <div class="row">
         <form class="col s12" action="{% url 'Account:registreer' %}" method="post">
             {% csrf_token %}

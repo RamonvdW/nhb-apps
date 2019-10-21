@@ -15,7 +15,7 @@
 
 <p>Heb je al een account, log dan in:</p>
 
-<div class="container z-depth-2">
+<div class="container z-depth-2 white">
     <div class="row">
         <form class="col s12" action="{% url 'Account:login' %}" method="post">
             {% csrf_token %}
