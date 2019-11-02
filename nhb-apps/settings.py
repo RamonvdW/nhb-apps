@@ -18,33 +18,16 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 
 import os
 
+# NOTE: some setting have been moved to settings_local.py
+#       see end of this file
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 PROJ_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated to version
-SITE_VERSIE = 'test 2019-10-19'
-
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-# TODO: uitzoeken waarom en hoe dit in elkaar steekt
-#-SECRET_KEY = 'a=^8025bv$o+%$qve3&v5d$gxnx-o640#5!$rxk4g*!73wofs7'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-#- DEBUG = True
-
-#- ALLOWED_HOSTS = [
-#-    '127.0.0.1'
-#-]
-
-# for debug_toolbar
-INTERNAL_IPS = [
-    '127.0.0.1',
-]
+SITE_VERSIE = 'test 2019-11-02'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -53,7 +36,7 @@ INSTALLED_APPS = [
     'Account.apps.AccountConfig',
     #'BasisTypen.apps.BasisTypenConfig',
     #'HistComp.apps.HistCompConfig',
-    #'Records.apps.RecordsConfig',
+    'Records.apps.RecordsConfig',
     'Overig.apps.OverigConfig',
     'django.contrib.staticfiles',   # gather static files from modules helper
     'django.contrib.sessions',      # support for database-backed sessions; needed for logged-in user
@@ -115,22 +98,8 @@ TEMPLATES = [
 ]
 
 
-# integratie met Apache2 (TODO: denk ik)
+# point out location of WSGI application for django runserver command
 WSGI_APPLICATION = 'nhb-apps.wsgi.application'
-
-
-# Database
-# https://docs.djangoproject.com/en/2.2/ref/settings/#databases
-#- DATABASES = {
-#-     'default': {
-#-         'ENGINE': 'django.db.backends.postgresql',
-#-         'NAME': 'some-database-name',
-#-         'USER': 'some-username',
-#-         'PASSWORD': 'some-password',
-#-         'HOST': 'localhost',
-#-         'PORT': '5432'
-#-     }
-#- }
 
 
 # Password validation
@@ -182,16 +151,23 @@ STATICFILES_FINDER = [
     'django.contrib.staticfiles.finders.AppDirectoriesFinder'
 ]
 
-# TODO: wat is dit? Wordt gebruikt door een login-decorator?
+
+# wordt gebruikt door LoginView als er geen 'next' veld bij de POST zit
 #LOGIN_REDIRECT_URL = '/plein/'
+
+
+# for debug_toolbar
+INTERNAL_IPS = [
+    '127.0.0.1',
+]
+
 
 # applicatie specifieke settings
 MINIMUM_LEEFTIJD_LID = 5
 
+
 # import install-specific settings from a separate file
 # that is easy to replace as part of the deployment process
-# provides parametes commented out above with #-
 from .settings_local import *
 
 # end of file
-
