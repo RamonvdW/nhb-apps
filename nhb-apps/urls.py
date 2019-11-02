@@ -17,7 +17,7 @@ urlpatterns = [
     path('account/', include('Account.urls')),
     path('plein/',   include('Plein.urls')),
     #path('hist/',    include('HistComp.urls')),
-    #path('records/', include('Records.urls')),
+    path('records/', include('Records.urls')),
     path('overig/',  include('Overig.urls')),
     path('admin/',   admin.site.urls),
 ]
