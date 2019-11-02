@@ -11,12 +11,19 @@
 {% block pagina %}
 {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="registreer" %}
 
-<h1>Registreren</h1>
+<h1>Account aanmaken</h1>
 
 <p>Op deze pagina maak je een nieuw account aan. Dit hoef je maar één keer te doen.</p>
 <p>Je kan alleen een account aanmaken als je een NHB nummer hebt en je e-mail adres bekend is bij de bond.</p>
 
 <div class="container z-depth-2 white">
+    <div class="row nav blue white-text">
+        <div class="col s12 center">
+            <h5>Account aanmaken</h5>
+            <p>voor NHB leden</p>
+        </div>
+    </div>
+
     <div class="row">
         <form class="col s12" action="{% url 'Account:registreer' %}" method="post">
             {% csrf_token %}
@@ -41,7 +48,7 @@
 
             <div class="row"><div class="col s12"></div>
                 <div class="center-align">
-                    <input class="btn blue" name="button_registreer" type="submit" value="Registreren">
+                    <input class="btn blue" name="button_registreer" type="submit" value="Aanmaken">
                 </div>
             </div>
         </form>
@@ -50,6 +57,6 @@
 
 <h3>Wat is mijn e-mail?</h3>
 <p>Om veiligheidsredenen is er geen manier om je e-mail adres op te vragen.<p>
-<p>De secretaris van je boogschietvereniging kan het e-mail inzien en aanpassen.</p>
+<p>De secretaris van je boogschietvereniging kan je verder helpen.</p>
 
 {% endblock %}
