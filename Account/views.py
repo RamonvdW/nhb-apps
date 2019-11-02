@@ -107,6 +107,7 @@ class WachtwoordVergetenView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        menu_dynamics(self.request, context, actief="inloggen")
         return context
 
 
@@ -172,7 +173,7 @@ class RegistreerNhbNummerView(TemplateView):
         # GET operation --> create empty form
         form = RegistreerForm()
         context = { 'form': form }
-        # TODO: menu_dynamics?
+        menu_dynamics(request, context, actief="inloggen")
         return render(request, TEMPLATE_REGISTREER, context)
 
 
