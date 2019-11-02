@@ -16,9 +16,17 @@
 <p>Heb je al een account, log dan in:</p>
 
 <div class="container z-depth-2 white">
+    <div class="row nav blue white-text">
+        <div class="col s12 center">
+            <h5>Inloggen</h5>
+            <p>Met een bestaand account</p>
+        </div>
+    </div>
+
     <div class="row">
         <form class="col s12" action="{% url 'Account:login' %}" method="post">
             {% csrf_token %}
+
             <div class="row"><div class="input-field col s12">
                 {{ form.login_naam.label_tag }}{{ form.login_naam }}
             </div></div>
@@ -40,16 +48,17 @@
                     <input class="btn blue" name="button_login" type="submit" value="Log in">
                 </div>
             </div>
-
-            <div class="row">
-                <div class="col s6 center-align">
-                    <a href="{% url 'Account:registreer' %}">Nog geen account?</a>
-                </div>
-                <div class="col s6 center-align">
-                    <a href="{% url 'Account:wachtwoord-vergeten' %}">Wachtwoord vergeten?</a>
-                </div>
-            </div>
         </form>
+
+        <div class="row">
+            <!--
+            <div class="col s6 center-align">
+                <a href="{% url 'Account:registreer' %}">Nog geen account?</a>
+            </div> -->
+            <div class="col s6 offset-s6 center-align">
+                <a href="{% url 'Account:wachtwoord-vergeten' %}">Wachtwoord vergeten?</a>
+            </div>
+        </div>
     </div>
 </div>
 
