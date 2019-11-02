@@ -26,8 +26,8 @@ class IndivRecord(models.Model):
                           ('C', 'Cadet'),
                           ('U', 'Uniform (para)')]
 
-    volg_nr = models.PositiveIntegerField()     # nieuwste record heeft hoogste nummer
     discipline = models.CharField(max_length=2, choices=DISCIPLINE)
+    volg_nr = models.PositiveIntegerField()     # nieuwste record heeft hoogste nummer, binnen elke dicipline
     soort_record = models.CharField(max_length=40)
     geslacht = models.CharField(max_length=1, choices=GESLACHT)
     leeftijdscategorie = models.CharField(max_length=1, choices=LEEFTIJDSCATEGORIE)

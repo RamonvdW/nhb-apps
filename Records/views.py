@@ -7,7 +7,7 @@
 from django.urls import Resolver404, reverse
 from django.views.generic import TemplateView, ListView
 from django.db.models import Q
-from Plein.kruimels import make_context_broodkruimels
+from Plein.menu import menu_dynamics
 from NhbStructuur.models import NhbLid
 from .models import IndivRecord
 from .forms import ZoekForm
@@ -20,18 +20,21 @@ TEMPLATE_RECORDS_ZOEK = 'records/records_zoek.dtl'
 
 
 class RecordsOverzichtView(ListView):
-    """ This class just provides broodkruimels for the otherwise static template. """
+    """ Dit is de top-level pagina van de records met een overzicht van de meest
+        recente records
+    """
 
     # class variables shared by all instances
     template_name = TEMPLATE_RECORDS_OVERZICHT
 
     @staticmethod
     def set_url_specifiek(obj):
-        obj.url = reverse('Records:specifiek', kwargs={'nummer': obj.volg_nr})
+        obj.url = reverse('Records:specifiek', kwargs={'nummer': obj.volg_nr, 'discipline': obj.discipline})
 
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
-        objs = IndivRecord.objects.all().order_by('-volg_nr')[:5]
+        # 10 nieuwste records (alle disciplines), op datum
+        objs = IndivRecord.objects.all().order_by('-datum')[:10]
         for obj in objs:
             self.set_url_specifiek(obj)
         # for
@@ -40,7 +43,7 @@ class RecordsOverzichtView(ListView):
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
-        make_context_broodkruimels(context, 'Plein:plein', 'Records:overzicht')
+        menu_dynamics(self.request, context, actief='records')
         return context
 
 
@@ -49,56 +52,6 @@ class SelObject(object):
 
     def __init__(self):
         self.sel_url = self.sel_str = ""
-
-
-def make_record_kruimels(params, sel_gesl, sel_disc, sel_lcat, sel_makl, rec_nr, gesl_str, disc_str, lcat_str, makl_str, type_str):
-
-    kruimels = ['Plein:plein', 'Records:overzicht', 'Records:indiv']
-
-    # url om geslacht te kiezen (0 filters)
-    url_gesl = reverse('Records:indiv')
-
-    if sel_gesl:
-        # geslacht is gekozen
-        # als je deze kruimel volgt wil je het geslacht weer in kunnen stellen
-        kruimels.append((gesl_str, url_gesl))
-
-        # url om discipline te kiezen (1 filter)
-        sub_params = {k: params[k] for k in ('gesl',)}
-        url_disc = reverse('Records:indiv-g', kwargs=sub_params)
-
-        if sel_disc:
-            # discipline is gekozen
-            # als je deze kruimel volgt wil je een andere discipline kunnen kiezen
-            kruimels.append((disc_str, url_disc))
-
-            # url om leeftijdscategorie te kiezen (2 filters)
-            sub_params = {k: params[k] for k in ('gesl', 'disc')}
-            url_lcat = reverse('Records:indiv-gd', kwargs=sub_params)
-
-            if sel_lcat:
-                # leeftijdscategorie is gekozen
-                # als je deze kruimel volgt wil je een andere leeftijdscategorie kunnen kiezen
-                kruimels.append((lcat_str, url_lcat))
-
-                # url om materiaalklasse te kunnen kiezen (3 filters)
-                sub_params = {k: params[k] for k in ('gesl', 'disc', 'lcat')}
-                url_makl = reverse('Records:indiv-gdl', kwargs=sub_params)
-
-                if sel_makl:
-                    # materiaalklasse is gekozen
-                    # als je deze kruimel volgt wil je een andere materiaalklasse kunnen kiezen
-                    kruimels.append((makl_str, url_makl))
-
-                    # url om een het soort-record te kunnen kiezen (4 filters)
-                    url_soortrec = reverse('Records:indiv-gdlm', kwargs=params)
-
-                    if rec_nr:
-                        # kruimel voor het specifieke record
-                        # als je deze kruimel volgt wil je een andere soort-record kunnen kiezen
-                        kruimels.append((type_str, url_soortrec))
-
-    return kruimels
 
 
 class RecordsIndivZoomBaseView(ListView):
@@ -116,7 +69,6 @@ class RecordsIndivZoomBaseView(ListView):
 
         self.disc_str = self.gesl_str = self.makl_str = self.lcat_str = None
         self.url = None
-        self.kruimels = list()
         self.params = dict()        # url representatie voor gesl/disc/lcat/makl
 
     def get_arg(self, arg_name):
@@ -158,7 +110,6 @@ class RecordsIndivZoomBaseView(ListView):
 
     def set_urls(self):
         """Vertaal de opgegeven filter delen naar hun url representatie en sla deze op in self.params
-           Voer de aanwezige filter delen toe aan self.kruimels
         """
         if self.sel_gesl:
             self.params['gesl'] = IndivRecord.gesl2url[self.sel_gesl]
@@ -168,12 +119,6 @@ class RecordsIndivZoomBaseView(ListView):
             self.params['lcat'] = IndivRecord.lcat2url[self.sel_lcat]
         if self.sel_makl:
             self.params['makl'] = IndivRecord.makl2url[self.sel_makl]
-
-        self.kruimels = make_record_kruimels(
-                                self.params,
-                                self.sel_gesl, self.sel_disc, self.sel_lcat, self.sel_makl,
-                                None,       # rec_nr
-                                self.gesl_str, self.disc_str, self.lcat_str, self.makl_str, '')
 
     def make_items(self, objs, arg, url_name, keys):
         """ Deze functie voegt een aantal filter opties toe aan de objects list die aan de template gegeven wordt.
@@ -226,7 +171,7 @@ class RecordsIndivZoom1234View(RecordsIndivZoomBaseView):
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
-        make_context_broodkruimels(context, *self.kruimels)
+        menu_dynamics(self.request, context, actief='records')
         return context
 
 
@@ -240,7 +185,7 @@ class RecordsIndivZoom5View(RecordsIndivZoomBaseView):
     @staticmethod
     def set_url_specifiek(obj):
         """ Deze functie voegt een URL toe aan een object, voor gebruik in de template. """
-        obj.url = reverse('Records:specifiek', kwargs={'nummer': obj.volg_nr})
+        obj.url = reverse('Records:specifiek', kwargs={'nummer': obj.volg_nr, 'discipline': obj.discipline})
 
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
@@ -283,7 +228,7 @@ class RecordsIndivZoom5View(RecordsIndivZoomBaseView):
         context['geslacht'] = self.gesl_str
         context['materiaalklasse'] = self.makl_str
         context['leeftijdscategorie'] = self.lcat_str
-        make_context_broodkruimels(context, *self.kruimels)
+        menu_dynamics(self.request, context, actief='records')
         return context
 
 
@@ -301,16 +246,18 @@ class RecordsIndivSpecifiekView(ListView):
 
     @staticmethod
     def set_url_specifiek(obj):
-        obj.url = reverse('Records:specifiek', kwargs={'nummer': obj.volg_nr})
+        obj.url = reverse('Records:specifiek', kwargs={'nummer': obj.volg_nr, 'discipline': obj.discipline})
 
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
         volg_nr = self.kwargs['nummer']     # parameter guaranteed by urlconf
+        discipline = self.kwargs['discipline']
 
         # zoek het specifieke record erbij
-        specifiek = IndivRecord.objects.filter(volg_nr=volg_nr)
+        specifiek = IndivRecord.objects.filter(volg_nr=volg_nr, discipline=discipline)
         if len(specifiek) == 0:
             # dat was geen valide record nummer
+            # TODO: consider to make more user friendly
             raise Resolver404()
 
         spec = specifiek[0]      # het volg_nr is nog niet altijd uniek, dus kies de eerste
@@ -322,9 +269,6 @@ class RecordsIndivSpecifiekView(ListView):
             spec.makl_str = spec.materiaalklasse_overig     # beschrijving voor de overige klasse
         else:
             spec.makl_str = IndivRecord.makl2str[spec.materiaalklasse]
-
-        # kopieer de strings voor de kruimels
-        self.gesl_str, self.disc_str, self.lcat_str, self.makl_str, self.type_str = spec.gesl_str, spec.disc_str, spec.lcat_str, spec.makl_str, spec.soort_record
 
         # stel de url parameters vast voor de broodkruimel urls
         self.params['gesl'] = IndivRecord.gesl2url[spec.geslacht]
@@ -353,18 +297,7 @@ class RecordsIndivSpecifiekView(ListView):
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
-
-        # kruimel voor het specifieke record
-        rec_nr = self.kwargs['nummer']
-
-        kruimels = make_record_kruimels(
-                                self.params,
-                                1, 1, 1, 1,
-                                rec_nr,
-                                self.gesl_str, self.disc_str, self.lcat_str, self.makl_str,
-                                self.type_str)
-
-        make_context_broodkruimels(context, *kruimels)
+        menu_dynamics(self.request, context, actief='records')
         return context
 
 
@@ -422,11 +355,7 @@ class RecordsZoekView(ListView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
         context['form'] = self.form
-        make_context_broodkruimels(
-            context,
-            'Plein:plein',
-            'Records:overzicht',
-            'Records:zoek')
+        menu_dynamics(self.request, context, actief='records')
         return context
 
 # end of file

@@ -34,7 +34,7 @@ urlpatterns = [
          views.RecordsZoekView.as_view(),
          name='zoek'),
 
-    path('record-<int:nummer>/',
+    path('record-<str:discipline>-<int:nummer>/',
          views.RecordsIndivSpecifiekView.as_view(),
          name='specifiek'),
 

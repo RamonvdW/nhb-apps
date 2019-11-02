@@ -9,24 +9,48 @@
 
 <link rel="stylesheet" type="text/css" href="{% static 'records/style.css' %}">{% endblock %}
 
-{% block title %}Welkom bij de RECORDS{% endblock %}
+{% block title %}Handboogsport records doorzoeken{% endblock %}
 
 {% block pagina %}
 
-<p>Nederlandse Handboogsport Records (zoek)</p>
+<h2>Records doorzoeken</h2>
 
-<p>Voer een deel van de naam van een schutter in:
-<form method="get" action="{{ records_zoek_url }}">
-{{ form.zoekterm.label_tag }} {{ form.zoekterm }}
-<input type="submit" value="Zoeken">
-</form>
-</p>
-<p>Tip: Je kan ook een NHB nummer of plaatsnaam invoeren.</p>
+<div class="container z-depth-2 white">
+    <div class="row nav blue white-text">
+        <div class="col s12 center">
+            <h5>Zoeken</h5>
+            <p>in de handboogsport records</p>
+        </div>
+    </div>
 
-<p>Aantal records gevonden: {{ object_list.count }}</p>
+    <div class="row">
+        <div class="col s12">
+            <span>Voer een deel van de naam van een schutter in:</span>
+            <p>Je kan ook een NHB nummer of plaatsnaam invoeren.</p>
+        </div>
+    </div>
 
-<ul>
-    {% for obj in object_list %}<li><a href="{% url 'Records:specifiek' obj.volg_nr %}">Record {{ obj.volg_nr }}</a> - {{ obj.datum }} - {{ obj.naam }} - {{ obj.plaats }} {{ obj.land }} - {{ obj.score }}</li>{% endfor %}
-</ul>
+    <div class="row">
+        <form class="col s12" method="get" action="{{ records_zoek_url }}">
+            {{ form.zoekterm.label_tag }} {{ form.zoekterm }}
+            <p>&nbsp;</p>
+            <div class="center-align">
+                <input class="btn blue" type="submit" value="Zoeken">
+            </div>
+        </form>
+    </div>
+
+    <div class="row">&nbsp;</div>
+</div>
+
+{% if object_list.count %}
+    <p>Aantal records gevonden: {{ object_list.count }}</p>
+
+    <ul>
+        {% for obj in object_list %}
+        <li><a href="{% url 'Records:specifiek' obj.discipline obj.volg_nr %}">Record {{ obj.volg_nr }}</a> - {{ obj.datum }} - {{ obj.naam }} - {{ obj.plaats }} {{ obj.land }} - {{ obj.score }}</li>
+        {% endfor %}
+    </ul>
+{% endif %}
 
 {% endblock %}

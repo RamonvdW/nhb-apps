@@ -5,59 +5,61 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
-{% block extrastyle %}<link rel="stylesheet" type="text/css" href="{% static 'records/style.css' %}">{% endblock %}
 
-{% block title %}Welkom bij de RECORDS{% endblock %}
+{% block title %}Handboogsport Record{% endblock %}
 
 {% block pagina %}
 
-<p>Nederlandse Handboogsport Records (specifiek record)</p>
+<h3>Nederlandse Handboogsport Records</h3>
 
 {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="records_specifiek" %}
 
 {% for obj in object_list %}
-{% if forloop.first %}
-<table class="record">
-<tbody class="record">
-<tr><td>Record #</td><td>{{ obj.volg_nr }}</td></tr>
-<tr><td>Dicipline:</td><td>{{ obj.dici_str }}</td></tr>
-<tr><td>Soort record:</td><td>{{ obj.soort_record }}</td></tr>
-<tr><td>Geslacht:</td><td>{{ obj.gesl_str }}</td></tr>
-<tr><td>Leeftijdscategorie:</td><td>{{ obj.lcat_str }}</td></tr>
-<tr><td>Materiaalklasse:</td><td>{{ obj.makl_str }}</td></tr>
-<tr><td>Naam:</td><td>{{ obj.naam }}</td></tr>
-<tr><td>Plaats:</td><td>{{ obj.plaats }}</td></tr>
-<tr><td>Land:</td><td>{{ obj.land }}</td></tr>
-<tr><td>Datum:</td><td>{{ obj.datum }}</td></tr>
-<tr><td>Score:</td><td>{{ obj.score }}</td></tr>
-<tr><td>Score notitie:</td><td>{{ obj.score_notitie }}</td></tr>
-<tr><td>NHB lid:</td><td>{{ obj.nhb_lid.nhb_nr }}</td></tr>
-<tr><td>Soort record:</td><td>
-    {% if obj.is_national_record %}Nederlands<br>{% endif %}
-    {% if obj.is_european_record %}Europees<br>{% endif %}
-    {% if obj.is_word_record %}Wereld<br>{% endif %}
-</td></tr>
-</tbody>
-</table>
-<p>Gerelateerde records:</p>
-<table>
-    <thead>
-    <tr>
-        <th align="left">Record #</th>
-        <th align="left">Datum</th>
-        <th align="left">Score</th>
-        <th align="left">Recordhouder</th>
-    </tr>
-    </thead>
-    <tbody class="gerelateerd">
-{% else %}
-    <tr>
-        <td><a href="{{ obj.url }}">{{ obj.volg_nr }}</a>{% if obj.is_specifieke_record %} ***{% endif %}</td>
-        <td>{{ obj.datum }}</td>
-        <td>{{ obj.score }}</td>
-        <td>{{ obj.naam }}</td>
-    </tr>
-{% endif %}
+    {% if forloop.first %}
+        <div class="row"><div class="col s5">
+        <p>Record {{ obj.discipline }}-{{ obj.volg_nr }}</p>
+        <table class="highlight z-depth-2">
+            <tbody>
+                <tr><td>Discipline:</td><td>{{ obj.disc_str }}</td></tr>
+                <tr><td>Soort record:</td><td>{{ obj.soort_record }}</td></tr>
+                <tr><td>Geslacht:</td><td>{{ obj.gesl_str }}</td></tr>
+                <tr><td>Leeftijdscategorie:</td><td>{{ obj.lcat_str }}</td></tr>
+                <tr><td>Materiaalklasse:</td><td>{{ obj.makl_str }}</td></tr>
+                <tr><td>Naam:</td><td>{{ obj.naam }}</td></tr>
+                <tr><td>Plaats:</td><td>{{ obj.plaats }}</td></tr>
+                <tr><td>Land:</td><td>{{ obj.land }}</td></tr>
+                <tr><td>Datum:</td><td>{{ obj.datum }}</td></tr>
+                <tr><td>Score:</td><td>{{ obj.score }}</td></tr>
+                <tr><td>Score notitie:</td><td>{{ obj.score_notitie }}</td></tr>
+                <tr><td>NHB lid:</td><td>{{ obj.nhb_lid.nhb_nr }}</td></tr>
+                <tr><td>Soort record:</td><td>
+                    {% if obj.is_national_record %}Nederlands<br>{% endif %}
+                    {% if obj.is_european_record %}Europees<br>{% endif %}
+                    {% if obj.is_word_record %}Wereld<br>{% endif %}
+                </td></tr>
+            </tbody>
+        </table>
+        </div></div>
+
+        <h5>Gerelateerde records</h5>
+        <table class="responsive-table">
+            <thead>
+            <tr>
+                <th align="left">Record #</th>
+                <th align="left">Datum</th>
+                <th align="left">Score</th>
+                <th align="left">Recordhouder</th>
+            </tr>
+            </thead>
+            <tbody>
+    {% else %}
+        <tr>
+            <td><a href="{{ obj.url }}">{{ obj.discipline }}-{{ obj.volg_nr }}</a>{% if obj.is_specifieke_record %} ***{% endif %}</td>
+            <td>{{ obj.datum }}</td>
+            <td>{{ obj.score }}</td>
+            <td>{{ obj.naam }}</td>
+        </tr>
+    {% endif %}
 {% endfor %}
 </tbody></table>
 
