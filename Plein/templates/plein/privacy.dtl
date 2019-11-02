@@ -12,37 +12,28 @@
 
 {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="privacy" %}
 
-<h1>Privacy</h1>
+<h2>Privacy verklaring</h2>
 
-<p>Deze pagina beschrijft hoe we omgaan met jouw privacy.</p>
+<p>Op deze pagina beschrijven we hoe we omgaan met jouw privacy.</p>
 
-<h2>Cookies</h2>
+<p>De Nederlandse Handboog Bond (NHB) is eigenaar van deze website. De uitgebreide privacy verklaring van de NHB is
+te vinden op de hoofdwebsite van de NHB: <a href="https://www.handboogsport.nl">www.handboogsport.nl</a></p>
 
-<p>Tijdens een bezoek aan deze website kunnen wij 'cookies' naar jouw browser sturen.
-Dit zijn kleine bestanden die op jouw apparaat kunnen worden opgeslagen en op een
-later moment weer naar onze website worden gestuurd.</p>
 
-<p>Deze 'cookies' worden gebruikt om je inlog te onthouden en om onze website te beschermen.
-Dit zijn puur functionele cookies (meer uitleg hier) en bevatten geen persoonsgegevens.</p>
-
-<p>We gebruiken geen tracking cookies waarvoor we je toestemming nodig hebben.
-Daarom krijg je bij deze website geen vraag of je cookies wilt accepteren.</p>
-
-<p>Hier kan je <a href="https://www.rijksoverheid.nl/onderwerpen/telecommunicatie/vraag-en-antwoord/mag-een-website-ongevraagd-cookies-plaatsen">meer informatie over cookies</a> vinden.</p>
-
-<h2>Persoonsgegevens</h2>
+<h3>Persoonsgegevens</h3>
 
 <p>Een groot deel van deze website is gemaakt om informatie te tonen die voor jou interessant is.</p>
 
 <p>Als je een account aanmaakt en inlogt dan tonen we deze informatie.</p>
 
 <p>Om je te kunnen identificeren gebruiken we persoonsgegevens die bekend zijn bij de NHB,
-waaronder je NHB nummer, volledig naam en e-mail adres.</p>
+waaronder je lidmaatschapsnummer, volledig naam en e-mail adres.</p>
 
 <p>Andere gegevens die we verzamelen om de website te beschermen zijn je internet IP-adres,
 informatie over je browser, het tijdstip waarop je de website benadert en welke inlog je gebruikt.</p>
 
-<h2>Publicaties</h2>
+
+<h3>Publicaties</h3>
 
 <p>Wedstrijden en competities hebben openbare deelnemerslijsten en uitslagen.</p>
 
@@ -57,7 +48,23 @@ informatie over je browser, het tijdstip waarop je de website benadert en welke 
 
 <p>Als je een Nederlands Record behaald hebt dan worden dezelfde persoonsgegevens openbaar gemaakt.</p>
 
-<h2>Contact</h2>
+
+<h3>Cookies</h3>
+
+<p>Tijdens een bezoek aan deze website kunnen wij 'cookies' naar jouw browser sturen.
+Dit zijn kleine bestanden die op jouw apparaat kunnen worden opgeslagen en op een
+later moment weer naar onze website worden gestuurd.</p>
+
+<p>Deze 'cookies' worden gebruikt om je inlog te onthouden en om onze website te beschermen.
+Dit zijn puur functionele cookies (meer uitleg hier) en bevatten geen persoonsgegevens.</p>
+
+<p>We gebruiken geen tracking cookies waarvoor we je toestemming nodig hebben.
+Daarom krijg je bij deze website geen vraag of je cookies wilt accepteren.</p>
+
+<p>Hier kan je <a href="https://www.rijksoverheid.nl/onderwerpen/telecommunicatie/vraag-en-antwoord/mag-een-website-ongevraagd-cookies-plaatsen">meer informatie over cookies</a> vinden.</p>
+
+
+<h3>Contact</h3>
 
 <p>Alle vragen en verzoeken over privacy kunnen gericht worden aan de Nederlandse Handboog Bond
 via <a href="mailto:info@handboogsport.nl">info@handboogsport.nl</a>.</p>
