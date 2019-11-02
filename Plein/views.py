@@ -7,7 +7,6 @@
 # from django.shortcuts import render
 from django.views.generic import TemplateView
 from django import forms
-from Plein.kruimels import make_context_broodkruimels
 from Plein.menu import menu_dynamics
 from django.shortcuts import redirect
 
