@@ -37,11 +37,6 @@ class SiteFeedbackView(View):
             # stuur ze weg
             raise Resolver404()
 
-        try:
-            initial_bevinding = SiteFeedback.url2bev[kwargs['bevinding']]
-        except KeyError:
-            # rare waarde
-            initial_bevinding = SiteFeedback.url2bev['nul']
         gebruiker_naam = request.user.username      # TODO: gebruik volledige naam uit account
         if not gebruiker_naam:
             gebruiker_naam = 'Niet bekend (anoniem)'
@@ -51,10 +46,15 @@ class SiteFeedbackView(View):
         request.session['gebruiker'] = gebruiker_naam
 
         # geef het formulier aan de gebruiker om in te vullen
-        form = SiteFeedbackForm(initial={'bevinding': initial_bevinding})
+        form = SiteFeedbackForm(initial={'bevinding': '6'})     # TODO: werkt niet met materialcss radiobuttons
+        bev = kwargs['bevinding']
         context = {'form': form,
                    'formulier_url': reverse('Overig:feedback-formulier'),     # URL voor de POST
-                   'gebruiker_naam': gebruiker_naam}
+                   'gebruiker_naam': gebruiker_naam,
+                   'check_0': (bev == 'min'),      # TODO: workaround for materializecss radiobuttons in Django
+                   'check_1': (bev == 'nul'),      #       see comment in site-feedback-formulier.dtl
+                   'check_2': (bev == 'plus')
+                  }
         menu_dynamics(request, context)
         return render(request, self.template_name, context)
 
