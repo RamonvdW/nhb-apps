@@ -9,7 +9,7 @@ def menu_dynamics(request, context, actief=None):
         menu zoals de 'Andere rollen' en het menu item dat actief is.
     """
     if actief:
-        if actief in ('inloggen', 'privacy'):
+        if actief in ('inloggen', 'privacy', 'records'):
             context['menu_actief'] = actief
         else:
             print('[WARNING] menu_dynamics: Onbekende actief waarde %s' % repr(actief))

@@ -38,14 +38,14 @@
     <i class="material-icons-round white-text">account_balance</i>Eerdere competities</a>
 </li>
 
-<li>
-    <a href="#" class="white-text">
-    <i class="material-icons-round white-text">star</i>Records</a>
+<li {% if menu_actief == "records" %}class="actief"{% endif %}>
+    <a href="{% url 'Records:overzicht' %}" class="white-text">
+    <i class="material-icons-round white-text"><!--star-->trending_up</i>Nederlandse records</a>
 </li>
 
 <li {% if menu_actief == "privacy" %}class="actief"{% endif %}>
     <a href="{% url 'Plein:privacy' %}" class="white-text">
-    <i class="material-icons-round white-text">security</i>Privacy</a>
+    <i class="material-icons-round white-text">security</i>Privacy verklaring</a>
 </li>
 
 {% if menu_show_admin %}
