@@ -64,7 +64,7 @@ class Loader(AppDirectoriesLoader):
             clean += contents[:pos]
             endpos = contents.find('-->', pos)
             if endpos >= 0:
-                contents = contents[endpos+4:]
+                contents = contents[endpos+3:]
             else:
                 print("[WARNING] remove_html_comments: missing comment end-tag")
                 clean += contents
