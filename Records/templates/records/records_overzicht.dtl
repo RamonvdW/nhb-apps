@@ -13,22 +13,26 @@
 
 <h3>Nederlandse Handboogsport Records</h3>
 
+<div class="row"><div class="col s5 m5 l5 xl5">
+    <ul class="collection">
+    <li class="collection-item"><a href="{% url 'Records:indiv' %}">Individuele records</a></li>
+    <li class="collection-item">Team records</li>
+    <li class="collection-item"><a href="{% url 'Records:zoek' %}">Zoek in de records</a></li>
+    </ul>
+</div>
 {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="records_overzicht" %}
+</div>
 
-<ul class="collection">
-<li class="collection-item"><a href="{% url 'Records:indiv' %}">Individuele records</a></li>
-<li class="collection-item">Team records</li>
-<li class="collection-item"><a href="{% url 'Records:zoek' %}">Zoek in de records</a></li>
-</ul>
 
-<h5>De nieuwste records (3)</h5>
+<h5>De nieuwste records</h5>
 
 <div class="row">
     {% for obj in object_list %}
     <div class="col s12 m6 l6 xl4">
         <div class="card">
             <div class="card-content">
-                {% if obj.is_word_record %}
+                <img class="right" src="{{ obj.icon }}" height="50px">
+                {% if obj.is_world_record %}
                     <span class="card-title">Wereld Record</span>
                 {% elif obj.is_european_record %}
                     <span class="card-title">Europees Record</span>
@@ -37,48 +41,20 @@
                 {% else %}
                     <span class="card-title">Nieuw Record</span>
                 {% endif %}
+                <p>{{ obj.descr1_str }}</p>
+                <p>{{ obj.descr2_str }}</p>
+                <p>&nbsp;</p>
                 <p>{{ obj.datum }}</p>
-                <p>{{ obj.naam }}</p>
+                <p><b>{{ obj.naam }}</b></p>
                 <p>Score: {{ obj.score }}</p>
                 <p>Plaats: {{ obj.plaats }}</p>
             </div>
-            <div class="card-action">
-                <a href="{{ obj.url }}">Meer details</a>
+            <div class="card-action center">
+                <a href="{{ obj.url }}">Details</a>
             </div>
         </div>
     </div>
     {% endfor %}
 </div>
-
-<h5>De nieuwste records (2)</h5>
-
-<table class="responsive-table">
-    <thead>
-    <tr>
-        <th align="left">Record #</th>
-        <th align="left">Datum</th>
-        <th align="left">Score</th>
-        <th align="left">Recordhouder</th>
-    </tr>
-    </thead>
-    <tbody>
-{% for obj in object_list %}
-        <tr>
-            <td><a href="{{ obj.url }}">{{ obj.discipline }}-{{ obj.volg_nr }}</a>{% if obj.is_specifieke_record %} ***{% endif %}</td>
-            <td>{{ obj.datum }}</td>
-            <td>{{ obj.score }}</td>
-            <td>{{ obj.naam }}</td>
-        </tr>
-{% endfor %}
-    </tbody>
-</table>
-
-<h5>De nieuwste records (1)</h5>
-
-<ul class="collection">
-{% for obj in object_list %}
-<li class="collection-item"><a href="{{ obj.url }}">{{ obj.discipline }}-{{ obj.volg_nr }}</a>: {{ obj.datum }} - {{ obj.naam }} - {{ obj.discipline }} - {{ obj.soort_record }} - {{ obj.score }}</li>
-{% endfor %}
-</ul>
 
 {% endblock %}
