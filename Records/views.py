@@ -7,6 +7,7 @@
 from django.urls import Resolver404, reverse
 from django.views.generic import TemplateView, ListView
 from django.db.models import Q
+from django.contrib.staticfiles.templatetags.staticfiles import static
 from Plein.menu import menu_dynamics
 from NhbStructuur.models import NhbLid
 from .models import IndivRecord
@@ -19,6 +20,12 @@ TEMPLATE_RECORDS_INDIV_ZOOM5 = 'records/records_indiv_zoom5.dtl'
 TEMPLATE_RECORDS_ZOEK = 'records/records_zoek.dtl'
 
 
+DISCIPLINE_TO_ICON = {
+    'OD': static('plein/badge_nhb_outdoor.png'),
+    '18': static('plein/badge_nhb_indoor.png'),
+    '25': static('plein/badge_nhb_25m1p.png')
+}
+
 class RecordsOverzichtView(ListView):
     """ Dit is de top-level pagina van de records met een overzicht van de meest
         recente records
@@ -30,6 +37,22 @@ class RecordsOverzichtView(ListView):
     @staticmethod
     def set_url_specifiek(obj):
         obj.url = reverse('Records:specifiek', kwargs={'nummer': obj.volg_nr, 'discipline': obj.discipline})
+        obj.icon = DISCIPLINE_TO_ICON[obj.discipline]
+
+        obj.descr1_str = IndivRecord.disc2str[obj.discipline] + " "
+
+        # recurve etc.
+        if obj.materiaalklasse == "O":
+            obj.descr1_str += obj.materiaalklasse_overig
+        else:
+            obj.descr1_str += IndivRecord.makl2str[obj.materiaalklasse]
+
+        # heren/dames
+        obj.descr2_str = IndivRecord.gesl2str[obj.geslacht] + " "
+
+        # junioren, etc.
+        obj.descr2_str += IndivRecord.lcat2str[obj.leeftijdscategorie]
+
 
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
