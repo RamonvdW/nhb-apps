@@ -36,12 +36,12 @@ h1, h2, h3, h4, h5, h6 {
 
 /* colors */
 .blue {
-    background-color: var(--mdc-theme-primary) important!;
+    background-color: var(--mdc-theme-primary) !important;
 }
 
 /* achtergrondkleur van het menu */
 .blue2 {
-    background-color: var(--mdc-theme-primary2) important!;
+    background-color: var(--mdc-theme-primary2) !important;
 }
 
 /* actieve menu item in rood */
@@ -68,12 +68,34 @@ textarea.materialize-textarea:focus:not([readonly]) {
           box-shadow: 0 1px 0 0 var(--mdc-theme-primary);
 }
 
-
 /* duidelijkere hover highlight voor table 'highlight' class */
 table.highlight > tbody > tr:hover {
   background-color: var(--mdc-theme-primary-light);
 }
 
+
+/* kleur van card-action link + hover */
+.card .card-action a:not(.btn):not(.btn-large):not(.btn-small):not(.btn-large):not(.btn-floating) {
+  color: var(--mdc-theme-primary);
+}
+
+.card .card-action a:not(.btn):not(.btn-large):not(.btn-small):not(.btn-large):not(.btn-floating):hover {
+  color: var(--mdc-theme-primary2);
+}
+
+a:hover {
+  color: var(--mdc-theme-primary2);
+}
+
+a {
+  color: var(--mdc-theme-primary);
+}
+
+/* vertikale verkleiner in een grid */
+.small-row {
+    padding: 5px 10px 5px 10px;
+    margin-bottom: 0px;
+}
 
 /* site feedback floater */
 .site-sidebar-rechts {
