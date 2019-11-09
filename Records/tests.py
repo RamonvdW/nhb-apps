@@ -162,13 +162,16 @@ class RecordsTest(TestCase):
         # let op de zoekterm: mag niet matchen met soort_record, naam, plaats of land
         rsp = self.client.get('/records/zoek/', {'zoekterm': 'jaja'})
         self.assertEqual(rsp.status_code, 200)
+        self.assertContains(rsp, "Niets gevonden")
 
     def test_view_zoek_plaats(self):
         rsp = self.client.get('/records/zoek/', {'zoekterm': 'Papendal'})
         self.assertEqual(rsp.status_code, 200)
+        self.assertContains(rsp, "Gevonden records (1)")
 
     def test_view_zoek_plaats_case_insensitive(self):
-        rsp = self.client.get('/records/zoek/', {'zoekterm': 'paPENdal'})
+        rsp = self.client.get('/records/zoek/', {'zoekterm': 'PENdal'})
         self.assertEqual(rsp.status_code, 200)
+        self.assertContains(rsp, "Gevonden records (1)")
 
 # end of file

@@ -353,10 +353,11 @@ class RecordsZoekView(ListView):
             self.get_zoekterm = self.form.cleaned_data['zoekterm']
 
             if self.get_zoekterm:
+                zoekterm = self.get_zoekterm
                 self.have_searched = True
 
                 try:
-                    filter_nr = int(self.get_zoekterm)
+                    filter_nr = int(zoekterm)
                     filter_is_nr = True
                 except ValueError:
                     filter_is_nr = False
@@ -374,10 +375,11 @@ class RecordsZoekView(ListView):
                         return IndivRecord.objects.filter(nhb_lid=lid)
                 else:
                     return IndivRecord.objects.filter(
-                                    Q(soort_record__icontains=self.get_zoekterm) |
-                                    Q(naam__icontains=self.get_zoekterm) |
-                                    Q(plaats__icontains=self.get_zoekterm) |
-                                    Q(land__icontains=self.get_zoekterm)).order_by('-datum')
+                                    Q(soort_record__icontains=zoekterm) |
+                                    Q(naam__icontains=zoekterm) |
+                                    Q(plaats__icontains=zoekterm) |
+                                    Q(land__icontains=zoekterm)).order_by('-datum')
+
         return None
 
     def get_context_data(self, **kwargs):
@@ -385,6 +387,7 @@ class RecordsZoekView(ListView):
         context = super().get_context_data(**kwargs)
         context['form'] = self.form
         context['have_searched'] = self.have_searched
+        context['zoekterm'] = self.get_zoekterm
         menu_dynamics(self.request, context, actief='records')
         return context
 
