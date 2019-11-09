@@ -90,7 +90,7 @@ class OverigTest(TestCase):
         self.client.logout()
         rsp = self.client.get('/overig/feedback/nul/plein/')   # zet sessie variabelen: op_pagina en gebruiker
         rsp = self.client.post('/overig/feedback/formulier/', {'bevinding': '4', 'feedback': 'Just testing'})
-        self.assertEqual(rsp.status_code, 302)
+        self.assertEqual(rsp.status_code, 302)  # redirect to bedankt pagina
         obj = SiteFeedback.objects.all()[0]
         self.assertFalse(obj.is_afgehandeld)
         obj.is_afgehandeld = True
@@ -104,13 +104,22 @@ class OverigTest(TestCase):
         rsp = self.client.get('/overig/feedback/formulier/')
         self.assertEqual(rsp.status_code, 404)
 
-    def test_inzicht(self):
+    def test_inzicht_annon(self):
         # do een get van alle feedback
+        self.client.logout()
+        rsp = self.client.get('/overig/feedback/inzicht/')
+        self.assertEqual(rsp.status_code, 302)  # redirect
+
+    def test_inzicht_user(self):
+        # do een get van alle feedback
+        self.client.login(username='normaal', password='wachtwoord')
         rsp = self.client.get('/overig/feedback/inzicht/')
         self.assertEqual(rsp.status_code, 200)
         assert_template_used(self, rsp, ('overig/site-feedback-inzicht.dtl', 'plein/site_layout.dtl'))
         assert_html_ok(self, rsp)
+        self.assertContains(rsp, "door de ontwikkelaar afgehandeld")
         assert_other_http_commands_not_supported(self, '/overig/feedback/inzicht/')
+
 
 # TODO: add use of assert_other_http_commands_not_supported
 

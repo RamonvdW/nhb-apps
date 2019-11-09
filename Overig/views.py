@@ -9,6 +9,7 @@ from django.views.generic import TemplateView, ListView
 from django.shortcuts import render, redirect
 from django.urls import Resolver404, reverse
 from django.http import HttpResponseRedirect
+from django.contrib.auth.mixins import LoginRequiredMixin
 from Plein.menu import menu_dynamics
 from .forms import SiteFeedbackForm
 from .models import SiteFeedback, store_feedback, SiteTijdelijkeUrl
@@ -52,9 +53,9 @@ class SiteFeedbackView(View):
         context = {'form': form,
                    'formulier_url': reverse('Overig:feedback-formulier'),     # URL voor de POST
                    'gebruiker_naam': gebruiker_naam,
-                   'check_0': (bev == 'min'),      # TODO: workaround for materializecss radiobuttons in Django
+                   'check_0': (bev == 'plus'),     # TODO: workaround for materializecss radiobuttons in Django
                    'check_1': (bev == 'nul'),      #       see comment in site-feedback-formulier.dtl
-                   'check_2': (bev == 'plus')
+                   'check_2': (bev == 'min')
                   }
         menu_dynamics(request, context)
         return render(request, self.template_name, context)
@@ -99,22 +100,26 @@ class SiteFeedbackBedanktView(TemplateView):
         return context
 
 
-class SiteFeedbackInzichtView(ListView):
+class SiteFeedbackInzichtView(LoginRequiredMixin, ListView):
     """ Deze view toont de ontvangen feedback. """
 
     # class variables shared by all instances
     template_name = TEMPLATE_FEEDBACK_INZICHT
+    login_url = '/account/login/'       # no reverse call
 
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
         # 50 nieuwste onafgehandelde site feedback items
-        objs = SiteFeedback.objects.filter(is_afgehandeld=False).order_by('-toegevoegd_op')[:50]
-        return objs
+        self.count_aanwezig = len(SiteFeedback.objects.all())
+        self.count_niet_afgehandeld = len(SiteFeedback.objects.filter(is_afgehandeld=False))
+        return SiteFeedback.objects.filter(is_afgehandeld=False).order_by('-toegevoegd_op')[:50]
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
-        menu_dynamics(self.request, context)
+        context['count_aanwezig'] = self.count_aanwezig
+        context['count_afgehandeld'] = self.count_aanwezig - self.count_niet_afgehandeld
+        menu_dynamics(self.request, context, actief='site-feedback-inzicht')
         return context
 
 
