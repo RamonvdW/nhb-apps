@@ -11,7 +11,7 @@
 {% block pagina %}
 {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="registreer" %}
 
-<h1>Account aanmaken</h1>
+<h2>Account aanmaken</h2>
 
 <p>Op deze pagina maak je een nieuw account aan. Dit hoef je maar één keer te doen.</p>
 <p>Je kan alleen een account aanmaken als je een NHB nummer hebt en je e-mail adres bekend is bij de bond.</p>
@@ -58,5 +58,8 @@
 <h3>Wat is mijn e-mail?</h3>
 <p>Om veiligheidsredenen is er geen manier om je e-mail adres op te vragen.<p>
 <p>De secretaris van je boogschietvereniging kan je verder helpen.</p>
+
+<h3>Hoe zit het met mijn privacy?</h3>
+<p>Op de pagina <a href="{% url 'Plein:privacy' %}">Privacy Verklaring</a> kan je meer informatie vinden.</p>
 
 {% endblock %}
