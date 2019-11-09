@@ -6,7 +6,7 @@
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
-
+from .menu import menu_dynamics
 
 def assert_html_ok(testcase, response):
     """ Doe een aantal basic checks op een html response """
@@ -96,5 +96,13 @@ class PleinTest(TestCase):
         assert_html_ok(self, rsp)
         assert_other_http_commands_not_supported(self, '/plein/privacy/')
         assert_template_used(self, rsp, ('plein/privacy.dtl', 'plein/site_layout.dtl'))
+
+    def test_dynamic_menu_print(self):
+        # not so interesting, so just invoke to get coverage without bothering about the result
+        context = dict()
+        request = lambda: None      # create an empty object
+        request.user = lambda: None
+        request.user.is_authenticated = False
+        menu_dynamics(request, context, actief='test-bestaat-niet')
 
 # end of file
