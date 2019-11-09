@@ -14,109 +14,137 @@
 
 <h3>Nederlandse Handboogsport Record</h3>
 
-{% for obj in object_list %}
-    {% if forloop.first %}
-        <p>Record {{ obj.discipline }}-{{ obj.volg_nr }}</p>
 
-        <div class="row"><div class="col s12 m10 l8 xl6">
-            <div class="white-text blue z-depth-2">
-                <!-- <div class="row">
-                    <div class="col s1">1</div>
-                    <div class="col s1">2</div>
-                    <div class="col s1">3</div>
-                    <div class="col s1">4</div>
-                    <div class="col s1">5</div>
-                    <div class="col s1">6</div>
-                    <div class="col s1">7</div>
-                    <div class="col s1">8</div>
-                    <div class="col s1">9</div>
-                    <div class="col s1">10</div>
-                    <div class="col s1">11</div>
-                    <div class="col s1">12</div>
-                </div> -->
-                <div class="row small-row">
-                    <div class="col s4">Soort record:</div>
-                    {% if obj.is_world_record %}
-                    <div class="col s6">Wereld Record</div>
-                    {% elif obj.is_european_record %}
-                    <div class="col s6">Europees Record</div>
-                    {% elif obj.is_national_record %}
-                    <div class="col s6">Nederlands Record</div>
-                    {% endif %}
-                </div>
-                <div class="row small-row">
-                    <div class="col s4">Discipline:</div>
-                    <div class="col s6">{{ obj.disc_str }}</div>
-                </div>
-                <div class="row small-row">
-                    <div class="col s4">Soort record:</div>
-                    <div class="col s6">{{ obj.soort_record }}</div>
-                </div>
-                <div class="row small-row">
-                    <div class="col s4">Geslacht:</div>
-                    <div class="col s6">{{ obj.gesl_str }}</div>
-                </div>
-                <div class="row small-row">
-                    <div class="col s4">Leeftijdscategorie:</div>
-                    <div class="col s6">{{ obj.lcat_str }}</div>
-                </div>
-                <div class="row small-row">
-                    <div class="col s4">Materiaalklasse:</div>
-                    <div class="col s6">{{ obj.makl_str }}</div>
-                </div>
-                <div class="row small-row">
-                    <div class="col s4">Naam:</div>
-                    <div class="col s6">{{ obj.naam }}</div>
-                </div>
-                <div class="row small-row">
-                    <div class="col s4">Plaats:</div>
-                    <div class="col s6">{{ obj.plaats }}</div>
-                </div>
-                <div class="row small-row">
-                    <div class="col s4">Land:</div>
-                    <div class="col s6">{{ obj.land }}</div>
-                </div>
-                <div class="row small-row">
-                    <div class="col s4">Datum:</div>
-                    <div class="col s6">{{ obj.datum }}</div>
-                </div>
-                <div class="row small-row">
-                    <div class="col s4">Score:</div>
-                    <div class="col s6">{{ obj.score }}</div>
-                </div>
-                <div class="row small-row">
-                    <div class="col s4">Score notitie:</div>
-                    <div class="col s6">{{ obj.score_notitie }}</div>
-                </div>
-                <!--
-                <div class="row small-row">
-                    <tr><td>NHB lid:</td><td>{{ obj.nhb_lid.nhb_nr }}</td></tr>
-                </div>
-                -->
-            </div></div>
-        </div></div>
+<div class="row">
 
-        <h5>Gerelateerde records</h5>
+    <!-- on extra-large disable, show the related records besides the actual record -->
+    <div class="col xl6 hide-on-large-and-down">
+        <ul class="collection with-header">
+            <li class="collection-header"><h5>Gerelateerde records</h5></li>
+            {% for obj in object_list %}
+                {% if obj.is_specifieke_record %}
+                <li class="collection-item active">
+                {% else %}
+                <li class="collection-item">
+                {% endif %}
+                    <div>{{ obj.score }} door <b>{{ obj.naam }}</b> op {{ obj.datum }}
+                        {% if obj.is_specifieke_record %}
+                        <i class="material-icons-round secondary-content white-text">visibility</i>
+                        {% else %}
+                        <a href="{{ obj.url }}"><i class="material-icons-round secondary-content">visibility</i></a>
+                        {% endif %}
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
 
-        <table class="responsive-table">
-            <thead>
-            <tr>
-                <th align="left">Record #</th>
-                <th align="left">Datum</th>
-                <th align="left">Score</th>
-                <th align="left">Recordhouder</th>
-            </tr>
-            </thead>
-            <tbody>
-    {% else %}
-        <tr>
-            <td><a href="{{ obj.url }}">{{ obj.discipline }}-{{ obj.volg_nr }}</a>{% if obj.is_specifieke_record %} ***{% endif %}</td>
-            <td>{{ obj.datum }}</td>
-            <td>{{ obj.score }}</td>
-            <td>{{ obj.naam }}</td>
-        </tr>
-    {% endif %}
-{% endfor %}
-</tbody></table>
+    <!-- show the actual record in a blue box -->
+    <div class="col s12 m10 l8 xl6">
+        <p>Record {{ obj_record.discipline }}-{{ obj_record.volg_nr }}</p>
+
+        <div class="white-text blue z-depth-2">
+            <!-- <div class="row">
+                <div class="col s1">1</div>
+                <div class="col s1">2</div>
+                <div class="col s1">3</div>
+                <div class="col s1">4</div>
+                <div class="col s1">5</div>
+                <div class="col s1">6</div>
+                <div class="col s1">7</div>
+                <div class="col s1">8</div>
+                <div class="col s1">9</div>
+                <div class="col s1">10</div>
+                <div class="col s1">11</div>
+                <div class="col s1">12</div>
+            </div> -->
+            <div class="row small-row">
+                <div class="col s4">Soort record:</div>
+                {% if obj_record.is_world_record %}
+                <div class="col s6">Wereld Record</div>
+                {% elif obj_record.is_european_record %}
+                <div class="col s6">Europees Record</div>
+                {% elif obj_record.is_national_record %}
+                <div class="col s6">Nederlands Record</div>
+                {% endif %}
+            </div>
+            <div class="divider">&nbps;</div>
+            <div class="row small-row">
+                <div class="col s4">Discipline:</div>
+                <div class="col s6">{{ obj_record.disc_str }}</div>
+            </div>
+            <div class="row small-row">
+                <div class="col s4">Soort record:</div>
+                <div class="col s6">{{ obj_record.soort_record }}</div>
+            </div>
+            <div class="row small-row">
+                <div class="col s4">Geslacht:</div>
+                <div class="col s6">{{ obj_record.gesl_str }}</div>
+            </div>
+            <div class="row small-row">
+                <div class="col s4">Leeftijdscategorie:</div>
+                <div class="col s6">{{ obj_record.lcat_str }}</div>
+            </div>
+            <div class="row small-row">
+                <div class="col s4">Materiaalklasse:</div>
+                <div class="col s6">{{ obj_record.makl_str }}</div>
+            </div>
+            <div class="divider">&nbps;</div>
+            <div class="row small-row">
+                <div class="col s4">Score:</div>
+                <div class="col s6">{{ obj_record.score }}</div>
+            </div>
+            <div class="row small-row">
+                <div class="col s4">Score notitie:</div>
+                <div class="col s6">{{ obj_record.score_notitie }}</div>
+            </div>
+            <div class="row small-row">
+                <div class="col s4">Naam:</div>
+                <div class="col s6"><b>{{ obj_record.naam }}</b></div>
+            </div>
+            <div class="row small-row">
+                <div class="col s4">Plaats:</div>
+                <div class="col s6">{{ obj_record.plaats }}</div>
+            </div>
+            <div class="row small-row">
+                <div class="col s4">Land:</div>
+                <div class="col s6">{{ obj_record.land }}</div>
+            </div>
+            <div class="row small-row">
+                <div class="col s4">Datum:</div>
+                <div class="col s6">{{ obj_record.datum }}</div>
+            </div>
+            <!--
+            <div class="row small-row">
+                <tr><td>NHB lid:</td><td>{{ obj_record.nhb_lid.nhb_nr }}</td></tr>
+            </div>
+            -->
+        </div>
+    </div>
+</div>
+
+
+<div class="row hide-on-extra-large-only">
+    <div class="col s12 m10 l8 xl6">
+        <ul class="collection with-header">
+            <li class="collection-header"><h5>Gerelateerde records</h5></li>
+            {% for obj in object_list %}
+                {% if obj.is_specifieke_record %}
+                <li class="collection-item active">
+                {% else %}
+                <li class="collection-item">
+                {% endif %}
+                    <div>{{ obj.score }} door <b>{{ obj.naam }}</b> op {{ obj.datum }}
+                        {% if obj.is_specifieke_record %}
+                        <i class="material-icons-round secondary-content white-text">visibility</i>
+                        {% else %}
+                        <a href="{{ obj.url }}"><i class="material-icons-round secondary-content">visibility</i></a>
+                        {% endif %}
+                    </div>
+ontleed                 </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
 
 {% endblock %}

@@ -5,7 +5,6 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
-{% block extrastyle %}<link rel="stylesheet" type="text/css" href="{% static 'records/style.css' %}">{% endblock %}
 
 {% block title %}Handboogsport Records{% endblock %}
 
@@ -13,14 +12,15 @@
 
 <h3>Nederlandse Handboogsport Records</h3>
 
-<div class="row"><div class="col s5 m5 l5 xl5">
-    <ul class="collection">
-    <li class="collection-item"><a href="{% url 'Records:indiv' %}">Individuele records</a></li>
-    <li class="collection-item">Team records</li>
-    <li class="collection-item"><a href="{% url 'Records:zoek' %}">Zoek in de records</a></li>
-    </ul>
-</div>
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="records_overzicht" %}
+<div class="row">
+    <div class="col s5 m5 l5 xl5">
+        <ul class="collection">
+            <li class="collection-item"><a href="{% url 'Records:indiv' %}">Individuele records</a></li>
+            <li class="collection-item">Team records</li>
+            <li class="collection-item"><a href="{% url 'Records:zoek' %}">Zoek in de records</a></li>
+        </ul>
+    </div>
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="records_overzicht" %}
 </div>
 
 

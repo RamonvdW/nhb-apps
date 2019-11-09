@@ -34,7 +34,7 @@ class RecordsTest(TestCase):
         # Record 42
         rec = IndivRecord()
         rec.volg_nr = 42
-        rec.discipline = IndivRecord.DISCIPLINE[0][0]
+        rec.discipline = IndivRecord.DISCIPLINE[0][0]   # OD
         rec.soort_record = 'Test record'
         rec.geslacht = IndivRecord.GESLACHT[0][0]
         rec.leeftijdscategorie = IndivRecord.LEEFTIJDSCATEGORIE[0][0]
@@ -58,7 +58,7 @@ class RecordsTest(TestCase):
         rec.discipline = IndivRecord.DISCIPLINE[1][0]
         rec.soort_record = 'Test record overig'
         rec.geslacht = IndivRecord.GESLACHT[1][0]
-        rec.leeftijdscategorie = IndivRecord.LEEFTIJDSCATEGORIE[1][0]
+        rec.leeftijdscategorie = IndivRecord.LEEFTIJDSCATEGORIE[1][0]   # 18
         rec.materiaalklasse = 'O'       # overig
         rec.materiaalklasse_overig = 'Overige Test'
         # rec.nhb_lid =
@@ -88,22 +88,22 @@ class RecordsTest(TestCase):
         assert_other_http_commands_not_supported(self, '/records/')
 
     def test_view_specifiek(self):
-        rsp = self.client.get('/records/record-42/')    # 42=volg_nr
+        rsp = self.client.get('/records/record-OD-42/')    # OD=Outdoor, 42=volg_nr
         self.assertEqual(rsp.status_code, 200)
         assert_template_used(self, rsp, ('records/records_specifiek.dtl', 'plein/site_layout.dtl'))
         assert_html_ok(self, rsp)
-        assert_other_http_commands_not_supported(self, '/records/record-42/')
+        assert_other_http_commands_not_supported(self, '/records/record-OD-42/')
         # TODO: check extra zaken via template context (rsp.context)
 
     def test_view_specifiek_overig(self):
-        rsp = self.client.get('/records/record-43/')    # 43=volg_nr
+        rsp = self.client.get('/records/record-18-43/')    # 18=Indoor, 43=volg_nr
         self.assertEqual(rsp.status_code, 200)
         assert_template_used(self, rsp, ('records/records_specifiek.dtl', 'plein/site_layout.dtl'))
         assert_html_ok(self, rsp)
         # TODO: check extra zaken via template context (rsp.context)
 
     def test_view_specifiek_missing(self):
-        rsp = self.client.get('/records/record-0/')    # niet bestaand record nummer
+        rsp = self.client.get('/records/record-OD-0/')    # niet bestaand record nummer
         self.assertEqual(rsp.status_code, 404)
 
     def test_view_zoom_0args(self):

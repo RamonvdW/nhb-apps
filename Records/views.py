@@ -7,6 +7,7 @@
 from django.urls import Resolver404, reverse
 from django.views.generic import TemplateView, ListView
 from django.db.models import Q
+from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.staticfiles.templatetags.staticfiles import static
 from Plein.menu import menu_dynamics
 from NhbStructuur.models import NhbLid
@@ -277,13 +278,13 @@ class RecordsIndivSpecifiekView(ListView):
         discipline = self.kwargs['discipline']
 
         # zoek het specifieke record erbij
-        specifiek = IndivRecord.objects.filter(volg_nr=volg_nr, discipline=discipline)
-        if len(specifiek) == 0:
+        try:
+            spec = IndivRecord.objects.get(volg_nr=volg_nr, discipline=discipline)
+        except ObjectDoesNotExist:
             # dat was geen valide record nummer
             # TODO: consider to make more user friendly
             raise Resolver404()
 
-        spec = specifiek[0]      # het volg_nr is nog niet altijd uniek, dus kies de eerste
         # voeg informatie toe voor de template
         spec.gesl_str = IndivRecord.gesl2str[spec.geslacht]
         spec.disc_str = IndivRecord.disc2str[spec.discipline]
@@ -299,27 +300,28 @@ class RecordsIndivSpecifiekView(ListView):
         self.params['lcat'] = IndivRecord.lcat2url[spec.leeftijdscategorie]
         self.params['makl'] = IndivRecord.makl2url[spec.materiaalklasse]
 
+        self.spec = spec
+
         # zoek de andere records die hier bij horen, aflopend gesorteerd op datum
         # hier zit ook het record zelf bij
-        hist = IndivRecord.objects.filter(
+        objs = IndivRecord.objects.filter(
                         geslacht=spec.geslacht,
                         discipline=spec.discipline,
                         leeftijdscategorie=spec.leeftijdscategorie,
                         materiaalklasse=spec.materiaalklasse,
                         soort_record=spec.soort_record).order_by('-datum')
 
-        objs = list()
-        objs.append(spec)
-        objs.extend(hist)
-        for obj in hist:
+        for obj in objs:
             obj.is_specifieke_record = (obj.volg_nr == spec.volg_nr)
             self.set_url_specifiek(obj)
         # for
+
         return objs
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
+        context['obj_record'] = self.spec
         menu_dynamics(self.request, context, actief='records')
         return context
 
@@ -345,10 +347,14 @@ class RecordsZoekView(ListView):
         # haal de GET parameters uit de request
         self.form = ZoekForm(self.request.GET)
 
+        self.have_searched = False
+
         if self.form.is_valid():
             self.get_zoekterm = self.form.cleaned_data['zoekterm']
 
             if self.get_zoekterm:
+                self.have_searched = True
+
                 try:
                     filter_nr = int(self.get_zoekterm)
                     filter_is_nr = True
@@ -378,6 +384,7 @@ class RecordsZoekView(ListView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
         context['form'] = self.form
+        context['have_searched'] = self.have_searched
         menu_dynamics(self.request, context, actief='records')
         return context
 

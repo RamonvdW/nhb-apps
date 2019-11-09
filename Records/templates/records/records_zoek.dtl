@@ -5,9 +5,6 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
-{% block extrastyle %}
-
-<link rel="stylesheet" type="text/css" href="{% static 'records/style.css' %}">{% endblock %}
 
 {% block title %}Handboogsport records doorzoeken{% endblock %}
 
@@ -44,13 +41,31 @@
 </div>
 
 {% if object_list.count %}
-    <p>Aantal records gevonden: {{ object_list.count }}</p>
+<div class="row">
+    <div class="col s12 m10 l8 xl6">
+        <ul class="collection with-header">
+            <li class="collection-header"><h5>Gevonden records ({{ object_list.count }})</h5></li>
+            {% for obj in object_list %}
+                <li class="collection-item">
+                    <div>{{ obj.naam }} op {{ obj.datum }} in {{ obj.plaats }}
+                        <a href="{% url 'Records:specifiek' obj.discipline obj.volg_nr %}"><i class="material-icons-round secondary-content">visibility</i></a>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
 
     <ul>
         {% for obj in object_list %}
-        <li><a href="{% url 'Records:specifiek' obj.discipline obj.volg_nr %}">Record {{ obj.volg_nr }}</a> - {{ obj.datum }} - {{ obj.naam }} - {{ obj.plaats }} {{ obj.land }} - {{ obj.score }}</li>
+        <li><a href="{% url 'Records:specifiek' obj.discipline obj.volg_nr %}">Record {{ obj.volg_nr }}</a>
+            - {{ obj.datum }} - {{ obj.naam }} - {{ obj.plaats }} {{ obj.land }} - {{ obj.score }}</li>
         {% endfor %}
     </ul>
+{% else %}
+    {% if have_searched %}
+    <p class="red-text">Niets gevonden</p>
+    {% endif %}
 {% endif %}
 
 {% endblock %}
