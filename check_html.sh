@@ -14,6 +14,7 @@ PAGES='
 /plein/privacy/
 /records/record-OD-1/
 /records/zoek/
+/records/zoek/?zoekterm=schijndel
 /account/login/
 /account/registreer/
 /account/uitgelogd/
