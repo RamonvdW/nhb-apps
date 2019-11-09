@@ -98,11 +98,12 @@ class PleinTest(TestCase):
         assert_template_used(self, rsp, ('plein/privacy.dtl', 'plein/site_layout.dtl'))
 
     def test_dynamic_menu_print(self):
-        # not so interesting, so just invoke to get coverage without bothering about the result
+        # test the assert in menu_dynamics
         context = dict()
         request = lambda: None      # create an empty object
         request.user = lambda: None
         request.user.is_authenticated = False
-        menu_dynamics(request, context, actief='test-bestaat-niet')
+        with self.assertRaises(AssertionError):
+            menu_dynamics(request, context, actief='test-bestaat-niet')
 
 # end of file
