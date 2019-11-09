@@ -1,0 +1,42 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2019 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Feedback{% endblock %}
+
+{% block pagina %}
+
+<h2>Site feedback</h2>
+
+<p>De nieuwste feedback op de site (maximaal 50) volgen hieronder.</p>
+
+<ul class="collapsible">
+    {% for obj in object_list %}
+    <li>
+        <div class="collapsible-header white-text">
+            {% if obj.bevinding == "4" %}
+                <i class="material-icons-round red-text">thumb_down</i>
+            {% elif obj.bevinding == "6" %}
+                <i class="material-icons-round">thumbs_up_down</i>
+            {% elif obj.bevinding == "8" %}
+                <i class="material-icons-round green-text">thumb_up</i>
+            {% else %}
+                Bevinding {{ obj.bevinding }}
+            {% endif %}
+            op pagina '{{ obj.op_pagina }}'
+        </div>
+        <div class="collapsible-body">
+            <span>#{{ obj.pk }} door <b>{{ obj.gebruiker }}</b> toegevoegd op {{ obj.toegevoegd_op|date:"l n F Y" }} om {{ obj.toegevoegd_op|date:"H:i" }}</span>
+            <p>(site versie: {{ obj.site_versie }})</p>
+            <p><u>Feedback</u></p>
+            <h6>{{ obj.feedback }}</h6>
+        </div>
+    </li>
+    {% endfor %}
+</ul>
+
+{% endblock %}
