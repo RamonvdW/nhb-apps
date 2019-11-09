@@ -141,7 +141,7 @@
                         <a href="{{ obj.url }}"><i class="material-icons-round secondary-content">visibility</i></a>
                         {% endif %}
                     </div>
-ontleed                 </li>
+                </li>
             {% endfor %}
         </ul>
     </div>
