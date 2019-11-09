@@ -28,7 +28,7 @@
   }
 }
 .keyboard-focused .collapsible-header:focus {
-  background-color: #eee;
+  background-color: $collapsible-focussed-color;
 }
 
 .collapsible-body {
