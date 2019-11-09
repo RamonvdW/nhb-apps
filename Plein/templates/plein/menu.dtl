@@ -49,6 +49,10 @@
 </li>
 
 {% if menu_show_admin %}
+<li {% if menu_actief == "site-feedback-inzicht" %}class="actief"{% endif %}>
+    <a href="{% url 'Overig:feedback-inzicht' %}" class="white-text">
+    <i class="material-icons-round white-text">feedback</i>Site feedback</a>
+</li>
 <li>
     <a href="/admin/" class="white-text">
     <i class="material-icons-round red-text">build</i>Admin site</a>

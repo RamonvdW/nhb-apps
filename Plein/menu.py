@@ -10,7 +10,7 @@ def menu_dynamics(request, context, actief=None):
         menu zoals de 'Andere rollen' en het menu item dat actief is.
     """
     if actief:
-        assert (actief in ('inloggen', 'privacy', 'records')), 'menu_dynamics: Onbekende actief waarde %s' % repr(actief)
+        assert (actief in ('inloggen', 'privacy', 'records', 'site-feedback-inzicht')), 'menu_dynamics: Onbekende actief waarde %s' % repr(actief)
         context['menu_actief'] = actief
 
     # zet context variabele om aan te geven of de link naar de Admin site erbij mag
