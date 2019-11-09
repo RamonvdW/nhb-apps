@@ -15,7 +15,7 @@
 {% load static %}
 
 <div class="grey lighten-4" style="padding: 10px">
-    <a href="{% url 'Plein:plein' %}"><img src="{% static 'plein/logo_with_text_nhb.png' %}" width="100%"></a>
+    <a href="{% url 'Plein:plein' %}"><img src="{% static 'plein/logo_with_text_nhb.png' %}" width="100%" alt="NHB logo"></a>
 
     <!-- informatie over ingelogde gebruiker -->
     {% if user.is_authenticated %}

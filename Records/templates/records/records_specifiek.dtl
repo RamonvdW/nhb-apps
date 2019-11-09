@@ -68,7 +68,7 @@
                 <div class="col s6">Nederlands Record</div>
                 {% endif %}
             </div>
-            <div class="divider">&nbps;</div>
+            <div class="divider">&nbsp;</div>
             <div class="row small-row">
                 <div class="col s4">Discipline:</div>
                 <div class="col s6">{{ obj_record.disc_str }}</div>
@@ -89,7 +89,7 @@
                 <div class="col s4">Materiaalklasse:</div>
                 <div class="col s6">{{ obj_record.makl_str }}</div>
             </div>
-            <div class="divider">&nbps;</div>
+            <div class="divider">&nbsp;</div>
             <div class="row small-row">
                 <div class="col s4">Score:</div>
                 <div class="col s6">{{ obj_record.score }}</div>
