@@ -5,90 +5,31 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 */
 
-/* colors */
-:root {
-    --mdc-theme-primary-light: #5ebde7; /* licht blauw */
-    --mdc-theme-primary: #0aa0e1;       /* medium blauw */
-    --mdc-theme-primary2: #03628c;      /* donker blauw */
-    --mdc-theme-secondary: #f94137;     /* medium rood */
-    --mdc-theme-secondary2: #ae0b03;    /* donker rood */
-    --mdc-theme-surface: #f5f5f5;       /* licht grijs (lichter dan pallet) */
-    --mdc-theme-background: #fff;       /* white */
-    --mdc-theme-error: #b00020;         /* blood red */
-    --mdc-theme-on-primary: #fff;       /* white */
-    --mdc-theme-on-secondary: #fff;     /* white */
-    --mdc-theme-on-surface: #000;       /* black */
-    --mdc-theme-on-error: #fff;         /* white */
-    --mdc-theme-text-primary-on-background: rgba(255, 255, 255, 0.87);    /* soft white, voor mdc-list subheader */
-    --mdc-theme-text-secondary-on-background: rgba(255, 255, 255, 0.54);  /* thin white, voor mdc-list secondary text */
-    --site-font-body: 'Open Sans', sans-serif;
-    --site-font-headers: 'Ubuntu', sans-serif;
-}
-
 /* fonts */
 body {
-    font-family: var(--site-font-body);
+    font-family: 'Open Sans', sans-serif;
 }
 
 h1, h2, h3, h4, h5, h6 {
-    font-family: var(--site-font-headers);
+    font-family: 'Ubuntu', sans-serif;
 }
 
 /* colors */
 .blue {
-    background-color: var(--mdc-theme-primary) !important;
-}
-
-/* achtergrondkleur van het menu */
-.blue2 {
-    background-color: var(--mdc-theme-primary2) !important;
+    background-color: #0aa0e1 !important;   /* NHB medium blauw */
 }
 
 /* actieve menu item in rood */
 .actief  {
-    background-color: var(--mdc-theme-secondary);
-}
-
-/* streep onder invoerveld formulier */
-input:not([type]):focus:not([readonly]),
-input[type=text]:not(.browser-default):focus:not([readonly]),
-input[type=password]:not(.browser-default):focus:not([readonly]),
-input[type=email]:not(.browser-default):focus:not([readonly]),
-input[type=url]:not(.browser-default):focus:not([readonly]),
-input[type=time]:not(.browser-default):focus:not([readonly]),
-input[type=date]:not(.browser-default):focus:not([readonly]),
-input[type=datetime]:not(.browser-default):focus:not([readonly]),
-input[type=datetime-local]:not(.browser-default):focus:not([readonly]),
-input[type=tel]:not(.browser-default):focus:not([readonly]),
-input[type=number]:not(.browser-default):focus:not([readonly]),
-input[type=search]:not(.browser-default):focus:not([readonly]),
-textarea.materialize-textarea:focus:not([readonly]) {
-  border-bottom: 1px solid var(--mdc-theme-primary);
-  -webkit-box-shadow: 0 1px 0 0 var(--mdc-theme-primary);
-          box-shadow: 0 1px 0 0 var(--mdc-theme-primary);
-}
-
-/* duidelijkere hover highlight voor table 'highlight' class */
-table.highlight > tbody > tr:hover {
-  background-color: var(--mdc-theme-primary-light);
-}
-
-
-/* kleur van card-action link + hover */
-.card .card-action a:not(.btn):not(.btn-large):not(.btn-small):not(.btn-large):not(.btn-floating) {
-  color: var(--mdc-theme-primary);
-}
-
-.card .card-action a:not(.btn):not(.btn-large):not(.btn-small):not(.btn-large):not(.btn-floating):hover {
-  color: var(--mdc-theme-primary2);
+    background-color: #f94137;     /* NHB medium rood */
 }
 
 a:hover {
-  color: var(--mdc-theme-primary2);
+  color: #03628c;       /* NHB donker blauw */
 }
 
 a {
-  color: var(--mdc-theme-primary);
+  color: #0aa0e1;       /* NHB medium blauw */
 }
 
 /* vertikale verkleiner in een grid */
@@ -103,9 +44,10 @@ a {
     float: right;
     text-align: center;
     margin-top: 10px;
-    background-color: var(--mdc-theme-background)
+    background-color: #fff;     /* wit */
 }
 
+/* de binnenkant van de feedback floater */
 .site-feedback {
     display: inline-block;
 }

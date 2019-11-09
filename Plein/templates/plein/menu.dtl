@@ -69,9 +69,9 @@
     <ul class="collapsible collapsible-accordion">
         <li>
             <!-- gebruik van lokaal style= omdat dit de hoogste hierarchy is en important! kan overriden -->
-            <a class="collapsible-header white-text" style="background-color: var(--mdc-theme-primary2)">
+            <a class="collapsible-header white-text">
                 <i class="material-icons-round white-text">arrow_drop_down_circle</i>Andere rollen</a>
-            <div class="collapsible-body white-text" style="background-color: var(--mdc-theme-primary2)">
+            <div class="collapsible-body white-text">
                 <ul>
                     <li><a href="#!" class="white-text">Schutter</a></li>
                     <li><a href="#!" class="white-text">CWZ (vereniging)</a></li>
