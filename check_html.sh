@@ -20,6 +20,7 @@ PAGES='
 /account/uitgelogd/
 /account/wachtwoord-vergeten/
 /overig/feedback/plus/plein/
+/overig/feedback/inzicht/
 '
 #/hist/
 #/hist/2010-2011/18/Recurve/indiv/

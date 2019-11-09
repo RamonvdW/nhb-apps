@@ -42,6 +42,7 @@ class OverigTest(TestCase):
         self.assertEqual(rsp.status_code, 200)
         assert_template_used(self, rsp, ('overig/site-feedback-bedankt.dtl', 'plein/site_layout.dtl'))
         assert_html_ok(self, rsp)
+        assert_other_http_commands_not_supported(self, '/overig/feedback/bedankt/')
 
     def test_post_annon(self):
         self.client.logout()
@@ -49,6 +50,7 @@ class OverigTest(TestCase):
         rsp = self.client.post('/overig/feedback/formulier/', {'bevinding': '4', 'feedback': 'Just testing'})
         self.assertEqual(rsp.status_code, 302)
         self.assertEqual(rsp.url, '/overig/feedback/bedankt/')
+        assert_other_http_commands_not_supported(self, '/overig/feedback/nul/plein/', post=False)   # post mag wel
 
     def test_post_user(self):
         self.client.login(username='normaal', password='wachtwoord')
@@ -101,6 +103,14 @@ class OverigTest(TestCase):
         self.client.logout()
         rsp = self.client.get('/overig/feedback/formulier/')
         self.assertEqual(rsp.status_code, 404)
+
+    def test_inzicht(self):
+        # do een get van alle feedback
+        rsp = self.client.get('/overig/feedback/inzicht/')
+        self.assertEqual(rsp.status_code, 200)
+        assert_template_used(self, rsp, ('overig/site-feedback-inzicht.dtl', 'plein/site_layout.dtl'))
+        assert_html_ok(self, rsp)
+        assert_other_http_commands_not_supported(self, '/overig/feedback/inzicht/')
 
 # TODO: add use of assert_other_http_commands_not_supported
 

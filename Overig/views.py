@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.views import View
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, ListView
 from django.shortcuts import render, redirect
 from django.urls import Resolver404, reverse
 from django.http import HttpResponseRedirect
@@ -16,6 +16,7 @@ from .tijdelijke_url import do_dispatch
 
 TEMPLATE_FEEDBACK_FORMULIER = 'overig/site-feedback-formulier.dtl'
 TEMPLATE_FEEDBACK_BEDANKT = 'overig/site-feedback-bedankt.dtl'
+TEMPLATE_FEEDBACK_INZICHT = 'overig/site-feedback-inzicht.dtl'
 
 
 class SiteFeedbackView(View):
@@ -94,7 +95,25 @@ class SiteFeedbackBedanktView(TemplateView):
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
+        menu_dynamics(self.request, context)
+        return context
 
+
+class SiteFeedbackInzichtView(ListView):
+    """ Deze view toont de ontvangen feedback. """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_FEEDBACK_INZICHT
+
+    def get_queryset(self):
+        """ called by the template system to get the queryset or list of objects for the template """
+        # 50 nieuwste onafgehandelde site feedback items
+        objs = SiteFeedback.objects.filter(is_afgehandeld=False).order_by('-toegevoegd_op')[:50]
+        return objs
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
         menu_dynamics(self.request, context)
         return context
 
@@ -105,6 +124,10 @@ class SiteTijdelijkeUrlView(View):
     """
 
     def get(self, request, *args, **kwargs):
+        """
+            deze functie handelt het GET verzoek af met de extra parameter 'code',
+            zoekt de bijbehorende data op en roept de juiste dispatcher aan.
+        """
         url_code = kwargs['code']
         print("SiteTijdelijkeUrlView: url_code=%s" % repr(url_code))
 

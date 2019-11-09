@@ -24,6 +24,11 @@ urlpatterns = [
          views.SiteFeedbackView.as_view(),
          name='feedback-formulier'),
 
+    # overzicht van verkregen feedback
+    path('feedback/inzicht/',
+         views.SiteFeedbackInzichtView.as_view(),
+         name='feedback-inzicht'),
+
     # url dispatcher
     path('url/<code>/',
          views.SiteTijdelijkeUrlView.as_view(),
