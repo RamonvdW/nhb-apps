@@ -12,7 +12,7 @@
 
 {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="plein" %}
 
-<h1>Welkom</h1>
+<h2>Welkom</h2>
 
 <p>Binnenkort krijgen schutters een persoonlijke pagina.</p>
 
