@@ -97,7 +97,9 @@ def validate_sinds_datum(datum):
 
 class NhbLid(models.Model):
     """Tabel om gegevens van een lid van de NHB bij te houden"""
+
     GESLACHT = [('M', 'Man'), ('V', 'Vrouw')]
+
     nhb_nr = models.PositiveIntegerField(primary_key=True)
     voornaam = models.CharField(max_length=100)
     achternaam = models.CharField(max_length=100)
@@ -106,8 +108,8 @@ class NhbLid(models.Model):
     postcode = models.CharField(max_length=10)
     huisnummer = models.CharField(max_length=10)
     geslacht = models.CharField(max_length=1, choices=GESLACHT)
-    is_rolstoelschutter = models.BooleanField(default=False)
-    is_actief_lid = models.BooleanField(default=True)
+    para_classificatie = models.CharField(max_length=30)
+    is_actief_lid = models.BooleanField(default=True)   # False = niet meer in import dataset
     sinds_datum = models.DateField(validators=[validate_sinds_datum,])
     bij_vereniging = models.ForeignKey(
                                 NhbVereniging,
