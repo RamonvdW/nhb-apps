@@ -13,12 +13,15 @@ import django.utils.timezone
 
 class Migration(migrations.Migration):
 
+    # dit is de eerste
     initial = True
 
+    # volgorde afdwingen
     dependencies = [
         ('auth', '0011_update_proxy_permissions'),
     ]
 
+    # migratie functies
     operations = [
         migrations.CreateModel(
             name='Account',

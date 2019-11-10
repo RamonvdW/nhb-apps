@@ -10,12 +10,15 @@ import django.db.models.deletion
 
 class Migration(migrations.Migration):
 
+    # dit is de eerste
     initial = True
 
+    # volgorde afdwingen
     dependencies = [
-        ('Account', '0001_initial'),
+        ('Account', 'm0001_initial'),
     ]
 
+    # migratie functies
     operations = [
         migrations.CreateModel(
             name='SiteFeedback',
