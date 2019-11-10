@@ -19,6 +19,7 @@ urlpatterns = [
     #path('hist/',    include('HistComp.urls')),
     path('records/', include('Records.urls')),
     path('overig/',  include('Overig.urls')),
+    path('logboek/', include('Logboek.urls')),
     path('admin/',   admin.site.urls),
 ]
 

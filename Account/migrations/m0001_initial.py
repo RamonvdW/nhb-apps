@@ -52,20 +52,6 @@ class Migration(migrations.Migration):
             ],
         ),
         migrations.CreateModel(
-            name='LogboekRegel',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('toegevoegd_op', models.DateTimeField()),
-                ('gebruikte_functie', models.CharField(max_length=100)),
-                ('activiteit', models.CharField(max_length=500)),
-                ('actie_door_account', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
-            ],
-            options={
-                'verbose_name': 'Logboek regel',
-                'verbose_name_plural': 'Logboek regels',
-            },
-        ),
-        migrations.CreateModel(
             name='HanterenPersoonsgegevens',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),

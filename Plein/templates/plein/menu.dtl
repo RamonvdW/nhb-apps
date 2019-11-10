@@ -33,10 +33,12 @@
 </li>
 {% endif %}
 
+<!-- nabije toekomst
 <li>
     <a href="#" class="white-text">
     <i class="material-icons-round white-text">account_balance</i>Eerdere competities</a>
 </li>
+-->
 
 <li {% if menu_actief == "records" %}class="actief"{% endif %}>
     <a href="{% url 'Records:overzicht' %}" class="white-text">
@@ -52,6 +54,10 @@
 <li {% if menu_actief == "site-feedback-inzicht" %}class="actief"{% endif %}>
     <a href="{% url 'Overig:feedback-inzicht' %}" class="white-text">
     <i class="material-icons-round white-text">feedback</i>Site feedback</a>
+</li>
+<li {% if menu_actief == "logboek" %}class="actief"{% endif %}>
+    <a href="{% url 'Logboek:logboek' %}" class="white-text">
+    <i class="material-icons-round white-text">book</i>Logboek</a>
 </li>
 <li>
     <a href="/admin/" class="white-text">

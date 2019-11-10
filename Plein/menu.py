@@ -5,12 +5,20 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 
+ACTIEF_OPTIES = (
+    'inloggen',
+    'privacy',
+    'records',
+    'logboek',
+    'site-feedback-inzicht'
+)
+
 def menu_dynamics(request, context, actief=None):
     """ Deze functie update the template context voor het dynamische gedrag van
         menu zoals de 'Andere rollen' en het menu item dat actief is.
     """
     if actief:
-        assert (actief in ('inloggen', 'privacy', 'records', 'site-feedback-inzicht')), 'menu_dynamics: Onbekende actief waarde %s' % repr(actief)
+        assert (actief in ACTIEF_OPTIES), 'menu_dynamics: Onbekende actief waarde %s' % repr(actief)
         context['menu_actief'] = actief
 
     # zet context variabele om aan te geven of de link naar de Admin site erbij mag

@@ -1,0 +1,30 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2019 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Logboek{% endblock %}
+
+{% block pagina %}
+
+<h3>Logboek</h3>
+
+<ul class="collapsible">
+    {% for obj in object_list %}
+    <li>
+        <div class="collapsible-header white-text">
+            {{ obj.toegevoegd_op|date:"l n F Y" }} om {{ obj.toegevoegd_op|date:"H:i" }}
+        </div>
+        <div class="collapsible-body">
+            <span>Door: {{ obj.actie_door_account.username }}</span>
+            <p>Functie: {{ obj.gebruikte_functie }}</p>
+            <p>Activiteit: {{ obj.activiteit }}</p>
+        </div>
+    </li>
+    {% endfor %}
+</ul>
+
+{% endblock %}

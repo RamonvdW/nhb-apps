@@ -93,26 +93,6 @@ class AccountEmail(models.Model):
         verbose_name_plural = "AccountEmails"
 
 
-class LogboekRegel(models.Model):
-    """ definitie van een regel in het logboek """
-    toegevoegd_op = models.DateTimeField()
-    actie_door_account = models.ForeignKey(Account, on_delete=models.CASCADE)
-    gebruikte_functie = models.CharField(max_length=100)
-    activiteit = models.CharField(max_length=500)
-
-    def __str__(self):
-        """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
-        return "%s [%s] %s: %s" % (str(self.toegevoegd_op),
-                                   self.actie_door_account.login_naam,
-                                   self.gebruikte_functie,
-                                   self.activiteit)
-
-    class Meta:
-        """ meta data voor de admin interface """
-        verbose_name = "Logboek regel"
-        verbose_name_plural = "Logboek regels"
-
-
 class HanterenPersoonsgegevens(models.Model):
     """ status van de vraag om juist om te gaan met persoonsgegevens,
         voor accounts waarvoor dit relevant is.

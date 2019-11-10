@@ -7,7 +7,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.utils.translation import gettext, gettext_lazy as _
-from .models import Account, AccountEmail, LogboekRegel, HanterenPersoonsgegevens
+from .models import Account, AccountEmail, HanterenPersoonsgegevens
 
 
 class AccountAdmin(UserAdmin):
@@ -27,7 +27,6 @@ class AccountAdmin(UserAdmin):
 
 admin.site.register(Account, AccountAdmin)
 admin.site.register(AccountEmail)
-admin.site.register(LogboekRegel)
 admin.site.register(HanterenPersoonsgegevens)
 
 # end of file

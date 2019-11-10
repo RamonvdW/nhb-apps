@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     #'HistComp.apps.HistCompConfig',
     'Records.apps.RecordsConfig',
     'Overig.apps.OverigConfig',
+    'Logboek.apps.LogboekConfig',
     'django.contrib.staticfiles',   # gather static files from modules helper
     'django.contrib.sessions',      # support for database-backed sessions; needed for logged-in user
     'django.contrib.admin',         # see-all/fix-all admin pages
