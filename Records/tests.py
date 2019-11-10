@@ -83,13 +83,13 @@ class RecordsTest(TestCase):
 
     def test_view_overzicht(self):
         rsp = self.client.get('/records/')
-        self.assertEqual(rsp.status_code, 200)
+        self.assertEqual(rsp.status_code, 200)  # 200 = OK
         assert_html_ok(self, rsp)
         assert_other_http_commands_not_supported(self, '/records/')
 
     def test_view_specifiek(self):
         rsp = self.client.get('/records/record-OD-42/')    # OD=Outdoor, 42=volg_nr
-        self.assertEqual(rsp.status_code, 200)
+        self.assertEqual(rsp.status_code, 200)  # 200 = OK
         assert_template_used(self, rsp, ('records/records_specifiek.dtl', 'plein/site_layout.dtl'))
         assert_html_ok(self, rsp)
         assert_other_http_commands_not_supported(self, '/records/record-OD-42/')
@@ -97,81 +97,81 @@ class RecordsTest(TestCase):
 
     def test_view_specifiek_overig(self):
         rsp = self.client.get('/records/record-18-43/')    # 18=Indoor, 43=volg_nr
-        self.assertEqual(rsp.status_code, 200)
+        self.assertEqual(rsp.status_code, 200)  # 200 = OK
         assert_template_used(self, rsp, ('records/records_specifiek.dtl', 'plein/site_layout.dtl'))
         assert_html_ok(self, rsp)
         # TODO: check extra zaken via template context (rsp.context)
 
     def test_view_specifiek_missing(self):
         rsp = self.client.get('/records/record-OD-0/')    # niet bestaand record nummer
-        self.assertEqual(rsp.status_code, 404)
+        self.assertEqual(rsp.status_code, 404)  # 404 = Not found
 
     def test_view_zoom_0args(self):
         rsp = self.client.get('/records/indiv/')
-        self.assertEqual(rsp.status_code, 200)
+        self.assertEqual(rsp.status_code, 200)  # 200 = OK
         assert_template_used(self, rsp, ('records/records_indiv_zoom1234.dtl', 'plein/site_layout.dtl'))
         assert_html_ok(self, rsp)
         # TODO: check extra zaken via template context (rsp.context)
 
     def test_view_zoom_1args(self):
         rsp = self.client.get('/records/indiv/mannen/')
-        self.assertEqual(rsp.status_code, 200)
+        self.assertEqual(rsp.status_code, 200)  # 200 = OK
         assert_template_used(self, rsp, ('records/records_indiv_zoom1234.dtl', 'plein/site_layout.dtl'))
         assert_html_ok(self, rsp)
         # TODO: check extra zaken via template context (rsp.context)
 
     def test_view_zoom_2args(self):
         rsp = self.client.get('/records/indiv/mannen/outdoor/')
-        self.assertEqual(rsp.status_code, 200)
+        self.assertEqual(rsp.status_code, 200)  # 200 = OK
         assert_template_used(self, rsp, ('records/records_indiv_zoom1234.dtl', 'plein/site_layout.dtl'))
         assert_html_ok(self, rsp)
         # TODO: check extra zaken via template context (rsp.context)
 
     def test_view_zoom_3args(self):
         rsp = self.client.get('/records/indiv/mannen/outdoor/masters/')
-        self.assertEqual(rsp.status_code, 200)
+        self.assertEqual(rsp.status_code, 200)  # 200 = OK
         assert_template_used(self, rsp, ('records/records_indiv_zoom1234.dtl', 'plein/site_layout.dtl'))
         assert_html_ok(self, rsp)
         # TODO: check extra zaken via template context (rsp.context)
 
     def test_view_zoom_4args(self):
         rsp = self.client.get('/records/indiv/mannen/outdoor/masters/recurve/')
-        self.assertEqual(rsp.status_code, 200)
+        self.assertEqual(rsp.status_code, 200)  # 200 = OK
         assert_template_used(self, rsp, ('records/records_indiv_zoom5.dtl', 'plein/site_layout.dtl'))
         assert_html_ok(self, rsp)
         # TODO: check extra zaken via template context (rsp.context)
 
     def test_view_zoom_1args_neg(self):
         rsp = self.client.get('/records/indiv/neg/')
-        self.assertEqual(rsp.status_code, 404)
+        self.assertEqual(rsp.status_code, 404)  # 404 = Not found
 
     def test_view_zoek(self):
         rsp = self.client.get('/records/zoek/')
-        self.assertEqual(rsp.status_code, 200)
+        self.assertEqual(rsp.status_code, 200)  # 200 = OK
         assert_other_http_commands_not_supported(self, '/records/zoek/')
 
     def test_view_zoek_nhb_nr(self):
         rsp = self.client.get('/records/zoek/', {'zoekterm': '123456'})
-        self.assertEqual(rsp.status_code, 200)
+        self.assertEqual(rsp.status_code, 200)  # 200 = OK
 
     def test_view_zoek_unknown_nhb_nr(self):
         rsp = self.client.get('/records/zoek/', {'zoekterm': '999999'})
-        self.assertEqual(rsp.status_code, 200)
+        self.assertEqual(rsp.status_code, 200)  # 200 = OK
 
     def test_view_zoek_not_nhb_nr(self):
         # let op de zoekterm: mag niet matchen met soort_record, naam, plaats of land
         rsp = self.client.get('/records/zoek/', {'zoekterm': 'jaja'})
-        self.assertEqual(rsp.status_code, 200)
+        self.assertEqual(rsp.status_code, 200)  # 200 = OK
         self.assertContains(rsp, "Niets gevonden")
 
     def test_view_zoek_plaats(self):
         rsp = self.client.get('/records/zoek/', {'zoekterm': 'Papendal'})
-        self.assertEqual(rsp.status_code, 200)
+        self.assertEqual(rsp.status_code, 200)  # 200 = OK
         self.assertContains(rsp, "Gevonden records (1)")
 
     def test_view_zoek_plaats_case_insensitive(self):
         rsp = self.client.get('/records/zoek/', {'zoekterm': 'PENdal'})
-        self.assertEqual(rsp.status_code, 200)
+        self.assertEqual(rsp.status_code, 200)  # 200 = OK
         self.assertContains(rsp, "Gevonden records (1)")
 
 # end of file

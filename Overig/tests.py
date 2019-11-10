@@ -15,6 +15,7 @@ class OverigTest(TestCase):
         """ initializatie van de test case """
         usermodel = get_user_model()
         usermodel.objects.create_user('normaal', 'normaal@test.com', 'wachtwoord')
+        # TODO: add real feedback to the database, for better tests
 
     def test_feedback_get(self):
         rsp = self.client.get('/overig/feedback/min/plein/')
