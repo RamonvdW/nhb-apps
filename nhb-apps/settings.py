@@ -27,7 +27,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated to version
-SITE_VERSIE = 'test 2019-11-09'
+SITE_VERSIE = 'test 2019-11-10'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -165,6 +165,10 @@ INTERNAL_IPS = [
 # applicatie specifieke settings
 MINIMUM_LEEFTIJD_LID = 5
 
+# maximum aantal resultaten dat een doorzoeking van de records terug geeft
+# dit voorkomt honderden resultaten bij het zoeken naar de letter e
+# 150 omdat bepaalde plaatsen veel records hebben, zoals Schijndel (93 in Okt 2019)
+RECORDS_MAX_ZOEKRESULTATEN = 150
 
 # import install-specific settings from a separate file
 # that is easy to replace as part of the deployment process

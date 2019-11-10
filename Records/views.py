@@ -4,6 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+from django.conf import settings
 from django.urls import Resolver404, reverse
 from django.views.generic import TemplateView, ListView
 from django.db.models import Q
@@ -378,7 +379,7 @@ class RecordsZoekView(ListView):
                                     Q(soort_record__icontains=zoekterm) |
                                     Q(naam__icontains=zoekterm) |
                                     Q(plaats__icontains=zoekterm) |
-                                    Q(land__icontains=zoekterm)).order_by('-datum')
+                                    Q(land__icontains=zoekterm)).order_by('-datum')[:settings.RECORDS_MAX_ZOEKRESULTATEN]
 
         return None
 
