@@ -23,7 +23,11 @@ class LogboekView(LoginRequiredMixin, ListView):
         """ called by the template system to get the queryset or list of objects for the template """
         # 50 nieuwste logboek entries
         # TODO: pagination toevoegen
-        return LogboekRegel.objects.all().order_by('-toegevoegd_op')[:50]
+        objs = LogboekRegel.objects.all().order_by('-toegevoegd_op')[:50]
+        for obj in objs:
+            obj.door = obj.bepaal_door()
+        # for
+        return objs
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """

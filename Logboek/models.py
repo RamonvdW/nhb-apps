@@ -12,15 +12,22 @@ from Account.models import Account
 class LogboekRegel(models.Model):
     """ definitie van een regel in het logboek """
     toegevoegd_op = models.DateTimeField()
-    actie_door_account = models.ForeignKey(Account, on_delete=models.CASCADE)
+    actie_door_account = models.ForeignKey(Account, on_delete=models.CASCADE,
+                                           blank=True,  # allow access input in form
+                                           null=True)  # allow NULL relation in database
     gebruikte_functie = models.CharField(max_length=100)
     activiteit = models.CharField(max_length=500)
 
+    def bepaal_door(self):
+        """ bepaal door wie actie uitgevoerd is """
+        if not self.actie_door_account:
+            return 'IT beheerder'
+        return self.actie_door_account.username
+
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
-        """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
         return "%s (%s) %s" % (self.toegevoegd_op.strftime('%Y-%m-%d %H:%M'),
-                               self.actie_door_account.username,
+                               self.bepaal_door(),
                                self.gebruikte_functie)
 
     class Meta:

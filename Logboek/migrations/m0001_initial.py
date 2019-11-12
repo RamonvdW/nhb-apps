@@ -28,7 +28,7 @@ class Migration(migrations.Migration):
                 ('toegevoegd_op', models.DateTimeField()),
                 ('gebruikte_functie', models.CharField(max_length=100)),
                 ('activiteit', models.CharField(max_length=500)),
-                ('actie_door_account', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='Account.Account')),
+                ('actie_door_account', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='Account.Account', blank=True, null=True)),
             ],
             options={
                 'verbose_name': 'Logboek regel',

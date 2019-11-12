@@ -22,6 +22,8 @@ class OverigTest(TestCase):
         account = Account.objects.get(username='normaal')
         schrijf_in_logboek(account, 'Logboek unittest', 'test setUp')
 
+        schrijf_in_logboek(None, 'Logboek unittest', 'zonder account')
+
     def test_logboek_annon(self):
         # do een get van alle feedback
         self.client.logout()
@@ -41,6 +43,7 @@ class OverigTest(TestCase):
         assert_template_used(self, rsp, ('logboek/logboek.dtl', 'plein/site_layout.dtl'))
         assert_html_ok(self, rsp)
         self.assertContains(rsp, 'test setUp')
+        self.assertContains(rsp, 'IT beheerder')
         assert_other_http_commands_not_supported(self, '/logboek/')
 
 # end of file
