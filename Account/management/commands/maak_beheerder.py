@@ -4,11 +4,12 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-# maak een account aan vanaf de commandline
+# maak een account beheerder, vanaf de commandline
 
 import argparse
 from django.core.management.base import BaseCommand
 from Account.models import Account
+from Logboek.models import schrijf_in_logboek
 
 
 class Command(BaseCommand):
@@ -23,12 +24,17 @@ class Command(BaseCommand):
         try:
             account = Account.objects.get(username=username)
         except Account.DoesNotExist as exc:
-            self.stdout.write("%s" % str(exc))
-            return
+            self.stderr.write("%s" % str(exc))
         else:
             account.is_staff = True
             account.is_superuser = True
             account.save()
-            self.stdout.write("Account %s heeft nu de rechten voor 'beheerder'" % repr(username))
+
+            # schrijf in het logboek
+            schrijf_in_logboek(account=None,
+                               gebruikte_functie="maak_beheerder (command line)",
+                               activiteit="Account %s is beheerder gemaakt" % repr(username))
+
+            self.stdout.write("Account %s is beheerder gemaakt" % repr(username))
 
 # end of file

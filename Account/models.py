@@ -47,6 +47,14 @@ class Account(AbstractUser):
                                     default=False,
                                     help_text="Moet de gebruiker een nieuw wachtwoord opgeven bij volgende inlog?")
 
+    # optionele koppeling met NhbLid
+    # (niet alle Accounts zijn NHB lid)
+    nhblid = models.ForeignKey(NhbLid, on_delete=models.PROTECT,
+                               blank=True,  # allow access input in form
+                               null=True)   # allow NULL relation in database
+
+    laatste_inlog_poging = models.DateTimeField(blank=True, null=True)
+
     REQUIRED_FIELDS = ['password']
 
     class Meta:
@@ -127,8 +135,8 @@ def is_email_valide(adres):
     return False
 
 
-def account_create_username_wachtwoord_email(username, wachtwoord, email):
-    """ Maak een nieuw account aan met een willekeurige naam
+def account_create(username, wachtwoord, email, voornaam):
+    """ Maak een nieuw Account aan met een willekeurige naam
         Email wordt er meteen in gezet en heeft geen bevestiging nodig
     """
 
@@ -139,6 +147,7 @@ def account_create_username_wachtwoord_email(username, wachtwoord, email):
     account = Account()
     account.username = username
     account.set_password(wachtwoord)
+    account.first_name = voornaam
     account.save()
 
     # maak het email record aan
@@ -185,6 +194,7 @@ def account_create_nhb(nhb_nummer, email, nieuw_wachtwoord):
     account = Account()
     account.username = nhb_nummer
     account.set_password(nieuw_wachtwoord)
+    account.nhblid = nhblid
     account.save()
 
     # maak het email record aan
@@ -205,6 +215,7 @@ def account_email_is_bevestigd(mail):
         aanroepen met mail = AccountEmail object waar dit op van toepassing is
     """
     mail.bevestigde_email = mail.nieuwe_email
+    mail.nieuwe_email = ''
     mail.email_is_bevestigd = True
     mail.save()
 
