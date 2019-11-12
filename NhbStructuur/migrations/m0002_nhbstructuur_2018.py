@@ -6,6 +6,7 @@
 
 from django.db import migrations
 
+
 RAYONS_2018 = (
     (1, "Rayon 1", "Noord Nederland"),
     (2, "Rayon 2", "Zuid-West Nederland"),
@@ -53,6 +54,7 @@ def maak_regios_2018(rayon_klas, regio_klas):
         for _ in (1, 2, 3, 4):
             regio.naam = "Regio %s" % regio.regio_nr
             regio.save()
+
             regio.regio_nr += 1     # nieuwe PK
         # for
     # for
