@@ -11,11 +11,13 @@ from .models import NhbRayon, NhbRegio, NhbLid, NhbVereniging
 class NhbLidAdmin(admin.ModelAdmin):
     """ Admin configuratie voor NhbLid klasse """
     ordering = ('nhb_nr',)
+    search_fields = ('voornaam', 'achternaam', 'nhb_nr')
 
 
 class NhbVerenigingAdmin(admin.ModelAdmin):
     """ Admin configuratie voor NhbVereniging klasse """
     ordering = ('nhb_nr',)
+    search_fields = ('naam', 'nhb_nr')
 
 
 class NhbRayonAdmin(admin.ModelAdmin):
