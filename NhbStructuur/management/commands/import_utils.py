@@ -9,6 +9,7 @@
 import argparse
 from django.core.management.base import BaseCommand
 
+
 # https://unicode-table.com/
 APPROVED_UNICODE_CHARS = (
     214,  # Ö
@@ -34,11 +35,15 @@ APPROVED_UNICODE_CHARS = (
 
 def check_unexpected_utf8(txt):
     """ check a string for unexpected bytes, hinting at non-utf8 files """
+    problems = list()
     for char in txt:
         char_nr = ord(char)  # decodes unicode to character value
         if not ((32 <= char_nr < 128) or char_nr in APPROVED_UNICODE_CHARS):
-            print("[WARNING] Suspicious non-utf8: %s (char nr %s)" % (txt.encode(), char_nr))
+            problems.append("%s" % char_nr)
     # for
+    if len(problems):
+        return "Suspicious non-utf8 characters in %s (char nr %s)" % (txt.encode(), ", ".join(problems))
+    return None
 
 
 # end of file
