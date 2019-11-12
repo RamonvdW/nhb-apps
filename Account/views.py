@@ -11,9 +11,10 @@ from django.contrib.auth import authenticate, login, logout
 from django.views import View
 from django.views.generic import TemplateView
 from .forms import LoginForm, RegistreerForm
-from .models import account_create_nhb, account_email_is_bevestigd, AccountCreateError
+from .models import account_create_nhb, account_email_is_bevestigd, AccountCreateError, Account
 from Overig.tijdelijke_url import set_tijdelijke_url_receiver, RECEIVER_ACCOUNTEMAIL
 from Plein.menu import menu_dynamics
+from Logboek.models import schrijf_in_logboek
 
 
 TEMPLATE_LOGIN = 'account/login.dtl'
@@ -47,8 +48,21 @@ class LoginView(TemplateView):
             if user:
                 # integratie met de authenticatie laag van Django
                 login(request, user)
+
+                request.session['gebruiker_heeft_rol'] = True
+
                 # TODO: redirect NHB schutters naar schutter start-pagina
                 return HttpResponseRedirect(reverse('Plein:plein'))
+            else:
+                # schrijf de inlogpoging in het logboek
+                from_ip = request.META['REMOTE_ADDR']
+                try:
+                    account = Account.objects.get(username=login_naam)
+                except Account.DoesNotExist:
+                    schrijf_in_logboek(None, 'Inloggen', 'Mislukte inlog vanaf IP %s: onbekend account %s' % (repr(from_ip), repr(login_naam)))
+                else:
+                    schrijf_in_logboek(account, 'Inloggen', 'Mislukte inlog vanaf IP %s voor account %s: fout wachtwoord' % (repr(from_ip), repr(login_naam)))
+
             form.add_error(None, 'De combinatie van inlog naam en wachtwoord worden niet herkend. Probeer het nog eens.')
 
         # still here --> re-render with error message
@@ -78,6 +92,7 @@ class LogoutView(View):
         """
 
         # integratie met de authenticatie laag van Django
+        # TODO: wist dit ook de session?
         logout(request)
 
         # redirect to success page
@@ -141,21 +156,28 @@ class RegistreerNhbNummerView(TemplateView):
         """ deze functie wordt aangeroepen als een POST request ontvangen is.
             dit is gekoppeld aan het drukken op de Registreer knop.
         """
-        print("RegistreerNhbNummerView.post")
         form = RegistreerForm(request.POST)
         if form.is_valid():
-            print("RegistreerNhbNummerView: form is valid")
             nhb_nummer = form.cleaned_data.get('nhb_nummer')
             email = form.cleaned_data.get('email')
             nieuw_wachtwoord = form.cleaned_data.get('nieuw_wachtwoord')
+            from_ip = request.META['REMOTE_ADDR']
             error = False
             try:
                 ack_url = account_create_nhb(nhb_nummer, email, nieuw_wachtwoord)
             except AccountCreateError as exc:
-                print("Exception: AccountCreateError: %s" % str(exc))
                 form.add_error(None, str(exc))
+
+                # schrijf in het logboek
+                schrijf_in_logboek(account=None,
+                                   gebruikte_functie="Registreer met NHB nummer",
+                                   activiteit="Mislukt voor nhb nummer %s vanaf IP %s: %s" % (repr(nhb_nummer), repr(from_ip), str(exc)))
             else:
-                print("RegistreerView: email=%s, ack_url=%s" % (repr(email), repr(ack_url)))
+                # schrijf in het logboek
+                schrijf_in_logboek(account=None,
+                                   gebruikte_functie="Registreer met NHB nummer",
+                                   activiteit="Account aangemaakt voor NHB nummer %s vanaf IP %s" % (repr(nhb_nummer), repr(from_ip)))
+
                 # TODO: send email
                 request.session['login_naam'] = nhb_nummer
                 request.session['partial_email'] = obfuscate_email(email)
@@ -164,7 +186,7 @@ class RegistreerNhbNummerView(TemplateView):
 
         # still here --> re-render with error message
         context = { 'form': form }
-        # TODO: menu_dynamics?
+        menu_dynamics(request, context, actief="inloggen")
         return render(request, TEMPLATE_REGISTREER, context)
 
     def get(self, request, *args, **kwargs):
@@ -174,48 +196,6 @@ class RegistreerNhbNummerView(TemplateView):
         form = RegistreerForm()
         context = { 'form': form }
         menu_dynamics(request, context, actief="inloggen")
-        return render(request, TEMPLATE_REGISTREER, context)
-
-
-class RegistreerWachtwoordView(TemplateView):
-    """
-        Deze view wordt gebruikt om een het wachtwoord in te voeren voor een nieuw account.
-    """
-
-    def post(self, request, *args, **kwargs):
-        """ deze functie wordt aangeroepen als een POST request ontvangen is.
-            dit is gekoppeld aan het drukken op een van de knoppen.
-        """
-        form = RegistreerForm(request.POST)
-        if form.is_valid():
-            nhb_nummer = form.cleaned_data.get('nhb_nummer')
-            email = form.cleaned_data.get('nhb_nummer')
-            nieuw_wachtwoord = form.cleaned_data.get('nieuw_wachtwoord')
-            error = False
-            try:
-                email, ack_url = account_create_nhb(nhb_nummer, nieuw_wachtwoord)
-            except AccountCreateError as exc:
-                form.add_error(None, str(exc))
-            else:
-                print("RegistreerView: email=%s, ack_url=%s" % (repr(email), repr(ack_url)))
-                request.session['login_naam'] = nhb_nummer
-                request.session['partial_email'] = obfuscate_email(email)
-                request.session['TEMP_ACK_URL'] = ack_url
-                # TODO: send email
-                return HttpResponseRedirect(reverse('Account:aangemaakt'))
-
-        # still here --> re-render with error message
-        context = { 'form': form }
-        # TODO: menu_dynamics?
-        return render(request, TEMPLATE_REGISTREER, context)
-
-    def get(self, request, *args, **kwargs):
-        """ deze functie wordt aangeroepen als een GET request ontvangen is
-        """
-        # GET operation --> create empty form
-        form = RegistreerForm()
-        context = { 'form': form }
-        # TODO: menu_dynamics?
         return render(request, TEMPLATE_REGISTREER, context)
 
 
@@ -235,11 +215,11 @@ class BevestigdView(TemplateView):
 
 class AangemaaktView(TemplateView):
 
-    def get(selfself, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         """ deze functie wordt aangeroepen als een GET request ontvangen is
         """
         # informatie doorgifte van de registratie view naar deze view
-        # gaat via server-side sessie-variabelen
+        # gaat via server-side session-variabelen
         try:
             login_naam = request.session['login_naam']
             partial_email = request.session['partial_email']
@@ -252,8 +232,8 @@ class AangemaaktView(TemplateView):
         context = {'login_naam': login_naam,
                    'partial_email': partial_email,
                    'temp_ack_url': temp_ack_url}
+        menu_dynamics(request, context)
 
-        # TODO: menu_dynamic?
         return render(request, TEMPLATE_AANGEMAAKT, context)
 
 
@@ -263,9 +243,22 @@ def receive_bevestiging_accountemail(request, obj):
             obj is een AccountEmail object.
         We moeten een url teruggeven waar een http-redirect naar gedaan kan worden.
     """
-    print("receive_bevestiging_accountemail: obj=%s" % repr(obj))
+    #print("receive_bevestiging_accountemail: obj=%s" % repr(obj))
     account_email_is_bevestigd(obj)
-    # TODO: implement verdere reactie.
+
+    # schrijf in het logboek
+    from_ip = request.META['REMOTE_ADDR']
+    msg = "Bevestigd vanaf IP " + repr(from_ip)
+
+    account = obj.account
+    msg += " voor account " + repr(account.username)
+    if account.nhblid:
+        msg += " (NHB lid met nummer %s)" % account.nhblid.nhb_nr
+    schrijf_in_logboek(account=account,
+                       gebruikte_functie="Bevestig e-mail",
+                       activiteit=msg)
+
+    # TODO: implementeer verdere reactie.
     # TODO: Iets opslaan in de sessie voor de pagina waar we naar redirecten?
     request.session['XXX'] = 123
     return reverse('Account:bevestigd')
