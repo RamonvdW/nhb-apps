@@ -18,10 +18,11 @@ class AccountAdmin(UserAdmin):
     fieldsets = (
         (None, {'fields': ('username', 'password', 'vraag_nieuw_wachtwoord')}),
         (_('Personal info'), {'fields': ('first_name', 'is_voltooid', 'extra_info_pogingen')}),
+        (_('Coupling'), {'fields': ('nhblid',)}),
+        (_('Important dates'), {'fields': ('last_login', 'date_joined')}),
         (_('Permissions'), {
             'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions'),
         }),
-        (_('Important dates'), {'fields': ('last_login', 'date_joined')}),
     )
 
 
