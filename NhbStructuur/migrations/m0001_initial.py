@@ -49,7 +49,7 @@ class Migration(migrations.Migration):
                 ('postcode', models.CharField(max_length=10)),
                 ('huisnummer', models.CharField(max_length=10)),
                 ('geslacht', models.CharField(choices=[('M', 'Man'), ('V', 'Vrouw')], max_length=1)),
-                ('para_classificatie', models.CharField(max_length=30)),
+                ('para_classificatie', models.CharField(blank=True, max_length=30)),
                 ('is_actief_lid', models.BooleanField(default=True)),
                 ('sinds_datum', models.DateField(validators=[NhbStructuur.models.validate_sinds_datum])),
             ],

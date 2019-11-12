@@ -108,7 +108,7 @@ class NhbLid(models.Model):
     postcode = models.CharField(max_length=10)
     huisnummer = models.CharField(max_length=10)
     geslacht = models.CharField(max_length=1, choices=GESLACHT)
-    para_classificatie = models.CharField(max_length=30)
+    para_classificatie = models.CharField(max_length=30, blank=True)
     is_actief_lid = models.BooleanField(default=True)   # False = niet meer in import dataset
     sinds_datum = models.DateField(validators=[validate_sinds_datum,])
     bij_vereniging = models.ForeignKey(
