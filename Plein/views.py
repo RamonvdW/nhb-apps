@@ -4,14 +4,15 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-# from django.shortcuts import render
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, ListView
 from django import forms
 from Plein.menu import menu_dynamics
 from django.shortcuts import redirect
 
+
 TEMPLATE_PLEIN = 'plein/plein.dtl'
 TEMPLATE_PRIVACY = 'plein/privacy.dtl'
+TEMPLATE_WISSELVANROL = 'plein/wissel-van-rol.dtl'
 
 
 def site_root_view(request):
@@ -45,5 +46,22 @@ class PrivacyView(TemplateView):
         menu_dynamics(self.request, context, actief='privacy')
         return context
 
+
+class WisselVanRolView(ListView):
+
+    """ Django class-based view om van rol te wisselen """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_WISSELVANROL
+
+    def get_queryset(self):
+        """ called by the template system to get the queryset or list of objects for the template """
+        return list()
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+        menu_dynamics(self.request, context, actief='wissel-van-rol')
+        return context
 
 # end of file

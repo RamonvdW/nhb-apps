@@ -38,20 +38,20 @@ def assert_other_http_commands_not_supported(testcase, url, post=True, delete=Tr
         POST, DELETE, PATCH
     """
     if post:
-        rsp = testcase.client.post(url)
-        testcase.assertEqual(rsp.status_code, 405)  # 405=not allowd
+        resp = testcase.client.post(url)
+        testcase.assertEqual(resp.status_code, 405)  # 405=not allowd
 
     if delete:
-        rsp = testcase.client.delete(url)
-        testcase.assertEqual(rsp.status_code, 405)
+        resp = testcase.client.delete(url)
+        testcase.assertEqual(resp.status_code, 405)
 
     if put:
-        rsp = testcase.client.put(url)
-        testcase.assertEqual(rsp.status_code, 405)
+        resp = testcase.client.put(url)
+        testcase.assertEqual(resp.status_code, 405)
 
     if patch:
-        rsp = testcase.client.patch(url)
-        testcase.assertEqual(rsp.status_code, 405)
+        resp = testcase.client.patch(url)
+        testcase.assertEqual(resp.status_code, 405)
 
 
 class PleinTest(TestCase):
@@ -63,41 +63,59 @@ class PleinTest(TestCase):
         usermodel.objects.create_superuser('admin', 'admin@test.com', 'wachtwoord')
 
     def test_root_redirect(self):
-        rsp = self.client.get('/')
-        self.assertEqual(rsp.status_code, 302)
-        self.assertEqual(rsp.url, '/plein/')
+        resp = self.client.get('/')
+        self.assertEqual(resp.status_code, 302)     # 302 = redirect
+        self.assertEqual(resp.url, '/plein/')
 
     def test_plein_annon(self):
         self.client.logout()
-        rsp = self.client.get('/plein/')
-        self.assertEqual(rsp.status_code, 200)
-        assert_html_ok(self, rsp)
-        assert_template_used(self, rsp, ('plein/plein.dtl', 'plein/site_layout.dtl'))
+        resp = self.client.get('/plein/')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_html_ok(self, resp)
+        assert_template_used(self, resp, ('plein/plein.dtl', 'plein/site_layout.dtl'))
 
     def test_plein_normaal(self):
         self.client.login(username='normaal', password='wachtwoord')
-        rsp = self.client.get('/plein/')
-        self.assertEqual(rsp.status_code, 200)
-        self.assertNotContains(rsp, '/admin/')
-        assert_template_used(self, rsp, ('plein/plein.dtl', 'plein/site_layout.dtl'))
+        resp = self.client.get('/plein/')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assertNotContains(resp, '/admin/')
+        assert_template_used(self, resp, ('plein/plein.dtl', 'plein/site_layout.dtl'))
         self.client.logout()
 
     def test_plein_admin(self):
         self.client.login(username='admin', password='wachtwoord')
-        rsp = self.client.get('/plein/')
-        self.assertEqual(rsp.status_code, 200)
-        self.assertContains(rsp, '/admin/')
-        assert_template_used(self, rsp, ('plein/plein.dtl', 'plein/site_layout.dtl'))
+        resp = self.client.get('/plein/')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assertContains(resp, '/admin/')
+        assert_template_used(self, resp, ('plein/plein.dtl', 'plein/site_layout.dtl'))
         self.client.logout()
 
     def test_privacy(self):
-        rsp = self.client.get('/plein/privacy/')
-        self.assertEqual(rsp.status_code, 200)
-        assert_html_ok(self, rsp)
+        resp = self.client.get('/plein/privacy/')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_html_ok(self, resp)
+        assert_template_used(self, resp, ('plein/privacy.dtl', 'plein/site_layout.dtl'))
         assert_other_http_commands_not_supported(self, '/plein/privacy/')
-        assert_template_used(self, rsp, ('plein/privacy.dtl', 'plein/site_layout.dtl'))
 
-    def test_dynamic_menu_print(self):
+    def test_wisselvanrol(self):
+        self.client.login(username='admin', password='wachtwoord')
+        resp = self.client.get('/plein/wissel-van-rol/')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_html_ok(self, resp)
+        assert_template_used(self, resp, ('plein/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
+        assert_other_http_commands_not_supported(self, '/plein/privacy/')
+        self.client.logout()
+
+    def test_wisselvanrol_menu(self):
+        self.client.login(username='admin', password='wachtwoord')
+        session = self.client.session
+        session['gebruiker_heeft_rol'] = True
+        session.save()
+        resp = self.client.get('/plein/')
+        self.assertContains(resp, "Wissel van rol")
+        self.client.logout()
+
+    def test_dynamic_menu_asssert(self):
         # test the assert in menu_dynamics
         context = dict()
         request = lambda: None      # create an empty object

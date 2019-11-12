@@ -10,8 +10,10 @@ ACTIEF_OPTIES = (
     'privacy',
     'records',
     'logboek',
-    'site-feedback-inzicht'
+    'site-feedback-inzicht',
+    'wissel-van-rol'
 )
+
 
 def menu_dynamics(request, context, actief=None):
     """ Deze functie update the template context voor het dynamische gedrag van
@@ -24,9 +26,20 @@ def menu_dynamics(request, context, actief=None):
     # zet context variabele om aan te geven of de link naar de Admin site erbij mag
     # TODO: blijven doen met django authentication system?
     if request.user.is_authenticated:
+
+        # gebruiker mag uitloggen
         context['menu_show_logout'] = True
+
+        # gebruiker mag naar admin menu
         if request.user.is_superuser:
             context['menu_show_admin'] = True
+
+        # gebruiker mag van rol wisselen
+        try:
+            if request.session['gebruiker_heeft_rol']:
+                context['menu_show_wisselvanrol'] = True
+        except KeyError:
+            pass
     else:
         context['menu_show_login'] = True
 

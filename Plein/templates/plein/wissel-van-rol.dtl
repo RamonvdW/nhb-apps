@@ -1,0 +1,40 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2019 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Kies je rol{% endblock %}
+
+{% block pagina %}
+
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="plein" %}
+
+<h2>Kies je rol</h2>
+
+<p>Hier kan je straks kiezen welke rol actief is</p>
+
+<!-- uit menu
+<li class="no-padding no-select">   'no-select' voorkomt het markeren van tekst in het menu
+    <ul class="collapsible collapsible-accordion">
+        <li>
+            -- gebruik van lokaal style= omdat dit de hoogste hierarchy is en important! kan overriden --
+            <a class="collapsible-header white-text">
+                <i class="material-icons-round white-text">arrow_drop_down_circle</i>Andere rollen</a>
+            <div class="collapsible-body white-text">
+                <ul>
+                    <li><a href="#!" class="white-text">Schutter</a></li>
+                    <li><a href="#!" class="white-text">CWZ (vereniging)</a></li>
+                    <li><a href="#!" class="white-text">RCL (regio)</a></li>
+                    <li><a href="#!" class="white-text">RKO (rayon)</a></li>
+                    <li><a href="#!" class="white-text">BKO (bond)</a></li>
+                </ul>
+            </div>
+        </li>
+    </ul>
+</li>
+-->
+
+{% endblock %}

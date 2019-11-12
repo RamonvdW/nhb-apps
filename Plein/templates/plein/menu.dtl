@@ -33,6 +33,14 @@
 </li>
 {% endif %}
 
+<!-- wisselen van rol, voor bestuurders -->
+{% if menu_show_wisselvanrol %}
+<li {% if menu_actief == "wissel-van-rol" %}class="actief"{% endif %}>
+    <a href="{% url 'Plein:wissel-van-rol' %}" class="white-text">
+    <i class="material-icons-round white-text">supervisor_account</i>Wissel van rol</a>
+</li>
+{% endif %}
+
 <!-- nabije toekomst
 <li>
     <a href="#" class="white-text">
@@ -63,7 +71,6 @@
     <a href="/admin/" class="white-text">
     <i class="material-icons-round red-text">build</i>Admin site</a>
 </li>
-{% endif %}
 
 <!-- uitlog knop als gebruiker ingelogd is -->
 {% if menu_show_logout %}
@@ -73,24 +80,4 @@
 </li>
 {% endif %}
 
-<!-- uitklapbaar menu om een andere rol te kiezen -->
-{% if menu_show_logout %}
-<li class="no-padding no-select">   <!-- 'no-select' voorkomt het markeren van tekst in het menu -->
-    <ul class="collapsible collapsible-accordion">
-        <li>
-            <!-- gebruik van lokaal style= omdat dit de hoogste hierarchy is en important! kan overriden -->
-            <a class="collapsible-header white-text">
-                <i class="material-icons-round white-text">arrow_drop_down_circle</i>Andere rollen</a>
-            <div class="collapsible-body white-text">
-                <ul>
-                    <li><a href="#!" class="white-text">Schutter</a></li>
-                    <li><a href="#!" class="white-text">CWZ (vereniging)</a></li>
-                    <li><a href="#!" class="white-text">RCL (regio)</a></li>
-                    <li><a href="#!" class="white-text">RKO (rayon)</a></li>
-                    <li><a href="#!" class="white-text">BKO (bond)</a></li>
-                </ul>
-            </div>
-        </li>
-    </ul>
-</li>
 {% endif %}
