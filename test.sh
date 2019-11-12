@@ -4,19 +4,27 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+ARGS="$*"
 RED="\e[31m"
 RESET="\e[0m"
+REPORT_DIR="/tmp/covhtml"
+OMIT="--omit=data3/wsgi.py,/usr/lib/python3.6/site-packages/*,/usr/local/lib/python3.6/site-packages/*"
 
-OMIT="--omit=data3/wsgi.py,/usr/lib/python3.6/site-packages/*"
-ARGS="$*"
+rm -rf "$REPORT_DIR"
 
 coverage erase
-coverage run ./manage.py test --noinput $*  # note: double quotes not supported around $*
+# add coverage with debug enabled
+coverage run ./manage.py test --debug-mode Plein.tests.PleinTest.test_plein_normaal
+coverage run --append ./manage.py test --noinput $*  # note: double quotes not supported around $*
+
+echo
 coverage report --skip-covered --fail-under=80 $OMIT
 res=$?
-coverage html -d covhtml --skip-covered $OMIT
-
 #echo "res=$res"
+echo
+
+coverage html -d "$REPORT_DIR" --skip-covered $OMIT
+
 if [ "$res" -gt 0 ] && [ -z "$ARGS" ]
 then
     echo -e "$RED"
@@ -24,8 +32,12 @@ then
     echo "      FAILED: NOT ENOUGH COVERAGE"
     echo "      ==========================="
     echo -e "$RESET"
-    firefox covhtml/index.html&
+    firefox "$REPORT_DIR/index.html" &
+else
+    echo "HTML report is in $REPORT_DIR  (try firefox $REPORT_DIR/index.html)"
 fi
+
+echo
 
 # end of file
 
