@@ -7,28 +7,41 @@
 {% load static %}
 {% block extrastyle %}<link rel="stylesheet" type="text/css" href="{% static 'records/style.css' %}">{% endblock %}
 
-{% block title %}Welkom bij de RECORDS{% endblock %}
+{% block title %}Handboogsport Records{% endblock %}
 
 {% block pagina %}
 
-<p>Nederlandse Handboogsport Records (Zoom5)</p>
-
 {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="records_zoom5" %}
 
-<ul>
-<li>Dicipline: {{ dicipline }}</li>
-<li>Geslacht: {{ geslacht }}</li>
-<li>Materiaalklasse: {{ materiaalklasse }}</li>
-<li>Leeftijdscategorie: {{ leeftijdscategorie }}</li>
-</ul>
+<h4>Nederlandse Handboogsport Records</h4>
 
-<p>Hoogste scores tot nu toe per record soort (typisch afstand):</p>
+<p>Gemaakte keuzes:</p>
 
-<ul>
+<div class="row"><div class="col s12 m10 l8 xl6">
+    <div class="white-text blue z-depth-2">
+        <div class="row small-row">
+            <div class="col s4">Discipline:</div>
+            <div class="col s6">{{ discipline }}</div>
+        </div>
+        <div class="row small-row">
+            <div class="col s4">Geslacht:</div>
+            <div class="col s6">{{ geslacht }}</div>
+        </div>
+        <div class="row small-row">
+            <div class="col s4">Materiaalklasse:</div>
+            <div class="col s6">{{ materiaalklasse }}</div>
+        </div>
+        <div class="row small-row">
+            <div class="col s4">Leeftijdscategorie:</div>
+            <div class="col s6">{{ leeftijdscategorie }}</div>
+        </div>
+    </div>
+</div></div>
+
+<p>Kies nu het soort record (dit is typisch de afstand en aantal pijlen):</p>
+
 {% for obj in object_list %}
-<li><a href="{{ obj.url }}">{{ obj.soort_record }}</a></li>
-
+<p><a class="btn white blue-text" href="{{ obj.url }}">{{ obj.soort_record }}</a></p>
 {% endfor %}
-</ul>
 
 {% endblock %}

@@ -10,10 +10,9 @@
 
 {% block pagina %}
 
+<h4>Nederlandse Handboogsport Record</h4>
+
 {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="records_specifiek" %}
-
-<h3>Nederlandse Handboogsport Record</h3>
-
 
 <div class="row">
 

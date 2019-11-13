@@ -7,17 +7,18 @@
 {% load static %}
 {% block extrastyle %}<link rel="stylesheet" type="text/css" href="{% static 'records/style.css' %}">{% endblock %}
 
-{% block title %}Welkom bij de RECORDS{% endblock %}
+{% block title %}Handboogsport Records{% endblock %}
 
 {% block pagina %}
-<p>Nederlandse Handboogsport Records (Zoom1234)</p>
 
 {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="records_indiv_zoom1234" %}
 
-<ul>
+<h4>Nederlandse Handboogsport Records</h4>
+
+<p>Maak een keuze:</p>
+
 {% for obj in object_list %}
-    <li><a href="{{ obj.sel_url }}">{{ obj.sel_str}}</a></li>
+<p><a class="btn white blue-text" href="{{ obj.sel_url }}">{{ obj.sel_str}}</a></p>
 {% endfor %}
-</ul>
 
 {% endblock %}

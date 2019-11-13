@@ -12,17 +12,10 @@
 
 <h3>Nederlandse Handboogsport Records</h3>
 
-<div class="row">
-    <div class="col s5 m5 l5 xl5">
-        <ul class="collection">
-            <li class="collection-item"><a href="{% url 'Records:indiv' %}">Individuele records</a></li>
-            <li class="collection-item">Team records</li>
-            <li class="collection-item"><a href="{% url 'Records:zoek' %}">Zoek in de records</a></li>
-        </ul>
-    </div>
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="records_overzicht" %}
-</div>
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="records_overzicht" %}
 
+<p><a class="btn white blue-text" href="{% url 'Records:indiv' %}">Individuele records</a></p>
+<p><a class="btn blue" href="{% url 'Records:zoek' %}">Zoek in de records</a></p>
 
 <h5>De nieuwste records</h5>
 
