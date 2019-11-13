@@ -18,6 +18,10 @@ urlpatterns = [
          views.PrivacyView.as_view(),
          name='privacy'),
 
+    path('wissel-van-rol/<str:rol>/',
+         views.ActiveerRolView.as_view(),
+         name='activeer-rol'),
+
     path('wissel-van-rol/',
          views.WisselVanRolView.as_view(),
          name='wissel-van-rol'),
