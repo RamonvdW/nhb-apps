@@ -5,7 +5,9 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
+from django.conf.urls import include
 from . import views
+import Logboek.views
 
 app_name = 'Overig'
 
@@ -29,10 +31,15 @@ urlpatterns = [
          views.SiteFeedbackInzichtView.as_view(),
          name='feedback-inzicht'),
 
-    # url dispatcher
+    # tijdelijke url dispatcher
     path('url/<code>/',
          views.SiteTijdelijkeUrlView.as_view(),
-         name='tijdelijke-url')
+         name='tijdelijke-url'),
+
+    # logboek
+    path('logboek/',
+         Logboek.views.LogboekView.as_view(),
+         name='logboek'),
 ]
 
 # end of file
