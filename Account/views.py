@@ -10,8 +10,10 @@ from django.urls import reverse
 from django.contrib.auth import authenticate, login, logout
 from django.views import View
 from django.views.generic import TemplateView
+from django.utils import timezone
 from .forms import LoginForm, RegistreerForm
 from .models import account_create_nhb, account_email_is_bevestigd, AccountCreateError, Account
+from .rol import rol_zet_sessionvars_na_login
 from Overig.tijdelijke_url import set_tijdelijke_url_receiver, RECEIVER_ACCOUNTEMAIL
 from Plein.menu import menu_dynamics
 from Logboek.models import schrijf_in_logboek
@@ -44,12 +46,11 @@ class LoginView(TemplateView):
         if form.is_valid():
             login_naam = form.cleaned_data.get("login_naam")
             wachtwoord = form.cleaned_data.get("wachtwoord")
-            user = authenticate(username=login_naam, password=wachtwoord)
-            if user:
+            account = authenticate(username=login_naam, password=wachtwoord)
+            if account:
                 # integratie met de authenticatie laag van Django
-                login(request, user)
-
-                request.session['gebruiker_heeft_rol'] = True
+                login(request, account)
+                rol_zet_sessionvars_na_login(account, request)
 
                 # TODO: redirect NHB schutters naar schutter start-pagina
                 return HttpResponseRedirect(reverse('Plein:plein'))
@@ -61,7 +62,11 @@ class LoginView(TemplateView):
                 except Account.DoesNotExist:
                     schrijf_in_logboek(None, 'Inloggen', 'Mislukte inlog vanaf IP %s: onbekend account %s' % (repr(from_ip), repr(login_naam)))
                 else:
-                    schrijf_in_logboek(account, 'Inloggen', 'Mislukte inlog vanaf IP %s voor account %s: fout wachtwoord' % (repr(from_ip), repr(login_naam)))
+                    # reden kan zijn: verkeerd wachtwoord of is_active=False
+                    schrijf_in_logboek(account, 'Inloggen', 'Mislukte inlog vanaf IP %s voor account %s' % (repr(from_ip), repr(login_naam)))
+                    # onthoudt precies wanneer dit was
+                    account.laatste_inlog_poging = timezone.now()
+                    account.save()
 
             form.add_error(None, 'De combinatie van inlog naam en wachtwoord worden niet herkend. Probeer het nog eens.')
 
@@ -243,7 +248,6 @@ def receive_bevestiging_accountemail(request, obj):
             obj is een AccountEmail object.
         We moeten een url teruggeven waar een http-redirect naar gedaan kan worden.
     """
-    #print("receive_bevestiging_accountemail: obj=%s" % repr(obj))
     account_email_is_bevestigd(obj)
 
     # schrijf in het logboek

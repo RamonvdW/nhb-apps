@@ -13,7 +13,7 @@ from Logboek.models import schrijf_in_logboek
 
 
 class Command(BaseCommand):
-    help = "Maak een Account aan"
+    help = "Maak een Account beheerder"
 
     def add_arguments(self, parser):
         parser.add_argument('username', nargs=1,
