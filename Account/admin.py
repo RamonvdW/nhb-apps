@@ -14,6 +14,8 @@ class AccountAdmin(UserAdmin):
     # volgorde van de velden in de admin site
     exclude = ('email', 'last_name')
 
+    readonly_fields = ('is_staff', )
+
     # volgorde van de te tonen velden
     fieldsets = (
         (None, {'fields': ('username', 'password', 'vraag_nieuw_wachtwoord')}),
@@ -21,7 +23,7 @@ class AccountAdmin(UserAdmin):
         (_('Coupling'), {'fields': ('nhblid',)}),
         (_('Important dates'), {'fields': ('last_login', 'date_joined')}),
         (_('Permissions'), {
-            'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions'),
+            'fields': ('is_active', 'is_BKO', 'is_staff', 'groups', 'user_permissions'),
         }),
     )
 
