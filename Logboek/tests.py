@@ -10,6 +10,7 @@ from Plein.tests import assert_html_ok, assert_other_http_commands_not_supported
 from django.utils import timezone
 from .models import LogboekRegel, schrijf_in_logboek
 from Account.models import Account
+from Account.rol import rol_zet_sessionvars_na_login
 
 
 class OverigTest(TestCase):
@@ -18,17 +19,23 @@ class OverigTest(TestCase):
         """ initializatie van de test case """
         usermodel = get_user_model()
         usermodel.objects.create_user('normaal', 'normaal@test.com', 'wachtwoord')
+        usermodel.objects.create_superuser('admin', 'admin@test.com', 'wachtwoord')
 
-        account = Account.objects.get(username='normaal')
-        schrijf_in_logboek(account, 'Logboek unittest', 'test setUp')
+        self.account_normaal = Account.objects.get(username='normaal')
+        self.account_admin = Account.objects.get(username='admin')
+
+        schrijf_in_logboek(self.account_normaal, 'Logboek unittest', 'test setUp')
 
         schrijf_in_logboek(None, 'Logboek unittest', 'zonder account')
 
-    def test_logboek_annon(self):
-        # do een get van alle feedback
+        self.logboek_url = '/overig/logboek/'
+
+    def test_logboek_annon_redirect_login(self):
+        # do een get van het logboek zonder ingelogd te zijn
+        # resulteert in een redirect naar de login pagina
         self.client.logout()
-        rsp = self.client.get('/logboek/')
-        self.assertRedirects(rsp, '/account/login/?next=/logboek/')
+        resp = self.client.get(self.logboek_url)
+        self.assertRedirects(resp, '/account/login/?next=' + self.logboek_url)
 
     def test_logboek_str(self):
         # gebruik de str functie op de Logboek class
@@ -36,14 +43,25 @@ class OverigTest(TestCase):
         msg = str(log)
         self.assertTrue("Logboek unittest" in msg and "normaal" in msg)
 
-    def test_logboek_user(self):
+    def test_logboek_users_forbidden(self):
+        # do een get van het logboek met een gebruiker die daar geen rechten toe heeft
+        # resulteert rauwe Forbidden
         self.client.login(username='normaal', password='wachtwoord')
-        rsp = self.client.get('/logboek/')
+        rol_zet_sessionvars_na_login(self.account_normaal, self.client).save()
+        #sessionvars = rol_zet_sessionvars_na_login(self.account_normaal, self.client)
+        #sessionvars.save()      # required for unittest only
+        resp = self.client.get(self.logboek_url)
+        self.assertEqual(resp.status_code, 403)  # 403 = Forbidden
+
+    def test_logboek_user_allowed(self):
+        self.client.login(username='admin', password='wachtwoord')
+        rol_zet_sessionvars_na_login(self.account_admin, self.client).save()
+        rsp = self.client.get(self.logboek_url)
         self.assertEqual(rsp.status_code, 200)  # 200 = OK
         assert_template_used(self, rsp, ('logboek/logboek.dtl', 'plein/site_layout.dtl'))
         assert_html_ok(self, rsp)
         self.assertContains(rsp, 'test setUp')
         self.assertContains(rsp, 'IT beheerder')
-        assert_other_http_commands_not_supported(self, '/logboek/')
+        assert_other_http_commands_not_supported(self, self.logboek_url)
 
 # end of file

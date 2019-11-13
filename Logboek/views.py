@@ -5,19 +5,24 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.views.generic import ListView
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from Account.rol import Rollen, rol_get_huidige
 from Plein.menu import menu_dynamics
 from .models import LogboekRegel
 
 TEMPLATE_LOGBOEK = 'logboek/logboek.dtl'
 
 
-class LogboekView(LoginRequiredMixin, ListView):
+class LogboekView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     """ Deze view toont het logboek """
 
     # class variables shared by all instances
     template_name = TEMPLATE_LOGBOEK
     login_url = '/account/login/'       # no reverse call
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        return rol_get_huidige(self.request) in (Rollen.ROL_IT, Rollen.ROL_BKO)
 
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
