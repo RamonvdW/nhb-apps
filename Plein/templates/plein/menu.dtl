@@ -15,13 +15,15 @@
 {% load static %}
 
 <div class="grey lighten-4" style="padding: 10px">
-    <a href="{% url 'Plein:plein' %}"><img src="{% static 'plein/logo_with_text_nhb.png' %}" width="100%" alt="NHB logo"></a>
+    <a href="{% url 'Plein:plein' %}">
+        <img src="{% static 'plein/logo_with_text_nhb.png' %}" width="100%" alt="NHB logo">
+    </a>
 
     <!-- informatie over ingelogde gebruiker -->
-    {% if user.is_authenticated %}
+    {% if menu_show_logout %}
         <div class="divider"></div>
         <h5>{{ user.get_first_name|escape }}</h5>
-        <h6>Hier komt je rol</h6>
+        <h6>Rol: {{ menu_rol_beschrijving }}</h6>
     {% endif %}
 </div>
 
@@ -58,19 +60,26 @@
     <i class="material-icons-round white-text">security</i>Privacy verklaring</a>
 </li>
 
-{% if menu_show_admin %}
+{% if menu_show_sitefeedback %}
 <li {% if menu_actief == "site-feedback-inzicht" %}class="actief"{% endif %}>
     <a href="{% url 'Overig:feedback-inzicht' %}" class="white-text">
     <i class="material-icons-round white-text">feedback</i>Site feedback</a>
 </li>
+{% endif %}
+
+{% if menu_show_logboek %}
 <li {% if menu_actief == "logboek" %}class="actief"{% endif %}>
-    <a href="{% url 'Logboek:logboek' %}" class="white-text">
+    <a href="{% url 'Overig:logboek' %}" class="white-text">
     <i class="material-icons-round white-text">book</i>Logboek</a>
 </li>
+{% endif %}
+
+{% if menu_show_admin %}
 <li>
     <a href="/admin/" class="white-text">
     <i class="material-icons-round red-text">build</i>Admin site</a>
 </li>
+{% endif %}
 
 <!-- uitlog knop als gebruiker ingelogd is -->
 {% if menu_show_logout %}
@@ -80,4 +89,3 @@
 </li>
 {% endif %}
 
-{% endif %}
