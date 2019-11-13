@@ -9,7 +9,8 @@ from django.views.generic import TemplateView, ListView
 from django.shortcuts import render, redirect
 from django.urls import Resolver404, reverse
 from django.http import HttpResponseRedirect
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from Account.rol import Rollen, rol_get_huidige
 from Plein.menu import menu_dynamics
 from .forms import SiteFeedbackForm
 from .models import SiteFeedback, store_feedback, SiteTijdelijkeUrl
@@ -100,12 +101,16 @@ class SiteFeedbackBedanktView(TemplateView):
         return context
 
 
-class SiteFeedbackInzichtView(LoginRequiredMixin, ListView):
+class SiteFeedbackInzichtView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     """ Deze view toont de ontvangen feedback. """
 
     # class variables shared by all instances
     template_name = TEMPLATE_FEEDBACK_INZICHT
     login_url = '/account/login/'       # no reverse call
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        return rol_get_huidige(self.request) in (Rollen.ROL_IT, Rollen.ROL_BKO)
 
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """

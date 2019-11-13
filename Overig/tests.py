@@ -8,6 +8,9 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from Plein.tests import assert_html_ok, assert_other_http_commands_not_supported, assert_template_used
 from .models import SiteFeedback
+from Account.models import Account
+from Account.rol import rol_zet_sessionvars_na_login
+
 
 class OverigTest(TestCase):
 
@@ -15,83 +18,87 @@ class OverigTest(TestCase):
         """ initializatie van de test case """
         usermodel = get_user_model()
         usermodel.objects.create_user('normaal', 'normaal@test.com', 'wachtwoord')
+        usermodel.objects.create_superuser('admin', 'admin@test.com', 'wachtwoord')
+
+        self.account_normaal = Account.objects.get(username='normaal')
+        self.account_admin = Account.objects.get(username='admin')
         # TODO: add real feedback to the database, for better tests
 
     def test_feedback_get(self):
-        rsp = self.client.get('/overig/feedback/min/plein/')
-        self.assertEqual(rsp.status_code, 200)
-        assert_template_used(self, rsp, ('overig/site-feedback-formulier.dtl', 'plein/site_layout.dtl'))
-        assert_html_ok(self, rsp)
+        resp = self.client.get('/overig/feedback/min/plein/')
+        self.assertEqual(resp.status_code, 200)
+        assert_template_used(self, resp, ('overig/site-feedback-formulier.dtl', 'plein/site_layout.dtl'))
+        assert_html_ok(self, resp)
 
-        rsp = self.client.get('/overig/feedback/nul/plein/')
-        self.assertEqual(rsp.status_code, 200)
-        assert_template_used(self, rsp, ('overig/site-feedback-formulier.dtl', 'plein/site_layout.dtl'))
-        assert_html_ok(self, rsp)
+        resp = self.client.get('/overig/feedback/nul/plein/')
+        self.assertEqual(resp.status_code, 200)
+        assert_template_used(self, resp, ('overig/site-feedback-formulier.dtl', 'plein/site_layout.dtl'))
+        assert_html_ok(self, resp)
 
-        rsp = self.client.get('/overig/feedback/plus/plein/')
-        self.assertEqual(rsp.status_code, 200)
-        assert_template_used(self, rsp, ('overig/site-feedback-formulier.dtl', 'plein/site_layout.dtl'))
-        assert_html_ok(self, rsp)
+        resp = self.client.get('/overig/feedback/plus/plein/')
+        self.assertEqual(resp.status_code, 200)
+        assert_template_used(self, resp, ('overig/site-feedback-formulier.dtl', 'plein/site_layout.dtl'))
+        assert_html_ok(self, resp)
 
-        rsp = self.client.get('/overig/feedback/huh/plein/')
-        self.assertEqual(rsp.status_code, 200)
-        assert_template_used(self, rsp, ('overig/site-feedback-formulier.dtl', 'plein/site_layout.dtl'))
-        assert_html_ok(self, rsp)
+        resp = self.client.get('/overig/feedback/huh/plein/')
+        self.assertEqual(resp.status_code, 200)
+        assert_template_used(self, resp, ('overig/site-feedback-formulier.dtl', 'plein/site_layout.dtl'))
+        assert_html_ok(self, resp)
 
     def test_feedback_bedankt(self):
-        rsp = self.client.get('/overig/feedback/bedankt/')
-        self.assertEqual(rsp.status_code, 200)
-        assert_template_used(self, rsp, ('overig/site-feedback-bedankt.dtl', 'plein/site_layout.dtl'))
-        assert_html_ok(self, rsp)
+        resp = self.client.get('/overig/feedback/bedankt/')
+        self.assertEqual(resp.status_code, 200)
+        assert_template_used(self, resp, ('overig/site-feedback-bedankt.dtl', 'plein/site_layout.dtl'))
+        assert_html_ok(self, resp)
         assert_other_http_commands_not_supported(self, '/overig/feedback/bedankt/')
 
     def test_post_annon(self):
         self.client.logout()
-        rsp = self.client.get('/overig/feedback/nul/plein/')    # zet sessie variabelen: op_pagina en gebruiker
-        rsp = self.client.post('/overig/feedback/formulier/', {'bevinding': '4', 'feedback': 'Just testing'})
-        self.assertEqual(rsp.status_code, 302)
-        self.assertEqual(rsp.url, '/overig/feedback/bedankt/')
+        resp = self.client.get('/overig/feedback/nul/plein/')    # zet sessie variabelen: op_pagina en gebruiker
+        resp = self.client.post('/overig/feedback/formulier/', {'bevinding': '4', 'feedback': 'Just testing'})
+        self.assertEqual(resp.status_code, 302)
+        self.assertEqual(resp.url, '/overig/feedback/bedankt/')
         assert_other_http_commands_not_supported(self, '/overig/feedback/nul/plein/', post=False)   # post mag wel
 
     def test_post_user(self):
         self.client.login(username='normaal', password='wachtwoord')
-        rsp = self.client.get('/overig/feedback/nul/plein/')   # zet sessie variabelen: op_pagina en gebruiker
-        rsp = self.client.post('/overig/feedback/formulier/', {'bevinding': '4', 'feedback': 20*'Just testing '})   # 20x makes it >80 chars long
-        self.assertEqual(rsp.status_code, 302)
-        self.assertEqual(rsp.url, '/overig/feedback/bedankt/')
+        resp = self.client.get('/overig/feedback/nul/plein/')   # zet sessie variabelen: op_pagina en gebruiker
+        resp = self.client.post('/overig/feedback/formulier/', {'bevinding': '4', 'feedback': 20*'Just testing '})   # 20x makes it >80 chars long
+        self.assertEqual(resp.status_code, 302)
+        self.assertEqual(resp.url, '/overig/feedback/bedankt/')
         obj = SiteFeedback.objects.all()[0]
         descr = str(obj)
         self.assertGreater(len(descr), 0)
 
     def test_post_annon_illegal_feedback(self):
         self.client.logout()
-        rsp = self.client.get('/overig/feedback/nul/plein/')   # zet sessie variabelen: op_pagina en gebruiker
-        rsp = self.client.post('/overig/feedback/formulier/', {'bevinding': '4', 'feedback': ''})
-        self.assertEqual(rsp.status_code, 200)
-        assert_template_used(self, rsp, ('overig/site-feedback-formulier.dtl', 'plein/site_layout.dtl'))
-        assert_html_ok(self, rsp)
+        resp = self.client.get('/overig/feedback/nul/plein/')   # zet sessie variabelen: op_pagina en gebruiker
+        resp = self.client.post('/overig/feedback/formulier/', {'bevinding': '4', 'feedback': ''})
+        self.assertEqual(resp.status_code, 200)
+        assert_template_used(self, resp, ('overig/site-feedback-formulier.dtl', 'plein/site_layout.dtl'))
+        assert_html_ok(self, resp)
 
     def test_post_annon_illegal_bevinding(self):
         self.client.logout()
-        rsp = self.client.get('/overig/feedback/nul/plein/')   # zet sessie variabelen: op_pagina en gebruiker
-        rsp = self.client.post('/overig/feedback/formulier/', {'bevinding': '5', 'feedback': 'Just testing'})
-        self.assertEqual(rsp.status_code, 200)
-        assert_template_used(self, rsp, ('overig/site-feedback-formulier.dtl', 'plein/site_layout.dtl'))
-        assert_html_ok(self, rsp)
+        resp = self.client.get('/overig/feedback/nul/plein/')   # zet sessie variabelen: op_pagina en gebruiker
+        resp = self.client.post('/overig/feedback/formulier/', {'bevinding': '5', 'feedback': 'Just testing'})
+        self.assertEqual(resp.status_code, 200)
+        assert_template_used(self, resp, ('overig/site-feedback-formulier.dtl', 'plein/site_layout.dtl'))
+        assert_html_ok(self, resp)
 
     def test_post_without_get(self):
         # probeer een post van het formulier zonder de get
         self.client.logout()
-        rsp = self.client.post('/overig/feedback/formulier/', {'bevinding': '4', 'feedback': 'Just testing'})
-        self.assertEqual(rsp.status_code, 200)
-        assert_template_used(self, rsp, ('overig/site-feedback-formulier.dtl', 'plein/site_layout.dtl'))
-        assert_html_ok(self, rsp)
+        resp = self.client.post('/overig/feedback/formulier/', {'bevinding': '4', 'feedback': 'Just testing'})
+        self.assertEqual(resp.status_code, 200)
+        assert_template_used(self, resp, ('overig/site-feedback-formulier.dtl', 'plein/site_layout.dtl'))
+        assert_html_ok(self, resp)
 
     def test_afgehandeld(self):
         self.client.logout()
-        rsp = self.client.get('/overig/feedback/nul/plein/')   # zet sessie variabelen: op_pagina en gebruiker
-        rsp = self.client.post('/overig/feedback/formulier/', {'bevinding': '4', 'feedback': 'Just testing'})
-        self.assertEqual(rsp.status_code, 302)  # redirect to bedankt pagina
+        resp = self.client.get('/overig/feedback/nul/plein/')   # zet sessie variabelen: op_pagina en gebruiker
+        resp = self.client.post('/overig/feedback/formulier/', {'bevinding': '4', 'feedback': 'Just testing'})
+        self.assertEqual(resp.status_code, 302)  # redirect to bedankt pagina
         obj = SiteFeedback.objects.all()[0]
         self.assertFalse(obj.is_afgehandeld)
         obj.is_afgehandeld = True
@@ -102,23 +109,33 @@ class OverigTest(TestCase):
     def test_get_formulier(self):
         # get van het formulier is niet de bedoeling
         self.client.logout()
-        rsp = self.client.get('/overig/feedback/formulier/')
-        self.assertEqual(rsp.status_code, 404)
+        resp = self.client.get('/overig/feedback/formulier/')
+        self.assertEqual(resp.status_code, 404)
 
-    def test_inzicht_annon(self):
-        # do een get van alle feedback
+    def test_inzicht_annon_redirect_login(self):
+        # zonder inlog is feedback niet te zien
         self.client.logout()
-        rsp = self.client.get('/overig/feedback/inzicht/')
-        self.assertEqual(rsp.status_code, 302)  # redirect
+        resp = self.client.get('/overig/feedback/inzicht/')
+        self.assertEqual(resp.status_code, 302)  # redirect
+        self.assertRedirects(resp, '/account/login/?next=/overig/feedback/inzicht/')
+
+    def test_inzicht_user_forbidden(self):
+        # do een get van het logboek met een gebruiker die daar geen rechten toe heeft
+        # resulteert rauwe Forbidden
+        self.client.login(username='normaal', password='wachtwoord')
+        rol_zet_sessionvars_na_login(self.account_normaal, self.client).save()
+        resp = self.client.get('/overig/feedback/inzicht/')
+        self.assertEqual(resp.status_code, 403)  # 403 = Forbidden
 
     def test_inzicht_user(self):
         # do een get van alle feedback
         self.client.login(username='normaal', password='wachtwoord')
-        rsp = self.client.get('/overig/feedback/inzicht/')
-        self.assertEqual(rsp.status_code, 200)
-        assert_template_used(self, rsp, ('overig/site-feedback-inzicht.dtl', 'plein/site_layout.dtl'))
-        assert_html_ok(self, rsp)
-        self.assertContains(rsp, "door de ontwikkelaar afgehandeld")
+        rol_zet_sessionvars_na_login(self.account_admin, self.client).save()
+        resp = self.client.get('/overig/feedback/inzicht/')
+        self.assertEqual(resp.status_code, 200)
+        assert_template_used(self, resp, ('overig/site-feedback-inzicht.dtl', 'plein/site_layout.dtl'))
+        assert_html_ok(self, resp)
+        self.assertContains(resp, "door de ontwikkelaar afgehandeld")
         assert_other_http_commands_not_supported(self, '/overig/feedback/inzicht/')
 
 
