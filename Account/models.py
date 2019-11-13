@@ -55,6 +55,10 @@ class Account(AbstractUser):
 
     laatste_inlog_poging = models.DateTimeField(blank=True, null=True)
 
+    is_BKO = models.BooleanField(
+                        default=False,
+                        help_text="BK Organisator")
+
     REQUIRED_FIELDS = ['password']
 
     class Meta:
