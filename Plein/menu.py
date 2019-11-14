@@ -36,7 +36,7 @@ def menu_dynamics(request, context, actief=None):
         context['menu_show_logout'] = True
 
         # wissel van rol
-        if rol_limiet != Rollen.ROL_UNKNOWN:
+        if rol_limiet not in (Rollen.ROL_UNKNOWN, Rollen.ROL_SCHUTTER):
             context['menu_show_wisselvanrol'] = True
 
         # IT: admin menu
