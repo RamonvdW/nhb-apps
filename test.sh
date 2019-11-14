@@ -13,9 +13,13 @@ OMIT="--omit=data3/wsgi.py,/usr/lib/python3.6/site-packages/*,/usr/local/lib/pyt
 rm -rf "$REPORT_DIR"
 
 coverage erase
-# add coverage with debug enabled
-coverage run ./manage.py test --debug-mode Plein.tests.PleinTest.test_plein_normaal
+
 coverage run --append ./manage.py test --noinput $*  # note: double quotes not supported around $*
+if [ $# -eq 0 ]
+then
+    # add coverage with debug enabled
+    coverage run --append ./manage.py test --debug-mode Plein.tests.PleinTest.test_plein_normaal
+fi
 
 echo
 coverage report --skip-covered --fail-under=80 $OMIT
