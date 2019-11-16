@@ -5,7 +5,6 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.apps import AppConfig
-from django.conf import settings
 
 
 class LogboekConfig(AppConfig):
