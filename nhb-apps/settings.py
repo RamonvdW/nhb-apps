@@ -102,6 +102,10 @@ TEMPLATES = [
 # point out location of WSGI application for django runserver command
 WSGI_APPLICATION = 'nhb-apps.wsgi.application'
 
+# let browsers remember to connect with https
+# TODO: increase time to 1 year
+SECURE_HSTS_SECONDS = 3600      # 3600 = rememeber for 1 hour
+
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
