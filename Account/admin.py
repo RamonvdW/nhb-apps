@@ -21,11 +21,13 @@ class AccountAdmin(UserAdmin):
         (None, {'fields': ('username', 'password', 'vraag_nieuw_wachtwoord')}),
         (_('Personal info'), {'fields': ('first_name', 'is_voltooid', 'extra_info_pogingen')}),
         (_('Coupling'), {'fields': ('nhblid',)}),
-        (_('Important dates'), {'fields': ('last_login', 'date_joined')}),
+        (_('Important dates'), {'fields': ('laatste_inlog_poging', 'last_login', 'date_joined')}),
         (_('Permissions'), {
             'fields': ('is_active', 'is_BKO', 'is_staff', 'groups', 'user_permissions'),
         }),
     )
+
+    list_display = ('username', 'last_login', 'is_staff')
 
 
 admin.site.register(Account, AccountAdmin)
