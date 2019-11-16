@@ -23,7 +23,9 @@
     {% if menu_show_logout %}
         <div class="divider"></div>
         <h5>{{ user.get_first_name|escape }}</h5>
-        <h6>Rol: {{ menu_rol_beschrijving }}</h6>
+        {% if menu_show_wisselvanrol %}
+            <h6>Rol: {{ menu_rol_beschrijving }}</h6>
+        {% endif %}
     {% endif %}
 </div>
 
