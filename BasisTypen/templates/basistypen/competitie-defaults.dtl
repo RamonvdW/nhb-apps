@@ -1,0 +1,79 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2019 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Instellingen volgende competitie{% endblock %}
+
+{% block pagina %}
+
+<h3>Instellingen volgende competitie</h3>
+
+<div class="row">
+    <h5>Wedstrijdklassen voor de individuele competities</h5>
+    <div class="col s12 m10 l10 xl10">
+        <div class="white-text blue z-depth-2">
+            <div class="row small-row">
+                <div class="col s4"><b>Beschrijving</b></div>
+                <div class="col s2"><b>Boogtypen</b></div>
+                <div class="col s3"><b>Leeftijdsklassen</b></div>
+                <div class="col s3"><b>Minimale AG</b></div>
+            </div>
+            <div class="divider">&nbsp;</div>
+            {% for obj in indivklassen %}
+                <div class="row small-row">
+                    <div class="col s4">{{ obj.beschrijving }}</div>
+                    <div class="col s2">{{ obj.boogtypen }}</div>
+                    <div class="col s3">{{ obj.leeftijden }}</div>
+                    <div class="col s3">{{ obj.min_ag }}</div>
+                </div>
+                {% if obj.min_ag == 0.0 %}
+                <div class="divider">&nbsp;</div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <h5>Wedstrijdklassen voor de team competities</h5>
+    <div class="col s12 m10 l10 xl10">
+        <div class="white-text blue z-depth-2">
+            <div class="row small-row">
+                <div class="col s6"><b>Beschrijving</b></div>
+                <div class="col s3"><b>Boogtypen</b></div>
+                <div class="col s3"><b>Minimale AG</b></div>
+            </div>
+            <div class="divider">&nbsp;</div>
+            {% for obj in teamklassen %}
+                <div class="row small-row">
+                    <div class="col s6">{{ obj.beschrijving }}</div>
+                    <div class="col s3">{{ obj.boogtypen }}</div>
+                    <div class="col s3">{{ obj.min_ag }}</div>
+                </div>
+                {% if obj.min_ag == 0.0 %}
+                <div class="divider">&nbsp;</div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <h5>Team typen en toegestane boog typen</h5>
+    <div class="col s12 m10 l8 xl6">
+        <div class="white-text blue z-depth-2">
+            {% for obj in teamtypen %}
+                <div class="row small-row">
+                    <div class="col s5">{{ obj.beschrijving }}</div>
+                    <div class="col s6">{{ obj.boogtypen }}</div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}
