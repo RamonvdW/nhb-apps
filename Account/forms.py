@@ -64,7 +64,6 @@ class RegistreerForm(forms.Form):
 
     def is_valid(self):
         valid = super(forms.Form, self).is_valid()
-        print("RegistreerForm.is_valid: %s" % repr(valid))
         if valid:
             nhb_nummer = self.cleaned_data.get('nhb_nummer')
             email = self.cleaned_data.get('email')

@@ -66,8 +66,8 @@ def rol_zet_sessionvars_na_login(account, request):
         rol = Rollen.ROL_IT
     elif account.is_BKO:
         rol = Rollen.ROL_BKO
-    elif account.nhblid:
-        rol = Rollen.ROL_SCHUTTER
+    #elif account.nhblid:
+    #    rol = Rollen.ROL_SCHUTTER
 
     if rol:
         sessionvars[SESSIONVAR_ROL_LIMIET] = rol
@@ -110,9 +110,13 @@ def rol_activate(request, rolurl):
         rol = url2rol[rolurl]
     except KeyError:
         # print('rol %s not found in url2rol' % repr(rolurl))
-        return None
+        return
 
-    rol_limiet = request.session[SESSIONVAR_ROL_LIMIET]
+    try:
+        rol_limiet = request.session[SESSIONVAR_ROL_LIMIET]
+    except KeyError:
+        # should not have been called
+        return
 
     if rol == Rollen.ROL_IT and rol_limiet == Rollen.ROL_IT:
         request.session[SESSIONVAR_ROL_HUIDIGE] = rol

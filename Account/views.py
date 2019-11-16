@@ -135,7 +135,10 @@ def obfuscate_email(email):
     """ Helper functie om een email adres te maskeren
         voorbeeld: nhb.ramonvdw@gmail.com --> nh####w@gmail.com
     """
-    user, domein = email.rsplit("@", 1)
+    try:
+        user, domein = email.rsplit("@", 1)
+    except ValueError:
+        return email
     voor = 2
     achter = 1
     if len(user) <= 4:
@@ -148,7 +151,6 @@ def obfuscate_email(email):
     if achter > 0:
         new_email += user[-achter:]
     new_email = new_email + '@' + domein
-    print("obfuscate_email: %s --> %s" % (repr(email), repr(new_email)))
     return new_email
 
 

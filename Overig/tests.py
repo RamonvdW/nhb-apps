@@ -138,6 +138,10 @@ class OverigTest(TestCase):
         self.assertContains(resp, "door de ontwikkelaar afgehandeld")
         assert_other_http_commands_not_supported(self, '/overig/feedback/inzicht/')
 
+    def test_tijdelijkeurl_nonexist(self):
+        resp = self.client.get('/overig/url/test/')
+        self.assertEqual(resp.status_code, 404)
+
 
 # TODO: add use of assert_other_http_commands_not_supported
 

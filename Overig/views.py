@@ -139,7 +139,7 @@ class SiteTijdelijkeUrlView(View):
             zoekt de bijbehorende data op en roept de juiste dispatcher aan.
         """
         url_code = kwargs['code']
-        print("SiteTijdelijkeUrlView: url_code=%s" % repr(url_code))
+        # print("SiteTijdelijkeUrlView: url_code=%s" % repr(url_code))
 
         try:
             obj = SiteTijdelijkeUrl.objects.get(url_code=url_code)
@@ -147,7 +147,7 @@ class SiteTijdelijkeUrlView(View):
             # onbekende url code
             raise Resolver404()
 
-        print("SiteTijdelijkeUrlView: obj=%s" % repr(obj))
+        # print("SiteTijdelijkeUrlView: obj=%s" % repr(obj))
         # TODO: check obj.geldig_tot
 
         # dispatch naar de juiste applicatie waar deze bij hoort
@@ -155,11 +155,10 @@ class SiteTijdelijkeUrlView(View):
         redirect = do_dispatch(request, obj.hoortbij_accountemail)
 
         if redirect:
-            print("redirect: %s" % repr(redirect))
+            # print("redirect: %s" % repr(redirect))
             return HttpResponseRedirect(redirect)
 
-        print("SiteTijdelijkeUrlView: No valid redirect")
+        # print("SiteTijdelijkeUrlView: No valid redirect")
         raise Resolver404()
-
 
 # end of file

@@ -179,7 +179,7 @@ def account_create_nhb(nhb_nummer, email, nieuw_wachtwoord):
     try:
         nhb_nr = int(nhb_nummer)
     except ValueError:
-        raise AccountCreateError('Onbekend NHB nummmer')
+        raise AccountCreateError('Onbekend NHB nummer')
 
     try:
         nhblid = NhbLid.objects.get(nhb_nr=nhb_nr)
