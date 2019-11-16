@@ -10,9 +10,9 @@
 
 {% block pagina %}
 
-<h4>Nederlandse Handboogsport Record</h4>
-
 {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="records_specifiek" %}
+
+<h4>Nederlandse Handboog<wbr/>sport Record</h4>
 
 <div class="row">
 
@@ -26,12 +26,13 @@
                 {% else %}
                 <li class="collection-item">
                 {% endif %}
-                    <div>{{ obj.score }} door <b>{{ obj.naam }}</b> op {{ obj.datum }}
+                    <div>
                         {% if obj.is_specifieke_record %}
                         <i class="material-icons-round secondary-content white-text">visibility</i>
                         {% else %}
                         <a href="{{ obj.url }}"><i class="material-icons-round secondary-content">visibility</i></a>
                         {% endif %}
+                        {{ obj.score }} door <b>{{ obj.naam }}</b> op {{ obj.datum }}
                     </div>
                 </li>
             {% endfor %}
@@ -58,7 +59,7 @@
                 <div class="col s1">12</div>
             </div> -->
             <div class="row small-row">
-                <div class="col s4">Soort record:</div>
+                <div class="col s5">Soort record:</div>
                 {% if obj_record.is_world_record %}
                 <div class="col s6">Wereld Record</div>
                 {% elif obj_record.is_european_record %}
@@ -69,48 +70,48 @@
             </div>
             <div class="divider">&nbsp;</div>
             <div class="row small-row">
-                <div class="col s4">Discipline:</div>
+                <div class="col s5">Discipline:</div>
                 <div class="col s6">{{ obj_record.disc_str }}</div>
             </div>
             <div class="row small-row">
-                <div class="col s4">Soort record:</div>
+                <div class="col s5">Soort record:</div>
                 <div class="col s6">{{ obj_record.soort_record }}</div>
             </div>
             <div class="row small-row">
-                <div class="col s4">Geslacht:</div>
+                <div class="col s5">Geslacht:</div>
                 <div class="col s6">{{ obj_record.gesl_str }}</div>
             </div>
             <div class="row small-row">
-                <div class="col s4">Leeftijdscategorie:</div>
+                <div class="col s5">Leeftijds<wbr/>categorie:</div>
                 <div class="col s6">{{ obj_record.lcat_str }}</div>
             </div>
             <div class="row small-row">
-                <div class="col s4">Materiaalklasse:</div>
+                <div class="col s5">Materiaal<wbr/>klasse:</div>
                 <div class="col s6">{{ obj_record.makl_str }}</div>
             </div>
             <div class="divider">&nbsp;</div>
             <div class="row small-row">
-                <div class="col s4">Score:</div>
+                <div class="col s5">Score:</div>
                 <div class="col s6">{{ obj_record.score }}</div>
             </div>
             <div class="row small-row">
-                <div class="col s4">Score notitie:</div>
+                <div class="col s5">Score notitie:</div>
                 <div class="col s6">{{ obj_record.score_notitie }}</div>
             </div>
             <div class="row small-row">
-                <div class="col s4">Naam:</div>
+                <div class="col s5">Naam:</div>
                 <div class="col s6"><b>{{ obj_record.naam }}</b></div>
             </div>
             <div class="row small-row">
-                <div class="col s4">Plaats:</div>
+                <div class="col s5">Plaats:</div>
                 <div class="col s6">{{ obj_record.plaats }}</div>
             </div>
             <div class="row small-row">
-                <div class="col s4">Land:</div>
+                <div class="col s5">Land:</div>
                 <div class="col s6">{{ obj_record.land }}</div>
             </div>
             <div class="row small-row">
-                <div class="col s4">Datum:</div>
+                <div class="col s5">Datum:</div>
                 <div class="col s6">{{ obj_record.datum }}</div>
             </div>
             <!--
@@ -133,12 +134,13 @@
                 {% else %}
                 <li class="collection-item">
                 {% endif %}
-                    <div>{{ obj.score }} door <b>{{ obj.naam }}</b> op {{ obj.datum }}
+                    <div>
                         {% if obj.is_specifieke_record %}
                         <i class="material-icons-round secondary-content white-text">visibility</i>
                         {% else %}
                         <a href="{{ obj.url }}"><i class="material-icons-round secondary-content">visibility</i></a>
                         {% endif %}
+                        {{ obj.score }} door <b>{{ obj.naam }}</b> op {{ obj.datum }}
                     </div>
                 </li>
             {% endfor %}

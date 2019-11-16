@@ -18,6 +18,6 @@
 
 <p>Voel je vrij om deze functie vaker te gebruiken. We staan open voor alle tips en tops!</p>
 
-<p><a class="btn white blue-text" href="{% url 'Plein:plein' %}">Terug</a></p>
+<p><a class="btn white blue-text" href="{% url 'Plein:plein' %}">Startpagina</a></p>
 
 {% endblock %}

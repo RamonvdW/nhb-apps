@@ -49,8 +49,8 @@
                 {% for obj in object_list %}
                     <li class="collection-item">
                         <div>
-                            {{ obj.naam|highlight:zoekterm }} op {{ obj.datum }} in {{ obj.plaats|highlight:zoekterm }}
                             <a href="{% url 'Records:specifiek' obj.discipline obj.volg_nr %}"><i class="material-icons-round secondary-content">visibility</i></a>
+                            {{ obj.naam|highlight:zoekterm }} op {{ obj.datum }} in {{ obj.plaats|highlight:zoekterm }}
                         </div>
                     </li>
                 {% endfor %}

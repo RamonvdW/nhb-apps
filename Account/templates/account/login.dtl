@@ -36,9 +36,9 @@
 
             {% if form.errors %}
             <div class="row">
-                <div class="col s1 red-text">Fout:</div>
+                <div class="col s2 m1 red-text">Fout:</div>
                 {% for error in form.non_field_errors %}
-                <div class="row"><div class="col s10 red-text">{{ error|escape }}</div></div>
+                <div class="row"><div class="col s9 red-text">{{ error|escape }}</div></div>
                 {% endfor %}
             </div>
             {% endif %}
