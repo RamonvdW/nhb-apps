@@ -21,6 +21,7 @@ PAGES='
 /account/wachtwoord-vergeten/
 /overig/feedback/plus/plein/
 /overig/feedback/inzicht/
+/overig/logboek/
 '
 #/hist/
 #/hist/2010-2011/18/Recurve/indiv/
@@ -45,6 +46,7 @@ do
     if [ $RES -ne 0 ]
     then
         echo "Curl exit code $RES for $SERVER$page"
+        echo "Is your webserver running?"
         exit 1
     else
         grep -q "Django tried these URL patterns" "$file_cache"
