@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.views.generic import ListView
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.rol import Rollen, rol_get_huidige
 from Plein.menu import menu_dynamics
 from .models import LogboekRegel
@@ -13,7 +13,7 @@ from .models import LogboekRegel
 TEMPLATE_LOGBOEK = 'logboek/logboek.dtl'
 
 
-class LogboekView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+class LogboekView(UserPassesTestMixin, ListView):
     """ Deze view toont het logboek """
 
     # class variables shared by all instances
