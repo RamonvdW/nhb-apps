@@ -94,6 +94,10 @@ def rol_get_huidige(request):
     return Rollen.ROL_UNKNOWN
 
 
+def rol_is_BKO(request):
+    return rol_get_huidige(request) in (Rollen.ROL_IT, Rollen.ROL_BKO)
+
+
 def rol_mag_wisselen(request):
     try:
         return request.session[SESSIONVAR_ROL_MAG_WISSELEN]
