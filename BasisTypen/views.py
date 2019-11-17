@@ -8,20 +8,28 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from django.views.generic import ListView
+from django.contrib.auth.mixins import UserPassesTestMixin
 from Plein.menu import menu_dynamics
 from Logboek.models import schrijf_in_logboek
+from Account.rol import rol_is_BKO
 from .models import TeamType, TeamTypeBoog, BoogType, WedstrijdKlasse, WedstrijdKlasseBoog, WedstrijdKlasseLeeftijd
 
 
 TEMPLATE_COMPETITIE_DEFAULTS = 'basistypen/competitie-defaults.dtl'
 
 
-class InstellingenVolgendeCompetitieView(ListView):
+class InstellingenVolgendeCompetitieView(UserPassesTestMixin, ListView):
 
     """ deze view laat de defaults voor de volgende competitie zien """
 
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_DEFAULTS
+    login_url = '/account/login/'       # no reverse call
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        res = rol_is_BKO(self.request)
+        return res
 
     def _get_queryset_teamtypen(self):
         objs = TeamType.objects.all()
@@ -61,6 +69,7 @@ class InstellingenVolgendeCompetitieView(ListView):
         return None
 
     def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
         context['teamtypen'] = self.teamtypen
         context['indivklassen'] = self.indivklassen
