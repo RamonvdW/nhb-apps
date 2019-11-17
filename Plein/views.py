@@ -7,7 +7,7 @@
 from django.urls import reverse
 from django.shortcuts import redirect
 from django.views.generic import TemplateView, ListView, View
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.contrib.auth.mixins import UserPassesTestMixin
 from Plein.menu import menu_dynamics
 from Account.rol import Rollen, rol_get_huidige, rol_get_limiet, rol_activate, rol_mag_wisselen
 from Account.leeftijdsklassen import get_leeftijdsklassen
@@ -36,6 +36,7 @@ class PleinView(TemplateView):
 
         huidige_jaar, leeftijd, is_jong, wlst, clst = get_leeftijdsklassen(self.request)
         if huidige_jaar:
+            context['plein_is_nhb_lid'] = True
             context['plein_toon_leeftijdsklassen'] = True
             context['plein_is_jonge_schutter'] = is_jong
             context['plein_huidige_jaar'] = huidige_jaar
@@ -44,6 +45,7 @@ class PleinView(TemplateView):
             context['plein_clst'] = clst
         else:
             context['plein_toon_leeftijdsklassen'] = False
+            context['plein_is_nhb_lid'] = False
 
         menu_dynamics(self.request, context)
         return context
@@ -63,6 +65,7 @@ class PrivacyView(TemplateView):
         return context
 
 
+# TODO: add Login mixin?
 class WisselVanRolView(UserPassesTestMixin, ListView):
 
     """ Django class-based view om van rol te wisselen """
@@ -124,7 +127,7 @@ class ActiveerRolView(UserPassesTestMixin, View):
         return redirect('Plein:plein')
 
 
-class LeeftijdsklassenView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+class LeeftijdsklassenView(UserPassesTestMixin, TemplateView):
     """ Django class-based view voor de leeftijdsklassen """
 
     # class variables shared by all instances

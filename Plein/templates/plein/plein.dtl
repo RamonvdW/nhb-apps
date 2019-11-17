@@ -13,19 +13,32 @@
 {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="plein" %}
 
 {% if user.is_authenticated %}
+    <!-- ingelogd -->
 
-<h2>Hallo, schutter!</h2>
+    {% if plein_is_nhb_lid %}
 
-{% if plein_toon_leeftijdsklassen %}
-<p>Klik <a href="{% url 'Plein:leeftijdsklassen' %}">hier</a> om je te zien in welke klasse je uit moet komen.</p>
-{% endif %}
+        <!-- ingelogd, wel nhblid -->
+        <h2>Hallo, schutter!</h2>
+
+        {% if plein_toon_leeftijdsklassen %}
+        <p>Klik <a href="{% url 'Plein:leeftijdsklassen' %}">hier</a> om te zien in welke klasse je uit moet komen op wedstrijden en voor de competitie.</p>
+        {% endif %}
+
+    {% else %}
+
+        <!-- ingelogd, geen nhblid -->
+        <h2>Welkom</h2>
+
+        <p>Je hebt een speciaal account dat niet gekoppeld aan een NHB lidmaatschap.</p>
+
+    {% endif %}
 
 {% else %}
+    <!-- niet ingelogd -->
+    <h2>Welkom</h2>
 
-<h2>Welkom</h2>
-
-<p>Ben je lid bij van de Nederlandse Handboog Bond (heb je een NHB nummer?),
-maak dan een account aan en log in, dan tonen we informatie die voor jou relevant is.</p>
+    <p>Ben je lid bij van de Nederlandse Handboog Bond (heb je een NHB nummer?),
+    maak dan een account aan en log in, dan tonen we informatie die voor jou relevant is.</p>
 
 {% endif %}
 
