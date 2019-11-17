@@ -116,6 +116,7 @@ class UitgelogdView(TemplateView):
     template_name = TEMPLATE_UITGELOGD
 
     def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
         menu_dynamics(self.request, context)
         return context
@@ -129,6 +130,7 @@ class WachtwoordVergetenView(TemplateView):
     template_name = TEMPLATE_VERGETEN
 
     def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
         menu_dynamics(self.request, context, actief="inloggen")
         return context
