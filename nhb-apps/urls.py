@@ -13,19 +13,18 @@ from Plein.views import site_root_view
 from django.contrib import admin
 
 urlpatterns = [
-    path('',         site_root_view),
-    path('account/', include('Account.urls')),
-    path('plein/',   include('Plein.urls')),
-    #path('hist/',    include('HistComp.urls')),
-    path('records/', include('Records.urls')),
-    path('overig/',  include('Overig.urls')),
-    path('admin/', admin.site.urls),
+    path('',            site_root_view),
+    path('account/',    include('Account.urls')),
+    path('plein/',      include('Plein.urls')),
+    # path('hist/',       include('HistComp.urls')),
+    path('records/',    include('Records.urls')),
+    path('overig/',     include('Overig.urls')),
+    path('competitie/', include('Competitie.urls')),
+    path('admin/',      admin.site.urls),
 ]
 
 if settings.DEBUG:
     import debug_toolbar
-    urlpatterns = [
-        path('__debug__', include(debug_toolbar.urls)),
-    ] + urlpatterns
+    urlpatterns = [path('__debug__', include(debug_toolbar.urls)), ] + urlpatterns
 
 # end of file
