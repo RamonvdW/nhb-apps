@@ -5,9 +5,9 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from .models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
-from NhbStructuur.migrations.m0002_nhbstructuur_2018 import maak_rayons_2018, maak_regios_2018
 from django.core.exceptions import ValidationError
+from .models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
+from .migrations.m0002_nhbstructuur_2018 import maak_rayons_2018, maak_regios_2018
 import datetime
 
 
@@ -42,7 +42,6 @@ class TestNhbStructuur(TestCase):
         lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
         lid.bij_vereniging = ver
         lid.save()
-
 
     def test_rayons(self):
         self.assertEqual(NhbRayon.objects.all().count(), 4)
