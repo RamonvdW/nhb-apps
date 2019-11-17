@@ -10,6 +10,7 @@ from django.utils import timezone
 from django.contrib.auth.models import AbstractUser
 from NhbStructuur.models import NhbLid
 from Overig.tijdelijke_url import maak_tijdelijke_url_accountemail, set_tijdelijke_url_receiver, RECEIVER_ACCOUNTEMAIL
+from BasisTypen.models import BoogType
 
 
 class AccountCreateError(Exception):
@@ -111,7 +112,11 @@ class HanterenPersoonsgegevens(models.Model):
     """ status van de vraag om juist om te gaan met persoonsgegevens,
         voor accounts waarvoor dit relevant is.
     """
+
+    # het account waar dit record bij hoort
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
+
+    # datum waarop de acceptatie voor het laatste gedaan is
     acceptatie_datum = models.DateTimeField()
 
     def __str__(self):
@@ -123,6 +128,23 @@ class HanterenPersoonsgegevens(models.Model):
         """ meta data voor de admin interface """
         verbose_name = "Hanteren Persoonsgegevens"
         verbose_name_plural = "Hanteren Persoonsgegevens"
+
+
+class SchutterBoog(models.Model):
+    """ voor elk type boog waar de schutter interesse in heeft is er een record """
+
+    # het account waar dit record bij hoort
+    account = models.ForeignKey(Account, on_delete=models.CASCADE)
+
+    # het type boog waar dit record over gaat
+    boogtype = models.ForeignKey(BoogType, on_delete=models.PROTECT)
+
+    # voorkeuren van de schutter: alleen interesse, of ook actief schieten?
+    heeft_interesse = models.BooleanField(default=False)
+    voor_wedstrijd = models.BooleanField(default=False)
+
+    # voorkeur voor DT (alleen voor Recurve)
+    voorkeur_dutchtarget_18m = models.BooleanField(default=False)
 
 
 def is_email_valide(adres):
