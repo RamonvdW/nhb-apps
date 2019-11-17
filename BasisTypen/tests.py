@@ -6,6 +6,8 @@
 
 from django.test import TestCase
 from .models import BoogType, TeamType, WedstrijdKlasse, LeeftijdsKlasse, TeamTypeBoog, WedstrijdKlasseBoog, WedstrijdKlasseLeeftijd
+from Plein.tests import assert_html_ok, assert_template_used
+
 
 class TestBasisTypen(TestCase):
     """ unit tests voor de BasisTypen application """
@@ -59,6 +61,12 @@ class TestBasisTypen(TestCase):
         obj.wedstrijdklasse = WedstrijdKlasse.objects.all()[0]
         obj.leeftijdsklasse = LeeftijdsKlasse.objects.all()[0]
         self.assertIsNotNone(str(obj))      # use the __str__ method (only used by admin interface)
+
+    def test_competitie_defaults(self):
+        resp = self.client.get('/overig/instellingen-volgende-competitie/')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_html_ok(self, resp)
+        assert_template_used(self, resp, ('basistypen/competitie-defaults.dtl', 'plein/site_layout.dtl'))
 
 # end of file
 

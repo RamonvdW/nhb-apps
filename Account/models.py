@@ -70,6 +70,8 @@ class Account(AbstractUser):
         """ Deze functie wordt aangeroepen als user.get_first_name
             gebruikt wordt in een template
         """
+        if self.nhblid:
+            return self.nhblid.voornaam
         # TODO: werkt dit ook nog goed voor niet-NHB leden die een email als username hebben?
         return self.first_name or self.username
 
@@ -222,5 +224,6 @@ def account_email_is_bevestigd(mail):
     mail.nieuwe_email = ''
     mail.email_is_bevestigd = True
     mail.save()
+
 
 # end of file

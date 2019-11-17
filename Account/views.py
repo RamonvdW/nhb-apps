@@ -12,7 +12,9 @@ from django.views import View
 from django.views.generic import TemplateView
 from django.utils import timezone
 from .forms import LoginForm, RegistreerForm
-from .models import account_create_nhb, account_email_is_bevestigd, AccountCreateError, Account
+from .models import AccountCreateError, Account,\
+                    account_create_nhb, account_email_is_bevestigd
+from .leeftijdsklassen import leeftijdsklassen_zet_sessionvars_na_login
 from .rol import rol_zet_sessionvars_na_login
 from Overig.tijdelijke_url import set_tijdelijke_url_receiver, RECEIVER_ACCOUNTEMAIL
 from Plein.menu import menu_dynamics
@@ -51,6 +53,7 @@ class LoginView(TemplateView):
                 # integratie met de authenticatie laag van Django
                 login(request, account)
                 rol_zet_sessionvars_na_login(account, request)
+                leeftijdsklassen_zet_sessionvars_na_login(account, request)
 
                 # TODO: redirect NHB schutters naar schutter start-pagina
                 return HttpResponseRedirect(reverse('Plein:plein'))

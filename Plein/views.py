@@ -7,14 +7,16 @@
 from django.urls import reverse
 from django.shortcuts import redirect
 from django.views.generic import TemplateView, ListView, View
-from django.contrib.auth.mixins import UserPassesTestMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from Plein.menu import menu_dynamics
 from Account.rol import Rollen, rol_get_huidige, rol_get_limiet, rol_activate, rol_mag_wisselen
+from Account.leeftijdsklassen import get_leeftijdsklassen
 
 
 TEMPLATE_PLEIN = 'plein/plein.dtl'
 TEMPLATE_PRIVACY = 'plein/privacy.dtl'
 TEMPLATE_WISSELVANROL = 'plein/wissel-van-rol.dtl'
+TEMPLATE_LEEFTIJDSKLASSEN = 'plein/leeftijdsklassen.dtl'
 
 
 def site_root_view(request):
@@ -31,6 +33,18 @@ class PleinView(TemplateView):
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
+
+        huidige_jaar, leeftijd, is_jong, wlst, clst = get_leeftijdsklassen(self.request)
+        if huidige_jaar:
+            context['plein_toon_leeftijdsklassen'] = True
+            context['plein_is_jonge_schutter'] = is_jong
+            context['plein_huidige_jaar'] = huidige_jaar
+            context['plein_leeftijd'] = leeftijd
+            context['plein_wlst'] = wlst
+            context['plein_clst'] = clst
+        else:
+            context['plein_toon_leeftijdsklassen'] = False
+
         menu_dynamics(self.request, context)
         return context
 
@@ -108,6 +122,33 @@ class ActiveerRolView(UserPassesTestMixin, View):
     def get(self, request, *args, **kwargs):
         rol_activate(request, kwargs['rol'])
         return redirect('Plein:plein')
+
+
+class LeeftijdsklassenView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+    """ Django class-based view voor de leeftijdsklassen """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_LEEFTIJDSKLASSEN
+    login_url = '/account/login/'       # no reverse call
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        huidige_jaar, leeftijd, is_jong, wlst, clst = get_leeftijdsklassen(self.request)
+        return (leeftijd is not None)
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        huidige_jaar, leeftijd, is_jong, wlst, clst = get_leeftijdsklassen(self.request)
+        context['plein_is_jonge_schutter'] = is_jong
+        context['plein_huidige_jaar'] = huidige_jaar
+        context['plein_leeftijd'] = leeftijd
+        context['plein_wlst'] = wlst
+        context['plein_clst'] = clst
+
+        menu_dynamics(self.request, context)
+        return context
 
 
 # end of file

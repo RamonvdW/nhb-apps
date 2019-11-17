@@ -34,6 +34,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('afkorting', models.CharField(max_length=5)),
                 ('beschrijving', models.CharField(max_length=80)),
+                ('klasse_kort', models.CharField(max_length=30)),
                 ('geslacht', models.CharField(choices=[('M', 'Man'), ('V', 'Vrouw')], max_length=1)),
                 ('max_wedstrijdleeftijd', models.IntegerField()),
             ],

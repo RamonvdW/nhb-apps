@@ -5,9 +5,12 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 from django.test import TestCase
-from Account.rol import Rollen, rol_zet_sessionvars_na_login, rol_mag_wisselen,\
-                                rol_get_limiet, rol_get_huidige, rol_activate
+from .rol import Rollen, rol_zet_sessionvars_na_login, rol_mag_wisselen,\
+                         rol_get_limiet, rol_get_huidige, rol_activate
+from .leeftijdsklassen import leeftijdsklassen_zet_sessionvars_na_login,\
+                              get_leeftijdsklassen
 from .models import Account
 from .views import obfuscate_email
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
@@ -68,6 +71,7 @@ class AccountTest(TestCase):
         lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
         lid.bij_vereniging = ver
         lid.save()
+        self.nhblid1 = lid
 
         # maak een test lid aan
         lid = NhbLid()
@@ -349,5 +353,114 @@ class AccountTest(TestCase):
         self.assertEqual(obfuscate_email('vier@test.nhb'), 'v##r@test.nhb')
         self.assertEqual(obfuscate_email('zeven@test.nhb'), 'ze##n@test.nhb')
         self.assertEqual(obfuscate_email('hele.lange@maaktnietuit.nl'), 'he#######e@maaktnietuit.nl')
+
+    def test_leeftijdsklassen(self):
+        # unit-tests voor de 'leeftijdsklassen' module
+
+        # simuleer de normale inputs
+        account = lambda: None
+        request = lambda: None
+        nhblid = lambda: None
+        nhblid.geboorte_datum = lambda: None
+        nhblid.geboorte_datum.year = 0
+        request.session = dict()
+
+        # session vars niet gezet
+        huidige_jaar, leeftijd, is_jong, wlst, clst = get_leeftijdsklassen(request)
+        self.assertIsNone(huidige_jaar)
+        self.assertIsNone(leeftijd)
+        self.assertFalse(is_jong)
+        self.assertIsNone(wlst)
+        self.assertIsNone(clst)
+
+        # geen nhblid
+        account.nhblid = None
+        leeftijdsklassen_zet_sessionvars_na_login(account, request)
+        huidige_jaar, leeftijd, is_jong, wlst, clst = get_leeftijdsklassen(request)
+        self.assertIsNone(huidige_jaar)
+        self.assertIsNone(leeftijd)
+        self.assertFalse(is_jong)
+        self.assertIsNone(wlst)
+        self.assertIsNone(clst)
+
+        # test met verschillende leeftijdsklassen van een nhblid
+        # noteer: afhankelijk van BasisTypen: init_leeftijdsklasse_2018
+        account.nhblid = nhblid
+        now_jaar = timezone.now().year  # TODO: should stub, for more reliable test
+
+        # nhblid, aspirant (<= 13)
+        nhb_leeftijd = 11
+        nhblid.geboorte_datum.year = now_jaar - nhb_leeftijd
+        leeftijdsklassen_zet_sessionvars_na_login(account, request)
+        huidige_jaar, leeftijd, is_jong, wlst, clst = get_leeftijdsklassen(request)
+        self.assertEquals(huidige_jaar, now_jaar)
+        self.assertEqual(leeftijd, nhb_leeftijd)
+        self.assertTrue(is_jong)        # onder 30 == jong
+        self.assertEqual(wlst, ('Aspirant', 'Aspirant', 'Aspirant', 'Aspirant', 'Cadet'))
+        #                        -1=10       0=11        +1=12       +2=13       +3=14
+        self.assertEqual(clst, ('Aspirant', 'Aspirant', 'Aspirant', 'Cadet', 'Cadet'))
+
+        # nhblid, cadet (14, 15, 16, 17)
+        nhb_leeftijd = 14
+        nhblid.geboorte_datum.year = now_jaar - nhb_leeftijd
+        leeftijdsklassen_zet_sessionvars_na_login(account, request)
+        huidige_jaar, leeftijd, is_jong, wlst, clst = get_leeftijdsklassen(request)
+        self.assertEquals(huidige_jaar, now_jaar)
+        self.assertEqual(leeftijd, nhb_leeftijd)
+        self.assertTrue(is_jong)        # onder 30 == jong
+        self.assertEqual(wlst, ('Aspirant', 'Cadet', 'Cadet', 'Cadet', 'Cadet'))
+        #                        -1=13       0=14     +1=15    +2=16    +3=17
+        self.assertEqual(clst, ('Cadet', 'Cadet', 'Cadet', 'Cadet', 'Junior'))
+
+        # nhblid, junior (18, 19, 20)
+        nhb_leeftijd = 18
+        nhblid.geboorte_datum.year = now_jaar - nhb_leeftijd
+        leeftijdsklassen_zet_sessionvars_na_login(account, request)
+        huidige_jaar, leeftijd, is_jong, wlst, clst = get_leeftijdsklassen(request)
+        self.assertEquals(huidige_jaar, now_jaar)
+        self.assertEqual(leeftijd, nhb_leeftijd)
+        self.assertTrue(is_jong)        # onder 30 == jong
+        self.assertEqual(wlst, ('Cadet', 'Junior', 'Junior', 'Junior', 'Senior'))
+        #                        -1=17    0=18     +1=19      +2=20     +3=21
+        self.assertEqual(clst, ('Junior', 'Junior', 'Junior', 'Senior', 'Senior'))
+
+        # nhblid, senior (>= 21)
+        nhb_leeftijd = 30
+        nhblid.geboorte_datum.year = now_jaar - nhb_leeftijd
+        leeftijdsklassen_zet_sessionvars_na_login(account, request)
+        huidige_jaar, leeftijd, is_jong, wlst, clst = get_leeftijdsklassen(request)
+        self.assertEquals(huidige_jaar, now_jaar)
+        self.assertEqual(leeftijd, nhb_leeftijd)
+        self.assertFalse(is_jong)        # onder 30 == jong
+        self.assertEqual(wlst, ('Senior', 'Senior', 'Senior', 'Senior', 'Senior'))
+        self.assertEqual(clst, wlst)
+
+        # nhblid, master (zelfde als senior, for now)
+        nhb_leeftijd = 50
+        nhblid.geboorte_datum.year = now_jaar - nhb_leeftijd
+        leeftijdsklassen_zet_sessionvars_na_login(account, request)
+        huidige_jaar, leeftijd, is_jong, wlst, clst = get_leeftijdsklassen(request)
+        self.assertEquals(huidige_jaar, now_jaar)
+        self.assertEqual(leeftijd, nhb_leeftijd)
+        self.assertFalse(is_jong)        # onder 30 == jong
+        self.assertEqual(wlst, ('Senior', 'Senior', 'Senior', 'Senior', 'Senior'))
+        self.assertEqual(clst, wlst)
+
+    def test_get_first_name(self):
+        account = self.account_normaal
+
+        # account.username
+        account.nhblid = None
+        self.assertEqual(account.get_first_name(), 'normaal')
+
+        # account.first_name
+        account.nhblid = None
+        account.first_name = 'Normaal'
+        self.assertEqual(account.get_first_name(), 'Normaal')
+
+        # nhblid.voornaam
+        account.nhblid = self.nhblid1
+        self.assertEqual(account.get_first_name(), 'Ramon')
+
 
 # end of file

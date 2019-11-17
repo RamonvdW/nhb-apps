@@ -78,48 +78,62 @@ def init_leeftijdsklasse_2018(apps, schema_editor):
 
     leeftijdsklasse_klas(
         afkorting='SH', geslacht='M',
+        klasse_kort='Senior',
         beschrijving='Senioren, mannen',
         max_wedstrijdleeftijd=150).save()
     leeftijdsklasse_klas(
         afkorting='SV', geslacht='V',
+        klasse_kort='Senior',
         beschrijving='Senioren, vrouwen',
         max_wedstrijdleeftijd=150).save()
 
+    # 18, 19, 20
     leeftijdsklasse_klas(
         afkorting='JH', geslacht='M',
+        klasse_kort='Junior',
         beschrijving='Junioren, mannen',
         max_wedstrijdleeftijd=20).save()
     leeftijdsklasse_klas(
         afkorting='JV', geslacht='V',
+        klasse_kort='Junior',
         beschrijving='Junioren, vrouwen',
         max_wedstrijdleeftijd=20).save()
 
+    # 14, 15, 16, 17
     leeftijdsklasse_klas(
         afkorting='CH', geslacht='M',
+        klasse_kort='Cadet',
         beschrijving='Cadetten, jongens',
         max_wedstrijdleeftijd=17).save()
     leeftijdsklasse_klas(
         afkorting='CV', geslacht='M',
+        klasse_kort='Cadet',
         beschrijving='Cadetten, meisjes',
         max_wedstrijdleeftijd=17).save()
 
+    # 12 + 13
     leeftijdsklasse_klas(
         afkorting='AH2', geslacht='M',
+        klasse_kort='Aspirant',
         beschrijving='Aspiranten 11-12, jongens',
-        max_wedstrijdleeftijd=12).save()
+        max_wedstrijdleeftijd=13).save()
     leeftijdsklasse_klas(
         afkorting='AV2', geslacht='V',
+        klasse_kort='Aspirant',
         beschrijving='Aspiranten 11-12, meisjes',
-        max_wedstrijdleeftijd=12).save()
+        max_wedstrijdleeftijd=13).save()
 
+    # 10 + 11
     leeftijdsklasse_klas(
         afkorting='AH1', geslacht='M',
+        klasse_kort='Aspirant',
         beschrijving='Aspiranten <11, jongens',
-        max_wedstrijdleeftijd=10).save()
+        max_wedstrijdleeftijd=11).save()
     leeftijdsklasse_klas(
         afkorting='AV1', geslacht='V',
+        klasse_kort='Aspirant',
         beschrijving='Aspiranten <11, meisjes',
-        max_wedstrijdleeftijd=10).save()
+        max_wedstrijdleeftijd=11).save()
 
 
 def create_wedstrijdklasse_individueel(apps, beschrijving, boogtypen, leeftijdsklassen, min_ag, niet_voor_rk_bk=False):

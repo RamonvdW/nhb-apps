@@ -25,6 +25,10 @@ urlpatterns = [
     path('wissel-van-rol/',
          views.WisselVanRolView.as_view(),
          name='wissel-van-rol'),
+
+    path('leeftijdsklassen/',
+         views.LeeftijdsklassenView.as_view(),
+         name='leeftijdsklassen'),
 ]
 
 # end of file
