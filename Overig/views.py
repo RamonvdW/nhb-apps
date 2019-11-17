@@ -9,7 +9,7 @@ from django.views.generic import TemplateView, ListView
 from django.shortcuts import render, redirect
 from django.urls import Resolver404, reverse
 from django.http import HttpResponseRedirect
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.rol import Rollen, rol_get_huidige
 from Plein.menu import menu_dynamics
 from .forms import SiteFeedbackForm
@@ -101,7 +101,7 @@ class SiteFeedbackBedanktView(TemplateView):
         return context
 
 
-class SiteFeedbackInzichtView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+class SiteFeedbackInzichtView(UserPassesTestMixin, ListView):
     """ Deze view toont de ontvangen feedback. """
 
     # class variables shared by all instances
