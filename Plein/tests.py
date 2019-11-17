@@ -8,7 +8,11 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from .menu import menu_dynamics
 from Account.rol import rol_zet_sessionvars_na_login
+from Account.leeftijdsklassen import leeftijdsklassen_zet_sessionvars_na_login
 from Account.models import Account
+from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
+from NhbStructuur.migrations.m0002_nhbstructuur_2018 import maak_rayons_2018, maak_regios_2018
+import datetime
 
 
 def assert_html_ok(testcase, response):
@@ -62,10 +66,40 @@ class PleinTest(TestCase):
     def setUp(self):
         """ initializatie van de test case """
         usermodel = get_user_model()
+        usermodel.objects.create_user('100001', 'nhb100001@test.com', 'wachtwoord')
         usermodel.objects.create_user('normaal', 'normaal@test.com', 'wachtwoord')
         usermodel.objects.create_superuser('admin', 'admin@test.com', 'wachtwoord')
         self.account_admin = Account.objects.get(username='admin')
         self.account_normaal = Account.objects.get(username='normaal')
+        self.account_100001 = Account.objects.get(username='100001')
+
+        # maak de standard rayon/regio structuur aan
+        maak_rayons_2018(NhbRayon)
+        maak_regios_2018(NhbRayon, NhbRegio)
+
+        # maak een test vereniging
+        ver = NhbVereniging()
+        ver.naam = "Grote Club"
+        ver.nhb_nr = "1000"
+        ver.regio = NhbRegio.objects.get(pk=111)
+        # secretaris kan nog niet ingevuld worden
+        ver.save()
+
+        # maak een test lid aan
+        lid = NhbLid()
+        lid.nhb_nr = 100001
+        lid.geslacht = "M"
+        lid.voornaam = "Ramon"
+        lid.achternaam = "de Tester"
+        lid.email = "rdetester@gmail.not"
+        lid.postcode = "1234PC"
+        lid.huisnummer = "42bis"
+        lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
+        lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
+        lid.bij_vereniging = ver
+        lid.save()
+        self.account_100001.nhblid = lid
+        self.account_100001.save()
 
     def test_root_redirect(self):
         resp = self.client.get('/')
@@ -81,7 +115,18 @@ class PleinTest(TestCase):
 
     def test_plein_normaal(self):
         self.client.login(username='normaal', password='wachtwoord')
-        rol_zet_sessionvars_na_login(self.account_normaal, self.client)
+        rol_zet_sessionvars_na_login(self.account_normaal, self.client).save()
+        resp = self.client.get('/plein/')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assertNotContains(resp, '/admin/')
+        self.assertNotContains(resp, 'Wissel van rol')
+        assert_template_used(self, resp, ('plein/plein.dtl', 'plein/site_layout.dtl'))
+        self.client.logout()
+
+    def test_plein_nhblid(self):
+        self.client.login(username='100001', password='wachtwoord')
+        rol_zet_sessionvars_na_login(self.account_100001, self.client).save()
+        leeftijdsklassen_zet_sessionvars_na_login(self.account_100001, self.client).save()
         resp = self.client.get('/plein/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertNotContains(resp, '/admin/')
@@ -168,5 +213,19 @@ class PleinTest(TestCase):
         request.user.is_authenticated = False
         with self.assertRaises(AssertionError):
             menu_dynamics(request, context, actief='test-bestaat-niet')
+
+    def test_leeftijdsklassen_anon(self):
+        self.client.logout()
+        resp = self.client.get('/plein/leeftijdsklassen/')
+        self.assertEqual(resp.status_code, 302)     # 302 = Redirect (to login)
+
+    def test_leeftijdsklassen_nhblid(self):
+        self.client.login(username='100001', password='wachtwoord')
+        rol_zet_sessionvars_na_login(self.account_100001, self.client).save()
+        leeftijdsklassen_zet_sessionvars_na_login(self.account_100001, self.client).save()
+        resp = self.client.get('/plein/leeftijdsklassen/')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_html_ok(self, resp)
+        assert_template_used(self, resp, ('plein/leeftijdsklassen.dtl', 'plein/site_layout.dtl'))
 
 # end of file
