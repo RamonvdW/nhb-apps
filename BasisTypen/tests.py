@@ -5,7 +5,10 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
+from django.contrib.auth import get_user_model
 from .models import BoogType, TeamType, WedstrijdKlasse, LeeftijdsKlasse, TeamTypeBoog, WedstrijdKlasseBoog, WedstrijdKlasseLeeftijd
+from Account.models import Account
+from Account.rol import rol_zet_sessionvars_na_login
 from Plein.tests import assert_html_ok, assert_template_used
 
 
@@ -27,6 +30,14 @@ class TestBasisTypen(TestCase):
 
         obj = LeeftijdsKlasse(afkorting="CH", geslacht="M", max_wedstrijdleeftijd=17, beschrijving="Heren Cadet")
         obj.save()
+
+        # maak een BKO aan, nodig om de competitie defaults in te zien
+        usermodel = get_user_model()
+        usermodel.objects.create_user('bko', 'bko@test.com', 'wachtwoord')
+        account = Account.objects.get(username='bko')
+        account.is_BKO = True
+        account.save()
+        self.account_bko = account
 
     def test_boogtype(self):
         obj = BoogType.objects.all()[0]
@@ -62,7 +73,14 @@ class TestBasisTypen(TestCase):
         obj.leeftijdsklasse = LeeftijdsKlasse.objects.all()[0]
         self.assertIsNotNone(str(obj))      # use the __str__ method (only used by admin interface)
 
-    def test_competitie_defaults(self):
+    def test_competitie_defaults_anon(self):
+        self.client.logout()
+        resp = self.client.get('/overig/instellingen-volgende-competitie/')
+        self.assertEqual(resp.status_code, 302)     # 302 = Redirect (to login)
+
+    def test_competitie_defaults_bko(self):
+        self.client.login(username='bko', password='wachtwoord')
+        rol_zet_sessionvars_na_login(self.account_bko, self.client).save()
         resp = self.client.get('/overig/instellingen-volgende-competitie/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         assert_html_ok(self, resp)
