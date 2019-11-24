@@ -21,7 +21,7 @@
         <div class="collapsible-body">
             <span>Door: {{ obj.door }}</span>
             <p>Functie: {{ obj.gebruikte_functie }}</p>
-            <p>Activiteit: {{ obj.activiteit }}</p>
+            <p>Activiteit: {{ obj.activiteit|linebreaksbr }}</p>
         </div>
     </li>
     {% endfor %}

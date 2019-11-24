@@ -21,7 +21,7 @@ class LogboekRegel(models.Model):
     def bepaal_door(self):
         """ bepaal door wie actie uitgevoerd is """
         if not self.actie_door_account:
-            return 'IT beheerder'
+            return 'Systeem of IT beheerder'
         return self.actie_door_account.username
 
     def __str__(self):
