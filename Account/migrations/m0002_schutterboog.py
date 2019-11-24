@@ -10,6 +10,7 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
+    """ Migratie class voor dit deel van de applicatie """
 
     dependencies = [
         ('BasisTypen', 'm0002_basistypen_2018'),
