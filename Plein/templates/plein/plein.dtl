@@ -29,7 +29,7 @@
         <!-- ingelogd, geen nhblid -->
         <h2>Welkom</h2>
 
-        <p>Je hebt een speciaal account dat niet gekoppeld aan een NHB lidmaatschap.</p>
+        <p>Je hebt een speciaal account dat niet gekoppeld is aan een NHB lidmaatschap.</p>
 
     {% endif %}
 
