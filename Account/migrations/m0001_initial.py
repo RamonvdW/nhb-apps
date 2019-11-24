@@ -12,6 +12,7 @@ import django.utils.timezone
 
 
 class Migration(migrations.Migration):
+    """ Migratie class voor dit deel van de applicatie """
 
     # dit is de eerste
     initial = True

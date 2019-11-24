@@ -9,6 +9,7 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
+    """ Migratie class voor dit deel van de applicatie """
 
     initial = True
 

@@ -10,6 +10,7 @@ import NhbStructuur.models
 
 
 class Migration(migrations.Migration):
+    """ Migratie class voor dit deel van de applicatie """
 
     # dit is de eerste
     initial = True
