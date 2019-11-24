@@ -55,6 +55,9 @@ class RecordsOverzichtView(ListView):
         # junioren, etc.
         obj.descr2_str += IndivRecord.lcat2str[obj.leeftijdscategorie]
 
+        obj.score_str = str(obj.score)
+        if obj.x_count:
+            obj.score_str += " (%sX)" % obj.x_count
 
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
@@ -272,6 +275,9 @@ class RecordsIndivSpecifiekView(ListView):
     @staticmethod
     def set_url_specifiek(obj):
         obj.url = reverse('Records:specifiek', kwargs={'nummer': obj.volg_nr, 'discipline': obj.discipline})
+        obj.score_str = str(obj.score)
+        if obj.x_count:
+            obj.score_str += " (%sX)" % obj.x_count
 
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
@@ -300,6 +306,10 @@ class RecordsIndivSpecifiekView(ListView):
         self.params['disc'] = IndivRecord.disc2url[spec.discipline]
         self.params['lcat'] = IndivRecord.lcat2url[spec.leeftijdscategorie]
         self.params['makl'] = IndivRecord.makl2url[spec.materiaalklasse]
+
+        spec.score_str = str(spec.score)
+        if spec.x_count:
+            spec.score_str += " (%sX)" % spec.x_count
 
         self.spec = spec
 

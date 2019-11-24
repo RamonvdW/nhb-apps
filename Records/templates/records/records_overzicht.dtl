@@ -39,7 +39,7 @@
                 <p>&nbsp;</p>
                 <p>{{ obj.datum }}</p>
                 <p><b>{{ obj.naam }}</b></p>
-                <p>Score: {{ obj.score }}</p>
+                <p>Score: {{ obj.score_str }}</p>
                 <p>Plaats: {{ obj.plaats }}</p>
             </div>
             <div class="card-action center">
