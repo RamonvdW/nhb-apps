@@ -8,10 +8,15 @@ from django.db import models
 from NhbStructuur.models import NhbLid
 
 
+# TODO: support voor team records toevoegen
+
+
 class IndivRecord(models.Model):
+    """ een individueel record """
+
     DISCIPLINE = [('OD', 'Outdoor'),
-                 ('18', 'Indoor'),
-                 ('25', '25m 1pijl')]
+                  ('18', 'Indoor'),
+                  ('25', '25m 1pijl')]
     GESLACHT = [('M', 'Man'),
                 ('V', 'Vrouw')]
     MATERIAALKLASSE = [('R', 'Recurve'),
@@ -27,7 +32,7 @@ class IndivRecord(models.Model):
                           ('U', 'Uniform (para)')]
 
     discipline = models.CharField(max_length=2, choices=DISCIPLINE)
-    volg_nr = models.PositiveIntegerField()     # nieuwste record heeft hoogste nummer, binnen elke dicipline
+    volg_nr = models.PositiveIntegerField()         # uniek binnen elke dicipline
     soort_record = models.CharField(max_length=40)
     geslacht = models.CharField(max_length=1, choices=GESLACHT)
     leeftijdscategorie = models.CharField(max_length=1, choices=LEEFTIJDSCATEGORIE)
@@ -41,8 +46,10 @@ class IndivRecord(models.Model):
     plaats = models.CharField(max_length=50)
     land = models.CharField(max_length=50)
     score = models.PositiveIntegerField()
-    score_notitie = models.CharField(max_length=10, blank=True)    # 20X
-    is_national_record = models.BooleanField(default=False)
+    x_count = models.PositiveIntegerField(default=0)
+    max_score = models.PositiveIntegerField(default=0)
+    score_notitie = models.CharField(max_length=30, blank=True)
+    is_national_record = models.BooleanField(default=False)     # TODO: kan weg? alle records zijn toch NL?
     is_european_record = models.BooleanField(default=False)
     is_world_record = models.BooleanField(default=False)
 
