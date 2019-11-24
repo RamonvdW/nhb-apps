@@ -10,7 +10,7 @@ import argparse
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import Group
 from NhbStructuur.models import NhbVereniging, NhbRegio
-from .import_utils import check_unexpected_utf8
+from NhbStructuur.management.import_utils import check_unexpected_utf8
 
 
 def find_regio(regio_nr):

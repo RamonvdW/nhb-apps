@@ -7,11 +7,10 @@
 """ importeer leden gebaseerd op eenmalige dataset uit 2019 """
 
 import argparse
-from django.utils import timezone
 from django.utils.dateparse import parse_date
 from django.core.management.base import BaseCommand
 from NhbStructuur.models import NhbLid, NhbVereniging
-from .import_utils import check_unexpected_utf8
+from NhbStructuur.management.import_utils import check_unexpected_utf8
 
 
 class Command(BaseCommand):
