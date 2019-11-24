@@ -101,6 +101,10 @@
             </div>
             {% endif %}
             <div class="row small-row">
+                <div class="col s5">Maximale score:</div>
+                <div class="col s6">{{ obj_record.max_score }}</div>
+            </div>
+            <div class="row small-row">
                 <div class="col s5">Naam:</div>
                 <div class="col s6"><b>{{ obj_record.naam }}</b></div>
             </div>
