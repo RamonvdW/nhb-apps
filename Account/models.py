@@ -68,13 +68,23 @@ class Account(AbstractUser):
         verbose_name_plural = "Accounts"
 
     def get_first_name(self):
-        """ Deze functie wordt aangeroepen als user.get_first_name
-            gebruikt wordt in een template
+        """ Deze functie wordt gebruikt om de voornaam van de gebruiker te krijgen
+            voor in het menu.
+            Vanuit template: user.get_first_name
         """
         if self.nhblid:
             return self.nhblid.voornaam
         # TODO: werkt dit ook nog goed voor niet-NHB leden die een email als username hebben?
         return self.first_name or self.username
+
+    def get_account_full_name(self):
+        """ Deze functie wordt aangeroepen vanuit de site feedback om een volledige
+            referentie aan de gebruiker te krijgen.
+            Vanuit template: user.get_account_full_name
+        """
+        if self.nhblid:
+            return "%s %s (%s)" % (self.nhblid.voornaam, self.nhblid.achternaam, self.username)
+        return self.username
 
 
 class AccountEmail(models.Model):

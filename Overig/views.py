@@ -40,13 +40,14 @@ class SiteFeedbackView(View):
             # stuur ze weg
             raise Resolver404()
 
-        gebruiker_naam = request.user.username      # TODO: gebruik volledige naam uit account
-        if not gebruiker_naam:
+        if request.user.is_authenticated:
+            gebruiker_naam = request.user.get_account_full_name()
+        else:
             gebruiker_naam = 'Niet bekend (anoniem)'
 
         # bewaar twee parameters in de sessie - deze blijven server-side
-        request.session['op_pagina'] = kwargs['op_pagina']
-        request.session['gebruiker'] = gebruiker_naam
+        request.session['feedback_op_pagina'] = kwargs['op_pagina']
+        request.session['feedback_gebruiker'] = gebruiker_naam
 
         # geef het formulier aan de gebruiker om in te vullen
         form = SiteFeedbackForm(initial={'bevinding': '6'})     # TODO: werkt niet met materialcss radiobuttons
@@ -68,8 +69,8 @@ class SiteFeedbackView(View):
         form = SiteFeedbackForm(data=request.POST)
         if form.is_valid():
             try:
-                op_pagina = request.session['op_pagina']
-                gebruiker = request.session['gebruiker']
+                op_pagina = request.session['feedback_op_pagina']
+                gebruiker = request.session['feedback_gebruiker']
             except KeyError:
                 pass
             else:

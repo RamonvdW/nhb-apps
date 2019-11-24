@@ -446,21 +446,24 @@ class AccountTest(TestCase):
         self.assertEqual(wlst, ('Senior', 'Senior', 'Senior', 'Senior', 'Senior'))
         self.assertEqual(clst, wlst)
 
-    def test_get_first_name(self):
+    def test_get_names(self):
         account = self.account_normaal
 
         # account.username
         account.nhblid = None
         self.assertEqual(account.get_first_name(), 'normaal')
+        self.assertEqual(account.get_account_full_name(), 'normaal')
 
         # account.first_name
         account.nhblid = None
         account.first_name = 'Normaal'
         self.assertEqual(account.get_first_name(), 'Normaal')
+        self.assertEqual(account.get_account_full_name(), 'normaal')
 
         # nhblid.voornaam
         account.nhblid = self.nhblid1
         self.assertEqual(account.get_first_name(), 'Ramon')
+        self.assertEqual(account.get_account_full_name(), 'Ramon de Tester (normaal)')
 
 
 # end of file

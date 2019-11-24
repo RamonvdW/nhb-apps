@@ -57,7 +57,7 @@
             </div></div>
 
             <div class="row"><div class="input-field col s12">
-                Jouw login naam: {{ gebruiker_naam }}
+                Jouw naam: {{ gebruiker_naam }}
             </div></div>
 
             {% if form.errors %}
