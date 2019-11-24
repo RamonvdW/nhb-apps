@@ -176,6 +176,67 @@ MINIMUM_LEEFTIJD_LID = 5
 # 150 omdat bepaalde plaatsen veel records hebben, zoals Schijndel (93 in Okt 2019)
 RECORDS_MAX_ZOEKRESULTATEN = 150
 
+# de mogelijke waarden voor soort_record in de administratie van de NL records
+# wordt gebruikt om invoerfouten te ontdekken en rapporteren
+RECORDS_TOEGESTANE_SOORTEN = (
+
+    # outdoor
+    '30m',
+    '30m para',
+    '30m recurve staand',
+    '40m',
+    '50m',
+    '50m (15p)',
+    '50m (15p) finale ronde',
+    '50m (15p) match ronde',
+    '50m match ronde (15p)',
+    '50m (122cm)',
+    '50m (72p)',
+    '50m ronde (72p)',
+    '50m ronde (72p) W1',
+    '50m ronde',
+    '50m para',
+    '50m recurve staand',
+    '60m',
+    '60m (12p)',
+    '60m (72p)',
+    '60m ronde (72p)',
+    '70m',
+    '70m (12p)',
+    '70m (72p)',
+    '70m ronde (72p)',
+    '70m ronde (72p) W1',
+    '70m open klasse (para)',
+    '72P',
+    '90m',
+    'WA 1440 ronde',
+    '144p WA ronde',
+    '144p WA Ronde',
+    '144p Fita ronde',
+    '144p para',
+    '144p',
+    '288p',
+    'Fita RK Rayon 4',
+    'ShortMetric',
+
+    # indoor
+    '18m (15p)',
+    '18m (60p)',
+    '18m',
+    '18m (12p)',
+    '25m',
+    '25m (60p)',
+    '25m ronde (60p)',
+    '25m+18m (60p)',
+    '25m+18m (120p)',
+    'match (15p)',
+
+    # 25m1pijl
+    '50p',
+    '30p',
+)
+
+
 # import install-specific settings from a separate file
 # that is easy to replace as part of the deployment process
 from .settings_local import *
