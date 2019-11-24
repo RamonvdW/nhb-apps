@@ -33,7 +33,7 @@
             <span>#{{ obj.pk }} door <b>{{ obj.gebruiker }}</b> toegevoegd op {{ obj.toegevoegd_op|date:"l n F Y" }} om {{ obj.toegevoegd_op|date:"H:i" }}</span>
             <p>(site versie: {{ obj.site_versie }})</p>
             <p><u>Feedback</u></p>
-            <h6>{{ obj.feedback }}</h6>
+            <h6>{{ obj.feedback|linebreaks }}</h6>
         </div>
     </li>
     {% endfor %}
