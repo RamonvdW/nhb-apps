@@ -46,6 +46,7 @@ class RecordsTest(TestCase):
         rec.plaats = 'Papendal'
         rec.land = 'Nederland'
         rec.score = 1234
+        rec.x_count = 56
         # rec.score_notitie =
         # rec.is_national_record =
         # rec.is_european_record =
@@ -93,14 +94,20 @@ class RecordsTest(TestCase):
         assert_template_used(self, rsp, ('records/records_specifiek.dtl', 'plein/site_layout.dtl'))
         assert_html_ok(self, rsp)
         assert_other_http_commands_not_supported(self, '/records/record-OD-42/')
-        # TODO: check extra zaken via template context (rsp.context)
+        self.assertContains(rsp, '1234 (56X)')
+        self.assertContains(rsp, 'Papendal')
+        self.assertContains(rsp, 'Nederland')
+        self.assertContains(rsp, 'Top Schutter')
 
     def test_view_specifiek_overig(self):
         rsp = self.client.get('/records/record-18-43/')    # 18=Indoor, 43=volg_nr
         self.assertEqual(rsp.status_code, 200)  # 200 = OK
         assert_template_used(self, rsp, ('records/records_specifiek.dtl', 'plein/site_layout.dtl'))
         assert_html_ok(self, rsp)
-        # TODO: check extra zaken via template context (rsp.context)
+        self.assertContains(rsp, '1235')
+        self.assertContains(rsp, 'Ergens Anders')
+        self.assertContains(rsp, 'Nederland')
+        self.assertContains(rsp, 'Top Schutter 2')
 
     def test_view_specifiek_missing(self):
         rsp = self.client.get('/records/record-OD-0/')    # niet bestaand record nummer
