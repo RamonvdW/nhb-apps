@@ -15,6 +15,8 @@ PAGES='
 /records/record-OD-1/
 /records/zoek/
 /records/zoek/?zoekterm=schijndel
+/records/indiv/
+/records/indiv/mannen/indoor/senioren/recurve/
 /account/login/
 /account/registreer/
 /account/uitgelogd/
