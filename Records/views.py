@@ -301,17 +301,19 @@ class RecordsIndivSpecifiekView(ListView):
         else:
             spec.makl_str = IndivRecord.makl2str[spec.materiaalklasse]
 
+        spec.score_str = str(spec.score)
+        if spec.x_count:
+            spec.score_str += " (%sX)" % spec.x_count
+
+        spec.op_pagina = "specifiek record: %s-%s" % (discipline, volg_nr)
+
+        self.spec = spec
+
         # stel de url parameters vast voor de broodkruimel urls
         self.params['gesl'] = IndivRecord.gesl2url[spec.geslacht]
         self.params['disc'] = IndivRecord.disc2url[spec.discipline]
         self.params['lcat'] = IndivRecord.lcat2url[spec.leeftijdscategorie]
         self.params['makl'] = IndivRecord.makl2url[spec.materiaalklasse]
-
-        spec.score_str = str(spec.score)
-        if spec.x_count:
-            spec.score_str += " (%sX)" % spec.x_count
-
-        self.spec = spec
 
         # zoek de andere records die hier bij horen, aflopend gesorteerd op datum
         # hier zit ook het record zelf bij

@@ -10,7 +10,7 @@
 
 {% block pagina %}
 
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="records_specifiek: {{ obj_record.discipline }}-{{ obj_record.volg_nr }}" %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina=obj_record.op_pagina %}
 
 <h4>Nederlandse Handboog<wbr/>sport Record</h4>
 
