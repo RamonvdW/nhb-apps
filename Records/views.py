@@ -41,13 +41,13 @@ class RecordsOverzichtView(ListView):
         obj.url = reverse('Records:specifiek', kwargs={'nummer': obj.volg_nr, 'discipline': obj.discipline})
         obj.icon = DISCIPLINE_TO_ICON[obj.discipline]
 
-        obj.descr1_str = IndivRecord.disc2str[obj.discipline] + " "
+        obj.descr1_str = (IndivRecord.disc2str[obj.discipline] +             # indoor/outdoor
+                          " " + IndivRecord.makl2str[obj.materiaalklasse] +  # longbow/recurve
+                          " " + obj.soort_record)                            # 70m (72p)
 
         # recurve etc.
         if obj.materiaalklasse == "O":
-            obj.descr1_str += obj.materiaalklasse_overig
-        else:
-            obj.descr1_str += IndivRecord.makl2str[obj.materiaalklasse]
+            obj.descr1_str += " " + obj.materiaalklasse_overig
 
         # heren/dames
         obj.descr2_str = IndivRecord.gesl2str[obj.geslacht] + " "
