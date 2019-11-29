@@ -132,9 +132,15 @@ class AccountTest(TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, 'Uitloggen')
 
-        resp = self.client.get('/account/logout/', follow=True)
+        resp = self.client.get('/account/logout/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        assert_template_used(self, resp, ('account/uitgelogd.dtl', 'plein/site_layout.dtl'))
+        assert_template_used(self, resp, ('account/uitloggen.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, 'Uitloggen')
+
+        # do the actual logout
+        resp = self.client.post('/account/logout/', {}, follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_template_used(self, resp, ('plein/plein.dtl', 'plein/site_layout.dtl'))
         self.assertNotContains(resp, 'Uitloggen')
 
     def test_rol(self):

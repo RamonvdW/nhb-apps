@@ -9,6 +9,7 @@ from Account.rol import Rollen, rol_get_huidige, rol_get_limiet
 
 ACTIEF_OPTIES = (
     'inloggen',
+    'uitloggen',
     'privacy',
     'records',
     'logboek',

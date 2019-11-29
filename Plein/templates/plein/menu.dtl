@@ -85,7 +85,7 @@
 
 <!-- uitlog knop als gebruiker ingelogd is -->
 {% if menu_show_logout %}
-<li>
+<li {% if menu_actief == "uitloggen" %}class="actief"{% endif %}>
     <a href="{% url 'Account:logout' %}" class="white-text">
     <i class="material-icons-round white-text">exit_to_app</i>Uitloggen</a>
 </li>

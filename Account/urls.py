@@ -18,10 +18,6 @@ urlpatterns = [
          views.LogoutView.as_view(),
          name='logout'),
 
-    path('uitgelogd/',
-         views.UitgelogdView.as_view(),
-         name='uitgelogd'),
-
     path('registreer/',
          views.RegistreerNhbNummerView.as_view(),
          name='registreer'),

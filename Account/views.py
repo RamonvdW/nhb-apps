@@ -22,7 +22,7 @@ from Logboek.models import schrijf_in_logboek
 
 
 TEMPLATE_LOGIN = 'account/login.dtl'
-TEMPLATE_UITGELOGD = 'account/uitgelogd.dtl'
+TEMPLATE_UITLOGGEN = 'account/uitloggen.dtl'
 TEMPLATE_REGISTREER = 'account/registreer.dtl'
 TEMPLATE_AANGEMAAKT = 'account/aangemaakt.dtl'
 TEMPLATE_BEVESTIGD = 'account/bevestigd.dtl'
@@ -32,18 +32,18 @@ TEMPLATE_VERGETEN = 'account/wachtwoord-vergeten.dtl'
 class LoginView(TemplateView):
     """
         Deze view het startpunt om in te loggen
-        De login dialoog bevat drie knoppen:
-            Log in --> inloggen met ingevoerd username/password
-            Wachtwoord vergeten --> wachtwoord reset email krijgen
-            Registreer --> nieuw account aanmaken
+        Het inloggen zelf gebeurt met een POST omdat de invoervelden dan in
+        de http body meegestuurd worden
     """
 
+    # class variables shared by all instances
     form_class = LoginForm
 
     def post(self, request, *args, **kwargs):
         """ deze functie wordt aangeroepen als een POST request ontvangen is.
             dit is gekoppeld aan het drukken op de LOG IN knop.
         """
+        # https://stackoverflow.com/questions/5868786/what-method-should-i-use-for-a-login-authentication-request
         form = LoginForm(request.POST)
         if form.is_valid():
             login_naam = form.cleaned_data.get("login_naam")
@@ -88,14 +88,23 @@ class LoginView(TemplateView):
         return render(request, TEMPLATE_LOGIN, context)
 
 
-class LogoutView(View):
+class LogoutView(TemplateView):
     """
-        Deze view zorgt voor het uitloggen
+        Deze view zorgt voor het uitloggen met een POST
         Knoppen / links om uit te loggen moeten hier naartoe wijzen
     """
 
-    def get(self, request, *args, **kwargs):
-        """ deze functie wordt aangeroepen als een GET request ontvangen is
+    # https://stackoverflow.com/questions/3521290/logout-get-or-post
+    template_name = TEMPLATE_UITLOGGEN
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+        menu_dynamics(self.request, context, actief='uitloggen')
+        return context
+
+    def post(self, request, *args, **kwargs):
+        """ deze functie wordt aangeroepen als een POST request ontvangen is
             we zorgen voor het uitloggen en sturen door naar een andere pagina
         """
 
@@ -103,23 +112,8 @@ class LogoutView(View):
         # TODO: wist dit ook de session?
         logout(request)
 
-        # redirect to success page
-        return HttpResponseRedirect(reverse('Account:uitgelogd'))
-
-
-class UitgelogdView(TemplateView):
-    """
-        Deze view geeft de pagina die de gebruiker vertelt dat uitloggen gelukt is
-    """
-
-    # class variables shared by all instances
-    template_name = TEMPLATE_UITGELOGD
-
-    def get_context_data(self, **kwargs):
-        """ called by the template system to get the context data for the template """
-        context = super().get_context_data(**kwargs)
-        menu_dynamics(self.request, context)
-        return context
+        # redirect naar het plein
+        return HttpResponseRedirect(reverse('Plein:plein'))
 
 
 class WachtwoordVergetenView(TemplateView):
