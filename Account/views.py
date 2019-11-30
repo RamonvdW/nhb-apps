@@ -11,6 +11,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.views import View
 from django.views.generic import TemplateView
 from django.utils import timezone
+from django.conf import settings
 from .forms import LoginForm, RegistreerForm
 from .models import AccountCreateError, Account,\
                     account_create_nhb, account_email_is_bevestigd
@@ -19,6 +20,7 @@ from .rol import rol_zet_sessionvars_na_login
 from Overig.tijdelijke_url import set_tijdelijke_url_receiver, RECEIVER_ACCOUNTEMAIL
 from Plein.menu import menu_dynamics
 from Logboek.models import schrijf_in_logboek
+from datetime import timedelta
 
 
 TEMPLATE_LOGIN = 'account/login.dtl'
@@ -26,6 +28,7 @@ TEMPLATE_UITLOGGEN = 'account/uitloggen.dtl'
 TEMPLATE_REGISTREER = 'account/registreer.dtl'
 TEMPLATE_AANGEMAAKT = 'account/aangemaakt.dtl'
 TEMPLATE_BEVESTIGD = 'account/bevestigd.dtl'
+TEMPLATE_GEBLOKKEERD = 'account/geblokkeerd.dtl'
 TEMPLATE_VERGETEN = 'account/wachtwoord-vergeten.dtl'
 
 
@@ -46,31 +49,67 @@ class LoginView(TemplateView):
         # https://stackoverflow.com/questions/5868786/what-method-should-i-use-for-a-login-authentication-request
         form = LoginForm(request.POST)
         if form.is_valid():
+            from_ip = request.META['REMOTE_ADDR']
             login_naam = form.cleaned_data.get("login_naam")
             wachtwoord = form.cleaned_data.get("wachtwoord")
-            account = authenticate(username=login_naam, password=wachtwoord)
-            if account:
-                # integratie met de authenticatie laag van Django
-                login(request, account)
-                rol_zet_sessionvars_na_login(account, request)
-                leeftijdsklassen_zet_sessionvars_na_login(account, request)
 
-                # TODO: redirect NHB schutters naar schutter start-pagina
-                return HttpResponseRedirect(reverse('Plein:plein'))
+            # kijk of het account bestaat en geblokkeerd is
+            try:
+                account = Account.objects.get(username=login_naam)
+            except Account.DoesNotExist:
+                # account bestaat niet
+                # schrijf de mislukte inlogpoging in het logboek
+                schrijf_in_logboek(None, 'Inloggen', 'Mislukte inlog vanaf IP %s: onbekend account %s' % (repr(from_ip), repr(login_naam)))
             else:
-                # schrijf de inlogpoging in het logboek
-                from_ip = request.META['REMOTE_ADDR']
-                try:
-                    account = Account.objects.get(username=login_naam)
-                except Account.DoesNotExist:
-                    schrijf_in_logboek(None, 'Inloggen', 'Mislukte inlog vanaf IP %s: onbekend account %s' % (repr(from_ip), repr(login_naam)))
+                # account bestaat wel
+                # kijk of het geblokkeerd is
+                now = timezone.now()
+                if account.is_geblokkeerd_tot:
+                    if account.is_geblokkeerd_tot > now:
+                        schrijf_in_logboek(account, 'Inloggen',
+                                           'Mislukte inlog vanaf IP %s voor geblokkeerd account %s' % (repr(from_ip), repr(login_naam)))
+                        context = {'account': account}
+                        menu_dynamics(request, context, actief='inloggen')
+                        return render(request, TEMPLATE_GEBLOKKEERD, context)
+
+                # niet geblokkeerd
+                account2 = authenticate(username=login_naam, password=wachtwoord)
+                if account2:
+                    # authenticatie is gelukt
+                    # integratie met de authenticatie laag van Django
+                    login(request, account2)
+                    rol_zet_sessionvars_na_login(account2, request)
+                    leeftijdsklassen_zet_sessionvars_na_login(account2, request)
+
+                    if account2.verkeerd_wachtwoord_teller > 0:
+                        account2.verkeerd_wachtwoord_teller = 0
+                        account2.save()
+
+                    return HttpResponseRedirect(reverse('Plein:plein'))
                 else:
+                    # authenticatie is niet gelukt
                     # reden kan zijn: verkeerd wachtwoord of is_active=False
-                    schrijf_in_logboek(account, 'Inloggen', 'Mislukte inlog vanaf IP %s voor account %s' % (repr(from_ip), repr(login_naam)))
+
                     # onthoudt precies wanneer dit was
                     account.laatste_inlog_poging = timezone.now()
+                    schrijf_in_logboek(account, 'Inloggen', 'Mislukte inlog vanaf IP %s voor account %s' % (repr(from_ip), repr(login_naam)))
+
+                    # onthoudt hoe vaak dit verkeerd gegaan is
+                    account.verkeerd_wachtwoord_teller += 1
                     account.save()
 
+                    # bij te veel pogingen, blokkeer het account
+                    if account.verkeerd_wachtwoord_teller >= settings.AUTH_BAD_PASSWORD_LIMIT:
+                        account.is_geblokkeerd_tot = timezone.now() + timedelta(minutes=settings.AUTH_BAD_PASSWORD_LOCKOUT_MINS)
+                        account.verkeerd_wachtwoord_teller = 0      # daarna weer volle mogelijkheden
+                        account.save()
+                        schrijf_in_logboek(account, 'Inlog geblokkeerd',
+                                           'Account %s wordt geblokkeerd tot %s' % (repr(login_naam), account.is_geblokkeerd_tot.strftime('%Y-%m-%d %H:%M:%S')))
+                        context = {'account': account}
+                        menu_dynamics(request, context, actief='inloggen')
+                        return render(request, TEMPLATE_GEBLOKKEERD, context)
+
+            # gebruiker mag het nog een keer proberen
             form.add_error(None, 'De combinatie van inlog naam en wachtwoord worden niet herkend. Probeer het nog eens.')
 
         # still here --> re-render with error message

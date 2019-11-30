@@ -38,13 +38,13 @@ class Account(AbstractUser):
     # (inherited, not used) email
     # (inherited) user_permissions: ManyToMany
     # (inherited) groups: ManyToMany
-    is_voltooid = models.BooleanField(
+    is_voltooid = models.BooleanField(              # TODO: obsolete
                         default=False,
                         help_text="Extra informatie correct opgegeven voor NHB account?")
-    extra_info_pogingen = models.IntegerField(
+    extra_info_pogingen = models.IntegerField(      # TODO: obsolete
                                 default=3,
                                 help_text="Aantal pogingen over om extra informatie voor NHB account op te geven")
-    vraag_nieuw_wachtwoord = models.BooleanField(
+    vraag_nieuw_wachtwoord = models.BooleanField(   # TODO: implement
                                     default=False,
                                     help_text="Moet de gebruiker een nieuw wachtwoord opgeven bij volgende inlog?")
 
@@ -55,6 +55,15 @@ class Account(AbstractUser):
                                null=True)   # allow NULL relation in database
 
     laatste_inlog_poging = models.DateTimeField(blank=True, null=True)
+
+    # verkeerd wachtwoord opgegeven via login of wijzig-wachtwoord
+    verkeerd_wachtwoord_teller = models.IntegerField(
+                                    default=0,
+                                    help_text="Aantal mislukte inlog pogingen op rij")
+
+    is_geblokkeerd_tot = models.DateTimeField(
+                                    blank=True, null=True,
+                                    help_text="Login niet mogelijk tot")
 
     is_BKO = models.BooleanField(
                         default=False,

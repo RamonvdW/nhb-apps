@@ -25,6 +25,7 @@ class AccountAdmin(UserAdmin):
         (_('Permissions'), {
             'fields': ('is_active', 'is_BKO', 'is_staff', 'groups', 'user_permissions'),
         }),
+        (_('Beveiliging'), {'fields': ('verkeerd_wachtwoord_teller', 'is_geblokkeerd_tot')})
     )
 
     list_display = ('username', 'last_login', 'is_staff')

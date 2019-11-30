@@ -7,6 +7,7 @@
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from django.test import TestCase
+from django.conf import settings
 from .rol import Rollen, rol_zet_sessionvars_na_login, rol_mag_wisselen,\
                          rol_get_limiet, rol_get_huidige, rol_activate
 from .leeftijdsklassen import leeftijdsklassen_zet_sessionvars_na_login,\
@@ -96,12 +97,16 @@ class AccountTest(TestCase):
 
     def test_inlog_form_post(self):
         # test inlog via het inlog formulier
+        self.account_normaal.verkeerd_wachtwoord_teller = 3
+        self.account_normaal.save()
         resp = self.client.post('/account/login/', {'login_naam': 'normaal', 'wachtwoord': 'wachtwoord'}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         assert_html_ok(self, resp)
         # redirect is naar het plein
         assert_template_used(self, resp, ('plein/plein.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'Uitloggen')
+        self.account_normaal = Account.objects.get(username='normaal')
+        self.assertEqual(self.account_normaal.verkeerd_wachtwoord_teller, 0)
 
     def test_inlog_form_post_bad_login_naam(self):
         # test inlog via het inlog formulier, met onbekende login naam
@@ -113,11 +118,44 @@ class AccountTest(TestCase):
 
     def test_inlog_form_post_bad_wachtwoord(self):
         # test inlog via het inlog formulier, met verkeerd wachtwoord
+        self.assertEqual(self.account_normaal.verkeerd_wachtwoord_teller, 0)
         resp = self.client.post('/account/login/', {'login_naam': 'normaal', 'wachtwoord': 'huh'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         assert_html_ok(self, resp)
         assert_template_used(self, resp, ('account/login.dtl', 'plein/site_layout.dtl'))
         self.assertFormError(resp, 'form', None, 'De combinatie van inlog naam en wachtwoord worden niet herkend. Probeer het nog eens.')
+        self.account_normaal = Account.objects.get(username='normaal')
+        self.assertEqual(self.account_normaal.verkeerd_wachtwoord_teller, 1)
+
+    def test_inlog_is_geblokkeerd(self):
+        self.account_normaal.is_geblokkeerd_tot = timezone.now() + datetime.timedelta(hours=1)
+        self.account_normaal.save()
+        resp = self.client.post('/account/login/', {'login_naam': 'normaal', 'wachtwoord': 'huh'})
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_html_ok(self, resp)
+        assert_template_used(self, resp, ('account/geblokkeerd.dtl', 'plein/site_layout.dtl'))
+
+    def test_inlog_was_geblokkeerd(self):
+        self.account_normaal.is_geblokkeerd_tot = timezone.now() + datetime.timedelta(hours=-1)
+        self.account_normaal.save()
+        resp = self.client.post('/account/login/', {'login_naam': 'normaal', 'wachtwoord': 'wachtwoord'}, follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        # redirect is naar het plein
+        assert_template_used(self, resp, ('plein/plein.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, 'Uitloggen')
+
+    def test_inlog_wordt_geblokkeerd(self):
+        # te vaak een verkeerd wachtwoord
+        self.account_normaal.verkeerd_wachtwoord_teller = settings.AUTH_BAD_PASSWORD_LIMIT - 1
+        self.account_normaal.save()
+        resp = self.client.post('/account/login/', {'login_naam': 'normaal', 'wachtwoord': 'huh'})
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_html_ok(self, resp)
+        assert_template_used(self, resp, ('account/geblokkeerd.dtl', 'plein/site_layout.dtl'))
+        self.account_normaal = Account.objects.get(username='normaal')
+        should_block_until = timezone.now() + datetime.timedelta(minutes=settings.AUTH_BAD_PASSWORD_LOCKOUT_MINS-1)
+        self.assertTrue(self.account_normaal.is_geblokkeerd_tot > should_block_until)
+        self.assertEqual(self.account_normaal.verkeerd_wachtwoord_teller, 0)
 
     def test_inlog_partialfields(self):
         # test inlog via het inlog formulier, met verkeerd wachtwoord
