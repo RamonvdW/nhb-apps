@@ -28,6 +28,15 @@ DISCIPLINE_TO_ICON = {
     '25': static('plein/badge_nhb_25m1p.png')
 }
 
+
+def make_score_str(obj):
+    """  make score beschrijving, inclusief X-count indien relevant """
+    msg = str(obj.score)
+    if obj.x_count:
+        msg += " (%sX)" % obj.x_count
+    return msg
+
+
 class RecordsOverzichtView(ListView):
     """ Dit is de top-level pagina van de records met een overzicht van de meest
         recente records
@@ -55,9 +64,7 @@ class RecordsOverzichtView(ListView):
         # junioren, etc.
         obj.descr2_str += IndivRecord.lcat2str[obj.leeftijdscategorie]
 
-        obj.score_str = str(obj.score)
-        if obj.x_count:
-            obj.score_str += " (%sX)" % obj.x_count
+        obj.score_str = make_score_str(obj)
 
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
@@ -275,9 +282,7 @@ class RecordsIndivSpecifiekView(ListView):
     @staticmethod
     def set_url_specifiek(obj):
         obj.url = reverse('Records:specifiek', kwargs={'nummer': obj.volg_nr, 'discipline': obj.discipline})
-        obj.score_str = str(obj.score)
-        if obj.x_count:
-            obj.score_str += " (%sX)" % obj.x_count
+        obj.score_str = make_score_str(obj)
 
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
