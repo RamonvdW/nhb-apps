@@ -20,7 +20,7 @@
 
 {% load static %}
 <div class="site-sidebar-rechts z-depth-1">
-    <div class="site-feedback">Wat vind je van deze pagina?
+    <div class="site-feedback"><span>Wat vind je van deze pagina?</span>
         <a href="{% url 'Overig:feedback-bevinding' bevinding='plus' op_pagina=op_pagina %}">
             <img src="{% static 'overig/smiley4_plus.png' %}" width=50 height=50 alt="min"></a>
         <a href="{% url 'Overig:feedback-bevinding' bevinding='nul'  op_pagina=op_pagina %}">
