@@ -324,7 +324,7 @@ class AccountTest(TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         assert_html_ok(self, resp)
         assert_template_used(self, resp, ('account/registreer.dtl', 'plein/site_layout.dtl'))
-        self.assertFormError(resp, 'form', None, 'Account heeft geen email adres. Neem contact op met de secretaris van je vereniging.')
+        self.assertFormError(resp, 'form', None, 'Geen email adres bekend. Neem contact op met de secretaris van je vereniging.')
 
     def test_registreer_nhb_verkeerde_email(self):
         resp = self.client.post('/account/registreer/',

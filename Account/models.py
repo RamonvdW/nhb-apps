@@ -18,6 +18,11 @@ class AccountCreateError(Exception):
     pass
 
 
+class AccountCreateNhbGeenEmail(Exception):
+    """ Specifieke foutmelding omdat het NHB lid geen email adres heeft """
+    pass
+
+
 # see https://simpleisbetterthancomplex.com/tutorial/2016/07/22/how-to-extend-django-user-model.html#abstractuser
 # on extending AbstractUser
 class Account(AbstractUser):
@@ -38,10 +43,10 @@ class Account(AbstractUser):
     # (inherited, not used) email
     # (inherited) user_permissions: ManyToMany
     # (inherited) groups: ManyToMany
-    is_voltooid = models.BooleanField(              # TODO: obsolete
+    is_voltooid = models.BooleanField(              # TODO: obsolete?
                         default=False,
                         help_text="Extra informatie correct opgegeven voor NHB account?")
-    extra_info_pogingen = models.IntegerField(      # TODO: obsolete
+    extra_info_pogingen = models.IntegerField(      # TODO: obsolete?
                                 default=3,
                                 help_text="Aantal pogingen over om extra informatie voor NHB account op te geven")
     vraag_nieuw_wachtwoord = models.BooleanField(   # TODO: implement
@@ -230,9 +235,7 @@ def account_create_nhb(nhb_nummer, email, nieuw_wachtwoord):
         raise AccountCreateError('Onbekend NHB nummer')
 
     if not is_email_valide(nhblid.email):
-        raise AccountCreateError('Account heeft geen email adres. Neem contact op met de secretaris van je vereniging.')
-        # TODO: dit moeten gaan loggen
-        # TODO: redirect naar de secretaris?
+        raise AccountCreateNhbGeenEmail()
 
     if email != nhblid.email:
         raise AccountCreateError('De combinatie van NHB nummer en email worden niet herkend. Probeer het nog eens.')

@@ -13,7 +13,7 @@ from django.views.generic import TemplateView
 from django.utils import timezone
 from django.conf import settings
 from .forms import LoginForm, RegistreerForm
-from .models import AccountCreateError, Account,\
+from .models import AccountCreateError, AccountCreateNhbGeenEmail, Account,\
                     account_create_nhb, account_email_is_bevestigd
 from .leeftijdsklassen import leeftijdsklassen_zet_sessionvars_na_login
 from .rol import rol_zet_sessionvars_na_login
@@ -210,6 +210,13 @@ class RegistreerNhbNummerView(TemplateView):
             error = False
             try:
                 ack_url = account_create_nhb(nhb_nummer, email, nieuw_wachtwoord)
+            except AccountCreateNhbGeenEmail:
+                schrijf_in_logboek(account=None,
+                                   gebruikte_functie="Registreer met NHB nummer",
+                                   activiteit='NHB lid %s heeft geen email adres.' % nhb_nummer)
+
+                form.add_error(None, 'Geen email adres bekend. Neem contact op met de secretaris van je vereniging.')
+                # TODO: redirect naar een pagina met een uitgebreider duidelijk bericht
             except AccountCreateError as exc:
                 form.add_error(None, str(exc))
 
