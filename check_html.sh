@@ -18,8 +18,8 @@ PAGES='
 /records/indiv/
 /records/indiv/mannen/indoor/senioren/recurve/
 /account/login/
+/account/logout/
 /account/registreer/
-/account/uitgelogd/
 /account/wachtwoord-vergeten/
 /overig/feedback/plus/plein/
 /overig/feedback/inzicht/
