@@ -74,8 +74,6 @@ class RecordsTest(TestCase):
         # rec.is_world_record =
         rec.save()
 
-        # TODO: add record with reference to nhb_lid
-
     def test_create(self):
         rec = IndivRecord.objects.all()[0]
         rec.clean_fields()      # run field validators
