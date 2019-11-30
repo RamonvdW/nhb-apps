@@ -32,7 +32,10 @@
                         {% else %}
                         <a href="{{ obj.url }}"><i class="material-icons-round secondary-content">visibility</i></a>
                         {% endif %}
-                        {{ obj.score_str }} door <b>{{ obj.naam }}</b> op {{ obj.datum }}
+                        <span>{{ obj.score_str }} door <b>{{ obj.naam }}</b></span>
+                        {% if obj.datum.year >= 1950 %}
+                            <span> op {{ obj.datum }}</span>
+                        {% endif %}
                     </div>
                 </li>
             {% endfor %}
@@ -110,7 +113,13 @@
             </div>
             <div class="row small-row">
                 <div class="col s5">Plaats:</div>
-                <div class="col s6">{{ obj_record.plaats }}</div>
+                <div class="col s6">
+                    {% if obj_record.plaats %}
+                    <span>{{ obj_record.plaats }}</span>
+                    {% else %}
+                    <span>Onbekend</span>
+                    {% endif %}
+                </div>
             </div>
             {% if obj_record.land %}
             <div class="row small-row">
@@ -120,7 +129,13 @@
             {% endif %}
             <div class="row small-row">
                 <div class="col s5">Datum:</div>
-                <div class="col s6">{{ obj_record.datum }}</div>
+                <div class="col s6">
+                    {% if obj_record.datum.year >= 1950 %}
+                    <span>{{ obj_record.datum }}</span>
+                    {% else %}
+                    <span>Onbekend</span>
+                    {% endif %}
+                </div>
             </div>
             <!--
             <div class="row small-row">
@@ -148,7 +163,10 @@
                         {% else %}
                         <a href="{{ obj.url }}"><i class="material-icons-round secondary-content">visibility</i></a>
                         {% endif %}
-                        {{ obj.score_str }} door <b>{{ obj.naam }}</b> op {{ obj.datum }}
+                        <span>{{ obj.score_str }} door <b>{{ obj.naam }}</b></span>
+                        {% if obj.datum.year >= 1950 %}
+                            <span> op {{ obj.datum }}</span>
+                        {% endif %}
                     </div>
                 </li>
             {% endfor %}

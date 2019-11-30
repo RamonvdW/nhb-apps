@@ -50,7 +50,13 @@
                     <li class="collection-item">
                         <div>
                             <a href="{% url 'Records:specifiek' obj.discipline obj.volg_nr %}"><i class="material-icons-round secondary-content">visibility</i></a>
-                            {{ obj.naam|highlight:zoekterm }} op {{ obj.datum }} in {{ obj.plaats|highlight:zoekterm }}
+                            <span>{{ obj.naam|highlight:zoekterm }}</span>
+                            {% if obj.datum.year >= 1950 %}
+                                <span> op {{ obj.datum }}</span>
+                            {% endif %}
+                            {% if obj.plaats %}
+                                <span> in {{ obj.plaats|highlight:zoekterm }}</span>
+                            {% endif %}
                         </div>
                     </li>
                 {% endfor %}

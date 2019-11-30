@@ -40,9 +40,9 @@ class IndivRecord(models.Model):
     materiaalklasse_overig = models.CharField(max_length=20, blank=True)
     nhb_lid = models.ForeignKey(NhbLid, on_delete=models.PROTECT,
                                 blank=True,  # allow access input in form
-                                null=True)  # allow NULL relation in database
+                                null=True)   # allow NULL relation in database
     naam = models.CharField(max_length=50)
-    datum = models.DateField()
+    datum = models.DateField()               # dates before 1950 mean "no date known"
     plaats = models.CharField(max_length=50)
     land = models.CharField(max_length=50)
     score = models.PositiveIntegerField()
