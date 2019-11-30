@@ -30,7 +30,6 @@ def menu_dynamics(request, context, actief=None):
     rol_limiet = rol_get_limiet(request)
 
     # zet context variabele om aan te geven of de link naar de Admin site erbij mag
-    # TODO: blijven doen met django authentication system?
     if request.user.is_authenticated:
 
         # uitloggen

@@ -65,7 +65,6 @@ class PrivacyView(TemplateView):
         return context
 
 
-# TODO: add Login mixin?
 class WisselVanRolView(UserPassesTestMixin, ListView):
 
     """ Django class-based view om van rol te wisselen """
