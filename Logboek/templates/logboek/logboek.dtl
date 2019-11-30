@@ -16,7 +16,7 @@
     {% for obj in object_list %}
     <li>
         <div class="collapsible-header white-text">
-            {{ obj.toegevoegd_op|date:"l n F Y" }} om {{ obj.toegevoegd_op|date:"H:i" }}: {{ obj.gebruikte_functie }}
+            {{ obj.toegevoegd_op|date:"l j F Y" }} om {{ obj.toegevoegd_op|date:"H:i" }}: {{ obj.gebruikte_functie }}
         </div>
         <div class="collapsible-body">
             <span>Door: {{ obj.door }}</span>
