@@ -27,7 +27,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated to version
-SITE_VERSIE = 'test 2019-11-27'
+SITE_VERSIE = 'test 2019-11-30'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -74,6 +74,11 @@ AUTHENTICATION_BACKENDS = [
 
 # vervanger van (aanpassing/uitbreiding op)  de ingebouwde User
 AUTH_USER_MODEL = 'Account.Account'
+
+# maximum aantal keer dat een verkeerd wachtwoord opgegeven mag worden
+# voor een account (login of wijzig-wachtwoord) voor het geblokkeerd wordt
+AUTH_BAD_PASSWORD_LIMIT = 5
+AUTH_BAD_PASSWORD_LOCKOUT_MINS = 15
 
 
 # templates (django template language) processors
@@ -128,7 +133,8 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
-LANGUAGE_CODE = 'en-us'
+#LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'nl-NL'     # provides wanted date/time output format
 TIME_ZONE = 'Europe/Amsterdam'
 USE_I18N = True
 
