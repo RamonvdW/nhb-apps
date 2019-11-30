@@ -41,9 +41,6 @@ urlpatterns = [
     path('',
          views.RecordsOverzichtView.as_view(),
          name='overzicht'),
-
-    # TODO: wijzigen/
-    # TODO: toevoegen/
 ]
 
 # end of file
