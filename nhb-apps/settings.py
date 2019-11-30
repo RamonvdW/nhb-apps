@@ -45,9 +45,9 @@ INSTALLED_APPS = [
     'django.contrib.admin',         # see-all/fix-all admin pages
     'django.contrib.auth',          # authenticatie framework
     'django.contrib.contenttypes',  # permission association to models
-    'django.contrib.messages'
-    #'debug_toolbar'                 # DEV ONLY
-    # 'django_extensions'             # DEV ONLY
+    'django.contrib.messages',
+    #'debug_toolbar',                # DEV ONLY
+    #'django_extensions'             # DEV ONLY
 ]
 
 
@@ -110,7 +110,7 @@ WSGI_APPLICATION = 'nhb-apps.wsgi.application'
 
 # let browsers remember to connect with https
 # TODO: increase time to 1 year
-SECURE_HSTS_SECONDS = 3600      # 3600 = rememeber for 1 hour
+SECURE_HSTS_SECONDS = 3600      # 3600 = remember for 1 hour
 
 
 # Password validation
