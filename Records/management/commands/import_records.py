@@ -19,12 +19,15 @@ class Command(BaseCommand):
     help = "Importeer alle records"
     verbose = False
 
+
     def add_arguments(self, parser):
         parser.add_argument('filename', nargs=1,
                             help="in te lezen file")
         parser.add_argument('--dryrun', action='store_true')
 
     def _import_indiv(self, sheet, blad):
+
+        reported_nhbnrs = list()
 
         for row in sheet['values'][1:]:
             self.count_read += 1
@@ -57,7 +60,7 @@ class Command(BaseCommand):
                     # new record
                     pass
                 except IndivRecord.MultipleObjectsReturned:
-                    self.stderr.write('[ERROR] Meerdere records voor %s-%s' % (blad, val))
+                    errors.append('Meerdere records voor %s-%s' % (blad, val))
 
             if curr_record:
                 record.volg_nr = curr_record.volg_nr
@@ -174,7 +177,12 @@ class Command(BaseCommand):
                     record.nhb_lid = NhbLid.objects.get(nhb_nr=val)
                 except NhbLid.DoesNotExist:
                     # toch door, want niet alle oude leden zitten nog in de database
-                    self.stderr.write('NHB nummer niet bekend: %s voor record %s' % (repr(val), repr(row)))
+                    naam = row[9]
+                    fout = 'NHB nummer niet bekend: %s (voor schutter %s)' % (repr(val), repr(naam))
+                    if fout not in reported_nhbnrs:
+                        reported_nhbnrs.append(fout)
+                        self.stderr.write(fout)
+                        #self.stderr.write('NHB nummer niet bekend: %s voor record %s' % (repr(val), repr(row)))
             else:
                 errors.append('Fout NHB nummer: %s' % repr(val))
                 val = None
@@ -187,11 +195,15 @@ class Command(BaseCommand):
             val = row[9][:50]
             if record.nhb_lid:
                 naam = record.nhb_lid.voornaam + " " + record.nhb_lid.achternaam
-                ok = True
+                match = 0
+                mis = 0
                 for part in val.replace('.', ' ').replace('/', ' ').replace(' vd ', ' v d ').split(' '):
-                    if part not in naam:
-                        ok = False
+                    if part in naam:
+                        match += len(part)
+                    else:
+                        mis += len(part)
                 # for
+                ok = (match >= 4)       # last name can change significantly after marriage
                 if ok:
                     # neem de officiele naam over uit het nhb_lid
                     record.naam = naam
@@ -200,23 +212,26 @@ class Command(BaseCommand):
                             wijzigingen.append('naam: %s --> %s' % (repr(curr_record.naam), repr(record.naam)))
                             curr_record.naam = record.naam
                 else:
-                    errors.append('Foute naam: %s moet zijn %s' % (repr(val), repr(naam)))
+                    errors.append('Foute naam: %s maar nhb lid naam is %s' % (repr(val), repr(naam)))
             else:
                 record.naam = val
 
             # 10 = Datum
             val = row[10]
-            try:
-                # 30/06/2017
-                datum = datetime.datetime.strptime(val, "%d-%m-%Y")
-            except ValueError:
-                errors.append("Fout in datum: %s" % repr(val))
-                val = None
+            if val.upper() == "ONBEKEND":
+                record.datum = datetime.date(year=1901, month=1, day=1)
             else:
-                record.datum = datetime.date(year=datum.year, month=datum.month, day=datum.day)
-                if record.datum.year < 1950 or record.datum >= self.datum_morgen:
-                    errors.append("Foute in datum: %s" % repr(val))
+                try:
+                    # 30/06/2017
+                    datum = datetime.datetime.strptime(val, "%d-%m-%Y")
+                except ValueError:
+                    errors.append("Fout in datum: %s" % repr(val))
                     val = None
+                else:
+                    record.datum = datetime.date(year=datum.year, month=datum.month, day=datum.day)
+                    if record.datum.year < 1950 or record.datum >= self.datum_morgen:
+                        errors.append("Fout in datum: %s" % repr(val))
+                        val = None
             if val and curr_record:
                 if curr_record.datum != record.datum:
                     wijzigingen.append('datum: %s --> %s' % (str(curr_record.datum), str(record.datum)))
@@ -337,6 +352,36 @@ class Command(BaseCommand):
                         record.save()
         # for
 
+    def check_consistency(self, disc):
+        """ Controleer de consistentie van de records door voor elke soort_record
+            te controleren dat de score en de datum aflopen.
+        """
+        soorten = IndivRecord.objects.filter(discipline=disc).distinct('soort_record', 'geslacht', 'leeftijdscategorie', 'materiaalklasse').values_list('geslacht', 'leeftijdscategorie', 'materiaalklasse', 'soort_record')
+        for tup in soorten:
+            gesl, lcat, makl, srec = tup
+
+            # maak de gesorteerde lijst van de records
+            # net als RecordsIndivSpecifiekView:get_queryset
+            objs = IndivRecord.objects.filter(
+                            geslacht=gesl,
+                            discipline=disc,
+                            soort_record=srec,
+                            materiaalklasse=makl,
+                            leeftijdscategorie=lcat).order_by('-datum')
+            prev_obj = objs[0]
+            for obj in objs[1:]:
+                if obj.datum == prev_obj.datum and obj.score == prev_obj.score and obj.x_count == prev_obj.x_count:
+                    print("[WARNING] Identieke datum en score voor records %s-%s en %s-%s" % (disc, prev_obj.volg_nr, disc, obj.volg_nr))
+                elif obj.score > prev_obj.score or (obj.score == prev_obj.score and obj.x_count >= prev_obj.x_count):
+                    if obj.x_count + prev_obj.x_count > 0:
+                        print("[WARNING] Score niet consecutief voor records %s-%s en %s-%s (%s(%sX) >= %s(%sX))" % (disc, prev_obj.volg_nr, disc, obj.volg_nr, obj.score, obj.x_count, prev_obj.score, prev_obj.x_count))
+                    else:
+                        print("[WARNING] Score niet consecutief voor records %s-%s en %s-%s (%s >= %s)" % (disc, prev_obj.volg_nr, disc, obj.volg_nr, obj.score, prev_obj.score))
+
+                prev_obj = obj
+            # for
+        # for
+
     def handle(self, *args, **options):
         self.dryrun = options['dryrun']
 
@@ -393,6 +438,7 @@ class Command(BaseCommand):
             else:
                 if blad in ('OD', '18', '25'):
                     self._import_indiv(sheet, blad)
+                    self.check_consistency(blad)
                 else:
                     # TODO: support voor team records toevoegen
                     pass
