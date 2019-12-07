@@ -37,6 +37,16 @@ TIDY_ISSUES_CLEANED="$TIDY_ISSUES".cleaned
 rm -rf "$TMPDIR"
 mkdir "$TMPDIR"
 
+# text/css (goed) → text/ccs (fout)
+CCS=$(grep ccs * -r | grep -vE "data_private|check_html" | wc -l)
+if [ $CCS -ne 0 ]
+then
+    echo "-----------------------------------"
+    grep ccs * -r | grep -v data_private
+    echo "-----------------------------------"
+    exit 1
+fi
+
 nr=0
 for page in $PAGES
 do
