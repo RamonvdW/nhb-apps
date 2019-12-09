@@ -21,13 +21,6 @@ then
     coverage run --append ./manage.py test --debug-mode Plein.tests.PleinTest.test_plein_normaal
 fi
 
-# TODO: add management commands
-#coverage run --append ./manage.py maak_account
-#coverage run --append ./manage.py maak_beheerder
-#coverage run --append ./manage.py import_nhb_leden_eenmalig
-#coverage run --append ./manage.py import_nhb_verenigingen_eenmalig
-#coverage run --append ./manage.py import_records
-
 echo
 coverage report --skip-covered --fail-under=90 $OMIT
 res=$?
