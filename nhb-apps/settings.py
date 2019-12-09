@@ -27,7 +27,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated to version
-SITE_VERSIE = 'test 2019-11-30'
+SITE_VERSIE = 'test 2019-12-09'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -188,40 +188,23 @@ RECORDS_TOEGESTANE_SOORTEN = (
 
     # outdoor
     '30m',
-    '30m para',
-    '30m recurve staand',
     '40m',
     '50m',
     '50m (15p)',
-    '50m (15p) finale ronde',
-    '50m (15p) match ronde',
-    '50m match ronde (15p)',
     '50m (122cm)',
     '50m (72p)',
-    '50m ronde (72p)',
-    '50m ronde (72p) W1',
-    '50m ronde',
-    '50m para',
-    '50m recurve staand',
     '60m',
     '60m (12p)',
     '60m (72p)',
-    '60m ronde (72p)',
     '70m',
     '70m (12p)',
     '70m (72p)',
-    '70m ronde (72p)',
-    '70m ronde (72p) W1',
-    '70m open klasse (para)',
-    '72P',
     '90m',
-    'WA 1440 ronde',
-    '144p WA ronde',
-    '144p WA Ronde',
-    '144p Fita ronde',
-    '144p para',
-    '144p',
+    'WA1440',
     '288p',
+
+    # Outdoor, still to be cleaned up
+    '72P',
     'Fita RK Rayon 4',
     'ShortMetric',
 
@@ -232,9 +215,10 @@ RECORDS_TOEGESTANE_SOORTEN = (
     '18m (12p)',
     '25m',
     '25m (60p)',
-    '25m ronde (60p)',
     '25m+18m (60p)',
     '25m+18m (120p)',
+
+    # Indoor, to be cleaned up
     'match (15p)',
 
     # 25m1pijl
@@ -242,6 +226,13 @@ RECORDS_TOEGESTANE_SOORTEN = (
     '30p',
 )
 
+RECORDS_TOEGESTANE_PARA_KLASSEN = (
+    "Open",
+    "Staand",
+    "W1",
+    "W2",
+    "Ja"        # aka Onbekend
+)
 
 # import install-specific settings from a separate file
 # that is easy to replace as part of the deployment process
