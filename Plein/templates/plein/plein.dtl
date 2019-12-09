@@ -37,8 +37,7 @@
     <!-- niet ingelogd -->
     <h2>Welkom</h2>
 
-    <p>Ben je lid bij van de Nederlandse Handboog Bond (heb je een NHB nummer?),
-    maak dan een account aan en log in, dan tonen we informatie die voor jou relevant is.</p>
+    <p>Ben je lid van de Nederlandse Handboog Bond (heb je een NHB nummer?), maak dan een account aan en log in, dan tonen we informatie die voor jou relevant is.</p>
 
 {% endif %}
 
