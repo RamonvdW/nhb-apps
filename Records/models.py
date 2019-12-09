@@ -23,8 +23,7 @@ class IndivRecord(models.Model):
                        ('C', 'Compound'),
                        ('BB', 'Barebow'),
                        ('LB', 'Longbow'),
-                       ('IB', 'Instinctive bow'),
-                       ('O', 'Overige')]
+                       ('IB', 'Instinctive bow')]
     LEEFTIJDSCATEGORIE = [('M', 'Master'),
                           ('S', 'Senior'),
                           ('J', 'Junior'),
@@ -37,7 +36,7 @@ class IndivRecord(models.Model):
     geslacht = models.CharField(max_length=1, choices=GESLACHT)
     leeftijdscategorie = models.CharField(max_length=1, choices=LEEFTIJDSCATEGORIE)
     materiaalklasse = models.CharField(max_length=2, choices=MATERIAALKLASSE)
-    materiaalklasse_overig = models.CharField(max_length=20, blank=True)
+    para_klasse = models.CharField(max_length=20, blank=True)
     nhb_lid = models.ForeignKey(NhbLid, on_delete=models.PROTECT,
                                 blank=True,  # allow access input in form
                                 null=True)   # allow NULL relation in database
@@ -49,17 +48,17 @@ class IndivRecord(models.Model):
     x_count = models.PositiveIntegerField(default=0)
     max_score = models.PositiveIntegerField(default=0)
     score_notitie = models.CharField(max_length=30, blank=True)
-    is_national_record = models.BooleanField(default=False)     # TODO: kan weg? alle records zijn toch NL?
     is_european_record = models.BooleanField(default=False)
     is_world_record = models.BooleanField(default=False)
 
     def __str__(self):
-        return "%s: %s - %s - %s - %s - %s - %s" %\
+        return "%s: %s - %s - %s - %s - %s - %s - %s" %\
                (self.volg_nr,
+                self.discipline,
                 self.geslacht,
                 self.leeftijdscategorie,
                 self.materiaalklasse,
-                self.discipline,
+                self.para_klasse,
                 self.naam,
                 self.score)
 
