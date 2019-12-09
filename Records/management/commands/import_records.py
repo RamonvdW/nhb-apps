@@ -4,7 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-# importeer individuele competitie historie
+""" Nederlandse Records importeren en aanpassen vanuit de administratie """
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
@@ -17,8 +17,9 @@ import json
 
 class Command(BaseCommand):
     help = "Importeer alle records"
-    verbose = False
 
+    # globale variabelen
+    verbose = False
 
     def add_arguments(self, parser):
         parser.add_argument('filename', nargs=1,
@@ -29,25 +30,23 @@ class Command(BaseCommand):
 
         reported_nhbnrs = list()
 
+        # houd bij welke volg_nrs als in de database zitten
+        # als deze niet meer voorkomen, dan zijn ze verwijderd
+        volg_nrs = [tup[0] for tup in IndivRecord.objects.filter(discipline=blad).values_list('volg_nr')]
+
         for row in sheet['values'][1:]:
             self.count_read += 1
 
-            # remove the extra date column (is hidden in the gsheet)
-            if blad in ('OD', '18') and len(row) > 18:
-                row = row[:-1]
-            elif blad == '25' and len(row) > 16:
-                row = row[:-1]
-
-            # laatste colommen volgen niet meer als ze leeg zijn
+            # lege colommen aan het einde van de regel zijn afwezig in JSON file
             # vul aan om verwerken eenvoudig te houden
-            while len(row) < 18:
+            while len(row) < 19:
                 row.append('')
 
             wijzigingen = list()
             errors = list()
             record = IndivRecord()
 
-            # 0 = Index
+            # 0 = Index == volg_nr
             curr_record = None
             try:
                 val = int(row[0])
@@ -61,6 +60,10 @@ class Command(BaseCommand):
                     pass
                 except IndivRecord.MultipleObjectsReturned:
                     errors.append('Meerdere records voor %s-%s' % (blad, val))
+                else:
+                    # gevonden
+                    if val in volg_nrs:
+                        volg_nrs.remove(val)
 
             if curr_record:
                 record.volg_nr = curr_record.volg_nr
@@ -89,7 +92,7 @@ class Command(BaseCommand):
             val = row[2]
             if val in ('M', 'S', 'J', 'C'):
                 record.leeftijdscategorie = val
-            elif val == 'geen bij para':
+            elif val == 'nvt':
                 record.leeftijdscategorie = 'U'
             else:
                 errors.append("Foute leeftijdscategorie': %s" % repr(val))
@@ -103,12 +106,6 @@ class Command(BaseCommand):
             val = row[3]
             if val in ('R', 'C', 'BB', 'IB', 'LB'):
                 record.materiaalklasse = val
-                record.materiaalklasse_overig = ""
-            elif val in ('R staand (Para)',
-                         'R Open (Para)', 'C Open (Para)',
-                         'C W1', 'C W2', 'R W1', 'R W2'):
-                record.materiaalklasse = 'O'
-                record.materiaalklasse_overig = val
             else:
                 errors.append("Foute materiaalklasse: %s" % repr(val))
                 val = None
@@ -116,9 +113,6 @@ class Command(BaseCommand):
                 if record.materiaalklasse != curr_record.materiaalklasse:
                     wijzigingen.append('materiaalklasse: %s --> %s' % (repr(curr_record.materiaalklasse), repr(record.materiaalklasse)))
                     curr_record.materiaalklasse = record.materiaalklasse
-                if record.materiaalklasse_overig != curr_record.materiaalklasse_overig:
-                    wijzigingen.append('materiaalklasse_overig: %s --> %s' % (repr(curr_record.materiaalklasse_overig), repr(record.materiaalklasse_overig)))
-                    curr_record.materiaalklasse_overig = record.materiaalklasse_overig
 
             # 4 = Discipline
             # onnodig veld, maar we controleren het toch even
@@ -145,8 +139,20 @@ class Command(BaseCommand):
                     wijzigingen.append('soort_record: %s --> %s' % (repr(curr_record.soort_record), repr(record.soort_record)))
                     curr_record.soort_record = record.soort_record
 
-            # 6 = Afstand
-            #val = row[6]
+            # 6 = Para klasse
+            val = row[6][:20]
+            if val and val not in settings.RECORDS_TOEGESTANE_PARA_KLASSEN:
+                errors.append('Fout in para klasse: %s is niet bekend' % repr(val))
+                val = None
+            else:
+                record.para_klasse = val
+            if val and curr_record:
+                if curr_record.para_klasse != record.para_klasse:
+                    wijzigingen.append('para_klasse: %s --> %s' % (repr(curr_record.para_klasse), repr(record.para_klasse)))
+                    curr_record.para_klasse = record.para_klasse
+
+            # 7 = Afstand
+            #val = row[7]
             #if blad == '18':
             #    if val not in ('18', '25', '25+18'):
             #        errors.append("Foute afstand: %s is geen indoor afstand" % repr(val))
@@ -155,8 +161,8 @@ class Command(BaseCommand):
             #if blad == 'OD' and val not in ('30', '40', '50', '60', '70', '90'):
             #    errors.append("Foute afstand: %s is geen outdoor afstand" % repr(val))
 
-            # 7 = Pijlen
-            val = row[7]
+            # 8 = Pijlen
+            val = row[8]
             if val:
                 try:
                     record.max_score = 10 * int(val)
@@ -169,15 +175,15 @@ class Command(BaseCommand):
                             wijzigingen.append('max_score: %s --> %s' % (curr_record.max_score, record.max_score))
                         curr_record.max_score = record.max_score
 
-            # 8 = Bondsnummer
-            val = row[8]
+            # 9 = Bondsnummer
+            val = row[9]
             if len(val) == 6:
                 # 123456
                 try:
                     record.nhb_lid = NhbLid.objects.get(nhb_nr=val)
                 except NhbLid.DoesNotExist:
                     # toch door, want niet alle oude leden zitten nog in de database
-                    naam = row[9]
+                    naam = row[10]
                     fout = 'NHB nummer niet bekend: %s (voor schutter %s)' % (repr(val), repr(naam))
                     if fout not in reported_nhbnrs:
                         reported_nhbnrs.append(fout)
@@ -191,8 +197,8 @@ class Command(BaseCommand):
                     wijzigingen.append('nhb_lid: %s --> %s' % (repr(curr_record.nhb_lid), record.nhb_lid))
                     curr_record.nhb_lid = record.nhb_lid
 
-            # 9 = Naam
-            val = row[9][:50]
+            # 10 = Naam
+            val = row[10][:50]
             if record.nhb_lid:
                 naam = record.nhb_lid.voornaam + " " + record.nhb_lid.achternaam
                 match = 0
@@ -216,8 +222,8 @@ class Command(BaseCommand):
             else:
                 record.naam = val
 
-            # 10 = Datum
-            val = row[10]
+            # 11 = Datum
+            val = row[11]
             if val.upper() == "ONBEKEND":
                 record.datum = datetime.date(year=1901, month=1, day=1)
             else:
@@ -237,24 +243,24 @@ class Command(BaseCommand):
                     wijzigingen.append('datum: %s --> %s' % (str(curr_record.datum), str(record.datum)))
                     curr_record.datum = record.datum
 
-            # 11 = Plaats
-            val = row[11][:50]
+            # 12 = Plaats
+            val = row[12][:50]
             record.plaats = val
             if val and curr_record:
                 if curr_record.plaats != record.plaats:
                     wijzigingen.append('plaats: %s --> %s' % (repr(curr_record.plaats), repr(record.plaats)))
                     curr_record.plaats = record.plaats
 
-            # 12 = Land
-            val = row[12][:50]
+            # 13 = Land
+            val = row[13][:50]
             record.land = val
             if val and curr_record:
                 if curr_record.land != record.land:
                     wijzigingen.append('land: %s --> %s' % (repr(curr_record.land), repr(record.land)))
                     curr_record.land = record.land
 
-            # 13 = Score
-            val = row[13]
+            # 14 = Score
+            val = row[14]
             try:
                 record.score = int(val)
             except ValueError:
@@ -266,8 +272,8 @@ class Command(BaseCommand):
                     curr_record.score = record.score
 
             if blad in ('OD', '18'):
-                # 14 = X-count
-                val = row[14]
+                # 15 = X-count
+                val = row[15]
                 if val:
                     try:
                         cnt = int(val)
@@ -281,8 +287,8 @@ class Command(BaseCommand):
                         wijzigingen.append('x_count: %s --> %s' % (repr(curr_record.x_count), repr(record.x_count)))
                         curr_record.x_count = record.x_count
 
-                # 15 = Ook ER
-                val = row[15]
+                # 16 = Ook ER
+                val = row[16]
                 if val:
                     if val != 'ER':
                         errors.append('Foute tekst in Ook ER: %s' % (repr(val)))
@@ -297,8 +303,8 @@ class Command(BaseCommand):
                         wijzigingen.append('is_european_record: %s --> %s' % (repr(curr_record.is_european_record), repr(record.is_european_record)))
                         curr_record.is_european_record = record.is_european_record
 
-                # 16 = Ook WR
-                val = row[16]
+                # 17 = Ook WR
+                val = row[17]
                 if val:
                     if val != 'WR':
                         errors.append('Foute tekst in Ook WR: %s' % (repr(val)))
@@ -313,8 +319,8 @@ class Command(BaseCommand):
                         wijzigingen.append('is_world_record: %s --> %s' % (repr(curr_record.is_world_record), repr(record.is_world_record)))
                         curr_record.is_world_record = record.is_world_record
 
-                # 17 = Notities
-                val = row[17][:30]
+                # 18 = Notities
+                val = row[18][:30]
                 record.score_notitie = val
                 if curr_record:
                     if curr_record.score_notitie != record.score_notitie:
@@ -322,8 +328,8 @@ class Command(BaseCommand):
                         curr_record.score_notitie = record.score_notitie
 
             elif blad == '25':
-                # 14 = Notities
-                val = row[14][:30]
+                # 15 = Notities
+                val = row[15][:30]
                 record.score_notitie = val
                 if curr_record:
                     if curr_record.score_notitie != record.score_notitie:
@@ -352,26 +358,34 @@ class Command(BaseCommand):
                         record.save()
         # for
 
+        # alle overgebleven volg_nrs zijn verwijderd
+        for volg_nr in volg_nrs:
+            IndivRecord.objects.get(discipline=blad, volg_nr=volg_nr).delete()
+            self.count_verwijderd += 1
+        # for
+
     def check_consistency(self, disc):
         """ Controleer de consistentie van de records door voor elke soort_record
             te controleren dat de score en de datum aflopen.
         """
-        soorten = IndivRecord.objects.filter(discipline=disc).distinct('soort_record', 'geslacht', 'leeftijdscategorie', 'materiaalklasse').values_list('geslacht', 'leeftijdscategorie', 'materiaalklasse', 'soort_record')
+        soorten = IndivRecord.objects.filter(discipline=disc).distinct('soort_record', 'geslacht', 'leeftijdscategorie', 'materiaalklasse').values_list('geslacht', 'leeftijdscategorie', 'materiaalklasse', 'soort_record', 'para_klasse')
         for tup in soorten:
-            gesl, lcat, makl, srec = tup
+            gesl, lcat, makl, srec, para = tup
 
             # maak de gesorteerde lijst van de records
             # net als RecordsIndivSpecifiekView:get_queryset
             objs = IndivRecord.objects.filter(
                             geslacht=gesl,
                             discipline=disc,
+                            para_klasse=para,
                             soort_record=srec,
                             materiaalklasse=makl,
-                            leeftijdscategorie=lcat).order_by('-datum')
+                            leeftijdscategorie=lcat).order_by('-datum', '-score')
             prev_obj = objs[0]
             for obj in objs[1:]:
                 if obj.datum == prev_obj.datum and obj.score == prev_obj.score and obj.x_count == prev_obj.x_count:
-                    print("[WARNING] Identieke datum en score voor records %s-%s en %s-%s" % (disc, prev_obj.volg_nr, disc, obj.volg_nr))
+                    if obj.score_notitie != "gedeeld" or prev_obj.score_notitie != "gedeeld":
+                        print("[WARNING] Identieke datum en score voor records %s-%s en %s-%s" % (disc, prev_obj.volg_nr, disc, obj.volg_nr))
                 elif obj.score > prev_obj.score or (obj.score == prev_obj.score and obj.x_count >= prev_obj.x_count):
                     if obj.x_count + prev_obj.x_count > 0:
                         print("[WARNING] Score niet consecutief voor records %s-%s en %s-%s (%s(%sX) >= %s(%sX))" % (disc, prev_obj.volg_nr, disc, obj.volg_nr, obj.score, obj.x_count, prev_obj.score, prev_obj.x_count))
@@ -400,6 +414,7 @@ class Command(BaseCommand):
         self.count_errors = 0
         self.count_wijzigingen = 0
         self.count_toegevoegd = 0
+        self.count_verwijderd = 0
 
         # doorloop de tabbladen
         for sheet in data['valueRanges']:
@@ -407,16 +422,18 @@ class Command(BaseCommand):
             blad = ''
             if 'Data individueel outdoor' in naam:
                 blad = 'OD'
-                COLS = ['Index', 'Geslacht', 'Leeftijd', 'Materiaalklasse', 'Discipline', 'Soort_record', 'Afstand (m)', 'Pijlen', 'Bondsnummer',
-                        'Naam', 'Datum', 'Plaats', 'Land', 'Score', 'X-count', 'Ook ER', 'Ook WR', 'Notities']
+                COLS = ['Index', 'Geslacht', 'Leeftijd', 'Materiaalklasse', 'Discipline', 'Soort_record', 'Para klasse',
+                        'Afstand (m)', 'Pijlen', 'Bondsnummer', 'Naam', 'Datum', 'Plaats', 'Land', 'Score', 'X-count',
+                        'Ook ER', 'Ook WR', 'Notities']
             elif 'Data individueel indoor' in naam:
                 blad = '18'
-                COLS = ['Index', 'Geslacht', 'Leeftijd', 'Materiaalklasse', 'Discipline', 'Soort_record', 'Afstand (m)', 'Pijlen', 'Bondsnummer',
-                        'Naam', 'Datum', 'Plaats', 'Land', 'Score', 'X-count', 'Ook ER', 'Ook WR', 'Notities']
+                COLS = ['Index', 'Geslacht', 'Leeftijd', 'Materiaalklasse', 'Discipline', 'Soort_record', 'Para klasse',
+                        'Afstand (m)', 'Pijlen', 'Bondsnummer', 'Naam', 'Datum', 'Plaats', 'Land', 'Score', 'X-count',
+                        'Ook ER', 'Ook WR', 'Notities']
             elif 'Data individueel 25m1pijl' in naam:
                 blad = '25'
-                COLS = ['Index', 'Geslacht', 'Leeftijd', 'Materiaalklasse', 'Discipline', 'Soort_record', 'Afstand (m)', 'Pijlen', 'Bondsnummer',
-                        'Naam', 'Datum', 'Plaats', 'Land', 'Score', 'Notities']
+                COLS = ['Index', 'Geslacht', 'Leeftijd', 'Materiaalklasse', 'Discipline', 'Soort_record', 'Para klasse',
+                        'Afstand (m)', 'Pijlen', 'Bondsnummer', 'Naam', 'Datum', 'Plaats', 'Land', 'Score', 'Notities']
             elif 'Data team' in naam:
                 blad = 'team'
                 COLS = ['Geslacht', 'Leeftijd', 'Materiaalklasse', 'Discipline', 'Soort_record', 'Afstand (m)', 'Pijlen', 'Bondsnummer',
@@ -445,10 +462,11 @@ class Command(BaseCommand):
         # for
 
         # rapporteer de samenvatting en schrijf deze ook in het logboek
-        samenvatting = "Samenvatting: %s records ingelezen; %s ongewijzigd; %s overgeslagen ivm errors; %s wijzigingen; %s toegevoegd" %\
+        samenvatting = "Samenvatting: %s records; %s ongewijzigd; %s overgeslagen i.v.m. fouten; %s verwijderd; %s wijzigingen; %s toegevoegd" %\
                           (self.count_read,
                            self.count_ongewijzigd,
                            self.count_errors,
+                           self.count_verwijderd,
                            self.count_wijzigingen,
                            self.count_toegevoegd)
 
