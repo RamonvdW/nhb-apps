@@ -8,16 +8,18 @@ from django.contrib.auth import get_user_model
 from django.utils import timezone
 from django.test import TestCase
 from django.conf import settings
+from django.core import management
 from .rol import Rollen, rol_zet_sessionvars_na_login, rol_mag_wisselen,\
                          rol_get_limiet, rol_get_huidige, rol_activate
 from .leeftijdsklassen import leeftijdsklassen_zet_sessionvars_na_login,\
                               get_leeftijdsklassen
-from .models import Account
+from .models import Account, AccountEmail
 from .views import obfuscate_email
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
 from NhbStructuur.migrations.m0002_nhbstructuur_2018 import maak_rayons_2018, maak_regios_2018
 from Plein.tests import assert_html_ok, assert_template_used
 import datetime
+import io
 
 
 def get_url(resp, pre=b'\x00', post=b''):
@@ -509,5 +511,80 @@ class AccountTest(TestCase):
         self.assertEqual(account.get_first_name(), 'Ramon')
         self.assertEqual(account.get_account_full_name(), 'Ramon de Tester (normaal)')
 
+    def test_deblok_account(self):
+        # validate precondition
+        self.assertIsNone(self.account_normaal.is_geblokkeerd_tot)
+
+        # deblock when not blocked
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('deblok_account', 'normaal', stderr=f1, stdout=f2)
+        self.assertEqual(f1.getvalue(), '')
+        self.assertEqual(f2.getvalue(), "Account 'normaal' is niet geblokkeerd\n")
+
+        # blokkeren
+        self.account_normaal.is_geblokkeerd_tot = timezone.now() + datetime.timedelta(hours=1)
+        self.account_normaal.save()
+
+        # deblock
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('deblok_account', 'normaal', stderr=f1, stdout=f2)
+        self.assertEqual(f1.getvalue(), '')
+        self.assertEqual(f2.getvalue(), "Account 'normaal' is niet meer geblokkeerd\n")
+        # validate
+        self.account_normaal = Account.objects.get(username='normaal')
+        self.assertTrue(self.account_normaal.is_geblokkeerd_tot <= timezone.now())
+
+        # exception case
+        management.call_command('deblok_account', 'nietbestaand', stderr=f1, stdout=f2)
+        self.assertEqual(f1.getvalue(), 'Account matching query does not exist.\n')
+
+    def test_maak_account(self):
+        with self.assertRaises(Account.DoesNotExist):
+            Account.objects.get(username='nieuwelogin')
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('maak_account', 'Voornaam', 'nieuwelogin', 'nieuwwachtwoord', 'nieuw@nhb.test', stderr=f1, stdout=f2)
+        self.assertEqual(f1.getvalue(), '')
+        self.assertEqual(f2.getvalue(), "Aanmaken van account 'nieuwelogin' is gelukt\n")
+        obj = Account.objects.get(username='nieuwelogin')
+        self.assertEqual(obj.username, 'nieuwelogin')
+        self.assertEqual(obj.first_name, 'Voornaam')
+        self.assertEqual(obj.email, '')
+        self.assertTrue(obj.is_active)
+        self.assertFalse(obj.is_staff)
+        self.assertFalse(obj.is_superuser)
+
+        mail = AccountEmail.objects.get(account=obj)
+        self.assertTrue(mail.email_is_bevestigd)
+        self.assertEqual(mail.bevestigde_email, 'nieuw@nhb.test')
+        self.assertEqual(mail.nieuwe_email, 'nieuw@nhb.test')
+
+        # coverage voor AccountEmail.__str__()
+        self.assertEqual(str(mail), "Email voor account 'nieuwelogin' (nieuw@nhb.test)")
+
+        # exception cases
+        f1 = io.StringIO()
+        management.call_command('maak_account', 'Voornaam', 'nieuwelogin', 'nieuwwachtwoord', 'nieuw@nhb.test', stderr=f1, stdout=f2)
+        self.assertEqual(f1.getvalue(), 'Account bestaat al\n')
+
+        f1 = io.StringIO()
+        management.call_command('maak_account', 'Voornaam', 'nieuwelogin', 'nieuwwachtwoord', 'nieuw.nhb.test', stderr=f1, stdout=f2)
+        self.assertEqual(f1.getvalue(), 'Dat is geen valide email\n')
+
+    def test_maak_beheerder(self):
+        self.assertFalse(self.account_normaal.is_staff)
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('maak_beheerder', 'normaal', stderr=f1, stdout=f2)
+        self.assertEqual(f1.getvalue(), '')
+        self.assertEqual(f2.getvalue(), "Account 'normaal' is beheerder gemaakt\n")
+        self.account_normaal = Account.objects.get(username='normaal')
+        self.assertTrue(self.account_normaal.is_staff)
+
+        # exception case
+        management.call_command('maak_beheerder', 'nietbestaand', stderr=f1, stdout=f2)
+        self.assertEqual(f1.getvalue(), 'Account matching query does not exist.\n')
 
 # end of file
