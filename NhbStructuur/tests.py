@@ -90,4 +90,6 @@ class TestNhbStructuur(TestCase):
         ver.clean_fields()      # run validators
         ver.clean()             # run model validator
 
+# TODO: add call_command for management commands
+
 # end of file

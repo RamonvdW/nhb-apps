@@ -179,4 +179,6 @@ class RecordsTest(TestCase):
         self.assertEqual(rsp.status_code, 200)  # 200 = OK
         self.assertContains(rsp, "Gevonden records (1)")
 
+# TODO: add call_command for management commands
+
 # end of file
