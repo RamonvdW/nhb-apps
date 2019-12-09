@@ -6,11 +6,11 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}Instellingen volgende competitie{% endblock %}
+{% block title %}Instellingen volgende bondscompetitie{% endblock %}
 
 {% block pagina %}
 
-<h3>Instellingen volgende competitie</h3>
+<h3>Instellingen volgende bondscompetitie</h3>
 
 <div class="row">
     <h5>Wedstrijdklassen voor de individuele competities</h5>
@@ -63,7 +63,7 @@
 </div>
 
 <div class="row">
-    <h5>Team typen en toegestane boog typen</h5>
+    <h5>Teamtypen en toegestane boogtypen</h5>
     <div class="col s12 m10 l8 xl6">
         <div class="white-text blue z-depth-2">
             {% for obj in teamtypen %}
