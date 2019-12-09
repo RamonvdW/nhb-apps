@@ -68,6 +68,7 @@ do
         else
             # voeg wat newlines toe om het leesbaarder te maken
             sed 's#</#\n</#g' "$file_cache" > "$file_pretty"
+
             echo "Checking $file_pretty containing $page"
             tidy $TIDY_OPTIONS -o /dev/null -f "$TIDY_ISSUES" "$file_pretty"
             if [ $? -ne 0 ]
@@ -83,6 +84,15 @@ do
                     echo "-----------------------------------"
                     echo
                 fi
+            fi
+
+            # run additional quality checks
+            grep -q '<li >' "$file_pretty"
+            if [ $? -eq 0 ]
+            then
+                echo "-----------------------------------"
+                echo "Found <li >"
+                echo "-----------------------------------"
             fi
         fi
     fi
