@@ -29,17 +29,15 @@
                     <span class="card-title">Wereld Record</span>
                 {% elif obj.is_european_record %}
                     <span class="card-title">Europees Record</span>
-                {% elif obj.is_national_record %}
-                    <span class="card-title">Nederlands Record</span>
                 {% else %}
-                    <span class="card-title">Nieuw Record</span>
+                    <span class="card-title">Nederlands Record</span>
                 {% endif %}
                 <p>{{ obj.descr1_str }}</p>
                 <p>{{ obj.descr2_str }}</p>
                 <p>&nbsp;</p>
                 <p>{{ obj.datum }}</p>
                 <p><b>{{ obj.naam }}</b></p>
-                <p>Score: {{ obj.score_str }}</p>
+                <p>Score: {{ obj.score_str }} / {{ obj.max_score_str }}</p>
                 <p>Plaats: {{ obj.plaats }}</p>
             </div>
             <div class="card-action center">

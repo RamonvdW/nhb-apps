@@ -36,6 +36,14 @@ def make_score_str(obj):
         msg += " (%sX)" % obj.x_count
     return msg
 
+def make_max_score_str(obj):
+    msg = "%s" % obj.max_score
+    if obj.x_count:
+        # add maximum X-count to maximum score
+        max_x_count = int(obj.max_score / 10)
+        msg += " (%sX)" % max_x_count
+    return msg
+
 
 class RecordsOverzichtView(ListView):
     """ Dit is de top-level pagina van de records met een overzicht van de meest
@@ -55,8 +63,8 @@ class RecordsOverzichtView(ListView):
                           " " + obj.soort_record)                            # 70m (72p)
 
         # recurve etc.
-        if obj.materiaalklasse == "O":
-            obj.descr1_str += " " + obj.materiaalklasse_overig
+        if obj.para_klasse:
+            obj.descr1_str += " para " + obj.para_klasse
 
         # heren/dames
         obj.descr2_str = IndivRecord.gesl2str[obj.geslacht] + " "
@@ -65,6 +73,7 @@ class RecordsOverzichtView(ListView):
         obj.descr2_str += IndivRecord.lcat2str[obj.leeftijdscategorie]
 
         obj.score_str = make_score_str(obj)
+        obj.max_score_str = make_max_score_str(obj)
 
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
@@ -278,11 +287,13 @@ class RecordsIndivSpecifiekView(ListView):
         super().__init__(**kwargs)
         self.gesl_str = self.disc_str = self.lcat_str = self.makl_str = ''
         self.params = dict()
+        self.spec = None
 
     @staticmethod
     def set_url_specifiek(obj):
         obj.url = reverse('Records:specifiek', kwargs={'nummer': obj.volg_nr, 'discipline': obj.discipline})
         obj.score_str = make_score_str(obj)
+        obj.max_score_str = make_max_score_str(obj)
 
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
@@ -301,14 +312,10 @@ class RecordsIndivSpecifiekView(ListView):
         spec.gesl_str = IndivRecord.gesl2str[spec.geslacht]
         spec.disc_str = IndivRecord.disc2str[spec.discipline]
         spec.lcat_str = IndivRecord.lcat2str[spec.leeftijdscategorie]
-        if spec.materiaalklasse == 'O':
-            spec.makl_str = spec.materiaalklasse_overig     # beschrijving voor de overige klasse
-        else:
-            spec.makl_str = IndivRecord.makl2str[spec.materiaalklasse]
+        spec.makl_str = IndivRecord.makl2str[spec.materiaalklasse]
 
-        spec.score_str = str(spec.score)
-        if spec.x_count:
-            spec.score_str += " (%sX)" % spec.x_count
+        spec.score_str = make_score_str(spec)
+        spec.max_score_str = make_max_score_str(spec)
 
         spec.op_pagina = "specifiek record: %s-%s" % (discipline, volg_nr)
 
@@ -327,7 +334,8 @@ class RecordsIndivSpecifiekView(ListView):
                         discipline=spec.discipline,
                         leeftijdscategorie=spec.leeftijdscategorie,
                         materiaalklasse=spec.materiaalklasse,
-                        soort_record=spec.soort_record).order_by('-datum')
+                        soort_record=spec.soort_record,
+                        para_klasse=spec.para_klasse).order_by('-datum')
 
         for obj in objs:
             obj.is_specifieke_record = (obj.volg_nr == spec.volg_nr)
@@ -396,7 +404,7 @@ class RecordsZoekView(ListView):
                                     Q(soort_record__icontains=zoekterm) |
                                     Q(naam__icontains=zoekterm) |
                                     Q(plaats__icontains=zoekterm) |
-                                    Q(land__icontains=zoekterm)).order_by('-datum')[:settings.RECORDS_MAX_ZOEKRESULTATEN]
+                                    Q(land__icontains=zoekterm)).order_by('-datum', 'soort_record')[:settings.RECORDS_MAX_ZOEKRESULTATEN]
 
         return None
 

@@ -57,6 +57,14 @@
                             {% if obj.plaats %}
                                 <span> in {{ obj.plaats|highlight:zoekterm }}</span>
                             {% endif %}
+                            <span>, {{ obj.soort_record }}</span>
+                            {% if obj.para_klasse %}
+                                {% if obj.para_klasse == "Ja" %}
+                                <span> - Para</span>
+                                {% else %}
+                                <span> - Para {{ obj.para_klasse }}</span>
+                                {% endif %}
+                            {% endif %}
                         </div>
                     </li>
                 {% endfor %}

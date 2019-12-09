@@ -48,7 +48,6 @@ class RecordsTest(TestCase):
         rec.score = 1234
         rec.x_count = 56
         # rec.score_notitie =
-        # rec.is_national_record =
         # rec.is_european_record =
         # rec.is_world_record =
         rec.save()
@@ -57,11 +56,11 @@ class RecordsTest(TestCase):
         rec = IndivRecord()
         rec.volg_nr = 43
         rec.discipline = IndivRecord.DISCIPLINE[1][0]
-        rec.soort_record = 'Test record overig'
+        rec.soort_record = 'Test record para'
         rec.geslacht = IndivRecord.GESLACHT[1][0]
         rec.leeftijdscategorie = IndivRecord.LEEFTIJDSCATEGORIE[1][0]   # 18
-        rec.materiaalklasse = 'O'       # overig
-        rec.materiaalklasse_overig = 'Overige Test'
+        rec.materiaalklasse = 'R'       # Recurve
+        rec.para_klasse = 'Open'
         # rec.nhb_lid =
         rec.naam = 'Top Schutter 2'
         rec.datum = datetime.datetime.now()
@@ -69,10 +68,10 @@ class RecordsTest(TestCase):
         rec.land = 'Nederland'
         rec.score = 1235
         # rec.score_notitie =
-        # rec.is_national_record =
         # rec.is_european_record =
         # rec.is_world_record =
         rec.save()
+
 
     def test_create(self):
         rec = IndivRecord.objects.all()[0]
@@ -106,6 +105,8 @@ class RecordsTest(TestCase):
         self.assertContains(rsp, 'Ergens Anders')
         self.assertContains(rsp, 'Nederland')
         self.assertContains(rsp, 'Top Schutter 2')
+        self.assertContains(rsp, 'Para klasse:')
+        self.assertContains(rsp, 'Open')
 
     def test_view_specifiek_missing(self):
         rsp = self.client.get('/records/record-OD-0/')    # niet bestaand record nummer

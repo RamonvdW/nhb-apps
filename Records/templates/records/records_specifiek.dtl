@@ -67,7 +67,7 @@
                 <div class="col s6">Wereld Record</div>
                 {% elif obj_record.is_european_record %}
                 <div class="col s6">Europees Record</div>
-                {% elif obj_record.is_national_record %}
+                {% else %}
                 <div class="col s6">Nederlands Record</div>
                 {% endif %}
             </div>
@@ -92,6 +92,12 @@
                 <div class="col s5">Materiaal<wbr/>klasse:</div>
                 <div class="col s6">{{ obj_record.makl_str }}</div>
             </div>
+            {% if obj_record.para_klasse %}
+            <div class="row small-row">
+                <div class="col s5">Para klasse:</div>
+                <div class="col s6">{{ obj_record.para_klasse }}</div>
+            </div>
+            {% endif %}
             <div class="divider">&nbsp;</div>
             <div class="row small-row">
                 <div class="col s5">Score:</div>
@@ -105,7 +111,7 @@
             {% endif %}
             <div class="row small-row">
                 <div class="col s5">Maximale score:</div>
-                <div class="col s6">{{ obj_record.max_score }}</div>
+                <div class="col s6">{{ obj_record.max_score_str }}</div>
             </div>
             <div class="row small-row">
                 <div class="col s5">Naam:</div>
