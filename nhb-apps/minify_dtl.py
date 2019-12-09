@@ -96,11 +96,11 @@ class Loader(AppDirectoriesLoader):
             contents = re.sub(r'\%}\s+<', '%}<', contents, flags=re.MULTILINE)
             contents = re.sub(r'>\s+{%', '>{%', contents, flags=re.MULTILINE)
 
-            # remove whitespace between template context variables en html tags
+            # remove whitespace between template context variables and html tags
             contents = re.sub(r'>\s+{{', '>{{', contents, flags=re.MULTILINE)
             contents = re.sub(r'}}\s+<', '}}<', contents, flags=re.MULTILINE)
 
-            # remove css block comments
+            # remove /* css block comments */
             contents = re.sub(r'/\*(.*?)\*/', '', contents, flags=re.MULTILINE)
 
             # remove empty lines
