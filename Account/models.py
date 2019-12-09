@@ -195,6 +195,9 @@ def account_create(username, wachtwoord, email, voornaam):
     if not is_email_valide(email):
         raise AccountCreateError('Dat is geen valide email')
 
+    if Account.objects.filter(username=username).count() != 0:
+        raise AccountCreateError('Account bestaat al')
+
     # maak het account aan
     account = Account()
     account.username = username
