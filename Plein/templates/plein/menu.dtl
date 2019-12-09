@@ -31,7 +31,7 @@
 
 <!-- inlog knop als gebruiker niet ingelogd is -->
 {% if menu_show_login %}
-<li {% if menu_actief == "inloggen" %}class="actief"{% endif %}>
+<li{% if menu_actief == "inloggen" %} class="actief"{% endif %}>
     <a href="{% url 'Account:login' %}" class="white-text">
     <i class="material-icons-round white-text">person</i>Inloggen</a>
 </li>
@@ -39,7 +39,7 @@
 
 <!-- wisselen van rol, voor bestuurders -->
 {% if menu_show_wisselvanrol %}
-<li {% if menu_actief == "wissel-van-rol" %}class="actief"{% endif %}>
+<li{% if menu_actief == "wissel-van-rol" %} class="actief"{% endif %}>
     <a href="{% url 'Plein:wissel-van-rol' %}" class="white-text">
     <i class="material-icons-round white-text">supervisor_account</i>Wissel van rol</a>
 </li>
@@ -52,25 +52,25 @@
 </li>
 -->
 
-<li {% if menu_actief == "records" %}class="actief"{% endif %}>
+<li{% if menu_actief == "records" %} class="actief"{% endif %}>
     <a href="{% url 'Records:overzicht' %}" class="white-text">
     <i class="material-icons-round white-text"><!--star-->trending_up</i>Nederlandse records</a>
 </li>
 
-<li {% if menu_actief == "privacy" %}class="actief"{% endif %}>
+<li{% if menu_actief == "privacy" %} class="actief"{% endif %}>
     <a href="{% url 'Plein:privacy' %}" class="white-text">
     <i class="material-icons-round white-text">security</i>Privacy verklaring</a>
 </li>
 
 {% if menu_show_sitefeedback %}
-<li {% if menu_actief == "site-feedback-inzicht" %}class="actief"{% endif %}>
+<li{% if menu_actief == "site-feedback-inzicht" %} class="actief"{% endif %}>
     <a href="{% url 'Overig:feedback-inzicht' %}" class="white-text">
     <i class="material-icons-round white-text">feedback</i>Site feedback</a>
 </li>
 {% endif %}
 
 {% if menu_show_logboek %}
-<li {% if menu_actief == "logboek" %}class="actief"{% endif %}>
+<li{% if menu_actief == "logboek" %} class="actief"{% endif %}>
     <a href="{% url 'Overig:logboek' %}" class="white-text">
     <i class="material-icons-round white-text">book</i>Logboek</a>
 </li>
@@ -85,7 +85,7 @@
 
 <!-- uitlog knop als gebruiker ingelogd is -->
 {% if menu_show_logout %}
-<li {% if menu_actief == "uitloggen" %}class="actief"{% endif %}>
+<li{% if menu_actief == "uitloggen" %} class="actief"{% endif %}>
     <a href="{% url 'Account:logout' %}" class="white-text">
     <i class="material-icons-round white-text">exit_to_app</i>Uitloggen</a>
 </li>
