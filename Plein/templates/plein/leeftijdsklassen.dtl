@@ -44,14 +44,14 @@
     </li>
 </ul>
 
-<h5>Competitie</h5>
+<h5>Bondscompetitie</h5>
 
-<p>Omdat de finales van de competitie in het nieuwe jaar plaatsvinden, moet je de competitie beginnen in de klasse waarin je volgend jaar uit moet komen.</p>
+<p>Omdat de finales van de bondscompetitie in het nieuwe jaar plaatsvinden, moet je de bondscompetitie beginnen in de klasse waarin je volgend jaar uit moet komen.</p>
 
-<p>Voor seizoen {{ plein_huidige_jaar }}/{{ plein_huidige_jaar|add:"1" }} schiet je de competitie als <b>{{ plein_clst.1 }}</b>.</p>
+<p>Voor seizoen {{ plein_huidige_jaar }}/{{ plein_huidige_jaar|add:"1" }} schiet je de bondscompetitie als <b>{{ plein_clst.1 }}</b>.</p>
 
 <ul class="collection with-header">
-    <li class="collection-header"><b>Competitie seizoen, jouw wedstrijdklasse</b></li>
+    <li class="collection-header"><b>Bondscompetitie seizoen, jouw wedstrijdklasse</b></li>
     <li class="collection-item">
         <div>Seizoen {{ plein_huidige_jaar|add:"-1" }}/{{ plein_huidige_jaar }}: klasse {{ plein_clst.0 }}</div>
     </li>
