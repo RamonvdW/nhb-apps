@@ -18,9 +18,6 @@ import json
 class Command(BaseCommand):
     help = "Importeer alle records"
 
-    # globale variabelen
-    verbose = False
-
     def add_arguments(self, parser):
         parser.add_argument('filename', nargs=1,
                             help="in te lezen file")
@@ -234,7 +231,7 @@ class Command(BaseCommand):
                     errors.append("Fout in datum: %s" % repr(val))
                     val = None
                 else:
-                    record.datum = datetime.date(year=datum.year, month=datum.month, day=datum.day)
+                    record.datum = datum.date()
                     if record.datum.year < 1950 or record.datum >= self.datum_morgen:
                         errors.append("Fout in datum: %s" % repr(val))
                         val = None
