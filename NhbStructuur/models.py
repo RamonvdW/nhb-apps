@@ -33,7 +33,7 @@ class NhbRayon(models.Model):
 class NhbRegio(models.Model):
     """Tabel waarin de Regio definities van de NHB staan"""
     regio_nr = models.PositiveIntegerField(primary_key=True)
-    naam = models.CharField(max_length=20)      # Regio 111
+    naam = models.CharField(max_length=50)
     rayon = models.ForeignKey(NhbRayon, on_delete=models.PROTECT)
 
     def __str__(self):
@@ -105,8 +105,8 @@ class NhbLid(models.Model):
     achternaam = models.CharField(max_length=100)
     email = models.CharField(max_length=150)
     geboorte_datum = models.DateField(validators=[validate_geboorte_datum,])
-    postcode = models.CharField(max_length=10)
-    huisnummer = models.CharField(max_length=10)
+    postcode = models.CharField(max_length=10)      # TODO: obsolete
+    huisnummer = models.CharField(max_length=10)    # TODO: obsolete
     geslacht = models.CharField(max_length=1, choices=GESLACHT)
     para_classificatie = models.CharField(max_length=30, blank=True)
     is_actief_lid = models.BooleanField(default=True)   # False = niet meer in import dataset
@@ -115,7 +115,7 @@ class NhbLid(models.Model):
                                 NhbVereniging,
                                 on_delete=models.PROTECT,
                                 blank=True,  # allow access input in form
-                                null=True)  # allow NULL relation in database
+                                null=True)   # allow NULL relation in database
 
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
