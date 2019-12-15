@@ -13,6 +13,9 @@ class NhbLidAdmin(admin.ModelAdmin):
     ordering = ('nhb_nr',)
     search_fields = ('voornaam', 'achternaam', 'nhb_nr')
 
+    # filter mogelijkheid
+    list_filter = ('geslacht', 'para_classificatie', 'is_actief_lid')
+
 
 class NhbVerenigingAdmin(admin.ModelAdmin):
     """ Admin configuratie voor NhbVereniging klasse """
