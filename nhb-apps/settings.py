@@ -25,7 +25,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated to version
-SITE_VERSIE = 'test 2019-12-15'
+SITE_VERSIE = 'test 2019-12-28'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -107,8 +107,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'nhb-apps.wsgi.application'
 
 # let browsers remember to connect with https
-# TODO: increase time to 1 year
-SECURE_HSTS_SECONDS = 3600      # 3600 = remember for 1 hour
+SECURE_HSTS_SECONDS = 8640000      # 8640000 = 100 days
 
 
 # Password validation
@@ -152,7 +151,7 @@ ROOT_URLCONF = 'nhb-apps.urls'
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 STATIC_URL = '/static/'     # url
-STATIC_ROOT = 'static'      # relative to project top-dir
+STATIC_ROOT = 'nhb-apps/.static'     # relative to project top-dir
 STATICFILES_DIRS = [
     os.path.join(PROJ_DIR, "global_static"),
 ]
