@@ -350,6 +350,7 @@ class Command(BaseCommand):
                         self.count_ongewijzigd += 1
                 else:
                     # nieuw record
+                    print("[INFO] Record %s-%s toegevoegd" % (blad, record.volg_nr))
                     self.count_toegevoegd += 1
                     if not self.dryrun:
                         record.save()
@@ -359,6 +360,7 @@ class Command(BaseCommand):
         for volg_nr in volg_nrs:
             IndivRecord.objects.get(discipline=blad, volg_nr=volg_nr).delete()
             self.count_verwijderd += 1
+            print("[INFO] Record %s-%s verwijderd" % (blad, volg_nr))
         # for
 
     def check_consistency(self, disc):
