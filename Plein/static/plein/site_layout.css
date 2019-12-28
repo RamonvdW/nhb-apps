@@ -39,8 +39,8 @@ a {
 }
 
 /* site feedback floater */
-.site-sidebar-rechts {
-    width: 230px;
+.site-sidebar-box {
+    width: 180px;
     float: right;
     text-align: center;
     margin-top: 10px;
@@ -50,6 +50,7 @@ a {
 /* de binnenkant van de feedback floater */
 .site-feedback {
     display: inline-block;
+    font-size: 12px;
 }
 
 /* sidenav zichtbaar / verstopt */
