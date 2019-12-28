@@ -42,7 +42,7 @@ class Loader(AppDirectoriesLoader):
                 clean += script
                 clean += '</script>'
                 contents = contents[pos2+9:]
-            else:
+            else:   # pragma: no cover
                 # unexpected: start-tag but no end-tag
                 print("[WARNING] minify_scripts: missing script end-tag")
                 clean += contents
@@ -65,7 +65,7 @@ class Loader(AppDirectoriesLoader):
             endpos = contents.find('-->', pos)
             if endpos >= 0:
                 contents = contents[endpos+3:]
-            else:
+            else:   # pragma: no cover
                 print("[WARNING] remove_html_comments: missing comment end-tag")
                 clean += contents
                 contents = ""
