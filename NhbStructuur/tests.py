@@ -5,10 +5,12 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
+from django.core import management
 from django.core.exceptions import ValidationError
 from .models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
 from .migrations.m0002_nhbstructuur_2018 import maak_rayons_2018, maak_regios_2018
 import datetime
+import io
 
 
 class TestNhbStructuur(TestCase):
@@ -51,7 +53,7 @@ class TestNhbStructuur(TestCase):
         self.assertIsNotNone(str(rayon))
 
     def test_regios(self):
-        self.assertEqual(NhbRegio.objects.all().count(), 16)
+        self.assertEqual(NhbRegio.objects.all().count(), 17)
         regio = NhbRegio.objects.get(pk=111)
         self.assertEqual(regio.naam, "Regio 111")
         self.assertIsNotNone(str(regio))
@@ -90,6 +92,132 @@ class TestNhbStructuur(TestCase):
         ver.clean_fields()      # run validators
         ver.clean()             # run model validator
 
-# TODO: add call_command for management commands
+    def test_import_nhb_crm_00(self):
+        # afhandelen niet bestaand bestand
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/notexisting.json', stderr=f1, stdout=f2)
+        self.assertTrue(f1.getvalue().startswith('[ERROR] Bestand kan niet gelezen worden'))
+        self.assertEqual(f2.getvalue(), '')
+
+    def test_import_nhb_crm_01(self):
+        # afhandelen slechte/lege JSON file
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_01.json', stderr=f1, stdout=f2)
+        self.assertTrue(f1.getvalue().startswith('[ERROR] Probleem met het JSON formaat in bestand'))
+        self.assertEqual(f2.getvalue(), '')
+
+    def test_import_nhb_crm_02(self):
+        # top-level keys afwezig
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_02.json', stderr=f1, stdout=f2)
+        #print("f1: %s" % f1.getvalue())
+        self.assertTrue("[ERROR] Verplichte sleutel 'rayons' niet aanwezig in de 'top-level' data" in f1.getvalue())
+        self.assertTrue("[ERROR] Verplichte sleutel 'regions' niet aanwezig in de 'top-level' data" in f1.getvalue())
+        self.assertTrue("[ERROR] Verplichte sleutel 'clubs' niet aanwezig in de 'top-level' data" in f1.getvalue())
+        self.assertTrue("[ERROR] Verplichte sleutel 'members' niet aanwezig in de 'top-level' data" in f1.getvalue())
+        self.assertEqual(f2.getvalue(), '')
+
+    def test_import_nhb_crm_03(self):
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_03.json', stderr=f1, stdout=f2)
+        self.assertTrue("[WARNING] Vereniging 1000 (Grote Club) heeft geen secretaris!" in f1.getvalue())
+        self.assertTrue("[ERROR] Kan secretaris 1 van vereniging 1001 niet vinden" in f1.getvalue())
+        self.assertTrue("[INFO] Wijziging naam rayon 4: 'Rayon 4' --> 'Rayon 99'" in f2.getvalue())
+        self.assertTrue("[INFO] Wijziging naam regio 101: 'Regio 101' --> 'Regio 99'" in f2.getvalue())
+        self.assertTrue("[INFO] Lid 100001: naam Ramon de Tester --> Voornaam van der Achternaam" in f2.getvalue())
+        self.assertTrue("[INFO] Lid 100001 email: 'rdetester@gmail.not' --> ''" in f2.getvalue())
+        self.assertTrue("[INFO] Lid 100001 geslacht: M --> V" in f2.getvalue())
+        self.assertTrue("[INFO] Lid 100001 geboortedatum: 1972-03-04 --> 2000-02-01" in f2.getvalue())
+        self.assertTrue("[INFO] Lid 100001: sinds_datum: 2010-11-12 --> 2000-01-01" in f2.getvalue())
+        #self.assertEqual(f2.getvalue(), '')
+
+    def test_import_nhb_crm_04(self):
+        # UnicodeDecodeError
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_04.json', stderr=f1, stdout=f2)
+        self.assertTrue("[ERROR] Bestand heeft unicode problemen ('rawunicodeescape' codec can't decode bytes in position 180-181: truncated" in f1.getvalue())
+        self.assertEqual(f2.getvalue(), '')
+
+    def test_import_nhb_crm_05(self):
+        # missing/extra keys
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_05.json', stderr=f1, stdout=f2)
+        self.assertTrue("[ERROR] Verplichte sleutel 'name' niet aanwezig in de 'rayon' data" in f1.getvalue())
+        self.assertTrue("[ERROR] Verplichte sleutel 'name' niet aanwezig in de 'regio' data" in f1.getvalue())
+        self.assertTrue("[ERROR] Verplichte sleutel 'name' niet aanwezig in de 'club' data" in f1.getvalue())
+        self.assertTrue("[ERROR] Verplichte sleutel 'name' niet aanwezig in de 'member' data" in f1.getvalue())
+        self.assertTrue("[WARNING] Extra sleutel aanwezig in de 'rayon' data: ['name1']" in f1.getvalue())
+        self.assertTrue("[WARNING] Extra sleutel aanwezig in de 'regio' data: ['name2']" in f1.getvalue())
+        self.assertTrue("[WARNING] Extra sleutel aanwezig in de 'club' data: ['name3']" in f1.getvalue())
+        self.assertTrue("[WARNING] Extra sleutel aanwezig in de 'member' data: ['name4']" in f1.getvalue())
+        #self.assertEqual(f2.getvalue(), '')
+
+    def test_import_nhb_crm_06(self):
+        # extra rayon/regio
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_06.json', stderr=f1, stdout=f2)
+        #print("f1: %s" % f1.getvalue())
+        #print("f2: %s" % f2.getvalue())
+        self.assertTrue("[ERROR] Onbekend rayon {'rayon_number': 0, 'name': 'Rayon 0'}" in f1.getvalue())
+        self.assertTrue("[ERROR] Onbekende regio {'region_number': 0, 'name': 'Regio 0', 'rayon_number': 1}" in f1.getvalue())
+        #self.assertEqual(f2.getvalue(), '')
+
+    def test_import_nhb_crm_07(self):
+        # lege dataset
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_07.json', stderr=f1, stdout=f2)
+        self.assertTrue("[ERROR] Geen data voor top-level sleutel 'clubs'" in f1.getvalue())
+        self.assertEqual(f2.getvalue(), '')
+
+    def test_import_nhb_crm_08(self):
+        # vereniging mutaties
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_03.json', stderr=f1, stdout=f2)
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_08.json', stderr=f1, stdout=f2)
+        self.assertTrue("[INFO] Wijziging van regio voor vereniging 1000: 111 --> 112" in f2.getvalue())
+        self.assertTrue("[INFO] Wijziging van naam voor vereniging 1000: Grote Club --> Nieuwe Grote Club" in f2.getvalue())
+        self.assertTrue("[ERROR] Kan vereniging 1001 niet wijzigen naar onbekende regio 199" in f1.getvalue())
+        self.assertTrue("[ERROR] Vereniging 1002 hoort bij onbekende regio 199" in f1.getvalue())
+        self.assertTrue("[INFO] Wijziging van secretaris voor vereniging 1001: geen --> 100001" in f2.getvalue())
+
+    def test_import_nhb_crm_09(self):
+        # lid mutaties
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_03.json', stderr=f1, stdout=f2)
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_09.json', stderr=f1, stdout=f2)
+        #print("f1: %s" % f1.getvalue())
+        #print("f2: %s" % f2.getvalue())
+        self.assertTrue("[ERROR] Lid 100001 heeft geen valide geboortedatum", f1.getvalue())
+        self.assertTrue("[ERROR] Lid 100001 heeft onbekend geslacht: X (moet zijn: M of F)", f1.getvalue())
+        self.assertTrue("[WARNING] Lid 100009 heeft geen voornaam of initials" in f1.getvalue())
+        self.assertTrue("[INFO] Lid 100009 wordt overgeslagen (geen valide geboortedatum, maar toch blocked)" in f2.getvalue())
+        self.assertTrue("[ERROR] Lid 100009 heeft geen valide lidmaatschapsdatum", f1.getvalue())
+        self.assertTrue("[ERROR] Lid 100009 heeft geen valide email (geen)", f1.getvalue())
+        self.assertTrue("[INFO] Lid 100024: is_actief_lid nee --> ja", f2.getvalue())
+        self.assertTrue("[INFO] Lid 100001: is_actief_lid: ja --> nee", f2.getvalue())
+        self.assertTrue("[INFO] Lid 100024: para_classificatie: 'W1' --> ''", f2.getvalue())
+        self.assertTrue("[INFO] Lid 100025: is_actief_lid ja --> nee (want blocked)", f2.getvalue())
+        self.assertTrue("[INFO] Lid 100025: vereniging 1000 Grote Club --> 1001 HBS Dichtbij", f2.getvalue())
+
+    def test_import_nhb_crm_dryrun(self):
+        # dryrun
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_03.json', '--dryrun', stderr=f1, stdout=f2)
+        self.assertTrue("DRY RUN" in f2.getvalue())
 
 # end of file
