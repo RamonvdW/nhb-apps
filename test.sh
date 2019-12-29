@@ -42,6 +42,11 @@ else
 fi
 
 echo
+echo -n "Press ENTER to start firefox now, or Ctrl+C to abort"
+read
+
+firefox $REPORT_DIR/index.html &
+
 
 # end of file
 
