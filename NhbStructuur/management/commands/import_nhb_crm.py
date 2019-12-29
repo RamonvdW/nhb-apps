@@ -64,7 +64,7 @@ EXPECTED_MEMBER_KEYS = ('club_number', 'member_number', 'name', 'prefix', 'first
                         'iso_abbr', 'latitude', 'longitude', 'blocked')
 
 
-# administratieve entries (met foutne) die overslagen moeten worden
+# administratieve entries (met fouten) die overslagen moeten worden
 SKIP_MEMBERS = (101711,)
 
 
@@ -98,11 +98,11 @@ class Command(BaseCommand):
             try:
                 keys.remove(key)
             except ValueError:
-                self.stderr.write("[ERROR] Unexpected: mandatory key %s not present in %s data" % (repr(key), level))
+                self.stderr.write("[ERROR] Verplichte sleutel %s niet aanwezig in de %s data" % (repr(key), repr(level)))
                 has_error = True
         # for
         if len(keys):
-            self.stderr.write("[WARNING] Unexpected extra keys present in %s data: %s" % (level, repr(keys)))
+            self.stderr.write("[WARNING] Extra sleutel aanwezig in de %s data: %s" % (repr(level), repr(keys)))
         return has_error
 
     def _import_rayons(self, data):
@@ -216,12 +216,12 @@ class Command(BaseCommand):
                 nhb_nrs.remove(ver_nhb_nr)
 
                 if obj.regio.regio_nr != ver_regio:
-                    self.stdout.write('[INFO] Wijziging van regio voor vereniging %s: %s --> %s' % (ver_nhb_nr, obj.regio.regio_nr, ver_regio))
                     regio_obj = vind_regio(ver_regio)
                     if regio_obj is None:
-                        self.stderr.write('[ERROR] Vereniging %s hoort bij onbekende regio %s' % (ver_nhb_nr, ver_regio))
+                        self.stderr.write('[ERROR] Kan vereniging %s niet wijzigen naar onbekende regio %s' % (ver_nhb_nr, ver_regio))
                         self._count_errors += 1
                     else:
+                        self.stdout.write('[INFO] Wijziging van regio voor vereniging %s: %s --> %s' % (ver_nhb_nr, obj.regio.regio_nr, ver_regio))
                         self._count_wijzigingen += 1
                         obj.regio = regio_obj
                         if not self.dryrun:
@@ -258,6 +258,9 @@ class Command(BaseCommand):
     def _import_clubs_secretaris(self, data):
         """ voor elke club, koppel de secretaris aan een NhbLid """
 
+        if self._check_keys(data[0].keys(), EXPECTED_CLUB_KEYS, "club"):
+            return
+
         for club in data:
             ver_nhb_nr = club['club_number']
             ver_naam = club['name']
@@ -269,7 +272,7 @@ class Command(BaseCommand):
                 ver_secretaris_nr = club['secretaris'][0]['member_number']
                 ver_secretaris_nhblid = vind_lid(ver_secretaris_nr)
                 if ver_secretaris_nhblid is None:
-                    self.stderr.write('[ERROR] Kan secretaris %s van vereniging %s niet vinden' % (ver_nhb_nr, ver_secretaris_nr))
+                    self.stderr.write('[ERROR] Kan secretaris %s van vereniging %s niet vinden' % (ver_secretaris_nr, ver_nhb_nr))
                     self._count_errors += 1
 
             # zoek de vereniging op
@@ -335,24 +338,35 @@ class Command(BaseCommand):
             if not lid_voornaam:
                 lid_voornaam = member['initials']
                 if not lid_voornaam:
-                    self.stderr.write('[WARNING] Lid %s heeft geen voornaam of initials: %s' % lid_nhb_nr)
+                    self.stderr.write('[WARNING] Lid %s heeft geen voornaam of initials' % lid_nhb_nr)
                     self._count_warnings += 1
 
             lid_achternaam = member['name']
             if member['prefix']:
                 lid_achternaam = member['prefix'] + ' ' + lid_achternaam
 
+            lid_blocked = member['blocked']
+
+            lid_ver = vind_vereniging(member['club_number'])
+            if not lid_ver:
+                lid_blocked = True
+                # ex-leden hebben geen vereniging, dus niet te veel klagen
+                # self.stderr.write('[WARNING] Lid %s is niet aangesloten bij een vereniging' % lid_nhb_nr)
+
             try:
                 lid_geboorte_datum = datetime.datetime.strptime(member['birthday'], "%Y-%m-%d").date() # YYYY-MM-DD
-            except TypeError:
+            except ValueError:
                 lid_geboorte_datum = None
                 is_valid = False
-                self.stderr.write('[ERROR] Lid %s heeft geen valide geboortedatum' % lid_nhb_nr)
-                self._count_errors += 1
+                if not lid_ver:
+                    self.stdout.write('[INFO] Lid %s wordt overgeslagen (geen valide geboortedatum, maar toch blocked)' % lid_nhb_nr)
+                else:
+                    self.stderr.write('[ERROR] Lid %s heeft geen valide geboortedatum' % lid_nhb_nr)
+                    self._count_errors += 1
 
             lid_geslacht = member['gender']
             if lid_geslacht not in ('M', 'F'):
-                self.stderr.write('[ERROR] Lid heeft onbekend geslacht: %s (moet zijn: M of F)' % lid_geslacht)
+                self.stderr.write('[ERROR] Lid %s heeft onbekend geslacht: %s (moet zijn: M of F)' % (lid_nhb_nr, lid_geslacht))
                 self._count_errors += 1
                 lid_geslacht = 'M'  # forceer naar iets valides
             if lid_geslacht == 'F':
@@ -364,19 +378,11 @@ class Command(BaseCommand):
 
             try:
                 lid_sinds = datetime.datetime.strptime(member['member_from'], "%Y-%m-%d").date() # YYYY-MM-DD
-            except TypeError:
+            except ValueError:
                 lid_sinds = None
                 is_valid = False
                 self.stderr.write('[ERROR] Lid %s heeft geen valide lidmaatschapsdatum' % lid_nhb_nr)
                 self._count_errors += 1
-
-            lid_blocked = member['blocked']
-
-            lid_ver = vind_vereniging(member['club_number'])
-            # ex-leden hebben geen vereniging
-            if not lid_ver:
-                # self.stderr.write('[WARNING] Lid %s is niet aangesloten bij een vereniging' % lid_nhb_nr)
-                lid_blocked = True
 
             lid_email = member['email']
             if not lid_email:
@@ -508,17 +514,22 @@ class Command(BaseCommand):
             with open(fname, encoding='raw_unicode_escape') as fhandle:
                 data = json.load(fhandle)
         except IOError as exc:
-            self.stderr.write("Bestand kan niet gelezen worden (%s)" % str(exc))
+            self.stderr.write("[ERROR] Bestand kan niet gelezen worden (%s)" % str(exc))
             return
         except json.decoder.JSONDecodeError as exc:
-            self.stderr.write("Probleem met het JSON formaat in bestand %s (%s)" % (repr(fname), str(exc)))
+            self.stderr.write("[ERROR] Probleem met het JSON formaat in bestand %s (%s)" % (repr(fname), str(exc)))
             return
         except UnicodeDecodeError as exc:
-            self.stderr.write("Bestand heeft unicode problemen (%s)" % str(exc))
+            self.stderr.write("[ERROR] Bestand heeft unicode problemen (%s)" % str(exc))
             return
 
         if self._check_keys(data.keys(), EXPECTED_DATA_KEYS, "top-level"):
             return
+
+        for key in EXPECTED_DATA_KEYS:
+            if len(data[key]) < 1:
+                self.stderr.write("[ERROR] Geen data voor top-level sleutel %s" % repr(key))
+                return
 
         # vang generieke fouten af
         try:
