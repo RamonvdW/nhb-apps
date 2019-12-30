@@ -10,7 +10,7 @@
 
 {% block pagina %}
 
-<h2>Site feedback</h2>
+<h4>Site feedback</h4>
 
 <p>De nieuwste feedback op de site (maximaal 50) volgen hieronder.</p>
 
@@ -42,3 +42,4 @@
 <p>Let op: Van alle nog aanwezige site feedback ({{ count_aanwezig }}) zijn er {{ count_afgehandeld }} door de ontwikkelaar afgehandeld en worden niet meer getoond.</p>
 
 {% endblock %}
+

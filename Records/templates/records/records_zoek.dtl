@@ -11,7 +11,7 @@
 
 {% block pagina %}
 
-<h2>Records doorzoeken</h2>
+<h4>Records doorzoeken</h4>
 
 <div class="container z-depth-2 white">
     <div class="row nav blue white-text">

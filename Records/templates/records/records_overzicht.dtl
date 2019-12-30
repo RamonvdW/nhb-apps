@@ -12,7 +12,7 @@
 
 {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="records_overzicht" %}
 
-<h3>Nederlandse Handboog<wbr/>sport Records</h3>
+<h4>Nederlandse Handboog<wbr/>sport Records</h4>
 
 <p><a class="btn white blue-text" href="{% url 'Records:indiv' %}">Individuele records</a></p>
 <p><a class="btn blue" href="{% url 'Records:zoek' %}">Zoek in de records</a></p>
@@ -49,3 +49,4 @@
 </div>
 
 {% endblock %}
+

@@ -9,7 +9,9 @@
 {% block title %}E-mail bevestigd{% endblock %}
 
 {% block pagina %}
-<h1>Bevestigd</h1>
+
+<h4>Bevestigd</h4>
+
 <p>Je hebt laten zien dat je e-mail adres klopt.</p>
 <p>Je kan nu inloggen.</p>
 

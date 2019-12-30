@@ -10,7 +10,7 @@
 
 {% block pagina %}
 
-<h3>Logboek</h3>
+<h4>Logboek</h4>
 
 <ul class="collapsible">
     {% for obj in object_list %}
@@ -28,3 +28,4 @@
 </ul>
 
 {% endblock %}
+

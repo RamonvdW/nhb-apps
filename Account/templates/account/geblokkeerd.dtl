@@ -9,7 +9,9 @@
 {% block title %}Inlog mislukt{% endblock %}
 
 {% block pagina %}
-<h1>Inlog mislukt</h1>
+
+<h4>Inlog mislukt</h4>
+
 <p>Het account {{ account.username }} is geblokkeerd tot {{ account.is_geblokkeerd_tot }} omdat te vaak een verkeerd wachtwoord ingevoerd is.</p>
 
 {% endblock %}

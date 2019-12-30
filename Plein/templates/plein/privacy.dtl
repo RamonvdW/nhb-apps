@@ -13,7 +13,7 @@
 <!-- gebruik niet de hele breedte van het scherm -->
 <div class="row"><div class="col s12 m9">
 
-<h3>Privacy verklaring</h3>
+<h4>Privacy verklaring</h4>
 
 <p>Op deze pagina beschrijven we hoe we omgaan met jouw privacy.</p>
 
@@ -21,7 +21,7 @@
 te vinden op de hoofdwebsite van de NHB: <a href="https://www.handboogsport.nl" target="_blank">www.handboogsport.nl</a></p>
 
 
-<h4>Persoons<wbr/>gegevens</h4>
+<h5>Persoons<wbr/>gegevens</h5>
 
 <p>Een groot deel van deze website is gemaakt om informatie te tonen die voor jou interessant is.
 Als je een account aanmaakt en inlogt dan tonen we deze informatie.</p>
@@ -33,7 +33,7 @@ waaronder je lidmaatschapsnummer, volledig naam en e-mail adres.</p>
 informatie over je browser, het tijdstip waarop je de website benadert en welke inlog je gebruikt.</p>
 
 
-<h4>Publicaties</h4>
+<h5>Publicaties</h5>
 
 <p>Wedstrijden en competities hebben openbare deelnemerslijsten en uitslagen.
 Als je meedoet aan een wedstrijd of competitie dan worden de volgende persoonsgegevens openbaar gemaakt:</p>
@@ -49,7 +49,7 @@ Als je meedoet aan een wedstrijd of competitie dan worden de volgende persoonsge
 <p>Als je een Nederlands Record behaald hebt dan worden dezelfde persoonsgegevens openbaar gemaakt.</p>
 
 
-<h4>Cookies</h4>
+<h5>Cookies</h5>
 
 <p>Tijdens een bezoek aan deze website kunnen wij 'cookies' naar jouw browser sturen.
 Dit zijn kleine bestanden die op jouw apparaat kunnen worden opgeslagen en op een
@@ -64,7 +64,7 @@ Daarom krijg je bij deze website geen vraag of je cookies wilt accepteren.</p>
 <p>Hier kan je <a href="https://www.rijksoverheid.nl/onderwerpen/telecommunicatie/vraag-en-antwoord/mag-een-website-ongevraagd-cookies-plaatsen" target="_blank">meer informatie over cookies</a> vinden.</p>
 
 
-<h4>Contact</h4>
+<h5>Contact</h5>
 
 <p>Alle vragen en verzoeken over privacy kunnen gericht worden aan de Nederlandse Handboog Bond
 via <a href="mailto:info@handboogsport.nl">info@handboogsport.nl</a>.</p>
@@ -74,3 +74,4 @@ via <a href="mailto:info@handboogsport.nl">info@handboogsport.nl</a>.</p>
 {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="privacy" %}
 
 {% endblock %}
+

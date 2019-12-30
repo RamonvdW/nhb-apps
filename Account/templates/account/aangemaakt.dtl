@@ -10,7 +10,7 @@
 
 {% block pagina %}
 
-<h1>E-mail bevestigen</h1>
+<h4>E-mail bevestigen</h4>
 
 <p>Het account voor NHB nummer <b>{{ login_naam }}</b> is aangemaakt. Dit nummer is je inlog naam.</p>
 

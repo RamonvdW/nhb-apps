@@ -12,7 +12,7 @@
 
 {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="plein" %}
 
-<h3>Je leeftijdsklasse</h3>
+<h4>Je leeftijdsklasse</h4>
 
 <p>Schutters worden in een wedstrijd opgedeeld aan de hand van hun leeftijd. Dit noemen we de leeftijdsklasse.</p>
 
@@ -70,3 +70,4 @@
 </ul>
 
 {% endblock %}
+

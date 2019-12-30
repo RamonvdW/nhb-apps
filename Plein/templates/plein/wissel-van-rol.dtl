@@ -12,7 +12,7 @@
 
 {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="plein" %}
 
-<h2>Kies je rol</h2>
+<h4>Kies je rol</h4>
 
 <p>Kies hieronder de rol die je aan wilt nemen:</p>
 

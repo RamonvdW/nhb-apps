@@ -16,7 +16,7 @@
 
 <div class="row">
 
-    <!-- on extra-large disable, show the related records besides the actual record -->
+    <!-- on extra-large displays, show the related records besides the actual record -->
     <div class="col xl6 hide-on-large-and-down">
         <ul class="collection with-header">
             <li class="collection-header"><h5>Gerelateerde records</h5></li>
@@ -181,3 +181,4 @@
 </div>
 
 {% endblock %}
+

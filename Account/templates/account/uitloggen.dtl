@@ -11,7 +11,7 @@
 {% block pagina %}
 {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="logout" %}
 
-<h2>Uitloggen</h2>
+<h4>Uitloggen</h4>
 
 <p>Druk op de knop om volledig uit te loggen.</p>
 

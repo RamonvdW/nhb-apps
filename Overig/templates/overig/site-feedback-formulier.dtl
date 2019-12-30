@@ -10,7 +10,7 @@
 
 {% block pagina %}
 
-<h2>Feedback</h2>
+<h4>Feedback</h4>
 
 <p>Met dit formulier kan je een suggestie of compliment aan de ontwikkelaars doorgeven.</p>
 <p>Dit gebruiken we om de site te verbeteren.</p>
@@ -79,3 +79,4 @@
 </div>
 
 {% endblock %}
+

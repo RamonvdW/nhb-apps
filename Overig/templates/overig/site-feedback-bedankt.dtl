@@ -10,7 +10,7 @@
 
 {% block pagina %}
 
-<h2>Bedankt!</h2>
+<h4>Bedankt!</h4>
 
 <p>Bedankt voor het delen van je mening.</p>
 
@@ -18,6 +18,6 @@
 
 <p>Voel je vrij om deze functie vaker te gebruiken. We staan open voor alle tips en tops!</p>
 
-<p><a class="btn white blue-text" href="{% url 'Plein:plein' %}">Startpagina</a></p>
+<p><a class="btn blue white-text" href="{% url 'Plein:plein' %}">Startpagina</a></p>
 
 {% endblock %}

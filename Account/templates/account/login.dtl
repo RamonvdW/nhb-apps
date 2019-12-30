@@ -11,13 +11,13 @@
 {% block pagina %}
 {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="login" %}
 
-<h2>Inloggen</h2>
+<h4>Inloggen</h4>
 
 <p>Heb je al een account, log dan in:</p>
 
 <div class="container z-depth-2 white">
     <div class="row nav blue white-text">
-        <div class="col s12 center">
+        <div class="col s12 center-align">
             <h5>Inloggen</h5>
             <p>Met een bestaand account</p>
         </div>
@@ -62,7 +62,7 @@
     </div>
 </div>
 
-<h3>Nog geen account?</h3>
+<h5>Nog geen account?</h5>
 <p>Ben je lid bij een handboogvereniging, dan kan je een account aanmaken.</p>
 <p>De vereniging moet aangesloten zijn bij de Nederlandse Handboog Bond (NHB).</p>
 <p><a class="btn blue" href="{% url 'Account:registreer' %}">Aanmaken</a></p>
