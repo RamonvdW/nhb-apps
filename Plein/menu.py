@@ -4,7 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from Account.rol import Rollen, rol_get_huidige, rol_get_limiet
+from Account.rol import Rollen, rol_get_huidige, rol_get_limiet, rol_mag_wisselen
 
 
 ACTIEF_OPTIES = (
@@ -36,7 +36,7 @@ def menu_dynamics(request, context, actief=None):
         context['menu_show_logout'] = True
 
         # wissel van rol
-        if rol_limiet not in (Rollen.ROL_UNKNOWN, Rollen.ROL_SCHUTTER):
+        if rol_mag_wisselen(request):
             context['menu_show_wisselvanrol'] = True
 
         # IT: admin menu

@@ -7,6 +7,7 @@
 """ ondersteuning voor de rollen binnen de NHB applicaties """
 
 import enum
+from Account.models import user_is_otp_verified, account_needs_otp
 
 
 SESSIONVAR_ROL_HUIDIGE = 'gebruiker_rol_huidige'
@@ -62,20 +63,26 @@ def rol_zet_sessionvars_na_login(account, request):
     sessionvars[SESSIONVAR_ROL_MAG_WISSELEN] = False
 
     rol = None
-    if account.is_staff:
-        rol = Rollen.ROL_IT
-    elif account.is_BKO:
-        rol = Rollen.ROL_BKO
+    if user_is_otp_verified(request):
+        if account.is_staff:
+            rol = Rollen.ROL_IT
+        elif account.is_BKO:
+            rol = Rollen.ROL_BKO
     #elif account.nhblid:
     #    rol = Rollen.ROL_SCHUTTER
-
     if rol:
         sessionvars[SESSIONVAR_ROL_LIMIET] = rol
+        sessionvars[SESSIONVAR_ROL_MAG_WISSELEN] = True
+    elif account_needs_otp(account):
         sessionvars[SESSIONVAR_ROL_MAG_WISSELEN] = True
 
     sessionvars[SESSIONVAR_ROL_HUIDIGE] = sessionvars[SESSIONVAR_ROL_LIMIET]
 
     return sessionvars  # allows unittest to do sessionvars.save()
+
+
+def rol_zet_sessionvars_na_otp_controle(account, request):
+    rol_zet_sessionvars_na_login(account, request)
 
 
 def rol_get_limiet(request):

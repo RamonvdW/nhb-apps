@@ -1,0 +1,57 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2019 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Controle tweede factor{% endblock %}
+
+{% block pagina %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="login" %}
+
+<h4>Extra controle</h4>
+
+<p>Bestuurders moeten verplicht met twee-factor authenticatie inloggen.</p>
+
+<div class="container z-depth-2 white">
+    <div class="row nav red white-text">
+        <div class="col s12 center-align">
+            <h5>Controle tweede factor</h5>
+            <p>Voor bestuurders</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <form class="col s12" action="{% url 'Account:otp-controle' %}" method="post">
+            {% csrf_token %}
+
+            <div class="row"><div class="input-field col s12">
+                {{ form.otp_code.label_tag }}{{ form.otp_code }}
+            </div></div>
+
+            {% if form.errors %}
+            <div class="row">
+                <div class="col s2 m1 red-text">Fout:</div>
+                {% for error in form.non_field_errors %}
+                <div class="row"><div class="col s9 red-text">{{ error|escape }}</div></div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="row"><div class="col s12"></div>
+                <div class="center-align">
+                    <input class="btn blue" name="button_login" type="submit" value="Controleer">
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<h5>Nog niet geactiveerd?</h5>
+
+<p>Controle met een tweede factor is verplicht voor gebruikers met toegang tot persoonsgegevens.</p>
+<p><a class="btn blue" href="{% url 'Account:otp-koppelen' %}">Koppelen</a></p>
+
+{% endblock %}

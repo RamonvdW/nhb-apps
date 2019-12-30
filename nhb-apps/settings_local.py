@@ -5,15 +5,16 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 """
-Django local settings for the nhba-apps project.
+Django local settings for the nhb-apps project.
 
 This file is included from settings.py and contains specific
 settings that can be changed as part of a deployment, without
 having to edit the settings.py file.
 """
 
-# SECURITY WARNING: keep the secret key used in production secret!
-# TODO: uitzoeken waarom en hoe dit in elkaar steekt
+# the secret below ensures an adversary cannot fake aspects like a session-id
+# just make sure it is unique per installation and keep it private
+# details: https://docs.djangoproject.com/en/2.2/ref/settings/#secret-key
 SECRET_KEY = '1234-replace-with-your-own-secret-key-56789abcdefg'
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -35,6 +36,9 @@ DATABASES = {
         'PORT': '5432'
     }
 }
+
+# the issuer name that is sent to the OTP application in the QR code
+OTP_ISSUER_NAME = "yoursite.com"
 
 # end of file
 

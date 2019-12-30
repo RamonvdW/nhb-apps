@@ -12,11 +12,14 @@ from django.views import View
 from django.views.generic import TemplateView
 from django.utils import timezone
 from django.conf import settings
-from .forms import LoginForm, RegistreerForm
+from .forms import LoginForm, RegistreerForm, OTPControleForm
 from .models import AccountCreateError, AccountCreateNhbGeenEmail, Account,\
-                    account_create_nhb, account_email_is_bevestigd
+                    account_create_nhb, account_email_is_bevestigd,\
+                    account_needs_otp, account_prep_for_otp, account_controleer_otp_code,\
+                    account_zet_sessionvars_na_login, account_zet_sessionvars_na_otp_controle
 from .leeftijdsklassen import leeftijdsklassen_zet_sessionvars_na_login
-from .rol import rol_zet_sessionvars_na_login
+from .rol import rol_zet_sessionvars_na_login, rol_zet_sessionvars_na_otp_controle
+from .qrcode import qrcode_get
 from Overig.tijdelijke_url import set_tijdelijke_url_receiver, RECEIVER_ACCOUNTEMAIL
 from Plein.menu import menu_dynamics
 from Logboek.models import schrijf_in_logboek
@@ -30,6 +33,9 @@ TEMPLATE_AANGEMAAKT = 'account/aangemaakt.dtl'
 TEMPLATE_BEVESTIGD = 'account/bevestigd.dtl'
 TEMPLATE_GEBLOKKEERD = 'account/geblokkeerd.dtl'
 TEMPLATE_VERGETEN = 'account/wachtwoord-vergeten.dtl'
+TEMPLATE_OTPCONTROLE = 'account/otp-controle.dtl'
+TEMPLATE_OTPKOPPELEN = 'account/otp-koppelen.dtl'
+TEMPLATE_OTPGEKOPPELD = 'account/otp-koppelen-gelukt.dtl'
 
 
 class LoginView(TemplateView):
@@ -78,12 +84,18 @@ class LoginView(TemplateView):
                     # authenticatie is gelukt
                     # integratie met de authenticatie laag van Django
                     login(request, account2)
+                    account_zet_sessionvars_na_login(request)
                     rol_zet_sessionvars_na_login(account2, request)
                     leeftijdsklassen_zet_sessionvars_na_login(account2, request)
 
                     if account2.verkeerd_wachtwoord_teller > 0:
                         account2.verkeerd_wachtwoord_teller = 0
                         account2.save()
+
+                    # meteen de OTP verificatie laten doen als dit account het nodig heeft
+                    # als de gebruiker dit over slaat, dan komt het bij elke view die het nodig heeft automatisch terug
+                    if account_needs_otp(account2):
+                        return HttpResponseRedirect(reverse('Account:otp-controle'))
 
                     return HttpResponseRedirect(reverse('Plein:plein'))
                 else:
@@ -113,7 +125,7 @@ class LoginView(TemplateView):
             form.add_error(None, 'De combinatie van inlog naam en wachtwoord worden niet herkend. Probeer het nog eens.')
 
         # still here --> re-render with error message
-        context = { 'form': form }
+        context = {'form': form}
         menu_dynamics(request, context, actief='inloggen')
         return render(request, TEMPLATE_LOGIN, context)
 
@@ -122,7 +134,7 @@ class LoginView(TemplateView):
             we geven een lege form aan de template
         """
         form = LoginForm()
-        context = { 'form': form }
+        context = {'form': form}
         menu_dynamics(request, context, actief='inloggen')
         return render(request, TEMPLATE_LOGIN, context)
 
@@ -237,7 +249,7 @@ class RegistreerNhbNummerView(TemplateView):
                 return HttpResponseRedirect(reverse('Account:aangemaakt'))
 
         # still here --> re-render with error message
-        context = { 'form': form }
+        context = {'form': form}
         menu_dynamics(request, context, actief="inloggen")
         return render(request, TEMPLATE_REGISTREER, context)
 
@@ -246,7 +258,7 @@ class RegistreerNhbNummerView(TemplateView):
         """
         # GET operation --> create empty form
         form = RegistreerForm()
-        context = { 'form': form }
+        context = {'form': form}
         menu_dynamics(request, context, actief="inloggen")
         return render(request, TEMPLATE_REGISTREER, context)
 
@@ -266,6 +278,9 @@ class BevestigdView(TemplateView):
 
 
 class AangemaaktView(TemplateView):
+    """ Deze view geeft de laatste feedback naar de gebruiker
+        nadat het account volledig aangemaakt is.
+    """
 
     def get(self, request, *args, **kwargs):
         """ deze functie wordt aangeroepen als een GET request ontvangen is
@@ -287,6 +302,133 @@ class AangemaaktView(TemplateView):
         menu_dynamics(request, context)
 
         return render(request, TEMPLATE_AANGEMAAKT, context)
+
+
+class OTPControleView(TemplateView):
+    """ Met deze view kan de OTP controle doorlopen worden
+        Na deze controle is de gebruiker authenticated + verified
+    """
+
+    def get(self, request, *args, **kwargs):
+        """ deze functie wordt aangeroepen als een GET request ontvangen is
+        """
+        if not request.user.is_authenticated:
+            # gebruiker is niet ingelogd, dus stuur terug naar af
+            return HttpResponseRedirect(reverse('Plein:plein'))
+
+        form = OTPControleForm()
+        context = {'form': form}
+        menu_dynamics(request, context)
+        return render(request, TEMPLATE_OTPCONTROLE, context)
+
+    def post(self, request, *args, **kwargs):
+        """ deze functie wordt aangeroepen als een POST request ontvangen is.
+            dit is gekoppeld aan het drukken op de Controleer knop.
+        """
+        form = OTPControleForm(request.POST)
+        if form.is_valid():
+            otp_code = form.cleaned_data.get('otp_code')
+            from_ip = request.META['REMOTE_ADDR']
+            error = False
+            account = request.user
+            if account_controleer_otp_code(account, otp_code):
+                # controle is gelukt
+                account_zet_sessionvars_na_otp_controle(request)
+                rol_zet_sessionvars_na_otp_controle(account, request)
+                return HttpResponseRedirect(reverse('Plein:plein'))
+            else:
+                # controle is mislukt - schrijf dit in het logboek
+                schrijf_in_logboek(account=None,
+                                   gebruikte_functie="OTP controle",
+                                   activiteit='Gebruiker %s OTP controle mislukt vanaf IP %s' % (repr(account.username), repr(from_ip)))
+
+                form.add_error(None, 'Verkeerde code. Probeer het nog eens.')
+                # TODO: blokkeer na X pogingen
+
+        # still here --> re-render with error message
+        context = {'form': form}
+        menu_dynamics(request, context, actief="inloggen")
+        return render(request, TEMPLATE_OTPCONTROLE, context)
+
+
+class OTPKoppelenView(TemplateView):
+    """ Met deze view kan de OTP koppeling tot stand gebracht worden
+    """
+
+    def get(self, request, *args, **kwargs):
+        """ deze functie wordt aangeroepen als een GET request ontvangen is
+        """
+        if not request.user.is_authenticated:
+            # gebruiker is niet ingelogd, dus zou hier niet moeten komen
+            return HttpResponseRedirect(reverse('Plein:plein'))
+
+        account = request.user
+
+        if account.otp_is_actief:
+            # gebruiker is al gekoppeld, dus niet zomaar toestaan om een ander apparaat ook te koppelen!!
+            return HttpResponseRedirect(reverse('Plein:plein'))
+
+        # haal de QR code op (en alles wat daar voor nodig is)
+        account_prep_for_otp(account)
+        qrcode = qrcode_get(account)
+
+        tmp = account.otp_code.lower()
+        secret = " ".join([tmp[i:i+4] for i in range(0, 16, 4)])
+
+        form = OTPControleForm()
+        context = {'form': form,
+                   'qrcode': qrcode,
+                   'otp_secret': secret }
+        menu_dynamics(request, context, actief="inloggen")
+        return render(request, TEMPLATE_OTPKOPPELEN, context)
+
+    def post(self, request, *args, **kwargs):
+        """ deze functie wordt aangeroepen als een POST request ontvangen is.
+            dit is gekoppeld aan het drukken op de Controleer knop.
+        """
+        if not request.user.is_authenticated:
+            # gebruiker is niet ingelogd, dus stuur terug naar af
+            return HttpResponseRedirect(reverse('Plein:plein'))
+
+        account = request.user
+
+        if account.otp_is_actief:
+            # gebruiker is al gekoppeld, dus niet zomaar toestaan om een ander apparaat ook te koppelen!!
+            return HttpResponseRedirect(reverse('Plein:plein'))
+
+        form = OTPControleForm(request.POST)
+        if form.is_valid():
+            otp_code = form.cleaned_data.get('otp_code')
+            from_ip = request.META['REMOTE_ADDR']
+            error = False
+            if account_controleer_otp_code(account, otp_code):
+                # controle is gelukt
+                account.otp_is_actief = True
+                account.save()
+                account_zet_sessionvars_na_otp_controle(request)
+                rol_zet_sessionvars_na_otp_controle(account, request)
+                # geef de succes pagina
+                context = dict()
+                menu_dynamics(request, context, actief="inloggen")
+                return render(request, TEMPLATE_OTPGEKOPPELD, context)
+            else:
+                # controle is mislukt - schrijf dit in het logboek
+                schrijf_in_logboek(account=None,
+                                   gebruikte_functie="OTP controle",
+                                   activiteit='Gebruiker %s OTP koppeling controle mislukt vanaf IP %s' % (repr(account.username), repr(from_ip)))
+
+                form.add_error(None, 'Verkeerde code. Probeer het nog eens.')
+                # TODO: blokkeer na X pogingen
+
+        # still here --> re-render with error message
+        qrcode = qrcode_get(account)
+        tmp = account.otp_code.lower()
+        secret = " ".join([tmp[i:i+4] for i in range(0, 16, 4)])
+        context = {'form': form,
+                   'qrcode': qrcode,
+                   'otp_secret': secret }
+        menu_dynamics(request, context, actief="inloggen")
+        return render(request, TEMPLATE_OTPKOPPELEN, context)
 
 
 def receive_bevestiging_accountemail(request, obj):

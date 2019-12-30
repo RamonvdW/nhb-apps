@@ -17,8 +17,12 @@
 <p>Kies hieronder de rol die je aan wilt nemen:</p>
 
 {% for obj in object_list %}
-
 <p><a class="btn blue" href="{{ obj.url }}" %}">{{ obj.titel }}</a></p>
 {% endfor %}
+
+{% if show_otp_controle %}
+    <p>Een aantal rollen worden pas beschikbaar nadat de controle van de tweede factor uitgevoerd is.</p>
+    <a class="btn red" href="{{ otp_controle_url }}">Nu controleren</a>
+{% endif %}
 
 {% endblock %}

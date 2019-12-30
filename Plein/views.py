@@ -10,6 +10,7 @@ from django.views.generic import TemplateView, ListView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Plein.menu import menu_dynamics
 from Account.rol import Rollen, rol_get_huidige, rol_get_limiet, rol_activate, rol_mag_wisselen
+from Account.models import user_is_otp_verified, account_needs_otp
 from Account.leeftijdsklassen import get_leeftijdsklassen
 
 
@@ -65,6 +66,8 @@ class PrivacyView(TemplateView):
         return context
 
 
+# TODO: als de test_func()==False resulteert in een redirect naar invalid url: accounts/login --> 404
+# TODO: bij niet voldoende rechten geeft UserPassesTestMixin een PermissionDenied exceptie die niet opgevangen wordt --> 403
 class WisselVanRolView(UserPassesTestMixin, ListView):
 
     """ Django class-based view om van rol te wisselen """
@@ -108,6 +111,13 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
+        context['is_verified'] = False
+        context['show_otp_controle'] = False
+        if user_is_otp_verified(self.request):
+            context['is_verified'] = True
+        elif account_needs_otp(self.request.user):
+            context['show_otp_controle'] = True
+            context['otp_controle_url'] = reverse('Account:otp-controle')
         menu_dynamics(self.request, context, actief='wissel-van-rol')
         return context
 

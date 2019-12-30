@@ -11,6 +11,10 @@ from django.contrib.auth.models import AbstractUser
 from NhbStructuur.models import NhbLid
 from Overig.tijdelijke_url import maak_tijdelijke_url_accountemail, set_tijdelijke_url_receiver, RECEIVER_ACCOUNTEMAIL
 from BasisTypen.models import BoogType
+import pyotp
+
+
+SESSIONVAR_ACCOUNT_IS_OTP_VERIFIED = "account_otp_verified"
 
 
 class AccountCreateError(Exception):
@@ -43,12 +47,6 @@ class Account(AbstractUser):
     # (inherited, not used) email
     # (inherited) user_permissions: ManyToMany
     # (inherited) groups: ManyToMany
-    is_voltooid = models.BooleanField(              # TODO: obsolete?
-                        default=False,
-                        help_text="Extra informatie correct opgegeven voor NHB account?")
-    extra_info_pogingen = models.IntegerField(      # TODO: obsolete?
-                                default=3,
-                                help_text="Aantal pogingen over om extra informatie voor NHB account op te geven")
     vraag_nieuw_wachtwoord = models.BooleanField(   # TODO: implement
                                     default=False,
                                     help_text="Moet de gebruiker een nieuw wachtwoord opgeven bij volgende inlog?")
@@ -73,6 +71,16 @@ class Account(AbstractUser):
     is_BKO = models.BooleanField(
                         default=False,
                         help_text="BK Organisator")
+
+    # TOTP ondersteuning
+    otp_code = models.CharField(
+                        max_length=16,          # 16-char base32 encoded secret
+                        default="",
+                        help_text ="OTP code")
+
+    otp_is_actief = models.BooleanField(
+                        default=False,
+                        help_text="Is OTP verificatie gelukt")
 
     REQUIRED_FIELDS = ['password']
 
@@ -271,6 +279,62 @@ def account_email_is_bevestigd(mail):
     mail.nieuwe_email = ''
     mail.email_is_bevestigd = True
     mail.save()
+
+
+def account_needs_otp(account):
+    """ Controleer of het Account OTP verificatie nodig heeft
+        Returns: True or False
+        Bepaalde rechten vereisen OTP:
+            is_BKO
+            is_staff
+            rechten voor beheerders
+    """
+    if account.is_BKO or account.is_staff:
+        return True
+    # TODO: check rechten voor beheerders
+    return False
+
+
+def account_prep_for_otp(account):
+    """ Als het account nog niet voorbereid is voor OTP, maak het dan in orde
+    """
+    if account.otp_is_actief:
+        # all set
+        return
+
+    # maak eenmalig het OTP geheim aan voor deze gebruiker
+    if len(account.otp_code) != 16:
+        account.otp_code = pyotp.random_base32()
+        account.save()
+
+
+def account_controleer_otp_code(account, code):
+    otp = pyotp.TOTP(account.otp_code)
+    # valid_window=1 staat toe dat er net een nieuwe code gegenereerd is tijdens het intikken van de code
+    return otp.verify(code, valid_window=1)
+
+
+def account_zet_sessionvars_na_login(request):
+    """ Deze functie wordt aangeroepen vanuit de LoginView om een sessie variabele
+        te zetten die onthoudt of de gebruiker een OTP controle uitgevoerd heeft
+    """
+    sessionvars = request.session
+    sessionvars[SESSIONVAR_ACCOUNT_IS_OTP_VERIFIED] = False
+
+
+def account_zet_sessionvars_na_otp_controle(request):
+    """ Deze functie wordt aangeroepen vanuit de OTPControleView om een sessie variabele
+        te zetten die onthoudt dat de OTP controle voor de gebruiker gelukt is
+    """
+    sessionvars = request.session
+    sessionvars[SESSIONVAR_ACCOUNT_IS_OTP_VERIFIED] = True
+
+def user_is_otp_verified(request):
+    try:
+        return request.session[SESSIONVAR_ACCOUNT_IS_OTP_VERIFIED]
+    except KeyError:
+        pass
+    return False
 
 
 # end of file

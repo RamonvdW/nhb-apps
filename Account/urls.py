@@ -32,7 +32,15 @@ urlpatterns = [
 
     path('wachtwoord-vergeten/',
          views.WachtwoordVergetenView.as_view(),
-         name='wachtwoord-vergeten')
+         name='wachtwoord-vergeten'),
+
+    path('otp-controle/',
+         views.OTPControleView.as_view(),
+         name="otp-controle"),
+
+    path('otp-koppelen/',
+         views.OTPKoppelenView.as_view(),
+         name="otp-koppelen")
 ]
 
 # end of file
