@@ -36,7 +36,6 @@ then
     echo "      FAILED: NOT ENOUGH COVERAGE"
     echo "      ==========================="
     echo -e "$RESET"
-    firefox "$REPORT_DIR/index.html" &
 else
     echo "HTML report is in $REPORT_DIR  (try firefox $REPORT_DIR/index.html)"
 fi
