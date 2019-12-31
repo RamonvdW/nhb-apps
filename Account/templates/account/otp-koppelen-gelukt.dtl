@@ -15,7 +15,7 @@
 
 <p>De registratie van de twee-factor authenticatie was succesvol.</p>
 
-<p>Na de inlog met gebruikersnaam en wachtwoord vraagt deze website vanaf nu ook om de tweede-factor code.</p>
+<p>Naast de inlog met gebruikersnaam en wachtwoord vraagt deze website vanaf nu bij een rol wissel ook om de tweede-factor code.</p>
 
 <p><a class="btn blue white-text" href="{% url 'Plein:plein' %}">Startpagina</a></p>
 
