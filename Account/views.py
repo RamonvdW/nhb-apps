@@ -94,8 +94,8 @@ class LoginView(TemplateView):
 
                     # meteen de OTP verificatie laten doen als dit account het nodig heeft
                     # als de gebruiker dit over slaat, dan komt het bij elke view die het nodig heeft automatisch terug
-                    if account_needs_otp(account2):
-                        return HttpResponseRedirect(reverse('Account:otp-controle'))
+                    #if account_needs_otp(account2):
+                    #    return HttpResponseRedirect(reverse('Account:otp-controle'))
 
                     return HttpResponseRedirect(reverse('Plein:plein'))
                 else:
@@ -364,6 +364,10 @@ class OTPKoppelenView(TemplateView):
 
         account = request.user
 
+        if not account_needs_otp(account):
+            # gebruiker heeft geen OTP nodig
+            return HttpResponseRedirect(reverse('Plein:plein'))
+
         if account.otp_is_actief:
             # gebruiker is al gekoppeld, dus niet zomaar toestaan om een ander apparaat ook te koppelen!!
             return HttpResponseRedirect(reverse('Plein:plein'))
@@ -394,6 +398,10 @@ class OTPKoppelenView(TemplateView):
 
         if account.otp_is_actief:
             # gebruiker is al gekoppeld, dus niet zomaar toestaan om een ander apparaat ook te koppelen!!
+            return HttpResponseRedirect(reverse('Plein:plein'))
+
+        if not account_needs_otp(account):
+            # gebruiker heeft geen OTP nodig
             return HttpResponseRedirect(reverse('Plein:plein'))
 
         form = OTPControleForm(request.POST)
