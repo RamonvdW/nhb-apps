@@ -19,7 +19,7 @@
     <div class="row nav red white-text">
         <div class="col s12 center-align">
             <h5>Controle tweede factor</h5>
-            <p>Voor bestuurders</p>
+            <p>voor bestuurders</p>
         </div>
     </div>
 
@@ -48,10 +48,5 @@
         </form>
     </div>
 </div>
-
-<h5>Nog niet geactiveerd?</h5>
-
-<p>Controle met een tweede factor is verplicht voor gebruikers met toegang tot persoonsgegevens.</p>
-<p><a class="btn blue" href="{% url 'Account:otp-koppelen' %}">Koppelen</a></p>
 
 {% endblock %}

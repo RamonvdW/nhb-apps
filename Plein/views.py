@@ -9,14 +9,11 @@ from django.shortcuts import redirect
 from django.views.generic import TemplateView, ListView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Plein.menu import menu_dynamics
-from Account.rol import Rollen, rol_get_huidige, rol_get_limiet, rol_activate, rol_mag_wisselen
-from Account.models import user_is_otp_verified, account_needs_otp
 from Account.leeftijdsklassen import get_leeftijdsklassen
 
 
 TEMPLATE_PLEIN = 'plein/plein.dtl'
 TEMPLATE_PRIVACY = 'plein/privacy.dtl'
-TEMPLATE_WISSELVANROL = 'plein/wissel-van-rol.dtl'
 TEMPLATE_LEEFTIJDSKLASSEN = 'plein/leeftijdsklassen.dtl'
 
 
@@ -64,76 +61,6 @@ class PrivacyView(TemplateView):
         context = super().get_context_data(**kwargs)
         menu_dynamics(self.request, context, actief='privacy')
         return context
-
-
-# TODO: als de test_func()==False resulteert in een redirect naar invalid url: accounts/login --> 404
-# TODO: bij niet voldoende rechten geeft UserPassesTestMixin een PermissionDenied exceptie die niet opgevangen wordt --> 403
-class WisselVanRolView(UserPassesTestMixin, ListView):
-
-    """ Django class-based view om van rol te wisselen """
-
-    # class variables shared by all instances
-    template_name = TEMPLATE_WISSELVANROL
-
-    def test_func(self):
-        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        return rol_mag_wisselen(self.request)
-
-    def get_queryset(self):
-        """ called by the template system to get the queryset or list of objects for the template """
-        objs = list()
-
-        rol = rol_get_limiet(self.request)
-
-        if rol <= Rollen.ROL_IT:
-            url = reverse('Plein:activeer-rol', kwargs={'rol': 'beheerder'})
-            objs.append({ 'titel': 'IT beheerder', 'url': url})
-
-        if rol <= Rollen.ROL_BKO:
-            url = reverse('Plein:activeer-rol', kwargs={'rol': 'BKO'})
-            objs.append({ 'titel': 'BK Organizator (BKO)', 'url': url})
-
-        #if rol <= Rollen.ROL_RKO:
-        #    objs.append('RKO rayon X')      # TODO: voor specifieke rayons
-
-        #if rol <= Rollen.ROL_RCL:
-        #    objs.append('RCL regio Y')      # TODO: voor specifieke regios
-
-        #if rol <= Rollen.ROL_CWZ:
-        #    objs.append('CWZ vereniging Z') # TODO: voor specifieke verenigingen
-
-        if rol <= Rollen.ROL_SCHUTTER:
-            url = reverse('Plein:activeer-rol', kwargs={'rol': 'schutter'})
-            objs.append({ 'titel': 'Schutter', 'url': url})
-
-        return objs
-
-    def get_context_data(self, **kwargs):
-        """ called by the template system to get the context data for the template """
-        context = super().get_context_data(**kwargs)
-        context['is_verified'] = False
-        context['show_otp_controle'] = False
-        if user_is_otp_verified(self.request):
-            context['is_verified'] = True
-        elif account_needs_otp(self.request.user):
-            context['show_otp_controle'] = True
-            context['otp_controle_url'] = reverse('Account:otp-controle')
-        menu_dynamics(self.request, context, actief='wissel-van-rol')
-        return context
-
-
-class ActiveerRolView(UserPassesTestMixin, View):
-    """ Django class-based view om een andere rol aan te nemen """
-
-    # class variables shared by all instances
-
-    def test_func(self):
-        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        return rol_mag_wisselen(self.request)
-
-    def get(self, request, *args, **kwargs):
-        rol_activate(request, kwargs['rol'])
-        return redirect('Plein:plein')
 
 
 class LeeftijdsklassenView(UserPassesTestMixin, TemplateView):

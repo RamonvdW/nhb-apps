@@ -9,7 +9,7 @@ from django.test import TestCase
 from .menu import menu_dynamics
 from Account.rol import rol_zet_sessionvars_na_login
 from Account.leeftijdsklassen import leeftijdsklassen_zet_sessionvars_na_login
-from Account.models import Account
+from Account.models import Account, account_zet_sessionvars_na_login, account_zet_sessionvars_na_otp_controle
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
 from NhbStructuur.migrations.m0002_nhbstructuur_2018 import maak_rayons_2018, maak_regios_2018
 import datetime
@@ -136,6 +136,14 @@ class PleinTest(TestCase):
 
     def test_plein_admin(self):
         self.client.login(username='admin', password='wachtwoord')
+        account_zet_sessionvars_na_login(self.client).save()
+        rol_zet_sessionvars_na_login(self.account_admin, self.client).save()
+        resp = self.client.get('/plein/')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assertNotContains(resp, '/admin/')
+        self.assertContains(resp, 'Wissel van rol')
+        # simuleert 2FA
+        account_zet_sessionvars_na_otp_controle(self.client).save()
         rol_zet_sessionvars_na_login(self.account_admin, self.client).save()
         resp = self.client.get('/plein/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -150,60 +158,6 @@ class PleinTest(TestCase):
         assert_html_ok(self, resp)
         assert_template_used(self, resp, ('plein/privacy.dtl', 'plein/site_layout.dtl'))
         assert_other_http_commands_not_supported(self, '/plein/privacy/')
-
-    def test_wisselvanrol_pagina(self):
-        self.client.login(username='admin', password='wachtwoord')
-        rol_zet_sessionvars_na_login(self.account_admin, self.client).save()
-        resp = self.client.get('/plein/wissel-van-rol/')
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        assert_html_ok(self, resp)
-        # controleer dat de keuze mogelijkheden op de pagina staan
-        self.assertContains(resp, 'IT beheerder')
-        self.assertContains(resp, 'BKO')
-        self.assertContains(resp, 'Schutter')
-        assert_template_used(self, resp, ('plein/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
-        assert_other_http_commands_not_supported(self, '/plein/wissel-van-rol/')
-        self.client.logout()
-
-    def test_rolwissel(self):
-        self.client.login(username='admin', password='wachtwoord')
-        rol_zet_sessionvars_na_login(self.account_admin, self.client).save()
-
-        resp = self.client.get('/plein/wissel-van-rol/BKO/', follow=True)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, "Rol: BKO")
-
-        resp = self.client.get('/plein/wissel-van-rol/beheerder/', follow=True)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, "Rol: IT beheerder")
-
-        resp = self.client.get('/plein/wissel-van-rol/schutter/', follow=True)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, "Rol: Schutter")
-
-        self.client.logout()
-
-    def test_rolwissel_bad(self):
-        self.client.login(username='admin', password='wachtwoord')
-        rol_zet_sessionvars_na_login(self.account_admin, self.client).save()
-
-        resp = self.client.get('/plein/wissel-van-rol/BKO/', follow=True)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, "Rol: BKO")
-
-        # controleer dat een niet valide rol wissel geen effect heeft
-        # dit raakt een exception in Account.rol:rol_activate
-        resp = self.client.get('/plein/wissel-van-rol/huh/', follow=True)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, "Rol: BKO")
-
-        self.client.logout()
-
-    def test_geen_rolwissel(self):
-        # dit raakt de exceptie in Account.rol:rol_mag_wisselen
-        self.client.logout()
-        resp = self.client.get('/plein/wissel-van-rol/')
-        self.assertEqual(resp.status_code, 302)     # 302 = Redirect (to login)
 
     def test_dynamic_menu_asssert(self):
         # test the assert in menu_dynamics

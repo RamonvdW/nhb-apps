@@ -40,7 +40,15 @@ urlpatterns = [
 
     path('otp-koppelen/',
          views.OTPKoppelenView.as_view(),
-         name="otp-koppelen")
+         name="otp-koppelen"),
+
+    path('wissel-van-rol/<str:rol>/',
+         views.ActiveerRolView.as_view(),
+         name='activeer-rol'),
+
+    path('wissel-van-rol/',
+         views.WisselVanRolView.as_view(),
+         name='wissel-van-rol'),
 ]
 
 # end of file

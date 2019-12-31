@@ -8,7 +8,7 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from Plein.tests import assert_html_ok, assert_other_http_commands_not_supported, assert_template_used
 from .models import SiteFeedback
-from Account.models import Account
+from Account.models import Account, account_zet_sessionvars_na_otp_controle
 from Account.rol import rol_zet_sessionvars_na_login
 
 
@@ -52,7 +52,7 @@ class OverigTest(TestCase):
         assert_html_ok(self, resp)
         assert_other_http_commands_not_supported(self, '/overig/feedback/bedankt/')
 
-    def test_post_annon(self):
+    def test_feedback_post_annon(self):
         self.client.logout()
         resp = self.client.get('/overig/feedback/nul/plein/')    # zet sessie variabelen: op_pagina en gebruiker
         resp = self.client.post('/overig/feedback/formulier/', {'bevinding': '4', 'feedback': 'Just testing'})
@@ -60,7 +60,7 @@ class OverigTest(TestCase):
         self.assertEqual(resp.url, '/overig/feedback/bedankt/')
         assert_other_http_commands_not_supported(self, '/overig/feedback/nul/plein/', post=False)   # post mag wel
 
-    def test_post_user(self):
+    def test_feedback_post_user(self):
         self.client.login(username='normaal', password='wachtwoord')
         resp = self.client.get('/overig/feedback/nul/plein/')   # zet sessie variabelen: op_pagina en gebruiker
         resp = self.client.post('/overig/feedback/formulier/', {'bevinding': '4', 'feedback': 20*'Just testing '})   # 20x makes it >80 chars long
@@ -70,7 +70,7 @@ class OverigTest(TestCase):
         descr = str(obj)
         self.assertGreater(len(descr), 0)
 
-    def test_post_annon_illegal_feedback(self):
+    def test_feedback_post_annon_illegal_feedback(self):
         self.client.logout()
         resp = self.client.get('/overig/feedback/nul/plein/')   # zet sessie variabelen: op_pagina en gebruiker
         resp = self.client.post('/overig/feedback/formulier/', {'bevinding': '4', 'feedback': ''})
@@ -78,7 +78,7 @@ class OverigTest(TestCase):
         assert_template_used(self, resp, ('overig/site-feedback-formulier.dtl', 'plein/site_layout.dtl'))
         assert_html_ok(self, resp)
 
-    def test_post_annon_illegal_bevinding(self):
+    def test_feedback_post_annon_illegal_bevinding(self):
         self.client.logout()
         resp = self.client.get('/overig/feedback/nul/plein/')   # zet sessie variabelen: op_pagina en gebruiker
         resp = self.client.post('/overig/feedback/formulier/', {'bevinding': '5', 'feedback': 'Just testing'})
@@ -86,7 +86,7 @@ class OverigTest(TestCase):
         assert_template_used(self, resp, ('overig/site-feedback-formulier.dtl', 'plein/site_layout.dtl'))
         assert_html_ok(self, resp)
 
-    def test_post_without_get(self):
+    def test_feedback_post_without_get(self):
         # probeer een post van het formulier zonder de get
         self.client.logout()
         resp = self.client.post('/overig/feedback/formulier/', {'bevinding': '4', 'feedback': 'Just testing'})
@@ -94,7 +94,7 @@ class OverigTest(TestCase):
         assert_template_used(self, resp, ('overig/site-feedback-formulier.dtl', 'plein/site_layout.dtl'))
         assert_html_ok(self, resp)
 
-    def test_afgehandeld(self):
+    def test_feedback_afgehandeld(self):
         self.client.logout()
         resp = self.client.get('/overig/feedback/nul/plein/')   # zet sessie variabelen: op_pagina en gebruiker
         resp = self.client.post('/overig/feedback/formulier/', {'bevinding': '4', 'feedback': 'Just testing'})
@@ -106,20 +106,20 @@ class OverigTest(TestCase):
         descr = str(obj)
         self.assertTrue("(afgehandeld) " in descr)
 
-    def test_get_formulier(self):
+    def test_get_feedback_formulier(self):
         # get van het formulier is niet de bedoeling
         self.client.logout()
         resp = self.client.get('/overig/feedback/formulier/')
         self.assertEqual(resp.status_code, 404)
 
-    def test_inzicht_annon_redirect_login(self):
+    def test_feedback_inzicht_annon_redirect_login(self):
         # zonder inlog is feedback niet te zien
         self.client.logout()
         resp = self.client.get('/overig/feedback/inzicht/')
         self.assertEqual(resp.status_code, 302)  # redirect
         self.assertRedirects(resp, '/account/login/?next=/overig/feedback/inzicht/')
 
-    def test_inzicht_user_forbidden(self):
+    def test_feedback_inzicht_user_forbidden(self):
         # do een get van het logboek met een gebruiker die daar geen rechten toe heeft
         # resulteert rauwe Forbidden
         self.client.login(username='normaal', password='wachtwoord')
@@ -127,9 +127,10 @@ class OverigTest(TestCase):
         resp = self.client.get('/overig/feedback/inzicht/')
         self.assertEqual(resp.status_code, 403)  # 403 = Forbidden
 
-    def test_inzicht_user(self):
+    def test_feedback_inzicht_admin(self):
         # do een get van alle feedback
         self.client.login(username='normaal', password='wachtwoord')
+        account_zet_sessionvars_na_otp_controle(self.client).save()
         rol_zet_sessionvars_na_login(self.account_admin, self.client).save()
         resp = self.client.get('/overig/feedback/inzicht/')
         self.assertEqual(resp.status_code, 200)

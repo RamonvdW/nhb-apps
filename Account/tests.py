@@ -13,13 +13,19 @@ from .rol import Rollen, rol_zet_sessionvars_na_login, rol_mag_wisselen,\
                          rol_get_limiet, rol_get_huidige, rol_activate
 from .leeftijdsklassen import leeftijdsklassen_zet_sessionvars_na_login,\
                               get_leeftijdsklassen
-from .models import Account, AccountEmail
+from .models import Account, AccountEmail, account_zet_sessionvars_na_login, account_zet_sessionvars_na_otp_controle
 from .views import obfuscate_email
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
 from NhbStructuur.migrations.m0002_nhbstructuur_2018 import maak_rayons_2018, maak_regios_2018
-from Plein.tests import assert_html_ok, assert_template_used
+from Plein.tests import assert_html_ok, assert_template_used, assert_other_http_commands_not_supported
 import datetime
+import pyotp
 import io
+
+
+def get_otp_code(account):
+    otp = pyotp.TOTP(account.otp_code)
+    return otp.now()
 
 
 def get_url(resp, pre=b'\x00', post=b''):
@@ -221,6 +227,7 @@ class AccountTest(TestCase):
         account.is_BKO = False
         account.nhblid = 1
         request.session = dict()
+        account_zet_sessionvars_na_login(request)
         rol_zet_sessionvars_na_login(account, request)
         self.assertFalse(rol_mag_wisselen(request))
         self.assertEqual(rol_get_limiet(request), Rollen.ROL_SCHUTTER)
@@ -237,8 +244,13 @@ class AccountTest(TestCase):
         account.is_BKO = True
         account.nhblid = 1
         request.session = dict()
+        account_zet_sessionvars_na_login(request)
         rol_zet_sessionvars_na_login(account, request)
         self.assertTrue(rol_mag_wisselen(request))
+        self.assertEqual(rol_get_limiet(request), Rollen.ROL_SCHUTTER)
+        self.assertEqual(rol_get_huidige(request), Rollen.ROL_SCHUTTER)
+        account_zet_sessionvars_na_otp_controle(request)
+        rol_zet_sessionvars_na_login(account, request)
         self.assertEqual(rol_get_limiet(request), Rollen.ROL_BKO)
         self.assertEqual(rol_get_huidige(request), Rollen.ROL_BKO)
         rol_activate(request, 'schutter')
@@ -255,6 +267,11 @@ class AccountTest(TestCase):
         account.is_BKO = False
         account.nhblid = None
         request.session = dict()
+        account_zet_sessionvars_na_login(request)
+        rol_zet_sessionvars_na_login(account, request)
+        self.assertEqual(rol_get_limiet(request), Rollen.ROL_SCHUTTER)
+        self.assertEqual(rol_get_huidige(request), Rollen.ROL_SCHUTTER)
+        account_zet_sessionvars_na_otp_controle(request)
         rol_zet_sessionvars_na_login(account, request)
         self.assertTrue(rol_mag_wisselen(request))
         self.assertEqual(rol_get_limiet(request), Rollen.ROL_IT)
@@ -586,5 +603,261 @@ class AccountTest(TestCase):
         # exception case
         management.call_command('maak_beheerder', 'nietbestaand', stderr=f1, stdout=f2)
         self.assertEqual(f1.getvalue(), 'Account matching query does not exist.\n')
+
+    def test_wisselvanrol_pagina(self):
+
+        # controleer dat de link naar het koppelen op de pagina staat
+        self.account_admin.otp_is_actief = False
+        self.account_admin.save()
+        self.client.login(username='admin', password='wachtwoord')
+        account_zet_sessionvars_na_login(self.client).save()
+        rol_zet_sessionvars_na_login(self.account_admin, self.client).save()
+        resp = self.client.get('/account/wissel-van-rol/')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_html_ok(self, resp)
+        self.assertNotContains(resp, 'IT beheerder')
+        self.assertNotContains(resp, 'BKO')
+        self.assertContains(resp, 'Schutter')
+        self.assertContains(resp, 'Controle met een tweede factor is verplicht voor gebruikers met toegang tot persoonsgegevens')
+
+        self.client.logout()
+
+        # controleer dat de link naar het controleren op de pagina staat
+        self.account_admin.otp_is_actief = True
+        self.account_admin.save()
+        self.client.login(username='admin', password='wachtwoord')
+        account_zet_sessionvars_na_login(self.client).save()
+        rol_zet_sessionvars_na_login(self.account_admin, self.client).save()
+        resp = self.client.get('/account/wissel-van-rol/')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_html_ok(self, resp)
+        self.assertNotContains(resp, 'IT beheerder')
+        self.assertNotContains(resp, 'BKO')
+        self.assertContains(resp, 'Schutter')
+        self.assertContains(resp, 'Een aantal rollen worden pas beschikbaar nadat de controle van de tweede factor uitgevoerd is')
+
+        # controleer dat de complete keuzemogelijkheden op de pagina staan
+        account_zet_sessionvars_na_otp_controle(self.client).save()
+        rol_zet_sessionvars_na_login(self.account_admin, self.client).save()
+        resp = self.client.get('/account/wissel-van-rol/')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_html_ok(self, resp)
+        self.assertContains(resp, 'IT beheerder')
+        self.assertContains(resp, 'BKO')
+        self.assertContains(resp, 'Schutter')
+
+        assert_template_used(self, resp, ('account/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
+        assert_other_http_commands_not_supported(self, '/account/wissel-van-rol/')
+        self.client.logout()
+
+    def test_rolwissel(self):
+        self.client.login(username='admin', password='wachtwoord')
+        account_zet_sessionvars_na_otp_controle(self.client).save()
+        rol_zet_sessionvars_na_login(self.account_admin, self.client).save()
+
+        resp = self.client.get('/account/wissel-van-rol/BKO/', follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assertContains(resp, "Rol: BKO")
+
+        resp = self.client.get('/account/wissel-van-rol/beheerder/', follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assertContains(resp, "Rol: IT beheerder")
+
+        resp = self.client.get('/account/wissel-van-rol/schutter/', follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assertContains(resp, "Rol: Schutter")
+
+        self.client.logout()
+
+    def test_rolwissel_bad(self):
+        self.client.login(username='admin', password='wachtwoord')
+        account_zet_sessionvars_na_otp_controle(self.client).save()
+        rol_zet_sessionvars_na_login(self.account_admin, self.client).save()
+
+        resp = self.client.get('/account/wissel-van-rol/BKO/', follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assertContains(resp, "Rol: BKO")
+
+        # controleer dat een niet valide rol wissel geen effect heeft
+        # dit raakt een exception in Account.rol:rol_activate
+        resp = self.client.get('/account/wissel-van-rol/huh/', follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assertContains(resp, "Rol: BKO")
+
+        self.client.logout()
+
+    def test_geen_rolwissel(self):
+        # dit raakt de exceptie in Account.rol:rol_mag_wisselen
+        self.client.logout()
+        resp = self.client.get('/account/wissel-van-rol/')
+        self.assertEqual(resp.status_code, 302)     # 302 = Redirect (to login)
+
+    def test_reset_otp(self):
+        # non-existing user
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('reset_otp', 'noujazeg', stderr=f1, stdout=f2)
+        self.assertEqual(f1.getvalue(), "Account matching query does not exist.\n")
+        self.assertEqual(f2.getvalue(), '')
+
+        # OTP is niet actief
+        self.account_normaal.otp_is_actief = False
+        self.account_normaal.save()
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('reset_otp', 'normaal', stderr=f1, stdout=f2)
+        self.assertEqual(f1.getvalue(), '')
+        self.assertEqual(f2.getvalue(), "Account 'normaal' heeft OTP niet aan staan\n")
+
+        # OTP resetten
+        self.account_normaal.otp_is_actief = True
+        self.account_normaal.otp_code = "1234"
+        self.account_normaal.save()
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('reset_otp', 'normaal', stderr=f1, stdout=f2)
+        self.assertEqual(f1.getvalue(), '')
+        self.assertEqual(f2.getvalue(), "Account 'normaal' moet nu opnieuw de OTP koppeling leggen\n")
+        self.account_normaal = Account.objects.get(username='normaal')
+        self.assertFalse(self.account_normaal.otp_is_actief)
+        self.assertEqual(self.account_normaal.otp_code, "1234")
+
+        # OTP resetten + otp_code vergeten
+        self.account_normaal.otp_is_actief = True
+        self.account_normaal.otp_code = "1234"
+        self.account_normaal.save()
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('reset_otp', 'normaal', '--reset_secret', stderr=f1, stdout=f2)
+        self.assertEqual(f1.getvalue(), '')
+        self.assertEqual(f2.getvalue(), "Account 'normaal' moet nu opnieuw de OTP koppeling leggen\n")
+        self.account_normaal = Account.objects.get(username='normaal')
+        self.assertFalse(self.account_normaal.otp_is_actief)
+        self.assertNotEqual(self.account_normaal.otp_code, "1234")
+
+        # exception case
+        management.call_command('deblok_account', 'nietbestaand', stderr=f1, stdout=f2)
+        self.assertEqual(f1.getvalue(), 'Account matching query does not exist.\n')
+
+    def test_otp_koppelen_niet_ingelogd(self):
+        self.client.logout()
+        # controleer redirect naar het plein, omdat de gebruiker niet ingelogged is
+        resp = self.client.get('/account/otp-koppelen/', follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_template_used(self, resp, ('plein/plein.dtl', 'plein/site_layout.dtl'))
+
+        resp = self.client.post('/account/otp-koppelen/', {'otp_code': '123456'}, follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_template_used(self, resp, ('plein/plein.dtl', 'plein/site_layout.dtl'))
+
+    def test_otp_koppelen_niet_nodig(self):
+        self.client.login(username='normaal', password='wachtwoord')
+        # controleer redirect naar het plein, omdat OTP koppeling niet nodig is
+        resp = self.client.get('/account/otp-koppelen/', follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_template_used(self, resp, ('plein/plein.dtl', 'plein/site_layout.dtl'))
+
+        resp = self.client.post('/account/otp-koppelen/', {'otp_code': '123456'}, follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_template_used(self, resp, ('plein/plein.dtl', 'plein/site_layout.dtl'))
+
+    def test_otp_koppelen_al_gekoppelend(self):
+        self.account_admin.otp_is_actief = True
+        self.account_admin.save()
+        self.client.login(username='admin', password='wachtwoord')
+        account_zet_sessionvars_na_login(self.client).save()
+        rol_zet_sessionvars_na_login(self.account_admin, self.client).save()
+        # controleer redirect naar het plein, omdat OTP koppeling er al is
+        resp = self.client.get('/account/otp-koppelen/', follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_template_used(self, resp, ('plein/plein.dtl', 'plein/site_layout.dtl'))
+
+        resp = self.client.post('/account/otp-koppelen/', {'otp_code': '123456'}, follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_template_used(self, resp, ('plein/plein.dtl', 'plein/site_layout.dtl'))
+
+    def test_otp_koppelen(self):
+        self.account_admin.otp_is_actief = False
+        self.account_admin.otp_code = 'xx'
+        self.account_admin.save()
+        self.client.login(username='admin', password='wachtwoord')
+        account_zet_sessionvars_na_login(self.client).save()
+        rol_zet_sessionvars_na_login(self.account_admin, self.client).save()
+        resp = self.client.get('/account/otp-koppelen/', follow=False)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_template_used(self, resp, ('account/otp-koppelen.dtl', 'plein/site_layout.dtl'))
+        self.account_admin = Account.objects.get(username='admin')
+        self.assertNotEqual(self.account_admin.otp_code, 'xx')
+        # foute otp code
+        resp = self.client.post('/account/otp-koppelen/', {'otp_code': '123456'}, follow=False)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_template_used(self, resp, ('account/otp-koppelen.dtl', 'plein/site_layout.dtl'))
+        self.account_admin = Account.objects.get(username='admin')
+        self.assertFalse(self.account_admin.otp_is_actief)
+        # juiste otp code
+        code = get_otp_code(self.account_admin)
+        resp = self.client.post('/account/otp-koppelen/', {'otp_code': code}, follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_template_used(self, resp, ('account/otp-koppelen-gelukt.dtl', 'plein/site_layout.dtl'))
+        self.account_admin = Account.objects.get(username='admin')
+        self.assertTrue(self.account_admin.otp_is_actief)
+
+    def test_otp_controle_niet_ingelogd(self):
+        self.client.logout()
+        # controleer redirect naar het plein, omdat de gebruiker niet ingelogged is
+        resp = self.client.get('/account/otp-controle/', follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_template_used(self, resp, ('plein/plein.dtl', 'plein/site_layout.dtl'))
+
+        resp = self.client.post('/account/otp-controle/', {'otp_code': '123456'}, follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_template_used(self, resp, ('plein/plein.dtl', 'plein/site_layout.dtl'))
+
+    def test_otp_controle_niet_nodig(self):
+        self.client.login(username='normaal', password='wachtwoord')
+        # controleer redirect naar het plein, omdat OTP koppeling niet nodig is
+        resp = self.client.get('/account/otp-controle/', follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_template_used(self, resp, ('plein/plein.dtl', 'plein/site_layout.dtl'))
+
+        resp = self.client.post('/account/otp-controle/', {'otp_code': '123456'}, follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_template_used(self, resp, ('plein/plein.dtl', 'plein/site_layout.dtl'))
+
+    def test_otp_controle(self):
+        self.account_admin.otp_is_actief = True
+        self.account_admin.otp_code = "ABCDEFGHIJKLMNOP"
+        self.account_admin.save()
+        self.client.login(username='admin', password='wachtwoord')
+        account_zet_sessionvars_na_login(self.client).save()
+        rol_zet_sessionvars_na_login(self.account_admin, self.client).save()
+        resp = self.client.get('/account/otp-controle/', follow=False)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_template_used(self, resp, ('account/otp-controle.dtl', 'plein/site_layout.dtl'))
+        # geen code
+        resp = self.client.post('/account/otp-controle/', {'jaja': 'nee'}, follow=False)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_template_used(self, resp, ('account/otp-controle.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, "De gegevens worden niet geaccepteerd")
+        # lege code
+        resp = self.client.post('/account/otp-controle/', {'otp_code': ''}, follow=False)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_template_used(self, resp, ('account/otp-controle.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, "De gegevens worden niet geaccepteerd")
+        # illegale code
+        resp = self.client.post('/account/otp-controle/', {'otp_code': 'ABCDEF'}, follow=False)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_template_used(self, resp, ('account/otp-controle.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, "Voer de vereiste code in")
+        # fout code
+        resp = self.client.post('/account/otp-controle/', {'otp_code': '123456'}, follow=False)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_template_used(self, resp, ('account/otp-controle.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, "Verkeerde code. Probeer het nog eens.")
+        # juiste otp code resulteert in redirect naar het plein
+        code = get_otp_code(self.account_admin)
+        resp = self.client.post('/account/otp-controle/', {'otp_code': code}, follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_template_used(self, resp, ('plein/plein.dtl', 'plein/site_layout.dtl'))
 
 # end of file

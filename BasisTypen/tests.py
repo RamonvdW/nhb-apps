@@ -7,7 +7,7 @@
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from .models import BoogType, TeamType, WedstrijdKlasse, LeeftijdsKlasse, TeamTypeBoog, WedstrijdKlasseBoog, WedstrijdKlasseLeeftijd
-from Account.models import Account
+from Account.models import Account, account_zet_sessionvars_na_otp_controle
 from Account.rol import rol_zet_sessionvars_na_login
 from Plein.tests import assert_html_ok, assert_template_used
 
@@ -80,6 +80,7 @@ class TestBasisTypen(TestCase):
 
     def test_competitie_defaults_bko(self):
         self.client.login(username='bko', password='wachtwoord')
+        account_zet_sessionvars_na_otp_controle(self.client).save()
         rol_zet_sessionvars_na_login(self.account_bko, self.client).save()
         resp = self.client.get('/overig/instellingen-volgende-competitie/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK

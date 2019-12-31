@@ -91,15 +91,11 @@ class OTPControleForm(forms.Form):
         valid = super(forms.Form, self).is_valid()
         if valid:
             otp_code = self.cleaned_data.get('otp_code')
-            if otp_code == "":
+            try:
+                code = int(otp_code)
+            except ValueError:
                 self.add_error(None, 'Voer de vereiste code in')
                 valid = False
-            else:
-                try:
-                    code = int(otp_code)
-                except ValueError:
-                    self.add_error(None, 'Voer de vereist code in')
-                    valid = False
         else:
             self.add_error(None, 'De gegevens worden niet geaccepteerd')
 

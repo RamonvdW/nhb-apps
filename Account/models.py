@@ -295,6 +295,10 @@ def account_needs_otp(account):
     return False
 
 
+def account_is_otp_gekoppeld(account):
+    return account.otp_is_actief
+
+
 def account_prep_for_otp(account):
     """ Als het account nog niet voorbereid is voor OTP, maak het dan in orde
     """
@@ -320,6 +324,7 @@ def account_zet_sessionvars_na_login(request):
     """
     sessionvars = request.session
     sessionvars[SESSIONVAR_ACCOUNT_IS_OTP_VERIFIED] = False
+    return sessionvars  # allows unittest to do sessionvars.save()
 
 
 def account_zet_sessionvars_na_otp_controle(request):
@@ -328,6 +333,8 @@ def account_zet_sessionvars_na_otp_controle(request):
     """
     sessionvars = request.session
     sessionvars[SESSIONVAR_ACCOUNT_IS_OTP_VERIFIED] = True
+    return sessionvars  # allows unittest to do sessionvars.save()
+
 
 def user_is_otp_verified(request):
     try:

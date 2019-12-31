@@ -9,7 +9,7 @@ from django.test import TestCase
 from Plein.tests import assert_html_ok, assert_other_http_commands_not_supported, assert_template_used
 from django.utils import timezone
 from .models import LogboekRegel, schrijf_in_logboek
-from Account.models import Account
+from Account.models import Account, account_zet_sessionvars_na_login, account_zet_sessionvars_na_otp_controle
 from Account.rol import rol_zet_sessionvars_na_login
 
 
@@ -47,6 +47,7 @@ class OverigTest(TestCase):
         # do een get van het logboek met een gebruiker die daar geen rechten toe heeft
         # resulteert rauwe Forbidden
         self.client.login(username='normaal', password='wachtwoord')
+        account_zet_sessionvars_na_login(self.client).save()
         rol_zet_sessionvars_na_login(self.account_normaal, self.client).save()
         #sessionvars = rol_zet_sessionvars_na_login(self.account_normaal, self.client)
         #sessionvars.save()      # required for unittest only
@@ -55,6 +56,7 @@ class OverigTest(TestCase):
 
     def test_logboek_user_allowed(self):
         self.client.login(username='admin', password='wachtwoord')
+        account_zet_sessionvars_na_otp_controle(self.client).save()
         rol_zet_sessionvars_na_login(self.account_admin, self.client).save()
         rsp = self.client.get(self.logboek_url)
         self.assertEqual(rsp.status_code, 200)  # 200 = OK

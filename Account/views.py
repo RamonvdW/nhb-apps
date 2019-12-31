@@ -5,20 +5,25 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.http import HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.mixins import UserPassesTestMixin
 from django.views import View
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, ListView
 from django.utils import timezone
 from django.conf import settings
 from .forms import LoginForm, RegistreerForm, OTPControleForm
 from .models import AccountCreateError, AccountCreateNhbGeenEmail, Account,\
                     account_create_nhb, account_email_is_bevestigd,\
-                    account_needs_otp, account_prep_for_otp, account_controleer_otp_code,\
-                    account_zet_sessionvars_na_login, account_zet_sessionvars_na_otp_controle
+                    account_needs_otp, account_is_otp_gekoppeld,\
+                    account_prep_for_otp, account_controleer_otp_code,\
+                    account_zet_sessionvars_na_login, account_zet_sessionvars_na_otp_controle,\
+                    user_is_otp_verified
 from .leeftijdsklassen import leeftijdsklassen_zet_sessionvars_na_login
-from .rol import rol_zet_sessionvars_na_login, rol_zet_sessionvars_na_otp_controle
+from .rol import Rollen,\
+                 rol_get_huidige, rol_get_limiet, rol_activate, rol_mag_wisselen,\
+                 rol_zet_sessionvars_na_login, rol_zet_sessionvars_na_otp_controle
 from .qrcode import qrcode_get
 from Overig.tijdelijke_url import set_tijdelijke_url_receiver, RECEIVER_ACCOUNTEMAIL
 from Plein.menu import menu_dynamics
@@ -36,6 +41,7 @@ TEMPLATE_VERGETEN = 'account/wachtwoord-vergeten.dtl'
 TEMPLATE_OTPCONTROLE = 'account/otp-controle.dtl'
 TEMPLATE_OTPKOPPELEN = 'account/otp-koppelen.dtl'
 TEMPLATE_OTPGEKOPPELD = 'account/otp-koppelen-gelukt.dtl'
+TEMPLATE_WISSELVANROL = 'account/wissel-van-rol.dtl'
 
 
 class LoginView(TemplateView):
@@ -316,6 +322,10 @@ class OTPControleView(TemplateView):
             # gebruiker is niet ingelogd, dus stuur terug naar af
             return HttpResponseRedirect(reverse('Plein:plein'))
 
+        if not account_is_otp_gekoppeld(request.user):
+            # gebruiker heeft geen OTP koppeling
+            return HttpResponseRedirect(reverse('Plein:plein'))
+
         form = OTPControleForm()
         context = {'form': form}
         menu_dynamics(request, context)
@@ -325,6 +335,14 @@ class OTPControleView(TemplateView):
         """ deze functie wordt aangeroepen als een POST request ontvangen is.
             dit is gekoppeld aan het drukken op de Controleer knop.
         """
+        if not request.user.is_authenticated:
+            # gebruiker is niet ingelogd, dus stuur terug naar af
+            return HttpResponseRedirect(reverse('Plein:plein'))
+
+        if not account_is_otp_gekoppeld(request.user):
+            # gebruiker heeft geen OTP koppeling
+            return HttpResponseRedirect(reverse('Plein:plein'))
+
         form = OTPControleForm(request.POST)
         if form.is_valid():
             otp_code = form.cleaned_data.get('otp_code')
@@ -437,6 +455,79 @@ class OTPKoppelenView(TemplateView):
                    'otp_secret': secret }
         menu_dynamics(request, context, actief="inloggen")
         return render(request, TEMPLATE_OTPKOPPELEN, context)
+
+
+# TODO: als de test_func()==False resulteert in een redirect naar invalid url: accounts/login --> 404
+# TODO: bij niet voldoende rechten geeft UserPassesTestMixin een PermissionDenied exceptie die niet opgevangen wordt --> 403
+class WisselVanRolView(UserPassesTestMixin, ListView):
+
+    """ Django class-based view om van rol te wisselen """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_WISSELVANROL
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        return rol_mag_wisselen(self.request)
+
+    def get_queryset(self):
+        """ called by the template system to get the queryset or list of objects for the template """
+        objs = list()
+
+        rol = rol_get_limiet(self.request)
+
+        if rol <= Rollen.ROL_IT:
+            url = reverse('Account:activeer-rol', kwargs={'rol': 'beheerder'})
+            objs.append({ 'titel': 'IT beheerder', 'url': url})
+
+        if rol <= Rollen.ROL_BKO:
+            url = reverse('Account:activeer-rol', kwargs={'rol': 'BKO'})
+            objs.append({ 'titel': 'BK Organizator (BKO)', 'url': url})
+
+        #if rol <= Rollen.ROL_RKO:
+        #    objs.append('RKO rayon X')      # TODO: voor specifieke rayons
+
+        #if rol <= Rollen.ROL_RCL:
+        #    objs.append('RCL regio Y')      # TODO: voor specifieke regios
+
+        #if rol <= Rollen.ROL_CWZ:
+        #    objs.append('CWZ vereniging Z') # TODO: voor specifieke verenigingen
+
+        if rol <= Rollen.ROL_SCHUTTER:
+            url = reverse('Account:activeer-rol', kwargs={'rol': 'schutter'})
+            objs.append({ 'titel': 'Schutter', 'url': url})
+
+        return objs
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+        context['is_verified'] = False
+        context['show_otp_controle'] = False
+        context['show_otp_koppelen'] = False
+        if user_is_otp_verified(self.request):
+            context['is_verified'] = True
+        elif account_needs_otp(self.request.user):
+            if not account_is_otp_gekoppeld(self.request.user):
+                context['show_otp_koppelen'] = True
+            else:
+                context['show_otp_controle'] = True
+        menu_dynamics(self.request, context, actief='wissel-van-rol')
+        return context
+
+
+class ActiveerRolView(UserPassesTestMixin, View):
+    """ Django class-based view om een andere rol aan te nemen """
+
+    # class variables shared by all instances
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        return rol_mag_wisselen(self.request)
+
+    def get(self, request, *args, **kwargs):
+        rol_activate(request, kwargs['rol'])
+        return redirect('Plein:plein')
 
 
 def receive_bevestiging_accountemail(request, obj):

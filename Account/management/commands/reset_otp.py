@@ -17,11 +17,13 @@ class Command(BaseCommand):
     help = "Reset de OTP / 2FA koppeling"
 
     def add_arguments(self, parser):
-        parser.add_argument('username', nargs=1,
-                            help="inlog naam")
+        parser.add_argument('username', nargs=1,  help="inlog naam")
+        parser.add_argument('--reset_secret', action='store_true', help="Huidige OTP geheim verwijderen")
 
     def handle(self, *args, **options):
         username = options['username'][0]
+        reset_secret = options['reset_secret']
+
         try:
             account = Account.objects.get(username=username)
         except Account.DoesNotExist as exc:
@@ -31,6 +33,8 @@ class Command(BaseCommand):
                 self.stdout.write("Account %s heeft OTP niet aan staan" % repr(username))
             else:
                 account.otp_is_actief = False
+                if reset_secret:
+                    account.otp_code = "x"
                 account.save()
                 self.stdout.write("Account %s moet nu opnieuw de OTP koppeling leggen" % repr(username))
 
