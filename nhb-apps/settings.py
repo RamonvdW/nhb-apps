@@ -25,7 +25,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated to version
-SITE_VERSIE = 'test 2019-12-31'
+
 
 # modules van de site
 INSTALLED_APPS = [
@@ -201,7 +201,6 @@ RECORDS_TOEGESTANE_SOORTEN = (
     '288p',
 
     # Outdoor, still to be cleaned up
-    '72P',
     'Fita RK Rayon 4',
     'ShortMetric',
 
