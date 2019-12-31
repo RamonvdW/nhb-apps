@@ -355,7 +355,7 @@ class Command(BaseCommand):
 
             try:
                 lid_geboorte_datum = datetime.datetime.strptime(member['birthday'], "%Y-%m-%d").date() # YYYY-MM-DD
-            except ValueError:
+            except (ValueError, TypeError):
                 lid_geboorte_datum = None
                 is_valid = False
                 if not lid_ver:
@@ -378,7 +378,7 @@ class Command(BaseCommand):
 
             try:
                 lid_sinds = datetime.datetime.strptime(member['member_from'], "%Y-%m-%d").date() # YYYY-MM-DD
-            except ValueError:
+            except (ValueError, TypeError):
                 lid_sinds = None
                 is_valid = False
                 self.stderr.write('[ERROR] Lid %s heeft geen valide lidmaatschapsdatum' % lid_nhb_nr)
