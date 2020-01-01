@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019 Ramon van der Winkel.
+#  Copyright (c) 2019-2020 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -13,7 +13,7 @@ from Account.models import Account, account_zet_sessionvars_na_login, account_ze
 from Account.rol import rol_zet_sessionvars_na_login
 
 
-class OverigTest(TestCase):
+class LogboekTest(TestCase):
 
     def setUp(self):
         """ initializatie van de test case """
