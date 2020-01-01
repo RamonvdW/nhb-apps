@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019 Ramon van der Winkel.
+#  Copyright (c) 2019-2020 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -22,13 +22,25 @@ class RecordsTest(TestCase):
         # NhbLib
         lid = NhbLid()
         lid.nhb_nr = 123456
-        lid.voornaam = 'Top'
+        lid.voornaam = 'Jan'
         lid.achternaam = 'Schutter'
-        lid.email = 'user@test.nl'
+        lid.email = 'jan@test.nl'
         lid.geboorte_datum = parse_date('1970-03-03')
         lid.woon_straatnaam = 'Papendal'
         lid.geslacht = 'M'
         lid.sinds_datum = parse_date("1991-02-03") # Y-M-D
+        #lid.bij_vereniging
+        lid.save()
+
+        lid = NhbLid()
+        lid.nhb_nr = 123457
+        lid.voornaam = 'Petra'
+        lid.achternaam = 'Schutter'
+        lid.email = 'petra@test.nl'
+        lid.geboorte_datum = parse_date('1970-01-30')
+        lid.woon_straatnaam = 'Arnhem'
+        lid.geslacht = 'V'
+        lid.sinds_datum = parse_date("1991-02-05") # Y-M-D
         #lid.bij_vereniging
         lid.save()
 
@@ -186,11 +198,50 @@ class RecordsTest(TestCase):
         f1 = io.StringIO()
         f2 = io.StringIO()
         management.call_command('import_records', './notexisting.json', stderr=f1, stdout=f2)
-        #print("f1: %s" % f1.getvalue())
-        #print("f2: %s" % f2.getvalue())
         self.assertTrue(f1.getvalue().startswith('[ERROR] Kan bestand ./notexisting.json niet lezen ('))
-        self.assertEqual(f2.getvalue(), 'Done\n')
+        self.assertEqual(f2.getvalue(), '')
 
-# TODO: add call_command for management commands
+    def test_import_records_01(self):
+        # kapot bestand
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('import_records', './Records/management/testfiles/testfile_01.json', stderr=f1, stdout=f2)
+        self.assertTrue(f1.getvalue().startswith("[ERROR] Probleem met het JSON formaat in bestand './Records/management/testfiles/testfile_01.json'"))
+        self.assertEqual(f2.getvalue(), '')
+
+    def test_import_records_02(self):
+        # onverwacht tabblad
+        # verkeerde headers
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('import_records', './Records/management/testfiles/testfile_02.json', '--dryrun', stderr=f1, stdout=f2)
+        self.assertTrue('[ERROR] Niet ondersteunde tabblad naam: Onbekende blad naam' in f1.getvalue())
+        self.assertTrue('[ERROR] Kolom headers kloppen niet voor range Data team' in f1.getvalue())
+        self.assertTrue('Samenvatting: ' in f2.getvalue())
+        self.assertTrue('\nDRY RUN\n' in f2.getvalue())
+        self.assertTrue('\nDone\n' in f2.getvalue())
+
+    def test_import_records_03(self):
+        # bestand met alleen headers, geen data
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('import_records', './Records/management/testfiles/testfile_03.json', stderr=f1, stdout=f2)
+        self.assertFalse('[ERROR]' in f1.getvalue())
+        self.assertTrue('\nDone\n' in f2.getvalue())
+
+    def test_import_records_04(self):
+        # incompleet bestand
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('import_records', './Records/management/testfiles/testfile_04.json', stderr=f1, stdout=f2)
+        print("f1: %s" % f1.getvalue())
+        print("f2: %s" % f2.getvalue())
+        self.assertFalse('[ERROR]' in f1.getvalue())
+        self.assertTrue('[INFO] Record OD-1 toegevoegd' in f2.getvalue())
+        self.assertTrue('[INFO] Record OD-2 toegevoegd' in f2.getvalue())
+        self.assertTrue('[INFO] Record 18-1 toegevoegd' in f2.getvalue())
+        self.assertTrue('[INFO] Record 18-2 toegevoegd' in f2.getvalue())
+        self.assertTrue('[INFO] Record 25-1 toegevoegd' in f2.getvalue())
+        self.assertTrue('[INFO] Record 25-2 toegevoegd' in f2.getvalue())
 
 # end of file
