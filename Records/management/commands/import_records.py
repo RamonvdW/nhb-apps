@@ -18,6 +18,16 @@ import json
 class Command(BaseCommand):
     help = "Importeer alle records"
 
+    def __init__(self):
+        super().__init__()
+        self.count_read = 0
+        self.count_ongewijzigd = 0
+        self.count_errors = 0
+        self.count_wijzigingen = 0
+        self.count_toegevoegd = 0
+        self.count_verwijderd = 0
+        self.count_waarschuwing = 0
+
     def add_arguments(self, parser):
         parser.add_argument('filename', nargs=1,
                             help="in te lezen file")
@@ -385,36 +395,20 @@ class Command(BaseCommand):
                 if obj.datum == prev_obj.datum and obj.score == prev_obj.score and obj.x_count == prev_obj.x_count:
                     if obj.score_notitie != "gedeeld" or prev_obj.score_notitie != "gedeeld":
                         print("[WARNING] Identieke datum en score voor records %s-%s en %s-%s" % (disc, prev_obj.volg_nr, disc, obj.volg_nr))
+                        self.count_waarschuwing += 1
                 elif obj.score > prev_obj.score or (obj.score == prev_obj.score and obj.x_count >= prev_obj.x_count):
                     if obj.x_count + prev_obj.x_count > 0:
                         print("[WARNING] Score niet consecutief voor records %s-%s en %s-%s (%s(%sX) >= %s(%sX))" % (disc, prev_obj.volg_nr, disc, obj.volg_nr, obj.score, obj.x_count, prev_obj.score, prev_obj.x_count))
+                        self.count_waarschuwing += 1
                     else:
                         print("[WARNING] Score niet consecutief voor records %s-%s en %s-%s (%s >= %s)" % (disc, prev_obj.volg_nr, disc, obj.volg_nr, obj.score, prev_obj.score))
+                        self.count_waarschuwing += 1
 
                 prev_obj = obj
             # for
         # for
 
-    def handle(self, *args, **options):
-        self.dryrun = options['dryrun']
-
-        fname = options['filename'][0]
-        #print('fname=%s' % repr(fname))
-        with open(fname, 'rb') as jsonfile:
-            data = json.load(jsonfile)
-
-        # bereken de datum van morgen, om een check te kunnen doen van een datum
-        morgen = datetime.datetime.now() + datetime.timedelta(days=1)
-        self.datum_morgen = datetime.date(year=morgen.year, month=morgen.month, day=morgen.day)
-        del morgen
-
-        self.count_read = 0
-        self.count_ongewijzigd = 0
-        self.count_errors = 0
-        self.count_wijzigingen = 0
-        self.count_toegevoegd = 0
-        self.count_verwijderd = 0
-
+    def _import_data(self, data):
         # doorloop de tabbladen
         for sheet in data['valueRanges']:
             naam = sheet['range']       # 'Tabblad naam'!A1:AF1006
@@ -461,13 +455,14 @@ class Command(BaseCommand):
         # for
 
         # rapporteer de samenvatting en schrijf deze ook in het logboek
-        samenvatting = "Samenvatting: %s records; %s ongewijzigd; %s overgeslagen i.v.m. fouten; %s verwijderd; %s wijzigingen; %s toegevoegd" %\
+        samenvatting = "Samenvatting: %s records; %s ongewijzigd; %s overgeslagen i.v.m. fouten; %s verwijderd; %s wijzigingen; %s toegevoegd; %s waarschuwingen" %\
                           (self.count_read,
                            self.count_ongewijzigd,
                            self.count_errors,
                            self.count_verwijderd,
                            self.count_wijzigingen,
-                           self.count_toegevoegd)
+                           self.count_toegevoegd,
+                           self.count_waarschuwing)
 
         if self.dryrun:
             self.stdout.write("\nDRY RUN")
@@ -476,6 +471,24 @@ class Command(BaseCommand):
             self.stdout.write("\n")
 
         self.stdout.write(samenvatting)
+
+    def handle(self, *args, **options):
+        self.dryrun = options['dryrun']
+
+        # bereken de datum van morgen, om een check te kunnen doen van een datum
+        morgen = datetime.datetime.now() + datetime.timedelta(days=1)
+        self.datum_morgen = datetime.date(year=morgen.year, month=morgen.month, day=morgen.day)
+        del morgen
+
+        # lees de file in
+        fname = options['filename'][0]
+        try:
+            with open(fname, 'rb') as jsonfile:
+                data = json.load(jsonfile)
+        except IOError as exc:
+            self.stderr.write("[ERROR] Kan bestand %s niet lezen (%s)" % (fname, str(exc)))
+        else:
+            self._import_data(data)
 
         self.stdout.write('Done')
         return
