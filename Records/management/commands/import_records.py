@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019 Ramon van der Winkel.
+#  Copyright (c) 2019-2020 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -360,7 +360,7 @@ class Command(BaseCommand):
                         self.count_ongewijzigd += 1
                 else:
                     # nieuw record
-                    print("[INFO] Record %s-%s toegevoegd" % (blad, record.volg_nr))
+                    self.stdout.write("[INFO] Record %s-%s toegevoegd" % (blad, record.volg_nr))
                     self.count_toegevoegd += 1
                     if not self.dryrun:
                         record.save()
@@ -370,7 +370,7 @@ class Command(BaseCommand):
         for volg_nr in volg_nrs:
             IndivRecord.objects.get(discipline=blad, volg_nr=volg_nr).delete()
             self.count_verwijderd += 1
-            print("[INFO] Record %s-%s verwijderd" % (blad, volg_nr))
+            self.stdout.write("[INFO] Record %s-%s verwijderd" % (blad, volg_nr))
         # for
 
     def check_consistency(self, disc):
@@ -394,14 +394,14 @@ class Command(BaseCommand):
             for obj in objs[1:]:
                 if obj.datum == prev_obj.datum and obj.score == prev_obj.score and obj.x_count == prev_obj.x_count:
                     if obj.score_notitie != "gedeeld" or prev_obj.score_notitie != "gedeeld":
-                        print("[WARNING] Identieke datum en score voor records %s-%s en %s-%s" % (disc, prev_obj.volg_nr, disc, obj.volg_nr))
+                        self.stderr.write("[WARNING] Identieke datum en score voor records %s-%s en %s-%s" % (disc, prev_obj.volg_nr, disc, obj.volg_nr))
                         self.count_waarschuwing += 1
                 elif obj.score > prev_obj.score or (obj.score == prev_obj.score and obj.x_count >= prev_obj.x_count):
                     if obj.x_count + prev_obj.x_count > 0:
-                        print("[WARNING] Score niet consecutief voor records %s-%s en %s-%s (%s(%sX) >= %s(%sX))" % (disc, prev_obj.volg_nr, disc, obj.volg_nr, obj.score, obj.x_count, prev_obj.score, prev_obj.x_count))
+                        self.stderr.write("[WARNING] Score niet consecutief voor records %s-%s en %s-%s (%s(%sX) >= %s(%sX))" % (disc, prev_obj.volg_nr, disc, obj.volg_nr, obj.score, obj.x_count, prev_obj.score, prev_obj.x_count))
                         self.count_waarschuwing += 1
                     else:
-                        print("[WARNING] Score niet consecutief voor records %s-%s en %s-%s (%s >= %s)" % (disc, prev_obj.volg_nr, disc, obj.volg_nr, obj.score, prev_obj.score))
+                        self.stderr.write("[WARNING] Score niet consecutief voor records %s-%s en %s-%s (%s >= %s)" % (disc, prev_obj.volg_nr, disc, obj.volg_nr, obj.score, prev_obj.score))
                         self.count_waarschuwing += 1
 
                 prev_obj = obj
@@ -412,7 +412,6 @@ class Command(BaseCommand):
         # doorloop de tabbladen
         for sheet in data['valueRanges']:
             naam = sheet['range']       # 'Tabblad naam'!A1:AF1006
-            blad = ''
             if 'Data individueel outdoor' in naam:
                 blad = 'OD'
                 COLS = ['Index', 'Geslacht', 'Leeftijd', 'Materiaalklasse', 'Discipline', 'Soort_record', 'Para klasse',
@@ -433,6 +432,7 @@ class Command(BaseCommand):
                         'Naam', 'Datum', 'Plaats', 'Land', 'Score', 'Notities']
             else:
                 self.stderr.write('[ERROR] Niet ondersteunde tabblad naam: %s' % naam)
+                continue    # with the for
 
             # check the headers
             cols = sheet['values'][0]
@@ -451,7 +451,7 @@ class Command(BaseCommand):
                     self.check_consistency(blad)
                 else:
                     # TODO: support voor team records toevoegen
-                    pass
+                    self.stdout.write("[TODO] Team records worden nog niet ondersteund")
         # for
 
         # rapporteer de samenvatting en schrijf deze ook in het logboek
@@ -487,9 +487,12 @@ class Command(BaseCommand):
                 data = json.load(jsonfile)
         except IOError as exc:
             self.stderr.write("[ERROR] Kan bestand %s niet lezen (%s)" % (fname, str(exc)))
-        else:
-            self._import_data(data)
+            return
+        except json.decoder.JSONDecodeError as exc:
+            self.stderr.write("[ERROR] Probleem met het JSON formaat in bestand %s (%s)" % (repr(fname), str(exc)))
+            return
 
+        self._import_data(data)
         self.stdout.write('Done')
         return
 
