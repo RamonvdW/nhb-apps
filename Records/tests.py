@@ -5,12 +5,13 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
+from django.core import management
 from django.utils.dateparse import parse_date
 from .models import IndivRecord
 from NhbStructuur.models import NhbLid
 from Plein.tests import assert_html_ok, assert_other_http_commands_not_supported, assert_template_used
 import datetime
-
+import io
 
 class RecordsTest(TestCase):
     """ unittests voor de Records applicatie """
@@ -179,6 +180,16 @@ class RecordsTest(TestCase):
         rsp = self.client.get('/records/zoek/', {'zoekterm': 'PENdal'})
         self.assertEqual(rsp.status_code, 200)  # 200 = OK
         self.assertContains(rsp, "Gevonden records (1)")
+
+    def test_import_records(self):
+        # afhandelen niet bestaand bestand
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('import_records', './notexisting.json', stderr=f1, stdout=f2)
+        #print("f1: %s" % f1.getvalue())
+        #print("f2: %s" % f2.getvalue())
+        self.assertTrue(f1.getvalue().startswith('[ERROR] Kan bestand ./notexisting.json niet lezen ('))
+        self.assertEqual(f2.getvalue(), 'Done\n')
 
 # TODO: add call_command for management commands
 
