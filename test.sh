@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#  Copyright (c) 2019 Ramon van der Winkel.
+#  Copyright (c) 2019-2020 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -42,10 +42,15 @@ fi
 
 echo
 echo -n "Press ENTER to start firefox now, or Ctrl+C to abort"
-read
+timeout --foreground 10 read
+if [ $? -ne 0 ]
+then
+    # automatically abort
+    echo "^C"
+    exit 1
+fi
 
 firefox $REPORT_DIR/index.html &
-
 
 # end of file
 
