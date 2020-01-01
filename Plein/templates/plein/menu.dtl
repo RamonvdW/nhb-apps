@@ -1,5 +1,5 @@
 {% comment %}
-                Copyright (c) 2019 Ramon van der Winkel.
+                Copyright (c) 2019-2020 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -78,7 +78,7 @@
 
 {% if menu_show_admin %}
 <li>
-    <a href="/admin/" class="white-text">
+    <a href="{% url 'admin:index' %}" class="white-text">
     <i class="material-icons-round red-text">build</i>Admin site</a>
 </li>
 {% endif %}
