@@ -8,6 +8,7 @@
 
 from django.utils.dateparse import parse_date
 from django.core.management.base import BaseCommand
+from django.db.models import ProtectedError
 import django.db.utils
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbLid, NhbVereniging
 from NhbStructuur.management.import_utils import check_unexpected_utf8
@@ -67,6 +68,7 @@ EXPECTED_MEMBER_KEYS = ('club_number', 'member_number', 'name', 'prefix', 'first
 # administratieve entries (met fouten) die overslagen moeten worden
 SKIP_MEMBERS = (101711,)
 
+GEEN_SECRETARIS_NODIG = (1377,)
 
 class Command(BaseCommand):
 
@@ -213,6 +215,7 @@ class Command(BaseCommand):
                 # nieuwe vereniging
                 is_nieuw = True
             else:
+                # bestaande vereniging
                 nhb_nrs.remove(ver_nhb_nr)
 
                 if obj.regio.regio_nr != ver_regio:
@@ -250,10 +253,19 @@ class Command(BaseCommand):
         # for
 
         # kijk of er verenigingen verwijderd moeten worden
-        if len(nhb_nrs) > 0:
-            # TODO: voeg ondersteuning toe om vereniging te verwijderen
-            # kan alleen als er geen leden maar aan hangen
-            print('[ERROR] Kan vereniging nog niet verwijderen: %s' % repr(nhb_nrs))
+        while len(nhb_nrs) > 0:
+            ver_nhb_nr = nhb_nrs.pop(0)
+            obj = NhbVereniging.objects.get(nhb_nr=ver_nhb_nr)
+            self.stdout.write('[INFO] Vereniging %s wordt nu verwijderd' % str(obj))
+            if not self.dryrun:
+                # kan alleen als er geen leden maar aan hangen --> de modellen beschermen dit automatisch
+                # vang de gerelateerde exceptie af
+                try:
+                    obj.delete()
+                except ProtectedError as exc:
+                    self._count_errors += 1
+                    self.stderr.write('[ERROR] Onverwachte fout bij het verwijderen van een vereniging: %s' % str(exc))
+        # while
 
     def _import_clubs_secretaris(self, data):
         """ voor elke club, koppel de secretaris aan een NhbLid """
@@ -265,8 +277,9 @@ class Command(BaseCommand):
             ver_nhb_nr = club['club_number']
             ver_naam = club['name']
             if len(club['secretaris']) < 1:
-                self.stderr.write('[WARNING] Vereniging %s (%s) heeft geen secretaris!' % (ver_nhb_nr, ver_naam))
-                self._count_warnings += 1
+                if ver_nhb_nr not in GEEN_SECRETARIS_NODIG:
+                    self.stderr.write('[WARNING] Vereniging %s (%s) heeft geen secretaris!' % (ver_nhb_nr, ver_naam))
+                    self._count_warnings += 1
                 ver_secretaris_nhblid = None
             else:
                 ver_secretaris_nr = club['secretaris'][0]['member_number']
@@ -491,9 +504,8 @@ class Command(BaseCommand):
                     lid.save()
         # for
 
-        # TODO: echt verwijderen van een lid
-        #       bij relevante uitslag wel behouden maar onnodige persoonsgegevens wissen
-        for lid_nhb_nr in nhb_nrs:
+        while len(nhb_nrs) > 0:
+            lid_nhb_nr = nhb_nrs.pop(0)
             obj = NhbLid.objects.get(nhb_nr=lid_nhb_nr)
             if obj.is_actief_lid:
                 self.stdout.write('[INFO] Lid %s: is_actief_lid: ja --> nee' % repr(lid_nhb_nr))
@@ -504,7 +516,18 @@ class Command(BaseCommand):
                 self._count_wijzigingen += 1
                 if not self.dryrun:
                     obj.save()
-        # for
+            else:
+                # TODO: afhandelen van het verwijderen van een lid dat in een team zit in een competitie
+                self.stdout.write('[INFO] Lid %s wordt nu verwijderd' % str(obj))
+                if not self.dryrun:
+                    # kan alleen als er geen leden maar aan hangen --> de modellen beschermen dit automatisch
+                    # vang de gerelateerde exceptie af
+                    try:
+                        obj.delete()
+                    except ProtectedError as exc:
+                        self._count_errors += 1
+                        self.stderr.write('[ERROR] Onverwachte fout bij het verwijderen van een lid: %s' % str(exc))
+        # while
 
     def handle(self, *args, **options):
         self.dryrun = options['dryrun']
