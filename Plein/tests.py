@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019 Ramon van der Winkel.
+#  Copyright (c) 2019-2020 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -140,6 +140,7 @@ class PleinTest(TestCase):
         rol_zet_sessionvars_na_login(self.account_admin, self.client).save()
         resp = self.client.get('/plein/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assertNotContains(resp, '/beheer/')
         self.assertNotContains(resp, '/admin/')
         self.assertContains(resp, 'Wissel van rol')
         # simuleert 2FA
@@ -147,7 +148,7 @@ class PleinTest(TestCase):
         rol_zet_sessionvars_na_login(self.account_admin, self.client).save()
         resp = self.client.get('/plein/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, '/admin/')
+        self.assertContains(resp, '/beheer/')
         self.assertContains(resp, 'Wissel van rol')
         assert_template_used(self, resp, ('plein/plein.dtl', 'plein/site_layout.dtl'))
         self.client.logout()
