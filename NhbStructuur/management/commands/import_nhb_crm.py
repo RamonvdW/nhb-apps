@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019 Ramon van der Winkel.
+#  Copyright (c) 2019-2020 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -262,6 +262,7 @@ class Command(BaseCommand):
                 # vang de gerelateerde exceptie af
                 try:
                     obj.delete()
+                    self._count_verwijderingen += 1
                 except ProtectedError as exc:
                     self._count_errors += 1
                     self.stderr.write('[ERROR] Onverwachte fout bij het verwijderen van een vereniging: %s' % str(exc))
@@ -524,6 +525,7 @@ class Command(BaseCommand):
                     # vang de gerelateerde exceptie af
                     try:
                         obj.delete()
+                        self._count_verwijderingen += 1
                     except ProtectedError as exc:
                         self._count_errors += 1
                         self.stderr.write('[ERROR] Onverwachte fout bij het verwijderen van een lid: %s' % str(exc))
