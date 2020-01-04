@@ -91,3 +91,7 @@
 </li>
 {% endif %}
 
+<!-- algemene help referentie -->
+<li>
+    <a href="{{ wiki_url }}" class="white-text" target="_blank"><i class="material-icons-round white-text">help_outline</i>Hulp</a>
+</li>

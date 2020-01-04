@@ -40,5 +40,8 @@ DATABASES = {
 # the issuer name that is sent to the OTP application in the QR code
 OTP_ISSUER_NAME = "yoursite.com"
 
+# url van de wiki server
+WIKI_URL = 'http://wiki.yourdomain.com'
+
 # end of file
 
