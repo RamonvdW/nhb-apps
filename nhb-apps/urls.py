@@ -21,7 +21,7 @@ urlpatterns = [
     path('account/',    include('Account.urls')),
     path('beheer/',     admin.site.urls),
     path('competitie/', include('Competitie.urls')),
-    # path('hist/',       include('HistComp.urls')),
+    path('hist/',       include('HistComp.urls')),
     path('overig/',     include('Overig.urls')),
     path('plein/',      include('Plein.urls')),
     path('records/',    include('Records.urls')),
