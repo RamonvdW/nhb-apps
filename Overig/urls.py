@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019 Ramon van der Winkel.
+#  Copyright (c) 2019-2020 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -44,9 +44,15 @@ urlpatterns = [
          name='logboek'),
 
     # instellingen volgende competitie
+    # TODO: move to other app
     path('instellingen-volgende-competitie/',
          BasisTypen.views.InstellingenVolgendeCompetitieView.as_view(),
          name='instellingen-volgende-competitie'),
+
+    # TODO: move to other app
+    path('aanvangsgemiddelden/',
+         BasisTypen.views.AanvangsgemiddeldenView.as_view(),
+         name='aanvangsgemiddelden'),
 
 ]
 
