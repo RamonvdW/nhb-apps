@@ -367,6 +367,18 @@ class Command(BaseCommand):
                 # ex-leden hebben geen vereniging, dus niet te veel klagen
                 # self.stderr.write('[WARNING] Lid %s is niet aangesloten bij een vereniging' % lid_nhb_nr)
 
+            if member['birthday'] and member['birthday'][0:0+2] not in ("19", "20"):
+                self.stderr.write('[ERROR] Lid %s heeft geen valide geboortedatum: %s' % (lid_nhb_nr, member['birthday']))
+                self._count_errors += 1
+                # poging tot repareren
+                if member['birthday'][0:0+2] == "00":
+                    year = int(member['birthday'][2:2+2])
+                    if year < 25:
+                        member['birthday'] = '20' + member['birthday'][2:]
+                    else:
+                        member['birthday'] = '19' + member['birthday'][2:]
+                else:
+                    is_valid = False
             try:
                 lid_geboorte_datum = datetime.datetime.strptime(member['birthday'], "%Y-%m-%d").date() # YYYY-MM-DD
             except (ValueError, TypeError):
@@ -390,6 +402,9 @@ class Command(BaseCommand):
             if lid_para is None:
                 lid_para = ""      # converts None to string
 
+            if member['member_from'] and member['member_from'][0:0+2] not in ("19", "20"):
+                self.stderr.write('[ERROR] Lid %s heeft geen valide lidmaatschapdatum: %s' % (lid_nhb_nr, member['member_from']))
+                self._count_errors += 1
             try:
                 lid_sinds = datetime.datetime.strptime(member['member_from'], "%Y-%m-%d").date() # YYYY-MM-DD
             except (ValueError, TypeError):
