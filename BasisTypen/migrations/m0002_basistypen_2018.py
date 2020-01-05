@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019 Ramon van der Winkel.
+#  Copyright (c) 2019-2020 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -10,7 +10,7 @@ from django.db import migrations
 def init_boogtype_2018(apps, schema_editor):
     """ Boog typen jaar 2018, volgens spec v1.2, tabel 2.2 """
 
-    # haal de klassen op die van toepassing zijn vóór de migratie
+    # haal de klassen op die van toepassing zijn tijdens deze migratie
     boogtype_klas = apps.get_model('BasisTypen', 'BoogType')
 
     # maak de standaard boogtypen aan
@@ -31,7 +31,7 @@ def create_teamtype_boog(apps, beschrijving, boogtypen):
             boogtypen:    lijst met boogtype.afkorting
     """
 
-    # haal de klassen op die van toepassing zijn vóór de migratie
+    # haal de klassen op die van toepassing zijn tijdens deze migratie
     teamtype_klas = apps.get_model('BasisTypen', 'TeamType')
     boogtype_klas = apps.get_model('BasisTypen', 'BoogType')
     teamtypeboog_klas = apps.get_model('BasisTypen', 'TeamTypeBoog')
@@ -73,7 +73,7 @@ def init_leeftijdsklasse_2018(apps, schema_editor):
     # note: wedstrijdleeftijd = leeftijd die je bereikt in een jaar
     #       competitieleeftijd = wedstrijdleeftijd + 1
 
-    # haal de klassen op die van toepassing zijn vóór de migratie
+    # haal de klassen op die van toepassing zijn tijdens deze migratie
     leeftijdsklasse_klas = apps.get_model('BasisTypen', 'LeeftijdsKlasse')
 
     leeftijdsklasse_klas(
@@ -141,7 +141,7 @@ def create_wedstrijdklasse_individueel(apps, beschrijving, boogtypen, leeftijdsk
         Koppel de gewenste boogtypen en leeftijdsklassen aan de wedstrijdklasse
     """
 
-    # haal de klassen op die van toepassing zijn vóór de migratie
+    # haal de klassen op die van toepassing zijn tijdens deze migratie
     wedstrijdklasse_klas = apps.get_model('BasisTypen', 'WedstrijdKlasse')
     leeftijdsklasse_klas = apps.get_model('BasisTypen', 'LeeftijdsKlasse')
     boogtype_klas = apps.get_model('BasisTypen', 'BoogType')
@@ -176,7 +176,7 @@ def create_wedstrijdklasse_team(apps, beschrijving, boogtypen, min_ag):
         (voor teams gelden geen leeftijdsklassen)
     """
 
-    # haal de klassen op die van toepassing zijn vóór de migratie
+    # haal de klassen op die van toepassing zijn tijdens deze migratie
     wedstrijdklasse_klas = apps.get_model('BasisTypen', 'WedstrijdKlasse')
     boogtype_klas = apps.get_model('BasisTypen', 'BoogType')
     wedstrijdklasseboog_klas = apps.get_model('BasisTypen', 'WedstrijdKlasseBoog')
