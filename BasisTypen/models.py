@@ -62,6 +62,7 @@ class LeeftijdsKlasse(models.Model):
     beschrijving = models.CharField(max_length=80)      # CH Cadetten, mannen
     klasse_kort = models.CharField(max_length=30)       # Cadet, Junior, etc.
     geslacht = models.CharField(max_length=1, choices=GESLACHT)
+    min_wedstrijdleeftijd = models.IntegerField(default=0)
     max_wedstrijdleeftijd = models.IntegerField()
 
     def __str__(self):
