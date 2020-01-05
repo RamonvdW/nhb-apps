@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019 Ramon van der Winkel.
+                Copyright (c) 2019-2020 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -38,6 +38,41 @@
     <h4>Welkom</h4>
 
     <p>Ben je lid van de Nederlandse Handboog Bond (heb je een NHB nummer?), maak dan een account aan en log in, dan tonen we informatie die voor jou relevant is.</p>
+
+{% endif %}
+
+{% if show_bko %}
+<h5>Speciaal voor de BKO</h5>
+
+<div class="row">
+    <div class="col s12 m12 l6">
+        <div class="card">
+            <div class="card-content">
+                <table class="simple"><tr style="border:0px">
+                    <td><i class="material-icons-round large">swap_vertical_circle</i></td>
+                    <td>Instellingen voor de volgende competitie: wedstrijd<wbr/>klassen individueel en team, team typen en toegestande boogtypen.</td>
+                </tr></table>
+            </div>
+            <div class="card-action center">
+                <a href="{% url 'Overig:instellingen-volgende-competitie' %}">Defaults</a>
+            </div>
+        </div>
+    </div>
+    <div class="col s12 m12 l6">
+        <div class="card">
+            <div class="card-content">
+                <table class="simple"><tr style="border:0px">
+                    <td><i class="material-icons-round large">equalizer</i></td>
+                    <td>Klasse<wbr/>grenzen voor de volgende competitie bepalen met de uitslagen van vorig seizoen.</td>
+                </tr></table>
+            </div>
+            <div class="card-action center">
+                <a href="{% url 'Overig:aanvangsgemiddelden' %}">Klassegrenzen</a>
+            </div>
+        </div>
+
+    </div>
+</div>
 
 {% endif %}
 

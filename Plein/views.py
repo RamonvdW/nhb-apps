@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019 Ramon van der Winkel.
+#  Copyright (c) 2019-2020 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -10,6 +10,7 @@ from django.views.generic import TemplateView, ListView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Plein.menu import menu_dynamics
 from Account.leeftijdsklassen import get_leeftijdsklassen
+from Account.rol import rol_is_BKO
 
 
 TEMPLATE_PLEIN = 'plein/plein.dtl'
@@ -44,6 +45,9 @@ class PleinView(TemplateView):
         else:
             context['plein_toon_leeftijdsklassen'] = False
             context['plein_is_nhb_lid'] = False
+
+        if rol_is_BKO(self.request):
+            context['show_bko'] = True
 
         menu_dynamics(self.request, context)
         return context
