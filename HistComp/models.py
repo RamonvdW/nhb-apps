@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019 Ramon van der Winkel.
+#  Copyright (c) 2019-2020 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -19,7 +19,7 @@ class HistCompetitie(models.Model):
         ('25', '25m1pijl')
     ]
     # primary key = los uniek nummer
-    jaar = models.CharField(max_length=9)             # 20xx-20yy
+    seizoen = models.CharField(max_length=9)          # 20xx-20yy
     comp_type = models.CharField(max_length=2, choices=COMP_TYPE)  # 18/25
     klasse = models.CharField(max_length=20)          # Recurve / Compound
     is_team = models.BooleanField(default=False)
@@ -28,7 +28,7 @@ class HistCompetitie(models.Model):
 
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
-        return "%s (%s) %s (team=%s)" % (self.jaar,
+        return "%s (%s) %s (team=%s)" % (self.seizoen,
                                          self.comp_type,
                                          self.klasse,
                                          self.is_team)
@@ -44,11 +44,11 @@ class HistCompetitieIndividueel(models.Model):
     """
     # primary key = los uniek nummer
     histcompetitie = models.ForeignKey(HistCompetitie, on_delete=models.CASCADE)
-    subklasse = models.CharField(max_length=20)       # Klasse 1 / Onbekend
     rank = models.PositiveIntegerField()
-    schutter_nr = models.PositiveIntegerField()       # NHB nummer
-    schutter_naam = models.CharField(max_length=50)   # voor + achternaam aaneen
-    vereniging_nr = models.PositiveIntegerField()     # NHB nummer
+    schutter_nr = models.PositiveIntegerField()             # NHB nummer
+    schutter_naam = models.CharField(max_length=50)         # voor + achternaam aaneen
+    boogtype = models.CharField(max_length=5)               # indien beschikbaar: R/C/BB/IB/LB
+    vereniging_nr = models.PositiveIntegerField()           # NHB nummer
     vereniging_naam = models.CharField(max_length=50)
     score1 = models.PositiveIntegerField()
     score2 = models.PositiveIntegerField()
@@ -62,9 +62,7 @@ class HistCompetitieIndividueel(models.Model):
 
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
-        return "%s, %s, %s" % (self.subklasse,
-                               self.rank,
-                               self.schutter_nr)
+        return "%s, %s" % (self.rank, self.schutter_nr)
 
     class Meta:
         """ meta data voor de admin interface """

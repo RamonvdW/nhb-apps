@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019 Ramon van der Winkel.
+#  Copyright (c) 2019-2020 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,9 +8,9 @@
 from django.urls import Resolver404, reverse
 from django.views.generic import ListView
 from django.db.models import Q
-from Plein.kruimels import make_context_broodkruimels
 from .models import HistCompetitie, HistCompetitieIndividueel, HistCompetitieTeam
 from .forms import FilterForm
+from Plein.menu import menu_dynamics
 
 TEMPLATE_HISTCOMP_ALLEJAREN = 'hist/histcomp_allejaren.dtl'
 TEMPLATE_HISTCOMP_INDIV = 'hist/histcomp_indiv.dtl'
@@ -28,7 +28,7 @@ class HistCompAlleJarenView(ListView):
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
-        make_context_broodkruimels(context, 'Plein:plein', 'HistComp:allejaren')
+        menu_dynamics(self.request, context)#, 'histcomp')
         return context
 
 
@@ -190,11 +190,7 @@ class HistCompBaseView(ListView):
             context['all_count'] = self.all_count
         # else: we laten de 'all' lijst zien dus laat de 'all' knop weg
 
-        make_context_broodkruimels(
-            context,
-            'Plein:plein',
-            'HistComp:allejaren',
-            ('%s %s %s' % (self.jaar, context['comp_type_str'], self.klasse), self.base_url))
+        menu_dynamics(request, context)#, 'histcomp')
         return context
 
 
