@@ -25,7 +25,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated to version
-SITE_VERSIE = 'test 2020-02-05'
+
 
 # modules van de site
 INSTALLED_APPS = [
@@ -35,7 +35,7 @@ INSTALLED_APPS = [
     'Account.apps.AccountConfig',
     'BasisTypen.apps.BasisTypenConfig',
     'Competitie.apps.CompetitieConfig',
-    #'HistComp.apps.HistCompConfig',
+    'HistComp.apps.HistCompConfig',
     'Records.apps.RecordsConfig',
     'Overig.apps.OverigConfig',
     'Logboek.apps.LogboekConfig',
