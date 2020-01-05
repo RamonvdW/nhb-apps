@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019 Ramon van der Winkel.
+#  Copyright (c) 2019-2020 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -130,6 +130,13 @@ class NhbLid(models.Model):
         # sinds_datum moet 5 jaar ná het geboortejaar liggen
         if self.sinds_datum.year - self.geboorte_datum.year < 5:
             raise ValidationError('datum van lidmaatschap moet minimaal 5 jaar na geboortejaar zijn')
+
+    def bereken_wedstrijdleeftijd(self, jaar):
+        """ Bereken de wedstrijdleeftijd voor dit lid in het opgegeven jaar
+            De wedstrijdleeftijd is de leeftijd die je bereikt in dat jaar
+        """
+        # voorbeeld: geboren 2001, huidig jaar = 2019 --> leeftijd 18 wordt bereikt
+        return jaar - self.geboorte_datum.year
 
     class Meta:
         """ meta data voor de admin interface """
