@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019 Ramon van der Winkel.
+#  Copyright (c) 2019-2020 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -28,7 +28,7 @@ class LogboekView(UserPassesTestMixin, ListView):
         """ called by the template system to get the queryset or list of objects for the template """
         # 50 nieuwste logboek entries
         # TODO: pagination toevoegen
-        objs = LogboekRegel.objects.all().order_by('-toegevoegd_op')[:50]
+        objs = LogboekRegel.objects.all().order_by('-toegevoegd_op')[:100]
         for obj in objs:
             obj.door = obj.bepaal_door()
         # for
