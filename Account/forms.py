@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019 Ramon van der Winkel.
+#  Copyright (c) 2019-2020 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -16,10 +16,16 @@ class LoginForm(forms.Form):
                         max_length=50,
                         required=False,
                         widget=forms.TextInput(attrs={'autofocus': True}))
+
     wachtwoord = forms.CharField(
                         max_length=50,
                         required=False,
                         widget=forms.PasswordInput())
+
+    aangemeld_blijven = forms.BooleanField(
+                        label='Aangemeld blijven',
+                        initial=False,
+                        required=False)     # avoids form validation failure when not checked
 
     def is_valid(self):
         """
@@ -37,6 +43,8 @@ class LoginForm(forms.Form):
             if login_naam == "" or wachtwoord == "":
                 self.add_error(None, 'Niet alle velden zijn ingevuld')
                 valid = False
+        else:
+            self.add_error(None, 'Onverwachte fout: %s' % repr(self.errors))
         return valid
 
 

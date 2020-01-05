@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019 Ramon van der Winkel.
+                Copyright (c) 2019-2020 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -30,8 +30,20 @@
             <div class="row"><div class="input-field col s12">
                 {{ form.login_naam.label_tag }}{{ form.login_naam }}
             </div></div>
+
             <div class="row"><div class="input-field col s12">
                 {{ form.wachtwoord.label_tag }}{{ form.wachtwoord }}
+            </div></div>
+
+            <!-- between Django and MaterializeCSS, checkboxes do not work
+                 because of the way Django generates the html (label before input tag)
+                 old: {{ form.aangemeld_blijven.label_tag }}{{ form.aangemeld_blijven }}
+                 workaround: manual deployment of the checkbox -->
+            <div class="row"><div class="input-field col s12">
+                <label>
+                    <input type="checkbox" class="filled-in" name="aangemeld_blijven">
+                    <span>Aangemeld blijven</span>
+                </label>
             </div></div>
 
             {% if form.errors %}

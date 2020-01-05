@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019 Ramon van der Winkel.
+#  Copyright (c) 2019-2020 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -93,6 +93,12 @@ class LoginView(TemplateView):
                     account_zet_sessionvars_na_login(request)
                     rol_zet_sessionvars_na_login(account2, request)
                     leeftijdsklassen_zet_sessionvars_na_login(account2, request)
+
+                    # Aangemeld blijven checkbox
+                    if not form.cleaned_data.get('aangemeld_blijven', False):
+                        # gebruiker wil NIET aangemeld blijven
+                        # zorg dat de session-cookie snel verloopt
+                        request.session.set_expiry(0)
 
                     if account2.verkeerd_wachtwoord_teller > 0:
                         account2.verkeerd_wachtwoord_teller = 0
