@@ -518,6 +518,7 @@ class Command(BaseCommand):
                     lid.is_actief_lid = False
                 if not self.dryrun:
                     lid.save()
+                self._count_toevoegingen += 1
         # for
 
         while len(nhb_nrs) > 0:
@@ -613,7 +614,6 @@ class Command(BaseCommand):
 
         self.stdout.write('Done')
         return
-
 
 # end of file
 
