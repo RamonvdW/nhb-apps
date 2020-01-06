@@ -131,6 +131,11 @@ class AanvangsgemiddeldenView(UserPassesTestMixin, ListView):
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
 
+        # bepaal het jaar waarin de wedstrijdleeftijd bepaald moet worden
+        # dit is het huidige jaar + 1
+        jaar = timezone.now().year + 1
+        self.wedstrijdjaar = jaar
+
         if len(HistCompetitie.objects.all()) < 1:
             # geen historische competitiedata aanwezig
             self.seizoen = "FOUT - GEEN DATA AANWEZIG"
@@ -139,11 +144,6 @@ class AanvangsgemiddeldenView(UserPassesTestMixin, ListView):
         # bepaal 'het vorige seizoen'
         # seizoen = '20xx-20yy'
         self.seizoen = HistCompetitie.objects.distinct('seizoen').order_by('-seizoen')[0].seizoen
-
-        # bepaal het jaar waarin de wedstrijdleeftijd bepaald moet worden
-        # dit is het huidige jaar + 1
-        jaar = timezone.now().year + 1
-        self.wedstrijdjaar = jaar
 
         # eenmalig de wedstrijdleeftijd van elke schutter berekenen
         schutternr2age = dict()     # [ nhb_nr ] = age
@@ -191,14 +191,14 @@ class AanvangsgemiddeldenView(UserPassesTestMixin, ListView):
                         objs.append(res)
                     # for
                     # laatste klassen heeft geen grens
-                    res = {'comp_type' : comptype_str, 'klasse': wedstrklassen[-1].beschrijving, 'count' : count - (aantal - 1) * step, 'ag': '0.000'}
+                    res = {'comp_type' : comptype_str, 'klasse': wedstrklassen[-1].beschrijving, 'count' : count - (aantal - 1) * step, 'ag': '0,000'}
                     objs.append(res)
                 else:
                     # geen historische gemiddelden
                     #print("[ERROR] geen gemiddelden voor klassen %s" % repr(wedstrklassen))
                     # zet alles op 0.000 - dit geeft een beetje een rommeltje als er meerdere klassen zijn
                     for klasse in wedstrklassen:
-                        res = {'comp_type' : comptype_str, 'klasse': klasse.beschrijving, 'count' : 0, 'ag': '0.000'}
+                        res = {'comp_type' : comptype_str, 'klasse': klasse.beschrijving, 'count' : 0, 'ag': '0,000'}
                         objs.append(res)
                     # for
             # for
