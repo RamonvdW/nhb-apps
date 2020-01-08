@@ -66,7 +66,7 @@ EXPECTED_MEMBER_KEYS = ('club_number', 'member_number', 'name', 'prefix', 'first
 
 
 # administratieve entries (met fouten) die overslagen moeten worden
-SKIP_MEMBERS = (101711,)
+SKIP_MEMBERS = (101711,)        # CRM developer
 
 GEEN_SECRETARIS_NODIG = (1377,)
 
@@ -356,6 +356,11 @@ class Command(BaseCommand):
                     self._count_warnings += 1
 
             lid_achternaam = member['name']
+            if lid_achternaam.endswith(" (Erelid NHB)"):
+                new_achternaam = lid_achternaam[:-13]
+                self.stdout.write("[INFO] Lid %s: verwijder toevoeging erelid: %s --> %s" % (lid_nhb_nr, repr(lid_achternaam), repr(new_achternaam)))
+                lid_achternaam = new_achternaam
+
             if member['prefix']:
                 lid_achternaam = member['prefix'] + ' ' + lid_achternaam
 

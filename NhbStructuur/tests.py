@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019 Ramon van der Winkel.
+#  Copyright (c) 2019-2020 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -219,5 +219,54 @@ class TestNhbStructuur(TestCase):
         f2 = io.StringIO()
         management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_03.json', '--dryrun', stderr=f1, stdout=f2)
         self.assertTrue("DRY RUN" in f2.getvalue())
+
+    def test_erelid(self):
+        # sommige leden hebben de toevoegen " (Erelid NHB)" aan hun achternaam toegevoegd
+        # import verwijderd dit
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_10.json', stderr=f1, stdout=f2)
+        self.assertTrue("[INFO] Lid 100999: verwijder toevoeging erelid: 'Dienbaar (Erelid NHB)' --> 'Dienbaar'" in f2.getvalue())
+
+    def test_datum_zonder_eeuw(self):
+        # sommige leden hebben een geboortedatum zonder eeuw
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_11.json', stderr=f1, stdout=f2)
+        self.assertTrue("[ERROR] Lid 100999 heeft geen valide geboortedatum: 0030-05-05" in f1.getvalue())
+        lid = NhbLid.objects.get(nhb_nr=100999)
+        self.assertEqual(lid.geboorte_datum.year, 1930)
+        self.assertTrue("[ERROR] Lid 100998 heeft geen valide geboortedatum: 0010-05-05" in f1.getvalue())
+        lid = NhbLid.objects.get(nhb_nr=100998)
+        self.assertEqual(lid.geboorte_datum.year, 2010)
+        self.assertTrue("[ERROR] Lid 100997 heeft geen valide geboortedatum: 1810-05-05" in f1.getvalue())
+        self.assertTrue("[ERROR] Lid 100997 heeft geen valide lidmaatschapdatum: 1815-06-06" in f1.getvalue())
+
+    def test_skip_member(self):
+        # sommige leden worden niet geimporteerd
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_12.json', stderr=f1, stdout=f2)
+        #print("f1: %s" % f1.getvalue())
+        #print("f2: %s" % f2.getvalue())
+        with self.assertRaises(NhbLid.DoesNotExist):
+            lid = NhbLid.objects.get(nhb_nr=101711)
+
+    def test_del_vereniging(self):
+        # test het verwijderen van een lege vereniging
+
+        # maak een test vereniging
+        ver = NhbVereniging()
+        ver.naam = "Wegisweg Club"
+        ver.nhb_nr = "1999"
+        ver.regio = NhbRegio.objects.get(pk=116)
+        ver.save()
+
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_12.json', stderr=f1, stdout=f2)
+        #print("f1: %s" % f1.getvalue())
+        #print("f2: %s" % f2.getvalue())
+        self.assertTrue("[INFO] Vereniging 1999 Wegisweg Club wordt nu verwijderd" in f2.getvalue())
 
 # end of file
