@@ -14,9 +14,9 @@
 
 <p>Aanvangsgemiddelden voor de individuele wedstrijdklasssen voor de volgende bondscompetitie.</p>
 <p>Gebaseerd op de uitslagen van seizoen {{ seizoen }}.</p>
-<p>Wedstrijdklassen bepaald aan de hand van de wedstrijdleeftijd van de leden in het jaar {{ wedstrijdjaar }}.</p>
+<p>Wedstrijdklassen bepaald aan de hand van de wedstrijdleeftijd van de schutters in het jaar {{ wedstrijdjaar }}.</p>
 
-<table>
+<table class="white">
     <thead>
         <tr>
             <th>Competitie type</th>
