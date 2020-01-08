@@ -35,6 +35,7 @@ class Migration(migrations.Migration):
         ('BasisTypen', 'm0002_basistypen_2018'),
     ]
 
+    # migratie functies
     operations = [
         migrations.AddField(
             model_name='leeftijdsklasse',
