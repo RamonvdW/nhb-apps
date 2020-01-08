@@ -47,7 +47,8 @@ class HistCompetitieIndividueel(models.Model):
     rank = models.PositiveIntegerField()
     schutter_nr = models.PositiveIntegerField()             # NHB nummer
     schutter_naam = models.CharField(max_length=50)         # voor + achternaam aaneen
-    boogtype = models.CharField(max_length=5)               # indien beschikbaar: R/C/BB/IB/LB
+    boogtype = models.CharField(max_length=5,               # R/C/BB/IB/LB
+                                null=True, blank=True)      # indien beschikbaar
     vereniging_nr = models.PositiveIntegerField()           # NHB nummer
     vereniging_naam = models.CharField(max_length=50)
     score1 = models.PositiveIntegerField()
