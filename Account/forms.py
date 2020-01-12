@@ -43,8 +43,7 @@ class LoginForm(forms.Form):
             if login_naam == "" or wachtwoord == "":
                 self.add_error(None, 'Niet alle velden zijn ingevuld')
                 valid = False
-        else:
-            self.add_error(None, 'Onverwachte fout: %s' % repr(self.errors))
+
         return valid
 
 

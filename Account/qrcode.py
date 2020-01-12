@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019 Ramon van der Winkel.
+#  Copyright (c) 2019-2020 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -54,6 +54,7 @@ def qrcode_get(account):
     #print("provisioning uri: %s" % repr(uri))
     stream = io.BytesIO()
     make_qr_code_image(uri).save(stream, kind="SVG")
-    return mark_safe(stream.getvalue().decode('utf-8'))
+    html = stream.getvalue().decode('utf-8')
+    return mark_safe(html)
 
 # end of file

@@ -15,6 +15,7 @@ from .leeftijdsklassen import leeftijdsklassen_zet_sessionvars_na_login,\
                               get_leeftijdsklassen
 from .models import Account, AccountEmail, account_zet_sessionvars_na_login, account_zet_sessionvars_na_otp_controle
 from .views import obfuscate_email
+from .forms import LoginForm
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
 from NhbStructuur.migrations.m0002_nhbstructuur_2018 import maak_rayons_2018, maak_regios_2018
 from Plein.tests import assert_html_ok, assert_template_used, assert_other_http_commands_not_supported
@@ -123,6 +124,14 @@ class AccountTest(TestCase):
         assert_html_ok(self, resp)
         assert_template_used(self, resp, ('account/login.dtl', 'plein/site_layout.dtl'))
         self.assertFormError(resp, 'form', None, 'De combinatie van inlog naam en wachtwoord worden niet herkend. Probeer het nog eens.')
+
+    def test_inlog_form_niet_compleet(self):
+        # test inlog via het inlog formulier, met niet complete parameters
+        resp = self.client.post('/account/login/', {'wachtwoord': 'ja'})
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_html_ok(self, resp)
+        assert_template_used(self, resp, ('account/login.dtl', 'plein/site_layout.dtl'))
+        self.assertFormError(resp, 'form', None, 'Niet alle velden zijn ingevuld')
 
     def test_inlog_form_post_bad_wachtwoord(self):
         # test inlog via het inlog formulier, met verkeerd wachtwoord
@@ -605,7 +614,6 @@ class AccountTest(TestCase):
         self.assertEqual(f1.getvalue(), 'Account matching query does not exist.\n')
 
     def test_wisselvanrol_pagina(self):
-
         # controleer dat de link naar het koppelen op de pagina staat
         self.account_admin.otp_is_actief = False
         self.account_admin.save()
@@ -777,18 +785,22 @@ class AccountTest(TestCase):
         assert_template_used(self, resp, ('plein/plein.dtl', 'plein/site_layout.dtl'))
 
     def test_otp_koppelen(self):
+        # reset OTP koppeling
         self.account_admin.otp_is_actief = False
         self.account_admin.otp_code = 'xx'
         self.account_admin.save()
+        # log in
         self.client.login(username='admin', password='wachtwoord')
         account_zet_sessionvars_na_login(self.client).save()
         rol_zet_sessionvars_na_login(self.account_admin, self.client).save()
+        # check mogelijkheid tot koppelen
         resp = self.client.get('/account/otp-koppelen/', follow=False)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         assert_template_used(self, resp, ('account/otp-koppelen.dtl', 'plein/site_layout.dtl'))
+        # check dat het OTP secret aangemaakt is
         self.account_admin = Account.objects.get(username='admin')
         self.assertNotEqual(self.account_admin.otp_code, 'xx')
-        # foute otp code
+        # geef foute otp code op
         resp = self.client.post('/account/otp-koppelen/', {'otp_code': '123456'}, follow=False)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         assert_template_used(self, resp, ('account/otp-koppelen.dtl', 'plein/site_layout.dtl'))
