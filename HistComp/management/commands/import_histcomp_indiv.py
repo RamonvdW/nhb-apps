@@ -50,14 +50,6 @@ class Command(BaseCommand):
 
         return histcompetitie
 
-    def _vind_nhblid(self, nhb_nr):
-        try:
-            return NhbLid.objects.get(nhb_nr=nhb_nr)
-        except NhbLid.DoesNotExist:
-            self.stderr.write('[ERROR] Kan geen NHB lid vinden met nhb_nr %s' % repr(nhb_nr))
-            self._count_error += 1
-        return None
-
     def _convert_scores(self, scores):
         count = 0
         totaal = 0
@@ -77,11 +69,11 @@ class Command(BaseCommand):
         for line in lines:
             linenr += 1
             spl = line.split(';')
-            if len(spl) != 10:
-                self.stderr.write("[ERROR] Fout in regel %s: niet 10 kolommen" % linenr)
+            if len(spl) != 11:
+                self.stderr.write("[ERROR] Fout in regel %s: niet 11 kolommen" % linenr)
                 self._count_error += 1
 
-            if linenr > 1 and spl[1] not in TOEGESTANE_KLASSEN:
+            if linenr > 1 and spl[2] not in TOEGESTANE_KLASSEN:
                 self.stderr.write('[ERROR] Regel %s: onbekende klasse %s' % (linenr, repr(spl[1])))
                 self._count_error += 1
         # for
@@ -99,9 +91,6 @@ class Command(BaseCommand):
 
         bulk = list()
         line_nr = 0
-        dupe_count = 0
-        added_count = 0
-        error_count = 0
         for line in lines:
             line_nr += 1
             spl = line.strip().split(";")
@@ -110,7 +99,9 @@ class Command(BaseCommand):
 
             nhb_nr = spl[0]
 
-            klasse = spl[1]
+            ver_nr = spl[1]
+
+            klasse = spl[2]
             try:
                 histcompetitie = histcomps[klasse]
             except KeyError:
@@ -135,23 +126,41 @@ class Command(BaseCommand):
             else:
                 boogtype = "?"
                 self.stdout.write('[WARNING] Onzeker welk boogtype voor klasse %s' % repr(klasse))
+                self._count_skip += 1
+                continue
 
             # overslaan als er niet ten minste 6 scores zijn
-            scores, count, totaal = self._convert_scores(spl[2:2+7])
+            scores, count, totaal = self._convert_scores(spl[3:3+7])
             if count < 6:
+                # silently skip
                 continue
 
             # lid erbij zoeken voor de schutter naam en vereniging
-            lid = self._vind_nhblid(nhb_nr)
-            if not lid:
+            try:
+                lid = NhbLid.objects.get(nhb_nr=nhb_nr)
+            except NhbLid.DoesNotExist:
+                self.stdout.write("[WARNING] Lid %s wordt overgeslagen kan naam niet opzoeken (geen lid meer)" % nhb_nr)
+                self._count_skip += 1
                 continue
 
-            if not lid.bij_vereniging:
-                self.stderr.write("[ERROR] Lid %s heeft geen vereniging" % (repr(lid.nhb_nr)))
-                self._count_error += 1
-                continue
+            try:
+                ver = NhbVereniging.objects.get(nhb_nr=ver_nr)
+                ver_naam = ver.naam
+            except NhbVereniging.DoesNotExist:
+                # fall-back voor recent verwijderde verenigingen
+                if ver_nr == '1058':
+                    ver_naam = 'Willem Tell'
+                elif ver_nr == '1093':
+                    ver_naam = 'De Bosjagers'
+                elif ver_nr == '1147':
+                    ver_naam = 'Diana'
+                elif ver_nr == '1170':
+                    ver_naam = 'Batavieren Treffers'
+                else:
+                    ver_naam = '?'
+                    self.stdout.write('[WARNING] Kan geen naam opzoeken voor verwijderde vereniging %s' % ver_nr)
 
-            gemiddelde = float(spl[9].replace(',', '.'))    # 9,123 --> 9.123
+            gemiddelde = float(spl[10].replace(',', '.'))    # 9,123 --> 9.123
 
             hist = HistCompetitieIndividueel()
             hist.histcompetitie = histcompetitie
@@ -159,8 +168,8 @@ class Command(BaseCommand):
             hist.schutter_nr = nhb_nr
             hist.schutter_naam = " ".join([lid.voornaam, lid.achternaam])
             hist.boogtype = boogtype
-            hist.vereniging_nr = lid.bij_vereniging.nhb_nr
-            hist.vereniging_naam = lid.bij_vereniging.naam
+            hist.vereniging_nr = ver_nr
+            hist.vereniging_naam = ver_naam
             hist.score1 = scores[0]
             hist.score2 = scores[1]
             hist.score3 = scores[2]
@@ -207,11 +216,12 @@ class Command(BaseCommand):
         self._count_dupe = 0
         self._count_added  =0
         self._count_error = 0
+        self._count_skip = 0
         linecount = len(lines)
 
         self._import(lines, options['seizoen'][0], options['comptype'][0])
 
-        self.stdout.write("Read %s lines; skipped %s dupes; skipped %s errors; added %s records" % (linecount, self._count_dupe, self._count_error, self._count_added))
+        self.stdout.write("Read %s lines; skipped %s dupes; %s skipped; %s skip with errors; added %s records" % (linecount, self._count_dupe, self._count_skip, self._count_error, self._count_added))
 
 # end of file
 
