@@ -220,7 +220,7 @@ class TestNhbStructuur(TestCase):
         management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_03.json', '--dryrun', stderr=f1, stdout=f2)
         self.assertTrue("DRY RUN" in f2.getvalue())
 
-    def test_erelid(self):
+    def test_import_crm_erelid(self):
         # sommige leden hebben de toevoegen " (Erelid NHB)" aan hun achternaam toegevoegd
         # import verwijderd dit
         f1 = io.StringIO()
@@ -228,7 +228,7 @@ class TestNhbStructuur(TestCase):
         management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_10.json', stderr=f1, stdout=f2)
         self.assertTrue("[INFO] Lid 100999: verwijder toevoeging erelid: 'Dienbaar (Erelid NHB)' --> 'Dienbaar'" in f2.getvalue())
 
-    def test_datum_zonder_eeuw(self):
+    def test_import_crm_datum_zonder_eeuw(self):
         # sommige leden hebben een geboortedatum zonder eeuw
         f1 = io.StringIO()
         f2 = io.StringIO()
@@ -242,7 +242,7 @@ class TestNhbStructuur(TestCase):
         self.assertTrue("[ERROR] Lid 100997 heeft geen valide geboortedatum: 1810-05-05" in f1.getvalue())
         self.assertTrue("[ERROR] Lid 100997 heeft geen valide lidmaatschapdatum: 1815-06-06" in f1.getvalue())
 
-    def test_skip_member(self):
+    def test_import_crm_skip_member(self):
         # sommige leden worden niet geimporteerd
         f1 = io.StringIO()
         f2 = io.StringIO()
@@ -252,7 +252,7 @@ class TestNhbStructuur(TestCase):
         with self.assertRaises(NhbLid.DoesNotExist):
             lid = NhbLid.objects.get(nhb_nr=101711)
 
-    def test_del_vereniging(self):
+    def test_import_crm_del_vereniging(self):
         # test het verwijderen van een lege vereniging
 
         # maak een test vereniging
@@ -265,8 +265,34 @@ class TestNhbStructuur(TestCase):
         f1 = io.StringIO()
         f2 = io.StringIO()
         management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_12.json', stderr=f1, stdout=f2)
+        self.assertTrue("[INFO] Vereniging 1999 Wegisweg Club wordt nu verwijderd" in f2.getvalue())
+
+    def test_import_crm_inactief(self):
+        # inactief maken nadat al geen lid meer van een vereniging
+
+        # maak een test lid aan
+        lid = NhbLid()
+        lid.nhb_nr = 110000
+        lid.geslacht = "M"
+        lid.voornaam = "Zweven"
+        lid.achternaam = "de Tester"
+        lid.email = "zdetester@gmail.not"
+        lid.postcode = "1234PC"
+        lid.huisnummer = "42sur"
+        lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
+        lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
+        lid.bij_vereniging = None
+        lid.save()
+
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_13.json', stderr=f1, stdout=f2)
         #print("f1: %s" % f1.getvalue())
         #print("f2: %s" % f2.getvalue())
-        self.assertTrue("[INFO] Vereniging 1999 Wegisweg Club wordt nu verwijderd" in f2.getvalue())
+        self.assertTrue("[INFO] Lid 110000: vereniging geen --> 1000 Grote Club" in f2.getvalue())
+
+    def test_bereken_wedstrijdleeftijd(self):
+        lid = NhbLid.objects.get(nhb_nr=100001)     # geboren 1972; bereikt leeftijd 40 in 2012
+        self.assertEqual(lid.bereken_wedstrijdleeftijd(2012), 40)
 
 # end of file

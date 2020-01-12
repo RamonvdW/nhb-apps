@@ -366,11 +366,16 @@ class Command(BaseCommand):
 
             lid_blocked = member['blocked']
 
-            lid_ver = vind_vereniging(member['club_number'])
-            if not lid_ver:
-                lid_blocked = True
+            if not member['club_number']:
                 # ex-leden hebben geen vereniging, dus niet te veel klagen
-                # self.stderr.write('[WARNING] Lid %s is niet aangesloten bij een vereniging' % lid_nhb_nr)
+                lid_blocked = True
+                lid_ver = None
+            else:
+                lid_ver = vind_vereniging(member['club_number'])
+                if not lid_ver:
+                    lid_blocked = True
+                    self.stderr.write('[ERROR] Kan vereniging %s voor lid %s niet vinden' % (repr(member['club_number']), lid_nhb_nr))
+                    self._count_errors += 1
 
             if member['birthday'] and member['birthday'][0:0+2] not in ("19", "20"):
                 self.stderr.write('[ERROR] Lid %s heeft geen valide geboortedatum: %s' % (lid_nhb_nr, member['birthday']))
