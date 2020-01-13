@@ -8,7 +8,7 @@ ARGS="$*"
 RED="\e[31m"
 RESET="\e[0m"
 REPORT_DIR="/tmp/covhtml"
-OMIT="--omit=data3/wsgi.py,/usr/lib/python3.6/site-packages/*,/usr/local/lib/python3.6/site-packages/*"
+OMIT="--omit=data3/wsgi.py,/usr/*/python3*/site-packages/*"
 
 rm -rf "$REPORT_DIR"
 
