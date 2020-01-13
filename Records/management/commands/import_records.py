@@ -72,280 +72,280 @@ class Command(BaseCommand):
                     if val in volg_nrs:
                         volg_nrs.remove(val)
 
-            if curr_record:
-                record.volg_nr = curr_record.volg_nr
-                record.discipline = curr_record.discipline
-            else:
-                record.volg_nr = val
-                record.discipline = blad
+                if curr_record:
+                    record.volg_nr = curr_record.volg_nr
+                    record.discipline = curr_record.discipline
+                else:
+                    record.volg_nr = val
+                    record.discipline = blad
 
-            # 1 = Geslacht
-            # H(eer) / D(ame)
-            val = row[1]
-            if val == 'H':
-                record.geslacht = 'M'
-            elif val == 'D':
-                record.geslacht = 'V'
-            else:
-                errors.append("Fout geslacht: %s" % repr(val))
-                val = None
-            if val and curr_record:
-                if record.geslacht != curr_record.geslacht:
-                    wijzigingen.append('geslacht: %s --> %s' % (repr(curr_record.geslacht), repr(record.geslacht)))
-                    curr_record.geslacht = record.geslacht
-
-            # 2 = Leeftijdscategorie
-            # S(enior) / J(unior) / C(adet)
-            val = row[2]
-            if val in ('M', 'S', 'J', 'C'):
-                record.leeftijdscategorie = val
-            elif val == 'nvt':
-                record.leeftijdscategorie = 'U'
-            else:
-                errors.append("Foute leeftijdscategorie': %s" % repr(val))
-                val = None
-            if val and curr_record:
-                if record.leeftijdscategorie != curr_record.leeftijdscategorie:
-                    wijzigingen.append('leeftijdscategorie: %s --> %s' % (repr(curr_record.leeftijdscategorie), repr(record.leeftijdscategorie)))
-                    curr_record.leeftijdscategorie = record.leeftijdscategorie
-
-            # 3 = Materiaalklasse
-            val = row[3]
-            if val in ('R', 'C', 'BB', 'IB', 'LB'):
-                record.materiaalklasse = val
-            else:
-                errors.append("Foute materiaalklasse: %s" % repr(val))
-                val = None
-            if val and curr_record:
-                if record.materiaalklasse != curr_record.materiaalklasse:
-                    wijzigingen.append('materiaalklasse: %s --> %s' % (repr(curr_record.materiaalklasse), repr(record.materiaalklasse)))
-                    curr_record.materiaalklasse = record.materiaalklasse
-
-            # 4 = Discipline
-            # onnodig veld, maar we controleren het toch even
-            val = row[4]
-            if blad == 'OD' and val == 'Outdoor':
-                record.discipline = 'OD'
-            elif blad == '18' and val == 'Indoor':
-                record.discipline = '18'
-            elif blad == '25' and val == '25m1p':
-                record.discipline = '25'
-            else:
-                errors.append("Foute discipline: %s op blad %s" % (repr(val), repr(blad)))
-
-            # 5 = Soort_record
-            # wordt gebruikt om records te categoriseren
-            val = row[5][:40]
-            if val not in settings.RECORDS_TOEGESTANE_SOORTEN:
-                errors.append('Fout in soort_record: %s is niet bekend' % repr(val))
-                val = None
-            else:
-                record.soort_record = val
-            if val and curr_record:
-                if curr_record.soort_record != record.soort_record:
-                    wijzigingen.append('soort_record: %s --> %s' % (repr(curr_record.soort_record), repr(record.soort_record)))
-                    curr_record.soort_record = record.soort_record
-
-            # 6 = Para klasse
-            val = row[6][:20]
-            if val and val not in settings.RECORDS_TOEGESTANE_PARA_KLASSEN:
-                errors.append('Fout in para klasse: %s is niet bekend' % repr(val))
-                val = None
-            else:
-                record.para_klasse = val
-            if val and curr_record:
-                if curr_record.para_klasse != record.para_klasse:
-                    wijzigingen.append('para_klasse: %s --> %s' % (repr(curr_record.para_klasse), repr(record.para_klasse)))
-                    curr_record.para_klasse = record.para_klasse
-
-            # 7 = Afstand
-            #val = row[7]
-            #if blad == '18':
-            #    if val not in ('18', '25', '25+18'):
-            #        errors.append("Foute afstand: %s is geen indoor afstand" % repr(val))
-            #if blad == '25' and val != '25':
-            #    errors.append("Foute afstand: %s moet 25 zijn" % repr(val))
-            #if blad == 'OD' and val not in ('30', '40', '50', '60', '70', '90'):
-            #    errors.append("Foute afstand: %s is geen outdoor afstand" % repr(val))
-
-            # 8 = Pijlen
-            val = row[8]
-            if val:
-                try:
-                    record.max_score = 10 * int(val)
-                except ValueError:
-                    errors.append("Fout in pijlen: %s is geen nummer" % repr(val))
+                # 1 = Geslacht
+                # H(eer) / D(ame)
+                val = row[1]
+                if val == 'H':
+                    record.geslacht = 'M'
+                elif val == 'D':
+                    record.geslacht = 'V'
+                else:
+                    errors.append("Fout geslacht: %s" % repr(val))
                     val = None
                 if val and curr_record:
-                    if record.max_score != curr_record.max_score:
-                        if curr_record.max_score != 0:
-                            wijzigingen.append('max_score: %s --> %s' % (curr_record.max_score, record.max_score))
-                        curr_record.max_score = record.max_score
+                    if record.geslacht != curr_record.geslacht:
+                        wijzigingen.append('geslacht: %s --> %s' % (repr(curr_record.geslacht), repr(record.geslacht)))
+                        curr_record.geslacht = record.geslacht
 
-            # 9 = Bondsnummer
-            val = row[9]
-            if len(val) == 6:
-                # 123456
-                try:
-                    record.nhb_lid = NhbLid.objects.get(nhb_nr=val)
-                except NhbLid.DoesNotExist:
-                    # toch door, want niet alle oude leden zitten nog in de database
-                    naam = row[10]
-                    fout = 'NHB nummer niet bekend: %s (voor schutter %s)' % (repr(val), repr(naam))
-                    if fout not in reported_nhbnrs:
-                        reported_nhbnrs.append(fout)
-                        self.stderr.write(fout)
-                        #self.stderr.write('NHB nummer niet bekend: %s voor record %s' % (repr(val), repr(row)))
-            else:
-                errors.append('Fout NHB nummer: %s' % repr(val))
-                val = None
-            if val and curr_record:
-                if record.nhb_lid != curr_record.nhb_lid:
-                    wijzigingen.append('nhb_lid: %s --> %s' % (repr(curr_record.nhb_lid), record.nhb_lid))
-                    curr_record.nhb_lid = record.nhb_lid
-
-            # 10 = Naam
-            val = row[10][:50]
-            if record.nhb_lid:
-                naam = record.nhb_lid.voornaam + " " + record.nhb_lid.achternaam
-                match = 0
-                mis = 0
-                for part in val.replace('.', ' ').replace('/', ' ').replace(' vd ', ' v d ').split(' '):
-                    if part in naam:
-                        match += len(part)
-                    else:
-                        mis += len(part)
-                # for
-                ok = (match >= 4)       # last name can change significantly after marriage
-                if ok:
-                    # neem de officiele naam over uit het nhb_lid
-                    record.naam = naam
-                    if curr_record:
-                        if curr_record.naam != record.naam:
-                            wijzigingen.append('naam: %s --> %s' % (repr(curr_record.naam), repr(record.naam)))
-                            curr_record.naam = record.naam
+                # 2 = Leeftijdscategorie
+                # S(enior) / J(unior) / C(adet)
+                val = row[2]
+                if val in ('M', 'S', 'J', 'C'):
+                    record.leeftijdscategorie = val
+                elif val == 'nvt':
+                    record.leeftijdscategorie = 'U'
                 else:
-                    errors.append('Foute naam: %s maar nhb lid naam is %s' % (repr(val), repr(naam)))
-            else:
-                record.naam = val
+                    errors.append("Foute leeftijdscategorie': %s" % repr(val))
+                    val = None
+                if val and curr_record:
+                    if record.leeftijdscategorie != curr_record.leeftijdscategorie:
+                        wijzigingen.append('leeftijdscategorie: %s --> %s' % (repr(curr_record.leeftijdscategorie), repr(record.leeftijdscategorie)))
+                        curr_record.leeftijdscategorie = record.leeftijdscategorie
 
-            # 11 = Datum
-            val = row[11]
-            if val.upper() == "ONBEKEND":
-                record.datum = datetime.date(year=1901, month=1, day=1)
-            else:
-                try:
-                    # 30/06/2017
-                    datum = datetime.datetime.strptime(val, "%d-%m-%Y")
-                except ValueError:
-                    errors.append("Fout in datum: %s" % repr(val))
+                # 3 = Materiaalklasse
+                val = row[3]
+                if val in ('R', 'C', 'BB', 'IB', 'LB'):
+                    record.materiaalklasse = val
+                else:
+                    errors.append("Foute materiaalklasse: %s" % repr(val))
+                    val = None
+                if val and curr_record:
+                    if record.materiaalklasse != curr_record.materiaalklasse:
+                        wijzigingen.append('materiaalklasse: %s --> %s' % (repr(curr_record.materiaalklasse), repr(record.materiaalklasse)))
+                        curr_record.materiaalklasse = record.materiaalklasse
+
+                # 4 = Discipline
+                # onnodig veld, maar we controleren het toch even
+                val = row[4]
+                if blad == 'OD' and val == 'Outdoor':
+                    record.discipline = 'OD'
+                elif blad == '18' and val == 'Indoor':
+                    record.discipline = '18'
+                elif blad == '25' and val == '25m1p':
+                    record.discipline = '25'
+                else:
+                    errors.append("Foute discipline: %s op blad %s" % (repr(val), repr(blad)))
+
+                # 5 = Soort_record
+                # wordt gebruikt om records te categoriseren
+                val = row[5][:40]
+                if val not in settings.RECORDS_TOEGESTANE_SOORTEN:
+                    errors.append('Fout in soort_record: %s is niet bekend' % repr(val))
                     val = None
                 else:
-                    record.datum = datum.date()
-                    if record.datum.year < 1950 or record.datum >= self.datum_morgen:
-                        errors.append("Fout in datum: %s" % repr(val))
-                        val = None
-            if val and curr_record:
-                if curr_record.datum != record.datum:
-                    wijzigingen.append('datum: %s --> %s' % (str(curr_record.datum), str(record.datum)))
-                    curr_record.datum = record.datum
+                    record.soort_record = val
+                if val and curr_record:
+                    if curr_record.soort_record != record.soort_record:
+                        wijzigingen.append('soort_record: %s --> %s' % (repr(curr_record.soort_record), repr(record.soort_record)))
+                        curr_record.soort_record = record.soort_record
 
-            # 12 = Plaats
-            val = row[12][:50]
-            record.plaats = val
-            if val and curr_record:
-                if curr_record.plaats != record.plaats:
-                    wijzigingen.append('plaats: %s --> %s' % (repr(curr_record.plaats), repr(record.plaats)))
-                    curr_record.plaats = record.plaats
+                # 6 = Para klasse
+                val = row[6][:20]
+                if val and val not in settings.RECORDS_TOEGESTANE_PARA_KLASSEN:
+                    errors.append('Fout in para klasse: %s is niet bekend' % repr(val))
+                    val = None
+                else:
+                    record.para_klasse = val
+                if val and curr_record:
+                    if curr_record.para_klasse != record.para_klasse:
+                        wijzigingen.append('para_klasse: %s --> %s' % (repr(curr_record.para_klasse), repr(record.para_klasse)))
+                        curr_record.para_klasse = record.para_klasse
 
-            # 13 = Land
-            val = row[13][:50]
-            record.land = val
-            if val and curr_record:
-                if curr_record.land != record.land:
-                    wijzigingen.append('land: %s --> %s' % (repr(curr_record.land), repr(record.land)))
-                    curr_record.land = record.land
+                # 7 = Afstand
+                #val = row[7]
+                #if blad == '18':
+                #    if val not in ('18', '25', '25+18'):
+                #        errors.append("Foute afstand: %s is geen indoor afstand" % repr(val))
+                #if blad == '25' and val != '25':
+                #    errors.append("Foute afstand: %s moet 25 zijn" % repr(val))
+                #if blad == 'OD' and val not in ('30', '40', '50', '60', '70', '90'):
+                #    errors.append("Foute afstand: %s is geen outdoor afstand" % repr(val))
 
-            # 14 = Score
-            val = row[14]
-            try:
-                record.score = int(val)
-            except ValueError:
-                errors.append('Fout in score %s' % repr(val))
-                val = None
-            if val and curr_record:
-                if curr_record.score != record.score:
-                    wijzigingen.append('score: %s --> %s' % (repr(curr_record.score), repr(record.score)))
-                    curr_record.score = record.score
-
-            if blad in ('OD', '18'):
-                # 15 = X-count
-                val = row[15]
+                # 8 = Pijlen
+                val = row[8]
                 if val:
                     try:
-                        cnt = int(val)
+                        record.max_score = 10 * int(val)
                     except ValueError:
-                        errors.append('Fout in X-count %s is geen getal' % repr(val))
+                        errors.append("Fout in pijlen: %s is geen nummer" % repr(val))
+                        val = None
+                    if val and curr_record:
+                        if record.max_score != curr_record.max_score:
+                            if curr_record.max_score != 0:
+                                wijzigingen.append('max_score: %s --> %s' % (curr_record.max_score, record.max_score))
+                            curr_record.max_score = record.max_score
+
+                # 9 = Bondsnummer
+                val = row[9]
+                if len(val) == 6:
+                    # 123456
+                    try:
+                        record.nhb_lid = NhbLid.objects.get(nhb_nr=val)
+                    except NhbLid.DoesNotExist:
+                        # toch door, want niet alle oude leden zitten nog in de database
+                        naam = row[10]
+                        fout = 'NHB nummer niet bekend: %s (voor schutter %s)' % (repr(val), repr(naam))
+                        if fout not in reported_nhbnrs:
+                            reported_nhbnrs.append(fout)
+                            self.stderr.write(fout)
+                            #self.stderr.write('NHB nummer niet bekend: %s voor record %s' % (repr(val), repr(row)))
+                else:
+                    errors.append('Fout NHB nummer: %s' % repr(val))
+                    val = None
+                if val and curr_record:
+                    if record.nhb_lid != curr_record.nhb_lid:
+                        wijzigingen.append('nhb_lid: %s --> %s' % (curr_record.nhb_lid, record.nhb_lid))
+                        curr_record.nhb_lid = record.nhb_lid
+
+                # 10 = Naam
+                val = row[10][:50]
+                if record.nhb_lid:
+                    naam = record.nhb_lid.voornaam + " " + record.nhb_lid.achternaam
+                    match = 0
+                    mis = 0
+                    for part in val.replace('.', ' ').replace('/', ' ').replace(' vd ', ' v d ').split(' '):
+                        if part in naam:
+                            match += len(part)
+                        else:
+                            mis += len(part)
+                    # for
+                    ok = (match >= 4)       # last name can change significantly after marriage
+                    if ok:
+                        # neem de officiele naam over uit het nhb_lid
+                        record.naam = naam
+                        if curr_record:
+                            if curr_record.naam != record.naam:
+                                wijzigingen.append('naam: %s --> %s' % (repr(curr_record.naam), repr(record.naam)))
+                                curr_record.naam = record.naam
+                    else:
+                        errors.append('Foute naam: %s maar nhb lid naam is %s' % (repr(val), repr(naam)))
+                else:
+                    record.naam = val
+
+                # 11 = Datum
+                val = row[11]
+                if val.upper() == "ONBEKEND":
+                    record.datum = datetime.date(year=1901, month=1, day=1)
+                else:
+                    try:
+                        # 30/06/2017
+                        datum = datetime.datetime.strptime(val, "%d-%m-%Y")
+                    except ValueError:
+                        errors.append("Fout in datum: %s" % repr(val))
                         val = None
                     else:
-                        record.x_count = cnt
+                        record.datum = datum.date()
+                        if record.datum.year < 1950 or record.datum >= self.datum_morgen:
+                            errors.append("Fout in datum: %s" % repr(val))
+                            val = None
                 if val and curr_record:
-                    if curr_record.x_count != record.x_count:
-                        wijzigingen.append('x_count: %s --> %s' % (repr(curr_record.x_count), repr(record.x_count)))
-                        curr_record.x_count = record.x_count
+                    if curr_record.datum != record.datum:
+                        wijzigingen.append('datum: %s --> %s' % (str(curr_record.datum), str(record.datum)))
+                        curr_record.datum = record.datum
 
-                # 16 = Ook ER
-                val = row[16]
-                if val:
-                    if val != 'ER':
-                        errors.append('Foute tekst in Ook ER: %s' % (repr(val)))
+                # 12 = Plaats
+                val = row[12][:50]
+                record.plaats = val
+                if val and curr_record:
+                    if curr_record.plaats != record.plaats:
+                        wijzigingen.append('plaats: %s --> %s' % (repr(curr_record.plaats), repr(record.plaats)))
+                        curr_record.plaats = record.plaats
+
+                # 13 = Land
+                val = row[13][:50]
+                record.land = val
+                if val and curr_record:
+                    if curr_record.land != record.land:
+                        wijzigingen.append('land: %s --> %s' % (repr(curr_record.land), repr(record.land)))
+                        curr_record.land = record.land
+
+                # 14 = Score
+                val = row[14]
+                try:
+                    record.score = int(val)
+                except ValueError:
+                    errors.append('Fout in score %s' % repr(val))
+                    val = None
+                if val and curr_record:
+                    if curr_record.score != record.score:
+                        wijzigingen.append('score: %s --> %s' % (repr(curr_record.score), repr(record.score)))
+                        curr_record.score = record.score
+
+                if blad in ('OD', '18'):
+                    # 15 = X-count
+                    val = row[15]
+                    if val:
+                        try:
+                            cnt = int(val)
+                        except ValueError:
+                            errors.append('Fout in X-count %s is geen getal' % repr(val))
+                            val = None
+                        else:
+                            record.x_count = cnt
+                    if val and curr_record:
+                        if curr_record.x_count != record.x_count:
+                            wijzigingen.append('x_count: %s --> %s' % (repr(curr_record.x_count), repr(record.x_count)))
+                            curr_record.x_count = record.x_count
+
+                    # 16 = Ook ER
+                    val = row[16]
+                    if val:
+                        if val != 'ER':
+                            errors.append('Foute tekst in Ook ER: %s' % (repr(val)))
+                        else:
+                            record.is_european_record = True
                     else:
-                        record.is_european_record = True
-                else:
-                    # no longer ER
-                    record.is_european_record = False
+                        # no longer ER
+                        record.is_european_record = False
 
-                if curr_record:
-                    if curr_record.is_european_record != record.is_european_record:
-                        wijzigingen.append('is_european_record: %s --> %s' % (repr(curr_record.is_european_record), repr(record.is_european_record)))
-                        curr_record.is_european_record = record.is_european_record
+                    if curr_record:
+                        if curr_record.is_european_record != record.is_european_record:
+                            wijzigingen.append('is_european_record: %s --> %s' % (repr(curr_record.is_european_record), repr(record.is_european_record)))
+                            curr_record.is_european_record = record.is_european_record
 
-                # 17 = Ook WR
-                val = row[17]
-                if val:
-                    if val != 'WR':
-                        errors.append('Foute tekst in Ook WR: %s' % (repr(val)))
+                    # 17 = Ook WR
+                    val = row[17]
+                    if val:
+                        if val != 'WR':
+                            errors.append('Foute tekst in Ook WR: %s' % (repr(val)))
+                        else:
+                            record.is_world_record = True
                     else:
-                        record.is_world_record = True
-                else:
-                    # no longer ER
-                    record.is_world_record = False
+                        # no longer ER
+                        record.is_world_record = False
 
-                if curr_record:
-                    if curr_record.is_world_record != record.is_world_record:
-                        wijzigingen.append('is_world_record: %s --> %s' % (repr(curr_record.is_world_record), repr(record.is_world_record)))
-                        curr_record.is_world_record = record.is_world_record
+                    if curr_record:
+                        if curr_record.is_world_record != record.is_world_record:
+                            wijzigingen.append('is_world_record: %s --> %s' % (repr(curr_record.is_world_record), repr(record.is_world_record)))
+                            curr_record.is_world_record = record.is_world_record
 
-                # 18 = Notities
-                val = row[18][:30]
-                record.score_notitie = val
-                if curr_record:
-                    if curr_record.score_notitie != record.score_notitie:
-                        wijzigingen.append('score_notitie: %s --> %s' % (repr(curr_record.score_notitie), repr(record.score_notitie)))
-                        curr_record.score_notitie = record.score_notitie
+                    # 18 = Notities
+                    val = row[18][:30]
+                    record.score_notitie = val
+                    if curr_record:
+                        if curr_record.score_notitie != record.score_notitie:
+                            wijzigingen.append('score_notitie: %s --> %s' % (repr(curr_record.score_notitie), repr(record.score_notitie)))
+                            curr_record.score_notitie = record.score_notitie
 
-            elif blad == '25':
-                # 15 = Notities
-                val = row[15][:30]
-                record.score_notitie = val
-                if curr_record:
-                    if curr_record.score_notitie != record.score_notitie:
-                        wijzigingen.append('score_notitie: %s --> %s' % (repr(curr_record.score_notitie), repr(record.score_notitie)))
-                        curr_record.score_notitie = record.score_notitie
-
+                elif blad == '25':
+                    # 15 = Notities
+                    val = row[15][:30]
+                    record.score_notitie = val
+                    if curr_record:
+                        if curr_record.score_notitie != record.score_notitie:
+                            wijzigingen.append('score_notitie: %s --> %s' % (repr(curr_record.score_notitie), repr(record.score_notitie)))
+                            curr_record.score_notitie = record.score_notitie
+            # if
 
             if len(errors):
-                self.stderr.write("%s in %s" % (" + ".join(errors), repr(row)))
+                self.stderr.write("[ERROR] %s in %s" % (" + ".join(errors), repr(row)))
                 self.count_errors += len(errors)
             else:
                 if curr_record:

@@ -49,9 +49,9 @@ class RecordsTest(TestCase):
         rec.volg_nr = 42
         rec.discipline = IndivRecord.DISCIPLINE[0][0]   # OD
         rec.soort_record = 'Test record'
-        rec.geslacht = IndivRecord.GESLACHT[0][0]
-        rec.leeftijdscategorie = IndivRecord.LEEFTIJDSCATEGORIE[0][0]
-        rec.materiaalklasse = IndivRecord.MATERIAALKLASSE[0][0]
+        rec.geslacht = IndivRecord.GESLACHT[0][0]   # M
+        rec.leeftijdscategorie = IndivRecord.LEEFTIJDSCATEGORIE[0][0]   # M
+        rec.materiaalklasse = IndivRecord.MATERIAALKLASSE[0][0]     # R
         # rec.materiaalklasse_overig =
         rec.nhb_lid = lid
         rec.naam = 'Top Schutter'
@@ -59,6 +59,7 @@ class RecordsTest(TestCase):
         rec.plaats = 'Papendal'
         rec.land = 'Nederland'
         rec.score = 1234
+        rec.max_score = 5678
         rec.x_count = 56
         # rec.score_notitie =
         # rec.is_european_record =
@@ -68,10 +69,10 @@ class RecordsTest(TestCase):
         # Record 43
         rec = IndivRecord()
         rec.volg_nr = 43
-        rec.discipline = IndivRecord.DISCIPLINE[1][0]
+        rec.discipline = IndivRecord.DISCIPLINE[1][0]   # 18
         rec.soort_record = 'Test record para'
-        rec.geslacht = IndivRecord.GESLACHT[1][0]
-        rec.leeftijdscategorie = IndivRecord.LEEFTIJDSCATEGORIE[1][0]   # 18
+        rec.geslacht = IndivRecord.GESLACHT[1][0]   # V
+        rec.leeftijdscategorie = IndivRecord.LEEFTIJDSCATEGORIE[1][0]   # S
         rec.materiaalklasse = 'R'       # Recurve
         rec.para_klasse = 'Open'
         # rec.nhb_lid =
@@ -85,6 +86,25 @@ class RecordsTest(TestCase):
         # rec.is_world_record =
         rec.save()
 
+        # Record 44
+        rec = IndivRecord()
+        rec.volg_nr = 44
+        rec.discipline = IndivRecord.DISCIPLINE[2][0]   # 25
+        rec.soort_record = 'Test record 25m1p'
+        rec.geslacht = IndivRecord.GESLACHT[1][0]   # V
+        rec.leeftijdscategorie = IndivRecord.LEEFTIJDSCATEGORIE[3][0]   # C
+        rec.materiaalklasse = 'R'       # Recurve
+        #rec.para_klasse =
+        rec.nhb_lid = lid
+        rec.naam = 'Top Schutter'
+        rec.datum = datetime.datetime.now()
+        rec.plaats = 'Nergens'
+        rec.land = 'Niederland'
+        rec.score = 249
+        # rec.score_notitie =
+        # rec.is_european_record =
+        # rec.is_world_record =
+        rec.save()
 
     def test_create(self):
         rec = IndivRecord.objects.all()[0]
@@ -234,8 +254,8 @@ class RecordsTest(TestCase):
         f1 = io.StringIO()
         f2 = io.StringIO()
         management.call_command('import_records', './Records/management/testfiles/testfile_04.json', stderr=f1, stdout=f2)
-        print("f1: %s" % f1.getvalue())
-        print("f2: %s" % f2.getvalue())
+        #print("f1: %s" % f1.getvalue())
+        #print("f2: %s" % f2.getvalue())
         self.assertFalse('[ERROR]' in f1.getvalue())
         self.assertTrue('[INFO] Record OD-1 toegevoegd' in f2.getvalue())
         self.assertTrue('[INFO] Record OD-2 toegevoegd' in f2.getvalue())
@@ -243,5 +263,45 @@ class RecordsTest(TestCase):
         self.assertTrue('[INFO] Record 18-2 toegevoegd' in f2.getvalue())
         self.assertTrue('[INFO] Record 25-1 toegevoegd' in f2.getvalue())
         self.assertTrue('[INFO] Record 25-2 toegevoegd' in f2.getvalue())
+
+    def test_import_records_05(self):
+        # all kinds of errors
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('import_records', './Records/management/testfiles/testfile_05.json', stderr=f1, stdout=f2)
+        #print("f1: %s" % f1.getvalue())
+        #print("f2: %s" % f2.getvalue())
+        self.assertTrue("[ERROR] Foute index (geen nummer): 'XA' in" in f1.getvalue())
+        self.assertTrue("Fout geslacht: 'XB' + Foute leeftijdscategorie': 'XC' + Foute materiaalklasse: 'XD' + Foute discipline: 'XE' op blad 'OD' + Fout in soort_record: 'XF' is niet bekend + Fout in para klasse: 'XG' is niet bekend + Fout in pijlen: 'XI' is geen nummer + Fout NHB nummer: 'XJ' + Fout in score 'XK' + Fout in X-count 'XL' is geen getal + Foute tekst in Ook ER: 'XM' + Foute tekst in Ook WR: 'XN' in " in f1.getvalue())
+        obj = IndivRecord.objects.get(discipline='18', volg_nr=2)
+        self.assertEqual(obj.leeftijdscategorie, 'U')
+
+    def test_import_records_06(self):
+        # all kinds of changes
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('import_records', './Records/management/testfiles/testfile_06.json', stderr=f1, stdout=f2)
+        #print("f1: %s" % f1.getvalue())
+        #print("f2: %s" % f2.getvalue())
+        self.assertTrue("Wijzigingen voor record OD-42:" in f2.getvalue())
+        self.assertTrue("geslacht: 'M' --> 'V'" in f2.getvalue())
+        self.assertTrue("leeftijdscategorie: 'M' --> 'C'" in f2.getvalue())
+        self.assertTrue("materiaalklasse: 'R' --> 'C'" in f2.getvalue())
+        self.assertTrue("soort_record: 'Test record' --> '60m'" in f2.getvalue())
+        self.assertTrue("para_klasse: '' --> 'W1'" in f2.getvalue())
+        self.assertTrue("max_score: 5678 --> 1200" in f2.getvalue())
+        self.assertTrue("nhb_lid: 123457 Petra Schutter [V, 1970] --> 123456 Jan Schutter [M, 1970]" in f2.getvalue())
+        self.assertTrue("naam: 'Top Schutter' --> 'Jan Schutter'" in f2.getvalue())
+        self.assertTrue("datum: 2020-01-13 --> 1901-01-01" in f2.getvalue())
+        self.assertTrue("plaats: 'Papendal' --> 'Elbonia'" in f2.getvalue())
+        self.assertTrue("land: 'Nederland' --> 'Mudland'" in f2.getvalue())
+        self.assertTrue("score: 1234 --> 1432" in f2.getvalue())
+        self.assertTrue("x_count: 56 --> 21" in f2.getvalue())
+        self.assertTrue("is_european_record: False --> True" in f2.getvalue())
+        self.assertTrue("is_world_record: False --> True" in f2.getvalue())
+        self.assertTrue("score_notitie: '' --> 'Geen notitie'" in f2.getvalue())
+
+        self.assertTrue("Wijzigingen voor record 25-44:" in f2.getvalue())
+        self.assertTrue("score_notitie: '' --> 'gedeeld'" in f2.getvalue())
 
 # end of file
