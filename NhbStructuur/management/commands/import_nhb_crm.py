@@ -11,7 +11,6 @@ from django.core.management.base import BaseCommand
 from django.db.models import ProtectedError
 import django.db.utils
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbLid, NhbVereniging
-from NhbStructuur.management.import_utils import check_unexpected_utf8
 from Account.models import is_email_valide
 from Logboek.models import schrijf_in_logboek
 import argparse
@@ -591,7 +590,7 @@ class Command(BaseCommand):
             self._import_clubs(data['clubs'])
             self._import_members(data['members'])
             self._import_clubs_secretaris(data['clubs'])
-        except django.db.utils.DataError as exc:
+        except django.db.utils.DataError as exc:        # pragma: no coverage
             self.stderr.write('[ERROR] Overwachte database fout: %s' % str(exc))
 
         self.stdout.write('Import van CRM data is klaar')

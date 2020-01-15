@@ -65,7 +65,7 @@ class Command(BaseCommand):
                 except IndivRecord.DoesNotExist:
                     # new record
                     pass
-                except IndivRecord.MultipleObjectsReturned:
+                except IndivRecord.MultipleObjectsReturned:     # pragma: no coverage
                     errors.append('Meerdere records voor %s-%s' % (blad, val))
                 else:
                     # gevonden
@@ -195,7 +195,6 @@ class Command(BaseCommand):
                         if fout not in reported_nhbnrs:
                             reported_nhbnrs.append(fout)
                             self.stderr.write(fout)
-                            #self.stderr.write('NHB nummer niet bekend: %s voor record %s' % (repr(val), repr(row)))
                 else:
                     errors.append('Fout NHB nummer: %s' % repr(val))
                     val = None
@@ -235,7 +234,7 @@ class Command(BaseCommand):
                     record.datum = datetime.date(year=1901, month=1, day=1)
                 else:
                     try:
-                        # 30/06/2017
+                        # 30-6-2017
                         datum = datetime.datetime.strptime(val, "%d-%m-%Y")
                     except ValueError:
                         errors.append("Fout in datum: %s" % repr(val))

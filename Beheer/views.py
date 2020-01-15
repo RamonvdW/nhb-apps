@@ -9,7 +9,7 @@ from django.urls import reverse
 from django.http import HttpResponseRedirect
 from Account.models import user_is_otp_verified
 
-# vervanger van de ingebouwde Admin site
+# aanpassingen van de ingebouwde Admin site
 # hiermee kunnen we 2FA checks doen
 # hiermee verwijderen we de login/logout/password change views
 

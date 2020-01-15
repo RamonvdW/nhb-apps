@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019 Ramon van der Winkel.
+#  Copyright (c) 2019-2020 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,7 +8,7 @@ from django.contrib import admin
 from .models import SiteFeedback, SiteTijdelijkeUrl
 
 
-class IsAfgehandeldListFilter(admin.SimpleListFilter):
+class IsAfgehandeldListFilter(admin.SimpleListFilter):      # pragma: no cover
     """ speciaal filter voor is_afgehandeld met default=No """
 
     # Human-readable title which will be displayed in the
