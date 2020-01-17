@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019 Ramon van der Winkel.
+#  Copyright (c) 2019-2020 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -42,12 +42,14 @@ class WedstrijdKlasse(models.Model):
     beschrijving = models.CharField(max_length=80)
     niet_voor_rk_bk = models.BooleanField()         # aspirant klassen
     is_voor_teams = models.BooleanField()           # team klasse?
-    min_ag = models.DecimalField(max_digits=5, decimal_places=3)    # 10.000
 
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
-        return "%s (%s)" % (self.beschrijving,
-                            self.min_ag)
+        if self.is_voor_teams:
+            descr = 'Team'
+        else:
+            descr = 'Indiv'
+        return "%s - %s" % (descr, self.beschrijving)
 
     class Meta:
         """ meta data voor de admin interface """
