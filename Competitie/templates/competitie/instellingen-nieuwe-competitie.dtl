@@ -1,0 +1,84 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2019 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Instellingen volgende bondscompetitie{% endblock %}
+
+{% block pagina %}
+
+<h4>Instellingen volgende bondscompetitie</h4>
+
+<p>Hieronder staan de klassen voor de individuele competitie en teamcompetitie.</p>
+<p>Kijk deze nog een keer door voordat de nieuwe competitie opgestart wordt.
+Onder aan deze pagina vindt je een knop om de nieuwe competitie aan te maken.</p>
+
+<div class="row">
+    <h5>Wedstrijdklassen voor de individuele competities</h5>
+    <div class="col s12 m10 l10 xl10">
+        <div class="white-text blue z-depth-2">
+            <div class="row small-row">
+                <div class="col s5"><b>Beschrijving</b></div>
+                <div class="col s2"><b>Boogtypen</b></div>
+                <div class="col s3"><b>Leeftijdsklassen</b></div>
+            </div>
+            {% for obj in indivklassen %}
+                {% if obj.separate_before %}
+                <div class="divider">&nbsp;</div>
+                {% endif %}
+                <div class="row small-row">
+                    <div class="col s5">{{ obj.beschrijving }}</div>
+                    <div class="col s2">{{ obj.boogtypen }}</div>
+                    <div class="col s3">{{ obj.leeftijden }}</div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <h5>Wedstrijdklassen voor de team competities</h5>
+    <div class="col s12 m10 l10 xl10">
+        <div class="white-text blue z-depth-2">
+            <div class="row small-row">
+                <div class="col s5"><b>Beschrijving</b></div>
+                <div class="col s3"><b>Boogtypen</b></div>
+            </div>
+            {% for obj in teamklassen %}
+                {% if obj.separate_before %}
+                <div class="divider">&nbsp;</div>
+                {% endif %}
+                <div class="row small-row">
+                    <div class="col s5">{{ obj.beschrijving }}</div>
+                    <div class="col s3">{{ obj.boogtypen }}</div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <h5>Team typen</h5>
+    <div class="col s12 m10 l10 xl10">
+        <div class="white-text blue z-depth-2">
+            <div class="row small-row">
+                <div class="col s5"><b>Team type</b></div>
+                <div class="col s3"><b>Boogtypen</b></div>
+            </div>
+            <div class="divider">&nbsp;</div>
+            {% for obj in teamtypen %}
+            <div class="row small-row">
+                <div class="col s5">{{ obj.beschrijving }}</div>
+                <div class="col s3">{{ obj.boogtypen }}</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<a class="btn red" href="{% url 'Competitie:aanmaken' %}">Ik wil de nieuwe competities aanmaken</a>
+
+{% endblock %}
