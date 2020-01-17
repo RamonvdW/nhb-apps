@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019 Ramon van der Winkel.
+#  Copyright (c) 2019-2020 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -72,20 +72,6 @@ class TestBasisTypen(TestCase):
         obj.wedstrijdklasse = WedstrijdKlasse.objects.all()[0]
         obj.leeftijdsklasse = LeeftijdsKlasse.objects.all()[0]
         self.assertIsNotNone(str(obj))      # use the __str__ method (only used by admin interface)
-
-    def test_competitie_defaults_anon(self):
-        self.client.logout()
-        resp = self.client.get('/overig/instellingen-volgende-competitie/')
-        self.assertEqual(resp.status_code, 302)     # 302 = Redirect (to login)
-
-    def test_competitie_defaults_bko(self):
-        self.client.login(username='bko', password='wachtwoord')
-        account_zet_sessionvars_na_otp_controle(self.client).save()
-        rol_zet_sessionvars_na_login(self.account_bko, self.client).save()
-        resp = self.client.get('/overig/instellingen-volgende-competitie/')
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        assert_html_ok(self, resp)
-        assert_template_used(self, resp, ('basistypen/competitie-defaults.dtl', 'plein/site_layout.dtl'))
 
 # end of file
 

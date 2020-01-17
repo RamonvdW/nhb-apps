@@ -1,0 +1,25 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2020 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Competitie aanmaken{% endblock %}
+
+{% block pagina %}
+
+<h4>Competitie aanmaken</h4>
+
+<p>Als BKO wil je de nieuwe bondscompetitie opstarten voor seizoen {{ seizoen }}.</p>
+<p>Dit is een eenmalige actie waardoor zowel de Indoor als 25m1pijl competitie aangemaakt worden.</p>
+<p>In een later stadium kan je de aanvangsgemiddelden vaststellen en de bestuurders koppelen.</p>
+
+<form method="post" action="{% url 'Competitie:aanmaken' %}">
+{% csrf_token %}
+<input class="btn red" name="button_aanmaken" type="submit" value="Ja, maak de nieuwe competities aan!">
+</form>
+
+{% endblock %}
+
