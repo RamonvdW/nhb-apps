@@ -14,10 +14,9 @@ class HistCompetitie(models.Model):
         De tabel bevat velden die anders heel vaak herhaald zouden worden in een andere tabel
         en het voorkomt zoeken naar deze informatie uit de grote tabel.
     """
-    COMP_TYPE = [
-        ('18', '18m Indoor'),
-        ('25', '25m1pijl')
-    ]
+    COMP_TYPE = [('18', '18m Indoor'),      # note: 18, 25 must be in sync with Competitie.AFSTAND
+                 ('25', '25m1pijl')]
+
     # primary key = los uniek nummer
     seizoen = models.CharField(max_length=9)          # 20xx-20yy
     comp_type = models.CharField(max_length=2, choices=COMP_TYPE)  # 18/25
