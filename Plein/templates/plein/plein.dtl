@@ -45,33 +45,103 @@
 <h5>Speciaal voor de BKO</h5>
 
 <div class="row">
+    {% if bko_kan_competitie_aanmaken %}
     <div class="col s12 m12 l6">
         <div class="card">
             <div class="card-content">
                 <table class="simple"><tr style="border:0px">
                     <td><i class="material-icons-round large">swap_vertical_circle</i></td>
-                    <td>Instellingen voor de volgende competitie: wedstrijd<wbr/>klassen individueel en team, team typen en toegestande boogtypen.</td>
+                    <td>Instellingen voor de volgende bondscompetities controleren en competities aanmaken.</td>
                 </tr></table>
             </div>
             <div class="card-action center">
-                <a href="{% url 'Overig:instellingen-volgende-competitie' %}">Defaults</a>
+                <a href="{% url 'Competitie:instellingen-volgende-competitie' %}">Competitie opstarten</a>
             </div>
         </div>
     </div>
+    {% else %}
+    <p>Competitie status:</p>
+    <table class="white">
+        <thead>
+            <th>Aspect</th>
+            <th>Indoor competitie</th>
+            <th>25m1pijl competitie</th>
+        </thead>
+        <tr>
+            <td>Fase</td>
+            <td>{{ bko_comp18.fase }}</td>
+            <td>{{ bko_comp25.fase }}</td>
+        </tr>
+        <tr>
+            <td>Begin jaar</td>
+            <td>{{ bko_comp18.begin_jaar }}</td>
+            <td>{{ bko_comp25.begin_jaar }}</td>
+        </tr>
+        <tr>
+            <td>Uiterste datum lid (voor deelname team)</td>
+            <td>{{ bko_comp18.uiterste_datum_lid }}</td>
+            <td>{{ bko_comp25.uiterste_datum_lid }}</td>
+        </tr>
+        <tr>
+            <td>Begin aanmeldingen</td>
+            <td>{{ bko_comp18.begin_aanmeldingen }}</td>
+            <td>{{ bko_comp25.begin_aanmeldingen }}</td>
+        </tr>
+        <tr>
+            <td>Einde aanmeldingen</td>
+            <td>{{ bko_comp18.einde_aanmeldingen }}</td>
+            <td>{{ bko_comp25.einde_aanmeldingen }}</td>
+        </tr>
+        <tr>
+            <td>Einde teamvorming</td>
+            <td>{{ bko_comp18.einde_teamvorming }}</td>
+            <td>{{ bko_comp25.einde_teamvorming }}</td>
+        </tr>
+        <tr>
+            <td>Eerste wedstrijd</td>
+            <td>{{ bko_comp18.eerste_wedstrijd }}</td>
+            <td>{{ bko_comp25.eerste_wedstrijd }}</td>
+        </tr>
+        <tr>
+            <td>Is afgesloten</td>
+            <td>{{ bko_comp18.is_afgesloten_str }}</td>
+            <td>{{ bko_comp25.is_afgesloten_str }}</td>
+        </tr>
+    </table>
+    {% endif %}
+
+    {% if bko_kan_klassegrenzen_instellen_18 %}
     <div class="col s12 m12 l6">
         <div class="card">
             <div class="card-content">
                 <table class="simple"><tr style="border:0px">
                     <td><i class="material-icons-round large">equalizer</i></td>
-                    <td>Klasse<wbr/>grenzen voor de volgende competitie bepalen met de uitslagen van vorig seizoen.</td>
+                    <td>Klasse<wbr/>grenzen voor de Indoor competitie vaststellen aan de hand van uitslagen van vorig seizoen.</td>
                 </tr></table>
             </div>
             <div class="card-action center">
-                <a href="{% url 'Overig:aanvangsgemiddelden' %}">Klassegrenzen</a>
+                <a href="{% url 'Competitie:klassegrenzen' afstand=18 %}">Klassegrenzen vaststellen</a>
             </div>
         </div>
-
     </div>
+    {% endif %}
+
+    {% if bko_kan_klassegrenzen_instellen_25 %}
+    <div class="col s12 m12 l6">
+        <div class="card">
+            <div class="card-content">
+                <table class="simple"><tr style="border:0px">
+                    <td><i class="material-icons-round large">equalizer</i></td>
+                    <td>Klasse<wbr/>grenzen voor de 25m1pijl competitie vaststellen aan de hand van uitslagen van vorig seizoen.</td>
+                </tr></table>
+            </div>
+            <div class="card-action center">
+                <a href="{% url 'Competitie:klassegrenzen' afstand=25 %}">Klassegrenzen vaststellen</a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
 </div>
 
 {% endif %}

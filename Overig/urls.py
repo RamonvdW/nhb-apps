@@ -5,10 +5,8 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from django.conf.urls import include
 from . import views
 import Logboek.views
-import BasisTypen.views
 
 
 app_name = 'Overig'
@@ -42,18 +40,6 @@ urlpatterns = [
     path('logboek/',
          Logboek.views.LogboekView.as_view(),
          name='logboek'),
-
-    # instellingen volgende competitie
-    # TODO: move to other app
-    path('instellingen-volgende-competitie/',
-         BasisTypen.views.InstellingenVolgendeCompetitieView.as_view(),
-         name='instellingen-volgende-competitie'),
-
-    # TODO: move to other app
-    path('aanvangsgemiddelden/',
-         BasisTypen.views.AanvangsgemiddeldenView.as_view(),
-         name='aanvangsgemiddelden'),
-
 ]
 
 # end of file

@@ -11,11 +11,14 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Plein.menu import menu_dynamics
 from Account.leeftijdsklassen import get_leeftijdsklassen
 from Account.rol import rol_is_BKO
+from Competitie.models import get_competitie_fase
 
 
 TEMPLATE_PLEIN = 'plein/plein.dtl'
 TEMPLATE_PRIVACY = 'plein/privacy.dtl'
 TEMPLATE_LEEFTIJDSKLASSEN = 'plein/leeftijdsklassen.dtl'
+
+JA_NEE = {False: 'Nee', True: 'Ja'}
 
 
 def site_root_view(request):
@@ -48,6 +51,18 @@ class PleinView(TemplateView):
 
         if rol_is_BKO(self.request):
             context['show_bko'] = True
+            fase18, comp18 = get_competitie_fase('18')
+            fase25, comp25 = get_competitie_fase('25')
+            comp18.fase = fase18
+            comp25.fase = fase25
+            comp18.is_afgesloten_str = JA_NEE[comp18.is_afgesloten]
+            comp25.is_afgesloten_str = JA_NEE[comp25.is_afgesloten]
+            context['bko_comp18'] = comp18
+            context['bko_comp25'] = comp25
+            context['bko_kan_competitie_aanmaken'] = (fase18 == 'A' and fase25 == 'A')
+            if not context['bko_kan_competitie_aanmaken']:
+                context['bko_kan_klassegrenzen_instellen_18'] = (fase18 == 'A1')
+                context['bko_kan_klassegrenzen_instellen_25'] = (fase25 == 'A1')
 
         menu_dynamics(self.request, context)
         return context
