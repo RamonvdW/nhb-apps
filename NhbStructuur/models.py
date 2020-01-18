@@ -13,6 +13,8 @@ import datetime
 # global
 maximum_geboortejaar = datetime.datetime.now().year - settings.MINIMUM_LEEFTIJD_LID
 
+ADMINISTRATIEVE_REGIO = 100      # TOOD: make een boolean field?
+
 
 class NhbRayon(models.Model):
     """Tabel waarin de Rayon definities van de NHB staan"""
