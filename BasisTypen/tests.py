@@ -25,7 +25,7 @@ class TestBasisTypen(TestCase):
         obj = TeamType(beschrijving="Een team type")
         obj.save()
 
-        obj = WedstrijdKlasse(beschrijving="Wedstrijdklasse Test", niet_voor_rk_bk=True, is_voor_teams=False, min_ag='9.000')
+        obj = WedstrijdKlasse(beschrijving="Wedstrijdklasse Test", niet_voor_rk_bk=True, is_voor_teams=False)
         obj.save()
 
         obj = LeeftijdsKlasse(afkorting="CH", geslacht="M", max_wedstrijdleeftijd=17, beschrijving="Heren Cadet")

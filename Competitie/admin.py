@@ -15,7 +15,7 @@ class CompetitieWedstrijdKlasseAdmin(admin.ModelAdmin):
 
 class CompetitieAdmin(admin.ModelAdmin):
 
-    def formfield_for_manytomany(self, db_field, request, **kwargs):
+    def formfield_for_manytomany(self, db_field, request, **kwargs):    # pragma: no coverage
         if db_field.name == 'klassen_indiv':
             kwargs['queryset'] = CompetitieWedstrijdKlasse.objects.filter(wedstrijdklasse__is_voor_teams=False)
         elif db_field.name == 'klassen_team':

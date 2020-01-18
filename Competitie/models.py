@@ -8,11 +8,13 @@ from django.db import models
 from django.contrib.auth.models import Group, Permission
 from django.utils import timezone
 from BasisTypen.models import WedstrijdKlasse
-from NhbStructuur.models import NhbRegio, NhbRayon
+from NhbStructuur.models import NhbRegio, NhbRayon, ADMINISTRATIEVE_REGIO
 from datetime import date
 from decimal import Decimal
 
+
 ZERO = Decimal('0.000')
+
 
 class CompetitieWedstrijdKlasse(models.Model):
     """ Deze database tabel bevat een de klassen voor een competitie,
@@ -147,9 +149,10 @@ def competitie_aanmaken():
                 if laag == DeelCompetitie.LAAG[0][0]:
                     # Regio
                     for obj in NhbRegio.objects.all():
-                        deel.nhb_regio = obj
-                        deel.pk = None
-                        deel.save()
+                        if obj.regio_nr != ADMINISTRATIEVE_REGIO:
+                            deel.nhb_regio = obj
+                            deel.pk = None
+                            deel.save()
                     # for
                 elif laag == DeelCompetitie.LAAG[1][0]:
                     # RK
