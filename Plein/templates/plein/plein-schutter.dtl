@@ -1,0 +1,21 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2019-2020 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Welkom op het PLEIN{% endblock %}
+
+{% block pagina %}
+
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="plein" %}
+
+<h4>Hallo, schutter!</h4>
+
+{% if plein_toon_leeftijdsklassen %}
+<p>Klik <a href="{% url 'Plein:leeftijdsklassen' %}">hier</a> om te zien in welke klasse je uit moet komen op wedstrijden en voor de competitie.</p>
+{% endif %}
+
+{% endblock %}

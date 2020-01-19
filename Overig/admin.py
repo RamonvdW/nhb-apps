@@ -25,7 +25,6 @@ class IsAfgehandeldListFilter(admin.SimpleListFilter):      # pragma: no cover
     def queryset(self, request, queryset):
         """ geef een gefilterde lijst met records terug """
         val = self.value()
-        print("val in =%s" % repr(val))
         if val == '-1':
             return queryset
         if val == '0':
@@ -34,7 +33,6 @@ class IsAfgehandeldListFilter(admin.SimpleListFilter):      # pragma: no cover
             val = True
         else:
             val = False     # also default
-        print("val=%s" % val)
         return queryset.filter(is_afgehandeld=val)
 
     def choices(self, cl):
@@ -50,17 +48,9 @@ class IsAfgehandeldListFilter(admin.SimpleListFilter):      # pragma: no cover
                     opt['selected'] = True
             # mik de All optie eruit
             if opt['display'] != 'All':
-                print("opt=%s" % repr(opt))
                 yield opt
         # for
 
-#{% for choice in choices %}
-#    <li{% if choice.selected %} class="selected"{% endif %}>
-#    <a href="{{ choice.query_string|iriencode }}" title="{{ choice.display }}">{{ choice.display }}</a></li>
-#{% endfor %}
-
-# choice.query_string
-# choice.display
 
 class SiteFeedbackAdmin(admin.ModelAdmin):
     # filter mogelijkheid

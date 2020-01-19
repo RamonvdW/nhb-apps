@@ -36,7 +36,9 @@ def assert_template_used(testcase, response, template_names):
         if templ.name in lst:
             lst.remove(templ.name)
     # for
-    testcase.assertEqual(lst, list())
+    if len(lst):    # pragma: no coverage
+        msg = "Following templates should have been used: %s\n(actually used: %s)" % (repr(lst), repr([t.name for t in response.templates]))
+        testcase.assertTrue(False, msg=msg)
 
 
 def assert_other_http_commands_not_supported(testcase, url, post=True, delete=True, put=True, patch=True):
@@ -111,7 +113,7 @@ class PleinTest(TestCase):
         resp = self.client.get('/plein/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         assert_html_ok(self, resp)
-        assert_template_used(self, resp, ('plein/plein.dtl', 'plein/site_layout.dtl'))
+        assert_template_used(self, resp, ('plein/plein-bezoeker.dtl', 'plein/site_layout.dtl'))
 
     def test_plein_normaal(self):
         self.client.login(username='normaal', password='wachtwoord')
@@ -120,7 +122,7 @@ class PleinTest(TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertNotContains(resp, '/admin/')
         self.assertNotContains(resp, 'Wissel van rol')
-        assert_template_used(self, resp, ('plein/plein.dtl', 'plein/site_layout.dtl'))
+        assert_template_used(self, resp, ('plein/plein-gebruiker.dtl', 'plein/site_layout.dtl'))
         self.client.logout()
 
     def test_plein_nhblid(self):
@@ -131,7 +133,7 @@ class PleinTest(TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertNotContains(resp, '/admin/')
         self.assertNotContains(resp, 'Wissel van rol')
-        assert_template_used(self, resp, ('plein/plein.dtl', 'plein/site_layout.dtl'))
+        assert_template_used(self, resp, ('plein/plein-schutter.dtl', 'plein/site_layout.dtl'))
         self.client.logout()
 
     def test_plein_admin(self):
@@ -150,7 +152,7 @@ class PleinTest(TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, '/beheer/')
         self.assertContains(resp, 'Wissel van rol')
-        assert_template_used(self, resp, ('plein/plein.dtl', 'plein/site_layout.dtl'))
+        assert_template_used(self, resp, ('plein/plein-bko.dtl', 'plein/site_layout.dtl'))
         self.client.logout()
 
     def test_privacy(self):

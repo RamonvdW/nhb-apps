@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019 Ramon van der Winkel.
+#  Copyright (c) 2019-2020 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -112,7 +112,7 @@ class AccountTest(TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         assert_html_ok(self, resp)
         # redirect is naar het plein
-        assert_template_used(self, resp, ('plein/plein.dtl', 'plein/site_layout.dtl'))
+        assert_template_used(self, resp, ('plein/plein-gebruiker.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'Uitloggen')
         self.account_normaal = Account.objects.get(username='normaal')
         self.assertEqual(self.account_normaal.verkeerd_wachtwoord_teller, 0)
@@ -158,7 +158,7 @@ class AccountTest(TestCase):
         resp = self.client.post('/account/login/', {'login_naam': 'normaal', 'wachtwoord': 'wachtwoord'}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         # redirect is naar het plein
-        assert_template_used(self, resp, ('plein/plein.dtl', 'plein/site_layout.dtl'))
+        assert_template_used(self, resp, ('plein/plein-gebruiker.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'Uitloggen')
 
     def test_inlog_wordt_geblokkeerd(self):
@@ -195,7 +195,7 @@ class AccountTest(TestCase):
         # do the actual logout
         resp = self.client.post('/account/logout/', {}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        assert_template_used(self, resp, ('plein/plein.dtl', 'plein/site_layout.dtl'))
+        assert_template_used(self, resp, ('plein/plein-bezoeker.dtl', 'plein/site_layout.dtl'))
         self.assertNotContains(resp, 'Uitloggen')
 
     def test_rol(self):
@@ -752,24 +752,24 @@ class AccountTest(TestCase):
         # controleer redirect naar het plein, omdat de gebruiker niet ingelogged is
         resp = self.client.get('/account/otp-koppelen/', follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        assert_template_used(self, resp, ('plein/plein.dtl', 'plein/site_layout.dtl'))
+        assert_template_used(self, resp, ('plein/plein-bezoeker.dtl', 'plein/site_layout.dtl'))
 
         resp = self.client.post('/account/otp-koppelen/', {'otp_code': '123456'}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        assert_template_used(self, resp, ('plein/plein.dtl', 'plein/site_layout.dtl'))
+        assert_template_used(self, resp, ('plein/plein-bezoeker.dtl', 'plein/site_layout.dtl'))
 
     def test_otp_koppelen_niet_nodig(self):
         self.client.login(username='normaal', password='wachtwoord')
         # controleer redirect naar het plein, omdat OTP koppeling niet nodig is
         resp = self.client.get('/account/otp-koppelen/', follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        assert_template_used(self, resp, ('plein/plein.dtl', 'plein/site_layout.dtl'))
+        assert_template_used(self, resp, ('plein/plein-gebruiker.dtl', 'plein/site_layout.dtl'))
 
         resp = self.client.post('/account/otp-koppelen/', {'otp_code': '123456'}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        assert_template_used(self, resp, ('plein/plein.dtl', 'plein/site_layout.dtl'))
+        assert_template_used(self, resp, ('plein/plein-gebruiker.dtl', 'plein/site_layout.dtl'))
 
-    def test_otp_koppelen_al_gekoppelend(self):
+    def test_otp_koppelen_al_gekoppeld(self):
         self.account_admin.otp_is_actief = True
         self.account_admin.save()
         self.client.login(username='admin', password='wachtwoord')
@@ -778,11 +778,11 @@ class AccountTest(TestCase):
         # controleer redirect naar het plein, omdat OTP koppeling er al is
         resp = self.client.get('/account/otp-koppelen/', follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        assert_template_used(self, resp, ('plein/plein.dtl', 'plein/site_layout.dtl'))
+        assert_template_used(self, resp, ('plein/plein-gebruiker.dtl', 'plein/site_layout.dtl'))
 
         resp = self.client.post('/account/otp-koppelen/', {'otp_code': '123456'}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        assert_template_used(self, resp, ('plein/plein.dtl', 'plein/site_layout.dtl'))
+        assert_template_used(self, resp, ('plein/plein-gebruiker.dtl', 'plein/site_layout.dtl'))
 
     def test_otp_koppelen(self):
         # reset OTP koppeling
@@ -819,22 +819,22 @@ class AccountTest(TestCase):
         # controleer redirect naar het plein, omdat de gebruiker niet ingelogged is
         resp = self.client.get('/account/otp-controle/', follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        assert_template_used(self, resp, ('plein/plein.dtl', 'plein/site_layout.dtl'))
+        assert_template_used(self, resp, ('plein/plein-bezoeker.dtl', 'plein/site_layout.dtl'))
 
         resp = self.client.post('/account/otp-controle/', {'otp_code': '123456'}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        assert_template_used(self, resp, ('plein/plein.dtl', 'plein/site_layout.dtl'))
+        assert_template_used(self, resp, ('plein/plein-bezoeker.dtl', 'plein/site_layout.dtl'))
 
     def test_otp_controle_niet_nodig(self):
         self.client.login(username='normaal', password='wachtwoord')
         # controleer redirect naar het plein, omdat OTP koppeling niet nodig is
         resp = self.client.get('/account/otp-controle/', follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        assert_template_used(self, resp, ('plein/plein.dtl', 'plein/site_layout.dtl'))
+        assert_template_used(self, resp, ('plein/plein-gebruiker.dtl', 'plein/site_layout.dtl'))
 
         resp = self.client.post('/account/otp-controle/', {'otp_code': '123456'}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        assert_template_used(self, resp, ('plein/plein.dtl', 'plein/site_layout.dtl'))
+        assert_template_used(self, resp, ('plein/plein-gebruiker.dtl', 'plein/site_layout.dtl'))
 
     def test_otp_controle(self):
         self.account_admin.otp_is_actief = True
@@ -870,6 +870,6 @@ class AccountTest(TestCase):
         code = get_otp_code(self.account_admin)
         resp = self.client.post('/account/otp-controle/', {'otp_code': code}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        assert_template_used(self, resp, ('plein/plein.dtl', 'plein/site_layout.dtl'))
+        assert_template_used(self, resp, ('plein/plein-bko.dtl', 'plein/site_layout.dtl'))
 
 # end of file

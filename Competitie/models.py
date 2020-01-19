@@ -48,6 +48,41 @@ class Competitie(models.Model):
     klassen_team = models.ManyToManyField(CompetitieWedstrijdKlasse, related_name='team')
     is_afgesloten = models.BooleanField(default=False)
 
+    def zet_fase(self):
+        # fase A was totdat dit object gemaakt werd
+
+        now = timezone.now()
+        now = date(year=now.year, month=now.month, day=now.day)
+
+        # A1 = competitie is aangemaakt en mag nog getuned worden
+        if now < self.begin_aanmeldingen:
+            # zijn de aanvangsgemiddelden bepaald?
+            if len(self.klassen_indiv.all()) == 0:
+                self.fase = 'A1'
+                return
+
+            # A2 = klassengrenzen zijn bepaald
+            self.fase ='A2'
+            return
+
+        # B = open voor inschrijvingen
+        if now < self.einde_aanmeldingen:
+            self.fase ='B'
+            return
+
+        # C = aanmaken teams; gesloten voor individuele inschrijvingen
+        if now < self.einde_teamvorming:
+            self.fase = 'C'
+            return
+
+        # D = aanmaken poules en afronden wedstrijdschema's
+        if now < self.eerste_wedstrijd:
+            self.fase ='D'
+            return
+
+        # E = Begin wedstrijden
+        self.fase ='E'
+
     def __str__(self):
         """ geef een tekstuele afkorting van dit object, voor in de admin interface """
         return self.beschrijving
@@ -88,37 +123,16 @@ def models_bepaal_startjaar_nieuwe_competitie():
 def get_competitie_fase(afstand):
     # volgens tabel in hoofdstuk 1.3.1
 
+    # TODO: er kunnen twee competities actief zijn. Geef de status van de oudste competitie.
+
     # A = initieel
     objs = Competitie.objects.filter(is_afgesloten=False, afstand=afstand)
     if len(objs) == 0:
         return 'A', Competitie()
 
     comp = objs[0]
-    now = timezone.now()
-    now = date(year=now.year, month=now.month, day=now.day)
-
-    # A1 = competitie is aangemaakt en mag nog getuned worden
-    if now < comp.begin_aanmeldingen:
-        # zijn de aanvangsgemiddelden bepaald?
-        if len(comp.klassen_indiv.all()) == 0:
-            return 'A1', comp
-        # A2 = klassengrenzen zijn bepaald
-        return 'A2', comp
-
-    # B = open voor inschrijvingen
-    if now < comp.einde_aanmeldingen:
-        return 'B', comp
-
-    # C = aanmaken teams; gesloten voor individuele inschrijvingen
-    if now < comp.einde_teamvorming:
-        return 'C', comp
-
-    # D = aanmaken poules en afronden wedstrijdschema's
-    if now < comp.eerste_wedstrijd:
-        return 'D', comp
-
-    # E = Begin wedstrijden
-    return 'E', comp
+    comp.zet_fase()
+    return comp.fase, comp
 
 
 def competitie_aanmaken():
