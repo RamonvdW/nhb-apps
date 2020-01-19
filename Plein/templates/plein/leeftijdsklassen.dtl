@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019 Ramon van der Winkel.
+                Copyright (c) 2019-2020 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -19,7 +19,7 @@
 <p>Volgens het reglement van World Archery wordt de klasse bepaald door de leeftijd die je <i>bereikt</i> in een jaar.
  Jij bereikt dit jaar de leeftijd {{ plein_leeftijd }}.</p>
 
-<p>Vooral voor jonge schutters verandert de de klasse waarin je uit mag komen regelmatig, daarom hebben we hieronder een overzicht gemaakt.</p>
+<p>Vooral voor jonge schutters verandert de klasse waarin je uit mag komen regelmatig, daarom hebben we hieronder een overzicht gemaakt.</p>
 
 <h5>Wedstrijden</h5>
 
