@@ -9,6 +9,7 @@ from django.contrib.auth.models import Group, Permission
 from django.utils import timezone
 from BasisTypen.models import WedstrijdKlasse
 from NhbStructuur.models import NhbRegio, NhbRayon, ADMINISTRATIEVE_REGIO
+from Logboek.models import schrijf_in_logboek
 from datetime import date
 from decimal import Decimal
 

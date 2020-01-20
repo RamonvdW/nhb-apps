@@ -113,6 +113,9 @@ class CompetitieAanmakenView(UserPassesTestMixin, TemplateView):
             (wat volgt uit het drukken op de knop)
             om de nieuwe competitie op te starten.
         """
+        jaar = models_bepaal_startjaar_nieuwe_competitie()
+        seizoen = "%s/%s" % (jaar, jaar+1)
+        schrijf_in_logboek(request.user, 'Competitie', 'Aanmaken competities %s' % seizoen)
         competitie_aanmaken()
         return redirect('Plein:plein')
 
@@ -258,6 +261,7 @@ class KlassegrenzenView(UserPassesTestMixin, TemplateView):
         objs = Competitie.objects.filter(afstand=afstand)
         if len(objs) > 0:
             comp = objs[0]
+            schrijf_in_logboek(request.user, 'Competitie', 'Klassegrenzen bevestigd voor %s' % comp.beschrijving)
             for obj in self._get_queryset(afstand):
                 klasse = obj['wedstrkl_obj']
                 maak_competitieklasse_indiv(comp, klasse, obj['ag'])

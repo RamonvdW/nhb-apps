@@ -6,7 +6,7 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}Aanvangsgemiddelden bondscompetitie{% endblock %}
+{% block title %}Klassegrenzen{% endblock %}
 
 {% block pagina %}
 
