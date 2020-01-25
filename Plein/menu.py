@@ -15,7 +15,8 @@ ACTIEF_OPTIES = (
     'records',
     'logboek',
     'site-feedback-inzicht',
-    'wissel-van-rol'
+    'wissel-van-rol',
+    'competitie'
 )
 
 

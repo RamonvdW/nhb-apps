@@ -7,7 +7,7 @@
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from .menu import menu_dynamics
-from Account.rol import rol_zet_sessionvars_na_login
+from Account.rol import rol_zet_sessionvars_na_login, rol_activate
 from Account.leeftijdsklassen import leeftijdsklassen_zet_sessionvars_na_login
 from Account.models import Account, account_zet_sessionvars_na_login, account_zet_sessionvars_na_otp_controle
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
@@ -150,9 +150,16 @@ class PleinTest(TestCase):
         rol_zet_sessionvars_na_login(self.account_admin, self.client).save()
         resp = self.client.get('/plein/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assertNotContains(resp, '/beheer/')    # komt pas in beeld na kiezen rol IT
+        self.assertContains(resp, 'Wissel van rol')
+        assert_template_used(self, resp, ('plein/plein-gebruiker.dtl', 'plein/site_layout.dtl'))
+        # wissel naar IT beheerder
+        rol_activate(self.client, 'beheerder').save()
+        resp = self.client.get('/plein/')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, '/beheer/')
         self.assertContains(resp, 'Wissel van rol')
-        assert_template_used(self, resp, ('plein/plein-bko.dtl', 'plein/site_layout.dtl'))
+        assert_template_used(self, resp, ('plein/plein-gebruiker.dtl', 'plein/site_layout.dtl'))
         self.client.logout()
 
     def test_privacy(self):

@@ -10,14 +10,11 @@ from django.views.generic import TemplateView, ListView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Plein.menu import menu_dynamics
 from Account.leeftijdsklassen import get_leeftijdsklassen
-from Account.rol import rol_is_BKO
-from Competitie.models import Competitie, models_bepaal_startjaar_nieuwe_competitie
 
 
 TEMPLATE_PLEIN_BEZOEKER = 'plein/plein-bezoeker.dtl'
 TEMPLATE_PLEIN_GEBRUIKER = 'plein/plein-gebruiker.dtl'
 TEMPLATE_PLEIN_SCHUTTER = 'plein/plein-schutter.dtl'
-TEMPLATE_PLEIN_BKO = 'plein/plein-bko.dtl'
 TEMPLATE_PRIVACY = 'plein/privacy.dtl'
 TEMPLATE_LEEFTIJDSKLASSEN = 'plein/leeftijdsklassen.dtl'
 
@@ -55,25 +52,6 @@ class PleinView(View):
             else:
                 # ouder lid
                 context['plein_toon_leeftijdsklassen'] = False
-
-            if rol_is_BKO(self.request):
-                template = TEMPLATE_PLEIN_BKO
-
-                objs = Competitie.objects.filter(is_afgesloten=False).order_by('begin_jaar', 'afstand')
-                context['object_list'] = objs
-                context['have_active_comps'] = (len(objs) > 0)
-
-                for obj in objs:
-                    obj.zet_fase()
-                    obj.is_afgesloten_str = JA_NEE[obj.is_afgesloten]
-                # for
-
-                # als er nog geen competitie is voor het huidige jaar, geeft de BKO dan de optie om deze op te starten
-                beginjaar = models_bepaal_startjaar_nieuwe_competitie()
-                context['bko_kan_competitie_aanmaken'] = (len(objs.filter(begin_jaar=beginjaar)) == 0)
-                if context['bko_kan_competitie_aanmaken']:
-                    context['nieuwe_seizoen'] = "%s/%s" % (beginjaar, beginjaar+1)
-            # if
         # if
 
         menu_dynamics(self.request, context)
