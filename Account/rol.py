@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019 Ramon van der Winkel.
+#  Copyright (c) 2019-2020 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -56,7 +56,6 @@ def rol_zet_sessionvars_na_login(account, request):
         session variables
             gebruiker_rol_mag_wisselen: gebruik van de Plein.WisselVanRolView
     """
-
     sessionvars = request.session
 
     sessionvars[SESSIONVAR_ROL_LIMIET] = Rollen.ROL_SCHUTTER
@@ -76,7 +75,10 @@ def rol_zet_sessionvars_na_login(account, request):
     elif account_needs_otp(account):
         sessionvars[SESSIONVAR_ROL_MAG_WISSELEN] = True
 
-    sessionvars[SESSIONVAR_ROL_HUIDIGE] = sessionvars[SESSIONVAR_ROL_LIMIET]
+    if rol == Rollen.ROL_IT:
+        sessionvars[SESSIONVAR_ROL_HUIDIGE] = Rollen.ROL_BKO
+    else:
+        sessionvars[SESSIONVAR_ROL_HUIDIGE] = sessionvars[SESSIONVAR_ROL_LIMIET]
 
     return sessionvars  # allows unittest to do sessionvars.save()
 
@@ -102,10 +104,21 @@ def rol_get_huidige(request):
 
 
 def rol_is_BKO(request):
-    return rol_get_huidige(request) in (Rollen.ROL_IT, Rollen.ROL_BKO)
+    """ Geeft True terug als de gebruiker BKO rechten heeft en op dit moment BKO als rol gekozen heeft
+        Wordt gebruikt om specifieke content voor de BKO te tonen
+    """
+    return rol_get_huidige(request) == Rollen.ROL_BKO
+
+
+def rol_is_bestuurder(request):
+    """ Geeft True terug als de gebruiker een bestuurder is
+        Wordt gebruikt om toegang tot bepaalde schermen te voorkomen
+    """
+    return rol_get_huidige(request) in (Rollen.ROL_IT, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_CWZ)
 
 
 def rol_mag_wisselen(request):
+    """ Geeft True terug als deze gebruiker de wissel-van-rol getoond moet worden """
     try:
         return request.session[SESSIONVAR_ROL_MAG_WISSELEN]
     except KeyError:
@@ -117,43 +130,40 @@ def rol_activate(request, rolurl):
     """ Activeer een andere rol, als dit toegestaan is
         geen foutmelding of exceptions als het niet mag.
     """
+    sessionvars = request.session
+
     try:
         rol = url2rol[rolurl]
     except KeyError:
         # print('rol %s not found in url2rol' % repr(rolurl))
-        return
+        pass
+    else:
+        try:
+            rol_limiet = request.session[SESSIONVAR_ROL_LIMIET]
+        except KeyError:
+            # should not have been called
+            pass
+        else:
+            if rol == Rollen.ROL_IT and rol_limiet == Rollen.ROL_IT:
+                sessionvars[SESSIONVAR_ROL_HUIDIGE] = rol
 
-    try:
-        rol_limiet = request.session[SESSIONVAR_ROL_LIMIET]
-    except KeyError:
-        # should not have been called
-        return
+            if rol == Rollen.ROL_BKO and rol_limiet <= Rollen.ROL_BKO:
+                sessionvars[SESSIONVAR_ROL_HUIDIGE] = rol
 
-    if rol == Rollen.ROL_IT and rol_limiet == Rollen.ROL_IT:
-        request.session[SESSIONVAR_ROL_HUIDIGE] = rol
-        return
+            #if rol == "RKO" and rol_limiet <= Rollen.ROL_RKO:
+            #    sessionvars[SESSIONVAR_ROL_HUIDIGE] = rol
 
-    if rol == Rollen.ROL_BKO and rol_limiet <= Rollen.ROL_BKO:
-        request.session[SESSIONVAR_ROL_HUIDIGE] = rol
-        return
+            #if rol == "RCL" and rol_limiet <= Rollen.ROL_RCL:
+            #    sessionvars[SESSIONVAR_ROL_HUIDIGE] = rol
 
-    #if rol == "RKO" and rol_limiet <= Rollen.ROL_RKO:
-    #    request.sessions[SESSIONVAR_ROL_HUIDIGE] = rol
-    #    return
+            #if rol == "CWZ" and rol_limiet <= Rollen.ROL_CWZ:
+            #    sessionvars[SESSIONVAR_ROL_HUIDIGE] = rol
 
-    #if rol == "RCL" and rol_limiet <= Rollen.ROL_RCL:
-    #    request.sessions[SESSIONVAR_ROL_HUIDIGE] = rol
-    #    return
-
-    #if rol == "CWZ" and rol_limiet <= Rollen.ROL_CWZ:
-    #    request.sessions[SESSIONVAR_ROL_HUIDIGE] = rol
-    #    return
-
-    if rol == Rollen.ROL_SCHUTTER:
-        request.session[SESSIONVAR_ROL_HUIDIGE] = rol
-        return
+            if rol == Rollen.ROL_SCHUTTER:
+                sessionvars[SESSIONVAR_ROL_HUIDIGE] = rol
 
     # not recognized --> no change
+    return sessionvars  # allows unittest to do sessionvars.save()
 
 
 # end of file
