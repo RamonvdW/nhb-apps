@@ -11,6 +11,10 @@ app_name = 'Competitie'
 
 urlpatterns = [
 
+    path('',
+         views.CompetitieOverzichtView.as_view(),
+         name='overzicht'),
+
     # instellingen volgende competitie
     path('instellingen-volgende-competitie/',
          views.InstellingenVolgendeCompetitieView.as_view(),
@@ -23,6 +27,15 @@ urlpatterns = [
     path('klassegrenzen/<afstand>/',
          views.KlassegrenzenView.as_view(),
          name='klassegrenzen'),
+
+    path('beheer-favorieten/wijzig/',
+         views.WijzigFavorieteBestuurdersView.as_view(),
+         name='wijzigfavoriet'),
+
+    path('beheer-favorieten/',
+         views.BeheerFavorieteBestuurdersView.as_view(),
+         name='beheerfavorieten'),
+
 ]
 
 # end of file

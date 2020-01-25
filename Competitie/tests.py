@@ -11,7 +11,8 @@ from Account.rol import rol_zet_sessionvars_na_login
 from Plein.tests import assert_html_ok, assert_template_used
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
-from .models import Competitie, DeelCompetitie, CompetitieWedstrijdKlasse, get_competitie_fase
+from .models import Competitie, DeelCompetitie, CompetitieWedstrijdKlasse, get_competitie_fase, \
+                    FavorieteBestuurders
 import datetime
 
 
@@ -159,7 +160,7 @@ class TestCompetitie(TestCase):
         account_zet_sessionvars_na_otp_controle(self.client).save()
         rol_zet_sessionvars_na_login(self.account_bko, self.client).save()
 
-        fase, comp = get_competitie_fase(18)
+        fase, comp = get_competitie_fase(18)        # TODO: werkt niet bij twee actieve competities
         self.assertEqual(fase, 'A')
 
         # gebruik een POST om de competitie aan te maken
@@ -185,5 +186,97 @@ class TestCompetitie(TestCase):
         fase, comp = get_competitie_fase(18)
         self.assertEqual(fase, 'A2')
         # TODO: check nog meer velden van de aangemaakte objecten
+
+    def test_competitie_overzicht_anon(self):
+        self.client.logout()
+        resp = self.client.get('/competitie/')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_html_ok(self, resp)
+        assert_template_used(self, resp, ('competitie/overzicht.dtl', 'plein/site_layout.dtl'))
+        self.assertNotContains(resp, '/competitie/beheer-favorieten/')
+
+    def test_competitie_overzicht_bestuurder(self):
+        self.client.login(username='bko', password='wachtwoord')
+        account_zet_sessionvars_na_otp_controle(self.client).save()
+        rol_zet_sessionvars_na_login(self.account_bko, self.client).save()
+
+        resp = self.client.get('/competitie/')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_html_ok(self, resp)
+        assert_template_used(self, resp, ('competitie/overzicht-bestuurder.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, '/competitie/beheer-favorieten/')
+
+    def test_beheer_favorieten_anon(self):
+        self.client.logout()
+        resp = self.client.get('/competitie/beheer-favorieten/', follow=True)
+        self.assertEqual(resp.status_code, 404)     # 404 = not allowed
+
+    def test_beheer_favorieten(self):
+        self.client.login(username='bko', password='wachtwoord')
+        account_zet_sessionvars_na_otp_controle(self.client).save()
+        rol_zet_sessionvars_na_login(self.account_bko, self.client).save()
+
+        resp = self.client.get('/competitie/beheer-favorieten/')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_html_ok(self, resp)
+        assert_template_used(self, resp, ('competitie/beheer-favorieten.dtl', 'plein/site_layout.dtl'))
+        self.assertNotContains(resp, "de Tester")
+        self.assertEqual(len(FavorieteBestuurders.objects.all()), 0)
+
+        # zoeken en toevoegen
+        resp = self.client.get('/competitie/beheer-favorieten/', {'zoekterm': "de Test"})
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_html_ok(self, resp)
+        assert_template_used(self, resp, ('competitie/beheer-favorieten.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, "100001")
+        self.assertContains(resp, "Ramon de Tester")
+
+        # voeg toe
+        resp = self.client.post('/competitie/beheer-favorieten/wijzig/', {'add_nhb_nr': '100001'}, follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_html_ok(self, resp)
+        assert_template_used(self, resp, ('competitie/beheer-favorieten.dtl', 'plein/site_layout.dtl'))
+        self.assertEqual(len(FavorieteBestuurders.objects.all()), 1)
+        self.assertContains(resp, "100001")
+        self.assertContains(resp, "Ramon de Tester")
+        obj = FavorieteBestuurders.objects.all()[0]
+        self.assertTrue(str(obj) != "")
+
+        # voeg niet bestaand lid toe
+        resp = self.client.post('/competitie/beheer-favorieten/wijzig/', {'add_nhb_nr': '999999'}, follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_html_ok(self, resp)
+        assert_template_used(self, resp, ('competitie/beheer-favorieten.dtl', 'plein/site_layout.dtl'))
+        self.assertEqual(len(FavorieteBestuurders.objects.all()), 1)
+
+        # dubbel toevoegen
+        resp = self.client.post('/competitie/beheer-favorieten/wijzig/', {'add_nhb_nr': '100001'}, follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_html_ok(self, resp)
+        assert_template_used(self, resp, ('competitie/beheer-favorieten.dtl', 'plein/site_layout.dtl'))
+        self.assertEqual(len(FavorieteBestuurders.objects.all()), 1)
+
+        # verwijder
+        resp = self.client.post('/competitie/beheer-favorieten/wijzig/', {'drop_nhb_nr': '100001'}, follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_html_ok(self, resp)
+        assert_template_used(self, resp, ('competitie/beheer-favorieten.dtl', 'plein/site_layout.dtl'))
+        self.assertEqual(len(FavorieteBestuurders.objects.all()), 0)
+        self.assertNotContains(resp, "100001")
+        self.assertNotContains(resp, "Ramon de Tester")
+
+        # verwijder niet aanwezig
+        resp = self.client.post('/competitie/beheer-favorieten/wijzig/', {'drop_nhb_nr': '100001'}, follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_html_ok(self, resp)
+        assert_template_used(self, resp, ('competitie/beheer-favorieten.dtl', 'plein/site_layout.dtl'))
+        self.assertEqual(len(FavorieteBestuurders.objects.all()), 0)
+
+        # verwijder niet bestaand
+        resp = self.client.post('/competitie/beheer-favorieten/wijzig/', {'drop_nhb_nr': '999999'}, follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_html_ok(self, resp)
+        assert_template_used(self, resp, ('competitie/beheer-favorieten.dtl', 'plein/site_layout.dtl'))
+        self.assertEqual(len(FavorieteBestuurders.objects.all()), 0)
 
 # end of file

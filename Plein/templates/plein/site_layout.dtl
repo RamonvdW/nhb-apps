@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 {% comment %}
-                Copyright (c) 2019 Ramon van der Winkel.
+                Copyright (c) 2019-2020 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -68,6 +68,24 @@
                           };
                 var insts = M.Collapsible.init(elems, options)
             })
+        </script>
+
+        <script>
+            function getCookie(name) {
+                var cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    var cookies = document.cookie.split(';');
+                    for (var i = 0; i < cookies.length; i++) {
+                        var cookie = cookies[i].trim();
+                        // Does this cookie string begin with the name we want?
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
         </script>
     </body>
 </html>

@@ -8,13 +8,50 @@ from django.db import models
 from django.contrib.auth.models import Group, Permission
 from django.utils import timezone
 from BasisTypen.models import WedstrijdKlasse
-from NhbStructuur.models import NhbRegio, NhbRayon, ADMINISTRATIEVE_REGIO
+from NhbStructuur.models import NhbRegio, NhbRayon, NhbLid, ADMINISTRATIEVE_REGIO
 from Logboek.models import schrijf_in_logboek
+from Account.models import Account
 from datetime import date
 from decimal import Decimal
 
 
 ZERO = Decimal('0.000')
+
+
+class FavorieteBestuurders(models.Model):
+    """ Deze klasse verbindt accounts met favoriete bestuurders
+        De favorieten kunnen gekozen worden bij het koppelen van bestuurders
+    """
+    zelf = models.ForeignKey(Account, on_delete=models.CASCADE)
+    favlid = models.ForeignKey(NhbLid, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return "%s: %s %s" % (self.zelf.username, self.favlid.voornaam, self.favlid.achternaam)
+
+    class Meta:
+        verbose_name = verbose_name_plural = 'favoriete bestuurders'
+
+
+def add_favoriete_bestuurder(account, nhb_nr):
+    try:
+        nhblid = NhbLid.objects.get(nhb_nr=nhb_nr)
+    except NhbLid.DoesNotExist:
+        pass
+    else:
+        # alleen toevoegen als nog niet in de lijst
+        if len(FavorieteBestuurders.objects.filter(zelf=account, favlid=nhblid)) == 0:
+            obj = FavorieteBestuurders(zelf=account, favlid=nhblid)
+            obj.save()
+
+
+def drop_favoriete_bestuurder(account, nhb_nr):
+    try:
+        nhblid = NhbLid.objects.get(nhb_nr=nhb_nr)
+    except NhbLid.DoesNotExist:
+        pass
+    else:
+        # TODO: exception to handle?
+        FavorieteBestuurders.objects.filter(zelf=account, favlid=nhblid).delete()
 
 
 class CompetitieWedstrijdKlasse(models.Model):

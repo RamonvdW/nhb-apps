@@ -1,0 +1,110 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2020 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Beheer favorieten{% endblock %}
+
+{% block pagina %}
+
+<h4>Beheer favorieten</h4>
+
+<p>Via deze pagina kan jij een handig lijstje samenstellen van een aantal NHB leden die je vaak nodig hebt, bijvoorbeeld bij het toekennen als bestuurder voor de competitie.</p>
+
+<script>
+function wijzigfavlid(actie, id) {
+    // voer een POST uit om toe te voegen
+    var form = document.createElement('form');
+    form.setAttribute('method', 'post');
+    form.setAttribute('action', '{% url 'Competitie:wijzigfavoriet' %}');
+
+    var inp = document.createElement('input');
+    inp.type = "hidden";
+    inp.name = actie;
+    inp.value = id.getAttribute("data-nhb-nr");
+    form.appendChild(inp)
+
+    var inp = document.createElement('input');
+    inp.type = "hidden";
+    inp.name = "csrfmiddlewaretoken";
+    inp.value = getCookie('csrftoken');
+    form.appendChild(inp)
+
+    form.style.display = 'hidden';
+    document.body.appendChild(form)
+    form.submit();
+}
+</script>
+
+{% if huidige_lijst.count %}
+    <h5>Huidige favorieten ({{ huidige_lijst.count }})</h5>
+    <ul class="collapsible">
+        {% for obj in huidige_lijst %}
+            <li>
+                <div class="collapsible-header white"><span><b>{{ obj.nhb_nr }}</b>&nbsp;{{ obj.voornaam }} {{ obj.achternaam }}</span></div>
+                <div class="collapsible-body white">
+                    <p>Rayon {{ obj.bij_vereniging.regio.rayon.rayon_nr }}</p>
+                    <p>Regio {{ obj.bij_vereniging.regio.regio_nr }}</p>
+                    <button class="btn red" onclick="wijzigfavlid('drop_nhb_nr', this)" data-nhb-nr="{{ obj.nhb_nr }}">Verwijder uit mijn lijst</button>
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>Je hebt nog geen favorieten toegevoegd. Gebruik het formulier om leden te zoeken en toe te voegen.</p>
+{% endif %}
+
+<div class="container z-depth-2 white">
+    <div class="row nav blue white-text">
+        <div class="col s12 center">
+            <h5>Zoeken</h5>
+            <p>naar favoriete NHB leden</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col s12">
+            <span>Voer een deel van de naam van een NHB lid in.</span>
+            <p>Je kan ook een NHB nummer invoeren.</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <form class="col s12" method="get" action="{{ zoek_url }}">
+            {{ form.zoekterm.label_tag }} {{ form.zoekterm }}
+            <p>&nbsp;</p>
+            <div class="center-align">
+                <input class="btn blue" type="submit" value="Zoeken">
+            </div>
+        </form>
+    </div>
+
+    <div class="row">&nbsp;</div>
+</div>
+
+
+{% if object_list.count %}
+    <h5>Gevonden leden ({{ object_list.count }})</h5>
+    <ul class="collapsible">
+        {% for obj in object_list %}
+            <li>
+                <div class="collapsible-header white"><span><b>{{ obj.nhb_nr }}</b>&nbsp;{{ obj.voornaam }} {{ obj.achternaam }}</span></div>
+                <div class="collapsible-body white">
+                    <p>Rayon {{ obj.bij_vereniging.regio.rayon.rayon_nr }}</p>
+                    <p>Regio {{ obj.bij_vereniging.regio.regio_nr }}</p>
+                    <button class="btn blue" onclick="wijzigfavlid('add_nhb_nr', this)" data-nhb-nr="{{ obj.nhb_nr }}">Voeg toe aan mijn favorieten</button>
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    {% if have_searched %}
+    <p class="red-text">Niets gevonden</p>
+    {% endif %}
+{% endif %}
+
+{% endblock %}
+
