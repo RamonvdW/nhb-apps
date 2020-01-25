@@ -9,7 +9,7 @@ from django.utils import timezone
 from django.test import TestCase
 from django.conf import settings
 from django.core import management
-from .rol import Rollen, rol_zet_sessionvars_na_login, rol_mag_wisselen,\
+from .rol import Rollen, rol_zet_sessionvars_na_login, rol_mag_wisselen, rol_is_bestuurder,\
                          rol_get_limiet, rol_get_huidige, rol_activate
 from .leeftijdsklassen import leeftijdsklassen_zet_sessionvars_na_login,\
                               get_leeftijdsklassen
@@ -214,6 +214,7 @@ class AccountTest(TestCase):
         self.assertEqual(rol_get_huidige(request), Rollen.ROL_UNKNOWN)
         rol_activate(request, 'schutter')
         self.assertEqual(rol_get_huidige(request), Rollen.ROL_UNKNOWN)
+        self.assertFalse(rol_is_bestuurder(request))
 
         # niet aan nhblid gekoppeld schutter account
         account.is_staff = False
@@ -224,6 +225,7 @@ class AccountTest(TestCase):
         self.assertFalse(rol_mag_wisselen(request))
         self.assertEqual(rol_get_limiet(request), Rollen.ROL_SCHUTTER)
         self.assertEqual(rol_get_huidige(request), Rollen.ROL_SCHUTTER)
+        self.assertFalse(rol_is_bestuurder(request))
         rol_activate(request, 'beheerder')
         self.assertEqual(rol_get_huidige(request), Rollen.ROL_SCHUTTER)
         rol_activate(request, 'BKO')
@@ -241,6 +243,7 @@ class AccountTest(TestCase):
         self.assertFalse(rol_mag_wisselen(request))
         self.assertEqual(rol_get_limiet(request), Rollen.ROL_SCHUTTER)
         self.assertEqual(rol_get_huidige(request), Rollen.ROL_SCHUTTER)
+        self.assertFalse(rol_is_bestuurder(request))
         rol_activate(request, 'beheerder')
         self.assertEqual(rol_get_huidige(request), Rollen.ROL_SCHUTTER)
         rol_activate(request, 'BKO')
@@ -262,6 +265,7 @@ class AccountTest(TestCase):
         rol_zet_sessionvars_na_login(account, request)
         self.assertEqual(rol_get_limiet(request), Rollen.ROL_BKO)
         self.assertEqual(rol_get_huidige(request), Rollen.ROL_BKO)
+        self.assertTrue(rol_is_bestuurder(request))
         rol_activate(request, 'schutter')
         self.assertEqual(rol_get_huidige(request), Rollen.ROL_SCHUTTER)
         rol_activate(request, 'beheerder')
@@ -284,7 +288,8 @@ class AccountTest(TestCase):
         rol_zet_sessionvars_na_login(account, request)
         self.assertTrue(rol_mag_wisselen(request))
         self.assertEqual(rol_get_limiet(request), Rollen.ROL_IT)
-        self.assertEqual(rol_get_huidige(request), Rollen.ROL_IT)
+        self.assertEqual(rol_get_huidige(request), Rollen.ROL_BKO)  # wissel is nodig naar ROL_IT
+        self.assertTrue(rol_is_bestuurder(request))
         rol_activate(request, 'beheerder')
         self.assertEqual(rol_get_huidige(request), Rollen.ROL_IT)
         rol_activate(request, 'BKO')
@@ -870,6 +875,6 @@ class AccountTest(TestCase):
         code = get_otp_code(self.account_admin)
         resp = self.client.post('/account/otp-controle/', {'otp_code': code}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        assert_template_used(self, resp, ('plein/plein-bko.dtl', 'plein/site_layout.dtl'))
+        assert_template_used(self, resp, ('plein/plein-gebruiker.dtl', 'plein/site_layout.dtl'))
 
 # end of file
