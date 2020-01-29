@@ -31,7 +31,7 @@
         {% block extrastyle %}{% endblock %}
     </head>
 
-    <body class="grey lighten-4">   <!-- identical to #f5f5f5 from NHB style -->
+    <body class="grey lighten-2">   <!-- grey lighten-4 is identical to #f5f5f5 from NHB style -->
         <div id="container">        <!-- css manipulates this to make space for the menu -->
 
             <!-- sidenav -->
