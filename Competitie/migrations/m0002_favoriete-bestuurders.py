@@ -29,6 +29,7 @@ class Migration(migrations.Migration):
                 ('favlid', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='NhbStructuur.NhbLid')),
                 ('zelf', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
+            options={'verbose_name': 'favoriete bestuurders', 'verbose_name_plural': 'favoriete bestuurders'},
         ),
     ]
 
