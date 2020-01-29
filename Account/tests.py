@@ -13,12 +13,15 @@ from .rol import Rollen, rol_zet_sessionvars_na_login, rol_mag_wisselen, rol_is_
                          rol_get_limiet, rol_get_huidige, rol_activate
 from .leeftijdsklassen import leeftijdsklassen_zet_sessionvars_na_login,\
                               get_leeftijdsklassen
-from .models import Account, AccountEmail, account_zet_sessionvars_na_login, account_zet_sessionvars_na_otp_controle
+from .models import Account, AccountEmail,\
+                    account_zet_sessionvars_na_login, account_zet_sessionvars_na_otp_controle,\
+                    is_email_valide
 from .views import obfuscate_email
 from .forms import LoginForm
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
 from NhbStructuur.migrations.m0002_nhbstructuur_2018 import maak_rayons_2018, maak_regios_2018
 from Plein.tests import assert_html_ok, assert_template_used, assert_other_http_commands_not_supported
+from Overig.models import SiteTijdelijkeUrl
 import datetime
 import pyotp
 import io
@@ -27,23 +30,6 @@ import io
 def get_otp_code(account):
     otp = pyotp.TOTP(account.otp_code)
     return otp.now()
-
-
-def get_url(resp, pre=b'\x00', post=b''):
-    html = resp.content
-    pos = html.find(pre)
-    if pos >= 0:
-        # print("pre pos=%s" % pos)
-        html = html[pos + len(pre):]
-        # print("pre html=%s" % repr(html))
-        pos = html.find(post)
-        if pos >= 0:
-            # print("post pos=%s" % pos)
-            html = html[:pos]
-            # print("post html=%s" % repr(html))
-            url = html.decode()     # convert to string
-            return url
-    return None
 
 
 class AccountTest(TestCase):
@@ -385,11 +371,20 @@ class AccountTest(TestCase):
         self.assertContains(resp, 'r@gmail.not')     # iets van r######r@gmail.not
 
         # volg de link om de email te bevestigen
-        url = get_url(resp, pre=b'Klik voorlopig even op <a href="', post=b'">deze link</a>')
+        objs = SiteTijdelijkeUrl.objects.all().order_by('-aangemaakt_op')       # nieuwste eerst
+        self.assertTrue(len(objs) > 0)
+        obj = objs[0]
+        self.assertEqual(obj.hoortbij_accountemail.nieuwe_email, 'rdetester@gmail.not')
+        self.assertFalse(obj.hoortbij_accountemail.email_is_bevestigd)
+        url = '/overig/url/' + obj.url_code + '/'
         resp = self.client.get(url, follow=True)    # temporary url redirects
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         assert_html_ok(self, resp)
         assert_template_used(self, resp, ('account/bevestigd.dtl', 'plein/site_layout.dtl'))
+
+        account = Account.objects.filter(username='100001')[0]
+        accmail = AccountEmail.objects.filter(account=account)[0]
+        self.assertTrue(accmail.email_is_bevestigd)
 
     def test_registreer_nhb_bestaat_al(self):
         resp = self.client.post('/account/registreer/',
@@ -417,9 +412,6 @@ class AccountTest(TestCase):
         resp = self.client.get('/account/aangemaakt/')
         self.assertEqual(resp.status_code, 302)     # 302 = Redirect
         self.assertEqual(resp.url, '/plein/')
-
-        # zorg even voor 100% coverage van deze file
-        url = get_url(resp)
 
     def test_obfuscate_email(self):
         self.assertEqual(obfuscate_email(''), '')
@@ -590,10 +582,10 @@ class AccountTest(TestCase):
         mail = AccountEmail.objects.get(account=obj)
         self.assertTrue(mail.email_is_bevestigd)
         self.assertEqual(mail.bevestigde_email, 'nieuw@nhb.test')
-        self.assertEqual(mail.nieuwe_email, 'nieuw@nhb.test')
+        self.assertEqual(mail.nieuwe_email, '')
 
         # coverage voor AccountEmail.__str__()
-        self.assertEqual(str(mail), "Email voor account 'nieuwelogin' (nieuw@nhb.test)")
+        self.assertEqual(str(mail), "E-mail voor account 'nieuwelogin' (nieuw@nhb.test)")
 
         # exception cases
         f1 = io.StringIO()
@@ -602,7 +594,7 @@ class AccountTest(TestCase):
 
         f1 = io.StringIO()
         management.call_command('maak_account', 'Voornaam', 'nieuwelogin', 'nieuwwachtwoord', 'nieuw.nhb.test', stderr=f1, stdout=f2)
-        self.assertEqual(f1.getvalue(), 'Dat is geen valide email\n')
+        self.assertEqual(f1.getvalue(), 'Dat is geen valide e-mail\n')
 
     def test_maak_beheerder(self):
         self.assertFalse(self.account_normaal.is_staff)
@@ -876,5 +868,15 @@ class AccountTest(TestCase):
         resp = self.client.post('/account/otp-controle/', {'otp_code': code}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         assert_template_used(self, resp, ('plein/plein-gebruiker.dtl', 'plein/site_layout.dtl'))
+
+    def test_is_email_valide(self):
+        self.assertTrue(is_email_valide('test@nhb.nl'))
+        self.assertTrue(is_email_valide('jan.de.tester@nhb.nl'))
+        self.assertTrue(is_email_valide('jan.de.tester@hb.nl'))
+        self.assertTrue(is_email_valide('r@hb.nl'))
+        self.assertFalse(is_email_valide('tester@nhb'))
+        self.assertFalse(is_email_valide('test er@nhb.nl'))
+        self.assertFalse(is_email_valide('test\ter@nhb.nl'))
+        self.assertFalse(is_email_valide('test\ner@nhb.nl'))
 
 # end of file

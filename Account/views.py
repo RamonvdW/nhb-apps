@@ -28,6 +28,7 @@ from .qrcode import qrcode_get
 from Overig.tijdelijke_url import set_tijdelijke_url_receiver, RECEIVER_ACCOUNTEMAIL
 from Plein.menu import menu_dynamics
 from Logboek.models import schrijf_in_logboek
+from Mailer.models import queue_email
 from datetime import timedelta
 
 
@@ -254,10 +255,18 @@ class RegistreerNhbNummerView(TemplateView):
                                    gebruikte_functie="Registreer met NHB nummer",
                                    activiteit="Account aangemaakt voor NHB nummer %s vanaf IP %s" % (repr(nhb_nummer), repr(from_ip)))
 
-                # TODO: send email
+                text_body = "Hallo!\n\n" +\
+                            "Je hebt een account aangemaakt op de website van de NHB.\n" +\
+                            "Klik op de onderstaande link om dit te bevestigen.\n\n" +\
+                            ack_url + "\n\n" +\
+                            "Als jij dit niet was, neem dan contact met ons op via info@handboogsport.nl\n\n" +\
+                            "Veel plezier met de site!\n" +\
+                            "Het bondsburo\n"
+
+                queue_email(email, 'Aanmaken account voltooien', text_body)
+
                 request.session['login_naam'] = nhb_nummer
                 request.session['partial_email'] = obfuscate_email(email)
-                request.session['TEMP_ACK_URL'] = ack_url
                 return HttpResponseRedirect(reverse('Account:aangemaakt'))
 
         # still here --> re-render with error message
@@ -302,15 +311,13 @@ class AangemaaktView(TemplateView):
         try:
             login_naam = request.session['login_naam']
             partial_email = request.session['partial_email']
-            temp_ack_url = request.session['TEMP_ACK_URL']
         except KeyError:
             # url moet direct gebruikt zijn
             return HttpResponseRedirect(reverse('Plein:plein'))
 
         # geef de data door aan de template
         context = {'login_naam': login_naam,
-                   'partial_email': partial_email,
-                   'temp_ack_url': temp_ack_url}
+                   'partial_email': partial_email}
         menu_dynamics(request, context)
 
         return render(request, TEMPLATE_AANGEMAAKT, context)
