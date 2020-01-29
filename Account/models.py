@@ -23,7 +23,7 @@ class AccountCreateError(Exception):
 
 
 class AccountCreateNhbGeenEmail(Exception):
-    """ Specifieke foutmelding omdat het NHB lid geen email adres heeft """
+    """ Specifieke foutmelding omdat het NHB lid geen e-mail adres heeft """
     pass
 
 
@@ -44,7 +44,7 @@ class Account(AbstractUser):
     # (inherited) is_superuser  - all permissions
     # (inherited) first_name
     # (inherited, not used) last_name
-    # (inherited, not used) email
+    # (inherited, not used) e-mail
     # (inherited) user_permissions: ManyToMany
     # (inherited) groups: ManyToMany
     vraag_nieuw_wachtwoord = models.BooleanField(   # TODO: implement
@@ -96,7 +96,7 @@ class Account(AbstractUser):
         """
         if self.nhblid:
             return self.nhblid.voornaam
-        # TODO: werkt dit ook nog goed voor niet-NHB leden die een email als username hebben?
+        # TODO: werkt dit ook nog goed voor niet-NHB leden die een e-mail als username hebben?
         return self.first_name or self.username
 
     def get_account_full_name(self):
@@ -110,10 +110,10 @@ class Account(AbstractUser):
 
 
 class AccountEmail(models.Model):
-    """ definitie van een email adres (en de status daarvan) voor een account """
+    """ definitie van een e-mail adres (en de status daarvan) voor een account """
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
 
-    # email
+    # e-mail
     email_is_bevestigd = models.BooleanField(default=False)
     bevestigde_email = models.EmailField(blank=True)
     nieuwe_email = models.EmailField(blank=True)
@@ -131,7 +131,7 @@ class AccountEmail(models.Model):
 
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
-        return "Email voor account '%s' (%s)" % (self.account.username,
+        return "E-mail voor account '%s' (%s)" % (self.account.username,
                                                  self.bevestigde_email)
 
     class Meta:
@@ -180,15 +180,19 @@ class SchutterBoog(models.Model):
 
 
 def is_email_valide(adres):
-    """ Basic check of dit een valide email adres is:
+    """ Basic check of dit een valide e-mail adres is:
         - niet leeg
         - bevat @
         - bevat geen spatie
         - domein bevat een .
-        Uiteindelijk weet je pas of het een valide adres is als je er een email naartoe kon sturen
+        Uiteindelijk weet je pas of het een valide adres is als je er een e-mail naartoe kon sturen
         We proberen lege velden en velden met opmerkingen als "geen" of "niet bekend" te ontdekken.
     """
-    if adres and len(adres) >= 4 and '@' in adres and ' ' not in adres and r'\t' not in adres:
+    # full rules: https://stackoverflow.com/questions/2049502/what-characters-are-allowed-in-an-email-address
+    if adres and len(adres) >= 4 and '@' in adres and ' ' not in adres:
+        for char in ('\t', '\n', '\r'):
+            if char in adres:
+                return False
         user, domein = adres.rsplit('@', 1)
         if '.' in domein:
             return True
@@ -201,7 +205,7 @@ def account_create(username, wachtwoord, email, voornaam):
     """
 
     if not is_email_valide(email):
-        raise AccountCreateError('Dat is geen valide email')
+        raise AccountCreateError('Dat is geen valide e-mail')
 
     if Account.objects.filter(username=username).count() != 0:
         raise AccountCreateError('Account bestaat al')
@@ -218,7 +222,7 @@ def account_create(username, wachtwoord, email, voornaam):
     mail.account = account
     mail.email_is_bevestigd = True
     mail.bevestigde_email = email
-    mail.nieuwe_email = email
+    mail.nieuwe_email = ''
     mail.save()
 
 
