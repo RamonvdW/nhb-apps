@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019 Ramon van der Winkel.
+#  Copyright (c) 2019-2020 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,6 +9,7 @@ from django.views.generic import TemplateView, ListView
 from django.shortcuts import render, redirect
 from django.urls import Resolver404, reverse
 from django.http import HttpResponseRedirect
+from django.utils import timezone
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.rol import Rollen, rol_get_huidige
 from Plein.menu import menu_dynamics
@@ -148,12 +149,17 @@ class SiteTijdelijkeUrlView(View):
             # onbekende url code
             raise Resolver404()
 
-        # print("SiteTijdelijkeUrlView: obj=%s" % repr(obj))
-        # TODO: check obj.geldig_tot
+        # kijk of deze tijdelijke url al verlopen is
+        if obj.geldig_tot < timezone.now():
+            obj.delete()
+            raise Resolver404()
 
         # dispatch naar de juiste applicatie waar deze bij hoort
         # de callbacks staan in de dispatcher
         redirect = do_dispatch(request, obj.hoortbij_accountemail)
+
+        # verwijder de gebruikte tijdelijke url
+        obj.delete()
 
         if redirect:
             # print("redirect: %s" % repr(redirect))

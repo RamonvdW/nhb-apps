@@ -5,6 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import reverse
+from django.conf import settings
 from uuid import uuid5, NAMESPACE_URL
 
 uuid_namespace = uuid5(NAMESPACE_URL, 'Overig.Models.SiteUrls')
@@ -43,14 +44,14 @@ def _maak_url_code(**kwargs):
 
 def maak_tijdelijke_url_accountemail(accountemail, **kwargs):
     """ Maak een tijdelijke URL aan die gebruikt kan worden om een
-        account email te bevestigen.
+        account e-mail te bevestigen.
         Een SiteTijdelijkeUrl record wordt in de database gezet met de
         url_code en waar deze voor bedoeld is.
         De volledige url wordt terug gegeven.
     """
     url_code = _maak_url_code(**kwargs)
     dispatcher[SAVER](url_code, geldig_dagen=7, accountemail=accountemail)
-    return reverse('Overig:tijdelijke-url', args=[url_code])
+    return settings.SITE_URL + reverse('Overig:tijdelijke-url', args=[url_code])
 
 
 def do_dispatch(request, accountemail):
