@@ -71,7 +71,7 @@ GEEN_SECRETARIS_NODIG = (1377,)
 
 class Command(BaseCommand):
 
-    help = "Importeer een JSON file met data uit het CRM systeem van de NHB "
+    help = "Importeer een JSON file met data uit het CRM systeem van de NHB"
 
     def __init__(self):
         super().__init__()
@@ -428,7 +428,7 @@ class Command(BaseCommand):
                 if not lid_blocked:
                     self._count_lid_no_email += 1
             elif not is_email_valide(lid_email):
-                self.stderr.write('[ERROR] Lid %s heeft geen valide email (%s)' % (lid_nhb_nr, lid_email))
+                self.stderr.write('[ERROR] Lid %s heeft geen valide e-mail (%s)' % (lid_nhb_nr, lid_email))
                 self._count_errors += 1
                 self._count_lid_no_email += 1
                 lid_email = ""      # convert invalid email to no email
@@ -471,7 +471,7 @@ class Command(BaseCommand):
                         obj.save()
 
                 if obj.email != lid_email:
-                    self.stdout.write('[INFO] Lid %s email: %s --> %s' % (lid_nhb_nr, repr(obj.email), repr(lid_email)))
+                    self.stdout.write('[INFO] Lid %s e-mail: %s --> %s' % (lid_nhb_nr, repr(obj.email), repr(lid_email)))
                     obj.email = lid_email
                     self._count_wijzigingen += 1
                     if not self.dryrun:
@@ -598,7 +598,7 @@ class Command(BaseCommand):
 
         # rapporteer de samenvatting en schrijf deze ook in het logboek
         samenvatting = "Samenvatting: %s fouten; %s waarschuwingen; %s nieuw; %s wijzigingen; %s verwijderingen; "\
-                        "%s leden; %s verenigingen; %s regios; %s rayons; %s actieve leden zonder email" %\
+                        "%s leden; %s verenigingen; %s regios; %s rayons; %s actieve leden zonder e-mail" %\
                           (self._count_errors,
                            self._count_warnings,
                            self._count_toevoegingen,
