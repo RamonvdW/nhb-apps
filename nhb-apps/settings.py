@@ -25,7 +25,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated to version
-SITE_VERSIE = 'test 2020-01-25'
+
 
 # modules van de site
 INSTALLED_APPS = [
@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'Records.apps.RecordsConfig',
     'Overig.apps.OverigConfig',
     'Logboek.apps.LogboekConfig',
+    'Mailer.apps.MailerConfig',
     'django.contrib.staticfiles',   # gather static files from modules helper
     'django.contrib.sessions',      # support for database-backed sessions; needed for logged-in user
     'django.contrib.admin',         # see-all/fix-all admin pages
