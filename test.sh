@@ -14,11 +14,11 @@ rm -rf "$REPORT_DIR"
 
 coverage erase
 
-coverage run --append ./manage.py test --noinput $*  # note: double quotes not supported around $*
+coverage run --append --branch ./manage.py test --noinput $*  # note: double quotes not supported around $*
 if [ $# -eq 0 ]
 then
     # add coverage with debug enabled
-    coverage run --append ./manage.py test --debug-mode Plein.tests.PleinTest.test_plein_normaal
+    coverage run --append --branch ./manage.py test --debug-mode Plein.tests.PleinTest.test_plein_normaal
 fi
 
 echo
