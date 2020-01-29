@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019 Ramon van der Winkel.
+#  Copyright (c) 2019-2020 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -26,7 +26,7 @@ class LogboekRegel(models.Model):
 
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
-        return "%s (%s) %s" % (self.toegevoegd_op.strftime('%Y-%m-%d %H:%M'),
+        return "%s (%s) %s" % (self.toegevoegd_op.strftime('%Y-%m-%d %H:%M utc'),
                                self.bepaal_door(),
                                self.gebruikte_functie)
 
