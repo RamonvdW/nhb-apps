@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019 Ramon van der Winkel.
+#  Copyright (c) 2019-2020 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -47,7 +47,7 @@ class SiteFeedback(models.Model):
         if len(self.feedback) > 60:
             short_feedback += "..."
         msg = "[%s] %s (%s) pagina '%s': [%s] %s" % (self.site_versie,
-                                        self.toegevoegd_op.strftime('%Y-%m-%d %H:%M'),
+                                        self.toegevoegd_op.strftime('%Y-%m-%d %H:%M utc'),
                                         self.gebruiker,
                                         self.op_pagina,
                                         self.bev2str[self.bevinding],
