@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019 Ramon van der Winkel.
+                Copyright (c) 2019-2020 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -12,7 +12,7 @@
 
 <h4>Bevestigd</h4>
 
-<p>Je hebt laten zien dat je e-mail adres klopt.</p>
+<p>Je hebt laten zien dat je toegang hebt tot je e-mail.</p>
 <p>Je kan nu inloggen.</p>
 
 <p><a class="btn blue" href="{% url 'Account:login' %}">inloggen</a></p>
