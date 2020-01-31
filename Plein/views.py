@@ -98,5 +98,4 @@ class LeeftijdsklassenView(UserPassesTestMixin, TemplateView):
         menu_dynamics(self.request, context)
         return context
 
-
 # end of file
