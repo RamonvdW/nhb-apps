@@ -867,7 +867,7 @@ class AccountTest(TestCase):
         code = get_otp_code(self.account_admin)
         resp = self.client.post('/account/otp-controle/', {'otp_code': code}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        assert_template_used(self, resp, ('plein/plein-gebruiker.dtl', 'plein/site_layout.dtl'))
+        assert_template_used(self, resp, ('account/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
 
     def test_is_email_valide(self):
         self.assertTrue(is_email_valide('test@nhb.nl'))

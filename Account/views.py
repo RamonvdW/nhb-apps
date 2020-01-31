@@ -366,7 +366,8 @@ class OTPControleView(TemplateView):
                 # controle is gelukt
                 account_zet_sessionvars_na_otp_controle(request)
                 rol_zet_sessionvars_na_otp_controle(account, request)
-                return HttpResponseRedirect(reverse('Plein:plein'))
+                # terug naar de Wissel-van-rol pagina
+                return HttpResponseRedirect(reverse('Account:wissel-van-rol'))
             else:
                 # controle is mislukt - schrijf dit in het logboek
                 schrijf_in_logboek(account=None,
