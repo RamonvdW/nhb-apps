@@ -209,7 +209,10 @@ class TestCompetitie(TestCase):
     def test_beheer_favorieten_anon(self):
         self.client.logout()
         resp = self.client.get('/competitie/beheer-favorieten/', follow=True)
-        self.assertEqual(resp.status_code, 404)     # 404 = not allowed
+        # controleer dat dit een redirect is naar de login pagina
+        self.assertEqual(resp.status_code, 200)
+        assert_html_ok(self, resp)
+        assert_template_used(self, resp, ('account/login.dtl', 'plein/site_layout.dtl'))
 
     def test_beheer_favorieten(self):
         self.client.login(username='bko', password='wachtwoord')
