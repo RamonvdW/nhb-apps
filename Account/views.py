@@ -479,6 +479,7 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_WISSELVANROL
+    login_url = '/account/login/'       # override automatic incorrect admin url
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -534,6 +535,7 @@ class ActiveerRolView(UserPassesTestMixin, View):
     """ Django class-based view om een andere rol aan te nemen """
 
     # class variables shared by all instances
+    login_url = '/account/login/'       # override automatic incorrect admin url
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """

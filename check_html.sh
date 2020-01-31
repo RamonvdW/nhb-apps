@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#  Copyright (c) 2019 Ramon van der Winkel.
+#  Copyright (c) 2019-2020 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -12,21 +12,43 @@ PAGES='
 /
 /plein/
 /plein/privacy/
+/plein/leeftijdsklassen/
 /records/record-OD-1/
 /records/zoek/
 /records/zoek/?zoekterm=schijndel
 /records/indiv/
+/records/indiv/mannen/
+/records/indiv/mannen/indoor/
+/records/indiv/mannen/indoor/senioren/
 /records/indiv/mannen/indoor/senioren/recurve/
+/records/record-18-971/
 /account/login/
 /account/logout/
+/account/aangemaakt/
+/account/bevestigd/
 /account/registreer/
+/account/otp-controle/
+/account/otp-koppelen/
 /account/wachtwoord-vergeten/
+/account/wissel-van-rol/
+/account/wissel-van-rol/schutter/
 /overig/feedback/plus/plein/
 /overig/feedback/inzicht/
+/overig/feedback/bedankt/
+/overig/feedback/inzicht/
 /overig/logboek/
+/beheer/
+/competitie/
+/competitie/instellingen-volgende-competitie/
+/competitie/aanmaken/
+/competitie/klassegrenzen/18/
+/competitie/beheer-favorieten/
 '
+
 #/hist/
 #/hist/2010-2011/18/Recurve/indiv/
+#/overig/url/xx/    --> 404
+#/competitie/beheer-favorieten/wijzig/  --> 404
 
 TMPDIR="/tmp/check_html"
 CURL_OPTIONS="-sL --max-redirs 5"

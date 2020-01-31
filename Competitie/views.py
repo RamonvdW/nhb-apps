@@ -6,7 +6,7 @@
 
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
-from django.urls import reverse
+from django.urls import Resolver404, reverse
 from django.views.generic import TemplateView, ListView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.db.models import Q
@@ -41,7 +41,7 @@ class InstellingenVolgendeCompetitieView(UserPassesTestMixin, ListView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_INSTELLINGEN
-    login_url = '/account/login/'       # no reverse call
+    login_url = '/account/login/'       # override automatic incorrect admin url
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -112,6 +112,7 @@ class CompetitieAanmakenView(UserPassesTestMixin, TemplateView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_AANMAKEN
+    login_url = '/account/login/'       # override automatic incorrect admin url
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -147,7 +148,7 @@ class KlassegrenzenView(UserPassesTestMixin, TemplateView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_KLASSEGRENZEN
-    login_url = '/account/login/'       # no reverse call
+    login_url = '/account/login/'       # override automatic incorrect admin url
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -320,6 +321,10 @@ class CompetitieOverzichtView(View):
 
 class WijzigFavorieteBestuurdersView(View):
 
+    def get(self, request, *args, **kwargs):
+        """ called by the template system to get the context data for the template """
+        raise Resolver404()
+
     def post(self, request, *args, **kwargs):
         """ deze functie wordt aangeroepen als een POST request ontvangen is.
             dit is gekoppeld aan het drukken op de Registreer knop.
@@ -343,6 +348,7 @@ class BeheerFavorieteBestuurdersView(UserPassesTestMixin, ListView):
     """ Via deze view kunnen bestuurders hun lijst met favoriete NHB leden beheren """
 
     template_name = TEMPLATE_COMPETITIE_BEHEER_FAVORIETEN
+    login_url = '/account/login/'       # override automatic incorrect admin url
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
