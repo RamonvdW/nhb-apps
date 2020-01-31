@@ -12,6 +12,9 @@ OMIT="--omit=data3/wsgi.py,/usr/*/python3*/site-packages/*"
 
 rm -rf "$REPORT_DIR"
 
+# start the http simulator in the background
+python3.6 ./websim.py &
+
 coverage erase
 
 coverage run --append --branch ./manage.py test --noinput $*  # note: double quotes not supported around $*
@@ -20,6 +23,12 @@ then
     # add coverage with debug enabled
     coverage run --append --branch ./manage.py test --debug-mode Plein.tests.PleinTest.test_plein_normaal
 fi
+
+# stop the http simulator
+# do this by killing the most recent background task
+# and use bash construct to prevent the Terminated message on the console
+kill $!
+wait $! 2>/dev/null
 
 echo
 coverage report --skip-covered --fail-under=90 $OMIT
