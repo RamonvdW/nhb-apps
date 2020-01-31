@@ -257,7 +257,7 @@ class RegistreerNhbNummerView(TemplateView):
 
                 text_body = "Hallo!\n\n" +\
                             "Je hebt een account aangemaakt op de website van de NHB.\n" +\
-                            "Klik op de onderstaande link om dit te bevestigen.\n\n" +\
+                            "Klik op onderstaande link om dit te bevestigen.\n\n" +\
                             ack_url + "\n\n" +\
                             "Als jij dit niet was, neem dan contact met ons op via info@handboogsport.nl\n\n" +\
                             "Veel plezier met de site!\n" +\

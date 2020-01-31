@@ -65,7 +65,7 @@ class TestMailer(TestCase):
         self.assertEqual(obj.aantal_pogingen, 0)
         # following port must not have any service responding to it
         with self.settings(MAILGUN_URL='http://localhost:9999'):
-            send_mail(obj, False)
+            send_mail(obj)
         obj = MailQueue.objects.all()[0]
         self.assertEqual(obj.aantal_pogingen, 1)
 
@@ -83,7 +83,7 @@ class TestMailer(TestCase):
         with self.settings(MAILGUN_URL='http://localhost:8123/v3/testdomain1.com/messages',
                            MAILGUN_API_KEY='the-api-key',
                            EMAIL_FROM_ADDRESS='noreply@nhb.test'):
-            send_mail(obj, False)
+            send_mail(obj)
         obj = MailQueue.objects.all()[0]
         self.assertEqual(obj.aantal_pogingen, 1)
         self.assertTrue(obj.is_verstuurd)
@@ -102,7 +102,7 @@ class TestMailer(TestCase):
         with self.settings(MAILGUN_URL='http://localhost:8123/v3/testdomain2.com/messages',
                            MAILGUN_API_KEY='the-api-key',
                            EMAIL_FROM_ADDRESS='noreply@nhb.test'):
-            send_mail(obj, False)
+            send_mail(obj)
         obj = MailQueue.objects.all()[0]
         self.assertEqual(obj.aantal_pogingen, 1)
         self.assertFalse(obj.is_verstuurd)
@@ -124,7 +124,7 @@ class TestMailer(TestCase):
         with self.settings(MAILGUN_URL='http://localhost:9999',
                            MAILGUN_API_KEY='the-api-key',
                            EMAIL_FROM_ADDRESS='noreply@nhb.test'):
-            send_mail(obj, False)
+            send_mail(obj)
         obj = MailQueue.objects.all()[0]
         self.assertEqual(obj.aantal_pogingen, 25)
         old_log = obj.log
@@ -133,7 +133,7 @@ class TestMailer(TestCase):
         with self.settings(MAILGUN_URL='http://localhost:9999',
                            MAILGUN_API_KEY='the-api-key',
                            EMAIL_FROM_ADDRESS='noreply@nhb.test'):
-            send_mail(obj, False)
+            send_mail(obj)
         obj = MailQueue.objects.all()[0]
         self.assertEqual(obj.aantal_pogingen, 25)
         self.assertEqual(obj.log, old_log)
@@ -150,8 +150,8 @@ class TestMailer(TestCase):
                            MAILGUN_API_KEY='the-api-key',
                            EMAIL_FROM_ADDRESS='noreply@nhb.test'):
             management.call_command('stuur_mails', '0', stderr=f1, stdout=f2)
-        print("f1: %s" % f1.getvalue())
-        print("f2: %s" % f2.getvalue())
+        #print("f1: %s" % f1.getvalue())
+        #print("f2: %s" % f2.getvalue())
         self.assertTrue('[INFO] Aantal oude mails geprobeerd te versturen: 1' in f2.getvalue())
         self.assertTrue('[INFO] Aantal nieuwe mails geprobeerd te versturen: 0' in f2.getvalue())
         self.assertEqual(f1.getvalue(), '')
@@ -159,7 +159,6 @@ class TestMailer(TestCase):
         obj = MailQueue.objects.all()[0]
         self.assertTrue(obj.is_verstuurd)
         self.assertTrue('(verstuurd)' in str(obj))
-
 
     def test_stuur_mail_vertraag(self):
         # stop een mail in de queue

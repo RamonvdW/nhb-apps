@@ -9,9 +9,9 @@
 from django.conf import settings
 from django.utils import timezone
 import requests
-import sys
 
-def send_mail(obj, log_stdio=True):
+
+def send_mail(obj, stdout=None, stderr=None):
     """ Deze functie probeert een mail te sturen die in de database staat
         en werkt de velden bij: laatste_poging, aantal_pogingen, log, is_verstuurd
 
@@ -20,7 +20,6 @@ def send_mail(obj, log_stdio=True):
 
         obj: MailQueue object
     """
-
     if not settings.MAILGUN_API_KEY:
         # not configured for sending emails
         return
@@ -33,7 +32,7 @@ def send_mail(obj, log_stdio=True):
 
     obj.laatste_poging = now
     obj.aantal_pogingen += 1
-    obj.log += "Nieuwe poging om %s\n" % str(now)
+    obj.log += "[INFO] Nieuwe poging om %s\n" % str(now)
     obj.save()
 
     # format specs: https://tools.ietf.org/html/rfc2822
@@ -52,20 +51,23 @@ def send_mail(obj, log_stdio=True):
                         data=data)
     except (requests.exceptions.SSLError, requests.exceptions.ConnectionError) as exc:
         # TODO: error handling
-        obj.log += "Exceptie bij versturen: %s\n" % str(exc)
-        if log_stdio:
-            sys.stderr.write("Exceptie bij versturen: %s\n" % str(exc))
+        obj.log += "[WARNING] Exceptie bij versturen: %s\n" % str(exc)
+        if stderr:
+            stderr.write("[ERROR] Exceptie bij versturen e-mail: %s\n" % str(exc))
     else:
         if resp.status_code == 200:
             # success!
-            obj.log += "Success (code 200)\n"
+            obj.log += "[INFO] Success (code 200)\n"
             obj.is_verstuurd = True
+            if stdout:
+                stdout.write("[INFO] Een mail verstuurd")
         else:
-            obj.log += "Mislukt: response encoding:%s, status_code:%s\n" % (repr(resp.encoding), repr(resp.status_code))
+            obj.log += "[WARNING] Mail niet kunnen versturen\n"
+            obj.log += "  response encoding:%s, status_code:%s\n" % (repr(resp.encoding), repr(resp.status_code))
             obj.log += "  full response: %s\n" % repr(resp.text)
-            if log_stdio:
-                sys.stdout.write("Mislukt: response encoding:%s, status_code:%s" % (repr(resp.encoding), repr(resp.status_code)))
-                sys.stdout.write("  full response: %s\n" % repr(resp.text))
+            if stdout:
+                stdout.write("[ERROR] Mail niet kunnen versturen! response encoding:%s, status_code:%s" % (repr(resp.encoding), repr(resp.status_code)))
+                stdout.write("  full response: %s\n" % repr(resp.text))
 
     obj.save()
 
