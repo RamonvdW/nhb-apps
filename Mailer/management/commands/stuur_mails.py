@@ -32,7 +32,7 @@ class Command(BaseCommand):
         send_count = 0
         now = datetime.datetime.now()
         for obj in MailQueue.objects.filter(is_verstuurd=False, aantal_pogingen__lt=25):
-            mailer.send_mail(obj)
+            mailer.send_mail(obj, log_stdio=True)
             send_count += 1
 
             # bail out when time's up
@@ -51,7 +51,7 @@ class Command(BaseCommand):
             objs = MailQueue.objects.filter(is_verstuurd=False, aantal_pogingen=0)
             if len(objs):
                 obj = objs[0]
-                mailer.send_mail(obj)
+                mailer.send_mail(obj, log_stdio=True)
                 send_count += 1
             else:
                 # sleep a bit, then check again

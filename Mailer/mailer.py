@@ -9,9 +9,9 @@
 from django.conf import settings
 from django.utils import timezone
 import requests
+import sys
 
-
-def send_mail(obj):
+def send_mail(obj, log_stdio=True):
     """ Deze functie probeert een mail te sturen die in de database staat
         en werkt de velden bij: laatste_poging, aantal_pogingen, log, is_verstuurd
 
@@ -50,10 +50,11 @@ def send_mail(obj):
                         settings.MAILGUN_URL,
                         auth=('api', settings.MAILGUN_API_KEY),
                         data=data)
-    except requests.exceptions.SSLError as exc:
+    except (requests.exceptions.SSLError, requests.exceptions.ConnectionError) as exc:
         # TODO: error handling
         obj.log += "Exceptie bij versturen: %s\n" % str(exc)
-        sys.stderr.write("Exceptie bij versturen: %s\n" % str(exc))
+        if log_stdio:
+            sys.stderr.write("Exceptie bij versturen: %s\n" % str(exc))
     else:
         if resp.status_code == 200:
             # success!
@@ -62,8 +63,9 @@ def send_mail(obj):
         else:
             obj.log += "Mislukt: response encoding:%s, status_code:%s\n" % (repr(resp.encoding), repr(resp.status_code))
             obj.log += "  full response: %s\n" % repr(resp.text)
-            sys.stdout.write("Mislukt: response encoding:%s, status_code:%s" % (repr(resp.encoding), repr(resp.status_code)))
-            sys.stdout.write("  full response: %s\n" % repr(resp.text))
+            if log_stdio:
+                sys.stdout.write("Mislukt: response encoding:%s, status_code:%s" % (repr(resp.encoding), repr(resp.status_code)))
+                sys.stdout.write("  full response: %s\n" % repr(resp.text))
 
     obj.save()
 
