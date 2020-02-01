@@ -69,6 +69,25 @@ class TestMailer(TestCase):
         obj = MailQueue.objects.all()[0]
         self.assertEqual(obj.aantal_pogingen, 1)
 
+    def test_stuur_mail_no_connect(self):
+        # stop een mail in de queue
+        objs = MailQueue.objects.all()
+        self.assertEqual(len(objs), 0)
+        queue_email('schutter@nhb.test', 'onderwerp', 'body\ndoei!\n')
+
+        # probeer te versturen
+        obj = MailQueue.objects.all()[0]
+        self.assertFalse(obj.is_verstuurd)
+        self.assertEqual(obj.aantal_pogingen, 0)
+        # following port must not have any service responding to it
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        with self.settings(MAILGUN_URL='http://localhost:9999'):
+            management.call_command('stuur_mails', '0', stderr=f1, stdout=f2)
+        obj = MailQueue.objects.all()[0]
+        self.assertEqual(obj.aantal_pogingen, 1)
+        self.assertTrue('[ERROR] ' in f1.getvalue())
+
     def test_send_mail_deliver(self):
         # stop een mail in de queue
         objs = MailQueue.objects.all()
@@ -106,6 +125,28 @@ class TestMailer(TestCase):
         obj = MailQueue.objects.all()[0]
         self.assertEqual(obj.aantal_pogingen, 1)
         self.assertFalse(obj.is_verstuurd)
+
+    def test_stuur_mail_deliver_faal(self):
+        # stop een mail in de queue
+        objs = MailQueue.objects.all()
+        self.assertEqual(len(objs), 0)
+        queue_email('schutter@nhb.test', 'onderwerp faal', 'body\ndoei!\n')
+
+        # probeer te versturen
+        obj = MailQueue.objects.all()[0]
+        self.assertFalse(obj.is_verstuurd)
+        self.assertEqual(obj.aantal_pogingen, 0)
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        # following requires websim.py running in the background
+        with self.settings(MAILGUN_URL='http://localhost:8123/v3/testdomain2.com/messages',
+                           MAILGUN_API_KEY='the-api-key',
+                           EMAIL_FROM_ADDRESS='noreply@nhb.test'):
+            management.call_command('stuur_mails', '0', stderr=f1, stdout=f2)
+        obj = MailQueue.objects.all()[0]
+        self.assertEqual(obj.aantal_pogingen, 1)
+        self.assertFalse(obj.is_verstuurd)
+        self.assertTrue('[WARNING] ' in f2.getvalue())
 
     def test_send_mail_limit(self):
         # stop een mail in de queue

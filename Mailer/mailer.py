@@ -50,7 +50,6 @@ def send_mail(obj, stdout=None, stderr=None):
                         auth=('api', settings.MAILGUN_API_KEY),
                         data=data)
     except (requests.exceptions.SSLError, requests.exceptions.ConnectionError) as exc:
-        # TODO: error handling
         obj.log += "[WARNING] Exceptie bij versturen: %s\n" % str(exc)
         if stderr:
             stderr.write("[ERROR] Exceptie bij versturen e-mail: %s\n" % str(exc))
@@ -66,7 +65,7 @@ def send_mail(obj, stdout=None, stderr=None):
             obj.log += "  response encoding:%s, status_code:%s\n" % (repr(resp.encoding), repr(resp.status_code))
             obj.log += "  full response: %s\n" % repr(resp.text)
             if stdout:
-                stdout.write("[ERROR] Mail niet kunnen versturen! response encoding:%s, status_code:%s" % (repr(resp.encoding), repr(resp.status_code)))
+                stdout.write("[WARNING] Mail niet kunnen versturen! response encoding:%s, status_code:%s" % (repr(resp.encoding), repr(resp.status_code)))
                 stdout.write("  full response: %s\n" % repr(resp.text))
 
     obj.save()
