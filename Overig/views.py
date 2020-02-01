@@ -108,7 +108,6 @@ class SiteFeedbackInzichtView(UserPassesTestMixin, ListView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_FEEDBACK_INZICHT
-    login_url = '/account/login/'       # no reverse call
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """

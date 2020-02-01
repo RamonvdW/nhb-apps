@@ -471,15 +471,12 @@ class OTPKoppelenView(TemplateView):
         return render(request, TEMPLATE_OTPKOPPELEN, context)
 
 
-# TODO: als de test_func()==False resulteert in een redirect naar invalid url: accounts/login --> 404
-# TODO: bij niet voldoende rechten geeft UserPassesTestMixin een PermissionDenied exceptie die niet opgevangen wordt --> 403
 class WisselVanRolView(UserPassesTestMixin, ListView):
 
     """ Django class-based view om van rol te wisselen """
 
     # class variables shared by all instances
     template_name = TEMPLATE_WISSELVANROL
-    login_url = '/account/login/'       # override automatic incorrect admin url
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -535,7 +532,6 @@ class ActiveerRolView(UserPassesTestMixin, View):
     """ Django class-based view om een andere rol aan te nemen """
 
     # class variables shared by all instances
-    login_url = '/account/login/'       # override automatic incorrect admin url
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
