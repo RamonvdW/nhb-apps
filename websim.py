@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 #  Copyright (c) 2020 Ramon van der Winkel.
 #  All rights reserved.
