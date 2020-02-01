@@ -13,6 +13,7 @@ from Account.models import Account, account_zet_sessionvars_na_login, account_ze
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
 from NhbStructuur.migrations.m0002_nhbstructuur_2018 import maak_rayons_2018, maak_regios_2018
 import datetime
+from types import SimpleNamespace
 
 
 def assert_html_ok(testcase, response):
@@ -172,8 +173,8 @@ class PleinTest(TestCase):
     def test_dynamic_menu_asssert(self):
         # test the assert in menu_dynamics
         context = dict()
-        request = lambda: None      # create an empty object
-        request.user = lambda: None
+        request = SimpleNamespace()      # creates an empty object
+        request.user = SimpleNamespace()
         request.user.is_authenticated = False
         with self.assertRaises(AssertionError):
             menu_dynamics(request, context, actief='test-bestaat-niet')

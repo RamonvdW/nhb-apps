@@ -25,6 +25,7 @@ from Overig.models import SiteTijdelijkeUrl
 import datetime
 import pyotp
 import io
+from types import SimpleNamespace
 
 
 def get_otp_code(account):
@@ -188,8 +189,8 @@ class AccountTest(TestCase):
         # unit-tests voor de 'rol' module
 
         # simuleer de normale inputs
-        account = lambda: None
-        request = lambda: None
+        account = SimpleNamespace()
+        request = SimpleNamespace()
         request.session = dict()
 
         # no session vars / not logged in
