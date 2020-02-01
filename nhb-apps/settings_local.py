@@ -40,12 +40,15 @@ DATABASES = {
 }
 
 # the issuer name that is sent to the OTP application in the QR code
-OTP_ISSUER_NAME = "yoursite.com"
+OTP_ISSUER_NAME = "yourdomain.com"
 
 # sending email via MailGun
 MAILGUN_URL = 'https://api.eu.mailgun.net/v3/yourdomain.com/messages'
 MAILGUN_API_KEY = 'mailgun private api key'
 EMAIL_FROM_ADDRESS = 'noreply@yourdomain.com'         # zie ook https://nl.wikipedia.org/wiki/Noreply
+
+# url van het document privacyverklaring
+PRIVACYVERKLARING_URL = 'url to privacy statement html, pdf or googledoc, etc'
 
 # google doc id van het gsheet document
 RECORDS_GSHEET_FILE_ID = 'random google document number'

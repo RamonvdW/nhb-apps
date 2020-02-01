@@ -64,7 +64,7 @@
 
 <li{% if menu_actief == "privacy" %} class="actief"{% endif %}>
     <a href="{% url 'Plein:privacy' %}" class="white-text">
-    <i class="material-icons-round white-text">security</i>Privacy verklaring</a>
+    <i class="material-icons-round white-text">security</i>Privacyverklaring</a>
 </li>
 
 {% if menu_show_sitefeedback %}

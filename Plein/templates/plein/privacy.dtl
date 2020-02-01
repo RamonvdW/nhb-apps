@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019 Ramon van der Winkel.
+                Copyright (c) 2019-2020 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -13,42 +13,11 @@
 <!-- gebruik niet de hele breedte van het scherm -->
 <div class="row"><div class="col s12 m9">
 
-<h4>Privacy verklaring</h4>
+<h4>Privacy<wbr/>verklaring</h4>
 
-<p>Op deze pagina beschrijven we hoe we omgaan met jouw privacy.</p>
+<p>Hoe we omgaan met jouw privacy staat beschreven in <a href="{{ url_privacyverklaring }}" target="_blank">dit document</a>.</p>
 
-<p>De Nederlandse Handboog Bond (NHB) is eigenaar van deze website. De uitgebreide privacy verklaring van de NHB is
-te vinden op de hoofdwebsite van de NHB: <a href="https://www.handboogsport.nl" target="_blank">www.handboogsport.nl</a></p>
-
-
-<h5>Persoons<wbr/>gegevens</h5>
-
-<p>Een groot deel van deze website is gemaakt om informatie te tonen die voor jou interessant is.
-Als je een account aanmaakt en inlogt dan tonen we deze informatie.</p>
-
-<p>Om je te kunnen identificeren gebruiken we persoonsgegevens die bekend zijn bij de NHB,
-waaronder je lidmaatschapsnummer, volledig naam en e-mail adres.</p>
-
-<p>Andere gegevens die we verzamelen om de website te beschermen zijn je internet IP-adres,
-informatie over je browser, het tijdstip waarop je de website benadert en welke inlog je gebruikt.</p>
-
-
-<h5>Publicaties</h5>
-
-<p>Wedstrijden en competities hebben openbare deelnemerslijsten en uitslagen.
-Als je meedoet aan een wedstrijd of competitie dan worden de volgende persoonsgegevens openbaar gemaakt:</p>
-
-<ul class="browser-default">
-    <li>je volledige naam</li>
-    <li>de vereniging waar je lid bent</li>
-    <li>wedstrijdklasse, bijvoorbeeld 'Heren Recurve Senioren'</li>
-    <li>behaalde score(s)</li>
-    <li>ranking (bijvoorbeeld "21e plaats")</li>
-</ul>
-
-<p>Als je een Nederlands Record behaald hebt dan worden dezelfde persoonsgegevens openbaar gemaakt.</p>
-
-
+<!--
 <h5>Cookies</h5>
 
 <p>Tijdens een bezoek aan deze website kunnen wij 'cookies' naar jouw browser sturen.
@@ -62,7 +31,7 @@ Dit zijn puur functionele cookies en bevatten geen persoonsgegevens.</p>
 Daarom krijg je bij deze website geen vraag of je cookies wilt accepteren.</p>
 
 <p>Hier kan je <a href="https://www.rijksoverheid.nl/onderwerpen/telecommunicatie/vraag-en-antwoord/mag-een-website-ongevraagd-cookies-plaatsen" target="_blank">meer informatie over cookies</a> vinden.</p>
-
+-->
 
 <h5>Contact</h5>
 
