@@ -173,9 +173,29 @@ def get_competitie_fase(afstand):
     return comp.fase, comp
 
 
+def maak_deelcompetitie_functie(deel):
+    """ Maak een nieuwe functie aan voor dit deel van de competitie
+        Hieraan kunnen bestuurders gekoppeld worden.
+    """
+
+    func_naam = deel.competitie.beschrijving
+    if deel.nhb_regio:
+        func_naam += " RCL regio %s" % deel.nhb_regio.regio_nr
+    elif deel.nhb_rayon:
+        func_naam += " RKO rayon %s" % deel.nhb_rayon.rayon_nr
+    else:
+        func_naam += " BKO"
+
+    # een Functie is gewoon een auth.Group
+    func, created = Group.objects.get_or_create(name=func_naam)
+    deel.functies.add(func)
+
+
 def competitie_aanmaken():
     """ Deze functie wordt aangeroepen als de BKO de nieuwe competitie op wil starten
         We maken de 18m en 25m competitie aan en daaronder de deelcompetities voor regio, rayon en bond
+
+        Wedstrijdklassen volgen later, tijdens het bepalen van de klassengrenzen
     """
     jaar = models_bepaal_startjaar_nieuwe_competitie()
     yearend = date(year=jaar, month=12, day=31)     # 31 december
@@ -205,6 +225,7 @@ def competitie_aanmaken():
                             deel.nhb_regio = obj
                             deel.pk = None
                             deel.save()
+                            maak_deelcompetitie_functie(deel)
                     # for
                 elif laag == DeelCompetitie.LAAG[1][0]:
                     # RK
@@ -212,14 +233,14 @@ def competitie_aanmaken():
                         deel.nhb_rayon = obj
                         deel.pk = None
                         deel.save()
+                        maak_deelcompetitie_functie(deel)
                 else:
                     # BK
                     deel.save()
+                    maak_deelcompetitie_functie(deel)
             # for
         # if
     # for
-
-    # wedstrijdklassen volgens later, tijdens het bepalen van de klassengrenzen
 
 
 def maak_competitieklasse_indiv(comp, wedstrijdklasse, min_ag):
