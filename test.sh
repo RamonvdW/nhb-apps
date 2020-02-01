@@ -10,10 +10,16 @@ RESET="\e[0m"
 REPORT_DIR="/tmp/covhtml"
 OMIT="--omit=data3/wsgi.py,/usr/*/python3*/site-packages/*"
 
-rm -rf "$REPORT_DIR"
-
 # start the http simulator in the background
+pgrep -f websim
+if [ $? -eq 0 ]
+then
+    echo "[ERROR] websim is already running - please stop it"
+    exit 1
+fi
 python3.6 ./websim.py &
+
+rm -rf "$REPORT_DIR"
 
 coverage erase
 
