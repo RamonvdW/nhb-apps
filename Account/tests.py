@@ -120,6 +120,11 @@ class AccountTest(TestCase):
         assert_template_used(self, resp, ('account/login.dtl', 'plein/site_layout.dtl'))
         self.assertFormError(resp, 'form', None, 'Niet alle velden zijn ingevuld')
 
+    def test_inlog_form_invalid_input(self):
+        # coverage voor is_valid functie van het formulier door valid==False
+        form = LoginForm()
+        self.assertFalse(form.is_valid())
+
     def test_inlog_form_post_bad_wachtwoord(self):
         # test inlog via het inlog formulier, met verkeerd wachtwoord
         self.assertEqual(self.account_normaal.verkeerd_wachtwoord_teller, 0)
