@@ -4,6 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+from django.conf import settings
 from django.urls import reverse
 from django.shortcuts import redirect, render
 from django.views.generic import TemplateView, ListView, View
@@ -68,6 +69,7 @@ class PrivacyView(TemplateView):
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
+        context['url_privacyverklaring'] = settings.PRIVACYVERKLARING_URL
         menu_dynamics(self.request, context, actief='privacy')
         return context
 
@@ -77,7 +79,6 @@ class LeeftijdsklassenView(UserPassesTestMixin, TemplateView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_LEEFTIJDSKLASSEN
-    login_url = '/account/login/'       # no reverse call
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
