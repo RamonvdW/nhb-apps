@@ -9,7 +9,7 @@
 {% block title %}Registreer tweede factor{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="login" %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="otp koppelen" %}
 
 <h4>Registreer tweede factor</h4>
 

@@ -9,8 +9,7 @@
 {% block title %}Welkom{% endblock %}
 
 {% block pagina %}
-
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="plein" %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="plein-gebruiker" %}
 
 <h4>Welkom, gebruiker!</h4>
 

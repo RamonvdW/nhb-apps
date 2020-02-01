@@ -9,6 +9,7 @@
 {% block title %}Competitie aanmaken{% endblock %}
 
 {% block pagina %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competities aanmaken" %}
 
 <h4>Competitie aanmaken</h4>
 

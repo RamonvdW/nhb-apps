@@ -9,6 +9,7 @@
 {% block title %}Beheer favorieten{% endblock %}
 
 {% block pagina %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="beheer favorieten" %}
 
 <h4>Beheer favorieten</h4>
 

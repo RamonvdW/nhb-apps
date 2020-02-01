@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019 Ramon van der Winkel.
+                Copyright (c) 2019-2020 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -9,6 +9,7 @@
 {% block title %}Instellingen volgende bondscompetitie{% endblock %}
 
 {% block pagina %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="instellingen nieuwe competitie" %}
 
 <h4>Instellingen volgende bondscompetitie</h4>
 

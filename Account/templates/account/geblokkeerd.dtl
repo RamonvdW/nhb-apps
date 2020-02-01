@@ -9,6 +9,7 @@
 {% block title %}Inlog mislukt{% endblock %}
 
 {% block pagina %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="account geblokkeerd" %}
 
 <h4>Inlog mislukt</h4>
 
