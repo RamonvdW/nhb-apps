@@ -9,7 +9,8 @@ from django.shortcuts import render
 from django.urls import Resolver404, reverse
 from django.views.generic import TemplateView, ListView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
-from django.db.models import Q
+from django.db.models import Q, Value
+from django.db.models.functions import Concat
 from django.utils import timezone
 from django.shortcuts import redirect
 from Plein.menu import menu_dynamics
@@ -41,7 +42,6 @@ class InstellingenVolgendeCompetitieView(UserPassesTestMixin, ListView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_INSTELLINGEN
-    login_url = '/account/login/'       # override automatic incorrect admin url
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -112,7 +112,6 @@ class CompetitieAanmakenView(UserPassesTestMixin, TemplateView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_AANMAKEN
-    login_url = '/account/login/'       # override automatic incorrect admin url
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -148,7 +147,6 @@ class KlassegrenzenView(UserPassesTestMixin, TemplateView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_KLASSEGRENZEN
-    login_url = '/account/login/'       # override automatic incorrect admin url
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -348,7 +346,6 @@ class BeheerFavorieteBestuurdersView(UserPassesTestMixin, ListView):
     """ Via deze view kunnen bestuurders hun lijst met favoriete NHB leden beheren """
 
     template_name = TEMPLATE_COMPETITIE_BEHEER_FAVORIETEN
-    login_url = '/account/login/'       # override automatic incorrect admin url
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -376,13 +373,15 @@ class BeheerFavorieteBestuurdersView(UserPassesTestMixin, ListView):
                 zoekterm = self.get_zoekterm
                 self.have_searched = True
                 fav_nhb_nrs = FavorieteBestuurders.objects.filter(zelf=self.request.user).values_list('favlid__nhb_nr', flat=True)
-                return NhbLid.objects.filter(
-                                Q(nhb_nr__contains=zoekterm) |
-                                Q(voornaam__icontains=zoekterm) |
-                                Q(achternaam__icontains=zoekterm)).\
-                           exclude(is_actief_lid=False).\
-                           exclude(nhb_nr__in=fav_nhb_nrs).\
-                           order_by('nhb_nr')[:50]
+                return NhbLid.objects.exclude(is_actief_lid=False).\
+                                      exclude(nhb_nr__in=fav_nhb_nrs).\
+                                      annotate(hele_naam=Concat('voornaam', Value(' '), 'achternaam')).\
+                                      filter(
+                                            Q(nhb_nr__contains=zoekterm) |
+                                            Q(voornaam__icontains=zoekterm) |
+                                            Q(achternaam__icontains=zoekterm) |
+                                            Q(hele_naam__icontains=zoekterm)).\
+                                       order_by('nhb_nr')[:50]
 
         return None
 
