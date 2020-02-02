@@ -200,6 +200,11 @@ class Command(BaseCommand):
             self._count_clubs += 1
             ver_nhb_nr = club['club_number']
             ver_naam = club['name']
+            # maak 1377 wat korter
+            pos = ver_naam.find(' (geen deelname wedstrijden)')
+            if pos > 0:
+                ver_naam = ver_naam[:pos]
+
             if club['prefix']:
                 ver_naam = club['prefix'] + ' ' + ver_naam
             ver_regio = club['region_number']
@@ -305,6 +310,7 @@ class Command(BaseCommand):
                     obj.secretaris_lid = ver_secretaris_nhblid
                     if not self.dryrun:
                         obj.save()
+                    # TODO: maak CWZ groep aan voor deze vereniging
                     # TODO: maak dit lid CWZ
         # for
 

@@ -16,16 +16,34 @@ class FavorieteBestuurdersForm(forms.Form):
     zoekterm = forms.CharField(
                     label='Zoek op:',
                     max_length=50,
-                    required=False,
-                    widget=forms.TextInput(attrs={'autofocus': True}))
+                    required=False)
 
 
 class WijzigFavorieteBestuurdersForm(forms.Form):
     """ Dit formulier wordt gebruikt om via POST requests wijzigingen te ontvangen
         van verborgen formulieren
     """
-    add_nhb_nr = forms.CharField(max_length=6, required=False)
-    drop_nhb_nr = forms.CharField(max_length=6, required=False)
+    add_favoriet = forms.IntegerField(required=False)
+    drop_favoriet = forms.IntegerField(required=False)
+
+
+class KoppelBestuurdersForm(forms.Form):
+    """ Dit formulier wordt gebruikt om via POST requests wijzigingen te ontvangen
+        van verborgen formulieren
+    """
+
+    def __init__(self, *args, **kwargs):
+        fav_bestuurders = kwargs.pop('fav_bestuurders')       # super() is gevoelig voor onbekende velden
+        super().__init__(*args, **kwargs)
+
+        # maak extra velden aan voor verwachte bestuurders
+        # allemaal optioneel, want alleen de aangekruisde nummers komen terug
+        for obj in fav_bestuurders:
+            self.fields['bestuurder_%s' % obj.favoriet.pk] = forms.BooleanField(required=False)
+        # for
+
+    # standaard velden
+    deelcomp_pk = forms.IntegerField()
 
 
 # end of file

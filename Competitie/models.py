@@ -23,35 +23,26 @@ class FavorieteBestuurders(models.Model):
         De favorieten kunnen gekozen worden bij het koppelen van bestuurders
     """
     zelf = models.ForeignKey(Account, on_delete=models.CASCADE)
-    favlid = models.ForeignKey(NhbLid, on_delete=models.CASCADE)
+    favoriet = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='favorietebestuurder', blank=True, null=True)
 
     def __str__(self):
-        return "%s: %s %s" % (self.zelf.username, self.favlid.voornaam, self.favlid.achternaam)
+        return "%s --> %s" % (self.zelf.volledige_naam(), self.favoriet.volledige_naam())
 
     class Meta:
-        verbose_name = verbose_name_plural = 'favoriete bestuurders'
+        verbose_name = verbose_name_plural = 'Favoriete bestuurders'
 
 
-def add_favoriete_bestuurder(account, nhb_nr):
-    try:
-        nhblid = NhbLid.objects.get(nhb_nr=nhb_nr)
-    except NhbLid.DoesNotExist:
-        pass
-    else:
-        # alleen toevoegen als nog niet in de lijst
-        if len(FavorieteBestuurders.objects.filter(zelf=account, favlid=nhblid)) == 0:
-            obj = FavorieteBestuurders(zelf=account, favlid=nhblid)
-            obj.save()
+def add_favoriete_bestuurder(zelf_account, fav_account_pk):
+    # alleen toevoegen als nog niet in de lijst
+    if len(FavorieteBestuurders.objects.filter(zelf=zelf_account, favoriet__pk=fav_account_pk)) == 0:
+        # TODO: error handling
+        account = Account.objects.get(pk=fav_account_pk)
+        FavorieteBestuurders(zelf=zelf_account, favoriet=account).save()
 
 
-def drop_favoriete_bestuurder(account, nhb_nr):
-    try:
-        nhblid = NhbLid.objects.get(nhb_nr=nhb_nr)
-    except NhbLid.DoesNotExist:
-        pass
-    else:
-        # TODO: exception to handle?
-        FavorieteBestuurders.objects.filter(zelf=account, favlid=nhblid).delete()
+def drop_favoriete_bestuurder(zelf_account, fav_account_pk):
+    # TODO: exception to handle?
+    FavorieteBestuurders.objects.filter(zelf=zelf_account, favoriet__pk=fav_account_pk).delete()
 
 
 class CompetitieWedstrijdKlasse(models.Model):
@@ -140,7 +131,7 @@ class DeelCompetitie(models.Model):
     nhb_rayon = models.ForeignKey(NhbRayon, on_delete=models.PROTECT,
                                   null=True, blank=True)    # optioneel want alleen voor laag Rayon
     is_afgesloten = models.BooleanField(default=False)
-    functies = models.ManyToManyField(Group)
+    functies = models.ManyToManyField(Group)    # Group representeert een Functie
 
     def __str__(self):
         """ geef een tekstuele afkorting van dit object, voor in de admin interface """
@@ -152,6 +143,31 @@ class DeelCompetitie(models.Model):
             substr = "BK"
         return "%s - %s"  % (self.competitie, substr)
 
+    def get_rol_str(self):
+        if self.laag == 'Regio':
+            rol = 'RCL regio %s' % self.nhb_regio.regio_nr
+        elif self.laag == 'RK':
+            rol = 'RKO rayon %s' % self.nhb_rayon.rayon_nr
+        else:
+            rol = "BKO"
+        return rol
+
+    def bepaal_rol(self, Rollen):
+        if self.laag == 'Regio':
+            rol = Rollen.ROL_RCL
+        elif self.laag == 'RK':
+            rol = Rollen.ROL_RKO
+        else:
+            rol = "BKO"
+        return rol
+
+
+def deelcompetitie_met_functie(group):
+    deelcomps = group.deelcompetitie_set.all()
+    if len(deelcomps):
+        return deelcomps[0]     # normaal is het er maar 1
+
+    return None
 
 def models_bepaal_startjaar_nieuwe_competitie():
     """ bepaal het start jaar van de nieuwe competitie """
@@ -177,14 +193,14 @@ def maak_deelcompetitie_functie(deel):
     """ Maak een nieuwe functie aan voor dit deel van de competitie
         Hieraan kunnen bestuurders gekoppeld worden.
     """
-
-    func_naam = deel.competitie.beschrijving
     if deel.nhb_regio:
-        func_naam += " RCL regio %s" % deel.nhb_regio.regio_nr
+        func_naam = "RCL regio %s" % deel.nhb_regio.regio_nr
     elif deel.nhb_rayon:
-        func_naam += " RKO rayon %s" % deel.nhb_rayon.rayon_nr
+        func_naam = "RKO rayon %s" % deel.nhb_rayon.rayon_nr
     else:
-        func_naam += " BKO"
+        func_naam = "BKO"
+
+    func_naam += " voor de " + deel.competitie.beschrijving
 
     # een Functie is gewoon een auth.Group
     func, created = Group.objects.get_or_create(name=func_naam)

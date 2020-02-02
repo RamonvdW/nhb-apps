@@ -34,12 +34,13 @@
 // 1. Colors
 // ==========================================================================
 
-$primary-color: #0aa0e1 !default;           // blauw
+$primary-color: #0aa0e1 !default;             // blauw
 $primary-color-light: #5ebde7 !default;
 $primary-color-dark: #03628c !default;
 
-$secondary-color: #f94137 !default;         // rood
-$secondary2-color: #ae0b03;
+//$secondary-color: #f94137 !default;         // rood
+$secondary-color: #0aa0e1 !default;           // blauw!
+
 $success-color: color("green", "base") !default;
 $error-color: color("red", "base") !default;
 $link-color: $primary-color-dark !default;

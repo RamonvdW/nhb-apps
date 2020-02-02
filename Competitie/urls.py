@@ -28,6 +28,7 @@ urlpatterns = [
          views.KlassegrenzenView.as_view(),
          name='klassegrenzen'),
 
+    # post-only, alle data gaat via parameters in de body ipv de url
     path('beheer-favorieten/wijzig/',
          views.WijzigFavorieteBestuurdersView.as_view(),
          name='wijzigfavoriet'),
@@ -35,6 +36,20 @@ urlpatterns = [
     path('beheer-favorieten/',
          views.BeheerFavorieteBestuurdersView.as_view(),
          name='beheerfavorieten'),
+
+    # post-only, alle data gaat via parameters in de body ipv de url
+    path('wijzig-bestuurders/',
+         views.KoppelBestuurdersOntvangWijzigingView.as_view(),
+         name='wijzig-deelcomp-bestuurders'),
+
+    path('kies-bestuurders/<deelcomp_pk>/',
+         views.KoppelBestuurderDeelCompetitieView.as_view(),
+         name='kies-deelcomp-bestuurder'),
+
+    path('toon-bestuurders/<comp_pk>/',
+         views.KoppelBestuurdersCompetitieView.as_view(),
+         name='toon-competitie-bestuurders'),
+
 
 ]
 

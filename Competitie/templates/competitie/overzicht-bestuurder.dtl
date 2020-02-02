@@ -31,7 +31,7 @@
     <tr>
         <td>A</td>
         <td>Competitie opstarten (BKO)</td>
-        <td class="green-text">Afgerond</td>materializ
+        <td class="green-text">Afgerond</td>
     </tr>
     <tr>
         <td{% if obj.fase == 'A1' %} class="blue"{% endif %}>A1</td>
@@ -103,7 +103,9 @@
 <h5>Volgende stappen</h5>
 <div class="row">
     {% if kan_favorieten_beheren %}
-    <div class="col s12 m12 l6">
+    <div class="col s12 m6 xl4">
+
+        <!-- let op! gelijk houden aan zelfde kaart in koppel-bestuurders-overzicht.dtl -->
         <div class="card">
             <div class="card-content">
                 <table class="simple"><tr style="border:0px">
@@ -115,11 +117,51 @@
                 <a href="{% url 'Competitie:beheerfavorieten' %}">Beheer favorieten</a>
             </div>
         </div>
+
     </div>
     {% endif %}
 
+    {% for obj in object_list %}
+
+        <!-- koppelen beheerders -->
+        {% if bko_kan_rko_koppelen %}
+            <div class="col s12 m6 xl4">
+                <div class="card">
+                    <div class="card-content">
+                        <table class="simple"><tr style="border:0px">
+                            <td><i class="material-icons-round large">supervisor_account</i></td>
+                            <td>RKO's (Rayon Kampioenschap Organisatoren) instellen voor de {{ obj.beschrijving }}.</td>
+                        </tr></table>
+                    </div>
+                    <div class="card-action center">
+                        <a href="{{ obj.wijzig_url }}">Bestuurders kiezen</a>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        {% if rko_kan_rcl_koppelen %}
+            <div class="col s12 m6 xl4">
+                <div class="card">
+                    <div class="card-content">
+                        <table class="simple"><tr style="border:0px">
+                            <td><i class="material-icons-round large">supervisor_account</i></td>
+                            <td>RCL's (Regio Competitie Leiders) instellen voor de {{ obj.beschrijving }}.</td>
+                        </tr></table>
+                    </div>
+                    <div class="card-action center">
+                        <a href="{{ obj.wijzig_url }}">Bestuurders kiezen</a>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+    {% endfor %}
+</div>
+
+<div class="row">
     {% if bko_kan_competitie_aanmaken %}
-    <div class="col s12 m12 l6">
+    <div class="col s12 m6 xl4">
         <div class="card">
             <div class="card-content">
                 <table class="simple"><tr style="border:0px">
@@ -134,44 +176,30 @@
     </div>
     {% endif %}
 
-    {% for obj in object_list %}
-        {% if obj.fase == 'A1' %}
-            <div class="col s12 m6 l6">
-                <div class="card">
-                    <div class="card-content">
-                        <table class="simple"><tr style="border:0px">
-                            <td><i class="material-icons-round large">equalizer</i></td>
-                            <td>Klasse<wbr/>grenzen voor de {{ obj.beschrijving }} vaststellen aan de hand van uitslagen van vorig seizoen.</td>
-                        </tr></table>
-                    </div>
-                    <div class="card-action center">
-                        {% if obj.afstand == '18' %}
-                        <a href="{% url 'Competitie:klassegrenzen' afstand=18 %}">Klassegrenzen vaststellen</a>
-                        {% else %}
-                        <a href="{% url 'Competitie:klassegrenzen' afstand=25 %}">Klassegrenzen vaststellen</a>
-                        {% endif %}
+    {% if bko__kan_klassegrenzen_vaststellen %}
+        {% for obj in object_list %}
+            <!-- klassegrenzen vaststellen -->
+            {% if obj.fase == 'A1' %}
+                <div class="col s12 m6 xl4">
+                    <div class="card">
+                        <div class="card-content">
+                            <table class="simple"><tr style="border:0px">
+                                <td><i class="material-icons-round large">equalizer</i></td>
+                                <td>Klasse<wbr/>grenzen voor de {{ obj.beschrijving }} vaststellen aan de hand van uitslagen van vorig seizoen.</td>
+                            </tr></table>
+                        </div>
+                        <div class="card-action center">
+                            {% if obj.afstand == '18' %}
+                                <a href="{% url 'Competitie:klassegrenzen' afstand=18 %}">Klassegrenzen vaststellen</a>
+                            {% else %}
+                                <a href="{% url 'Competitie:klassegrenzen' afstand=25 %}">Klassegrenzen vaststellen</a>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
-            </div>
-        {% endif %}
-    {% endfor %}
-
-    {% if bko_kan_klassegrenzen_instellen_25 %}
-    <div class="col s12 m12 l6">
-        <div class="card">
-            <div class="card-content">
-                <table class="simple"><tr style="border:0px">
-                    <td><i class="material-icons-round large">equalizer</i></td>
-                    <td>Klasse<wbr/>grenzen voor de 25m1pijl competitie vaststellen aan de hand van uitslagen van vorig seizoen.</td>
-                </tr></table>
-            </div>
-            <div class="card-action center">
-                <a href="{% url 'Competitie:klassegrenzen' afstand=25 %}">Klassegrenzen vaststellen</a>
-            </div>
-        </div>
-    </div>
+            {% endif %}
+        {% endfor %}
     {% endif %}
-
 </div>
 
 {% endblock %}

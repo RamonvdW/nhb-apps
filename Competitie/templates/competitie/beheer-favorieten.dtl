@@ -16,7 +16,7 @@
 <p>Via deze pagina kan jij een handig lijstje samenstellen van een aantal NHB leden die je vaak nodig hebt, bijvoorbeeld bij het toekennen als bestuurder voor de competitie.</p>
 
 <script>
-function wijzigfavlid(actie, id) {
+function wijzigfavoriet(actie, id) {
     // voer een POST uit om toe te voegen
     var form = document.createElement('form');
     form.setAttribute('method', 'post');
@@ -25,7 +25,7 @@ function wijzigfavlid(actie, id) {
     var inp = document.createElement('input');
     inp.type = "hidden";
     inp.name = actie;
-    inp.value = id.getAttribute("data-nhb-nr");
+    inp.value = id.getAttribute("data-pk");
     form.appendChild(inp)
 
     var inp = document.createElement('input');
@@ -40,16 +40,16 @@ function wijzigfavlid(actie, id) {
 }
 </script>
 
-{% if huidige_lijst.count %}
-    <h5>Huidige favorieten ({{ huidige_lijst.count }})</h5>
+{% if favoriete_bestuurders.count %}
+    <h5>Huidige favorieten ({{ favoriete_bestuurders.count }})</h5>
     <ul class="collapsible">
-        {% for obj in huidige_lijst %}
+        {% for obj in favoriete_bestuurders %}
             <li>
-                <div class="collapsible-header white"><span><b>{{ obj.nhb_nr }}</b>&nbsp;{{ obj.voornaam }} {{ obj.achternaam }}</span></div>
+                <div class="collapsible-header white"><span><b>{{ obj.favoriet.username }}</b>&nbsp;{{ obj.favoriet.volledige_naam }}</span></div>
                 <div class="collapsible-body white">
-                    <p>Rayon {{ obj.bij_vereniging.regio.rayon.rayon_nr }}</p>
-                    <p>Regio {{ obj.bij_vereniging.regio.regio_nr }}</p>
-                    <button class="btn red" onclick="wijzigfavlid('drop_nhb_nr', this)" data-nhb-nr="{{ obj.nhb_nr }}">Verwijder uit mijn lijst</button>
+                    <p>Rayon {{ obj.favoriet.nhblid.bij_vereniging.regio.rayon.rayon_nr }}</p>
+                    <p>Regio {{ obj.favoriet.nhblid.bij_vereniging.regio.regio_nr }}</p>
+                    <button class="btn opletten" onclick="wijzigfavoriet('drop_favoriet', this)" data-pk="{{ obj.favoriet.pk }}">Verwijder uit mijn lijst</button>
                 </div>
             </li>
         {% endfor %}
@@ -92,11 +92,11 @@ function wijzigfavlid(actie, id) {
     <ul class="collapsible">
         {% for obj in object_list %}
             <li>
-                <div class="collapsible-header white"><span><b>{{ obj.nhb_nr }}</b>&nbsp;{{ obj.voornaam }} {{ obj.achternaam }}</span></div>
+                <div class="collapsible-header white"><span><b>{{ obj.username }}</b>&nbsp;{{ obj.volledige_naam }}</span></div>
                 <div class="collapsible-body white">
-                    <p>Rayon {{ obj.bij_vereniging.regio.rayon.rayon_nr }}</p>
-                    <p>Regio {{ obj.bij_vereniging.regio.regio_nr }}</p>
-                    <button class="btn blue" onclick="wijzigfavlid('add_nhb_nr', this)" data-nhb-nr="{{ obj.nhb_nr }}">Voeg toe aan mijn favorieten</button>
+                    <p>Rayon {{ obj.nhblid.bij_vereniging.regio.rayon.rayon_nr }}</p>
+                    <p>Regio {{ obj.nhblid.bij_vereniging.regio.regio_nr }}</p>
+                    <button class="btn blue" onclick="wijzigfavoriet('add_favoriet', this)" data-pk="{{ obj.pk }}">Voeg toe aan mijn favorieten</button>
                 </div>
             </li>
         {% endfor %}
@@ -106,6 +106,8 @@ function wijzigfavlid(actie, id) {
     <p class="red-text">Niets gevonden</p>
     {% endif %}
 {% endif %}
+
+<p>Staat de gezochte persoon er niet bij? Alleen personen met een account op deze website worden getoond.</p>
 
 {% endblock %}
 

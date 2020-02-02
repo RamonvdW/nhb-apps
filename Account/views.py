@@ -21,8 +21,8 @@ from .models import AccountCreateError, AccountCreateNhbGeenEmail, Account,\
                     account_zet_sessionvars_na_login, account_zet_sessionvars_na_otp_controle,\
                     user_is_otp_verified
 from .leeftijdsklassen import leeftijdsklassen_zet_sessionvars_na_login
-from .rol import Rollen,\
-                 rol_get_huidige, rol_get_limiet, rol_activate, rol_mag_wisselen,\
+from .rol import Rollen, rol_activate, rol_activate_functie,\
+                 rol_get_huidige, rol_get_limiet, rol_mag_wisselen,\
                  rol_zet_sessionvars_na_login, rol_zet_sessionvars_na_otp_controle
 from .qrcode import qrcode_get
 from Overig.tijdelijke_url import set_tijdelijke_url_receiver, RECEIVER_ACCOUNTEMAIL
@@ -496,18 +496,29 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
             url = reverse('Account:activeer-rol', kwargs={'rol': 'BKO'})
             objs.append({ 'titel': 'BK Organizator (BKO)', 'url': url})
 
-        #if rol <= Rollen.ROL_RKO:
-        #    objs.append('RKO rayon X')      # TODO: voor specifieke rayons
+        # analyseer de functies van dit account voor bepalen van verdere rollen
+        for group in self.request.user.groups.all():
+            print("groep naam: %s" % group.name)
+            if group.name[:4] in ("RKO ", "RCL ", "CWZ "):
+                url = reverse('Account:activeer-rol-functie', kwargs={'group_pk': group.pk})
+                # TODO: kennis over de title is ongewenst
+                titel = group.name
+                comp_str = ''
+                # split the titel bij " voor de ... competitie .. seizoen"
+                pos = titel.find(" voor de")
+                if pos > 0:
+                    comp_str = titel[pos+1:]    # +1 om de spatie over te slaan
+                    titel = titel[:pos]
+                objs.append({ 'titel': titel, 'comp_str': comp_str, 'url': url})
+        # for
 
-        #if rol <= Rollen.ROL_RCL:
-        #    objs.append('RCL regio Y')      # TODO: voor specifieke regios
-
-        #if rol <= Rollen.ROL_CWZ:
-        #    objs.append('CWZ vereniging Z') # TODO: voor specifieke verenigingen
-
-        if rol <= Rollen.ROL_SCHUTTER:
+        if rol <= Rollen.ROL_SCHUTTER and self.request.user.nhblid:
             url = reverse('Account:activeer-rol', kwargs={'rol': 'schutter'})
             objs.append({ 'titel': 'Schutter', 'url': url})
+
+        if not self.request.user.nhblid:
+            url = reverse('Account:activeer-rol', kwargs={'rol': 'gebruiker'})
+            objs.append({ 'titel': 'Gebruiker', 'url': url})
 
         return objs
 
@@ -538,7 +549,11 @@ class ActiveerRolView(UserPassesTestMixin, View):
         return rol_mag_wisselen(self.request)
 
     def get(self, request, *args, **kwargs):
-        rol_activate(request, kwargs['rol'])
+        if 'rol' in kwargs:
+            rol_activate(request, kwargs['rol'])
+        else:
+            rol_activate_functie(request, kwargs['group_pk'])
+
         return redirect('Plein:plein')
 
 

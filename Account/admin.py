@@ -14,6 +14,7 @@ class AccountAdmin(UserAdmin):
     # volgorde van de velden in de admin site
     exclude = ('email', 'last_name')
 
+    # velden die niet gewijzigd mogen worden via de admin interface
     readonly_fields = ('is_staff', )
 
     # volgorde van de te tonen velden

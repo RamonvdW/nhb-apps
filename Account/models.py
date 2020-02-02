@@ -99,6 +99,11 @@ class Account(AbstractUser):
         # TODO: werkt dit ook nog goed voor niet-NHB leden die een e-mail als username hebben?
         return self.first_name or self.username
 
+    def volledige_naam(self):
+        if self.nhblid:
+            return self.nhblid.volledige_naam()
+        return self.username
+
     def get_account_full_name(self):
         """ Deze functie wordt aangeroepen vanuit de site feedback om een volledige
             referentie aan de gebruiker te krijgen.
@@ -295,7 +300,11 @@ def account_needs_otp(account):
     """
     if account.is_BKO or account.is_staff:
         return True
-    # TODO: check rechten voor beheerders
+
+    for group in account.groups.all():
+        if group.name[:4] in ("BKO ", "RKO ", "RCL ", "CWZ "):
+            return True
+
     return False
 
 

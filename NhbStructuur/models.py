@@ -140,6 +140,9 @@ class NhbLid(models.Model):
         # voorbeeld: geboren 2001, huidig jaar = 2019 --> leeftijd 18 wordt bereikt
         return jaar - self.geboorte_datum.year
 
+    def volledige_naam(self):
+        return self.voornaam + " " + self.achternaam
+
     class Meta:
         """ meta data voor de admin interface """
         verbose_name = 'Nhb lid'

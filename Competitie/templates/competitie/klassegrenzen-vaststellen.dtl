@@ -40,7 +40,7 @@ Deze zijn gebaseerd op de uitslagen van seizoen {{ seizoen }} en de wedstrijdlee
 <div class="row">
     <form method="post" action="{% url 'Competitie:klassegrenzen' afstand=afstand %}">
     {% csrf_token %}
-    <input class="btn red" name="button_aanmaken" type="submit" value="Deze klassegrenzen vaststellen">
+    <input class="btn opletten" name="button_aanmaken" type="submit" value="Deze klassegrenzen vaststellen">
     </form>
 </div>
 

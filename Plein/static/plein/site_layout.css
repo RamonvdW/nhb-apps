@@ -19,6 +19,14 @@ h1, h2, h3, h4, h5, h6 {
     background-color: #0aa0e1 !important;   /* NHB medium blauw */
 }
 
+.opletten {
+    background-color: #f94137 !important;   /* NHB hoofdkleur oranje */
+}
+
+.margin-5 {
+    margin: 5px;
+}
+
 /* actieve menu item in rood */
 .actief  {
     background-color: #f94137;     /* NHB medium rood */

@@ -54,7 +54,7 @@
 
 <li{% if menu_actief == "competitie" %} class="actief"{% endif %}>
     <a href="{% url 'Competitie:overzicht' %}" class="white-text">
-    <i class="material-icons-round white-text"><!--developer_board--><!--gamepad--><!--assistant-->my_location</i>Competitie</a>
+    <i class="material-icons-round white-text"><!--developer_board--><!--gamepad--><!--assistant-->my_location</i>Competities</a>
 </li>
 
 <li{% if menu_actief == "records" %} class="actief"{% endif %}>
