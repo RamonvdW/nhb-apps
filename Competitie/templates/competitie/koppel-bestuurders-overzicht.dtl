@@ -1,0 +1,82 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2020 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Koppel bestuurders{% endblock %}
+
+{% block pagina %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="koppel bestuurders" %}
+
+<h4>Koppel bestuurders</h4>
+
+<p>Hieronder worden de bestuurders voor de {{ competitie.beschrijving }} getoond.</p>
+
+{% if kies_favleden_url %}
+    <div class="row">
+        <div class="col s12 white z-depth-2">
+            <h5 class="red-text">Oeps!</h5>
+
+            <p>Om bestuurders te koppelen moet je eerst een aantal NHB leden selecteren en opslaan als favorieten.</p>
+        </div>
+
+        <div class="col s12 m6 xl4">
+
+            <!-- let op! gelijk houden aan zelfde kaart in overzicht-bestuurder.dtl -->
+            <div class="card">
+                <div class="card-content">
+                    <table class="simple"><tr style="border:0px">
+                        <td><i class="material-icons-round large">contacts</i></td>
+                        <td>Selecteer je favoriete NHB leden, voor koppelen aan rollen.</td>
+                    </tr></table>
+                </div>
+                <div class="card-action center">
+                    <a href="{% url 'Competitie:beheerfavorieten' %}">Beheer favorieten</a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+{% else %}
+
+    <!-- toon de deelcompetities met huidige bestuurders in een tabel -->
+    <div class="row">
+        <table class="white">
+            <thead>
+                <tr>
+                    <th>Rol</th>
+                    <th>Bestuurder(s)</th>
+                    <th></th>   <!-- kolom voor de 'wijzig' knoppen -->
+                </tr>
+            </thead>
+            {% for obj in object_list %}
+                <tr>
+                    <td>{{ obj.rol_str }}</td>
+
+                    <td>
+                    {% if obj.bestuurders.count %}
+                        {% for bestuurder in obj.bestuurders %}
+                            <p>{{ bestuurder.volledige_naam }}</p>
+                        {% endfor %}
+                    {% else %}
+                        <i>Nog niet gekoppeld</i>
+                    {% endif %}
+                    </td>
+
+                    <td>
+                        {% if obj.wijzig_url %}
+                            <a class="btn blue" href="{{ obj.wijzig_url }}">Wijzig</a>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+{% endif %}
+
+{% endblock %}
+
