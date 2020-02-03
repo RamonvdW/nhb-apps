@@ -17,6 +17,11 @@ then
     echo "[ERROR] websim is already running - please stop it"
     exit 1
 fi
+
+echo
+echo "****************************** START OF TEST RUN ******************************"
+echo
+
 python3.6 ./websim.py &
 
 rm -rf "$REPORT_DIR"

@@ -55,6 +55,12 @@ class TestCompetitie(TestCase):
         lid.bij_vereniging = ver
         lid.save()
 
+        usermodel.objects.create_user('100001', 'nhb100001@test.com', 'wachtwoord')
+        account = Account.objects.get(username='100001')
+        account.nhblid = lid
+        account.save()
+        self.account_lid = account
+
         # (strategisch gekozen) historische data om klassegrenzen uit te bepalen
         comp = HistCompetitie()
         comp.seizoen = '2018/2019'
@@ -231,36 +237,38 @@ class TestCompetitie(TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         assert_html_ok(self, resp)
         assert_template_used(self, resp, ('competitie/beheer-favorieten.dtl', 'plein/site_layout.dtl'))
+        self.assertNotContains(resp, "Niets gevonden")
         self.assertContains(resp, "100001")
         self.assertContains(resp, "Ramon de Tester")
 
-        # voeg toe
-        resp = self.client.post('/competitie/beheer-favorieten/wijzig/', {'add_nhb_nr': '100001'}, follow=True)
+        # voeg niet bestaand lid toe
+        resp = self.client.post('/competitie/beheer-favorieten/wijzig/', {'add_favoriet': '999999'}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         assert_html_ok(self, resp)
         assert_template_used(self, resp, ('competitie/beheer-favorieten.dtl', 'plein/site_layout.dtl'))
+        self.assertEqual(len(FavorieteBestuurders.objects.all()), 0)
+
+        # voeg toe
+        resp = self.client.post('/competitie/beheer-favorieten/wijzig/', {'add_favoriet': self.account_lid.pk}, follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_html_ok(self, resp)
+        assert_template_used(self, resp, ('competitie/beheer-favorieten.dtl', 'plein/site_layout.dtl'))
+        #print("resp: %s" % repr(resp.content))
         self.assertEqual(len(FavorieteBestuurders.objects.all()), 1)
         self.assertContains(resp, "100001")
         self.assertContains(resp, "Ramon de Tester")
         obj = FavorieteBestuurders.objects.all()[0]
         self.assertTrue(str(obj) != "")
 
-        # voeg niet bestaand lid toe
-        resp = self.client.post('/competitie/beheer-favorieten/wijzig/', {'add_nhb_nr': '999999'}, follow=True)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        assert_html_ok(self, resp)
-        assert_template_used(self, resp, ('competitie/beheer-favorieten.dtl', 'plein/site_layout.dtl'))
-        self.assertEqual(len(FavorieteBestuurders.objects.all()), 1)
-
         # dubbel toevoegen
-        resp = self.client.post('/competitie/beheer-favorieten/wijzig/', {'add_nhb_nr': '100001'}, follow=True)
+        resp = self.client.post('/competitie/beheer-favorieten/wijzig/', {'add_favoriet': self.account_lid.pk}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         assert_html_ok(self, resp)
         assert_template_used(self, resp, ('competitie/beheer-favorieten.dtl', 'plein/site_layout.dtl'))
         self.assertEqual(len(FavorieteBestuurders.objects.all()), 1)
 
         # verwijder
-        resp = self.client.post('/competitie/beheer-favorieten/wijzig/', {'drop_nhb_nr': '100001'}, follow=True)
+        resp = self.client.post('/competitie/beheer-favorieten/wijzig/', {'drop_favoriet': self.account_lid.pk}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         assert_html_ok(self, resp)
         assert_template_used(self, resp, ('competitie/beheer-favorieten.dtl', 'plein/site_layout.dtl'))

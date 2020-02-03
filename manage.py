@@ -13,8 +13,14 @@ import os
 import sys
 from django.core.management import execute_from_command_line
 
-
 def main():
+    # print a clear separator on the terminal when using runserver or test
+    if "runserver" in sys.argv:
+        # avoid double line when runserver starts a child process
+        if "DJANGO_SETTINGS_MODULE" not in os.environ:
+            stars = "*" * 30
+            print("\n%s START OF RUN %s\n" % (stars, stars))
+
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'nhb-apps.settings')
     execute_from_command_line(sys.argv)
 

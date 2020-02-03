@@ -92,12 +92,14 @@ def rol_zet_sessionvars_na_login(account, request):
                         rol = Rollen.ROL_CWZ
             # for
 
-    if rol:
+    if rol and rol < Rollen.ROL_SCHUTTER:
         sessionvars[SESSIONVAR_ROL_LIMIET] = rol
         sessionvars[SESSIONVAR_ROL_MAG_WISSELEN] = True
     elif account_needs_otp(account):
         sessionvars[SESSIONVAR_ROL_MAG_WISSELEN] = True
 
+    # automatisch een verhoogde functie aannemen voor BKO en Beheerder
+    # de rest blijft op hun standaard level
     if rol in (Rollen.ROL_IT, Rollen.ROL_BKO):
         sessionvars[SESSIONVAR_ROL_HUIDIGE] = Rollen.ROL_BKO
     else:

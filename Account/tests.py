@@ -5,6 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
 from django.utils import timezone
 from django.test import TestCase
 from django.conf import settings
@@ -33,6 +34,23 @@ def get_otp_code(account):
     return otp.now()
 
 
+class TestGroupManager(object):
+
+    def __init__(self):
+        self._groups = list()
+        self.add("Test groep")
+
+    def add(self, group_name):
+        new_group = SimpleNamespace()
+        new_group.name = group_name
+        self._groups.append(new_group)
+
+    def all(self):
+        # iterator of the groups
+        for group in self._groups:
+            yield group
+
+
 class AccountTest(TestCase):
 
     def setUp(self):
@@ -42,6 +60,11 @@ class AccountTest(TestCase):
         usermodel.objects.create_superuser('admin', 'admin@test.com', 'wachtwoord')
         self.account_admin = Account.objects.get(username='admin')
         self.account_normaal = Account.objects.get(username='normaal')
+
+        self.group_bko, _ = Group.objects.get_or_create(name="BKO test")
+        self.group_rko, _ = Group.objects.get_or_create(name="RKO test")
+        self.group_rcl, _ = Group.objects.get_or_create(name="RCL test")
+        self.group_cwz, _ = Group.objects.get_or_create(name="CWZ test")
 
         # maak de standard rayon/regio structuur aan
         maak_rayons_2018(NhbRayon)
@@ -197,6 +220,8 @@ class AccountTest(TestCase):
         account = SimpleNamespace()
         request = SimpleNamespace()
         request.session = dict()
+        request.user = account
+        request.user.groups = TestGroupManager()
 
         # no session vars / not logged in
         self.assertEqual(rol_get_limiet(request), Rollen.ROL_UNKNOWN)
@@ -433,10 +458,10 @@ class AccountTest(TestCase):
         # unit-tests voor de 'leeftijdsklassen' module
 
         # simuleer de normale inputs
-        account = lambda: None
-        request = lambda: None
-        nhblid = lambda: None
-        nhblid.geboorte_datum = lambda: None
+        account = SimpleNamespace()
+        request = SimpleNamespace()
+        nhblid = SimpleNamespace()
+        nhblid.geboorte_datum = SimpleNamespace()
         nhblid.geboorte_datum.year = 0
         request.session = dict()
 
@@ -528,17 +553,20 @@ class AccountTest(TestCase):
         account.nhblid = None
         self.assertEqual(account.get_first_name(), 'normaal')
         self.assertEqual(account.get_account_full_name(), 'normaal')
+        self.assertEqual(account.volledige_naam(), 'normaal')
 
         # account.first_name
         account.nhblid = None
         account.first_name = 'Normaal'
         self.assertEqual(account.get_first_name(), 'Normaal')
         self.assertEqual(account.get_account_full_name(), 'normaal')
+        self.assertEqual(account.volledige_naam(), 'normaal')
 
         # nhblid.voornaam
         account.nhblid = self.nhblid1
         self.assertEqual(account.get_first_name(), 'Ramon')
         self.assertEqual(account.get_account_full_name(), 'Ramon de Tester (normaal)')
+        self.assertEqual(account.volledige_naam(), 'Ramon de Tester')
 
     def test_deblok_account(self):
         # validate precondition
@@ -616,8 +644,8 @@ class AccountTest(TestCase):
         management.call_command('maak_beheerder', 'nietbestaand', stderr=f1, stdout=f2)
         self.assertEqual(f1.getvalue(), 'Account matching query does not exist.\n')
 
-    def test_wisselvanrol_pagina(self):
-        # controleer dat de link naar het koppelen op de pagina staat
+    def test_wisselvanrol_pagina_admin(self):
+        # controleer dat de link naar het wisselen van rol op de pagina staat
         self.account_admin.otp_is_actief = False
         self.account_admin.save()
         self.client.login(username='admin', password='wachtwoord')
@@ -628,7 +656,7 @@ class AccountTest(TestCase):
         assert_html_ok(self, resp)
         self.assertNotContains(resp, 'IT beheerder')
         self.assertNotContains(resp, 'BKO')
-        self.assertContains(resp, 'Schutter')
+        self.assertContains(resp, 'Gebruiker')
         self.assertContains(resp, 'Controle met een tweede factor is verplicht voor gebruikers met toegang tot persoonsgegevens')
 
         self.client.logout()
@@ -644,7 +672,7 @@ class AccountTest(TestCase):
         assert_html_ok(self, resp)
         self.assertNotContains(resp, 'IT beheerder')
         self.assertNotContains(resp, 'BKO')
-        self.assertContains(resp, 'Schutter')
+        self.assertContains(resp, 'Gebruiker')
         self.assertContains(resp, 'Een aantal rollen worden pas beschikbaar nadat de controle van de tweede factor uitgevoerd is')
 
         # controleer dat de complete keuzemogelijkheden op de pagina staan
@@ -655,11 +683,46 @@ class AccountTest(TestCase):
         assert_html_ok(self, resp)
         self.assertContains(resp, 'IT beheerder')
         self.assertContains(resp, 'BKO')
-        self.assertContains(resp, 'Schutter')
+        self.assertContains(resp, 'Gebruiker')
 
         assert_template_used(self, resp, ('account/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
         assert_other_http_commands_not_supported(self, '/account/wissel-van-rol/')
         self.client.logout()
+
+    def test_wisselvanrol_pagina_normaal(self):
+        self.account_normaal.nhblid = self.nhblid1
+        self.account_normaal.save()
+        self.client.login(username='normaal', password='wachtwoord')
+        account_zet_sessionvars_na_login(self.client).save()
+        rol_zet_sessionvars_na_login(self.account_normaal, self.client).save()
+        # controleer dat de wissel-van-rol pagina niet aanwezig is voor deze normale gebruiker
+        resp = self.client.get('/account/wissel-van-rol/')
+        self.assertEqual(resp.status_code, 403)     # 403 = Forbidden
+        self.client.logout()
+
+        # voeg de gebruiker toe aan een groep waardoor wissel-van-rol actief wordt
+
+        # TODO: BKO (besluit eerst of een BKO groep nodig is)
+        #self.group_bko
+
+        self.account_normaal.groups.clear()
+        self.account_normaal.groups.add(self.group_rko)
+        self.client.login(username='normaal', password='wachtwoord')
+        account_zet_sessionvars_na_login(self.client).save()
+        rol_zet_sessionvars_na_login(self.account_normaal, self.client).save()
+        resp = self.client.get('/account/wissel-van-rol/')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_html_ok(self, resp)
+        self.assertNotContains(resp, "BKO")
+        self.assertContains(resp, "RKO")
+        self.assertNotContains(resp, "RCL")     # TODO: RKO moet RCL kunnen helpen
+        self.assertNotContains(resp, "CWZ")
+
+        # TODO: RCL
+        #self.group_rcl
+
+        # TODO: CWZ
+        #self.group_cwz
 
     def test_rolwissel(self):
         self.client.login(username='admin', password='wachtwoord')

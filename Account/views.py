@@ -498,8 +498,8 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
 
         # analyseer de functies van dit account voor bepalen van verdere rollen
         for group in self.request.user.groups.all():
-            print("groep naam: %s" % group.name)
-            if group.name[:4] in ("RKO ", "RCL ", "CWZ "):
+            #print("groep naam: %s" % group.name)
+            if group.name[:4] in ("RKO ", "RCL ", "CWZ "):  # TODO: BKO groep ondersteuning
                 url = reverse('Account:activeer-rol-functie', kwargs={'group_pk': group.pk})
                 # TODO: kennis over de title is ongewenst
                 titel = group.name

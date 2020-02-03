@@ -35,9 +35,13 @@ class FavorieteBestuurders(models.Model):
 def add_favoriete_bestuurder(zelf_account, fav_account_pk):
     # alleen toevoegen als nog niet in de lijst
     if len(FavorieteBestuurders.objects.filter(zelf=zelf_account, favoriet__pk=fav_account_pk)) == 0:
-        # TODO: error handling
-        account = Account.objects.get(pk=fav_account_pk)
-        FavorieteBestuurders(zelf=zelf_account, favoriet=account).save()
+        try:
+            account = Account.objects.get(pk=fav_account_pk)
+        except Account.DoesNotExist:
+            # ignore illegal request
+            pass
+        else:
+            FavorieteBestuurders(zelf=zelf_account, favoriet=account).save()
 
 
 def drop_favoriete_bestuurder(zelf_account, fav_account_pk):
