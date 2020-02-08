@@ -13,24 +13,12 @@ from Plein.tests import assert_html_ok, assert_template_used
 
 
 class TestBasisTypen(TestCase):
-    """ unit tests voor de BasisTypen application """
+    """ unit tests voor de BasisTypen applicatie """
 
     def setUp(self):
         """ eenmalige setup voor alle tests
             wordt als eerste aangeroepen
         """
-        obj = BoogType(afkorting='R', beschrijving='Recurve')
-        obj.save()
-
-        obj = TeamType(beschrijving="Een team type")
-        obj.save()
-
-        obj = WedstrijdKlasse(beschrijving="Wedstrijdklasse Test", niet_voor_rk_bk=True, is_voor_teams=False)
-        obj.save()
-
-        obj = LeeftijdsKlasse(afkorting="CH", geslacht="M", max_wedstrijdleeftijd=17, beschrijving="Heren Cadet")
-        obj.save()
-
         # maak een BKO aan, nodig om de competitie defaults in te zien
         usermodel = get_user_model()
         usermodel.objects.create_user('bko', 'bko@test.com', 'wachtwoord')
@@ -48,8 +36,11 @@ class TestBasisTypen(TestCase):
         self.assertIsNotNone(str(obj))      # use the __str__ method (only used by admin interface)
 
     def test_wedstrijdklasse(self):
-        obj = WedstrijdKlasse.objects.all()[0]
+        obj = WedstrijdKlasse.objects.filter(is_voor_teams=False)[0]
         self.assertIsNotNone(str(obj))      # use the __str__ method (only used by admin interface)
+
+        obj = WedstrijdKlasse.objects.filter(is_voor_teams=True)[0]
+        self.assertIsNotNone(str(obj))
 
     def test_leeftijdklasse(self):
         obj = LeeftijdsKlasse()
