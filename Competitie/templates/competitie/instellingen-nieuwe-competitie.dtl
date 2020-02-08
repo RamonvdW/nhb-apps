@@ -80,6 +80,6 @@ Onder aan deze pagina vindt je een knop om de nieuwe competitie aan te maken.</p
     </div>
 </div>
 
-<a class="btn opletten" href="{% url 'Competitie:aanmaken' %}">Ik wil de nieuwe competities aanmaken</a>
+<a class="btn-nhb-rood" href="{% url 'Competitie:aanmaken' %}">Ik wil de nieuwe competities aanmaken</a>
 
 {% endblock %}

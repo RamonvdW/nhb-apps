@@ -34,10 +34,10 @@
 
     <div class="row">
         <div class="col">
-            <a class="btn margin-5" href="{{ terug_url }}">Terug (niet opslaan)</a>
+            <a class="btn-nhb-blauw margin-5" href="{{ terug_url }}">Terug (niet opslaan)</a>
         </div>
         <div class="col">
-            <input class="btn margin-5 opletten" type="submit" value="Wijzigingen opslaan">
+            <input class="btn-nhb-rood margin-5" type="submit" value="Wijzigingen opslaan">
         </div>
     </div>
 </form>

@@ -68,7 +68,7 @@
 
                     <td>
                         {% if obj.wijzig_url %}
-                            <a class="btn blue" href="{{ obj.wijzig_url }}">Wijzig</a>
+                            <a class="btn-nhb-blauw" href="{{ obj.wijzig_url }}">Wijzig</a>
                         {% endif %}
                     </td>
                 </tr>

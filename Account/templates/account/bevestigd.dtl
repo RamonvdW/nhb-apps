@@ -16,6 +16,6 @@
 <p>Je hebt laten zien dat je toegang hebt tot je e-mail.</p>
 <p>Je kan nu inloggen.</p>
 
-<p><a class="btn blue" href="{% url 'Account:login' %}">inloggen</a></p>
+<p><a class="btn-nhb-blauw" href="{% url 'Account:login' %}">inloggen</a></p>
 
 {% endblock %}

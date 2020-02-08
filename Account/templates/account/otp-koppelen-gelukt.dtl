@@ -17,6 +17,6 @@
 
 <p>Naast de inlog met gebruikersnaam en wachtwoord vraagt deze website vanaf nu bij een rol wissel ook om de tweede-factor code.</p>
 
-<p><a class="btn blue white-text" href="{% url 'Account:wissel-van-rol' %}">Wissel van rol</a></p>
+<p><a class="btn-nhb-blauw" href="{% url 'Account:wissel-van-rol' %}">Wissel van rol</a></p>
 
 {% endblock %}

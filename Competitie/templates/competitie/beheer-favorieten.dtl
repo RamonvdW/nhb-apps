@@ -49,7 +49,7 @@ function wijzigfavoriet(actie, id) {
                 <div class="collapsible-body white">
                     <p>Rayon {{ obj.favoriet.nhblid.bij_vereniging.regio.rayon.rayon_nr }}</p>
                     <p>Regio {{ obj.favoriet.nhblid.bij_vereniging.regio.regio_nr }}</p>
-                    <button class="btn opletten" onclick="wijzigfavoriet('drop_favoriet', this)" data-pk="{{ obj.favoriet.pk }}">Verwijder uit mijn lijst</button>
+                    <button class="btn-nhb-rood" onclick="wijzigfavoriet('drop_favoriet', this)" data-pk="{{ obj.favoriet.pk }}">Verwijder uit mijn lijst</button>
                 </div>
             </li>
         {% endfor %}
@@ -78,7 +78,7 @@ function wijzigfavoriet(actie, id) {
             {{ form.zoekterm.label_tag }} {{ form.zoekterm }}
             <p>&nbsp;</p>
             <div class="center-align">
-                <input class="btn blue" type="submit" value="Zoeken">
+                <input class="btn-nhb-blauw" type="submit" value="Zoeken">
             </div>
         </form>
     </div>
@@ -96,7 +96,7 @@ function wijzigfavoriet(actie, id) {
                 <div class="collapsible-body white">
                     <p>Rayon {{ obj.nhblid.bij_vereniging.regio.rayon.rayon_nr }}</p>
                     <p>Regio {{ obj.nhblid.bij_vereniging.regio.regio_nr }}</p>
-                    <button class="btn blue" onclick="wijzigfavoriet('add_favoriet', this)" data-pk="{{ obj.pk }}">Voeg toe aan mijn favorieten</button>
+                    <button class="btn-nhb-blauw" onclick="wijzigfavoriet('add_favoriet', this)" data-pk="{{ obj.pk }}">Voeg toe aan mijn favorieten</button>
                 </div>
             </li>
         {% endfor %}

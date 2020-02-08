@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019 Ramon van der Winkel.
+                Copyright (c) 2019-2020 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -16,7 +16,7 @@
 <p>Dit gebruiken we om de site te verbeteren.</p>
 
 <div class="container z-depth-2 white">
-    <div class="row nav blue white-text">
+    <div class="row nav nhb-blauw white-text">
         <div class="col s12 center">
             <h5>Feedback</h5>
         </div>
@@ -71,7 +71,7 @@
 
             <div class="row"><div class="col s12"></div>
                 <div class="center-align">
-                    <input class="btn blue" name="button_login" type="submit" value="Verstuur">
+                    <input class="btn-nhb-blauw" type="submit" value="Verstuur">
                 </div>
             </div>
         </form>

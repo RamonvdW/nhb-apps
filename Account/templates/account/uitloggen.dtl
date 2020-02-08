@@ -17,7 +17,7 @@
 
 <form class="col s12" action="{% url 'Account:logout' %}" method="post">
     {% csrf_token %}
-    <input class="btn blue" name="button_logout" type="submit" value="Uitloggen">
+    <input class="btn-nhb-blauw" name="button_logout" type="submit" value="Uitloggen">
 </form>
 
 {% endblock %}

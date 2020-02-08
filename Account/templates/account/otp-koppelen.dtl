@@ -39,7 +39,7 @@
 
 
 <div class="container z-depth-2 white">
-    <div class="row nav blue white-text">
+    <div class="row nhb-blauw white-text">
         <div class="col s12 center-align">
             <h5>Controleer de tweede factor</h5>
             <p>Voer een code in om te kijken of het allemaal werkt</p>
@@ -65,7 +65,7 @@
 
             <div class="row"><div class="col s12"></div>
                 <div class="center-align">
-                    <input class="btn blue" name="button_login" type="submit" value="Controleer">
+                    <input class="btn-nhb-blauw" name="button_login" type="submit" value="Controleer">
                 </div>
             </div>
         </form>

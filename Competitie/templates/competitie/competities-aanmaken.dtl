@@ -19,7 +19,7 @@
 
 <form method="post" action="{% url 'Competitie:aanmaken' %}">
 {% csrf_token %}
-<input class="btn opletten" name="button_aanmaken" type="submit" value="Ja, maak de nieuwe competities aan!">
+<input class="btn-nhb-rood" name="button_aanmaken" type="submit" value="Ja, maak de nieuwe competities aan!">
 </form>
 
 {% endblock %}
