@@ -33,7 +33,7 @@ if [ $# -eq 0 ]
 then
     # add coverage with debug enabled
     echo "[INFO] Performing quick debug run"
-    coverage run --append --branch ./manage.py test --debug-mode Plein.tests.PleinTest.test_plein_normaal &>/dev/null
+    coverage run --append --branch ./manage.py test --debug-mode Plein.tests.TestPlein.test_plein_normaal &>/dev/null
 fi
 
 # stop the http simulator
