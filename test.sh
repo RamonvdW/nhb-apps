@@ -8,7 +8,7 @@ ARGS="$*"
 RED="\e[31m"
 RESET="\e[0m"
 REPORT_DIR="/tmp/covhtml"
-OMIT="--omit=data3/wsgi.py,/usr/*/python3*/site-packages/*"
+OMIT="--omit=data3/wsgi.py,manage.py,/usr/*/python3*/site-packages/*"
 
 # start the http simulator in the background
 pgrep -f websim
@@ -32,7 +32,8 @@ coverage run --append --branch ./manage.py test --noinput $*  # note: double quo
 if [ $# -eq 0 ]
 then
     # add coverage with debug enabled
-    coverage run --append --branch ./manage.py test --debug-mode Plein.tests.PleinTest.test_plein_normaal
+    echo "[INFO] Performing quick debug run"
+    coverage run --append --branch ./manage.py test --debug-mode Plein.tests.PleinTest.test_plein_normaal &>/dev/null
 fi
 
 # stop the http simulator
