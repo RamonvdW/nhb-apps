@@ -4,20 +4,24 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.test import TestCase
+from django.test import TestCase, RequestFactory
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
+from django.urls import Resolver404
 from Account.models import Account, account_zet_sessionvars_na_otp_controle
-from Account.rol import rol_zet_sessionvars_na_login
-from Plein.tests import assert_html_ok, assert_template_used
+from Account.rol import rol_zet_sessionvars_na_login, rol_zet_sessionvars_na_otp_controle,\
+                        rol_activate, rol_is_bestuurder
+from Plein.tests import assert_html_ok, assert_template_used, extract_all_href_urls
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
 from .models import Competitie, DeelCompetitie, CompetitieWedstrijdKlasse, get_competitie_fase, \
-                    FavorieteBestuurders
+                    FavorieteBestuurders, add_favoriete_bestuurder, competitie_aanmaken
+from .views import KoppelBestuurdersCompetitieView
 import datetime
 
 
 class TestCompetitie(TestCase):
-    """ unit tests voor de BasisTypen application """
+    """ unit tests voor de Competitie applicatie """
 
     def setUp(self):
         """ eenmalige setup voor alle tests
@@ -302,5 +306,156 @@ class TestCompetitie(TestCase):
         assert_html_ok(self, resp)
         assert_template_used(self, resp, ('competitie/beheer-favorieten.dtl', 'plein/site_layout.dtl'))
         self.assertEqual(len(FavorieteBestuurders.objects.all()), 0)
+
+
+class TestCompetitieKoppelBestuurders(TestCase):
+    """ unit tests voor de Koppel Bestuurders functie in de Competitie application """
+
+    def _prep_lid(self, voornaam):
+        nhb_nr = self._next_nhbnr
+        self._next_nhbnr += 1
+
+        lid = NhbLid()
+        lid.nhb_nr = nhb_nr
+        lid.geslacht = "M"
+        lid.voornaam = voornaam
+        lid.achternaam = "Tester"
+        lid.email = "whatever@gmail.not"
+        lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
+        lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
+        lid.bij_vereniging = self._ver
+        lid.save()
+
+        self.usermodel.objects.create_user(nhb_nr, lid.email, 'wachtwoord')
+        account = Account.objects.get(username=nhb_nr)
+        account.nhblid = lid
+        account.save()
+        return account
+
+    def _set_fav(self, account, favs):
+        for fav in favs:
+            add_favoriete_bestuurder(account, fav.pk)
+        # for
+
+    def setUp(self):
+        """ eenmalige setup voor alle tests
+            wordt als eerste aangeroepen
+        """
+        self.usermodel = get_user_model()
+        self.factory = RequestFactory()
+
+        self.rayon_1 = NhbRayon.objects.get(rayon_nr=1)
+        self.rayon_2 = NhbRayon.objects.get(rayon_nr=2)
+        self.rayon_3 = NhbRayon.objects.get(rayon_nr=3)
+        self.rayon_4 = NhbRayon.objects.get(rayon_nr=4)
+
+        self.regio_101 = NhbRegio.objects.get(regio_nr=101)
+
+        # maak een test vereniging
+        ver = NhbVereniging()
+        ver.naam = "Grote Club"
+        ver.nhb_nr = "1000"
+        ver.regio = self.regio_101
+        # secretaris kan nog niet ingevuld worden
+        ver.save()
+        self._ver = ver
+        self._next_nhbnr = 100001
+
+        # maak een BKO aan (geen NHB lid)
+        self.usermodel.objects.create_user('bko', 'bko@test.com', 'wachtwoord')
+        account = Account.objects.get(username='bko')
+        account.is_BKO = True
+        account.save()
+        self.account_bko = account
+
+        # maak test leden aan die we kunnen koppelen aan bestuurdersrollen
+        self.account_rko1 = self._prep_lid('RKO1')
+        self.account_rko2 = self._prep_lid('RKO2')
+        self.account_rko3 = self._prep_lid('RKO3')
+        self.account_rko4 = self._prep_lid('RKO4')
+        self.account_rcl11 = self._prep_lid('RCL11')
+        self.account_rcl12 = self._prep_lid('RCL12')
+        self.account_rcl21 = self._prep_lid('RCL21')
+        self.account_rcl22 = self._prep_lid('RCL22')
+        self.account_rcl31 = self._prep_lid('RCL31')
+
+        # stel the favorieten van elk lid in
+        self._set_fav(self.account_bko, (self.account_rko1, self.account_rko2, self.account_rko3, self.account_rko4))
+        self._set_fav(self.account_rko1, (self.account_rcl11, self.account_rcl12))
+        self._set_fav(self.account_rko2, (self.account_rcl21, self.account_rcl22))
+        self._set_fav(self.account_rko3, (self.account_rcl31, self.account_rcl22))
+        self._set_fav(self.account_rko4, (self.account_rcl31,))
+
+        # creer een competitie met deelcompetities
+        competitie_aanmaken()
+
+    def test_koppelbestuurder_competitie_anon(self):
+        self.client.logout()
+
+        resp = self.client.get('/competitie/toon-bestuurders/9999/', follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_html_ok(self, resp)
+        assert_template_used(self, resp, ('account/login.dtl', 'plein/site_layout.dtl'))
+
+        resp = self.client.get('/competitie/kies-bestuurders/9999/', follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_html_ok(self, resp)
+        assert_template_used(self, resp, ('account/login.dtl', 'plein/site_layout.dtl'))
+
+        # get wordt niet ondersteund
+        resp = self.client.get('/competitie/wijzig-bestuurders/')
+        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+
+    def test_koppelbestuurder_competitie_bko(self):
+        # login als BKO
+        self.client.login(username='bko', password='wachtwoord')
+        account_zet_sessionvars_na_otp_controle(self.client).save()
+        rol_zet_sessionvars_na_otp_controle(self.account_bko, self.client).save()
+        rol_activate(self.client, 'BKO').save()
+        self.assertTrue(rol_is_bestuurder(self.client))
+
+        # niet bestaande competitie_pk
+        resp = self.client.get('/competitie/toon-bestuurders/9999/')
+        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+
+        # haal de lijst met gekoppelde bestuurders op voor de competitie
+        competitie = Competitie.objects.all()[0]
+        resp = self.client.get('/competitie/toon-bestuurders/%s/' % competitie.pk)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_html_ok(self, resp)
+        assert_template_used(self, resp, ('competitie/koppel-bestuurders-overzicht.dtl', 'plein/site_layout.dtl'))
+
+        # controlleer dat de juiste Wijzig knoppen aanwezig zijn voor de BKO rol
+        urls = extract_all_href_urls(resp)
+        for deelcomp in DeelCompetitie.objects.filter(competitie=competitie):
+            url = '/competitie/kies-bestuurders/%s/' % deelcomp.pk
+            if deelcomp.laag == "RK":
+                self.assertTrue(url in urls)        # check link voor koppelen RKO
+            else:
+                self.assertFalse(url in urls)       # check geen link voor koppelen RCL
+        # for
+
+    def test_koppelbestuurder_competitie_rcl(self):
+        # RCL kan niemand koppelen
+
+        # koppel RCL11 aan de functie van RCL voor regio 101
+        competitie = Competitie.objects.all()[0]
+        functie = Group.objects.get(name="RCL regio 101 voor de %s" % competitie.beschrijving)
+        functie.user_set.add(self.account_rcl11)
+
+        # login als RCL11
+        self.client.login(username='rcl11', password='wachtwoord')
+        account_zet_sessionvars_na_otp_controle(self.client).save()
+        rol_zet_sessionvars_na_otp_controle(self.account_rcl11, self.client).save()
+        rol_activate(self.client, 'RCL').save()
+        self.assertTrue(rol_is_bestuurder(self.client))
+
+        # haal de lijst met gekoppelde bestuurders op voor de competitie
+        # dit werkt niet meer met self.client
+        request = self.factory.get('/competitie/toon-bestuurders/%s/' % competitie.pk, follow=True)
+        request.session = self.client.session
+        request.user = self.account_rcl11
+        with self.assertRaises(Resolver404):
+            resp = KoppelBestuurdersCompetitieView.as_view()(request)
 
 # end of file

@@ -536,8 +536,8 @@ class KoppelBestuurdersCompetitieView(UserPassesTestMixin, ListView):
             wijzigbare_laag = 'Regio'
             deelcomp = rol_get_deelcompetitie(self.request)
         else:
-            # niets te zoeken hier - los het netjes op
-            return HttpResponseRedirect(reverse('Competitie:overzicht'))
+            # niets te zoeken hier (RCL / CWZ)
+            raise Resolver404()
 
         try:
             self.competitie = Competitie.objects.get(pk=self.kwargs['comp_pk'])
