@@ -16,6 +16,24 @@ import datetime
 from types import SimpleNamespace
 
 
+def extract_all_href_urls(resp):
+    content = str(resp.content)
+    pos = content.find('<body')
+    if pos > 0:
+        content = content[pos:]           # strip head
+    urls = list()
+    while len(content):
+        pos = content.find('href="')
+        if pos > 0:
+            content = content[pos+6:]     # strip all before href
+            pos = content.find('"')
+            urls.append(content[:pos])
+            content = content[pos:]
+        else:
+            content = ""
+    # while
+    return urls
+
 def assert_html_ok(testcase, response):
     """ Doe een aantal basic checks op een html response """
     html = str(response.content)
@@ -64,7 +82,8 @@ def assert_other_http_commands_not_supported(testcase, url, post=True, delete=Tr
         testcase.assertEqual(resp.status_code, 405)
 
 
-class PleinTest(TestCase):
+class TestPlein(TestCase):
+    """ unit tests voor de Plein applicatie """
 
     def setUp(self):
         """ initializatie van de test case """

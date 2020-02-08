@@ -13,7 +13,7 @@ from Plein.tests import assert_html_ok, assert_other_http_commands_not_supported
 import datetime
 import io
 
-class RecordsTest(TestCase):
+class TestRecords(TestCase):
     """ unittests voor de Records applicatie """
 
     def setUp(self):

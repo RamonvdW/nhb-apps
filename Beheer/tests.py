@@ -11,10 +11,8 @@ from Plein.tests import assert_html_ok, assert_template_used, assert_other_http_
 from Account.models import Account, account_zet_sessionvars_na_login, account_zet_sessionvars_na_otp_controle
 
 
-class BeheerTest(TestCase):
-    """
-        Test Suite voor de Beheer app
-    """
+class TestBeheer(TestCase):
+    """ unit tests voor de Beheer applicatie """
 
     def setUp(self):
         usermodel = get_user_model()

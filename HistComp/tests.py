@@ -12,7 +12,7 @@ from .forms import FilterForm
 import datetime
 
 
-class HistCompTest(TestCase):
+class TestHistComp(TestCase):
     """ unittests voor de HistComp applicatie """
 
     def setUp(self):

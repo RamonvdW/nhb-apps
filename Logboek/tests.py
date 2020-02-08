@@ -13,7 +13,8 @@ from Account.models import Account, account_zet_sessionvars_na_login, account_ze
 from Account.rol import rol_zet_sessionvars_na_login
 
 
-class LogboekTest(TestCase):
+class TestLogboek(TestCase):
+    """ unit tests voor de Logboek applicatie """
 
     def setUp(self):
         """ initializatie van de test case """

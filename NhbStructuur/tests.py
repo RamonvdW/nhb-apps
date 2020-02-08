@@ -14,9 +14,7 @@ import io
 
 
 class TestNhbStructuur(TestCase):
-    """
-        Test Suite voor de NhbStructuur code
-    """
+    """ unit tests voor de NhbStructuur applicatie """
 
     def setUp(self):
         # maak de standard rayon/regio structuur aan
