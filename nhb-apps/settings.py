@@ -25,7 +25,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated to version
-SITE_VERSIE = 'test 2020-02-03'
+SITE_VERSIE = 'test 2020-02-08'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -165,6 +165,10 @@ STATICFILES_FINDER = [
 
 # wordt gebruikt door LoginView als er geen 'next' veld bij de POST zit
 #LOGIN_REDIRECT_URL = '/plein/'
+
+# wordt gebruikt door de permission_required decorator en UserPassesTextMixin
+# om de gebruiker door te sturen als een view geen toegang verleend
+LOGIN_URL = '/account/login/'
 
 
 # for debug_toolbar
