@@ -15,12 +15,12 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* colors */
-.blue {
-    background-color: #0aa0e1 !important;   /* NHB medium blauw */
+.nhb-blauw {
+    background-color: #0aa0e1;   /* NHB medium blauw */
 }
 
-.opletten {
-    background-color: #f94137 !important;   /* NHB hoofdkleur oranje */
+.nhb-rood {
+    background-color: #f94137;   /* NHB hoofdkleur oranje */
 }
 
 .margin-5 {
@@ -30,14 +30,6 @@ h1, h2, h3, h4, h5, h6 {
 /* actieve menu item in rood */
 .actief  {
     background-color: #f94137;     /* NHB medium rood */
-}
-
-a:hover {
-    color: #03628c;       /* NHB donker blauw */
-}
-
-a {
-    color: #0aa0e1;       /* NHB medium blauw */
 }
 
 .collection-button {
