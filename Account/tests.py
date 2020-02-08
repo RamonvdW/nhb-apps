@@ -16,7 +16,8 @@ from .leeftijdsklassen import leeftijdsklassen_zet_sessionvars_na_login,\
                               get_leeftijdsklassen
 from .models import Account, AccountEmail,\
                     account_zet_sessionvars_na_login, account_zet_sessionvars_na_otp_controle,\
-                    is_email_valide
+                    is_email_valide,\
+                    HanterenPersoonsgegevens, account_needs_vhpg
 from .views import obfuscate_email
 from .forms import LoginForm
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
@@ -51,7 +52,8 @@ class TestGroupManager(object):
             yield group
 
 
-class AccountTest(TestCase):
+class TestAccount(TestCase):
+    """ unit tests voor de Account applicatie """
 
     def setUp(self):
         """ initializatie van de test case """
@@ -85,8 +87,6 @@ class AccountTest(TestCase):
         lid.voornaam = "Ramon"
         lid.achternaam = "de Tester"
         lid.email = "rdetester@gmail.not"
-        lid.postcode = "1234PC"
-        lid.huisnummer = "42bis"
         lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
         lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
         lid.bij_vereniging = ver
@@ -100,8 +100,6 @@ class AccountTest(TestCase):
         lid.voornaam = "Ramona"
         lid.achternaam = "de Testerin"
         lid.email = ""
-        lid.postcode = "1234PC"
-        lid.huisnummer = "1"
         lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
         lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
         lid.bij_vereniging = ver
@@ -947,5 +945,75 @@ class AccountTest(TestCase):
         self.assertFalse(is_email_valide('test er@nhb.nl'))
         self.assertFalse(is_email_valide('test\ter@nhb.nl'))
         self.assertFalse(is_email_valide('test\ner@nhb.nl'))
+
+    def test_vhpg_anon(self):
+        self.client.logout()
+        resp = self.client.get('/account/vhpg-acceptatie/', follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_template_used(self, resp, ('plein/plein-bezoeker.dtl', 'plein/site_layout.dtl'))
+
+        # doe een post zonder ingelogd te zijn
+        resp = self.client.post('/account/vhpg-acceptatie/', {}, follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_html_ok(self, resp)
+        assert_template_used(self, resp, ('plein/plein-bezoeker.dtl', 'plein/site_layout.dtl'))
+
+    def test_vhpg_niet_nodig(self):
+        self.client.login(username='normaal', password='wachtwoord')
+        account_zet_sessionvars_na_login(self.client).save()
+        rol_zet_sessionvars_na_login(self.account_normaal, self.client).save()
+        resp = self.client.get('/account/vhpg-acceptatie/', follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_template_used(self, resp, ('plein/plein-gebruiker.dtl', 'plein/site_layout.dtl'))
+
+    def test_vhpg(self):
+        self.client.login(username='admin', password='wachtwoord')
+        account_zet_sessionvars_na_login(self.client).save()
+        rol_zet_sessionvars_na_login(self.account_admin, self.client).save()
+        resp = self.client.get('/account/vhpg-acceptatie/', follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_template_used(self, resp, ('account/vhpg-acceptatie.dtl', 'plein/site_layout.dtl'))
+        self.assertNotContains(resp, 'verplicht')
+
+        self.assertEqual(len(HanterenPersoonsgegevens.objects.all()), 0)
+        needs_vhpg, _ = account_needs_vhpg(self.account_admin)
+        self.assertTrue(needs_vhpg)
+
+        # voer de post uit zonder checkbox (dit gebeurt ook als de checkbox niet gezet wordt)
+        resp = self.client.post('/account/vhpg-acceptatie/', {}, follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_html_ok(self, resp)
+        assert_template_used(self, resp, ('account/vhpg-acceptatie.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, 'verplicht')
+
+        self.assertEqual(len(HanterenPersoonsgegevens.objects.all()), 0)
+
+        # voer de post uit met checkbox wel gezet (waarde maakt niet uit)
+        resp = self.client.post('/account/vhpg-acceptatie/', {'accepteert': 'whatever'}, follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_html_ok(self, resp)
+        assert_template_used(self, resp, ('account/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
+
+        self.assertEqual(len(HanterenPersoonsgegevens.objects.all()), 1)
+        needs_vhpg, _ = account_needs_vhpg(self.account_admin)
+        self.assertFalse(needs_vhpg)
+
+        obj = HanterenPersoonsgegevens.objects.all()[0]
+        self.assertTrue(str(obj) != "")
+
+    def test_vhpg_afspraken_anon(self):
+        self.client.logout()
+        resp = self.client.get('/account/vhpg-afspraken/', follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_template_used(self, resp, ('account/login.dtl', 'plein/site_layout.dtl'))
+
+    def test_vhpg_afspraken(self):
+        self.client.login(username='admin', password='wachtwoord')
+        account_zet_sessionvars_na_login(self.client).save()
+        rol_zet_sessionvars_na_login(self.account_admin, self.client).save()
+        resp = self.client.get('/account/vhpg-afspraken/', follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_html_ok(self, resp)
+        assert_template_used(self, resp, ('account/vhpg-afspraken.dtl', 'plein/site_layout.dtl'))
 
 # end of file
