@@ -107,8 +107,6 @@ class NhbLid(models.Model):
     achternaam = models.CharField(max_length=100)
     email = models.CharField(max_length=150)
     geboorte_datum = models.DateField(validators=[validate_geboorte_datum,])
-    postcode = models.CharField(max_length=10)      # TODO: obsolete
-    huisnummer = models.CharField(max_length=10)    # TODO: obsolete
     geslacht = models.CharField(max_length=1, choices=GESLACHT)
     para_classificatie = models.CharField(max_length=30, blank=True)
     is_actief_lid = models.BooleanField(default=True)   # False = niet meer in import dataset

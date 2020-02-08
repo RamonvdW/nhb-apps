@@ -38,8 +38,6 @@ class TestNhbStructuur(TestCase):
         lid.voornaam = "Ramon"
         lid.achternaam = "de Tester"
         lid.email = "rdetester@gmail.not"
-        lid.postcode = "1234PC"
-        lid.huisnummer = "42bis"
         lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
         lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
         lid.bij_vereniging = ver
@@ -277,8 +275,6 @@ class TestNhbStructuur(TestCase):
         lid.voornaam = "Zweven"
         lid.achternaam = "de Tester"
         lid.email = "zdetester@gmail.not"
-        lid.postcode = "1234PC"
-        lid.huisnummer = "42sur"
         lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
         lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
         lid.bij_vereniging = None
