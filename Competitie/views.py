@@ -338,14 +338,16 @@ class WijzigFavorieteBestuurdersView(View):
         """
         if rol_is_bestuurder(request):
             form = WijzigFavorieteBestuurdersForm(request.POST)
-            if form.is_valid():
-                account_pk = form.cleaned_data.get('add_favoriet')
-                if account_pk:
-                    add_favoriete_bestuurder(request.user, account_pk)
-                else:
-                    account_pk = form.cleaned_data.get('drop_favoriet')
-                    if account_pk:
-                        drop_favoriete_bestuurder(request.user, account_pk)
+            form.full_clean()       # vult cleaned_data
+            # form is altijd valid, dus niet nodig om is_valid aan te roepen
+
+            account_pk = form.cleaned_data.get('add_favoriet')
+            if account_pk:
+                add_favoriete_bestuurder(request.user, account_pk)
+
+            account_pk = form.cleaned_data.get('drop_favoriet')
+            if account_pk:
+                drop_favoriete_bestuurder(request.user, account_pk)
 
         return HttpResponseRedirect(reverse('Competitie:beheerfavorieten'))
 
@@ -372,26 +374,26 @@ class BeheerFavorieteBestuurdersView(UserPassesTestMixin, ListView):
 
         # haal de GET parameters uit de request
         self.form = FavorieteBestuurdersForm(self.request.GET)
+        self.form.full_clean()      # vult cleaned_data
+        # formulier is altijd goed, dus niet nodig om is_valid te gebruiken
+
+        zoekterm = self.form.cleaned_data['zoekterm']
+
+        if len(zoekterm) >= 2:      # minimaal twee tekens van de naam/nummer
+            self.have_searched = True
+            self.get_zoekterm = zoekterm
+            fav_accounts = FavorieteBestuurders.objects.filter(zelf=self.request.user).values_list('favoriet__pk', flat=True)
+            return Account.objects.exclude(pk__in=fav_accounts).\
+                                   exclude(nhblid__is_actief_lid=False).\
+                                   annotate(hele_naam=Concat('nhblid__voornaam', Value(' '), 'nhblid__achternaam')).\
+                                   filter(
+                                        Q(username__icontains=zoekterm) |       # dekt ook nhb_nr
+                                        Q(nhblid__voornaam__icontains=zoekterm) |
+                                        Q(nhblid__achternaam__icontains=zoekterm) |
+                                        Q(hele_naam__icontains=zoekterm)).order_by('nhblid__nhb_nr')[:50]
 
         self.have_searched = False
         self.zoekterm = ""
-
-        if self.form.is_valid():
-            zoekterm = self.form.cleaned_data['zoekterm']
-
-            if len(zoekterm) >= 2:      # minimaal twee tekens van de naam/nummer
-                self.have_searched = True
-                self.get_zoekterm = zoekterm
-                fav_accounts = FavorieteBestuurders.objects.filter(zelf=self.request.user).values_list('favoriet__pk', flat=True)
-                return Account.objects.exclude(pk__in=fav_accounts).\
-                                       exclude(nhblid__is_actief_lid=False).\
-                                       annotate(hele_naam=Concat('nhblid__voornaam', Value(' '), 'nhblid__achternaam')).\
-                                       filter(
-                                            Q(username__icontains=zoekterm) |       # dekt ook nhb_nr
-                                            Q(nhblid__voornaam__icontains=zoekterm) |
-                                            Q(nhblid__achternaam__icontains=zoekterm) |
-                                            Q(hele_naam__icontains=zoekterm)).order_by('nhblid__nhb_nr')[:50]
-
         return None
 
     def get_context_data(self, **kwargs):

@@ -48,8 +48,6 @@ class TestCompetitie(TestCase):
         lid.voornaam = "Ramon"
         lid.achternaam = "de Tester"
         lid.email = "rdetester@gmail.not"
-        lid.postcode = "1234PC"
-        lid.huisnummer = "42bis"
         lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
         lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
         lid.bij_vereniging = ver
@@ -219,6 +217,21 @@ class TestCompetitie(TestCase):
         self.assertEqual(resp.status_code, 200)
         assert_html_ok(self, resp)
         assert_template_used(self, resp, ('account/login.dtl', 'plein/site_layout.dtl'))
+
+        resp = self.client.get('/competitie/beheer-favorieten/wijzig/', follow=False)
+        self.assertEqual(resp.status_code, 404)     # 404 indicates rejected
+
+    def test_beheer_favorieten_normaal(self):
+        # niet-bestuurder mag favorieten niet te wijzigen
+        self.client.login(username='100001', password='wachtwoord')
+        account_zet_sessionvars_na_otp_controle(self.client).save()
+        rol_zet_sessionvars_na_login(self.account_lid, self.client).save()
+
+        self.assertEqual(len(FavorieteBestuurders.objects.all()), 0)
+        resp = self.client.post('/competitie/beheer-favorieten/wijzig/', {'add_favoriet': self.account_lid.pk})
+        self.assertEqual(resp.status_code, 302)     # 302 = Redirect
+        self.assertEqual(resp.url, '/competitie/beheer-favorieten/')
+        self.assertEqual(len(FavorieteBestuurders.objects.all()), 0)
 
     def test_beheer_favorieten(self):
         self.client.login(username='bko', password='wachtwoord')
