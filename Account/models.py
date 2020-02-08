@@ -11,6 +11,7 @@ from django.contrib.auth.models import AbstractUser
 from NhbStructuur.models import NhbLid
 from Overig.tijdelijke_url import maak_tijdelijke_url_accountemail, set_tijdelijke_url_receiver, RECEIVER_ACCOUNTEMAIL
 from BasisTypen.models import BoogType
+import datetime
 import pyotp
 
 
@@ -147,7 +148,7 @@ class AccountEmail(models.Model):
 
 class HanterenPersoonsgegevens(models.Model):
     """ status van de vraag om juist om te gaan met persoonsgegevens,
-        voor accounts waarvoor dit relevant is.
+        voor de paar accounts waarvoor dit relevant is.
     """
 
     # het account waar dit record bij hoort
@@ -159,12 +160,46 @@ class HanterenPersoonsgegevens(models.Model):
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
         return "%s [%s]" % (str(self.acceptatie_datum),
-                            self.account.login_naam)
+                            self.account.username)
 
     class Meta:
         """ meta data voor de admin interface """
         verbose_name = "Hanteren Persoonsgegevens"
         verbose_name_plural = "Hanteren Persoonsgegevens"
+
+
+def account_needs_vhpg(account):
+    """ Controlleer of het Account een VHPG af moet leggen """
+
+    if not account_needs_otp(account):
+        # niet nodig
+        return False, None
+
+    # kijk of de acceptatie recent al afgelegd is
+    try:
+        vhpg = HanterenPersoonsgegevens.objects.get(account=account)
+    except HanterenPersoonsgegevens.DoesNotExist:
+        # niet uitgevoerd, wel nodig
+        return True, None
+
+    # elke 11 maanden moet de verklaring afgelegd worden
+    # dit is ongeveer (11/12)*365 == 365-31 = 334 dagen
+    next = vhpg.acceptatie_datum + datetime.timedelta(days=334)
+    now = timezone.now()
+    return next < now, vhpg
+
+
+def account_vhpg_is_geaccepteerd(account):
+    """ onthoud dat de vhpg net geaccepteerd is door de gebruiker
+    """
+    try:
+        vhpg = HanterenPersoonsgegevens.objects.get(account=account)
+    except HanterenPersoonsgegevens.DoesNotExist:
+        vhpg = HanterenPersoonsgegevens()
+        vhpg.account = account
+
+    vhpg.acceptatie_datum = timezone.now()
+    vhpg.save()
 
 
 class SchutterBoog(models.Model):
@@ -292,6 +327,7 @@ def account_email_is_bevestigd(mail):
 
 def account_needs_otp(account):
     """ Controleer of het Account OTP verificatie nodig heeft
+
         Returns: True or False
         Bepaalde rechten vereisen OTP:
             is_BKO

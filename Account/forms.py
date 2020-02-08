@@ -109,4 +109,21 @@ class OTPControleForm(forms.Form):
         return valid
 
 
+class AccepteerVHPGForm(forms.Form):
+    """ Dit formulier wordt gebruikt bij de acceptatie van de verklaring hanteren persoonsgegevens (VHPG)
+    """
+
+    my_errors = {
+        'required': 'verplicht',
+    }
+
+    accepteert = forms.BooleanField(
+                        label='Ik accepteer bovenstaande',
+                        initial=False,
+                        required=True,     # checkbox must be crossed in
+                        error_messages=my_errors)
+
+
+
+
 # end of file

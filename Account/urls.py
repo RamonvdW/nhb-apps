@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019 Ramon van der Winkel.
+#  Copyright (c) 2019-2020 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -53,6 +53,14 @@ urlpatterns = [
     path('wissel-van-rol/',
          views.WisselVanRolView.as_view(),
          name='wissel-van-rol'),
+
+    path('vhpg-acceptatie/',
+         views.VhpgAcceptatieView.as_view(),
+         name='vhpg-acceptatie'),
+
+    path('vhpg-afspraken/',
+         views.VhpgAfsprakenView.as_view(),
+         name='vhpg-afspraken'),
 ]
 
 # end of file

@@ -18,6 +18,11 @@
 <p><a class="btn-nhb-rood" href="{% url 'Account:otp-koppelen' %}">Nu Koppelen</a></p>
 {% endif %}
 
+{% if show_vhpg %}
+<p>Voordat je aan de slag kan moeten we eerst een paar afspraken maken over het omgaan met persoonsgegevens.</p>
+<p><a class="btn-nhb-rood" href="{% url 'Account:vhpg-acceptatie' %}">Bekijken</a></p>
+{% endif %}
+
 {% if show_otp_controle %}
 <p>Een aantal rollen worden pas beschikbaar nadat de controle van de tweede factor uitgevoerd is.</p>
 <a class="btn-nhb-rood" href="{% url 'Account:otp-controle' %}">Nu controleren</a>
@@ -33,5 +38,10 @@
     {% endif %}
 </p>
 {% endfor %}
+
+{% if not show_vhpg %}
+<p>Je hebt de verklaring hanteren persoonsgegevens afgegeven op {{ vhpg.acceptatie_datum|date:"j F Y" }}.<br/><a href="{% url 'Account:vhpg-afspraken' %}">Klik hier</a> om de afspraken in te zien.</p>
+{% endif %}
+
 
 {% endblock %}

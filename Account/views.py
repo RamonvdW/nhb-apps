@@ -13,13 +13,13 @@ from django.views import View
 from django.views.generic import TemplateView, ListView
 from django.utils import timezone
 from django.conf import settings
-from .forms import LoginForm, RegistreerForm, OTPControleForm
+from .forms import LoginForm, RegistreerForm, OTPControleForm, AccepteerVHPGForm
 from .models import AccountCreateError, AccountCreateNhbGeenEmail, Account,\
                     account_create_nhb, account_email_is_bevestigd,\
                     account_needs_otp, account_is_otp_gekoppeld,\
-                    account_prep_for_otp, account_controleer_otp_code,\
+                    account_prep_for_otp, account_controleer_otp_code, user_is_otp_verified,\
                     account_zet_sessionvars_na_login, account_zet_sessionvars_na_otp_controle,\
-                    user_is_otp_verified
+                    account_needs_vhpg, account_vhpg_is_geaccepteerd
 from .leeftijdsklassen import leeftijdsklassen_zet_sessionvars_na_login
 from .rol import Rollen, rol_activate, rol_activate_functie,\
                  rol_get_huidige, rol_get_limiet, rol_mag_wisselen,\
@@ -43,6 +43,8 @@ TEMPLATE_OTPCONTROLE = 'account/otp-controle.dtl'
 TEMPLATE_OTPKOPPELEN = 'account/otp-koppelen.dtl'
 TEMPLATE_OTPGEKOPPELD = 'account/otp-koppelen-gelukt.dtl'
 TEMPLATE_WISSELVANROL = 'account/wissel-van-rol.dtl'
+TEMPLATE_VHPGACCEPTATIE = 'account/vhpg-acceptatie.dtl'
+TEMPLATE_VHPGAFSPRAKEN = 'account/vhpg-afspraken.dtl'
 
 
 class LoginView(TemplateView):
@@ -323,6 +325,68 @@ class AangemaaktView(TemplateView):
         return render(request, TEMPLATE_AANGEMAAKT, context)
 
 
+class VhpgAfsprakenView(UserPassesTestMixin, TemplateView):
+
+    """ Django class-based view om van rol te wisselen """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_VHPGAFSPRAKEN
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        return self.request.user.is_authenticated and account_needs_vhpg(self.request.user)
+
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+        menu_dynamics(self.request, context, actief='wissel-van-rol')
+        return context
+
+
+class VhpgAcceptatieView(TemplateView):
+    """ Met deze view kan de gebruiker de verklaring hanteren persoonsgegevens accepteren
+    """
+
+    def get(self, request, *args, **kwargs):
+        """ deze functie wordt aangeroepen als een GET request ontvangen is
+        """
+        if not request.user.is_authenticated:
+            # gebruiker is niet ingelogd, dus zou hier niet moeten komen
+            return HttpResponseRedirect(reverse('Plein:plein'))
+
+        account = request.user
+        needs_vhpg, _ = account_needs_vhpg(account)
+        if not needs_vhpg:
+            # gebruiker heeft geen VHPG nodig
+            return HttpResponseRedirect(reverse('Plein:plein'))
+
+        form = AccepteerVHPGForm()
+        context = {'form': form}
+        menu_dynamics(request, context, actief="wissel-van-rol")
+        return render(request, TEMPLATE_VHPGACCEPTATIE, context)
+
+    def post(self, request, *args, **kwargs):
+        """ deze functie wordt aangeroepen als een POST request ontvangen is.
+            dit is gekoppeld aan het drukken op de knop van het formulier.
+        """
+        if not request.user.is_authenticated:
+            # gebruiker is niet ingelogd, dus stuur terug naar af
+            return HttpResponseRedirect(reverse('Plein:plein'))
+
+        form = AccepteerVHPGForm(request.POST)
+        if form.is_valid():
+            # hier komen we alleen als de checkbox gezet is
+            account = request.user
+            account_vhpg_is_geaccepteerd(account)
+            return HttpResponseRedirect(reverse('Account:wissel-van-rol'))
+
+        # checkbox is verplicht --> nog een keer
+        context = {'form': form}
+        menu_dynamics(request, context, actief="inloggen")
+        return render(request, TEMPLATE_VHPGACCEPTATIE, context)
+
+
 class OTPControleView(TemplateView):
     """ Met deze view kan de OTP controle doorlopen worden
         Na deze controle is de gebruiker authenticated + verified
@@ -525,16 +589,16 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
-        context['is_verified'] = False
+        context['show_vhpg'], context['vhpg'] = account_needs_vhpg(self.request.user)
         context['show_otp_controle'] = False
         context['show_otp_koppelen'] = False
+        context['is_verified'] = False
         if user_is_otp_verified(self.request):
             context['is_verified'] = True
-        elif account_needs_otp(self.request.user):
-            if not account_is_otp_gekoppeld(self.request.user):
-                context['show_otp_koppelen'] = True
-            else:
-                context['show_otp_controle'] = True
+        elif not account_is_otp_gekoppeld(self.request.user):
+            context['show_otp_koppelen'] = True
+        else:
+            context['show_otp_controle'] = True
         menu_dynamics(self.request, context, actief='wissel-van-rol')
         return context
 
@@ -546,7 +610,7 @@ class ActiveerRolView(UserPassesTestMixin, View):
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        return rol_mag_wisselen(self.request)
+        return self.request.user.is_authenticated and rol_mag_wisselen(self.request)
 
     def get(self, request, *args, **kwargs):
         if 'rol' in kwargs:
