@@ -11,6 +11,7 @@ from BasisTypen.models import WedstrijdKlasse
 from NhbStructuur.models import NhbRegio, NhbRayon, NhbLid, ADMINISTRATIEVE_REGIO
 from Logboek.models import schrijf_in_logboek
 from Account.models import Account
+from Account.rol import rol_zet_plugins, Rollen
 from datetime import date
 from decimal import Decimal
 
@@ -135,7 +136,10 @@ class DeelCompetitie(models.Model):
     nhb_rayon = models.ForeignKey(NhbRayon, on_delete=models.PROTECT,
                                   null=True, blank=True)    # optioneel want alleen voor laag Rayon
     is_afgesloten = models.BooleanField(default=False)
+
     functies = models.ManyToManyField(Group)    # Group representeert een Functie
+    # Note: er is maar 1 functie per deelcompetitie
+    #       ManyToMany maakt het mogelijk om via group.deelcompetities_set weer hier te komen
 
     def __str__(self):
         """ geef een tekstuele afkorting van dit object, voor in de admin interface """
@@ -272,5 +276,56 @@ def maak_competitieklasse_indiv(comp, wedstrijdklasse, min_ag):
     compkl.min_ag = min_ag
     compkl.save()
     comp.klassen_indiv.add(compkl)
+
+
+def competitie_expandeer_rol(rol_in, group_in):
+    """ Plug-in van de Account.rol module om een groep/functie te expanderen naar onderliggende functies
+        Voorbeeld: RKO rayon 3 --> RCL regios 109, 110, 111, 112
+        Deze functie yield rol, group_pk
+    """
+    #print("competitie_expandeer_rol: rol=%s, group=%s" % (repr(rol_in), repr(group_in)))
+
+    if rol_in == Rollen.ROL_BB:
+        # deze rol mag voor alle competities BKO zijn
+        for competitie in Competitie.objects.filter(is_afgesloten=False):
+            for deelcomp in DeelCompetitie.objects.filter(competitie=competitie, laag="BK"):
+                for group in deelcomp.functies.all():
+                    yield (Rollen.ROL_BKO, group.pk)
+            # for
+        # for
+
+    if group_in:
+        if group_in.name[:4] == "BKO ":
+            # expandeer naar de RKO rollen
+            # group --> deelcompetitie laag=BK --> competitie --> deelcompetities laag=RK
+            for deelcomp_top in group_in.deelcompetitie_set.all():     # TODO: kan compacter met values_list
+                competitie = deelcomp_top.competitie
+                # zoek andere deelcompetitie die hier bij horen
+                for deelcomp in DeelCompetitie.objects.filter(competitie=competitie, laag="RK"):
+                    for group in deelcomp.functies.all():
+                        yield (Rollen.ROL_RKO, group.pk)
+                    # for
+                # for
+            # for
+
+        if group_in.name[:4] == "RKO ":
+            # expandeer naar de RCL rollen
+            # group --> deelcompetitie laag=RK --> competitie --> deelcompetities laag=Regio
+            for deelcomp_top in group_in.deelcompetitie_set.all():     # TODO: kan compacter met values_list
+                competitie = deelcomp_top.competitie
+                rayon_nr = deelcomp_top.nhb_rayon.rayon_nr      # rayon nummer van de RKO
+                # zoek andere deelcompetitie die hier bij horen
+                for deelcomp in DeelCompetitie.objects.filter(competitie=competitie, laag="Regio"):
+                    # alleen de regio's die in het rayon van de RKO zitten
+                    if deelcomp.nhb_regio.rayon.rayon_nr == rayon_nr:
+                        for group in deelcomp.functies.all():
+                            yield (Rollen.ROL_RCL, group.pk)
+                    # for
+                # for
+            # for
+
+        # TODO: expandeer RCL --> CWZ
+
+rol_zet_plugins(competitie_expandeer_rol)
 
 # end of file
