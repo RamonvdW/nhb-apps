@@ -12,6 +12,16 @@
 
 <h4>Logboek</h4>
 
+<p>Focus:
+    <a class="btn-nhb-blauw" href="{% url 'Logboek:records' %}">Records</a>
+    <span>&nbsp;</span>
+    <a class="btn-nhb-blauw" href="{% url 'Logboek:accounts' %}">Accounts</a>
+    <span>&nbsp;</span>
+    <a class="btn-nhb-blauw" href="{% url 'Logboek:rollen' %}">Rollen</a>
+    <span>&nbsp;</span>
+    <a class="btn-nhb-blauw" href="{% url 'Logboek:nhbstructuur' %}">CRM import</a>
+</p>
+
 <ul class="collapsible white">
     {% for obj in object_list %}
     <li>
@@ -28,4 +38,3 @@
 </ul>
 
 {% endblock %}
-
