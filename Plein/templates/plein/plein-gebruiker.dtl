@@ -13,7 +13,7 @@
 
 <h4>Welkom, gebruiker!</h4>
 
-<p>Je hebt een speciaal account dat niet gekoppeld is aan een NHB lidmaatschap.</p>
+<p>Wat zouden we hier kunnen tonen?</p>
 
 {% endblock %}
 

@@ -9,15 +9,19 @@ from django.urls import reverse
 from django.shortcuts import redirect, render
 from django.views.generic import TemplateView, ListView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
+from django.contrib.auth.models import Group
 from Plein.menu import menu_dynamics
 from Account.leeftijdsklassen import get_leeftijdsklassen
+from Account.rol import Rollen, rol_get_huidige_functie, rol_get_huidige, rol_get_beschrijving
 
 
-TEMPLATE_PLEIN_BEZOEKER = 'plein/plein-bezoeker.dtl'
-TEMPLATE_PLEIN_GEBRUIKER = 'plein/plein-gebruiker.dtl'
-TEMPLATE_PLEIN_SCHUTTER = 'plein/plein-schutter.dtl'
-TEMPLATE_PRIVACY = 'plein/privacy.dtl'
+TEMPLATE_PLEIN_BEZOEKER = 'plein/plein-bezoeker.dtl'            # niet ingelogd
+TEMPLATE_PLEIN_GEBRUIKER = 'plein/plein-gebruiker.dtl'          # special (ROL_NONE)
+TEMPLATE_PLEIN_SCHUTTER = 'plein/plein-schutter.dtl'            # schutter (ROL_SCHUTTER)
+TEMPLATE_PLEIN_BESTUURDER = 'plein/plein-bestuurder.dtl'        # bestuurder (ROL_BB/BKO/RKO/RCL/CWZ)
+
 TEMPLATE_LEEFTIJDSKLASSEN = 'plein/leeftijdsklassen.dtl'
+TEMPLATE_PRIVACY = 'plein/privacy.dtl'
 
 JA_NEE = {False: 'Nee', True: 'Ja'}
 
@@ -35,25 +39,38 @@ class PleinView(View):
     def get(self, request, *args, **kwargs):
         """ called by the template system to get the context data for the template """
 
+        # zet alles goed voor bezoekers / geen rol
         template = TEMPLATE_PLEIN_BEZOEKER
         context = dict()
 
         if request.user.is_authenticated:
-            template = TEMPLATE_PLEIN_GEBRUIKER
+            rol_nu, functie_nu = rol_get_huidige_functie(request)
 
-            huidige_jaar, leeftijd, is_jong, wlst, clst = get_leeftijdsklassen(self.request)
-            if huidige_jaar:
+            if rol_nu == Rollen.ROL_NONE or rol_nu == None:
+                template = TEMPLATE_PLEIN_GEBRUIKER
+
+            elif rol_nu == Rollen.ROL_SCHUTTER:
                 template = TEMPLATE_PLEIN_SCHUTTER
-                context['plein_toon_leeftijdsklassen'] = True
-                context['plein_is_jonge_schutter'] = is_jong
-                context['plein_huidige_jaar'] = huidige_jaar
-                context['plein_leeftijd'] = leeftijd
-                context['plein_wlst'] = wlst
-                context['plein_clst'] = clst
-            else:
-                # ouder lid
-                context['plein_toon_leeftijdsklassen'] = False
-        # if
+                huidige_jaar, leeftijd, is_jong, wlst, clst = get_leeftijdsklassen(request)
+                if True: #is_jong:
+                    context['plein_toon_leeftijdsklassen'] = True
+                    context['plein_is_jonge_schutter'] = is_jong
+                    context['plein_huidige_jaar'] = huidige_jaar
+                    context['plein_leeftijd'] = leeftijd
+                    context['plein_wlst'] = wlst
+                    context['plein_clst'] = clst
+                else:
+                    # ouder lid
+                    context['plein_toon_leeftijdsklassen'] = False
+
+            else:   # rol_nu < Rollen.ROL_SCHUTTER:
+                # bestuurder
+                template = TEMPLATE_PLEIN_BESTUURDER
+                if functie_nu:
+                    context['huidige_rol'] = Group.objects.get(pk=functie_nu).name
+                else:
+                    context['huidige_rol'] = rol_get_beschrijving(request)
+
 
         menu_dynamics(self.request, context)
         return render(request, template, context)
@@ -82,8 +99,8 @@ class LeeftijdsklassenView(UserPassesTestMixin, TemplateView):
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        huidige_jaar, leeftijd, is_jong, wlst, clst = get_leeftijdsklassen(self.request)
-        return (leeftijd is not None)
+        rol = rol_get_huidige(self.request)
+        return rol == Rollen.ROL_SCHUTTER
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """

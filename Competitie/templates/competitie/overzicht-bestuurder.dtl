@@ -13,9 +13,8 @@
 
 <h4>Competitie</h4>
 
-{% if have_active_comps %}
-{% else %}
-<p>Er zijn op dit moment geen actieve competities.</p>
+{% if not have_active_comps %}
+<p>Er zijn geen competities om te tonen.</p>
 {% endif %}
 
 {% for obj in object_list %}
@@ -30,12 +29,12 @@
     </thead>
     <tr>
         <td>A</td>
-        <td>Competitie opstarten (BKO)</td>
+        <td>Competitie opstarten (Bondsburo)</td>
         <td class="green-text">Afgerond</td>
     </tr>
     <tr>
         <td{% if obj.fase == 'A1' %} class="blue"{% endif %}>A1</td>
-        <td>Vaststellen klassegrenzen (BKO)</td>
+        <td>Vaststellen klassegrenzen (Bondsburo)</td>
         {% if obj.fase > 'A1' %}
         <td class="green-text">Afgerond</td>
         {% else %}
@@ -44,7 +43,7 @@
     </tr>
     <tr>
         <td{% if obj.fase == 'A2' %} class="blue"{% endif %}>A2</td>
-        <td>Koppelen bestuurders (BKO); Instellingen regio (RCL)</td>
+        <td>Koppelen RKO/RCL bestuurders door BKO/RKO; Instellingen regio (RCL)</td>
         {% if obj.fase > 'A2' %}
         <td class="green-text">Afgerond</td>
         {% else %}
@@ -99,7 +98,9 @@
 </table>
 {% endfor %}
 
+
 <p>&nbsp;</p>
+
 <h5>Volgende stappen</h5>
 <div class="row">
     {% if kan_favorieten_beheren %}
@@ -156,11 +157,26 @@
             </div>
         {% endif %}
 
+        {% if toon_competitie_bestuurders %}
+            <div class="col s12 m6 xl4">
+                <div class="card">
+                    <div class="card-content">
+                        <table class="simple"><tr style="border:0px">
+                            <td><i class="material-icons-round large">supervisor_account</i></td>
+                            <td>Toon de bestuurders voor de {{ obj.beschrijving }}.</td>
+                        </tr></table>
+                    </div>
+                    <div class="card-action center">
+                        <a href="{{ obj.wijzig_url }}">Toon bestuurders</a>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
     {% endfor %}
 </div>
 
 <div class="row">
-    {% if bko_kan_competitie_aanmaken %}
+    {% if bb_kan_competitie_aanmaken %}
     <div class="col s12 m6 xl4">
         <div class="card">
             <div class="card-content">
@@ -176,7 +192,7 @@
     </div>
     {% endif %}
 
-    {% if bko__kan_klassegrenzen_vaststellen %}
+    {% if rol_is_bb %}
         {% for obj in object_list %}
             <!-- klassegrenzen vaststellen -->
             {% if obj.fase == 'A1' %}
@@ -201,6 +217,9 @@
         {% endfor %}
     {% endif %}
 </div>
+
+<p>Kan je niet vinden wat je zoekt? Misschien moet je eerst van rol wisselen.</p>
+<p>Je huidige rol is: <b>{{ huidige_rol }}</b>.</p>
 
 {% endblock %}
 

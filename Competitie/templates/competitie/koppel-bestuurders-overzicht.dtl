@@ -13,7 +13,9 @@
 
 <h4>Koppel bestuurders</h4>
 
-<p>Hieronder worden de bestuurders voor de {{ competitie.beschrijving }} getoond.</p>
+<p>Hieronder worden de bestuurders getoond voor de <b>{{ competitie.beschrijving }}</b>.</p>
+
+<p>Je huidige rol is: <b>{{ huidige_rol }}</b>.</p>
 
 {% if kies_favleden_url %}
     <div class="row">
@@ -49,7 +51,9 @@
                 <tr>
                     <th>Rol</th>
                     <th>Bestuurder(s)</th>
+                    {% if show_wijzig_kolom %}
                     <th></th>   <!-- kolom voor de 'wijzig' knoppen -->
+                    {% endif %}
                 </tr>
             </thead>
             {% for obj in object_list %}
@@ -66,11 +70,13 @@
                     {% endif %}
                     </td>
 
+                    {% if show_wijzig_kolom %}
                     <td>
                         {% if obj.wijzig_url %}
                             <a class="btn-nhb-blauw" href="{{ obj.wijzig_url }}">Wijzig</a>
                         {% endif %}
                     </td>
+                    {% endif %}
                 </tr>
             {% endfor %}
         </table>

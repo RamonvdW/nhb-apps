@@ -10,14 +10,15 @@ from django.utils import timezone
 from django.test import TestCase
 from django.conf import settings
 from django.core import management
-from .rol import Rollen, rol_zet_sessionvars_na_login, rol_mag_wisselen, rol_is_bestuurder,\
-                         rol_get_limiet, rol_get_huidige, rol_activate
+from .rol import Rollen, rol_zet_sessionvars_na_login, rol_zet_sessionvars_na_otp_controle,\
+                         rol_mag_wisselen, rol_is_bestuurder,\
+                         rol_get_huidige, rol_activeer_rol, rol_activeer_functie
 from .leeftijdsklassen import leeftijdsklassen_zet_sessionvars_na_login,\
                               get_leeftijdsklassen
 from .models import Account, AccountEmail,\
                     account_zet_sessionvars_na_login, account_zet_sessionvars_na_otp_controle,\
                     is_email_valide,\
-                    HanterenPersoonsgegevens, account_needs_vhpg
+                    HanterenPersoonsgegevens, account_needs_vhpg, account_vhpg_is_geaccepteerd
 from .views import obfuscate_email
 from .forms import LoginForm
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
@@ -33,23 +34,6 @@ from types import SimpleNamespace
 def get_otp_code(account):
     otp = pyotp.TOTP(account.otp_code)
     return otp.now()
-
-
-class TestGroupManager(object):
-
-    def __init__(self):
-        self._groups = list()
-        self.add("Test groep")
-
-    def add(self, group_name):
-        new_group = SimpleNamespace()
-        new_group.name = group_name
-        self._groups.append(new_group)
-
-    def all(self):
-        # iterator of the groups
-        for group in self._groups:
-            yield group
 
 
 class TestAccount(TestCase):
@@ -215,20 +199,18 @@ class TestAccount(TestCase):
         # unit-tests voor de 'rol' module
 
         # simuleer de normale inputs
-        account = SimpleNamespace()
+        account = self.account_normaal
         request = SimpleNamespace()
         request.session = dict()
         request.user = account
-        request.user.groups = TestGroupManager()
 
         # no session vars / not logged in
-        self.assertEqual(rol_get_limiet(request), Rollen.ROL_UNKNOWN)
-        self.assertEqual(rol_get_huidige(request), Rollen.ROL_UNKNOWN)
+        self.assertEqual(rol_get_huidige(request), Rollen.ROL_NONE)
         self.assertFalse(rol_mag_wisselen(request))
-        rol_activate(request, 'bestaat niet')
-        self.assertEqual(rol_get_huidige(request), Rollen.ROL_UNKNOWN)
-        rol_activate(request, 'schutter')
-        self.assertEqual(rol_get_huidige(request), Rollen.ROL_UNKNOWN)
+        rol_activeer_rol(request, 'bestaat niet')
+        self.assertEqual(rol_get_huidige(request), Rollen.ROL_NONE)
+        rol_activeer_rol(request, 'schutter')
+        self.assertEqual(rol_get_huidige(request), Rollen.ROL_NONE)
         self.assertFalse(rol_is_bestuurder(request))
 
         # niet aan nhblid gekoppeld schutter account
@@ -238,80 +220,87 @@ class TestAccount(TestCase):
         request.session = dict()
         rol_zet_sessionvars_na_login(account, request)
         self.assertFalse(rol_mag_wisselen(request))
-        self.assertEqual(rol_get_limiet(request), Rollen.ROL_SCHUTTER)
-        self.assertEqual(rol_get_huidige(request), Rollen.ROL_SCHUTTER)
+        self.assertEqual(rol_get_huidige(request), Rollen.ROL_NONE)
         self.assertFalse(rol_is_bestuurder(request))
-        rol_activate(request, 'beheerder')
-        self.assertEqual(rol_get_huidige(request), Rollen.ROL_SCHUTTER)
-        rol_activate(request, 'BKO')
-        self.assertEqual(rol_get_huidige(request), Rollen.ROL_SCHUTTER)
-        rol_activate(request, 'schutter')
-        self.assertEqual(rol_get_huidige(request), Rollen.ROL_SCHUTTER)
+        rol_activeer_rol(request, 'beheerder')
+        self.assertEqual(rol_get_huidige(request), Rollen.ROL_NONE)
+        rol_activeer_rol(request, 'BKO')
+        self.assertEqual(rol_get_huidige(request), Rollen.ROL_NONE)
+        rol_activeer_rol(request, 'schutter')
+        self.assertEqual(rol_get_huidige(request), Rollen.ROL_NONE)
+        rol_activeer_rol(request, 'geen')
+        self.assertEqual(rol_get_huidige(request), Rollen.ROL_NONE)
 
         # schutter
         account.is_staff = False
         account.is_BKO = False
-        account.nhblid = 1
+        account.nhblid = self.nhblid1
         request.session = dict()
         account_zet_sessionvars_na_login(request)
         rol_zet_sessionvars_na_login(account, request)
         self.assertFalse(rol_mag_wisselen(request))
-        self.assertEqual(rol_get_limiet(request), Rollen.ROL_SCHUTTER)
         self.assertEqual(rol_get_huidige(request), Rollen.ROL_SCHUTTER)
         self.assertFalse(rol_is_bestuurder(request))
-        rol_activate(request, 'beheerder')
+        rol_activeer_rol(request, 'beheerder')
         self.assertEqual(rol_get_huidige(request), Rollen.ROL_SCHUTTER)
-        rol_activate(request, 'BKO')
+        rol_activeer_rol(request, 'BKO')
         self.assertEqual(rol_get_huidige(request), Rollen.ROL_SCHUTTER)
-        rol_activate(request, 'schutter')
+        rol_activeer_rol(request, 'geen')
+        self.assertEqual(rol_get_huidige(request), Rollen.ROL_NONE)
+        rol_activeer_rol(request, 'schutter')
         self.assertEqual(rol_get_huidige(request), Rollen.ROL_SCHUTTER)
 
-        # bko
+        # bb
         account.is_staff = False
         account.is_BKO = True
-        account.nhblid = 1
+        account.nhblid = self.nhblid1
         request.session = dict()
-        account_zet_sessionvars_na_login(request)
-        rol_zet_sessionvars_na_login(account, request)
-        self.assertTrue(rol_mag_wisselen(request))
-        self.assertEqual(rol_get_limiet(request), Rollen.ROL_SCHUTTER)
-        self.assertEqual(rol_get_huidige(request), Rollen.ROL_SCHUTTER)
         account_zet_sessionvars_na_otp_controle(request)
-        rol_zet_sessionvars_na_login(account, request)
-        self.assertEqual(rol_get_limiet(request), Rollen.ROL_BKO)
-        self.assertEqual(rol_get_huidige(request), Rollen.ROL_BKO)
+        rol_zet_sessionvars_na_otp_controle(account, request)
+        self.assertEqual(rol_get_huidige(request), Rollen.ROL_SCHUTTER)
+        self.assertTrue(rol_mag_wisselen(request))
+        self.assertFalse(rol_is_bestuurder(request))        # ivm VHPG niet geaccepteerd
+
+        account_vhpg_is_geaccepteerd(account)
+        account_zet_sessionvars_na_otp_controle(request)
+        rol_zet_sessionvars_na_otp_controle(account, request)
+        self.assertEqual(rol_get_huidige(request), Rollen.ROL_SCHUTTER)
+        self.assertFalse(rol_is_bestuurder(request))
+
+        rol_activeer_rol(request, 'schutter')
+        self.assertEqual(rol_get_huidige(request), Rollen.ROL_SCHUTTER)
+        rol_activeer_rol(request, 'beheerder')
+        self.assertEqual(rol_get_huidige(request), Rollen.ROL_SCHUTTER)
+        rol_activeer_rol(request, 'BB')
+        self.assertEqual(rol_get_huidige(request), Rollen.ROL_BB)
         self.assertTrue(rol_is_bestuurder(request))
-        rol_activate(request, 'schutter')
-        self.assertEqual(rol_get_huidige(request), Rollen.ROL_SCHUTTER)
-        rol_activate(request, 'beheerder')
-        self.assertEqual(rol_get_huidige(request), Rollen.ROL_SCHUTTER)
-        rol_activate(request, 'BKO')
-        self.assertEqual(rol_get_huidige(request), Rollen.ROL_BKO)
-        rol_activate(request, 'beheerder')
-        self.assertEqual(rol_get_huidige(request), Rollen.ROL_BKO)
+        rol_activeer_rol(request, 'geen')
+        self.assertEqual(rol_get_huidige(request), Rollen.ROL_NONE)
+        rol_activeer_rol(request, 'BB')
+        self.assertEqual(rol_get_huidige(request), Rollen.ROL_BB)
+        rol_activeer_rol(request, 'beheerder')
+        self.assertEqual(rol_get_huidige(request), Rollen.ROL_BB)
+        rol_activeer_rol(request, 'BKO')        # kan niet, moet via functie
+        self.assertEqual(rol_get_huidige(request), Rollen.ROL_BB)
 
         # beheerder
-        account.is_staff = True
-        account.is_BKO = False
-        account.nhblid = None
+        account = self.account_admin
         request.session = dict()
-        account_zet_sessionvars_na_login(request)
-        rol_zet_sessionvars_na_login(account, request)
-        self.assertEqual(rol_get_limiet(request), Rollen.ROL_SCHUTTER)
-        self.assertEqual(rol_get_huidige(request), Rollen.ROL_SCHUTTER)
+        account_vhpg_is_geaccepteerd(account)
         account_zet_sessionvars_na_otp_controle(request)
-        rol_zet_sessionvars_na_login(account, request)
+        rol_zet_sessionvars_na_otp_controle(account, request)
+        self.assertEqual(rol_get_huidige(request), Rollen.ROL_NONE)
         self.assertTrue(rol_mag_wisselen(request))
-        self.assertEqual(rol_get_limiet(request), Rollen.ROL_IT)
-        self.assertEqual(rol_get_huidige(request), Rollen.ROL_BKO)  # wissel is nodig naar ROL_IT
-        self.assertTrue(rol_is_bestuurder(request))
-        rol_activate(request, 'beheerder')
+
+        rol_activeer_rol(request, 'beheerder')
         self.assertEqual(rol_get_huidige(request), Rollen.ROL_IT)
-        rol_activate(request, 'BKO')
-        self.assertEqual(rol_get_huidige(request), Rollen.ROL_BKO)
-        rol_activate(request, 'schutter')
-        self.assertEqual(rol_get_huidige(request), Rollen.ROL_SCHUTTER)
-        rol_activate(request, 'beheerder')
+        rol_activeer_rol(request, 'BB')
+        self.assertEqual(rol_get_huidige(request), Rollen.ROL_BB)
+        rol_activeer_rol(request, 'geen')
+        self.assertEqual(rol_get_huidige(request), Rollen.ROL_NONE)
+        rol_activeer_rol(request, 'beheerder')
+        self.assertEqual(rol_get_huidige(request), Rollen.ROL_IT)
+        rol_activeer_rol(request, 'schutter')
         self.assertEqual(rol_get_huidige(request), Rollen.ROL_IT)
 
     def test_registreer_get(self):
@@ -653,13 +642,13 @@ class TestAccount(TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         assert_html_ok(self, resp)
         self.assertNotContains(resp, 'IT beheerder')
-        self.assertNotContains(resp, 'BKO')
+        self.assertNotContains(resp, 'Coordinator')
         self.assertContains(resp, 'Gebruiker')
         self.assertContains(resp, 'Controle met een tweede factor is verplicht voor gebruikers met toegang tot persoonsgegevens')
 
         self.client.logout()
 
-        # controleer dat de link naar het controleren op de pagina staat
+        # controleer dat de link naar de OTP controle en VHPG op de pagina staan
         self.account_admin.otp_is_actief = True
         self.account_admin.save()
         self.client.login(username='admin', password='wachtwoord')
@@ -669,18 +658,20 @@ class TestAccount(TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         assert_html_ok(self, resp)
         self.assertNotContains(resp, 'IT beheerder')
-        self.assertNotContains(resp, 'BKO')
+        self.assertNotContains(resp, 'Coordinator')
         self.assertContains(resp, 'Gebruiker')
-        self.assertContains(resp, 'Een aantal rollen worden pas beschikbaar nadat de controle van de tweede factor uitgevoerd is')
+        self.assertContains(resp, 'Voordat je aan de slag kan moeten we eerst een paar afspraken maken over het omgaan met persoonsgegevens.')
+        self.assertContains(resp, 'Een aantal rollen komen beschikbaar nadat de controle van de tweede factor uitgevoerd is.')
 
         # controleer dat de complete keuzemogelijkheden op de pagina staan
+        account_vhpg_is_geaccepteerd(self.account_admin)
         account_zet_sessionvars_na_otp_controle(self.client).save()
-        rol_zet_sessionvars_na_login(self.account_admin, self.client).save()
+        rol_zet_sessionvars_na_otp_controle(self.account_admin, self.client).save()
         resp = self.client.get('/account/wissel-van-rol/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         assert_html_ok(self, resp)
         self.assertContains(resp, 'IT beheerder')
-        self.assertContains(resp, 'BKO')
+        self.assertContains(resp, 'Coordinator')
         self.assertContains(resp, 'Gebruiker')
 
         assert_template_used(self, resp, ('account/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
@@ -690,71 +681,62 @@ class TestAccount(TestCase):
     def test_wisselvanrol_pagina_normaal(self):
         self.account_normaal.nhblid = self.nhblid1
         self.account_normaal.save()
-        self.client.login(username='normaal', password='wachtwoord')
+        self.client.login(username=self.account_normaal.username, password='wachtwoord')
         account_zet_sessionvars_na_login(self.client).save()
         rol_zet_sessionvars_na_login(self.account_normaal, self.client).save()
+
         # controleer dat de wissel-van-rol pagina niet aanwezig is voor deze normale gebruiker
         resp = self.client.get('/account/wissel-van-rol/')
         self.assertEqual(resp.status_code, 403)     # 403 = Forbidden
         self.client.logout()
 
+    def test_wisselvanrol_pagina_normaal_met_rol(self):
         # voeg de gebruiker toe aan een groep waardoor wissel-van-rol actief wordt
+        self.account_normaal.nhblid = self.nhblid1
+        self.account_normaal.save()
+        self.account_normaal.groups.add(self.group_rcl)
+        account_vhpg_is_geaccepteerd(self.account_normaal)
 
-        # TODO: BKO (besluit eerst of een BKO groep nodig is)
-        #self.group_bko
+        self.client.login(username=self.account_normaal.username, password='wachtwoord')
+        account_zet_sessionvars_na_otp_controle(self.client).save()
+        rol_zet_sessionvars_na_otp_controle(self.account_normaal, self.client).save()
 
-        self.account_normaal.groups.clear()
-        self.account_normaal.groups.add(self.group_rko)
-        self.client.login(username='normaal', password='wachtwoord')
-        account_zet_sessionvars_na_login(self.client).save()
-        rol_zet_sessionvars_na_login(self.account_normaal, self.client).save()
         resp = self.client.get('/account/wissel-van-rol/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         assert_html_ok(self, resp)
         self.assertNotContains(resp, "BKO")
-        self.assertContains(resp, "RKO")
-        self.assertNotContains(resp, "RCL")     # TODO: RKO moet RCL kunnen helpen
+        self.assertNotContains(resp, "RKO")
+        self.assertContains(resp, "RCL")     # TODO: RKO moet RCL kunnen helpen
         self.assertNotContains(resp, "CWZ")
 
-        # TODO: RCL
-        #self.group_rcl
-
-        # TODO: CWZ
-        #self.group_cwz
-
     def test_rolwissel(self):
-        self.client.login(username='admin', password='wachtwoord')
+        self.client.login(username=self.account_admin.username, password='wachtwoord')
+        account_vhpg_is_geaccepteerd(self.account_admin)
         account_zet_sessionvars_na_otp_controle(self.client).save()
-        rol_zet_sessionvars_na_login(self.account_admin, self.client).save()
+        rol_zet_sessionvars_na_otp_controle(self.account_admin, self.client).save()
 
-        resp = self.client.get('/account/wissel-van-rol/BKO/', follow=True)
+        resp = self.client.get('/account/wissel-van-rol/BB/', follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, "Rol: BKO")
+        self.assertContains(resp, "Rol: Coordinator")
 
         resp = self.client.get('/account/wissel-van-rol/beheerder/', follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, "Rol: IT beheerder")
 
-        resp = self.client.get('/account/wissel-van-rol/schutter/', follow=True)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, "Rol: Schutter")
-
-        self.client.logout()
-
-    def test_rolwissel_bad(self):
-        self.client.login(username='admin', password='wachtwoord')
-        account_zet_sessionvars_na_otp_controle(self.client).save()
-        rol_zet_sessionvars_na_login(self.account_admin, self.client).save()
-
-        resp = self.client.get('/account/wissel-van-rol/BKO/', follow=True)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, "Rol: BKO")
-
         # controleer dat een niet valide rol wissel geen effect heeft
-        # dit raakt een exception in Account.rol:rol_activate
+        # dit raakt een exception in Account.rol:rol_activeer
         resp = self.client.get('/account/wissel-van-rol/huh/', follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, "Rol: BKO")
+        self.assertContains(resp, "Rol: IT beheerder")
+
+        # controleer dat een rol wissel die met een functie moet geen effect heeft
+        resp = self.client.get('/account/wissel-van-rol/BKO/', follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assertContains(resp, "Rol: IT beheerder")
+
+        resp = self.client.get('/account/wissel-van-rol/geen/', follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assertContains(resp, "Rol: Gebruiker")
 
         self.client.logout()
 

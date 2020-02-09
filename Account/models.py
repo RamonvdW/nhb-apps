@@ -69,6 +69,7 @@ class Account(AbstractUser):
                                     blank=True, null=True,
                                     help_text="Login niet mogelijk tot")
 
+    # TODO: rename "bondsburo"
     is_BKO = models.BooleanField(
                         default=False,
                         help_text="BK Organisator")

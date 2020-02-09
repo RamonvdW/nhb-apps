@@ -5,82 +5,19 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
 from django.test import TestCase
 from .menu import menu_dynamics
-from Account.rol import rol_zet_sessionvars_na_login, rol_activate
+from Account.rol import rol_zet_sessionvars_na_login, rol_zet_sessionvars_na_otp_controle,\
+                        rol_activeer_rol, rol_activeer_functie
 from Account.leeftijdsklassen import leeftijdsklassen_zet_sessionvars_na_login
-from Account.models import Account, account_zet_sessionvars_na_login, account_zet_sessionvars_na_otp_controle
+from Account.models import Account, account_zet_sessionvars_na_login, account_zet_sessionvars_na_otp_controle,\
+                           account_vhpg_is_geaccepteerd
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
 from NhbStructuur.migrations.m0002_nhbstructuur_2018 import maak_rayons_2018, maak_regios_2018
 import datetime
 from types import SimpleNamespace
-
-
-def extract_all_href_urls(resp):
-    content = str(resp.content)
-    pos = content.find('<body')
-    if pos > 0:
-        content = content[pos:]           # strip head
-    urls = list()
-    while len(content):
-        pos = content.find('href="')
-        if pos > 0:
-            content = content[pos+6:]     # strip all before href
-            pos = content.find('"')
-            urls.append(content[:pos])
-            content = content[pos:]
-        else:
-            content = ""
-    # while
-    return urls
-
-def assert_html_ok(testcase, response):
-    """ Doe een aantal basic checks op een html response """
-    html = str(response.content)
-    testcase.assertContains(response, "<html")
-    testcase.assertIn("lang=", html)
-    testcase.assertIn("</html>", html)
-    testcase.assertIn("<head>", html)
-    testcase.assertIn("</head>", html)
-    testcase.assertIn("<body ", html)
-    testcase.assertIn("</body>", html)
-    testcase.assertIn("<!DOCTYPE html>", html)
-
-
-def assert_template_used(testcase, response, template_names):
-    """ Controleer dat de gevraagde templates gebruikt zijn """
-    lst = list(template_names)
-    for templ in response.templates:
-        # print("template name: %s" % templ.name)
-        if templ.name in lst:
-            lst.remove(templ.name)
-    # for
-    if len(lst):    # pragma: no coverage
-        msg = "Following templates should have been used: %s\n(actually used: %s)" % (repr(lst), repr([t.name for t in response.templates]))
-        testcase.assertTrue(False, msg=msg)
-
-
-def assert_other_http_commands_not_supported(testcase, url, post=True, delete=True, put=True, patch=True):
-    """ Test een aantal 'common' http methoden
-        en controleer dat deze niet ondersteund zijn (status code 405 = not allowed)
-        POST, DELETE, PATCH
-    """
-    if post:
-        resp = testcase.client.post(url)
-        testcase.assertEqual(resp.status_code, 405)  # 405=not allowd
-
-    if delete:                                  # pragma: no branch
-        resp = testcase.client.delete(url)
-        testcase.assertEqual(resp.status_code, 405)
-
-    if put:                                     # pragma: no branch
-        resp = testcase.client.put(url)
-        testcase.assertEqual(resp.status_code, 405)
-
-    if patch:                                   # pragma: no branch
-        resp = testcase.client.patch(url)
-        testcase.assertEqual(resp.status_code, 405)
-
+from .test_helpers import assert_html_ok, assert_template_used, assert_other_http_commands_not_supported
 
 class TestPlein(TestCase):
     """ unit tests voor de Plein applicatie """
@@ -94,6 +31,7 @@ class TestPlein(TestCase):
         self.account_admin = Account.objects.get(username='admin')
         self.account_normaal = Account.objects.get(username='normaal')
         self.account_100001 = Account.objects.get(username='100001')
+        self.group_rko, _ = Group.objects.get_or_create(name="RKO test")
 
         # maak de standard rayon/regio structuur aan
         maak_rayons_2018(NhbRayon)
@@ -155,7 +93,9 @@ class TestPlein(TestCase):
         self.client.logout()
 
     def test_plein_admin(self):
+        self.account_admin.groups.add(self.group_rko)
         self.client.login(username='admin', password='wachtwoord')
+
         account_zet_sessionvars_na_login(self.client).save()
         rol_zet_sessionvars_na_login(self.account_admin, self.client).save()
         resp = self.client.get('/plein/')
@@ -163,21 +103,31 @@ class TestPlein(TestCase):
         self.assertNotContains(resp, '/beheer/')
         self.assertNotContains(resp, '/admin/')
         self.assertContains(resp, 'Wissel van rol')
+
         # simuleert 2FA
+        account_vhpg_is_geaccepteerd(self.account_admin)
         account_zet_sessionvars_na_otp_controle(self.client).save()
-        rol_zet_sessionvars_na_login(self.account_admin, self.client).save()
+        rol_zet_sessionvars_na_otp_controle(self.account_admin, self.client).save()
         resp = self.client.get('/plein/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertNotContains(resp, '/beheer/')    # komt pas in beeld na kiezen rol IT
         self.assertContains(resp, 'Wissel van rol')
         assert_template_used(self, resp, ('plein/plein-gebruiker.dtl', 'plein/site_layout.dtl'))
+
         # wissel naar IT beheerder
-        rol_activate(self.client, 'beheerder').save()
+        rol_activeer_rol(self.client, 'beheerder').save()
         resp = self.client.get('/plein/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, '/beheer/')
         self.assertContains(resp, 'Wissel van rol')
-        assert_template_used(self, resp, ('plein/plein-gebruiker.dtl', 'plein/site_layout.dtl'))
+        assert_template_used(self, resp, ('plein/plein-bestuurder.dtl', 'plein/site_layout.dtl'))
+
+        # wissel naar een functie
+        rol_activeer_functie(self.client, self.group_rko.pk).save()
+        resp = self.client.get('/plein/')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assertContains(resp, 'Rol: RKO')
+
         self.client.logout()
 
     def test_privacy(self):

@@ -8,6 +8,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.models import Group
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.views import View
 from django.views.generic import TemplateView, ListView
@@ -21,9 +22,10 @@ from .models import AccountCreateError, AccountCreateNhbGeenEmail, Account,\
                     account_zet_sessionvars_na_login, account_zet_sessionvars_na_otp_controle,\
                     account_needs_vhpg, account_vhpg_is_geaccepteerd
 from .leeftijdsklassen import leeftijdsklassen_zet_sessionvars_na_login
-from .rol import Rollen, rol_activate, rol_activate_functie,\
-                 rol_get_huidige, rol_get_limiet, rol_mag_wisselen,\
-                 rol_zet_sessionvars_na_login, rol_zet_sessionvars_na_otp_controle
+from .rol import Rollen, rol_mag_wisselen, rol_enum_pallet, rol2url,\
+                 rol_zet_sessionvars_na_login, rol_zet_sessionvars_na_otp_controle,\
+                 rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving,\
+                 rol_activeer_rol, rol_activeer_functie
 from .qrcode import qrcode_get
 from Overig.tijdelijke_url import set_tijdelijke_url_receiver, RECEIVER_ACCOUNTEMAIL
 from Plein.menu import menu_dynamics
@@ -544,45 +546,82 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        return rol_mag_wisselen(self.request)
+        return self.request.user.is_authenticated and rol_mag_wisselen(self.request)
 
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
         objs = list()
+        objs2 = list()
 
-        rol = rol_get_limiet(self.request)
+        hierarchy2 = dict()      # [parent_tup] = list of child_tup
+        for child_tup, parent_tup in rol_enum_pallet(self.request):
+            rol, group_pk = child_tup
 
-        if rol <= Rollen.ROL_IT:
-            url = reverse('Account:activeer-rol', kwargs={'rol': 'beheerder'})
-            objs.append({ 'titel': 'IT beheerder', 'url': url})
+            # rollen die je altijd aan moet kunnen nemen als je ze hebt
+            if rol == Rollen.ROL_IT:
+                url = reverse('Account:activeer-rol', kwargs={'rol': rol2url[rol]})
+                objs.append({ 'titel': 'IT beheerder', 'url': url})
 
-        if rol <= Rollen.ROL_BKO:
-            url = reverse('Account:activeer-rol', kwargs={'rol': 'BKO'})
-            objs.append({ 'titel': 'BK Organizator (BKO)', 'url': url})
+            elif rol == Rollen.ROL_BB:
+                url = reverse('Account:activeer-rol', kwargs={'rol': rol2url[rol]})
+                objs.append({ 'titel': 'Coordinator', 'url': url})
 
-        # analyseer de functies van dit account voor bepalen van verdere rollen
-        for group in self.request.user.groups.all():
-            #print("groep naam: %s" % group.name)
-            if group.name[:4] in ("RKO ", "RCL ", "CWZ "):  # TODO: BKO groep ondersteuning
-                url = reverse('Account:activeer-rol-functie', kwargs={'group_pk': group.pk})
-                # TODO: kennis over de title is ongewenst
-                titel = group.name
-                comp_str = ''
-                # split the titel bij " voor de ... competitie .. seizoen"
-                pos = titel.find(" voor de")
-                if pos > 0:
-                    comp_str = titel[pos+1:]    # +1 om de spatie over te slaan
-                    titel = titel[:pos]
-                objs.append({ 'titel': titel, 'comp_str': comp_str, 'url': url})
+            elif rol == Rollen.ROL_SCHUTTER:
+                url = reverse('Account:activeer-rol', kwargs={'rol': rol2url[rol]})
+                objs2.append({ 'titel': 'Schutter', 'url': url})
+
+            elif rol == Rollen.ROL_NONE:
+                url = reverse('Account:activeer-rol', kwargs={'rol': rol2url[rol]})
+                objs2.append({ 'titel': 'Gebruiker', 'url': url})
+
+            elif parent_tup == (None, None):
+                # top-level rol voor deze gebruiker - deze altijd tonen
+                url = reverse('Account:activeer-rol-functie', kwargs={'group_pk': group_pk})
+                group = Group.objects.get(pk=group_pk)
+                title = group.name
+                pos = title.find(" voor de ")
+                if pos:
+                    comp_str = title[pos:]
+                    title = title[:pos]
+                else:
+                    comp_str = ""
+                objs.append({ 'titel': title, 'comp_str': comp_str, 'url': url})
+
+            else:
+                try:
+                    hierarchy2[parent_tup].append(child_tup)
+                except KeyError:
+                    hierarchy2[parent_tup] = [child_tup,]
         # for
 
-        if rol <= Rollen.ROL_SCHUTTER and self.request.user.nhblid:
-            url = reverse('Account:activeer-rol', kwargs={'rol': 'schutter'})
-            objs.append({ 'titel': 'Schutter', 'url': url})
+        # zet 'lage' functies onderaan
+        objs.extend(objs2)
+        del objs2
 
-        if not self.request.user.nhblid:
-            url = reverse('Account:activeer-rol', kwargs={'rol': 'gebruiker'})
-            objs.append({ 'titel': 'Gebruiker', 'url': url})
+        # nu nog uitzoeken welke ge-erfde functies we willen tonen
+        # deze staan in hierarchy
+        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
+
+        nu_tup = (rol_nu, functie_nu)
+        try:
+            child_tups = hierarchy2[nu_tup]
+        except KeyError:
+            # geen ge-erfde functies
+            pass
+        else:
+            objs.append({ 'separator': True})
+            for rol, group_pk in child_tups:
+                url = reverse('Account:activeer-rol-functie', kwargs={'group_pk': group_pk})
+                group = Group.objects.get(pk=group_pk)
+                title = group.name
+                pos = title.find(" voor de ")
+                if pos:
+                    comp_str = title[pos:]
+                    title = title[:pos]
+                else:
+                    comp_str = ""
+                objs.append({ 'titel': title, 'comp_str': comp_str, 'url': url})
+            # for
 
         return objs
 
@@ -593,6 +632,13 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
         context['show_otp_controle'] = False
         context['show_otp_koppelen'] = False
         context['is_verified'] = False
+
+        dummy, group_pk = rol_get_huidige_functie(self.request)
+        if group_pk:
+            context['huidige_rol'] = Group.objects.get(pk=group_pk).name
+        else:
+            context['huidige_rol'] = rol_get_beschrijving(self.request)
+
         if user_is_otp_verified(self.request):
             context['is_verified'] = True
         elif not account_is_otp_gekoppeld(self.request.user):
@@ -614,9 +660,9 @@ class ActiveerRolView(UserPassesTestMixin, View):
 
     def get(self, request, *args, **kwargs):
         if 'rol' in kwargs:
-            rol_activate(request, kwargs['rol'])
+            rol_activeer_rol(request, kwargs['rol'])
         else:
-            rol_activate_functie(request, kwargs['group_pk'])
+            rol_activeer_functie(request, kwargs['group_pk'])
 
         return redirect('Plein:plein')
 

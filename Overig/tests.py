@@ -8,8 +8,10 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from Plein.tests import assert_html_ok, assert_other_http_commands_not_supported, assert_template_used
 from .models import SiteFeedback, save_tijdelijke_url
-from Account.models import Account, account_zet_sessionvars_na_otp_controle
-from Account.rol import rol_zet_sessionvars_na_login
+from .tijdelijke_url import dispatcher, SAVER, set_tijdelijke_url_receiver
+from Account.models import Account, account_vhpg_is_geaccepteerd,\
+                           account_zet_sessionvars_na_otp_controle, account_zet_sessionvars_na_login
+from Account.rol import rol_zet_sessionvars_na_otp_controle, rol_zet_sessionvars_na_login, rol_activeer_rol
 
 
 class TestOverig(TestCase):
@@ -127,15 +129,18 @@ class TestOverig(TestCase):
         # do een get van het logboek met een gebruiker die daar geen rechten toe heeft
         # resulteert rauwe Forbidden
         self.client.login(username='normaal', password='wachtwoord')
+        account_zet_sessionvars_na_login(self.client).save()
         rol_zet_sessionvars_na_login(self.account_normaal, self.client).save()
         resp = self.client.get('/overig/feedback/inzicht/')
         self.assertEqual(resp.status_code, 403)  # 403 = Forbidden
 
     def test_feedback_inzicht_admin(self):
         # do een get van alle feedback
-        self.client.login(username='normaal', password='wachtwoord')
+        account_vhpg_is_geaccepteerd(self.account_admin)
+        self.client.login(username=self.account_admin.username, password='wachtwoord')
         account_zet_sessionvars_na_otp_controle(self.client).save()
-        rol_zet_sessionvars_na_login(self.account_admin, self.client).save()
+        rol_zet_sessionvars_na_otp_controle(self.account_admin, self.client).save()
+        rol_activeer_rol(self.client, 'beheerder').save()
         resp = self.client.get('/overig/feedback/inzicht/')
         self.assertEqual(resp.status_code, 200)
         assert_template_used(self, resp, ('overig/site-feedback-inzicht.dtl', 'plein/site_layout.dtl'))
@@ -154,6 +159,16 @@ class TestOverig(TestCase):
     def test_tijdelijkeurl_geen_accountemail(self):
         resp = self.client.get('/overig/url/code2/')
         self.assertEqual(resp.status_code, 404)
+
+    def test_tijdelijkeurl_setup_dispatcher(self):
+        self.assertTrue(SAVER in dispatcher)
+        old = dispatcher[SAVER]
+        set_tijdelijke_url_receiver("mytopic", "123")
+        self.assertEqual(dispatcher["mytopic"], "123")
+        self.assertEqual(dispatcher[SAVER], old)
+        # controleer bescherming tegen overschrijven SAVER entry
+        set_tijdelijke_url_receiver(SAVER, "456")
+        self.assertEqual(dispatcher[SAVER], old)
 
 # TODO: add use of assert_other_http_commands_not_supported
 

@@ -6,7 +6,6 @@
 
 from django.urls import path
 from . import views
-import Logboek.views
 
 
 app_name = 'Overig'
@@ -35,11 +34,6 @@ urlpatterns = [
     path('url/<code>/',
          views.SiteTijdelijkeUrlView.as_view(),
          name='tijdelijke-url'),
-
-    # logboek
-    path('logboek/',
-         Logboek.views.LogboekView.as_view(),
-         name='logboek'),
 ]
 
 # end of file

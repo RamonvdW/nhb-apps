@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
-from Account.rol import Rollen, rol_get_huidige, rol_get_limiet, rol_mag_wisselen, rol_get_beschrijving
+from Account.rol import Rollen, rol_get_huidige, rol_mag_wisselen, rol_get_beschrijving
 
 
 ACTIEF_OPTIES = (
@@ -29,12 +29,10 @@ def menu_dynamics(request, context, actief=None):
         context['menu_actief'] = actief
 
     rol = rol_get_huidige(request)
-    rol_limiet = rol_get_limiet(request)
     rol_beschrijving = rol_get_beschrijving(request)
 
-    # zet context variabele om aan te geven of de link naar de Admin site erbij mag
+    # zet context variabelen om aan te geven welke optionele delen van het menu getoond moeten worden
     if request.user.is_authenticated:
-
         # uitloggen
         context['menu_show_logout'] = True
 
@@ -42,12 +40,12 @@ def menu_dynamics(request, context, actief=None):
         if rol_mag_wisselen(request):
             context['menu_show_wisselvanrol'] = True
 
-        # IT: admin menu
+        # admin menu
         if rol == Rollen.ROL_IT:
             context['menu_show_admin'] = True
 
-        # BKO: logboek en sitefeedback
-        if rol in (Rollen.ROL_IT, Rollen.ROL_BKO):
+        # logboek en sitefeedback
+        if rol in (Rollen.ROL_IT, Rollen.ROL_BB):
             context['menu_show_logboek'] = True
             context['menu_show_sitefeedback'] = True
     else:

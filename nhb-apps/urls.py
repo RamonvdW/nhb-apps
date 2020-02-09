@@ -24,6 +24,7 @@ urlpatterns = [
     path('hist/',       include('HistComp.urls')),
     path('overig/',     include('Overig.urls')),
     path('plein/',      include('Plein.urls')),
+    path('logboek/',    include('Logboek.urls')),
     path('records/',    include('Records.urls')),
 ]
 

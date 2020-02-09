@@ -76,7 +76,7 @@
 
 {% if menu_show_logboek %}
 <li{% if menu_actief == "logboek" %} class="actief"{% endif %}>
-    <a href="{% url 'Overig:logboek' %}" class="white-text">
+    <a href="{% url 'Logboek:alles' %}" class="white-text">
     <i class="material-icons-round white-text">book</i>Logboek</a>
 </li>
 {% endif %}

@@ -8,10 +8,9 @@ from django.test import TestCase, RequestFactory
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.urls import Resolver404
-from Account.models import Account, account_zet_sessionvars_na_otp_controle
-from Account.rol import rol_zet_sessionvars_na_login, rol_zet_sessionvars_na_otp_controle,\
-                        rol_activate, rol_is_bestuurder
-from Plein.tests import assert_html_ok, assert_template_used, extract_all_href_urls
+from Account.models import Account, account_vhpg_is_geaccepteerd, account_zet_sessionvars_na_otp_controle
+from Account.rol import rol_zet_sessionvars_na_otp_controle, rol_activeer_rol, rol_activeer_functie, rol_is_bestuurder
+from Plein.test_helpers import assert_html_ok, assert_template_used, extract_all_href_urls
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
 from .models import Competitie, DeelCompetitie, CompetitieWedstrijdKlasse, get_competitie_fase, \
@@ -34,6 +33,7 @@ class TestCompetitie(TestCase):
         account.is_BKO = True
         account.save()
         self.account_bko = account
+        account_vhpg_is_geaccepteerd(account)
 
         regio = NhbRegio.objects.get(regio_nr=101)
 
@@ -110,7 +110,10 @@ class TestCompetitie(TestCase):
     def test_competitie_instellingen(self):
         self.client.login(username='bko', password='wachtwoord')
         account_zet_sessionvars_na_otp_controle(self.client).save()
-        rol_zet_sessionvars_na_login(self.account_bko, self.client).save()
+        rol_zet_sessionvars_na_otp_controle(self.account_bko, self.client).save()
+        rol_activeer_rol(self.client, 'BB').save()
+        self.assertTrue(rol_is_bestuurder(self.client))
+
         resp = self.client.get('/competitie/instellingen-volgende-competitie/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         assert_html_ok(self, resp)
@@ -119,7 +122,10 @@ class TestCompetitie(TestCase):
     def test_competitie_aanmaken(self):
         self.client.login(username='bko', password='wachtwoord')
         account_zet_sessionvars_na_otp_controle(self.client).save()
-        rol_zet_sessionvars_na_login(self.account_bko, self.client).save()
+        rol_zet_sessionvars_na_otp_controle(self.account_bko, self.client).save()
+        rol_activeer_rol(self.client, 'BB').save()
+        self.assertTrue(rol_is_bestuurder(self.client))
+
         resp = self.client.get('/competitie/aanmaken/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         assert_html_ok(self, resp)
@@ -148,7 +154,10 @@ class TestCompetitie(TestCase):
     def test_competitie_klassegrenzen_cornercases(self):
         self.client.login(username='bko', password='wachtwoord')
         account_zet_sessionvars_na_otp_controle(self.client).save()
-        rol_zet_sessionvars_na_login(self.account_bko, self.client).save()
+        rol_zet_sessionvars_na_otp_controle(self.account_bko, self.client).save()
+        rol_activeer_rol(self.client, 'BB').save()
+        self.assertTrue(rol_is_bestuurder(self.client))
+
         # gebruik een POST om de competitie aan te maken
         # daarna is het mogelijk om klassegrenzen in te stellen
         resp = self.client.post('/competitie/aanmaken/')
@@ -166,7 +175,9 @@ class TestCompetitie(TestCase):
     def test_competitie_klassegrenzen(self):
         self.client.login(username='bko', password='wachtwoord')
         account_zet_sessionvars_na_otp_controle(self.client).save()
-        rol_zet_sessionvars_na_login(self.account_bko, self.client).save()
+        rol_zet_sessionvars_na_otp_controle(self.account_bko, self.client).save()
+        rol_activeer_rol(self.client, 'BB').save()
+        self.assertTrue(rol_is_bestuurder(self.client))
 
         fase, comp = get_competitie_fase(18)        # TODO: werkt niet bij twee actieve competities
         self.assertEqual(fase, 'A')
@@ -206,7 +217,9 @@ class TestCompetitie(TestCase):
     def test_competitie_overzicht_bestuurder(self):
         self.client.login(username='bko', password='wachtwoord')
         account_zet_sessionvars_na_otp_controle(self.client).save()
-        rol_zet_sessionvars_na_login(self.account_bko, self.client).save()
+        rol_zet_sessionvars_na_otp_controle(self.account_bko, self.client).save()
+        rol_activeer_rol(self.client, 'BB').save()
+        self.assertTrue(rol_is_bestuurder(self.client))
 
         resp = self.client.get('/competitie/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -229,7 +242,7 @@ class TestCompetitie(TestCase):
         # niet-bestuurder mag favorieten niet te wijzigen
         self.client.login(username='100001', password='wachtwoord')
         account_zet_sessionvars_na_otp_controle(self.client).save()
-        rol_zet_sessionvars_na_login(self.account_lid, self.client).save()
+        rol_zet_sessionvars_na_otp_controle(self.account_lid, self.client).save()
 
         self.assertEqual(len(FavorieteBestuurders.objects.all()), 0)
         resp = self.client.post('/competitie/beheer-favorieten/wijzig/', {'add_favoriet': self.account_lid.pk})
@@ -240,7 +253,9 @@ class TestCompetitie(TestCase):
     def test_beheer_favorieten(self):
         self.client.login(username='bko', password='wachtwoord')
         account_zet_sessionvars_na_otp_controle(self.client).save()
-        rol_zet_sessionvars_na_login(self.account_bko, self.client).save()
+        rol_zet_sessionvars_na_otp_controle(self.account_bko, self.client).save()
+        rol_activeer_rol(self.client, 'BB').save()
+        self.assertTrue(rol_is_bestuurder(self.client))
 
         resp = self.client.get('/competitie/beheer-favorieten/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -330,6 +345,7 @@ class TestCompetitieKoppelBestuurders(TestCase):
         account = Account.objects.get(username=nhb_nr)
         account.nhblid = lid
         account.save()
+        account_vhpg_is_geaccepteerd(account)
         return account
 
     def _set_fav(self, account, favs):
@@ -367,6 +383,7 @@ class TestCompetitieKoppelBestuurders(TestCase):
         account.is_BKO = True
         account.save()
         self.account_bko = account
+        account_vhpg_is_geaccepteerd(account)
 
         # maak test leden aan die we kunnen koppelen aan bestuurdersrollen
         self.account_rko1 = self._prep_lid('RKO1')
@@ -407,11 +424,16 @@ class TestCompetitieKoppelBestuurders(TestCase):
         self.assertEqual(resp.status_code, 404)     # 404 = Not found
 
     def test_koppelbestuurder_competitie_bko(self):
-        # login als BKO
-        self.client.login(username='bko', password='wachtwoord')
+        # login als BB
+        self.client.login(username=self.account_bko.username, password='wachtwoord')
         account_zet_sessionvars_na_otp_controle(self.client).save()
         rol_zet_sessionvars_na_otp_controle(self.account_bko, self.client).save()
-        rol_activate(self.client, 'BKO').save()
+
+        # wissel naar BKO rol voor de juiste competitie
+        competitie = Competitie.objects.all()[0]
+        deelcomp = DeelCompetitie.objects.filter(competitie=competitie, laag='BK')[0]
+        functie = deelcomp.functies.all()[0]
+        rol_activeer_functie(self.client, functie.pk).save()
         self.assertTrue(rol_is_bestuurder(self.client))
 
         # niet bestaande competitie_pk
@@ -432,7 +454,38 @@ class TestCompetitieKoppelBestuurders(TestCase):
             if deelcomp.laag == "RK":
                 self.assertTrue(url in urls)        # check link voor koppelen RKO
             else:
-                self.assertFalse(url in urls)       # check geen link voor koppelen RCL
+                self.assertFalse(url in urls)       # check geen link voor andere lagen
+        # for
+
+    def test_koppelbestuurder_competitie_rko(self):
+        # RKO kan RCL's koppelen
+
+        # koppel rko2 aan de functie van RKO voor rayon 2
+        competitie = Competitie.objects.all()[0]
+        functie = Group.objects.get(name="RKO rayon 2 voor de %s" % competitie.beschrijving)
+        functie.user_set.add(self.account_rko2)
+
+        # login als rko2
+        self.client.login(username=self.account_rko2.username, password='wachtwoord')
+        account_zet_sessionvars_na_otp_controle(self.client).save()
+        rol_zet_sessionvars_na_otp_controle(self.account_rko2, self.client).save()
+        rol_activeer_functie(self.client, functie.pk).save()
+        self.assertTrue(rol_is_bestuurder(self.client))
+
+        resp = self.client.get('/competitie/toon-bestuurders/%s/' % competitie.pk)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_html_ok(self, resp)
+        assert_template_used(self, resp, ('competitie/koppel-bestuurders-overzicht.dtl', 'plein/site_layout.dtl'))
+
+        # controlleer dat de juiste Wijzig knoppen aanwezig zijn voor de RCL rol
+        rko_rayon_nr = functie.deelcompetitie_set.all()[0].nhb_rayon.rayon_nr
+        urls = extract_all_href_urls(resp)
+        for deelcomp in DeelCompetitie.objects.filter(competitie=competitie):
+            url = '/competitie/kies-bestuurders/%s/' % deelcomp.pk
+            if deelcomp.laag == "Regio" and deelcomp.nhb_regio.rayon.rayon_nr == rko_rayon_nr:
+                self.assertTrue(url in urls)        # check link voor koppelen RCL
+            else:
+                self.assertFalse(url in urls)       # check geen link voor andere lagen
         # for
 
     def test_koppelbestuurder_competitie_rcl(self):
@@ -443,19 +496,32 @@ class TestCompetitieKoppelBestuurders(TestCase):
         functie = Group.objects.get(name="RCL regio 101 voor de %s" % competitie.beschrijving)
         functie.user_set.add(self.account_rcl11)
 
-        # login als RCL11
-        self.client.login(username='rcl11', password='wachtwoord')
+        # login als rcl11
+        self.client.login(username=self.account_rcl11.username, password='wachtwoord')
         account_zet_sessionvars_na_otp_controle(self.client).save()
         rol_zet_sessionvars_na_otp_controle(self.account_rcl11, self.client).save()
-        rol_activate(self.client, 'RCL').save()
+        rol_activeer_functie(self.client, functie.pk).save()
         self.assertTrue(rol_is_bestuurder(self.client))
+
+        resp = self.client.get('/competitie/toon-bestuurders/%s/' % competitie.pk, follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_html_ok(self, resp)
+        assert_template_used(self, resp, ('competitie/koppel-bestuurders-overzicht.dtl', 'plein/site_layout.dtl'))
+
+        # controlleer dat de juiste Wijzig knoppen aanwezig zijn voor de RCL rol
+        urls = extract_all_href_urls(resp)
+        for deelcomp in DeelCompetitie.objects.filter(competitie=competitie):
+            url = '/competitie/kies-bestuurders/%s/' % deelcomp.pk
+            self.assertFalse(url in urls)       # check geen link voor koppelen RCL
+        # for
+
 
         # haal de lijst met gekoppelde bestuurders op voor de competitie
         # dit werkt niet meer met self.client
-        request = self.factory.get('/competitie/toon-bestuurders/%s/' % competitie.pk, follow=True)
-        request.session = self.client.session
-        request.user = self.account_rcl11
-        with self.assertRaises(Resolver404):
-            resp = KoppelBestuurdersCompetitieView.as_view()(request)
+        #request = self.factory.get('/competitie/toon-bestuurders/%s/' % competitie.pk, follow=True)
+        #request.session = self.client.session
+        #request.user = self.account_rcl11
+        #with self.assertRaises(Resolver404):
+        #    resp = KoppelBestuurdersCompetitieView.as_view()(request)
 
 # end of file
