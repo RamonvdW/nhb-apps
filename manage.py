@@ -16,7 +16,7 @@ from django.core.management import execute_from_command_line
 def main():
     # print a clear separator on the terminal when using runserver or test
     stars = None
-    if "runserver" in sys.argv:
+    if "runserver" in sys.argv or ("test" in sys.argv and "--noinput" not in sys.argv):
         # avoid double line when runserver starts a child process
         if "DJANGO_SETTINGS_MODULE" not in os.environ:
             stars = "*" * 30
@@ -26,7 +26,7 @@ def main():
     execute_from_command_line(sys.argv)
 
     if stars:
-        print("\nBYE!")
+        print("\nDone!")
 
 
 if __name__ == '__main__':
