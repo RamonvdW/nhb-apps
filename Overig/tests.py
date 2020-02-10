@@ -148,6 +148,22 @@ class TestOverig(TestCase):
         self.assertContains(resp, "door de ontwikkelaar afgehandeld")
         assert_other_http_commands_not_supported(self, '/overig/feedback/inzicht/')
 
+    def test_feedback_inzicht_bb(self):
+        # do een get van alle feedback
+        self.account_normaal.is_BKO = True
+        self.account_normaal.save()
+        account_vhpg_is_geaccepteerd(self.account_normaal)
+        self.client.login(username=self.account_normaal.username, password='wachtwoord')
+        account_zet_sessionvars_na_otp_controle(self.client).save()
+        rol_zet_sessionvars_na_otp_controle(self.account_normaal, self.client).save()
+        rol_activeer_rol(self.client, 'BB').save()
+        resp = self.client.get('/overig/feedback/inzicht/')
+        self.assertEqual(resp.status_code, 200)
+        assert_template_used(self, resp, ('overig/site-feedback-inzicht.dtl', 'plein/site_layout.dtl'))
+        assert_html_ok(self, resp)
+        self.assertContains(resp, "door de ontwikkelaar afgehandeld")
+        assert_other_http_commands_not_supported(self, '/overig/feedback/inzicht/')
+
     def test_tijdelijkeurl_nonexist(self):
         resp = self.client.get('/overig/url/test/')
         self.assertEqual(resp.status_code, 404)
