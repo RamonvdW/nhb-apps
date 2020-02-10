@@ -642,7 +642,7 @@ class TestAccount(TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         assert_html_ok(self, resp)
         self.assertNotContains(resp, 'IT beheerder')
-        self.assertNotContains(resp, 'Coordinator')
+        self.assertNotContains(resp, 'Manager competitiezaken')
         self.assertContains(resp, 'Gebruiker')
         self.assertContains(resp, 'Controle met een tweede factor is verplicht voor gebruikers met toegang tot persoonsgegevens')
 
@@ -658,10 +658,10 @@ class TestAccount(TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         assert_html_ok(self, resp)
         self.assertNotContains(resp, 'IT beheerder')
-        self.assertNotContains(resp, 'Coordinator')
+        self.assertNotContains(resp, 'Manager competitiezaken')
         self.assertContains(resp, 'Gebruiker')
         self.assertContains(resp, 'Voordat je aan de slag kan moeten we eerst een paar afspraken maken over het omgaan met persoonsgegevens.')
-        self.assertContains(resp, 'Een aantal rollen komen beschikbaar nadat de controle van de tweede factor uitgevoerd is.')
+        self.assertContains(resp, 'Een aantal rollen komt beschikbaar nadat de controle van de tweede factor uitgevoerd is.')
 
         # controleer dat de complete keuzemogelijkheden op de pagina staan
         account_vhpg_is_geaccepteerd(self.account_admin)
@@ -671,7 +671,7 @@ class TestAccount(TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         assert_html_ok(self, resp)
         self.assertContains(resp, 'IT beheerder')
-        self.assertContains(resp, 'Coordinator')
+        self.assertContains(resp, 'Manager competitiezaken')
         self.assertContains(resp, 'Gebruiker')
 
         assert_template_used(self, resp, ('account/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
@@ -717,7 +717,7 @@ class TestAccount(TestCase):
 
         resp = self.client.get('/account/wissel-van-rol/BB/', follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, "Rol: Coordinator")
+        self.assertContains(resp, "Rol: Manager competitiezaken")
 
         resp = self.client.get('/account/wissel-van-rol/beheerder/', follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK

@@ -33,7 +33,7 @@
 {% if show_otp_controle %}
 <p>&nbsp;</p>
 <h5>Veiligheid</h5>
-<p>Een aantal rollen komen beschikbaar nadat de controle van de tweede factor uitgevoerd is.</p>
+<p>Een aantal rollen komt beschikbaar nadat de controle van de tweede factor uitgevoerd is.</p>
 <a class="btn-nhb-rood" href="{% url 'Account:otp-controle' %}">Nu controleren</a>
 {% endif %}
 

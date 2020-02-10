@@ -381,6 +381,9 @@ class VhpgAcceptatieView(TemplateView):
             # hier komen we alleen als de checkbox gezet is
             account = request.user
             account_vhpg_is_geaccepteerd(account)
+            schrijf_in_logboek(account, 'Rollen', 'VHPG geaccepteerd')
+            # opnieuw de rechten evalueren
+            rol_zet_sessionvars_na_login(account, request)
             return HttpResponseRedirect(reverse('Account:wissel-van-rol'))
 
         # checkbox is verplicht --> nog een keer
@@ -564,7 +567,7 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
 
             elif rol == Rollen.ROL_BB:
                 url = reverse('Account:activeer-rol', kwargs={'rol': rol2url[rol]})
-                objs.append({ 'titel': 'Coordinator', 'url': url})
+                objs.append({ 'titel': 'Manager competitiezaken', 'url': url})
 
             elif rol == Rollen.ROL_SCHUTTER:
                 url = reverse('Account:activeer-rol', kwargs={'rol': rol2url[rol]})

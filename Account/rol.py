@@ -26,11 +26,11 @@ class Rollen(enum.IntEnum):
     # rollen staan in prio volgorde
     # dus als je 3 hebt mag je kiezen uit 3 of hoger
     ROL_IT = 1          # IT beheerder
-    ROL_BB = 2          # Coordinator bondsburo
+    ROL_BB = 2          # Manager competitiezaken
     ROL_BKO = 3         # BK organisator, specifieke competitie
     ROL_RKO = 4         # RK organisator, specifieke competitie en rayon
     ROL_RCL = 5         # Regiocompetitieleider, specifieke competitie en regio
-    ROL_CWZ = 6         # Coordinator wedstrijdzaken verenining, alle competities
+    ROL_CWZ = 6         # Coordinator wedstrijdzaken vereniging, alle competities
     ROL_SCHUTTER = 7    # Individuele schutter en NHB lid
     ROL_NONE = 99       # geen rol
 
@@ -233,7 +233,7 @@ def rol_bepaal_beschrijving(rol, group_pk=None):
     if rol == Rollen.ROL_IT:
         beschr = 'IT beheerder'
     elif rol == Rollen.ROL_BB:
-        beschr = 'Coordinator'
+        beschr = 'Manager competitiezaken'
     elif rol in (Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL):
         beschr = grp_naam
     elif rol == Rollen.ROL_CWZ:
