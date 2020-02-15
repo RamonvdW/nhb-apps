@@ -271,14 +271,17 @@ SAML_IDP_CONFIG = {
                      (SAML_BASE_URL + '/sso/redirect', BINDING_HTTP_REDIRECT)
                  ]
              },
+             'name_id_format': [NAMEID_FORMAT_UNSPECIFIED],
              # signing assertion and responses is mandatory in SAML 2.0
              'sign_response': True,
              'sign_assertion': True,
-             'key_file': os.path.join(PROJ_DIR, 'data_private/saml2/private.key'),
-             'cert_file': os.path.join(PROJ_DIR, 'data_private/saml2/cert.crt'),
-             'valid_for': 100*24,
-         }
-     }
+        },
+    },
+
+    # signing keys
+    'key_file': os.path.join(BASE_DIR, 'data_private/saml2/private.key'),
+    'cert_file': os.path.join(BASE_DIR, 'data_private/saml2/cert.crt'),
+    'valid_for': 100*24,
 }
 
 SAML_IDP_SPCONFIG = {
@@ -287,8 +290,8 @@ SAML_IDP_SPCONFIG = {
      'https://wiki.handboogsport.st-visir.nl/saml/module.php/saml/sp/metadata.php/default-sp': {
          'processor': 'djangosaml2idp.processors.BaseProcessor',
          #'nameid_field': 'staffID',
-         'sign_response': False,
-         'sign_assertion': False,
+         'sign_response': True,
+         'sign_assertion': True,
          'attribute_mapping': {
              # Account.fieldname --> expose as
              # Account.method() --> expose as
