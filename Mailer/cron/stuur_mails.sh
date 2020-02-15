@@ -10,7 +10,7 @@
 NHBAPPS="/var/www/nhb-apps"
 LOGDIR="/var/log/www"
 RUN_DURATION=$1
-DEPLOY_FLAG = "/tmp/running_deploy"
+DEPLOY_FLAG="/tmp/running_deploy"
 
 ID=$(id -u)
 if [ $ID -ne 0 ]
