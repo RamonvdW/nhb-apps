@@ -244,11 +244,11 @@ from .settings_local import *
 # definitions taken from saml2.saml to avoid importing saml2
 # because it replaces ElementTree with cElementTree, which gives problems with QR code generation
 NAMEID_FORMAT_UNSPECIFIED = 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified'
-NAMEID_FORMAT_EMAILADDRESS = 'urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress'
+#NAMEID_FORMAT_EMAILADDRESS = 'urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress'
 BINDING_HTTP_REDIRECT = 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect'
 BINDING_HTTP_POST = 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST'
 
-SAML_BASE_URL = BASE_URL + '/idp'
+SAML_BASE_URL = SITE_URL + '/idp'
 
 SAML_IDP_CONFIG = {
      'debug' : DEBUG,
@@ -271,7 +271,7 @@ SAML_IDP_CONFIG = {
                      (SAML_BASE_URL + '/sso/redirect', BINDING_HTTP_REDIRECT)
                  ]
              },
-             'name_id_format': [NAMEID_FORMAT_EMAILADDRESS, NAMEID_FORMAT_UNSPECIFIED],
+             'name_id_format': [NAMEID_FORMAT_UNSPECIFIED,],
              'sign_response': False,         # TODO: set to True?
              'sign_assertion': False,        # TODO: set to True?
              # signing
@@ -287,7 +287,7 @@ SAML_IDP_SPCONFIG = {
      # entry name = entity_id
      'https://wiki.handboogsport.st-visir.nl/saml/module.php/saml/sp/metadata.php/default-sp': {
          'processor': 'djangosaml2idp.processors.BaseProcessor',
-         'nameid_field': 'staffID',
+         #'nameid_field': 'staffID',
          'sign_response': False,
          'sign_assertion': False,
          'attribute_mapping': {
