@@ -45,7 +45,7 @@ class Account(AbstractUser):
     # (inherited) is_superuser  - all permissions
     # (inherited) first_name
     # (inherited, not used) last_name
-    # (inherited, not used) e-mail
+    # (inherited, not used) email
     # (inherited) user_permissions: ManyToMany
     # (inherited) groups: ManyToMany
     vraag_nieuw_wachtwoord = models.BooleanField(   # TODO: implement
@@ -110,10 +110,23 @@ class Account(AbstractUser):
         """ Deze functie wordt aangeroepen vanuit de site feedback om een volledige
             referentie aan de gebruiker te krijgen.
             Vanuit template: user.get_account_full_name
+
+            Wordt ook gebruikt vanuit djangosaml2idp
+            in settings.py staat de referentie naar deze methode naam
         """
         if self.nhblid:
             return "%s %s (%s)" % (self.nhblid.voornaam, self.nhblid.achternaam, self.username)
         return self.username
+
+    def get_email(self):
+        """ helper om de email van de gebruiker te krijgen voor djangosaml2idp
+            zodat deze doorgegeven kan worden aan een Service Provider zoals de Wiki server
+        """
+        try:
+            email = AccountEmail.objects.get(account=self).bevestigde_email
+        except AccountEmail.DoesNotExist:
+            email = ""
+        return email
 
 
 class AccountEmail(models.Model):

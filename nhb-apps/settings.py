@@ -271,7 +271,7 @@ SAML_IDP_CONFIG = {
                      (SAML_BASE_URL + '/sso/redirect', BINDING_HTTP_REDIRECT)
                  ]
              },
-             'name_id_format': [NAMEID_FORMAT_UNSPECIFIED,],
+             #'name_id_format': [NAMEID_FORMAT_UNSPECIFIED,],       # default == UNSPECIFIED
              'sign_response': False,         # TODO: set to True?
              'sign_assertion': False,        # TODO: set to True?
              # signing
@@ -291,10 +291,11 @@ SAML_IDP_SPCONFIG = {
          'sign_response': False,
          'sign_assertion': False,
          'attribute_mapping': {
-             # Account.fieldname --> expose how
-             'first_name': 'real_name',
+             # Account.fieldname --> expose as
+             # Account.method() --> expose as
              'username': 'username',
-             'email': 'email'
+             'get_email': 'email',
+             'get_account_full_name': 'real_name',
          }
      },
 }
