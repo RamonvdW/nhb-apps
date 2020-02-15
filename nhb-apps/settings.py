@@ -271,12 +271,11 @@ SAML_IDP_CONFIG = {
                      (SAML_BASE_URL + '/sso/redirect', BINDING_HTTP_REDIRECT)
                  ]
              },
-             #'name_id_format': [NAMEID_FORMAT_UNSPECIFIED,],       # default == UNSPECIFIED
-             'sign_response': False,         # TODO: set to True?
-             'sign_assertion': False,        # TODO: set to True?
-             # signing
+             # signing assertion and responses is mandatory in SAML 2.0
+             'sign_response': True,
+             'sign_assertion': True,
              'key_file': os.path.join(PROJ_DIR, 'data_private/saml2/private.key'),
-             'key_file': os.path.join(PROJ_DIR, 'data_private/saml2/cert.crt'),
+             'cert_file': os.path.join(PROJ_DIR, 'data_private/saml2/cert.crt'),
              'valid_for': 100*24,
          }
      }
