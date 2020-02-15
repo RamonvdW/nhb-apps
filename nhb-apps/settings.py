@@ -25,7 +25,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated to version
-SITE_VERSIE = 'test 2020-02-10'
+
 
 # modules van de site
 INSTALLED_APPS = [
@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'Overig.apps.OverigConfig',
     'Logboek.apps.LogboekConfig',
     'Mailer.apps.MailerConfig',
+    'djangosaml2idp',               # single sign-on Identity Provider (IP) using SAML2 (Security Assertion Markup Language)
     'django.contrib.staticfiles',   # gather static files from modules helper
     'django.contrib.sessions',      # support for database-backed sessions; needed for logged-in user
     'django.contrib.admin',         # see-all/fix-all admin pages
@@ -239,5 +240,64 @@ RECORDS_TOEGESTANE_PARA_KLASSEN = (
 # import install-specific settings from a separate file
 # that is easy to replace as part of the deployment process
 from .settings_local import *
+
+# definitions taken from saml2.saml to avoid importing saml2
+# because it replaces ElementTree with cElementTree, which gives problems with QR code generation
+NAMEID_FORMAT_UNSPECIFIED = 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified'
+NAMEID_FORMAT_EMAILADDRESS = 'urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress'
+BINDING_HTTP_REDIRECT = 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect'
+BINDING_HTTP_POST = 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST'
+
+SAML_BASE_URL = BASE_URL + '/idp'
+
+SAML_IDP_CONFIG = {
+     'debug' : DEBUG,
+     'xmlsec_binary': '/usr/bin/xmlsec1',
+
+     # the SAML entity id of this side, the Identity Provider
+     # just a globally unique string
+     'entityid': 'NHB IT applications SAML2 Identity Provider',
+
+     # metadata for trusted service providers (like mediawiki)
+     #'metadata': { 'local': os.path.join(PROJ_DIR, 'saml2_sp_metadata.xml') },      # same dir as this file
+     'metadata': { 'local': os.path.join(BASE_DIR, 'data_private/saml2/saml2_sp_metadata.xml') },
+
+     # our service description (the identity provider)
+     'service': {
+         'idp': {
+             'name': 'NHB IT applications IdP',
+             'endpoints': {
+                 'single_sign_on_service': [
+                     (SAML_BASE_URL + '/sso/post',     BINDING_HTTP_POST),
+                     (SAML_BASE_URL + '/sso/redirect', BINDING_HTTP_REDIRECT)
+                 ]
+             },
+             'name_id_format': [NAMEID_FORMAT_EMAILADDRESS, NAMEID_FORMAT_UNSPECIFIED],
+             'sign_response': False,         # TODO: set to True?
+             'sign_assertion': False,        # TODO: set to True?
+             # signing
+             'key_file': os.path.join(PROJ_DIR, 'data_private/saml2/private.key'),
+             'key_file': os.path.join(PROJ_DIR, 'data_private/saml2/cert.crt'),
+             'valid_for': 100*24,
+         }
+     }
+}
+
+SAML_IDP_SPCONFIG = {
+     # configuration of trusted service providers
+     # entry name = entity_id
+     'https://wiki.handboogsport.st-visir.nl/saml/module.php/saml/sp/metadata.php/default-sp': {
+         'processor': 'djangosaml2idp.processors.BaseProcessor',
+         'nameid_field': 'staffID',
+         'sign_response': False,
+         'sign_assertion': False,
+         'attribute_mapping': {
+             # Account.fieldname --> expose how
+             'first_name': 'first_name',
+             'last_name': 'last_name',
+             'email': 'email'
+         }
+     },
+}
 
 # end of file
