@@ -259,8 +259,7 @@ SAML_IDP_CONFIG = {
      'entityid': 'NHB IT applications SAML2 Identity Provider',
 
      # metadata for trusted service providers (like mediawiki)
-     'metadata': { 'local': os.path.join(PROJ_DIR, 'saml2_sp_metadata.xml') },      # same dir as this file
-     #'metadata': { 'local': os.path.join(BASE_DIR, 'data_private/saml2/saml2_sp_metadata.xml') },
+     'metadata': { 'local': os.path.join(BASE_DIR, 'data_private/saml2/saml2_sp_metadata.xml') },
 
      # our service description (the identity provider)
      'service': {
