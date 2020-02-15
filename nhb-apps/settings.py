@@ -25,7 +25,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated to version
-
+SITE_VERSIE = 'test 2020-02-15'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -259,8 +259,8 @@ SAML_IDP_CONFIG = {
      'entityid': 'NHB IT applications SAML2 Identity Provider',
 
      # metadata for trusted service providers (like mediawiki)
-     #'metadata': { 'local': os.path.join(PROJ_DIR, 'saml2_sp_metadata.xml') },      # same dir as this file
-     'metadata': { 'local': os.path.join(BASE_DIR, 'data_private/saml2/saml2_sp_metadata.xml') },
+     'metadata': { 'local': os.path.join(PROJ_DIR, 'saml2_sp_metadata.xml') },      # same dir as this file
+     #'metadata': { 'local': os.path.join(BASE_DIR, 'data_private/saml2/saml2_sp_metadata.xml') },
 
      # our service description (the identity provider)
      'service': {
@@ -293,8 +293,8 @@ SAML_IDP_SPCONFIG = {
          'sign_assertion': False,
          'attribute_mapping': {
              # Account.fieldname --> expose how
-             'first_name': 'first_name',
-             'last_name': 'last_name',
+             'first_name': 'real_name',
+             'username': 'username',
              'email': 'email'
          }
      },
