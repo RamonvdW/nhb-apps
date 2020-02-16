@@ -287,7 +287,7 @@ class TestCompetitie(TestCase):
         assert_template_used(self, resp, ('competitie/beheer-favorieten.dtl', 'plein/site_layout.dtl'))
         #print("resp: %s" % repr(resp.content))
         self.assertEqual(len(FavorieteBestuurders.objects.all()), 1)
-        self.assertContains(resp, "100001")
+        self.assertNotContains(resp, "100001")
         self.assertContains(resp, "Ramon de Tester")
         obj = FavorieteBestuurders.objects.all()[0]
         self.assertTrue(str(obj) != "")
