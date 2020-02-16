@@ -20,6 +20,14 @@ ACTIEF_OPTIES = (
 )
 
 
+WIKI = {
+    Rollen.ROL_BKO: (settings.WIKI_URL_BKO, 'Handleiding BKO'),
+    Rollen.ROL_RKO: (settings.WIKI_URL_RKO, 'Handleiding RKO'),
+    Rollen.ROL_RCL: (settings.WIKI_URL_RCL, 'Handleiding RCL'),
+    Rollen.ROL_CWZ: (settings.WIKI_URL_CWZ, 'Handleiding CWZ'),
+}
+
+
 def menu_dynamics(request, context, actief=None):
     """ Deze functie update the template context voor het dynamische gedrag van
         menu zoals de 'Andere rollen' en het menu item dat actief is.
@@ -29,7 +37,6 @@ def menu_dynamics(request, context, actief=None):
         context['menu_actief'] = actief
 
     rol = rol_get_huidige(request)
-    rol_beschrijving = rol_get_beschrijving(request)
 
     # zet context variabelen om aan te geven welke optionele delen van het menu getoond moeten worden
     if request.user.is_authenticated:
@@ -39,6 +46,12 @@ def menu_dynamics(request, context, actief=None):
         # wissel van rol
         if rol_mag_wisselen(request):
             context['menu_show_wisselvanrol'] = True
+
+            try:
+                context['wiki_url'], context['wiki_titel'] = WIKI[rol]
+            except KeyError:
+                context['wiki_url'] = settings.WIKI_URL_TOP
+                context['wiki_titel'] = 'Handleiding'
 
         # admin menu
         if rol == Rollen.ROL_IT:
@@ -52,8 +65,7 @@ def menu_dynamics(request, context, actief=None):
         # inloggen
         context['menu_show_login'] = True
 
-    context['menu_rol_beschrijving'] = rol_beschrijving
+    context['menu_rol_beschrijving'] = rol_get_beschrijving(request)
 
-    context['wiki_url'] = settings.WIKI_URL
 
 # end of file

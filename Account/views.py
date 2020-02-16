@@ -648,6 +648,10 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
             context['show_otp_koppelen'] = True
         else:
             context['show_otp_controle'] = True
+
+        context['wiki_2fa_url'] = settings.WIKI_URL_2FA
+        context['wiki_2fa_titel'] = 'Twee-factor authenticatie'
+
         menu_dynamics(self.request, context, actief='wissel-van-rol')
         return context
 

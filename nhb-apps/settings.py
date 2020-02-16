@@ -25,7 +25,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated to version
-SITE_VERSIE = 'test 2020-02-15'
+SITE_VERSIE = 'test 2020-02-16'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -301,5 +301,14 @@ SAML_IDP_SPCONFIG = {
          }
      },
 }
+
+
+# pagina's van de wiki
+WIKI_URL_TOP = WIKI_URL + '/Hoofdpagina'
+WIKI_URL_CWZ = WIKI_URL + '/Handleiding_CWZ'
+WIKI_URL_RCL = WIKI_URL + '/Handleiding_RCL'
+WIKI_URL_RKO = WIKI_URL + '/Handleiding_RKO'
+WIKI_URL_BKO = WIKI_URL + '/Handleiding_BKO'
+WIKI_URL_2FA = WIKI_URL + '/Twee-factor_authenticatie'
 
 # end of file
