@@ -18,7 +18,7 @@ from Plein.menu import menu_dynamics
 from Logboek.models import schrijf_in_logboek
 from Account.models import Account
 from Account.rol import Rollen, rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving,\
-                        rol_is_BB, rol_is_BKO, rol_is_RKO, rol_is_bestuurder
+                        rol_is_BB, rol_is_BKO, rol_is_RKO, rol_is_bestuurder, rol_evalueer_opnieuw
 from BasisTypen.models import TeamType, TeamTypeBoog, BoogType, LeeftijdsKlasse, WedstrijdKlasse, \
                               WedstrijdKlasseBoog, WedstrijdKlasseLeeftijd
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
@@ -87,7 +87,7 @@ class CompetitieOverzichtView(View):
             beginjaar = models_bepaal_startjaar_nieuwe_competitie()
             context['nieuwe_seizoen'] = "%s/%s" % (beginjaar, beginjaar+1)
             context['bb_kan_competitie_aanmaken'] = (len(objs.filter(begin_jaar=beginjaar)) == 0)
-            # context['bb_kan_bko_koppelen'] = True
+            context['bb_kan_bko_koppelen'] = True
         elif rol_nu == Rollen.ROL_BKO:
             context['bko_kan_rko_koppelen'] = True
         elif rol_nu == Rollen.ROL_RKO:
@@ -204,6 +204,7 @@ class CompetitieAanmakenView(UserPassesTestMixin, TemplateView):
         seizoen = "%s/%s" % (jaar, jaar+1)
         schrijf_in_logboek(request.user, 'Competitie', 'Aanmaken competities %s' % seizoen)
         competitie_aanmaken()
+        rol_evalueer_opnieuw(request)
         return redirect('Plein:plein')
 
     def get_context_data(self, **kwargs):
@@ -453,8 +454,8 @@ class KoppelBestuurdersOntvangWijzigingView(View):
         url = reverse('Competitie:overzicht')
 
         rol_nu, functie_nu = rol_get_huidige_functie(request)
-        print("post: rol_nu=%s" % repr(rol_nu))
-        if rol_nu in (Rollen.ROL_BKO, Rollen.ROL_RKO):
+
+        if rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO):
             # zoek de favoriete bestuurders erbij
             # TODO: Wat als twee bestuurders niet dezelfde favorieten hebben?
             fav_bestuurders = FavorieteBestuurders.objects.filter(zelf=self.request.user)
@@ -467,10 +468,12 @@ class KoppelBestuurdersOntvangWijzigingView(View):
                     # foute deelcomp_pk
                     raise Resolver404()
 
-                print("deelcompetitie: %s" % repr(deelcompetitie))
-
                 # controleer dat de bestuurder deze wijziging mag maken
-                if rol_nu == Rollen.ROL_BKO:
+                if rol_nu == Rollen.ROL_BB:
+                    if deelcompetitie.laag != 'BK':
+                        # bestuurder heeft hier niets te zoeken
+                        raise Resolver404()
+                elif rol_nu == Rollen.ROL_BKO:
                     # BKO
                     if deelcompetitie.laag != 'RK':
                         # bestuurder heeft hier niets te zoeken
@@ -484,9 +487,11 @@ class KoppelBestuurdersOntvangWijzigingView(View):
                         # bestuurder heeft hier niets te zoeken
                         raise Resolver404()
 
+                # haal de functie(=groep) op van deze deelcompetitie
                 functie = deelcompetitie.functies.all()[0]
 
                 # gooi alle gekoppelde bestuurders weg
+                bestuurders_old = [pk for pk in functie.user_set.all().values_list('pk', flat=True)]
                 functie.user_set.clear()
 
                 # koppel de gekozen bestuurders (oud en nieuw)
@@ -496,6 +501,25 @@ class KoppelBestuurdersOntvangWijzigingView(View):
                         # voeg het account toe aan de functie
                         functie.user_set.add(obj.favoriet)
                 # for
+
+                bestuurders_new = functie.user_set.all().values_list('pk', flat=True)
+
+                # de wijzigingen in het logboek schrijven
+                wijzigingen = list()
+                wijzigingen.append("Rol: %s" % deelcompetitie.get_rol_str())
+                for pk in bestuurders_old:
+                    if pk not in bestuurders_new:
+                        bestuurder = Account.objects.get(pk=pk).volledige_naam()
+                        wijzigingen.append('Losgekoppeld: %s' % bestuurder)
+                # for
+                for pk in bestuurders_new:
+                    if pk not in bestuurders_old:
+                        bestuurder = Account.objects.get(pk=pk).volledige_naam()
+                        wijzigingen.append('Gekoppeld: %s' % bestuurder)
+                # for
+
+                if len(wijzigingen) > 1:
+                    schrijf_in_logboek(request.user, 'Rollen', "\n".join(wijzigingen))
 
                 url = reverse('Competitie:toon-competitie-bestuurders', kwargs={'comp_pk': deelcompetitie.competitie.pk})
             #else:
@@ -531,10 +555,8 @@ class KoppelBestuurderDeelCompetitieView(UserPassesTestMixin, ListView):
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        # weer iedereen behalve BKO en RKO
-        # rechten-check voor BKO vindt later plaats
         rol = rol_get_huidige(self.request)
-        return rol in (Rollen.ROL_BKO, Rollen.ROL_RKO)
+        return rol in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO)
 
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
@@ -547,7 +569,11 @@ class KoppelBestuurderDeelCompetitieView(UserPassesTestMixin, ListView):
 
         # controleer dat de bestuurder dit stukje mag wijzigen
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
-        if rol_nu == Rollen.ROL_BKO:
+        if rol_nu == Rollen.ROL_BB:
+            if self.deelcompetitie.laag != 'BK':
+                # bestuurder heeft hier niets te zoeken
+                raise Resolver404()
+        elif rol_nu == Rollen.ROL_BKO:
             if self.deelcompetitie.laag != 'RK':
                 # bestuurder heeft hier niets te zoeken
                 raise Resolver404()
@@ -615,7 +641,9 @@ class KoppelBestuurdersCompetitieView(UserPassesTestMixin, ListView):
 
         # bepaal welke laag door deze bestuurder gewijzigd mag worden
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
-        if rol_nu == Rollen.ROL_BKO:
+        if rol_nu == Rollen.ROL_BB:
+            wijzigbare_laag = 'BK'
+        elif rol_nu == Rollen.ROL_BKO:
             wijzigbare_laag = 'RK'
         elif rol_nu == Rollen.ROL_RKO:
             wijzigbare_laag = 'Regio'
@@ -628,13 +656,16 @@ class KoppelBestuurdersCompetitieView(UserPassesTestMixin, ListView):
 
         # maak een lijst van bestuurders aan de hand van de deelcompetities in deze competitie
         # per deelcompetitie is er een BKO, RKO of RCL
+
+        # eerst de BKO's zodat deze bovenaan komen te staan
         deelcompetities = list()
         for obj in DeelCompetitie.objects.filter(competitie=self.competitie).filter(laag='BK'):
             obj.rol_str = obj.get_rol_str()
             obj.wijzig_url = None
 
-            #if obj.laag == wijzigbare_laag and not obj.is_afgesloten:
-            # obj.laag == 'BK' wordt nog niet ondersteund
+            if obj.laag == wijzigbare_laag and not obj.is_afgesloten:
+                # BB --> BKO
+                obj.wijzig_url = reverse('Competitie:kies-deelcomp-bestuurder', kwargs={'deelcomp_pk': obj.pk})
 
             functie = obj.functies.all()[0]
             obj.bestuurders = functie.user_set.all()
@@ -642,6 +673,7 @@ class KoppelBestuurdersCompetitieView(UserPassesTestMixin, ListView):
             deelcompetities.append(obj)
         # for
 
+        # nu de RKO's en RCL's gesorteerd op rayon nummer / regio nummer
         for obj in DeelCompetitie.objects.filter(competitie=self.competitie).exclude(laag='BK').order_by('-laag', 'nhb_rayon__rayon_nr', 'nhb_regio__regio_nr'):
             obj.rol_str = obj.get_rol_str()
             obj.wijzig_url = None
@@ -671,7 +703,7 @@ class KoppelBestuurdersCompetitieView(UserPassesTestMixin, ListView):
         if functie_nu:
             context['huidige_rol'] = Group.objects.get(pk=functie_nu).name
         else:
-            context['huidige_rol'] = rol_get_beschrijving(request)
+            context['huidige_rol'] = rol_get_beschrijving(self.request)
 
         if rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO):
             # heeft deze gebruiker al favoriete bestuurders?
