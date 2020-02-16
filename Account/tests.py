@@ -15,9 +15,9 @@ from .rol import Rollen, rol_zet_sessionvars_na_login, rol_zet_sessionvars_na_ot
                          rol_get_huidige, rol_activeer_rol, rol_activeer_functie
 from .leeftijdsklassen import leeftijdsklassen_zet_sessionvars_na_login,\
                               get_leeftijdsklassen
-from .models import Account, AccountEmail,\
-                    account_zet_sessionvars_na_login, account_zet_sessionvars_na_otp_controle,\
-                    is_email_valide,\
+from .models import Account, AccountEmail,is_email_valide,\
+                    account_zet_sessionvars_na_login,\
+                    account_prep_for_otp, account_needs_otp, account_zet_sessionvars_na_otp_controle,\
                     HanterenPersoonsgegevens, account_needs_vhpg, account_vhpg_is_geaccepteerd
 from .views import obfuscate_email
 from .forms import LoginForm
@@ -51,6 +51,7 @@ class TestAccount(TestCase):
         self.group_rko, _ = Group.objects.get_or_create(name="RKO test")
         self.group_rcl, _ = Group.objects.get_or_create(name="RCL test")
         self.group_cwz, _ = Group.objects.get_or_create(name="CWZ test")
+        self.group_tst, _ = Group.objects.get_or_create(name="Test test")
 
         # maak de standard rayon/regio structuur aan
         maak_rayons_2018(NhbRayon)
@@ -403,6 +404,17 @@ class TestAccount(TestCase):
         account = Account.objects.filter(username='100001')[0]
         accmail = AccountEmail.objects.filter(account=account)[0]
         self.assertTrue(accmail.email_is_bevestigd)
+
+        self.assertEqual(account.get_email(), 'rdetester@gmail.not')
+        self.assertEqual(account.get_real_name(), 'Ramon de Tester')
+
+    def test_account_funcs(self):
+        # niet gekoppeld aan een NHB lid
+        # geen AccountEmail beschikbaar
+        # de test wordt getest aan het einde van test_registreer_nhb hierboven
+        account = self.account_admin
+        self.assertEqual(account.get_email(), '')
+        self.assertEqual(account.get_real_name(), 'admin')
 
     def test_registreer_nhb_bestaat_al(self):
         resp = self.client.post('/account/registreer/',
@@ -997,5 +1009,67 @@ class TestAccount(TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         assert_html_ok(self, resp)
         assert_template_used(self, resp, ('account/vhpg-afspraken.dtl', 'plein/site_layout.dtl'))
+
+    def test_account_needs_otp(self):
+        account = self.account_normaal
+
+        account.is_BKO = False
+        account.is_staff = False
+        account.groups.clear()
+
+        self.assertFalse(account_needs_otp(account))
+
+        account.is_BKO = True
+        self.assertTrue(account_needs_otp(account))
+        account.is_BKO = False
+        self.assertFalse(account_needs_otp(account))
+
+        account.is_staff = True
+        self.assertTrue(account_needs_otp(account))
+        account.is_staff = False
+        self.assertFalse(account_needs_otp(account))
+
+        account.groups.add(self.group_tst)
+        self.assertFalse(account_needs_otp(account))
+        account.groups.clear()
+
+        account.groups.add(self.group_bko)
+        self.assertTrue(account_needs_otp(account))
+        account.groups.clear()
+        self.assertFalse(account_needs_otp(account))
+
+        account.groups.add(self.group_rko)
+        self.assertTrue(account_needs_otp(account))
+        account.groups.clear()
+        self.assertFalse(account_needs_otp(account))
+
+        account.groups.add(self.group_rcl)
+        self.assertTrue(account_needs_otp(account))
+        account.groups.clear()
+        self.assertFalse(account_needs_otp(account))
+
+        account.groups.add(self.group_cwz)
+        self.assertTrue(account_needs_otp(account))
+        account.groups.clear()
+        self.assertFalse(account_needs_otp(account))
+
+    def test_account_prep_for_otp(self):
+        account = self.account_normaal
+
+        account.otp_code = ""
+        account_prep_for_otp(account)
+        account = Account.objects.get(username=account.username)
+        self.assertEqual(len(account.otp_code), 16)
+
+        account.otp_code = "niet 16 lang"
+        account_prep_for_otp(account)
+        account = Account.objects.get(username=account.username)
+        self.assertEqual(len(account.otp_code), 16)
+
+        # branch coverage: already good
+        account_prep_for_otp(account)
+        account = Account.objects.get(username=account.username)
+        self.assertEqual(len(account.otp_code), 16)
+
 
 # end of file

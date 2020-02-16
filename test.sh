@@ -8,7 +8,10 @@ ARGS="$*"
 RED="\e[31m"
 RESET="\e[0m"
 REPORT_DIR="/tmp/covhtml"
+
 OMIT="--omit=data3/wsgi.py,manage.py,/usr/*/python3*/site-packages/*"
+# show all saml2 and djangosaml2idp source files
+#OMIT="--omit=data3/wsgi.py,manage.py,/usr/local/lib64/*,/usr/lib/*,/usr/local/lib/python3.6/site-packages/c*,/usr/local/lib/python3.6/site-packages/da*,/usr/local/lib/python3.6/site-packages/de*,/usr/local/lib/python3.6/site-packages/i*,/usr/local/lib/python3.6/site-packages/p*,/usr/local/lib/python3.6/site-packages/q*,/usr/local/lib/python3.6/site-packages/r*,/usr/local/lib/python3.6/site-packages/si*,/usr/local/lib/python3.6/site-packages/u*,/usr/local/lib/python3.6/site-packages/django/*"
 
 # start the http simulator in the background
 pgrep -f websim
