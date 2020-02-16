@@ -21,12 +21,28 @@ class BasisTypenReadonlyAdmin(admin.ModelAdmin):
         return False
 
 
+class BasisTypenWedstrijdKlasseAdmin(BasisTypenReadonlyAdmin):
+    """ filter voor WedstrijdKlasse """
+    list_filter = ('buiten_gebruik',)
+
+
+class BasisTypenWedstrijdKlasseBoogAdmin(BasisTypenReadonlyAdmin):
+    """ filter voor WedstrijdKlasseBoog """
+    list_filter = ('wedstrijdklasse__buiten_gebruik',)
+
+
+class BasisTypenWedstrijdKlasseLeeftijdAdmin(BasisTypenReadonlyAdmin):
+    """ filter voor WedstrijdKlasseLeeftijd """
+    list_filter = ('wedstrijdklasse__buiten_gebruik',)
+
+
+
 admin.site.register(BoogType, BasisTypenReadonlyAdmin)
 admin.site.register(TeamType, BasisTypenReadonlyAdmin)
-admin.site.register(WedstrijdKlasse, BasisTypenReadonlyAdmin)
+admin.site.register(WedstrijdKlasse, BasisTypenWedstrijdKlasseAdmin)
 admin.site.register(LeeftijdsKlasse, BasisTypenReadonlyAdmin)
 admin.site.register(TeamTypeBoog, BasisTypenReadonlyAdmin)
-admin.site.register(WedstrijdKlasseBoog, BasisTypenReadonlyAdmin)
-admin.site.register(WedstrijdKlasseLeeftijd, BasisTypenReadonlyAdmin)
+admin.site.register(WedstrijdKlasseBoog, BasisTypenWedstrijdKlasseBoogAdmin)
+admin.site.register(WedstrijdKlasseLeeftijd, BasisTypenWedstrijdKlasseLeeftijdAdmin)
 
 # end of file

@@ -134,7 +134,7 @@ class InstellingenVolgendeCompetitieView(UserPassesTestMixin, ListView):
         return objs
 
     def _get_queryset_indivklassen(self):
-        objs = WedstrijdKlasse.objects.filter(is_voor_teams=False)
+        objs = WedstrijdKlasse.objects.filter(is_voor_teams=False, buiten_gebruik=False)
         prev = "-"
         for klasse in objs:
             klasse.separate_before = not klasse.beschrijving.startswith(prev)
@@ -154,7 +154,7 @@ class InstellingenVolgendeCompetitieView(UserPassesTestMixin, ListView):
         return objs
 
     def _get_queryset_teamklassen(self):
-        objs = WedstrijdKlasse.objects.filter(is_voor_teams=True)
+        objs = WedstrijdKlasse.objects.filter(is_voor_teams=True, buiten_gebruik=False)
         prev = "-"
         for klasse in objs:
             klasse.separate_before = not klasse.beschrijving.startswith(prev)
@@ -232,7 +232,7 @@ class KlassegrenzenView(UserPassesTestMixin, TemplateView):
 
     def _get_targets(self):
         targets = dict()        # [ (min_age, max_age, tuple(bogen)) ] = list(wedstrijdklassen)
-        for wedstrklasse in WedstrijdKlasse.objects.filter(is_voor_teams=False):
+        for wedstrklasse in WedstrijdKlasse.objects.filter(is_voor_teams=False, buiten_gebruik=False):
             age_min = 999
             age_max = 0
             for obj in WedstrijdKlasseLeeftijd.objects.filter(wedstrijdklasse=wedstrklasse):
@@ -254,6 +254,7 @@ class KlassegrenzenView(UserPassesTestMixin, TemplateView):
                 targets[tup] = list()
             targets[tup].append(wedstrklasse)
         # for
+
         return targets
 
     def _get_queryset(self, afstand):
@@ -277,6 +278,7 @@ class KlassegrenzenView(UserPassesTestMixin, TemplateView):
         schutternr2age = dict()     # [ nhb_nr ] = age
         for lid in NhbLid.objects.all():
             schutternr2age[lid.nhb_nr] = lid.bereken_wedstrijdleeftijd(jaar)
+        # for
 
         # creeer de resultatenlijst
         objs = list()
@@ -320,7 +322,8 @@ class KlassegrenzenView(UserPassesTestMixin, TemplateView):
                     objs.append(res)
                 # for
         # for
-        return objs
+        objs2 = sorted(objs, key=lambda k: k['beschrijving'])
+        return objs2
 
     def get(self, request, *args, **kwargs):
         context = super().get_context_data(**kwargs)

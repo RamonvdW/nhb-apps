@@ -39,9 +39,10 @@ class TeamType(models.Model):
 
 class WedstrijdKlasse(models.Model):
     """ definitie van een wedstrijdklasse """
+    buiten_gebruik = models.BooleanField(default=False)     # niet meer gebruiken?
     beschrijving = models.CharField(max_length=80)
-    niet_voor_rk_bk = models.BooleanField()         # aspirant klassen
-    is_voor_teams = models.BooleanField()           # team klasse?
+    niet_voor_rk_bk = models.BooleanField()                 # aspirant klassen
+    is_voor_teams = models.BooleanField()                   # team klasse?
 
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
