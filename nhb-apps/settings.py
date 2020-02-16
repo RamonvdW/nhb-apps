@@ -110,7 +110,8 @@ TEMPLATES = [
 WSGI_APPLICATION = 'nhb-apps.wsgi.application'
 
 # let browsers remember to connect with https
-SECURE_HSTS_SECONDS = 8640000      # 8640000 = 100 days
+# security analysis recommends at least 180 days
+SECURE_HSTS_SECONDS = 17280000      # 17280000 = 200 days
 
 
 # Password validation
