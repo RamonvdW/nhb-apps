@@ -45,10 +45,8 @@ function wijzigfavoriet(actie, id) {
     <ul class="collapsible">
         {% for obj in favoriete_bestuurders %}
             <li>
-                <div class="collapsible-header white"><span><b>{{ obj.favoriet.username }}</b>&nbsp;{{ obj.favoriet.volledige_naam }}</span></div>
+                <div class="collapsible-header white"><span>{{ obj.favoriet.volledige_naam }} (regio {{ obj.favoriet.nhblid.bij_vereniging.regio.regio_nr }} / rayon {{ obj.favoriet.nhblid.bij_vereniging.regio.rayon.rayon_nr }})</span></div>
                 <div class="collapsible-body white">
-                    <p>Rayon {{ obj.favoriet.nhblid.bij_vereniging.regio.rayon.rayon_nr }}</p>
-                    <p>Regio {{ obj.favoriet.nhblid.bij_vereniging.regio.regio_nr }}</p>
                     <button class="btn-nhb-rood" onclick="wijzigfavoriet('drop_favoriet', this)" data-pk="{{ obj.favoriet.pk }}">Verwijder uit mijn lijst</button>
                 </div>
             </li>
@@ -92,10 +90,9 @@ function wijzigfavoriet(actie, id) {
     <ul class="collapsible">
         {% for obj in object_list %}
             <li>
-                <div class="collapsible-header white"><span><b>{{ obj.username }}</b>&nbsp;{{ obj.volledige_naam }}</span></div>
+                <div class="collapsible-header white"><span>{{ obj.volledige_naam }} (regio {{ obj.nhblid.bij_vereniging.regio.regio_nr }} / rayon {{ obj.nhblid.bij_vereniging.regio.rayon.rayon_nr }})</span></div>
                 <div class="collapsible-body white">
-                    <p>Rayon {{ obj.nhblid.bij_vereniging.regio.rayon.rayon_nr }}</p>
-                    <p>Regio {{ obj.nhblid.bij_vereniging.regio.regio_nr }}</p>
+                    <p>NHB nummer: {{ obj.username }}</p>
                     <button class="btn-nhb-blauw" onclick="wijzigfavoriet('add_favoriet', this)" data-pk="{{ obj.pk }}">Voeg toe aan mijn favorieten</button>
                 </div>
             </li>
