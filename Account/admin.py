@@ -12,7 +12,7 @@ from .models import Account, AccountEmail, HanterenPersoonsgegevens
 
 class AccountAdmin(UserAdmin):
     # volgorde van de velden in de admin site
-    exclude = ('email', 'last_name')
+    exclude = ('email', )
 
     # velden die niet gewijzigd mogen worden via de admin interface
     readonly_fields = ('is_staff', )
@@ -20,13 +20,13 @@ class AccountAdmin(UserAdmin):
     # volgorde van de te tonen velden
     fieldsets = (
         (None, {'fields': ('username', 'password', 'vraag_nieuw_wachtwoord')}),
-        (_('Personal info'), {'fields': ('first_name', )}),
+        (_('Personal info'), {'fields': ('first_name', 'last_name')}),
+        (_('OTP'), { 'fields': ('otp_code', 'otp_is_actief')}),
         (_('Coupling'), {'fields': ('nhblid',)}),
         (_('Important dates'), {'fields': ('laatste_inlog_poging', 'last_login', 'date_joined')}),
         (_('Permissions'), {
             'fields': ('is_active', 'is_BKO', 'is_staff', 'groups', 'user_permissions'),
         }),
-        (_('OTP'), { 'fields': ('otp_code', 'otp_is_actief')}),
         (_('Beveiliging'), {'fields': ('verkeerd_wachtwoord_teller', 'is_geblokkeerd_tot')})
     )
 

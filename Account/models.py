@@ -44,7 +44,7 @@ class Account(AbstractUser):
     # (inherited) is_staff      - admin site access
     # (inherited) is_superuser  - all permissions
     # (inherited) first_name
-    # (inherited, not used) last_name
+    # (inherited) last_name
     # (inherited, not used) email
     # (inherited) user_permissions: ManyToMany
     # (inherited) groups: ManyToMany
@@ -116,6 +116,7 @@ class Account(AbstractUser):
         """
         if self.nhblid:
             return "%s %s (%s)" % (self.nhblid.voornaam, self.nhblid.achternaam, self.username)
+
         return self.username
 
     def get_real_name(self):
@@ -126,6 +127,11 @@ class Account(AbstractUser):
         """
         if self.nhblid:
             return "%s %s" % (self.nhblid.voornaam, self.nhblid.achternaam)
+
+        if self.first_name or self.last_name:
+            name = self.first_name + " " + self.last_name
+            return name.strip()
+
         return self.username
 
     def get_email(self):
