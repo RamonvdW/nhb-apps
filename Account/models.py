@@ -118,6 +118,16 @@ class Account(AbstractUser):
             return "%s %s (%s)" % (self.nhblid.voornaam, self.nhblid.achternaam, self.username)
         return self.username
 
+    def get_real_name(self):
+        """ Deze functie geeft de volledige naam van de gebruiker terug, indien beschikbaar.
+
+            Wordt gebruikt vanuit djangosaml2idp
+            in settings.py staat de referentie naar deze methode naam
+        """
+        if self.nhblid:
+            return "%s %s" % (self.nhblid.voornaam, self.nhblid.achternaam)
+        return self.username
+
     def get_email(self):
         """ helper om de email van de gebruiker te krijgen voor djangosaml2idp
             zodat deze doorgegeven kan worden aan een Service Provider zoals de Wiki server

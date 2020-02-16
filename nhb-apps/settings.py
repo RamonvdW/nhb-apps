@@ -297,7 +297,7 @@ SAML_IDP_SPCONFIG = {
              # Account.method() --> expose as
              'username': 'username',
              'get_email': 'emailAddress',
-             'get_account_full_name': 'real_name',
+             'get_real_name': 'real_name',
          }
      },
 }
