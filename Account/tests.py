@@ -416,6 +416,17 @@ class TestAccount(TestCase):
         self.assertEqual(account.get_email(), '')
         self.assertEqual(account.get_real_name(), 'admin')
 
+        account.first_name = 'Ad'
+        self.assertEqual(account.get_real_name(), 'Ad')
+
+        account.first_name = ''
+        account.last_name = 'min'
+        self.assertEqual(account.get_real_name(), 'min')
+
+        account.first_name = 'Ad'
+        account.last_name = 'min'
+        self.assertEqual(account.get_real_name(), 'Ad min')
+
     def test_registreer_nhb_bestaat_al(self):
         resp = self.client.post('/account/registreer/',
                                 {'nhb_nummer': '100001',
@@ -994,6 +1005,22 @@ class TestAccount(TestCase):
 
         obj = HanterenPersoonsgegevens.objects.all()[0]
         self.assertTrue(str(obj) != "")
+
+    def test_vhpg_overzicht(self):
+        account_vhpg_is_geaccepteerd(self.account_admin)
+
+        self.client.login(username='admin', password='wachtwoord')
+        account_zet_sessionvars_na_otp_controle(self.client).save()
+        rol_zet_sessionvars_na_otp_controle(self.account_admin, self.client).save()
+
+        resp = self.client.get('/account/vhpg-overzicht/')
+        self.assertEqual(resp.status_code, 403)     # 403 = Forbidden
+
+        rol_activeer_rol(self.client, "BB").save()
+        resp = self.client.get('/account/vhpg-overzicht/')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_html_ok(self, resp)
+        assert_template_used(self, resp, ('account/vhpg-overzicht.dtl', 'plein/site_layout.dtl'))
 
     def test_vhpg_afspraken_anon(self):
         self.client.logout()

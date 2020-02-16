@@ -15,7 +15,7 @@ from django.views.generic import TemplateView, ListView
 from django.utils import timezone
 from django.conf import settings
 from .forms import LoginForm, RegistreerForm, OTPControleForm, AccepteerVHPGForm
-from .models import AccountCreateError, AccountCreateNhbGeenEmail, Account,\
+from .models import AccountCreateError, AccountCreateNhbGeenEmail, Account, HanterenPersoonsgegevens,\
                     account_create_nhb, account_email_is_bevestigd,\
                     account_needs_otp, account_is_otp_gekoppeld,\
                     account_prep_for_otp, account_controleer_otp_code, user_is_otp_verified,\
@@ -25,7 +25,7 @@ from .leeftijdsklassen import leeftijdsklassen_zet_sessionvars_na_login
 from .rol import Rollen, rol_mag_wisselen, rol_enum_pallet, rol2url,\
                  rol_zet_sessionvars_na_login, rol_zet_sessionvars_na_otp_controle,\
                  rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving,\
-                 rol_activeer_rol, rol_activeer_functie
+                 rol_activeer_rol, rol_activeer_functie, rol_is_BB
 from .qrcode import qrcode_get
 from Overig.tijdelijke_url import set_tijdelijke_url_receiver, RECEIVER_ACCOUNTEMAIL
 from Plein.menu import menu_dynamics
@@ -47,6 +47,7 @@ TEMPLATE_OTPGEKOPPELD = 'account/otp-koppelen-gelukt.dtl'
 TEMPLATE_WISSELVANROL = 'account/wissel-van-rol.dtl'
 TEMPLATE_VHPGACCEPTATIE = 'account/vhpg-acceptatie.dtl'
 TEMPLATE_VHPGAFSPRAKEN = 'account/vhpg-afspraken.dtl'
+TEMPLATE_VHPGOVERZICHT = 'account/vhpg-overzicht.dtl'
 
 
 class LoginView(TemplateView):
@@ -163,6 +164,8 @@ class LogoutView(TemplateView):
     """
 
     # https://stackoverflow.com/questions/3521290/logout-get-or-post
+
+    # class variables shared by all instances
     template_name = TEMPLATE_UITLOGGEN
 
     def get_context_data(self, **kwargs):
@@ -189,6 +192,7 @@ class WachtwoordVergetenView(TemplateView):
         Deze view geeft de pagina waarmee de gebruiker zijn wachtwoord kan wijzigen
     """
 
+    # class variables shared by all instances
     template_name = TEMPLATE_VERGETEN
 
     def get_context_data(self, **kwargs):
@@ -390,6 +394,31 @@ class VhpgAcceptatieView(TemplateView):
         context = {'form': form}
         menu_dynamics(request, context, actief="inloggen")
         return render(request, TEMPLATE_VHPGACCEPTATIE, context)
+
+
+class VhpgOverzichtView(UserPassesTestMixin, ListView):
+
+    """ Met deze view kan de Manager Competitiezaken een overzicht krijgen van alle bestuurders
+        die de VHPG geaccepteerd hebben en wanneer dit voor het laatste was.
+    """
+
+    template_name = TEMPLATE_VHPGOVERZICHT
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        return self.request.user.is_authenticated and rol_is_BB(self.request)
+
+    def get_queryset(self):
+        """ called by the template system to get the queryset or list of objects for the template """
+        # er zijn ongeveer 30 bestuurders
+        # voorlopig geen probleem als een bestuurder vaker voorkomt
+        return HanterenPersoonsgegevens.objects.order_by('-acceptatie_datum')[:100]
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+        menu_dynamics(self.request, context, actief='competitie')
+        return context
 
 
 class OTPControleView(TemplateView):
