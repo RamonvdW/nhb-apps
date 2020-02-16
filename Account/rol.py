@@ -133,6 +133,7 @@ def rol_zet_sessionvars_na_login(account, request):
             else:
                 te_doorzoeken = list()
         # while
+    # if user is otp verified
 
     if len(rollen_vast) + len(rollen_functies) > 0:
         sessionvars[SESSIONVAR_ROL_MAG_WISSELEN] = True
@@ -307,9 +308,9 @@ def rol_activeer_rol(request, rolurl):
                 sessionvars[SESSIONVAR_ROL_HUIDIGE_FUNCTIE] = None
                 sessionvars[SESSIONVAR_ROL_HUIDIGE] = nwe_rol
                 sessionvars[SESSIONVAR_ROL_BESCHRIJVING] = rol_bepaal_beschrijving(nwe_rol)
-            #else:
-            #    # TODO: remove this debug print
-            #    print("rol_activeer_rol: gevraagde rol (%s) niet in rollen_vast" % rolurl)
+            else:
+                #print("rol_activeer_rol: gevraagde rol (%s) niet in rollen_vast" % rolurl)
+                pass
 
     # not recognized --> no change
     return sessionvars  # allows unittest to do sessionvars.save()
@@ -345,11 +346,25 @@ def rol_activeer_functie(request, group_pk):
                     break   # from the for
             # for
 
-            # TODO: test code, to be disabled
             #if not done:
             #    print("rol_activeer_functie: mislukt.\n  TIP: Zit je account wel in de juist groep?\n  TIP: Heb je rol_zet_sessionvars_na_otp_controle aangroepen?\n  TIP: Heb je account_vhpg_is_geaccepteerd aangeroepen?")
 
     # not recognized --> no change
     return sessionvars  # allows unittest to do sessionvars.save()
+
+
+def rol_evalueer_opnieuw(request):
+    """ Deze functie kan gebruik worden als de beschikbare keuzes veranderd zijn,
+        zoals na het aanmaken van een nieuwe competitie.
+        Hierdoor hoeft de gebruiker niet opnieuw in te loggen om deze mogelijkheden te krijgen.
+    """
+
+    rol, functie = rol_get_huidige_functie(request)
+    rol_zet_sessionvars_na_otp_controle(request.user, request)
+    if functie:
+        rol_activeer_functie(request, functie.pk)
+    else:
+        rol_activeer_rol(request, rol2url[rol])
+
 
 # end of file
