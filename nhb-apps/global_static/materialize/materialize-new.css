@@ -5592,3 +5592,6 @@ input[type=range]::-ms-thumb {
   @extends .collection-item; }
   .collection-item:hover {
     background-color: #f5f5f5; }
+
+.sidenav li > a:hover {
+  background-color: rgba(0, 0, 0, 0.15); }

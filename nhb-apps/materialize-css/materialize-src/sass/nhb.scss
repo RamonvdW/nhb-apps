@@ -73,7 +73,6 @@ $nhb-collection-hover-background: $nhb-card-hover-background;
 }
 
 
-
 //-----------------------------------
 // grote klikbare oppervlakten
 //
@@ -116,5 +115,16 @@ $nhb-collection-hover-background: $nhb-card-hover-background;
     }
 }
 
+
+//-----------------------------------
+// sidenav
+//
+.sidenav {
+  @extend .sidenav;
+
+  li > a {
+    &:hover { background-color: rgba(0,0,0,.15); }
+  }
+}
 
 // end of file
