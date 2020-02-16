@@ -114,9 +114,11 @@
                     <td>Selecteer je favoriete NHB leden, voor koppelen aan rollen.</td>
                 </tr></table>
             </div>
-            <div class="card-action center">
-                <a href="{% url 'Competitie:beheerfavorieten' %}">Beheer favorieten</a>
-            </div>
+            <a href="{% url 'Competitie:beheerfavorieten' %}" class="nhb-klikbare-balk">
+                <div class="card-action center-align">
+                    <span class="nhb-klikbare-link">Beheer favorieten</span>
+                </div>
+            </a>
         </div>
 
     </div>
@@ -125,36 +127,62 @@
     {% for obj in object_list %}
 
         <!-- koppelen beheerders -->
-        {% if bko_kan_rko_koppelen %}
-            <div class="col s12 m6 xl4">
-                <div class="card">
-                    <div class="card-content">
-                        <table class="simple"><tr style="border:0px">
-                            <td><i class="material-icons-round large">supervisor_account</i></td>
-                            <td>RKO's (Rayon Kampioenschap Organisatoren) instellen voor de {{ obj.beschrijving }}.</td>
-                        </tr></table>
-                    </div>
-                    <div class="card-action center">
-                        <a href="{{ obj.wijzig_url }}">Bestuurders kiezen</a>
-                    </div>
-                </div>
-            </div>
-        {% endif %}
+        {% if obj.fase != 'A1' %}
 
-        {% if rko_kan_rcl_koppelen %}
-            <div class="col s12 m6 xl4">
-                <div class="card">
-                    <div class="card-content">
-                        <table class="simple"><tr style="border:0px">
-                            <td><i class="material-icons-round large">supervisor_account</i></td>
-                            <td>RCL's (Regio Competitie Leiders) instellen voor de {{ obj.beschrijving }}.</td>
-                        </tr></table>
-                    </div>
-                    <div class="card-action center">
-                        <a href="{{ obj.wijzig_url }}">Bestuurders kiezen</a>
+            {% if bb_kan_bko_koppelen %}
+                <div class="col s12 m6 xl4">
+                    <div class="card">
+                        <div class="card-content">
+                            <table class="simple"><tr style="border:0px">
+                                <td><i class="material-icons-round large">supervisor_account</i></td>
+                                <td>BKO (Bond Kampioenschap Organisator) kiezen voor de {{ obj.beschrijving }}.</td>
+                            </tr></table>
+                        </div>
+                        <a href="{{ obj.wijzig_url }}" class="nhb-klikbare-balk">
+                            <div class="card-action center-align">
+                                <span class="nhb-klikbare-link">Bestuurders koppelen</span>
+                            </div>
+                        </a>
                     </div>
                 </div>
-            </div>
+            {% endif %}
+
+            {% if bko_kan_rko_koppelen %}
+                <div class="col s12 m6 xl4">
+                    <div class="card">
+                        <div class="card-content">
+                            <table class="simple"><tr style="border:0px">
+                                <td><i class="material-icons-round large">supervisor_account</i></td>
+                                <td>RKO's (Rayon Kampioenschap Organisatoren) kiezen voor de {{ obj.beschrijving }}.</td>
+                            </tr></table>
+                        </div>
+                        <a href="{{ obj.wijzig_url }}" class="nhb-klikbare-balk">
+                            <div class="card-action center-align">
+                                <span class="nhb-klikbare-link">Bestuurders koppelen</span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if rko_kan_rcl_koppelen %}
+                <div class="col s12 m6 xl4">
+                    <div class="card">
+                        <div class="card-content">
+                            <table class="simple"><tr style="border:0px">
+                                <td><i class="material-icons-round large">supervisor_account</i></td>
+                                <td>RCL's (Regio Competitie Leiders) kiezen voor de {{ obj.beschrijving }}.</td>
+                            </tr></table>
+                        </div>
+                        <a href="{{ obj.wijzig_url }}" class="nhb-klikbare-balk">
+                            <div class="card-action center-align">
+                                <span class="nhb-klikbare-link">Bestuurders koppelen</span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+
         {% endif %}
 
         {% if toon_competitie_bestuurders %}
@@ -166,9 +194,11 @@
                             <td>Toon de bestuurders voor de {{ obj.beschrijving }}.</td>
                         </tr></table>
                     </div>
-                    <div class="card-action center">
-                        <a href="{{ obj.wijzig_url }}">Toon bestuurders</a>
-                    </div>
+                    <a href="{{ obj.wijzig_url }}" class="nhb-klikbare-balk">
+                        <div class="card-action center-align">
+                            <span class="nhb-klikbare-link">Toon bestuurders</span>
+                        </div>
+                    </a>
                 </div>
             </div>
         {% endif %}
@@ -185,14 +215,17 @@
                     <td>Instellingen voor de bondscompetities {{ nieuwe_seizoen }} controleren en competities aanmaken.</td>
                 </tr></table>
             </div>
-            <div class="card-action center">
-                <a href="{% url 'Competitie:instellingen-volgende-competitie' %}">Competitie opstarten</a>
-            </div>
+            <a href="{% url 'Competitie:instellingen-volgende-competitie' %}" class="nhb-klikbare-balk">
+                <div class="card-action center-align">
+                    <span class="nhb-klikbare-link">Competitie opstarten</span>
+                </div>
+            </a>
         </div>
     </div>
     {% endif %}
 
     {% if rol_is_bb %}
+
         {% for obj in object_list %}
             <!-- klassegrenzen vaststellen -->
             {% if obj.fase == 'A1' %}
@@ -204,17 +237,37 @@
                                 <td>Klasse<wbr/>grenzen voor de {{ obj.beschrijving }} vaststellen aan de hand van uitslagen van vorig seizoen.</td>
                             </tr></table>
                         </div>
-                        <div class="card-action center">
-                            {% if obj.afstand == '18' %}
-                                <a href="{% url 'Competitie:klassegrenzen' afstand=18 %}">Klassegrenzen vaststellen</a>
-                            {% else %}
-                                <a href="{% url 'Competitie:klassegrenzen' afstand=25 %}">Klassegrenzen vaststellen</a>
-                            {% endif %}
-                        </div>
+                        {% if obj.afstand == '18' %}
+                        <a href="{% url 'Competitie:klassegrenzen' afstand=18 %}" class="nhb-klikbare-balk">
+                        {% else %}
+                        <a href="{% url 'Competitie:klassegrenzen' afstand=25 %}" class="nhb-klikbare-balk">
+                        {% endif %}
+                            <div class="card-action center-align">
+                                <span class="nhb-klikbare-link">Klassegrenzen vaststellen</span>
+                            </div>
+                        </a>
                     </div>
                 </div>
             {% endif %}
         {% endfor %}
+
+        <!-- overzicht VHPG acceptatie -->
+        <div class="col s12 m6 xl4">
+            <div class="card">
+                <div class="card-content">
+                    <table class="simple"><tr style="border:0px">
+                        <td><i class="material-icons-round large">verified_user</i></td>
+                        <td>Toon overzicht van bestuurders die de Verklaring Hanteren Persoonsgegevens (VHPG) geaccepteerd hebben.</td>
+                    </tr></table>
+                </div>
+                <a href="{% url 'Account:vhpg-overzicht' %}" class="nhb-klikbare-balk">
+                    <div class="card-action center-align">
+                        <span class="nhb-klikbare-link">Overzicht tonen</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+
     {% endif %}
 </div>
 
