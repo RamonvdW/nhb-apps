@@ -78,5 +78,8 @@
     </div>
 </div>
 
+<p>&nbsp;</p>
+<p>Toch geen feedback achterlaten, klik dan <a class="btn white blue-text" href="{% url 'Plein:plein' %}">hier</a></p>
+
 {% endblock %}
 
