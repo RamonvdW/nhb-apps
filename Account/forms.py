@@ -47,6 +47,67 @@ class LoginForm(forms.Form):
         return valid
 
 
+# alles in kleine letter
+VERBODEN_WOORDEN_IN_WACHTWOORD = (
+    'password',
+    'wachtwoord',
+    'geheim',
+    'handboog',
+    # keyboard walks
+    '12345',
+    '23456',
+    '34567',
+    '45678',
+    '56789',
+    '67890',
+    'qwert',
+    'werty',
+    'ertyu',
+    'rtyui',
+    'tyuio',
+    'yuiop',
+    'asdfg',
+    'sdfgh',
+    'dfghj',
+    'fghjk',
+    'ghjkl',
+    'zxcvb',
+    'xcvbn',
+    'cvbnm'
+)
+
+def test_wachtwoord_sterkte(wachtwoord, verboden_str):
+    """ Controleer de sterkte van het opgegeven wachtwoord
+        Retourneert: True,  None                als het wachtwoord goed genoeg is
+                     False, "een error message" als het wachtwoord niet goed genoeg is
+    """
+
+    # controleer de minimale length
+    if len(wachtwoord) < 9:
+        return False, "Wachtwoord moet minimaal 9 tekens lang zijn"
+
+    # controleer op alleen cijfers
+    if wachtwoord.isdigit():
+        return False, "Wachtwoord bevat alleen cijfers"
+
+    if verboden_str in wachtwoord:
+        return False, "Wachtwoord bevat een verboden reeks"
+
+    lower_wachtwoord = wachtwoord.lower()
+
+    # tel het aantal unieke tekens dat gebruikt is
+    # (voorkomt wachtwoorden zoals jajajajajaja of xxxxxxxxxx)
+    if len(set(lower_wachtwoord)) < 5:
+        return False, "Wachtwoord bevat te veel gelijke tekens"
+
+    # detecteer herkenbare woorden en keyboard walks
+    for verboden_woord in VERBODEN_WOORDEN_IN_WACHTWOORD:
+        if verboden_woord in lower_wachtwoord:
+            return False, "Wachtwoord is niet sterk genoeg"
+
+    return True, None
+
+
 class RegistreerForm(forms.Form):
     """
         Dit formulier wordt gebruikt om een nieuw account aan te maken
@@ -75,9 +136,14 @@ class RegistreerForm(forms.Form):
             nhb_nummer = self.cleaned_data.get('nhb_nummer')
             email = self.cleaned_data.get('email')
             nieuw_wachtwoord = self.cleaned_data.get('nieuw_wachtwoord')
+
             if nhb_nummer == "" or email == "" or nieuw_wachtwoord == "":
                 self.add_error(None, 'Niet alle velden zijn ingevuld')
                 valid = False
+            else:
+                valid, errmsg = test_wachtwoord_sterkte(nieuw_wachtwoord, nhb_nummer)
+                if not valid:
+                    self.add_error(None, errmsg)
         else:
             self.add_error(None, 'De gegevens worden niet geaccepteerd')
 

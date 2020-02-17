@@ -31,6 +31,8 @@ import io
 from types import SimpleNamespace
 
 
+CORRECT_WACHTWOORD = "qewretrytuyi"
+
 def get_otp_code(account):
     otp = pyotp.TOTP(account.otp_code)
     return otp.now()
@@ -325,7 +327,7 @@ class TestAccount(TestCase):
         resp = self.client.post('/account/registreer/',
                                 {'nhb_nummer': '100678',
                                  'email': 'is geen email',
-                                 'nieuw_wachtwoord': 'jaja'})
+                                 'nieuw_wachtwoord': CORRECT_WACHTWOORD})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         assert_html_ok(self, resp)
         assert_template_used(self, resp, ('account/registreer.dtl', 'plein/site_layout.dtl'))
@@ -335,7 +337,7 @@ class TestAccount(TestCase):
         resp = self.client.post('/account/registreer/',
                                 {'nhb_nummer': 'hallo!',
                                  'email': 'test@test.not',
-                                 'nieuw_wachtwoord': 'x'},
+                                 'nieuw_wachtwoord': CORRECT_WACHTWOORD},
                                 follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         assert_html_ok(self, resp)
@@ -346,7 +348,7 @@ class TestAccount(TestCase):
         resp = self.client.post('/account/registreer/',
                                 {'nhb_nummer': '999999',
                                  'email': 'test@test.not',
-                                 'nieuw_wachtwoord': 'x'},
+                                 'nieuw_wachtwoord': CORRECT_WACHTWOORD},
                                 follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         assert_html_ok(self, resp)
@@ -357,7 +359,7 @@ class TestAccount(TestCase):
         resp = self.client.post('/account/registreer/',
                                 {'nhb_nummer': '100002',
                                  'email': 'rdetester@gmail.not',
-                                 'nieuw_wachtwoord': 'jaja'},
+                                 'nieuw_wachtwoord': CORRECT_WACHTWOORD},
                                 follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         assert_html_ok(self, resp)
@@ -368,7 +370,7 @@ class TestAccount(TestCase):
         resp = self.client.post('/account/registreer/',
                                 {'nhb_nummer': '100001',
                                  'email': 'rdetester@gmail.yes',
-                                 'nieuw_wachtwoord': 'jaja'},
+                                 'nieuw_wachtwoord': CORRECT_WACHTWOORD},
                                 follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         assert_html_ok(self, resp)
@@ -379,7 +381,7 @@ class TestAccount(TestCase):
         resp = self.client.post('/account/registreer/',
                                 {'nhb_nummer': '100001',
                                  'email': 'rdetester@gmail.not',
-                                 'nieuw_wachtwoord': 'jaja'},
+                                 'nieuw_wachtwoord': CORRECT_WACHTWOORD},
                                 follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         assert_html_ok(self, resp)
@@ -431,7 +433,7 @@ class TestAccount(TestCase):
         resp = self.client.post('/account/registreer/',
                                 {'nhb_nummer': '100001',
                                  'email': 'rdetester@gmail.not',
-                                 'nieuw_wachtwoord': 'jaja'},
+                                 'nieuw_wachtwoord': CORRECT_WACHTWOORD},
                                 follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         assert_html_ok(self, resp)
@@ -441,12 +443,145 @@ class TestAccount(TestCase):
         resp = self.client.post('/account/registreer/',
                                 {'nhb_nummer': '100001',
                                  'email': 'rdetester@gmail.not',
-                                 'nieuw_wachtwoord': 'neenee'},
+                                 'nieuw_wachtwoord': CORRECT_WACHTWOORD},
                                 follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         assert_html_ok(self, resp)
         assert_template_used(self, resp, ('account/registreer.dtl', 'plein/site_layout.dtl'))
         self.assertFormError(resp, 'form', None, 'Account bestaat al')
+
+    def test_registreer_zwak_wachtwoord(self):
+        # te kort
+        resp = self.client.post('/account/registreer/',
+                                {'nhb_nummer': '100001',
+                                 'email': 'rdetester@gmail.not',
+                                 'nieuw_wachtwoord': 'te kort'},
+                                follow=False)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_html_ok(self, resp)
+        assert_template_used(self, resp, ('account/registreer.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, "Wachtwoord moet minimaal 9 tekens lang zijn")
+
+        # verboden reeks
+        resp = self.client.post('/account/registreer/',
+                                {'nhb_nummer': '100001',
+                                 'email': 'rdetester@gmail.not',
+                                 'nieuw_wachtwoord': 'handboogsport'},
+                                follow=False)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_html_ok(self, resp)
+        assert_template_used(self, resp, ('account/registreer.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, "Wachtwoord is niet sterk genoeg")
+
+        # NHB nummer in wachtwoord
+        resp = self.client.post('/account/registreer/',
+                                {'nhb_nummer': '100001',
+                                 'email': 'rdetester@gmail.not',
+                                 'nieuw_wachtwoord': 'yoho100001jaha'},
+                                follow=False)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_html_ok(self, resp)
+        assert_template_used(self, resp, ('account/registreer.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, "Wachtwoord bevat een verboden reeks")
+
+        # alleen cijfers
+        resp = self.client.post('/account/registreer/',
+                                {'nhb_nummer': '100001',
+                                 'email': 'rdetester@gmail.not',
+                                 'nieuw_wachtwoord': '4263482638476284'},
+                                follow=False)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_html_ok(self, resp)
+        assert_template_used(self, resp, ('account/registreer.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, "Wachtwoord bevat alleen cijfers")
+
+        # keyboard walk 1
+        resp = self.client.post('/account/registreer/',
+                                {'nhb_nummer': '100001',
+                                 'email': 'rdetester@gmail.not',
+                                 'nieuw_wachtwoord': 'qwertyuiop'},
+                                follow=False)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_html_ok(self, resp)
+        assert_template_used(self, resp, ('account/registreer.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, "Wachtwoord is niet sterk genoeg")
+
+        # keyboard walk 2
+        resp = self.client.post('/account/registreer/',
+                                {'nhb_nummer': '100001',
+                                 'email': 'rdetester@gmail.not',
+                                 'nieuw_wachtwoord': 'asdfghjkl'},
+                                follow=False)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_html_ok(self, resp)
+        assert_template_used(self, resp, ('account/registreer.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, "Wachtwoord is niet sterk genoeg")
+
+        # keyboard walk 3
+        resp = self.client.post('/account/registreer/',
+                                {'nhb_nummer': '100001',
+                                 'email': 'rdetester@gmail.not',
+                                 'nieuw_wachtwoord': 'zxcvbnm,.'},
+                                follow=False)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_html_ok(self, resp)
+        assert_template_used(self, resp, ('account/registreer.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, "Wachtwoord is niet sterk genoeg")
+
+        # keyboard walk 4
+        resp = self.client.post('/account/registreer/',
+                                {'nhb_nummer': '100001',
+                                 'email': 'rdetester@gmail.not',
+                                 'nieuw_wachtwoord': '1234567890!'},
+                                follow=False)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_html_ok(self, resp)
+        assert_template_used(self, resp, ('account/registreer.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, "Wachtwoord is niet sterk genoeg")
+
+        # te weinig verschillende tekens 1
+        resp = self.client.post('/account/registreer/',
+                                {'nhb_nummer': '100001',
+                                 'email': 'rdetester@gmail.not',
+                                 'nieuw_wachtwoord': 'xxxxxxxxx'},
+                                follow=False)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_html_ok(self, resp)
+        assert_template_used(self, resp, ('account/registreer.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, "Wachtwoord bevat te veel gelijke tekens")
+
+        # te weinig verschillende tekens 2
+        resp = self.client.post('/account/registreer/',
+                                {'nhb_nummer': '100001',
+                                 'email': 'rdetester@gmail.not',
+                                 'nieuw_wachtwoord': 'jaJAjaJAjaJA'},
+                                follow=False)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_html_ok(self, resp)
+        assert_template_used(self, resp, ('account/registreer.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, "Wachtwoord bevat te veel gelijke tekens")
+
+        # te weinig verschillende tekens 3
+        resp = self.client.post('/account/registreer/',
+                                {'nhb_nummer': '100001',
+                                 'email': 'rdetester@gmail.not',
+                                 'nieuw_wachtwoord': 'Jo!Jo!Jo!Jo!Jo!'},
+                                follow=False)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_html_ok(self, resp)
+        assert_template_used(self, resp, ('account/registreer.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, "Wachtwoord bevat te veel gelijke tekens")
+
+        # te weinig verschillende tekens 4
+        resp = self.client.post('/account/registreer/',
+                                {'nhb_nummer': '100001',
+                                 'email': 'rdetester@gmail.not',
+                                 'nieuw_wachtwoord': 'helphelphelphelp'},
+                                follow=False)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_html_ok(self, resp)
+        assert_template_used(self, resp, ('account/registreer.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, "Wachtwoord bevat te veel gelijke tekens")
 
     def test_direct_aangemaakt(self):
         # test rechtstreeks de 'aangemaakt' pagina ophalen, zonder registratie stappen

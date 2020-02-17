@@ -31,7 +31,7 @@
             {% else %}
                 <td>{{ obj.account.get_real_name }}</td>
             {% endif %}
-            <td>{{ obj.acceptatie_datum|date:"l j F Y" }} om {{ obj.toegevoegd_op|date:"H:i" }}</td>
+            <td>{{ obj.acceptatie_datum|date:"l j F Y" }} om {{ obj.acceptatie_datum|date:"H:i" }}</td>
         </tr>
     {% endfor %}
 </table>
