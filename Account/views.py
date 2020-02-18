@@ -6,7 +6,7 @@
 
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
-from django.urls import reverse
+from django.urls import reverse, resolve, Resolver404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import Group
 from django.contrib.auth.mixins import UserPassesTestMixin
@@ -68,8 +68,9 @@ class LoginView(TemplateView):
         form = LoginForm(request.POST)
         if form.is_valid():
             from_ip = request.META['REMOTE_ADDR']
-            login_naam = form.cleaned_data.get("login_naam")
-            wachtwoord = form.cleaned_data.get("wachtwoord")
+            login_naam = form.cleaned_data.get('login_naam')
+            wachtwoord = form.cleaned_data.get('wachtwoord')
+            next = form.cleaned_data.get('next')
 
             # kijk of het account bestaat en geblokkeerd is
             try:
@@ -110,10 +111,19 @@ class LoginView(TemplateView):
                         account2.verkeerd_wachtwoord_teller = 0
                         account2.save()
 
-                    # meteen de OTP verificatie laten doen als dit account het nodig heeft
-                    # als de gebruiker dit over slaat, dan komt het bij elke view die het nodig heeft automatisch terug
-                    #if account_needs_otp(account2):
-                    #    return HttpResponseRedirect(reverse('Account:otp-controle'))
+                    # voer de automatische redirect uit, indien gevraagd
+                    if next:
+                        # reject niet bestaande urls
+                        # resolve zoekt de view die de url af kan handelen
+                        if next[-1] != '/':
+                            next += '/'
+                        try:
+                            resolve(next)
+                        except Resolver404:
+                            pass
+                        else:
+                            # is valide url
+                            return HttpResponseRedirect(next)
 
                     return HttpResponseRedirect(reverse('Plein:plein'))
                 else:
@@ -151,7 +161,8 @@ class LoginView(TemplateView):
         """ deze functie wordt aangeroepen als een GET request ontvangen is
             we geven een lege form aan de template
         """
-        form = LoginForm()
+        next = request.GET.get('next', '')      # waar eventueel naartoe na de login?
+        form = LoginForm(initial={'next': next})
         context = {'form': form}
         menu_dynamics(request, context, actief='inloggen')
         return render(request, TEMPLATE_LOGIN, context)

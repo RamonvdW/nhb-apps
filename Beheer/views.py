@@ -29,7 +29,11 @@ class BeheerAdminSite(AdminSite):
         return HttpResponseRedirect(reverse('Account:logout'))
 
     def login(self, request, extra_context=None):
-        return HttpResponseRedirect(reverse('Account:login'))
+        url = reverse('Account:login')
+        next = request.GET.get('next', '')
+        if next:
+            url += '?next=' + next
+        return HttpResponseRedirect(url)
 
     def get_urls(self):
         # remove the password-change-done entry

@@ -182,6 +182,25 @@ class TestAccount(TestCase):
         assert_template_used(self, resp, ('account/login.dtl', 'plein/site_layout.dtl'))
         self.assertFormError(resp, 'form', None, 'Niet alle velden zijn ingevuld')
 
+    def test_inlog_form_post_next_good(self):
+        # controleer dat de next parameter gebruikt wordt
+        resp = self.client.post('/account/login/', {'login_naam': 'normaal', 'wachtwoord': 'wachtwoord', 'next': '/account/logout/'}, follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_html_ok(self, resp)
+        assert_template_used(self, resp, ('account/uitloggen.dtl', 'plein/site_layout.dtl'))
+
+    def test_inlog_form_post_next_bad(self):
+        # controleer dat een slechte next parameter naar het Plein gaat
+        resp = self.client.post('/account/login/', {'login_naam': 'normaal', 'wachtwoord': 'wachtwoord', 'next': '/bla/bla/'}, follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_html_ok(self, resp)
+        assert_template_used(self, resp, ('plein/plein-gebruiker.dtl', 'plein/site_layout.dtl'))
+
+        resp = self.client.post('/account/login/', {'login_naam': 'normaal', 'wachtwoord': 'wachtwoord', 'next': 'www.handboogsport.nl'}, follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_html_ok(self, resp)
+        assert_template_used(self, resp, ('plein/plein-gebruiker.dtl', 'plein/site_layout.dtl'))
+
     def test_logout(self):
         resp = self.client.post('/account/login/', {'login_naam': 'normaal', 'wachtwoord': 'wachtwoord'}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -483,17 +502,6 @@ class TestAccount(TestCase):
         assert_html_ok(self, resp)
         assert_template_used(self, resp, ('account/registreer.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, "Wachtwoord bevat een verboden reeks")
-
-        # alleen cijfers
-        resp = self.client.post('/account/registreer/',
-                                {'nhb_nummer': '100001',
-                                 'email': 'rdetester@gmail.not',
-                                 'nieuw_wachtwoord': '4263482638476284'},
-                                follow=False)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        assert_html_ok(self, resp)
-        assert_template_used(self, resp, ('account/registreer.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, "Wachtwoord bevat alleen cijfers")
 
         # keyboard walk 1
         resp = self.client.post('/account/registreer/',

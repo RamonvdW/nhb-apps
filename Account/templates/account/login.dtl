@@ -26,6 +26,7 @@
     <div class="row">
         <form class="col s12" action="{% url 'Account:login' %}" method="post">
             {% csrf_token %}
+            {{ form.next }}
 
             <div class="row"><div class="input-field col s12">
                 {{ form.login_naam.label_tag }}{{ form.login_naam }}

@@ -28,6 +28,9 @@ class TestBeheer(TestCase):
         resp = self.client.get('/beheer/login/', follow=True)
         self.assertEqual(resp.redirect_chain[-1], ('/account/login/', 302))
 
+        resp = self.client.get('/beheer/login/?next=/records/', follow=True)
+        self.assertEqual(resp.redirect_chain[-1], ('/account/login/?next=/records/', 302))
+
     def test_index(self):
         self.client.login(username='admin', password='wachtwoord')
 
@@ -35,7 +38,7 @@ class TestBeheer(TestCase):
         account_zet_sessionvars_na_login(self.client).save()
         # since OTP verification is not done yet, it will still redirect to the login page
         resp = self.client.get('/beheer/', follow=True)
-        self.assertEqual(resp.redirect_chain[-1], ('/account/login/', 302))
+        self.assertEqual(resp.redirect_chain[-1], ('/account/login/?next=/beheer/', 302))
 
         # na 2FA verificatie
         account_zet_sessionvars_na_otp_controle(self.client).save()
