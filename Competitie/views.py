@@ -22,7 +22,7 @@ from Account.rol import Rollen, rol_get_huidige, rol_get_huidige_functie, rol_ge
 from BasisTypen.models import TeamType, TeamTypeBoog, BoogType, LeeftijdsKlasse, WedstrijdKlasse, \
                               WedstrijdKlasseBoog, WedstrijdKlasseLeeftijd
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
-from NhbStructuur.models import NhbLid
+from NhbStructuur.models import NhbLid, NhbVereniging
 from .models import models_bepaal_startjaar_nieuwe_competitie, competitie_aanmaken, maak_competitieklasse_indiv, \
                     Competitie, ZERO, FavorieteBestuurders, add_favoriete_bestuurder, drop_favoriete_bestuurder, \
                     DeelCompetitie
@@ -37,6 +37,7 @@ TEMPLATE_COMPETITIE_KLASSEGRENZEN = 'competitie/klassegrenzen-vaststellen.dtl'
 TEMPLATE_COMPETITIE_BEHEER_FAVORIETEN = 'competitie/beheer-favorieten.dtl'
 TEMPLATE_COMPETITIE_KOPPEL_BESTUURDERS_OVERZICHT = 'competitie/koppel-bestuurders-overzicht.dtl'
 TEMPLATE_COMPETITIE_KOPPEL_BESTUURDERS_WIJZIG = 'competitie/koppel-bestuurders-wijzig.dtl'
+TEMPLATE_COMPETITIE_LIJST_VERENIGINGEN = 'competitie/lijst-verenigingen.dtl'
 
 
 JA_NEE = {False: 'Nee', True: 'Ja'}
@@ -483,7 +484,7 @@ class KoppelBestuurdersOntvangWijzigingView(View):
                     # even het rayon van deze RKO rol erbij zoeken
                     rko_deelcomp = Group(pk=functie_nu).deelcompetitie_set.all()[0]
                     rko_rayon_nr = rko_deelcomp.nhb_rayon.rayon_nr
-                    if deelcompetitie.laag != 'Regio' or self.deelcompetitie.nhb_regio.rayon.rayon_nr != rko_rayon_nr:
+                    if deelcompetitie.laag != 'Regio' or deelcompetitie.nhb_regio.rayon.rayon_nr != rko_rayon_nr:
                         # bestuurder heeft hier niets te zoeken
                         raise Resolver404()
 
@@ -720,5 +721,48 @@ class KoppelBestuurdersCompetitieView(UserPassesTestMixin, ListView):
 
         menu_dynamics(self.request, context, actief='competitie')
         return context
+
+
+class LijstVerenigingenView(UserPassesTestMixin, ListView):
+
+    """ Via deze view worden kan een BKO, RKO of RCL de lijst van verenigingen zien in zijn werkgebied.
+    """
+
+    template_name = TEMPLATE_COMPETITIE_LIJST_VERENIGINGEN
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        return rol_is_bestuurder(self.request)
+
+    def get_queryset(self):
+        """ called by the template system to get the queryset or list of objects for the template """
+
+        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
+
+        if rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO):
+            # toon de landelijke lijst
+            return NhbVereniging.objects.all().exclude(regio__regio_nr=100).order_by('regio__regio_nr', 'nhb_nr')
+
+        if rol_nu == Rollen.ROL_RKO:
+            # toon de lijst van verenigingen in het rayon van de RKO
+            # het rayonnummer is verkrijgbaar via de deelcompetitie van de functie
+            deelcompetitie = Group(pk=functie_nu).deelcompetitie_set.all()[0]
+            return NhbVereniging.objects.filter(regio__rayon=deelcompetitie.nhb_rayon).order_by('regio__regio_nr', 'nhb_nr')
+
+        if rol_nu == Rollen.ROL_RCL:
+            # toon de lijst van verenigingen in de regio van de RCL
+            # het regionummer is verkrijgbaar via de deelcompetitie van de functie
+            deelcompetitie = Group(pk=functie_nu).deelcompetitie_set.all()[0]
+            return NhbVereniging.objects.filter(regio=deelcompetitie.nhb_regio)
+
+        # waarom hier?
+        raise Resolver404()
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+        menu_dynamics(self.request, context, actief='competitie')
+        return context
+
 
 # end of file

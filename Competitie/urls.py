@@ -49,6 +49,10 @@ urlpatterns = [
     path('toon-bestuurders/<comp_pk>/',
          views.KoppelBestuurdersCompetitieView.as_view(),
          name='toon-competitie-bestuurders'),
+
+    path('lijst-verenigingen/',
+         views.LijstVerenigingenView.as_view(),
+         name='lijst-verenigingen'),
 ]
 
 # end of file
