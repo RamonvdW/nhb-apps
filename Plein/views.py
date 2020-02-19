@@ -66,6 +66,16 @@ class PleinView(View):
             else:   # rol_nu < Rollen.ROL_SCHUTTER:
                 # bestuurder
                 template = TEMPLATE_PLEIN_BESTUURDER
+
+                if rol_nu == Rollen.ROL_BB:
+                    context['rol_is_bb'] = True;
+                elif rol_nu == Rollen.ROL_BKO:
+                    context['rol_is_bko'] = True;
+                elif rol_nu == Rollen.ROL_RKO:
+                    context['rol_is_rko'] = True;
+                elif rol_nu == Rollen.ROL_RCL:
+                    context['rol_is_rcl'] = True;
+
                 if functie_nu:
                     context['huidige_rol'] = Group.objects.get(pk=functie_nu).name
                 else:

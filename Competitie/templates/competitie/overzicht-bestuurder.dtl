@@ -251,23 +251,6 @@
             {% endif %}
         {% endfor %}
 
-        <!-- overzicht VHPG acceptatie -->
-        <div class="col s12 m6 xl4">
-            <div class="card">
-                <div class="card-content">
-                    <table class="simple"><tr style="border:0px">
-                        <td><i class="material-icons-round large">verified_user</i></td>
-                        <td>Toon overzicht van bestuurders die de Verklaring Hanteren Persoonsgegevens (VHPG) geaccepteerd hebben.</td>
-                    </tr></table>
-                </div>
-                <a href="{% url 'Account:vhpg-overzicht' %}" class="nhb-klikbare-balk">
-                    <div class="card-action center-align">
-                        <span class="nhb-klikbare-link">Overzicht tonen</span>
-                    </div>
-                </a>
-            </div>
-        </div>
-
     {% endif %}
 </div>
 
