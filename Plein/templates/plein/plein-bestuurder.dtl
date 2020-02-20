@@ -9,7 +9,7 @@
 {% block title %}Welkom Bestuurder!{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="plein-schutter" %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="plein-bestuurder" %}
 
 <h4>Hallo, bestuurder!</h4>
 

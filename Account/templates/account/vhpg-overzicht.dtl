@@ -9,7 +9,7 @@
 {% block title %}Omgaan met persoonsgegevens{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="account aangemaakt" %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vhpg overzicht" %}
 
 <h4>Omgaan met persoons<wbr/>gegevens</h4>
 

@@ -9,7 +9,7 @@
 {% block title %}Omgaan met persoonsgegevens{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="otp controle" %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vhpg acceptatie" %}
 
 <h4>Omgaan met persoonsgegevens</h4>
 

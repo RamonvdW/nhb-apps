@@ -9,7 +9,7 @@
 {% block title %}Koppel bestuurder{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="koppel bestuurders" %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="koppel bestuurders wijzig" %}
 
 <h4>Koppel bestuurder</h4>
 

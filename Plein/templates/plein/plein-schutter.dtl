@@ -9,7 +9,7 @@
 {% block title %}Welkom Schutter!{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="plein-schutter" %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="plein schutter" %}
 
 <h4>Hallo, schutter!</h4>
 
