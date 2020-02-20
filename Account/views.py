@@ -658,9 +658,11 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
                 group = Group.objects.get(pk=group_pk)
                 title = group.name
                 pos = title.find(" voor de ")
-                if pos:
+                if pos > 0:
                     comp_str = title[pos:]
                     title = title[:pos]
+                elif group.name[:4] == "CWZ ":
+                    comp_str = group.nhbvereniging_set.all()[0].naam
                 else:
                     comp_str = ""
                 objs.append({ 'titel': title, 'comp_str': comp_str, 'url': url})

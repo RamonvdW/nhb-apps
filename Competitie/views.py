@@ -18,7 +18,7 @@ from Plein.menu import menu_dynamics
 from Logboek.models import schrijf_in_logboek
 from Account.models import Account
 from Account.rol import Rollen, rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving,\
-                        rol_is_BB, rol_is_BKO, rol_is_RKO, rol_is_bestuurder, rol_evalueer_opnieuw
+                        rol_is_BB, rol_is_BKO, rol_is_RKO, rol_is_CWZ, rol_is_bestuurder, rol_evalueer_opnieuw
 from BasisTypen.models import TeamType, TeamTypeBoog, BoogType, LeeftijdsKlasse, WedstrijdKlasse, \
                               WedstrijdKlasseBoog, WedstrijdKlasseLeeftijd
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
@@ -30,6 +30,7 @@ from .forms import FavorieteBestuurdersForm, WijzigFavorieteBestuurdersForm, Kop
 
 
 TEMPLATE_COMPETITIE_OVERZICHT = 'competitie/overzicht.dtl'
+TEMPLATE_COMPETITIE_OVERZICHT_CWZ = 'competitie/overzicht-cwz.dtl'
 TEMPLATE_COMPETITIE_OVERZICHT_BESTUURDER = 'competitie/overzicht-bestuurder.dtl'
 TEMPLATE_COMPETITIE_INSTELLINGEN = 'competitie/instellingen-nieuwe-competitie.dtl'
 TEMPLATE_COMPETITIE_AANMAKEN = 'competitie/competities-aanmaken.dtl'
@@ -98,6 +99,10 @@ class CompetitieOverzichtView(View):
 
         return context, TEMPLATE_COMPETITIE_OVERZICHT_BESTUURDER
 
+    def _get_competitie_overzicht_cwz(self, request):
+        context = dict()
+        return context, TEMPLATE_COMPETITIE_OVERZICHT_CWZ
+
     def _get_competitie_overzicht_schutter(self):
         context = dict()
         return context, TEMPLATE_COMPETITIE_OVERZICHT
@@ -107,6 +112,8 @@ class CompetitieOverzichtView(View):
 
         if rol_is_bestuurder(self.request):
             context, template = self._get_competitie_overzicht_bestuurder(request)
+        elif rol_is_CWZ(self.request):
+            context, template = self._get_competitie_overzicht_cwz(request)
         else:
             context, template = self._get_competitie_overzicht_schutter()
 
@@ -718,7 +725,6 @@ class KoppelBestuurdersCompetitieView(UserPassesTestMixin, ListView):
                 context['show_wijzig_kolom'] = True
                 break   # from the for
         # for
-
         menu_dynamics(self.request, context, actief='competitie')
         return context
 

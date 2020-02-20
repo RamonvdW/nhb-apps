@@ -25,6 +25,8 @@ class BeheerAdminSite(AdminSite):
     #    return HttpResponseRedirect(reverse('Plein:plein'))
 
 
+    # TODO: deze view verwijst naar de login pagina als wissel-van-rol nodig is --> oneindige inlog lus
+
     def logout(self, request, extra_context=None):
         return HttpResponseRedirect(reverse('Account:logout'))
 

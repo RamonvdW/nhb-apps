@@ -9,7 +9,8 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.urls import Resolver404
 from Account.models import Account, account_vhpg_is_geaccepteerd, account_zet_sessionvars_na_otp_controle
-from Account.rol import rol_zet_sessionvars_na_otp_controle, rol_activeer_rol, rol_activeer_functie, rol_is_bestuurder
+from Account.rol import rol_zet_sessionvars_na_otp_controle, rol_activeer_rol, rol_activeer_functie, \
+                        rol_is_bestuurder, rol_is_BB
 from Plein.test_helpers import assert_html_ok, assert_template_used, extract_all_href_urls
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
@@ -377,9 +378,9 @@ class TestCompetitieKoppelBestuurders(TestCase):
         self._ver = ver
         self._next_nhbnr = 100001
 
-        # maak een BKO aan (geen NHB lid)
-        self.usermodel.objects.create_user('bko', 'bko@test.com', 'wachtwoord')
-        account = Account.objects.get(username='bko')
+        # maak een BB aan (geen NHB lid)
+        self.usermodel.objects.create_user('bb', 'bko@test.com', 'wachtwoord')
+        account = Account.objects.get(username='bb')
         account.is_BKO = True
         account.save()
         self.account_bb = account
@@ -432,6 +433,25 @@ class TestCompetitieKoppelBestuurders(TestCase):
         rol_zet_sessionvars_na_otp_controle(self.account_bb, self.client).save()
         rol_activeer_rol(self.client, 'BB').save()
         self.assertTrue(rol_is_bestuurder(self.client))
+        self.assertTrue(rol_is_BB(self.client))
+
+        # haal de lijst met gekoppelde bestuurders op voor de competitie
+        competitie = Competitie.objects.all()[0]
+        resp = self.client.get('/competitie/toon-bestuurders/%s/' % competitie.pk)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_html_ok(self, resp)
+        assert_template_used(self, resp, ('competitie/koppel-bestuurders-overzicht.dtl', 'plein/site_layout.dtl'))
+
+        # controlleer dat de juiste Wijzig knoppen aanwezig zijn voor de BKO rol
+        # initieel zijn er geen, omdat er nog geen favorieten gekozen zijn
+        urls = extract_all_href_urls(resp)
+        for deelcomp in DeelCompetitie.objects.filter(competitie=competitie):
+            url = '/competitie/kies-bestuurders/%s/' % deelcomp.pk
+            self.assertFalse(url in urls)       # check geen link
+        # for
+
+        # geef de BB nu een favoriet en probeer nog een keer
+        self._set_fav(self.account_bb, (self.account_bko,))
 
         # haal de lijst met gekoppelde bestuurders op voor de competitie
         competitie = Competitie.objects.all()[0]
@@ -445,7 +465,7 @@ class TestCompetitieKoppelBestuurders(TestCase):
         for deelcomp in DeelCompetitie.objects.filter(competitie=competitie):
             url = '/competitie/kies-bestuurders/%s/' % deelcomp.pk
             if deelcomp.laag == "BK":
-                self.assertTrue(url in urls)        # check link voor koppelen RKO
+                self.assertTrue(url in urls)        # check link voor koppelen BKO
             else:
                 self.assertFalse(url in urls)       # check geen link voor andere lagen
         # for

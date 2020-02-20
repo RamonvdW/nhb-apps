@@ -133,6 +133,7 @@ def rol_zet_sessionvars_na_login(account, request):
             else:
                 te_doorzoeken = list()
         # while
+
     # if user is otp verified
 
     if len(rollen_vast) + len(rollen_functies) > 0:
@@ -235,10 +236,8 @@ def rol_bepaal_beschrijving(rol, group_pk=None):
         beschr = 'IT beheerder'
     elif rol == Rollen.ROL_BB:
         beschr = 'Manager competitiezaken'
-    elif rol in (Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL):
+    elif rol in (Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_CWZ):
         beschr = grp_naam
-    elif rol == Rollen.ROL_CWZ:
-        beschr = 'CWZ'
     elif rol == Rollen.ROL_SCHUTTER:
         beschr = 'Schutter'
     else:   # ook rol == None
@@ -268,11 +267,18 @@ def rol_is_RKO(request):
     return rol_get_huidige(request) == Rollen.ROL_RKO
 
 
+def rol_is_CWZ(request):
+    """ Geeft True terug als de gebruiker CWZ rechten heeft en op dit moment CWZ als rol gekozen heeft
+        Wordt gebruikt om specifieke content voor de CWZ te tonen
+    """
+    return rol_get_huidige(request) == Rollen.ROL_CWZ
+
+
 def rol_is_bestuurder(request):
     """ Geeft True terug als de gebruiker een bestuurder is
         Wordt gebruikt om toegang tot bepaalde schermen te voorkomen
     """
-    return rol_get_huidige(request) in (Rollen.ROL_IT, Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_CWZ)
+    return rol_get_huidige(request) in (Rollen.ROL_IT, Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL)
 
 
 def rol_mag_wisselen(request):

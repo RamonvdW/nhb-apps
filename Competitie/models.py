@@ -8,7 +8,7 @@ from django.db import models
 from django.contrib.auth.models import Group, Permission
 from django.utils import timezone
 from BasisTypen.models import WedstrijdKlasse
-from NhbStructuur.models import NhbRegio, NhbRayon, NhbLid, ADMINISTRATIEVE_REGIO
+from NhbStructuur.models import NhbRegio, NhbRayon, NhbVereniging, NhbLid, ADMINISTRATIEVE_REGIO
 from Logboek.models import schrijf_in_logboek
 from Account.models import Account
 from Account.rol import rol_zet_plugins, Rollen
@@ -281,7 +281,7 @@ def maak_competitieklasse_indiv(comp, wedstrijdklasse, min_ag):
 def competitie_expandeer_rol(rol_in, group_in):
     """ Plug-in van de Account.rol module om een groep/functie te expanderen naar onderliggende functies
         Voorbeeld: RKO rayon 3 --> RCL regios 109, 110, 111, 112
-        Deze functie yield rol, group_pk
+        Deze functie yield (rol, group_pk)
     """
     #print("competitie_expandeer_rol: rol=%s, group=%s" % (repr(rol_in), repr(group_in)))
 
@@ -309,7 +309,7 @@ def competitie_expandeer_rol(rol_in, group_in):
             # for
 
         if group_in.name[:4] == "RKO ":
-            # expandeer naar de RCL rollen
+            # expandeer naar de RCL rollen binnen het rayon
             # group --> deelcompetitie laag=RK --> competitie --> deelcompetities laag=Regio
             for deelcomp_top in group_in.deelcompetitie_set.all():     # TODO: kan compacter met values_list
                 competitie = deelcomp_top.competitie
@@ -324,7 +324,17 @@ def competitie_expandeer_rol(rol_in, group_in):
                 # for
             # for
 
-        # TODO: expandeer RCL --> CWZ
+        if group_in.name[:4] == "RCL ":
+            # expandeer naar de CWZ rollen binnen de regio
+            # deelcompetitie.laag=Regio; deelcompetitie.nhb_regio == NhbVereniging.regio
+            for deelcomp in group_in.deelcompetitie_set.all():      # normaal maar een
+                if deelcomp.laag == "Regio":
+                    # vind alle verenigingen in deze regio
+                    for ver in NhbVereniging.objects.filter(regio=deelcomp.nhb_regio):
+                        if ver.cwz_group:
+                            yield (Rollen.ROL_CWZ, ver.cwz_group.pk)
+                    # for
+            # for
 
 rol_zet_plugins(competitie_expandeer_rol)
 
