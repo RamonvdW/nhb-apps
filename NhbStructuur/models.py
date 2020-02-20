@@ -6,6 +6,7 @@
 
 from django.db import models
 from django.core.exceptions import ValidationError
+from django.contrib.auth.models import Group
 from django.conf import settings
 import datetime
 
@@ -57,10 +58,32 @@ class NhbVereniging(models.Model):
                                        blank=True,  # allow access input in form
                                        null=True)   # allow NULL relation in database
 
+    # de groep waar je als gebruiker lid van moet zijn om CWZ te zijn van deze vereniging
+    cwz_group = models.ForeignKey(Group, on_delete=models.PROTECT,
+                                  blank=True, null=True)
+
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
         # selectie in de admin interface gaat op deze string, dus nhb_nr eerst
         return "%s %s" % (self.nhb_nr, self.naam)
+
+    def make_cwz(self, nhb_nr):
+        # kijk of dit lid al in de groep zit
+        if self.cwz_group:
+            if len(self.cwz_group.user_set.filter(nhblid__nhb_nr=nhb_nr)) == 0:
+                # nog niet in de groep --> zoek het user account erbij
+                try:
+                    account = Account.objects.get(nhblid__nhb_nr=nhb_nr)
+                except Account.DoesNotExist:
+                    # CWZ heeft nog geen account
+                    print("[WARNING] CWZ %s heeft nog geen account" % nhb_nr)
+                    pass
+                else:
+                    # voeg dit account toe aan de groep
+                    print("[INFO] CWZ %s gekoppeld aan vereninging %s" % (nhb_nr, self.nhb_nr))
+                    self.cwz_group.user_set.add(account)
+        else:
+            print("[ERROR] NhbVereniging.make_cwz: no cwz_group!")
 
     class Meta:
         """ meta data voor de admin interface """

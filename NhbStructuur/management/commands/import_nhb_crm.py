@@ -8,10 +8,11 @@
 
 from django.utils.dateparse import parse_date
 from django.core.management.base import BaseCommand
+from django.contrib.auth.models import Group
 from django.db.models import ProtectedError
 import django.db.utils
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbLid, NhbVereniging
-from Account.models import is_email_valide
+from Account.models import is_email_valide, Account
 from Logboek.models import schrijf_in_logboek
 import argparse
 import datetime
@@ -85,6 +86,7 @@ class Command(BaseCommand):
         self._count_verwijderingen = 0
         self._count_toevoegingen = 0
         self._count_lid_no_email = 0
+        self._count_cwz_no_account = 0
 
         self._nieuwe_clubs = list()
 
@@ -241,6 +243,7 @@ class Command(BaseCommand):
                         obj.save()
 
             if is_nieuw:
+                obj = None
                 ver = NhbVereniging()
                 ver.nhb_nr = ver_nhb_nr
                 ver.naam = ver_naam
@@ -254,6 +257,16 @@ class Command(BaseCommand):
                     if not self.dryrun:
                         ver.save()
                     self._nieuwe_clubs.append(ver_nhb_nr)   # voor onderdrukken 'wijziging' secretaris
+                    obj = ver
+
+            # maak de cwz groep aan
+            if obj:
+                cwz_group, created = Group.objects.get_or_create(name="CWZ vereniging %s" % obj.nhb_nr)
+                if cwz_group != obj.cwz_group:
+                    self.stdout.write("[INFO] Nieuwe CWZ groep met naam %s voor vereniging %s" % (repr(cwz_group.name), repr(obj.nhb_nr)))
+                    obj.cwz_group = cwz_group
+                    if not self.dryrun:
+                        obj.save()
         # for
 
         # kijk of er verenigingen verwijderd moeten worden
@@ -310,8 +323,17 @@ class Command(BaseCommand):
                     obj.secretaris_lid = ver_secretaris_nhblid
                     if not self.dryrun:
                         obj.save()
-                    # TODO: maak CWZ groep aan voor deze vereniging
-                    # TODO: maak dit lid CWZ
+
+                # forceer de secretaris in de CWZ groep
+                if ver_secretaris_nhblid:
+                    try:
+                        account = Account.objects.get(nhblid=ver_secretaris_nhblid)
+                    except Account.DoesNotExist:
+                        # cwz heeft nog geen account aangemaakt
+                        self._count_cwz_no_account += 1
+                    else:
+                        if not self.dryrun:
+                            obj.cwz_group.user_set.add(account)     # dupes are prevented
         # for
 
     def _import_members(self, data):
@@ -604,7 +626,7 @@ class Command(BaseCommand):
 
         # rapporteer de samenvatting en schrijf deze ook in het logboek
         samenvatting = "Samenvatting: %s fouten; %s waarschuwingen; %s nieuw; %s wijzigingen; %s verwijderingen; "\
-                        "%s leden; %s verenigingen; %s regios; %s rayons; %s actieve leden zonder e-mail" %\
+                        "%s leden; %s verenigingen; %s cwz's zonder account; %s regios; %s rayons; %s actieve leden zonder e-mail" %\
                           (self._count_errors,
                            self._count_warnings,
                            self._count_toevoegingen,
@@ -612,6 +634,7 @@ class Command(BaseCommand):
                            self._count_verwijderingen,
                            self._count_members,
                            self._count_clubs,
+                           self._count_cwz_no_account,
                            self._count_regios,
                            self._count_rayons,
                            self._count_lid_no_email)
