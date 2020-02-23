@@ -1,0 +1,19 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2020 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Competitie{% endblock %}
+
+{% block pagina %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie overzicht cwz" %}
+
+<h4>Competitie overzicht voor de CWZ</h4>
+
+<p>Nog even geduld, dit stukje van de site is nog niet af.</p>
+
+{% endblock %}
+

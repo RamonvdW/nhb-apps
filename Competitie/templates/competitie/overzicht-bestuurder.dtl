@@ -1,0 +1,261 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2020 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Competitie{% endblock %}
+
+{% block pagina %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie overzicht bestuurder" %}
+
+<h4>Competitie</h4>
+
+{% if not have_active_comps %}
+<p>Er zijn geen competities om te tonen.</p>
+{% endif %}
+
+{% for obj in object_list %}
+
+<p>&nbsp;</p>
+<h5>Overzicht {{ obj.beschrijving }}</h5>
+<table class="white">
+    <thead>
+        <th>Fase</th>
+        <th>Activiteit</th>
+        <th>Periode</th>
+    </thead>
+    <tr>
+        <td>A</td>
+        <td>Competitie opstarten (Bondsburo)</td>
+        <td class="green-text">Afgerond</td>
+    </tr>
+    <tr>
+        <td{% if obj.fase == 'A1' %} class="blue"{% endif %}>A1</td>
+        <td>Vaststellen klassegrenzen (Bondsburo)</td>
+        {% if obj.fase > 'A1' %}
+        <td class="green-text">Afgerond</td>
+        {% else %}
+        <td>tot 15 juli</td>
+        {% endif %}
+    </tr>
+    <tr>
+        <td{% if obj.fase == 'A2' %} class="blue"{% endif %}>A2</td>
+        <td>Koppelen RKO/RCL bestuurders door BKO/RKO; Instellingen regio (RCL)</td>
+        {% if obj.fase > 'A2' %}
+        <td class="green-text">Afgerond</td>
+        {% else %}
+        <td>tot 15 juli</td>
+        {% endif %}
+    </tr>
+    <tr>
+        <td{% if obj.fase == 'B' %} class="blue"{% endif %}>B</td>
+        <td>Open voor inschrijvingen individueel en teams (indien lid voor {{ obj.uiterste_datum_lid }})</td>
+        {% if obj.fase > 'B' %}
+        <td class="green-text">Afgerond</td>
+        {% else %}
+        <td>vanaf {{ obj.begin_aanmeldingen }}{% if obj.einde_aanmeldingen > obj.begin_aanmeldingen %}<br>tot {{ obj.einde_aanmeldingen }}{% endif %}</td>
+        {% endif %}
+    </tr>
+    <tr>
+        <td{% if obj.fase == 'C' %} class="blue"{% endif %}>C</td>
+        <td>Samenstellen vaste teams (CWZ)</td>
+        {% if obj.fase > 'C' %}
+        <td class="green-text">Afgerond</td>
+        {% else %}
+        <td>tot {{ obj.einde_teamvorming }}</td>
+        {% endif %}
+    </tr>
+    <tr>
+        <td{% if obj.fase == 'D' %} class="blue"{% endif %}>D</td>
+        <td>Aanmaken poules (RCL)</td>
+        {% if obj.fase > 'D' %}
+        <td class="green-text">Afgerond</td>
+        {% else %}
+        <td>tot {{ obj.eerste_wedstrijd }}</td>
+        {% endif %}
+    </tr>
+    <tr>
+        <td{% if obj.fase == 'E' %} class="blue"{% endif %}>E</td>
+        <td>Wedstrijden</td>
+        {% if obj.fase > 'E' %}
+        <td class="green-text">Afgerond</td>
+        {% else %}
+        <td>vanaf {{ obj.eerste_wedstrijd }}</td>
+        {% endif %}
+    </tr>
+    <tr>
+        <td{% if obj.fase == 'F' %} class="blue"{% endif %}>F</td>
+        <td>Vaststellen uitslag regiocompetitie</td>
+        {% if obj.fase > 'F' %}
+        <td class="green-text">Afgerond</td>
+        {% else %}
+        <td>?</td>
+        {% endif %}
+    </tr>
+</table>
+{% endfor %}
+
+
+<p>&nbsp;</p>
+
+<h5>Volgende stappen</h5>
+<div class="row">
+    {% if kan_favorieten_beheren %}
+    <div class="col s12 m6 xl4">
+
+        <!-- let op! gelijk houden aan zelfde kaart in koppel-bestuurders-overzicht.dtl -->
+        <div class="card">
+            <div class="card-content">
+                <table class="simple"><tr style="border:0px">
+                    <td><i class="material-icons-round large">contacts</i></td>
+                    <td>Selecteer je favoriete NHB leden, voor koppelen aan rollen.</td>
+                </tr></table>
+            </div>
+            <a href="{% url 'Competitie:beheerfavorieten' %}" class="nhb-klikbare-balk">
+                <div class="card-action center-align">
+                    <span class="nhb-klikbare-link">Beheer favorieten</span>
+                </div>
+            </a>
+        </div>
+
+    </div>
+    {% endif %}
+
+    {% for obj in object_list %}
+
+        <!-- koppelen beheerders -->
+        {% if obj.fase != 'A1' %}
+
+            {% if bb_kan_bko_koppelen %}
+                <div class="col s12 m6 xl4">
+                    <div class="card">
+                        <div class="card-content">
+                            <table class="simple"><tr style="border:0px">
+                                <td><i class="material-icons-round large">supervisor_account</i></td>
+                                <td>BKO (Bond Kampioenschap Organisator) kiezen voor de {{ obj.beschrijving }}.</td>
+                            </tr></table>
+                        </div>
+                        <a href="{{ obj.wijzig_url }}" class="nhb-klikbare-balk">
+                            <div class="card-action center-align">
+                                <span class="nhb-klikbare-link">Bestuurders koppelen</span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if bko_kan_rko_koppelen %}
+                <div class="col s12 m6 xl4">
+                    <div class="card">
+                        <div class="card-content">
+                            <table class="simple"><tr style="border:0px">
+                                <td><i class="material-icons-round large">supervisor_account</i></td>
+                                <td>RKO's (Rayon Kampioenschap Organisatoren) kiezen voor de {{ obj.beschrijving }}.</td>
+                            </tr></table>
+                        </div>
+                        <a href="{{ obj.wijzig_url }}" class="nhb-klikbare-balk">
+                            <div class="card-action center-align">
+                                <span class="nhb-klikbare-link">Bestuurders koppelen</span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if rko_kan_rcl_koppelen %}
+                <div class="col s12 m6 xl4">
+                    <div class="card">
+                        <div class="card-content">
+                            <table class="simple"><tr style="border:0px">
+                                <td><i class="material-icons-round large">supervisor_account</i></td>
+                                <td>RCL's (Regio Competitie Leiders) kiezen voor de {{ obj.beschrijving }}.</td>
+                            </tr></table>
+                        </div>
+                        <a href="{{ obj.wijzig_url }}" class="nhb-klikbare-balk">
+                            <div class="card-action center-align">
+                                <span class="nhb-klikbare-link">Bestuurders koppelen</span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+
+        {% endif %}
+
+        {% if toon_competitie_bestuurders %}
+            <div class="col s12 m6 xl4">
+                <div class="card">
+                    <div class="card-content">
+                        <table class="simple"><tr style="border:0px">
+                            <td><i class="material-icons-round large">supervisor_account</i></td>
+                            <td>Toon de bestuurders voor de {{ obj.beschrijving }}.</td>
+                        </tr></table>
+                    </div>
+                    <a href="{{ obj.wijzig_url }}" class="nhb-klikbare-balk">
+                        <div class="card-action center-align">
+                            <span class="nhb-klikbare-link">Toon bestuurders</span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    {% endfor %}
+</div>
+
+<div class="row">
+    {% if bb_kan_competitie_aanmaken %}
+    <div class="col s12 m6 xl4">
+        <div class="card">
+            <div class="card-content">
+                <table class="simple"><tr style="border:0px">
+                    <td><i class="material-icons-round large">swap_vertical_circle</i></td>
+                    <td>Instellingen voor de bondscompetities {{ nieuwe_seizoen }} controleren en competities aanmaken.</td>
+                </tr></table>
+            </div>
+            <a href="{% url 'Competitie:instellingen-volgende-competitie' %}" class="nhb-klikbare-balk">
+                <div class="card-action center-align">
+                    <span class="nhb-klikbare-link">Competitie opstarten</span>
+                </div>
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if rol_is_bb %}
+
+        {% for obj in object_list %}
+            <!-- klassegrenzen vaststellen -->
+            {% if obj.fase == 'A1' %}
+                <div class="col s12 m6 xl4">
+                    <div class="card">
+                        <div class="card-content">
+                            <table class="simple"><tr style="border:0px">
+                                <td><i class="material-icons-round large">equalizer</i></td>
+                                <td>Klasse<wbr/>grenzen voor de {{ obj.beschrijving }} vaststellen aan de hand van uitslagen van vorig seizoen.</td>
+                            </tr></table>
+                        </div>
+                        {% if obj.afstand == '18' %}
+                        <a href="{% url 'Competitie:klassegrenzen' afstand=18 %}" class="nhb-klikbare-balk">
+                        {% else %}
+                        <a href="{% url 'Competitie:klassegrenzen' afstand=25 %}" class="nhb-klikbare-balk">
+                        {% endif %}
+                            <div class="card-action center-align">
+                                <span class="nhb-klikbare-link">Klassegrenzen vaststellen</span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+        {% endfor %}
+
+    {% endif %}
+</div>
+
+<p>Kan je niet vinden wat je zoekt? Misschien moet je eerst van rol wisselen.</p>
+<p>Je huidige rol is: <b>{{ huidige_rol }}</b>.</p>
+
+{% endblock %}
+

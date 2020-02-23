@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+{% comment %}
+                Copyright (c) 2019-2020 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+
+{% comment %}
+
+    Dit document is de blauwdruk voor alle pagina's van de site.
+    Andere template's beginnen met een 'extends' op deze template
+    en kunnen de volgende block tags gebruiken om delen te vervangen:
+        extrastyle    extra stijlsheets (komen in de header)
+        title         pagina titel instellen
+        pagina        de body van de pagina
+
+{% endcomment %}
+
+{% load static %}
+
+<html lang="nl">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{% block title %}{% endblock %}</title>
+        <link rel="icon" href="{% static 'plein/logo_nhb_192x192.png' %}" sizes="192x192">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans&amp;display=swap">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu&amp;display=swap">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Round">
+        <link rel="stylesheet" href="{% static 'materialize/materialize-new.css' %}">
+        <link rel="stylesheet" href="{% static 'plein/site_layout.css' %}"> <!-- moet ná materialize css -->
+        {% block extrastyle %}{% endblock %}
+    </head>
+
+    <body class="grey lighten-2">   <!-- grey lighten-4 is identical to #f5f5f5 from NHB style -->
+        <div id="container">        <!-- css manipulates this to make space for the menu -->
+
+            <!-- sidenav -->
+            <div id="menu">
+                <ul id="slide-out" class="sidenav sidenav-fixed">
+                    {% include 'plein/menu.dtl' %}
+                </ul>
+            </div>
+
+            <!-- main contents -->
+            <div id="content">      <!-- css manipulates this -->
+                <!-- button to call-up the sidenav; hidden when not needed -->
+                <a href="#" data-target="slide-out" class="sidenav-trigger hide-on-large-only"><i class="material-icons-round">menu</i></a>
+                {% block pagina %}{% endblock %}
+            </div>
+        </div>
+
+        <script src="{% static 'materialize/materialize.min.js' %}"></script>
+
+        <!-- configure the sidenav after everything has loaded and has been instantiated -->
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                var elems = document.querySelectorAll('.sidenav')
+                options = { menuWidth: 250,       // Default is 300
+                            edge: 'left',         // Choose the horizontal origin
+                            closeOnClick: false,  // Closes side-nav on <a> clicks, useful for Angular/Meteor
+                            draggable: true       // Choose whether you can drag to open on touch screens,
+                          };
+                var insts = M.Sidenav.init(elems, options)
+
+                var elems = document.querySelectorAll('.collapsible')
+                options = { inDuration: 100,    // default is 300
+                            outDuration: 100    // default is 300
+                          };
+                var insts = M.Collapsible.init(elems, options)
+
+                var elems = document.querySelectorAll('select')
+                options = {};
+                var insts = M.FormSelect.init(elems, options)
+
+            })
+        </script>
+
+        <script>
+            function getCookie(name) {
+                var cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    var cookies = document.cookie.split(';');
+                    for (var i = 0; i < cookies.length; i++) {
+                        var cookie = cookies[i].trim();
+                        // Does this cookie string begin with the name we want?
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+        </script>
+    </body>
+</html>

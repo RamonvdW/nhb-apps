@@ -1,0 +1,21 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2019-2020 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}E-mail bevestigd{% endblock %}
+
+{% block pagina %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="email bevestigd" %}
+
+<h4>Bevestigd</h4>
+
+<p>Je hebt laten zien dat je toegang hebt tot je e-mail.</p>
+<p>Je kan nu inloggen.</p>
+
+<p><a class="btn-nhb-blauw" href="{% url 'Account:login' %}">inloggen</a></p>
+
+{% endblock %}

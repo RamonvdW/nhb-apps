@@ -1,0 +1,46 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2019-2020 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Privacy{% endblock %}
+
+{% block pagina %}
+
+<!-- gebruik niet de hele breedte van het scherm -->
+<div class="row"><div class="col s12 m9">
+
+<h4>Privacy<wbr/>verklaring</h4>
+
+<p>Hoe we omgaan met jouw privacy staat beschreven in <a href="{{ url_privacyverklaring }}" target="_blank">dit document</a>.</p>
+
+<!--
+<h5>Cookies</h5>
+
+<p>Tijdens een bezoek aan deze website kunnen wij 'cookies' naar jouw browser sturen.
+Dit zijn kleine bestanden die op jouw apparaat kunnen worden opgeslagen en op een
+later moment weer naar onze website worden gestuurd.</p>
+
+<p>Deze 'cookies' worden gebruikt om je inlog te onthouden en om onze website te beschermen.
+Dit zijn puur functionele cookies en bevatten geen persoonsgegevens.</p>
+
+<p>We gebruiken geen tracking cookies waarvoor we je toestemming nodig hebben.
+Daarom krijg je bij deze website geen vraag of je cookies wilt accepteren.</p>
+
+<p>Hier kan je <a href="https://www.rijksoverheid.nl/onderwerpen/telecommunicatie/vraag-en-antwoord/mag-een-website-ongevraagd-cookies-plaatsen" target="_blank">meer informatie over cookies</a> vinden.</p>
+-->
+
+<h5>Contact</h5>
+
+<p>Alle vragen en verzoeken over privacy kunnen gericht worden aan de Nederlandse Handboog Bond
+via <a href="mailto:info@handboogsport.nl">info@handboogsport.nl</a>.</p>
+
+</div></div>
+
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="privacy" %}
+
+{% endblock %}
+

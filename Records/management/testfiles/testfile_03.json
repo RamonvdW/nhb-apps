@@ -1,0 +1,106 @@
+{
+  "spreadsheetId": "this-is-a-test-file",
+  "valueRanges": [
+    {
+      "range": "'Data individueel outdoor'!A1:AF100",
+      "majorDimension": "ROWS",
+      "values": [
+        [
+          "Index",
+          "Geslacht",
+          "Leeftijd",
+          "Materiaalklasse",
+          "Discipline",
+          "Soort_record",
+          "Para klasse",
+          "Afstand (m)",
+          "Pijlen",
+          "Bondsnummer",
+          "Naam",
+          "Datum",
+          "Plaats",
+          "Land",
+          "Score",
+          "X-count",
+          "Ook ER",
+          "Ook WR",
+          "Notities"
+        ]
+      ]
+    },
+    {
+      "range": "'Data individueel indoor'!A1:AG100",
+      "majorDimension": "ROWS",
+      "values": [
+        [
+          "Index",
+          "Geslacht",
+          "Leeftijd",
+          "Materiaalklasse",
+          "Discipline",
+          "Soort_record",
+          "Para klasse",
+          "Afstand (m)",
+          "Pijlen",
+          "Bondsnummer",
+          "Naam",
+          "Datum",
+          "Plaats",
+          "Land",
+          "Score",
+          "X-count",
+          "Ook ER",
+          "Ook WR",
+          "Notities"
+        ]
+      ]
+    },
+    {
+      "range": "'Data individueel 25m1pijl'!A1:AD100",
+      "majorDimension": "ROWS",
+      "values": [
+        [
+          "Index",
+          "Geslacht",
+          "Leeftijd",
+          "Materiaalklasse",
+          "Discipline",
+          "Soort_record",
+          "Para klasse",
+          "Afstand (m)",
+          "Pijlen",
+          "Bondsnummer",
+          "Naam",
+          "Datum",
+          "Plaats",
+          "Land",
+          "Score",
+          "Notities"
+        ]
+      ]
+    },
+    {
+      "range": "'Data team'!A1:AC100",
+      "majorDimension": "ROWS",
+      "values": [
+        [
+          "Geslacht",
+          "Leeftijd",
+          "Materiaalklasse",
+          "Discipline",
+          "Soort_record",
+          "Afstand (m)",
+          "Pijlen",
+          "Bondsnummer",
+          "Naam",
+          "Datum",
+          "Plaats",
+          "Land",
+          "Score",
+          "Notities"
+        ]
+      ]
+    }
+  ]
+}
+

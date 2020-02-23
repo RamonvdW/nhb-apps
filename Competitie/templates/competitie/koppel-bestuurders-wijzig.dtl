@@ -1,0 +1,46 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2020 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Koppel bestuurder{% endblock %}
+
+{% block pagina %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="koppel bestuurders wijzig" %}
+
+<h4>Koppel bestuurder</h4>
+
+<p>Kies de bestuurder voor de {{ deelcompetitie.competitie.beschrijving }}.</p>
+
+<div class="row">
+    <h5>{{ rol_str }}</h5>
+</div>
+
+<form method="post" action="{{ formulier_url }}">
+    {% csrf_token %}
+    <input type="hidden" name="deelcomp_pk" value="{{ deelcompetitie.pk }}"/>
+
+    {% for obj in object_list %}
+        <p>
+            <label for="{{ obj.form_index }}">
+                <input type="checkbox" class="filled-in" id="{{ obj.form_index }}" name="{{ obj.form_index }}" {%if obj.is_gekozen_bestuurder %}checked{% endif %}/>
+                <span class="black-text">{{ obj.favoriet.volledige_naam }} ({{ obj.beschrijving }})</span>
+            </label>
+        </p>
+    {% endfor %}
+
+    <div class="row">
+        <div class="col">
+            <a class="btn-nhb-blauw margin-5" href="{{ terug_url }}">Terug (niet opslaan)</a>
+        </div>
+        <div class="col">
+            <input class="btn-nhb-rood margin-5" type="submit" value="Wijzigingen opslaan">
+        </div>
+    </div>
+</form>
+
+{% endblock %}
+

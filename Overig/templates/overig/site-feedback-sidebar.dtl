@@ -1,0 +1,31 @@
+{% comment %}
+                Copyright (c) 2019 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+
+{% comment %}
+
+    Deze template kan door middel van een include opgenomen worden in andere templates
+    en levert de drie smiley's waarmee feedback op een pagina gegeven kan worden.
+
+    de context variabele 'op_pagina' moet een unieke verwijzing zijn naar de pagina
+    waarop de feedback gaat. Deze string wordt as-is opgeslagen als referentie.
+
+    voorbeeld: {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="plein" %}
+
+    de stijlen zijn onderdeel van de globale site stijlen.
+
+{% endcomment %}
+
+{% load static %}
+<div class="site-sidebar-box z-depth-1">
+    <div class="site-feedback"><span>Wat vind je van deze pagina?</span><br>
+        <a href="{% url 'Overig:feedback-bevinding' bevinding='plus' op_pagina=op_pagina %}">
+            <img src="{% static 'overig/smiley4_plus.png' %}" width=40 height=40 alt="min"></a>
+        <a href="{% url 'Overig:feedback-bevinding' bevinding='nul'  op_pagina=op_pagina %}">
+            <img src="{% static 'overig/smiley4_nul.png'  %}" width=40 height=40 alt="nul" style="margin: 0px 15px 0px 15px"></a>
+        <a href="{% url 'Overig:feedback-bevinding' bevinding='min'  op_pagina=op_pagina %}">
+            <img src="{% static 'overig/smiley4_min.png'  %}" width=40 height=40 alt="plus"></a>
+    </div>
+</div>

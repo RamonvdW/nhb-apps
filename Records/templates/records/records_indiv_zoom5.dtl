@@ -1,0 +1,45 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2019-2020 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Handboogsport Records{% endblock %}
+
+{% block pagina %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="records_indiv_zoom5" %}
+
+<h4>Nederlandse Handboogsport Records</h4>
+
+<p>Gemaakte keuzes:</p>
+
+<div class="row"><div class="col s12 m10 l8 xl6">
+    <div class="white-text blue z-depth-2">
+        <div class="row small-row">
+            <div class="col s4">Discipline:</div>
+            <div class="col s6">{{ discipline }}</div>
+        </div>
+        <div class="row small-row">
+            <div class="col s4">Geslacht:</div>
+            <div class="col s6">{{ geslacht }}</div>
+        </div>
+        <div class="row small-row">
+            <div class="col s4">Materiaalklasse:</div>
+            <div class="col s6">{{ materiaalklasse }}</div>
+        </div>
+        <div class="row small-row">
+            <div class="col s4">Leeftijdscategorie:</div>
+            <div class="col s6">{{ leeftijdscategorie }}</div>
+        </div>
+    </div>
+</div></div>
+
+<p>Kies nu het soort record (dit is typisch de afstand en aantal pijlen):</p>
+
+{% for obj in object_list %}
+<p><a class="btn white blue-text" href="{{ obj.url }}">{{ obj.soort_record }}</a></p>
+{% endfor %}
+
+{% endblock %}

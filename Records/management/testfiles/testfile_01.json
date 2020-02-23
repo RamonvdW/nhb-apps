@@ -1,0 +1,11 @@
+{
+  "spreadsheetId": "this-is-a-broken-test-file",
+  "valueRanges": [
+    {
+      "range": "Broken file",
+      "majorDimension": "ROWS",
+      "values": [
+    },
+  ]
+}
+

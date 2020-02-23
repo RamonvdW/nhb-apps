@@ -1,0 +1,79 @@
+
+/*
+                Copyright (c) 2019-2020 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+*/
+
+/* fonts */
+body {
+    font-family: 'Open Sans', sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Ubuntu', sans-serif;
+}
+
+/* colors */
+.nhb-blauw {
+    background-color: #0aa0e1;   /* NHB medium blauw */
+}
+
+.nhb-rood {
+    background-color: #f94137;   /* NHB hoofdkleur oranje */
+}
+
+.margin-5 {
+    margin: 5px;
+}
+
+/* actieve menu item in rood */
+.actief  {
+    background-color: #f94137;     /* NHB medium rood */
+}
+
+.collection-button {
+    background: none;
+    border: none;
+    text-decoration: none;
+    cursor: pointer;
+    font-size: 1em;
+    font-family: serif;
+    color: blue;
+}
+
+/* vertikale verkleiner in een grid */
+.small-row {
+    padding: 5px 10px 5px 10px;
+    margin-bottom: 0px;
+}
+
+/* site feedback floater */
+.site-sidebar-box {
+    width: 180px;
+    float: right;
+    text-align: center;
+    margin-top: 10px;
+    background-color: #fff;     /* wit */
+}
+
+/* de binnenkant van de feedback floater */
+.site-feedback {
+    display: inline-block;
+    font-size: 12px;
+}
+
+/* sidenav zichtbaar / verstopt */
+#container {
+    padding-left: 300px;
+}
+
+#content {
+    padding: 20px;
+}
+
+@media only screen and (max-width : 992px) {
+    #container {
+        padding-left: 0px;
+    }
+}
