@@ -272,7 +272,9 @@ class TestCompetitie(TestCase):
         assert_template_used(self, resp, ('competitie/beheer-favorieten.dtl', 'plein/site_layout.dtl'))
         self.assertNotContains(resp, "Niets gevonden")
         self.assertContains(resp, "100001")
-        self.assertContains(resp, "Ramon de Tester")
+        # check twee delen gescheiden omdat er highlight opmaak tussen zit
+        self.assertContains(resp, "Ramon")
+        self.assertContains(resp, "de Test")
 
         # voeg niet bestaand lid toe
         resp = self.client.post('/competitie/beheer-favorieten/wijzig/', {'add_favoriet': '999999'}, follow=True)
