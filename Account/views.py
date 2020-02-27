@@ -623,7 +623,7 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
                 group = Group.objects.get(pk=group_pk)
                 title = group.name
                 pos = title.find(" voor de ")
-                if pos:
+                if pos >= 0:
                     comp_str = title[pos:]
                     title = title[:pos]
                 else:
