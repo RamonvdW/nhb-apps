@@ -6,14 +6,14 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}Koppel bestuurder{% endblock %}
+{% block title %}Koppel beheerder{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="koppel bestuurders wijzig" %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="koppel-beheerder-wijzig" %}
 
-<h4>Koppel bestuurder</h4>
+<h4>Koppel beheerder</h4>
 
-<p>Kies de bestuurder voor de {{ deelcompetitie.competitie.beschrijving }}.</p>
+<p>Kies de beheerder voor de {{ deelcompetitie.competitie.beschrijving }}.</p>
 
 <div class="row">
     <h5>{{ rol_str }}</h5>
@@ -26,7 +26,7 @@
     {% for obj in object_list %}
         <p>
             <label for="{{ obj.form_index }}">
-                <input type="checkbox" class="filled-in" id="{{ obj.form_index }}" name="{{ obj.form_index }}" {%if obj.is_gekozen_bestuurder %}checked{% endif %}/>
+                <input type="checkbox" class="filled-in" id="{{ obj.form_index }}" name="{{ obj.form_index }}" {%if obj.is_gekozen_beheerder %}checked{% endif %}/>
                 <span class="black-text">{{ obj.favoriet.volledige_naam }} ({{ obj.beschrijving }})</span>
             </label>
         </p>

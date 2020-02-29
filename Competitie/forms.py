@@ -7,8 +7,8 @@
 from django import forms
 
 
-class FavorieteBestuurdersForm(forms.Form):
-    """ definitie van het formulier waarmee de bestuurder een zoekterm in kan voeren
+class FavorieteBeheerdersForm(forms.Form):
+    """ definitie van het formulier waarmee de beheerder een zoekterm in kan voeren
         om te zoeken naar een NHB lid.
     """
 
@@ -19,7 +19,7 @@ class FavorieteBestuurdersForm(forms.Form):
                     required=False)
 
 
-class WijzigFavorieteBestuurdersForm(forms.Form):
+class WijzigFavorieteBeheerdersForm(forms.Form):
     """ Dit formulier wordt gebruikt om via POST requests wijzigingen te ontvangen
         van verborgen formulieren
     """
@@ -27,19 +27,19 @@ class WijzigFavorieteBestuurdersForm(forms.Form):
     drop_favoriet = forms.IntegerField(required=False)
 
 
-class KoppelBestuurdersForm(forms.Form):
+class KoppelBeheerdersForm(forms.Form):
     """ Dit formulier wordt gebruikt om via POST requests wijzigingen te ontvangen
         van verborgen formulieren
     """
 
     def __init__(self, *args, **kwargs):
-        fav_bestuurders = kwargs.pop('fav_bestuurders')       # super() is gevoelig voor onbekende velden
+        fav_beheerders = kwargs.pop('fav_beheerders')       # super() is gevoelig voor onbekende velden
         super().__init__(*args, **kwargs)
 
-        # maak extra velden aan voor verwachte bestuurders
+        # maak extra velden aan voor verwachte beheerders
         # allemaal optioneel, want alleen de aangekruisde nummers komen terug
-        for obj in fav_bestuurders:
-            self.fields['bestuurder_%s' % obj.favoriet.pk] = forms.BooleanField(required=False)
+        for obj in fav_beheerders:
+            self.fields['beheerder_%s' % obj.favoriet.pk] = forms.BooleanField(required=False)
         # for
 
     # standaard velden

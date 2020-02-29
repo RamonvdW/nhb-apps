@@ -274,8 +274,8 @@ def rol_is_CWZ(request):
     return rol_get_huidige(request) == Rollen.ROL_CWZ
 
 
-def rol_is_bestuurder(request):
-    """ Geeft True terug als de gebruiker een bestuurder is
+def rol_is_beheerder(request):
+    """ Geeft True terug als de gebruiker een beheerder is
         Wordt gebruikt om toegang tot bepaalde schermen te voorkomen
     """
     return rol_get_huidige(request) in (Rollen.ROL_IT, Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL)

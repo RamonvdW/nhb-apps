@@ -10,14 +10,14 @@ from Plein.tests import assert_html_ok, assert_other_http_commands_not_supported
 from django.utils import timezone
 from .models import LogboekRegel, schrijf_in_logboek
 from Account.models import Account, account_vhpg_is_geaccepteerd, account_zet_sessionvars_na_otp_controle
-from Account.rol import rol_zet_sessionvars_na_otp_controle, rol_activeer_rol, rol_activeer_functie, rol_is_bestuurder
+from Account.rol import rol_zet_sessionvars_na_otp_controle, rol_activeer_rol, rol_activeer_functie, rol_is_beheerder
 
 
 class TestLogboek(TestCase):
     """ unit tests voor de Logboek applicatie """
 
     def setUp(self):
-        """ initializatie van de test case """
+        """ initialisatie van de test case """
         usermodel = get_user_model()
         usermodel.objects.create_user('normaal', 'normaal@test.com', 'wachtwoord')
         usermodel.objects.create_superuser('admin', 'admin@test.com', 'wachtwoord')
@@ -65,7 +65,7 @@ class TestLogboek(TestCase):
         rol_zet_sessionvars_na_otp_controle(self.account_admin, self.client).save()
         self.assertTrue(self.account_admin.is_staff)
         rol_activeer_rol(self.client, 'BB').save()
-        self.assertTrue(rol_is_bestuurder(self.client))
+        self.assertTrue(rol_is_beheerder(self.client))
 
         # alles
         resp = self.client.get(self.logboek_url)

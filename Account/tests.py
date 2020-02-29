@@ -11,7 +11,7 @@ from django.test import TestCase
 from django.conf import settings
 from django.core import management
 from .rol import Rollen, rol_zet_sessionvars_na_login, rol_zet_sessionvars_na_otp_controle,\
-                         rol_mag_wisselen, rol_is_bestuurder,\
+                         rol_mag_wisselen, rol_is_beheerder,\
                          rol_get_huidige, rol_activeer_rol, rol_activeer_functie
 from .leeftijdsklassen import leeftijdsklassen_zet_sessionvars_na_login,\
                               get_leeftijdsklassen
@@ -233,7 +233,7 @@ class TestAccount(TestCase):
         self.assertEqual(rol_get_huidige(request), Rollen.ROL_NONE)
         rol_activeer_rol(request, 'schutter')
         self.assertEqual(rol_get_huidige(request), Rollen.ROL_NONE)
-        self.assertFalse(rol_is_bestuurder(request))
+        self.assertFalse(rol_is_beheerder(request))
 
         # niet aan nhblid gekoppeld schutter account
         account.is_staff = False
@@ -243,7 +243,7 @@ class TestAccount(TestCase):
         rol_zet_sessionvars_na_login(account, request)
         self.assertFalse(rol_mag_wisselen(request))
         self.assertEqual(rol_get_huidige(request), Rollen.ROL_NONE)
-        self.assertFalse(rol_is_bestuurder(request))
+        self.assertFalse(rol_is_beheerder(request))
         rol_activeer_rol(request, 'beheerder')
         self.assertEqual(rol_get_huidige(request), Rollen.ROL_NONE)
         rol_activeer_rol(request, 'BKO')
@@ -262,7 +262,7 @@ class TestAccount(TestCase):
         rol_zet_sessionvars_na_login(account, request)
         self.assertFalse(rol_mag_wisselen(request))
         self.assertEqual(rol_get_huidige(request), Rollen.ROL_SCHUTTER)
-        self.assertFalse(rol_is_bestuurder(request))
+        self.assertFalse(rol_is_beheerder(request))
         rol_activeer_rol(request, 'beheerder')
         self.assertEqual(rol_get_huidige(request), Rollen.ROL_SCHUTTER)
         rol_activeer_rol(request, 'BKO')
@@ -281,13 +281,13 @@ class TestAccount(TestCase):
         rol_zet_sessionvars_na_otp_controle(account, request)
         self.assertEqual(rol_get_huidige(request), Rollen.ROL_SCHUTTER)
         self.assertTrue(rol_mag_wisselen(request))
-        self.assertFalse(rol_is_bestuurder(request))        # ivm VHPG niet geaccepteerd
+        self.assertFalse(rol_is_beheerder(request))        # ivm VHPG niet geaccepteerd
 
         account_vhpg_is_geaccepteerd(account)
         account_zet_sessionvars_na_otp_controle(request)
         rol_zet_sessionvars_na_otp_controle(account, request)
         self.assertEqual(rol_get_huidige(request), Rollen.ROL_SCHUTTER)
-        self.assertFalse(rol_is_bestuurder(request))
+        self.assertFalse(rol_is_beheerder(request))
 
         rol_activeer_rol(request, 'schutter')
         self.assertEqual(rol_get_huidige(request), Rollen.ROL_SCHUTTER)
@@ -295,7 +295,7 @@ class TestAccount(TestCase):
         self.assertEqual(rol_get_huidige(request), Rollen.ROL_SCHUTTER)
         rol_activeer_rol(request, 'BB')
         self.assertEqual(rol_get_huidige(request), Rollen.ROL_BB)
-        self.assertTrue(rol_is_bestuurder(request))
+        self.assertTrue(rol_is_beheerder(request))
         rol_activeer_rol(request, 'geen')
         self.assertEqual(rol_get_huidige(request), Rollen.ROL_NONE)
         rol_activeer_rol(request, 'BB')

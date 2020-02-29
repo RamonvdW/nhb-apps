@@ -14,7 +14,7 @@
 
 <h4>Beheer favorieten</h4>
 
-<p>Via deze pagina kan jij een handig lijstje samenstellen van een aantal NHB leden die je vaak nodig hebt, bijvoorbeeld bij het toekennen als bestuurder voor de competitie.</p>
+<p>Via deze pagina kan jij een handig lijstje samenstellen van een aantal NHB leden die je vaak nodig hebt, bijvoorbeeld bij het toekennen als beheerder voor de competitie.</p>
 
 <script>
 function wijzigfavoriet(actie, id) {
@@ -41,10 +41,10 @@ function wijzigfavoriet(actie, id) {
 }
 </script>
 
-{% if favoriete_bestuurders.count %}
-    <h5>Huidige favorieten ({{ favoriete_bestuurders.count }})</h5>
+{% if favoriete_beheerders.count %}
+    <h5>Huidige favorieten ({{ favoriete_beheerders.count }})</h5>
     <ul class="collapsible">
-        {% for obj in favoriete_bestuurders %}
+        {% for obj in favoriete_beheerders %}
             <li>
                 <div class="collapsible-header white"><span>{{ obj.favoriet.volledige_naam }} (regio {{ obj.favoriet.nhblid.bij_vereniging.regio.regio_nr }} / rayon {{ obj.favoriet.nhblid.bij_vereniging.regio.rayon.rayon_nr }})</span></div>
                 <div class="collapsible-body white">

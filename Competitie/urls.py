@@ -30,25 +30,25 @@ urlpatterns = [
 
     # post-only, alle data gaat via parameters in de body ipv de url
     path('beheer-favorieten/wijzig/',
-         views.WijzigFavorieteBestuurdersView.as_view(),
+         views.WijzigFavorieteBeheerdersView.as_view(),
          name='wijzigfavoriet'),
 
     path('beheer-favorieten/',
-         views.BeheerFavorieteBestuurdersView.as_view(),
+         views.BeheerFavorieteBeheerdersView.as_view(),
          name='beheerfavorieten'),
 
     # post-only, alle data gaat via parameters in de body ipv de url
-    path('wijzig-bestuurders/',
-         views.KoppelBestuurdersOntvangWijzigingView.as_view(),
-         name='wijzig-deelcomp-bestuurders'),
+    path('wijzig-beheerders/',
+         views.KoppelBeheerdersOntvangWijzigingView.as_view(),
+         name='wijzig-deelcomp-beheerders'),
 
-    path('kies-bestuurders/<deelcomp_pk>/',
-         views.KoppelBestuurderDeelCompetitieView.as_view(),
-         name='kies-deelcomp-bestuurder'),
+    path('kies-beheerders/<deelcomp_pk>/',
+         views.KoppelBeheerderDeelCompetitieView.as_view(),
+         name='kies-deelcomp-beheerders'),
 
-    path('toon-bestuurders/<comp_pk>/',
-         views.KoppelBestuurdersCompetitieView.as_view(),
-         name='toon-competitie-bestuurders'),
+    path('toon-beheerders/<comp_pk>/',
+         views.KoppelBeheerdersCompetitieView.as_view(),
+         name='toon-competitie-beheerders'),
 
     path('lijst-verenigingen/',
          views.LijstVerenigingenView.as_view(),

@@ -6,14 +6,14 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}Koppel bestuurders{% endblock %}
+{% block title %}Koppel beheerders{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="koppel bestuurders overzicht" %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="koppel-beheerders-overzicht" %}
 
-<h4>Koppel bestuurders</h4>
+<h4>Koppel beheerders</h4>
 
-<p>Hieronder worden de bestuurders getoond voor de <b>{{ competitie.beschrijving }}</b>.</p>
+<p>Hieronder worden de beheerders getoond voor de <b>{{ competitie.beschrijving }}</b>.</p>
 
 <p>Je huidige rol is: <b>{{ huidige_rol }}</b>.</p>
 
@@ -22,12 +22,12 @@
         <div class="col s12 white z-depth-2">
             <h5 class="red-text">Oeps!</h5>
 
-            <p>Om bestuurders te koppelen moet je eerst een aantal NHB leden selecteren en opslaan als favorieten.</p>
+            <p>Om beheerders te koppelen moet je eerst een aantal NHB leden selecteren en opslaan als favorieten.</p>
         </div>
 
         <div class="col s12 m6 xl4">
 
-            <!-- let op! gelijk houden aan zelfde kaart in overzicht-bestuurder.dtl -->
+            <!-- let op! gelijk houden aan zelfde kaart in overzicht-beheerder.dtl -->
             <div class="card">
                 <div class="card-content">
                     <table class="simple"><tr style="border:0px">
@@ -44,13 +44,13 @@
     </div>
 {% else %}
 
-    <!-- toon de deelcompetities met huidige bestuurders in een tabel -->
+    <!-- toon de deelcompetities met huidige beheerders in een tabel -->
     <div class="row">
         <table class="white">
             <thead>
                 <tr>
                     <th>Rol</th>
-                    <th>Bestuurder(s)</th>
+                    <th>Beheerder(s)</th>
                     {% if show_wijzig_kolom %}
                     <th></th>   <!-- kolom voor de 'wijzig' knoppen -->
                     {% endif %}
@@ -61,9 +61,9 @@
                     <td>{{ obj.rol_str }}</td>
 
                     <td>
-                    {% if obj.bestuurders.count %}
-                        {% for bestuurder in obj.bestuurders %}
-                            <p>{{ bestuurder.volledige_naam }}</p>
+                    {% if obj.beheerders.count %}
+                        {% for beheerder in obj.beheerders %}
+                            <p>{{ beheerder.volledige_naam }}</p>
                         {% endfor %}
                     {% else %}
                         <i>Nog niet gekoppeld</i>

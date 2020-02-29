@@ -37,7 +37,7 @@
 </li>
 {% endif %}
 
-<!-- wisselen van rol, voor bestuurders -->
+<!-- wisselen van rol, voor beheerders -->
 {% if menu_show_wisselvanrol %}
 <li{% if menu_actief == "wissel-van-rol" %} class="actief"{% endif %}>
     <a href="{% url 'Account:wissel-van-rol' %}" class="white-text">

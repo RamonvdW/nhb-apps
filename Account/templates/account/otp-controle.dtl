@@ -13,14 +13,14 @@
 
 <h4>Extra controle</h4>
 
-<p>Bestuurders moeten verplicht met twee-factor authenticatie inloggen.</p>
+<p>Beheerders moeten verplicht met twee-factor authenticatie inloggen.</p>
 
 <div class="container z-depth-2 white">
 
     <div class="row nhb-rood white-text">
         <div class="col s12 center-align">
             <h5>Controle tweede factor</h5>
-            <p>voor bestuurders</p>
+            <p>voor beheerders</p>
         </div>
     </div>
 
@@ -53,5 +53,7 @@
         </form>
     </div>
 </div>
+
+<p>Pak je mobiel erbij en tik de 6-cijferige code over.</p>
 
 {% endblock %}

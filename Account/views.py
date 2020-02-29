@@ -409,7 +409,7 @@ class VhpgAcceptatieView(TemplateView):
 
 class VhpgOverzichtView(UserPassesTestMixin, ListView):
 
-    """ Met deze view kan de Manager Competitiezaken een overzicht krijgen van alle bestuurders
+    """ Met deze view kan de Manager Competitiezaken een overzicht krijgen van alle beheerders
         die de VHPG geaccepteerd hebben en wanneer dit voor het laatste was.
     """
 
@@ -421,8 +421,8 @@ class VhpgOverzichtView(UserPassesTestMixin, ListView):
 
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
-        # er zijn ongeveer 30 bestuurders
-        # voorlopig geen probleem als een bestuurder vaker voorkomt
+        # er zijn ongeveer 30 beheerders
+        # voorlopig geen probleem als een beheerder vaker voorkomt
         return HanterenPersoonsgegevens.objects.order_by('-acceptatie_datum')[:100]
 
     def get_context_data(self, **kwargs):

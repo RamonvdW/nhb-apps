@@ -9,7 +9,7 @@
 {% block title %}Competitie{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie overzicht bestuurder" %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-overzicht-beheerder" %}
 
 <h4>Competitie</h4>
 
@@ -43,7 +43,7 @@
     </tr>
     <tr>
         <td{% if obj.fase == 'A2' %} class="blue"{% endif %}>A2</td>
-        <td>Koppelen RKO/RCL bestuurders door BKO/RKO; Instellingen regio (RCL)</td>
+        <td>Koppelen RKO/RCL beheerders door BKO/RKO; Instellingen regio (RCL)</td>
         {% if obj.fase > 'A2' %}
         <td class="green-text">Afgerond</td>
         {% else %}
@@ -106,7 +106,7 @@
     {% if kan_favorieten_beheren %}
     <div class="col s12 m6 xl4">
 
-        <!-- let op! gelijk houden aan zelfde kaart in koppel-bestuurders-overzicht.dtl -->
+        <!-- let op! gelijk houden aan zelfde kaart in koppel-beheerders-overzicht.dtl -->
         <div class="card">
             <div class="card-content">
                 <table class="simple"><tr style="border:0px">
@@ -140,7 +140,7 @@
                         </div>
                         <a href="{{ obj.wijzig_url }}" class="nhb-klikbare-balk">
                             <div class="card-action center-align">
-                                <span class="nhb-klikbare-link">Bestuurders koppelen</span>
+                                <span class="nhb-klikbare-link">Beheerders koppelen</span>
                             </div>
                         </a>
                     </div>
@@ -158,7 +158,7 @@
                         </div>
                         <a href="{{ obj.wijzig_url }}" class="nhb-klikbare-balk">
                             <div class="card-action center-align">
-                                <span class="nhb-klikbare-link">Bestuurders koppelen</span>
+                                <span class="nhb-klikbare-link">Beheerders koppelen</span>
                             </div>
                         </a>
                     </div>
@@ -176,7 +176,7 @@
                         </div>
                         <a href="{{ obj.wijzig_url }}" class="nhb-klikbare-balk">
                             <div class="card-action center-align">
-                                <span class="nhb-klikbare-link">Bestuurders koppelen</span>
+                                <span class="nhb-klikbare-link">Beheerders koppelen</span>
                             </div>
                         </a>
                     </div>
@@ -185,18 +185,18 @@
 
         {% endif %}
 
-        {% if toon_competitie_bestuurders %}
+        {% if toon_competitie_beheerders %}
             <div class="col s12 m6 xl4">
                 <div class="card">
                     <div class="card-content">
                         <table class="simple"><tr style="border:0px">
                             <td><i class="material-icons-round large">supervisor_account</i></td>
-                            <td>Toon de bestuurders voor de {{ obj.beschrijving }}.</td>
+                            <td>Toon de beheerders voor de {{ obj.beschrijving }}.</td>
                         </tr></table>
                     </div>
                     <a href="{{ obj.wijzig_url }}" class="nhb-klikbare-balk">
                         <div class="card-action center-align">
-                            <span class="nhb-klikbare-link">Toon bestuurders</span>
+                            <span class="nhb-klikbare-link">Toon beheerders</span>
                         </div>
                     </a>
                 </div>

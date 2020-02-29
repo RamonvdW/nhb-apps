@@ -18,7 +18,7 @@ from Account.rol import Rollen, rol_get_huidige_functie, rol_get_huidige, rol_ge
 TEMPLATE_PLEIN_BEZOEKER = 'plein/plein-bezoeker.dtl'            # niet ingelogd
 TEMPLATE_PLEIN_GEBRUIKER = 'plein/plein-gebruiker.dtl'          # special (ROL_NONE)
 TEMPLATE_PLEIN_SCHUTTER = 'plein/plein-schutter.dtl'            # schutter (ROL_SCHUTTER)
-TEMPLATE_PLEIN_BESTUURDER = 'plein/plein-bestuurder.dtl'        # bestuurder (ROL_BB/BKO/RKO/RCL/CWZ)
+TEMPLATE_PLEIN_BEHEERDER = 'plein/plein-beheerder.dtl'          # beheerder (ROL_BB/BKO/RKO/RCL/CWZ)
 
 TEMPLATE_LEEFTIJDSKLASSEN = 'plein/leeftijdsklassen.dtl'
 TEMPLATE_PRIVACY = 'plein/privacy.dtl'
@@ -64,8 +64,8 @@ class PleinView(View):
                     context['plein_toon_leeftijdsklassen'] = False
 
             else:   # rol_nu < Rollen.ROL_SCHUTTER:
-                # bestuurder
-                template = TEMPLATE_PLEIN_BESTUURDER
+                # beheerder
+                template = TEMPLATE_PLEIN_BEHEERDER
 
                 if rol_nu == Rollen.ROL_BB:
                     context['rol_is_bb'] = True;

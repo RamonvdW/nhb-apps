@@ -20,8 +20,8 @@ ZERO = Decimal('0.000')
 
 
 class FavorieteBestuurders(models.Model):
-    """ Deze klasse verbindt accounts met favoriete bestuurders
-        De favorieten kunnen gekozen worden bij het koppelen van bestuurders
+    """ Deze klasse verbindt accounts met favoriete beheerders
+        De favorieten kunnen gekozen worden bij het koppelen van beheerders
     """
     zelf = models.ForeignKey(Account, on_delete=models.CASCADE)
     favoriet = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='favorietebestuurder', blank=True, null=True)
@@ -33,7 +33,7 @@ class FavorieteBestuurders(models.Model):
         verbose_name = verbose_name_plural = 'Favoriete bestuurders'
 
 
-def add_favoriete_bestuurder(zelf_account, fav_account_pk):
+def add_favoriete_beheerder(zelf_account, fav_account_pk):
     # alleen toevoegen als nog niet in de lijst
     if len(FavorieteBestuurders.objects.filter(zelf=zelf_account, favoriet__pk=fav_account_pk)) == 0:
         try:
@@ -45,7 +45,7 @@ def add_favoriete_bestuurder(zelf_account, fav_account_pk):
             FavorieteBestuurders(zelf=zelf_account, favoriet=account).save()
 
 
-def drop_favoriete_bestuurder(zelf_account, fav_account_pk):
+def drop_favoriete_beheerder(zelf_account, fav_account_pk):
     # TODO: exception to handle?
     FavorieteBestuurders.objects.filter(zelf=zelf_account, favoriet__pk=fav_account_pk).delete()
 
@@ -199,7 +199,7 @@ def get_competitie_fase(afstand):
 
 def maak_deelcompetitie_functie(deel):
     """ Maak een nieuwe functie aan voor dit deel van de competitie
-        Hieraan kunnen bestuurders gekoppeld worden.
+        Hieraan kunnen beheerders gekoppeld worden.
     """
     if deel.nhb_regio:
         func_naam = "RCL regio %s" % deel.nhb_regio.regio_nr

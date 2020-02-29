@@ -6,19 +6,18 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}Welkom Bestuurder!{% endblock %}
+{% block title %}Welkom Beheerder!{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="plein-bestuurder" %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="plein-beheerder" %}
 
-<h4>Hallo, bestuurder!</h4>
+<h4>Hallo, beheerder!</h4>
 
 <p>Op deze pagina verzamelen we informatie die voor jou interessant is.</p>
 
 <p>Je huidige rol is: <b>{{ huidige_rol }}</b>.</p>
 
-<p>Kijk eens in het menu onder Competitie en Wissel van rol.</p>
-
+<p>Kijk eens in het menu onder Competities en Wissel van rol.</p>
 
 <div class="row">
 
@@ -29,7 +28,7 @@
                 <div class="card-content">
                     <table class="simple"><tr style="border:0px">
                         <td><i class="material-icons-round large">verified_user</i></td>
-                        <td>Toon overzicht van bestuurders die de Verklaring Hanteren Persoonsgegevens (VHPG) geaccepteerd hebben.</td>
+                        <td>Toon overzicht van beheerders die de Verklaring Hanteren Persoonsgegevens (VHPG) geaccepteerd hebben.</td>
                     </tr></table>
                 </div>
                 <a href="{% url 'Account:vhpg-overzicht' %}" class="nhb-klikbare-balk">

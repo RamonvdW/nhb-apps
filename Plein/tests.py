@@ -120,7 +120,7 @@ class TestPlein(TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, '/beheer/')
         self.assertContains(resp, 'Wissel van rol')
-        assert_template_used(self, resp, ('plein/plein-bestuurder.dtl', 'plein/site_layout.dtl'))
+        assert_template_used(self, resp, ('plein/plein-beheerder.dtl', 'plein/site_layout.dtl'))
 
         # wissel naar een functie
         rol_activeer_functie(self.client, self.group_rko.pk).save()

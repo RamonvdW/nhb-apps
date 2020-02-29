@@ -13,7 +13,7 @@
 
 <h4>Registreer tweede factor</h4>
 
-<p>Als bestuurder kan je op deze pagina je account koppelen met een applicatie die je gebruikt voor twee-factor authenticatie.</p>
+<p>Als beheerder kan je op deze pagina je account koppelen met een applicatie die je gebruikt voor twee-factor authenticatie.</p>
 <p>Bekende voorbeelden zijn de gratis <a href="https://en.wikipedia.org/wiki/Google_Authenticator" target="_blank">Google Authenticator</a> (Play store, Apple store, etc.) en <a href="https://authy.com" target="_blank">Authy</a>.</p>
 
 <div class="container z-depth-2 white center-align">
@@ -71,5 +71,8 @@
         </form>
     </div>
 </div>
+
+
+<p>Open de applicatie op je mobiel en scan de QR-code.</p>
 
 {% endblock %}
