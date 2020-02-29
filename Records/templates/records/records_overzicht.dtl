@@ -10,7 +10,7 @@
 
 {% block pagina %}
 
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="records_overzicht" %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="records-overzicht" %}
 
 <h4>Nederlandse Handboog<wbr/>sport Records</h4>
 

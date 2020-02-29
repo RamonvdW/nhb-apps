@@ -9,7 +9,7 @@
 {% block title %}Verenigingen{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="lijst verenigingen" %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="lijst-verenigingen" %}
 
 <h4>Verenigingen</h4>
 

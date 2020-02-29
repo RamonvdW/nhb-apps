@@ -9,7 +9,7 @@
 {% block title %}Instellingen volgende bondscompetitie{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="instellingen nieuwe competitie" %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="instellingen-nieuwe-competitie" %}
 
 <h4>Instellingen volgende bondscompetitie</h4>
 

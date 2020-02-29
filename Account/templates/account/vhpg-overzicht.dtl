@@ -9,11 +9,11 @@
 {% block title %}Omgaan met persoonsgegevens{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vhpg overzicht" %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vhpg-overzicht" %}
 
 <h4>Omgaan met persoons<wbr/>gegevens</h4>
 
-<p>Hieronder kan je zien welke bestuurders de Verklaring Hanteren Persoonsgegevens (VPGH) geaccepteerd hebben.</p>
+<p>Hieronder kan je zien welke beheerders de Verklaring Hanteren Persoonsgegevens (VHPG) geaccepteerd hebben.</p>
 
 <table class="white">
     <thead>

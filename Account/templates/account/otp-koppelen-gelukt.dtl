@@ -9,7 +9,7 @@
 {% block title %}Tweede factor gelukt{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="otp koppelen gelukt" %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="otp-koppelen-gelukt" %}
 
 <h4>Gelukt!</h4>
 

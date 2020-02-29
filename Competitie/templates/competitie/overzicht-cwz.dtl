@@ -9,7 +9,7 @@
 {% block title %}Competitie{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie overzicht cwz" %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-overzicht-cwz" %}
 
 <h4>Competitie overzicht voor de CWZ</h4>
 

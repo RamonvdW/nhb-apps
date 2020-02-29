@@ -9,7 +9,7 @@
 {% block title %}Controle tweede factor{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="otp controle" %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="otp-controle" %}
 
 <h4>Extra controle</h4>
 

@@ -9,7 +9,7 @@
 {% block title %}Handboogsport Records{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="records_indiv_zoom5" %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="records-indiv-zoom5" %}
 
 <h4>Nederlandse Handboogsport Records</h4>
 

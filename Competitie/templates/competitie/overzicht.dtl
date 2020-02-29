@@ -9,7 +9,7 @@
 {% block title %}Competitie{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie overzicht" %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-overzicht" %}
 
 <h4>Competitie</h4>
 

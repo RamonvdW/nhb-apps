@@ -9,7 +9,7 @@
 {% block title %}Klassegrenzen{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="klassegrenzen vaststellen" %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="klassegrenzen-vaststellen" %}
 
 <h4>Klassegrenzen</h4>
 

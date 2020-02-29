@@ -10,7 +10,7 @@
 {% block title %}Handboogsport records doorzoeken{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="records zoek formulier" %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="records-zoek-formulier" %}
 
 <h4>Records doorzoeken</h4>
 
