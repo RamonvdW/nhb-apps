@@ -29,9 +29,9 @@ python3.6 ./websim.py &
 
 rm -rf "$REPORT_DIR"
 
-coverage erase
+python3.6 -m coverage erase
 
-coverage run --append --branch ./manage.py test --noinput $*  # note: double quotes not supported around $*
+python3.6 -m coverage run --append --branch ./manage.py test --noinput $*  # note: double quotes not supported around $*
 if [ $# -eq 0 ]
 then
     # add coverage with debug enabled
@@ -46,12 +46,12 @@ kill $!
 wait $! 2>/dev/null
 
 echo
-coverage report --skip-covered --fail-under=90 $OMIT
+python3.6 -m coverage report --skip-covered --fail-under=90 $OMIT
 res=$?
 #echo "res=$res"
 echo
 
-coverage html -d "$REPORT_DIR" --skip-covered $OMIT
+python3.6 -m coverage html -d "$REPORT_DIR" --skip-covered $OMIT
 
 if [ "$res" -gt 0 ] && [ -z "$ARGS" ]
 then
@@ -63,6 +63,8 @@ then
 else
     echo "HTML report is in $REPORT_DIR  (try firefox $REPORT_DIR/index.html)"
 fi
+
+rm .coverage
 
 echo
 echo -n "Press ENTER to start firefox now, or Ctrl+C to abort"
