@@ -10,6 +10,7 @@ from django.core.exceptions import ValidationError
 from .models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
 from .migrations.m0002_nhbstructuur_2018 import maak_rayons_2018, maak_regios_2018
 import datetime
+from dateutil.relativedelta import relativedelta
 import io
 
 
@@ -64,7 +65,7 @@ class TestNhbStructuur(TestCase):
 
         # test: geboortejaar in de toekomst
         now = datetime.datetime.now()
-        lid.geboorte_datum = datetime.date(year=now.year+1, month=now.month, day=now.day)
+        lid.geboorte_datum = now - relativedelta(years=1)   # avoid leap-year issue
         with self.assertRaises(ValidationError):
             lid.clean_fields()
 
