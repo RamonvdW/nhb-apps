@@ -29,7 +29,7 @@ urlpatterns = [
     path('idp/',        include('djangosaml2idp.urls')),        # single sign-on
 ]
 
-if settings.DEBUG:
+if settings.DEBUG:          # pragma: no cover
     import debug_toolbar
     urlpatterns = [path('__debug__', include(debug_toolbar.urls)), ] + urlpatterns
 

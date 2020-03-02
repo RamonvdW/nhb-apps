@@ -21,18 +21,18 @@ class AccountAdmin(UserAdmin):
     fieldsets = (
         (None, {'fields': ('username', 'password', 'vraag_nieuw_wachtwoord')}),
         (_('Personal info'), {'fields': ('first_name', 'last_name')}),
-        (_('OTP'), { 'fields': ('otp_code', 'otp_is_actief')}),
-        (_('Coupling'), {'fields': ('nhblid',)}),
-        (_('Important dates'), {'fields': ('laatste_inlog_poging', 'last_login', 'date_joined')}),
+        (_('2FA'), { 'fields': ('otp_code', 'otp_is_actief')}),
+        (_('Koppeling'), {'fields': ('nhblid',)}),
         (_('Permissions'), {
-            'fields': ('is_active', 'is_BKO', 'is_staff', 'groups', 'user_permissions'),
+            'fields': ('is_active', 'is_BB', 'is_Observer', 'is_staff', 'groups', 'user_permissions'),
         }),
-        (_('Beveiliging'), {'fields': ('verkeerd_wachtwoord_teller', 'is_geblokkeerd_tot')})
+        (_('Beveiliging'), {'fields': ('verkeerd_wachtwoord_teller', 'is_geblokkeerd_tot')}),
+        (_('Important dates'), {'fields': ('laatste_inlog_poging', 'last_login', 'date_joined')}),
     )
 
     list_display = ('username', 'last_login', 'is_staff')
 
-    list_filter = ('is_staff', 'is_BKO', 'otp_is_actief')
+    list_filter = ('is_staff', 'is_BB', 'otp_is_actief')
 
 
 admin.site.register(Account, AccountAdmin)

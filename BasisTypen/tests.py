@@ -23,7 +23,7 @@ class TestBasisTypen(TestCase):
         usermodel = get_user_model()
         usermodel.objects.create_user('bko', 'bko@test.com', 'wachtwoord')
         account = Account.objects.get(username='bko')
-        account.is_BKO = True
+        account.is_BB = True
         account.save()
         self.account_bko = account
 

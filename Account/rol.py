@@ -82,7 +82,7 @@ def rol_zet_sessionvars_na_login(account, request):
             rollen_vast.append(Rollen.ROL_IT)
             rollen_vast.append(Rollen.ROL_NONE)      # special case
 
-        if account.is_staff or account.is_BKO:
+        if account.is_staff or account.is_BB:
             rollen_vast.append(Rollen.ROL_BB)
 
             for func in rol_expandeer_functies:
@@ -241,7 +241,7 @@ def rol_bepaal_beschrijving(rol, group_pk=None):
     elif rol == Rollen.ROL_SCHUTTER:
         beschr = 'Schutter'
     else:   # ook rol == None
-        # dit komt alleen voor als account geen nhblid is maar wel OTP mag koppelen (is_staff of is_BKO)
+        # dit komt alleen voor als account geen nhblid is maar wel OTP mag koppelen (is_staff of is_BB)
         beschr = "Gebruiker"
     return beschr
 

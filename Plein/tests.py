@@ -29,9 +29,14 @@ class TestPlein(TestCase):
         usermodel.objects.create_user('normaal', 'normaal@test.com', 'wachtwoord')
         usermodel.objects.create_superuser('admin', 'admin@test.com', 'wachtwoord')
         self.account_admin = Account.objects.get(username='admin')
+        self.account_admin.is_BB = True
+        self.account_admin.save()
         self.account_normaal = Account.objects.get(username='normaal')
         self.account_100001 = Account.objects.get(username='100001')
+        self.group_bko, _ = Group.objects.get_or_create(name="BKO test")
         self.group_rko, _ = Group.objects.get_or_create(name="RKO test")
+        self.group_rcl, _ = Group.objects.get_or_create(name="RCL test")
+        self.group_cwz, _ = Group.objects.get_or_create(name="CWZ test")
 
         # maak de standard rayon/regio structuur aan
         maak_rayons_2018(NhbRayon)
@@ -93,7 +98,10 @@ class TestPlein(TestCase):
         self.client.logout()
 
     def test_plein_admin(self):
+        self.account_admin.groups.add(self.group_bko)
         self.account_admin.groups.add(self.group_rko)
+        self.account_admin.groups.add(self.group_rcl)
+        self.account_admin.groups.add(self.group_cwz)
         self.client.login(username='admin', password='wachtwoord')
 
         account_zet_sessionvars_na_login(self.client).save()
@@ -104,7 +112,7 @@ class TestPlein(TestCase):
         self.assertNotContains(resp, '/admin/')
         self.assertContains(resp, 'Wissel van rol')
 
-        # simuleert 2FA
+        # simuleer 2FA
         account_vhpg_is_geaccepteerd(self.account_admin)
         account_zet_sessionvars_na_otp_controle(self.client).save()
         rol_zet_sessionvars_na_otp_controle(self.account_admin, self.client).save()
@@ -122,11 +130,43 @@ class TestPlein(TestCase):
         self.assertContains(resp, 'Wissel van rol')
         assert_template_used(self, resp, ('plein/plein-beheerder.dtl', 'plein/site_layout.dtl'))
 
-        # wissel naar een functie
+        # wissel naar elk van de functies
+
+        # bb
+        rol_activeer_rol(self.client, "BB").save()
+        resp = self.client.get('/plein/')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assertContains(resp, 'Rol: Manager competitiezaken')
+
+        # bko
+        rol_activeer_functie(self.client, self.group_bko.pk).save()
+        resp = self.client.get('/plein/')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assertContains(resp, 'Rol: BKO')
+
+        # rko
         rol_activeer_functie(self.client, self.group_rko.pk).save()
         resp = self.client.get('/plein/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, 'Rol: RKO')
+
+        # rcl
+        rol_activeer_functie(self.client, self.group_rcl.pk).save()
+        resp = self.client.get('/plein/')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assertContains(resp, 'Rol: RCL')
+
+        # cwz
+        rol_activeer_functie(self.client, self.group_cwz.pk).save()
+        resp = self.client.get('/plein/')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assertContains(resp, 'Rol: CWZ')
+
+        # geen
+        rol_activeer_rol(self.client, "geen").save()
+        resp = self.client.get('/plein/')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assertContains(resp, 'Rol: Gebruiker')
 
         self.client.logout()
 

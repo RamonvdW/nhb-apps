@@ -31,7 +31,7 @@ class TestCompetitie(TestCase):
         usermodel = get_user_model()
         usermodel.objects.create_user('bko', 'bko@test.com', 'wachtwoord')
         account = Account.objects.get(username='bko')
-        account.is_BKO = True
+        account.is_BB = True
         account.save()
         self.account_bko = account
         account_vhpg_is_geaccepteerd(account)
@@ -383,7 +383,7 @@ class TestCompetitieKoppelBeheerders(TestCase):
         # maak een BB aan (geen NHB lid)
         self.usermodel.objects.create_user('bb', 'bko@test.com', 'wachtwoord')
         account = Account.objects.get(username='bb')
-        account.is_BKO = True
+        account.is_BB = True
         account.save()
         self.account_bb = account
         account_vhpg_is_geaccepteerd(account)
@@ -646,11 +646,6 @@ class TestCompetitieBeheerders(TestCase):
         account_vhpg_is_geaccepteerd(account)
         return account
 
-    def _set_fav(self, account, favs):
-        for fav in favs:
-            add_favoriete_beheerder(account, fav.pk)
-        # for
-
     def setUp(self):
         """ eenmalige setup voor alle tests
             wordt als eerste aangeroepen
@@ -678,7 +673,7 @@ class TestCompetitieBeheerders(TestCase):
         # maak een BKO aan (geen NHB lid)
         self.usermodel.objects.create_user('bko', 'bko@test.com', 'wachtwoord')
         account = Account.objects.get(username='bko')
-        account.is_BKO = True
+        account.is_BB = True
         account.save()
         self.account_bb = account
 

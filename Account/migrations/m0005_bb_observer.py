@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2020 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -12,21 +12,23 @@ class Migration(migrations.Migration):
 
     # volgorde afdwingen
     dependencies = [
-        ('Account', 'm0002_schutterboog'),
+        ('Account', 'm0004_2fa'),
     ]
 
     # migratie functies
     operations = [
-        migrations.AddField(
+        migrations.RemoveField(
             model_name='account',
-            name='is_geblokkeerd_tot',
-            field=models.DateTimeField(blank=True, help_text='Login niet mogelijk tot', null=True),
+            name='is_BKO',
         ),
         migrations.AddField(
             model_name='account',
-            name='verkeerd_wachtwoord_teller',
-            field=models.IntegerField(default=0, help_text='Aantal mislukte inlog pogingen op rij'),
+            name='is_BB',
+            field=models.BooleanField(default=False, help_text='Manager Competitiezaken'),
+        ),
+        migrations.AddField(
+            model_name='account',
+            name='is_Observer',
+            field=models.BooleanField(default=False, help_text='Alleen observeren'),
         ),
     ]
-
-# end of file

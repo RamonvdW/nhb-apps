@@ -69,10 +69,13 @@ class Account(AbstractUser):
                                     blank=True, null=True,
                                     help_text="Login niet mogelijk tot")
 
-    # TODO: rename "bondsburo"
-    is_BKO = models.BooleanField(
+    is_BB = models.BooleanField(
                         default=False,
-                        help_text="BK Organisator")
+                        help_text="Manager Competitiezaken")
+
+    is_Observer = models.BooleanField(
+                        default=False,
+                        help_text="Alleen observeren")
 
     # TOTP ondersteuning
     otp_code = models.CharField(
@@ -360,11 +363,11 @@ def account_needs_otp(account):
 
         Returns: True or False
         Bepaalde rechten vereisen OTP:
-            is_BKO
+            is_BB
             is_staff
             rechten voor beheerders
     """
-    if account.is_BKO or account.is_staff:
+    if account.is_BB or account.is_staff:
         return True
 
     for group in account.groups.all():

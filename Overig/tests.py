@@ -150,7 +150,7 @@ class TestOverig(TestCase):
 
     def test_feedback_inzicht_bb(self):
         # do een get van alle feedback
-        self.account_normaal.is_BKO = True
+        self.account_normaal.is_BB = True
         self.account_normaal.save()
         account_vhpg_is_geaccepteerd(self.account_normaal)
         self.client.login(username=self.account_normaal.username, password='wachtwoord')

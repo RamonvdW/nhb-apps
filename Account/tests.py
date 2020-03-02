@@ -237,7 +237,7 @@ class TestAccount(TestCase):
 
         # niet aan nhblid gekoppeld schutter account
         account.is_staff = False
-        account.is_BKO = False
+        account.is_BB = False
         account.nhblid = None
         request.session = dict()
         rol_zet_sessionvars_na_login(account, request)
@@ -255,7 +255,7 @@ class TestAccount(TestCase):
 
         # schutter
         account.is_staff = False
-        account.is_BKO = False
+        account.is_BB = False
         account.nhblid = self.nhblid1
         request.session = dict()
         account_zet_sessionvars_na_login(request)
@@ -274,7 +274,7 @@ class TestAccount(TestCase):
 
         # bb
         account.is_staff = False
-        account.is_BKO = True
+        account.is_BB = True
         account.nhblid = self.nhblid1
         request.session = dict()
         account_zet_sessionvars_na_otp_controle(request)
@@ -1183,15 +1183,15 @@ class TestAccount(TestCase):
     def test_account_needs_otp(self):
         account = self.account_normaal
 
-        account.is_BKO = False
+        account.is_BB = False
         account.is_staff = False
         account.groups.clear()
 
         self.assertFalse(account_needs_otp(account))
 
-        account.is_BKO = True
+        account.is_BB = True
         self.assertTrue(account_needs_otp(account))
-        account.is_BKO = False
+        account.is_BB = False
         self.assertFalse(account_needs_otp(account))
 
         account.is_staff = True
