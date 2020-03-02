@@ -7,7 +7,10 @@
 from django.test import TestCase
 from django.core import management
 from django.core.exceptions import ValidationError
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
 from .models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
+from Account.models import Account
 from .migrations.m0002_nhbstructuur_2018 import maak_rayons_2018, maak_regios_2018
 import datetime
 from dateutil.relativedelta import relativedelta
@@ -27,7 +30,10 @@ class TestNhbStructuur(TestCase):
         ver.naam = "Grote Club"
         ver.nhb_nr = "1000"
         ver.regio = NhbRegio.objects.get(pk=111)
-        # secretaris kan nog niet ingevuld worden
+        group = Group()
+        group.name = "CWZ vereniging 1000"
+        group.save()
+        ver.cwz_group = group
         ver.save()
 
         # maak een test lid aan
@@ -42,6 +48,13 @@ class TestNhbStructuur(TestCase):
         lid.bij_vereniging = ver
         lid.save()
 
+        usermodel = get_user_model()
+        usermodel.objects.create_user('100001', 'rdetester@gmail.not', 'wachtwoord')
+        account = Account.objects.get(username='100001')
+        account.nhblid = lid
+        account.save()
+        self.account_100001 = account
+
     def test_rayons(self):
         self.assertEqual(NhbRayon.objects.all().count(), 4)
         rayon = NhbRayon.objects.get(pk=3)
@@ -55,9 +68,9 @@ class TestNhbStructuur(TestCase):
         self.assertEqual(regio.naam, "Regio 111")
         self.assertIsNotNone(str(regio))
 
-
     def test_lid(self):
-        lid = NhbLid.objects.all()[0]
+        lid = NhbLid.objects.get(nhb_nr="100001")
+        self.assertIsNotNone(lid)
         self.assertIsNotNone(str(lid))
 
         lid.clean_fields()      # run field validators
@@ -83,13 +96,17 @@ class TestNhbStructuur(TestCase):
         with self.assertRaises(ValidationError):
             lid.clean_fields()
 
+        self.assertEqual(lid.voornaam, "Ramon")
+        self.assertEqual(lid.achternaam, "de Tester")
+        self.assertEqual(lid.volledige_naam(), "Ramon de Tester")
+
     def test_vereniging(self):
         ver = NhbVereniging.objects.all()[0]
         self.assertIsNotNone(str(ver))
         ver.clean_fields()      # run validators
         ver.clean()             # run model validator
 
-    def test_import_nhb_crm_00(self):
+    def test_import_nhb_crm_00_file_not_found(self):
         # afhandelen niet bestaand bestand
         f1 = io.StringIO()
         f2 = io.StringIO()
@@ -97,7 +114,7 @@ class TestNhbStructuur(TestCase):
         self.assertTrue(f1.getvalue().startswith('[ERROR] Bestand kan niet gelezen worden'))
         self.assertEqual(f2.getvalue(), '')
 
-    def test_import_nhb_crm_01(self):
+    def test_import_nhb_crm_01_bad_json(self):
         # afhandelen slechte/lege JSON file
         f1 = io.StringIO()
         f2 = io.StringIO()
@@ -105,12 +122,11 @@ class TestNhbStructuur(TestCase):
         self.assertTrue(f1.getvalue().startswith('[ERROR] Probleem met het JSON formaat in bestand'))
         self.assertEqual(f2.getvalue(), '')
 
-    def test_import_nhb_crm_02(self):
+    def test_import_nhb_crm_02_toplevel_structuur_afwezig(self):
         # top-level keys afwezig
         f1 = io.StringIO()
         f2 = io.StringIO()
         management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_02.json', stderr=f1, stdout=f2)
-        #print("f1: %s" % f1.getvalue())
         self.assertTrue("[ERROR] Verplichte sleutel 'rayons' niet aanwezig in de 'top-level' data" in f1.getvalue())
         self.assertTrue("[ERROR] Verplichte sleutel 'regions' niet aanwezig in de 'top-level' data" in f1.getvalue())
         self.assertTrue("[ERROR] Verplichte sleutel 'clubs' niet aanwezig in de 'top-level' data" in f1.getvalue())
@@ -130,9 +146,8 @@ class TestNhbStructuur(TestCase):
         self.assertTrue("[INFO] Lid 100001 geslacht: M --> V" in f2.getvalue())
         self.assertTrue("[INFO] Lid 100001 geboortedatum: 1972-03-04 --> 2000-02-01" in f2.getvalue())
         self.assertTrue("[INFO] Lid 100001: sinds_datum: 2010-11-12 --> 2000-01-01" in f2.getvalue())
-        #self.assertEqual(f2.getvalue(), '')
 
-    def test_import_nhb_crm_04(self):
+    def test_import_nhb_crm_04_unicode_error(self):
         # UnicodeDecodeError
         f1 = io.StringIO()
         f2 = io.StringIO()
@@ -140,7 +155,7 @@ class TestNhbStructuur(TestCase):
         self.assertTrue("[ERROR] Bestand heeft unicode problemen ('rawunicodeescape' codec can't decode bytes in position 180-181: truncated" in f1.getvalue())
         self.assertEqual(f2.getvalue(), '')
 
-    def test_import_nhb_crm_05(self):
+    def test_import_nhb_crm_05_missing_keys(self):
         # missing/extra keys
         f1 = io.StringIO()
         f2 = io.StringIO()
@@ -155,18 +170,16 @@ class TestNhbStructuur(TestCase):
         self.assertTrue("[WARNING] Extra sleutel aanwezig in de 'member' data: ['name4']" in f1.getvalue())
         #self.assertEqual(f2.getvalue(), '')
 
-    def test_import_nhb_crm_06(self):
+    def test_import_nhb_crm_06_extra_geo_structuur(self):
         # extra rayon/regio
         f1 = io.StringIO()
         f2 = io.StringIO()
         management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_06.json', stderr=f1, stdout=f2)
-        #print("f1: %s" % f1.getvalue())
-        #print("f2: %s" % f2.getvalue())
         self.assertTrue("[ERROR] Onbekend rayon {'rayon_number': 0, 'name': 'Rayon 0'}" in f1.getvalue())
         self.assertTrue("[ERROR] Onbekende regio {'region_number': 0, 'name': 'Regio 0', 'rayon_number': 1}" in f1.getvalue())
         #self.assertEqual(f2.getvalue(), '')
 
-    def test_import_nhb_crm_07(self):
+    def test_import_nhb_crm_07_geen_data(self):
         # lege dataset
         f1 = io.StringIO()
         f2 = io.StringIO()
@@ -174,7 +187,7 @@ class TestNhbStructuur(TestCase):
         self.assertTrue("[ERROR] Geen data voor top-level sleutel 'clubs'" in f1.getvalue())
         self.assertEqual(f2.getvalue(), '')
 
-    def test_import_nhb_crm_08(self):
+    def test_import_nhb_crm_08_vereniging_mutaties(self):
         # vereniging mutaties
         f1 = io.StringIO()
         f2 = io.StringIO()
@@ -188,7 +201,7 @@ class TestNhbStructuur(TestCase):
         self.assertTrue("[ERROR] Vereniging 1002 hoort bij onbekende regio 199" in f1.getvalue())
         self.assertTrue("[INFO] Wijziging van secretaris voor vereniging 1001: geen --> 100001" in f2.getvalue())
 
-    def test_import_nhb_crm_09(self):
+    def test_import_nhb_crm_09_lid_mutaties(self):
         # lid mutaties
         f1 = io.StringIO()
         f2 = io.StringIO()
@@ -196,8 +209,6 @@ class TestNhbStructuur(TestCase):
         f1 = io.StringIO()
         f2 = io.StringIO()
         management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_09.json', stderr=f1, stdout=f2)
-        #print("f1: %s" % f1.getvalue())
-        #print("f2: %s" % f2.getvalue())
         self.assertTrue("[ERROR] Lid 100001 heeft geen valide geboortedatum", f1.getvalue())
         self.assertTrue("[ERROR] Lid 100001 heeft onbekend geslacht: X (moet zijn: M of F)", f1.getvalue())
         self.assertTrue("[WARNING] Lid 100009 heeft geen voornaam of initials" in f1.getvalue())
@@ -210,14 +221,7 @@ class TestNhbStructuur(TestCase):
         self.assertTrue("[INFO] Lid 100025: is_actief_lid ja --> nee (want blocked)", f2.getvalue())
         self.assertTrue("[INFO] Lid 100025: vereniging 1000 Grote Club --> 1001 HBS Dichtbij", f2.getvalue())
 
-    def test_import_nhb_crm_dryrun(self):
-        # dryrun
-        f1 = io.StringIO()
-        f2 = io.StringIO()
-        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_03.json', '--dryrun', stderr=f1, stdout=f2)
-        self.assertTrue("DRY RUN" in f2.getvalue())
-
-    def test_import_crm_erelid(self):
+    def test_import_crm_10_erelid(self):
         # sommige leden hebben de toevoegen " (Erelid NHB)" aan hun achternaam toegevoegd
         # import verwijderd dit
         f1 = io.StringIO()
@@ -225,7 +229,7 @@ class TestNhbStructuur(TestCase):
         management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_10.json', stderr=f1, stdout=f2)
         self.assertTrue("[INFO] Lid 100999: verwijder toevoeging erelid: 'Dienbaar (Erelid NHB)' --> 'Dienbaar'" in f2.getvalue())
 
-    def test_import_crm_datum_zonder_eeuw(self):
+    def test_import_crm_11_datum_zonder_eeuw(self):
         # sommige leden hebben een geboortedatum zonder eeuw
         f1 = io.StringIO()
         f2 = io.StringIO()
@@ -239,20 +243,18 @@ class TestNhbStructuur(TestCase):
         self.assertTrue("[ERROR] Lid 100997 heeft geen valide geboortedatum: 1810-05-05" in f1.getvalue())
         self.assertTrue("[ERROR] Lid 100997 heeft geen valide lidmaatschapdatum: 1815-06-06" in f1.getvalue())
 
-    def test_import_crm_skip_member(self):
+    def test_import_crm_12_skip_member(self):
         # sommige leden worden niet geimporteerd
         f1 = io.StringIO()
         f2 = io.StringIO()
         management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_12.json', stderr=f1, stdout=f2)
-        #print("f1: %s" % f1.getvalue())
-        #print("f2: %s" % f2.getvalue())
         with self.assertRaises(NhbLid.DoesNotExist):
             lid = NhbLid.objects.get(nhb_nr=101711)
 
-    def test_import_crm_del_vereniging(self):
+    def test_import_crm_12_del_vereniging(self):
         # test het verwijderen van een lege vereniging
 
-        # maak een test vereniging
+        # maak een test vereniging die verwijderd kan worden
         ver = NhbVereniging()
         ver.naam = "Wegisweg Club"
         ver.nhb_nr = "1999"
@@ -264,7 +266,7 @@ class TestNhbStructuur(TestCase):
         management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_12.json', stderr=f1, stdout=f2)
         self.assertTrue("[INFO] Vereniging 1999 Wegisweg Club wordt nu verwijderd" in f2.getvalue())
 
-    def test_import_crm_inactief(self):
+    def test_import_crm_13_inactief(self):
         # inactief maken nadat al geen lid meer van een vereniging
 
         # maak een test lid aan
@@ -282,9 +284,123 @@ class TestNhbStructuur(TestCase):
         f1 = io.StringIO()
         f2 = io.StringIO()
         management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_13.json', stderr=f1, stdout=f2)
+        self.assertTrue("[INFO] Lid 110000: vereniging geen --> 1000 Grote Club" in f2.getvalue())
+
+    def test_import_crm_14_maak_cwz(self):
+        # secretaris-lid cwz maken
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_14.json', stderr=f1, stdout=f2)
         #print("f1: %s" % f1.getvalue())
         #print("f2: %s" % f2.getvalue())
-        self.assertTrue("[INFO] Lid 110000: vereniging geen --> 1000 Grote Club" in f2.getvalue())
+        self.assertEqual(f1.getvalue(), '')
+        self.assertTrue("[INFO] Wijziging van secretaris voor vereniging 1000: geen --> 100001 Ramon de Tester" in f2.getvalue())
+        self.assertTrue("[INFO] Nieuwe CWZ groep met naam 'CWZ vereniging 2000' voor vereniging 2000" in f2.getvalue())
+        self.assertTrue("[WARNING] CWZ 100024 voor vereniging 2000 heeft nog geen account" in f2.getvalue())
+
+        lid = NhbLid.objects.get(nhb_nr="100001")
+        ver = NhbVereniging.objects.get(nhb_nr="1000")
+        self.assertEqual(len(ver.cwz_group.user_set.all()), 1)
+
+        lid = NhbLid.objects.get(nhb_nr="100024")
+        ver = NhbVereniging.objects.get(nhb_nr="2000")
+        self.assertEqual(len(ver.cwz_group.user_set.all()), 0)
+        # 100024 is nog geen CWZ omdat ze geen account heeft
+
+        # maak het account van 100024 aan en probeer het nog een keer
+        usermodel = get_user_model()
+        usermodel.objects.create_user('100024', 'maakt.niet.uit@gratis.net', 'wachtwoord')
+        account = Account.objects.get(username='100024')
+        account.nhblid = lid
+        account.save()
+
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_14.json', stderr=f1, stdout=f2)
+        #print("f1: %s" % f1.getvalue())
+        #print("f2: %s" % f2.getvalue())
+        self.assertEqual(f1.getvalue(), '')
+        self.assertTrue("[INFO] CWZ 100024 gekoppeld aan vereniging 2000" in f2.getvalue())
+
+        lid = NhbLid.objects.get(nhb_nr="100024")
+        #print("lid: %s" % repr(lid))
+        ver = NhbVereniging.objects.get(nhb_nr="2000")
+        #print("ver: %s" % repr(ver))
+        #print("ver.cwz_group: %s" % repr(ver.cwz_group))
+        #print("ver.cwz_group.user_set: %s" % repr(ver.cwz_group.user_set.all()))
+        self.assertEqual(len(ver.cwz_group.user_set.all()), 1)
+
+        # corner-case test
+        f1 = io.StringIO()
+        ver.cwz_group = None
+        ver.make_cwz("100024", f1.write)
+        #print("f1: %s" % f1.getvalue())
+        self.assertTrue("[ERROR] NhbVereniging.make_cwz: no cwz_group!" in f1.getvalue())
+
+    def test_import_crm_15(self):
+        # een paar speciale import gevallen
+
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_15.json', stderr=f1, stdout=f2)
+        #print("f1: %s" % f1.getvalue())
+        #print("f2: %s" % f2.getvalue())
+
+        # verifieer verwijderen van "(geen deelname wedstrijden)" uit de naam
+        ver = NhbVereniging.objects.get(nhb_nr=1377)
+        self.assertEqual(ver.naam, "Persoonlijk")
+
+    def test_import_crm_16_verwijder_secretaris_fail(self):
+        # verwijderen van de secretaris geeft een fout
+
+        # maak 100024 aan
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_14.json', stderr=f1, stdout=f2)
+        lid = NhbLid.objects.get(nhb_nr="100024")
+
+        # maak het account van 100024 aan, zodat deze secretaris kan worden
+        usermodel = get_user_model()
+        usermodel.objects.create_user('100024', 'maakt.niet.uit@gratis.net', 'wachtwoord')
+        account = Account.objects.get(username='100024')
+        account.nhblid = lid
+        account.save()
+
+        # maak 100024 secretaris
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_14.json', stderr=f1, stdout=f2)
+        self.assertEqual(f1.getvalue(), '')
+        self.assertTrue("[INFO] CWZ 100024 gekoppeld aan vereniging 2000" in f2.getvalue())
+
+        # probeer 100024 te verwijderen
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_16.json', stderr=f1, stdout=f2)
+        #print("f1: %s" % f1.getvalue())
+        #print("f2: %s" % f2.getvalue())
+        self.assertTrue("[INFO] Lid 100024 Voornaam van der Achternaam [V, 2000] wordt nu verwijderd" in f2.getvalue())
+        self.assertTrue("[ERROR] Onverwachte fout bij het verwijderen van een lid: " in f1.getvalue())
+
+    def test_import_nhb_crm_dryrun(self):
+        # dryrun
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_08.json', '--dryrun', stderr=f1, stdout=f2)
+        self.assertTrue("DRY RUN" in f2.getvalue())
+
+        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_03.json', stderr=f1, stdout=f2)
+        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_08.json', '--dryrun', stderr=f1, stdout=f2)
+        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_09.json', '--dryrun', stderr=f1, stdout=f2)
+        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_14.json', '--dryrun', stderr=f1, stdout=f2)
+
+        # maak een test vereniging die verwijderd kan worden
+        ver = NhbVereniging()
+        ver.naam = "Wegisweg Club"
+        ver.nhb_nr = "1999"
+        ver.regio = NhbRegio.objects.get(pk=116)
+        ver.save()
+        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_12.json', '--dryrun', stderr=f1, stdout=f2)
 
     def test_bereken_wedstrijdleeftijd(self):
         lid = NhbLid.objects.get(nhb_nr=100001)     # geboren 1972; bereikt leeftijd 40 in 2012

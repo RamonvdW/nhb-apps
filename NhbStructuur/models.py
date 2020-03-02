@@ -7,6 +7,7 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import Group
+from django.contrib.auth import get_user_model      # avoid circular dependency with Account.models
 from django.conf import settings
 import datetime
 
@@ -67,23 +68,24 @@ class NhbVereniging(models.Model):
         # selectie in de admin interface gaat op deze string, dus nhb_nr eerst
         return "%s %s" % (self.nhb_nr, self.naam)
 
-    def make_cwz(self, nhb_nr):
+    def make_cwz(self, nhb_nr, write_stdout):
         # kijk of dit lid al in de groep zit
         if self.cwz_group:
             if len(self.cwz_group.user_set.filter(nhblid__nhb_nr=nhb_nr)) == 0:
                 # nog niet in de groep --> zoek het user account erbij
+                usermodel = get_user_model()
                 try:
-                    account = Account.objects.get(nhblid__nhb_nr=nhb_nr)
-                except Account.DoesNotExist:
+                    account = usermodel.objects.get(nhblid__nhb_nr=nhb_nr)
+                except usermodel.DoesNotExist:
                     # CWZ heeft nog geen account
-                    print("[WARNING] CWZ %s heeft nog geen account" % nhb_nr)
+                    write_stdout("[WARNING] CWZ %s voor vereniging %s heeft nog geen account" % (nhb_nr, self.nhb_nr))
                     pass
                 else:
                     # voeg dit account toe aan de groep
-                    print("[INFO] CWZ %s gekoppeld aan vereninging %s" % (nhb_nr, self.nhb_nr))
+                    write_stdout("[INFO] CWZ %s gekoppeld aan vereniging %s" % (nhb_nr, self.nhb_nr))
                     self.cwz_group.user_set.add(account)
         else:
-            print("[ERROR] NhbVereniging.make_cwz: no cwz_group!")
+            write_stdout("[ERROR] NhbVereniging.make_cwz: no cwz_group!")
 
     class Meta:
         """ meta data voor de admin interface """

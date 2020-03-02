@@ -252,6 +252,7 @@ class Command(BaseCommand):
                     self._count_errors += 1
                     self.stderr.write('[ERROR] Vereniging %s hoort bij onbekende regio %s' % (ver_nhb_nr, ver_regio))
                 else:
+                    self.stdout.write('[INFO] Vereniging %s aangemaakt: %s' % (ver_nhb_nr, repr(ver.naam)))
                     self._count_toevoegingen += 1
                     ver.regio = regio_obj
                     if not self.dryrun:
@@ -280,7 +281,7 @@ class Command(BaseCommand):
                 try:
                     obj.delete()
                     self._count_verwijderingen += 1
-                except ProtectedError as exc:
+                except ProtectedError as exc:       # pragma: no coverage
                     self._count_errors += 1
                     self.stderr.write('[ERROR] Onverwachte fout bij het verwijderen van een vereniging: %s' % str(exc))
         # while
@@ -326,14 +327,7 @@ class Command(BaseCommand):
 
                 # forceer de secretaris in de CWZ groep
                 if ver_secretaris_nhblid:
-                    try:
-                        account = Account.objects.get(nhblid=ver_secretaris_nhblid)
-                    except Account.DoesNotExist:
-                        # cwz heeft nog geen account aangemaakt
-                        self._count_cwz_no_account += 1
-                    else:
-                        if not self.dryrun:
-                            obj.cwz_group.user_set.add(account)     # dupes are prevented
+                    obj.make_cwz(ver_secretaris_nhblid.nhb_nr, self.stdout.write)
         # for
 
     def _import_members(self, data):
