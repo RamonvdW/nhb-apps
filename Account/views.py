@@ -15,7 +15,8 @@ from django.views.generic import TemplateView, ListView
 from django.utils import timezone
 from django.conf import settings
 from .forms import LoginForm, RegistreerForm, OTPControleForm, AccepteerVHPGForm
-from .models import AccountCreateError, AccountCreateNhbGeenEmail, Account, HanterenPersoonsgegevens,\
+from .models import AccountCreateError, AccountCreateNhbGeenEmail, \
+                    Account, AccountEmail, HanterenPersoonsgegevens,\
                     account_create_nhb, account_email_is_bevestigd,\
                     account_needs_otp, account_is_otp_gekoppeld,\
                     account_prep_for_otp, account_controleer_otp_code, user_is_otp_verified,\
@@ -73,13 +74,29 @@ class LoginView(TemplateView):
             next = form.cleaned_data.get('next')
 
             # kijk of het account bestaat en geblokkeerd is
+            account = None
             try:
                 account = Account.objects.get(username=login_naam)
             except Account.DoesNotExist:
-                # account bestaat niet
-                # schrijf de mislukte inlogpoging in het logboek
-                schrijf_in_logboek(None, 'Inloggen', 'Mislukte inlog vanaf IP %s: onbekend account %s' % (repr(from_ip), repr(login_naam)))
-            else:
+                # account met deze username bestaat niet
+                # sta ook toe dat met het email adres ingelogd wordt
+                try:
+                    email = AccountEmail.objects.get(bevestigde_email=login_naam)
+                except AccountEmail.DoesNotExist:
+                    # schrijf de mislukte inlogpoging in het logboek
+                    schrijf_in_logboek(None, 'Inloggen', 'Mislukte inlog vanaf IP %s: onbekend inlog naam %s' % (repr(from_ip), repr(login_naam)))
+                except AccountEmail.MultipleObjectsReturned:
+                    # kan niet kiezen tussen verschillende accounts
+                    # werkt dus niet als het email hergebruikt is voor meerdere accounts
+                    form.add_error(None,
+                                   'Inloggen met e-mail is niet mogelijk. Probeer het nog eens.')
+                    account = None
+                else:
+                    # email gevonden
+                    # pak het account erbij
+                    account = email.account
+
+            if account:
                 # account bestaat wel
                 # kijk of het geblokkeerd is
                 now = timezone.now()
@@ -92,7 +109,7 @@ class LoginView(TemplateView):
                         return render(request, TEMPLATE_GEBLOKKEERD, context)
 
                 # niet geblokkeerd
-                account2 = authenticate(username=login_naam, password=wachtwoord)
+                account2 = authenticate(username=account.username, password=wachtwoord)
                 if account2:
                     # authenticatie is gelukt
                     # integratie met de authenticatie laag van Django
@@ -150,7 +167,8 @@ class LoginView(TemplateView):
                         return render(request, TEMPLATE_GEBLOKKEERD, context)
 
             # gebruiker mag het nog een keer proberen
-            form.add_error(None, 'De combinatie van inlog naam en wachtwoord worden niet herkend. Probeer het nog eens.')
+            if len(form.errors) == 0:
+                form.add_error(None, 'De combinatie van inlog naam en wachtwoord worden niet herkend. Probeer het nog eens.')
 
         # still here --> re-render with error message
         context = {'form': form}
@@ -162,6 +180,25 @@ class LoginView(TemplateView):
             we geven een lege form aan de template
         """
         next = request.GET.get('next', '')      # waar eventueel naartoe na de login?
+        if request.user.is_authenticated:
+            # gebruiker is al ingelogd --> stuur meteen door
+
+            # voer de automatische redirect uit, indien gevraagd
+            if next:
+                # reject niet bestaande urls
+                # resolve zoekt de view die de url af kan handelen
+                if next[-1] != '/':
+                    next += '/'
+                try:
+                    resolve(next)
+                except Resolver404:
+                    pass
+                else:
+                    # is valide url
+                    return HttpResponseRedirect(next)
+
+            return HttpResponseRedirect(reverse('Plein:plein'))
+
         form = LoginForm(initial={'next': next})
         context = {'form': form}
         menu_dynamics(request, context, actief='inloggen')
@@ -583,6 +620,8 @@ class OTPKoppelenView(TemplateView):
 class WisselVanRolView(UserPassesTestMixin, ListView):
 
     """ Django class-based view om van rol te wisselen """
+
+    # TODO: zou next parameter kunnen ondersteunen, net als login view
 
     # class variables shared by all instances
     template_name = TEMPLATE_WISSELVANROL
