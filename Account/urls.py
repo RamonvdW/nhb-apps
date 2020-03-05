@@ -26,6 +26,10 @@ urlpatterns = [
          views.AangemaaktView.as_view(),
          name='aangemaakt'),
 
+    path('nieuwe-email/',
+         views.EmailGewijzigdView.as_view(),
+         name='nieuwe-email'),
+
     path('bevestigd/',
          views.BevestigdView.as_view(),
          name='bevestigd'),

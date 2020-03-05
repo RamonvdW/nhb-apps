@@ -9,7 +9,8 @@ from django.conf import settings
 from django.utils import timezone
 from django.contrib.auth.models import AbstractUser
 from NhbStructuur.models import NhbLid
-from Overig.tijdelijke_url import maak_tijdelijke_url_accountemail, set_tijdelijke_url_receiver, RECEIVER_ACCOUNTEMAIL
+from Overig.tijdelijke_url import set_tijdelijke_url_receiver, RECEIVER_ACCOUNTEMAIL, \
+                                  maak_tijdelijke_url_accountemail
 from BasisTypen.models import BoogType
 import datetime
 import pyotp
@@ -171,7 +172,7 @@ class AccountEmail(models.Model):
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
         return "E-mail voor account '%s' (%s)" % (self.account.username,
-                                                 self.bevestigde_email)
+                                                  self.bevestigde_email)
 
     class Meta:
         """ meta data voor de admin interface """
@@ -356,6 +357,42 @@ def account_email_is_bevestigd(mail):
     mail.nieuwe_email = ''
     mail.email_is_bevestigd = True
     mail.save()
+
+
+def account_check_gewijzigde_email(account):
+    """ Zoek uit of dit account een nieuw email adres heeft vanuit de NHB administratie
+
+        Zo ja, stuur dan een mailtje om deze nieuwe email te laten bevestigen
+        en geef een AccountEmail object terug zodat de aanroepende view kan redirecten
+        naar de Nieuwe-email view
+
+        Zo nee, geen None terug.
+
+        Exceptie AccountEmail.DoesNotExist moet door de aanroepen afgehandeld worden
+    """
+    email = AccountEmail.objects.get(account=account)
+
+    # neem een nieuw email adres over uit de NHB administratie (indien aanwezig)
+    if account.nhblid:
+        if account.nhblid.email != email.bevestigde_email:
+            email.nieuwe_email = account.nhblid.email
+            email.save()
+            # onderstaande code neemt het over
+
+    if email.nieuwe_email:
+        if email.nieuwe_email != email.bevestigde_email:
+            # vraag om bevestiging van deze gewijzgde email
+            # email kan eerder overgenomen zijn uit de NHB administratie
+            # of handmatig ingevoerd zijn
+
+            # maak de url aan om het emailadres te bevestigen
+            # extra parameters are just to make the url unique
+            mail = email.nieuwe_email
+            url = maak_tijdelijke_url_accountemail(email, username=account.username, email=mail)
+            return url, mail
+
+    # geen gewijzigde email
+    return None, None
 
 
 def account_needs_otp(account):

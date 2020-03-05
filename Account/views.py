@@ -17,7 +17,7 @@ from django.conf import settings
 from .forms import LoginForm, RegistreerForm, OTPControleForm, AccepteerVHPGForm
 from .models import AccountCreateError, AccountCreateNhbGeenEmail, \
                     Account, AccountEmail, HanterenPersoonsgegevens,\
-                    account_create_nhb, account_email_is_bevestigd,\
+                    account_create_nhb, account_email_is_bevestigd, account_check_gewijzigde_email,\
                     account_needs_otp, account_is_otp_gekoppeld,\
                     account_prep_for_otp, account_controleer_otp_code, user_is_otp_verified,\
                     account_zet_sessionvars_na_login, account_zet_sessionvars_na_otp_controle,\
@@ -39,6 +39,7 @@ TEMPLATE_LOGIN = 'account/login.dtl'
 TEMPLATE_UITLOGGEN = 'account/uitloggen.dtl'
 TEMPLATE_REGISTREER = 'account/registreer.dtl'
 TEMPLATE_AANGEMAAKT = 'account/aangemaakt.dtl'
+TEMPLATE_NIEUWEEMAIL = 'account/nieuwe-email.dtl'
 TEMPLATE_BEVESTIGD = 'account/bevestigd.dtl'
 TEMPLATE_GEBLOKKEERD = 'account/geblokkeerd.dtl'
 TEMPLATE_VERGETEN = 'account/wachtwoord-vergeten.dtl'
@@ -108,10 +109,13 @@ class LoginView(TemplateView):
                         menu_dynamics(request, context, actief='inloggen')
                         return render(request, TEMPLATE_GEBLOKKEERD, context)
 
+                # TODO: blokkeer inlog als email nog niet bevestigd is
+
                 # niet geblokkeerd
                 account2 = authenticate(username=account.username, password=wachtwoord)
                 if account2:
                     # authenticatie is gelukt
+
                     # integratie met de authenticatie laag van Django
                     login(request, account2)
                     account_zet_sessionvars_na_login(request)
@@ -127,6 +131,32 @@ class LoginView(TemplateView):
                     if account2.verkeerd_wachtwoord_teller > 0:
                         account2.verkeerd_wachtwoord_teller = 0
                         account2.save()
+
+                    # kijk of een nieuw emailadres bevestigd moet worden
+                    try:
+                        ack_url, mail = account_check_gewijzigde_email(account2)
+                        if ack_url:
+                            # schrijf in het logboek
+                            schrijf_in_logboek(account=None,
+                                               gebruikte_functie="Inloggen",
+                                               activiteit="Bevestiging van nieuwe email gevraagd voor account %s" % repr(account2.username))
+
+                            text_body = "Hallo!\n\n" + \
+                                        "Dit is een verzoek vanuit de website van de NHB om toegang tot je email te bevestigen.\n" + \
+                                        "Klik op onderstaande link om dit te bevestigen.\n\n" + \
+                                        ack_url + "\n\n" + \
+                                        "Als je dit verzoek onverwacht ontvangen hebt, neem dan contact met ons op via info@handboogsport.nl\n\n" + \
+                                        "Veel plezier met de site!\n" + \
+                                        "Het bondsburo\n"
+
+                            queue_email(mail, 'Email adres bevestigen', text_body)
+
+                            return redirect(reverse('Account:nieuwe-email'))
+                        # else:
+                        #   geen wijziging in de email - gewoon doorgaan
+                    except AccountEmail.DoesNotExist:
+                        # onverwachte fout
+                        pass
 
                     # voer de automatische redirect uit, indien gevraagd
                     if next:
@@ -350,6 +380,8 @@ class BevestigdView(TemplateView):
     def get(self, request, *args, **kwargs):
         """ deze functie wordt aangeroepen als een GET request ontvangen is """
         context = dict()
+        if not request.user.is_authenticated:
+            context['show_login'] = True
         menu_dynamics(request, context)
         return render(request, TEMPLATE_BEVESTIGD, context)
 
@@ -377,6 +409,29 @@ class AangemaaktView(TemplateView):
         menu_dynamics(request, context)
 
         return render(request, TEMPLATE_AANGEMAAKT, context)
+
+
+class EmailGewijzigdView(TemplateView):
+    """ Deze view vertelt de gebruiker dat zijn nieuwe email bevestigd moet worden.
+    """
+
+    def get(self, request, *args, **kwargs):
+        """ deze functie wordt aangeroepen als een GET request ontvangen is
+        """
+        context = dict()
+
+        if request.user.is_authenticated:
+            try:
+                email = AccountEmail.objects.get(account=request.user)
+            except AccountEmail.DoesNotExist:
+                # onverwachte fout
+                pass
+            else:
+                context['partial_email'] = obfuscate_email(email.nieuwe_email)
+                menu_dynamics(request, context, actief='inloggen')
+                return render(request, TEMPLATE_NIEUWEEMAIL, context)
+
+        return HttpResponseRedirect(reverse('Plein:plein'))
 
 
 class VhpgAfsprakenView(UserPassesTestMixin, TemplateView):
@@ -757,7 +812,7 @@ class ActiveerRolView(UserPassesTestMixin, View):
 
 def receive_bevestiging_accountemail(request, obj):
     """ deze functie wordt aangeroepen als een tijdelijke url gevolgt wordt
-        om een email adres te bevestigen.
+        om een email adres te bevestigen, zowel de eerste keer als wijziging van email.
             obj is een AccountEmail object.
         We moeten een url teruggeven waar een http-redirect naar gedaan kan worden.
     """
@@ -775,9 +830,6 @@ def receive_bevestiging_accountemail(request, obj):
                        gebruikte_functie="Bevestig e-mail",
                        activiteit=msg)
 
-    # TODO: implementeer verdere reactie.
-    # TODO: Iets opslaan in de sessie voor de pagina waar we naar redirecten?
-    request.session['XXX'] = 123
     return reverse('Account:bevestigd')
 
 

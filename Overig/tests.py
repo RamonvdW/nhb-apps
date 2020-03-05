@@ -8,8 +8,9 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from Plein.tests import assert_html_ok, assert_other_http_commands_not_supported, assert_template_used
 from .models import SiteFeedback, save_tijdelijke_url
-from .tijdelijke_url import dispatcher, SAVER, set_tijdelijke_url_receiver
-from Account.models import Account, account_vhpg_is_geaccepteerd,\
+from .tijdelijke_url import dispatcher, SAVER, set_tijdelijke_url_receiver, \
+                            RECEIVER_ACCOUNTEMAIL, maak_tijdelijke_url_accountemail
+from Account.models import Account, AccountEmail, account_vhpg_is_geaccepteerd,\
                            account_zet_sessionvars_na_otp_controle, account_zet_sessionvars_na_login
 from Account.rol import rol_zet_sessionvars_na_otp_controle, rol_zet_sessionvars_na_login, rol_activeer_rol
 
@@ -26,6 +27,11 @@ class TestOverig(TestCase):
         self.account_normaal = Account.objects.get(username='normaal')
         self.account_admin = Account.objects.get(username='admin')
         # TODO: add real feedback to the database, for better tests
+
+        email, created_new = AccountEmail.objects.get_or_create(account=self.account_normaal)
+        email.nieuwe_email = "hoi@gmail.not"
+        email.save()
+        self.email_normaal = email
 
         save_tijdelijke_url('code1', geldig_dagen=-1)       # verlopen
         save_tijdelijke_url('code2', geldig_dagen=1)        # no accountemail
@@ -185,6 +191,24 @@ class TestOverig(TestCase):
         # controleer bescherming tegen overschrijven SAVER entry
         set_tijdelijke_url_receiver(SAVER, "456")
         self.assertEqual(dispatcher[SAVER], old)
+
+    def _my_receiver_func(self, request, accountemail):
+        # self.assertEqual(request, "request")
+        self.assertEqual(accountemail, self.email_normaal)
+        self.got_callback = True
+        return "/overig/feedback/bedankt/"
+
+    def test_tijdelijkeurl_accountemail(self):
+        set_tijdelijke_url_receiver(RECEIVER_ACCOUNTEMAIL, self._my_receiver_func)
+        url = maak_tijdelijke_url_accountemail(self.email_normaal, test="ja")
+        self.assertTrue("/overig/url/" in url)
+        self.got_callback = False
+        # print("url: %s" % repr(url))
+        resp = self.client.get(url, follow=True)
+        self.assertTrue(self.got_callback)
+        # redirect is naar de feedback-bedankt pagina
+        self.assertEqual(resp.status_code, 200)
+        assert_template_used(self, resp, ('overig/site-feedback-bedankt.dtl', 'plein/site_layout.dtl'))
 
 # TODO: add use of assert_other_http_commands_not_supported
 

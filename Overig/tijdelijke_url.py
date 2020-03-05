@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019 Ramon van der Winkel.
+#  Copyright (c) 2019-2020 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -13,9 +13,10 @@ uuid_namespace = uuid5(NAMESPACE_URL, 'Overig.Models.SiteUrls')
 
 # dit gedoe met de dispatcher is om geen last te hebben van circulaire dependencies
 # Overig.models gebruikt Account.Account en Account.AccountEmail
-# als Account deze file includeert en wij Overig.models dan hebben we een circulaire dependency
+# als Account deze file importeert en wij Overig.models dan hebben we een circulaire dependency
 SAVER = '__saver__'
 RECEIVER_ACCOUNTEMAIL = 'accountemail'
+
 dispatcher = dict()
 
 
