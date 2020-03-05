@@ -14,8 +14,12 @@
 <h4>Bevestigd</h4>
 
 <p>Je hebt laten zien dat je toegang hebt tot je e-mail.</p>
-<p>Je kan nu inloggen.</p>
 
-<p><a class="btn-nhb-blauw" href="{% url 'Account:login' %}">inloggen</a></p>
+{% if show_login %}
+    <p>Je kan nu inloggen.</p>
+    <p><a class="btn-nhb-blauw" href="{% url 'Account:login' %}">inloggen</a></p>
+{% else %}
+    <p><a class="btn white blue-text" href="{% url 'Plein:plein' %}">Sluiten</a></p>
+{% endif %}
 
 {% endblock %}
