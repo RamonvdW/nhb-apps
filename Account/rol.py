@@ -60,6 +60,7 @@ rol2url = {
 
 rol_expandeer_functies = list()
 
+
 def rol_zet_plugins(expandeer_functie):
     rol_expandeer_functies.append(expandeer_functie)
 
@@ -105,9 +106,10 @@ def rol_zet_sessionvars_na_login(account, request):
                 rol = Rollen.ROL_RCL
             elif group.name[:4] == "CWZ ":
                 rol = Rollen.ROL_CWZ
-            child_tup = (rol, group.pk)
-            tup = (child_tup, parent_tup)
-            rollen_functies.append(tup)
+            if rol:
+                child_tup = (rol, group.pk)
+                tup = (child_tup, parent_tup)
+                rollen_functies.append(tup)
         # for
 
         # probeer elke rol nog verder te expanderen
@@ -181,14 +183,6 @@ def rol_enum_pallet(request):
         for child_tup, parent_tup in rollen_functies:
             yield (tuple(child_tup), tuple(parent_tup))
         # for
-
-def rol_unpack_functie(functie):
-    """ Onderzoek een functie en zoek de bijbehorende Competitie, DeelCompetitie en NhbVereniging
-        geeft None in de posities die niet van toepassing zijn
-        Voorbeeld: BKO voor een Competitie geeft geen DeelCompetitie of NhbVereninging
-                   CWZ geeft NhbVereniging maar geen Competitie/DeelCompetitie
-    """
-    return None, None, None
 
 
 def rol_get_huidige(request):
