@@ -21,6 +21,25 @@
 
 <div class="row">
 
+    {% if toon_nieuwe_accounts %}
+        <!-- nieuwe accounts -->
+        <div class="col s12 m6 xl4">
+            <div class="card">
+                <div class="card-content">
+                    <table class="simple"><tr style="border:0px">
+                        <td><i class="material-icons-round large">create</i></td>
+                        <td>Toon overzicht van de recente gebruikte en aangemaakte accounts.</td>
+                    </tr></table>
+                </div>
+                <a href="{% url 'Plein:account-activiteit' %}" class="nhb-klikbare-balk">
+                    <div class="card-action center-align">
+                        <span class="nhb-klikbare-link">Overzicht tonen</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+    {% endif %}
+
     {% if rol_is_bb %}
         <!-- overzicht VHPG acceptatie -->
         <div class="col s12 m6 xl4">
