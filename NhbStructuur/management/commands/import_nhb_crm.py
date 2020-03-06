@@ -327,7 +327,9 @@ class Command(BaseCommand):
 
                 # forceer de secretaris in de CWZ groep
                 if ver_secretaris_nhblid:
-                    obj.make_cwz(ver_secretaris_nhblid.nhb_nr, self.stdout.write)
+                    cwz_no_account = obj.make_cwz(ver_secretaris_nhblid.nhb_nr, self.stdout.write)
+                    if cwz_no_account:
+                        self._count_cwz_no_account += 1
         # for
 
     def _import_members(self, data):

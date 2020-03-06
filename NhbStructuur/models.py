@@ -69,6 +69,7 @@ class NhbVereniging(models.Model):
         return "%s %s" % (self.nhb_nr, self.naam)
 
     def make_cwz(self, nhb_nr, write_stdout):
+        cwz_no_account = False
         # kijk of dit lid al in de groep zit
         if self.cwz_group:
             if len(self.cwz_group.user_set.filter(nhblid__nhb_nr=nhb_nr)) == 0:
@@ -79,13 +80,15 @@ class NhbVereniging(models.Model):
                 except usermodel.DoesNotExist:
                     # CWZ heeft nog geen account
                     write_stdout("[WARNING] CWZ %s voor vereniging %s heeft nog geen account" % (nhb_nr, self.nhb_nr))
-                    pass
+                    cwz_no_account = True
                 else:
                     # voeg dit account toe aan de groep
                     write_stdout("[INFO] CWZ %s gekoppeld aan vereniging %s" % (nhb_nr, self.nhb_nr))
                     self.cwz_group.user_set.add(account)
         else:
             write_stdout("[ERROR] NhbVereniging.make_cwz: no cwz_group!")
+
+        return cwz_no_account
 
     class Meta:
         """ meta data voor de admin interface """
