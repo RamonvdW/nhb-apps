@@ -30,7 +30,7 @@
             op pagina '{{ obj.op_pagina }}'
         </div>
         <div class="collapsible-body">
-            <span>#{{ obj.pk }} door <b>{{ obj.gebruiker }}</b> toegevoegd op {{ obj.toegevoegd_op|date:"l n F Y" }} om {{ obj.toegevoegd_op|date:"H:i" }}</span>
+            <span>#{{ obj.pk }} door <b>{{ obj.gebruiker }}</b> toegevoegd op {{ obj.toegevoegd_op|date:"l j F Y" }} om {{ obj.toegevoegd_op|date:"H:i" }}</span>
             <p>(site versie: {{ obj.site_versie }})</p>
             <p><u>Feedback</u></p>
             <h6>{{ obj.feedback|linebreaks }}</h6>
