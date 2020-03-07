@@ -11,7 +11,6 @@ from django.contrib.auth.models import AbstractUser
 from NhbStructuur.models import NhbLid
 from Overig.tijdelijke_url import set_tijdelijke_url_receiver, RECEIVER_ACCOUNTEMAIL, \
                                   maak_tijdelijke_url_accountemail
-from BasisTypen.models import BoogType
 import datetime
 import pyotp
 
@@ -234,23 +233,6 @@ def account_vhpg_is_geaccepteerd(account):
 
     vhpg.acceptatie_datum = timezone.now()
     vhpg.save()
-
-
-class SchutterBoog(models.Model):
-    """ voor elk type boog waar de schutter interesse in heeft is er een record """
-
-    # het account waar dit record bij hoort
-    account = models.ForeignKey(Account, on_delete=models.CASCADE)
-
-    # het type boog waar dit record over gaat
-    boogtype = models.ForeignKey(BoogType, on_delete=models.PROTECT)
-
-    # voorkeuren van de schutter: alleen interesse, of ook actief schieten?
-    heeft_interesse = models.BooleanField(default=False)
-    voor_wedstrijd = models.BooleanField(default=False)
-
-    # voorkeur voor DT (alleen voor Recurve)
-    voorkeur_dutchtarget_18m = models.BooleanField(default=False)
 
 
 def is_email_valide(adres):
