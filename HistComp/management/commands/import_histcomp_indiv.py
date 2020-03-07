@@ -111,7 +111,7 @@ class Command(BaseCommand):
             else:
                 rank[klasse] += 1
 
-            # fataseer een redelijk boogtype voor elke klasse
+            # fantaseer een redelijk boogtype voor elke klasse
             # dit helpt in het bepalen van het aanvangsgemiddelde voor een competitieklasse
             if "Recurve" in klasse:
                 boogtype = "R"
@@ -141,6 +141,7 @@ class Command(BaseCommand):
             except NhbLid.DoesNotExist:
                 self.stdout.write("[WARNING] Lid %s wordt overgeslagen kan naam niet opzoeken (geen lid meer)" % nhb_nr)
                 self._count_skip += 1
+                # TODO: niet leuk als er een gat in de uitslag zit - dit is te zien in de ranking nummers
                 continue
 
             try:
