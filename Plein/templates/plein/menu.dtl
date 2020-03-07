@@ -45,16 +45,14 @@
 </li>
 {% endif %}
 
-<!-- nabije toekomst
-<li>
-    <a href="#" class="white-text">
-    <i class="material-icons-round white-text">account_balance</i>Eerdere competities</a>
-</li>
--->
-
 <li{% if menu_actief == "competitie" %} class="actief"{% endif %}>
     <a href="{% url 'Competitie:overzicht' %}" class="white-text">
     <i class="material-icons-round white-text"><!--developer_board--><!--gamepad--><!--assistant-->my_location</i>Competities</a>
+</li>
+
+<li{% if menu_actief == "histcomp" %} class="actief"{% endif %}>
+    <a href="{% url 'HistComp:allejaren' %}" class="white-text">
+    <i class="material-icons-round white-text">account_balance</i>Competitie uitslagen</a>
 </li>
 
 <li{% if menu_actief == "records" %} class="actief"{% endif %}>

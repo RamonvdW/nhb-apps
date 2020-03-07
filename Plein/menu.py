@@ -16,7 +16,8 @@ ACTIEF_OPTIES = (
     'logboek',
     'site-feedback-inzicht',
     'wissel-van-rol',
-    'competitie'
+    'competitie',
+    'histcomp'
 )
 
 
@@ -57,7 +58,7 @@ def menu_dynamics(request, context, actief=None):
         if rol == Rollen.ROL_IT:
             context['menu_show_admin'] = True
 
-        # logboek en sitefeedback
+        # logboek en site feedback
         if rol in (Rollen.ROL_IT, Rollen.ROL_BB):
             context['menu_show_logboek'] = True
             context['menu_show_sitefeedback'] = True
