@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019 Ramon van der Winkel.
+#  Copyright (c) 2019-2020 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -14,28 +14,31 @@ def filter_highlight(text, search_for):
          and puts a html tags around it to highlight that text.
          The search is case-insensitive.
     """
-    search_for = search_for.lower()
     new_text = ""
-    search_len = len(search_for)
-    pos = text.lower().find(search_for)
-    while pos >= 0:
-        # found an instance that we want to highlight
-        # eat all text before that point + perform escaping
-        if pos:
-            new_text += escape(text[:pos])
-            text = text[pos:]
-
-        new_text += '<b>'           # highlighter prefix
-
-        # take over the found part, in the original case + perform escaping
-        new_text += escape(text[:search_len])
-        text = text[search_len:]
-
-        new_text += '</b>'          # highlighter postfix
-
-        # find the next occurence
+    if len(search_for):
+        search_for = search_for.lower()
+        search_len = len(search_for)
         pos = text.lower().find(search_for)
-    # while
+        limit = 10
+        while pos >= 0 and limit > 0:
+            limit -= 1
+            # found an instance that we want to highlight
+            # eat all text before that point + perform escaping
+            if pos:
+                new_text += escape(text[:pos])
+                text = text[pos:]
+
+            new_text += '<b>'           # highlighter prefix
+
+            # take over the found part, in the original case + perform escaping
+            new_text += escape(text[:search_len])
+            text = text[search_len:]
+
+            new_text += '</b>'          # highlighter postfix
+
+            # find the next occurence
+            pos = text.lower().find(search_for)
+        # while
 
     return mark_safe(new_text + text)
 
