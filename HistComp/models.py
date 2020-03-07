@@ -15,7 +15,7 @@ class HistCompetitie(models.Model):
         en het voorkomt zoeken naar deze informatie uit de grote tabel.
     """
     COMP_TYPE = [('18', '18m Indoor'),      # note: 18, 25 must be in sync with Competitie.AFSTAND
-                 ('25', '25m 1pijl')]
+                 ('25', '25m1pijl')]
 
     comptype2str = {'18': '18m Indoor',
                     '25': '25m 1pijl'}
