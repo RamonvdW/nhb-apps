@@ -35,12 +35,12 @@ class TestLogboek(TestCase):
 
         self.logboek_url = '/logboek/'
 
-    def test_logboek_annon_redirect_login(self):
+    def test_logboek_annon(self):
         # do een get van het logboek zonder ingelogd te zijn
-        # resulteert in een redirect naar de login pagina
+        # resulteert in een redirect naar het plein
         self.client.logout()
         resp = self.client.get(self.logboek_url)
-        self.assertRedirects(resp, '/account/login/?next=' + self.logboek_url)
+        self.assertRedirects(resp, '/plein/')
 
     def test_logboek_str(self):
         # gebruik de str functie op de Logboek class
@@ -57,7 +57,7 @@ class TestLogboek(TestCase):
         #sessionvars = rol_zet_sessionvars_na_login(self.account_normaal, self.client)
         #sessionvars.save()      # required for unittest only
         resp = self.client.get(self.logboek_url)
-        self.assertEqual(resp.status_code, 403)  # 403 = Forbidden
+        self.assertEqual(resp.status_code, 302)  # 302 = Redirect (naar het plein)
 
     def test_logboek_user_allowed(self):
         self.client.login(username='admin', password='wachtwoord')

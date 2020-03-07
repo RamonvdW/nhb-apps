@@ -256,7 +256,7 @@ class TestAccountRol(TestCase):
 
         # controleer dat de wissel-van-rol pagina niet aanwezig is voor deze normale gebruiker
         resp = self.client.get('/account/wissel-van-rol/')
-        self.assertEqual(resp.status_code, 403)     # 403 = Forbidden
+        self.assertEqual(resp.status_code, 302)     # 302 = Redirect (to plein)
         self.client.logout()
 
     def test_wisselvanrol_pagina_normaal_met_rol(self):

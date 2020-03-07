@@ -133,6 +133,10 @@ class InstellingenVolgendeCompetitieView(UserPassesTestMixin, ListView):
         res = rol_is_BB(self.request)
         return res
 
+    def handle_no_permission(self):
+        """ gebruiker heeft geen toegang --> redirect naar het plein """
+        return HttpResponseRedirect(reverse('Plein:plein'))
+
     def _get_queryset_teamtypen(self):
         objs = TeamType.objects.all()
         for teamtype in objs:
@@ -203,6 +207,10 @@ class CompetitieAanmakenView(UserPassesTestMixin, TemplateView):
         res = rol_is_BB(self.request)
         return res
 
+    def handle_no_permission(self):
+        """ gebruiker heeft geen toegang --> redirect naar het plein """
+        return HttpResponseRedirect(reverse('Plein:plein'))
+
     def post(self, request, *args, **kwargs):
         """ deze functie handelt het http-post verzoek af
             (wat volgt uit het drukken op de knop)
@@ -238,6 +246,10 @@ class KlassegrenzenView(UserPassesTestMixin, TemplateView):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         res = rol_is_BB(self.request)
         return res
+
+    def handle_no_permission(self):
+        """ gebruiker heeft geen toegang --> redirect naar het plein """
+        return HttpResponseRedirect(reverse('Plein:plein'))
 
     def _get_targets(self):
         targets = dict()        # [ (min_age, max_age, tuple(bogen)) ] = list(wedstrijdklassen)
@@ -408,6 +420,10 @@ class BeheerFavorieteBeheerdersView(UserPassesTestMixin, ListView):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         return rol_is_beheerder(self.request)
 
+    def handle_no_permission(self):
+        """ gebruiker heeft geen toegang --> redirect naar het plein """
+        return HttpResponseRedirect(reverse('Plein:plein'))
+
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
         # retourneer een QuerySet voor de template
@@ -566,6 +582,10 @@ class KoppelBeheerderDeelCompetitieView(UserPassesTestMixin, ListView):
         rol = rol_get_huidige(self.request)
         return rol in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO)
 
+    def handle_no_permission(self):
+        """ gebruiker heeft geen toegang --> redirect naar het plein """
+        return HttpResponseRedirect(reverse('Plein:plein'))
+
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
 
@@ -635,6 +655,10 @@ class KoppelBeheerdersCompetitieView(UserPassesTestMixin, ListView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         return rol_is_beheerder(self.request)
+
+    def handle_no_permission(self):
+        """ gebruiker heeft geen toegang --> redirect naar het plein """
+        return HttpResponseRedirect(reverse('Plein:plein'))
 
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
@@ -739,6 +763,10 @@ class LijstVerenigingenView(UserPassesTestMixin, ListView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         return rol_is_beheerder(self.request)
+
+    def handle_no_permission(self):
+        """ gebruiker heeft geen toegang --> redirect naar het plein """
+        return HttpResponseRedirect(reverse('Plein:plein'))
 
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """

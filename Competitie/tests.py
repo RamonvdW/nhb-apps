@@ -7,7 +7,6 @@
 from django.test import TestCase, RequestFactory
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
-from django.urls import Resolver404
 from Account.models import Account, account_vhpg_is_geaccepteerd, account_zet_sessionvars_na_otp_controle
 from Account.rol import rol_zet_sessionvars_na_otp_controle, rol_activeer_rol, rol_activeer_functie, \
                         rol_is_beheerder, rol_is_BB
@@ -16,7 +15,6 @@ from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
 from .models import Competitie, DeelCompetitie, CompetitieWedstrijdKlasse, get_competitie_fase, \
                     FavorieteBestuurders, add_favoriete_beheerder, competitie_aanmaken
-from .views import KoppelBeheerdersCompetitieView
 import datetime
 
 
@@ -234,7 +232,7 @@ class TestCompetitie(TestCase):
         # controleer dat dit een redirect is naar de login pagina
         self.assertEqual(resp.status_code, 200)
         assert_html_ok(self, resp)
-        assert_template_used(self, resp, ('account/login.dtl', 'plein/site_layout.dtl'))
+        assert_template_used(self, resp, ('plein/plein-bezoeker.dtl', 'plein/site_layout.dtl'))
 
         resp = self.client.get('/competitie/beheer-favorieten/wijzig/', follow=False)
         self.assertEqual(resp.status_code, 404)     # 404 indicates rejected
@@ -417,12 +415,12 @@ class TestCompetitieKoppelBeheerders(TestCase):
         resp = self.client.get('/competitie/toon-beheerders/9999/', follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         assert_html_ok(self, resp)
-        assert_template_used(self, resp, ('account/login.dtl', 'plein/site_layout.dtl'))
+        assert_template_used(self, resp, ('plein/plein-bezoeker.dtl', 'plein/site_layout.dtl'))
 
         resp = self.client.get('/competitie/kies-beheerders/9999/', follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         assert_html_ok(self, resp)
-        assert_template_used(self, resp, ('account/login.dtl', 'plein/site_layout.dtl'))
+        assert_template_used(self, resp, ('plein/plein-bezoeker.dtl', 'plein/site_layout.dtl'))
 
         # get wordt niet ondersteund
         resp = self.client.get('/competitie/wijzig-beheerders/')
@@ -705,7 +703,7 @@ class TestCompetitieBeheerders(TestCase):
         resp = self.client.get('/competitie/lijst-verenigingen/', follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         assert_html_ok(self, resp)
-        assert_template_used(self, resp, ('account/login.dtl', 'plein/site_layout.dtl'))
+        assert_template_used(self, resp, ('plein/plein-bezoeker.dtl', 'plein/site_layout.dtl'))
 
     def test_lijst_verenigingen_admin(self):
         account = self.account_admin

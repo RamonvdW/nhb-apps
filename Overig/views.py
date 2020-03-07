@@ -113,6 +113,10 @@ class SiteFeedbackInzichtView(UserPassesTestMixin, ListView):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         return rol_get_huidige(self.request) in (Rollen.ROL_IT, Rollen.ROL_BB)
 
+    def handle_no_permission(self):
+        """ gebruiker heeft geen toegang --> redirect naar het plein """
+        return HttpResponseRedirect(reverse('Plein:plein'))
+
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
         # 50 nieuwste onafgehandelde site feedback items

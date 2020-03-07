@@ -6,6 +6,7 @@
 
 from django.conf import settings
 from django.urls import reverse
+from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.db.models import F
 from django.views.generic import TemplateView, ListView, View
@@ -118,6 +119,10 @@ class LeeftijdsklassenView(UserPassesTestMixin, TemplateView):
         rol = rol_get_huidige(self.request)
         return rol == Rollen.ROL_SCHUTTER
 
+    def handle_no_permission(self):
+        """ gebruiker heeft geen toegang --> redirect naar het plein """
+        return HttpResponseRedirect(reverse('Plein:plein'))
+
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
@@ -145,6 +150,9 @@ class AccountActiviteitView(UserPassesTestMixin, TemplateView):
         rol = rol_get_huidige(self.request)
         return (rol in (Rollen.ROL_IT, Rollen.ROL_BB))
 
+    def handle_no_permission(self):
+        """ gebruiker heeft geen toegang --> redirect naar het plein """
+        return HttpResponseRedirect(reverse('Plein:plein'))
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """

@@ -127,7 +127,7 @@ class TestAccountVHPG(TestCase):
         rol_zet_sessionvars_na_otp_controle(self.account_admin, self.client).save()
 
         resp = self.client.get('/account/vhpg-overzicht/')
-        self.assertEqual(resp.status_code, 403)     # 403 = Forbidden
+        self.assertEqual(resp.status_code, 302)     # 302 = Redirect (to plein)
 
         rol_activeer_rol(self.client, "BB").save()
         resp = self.client.get('/account/vhpg-overzicht/')
@@ -139,7 +139,7 @@ class TestAccountVHPG(TestCase):
         self.client.logout()
         resp = self.client.get('/account/vhpg-afspraken/', follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        assert_template_used(self, resp, ('account/login.dtl', 'plein/site_layout.dtl'))
+        assert_template_used(self, resp, ('plein/plein-bezoeker.dtl', 'plein/site_layout.dtl'))
 
     def test_vhpg_afspraken(self):
         self.client.login(username='admin', password='wachtwoord')

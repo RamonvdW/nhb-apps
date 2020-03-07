@@ -130,7 +130,7 @@ class TestOverig(TestCase):
         self.client.logout()
         resp = self.client.get('/overig/feedback/inzicht/')
         self.assertEqual(resp.status_code, 302)  # redirect
-        self.assertRedirects(resp, '/account/login/?next=/overig/feedback/inzicht/')
+        self.assertRedirects(resp, '/plein/')
 
     def test_feedback_inzicht_user_forbidden(self):
         # do een get van het logboek met een gebruiker die daar geen rechten toe heeft
@@ -139,7 +139,7 @@ class TestOverig(TestCase):
         account_zet_sessionvars_na_login(self.client).save()
         rol_zet_sessionvars_na_login(self.account_normaal, self.client).save()
         resp = self.client.get('/overig/feedback/inzicht/')
-        self.assertEqual(resp.status_code, 403)  # 403 = Forbidden
+        self.assertEqual(resp.status_code, 302)  # 302 = Redirect (naar het plein)
 
     def test_feedback_inzicht_admin(self):
         # do een get van alle feedback

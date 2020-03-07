@@ -7,6 +7,8 @@
 from django.views.generic import ListView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.db.models import Q
+from django.http import HttpResponseRedirect
+from django.urls import reverse
 from Account.rol import Rollen, rol_get_huidige
 from Plein.menu import menu_dynamics
 from .models import LogboekRegel
@@ -29,6 +31,10 @@ class LogboekBasisView(UserPassesTestMixin, ListView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         return rol_get_huidige(self.request) in (Rollen.ROL_IT, Rollen.ROL_BB)
+
+    def handle_no_permission(self):
+        """ gebruiker heeft geen toegang --> redirect naar het plein """
+        return HttpResponseRedirect(reverse('Plein:plein'))
 
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """

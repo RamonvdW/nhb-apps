@@ -455,6 +455,9 @@ class VhpgAfsprakenView(UserPassesTestMixin, TemplateView):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         return self.request.user.is_authenticated and account_needs_vhpg(self.request.user)
 
+    def handle_no_permission(self):
+        """ gebruiker heeft geen toegang --> redirect naar het plein """
+        return HttpResponseRedirect(reverse('Plein:plein'))
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -520,6 +523,10 @@ class VhpgOverzichtView(UserPassesTestMixin, ListView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         return self.request.user.is_authenticated and rol_is_BB(self.request)
+
+    def handle_no_permission(self):
+        """ gebruiker heeft geen toegang --> redirect naar het plein """
+        return HttpResponseRedirect(reverse('Plein:plein'))
 
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
@@ -699,6 +706,10 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         return self.request.user.is_authenticated and rol_mag_wisselen(self.request)
 
+    def handle_no_permission(self):
+        """ gebruiker heeft geen toegang --> redirect naar het plein """
+        return HttpResponseRedirect(reverse('Plein:plein'))
+
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
         objs = list()
@@ -814,6 +825,10 @@ class ActiveerRolView(UserPassesTestMixin, View):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         return self.request.user.is_authenticated and rol_mag_wisselen(self.request)
+
+    def handle_no_permission(self):
+        """ gebruiker heeft geen toegang --> redirect naar het plein """
+        return HttpResponseRedirect(reverse('Plein:plein'))
 
     def get(self, request, *args, **kwargs):
         from_ip = get_safe_from_ip(self.request)

@@ -19,6 +19,7 @@ import datetime
 from types import SimpleNamespace
 from .test_helpers import assert_html_ok, assert_template_used, assert_other_http_commands_not_supported
 
+
 class TestPlein(TestCase):
     """ unit tests voor de Plein applicatie """
 
