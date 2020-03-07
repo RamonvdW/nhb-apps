@@ -5,10 +5,11 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib.auth import get_user_model
+from django.conf import settings
 from django.test import TestCase
 from Plein.tests import assert_html_ok, assert_other_http_commands_not_supported, assert_template_used
-from django.utils import timezone
 from .models import LogboekRegel, schrijf_in_logboek
+from .apps import LogboekConfig
 from Account.models import Account, account_vhpg_is_geaccepteerd, account_zet_sessionvars_na_otp_controle
 from Account.rol import rol_zet_sessionvars_na_otp_controle, rol_activeer_rol, rol_activeer_functie, rol_is_beheerder
 
@@ -103,5 +104,11 @@ class TestLogboek(TestCase):
         assert_template_used(self, resp, ('logboek/logboek-nhbstructuur.dtl', 'plein/site_layout.dtl'))
         assert_html_ok(self, resp)
         self.assertContains(resp, 'weer een nieuw lid')
+
+    def test_log_versie(self):
+        # controleer dat er 1 regel met het versienummer aanwezig is in het logboek
+        qset = LogboekRegel.objects.all().filter(gebruikte_functie='Uitrol', activiteit__contains=settings.SITE_VERSIE)
+        self.assertEqual(len(qset), 1)
+
 
 # end of file
