@@ -8,6 +8,7 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from Plein.tests import assert_html_ok, assert_other_http_commands_not_supported, assert_template_used
 from .models import SiteFeedback, save_tijdelijke_url
+from .helpers import get_safe_from_ip
 from .tijdelijke_url import dispatcher, SAVER, set_tijdelijke_url_receiver, \
                             RECEIVER_ACCOUNTEMAIL, maak_tijdelijke_url_accountemail
 from Account.models import Account, AccountEmail, account_vhpg_is_geaccepteerd,\
@@ -209,6 +210,29 @@ class TestOverig(TestCase):
         # redirect is naar de feedback-bedankt pagina
         self.assertEqual(resp.status_code, 200)
         assert_template_used(self, resp, ('overig/site-feedback-bedankt.dtl', 'plein/site_layout.dtl'))
+
+    def test_get_safe_from_ip(self):
+        self.assertEqual(get_safe_from_ip(None), "")
+
+        self.assertEqual(get_safe_from_ip(self.client), "")
+
+        self.client.META = dict()
+        self.assertEqual(get_safe_from_ip(self.client), "")
+
+        self.client.META['REMOTE_ADDR'] = '1.2.3.4'
+        self.assertEqual(get_safe_from_ip(self.client), "1.2.3.4")
+
+        self.client.META['REMOTE_ADDR'] = '100.200.300.400'
+        self.assertEqual(get_safe_from_ip(self.client), "100.200.300.400")
+
+        self.client.META['REMOTE_ADDR'] = ''
+        self.assertEqual(get_safe_from_ip(self.client), "")
+
+        self.client.META['REMOTE_ADDR'] = '0000:1111:2222:3344:5555:6666:aabb:ccdd:EEFF'
+        self.assertEqual(get_safe_from_ip(self.client), '0000:1111:2222:3344:5555:6666:aabb:ccdd:EEFF')
+
+        self.client.META['REMOTE_ADDR'] = 'wat een puinhoop\0<li>'
+        self.assertEqual(get_safe_from_ip(self.client), 'aee')
 
 # TODO: add use of assert_other_http_commands_not_supported
 

@@ -31,8 +31,10 @@ from .qrcode import qrcode_get
 from Overig.tijdelijke_url import set_tijdelijke_url_receiver, RECEIVER_ACCOUNTEMAIL
 from Plein.menu import menu_dynamics
 from Logboek.models import schrijf_in_logboek
+from Overig.helpers import get_safe_from_ip
 from Mailer.models import queue_email
 from datetime import timedelta
+import logging
 
 
 TEMPLATE_LOGIN = 'account/login.dtl'
@@ -50,6 +52,8 @@ TEMPLATE_WISSELVANROL = 'account/wissel-van-rol.dtl'
 TEMPLATE_VHPGACCEPTATIE = 'account/vhpg-acceptatie.dtl'
 TEMPLATE_VHPGAFSPRAKEN = 'account/vhpg-afspraken.dtl'
 TEMPLATE_VHPGOVERZICHT = 'account/vhpg-overzicht.dtl'
+
+my_logger = logging.getLogger('NHBApps.Account')
 
 
 class LoginView(TemplateView):
@@ -69,7 +73,7 @@ class LoginView(TemplateView):
         # https://stackoverflow.com/questions/5868786/what-method-should-i-use-for-a-login-authentication-request
         form = LoginForm(request.POST)
         if form.is_valid():
-            from_ip = request.META['REMOTE_ADDR']
+            from_ip = get_safe_from_ip(request)
             login_naam = form.cleaned_data.get('login_naam')
             wachtwoord = form.cleaned_data.get('wachtwoord')
             next = form.cleaned_data.get('next')
@@ -85,7 +89,7 @@ class LoginView(TemplateView):
                     email = AccountEmail.objects.get(bevestigde_email=login_naam)
                 except AccountEmail.DoesNotExist:
                     # schrijf de mislukte inlogpoging in het logboek
-                    schrijf_in_logboek(None, 'Inloggen', 'Mislukte inlog vanaf IP %s: onbekend inlog naam %s' % (repr(from_ip), repr(login_naam)))
+                    schrijf_in_logboek(None, 'Inloggen', 'Mislukte inlog vanaf IP %s: onbekende inlog naam %s' % (from_ip, repr(login_naam)))
                 except AccountEmail.MultipleObjectsReturned:
                     # kan niet kiezen tussen verschillende accounts
                     # werkt dus niet als het email hergebruikt is voor meerdere accounts
@@ -104,7 +108,8 @@ class LoginView(TemplateView):
                 if account.is_geblokkeerd_tot:
                     if account.is_geblokkeerd_tot > now:
                         schrijf_in_logboek(account, 'Inloggen',
-                                           'Mislukte inlog vanaf IP %s voor geblokkeerd account %s' % (repr(from_ip), repr(login_naam)))
+                                           'Mislukte inlog vanaf IP %s voor geblokkeerd account %s' % (from_ip, repr(login_naam)))
+                        my_logger.info('%s LOGIN Mislukte inlog voor geblokkeerd account %s' % (from_ip, repr(login_naam)))
                         context = {'account': account}
                         menu_dynamics(request, context, actief='inloggen')
                         return render(request, TEMPLATE_GEBLOKKEERD, context)
@@ -179,7 +184,8 @@ class LoginView(TemplateView):
 
                     # onthoudt precies wanneer dit was
                     account.laatste_inlog_poging = timezone.now()
-                    schrijf_in_logboek(account, 'Inloggen', 'Mislukte inlog vanaf IP %s voor account %s' % (repr(from_ip), repr(login_naam)))
+                    schrijf_in_logboek(account, 'Inloggen', 'Mislukte inlog vanaf IP %s voor account %s' % (from_ip, repr(login_naam)))
+                    my_logger.info('%s LOGIN Mislukte inlog voor account %s' % (from_ip, repr(login_naam)))
 
                     # onthoudt hoe vaak dit verkeerd gegaan is
                     account.verkeerd_wachtwoord_teller += 1
@@ -256,6 +262,8 @@ class LogoutView(TemplateView):
         """ deze functie wordt aangeroepen als een POST request ontvangen is
             we zorgen voor het uitloggen en sturen door naar een andere pagina
         """
+        from_ip = get_safe_from_ip(request)
+        my_logger.info('%s LOGOUT voor account %s' % (from_ip, repr(request.user.username)))
 
         # integratie met de authenticatie laag van Django
         # TODO: wist dit ook de session?
@@ -317,7 +325,7 @@ class RegistreerNhbNummerView(TemplateView):
             nhb_nummer = form.cleaned_data.get('nhb_nummer')
             email = form.cleaned_data.get('email')
             nieuw_wachtwoord = form.cleaned_data.get('nieuw_wachtwoord')
-            from_ip = request.META['REMOTE_ADDR']
+            from_ip = get_safe_from_ip(request)
             error = False
             try:
                 ack_url = account_create_nhb(nhb_nummer, email, nieuw_wachtwoord)
@@ -334,12 +342,14 @@ class RegistreerNhbNummerView(TemplateView):
                 # schrijf in het logboek
                 schrijf_in_logboek(account=None,
                                    gebruikte_functie="Registreer met NHB nummer",
-                                   activiteit="Mislukt voor nhb nummer %s vanaf IP %s: %s" % (repr(nhb_nummer), repr(from_ip), str(exc)))
+                                   activiteit="Mislukt voor nhb nummer %s vanaf IP %s: %s" % (repr(nhb_nummer), from_ip, str(exc)))
+                my_logger.info('%s REGISTREER Mislukt voor NHB nummer %s (reden: %s)' % (from_ip, repr(nhb_nummer), str(exc)))
             else:
                 # schrijf in het logboek
                 schrijf_in_logboek(account=None,
                                    gebruikte_functie="Registreer met NHB nummer",
-                                   activiteit="Account aangemaakt voor NHB nummer %s vanaf IP %s" % (repr(nhb_nummer), repr(from_ip)))
+                                   activiteit="Account aangemaakt voor NHB nummer %s vanaf IP %s" % (repr(nhb_nummer), from_ip))
+                my_logger.info('%s REGISTREER account aangemaakt voor NHB nummer %s' % (from_ip, repr(nhb_nummer)))
 
                 text_body = "Hallo!\n\n" +\
                             "Je hebt een account aangemaakt op de website van de NHB.\n" +\
@@ -560,20 +570,22 @@ class OTPControleView(TemplateView):
         form = OTPControleForm(request.POST)
         if form.is_valid():
             otp_code = form.cleaned_data.get('otp_code')
-            from_ip = request.META['REMOTE_ADDR']
+            from_ip = get_safe_from_ip(request)
             error = False
             account = request.user
             if account_controleer_otp_code(account, otp_code):
                 # controle is gelukt
                 account_zet_sessionvars_na_otp_controle(request)
                 rol_zet_sessionvars_na_otp_controle(account, request)
+                my_logger.info('%s 2FA controle gelukt voor account %s' % (from_ip, request.user.username))
                 # terug naar de Wissel-van-rol pagina
                 return HttpResponseRedirect(reverse('Account:wissel-van-rol'))
             else:
                 # controle is mislukt - schrijf dit in het logboek
                 schrijf_in_logboek(account=None,
                                    gebruikte_functie="OTP controle",
-                                   activiteit='Gebruiker %s OTP controle mislukt vanaf IP %s' % (repr(account.username), repr(from_ip)))
+                                   activiteit='Gebruiker %s OTP controle mislukt vanaf IP %s' % (repr(account.username), from_ip))
+                my_logger.info('%s 2FA mislukte controle voor account %s' % (from_ip, request.user.username))
 
                 form.add_error(None, 'Verkeerde code. Probeer het nog eens.')
                 # TODO: blokkeer na X pogingen
@@ -640,7 +652,7 @@ class OTPKoppelenView(TemplateView):
         form = OTPControleForm(request.POST)
         if form.is_valid():
             otp_code = form.cleaned_data.get('otp_code')
-            from_ip = request.META['REMOTE_ADDR']
+            from_ip = get_safe_from_ip(request)
             error = False
             if account_controleer_otp_code(account, otp_code):
                 # controle is gelukt
@@ -648,6 +660,7 @@ class OTPKoppelenView(TemplateView):
                 account.save()
                 account_zet_sessionvars_na_otp_controle(request)
                 rol_zet_sessionvars_na_otp_controle(account, request)
+                my_logger.info('%s 2FA koppeling gelukt voor account %s' % (from_ip, request.user.username))
                 # geef de succes pagina
                 context = dict()
                 menu_dynamics(request, context, actief="inloggen")
@@ -656,7 +669,8 @@ class OTPKoppelenView(TemplateView):
                 # controle is mislukt - schrijf dit in het logboek
                 schrijf_in_logboek(account=None,
                                    gebruikte_functie="OTP controle",
-                                   activiteit='Gebruiker %s OTP koppeling controle mislukt vanaf IP %s' % (repr(account.username), repr(from_ip)))
+                                   activiteit='Gebruiker %s OTP koppeling controle mislukt vanaf IP %s' % (repr(account.username), from_ip))
+                my_logger.info('%s 2FA koppeling mislukte controle voor account %s' % (from_ip, request.user.username))
 
                 form.add_error(None, 'Verkeerde code. Probeer het nog eens.')
                 # TODO: blokkeer na X pogingen
@@ -802,10 +816,17 @@ class ActiveerRolView(UserPassesTestMixin, View):
         return self.request.user.is_authenticated and rol_mag_wisselen(self.request)
 
     def get(self, request, *args, **kwargs):
+        from_ip = get_safe_from_ip(self.request)
+
         if 'rol' in kwargs:
+            my_logger.info('%s ROL account %s wissel naar rol %s' % (from_ip, self.request.user.username, repr(kwargs['rol'])))
             rol_activeer_rol(request, kwargs['rol'])
         else:
+            my_logger.info('%s ROL account %s wissel naar functie %s' % (from_ip, self.request.user.username, repr(kwargs['group_pk'])))
             rol_activeer_functie(request, kwargs['group_pk'])
+
+        rol_beschrijving = rol_get_beschrijving(request)
+        my_logger.info('%s ROL account %s is nu %s' % (from_ip, self.request.user.username, rol_beschrijving))
 
         return redirect('Plein:plein')
 
@@ -819,8 +840,8 @@ def receive_bevestiging_accountemail(request, obj):
     account_email_is_bevestigd(obj)
 
     # schrijf in het logboek
-    from_ip = request.META['REMOTE_ADDR']
-    msg = "Bevestigd vanaf IP " + repr(from_ip)
+    from_ip = get_safe_from_ip(request)
+    msg = "Bevestigd vanaf IP %s" % from_ip
 
     account = obj.account
     msg += " voor account " + repr(account.username)
