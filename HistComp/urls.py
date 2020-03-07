@@ -10,17 +10,17 @@ from . import views
 app_name = 'HistComp'
 
 urlpatterns = [
-    #path('',
-    #     views.HistCompAlleJarenView.as_view(),
-    #     name='allejaren'),
+    path('',
+         views.HistCompAlleJarenView.as_view(),
+         name='allejaren'),
 
-    #path('<jaar>/<comp_type>/<klasse>/indiv/',
-    #     views.HistCompIndivView.as_view(),
-    #     name='indiv'),
+    path('indiv/<histcomp_pk>/',
+         views.HistCompIndivView.as_view(),
+         name='indiv'),
 
-    #path('<jaar>/<comp_type>/<klasse>/team/',
-    #     views.HistCompTeamView.as_view(),
-    #     name='team')
+    path('team/<histcomp_pk>/',
+         views.HistCompTeamView.as_view(),
+         name='team')
 ]
 
 # end of file

@@ -1,36 +1,97 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019 Ramon van der Winkel.
+                Copyright (c) 2019-2020 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
 
-{% block extrastyle %}
-<link rel="stylesheet" type="text/css" href="{% static 'histcomp/allejaren.css' %}">
-{% endblock %}
-
-{% block title %}Welkom in de GESCHIEDENIS{% endblock %}
+{% block title %}Uitslag regiocompetitie{% endblock %}
 
 {% block pagina %}
 
-<p>Individuele competitie historie.</p>
-
 {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="histcomp_allejaren" %}
 
-<ul>
-{% for obj in object_list %}{% if obj.is_team is False %}
-    {% url 'HistComp:indiv' obj.jaar obj.comp_type obj.klasse as obj_url %}
-    <li><a href="{{ obj_url }}">{{ obj.jaar }} - {{ obj.comp_type }} - {{ obj.klasse }}</a></li>
-{% endif %}{% endfor %}
-</ul>
+<h4>Uitslag regiocompetitie</h4>
 
-<p>Team competitie historie.</p>
-<ul>
-{% for obj in object_list %}{% if obj.is_team is True %}
-    {% url 'HistComp:team' obj.jaar obj.comp_type obj.klasse as obj_url %}
-    <li><a href="{{ obj_url }}">{{ obj.jaar }} - {{ obj.comp_type }} - {{ obj.klasse }}</a></li>
-{% endif %}{% endfor %}
-</ul>
+{% if object_list.count %}
+
+    <p>Op deze pagina tonen we de uitslag van de regiocompetitie {{ seizoen }}.</p>
+
+    <h5>Individuele competitie 18m Indoor</h5>
+
+    <ul class="collection with-header">
+        <li class="collection-header"><h5>Klassen</h5></li>
+        {% for obj in object_list %}
+            {% if obj.comp_type == '18' %}
+                {% if obj.is_team is False %}
+                    <a href="{{ obj.url }}" class="nhb-klikbare-balk">
+                        <li class="collection-item">
+                            <span>{{ obj.klasse }}</span>
+                        </li>
+                    </a>
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+    </ul>
+
+    <h5>Individuele competitie 25m 1pijl</h5>
+
+    <ul class="collection with-header">
+        <li class="collection-header"><h6>Klassen</h6></li>
+        {% for obj in object_list %}
+            {% if obj.comp_type == '25' %}
+                {% if obj.is_team is False %}
+                    <a href="{{ obj.url }}" class="nhb-klikbare-balk">
+                        <li class="collection-item">
+                            <span>{{ obj.klasse }}</span>
+                        </li>
+                    </a>
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+    </ul>
+
+    {% if show_team %}
+        <h5>Team competitie 18m Indoor</h5>
+
+        <ul class="collection with-header">
+            <li class="collection-header"><h6>Klassen</h6></li>
+            {% for obj in object_list %}
+                {% if obj.comp_type == '18' %}
+                    {% if obj.is_team is True %}
+                        <a href="{{ obj.url }}" class="nhb-klikbare-balk">
+                            <li class="collection-item">
+                                <span>{{ obj.klasse }}</span>
+                            </li>
+                        </a>
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+        </ul>
+
+        <h5>Team competitie 25m 1pijl</h5>
+
+        <ul class="collection with-header">
+            <li class="collection-header"><h6>Klassen</h6></li>
+            {% for obj in object_list %}
+                {% if obj.comp_type == '25' %}
+                    {% if obj.is_team is True %}
+                        <a href="{{ obj.url }}" class="nhb-klikbare-balk">
+                            <li class="collection-item">
+                                <span>{{ obj.klasse }}</span>
+                            </li>
+                        </a>
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+{% else %}
+
+    <p>Er is op dit moment geen uitslag beschikbaar.</p>
+
+{% endif %}
 
 {% endblock %}

@@ -1,77 +1,96 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019 Ramon van der Winkel.
+                Copyright (c) 2019-2020 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load overig_filters %}   <!-- highlight filter -->
 
-{% block extrastyle %}<link rel="stylesheet" type="text/css" href="{% static 'histcomp/indiv.css' %}">{% endblock %}
-
-{% block title %}Welkom in de INDIVIDUELE geschiedenis{% endblock %}
+{% block title %}Uitslag individuele competitie{% endblock %}
 
 {% block pagina %}
-
-<p>Uitslag van de {{ comp_type_str }} individuele competitie, seizoen {{ jaar }}, klasse {{ klasse }}.</p>
-
 {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="histcomp_indiv" %}
 
+<h4>Uitslag individuele competitie</h4>
+
+<div class="container white z-depth-2">
+    <div class="row nhb-blauw white-text">
+        <div class="col s12 center-align">
+            <h5>Zoeken op naam</h5>
+            <p>of verenigingsnummer</p>
+        </div>
+    </div>
+
+    <form class="row" method="get" action="{{ filter_url }}">
+
+        <div class="row">
+            <div class="input-field col s12">
+                {{ form.filter.label_tag }} {{ form.filter }}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="center-align">
+                <input class="btn-nhb-blauw" type="submit" value="Zoek">
+                {% if unfiltered_url %}
+                    <span>&nbsp;&nbsp;</span><a class="btn nhb-blue" href="{{ unfiltered_url }}">Leeg maken</a>
+                {% endif %}
+            </div>
+        </div>
+    </form>
+</div>
+
+<p>Uitslag van de {{ histcomp.comp_type_str }} individuele competitie, seizoen {{ histcomp.seizoen }}, klasse {{ histcomp.klasse }}.</p>
+
 {% if is_paginated %}
-<p>Pagina {{ page_obj.number }} van de {{ paginator.num_pages }}</p>
-<p>Spring naar een andere pagina:{% for linkname, url in page_links %} [<a href="{{ url }}">{{ linkname }}</a>]{% endfor %}</p>
+    <p>Pagina {{ page_obj.number }} van de {{ paginator.num_pages }}</p>
+    <p>Spring naar een andere pagina:{% for linkname, url in page_links %} [<a href="{{ url }}">{{ linkname }}</a>]{% endfor %}</p>
 {% endif %}
-
-<form method="get" action="{{ filter_url }}">
-{{ form.filter.label_tag }} {{ form.filter }}
-&nbsp;<input type="submit" value="Filter">
-{% if unfiltered_url %}&nbsp;<a href="{{ unfiltered_url }}">Clear</a>{% endif %}
-</form>
-
-&nbsp;
 
 {% if object_list.all %}
-<table>
-<thead class="table-header">
- <tr>
-  <th class="rank-nr">Nr</th>
-  <th colspan="2">Schutter</th>
-  <th colspan="2">Vereniging</th>
-  <th colspan="7">Scores</th>
-  <th>Totale score</th>
-  <th>Gemiddelde pijl</th>
- </tr>
-</thead>
+    <table class="white">
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <th>Schutter</th>
+                <th>Vereniging</th>
+                <th>Gemiddelde pijl</th>
+                <th colspan="7">Scores</th>
+                <th>Totale score</th>
+            </tr>
+        </thead>
 
-{% for obj in object_list %}
-<tr>
- <td class="rank-nr">{{ obj.rank }}</td>
- <td>[{{ obj.schutter_nr }}]</td>
- <td>{{ obj.schutter_naam }}</td>
- <td>[{{ obj.vereniging_nr }}]</td>
- <td>{{ obj.vereniging_naam }}</td>
- <td class="score">{{ obj.score1 }}</td>
- <td class="score">{{ obj.score2 }}</td>
- <td class="score">{{ obj.score3 }}</td>
- <td class="score">{{ obj.score4 }}</td>
- <td class="score">{{ obj.score5 }}</td>
- <td class="score">{{ obj.score6 }}</td>
- <td class="score">{{ obj.score7 }}</td>
- <td class="score">{{ obj.totaal }}</td>
- <td class="gemiddelde-pijl">{{ obj.gemiddelde }}</td>
-</tr>
-{% endfor %}
-</table>
+        {% for obj in object_list %}
+            <tr>
+                 <td>{{ obj.rank }}</td>
+                 <td>{{ obj.schutter_naam|highlight:zoekterm }}</td>
+                 <td>{{ obj.vereniging_naam|highlight:zoekterm }}</td>
+                 <td>{{ obj.gemiddelde }}</td>
+                 <td>{{ obj.score1 }}</td>
+                 <td>{{ obj.score2 }}</td>
+                 <td>{{ obj.score3 }}</td>
+                 <td>{{ obj.score4 }}</td>
+                 <td>{{ obj.score5 }}</td>
+                 <td>{{ obj.score6 }}</td>
+                 <td>{{ obj.score7 }}</td>
+                 <td>{{ obj.totaal }}</td>
+            </tr>
+        {% endfor %}
+    </table>
 
-{% if is_paginated %}
-<p>Spring naar een andere pagina:{% for linkname, url in page_links %} [<a href="{{ url }}">{{ linkname }}</a>]{% endfor %}</p>
-{% endif %}
+    {% if is_paginated %}
+        <p>Spring naar een andere pagina:{% for linkname, url in page_links %} [<a href="{{ url }}">{{ linkname }}</a>]{% endfor %}</p>
+    {% endif %}
 
-{% if all_url and not unfiltered_url %}
-<p>Laad <a href="{{ all_url }}">alle {{ all_count }}</a> regels.</p>
-{% endif %}
+    {% if all_url and not unfiltered_url %}
+        <p>Laad <a href="{{ all_url }}">alle {{ all_count }}</a> regels.</p>
+    {% endif %}
 
 {% else %}
-Geen resultaten gevonden.
+
+    <p>Geen resultaten gevonden.</p>
+
 {% endif %}
 
 {% endblock %}
