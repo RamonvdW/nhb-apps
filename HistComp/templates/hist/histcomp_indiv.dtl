@@ -42,22 +42,38 @@
 </div>
 
 <p>Uitslag van de {{ histcomp.comp_type_str }} individuele competitie, seizoen {{ histcomp.seizoen }}, klasse {{ histcomp.klasse }}.</p>
+<p>De gemiddelde pijl is berekend over de 6 hoogste scores. De laagste van de zeven scores is tussen haakjes gezet.</p>
 
 {% if is_paginated %}
-    <p>Pagina {{ page_obj.number }} van de {{ paginator.num_pages }}</p>
-    <p>Spring naar een andere pagina:{% for linkname, url in page_links %} [<a href="{{ url }}">{{ linkname }}</a>]{% endfor %}</p>
+    <ul class="pagination">
+        {% for linkname, url in page_links %}
+            {% if linkname == active %}
+                <li class="active"><a href="{{ url }}">{{ linkname }}</a></li>
+            {% elif linkname == "vorige_disable" %}
+                <li class="disabled"><a href="#!"><i class="material-icons-round">chevron_left</i></a></li>
+            {% elif linkname == "vorige" %}
+                <li class="waves-effect"><a href="{{ url }}"><i class="material-icons-round">chevron_left</i></a></li>
+            {% elif linkname == "volgende" %}
+                <li class="waves-effect"><a href="{{ url }}"><i class="material-icons-round">chevron_right</i></a></li>
+            {% elif linkname == "volgende_disable" %}
+                <li class="disabled"><a href="#!"><i class="material-icons-round">chevron_right</i></a></li>
+            {% else %}
+                <li class="waves-effect"><a href="{{ url }}">{{ linkname }}</a></li>
+            {% endif %}
+        {% endfor %}
+    </ul>
 {% endif %}
 
-{% if object_list.all %}
+{% if object_list.count %}
     <table class="white">
         <thead>
             <tr>
                 <th>Rank</th>
                 <th>Schutter</th>
                 <th>Vereniging</th>
-                <th>Gemiddelde pijl</th>
-                <th colspan="7">Scores</th>
-                <th>Totale score</th>
+                <th class="center-align">Gemiddelde pijl</th>
+                <th class="center-align" colspan="7">Scores</th>
+                <th class="right-align">Totale score</th>
             </tr>
         </thead>
 
@@ -66,21 +82,37 @@
                  <td>{{ obj.rank }}</td>
                  <td>{{ obj.schutter_naam|highlight:zoekterm }}</td>
                  <td>{{ obj.vereniging_naam|highlight:zoekterm }}</td>
-                 <td>{{ obj.gemiddelde }}</td>
-                 <td>{{ obj.score1 }}</td>
-                 <td>{{ obj.score2 }}</td>
-                 <td>{{ obj.score3 }}</td>
-                 <td>{{ obj.score4 }}</td>
-                 <td>{{ obj.score5 }}</td>
-                 <td>{{ obj.score6 }}</td>
-                 <td>{{ obj.score7 }}</td>
-                 <td>{{ obj.totaal }}</td>
+                 <td class="center-align">{{ obj.gemiddelde }}</td>
+                 <td class="right-align">{% if obj.laagste_score_nr == 1 %}({{ obj.score1 }}){% else %}{{ obj.score1 }}{% endif %}</td>
+                 <td class="right-align">{% if obj.laagste_score_nr == 2 %}({{ obj.score2 }}){% else %}{{ obj.score2 }}{% endif %}</td>
+                 <td class="right-align">{% if obj.laagste_score_nr == 3 %}({{ obj.score3 }}){% else %}{{ obj.score3 }}{% endif %}</td>
+                 <td class="right-align">{% if obj.laagste_score_nr == 4 %}({{ obj.score4 }}){% else %}{{ obj.score4 }}{% endif %}</td>
+                 <td class="right-align">{% if obj.laagste_score_nr == 5 %}({{ obj.score5 }}){% else %}{{ obj.score5 }}{% endif %}</td>
+                 <td class="right-align">{% if obj.laagste_score_nr == 6 %}({{ obj.score6 }}){% else %}{{ obj.score6 }}{% endif %}</td>
+                 <td class="right-align">{% if obj.laagste_score_nr == 7 %}({{ obj.score7 }}){% else %}{{ obj.score7 }}{% endif %}</td>
+                 <td class="center-align">{{ obj.totaal }}</td>
             </tr>
         {% endfor %}
     </table>
 
     {% if is_paginated %}
-        <p>Spring naar een andere pagina:{% for linkname, url in page_links %} [<a href="{{ url }}">{{ linkname }}</a>]{% endfor %}</p>
+        <ul class="pagination">
+            {% for linkname, url in page_links %}
+                {% if linkname == active %}
+                    <li class="active"><a href="{{ url }}">{{ linkname }}</a></li>
+                {% elif linkname == "vorige_disable" %}
+                    <li class="disabled"><a href="#!"><i class="material-icons-round">chevron_left</i></a></li>
+                {% elif linkname == "vorige" %}
+                    <li class="waves-effect"><a href="{{ url }}"><i class="material-icons-round">chevron_left</i></a></li>
+                {% elif linkname == "volgende" %}
+                    <li class="waves-effect"><a href="{{ url }}"><i class="material-icons-round">chevron_right</i></a></li>
+                {% elif linkname == "volgende_disable" %}
+                    <li class="disabled"><a href="#!"><i class="material-icons-round">chevron_right</i></a></li>
+                {% else %}
+                    <li class="waves-effect"><a href="{{ url }}">{{ linkname }}</a></li>
+                {% endif %}
+            {% endfor %}
+        </ul>
     {% endif %}
 
     {% if all_url and not unfiltered_url %}

@@ -14,7 +14,7 @@
 
 <h4>Uitslag regiocompetitie</h4>
 
-{% if object_list.count %}
+{% if object_list %}
 
     <p>Op deze pagina tonen we de uitslag van de regiocompetitie {{ seizoen }}.</p>
 

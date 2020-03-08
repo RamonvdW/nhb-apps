@@ -18,11 +18,32 @@ TEMPLATE_HISTCOMP_TEAM = 'hist/histcomp_team.dtl'
 
 RESULTS_PER_PAGE = 100
 
+KLASSEN_VOLGORDE = ("Recurve", "Compound", "Barebow", "Longbow", "Instinctive")
+
 
 class HistCompAlleJarenView(ListView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_HISTCOMP_ALLEJAREN
+
+    def _zet_op_volgorde_klassen(self, objs_unsorted):
+        # sorteer de klassen op de gewenste volgorde
+        # deze routine lijkt een beetje omslachtig, maar dat komt omdat QuerySet geen remove heeft
+        objs = list()
+        for klas in KLASSEN_VOLGORDE:
+            # zoek objecten met klassen die hier aan voldoen
+            transfer = list()
+            for obj in objs_unsorted:
+                if klas in obj.klasse:
+                    objs.append(obj)
+            # for
+        # for
+        # voeg de rest ongesorteerd toe
+        for obj in objs_unsorted:
+            if obj not in objs:
+                objs.append(obj)
+        # for
+        return objs
 
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
@@ -30,10 +51,14 @@ class HistCompAlleJarenView(ListView):
         # zoek het nieuwste seizoen beschikbaar
         qset = HistCompetitie.objects.order_by('-seizoen').distinct('seizoen')
         if len(qset) == 0:
+            # geen data beschikbaar
             objs = list()
         else:
+            # neem de data van het nieuwste seizoen
             self.seizoen = qset[0].seizoen
-            objs = HistCompetitie.objects.filter(seizoen=self.seizoen)
+            objs_unsorted = HistCompetitie.objects.filter(seizoen=self.seizoen)
+            objs = self._zet_op_volgorde_klassen(objs_unsorted)
+            # bepaal voor elke entry een url om de uitslag te bekijken
             for obj in objs:
                 if obj.is_team:
                     urlconf = 'HistComp:team'
@@ -157,6 +182,9 @@ class HistCompBaseView(ListView):
         if page_nr > 1:
             tup = ('vorige', base_url + '&page=%s' % (page_nr - 1))
             links.append(tup)
+        else:
+            tup = ('vorige_disable', '')
+            links.append(tup)
 
         # block van 10 pagina's; huidige pagina in het midden
         range_start = page_nr - 5
@@ -175,6 +203,9 @@ class HistCompBaseView(ListView):
         if page_nr < num_pages:
             tup = ('volgende', base_url + '&page=%s' % (page_nr + 1))
             links.append(tup)
+        else:
+            tup = ('volgende_disable', '')
+            links.append(tup)
 
         return links
 
@@ -190,6 +221,7 @@ class HistCompBaseView(ListView):
 
         if context['is_paginated']:
             context['page_links'] = self._make_link_urls(context)
+            context['active'] = str(context['page_obj'].number)
 
         if self.get_filter:
             # als een filter actief is, toon de 'clear' knop

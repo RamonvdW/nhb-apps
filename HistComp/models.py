@@ -60,6 +60,7 @@ class HistCompetitieIndividueel(models.Model):
     score5 = models.PositiveIntegerField()
     score6 = models.PositiveIntegerField()
     score7 = models.PositiveIntegerField()
+    laagste_score_nr = models.PositiveIntegerField(default=0)  # 1..7
     totaal = models.PositiveIntegerField()
     gemiddelde = models.DecimalField(max_digits=5, decimal_places=3)    # 10.000
 

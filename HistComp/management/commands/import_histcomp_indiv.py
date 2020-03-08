@@ -61,7 +61,7 @@ class Command(BaseCommand):
                 count += 1
                 totaal += getal
             # for
-        return scores, count, totaal
+        return getallen, count, totaal
 
     def _import(self, lines, seizoen, comptype):
         # sanity-check voor de hele file
@@ -157,6 +157,8 @@ class Command(BaseCommand):
                     ver_naam = 'Diana'
                 elif ver_nr == '1170':
                     ver_naam = 'Batavieren Treffers'
+                elif ver_nr == '1191':
+                    ver_naam = 'Eendracht St Sebast'
                 else:
                     ver_naam = '?'
                     self.stdout.write('[WARNING] Kan geen naam opzoeken voor verwijderde vereniging %s' % ver_nr)
@@ -180,6 +182,23 @@ class Command(BaseCommand):
             hist.score7 = scores[6]
             hist.gemiddelde = gemiddelde
             hist.totaal = totaal
+
+            scores.sort()
+            lowest = scores[0]
+            if hist.score7 == lowest:
+                hist.laagste_score_nr = 7
+            elif hist.score6 == lowest:
+                hist.laagste_score_nr = 6
+            elif hist.score5 == lowest:
+                hist.laagste_score_nr = 5
+            elif hist.score4 == lowest:
+                hist.laagste_score_nr = 4
+            elif hist.score3 == lowest:
+                hist.laagste_score_nr = 3
+            elif hist.score2 == lowest:
+                hist.laagste_score_nr = 2
+            else:
+                hist.laagste_score_nr = 1
 
             # check if the record already exists
             dupe = HistCompetitieIndividueel.objects.filter(
