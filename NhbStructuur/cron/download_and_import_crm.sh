@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#  Copyright (c) 2019 Ramon van der Winkel.
+#  Copyright (c) 2019-2020 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -22,10 +22,13 @@ then
     exit 1
 fi
 
+# everything sent to stdout/stderr will be picked up by crontab and sent in an email
+# avoid this by writing to a logfile
+
 STAMP=$(date +"%Y%m%d_%H%M%S")
 SHORTSTAMP=$(date +"%Y%m")       # elke maand een nieuwe logfile
 LOG="$LOGDIR/${SHORTSTAMP}_download_and_import_crm.log"
-echo "Logging to: $LOG"
+#echo "Logging to: $LOG"
 echo "[INFO] Started at $STAMP" >> "$LOG"
 
 URL=$(head -1 "$CONFIGFILE")
