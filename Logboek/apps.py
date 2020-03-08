@@ -7,6 +7,7 @@
 from django.apps import AppConfig
 from django.conf import settings
 import logging
+import os
 
 my_logger = logging.getLogger('NHBApps.Account')
 
@@ -21,7 +22,8 @@ class LogboekConfig(AppConfig):
         from .models import LogboekRegel, schrijf_in_logboek
 
         msg = "Start met versie %s" % repr(settings.SITE_VERSIE)
-        my_logger.info("UITROL " + msg)
+        pidmsg = "(pid %s) " % os.getpid()
+        my_logger.info("UITROL " + pidmsg + msg)
 
         # schrijf het nieuw versienummer in het logboek
         if len(LogboekRegel.objects.filter(gebruikte_functie='Uitrol', activiteit=msg)) == 0:
