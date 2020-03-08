@@ -14,7 +14,9 @@ CONFIGFILE="download_crm_config.txt"
 # TODO: cleanup of spool directory
 
 ID=$(id -u)
-if [ $ID -ne 0 ]
+ID_ROOT=$(id -u root)
+ID_WWW=$(id -u apache)
+if [ $ID -ne $ID_ROOT -a $ID -ne $ID_WWW ]
 then
     echo "Please run with sudo"
     exit 1
