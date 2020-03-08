@@ -15,7 +15,8 @@ def filter_highlight(text, search_for):
          The search is case-insensitive.
     """
     new_text = ""
-    if len(search_for):
+    if search_for:
+        # not None, not empty
         search_for = search_for.lower()
         search_len = len(search_for)
         pos = text.lower().find(search_for)
@@ -24,9 +25,8 @@ def filter_highlight(text, search_for):
             limit -= 1
             # found an instance that we want to highlight
             # eat all text before that point + perform escaping
-            if pos:
-                new_text += escape(text[:pos])
-                text = text[pos:]
+            new_text += escape(text[:pos])
+            text = text[pos:]
 
             new_text += '<b>'           # highlighter prefix
 

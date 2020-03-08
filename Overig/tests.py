@@ -11,6 +11,7 @@ from .models import SiteFeedback, save_tijdelijke_url
 from .helpers import get_safe_from_ip
 from .tijdelijke_url import dispatcher, SAVER, set_tijdelijke_url_receiver, \
                             RECEIVER_ACCOUNTEMAIL, maak_tijdelijke_url_accountemail
+from .templatetags.overig_filters import filter_highlight
 from Account.models import Account, AccountEmail, account_vhpg_is_geaccepteerd,\
                            account_zet_sessionvars_na_otp_controle, account_zet_sessionvars_na_login
 from Account.rol import rol_zet_sessionvars_na_otp_controle, rol_zet_sessionvars_na_login, rol_activeer_rol
@@ -233,6 +234,15 @@ class TestOverig(TestCase):
 
         self.client.META['REMOTE_ADDR'] = 'wat een puinhoop\0<li>'
         self.assertEqual(get_safe_from_ip(self.client), 'aee')
+
+    def test_filter_highlight(self):
+        self.assertEqual(filter_highlight("", None), "")
+        self.assertEqual(filter_highlight("ramon", None), "ramon")
+        self.assertEqual(filter_highlight("ramon", ""), "ramon")
+        self.assertEqual(filter_highlight("ramon", "jaja"), "ramon")
+        self.assertEqual(filter_highlight("ramon", "ra"), "<b>ra</b>mon")
+        self.assertEqual(filter_highlight("ramon", "mo"), "ra<b>mo</b>n")
+        self.assertEqual(filter_highlight("ramon", "on"), "ram<b>on</b>")
 
 # TODO: add use of assert_other_http_commands_not_supported
 
