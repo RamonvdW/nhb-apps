@@ -121,7 +121,7 @@
 
 {% else %}
 
-    <p>Geen resultaten gevonden.</p>
+    <p>Er zijn geen resultaten beschikbaar.</p>
 
 {% endif %}
 

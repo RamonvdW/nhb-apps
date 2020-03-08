@@ -52,6 +52,7 @@ class HistCompAlleJarenView(ListView):
         qset = HistCompetitie.objects.order_by('-seizoen').distinct('seizoen')
         if len(qset) == 0:
             # geen data beschikbaar
+            self.seizoen = ""
             objs = list()
         else:
             # neem de data van het nieuwste seizoen
@@ -92,10 +93,10 @@ class HistCompBaseView(ListView):
     """
 
     # class variables shared by all instances
-    is_team = None          # override in child class
-    reverse_name = None     # override in child class
-    query_class = None      # override in child class
-    paginate_by = 100       # enable Paginator built into ListView
+    is_team = None                  # override in child class
+    reverse_name = None             # override in child class
+    query_class = None              # override in child class
+    paginate_by = RESULTS_PER_PAGE  # enable Paginator built into ListView
     # ordering = ['rank']    # only works when pagination is active
 
     def __init__(self, **kwargs):

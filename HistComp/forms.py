@@ -20,7 +20,7 @@ class FilterForm(forms.Form):
                     required=False)
 
     # gevraagde pagina nummer
-    pg = forms.IntegerField(
+    pg = forms.IntegerField(        # TODO: is deze nodig?
                     min_value=1, max_value=1000,
                     required=False,
                     widget=forms.HiddenInput())
