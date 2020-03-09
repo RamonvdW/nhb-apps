@@ -312,4 +312,46 @@ WIKI_URL_RKO = WIKI_URL + '/Handleiding_RKO'
 WIKI_URL_BKO = WIKI_URL + '/Handleiding_BKO'
 WIKI_URL_2FA = WIKI_URL + '/Twee-factor_authenticatie'
 
+
+# logging to syslog
+# zie https://docs.djangoproject.com/en/3.0/topics/logging/
+# en  https://docs.python.org/3/howto/logging-cookbook.html#logging-to-a-single-file-from-multiple-processes
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': "[django] %(asctime)s %(name)s [%(levelname)s] %(message)s",
+            'datefmt': "%Y-%b-%d %H:%M:%S"
+        }
+    },
+    'handlers': {
+        'syslog': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.SysLogHandler',
+            'formatter': 'verbose',
+            'facility': 'user',
+            'address': '/dev/log'
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['syslog'],
+            'level': 'ERROR'
+        },
+        'saml2': {
+            'handlers': ['syslog'],
+            'level': 'WARNING'
+        },
+        'djangosaml2idp': {
+            'handlers': ['syslog'],
+            'level': 'WARNING'
+        },
+        '': {
+            'handlers': ['syslog'],
+            'level': 'DEBUG'
+        }
+    }
+}
+
 # end of file
