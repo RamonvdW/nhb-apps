@@ -88,8 +88,11 @@ class LoginView(TemplateView):
                 try:
                     email = AccountEmail.objects.get(bevestigde_email=login_naam)
                 except AccountEmail.DoesNotExist:
-                    # schrijf de mislukte inlogpoging in het logboek
-                    schrijf_in_logboek(None, 'Inloggen', 'Mislukte inlog vanaf IP %s: onbekende inlog naam %s' % (from_ip, repr(login_naam)))
+                    # email is ook niet bekend
+                    # LET OP! dit kan heel snel heel veel data worden! - voorkom storage overflow!!
+                    #my_logger.info('%s LOGIN Mislukte inlog voor onbekend inlog naam %s' % (from_ip, repr(login_naam)))
+                    #schrijf_in_logboek(None, 'Inloggen', 'Mislukte inlog vanaf IP %s: onbekende inlog naam %s' % (from_ip, repr(login_naam)))
+                    pass
                 except AccountEmail.MultipleObjectsReturned:
                     # kan niet kiezen tussen verschillende accounts
                     # werkt dus niet als het email hergebruikt is voor meerdere accounts
@@ -136,6 +139,8 @@ class LoginView(TemplateView):
                     if account2.verkeerd_wachtwoord_teller > 0:
                         account2.verkeerd_wachtwoord_teller = 0
                         account2.save()
+
+                    my_logger.info('%s LOGIN op account %s' % (from_ip, repr(account2.username)))
 
                     # kijk of een nieuw emailadres bevestigd moet worden
                     try:
