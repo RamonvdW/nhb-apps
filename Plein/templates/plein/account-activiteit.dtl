@@ -79,7 +79,7 @@
 
 <h5 id="poging">Mislukte inlog pogingen</h5>
 
-<p>Hieronder staan accounts waar recent geprobeerd is op in te loggen (maximaal 50)</p>
+<p>Hieronder staan accounts waar recent geprobeerd is op in te loggen (maximaal 50). Dit zijn accounts waar de ooit op ingelogd is en daarna een mislukte inlogpoging.</p>
 
 <table class="white">
     <thead>
