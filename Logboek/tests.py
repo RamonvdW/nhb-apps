@@ -106,8 +106,19 @@ class TestLogboek(TestCase):
         self.assertContains(resp, 'weer een nieuw lid')
 
     def test_log_versie(self):
-        # controleer dat er 1 regel met het versienummer aanwezig is in het logboek
-        qset = LogboekRegel.objects.all().filter(gebruikte_functie='Uitrol', activiteit__contains=settings.SITE_VERSIE)
+        # in de test database zit geen logboek regel
+        qset = LogboekRegel.objects.filter(gebruikte_functie='Uitrol', activiteit__contains=settings.SITE_VERSIE)
+        self.assertEqual(len(qset), 0)
+
+        from importlib import import_module
+        logboek_module = import_module('Logboek.apps')
+
+        # trigger de init code die in het logboek schrijft
+        app = LogboekConfig('Logboek', logboek_module)
+        app.ready()
+
+        # controleer dat er 1 regel met het versienummer toegevoegd is in het logboek
+        qset = LogboekRegel.objects.filter(gebruikte_functie='Uitrol', activiteit__contains=settings.SITE_VERSIE)
         self.assertEqual(len(qset), 1)
 
 
