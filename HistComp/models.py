@@ -70,6 +70,7 @@ class HistCompetitieIndividueel(models.Model):
 
     class Meta:
         """ meta data voor de admin interface """
+        # TODO: Historie --> Historische
         verbose_name = verbose_name_plural = "Historie individuele competitie"
 
 
@@ -102,6 +103,7 @@ class HistCompetitieTeam(models.Model):
 
     class Meta:
         """ meta data voor de admin interface """
+        # TODO: Historie --> Historische
         verbose_name = verbose_name_plural = "Historie team competitie"
 
 
