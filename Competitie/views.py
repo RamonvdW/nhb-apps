@@ -252,8 +252,20 @@ class KlassegrenzenView(UserPassesTestMixin, TemplateView):
         return HttpResponseRedirect(reverse('Plein:plein'))
 
     def _get_targets(self):
+        """ Retourneer een data structuur met daarin voor alle wedstrijdklassen
+            de toegestande boogtypen en leeftijden
+
+            out: target = dict() met [ (min_age, max_age, tuple(bogen)) ] = list(wedstrijdklassen)
+
+            Voorbeeld: { (21,150,('R','BB','IB','LB')): [obj1, obj2, etc.],
+                         (21,150,('C')): [obj10, obj11],
+                         (14,17),('C')): [obj20, obj21]  }
+                    Waarbij obj* = WedstrijdKlasse object
+        """
         targets = dict()        # [ (min_age, max_age, tuple(bogen)) ] = list(wedstrijdklassen)
         for wedstrklasse in WedstrijdKlasse.objects.filter(is_voor_teams=False, buiten_gebruik=False):
+
+            # zoek de minimale en maximaal toegestaande leeftijd voor deze wedstrijdklasse
             age_min = 999
             age_max = 0
             for obj in WedstrijdKlasseLeeftijd.objects.filter(wedstrijdklasse=wedstrklasse):
@@ -265,7 +277,6 @@ class KlassegrenzenView(UserPassesTestMixin, TemplateView):
             # verzamel alle toegestane boogsoorten voor deze wedstrijdklasse
             bogen = list()
             for obj in WedstrijdKlasseBoog.objects.filter(wedstrijdklasse=wedstrklasse):
-                # helaas op beschrijving, want we matchen met
                 if obj.boogtype.afkorting not in bogen:
                     bogen.append(obj.boogtype.afkorting)
             # for
@@ -275,7 +286,6 @@ class KlassegrenzenView(UserPassesTestMixin, TemplateView):
                 targets[tup] = list()
             targets[tup].append(wedstrklasse)
         # for
-
         return targets
 
     def _get_queryset(self, afstand):
@@ -304,7 +314,7 @@ class KlassegrenzenView(UserPassesTestMixin, TemplateView):
         # creeer de resultatenlijst
         objs = list()
         histcomps = HistCompetitie.objects.filter(seizoen=self.seizoen, comp_type=afstand, is_team=False)
-        targets = self._get_targets()
+        targets = self._get_targets()   # wedstrijdklassen vs leeftijd + bogen
 
         for tup, wedstrklassen in targets.items():
             min_age, max_age, bogen = tup
@@ -321,25 +331,34 @@ class KlassegrenzenView(UserPassesTestMixin, TemplateView):
 
             if len(gemiddelden):
                 gemiddelden.sort(reverse=True)  # in-place sort, highest to lowest
-                count = len(gemiddelden)
+                count = len(gemiddelden)        # aantal schutters
                 aantal = len(wedstrklassen)     # aantal groepen
                 step = int(count / aantal)      # omlaag afgerond = OK voor grote groepen
                 pos = 0
                 for klasse in wedstrklassen[:-1]:
                     pos += step
                     ag = gemiddelden[pos]
-                    res = {'beschrijving': klasse.beschrijving, 'count' : step, 'ag': ag, 'wedstrkl_obj': klasse}
+                    res = {'beschrijving': klasse.beschrijving,
+                           'count' : step,
+                           'ag': ag,
+                           'wedstrkl_obj': klasse}
                     objs.append(res)
                 # for
                 # laatste klasse krijgt 0,000 als AG
                 klasse = wedstrklassen[-1]
-                res = {'beschrijving': klasse.beschrijving, 'count' : count - (aantal - 1) * step, 'ag': ZERO, 'wedstrkl_obj': klasse}
+                res = {'beschrijving': klasse.beschrijving,
+                       'count' : count - (aantal - 1) * step,
+                       'ag': ZERO,
+                       'wedstrkl_obj': klasse}
                 objs.append(res)
             else:
                 # geen historische gemiddelden
                 # zet alles op 0,000 - dit geeft een beetje een rommeltje als er meerdere klassen zijn
                 for klasse in wedstrklassen:
-                    res = {'beschrijving': klasse.beschrijving, 'count': 0, 'ag': ZERO, 'wedstrkl_obj': klasse}
+                    res = {'beschrijving': klasse.beschrijving,
+                           'count': 0,
+                           'ag': ZERO,
+                           'wedstrkl_obj': klasse}
                     objs.append(res)
                 # for
         # for
@@ -347,6 +366,8 @@ class KlassegrenzenView(UserPassesTestMixin, TemplateView):
         return objs2
 
     def get(self, request, *args, **kwargs):
+        """ deze functie wordt aangeroepen als een GET request ontvangen is
+        """
         context = super().get_context_data(**kwargs)
 
         afstand = kwargs['afstand']
@@ -367,11 +388,15 @@ class KlassegrenzenView(UserPassesTestMixin, TemplateView):
         return render(request, self.template_name, context)
 
     def post(self, request, *args, **kwargs):
+        """ deze functie wordt aangeroepen als een POST request ontvangen is.
+            --> de beheerder wil deze klassegrenzen vaststellen
+        """
         afstand = kwargs['afstand']
         objs = Competitie.objects.filter(afstand=afstand)
         if len(objs) > 0:
             comp = objs[0]
             schrijf_in_logboek(request.user, 'Competitie', 'Klassegrenzen bevestigd voor %s' % comp.beschrijving)
+            # haal dezelfde data op als voor de GET request
             for obj in self._get_queryset(afstand):
                 klasse = obj['wedstrkl_obj']
                 maak_competitieklasse_indiv(comp, klasse, obj['ag'])
