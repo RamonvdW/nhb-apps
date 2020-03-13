@@ -82,6 +82,7 @@ class Command(BaseCommand):
         self._count_regios = 0
         self._count_clubs = 0
         self._count_members = 0
+        self._count_blocked = 0
         self._count_wijzigingen = 0
         self._count_verwijderingen = 0
         self._count_toevoegingen = 0
@@ -462,6 +463,9 @@ class Command(BaseCommand):
 
             self._count_members += 1
 
+            if lid_blocked:
+                self._count_blocked += 1
+
             is_nieuw = False
             try:
                 obj = NhbLid.objects.get(nhb_nr=lid_nhb_nr)
@@ -622,13 +626,14 @@ class Command(BaseCommand):
 
         # rapporteer de samenvatting en schrijf deze ook in het logboek
         samenvatting = "Samenvatting: %s fouten; %s waarschuwingen; %s nieuw; %s wijzigingen; %s verwijderingen; "\
-                        "%s leden; %s verenigingen; %s cwz's zonder account; %s regios; %s rayons; %s actieve leden zonder e-mail" %\
+                        "%s leden, %s inactief; %s verenigingen; %s cwz's zonder account; %s regios; %s rayons; %s actieve leden zonder e-mail" %\
                           (self._count_errors,
                            self._count_warnings,
                            self._count_toevoegingen,
                            self._count_wijzigingen,
                            self._count_verwijderingen,
-                           self._count_members,
+                           self._count_members - self._count_blocked,
+                           self._count_blocked,
                            self._count_clubs,
                            self._count_cwz_no_account,
                            self._count_regios,
