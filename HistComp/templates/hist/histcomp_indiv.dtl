@@ -81,7 +81,7 @@
             <tr>
                  <td>{{ obj.rank }}</td>
                  <td>{{ obj.schutter_naam|highlight:zoekterm }}</td>
-                 <td>{{ obj.vereniging_naam|highlight:zoekterm }}</td>
+                 <td>[{{ obj.vereniging_nr }}] {{ obj.vereniging_naam|highlight:zoekterm }}</td>
                  <td class="center-align">{{ obj.gemiddelde }}</td>
                  <td class="right-align">{% if obj.laagste_score_nr == 1 %}({{ obj.score1 }}){% else %}{{ obj.score1 }}{% endif %}</td>
                  <td class="right-align">{% if obj.laagste_score_nr == 2 %}({{ obj.score2 }}){% else %}{{ obj.score2 }}{% endif %}</td>
