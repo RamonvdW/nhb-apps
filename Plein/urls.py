@@ -21,10 +21,6 @@ urlpatterns = [
     path('leeftijdsklassen/',
          views.LeeftijdsklassenView.as_view(),
          name='leeftijdsklassen'),
-
-    path('accounts-activiteit/',
-         views.AccountActiviteitView.as_view(),
-         name='account-activiteit')
 ]
 
 # end of file

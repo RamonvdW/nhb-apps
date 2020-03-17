@@ -47,6 +47,8 @@ TEMPLATE_OTPGEKOPPELD = 'account/otp-koppelen-gelukt.dtl'
 TEMPLATE_VHPGACCEPTATIE = 'account/vhpg-acceptatie.dtl'
 TEMPLATE_VHPGAFSPRAKEN = 'account/vhpg-afspraken.dtl'
 TEMPLATE_VHPGOVERZICHT = 'account/vhpg-overzicht.dtl'
+TEMPLATE_ACTIVITEIT = 'account/activiteit.dtl'
+
 
 my_logger = logging.getLogger('NHBApps.Account')
 
@@ -690,6 +692,35 @@ class OTPKoppelenView(TemplateView):
                    'otp_secret': secret }
         menu_dynamics(request, context, actief="inloggen")
         return render(request, TEMPLATE_OTPKOPPELEN, context)
+
+
+class ActiviteitView(UserPassesTestMixin, TemplateView):
+
+    """ Django class-based view voor de leeftijdsklassen """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_ACTIVITEIT
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        account = self.request.user
+        if account.is_authenticated:
+            if account.is_BB or account.is_staff:
+                return True
+        return False
+
+    def handle_no_permission(self):
+        """ gebruiker heeft geen toegang --> redirect naar het plein """
+        return HttpResponseRedirect(reverse('Plein:plein'))
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+        context['nieuwe_accounts'] = AccountEmail.objects.all().order_by('-account__date_joined')[:50]
+        context['recente_activiteit'] = AccountEmail.objects.all().filter(account__last_login__isnull=False).order_by('-account__last_login')[:50]
+        context['inlog_pogingen'] = AccountEmail.objects.all().filter(account__laatste_inlog_poging__isnull=False).filter(account__last_login__lt=F('account__laatste_inlog_poging')).order_by('-account__laatste_inlog_poging')
+        menu_dynamics(self.request, context)
+        return context
 
 
 def receive_bevestiging_accountemail(request, obj):

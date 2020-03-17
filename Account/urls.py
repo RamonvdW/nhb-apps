@@ -57,6 +57,10 @@ urlpatterns = [
     path('vhpg-overzicht/',
          views.VhpgOverzichtView.as_view(),
          name='vhpg-overzicht'),
+
+    path('activiteit/',
+         views.ActiviteitView.as_view(),
+         name='activiteit')
 ]
 
 # end of file

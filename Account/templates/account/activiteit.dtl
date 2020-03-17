@@ -13,13 +13,10 @@
 
 <h4>Account activiteit</h4>
 
-<p>Op deze pagina:</p>
-<ul>
-    <li><a href="#nieuwe" class="collection-item">Nieuwe accounts</a></li>
-    <li><a href="#recent" class="collection-item">Recente activiteit</a></li>
-    <li><a href="#poging" class="collection-item">Mislukte inlog pogingen</a></li>
-</ul>
-
+<p>Focus:</p>
+<p><a class="btn-nhb-blauw" href="#nieuwe">Nieuwe accounts</a></p>
+<p><a class="btn-nhb-blauw" href="#recent">Recente activiteit</a></p>
+<p><a class="btn-nhb-blauw" href="#poging">Mislukte inlog pogingen</a></p>
 
 <h5 id="nieuwe">Nieuwste accounts</h5>
 

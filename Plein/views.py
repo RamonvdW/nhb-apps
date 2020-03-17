@@ -8,14 +8,11 @@ from django.conf import settings
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render
-from django.db.models import F
-from django.views.generic import TemplateView, ListView, View
+from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
-from django.contrib.auth.models import Group
-from Plein.menu import menu_dynamics
-from Account.models import AccountEmail
-from Account.leeftijdsklassen import get_leeftijdsklassen
-from Account.rol import Rollen, rol_get_huidige_functie, rol_get_huidige, rol_get_beschrijving
+from Functie.rol import Rollen, rol_get_huidige, rol_get_beschrijving
+from .menu import menu_dynamics
+from .leeftijdsklassen import get_leeftijdsklassen
 
 
 TEMPLATE_PLEIN_BEZOEKER = 'plein/plein-bezoeker.dtl'            # niet ingelogd
@@ -24,10 +21,7 @@ TEMPLATE_PLEIN_SCHUTTER = 'plein/plein-schutter.dtl'            # schutter (ROL_
 TEMPLATE_PLEIN_BEHEERDER = 'plein/plein-beheerder.dtl'          # beheerder (ROL_BB/BKO/RKO/RCL/CWZ)
 
 TEMPLATE_LEEFTIJDSKLASSEN = 'plein/leeftijdsklassen.dtl'
-TEMPLATE_NIEUWEACCOUNTS = 'plein/account-activiteit.dtl'
 TEMPLATE_PRIVACY = 'plein/privacy.dtl'
-
-JA_NEE = {False: 'Nee', True: 'Ja'}
 
 
 def site_root_view(request):
@@ -133,32 +127,6 @@ class LeeftijdsklassenView(UserPassesTestMixin, TemplateView):
         context['plein_wlst'] = wlst
         context['plein_clst'] = clst
 
-        menu_dynamics(self.request, context)
-        return context
-
-
-class AccountActiviteitView(UserPassesTestMixin, TemplateView):
-
-    """ Django class-based view voor de leeftijdsklassen """
-
-    # class variables shared by all instances
-    template_name = TEMPLATE_NIEUWEACCOUNTS
-
-    def test_func(self):
-        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        rol = rol_get_huidige(self.request)
-        return (rol in (Rollen.ROL_IT, Rollen.ROL_BB))
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
-
-    def get_context_data(self, **kwargs):
-        """ called by the template system to get the context data for the template """
-        context = super().get_context_data(**kwargs)
-        context['nieuwe_accounts'] = AccountEmail.objects.all().order_by('-account__date_joined')[:50]
-        context['recente_activiteit'] = AccountEmail.objects.all().filter(account__last_login__isnull=False).order_by('-account__last_login')[:50]
-        context['inlog_pogingen'] = AccountEmail.objects.all().filter(account__laatste_inlog_poging__isnull=False).filter(account__last_login__lt=F('account__laatste_inlog_poging')).order_by('-account__laatste_inlog_poging')
         menu_dynamics(self.request, context)
         return context
 
