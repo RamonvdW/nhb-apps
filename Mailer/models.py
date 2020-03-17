@@ -6,7 +6,7 @@
 
 from django.db import models
 from django.utils import timezone
-from Mailer.mailer import send_mail
+from .mailer import send_mail
 
 
 class MailQueue(models.Model):
