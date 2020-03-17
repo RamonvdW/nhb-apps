@@ -1,0 +1,114 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2020 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+{% load overig_filters %}   <!-- highlight filter -->
+
+{% block title %}Wijzig beheerder{% endblock %}
+
+{% block pagina %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="functie-wijzig" %}
+
+<h4>Wijzig beheerder</h4>
+
+<p>Kies de beheerders voor de functie <b>{{ functie.beschrijving }}</b>.</p>
+
+<script>
+function do_wijzig(actie, id) {
+    // voer een POST uit om toe te voegen
+    var form = document.createElement('form');
+    form.setAttribute('method', 'post');
+    form.setAttribute('action', '{{ wijzig_url }}');
+
+    var inp = document.createElement('input');
+    inp.type = "hidden";
+    inp.name = actie;
+    inp.value = id.getAttribute("data-pk");
+    form.appendChild(inp)
+
+    var inp = document.createElement('input');
+    inp.type = "hidden";
+    inp.name = "csrfmiddlewaretoken";
+    inp.value = getCookie('csrftoken');
+    form.appendChild(inp)
+
+    form.style.display = 'hidden';
+    document.body.appendChild(form)
+    form.submit();
+}
+</script>
+
+{% if huidige_beheerders.count %}
+    <h5>Huidige beheerders ({{ huidige_beheerders.count }})</h5>
+    <ul class="collapsible">
+        {% for obj in huidige_beheerders %}
+            <li>
+                <div class="collapsible-header white"><span>{{ obj.volledige_naam }} (regio {{ obj.nhblid.bij_vereniging.regio.regio_nr }} / rayon {{ obj.nhblid.bij_vereniging.regio.rayon.rayon_nr }})</span></div>
+                <div class="collapsible-body white">
+                    <button class="btn-nhb-rood" onclick="do_wijzig('drop', this)" data-pk="{{ obj.pk }}">Verwijder beheerder</button>
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>Er zijn nog geen beheerders gekoppeld. Gebruik het formulier om leden te zoeken en toe te voegen.</p>
+{% endif %}
+
+<p>Om een beheerder te verwijderen: klik op de naam, dan op de verwijder knop.</p>
+
+<h5>Beheerders toevoegen</h5>
+
+<p>Gebruik onderstaand formulier om naar bestuurders te zoeken.</p>
+
+<div class="container z-depth-2 white">
+    <div class="row nhb-blauw white-text">
+        <div class="col s12 center-align">
+            <h5>Zoeken beheerder</h5>
+            <p>Zoek NHB nummer of deel van de naam</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <form class="col s12" action="{{ zoek_url }}" method="get">
+            <div class="row"><div class="input-field col s12">
+                {{ form.zoekterm.label_tag }}{{ form.zoekterm }}
+            </div></div>
+
+            <div class="row"><div class="col s12"></div>
+                <div class="center-align">
+                    <input class="btn-nhb-blauw" type="submit" value="Zoek">
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+{% if zoekterm %}
+    {% if object_list.count %}
+        <h5>Gevonden leden ({{ object_list.count }})</h5>
+        <ul class="collapsible">
+            {% for obj in object_list %}
+                <li>
+                    <div class="collapsible-header white"><span>{{ obj.volledige_naam|highlight:zoekterm }} (regio {{ obj.nhblid.bij_vereniging.regio.regio_nr }} / rayon {{ obj.nhblid.bij_vereniging.regio.rayon.rayon_nr }})</span></div>
+                    <div class="collapsible-body white">
+                        <p>NHB nummer: {{ obj.username|highlight:zoekterm }}</p>
+                        <button class="btn-nhb-blauw" onclick="do_wijzig('add', this)" data-pk="{{ obj.pk }}">Maak beheerder</button>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p class="red-text">Niets gevonden</p>
+    {% endif %}
+
+    <p>Staat de gezochte persoon er niet bij? Alleen personen met een account op deze website worden getoond.</p>
+{% endif %}
+
+<p><a class="btn-nhb-blauw margin-5" href="{% url 'Functie:overzicht' %}">Terug</a></p>
+
+{% endblock %}
+

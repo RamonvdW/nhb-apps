@@ -25,15 +25,16 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2020-03-13'
+SITE_VERSIE = '2020-03-17'
 
 # modules van de site
 INSTALLED_APPS = [
     'Plein.apps.PleinConfig',
-    'Beheer.apps.BeheerConfig',
+    'Beheer.apps.BeheerConfig',             # replaces admin
     'NhbStructuur.apps.NhbStructuurConfig',
     'Account.apps.AccountConfig',
     'BasisTypen.apps.BasisTypenConfig',
+    'Functie.apps.FunctieConfig',
     'Competitie.apps.CompetitieConfig',
     'HistComp.apps.HistCompConfig',
     'Records.apps.RecordsConfig',

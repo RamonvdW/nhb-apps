@@ -1,0 +1,80 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2019-2020 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Kies je rol{% endblock %}
+
+{% block pagina %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="wissel-van-rol" %}
+
+<h4>Wissel van rol</h4>
+
+<p>Op deze pagina kan je de rol kiezen die je aan wilt nemen.</p>
+<p>Je huidige rol is: <b>{{ huidige_rol }}</b>.</p>
+
+{% if show_otp_koppelen %}
+<p>&nbsp;</p>
+<h5>Veiligheid</h5>
+<p>Controle met een tweede factor is verplicht voor gebruikers met toegang tot persoonsgegevens.</p>
+<p>Meer informatie: <a href="{{ wiki_2fa_url }}" target="_blank">{{ wiki_2fa_titel }}</a>.</p>
+<p><a class="btn-nhb-rood" href="{% url 'Account:otp-koppelen' %}">Nu Koppelen</a></p>
+{% endif %}
+
+{% if show_vhpg %}
+<p>&nbsp;</p>
+<h5>Hanteren persoons<wbr/>gegevens</h5>
+<p>Voordat je aan de slag kan moeten we eerst een paar afspraken maken over het omgaan met persoonsgegevens.</p>
+<p><a class="btn-nhb-rood" href="{% url 'Account:vhpg-acceptatie' %}">Bekijken</a></p>
+{% endif %}
+
+{% if show_otp_controle %}
+<p>&nbsp;</p>
+<h5>Veiligheid</h5>
+<p>Een aantal rollen komt beschikbaar nadat de controle van de tweede factor uitgevoerd is.</p>
+<a class="btn-nhb-rood" href="{% url 'Account:otp-controle' %}">Nu controleren</a>
+{% endif %}
+
+<p>&nbsp;</p>
+<h5>Eigen rollen</h5>
+
+{% for obj in object_list %}
+    <p>
+        {% if obj.separator %}
+            <p>&nbsp;</p>
+            <h5>Help anderen</h5>
+
+            <p>Vanuit je <i>huidige</i> rol heb je de mogelijkheid om andere beheerders te helpen door naar <b>hun rol</b> te wisselen.<br>Na het wisselen zie je de website precies zoals zij hem zien. Je kan altijd weer terug.</p>
+            <p>De keuzes hieronder veranderen dus steeds, afhankelijk van de je gekozen rol.<br>
+                <span>De hi&euml;rarchie is Manager Competitiezaken</span>
+                <span style="position: relative; bottom: .15em;"> &rarr; </span>
+                <span>BKO</span>
+                <span style="position: relative; bottom: .15em;"> &rarr; </span>
+                <span>RKO</span>
+                <span style="position: relative; bottom: .15em;"> &rarr; </span>
+                <span>RCL</span>
+                <span style="position: relative; bottom: .15em;"> &rarr; </span>
+                <span>CWZ.</span></p>
+        {% else %}
+            <a class="btn-nhb-blauw" href="{{ obj.url }}">{{ obj.titel }}</a>
+            {% if obj.ver_naam %}
+                <span>&nbsp;&nbsp;{{ obj.ver_naam }}</span>
+            {% endif %}
+        {% endif %}
+    </p>
+{% endfor %}
+
+{% if not show_vhpg %}
+
+    <p>&nbsp;</p>
+    <h5>Hanteren persoons<wbr/>gegevens</h5>
+
+    <p>Je hebt de verklaring hanteren persoonsgegevens afgegeven op {{ vhpg.acceptatie_datum|date:"j F Y" }}.<br/><a href="{% url 'Account:vhpg-afspraken' %}">Klik hier</a> om de afspraken in te zien.</p>
+
+{% endif %}
+
+
+{% endblock %}
