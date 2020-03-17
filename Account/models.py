@@ -79,7 +79,7 @@ class Account(AbstractUser):
                         default=False,
                         help_text="Alleen observeren")
 
-    functies = models.ManyToManyField(Functie)
+    functies = models.ManyToManyField(Functie, blank=True)
 
     # TOTP ondersteuning
     otp_code = models.CharField(
