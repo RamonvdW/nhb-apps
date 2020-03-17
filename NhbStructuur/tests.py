@@ -12,6 +12,7 @@ from django.contrib.auth.models import Group
 from .models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
 from Account.models import Account
 from .migrations.m0002_nhbstructuur_2018 import maak_rayons_2018, maak_regios_2018
+from Functie.models import Functie, maak_cwz
 import datetime
 from dateutil.relativedelta import relativedelta
 import io
@@ -30,10 +31,6 @@ class TestNhbStructuur(TestCase):
         ver.naam = "Grote Club"
         ver.nhb_nr = "1000"
         ver.regio = NhbRegio.objects.get(pk=111)
-        group = Group()
-        group.name = "CWZ vereniging 1000"
-        group.save()
-        ver.cwz_group = group
         ver.save()
 
         # maak een test lid aan
@@ -137,6 +134,8 @@ class TestNhbStructuur(TestCase):
         f1 = io.StringIO()
         f2 = io.StringIO()
         management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_03.json', stderr=f1, stdout=f2)
+        #print("f1: %s" % f1.getvalue())
+        #print("f2: %s" % f2.getvalue())
         self.assertTrue("[WARNING] Vereniging 1000 (Grote Club) heeft geen secretaris!" in f1.getvalue())
         self.assertTrue("[ERROR] Kan secretaris 1 van vereniging 1001 niet vinden" in f1.getvalue())
         self.assertTrue("[INFO] Wijziging naam rayon 4: 'Rayon 4' --> 'Rayon 99'" in f2.getvalue())
@@ -291,20 +290,19 @@ class TestNhbStructuur(TestCase):
         f1 = io.StringIO()
         f2 = io.StringIO()
         management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_14.json', stderr=f1, stdout=f2)
-        #print("f1: %s" % f1.getvalue())
-        #print("f2: %s" % f2.getvalue())
         self.assertEqual(f1.getvalue(), '')
         self.assertTrue("[INFO] Wijziging van secretaris voor vereniging 1000: geen --> 100001 Ramon de Tester" in f2.getvalue())
-        self.assertTrue("[INFO] Nieuwe CWZ groep met naam 'CWZ vereniging 2000' voor vereniging 2000" in f2.getvalue())
-        self.assertTrue("[WARNING] CWZ 100024 voor vereniging 2000 heeft nog geen account" in f2.getvalue())
+        self.assertTrue("[WARNING] Secretaris 100024 van vereniging 2000 heeft nog geen account" in f2.getvalue())
 
         lid = NhbLid.objects.get(nhb_nr="100001")
         ver = NhbVereniging.objects.get(nhb_nr="1000")
-        self.assertEqual(len(ver.cwz_group.user_set.all()), 1)
+        functie = Functie.objects.get(rol="CWZ", nhb_ver=ver)
+        self.assertEqual(len(functie.account_set.all()), 1)
 
         lid = NhbLid.objects.get(nhb_nr="100024")
         ver = NhbVereniging.objects.get(nhb_nr="2000")
-        self.assertEqual(len(ver.cwz_group.user_set.all()), 0)
+        functie = Functie.objects.get(rol="CWZ", nhb_ver=ver)
+        self.assertEqual(len(functie.account_set.all()), 0)
         # 100024 is nog geen CWZ omdat ze geen account heeft
 
         # maak het account van 100024 aan en probeer het nog een keer
@@ -317,25 +315,13 @@ class TestNhbStructuur(TestCase):
         f1 = io.StringIO()
         f2 = io.StringIO()
         management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_14.json', stderr=f1, stdout=f2)
-        #print("f1: %s" % f1.getvalue())
-        #print("f2: %s" % f2.getvalue())
         self.assertEqual(f1.getvalue(), '')
-        self.assertTrue("[INFO] CWZ 100024 gekoppeld aan vereniging 2000" in f2.getvalue())
+        self.assertTrue("[INFO] Secretaris 100024 van vereniging 2000 is gekoppeld aan CWZ functie" in f2.getvalue())
 
         lid = NhbLid.objects.get(nhb_nr="100024")
-        #print("lid: %s" % repr(lid))
         ver = NhbVereniging.objects.get(nhb_nr="2000")
-        #print("ver: %s" % repr(ver))
-        #print("ver.cwz_group: %s" % repr(ver.cwz_group))
-        #print("ver.cwz_group.user_set: %s" % repr(ver.cwz_group.user_set.all()))
-        self.assertEqual(len(ver.cwz_group.user_set.all()), 1)
-
-        # corner-case test
-        f1 = io.StringIO()
-        ver.cwz_group = None
-        ver.make_cwz("100024", f1.write)
-        #print("f1: %s" % f1.getvalue())
-        self.assertTrue("[ERROR] NhbVereniging.make_cwz: no cwz_group!" in f1.getvalue())
+        functie = Functie.objects.get(rol="CWZ", nhb_ver=ver)
+        self.assertEqual(len(functie.account_set.all()), 1)
 
     def test_import_crm_15(self):
         # een paar speciale import gevallen
@@ -371,7 +357,7 @@ class TestNhbStructuur(TestCase):
         f2 = io.StringIO()
         management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_14.json', stderr=f1, stdout=f2)
         self.assertEqual(f1.getvalue(), '')
-        self.assertTrue("[INFO] CWZ 100024 gekoppeld aan vereniging 2000" in f2.getvalue())
+        self.assertTrue("[INFO] Secretaris 100024 van vereniging 2000 is gekoppeld aan CWZ functie" in f2.getvalue())
 
         # probeer 100024 te verwijderen
         f1 = io.StringIO()

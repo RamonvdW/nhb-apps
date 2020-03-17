@@ -8,12 +8,12 @@
 
 from django.utils.dateparse import parse_date
 from django.core.management.base import BaseCommand
-from django.contrib.auth.models import Group
 from django.db.models import ProtectedError
 import django.db.utils
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbLid, NhbVereniging
 from Account.models import is_email_valide, Account
 from Logboek.models import schrijf_in_logboek
+from Functie.models import maak_functie, maak_cwz
 import argparse
 import datetime
 import json
@@ -261,14 +261,12 @@ class Command(BaseCommand):
                     self._nieuwe_clubs.append(ver_nhb_nr)   # voor onderdrukken 'wijziging' secretaris
                     obj = ver
 
-            # maak de cwz groep aan
+            # maak de cwz functie aan
             if obj:
-                cwz_group, created = Group.objects.get_or_create(name="CWZ vereniging %s" % obj.nhb_nr)
-                if cwz_group != obj.cwz_group:
-                    self.stdout.write("[INFO] Nieuwe CWZ groep met naam %s voor vereniging %s" % (repr(cwz_group.name), repr(obj.nhb_nr)))
-                    obj.cwz_group = cwz_group
-                    if not self.dryrun:
-                        obj.save()
+                functie = maak_functie("CWZ vereniging %s" % obj.nhb_nr, "CWZ")
+                functie.nhb_ver = obj
+                if not self.dryrun:
+                    functie.save()
         # for
 
         # kijk of er verenigingen verwijderd moeten worden
@@ -297,9 +295,6 @@ class Command(BaseCommand):
             ver_nhb_nr = club['club_number']
             ver_naam = club['name']
             if len(club['secretaris']) < 1:
-                if ver_nhb_nr not in GEEN_SECRETARIS_NODIG:
-                    self.stderr.write('[WARNING] Vereniging %s (%s) heeft geen secretaris!' % (ver_nhb_nr, ver_naam))
-                    self._count_warnings += 1
                 ver_secretaris_nhblid = None
             else:
                 ver_secretaris_nr = club['secretaris'][0]['member_number']
@@ -322,15 +317,28 @@ class Command(BaseCommand):
                         new_secr_str = get_secretaris_str(ver_secretaris_nhblid)
                         self.stdout.write('[INFO] Wijziging van secretaris voor vereniging %s: %s --> %s' % (ver_nhb_nr, old_secr_str, new_secr_str))
                         self._count_wijzigingen += 1
+
                     obj.secretaris_lid = ver_secretaris_nhblid
                     if not self.dryrun:
                         obj.save()
 
+                if not ver_secretaris_nhblid:
+                    if ver_nhb_nr not in GEEN_SECRETARIS_NODIG:
+                        self.stderr.write(
+                            '[WARNING] Vereniging %s (%s) heeft geen secretaris!' % (ver_nhb_nr, ver_naam))
+                        self._count_warnings += 1
+
                 # forceer de secretaris in de CWZ groep
                 if ver_secretaris_nhblid:
-                    cwz_no_account = obj.make_cwz(ver_secretaris_nhblid.nhb_nr, self.stdout.write)
-                    if cwz_no_account:
+                    try:
+                        account = Account.objects.get(nhblid=ver_secretaris_nhblid)
+                    except Account.DoesNotExist:
+                        # CWZ heeft nog geen account
+                        self.stdout.write("[WARNING] Secretaris %s van vereniging %s heeft nog geen account" % (ver_secretaris_nhblid.nhb_nr, obj.nhb_nr))
                         self._count_cwz_no_account += 1
+                    else:
+                        if maak_cwz(obj, account):
+                            self.stdout.write("[INFO] Secretaris %s van vereniging %s is gekoppeld aan CWZ functie" % (ver_secretaris_nhblid.nhb_nr, obj.nhb_nr))
         # for
 
     def _import_members(self, data):

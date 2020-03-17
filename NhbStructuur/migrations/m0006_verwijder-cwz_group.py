@@ -12,19 +12,16 @@ class Migration(migrations.Migration):
     """ Migratie class voor dit deel van de applicatie """
 
     # volgorde afdwingen
+
     dependencies = [
-        ('NhbStructuur', 'm0003_nhbstructuur_2019'),
+        ('NhbStructuur', 'm0005_vereniging_cwz_group'),
     ]
 
     # migratie functies
     operations = [
         migrations.RemoveField(
-            model_name='nhblid',
-            name='huisnummer',
-        ),
-        migrations.RemoveField(
-            model_name='nhblid',
-            name='postcode',
+            model_name='nhbvereniging',
+            name='cwz_group',
         ),
     ]
 

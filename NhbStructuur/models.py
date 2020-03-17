@@ -15,7 +15,7 @@ import datetime
 # global
 maximum_geboortejaar = datetime.datetime.now().year - settings.MINIMUM_LEEFTIJD_LID
 
-ADMINISTRATIEVE_REGIO = 100      # TOOD: make een boolean field?
+ADMINISTRATIEVE_REGIO = 100      # TODO: make een boolean field?
 
 
 class NhbRayon(models.Model):
@@ -59,36 +59,10 @@ class NhbVereniging(models.Model):
                                        blank=True,  # allow access input in form
                                        null=True)   # allow NULL relation in database
 
-    # de groep waar je als gebruiker lid van moet zijn om CWZ te zijn van deze vereniging
-    cwz_group = models.ForeignKey(Group, on_delete=models.PROTECT,
-                                  blank=True, null=True)
-
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
         # selectie in de admin interface gaat op deze string, dus nhb_nr eerst
         return "%s %s" % (self.nhb_nr, self.naam)
-
-    def make_cwz(self, nhb_nr, write_stdout):
-        cwz_no_account = False
-        # kijk of dit lid al in de groep zit
-        if self.cwz_group:
-            if len(self.cwz_group.user_set.filter(nhblid__nhb_nr=nhb_nr)) == 0:
-                # nog niet in de groep --> zoek het user account erbij
-                usermodel = get_user_model()
-                try:
-                    account = usermodel.objects.get(nhblid__nhb_nr=nhb_nr)
-                except usermodel.DoesNotExist:
-                    # CWZ heeft nog geen account
-                    write_stdout("[WARNING] CWZ %s voor vereniging %s heeft nog geen account" % (nhb_nr, self.nhb_nr))
-                    cwz_no_account = True
-                else:
-                    # voeg dit account toe aan de groep
-                    write_stdout("[INFO] CWZ %s gekoppeld aan vereniging %s" % (nhb_nr, self.nhb_nr))
-                    self.cwz_group.user_set.add(account)
-        else:
-            write_stdout("[ERROR] NhbVereniging.make_cwz: no cwz_group!")
-
-        return cwz_no_account
 
     class Meta:
         """ meta data voor de admin interface """
