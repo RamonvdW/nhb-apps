@@ -40,7 +40,7 @@
 <!-- wisselen van rol, voor beheerders -->
 {% if menu_show_wisselvanrol %}
 <li{% if menu_actief == "wissel-van-rol" %} class="actief"{% endif %}>
-    <a href="{% url 'Account:wissel-van-rol' %}" class="white-text">
+    <a href="{% url 'Functie:wissel-van-rol' %}" class="white-text">
     <i class="material-icons-round white-text">supervisor_account</i>Wissel van rol</a>
 </li>
 {% endif %}

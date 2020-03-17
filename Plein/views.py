@@ -48,7 +48,7 @@ class PleinView(View):
         context = dict()
 
         if request.user.is_authenticated:
-            rol_nu, functie_nu = rol_get_huidige_functie(request)
+            rol_nu = rol_get_huidige(request)
 
             if rol_nu == Rollen.ROL_NONE or rol_nu == None:
                 template = TEMPLATE_PLEIN_GEBRUIKER
@@ -74,6 +74,9 @@ class PleinView(View):
                 if rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB):
                     context['toon_nieuwe_accounts'] = True
 
+                if rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_CWZ):
+                    context['toon_functies'] = True
+
                 if rol_nu == Rollen.ROL_BB:
                     context['rol_is_bb'] = True;
                 elif rol_nu == Rollen.ROL_BKO:
@@ -83,11 +86,7 @@ class PleinView(View):
                 elif rol_nu == Rollen.ROL_RCL:
                     context['rol_is_rcl'] = True;
 
-                if functie_nu:
-                    context['huidige_rol'] = Group.objects.get(pk=functie_nu).name
-                else:
-                    context['huidige_rol'] = rol_get_beschrijving(request)
-
+                context['huidige_rol'] = rol_get_beschrijving(request)
 
         menu_dynamics(self.request, context)
         return render(request, template, context)

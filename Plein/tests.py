@@ -7,17 +7,18 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.test import TestCase
-from .menu import menu_dynamics
-from Account.rol import rol_zet_sessionvars_na_login, rol_zet_sessionvars_na_otp_controle,\
+from Functie.rol import rol_zet_sessionvars_na_login, rol_zet_sessionvars_na_otp_controle,\
                         rol_activeer_rol, rol_activeer_functie
-from Account.leeftijdsklassen import leeftijdsklassen_zet_sessionvars_na_login
 from Account.models import Account, account_zet_sessionvars_na_login, account_zet_sessionvars_na_otp_controle,\
                            account_vhpg_is_geaccepteerd
+from Functie.models import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
 from NhbStructuur.migrations.m0002_nhbstructuur_2018 import maak_rayons_2018, maak_regios_2018
-import datetime
-from types import SimpleNamespace
+from .menu import menu_dynamics
+from .leeftijdsklassen import leeftijdsklassen_zet_sessionvars_na_login
 from .test_helpers import assert_html_ok, assert_template_used, assert_other_http_commands_not_supported
+from types import SimpleNamespace
+import datetime
 
 
 class TestPlein(TestCase):
@@ -34,10 +35,7 @@ class TestPlein(TestCase):
         self.account_admin.save()
         self.account_normaal = Account.objects.get(username='normaal')
         self.account_100001 = Account.objects.get(username='100001')
-        self.group_bko, _ = Group.objects.get_or_create(name="BKO test")
-        self.group_rko, _ = Group.objects.get_or_create(name="RKO test")
-        self.group_rcl, _ = Group.objects.get_or_create(name="RCL test")
-        self.group_cwz, _ = Group.objects.get_or_create(name="CWZ test")
+        self.functie_bko = maak_functie('BKO Test', 'BKO')
 
         # maak de standard rayon/regio structuur aan
         maak_rayons_2018(NhbRayon)
@@ -78,7 +76,7 @@ class TestPlein(TestCase):
         assert_template_used(self, resp, ('plein/plein-bezoeker.dtl', 'plein/site_layout.dtl'))
 
     def test_plein_normaal(self):
-        self.client.login(username='normaal', password='wachtwoord')
+        self.client.login(username=self.account_normaal.username, password='wachtwoord')
         rol_zet_sessionvars_na_login(self.account_normaal, self.client).save()
         resp = self.client.get('/plein/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -88,7 +86,7 @@ class TestPlein(TestCase):
         self.client.logout()
 
     def test_plein_nhblid(self):
-        self.client.login(username='100001', password='wachtwoord')
+        self.client.login(username=self.account_100001.username, password='wachtwoord')
         rol_zet_sessionvars_na_login(self.account_100001, self.client).save()
         leeftijdsklassen_zet_sessionvars_na_login(self.account_100001, self.client).save()
         resp = self.client.get('/plein/')
@@ -99,11 +97,8 @@ class TestPlein(TestCase):
         self.client.logout()
 
     def test_plein_admin(self):
-        self.account_admin.groups.add(self.group_bko)
-        self.account_admin.groups.add(self.group_rko)
-        self.account_admin.groups.add(self.group_rcl)
-        self.account_admin.groups.add(self.group_cwz)
-        self.client.login(username='admin', password='wachtwoord')
+        self.account_admin.functies.add(self.functie_bko)
+        self.client.login(username=self.account_admin.username, password='wachtwoord')
 
         account_zet_sessionvars_na_login(self.client).save()
         rol_zet_sessionvars_na_login(self.account_admin, self.client).save()
@@ -140,28 +135,10 @@ class TestPlein(TestCase):
         self.assertContains(resp, 'Rol: Manager competitiezaken')
 
         # bko
-        rol_activeer_functie(self.client, self.group_bko.pk).save()
+        rol_activeer_functie(self.client, self.functie_bko.pk).save()
         resp = self.client.get('/plein/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, 'Rol: BKO')
-
-        # rko
-        rol_activeer_functie(self.client, self.group_rko.pk).save()
-        resp = self.client.get('/plein/')
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, 'Rol: RKO')
-
-        # rcl
-        rol_activeer_functie(self.client, self.group_rcl.pk).save()
-        resp = self.client.get('/plein/')
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, 'Rol: RCL')
-
-        # cwz
-        rol_activeer_functie(self.client, self.group_cwz.pk).save()
-        resp = self.client.get('/plein/')
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, 'Rol: CWZ')
 
         # geen
         rol_activeer_rol(self.client, "geen").save()
@@ -193,7 +170,7 @@ class TestPlein(TestCase):
         self.assertEqual(resp.status_code, 302)     # 302 = Redirect (to login)
 
     def test_leeftijdsklassen_nhblid(self):
-        self.client.login(username='100001', password='wachtwoord')
+        self.client.login(username=self.account_100001.username, password='wachtwoord')
         rol_zet_sessionvars_na_login(self.account_100001, self.client).save()
         leeftijdsklassen_zet_sessionvars_na_login(self.account_100001, self.client).save()
         resp = self.client.get('/plein/leeftijdsklassen/')

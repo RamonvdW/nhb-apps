@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
-from Account.rol import Rollen, rol_get_huidige, rol_mag_wisselen, rol_get_beschrijving
+from Functie.rol import Rollen, rol_get_huidige, rol_mag_wisselen, rol_get_beschrijving
 
 
 ACTIEF_OPTIES = (
