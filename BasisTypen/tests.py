@@ -7,9 +7,7 @@
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from .models import BoogType, TeamType, WedstrijdKlasse, LeeftijdsKlasse, TeamTypeBoog, WedstrijdKlasseBoog, WedstrijdKlasseLeeftijd
-from Account.models import Account, account_zet_sessionvars_na_otp_controle
-from Account.rol import rol_zet_sessionvars_na_login
-from Plein.tests import assert_html_ok, assert_template_used
+from Account.models import Account
 
 
 class TestBasisTypen(TestCase):

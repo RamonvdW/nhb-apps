@@ -8,7 +8,8 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-    """ Migratie classs voor dit deel van de applicatie """
+
+    """ Migratie class voor dit deel van de applicatie """
 
     # volgorde afdwingen
     dependencies = [

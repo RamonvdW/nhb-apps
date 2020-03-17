@@ -89,7 +89,8 @@ def wijzig_wedstrijdklassen_hout_jeugd(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-    """ Migratie classs voor dit deel van de applicatie """
+
+    """ Migratie class voor dit deel van de applicatie """
 
     # volgorde afdwingen
     dependencies = [
