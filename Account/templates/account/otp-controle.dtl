@@ -54,6 +54,6 @@
     </div>
 </div>
 
-<p>Pak je mobiel erbij en tik de 6-cijferige code over.</p>
+<p>Tip: Je moet de 6-cijferige code overtikken uit je authenticatie app (waarschijnlijk op je mobiel).</p>
 
 {% endblock %}

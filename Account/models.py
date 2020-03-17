@@ -8,6 +8,7 @@ from django.db import models
 from django.conf import settings
 from django.utils import timezone
 from django.contrib.auth.models import AbstractUser
+from Functie.models import Functie
 from NhbStructuur.models import NhbLid
 from Overig.tijdelijke_url import set_tijdelijke_url_receiver, RECEIVER_ACCOUNTEMAIL, \
                                   maak_tijdelijke_url_accountemail
@@ -69,6 +70,7 @@ class Account(AbstractUser):
                                     blank=True, null=True,
                                     help_text="Login niet mogelijk tot")
 
+    # rollen / functies
     is_BB = models.BooleanField(
                         default=False,
                         help_text="Manager Competitiezaken")
@@ -76,6 +78,8 @@ class Account(AbstractUser):
     is_Observer = models.BooleanField(
                         default=False,
                         help_text="Alleen observeren")
+
+    functies = models.ManyToManyField(Functie)
 
     # TOTP ondersteuning
     otp_code = models.CharField(
@@ -384,14 +388,15 @@ def account_needs_otp(account):
         Bepaalde rechten vereisen OTP:
             is_BB
             is_staff
-            rechten voor beheerders
+            bepaalde functies
     """
-    if account.is_BB or account.is_staff:
-        return True
-
-    for group in account.groups.all():
-        if group.name[:4] in ("BKO ", "RKO ", "RCL ", "CWZ "):
+    if account.is_authenticated:
+        if account.is_BB or account.is_staff:
             return True
+
+        for functie in account.functies.all():
+            if functie.needs_otp():
+                return True
 
     return False
 

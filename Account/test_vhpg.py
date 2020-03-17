@@ -6,13 +6,13 @@
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
-from .rol import rol_zet_sessionvars_na_login, rol_zet_sessionvars_na_otp_controle, rol_activeer_rol
+from Functie.rol import rol_zet_sessionvars_na_login, rol_zet_sessionvars_na_otp_controle, rol_activeer_rol
 from .models import Account, account_zet_sessionvars_na_login,\
                     account_zet_sessionvars_na_otp_controle,\
                     HanterenPersoonsgegevens, account_needs_vhpg, account_vhpg_is_geaccepteerd
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
 from NhbStructuur.migrations.m0002_nhbstructuur_2018 import maak_rayons_2018, maak_regios_2018
-from Plein.tests import assert_html_ok, assert_template_used, assert_other_http_commands_not_supported
+from Plein.tests import assert_html_ok, assert_template_used
 import datetime
 
 
@@ -110,7 +110,7 @@ class TestAccountVHPG(TestCase):
         resp = self.client.post('/account/vhpg-acceptatie/', {'accepteert': 'whatever'}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         assert_html_ok(self, resp)
-        assert_template_used(self, resp, ('account/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
+        assert_template_used(self, resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
 
         self.assertEqual(len(HanterenPersoonsgegevens.objects.all()), 1)
         needs_vhpg, _ = account_needs_vhpg(self.account_admin)

@@ -46,18 +46,6 @@ urlpatterns = [
          views.OTPKoppelenView.as_view(),
          name="otp-koppelen"),
 
-    path('wissel-van-rol/functie/<group_pk>/',
-         views.ActiveerRolView.as_view(),
-         name='activeer-rol-functie'),
-
-    path('wissel-van-rol/<str:rol>/',
-         views.ActiveerRolView.as_view(),
-         name='activeer-rol'),
-
-    path('wissel-van-rol/',
-         views.WisselVanRolView.as_view(),
-         name='wissel-van-rol'),
-
     path('vhpg-acceptatie/',
          views.VhpgAcceptatieView.as_view(),
          name='vhpg-acceptatie'),

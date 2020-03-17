@@ -9,14 +9,14 @@ from django.contrib.auth.models import Group
 from django.utils import timezone
 from django.test import TestCase
 from django.conf import settings
-from .rol import rol_zet_sessionvars_na_login
+from Functie.rol import rol_zet_sessionvars_na_login
 from .models import Account, AccountEmail,is_email_valide,\
                     account_zet_sessionvars_na_login
 from .views import obfuscate_email
 from .forms import LoginForm
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
 from NhbStructuur.migrations.m0002_nhbstructuur_2018 import maak_rayons_2018, maak_regios_2018
-from Plein.tests import assert_html_ok, assert_template_used, assert_other_http_commands_not_supported
+from Plein.tests import assert_html_ok, assert_template_used
 import datetime
 
 
@@ -38,12 +38,6 @@ class TestAccountLogin(TestCase):
         email.bevestigde_email = 'metmail@test.com'
         email.save()
         self.email_metmail = email
-
-        self.group_bko, _ = Group.objects.get_or_create(name="BKO test")
-        self.group_rko, _ = Group.objects.get_or_create(name="RKO test")
-        self.group_rcl, _ = Group.objects.get_or_create(name="RCL test")
-        self.group_cwz, _ = Group.objects.get_or_create(name="CWZ test")
-        self.group_tst, _ = Group.objects.get_or_create(name="Test test")
 
         # maak de standard rayon/regio structuur aan
         maak_rayons_2018(NhbRayon)
