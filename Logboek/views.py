@@ -9,7 +9,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.urls import reverse
-from Account.rol import Rollen, rol_get_huidige
+from Functie.rol import Rollen, rol_get_huidige
 from Plein.menu import menu_dynamics
 from .models import LogboekRegel
 

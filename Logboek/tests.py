@@ -11,7 +11,7 @@ from Plein.tests import assert_html_ok, assert_other_http_commands_not_supported
 from .models import LogboekRegel, schrijf_in_logboek
 from .apps import LogboekConfig
 from Account.models import Account, account_vhpg_is_geaccepteerd, account_zet_sessionvars_na_otp_controle
-from Account.rol import rol_zet_sessionvars_na_otp_controle, rol_activeer_rol, rol_activeer_functie, rol_is_beheerder
+from Functie.rol import rol_zet_sessionvars_na_otp_controle, rol_activeer_rol, rol_is_beheerder
 
 
 class TestLogboek(TestCase):
