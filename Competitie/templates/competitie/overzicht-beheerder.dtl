@@ -43,7 +43,7 @@
     </tr>
     <tr>
         <td{% if obj.fase == 'A2' %} class="blue"{% endif %}>A2</td>
-        <td>Koppelen RKO/RCL beheerders door BKO/RKO; Instellingen regio (RCL)</td>
+        <td>Instellingen regio (RCL)</td>
         {% if obj.fase > 'A2' %}
         <td class="green-text">Afgerond</td>
         {% else %}
@@ -102,26 +102,26 @@
 <p>&nbsp;</p>
 
 <h5>Volgende stappen</h5>
+
 <div class="row">
-    {% if kan_favorieten_beheren %}
-    <div class="col s12 m6 xl4">
 
-        <!-- let op! gelijk houden aan zelfde kaart in koppel-beheerders-overzicht.dtl -->
-        <div class="card">
-            <div class="card-content">
-                <table class="simple"><tr style="border:0px">
-                    <td><i class="material-icons-round large">contacts</i></td>
-                    <td>Selecteer je favoriete NHB leden, voor koppelen aan rollen.</td>
-                </tr></table>
-            </div>
-            <a href="{% url 'Competitie:beheerfavorieten' %}" class="nhb-klikbare-balk">
-                <div class="card-action center-align">
-                    <span class="nhb-klikbare-link">Beheer favorieten</span>
+    {% if toon_functies %}
+        <!-- toon en koppel beheerders -->
+        <div class="col s12 m6 xl4">
+            <div class="card">
+                <div class="card-content">
+                    <table class="simple"><tr style="border:0px">
+                        <td><i class="material-icons-round large">face</i></td>
+                        <td>De functies en de gekoppelde beheerders.</td>
+                    </tr></table>
                 </div>
-            </a>
+                <a href="{% url 'Functie:overzicht' %}" class="nhb-klikbare-balk">
+                    <div class="card-action center-align">
+                        <span class="nhb-klikbare-link">Beheerders</span>
+                    </div>
+                </a>
+            </div>
         </div>
-
-    </div>
     {% endif %}
 
     {% for obj in object_list %}
@@ -147,61 +147,8 @@
                 </div>
             {% endif %}
 
-            {% if bko_kan_rko_koppelen %}
-                <div class="col s12 m6 xl4">
-                    <div class="card">
-                        <div class="card-content">
-                            <table class="simple"><tr style="border:0px">
-                                <td><i class="material-icons-round large">supervisor_account</i></td>
-                                <td>RKO's (Rayon Kampioenschap Organisatoren) kiezen voor de {{ obj.beschrijving }}.</td>
-                            </tr></table>
-                        </div>
-                        <a href="{{ obj.wijzig_url }}" class="nhb-klikbare-balk">
-                            <div class="card-action center-align">
-                                <span class="nhb-klikbare-link">Beheerders koppelen</span>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-            {% endif %}
-
-            {% if rko_kan_rcl_koppelen %}
-                <div class="col s12 m6 xl4">
-                    <div class="card">
-                        <div class="card-content">
-                            <table class="simple"><tr style="border:0px">
-                                <td><i class="material-icons-round large">supervisor_account</i></td>
-                                <td>RCL's (Regio Competitie Leiders) kiezen voor de {{ obj.beschrijving }}.</td>
-                            </tr></table>
-                        </div>
-                        <a href="{{ obj.wijzig_url }}" class="nhb-klikbare-balk">
-                            <div class="card-action center-align">
-                                <span class="nhb-klikbare-link">Beheerders koppelen</span>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-            {% endif %}
-
         {% endif %}
 
-        {% if toon_competitie_beheerders %}
-            <div class="col s12 m6 xl4">
-                <div class="card">
-                    <div class="card-content">
-                        <table class="simple"><tr style="border:0px">
-                            <td><i class="material-icons-round large">supervisor_account</i></td>
-                            <td>Toon de beheerders voor de {{ obj.beschrijving }}.</td>
-                        </tr></table>
-                    </div>
-                    <a href="{{ obj.wijzig_url }}" class="nhb-klikbare-balk">
-                        <div class="card-action center-align">
-                            <span class="nhb-klikbare-link">Toon beheerders</span>
-                        </div>
-                    </a>
-                </div>
-            </div>
-        {% endif %}
     {% endfor %}
 </div>
 
@@ -211,7 +158,7 @@
         <div class="card">
             <div class="card-content">
                 <table class="simple"><tr style="border:0px">
-                    <td><i class="material-icons-round large">swap_vertical_circle</i></td>
+                    <td><i class="material-icons-round large">playlist_add</i></td>
                     <td>Instellingen voor de bondscompetities {{ nieuwe_seizoen }} controleren en competities aanmaken.</td>
                 </tr></table>
             </div>
@@ -227,8 +174,9 @@
     {% if rol_is_bb %}
 
         {% for obj in object_list %}
-            <!-- klassegrenzen vaststellen -->
+
             {% if obj.fase == 'A1' %}
+                <!-- klassegrenzen vaststellen -->
                 <div class="col s12 m6 xl4">
                     <div class="card">
                         <div class="card-content">
@@ -249,6 +197,7 @@
                     </div>
                 </div>
             {% endif %}
+
         {% endfor %}
 
     {% endif %}

@@ -15,20 +15,44 @@
 
 <p>Hieronder volgt de lijst van {{ object_list.count }} verenigingen in jouw gebied.</p>
 
+<p>Je rol is <b>{{ huidige_rol }}</b>.</p>
+
 <table class="white">
     <thead>
-        <th>Rayon</th>
-        <th>Regio</th>
-        <th>NHB nummer</th>
-        <th>Naam</th>
+        {% if toon_rayon %}
+            <th>Rayon</th>
+        {% endif %}
+
+        {% if toon_regio %}
+            <th>Regio</th>
+        {% endif %}
+
+        <th>Vereniging</th>
+
+        {% if toon_cwzs %}
+            <th>CWZ(s)</th>
+        {% endif %}
     </thead>
 
     {% for obj in object_list %}
         <tr>
-            <td>{{ obj.regio.rayon.rayon_nr }}</td>
-            <td>{{ obj.regio.regio_nr }}</td>
-            <td>{{ obj.nhb_nr }}</td>
-            <td>{{ obj.naam }}</td>
+            {% if toon_rayon %}
+                <td>{{ obj.regio.rayon.rayon_nr }}</td>
+            {% endif %}
+
+            {% if toon_regio %}
+                <td>{{ obj.regio.regio_nr }}</td>
+            {% endif %}
+
+            <td>[{{ obj.nhb_nr }}] {{ obj.naam }}</td>
+
+            {% if toon_cwzs %}
+                <td>
+                    {% for cwz in obj.cwzs %}
+                        {{ obj.volledige_naam }}
+                    {% endfor %}
+                </td>
+            {% endif %}
         </tr>
     {% endfor %}
 </table>

@@ -9,24 +9,21 @@ from django.shortcuts import render
 from django.urls import Resolver404, reverse
 from django.views.generic import TemplateView, ListView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
-from django.contrib.auth.models import Group
-from django.db.models import Q, Value
-from django.db.models.functions import Concat
-from django.utils import timezone
 from django.shortcuts import redirect
+from django.utils import timezone
+from Account.models import Account
 from Plein.menu import menu_dynamics
 from Logboek.models import schrijf_in_logboek
-from Account.models import Account
-from Account.rol import Rollen, rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving,\
-                        rol_is_BB, rol_is_BKO, rol_is_RKO, rol_is_CWZ, rol_is_beheerder, rol_evalueer_opnieuw
-from BasisTypen.models import TeamType, TeamTypeBoog, BoogType, LeeftijdsKlasse, WedstrijdKlasse, \
+from Functie.models import Functie
+from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving,\
+                        rol_is_BB, rol_is_CWZ, rol_is_beheerder
+from BasisTypen.models import TeamType, TeamTypeBoog, WedstrijdKlasse, \
                               WedstrijdKlasseBoog, WedstrijdKlasseLeeftijd
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from NhbStructuur.models import NhbLid, NhbVereniging
-from .models import models_bepaal_startjaar_nieuwe_competitie, competitie_aanmaken, maak_competitieklasse_indiv, \
-                    Competitie, ZERO, FavorieteBestuurders, add_favoriete_beheerder, drop_favoriete_beheerder, \
-                    DeelCompetitie
-from .forms import FavorieteBeheerdersForm, WijzigFavorieteBeheerdersForm, KoppelBeheerdersForm
+from .models import Competitie, ZERO, CompetitieWedstrijdKlasse, DeelCompetitie,\
+                    competitie_aanmaken, maak_competitieklasse_indiv
+from datetime import date
 
 
 TEMPLATE_COMPETITIE_OVERZICHT = 'competitie/overzicht.dtl'
@@ -35,13 +32,51 @@ TEMPLATE_COMPETITIE_OVERZICHT_BEHEERDER = 'competitie/overzicht-beheerder.dtl'
 TEMPLATE_COMPETITIE_INSTELLINGEN = 'competitie/instellingen-nieuwe-competitie.dtl'
 TEMPLATE_COMPETITIE_AANMAKEN = 'competitie/competities-aanmaken.dtl'
 TEMPLATE_COMPETITIE_KLASSEGRENZEN = 'competitie/klassegrenzen-vaststellen.dtl'
-TEMPLATE_COMPETITIE_BEHEER_FAVORIETEN = 'competitie/beheer-favorieten.dtl'
-TEMPLATE_COMPETITIE_KOPPEL_BEHEERDERS_OVERZICHT = 'competitie/koppel-beheerders-overzicht.dtl'
-TEMPLATE_COMPETITIE_KOPPEL_BEHEERDERS_WIJZIG = 'competitie/koppel-beheerders-wijzig.dtl'
 TEMPLATE_COMPETITIE_LIJST_VERENIGINGEN = 'competitie/lijst-verenigingen.dtl'
 
 
 JA_NEE = {False: 'Nee', True: 'Ja'}
+
+
+def models_bepaal_startjaar_nieuwe_competitie():
+    """ bepaal het start jaar van de nieuwe competitie """
+    return timezone.now().year
+
+
+def zet_fase(comp):
+    # fase A was totdat dit object gemaakt werd
+
+    now = timezone.now()
+    now = date(year=now.year, month=now.month, day=now.day)
+
+    if now < comp.begin_aanmeldingen:
+        # zijn de wedstrijdklassen vastgesteld?
+        if len(CompetitieWedstrijdKlasse.objects.filter(competitie=comp)) == 0:
+            # A1 = competitie is aangemaakt
+            comp.fase = 'A1'
+            return
+
+        # A2 = klassengrenzen zijn bepaald
+        comp.fase = 'A2'
+        return
+
+    # B = open voor inschrijvingen
+    if now < comp.einde_aanmeldingen:
+        comp.fase = 'B'
+        return
+
+    # C = aanmaken teams; gesloten voor individuele inschrijvingen
+    if now < comp.einde_teamvorming:
+        comp.fase = 'C'
+        return
+
+    # D = aanmaken poules en afronden wedstrijdschema's
+    if now < comp.eerste_wedstrijd:
+        comp.fase = 'D'
+        return
+
+    # E = Begin wedstrijden
+    comp.fase = 'E'
 
 
 class CompetitieOverzichtView(View):
@@ -50,17 +85,15 @@ class CompetitieOverzichtView(View):
     # class variables shared by all instances
     # (none)
 
-    def _get_competitie_overzicht_beheerder(self, request):
+    @staticmethod
+    def _get_competitie_overzicht_beheerder(request):
         context = dict()
 
         rol_nu, functie_nu = rol_get_huidige_functie(request)
-        if functie_nu:
-            group = Group.objects.get(pk=functie_nu)
-            context['huidige_rol'] = group.name
-        else:
-            context['huidige_rol'] = rol_get_beschrijving(request)
 
-        context['kan_favorieten_beheren'] = rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO)
+        context['huidige_rol'] = rol_get_beschrijving(request)
+
+        context['toon_functies'] = rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO)
 
         # kies de competities om het tijdschema van de tonen
         objs = list()
@@ -68,19 +101,18 @@ class CompetitieOverzichtView(View):
             # toon alle competities
             objs = Competitie.objects.filter(is_afgesloten=False).order_by('begin_jaar', 'afstand')
         elif functie_nu:
-            # gebaseerd op de functie moeten we de competities filteren
-            # de functie wijst naar een deelcompetitie, welke bij een competitie hoort
-            competitie = group.deelcompetitie_set.all()[0].competitie
-            objs.append(competitie)
+            # toon de competitie waar de functie een rol in heeft
+            for deelcomp in DeelCompetitie.objects.filter(is_afgesloten=False, functie=functie_nu):
+                objs.append(deelcomp.competitie)
+            # for
 
         context['object_list'] = objs
         context['have_active_comps'] = (len(objs) > 0)
 
         # kies de competities waarvoor de beheerder getoond kunnen worden
         for obj in objs:
-            obj.zet_fase()
+            zet_fase(obj)
             obj.is_afgesloten_str = JA_NEE[obj.is_afgesloten]
-            obj.wijzig_url = reverse('Competitie:toon-competitie-beheerders', kwargs={'comp_pk': obj.id})
         # for
 
         if rol_nu == Rollen.ROL_BB:
@@ -89,21 +121,16 @@ class CompetitieOverzichtView(View):
             beginjaar = models_bepaal_startjaar_nieuwe_competitie()
             context['nieuwe_seizoen'] = "%s/%s" % (beginjaar, beginjaar+1)
             context['bb_kan_competitie_aanmaken'] = (len(objs.filter(begin_jaar=beginjaar)) == 0)
-            context['bb_kan_bko_koppelen'] = True
-        elif rol_nu == Rollen.ROL_BKO:
-            context['bko_kan_rko_koppelen'] = True
-        elif rol_nu == Rollen.ROL_RKO:
-            context['rko_kan_rcl_koppelen'] = True
-        else:
-            context['toon_competitie_beheerders'] = True
 
         return context, TEMPLATE_COMPETITIE_OVERZICHT_BEHEERDER
 
-    def _get_competitie_overzicht_cwz(self, request):
+    @staticmethod
+    def _get_competitie_overzicht_cwz(request):
         context = dict()
         return context, TEMPLATE_COMPETITIE_OVERZICHT_CWZ
 
-    def _get_competitie_overzicht_schutter(self):
+    @staticmethod
+    def _get_competitie_overzicht_schutter():
         context = dict()
         return context, TEMPLATE_COMPETITIE_OVERZICHT
 
@@ -219,9 +246,8 @@ class CompetitieAanmakenView(UserPassesTestMixin, TemplateView):
         jaar = models_bepaal_startjaar_nieuwe_competitie()
         seizoen = "%s/%s" % (jaar, jaar+1)
         schrijf_in_logboek(request.user, 'Competitie', 'Aanmaken competities %s' % seizoen)
-        competitie_aanmaken()
-        rol_evalueer_opnieuw(request)
-        return redirect('Plein:plein')
+        competitie_aanmaken(jaar)
+        return redirect('Competitie:overzicht')
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -265,7 +291,7 @@ class KlassegrenzenView(UserPassesTestMixin, TemplateView):
         targets = dict()        # [ (min_age, max_age, tuple(bogen)) ] = list(wedstrijdklassen)
         for wedstrklasse in WedstrijdKlasse.objects.filter(is_voor_teams=False, buiten_gebruik=False):
 
-            # zoek de minimale en maximaal toegestaande leeftijd voor deze wedstrijdklasse
+            # zoek de minimale en maximaal toegestane leeftijden voor deze wedstrijdklasse
             age_min = 999
             age_max = 0
             for obj in WedstrijdKlasseLeeftijd.objects.filter(wedstrijdklasse=wedstrklasse):
@@ -373,7 +399,7 @@ class KlassegrenzenView(UserPassesTestMixin, TemplateView):
         afstand = kwargs['afstand']
         context['afstand'] = afstand
 
-        objs = Competitie.objects.filter(afstand=afstand)
+        objs = Competitie.objects.filter(afstand=afstand, is_afgesloten=False)
         if len(objs) == 0:
             # onverwachts here
             return redirect('Plein:plein')
@@ -392,7 +418,8 @@ class KlassegrenzenView(UserPassesTestMixin, TemplateView):
             --> de beheerder wil deze klassegrenzen vaststellen
         """
         afstand = kwargs['afstand']
-        objs = Competitie.objects.filter(afstand=afstand)
+        # TODO: pk doorgeven via het formulier?
+        objs = Competitie.objects.filter(afstand=afstand, is_afgesloten=False)
         if len(objs) > 0:
             comp = objs[0]
             schrijf_in_logboek(request.user, 'Competitie', 'Klassegrenzen bevestigd voor %s' % comp.beschrijving)
@@ -401,386 +428,13 @@ class KlassegrenzenView(UserPassesTestMixin, TemplateView):
                 klasse = obj['wedstrkl_obj']
                 maak_competitieklasse_indiv(comp, klasse, obj['ag'])
             # for
-        return redirect('Plein:plein')
-
-
-class WijzigFavorieteBeheerdersView(View):
-
-    def get(self, request, *args, **kwargs):
-        """ called by the template system to get the context data for the template """
-        raise Resolver404()
-
-    def post(self, request, *args, **kwargs):
-        """ deze functie wordt aangeroepen als een POST request ontvangen is.
-            dit is gekoppeld aan het drukken op de Registreer knop.
-        """
-        if rol_is_beheerder(request):
-            form = WijzigFavorieteBeheerdersForm(request.POST)
-            form.full_clean()       # vult cleaned_data
-            # form is altijd valid, dus niet nodig om is_valid aan te roepen
-
-            account_pk = form.cleaned_data.get('add_favoriet')
-            if account_pk:
-                add_favoriete_beheerder(request.user, account_pk)
-
-            account_pk = form.cleaned_data.get('drop_favoriet')
-            if account_pk:
-                drop_favoriete_beheerder(request.user, account_pk)
-
-        return HttpResponseRedirect(reverse('Competitie:beheerfavorieten'))
-
-
-class BeheerFavorieteBeheerdersView(UserPassesTestMixin, ListView):
-
-    """ Via deze view kunnen beheerders hun lijst met favoriete NHB leden beheren """
-
-    template_name = TEMPLATE_COMPETITIE_BEHEER_FAVORIETEN
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.form = FavorieteBeheerdersForm()
-        self.get_zoekterm = None
-
-    def test_func(self):
-        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        return rol_is_beheerder(self.request)
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
-
-    def get_queryset(self):
-        """ called by the template system to get the queryset or list of objects for the template """
-        # retourneer een QuerySet voor de template
-        # onthoud zaken in de object instantie
-
-        # haal de GET parameters uit de request
-        self.form = FavorieteBeheerdersForm(self.request.GET)
-        self.form.full_clean()      # vult cleaned_data
-        # formulier is altijd goed, dus niet nodig om is_valid te gebruiken
-
-        zoekterm = self.form.cleaned_data['zoekterm']
-
-        if len(zoekterm) >= 2:      # minimaal twee tekens van de naam/nummer
-            self.have_searched = True
-            self.get_zoekterm = zoekterm
-            fav_accounts = FavorieteBestuurders.objects.filter(zelf=self.request.user).values_list('favoriet__pk', flat=True)
-            return Account.objects.exclude(pk__in=fav_accounts).\
-                                   exclude(nhblid__is_actief_lid=False).\
-                                   annotate(hele_naam=Concat('nhblid__voornaam', Value(' '), 'nhblid__achternaam')).\
-                                   filter(
-                                        Q(username__icontains=zoekterm) |       # dekt ook nhb_nr
-                                        Q(nhblid__voornaam__icontains=zoekterm) |
-                                        Q(nhblid__achternaam__icontains=zoekterm) |
-                                        Q(hele_naam__icontains=zoekterm)).order_by('nhblid__nhb_nr')[:50]
-
-        self.have_searched = False
-        self.zoekterm = ""
-        return None
-
-    def get_context_data(self, **kwargs):
-        """ called by the template system to get the context data for the template """
-        context = super().get_context_data(**kwargs)
-        context['form'] = self.form
-        context['have_searched'] = self.have_searched
-        context['zoekterm'] = self.get_zoekterm
-        context['favoriete_beheerders'] = FavorieteBestuurders.objects.filter(zelf=self.request.user)
-        menu_dynamics(self.request, context, actief='competitie')
-        return context
-
-
-class KoppelBeheerdersOntvangWijzigingView(View):
-
-    def get(self, request, *args, **kwargs):
-        """ called by the template system to get the context data for the template """
-        raise Resolver404()
-
-    def post(self, request, *args, **kwargs):
-        """ deze functie wordt aangeroepen als een POST request ontvangen is.
-            dit is gekoppeld aan het drukken op de Registreer knop.
-        """
-
-        url = reverse('Competitie:overzicht')
-
-        rol_nu, functie_nu = rol_get_huidige_functie(request)
-
-        if rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO):
-            # zoek de favoriete beheerders erbij
-            # TODO: Wat als twee beheerders niet dezelfde favorieten hebben?
-            fav_beheerders = FavorieteBestuurders.objects.filter(zelf=self.request.user)
-            form = KoppelBeheerdersForm(request.POST, fav_beheerders=fav_beheerders)
-            if form.is_valid():
-                # zoek de DeelCompetitie erbij
-                try:
-                    deelcompetitie = DeelCompetitie.objects.get(pk=form.cleaned_data.get('deelcomp_pk'))
-                except DeelCompetitie.DoesNotExist:
-                    # foute deelcomp_pk
-                    raise Resolver404()
-
-                # controleer dat de beheerders deze wijziging mag maken
-                if rol_nu == Rollen.ROL_BB:
-                    if deelcompetitie.laag != 'BK':
-                        # beheerder heeft hier niets te zoeken
-                        raise Resolver404()
-                elif rol_nu == Rollen.ROL_BKO:
-                    # BKO
-                    if deelcompetitie.laag != 'RK':
-                        # beheerder heeft hier niets te zoeken
-                        raise Resolver404()
-                else:
-                    # RKO
-                    # even het rayon van deze RKO rol erbij zoeken
-                    rko_deelcomp = Group(pk=functie_nu).deelcompetitie_set.all()[0]
-                    rko_rayon_nr = rko_deelcomp.nhb_rayon.rayon_nr
-                    if deelcompetitie.laag != 'Regio' or deelcompetitie.nhb_regio.rayon.rayon_nr != rko_rayon_nr:
-                        # beheerder heeft hier niets te zoeken
-                        raise Resolver404()
-
-                # haal de functie(=groep) op van deze deelcompetitie
-                functie = deelcompetitie.functies.all()[0]
-
-                # gooi alle gekoppelde beheerders weg
-                beheerders_old = [pk for pk in functie.user_set.all().values_list('pk', flat=True)]
-                functie.user_set.clear()
-
-                # koppel de gekozen beheerders (oud en nieuw)
-                for obj in fav_beheerders:
-                    is_gekozen = form.cleaned_data.get('beheerder_%s' % obj.favoriet.pk)
-                    if is_gekozen:
-                        # voeg het account toe aan de functie
-                        functie.user_set.add(obj.favoriet)
-                # for
-
-                beheerders_new = functie.user_set.all().values_list('pk', flat=True)
-
-                # de wijzigingen in het logboek schrijven
-                wijzigingen = list()
-                wijzigingen.append("Rol: %s" % deelcompetitie.get_rol_str())
-                for pk in beheerders_old:
-                    if pk not in beheerders_new:
-                        beheerder = Account.objects.get(pk=pk).volledige_naam()
-                        wijzigingen.append('Losgekoppeld: %s' % beheerder)
-                # for
-                for pk in beheerders_new:
-                    if pk not in beheerders_old:
-                        beheerder = Account.objects.get(pk=pk).volledige_naam()
-                        wijzigingen.append('Gekoppeld: %s' % beheerder)
-                # for
-
-                if len(wijzigingen) > 1:
-                    schrijf_in_logboek(request.user, 'Rollen', "\n".join(wijzigingen))
-
-                url = reverse('Competitie:toon-competitie-beheerders', kwargs={'comp_pk': deelcompetitie.competitie.pk})
-            #else:
-            #    print("form is not valid: %s" % repr(form.errors))
-
-        return HttpResponseRedirect(url)
-
-
-def beheerder_context_str(account):
-    if account.nhblid:
-        lid = account.nhblid
-        if lid.bij_vereniging:
-            ver = lid.bij_vereniging
-            descr = "rayon %s, regio %s, vereniging %s %s" % (ver.regio.rayon.rayon_nr,
-                                                              ver.regio.regio_nr,
-                                                              ver.nhb_nr,
-                                                              ver.naam)
-        else:
-            descr = "geen vereniging"
-    else:
-        descr = "geen lid"
-
-    return descr
-
-
-class KoppelBeheerderDeelCompetitieView(UserPassesTestMixin, ListView):
-
-    """ Via deze view kan de BKO en RKO beheerder andere beheerders kiezen voor een deelcompetitie.
-        Keuze moet komen uit de lijst met favoriete beheerders.
-    """
-
-    template_name = TEMPLATE_COMPETITIE_KOPPEL_BEHEERDERS_WIJZIG
-
-    def test_func(self):
-        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        rol = rol_get_huidige(self.request)
-        return rol in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO)
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
-
-    def get_queryset(self):
-        """ called by the template system to get the queryset or list of objects for the template """
-
-        try:
-            self.deelcompetitie = DeelCompetitie.objects.get(pk=self.kwargs['deelcomp_pk'])
-        except DeelCompetitie.DoesNotExist:
-            # foute deelcomp_pk
-            raise Resolver404()
-
-        # controleer dat de beheerder dit stukje mag wijzigen
-        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
-        if rol_nu == Rollen.ROL_BB:
-            if self.deelcompetitie.laag != 'BK':
-                # beheerder heeft hier niets te zoeken
-                raise Resolver404()
-        elif rol_nu == Rollen.ROL_BKO:
-            if self.deelcompetitie.laag != 'RK':
-                # beheerder heeft hier niets te zoeken
-                raise Resolver404()
-        elif rol_nu == Rollen.ROL_RKO:
-            # even het rayon van de gekozen RKO rol erbij zoeken
-            rko_deelcomp = Group(pk=functie_nu).deelcompetitie_set.all()[0]
-            rko_rayon_nr = rko_deelcomp.nhb_rayon.rayon_nr
-            if self.deelcompetitie.laag != 'Regio' or self.deelcompetitie.nhb_regio.rayon.rayon_nr != rko_rayon_nr:
-                # beheerder heeft hier niets te zoeken
-                raise Resolver404()
-        else:
-            # beheerder heeft hier niets te zoeken
-            raise Resolver404()
-
-        functie = self.deelcompetitie.functies.all()[0]
-        huidige_beheerders = functie.user_set.all()
-
-        # lijst van favoriete beheerders waar uit gekozen kan worden
-        # marker de beheerders die nu gekoppeld zijn
-        fav_beheerders = FavorieteBestuurders.objects.filter(zelf=self.request.user)
-        for obj in fav_beheerders:
-            obj.form_index = "beheerder_%s" % obj.favoriet.pk
-            obj.is_gekozen_beheerder = len(huidige_beheerders.filter(pk=obj.favoriet.pk)) > 0
-            obj.beschrijving = beheerder_context_str(obj.favoriet)
-            # for
-        # for
-
-        # TODO: rapporteer wie in huidige_beheerders niet in fav_beheerders zit en je dus kwijt kan raken!
-
-        return fav_beheerders
-
-    def get_context_data(self, **kwargs):
-        """ called by the template system to get the context data for the template """
-        context = super().get_context_data(**kwargs)
-        context['deelcompetitie'] = self.deelcompetitie
-        context['rol_str'] = self.deelcompetitie.get_rol_str()
-        context['formulier_url'] = reverse('Competitie:wijzig-deelcomp-beheerders')
-        context['terug_url'] = reverse('Competitie:toon-competitie-beheerders', kwargs={'comp_pk': self.deelcompetitie.competitie.pk})
-        menu_dynamics(self.request, context, actief='competitie')
-        return context
-
-
-class KoppelBeheerdersCompetitieView(UserPassesTestMixin, ListView):
-
-    """ Via deze view worden de huidige gekozen beheerders voor een competitie getoond
-        en kan de gebruiker, aan de hand van de rol, kiezen om er een te wijzigen.
-    """
-
-    template_name = TEMPLATE_COMPETITIE_KOPPEL_BEHEERDERS_OVERZICHT
-
-    def test_func(self):
-        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        return rol_is_beheerder(self.request)
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
-
-    def get_queryset(self):
-        """ called by the template system to get the queryset or list of objects for the template """
-
-        competitie_pk = self.kwargs['comp_pk']
-
-        try:
-            self.competitie = Competitie.objects.get(pk=competitie_pk)
-        except Competitie.DoesNotExist:
-            # foute comp_pk
-            raise Resolver404()
-
-        # bepaal welke laag door deze beheerder gewijzigd mag worden
-        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
-        if rol_nu == Rollen.ROL_BB:
-            wijzigbare_laag = 'BK'
-        elif rol_nu == Rollen.ROL_BKO:
-            wijzigbare_laag = 'RK'
-        elif rol_nu == Rollen.ROL_RKO:
-            wijzigbare_laag = 'Regio'
-            # even het rayon van de gekozen RKO rol erbij zoeken
-            deelcomp = Group(pk=functie_nu).deelcompetitie_set.all()[0]
-            rko_rayon_nr = deelcomp.nhb_rayon.rayon_nr
-        else:
-            # beheerder kan niets wijzigen, maar inzien mag wel
-            wijzigbare_laag = "niets"
-
-        # maak een lijst van beheerders aan de hand van de deelcompetities in deze competitie
-        # per deelcompetitie is er een BKO, RKO of RCL
-
-        # eerst de BKO's zodat deze bovenaan komen te staan
-        deelcompetities = list()
-        for obj in DeelCompetitie.objects.filter(competitie=self.competitie).filter(laag='BK'):
-            obj.rol_str = obj.get_rol_str()
-            obj.wijzig_url = None
-
-            if obj.laag == wijzigbare_laag and not obj.is_afgesloten:
-                # BB --> BKO
-                obj.wijzig_url = reverse('Competitie:kies-deelcomp-beheerders', kwargs={'deelcomp_pk': obj.pk})
-
-            functie = obj.functies.all()[0]
-            obj.beheerders = functie.user_set.all()
-
-            deelcompetities.append(obj)
-        # for
-
-        # nu de RKO's en RCL's gesorteerd op rayon nummer / regio nummer
-        for obj in DeelCompetitie.objects.filter(competitie=self.competitie).exclude(laag='BK').order_by('-laag', 'nhb_rayon__rayon_nr', 'nhb_regio__regio_nr'):
-            obj.rol_str = obj.get_rol_str()
-            obj.wijzig_url = None
-
-            # bepaal de URL voor het wijzig knopje
-            if obj.laag == wijzigbare_laag and not obj.is_afgesloten:
-                if obj.laag == 'RK':
-                    # BKO --> RKO
-                    obj.wijzig_url = reverse('Competitie:kies-deelcomp-beheerders', kwargs={'deelcomp_pk': obj.pk})
-                elif obj.laag == 'Regio' and obj.nhb_regio.rayon.rayon_nr == rko_rayon_nr:
-                    # RKO --> RCL
-                    obj.wijzig_url = reverse('Competitie:kies-deelcomp-beheerders', kwargs={'deelcomp_pk': obj.pk})
-
-            functie = obj.functies.all()[0]
-            obj.beheerders = functie.user_set.all()
-
-            deelcompetities.append(obj)
-        # for
-        return deelcompetities
-
-    def get_context_data(self, **kwargs):
-        """ called by the template system to get the context data for the template """
-        context = super().get_context_data(**kwargs)
-        context['competitie'] = self.competitie
-
-        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
-        if functie_nu:
-            context['huidige_rol'] = Group.objects.get(pk=functie_nu).name
-        else:
-            context['huidige_rol'] = rol_get_beschrijving(self.request)
-
-        if rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO):
-            # heeft deze gebruiker al favoriete beheerders?
-            if len(FavorieteBestuurders.objects.filter(zelf=self.request.user)) == 0:
-                context['kies_favleden_url'] = reverse('Competitie:beheerfavorieten')
-
-        # als er geen wijzig knop in beeld hoeft te komen, dan kan de tabel wat smaller
-        context['show_wijzig_kolom'] = False
-        for obj in context['object_list']:
-            if obj.wijzig_url:
-                context['show_wijzig_kolom'] = True
-                break   # from the for
-        # for
-        menu_dynamics(self.request, context, actief='competitie')
-        return context
+        return redirect('Competitie:overzicht')
 
 
 class LijstVerenigingenView(UserPassesTestMixin, ListView):
 
-    """ Via deze view worden kan een BKO, RKO of RCL de lijst van verenigingen zien in zijn werkgebied.
+    """ Via deze view worden kan een BKO, RKO of RCL
+          de lijst van verenigingen zien, in zijn werkgebied
     """
 
     template_name = TEMPLATE_COMPETITIE_LIJST_VERENIGINGEN
@@ -796,7 +450,7 @@ class LijstVerenigingenView(UserPassesTestMixin, ListView):
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
 
-        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
+        rol_nu, functie = rol_get_huidige_functie(self.request)
 
         if rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO):
             # toon de landelijke lijst
@@ -805,14 +459,21 @@ class LijstVerenigingenView(UserPassesTestMixin, ListView):
         if rol_nu == Rollen.ROL_RKO:
             # toon de lijst van verenigingen in het rayon van de RKO
             # het rayonnummer is verkrijgbaar via de deelcompetitie van de functie
-            deelcompetitie = Group(pk=functie_nu).deelcompetitie_set.all()[0]
-            return NhbVereniging.objects.filter(regio__rayon=deelcompetitie.nhb_rayon).order_by('regio__regio_nr', 'nhb_nr')
+            return NhbVereniging.objects.filter(regio__rayon=functie.nhb_rayon).exclude(regio__regio_nr=100).order_by('regio__regio_nr', 'nhb_nr')
 
         if rol_nu == Rollen.ROL_RCL:
             # toon de lijst van verenigingen in de regio van de RCL
             # het regionummer is verkrijgbaar via de deelcompetitie van de functie
-            deelcompetitie = Group(pk=functie_nu).deelcompetitie_set.all()[0]
-            return NhbVereniging.objects.filter(regio=deelcompetitie.nhb_regio)
+            objs = NhbVereniging.objects.filter(regio=functie.nhb_regio)
+            for obj in objs:
+                try:
+                    functie_cwz = Functie.objects.get(rol='CWZ', nhb_ver=obj)
+                except Functie.DoesNotExist:
+                    obj.cwzs = list()
+                else:
+                    obj.cwzs = Account.objects.get(functie=functie_cwz)
+            # for
+            return objs
 
         # waarom hier?
         raise Resolver404()
@@ -820,6 +481,21 @@ class LijstVerenigingenView(UserPassesTestMixin, ListView):
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
+
+        context['toon_rayon'] = True
+        context['toon_regio'] = True
+
+        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
+        context['huidige_rol'] = rol_get_beschrijving(self.request)
+
+        if rol_nu == Rollen.ROL_RKO:
+            context['toon_rayon'] = False
+
+        if rol_nu == Rollen.ROL_RCL:
+            context['toon_rayon'] = False
+            context['toon_regio'] = False
+            context['toon_cwzs'] = True
+
         menu_dynamics(self.request, context, actief='competitie')
         return context
 
