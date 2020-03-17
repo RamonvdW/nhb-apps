@@ -14,7 +14,7 @@ from .tijdelijke_url import dispatcher, SAVER, set_tijdelijke_url_receiver, \
 from .templatetags.overig_filters import filter_highlight
 from Account.models import Account, AccountEmail, account_vhpg_is_geaccepteerd,\
                            account_zet_sessionvars_na_otp_controle, account_zet_sessionvars_na_login
-from Account.rol import rol_zet_sessionvars_na_otp_controle, rol_zet_sessionvars_na_login, rol_activeer_rol
+from Functie.rol import rol_zet_sessionvars_na_otp_controle, rol_zet_sessionvars_na_login, rol_activeer_rol
 
 
 class TestOverig(TestCase):

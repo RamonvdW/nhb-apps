@@ -11,7 +11,7 @@ from django.urls import Resolver404, reverse
 from django.http import HttpResponseRedirect
 from django.utils import timezone
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Account.rol import Rollen, rol_get_huidige
+from Functie.rol import Rollen, rol_get_huidige
 from Plein.menu import menu_dynamics
 from .forms import SiteFeedbackForm
 from .models import SiteFeedback, store_feedback, SiteTijdelijkeUrl
