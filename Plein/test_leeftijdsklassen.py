@@ -7,13 +7,12 @@
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from django.test import TestCase
-from .leeftijdsklassen import leeftijdsklassen_zet_sessionvars_na_login,\
-                              get_leeftijdsklassen
-from .models import Account
+from Account.models import Account
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
 from NhbStructuur.migrations.m0002_nhbstructuur_2018 import maak_rayons_2018, maak_regios_2018
-import datetime
+from .leeftijdsklassen import leeftijdsklassen_zet_sessionvars_na_login, get_leeftijdsklassen
 from types import SimpleNamespace
+import datetime
 
 
 class TestAccountLeeftijdsklassen(TestCase):
