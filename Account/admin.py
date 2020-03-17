@@ -24,11 +24,13 @@ class AccountAdmin(UserAdmin):
         (_('2FA'), { 'fields': ('otp_code', 'otp_is_actief')}),
         (_('Koppeling'), {'fields': ('nhblid',)}),
         (_('Permissions'), {
-            'fields': ('is_active', 'is_BB', 'is_Observer', 'is_staff', 'groups', 'user_permissions'),
+            'fields': ('is_active', 'is_BB', 'is_Observer', 'is_staff', 'functies', 'groups'),  # TODO: remove groups
         }),
         (_('Beveiliging'), {'fields': ('verkeerd_wachtwoord_teller', 'is_geblokkeerd_tot')}),
         (_('Important dates'), {'fields': ('laatste_inlog_poging', 'last_login', 'date_joined')}),
     )
+
+    filter_horizontal = ('functies', 'groups')  # TODO: remove groups
 
     list_display = ('username', 'last_login', 'is_staff')
 

@@ -5,15 +5,14 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import Group
+from django.contrib.auth.models import AnonymousUser
 from django.test import TestCase
-from .rol import rol_zet_sessionvars_na_login
 from .models import Account, AccountEmail,\
-                    account_zet_sessionvars_na_login,\
-                    account_prep_for_otp, account_needs_otp
+                    account_zet_sessionvars_na_login, account_zet_sessionvars_na_otp_controle, \
+                    account_prep_for_otp, account_needs_otp, user_is_otp_verified
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
 from NhbStructuur.migrations.m0002_nhbstructuur_2018 import maak_rayons_2018, maak_regios_2018
-from Plein.tests import assert_html_ok, assert_template_used, assert_other_http_commands_not_supported
+from Plein.tests import assert_template_used
 import datetime
 import pyotp
 
@@ -41,12 +40,6 @@ class TestAccount2FA(TestCase):
         email.bevestigde_email = 'metmail@test.com'
         email.save()
         self.email_metmail = email
-
-        self.group_bko, _ = Group.objects.get_or_create(name="BKO test")
-        self.group_rko, _ = Group.objects.get_or_create(name="RKO test")
-        self.group_rcl, _ = Group.objects.get_or_create(name="RCL test")
-        self.group_cwz, _ = Group.objects.get_or_create(name="CWZ test")
-        self.group_tst, _ = Group.objects.get_or_create(name="Test test")
 
         # maak de standard rayon/regio structuur aan
         maak_rayons_2018(NhbRayon)
@@ -87,6 +80,7 @@ class TestAccount2FA(TestCase):
 
     def test_otp_koppelen_niet_ingelogd(self):
         self.client.logout()
+
         # controleer redirect naar het plein, omdat de gebruiker niet ingelogged is
         resp = self.client.get('/account/otp-koppelen/', follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -98,22 +92,8 @@ class TestAccount2FA(TestCase):
 
     def test_otp_koppelen_niet_nodig(self):
         self.client.login(username='normaal', password='wachtwoord')
+
         # controleer redirect naar het plein, omdat OTP koppeling niet nodig is
-        resp = self.client.get('/account/otp-koppelen/', follow=True)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        assert_template_used(self, resp, ('plein/plein-gebruiker.dtl', 'plein/site_layout.dtl'))
-
-        resp = self.client.post('/account/otp-koppelen/', {'otp_code': '123456'}, follow=True)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        assert_template_used(self, resp, ('plein/plein-gebruiker.dtl', 'plein/site_layout.dtl'))
-
-    def test_otp_koppelen_al_gekoppeld(self):
-        self.account_admin.otp_is_actief = True
-        self.account_admin.save()
-        self.client.login(username='admin', password='wachtwoord')
-        account_zet_sessionvars_na_login(self.client).save()
-        rol_zet_sessionvars_na_login(self.account_admin, self.client).save()
-        # controleer redirect naar het plein, omdat OTP koppeling er al is
         resp = self.client.get('/account/otp-koppelen/', follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         assert_template_used(self, resp, ('plein/plein-gebruiker.dtl', 'plein/site_layout.dtl'))
@@ -127,23 +107,60 @@ class TestAccount2FA(TestCase):
         self.account_admin.otp_is_actief = False
         self.account_admin.otp_code = 'xx'
         self.account_admin.save()
-        # log in
-        self.client.login(username='admin', password='wachtwoord')
+
+        # log out / is_authenticated == False
+        self.client.logout()
+        resp = self.client.get('/account/otp-koppelen/', follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_template_used(self, resp, ('plein/plein-bezoeker.dtl', 'plein/site_layout.dtl'))
+
+        # log out / is_authenticated == False
+        resp = self.client.post('/account/otp-koppelen/', {'otp_code': '123'}, follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_template_used(self, resp, ('plein/plein-bezoeker.dtl', 'plein/site_layout.dtl'))
+
+        # log in GET - geen otp nodig
+        self.client.login(username=self.account_normaal.username, password='wachtwoord')
         account_zet_sessionvars_na_login(self.client).save()
-        rol_zet_sessionvars_na_login(self.account_admin, self.client).save()
+        resp = self.client.get('/account/otp-koppelen/', follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_template_used(self, resp, ('plein/plein-gebruiker.dtl', 'plein/site_layout.dtl'))
+
+        # log in POST - geen otp nodig
+        resp = self.client.post('/account/otp-koppelen/', {'otp_code': '123'}, follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_template_used(self, resp, ('plein/plein-gebruiker.dtl', 'plein/site_layout.dtl'))
+        self.client.logout()
+
+        # log in
+        self.client.login(username=self.account_admin.username, password='wachtwoord')
+        account_zet_sessionvars_na_login(self.client).save()
+
         # check mogelijkheid tot koppelen
         resp = self.client.get('/account/otp-koppelen/', follow=False)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         assert_template_used(self, resp, ('account/otp-koppelen.dtl', 'plein/site_layout.dtl'))
+
         # check dat het OTP secret aangemaakt is
         self.account_admin = Account.objects.get(username='admin')
         self.assertNotEqual(self.account_admin.otp_code, 'xx')
+
+        # geef een illegale otp code op
+        resp = self.client.post('/account/otp-koppelen/', {'otp_code': '123'}, follow=False)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_template_used(self, resp, ('account/otp-koppelen.dtl', 'plein/site_layout.dtl'))
+        self.account_admin = Account.objects.get(username='admin')
+        self.assertNotContains(resp, 'Verkeerde code. Probeer het nog eens')
+        self.assertFalse(self.account_admin.otp_is_actief)
+
         # geef foute otp code op
         resp = self.client.post('/account/otp-koppelen/', {'otp_code': '123456'}, follow=False)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         assert_template_used(self, resp, ('account/otp-koppelen.dtl', 'plein/site_layout.dtl'))
         self.account_admin = Account.objects.get(username='admin')
+        self.assertContains(resp, 'Verkeerde code. Probeer het nog eens')
         self.assertFalse(self.account_admin.otp_is_actief)
+
         # juiste otp code
         code = get_otp_code(self.account_admin)
         resp = self.client.post('/account/otp-koppelen/', {'otp_code': code}, follow=True)
@@ -151,6 +168,30 @@ class TestAccount2FA(TestCase):
         assert_template_used(self, resp, ('account/otp-koppelen-gelukt.dtl', 'plein/site_layout.dtl'))
         self.account_admin = Account.objects.get(username='admin')
         self.assertTrue(self.account_admin.otp_is_actief)
+
+    def test_otp_koppelen_al_gekoppeld(self):
+        # maak OTP koppeling
+        self.account_admin.otp_is_actief = True
+        self.account_admin.otp_code = 'xx'
+        self.account_admin.save()
+
+        # login and pass OTP
+        self.client.login(username=self.account_admin.username, password='wachtwoord')
+        account_zet_sessionvars_na_login(self.client).save()
+        self.assertTrue(account_needs_otp(self.account_admin))
+        account_zet_sessionvars_na_otp_controle(self.client).save()
+        self.assertTrue(user_is_otp_verified(self.client))
+
+        # probeer OTP koppelen terwijl al gedaan
+        # post
+        code = get_otp_code(self.account_admin)
+        resp = self.client.post('/account/otp-koppelen/', {'otp_code': code}, follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_template_used(self, resp, ('plein/plein-gebruiker.dtl', 'plein/site_layout.dtl'))
+        # get
+        resp = self.client.get('/account/otp-koppelen/', follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_template_used(self, resp, ('plein/plein-gebruiker.dtl', 'plein/site_layout.dtl'))
 
     def test_otp_controle_niet_ingelogd(self):
         self.client.logout()
@@ -180,42 +221,47 @@ class TestAccount2FA(TestCase):
         self.account_admin.save()
         self.client.login(username='admin', password='wachtwoord')
         account_zet_sessionvars_na_login(self.client).save()
-        rol_zet_sessionvars_na_login(self.account_admin, self.client).save()
+
+        # ophalen van de OTP controle pagina
         resp = self.client.get('/account/otp-controle/', follow=False)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         assert_template_used(self, resp, ('account/otp-controle.dtl', 'plein/site_layout.dtl'))
+
         # geen code
         resp = self.client.post('/account/otp-controle/', {'jaja': 'nee'}, follow=False)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         assert_template_used(self, resp, ('account/otp-controle.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, "De gegevens worden niet geaccepteerd")
+
         # lege code
         resp = self.client.post('/account/otp-controle/', {'otp_code': ''}, follow=False)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         assert_template_used(self, resp, ('account/otp-controle.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, "De gegevens worden niet geaccepteerd")
+
         # illegale code
         resp = self.client.post('/account/otp-controle/', {'otp_code': 'ABCDEF'}, follow=False)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         assert_template_used(self, resp, ('account/otp-controle.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, "Voer de vereiste code in")
+
         # fout code
         resp = self.client.post('/account/otp-controle/', {'otp_code': '123456'}, follow=False)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         assert_template_used(self, resp, ('account/otp-controle.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, "Verkeerde code. Probeer het nog eens.")
-        # juiste otp code resulteert in redirect naar het plein
+
+        # juiste otp code
         code = get_otp_code(self.account_admin)
         resp = self.client.post('/account/otp-controle/', {'otp_code': code}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        assert_template_used(self, resp, ('account/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
+        assert_template_used(self, resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
 
     def test_account_needs_otp(self):
         account = self.account_normaal
 
         account.is_BB = False
         account.is_staff = False
-        account.groups.clear()
 
         self.assertFalse(account_needs_otp(account))
 
@@ -229,28 +275,7 @@ class TestAccount2FA(TestCase):
         account.is_staff = False
         self.assertFalse(account_needs_otp(account))
 
-        account.groups.add(self.group_tst)
-        self.assertFalse(account_needs_otp(account))
-        account.groups.clear()
-
-        account.groups.add(self.group_bko)
-        self.assertTrue(account_needs_otp(account))
-        account.groups.clear()
-        self.assertFalse(account_needs_otp(account))
-
-        account.groups.add(self.group_rko)
-        self.assertTrue(account_needs_otp(account))
-        account.groups.clear()
-        self.assertFalse(account_needs_otp(account))
-
-        account.groups.add(self.group_rcl)
-        self.assertTrue(account_needs_otp(account))
-        account.groups.clear()
-        self.assertFalse(account_needs_otp(account))
-
-        account.groups.add(self.group_cwz)
-        self.assertTrue(account_needs_otp(account))
-        account.groups.clear()
+        account = AnonymousUser() # heeft is_authenticated == False
         self.assertFalse(account_needs_otp(account))
 
     def test_account_prep_for_otp(self):
@@ -270,5 +295,19 @@ class TestAccount2FA(TestCase):
         account_prep_for_otp(account)
         account = Account.objects.get(username=account.username)
         self.assertEqual(len(account.otp_code), 16)
+
+    def test_user_is_otp_verified(self):
+        self.client.logout()
+        self.assertFalse(user_is_otp_verified(self.client))
+
+        self.account_admin.otp_is_actief = True
+        self.account_admin.otp_code = "ABCDEFGHIJKLMNOP"
+        self.account_admin.save()
+        self.client.login(username='admin', password='wachtwoord')
+        account_zet_sessionvars_na_login(self.client).save()
+        self.assertFalse(user_is_otp_verified(self.client))
+
+        account_zet_sessionvars_na_otp_controle(self.client).save()
+        self.assertTrue(user_is_otp_verified(self.client))
 
 # end of file
