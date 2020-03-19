@@ -40,6 +40,7 @@ TEMPLATE_AANGEMAAKT = 'account/aangemaakt.dtl'
 TEMPLATE_NIEUWEEMAIL = 'account/nieuwe-email.dtl'
 TEMPLATE_BEVESTIGD = 'account/bevestigd.dtl'
 TEMPLATE_GEBLOKKEERD = 'account/geblokkeerd.dtl'
+TEMPLATE_ISINACTIEF = 'account/is_inactief.dtl'
 TEMPLATE_VERGETEN = 'account/wachtwoord-vergeten.dtl'
 TEMPLATE_OTPCONTROLE = 'account/otp-controle.dtl'
 TEMPLATE_OTPKOPPELEN = 'account/otp-koppelen.dtl'
@@ -103,6 +104,7 @@ class LoginView(TemplateView):
 
             if account:
                 # account bestaat wel
+
                 # kijk of het geblokkeerd is
                 now = timezone.now()
                 if account.is_geblokkeerd_tot:
@@ -114,12 +116,22 @@ class LoginView(TemplateView):
                         menu_dynamics(request, context, actief='inloggen')
                         return render(request, TEMPLATE_GEBLOKKEERD, context)
 
-                # TODO: blokkeer inlog als email nog niet bevestigd is
-
                 # niet geblokkeerd
                 account2 = authenticate(username=account.username, password=wachtwoord)
                 if account2:
                     # authenticatie is gelukt
+
+                    # blokkeer bepaalde NHB leden
+                    if account.nhblid and account.nhblid.is_actief_lid == False:
+                        # NHB lid mag geen gebruik maken van de NHB faciliteiten
+                        schrijf_in_logboek(account, 'Inloggen',
+                                           'Mislukte inlog vanaf IP %s voor inactief account %s' % (from_ip, repr(login_naam)))
+                        my_logger.info('%s LOGIN Geblokkeerde inlog voor inactief account %s' % (from_ip, repr(login_naam)))
+                        context = {'account': account}
+                        menu_dynamics(request, context, actief='inloggen')
+                        return render(request, TEMPLATE_ISINACTIEF, context)
+
+                    # TODO: blokkeer inlog als email nog niet bevestigd is
 
                     # integratie met de authenticatie laag van Django
                     login(request, account2)

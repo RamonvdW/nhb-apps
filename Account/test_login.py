@@ -418,4 +418,17 @@ class TestAccountLogin(TestCase):
         self.assertEqual(resp.status_code, 302)     # 302 = Redirect
         self.assertEqual(resp.url, '/plein/')
 
+    def test_login_inactief(self):
+        self.nhblid1.is_actief_lid = False
+        self.nhblid1.save()
+
+        self.account_normaal.nhblid = self.nhblid1
+        self.account_normaal.save()
+
+        resp = self.client.post('/account/login/', {'login_naam': 'normaal', 'wachtwoord': 'wachtwoord'})
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_html_ok(self, resp)
+        assert_template_used(self, resp, ('account/is_inactief.dtl', 'plein/site_layout.dtl'))
+
+
 # end of file
