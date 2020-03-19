@@ -22,7 +22,10 @@ class LogboekRegel(models.Model):
         """ bepaal door wie actie uitgevoerd is """
         if not self.actie_door_account:
             return 'Systeem of IT beheerder'
-        return self.actie_door_account.username
+        volledige_naam = self.actie_door_account.volledige_naam()
+        if volledige_naam == self.actie_door_account.username:
+            return self.actie_door_account.username
+        return "%s (%s)" % (self.actie_door_account.username, volledige_naam)
 
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """

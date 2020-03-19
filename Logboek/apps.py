@@ -21,6 +21,8 @@ class LogboekConfig(AppConfig):
 
         msg = "Start met versie %s" % repr(settings.SITE_VERSIE)
 
+        # TODO: code below causes exception and crash before initial migrations
+
         # schrijf het nieuw versienummer in het logboek
         if len(LogboekRegel.objects.filter(gebruikte_functie='Uitrol', activiteit=msg)) == 0:
             schrijf_in_logboek(None, 'Uitrol', msg)         # pragma: no cover
