@@ -9,6 +9,7 @@ from django.contrib.auth import get_user_model
 from Account.models import Account, account_vhpg_is_geaccepteerd, account_zet_sessionvars_na_otp_controle
 from Functie.rol import rol_zet_sessionvars_na_otp_controle, rol_activeer_rol, rol_activeer_functie, \
                         rol_is_beheerder, rol_is_BB
+from Functie.models import maak_functie
 from Plein.test_helpers import assert_html_ok, assert_template_used, extract_all_href_urls
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
@@ -255,6 +256,8 @@ class TestCompetitieBeheerders(TestCase):
         usermodel.objects.create_superuser('admin', 'admin@test.com', 'wachtwoord')
         self.account_admin = Account.objects.get(username='admin')
 
+        self._next_nhbnr = 100001
+
         self.rayon_2 = NhbRayon.objects.get(rayon_nr=2)
         self.regio_101 = NhbRegio.objects.get(regio_nr=101)
 
@@ -266,7 +269,11 @@ class TestCompetitieBeheerders(TestCase):
         # secretaris kan nog niet ingevuld worden
         ver.save()
         self._ver = ver
-        self._next_nhbnr = 100001
+
+        # maak CWZ functie aan voor deze vereniging
+        self.functie_cwz = maak_functie("CWZ Vereniging %s" % ver.nhb_nr, "CWZ")
+        self.functie_cwz.nhb_ver = ver
+        self.functie_cwz.save()
 
         # maak een BKO aan (geen NHB lid)
         self.usermodel.objects.create_user('bko', 'bko@test.com', 'wachtwoord')
@@ -297,6 +304,14 @@ class TestCompetitieBeheerders(TestCase):
         self.account_bko.functies.add(self.functie_bko)
         self.account_rko.functies.add(self.functie_rko)
         self.account_rcl.functies.add(self.functie_rcl)
+
+        # maak nog een test vereniging, zonder CWZ functie
+        ver = NhbVereniging()
+        ver.naam = "Kleine Club"
+        ver.nhb_nr = "1100"
+        ver.regio = self.regio_101
+        # secretaris kan nog niet ingevuld worden
+        ver.save()
 
     def _login_as(self, account, functie):
         self.client.login(username=account.username, password='wachtwoord')

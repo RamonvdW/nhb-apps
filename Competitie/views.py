@@ -471,7 +471,7 @@ class LijstVerenigingenView(UserPassesTestMixin, ListView):
                 except Functie.DoesNotExist:
                     obj.cwzs = list()
                 else:
-                    obj.cwzs = Account.objects.get(functie=functie_cwz)
+                    obj.cwzs = functie_cwz.account_set.all()
             # for
             return objs
 
