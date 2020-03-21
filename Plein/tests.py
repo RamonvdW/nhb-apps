@@ -5,7 +5,6 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import Group
 from django.test import TestCase
 from Functie.rol import rol_zet_sessionvars_na_login, rol_zet_sessionvars_na_otp_controle,\
                         rol_activeer_rol, rol_activeer_functie

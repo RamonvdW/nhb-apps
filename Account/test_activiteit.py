@@ -5,19 +5,9 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import Group
-from django.utils import timezone
 from django.test import TestCase
-from django.conf import settings
-from Functie.rol import rol_zet_sessionvars_na_login
-from .models import Account, AccountEmail,is_email_valide,\
-                    account_zet_sessionvars_na_login
-from .views import obfuscate_email
-from .forms import LoginForm
-from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
-from NhbStructuur.migrations.m0002_nhbstructuur_2018 import maak_rayons_2018, maak_regios_2018
+from .models import Account, AccountEmail,is_email_valide
 from Plein.tests import assert_html_ok, assert_template_used
-import datetime
 
 
 class TestAccountActiviteit(TestCase):

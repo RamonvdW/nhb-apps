@@ -4,7 +4,6 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-# from django.shortcuts import render
 from django.urls import Resolver404, reverse
 from django.views.generic import ListView
 from django.db.models import Q

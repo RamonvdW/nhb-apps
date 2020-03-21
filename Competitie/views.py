@@ -11,11 +11,10 @@ from django.views.generic import TemplateView, ListView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.shortcuts import redirect
 from django.utils import timezone
-from Account.models import Account
 from Plein.menu import menu_dynamics
 from Logboek.models import schrijf_in_logboek
 from Functie.models import Functie
-from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving,\
+from Functie.rol import Rollen, rol_get_huidige_functie, rol_get_beschrijving,\
                         rol_is_BB, rol_is_CWZ, rol_is_beheerder
 from BasisTypen.models import TeamType, TeamTypeBoog, WedstrijdKlasse, \
                               WedstrijdKlasseBoog, WedstrijdKlasseLeeftijd

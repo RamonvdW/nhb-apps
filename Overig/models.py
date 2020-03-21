@@ -5,12 +5,10 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import models
-from django.urls import reverse
 from django.conf import settings
 from django.utils import timezone
 from datetime import timedelta
-from django.core.exceptions import ObjectDoesNotExist
-from Account.models import Account, AccountEmail
+from Account.models import AccountEmail
 from .tijdelijke_url import set_tijdelijke_url_saver
 
 

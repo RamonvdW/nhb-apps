@@ -8,11 +8,10 @@ from django.test import TestCase
 from django.core import management
 from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import Group
 from .models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
 from Account.models import Account
 from .migrations.m0002_nhbstructuur_2018 import maak_rayons_2018, maak_regios_2018
-from Functie.models import Functie, maak_cwz
+from Functie.models import Functie
 import datetime
 from dateutil.relativedelta import relativedelta
 import io

@@ -18,12 +18,12 @@ from .models import AccountCreateError, AccountCreateNhbGeenEmail, \
                     Account, AccountEmail, HanterenPersoonsgegevens,\
                     account_create_nhb, account_email_is_bevestigd, account_check_gewijzigde_email,\
                     account_needs_otp, account_is_otp_gekoppeld,\
-                    account_prep_for_otp, account_controleer_otp_code, account_zet_sessionvars_na_login, account_zet_sessionvars_na_otp_controle,\
+                    account_prep_for_otp, account_controleer_otp_code, \
+                    account_zet_sessionvars_na_login, account_zet_sessionvars_na_otp_controle,\
                     account_needs_vhpg, account_vhpg_is_geaccepteerd
-from Plein.leeftijdsklassen import leeftijdsklassen_zet_sessionvars_na_login
-from Functie.rol import rol_zet_sessionvars_na_login, rol_zet_sessionvars_na_otp_controle, \
-    rol_is_BB
 from .qrcode import qrcode_get
+from Plein.leeftijdsklassen import leeftijdsklassen_zet_sessionvars_na_login
+from Functie.rol import rol_zet_sessionvars_na_login, rol_zet_sessionvars_na_otp_controle, rol_is_BB
 from Overig.tijdelijke_url import set_tijdelijke_url_receiver, RECEIVER_ACCOUNTEMAIL
 from Plein.menu import menu_dynamics
 from Logboek.models import schrijf_in_logboek

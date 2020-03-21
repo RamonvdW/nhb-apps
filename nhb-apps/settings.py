@@ -25,7 +25,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2020-03-20'
+SITE_VERSIE = '2020-03-21'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -48,13 +48,13 @@ INSTALLED_APPS = [
     'django.contrib.auth',          # authenticatie framework
     'django.contrib.contenttypes',  # permission association to models
     'django.contrib.messages',
-    #'debug_toolbar',                # DEV ONLY
-    #'django_extensions'             # DEV ONLY
+    # 'debug_toolbar',                # DEV ONLY
+    # 'django_extensions'             # DEV ONLY
 ]
 
 
 MIDDLEWARE = [
-    #'debug_toolbar.middleware.DebugToolbarMiddleware',          # DEV ONLY
+    # 'debug_toolbar.middleware.DebugToolbarMiddleware',          # DEV ONLY
     'django.middleware.security.SecurityMiddleware',                # security (https improvements)
     'django.contrib.sessions.middleware.SessionMiddleware',         # manage sessions across requests
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -87,8 +87,8 @@ AUTH_BAD_PASSWORD_LOCKOUT_MINS = 15
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        #'DIRS': [ str(APPS_DIR.path('templates')), ],
-        #'APP_DIRS': True,
+        # 'DIRS': [ str(APPS_DIR.path('templates')), ],
+        # 'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
@@ -135,7 +135,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
-#LANGUAGE_CODE = 'en-us'
+# LANGUAGE_CODE = 'en-us'
 LANGUAGE_CODE = 'nl-NL'     # provides wanted date/time output format
 TIME_ZONE = 'Europe/Amsterdam'
 USE_I18N = True
@@ -167,7 +167,7 @@ STATICFILES_FINDER = [
 
 
 # wordt gebruikt door LoginView als er geen 'next' veld bij de POST zit
-#LOGIN_REDIRECT_URL = '/plein/'
+# LOGIN_REDIRECT_URL = '/plein/'
 
 # wordt gebruikt door de permission_required decorator en UserPassesTextMixin
 # om de gebruiker door te sturen als een view geen toegang verleend
@@ -246,7 +246,7 @@ from .settings_local import *
 # definitions taken from saml2.saml to avoid importing saml2
 # because it replaces ElementTree with cElementTree, which gives problems with QR code generation
 NAMEID_FORMAT_UNSPECIFIED = 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified'
-#NAMEID_FORMAT_EMAILADDRESS = 'urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress'
+# NAMEID_FORMAT_EMAILADDRESS = 'urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress'
 BINDING_HTTP_REDIRECT = 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect'
 BINDING_HTTP_POST = 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST'
 
