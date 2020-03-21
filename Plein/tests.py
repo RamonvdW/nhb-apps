@@ -14,7 +14,7 @@ from Functie.models import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
 from NhbStructuur.migrations.m0002_nhbstructuur_2018 import maak_rayons_2018, maak_regios_2018
 from .menu import menu_dynamics
-from .leeftijdsklassen import leeftijdsklassen_zet_sessionvars_na_login
+from Schutter.leeftijdsklassen import leeftijdsklassen_zet_sessionvars_na_login
 from .test_helpers import assert_html_ok, assert_template_used, assert_other_http_commands_not_supported
 from types import SimpleNamespace
 import datetime
