@@ -22,7 +22,7 @@ from .models import AccountCreateError, AccountCreateNhbGeenEmail, \
                     account_zet_sessionvars_na_login, account_zet_sessionvars_na_otp_controle,\
                     account_needs_vhpg, account_vhpg_is_geaccepteerd
 from .qrcode import qrcode_get
-from Plein.leeftijdsklassen import leeftijdsklassen_zet_sessionvars_na_login
+from Schutter.leeftijdsklassen import leeftijdsklassen_zet_sessionvars_na_login     # TODO: make plug-in
 from Functie.rol import rol_zet_sessionvars_na_login, rol_zet_sessionvars_na_otp_controle, rol_is_BB
 from Overig.tijdelijke_url import set_tijdelijke_url_receiver, RECEIVER_ACCOUNTEMAIL
 from Plein.menu import menu_dynamics
