@@ -7,16 +7,20 @@
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from django.test import TestCase
-from Account.models import Account
+from Account.models import Account, account_zet_sessionvars_na_login
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
 from NhbStructuur.migrations.m0002_nhbstructuur_2018 import maak_rayons_2018, maak_regios_2018
-from Schutter.leeftijdsklassen import leeftijdsklassen_zet_sessionvars_na_login, get_sessionvars_leeftijdsklassen
+from Plein.test_helpers import assert_html_ok, assert_template_used, \
+                               assert_other_http_commands_not_supported
+from Functie.rol import Rollen, rol_zet_sessionvars_na_login, rol_get_huidige
+from .leeftijdsklassen import leeftijdsklassen_zet_sessionvars_na_login, \
+                              get_sessionvars_leeftijdsklassen
 from types import SimpleNamespace
 import datetime
 
 
-class TestAccountLeeftijdsklassen(TestCase):
-    """ unit tests voor de Account applicatie, module Leeftijdsklassen """
+class TestSchutterLeeftijdsklassen(TestCase):
+    """ unit tests voor de Schutter applicatie, module Leeftijdsklassen """
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -50,6 +54,8 @@ class TestAccountLeeftijdsklassen(TestCase):
         lid.bij_vereniging = ver
         lid.save()
         self.nhblid1 = lid
+        self.account_normaal.nhblid = lid
+        self.account_normaal.save()
 
         # maak een test lid aan
         lid = NhbLid()
@@ -154,5 +160,25 @@ class TestAccountLeeftijdsklassen(TestCase):
         self.assertFalse(is_jong)        # onder 30 == jong
         self.assertEqual(wlst, ('Senior', 'Senior', 'Senior', 'Senior', 'Senior'))
         self.assertEqual(clst, wlst)
+
+    def test_view(self):
+        # zonder login --> terug naar het plein
+        resp = self.client.get('/schutter/leeftijdsklassen/', follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_template_used(self, resp, ('plein/plein-bezoeker.dtl', 'plein/site_layout.dtl'))
+
+        # met schutter-login wel toegankelijk
+        account = self.account_normaal
+        self.client.login(username=account.username, password='wachtwoord')
+        account_zet_sessionvars_na_login(self.client).save()
+        rol_zet_sessionvars_na_login(account, self.client).save()
+        leeftijdsklassen_zet_sessionvars_na_login(account, self.client).save()
+        self.assertEqual(rol_get_huidige(self.client), Rollen.ROL_SCHUTTER)
+
+        resp = self.client.get('/schutter/leeftijdsklassen/')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_html_ok(self, resp)
+        assert_template_used(self, resp, ('schutter/leeftijdsklassen.dtl', 'plein/site_layout.dtl'))
+        assert_other_http_commands_not_supported(self, '/schutter/leeftijdsklassen/')
 
 # end of file

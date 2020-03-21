@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2020 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -41,43 +41,40 @@ class ProfielView(UserPassesTestMixin, TemplateView):
     @staticmethod
     def _find_scores(account):
         """ Zoek alle scores van deze schutter """
+        boogtype2str = dict()
+        for boog in BoogType.objects.all():
+            boogtype2str[boog.afkorting] = boog.beschrijving
+        # for
+
         objs = list()
-        if account.nhblid:
-            boogtype2str = dict()
-            for boog in BoogType.objects.all():
-                boogtype2str[boog.afkorting] = boog.beschrijving
+        for obj in HistCompetitieIndividueel.objects.filter(schutter_nr=account.nhblid.nhb_nr):
+            wedstrijd = HistCompetitie.comptype2str[obj.histcompetitie.comp_type]
+            datum_str = 'Seizoen ' + obj.histcompetitie.seizoen
+            try:
+                boog_str = boogtype2str[obj.boogtype]
+            except KeyError:
+                boog_str = "?"
+            for score in (obj.score1, obj.score2, obj.score3, obj.score4, obj.score5, obj.score6, obj.score7):
+                if score:
+                    entry = dict()
+                    entry['score'] = score
+                    entry['datum'] = datum_str
+                    entry['wedstrijd'] = wedstrijd
+                    entry['boog'] = boog_str
+                    objs.append(entry)
             # for
+        # for
 
-            for obj in HistCompetitieIndividueel.objects.filter(schutter_nr=account.nhblid.nhb_nr):
-                wedstrijd = HistCompetitie.comptype2str[obj.histcompetitie.comp_type]
-                datum_str = 'Seizoen ' + obj.histcompetitie.seizoen
-                try:
-                    boog_str = boogtype2str[obj.boogtype]
-                except KeyError:
-                    boog_str = "?"
-                for score in (obj.score1, obj.score2, obj.score3, obj.score4, obj.score5, obj.score6, obj.score7):
-                    if score:
-                        entry = dict()
-                        entry['score'] = score
-                        entry['datum'] = datum_str
-                        entry['wedstrijd'] = wedstrijd
-                        entry['boog'] = boog_str
-                        objs.append(entry)
-                # for
-            # for
-
-            # records niet toevoegen, want dan wordt het dubbel getoond
+        # records niet toevoegen, want dan wordt het dubbel getoond
         return objs
 
     @staticmethod
     def _find_records(account):
         objs = list()
-        if account.nhblid:
-            for rec in IndivRecord.objects.filter(nhb_lid=account.nhblid).order_by('-datum'):
-                rec.url = reverse('Records:specifiek', kwargs={'discipline': rec.discipline, 'nummer': rec.volg_nr})
-                objs.append(rec)
-            # for
-
+        for rec in IndivRecord.objects.filter(nhb_lid=account.nhblid).order_by('-datum'):
+            rec.url = reverse('Records:specifiek', kwargs={'discipline': rec.discipline, 'nummer': rec.volg_nr})
+            objs.append(rec)
+        # for
         return objs
 
     def get_context_data(self, **kwargs):
