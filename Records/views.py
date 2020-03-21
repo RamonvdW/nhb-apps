@@ -29,22 +29,6 @@ DISCIPLINE_TO_ICON = {
 }
 
 
-def make_score_str(obj):
-    """  make score beschrijving, inclusief X-count indien relevant """
-    msg = str(obj.score)
-    if obj.x_count:
-        msg += " (%sX)" % obj.x_count
-    return msg
-
-def make_max_score_str(obj):
-    msg = "%s" % obj.max_score
-    if obj.x_count:
-        # add maximum X-count to maximum score
-        max_x_count = int(obj.max_score / 10)
-        msg += " (%sX)" % max_x_count
-    return msg
-
-
 class RecordsOverzichtView(ListView):
     """ Dit is de top-level pagina van de records met een overzicht van de meest
         recente records
@@ -72,13 +56,11 @@ class RecordsOverzichtView(ListView):
         # junioren, etc.
         obj.descr2_str += IndivRecord.lcat2str[obj.leeftijdscategorie]
 
-        obj.score_str = make_score_str(obj)
-        obj.max_score_str = make_max_score_str(obj)
-
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
-        # 10 nieuwste records (alle disciplines), op datum
-        objs = IndivRecord.objects.all().order_by('-datum')[:10]
+        # 10 nieuwste records (alle disciplines)
+        # op datum (nieuwste boven) en volg_nr (hoogste boven)
+        objs = IndivRecord.objects.all().order_by('-datum', '-volg_nr')[:10]
         for obj in objs:
             self.set_url_specifiek(obj)
         # for
@@ -292,8 +274,6 @@ class RecordsIndivSpecifiekView(ListView):
     @staticmethod
     def set_url_specifiek(obj):
         obj.url = reverse('Records:specifiek', kwargs={'nummer': obj.volg_nr, 'discipline': obj.discipline})
-        obj.score_str = make_score_str(obj)
-        obj.max_score_str = make_max_score_str(obj)
 
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
@@ -313,9 +293,6 @@ class RecordsIndivSpecifiekView(ListView):
         spec.disc_str = IndivRecord.disc2str[spec.discipline]
         spec.lcat_str = IndivRecord.lcat2str[spec.leeftijdscategorie]
         spec.makl_str = IndivRecord.makl2str[spec.materiaalklasse]
-
-        spec.score_str = make_score_str(spec)
-        spec.max_score_str = make_max_score_str(spec)
 
         spec.op_pagina = "specifiek record: %s-%s" % (discipline, volg_nr)
 
