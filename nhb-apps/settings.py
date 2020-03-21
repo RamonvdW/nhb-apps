@@ -41,7 +41,10 @@ INSTALLED_APPS = [
     'Overig.apps.OverigConfig',
     'Logboek.apps.LogboekConfig',
     'Mailer.apps.MailerConfig',
-    'djangosaml2idp',               # single sign-on Identity Provider (IP) using SAML2 (Security Assertion Markup Language)
+    'Schutter.apps.SchutterConfig',
+    'Score.apps.ScoreConfig',
+    'djangosaml2idp',               # single sign-on Identity Provider (IP)
+                                    #   using SAML2 (Security Assertion Markup Language)
     'django.contrib.staticfiles',   # gather static files from modules helper
     'django.contrib.sessions',      # support for database-backed sessions; needed for logged-in user
     'django.contrib.admin',         # see-all/fix-all admin pages

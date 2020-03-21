@@ -1,0 +1,91 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2019-2020 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Voorkeuren{% endblock %}
+
+{% block pagina %}
+
+<h4>Voorkeuren</h4>
+
+<p>Als schutter kan je op deze pagina je voorkeuren aanpassen.</p>
+
+
+<h5>Bogen</h5>
+
+<p>Door aan te geven welke bogen jouw voorkeur hebben kunnen we beschikbare informatie aanpassen aan jouw wensen en hoef je minder handelingen te verrichten.</p>
+
+<p>Voorbeelden:</p>
+<ul class="browser-default">
+    <li>We laten alleen wedstrijden zien waar je met de door jou gekozen bogen in uit mag komen.</li>
+    <li>We kunnen je meteen in de juiste wedstrijdklasse plaatsen.</li>
+</ul>
+
+<p>Je kan apart aangeven met welke bogen je zelf schiet en voor welke bogen je informatie over wil zien.</p>
+
+<form class="white" method="post" action="{{ opslaan_url }}">
+    {% csrf_token %}
+
+    <table class="white">
+
+        <thead>
+            <th>Hier schiet ik mee</th>
+            <th>Toon alleen informatie</th>
+        </thead>
+
+        {% for obj in bogen %}
+            <tr>
+                <td>
+                    <label>
+                        <input type="checkbox" class="filled-in" name="{{ obj.check_schiet }}" {% if obj.voor_wedstrijd %}checked{% endif %}>
+                        <span class="black-text">{{ obj.boogtype.beschrijving }}</span>
+                    </label>
+                </td>
+                <td>
+                    <label>
+                        <input type="checkbox" class="filled-in" name="{{ obj.check_info }}" {% if obj.heeft_interesse %}checked{% endif %}>
+                        <span class="black-text">{{ obj.boogtype.beschrijving }}</span>
+                    </label>
+                </td>
+            </tr>
+        {% endfor %}
+
+        <tr>
+            <td colspan="2"><b>Andere instellingen</b></td>
+        </tr>
+
+        <tr>
+            <td colspan="2">
+                <label>
+                    <input type="checkbox" class="filled-in" name="voorkeur_DT_18m" {% if obj.voorkeur_dutchtarget_18m %}checked{% endif %}>
+                    <span class="black-text">Voorkeur voor Dutch Target</span>
+                </label>
+            </td>
+        </tr>
+
+        <tr>
+            <td colspan="2" class="center-align">
+                <input class="btn-nhb-blauw" type="submit" value="Wijzigingen opslaan">
+            </td>
+        </tr>
+
+    </table>
+
+</form>
+
+<div class="container" style="margin-top:30px">
+
+    <div class="white-text blue z-depth-2" style="padding:20px">
+        <h6 class="center-align">Uitleg 'Voorkeur voor Dutch Target'</h6>
+        <p>De voorkeur voor Dutch Target / 3-spot is alleen van toepassing op Indoor wedstrijden op 18 meter waar normaal op 40cm blazoen geschoten wordt, zoals de Individuele Competitie.</p>
+        <p>Als je het vakje aankruist zal, waar mogelijk, jouw voorkeur worden doorgegeven aan de wedstrijdleider.</p>
+        <p>Noteer dat dit een voorkeur is, maar geen recht. Als er bijvoorbeeld geen ruimte is op het doel, dan moet je toch op een 40cm blazoen schieten.</p>
+    </div>
+
+</div>
+
+{% endblock %}

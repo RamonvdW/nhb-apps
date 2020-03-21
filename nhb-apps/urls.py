@@ -27,6 +27,7 @@ urlpatterns = [
     path('plein/',      include('Plein.urls')),
     path('logboek/',    include('Logboek.urls')),
     path('records/',    include('Records.urls')),
+    path('schutter/',   include('Schutter.urls')),
     path('idp/',        include('djangosaml2idp.urls')),        # single sign-on
 ]
 

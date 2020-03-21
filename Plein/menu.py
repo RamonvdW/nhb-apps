@@ -17,7 +17,8 @@ ACTIEF_OPTIES = (
     'site-feedback-inzicht',
     'wissel-van-rol',
     'competitie',
-    'histcomp'
+    'histcomp',
+    'schutter'
 )
 
 
@@ -62,6 +63,10 @@ def menu_dynamics(request, context, actief=None):
         if rol in (Rollen.ROL_IT, Rollen.ROL_BB):
             context['menu_show_logboek'] = True
             context['menu_show_sitefeedback'] = True
+
+        if rol == Rollen.ROL_SCHUTTER:
+            context['menu_show_schutter'] = True
+
     else:
         # inloggen
         context['menu_show_login'] = True

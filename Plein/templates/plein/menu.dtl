@@ -65,6 +65,13 @@
     <i class="material-icons-round white-text">security</i>Privacyverklaring</a>
 </li>
 
+{% if menu_show_schutter %}
+<li{% if menu_actief == "schutter" %} class="actief"{% endif %}>
+    <a href="{% url 'Schutter:voorkeuren' %}" class="white-text">
+    <i class="material-icons-round white-text"><!--settings-->tune</i>Voorkeuren</a>
+</li>
+{% endif %}
+
 {% if menu_show_sitefeedback %}
 <li{% if menu_actief == "site-feedback-inzicht" %} class="actief"{% endif %}>
     <a href="{% url 'Overig:feedback-inzicht' %}" class="white-text">
@@ -86,7 +93,6 @@
 </li>
 {% endif %}
 
-<!-- uitlog knop als gebruiker ingelogd is -->
 {% if menu_show_logout %}
 <li{% if menu_actief == "uitloggen" %} class="actief"{% endif %}>
     <a href="{% url 'Account:logout' %}" class="white-text">
