@@ -578,18 +578,22 @@ class Command(BaseCommand):
                 self._count_wijzigingen += 1
                 if not self.dryrun:
                     obj.save()
-            else:
-                # TODO: afhandelen van het verwijderen van een lid dat in een team zit in een competitie
-                self.stdout.write('[INFO] Lid %s wordt nu verwijderd' % str(obj))
-                if not self.dryrun:
-                    # kan alleen als er geen leden maar aan hangen --> de modellen beschermen dit automatisch
-                    # vang de gerelateerde exceptie af
-                    try:
-                        obj.delete()
-                        self._count_verwijderingen += 1
-                    except ProtectedError as exc:
-                        self._count_errors += 1
-                        self.stderr.write('[ERROR] Onverwachte fout bij het verwijderen van een lid: %s' % str(exc))
+                # TODO: afhandelen van het inactiveren/verwijderen van een lid dat in een team zit in een competitie
+
+            # echt verwijderen van een lid wordt op dit moment als een te groot risico gezien
+            # aangezien het verwijderen van gerelateerde records tot onrepareerbare schade kan lijden.
+            # TODO: minimaliseer de achtergebleven persoonsgegevens
+            # else:
+            #     self.stdout.write('[INFO] Lid %s wordt nu verwijderd' % str(obj))
+            #     if not self.dryrun:
+            #         # kan alleen als er geen leden maar aan hangen --> de modellen beschermen dit automatisch
+            #         # vang de gerelateerde exceptie af
+            #         try:
+            #             obj.delete()
+            #             self._count_verwijderingen += 1
+            #         except ProtectedError as exc:
+            #             self._count_errors += 1
+            #             self.stderr.write('[ERROR] Onverwachte fout bij het verwijderen van een lid: %s' % str(exc))
         # while
 
     def handle(self, *args, **options):

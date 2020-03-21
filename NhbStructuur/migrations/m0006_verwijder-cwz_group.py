@@ -12,7 +12,6 @@ class Migration(migrations.Migration):
     """ Migratie class voor dit deel van de applicatie """
 
     # volgorde afdwingen
-
     dependencies = [
         ('NhbStructuur', 'm0005_vereniging_cwz_group'),
     ]

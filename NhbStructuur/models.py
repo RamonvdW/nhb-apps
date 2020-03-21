@@ -55,7 +55,7 @@ class NhbVereniging(models.Model):
     nhb_nr = models.PositiveIntegerField(primary_key=True)
     naam = models.CharField(max_length=200)
     regio = models.ForeignKey(NhbRegio, on_delete=models.PROTECT)
-    secretaris_lid = models.ForeignKey('NhbLid', on_delete=models.PROTECT,
+    secretaris_lid = models.ForeignKey('NhbLid', on_delete=models.SET_NULL,
                                        blank=True,  # allow access input in form
                                        null=True)   # allow NULL relation in database
 

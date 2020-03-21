@@ -362,10 +362,11 @@ class TestNhbStructuur(TestCase):
         f1 = io.StringIO()
         f2 = io.StringIO()
         management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_16.json', stderr=f1, stdout=f2)
-        #print("f1: %s" % f1.getvalue())
-        #print("f2: %s" % f2.getvalue())
-        self.assertTrue("[INFO] Lid 100024 Voornaam van der Achternaam [V, 2000] wordt nu verwijderd" in f2.getvalue())
-        self.assertTrue("[ERROR] Onverwachte fout bij het verwijderen van een lid: " in f1.getvalue())
+
+        # verwijderen van leden staat op dit moment uit - zie import commando
+        #self.assertTrue("[INFO] Lid 100024 Voornaam van der Achternaam [V, 2000] wordt nu verwijderd" in f2.getvalue())
+        #self.assertTrue("[ERROR] Onverwachte fout bij het verwijderen van een lid: " in f1.getvalue())
+        self.assertFalse("[INFO] Lid 100024 Voornaam van der Achternaam [V, 2000] wordt nu verwijderd" in f2.getvalue())
 
     def test_import_nhb_crm_dryrun(self):
         # dryrun
