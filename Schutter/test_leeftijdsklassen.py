@@ -10,7 +10,7 @@ from django.test import TestCase
 from Account.models import Account
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
 from NhbStructuur.migrations.m0002_nhbstructuur_2018 import maak_rayons_2018, maak_regios_2018
-from .leeftijdsklassen import leeftijdsklassen_zet_sessionvars_na_login, get_leeftijdsklassen
+from Schutter.leeftijdsklassen import leeftijdsklassen_zet_sessionvars_na_login, get_sessionvars_leeftijdsklassen
 from types import SimpleNamespace
 import datetime
 
@@ -75,7 +75,7 @@ class TestAccountLeeftijdsklassen(TestCase):
         request.session = dict()
 
         # session vars niet gezet
-        huidige_jaar, leeftijd, is_jong, wlst, clst = get_leeftijdsklassen(request)
+        huidige_jaar, leeftijd, is_jong, wlst, clst = get_sessionvars_leeftijdsklassen(request)
         self.assertIsNone(huidige_jaar)
         self.assertIsNone(leeftijd)
         self.assertFalse(is_jong)
@@ -85,7 +85,7 @@ class TestAccountLeeftijdsklassen(TestCase):
         # geen nhblid
         account.nhblid = None
         leeftijdsklassen_zet_sessionvars_na_login(account, request)
-        huidige_jaar, leeftijd, is_jong, wlst, clst = get_leeftijdsklassen(request)
+        huidige_jaar, leeftijd, is_jong, wlst, clst = get_sessionvars_leeftijdsklassen(request)
         self.assertIsNone(huidige_jaar)
         self.assertIsNone(leeftijd)
         self.assertFalse(is_jong)
@@ -101,7 +101,7 @@ class TestAccountLeeftijdsklassen(TestCase):
         nhb_leeftijd = 11
         nhblid.geboorte_datum.year = now_jaar - nhb_leeftijd
         leeftijdsklassen_zet_sessionvars_na_login(account, request)
-        huidige_jaar, leeftijd, is_jong, wlst, clst = get_leeftijdsklassen(request)
+        huidige_jaar, leeftijd, is_jong, wlst, clst = get_sessionvars_leeftijdsklassen(request)
         self.assertEquals(huidige_jaar, now_jaar)
         self.assertEqual(leeftijd, nhb_leeftijd)
         self.assertTrue(is_jong)        # onder 30 == jong
@@ -113,7 +113,7 @@ class TestAccountLeeftijdsklassen(TestCase):
         nhb_leeftijd = 14
         nhblid.geboorte_datum.year = now_jaar - nhb_leeftijd
         leeftijdsklassen_zet_sessionvars_na_login(account, request)
-        huidige_jaar, leeftijd, is_jong, wlst, clst = get_leeftijdsklassen(request)
+        huidige_jaar, leeftijd, is_jong, wlst, clst = get_sessionvars_leeftijdsklassen(request)
         self.assertEquals(huidige_jaar, now_jaar)
         self.assertEqual(leeftijd, nhb_leeftijd)
         self.assertTrue(is_jong)        # onder 30 == jong
@@ -125,7 +125,7 @@ class TestAccountLeeftijdsklassen(TestCase):
         nhb_leeftijd = 18
         nhblid.geboorte_datum.year = now_jaar - nhb_leeftijd
         leeftijdsklassen_zet_sessionvars_na_login(account, request)
-        huidige_jaar, leeftijd, is_jong, wlst, clst = get_leeftijdsklassen(request)
+        huidige_jaar, leeftijd, is_jong, wlst, clst = get_sessionvars_leeftijdsklassen(request)
         self.assertEquals(huidige_jaar, now_jaar)
         self.assertEqual(leeftijd, nhb_leeftijd)
         self.assertTrue(is_jong)        # onder 30 == jong
@@ -137,7 +137,7 @@ class TestAccountLeeftijdsklassen(TestCase):
         nhb_leeftijd = 30
         nhblid.geboorte_datum.year = now_jaar - nhb_leeftijd
         leeftijdsklassen_zet_sessionvars_na_login(account, request)
-        huidige_jaar, leeftijd, is_jong, wlst, clst = get_leeftijdsklassen(request)
+        huidige_jaar, leeftijd, is_jong, wlst, clst = get_sessionvars_leeftijdsklassen(request)
         self.assertEquals(huidige_jaar, now_jaar)
         self.assertEqual(leeftijd, nhb_leeftijd)
         self.assertFalse(is_jong)        # onder 30 == jong
@@ -148,7 +148,7 @@ class TestAccountLeeftijdsklassen(TestCase):
         nhb_leeftijd = 50
         nhblid.geboorte_datum.year = now_jaar - nhb_leeftijd
         leeftijdsklassen_zet_sessionvars_na_login(account, request)
-        huidige_jaar, leeftijd, is_jong, wlst, clst = get_leeftijdsklassen(request)
+        huidige_jaar, leeftijd, is_jong, wlst, clst = get_sessionvars_leeftijdsklassen(request)
         self.assertEquals(huidige_jaar, now_jaar)
         self.assertEqual(leeftijd, nhb_leeftijd)
         self.assertFalse(is_jong)        # onder 30 == jong

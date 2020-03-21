@@ -58,7 +58,7 @@ def leeftijdsklassen_zet_sessionvars_na_login(account, request):
     return sessionvars  # allows unittest to do sessionvars.save()
 
 
-def get_leeftijdsklassen(request):
+def get_sessionvars_leeftijdsklassen(request):
     """ retourneert de eerder bepaalde informatie over de wedstrijdklasse
         voor jonge schutters (onder de 30 jaar).
         Retourneert:
