@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019-2020 Ramon van der Winkel.
+                Copyright (c) 2020 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -9,6 +9,7 @@
 {% block title %}Voorkeuren{% endblock %}
 
 {% block pagina %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="schutter-voorkeuren" %}
 
 <h4>Voorkeuren</h4>
 
@@ -34,7 +35,7 @@
 
         <thead>
             <th>Hier schiet ik mee</th>
-            <th>Toon alleen informatie</th>
+            <th>Alleen informatie</th>
         </thead>
 
         {% for obj in bogen %}
@@ -61,7 +62,7 @@
         <tr>
             <td colspan="2">
                 <label>
-                    <input type="checkbox" class="filled-in" name="voorkeur_DT_18m" {% if obj.voorkeur_dutchtarget_18m %}checked{% endif %}>
+                    <input type="checkbox" class="filled-in" name="voorkeur_DT_18m" {% if voorkeur_dt %}checked{% endif %}>
                     <span class="black-text">Voorkeur voor Dutch Target</span>
                 </label>
             </td>
