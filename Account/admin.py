@@ -36,6 +36,8 @@ class AccountAdmin(UserAdmin):
 
     list_filter = ('is_staff', 'is_BB', 'otp_is_actief')
 
+    search_fields = ('username', 'nhblid__voornaam', 'nhblid__achternaam')
+
 
 admin.site.register(Account, AccountAdmin)
 admin.site.register(AccountEmail)
