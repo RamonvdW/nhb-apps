@@ -6,21 +6,17 @@
 
 from django.conf import settings
 from django.urls import reverse
-from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.views.generic import TemplateView, View
-from django.contrib.auth.mixins import UserPassesTestMixin
 from Functie.rol import Rollen, rol_get_huidige, rol_get_beschrijving
 from .menu import menu_dynamics
-from .leeftijdsklassen import get_leeftijdsklassen
+from Schutter.leeftijdsklassen import get_sessionvars_leeftijdsklassen
 
 
 TEMPLATE_PLEIN_BEZOEKER = 'plein/plein-bezoeker.dtl'            # niet ingelogd
 TEMPLATE_PLEIN_GEBRUIKER = 'plein/plein-gebruiker.dtl'          # special (ROL_NONE)
 TEMPLATE_PLEIN_SCHUTTER = 'plein/plein-schutter.dtl'            # schutter (ROL_SCHUTTER)
 TEMPLATE_PLEIN_BEHEERDER = 'plein/plein-beheerder.dtl'          # beheerder (ROL_BB/BKO/RKO/RCL/CWZ)
-
-TEMPLATE_LEEFTIJDSKLASSEN = 'plein/leeftijdsklassen.dtl'
 TEMPLATE_PRIVACY = 'plein/privacy.dtl'
 
 
@@ -42,26 +38,17 @@ class PleinView(View):
         context = dict()
 
         if request.user.is_authenticated:
+            account = self.request.user
             rol_nu = rol_get_huidige(request)
 
-            if rol_nu == Rollen.ROL_NONE or rol_nu == None:
+            if rol_nu == Rollen.ROL_NONE or rol_nu is None:
                 template = TEMPLATE_PLEIN_GEBRUIKER
 
             elif rol_nu == Rollen.ROL_SCHUTTER:
                 template = TEMPLATE_PLEIN_SCHUTTER
-                huidige_jaar, leeftijd, is_jong, wlst, clst = get_leeftijdsklassen(request)
-                if True: #is_jong:
-                    context['plein_toon_leeftijdsklassen'] = True
-                    context['plein_is_jonge_schutter'] = is_jong
-                    context['plein_huidige_jaar'] = huidige_jaar
-                    context['plein_leeftijd'] = leeftijd
-                    context['plein_wlst'] = wlst
-                    context['plein_clst'] = clst
-                else:
-                    # ouder lid
-                    context['plein_toon_leeftijdsklassen'] = False
 
-            else:   # rol_nu < Rollen.ROL_SCHUTTER:
+            else:
+                # rol_nu < Rollen.ROL_SCHUTTER:
                 # beheerder
                 template = TEMPLATE_PLEIN_BEHEERDER
 
@@ -98,36 +85,6 @@ class PrivacyView(TemplateView):
         context = super().get_context_data(**kwargs)
         context['url_privacyverklaring'] = settings.PRIVACYVERKLARING_URL
         menu_dynamics(self.request, context, actief='privacy')
-        return context
-
-
-class LeeftijdsklassenView(UserPassesTestMixin, TemplateView):
-    """ Django class-based view voor de leeftijdsklassen """
-
-    # class variables shared by all instances
-    template_name = TEMPLATE_LEEFTIJDSKLASSEN
-
-    def test_func(self):
-        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        rol = rol_get_huidige(self.request)
-        return rol == Rollen.ROL_SCHUTTER
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
-
-    def get_context_data(self, **kwargs):
-        """ called by the template system to get the context data for the template """
-        context = super().get_context_data(**kwargs)
-
-        huidige_jaar, leeftijd, is_jong, wlst, clst = get_leeftijdsklassen(self.request)
-        context['plein_is_jonge_schutter'] = is_jong
-        context['plein_huidige_jaar'] = huidige_jaar
-        context['plein_leeftijd'] = leeftijd
-        context['plein_wlst'] = wlst
-        context['plein_clst'] = clst
-
-        menu_dynamics(self.request, context)
         return context
 
 
