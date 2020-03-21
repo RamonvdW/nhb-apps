@@ -9,7 +9,7 @@
 {% block title %}Account activiteit{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="leeftijdsklassen" %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="account-activiteit" %}
 
 <h4>Account activiteit</h4>
 

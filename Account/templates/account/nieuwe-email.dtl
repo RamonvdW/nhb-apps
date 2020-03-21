@@ -9,7 +9,7 @@
 {% block title %}E-mail bevestigen{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="account-aangemaakt" %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="account-nieuwe-email" %}
 
 <h4>E-mail bevestigen</h4>
 
