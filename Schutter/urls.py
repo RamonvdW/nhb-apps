@@ -10,9 +10,17 @@ from . import views
 app_name = 'Schutter'
 
 urlpatterns = [
+    path('',
+         views.ProfielView.as_view(),
+         name='profiel'),
+
     path('voorkeuren/',
          views.VoorkeurenView.as_view(),
          name='voorkeuren'),
+
+    path('leeftijdsklassen/',
+         views.LeeftijdsklassenView.as_view(),
+         name='leeftijdsklassen'),
 ]
 
 # end of file
