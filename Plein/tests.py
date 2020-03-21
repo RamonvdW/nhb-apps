@@ -34,17 +34,24 @@ class TestPlein(TestCase):
         self.account_admin.save()
         self.account_normaal = Account.objects.get(username='normaal')
         self.account_100001 = Account.objects.get(username='100001')
-        self.functie_bko = maak_functie('BKO Test', 'BKO')
 
         # maak de standard rayon/regio structuur aan
         maak_rayons_2018(NhbRayon)
         maak_regios_2018(NhbRayon, NhbRegio)
 
+        self.functie_bko = maak_functie('BKO Test', 'BKO')
+        self.functie_rko = maak_functie('RKO Test', 'RKO')
+        self.functie_rko.nhb_rayon = NhbRayon.objects.get(rayon_nr=3)
+        self.functie_rko.save()
+        self.functie_rcl = maak_functie('RCL Test', 'RCL')
+        self.functie_rcl.nhb_regio = NhbRegio.objects.get(regio_nr=111)
+        self.functie_rcl.save()
+
         # maak een test vereniging
         ver = NhbVereniging()
         ver.naam = "Grote Club"
         ver.nhb_nr = "1000"
-        ver.regio = NhbRegio.objects.get(pk=111)
+        ver.regio = NhbRegio.objects.get(regio_nr=111)
         # secretaris kan nog niet ingevuld worden
         ver.save()
 
@@ -67,7 +74,7 @@ class TestPlein(TestCase):
         self.assertEqual(resp.status_code, 302)     # 302 = redirect
         self.assertEqual(resp.url, '/plein/')
 
-    def test_plein_annon(self):
+    def test_plein_anon(self):
         self.client.logout()
         resp = self.client.get('/plein/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -139,6 +146,18 @@ class TestPlein(TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, 'Rol: BKO')
 
+        # rko
+        rol_activeer_functie(self.client, self.functie_rko.pk).save()
+        resp = self.client.get('/plein/')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assertContains(resp, 'Rol: RKO')
+
+        # rcl
+        rol_activeer_functie(self.client, self.functie_rcl.pk).save()
+        resp = self.client.get('/plein/')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assertContains(resp, 'Rol: RCL')
+
         # geen
         rol_activeer_rol(self.client, "geen").save()
         resp = self.client.get('/plein/')
@@ -162,19 +181,5 @@ class TestPlein(TestCase):
         request.user.is_authenticated = False
         with self.assertRaises(AssertionError):
             menu_dynamics(request, context, actief='test-bestaat-niet')
-
-    def test_leeftijdsklassen_anon(self):
-        self.client.logout()
-        resp = self.client.get('/plein/leeftijdsklassen/')
-        self.assertEqual(resp.status_code, 302)     # 302 = Redirect (to login)
-
-    def test_leeftijdsklassen_nhblid(self):
-        self.client.login(username=self.account_100001.username, password='wachtwoord')
-        rol_zet_sessionvars_na_login(self.account_100001, self.client).save()
-        leeftijdsklassen_zet_sessionvars_na_login(self.account_100001, self.client).save()
-        resp = self.client.get('/plein/leeftijdsklassen/')
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        assert_html_ok(self, resp)
-        assert_template_used(self, resp, ('plein/leeftijdsklassen.dtl', 'plein/site_layout.dtl'))
 
 # end of file
