@@ -29,11 +29,6 @@
                     {% else %}
                     <li class="collection-item">
                     {% endif %}
-                        {% if obj.is_specifieke_record %}
-                        <i class="material-icons-round secondary-content white-text">visibility</i>
-                        {% else %}
-                        <i class="material-icons-round secondary-content">visibility</i>
-                        {% endif %}
                         <span>{{ obj.score_str }} door <b>{{ obj.naam }}</b></span>
                         {% if obj.datum.year >= 1950 %}
                             <span> op {{ obj.datum }}</span>
@@ -145,11 +140,6 @@
                     {% endif %}
                 </div>
             </div>
-            <!--
-            <div class="row small-row">
-                <tr><td>NHB lid:</td><td>{{ obj_record.nhb_lid.nhb_nr }}</td></tr>
-            </div>
-            -->
         </div>
     </div>
 </div>
@@ -166,11 +156,6 @@
                     {% else %}
                     <li class="collection-item">
                     {% endif %}
-                        {% if obj.is_specifieke_record %}
-                        <i class="material-icons-round secondary-content white-text">visibility</i>
-                        {% else %}
-                        <i class="material-icons-round secondary-content">visibility</i>
-                        {% endif %}
                         <span>{{ obj.score_str }} door <b>{{ obj.naam }}</b></span>
                         {% if obj.datum.year >= 1950 %}
                             <span> op {{ obj.datum }}</span>
