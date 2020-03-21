@@ -37,7 +37,7 @@
 </div></div>
 
 
-{% if object_list.count %}
+{% if object_list %}
 
     <p>Kies nu het soort record (dit is typisch de afstand en aantal pijlen):</p>
 
