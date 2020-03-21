@@ -56,7 +56,7 @@ def assert_other_http_commands_not_supported(testcase, url, post=True, delete=Tr
     """
     if post:
         resp = testcase.client.post(url)
-        testcase.assertEqual(resp.status_code, 405)  # 405=not allowd
+        testcase.assertEqual(resp.status_code, 405)  # 405=not allowed
 
     if delete:                                  # pragma: no branch
         resp = testcase.client.delete(url)
