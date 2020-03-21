@@ -4141,10 +4141,10 @@ textarea {
   width: 20px;
   background-color: transparent;
   border: 2px solid #5a5a5a;
-  top: 0px;
+  top: 2px;
   z-index: 0; }
 [type="checkbox"].filled-in:checked + span:not(.lever):before {
-  top: 0;
+  top: 2px;
   left: 1px;
   width: 8px;
   height: 13px;
@@ -4155,7 +4155,7 @@ textarea {
   transform: rotateZ(37deg);
   transform-origin: 100% 100%; }
 [type="checkbox"].filled-in:checked + span:not(.lever):after {
-  top: 0;
+  top: 2px;
   width: 20px;
   height: 20px;
   border: 2px solid #0aa0e1;
