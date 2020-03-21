@@ -36,10 +36,22 @@
     </div>
 </div></div>
 
-<p>Kies nu het soort record (dit is typisch de afstand en aantal pijlen):</p>
 
-{% for obj in object_list %}
-<p><a class="btn white blue-text" href="{{ obj.url }}">{{ obj.soort_record }}</a></p>
-{% endfor %}
+{% if object_list.count %}
+
+    <p>Kies nu het soort record (dit is typisch de afstand en aantal pijlen):</p>
+
+    {% for obj in object_list %}
+    <p><a class="btn white blue-text" href="{{ obj.url }}">{{ obj.soort_record }}</a></p>
+    {% endfor %}
+
+{% else %}
+
+    <p class="red-text">Er zijn geen records gevonden in deze category.</p>
+
+    <a class="btn-nhb-blauw" href="{% url 'Records:overzicht' %}">Terug</a>
+
+{% endif %}
+
 
 {% endblock %}
