@@ -45,6 +45,14 @@
 </li>
 {% endif %}
 
+{% if menu_show_schutter %}
+<li{% if menu_actief == "schutter" %} class="actief"{% endif %}>
+    <a href="{% url 'Schutter:profiel' %}" class="white-text">
+    <i class="material-icons-round white-text">home</i>Schutter</a>
+</li>
+{% endif %}
+
+
 <li{% if menu_actief == "competitie" %} class="actief"{% endif %}>
     <a href="{% url 'Competitie:overzicht' %}" class="white-text">
     <i class="material-icons-round white-text"><!--developer_board--><!--gamepad--><!--assistant-->my_location</i>Competities</a>
@@ -64,13 +72,6 @@
     <a href="{% url 'Plein:privacy' %}" class="white-text">
     <i class="material-icons-round white-text">security</i>Privacyverklaring</a>
 </li>
-
-{% if menu_show_schutter %}
-<li{% if menu_actief == "schutter" %} class="actief"{% endif %}>
-    <a href="{% url 'Schutter:voorkeuren' %}" class="white-text">
-    <i class="material-icons-round white-text"><!--settings-->tune</i>Voorkeuren</a>
-</li>
-{% endif %}
 
 {% if menu_show_sitefeedback %}
 <li{% if menu_actief == "site-feedback-inzicht" %} class="actief"{% endif %}>
