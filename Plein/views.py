@@ -5,12 +5,10 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
-from django.urls import reverse
 from django.shortcuts import redirect, render
 from django.views.generic import TemplateView, View
 from Functie.rol import Rollen, rol_get_huidige, rol_get_beschrijving
 from .menu import menu_dynamics
-from Schutter.leeftijdsklassen import get_sessionvars_leeftijdsklassen
 
 
 TEMPLATE_PLEIN_BEZOEKER = 'plein/plein-bezoeker.dtl'            # niet ingelogd
@@ -55,17 +53,19 @@ class PleinView(View):
                 if rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB):
                     context['toon_nieuwe_accounts'] = True
 
-                if rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_CWZ):
+                if rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL):
                     context['toon_functies'] = True
 
                 if rol_nu == Rollen.ROL_BB:
-                    context['rol_is_bb'] = True;
+                    context['rol_is_bb'] = True
                 elif rol_nu == Rollen.ROL_BKO:
-                    context['rol_is_bko'] = True;
+                    context['rol_is_bko'] = True
                 elif rol_nu == Rollen.ROL_RKO:
-                    context['rol_is_rko'] = True;
+                    context['rol_is_rko'] = True
                 elif rol_nu == Rollen.ROL_RCL:
-                    context['rol_is_rcl'] = True;
+                    context['rol_is_rcl'] = True
+                elif rol_nu == Rollen.ROL_CWZ:
+                    context['rol_is_cwz'] = True
 
                 context['huidige_rol'] = rol_get_beschrijving(request)
 
