@@ -20,12 +20,14 @@
 <table class="white">
     <thead>
         {% if toon_rayon %}
-            <th>Rayon</th>
+            <th class="center-align">Rayon</th>
         {% endif %}
 
         {% if toon_regio %}
-            <th>Regio</th>
+            <th class="center-align">Regio</th>
         {% endif %}
+
+        <th>Plaats</th>
 
         <th>Vereniging</th>
 
@@ -37,12 +39,14 @@
     {% for obj in object_list %}
         <tr>
             {% if toon_rayon %}
-                <td>{{ obj.regio.rayon.rayon_nr }}</td>
+                <td class="center-align">{{ obj.regio.rayon.rayon_nr }}</td>
             {% endif %}
 
             {% if toon_regio %}
-                <td>{{ obj.regio.regio_nr }}</td>
+                <td class="center-align">{{ obj.regio.regio_nr }}</td>
             {% endif %}
+
+            <td>{{ obj.plaats }}</td>
 
             <td>[{{ obj.nhb_nr }}] {{ obj.naam }}</td>
 
