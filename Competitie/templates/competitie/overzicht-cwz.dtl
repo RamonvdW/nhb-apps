@@ -13,7 +13,25 @@
 
 <h4>Competitie overzicht voor de CWZ</h4>
 
-<p>Nog even geduld, dit stukje van de site is nog niet af.</p>
+<div class="row">
+
+    <div class="col s12 m6 xl4">
+        <div class="card">
+            <div class="card-content">
+                <table class="simple"><tr style="border:0px">
+                    <td><i class="material-icons-round large">face</i></td>
+                    <td>Toon de beheerders van de competities.</td>
+                </tr></table>
+            </div>
+            <a href="{% url 'Functie:overzicht' %}" class="nhb-klikbare-balk">
+                <div class="card-action center-align">
+                    <span class="nhb-klikbare-link">Beheerders</span>
+                </div>
+            </a>
+        </div>
+    </div>
+
+</div>
 
 {% endblock %}
 
