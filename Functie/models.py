@@ -60,7 +60,7 @@ class Functie(models.Model):
     nhb_regio = models.ForeignKey(NhbRegio, on_delete=models.PROTECT, null=True, blank=True)
 
     # CWZ/WL only: vereniging
-    nhb_ver = models.ForeignKey(NhbVereniging, on_delete=models.PROTECT, null=True, blank=True)
+    nhb_ver = models.ForeignKey(NhbVereniging, on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         """ Geef een string terug voor gebruik in de admin interface """
