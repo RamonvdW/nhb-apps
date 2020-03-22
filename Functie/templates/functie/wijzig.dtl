@@ -27,16 +27,16 @@ function do_wijzig(actie, id) {
     inp.type = "hidden";
     inp.name = actie;
     inp.value = id.getAttribute("data-pk");
-    form.appendChild(inp)
+    form.appendChild(inp);
 
     var inp = document.createElement('input');
     inp.type = "hidden";
     inp.name = "csrfmiddlewaretoken";
     inp.value = getCookie('csrftoken');
-    form.appendChild(inp)
+    form.appendChild(inp);
 
     form.style.display = 'hidden';
-    document.body.appendChild(form)
+    document.body.appendChild(form);
     form.submit();
 }
 </script>
@@ -48,7 +48,7 @@ function do_wijzig(actie, id) {
             <li>
                 <div class="collapsible-header white"><span>{{ obj.volledige_naam }} (regio {{ obj.nhblid.bij_vereniging.regio.regio_nr }} / rayon {{ obj.nhblid.bij_vereniging.regio.rayon.rayon_nr }})</span></div>
                 <div class="collapsible-body white">
-                    <button class="btn-nhb-rood" onclick="do_wijzig('drop', this)" data-pk="{{ obj.pk }}">Verwijder beheerder</button>
+                    <button class="btn-nhb-rood" onclick="do_wijzig('drop', this)" data-pk="{{ obj.pk }}"><i class="material-icons-round left">delete</i>Verwijder beheerder</button>
                 </div>
             </li>
         {% endfor %}
@@ -79,7 +79,7 @@ function do_wijzig(actie, id) {
 
             <div class="row"><div class="col s12"></div>
                 <div class="center-align">
-                    <input class="btn-nhb-blauw" type="submit" value="Zoek">
+                    <button class="btn-nhb-blauw" type="submit"><i class="material-icons-round left">search</i>Zoek</button>
                 </div>
             </div>
         </form>
@@ -96,7 +96,7 @@ function do_wijzig(actie, id) {
                     <div class="collapsible-header white"><span>{{ obj.volledige_naam|highlight:zoekterm }} (regio {{ obj.nhblid.bij_vereniging.regio.regio_nr }} / rayon {{ obj.nhblid.bij_vereniging.regio.rayon.rayon_nr }})</span></div>
                     <div class="collapsible-body white">
                         <p>NHB nummer: {{ obj.username|highlight:zoekterm }}</p>
-                        <button class="btn-nhb-blauw" onclick="do_wijzig('add', this)" data-pk="{{ obj.pk }}">Maak beheerder</button>
+                        <button class="btn-nhb-blauw" onclick="do_wijzig('add', this)" data-pk="{{ obj.pk }}"><i class="material-icons-round left">add_box</i>Maak beheerder</button>
                     </div>
                 </li>
             {% endfor %}
@@ -108,7 +108,7 @@ function do_wijzig(actie, id) {
     <p>Staat de gezochte persoon er niet bij? Alleen personen met een account op deze website worden getoond.</p>
 {% endif %}
 
-<p><a class="btn-nhb-blauw margin-5" href="{% url 'Functie:overzicht' %}">Terug</a></p>
+<p><a class="btn-nhb-blauw margin-5" href="{{ terug_url }}"><i class="material-icons-round left">cancel</i>Terug</a></p>
 
 {% endblock %}
 
