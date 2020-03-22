@@ -1,0 +1,62 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2020 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Beheerders vereniging{% endblock %}
+
+{% block pagina %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="functie-overzicht-vereniging" %}
+
+<h4>Beheerders van de vereniging</h4>
+
+<p>Hieronder staan functies en de gekoppelde beheerders. Afhankelijk van je rol mag je hier wijzigingen in aanbrengen.</p>
+
+<p>Jouw huidige rol is: <b>{{ huidige_rol }}</b></p>
+
+<!-- toon de functies met huidige beheerders in een tabel -->
+<div class="row">
+    <table class="white">
+        <thead>
+            <tr>
+                <th>Functie / Rol</th>
+                <th>Beheerder(s)</th>
+                {% if show_wijzig_kolom %}
+                <th></th>   <!-- kolom voor de 'wijzig' knoppen -->
+                {% endif %}
+            </tr>
+        </thead>
+        {% for obj in object_list %}
+            <tr>
+                <td>{{ obj.beschrijving }}</td>
+
+                <td>
+                {% if obj.account_set.all.count %}
+                    {% for beheerder in obj.account_set.all %}
+                        {% if not forloop.first %}
+                            <br>
+                        {% endif %}
+                        <span>{{ beheerder.volledige_naam }}</span>
+                    {% endfor %}
+                {% else %}
+                    <i>Nog niet gekoppeld</i>
+                {% endif %}
+                </td>
+
+                {% if show_wijzig_kolom %}
+                <td>
+                    {% if obj.wijzig_url %}
+                        <a class="btn-nhb-blauw" href="{{ obj.wijzig_url }}">Wijzig</a>
+                    {% endif %}
+                </td>
+                {% endif %}
+            </tr>
+        {% endfor %}
+    </table>
+</div>
+
+{% endblock %}
+

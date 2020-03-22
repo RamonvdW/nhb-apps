@@ -17,7 +17,7 @@ from Logboek.models import schrijf_in_logboek
 from Account.models import Account, account_needs_vhpg, account_is_otp_gekoppeld, user_is_otp_verified
 from Overig.helpers import get_safe_from_ip
 from .rol import Rollen, rol_mag_wisselen, rol_enum_pallet, rol2url,\
-                 rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving, rol_is_beheerder,\
+                 rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving, rol_is_beheerder, rol_is_CWZ,\
                  rol_activeer_rol, rol_activeer_functie, rol_evalueer_opnieuw
 from .models import Functie
 from .forms import ZoekBeheerdersForm, WijzigBeheerdersForm
@@ -25,6 +25,7 @@ import logging
 
 
 TEMPLATE_FUNCTIE_OVERZICHT = 'functie/overzicht.dtl'
+TEMPLATE_FUNCTIE_OVERZICHT_VERENIGING = 'functie/overzicht-vereniging.dtl'
 TEMPLATE_FUNCTIE_WIJZIG = 'functie/wijzig.dtl'
 TEMPLATE_FUNCTIE_WISSELVANROL = 'functie/wissel-van-rol.dtl'
 
@@ -43,6 +44,14 @@ def mag_wijzigen_of_404(request, functie):
             raise Resolver404()
     else:
         # functie zoals BKO, RKO, RCL, CWZ
+
+        if rol_nu == Rollen.ROL_CWZ:
+            if functie.nhb_ver != functie_nu.nhb_ver:
+                # verkeerde vereniging
+                raise Resolver404()
+
+            # CWZ or WL
+            return
 
         # controleer dat deze wijziging voor de juiste competitie is
         # (voorkomt BKO 25m 1pijl probeert RKO Indoor te koppelen)
@@ -124,10 +133,16 @@ class WijzigView(UserPassesTestMixin, ListView):
 
     template_name = TEMPLATE_FUNCTIE_WIJZIG
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.form = None
+        self.functie = None
+        self.zoekterm = None
+
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol = rol_get_huidige(self.request)
-        return rol in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO)
+        return rol in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_CWZ)
 
     def handle_no_permission(self):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
@@ -173,7 +188,64 @@ class WijzigView(UserPassesTestMixin, ListView):
         context['zoek_url'] = reverse('Functie:wijzig', kwargs={'functie_pk': self.functie.pk})
         context['zoekterm'] = self.zoekterm
         context['form'] = self.form
+        if self.functie.rol == "CWZ":
+            context['terug_url'] = reverse('Functie:overzicht-vereniging')
+        else:
+            context['terug_url'] = reverse('Functie:overzicht')
         menu_dynamics(self.request, context, actief='competitie')
+        return context
+
+
+class OverzichtVerenigingView(UserPassesTestMixin, ListView):
+
+    """ Via deze view kunnen beheerders binnen een vereniging getoond en gewijzigd worden.
+    """
+
+    template_name = TEMPLATE_FUNCTIE_OVERZICHT_VERENIGING
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        rol_nu = rol_get_huidige(self.request)
+        return rol_nu == Rollen.ROL_CWZ     # TODO: voeg ondersteuning toe voor WL
+
+    def handle_no_permission(self):
+        """ gebruiker heeft geen toegang --> redirect naar het plein """
+        return HttpResponseRedirect(reverse('Plein:plein'))
+
+    def get_queryset(self):
+        """ called by the template system to get the queryset or list of objects for the template """
+
+        # de huidige rol bepaalt welke functies gewijzigd mogen worden
+        # en de huidige functie selecteert de vereniging
+        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
+
+        # zoek alle rollen binnen deze vereniging
+        objs = Functie.objects.filter(nhb_ver=functie_nu.nhb_ver)
+
+        # zet wijzig_url
+        for obj in objs:
+            obj.wijzig_url = None
+            if rol_nu == Rollen.ROL_CWZ:
+                obj.wijzig_url = reverse('Functie:wijzig', kwargs={'functie_pk': obj.pk})
+        # for
+
+        return objs
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        context['huidige_rol'] = rol_get_beschrijving(self.request)
+
+        # als er geen wijzig knop in beeld hoeft te komen, dan kan de tabel wat smaller
+        context['show_wijzig_kolom'] = False
+        for obj in context['object_list']:
+            if obj.wijzig_url:
+                context['show_wijzig_kolom'] = True
+                break   # from the for
+        # for
+
+        menu_dynamics(self.request, context, actief='competitie')   # TODO: overweeg 'vereniging' in menu
         return context
 
 
@@ -187,7 +259,7 @@ class OverzichtView(UserPassesTestMixin, ListView):
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        return rol_is_beheerder(self.request)
+        return rol_is_beheerder(self.request) or rol_is_CWZ(self.request)
 
     def handle_no_permission(self):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
@@ -252,7 +324,15 @@ class OverzichtView(UserPassesTestMixin, ListView):
         """ called by the template system to get the queryset or list of objects for the template """
 
         # maak een lijst van de functies
-        objs = Functie.objects.exclude(rol='CWZ')       # TODO: verander in filter(rol__in [BKO, RKO, RCL]")
+        if rol_is_CWZ(self.request):
+            # tool alleen de hierarchy vanuit deze vereniging omhoog
+            _, functie_cwz = rol_get_huidige_functie(self.request)
+            objs = Functie.objects.filter(Q(rol='RCL', nhb_regio=functie_cwz.nhb_ver.regio) |
+                                          Q(rol='RKO', nhb_rayon=functie_cwz.nhb_ver.regio.rayon) |
+                                          Q(rol='BKO'))
+        else:
+            objs = Functie.objects.exclude(rol='CWZ')       # TODO: verander in filter(rol__in [BKO, RKO, RCL]")
+
         objs = self._sorteer_functies(objs)
 
         # zet de wijzig urls, waar toegestaan
@@ -272,6 +352,10 @@ class OverzichtView(UserPassesTestMixin, ListView):
                 context['show_wijzig_kolom'] = True
                 break   # from the for
         # for
+
+        if rol_is_CWZ(self.request):
+            context['rol_is_cwz'] = True
+
         menu_dynamics(self.request, context, actief='competitie')
         return context
 

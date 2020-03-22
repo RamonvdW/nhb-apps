@@ -20,6 +20,10 @@ urlpatterns = [
          views.WijzigView.as_view(),
          name='wijzig'),
 
+    path('overzicht/vereniging/',
+         views.OverzichtVerenigingView.as_view(),
+         name='overzicht-vereniging'),
+
     path('overzicht/',
          views.OverzichtView.as_view(),
          name='overzicht'),
