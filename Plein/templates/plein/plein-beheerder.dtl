@@ -27,7 +27,7 @@
             <div class="card">
                 <div class="card-content">
                     <table class="simple"><tr style="border:0px">
-                        <td><i class="material-icons-round large">create</i></td>
+                        <td><i class="material-icons-round large">recent_actors</i></td>
                         <td>Toon overzicht van de recente gebruikte en aangemaakte accounts.</td>
                     </tr></table>
                 </div>
@@ -131,6 +131,25 @@
             </div>
         </div>
     {% endif %}
+
+    {% if rol_is_cwz %}
+        <div class="col s12 m6 xl4">
+            <div class="card">
+                <div class="card-content">
+                    <table class="simple"><tr style="border:0px">
+                        <td><i class="material-icons-round large">supervisor_account</i></td>
+                        <td>Toon en koppel leden van de vereniging aan functies voor de website.</td>
+                    </tr></table>
+                </div>
+                <a href="{% url 'Functie:overzicht-vereniging' %}" class="nhb-klikbare-balk">
+                    <div class="card-action center-align">
+                        <span class="nhb-klikbare-link">Toon beheerders</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+    {% endif %}
+
 </div>
 
 {% endblock %}
