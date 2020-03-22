@@ -16,7 +16,7 @@
      "name": "Grote Club",
      "prefix": null,
      "secretaris": [{"member_number": 100001}],
-     "email": "test@groteclub.archery",
+     "email": null,
      "website": "www.groteclub.archery",
      "has_disabled_facilities": true,
      "location_name": null,

@@ -54,6 +54,8 @@ class NhbVereniging(models.Model):
     """Tabel waarin gegevens van de Verenigingen van de NHB staan"""
     nhb_nr = models.PositiveIntegerField(primary_key=True)
     naam = models.CharField(max_length=200)
+    plaats = models.CharField(max_length=100, blank=True)
+    contact_email = models.CharField(max_length=150, blank=True)
     regio = models.ForeignKey(NhbRegio, on_delete=models.PROTECT)
     secretaris_lid = models.ForeignKey('NhbLid', on_delete=models.SET_NULL,
                                        blank=True,  # allow access input in form

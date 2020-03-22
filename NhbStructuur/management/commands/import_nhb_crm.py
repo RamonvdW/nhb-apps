@@ -211,8 +211,21 @@ class Command(BaseCommand):
             if club['prefix']:
                 ver_naam = club['prefix'] + ' ' + ver_naam
             ver_regio = club['region_number']
-            # TODO: verdere velden: website, email (secretaris)
-            # TODO: wedstrijdlocatie velden verwerken: address, postal_code, location_name, has_disabled_facilities
+
+            ver_plaats = club['location_name']
+            if not ver_plaats:
+                self.stderr.write('[WARNING] Vereninging %s (%s) heeft geen plaatsnaam' % (ver_nhb_nr, ver_naam))
+                self._count_warnings += 1
+                ver_plaats = ""     # voorkom None
+
+            ver_email = club['email']
+            if not ver_email:
+                self.stderr.write('[WARNING] Vereninging %s (%s) heeft geen contact email' % (ver_nhb_nr, ver_naam))
+                self._count_warnings += 1
+                ver_email = ""      # voorkom None
+
+            # TODO: verdere velden: website
+            # TODO: wedstrijdlocatie velden verwerken: address, postal_code, has_disabled_facilities
 
             # zoek de vereniging op
             is_nieuw = False
@@ -225,6 +238,7 @@ class Command(BaseCommand):
                 # bestaande vereniging
                 nhb_nrs.remove(ver_nhb_nr)
 
+                # mutaties verwerken
                 if obj.regio.regio_nr != ver_regio:
                     regio_obj = vind_regio(ver_regio)
                     if regio_obj is None:
@@ -236,10 +250,25 @@ class Command(BaseCommand):
                         obj.regio = regio_obj
                         if not self.dryrun:
                             obj.save()
+
                 if obj.naam != ver_naam:
-                    self.stdout.write('[INFO] Wijziging van naam voor vereniging %s: %s --> %s' % (ver_nhb_nr, obj.naam, ver_naam))
+                    self.stdout.write('[INFO] Wijziging van naam voor vereniging %s: "%s" --> "%s"' % (ver_nhb_nr, obj.naam, ver_naam))
                     self._count_wijzigingen += 1
                     obj.naam = ver_naam
+                    if not self.dryrun:
+                        obj.save()
+
+                if obj.plaats != ver_plaats:
+                    self.stdout.write('[INFO] Wijziging van plaats voor vereniging %s: "%s" --> "%s"' % (ver_nhb_nr, obj.plaats, ver_plaats))
+                    self._count_wijzigingen += 1
+                    obj.plaats = ver_plaats
+                    if not self.dryrun:
+                        obj.save()
+
+                if obj.contact_email != ver_email:
+                    self.stdout.write('[INFO] Wijziging van contact email voor vereniging %s: "%s" --> "%s"' % (ver_nhb_nr, obj.contact_email, ver_email))
+                    self._count_wijzigingen += 1
+                    obj.contact_email = ver_email
                     if not self.dryrun:
                         obj.save()
 
@@ -248,6 +277,8 @@ class Command(BaseCommand):
                 ver = NhbVereniging()
                 ver.nhb_nr = ver_nhb_nr
                 ver.naam = ver_naam
+                ver.plaats = ver_plaats
+                ver.contact_email = ver_email
                 regio_obj = vind_regio(ver_regio)
                 if not regio_obj:
                     self._count_errors += 1

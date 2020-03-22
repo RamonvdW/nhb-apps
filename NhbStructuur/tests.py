@@ -193,11 +193,15 @@ class TestNhbStructuur(TestCase):
         f1 = io.StringIO()
         f2 = io.StringIO()
         management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_08.json', stderr=f1, stdout=f2)
+        #print("f1: %s" % f1.getvalue())
+        #print("f2: %s" % f2.getvalue())
         self.assertTrue("[INFO] Wijziging van regio voor vereniging 1000: 111 --> 112" in f2.getvalue())
-        self.assertTrue("[INFO] Wijziging van naam voor vereniging 1000: Grote Club --> Nieuwe Grote Club" in f2.getvalue())
+        self.assertTrue('[INFO] Wijziging van naam voor vereniging 1000: "Grote Club" --> "Nieuwe Grote Club"' in f2.getvalue())
         self.assertTrue("[ERROR] Kan vereniging 1001 niet wijzigen naar onbekende regio 199" in f1.getvalue())
         self.assertTrue("[ERROR] Vereniging 1002 hoort bij onbekende regio 199" in f1.getvalue())
         self.assertTrue("[INFO] Wijziging van secretaris voor vereniging 1001: geen --> 100001" in f2.getvalue())
+        self.assertTrue('[INFO] Wijziging van plaats voor vereniging 1000: "Stad" --> "Stadia"' in f2.getvalue())
+        self.assertTrue('[INFO] Wijziging van contact email voor vereniging 1000: "test@groteclub.archery" --> "andere@groteclub.archery"' in f2.getvalue())
 
     def test_import_nhb_crm_09_lid_mutaties(self):
         # lid mutaties
