@@ -40,9 +40,11 @@ class TestPlein(TestCase):
         maak_regios_2018(NhbRayon, NhbRegio)
 
         self.functie_bko = maak_functie('BKO Test', 'BKO')
+
         self.functie_rko = maak_functie('RKO Test', 'RKO')
         self.functie_rko.nhb_rayon = NhbRayon.objects.get(rayon_nr=3)
         self.functie_rko.save()
+
         self.functie_rcl = maak_functie('RCL Test', 'RCL')
         self.functie_rcl.nhb_regio = NhbRegio.objects.get(regio_nr=111)
         self.functie_rcl.save()
@@ -54,6 +56,10 @@ class TestPlein(TestCase):
         ver.regio = NhbRegio.objects.get(regio_nr=111)
         # secretaris kan nog niet ingevuld worden
         ver.save()
+
+        self.functie_cwz = maak_functie('CWZ vereniging 1000', 'CWZ')
+        self.functie_cwz.nhb_ver = ver
+        self.functie_cwz.save()
 
         # maak een test lid aan
         lid = NhbLid()
@@ -157,6 +163,12 @@ class TestPlein(TestCase):
         resp = self.client.get('/plein/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, 'Rol: RCL')
+
+        # cwz
+        rol_activeer_functie(self.client, self.functie_cwz.pk).save()
+        resp = self.client.get('/plein/')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assertContains(resp, 'Rol: CWZ ')
 
         # geen
         rol_activeer_rol(self.client, "geen").save()
