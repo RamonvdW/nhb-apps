@@ -11,9 +11,10 @@ from .rol import rol_zet_sessionvars_na_otp_controle
 from Account.models import Account,\
                     account_zet_sessionvars_na_otp_controle,\
                     account_vhpg_is_geaccepteerd
-from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
+from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
 from Plein.tests import assert_html_ok, assert_template_used, assert_other_http_commands_not_supported
 from Plein.test_helpers import extract_all_href_urls
+import datetime
 
 
 class TestFunctieKoppelen(TestCase):
@@ -44,6 +45,9 @@ class TestFunctieKoppelen(TestCase):
         self.account_beh2 = Account.objects.get(username='testbeheerder2')
         account_vhpg_is_geaccepteerd(self.account_beh2)
 
+        usermodel.objects.create_user('anderlid', 'anderlist@test.com', 'wachtwoord')
+        self.account_ander = Account.objects.get(username='anderlid')
+
         self.functie_bko = Functie.objects.get(comp_type='18', rol='BKO')
         self.functie_rko3 = Functie.objects.get(comp_type='18', rol='RKO', nhb_rayon=NhbRayon.objects.get(rayon_nr=3))
         self.functie_rcl111 = Functie.objects.get(comp_type='18', rol='RCL', nhb_regio=NhbRegio.objects.get(regio_nr=111))
@@ -57,9 +61,49 @@ class TestFunctieKoppelen(TestCase):
         # secretaris kan nog niet ingevuld worden
         ver.save()
 
+        lid = NhbLid()
+        lid.nhb_nr = 100042
+        lid.geslacht = "M"
+        lid.voornaam = "Beh"
+        lid.achternaam = "eerder"
+        lid.email = "beh2@test.com"
+        lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
+        lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
+        lid.bij_vereniging = ver
+        lid.save()
+
+        self.account_beh2.nhblid = lid
+        self.account_beh2.save()
+
         self.functie_cwz = maak_functie("CWZ test", "CWZ")
         self.functie_cwz.nhb_ver = ver
         self.functie_cwz.save()
+
+        # maak nog een test vereniging
+        ver2 = NhbVereniging()
+        ver2.naam = "Extra Club"
+        ver2.nhb_nr = "1900"
+        ver2.regio = NhbRegio.objects.get(regio_nr=112)
+        # secretaris kan nog niet ingevuld worden
+        ver2.save()
+
+        self.functie_cwz2 = maak_functie("CWZ test 2", "CWZ")
+        self.functie_cwz2.nhb_ver = ver2
+        self.functie_cwz2.save()
+
+        lid2 = NhbLid()
+        lid2.nhb_nr = 100024
+        lid2.geslacht = "V"
+        lid2.voornaam = "Ander"
+        lid2.achternaam = "Lid"
+        lid2.email = "anderlid@test.com"
+        lid2.geboorte_datum = datetime.date(year=1972, month=3, day=5)
+        lid2.sinds_datum = datetime.date(year=2010, month=11, day=11)
+        lid2.bij_vereniging = ver2
+        lid2.save()
+
+        self.account_ander.nhblid = lid2
+        self.account_ander.save()
 
     def test_anon(self):
         self.client.logout()
@@ -83,6 +127,10 @@ class TestFunctieKoppelen(TestCase):
         rol_zet_sessionvars_na_otp_controle(account, self.client).save()
 
         resp = self.client.get('/functie/overzicht/', follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_template_used(self, resp, ('plein/plein-gebruiker.dtl', 'plein/site_layout.dtl'))
+
+        resp = self.client.get('/functie/overzicht/vereniging/', follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         assert_template_used(self, resp, ('plein/plein-gebruiker.dtl', 'plein/site_layout.dtl'))
 
@@ -145,6 +193,39 @@ class TestFunctieKoppelen(TestCase):
 
         assert_other_http_commands_not_supported(self, '/functie/overzicht/')
 
+    def test_overzicht_view_cwz(self):
+        # de CWZ krijgt niet het hele overzicht te zien
+        # alleen de RCL, RKO, BKO worden getoond die aan de regio gerelateerd zijn
+        account = self.account_beh1
+        account.functies.add(self.functie_cwz)
+        self.client.login(username=account.username, password='wachtwoord')
+        account_zet_sessionvars_na_otp_controle(self.client).save()
+        rol_zet_sessionvars_na_otp_controle(account, self.client).save()
+        resp = self.client.get('/functie/wissel-van-rol/functie/%s/' % self.functie_cwz.pk, follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assertContains(resp, "Rol: CWZ")
+
+        # vraag het overzicht van competitie-bestuurders op
+        resp = self.client.get('/functie/overzicht/')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_html_ok(self, resp)
+        assert_template_used(self, resp, ('functie/overzicht.dtl', 'plein/site_layout.dtl'))
+        urls = [url for url in extract_all_href_urls(resp) if url.startswith('/functie/wijzig/')]
+        self.assertEqual(len(urls), 0)      # geen wijzig knoppen voor de CWZ
+
+        # controleer inhoudelijk op 2xRCL, 2xRKO en 2xBKO (18m en 25m)
+        self.assertContains(resp, "BKO", count=2)
+        self.assertContains(resp, "RKO", count=2)
+        self.assertContains(resp, "RCL", count=2)
+
+        # haal het overzicht van verenigingsbestuurders op
+        resp = self.client.get('/functie/overzicht/vereniging/')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_html_ok(self, resp)
+        assert_template_used(self, resp, ('functie/overzicht-vereniging.dtl', 'plein/site_layout.dtl'))
+
+        assert_other_http_commands_not_supported(self, '/functie/overzicht/vereniging/')
+
     def test_wijzig_view(self):
         # neem de BB rol aan
         account = self.account_admin
@@ -191,6 +272,29 @@ class TestFunctieKoppelen(TestCase):
         self.assertContains(resp, 'Verwijder beheerder', count=2)
 
         assert_other_http_commands_not_supported(self, url)
+
+    def test_wijzig_view_cwz(self):
+        # de CWZ vindt alleen leden van eigen vereniging
+        account = self.account_beh1
+        account.functies.add(self.functie_cwz)
+        self.client.login(username=account.username, password='wachtwoord')
+        account_zet_sessionvars_na_otp_controle(self.client).save()
+        rol_zet_sessionvars_na_otp_controle(account, self.client).save()
+        resp = self.client.get('/functie/wissel-van-rol/functie/%s/' % self.functie_cwz.pk, follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assertContains(resp, "Rol: CWZ")
+
+        # probeer de zoek functie: er vindt 'beheerder' en 'ander'
+        url = '/functie/wijzig/%s/' % self.functie_cwz.pk
+        resp = self.client.get(url + '?zoekterm=er', follow=False)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_html_ok(self, resp)
+        assert_template_used(self, resp, ('functie/wijzig.dtl', 'plein/site_layout.dtl'))
+
+        # controleer aanwezigheid van toevoeg knoppen
+        self.assertContains(resp, 'Maak beheerder', count=1)         # maar 1 lid van vereniging
+        # controleer afwezigheid van verwijder knoppen
+        self.assertContains(resp, 'Verwijder beheerder', count=1)    # kan zichzelf verwijderen
 
     def test_koppel_ontkoppel_bb(self):
         # neem de BB rol aan
@@ -328,5 +432,45 @@ class TestFunctieKoppelen(TestCase):
         resp = self.client.post(url, {'add': self.account_beh1.pk}, follow=True)
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
         self.assertEqual(len(self.functie_rcl101.account_set.all()), 0)
+
+    def test_koppel_cwz(self):
+        # CWZ mag zijn eigen leden koppelen: beh2
+        account = self.account_beh1
+        account.functies.add(self.functie_cwz)
+        self.client.login(username=account.username, password='wachtwoord')
+        account_zet_sessionvars_na_otp_controle(self.client).save()
+        rol_zet_sessionvars_na_otp_controle(account, self.client).save()
+        resp = self.client.get('/functie/wissel-van-rol/functie/%s/' % self.functie_cwz.pk, follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assertContains(resp, "Rol: CWZ")
+
+        # haal het overzicht van verenigingsbestuurders op
+        resp = self.client.get('/functie/overzicht/vereniging/')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        assert_html_ok(self, resp)
+        assert_template_used(self, resp, ('functie/overzicht-vereniging.dtl', 'plein/site_layout.dtl'))
+
+        # koppel een CWZ uit de eigen gelederen
+        url = '/functie/wijzig/%s/ontvang/' % self.functie_cwz.pk
+        self.assertEqual(len(self.functie_cwz.account_set.all()), 1)
+        resp = self.client.post(url, {'add': self.account_beh2.pk}, follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assertEqual(len(self.functie_cwz.account_set.all()), 2)
+
+        # poog een NHB lid te koppelen dat niet lid is van de vereniging
+        resp = self.client.post(url, {'add': self.account_ander.pk}, follow=True)
+        self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
+        self.assertEqual(len(self.functie_cwz.account_set.all()), 2)
+
+        # poog een niet-NHB lid account te koppelen
+        resp = self.client.post(url, {'add': self.account_admin.pk}, follow=True)
+        self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
+        self.assertEqual(len(self.functie_cwz.account_set.all()), 2)
+
+        # probeer een verkeerde vereniging te wijzigen
+        url = '/functie/wijzig/%s/ontvang/' % self.functie_cwz2.pk
+        resp = self.client.post(url, {'add': self.account_beh2.pk}, follow=True)
+        self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
+
 
 # end of file

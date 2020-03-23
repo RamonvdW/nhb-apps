@@ -33,47 +33,65 @@ my_logger = logging.getLogger('NHBApps.Account')
 
 
 def mag_wijzigen_of_404(request, functie):
-    # stuur gebruiker weg als illegaal van deze view gebruik gemaakt wordt
-    rol_nu, functie_nu = rol_get_huidige_functie(request)
+    """ Stuur gebruiker weg als illegaal van de aanroepende view gebruik gemaakt wordt
 
-    # alle BB, BKO of RKO kunnen hier komen (zie test_func)
+        Wordt gebruikt door:
+            WijzigView (koppelen van leden aan 1 functie) - tijdens get_queryset()
+            OntvangWijzigingenView - vroeg in afhandelen POST verzoek
+    """
+
+    # test_func van WijzigView laat alleen BB, BKO, RKO of CWZ door
+    # OntvangWijzigingenView heeft niet zo'n filter
+
+    rol_nu, functie_nu = rol_get_huidige_functie(request)
 
     if rol_nu == Rollen.ROL_BB:
         # BB mag BKO koppelen
         if functie.rol != 'BKO':
             raise Resolver404()
-    else:
-        # functie zoals BKO, RKO, RCL, CWZ
+        return
 
-        if rol_nu == Rollen.ROL_CWZ:
-            if functie.nhb_ver != functie_nu.nhb_ver:
-                # verkeerde vereniging
-                raise Resolver404()
-
-            # CWZ or WL
-            return
-
-        # controleer dat deze wijziging voor de juiste competitie is
-        # (voorkomt BKO 25m 1pijl probeert RKO Indoor te koppelen)
-        if not functie_nu or functie_nu.comp_type != functie.comp_type:
-            # CWZ verdwijnt hier ook
+    if rol_nu == Rollen.ROL_CWZ:
+        if functie.nhb_ver != functie_nu.nhb_ver:
+            # verkeerde vereniging
             raise Resolver404()
 
-        if rol_nu == Rollen.ROL_BKO:
-            if functie.rol != 'RKO':
-                raise Resolver404()
+        # CWZ or WL
+        return
 
-        elif rol_nu == Rollen.ROL_RKO:
-            if functie.rol != 'RCL':
-                raise Resolver404()
+    # BKO, RKO, RCL
 
-            # controleer of deze regio gewijzigd mag worden
-            if functie.nhb_regio.rayon != functie_nu.nhb_rayon:
-                raise Resolver404()
+    # controleer dat deze wijziging voor de juiste competitie is
+    # (voorkomt BKO 25m 1pijl probeert RKO Indoor te koppelen)
+    if not functie_nu or functie_nu.comp_type != functie.comp_type:
+        # CWZ verdwijnt hier ook
+        raise Resolver404()
 
-        else:
-            # niets hier te zoeken (RCL)
+    if rol_nu == Rollen.ROL_BKO:
+        if functie.rol != 'RKO':
             raise Resolver404()
+        return
+
+    elif rol_nu == Rollen.ROL_RKO:
+        if functie.rol != 'RCL':
+            raise Resolver404()
+
+        # controleer of deze regio gewijzigd mag worden
+        if functie.nhb_regio.rayon != functie_nu.nhb_rayon:
+            raise Resolver404()
+        return
+
+    # niets hier te zoeken (RCL en andere rollen)
+    raise Resolver404()
+
+
+def account_is_lid_bij_cwz_of_404(account, functie_nu):
+    """ Stel zeker dat Account lid is bij de vereniging van functie_nu """
+    if not account.nhblid:
+        raise Resolver404()
+
+    if account.nhblid.bij_vereniging != functie_nu.nhb_ver:
+        raise Resolver404()
 
 
 class OntvangWijzigingenView(View):
@@ -86,7 +104,6 @@ class OntvangWijzigingenView(View):
         """ deze functie wordt aangeroepen als een POST request ontvangen is.
             dit is gekoppeld aan het drukken op de Registreer knop.
         """
-
         functie_pk = self.kwargs['functie_pk']
         try:
             functie = Functie.objects.get(pk=functie_pk)
@@ -114,6 +131,10 @@ class OntvangWijzigingenView(View):
             raise Resolver404()
 
         if add:
+            rol_nu, functie_nu = rol_get_huidige_functie(request)
+            if rol_nu == Rollen.ROL_CWZ:
+                account_is_lid_bij_cwz_of_404(account, functie_nu)
+
             functie.account_set.add(account)
             schrijf_in_logboek(request.user, 'Rollen',
                                "%s beheerder gemaakt voor functie %s" % (account.volledige_naam(),
@@ -166,14 +187,21 @@ class WijzigView(UserPassesTestMixin, ListView):
         zoekterm = self.form.cleaned_data['zoekterm']
         if len(zoekterm) >= 2:  # minimaal twee tekens van de naam/nummer
             self.zoekterm = zoekterm
-            return Account.objects.\
+            qset = Account.objects.\
                        exclude(nhblid__is_actief_lid=False). \
                        annotate(hele_naam=Concat('nhblid__voornaam', Value(' '), 'nhblid__achternaam')). \
                        filter(
                             Q(username__icontains=zoekterm) |  # dekt ook nhb_nr
                             Q(nhblid__voornaam__icontains=zoekterm) |
                             Q(nhblid__achternaam__icontains=zoekterm) |
-                            Q(hele_naam__icontains=zoekterm)).order_by('nhblid__nhb_nr')[:50]
+                            Q(hele_naam__icontains=zoekterm)).order_by('nhblid__nhb_nr')
+
+            rol_nu, functie_nu = rol_get_huidige_functie(self.request)
+            if rol_nu == Rollen.ROL_CWZ:
+                # CWZ en WL alleen uit de eigen gelederen laten kiezen
+                return qset.filter(nhblid__bij_vereniging=functie_nu.nhb_ver)
+
+            return qset[:50]
 
         self.zoekterm = ""
         return None
@@ -189,6 +217,7 @@ class WijzigView(UserPassesTestMixin, ListView):
         context['zoekterm'] = self.zoekterm
         context['form'] = self.form
         if self.functie.rol == "CWZ":
+            context['is_rol_cwz'] = True
             context['terug_url'] = reverse('Functie:overzicht-vereniging')
         else:
             context['terug_url'] = reverse('Functie:overzicht')
@@ -225,6 +254,8 @@ class OverzichtVerenigingView(UserPassesTestMixin, ListView):
         # zet wijzig_url
         for obj in objs:
             obj.wijzig_url = None
+
+            # alleen CWZ mag wijzigingen doen; WL niet
             if rol_nu == Rollen.ROL_CWZ:
                 obj.wijzig_url = reverse('Functie:wijzig', kwargs={'functie_pk': obj.pk})
         # for
@@ -412,7 +443,11 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
                 url = reverse('Functie:activeer-rol-functie', kwargs={'functie_pk': functie_pk})
                 functie = Functie.objects.get(pk=functie_pk)
                 title = functie.beschrijving
-                objs.append({'titel': title, 'ver_naam': '', 'url': url})
+                if functie.nhb_ver:
+                    ver_naam = functie.nhb_ver.naam
+                else:
+                    ver_naam = ''
+                objs.append({'titel': title, 'ver_naam': ver_naam, 'url': url})
 
             else:
                 try:

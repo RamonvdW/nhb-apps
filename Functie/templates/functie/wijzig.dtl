@@ -46,7 +46,13 @@ function do_wijzig(actie, id) {
     <ul class="collapsible">
         {% for obj in huidige_beheerders %}
             <li>
-                <div class="collapsible-header white"><span>{{ obj.volledige_naam }} (regio {{ obj.nhblid.bij_vereniging.regio.regio_nr }} / rayon {{ obj.nhblid.bij_vereniging.regio.rayon.rayon_nr }})</span></div>
+                <div class="collapsible-header white">
+                    {% if is_rol_cwz %}
+                        <span>{{ obj.volledige_naam }}</span>
+                    {% else %}
+                        <span>{{ obj.volledige_naam }} (regio {{ obj.nhblid.bij_vereniging.regio.regio_nr }} / rayon {{ obj.nhblid.bij_vereniging.regio.rayon.rayon_nr }})</span>
+                    {% endif %}
+                </div>
                 <div class="collapsible-body white">
                     <button class="btn-nhb-rood" onclick="do_wijzig('drop', this)" data-pk="{{ obj.pk }}"><i class="material-icons-round left">delete</i>Verwijder beheerder</button>
                 </div>
@@ -93,10 +99,21 @@ function do_wijzig(actie, id) {
         <ul class="collapsible">
             {% for obj in object_list %}
                 <li>
-                    <div class="collapsible-header white"><span>{{ obj.volledige_naam|highlight:zoekterm }} (regio {{ obj.nhblid.bij_vereniging.regio.regio_nr }} / rayon {{ obj.nhblid.bij_vereniging.regio.rayon.rayon_nr }})</span></div>
+                    <div class="collapsible-header white">
+                        {% if is_rol_cwz %}
+                            <span>{{ obj.volledige_naam|highlight:zoekterm }}</span>
+                        {% else %}
+                            <span>{{ obj.volledige_naam|highlight:zoekterm }} (regio {{ obj.nhblid.bij_vereniging.regio.regio_nr }} / rayon {{ obj.nhblid.bij_vereniging.regio.rayon.rayon_nr }})</span>
+                        {% endif %}
+                    </div>
                     <div class="collapsible-body white">
+                        {% if is_rol_cwz %}
+                        <span>Lid van {{ obj.nhblid.bij_vereniging.naam }}</span>
                         <p>NHB nummer: {{ obj.username|highlight:zoekterm }}</p>
-                        <button class="btn-nhb-blauw" onclick="do_wijzig('add', this)" data-pk="{{ obj.pk }}"><i class="material-icons-round left">add_box</i>Maak beheerder</button>
+                        {% else %}
+                        <p style="margin-top:0px">NHB nummer: {{ obj.username|highlight:zoekterm }}</p>
+                        {% endif %}
+                        <button class="btn-nhb-blauw" onclick="do_wijzig('add', this)" data-pk="{{ obj.pk }}"><i class="material-icons-round left">add</i>Maak beheerder</button>
                     </div>
                 </li>
             {% endfor %}
@@ -108,7 +125,7 @@ function do_wijzig(actie, id) {
     <p>Staat de gezochte persoon er niet bij? Alleen personen met een account op deze website worden getoond.</p>
 {% endif %}
 
-<p><a class="btn-nhb-blauw margin-5" href="{{ terug_url }}"><i class="material-icons-round left">cancel</i>Terug</a></p>
+<p><a class="btn-nhb-blauw margin-5" href="{{ terug_url }}"><i class="material-icons-round left">arrow_back</i>Terug</a></p>
 
 {% endblock %}
 
