@@ -17,7 +17,7 @@
 
     <p>Hoe we omgaan met jouw privacy staat beschreven in een apart document.</p>
 
-    <a class="btn nhb-blue" href="{{ url_privacyverklaring }}" target="_blank">document openen</a>
+    <a class="btn nhb-blue" href="{{ url_privacyverklaring }}" target="_blank"><i class="material-icons-round left">open_in_new</i>document openen</a>
 
     <!--
     <h5>Cookies</h5>
@@ -37,7 +37,8 @@
 
     <h5>Contact</h5>
 
-    <p>Alle vragen en verzoeken over privacy kunnen gericht worden aan de Nederlandse Handboog Bond via <a href="mailto:info@handboogsport.nl">info@handboogsport.nl</a>.</p>
+    <p>Alle vragen en verzoeken over privacy kunnen gericht worden aan de Nederlandse Handboog Bond via email aan:</p>
+    <a class="btn-nhb-blauw" href="mailto:info@handboogsport.nl"><i class="material-icons-round left">email</i>info@handboogsport.nl</a>
 
 </div></div>
 
