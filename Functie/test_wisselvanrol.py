@@ -149,6 +149,7 @@ class TestFunctieWisselVanRol(TestCase):
         self.account_normaal.nhblid = self.nhblid1
         self.account_normaal.save()
         self.account_normaal.functies.add(self.functie_rcl)
+        self.account_normaal.functies.add(self.functie_cwz)
         account_vhpg_is_geaccepteerd(self.account_normaal)
 
         self.client.logout()
@@ -162,7 +163,8 @@ class TestFunctieWisselVanRol(TestCase):
         self.assertNotContains(resp, "BKO test")
         self.assertNotContains(resp, "RKO test")
         self.assertContains(resp, "RCL test")
-        self.assertNotContains(resp, "CWZ test")
+        self.assertContains(resp, "CWZ test")
+        self.assertContains(resp, "Grote Club")
 
         # activeer nu de rol van RCL
         # dan komen de CWZ rollen te voorschijn
