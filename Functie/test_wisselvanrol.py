@@ -15,6 +15,7 @@ from Account.models import Account,\
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
 from NhbStructuur.migrations.m0002_nhbstructuur_2018 import maak_rayons_2018, maak_regios_2018
 from Plein.tests import assert_html_ok, assert_template_used, assert_other_http_commands_not_supported
+from Plein.test_helpers import extract_all_href_urls
 import datetime
 
 
@@ -181,11 +182,19 @@ class TestFunctieWisselVanRol(TestCase):
 
         assert_other_http_commands_not_supported(self, '/functie/wissel-van-rol/')
 
-    def test_rolwissel(self):
+    def test_rolwissel_it(self):
         self.client.login(username=self.account_admin.username, password='wachtwoord')
         account_vhpg_is_geaccepteerd(self.account_admin)
         account_zet_sessionvars_na_otp_controle(self.client).save()
         rol_zet_sessionvars_na_otp_controle(self.account_admin, self.client).save()
+
+        resp = self.client.get('/functie/wissel-van-rol/')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assertContains(resp, "Rol: Gebruiker")
+        urls = [url for url in extract_all_href_urls(resp) if url.startswith('/functie/wissel-van-rol/')]
+        self.assertIn('/functie/wissel-van-rol/beheerder/', urls)   # IT beheerder
+        self.assertIn('/functie/wissel-van-rol/BB/', urls)          # Manager competitiezaken
+        self.assertIn('/functie/wissel-van-rol/geen/', urls)        # Gebruiker
 
         resp = self.client.get('/functie/wissel-van-rol/BB/', follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -210,7 +219,22 @@ class TestFunctieWisselVanRol(TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, "Rol: Gebruiker")
 
-        self.client.logout()
+    def test_rolwissel_bb(self):
+        account = self.account_normaal
+        account.nhblid = None
+        account.is_BB = True
+        account.save()
+        account_vhpg_is_geaccepteerd(account)
+        self.client.login(username=account.username, password='wachtwoord')
+        account_zet_sessionvars_na_otp_controle(self.client).save()
+        rol_zet_sessionvars_na_otp_controle(account, self.client).save()
+
+        resp = self.client.get('/functie/wissel-van-rol/')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assertContains(resp, "Rol: Gebruiker")
+        urls = [url for url in extract_all_href_urls(resp) if url.startswith('/functie/wissel-van-rol/')]
+        self.assertIn('/functie/wissel-van-rol/BB/', urls)          # Manager competitiezaken
+        self.assertIn('/functie/wissel-van-rol/geen/', urls)        # Gebruiker
 
     def test_geen_rolwissel(self):
         # dit raakt de exceptie in Account.rol:rol_mag_wisselen

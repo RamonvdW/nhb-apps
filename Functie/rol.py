@@ -103,10 +103,10 @@ def rol_zet_sessionvars_na_login(account, request):
         if user_is_otp_verified(request) and not show_vhpg:
             if account.is_staff:
                 rollen_vast.append(Rollen.ROL_IT)
-                rollen_vast.append(Rollen.ROL_NONE)      # special case
 
             if account.is_staff or account.is_BB:
                 rollen_vast.append(Rollen.ROL_BB)
+                rollen_vast.append(Rollen.ROL_NONE)      # Gebruiker (voor IT en BB)
 
                 for func in rol_expandeer_functies:
                     parent_tup = (Rollen.ROL_BB, None)
