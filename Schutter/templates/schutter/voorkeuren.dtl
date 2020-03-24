@@ -23,10 +23,8 @@
 <p>Voorbeelden:</p>
 <ul class="browser-default">
     <li>We laten alleen wedstrijden zien waar je met de door jou gekozen bogen in uit mag komen.</li>
-    <li>We kunnen je meteen in de juiste wedstrijdklasse plaatsen.</li>
+    <li>Waar mogelijk, kunnen we je meteen in de juiste wedstrijdklasse plaatsen.</li>
 </ul>
-
-<p>Je kan apart aangeven met welke bogen je zelf schiet en voor welke bogen je informatie over wil zien.</p>
 
 <form class="white" method="post" action="{{ opslaan_url }}">
     {% csrf_token %}
