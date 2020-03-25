@@ -7,12 +7,13 @@
 from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.test import TestCase
-from Plein.tests import assert_html_ok, assert_other_http_commands_not_supported, assert_template_used
 from .models import LogboekRegel, schrijf_in_logboek
 from .apps import LogboekConfig
 from Account.models import Account, account_vhpg_is_geaccepteerd, account_zet_sessionvars_na_otp_controle
 from Functie.rol import rol_zet_sessionvars_na_otp_controle, rol_activeer_rol, rol_is_beheerder
-
+from NhbStructuur.models import NhbLid
+from Plein.tests import assert_html_ok, assert_other_http_commands_not_supported, assert_template_used
+import datetime
 
 class TestLogboek(TestCase):
     """ unit tests voor de Logboek applicatie """
@@ -26,6 +27,19 @@ class TestLogboek(TestCase):
         self.account_normaal = Account.objects.get(username='normaal')
         self.account_admin = Account.objects.get(username='admin')
         account_vhpg_is_geaccepteerd(self.account_admin)
+
+        lid = NhbLid()
+        lid.nhb_nr = 100042
+        lid.geslacht = "M"
+        lid.voornaam = "Beh"
+        lid.achternaam = "eerder"
+        lid.email = "beh2@test.com"
+        lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
+        lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
+        lid.save()
+
+        self.account_normaal.nhblid = lid
+        self.account_normaal.save()
 
         schrijf_in_logboek(self.account_normaal, 'Logboek unittest', 'test setUp')
         schrijf_in_logboek(None, 'Logboek unittest', 'zonder account')
