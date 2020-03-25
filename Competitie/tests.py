@@ -10,7 +10,7 @@ from Account.models import Account, account_vhpg_is_geaccepteerd, account_zet_se
 from Functie.rol import rol_zet_sessionvars_na_otp_controle, rol_activeer_rol, rol_activeer_functie, \
                         rol_is_beheerder, rol_is_BB
 from Functie.models import maak_functie
-from Plein.test_helpers import assert_html_ok, assert_template_used, extract_all_href_urls
+from Overig.helpers import assert_html_ok, assert_template_used, extract_all_href_urls
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
 from .models import Competitie, DeelCompetitie, CompetitieWedstrijdKlasse, \

@@ -12,8 +12,7 @@ from Account.models import Account,\
                     account_zet_sessionvars_na_otp_controle,\
                     account_vhpg_is_geaccepteerd
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
-from Plein.tests import assert_html_ok, assert_template_used, assert_other_http_commands_not_supported
-from Plein.test_helpers import extract_all_href_urls
+from Overig.helpers import extract_all_href_urls, assert_html_ok, assert_template_used, assert_other_http_commands_not_supported
 import datetime
 
 

@@ -14,8 +14,7 @@ from Account.models import Account,\
                     account_vhpg_is_geaccepteerd
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
 from NhbStructuur.migrations.m0002_nhbstructuur_2018 import maak_rayons_2018, maak_regios_2018
-from Plein.tests import assert_html_ok, assert_template_used, assert_other_http_commands_not_supported
-from Plein.test_helpers import extract_all_href_urls
+from Overig.helpers import extract_all_href_urls, assert_html_ok, assert_template_used, assert_other_http_commands_not_supported
 import datetime
 
 

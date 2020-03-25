@@ -10,8 +10,7 @@ from Account.models import Account, account_zet_sessionvars_na_login
 from BasisTypen.models import BoogType
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
 from NhbStructuur.migrations.m0002_nhbstructuur_2018 import maak_rayons_2018, maak_regios_2018
-from Plein.test_helpers import assert_html_ok, assert_template_used, \
-                               assert_other_http_commands_not_supported
+from Overig.helpers import assert_html_ok, assert_template_used, assert_other_http_commands_not_supported
 from Functie.rol import Rollen, rol_zet_sessionvars_na_login, rol_get_huidige
 from .models import SchutterBoog
 from .leeftijdsklassen import leeftijdsklassen_zet_sessionvars_na_login, \
