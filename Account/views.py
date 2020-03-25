@@ -24,7 +24,7 @@ from .models import AccountCreateError, AccountCreateNhbGeenEmail, \
 from .qrcode import qrcode_get
 from Schutter.leeftijdsklassen import leeftijdsklassen_zet_sessionvars_na_login     # TODO: make plug-in
 from Functie.rol import rol_zet_sessionvars_na_login, rol_zet_sessionvars_na_otp_controle, rol_is_BB
-from Overig.tijdelijke_url import set_tijdelijke_url_receiver, RECEIVER_ACCOUNTEMAIL
+from Overig.tijdelijke_url import set_tijdelijke_url_receiver, RECEIVER_BEVESTIG_EMAIL, RECEIVER_SELECTEER_SCHUTTER
 from Plein.menu import menu_dynamics
 from Logboek.models import schrijf_in_logboek
 from Overig.helpers import get_safe_from_ip
@@ -758,6 +758,44 @@ def receive_bevestiging_accountemail(request, obj):
     return reverse('Account:bevestigd')
 
 
-set_tijdelijke_url_receiver(RECEIVER_ACCOUNTEMAIL, receive_bevestiging_accountemail)
+set_tijdelijke_url_receiver(RECEIVER_BEVESTIG_EMAIL, receive_bevestiging_accountemail)
+
+
+def receiver_selecteer_schutter(request, obj):
+    """ Met deze functie kan een geauthoriseerd persoon tijdelijk inlogen op de site
+        als een andere gebruiker.
+            obj is een AccountEmail object.
+        We moeten een url teruggeven waar een http-redirect naar gedaan kan worden.
+    """
+    from_ip = get_safe_from_ip(request)
+
+    account = obj.account
+
+    # integratie met de authenticatie laag van Django
+    login(request, account)
+    if account.otp_is_actief:
+        account_zet_sessionvars_na_otp_controle(request)
+        rol_zet_sessionvars_na_otp_controle(account, request)
+    else:
+        account_zet_sessionvars_na_login(request)
+        rol_zet_sessionvars_na_login(account, request)
+    leeftijdsklassen_zet_sessionvars_na_login(account, request)
+
+    # gebruiker mag NIET aangemeld blijven
+    # zorg dat de session-cookie snel verloopt
+    request.session.set_expiry(0)
+
+    my_logger.info('%s LOGIN automatische inlog als schutter %s' % (from_ip, repr(account.username)))
+
+    # schrijf in het logboek
+    schrijf_in_logboek(account=None,
+                       gebruikte_functie="Inloggen",
+                       activiteit="Automatische inlog als schutter %s vanaf IP %s" % (repr(account.username), from_ip))
+
+    return reverse('Plein:plein')
+
+
+set_tijdelijke_url_receiver(RECEIVER_SELECTEER_SCHUTTER, receiver_selecteer_schutter)
+
 
 # end of file

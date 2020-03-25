@@ -10,7 +10,7 @@ from django.utils import timezone
 from django.contrib.auth.models import AbstractUser
 from Functie.models import Functie
 from NhbStructuur.models import NhbLid
-from Overig.tijdelijke_url import set_tijdelijke_url_receiver, RECEIVER_ACCOUNTEMAIL, \
+from Overig.tijdelijke_url import set_tijdelijke_url_receiver, \
                                   maak_tijdelijke_url_accountemail
 import datetime
 import pyotp
