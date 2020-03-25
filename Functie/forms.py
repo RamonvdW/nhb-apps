@@ -26,4 +26,11 @@ class WijzigBeheerdersForm(forms.Form):
     drop = forms.IntegerField(required=False)
 
 
+class SelecteerSchutterForm(forms.Form):
+    """ Dit formulier wordt gebruikt om via POST requests de keuze te ontvangen
+        van het verborgen formulier
+    """
+    selecteer = forms.IntegerField(required=False)
+
+
 # end of file

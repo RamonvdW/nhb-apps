@@ -195,14 +195,19 @@ class TestFunctieWisselVanRol(TestCase):
         self.assertIn('/functie/wissel-van-rol/beheerder/', urls)   # IT beheerder
         self.assertIn('/functie/wissel-van-rol/BB/', urls)          # Manager competitiezaken
         self.assertIn('/functie/wissel-van-rol/geen/', urls)        # Gebruiker
+        self.assertNotIn('/functie/wissel-van-rol/selecteer-schutter/', urls)
 
         resp = self.client.get('/functie/wissel-van-rol/BB/', follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, "Rol: Manager competitiezaken")
+        urls = [url for url in extract_all_href_urls(resp) if url.startswith('/functie/wissel-van-rol/')]
+        self.assertNotIn('/functie/wissel-van-rol/selecteer-schutter/', urls)
 
         resp = self.client.get('/functie/wissel-van-rol/beheerder/', follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, "Rol: IT beheerder")
+        urls = [url for url in extract_all_href_urls(resp) if url.startswith('/functie/wissel-van-rol/')]
+        self.assertIn('/functie/wissel-van-rol/selecteer-schutter/', urls)
 
         # controleer dat een niet valide rol wissel geen effect heeft
         # dit raakt een exception in Account.rol:rol_activeer
@@ -218,6 +223,8 @@ class TestFunctieWisselVanRol(TestCase):
         resp = self.client.get('/functie/wissel-van-rol/geen/', follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, "Rol: Gebruiker")
+        urls = [url for url in extract_all_href_urls(resp) if url.startswith('/functie/wissel-van-rol/')]
+        self.assertNotIn('/functie/wissel-van-rol/selecteer-schutter/', urls)
 
     def test_rolwissel_bb(self):
         account = self.account_normaal
@@ -233,6 +240,7 @@ class TestFunctieWisselVanRol(TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, "Rol: Gebruiker")
         urls = [url for url in extract_all_href_urls(resp) if url.startswith('/functie/wissel-van-rol/')]
+        self.assertNotIn('/functie/wissel-van-rol/selecteer-schutter/', urls)   # Selecteer schutter
         self.assertIn('/functie/wissel-van-rol/BB/', urls)          # Manager competitiezaken
         self.assertIn('/functie/wissel-van-rol/geen/', urls)        # Gebruiker
 
