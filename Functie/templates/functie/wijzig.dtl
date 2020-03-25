@@ -73,7 +73,7 @@ function do_wijzig(actie, id) {
     <div class="row nhb-blauw white-text">
         <div class="col s12 center-align">
             <h5>Zoeken beheerder</h5>
-            <p>Zoek NHB nummer of deel van de naam</p>
+            <p>Zoek op NHB nummer of een deel van de naam</p>
         </div>
     </div>
 
