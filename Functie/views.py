@@ -504,11 +504,11 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
         context['show_vhpg'], context['vhpg'] = account_needs_vhpg(self.request.user)
+        context['huidige_rol'] = rol_get_beschrijving(self.request)
+
         context['show_otp_controle'] = False
         context['show_otp_koppelen'] = False
         context['is_verified'] = False
-
-        context['huidige_rol'] = rol_get_beschrijving(self.request)
 
         if user_is_otp_verified(self.request):
             context['is_verified'] = True
@@ -522,6 +522,91 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
 
         menu_dynamics(self.request, context, actief='wissel-van-rol')
         return context
+
+
+class SelecteerSchutterView(UserPassesTestMixin, ListView):
+
+    """ Deze view laat Wissel van Rol toe naar een gekozen schutter
+        zodat de website 'door de ogen van' deze schutter bekeken kan worden
+    """
+
+    template_name = TEMPLATE_FUNCTIE_SELECTEER_SCHUTTER
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        # deze functie wordt gebruikt voordat de GET of de POST afgehandeld wordt (getest bewezen)
+        account = self.request.user
+        if account.is_authenticated:
+            return account.is_staff or account.is_BB
+        return False
+
+    def handle_no_permission(self):
+        """ gebruiker heeft geen toegang --> doe alsof dit niet bestaat """
+        raise Resolver404()
+
+    def get_queryset(self):
+        """ called by the template system to get the queryset or list of objects for the template """
+
+        self.form = ZoekBeheerdersForm(self.request.GET)
+        self.form.full_clean()  # vult cleaned_data
+
+        zoekterm = self.form.cleaned_data['zoekterm']
+        if len(zoekterm) >= 2:  # minimaal twee tekens van de naam/nummer
+            self.zoekterm = zoekterm
+            qset = Account.objects.\
+                       exclude(is_staff=True).\
+                       exclude(nhblid__is_actief_lid=False).\
+                       annotate(hele_naam=Concat('nhblid__voornaam', Value(' '), 'nhblid__achternaam')).\
+                       filter(
+                            Q(username__icontains=zoekterm) |  # dekt ook nhb_nr
+                            Q(nhblid__voornaam__icontains=zoekterm) |
+                            Q(nhblid__achternaam__icontains=zoekterm) |
+                            Q(hele_naam__icontains=zoekterm)).order_by('username')
+            return qset[:50]
+
+        self.zoekterm = ""
+        return None
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+        context['url'] = reverse('Functie:selecteer-schutter')
+        context['zoekterm'] = self.zoekterm
+        context['form'] = self.form
+        menu_dynamics(self.request, context, actief='wissel-van-rol')
+        return context
+
+    def post(self, request, *args, **kwargs):
+        """ deze functie wordt aangeroepen als een POST request ontvangen is.
+            dit is gekoppeld aan het drukken op de Selecteer knop.
+        """
+        form = SelecteerSchutterForm(request.POST)
+        form.full_clean()  # vult cleaned_data
+        account_pk = form.cleaned_data.get('selecteer')
+
+        try:
+            accountemail = AccountEmail.objects.get(account__pk=account_pk)
+        except AccountEmail.DoesNotExist:
+            raise Resolver404()
+
+        # prevent upgrade
+        if accountemail.account.is_staff:
+            raise Resolver404()
+
+        context = dict()
+        context['account'] = accountemail.account
+
+        # schrijf de intentie in het logboek
+        schrijf_in_logboek(account=self.request.user,
+                           gebruikte_functie="Inloggen",
+                           activiteit="Selecteer schutter %s" % repr(accountemail.account.username))
+
+        # maak een tijdelijke URL aan waarmee de inlog gedaan kan worden
+        url = maak_tijdelijke_url_selecteer_schutter(accountemail, selecteer_schutter=accountemail.account.username)
+        context['login_as_url'] = url
+
+        menu_dynamics(self.request, context, actief='wissel-van-rol')
+        return render(self.request, TEMPLATE_FUNCTIE_SELECTEER_SCHUTTER_GO, context)
 
 
 class ActiveerRolView(UserPassesTestMixin, View):
