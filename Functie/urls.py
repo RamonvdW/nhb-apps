@@ -28,6 +28,10 @@ urlpatterns = [
          views.OverzichtView.as_view(),
          name='overzicht'),
 
+    path('wissel-van-rol/selecteer-schutter/',
+         views.SelecteerSchutterView.as_view(),
+         name='selecteer-schutter'),
+
     path('wissel-van-rol/functie/<functie_pk>/',
          views.ActiveerRolView.as_view(),
          name='activeer-rol-functie'),

@@ -146,21 +146,23 @@ class SiteTijdelijkeUrlView(View):
         url_code = kwargs['code']
 
         try:
-            obj = SiteTijdelijkeUrl.objects.get(url_code=url_code)
+            objs = SiteTijdelijkeUrl.objects.filter(url_code=url_code)
         except SiteTijdelijkeUrl.DoesNotExist:
             # ignore onbekende url code
             pass
         else:
             # kijk of deze tijdelijke url al verlopen is
             url = None
-            if obj.geldig_tot > timezone.now():
-                # dispatch naar de juiste applicatie waar deze bij hoort
-                # de callbacks staan in de dispatcher
-                url = do_dispatch(request, obj.hoortbij_accountemail)
-            # else: url is verlopen --> doe niets
+            now = timezone.now()
+            for obj in objs:
+                if obj.geldig_tot > now:
+                    # dispatch naar de juiste applicatie waar deze bij hoort
+                    # de callbacks staan in de dispatcher
+                    url = do_dispatch(request, obj)
 
-            # verwijder de gebruikte tijdelijke url
-            obj.delete()
+                # verwijder de gebruikte tijdelijke url
+                obj.delete()
+            # for
 
             if url:
                 return HttpResponseRedirect(url)

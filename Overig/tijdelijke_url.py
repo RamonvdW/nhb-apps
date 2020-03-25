@@ -15,7 +15,8 @@ uuid_namespace = uuid5(NAMESPACE_URL, 'Overig.Models.SiteUrls')
 # Overig.models gebruikt Account.Account en Account.AccountEmail
 # als Account deze file importeert en wij Overig.models dan hebben we een circulaire dependency
 SAVER = '__saver__'
-RECEIVER_ACCOUNTEMAIL = 'accountemail'
+RECEIVER_BEVESTIG_EMAIL = 'bevestig_email'
+RECEIVER_SELECTEER_SCHUTTER = 'selecteer_schutter'
 
 dispatcher = dict()
 
@@ -51,20 +52,40 @@ def maak_tijdelijke_url_accountemail(accountemail, **kwargs):
         De volledige url wordt terug gegeven.
     """
     url_code = _maak_url_code(**kwargs)
-    dispatcher[SAVER](url_code, geldig_dagen=7, accountemail=accountemail)
+    dispatcher[SAVER](url_code, dispatch_to="bevestig_email", geldig_dagen=7, accountemail=accountemail)
     return settings.SITE_URL + reverse('Overig:tijdelijke-url', args=[url_code])
 
 
-def do_dispatch(request, accountemail):
+def maak_tijdelijke_url_selecteer_schutter(accountemail, **kwargs):
+    """ Maak een tijdelijke URL aan die gebruikt kan worden om eenmalig
+        in te loggen als het gekozen account.
+    """
+    url_code = _maak_url_code(**kwargs)
+    dispatcher[SAVER](url_code, dispatch_to="selecteer_schutter", geldig_seconden=60, accountemail=accountemail)
+    return settings.SITE_URL + reverse('Overig:tijdelijke-url', args=[url_code])
+
+
+def do_dispatch(request, obj):
     """ Deze functie wordt aangeroepen vanuit de view die de ontvangen url_code
         opgezocht heeft in de database.
         Deze functie zoekt de callback van de juiste ontvanger op en roept deze aan.
     """
-    if accountemail:
-        func = dispatcher[RECEIVER_ACCOUNTEMAIL]
-        redirect = func(request, accountemail)
-        return redirect
 
-    return None
+    redirect = None
+
+    if obj.dispatch_to == "selecteer_schutter":
+        func = dispatcher[RECEIVER_SELECTEER_SCHUTTER]
+        redirect = func(request, obj.hoortbij_accountemail)
+
+    elif obj.dispatch_to == "bevestig_email":
+        func = dispatcher[RECEIVER_BEVESTIG_EMAIL]
+        redirect = func(request, obj.hoortbij_accountemail)
+
+    # TODO: verwijder onderstaande legacy methode na 2020-04-02
+    elif obj.hoortbij_accountemail:
+        func = dispatcher[RECEIVER_BEVESTIG_EMAIL]
+        redirect = func(request, obj.hoortbij_accountemail)
+
+    return redirect
 
 # end of file

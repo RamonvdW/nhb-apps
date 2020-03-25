@@ -7,20 +7,23 @@
 from django.conf import settings
 from django.http import HttpResponseRedirect
 from django.urls import Resolver404, reverse
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 from django.db.models import Q, Value
 from django.db.models.functions import Concat
 from django.views.generic import ListView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Plein.menu import menu_dynamics
 from Logboek.models import schrijf_in_logboek
-from Account.models import Account, account_needs_vhpg, account_is_otp_gekoppeld, user_is_otp_verified
+from Account.models import Account, AccountEmail, \
+                           account_needs_vhpg, \
+                           account_is_otp_gekoppeld, user_is_otp_verified
 from Overig.helpers import get_safe_from_ip
+from Overig.tijdelijke_url import maak_tijdelijke_url_selecteer_schutter
 from .rol import Rollen, rol_mag_wisselen, rol_enum_pallet, rol2url,\
                  rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving, rol_is_beheerder, rol_is_CWZ,\
                  rol_activeer_rol, rol_activeer_functie, rol_evalueer_opnieuw
 from .models import Functie
-from .forms import ZoekBeheerdersForm, WijzigBeheerdersForm
+from .forms import ZoekBeheerdersForm, WijzigBeheerdersForm, SelecteerSchutterForm
 import logging
 
 
@@ -28,6 +31,8 @@ TEMPLATE_FUNCTIE_OVERZICHT = 'functie/overzicht.dtl'
 TEMPLATE_FUNCTIE_OVERZICHT_VERENIGING = 'functie/overzicht-vereniging.dtl'
 TEMPLATE_FUNCTIE_WIJZIG = 'functie/wijzig.dtl'
 TEMPLATE_FUNCTIE_WISSELVANROL = 'functie/wissel-van-rol.dtl'
+TEMPLATE_FUNCTIE_SELECTEER_SCHUTTER = 'functie/selecteer-schutter.dtl'
+TEMPLATE_FUNCTIE_SELECTEER_SCHUTTER_GO = 'functie/selecteer-schutter-go.dtl'
 
 my_logger = logging.getLogger('NHBApps.Account')
 
@@ -188,8 +193,8 @@ class WijzigView(UserPassesTestMixin, ListView):
         if len(zoekterm) >= 2:  # minimaal twee tekens van de naam/nummer
             self.zoekterm = zoekterm
             qset = Account.objects.\
-                       exclude(nhblid__is_actief_lid=False). \
-                       annotate(hele_naam=Concat('nhblid__voornaam', Value(' '), 'nhblid__achternaam')). \
+                       exclude(nhblid__is_actief_lid=False).\
+                       annotate(hele_naam=Concat('nhblid__voornaam', Value(' '), 'nhblid__achternaam')).\
                        filter(
                             Q(username__icontains=zoekterm) |  # dekt ook nhb_nr
                             Q(nhblid__voornaam__icontains=zoekterm) |
@@ -455,6 +460,12 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
                 except KeyError:
                     hierarchy2[parent_tup] = [child_tup,]
         # for
+
+        # afhankelijk van de huidige rol
+        # TODO: overweeg gebruik door BB of Support
+        if rol_get_huidige(self.request) == Rollen.ROL_IT:
+            url = reverse('Functie:selecteer-schutter')
+            objs.append({'titel': 'Selecteer schutter', 'url': url})
 
         # zet 'lage' functies onderaan
         objs.extend(objs2)

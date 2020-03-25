@@ -1,0 +1,95 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2020 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+{% load overig_filters %}   <!-- highlight filter -->
+
+{% block title %}Selecteer schutter{% endblock %}
+
+{% block pagina %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="selecteer-schutter" %}
+
+<h4>Selecteer schutter</h4>
+
+<script>
+function do_selecteer(id) {
+    // voer een POST uit om toe te voegen
+    var form = document.createElement('form');
+    form.setAttribute('method', 'post');
+    form.setAttribute('action', '{{ url }}');
+
+    var inp = document.createElement('input');
+    inp.type = "hidden";
+    inp.name = "selecteer";
+    inp.value = id.getAttribute("data-pk");
+    form.appendChild(inp);
+
+    var inp = document.createElement('input');
+    inp.type = "hidden";
+    inp.name = "csrfmiddlewaretoken";
+    inp.value = getCookie('csrftoken');
+    form.appendChild(inp);
+
+    form.style.display = 'hidden';
+    document.body.appendChild(form);
+    form.submit();
+}
+</script>
+
+<p>Beleef de website als elke andere gebruiker.</p>
+<p>Gebruik onderstaand formulier om naar een schutter te zoeken.</p>
+
+<div class="container z-depth-2 white">
+    <div class="row nhb-blauw white-text">
+        <div class="col s12 center-align">
+            <h5>Zoek schutter</h5>
+            <p>Zoek op NHB nummer of een deel van de naam</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <form class="col s12" action="{{ url }}" method="get">
+            <div class="row"><div class="input-field col s12">
+                {{ form.zoekterm.label_tag }}{{ form.zoekterm }}
+            </div></div>
+
+            <div class="row"><div class="col s12"></div>
+                <div class="center-align">
+                    <button class="btn-nhb-blauw" type="submit"><i class="material-icons-round left">search</i>Zoek</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+{% if zoekterm %}
+    {% if object_list.count %}
+        <h5>Gevonden schutters ({{ object_list.count }})</h5>
+        <ul class="collapsible">
+            {% for obj in object_list %}
+                <!-- obj is Account -->
+                <li>
+                    <div class="collapsible-header white">
+                        <span>{{ obj.volledige_naam|highlight:zoekterm }}</span>
+                    </div>
+                    <div class="collapsible-body white">
+                        <span>Lid van {{ obj.nhblid.bij_vereniging.naam }}</span>
+                        <p>NHB nummer: {{ obj.username|highlight:zoekterm }}</p>
+                        <button class="btn-nhb-blauw" onclick="do_selecteer(this)" data-pk="{{ obj.pk }}">Selecteer</button>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p class="red-text">Niets gevonden</p>
+    {% endif %}
+
+    <p>Staat de gezochte persoon er niet bij? Alleen personen met een account op deze website worden getoond.</p>
+{% endif %}
+
+{% endblock %}
+
