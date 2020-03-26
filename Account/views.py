@@ -767,9 +767,9 @@ def receiver_selecteer_schutter(request, obj):
             obj is een AccountEmail object.
         We moeten een url teruggeven waar een http-redirect naar gedaan kan worden.
     """
-    from_ip = get_safe_from_ip(request)
-
     account = obj.account
+
+    old_last_login = account.last_login
 
     # integratie met de authenticatie laag van Django
     login(request, account)
@@ -781,10 +781,15 @@ def receiver_selecteer_schutter(request, obj):
         rol_zet_sessionvars_na_login(account, request)
     leeftijdsklassen_zet_sessionvars_na_login(account, request)
 
+    # herstel de last_login van de echte gebruiker
+    account.last_login = old_last_login
+    account.save(update_fields=['last_login'])
+
     # gebruiker mag NIET aangemeld blijven
     # zorg dat de session-cookie snel verloopt
     request.session.set_expiry(0)
 
+    from_ip = get_safe_from_ip(request)
     my_logger.info('%s LOGIN automatische inlog als schutter %s' % (from_ip, repr(account.username)))
 
     # schrijf in het logboek
