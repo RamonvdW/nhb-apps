@@ -6,9 +6,10 @@
 
 from django.test import TestCase
 from django.contrib.auth import get_user_model
-from Account.models import Account, account_vhpg_is_geaccepteerd, account_zet_sessionvars_na_otp_controle
+from Account.models import Account, account_vhpg_is_geaccepteerd, account_zet_sessionvars_na_otp_controle,\
+                           account_create_nhb
 from Functie.rol import rol_zet_sessionvars_na_otp_controle, rol_activeer_rol, rol_activeer_functie, \
-                        rol_is_beheerder, rol_is_BB
+                        rol_is_beheerder, rol_is_BB, rol_is_CWZ
 from Functie.models import maak_functie
 from Overig.helpers import assert_html_ok, assert_template_used, extract_all_href_urls
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
@@ -366,5 +367,109 @@ class TestCompetitieBeheerders(TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         assert_html_ok(self, resp)
         assert_template_used(self, resp, ('competitie/lijst-verenigingen.dtl', 'plein/site_layout.dtl'))
+
+
+class TestCompetitieCWZ(TestCase):
+
+    """ Tests voor de Competitie applicatie, functies voor de CWZ """
+
+    def setUp(self):
+        """ eenmalige setup voor alle tests
+            wordt als eerste aangeroepen
+        """
+
+        regio_111 = NhbRegio.objects.get(regio_nr=111)
+
+        # maak een test vereniging
+        ver = NhbVereniging()
+        ver.naam = "Grote Club"
+        ver.nhb_nr = "1000"
+        ver.regio = regio_111
+        # secretaris kan nog niet ingevuld worden
+        ver.save()
+
+        # maak de CWZ functie
+        self.functie_cwz = maak_functie("CWZ test", "CWZ")
+        self.functie_cwz.nhb_ver = ver
+        self.functie_cwz.save()
+
+        # maak het lid aan dat CWZ wordt
+        lid = NhbLid()
+        lid.nhb_nr = 100001
+        lid.geslacht = "M"
+        lid.voornaam = "Ramon"
+        lid.achternaam = "de Tester"
+        lid.email = "rdetester@gmail.not"
+        lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
+        lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
+        lid.bij_vereniging = ver
+        lid.save()
+        self.nhblid1 = lid
+
+        account_create_nhb(lid.nhb_nr, lid.email, 'wachtwoord')
+        self.account_cwz = Account.objects.get(nhblid__nhb_nr=lid.nhb_nr)
+        self.account_cwz.functies.add(self.functie_cwz)
+        account_vhpg_is_geaccepteerd(self.account_cwz)
+
+        # maak een jeugdlid aan
+        lid = NhbLid()
+        lid.nhb_nr = 100002
+        lid.geslacht = "V"
+        lid.voornaam = "Ramona"
+        lid.achternaam = "de Jeugdschutter"
+        lid.email = ""
+        lid.geboorte_datum = datetime.date(year=2010, month=3, day=4)
+        lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
+        lid.bij_vereniging = ver
+        lid.save()
+
+        # maak een senior lid aan
+        lid = NhbLid()
+        lid.nhb_nr = 100003
+        lid.geslacht = "V"
+        lid.voornaam = "Ramona"
+        lid.achternaam = "de Testerin"
+        lid.email = ""
+        lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
+        lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
+        lid.bij_vereniging = ver
+        lid.save()
+
+        self.nhblid2 = lid
+
+    def test_ledenlijst(self):
+        account = self.account_cwz
+        self.client.login(username=account.username, password='wachtwoord')
+        account_zet_sessionvars_na_otp_controle(self.client).save()
+        rol_zet_sessionvars_na_otp_controle(account, self.client).save()
+        rol_activeer_functie(self.client, self.functie_cwz.pk).save()
+        self.assertTrue(rol_is_CWZ(self.client))
+
+        resp = self.client.get('/competitie/lijst-leden/', follow=False)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        assert_html_ok(self, resp)
+        assert_template_used(self, resp, ('competitie/ledenlijst.dtl', 'plein/site_layout.dtl'))
+
+        self.assertContains(resp, 'Jeugd')
+        self.assertContains(resp, 'Volwassen')
+        self.assertNotContains(resp, 'Inactieve leden')
+
+        # maak 1 lid inactief
+        self.nhblid2.is_actief_lid = False
+        self.nhblid2.save()
+
+        resp = self.client.get('/competitie/lijst-leden/', follow=False)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+
+        self.assertContains(resp, 'Jeugd')
+        self.assertContains(resp, 'Volwassen')
+        self.assertContains(resp, 'Inactieve leden')
+
+        # corner-case
+        self.client.logout()
+        resp = self.client.get('/competitie/lijst-leden/', follow=True)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        assert_html_ok(self, resp)
+        assert_template_used(self, resp, ('competitie/overzicht.dtl', 'plein/site_layout.dtl'))
 
 # end of file

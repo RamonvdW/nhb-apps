@@ -31,6 +31,22 @@
         </div>
     </div>
 
+    <div class="col s12 m6 xl4">
+        <div class="card">
+            <div class="card-content">
+                <table class="simple"><tr style="border:0px">
+                    <td><i class="material-icons-round large">list_alt</i></td>
+                    <td>Toon de ledenlijst van jouw vereniging.</td>
+                </tr></table>
+            </div>
+            <a href="{% url 'Competitie:ledenlijst' %}" class="nhb-klikbare-balk">
+                <div class="card-action center-align">
+                    <span class="nhb-klikbare-link">Ledenlijst</span>
+                </div>
+            </a>
+        </div>
+    </div>
+
 </div>
 
 {% endblock %}

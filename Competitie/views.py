@@ -16,7 +16,7 @@ from Logboek.models import schrijf_in_logboek
 from Functie.models import Functie
 from Functie.rol import Rollen, rol_get_huidige_functie, rol_get_beschrijving,\
                         rol_is_BB, rol_is_CWZ, rol_is_beheerder
-from BasisTypen.models import TeamType, TeamTypeBoog, WedstrijdKlasse, \
+from BasisTypen.models import TeamType, TeamTypeBoog, WedstrijdKlasse, LeeftijdsKlasse, \
                               WedstrijdKlasseBoog, WedstrijdKlasseLeeftijd
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from NhbStructuur.models import NhbLid, NhbVereniging
@@ -32,7 +32,7 @@ TEMPLATE_COMPETITIE_INSTELLINGEN = 'competitie/instellingen-nieuwe-competitie.dt
 TEMPLATE_COMPETITIE_AANMAKEN = 'competitie/competities-aanmaken.dtl'
 TEMPLATE_COMPETITIE_KLASSEGRENZEN = 'competitie/klassegrenzen-vaststellen.dtl'
 TEMPLATE_COMPETITIE_LIJST_VERENIGINGEN = 'competitie/lijst-verenigingen.dtl'
-
+TEMPLATE_COMPETITIE_LEDENLIJST = 'competitie/ledenlijst.dtl'
 
 JA_NEE = {False: 'Nee', True: 'Ja'}
 
@@ -498,5 +498,83 @@ class LijstVerenigingenView(UserPassesTestMixin, ListView):
         menu_dynamics(self.request, context, actief='competitie')
         return context
 
+
+class LedenLijstView(UserPassesTestMixin, ListView):
+
+    """ Deze view laat de CWZ zijn ledenlijst zien """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_COMPETITIE_LEDENLIJST
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        _, functie_nu = rol_get_huidige_functie(self.request)
+        return functie_nu and functie_nu.rol == "CWZ"
+
+    def handle_no_permission(self):
+        """ gebruiker heeft geen toegang --> redirect naar Competitie scherm """
+        return HttpResponseRedirect(reverse('Competitie:overzicht'))
+
+    def get_queryset(self):
+        """ called by the template system to get the queryset or list of objects for the template """
+
+        huidige_jaar = timezone.now().year  # TODO: check for correctness in last hours of the year (due to timezone)
+        self._huidige_jaar = huidige_jaar
+
+        _, functie_nu = rol_get_huidige_functie(self.request)
+        qset = NhbLid.objects.filter(bij_vereniging=functie_nu.nhb_ver)
+        objs = list()
+
+        jeugdgrens = huidige_jaar - 21      # junior t/m 21 jaar
+
+        # jeugd
+        # sorteer op geboorte jaar en daarna naam
+        for obj in qset.filter(geboorte_datum__year__gt=jeugdgrens).order_by('-geboorte_datum__year', 'achternaam', 'voornaam'):
+            objs.append(obj)
+
+            # de wedstrijdleeftijd voor dit hele jaar
+            wedstrijdleeftijd = huidige_jaar - obj.geboorte_datum.year
+            obj.leeftijd = wedstrijdleeftijd
+
+            # de wedstrijdklasse voor dit hele jaar
+            obj.leeftijdsklasse = LeeftijdsKlasse.objects.filter(
+                            max_wedstrijdleeftijd__gte=wedstrijdleeftijd,
+                            geslacht='M').order_by('max_wedstrijdleeftijd')[0]
+        # for
+
+        # volwassenen
+        # sorteer op naam
+        for obj in qset.filter(geboorte_datum__year__lt=jeugdgrens).order_by('achternaam', 'voornaam'):
+            objs.append(obj)
+            obj.leeftijdsklasse = None
+
+            if not obj.is_actief_lid:
+                obj.leeftijd = huidige_jaar - obj.geboorte_datum.year
+        # for
+        return objs
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        jeugd = list()
+        senior = list()
+        inactief = list()
+        for obj in context['object_list']:
+            if not obj.is_actief_lid:
+                inactief.append(obj)
+            elif obj.leeftijdsklasse:
+                jeugd.append(obj)
+            else:
+                senior.append(obj)
+        # for
+
+        context['leden_jeugd'] = jeugd
+        context['leden_senior'] = senior
+        context['leden_inactief'] = inactief
+        context['wedstrijdklasse_jaar'] = self._huidige_jaar
+
+        menu_dynamics(self.request, context, actief='competitie')
+        return context
 
 # end of file
