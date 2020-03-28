@@ -29,6 +29,11 @@
     {% endif %}
 </div>
 
+<li{% if menu_actief == "hetplein" %} class="actief"{% endif %}>
+    <a href="{% url 'Plein:plein' %}" class="white-text">
+    <i class="material-icons-round white-text">home</i>Het Plein</a>
+</li>
+
 <!-- inlog knop als gebruiker niet ingelogd is -->
 {% if menu_show_login %}
 <li{% if menu_actief == "inloggen" %} class="actief"{% endif %}>
@@ -41,17 +46,16 @@
 {% if menu_show_wisselvanrol %}
 <li{% if menu_actief == "wissel-van-rol" %} class="actief"{% endif %}>
     <a href="{% url 'Functie:wissel-van-rol' %}" class="white-text">
-    <i class="material-icons-round white-text">supervisor_account</i>Wissel van rol</a>
+    <i class="material-icons-round white-text">people_alt</i>Wissel van rol</a>
 </li>
 {% endif %}
 
 {% if menu_show_schutter %}
 <li{% if menu_actief == "schutter" %} class="actief"{% endif %}>
     <a href="{% url 'Schutter:profiel' %}" class="white-text">
-    <i class="material-icons-round white-text">home</i>Schutter</a>
+    <i class="material-icons-round white-text">portrait</i>Schutter</a>
 </li>
 {% endif %}
-
 
 <li{% if menu_actief == "competitie" %} class="actief"{% endif %}>
     <a href="{% url 'Competitie:overzicht' %}" class="white-text">

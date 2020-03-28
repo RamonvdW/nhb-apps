@@ -6,12 +6,12 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}Welkom Schutter!{% endblock %}
+{% block title %}Welkom{% endblock %}
 
 {% block pagina %}
 {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="plein-schutter" %}
 
-<h4>Hallo, schutter!</h4>
+<h4>Welkom op het Plein</h4>
 
 <p>Zie Schutter in het menu.</p>
 

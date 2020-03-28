@@ -39,6 +39,8 @@ class PleinView(View):
             account = self.request.user
             rol_nu = rol_get_huidige(request)
 
+            context['menu_show_plein'] = True
+
             if rol_nu == Rollen.ROL_NONE or rol_nu is None:
                 template = TEMPLATE_PLEIN_GEBRUIKER
 
@@ -69,7 +71,7 @@ class PleinView(View):
 
                 context['huidige_rol'] = rol_get_beschrijving(request)
 
-        menu_dynamics(self.request, context)
+        menu_dynamics(self.request, context, actief='hetplein')
         return render(request, template, context)
 
 

@@ -11,6 +11,7 @@ from Functie.rol import Rollen, rol_get_huidige, rol_mag_wisselen, rol_get_besch
 ACTIEF_OPTIES = (
     'inloggen',
     'uitloggen',
+    'hetplein',
     'privacy',
     'records',
     'logboek',

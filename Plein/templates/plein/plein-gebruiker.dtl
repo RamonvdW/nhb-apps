@@ -11,9 +11,11 @@
 {% block pagina %}
 {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="plein-gebruiker" %}
 
-<h4>Welkom, gebruiker!</h4>
+<h4>Welkom op Het Plein</h4>
 
-<p>Wat zouden we hier kunnen tonen?</p>
+<p>Nog een beetje saai zo. Wat zouden we hier kunnen tonen?</p>
+
+<p>Je ziet deze pagina omdat je de rol 'Gebruiker' gekozen hebt. Maar een paar gebruikers kunnen dat.</p>
 
 {% endblock %}
 
