@@ -23,11 +23,17 @@
 
 <!-- toon de functies met huidige beheerders in een tabel -->
 <div class="row">
-    <table class="white">
+    <table class="white" id="table1">
         <thead>
+            <tr>        <!-- filter veld -->
+                <td colspan="2" class="table-filter"><input class="table-filter" oninput="myTableFilter(this, 'table1')" placeholder="Zoeken"/></td>
+                {% if show_wijzig_kolom %}
+                    <td/>
+                {% endif %}
+            </tr>
             <tr>
-                <th>Functie / Rol</th>
-                <th>Beheerder(s)</th>
+                <th filter="on">Functie / Rol</th>
+                <th filter="on">Beheerder(s)</th>
                 {% if show_wijzig_kolom %}
                 <th></th>   <!-- kolom voor de 'wijzig' knoppen -->
                 {% endif %}

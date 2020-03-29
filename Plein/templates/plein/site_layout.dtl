@@ -91,5 +91,46 @@
                 return cookieValue;
             }
         </script>
+
+        <script>
+            // wordt gebruikt om te reageren op de input van een gebruiker in een zoekveld
+            // en regels van de tabel wel/niet zichtbaar te maken
+            // kolommen waarin gezocht mag worden moeten het 'filter' attribuut hebben
+            //          <thead>
+            //              <th filter="on">Header1</th>
+            //              <th>Header2<th>
+            function myTableFilter(zoekveld, tableId)
+            {
+                var table = document.getElementById(tableId);
+                if (table == undefined) return;
+                //console.log('table: ', table);
+
+                filter_tekst = zoekveld.value;
+                //console.log('filter_tekst: ', filter_tekst);
+
+                // doorzoek de header kolommen op filter=on
+                var filter_kolommen = new Array();
+                for (var i=0, row; row = table.tHead.rows[i]; i++) {        // stops when row=null
+                    for (var j=0, cell; cell = row.cells[j]; j++) {         // stops when cell=null
+                        if (cell.hasAttribute('filter')) filter_kolommen.push(j);
+                    }
+                }
+                //console.log('kolom nummers met filter: ', filter_kolommen);
+
+                var body = table.tBodies[0];
+                //console.log("body: ", body);        // for debug
+                for (var i=0, row; row = body.rows[i]; i++) {               // stops when row=null
+                    // besluit om deze regel te tonen, of niet
+                    var show = false;
+                    // kijk of de zoekterm in een van de kozen kolommen voorkomt
+                    filter_kolommen.forEach(kolom_nr => {
+                            // TODO: dit is nog niet case-insensitive of accent-insensitive
+                            if (row.cells[kolom_nr].innerText.indexOf(filter_tekst) != -1) show = true;
+                        });
+                    row.style.display = show ? 'table-row' : 'none';
+                }
+            }
+        </script>
+
     </body>
 </html>

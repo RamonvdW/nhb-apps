@@ -48,6 +48,16 @@ h1, h2, h3, h4, h5, h6 {
     margin-bottom: 0px;
 }
 
+/* invoerveld voor een zoek / filter veld boven aan de tabel */
+.table-filter {
+    padding: 0 5px;     /* deze padding komt voor en na het invoer veld */
+}
+
+input.table-filter {
+    font-size: 14px;
+    padding: 0;
+}
+
 /* site feedback floater */
 .site-sidebar-box {
     width: 180px;

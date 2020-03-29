@@ -17,23 +17,44 @@
 
 <p>Je rol is <b>{{ huidige_rol }}</b>.</p>
 
-<table class="white">
+<table class="white" id="table1">
     <thead>
-        {% if toon_rayon %}
-            <th class="center-align">Rayon</th>
-        {% endif %}
+        <tr>        <!-- filter veld -->
+            {% if toon_rayon %}
+                <td/>
+            {% endif %}
 
-        {% if toon_regio %}
-            <th class="center-align">Regio</th>
-        {% endif %}
+            {% if toon_regio %}
+                <td/>
+            {% endif %}
 
-        <th>Plaats</th>
+            {% if toon_cwzs %}
+                <td colspan="3" class="table-filter"><input class="table-filter" oninput="myTableFilter(this, 'table1')" placeholder="Zoeken"/></td>
+            {% else %}
+                <td colspan="2" class="table-filter"><input class="table-filter" oninput="myTableFilter(this, 'table1')" placeholder="Zoeken"/></td>
+            {% endif %}
 
-        <th>Vereniging</th>
+            {% if show_wijzig_kolom %}
+                <td/>
+            {% endif %}
+        </tr>
+        <tr>
+            {% if toon_rayon %}
+                <th class="center-align">Rayon</th>
+            {% endif %}
 
-        {% if toon_cwzs %}
-            <th>CWZ(s)</th>
-        {% endif %}
+            {% if toon_regio %}
+                <th class="center-align">Regio</th>
+            {% endif %}
+
+            <th filter="on">Plaats</th>
+
+            <th filter="on">Vereniging</th>
+
+            {% if toon_cwzs %}
+                <th filter="on">CWZ(s)</th>
+            {% endif %}
+        </tr>
     </thead>
 
     {% for obj in object_list %}

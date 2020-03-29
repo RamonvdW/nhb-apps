@@ -15,13 +15,15 @@
 
 <p>Hieronder kan je zien welke beheerders de Verklaring Hanteren Persoonsgegevens (VHPG) geaccepteerd hebben.</p>
 
-<table class="white">
+<table class="white" id="table1">
     <thead>
-        <tr>
-            <th>Inlog naam</th>
-            <th>Volledige naam</th>
-            <th>Geaccepteerd op</th>
+        <tr>        <!-- filter veld -->
+            <td colspan="2" class="table-filter"><input class="table-filter" oninput="myTableFilter(this, 'table1')" placeholder="Zoeken"/></td>
+            <td/>
         </tr>
+        <th filter="on">Inlog naam</th>
+        <th filter="on">Volledige naam</th>
+        <th>Geaccepteerd op</th>
     </thead>
     {% for obj in object_list %}
         <tr>

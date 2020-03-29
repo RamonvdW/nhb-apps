@@ -17,13 +17,17 @@
 
     <h5>Jeugd</h5>
 
-    <table class="white">
+    <table class="white" id="table1">
         <thead>
+            <tr>        <!-- filter veld -->
+                <td colspan="4" class="table-filter"><input class="table-filter" oninput="myTableFilter(this, 'table1')" placeholder="Zoeken"/></td>
+                <td colspan="2"/>
+            </tr>
             <tr>
-                <th>NHB nummer</th>
+                <th filter="on">NHB nummer</th>
                 <th>M/V</th>
-                <th>Voornaam</th>
-                <th>Achternaam</th>
+                <th filter="on">Voornaam</th>
+                <th filter="on">Achternaam</th>
                 <th>Leeftijd</th>
                 <th>Wedstrijdklasse {{ wedstrijdklasse_jaar }}</th>
             </tr>
@@ -46,13 +50,16 @@
 
 <h5>Volwassenen</h5>
 
-<table class="white">
+<table class="white" id="table2">
     <thead>
+        <tr>        <!-- filter veld -->
+            <td colspan="4" class="table-filter"><input class="table-filter" oninput="myTableFilter(this, 'table2')" placeholder="Zoeken"/></td>
+        </tr>
         <tr>
-            <th>NHB nummer</th>
+            <th filter="on">NHB nummer</th>
             <th>M/V</th>
-            <th>Voornaam</th>
-            <th>Achternaam</th>
+            <th filter="on">Voornaam</th>
+            <th filter="on">Achternaam</th>
         </tr>
     </thead>
 
