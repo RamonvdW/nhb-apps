@@ -14,20 +14,22 @@
 
 {% load static %}
 
-<div class="grey lighten-4" style="padding: 10px">
-    <a href="{% url 'Plein:plein' %}">
-        <img src="{% static 'plein/logo_with_text_nhb.png' %}" width="100%" alt="NHB logo">
-    </a>
+<li style="line-height: 0">    <!-- default is 48px == unwanted spacing between image and divider -->
+    <div class="grey lighten-4" style="padding: 10px">  <!-- padding rond het logo en de naam-box -->
+        <a href="{% url 'Plein:plein' %}">
+            <img src="{% static 'plein/logo_with_text_nhb.png' %}" width="100%" alt="NHB logo">
+        </a>
 
-    <!-- informatie over ingelogde gebruiker -->
-    {% if menu_show_logout %}
-        <div class="divider"></div>
-        <h5>{{ user.get_first_name|escape }}</h5>
-        {% if menu_show_wisselvanrol %}
-            <h6>Rol: {{ menu_rol_beschrijving }}</h6>
+        <!-- informatie over ingelogde gebruiker -->
+        {% if menu_show_logout %}
+            <div class="divider"></div>
+            <h5>{{ user.get_first_name|escape }}</h5>
+            {% if menu_show_wisselvanrol %}
+                <h6>{{ menu_rol_beschrijving }}</h6>
+            {% endif %}
         {% endif %}
-    {% endif %}
-</div>
+    </div>
+</li>
 
 <li{% if menu_actief == "hetplein" %} class="actief"{% endif %}>
     <a href="{% url 'Plein:plein' %}" class="white-text">

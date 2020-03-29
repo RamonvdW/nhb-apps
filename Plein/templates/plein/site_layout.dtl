@@ -63,6 +63,7 @@
                 var insts = M.Sidenav.init(elems, options);
 
                 var elems = document.querySelectorAll('.collapsible');
+                // TODO: defaults statisch aanpassen
                 options = { inDuration: 100,    // default is 300
                             outDuration: 100    // default is 300
                           };
