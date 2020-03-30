@@ -34,7 +34,7 @@
             {{ form.zoekterm.label_tag }} {{ form.zoekterm }}
             <p>&nbsp;</p>
             <div class="center-align">
-                <input class="btn-nhb-blauw" type="submit" value="Zoeken">
+                <button class="btn-nhb-blauw" type="submit"><i class="material-icons-round left">search</i>Zoek</button>
             </div>
         </form>
     </div>
@@ -50,7 +50,6 @@
                 {% for obj in object_list %}
                     <a href="{% url 'Records:specifiek' obj.discipline obj.volg_nr %}" class="nhb-klikbare-balk">
                         <li class="collection-item">
-                            <i class="material-icons-round secondary-content">visibility</i>
                             <span>{{ obj.naam|highlight:zoekterm }}</span>
                             {% if obj.datum.year >= 1950 %}
                                 <span> op {{ obj.datum }}</span>
