@@ -55,12 +55,7 @@
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 var elems = document.querySelectorAll('.sidenav');
-                options = { menuWidth: 250,       // Default is 300
-                            edge: 'left',         // Choose the horizontal origin
-                            closeOnClick: false,  // Closes side-nav on <a> clicks, useful for Angular/Meteor
-                            draggable: true       // Choose whether you can drag to open on touch screens,
-                          };
-                var insts = M.Sidenav.init(elems, options);
+                var insts = M.Sidenav.init(elems, {});
 
                 var elems = document.querySelectorAll('.collapsible');
                 // TODO: defaults statisch aanpassen
@@ -70,8 +65,7 @@
                 var insts = M.Collapsible.init(elems, options);
 
                 var elems = document.querySelectorAll('select');
-                options = {};
-                var insts = M.FormSelect.init(elems, options);
+                var insts = M.FormSelect.init(elems, {});
             })
         </script>
 
