@@ -17,7 +17,9 @@
 <li style="line-height: 0">    <!-- default is 48px == unwanted spacing between image and divider -->
     <div class="grey lighten-4" style="padding: 10px">  <!-- padding rond het logo en de naam-box -->
         <a href="{% url 'Plein:plein' %}">
-            <img src="{% static 'plein/logo_with_text_nhb.png' %}" width="100%" alt="NHB logo">
+            <!-- het menu is 300px breed minus 10px padding left/right geeft 280px
+                 maar het logo /lijkt/ dan iets te ver naar rechts te staan, dus we nemen iets minder -->
+            <img src="{% static 'plein/logo_with_text_nhb.png' %}" width="277px" alt="NHB logo">
         </a>
 
         <!-- informatie over ingelogde gebruiker -->
