@@ -18,6 +18,10 @@ def my_watchdog_dtl(sender, **kwargs):      # pragma: no cover
         if '/templates/' in root:
             print('Watching %s/*.dtl' % root)
             sender.watch_dir(root, '*.dtl')
+        elif '/global_static/' in root:
+            print('Watching %s/*' % root)
+            sender.watch_dir(root, '*')
+    # for
 
 
 class OverigConfig(AppConfig):
