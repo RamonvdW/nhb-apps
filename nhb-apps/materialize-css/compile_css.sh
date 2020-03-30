@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#  Copyright (c) 2019 Ramon van der Winkel.
+#  Copyright (c) 2019-2020 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -11,6 +11,7 @@ cd $(dirname $0)
 OUT="$PWD/../global_static/materialize/"
 OUTFILE="$OUT/materialize-new.css"
 INFILE="$PWD/materialize-src/sass/materialize.scss"
+MINIFY="--style compressed"
 
 if [ ! -e "$INFILE" ]
 then
@@ -38,7 +39,7 @@ then
     exit 1
 fi
 
-sass --no-cache --sourcemap=none $INFILE $OUTFILE
+sass --no-cache --sourcemap=none $MINIFY $INFILE $OUTFILE
 
 # end of file
 
