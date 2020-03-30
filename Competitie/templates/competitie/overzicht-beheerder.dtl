@@ -104,55 +104,6 @@
 <h5>Volgende stappen</h5>
 
 <div class="row">
-
-    {% if toon_functies %}
-        <!-- toon en koppel beheerders -->
-        <div class="col s12 m6 xl4">
-            <div class="card">
-                <div class="card-content">
-                    <table class="simple"><tr style="border:0px">
-                        <td><i class="material-icons-round large">face</i></td>
-                        <td>De functies en de gekoppelde beheerders.</td>
-                    </tr></table>
-                </div>
-                <a href="{% url 'Functie:overzicht' %}" class="nhb-klikbare-balk">
-                    <div class="card-action center-align">
-                        <span class="nhb-klikbare-link">Beheerders</span>
-                    </div>
-                </a>
-            </div>
-        </div>
-    {% endif %}
-
-    {% for obj in object_list %}
-
-        <!-- koppelen beheerders -->
-        {% if obj.fase != 'A1' %}
-
-            {% if bb_kan_bko_koppelen %}
-                <div class="col s12 m6 xl4">
-                    <div class="card">
-                        <div class="card-content">
-                            <table class="simple"><tr style="border:0px">
-                                <td><i class="material-icons-round large">supervisor_account</i></td>
-                                <td>BKO (Bond Kampioenschap Organisator) kiezen voor de {{ obj.beschrijving }}.</td>
-                            </tr></table>
-                        </div>
-                        <a href="{{ obj.wijzig_url }}" class="nhb-klikbare-balk">
-                            <div class="card-action center-align">
-                                <span class="nhb-klikbare-link">Beheerders koppelen</span>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-            {% endif %}
-
-        {% endif %}
-
-    {% endfor %}
-</div>
-
-<div class="row">
     {% if bb_kan_competitie_aanmaken %}
     <div class="col s12 m6 xl4">
         <div class="card">
