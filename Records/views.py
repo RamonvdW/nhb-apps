@@ -42,19 +42,21 @@ class RecordsOverzichtView(ListView):
         obj.url = reverse('Records:specifiek', kwargs={'nummer': obj.volg_nr, 'discipline': obj.discipline})
         obj.icon = DISCIPLINE_TO_ICON[obj.discipline]
 
-        obj.descr1_str = (IndivRecord.disc2str[obj.discipline] +             # indoor/outdoor
+        # heren/dames
+        obj.descr1_str = IndivRecord.gesl2str[obj.geslacht] + " "
+
+        # junioren, etc.
+        obj.descr1_str += IndivRecord.lcat2str[obj.leeftijdscategorie]
+
+        # type wedstrijd
+        obj.descr2_str = (IndivRecord.disc2str[obj.discipline] +             # indoor/outdoor
                           " " + IndivRecord.makl2str[obj.materiaalklasse] +  # longbow/recurve
                           " " + obj.soort_record)                            # 70m (72p)
 
         # recurve etc.
         if obj.para_klasse:
-            obj.descr1_str += " para " + obj.para_klasse
+            obj.descr2_str += " para " + obj.para_klasse
 
-        # heren/dames
-        obj.descr2_str = IndivRecord.gesl2str[obj.geslacht] + " "
-
-        # junioren, etc.
-        obj.descr2_str += IndivRecord.lcat2str[obj.leeftijdscategorie]
 
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
