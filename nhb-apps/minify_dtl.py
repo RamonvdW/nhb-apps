@@ -108,10 +108,10 @@ class Loader(AppDirectoriesLoader):
             contents = re.sub(r'/\*(.*?)\*/', '', contents, flags=re.MULTILINE)
 
             # remove whitespace between template tags
-            contents = re.sub(r'\%}\s+{%', '%}{%', contents, flags=re.MULTILINE)
+            contents = re.sub(r'%}\s+{%', '%}{%', contents, flags=re.MULTILINE)
 
             # remove whitespace between template tags and html tags
-            contents = re.sub(r'\%}\s+<', '%}<', contents, flags=re.MULTILINE)
+            contents = re.sub(r'%}\s+<', '%}<', contents, flags=re.MULTILINE)
             contents = re.sub(r'>\s+{%', '>{%', contents, flags=re.MULTILINE)
 
             # remove whitespace between template context variables and html tags
