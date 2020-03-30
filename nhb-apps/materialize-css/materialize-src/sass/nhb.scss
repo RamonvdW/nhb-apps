@@ -81,7 +81,7 @@ $nhb-collection-hover-background: $nhb-card-hover-background;
 
 // voor in oppervlakte met a
 .nhb-klikbare-balk {
-    color: inherit;
+    color: inherit;     // dit zorgt voor een zwarte tekst ipv <a> kleur
 }
 
 .card-action {
@@ -98,9 +98,6 @@ $nhb-collection-hover-background: $nhb-card-hover-background;
             color: $card-link-color-light;
         }
     }
-}
-
-.nhb-klikbare-link {
 }
 
 
