@@ -164,7 +164,7 @@ class Command(BaseCommand):
                         wijzigingen.append('para_klasse: %s --> %s' % (repr(curr_record.para_klasse), repr(record.para_klasse)))
                         curr_record.para_klasse = record.para_klasse
 
-                # 7 = Afstand
+                # 7 = Verbeterbaar
                 #val = row[7]
                 #if blad == '18':
                 #    if val not in ('18', '25', '25+18'):
@@ -422,21 +422,21 @@ class Command(BaseCommand):
             if 'Data individueel outdoor' in naam:
                 blad = 'OD'
                 COLS = ['Index', 'Geslacht', 'Leeftijd', 'Materiaalklasse', 'Discipline', 'Soort_record', 'Para klasse',
-                        'Afstand (m)', 'Pijlen', 'Bondsnummer', 'Naam', 'Datum', 'Plaats', 'Land', 'Score', 'X-count',
+                        'Verbeterbaar', 'Pijlen', 'Bondsnummer', 'Naam', 'Datum', 'Plaats', 'Land', 'Score', 'X-count',
                         'Ook ER', 'Ook WR', 'Notities']
             elif 'Data individueel indoor' in naam:
                 blad = '18'
                 COLS = ['Index', 'Geslacht', 'Leeftijd', 'Materiaalklasse', 'Discipline', 'Soort_record', 'Para klasse',
-                        'Afstand (m)', 'Pijlen', 'Bondsnummer', 'Naam', 'Datum', 'Plaats', 'Land', 'Score', 'X-count',
+                        'Verbeterbaar', 'Pijlen', 'Bondsnummer', 'Naam', 'Datum', 'Plaats', 'Land', 'Score', 'X-count',
                         'Ook ER', 'Ook WR', 'Notities']
             elif 'Data individueel 25m1pijl' in naam:
                 blad = '25'
                 COLS = ['Index', 'Geslacht', 'Leeftijd', 'Materiaalklasse', 'Discipline', 'Soort_record', 'Para klasse',
-                        'Afstand (m)', 'Pijlen', 'Bondsnummer', 'Naam', 'Datum', 'Plaats', 'Land', 'Score', 'Notities']
+                        'Verbeterbaar', 'Pijlen', 'Bondsnummer', 'Naam', 'Datum', 'Plaats', 'Land', 'Score', 'Notities']
             elif 'Data team' in naam:
                 blad = 'team'
-                COLS = ['Geslacht', 'Leeftijd', 'Materiaalklasse', 'Discipline', 'Soort_record', 'Afstand (m)', 'Pijlen', 'Bondsnummer',
-                        'Naam', 'Datum', 'Plaats', 'Land', 'Score', 'Notities']
+                COLS = ['Geslacht', 'Leeftijd', 'Materiaalklasse', 'Discipline', 'Soort_record',
+                        'Verbeterbaar', 'Pijlen', 'Bondsnummer', 'Naam', 'Datum', 'Plaats', 'Land', 'Score', 'Notities']
             else:
                 self.stderr.write('[ERROR] Niet ondersteunde tabblad naam: %s' % naam)
                 continue    # with the for
