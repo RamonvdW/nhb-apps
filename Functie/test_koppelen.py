@@ -141,7 +141,7 @@ class TestFunctieKoppelen(TestCase):
         rol_zet_sessionvars_na_otp_controle(account, self.client).save()
         resp = self.client.get('/functie/wissel-van-rol/BB/', follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, "Rol: Manager competitiezaken")
+        self.assertContains(resp, "Manager competitiezaken")
 
         # controleer de Wijzig knoppen op de functie-overzicht pagina
         resp = self.client.get('/functie/overzicht/')
@@ -154,7 +154,7 @@ class TestFunctieKoppelen(TestCase):
         # neem de BKO 18m rol aan
         resp = self.client.get('/functie/wissel-van-rol/functie/%s' % self.functie_bko.pk, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, "Rol: BKO Indoor")
+        self.assertContains(resp, "BKO Indoor")
 
         # controleer de Wijzig knoppen op de functie-overzicht pagina
         resp = self.client.get('/functie/overzicht/')
@@ -167,7 +167,7 @@ class TestFunctieKoppelen(TestCase):
         # neem de RKO Rayon 3 Indoor rol aan
         resp = self.client.get('/functie/wissel-van-rol/functie/%s' % self.functie_rko3.pk, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, "Rol: RKO Rayon 3 Indoor")
+        self.assertContains(resp, "RKO Rayon 3 Indoor")
 
         # controleer de Wijzig knoppen op de functie-overzicht pagina
         resp = self.client.get('/functie/overzicht/')
@@ -180,7 +180,7 @@ class TestFunctieKoppelen(TestCase):
         # neem de RCL Rayon 111 Indoor aan
         resp = self.client.get('/functie/wissel-van-rol/functie/%s' % self.functie_rcl111.pk, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, "Rol: RCL Regio 111 Indoor")
+        self.assertContains(resp, "RCL Regio 111 Indoor")
 
         # controleer de Wijzig knoppen op de functie-overzicht pagina
         resp = self.client.get('/functie/overzicht/')
@@ -202,7 +202,7 @@ class TestFunctieKoppelen(TestCase):
         rol_zet_sessionvars_na_otp_controle(account, self.client).save()
         resp = self.client.get('/functie/wissel-van-rol/functie/%s/' % self.functie_cwz.pk, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, "Rol: CWZ")
+        self.assertContains(resp, "CWZ")
 
         # vraag het overzicht van competitie-bestuurders op
         resp = self.client.get('/functie/overzicht/')
@@ -233,7 +233,7 @@ class TestFunctieKoppelen(TestCase):
         rol_zet_sessionvars_na_otp_controle(account, self.client).save()
         resp = self.client.get('/functie/wissel-van-rol/BB/', follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, "Rol: Manager competitiezaken")
+        self.assertContains(resp, "Manager competitiezaken")
 
         # probeer een niet-bestaande functie
         resp = self.client.get('/functie/wijzig/999999/', follow=False)
@@ -281,7 +281,7 @@ class TestFunctieKoppelen(TestCase):
         rol_zet_sessionvars_na_otp_controle(account, self.client).save()
         resp = self.client.get('/functie/wissel-van-rol/functie/%s/' % self.functie_cwz.pk, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, "Rol: CWZ")
+        self.assertContains(resp, "CWZ")
 
         # probeer de zoek functie: er vindt 'beheerder' en 'ander'
         url = '/functie/wijzig/%s/' % self.functie_cwz.pk
@@ -303,7 +303,7 @@ class TestFunctieKoppelen(TestCase):
         rol_zet_sessionvars_na_otp_controle(account, self.client).save()
         resp = self.client.get('/functie/wissel-van-rol/BB/', follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, "Rol: Manager competitiezaken")
+        self.assertContains(resp, "Manager competitiezaken")
 
         # juiste URL om BKO te koppelen
         url = '/functie/wijzig/%s/ontvang/' % self.functie_bko.pk
@@ -358,7 +358,7 @@ class TestFunctieKoppelen(TestCase):
         rol_zet_sessionvars_na_otp_controle(account, self.client).save()
         resp = self.client.get('/functie/wissel-van-rol/functie/%s/' % self.functie_bko.pk, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, "Rol: BKO ")
+        self.assertContains(resp, "BKO ")
 
         # koppel de RKO
         url = '/functie/wijzig/%s/ontvang/' % self.functie_rko3.pk
@@ -391,7 +391,7 @@ class TestFunctieKoppelen(TestCase):
         rol_zet_sessionvars_na_otp_controle(account, self.client).save()
         resp = self.client.get('/functie/wissel-van-rol/functie/%s/' % self.functie_rko3.pk, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, "Rol: RKO ")
+        self.assertContains(resp, "RKO ")
 
         # koppel een RCL van het juiste rayon
         url = '/functie/wijzig/%s/ontvang/' % self.functie_rcl111.pk
@@ -423,7 +423,7 @@ class TestFunctieKoppelen(TestCase):
         rol_zet_sessionvars_na_otp_controle(account, self.client).save()
         resp = self.client.get('/functie/wissel-van-rol/functie/%s/' % self.functie_rcl111.pk, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, "Rol: RCL ")
+        self.assertContains(resp, "RCL ")
 
         # poog een andere rol te koppelen
         url = '/functie/wijzig/%s/ontvang/' % self.functie_rcl101.pk
@@ -441,7 +441,7 @@ class TestFunctieKoppelen(TestCase):
         rol_zet_sessionvars_na_otp_controle(account, self.client).save()
         resp = self.client.get('/functie/wissel-van-rol/functie/%s/' % self.functie_cwz.pk, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, "Rol: CWZ")
+        self.assertContains(resp, "CWZ")
 
         # haal het overzicht van verenigingsbestuurders op
         resp = self.client.get('/functie/overzicht/vereniging/')

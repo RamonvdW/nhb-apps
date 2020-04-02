@@ -206,19 +206,6 @@ class TestCompetitie(TestCase):
         assert_template_used(self, resp, ('competitie/overzicht.dtl', 'plein/site_layout.dtl'))
         self.assertNotContains(resp, '/competitie/beheer-favorieten/')
 
-    def test_competitie_overzicht_beheerder(self):
-        self.client.login(username='bko', password='wachtwoord')
-        account_zet_sessionvars_na_otp_controle(self.client).save()
-        rol_zet_sessionvars_na_otp_controle(self.account_bko, self.client).save()
-        rol_activeer_rol(self.client, 'BB').save()
-        self.assertTrue(rol_is_beheerder(self.client))
-
-        resp = self.client.get('/competitie/')
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        assert_html_ok(self, resp)
-        assert_template_used(self, resp, ('competitie/overzicht-beheerder.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, '/functie/overzicht/')
-
 
 class TestCompetitieBeheerders(TestCase):
 

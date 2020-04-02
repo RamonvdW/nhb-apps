@@ -83,7 +83,7 @@ class TestFunctieSelecteerSchutter(TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         assert_html_ok(self, resp)
         assert_template_used(self, resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, "Rol: IT beheerder")
+        self.assertContains(resp, "IT beheerder")
         urls = [url for url in extract_all_href_urls(resp) if url.startswith('/functie/wissel-van-rol/')]
         self.assertIn('/functie/wissel-van-rol/selecteer-schutter/', urls)
 

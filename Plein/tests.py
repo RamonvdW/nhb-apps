@@ -144,37 +144,37 @@ class TestPlein(TestCase):
         rol_activeer_rol(self.client, "BB").save()
         resp = self.client.get('/plein/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, 'Rol: Manager competitiezaken')
+        self.assertContains(resp, 'Manager competitiezaken')
 
         # bko
         rol_activeer_functie(self.client, self.functie_bko.pk).save()
         resp = self.client.get('/plein/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, 'Rol: BKO')
+        self.assertContains(resp, 'BKO')
 
         # rko
         rol_activeer_functie(self.client, self.functie_rko.pk).save()
         resp = self.client.get('/plein/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, 'Rol: RKO')
+        self.assertContains(resp, 'RKO')
 
         # rcl
         rol_activeer_functie(self.client, self.functie_rcl.pk).save()
         resp = self.client.get('/plein/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, 'Rol: RCL')
+        self.assertContains(resp, 'RCL')
 
         # cwz
         rol_activeer_functie(self.client, self.functie_cwz.pk).save()
         resp = self.client.get('/plein/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, 'Rol: CWZ ')
+        self.assertContains(resp, 'CWZ ')
 
         # geen
         rol_activeer_rol(self.client, "geen").save()
         resp = self.client.get('/plein/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, 'Rol: Gebruiker')
+        self.assertContains(resp, 'Gebruiker')
 
         self.client.logout()
 
