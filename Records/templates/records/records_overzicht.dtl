@@ -24,7 +24,7 @@
     <div class="col s12 m6 l6 xl4">
         <div class="card">
             <div class="card-content" style="height:250px">
-                <img class="right" src="{{ obj.icon }}" height="50px">
+                <img class="right" src="{{ obj.icon }}" height="50">
                 {% if obj.is_world_record %}
                     <span class="card-title">Wereld Record</span>
                 {% elif obj.is_european_record %}
