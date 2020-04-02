@@ -19,7 +19,7 @@
         <a href="{% url 'Plein:plein' %}">
             <!-- het menu is 300px breed minus 10px padding left/right geeft 280px
                  maar het logo /lijkt/ dan iets te ver naar rechts te staan, dus we nemen iets minder -->
-            <img src="{% static 'plein/logo_with_text_nhb.png' %}" width="277px" alt="NHB logo">
+            <img src="{% static 'plein/logo_with_text_nhb.png' %}" width="277" alt="NHB logo">
         </a>
 
         <!-- informatie over ingelogde gebruiker -->
