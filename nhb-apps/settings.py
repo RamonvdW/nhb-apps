@@ -25,7 +25,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2020-04-02'
+SITE_VERSIE = '2020-04-05'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -62,7 +62,7 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',         # manage sessions across requests
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',                    # security (cross-site scripting)
+    'django.middleware.csrf.CsrfViewMiddleware',                    # security (cross-site request forgery)
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',       # security
 ]
@@ -182,6 +182,9 @@ INTERNAL_IPS = [
     '127.0.0.1',
 ]
 
+# our own test runner that executes the tests ordered by application hierarchy indicators to ensure that
+# low-level errors are reported before applications depending that (broken) functionality report failures
+TEST_RUNNER = 'nhb-apps.app-hierarchy-testrunner.HierarchyRunner'
 
 # applicatie specifieke settings
 MINIMUM_LEEFTIJD_LID = 5

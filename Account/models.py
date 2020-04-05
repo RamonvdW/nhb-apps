@@ -8,24 +8,14 @@ from django.db import models
 from django.conf import settings
 from django.utils import timezone
 from django.contrib.auth.models import AbstractUser
-from Functie.models import Functie
-from NhbStructuur.models import NhbLid
-from Overig.tijdelijke_url import set_tijdelijke_url_receiver, \
-                                  maak_tijdelijke_url_accountemail
+from Overig.tijdelijke_url import set_tijdelijke_url_receiver, maak_tijdelijke_url_accountemail
+from Account.rechten import account_rechten_otp_controle_gelukt
 import datetime
-import pyotp
 
-
-SESSIONVAR_ACCOUNT_IS_OTP_VERIFIED = "account_otp_verified"
 
 
 class AccountCreateError(Exception):
     """ Generic exception raised by account_create_nhb """
-    pass
-
-
-class AccountCreateNhbGeenEmail(Exception):
-    """ Specifieke foutmelding omdat het NHB lid geen e-mail adres heeft """
     pass
 
 
@@ -53,12 +43,6 @@ class Account(AbstractUser):
                                     default=False,
                                     help_text="Moet de gebruiker een nieuw wachtwoord opgeven bij volgende inlog?")
 
-    # optionele koppeling met NhbLid
-    # (niet alle Accounts zijn NHB lid)
-    nhblid = models.ForeignKey(NhbLid, on_delete=models.PROTECT,
-                               blank=True,  # allow access input in form
-                               null=True)   # allow NULL relation in database
-
     laatste_inlog_poging = models.DateTimeField(blank=True, null=True)
 
     # verkeerd wachtwoord opgegeven via login of wijzig-wachtwoord
@@ -78,8 +62,6 @@ class Account(AbstractUser):
     is_Observer = models.BooleanField(
                         default=False,
                         help_text="Alleen observeren")
-
-    functies = models.ManyToManyField(Functie, blank=True)
 
     # TOTP ondersteuning
     otp_code = models.CharField(
@@ -103,28 +85,22 @@ class Account(AbstractUser):
             voor in het menu.
             Vanuit template: user.get_first_name
         """
-        if self.nhblid:
-            return self.nhblid.voornaam
         # TODO: werkt dit ook nog goed voor niet-NHB leden die een e-mail als username hebben?
         return self.first_name or self.username
 
     def volledige_naam(self):
-        if self.nhblid:
-            return self.nhblid.volledige_naam()
+        if self.first_name or self.last_name:
+            name = self.first_name + " " + self.last_name
+            return name.strip()
+
         return self.username
 
     def get_account_full_name(self):
         """ Deze functie wordt aangeroepen vanuit de site feedback om een volledige
             referentie aan de gebruiker te krijgen.
             Vanuit template: user.get_account_full_name
-
-            Wordt ook gebruikt vanuit djangosaml2idp
-            in settings.py staat de referentie naar deze methode naam
         """
-        if self.nhblid:
-            return "%s %s (%s)" % (self.nhblid.voornaam, self.nhblid.achternaam, self.username)
-
-        return self.username
+        return "%s (%s)" % (self.volledige_naam(), self.username)
 
     def get_real_name(self):
         """ Deze functie geeft de volledige naam van de gebruiker terug, indien beschikbaar.
@@ -132,22 +108,16 @@ class Account(AbstractUser):
             Wordt gebruikt vanuit djangosaml2idp
             in settings.py staat de referentie naar deze methode naam
         """
-        if self.nhblid:
-            return "%s %s" % (self.nhblid.voornaam, self.nhblid.achternaam)
-
-        if self.first_name or self.last_name:
-            name = self.first_name + " " + self.last_name
-            return name.strip()
-
-        return self.username
+        # TODO: djangosaml2idp get_real_name herzien
+        return self.volledige_naam()
 
     def get_email(self):
         """ helper om de email van de gebruiker te krijgen voor djangosaml2idp
             zodat deze doorgegeven kan worden aan een Service Provider zoals de Wiki server
         """
-        try:
-            email = AccountEmail.objects.get(account=self).bevestigde_email
-        except AccountEmail.DoesNotExist:
+        if len(self.accountemail_set.all()) == 1:
+            email = self.accountemail_set.all()[0].bevestigde_email
+        else:
             email = ""
         return email
 
@@ -205,41 +175,7 @@ class HanterenPersoonsgegevens(models.Model):
         verbose_name_plural = "Hanteren Persoonsgegevens"
 
 
-def account_needs_vhpg(account):
-    """ Controlleer of het Account een VHPG af moet leggen """
-
-    if not account_needs_otp(account):
-        # niet nodig
-        return False, None
-
-    # kijk of de acceptatie recent al afgelegd is
-    try:
-        vhpg = HanterenPersoonsgegevens.objects.get(account=account)
-    except HanterenPersoonsgegevens.DoesNotExist:
-        # niet uitgevoerd, wel nodig
-        return True, None
-
-    # elke 11 maanden moet de verklaring afgelegd worden
-    # dit is ongeveer (11/12)*365 == 365-31 = 334 dagen
-    next = vhpg.acceptatie_datum + datetime.timedelta(days=334)
-    now = timezone.now()
-    return next < now, vhpg
-
-
-def account_vhpg_is_geaccepteerd(account):
-    """ onthoud dat de vhpg net geaccepteerd is door de gebruiker
-    """
-    try:
-        vhpg = HanterenPersoonsgegevens.objects.get(account=account)
-    except HanterenPersoonsgegevens.DoesNotExist:
-        vhpg = HanterenPersoonsgegevens()
-        vhpg.account = account
-
-    vhpg.acceptatie_datum = timezone.now()
-    vhpg.save()
-
-
-def is_email_valide(adres):
+def account_is_email_valide(adres):
     """ Basic check of dit een valide e-mail adres is:
         - niet leeg
         - bevat @
@@ -264,7 +200,7 @@ def account_create(username, wachtwoord, email, voornaam):
         Email wordt er meteen in gezet en heeft geen bevestiging nodig
     """
 
-    if not is_email_valide(email):
+    if not account_is_email_valide(email):
         raise AccountCreateError('Dat is geen valide e-mail')
 
     if Account.objects.filter(username=username).count() != 0:
@@ -286,55 +222,6 @@ def account_create(username, wachtwoord, email, voornaam):
     mail.save()
 
 
-def account_create_nhb(nhb_nummer, email, nieuw_wachtwoord):
-    """ Maak een nieuw account aan voor een NHB lid
-        raises AccountError als:
-            - er al een account bestaat
-            - het nhb nummer niet valide is
-            - het email adres niet bekend is bij de nhb
-            - het email adres niet overeen komt
-        geeft de url terug die in de email verstuurd moet worden
-    """
-    if Account.objects.filter(username=nhb_nummer).count() != 0:
-        raise AccountCreateError('Account bestaat al')
-
-    # zoek het email adres van dit NHB lid erbij
-    try:
-        nhb_nr = int(nhb_nummer)
-    except ValueError:
-        raise AccountCreateError('Onbekend NHB nummer')
-
-    try:
-        nhblid = NhbLid.objects.get(nhb_nr=nhb_nr)
-    except NhbLid.DoesNotExist:
-        raise AccountCreateError('Onbekend NHB nummer')
-
-    if not is_email_valide(nhblid.email):
-        raise AccountCreateNhbGeenEmail()
-
-    if email != nhblid.email:
-        raise AccountCreateError('De combinatie van NHB nummer en email worden niet herkend. Probeer het nog eens.')
-
-    # maak het account aan
-    account = Account()
-    account.username = nhb_nummer
-    account.set_password(nieuw_wachtwoord)
-    account.nhblid = nhblid
-    account.save()
-
-    # maak het email record aan
-    mail = AccountEmail()
-    mail.account = account
-    mail.email_is_bevestigd = False
-    mail.bevestigde_email = ''
-    mail.nieuwe_email = email
-    mail.save()
-
-    # maak de url aan om het emailadres te bevestigen
-    url = maak_tijdelijke_url_accountemail(mail, nhb_nummer=nhb_nummer, email=email)
-    return url
-
-
 def account_email_is_bevestigd(mail):
     """ Deze functie wordt vanuit de tijdelijke url receiver functie (zie view)
         aanroepen met mail = AccountEmail object waar dit op van toepassing is
@@ -346,104 +233,96 @@ def account_email_is_bevestigd(mail):
 
 
 def account_check_gewijzigde_email(account):
-    """ Zoek uit of dit account een nieuw email adres heeft vanuit de NHB administratie
+    """ Zoek uit of dit account een nieuw email adres heeft wat nog bevestigd
+        moet worden. Zoja, dan wordt ereen tijdelijke URL aangemaakt en het emailadres terug gegeven
+        waar een mailtje heen gestuurd moet worden.
 
-        Zo ja, stuur dan een mailtje om deze nieuwe email te laten bevestigen
-        en geef een AccountEmail object terug zodat de aanroepende view kan redirecten
-        naar de Nieuwe-email view
-
-        Zo nee, geen None terug.
-
-        Exceptie AccountEmail.DoesNotExist moet door de aanroepen afgehandeld worden
+        Retourneert: tijdelijke_url, nieuwe_mail_adres
+                 of: None, None
     """
-    email = AccountEmail.objects.get(account=account)
 
-    # neem een nieuw email adres over uit de NHB administratie (indien aanwezig)
-    if account.nhblid:
-        if account.nhblid.email != email.bevestigde_email:
-            email.nieuwe_email = account.nhblid.email
-            email.save()
-            # onderstaande code neemt het over
+    if len(account.accountemail_set.all()) == 1:
+        email = account.accountemail_set.all()[0]
 
-    if email.nieuwe_email:
-        if email.nieuwe_email != email.bevestigde_email:
-            # vraag om bevestiging van deze gewijzgde email
-            # email kan eerder overgenomen zijn uit de NHB administratie
-            # of handmatig ingevoerd zijn
+        if email.nieuwe_email:
+            if email.nieuwe_email != email.bevestigde_email:
+                # vraag om bevestiging van deze gewijzgde email
+                # email kan eerder overgenomen zijn uit de NHB administratie
+                # of handmatig ingevoerd zijn
 
-            # maak de url aan om het emailadres te bevestigen
-            # extra parameters are just to make the url unique
-            mail = email.nieuwe_email
-            url = maak_tijdelijke_url_accountemail(email, username=account.username, email=mail)
-            return url, mail
+                # maak de url aan om het emailadres te bevestigen
+                # extra parameters are just to make the url unique
+                mail = email.nieuwe_email
+                url = maak_tijdelijke_url_accountemail(email, username=account.username, email=mail)
+                return url, mail
 
     # geen gewijzigde email
     return None, None
 
 
-def account_needs_otp(account):
-    """ Controleer of het Account OTP verificatie nodig heeft
+# alles in kleine letter
+VERBODEN_WOORDEN_IN_WACHTWOORD = (
+    'password',
+    'wachtwoord',
+    'geheim',
+    'handboog',
+    # keyboard walks
+    '12345',
+    '23456',
+    '34567',
+    '45678',
+    '56789',
+    '67890',
+    'qwert',
+    'werty',
+    'ertyu',
+    'rtyui',
+    'tyuio',
+    'yuiop',
+    'asdfg',
+    'sdfgh',
+    'dfghj',
+    'fghjk',
+    'ghjkl',
+    'zxcvb',
+    'xcvbn',
+    'cvbnm'
+)
 
-        Returns: True or False
-        Bepaalde rechten vereisen OTP:
-            is_BB
-            is_staff
-            bepaalde functies
+
+def account_test_wachtwoord_sterkte(wachtwoord, verboden_str):
+    """ Controleer de sterkte van het opgegeven wachtwoord
+        Retourneert: True,  None                als het wachtwoord goed genoeg is
+                     False, "een error message" als het wachtwoord niet goed genoeg is
     """
-    if account.is_authenticated:
-        if account.is_BB or account.is_staff:
-            return True
 
-        for functie in account.functies.all():
-            if functie.needs_otp():
-                return True
+    # we willen voorkomen dat mensen eenvoudig te RADEN wachtwoorden kiezen
+    # of wachtwoorden die eenvoudig AF TE KIJKEN zijn
 
-    return False
+    # controleer de minimale length
+    if len(wachtwoord) < 9:
+        return False, "Wachtwoord moet minimaal 9 tekens lang zijn"
 
+    # verboden_str is de inlog naam
+    if verboden_str in wachtwoord:
+        return False, "Wachtwoord bevat een verboden reeks"
 
-def account_is_otp_gekoppeld(account):
-    return account.otp_is_actief
+    # entropie van elk teken is gelijk, dus het verminderen van de zoekruimte is niet verstandig
+    # dus NIET: controleer op alleen cijfers
 
+    lower_wachtwoord = wachtwoord.lower()
 
-def account_prep_for_otp(account):
-    """ Als het account nog niet voorbereid is voor OTP, maak het dan in orde
-    """
-    # maak eenmalig het OTP geheim aan voor deze gebruiker
-    if len(account.otp_code) != 16:
-        account.otp_code = pyotp.random_base32()
-        account.save()
+    # tel het aantal unieke tekens dat gebruikt is
+    # (voorkomt wachtwoorden zoals jajajajajaja of xxxxxxxxxx)
+    if len(set(lower_wachtwoord)) < 5:
+        return False, "Wachtwoord bevat te veel gelijke tekens"
 
+    # detecteer herkenbare woorden en keyboard walks
+    for verboden_woord in VERBODEN_WOORDEN_IN_WACHTWOORD:
+        if verboden_woord in lower_wachtwoord:
+            return False, "Wachtwoord is niet sterk genoeg"
 
-def account_controleer_otp_code(account, code):
-    otp = pyotp.TOTP(account.otp_code)
-    # valid_window=1 staat toe dat er net een nieuwe code gegenereerd is tijdens het intikken van de code
-    return otp.verify(code, valid_window=1)
-
-
-def account_zet_sessionvars_na_login(request):
-    """ Deze functie wordt aangeroepen vanuit de LoginView om een sessie variabele
-        te zetten die onthoudt of de gebruiker een OTP controle uitgevoerd heeft
-    """
-    sessionvars = request.session
-    sessionvars[SESSIONVAR_ACCOUNT_IS_OTP_VERIFIED] = False
-    return sessionvars  # allows unittest to do sessionvars.save()
-
-
-def account_zet_sessionvars_na_otp_controle(request):
-    """ Deze functie wordt aangeroepen vanuit de OTPControleView om een sessie variabele
-        te zetten die onthoudt dat de OTP controle voor de gebruiker gelukt is
-    """
-    sessionvars = request.session
-    sessionvars[SESSIONVAR_ACCOUNT_IS_OTP_VERIFIED] = True
-    return sessionvars  # allows unittest to do sessionvars.save()
-
-
-def user_is_otp_verified(request):
-    try:
-        return request.session[SESSIONVAR_ACCOUNT_IS_OTP_VERIFIED]
-    except KeyError:
-        pass
-    return False
+    return True, None
 
 
 # end of file

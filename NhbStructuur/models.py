@@ -9,6 +9,7 @@ from django.core.exceptions import ValidationError
 from django.contrib.auth.models import Group
 from django.contrib.auth import get_user_model      # avoid circular dependency with Account.models
 from django.conf import settings
+from Account.models import Account
 import datetime
 
 
@@ -120,6 +121,7 @@ class NhbLid(models.Model):
                                 on_delete=models.PROTECT,
                                 blank=True,  # allow access input in form
                                 null=True)   # allow NULL relation in database
+    account = models.ForeignKey(Account, on_delete=models.SET_NULL, blank=True, null=True)
 
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """

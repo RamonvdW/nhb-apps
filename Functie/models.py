@@ -5,9 +5,10 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import models
-from django.contrib.auth.models import Group
+from django.utils import timezone
 from NhbStructuur.models import NhbRegio, NhbRayon, NhbVereniging
-
+from Account.models import Account, HanterenPersoonsgegevens
+import datetime
 
 """ Deze module houdt bij wie beheerders zijn
 
@@ -41,6 +42,9 @@ class Functie(models.Model):
 
     """ Deze klasse representeert een Functie met rechten """
 
+    # welke accounts zijn gekoppeld aan deze functie
+    accounts = models.ManyToManyField(Account)
+
     # in principe vrije tekst
     beschrijving = models.CharField(max_length=50)
 
@@ -66,13 +70,6 @@ class Functie(models.Model):
         """ Geef een string terug voor gebruik in de admin interface """
         return self.beschrijving
 
-    @staticmethod
-    def needs_otp():
-        """ Deze functie wordt aangeroepen vanuit Account.models.account_needs_otp()
-            Op dit moment geven we altijd True terug - dit kan in de toekomst verfijnd worden
-        """
-        return True
-
 
 def maak_functie(beschrijving, rol):
 
@@ -89,20 +86,60 @@ def maak_functie(beschrijving, rol):
 
 
 def maak_cwz(nhb_ver, account):
-    """ Maak het NHB lid een van de CWZ's van de NHB vereniging
-        Retourneert True als het NHB lid in de CWZ groep gestopt is
+    """ Maak het NHB lid een CWZ van de NHB vereniging
+        Retourneert True als het NHB lid aan de CWZ functie toegevoegd is
     """
 
-    # zoek de CWZ functie erbij
+    # zoek de CWZ functie van de vereniging erbij
     functie = Functie.objects.get(rol="CWZ", nhb_ver=nhb_ver)
 
     # kijk of dit lid al in de groep zit
-    if len(account.functies.filter(pk=functie.pk)) == 0:
+    if len(functie.accounts.filter(pk=account.pk)) == 0:
         # nog niet gekoppeld aan de functie --> koppel dit account nu
-        account.functies.add(functie)
+        functie.accounts.add(account)
         return True
 
     return False
 
+
+def account_needs_vhpg(account):
+    """ Controleer of het Account een VHPG af moet leggen """
+
+    if not account_needs_otp(account):
+        # niet nodig
+        return False, None
+
+    # kijk of de acceptatie recent al afgelegd is
+    try:
+        vhpg = HanterenPersoonsgegevens.objects.get(account=account)
+    except HanterenPersoonsgegevens.DoesNotExist:
+        # niet uitgevoerd, wel nodig
+        return True, None
+
+    # elke 11 maanden moet de verklaring afgelegd worden
+    # dit is ongeveer (11/12)*365 == 365-31 = 334 dagen
+    next = vhpg.acceptatie_datum + datetime.timedelta(days=334)
+    now = timezone.now()
+    return next < now, vhpg
+
+
+def account_needs_otp(account):
+    """ Controleer of het Account OTP verificatie nodig heeft
+
+        Returns: True or False
+        Bepaalde rechten vereisen OTP:
+            is_BB
+            is_staff
+            bepaalde functies
+    """
+    if account.is_authenticated:
+        if account.is_BB or account.is_staff:
+            return True
+
+        # alle functies hebben OTP nodig
+        if len(account.functie_set.all()) > 0:
+            return True
+
+    return False
 
 # end of file
