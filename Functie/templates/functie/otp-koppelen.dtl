@@ -47,7 +47,7 @@
     </div>
 
     <div class="row">
-        <form class="col s12" action="{% url 'Account:otp-koppelen' %}" method="post">
+        <form class="col s12" action="{% url 'Functie:otp-koppelen' %}" method="post">
             {% csrf_token %}
 
             <div class="row"><div class="input-field col s12">

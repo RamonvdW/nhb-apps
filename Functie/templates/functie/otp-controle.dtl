@@ -25,7 +25,7 @@
     </div>
 
     <div class="row">
-        <form action="{% url 'Account:otp-controle' %}" method="post">
+        <form action="{% url 'Functie:otp-controle' %}" method="post">
             {% csrf_token %}
 
             {% if form.errors %}
