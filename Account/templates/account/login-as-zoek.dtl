@@ -7,12 +7,12 @@
 {% load static %}
 {% load overig_filters %}   <!-- highlight filter -->
 
-{% block title %}Selecteer schutter{% endblock %}
+{% block title %}Account wissel{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="selecteer-schutter" %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="zoek-account" %}
 
-<h4>Selecteer schutter</h4>
+<h4>Zoek account</h4>
 
 <script>
 function do_selecteer(id) {
@@ -40,13 +40,13 @@ function do_selecteer(id) {
 </script>
 
 <p>Beleef de website als elke andere gebruiker.</p>
-<p>Gebruik onderstaand formulier om naar een schutter te zoeken.</p>
+<p>Gebruik onderstaand formulier om naar een account te zoeken.</p>
 
 <div class="container z-depth-2 white">
     <div class="row nhb-blauw white-text">
         <div class="col s12 center-align">
             <h5>Zoek schutter</h5>
-            <p>Zoek op NHB nummer of een deel van de naam</p>
+            <p>Zoek op username of gebruiker naam</p>
         </div>
     </div>
 
@@ -77,8 +77,8 @@ function do_selecteer(id) {
                         <span>{{ obj.volledige_naam|highlight:zoekterm }}</span>
                     </div>
                     <div class="collapsible-body white">
-                        <span>Lid van {{ obj.nhblid.bij_vereniging.naam }}</span>
-                        <p>NHB nummer: {{ obj.username|highlight:zoekterm }}</p>
+                        <span>Volledige naam: {{ obj.get_volledige_naam }}</span>
+                        <p>Username: {{ obj.username|highlight:zoekterm }}</p>
                         <button class="btn-nhb-blauw" onclick="do_selecteer(this)" data-pk="{{ obj.pk }}">Selecteer</button>
                     </div>
                 </li>

@@ -5,7 +5,6 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
-{% load overig_filters %}   <!-- highlight filter -->
 
 {% block extrastyle %}
 <!-- voorkom dat de knop nog een keer gebruikt wordt (dat werkt toch niet)
@@ -13,12 +12,12 @@
 <meta http-equiv="refresh" content="60; url=/functie/wissel-van-rol/" />
 {% endblock %}
 
-{% block title %}Selecteer schutter{% endblock %}
+{% block title %}Account wissel{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="selecteer-schutter-wissel" %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="wissel-naar-account" %}
 
-<h4>Selecteer schutter</h4>
+<h4>Wissel naar account</h4>
 
 <p>Met onderstaande knop wordt een nieuw tabblad geopend dat automatisch inlogt als account <b>{{ account.username }}</b>.</p>
 
@@ -26,6 +25,6 @@
 
 <a class="btn-nhb-rood" href="{{ login_as_url }}" target="_blank"><i class="material-icons-round right">open_in_new</i>Inloggen</a>
 
-<p>Tip: rechts-klikken en openen in een 'incognito window' (Chrome) of 'private window' (Firefox), anders wordt je hier uitgelogd.</p>
+<p>Advies: rechts-klikken en openen in een 'incognito window' (Chrome) of 'private window' (Firefox), anders wordt je hier uitgelogd.</p>
 
 {% endblock %}
