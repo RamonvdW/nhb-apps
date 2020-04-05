@@ -13,26 +13,26 @@ OMIT="--omit=data3/wsgi.py,manage.py,/usr/*/python3*/site-packages/*"
 # show all saml2 and djangosaml2idp source files
 #OMIT="--omit=data3/wsgi.py,manage.py,/usr/local/lib64/*,/usr/lib/*,/usr/local/lib/python3.6/site-packages/c*,/usr/local/lib/python3.6/site-packages/da*,/usr/local/lib/python3.6/site-packages/de*,/usr/local/lib/python3.6/site-packages/i*,/usr/local/lib/python3.6/site-packages/p*,/usr/local/lib/python3.6/site-packages/q*,/usr/local/lib/python3.6/site-packages/r*,/usr/local/lib/python3.6/site-packages/si*,/usr/local/lib/python3.6/site-packages/u*,/usr/local/lib/python3.6/site-packages/django/*"
 
-FOCUS=""
-if [ ! -z "$ARGS" ]
-then
-    # convert Function.testfile.TestCase.test_functie into "Function"
-    # also works for just "Function"
-    FOCUS=$(echo "$ARGS" | cut -d'.' -f1)
-    echo "Focus set to: $FOCUS"
-fi
-
 # start the http simulator in the background
 pgrep -f websim
 if [ $? -eq 0 ]
 then
-    echo "[ERROR] websim is already running - please stop it"
+    echo "[ERROR] websim is already running - please stop it (try pkill -f websim)"
     exit 1
 fi
 
 echo
 echo "****************************** START OF TEST RUN ******************************"
 echo
+
+FOCUS=""
+if [ ! -z "$ARGS" ]
+then
+    # convert Function.testfile.TestCase.test_functie into "Function"
+    # also works for just "Function"
+    FOCUS=$(echo "$ARGS" | cut -d'.' -f1)
+    echo "[INFO] Focus set to: $FOCUS"
+fi
 
 python3.6 ./websim.py &
 
@@ -60,7 +60,7 @@ then
     python3.6 -m coverage report --skip-covered --fail-under=90 $OMIT
     res=$?
 else
-    python3.6 -m coverage report --skip-covered --fail-under=90 $OMIT | grep -E "$FOCUS|----|Cover"
+    python3.6 -m coverage report $OMIT | grep -E "$FOCUS|----|Cover"
     res=0
 fi
 #echo "res=$res"
@@ -83,7 +83,7 @@ rm .coverage
 
 echo
 echo -n "Press ENTER to start firefox now, or Ctrl+C to abort"
-timeout --foreground 10 read
+timeout --foreground 5 read
 if [ $? -ne 0 ]
 then
     # automatically abort
