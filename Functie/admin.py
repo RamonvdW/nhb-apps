@@ -5,10 +5,13 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import admin
-
 from .models import Functie
 
 
-admin.site.register(Functie)
+class FunctieAdmin(admin.ModelAdmin):
+    filter_horizontal = ('accounts',)
+
+
+admin.site.register(Functie, FunctieAdmin)
 
 # end of file

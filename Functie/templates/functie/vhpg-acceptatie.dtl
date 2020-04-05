@@ -24,7 +24,7 @@ kan vragen we je onderstaande tekst goed door te lezen en akkoord te geven.</p>
     </div>
 
     <div class="row">
-        <form class="col s12" action="{% url 'Account:vhpg-acceptatie' %}" method="post">
+        <form class="col s12" action="{% url 'Functie:vhpg-acceptatie' %}" method="post">
             {% csrf_token %}
 
             <p>De NHB geeft jou via deze website toegang tot persoonsgegevens van leden van de NHB. Deze gegevens blijven eigendom van de NHB. Je mag de gegevens alleen gebruiken om je rol te vervullen.</p>

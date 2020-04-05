@@ -28,9 +28,13 @@ urlpatterns = [
          views.OverzichtView.as_view(),
          name='overzicht'),
 
-    path('wissel-van-rol/selecteer-schutter/',
-         views.SelecteerSchutterView.as_view(),
-         name='selecteer-schutter'),
+    path('otp-controle/',
+         views.OTPControleView.as_view(),
+         name="otp-controle"),
+
+    path('otp-koppelen/',
+         views.OTPKoppelenView.as_view(),
+         name="otp-koppelen"),
 
     path('wissel-van-rol/functie/<functie_pk>/',
          views.ActiveerRolView.as_view(),
@@ -43,6 +47,18 @@ urlpatterns = [
     path('wissel-van-rol/',
          views.WisselVanRolView.as_view(),
          name='wissel-van-rol'),
+
+    path('vhpg-acceptatie/',
+         views.VhpgAcceptatieView.as_view(),
+         name='vhpg-acceptatie'),
+
+    path('vhpg-afspraken/',
+         views.VhpgAfsprakenView.as_view(),
+         name='vhpg-afspraken'),
+
+    path('vhpg-overzicht/',
+         views.VhpgOverzichtView.as_view(),
+         name='vhpg-overzicht'),
 ]
 
 # end of file
