@@ -4,31 +4,25 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.contrib.auth import get_user_model
 from django.test import TestCase
-from Functie.rol import rol_zet_sessionvars_na_login, rol_zet_sessionvars_na_otp_controle
 from Functie.models import maak_functie
-from Account.models import Account,\
-                    account_zet_sessionvars_na_login,\
-                    account_zet_sessionvars_na_otp_controle,\
-                    account_vhpg_is_geaccepteerd
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
 from NhbStructuur.migrations.m0002_nhbstructuur_2018 import maak_rayons_2018, maak_regios_2018
-from Overig.helpers import extract_all_href_urls, assert_html_ok, assert_template_used, assert_other_http_commands_not_supported
+from Overig.e2ehelpers import E2EHelpers
 import datetime
 
 
-class TestFunctieWisselVanRol(TestCase):
+class TestFunctieWisselVanRol(E2EHelpers, TestCase):
     """ unit tests voor de Functie applicatie, module Wissel van Rol """
 
-    def setUp(self):
+    test_after = ('Functie.test_rol',)
 
+    def setUp(self):
         """ initialisatie van de test case """
-        usermodel = get_user_model()
-        usermodel.objects.create_user('normaal', 'normaal@test.com', 'wachtwoord')
-        usermodel.objects.create_superuser('admin', 'admin@test.com', 'wachtwoord')
-        self.account_admin = Account.objects.get(username='admin')
-        self.account_normaal = Account.objects.get(username='normaal')
+
+        self.account_admin = self.e2e_create_account_admin(accepteer_vhpg=False)
+        self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
+        self.account_geenlid = self.e2e_create_account('geenlid', 'geenlid@test.com', 'Geen')
 
         # maak de standard rayon/regio structuur aan
         maak_rayons_2018(NhbRayon)
@@ -62,6 +56,7 @@ class TestFunctieWisselVanRol(TestCase):
         lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
         lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
         lid.bij_vereniging = ver
+        lid.account = self.account_normaal
         lid.save()
         self.nhblid1 = lid
 
@@ -85,81 +80,70 @@ class TestFunctieWisselVanRol(TestCase):
         # secretaris kan nog niet ingevuld worden
         ver2.save()
 
+        self.url_wisselvanrol = '/functie/wissel-van-rol/'
+
     def test_admin(self):
         # controleer dat de link naar het wisselen van rol op de pagina staat
         self.account_admin.otp_is_actief = False
         self.account_admin.save()
-        self.client.login(username='admin', password='wachtwoord')
-        account_zet_sessionvars_na_login(self.client).save()
-        rol_zet_sessionvars_na_login(self.account_admin, self.client).save()
-        resp = self.client.get('/functie/wissel-van-rol/')
+        self.e2e_login(self.account_admin)
+        resp = self.client.get(self.url_wisselvanrol)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        assert_html_ok(self, resp)
+        self.assert_html_ok(resp)
         self.assertNotContains(resp, 'IT beheerder')
         self.assertNotContains(resp, 'Manager competitiezaken')
         self.assertContains(resp, 'Gebruiker')
         self.assertContains(resp, 'Controle met een tweede factor is verplicht voor gebruikers met toegang tot persoonsgegevens')
-
-        self.client.logout()
-
-        # controleer dat de link naar de OTP controle en VHPG op de pagina staan
         self.account_admin.otp_is_actief = True
         self.account_admin.save()
-        self.client.login(username='admin', password='wachtwoord')
-        account_zet_sessionvars_na_login(self.client).save()
-        rol_zet_sessionvars_na_login(self.account_admin, self.client).save()
-        resp = self.client.get('/functie/wissel-van-rol/')
+
+        # controleer dat de link naar de OTP controle en VHPG op de pagina staan
+        self.e2e_logout()        # TODO: onnodig?
+        self.e2e_login(self.account_admin)          # zonder OTP control
+        resp = self.client.get(self.url_wisselvanrol)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        assert_html_ok(self, resp)
+        self.assert_html_ok(resp)
         self.assertNotContains(resp, 'IT beheerder')
         self.assertNotContains(resp, 'Manager competitiezaken')
         self.assertContains(resp, 'Gebruiker')
         self.assertContains(resp, 'Voordat je aan de slag kan moeten we eerst een paar afspraken maken over het omgaan met persoonsgegevens.')
+        #print(str(resp.content).replace('>', '>\n'))
         self.assertContains(resp, 'Een aantal rollen komt beschikbaar nadat de controle van de tweede factor uitgevoerd is.')
 
+        # accepteer VHPG en login met OTP controle
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_account_accepteert_vhpg(self.account_admin)
+
         # controleer dat de complete keuzemogelijkheden op de pagina staan
-        account_vhpg_is_geaccepteerd(self.account_admin)
-        account_zet_sessionvars_na_otp_controle(self.client).save()
-        rol_zet_sessionvars_na_otp_controle(self.account_admin, self.client).save()
-        resp = self.client.get('/functie/wissel-van-rol/')
+        resp = self.client.get(self.url_wisselvanrol)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        assert_html_ok(self, resp)
+        self.assert_html_ok(resp)
         self.assertContains(resp, 'IT beheerder')
         self.assertContains(resp, 'Manager competitiezaken')
         self.assertContains(resp, 'Gebruiker')
 
-        assert_template_used(self, resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
-        assert_other_http_commands_not_supported(self, '/functie/wissel-van-rol/')
-        self.client.logout()
+        self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
+        self.e2e_assert_other_http_commands_not_supported(self.url_wisselvanrol)
 
     def test_normaal(self):
-        self.account_normaal.nhblid = self.nhblid1
-        self.account_normaal.save()
-        self.client.login(username=self.account_normaal.username, password='wachtwoord')
-        account_zet_sessionvars_na_login(self.client).save()
-        rol_zet_sessionvars_na_login(self.account_normaal, self.client).save()
-
+        self.e2e_login(self.account_normaal)
         # controleer dat de wissel-van-rol pagina niet aanwezig is voor deze normale gebruiker
-        resp = self.client.get('/functie/wissel-van-rol/')
+        resp = self.client.get(self.url_wisselvanrol)
         self.assertEqual(resp.status_code, 302)     # 302 = Redirect (to plein)
-        self.client.logout()
+
+        self.assertTrue(str(self.functie_cwz) == "CWZ test")
 
     def test_normaal_met_rol(self):
-        # voeg de gebruiker toe aan een groep waardoor wissel-van-rol actief wordt
-        self.account_normaal.nhblid = self.nhblid1
-        self.account_normaal.save()
-        self.account_normaal.functies.add(self.functie_rcl)
-        self.account_normaal.functies.add(self.functie_cwz)
-        account_vhpg_is_geaccepteerd(self.account_normaal)
+        # voeg de gebruiker toe aan twee functies waardoor wissel-van-rol actief wordt
+        self.e2e_account_accepteert_vhpg(self.account_normaal)
+        self.functie_rcl.accounts.add(self.account_normaal)
+        self.functie_cwz.accounts.add(self.account_normaal)
 
-        self.client.logout()
-        self.client.login(username=self.account_normaal.username, password='wachtwoord')
-        account_zet_sessionvars_na_otp_controle(self.client).save()
-        rol_zet_sessionvars_na_otp_controle(self.account_normaal, self.client).save()
+        self.e2e_login_and_pass_otp(self.account_normaal)
 
-        resp = self.client.get('/functie/wissel-van-rol/')
+        resp = self.client.get(self.url_wisselvanrol)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        assert_html_ok(self, resp)
+        self.assert_html_ok(resp)
         self.assertNotContains(resp, "BKO test")
         self.assertNotContains(resp, "RKO test")
         self.assertContains(resp, "RCL test")
@@ -168,90 +152,95 @@ class TestFunctieWisselVanRol(TestCase):
 
         # activeer nu de rol van RCL
         # dan komen de CWZ rollen te voorschijn
-        resp = self.client.get('/functie/wissel-van-rol/functie/%s/' % self.functie_rcl.pk)
-        self.assertEqual(resp.status_code, 302)     # 302 = Redirect
+        resp = self.client.get(self.url_wisselvanrol + 'functie/%s/' % self.functie_rcl.pk)
+        self.assert_is_redirect(resp, self.url_wisselvanrol)
 
-        resp = self.client.get('/functie/wissel-van-rol/')
+        resp = self.client.get(self.url_wisselvanrol)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        assert_html_ok(self, resp)
+        self.assert_html_ok(resp)
         self.assertNotContains(resp, "BKO test")
         self.assertNotContains(resp, "RKO test")
         self.assertContains(resp, "RCL test")
         self.assertContains(resp, "CWZ test")
 
-        assert_other_http_commands_not_supported(self, '/functie/wissel-van-rol/')
+        # niet bestaande functie
+        resp = self.client.get(self.url_wisselvanrol + 'functie/999999/')
+        self.assert_is_redirect(resp, self.url_wisselvanrol)
+        # TODO: check functie ongewijzigd
+
+        resp = self.client.get(self.url_wisselvanrol + 'functie/getal/')
+        self.assert_is_redirect(resp, self.url_wisselvanrol)
+        # TODO: check functie ongewijzigd
+
+        self.e2e_assert_other_http_commands_not_supported(self.url_wisselvanrol)
 
     def test_rolwissel_it(self):
-        self.client.login(username=self.account_admin.username, password='wachtwoord')
-        account_vhpg_is_geaccepteerd(self.account_admin)
-        account_zet_sessionvars_na_otp_controle(self.client).save()
-        rol_zet_sessionvars_na_otp_controle(self.account_admin, self.client).save()
+        self.e2e_account_accepteert_vhpg(self.account_admin)
+        self.e2e_login_and_pass_otp(self.account_admin)
 
-        resp = self.client.get('/functie/wissel-van-rol/')
+        resp = self.client.get(self.url_wisselvanrol)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, "Gebruiker")
-        urls = [url for url in extract_all_href_urls(resp) if url.startswith('/functie/wissel-van-rol/')]
-        self.assertIn('/functie/wissel-van-rol/beheerder/', urls)   # IT beheerder
-        self.assertIn('/functie/wissel-van-rol/BB/', urls)          # Manager competitiezaken
-        self.assertIn('/functie/wissel-van-rol/geen/', urls)        # Gebruiker
-        self.assertNotIn('/functie/wissel-van-rol/selecteer-schutter/', urls)
+        urls = [url for url in self.extract_all_href_urls(resp) if url.startswith(self.url_wisselvanrol)]
+        self.assertIn(self.url_wisselvanrol + 'beheerder/', urls)   # IT beheerder
+        self.assertIn(self.url_wisselvanrol + 'BB/', urls)          # Manager competitiezaken
+        self.assertIn(self.url_wisselvanrol + 'geen/', urls)        # Gebruiker
+        self.assertNotIn('/account/account-wissel/', urls)
 
-        resp = self.client.get('/functie/wissel-van-rol/BB/', follow=True)
+        resp = self.client.get(self.url_wisselvanrol + 'BB/', follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, "Manager competitiezaken")
-        urls = [url for url in extract_all_href_urls(resp) if url.startswith('/functie/wissel-van-rol/')]
-        self.assertNotIn('/functie/wissel-van-rol/selecteer-schutter/', urls)
+        urls = [url for url in self.extract_all_href_urls(resp) if url.startswith(self.url_wisselvanrol)]
+        self.assertNotIn('/account/account-wissel/', urls)
 
-        resp = self.client.get('/functie/wissel-van-rol/beheerder/', follow=True)
+        resp = self.client.get(self.url_wisselvanrol + 'beheerder/', follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, "IT beheerder")
-        urls = [url for url in extract_all_href_urls(resp) if url.startswith('/functie/wissel-van-rol/')]
-        self.assertIn('/functie/wissel-van-rol/selecteer-schutter/', urls)
+        urls = [url for url in self.extract_all_href_urls(resp) if url.startswith('/account/')]
+        self.assertIn('/account/account-wissel/', urls)
 
         # controleer dat een niet valide rol wissel geen effect heeft
         # dit raakt een exception in Account.rol:rol_activeer
-        resp = self.client.get('/functie/wissel-van-rol/huh/', follow=True)
+        resp = self.client.get(self.url_wisselvanrol + 'huh/', follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, "IT beheerder")
 
         # controleer dat een rol wissel die met een functie moet geen effect heeft
-        resp = self.client.get('/functie/wissel-van-rol/BKO/', follow=True)
+        resp = self.client.get(self.url_wisselvanrol + 'BKO/', follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, "IT beheerder")
 
-        resp = self.client.get('/functie/wissel-van-rol/geen/', follow=True)
+        resp = self.client.get(self.url_wisselvanrol + 'geen/', follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, "Gebruiker")
-        urls = [url for url in extract_all_href_urls(resp) if url.startswith('/functie/wissel-van-rol/')]
-        self.assertNotIn('/functie/wissel-van-rol/selecteer-schutter/', urls)
+        urls = [url for url in self.extract_all_href_urls(resp) if url.startswith(self.url_wisselvanrol)]
+        self.assertNotIn('/account/account-wissel', urls)
 
     def test_rolwissel_bb(self):
-        account = self.account_normaal
-        account.nhblid = None
-        account.is_BB = True
-        account.save()
-        account_vhpg_is_geaccepteerd(account)
-        self.client.login(username=account.username, password='wachtwoord')
-        account_zet_sessionvars_na_otp_controle(self.client).save()
-        rol_zet_sessionvars_na_otp_controle(account, self.client).save()
+        # maak een BB die geen NHB lid is
+        self.account_geenlid.is_BB = True
+        self.account_geenlid.save()
+        self.e2e_account_accepteert_vhpg(self.account_geenlid)
+        self.e2e_login_and_pass_otp(self.account_geenlid)
 
-        resp = self.client.get('/functie/wissel-van-rol/')
+        resp = self.client.get(self.url_wisselvanrol)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, "Gebruiker")
-        urls = [url for url in extract_all_href_urls(resp) if url.startswith('/functie/wissel-van-rol/')]
-        self.assertNotIn('/functie/wissel-van-rol/selecteer-schutter/', urls)   # Selecteer schutter
-        self.assertIn('/functie/wissel-van-rol/BB/', urls)          # Manager competitiezaken
-        self.assertIn('/functie/wissel-van-rol/geen/', urls)        # Gebruiker
+        urls = [url for url in self.extract_all_href_urls(resp) if url.startswith(self.url_wisselvanrol)]
+        self.assertNotIn('/account/account-wissel', urls)           # Account wissel
+        self.assertIn(self.url_wisselvanrol + 'BB/', urls)          # Manager competitiezaken
+        self.assertIn(self.url_wisselvanrol + 'geen/', urls)        # Gebruiker
 
     def test_geen_rolwissel(self):
         # dit raakt de exceptie in Account.rol:rol_mag_wisselen
-        self.client.logout()
-        resp = self.client.get('/functie/wissel-van-rol/')
+        self.e2e_logout()
+        resp = self.client.get(self.url_wisselvanrol)
         self.assertEqual(resp.status_code, 302)     # 302 = Redirect (to login)
 
         # probeer van rol te wisselen
-        resp = self.client.get('/functie/wissel-van-rol/beheerder/')
+        resp = self.client.get(self.url_wisselvanrol + 'beheerder/')
         self.assertEqual(resp.status_code, 302)     # 302 = Redirect (to login)
 
+# TODO: gebruik assert_other_http_commands_not_supported
 
 # end of file

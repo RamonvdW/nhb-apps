@@ -5,14 +5,12 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from Plein.tests import assert_html_ok, assert_other_http_commands_not_supported, assert_template_used
+from Overig.e2ehelpers import E2EHelpers
 from .models import HistCompetitie, HistCompetitieIndividueel, HistCompetitieTeam
 from .views import RESULTS_PER_PAGE
-from .forms import FilterForm
-import datetime
 
 
-class TestHistComp(TestCase):
+class TestHistComp(E2EHelpers, TestCase):
     """ unittests voor de HistComp applicatie """
 
     def setUp(self):
@@ -119,29 +117,29 @@ class TestHistComp(TestCase):
     def test_view_allejaren(self):
         resp = self.client.get('/hist/')
         self.assertEqual(resp.status_code, 200)
-        assert_html_ok(self, resp)
-        assert_template_used(self, resp, ('hist/histcomp_allejaren.dtl', 'plein/site_layout.dtl'))
-        assert_other_http_commands_not_supported(self, '/hist/')
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('hist/histcomp_allejaren.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, "2018/2019")
         self.assertNotContains(resp, "2017/2018")
         self.assertContains(resp, 'Compound')
         self.assertContains(resp, 'Special Type')
         self.assertContains(resp, 'Recurve')
+        self.e2e_assert_other_http_commands_not_supported('/hist/')
 
         # controleer de volgorde waarin de klassen getoond wordt
         resp_str = str(resp.content)
         pos1 = resp_str.find('Recurve')
         pos2 = resp_str.find('Compound')
         pos3 = resp_str.find('Special Type')
-        self.assertTrue(pos1 > 0 and pos1 < pos2)
-        self.assertTrue(pos2 > 0 and pos2 < pos3)
+        self.assertTrue(0 < pos1 < pos2)
+        self.assertTrue(0 < pos2 < pos3)
 
     def test_view_allejaren_leeg(self):
         # verwijder alle records en controleer dat het goed gaat
         HistCompetitie.objects.all().delete()
         resp = self.client.get('/hist/')
         self.assertEqual(resp.status_code, 200)
-        assert_html_ok(self, resp)
+        self.assert_html_ok(resp)
         self.assertContains(resp, "Er is op dit moment geen uitslag beschikbaar")
 
     def test_view_indiv_non_existing(self):
@@ -152,13 +150,13 @@ class TestHistComp(TestCase):
         url = '/hist/indiv/%s/' % self.indiv_histcomp_pk
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
-        assert_template_used(self, resp, ('hist/histcomp_indiv.dtl', 'plein/site_layout.dtl'))
-        assert_html_ok(self, resp)
-        assert_other_http_commands_not_supported(self, url)
+        self.assert_template_used(resp, ('hist/histcomp_indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
         self.assertNotContains(resp, "page=1")     # pagination not active
         self.assertNotContains(resp, "page=1")     # pagination not active
         self.assertContains(resp, "2018/2019")
         self.assertContains(resp, "Recurve")
+        self.e2e_assert_other_http_commands_not_supported(url)
 
     def test_view_indiv_many(self):
         self._add_many_records(10)  # 10*100 = +1000 records
@@ -166,8 +164,8 @@ class TestHistComp(TestCase):
 
         resp = self.client.get(url, {'page': 6})
         self.assertEqual(resp.status_code, 200)
-        assert_template_used(self, resp, ('hist/histcomp_indiv.dtl', 'plein/site_layout.dtl'))
-        assert_html_ok(self, resp)
+        self.assert_template_used(resp, ('hist/histcomp_indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
         self.assertContains(resp, "page=5")
 
         # haal de eerste aan de laatste pagina op, voor coverage
@@ -184,19 +182,19 @@ class TestHistComp(TestCase):
 
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
-        assert_html_ok(self, resp)
+        self.assert_html_ok(resp)
         self.assertContains(resp, "page=2")         # paginator actief
 
         resp = self.client.get(url, {'all': 1})
         self.assertEqual(resp.status_code, 200)
-        assert_html_ok(self, resp)
+        self.assert_html_ok(resp)
         self.assertNotContains(resp, "page=2")      # paginator inactief
 
         # corner-case: invalid form data
         resp = self.client.get(url, {'all': 'not an integer'})
         self.assertEqual(resp.status_code, 200)
 
-    def test_view_invid_few_filter(self):
+    def test_view_indiv_few_filter(self):
         rec = HistCompetitieIndividueel.objects.get(pk=self.indiv_rec_pk)
         rec.schutter_naam = "Dhr Blazoengatenmaker"
         rec.save()
@@ -205,18 +203,18 @@ class TestHistComp(TestCase):
         # filter on a string
         resp = self.client.get(url, {'filter': 'Blazoengatenmaker'})
         self.assertEqual(resp.status_code, 200)
-        assert_template_used(self, resp, ('hist/histcomp_indiv.dtl', 'plein/site_layout.dtl'))
-        assert_html_ok(self, resp)
+        self.assert_template_used(resp, ('hist/histcomp_indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
         self.assertContains(resp, 'Blazoengatenmaker')
         # TODO: check correct records was returned
 
         # filter on a number
         resp = self.client.get(url, {'filter': rec.vereniging_nr})
         self.assertEqual(resp.status_code, 200)
-        assert_template_used(self, resp, ('hist/histcomp_indiv.dtl', 'plein/site_layout.dtl'))
-        assert_html_ok(self, resp)
+        self.assert_template_used(resp, ('hist/histcomp_indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
 
-    def test_view_invid_many_filter(self):
+    def test_view_indiv_many_filter(self):
         self._add_many_records(2)  # 20*100 = +200 records --> paginering actief
 
         rec = HistCompetitieIndividueel.objects.get(pk=self.indiv_rec_pk)
@@ -225,57 +223,59 @@ class TestHistComp(TestCase):
         # filter on a string
         resp = self.client.get(url, {'filter': rec.schutter_naam})
         self.assertEqual(resp.status_code, 200)
-        assert_template_used(self, resp, ('hist/histcomp_indiv.dtl', 'plein/site_layout.dtl'))
-        assert_html_ok(self, resp)
+        self.assert_template_used(resp, ('hist/histcomp_indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
         self.assertContains(resp, "page=2")         # paginator actief
         self.assertContains(resp, "Test Club")
 
         # filter on a number
         resp = self.client.get(url, {'filter': rec.vereniging_nr})
         self.assertEqual(resp.status_code, 200)
-        assert_template_used(self, resp, ('hist/histcomp_indiv.dtl', 'plein/site_layout.dtl'))
-        assert_html_ok(self, resp)
+        self.assert_template_used(resp, ('hist/histcomp_indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
         self.assertContains(resp, "Test Club")
 
         # filter on an unknown number
         resp = self.client.get(url, {'filter': 9999})
         self.assertEqual(resp.status_code, 200)
-        assert_template_used(self, resp, ('hist/histcomp_indiv.dtl', 'plein/site_layout.dtl'))
-        assert_html_ok(self, resp)
+        self.assert_template_used(resp, ('hist/histcomp_indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
         self.assertNotContains(resp, "Test Club")
 
     # def _UIT_test_view_invid_empty(self):
     #     rsp = self.client.get('/hist/2019/18/Missing/indiv/')
     #     self.assertEqual(rsp.status_code, 200)
-    #     assert_template_used(self, rsp, ('hist/histcomp_indiv.dtl', 'plein/site_layout.dtl'))
-    #     assert_html_ok(self, rsp)
+    #     self.assert_template_used(rsp, ('hist/histcomp_indiv.dtl', 'plein/site_layout.dtl'))
+    #     self.assert_html_ok(rsp)
     #     # TODO: check correct records were returned
     #
     # def _UIT_test_view_team_all(self):
     #     rsp = self.client.get('/hist/2019/18/Teamcurve3/team/', {'all': '1'})
     #     self.assertEqual(rsp.status_code, 200)
-    #     assert_template_used(self, rsp, ('hist/histcomp_team.dtl', 'plein/site_layout.dtl'))
-    #     assert_html_ok(self, rsp)
+    #     self.assert_template_used(rsp, ('hist/histcomp_team.dtl', 'plein/site_layout.dtl'))
+    #     self.assert_html_ok(rsp)
     #
     # def _UIT_test_view_team_filter_schutter_nr(self):
     #     rsp = self.client.get('/hist/2019/18/Teamcurve3/team/', {'filter': '123456'})
     #     self.assertEqual(rsp.status_code, 200)
-    #     assert_template_used(self, rsp, ('hist/histcomp_team.dtl', 'plein/site_layout.dtl'))
-    #     assert_html_ok(self, rsp)
+    #     self.assert_template_used(rsp, ('hist/histcomp_team.dtl', 'plein/site_layout.dtl'))
+    #     self.assert_html_ok(rsp)
     #     # TODO: check correct records was returned
     #
     # def _UIT_test_view_team_filter_vereniging_nr(self):
     #     rsp = self.client.get('/hist/2019/18/Teamcurve3/team/', {'filter': '1234'})
     #     self.assertEqual(rsp.status_code, 200)
-    #     assert_template_used(self, rsp, ('hist/histcomp_team.dtl', 'plein/site_layout.dtl'))
-    #     assert_html_ok(self, rsp)
+    #     self.assert_template_used(rsp, ('hist/histcomp_team.dtl', 'plein/site_layout.dtl'))
+    #     self.assert_html_ok(rsp)
     #     # TODO: check correct records were returned
     #
     # def _UIT_test_view_team_filter_string(self):
     #     rsp = self.client.get('/hist/2019/18/Teamcurve3/team/', {'filter': 'club'})
     #     self.assertEqual(rsp.status_code, 200)
-    #     assert_template_used(self, rsp, ('hist/histcomp_team.dtl', 'plein/site_layout.dtl'))
-    #     assert_html_ok(self, rsp)
+    #     self.assert_template_used(rsp, ('hist/histcomp_team.dtl', 'plein/site_layout.dtl'))
+    #     self.assert_html_ok(rsp)
     #     # TODO: check correct records were returned
+
+# TODO: assert_other_http_commands_not_supported
 
 # end of file

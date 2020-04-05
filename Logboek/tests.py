@@ -7,26 +7,23 @@
 from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.test import TestCase
-from .models import LogboekRegel, schrijf_in_logboek
 from .apps import LogboekConfig
-from Account.models import Account, account_vhpg_is_geaccepteerd, account_zet_sessionvars_na_otp_controle
-from Functie.rol import rol_zet_sessionvars_na_otp_controle, rol_activeer_rol, rol_is_beheerder
+from .models import LogboekRegel, schrijf_in_logboek
 from NhbStructuur.models import NhbLid
-from Plein.tests import assert_html_ok, assert_other_http_commands_not_supported, assert_template_used
+from Overig.e2ehelpers import E2EHelpers
 import datetime
 
-class TestLogboek(TestCase):
+
+class TestLogboek(E2EHelpers, TestCase):
     """ unit tests voor de Logboek applicatie """
+
+    test_after = ('Functie',)
 
     def setUp(self):
         """ initialisatie van de test case """
-        usermodel = get_user_model()
-        usermodel.objects.create_user('normaal', 'normaal@test.com', 'wachtwoord')
-        usermodel.objects.create_superuser('admin', 'admin@test.com', 'wachtwoord')
 
-        self.account_normaal = Account.objects.get(username='normaal')
-        self.account_admin = Account.objects.get(username='admin')
-        account_vhpg_is_geaccepteerd(self.account_admin)
+        self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
+        self.account_admin = self.e2e_create_account_admin()
 
         lid = NhbLid()
         lid.nhb_nr = 100042
@@ -36,10 +33,8 @@ class TestLogboek(TestCase):
         lid.email = "beh2@test.com"
         lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
         lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
+        lid.account = self.account_normaal
         lid.save()
-
-        self.account_normaal.nhblid = lid
-        self.account_normaal.save()
 
         schrijf_in_logboek(self.account_normaal, 'Logboek unittest', 'test setUp')
         schrijf_in_logboek(None, 'Logboek unittest', 'zonder account')
@@ -50,10 +45,10 @@ class TestLogboek(TestCase):
 
         self.logboek_url = '/logboek/'
 
-    def test_logboek_annon(self):
+    def test_logboek_anon(self):
         # do een get van het logboek zonder ingelogd te zijn
         # resulteert in een redirect naar het plein
-        self.client.logout()
+        self.e2e_logout()
         resp = self.client.get(self.logboek_url)
         self.assertRedirects(resp, '/plein/')
 
@@ -66,57 +61,49 @@ class TestLogboek(TestCase):
     def test_logboek_users_forbidden(self):
         # do een get van het logboek met een gebruiker die daar geen rechten toe heeft
         # resulteert rauwe Forbidden
-        self.client.login(username='normaal', password='wachtwoord')
-        account_zet_sessionvars_na_otp_controle(self.client).save()
-        rol_zet_sessionvars_na_otp_controle(self.account_normaal, self.client).save()
-        #sessionvars = rol_zet_sessionvars_na_login(self.account_normaal, self.client)
-        #sessionvars.save()      # required for unittest only
+        self.e2e_login_and_pass_otp(self.account_normaal)
         resp = self.client.get(self.logboek_url)
         self.assertEqual(resp.status_code, 302)  # 302 = Redirect (naar het plein)
 
     def test_logboek_user_allowed(self):
-        self.client.login(username='admin', password='wachtwoord')
-        account_zet_sessionvars_na_otp_controle(self.client).save()
-        rol_zet_sessionvars_na_otp_controle(self.account_admin, self.client).save()
+        self.e2e_login_and_pass_otp(self.account_admin)
         self.assertTrue(self.account_admin.is_staff)
-        rol_activeer_rol(self.client, 'BB').save()
-        self.assertTrue(rol_is_beheerder(self.client))
+        self.e2e_wisselnaarrol_bb()
 
         # alles
         resp = self.client.get(self.logboek_url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        assert_template_used(self, resp, ('logboek/logboek.dtl', 'plein/site_layout.dtl'))
-        assert_html_ok(self, resp)
+        self.assert_template_used(resp, ('logboek/logboek.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
         self.assertContains(resp, 'test setUp')
         self.assertContains(resp, 'IT beheerder')
-        assert_other_http_commands_not_supported(self, self.logboek_url)
 
         # records import
         resp = self.client.get(self.logboek_url + 'records/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        assert_template_used(self, resp, ('logboek/logboek-records.dtl', 'plein/site_layout.dtl'))
-        assert_html_ok(self, resp)
+        self.assert_template_used(resp, ('logboek/logboek-records.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
         self.assertContains(resp, 'import gelukt')
 
         # accounts
         resp = self.client.get(self.logboek_url + 'accounts/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        assert_template_used(self, resp, ('logboek/logboek-accounts.dtl', 'plein/site_layout.dtl'))
-        assert_html_ok(self, resp)
+        self.assert_template_used(resp, ('logboek/logboek-accounts.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
         self.assertContains(resp, 'alweer verkeerd')
 
         # rollen
         resp = self.client.get(self.logboek_url + 'rollen/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        assert_template_used(self, resp, ('logboek/logboek-rollen.dtl', 'plein/site_layout.dtl'))
-        assert_html_ok(self, resp)
+        self.assert_template_used(resp, ('logboek/logboek-rollen.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
         self.assertContains(resp, 'Jantje is de baas')
 
         # nhbstructuur / crm import
         resp = self.client.get(self.logboek_url + 'crm-import/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        assert_template_used(self, resp, ('logboek/logboek-nhbstructuur.dtl', 'plein/site_layout.dtl'))
-        assert_html_ok(self, resp)
+        self.assert_template_used(resp, ('logboek/logboek-nhbstructuur.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
         self.assertContains(resp, 'weer een nieuw lid')
 
     def test_log_versie(self):
@@ -134,6 +121,16 @@ class TestLogboek(TestCase):
         # controleer dat er 1 regel met het versienummer toegevoegd is in het logboek
         qset = LogboekRegel.objects.filter(gebruikte_functie='Uitrol', activiteit__contains=settings.SITE_VERSIE)
         self.assertEqual(len(qset), 1)
+
+    def test_other_http(self):
+        # als BB
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_wisselnaarrol_bb()
+        self.e2e_assert_other_http_commands_not_supported(self.logboek_url)
+        self.e2e_assert_other_http_commands_not_supported(self.logboek_url + 'crm-import/')
+        self.e2e_assert_other_http_commands_not_supported(self.logboek_url + 'rollen/')
+        self.e2e_assert_other_http_commands_not_supported(self.logboek_url + 'accounts/')
+        self.e2e_assert_other_http_commands_not_supported(self.logboek_url + 'records/')
 
 
 # end of file

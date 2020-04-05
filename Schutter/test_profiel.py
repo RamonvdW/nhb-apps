@@ -4,25 +4,24 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.contrib.auth import get_user_model
 from django.utils.dateparse import parse_date
 from django.test import TestCase
-from Account.models import Account, account_zet_sessionvars_na_login
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
 from NhbStructuur.migrations.m0002_nhbstructuur_2018 import maak_rayons_2018, maak_regios_2018
-from Overig.helpers import assert_html_ok, assert_template_used, assert_other_http_commands_not_supported
-from Functie.rol import Rollen, rol_zet_sessionvars_na_login, rol_get_huidige
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Records.models import IndivRecord
-from .leeftijdsklassen import leeftijdsklassen_zet_sessionvars_na_login
+from Overig.e2ehelpers import E2EHelpers
 import datetime
 
 
-class TestSchutterProfiel(TestCase):
+class TestSchutterProfiel(E2EHelpers, TestCase):
     """ unit tests voor de Schutter applicatie, module Profiel """
 
     def setUp(self):
         """ initialisatie van de test case """
+
+        self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
+
         # maak de standard rayon/regio structuur aan
         maak_rayons_2018(NhbRayon)
         maak_regios_2018(NhbRayon, NhbRegio)
@@ -45,13 +44,8 @@ class TestSchutterProfiel(TestCase):
         lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
         lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
         lid.bij_vereniging = ver
+        lid.account = self.account_normaal
         lid.save()
-
-        usermodel = get_user_model()
-        usermodel.objects.create_user('normaal', 'normaal@test.com', 'wachtwoord')
-        self.account_normaal = Account.objects.get(username='normaal')
-        self.account_normaal.nhblid = lid
-        self.account_normaal.save()
 
         # geef dit account een record
         rec = IndivRecord()
@@ -102,23 +96,17 @@ class TestSchutterProfiel(TestCase):
 
     def test_view(self):
         # zonder login --> terug naar het plein
-        resp = self.client.get('/schutter/', follow=True)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        assert_template_used(self, resp, ('plein/plein-bezoeker.dtl', 'plein/site_layout.dtl'))
+        resp = self.client.get('/schutter/')
+        self.assert_is_redirect(resp, '/plein/')
 
         # met schutter-login wel toegankelijk
-        account = self.account_normaal
-        self.client.login(username=account.username, password='wachtwoord')
-        account_zet_sessionvars_na_login(self.client).save()
-        rol_zet_sessionvars_na_login(account, self.client).save()
-        leeftijdsklassen_zet_sessionvars_na_login(account, self.client).save()
-        self.assertEqual(rol_get_huidige(self.client), Rollen.ROL_SCHUTTER)
+        self.e2e_login(self.account_normaal)
 
         resp = self.client.get('/schutter/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        assert_html_ok(self, resp)
-        assert_template_used(self, resp, ('schutter/profiel.dtl', 'plein/site_layout.dtl'))
-        assert_other_http_commands_not_supported(self, '/schutter/')
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('schutter/profiel.dtl', 'plein/site_layout.dtl'))
+        self.e2e_assert_other_http_commands_not_supported('/schutter/')
 
         # check record
         self.assertContains(resp, 'Topstad')

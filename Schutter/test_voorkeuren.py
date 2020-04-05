@@ -4,30 +4,24 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.contrib.auth import get_user_model
 from django.test import TestCase
-from Account.models import Account, account_zet_sessionvars_na_login
 from BasisTypen.models import BoogType
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
 from NhbStructuur.migrations.m0002_nhbstructuur_2018 import maak_rayons_2018, maak_regios_2018
-from Overig.helpers import assert_html_ok, assert_template_used, assert_other_http_commands_not_supported
+from Overig.e2ehelpers import E2EHelpers
 from Functie.rol import Rollen, rol_zet_sessionvars_na_login, rol_get_huidige
 from .models import SchutterBoog
-from .leeftijdsklassen import leeftijdsklassen_zet_sessionvars_na_login, \
-                              get_sessionvars_leeftijdsklassen
+from .leeftijdsklassen import leeftijdsklassen_plugin_na_login
 import datetime
 
 
-class TestSchutterVoorkeuren(TestCase):
+class TestSchutterVoorkeuren(E2EHelpers, TestCase):
     """ unit tests voor de Schutter applicatie, module Voorkeuren """
 
     def setUp(self):
         """ initialisatie van de test case """
-        usermodel = get_user_model()
-        usermodel.objects.create_user('normaal', 'normaal@test.com', 'wachtwoord')
-        usermodel.objects.create_superuser('admin', 'admin@test.com', 'wachtwoord')
-        self.account_admin = Account.objects.get(username='admin')
-        self.account_normaal = Account.objects.get(username='normaal')
+        self.account_admin = self.e2e_create_account_admin()
+        self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
 
         # maak de standard rayon/regio structuur aan
         maak_rayons_2018(NhbRayon)
@@ -51,10 +45,9 @@ class TestSchutterVoorkeuren(TestCase):
         lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
         lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
         lid.bij_vereniging = ver
+        lid.account = self.account_normaal
         lid.save()
         self.nhblid1 = lid
-        self.account_normaal.nhblid = lid
-        self.account_normaal.save()
 
         # maak een test lid aan
         lid = NhbLid()
@@ -70,29 +63,29 @@ class TestSchutterVoorkeuren(TestCase):
 
         self.boog_R = BoogType.objects.get(afkorting='R')
 
+        self.url_voorkeuren = '/schutter/voorkeuren/'
+
     def test_view(self):
         # zonder login --> terug naar het plein
-        resp = self.client.get('/schutter/voorkeuren/', follow=True)
+        resp = self.client.get(self.url_voorkeuren, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        assert_template_used(self, resp, ('plein/plein-bezoeker.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('plein/plein-bezoeker.dtl', 'plein/site_layout.dtl'))
 
         # met schutter-login wel toegankelijk
-        account = self.account_normaal
-        self.client.login(username=account.username, password='wachtwoord')
-        account_zet_sessionvars_na_login(self.client).save()
-        rol_zet_sessionvars_na_login(account, self.client).save()
-        leeftijdsklassen_zet_sessionvars_na_login(account, self.client).save()
-        self.assertEqual(rol_get_huidige(self.client), Rollen.ROL_SCHUTTER)
+        self.e2e_login(self.account_normaal)
 
+        # initieel zijn er geen voorkeuren opgeslagen
         self.assertEqual(len(SchutterBoog.objects.all()), 0)
-        resp = self.client.get('/schutter/voorkeuren/')
+        resp = self.client.get(self.url_voorkeuren)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        assert_html_ok(self, resp)
-        assert_template_used(self, resp, ('schutter/voorkeuren.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('schutter/voorkeuren.dtl', 'plein/site_layout.dtl'))
+
+        # na bekijken voorkeuren zijn ze aangemaakt
         self.assertEqual(len(SchutterBoog.objects.all()), 5)
 
-        # bij tweede keer de view ophalen zijn alle SchutterBoog records al aangemaakt
-        resp = self.client.get('/schutter/voorkeuren/')
+        # controleer dat ze niet nog een keer aangemaakt worden
+        resp = self.client.get(self.url_voorkeuren)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertEqual(len(SchutterBoog.objects.all()), 5)
 
@@ -102,10 +95,10 @@ class TestSchutterVoorkeuren(TestCase):
         self.assertFalse(obj.voorkeur_dutchtarget_18m)
 
         # maak wat wijzigingen
-        resp = self.client.post('/schutter/voorkeuren/', {'schiet_R': 'on', 'info_BB': 'on', 'voorkeur_DT_18m': 'on'})
+        resp = self.client.post(self.url_voorkeuren, {'schiet_R': 'on', 'info_BB': 'on', 'voorkeur_DT_18m': 'on'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        assert_html_ok(self, resp)
-        assert_template_used(self, resp, ('schutter/voorkeuren-opgeslagen.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('schutter/voorkeuren-opgeslagen.dtl', 'plein/site_layout.dtl'))
         self.assertEqual(len(SchutterBoog.objects.all()), 5)
 
         obj = SchutterBoog.objects.get(account=self.account_normaal, boogtype=self.boog_R)
@@ -117,22 +110,22 @@ class TestSchutterVoorkeuren(TestCase):
         self.assertTrue(str(obj) != "")
 
         # GET met DT=aan
-        resp = self.client.get('/schutter/voorkeuren/')
+        resp = self.client.get(self.url_voorkeuren)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         # TODO: check DT=aan
 
         # DT voorkeur uitzetten
-        resp = self.client.post('/schutter/voorkeuren/', {'schiet_R': 'on', 'info_BB': 'on'})
+        resp = self.client.post(self.url_voorkeuren, {'schiet_R': 'on', 'info_BB': 'on'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        assert_html_ok(self, resp)
-        assert_template_used(self, resp, ('schutter/voorkeuren-opgeslagen.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('schutter/voorkeuren-opgeslagen.dtl', 'plein/site_layout.dtl'))
 
         obj = SchutterBoog.objects.get(account=self.account_normaal, boogtype=self.boog_R)
         self.assertFalse(obj.heeft_interesse)
         self.assertTrue(obj.voor_wedstrijd)
         self.assertFalse(obj.voorkeur_dutchtarget_18m)
 
-        assert_other_http_commands_not_supported(self, '/schutter/voorkeuren/', post=False)
+        self.e2e_assert_other_http_commands_not_supported(self.url_voorkeuren, post=False)
 
 
 # end of file
