@@ -7,6 +7,10 @@
 from django.db import models
 
 
+# leden zijn junior tot en met het jaar waarin ze 20 worden
+MAXIMALE_LEEFTIJD_JEUGD = 20
+
+
 class BoogType(models.Model):
     """ boog typen: volledige naam en unique afkorting """
     beschrijving = models.CharField(max_length=50)

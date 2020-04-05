@@ -14,11 +14,37 @@ uuid_namespace = uuid5(NAMESPACE_URL, 'Overig.Models.SiteUrls')
 # dit gedoe met de dispatcher is om geen last te hebben van circulaire dependencies
 # Overig.models gebruikt Account.Account en Account.AccountEmail
 # als Account deze file importeert en wij Overig.models dan hebben we een circulaire dependency
-SAVER = '__saver__'
 RECEIVER_BEVESTIG_EMAIL = 'bevestig_email'
-RECEIVER_SELECTEER_SCHUTTER = 'selecteer_schutter'
+RECEIVER_ACCOUNT_WISSEL = 'account_wissel'
 
-dispatcher = dict()
+
+class TijdelijkeUrlDispatcher(object):
+
+    def __init__(self):
+        self._dispatcher = dict()       # [entry] = func
+        self._backup = None
+
+    def test_backup(self):
+        self._backup = dict(self._dispatcher)
+
+    def test_restore(self):
+        self._dispatcher = self._backup
+        self._backup = None
+
+    def set_receiver(self, topic, func):
+        self._dispatcher[topic] = func
+
+    def get_receiver(self, topic):
+        return self._dispatcher[topic]
+
+    def set_saver(self, func):
+        self._saver = func
+
+    def get_saver(self):
+        return self._saver
+
+
+tijdelijkeurl_dispatcher = TijdelijkeUrlDispatcher()
 
 
 def set_tijdelijke_url_receiver(topic, func):
@@ -29,13 +55,12 @@ def set_tijdelijke_url_receiver(topic, func):
             het object waar de url op van toepassing is
         De functie moet de url terug geven voor een http-redirect
     """
-    if topic != SAVER:
-        dispatcher[topic] = func
+    tijdelijkeurl_dispatcher.set_receiver(topic, func)
 
 
 def set_tijdelijke_url_saver(func):
-    """ intern gebruik door Overig.models om de url-saver functie te registereren """
-    dispatcher[SAVER] = func
+    """ intern gebruik door Overig.models om de url-saver functie te registreren """
+    tijdelijkeurl_dispatcher.set_saver(func)
 
 
 def _maak_url_code(**kwargs):
@@ -52,16 +77,18 @@ def maak_tijdelijke_url_accountemail(accountemail, **kwargs):
         De volledige url wordt terug gegeven.
     """
     url_code = _maak_url_code(**kwargs)
-    dispatcher[SAVER](url_code, dispatch_to="bevestig_email", geldig_dagen=7, accountemail=accountemail)
+    func = tijdelijkeurl_dispatcher.get_saver()
+    func(url_code, dispatch_to=RECEIVER_BEVESTIG_EMAIL, geldig_dagen=7, accountemail=accountemail)
     return settings.SITE_URL + reverse('Overig:tijdelijke-url', args=[url_code])
 
 
-def maak_tijdelijke_url_selecteer_schutter(accountemail, **kwargs):
+def maak_tijdelijke_url_accountwissel(accountemail, **kwargs):
     """ Maak een tijdelijke URL aan die gebruikt kan worden om eenmalig
         in te loggen als het gekozen account.
     """
     url_code = _maak_url_code(**kwargs)
-    dispatcher[SAVER](url_code, dispatch_to="selecteer_schutter", geldig_seconden=60, accountemail=accountemail)
+    func = tijdelijkeurl_dispatcher.get_saver()
+    func(url_code, dispatch_to=RECEIVER_ACCOUNT_WISSEL, geldig_seconden=60, accountemail=accountemail)
     return settings.SITE_URL + reverse('Overig:tijdelijke-url', args=[url_code])
 
 
@@ -73,17 +100,13 @@ def do_dispatch(request, obj):
 
     redirect = None
 
-    if obj.dispatch_to == "selecteer_schutter":
-        func = dispatcher[RECEIVER_SELECTEER_SCHUTTER]
-        redirect = func(request, obj.hoortbij_accountemail)
-
-    elif obj.dispatch_to == "bevestig_email":
-        func = dispatcher[RECEIVER_BEVESTIG_EMAIL]
+    if obj.dispatch_to in (RECEIVER_ACCOUNT_WISSEL, RECEIVER_BEVESTIG_EMAIL):
+        func = tijdelijkeurl_dispatcher.get_receiver(obj.dispatch_to)
         redirect = func(request, obj.hoortbij_accountemail)
 
     # TODO: verwijder onderstaande legacy methode na 2020-04-02
     elif obj.hoortbij_accountemail:
-        func = dispatcher[RECEIVER_BEVESTIG_EMAIL]
+        func = tijdelijkeurl_dispatcher.get_receiver(RECEIVER_BEVESTIG_EMAIL)
         redirect = func(request, obj.hoortbij_accountemail)
 
     return redirect

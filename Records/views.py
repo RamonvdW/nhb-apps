@@ -349,41 +349,37 @@ class RecordsZoekView(ListView):
         # retourneer een QuerySet voor de template
         # onthoud zaken in de object instantie
 
-        # haal de GET parameters uit de request
+        # haal de zoekterm op
         self.form = ZoekForm(self.request.GET)
+        self.form.full_clean()  # vult cleaned_data
+        self.get_zoekterm = self.form.cleaned_data['zoekterm']
 
-        self.have_searched = False
+        if self.get_zoekterm:
+            zoekterm = self.get_zoekterm
 
-        if self.form.is_valid():
-            self.get_zoekterm = self.form.cleaned_data['zoekterm']
+            try:
+                filter_nr = int(zoekterm)
+                filter_is_nr = True
+            except ValueError:
+                filter_is_nr = False
 
-            if self.get_zoekterm:
-                zoekterm = self.get_zoekterm
-                self.have_searched = True
-
+            if filter_is_nr and len(str(filter_nr)) == 6:
+                # zoek het NHB lid met dit nummber
                 try:
-                    filter_nr = int(zoekterm)
-                    filter_is_nr = True
-                except ValueError:
-                    filter_is_nr = False
-
-                if filter_is_nr and len(str(filter_nr)) == 6:
-                    # zoek het NHB lid met dit nummber
-                    try:
-                        lid = NhbLid.objects.get(nhb_nr=filter_nr)
-                    except NhbLid.DoesNotExist:
-                        # geen lid met dit nummer
-                        # of slecht getal
-                        pass
-                    else:
-                        # zoek alle records van dit lid
-                        return IndivRecord.objects.filter(nhb_lid=lid)
+                    lid = NhbLid.objects.get(nhb_nr=filter_nr)
+                except NhbLid.DoesNotExist:
+                    # geen lid met dit nummer
+                    # of slecht getal
+                    pass
                 else:
-                    return IndivRecord.objects.filter(
-                                    Q(soort_record__icontains=zoekterm) |
-                                    Q(naam__icontains=zoekterm) |
-                                    Q(plaats__icontains=zoekterm) |
-                                    Q(land__icontains=zoekterm)).order_by('-datum', 'soort_record')[:settings.RECORDS_MAX_ZOEKRESULTATEN]
+                    # zoek alle records van dit lid
+                    return IndivRecord.objects.filter(nhb_lid=lid)
+            else:
+                return IndivRecord.objects.filter(
+                                Q(soort_record__icontains=zoekterm) |
+                                Q(naam__icontains=zoekterm) |
+                                Q(plaats__icontains=zoekterm) |
+                                Q(land__icontains=zoekterm)).order_by('-datum', 'soort_record')[:settings.RECORDS_MAX_ZOEKRESULTATEN]
 
         return None
 
@@ -391,7 +387,7 @@ class RecordsZoekView(ListView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
         context['form'] = self.form
-        context['have_searched'] = self.have_searched
+        context['have_searched'] = self.get_zoekterm != ""
         context['zoekterm'] = self.get_zoekterm
         menu_dynamics(self.request, context, actief='records')
         return context

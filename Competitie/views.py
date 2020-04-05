@@ -14,12 +14,12 @@ from django.utils import timezone
 from Plein.menu import menu_dynamics
 from Logboek.models import schrijf_in_logboek
 from Functie.models import Functie
-from Functie.rol import Rollen, rol_get_huidige_functie, rol_get_beschrijving,\
-                        rol_is_BB, rol_is_CWZ, rol_is_beheerder
+from Functie.rol import Rollen, rol_get_huidige_functie, rol_get_beschrijving, rol_get_huidige
 from BasisTypen.models import TeamType, TeamTypeBoog, WedstrijdKlasse, LeeftijdsKlasse, \
-                              WedstrijdKlasseBoog, WedstrijdKlasseLeeftijd
+                              WedstrijdKlasseBoog, WedstrijdKlasseLeeftijd, MAXIMALE_LEEFTIJD_JEUGD
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from NhbStructuur.models import NhbLid, NhbVereniging
+from Schutter.models import SchutterBoog
 from .models import Competitie, ZERO, CompetitieWedstrijdKlasse, DeelCompetitie,\
                     competitie_aanmaken, maak_competitieklasse_indiv
 from datetime import date
@@ -33,6 +33,8 @@ TEMPLATE_COMPETITIE_AANMAKEN = 'competitie/competities-aanmaken.dtl'
 TEMPLATE_COMPETITIE_KLASSEGRENZEN = 'competitie/klassegrenzen-vaststellen.dtl'
 TEMPLATE_COMPETITIE_LIJST_VERENIGINGEN = 'competitie/lijst-verenigingen.dtl'
 TEMPLATE_COMPETITIE_LEDENLIJST = 'competitie/ledenlijst.dtl'
+TEMPLATE_COMPETITIE_CWZ_SCHUTTERSBOOG_AANMELDEN = 'competitie/cwz-schutters-boog-aanmelden.dtl'
+TEMPLATE_COMPETITIE_CWZ_SCHUTTER_BOGEN_INSTELLEN = 'competitie/cwz-schutter-bogen-kiezen.dtl'
 
 JA_NEE = {False: 'Nee', True: 'Ja'}
 
@@ -136,9 +138,10 @@ class CompetitieOverzichtView(View):
     def get(self, request, *args, **kwargs):
         """ called by the template system to get the context data for the template """
 
-        if rol_is_beheerder(self.request):
+        rol_nu = rol_get_huidige(self.request)
+        if rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL):
             context, template = self._get_competitie_overzicht_beheerder(request)
-        elif rol_is_CWZ(self.request):
+        elif rol_nu == Rollen.ROL_CWZ:
             context, template = self._get_competitie_overzicht_cwz(request)
         else:
             context, template = self._get_competitie_overzicht_schutter()
@@ -156,14 +159,15 @@ class InstellingenVolgendeCompetitieView(UserPassesTestMixin, ListView):
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        res = rol_is_BB(self.request)
-        return res
+        rol_nu = rol_get_huidige(self.request)
+        return rol_nu == Rollen.ROL_BB
 
     def handle_no_permission(self):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
         return HttpResponseRedirect(reverse('Plein:plein'))
 
-    def _get_queryset_teamtypen(self):
+    @staticmethod
+    def _get_queryset_teamtypen():
         objs = TeamType.objects.all()
         for teamtype in objs:
             boogtypen = [obj.boogtype.afkorting for obj in TeamTypeBoog.objects.select_related('boogtype').filter(teamtype=teamtype)]
@@ -171,7 +175,8 @@ class InstellingenVolgendeCompetitieView(UserPassesTestMixin, ListView):
         # for
         return objs
 
-    def _get_queryset_indivklassen(self):
+    @staticmethod
+    def _get_queryset_indivklassen():
         objs = WedstrijdKlasse.objects.filter(is_voor_teams=False, buiten_gebruik=False)
         prev = "-"
         for klasse in objs:
@@ -230,8 +235,8 @@ class CompetitieAanmakenView(UserPassesTestMixin, TemplateView):
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        res = rol_is_BB(self.request)
-        return res
+        rol_nu = rol_get_huidige(self.request)
+        return rol_nu == Rollen.ROL_BB
 
     def handle_no_permission(self):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
@@ -269,8 +274,8 @@ class KlassegrenzenView(UserPassesTestMixin, TemplateView):
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        res = rol_is_BB(self.request)
-        return res
+        rol_nu = rol_get_huidige(self.request)
+        return rol_nu == Rollen.ROL_BB
 
     def handle_no_permission(self):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
@@ -440,7 +445,8 @@ class LijstVerenigingenView(UserPassesTestMixin, ListView):
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        return rol_is_beheerder(self.request)
+        rol_nu = rol_get_huidige(self.request)
+        return rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL)
 
     def handle_no_permission(self):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
@@ -470,7 +476,7 @@ class LijstVerenigingenView(UserPassesTestMixin, ListView):
                 except Functie.DoesNotExist:
                     obj.cwzs = list()
                 else:
-                    obj.cwzs = functie_cwz.account_set.all()
+                    obj.cwzs = functie_cwz.accounts.all()
             # for
             return objs
 
@@ -519,17 +525,15 @@ class LedenLijstView(UserPassesTestMixin, ListView):
         """ called by the template system to get the queryset or list of objects for the template """
 
         huidige_jaar = timezone.now().year  # TODO: check for correctness in last hours of the year (due to timezone)
+        jeugdgrens = huidige_jaar - MAXIMALE_LEEFTIJD_JEUGD
         self._huidige_jaar = huidige_jaar
 
         _, functie_nu = rol_get_huidige_functie(self.request)
         qset = NhbLid.objects.filter(bij_vereniging=functie_nu.nhb_ver)
         objs = list()
 
-        jeugdgrens = huidige_jaar - 21      # junior t/m 21 jaar
-
-        # jeugd
         # sorteer op geboorte jaar en daarna naam
-        for obj in qset.filter(geboorte_datum__year__gt=jeugdgrens).order_by('-geboorte_datum__year', 'achternaam', 'voornaam'):
+        for obj in qset.filter(geboorte_datum__year__gte=jeugdgrens).order_by('-geboorte_datum__year', 'achternaam', 'voornaam'):
             objs.append(obj)
 
             # de wedstrijdleeftijd voor dit hele jaar
@@ -576,5 +580,167 @@ class LedenLijstView(UserPassesTestMixin, ListView):
 
         menu_dynamics(self.request, context, actief='competitie')
         return context
+
+
+class SchutterBogenInstellenView(UserPassesTestMixin, ListView):
+
+    """ Deze view laat de CWZ de boven van een lid instellen """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_COMPETITIE_CWZ_SCHUTTER_BOGEN_INSTELLEN
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        _, functie_nu = rol_get_huidige_functie(self.request)
+        return functie_nu and functie_nu.rol == "CWZ"
+
+    def handle_no_permission(self):
+        """ gebruiker heeft geen toegang --> redirect naar Competitie scherm """
+        return HttpResponseRedirect(reverse('Competitie:overzicht'))
+
+    def get_queryset(self):
+        """ called by the template system to get the queryset or list of objects for the template """
+
+        huidige_jaar = timezone.now().year  # TODO: check for correctness in last hours of the year (due to timezone)
+        jeugdgrens = huidige_jaar - MAXIMALE_LEEFTIJD_JEUGD
+        self._huidige_jaar = huidige_jaar
+
+        _, functie_nu = rol_get_huidige_functie(self.request)
+        qset = NhbLid.objects.filter(bij_vereniging=functie_nu.nhb_ver)
+        objs = list()
+
+        # jeugd
+        # sorteer op geboorte jaar en daarna naam
+        for obj in qset.filter(geboorte_datum__year__gte=jeugdgrens).order_by('-geboorte_datum__year', 'achternaam', 'voornaam'):
+            objs.append(obj)
+
+            # de wedstrijdleeftijd voor dit hele jaar
+            wedstrijdleeftijd = huidige_jaar - obj.geboorte_datum.year
+            obj.leeftijd = wedstrijdleeftijd
+
+            # de wedstrijdklasse voor dit hele jaar
+            obj.leeftijdsklasse = LeeftijdsKlasse.objects.filter(
+                            max_wedstrijdleeftijd__gte=wedstrijdleeftijd,
+                            geslacht='M').order_by('max_wedstrijdleeftijd')[0]
+        # for
+
+        # volwassenen
+        # sorteer op naam
+        for obj in qset.filter(geboorte_datum__year__lt=jeugdgrens).order_by('achternaam', 'voornaam'):
+            objs.append(obj)
+            obj.leeftijdsklasse = None
+
+            if not obj.is_actief_lid:
+                obj.leeftijd = huidige_jaar - obj.geboorte_datum.year
+        # for
+        return objs
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        jeugd = list()
+        senior = list()
+        inactief = list()
+        for obj in context['object_list']:
+            if not obj.is_actief_lid:
+                inactief.append(obj)
+            elif obj.leeftijdsklasse:
+                jeugd.append(obj)
+            else:
+                senior.append(obj)
+        # for
+
+        context['leden_jeugd'] = jeugd
+        context['leden_senior'] = senior
+        context['leden_inactief'] = inactief
+        context['wedstrijdklasse_jaar'] = self._huidige_jaar
+
+        menu_dynamics(self.request, context, actief='competitie')
+        return context
+
+
+class SchuttersBoogAanmeldenView(UserPassesTestMixin, ListView):
+
+    """ Deze view laat de CWZ schutters van zijn vereniging aanmelden voor de competitie """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_COMPETITIE_CWZ_SCHUTTERSBOOG_AANMELDEN
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._huidige_jaar = timezone.now().year  # TODO: check for correctness in last hours of the year (due to timezone)
+        self._jeugdgrens = self._huidige_jaar - MAXIMALE_LEEFTIJD_JEUGD
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        _, functie_nu = rol_get_huidige_functie(self.request)
+        return functie_nu and functie_nu.rol == "CWZ"
+
+    def handle_no_permission(self):
+        """ gebruiker heeft geen toegang --> redirect naar Competitie scherm """
+        return HttpResponseRedirect(reverse('Competitie:overzicht'))
+
+    def get_queryset(self):
+        """ called by the template system to get the queryset or list of objects for the template """
+
+        _, functie_nu = rol_get_huidige_functie(self.request)
+        qset = NhbLid.objects.filter(bij_vereniging=functie_nu.nhb_ver)
+        objs = list()
+
+        # jeugd
+        # sorteer op geboorte jaar en daarna naam
+        for obj in qset.filter(geboorte_datum__year__gte=self._jeugdgrens).order_by('-geboorte_datum__year', 'achternaam', 'voornaam'):
+            objs.append(obj)
+
+            # de wedstrijdleeftijd voor dit hele jaar
+            wedstrijdleeftijd = self._huidige_jaar - obj.geboorte_datum.year
+            obj.leeftijd = wedstrijdleeftijd
+
+            # de wedstrijdklasse voor dit hele jaar
+            obj.leeftijdsklasse = LeeftijdsKlasse.objects.filter(
+                            max_wedstrijdleeftijd__gte=wedstrijdleeftijd,
+                            geslacht='M').order_by('max_wedstrijdleeftijd')[0]
+
+            for obj in SchutterBoog.objects.filter(account=obj.account):
+                pass
+            obj.bogen = "?"
+        # for
+
+        # volwassenen
+        # sorteer op naam
+        for obj in qset.filter(geboorte_datum__year__lt=self._jeugdgrens).order_by('achternaam', 'voornaam'):
+            objs.append(obj)
+            obj.leeftijdsklasse = None
+
+            if not obj.is_actief_lid:
+                obj.leeftijd = self._huidige_jaar - obj.geboorte_datum.year
+        # for
+        return objs
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        jeugd = list()
+        senior = list()
+        inactief = list()
+        for obj in context['object_list']:
+            if not obj.is_actief_lid:
+                inactief.append(obj)
+            elif obj.leeftijdsklasse:
+                jeugd.append(obj)
+            else:
+                senior.append(obj)
+        # for
+
+        context['leden_jeugd'] = jeugd
+        context['leden_senior'] = senior
+        context['leden_inactief'] = inactief
+        context['wedstrijdklasse_jaar'] = self._huidige_jaar
+
+        menu_dynamics(self.request, context, actief='competitie')
+        return context
+
 
 # end of file

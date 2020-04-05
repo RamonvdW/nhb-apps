@@ -18,10 +18,6 @@ urlpatterns = [
          views.LogoutView.as_view(),
          name='logout'),
 
-    path('registreer/',
-         views.RegistreerNhbNummerView.as_view(),
-         name='registreer'),
-
     path('aangemaakt/',
          views.AangemaaktView.as_view(),
          name='aangemaakt'),
@@ -38,29 +34,13 @@ urlpatterns = [
          views.WachtwoordVergetenView.as_view(),
          name='wachtwoord-vergeten'),
 
-    path('otp-controle/',
-         views.OTPControleView.as_view(),
-         name="otp-controle"),
-
-    path('otp-koppelen/',
-         views.OTPKoppelenView.as_view(),
-         name="otp-koppelen"),
-
-    path('vhpg-acceptatie/',
-         views.VhpgAcceptatieView.as_view(),
-         name='vhpg-acceptatie'),
-
-    path('vhpg-afspraken/',
-         views.VhpgAfsprakenView.as_view(),
-         name='vhpg-afspraken'),
-
-    path('vhpg-overzicht/',
-         views.VhpgOverzichtView.as_view(),
-         name='vhpg-overzicht'),
-
     path('activiteit/',
          views.ActiviteitView.as_view(),
-         name='activiteit')
+         name='activiteit'),
+
+    path('account-wissel/',
+         views.LoginAsZoekView.as_view(),
+         name='account-wissel'),
 ]
 
 # end of file

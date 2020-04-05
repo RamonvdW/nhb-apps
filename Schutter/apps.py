@@ -10,4 +10,8 @@ from django.apps import AppConfig
 class SchutterConfig(AppConfig):
     name = 'Schutter'
 
+    def ready(self):
+        # geef de code een kans om de plugin te registeren
+        import Schutter.leeftijdsklassen
+
 # end of file

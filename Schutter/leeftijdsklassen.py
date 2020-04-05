@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019 Ramon van der Winkel.
+#  Copyright (c) 2019-2020 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 """ ondersteuning voor de leeftijdsklassen binnen de NHB applicaties """
 
 from django.utils import timezone
+from Account.views import account_add_plugin_login
 from BasisTypen.models import LeeftijdsKlasse
 
 # unieke keys voor de server-side sessie variabelen
@@ -17,7 +18,7 @@ SESSIONVAR_WEDSTRIJDKLASSEN = 'leeftijdsklasse_wedstrijdklassen'        # jaar -
 SESSIONVAR_COMPETITIEKLASSEN = 'leeftijdsklasse_competitieklassen'      # jaar -1, 0, +1, +2, +3
 
 
-def leeftijdsklassen_zet_sessionvars_na_login(account, request):
+def leeftijdsklassen_plugin_na_login(request, from_ip, account):
     """ zet een paar session variabelen die gebruikt worden om de rol te beheren
         deze functie wordt aangeroepen vanuit de Account.LoginView
 
@@ -25,18 +26,18 @@ def leeftijdsklassen_zet_sessionvars_na_login(account, request):
             gebruiker_rol_mag_wisselen: gebruik van de Plein.WisselVanRolView
     """
 
-    sessionvars = request.session
+    if len(account.nhblid_set.all()) > 0:
+        nhblid = account.nhblid_set.all()[0]
 
-    if account.nhblid:
         huidige_jaar = timezone.now().year      # TODO: check for correctness in last hours of the year (due to timezone)
-        leeftijd = huidige_jaar - account.nhblid.geboorte_datum.year
-        sessionvars[SESSIONVAR_HUIDIGE_JAAR] = huidige_jaar
-        sessionvars[SESSIONVAR_LEEFTIJD] = leeftijd
+        leeftijd = huidige_jaar - nhblid.geboorte_datum.year
+        request.session[SESSIONVAR_HUIDIGE_JAAR] = huidige_jaar
+        request.session[SESSIONVAR_LEEFTIJD] = leeftijd
 
         if leeftijd >= 30:
-            sessionvars[SESSIONVAR_IS_JONGE_SCHUTTER] = False
+            request.session[SESSIONVAR_IS_JONGE_SCHUTTER] = False
         else:
-            sessionvars[SESSIONVAR_IS_JONGE_SCHUTTER] = True
+            request.session[SESSIONVAR_IS_JONGE_SCHUTTER] = True
 
         wlst = list()
         clst = list()
@@ -52,10 +53,10 @@ def leeftijdsklassen_zet_sessionvars_na_login(account, request):
             clst.append(cklasse.klasse_kort)
         # for
 
-        sessionvars[SESSIONVAR_WEDSTRIJDKLASSEN] = tuple(wlst)
-        sessionvars[SESSIONVAR_COMPETITIEKLASSEN] = tuple(clst)
+        request.session[SESSIONVAR_WEDSTRIJDKLASSEN] = tuple(wlst)
+        request.session[SESSIONVAR_COMPETITIEKLASSEN] = tuple(clst)
 
-    return sessionvars  # allows unittest to do sessionvars.save()
+    return None
 
 
 def get_sessionvars_leeftijdsklassen(request):
@@ -67,23 +68,27 @@ def get_sessionvars_leeftijdsklassen(request):
                 wlst en clst zijn een lijst van wedstrijdklassen voor
                 de jaren -1, 0, +1, +2, +3 ten opzicht van Leeftijd
                 Voorbeeld:
-                    Leeftijd=2001, huidige jaar = 2019
+                    huidige jaar = 2019
+                    leeftijd = 17
+                    is_jong = True
                     wlst=(Cadet, Junior, Junior, Junior, Senior)
     """
-    sessionvars = request.session
-
-    # accounts zonder nhblid hebben deze variabelen niet gezet
     try:
-        huidige_jaar = sessionvars[SESSIONVAR_HUIDIGE_JAAR]
+        huidige_jaar = request.session[SESSIONVAR_HUIDIGE_JAAR]
     except KeyError:
+        # accounts die niet gekoppeld zijn aan een nhblid hebben deze variabelen niet gezet
         return None, None, False, None, None
 
-    leeftijd = sessionvars[SESSIONVAR_LEEFTIJD]
-    is_jong = sessionvars[SESSIONVAR_IS_JONGE_SCHUTTER]
-    wlst = sessionvars[SESSIONVAR_WEDSTRIJDKLASSEN]
-    clst = sessionvars[SESSIONVAR_COMPETITIEKLASSEN]
+    leeftijd = request.session[SESSIONVAR_LEEFTIJD]
+    is_jong = request.session[SESSIONVAR_IS_JONGE_SCHUTTER]
+    wlst = request.session[SESSIONVAR_WEDSTRIJDKLASSEN]
+    clst = request.session[SESSIONVAR_COMPETITIEKLASSEN]
 
     return huidige_jaar, leeftijd, is_jong, wlst, clst
+
+
+# installeer de plugin
+account_add_plugin_login(leeftijdsklassen_plugin_na_login)
 
 
 # end of file

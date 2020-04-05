@@ -21,21 +21,21 @@
 <h5>Veiligheid</h5>
 <p>Controle met een tweede factor is verplicht voor gebruikers met toegang tot persoonsgegevens.</p>
 <p>Meer informatie: <a href="{{ wiki_2fa_url }}" target="_blank">{{ wiki_2fa_titel }}</a>.</p>
-<p><a class="btn-nhb-rood" href="{% url 'Account:otp-koppelen' %}">Nu Koppelen</a></p>
+<p><a class="btn-nhb-rood" href="{% url 'Functie:otp-koppelen' %}">Nu Koppelen</a></p>
 {% endif %}
 
 {% if show_vhpg %}
 <p>&nbsp;</p>
 <h5>Hanteren persoons<wbr/>gegevens</h5>
 <p>Voordat je aan de slag kan moeten we eerst een paar afspraken maken over het omgaan met persoonsgegevens.</p>
-<p><a class="btn-nhb-rood" href="{% url 'Account:vhpg-acceptatie' %}">Bekijken</a></p>
+<p><a class="btn-nhb-rood" href="{% url 'Functie:vhpg-acceptatie' %}">Bekijken</a></p>
 {% endif %}
 
 {% if show_otp_controle %}
 <p>&nbsp;</p>
 <h5>Veiligheid</h5>
 <p>Een aantal rollen komt beschikbaar nadat de controle van de tweede factor uitgevoerd is.</p>
-<a class="btn-nhb-rood" href="{% url 'Account:otp-controle' %}">Nu controleren</a>
+<a class="btn-nhb-rood" href="{% url 'Functie:otp-controle' %}">Nu controleren</a>
 {% endif %}
 
 <p>&nbsp;</p>
@@ -73,7 +73,7 @@
     <p>&nbsp;</p>
     <h5>Hanteren persoons<wbr/>gegevens</h5>
 
-    <p>Je hebt de verklaring hanteren persoonsgegevens afgegeven op {{ vhpg.acceptatie_datum|date:"j F Y" }}.<br/><a href="{% url 'Account:vhpg-afspraken' %}">Klik hier</a> om de afspraken in te zien.</p>
+    <p>Je hebt de verklaring hanteren persoonsgegevens afgegeven op {{ vhpg.acceptatie_datum|date:"j F Y" }}.<br/><a href="{% url 'Functie:vhpg-afspraken' %}">Klik hier</a> om de afspraken in te zien.</p>
 
 {% endif %}
 

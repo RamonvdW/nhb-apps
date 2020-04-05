@@ -6,11 +6,14 @@
 
 """ ondersteuning voor de rollen binnen de NHB applicaties """
 
-from Account.models import user_is_otp_verified, account_needs_otp, account_needs_vhpg
+from Account.rechten import account_add_plugin_rechten, account_rechten_is_otp_verified
 from NhbStructuur.models import NhbVereniging
-from .models import Functie
+from Overig.helpers import get_safe_from_ip
+from .models import Functie, account_needs_vhpg, account_needs_otp
+import logging
 import enum
 
+my_logger = logging.getLogger('NHBApps.Functie')
 
 SESSIONVAR_ROL_PALLET_VAST = 'gebruiker_rol_pallet_vast'
 SESSIONVAR_ROL_PALLET_FUNCTIES = 'gebruiker_rol_pallet_functies'
@@ -93,14 +96,12 @@ def rol_zet_sessionvars_na_login(account, request):
         session variables
             gebruiker_rol_mag_wisselen: gebruik van de Plein.WisselVanRolView
     """
-    sessionvars = request.session
-
     rollen_vast = list()            # list of rol
     rollen_functies = list()        # list of tuple(rol, functie_pk)
 
     if account.is_authenticated:
         show_vhpg, _ = account_needs_vhpg(account)
-        if user_is_otp_verified(request) and not show_vhpg:
+        if account_rechten_is_otp_verified(request) and not show_vhpg:
             if account.is_staff:
                 rollen_vast.append(Rollen.ROL_IT)
 
@@ -118,7 +119,7 @@ def rol_zet_sessionvars_na_login(account, request):
 
             # analyseer de gekoppelde functies van dit account
             parent_tup = (None, None)
-            for functie in account.functies.all():
+            for functie in account.functie_set.all():
                 rol = None
                 if functie.rol == "BKO":
                     rol = Rollen.ROL_BKO
@@ -161,30 +162,39 @@ def rol_zet_sessionvars_na_login(account, request):
     # if user is authenticated
 
     if len(rollen_vast) + len(rollen_functies) > 0:
-        sessionvars[SESSIONVAR_ROL_MAG_WISSELEN] = True
+        request.session[SESSIONVAR_ROL_MAG_WISSELEN] = True
     elif account_needs_otp(account):
         # waarschijnlijk komen er meer rollen beschikbaar na de OTP controle
-        sessionvars[SESSIONVAR_ROL_MAG_WISSELEN] = True
+        request.session[SESSIONVAR_ROL_MAG_WISSELEN] = True
     else:
-        sessionvars[SESSIONVAR_ROL_MAG_WISSELEN] = False
+        request.session[SESSIONVAR_ROL_MAG_WISSELEN] = False
 
     rol = Rollen.ROL_NONE
-    if account.is_authenticated and account.nhblid:
-        rollen_vast.append(Rollen.ROL_SCHUTTER)
-        rol = Rollen.ROL_SCHUTTER
+    if account.is_authenticated:
+        if len(account.nhblid_set.all()):
+            # koppeling met NhbLid, dus dit is een (potentiële) Schutter
+            rollen_vast.append(Rollen.ROL_SCHUTTER)
+            rol = Rollen.ROL_SCHUTTER
 
-    sessionvars[SESSIONVAR_ROL_HUIDIGE] = rol
-    sessionvars[SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK] = None
-    sessionvars[SESSIONVAR_ROL_BESCHRIJVING] = rol_bepaal_beschrijving(rol)
+    request.session[SESSIONVAR_ROL_HUIDIGE] = rol
+    request.session[SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK] = None
+    request.session[SESSIONVAR_ROL_BESCHRIJVING] = rol_bepaal_beschrijving(rol)
 
-    sessionvars[SESSIONVAR_ROL_PALLET_VAST] = rollen_vast
-    sessionvars[SESSIONVAR_ROL_PALLET_FUNCTIES] = rollen_functies
-
-    return sessionvars  # allows unittest to do sessionvars.save()
+    request.session[SESSIONVAR_ROL_PALLET_VAST] = rollen_vast
+    request.session[SESSIONVAR_ROL_PALLET_FUNCTIES] = rollen_functies
 
 
 def rol_zet_sessionvars_na_otp_controle(account, request):
     return rol_zet_sessionvars_na_login(account, request)
+
+
+def rol_plugin_rechten(request, account):
+    """ Deze functie wordt aangeroepen vanuit diverse punten in Account.views
+        om de [mogelijk gewijzigde] rechten te laten evalueren en onthouden in session variabelen.
+
+        Geen return value
+    """
+    rol_zet_sessionvars_na_login(account, request)
 
 
 def rol_enum_pallet(request):
@@ -269,41 +279,6 @@ def rol_bepaal_beschrijving(rol, functie_pk=None):
     return beschr
 
 
-def rol_is_BB(request):
-    """ Geeft True terug als de gebruiker BB rechten heeft en op dit moment BKO als rol gekozen heeft
-        Wordt gebruikt om specifieke content voor de BB te tonen
-    """
-    return rol_get_huidige(request) == Rollen.ROL_BB
-
-
-def rol_is_BKO(request):
-    """ Geeft True terug als de gebruiker BKO rechten heeft en op dit moment BKO als rol gekozen heeft
-        Wordt gebruikt om specifieke content voor de BKO te tonen
-    """
-    return rol_get_huidige(request) == Rollen.ROL_BKO
-
-
-def rol_is_RKO(request):
-    """ Geeft True terug als de gebruiker RKO rechten heeft en op dit moment RKO als rol gekozen heeft
-        Wordt gebruikt om specifieke content voor de RKO te tonen
-    """
-    return rol_get_huidige(request) == Rollen.ROL_RKO
-
-
-def rol_is_CWZ(request):
-    """ Geeft True terug als de gebruiker CWZ rechten heeft en op dit moment CWZ als rol gekozen heeft
-        Wordt gebruikt om specifieke content voor de CWZ te tonen
-    """
-    return rol_get_huidige(request) == Rollen.ROL_CWZ
-
-
-def rol_is_beheerder(request):
-    """ Geeft True terug als de gebruiker een beheerder is
-        Wordt gebruikt om toegang tot bepaalde schermen te voorkomen
-    """
-    return rol_get_huidige(request) in (Rollen.ROL_IT, Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL)
-
-
 def rol_mag_wisselen(request):
     """ Geeft True terug als deze gebruiker de wissel-van-rol getoond moet worden """
     try:
@@ -317,39 +292,35 @@ def rol_activeer_rol(request, rolurl):
     """ Activeer een andere rol, als dit toegestaan is
         geen foutmelding of exceptions als het niet mag.
     """
-    sessionvars = request.session
-
     try:
         nwe_rol = url2rol[rolurl]
     except KeyError:
         # onbekende rol
-        #print("rol_activeer_rol: onbekende rolurl %s" % repr(rolurl))
-        pass
+        from_ip = get_safe_from_ip(request)
+        my_logger.error('%s ROL verzoek activeer onbekende rol %s' % (from_ip, repr(rolurl)))
     else:
         try:
-            rollen_vast = sessionvars[SESSIONVAR_ROL_PALLET_VAST]
+            rollen_vast = request.session[SESSIONVAR_ROL_PALLET_VAST]
         except KeyError:
             #print("rol_activeer_rol: rollen_vast niet verkrijgbaar")
             pass
         else:
             # kijk of dit een toegestane rol is
             if nwe_rol == Rollen.ROL_NONE or nwe_rol in rollen_vast:
-                sessionvars[SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK] = None
-                sessionvars[SESSIONVAR_ROL_HUIDIGE] = nwe_rol
-                sessionvars[SESSIONVAR_ROL_BESCHRIJVING] = rol_bepaal_beschrijving(nwe_rol)
+                request.session[SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK] = None
+                request.session[SESSIONVAR_ROL_HUIDIGE] = nwe_rol
+                request.session[SESSIONVAR_ROL_BESCHRIJVING] = rol_bepaal_beschrijving(nwe_rol)
             else:
-                #print("rol_activeer_rol: gevraagde rol (%s) niet in rollen_vast" % rolurl)
-                pass
+                from_ip = get_safe_from_ip(request)
+                my_logger.error('%s ROL verzoek activeer niet toegekende rol %s' % (from_ip, repr(rolurl)))
 
     # not recognized --> no change
-    return sessionvars  # allows unittest to do sessionvars.save()
 
 
 def rol_activeer_functie(request, functie_pk):
     """ Activeer een andere rol gebaseerd op een Functie
         geen foutmelding of exceptions als het niet mag.
     """
-    sessionvars = request.session
 
     # conversie string (uit url) naar nummer
     try:
@@ -358,7 +329,7 @@ def rol_activeer_functie(request, functie_pk):
         pass
     else:
         try:
-            rollen_functies = sessionvars[SESSIONVAR_ROL_PALLET_FUNCTIES]
+            rollen_functies = request.session[SESSIONVAR_ROL_PALLET_FUNCTIES]
         except KeyError:
             pass
         else:
@@ -368,14 +339,13 @@ def rol_activeer_functie(request, functie_pk):
                 mag_rol, mag_functie_pk = child_tup
                 if mag_functie_pk == functie_pk:
                     # volledig correcte wissel - sla alles nu op
-                    sessionvars[SESSIONVAR_ROL_HUIDIGE] = mag_rol
-                    sessionvars[SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK] = mag_functie_pk
-                    sessionvars[SESSIONVAR_ROL_BESCHRIJVING] = rol_bepaal_beschrijving(mag_rol, mag_functie_pk)
+                    request.session[SESSIONVAR_ROL_HUIDIGE] = mag_rol
+                    request.session[SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK] = mag_functie_pk
+                    request.session[SESSIONVAR_ROL_BESCHRIJVING] = rol_bepaal_beschrijving(mag_rol, mag_functie_pk)
                     break   # from the for
             # for
 
     # not recognized --> no change
-    return sessionvars  # allows unittest to do sessionvars.save()
 
 
 def rol_evalueer_opnieuw(request):
@@ -385,11 +355,11 @@ def rol_evalueer_opnieuw(request):
     """
 
     rol, functie = rol_get_huidige_functie(request)
-    rol_zet_sessionvars_na_otp_controle(request.user, request).save()
+    rol_zet_sessionvars_na_otp_controle(request.user, request)
     if functie:
-        rol_activeer_functie(request, functie.pk).save()
+        rol_activeer_functie(request, functie.pk)
     else:
-        rol_activeer_rol(request, rol2url[rol]).save()
+        rol_activeer_rol(request, rol2url[rol])
 
 
 def functie_expandeer_rol(rol_in, functie_in):
@@ -430,6 +400,10 @@ def functie_expandeer_rol(rol_in, functie_in):
             # for
 
 
+# registreer de interne rol-expansie functie
 rol_zet_plugins(functie_expandeer_rol)
+
+# registreer de rechten plugin
+account_add_plugin_rechten(rol_plugin_rechten)
 
 # end of file

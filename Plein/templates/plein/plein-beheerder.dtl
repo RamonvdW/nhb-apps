@@ -69,7 +69,7 @@
                         <td>Toon overzicht van beheerders die de Verklaring Hanteren Persoonsgegevens (VHPG) geaccepteerd hebben.</td>
                     </tr></table>
                 </div>
-                <a href="{% url 'Account:vhpg-overzicht' %}" class="nhb-klikbare-balk">
+                <a href="{% url 'Functie:vhpg-overzicht' %}" class="nhb-klikbare-balk">
                     <div class="card-action center-align">
                         <span class="nhb-klikbare-link">Overzicht tonen</span>
                     </div>

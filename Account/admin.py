@@ -22,15 +22,11 @@ class AccountAdmin(UserAdmin):
         (None, {'fields': ('username', 'password', 'vraag_nieuw_wachtwoord')}),
         (_('Personal info'), {'fields': ('first_name', 'last_name')}),
         (_('2FA'), { 'fields': ('otp_code', 'otp_is_actief')}),
-        (_('Koppeling'), {'fields': ('nhblid',)}),
-        (_('Permissions'), {
-            'fields': ('is_active', 'is_BB', 'is_Observer', 'is_staff', 'functies', 'groups'),  # TODO: remove groups
+        (_('Permissions'), {'fields': ('is_active', 'is_BB', 'is_Observer', 'is_staff'),
         }),
         (_('Beveiliging'), {'fields': ('verkeerd_wachtwoord_teller', 'is_geblokkeerd_tot')}),
         (_('Important dates'), {'fields': ('laatste_inlog_poging', 'last_login', 'date_joined')}),
     )
-
-    filter_horizontal = ('functies', 'groups')  # TODO: remove groups
 
     list_display = ('username', 'last_login', 'is_staff')
 
