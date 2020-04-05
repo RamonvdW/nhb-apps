@@ -9,7 +9,7 @@
 {% block title %}Registreren{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="registreer" %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="schutter-registreer" %}
 
 <h4>Account aanmaken</h4>
 
@@ -25,7 +25,7 @@
     </div>
 
     <div class="row">
-        <form class="col s12" action="{% url 'Account:registreer' %}" method="post">
+        <form class="col s12" action="{% url 'Schutter:registreer' %}" method="post">
             {% csrf_token %}
             <div class="row"><div class="input-field col s12">
                 {{ form.nhb_nummer.label_tag }}{{ form.nhb_nummer }}

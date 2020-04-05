@@ -14,6 +14,10 @@ urlpatterns = [
          views.ProfielView.as_view(),
          name='profiel'),
 
+    path('registreer/',
+         views.RegistreerNhbNummerView.as_view(),
+         name='registreer'),
+
     path('voorkeuren/',
          views.VoorkeurenView.as_view(),
          name='voorkeuren'),
