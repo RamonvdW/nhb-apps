@@ -13,7 +13,7 @@
 
 <h4>Account aanmaken</h4>
 
-<p>Op deze pagina maak je een nieuw account aan. Dit hoef je maar één keer te doen.</p>
+<p>Met deze pagina maak je een nieuw account aan. Dit hoef je maar één keer te doen.</p>
 <p>Je kan alleen een account aanmaken als je een NHB nummer hebt en je e-mail adres bekend is bij de bond.</p>
 
 <div class="container z-depth-2 white">
@@ -60,6 +60,6 @@
 <p>De secretaris van je handboogvereniging kan je verder helpen.</p>
 
 <h5>Hoe zit het met mijn privacy?</h5>
-<p>Op de pagina <a href="{% url 'Plein:privacy' %}">Privacy verklaring</a> kan je meer informatie vinden.</p>
+<p>Kies de optie 'Privacyverklaring' in het menu voor meer informatie over je privacy.</p>
 
 {% endblock %}

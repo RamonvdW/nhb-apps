@@ -389,6 +389,7 @@ class RecordsZoekView(ListView):
         context['form'] = self.form
         context['have_searched'] = self.get_zoekterm != ""
         context['zoekterm'] = self.get_zoekterm
+        context['records_zoek_url'] = reverse('Records:zoek')
         menu_dynamics(self.request, context, actief='records')
         return context
 
