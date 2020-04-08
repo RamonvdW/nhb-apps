@@ -32,9 +32,9 @@ def nhblid_login_plugin(request, from_ip, account):
             # NHB lid mag geen gebruik maken van de NHB faciliteiten
 
             schrijf_in_logboek(account, 'Inloggen',
-                               'Mislukte inlog vanaf IP %s voor inactief account %s' % (from_ip, repr(login_naam)))
+                               'Mislukte inlog vanaf IP %s voor inactief account %s' % (from_ip, repr(account.username)))
 
-            my_logger.info('%s LOGIN Geblokkeerde inlog voor inactief account %s' % (from_ip, repr(login_naam)))
+            my_logger.info('%s LOGIN Geblokkeerde inlog voor inactief account %s' % (from_ip, repr(account.username)))
 
             context = {'account': account}
             menu_dynamics(request, context, actief='inloggen')
@@ -48,9 +48,12 @@ def nhblid_login_plugin(request, from_ip, account):
             account.save()
 
         # kijk of het email adres gewijzigd is
-        if len(account.accountemail_set.all()) == 1:
+        try:
             accountemail = account.accountemail_set.all()[0]
-
+        except IndexError:
+            # abnormal situations
+            pass
+        else:
             if accountemail.bevestigde_email != nhblid.email:
                 # propageer het email adres uit de CRM data naar AccountEmail
                 accountemail.nieuwe_email = nhblid.email
