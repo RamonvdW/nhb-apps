@@ -38,7 +38,7 @@
   ],
   "members": [
     {"member_number": 100999,
-      "club_number": 1001,
+      "club_number": 1000,
       "name": "Dienbaar",
       "prefix": "en",
       "first_name": "Groot",
@@ -57,7 +57,7 @@
       "blocked": false
     },
     {"member_number": 100998,
-      "club_number": 1001,
+      "club_number": 1000,
       "name": "Dienbaar",
       "prefix": "en",
       "first_name": "Klein",
@@ -76,7 +76,7 @@
       "blocked": false
     },
     {"member_number": 100997,
-      "club_number": 1001,
+      "club_number": 1000,
       "name": "Dienbaar",
       "prefix": "en",
       "first_name": "Oude",
@@ -95,7 +95,7 @@
       "blocked": false
     },
     {"member_number": 100997,
-      "club_number": 1001,
+      "club_number": 1000,
       "name": "Dienbaar",
       "prefix": "en",
       "first_name": "Oude",

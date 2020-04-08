@@ -155,7 +155,6 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         self.assertTrue("[ERROR] Lid 100001 heeft geen valide geboortedatum", f1.getvalue())
         self.assertTrue("[ERROR] Lid 100001 heeft onbekend geslacht: X (moet zijn: M of F)", f1.getvalue())
         self.assertTrue("[WARNING] Lid 100009 heeft geen voornaam of initials" in f1.getvalue())
-        self.assertTrue("[INFO] Lid 100009 wordt overgeslagen (geen valide geboortedatum, maar toch blocked)" in f2.getvalue())
         self.assertTrue("[ERROR] Lid 100009 heeft geen valide lidmaatschapsdatum", f1.getvalue())
         self.assertTrue("[ERROR] Lid 100009 heeft geen valide email (geen)", f1.getvalue())
         self.assertTrue("[INFO] Lid 100024: is_actief_lid nee --> ja", f2.getvalue())
@@ -177,14 +176,17 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         f1 = io.StringIO()
         f2 = io.StringIO()
         management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_11.json', stderr=f1, stdout=f2)
-        self.assertTrue("[ERROR] Lid 100999 heeft geen valide geboortedatum: 0030-05-05" in f1.getvalue())
+
+        #print(f1.getvalue(), f2.getvalue())
+        self.assertTrue("[WARNING] Lid 100999 geboortedatum gecorrigeerd van 0030-05-05 naar 1930-05-05" in f1.getvalue())
         lid = NhbLid.objects.get(nhb_nr=100999)
         self.assertEqual(lid.geboorte_datum.year, 1930)
-        self.assertTrue("[ERROR] Lid 100998 heeft geen valide geboortedatum: 0010-05-05" in f1.getvalue())
+
+        self.assertTrue("[WARNING] Lid 100998 geboortedatum gecorrigeerd van 0010-05-05 naar 2010-05-05" in f1.getvalue())
         lid = NhbLid.objects.get(nhb_nr=100998)
         self.assertEqual(lid.geboorte_datum.year, 2010)
         self.assertTrue("[ERROR] Lid 100997 heeft geen valide geboortedatum: 1810-05-05" in f1.getvalue())
-        self.assertTrue("[ERROR] Lid 100997 heeft geen valide lidmaatschapdatum: 1815-06-06" in f1.getvalue())
+        self.assertTrue("[ERROR] Lid 100997 heeft geen valide datum lidmaatschap: 1815-06-06" in f1.getvalue())
 
     def test_skip_member(self):
         # sommige leden worden niet geimporteerd

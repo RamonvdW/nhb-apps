@@ -440,26 +440,28 @@ class Command(BaseCommand):
                     self.stderr.write('[ERROR] Kan vereniging %s voor lid %s niet vinden' % (repr(member['club_number']), lid_nhb_nr))
                     self._count_errors += 1
 
-            if member['birthday'] and member['birthday'][0:0+2] not in ("19", "20"):
-                self.stderr.write('[ERROR] Lid %s heeft geen valide geboortedatum: %s' % (lid_nhb_nr, member['birthday']))
-                self._count_errors += 1
-                # poging tot repareren
-                if member['birthday'][0:0+2] == "00":
-                    year = int(member['birthday'][2:2+2])
-                    if year < 25:
-                        member['birthday'] = '20' + member['birthday'][2:]
+            if not lid_blocked:
+                if member['birthday'] and member['birthday'][0:0+2] not in ("19", "20"):
+                    # poging tot repareren
+                    if member['birthday'][0:0+2] == "00":
+                        old_birthday = member['birthday']
+                        year = int(old_birthday[2:2+2])
+                        if year < 25:
+                            member['birthday'] = '20' + old_birthday[2:]
+                        else:
+                            member['birthday'] = '19' + old_birthday[2:]
+                        self.stderr.write('[WARNING] Lid %s geboortedatum gecorrigeerd van %s naar %s' % (lid_nhb_nr, old_birthday, member['birthday']))
+                        self._count_warnings += 1
                     else:
-                        member['birthday'] = '19' + member['birthday'][2:]
-                else:
-                    is_valid = False
+                        is_valid = False
+                        self.stderr.write('[ERROR] Lid %s heeft geen valide geboortedatum: %s' % (lid_nhb_nr, member['birthday']))
+                        self._count_errors += 1
             try:
                 lid_geboorte_datum = datetime.datetime.strptime(member['birthday'], "%Y-%m-%d").date() # YYYY-MM-DD
             except (ValueError, TypeError):
                 lid_geboorte_datum = None
                 is_valid = False
-                if not lid_ver:
-                    self.stdout.write('[INFO] Lid %s wordt overgeslagen (geen valide geboortedatum, maar toch blocked)' % lid_nhb_nr)
-                else:
+                if not lid_blocked:
                     self.stderr.write('[ERROR] Lid %s heeft geen valide geboortedatum' % lid_nhb_nr)
                     self._count_errors += 1
 
@@ -476,7 +478,7 @@ class Command(BaseCommand):
                 lid_para = ""      # converts None to string
 
             if member['member_from'] and member['member_from'][0:0+2] not in ("19", "20"):
-                self.stderr.write('[ERROR] Lid %s heeft geen valide lidmaatschapdatum: %s' % (lid_nhb_nr, member['member_from']))
+                self.stderr.write('[ERROR] Lid %s heeft geen valide datum lidmaatschap: %s' % (lid_nhb_nr, member['member_from']))
                 self._count_errors += 1
             try:
                 lid_sinds = datetime.datetime.strptime(member['member_from'], "%Y-%m-%d").date() # YYYY-MM-DD
@@ -512,72 +514,78 @@ class Command(BaseCommand):
                 # nieuw lid
                 is_nieuw = True
             else:
-                nhb_nrs.remove(lid_nhb_nr)
-
-                if lid_blocked:
-                    if obj.is_actief_lid:
-                        self.stdout.write('[INFO] Lid %s: is_actief_lid ja --> nee (want blocked)' % lid_nhb_nr)
-                        self._count_wijzigingen += 1
-                        obj.is_actief_lid = False
-                        if not self.dryrun:
-                            obj.save()
+                try:
+                    nhb_nrs.remove(lid_nhb_nr)
+                except ValueError:
+                    self.stderr.write("[ERROR] Unexpected: nhb_nr %s onverwacht niet in lijst bestaande nhb nrs" % (repr(lid_nhb_nr)))
+                    self._count_errors += 1
                 else:
-                    if not obj.is_actief_lid:
-                        self.stdout.write('[INFO] Lid %s: is_actief_lid nee --> ja' % lid_nhb_nr)
+                    if lid_blocked:
+                        if obj.is_actief_lid:
+                            self.stdout.write('[INFO] Lid %s: is_actief_lid ja --> nee (want blocked)' % lid_nhb_nr)
+                            self._count_wijzigingen += 1
+                            obj.is_actief_lid = False
+                            if not self.dryrun:
+                                obj.save()
+                    else:
+                        if not obj.is_actief_lid:
+                            self.stdout.write('[INFO] Lid %s: is_actief_lid nee --> ja' % lid_nhb_nr)
+                            self._count_wijzigingen += 1
+                            obj.is_actief_lid = True
+                            if not self.dryrun:
+                                obj.save()
+
+                    if obj.voornaam != lid_voornaam or obj.achternaam != lid_achternaam:
+                        self.stdout.write('[INFO] Lid %s: naam %s %s --> %s %s' % (lid_nhb_nr, obj.voornaam, obj.achternaam, lid_voornaam, lid_achternaam))
+                        obj.voornaam = lid_voornaam
+                        obj.achternaam = lid_achternaam
                         self._count_wijzigingen += 1
-                        obj.is_actief_lid = True
                         if not self.dryrun:
                             obj.save()
 
-                if obj.voornaam != lid_voornaam or obj.achternaam != lid_achternaam:
-                    self.stdout.write('[INFO] Lid %s: naam %s %s --> %s %s' % (lid_nhb_nr, obj.voornaam, obj.achternaam, lid_voornaam, lid_achternaam))
-                    obj.voornaam = lid_voornaam
-                    obj.achternaam = lid_achternaam
-                    self._count_wijzigingen += 1
-                    if not self.dryrun:
-                        obj.save()
+                    if obj.email != lid_email:
+                        self.stdout.write('[INFO] Lid %s e-mail: %s --> %s' % (lid_nhb_nr, repr(obj.email), repr(lid_email)))
+                        obj.email = lid_email
+                        self._count_wijzigingen += 1
+                        if not self.dryrun:
+                            obj.save()
 
-                if obj.email != lid_email:
-                    self.stdout.write('[INFO] Lid %s e-mail: %s --> %s' % (lid_nhb_nr, repr(obj.email), repr(lid_email)))
-                    obj.email = lid_email
-                    self._count_wijzigingen += 1
-                    if not self.dryrun:
-                        obj.save()
+                    if obj.geslacht != lid_geslacht:
+                        self.stdout.write('[INFO] Lid %s geslacht: %s --> %s' % (lid_nhb_nr, obj.geslacht, lid_geslacht))
+                        obj.geslacht = lid_geslacht
+                        self._count_wijzigingen += 1
+                        if not self.dryrun:
+                            obj.save()
 
-                if obj.geslacht != lid_geslacht:
-                    self.stdout.write('[INFO] Lid %s geslacht: %s --> %s' % (lid_nhb_nr, obj.geslacht, lid_geslacht))
-                    obj.geslacht = lid_geslacht
-                    self._count_wijzigingen += 1
-                    if not self.dryrun:
-                        obj.save()
+                    if obj.geboorte_datum != lid_geboorte_datum:
+                        self.stdout.write('[INFO] Lid %s geboortedatum: %s --> %s' % (lid_nhb_nr, obj.geboorte_datum, lid_geboorte_datum))
+                        obj.geboorte_datum = lid_geboorte_datum
+                        self._count_wijzigingen += 1
+                        if not self.dryrun:
+                            obj.save()
 
-                if obj.geboorte_datum != lid_geboorte_datum:
-                    self.stdout.write('[INFO] Lid %s geboortedatum: %s --> %s' % (lid_nhb_nr, obj.geboorte_datum, lid_geboorte_datum))
-                    obj.geboorte_datum = lid_geboorte_datum
-                    self._count_wijzigingen += 1
-                    if not self.dryrun:
-                        obj.save()
+                    if obj.sinds_datum != lid_sinds:
+                        self.stdout.write('[INFO] Lid %s: sinds_datum: %s --> %s' % (lid_nhb_nr, obj.sinds_datum, lid_sinds))
+                        obj.sinds_datum = lid_sinds
+                        self._count_wijzigingen += 1
+                        if not self.dryrun:
+                            obj.save()
 
-                if obj.sinds_datum != lid_sinds:
-                    self.stdout.write('[INFO] Lid %s: sinds_datum: %s --> %s' % (lid_nhb_nr, obj.sinds_datum, lid_sinds))
-                    obj.sinds_datum = lid_sinds
-                    self._count_wijzigingen += 1
-                    if not self.dryrun:
-                        obj.save()
+                    if obj.para_classificatie != lid_para:
+                        self.stdout.write('[INFO] Lid %s: para_classificatie: %s --> %s' % (lid_nhb_nr, repr(obj.para_classificatie), repr(lid_para)))
+                        obj.para_classificatie = lid_para
+                        self._count_wijzigingen += 1
+                        if not self.dryrun:
+                            obj.save()
 
-                if obj.para_classificatie != lid_para:
-                    self.stdout.write('[INFO] Lid %s: para_classificatie: %s --> %s' % (lid_nhb_nr, repr(obj.para_classificatie), repr(lid_para)))
-                    obj.para_classificatie = lid_para
-                    self._count_wijzigingen += 1
-                    if not self.dryrun:
-                        obj.save()
-
-                if obj.bij_vereniging != lid_ver:
-                    self.stdout.write('[INFO] Lid %s: vereniging %s --> %s' % (lid_nhb_nr, get_vereniging_str(obj.bij_vereniging), get_vereniging_str(lid_ver)))
-                    obj.bij_vereniging = lid_ver
-                    self._count_wijzigingen += 1
-                    if not self.dryrun:
-                        obj.save()
+                    if obj.bij_vereniging != lid_ver:
+                        self.stdout.write('[INFO] Lid %s: vereniging %s --> %s' % (lid_nhb_nr, get_vereniging_str(obj.bij_vereniging), get_vereniging_str(lid_ver)))
+                        obj.bij_vereniging = lid_ver
+                        self._count_wijzigingen += 1
+                        if not self.dryrun:
+                            obj.save()
+                # else
+            # else
 
             if is_nieuw:
                 lid = NhbLid()
