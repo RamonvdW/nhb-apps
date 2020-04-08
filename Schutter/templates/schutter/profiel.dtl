@@ -15,36 +15,55 @@
 <p>Op deze pagina verzamelen we informatie die voor jou interessant is.</p>
 
 
+<span>&nbsp;</span>
 <h5>Basics</h5>
 
-<p>Je NHB nummer is <b>{{ nhb_nummer }}</b></p>
+<p>Je NHB nummer is <b>{{ nhblid.nhb_nr }}</b>.</p>
+<p>Je bent lid bij vereniging [{{ nhblid.bij_vereniging.nhb_nr }}] <b>{{ nhblid.bij_vereniging.naam }}</b>, in {{ nhblid.bij_vereniging.plaats }}.</p>
 
-<p><a class="btn-nhb-blauw" href="{% url 'Schutter:voorkeuren' %}"><i class="material-icons-round left">tune</i>Voorkeuren</a> Persoonlijke voorkeuren inzien/wijzigen</p>
+
+<span>&nbsp;</span>
+<h5>Voorkeuren</h5>
+
+<p>Gebruik de knop om naar de pagina te gaan waarop je persoonlijke voorkeuren in kan stellen, zoals welke boog je hebt.</p>
+
+<p><a class="btn-nhb-blauw" href="{% url 'Schutter:voorkeuren' %}"><i class="material-icons-round left">tune</i>Voorkeuren</a></p>
+
 
 {% if toon_leeftijdsklassen %}
 
-    <p><a class="btn-nhb-blauw" href="{% url 'Schutter:leeftijdsklassen' %}"><i class="material-icons-round left">grade</i>Leeftijdsklasse</a> In welke klasse kom je uit op wedstrijden en in de competitie.</p>
+    <span>&nbsp;</span>
+    <h5>Leeftijdsklassen</h5>
+
+    <p>Op wedstrijden en in de (winter)competitie wordt je aan de hand van de je leeftijd ingedeeld in een wedstrijdklassen.</p>
+    <p>Omdat hier veel vragen over waren hebben we een speciale pagina gemaakt waarop je kan zien in welke klasse jij uit moet komen.</p>
+    <p><a class="btn-nhb-blauw" href="{% url 'Schutter:leeftijdsklassen' %}"><i class="material-icons-round left">grade</i>Leeftijdsklassen</a></p>
 
 {% endif %}
 
 
 {% if records %}
+    <span>&nbsp;</span>
     <h5>Records!</h5>
+
     <p>De volgende records staan geregistreerd op jouw naam.</p>
+
     <table class="white">
         <thead>
             <th>Datum</th>
+            <th>Soort record</th>
             <th>Score</th>
             <th>Plaats</th>
-            <th>Link</th>
+            <th><!-- kolom voor knop --></th>
         </thead>
 
         {% for obj in records %}
             <tr>
                 <td>{{ obj.datum }}</td>
+                <td>{{ obj.soort_record }}</td>
                 <td>{{ obj.score_str }}</td>
                 <td>{{ obj.plaats }}{% if obj.land %}, {{ obj.land }}{% endif %}</td>
-                <td><a href="{{ obj.url }}">{{ obj.discipline }}-{{ obj.volg_nr }}</a></td>
+                <td><a class="btn-nhb-blauw" href="{{ obj.url }}">Toon details</a></td>
             </tr>
         {% endfor %}
     </table>

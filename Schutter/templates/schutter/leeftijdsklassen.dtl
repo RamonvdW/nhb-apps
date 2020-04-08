@@ -9,7 +9,6 @@
 {% block title %}Leeftijdsklassen{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="schutter-leeftijdsklassen" %}
 
 <h4>Je leeftijdsklasse</h4>
 
@@ -20,9 +19,11 @@
 
 <p>Vooral voor jonge schutters verandert de klasse waarin je uit mag komen regelmatig, daarom hebben we hieronder een overzicht gemaakt.</p>
 
+
+<span>&nbsp;</span>
 <h5>Wedstrijden</h5>
 
-<p>Dit jaar bereik je de leeftijd {{ plein_leeftijd }}. Daarom kom je het hele jaar uit in de klasse <b>{{ plein_wlst.1 }}.</b></p>
+<p>Dit jaar bereik je de leeftijd {{ plein_leeftijd }} jaar. Daarom kom je het hele jaar uit in de klasse <b>{{ plein_wlst.1 }}.</b></p>
 
 <ul class="collection with-header">
     <li class="collection-header"><b>Jaartal, te bereiken leeftijd en klasse voor wedstrijden</b></li>
@@ -43,6 +44,8 @@
     </li>
 </ul>
 
+
+<span>&nbsp;</span>
 <h5>Bondscompetitie</h5>
 
 <p>Omdat de finales van de bondscompetitie in het nieuwe jaar plaatsvinden, moet je de bondscompetitie beginnen in de klasse waarin je volgend jaar uit moet komen.</p>
@@ -67,6 +70,8 @@
         <div>Seizoen {{ plein_huidige_jaar|add:"3" }}/{{ plein_huidige_jaar|add:"4" }}: klasse {{ plein_clst.4 }}</div>
     </li>
 </ul>
+
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="schutter-leeftijdsklassen" %}
 
 {% endblock %}
 

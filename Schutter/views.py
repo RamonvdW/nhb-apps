@@ -97,7 +97,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         context['toon_leeftijdsklassen'] = is_jong
 
         nhblid = account.nhblid_set.all()[0]
-        context['nhb_nummer'] = nhblid.nhb_nr
+        context['nhblid'] = nhblid
         context['records'] = self._find_records(nhblid)
         context['scores'] = self._find_scores(nhblid)
 
