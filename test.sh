@@ -41,7 +41,7 @@ rm -rf "$REPORT_DIR"
 python3.6 -m coverage erase
 
 python3.6 -m coverage run --append --branch ./manage.py test --noinput $*  # note: double quotes not supported around $*
-if [ $# -eq 0 ]
+if [ $? -eq 0 ] # [ $# -eq 0 ]
 then
     # add coverage with debug enabled
     echo "[INFO] Performing quick debug run"
