@@ -214,8 +214,9 @@ class Command(BaseCommand):
 
             ver_plaats = club['location_name']
             if not ver_plaats:
-                self.stderr.write('[WARNING] Vereninging %s (%s) heeft geen plaatsnaam' % (ver_nhb_nr, ver_naam))
-                self._count_warnings += 1
+                # een vereniging zonder doel heeft een lege location_name - geen waarschuwing geven
+                #self.stderr.write('[WARNING] Vereninging %s (%s) heeft geen plaatsnaam' % (ver_nhb_nr, ver_naam))
+                #self._count_warnings += 1
                 ver_plaats = ""     # voorkom None
 
             ver_email = club['email']
