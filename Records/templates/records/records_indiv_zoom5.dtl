@@ -47,7 +47,7 @@
 
 {% else %}
 
-    <p class="red-text">Er zijn geen records gevonden in deze category.</p>
+    <p class="red-text">Er zijn geen records gevonden in deze categorie.</p>
 
     <a class="btn-nhb-blauw" href="{% url 'Records:overzicht' %}">Terug</a>
 
