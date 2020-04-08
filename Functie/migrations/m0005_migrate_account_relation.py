@@ -13,7 +13,7 @@ def zet_accounts(apps, schema_editor):
     # doorloop 1x alle Accounts en daarna 1x alle Functies
     functie_accounts = dict()   # [functie_pk] = [account, account]
 
-    for obj in account_klas.objects.all():
+    for obj in account_klas.objects.all():              # pragma: no cover
         functie_pks = obj.temp_functies.split(',')
         for functie_pk in functie_pks:
             try:
@@ -31,7 +31,7 @@ def zet_accounts(apps, schema_editor):
             # geen accounts gekoppeld aan deze functie
             pass
         else:
-            for account in accounts:
+            for account in accounts:                    # pragma: no cover
                 obj.accounts.add(account)
             # for
     # for

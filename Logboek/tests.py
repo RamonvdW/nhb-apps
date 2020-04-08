@@ -22,8 +22,9 @@ class TestLogboek(E2EHelpers, TestCase):
     def setUp(self):
         """ initialisatie van de test case """
 
-        self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
         self.account_admin = self.e2e_create_account_admin()
+        self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
+        self.account_same = self.e2e_create_account('same', 'same@test.com', 'same')
 
         lid = NhbLid()
         lid.nhb_nr = 100042
@@ -42,30 +43,31 @@ class TestLogboek(E2EHelpers, TestCase):
         schrijf_in_logboek(None, 'Rollen', 'Jantje is de baas')
         schrijf_in_logboek(None, 'NhbStructuur', 'weer een nieuw lid')
         schrijf_in_logboek(self.account_normaal, 'OTP controle', 'alweer verkeerd')
+        schrijf_in_logboek(self.account_same, 'Testafdeling', 'Afdeling gesloten')
 
         self.logboek_url = '/logboek/'
 
-    def test_logboek_anon(self):
+    def test_anon(self):
         # do een get van het logboek zonder ingelogd te zijn
         # resulteert in een redirect naar het plein
         self.e2e_logout()
         resp = self.client.get(self.logboek_url)
         self.assertRedirects(resp, '/plein/')
 
-    def test_logboek_str(self):
+    def test_str(self):
         # gebruik de str functie op de Logboek class
         log = LogboekRegel.objects.all()[0]
         msg = str(log)
         self.assertTrue("Logboek unittest" in msg and "normaal" in msg)
 
-    def test_logboek_users_forbidden(self):
+    def test_users_forbidden(self):
         # do een get van het logboek met een gebruiker die daar geen rechten toe heeft
         # resulteert rauwe Forbidden
         self.e2e_login_and_pass_otp(self.account_normaal)
         resp = self.client.get(self.logboek_url)
         self.assertEqual(resp.status_code, 302)  # 302 = Redirect (naar het plein)
 
-    def test_logboek_user_allowed(self):
+    def test_user_allowed(self):
         self.e2e_login_and_pass_otp(self.account_admin)
         self.assertTrue(self.account_admin.is_staff)
         self.e2e_wisselnaarrol_bb()
@@ -131,6 +133,13 @@ class TestLogboek(E2EHelpers, TestCase):
         self.e2e_assert_other_http_commands_not_supported(self.logboek_url + 'rollen/')
         self.e2e_assert_other_http_commands_not_supported(self.logboek_url + 'accounts/')
         self.e2e_assert_other_http_commands_not_supported(self.logboek_url + 'records/')
+
+    def test_same(self):
+        obj = LogboekRegel.objects.filter(actie_door_account=self.account_same)[0]
+        self.assertEqual(obj.bepaal_door(), 'same')
+
+        obj = LogboekRegel.objects.filter(actie_door_account=self.account_normaal)[0]
+        self.assertEqual(obj.bepaal_door(), 'normaal (Normaal)')
 
 
 # end of file

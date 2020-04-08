@@ -80,6 +80,12 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         # secretaris kan nog niet ingevuld worden
         ver2.save()
 
+        self.functie_bko = maak_functie("BKO test", "BKO")
+
+        self.functie_rko = maak_functie("RKO test", "RKO")
+        self.functie_rko.nhb_rayon = NhbRayon.objects.get(rayon_nr=1)
+        self.functie_rko.save()
+
         self.url_wisselvanrol = '/functie/wissel-van-rol/'
 
     def test_admin(self):
@@ -174,7 +180,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
 
         self.e2e_assert_other_http_commands_not_supported(self.url_wisselvanrol)
 
-    def test_rolwissel_it(self):
+    def test_it(self):
         self.e2e_account_accepteert_vhpg(self.account_admin)
         self.e2e_login_and_pass_otp(self.account_admin)
 
@@ -216,7 +222,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         urls = [url for url in self.extract_all_href_urls(resp) if url.startswith(self.url_wisselvanrol)]
         self.assertNotIn('/account/account-wissel', urls)
 
-    def test_rolwissel_bb(self):
+    def test_bb(self):
         # maak een BB die geen NHB lid is
         self.account_geenlid.is_BB = True
         self.account_geenlid.save()
@@ -230,6 +236,53 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.assertNotIn('/account/account-wissel', urls)           # Account wissel
         self.assertIn(self.url_wisselvanrol + 'BB/', urls)          # Manager competitiezaken
         self.assertIn(self.url_wisselvanrol + 'geen/', urls)        # Gebruiker
+
+    def test_bko(self):
+        self.functie_bko.accounts.add(self.account_normaal)
+        self.e2e_account_accepteert_vhpg(self.account_normaal)
+        self.e2e_login_and_pass_otp(self.account_normaal)
+
+        resp = self.client.get(self.url_wisselvanrol)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assertContains(resp, "Schutter")
+        urls = [url for url in self.extract_all_href_urls(resp) if url.startswith(self.url_wisselvanrol)]
+        self.assertIn(self.url_wisselvanrol + 'functie/%s/' % self.functie_bko.pk, urls)
+        self.assertIn(self.url_wisselvanrol + 'schutter/', urls)
+
+    def test_rko(self):
+        self.functie_rko.accounts.add(self.account_normaal)
+        self.e2e_account_accepteert_vhpg(self.account_normaal)
+        self.e2e_login_and_pass_otp(self.account_normaal)
+
+        resp = self.client.get(self.url_wisselvanrol)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assertContains(resp, "Schutter")
+        urls = [url for url in self.extract_all_href_urls(resp) if url.startswith(self.url_wisselvanrol)]
+        self.assertIn(self.url_wisselvanrol + 'functie/%s/' % self.functie_rko.pk, urls)
+        self.assertIn(self.url_wisselvanrol + 'schutter/', urls)
+
+    def test_cwz(self):
+        self.functie_cwz.accounts.add(self.account_normaal)
+        self.e2e_account_accepteert_vhpg(self.account_normaal)
+        self.e2e_login_and_pass_otp(self.account_normaal)
+
+        resp = self.client.get(self.url_wisselvanrol)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assertContains(resp, "Schutter")
+        urls = [url for url in self.extract_all_href_urls(resp) if url.startswith(self.url_wisselvanrol)]
+        self.assertIn(self.url_wisselvanrol + 'functie/%s/' % self.functie_cwz.pk, urls)
+        self.assertIn(self.url_wisselvanrol + 'schutter/', urls)
+
+    def test_funtie_geen_rol(self):
+        # test van een functie die niet resulteert in een rol
+        functie = maak_functie('Haha', 'HAHA')
+        functie.accounts.add(self.account_normaal)
+        self.e2e_account_accepteert_vhpg(self.account_normaal)
+        self.e2e_login_and_pass_otp(self.account_normaal)
+
+        resp = self.client.get(self.url_wisselvanrol)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assertContains(resp, "Schutter")
 
     def test_geen_rolwissel(self):
         # dit raakt de exceptie in Account.rol:rol_mag_wisselen

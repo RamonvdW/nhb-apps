@@ -144,28 +144,23 @@ class SiteTijdelijkeUrlView(View):
             zoekt de bijbehorende data op en roept de juiste dispatcher aan.
         """
         url_code = kwargs['code']
+        objs = SiteTijdelijkeUrl.objects.filter(url_code=url_code)
 
-        try:
-            objs = SiteTijdelijkeUrl.objects.filter(url_code=url_code)
-        except SiteTijdelijkeUrl.DoesNotExist:
-            # ignore onbekende url code
-            pass
-        else:
-            # kijk of deze tijdelijke url al verlopen is
-            url = None
-            now = timezone.now()
-            for obj in objs:
-                if obj.geldig_tot > now:
-                    # dispatch naar de juiste applicatie waar deze bij hoort
-                    # de callbacks staan in de dispatcher
-                    url = do_dispatch(request, obj)
+        # kijk of deze tijdelijke url al verlopen is
+        url = None
+        now = timezone.now()
+        for obj in objs:
+            if obj.geldig_tot > now:
+                # dispatch naar de juiste applicatie waar deze bij hoort
+                # de callbacks staan in de dispatcher
+                url = do_dispatch(request, obj)
 
-                # verwijder de gebruikte tijdelijke url
-                obj.delete()
-            # for
+            # verwijder de gebruikte tijdelijke url
+            obj.delete()
+        # for
 
-            if url:
-                return HttpResponseRedirect(url)
+        if url:
+            return HttpResponseRedirect(url)
 
         raise Resolver404()
 

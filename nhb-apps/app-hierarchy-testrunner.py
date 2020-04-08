@@ -45,13 +45,13 @@ class HierarchyRunner(DiscoverRunner):
                 # no test order requested
                 new_suite.addTest(test)
             else:
-                if type(test.test_after) != tuple:
+                if type(test.test_after) != tuple:      # pragma: no cover
                     raise TypeError("Expected tuple but got test_after = %s on %s" % (type(test.test_after), repr(test)))
 
                 ref = repr(test)[1:].split(" ")[0]      # extracts the class name
 
                 for check in test.test_after:
-                    if ref.startswith(check):
+                    if ref.startswith(check):           # pragma: no cover
                         raise LookupError('Circular dependency: %s.test_after depends on %s' % (ref, check))
 
                 # store the test object
@@ -99,7 +99,7 @@ class HierarchyRunner(DiscoverRunner):
             # for
         # while
 
-        if len(after) > 0:
+        if len(after) > 0:                                      # pragma: no branch
             print("Remaining test_after dependencies:")
             for ref, test_after in after.items():
                 print('  %-50s %s' % (ref, test_after))

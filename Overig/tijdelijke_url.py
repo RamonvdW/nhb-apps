@@ -97,16 +97,10 @@ def do_dispatch(request, obj):
         opgezocht heeft in de database.
         Deze functie zoekt de callback van de juiste ontvanger op en roept deze aan.
     """
-
     redirect = None
 
     if obj.dispatch_to in (RECEIVER_ACCOUNT_WISSEL, RECEIVER_BEVESTIG_EMAIL):
         func = tijdelijkeurl_dispatcher.get_receiver(obj.dispatch_to)
-        redirect = func(request, obj.hoortbij_accountemail)
-
-    # TODO: verwijder onderstaande legacy methode na 2020-04-02
-    elif obj.hoortbij_accountemail:
-        func = tijdelijkeurl_dispatcher.get_receiver(RECEIVER_BEVESTIG_EMAIL)
         redirect = func(request, obj.hoortbij_accountemail)
 
     return redirect

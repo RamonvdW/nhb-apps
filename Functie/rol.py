@@ -62,31 +62,12 @@ rol2url = {
 }
 
 
-# TODO: wrap dit in een class
-
 # plugin administratie
-
 rol_expandeer_functies = list()
-roltest_parked_expandeer_functies = None
 
 
 def rol_zet_plugins(expandeer_functie):
     rol_expandeer_functies.append(expandeer_functie)
-
-
-def roltest_park_plugins():
-    """ Geeft de lijst met plugins mee"""
-    global rol_expandeer_functies
-    global roltest_parked_expandeer_functies
-    roltest_parked_expandeer_functies = rol_expandeer_functies
-    rol_expandeer_functies = list()
-
-
-def roltest_restore_plugins():
-    global rol_expandeer_functies
-    global roltest_parked_expandeer_functies
-    rol_expandeer_functies = roltest_parked_expandeer_functies
-    roltest_parked_expandeer_functies = None
 
 
 def rol_zet_sessionvars_na_login(account, request):
@@ -146,7 +127,7 @@ def rol_zet_sessionvars_na_login(account, request):
                     for func in rol_expandeer_functies:
                         for nwe_tup in func(rol, functie):
                             tup = (nwe_tup, parent_tup)
-                            if tup not in rollen_functies:
+                            if tup not in rollen_functies:          # pragma: no branch
                                 rollen_functies.append(tup)
                                 nwe_functies.append(tup)
                         # for

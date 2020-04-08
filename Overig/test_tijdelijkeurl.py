@@ -35,16 +35,21 @@ class TestOverigTijdelijkeUrl(E2EHelpers, TestCase):
     def tearDown(self):
         tijdelijkeurl_dispatcher.test_restore()
 
-    def test_tijdelijkeurl_nonexist(self):
+    def test_nonexist(self):
         resp = self.client.get('/overig/url/test/')
         self.assertEqual(resp.status_code, 404)
 
-    def test_tijdelijkeurl_verlopen(self):
+    def test_verlopen(self):
         resp = self.client.get('/overig/url/code1/')
         self.assertEqual(resp.status_code, 404)
 
-    def test_tijdelijkeurl_geen_accountemail(self):
+    def test_geen_accountemail(self):
         resp = self.client.get('/overig/url/code2/')
+        self.assertEqual(resp.status_code, 404)
+
+    def test_onbekend(self):
+        save_tijdelijke_url('code3', 'onbekende code', geldig_dagen=1)
+        resp = self.client.get('/overig/url/code3/')
         self.assertEqual(resp.status_code, 404)
 
     def test_setup_dispatcher(self):
@@ -57,7 +62,7 @@ class TestOverigTijdelijkeUrl(E2EHelpers, TestCase):
         self.callback_count += 1
         return "/overig/feedback/bedankt/"
 
-    def test_tijdelijkeurl_accountemail(self):
+    def test_accountemail(self):
         set_tijdelijke_url_receiver(RECEIVER_BEVESTIG_EMAIL, self._my_receiver_func)
         url = maak_tijdelijke_url_accountemail(self.email_normaal, test="een")
         self.assertTrue("/overig/url/" in url)
@@ -68,7 +73,7 @@ class TestOverigTijdelijkeUrl(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assert_template_used(resp, ('overig/site-feedback-bedankt.dtl', 'plein/site_layout.dtl'))
 
-    def test_tijdelijkeurl_accountwissel(self):
+    def test_accountwissel(self):
         set_tijdelijke_url_receiver(RECEIVER_ACCOUNT_WISSEL, self._my_receiver_func)
         url = maak_tijdelijke_url_accountwissel(self.email_normaal, test="twee")
         self.assertTrue("/overig/url/" in url)

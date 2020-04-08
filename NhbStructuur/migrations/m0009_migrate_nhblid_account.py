@@ -17,7 +17,7 @@ def zet_nhblid_account(apps, schema_editor):
 
     # er zijn minder Accounts dan NhbLid records, dus doorloop Account
     for obj in account_klas.objects.all():
-        if obj.temp_nhb_nr > 0:
+        if obj.temp_nhb_nr > 0:                 # pragma: no cover
             # zoek het NhbLid record erbij
             lid = nhblid_klas.objects.get(pk=obj.temp_nhb_nr)
             lid.account = obj

@@ -52,11 +52,16 @@ class E2EHelpers(object):
         account.save()
         return account
 
-    def e2e_login(self, account):
+    def e2e_login_no_check(self, account):
         """ log in op de website via de voordeur, zodat alle rechten geëvalueerd worden """
         ww = self.WACHTWOORD
         assert isinstance(self, TestCase)
         resp = self.client.post('/account/login/', {'login_naam': account.username, 'wachtwoord': ww})
+        return resp
+
+    def e2e_login(self, account):
+        """ log in op de website via de voordeur, zodat alle rechten geëvalueerd worden """
+        resp = self.e2e_login_no_check(account)
         self.assertEqual(resp.status_code, 302)  # 302 = Redirect
         user = auth.get_user(self.client)
         self.assertTrue(user.is_authenticated)
@@ -91,7 +96,7 @@ class E2EHelpers(object):
         self.assert_is_redirect(resp, '/functie/wissel-van-rol/')
 
     @staticmethod
-    def e2e_dump_resp(resp):
+    def e2e_dump_resp(resp):                        # pragma: no cover
         print("status code:", resp.status_code)
         print(repr(resp))
         if resp.status_code == 302:
@@ -146,7 +151,7 @@ class E2EHelpers(object):
             if templ.name in lst:
                 lst.remove(templ.name)
         # for
-        if len(lst):    # pragma: no coverage
+        if len(lst):    # pragma: no cover
             msg = "Following templates should have been used: %s\n(actually used: %s)" % (repr(lst), repr([t.name for t in response.templates]))
             self.assertTrue(False, msg=msg)
 
@@ -167,15 +172,15 @@ class E2EHelpers(object):
             resp = self.client.post(url)
             self.assertTrue(resp.status_code in accepted_status_codes)
 
-        if delete:
+        if delete:                            # pragma: no cover
             resp = self.client.delete(url)
             self.assertTrue(resp.status_code in accepted_status_codes)
 
-        if put:
+        if put:                               # pragma: no cover
             resp = self.client.put(url)
             self.assertTrue(resp.status_code in accepted_status_codes)
 
-        if patch:
+        if patch:                             # pragma: no cover
             resp = self.client.patch(url)
             self.assertTrue(resp.status_code in accepted_status_codes)
 
