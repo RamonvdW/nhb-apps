@@ -133,6 +133,7 @@ class TestFunctieVHPG(E2EHelpers, TestCase):
 
         # wissel naar BB rol
         self.e2e_wisselnaarrol_bb()
+        self.e2e_check_rol('BB')
 
         resp = self.client.get(self.url_overzicht)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
