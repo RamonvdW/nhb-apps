@@ -8,6 +8,13 @@
 
 {% block title %}Kies je rol{% endblock %}
 
+{% block extraheader %}
+    {% if insert_meta %}
+        <!-- deze header is bedoeld voor de testsuite -->
+        <meta rol_nu="{{ meta_rol }}" functie_nu="{{ meta_functie }}">
+    {% endif %}
+{% endblock %}
+
 {% block pagina %}
 {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="wissel-van-rol" %}
 

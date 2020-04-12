@@ -113,6 +113,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
 
         # neem de BB rol aan
         self.e2e_wisselnaarrol_bb()
+        self.e2e_check_rol('BB')
         resp = self.client.get('/plein/')
         self.assert_html_ok(resp)
         self.assertContains(resp, "Manager competitiezaken")
@@ -129,6 +130,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
 
         # neem de BKO 18m rol aan
         self.e2e_wissel_naar_functie(self.functie_bko)
+        self.e2e_check_rol('BKO')
         resp = self.client.get(self.url_overzicht)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -139,6 +141,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
 
         # neem de RKO Rayon 3 Indoor rol aan
         self.e2e_wissel_naar_functie(self.functie_rko3)
+        self.e2e_check_rol('RKO')
         resp = self.client.get(self.url_overzicht)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -149,6 +152,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
 
         # neem de RCL Rayon 111 Indoor aan
         self.e2e_wissel_naar_functie(self.functie_rcl111)
+        self.e2e_check_rol('RCL')
 
         # controleer de Wijzig knoppen op de functie-overzicht pagina
         resp = self.client.get(self.url_overzicht)
@@ -168,6 +172,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_beh1)
 
         self.e2e_wissel_naar_functie(self.functie_cwz)
+        self.e2e_check_rol('CWZ')
 
         # vraag het overzicht van competitie-bestuurders op
         resp = self.client.get(self.url_overzicht)
@@ -196,6 +201,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
 
         # neem de BB rol aan
         self.e2e_wisselnaarrol_bb()
+        self.e2e_check_rol('BB')
 
         # probeer een niet-bestaande functie
         resp = self.client.get(self.url_wijzig + '999999/')
@@ -391,6 +397,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_beh1)
 
         self.e2e_wissel_naar_functie(self.functie_cwz)
+        self.e2e_check_rol('CWZ')
         resp = self.client.get('/plein/')
         self.assertContains(resp, "CWZ test")
 

@@ -530,6 +530,15 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
         context['wiki_2fa_url'] = settings.WIKI_URL_2FA
         context['wiki_2fa_titel'] = 'Tweede-factor authenticatie'
 
+        # TODO: volgende code is alleen voor de testsuite - willen we dit live terug zien?
+        context['insert_meta'] = True
+        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
+        context['meta_rol'] = rol2url[rol_nu]
+        if functie_nu:
+            context['meta_functie'] = functie_nu.beschrijving       # template doet html escaping
+        else:
+            context['meta_functie'] = ""
+
         menu_dynamics(self.request, context, actief='wissel-van-rol')
         return context
 

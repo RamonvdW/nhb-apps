@@ -108,6 +108,7 @@ class TestCompetitie(E2EHelpers, TestCase):
     def test_instellingen(self):
         self.e2e_login_and_pass_otp(self.account_bb)
         self.e2e_wisselnaarrol_bb()
+        self.e2e_check_rol('BB')
 
         resp = self.client.get('/competitie/instellingen-volgende-competitie/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -117,6 +118,7 @@ class TestCompetitie(E2EHelpers, TestCase):
     def test_aanmaken(self):
         self.e2e_login_and_pass_otp(self.account_bb)
         self.e2e_wisselnaarrol_bb()
+        self.e2e_check_rol('BB')
 
         resp = self.client.get('/competitie/aanmaken/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -147,6 +149,7 @@ class TestCompetitie(E2EHelpers, TestCase):
     def test_klassegrenzen_cornercases(self):
         self.e2e_login_and_pass_otp(self.account_bb)
         self.e2e_wisselnaarrol_bb()
+        self.e2e_check_rol('BB')
 
         # gebruik een POST om de competitie aan te maken
         # daarna is het mogelijk om klassegrenzen in te stellen
@@ -169,6 +172,7 @@ class TestCompetitie(E2EHelpers, TestCase):
     def test_klassegrenzen(self):
         self.e2e_login_and_pass_otp(self.account_bb)
         self.e2e_wisselnaarrol_bb()
+        self.e2e_check_rol('BB')
 
         # gebruik een POST om de competitie aan te maken
         # daarna is het mogelijk om klassegrenzen in te stellen

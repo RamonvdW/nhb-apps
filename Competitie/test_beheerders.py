@@ -96,12 +96,14 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
     def test_lijst_verenigingen_admin(self):
         self.e2e_login_and_pass_otp(self.account_admin)
         self.e2e_wisselnaarrol_beheerder()
+        self.e2e_check_rol('beheerder')
         resp = self.client.get('/competitie/lijst-verenigingen/')
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
 
     def test_lijst_verenigingen_bb(self):
         self.e2e_login_and_pass_otp(self.account_bb)
         self.e2e_wisselnaarrol_bb()
+        self.e2e_check_rol('BB')
         resp = self.client.get('/competitie/lijst-verenigingen/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -110,6 +112,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
     def test_lijst_verenigingen_bko(self):
         self.e2e_login_and_pass_otp(self.account_bko)
         self.e2e_wissel_naar_functie(self.functie_bko)
+        self.e2e_check_rol('BKO')
         resp = self.client.get('/competitie/lijst-verenigingen/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -118,6 +121,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
     def test_lijst_verenigingen_rko(self):
         self.e2e_login_and_pass_otp(self.account_rko)
         self.e2e_wissel_naar_functie(self.functie_rko)
+        self.e2e_check_rol('RKO')
         resp = self.client.get('/competitie/lijst-verenigingen/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -126,6 +130,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
     def test_lijst_verenigingen_rcl(self):
         self.e2e_login_and_pass_otp(self.account_rcl)
         self.e2e_wissel_naar_functie(self.functie_rcl)
+        self.e2e_check_rol('RCL')
         resp = self.client.get('/competitie/lijst-verenigingen/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)

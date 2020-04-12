@@ -95,6 +95,22 @@ class E2EHelpers(object):
         resp = self.client.get('/functie/wissel-van-rol/functie/%s/' % functie.pk)
         self.assert_is_redirect(resp, '/functie/wissel-van-rol/')
 
+    def e2e_check_rol(self, rol_verwacht):
+        resp = self.client.get('/functie/wissel-van-rol/')
+        self.assertEqual(resp.status_code, 200)
+
+        # <meta rol_nu="CWZ" functie_nu="CWZ vereniging 4444">
+        page = str(resp.content)
+        pos = page.find('<meta rol_nu=')
+        if pos < 0:
+            raise ValueError('Could not locate <meta rol_nu=')
+        spl = page[pos+14:pos+100].split('"')
+        rol_nu = spl[0]
+        functie_nu = spl[2]
+        if rol_nu != rol_verwacht:
+            print("e2e_check_rol: rol_nu=%s, functie_nu=%s" % (rol_nu, functie_nu))
+            raise ValueError('Rol mismatch: rol_nu=%s, rol_verwacht=%s' % (rol_nu, rol_verwacht))
+
     @staticmethod
     def e2e_dump_resp(resp):                        # pragma: no cover
         print("status code:", resp.status_code)

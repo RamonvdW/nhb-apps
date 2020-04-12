@@ -6,7 +6,7 @@
 {% endcomment %}
 {% load static %}
 
-{% block extrastyle %}
+{% block extraheader %}
 <!-- voorkom dat de knop nog een keer gebruikt wordt (dat werkt toch niet)
      door dit browser window automatisch weg te sturen na 60 seconden -->
 <meta http-equiv="refresh" content="60; url=/functie/wissel-van-rol/" />

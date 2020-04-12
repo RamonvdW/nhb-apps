@@ -10,7 +10,7 @@
     Dit document is de blauwdruk voor alle pagina's van de site.
     Andere template's beginnen met een 'extends' op deze template
     en kunnen de volgende block tags gebruiken om delen te vervangen:
-        extrastyle    extra stijlsheets (komen in de header)
+        extraheader   uitbreiding in de head sectie
         title         pagina titel instellen
         pagina        de body van de pagina
 
@@ -28,7 +28,7 @@
         <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Round">
         <link rel="stylesheet" href="{% static 'materialize/materialize-new.css' %}">
         <link rel="stylesheet" href="{% static 'plein/site_layout.css' %}"> <!-- moet ná materialize css -->
-        {% block extrastyle %}{% endblock %}
+        {% block extraheader %}{% endblock %}
     </head>
 
     <body class="grey lighten-2">   <!-- grey lighten-4 is identical to #f5f5f5 from NHB style -->

@@ -71,6 +71,7 @@ class TestLogboek(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_admin)
         self.assertTrue(self.account_admin.is_staff)
         self.e2e_wisselnaarrol_bb()
+        self.e2e_check_rol('BB')
 
         # alles
         resp = self.client.get(self.logboek_url)
@@ -128,6 +129,7 @@ class TestLogboek(E2EHelpers, TestCase):
         # als BB
         self.e2e_login_and_pass_otp(self.account_admin)
         self.e2e_wisselnaarrol_bb()
+        self.e2e_check_rol('BB')
         self.e2e_assert_other_http_commands_not_supported(self.logboek_url)
         self.e2e_assert_other_http_commands_not_supported(self.logboek_url + 'crm-import/')
         self.e2e_assert_other_http_commands_not_supported(self.logboek_url + 'rollen/')
