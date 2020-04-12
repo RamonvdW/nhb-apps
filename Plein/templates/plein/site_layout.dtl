@@ -106,14 +106,37 @@
             //          <thead>
             //              <th filter="on">Header1</th>
             //              <th>Header2<th>
+
+            // Uitgebreider voorbeeld:
+            //   <table class="white" id="table3">
+            //     <thead>
+            //       <tr>        <!-- filter veld -->
+            //         <td colspan="2"></td>
+            //         <td colspan="2" class="table-filter">
+            //            <input class="table-filter" oninput="myTableFilter(this, 'table3')" placeholder="Zoeken"/>
+            //         </td>
+            //         <td colspan="3"></td>
+            //       </tr>
+            //       <tr>
+            //         <th>Laatste poging</th>
+            //         <th>Laatste inlog</th>
+            //         <th filter="on">Inlog</th>
+            //         <th filter="on">Naam</th>
+            //         <th>Email is bevestigd</th>
+            //         <th>Tweede factor</th>
+            //          <th>Aangemaakt</th>
+            //       </tr>
+            //     </thead>
+
             function myTableFilter(zoekveld, tableId)
             {
+                //console.log("myTableFilter: ", zoekveld);
                 var table = document.getElementById(tableId);
                 if (table == undefined) return;
-                //console.log('table: ', table);
+                //console.log('  table: ', table);
 
                 filter_tekst = zoekveld.value;
-                //console.log('filter_tekst: ', filter_tekst);
+                //console.log('  filter_tekst: ', filter_tekst);
 
                 // doorzoek de header kolommen op filter=on
                 var filter_kolommen = new Array();
@@ -137,6 +160,22 @@
                     row.style.display = show ? 'table-row' : 'none';
                 }
             }
+
+            // zoek alle tabellen met een zoekveld en trigger de oninput method
+            // dit is noodzakelijk bij gebruik van de browser 'back' knop
+            // anders zijn de tabellen niet meer gefiltreerd
+            window.addEventListener("load", function(){
+                //console.log("load!");
+                var tables = document.getElementsByTagName('table');
+                //console.log('tables: ', tables);
+                for (var i=0, table; table = tables[i]; i++) {
+                    //console.log('  table: ', table);
+                    inputs = table.getElementsByTagName('input');
+                    if (inputs.length >= 1) {
+                        myTableFilter(inputs[0], table.id);
+                    }
+                }
+            });
         </script>
 
     </body>
