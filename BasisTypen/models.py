@@ -16,6 +16,9 @@ class BoogType(models.Model):
     beschrijving = models.CharField(max_length=50)
     afkorting = models.CharField(max_length=5)
 
+    # sorteervolgorde zodat order_by('volgorde') de juiste sortering oplevert
+    volgorde = models.CharField(max_length=1, default='?')
+
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
         return "(%s) %s" % (self.afkorting,
