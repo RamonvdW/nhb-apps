@@ -112,6 +112,8 @@ class TestPlein(E2EHelpers, TestCase):
 
         # wissel naar IT beheerder
         self.e2e_wisselnaarrol_beheerder()
+        self.e2e_check_rol('beheerder')
+
         resp = self.client.get('/plein/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, '/beheer/')
@@ -122,36 +124,42 @@ class TestPlein(E2EHelpers, TestCase):
 
         # bb
         self.e2e_wisselnaarrol_bb()
+        self.e2e_check_rol('BB')
         resp = self.client.get('/plein/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, 'Manager competitiezaken')
 
         # bko
         self.e2e_wissel_naar_functie(self.functie_bko)
+        self.e2e_check_rol('BKO')
         resp = self.client.get('/plein/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, 'BKO')
 
         # rko
         self.e2e_wissel_naar_functie(self.functie_rko)
+        self.e2e_check_rol('RKO')
         resp = self.client.get('/plein/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, 'RKO')
 
         # rcl
         self.e2e_wissel_naar_functie(self.functie_rcl)
+        self.e2e_check_rol('RCL')
         resp = self.client.get('/plein/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, 'RCL')
 
         # cwz
         self.e2e_wissel_naar_functie(self.functie_cwz)
+        self.e2e_check_rol('CWZ')
         resp = self.client.get('/plein/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, 'CWZ ')
 
         # geen
         self.e2e_wisselnaarrol_gebruiker()
+        self.e2e_check_rol('geen')
         resp = self.client.get('/plein/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, 'Gebruiker')
