@@ -147,16 +147,14 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
             return nhblid
 
         account = request.user
-        if len(account.nhblid_set.all()) == 0:
-            raise Resolver404()
-
-        return account.nhblid_set.all()[0]
+        return account.nhblid_set.all()[0]      # ROL_SCHUTTER geeft bescherming tegen geen nhblid
 
     def post(self, request, *args, **kwargs):
         """ Deze functie wordt aangeroepen als een POST request ontvangen is."""
         nhblid = self._get_nhblid_or_404(request, request.POST.get('nhblid_pk', None))
 
         # sla de nieuwe voorkeuren op in SchutterBoog records (1 per boogtype)
+        # werkt alleen na een GET (maakt de SchutterBoog records aan)
         for obj in SchutterBoog.objects.filter(nhblid=nhblid):
             check_info = 'info_' + obj.boogtype.afkorting
 

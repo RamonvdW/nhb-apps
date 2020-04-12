@@ -9,7 +9,7 @@ from BasisTypen.models import BoogType
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
 from NhbStructuur.migrations.m0002_nhbstructuur_2018 import maak_rayons_2018, maak_regios_2018
 from Overig.e2ehelpers import E2EHelpers
-from Functie.rol import Rollen, rol_zet_sessionvars_na_login, rol_get_huidige
+from Functie.models import maak_functie
 from .models import SchutterBoog
 from .leeftijdsklassen import leeftijdsklassen_plugin_na_login
 import datetime
@@ -22,6 +22,8 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
         """ initialisatie van de test case """
         self.account_admin = self.e2e_create_account_admin()
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
+        self.account_cwz = self.e2e_create_account('cwz', 'cwz@test.com', 'Secretaris')
+        self.e2e_account_accepteert_vhpg(self.account_cwz)
 
         # maak de standard rayon/regio structuur aan
         maak_rayons_2018(NhbRayon)
@@ -32,8 +34,12 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
         ver.naam = "Grote Club"
         ver.nhb_nr = "1000"
         ver.regio = NhbRegio.objects.get(pk=111)
-        # secretaris kan nog niet ingevuld worden
         ver.save()
+
+        self.functie_cwz = maak_functie('CWZ 1000', 'CWZ')
+        self.functie_cwz.nhb_ver = ver
+        self.functie_cwz.save()
+        self.functie_cwz.accounts.add(self.account_cwz)
 
         # maak een test lid aan
         lid = NhbLid()
@@ -48,6 +54,13 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
         lid.account = self.account_normaal
         lid.save()
         self.nhblid1 = lid
+
+        # maak nog een test vereniging
+        ver = NhbVereniging()
+        ver.naam = "Nieuwe Club"
+        ver.nhb_nr = "1001"
+        ver.regio = NhbRegio.objects.get(pk=112)
+        ver.save()
 
         # maak een test lid aan
         lid = NhbLid()
@@ -127,5 +140,57 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
 
         self.e2e_assert_other_http_commands_not_supported(self.url_voorkeuren, post=False)
 
+    def test_cwz(self):
+        # login as CWZ
+        self.e2e_login_and_pass_otp(self.account_cwz)
+        self.e2e_wissel_naar_functie(self.functie_cwz)
+        self.e2e_check_rol('CWZ')
+
+        # haal als CWZ de voorkeuren pagina op van een lid van de vereniging
+        # dit maakt ook de SchutterBoog records aan
+        resp = self.client.get(self.url_voorkeuren + '100001/')
+        self.assertEqual(resp.status_code, 200)
+
+        # controleer de stand van zaken voordat de CWZ iets wijzigt
+        obj_r = SchutterBoog.objects.get(nhblid__pk=100001, boogtype__afkorting='R')
+        obj_c = SchutterBoog.objects.get(nhblid__pk=100001, boogtype__afkorting='C')
+        self.assertFalse(obj_r.voor_wedstrijd)
+        self.assertFalse(obj_c.voor_wedstrijd)
+        self.assertTrue(obj_r.heeft_interesse)
+        self.assertTrue(obj_c.heeft_interesse)
+
+        # post een wijziging
+        resp = self.client.post(self.url_voorkeuren, {'nhblid_pk': '100001', 'schiet_R': 'on', 'info_C': 'on'})
+        self.assert_is_redirect(resp, '/vereniging/leden-voorkeuren/')
+
+        # controleer dat de post werkte
+        obj_r = SchutterBoog.objects.get(nhblid__pk=100001, boogtype__afkorting='R')
+        obj_c = SchutterBoog.objects.get(nhblid__pk=100001, boogtype__afkorting='C')
+        self.assertTrue(obj_r.voor_wedstrijd)
+        self.assertFalse(obj_c.voor_wedstrijd)
+        self.assertFalse(obj_r.heeft_interesse)
+        self.assertTrue(obj_c.heeft_interesse)
+
+    def test_cwz_bad(self):
+        # login as CWZ
+        self.e2e_login_and_pass_otp(self.account_cwz)
+        self.e2e_wissel_naar_functie(self.functie_cwz)
+        self.e2e_check_rol('CWZ')
+
+        # haal als CWZ 'de' voorkeuren pagina op, zonder specifiek nhblid_pk
+        resp = self.client.get(self.url_voorkeuren)
+        self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
+
+        # haal als CWZ de voorkeuren pagina op met een niet-numeriek nhblid_pk
+        resp = self.client.get(self.url_voorkeuren + 'snuiter/')
+        self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
+
+        # haal als CWZ de voorkeuren pagina op met een niet bestaand nhblid_pk
+        resp = self.client.get(self.url_voorkeuren + '999999/')
+        self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
+
+        # haal als CWZ de voorkeuren pagina op van een lid van een andere vereniging
+        resp = self.client.get(self.url_voorkeuren + '100002/')
+        self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
 
 # end of file
