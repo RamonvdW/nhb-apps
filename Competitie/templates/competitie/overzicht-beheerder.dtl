@@ -14,120 +14,136 @@
 <h4>Competitie</h4>
 
 {% if not have_active_comps %}
-<p>Er zijn geen competities om te tonen.</p>
+
+    <p>Er zijn geen competities om te tonen.</p>
+
 {% endif %}
 
 {% for obj in object_list %}
 
-<p>&nbsp;</p>
-<h5>Overzicht {{ obj.beschrijving }}</h5>
-<table class="white">
-    <thead>
-        <th>Fase</th>
-        <th>Activiteit</th>
-        <th>Periode</th>
-    </thead>
-    <tr>
-        <td>A</td>
-        <td>Competitie opstarten (Bondsburo)</td>
-        <td class="green-text">Afgerond</td>
-    </tr>
-    <tr>
-        <td{% if obj.fase == 'A1' %} class="blue"{% endif %}>A1</td>
-        <td>Vaststellen klassegrenzen (Bondsburo)</td>
-        {% if obj.fase > 'A1' %}
-        <td class="green-text">Afgerond</td>
-        {% else %}
-        <td>tot 15 juli</td>
-        {% endif %}
-    </tr>
-    <tr>
-        <td{% if obj.fase == 'A2' %} class="blue"{% endif %}>A2</td>
-        <td>Instellingen regio (RCL)</td>
-        {% if obj.fase > 'A2' %}
-        <td class="green-text">Afgerond</td>
-        {% else %}
-        <td>tot 15 juli</td>
-        {% endif %}
-    </tr>
-    <tr>
-        <td{% if obj.fase == 'B' %} class="blue"{% endif %}>B</td>
-        <td>Open voor inschrijvingen individueel en teams (indien lid voor {{ obj.uiterste_datum_lid }})</td>
-        {% if obj.fase > 'B' %}
-        <td class="green-text">Afgerond</td>
-        {% else %}
-        <td>vanaf {{ obj.begin_aanmeldingen }}{% if obj.einde_aanmeldingen > obj.begin_aanmeldingen %}<br>tot {{ obj.einde_aanmeldingen }}{% endif %}</td>
-        {% endif %}
-    </tr>
-    <tr>
-        <td{% if obj.fase == 'C' %} class="blue"{% endif %}>C</td>
-        <td>Samenstellen vaste teams (CWZ)</td>
-        {% if obj.fase > 'C' %}
-        <td class="green-text">Afgerond</td>
-        {% else %}
-        <td>tot {{ obj.einde_teamvorming }}</td>
-        {% endif %}
-    </tr>
-    <tr>
-        <td{% if obj.fase == 'D' %} class="blue"{% endif %}>D</td>
-        <td>Aanmaken poules (RCL)</td>
-        {% if obj.fase > 'D' %}
-        <td class="green-text">Afgerond</td>
-        {% else %}
-        <td>tot {{ obj.eerste_wedstrijd }}</td>
-        {% endif %}
-    </tr>
-    <tr>
-        <td{% if obj.fase == 'E' %} class="blue"{% endif %}>E</td>
-        <td>Wedstrijden</td>
-        {% if obj.fase > 'E' %}
-        <td class="green-text">Afgerond</td>
-        {% else %}
-        <td>vanaf {{ obj.eerste_wedstrijd }}</td>
-        {% endif %}
-    </tr>
-    <tr>
-        <td{% if obj.fase == 'F' %} class="blue"{% endif %}>F</td>
-        <td>Vaststellen uitslag regiocompetitie</td>
-        {% if obj.fase > 'F' %}
-        <td class="green-text">Afgerond</td>
-        {% else %}
-        <td>?</td>
-        {% endif %}
-    </tr>
-</table>
+    <p>&nbsp;</p>
+    <h5>Overzicht {{ obj.beschrijving }}</h5>
+
+    <table class="white">
+        <thead>
+            <th>Fase</th>
+            <th>Activiteit</th>
+            <th>Periode</th>
+        </thead>
+        <tr>
+            <td>A</td>
+            <td>Competitie opstarten (Bondsburo)</td>
+            <td class="green-text">Afgerond</td>
+        </tr>
+        <tr>
+            <td{% if obj.fase == 'A1' %} class="blue"{% endif %}>A1</td>
+            <td>Vaststellen klassegrenzen (Bondsburo)</td>
+            <td>
+                {% if obj.fase > 'A1' %}
+                <span class="green-text">Afgerond</span>
+                {% else %}
+                <span>tot 15 juli</span>
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td{% if obj.fase == 'A2' %} class="blue"{% endif %}>A2</td>
+            <td>Instellingen regio (RCL)</td>
+            <td>
+                {% if obj.fase > 'A2' %}
+                <span class="green-text">Afgerond</span>
+                {% else %}
+                <span>tot 15 juli</span>
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td{% if obj.fase == 'B' %} class="blue"{% endif %}>B</td>
+            <td>Open voor inschrijvingen individueel en teams (indien lid voor {{ obj.uiterste_datum_lid }})</td>
+            <td>
+                {% if obj.fase > 'B' %}
+                    <span class="green-text">Afgerond</span>
+                {% else %}
+                    <span>vanaf {{ obj.begin_aanmeldingen }}{% if obj.einde_aanmeldingen > obj.begin_aanmeldingen %}<br>tot {{ obj.einde_aanmeldingen }}{% endif %}</span>
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td{% if obj.fase == 'C' %} class="blue"{% endif %}>C</td>
+            <td>Samenstellen vaste teams (CWZ)</td>
+            <td>
+                {% if obj.fase > 'C' %}
+                    <span class="green-text">Afgerond</span>
+                {% else %}
+                    <span>tot {{ obj.einde_teamvorming }}</span>
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td{% if obj.fase == 'D' %} class="blue"{% endif %}>D</td>
+            <td>Aanmaken poules (RCL)</td>
+            <td>
+                {% if obj.fase > 'D' %}
+                    <span class="green-text">Afgerond</span>
+                {% else %}
+                    <span>tot {{ obj.eerste_wedstrijd }}</span>
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td{% if obj.fase == 'E' %} class="blue"{% endif %}>E</td>
+            <td>Wedstrijden</td>
+            <td>
+                {% if obj.fase > 'E' %}
+                    <span class="green-text">Afgerond</span>
+                {% else %}
+                    <span>vanaf {{ obj.eerste_wedstrijd }}</span>
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td{% if obj.fase == 'F' %} class="blue"{% endif %}>F</td>
+            <td>Vaststellen uitslag regiocompetitie</td>
+            <td>
+                {% if obj.fase > 'F' %}
+                    <span class="green-text">Afgerond</span>
+                {% else %}
+                    <span>?</span>
+                {% endif %}
+            </td>
+        </tr>
+    </table>
 {% endfor %}
 
 
 <p>&nbsp;</p>
-
 <h5>Volgende stappen</h5>
 
 <div class="row">
     {% if bb_kan_competitie_aanmaken %}
-    <div class="col s12 m6 xl4">
-        <div class="card">
-            <div class="card-content">
-                <table class="simple"><tr style="border:0px">
-                    <td><i class="material-icons-round large">playlist_add</i></td>
-                    <td>Instellingen voor de bondscompetities {{ nieuwe_seizoen }} controleren en competities aanmaken.</td>
-                </tr></table>
-            </div>
-            <a href="{% url 'Competitie:instellingen-volgende-competitie' %}" class="nhb-klikbare-balk">
-                <div class="card-action center-align">
-                    <span class="nhb-klikbare-link">Competitie opstarten</span>
+        <div class="col s12 m6 xl4">
+            <div class="card">
+                <div class="card-content">
+                    <table class="simple"><tr style="border:0px">
+                        <td><i class="material-icons-round large">playlist_add</i></td>
+                        <td>Instellingen voor de bondscompetities {{ nieuwe_seizoen }} controleren en competities aanmaken.</td>
+                    </tr></table>
                 </div>
-            </a>
+                <a href="{% url 'Competitie:instellingen-volgende-competitie' %}" class="nhb-klikbare-balk">
+                    <div class="card-action center-align">
+                        <span class="nhb-klikbare-link">Competitie opstarten</span>
+                    </div>
+                </a>
+            </div>
         </div>
-    </div>
     {% endif %}
 
     {% if rol_is_bb %}
 
         {% for obj in object_list %}
 
+            <!-- klassegrenzen vaststellen -->
             {% if obj.fase == 'A1' %}
-                <!-- klassegrenzen vaststellen -->
                 <div class="col s12 m6 xl4">
                     <div class="card">
                         <div class="card-content">
