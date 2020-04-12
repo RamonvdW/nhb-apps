@@ -76,6 +76,7 @@ def menu_dynamics(request, context, actief=None):
         context['menu_show_login'] = True
 
     context['menu_rol_beschrijving'] = rol_get_beschrijving(request)
+    context['is_debug'] = settings.DEBUG
 
 
 # end of file

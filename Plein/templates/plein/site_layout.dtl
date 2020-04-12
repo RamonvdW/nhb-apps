@@ -45,6 +45,18 @@
             <div id="content">      <!-- css manipulates this -->
                 <!-- button to call-up the sidenav; hidden when not needed -->
                 <a href="#" data-target="slide-out" class="sidenav-trigger hide-on-large-only"><i class="material-icons-round">menu</i></a>
+
+                <!-- screen-size indicator labels -->
+                {% if is_debug %}
+                    <div style="position: fixed; left: 320px; top: 2px; font-size:10px">
+                        <span class="hide-unless-small">Small</span>
+                        <span class="hide-unless-medium">Medium</span>
+                        <span class="hide-unless-large">Large</span>
+                        <span class="hide-unless-xlarge">Extra-large</span>
+                    </div>
+                {% endif %}
+
+                <!-- echt pagina komt hier, vanuit de template -->
                 {% block pagina %}{% endblock %}
             </div>
         </div>
