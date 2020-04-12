@@ -89,7 +89,7 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertEqual(len(SchutterBoog.objects.all()), 5)
 
-        obj = SchutterBoog.objects.get(account=self.account_normaal, boogtype=self.boog_R)
+        obj = SchutterBoog.objects.get(nhblid=self.nhblid1, boogtype=self.boog_R)
         self.assertTrue(obj.heeft_interesse)
         self.assertFalse(obj.voor_wedstrijd)
         self.assertFalse(obj.voorkeur_dutchtarget_18m)
@@ -101,7 +101,7 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('schutter/voorkeuren-opgeslagen.dtl', 'plein/site_layout.dtl'))
         self.assertEqual(len(SchutterBoog.objects.all()), 5)
 
-        obj = SchutterBoog.objects.get(account=self.account_normaal, boogtype=self.boog_R)
+        obj = SchutterBoog.objects.get(nhblid=self.nhblid1, boogtype=self.boog_R)
         self.assertFalse(obj.heeft_interesse)
         self.assertTrue(obj.voor_wedstrijd)
         self.assertTrue(obj.voorkeur_dutchtarget_18m)
@@ -120,7 +120,7 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('schutter/voorkeuren-opgeslagen.dtl', 'plein/site_layout.dtl'))
 
-        obj = SchutterBoog.objects.get(account=self.account_normaal, boogtype=self.boog_R)
+        obj = SchutterBoog.objects.get(nhblid=self.nhblid1, boogtype=self.boog_R)
         self.assertFalse(obj.heeft_interesse)
         self.assertTrue(obj.voor_wedstrijd)
         self.assertFalse(obj.voorkeur_dutchtarget_18m)

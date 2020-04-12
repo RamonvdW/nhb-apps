@@ -13,21 +13,37 @@
 
 <h4>Voorkeuren</h4>
 
-<p>Als schutter kan je op deze pagina je voorkeuren aanpassen.</p>
+{% if is_cwz %}
+
+    <p>Als CWZ kan je op deze pagina de voorkeuren van lid <b>{{ nhblid.volledige_naam }}</b> aanpassen.</p>
+
+{% else %}
+
+    <p>Als schutter kan je op deze pagina je voorkeuren aanpassen.</p>
+
+{% endif %}
 
 
 <h5>Bogen</h5>
 
-<p>Door aan te geven welke bogen jouw voorkeur hebben kunnen we beschikbare informatie aanpassen aan jouw wensen en hoef je minder handelingen te verrichten.</p>
+{% if not is_cwz %}
 
-<p>Voorbeelden:</p>
-<ul class="browser-default">
-    <li>We laten alleen wedstrijden zien waar je met de door jou gekozen bogen in uit mag komen.</li>
-    <li>Waar mogelijk, kunnen we je meteen in de juiste wedstrijdklasse plaatsen.</li>
-</ul>
+    <p>Door aan te geven welke bogen jouw voorkeur hebben kunnen we beschikbare informatie aanpassen aan jouw wensen en hoef je minder handelingen te verrichten.</p>
+
+    <p>Voorbeelden:</p>
+    <ul class="browser-default">
+        <li>We laten alleen wedstrijden zien waar je met de door jou gekozen bogen in uit mag komen.</li>
+        <li>Waar mogelijk, kunnen we je meteen in de juiste wedstrijdklasse plaatsen.</li>
+    </ul>
+
+{% endif %}
 
 <form class="white" method="post" action="{{ opslaan_url }}">
     {% csrf_token %}
+
+    {% if nhblid_pk %}
+    <input type="hidden" name="nhblid_pk" value="{{ nhblid_pk }}">
+    {% endif %}
 
     <table class="white">
 

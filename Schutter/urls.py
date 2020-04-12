@@ -18,6 +18,10 @@ urlpatterns = [
          views.RegistreerNhbNummerView.as_view(),
          name='registreer'),
 
+    path('voorkeuren/<nhblid_pk>/',
+         views.VoorkeurenView.as_view(),
+         name='voorkeuren-nhblid'),
+
     path('voorkeuren/',
          views.VoorkeurenView.as_view(),
          name='voorkeuren'),

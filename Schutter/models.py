@@ -10,6 +10,7 @@ from BasisTypen.models import BoogType
 from Account.models import Account, AccountEmail, AccountCreateError, account_is_email_valide
 from NhbStructuur.models import NhbLid
 from Overig.tijdelijke_url import maak_tijdelijke_url_accountemail
+# mag niet afhankelijk zijn van Competitie
 
 
 class AccountCreateNhbGeenEmail(Exception):
@@ -21,9 +22,7 @@ class SchutterBoog(models.Model):
     """ Schutter met een specifiek type boog en zijn voorkeuren
         voor elk type boog waar de schutter interesse in heeft is er een entry
     """
-
-    # het account waar dit record bij hoort
-    account = models.ForeignKey(Account, on_delete=models.CASCADE)
+    nhblid = models.ForeignKey(NhbLid, on_delete=models.CASCADE, null=True)
 
     # het type boog waar dit record over gaat
     boogtype = models.ForeignKey(BoogType, on_delete=models.CASCADE)
@@ -35,13 +34,17 @@ class SchutterBoog(models.Model):
     # voorkeur voor DT ipv 40cm blazoen (alleen voor 18m Recurve)
     voorkeur_dutchtarget_18m = models.BooleanField(default=False)
 
+    # het account waar dit record bij hoort
+    # (niet gebruiken!)
+    account = models.ForeignKey(Account, on_delete=models.CASCADE, null=True)
+
     class Meta:
         """ meta data voor de admin interface """
         verbose_name = "SchutterBoog"
         verbose_name_plural = "SchuttersBoog"
 
     def __str__(self):
-        return "%s - %s" % (self.account.username, self.boogtype.beschrijving)
+        return "%s - %s" % (self.nhblid.nhb_nr, self.boogtype.beschrijving)
 
 
 def account_create_nhb(nhb_nummer, email, nieuw_wachtwoord):
@@ -88,10 +91,9 @@ def account_create_nhb(nhb_nummer, email, nieuw_wachtwoord):
     mail.nieuwe_email = email
     mail.save()
 
-    # maak de url aan om het emailadres te bevestigen
+    # maak de url aan om het e-mailadres te bevestigen
     url = maak_tijdelijke_url_accountemail(mail, nhb_nummer=nhb_nummer, email=email)
     return url
-
 
 
 # end of file
