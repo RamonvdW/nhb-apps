@@ -99,7 +99,7 @@ class HierarchyRunner(DiscoverRunner):
             # for
         # while
 
-        if len(after) > 0:                                      # pragma: no branch
+        if len(after) > 0:                                      # pragma: no cover
             print("Remaining test_after dependencies:")
             for ref, test_after in after.items():
                 print('  %-50s %s' % (ref, test_after))
