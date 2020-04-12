@@ -102,12 +102,15 @@ def maak_cwz(nhb_ver, account):
     return False
 
 
-def account_needs_vhpg(account):
+def account_needs_vhpg(account, show_only=False):
     """ Controleer of het Account een VHPG af moet leggen """
 
     if not account_needs_otp(account):
         # niet nodig
         return False, None
+
+    if show_only:
+        return True, None
 
     # kijk of de acceptatie recent al afgelegd is
     try:

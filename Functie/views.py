@@ -576,7 +576,7 @@ class VhpgAfsprakenView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         if self.request.user.is_authenticated:
-            needs_vhpg, _ = account_needs_vhpg(self.request.user)
+            needs_vhpg, _ = account_needs_vhpg(self.request.user, show_only=True)
             return needs_vhpg
         return False
 
