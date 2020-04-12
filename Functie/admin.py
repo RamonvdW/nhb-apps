@@ -10,6 +10,8 @@ from .models import Functie
 
 class FunctieAdmin(admin.ModelAdmin):
     filter_horizontal = ('accounts',)
+    ordering = ('beschrijving',)
+    search_fields = ('beschrijving', 'nhb_ver__naam', 'nhb_ver__plaats')
 
 
 admin.site.register(Functie, FunctieAdmin)
