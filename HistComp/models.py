@@ -21,7 +21,7 @@ class HistCompetitie(models.Model):
                     '25': '25m 1pijl'}
 
     # primary key = los uniek nummer
-    seizoen = models.CharField(max_length=9)          # 20xx-20yy
+    seizoen = models.CharField(max_length=9)          # 20xx/20yy
     comp_type = models.CharField(max_length=2, choices=COMP_TYPE)  # 18/25
     klasse = models.CharField(max_length=20)          # Recurve / Compound
     is_team = models.BooleanField(default=False)
