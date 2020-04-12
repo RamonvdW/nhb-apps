@@ -83,6 +83,7 @@ class TestVerenigingCWZ(E2EHelpers, TestCase):
     def test_ledenlijst(self):
         self.e2e_login_and_pass_otp(self.account_cwz)
         self.e2e_wissel_naar_functie(self.functie_cwz)
+        self.e2e_check_rol('CWZ')
 
         resp = self.client.get(self.url_ledenlijst)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
