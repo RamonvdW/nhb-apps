@@ -19,6 +19,16 @@ class Command(BaseCommand):
     help = "Importeer competitie historie"
     verbose = False
 
+    def __init__(self, stdout=None, stderr=None, no_color=False, force_color=False):
+        super().__init__(stdout, stderr, no_color, force_color)
+        self._count_not6scores = 0
+        self._count_noname = 0
+        self._count_skip = 0
+        self._count_error = 0
+        self._count_added  =0
+        self._count_dupe = 0
+        self._boogtype2histcomp = dict()     # [boogtype] = HistCompetitie
+
     def add_arguments(self, parser):
         parser.add_argument('filename', nargs=1, type=argparse.FileType("r"),
                             help="in te lezen file")
@@ -50,7 +60,8 @@ class Command(BaseCommand):
 
         return histcompetitie
 
-    def _convert_scores(self, scores):
+    @staticmethod
+    def _convert_scores(scores):
         count = 0
         totaal = 0
         getallen = list()
@@ -94,7 +105,6 @@ class Command(BaseCommand):
         for line in lines:
             line_nr += 1
             spl = line.strip().split(";")
-            #self.stdout.write(repr(spl))
             # spl = [nhb_nr, klasse, score1..7, gemiddelde]
 
             nhb_nr = spl[0]
@@ -126,7 +136,7 @@ class Command(BaseCommand):
                 self._count_skip += 1
                 continue
 
-            self.boogtype2histcomp[boogtype] = histcompetitie
+            self._boogtype2histcomp[boogtype] = histcompetitie
 
             # overslaan als er niet ten minste 6 scores zijn
             scores, count, totaal = self._convert_scores(spl[3:3+7])
@@ -233,12 +243,12 @@ class Command(BaseCommand):
         """
         self.stdout.write("[INFO] Removing duplicates from Recurve results (dupe with BB/IB/LB)")
 
-        histcomp_r = self.boogtype2histcomp['R']
+        histcomp_r = self._boogtype2histcomp['R']
 
         # doorloop de kleinste klassen
         for boogtype in ('BB', 'IB', 'LB'):
             for houtobj in HistCompetitieIndividueel.objects.filter(boogtype=boogtype,
-                                                                    histcompetitie=self.boogtype2histcomp[boogtype]):
+                                                                    histcompetitie=self._boogtype2histcomp[boogtype]):
                 # zoek dit nummer op in de Recurve klasse
                 try:
                     robj = HistCompetitieIndividueel.objects.get(boogtype='R',
@@ -279,15 +289,7 @@ class Command(BaseCommand):
             self.stderr.write("File has format issues (%s)" % str(exc))
             return
 
-        self._count_dupe = 0
-        self._count_added  =0
-        self._count_error = 0
-        self._count_skip = 0
-        self._count_noname = 0
-        self._count_not6scores = 0
         linecount = len(lines)
-
-        self.boogtype2histcomp = dict()     # [boogtype] = HistCompetitie
 
         self._import(lines, seizoen, comptype)
         self._delete_dupes()
