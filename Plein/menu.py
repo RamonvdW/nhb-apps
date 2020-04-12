@@ -19,7 +19,8 @@ ACTIEF_OPTIES = (
     'wissel-van-rol',
     'competitie',
     'histcomp',
-    'schutter'
+    'schutter',
+    'vereniging'
 )
 
 
@@ -68,6 +69,8 @@ def menu_dynamics(request, context, actief=None):
         if rol == Rollen.ROL_SCHUTTER:
             context['menu_show_schutter'] = True
 
+        if rol == Rollen.ROL_CWZ:
+            context['menu_show_vereniging'] = True
     else:
         # inloggen
         context['menu_show_login'] = True

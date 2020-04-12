@@ -35,7 +35,7 @@
 
 <li{% if menu_actief == "hetplein" %} class="actief"{% endif %}>
     <a href="{% url 'Plein:plein' %}" class="white-text">
-    <i class="material-icons-round white-text">home</i>Het Plein</a>
+    <i class="material-icons-round white-text"><!--control_camera-->filter_vintage</i>Het Plein</a>
 </li>
 
 <!-- inlog knop als gebruiker niet ingelogd is -->
@@ -46,18 +46,17 @@
 </li>
 {% endif %}
 
-<!-- wisselen van rol, voor beheerders -->
-{% if menu_show_wisselvanrol %}
-<li{% if menu_actief == "wissel-van-rol" %} class="actief"{% endif %}>
-    <a href="{% url 'Functie:wissel-van-rol' %}" class="white-text">
-    <i class="material-icons-round white-text">people_alt</i>Wissel van rol</a>
-</li>
-{% endif %}
-
 {% if menu_show_schutter %}
 <li{% if menu_actief == "schutter" %} class="actief"{% endif %}>
     <a href="{% url 'Schutter:profiel' %}" class="white-text">
     <i class="material-icons-round white-text">portrait</i>Schutter</a>
+</li>
+{% endif %}
+
+{% if menu_show_vereniging %}
+<li{% if menu_actief == "vereniging" %} class="actief"{% endif %}>
+    <a href="{% url 'Vereniging:overzicht' %}" class="white-text">
+    <i class="material-icons-round white-text">home</i>Vereniging</a>
 </li>
 {% endif %}
 
@@ -113,6 +112,14 @@
 {% if wiki_url %}
 <li>
     <a href="{{ wiki_url }}" class="white-text" target="_blank"><i class="material-icons-round white-text">help_outline</i>{{ wiki_titel }}</a>
+</li>
+{% endif %}
+
+<!-- wisselen van rol, voor beheerders -->
+{% if menu_show_wisselvanrol %}
+<li{% if menu_actief == "wissel-van-rol" %} class="actief"{% endif %}>
+    <a href="{% url 'Functie:wissel-van-rol' %}" class="white-text">
+    <i class="material-icons-round white-text">people_alt</i>Wissel van rol</a>
 </li>
 {% endif %}
 

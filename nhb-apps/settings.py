@@ -25,7 +25,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2020-04-08'
+SITE_VERSIE = '2020-04-12'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'Overig.apps.OverigConfig',
     'Logboek.apps.LogboekConfig',
     'Mailer.apps.MailerConfig',
+    'Vereniging.apps.VerenigingConfig',
     'Schutter.apps.SchutterConfig',
     'Score.apps.ScoreConfig',
     'djangosaml2idp',               # single sign-on Identity Provider (IP)

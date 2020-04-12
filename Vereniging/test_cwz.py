@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2020 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -11,11 +11,11 @@ from Overig.e2ehelpers import E2EHelpers
 import datetime
 
 
-class TestCompetitieCWZ(E2EHelpers, TestCase):
+class TestVerenigingCWZ(E2EHelpers, TestCase):
 
-    """ Tests voor de Competitie applicatie, functies voor de CWZ """
+    """ Tests voor de Vereniging applicatie, functies voor de CWZ """
 
-    test_after = ('BasisTypen', 'Functie', 'Competitie.test_competitie', 'Competitie.test_beheerders')
+    test_after = ('BasisTypen', 'NhbStructuur', 'Functie', 'Schutter', 'Competitie')
 
     def setUp(self):
         """ eenmalige setup voor alle tests
@@ -78,6 +78,39 @@ class TestCompetitieCWZ(E2EHelpers, TestCase):
         lid.save()
         self.nhblid2 = lid
 
-        self.url_lijstleden = '/competitie/lijst-leden/'
+        self.url_ledenlijst = '/vereniging/leden-lijst/'
+
+    def test_ledenlijst(self):
+        self.e2e_login_and_pass_otp(self.account_cwz)
+        self.e2e_wissel_naar_functie(self.functie_cwz)
+
+        resp = self.client.get(self.url_ledenlijst)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('vereniging/ledenlijst.dtl', 'plein/site_layout.dtl'))
+
+        self.assertContains(resp, 'Jeugd')
+        self.assertContains(resp, 'Volwassen')
+        self.assertNotContains(resp, 'Inactieve leden')
+
+        # maak een lid inactief
+        self.nhblid2.is_actief_lid = False
+        self.nhblid2.save()
+
+        resp = self.client.get(self.url_ledenlijst)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+
+        self.assertContains(resp, 'Jeugd')
+        self.assertContains(resp, 'Volwassen')
+        self.assertContains(resp, 'Inactieve leden')
+
+        self.e2e_assert_other_http_commands_not_supported(self.url_ledenlijst)
+
+    def test_ledenlijst_anon(self):
+        # corner-case
+        self.e2e_logout()
+        resp = self.client.get(self.url_ledenlijst)
+        self.assert_is_redirect(resp, '/plein/')
+
 
 # end of file

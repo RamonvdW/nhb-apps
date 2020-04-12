@@ -9,9 +9,11 @@
 {% block title %}Ledenlijst{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-ledenlijst" %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vereniging-ledenlijst" %}
 
 <h4>Ledenlijst</h4>
+
+<p>Deze pagina toont een overzicht van de jeugdleden en volwassen leden van vereniging [{{ nhb_ver.nhb_nr }}] {{ nhb_ver.naam }} te {{ nhb_ver.plaats }}.</p>
 
 {% if leden_jeugd %}
 
@@ -21,7 +23,7 @@
         <thead>
             <tr>        <!-- filter veld -->
                 <td colspan="4" class="table-filter"><input class="table-filter" oninput="myTableFilter(this, 'table1')" placeholder="Zoeken"/></td>
-                <td colspan="2"/>
+                <td colspan="3"></td>
             </tr>
             <tr>
                 <th filter="on">NHB nummer</th>
@@ -30,6 +32,7 @@
                 <th filter="on">Achternaam</th>
                 <th>Leeftijd</th>
                 <th>Wedstrijdklasse {{ wedstrijdklasse_jaar }}</th>
+                <th>Laatste inlog</th>
             </tr>
         </thead>
 
@@ -41,6 +44,13 @@
                 <td>{{ obj.achternaam }}</td>
                 <td>{{ obj.leeftijd }}</td>
                 <td>{{ obj.leeftijdsklasse.klasse_kort }}</td>
+                <td>
+                    {% if obj.geen_inlog %}
+                        <i>Nooit</i>
+                    {% else %}
+                        <span>{{ obj.laatste_inlog }}</span>
+                    {% endif %}
+                </td>
             </tr>
         {% endfor %}
     </table>
@@ -54,12 +64,14 @@
     <thead>
         <tr>        <!-- filter veld -->
             <td colspan="4" class="table-filter"><input class="table-filter" oninput="myTableFilter(this, 'table2')" placeholder="Zoeken"/></td>
+            <td></td>
         </tr>
         <tr>
             <th filter="on">NHB nummer</th>
             <th>M/V</th>
             <th filter="on">Voornaam</th>
             <th filter="on">Achternaam</th>
+            <th>Laatste inlog</th>
         </tr>
     </thead>
 
@@ -69,6 +81,13 @@
             <td>{{ obj.geslacht }}</td>
             <td>{{ obj.voornaam }}</td>
             <td>{{ obj.achternaam }}</td>
+            <td>
+                {% if obj.geen_inlog %}
+                    <i>Nooit</i>
+                {% else %}
+                    <span>{{ obj.laatste_inlog }}</span>
+                {% endif %}
+            </td>
         </tr>
     {% endfor %}
 </table>

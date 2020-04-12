@@ -16,7 +16,7 @@ ZERO = Decimal('0.000')
 
 
 class Competitie(models.Model):
-    """ Deze database tabel bevat een van de jaarlijkste competities voor 18m of 25m
+    """ Deze database tabel bevat een van de jaarlijkse competities voor 18m of 25m
         Elke competitie heeft een beschrijving, een aantal belangrijke datums
         en een lijst van wedstrijdklassen met aanvangsgemiddelden
     """
@@ -56,6 +56,7 @@ class CompetitieWedstrijdKlasse(models.Model):
                                     null=True)      # nodig voor migratie
 
     # definitie
+    # (levert beschrijving, niet_voor_rk_bk, is_voor_teams)
     wedstrijdklasse = models.ForeignKey(WedstrijdKlasse, on_delete=models.PROTECT)
 
     # klassegrens voor deze competitie

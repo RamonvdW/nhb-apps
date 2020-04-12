@@ -31,18 +31,6 @@ urlpatterns = [
     path('lijst-verenigingen/',
          views.LijstVerenigingenView.as_view(),
          name='lijst-verenigingen'),
-
-    path('lijst-leden/',
-         views.LedenLijstView.as_view(),
-         name='ledenlijst'),
-
-    path('schutters-boog-aanmelden/',
-         views.SchuttersBoogAanmeldenView.as_view(),
-         name='cwz-schutters-boog-aanmelden'),
-
-    path('schutter-bogen-instellen/',
-         views.SchutterBogenInstellenView.as_view(),
-         name='cwz-schutter-bogen-instellen'),
 ]
 
 # end of file
