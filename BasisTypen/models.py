@@ -20,7 +20,7 @@ class BoogType(models.Model):
     volgorde = models.CharField(max_length=1, default='?')
 
     def __str__(self):
-        """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
+        """ Lever een tekstuele beschrijving voor de admin interface """
         return "(%s) %s" % (self.afkorting,
                             self.beschrijving)
 
@@ -28,41 +28,6 @@ class BoogType(models.Model):
         """ meta data voor de admin interface """
         verbose_name = "Boog type"
         verbose_name_plural = "Boog types"
-
-
-class TeamType(models.Model):
-    """ toegestane team types, zoals Compound """
-    beschrijving = models.CharField(max_length=80)
-
-    def __str__(self):
-        """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
-        return "%s" % self.beschrijving
-
-    class Meta:
-        """ meta data voor de admin interface """
-        verbose_name = "Team type"
-        verbose_name_plural = "Team types"
-
-
-class WedstrijdKlasse(models.Model):
-    """ definitie van een wedstrijdklasse """
-    buiten_gebruik = models.BooleanField(default=False)     # niet meer gebruiken?
-    beschrijving = models.CharField(max_length=80)
-    niet_voor_rk_bk = models.BooleanField()                 # aspirant klassen
-    is_voor_teams = models.BooleanField()                   # team klasse?
-
-    def __str__(self):
-        """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
-        if self.is_voor_teams:
-            descr = 'Team'
-        else:
-            descr = 'Indiv'
-        return "%s - %s" % (descr, self.beschrijving)
-
-    class Meta:
-        """ meta data voor de admin interface """
-        verbose_name = "Wedstrijdklasse"
-        verbose_name_plural = "Wedstrijdklassen"
 
 
 class LeeftijdsKlasse(models.Model):
@@ -86,59 +51,40 @@ class LeeftijdsKlasse(models.Model):
         verbose_name_plural = "Leeftijdsklassen"
 
 
-class TeamTypeBoog(models.Model):
-    """ koppelt een team type aan een boog type
-        creert toegestane combinaties
-        in andere woorden: deze tabel vult een team type met een of meerdere bogen
-    """
+class IndivWedstrijdklasse(models.Model):
+    """ definitie van een wedstrijdklasse """
+    buiten_gebruik = models.BooleanField(default=False)     # niet meer gebruiken?
+    beschrijving = models.CharField(max_length=80)
     boogtype = models.ForeignKey(BoogType, on_delete=models.PROTECT)
-    teamtype = models.ForeignKey(TeamType, on_delete=models.PROTECT)
+    volgorde = models.PositiveIntegerField()                # lager nummer = betere schutters
+    leeftijdsklassen = models.ManyToManyField(LeeftijdsKlasse)
+    niet_voor_rk_bk = models.BooleanField()                 # aspirant klassen
+    is_onbekend = models.BooleanField(default=False)
 
     def __str__(self):
-        """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
-        return "%s -- %s" % (self.teamtype.beschrijving,
-                             self.boogtype.afkorting)
+        """ Lever een tekstuele beschrijving voor de admin interface """
+        return self.beschrijving
 
     class Meta:
         """ meta data voor de admin interface """
-        verbose_name = "Boog voor een team type"
-        verbose_name_plural = "Bogen voor een team type"
+        verbose_name = "Wedstrijdklasse"
+        verbose_name_plural = "Wedstrijdklassen"
 
 
-class WedstrijdKlasseBoog(models.Model):
-    """ koppelt een wedstrijdklasse aan een boog type
-        creert toegestane combinaties
-    """
-    boogtype = models.ForeignKey(BoogType, on_delete=models.PROTECT)
-    wedstrijdklasse = models.ForeignKey(WedstrijdKlasse, on_delete=models.PROTECT)
+class TeamWedstrijdklasse(models.Model):
+    """ definitie van een team wedstrijdklasse """
+    buiten_gebruik = models.BooleanField(default=False)     # niet meer gebruiken?
+    beschrijving = models.CharField(max_length=80)
+    boogtypen = models.ManyToManyField(BoogType)
+    volgorde = models.PositiveIntegerField()                # lager nummer = betere schutters
 
     def __str__(self):
-        """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
-        return "%s -- %s" % (self.wedstrijdklasse.beschrijving,
-                             self.boogtype.afkorting)
+        """ Lever een tekstuele beschrijving voor de admin interface """
+        return self.beschrijving
 
     class Meta:
         """ meta data voor de admin interface """
-        verbose_name = "Boog voor een wedstrijdklasse"
-        verbose_name_plural = "Bogen voor elke wedstrijdklasse"
-
-
-class WedstrijdKlasseLeeftijd(models.Model):
-    """ koppelt een wedstrijdklasse aan een leeftijdsklasse
-        creert toegestane combinaties
-    """
-    wedstrijdklasse = models.ForeignKey(WedstrijdKlasse, on_delete=models.PROTECT)
-    leeftijdsklasse = models.ForeignKey(LeeftijdsKlasse, on_delete=models.PROTECT)
-
-    def __str__(self):
-        """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
-        return "%s -- %s" % (self.wedstrijdklasse.beschrijving,
-                             self.leeftijdsklasse.afkorting)
-
-    class Meta:
-        """ meta data voor de admin interface """
-        verbose_name = "Leeftijdsklasse voor een wedstrijdklasse"
-        verbose_name_plural = "Leeftijdsklassen voor elk wedstrijdklasse"
-
+        verbose_name = "Team Wedstrijdklasse"
+        verbose_name_plural = "Team Wedstrijdklassen"
 
 # end of file

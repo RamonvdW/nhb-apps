@@ -5,14 +5,18 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import models
-from BasisTypen.models import WedstrijdKlasse
-from NhbStructuur.models import NhbRegio, NhbRayon, ADMINISTRATIEVE_REGIO
+from BasisTypen.models import IndivWedstrijdklasse, TeamWedstrijdklasse
+from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, ADMINISTRATIEVE_REGIO
 from Functie.models import Functie
+from Schutter.models import SchutterBoog
 from decimal import Decimal
 from datetime import date
 
-
 ZERO = Decimal('0.000')
+
+LAAG_REGIO = 'Regio'
+LAAG_RK = 'RK'
+LAAG_BK = 'BK'
 
 
 class Competitie(models.Model):
@@ -46,44 +50,38 @@ class Competitie(models.Model):
         return self.beschrijving
 
 
-class CompetitieWedstrijdKlasse(models.Model):
-    """ Deze database tabel bevat een de klassen voor een competitie,
+class CompetitieKlasse(models.Model):
+    """ Deze database tabel bevat de klassen voor een competitie,
         met de vastgestelde aanvangsgemiddelden
     """
 
     # hoort bij
-    competitie = models.ForeignKey(Competitie, on_delete=models.CASCADE,
-                                    null=True)      # nodig voor migratie
+    competitie = models.ForeignKey(Competitie, on_delete=models.CASCADE, default=None)
 
-    # definitie
-    # (levert beschrijving, niet_voor_rk_bk, is_voor_teams)
-    wedstrijdklasse = models.ForeignKey(WedstrijdKlasse, on_delete=models.PROTECT)
+    # koppeling aan een individuele OF team wedstrijdklasse
+    indiv = models.ForeignKey(IndivWedstrijdklasse, on_delete=models.PROTECT, null=True, blank=True)
+    team = models.ForeignKey(TeamWedstrijdklasse, on_delete=models.PROTECT, null=True, blank=True)
 
     # klassegrens voor deze competitie
     min_ag = models.DecimalField(max_digits=5, decimal_places=3)    # 10.000
 
-    # teamcompetitie of individuele competitie
-    is_team = models.BooleanField(default=False)
-
-    # is de RCL klaar?
-    is_afgesloten = models.BooleanField(default=False)      # TODO: kan weg??!
-
     def __str__(self):
-        msg = "%s (%s) - " % (self.wedstrijdklasse, self.min_ag)
-        if self.competitie:
-            msg += self.competitie.beschrijving
-        else:
-            msg += "?"
+        msg = ""
+        if self.indiv:
+            msg = self.indiv.beschrijving
+        if self.team:
+            msg = self.team.beschrijving
+        msg += "(%s) %s" % (self.min_ag, self.competitie.beschrijving)
         return msg
 
 
-def maak_competitieklasse_indiv(comp, wedstrijdklasse, min_ag):
-    """ Deze functie maakt een nieuwe CompetitieWedstrijdKlasse aan met het gevraagde min_ag
+def maak_competitieklasse_indiv(comp, indivwedstrijdklasse, min_ag):
+    """ Deze functie maakt een nieuwe CompetitieWedstrijdklasse aan met het gevraagde min_ag
         en koppelt deze aan de gevraagde Competitie
     """
-    compkl = CompetitieWedstrijdKlasse()
+    compkl = CompetitieKlasse()
     compkl.competitie = comp
-    compkl.wedstrijdklasse = wedstrijdklasse
+    compkl.wedstrijdklasse = indivwedstrijdklasse
     compkl.min_ag = min_ag
     compkl.save()
 
@@ -92,16 +90,16 @@ class DeelCompetitie(models.Model):
     """ Deze database tabel bevat informatie over een deel van een competitie:
         regiocompetitie (16x), rayoncompetitie (4x) of bondscompetitie (1x)
     """
-    LAAG = [('Regio', 'Regiocompetitie'),
-            ('RK', 'Rayoncompetitie'),
-            ('BK', 'Bondscompetitie')]
+    LAAG = [(LAAG_REGIO, 'Regiocompetitie'),
+            (LAAG_RK, 'Rayoncompetitie'),
+            (LAAG_BK, 'Bondscompetitie')]
 
     laag = models.CharField(max_length=5, choices=LAAG)
 
     # hoort bij welke competitie?
     competitie = models.ForeignKey(Competitie, on_delete=models.CASCADE)
 
-    # nhb_regio is gezet voor de regioncompetitie
+    # nhb_regio is gezet voor de regiocompetitie
     # nhb_rayon is gezet voor het RK
     # geen van beiden is gezet voor de BK
 
@@ -155,7 +153,7 @@ def competitie_aanmaken(jaar):
             deel = DeelCompetitie()
             deel.laag = laag
             deel.competitie = comp
-            if laag == DeelCompetitie.LAAG[0][0]:
+            if laag == LAAG_REGIO:
                 # Regio
                 for obj in NhbRegio.objects.all():
                     if obj.regio_nr != ADMINISTRATIEVE_REGIO:
@@ -164,7 +162,7 @@ def competitie_aanmaken(jaar):
                         deel.functie = Functie.objects.get(rol="RCL", comp_type=afstand, nhb_regio=obj)
                         deel.save()
                 # for
-            elif laag == DeelCompetitie.LAAG[1][0]:
+            elif laag == LAAG_RK:
                 # RK
                 for obj in NhbRayon.objects.all():
                     deel.nhb_rayon = obj
@@ -177,6 +175,65 @@ def competitie_aanmaken(jaar):
                 deel.functie = Functie.objects.get(rol="BKO", comp_type=afstand)
                 deel.save()
         # for
+    # for
+
+
+class RegioCompetitieSchutterBoog(models.Model):
+    """ Een schutterboog aangemeld bij een competitie """
+
+    deelcompetitie = models.ForeignKey(DeelCompetitie, on_delete=models.CASCADE)
+
+    schutterboog = models.ForeignKey(SchutterBoog, on_delete=models.CASCADE)
+    bij_vereniging = models.ForeignKey(NhbVereniging, on_delete=models.PROTECT)
+
+    is_handmatig_ag = models.BooleanField(default=False)
+    aanvangsgemiddelde = models.DecimalField(max_digits=5, decimal_places=3)    # 10,000
+    klasse = models.ForeignKey(CompetitieKlasse, on_delete=models.CASCADE)
+
+    score1 = models.PositiveIntegerField()
+    score2 = models.PositiveIntegerField()
+    score3 = models.PositiveIntegerField()
+    score4 = models.PositiveIntegerField()
+    score5 = models.PositiveIntegerField()
+    score6 = models.PositiveIntegerField()
+    score7 = models.PositiveIntegerField()
+
+    # som van score1..score7
+    totaal = models.PositiveIntegerField()
+
+    # welke van score1..score7 is de laagste?
+    laagste_score_nr = models.PositiveIntegerField(default=0)  # 1..7
+
+    # gemiddelde over de 6 beste scores, dus exclusief laatste_score_nr
+    gemiddelde = models.DecimalField(max_digits=5, decimal_places=3)  # 10,000
+
+
+def regiocompetities_schutterboog_aanmelden(schutterboog, gem18, gem25):
+    """ Meld schutterboog aan voor de regiocompetities """
+
+    # schutterboog is nhblid van een vereniging in een bepaalde regio
+    regio = schutterboog.nhblid.bij_vereniging.regio
+
+    for deelcompetitie in DeelCompetitie.objects.filter(laag=LAAG_REGIO, nhb_regio=regio, is_afgesloten=False):
+        if deelcompetitie.competitie.afstand == '18':
+            gem = gem18
+        else:
+            gem = gem25
+
+        if not gem:
+            gem = ZERO
+
+        aanmelding = RegioCompetitieSchutterBoog()
+        aanmelding.deelcompetitie = deelcompetitie
+        aanmelding.schutterboog = schutterboog
+        aanmelding.bij_vereniging = schutterboog.nhblid.bij_vereniging
+
+        aanmelding.aanvangsgemiddelde = gem
+
+        # bepaald de wedstrijdklasse
+
+
+        aanmelding.save()
     # for
 
 # end of file

@@ -6,16 +6,11 @@
 
 from django.contrib import admin
 
-from .models import Competitie, DeelCompetitie, CompetitieWedstrijdKlasse
-
-
-class CompetitieWedstrijdKlasseAdmin(admin.ModelAdmin):
-    # filter mogelijkheid
-    list_filter = ('is_afgesloten',)
+from .models import Competitie, DeelCompetitie, CompetitieKlasse
 
 
 admin.site.register(Competitie)
 admin.site.register(DeelCompetitie)
-admin.site.register(CompetitieWedstrijdKlasse, CompetitieWedstrijdKlasseAdmin)
+admin.site.register(CompetitieKlasse)
 
 # end of file
