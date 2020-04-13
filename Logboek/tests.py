@@ -7,10 +7,10 @@
 from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.test import TestCase
-from .apps import LogboekConfig
-from .models import LogboekRegel, schrijf_in_logboek
+from Logboek.apps import post_migration_callback
 from NhbStructuur.models import NhbLid
 from Overig.e2ehelpers import E2EHelpers
+from .models import LogboekRegel, schrijf_in_logboek
 import datetime
 
 
@@ -36,6 +36,8 @@ class TestLogboek(E2EHelpers, TestCase):
         lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
         lid.account = self.account_normaal
         lid.save()
+
+        LogboekRegel.objects.all().delete()
 
         schrijf_in_logboek(self.account_normaal, 'Logboek unittest', 'test setUp')
         schrijf_in_logboek(None, 'Logboek unittest', 'zonder account')
