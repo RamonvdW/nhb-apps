@@ -10,7 +10,7 @@ from .models import SchutterBoog
 
 class SchutterBoogAdmin(admin.ModelAdmin):
     """ Admin configuratie voor SchutterBoog klasse """
-    search_fields = ('account__username',)
+    search_fields = ('nhblid__nhb_nr', 'nhblid__voornaam', 'nhblid__achternaam')
 
 
 admin.site.register(SchutterBoog, SchutterBoogAdmin)

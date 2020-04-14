@@ -38,6 +38,8 @@ class SchutterBoog(models.Model):
     # (niet gebruiken!)
     account = models.ForeignKey(Account, on_delete=models.CASCADE, null=True)
 
+    # aanvangsgemiddelde is opgeslagen in een Score en ScoreHist record
+
     class Meta:
         """ meta data voor de admin interface """
         verbose_name = "SchutterBoog"
