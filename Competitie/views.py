@@ -15,12 +15,10 @@ from Plein.menu import menu_dynamics
 from Logboek.models import schrijf_in_logboek
 from Functie.models import Functie
 from Functie.rol import Rollen, rol_get_huidige_functie, rol_get_beschrijving, rol_get_huidige
-from BasisTypen.models import TeamType, TeamTypeBoog, WedstrijdKlasse, \
-                              WedstrijdKlasseBoog, WedstrijdKlasseLeeftijd
+from BasisTypen.models import IndivWedstrijdklasse, TeamWedstrijdklasse
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from NhbStructuur.models import NhbLid, NhbVereniging
-from Schutter.models import SchutterBoog
-from .models import Competitie, ZERO, CompetitieWedstrijdKlasse, DeelCompetitie,\
+from .models import Competitie, AG_NUL, AG_LAAGSTE_NIET_NUL, CompetitieKlasse, DeelCompetitie,\
                     competitie_aanmaken, maak_competitieklasse_indiv
 from datetime import date
 
@@ -49,7 +47,7 @@ def zet_fase(comp):
 
     if now < comp.begin_aanmeldingen:
         # zijn de wedstrijdklassen vastgesteld?
-        if len(CompetitieWedstrijdKlasse.objects.filter(competitie=comp)) == 0:
+        if len(CompetitieKlasse.objects.filter(competitie=comp)) == 0:
             # A1 = competitie is aangemaakt
             comp.fase = 'A1'
             return
@@ -129,6 +127,7 @@ class CompetitieOverzichtView(View):
 
     @staticmethod
     def _get_competitie_overzicht_schutter():
+        # let op! Niet alleen voor schutter, maar ook voor gebruiker/anon
         context = dict()
         return context, TEMPLATE_COMPETITIE_OVERZICHT
 
@@ -147,7 +146,7 @@ class CompetitieOverzichtView(View):
         return render(request, template, context)
 
 
-class InstellingenVolgendeCompetitieView(UserPassesTestMixin, ListView):
+class InstellingenVolgendeCompetitieView(UserPassesTestMixin, TemplateView):
 
     """ deze view laat de defaults voor de volgende competitie zien """
 
@@ -164,61 +163,32 @@ class InstellingenVolgendeCompetitieView(UserPassesTestMixin, ListView):
         return HttpResponseRedirect(reverse('Plein:plein'))
 
     @staticmethod
-    def _get_queryset_teamtypen():
-        objs = TeamType.objects.all()
-        for teamtype in objs:
-            boogtypen = [obj.boogtype.afkorting for obj in TeamTypeBoog.objects.select_related('boogtype').filter(teamtype=teamtype)]
-            teamtype.boogtypen = "+".join(boogtypen)
+    def _get_queryset_indivklassen():
+        objs = IndivWedstrijdklasse.objects.filter(buiten_gebruik=False)
+        prev = 0
+        for klasse in objs:
+            groep = klasse.volgorde // 10
+            klasse.separate_before = groep != prev
+            prev = groep
         # for
         return objs
 
     @staticmethod
-    def _get_queryset_indivklassen():
-        objs = WedstrijdKlasse.objects.filter(is_voor_teams=False, buiten_gebruik=False)
-        prev = "-"
+    def _get_queryset_teamklassen():
+        objs = TeamWedstrijdklasse.objects.filter(buiten_gebruik=False).order_by('volgorde')
+        prev = 0
         for klasse in objs:
-            klasse.separate_before = not klasse.beschrijving.startswith(prev)
-            if klasse.beschrijving[-4:] == 'jaar':
-                prev = klasse.beschrijving[:-10]    # aspiranten hebben suffix "11-12 jaar"
-            else:
-                prev = klasse.beschrijving[:-1]     # klasse nummer 1..6
-
-            # add boogtypen
-            boogtypen = [obj.boogtype.afkorting for obj in WedstrijdKlasseBoog.objects.select_related('boogtype').filter(wedstrijdklasse=klasse)]
-            klasse.boogtypen = "+".join(boogtypen)
-
-            # add leeftijdsklassen
-            leeftijden = [obj.leeftijdsklasse.afkorting for obj in WedstrijdKlasseLeeftijd.objects.select_related('leeftijdsklasse').filter(wedstrijdklasse=klasse)]
-            klasse.leeftijden = "+".join(leeftijden)
+            groep = klasse.volgorde // 10
+            klasse.separate_before = groep != prev
+            prev = groep
         # for
         return objs
-
-    def _get_queryset_teamklassen(self):
-        objs = WedstrijdKlasse.objects.filter(is_voor_teams=True, buiten_gebruik=False)
-        prev = "-"
-        for klasse in objs:
-            klasse.separate_before = not klasse.beschrijving.startswith(prev)
-            prev = klasse.beschrijving[:-3]     # "ERE" is de langste suffix
-
-            # add boogtypen
-            boogtypen = [obj.boogtype.afkorting for obj in WedstrijdKlasseBoog.objects.select_related('boogtype').filter(wedstrijdklasse=klasse)]
-            klasse.boogtypen = "+".join(boogtypen)
-        # for
-        return objs
-
-    def get_queryset(self):
-        """ called by the template system to get the queryset or list of objects for the template """
-        self.teamtypen = self._get_queryset_teamtypen()
-        self.indivklassen = self._get_queryset_indivklassen()
-        self.teamklassen = self._get_queryset_teamklassen()
-        return None
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
-        context['teamtypen'] = self.teamtypen
-        context['indivklassen'] = self.indivklassen
-        context['teamklassen'] = self.teamklassen
+        context['indivklassen'] = self._get_queryset_indivklassen()
+        context['teamklassen'] = self._get_queryset_teamklassen()
         menu_dynamics(self.request, context, actief='competitie')
         return context
 
@@ -261,7 +231,7 @@ class CompetitieAanmakenView(UserPassesTestMixin, TemplateView):
 
 class KlassegrenzenView(UserPassesTestMixin, TemplateView):
 
-    """ deze view laat de aanvangemiddelden voor de volgende competitie zien,
+    """ deze view laat de aanvangsgemiddelden voor de volgende competitie zien,
         aan de hand van de historische competitie data
         De BKO kan deze bevestigen, waarna ze aan de competitie toegevoegd worden
     """
@@ -280,40 +250,38 @@ class KlassegrenzenView(UserPassesTestMixin, TemplateView):
 
     def _get_targets(self):
         """ Retourneer een data structuur met daarin voor alle wedstrijdklassen
-            de toegestande boogtypen en leeftijden
+            de toegestane boogtypen en leeftijden
 
-            out: target = dict() met [ (min_age, max_age, tuple(bogen)) ] = list(wedstrijdklassen)
+            out: target = dict() met [ (min_age, max_age, boogtype, heeft_onbekend) ] = list(IndivWedstrijdklasse)
 
-            Voorbeeld: { (21,150,('R','BB','IB','LB')): [obj1, obj2, etc.],
-                         (21,150,('C')): [obj10, obj11],
-                         (14,17),('C')): [obj20, obj21]  }
-                    Waarbij obj* = WedstrijdKlasse object
+            Voorbeeld: { (21,150,'R',True ): [obj1, obj2, etc.],
+                         (21,150,'C',True ): [obj10, obj11],
+                         (14, 17,'C',False): [obj20,]  }
         """
-        targets = dict()        # [ (min_age, max_age, tuple(bogen)) ] = list(wedstrijdklassen)
-        for wedstrklasse in WedstrijdKlasse.objects.filter(is_voor_teams=False, buiten_gebruik=False):
-
+        targets = dict()        # [ (min_age, max_age, boogtype) ] = list(wedstrijdklassen)
+        for wedstrklasse in IndivWedstrijdklasse.objects.filter(buiten_gebruik=False).order_by('volgorde'):
             # zoek de minimale en maximaal toegestane leeftijden voor deze wedstrijdklasse
             age_min = 999
             age_max = 0
-            for obj in WedstrijdKlasseLeeftijd.objects.filter(wedstrijdklasse=wedstrklasse):
-                lkl = obj.leeftijdsklasse
+            for lkl in wedstrklasse.leeftijdsklassen.all():
                 age_min = min(lkl.min_wedstrijdleeftijd, age_min)
                 age_max = max(lkl.max_wedstrijdleeftijd, age_max)
             # for
 
-            # verzamel alle toegestane boogsoorten voor deze wedstrijdklasse
-            bogen = list()
-            for obj in WedstrijdKlasseBoog.objects.filter(wedstrijdklasse=wedstrklasse):
-                if obj.boogtype.afkorting not in bogen:
-                    bogen.append(obj.boogtype.afkorting)
-            # for
-
-            tup = (age_min, age_max, tuple(bogen))
+            tup = (age_min, age_max, wedstrklasse.boogtype)
             if tup not in targets:
                 targets[tup] = list()
             targets[tup].append(wedstrklasse)
         # for
-        return targets
+
+        targets2 = dict()
+        for tup, wedstrklassen in targets.items():
+            age_min, age_max, boogtype = tup
+            # print("age=%s..%s, boogtype=%s, wkl=%s, %s" % (age_min, age_max, boogtype.afkorting, repr(wedstrklassen), wedstrklassen[-1].is_onbekend))
+            tup = (age_min, age_max, boogtype, wedstrklassen[-1].is_onbekend)
+            targets2[tup] = wedstrklassen
+        # for
+        return targets2
 
     def _get_queryset(self, afstand):
         """ called by the template system to get the queryset or list of objects for the template """
@@ -328,68 +296,86 @@ class KlassegrenzenView(UserPassesTestMixin, TemplateView):
             self.seizoen = "FOUT - GEEN DATA AANWEZIG"
             return list()
 
-        # bepaal 'het vorige seizoen'
-        # seizoen = '20xx-20yy'
+        # bepaal het vorige seizoen
+        # '2017/2018', '2018/2019', etc. --> sorteer hoogste eerst
         self.seizoen = HistCompetitie.objects.distinct('seizoen').order_by('-seizoen')[0].seizoen
 
-        # eenmalig de wedstrijdleeftijd van elke schutter berekenen
+        # eenmalig de wedstrijdleeftijd van elke nhblid berekenen
         schutternr2age = dict()     # [ nhb_nr ] = age
         for lid in NhbLid.objects.all():
             schutternr2age[lid.nhb_nr] = lid.bereken_wedstrijdleeftijd(jaar)
         # for
 
-        # creeer de resultatenlijst
+        # creëer de resultatenlijst
         objs = list()
         histcomps = HistCompetitie.objects.filter(seizoen=self.seizoen, comp_type=afstand, is_team=False)
         targets = self._get_targets()   # wedstrijdklassen vs leeftijd + bogen
 
         for tup, wedstrklassen in targets.items():
-            min_age, max_age, bogen = tup
-            wedstrklassen.sort(key=lambda kl: kl.beschrijving)     # forceer de juiste volgorde
-
+            min_age, max_age, boogtype, heeft_klasse_onbekend = tup
             # zoek alle schutters uit de vorige competitie die hier in passen (boog, leeftijd)
             gemiddelden = list()
-            for indiv in HistCompetitieIndividueel.objects.filter(histcompetitie__in=histcomps):
-                if indiv.boogtype in bogen:
-                    age = schutternr2age[indiv.schutter_nr]
-                    if min_age <= age and age <= max_age:
-                        gemiddelden.append(indiv.gemiddelde)
+            for indiv in HistCompetitieIndividueel.objects.filter(histcompetitie__in=histcomps, boogtype=boogtype.afkorting):
+                age = schutternr2age[indiv.schutter_nr]
+                if min_age <= age <= max_age:
+                    gemiddelden.append(indiv.gemiddelde)
             # for
 
             if len(gemiddelden):
                 gemiddelden.sort(reverse=True)  # in-place sort, highest to lowest
                 count = len(gemiddelden)        # aantal schutters
                 aantal = len(wedstrklassen)     # aantal groepen
+                if heeft_klasse_onbekend:
+                    stop = -2
+                    aantal -= 1
+                else:
+                    stop = -1
                 step = int(count / aantal)      # omlaag afgerond = OK voor grote groepen
                 pos = 0
-                for klasse in wedstrklassen[:-1]:
+                for klasse in wedstrklassen[:stop]:
                     pos += step
                     ag = gemiddelden[pos]
                     res = {'beschrijving': klasse.beschrijving,
-                           'count' : step,
+                           'count': step,
                            'ag': ag,
-                           'wedstrkl_obj': klasse}
+                           'wedstrkl_obj': klasse,
+                           'volgorde': klasse.volgorde}
                     objs.append(res)
                 # for
-                # laatste klasse krijgt 0,000 als AG
-                klasse = wedstrklassen[-1]
+
+                # laatste klasse krijgt speciaal AG
+                klasse = wedstrklassen[stop]
+                ag = AG_LAAGSTE_NIET_NUL if heeft_klasse_onbekend else AG_NUL
                 res = {'beschrijving': klasse.beschrijving,
-                       'count' : count - (aantal - 1) * step,
-                       'ag': ZERO,
-                       'wedstrkl_obj': klasse}
+                       'count': count - (aantal - 1) * step,
+                       'ag': ag,
+                       'wedstrkl_obj': klasse,
+                       'volgorde': klasse.volgorde}
                 objs.append(res)
-            else:
-                # geen historische gemiddelden
-                # zet alles op 0,000 - dit geeft een beetje een rommeltje als er meerdere klassen zijn
-                for klasse in wedstrklassen:
+
+                # klasse onbekend met AG=0.000
+                if heeft_klasse_onbekend:
+                    klasse = wedstrklassen[-1]
                     res = {'beschrijving': klasse.beschrijving,
                            'count': 0,
-                           'ag': ZERO,
-                           'wedstrkl_obj': klasse}
+                           'ag': AG_NUL,
+                           'wedstrkl_obj': klasse,
+                           'volgorde': klasse.volgorde}
+                    objs.append(res)
+            else:
+                # geen historische gemiddelden
+                # zet alles op 0,001 - dit geeft een beetje een rommeltje als er meerdere klassen zijn
+                for klasse in wedstrklassen:
+                    ag = AG_NUL if klasse.is_onbekend else AG_LAAGSTE_NIET_NUL
+                    res = {'beschrijving': klasse.beschrijving,
+                           'count': 0,
+                           'ag': ag,
+                           'wedstrkl_obj': klasse,
+                           'volgorde': klasse.volgorde}
                     objs.append(res)
                 # for
         # for
-        objs2 = sorted(objs, key=lambda k: k['beschrijving'])
+        objs2 = sorted(objs, key=lambda k: k['volgorde'])
         return objs2
 
     def get(self, request, *args, **kwargs):
@@ -397,19 +383,20 @@ class KlassegrenzenView(UserPassesTestMixin, TemplateView):
         """
         context = super().get_context_data(**kwargs)
 
-        afstand = kwargs['afstand']
-        context['afstand'] = afstand
+        # stukje input beveiliging: begrens tot 2 tekens (18/25)
+        afstand = kwargs['afstand'][:2]
 
         objs = Competitie.objects.filter(afstand=afstand, is_afgesloten=False)
         if len(objs) == 0:
             # onverwachts here
             return redirect('Plein:plein')
         obj = objs[0]
-        context['comp_str'] = obj.beschrijving
 
         context['object_list'] = self._get_queryset(afstand)
-        context['seizoen'] = self.seizoen
         context['wedstrijdjaar'] = self.wedstrijdjaar
+        context['comp_str'] = obj.beschrijving
+        context['seizoen'] = self.seizoen
+        context['afstand'] = afstand
 
         menu_dynamics(self.request, context, actief='competitie')
         return render(request, self.template_name, context)
@@ -419,15 +406,13 @@ class KlassegrenzenView(UserPassesTestMixin, TemplateView):
             --> de beheerder wil deze klassegrenzen vaststellen
         """
         afstand = kwargs['afstand']
-        # TODO: pk doorgeven via het formulier?
         objs = Competitie.objects.filter(afstand=afstand, is_afgesloten=False)
         if len(objs) > 0:
             comp = objs[0]
             schrijf_in_logboek(request.user, 'Competitie', 'Klassegrenzen bevestigd voor %s' % comp.beschrijving)
             # haal dezelfde data op als voor de GET request
             for obj in self._get_queryset(afstand):
-                klasse = obj['wedstrkl_obj']
-                maak_competitieklasse_indiv(comp, klasse, obj['ag'])
+                maak_competitieklasse_indiv(comp, obj['wedstrkl_obj'], obj['ag'])
             # for
         return redirect('Competitie:overzicht')
 

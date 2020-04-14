@@ -6,11 +6,12 @@
 
 from django.contrib import admin
 
-from .models import Competitie, DeelCompetitie, CompetitieKlasse
+from .models import Competitie, DeelCompetitie, CompetitieKlasse, RegioCompetitieSchutterBoog
 
 
 admin.site.register(Competitie)
 admin.site.register(DeelCompetitie)
 admin.site.register(CompetitieKlasse)
+admin.site.register(RegioCompetitieSchutterBoog)
 
 # end of file

@@ -12,7 +12,7 @@ from .models import DeelCompetitie, competitie_aanmaken
 import datetime
 
 
-class TestCompetitieBeheerders(E2EHelpers, TestCase):
+class TestCompetitieLijstVerenigingen(E2EHelpers, TestCase):
 
     """ unit tests voor de Competitie applicatie, Koppel Beheerders functie """
 
@@ -31,7 +31,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         lid.bij_vereniging = self._ver
         lid.save()
 
-        return self.e2e_create_account(nhb_nr, lid.email, lid.voornaam, accepteer_vhpg=True)
+        return self.e2e_create_account(nhb_nr, lid.email, E2EHelpers.WACHTWOORD, accepteer_vhpg=True)
 
     def setUp(self):
         """ eenmalige setup voor alle tests
@@ -88,56 +88,62 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         # secretaris kan nog niet ingevuld worden
         ver.save()
 
-        self.url_overzicht = '/competitie/'
+    def test_lijst_verenigingen_anon(self):
+        self.e2e_logout()
+        resp = self.client.get('/competitie/lijst-verenigingen/')
+        self.assert_is_redirect(resp, '/plein/')
+        self.e2e_assert_other_http_commands_not_supported('/competitie/lijst-verenigingen/')
+
+    def test_lijst_verenigingen_admin(self):
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_wisselnaarrol_beheerder()
+        self.e2e_check_rol('beheerder')
+        resp = self.client.get('/competitie/lijst-verenigingen/')
+        self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
+
+    def test_lijst_verenigingen_bb(self):
+        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_wisselnaarrol_bb()
+        self.e2e_check_rol('BB')
+        resp = self.client.get('/competitie/lijst-verenigingen/')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/lijst-verenigingen.dtl', 'plein/site_layout.dtl'))
+
+    def test_lijst_verenigingen_bko(self):
+        self.e2e_login_and_pass_otp(self.account_bko)
+        self.e2e_wissel_naar_functie(self.functie_bko)
+        self.e2e_check_rol('BKO')
+        resp = self.client.get('/competitie/lijst-verenigingen/')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/lijst-verenigingen.dtl', 'plein/site_layout.dtl'))
+
+    def test_lijst_verenigingen_rko(self):
+        self.e2e_login_and_pass_otp(self.account_rko)
+        self.e2e_wissel_naar_functie(self.functie_rko)
+        self.e2e_check_rol('RKO')
+        resp = self.client.get('/competitie/lijst-verenigingen/')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/lijst-verenigingen.dtl', 'plein/site_layout.dtl'))
+
+    def test_lijst_verenigingen_rcl(self):
+        self.e2e_login_and_pass_otp(self.account_rcl)
+        self.e2e_wissel_naar_functie(self.functie_rcl)
+        self.e2e_check_rol('RCL')
+        resp = self.client.get('/competitie/lijst-verenigingen/')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/lijst-verenigingen.dtl', 'plein/site_layout.dtl'))
+        self.e2e_assert_other_http_commands_not_supported('/competitie/lijst-verenigingen/')
 
     def test_overzicht_anon(self):
-        resp = self.client.get(self.url_overzicht)
+        resp = self.client.get('/competitie/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/overzicht.dtl', 'plein/site_layout.dtl'))
         self.assertNotContains(resp, '/competitie/beheer-favorieten/')
 
-    def test_overzicht_it(self):
-        self.e2e_login_and_pass_otp(self.account_admin)
-        self.e2e_wisselnaarrol_beheerder()
-
-        resp = self.client.get(self.url_overzicht)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/overzicht-beheerder.dtl', 'plein/site_layout.dtl'))
-        self.assertNotContains(resp, '/competitie/beheer-favorieten/')
-
-    def test_overzicht_bb(self):
-        self.e2e_login_and_pass_otp(self.account_bb)
-        self.e2e_wisselnaarrol_bb()
-
-        resp = self.client.get(self.url_overzicht)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/overzicht-beheerder.dtl', 'plein/site_layout.dtl'))
-        self.assertNotContains(resp, '/competitie/beheer-favorieten/')
-
-    def test_overzicht_rcl(self):
-        self.e2e_login_and_pass_otp(self.account_rcl)
-        self.e2e_wissel_naar_functie(self.functie_rcl)
-
-        resp = self.client.get(self.url_overzicht)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/overzicht-beheerder.dtl', 'plein/site_layout.dtl'))
-        self.assertNotContains(resp, '/competitie/beheer-favorieten/')
-
-    def test_overzicht_cwz(self):
-        self.e2e_login_and_pass_otp(self.account_bb)
-        self.e2e_wissel_naar_functie(self.functie_cwz)
-
-        resp = self.client.get(self.url_overzicht)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/overzicht-cwz.dtl', 'plein/site_layout.dtl'))
-        self.assertNotContains(resp, '/competitie/beheer-favorieten/')
-
-
-# TODO: gebruik assert_other_http_commands_not_supported
 
 # end of file

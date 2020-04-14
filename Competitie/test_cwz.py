@@ -78,6 +78,7 @@ class TestCompetitieCWZ(E2EHelpers, TestCase):
         lid.save()
         self.nhblid2 = lid
 
-        self.url_lijstleden = '/competitie/lijst-leden/'
+    def test_dummy(self):
+        self.assertFalse(False)
 
 # end of file

@@ -19,6 +19,9 @@
 
 {% endif %}
 
+
+<p>Deze pagina toont de actieve competities.</p>
+
 {% for obj in object_list %}
 
     <p>&nbsp;</p>

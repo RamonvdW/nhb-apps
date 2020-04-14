@@ -12,7 +12,8 @@ from Schutter.models import SchutterBoog
 from decimal import Decimal
 from datetime import date
 
-ZERO = Decimal('0.000')
+AG_NUL = Decimal('0.000')
+AG_LAAGSTE_NIET_NUL = Decimal('0.001')
 
 LAAG_REGIO = 'Regio'
 LAAG_RK = 'RK'
@@ -54,9 +55,8 @@ class CompetitieKlasse(models.Model):
     """ Deze database tabel bevat de klassen voor een competitie,
         met de vastgestelde aanvangsgemiddelden
     """
-
     # hoort bij
-    competitie = models.ForeignKey(Competitie, on_delete=models.CASCADE, default=None)
+    competitie = models.ForeignKey(Competitie, on_delete=models.CASCADE)
 
     # koppeling aan een individuele OF team wedstrijdklasse
     indiv = models.ForeignKey(IndivWedstrijdklasse, on_delete=models.PROTECT, null=True, blank=True)
@@ -66,22 +66,26 @@ class CompetitieKlasse(models.Model):
     min_ag = models.DecimalField(max_digits=5, decimal_places=3)    # 10.000
 
     def __str__(self):
-        msg = ""
+        msg = "?"
         if self.indiv:
             msg = self.indiv.beschrijving
         if self.team:
             msg = self.team.beschrijving
-        msg += "(%s) %s" % (self.min_ag, self.competitie.beschrijving)
+        msg += " (%s) %s" % (self.min_ag, self.competitie.beschrijving)
         return msg
 
+    class Meta:
+        verbose_name = "Competitie klasse"
+        verbose_name_plural = "Competitie klassen"
 
-def maak_competitieklasse_indiv(comp, indivwedstrijdklasse, min_ag):
+
+def maak_competitieklasse_indiv(comp, indiv_wedstrijdklasse, min_ag):
     """ Deze functie maakt een nieuwe CompetitieWedstrijdklasse aan met het gevraagde min_ag
         en koppelt deze aan de gevraagde Competitie
     """
     compkl = CompetitieKlasse()
     compkl.competitie = comp
-    compkl.wedstrijdklasse = indivwedstrijdklasse
+    compkl.indiv = indiv_wedstrijdklasse
     compkl.min_ag = min_ag
     compkl.save()
 
@@ -126,7 +130,7 @@ class DeelCompetitie(models.Model):
             substr = str(self.nhb_rayon)
         else:
             substr = "BK"
-        return "%s - %s"  % (self.competitie, substr)
+        return "%s - %s" % (self.competitie, substr)
 
 
 def competitie_aanmaken(jaar):
@@ -187,25 +191,52 @@ class RegioCompetitieSchutterBoog(models.Model):
     bij_vereniging = models.ForeignKey(NhbVereniging, on_delete=models.PROTECT)
 
     is_handmatig_ag = models.BooleanField(default=False)
-    aanvangsgemiddelde = models.DecimalField(max_digits=5, decimal_places=3)    # 10,000
+    aanvangsgemiddelde = models.DecimalField(max_digits=5, decimal_places=3, default=0.0)    # 10,000
     klasse = models.ForeignKey(CompetitieKlasse, on_delete=models.CASCADE)
 
-    score1 = models.PositiveIntegerField()
-    score2 = models.PositiveIntegerField()
-    score3 = models.PositiveIntegerField()
-    score4 = models.PositiveIntegerField()
-    score5 = models.PositiveIntegerField()
-    score6 = models.PositiveIntegerField()
-    score7 = models.PositiveIntegerField()
+    score1 = models.PositiveIntegerField(default=0)
+    score2 = models.PositiveIntegerField(default=0)
+    score3 = models.PositiveIntegerField(default=0)
+    score4 = models.PositiveIntegerField(default=0)
+    score5 = models.PositiveIntegerField(default=0)
+    score6 = models.PositiveIntegerField(default=0)
+    score7 = models.PositiveIntegerField(default=0)
 
     # som van score1..score7
-    totaal = models.PositiveIntegerField()
+    totaal = models.PositiveIntegerField(default=0)
 
     # welke van score1..score7 is de laagste?
     laagste_score_nr = models.PositiveIntegerField(default=0)  # 1..7
 
     # gemiddelde over de 6 beste scores, dus exclusief laatste_score_nr
-    gemiddelde = models.DecimalField(max_digits=5, decimal_places=3)  # 10,000
+    gemiddelde = models.DecimalField(max_digits=5, decimal_places=3, default=0.0)  # 10,000
+
+    def __str__(self):
+        # deelcompetitie (komt achteraan)
+        if self.deelcompetitie.nhb_regio:
+            substr = str(self.deelcompetitie.nhb_regio)
+        elif self.deelcompetitie.nhb_rayon:
+            substr = str(self.deelcompetitie.nhb_rayon)
+        else:
+            substr = "BK"
+
+        # klasse
+        msg = "?"
+        if self.klasse.indiv:
+            msg = self.klasse.indiv.beschrijving
+        if self.klasse.team:
+            msg = self.klasse.team.beschrijving
+
+        return "%s - %s (%s) - %s - %s" % (
+                    substr,
+                    msg,
+                    self.klasse.min_ag,
+                    self.schutterboog.nhblid.volledige_naam(),
+                    self.deelcompetitie.competitie.beschrijving)
+
+    class Meta:
+        verbose_name = "Regiocompetitie Schutterboog"
+        verbose_name_plural = "Regiocompetitie Schuttersboog"
 
 
 def regiocompetities_schutterboog_aanmelden(schutterboog, gem18, gem25):
@@ -221,19 +252,49 @@ def regiocompetities_schutterboog_aanmelden(schutterboog, gem18, gem25):
             gem = gem25
 
         if not gem:
-            gem = ZERO
+            gem = AG_NUL
 
-        aanmelding = RegioCompetitieSchutterBoog()
-        aanmelding.deelcompetitie = deelcompetitie
-        aanmelding.schutterboog = schutterboog
-        aanmelding.bij_vereniging = schutterboog.nhblid.bij_vereniging
+        # voorkom dubbele aanmelding
+        if len(RegioCompetitieSchutterBoog.objects.filter(deelcompetitie=deelcompetitie, schutterboog=schutterboog)) == 0:
+            aanmelding = RegioCompetitieSchutterBoog()
+            aanmelding.deelcompetitie = deelcompetitie
+            aanmelding.schutterboog = schutterboog
+            aanmelding.bij_vereniging = schutterboog.nhblid.bij_vereniging
+            aanmelding.aanvangsgemiddelde = gem
 
-        aanmelding.aanvangsgemiddelde = gem
+            # bepaald de wedstrijdklasse
+            age = schutterboog.nhblid.bereken_wedstrijdleeftijd(deelcompetitie.competitie.begin_jaar)
 
-        # bepaald de wedstrijdklasse
+            # zoek alle wedstrijdklassen van deze competitie met het juiste boogtype
+            qset = CompetitieKlasse.objects.filter(competitie=deelcompetitie.competitie,
+                                                   indiv__boogtype=schutterboog.boogtype)
 
+            # zoek een toepasselijke klasse aan de hand van de leeftijd
+            klassen = list()
+            for obj in qset:
+                if gem >= obj.min_ag or obj.indiv.is_onbekend:
+                    for lkl in obj.indiv.leeftijdsklassen.all():
+                        if lkl.geslacht == schutterboog.nhblid.geslacht:
+                            if lkl.min_wedstrijdleeftijd <= age <= lkl.max_wedstrijdleeftijd:
+                                klassen.append(obj)
+                    # for
+            # for
 
-        aanmelding.save()
+            if len(klassen) == 1:
+                aanmelding.klasse = klassen[0]
+                aanmelding.save()
+            else:
+                # TODO: zoek naar de juiste klasse aan de hand van het aanvangsgemiddelde
+                print("regiocompetities_schutterboog_aanmelden: lukt niet om een competitieklasse te kiezen voor schutterboog")
+                print("     schutterboog=%s (age %s, boogtype %s)" % (repr(schutterboog), age, repr(schutterboog.boogtype)))
+                print("     deelcompetitie=%s" % repr(deelcompetitie))
+                print("     kandidaat klassen: %s" % repr(klassen))
+                print("     alle klassen:")
+                for obj in qset:
+                    print("        %s" % obj)
+                #volgorde = models.PositiveIntegerField()  # lager nummer = betere schutters
+                #leeftijdsklassen = models.ManyToManyField(LeeftijdsKlasse)
+                aanmelding.save()
     # for
 
 # end of file

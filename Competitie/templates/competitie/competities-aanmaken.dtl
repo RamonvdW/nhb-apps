@@ -13,9 +13,9 @@
 
 <h4>Competitie aanmaken</h4>
 
-<p>Als BKO wil je de nieuwe bondscompetitie opstarten voor seizoen {{ seizoen }}.</p>
+<p>Als Manager Competitiezaken wil je de nieuwe bondscompetitie opstarten voor seizoen {{ seizoen }}.</p>
 <p>Dit is een eenmalige actie waardoor zowel de Indoor als 25m1pijl competitie aangemaakt worden.</p>
-<p>In een later stadium kan je de klassegrenzen vaststellen en de beheerders koppelen.</p>
+<p>In een later stadium kan je de klassegrenzen vaststellen.</p>
 
 <form method="post" action="{% url 'Competitie:aanmaken' %}">
 {% csrf_token %}
