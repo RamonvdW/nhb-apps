@@ -10,6 +10,7 @@ from django.contrib.auth.models import Group
 from django.contrib.auth import get_user_model      # avoid circular dependency with Account.models
 from django.conf import settings
 from Account.models import Account
+from BasisTypen.models import GESLACHT
 import datetime
 
 
@@ -104,8 +105,6 @@ def validate_sinds_datum(datum):
 
 class NhbLid(models.Model):
     """Tabel om gegevens van een lid van de NHB bij te houden"""
-
-    GESLACHT = [('M', 'Man'), ('V', 'Vrouw')]
 
     nhb_nr = models.PositiveIntegerField(primary_key=True)
     voornaam = models.CharField(max_length=100)
