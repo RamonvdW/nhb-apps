@@ -74,6 +74,17 @@ class HistCompetitieIndividueel(models.Model):
         verbose_name = verbose_name_plural = "Historie individuele competitie"
 
 
+def zoek_schutterboog_gemiddelde(comp_type, schutter_nr, boogtype):
+    """ Zoek in de historische data van de juiste competitie (18/25)
+        naar het eindgemiddelde van de schutterboog """
+
+    for obj in HistCompetitieIndividueel.objects.filter(schutter_nr=schutter_nr, boogtype=boogtype, histcompetitie__comp_type=comp_type):
+        print("zoek_schutterboog_gemiddelde: schutter_nr=%s, obj=%s" % repr(obj))
+    # for
+
+    return None
+
+
 class HistCompetitieTeam(models.Model):
     """ Deze database tabel bevat alle resultaten van de teamcompetitie
         Per regel: subklasse, rank, schutter details, scores en gemiddelde.
