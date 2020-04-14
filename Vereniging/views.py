@@ -14,7 +14,8 @@ from Functie.rol import rol_get_huidige_functie
 from BasisTypen.models import LeeftijdsKlasse, MAXIMALE_LEEFTIJD_JEUGD
 from NhbStructuur.models import NhbLid
 from Schutter.models import SchutterBoog
-from Competitie.models import competities_schutterboog_aanmelden
+from Competitie.models import regiocompetities_schutterboog_aanmelden
+from HistComp.models import zoek_schutterboog_gemiddelde
 import copy
 
 TEMPLATE_OVERZICHT = 'vereniging/overzicht.dtl'
@@ -273,8 +274,12 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                         # iemand loopt te klooien
                         raise Resolver404()
 
+                # zoek het aanvangsgemiddelde op
+                gem18 = zoek_schutterboog_gemiddelde('18', nhblid_pk, boogtype_pk)
+                gem25 = zoek_schutterboog_gemiddelde('25', nhblid_pk, boogtype_pk)
+
                 # meld schutterboog aan voor de competitie
-                competities_schutterboog_aanmelden(schutterboog)
+                regiocompetities_schutterboog_aanmelden(schutterboog, gem18, gem25)
 
             # else: silently ignore
         # for
