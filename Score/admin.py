@@ -8,7 +8,17 @@ from django.contrib import admin
 from .models import Score, ScoreHist
 
 
-admin.site.register(Score)
-admin.site.register(ScoreHist)
+class ScoreAdmin(admin.ModelAdmin):
+    """ Admin configuratie voor Score klasse """
+    list_filter = ('afstand_meter', 'schutterboog__boogtype', 'schutterboog__nhblid__bij_vereniging')
+
+
+class ScoreHistAdmin(admin.ModelAdmin):
+    """ Admin configuratie voor ScoreHist klasse """
+    list_filter = ('datum', 'score__afstand_meter')
+
+
+admin.site.register(Score, ScoreAdmin)
+admin.site.register(ScoreHist, ScoreHistAdmin)
 
 # end of file
