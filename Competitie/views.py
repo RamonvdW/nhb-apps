@@ -364,9 +364,11 @@ class KlassegrenzenView(UserPassesTestMixin, TemplateView):
                     objs.append(res)
             else:
                 # geen historische gemiddelden
-                # zet alles op 0,001 - dit geeft een beetje een rommeltje als er meerdere klassen zijn
+                # zet ag op 0,001 als er een klasse onbekend is, anders op 0,000
+                ag = AG_LAAGSTE_NIET_NUL if heeft_klasse_onbekend else AG_NUL
                 for klasse in wedstrklassen:
-                    ag = AG_NUL if klasse.is_onbekend else AG_LAAGSTE_NIET_NUL
+                    if klasse.is_onbekend:  # is de laatste klasse
+                        ag = AG_NUL
                     res = {'beschrijving': klasse.beschrijving,
                            'count': 0,
                            'ag': ag,
