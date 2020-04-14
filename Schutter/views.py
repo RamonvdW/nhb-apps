@@ -20,6 +20,7 @@ from Logboek.models import schrijf_in_logboek
 from Overig.helpers import get_safe_from_ip
 from Account.models import AccountCreateError
 from Account.views import obfuscate_email
+from Score.models import Score, ScoreHist
 from .leeftijdsklassen import get_sessionvars_leeftijdsklassen
 from .models import SchutterBoog, account_create_nhb, AccountCreateNhbGeenEmail
 from .forms import RegistreerForm
@@ -194,9 +195,9 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
         """ Retourneer een lijst met SchutterBoog objecten, aangevuld met hulpvelden """
 
         # haal de SchutterBoog records op van deze gebruiker
-        # ontbrekende records maken we aan
         objs = SchutterBoog.objects.filter(nhblid=nhblid).order_by('boogtype__volgorde')
 
+        # maak ontbrekende SchutterBoog records aan, indien nodig
         boogtypen = BoogType.objects.all()
         if len(objs) < len(boogtypen):
             aanwezig = objs.values_list('boogtype__pk', flat=True)
@@ -208,12 +209,30 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
             # for
             objs = SchutterBoog.objects.filter(nhblid=nhblid).order_by('boogtype__volgorde')
 
+        # voeg de checkbox velden toe en AG informatie
         voorkeur_dt = False
         for obj in objs:
             obj.check_schiet = 'schiet_' + obj.boogtype.afkorting
             obj.check_info = 'info_' + obj.boogtype.afkorting
             if obj.voorkeur_dutchtarget_18m:
                 voorkeur_dt = True
+
+            # haal AG van 18m en 25m op, indien aanwezig
+            scores = Score.objects.filter(schutterboog=obj, afstand_meter=18)
+            if len(scores):
+                score = scores[0]
+                obj.ag_18_waarde = score.waarde / 1000
+                hist = ScoreHist.objects.filter(score=score).order_by('-datum')
+                if len(hist):
+                    obj.ag_18_scorehist = hist[0]
+
+            scores = Score.objects.filter(schutterboog=obj, afstand_meter=25)
+            if len(scores):
+                score = scores[0]
+                obj.ag_25_waarde = score.waarde / 1000
+                hist = ScoreHist.objects.filter(score=score).order_by('-datum')
+                if len(hist):
+                    obj.ag_25_scorehist = hist[0]
         # for
         return objs, voorkeur_dt
 
