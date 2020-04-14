@@ -106,7 +106,7 @@ def init_leeftijdsklasse_2018(apps, schema_editor):
         beschrijving='Cadetten, jongens',
         max_wedstrijdleeftijd=17).save()
     leeftijdsklasse_klas(
-        afkorting='CV', geslacht='M',
+        afkorting='CV', geslacht='M',       # FOUT: moet V zijn; wordt in m0009_basistypen_2020 gecorrigeerd
         klasse_kort='Cadet',
         beschrijving='Cadetten, meisjes',
         max_wedstrijdleeftijd=17).save()

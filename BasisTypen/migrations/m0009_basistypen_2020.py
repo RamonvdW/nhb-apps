@@ -159,6 +159,17 @@ def init_wedstrijdklassen_2020(apps, schema_editor):
     # for
 
 
+def corrigeer_leeftijdsklassen(apps, schema_editor):
+    # correctie op leeftijdsklasse uit basistypen_2018
+    # Cadet meisjes heeft geslacht=M, moet zijn geslacht=V
+
+    leeftijdsklasse_klas = apps.get_model('BasisTypen', 'LeeftijdsKlasse')
+
+    obj = leeftijdsklasse_klas.objects.get(afkorting='CV')
+    obj.geslacht = 'V'
+    obj.save()
+
+
 class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
@@ -171,6 +182,7 @@ class Migration(migrations.Migration):
     # migratie functies
     operations = [
         migrations.RunPython(init_wedstrijdklassen_2020),
+        migrations.RunPython(corrigeer_leeftijdsklassen),
     ]
 
 # end of file
