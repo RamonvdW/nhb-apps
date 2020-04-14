@@ -10,6 +10,8 @@ from django.db import models
 # leden zijn junior tot en met het jaar waarin ze 20 worden
 MAXIMALE_LEEFTIJD_JEUGD = 20
 
+GESLACHT = [('M', 'Man'), ('V', 'Vrouw')]
+
 
 class BoogType(models.Model):
     """ boog typen: volledige naam en unique afkorting """
@@ -32,7 +34,7 @@ class BoogType(models.Model):
 
 class LeeftijdsKlasse(models.Model):
     """ definitie van een leeftijdsklasse """
-    GESLACHT = [('M', 'Man'), ('V', 'Vrouw')]
+
     afkorting = models.CharField(max_length=5)
     beschrijving = models.CharField(max_length=80)      # CH Cadetten, mannen
     klasse_kort = models.CharField(max_length=30)       # Cadet, Junior, etc.
