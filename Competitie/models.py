@@ -227,11 +227,12 @@ class RegioCompetitieSchutterBoog(models.Model):
         if self.klasse.team:
             msg = self.klasse.team.beschrijving
 
-        return "%s - %s (%s) - %s - %s" % (
+        return "%s - %s (%s) - %s (%s) - %s" % (
                     substr,
                     msg,
                     self.klasse.min_ag,
                     self.schutterboog.nhblid.volledige_naam(),
+                    self.aanvangsgemiddelde,
                     self.deelcompetitie.competitie.beschrijving)
 
     class Meta:
@@ -244,7 +245,6 @@ def regiocompetities_schutterboog_aanmelden(schutterboog, gem18, gem25):
 
     # schutterboog is nhblid van een vereniging in een bepaalde regio
     regio = schutterboog.nhblid.bij_vereniging.regio
-
     for deelcompetitie in DeelCompetitie.objects.filter(laag=LAAG_REGIO, nhb_regio=regio, is_afgesloten=False):
         if deelcompetitie.competitie.afstand == '18':
             gem = gem18
@@ -267,34 +267,32 @@ def regiocompetities_schutterboog_aanmelden(schutterboog, gem18, gem25):
 
             # zoek alle wedstrijdklassen van deze competitie met het juiste boogtype
             qset = CompetitieKlasse.objects.filter(competitie=deelcompetitie.competitie,
-                                                   indiv__boogtype=schutterboog.boogtype)
+                                                   indiv__boogtype=schutterboog.boogtype).order_by('indiv__volgorde')
 
             # zoek een toepasselijke klasse aan de hand van de leeftijd
-            klassen = list()
+            done = False
             for obj in qset:
                 if gem >= obj.min_ag or obj.indiv.is_onbekend:
                     for lkl in obj.indiv.leeftijdsklassen.all():
                         if lkl.geslacht == schutterboog.nhblid.geslacht:
                             if lkl.min_wedstrijdleeftijd <= age <= lkl.max_wedstrijdleeftijd:
-                                klassen.append(obj)
+                                aanmelding.klasse = obj
+                                aanmelding.save()
+                                done = True
+                                break
                     # for
+                if done:
+                    break
             # for
 
-            if len(klassen) == 1:
-                aanmelding.klasse = klassen[0]
-                aanmelding.save()
-            else:
-                # TODO: zoek naar de juiste klasse aan de hand van het aanvangsgemiddelde
+            if not done:
                 print("regiocompetities_schutterboog_aanmelden: lukt niet om een competitieklasse te kiezen voor schutterboog")
-                print("     schutterboog=%s (age %s, boogtype %s)" % (repr(schutterboog), age, repr(schutterboog.boogtype)))
+                print("     schutterboog=%s (age %s, boogtype %s, gem=%s)" % (repr(schutterboog), age, repr(schutterboog.boogtype), gem))
                 print("     deelcompetitie=%s" % repr(deelcompetitie))
-                print("     kandidaat klassen: %s" % repr(klassen))
                 print("     alle klassen:")
                 for obj in qset:
                     print("        %s" % obj)
-                #volgorde = models.PositiveIntegerField()  # lager nummer = betere schutters
-                #leeftijdsklassen = models.ManyToManyField(LeeftijdsKlasse)
-                aanmelding.save()
+                aanmelding.save()       # zorgt voor een foutmelding
     # for
 
 # end of file

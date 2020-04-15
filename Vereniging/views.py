@@ -14,8 +14,8 @@ from Functie.rol import rol_get_huidige_functie
 from BasisTypen.models import LeeftijdsKlasse, MAXIMALE_LEEFTIJD_JEUGD
 from NhbStructuur.models import NhbLid
 from Schutter.models import SchutterBoog
-from Competitie.models import regiocompetities_schutterboog_aanmelden
-from HistComp.models import zoek_schutterboog_gemiddelde
+from Competitie.models import AG_NUL, regiocompetities_schutterboog_aanmelden
+from Score.models import Score
 import copy
 
 TEMPLATE_OVERZICHT = 'vereniging/overzicht.dtl'
@@ -169,6 +169,13 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
         return HttpResponseRedirect(reverse('Plein:plein'))
 
+    @staticmethod
+    def _get_schutterboog_ag(schutterboog, afstand):
+        ags = Score.objects.filter(schutterboog=schutterboog, afstand_meter=afstand)
+        if len(ags) >= 1:       # zou er maar 1 moeten zijn
+            return ags[0].waarde / 1000
+        return AG_NUL
+
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
 
@@ -211,6 +218,11 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                     obj.boogtype = schutterboog.boogtype
                     obj.check = "lid_%s_boogtype_%s" % (nhblid.nhb_nr, schutterboog.boogtype.pk)
                     heeft_wedstrijdboog = True
+
+                    # zoek de aanvangsgemiddelden er bij
+                    obj.ag_18 = self._get_schutterboog_ag(schutterboog, 18)
+                    obj.ag_25 = self._get_schutterboog_ag(schutterboog, 25)
+
                     objs2.append(obj)
             # for
             if not heeft_wedstrijdboog:
@@ -274,11 +286,10 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                         # iemand loopt te klooien
                         raise Resolver404()
 
-                # zoek het aanvangsgemiddelde op
-                gem18 = zoek_schutterboog_gemiddelde('18', nhblid_pk, boogtype_pk)
-                gem25 = zoek_schutterboog_gemiddelde('25', nhblid_pk, boogtype_pk)
+                # zoek de aanvangsgemiddelden er bij
+                gem18 = self._get_schutterboog_ag(schutterboog, 18)
+                gem25 = self._get_schutterboog_ag(schutterboog, 25)
 
-                # meld schutterboog aan voor de competitie
                 regiocompetities_schutterboog_aanmelden(schutterboog, gem18, gem25)
 
             # else: silently ignore
