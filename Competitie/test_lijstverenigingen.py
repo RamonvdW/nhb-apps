@@ -99,7 +99,9 @@ class TestCompetitieLijstVerenigingen(E2EHelpers, TestCase):
         self.e2e_wisselnaarrol_beheerder()
         self.e2e_check_rol('beheerder')
         resp = self.client.get('/competitie/lijst-verenigingen/')
-        self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/lijst-verenigingen.dtl', 'plein/site_layout.dtl'))
 
     def test_lijst_verenigingen_bb(self):
         self.e2e_login_and_pass_otp(self.account_bb)

@@ -58,7 +58,9 @@ class PleinView(View):
                 if rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL):
                     context['toon_functies'] = True
 
-                if rol_nu == Rollen.ROL_BB:
+                if rol_nu == Rollen.ROL_IT:
+                    context['rol_is_it'] = True
+                elif rol_nu == Rollen.ROL_BB:
                     context['rol_is_bb'] = True
                 elif rol_nu == Rollen.ROL_BKO:
                     context['rol_is_bko'] = True
