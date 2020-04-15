@@ -43,9 +43,9 @@ class Command(BaseCommand):
         """ Zet het type boog waarmee de schutter schiet aan de hand van de HistCompetitieIndividueel uitslagen.
             De klasse waarin de schutter uitkwam bepaalt de boog waarmee hij schiet.
         """
-        boogtype = dict()
+        boogtype_dict = dict()
         for obj in BoogType.objects.all():
-            boogtype[obj.afkorting] = obj
+            boogtype_dict[obj.afkorting] = obj
         # for
 
         now = timezone.now()
@@ -61,43 +61,39 @@ class Command(BaseCommand):
 
         for obj in HistCompetitieIndividueel.objects.all():
             records += 1
-            if obj.totaal > 0 and obj.boogtype in boogtype:
-                tup = (obj.schutter_nr, obj.boogtype)
-                if tup not in done:
-                    done.append(tup)
-
-                    nhblid = self._get_nhblid(obj.schutter_nr)
-                    boogtype_obj = boogtype[obj.boogtype]
-                    if nhblid:
-                        # haal het schutterboog record op, of maak een nieuwe aan
-                        try:
-                            schutterboog = SchutterBoog.objects.get(nhblid=nhblid, boogtype=boogtype_obj)
-                        except SchutterBoog.DoesNotExist:
-                            # nieuw record nodig
-                            schutterboog = SchutterBoog()
-                            schutterboog.nhblid = nhblid
-                            schutterboog.boogtype = boogtype_obj
+            if obj.totaal > 0 and obj.boogtype in boogtype_dict:
+                boogtype_obj = boogtype_dict[obj.boogtype]
+                nhblid = self._get_nhblid(obj.schutter_nr)
+                if nhblid:
+                    # haal het schutterboog record op, of maak een nieuwe aan
+                    try:
+                        schutterboog = SchutterBoog.objects.get(nhblid=nhblid, boogtype=boogtype_obj)
+                    except SchutterBoog.DoesNotExist:
+                        # nieuw record nodig
+                        schutterboog = SchutterBoog()
+                        schutterboog.nhblid = nhblid
+                        schutterboog.boogtype = boogtype_obj
+                        schutterboog.voor_wedstrijd = True
+                        schutterboog.save()
+                        nieuw += 1
+                    else:
+                        if not schutterboog.voor_wedstrijd:
                             schutterboog.voor_wedstrijd = True
                             schutterboog.save()
                             nieuw += 1
                         else:
-                            if not schutterboog.voor_wedstrijd:
-                                schutterboog.voor_wedstrijd = True
-                                schutterboog.save()
-                                nieuw += 1
-                            else:
-                                al_aan += 1
+                            al_aan += 1
 
-                        # zoek het score record erbij
-                        if obj.gemiddelde > AG_NUL:
-                            if aanvangsgemiddelde_opslaan(
-                                    schutterboog,
-                                    int(obj.histcompetitie.comp_type),
-                                    obj.gemiddelde,
-                                    datum,
-                                    None,
-                                    "Uitslag competitie seizoen %s" % obj.histcompetitie.seizoen):
-                                nieuw_ag += 1
+                    # zoek het score record erbij
+                    if obj.gemiddelde > AG_NUL:
+                        if aanvangsgemiddelde_opslaan(
+                                schutterboog,
+                                int(obj.histcompetitie.comp_type),
+                                obj.gemiddelde,
+                                datum,
+                                None,
+                                "Uitslag competitie seizoen %s" % obj.histcompetitie.seizoen):
+                            nieuw_ag += 1
         # for
 
         leden = 0
