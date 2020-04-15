@@ -134,7 +134,7 @@ class TestVerenigingCWZ(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('vereniging/ledenlijst.dtl', 'plein/site_layout.dtl'))
 
         self.assertContains(resp, 'Jeugd')
-        self.assertContains(resp, 'Volwassen')
+        self.assertContains(resp, 'Senioren')
         self.assertNotContains(resp, 'Inactieve leden')
 
         # maak een lid inactief
@@ -148,7 +148,7 @@ class TestVerenigingCWZ(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)  # 200 = OK
 
         self.assertContains(resp, 'Jeugd')
-        self.assertContains(resp, 'Volwassen')
+        self.assertContains(resp, 'Senioren')
         self.assertContains(resp, 'Inactieve leden')
 
         self.e2e_assert_other_http_commands_not_supported(self.url_ledenlijst)
