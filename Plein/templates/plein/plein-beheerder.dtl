@@ -78,7 +78,7 @@
         </div>
     {% endif %}
 
-    {% if rol_is_bko or rol_is_bb %}
+    {% if rol_is_bko or rol_is_bb or rol_is_it %}
         <div class="col s12 m6 xl4">
             <div class="card">
                 <div class="card-content">
