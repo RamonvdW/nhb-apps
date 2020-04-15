@@ -15,6 +15,26 @@
 
 <div class="row">
 
+    <!-- toon inschrijvingen regiocompetitie -->
+    {% for comp in competities %}
+        <div class="col s12 m6 xl4">
+            <div class="card">
+                <div class="card-content">
+                    <table class="simple"><tr style="border:0px">
+                        <td><i class="material-icons-round large">receipt</i></td>
+                        <td>Toon lijst met schutters ingeschreven voor de {{ comp.beschrijving }}.</td>
+                    </tr></table>
+                </div>
+                <a href="{{ comp.url_inschrijvingen }}" class="nhb-klikbare-balk">
+                    <div class="card-action center-align">
+                        <span class="nhb-klikbare-link">Toon inschrijvingen</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+    {% endfor %}
+
+    <!-- beheerders van de competitie -->
     <div class="col s12 m6 xl4">
         <div class="card">
             <div class="card-content">

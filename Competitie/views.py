@@ -19,7 +19,7 @@ from BasisTypen.models import IndivWedstrijdklasse, TeamWedstrijdklasse
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from NhbStructuur.models import NhbLid, NhbVereniging
 from .models import Competitie, AG_NUL, AG_LAAGSTE_NIET_NUL, CompetitieKlasse, DeelCompetitie,\
-                    competitie_aanmaken, maak_competitieklasse_indiv
+                    competitie_aanmaken, maak_competitieklasse_indiv, RegioCompetitieSchutterBoog
 from datetime import date
 
 
@@ -30,6 +30,7 @@ TEMPLATE_COMPETITIE_INSTELLINGEN = 'competitie/instellingen-nieuwe-competitie.dt
 TEMPLATE_COMPETITIE_AANMAKEN = 'competitie/competities-aanmaken.dtl'
 TEMPLATE_COMPETITIE_KLASSEGRENZEN = 'competitie/klassegrenzen-vaststellen.dtl'
 TEMPLATE_COMPETITIE_LIJST_VERENIGINGEN = 'competitie/lijst-verenigingen.dtl'
+TEMPLATE_COMPETITIE_AANGEMELD_REGIO = 'competitie/lijst-aangemeld-regio.dtl'
 
 JA_NEE = {False: 'Nee', True: 'Ja'}
 
@@ -81,15 +82,22 @@ class CompetitieOverzichtView(View):
     # class variables shared by all instances
     # (none)
 
-    @staticmethod
-    def _get_competitie_overzicht_beheerder(request):
+    def _get_competities(self, context):
+        comps = Competitie.objects.filter(is_afgesloten=False).order_by('begin_jaar', 'afstand')
+        for comp in comps:
+            comp.url_inschrijvingen = reverse('Competitie:lijst-regio', kwargs={'comp_pk': comp.pk})
+        # for
+        context['competities'] = comps
+
+    def _get_competitie_overzicht_beheerder(self, request):
         context = dict()
 
         rol_nu, functie_nu = rol_get_huidige_functie(request)
 
         context['huidige_rol'] = rol_get_beschrijving(request)
-
         context['toon_functies'] = rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO)
+
+        self._get_competities(context)
 
         # kies de competities om het tijdschema van de tonen
         objs = list()
@@ -120,9 +128,9 @@ class CompetitieOverzichtView(View):
 
         return context, TEMPLATE_COMPETITIE_OVERZICHT_BEHEERDER
 
-    @staticmethod
-    def _get_competitie_overzicht_cwz(request):
+    def _get_competitie_overzicht_cwz(self, request):
         context = dict()
+        self._get_competities(context)
         return context, TEMPLATE_COMPETITIE_OVERZICHT_CWZ
 
     @staticmethod
@@ -441,9 +449,14 @@ class LijstVerenigingenView(UserPassesTestMixin, ListView):
 
         rol_nu, functie = rol_get_huidige_functie(self.request)
 
-        if rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO):
+        if rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB, Rollen.ROL_BKO):
             # toon de landelijke lijst
-            return NhbVereniging.objects.all().exclude(regio__regio_nr=100).order_by('regio__regio_nr', 'nhb_nr')
+            objs = NhbVereniging.objects.all().exclude(regio__regio_nr=100).order_by('regio__regio_nr', 'nhb_nr')
+            if rol_nu == Rollen.ROL_IT:
+                for obj in objs:
+                    obj.aantal_leden = NhbLid.objects.filter(bij_vereniging=obj).count()
+                # for
+            return objs
 
         if rol_nu == Rollen.ROL_RKO:
             # toon de lijst van verenigingen in het rayon van de RKO
@@ -477,6 +490,9 @@ class LijstVerenigingenView(UserPassesTestMixin, ListView):
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
         context['huidige_rol'] = rol_get_beschrijving(self.request)
 
+        if rol_nu == Rollen.ROL_IT:
+            context['toon_ledental'] = True
+
         if rol_nu == Rollen.ROL_RKO:
             context['toon_rayon'] = False
 
@@ -484,6 +500,43 @@ class LijstVerenigingenView(UserPassesTestMixin, ListView):
             context['toon_rayon'] = False
             context['toon_regio'] = False
             context['toon_cwzs'] = True
+
+        menu_dynamics(self.request, context, actief='competitie')
+        return context
+
+
+class LijstAangemeldRegioView(TemplateView):
+
+    """ Toon een lijst van SchutterBoog die aangemeld zijn voor de regiocompetitie """
+
+    template_name = TEMPLATE_COMPETITIE_AANGEMELD_REGIO
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        comp_pk = kwargs['comp_pk']
+
+        try:
+            context['competitie'] = Competitie.objects.get(pk=comp_pk)
+        except Competitie.DoesNotExist:
+            raise Resolver404()
+
+        context['object_list'] = RegioCompetitieSchutterBoog.objects.filter(deelcompetitie__competitie=comp_pk).\
+                                       order_by('deelcompetitie', 'klasse__indiv__volgorde', 'aanvangsgemiddelde')
+
+        volgorde = -1
+        prev_obj = None
+        for obj in context['object_list']:
+            if volgorde != obj.klasse.indiv.volgorde:
+                if prev_obj:
+                    prev_obj.einde_klasse = True
+                obj.nieuwe_klasse = True
+                volgorde = obj.klasse.indiv.volgorde
+            prev_obj = obj
+        # for
+        if prev_obj:
+            prev_obj.einde_klasse = True
 
         menu_dynamics(self.request, context, actief='competitie')
         return context

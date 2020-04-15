@@ -31,6 +31,10 @@ urlpatterns = [
     path('lijst-verenigingen/',
          views.LijstVerenigingenView.as_view(),
          name='lijst-verenigingen'),
+
+    path('lijst-regio/<comp_pk>/',
+         views.LijstAangemeldRegioView.as_view(),
+         name='lijst-regio'),
 ]
 
 # end of file
