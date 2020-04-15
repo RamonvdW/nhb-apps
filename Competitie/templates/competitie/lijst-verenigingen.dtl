@@ -21,11 +21,11 @@
     <thead>
         <tr>        <!-- filter veld -->
             {% if toon_rayon %}
-                <td/>
+                <td></td>
             {% endif %}
 
             {% if toon_regio %}
-                <td/>
+                <td></td>
             {% endif %}
 
             {% if toon_cwzs %}
@@ -34,8 +34,12 @@
                 <td colspan="2" class="table-filter"><input class="table-filter" oninput="myTableFilter(this, 'table1')" placeholder="Zoeken"/></td>
             {% endif %}
 
+            {% if toon_ledental %}
+                <td></td>
+            {% endif %}
+
             {% if show_wijzig_kolom %}
-                <td/>
+                <td></td>
             {% endif %}
         </tr>
         <tr>
@@ -47,12 +51,16 @@
                 <th class="center-align">Regio</th>
             {% endif %}
 
-            <th filter="on">Plaats</th>
+            <th filter="on">Plaats doel</th>
 
             <th filter="on">Vereniging</th>
 
             {% if toon_cwzs %}
                 <th filter="on">CWZ(s)</th>
+            {% endif %}
+
+            {% if toon_ledental %}
+                <th>Aantal leden</th>
             {% endif %}
         </tr>
     </thead>
@@ -67,7 +75,11 @@
                 <td class="center-align">{{ obj.regio.regio_nr }}</td>
             {% endif %}
 
-            <td>{{ obj.plaats }}</td>
+            {% if obj.plaats %}
+                <td>{{ obj.plaats }}</td>
+            {% else %}
+                <td><i>Geen</i></td>
+            {% endif %}
 
             <td>[{{ obj.nhb_nr }}] {{ obj.naam }}</td>
 
@@ -77,6 +89,10 @@
                         {{ obj.volledige_naam }}
                     {% endfor %}
                 </td>
+            {% endif %}
+
+            {% if toon_ledental %}
+                <td{% if obj.aantal_leden >= 100 %} class="blue-text"{% endif %}>{{ obj.aantal_leden }}</td>
             {% endif %}
         </tr>
     {% endfor %}
