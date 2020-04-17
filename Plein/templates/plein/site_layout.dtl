@@ -175,6 +175,10 @@
                         myTableFilter(inputs[0], table.id);
                     }
                 }
+
+                // evalueer de posities van de labels van de forms
+                // zodat het label niet over het ingevulde input veld staat
+                M.updateTextFields();
             });
         </script>
 
