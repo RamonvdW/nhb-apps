@@ -34,6 +34,12 @@ def account_otp_controleer(request, account, code):
         Returns: True:  Gelukt
                  False: Mislukt
     """
+    if not request.user.is_authenticated:
+        return False
+
+    if not request.user.otp_is_actief:
+        return False
+
     from_ip = get_safe_from_ip(request)
 
     otp = pyotp.TOTP(account.otp_code)
@@ -63,6 +69,9 @@ def account_otp_koppel(request, account, code):
         Returns: True:  Gelukt
                  False: Mislukt
     """
+    if not request.user.is_authenticated:
+        return False
+
     from_ip = get_safe_from_ip(request)
 
     otp = pyotp.TOTP(account.otp_code)
@@ -82,6 +91,7 @@ def account_otp_koppel(request, account, code):
                        activiteit='Gebruiker %s OTP koppeling controle mislukt vanaf IP %s' % (
                        repr(account.username), from_ip))
     my_logger.info('%s 2FA koppeling mislukte controle voor account %s' % (from_ip, account.username))
+    return False
 
 
 # end of file
