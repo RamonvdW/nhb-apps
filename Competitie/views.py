@@ -48,7 +48,7 @@ def zet_fase(comp):
 
     if now < comp.begin_aanmeldingen:
         # zijn de wedstrijdklassen vastgesteld?
-        if len(CompetitieKlasse.objects.filter(competitie=comp)) == 0:
+        if CompetitieKlasse.objects.filter(competitie=comp).count() == 0:
             # A1 = competitie is aangemaakt
             comp.fase = 'A1'
             return
@@ -111,7 +111,7 @@ class CompetitieOverzichtView(View):
             # for
 
         context['object_list'] = objs
-        context['have_active_comps'] = (len(objs) > 0)
+        context['have_active_comps'] = len(objs) > 0
 
         # kies de competities waarvoor de beheerder getoond kunnen worden
         for obj in objs:
@@ -124,7 +124,7 @@ class CompetitieOverzichtView(View):
             # als er nog geen competitie is voor het huidige jaar, geeft de BB dan de optie om deze op te starten
             beginjaar = models_bepaal_startjaar_nieuwe_competitie()
             context['nieuwe_seizoen'] = "%s/%s" % (beginjaar, beginjaar+1)
-            context['bb_kan_competitie_aanmaken'] = (len(objs.filter(begin_jaar=beginjaar)) == 0)
+            context['bb_kan_competitie_aanmaken'] = (objs.filter(begin_jaar=beginjaar).count() == 0)
 
         return context, TEMPLATE_COMPETITIE_OVERZICHT_BEHEERDER
 
@@ -299,7 +299,7 @@ class KlassegrenzenView(UserPassesTestMixin, TemplateView):
         jaar = 1 + models_bepaal_startjaar_nieuwe_competitie()
         self.wedstrijdjaar = jaar
 
-        if len(HistCompetitie.objects.all()) < 1:
+        if HistCompetitie.objects.count() < 1:
             # geen historische competitiedata aanwezig
             self.seizoen = "FOUT - GEEN DATA AANWEZIG"
             return list()
@@ -397,7 +397,7 @@ class KlassegrenzenView(UserPassesTestMixin, TemplateView):
         afstand = kwargs['afstand'][:2]
 
         objs = Competitie.objects.filter(afstand=afstand, is_afgesloten=False)
-        if len(objs) == 0:
+        if objs.count() == 0:
             # onverwachts here
             return redirect('Plein:plein')
         obj = objs[0]
@@ -417,7 +417,7 @@ class KlassegrenzenView(UserPassesTestMixin, TemplateView):
         """
         afstand = kwargs['afstand']
         objs = Competitie.objects.filter(afstand=afstand, is_afgesloten=False)
-        if len(objs) > 0:
+        if objs.count() > 0:
             comp = objs[0]
             schrijf_in_logboek(request.user, 'Competitie', 'Klassegrenzen bevestigd voor %s' % comp.beschrijving)
             # haal dezelfde data op als voor de GET request
