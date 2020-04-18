@@ -31,6 +31,8 @@ then
     # convert Function.testfile.TestCase.test_functie into "Function"
     # also works for just "Function"
     FOCUS=$(echo "$ARGS" | cut -d'.' -f1)
+    # support Func1 Func2 by converting to Func1|Func2
+    FOCUS=$(echo "$FOCUS" | sed 's/ /|/')
     echo "[INFO] Focus set to: $FOCUS"
 fi
 
