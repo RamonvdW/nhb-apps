@@ -177,12 +177,12 @@ class TestCompetitie(E2EHelpers, TestCase):
 
         # gebruik een post om de competitie aan te laten maken
         # geen parameters nodig
-        self.assertEqual(len(Competitie.objects.all()), 0)
-        self.assertEqual(len(DeelCompetitie.objects.all()), 0)
+        self.assertEqual(Competitie.objects.count(), 0)
+        self.assertEqual(DeelCompetitie.objects.count(), 0)
         resp = self.client.post(self.url_aanmaken)
         self.assert_is_redirect(resp, self.url_overzicht)
-        self.assertEqual(len(Competitie.objects.all()), 2)
-        self.assertEqual(len(DeelCompetitie.objects.all()), 2*(1 + 4 + 16))
+        self.assertEqual(Competitie.objects.count(), 2)
+        self.assertEqual(DeelCompetitie.objects.count(), 2*(1 + 4 + 16))
 
         obj = Competitie.objects.all()[0]
         self.assertTrue(len(str(obj)) != "")
@@ -236,10 +236,10 @@ class TestCompetitie(E2EHelpers, TestCase):
         # TODO: check de aangeboden data
 
         # nu kunnen we met een POST de klassegrenzen vaststellen
-        self.assertEqual(len(CompetitieKlasse.objects.all()), 0)       # TODO: filter op Competitie
+        self.assertEqual(CompetitieKlasse.objects.count(), 0)       # TODO: filter op Competitie
         resp = self.client.post(self.url_klassegrenzen_18)
         self.assert_is_redirect(resp, self.url_overzicht)
-        self.assertNotEqual(len(CompetitieKlasse.objects.all()), 0)    # TODO: filter op Competitie
+        self.assertNotEqual(CompetitieKlasse.objects.count(), 0)    # TODO: filter op Competitie
         # TODO: check nog meer velden van de aangemaakte objecten
 
         # coverage
@@ -264,8 +264,8 @@ class TestCompetitie(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_cwz)
 
         # meld de schutterboog aan
-        self.assertEqual(len(SchutterBoog.objects.all()), 1)
-        self.assertEqual(len(RegioCompetitieSchutterBoog.objects.all()), 0)
+        self.assertEqual(SchutterBoog.objects.count(), 1)
+        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
 
         comp = Competitie.objects.filter(is_afgesloten=False)[0]
 
@@ -274,7 +274,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         self.lid_100002.save()
 
         regiocompetities_schutterboog_aanmelden(self.schutterboog_100002, 8.18, None)
-        self.assertEqual(len(RegioCompetitieSchutterBoog.objects.all()), 2)    # 18 en 25 apart
+        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 2)    # 18 en 25 apart
 
         for obj in RegioCompetitieSchutterBoog.objects.all():
             self.assertEqual(obj.schutterboog, self.schutterboog_100002)
