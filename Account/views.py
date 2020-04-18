@@ -130,7 +130,7 @@ class LoginView(TemplateView):
                     for func in account_plugins_login:
                         httpresp = func(request, from_ip, account)
                         if httpresp:
-                            # plugin has decided that the user may nog login
+                            # plugin has decided that the user may not login
                             # and has generated/rendered an HttpResponse
                             return httpresp
 
