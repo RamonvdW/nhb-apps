@@ -94,7 +94,7 @@ def maak_cwz(nhb_ver, account):
     functie = Functie.objects.get(rol="CWZ", nhb_ver=nhb_ver)
 
     # kijk of dit lid al in de groep zit
-    if len(functie.accounts.filter(pk=account.pk)) == 0:
+    if functie.accounts.filter(pk=account.pk).count() == 0:
         # nog niet gekoppeld aan de functie --> koppel dit account nu
         functie.accounts.add(account)
         return True
@@ -114,16 +114,16 @@ def account_needs_vhpg(account, show_only=False):
 
     # kijk of de acceptatie recent al afgelegd is
     try:
-        vhpg = HanterenPersoonsgegevens.objects.get(account=account)
+        vhpg = HanterenPersoonsgegevens.objects.only('acceptatie_datum').get(account=account)
     except HanterenPersoonsgegevens.DoesNotExist:
         # niet uitgevoerd, wel nodig
         return True, None
 
     # elke 11 maanden moet de verklaring afgelegd worden
     # dit is ongeveer (11/12)*365 == 365-31 = 334 dagen
-    next = vhpg.acceptatie_datum + datetime.timedelta(days=334)
+    opnieuw = vhpg.acceptatie_datum + datetime.timedelta(days=334)
     now = timezone.now()
-    return next < now, vhpg
+    return opnieuw < now, vhpg
 
 
 def account_needs_otp(account):
@@ -140,7 +140,7 @@ def account_needs_otp(account):
             return True
 
         # alle functies hebben OTP nodig
-        if len(account.functie_set.all()) > 0:
+        if account.functie_set.count() > 0:
             return True
 
     return False
