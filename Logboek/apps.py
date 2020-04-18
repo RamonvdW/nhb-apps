@@ -18,7 +18,7 @@ def post_migration_callback(sender, **kwargs):
     from .models import LogboekRegel, schrijf_in_logboek
 
     # schrijf het nieuw versienummer in het logboek
-    if len(LogboekRegel.objects.filter(gebruikte_functie='Uitrol', activiteit=msg)) == 0:
+    if LogboekRegel.objects.filter(gebruikte_functie='Uitrol', activiteit=msg).count() == 0:
         schrijf_in_logboek(None, 'Uitrol', msg)  # pragma: no cover
 
 
