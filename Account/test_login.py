@@ -289,7 +289,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
         resp = self.client.post('/account/login/', {'login_naam': 'metmail@test.com', 'wachtwoord': E2EHelpers.WACHTWOORD, 'next': '/account/logout'}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        # redirect is naar de 'next' pagia
+        # redirect is naar de 'next' pagina
         self.assert_template_used(resp, ('account/uitloggen.dtl', 'plein/site_layout.dtl'))
 
     def test_login_next_bad_al_ingelogd(self):
@@ -321,37 +321,6 @@ class TestAccountLogin(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('account/uitloggen.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'Uitloggen')
 
-    def test_login_nieuwe_email_uit_crm(self):
-        # TODO: verplaats deze test naar NhbStructuur
-        # koppel account metmail aan NHB lid met ander email en log in
-        self.nhblid1.account = self.account_metmail
-        self.nhblid1.save()
-
-        # test inlog via het inlog formulier, met een email adres
-        resp = self.client.post('/account/login/', {'login_naam': 'metmail@test.com', 'wachtwoord': E2EHelpers.WACHTWOORD}, follow=True)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        # redirect is naar de nieuwe-email pagina
-        self.assert_template_used(resp, ('account/nieuwe-email.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, 'rd#')
-        self.assertContains(resp, '@gmail.not')     # was: @test.com
-
-    def test_login_oude_email_uit_crm(self):
-        # koppel account metmail aan NHB lid met ander email en log in
-        # TODO: verplaats deze test naar NhbStructuur
-        self.nhblid1.account = self.account_metmail
-        self.nhblid1.save()
-        self.email_metmail.bevestigde_email = self.nhblid1.email
-        self.email_metmail.save()
-
-        # test inlog via het inlog formulier, met een email adres
-        resp = self.client.post('/account/login/', {'login_naam': self.account_metmail.username, 'wachtwoord': E2EHelpers.WACHTWOORD},
-                                follow=True)
-        self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_html_ok(resp)
-        # redirect is naar het plein
-        self.assert_template_used(resp, ('plein/plein-schutter.dtl', 'plein/site_layout.dtl'))
-
     def test_nieuwe_email_bad(self):
         # nieuwe-email pagina ophalen zonder inlog
         self.e2e_logout()
@@ -367,6 +336,5 @@ class TestAccountLogin(E2EHelpers, TestCase):
 
         self.e2e_assert_other_http_commands_not_supported('/account/nieuwe-email/')
 
-# TODO: gebruik assert_other_http_commands_not_supported
 
 # end of file
