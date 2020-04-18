@@ -255,7 +255,7 @@ def regiocompetities_schutterboog_aanmelden(schutterboog, gem18, gem25):
             gem = AG_NUL
 
         # voorkom dubbele aanmelding
-        if len(RegioCompetitieSchutterBoog.objects.filter(deelcompetitie=deelcompetitie, schutterboog=schutterboog)) == 0:
+        if RegioCompetitieSchutterBoog.objects.filter(deelcompetitie=deelcompetitie, schutterboog=schutterboog).count() == 0:
             aanmelding = RegioCompetitieSchutterBoog()
             aanmelding.deelcompetitie = deelcompetitie
             aanmelding.schutterboog = schutterboog
