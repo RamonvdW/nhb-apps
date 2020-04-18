@@ -10,6 +10,7 @@ from Account.rechten import account_add_plugin_rechten, account_rechten_is_otp_v
 from NhbStructuur.models import NhbVereniging
 from Overig.helpers import get_safe_from_ip
 from .models import Functie, account_needs_vhpg, account_needs_otp
+from types import SimpleNamespace
 import logging
 import enum
 
@@ -70,7 +71,31 @@ def rol_zet_plugins(expandeer_functie):
     rol_expandeer_functies.append(expandeer_functie)
 
 
-def rol_zet_sessionvars_na_login(account, request):
+def rol_bepaal_hulp_rechten(functie_cache, nhbver_cache, rol, functie_pk):
+    nwe_functies = list()
+
+    # CWZ is eindstation, dus geen tijd aan spenderen
+    if rol != Rollen.ROL_CWZ:
+        functie = functie_cache[functie_pk].obj
+        parent_tup = (rol, functie_pk)
+        for func in rol_expandeer_functies:
+            for nwe_tup in func(functie_cache, nhbver_cache, rol, functie):
+                tup = (nwe_tup, parent_tup)
+                nwe_functies.append(tup)
+            # for
+        # for
+
+        # print("rol_bepaal_hulp_rechten:")
+        # print("   in: rol=%s, functie_pk=%s" % (rol, functie_pk))
+        # if len(nwe_functies):
+        #     for tup in nwe_functies:
+        #         print("  out: %s" % repr(tup))
+        # else:
+        #     print("  out: []")
+    return nwe_functies
+
+
+def rol_zet_sessionvars(account, request):
     """ zet een paar session variabelen die gebruikt worden om de rol te beheren
         deze functie wordt aangeroepen vanuit de Account.LoginView
 
@@ -79,6 +104,32 @@ def rol_zet_sessionvars_na_login(account, request):
     """
     rollen_vast = list()            # list of rol
     rollen_functies = list()        # list of tuple(rol, functie_pk)
+
+    # lees de functie tabel eenmalig in en kopieer alle informatie
+    # om verdere queries te voorkomen
+    functie_cache = dict()
+    for obj in Functie.objects.\
+                   select_related('nhb_rayon', 'nhb_regio', 'nhb_regio__rayon', 'nhb_ver').\
+                   only('rol', 'comp_type', 'nhb_rayon__rayon_nr', 'nhb_regio__rayon__rayon_nr', 'nhb_ver__nhb_nr').\
+                   all():
+        func = SimpleNamespace()
+        func.pk = obj.pk
+        func.obj = obj
+        func.rol = obj.rol
+        if func.rol == "BKO":
+            func.comp_type = obj.comp_type
+        if func.rol == "RKO":
+            func.rayon_nr = obj.nhb_rayon.rayon_nr
+            func.comp_type = obj.comp_type
+        elif func.rol == "RCL":
+            func.regio_rayon_nr = obj.nhb_regio.rayon.rayon_nr
+            func.comp_type = obj.comp_type
+        elif func.rol == "CWZ":
+            func.ver_nhb_nr = obj.nhb_ver.nhb_nr
+        functie_cache[obj.pk] = func
+    # for
+
+    nhbver_cache = dict()          # wordt gevuld als er behoefte is
 
     if account.is_authenticated:
         show_vhpg, _ = account_needs_vhpg(account)
@@ -92,7 +143,7 @@ def rol_zet_sessionvars_na_login(account, request):
 
                 for func in rol_expandeer_functies:
                     parent_tup = (Rollen.ROL_BB, None)
-                    for nwe_tup in func(Rollen.ROL_BB, None):
+                    for nwe_tup in func(functie_cache, nhbver_cache, Rollen.ROL_BB, None):
                         tup = (nwe_tup, parent_tup)
                         rollen_functies.append(tup)
                     # for
@@ -100,7 +151,7 @@ def rol_zet_sessionvars_na_login(account, request):
 
             # analyseer de gekoppelde functies van dit account
             parent_tup = (None, None)
-            for functie in account.functie_set.all():
+            for functie in account.functie_set.only('rol').all():
                 rol = None
                 if functie.rol == "BKO":
                     rol = Rollen.ROL_BKO
@@ -119,26 +170,21 @@ def rol_zet_sessionvars_na_login(account, request):
             # probeer elke rol nog verder te expanderen
             te_doorzoeken = rollen_functies[:]
             while len(te_doorzoeken) > 0:
-                nwe_functies = list()
-                for child_tup, dummy in te_doorzoeken:
-                    rol, functie_pk = child_tup
-                    functie = Functie.objects.get(pk=functie_pk)
-                    parent_tup = (rol, functie_pk)
-                    for func in rol_expandeer_functies:
-                        for nwe_tup in func(rol, functie):
-                            tup = (nwe_tup, parent_tup)
-                            if tup not in rollen_functies:          # pragma: no branch
-                                rollen_functies.append(tup)
-                                nwe_functies.append(tup)
-                        # for
+                next_doorzoeken = list()
+                for child_tup, parent_tup in te_doorzoeken:
+                    # print("\nexpanding: child=%s, parent=%s" % (repr(child_tup), (parent_tup)))
+                    nwe_functies = rol_bepaal_hulp_rechten(functie_cache, nhbver_cache, *child_tup)
+
+                    # voorkom dupes
+                    for nwe_tup in nwe_functies:
+                        if nwe_tup not in rollen_functies:
+                            rollen_functies.append(nwe_tup)
+                            next_doorzoeken.append(nwe_tup)
                     # for
                 # for
-
-                if len(nwe_functies) > 0:
-                    te_doorzoeken = nwe_functies
-                else:
-                    te_doorzoeken = list()
+                te_doorzoeken = next_doorzoeken
             # while
+
         # if user is otp verified
     # if user is authenticated
 
@@ -152,7 +198,7 @@ def rol_zet_sessionvars_na_login(account, request):
 
     rol = Rollen.ROL_NONE
     if account.is_authenticated:
-        if len(account.nhblid_set.all()):
+        if account.nhblid_set.count():
             # koppeling met NhbLid, dus dit is een (potentiële) Schutter
             rollen_vast.append(Rollen.ROL_SCHUTTER)
             rol = Rollen.ROL_SCHUTTER
@@ -165,21 +211,17 @@ def rol_zet_sessionvars_na_login(account, request):
     request.session[SESSIONVAR_ROL_PALLET_FUNCTIES] = rollen_functies
 
 
-def rol_zet_sessionvars_na_otp_controle(account, request):
-    return rol_zet_sessionvars_na_login(account, request)
-
-
 def rol_plugin_rechten(request, account):
     """ Deze functie wordt aangeroepen vanuit diverse punten in Account.views
         om de [mogelijk gewijzigde] rechten te laten evalueren en onthouden in session variabelen.
 
         Geen return value
     """
-    rol_zet_sessionvars_na_login(account, request)
+    rol_zet_sessionvars(account, request)
 
 
 def rol_enum_pallet(request):
-    """ Itereert over de mogelijke rollen in het pallet van deze gebruiker
+    """ Doorloop over de mogelijke rollen in het pallet van deze gebruiker
         elke yield geeft twee tuples (Rollen.ROL_xx, Group) van het de rol en zijn 'ouder', waar de rol uit ontstaan is
         waarbij elk veld None is indien het niet van toepassing is.
     """
@@ -194,7 +236,7 @@ def rol_enum_pallet(request):
         # for
         # let op: session heeft de tuples omgezet in een lijst!
         for child_tup, parent_tup in rollen_functies:
-            yield (tuple(child_tup), tuple(parent_tup))
+            yield tuple(child_tup), tuple(parent_tup)
         # for
 
 
@@ -223,11 +265,12 @@ def rol_get_huidige_functie(request):
         # geen functie opgeslagen
         pass
     else:
-        try:
-            functie = Functie.objects.get(pk=functie_pk)
-        except Functie.DoesNotExist:
-            # onverwacht!
-            pass
+        if functie_pk:
+            try:
+                functie = Functie.objects.get(pk=functie_pk)
+            except Functie.DoesNotExist:
+                # onverwacht!
+                pass
 
     return rol, functie
 
@@ -241,7 +284,7 @@ def rol_get_beschrijving(request):
 
 def rol_bepaal_beschrijving(rol, functie_pk=None):
     if functie_pk:
-        functie = Functie.objects.get(pk=functie_pk)
+        functie = Functie.objects.only('beschrijving').get(pk=functie_pk)
         functie_naam = functie.beschrijving
     else:
         functie_naam = ""
@@ -283,7 +326,6 @@ def rol_activeer_rol(request, rolurl):
         try:
             rollen_vast = request.session[SESSIONVAR_ROL_PALLET_VAST]
         except KeyError:
-            #print("rol_activeer_rol: rollen_vast niet verkrijgbaar")
             pass
         else:
             # kijk of dit een toegestane rol is
@@ -334,50 +376,68 @@ def rol_evalueer_opnieuw(request):
         zoals na het aanmaken van een nieuwe competitie.
         Hierdoor hoeft de gebruiker niet opnieuw in te loggen om deze mogelijkheden te krijgen.
     """
-
     rol, functie = rol_get_huidige_functie(request)
-    rol_zet_sessionvars_na_otp_controle(request.user, request)
+    rol_zet_sessionvars(request.user, request)
     if functie:
         rol_activeer_functie(request, functie.pk)
     else:
         rol_activeer_rol(request, rol2url[rol])
 
 
-def functie_expandeer_rol(rol_in, functie_in):
+def functie_expandeer_rol(functie_cache, nhbver_cache, rol_in, functie_in):
     """ Plug-in van de Functie.rol module om een groep/functie te expanderen naar onderliggende functies
         Voorbeeld: RKO rayon 3 --> RCL regios 109, 110, 111, 112
         Deze functie yield (rol, functie_pk)
     """
     if rol_in == Rollen.ROL_BB:
         # deze rol mag de functie BKO aannemen
-        for obj in Functie.objects.filter(rol='BKO'):
-            yield Rollen.ROL_BKO, obj.pk
+        for pk, obj in functie_cache.items():
+            if obj.rol == 'BKO':
+                yield Rollen.ROL_BKO, obj.pk
         # for
 
     if functie_in:
         if functie_in.rol == "BKO":
             # expandeer naar de RKO rollen
-            for obj in Functie.objects.filter(comp_type=functie_in.comp_type, rol='RKO'):
-                yield Rollen.ROL_RKO, obj.pk
+            for pk, obj in functie_cache.items():
+                if obj.rol == 'RKO' and obj.comp_type == functie_in.comp_type:
+                    yield Rollen.ROL_RKO, obj.pk
             # for
 
         if functie_in.rol == "RKO":
             # expandeer naar de RCL rollen binnen het rayon
-            for obj in Functie.objects.filter(comp_type=functie_in.comp_type, rol='RCL', nhb_regio__rayon=functie_in.nhb_rayon):
-                yield Rollen.ROL_RCL, obj.pk
+            for pk, obj in functie_cache.items():
+                if obj.rol == 'RCL' and obj.comp_type == functie_in.comp_type:
+                    if obj.regio_rayon_nr == functie_in.nhb_rayon.rayon_nr:
+                        yield Rollen.ROL_RCL, obj.pk
             # for
 
         if functie_in.rol == "RCL":
             # expandeer naar de CWZ rollen binnen de regio
             # vind alle verenigingen in deze regio
-            for ver in NhbVereniging.objects.filter(regio=functie_in.nhb_regio):
-                # zoek de CWZ functie van deze vereniging
-                try:
-                    functie = Functie.objects.get(rol='CWZ', nhb_ver=ver)
-                except Functie.DoesNotExist:
-                    pass
-                else:
-                    yield Rollen.ROL_CWZ, functie.pk
+            if len(nhbver_cache) == 0:
+                for ver in NhbVereniging.objects.\
+                                select_related('regio').\
+                                only('nhb_nr', 'regio__regio_nr').\
+                                all():
+                    store = SimpleNamespace()
+                    store.pk = ver.pk
+                    store.nhb_nr = ver.nhb_nr
+                    store.regio_nr = ver.regio.regio_nr
+                    nhbver_cache[store.nhb_nr] = store
+                # for
+
+            # zoek alle verenigingen in de regio van deze RCL
+            verenigingen = list()
+            for nhb_nr, ver in nhbver_cache.items():
+                if ver.regio_nr == functie_in.nhb_regio.regio_nr:
+                    verenigingen.append(nhb_nr)
+            # for
+
+            # zoek de CWZ functies op
+            for pk, obj in functie_cache.items():
+                if obj.rol == 'CWZ' and obj.ver_nhb_nr in verenigingen:
+                    yield Rollen.ROL_CWZ, obj.pk
             # for
 
 
