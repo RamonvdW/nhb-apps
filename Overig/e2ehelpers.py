@@ -35,7 +35,7 @@ class E2EHelpers(object):
         account_create(username, self.WACHTWOORD, email, voornaam)
         account = Account.objects.get(username=username)
 
-        # zet OTP actief (een test kan deze altijd weer uitzettenb)
+        # zet OTP actief (een test kan deze altijd weer uit zetten)
         account.otp_code = "whatever"
         account.otp_is_actief = True
         account.save()
