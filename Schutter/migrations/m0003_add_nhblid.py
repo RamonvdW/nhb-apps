@@ -16,7 +16,7 @@ def zet_nhblid(apps, schema_editor):
 
     # zoek voor elke SchutterBoog met het NhbLid dat bij het Account past
     for obj in schutterboog_klas.objects.all():              # pragma: no cover
-        if len(obj.account.nhblid_set.all()) > 0:
+        if obj.account.nhblid_set.count() > 0:
             obj.nhblid = obj.account.nhblid_set.all()[0]
             obj.account = None
             obj.save()
