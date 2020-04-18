@@ -274,29 +274,29 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         url = '/functie/wijzig/%s/ontvang/' % self.functie_bko.pk
 
         # koppel beheerder1
-        self.assertEqual(len(self.functie_bko.accounts.all()), 0)
+        self.assertEqual(self.functie_bko.accounts.count(), 0)
         resp = self.client.post(url, {'add': self.account_beh1.pk}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/wijzig.dtl', 'plein/site_layout.dtl'))
-        self.assertEqual(len(self.functie_bko.accounts.all()), 1)
+        self.assertEqual(self.functie_bko.accounts.count(), 1)
 
         # koppel beheerder2
         resp = self.client.post(url, {'add': self.account_beh2.pk}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertEqual(len(self.functie_bko.accounts.all()), 2)
+        self.assertEqual(self.functie_bko.accounts.count(), 2)
 
         # ontkoppel beheerder1
         resp = self.client.post(url, {'drop': self.account_beh1.pk}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertEqual(len(self.functie_bko.accounts.all()), 1)
+        self.assertEqual(self.functie_bko.accounts.count(), 1)
 
         # poog lager dan een BKO te koppelen
         url = '/functie/wijzig/%s/ontvang/' % self.functie_rko3.pk
-        self.assertEqual(len(self.functie_rko3.accounts.all()), 0)
+        self.assertEqual(self.functie_rko3.accounts.count(), 0)
         resp = self.client.post(url, {'add': self.account_beh1.pk}, follow=True)
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
-        self.assertEqual(len(self.functie_rko3.accounts.all()), 0)
+        self.assertEqual(self.functie_rko3.accounts.count(), 0)
 
         # probeer een GET
         resp = self.client.get('/functie/wijzig/123/ontvang/')
@@ -325,18 +325,18 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
 
         # koppel de RKO
         url = '/functie/wijzig/%s/ontvang/' % self.functie_rko3.pk
-        self.assertEqual(len(self.functie_rko3.accounts.all()), 0)
+        self.assertEqual(self.functie_rko3.accounts.count(), 0)
         resp = self.client.post(url, {'add': self.account_beh2.pk}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertEqual(len(self.functie_rko3.accounts.all()), 1)
+        self.assertEqual(self.functie_rko3.accounts.count(), 1)
 
         # check dat de BKO geen RCL kan koppelen
         # juiste URL om RCL te koppelen
         url = '/functie/wijzig/%s/ontvang/' % self.functie_rcl111.pk
-        self.assertEqual(len(self.functie_rcl111.accounts.all()), 0)
+        self.assertEqual(self.functie_rcl111.accounts.count(), 0)
         resp = self.client.post(url, {'add': self.account_beh2.pk}, follow=False)
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
-        self.assertEqual(len(self.functie_rcl111.accounts.all()), 0)
+        self.assertEqual(self.functie_rcl111.accounts.count(), 0)
 
         # probeer als bezoeker (corner case coverage)
         # (admin kan geen schutter worden)
@@ -356,23 +356,23 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
 
         # koppel een RCL van het juiste rayon
         url = '/functie/wijzig/%s/ontvang/' % self.functie_rcl111.pk
-        self.assertEqual(len(self.functie_rcl111.accounts.all()), 0)
+        self.assertEqual(self.functie_rcl111.accounts.count(), 0)
         resp = self.client.post(url, {'add': self.account_beh1.pk}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertEqual(len(self.functie_rcl111.accounts.all()), 1)
+        self.assertEqual(self.functie_rcl111.accounts.count(), 1)
 
         # koppel een RCL van het verkeerde rayon
         url = '/functie/wijzig/%s/ontvang/' % self.functie_rcl101.pk
         resp = self.client.post(url, {'add': self.account_beh1.pk}, follow=True)
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
-        self.assertEqual(len(self.functie_rcl111.accounts.all()), 1)
+        self.assertEqual(self.functie_rcl111.accounts.count(), 1)
 
         # poog een andere rol te koppelen
         url = '/functie/wijzig/%s/ontvang/' % self.functie_rko3.pk
-        self.assertEqual(len(self.functie_rko3.accounts.all()), 0)
+        self.assertEqual(self.functie_rko3.accounts.count(), 0)
         resp = self.client.post(url, {'add': self.account_beh1.pk}, follow=True)
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
-        self.assertEqual(len(self.functie_rko3.accounts.all()), 0)
+        self.assertEqual(self.functie_rko3.accounts.count(), 0)
 
     def test_koppel_rcl(self):
         # RCL mag niets
@@ -386,10 +386,10 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
 
         # poog een andere rol te koppelen
         url = '/functie/wijzig/%s/ontvang/' % self.functie_rcl101.pk
-        self.assertEqual(len(self.functie_rcl101.accounts.all()), 0)
+        self.assertEqual(self.functie_rcl101.accounts.count(), 0)
         resp = self.client.post(url, {'add': self.account_beh1.pk}, follow=True)
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
-        self.assertEqual(len(self.functie_rcl101.accounts.all()), 0)
+        self.assertEqual(self.functie_rcl101.accounts.count(), 0)
 
     def test_koppel_cwz(self):
         # CWZ mag zijn eigen leden koppelen: beh2
@@ -409,20 +409,20 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
 
         # koppel een CWZ uit de eigen gelederen
         url = '/functie/wijzig/%s/ontvang/' % self.functie_cwz.pk
-        self.assertEqual(len(self.functie_cwz.accounts.all()), 1)
+        self.assertEqual(self.functie_cwz.accounts.count(), 1)
         resp = self.client.post(url, {'add': self.account_beh2.pk}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertEqual(len(self.functie_cwz.accounts.all()), 2)
+        self.assertEqual(self.functie_cwz.accounts.count(), 2)
 
         # poog een NHB lid te koppelen dat niet lid is van de vereniging
         resp = self.client.post(url, {'add': self.account_ander.pk}, follow=True)
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
-        self.assertEqual(len(self.functie_cwz.accounts.all()), 2)
+        self.assertEqual(self.functie_cwz.accounts.count(), 2)
 
         # poog een niet-NHB lid account te koppelen
         resp = self.client.post(url, {'add': self.account_admin.pk}, follow=True)
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
-        self.assertEqual(len(self.functie_cwz.accounts.all()), 2)
+        self.assertEqual(self.functie_cwz.accounts.count(), 2)
 
         # probeer een verkeerde vereniging te wijzigen
         url = '/functie/wijzig/%s/ontvang/' % self.functie_cwz2.pk

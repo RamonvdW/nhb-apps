@@ -73,15 +73,15 @@ class TestFunctieRol(E2EHelpers, TestCase):
         lid.save()
 
     def test_maak_cwz(self):
-        self.assertEqual(len(self.functie_cwz.accounts.all()), 0)
+        self.assertEqual(self.functie_cwz.accounts.count(), 0)
         added = maak_cwz(self.nhbver1, self.account_normaal)
         self.assertTrue(added)
-        self.assertEqual(len(self.functie_cwz.accounts.all()), 1)
+        self.assertEqual(self.functie_cwz.accounts.count(), 1)
 
         # opnieuw toevoegen heeft geen effect
         added = maak_cwz(self.nhbver1, self.account_normaal)
         self.assertFalse(added)
-        self.assertEqual(len(self.functie_cwz.accounts.all()), 1)
+        self.assertEqual(self.functie_cwz.accounts.count(), 1)
 
     def test_geen_sessie(self):
         # probeer beveiliging tegen afwezigheid sessie variabelen

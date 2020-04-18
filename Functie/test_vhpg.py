@@ -94,7 +94,7 @@ class TestFunctieVHPG(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('functie/vhpg-acceptatie.dtl', 'plein/site_layout.dtl'))
         self.assertNotContains(resp, 'verplicht')
 
-        self.assertEqual(len(HanterenPersoonsgegevens.objects.all()), 0)
+        self.assertEqual(HanterenPersoonsgegevens.objects.count(), 0)
         needs_vhpg, _ = account_needs_vhpg(self.account_admin)
         self.assertTrue(needs_vhpg)
 
@@ -105,7 +105,7 @@ class TestFunctieVHPG(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('functie/vhpg-acceptatie.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'verplicht')
 
-        self.assertEqual(len(HanterenPersoonsgegevens.objects.all()), 0)
+        self.assertEqual(HanterenPersoonsgegevens.objects.count(), 0)
 
         # voer de post uit met checkbox wel gezet (waarde maakt niet uit)
         resp = self.client.post(self.url_acceptatie, {'accepteert': 'whatever'}, follow=True)
@@ -113,7 +113,7 @@ class TestFunctieVHPG(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
 
-        self.assertEqual(len(HanterenPersoonsgegevens.objects.all()), 1)
+        self.assertEqual(HanterenPersoonsgegevens.objects.count(), 1)
         needs_vhpg, _ = account_needs_vhpg(self.account_admin)
         self.assertFalse(needs_vhpg)
 
