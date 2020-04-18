@@ -470,7 +470,10 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
             elif parent_tup == (None, None):
                 # top-level rol voor deze gebruiker - deze altijd tonen
                 url = reverse('Functie:activeer-rol-functie', kwargs={'functie_pk': functie_pk})
-                functie = Functie.objects.only('beschrijving', 'nhb_ver__naam').select_related('nhb_ver').get(pk=functie_pk)
+                functie = Functie.objects.\
+                            select_related('nhb_ver').\
+                            only('beschrijving', 'nhb_ver__naam').\
+                            get(pk=functie_pk)
                 title = functie.beschrijving
                 if functie.nhb_ver:
                     ver_naam = functie.nhb_ver.naam
