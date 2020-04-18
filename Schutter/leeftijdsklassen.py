@@ -26,7 +26,7 @@ def leeftijdsklassen_plugin_na_login(request, from_ip, account):
             gebruiker_rol_mag_wisselen: gebruik van de Plein.WisselVanRolView
     """
 
-    if len(account.nhblid_set.all()) > 0:
+    if account.nhblid_set.count() > 0:
         nhblid = account.nhblid_set.all()[0]
 
         huidige_jaar = timezone.now().year      # TODO: check for correctness in last hours of the year (due to timezone)
