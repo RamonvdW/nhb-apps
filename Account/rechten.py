@@ -8,7 +8,6 @@
 SESSIONVAR_ACCOUNT_IS_OTP_VERIFIED = "account_otp_verified"
 
 
-# TODO: overweeg om Django Signals te gebruiken
 # rechten plugins zijn functies die reageren op het veranderen van de rechten van
 # een gebruiker. Typische wordt iets uitgezocht en opgeslagen in sessie variables.
 account_plugins_rechten = list()
