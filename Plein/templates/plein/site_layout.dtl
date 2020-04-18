@@ -141,8 +141,14 @@
                 // doorzoek de header kolommen op filter=on
                 var filter_kolommen = new Array();
                 for (var i=0, row; row = table.tHead.rows[i]; i++) {        // stops when row=null
-                    for (var j=0, cell; cell = row.cells[j]; j++) {         // stops when cell=null
-                        if (cell.hasAttribute('filter')) filter_kolommen.push(j);
+                    for (var j=0, col_nr=0, cell; cell = row.cells[j]; j++) {         // stops when cell=null
+                        if (cell.hasAttribute('filter')) filter_kolommen.push(col_nr);
+                        if (cell.hasAttribute('colSpan')) {
+                            //console.log('cell with colSpan: ', cell.colSpan);
+                            col_nr += cell.colSpan;
+                        } else {
+                            col_nr += 1;
+                        }
                     }
                 }
                 //console.log('kolom nummers met filter: ', filter_kolommen);
