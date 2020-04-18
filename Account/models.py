@@ -85,7 +85,6 @@ class Account(AbstractUser):
             voor in het menu.
             Vanuit template: user.get_first_name
         """
-        # TODO: werkt dit ook nog goed voor niet-NHB leden die een e-mail als username hebben?
         return self.first_name or self.username
 
     def volledige_naam(self):
@@ -115,7 +114,7 @@ class Account(AbstractUser):
         """ helper om de email van de gebruiker te krijgen voor djangosaml2idp
             zodat deze doorgegeven kan worden aan een Service Provider zoals de Wiki server
         """
-        if len(self.accountemail_set.all()) == 1:
+        if self.accountemail_set.count() == 1:
             email = self.accountemail_set.all()[0].bevestigde_email
         else:
             email = ""
@@ -241,7 +240,7 @@ def account_check_gewijzigde_email(account):
                  of: None, None
     """
 
-    if len(account.accountemail_set.all()) == 1:
+    if account.accountemail_set.count() == 1:
         email = account.accountemail_set.all()[0]
 
         if email.nieuwe_email:
