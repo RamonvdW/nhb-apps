@@ -74,7 +74,7 @@ class HistCompAlleJarenView(ListView):
 
         context['seizoen'] = self.seizoen
 
-        if len(HistCompetitie.objects.filter(seizoen=self.seizoen, is_team=True)) > 0:
+        if HistCompetitie.objects.filter(seizoen=self.seizoen, is_team=True).count() > 0:
             context['show_team'] = True
 
         menu_dynamics(self.request, context, 'histcomp')
