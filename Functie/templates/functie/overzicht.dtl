@@ -44,11 +44,11 @@
                 <td>{{ obj.beschrijving }}</td>
 
                 <td>
-                {% for beheerder in obj.accounts.all %}
+                {% for beheerder in obj.beheerders %}
                     {% if not forloop.first %}
                         <br>
                     {% endif %}
-                    <span>{{ beheerder.volledige_naam }}</span>
+                    <span>{{ beheerder }}</span>
                 {% empty %}
                     <i>Nog niet gekoppeld</i>
                 {% endfor %}

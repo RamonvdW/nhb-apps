@@ -97,7 +97,7 @@ def mag_wijzigen_of_404(request, functie):
 
 def account_is_lid_bij_cwz_of_404(account, functie_nu):
     """ Stel zeker dat Account lid is bij de vereniging van functie_nu """
-    if len(account.nhblid_set.all()) != 1:
+    if account.nhblid_set.count() != 1:
         raise Resolver404()
 
     nhblid = account.nhblid_set.all()[0]
@@ -364,6 +364,16 @@ class OverzichtView(UserPassesTestMixin, ListView):
                         obj.wijzig_url = None
         # for
 
+    def _zet_accounts(self, objs):
+        """ als we de template door functie.accounts.all() laten lopen dan resulteert
+            elke lookup in een database query voor het volledige account record.
+            Hier doen we het iets efficienter.
+        """
+        for obj in objs:
+            # TODO: ongewenste kennis over Account
+            obj.beheerders = [account.volledige_naam() for account in obj.accounts.only('username', 'first_name', 'last_name').all()]
+        # for
+
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
 
@@ -373,16 +383,19 @@ class OverzichtView(UserPassesTestMixin, ListView):
         if rol_nu == Rollen.ROL_CWZ:
             # tool alleen de hierarchy vanuit deze vereniging omhoog
             functie_cwz = functie_nu
-            objs = Functie.objects.filter(Q(rol='RCL', nhb_regio=functie_cwz.nhb_ver.regio) |
+            objs = Functie.objects.select_related('nhb_rayon', 'nhb_regio').\
+                                   filter(Q(rol='RCL', nhb_regio=functie_cwz.nhb_ver.regio) |
                                           Q(rol='RKO', nhb_rayon=functie_cwz.nhb_ver.regio.rayon) |
                                           Q(rol='BKO'))
         else:
-            objs = Functie.objects.exclude(rol='CWZ')       # TODO: verander in filter(rol__in [BKO, RKO, RCL]")
+            objs = Functie.objects.select_related('nhb_rayon', 'nhb_regio').\
+                                   exclude(rol='CWZ')       # TODO: verander in filter(rol__in [BKO, RKO, RCL]")
 
         objs = self._sorteer_functies(objs)
 
         # zet de wijzig urls, waar toegestaan
         self._zet_wijzig_urls(objs)
+        self._zet_accounts(objs)
         return objs
 
     def get_context_data(self, **kwargs):
@@ -457,7 +470,7 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
             elif parent_tup == (None, None):
                 # top-level rol voor deze gebruiker - deze altijd tonen
                 url = reverse('Functie:activeer-rol-functie', kwargs={'functie_pk': functie_pk})
-                functie = Functie.objects.get(pk=functie_pk)
+                functie = Functie.objects.only('beschrijving', 'nhb_ver__naam').select_related('nhb_ver').get(pk=functie_pk)
                 title = functie.beschrijving
                 if functie.nhb_ver:
                     ver_naam = functie.nhb_ver.naam
@@ -499,13 +512,12 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
             objs.append({'separator': True})
             for rol, functie_pk in child_tups:
                 url = reverse('Functie:activeer-rol-functie', kwargs={'functie_pk': functie_pk})
-                functie = Functie.objects.get(pk=functie_pk)
-                title = functie.beschrijving
-                if functie.rol == "CWZ":
-                    ver_naam = functie.nhb_ver.naam
+                if rol == Rollen.ROL_CWZ:
+                    functie = Functie.objects.select_related('nhb_ver').only('beschrijving', 'nhb_ver__naam').get(pk=functie_pk)
+                    objs.append({'titel': functie.beschrijving, 'ver_naam': functie.nhb_ver.naam, 'url': url})
                 else:
-                    ver_naam = ""
-                objs.append({'titel': title, 'ver_naam': ver_naam, 'url': url})
+                    functie = Functie.objects.only('beschrijving').get(pk=functie_pk)
+                    objs.append({'titel': functie.beschrijving, 'ver_naam': "", 'url': url})
             # for
 
         return objs
