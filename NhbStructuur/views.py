@@ -25,7 +25,7 @@ def nhblid_login_plugin(request, from_ip, account):
     """
 
     # zoek het NhbLid record dat bij dit account hoort
-    if len(account.nhblid_set.all()) == 1:
+    if account.nhblid_set.all().count() == 1:
         nhblid = account.nhblid_set.all()[0]
 
         if not nhblid.is_actief_lid:
