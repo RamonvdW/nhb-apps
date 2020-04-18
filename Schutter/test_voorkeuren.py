@@ -88,19 +88,19 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
         self.e2e_login(self.account_normaal)
 
         # initieel zijn er geen voorkeuren opgeslagen
-        self.assertEqual(len(SchutterBoog.objects.all()), 0)
+        self.assertEqual(SchutterBoog.objects.count(), 0)
         resp = self.client.get(self.url_voorkeuren)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('schutter/voorkeuren.dtl', 'plein/site_layout.dtl'))
 
         # na bekijken voorkeuren zijn ze aangemaakt
-        self.assertEqual(len(SchutterBoog.objects.all()), 5)
+        self.assertEqual(SchutterBoog.objects.count(), 5)
 
         # controleer dat ze niet nog een keer aangemaakt worden
         resp = self.client.get(self.url_voorkeuren)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertEqual(len(SchutterBoog.objects.all()), 5)
+        self.assertEqual(SchutterBoog.objects.count(), 5)
 
         obj = SchutterBoog.objects.get(nhblid=self.nhblid1, boogtype=self.boog_R)
         self.assertTrue(obj.heeft_interesse)
@@ -112,7 +112,7 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('schutter/voorkeuren-opgeslagen.dtl', 'plein/site_layout.dtl'))
-        self.assertEqual(len(SchutterBoog.objects.all()), 5)
+        self.assertEqual(SchutterBoog.objects.count(), 5)
 
         obj = SchutterBoog.objects.get(nhblid=self.nhblid1, boogtype=self.boog_R)
         self.assertFalse(obj.heeft_interesse)
