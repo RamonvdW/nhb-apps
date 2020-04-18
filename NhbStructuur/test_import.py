@@ -243,12 +243,12 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         lid = NhbLid.objects.get(nhb_nr="100001")
         ver = NhbVereniging.objects.get(nhb_nr="1000")
         functie = Functie.objects.get(rol="CWZ", nhb_ver=ver)
-        self.assertEqual(len(functie.accounts.all()), 1)
+        self.assertEqual(functie.accounts.count(), 1)
 
         lid = NhbLid.objects.get(nhb_nr="100024")
         ver = NhbVereniging.objects.get(nhb_nr="2000")
         functie = Functie.objects.get(rol="CWZ", nhb_ver=ver)
-        self.assertEqual(len(functie.accounts.all()), 0)
+        self.assertEqual(functie.accounts.count(), 0)
         # 100024 is nog geen CWZ omdat ze geen account heeft
 
         # maak het account van 100024 aan en probeer het nog een keer
@@ -263,7 +263,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
 
         ver = NhbVereniging.objects.get(nhb_nr="2000")
         functie = Functie.objects.get(rol="CWZ", nhb_ver=ver)
-        self.assertEqual(len(functie.accounts.all()), 1)
+        self.assertEqual(functie.accounts.count(), 1)
 
     def test_club_1377(self):
         # een paar speciale import gevallen

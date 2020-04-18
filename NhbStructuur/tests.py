@@ -50,14 +50,14 @@ class TestNhbStructuur(TestCase):
         lid.save()
 
     def test_rayons(self):
-        self.assertEqual(NhbRayon.objects.all().count(), 4)
+        self.assertEqual(NhbRayon.objects.count(), 4)
         rayon = NhbRayon.objects.get(pk=3)
         self.assertEqual(rayon.naam, "Rayon 3")
         self.assertEqual(rayon.geografisch_gebied, "Oost Brabant en Noord Limburg")
         self.assertIsNotNone(str(rayon))
 
     def test_regios(self):
-        self.assertEqual(NhbRegio.objects.all().count(), 17)
+        self.assertEqual(NhbRegio.objects.count(), 17)
         regio = NhbRegio.objects.get(pk=111)
         self.assertEqual(regio.naam, "Regio 111")
         self.assertIsNotNone(str(regio))
