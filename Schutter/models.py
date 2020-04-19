@@ -82,7 +82,6 @@ def account_create_nhb(nhb_nummer, email, nieuw_wachtwoord):
     account = Account()
     account.username = nhb_nummer
     account.set_password(nieuw_wachtwoord)
-    account.nhblid = nhblid
     account.save()
 
     # maak het email record aan
@@ -92,6 +91,10 @@ def account_create_nhb(nhb_nummer, email, nieuw_wachtwoord):
     mail.bevestigde_email = ''
     mail.nieuwe_email = email
     mail.save()
+
+    # koppelen nhblid en account
+    nhblid.account = account
+    nhblid.save()
 
     # maak de url aan om het e-mailadres te bevestigen
     url = maak_tijdelijke_url_accountemail(mail, nhb_nummer=nhb_nummer, email=email)

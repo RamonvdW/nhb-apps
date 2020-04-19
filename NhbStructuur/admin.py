@@ -26,10 +26,13 @@ class NhbVerenigingAdmin(admin.ModelAdmin):
 class NhbRayonAdmin(admin.ModelAdmin):
     """ Admin configuratie voor NhbRayon klasse """
     ordering = ('rayon_nr',)
+
     def has_change_permission(self, request, obj=None):
         return False
+
     def has_add_permission(self, request, obj=None):
         return False
+
     def has_delete_permission(self, request, obj=None):
         return False
 
@@ -37,10 +40,13 @@ class NhbRayonAdmin(admin.ModelAdmin):
 class NhbRegioAdmin(admin.ModelAdmin):
     """ Admin configuratie voor NhbRegio klasse """
     ordering = ('regio_nr',)
+
     def has_change_permission(self, request, obj=None):
         return False
+
     def has_add_permission(self, request, obj=None):
         return False
+
     def has_delete_permission(self, request, obj=None):
         return False
 

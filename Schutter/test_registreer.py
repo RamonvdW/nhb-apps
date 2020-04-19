@@ -145,6 +145,11 @@ class TestSchutterRegistreer(E2EHelpers, TestCase):
         self.assertNotContains(resp, 'rdetester@gmail.not')
         self.assertContains(resp, 'r@gmail.not')     # iets van r######r@gmail.not
 
+        account = Account.objects.get(username='100001')
+        self.assertEqual(account.get_real_name(), '100001')
+        nhblid = NhbLid.objects.get(nhb_nr=self.nhblid1.nhb_nr)
+        self.assertEqual(nhblid.account, account)
+
         # volg de link om de email te bevestigen
         objs = SiteTijdelijkeUrl.objects.all().order_by('-aangemaakt_op')       # nieuwste eerst
         self.assertTrue(len(objs) > 0)
@@ -158,14 +163,11 @@ class TestSchutterRegistreer(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('account/bevestigd.dtl', 'plein/site_layout.dtl'))
 
         account = Account.objects.get(username='100001')
-        accmail = AccountEmail.objects.get(account=account)
-        self.assertTrue(accmail.email_is_bevestigd)
+        email = AccountEmail.objects.get(account=account)
+        self.assertTrue(email.email_is_bevestigd)
 
         self.assertEqual(account.get_email(), 'rdetester@gmail.not')
 
-        self.assertEqual(account.get_real_name(), '100001')
-        self.nhblid1.account = account
-        self.nhblid1.save()
         # tijdens inlog wordt de volledige naam overgenomen
         self.e2e_login(account)
         account = Account.objects.get(username='100001')
