@@ -540,17 +540,11 @@ class LijstAangemeldRegioView(TemplateView):
                                        order_by('deelcompetitie', 'klasse__indiv__volgorde', 'aanvangsgemiddelde')
 
         volgorde = -1
-        prev_obj = None
         for obj in context['object_list']:
             if volgorde != obj.klasse.indiv.volgorde:
-                if prev_obj:
-                    prev_obj.einde_klasse = True
                 obj.nieuwe_klasse = True
                 volgorde = obj.klasse.indiv.volgorde
-            prev_obj = obj
         # for
-        if prev_obj:
-            prev_obj.einde_klasse = True
 
         menu_dynamics(self.request, context, actief='competitie')
         return context
