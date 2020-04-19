@@ -13,7 +13,7 @@
 
 <h4>Aanmeldingen regiocompetitie</h4>
 
-<p>Hieronder volgt de lijst schutters die ingeschreven zijn voor deelname aan de regiocompetitie <b>{{ competitie.beschrijving }}</b>.</p>
+<p>Hieronder volgt de lijst schutters die <u>landelijk</u> ingeschreven zijn voor deelname aan de regiocompetitie <b>{{ competitie.beschrijving }}</b>.</p>
 
 {% if object_list.count %}
 
