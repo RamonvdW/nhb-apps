@@ -25,9 +25,6 @@ class TestFunctieRol(E2EHelpers, TestCase):
         self.account_admin = self.e2e_create_account_admin()
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.nhb', 'Normaal')
 
-        self.functie_bko = maak_functie("BKO test", "BKO")
-        self.functie_rko = maak_functie("RKO test", "RKO")  # TODO: zet nhb_rayon
-        self.functie_rcl = maak_functie("RCL test", "RCL")  # TODO: zet nhb_regio
         self.functie_cwz = maak_functie("CWZ test", "CWZ")
         self.functie_tst = maak_functie("Test test", "x")
 
