@@ -237,6 +237,9 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.assertIn(self.url_wisselvanrol + 'BB/', urls)          # Manager competitiezaken
         self.assertIn(self.url_wisselvanrol + 'geen/', urls)        # Gebruiker
 
+        with self.assertRaises(ValueError):
+            self.e2e_check_rol('deze-rol-is-het-niet')
+
     def test_bko(self):
         self.functie_bko.accounts.add(self.account_normaal)
         self.e2e_account_accepteert_vhpg(self.account_normaal)
@@ -248,6 +251,9 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         urls = [url for url in self.extract_all_href_urls(resp) if url.startswith(self.url_wisselvanrol)]
         self.assertIn(self.url_wisselvanrol + 'functie/%s/' % self.functie_bko.pk, urls)
         self.assertIn(self.url_wisselvanrol + 'schutter/', urls)
+
+        self.e2e_wissel_naar_rol_schutter()
+        self.e2e_check_rol('schutter')
 
     def test_rko(self):
         self.functie_rko.accounts.add(self.account_normaal)

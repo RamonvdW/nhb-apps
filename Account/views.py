@@ -175,7 +175,7 @@ class LoginView(TemplateView):
                             return redirect(reverse('Account:nieuwe-email'))
                         # else:
                         #   geen wijziging in de email - gewoon doorgaan
-                    except AccountEmail.DoesNotExist:
+                    except AccountEmail.DoesNotExist:                       # pragma: no cover
                         # onverwachte fout
                         pass
 

@@ -70,6 +70,9 @@ class PleinView(View):
                     context['rol_is_rcl'] = True
                 elif rol_nu == Rollen.ROL_CWZ:
                     context['rol_is_cwz'] = True
+                else:                               # pragma: no cover
+                    # vangnet voor nieuwe rollen
+                    raise ValueError("PleinView: onbekende rol %s" % rol_nu)
 
                 context['huidige_rol'] = rol_get_beschrijving(request)
 

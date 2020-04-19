@@ -103,12 +103,14 @@ class E2EHelpers(object):
         page = str(resp.content)
         pos = page.find('<meta rol_nu=')
         if pos < 0:
-            raise ValueError('Could not locate <meta rol_nu=')
-        spl = page[pos+14:pos+100].split('"')
-        rol_nu = spl[0]
-        functie_nu = spl[2]
+            # informatie is niet aanwezig
+            rol_nu = "geen meta"
+        else:
+            spl = page[pos+14:pos+100].split('"')
+            rol_nu = spl[0]
+            # functie_nu = spl[2]
         if rol_nu != rol_verwacht:
-            print("e2e_check_rol: rol_nu=%s, functie_nu=%s" % (rol_nu, functie_nu))
+            # print("e2e_check_rol: rol_nu=%s, functie_nu=%s" % (rol_nu, functie_nu))
             raise ValueError('Rol mismatch: rol_nu=%s, rol_verwacht=%s' % (rol_nu, rol_verwacht))
 
     @staticmethod
