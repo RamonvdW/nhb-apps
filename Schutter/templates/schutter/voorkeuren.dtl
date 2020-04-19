@@ -50,7 +50,9 @@
         <thead>
             <th>Alleen informatie</th>
             <th>Hier schiet ik mee</th>
-            <th colspan="3">Aanvangsgemiddelden</th>
+            <th colspan="2">Aanvangsgemiddelden</th>
+            <th>Vastgesteld op</th>
+            <th>Bron</th>
         </thead>
 
         {% for obj in bogen %}
@@ -70,7 +72,9 @@
                 </td>
 
                 <td>Indoor (18m):<br>25m 1pijl:</td>
-                <td>{% if obj.ag_18_waarde %}
+
+                <td>
+                    {% if obj.ag_18_waarde %}
                         <span>{{ obj.ag_18_waarde }}</span>
                     {% else %}
                         <span><i>Onbekend</i></span>
@@ -83,14 +87,29 @@
                     {% endif %}
                 </td>
 
-                <td>{% if obj.ag_18_waarde %}
-                        <span>Vastgesteld op {{ obj.ag_18_scorehist.datum }}</span>
+                <td>
+                    {% if obj.ag_18_waarde %}
+                        <span>{{ obj.ag_18_scorehist.datum }}</span>
                     {% else %}
                         <span>&nbsp;</span>
                     {% endif %}
                     <br>
                     {% if obj.ag_25_waarde %}
-                        <span>Vastgesteld op {{ obj.ag_25_scorehist.datum }}</span>
+                        <span>{{ obj.ag_25_scorehist.datum }}</span>
+                    {% else %}
+                        <span>&nbsp;</span>
+                    {% endif %}
+                </td>
+
+                <td>
+                    {% if obj.ag_18_waarde %}
+                        <span>{{ obj.ag_18_scorehist.notitie }}</span>
+                    {% else %}
+                        <span>&nbsp;</span>
+                    {% endif %}
+                    <br>
+                    {% if obj.ag_25_waarde %}
+                        <span>{{ obj.ag_25_scorehist.notitie }}</span>
                     {% else %}
                         <span>&nbsp;</span>
                     {% endif %}
