@@ -152,6 +152,41 @@ class E2EHelpers(object):
         # while
         return urls
 
+    @staticmethod
+    def extract_checkboxes(resp):
+        content = str(resp.content)
+        checked = list()
+        unchecked = list()
+        pos = content.find('<input ')
+        while pos >= 0:
+            content = content[pos+7:]       # strip before and <input
+            pos = content.find('>')
+
+            is_checkbox = False
+            is_checked = False
+            name = ""
+            for part in content[:pos].split(' '):
+                spl = part.split('=')
+                if len(spl) == 2:
+                    if spl[0] == "type" and "checkbox" in spl[1]:
+                        is_checkbox = True
+                    elif spl[0] == "name":
+                        name = spl[1].replace('"', '')  # strip doublequotes
+                elif len(spl) == 1:
+                    if spl[0] == "checked":
+                        is_checked = True
+            # for
+
+            if is_checkbox:
+                if is_checked:
+                    checked.append(name)
+                else:
+                    unchecked.append(name)
+
+            pos = content.find('<input ')
+        # while
+        return checked, unchecked
+
     def assert_html_ok(self, response):
         """ Doe een aantal basic checks op een html response """
         assert isinstance(self, TestCase)

@@ -284,7 +284,6 @@ class TestCompetitie(E2EHelpers, TestCase):
             self.assertTrue('CH' in afk)
         # for
 
-
     def test_team(self):
         # slechts een test van een CompetitieKlasse() gekoppeld aan een TeamWedstrijdKlasse
         datum = datetime.date(year=2015, month=11, day=12)

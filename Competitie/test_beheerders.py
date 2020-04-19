@@ -96,6 +96,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/overzicht.dtl', 'plein/site_layout.dtl'))
         self.assertNotContains(resp, '/competitie/beheer-favorieten/')
+        self.e2e_assert_other_http_commands_not_supported(self.url_overzicht)
 
     def test_overzicht_it(self):
         self.e2e_login_and_pass_otp(self.account_admin)
@@ -137,7 +138,5 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('competitie/overzicht-cwz.dtl', 'plein/site_layout.dtl'))
         self.assertNotContains(resp, '/competitie/beheer-favorieten/')
 
-
-# TODO: gebruik assert_other_http_commands_not_supported
 
 # end of file

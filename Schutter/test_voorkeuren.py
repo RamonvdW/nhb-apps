@@ -125,7 +125,9 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
         # GET met DT=aan
         resp = self.client.get(self.url_voorkeuren)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        # TODO: check DT=aan
+        # check DT=aan
+        checked, unchecked = self.extract_checkboxes(resp)
+        self.assertTrue("voorkeur_DT_18m" in checked)
 
         # DT voorkeur uitzetten
         resp = self.client.post(self.url_voorkeuren, {'schiet_R': 'on', 'info_BB': 'on'})
