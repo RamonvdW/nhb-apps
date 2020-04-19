@@ -103,8 +103,8 @@
                 {% else %}
                     <td class="center-align">
                         <label>
-                            <input type="checkbox" class="filled-in" name="{{ obj.check }}">
-                            <span></span>
+                            <input type="checkbox" name="{{ obj.check }}" {% if obj.is_aangemeld %}disabled checked{% else %}class="filled-in"{%endif%}>
+                            <span><!-- noodzakelijk --></span>
                         </label>
                     </td>
                     <td>{{ obj.boogtype.beschrijving }}</td>
