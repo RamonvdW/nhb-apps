@@ -13,16 +13,17 @@ from Plein.menu import menu_dynamics
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from BasisTypen.models import BoogType
-from NhbStructuur.models import NhbLid
 from Records.models import IndivRecord
-from Mailer.models import queue_email
+from Mailer.models import mailer_email_is_valide, mailer_obfuscate_email
 from Logboek.models import schrijf_in_logboek
 from Overig.helpers import get_safe_from_ip
-from Account.models import AccountCreateError
-from Account.views import obfuscate_email
+from Account.models import AccountCreateError, account_create
+from Account.views import account_vraag_email_bevestiging
 from Score.models import Score, ScoreHist
+from NhbStructuur.models import NhbLid
+from Overig.tijdelijke_url import maak_tijdelijke_url_accountemail
 from .leeftijdsklassen import get_sessionvars_leeftijdsklassen
-from .models import SchutterBoog, account_create_nhb, AccountCreateNhbGeenEmail
+from .models import SchutterBoog, SchutterNhbLidGeenEmail
 from .forms import RegistreerForm
 import logging
 
@@ -291,6 +292,43 @@ class LeeftijdsklassenView(UserPassesTestMixin, TemplateView):
         return context
 
 
+def schutter_create_account_nhb(nhb_nummer, email, nieuw_wachtwoord):
+    """ Maak een nieuw account aan voor een NHB lid
+        raises AccountError als:
+            - er al een account bestaat
+            - het nhb nummer niet valide is
+            - het email adres niet bekend is bij de nhb
+            - het email adres niet overeen komt
+        geeft de url terug die in de email verstuurd moet worden
+    """
+    # zoek het email adres van dit NHB lid erbij
+    try:
+        # deze conversie beschermd ook tegen gevaarlijke invoer
+        nhb_nr = int(nhb_nummer)
+    except ValueError:
+        raise AccountCreateError('Onbekend NHB nummer')
+
+    try:
+        nhblid = NhbLid.objects.get(nhb_nr=nhb_nr)
+    except NhbLid.DoesNotExist:
+        raise AccountCreateError('Onbekend NHB nummer')
+
+    if not mailer_email_is_valide(nhblid.email):
+        raise SchutterNhbLidGeenEmail()
+
+    if email != nhblid.email:
+        raise AccountCreateError('De combinatie van NHB nummer en email worden niet herkend. Probeer het nog eens.')
+
+    # maak het account aan
+    account, accountmail = account_create(nhb_nummer, nhblid.voornaam, nhblid.achternaam, nieuw_wachtwoord, email, False)
+
+    # koppelen nhblid en account
+    nhblid.account = account
+    nhblid.save()
+
+    account_vraag_email_bevestiging(accountmail, nhb_nummer=nhb_nummer, email=email)
+
+
 class RegistreerNhbNummerView(TemplateView):
     """
         Deze view wordt gebruikt om het NHB nummer in te voeren voor een nieuw account.
@@ -306,10 +344,9 @@ class RegistreerNhbNummerView(TemplateView):
             email = form.cleaned_data.get('email')
             nieuw_wachtwoord = form.cleaned_data.get('nieuw_wachtwoord')
             from_ip = get_safe_from_ip(request)
-            error = False
             try:
-                ack_url = account_create_nhb(nhb_nummer, email, nieuw_wachtwoord)
-            except AccountCreateNhbGeenEmail:
+                schutter_create_account_nhb(nhb_nummer, email, nieuw_wachtwoord)
+            except SchutterNhbLidGeenEmail:
                 schrijf_in_logboek(account=None,
                                    gebruikte_functie="Registreer met NHB nummer",
                                    activiteit='NHB lid %s heeft geen email adres.' % nhb_nummer)
@@ -331,18 +368,8 @@ class RegistreerNhbNummerView(TemplateView):
                                    activiteit="Account aangemaakt voor NHB nummer %s vanaf IP %s" % (repr(nhb_nummer), from_ip))
                 my_logger.info('%s REGISTREER account aangemaakt voor NHB nummer %s' % (from_ip, repr(nhb_nummer)))
 
-                text_body = "Hallo!\n\n" +\
-                            "Je hebt een account aangemaakt op de website van de NHB.\n" +\
-                            "Klik op onderstaande link om dit te bevestigen.\n\n" +\
-                            ack_url + "\n\n" +\
-                            "Als jij dit niet was, neem dan contact met ons op via info@handboogsport.nl\n\n" +\
-                            "Veel plezier met de site!\n" +\
-                            "Het bondsburo\n"
-
-                queue_email(email, 'Aanmaken account voltooien', text_body)
-
                 request.session['login_naam'] = nhb_nummer
-                request.session['partial_email'] = obfuscate_email(email)
+                request.session['partial_email'] = mailer_obfuscate_email(email)
                 return HttpResponseRedirect(reverse('Account:aangemaakt'))
 
         # still here --> re-render with error message
