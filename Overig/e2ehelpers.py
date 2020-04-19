@@ -73,27 +73,31 @@ class E2EHelpers(object):
         resp = self.client.post('/functie/otp-controle/', {'otp_code': pyotp.TOTP(account.otp_code).now()})
         self.assert_is_redirect(resp, '/functie/wissel-van-rol/')
 
-    def _wissel_naar_rol(self, rol):
+    def _wissel_naar_rol(self, rol, expected_redirect):
         assert isinstance(self, TestCase)
         resp = self.client.get('/functie/wissel-van-rol/%s/' % rol)
-        self.assert_is_redirect(resp, '/functie/wissel-van-rol/')
+        self.assert_is_redirect(resp, expected_redirect)
 
     def e2e_wisselnaarrol_beheerder(self):
-        self._wissel_naar_rol('beheerder')
+        self._wissel_naar_rol('beheerder', '/functie/wissel-van-rol/')
 
     def e2e_wisselnaarrol_bb(self):
-        self._wissel_naar_rol('BB')
+        self._wissel_naar_rol('BB', '/competitie/')
 
     def e2e_wisselnaarrol_schutter(self):
-        self._wissel_naar_rol('schutter')
+        self._wissel_naar_rol('schutter', '/functie/wissel-van-rol/')
 
     def e2e_wisselnaarrol_gebruiker(self):
-        self._wissel_naar_rol('geen')
+        self._wissel_naar_rol('geen', '/functie/wissel-van-rol/')
 
     def e2e_wissel_naar_functie(self, functie):
         assert isinstance(self, TestCase)
         resp = self.client.get('/functie/wissel-van-rol/functie/%s/' % functie.pk)
-        self.assert_is_redirect(resp, '/functie/wissel-van-rol/')
+        if functie.rol == 'CWZ':
+            expected_redirect = '/vereniging/'
+        else:
+            expected_redirect = '/functie/wissel-van-rol/'
+        self.assert_is_redirect(resp, expected_redirect)
 
     def e2e_check_rol(self, rol_verwacht):
         resp = self.client.get('/functie/wissel-van-rol/')
