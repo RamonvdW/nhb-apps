@@ -223,11 +223,14 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                     obj.ag_18 = self._get_schutterboog_ag(schutterboog, 18)
                     obj.ag_25 = self._get_schutterboog_ag(schutterboog, 25)
 
+                    # kijk of de schutter al aangemeld is
+                    obj.is_aangemeld = schutterboog.regiocompetitieschutterboog_set.count() > 0
+
                     objs2.append(obj)
             # for
-            if not heeft_wedstrijdboog:
-                nhblid.geen_wedstrijdboog = True
-                objs2.append(nhblid)
+            #if not heeft_wedstrijdboog:
+            #    nhblid.geen_wedstrijdboog = True
+            #    objs2.append(nhblid)
         # for
 
         return objs2
@@ -271,7 +274,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                 try:
                     nhblid_pk = int(spl[1])
                     boogtype_pk = int(spl[3])
-                except TypeError:
+                except (TypeError, ValueError):
                     # iemand loopt te klooien
                     raise Resolver404()
 
@@ -295,6 +298,6 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
             # else: silently ignore
         # for
 
-        return HttpResponseRedirect(reverse('Vereniging:overzicht'))
+        return HttpResponseRedirect(reverse('Vereniging:leden-aanmelden'))
 
 # end of file
