@@ -463,22 +463,19 @@ class LijstVerenigingenView(UserPassesTestMixin, ListView):
             # het rayonnummer is verkrijgbaar via de deelcompetitie van de functie
             return NhbVereniging.objects.filter(regio__rayon=functie.nhb_rayon).exclude(regio__regio_nr=100).order_by('regio__regio_nr', 'nhb_nr')
 
-        if rol_nu == Rollen.ROL_RCL:
-            # toon de lijst van verenigingen in de regio van de RCL
-            # het regionummer is verkrijgbaar via de deelcompetitie van de functie
-            objs = NhbVereniging.objects.filter(regio=functie.nhb_regio)
-            for obj in objs:
-                try:
-                    functie_cwz = Functie.objects.get(rol='CWZ', nhb_ver=obj)
-                except Functie.DoesNotExist:
-                    obj.cwzs = list()
-                else:
-                    obj.cwzs = functie_cwz.accounts.all()
-            # for
-            return objs
-
-        # waarom hier?
-        raise Resolver404()
+        # (rol_nu == Rollen.ROL_RCL)
+        # toon de lijst van verenigingen in de regio van de RCL
+        # het regionummer is verkrijgbaar via de deelcompetitie van de functie
+        objs = NhbVereniging.objects.filter(regio=functie.nhb_regio)
+        for obj in objs:
+            try:
+                functie_cwz = Functie.objects.get(rol='CWZ', nhb_ver=obj)
+            except Functie.DoesNotExist:
+                obj.cwzs = list()
+            else:
+                obj.cwzs = functie_cwz.accounts.all()
+        # for
+        return objs
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
