@@ -32,7 +32,7 @@ class E2EHelpers(object):
 
     def e2e_create_account(self, username, email, voornaam, accepteer_vhpg=False):
         """ Maak een Account met AccountEmail aan in de database van de website """
-        account_create(username, self.WACHTWOORD, email, voornaam)
+        account_create(username, voornaam, '', self.WACHTWOORD, email, True)
         account = Account.objects.get(username=username)
 
         # zet OTP actief (een test kan deze altijd weer uit zetten)

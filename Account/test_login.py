@@ -7,8 +7,7 @@
 from django.utils import timezone
 from django.test import TestCase
 from django.conf import settings
-from .models import Account, AccountEmail,account_is_email_valide
-from .views import obfuscate_email
+from .models import Account, AccountEmail
 from .forms import LoginForm
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
 from NhbStructuur.migrations.m0002_nhbstructuur_2018 import maak_rayons_2018, maak_regios_2018
@@ -194,31 +193,11 @@ class TestAccountLogin(E2EHelpers, TestCase):
 
         self.e2e_assert_other_http_commands_not_supported('/account/logout/', post=False)
 
-    def test_obfuscate_email(self):
-        self.assertEqual(obfuscate_email(''), '')
-        self.assertEqual(obfuscate_email('x'), 'x')
-        self.assertEqual(obfuscate_email('x@test.nhb'), 'x@test.nhb')
-        self.assertEqual(obfuscate_email('do@test.nhb'), 'd#@test.nhb')
-        self.assertEqual(obfuscate_email('tre@test.nhb'), 't#e@test.nhb')
-        self.assertEqual(obfuscate_email('vier@test.nhb'), 'v##r@test.nhb')
-        self.assertEqual(obfuscate_email('zeven@test.nhb'), 'ze##n@test.nhb')
-        self.assertEqual(obfuscate_email('hele.lange@maaktnietuit.nl'), 'he#######e@maaktnietuit.nl')
-
     def test_get_names(self):
         account = self.account_normaal
         self.assertEqual(account.get_first_name(), 'Normaal')
         self.assertEqual(account.volledige_naam(), 'Normaal')
         self.assertEqual(account.get_account_full_name(), 'Normaal (normaal)')
-
-    def test_is_email_valide(self):
-        self.assertTrue(account_is_email_valide('test@nhb.nl'))
-        self.assertTrue(account_is_email_valide('jan.de.tester@nhb.nl'))
-        self.assertTrue(account_is_email_valide('jan.de.tester@hb.nl'))
-        self.assertTrue(account_is_email_valide('r@hb.nl'))
-        self.assertFalse(account_is_email_valide('tester@nhb'))
-        self.assertFalse(account_is_email_valide('test er@nhb.nl'))
-        self.assertFalse(account_is_email_valide('test\ter@nhb.nl'))
-        self.assertFalse(account_is_email_valide('test\ner@nhb.nl'))
 
     def test_login_met_email(self):
         # test inlog via het inlog formulier, met een email adres

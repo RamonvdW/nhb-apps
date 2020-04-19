@@ -10,12 +10,12 @@ from django.utils import timezone
 from django.contrib.auth.models import AbstractUser
 from Overig.tijdelijke_url import set_tijdelijke_url_receiver, maak_tijdelijke_url_accountemail
 from Account.rechten import account_rechten_otp_controle_gelukt
+from Mailer.models import mailer_email_is_valide
 import datetime
 
 
-
 class AccountCreateError(Exception):
-    """ Generic exception raised by account_create_nhb """
+    """ Generic exception raised by account_create """
     pass
 
 
@@ -174,32 +174,12 @@ class HanterenPersoonsgegevens(models.Model):
         verbose_name_plural = "Hanteren Persoonsgegevens"
 
 
-def account_is_email_valide(adres):
-    """ Basic check of dit een valide e-mail adres is:
-        - niet leeg
-        - bevat @
-        - bevat geen spatie
-        - domein bevat een .
-        Uiteindelijk weet je pas of het een valide adres is als je er een e-mail naartoe kon sturen
-        We proberen lege velden en velden met opmerkingen als "geen" of "niet bekend" te ontdekken.
-    """
-    # full rules: https://stackoverflow.com/questions/2049502/what-characters-are-allowed-in-an-email-address
-    if adres and len(adres) >= 4 and '@' in adres and ' ' not in adres:
-        for char in ('\t', '\n', '\r'):
-            if char in adres:
-                return False
-        user, domein = adres.rsplit('@', 1)
-        if '.' in domein:
-            return True
-    return False
-
-
-def account_create(username, wachtwoord, email, voornaam):
+def account_create(username, voornaam, achternaam, wachtwoord, email, email_is_bevestigd):
     """ Maak een nieuw Account aan met een willekeurige naam
         Email wordt er meteen in gezet en heeft geen bevestiging nodig
     """
 
-    if not account_is_email_valide(email):
+    if not mailer_email_is_valide(email):
         raise AccountCreateError('Dat is geen valide e-mail')
 
     if Account.objects.filter(username=username).count() != 0:
@@ -210,15 +190,23 @@ def account_create(username, wachtwoord, email, voornaam):
     account.username = username
     account.set_password(wachtwoord)
     account.first_name = voornaam
+    account.last_name = achternaam
     account.save()
 
     # maak het email record aan
     mail = AccountEmail()
     mail.account = account
-    mail.email_is_bevestigd = True
-    mail.bevestigde_email = email
-    mail.nieuwe_email = ''
+    if email_is_bevestigd:
+        mail.email_is_bevestigd = True
+        mail.bevestigde_email = email
+        mail.nieuwe_email = ''
+    else:
+        mail.email_is_bevestigd = False
+        mail.bevestigde_email = ''
+        mail.nieuwe_email = email
     mail.save()
+
+    return account, mail
 
 
 def account_email_is_bevestigd(mail):

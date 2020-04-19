@@ -11,7 +11,8 @@ from django.core.management.base import BaseCommand
 from django.db.models import ProtectedError
 import django.db.utils
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbLid, NhbVereniging
-from Account.models import account_is_email_valide, Account
+from Account.models import Account
+from Mailer.models import mailer_email_is_valide
 from Logboek.models import schrijf_in_logboek
 from Functie.models import maak_functie, maak_cwz
 import argparse
@@ -494,7 +495,7 @@ class Command(BaseCommand):
                 lid_email = ""      # converts None to string
                 if not lid_blocked:
                     self._count_lid_no_email += 1
-            elif not account_is_email_valide(lid_email):
+            elif not mailer_email_is_valide(lid_email):
                 self.stderr.write('[ERROR] Lid %s heeft geen valide e-mail (%s)' % (lid_nhb_nr, lid_email))
                 self._count_errors += 1
                 self._count_lid_no_email += 1
