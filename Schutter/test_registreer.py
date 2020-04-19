@@ -145,8 +145,16 @@ class TestSchutterRegistreer(E2EHelpers, TestCase):
         self.assertNotContains(resp, 'rdetester@gmail.not')
         self.assertContains(resp, 'r@gmail.not')     # iets van r######r@gmail.not
 
+        # controleer dat de volledige naam meteen al overgenomen is
         account = Account.objects.get(username='100001')
+        self.assertEqual(account.get_real_name(), 'Ramon de Tester')
+
+        # verander de naam, om te testen dat de volledige naam later uit het NhbLid overgenomen wordt
+        account.first_name = '100001'
+        account.last_name = ''
+        account.save()
         self.assertEqual(account.get_real_name(), '100001')
+
         nhblid = NhbLid.objects.get(nhb_nr=self.nhblid1.nhb_nr)
         self.assertEqual(nhblid.account, account)
 
