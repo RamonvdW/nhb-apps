@@ -15,31 +15,39 @@
 
 <p>Hieronder volgt de lijst schutters die ingeschreven zijn voor deelname aan de regiocompetitie <b>{{ competitie.beschrijving }}</b>.</p>
 
-{% for obj in object_list %}
-    {% if obj.nieuwe_klasse %}
-        <h5>{{ obj.klasse.indiv.beschrijving }}</h5>
-        <table class="white">
-            <thead>
+{% if object_list.count %}
+
+    <table class="white">
+
+    {% for obj in object_list %}
+
+        {% if obj.nieuwe_klasse %}
+            <tr class="grey lighten-2">     <!-- gelijk houden aan plein/site_layout.dtl -->
+                <td colspan="3" style="padding-bottom: 0px"><h5>{{ obj.klasse.indiv.beschrijving }}</h5></td>
+            </tr>
+
+            <tr>
                 <th>Vereniging</th>
                 <th>Aanvangsgemiddelde</th>
                 <th>Schutter naam</th>
-            </thead>
-            <tbody>
-    {% endif %}
+            </tr>
 
-    <tr>
-        <td>[{{ obj.schutterboog.nhblid.bij_vereniging.nhb_nr }}] {{ obj.schutterboog.nhblid.bij_vereniging.naam }}</td>
-        <td>{{ obj.aanvangsgemiddelde }}<!--{% if obj.is_handmatig_ag %}<i> (handmatig)</i>{% endif %}--></td>
-        <td>{{ obj.schutterboog.nhblid.volledige_naam }}</td>
-    </tr>
+        {% endif %}
 
-    {% if obj.einde_klasse %}
-            </tbody>
-        </table>
-    {% endif %}
+        <tr>
+            <td>[{{ obj.schutterboog.nhblid.bij_vereniging.nhb_nr }}] {{ obj.schutterboog.nhblid.bij_vereniging.naam }}</td>
+            <td>{{ obj.aanvangsgemiddelde }}<!--{% if obj.is_handmatig_ag %}<i> (handmatig)</i>{% endif %}--></td>
+            <td>{{ obj.schutterboog.nhblid.volledige_naam }}</td>
+        </tr>
 
-{% empty %}
+    {% endfor %}
+
+    </table>
+
+{% else %}
+
     <p>Er zijn nog geen aanmeldingen.</p>
-{% endfor %}
+
+{% endif %}
 
 {% endblock %}
