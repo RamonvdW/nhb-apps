@@ -223,9 +223,13 @@ class CompetitieAanmakenView(UserPassesTestMixin, TemplateView):
             om de nieuwe competitie op te starten.
         """
         jaar = models_bepaal_startjaar_nieuwe_competitie()
-        seizoen = "%s/%s" % (jaar, jaar+1)
-        schrijf_in_logboek(request.user, 'Competitie', 'Aanmaken competities %s' % seizoen)
-        competitie_aanmaken(jaar)
+
+        # beveiliging tegen dubbel aanmaken
+        if Competitie.objects.filter(is_afgesloten=False).order_by('begin_jaar', 'afstand').count() == 0:
+            seizoen = "%s/%s" % (jaar, jaar+1)
+            schrijf_in_logboek(request.user, 'Competitie', 'Aanmaken competities %s' % seizoen)
+            competitie_aanmaken(jaar)
+
         return redirect('Competitie:overzicht')
 
     def get_context_data(self, **kwargs):
@@ -233,6 +237,11 @@ class CompetitieAanmakenView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         jaar = models_bepaal_startjaar_nieuwe_competitie()
         context['seizoen'] = "%s/%s" % (jaar, jaar+1)
+
+        # beveiliging tegen dubbel aanmaken
+        if Competitie.objects.filter(is_afgesloten=False).order_by('begin_jaar', 'afstand').count() > 0:
+            context['bestaat_al'] = True
+
         menu_dynamics(self.request, context, actief='competitie')
         return context
 
@@ -296,8 +305,7 @@ class KlassegrenzenView(UserPassesTestMixin, TemplateView):
 
         # bepaal het jaar waarin de wedstrijdleeftijd bepaald moet worden
         # dit is het huidige jaar + 1
-        jaar = 1 + models_bepaal_startjaar_nieuwe_competitie()
-        self.wedstrijdjaar = jaar
+        self.wedstrijdjaar = jaar = 1 + models_bepaal_startjaar_nieuwe_competitie()
 
         if HistCompetitie.objects.count() < 1:
             # geen historische competitiedata aanwezig
@@ -402,10 +410,14 @@ class KlassegrenzenView(UserPassesTestMixin, TemplateView):
             return redirect('Plein:plein')
         obj = objs[0]
 
-        context['object_list'] = self._get_queryset(afstand)
-        context['wedstrijdjaar'] = self.wedstrijdjaar
+        if obj.competitieklasse_set.count() != 0:
+            context['al_vastgesteld'] = True
+        else:
+            context['object_list'] = self._get_queryset(afstand)
+            context['wedstrijdjaar'] = self.wedstrijdjaar
+            context['seizoen'] = self.seizoen
+
         context['comp_str'] = obj.beschrijving
-        context['seizoen'] = self.seizoen
         context['afstand'] = afstand
 
         menu_dynamics(self.request, context, actief='competitie')
@@ -419,6 +431,11 @@ class KlassegrenzenView(UserPassesTestMixin, TemplateView):
         objs = Competitie.objects.filter(afstand=afstand, is_afgesloten=False)
         if objs.count() > 0:
             comp = objs[0]
+
+            if comp.competitieklasse_set.count() != 0:
+                # onverwachts here
+                return redirect('Plein:plein')
+
             schrijf_in_logboek(request.user, 'Competitie', 'Klassegrenzen bevestigd voor %s' % comp.beschrijving)
             # haal dezelfde data op als voor de GET request
             for obj in self._get_queryset(afstand):
