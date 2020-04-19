@@ -50,7 +50,7 @@
                     {% endif %}
                     <span>{{ beheerder }}</span>
                 {% empty %}
-                    <i>Nog niet gekoppeld</i>
+                    <i class="grey-text">Nog niet gekoppeld</i>
                 {% endfor %}
                 </td>
 
