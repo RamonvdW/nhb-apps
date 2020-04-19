@@ -64,6 +64,7 @@ def aanvangsgemiddelde_opslaan(schutterboog, afstand, gemiddelde, datum, door_ac
     try:
         score = Score.objects.get(schutterboog=schutterboog, afstand_meter=afstand)
     except Score.DoesNotExist:
+        # eerste score voor deze afstand
         score = Score(schutterboog=schutterboog, waarde=waarde, afstand_meter=afstand)
         score.save()
 
@@ -77,7 +78,7 @@ def aanvangsgemiddelde_opslaan(schutterboog, afstand, gemiddelde, datum, door_ac
         return True
 
     if score.waarde != waarde:
-        # nieuwe waarde
+        # nieuwe score voor deze afstand
         hist = ScoreHist(score=score,
                          oude_waarde=score.waarde,
                          nieuwe_waarde=waarde,
@@ -90,18 +91,8 @@ def aanvangsgemiddelde_opslaan(schutterboog, afstand, gemiddelde, datum, door_ac
         score.save()
         return True
 
-    hists = ScoreHist.objects.filter(score=score).order_by('-datum')
-    if len(hists):
-        hist = hists[0]
-        if hist.notitie == notitie:
-            return False
-        print("(no change) score: %s" % score)
-        print("            hist: %s" % hist)
-    else:
-        # geen history, wel een score
-        # zou niet voor moeten komen
-        pass
-
+    # dezelfde score als voorheen --> voorlopig niet opslaan
+    # (ook al is de datum en/of notitie anders)
     return False
 
 # end of file
