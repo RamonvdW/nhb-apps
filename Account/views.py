@@ -15,15 +15,14 @@ from django.db.models import F, Q, Value
 from django.db.models.functions import Concat
 from django.utils import timezone
 from .forms import LoginForm, ZoekAccountForm, KiesAccountForm
-from .models import Account, \
-                    AccountEmail, account_email_is_bevestigd, account_check_gewijzigde_email
+from .models import Account, AccountEmail, account_email_is_bevestigd, account_check_gewijzigde_email
 from .rechten import account_rechten_otp_controle_gelukt, account_rechten_login_gelukt
 from Overig.tijdelijke_url import set_tijdelijke_url_receiver, RECEIVER_BEVESTIG_EMAIL, RECEIVER_ACCOUNT_WISSEL,\
-                                  maak_tijdelijke_url_accountwissel
+                                  maak_tijdelijke_url_accountwissel, maak_tijdelijke_url_accountemail
 from Plein.menu import menu_dynamics
 from Logboek.models import schrijf_in_logboek
 from Overig.helpers import get_safe_from_ip
-from Mailer.models import queue_email
+from Mailer.models import mailer_queue_email, mailer_obfuscate_email
 from datetime import timedelta
 import logging
 
@@ -170,7 +169,7 @@ class LoginView(TemplateView):
                                         "Veel plezier met de site!\n" + \
                                         "Het bondsburo\n"
 
-                            queue_email(mail, 'Email adres bevestigen', text_body)
+                            mailer_queue_email(mail, 'Email adres bevestigen', text_body)
 
                             return redirect(reverse('Account:nieuwe-email'))
                         # else:
@@ -282,7 +281,7 @@ class LogoutView(TemplateView):
         my_logger.info('%s LOGOUT voor account %s' % (from_ip, repr(request.user.username)))
 
         # integratie met de authenticatie laag van Django
-        # TODO: wist dit ook de session?
+        # dit wist ook de session data gekoppeld aan het cookie van de gebruiker
         logout(request)
 
         # redirect naar het plein
@@ -302,29 +301,6 @@ class WachtwoordVergetenView(TemplateView):
         context = super().get_context_data(**kwargs)
         menu_dynamics(self.request, context, actief="inloggen")
         return context
-
-
-def obfuscate_email(email):
-    """ Helper functie om een email adres te maskeren
-        voorbeeld: nhb.ramonvdw@gmail.com --> nh####w@gmail.com
-    """
-    try:
-        user, domein = email.rsplit("@", 1)
-    except ValueError:
-        return email
-    voor = 2
-    achter = 1
-    if len(user) <= 4:
-        voor = 1
-        achter = 1
-        if len(user) <= 2:
-            achter = 0
-    hekjes = (len(user) - voor - achter)*'#'
-    new_email = user[0:voor] + hekjes
-    if achter > 0:
-        new_email += user[-achter:]
-    new_email = new_email + '@' + domein
-    return new_email
 
 
 class BevestigdView(TemplateView):
@@ -383,7 +359,7 @@ class EmailGewijzigdView(TemplateView):     # TODO: change to View?
                 # onverwachte fout
                 pass
             else:
-                context['partial_email'] = obfuscate_email(email.nieuwe_email)
+                context['partial_email'] = mailer_obfuscate_email(email.nieuwe_email)
                 menu_dynamics(request, context, actief='inloggen')
                 return render(request, TEMPLATE_NIEUWEEMAIL, context)
 
@@ -504,6 +480,25 @@ class LoginAsZoekView(UserPassesTestMixin, ListView):
         return render(self.request, TEMPLATE_LOGINAS_GO, context)
 
 
+def account_vraag_email_bevestiging(accountmail, **kwargs):
+    """ Stuur een mail naar het adres om te vragen om een bevestiging.
+        Gebruik een tijdelijke URL die, na het volgen, weer in deze module uit komt.
+    """
+
+    # maak de url aan om het e-mailadres te bevestigen
+    url = maak_tijdelijke_url_accountemail(accountmail, **kwargs)
+
+    text_body = "Hallo!\n\n" + \
+                "Je hebt een account aangemaakt op de website van de NHB.\n" + \
+                "Klik op onderstaande link om dit te bevestigen.\n\n" + \
+                url + "\n\n" + \
+                "Als jij dit niet was, neem dan contact met ons op via info@handboogsport.nl\n\n" + \
+                "Veel plezier met de site!\n" + \
+                "Het bondsburo\n"
+
+    mailer_queue_email(accountmail.nieuwe_email, 'Aanmaken account voltooien', text_body)
+
+
 def receive_bevestiging_accountemail(request, obj):
     """ deze functie wordt aangeroepen als een tijdelijke url gevolgt wordt
         om een email adres te bevestigen, zowel de eerste keer als wijziging van email.
@@ -546,8 +541,8 @@ def receiver_account_wissel(request, obj):
     for func in account_plugins_login:
         httpresp = func(request, from_ip, account)
         if httpresp:
-            # plugin has decided that the user may nog login
-            # and has generated/rendered an HttpResponse
+            # plugin has decided that the user may not login
+            # and has generated/rendered an HttpResponse that we cannot handle here
             return httpresp
 
     if account.otp_is_actief:
