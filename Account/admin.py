@@ -27,7 +27,7 @@ class AccountAdmin(UserAdmin):
         (_('Important dates'), {'fields': ('laatste_inlog_poging', 'last_login', 'date_joined')}),
     )
 
-    list_display = ('username', 'last_login', 'is_staff')
+    list_display = ('get_account_full_name', 'last_login', 'is_staff')
 
     list_filter = ('is_staff', 'is_BB', 'otp_is_actief')
 
