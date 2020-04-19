@@ -6,6 +6,7 @@
 
 from django.test import TestCase
 from .models import BoogType, LeeftijdsKlasse, IndivWedstrijdklasse, TeamWedstrijdklasse
+from .admin import BasisTypenIndivWedstrijdklasseAdmin, BasisTypenTeamWedstrijdklasseAdmin
 
 
 class TestBasisTypen(TestCase):
@@ -32,6 +33,17 @@ class TestBasisTypen(TestCase):
     def test_team_wedstrijdklasse(self):
         obj = TeamWedstrijdklasse(beschrijving="Test")
         self.assertIsNotNone(str(obj))      # use the __str__ method (only used by admin interface)
+
+    def test_html(self):
+        adm = BasisTypenIndivWedstrijdklasseAdmin(IndivWedstrijdklasse, None)
+        obj = IndivWedstrijdklasse.objects.get(volgorde=100)
+        html = adm._leeftijdsklassen(obj)
+        self.assertTrue(html.count('<p>') == obj.leeftijdsklassen.count())
+
+        adm = BasisTypenTeamWedstrijdklasseAdmin(TeamWedstrijdklasse, None)
+        obj = TeamWedstrijdklasse.objects.get(volgorde=10)
+        html = adm._boogtypen(obj)
+        self.assertTrue(html.count('<p>') == obj.boogtypen.count())
 
 # end of file
 
