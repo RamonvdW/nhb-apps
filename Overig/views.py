@@ -8,7 +8,7 @@ from django.views import View
 from django.views.generic import TemplateView, ListView
 from django.shortcuts import render, redirect
 from django.urls import Resolver404, reverse
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.utils import timezone
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Functie.rol import Rollen, rol_get_huidige
@@ -147,20 +147,24 @@ class SiteTijdelijkeUrlView(View):
         objs = SiteTijdelijkeUrl.objects.filter(url_code=url_code)
 
         # kijk of deze tijdelijke url al verlopen is
-        url = None
+        url_or_response = None
         now = timezone.now()
         for obj in objs:
             if obj.geldig_tot > now:
                 # dispatch naar de juiste applicatie waar deze bij hoort
                 # de callbacks staan in de dispatcher
-                url = do_dispatch(request, obj)
+                url_or_response = do_dispatch(request, obj)
 
             # verwijder de gebruikte tijdelijke url
             obj.delete()
         # for
 
-        if url:
-            return HttpResponseRedirect(url)
+        if url_or_response:
+            if isinstance(url_or_response, HttpResponse):
+                http_response = url_or_response
+            else:
+                http_response = HttpResponseRedirect(url_or_response)
+            return http_response
 
         raise Resolver404()
 
