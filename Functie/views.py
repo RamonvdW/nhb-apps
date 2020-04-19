@@ -587,6 +587,13 @@ class ActiveerRolView(UserPassesTestMixin, View):
         rol_beschrijving = rol_get_beschrijving(request)
         my_logger.info('%s ROL account %s is nu %s' % (from_ip, self.request.user.username, rol_beschrijving))
 
+        rol = rol_get_huidige(request)
+        if rol == Rollen.ROL_BB:
+            return redirect('Competitie:overzicht')
+
+        if rol == Rollen.ROL_CWZ:
+            return redirect('Vereniging:overzicht')
+
         return redirect('Functie:wissel-van-rol')
 
 
