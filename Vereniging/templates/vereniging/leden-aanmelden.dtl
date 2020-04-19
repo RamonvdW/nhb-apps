@@ -15,10 +15,9 @@
 
 <p>Als CWZ kan je via deze pagina leden van vereniging [{{ nhb_ver.nhb_nr }}] {{ nhb_ver.naam }} te {{ nhb_ver.plaats }} aanmelden voor de competities van <b>seizoen {{ seizoen }}</b> (Indoor en 25m 1pijl).</p>
 
-<p>Onderstaande lijst toont alleen leden die nog niet aangemeld zijn.</p>
-<p>Aanmelden gaat in bulk: zet een vinkje bij de schutters die je aan wilt melden en druk dan rode knop in de rechter onderhoek.</p>
+<p>Onderstaande lijst toont alleen leden die ingesteld hebben met welke boog ze schieten. Je kan ze hier bij helpen via het kaartje "voorkeuren leden".</p>
 
-<p>Leden moet eerst (bij <i>voorkeuren</i>) instellen met welke boog ze schieten voordat je ze kunt aanmelden.</p>
+<p>Aanmelden gaat in bulk: zet een vinkje bij de schutters die je aan wilt melden en druk dan rode knop in de rechter onderhoek. Leden die al aangemeld zijn hebben een grijs vinkje.</p>
 
 <form method="post" action="{{ aanmelden_url }}">
     {% csrf_token %}
@@ -46,7 +45,7 @@
 
             {% for obj in leden_jeugd %}
                 <tr>
-                    {% if obj.geen_wedstrijdboog %}
+                    {% if obj.geen_wedstrijdboog %}     <!-- dead code -->
                         <!-- geen bogen gekozen, dus kan niet aanmelden -->
                         <td><!-- geen checkbox --></td>
                         <td class="grey-text"><i>Geen</i></td>
@@ -58,7 +57,7 @@
                     {% else %}
                         <td class="center-align">
                             <label>
-                                <input type="checkbox" class="filled-in" name="{{ obj.check }}">
+                                <input type="checkbox" name="{{ obj.check }}" {% if obj.is_aangemeld %}disabled checked{% else %}class="filled-in"{%endif%}>
                                 <span><!-- noodzakelijk --></span>
                             </label>
                         </td>
