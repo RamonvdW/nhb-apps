@@ -26,7 +26,7 @@ class TestCompetitie(E2EHelpers, TestCase):
             wordt als eerste aangeroepen
         """
         # maak een BB aan, nodig om de competitie defaults in te zien
-        self.account_bb = self.e2e_create_account('bko', 'bko@test.com', 'BKO', accepteer_vhpg=True)
+        self.account_bb = self.e2e_create_account('bb', 'bb@test.com', 'BB', accepteer_vhpg=True)
         self.account_bb.is_BB = True
         self.account_bb.save()
 
