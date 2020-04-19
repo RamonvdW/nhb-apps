@@ -252,7 +252,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.assertIn(self.url_wisselvanrol + 'functie/%s/' % self.functie_bko.pk, urls)
         self.assertIn(self.url_wisselvanrol + 'schutter/', urls)
 
-        self.e2e_wissel_naar_rol_schutter()
+        self.e2e_wisselnaarrol_schutter()
         self.e2e_check_rol('schutter')
 
     def test_rko(self):
