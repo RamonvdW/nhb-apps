@@ -21,6 +21,9 @@ class TestNhbStructuurLogin(E2EHelpers, TestCase):
     def setUp(self):
         """ initialisatie van de test case """
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
+        self.account_metmail = self.e2e_create_account('metmail', 'metmail@test.com', 'MetMail')
+
+        self.email_metmail = self.account_metmail.accountemail_set.all()[0]
 
         # maak een test vereniging
         ver = NhbVereniging()
@@ -93,12 +96,43 @@ class TestNhbStructuurLogin(E2EHelpers, TestCase):
         obj = self.account_normaal.accountemail_set.all()[0]
         self.assertEqual(obj.nieuwe_email, self.nhblid1.email)
 
-        # dit gebeurt niet als het email als bevestigd is
+        # dit gebeurt niet als het email al bevestigd is
         obj.bevestigde_email = self.nhblid1.email
         obj.nieuwe_email = ""
         obj.save()
         self.e2e_logout()
         self.e2e_login(self.account_normaal)
         self.assertEqual(obj.nieuwe_email, "")
+
+    def test_login_nieuwe_email_uit_crm(self):
+        # koppel account metmail aan NHB lid met ander email en log in
+        self.nhblid1.account = self.account_metmail
+        self.nhblid1.save()
+
+        # test inlog via het inlog formulier, met een email adres
+        resp = self.client.post('/account/login/', {'login_naam': 'metmail@test.com',
+                                                    'wachtwoord': E2EHelpers.WACHTWOORD}, follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        # redirect is naar de nieuwe-email pagina
+        self.assert_template_used(resp, ('account/nieuwe-email.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, 'rd#')            # email abbreviation
+        self.assertContains(resp, '@gmail.not')     # was: @test.com
+
+    def test_login_ongewijzigde_email_uit_crm(self):
+        # koppel account metmail aan NHB lid met ander email en log in
+        self.nhblid1.account = self.account_metmail
+        self.nhblid1.save()
+        self.email_metmail.bevestigde_email = self.nhblid1.email
+        self.email_metmail.save()
+
+        # test inlog via het inlog formulier, met een email adres
+        resp = self.client.post('/account/login/', {'login_naam': self.account_metmail.username,
+                                                    'wachtwoord': E2EHelpers.WACHTWOORD}, follow=True)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        # redirect is naar het plein
+        self.assert_template_used(resp, ('plein/plein-schutter.dtl', 'plein/site_layout.dtl'))
+
 
 # end of file
