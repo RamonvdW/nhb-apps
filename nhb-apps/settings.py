@@ -260,18 +260,18 @@ BINDING_HTTP_POST = 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST'
 SAML_BASE_URL = SITE_URL + '/idp'
 
 SAML_IDP_CONFIG = {
-     'debug' : DEBUG,
-     'xmlsec_binary': '/usr/bin/xmlsec1',
+    'debug' : DEBUG,
+    'xmlsec_binary': '/usr/bin/xmlsec1',
 
-     # the SAML entity id of this side, the Identity Provider
-     # just a globally unique string
-     'entityid': 'NHB IT applications SAML2 Identity Provider',
+    # the SAML entity id of this side, the Identity Provider
+    # just a globally unique string
+    'entityid': 'NHB IT applications SAML2 Identity Provider',
 
-     # metadata for trusted service providers (like mediawiki)
-     'metadata': { 'local': [os.path.join(BASE_DIR, 'data_private/saml2/saml2_sp_metadata.xml'),] },
+    # metadata for trusted service providers (like mediawiki)
+    'metadata': { 'local': [os.path.join(BASE_DIR, 'data_private/saml2/saml2_sp_metadata.xml'),] },
 
-     # our service description (the identity provider)
-     'service': {
+    # our service description (the identity provider)
+    'service': {
          'idp': {
              'name': 'NHB IT applications IdP',
              'endpoints': {
@@ -294,21 +294,21 @@ SAML_IDP_CONFIG = {
 }
 
 SAML_IDP_SPCONFIG = {
-     # configuration of trusted service providers
-     # entry name = entity_id
-     'https://wiki.handboogsport.st-visir.nl/saml/module.php/saml/sp/metadata.php/default-sp': {
-         'processor': 'djangosaml2idp.processors.BaseProcessor',
-         #'nameid_field': 'staffID',
-         'sign_response': True,
-         'sign_assertion': True,
-         'attribute_mapping': {
-             # Account.fieldname --> expose as
-             # Account.method() --> expose as
-             'username': 'username',
-             'get_email': 'emailAddress',
-             'get_real_name': 'real_name',
-         }
-     },
+    # configuration of trusted service providers
+    # entry name = entity_id
+    'https://wiki.handboogsport.st-visir.nl/saml/module.php/saml/sp/metadata.php/default-sp': {
+        'processor': 'djangosaml2idp.processors.BaseProcessor',
+        #'nameid_field': 'staffID',
+        'sign_response': True,
+        'sign_assertion': True,
+        'attribute_mapping': {
+            # Account.fieldname --> expose as
+            # Account.method() --> expose as
+            'username': 'username',
+            'get_email': 'emailAddress',
+            'get_real_name': 'real_name',
+        }
+    },
 }
 
 
@@ -319,6 +319,7 @@ WIKI_URL_RCL = WIKI_URL + '/Handleiding_RCL'
 WIKI_URL_RKO = WIKI_URL + '/Handleiding_RKO'
 WIKI_URL_BKO = WIKI_URL + '/Handleiding_BKO'
 WIKI_URL_2FA = WIKI_URL + '/Twee-factor_authenticatie'
+WIKI_URL_ROLLEN = WIKI_URL + '/Rollen'
 
 
 # logging to syslog
