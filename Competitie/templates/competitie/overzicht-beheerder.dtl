@@ -39,7 +39,7 @@
         </tr>
         <tr>
             <td{% if obj.fase == 'A1' %} class="blue"{% endif %}>A1</td>
-            <td>Vaststellen klassegrenzen (Bondsburo)</td>
+            <td>Vaststellen aanvangsgemiddelden en klassegrenzen (Bondsburo)</td>
             <td>
                 {% if obj.fase > 'A1' %}
                 <span class="green-text">Afgerond</span>
@@ -125,31 +125,34 @@
 
     <!-- toon inschrijvingen regiocompetitie -->
     {% for comp in competities %}
-        <div class="col s12 m6 xl4">
-            <div class="card">
-                <div class="card-content">
-                    <table class="simple"><tr style="border:0px">
-                        <td><i class="material-icons-round large">receipt</i></td>
-                        <td>Toon lijst met schutters ingeschreven voor de {{ comp.beschrijving }}.</td>
-                    </tr></table>
-                </div>
-                <a href="{{ comp.url_inschrijvingen }}" class="nhb-klikbare-balk">
-                    <div class="card-action center-align">
-                        <span class="nhb-klikbare-link">Toon inschrijvingen</span>
+        {% if comp.fase != 'A1' and comp.fase != 'A1' %}    <!-- TODO: change to !=A1 and !=A2 -->
+            <div class="col s12 m6 l4">
+                <div class="card">
+                    <div class="card-content">
+                        <div class="card-title center-align">Inschrijvingen<br>
+                            <br><i class="material-icons-round large">receipt</i>
+                        </div>
+                        <p>Toon lijst met schutters ingeschreven voor de {{ comp.beschrijving }}.</p>
                     </div>
-                </a>
+                    <a href="{{ comp.url_inschrijvingen }}" class="nhb-klikbare-balk">
+                        <div class="card-action center-align">
+                            <span class="nhb-klikbare-link">Toon inschrijvingen</span>
+                        </div>
+                    </a>
+                </div>
             </div>
-        </div>
+        {% endif %}
     {% endfor %}
 
+    <!-- competities aanmaken -->
     {% if bb_kan_competitie_aanmaken %}
-        <div class="col s12 m6 xl4">
+        <div class="col s12 m6 l4">
             <div class="card">
                 <div class="card-content">
-                    <table class="simple"><tr style="border:0px">
-                        <td><i class="material-icons-round large">playlist_add</i></td>
-                        <td>Instellingen voor de bondscompetities {{ nieuwe_seizoen }} controleren en competities aanmaken.</td>
-                    </tr></table>
+                    <div class="card-title center-align">Competitie opstarten<br>
+                        <br><i class="material-icons-round large">playlist_add</i>
+                    </div>
+                    <p>Instellingen voor de seizoen {{ nieuwe_seizoen }} controleren en competities aanmaken.</p>
                 </div>
                 <a href="{% url 'Competitie:instellingen-volgende-competitie' %}" class="nhb-klikbare-balk">
                     <div class="card-action center-align">
@@ -162,31 +165,48 @@
 
     {% if rol_is_bb %}
 
-        {% for obj in object_list %}
+        <!-- aanvangsgemiddelden vaststellen -->
+        {% if bb_kan_ag_vaststellen %}
+            <div class="col s12 m6 l4">
+                <div class="card">
+                    <div class="card-content">
+                        <div class="card-title center-align">Aanvangs<wbr/>gemiddelden<br>
+                            <br><i class="material-icons-round large">how_to_reg</i>
+                        </div>
+                        {% if bb_ag_nieuwste_datum %}
+                            <p class="center-align">(op {{ bb_ag_nieuwste_datum }} voor het laatst gedaan)</p>
+                            <br>
+                        {% endif %}
+                        <p>Aanvangsgemiddelden vaststellen voor elke schutter-boog, aan de hand van de uitslagen van vorig seizoen.</p>
+                    </div>
+                    <a href="{% url 'Competitie:ag-vaststellen' %}" class="nhb-klikbare-balk">
+                        <div class="card-action center-align">
+                            <span class="nhb-klikbare-link">Vaststellen</span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        {% endif %}
 
-            <!-- klassegrenzen vaststellen -->
+        <!-- klassegrenzen vaststellen -->
+        {% for obj in object_list %}
             {% if obj.fase == 'A1' %}
-                <div class="col s12 m6 xl4">
+                <div class="col s12 m6 l4">
                     <div class="card">
                         <div class="card-content">
-                            <table class="simple"><tr style="border:0px">
-                                <td><i class="material-icons-round large">equalizer</i></td>
-                                <td>Klasse<wbr/>grenzen voor de {{ obj.beschrijving }} vaststellen aan de hand van uitslagen van vorig seizoen.</td>
-                            </tr></table>
+                            <div class="card-title center-align">Klasse<wbr/>grenzen {{ obj.afstand }}m<br>
+                                <br><i class="material-icons-round large">equalizer</i>
+                            </div>
+                            <p>Klasse<wbr/>grenzen vaststellen voor de <b>{{ obj.beschrijving }}</b> aan de hand van de vastgestelde aanvangs<wbr/>gemiddelden.</p>
                         </div>
-                        {% if obj.afstand == '18' %}
-                        <a href="{% url 'Competitie:klassegrenzen' afstand=18 %}" class="nhb-klikbare-balk">
-                        {% else %}
-                        <a href="{% url 'Competitie:klassegrenzen' afstand=25 %}" class="nhb-klikbare-balk">
-                        {% endif %}
+                        <a href="{% url 'Competitie:klassegrenzen' afstand=obj.afstand %}" class="nhb-klikbare-balk">
                             <div class="card-action center-align">
-                                <span class="nhb-klikbare-link">Klassegrenzen vaststellen</span>
+                                <span class="nhb-klikbare-link">Vaststellen</span>
                             </div>
                         </a>
                     </div>
                 </div>
             {% endif %}
-
         {% endfor %}
 
     {% endif %}
