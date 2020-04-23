@@ -7,7 +7,10 @@
 from django.db import models
 
 
-# leden zijn junior tot en met het jaar waarin ze 20 worden
+# leden zijn aspirant tot en met het jaar waarin ze 13 worden
+MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT = 13
+
+# leden zijn jeugdlid tot en met het jaar waarin ze 20 worden
 MAXIMALE_LEEFTIJD_JEUGD = 20
 
 GESLACHT = [('M', 'Man'), ('V', 'Vrouw')]
