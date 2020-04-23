@@ -16,7 +16,7 @@
 {% if bestaat_al %}
 
     <p>Wat doe je hier? De bondscompetitie voor seizoen {{ seizoen }} is al aangemaakt!</p>
-    <a class="btn-nhb-blauw" href="{% url 'Plein:plein' %}">Sluiten</a>
+    <a class="btn-nhb-blauw" href="{% url 'Plein:plein' %}"><i class="material-icons-round left">close</i>Sluiten</a>
 
 {% else %}
 
