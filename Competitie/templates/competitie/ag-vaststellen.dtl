@@ -1,0 +1,40 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2020 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}AG vaststellen{% endblock %}
+
+{% block pagina %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competities-ag-vaststellen" %}
+
+<h4>Aanvangsgemiddelden vaststellen</h4>
+
+<p>Als Manager Competitiezaken wil je de aanvangsgemiddelden voor elke schutter-boog vaststellen.</p>
+
+<p>Deze actie moet tijdens de opstart van een nieuw competitieseizoen eenmalig uitgevoerd worden voordat de klassegrenzen vastgesteld worden.<br>(Meerdere keren de aanvangsgemiddelden vaststellen kan geen kwaad maar hoeft niet)</p>
+
+{% if geen_histcomp %}
+
+    <p>Er is GEEN HISTORISCHE UITSLAG data beschikbaar, dus deze actie kan nog niet uitgevoerd worden.</p>
+
+{% else %}
+
+    <p>De historische data waar de aanvangsgemiddelden op gebaseerd zullen worden is van <b>seizoen {{ seizoen }}</b>.<br>A.U.B. controleren dat dit juist is.</p>
+
+    <p>Alle huidige aanvangsgemiddelden zullen eerst verwijderd worden. Schutters-boog met minimaal 6 scores in de voorgaande competitie krijgen als aanvangsgemiddelde het gemiddelde van de 6 hoogste scores. Schutters-boog met minder dan 6 scores krijgen geen aanvangsgemiddelde.</p>
+
+    <form method="post" action="{% url 'Competitie:ag-vaststellen' %}">
+        {% csrf_token %}
+        <input class="btn-nhb-rood" name="button_vaststellen" type="submit" value="Ja, stel de aanvangsgemiddelden vast!">
+    </form>
+
+    <p>Let op! Na het drukken op bovenstaande knop duurt het misschien wel 30 seconden voordat de website weer reageert.</p>
+
+{% endif %}
+
+{% endblock %}
+

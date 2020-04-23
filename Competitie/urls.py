@@ -15,7 +15,6 @@ urlpatterns = [
          views.CompetitieOverzichtView.as_view(),
          name='overzicht'),
 
-    # instellingen volgende competitie
     path('instellingen-volgende-competitie/',
          views.InstellingenVolgendeCompetitieView.as_view(),
          name='instellingen-volgende-competitie'),
@@ -24,8 +23,12 @@ urlpatterns = [
          views.CompetitieAanmakenView.as_view(),
          name='aanmaken'),
 
+    path('ag-vaststellen/',
+         views.AGVaststellenView.as_view(),
+         name='ag-vaststellen'),
+
     path('klassegrenzen/<afstand>/',
-         views.KlassegrenzenView.as_view(),
+         views.KlassegrenzenAGView.as_view(),
          name='klassegrenzen'),
 
     path('lijst-verenigingen/',
