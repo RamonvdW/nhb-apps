@@ -219,6 +219,13 @@ class TestCompetitie(E2EHelpers, TestCase):
         resp = self.client.post(self.url_aanmaken)
         self.assert_is_redirect(resp, self.url_overzicht)
 
+        # controleer dat het "ag vaststellen" kaartje er is
+        # om te beginnen zonder "voor het laatst gedaan"
+        resp = self.client.get(self.url_overzicht)
+        urls = self.extract_all_href_urls(resp)
+        self.assertTrue(self.url_ag_vaststellen in urls)
+        self.assertNotContains(resp, "voor het laatst gedaan")
+
         # verander de fase van de 25m competitie zodat we een A1 en een A2 hebben
         comp = Competitie.objects.get(afstand=25, is_afgesloten=False)
         CompetitieKlasse(competitie=comp, min_ag=25.0).save()
@@ -228,6 +235,13 @@ class TestCompetitie(E2EHelpers, TestCase):
 
         # gebruik een POST om de AG's vast te stellen
         resp = self.client.post(self.url_ag_vaststellen)
+
+        # controleer dat het "ag vaststellen" kaartje er nog steeds is
+        # dit keer met de "voor het laatst gedaan" notitie
+        resp = self.client.get(self.url_overzicht)
+        urls = self.extract_all_href_urls(resp)
+        self.assertTrue(self.url_ag_vaststellen in urls)
+        self.assertContains(resp, "voor het laatst gedaan")
 
     def test_ag_vaststellen_cornercases(self):
         self.e2e_login_and_pass_otp(self.account_bb)
