@@ -219,7 +219,7 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
                 voorkeur_dt = True
 
             # haal AG van 18m en 25m op, indien aanwezig
-            scores = Score.objects.filter(schutterboog=obj, afstand_meter=18)
+            scores = Score.objects.filter(schutterboog=obj, is_ag=True, afstand_meter=18)
             if len(scores):
                 score = scores[0]
                 obj.ag_18_waarde = score.waarde / 1000
@@ -227,7 +227,7 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
                 if len(hist):
                     obj.ag_18_scorehist = hist[0]
 
-            scores = Score.objects.filter(schutterboog=obj, afstand_meter=25)
+            scores = Score.objects.filter(schutterboog=obj, is_ag=True, afstand_meter=25)
             if len(scores):
                 score = scores[0]
                 obj.ag_25_waarde = score.waarde / 1000
