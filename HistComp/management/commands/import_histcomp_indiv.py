@@ -27,6 +27,7 @@ class Command(BaseCommand):
         self._count_error = 0
         self._count_added  =0
         self._count_dupe = 0
+        self._count_dupebow = 0
         self._boogtype2histcomp = dict()     # [boogtype] = HistCompetitie
 
     def add_arguments(self, parser):
@@ -267,8 +268,9 @@ class Command(BaseCommand):
                             # gevonden
                             # verwijder het recurve object
                             # hierdoor valt helaas een gat in de ranking
+                            self._count_dupebow += 1
                             robj.delete()
-                            print("nhb_nr:%s, hout:%s, totaal_1:%s, totaal_2:%s" % (houtobj.schutter_nr, houtobj.boogtype, houtobj.totaal, robj.totaal))
+                            #print("nhb_nr:%s, hout:%s, totaal_1:%s, totaal_2:%s" % (houtobj.schutter_nr, houtobj.boogtype, houtobj.totaal, robj.totaal))
                         # if
             # for
         # for
@@ -294,7 +296,12 @@ class Command(BaseCommand):
         self._import(lines, seizoen, comptype)
         self._delete_dupes()
 
-        self.stdout.write("Read %s lines; skipped %s dupes; %s skipped; %s too few scores; %s skip with errors; added %s records; %s without name" % (linecount, self._count_dupe, self._count_skip, self._count_not6scores, self._count_error, self._count_added, self._count_noname))
+        self.stdout.write("Read %s lines; skipped %s dupes; %s skipped; %s too few scores;"\
+                          " %s skip with errors; %s skip dupe bow score; added %s records;"
+                          " %s without name" % (linecount, self._count_dupe, self._count_skip,
+                                                self._count_not6scores, self._count_error,
+                                                self._count_dupebow, self._count_added - self._count_dupebow,
+                                                self._count_noname))
 
 # end of file
 
