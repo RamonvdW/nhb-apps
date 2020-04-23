@@ -9,7 +9,6 @@
 {% block title %}Competitie{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-overzicht-cwz" %}
 
 <h4>Competitie overzicht voor de CWZ</h4>
 
@@ -20,14 +19,14 @@
         <div class="col s12 m6 xl4">
             <div class="card">
                 <div class="card-content">
-                    <table class="simple"><tr style="border:0px">
-                        <td><i class="material-icons-round large">receipt</i></td>
-                        <td>Toon lijst met schutters ingeschreven voor de {{ comp.beschrijving }}.</td>
-                    </tr></table>
+                    <div class="card-title center-align">Inschrijvingen {{ comp.afstand }}m<br>
+                            <br><i class="material-icons-round large">receipt</i>
+                    </div>
+                    <p>Lijst met schutters ingeschreven voor de <b>{{ comp.beschrijving }}</b>.</p>
                 </div>
                 <a href="{{ comp.url_inschrijvingen }}" class="nhb-klikbare-balk">
                     <div class="card-action center-align">
-                        <span class="nhb-klikbare-link">Toon inschrijvingen</span>
+                        <span class="nhb-klikbare-link">Tonen</span>
                     </div>
                 </a>
             </div>
@@ -38,20 +37,21 @@
     <div class="col s12 m6 xl4">
         <div class="card">
             <div class="card-content">
-                <table class="simple"><tr style="border:0px">
-                    <td><i class="material-icons-round large">face</i></td>
-                    <td>Toon de beheerders van de competities.</td>
-                </tr></table>
+                <div class="card-title center-align">Beheerders<br>
+                    <br><i class="material-icons-round large">face</i>
+                </div>
+                <p>Relevante beheerders van de competities.</p>
             </div>
             <a href="{% url 'Functie:overzicht' %}" class="nhb-klikbare-balk">
                 <div class="card-action center-align">
-                    <span class="nhb-klikbare-link">Beheerders</span>
+                    <span class="nhb-klikbare-link">Tonen</span>
                 </div>
             </a>
         </div>
     </div>
-
 </div>
+
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-overzicht-cwz" %}
 
 {% endblock %}
 
