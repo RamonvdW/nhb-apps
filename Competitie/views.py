@@ -20,7 +20,7 @@ from BasisTypen.models import IndivWedstrijdklasse, TeamWedstrijdklasse, MAXIMAL
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from NhbStructuur.models import NhbLid, NhbVereniging
 from Schutter.models import SchutterBoog
-from Score.models import Score, aanvangsgemiddelde_opslaan, zoek_meest_recente_automatisch_vastgestelde_ag
+from Score.models import Score, ScoreHist, zoek_meest_recente_automatisch_vastgestelde_ag
 from .models import Competitie, AG_NUL, AG_LAAGSTE_NIET_NUL, CompetitieKlasse, DeelCompetitie,\
                     competitie_aanmaken, maak_competitieklasse_indiv, RegioCompetitieSchutterBoog
 from datetime import date
@@ -337,40 +337,50 @@ class AGVaststellenView(UserPassesTestMixin, TemplateView):
                 nhblid_dict[obj.nhb_nr] = obj
             # for
 
+            # maak een cache aan van schutter-boog
+            schutterboog_cache = dict()     # [schutter_nr, boogtype_afkorting] = SchutterBoog
+            for schutterboog in SchutterBoog.objects.select_related('nhblid', 'boogtype'):
+                tup = (schutterboog.nhblid.nhb_nr, schutterboog.boogtype.afkorting)
+                schutterboog_cache[tup] = schutterboog
+            # for
+
             # verwijder alle bestaande aanvangsgemiddelden
             Score.objects.filter(is_ag=True, afstand_meter=18).all().delete()
             Score.objects.filter(is_ag=True, afstand_meter=25).all().delete()
+            bulk_score = list()
 
             now = timezone.now()
             datum = date(year=now.year, month=now.month, day=now.day)
 
             # doorloop alle individuele histcomp records die bij dit seizoen horen
             for obj in HistCompetitieIndividueel.objects.\
-                                    select_related('histcompetitie').\
-                                    filter(histcompetitie__seizoen=seizoen):
+                            select_related('histcompetitie').\
+                            filter(histcompetitie__seizoen=seizoen):
+                afstand_meter = int(obj.histcompetitie.comp_type)
                 if obj.gemiddelde > AG_NUL and obj.boogtype in boogtype_dict:
-                    boogtype_obj = boogtype_dict[obj.boogtype]
+                    # haal het schutterboog record op, of maak een nieuwe aan
                     try:
-                        nhblid = nhblid_dict[obj.schutter_nr]
+                        tup = (obj.schutter_nr, obj.boogtype)
+                        schutterboog = schutterboog_cache[tup]
                     except KeyError:
-                        # geen lid meer - skip
-                        pass
-                    else:
-                        # haal het schutterboog record op, of maak een nieuwe aan
+                        # nieuw record nodig
+                        schutterboog = SchutterBoog()
+                        schutterboog.boogtype = boogtype_dict[obj.boogtype]
+                        schutterboog.voor_wedstrijd = True
+
                         try:
-                            schutterboog = SchutterBoog.objects.get(nhblid=nhblid, boogtype=boogtype_obj)
-                        except SchutterBoog.DoesNotExist:
-                            # nieuw record nodig
-                            schutterboog = SchutterBoog()
-                            schutterboog.nhblid = nhblid
-                            schutterboog.boogtype = boogtype_obj
+                            schutterboog.nhblid = nhblid_dict[obj.schutter_nr]
+                        except KeyError:
+                            # geen lid meer - skip
+                            schutterboog = None
+                        else:
+                            schutterboog.save()
+                    else:
+                        if not schutterboog.voor_wedstrijd:
                             schutterboog.voor_wedstrijd = True
                             schutterboog.save()
-                        else:
-                            if not schutterboog.voor_wedstrijd:
-                                schutterboog.voor_wedstrijd = True
-                                schutterboog.save()
 
+                    if schutterboog:
                         # aspiranten schieten op een grotere kaart en altijd op 18m
                         # daarom AG van aspirant niet overnemen als deze cadet wordt
                         # aangezien er maar 1 klasse is, is het AG niet nodig
@@ -381,14 +391,42 @@ class AGVaststellenView(UserPassesTestMixin, TemplateView):
 
                         # zoek het score record erbij
                         if not was_aspirant:
-                            aanvangsgemiddelde_opslaan(
-                                    schutterboog,
-                                    int(obj.histcompetitie.comp_type),      # afstand_meter
-                                    obj.gemiddelde,
-                                    datum,
-                                    None,
-                                    "Uitslag competitie seizoen %s" % seizoen)
+                            # eerste aanvangsgemiddelde voor deze afstand
+                            waarde = int(obj.gemiddelde * 1000)
+
+                            score = Score(schutterboog=schutterboog,
+                                          is_ag=True,
+                                          waarde=waarde,
+                                          afstand_meter=afstand_meter)
+                            bulk_score.append(score)
+
+                            if len(bulk_score) >= 500:
+                                Score.objects.bulk_create(bulk_score)
+                                bulk_score = list()
             # for
+
+            if len(bulk_score) > 0:
+                Score.objects.bulk_create(bulk_score)
+            del bulk_score
+
+            # maak nu alle ScoreHist entries in 1x aan
+            bulk_scorehist = list()
+            notitie = "Uitslag competitie seizoen %s" % seizoen
+            for score in Score.objects.all():
+                scorehist = ScoreHist(score=score,
+                                      oude_waarde=0,
+                                      nieuwe_waarde=score.waarde,
+                                      datum=datum,
+                                      door_account=None,
+                                      notitie=notitie)
+                bulk_scorehist.append(scorehist)
+
+                if len(bulk_scorehist) > 250:
+                    ScoreHist.objects.bulk_create(bulk_scorehist)
+                    bulk_scorehist = list()
+            # for
+            if len(bulk_scorehist) > 0:
+                ScoreHist.objects.bulk_create(bulk_scorehist)
 
         return redirect('Competitie:overzicht')
 

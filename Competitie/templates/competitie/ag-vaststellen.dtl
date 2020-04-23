@@ -23,7 +23,7 @@
 
 {% else %}
 
-    <p>De historische data waar de aanvangsgemiddelden op gebaseerd zullen worden is van <b>seizoen {{ seizoen }}</b>.<br>A.U.B. controleren dat dit juist is.</p>
+<p>De historische data waar de aanvangsgemiddelden op gebaseerd zullen worden is van <b>seizoen {{ seizoen }}</b>.<br><span class="red-text">Controleer dat dit juist is.</span></p>
 
     <p>Alle huidige aanvangsgemiddelden zullen eerst verwijderd worden. Schutters-boog met minimaal 6 scores in de voorgaande competitie krijgen als aanvangsgemiddelde het gemiddelde van de 6 hoogste scores. Schutters-boog met minder dan 6 scores krijgen geen aanvangsgemiddelde.</p>
 
@@ -31,8 +31,6 @@
         {% csrf_token %}
         <input class="btn-nhb-rood" name="button_vaststellen" type="submit" value="Ja, stel de aanvangsgemiddelden vast!">
     </form>
-
-    <p>Let op! Na het drukken op bovenstaande knop duurt het misschien wel 30 seconden voordat de website weer reageert.</p>
 
 {% endif %}
 
