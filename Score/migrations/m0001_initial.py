@@ -44,3 +44,5 @@ class Migration(migrations.Migration):
             ],
         ),
     ]
+
+# end of file

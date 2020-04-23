@@ -10,7 +10,7 @@ from .models import Score, ScoreHist
 
 class ScoreAdmin(admin.ModelAdmin):
     """ Admin configuratie voor Score klasse """
-    list_filter = ('afstand_meter', 'schutterboog__boogtype', 'schutterboog__nhblid__bij_vereniging')
+    list_filter = ('afstand_meter', 'is_ag', 'schutterboog__boogtype', 'schutterboog__nhblid__bij_vereniging')
 
 
 class ScoreHistAdmin(admin.ModelAdmin):

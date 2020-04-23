@@ -20,6 +20,7 @@ class Score(models.Model):
     # een aanvangsgemiddelde wordt hier ook opgeslagen met drie decimalen
     # nauwkeurig als AG*1000. Dus 9,123 --> 9123
     # hierdoor kunnen we gebruik maken van de ScoreHist
+    is_ag = models.BooleanField(default=False)
 
     # waarde van de score, bijvoorbeeld 360
     waarde = models.PositiveSmallIntegerField()     # max = 32767
@@ -62,10 +63,10 @@ def aanvangsgemiddelde_opslaan(schutterboog, afstand, gemiddelde, datum, door_ac
     waarde = int(gemiddelde * 1000)
 
     try:
-        score = Score.objects.get(schutterboog=schutterboog, afstand_meter=afstand)
+        score = Score.objects.get(schutterboog=schutterboog, is_ag=True, afstand_meter=afstand)
     except Score.DoesNotExist:
-        # eerste score voor deze afstand
-        score = Score(schutterboog=schutterboog, waarde=waarde, afstand_meter=afstand)
+        # eerste aanvangsgemiddelde voor deze afstand
+        score = Score(schutterboog=schutterboog, is_ag=True, waarde=waarde, afstand_meter=afstand)
         score.save()
 
         hist = ScoreHist(score=score,
@@ -94,5 +95,15 @@ def aanvangsgemiddelde_opslaan(schutterboog, afstand, gemiddelde, datum, door_ac
     # dezelfde score als voorheen --> voorlopig niet opslaan
     # (ook al is de datum en/of notitie anders)
     return False
+
+
+def zoek_meest_recente_automatisch_vastgestelde_ag():
+    scorehist = ScoreHist.objects.\
+                    select_related('score').\
+                    filter(door_account=None, score__is_ag=True).\
+                    order_by('-datum')[:1]
+    if len(scorehist) > 0:
+        return scorehist[0].datum
+    return None
 
 # end of file
