@@ -13,7 +13,7 @@
 
 <h4>Voorkeuren leden</h4>
 
-<p>Deze pagina toont een overzicht van de voorkeuren van de leden van vereniging [{{ nhb_ver.nhb_nr }}] {{ nhb_ver.naam }} te {{ nhb_ver.plaats }} en geeft de mogelijkheid deze aan te passen.</p>
+<p>Deze pagina toont een overzicht van de voorkeuren van de leden van vereniging <b>[{{ nhb_ver.nhb_nr }}] {{ nhb_ver.naam }}</b> te {{ nhb_ver.plaats }} en geeft de mogelijkheid deze aan te passen.</p>
 
 {% if leden_jeugd %}
 
@@ -44,7 +44,7 @@
 
                 <td>
                     {% for boogtype in obj.wedstrijdbogen %}
-                        <span>{% if not forloop.first %},<br>{% endif %}{{ boogtype.beschrijving }}</span>
+                        <span>{% if not forloop.first %},<br>{% endif %}{{ boogtype }}</span>
                     {% empty %}
                         <i class="red-text">Geen</i>
                     {% endfor %}
@@ -81,7 +81,7 @@
 
             <td>
                 {% for boogtype in obj.wedstrijdbogen %}
-                    <span>{% if not forloop.first %},<br>{% endif %}{{ boogtype.beschrijving }}</span>
+                    <span>{% if not forloop.first %},<br>{% endif %}{{ boogtype }}</span>
                 {% empty %}
                     <i class="red-text">Geen</i>
                 {% endfor %}
