@@ -43,9 +43,17 @@ class Command(BaseCommand):
         """ Zet het type boog waarmee de schutter schiet aan de hand van de HistCompetitieIndividueel uitslagen.
             De klasse waarin de schutter uitkwam bepaalt de boog waarmee hij schiet.
         """
-        boogtype_dict = dict()
+
+        # maak een cache aan van boogtype
+        boogtype_dict = dict()      # [afkorting] = BoogType
         for obj in BoogType.objects.all():
             boogtype_dict[obj.afkorting] = obj
+        # for
+
+        # maak een cache aan van nhbleden
+        nhblid_dict = dict()        # [nhb_nr] = NhbLid
+        for obj in NhbLid.objects.all():
+            nhblid_dict[obj.nhb_nr] = obj
         # for
 
         now = timezone.now()
@@ -55,6 +63,8 @@ class Command(BaseCommand):
         nieuw = 0
         al_aan = 0
         nieuw_ag = 0
+        geen_lid_meer = 0
+        leden = 0
 
         self.schutternr2nhblid = dict()
         done = list()   # (schutter_nr, boogtype)
@@ -63,8 +73,12 @@ class Command(BaseCommand):
             records += 1
             if obj.totaal > 0 and obj.boogtype in boogtype_dict:
                 boogtype_obj = boogtype_dict[obj.boogtype]
-                nhblid = self._get_nhblid(obj.schutter_nr)
-                if nhblid:
+                try:
+                    nhblid = nhblid_dict[obj.schutter_nr]
+                except KeyError:
+                    geen_lid_meer += 1
+                else:
+                    leden += 1
                     # haal het schutterboog record op, of maak een nieuwe aan
                     try:
                         schutterboog = SchutterBoog.objects.get(nhblid=nhblid, boogtype=boogtype_obj)
@@ -96,18 +110,9 @@ class Command(BaseCommand):
                             nieuw_ag += 1
         # for
 
-        leden = 0
-        geen_lid = 0
-        for _, nhblid in self.schutternr2nhblid.items():
-            if nhblid:
-                leden += 1
-            else:
-                geen_lid += 1
-        # for
-
         print("Samenvatting: %s records doorzocht; %s verschillende leden gevonden in de uitslag;"
               " %s geen lid meer; %s bogen al gekozen voor wedstrijden; %s aangezet;"
-              " %s aanvangsgemiddelden bepaald" % (records, leden, geen_lid, al_aan, nieuw, nieuw_ag))
+              " %s aanvangsgemiddelden bepaald" % (records, leden, geen_lid_meer, al_aan, nieuw, nieuw_ag))
 
     def handle(self, *args, **options):
         self._zet_schutterboog_voorkeur()
