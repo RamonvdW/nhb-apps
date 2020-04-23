@@ -5,14 +5,16 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from BasisTypen.models import BoogType, TeamWedstrijdklasse
+from django.utils import timezone
+from BasisTypen.models import BoogType, TeamWedstrijdklasse, IndivWedstrijdklasse
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
 from Overig.e2ehelpers import E2EHelpers
 from Schutter.models import SchutterBoog
 from Functie.models import maak_functie
-from .models import Competitie, DeelCompetitie, CompetitieKlasse,\
+from .models import Competitie, DeelCompetitie, CompetitieKlasse, maak_competitieklasse_indiv,\
                     RegioCompetitieSchutterBoog, regiocompetities_schutterboog_aanmelden
+from .views import zet_fase
 import datetime
 
 
@@ -134,6 +136,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         self.url_overzicht = '/competitie/'
         self.url_instellingen = '/competitie/instellingen-volgende-competitie/'
         self.url_aanmaken = '/competitie/aanmaken/'
+        self.url_ag_vaststellen = '/competitie/ag-vaststellen/'
         self.url_klassegrenzen_18 = '/competitie/klassegrenzen/18/'
         self.url_klassegrenzen_25 = '/competitie/klassegrenzen/25/'
 
@@ -196,6 +199,55 @@ class TestCompetitie(E2EHelpers, TestCase):
                 self.assertTrue("BK" in msg)
         # for
 
+    def test_ag_vaststellen(self):
+        self.e2e_login_and_pass_otp(self.account_bb)
+
+        # trigger de permissie check (want: verkeerde rol)
+        self.e2e_wisselnaarrol_gebruiker()
+        resp = self.client.get(self.url_ag_vaststellen)
+        self.assert_is_redirect(resp, '/plein/')
+
+        self.e2e_wisselnaarrol_bb()
+        self.e2e_check_rol('BB')
+
+        # trigger de permissie check (want: geen competitie aangemaakt)
+        resp = self.client.get(self.url_ag_vaststellen)
+        self.assert_is_redirect(resp, '/plein/')
+
+        # gebruik een POST om de competitie aan te maken
+        # daarna is het mogelijk om AG's vast te stellen
+        resp = self.client.post(self.url_aanmaken)
+        self.assert_is_redirect(resp, self.url_overzicht)
+
+        # verander de fase van de 25m competitie zodat we een A1 en een A2 hebben
+        comp = Competitie.objects.get(afstand=25, is_afgesloten=False)
+        CompetitieKlasse(competitie=comp, min_ag=25.0).save()
+
+        # haal het AG scherm op
+        resp = self.client.get(self.url_ag_vaststellen)
+
+        # gebruik een POST om de AG's vast te stellen
+        resp = self.client.post(self.url_ag_vaststellen)
+
+    def test_ag_vaststellen_cornercases(self):
+        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_wisselnaarrol_bb()
+
+        # gebruik een POST om de competitie aan te maken
+        # daarna is het mogelijk om AG's vast te stellen
+        resp = self.client.post(self.url_aanmaken)
+        self.assert_is_redirect(resp, self.url_overzicht)
+
+        # geen HistComp
+        HistCompetitie.objects.all().delete()
+
+        # haal het AG scherm op
+        resp = self.client.get(self.url_ag_vaststellen)
+
+        # probeer de POST
+        resp = self.client.post(self.url_ag_vaststellen)
+        self.assert_is_redirect(resp, self.url_overzicht)
+
     def test_klassegrenzen_cornercases(self):
         self.e2e_login_and_pass_otp(self.account_bb)
         self.e2e_wisselnaarrol_bb()
@@ -208,15 +260,7 @@ class TestCompetitie(E2EHelpers, TestCase):
 
         # illegale competitie
         resp = self.client.get(self.url_klassegrenzen_18.replace('18', 'xx'))
-        self.assert_is_redirect(resp, '/plein/')
-
-        # 18m competitie, zonder historie
-        HistCompetitie.objects.all().delete()
-        resp = self.client.get(self.url_klassegrenzen_18)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/klassegrenzen-vaststellen.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, "FOUT - GEEN DATA AANWEZIG")
+        self.assertEqual(resp.status_code, 404)
 
     def test_klassegrenzen(self):
         self.e2e_login_and_pass_otp(self.account_bb)
@@ -300,6 +344,48 @@ class TestCompetitie(E2EHelpers, TestCase):
         obj = CompetitieKlasse(competitie=comp, team=wkl, min_ag=0.42)
         obj.save()
         self.assertTrue(wkl.beschrijving in str(obj))
+
+    def test_zet_fase(self):
+
+        now = timezone.now()
+        now = datetime.date(year=now.year, month=now.month, day=now.day)
+        einde_jaar = datetime.date(year=now.year, month=12, day=31)
+        gisteren = now - datetime.timedelta(days=1)
+
+        # maak een competitie aan en controleer de fase
+        comp = Competitie()
+        comp.begin_jaar = 2000
+        comp.uiterste_datum_lid = datetime.date(year=2000, month=1, day=1)
+        comp.begin_aanmeldingen = comp.einde_aanmeldingen = comp.einde_teamvorming = comp.eerste_wedstrijd = einde_jaar
+        comp.save()
+        zet_fase(comp)
+        self.assertEqual(comp.fase, 'A1')
+
+        # maak de klassen aan en controleer de fase weer
+        indiv = IndivWedstrijdklasse.objects.all()[0]
+        maak_competitieklasse_indiv(comp, indiv, 0.0)
+        zet_fase(comp)
+        self.assertEqual(comp.fase, 'A2')
+
+        # tussen begin en einde aanmeldingen = B
+        comp.begin_aanmeldingen = gisteren
+        zet_fase(comp)
+        self.assertEqual(comp.fase, 'B')
+
+        # na einde aanmeldingen tot einde_teamvorming = C
+        comp.einde_aanmeldingen = gisteren
+        zet_fase(comp)
+        self.assertEqual(comp.fase, 'C')
+
+        # na einde teamvorming tot eerste wedstrijd = D
+        comp.einde_teamvorming = gisteren
+        zet_fase(comp)
+        self.assertEqual(comp.fase, 'D')
+
+        # na eerste wedstrijd = E
+        comp.eerste_wedstrijd = gisteren
+        zet_fase(comp)
+        self.assertEqual(comp.fase, 'E')
 
 
 # TODO: gebruik assert_other_http_commands_not_supported
