@@ -23,7 +23,7 @@ Onder aan deze pagina vindt je een knop om de nieuwe competitie aan te maken.</p
         <div class="white-text blue z-depth-2">
             <div class="row small-row">
                 <div class="col s5"><b>Beschrijving</b></div>
-                <div class="col s2"><b>Boogtypen</b></div>
+                <div class="col s2"><b>Boogtype</b></div>
                 <div class="col s3"><b>Leeftijdsklassen</b></div>
             </div>
             {% for obj in indivklassen %}
@@ -34,8 +34,8 @@ Onder aan deze pagina vindt je een knop om de nieuwe competitie aan te maken.</p
                     <div class="col s5">{{ obj.beschrijving }}</div>
                     <div class="col s2">{{ obj.boogtype.beschrijving }}</div>
                     <div class="col s3">
-                        {% for lkl in obj.leeftijdsklassen.all %}
-                            <span>{{ lkl.beschrijving }}</span><br>
+                        {% for lkl in obj.lkl_list %}
+                            <span>{{ lkl }}</span><br>
                         {% endfor %}
                     </div>
                 </div>
@@ -59,8 +59,8 @@ Onder aan deze pagina vindt je een knop om de nieuwe competitie aan te maken.</p
                 <div class="row small-row">
                     <div class="col s5">{{ obj.beschrijving }}</div>
                     <div class="col s3">
-                        {% for boogtype in obj.boogtypen.all %}
-                            <span>{{ boogtype.beschrijving }}</span><br>
+                        {% for boogtype in obj.boogtypen_list %}
+                            <span>{{ boogtype }}</span><br>
                         {% endfor %}
                     </div>
                 </div>
