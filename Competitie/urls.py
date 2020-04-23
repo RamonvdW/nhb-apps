@@ -27,9 +27,13 @@ urlpatterns = [
          views.AGVaststellenView.as_view(),
          name='ag-vaststellen'),
 
-    path('klassegrenzen/<afstand>/',
-         views.KlassegrenzenAGView.as_view(),
-         name='klassegrenzen'),
+    path('klassegrenzen/<afstand>/vaststellen/',
+         views.KlassegrenzenVaststellenView.as_view(),
+         name='klassegrenzen-vaststellen'),
+
+    path('klassegrenzen/tonen/',
+         views.KlassegrenzenTonenView.as_view(),
+         name='klassegrenzen-tonen'),
 
     path('lijst-verenigingen/',
          views.LijstVerenigingenView.as_view(),

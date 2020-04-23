@@ -31,7 +31,8 @@ TEMPLATE_COMPETITIE_OVERZICHT_CWZ = 'competitie/overzicht-cwz.dtl'
 TEMPLATE_COMPETITIE_OVERZICHT_BEHEERDER = 'competitie/overzicht-beheerder.dtl'
 TEMPLATE_COMPETITIE_INSTELLINGEN = 'competitie/instellingen-nieuwe-competitie.dtl'
 TEMPLATE_COMPETITIE_AANMAKEN = 'competitie/competities-aanmaken.dtl'
-TEMPLATE_COMPETITIE_KLASSEGRENZEN = 'competitie/klassegrenzen-vaststellen.dtl'
+TEMPLATE_COMPETITIE_KLASSEGRENZEN_VASTSTELLEN = 'competitie/klassegrenzen-vaststellen.dtl'
+TEMPLATE_COMPETITIE_KLASSEGRENZEN_TONEN = 'competitie/klassegrenzen-tonen.dtl'
 TEMPLATE_COMPETITIE_LIJST_VERENIGINGEN = 'competitie/lijst-verenigingen.dtl'
 TEMPLATE_COMPETITIE_AANGEMELD_REGIO = 'competitie/lijst-aangemeld-regio.dtl'
 TEMPLATE_COMPETITIE_AG_VASTSTELLEN = 'competitie/ag-vaststellen.dtl'
@@ -539,7 +540,7 @@ class LijstAangemeldRegioView(TemplateView):
         return context
 
 
-class KlassegrenzenAGView(UserPassesTestMixin, TemplateView):
+class KlassegrenzenVaststellenView(UserPassesTestMixin, TemplateView):
 
     """ deze view laat de aanvangsgemiddelden voor de volgende competitie zien,
         aan de hand van de al vastgestelde aanvangsgemiddelden
@@ -547,7 +548,7 @@ class KlassegrenzenAGView(UserPassesTestMixin, TemplateView):
     """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_COMPETITIE_KLASSEGRENZEN
+    template_name = TEMPLATE_COMPETITIE_KLASSEGRENZEN_VASTSTELLEN
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -744,5 +745,40 @@ class KlassegrenzenAGView(UserPassesTestMixin, TemplateView):
 
         return redirect('Competitie:overzicht')
 
+
+class KlassegrenzenTonenView(ListView):
+
+    """ deze view laat de vastgestelde aanvangsgemiddelden voor de volgende competitie zien """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_COMPETITIE_KLASSEGRENZEN_TONEN
+
+    def get_queryset(self):
+        """ called by the template system to get the queryset or list of objects for the template """
+
+        indiv_dict = dict()     # [indiv.pk] = IndivWedstrijdklasse
+        objs = list()
+        for obj in IndivWedstrijdklasse.objects.order_by('volgorde'):
+            indiv_dict[obj.pk] = obj
+            objs.append(obj)
+        # for
+
+        for obj in CompetitieKlasse.objects.filter(team=None).select_related('competitie', 'indiv'):
+            indiv = indiv_dict[obj.indiv.pk]
+            min_ag = obj.min_ag
+            if min_ag != AG_NUL:
+                if obj.competitie.afstand == '18':
+                    indiv.min_ag18 = obj.min_ag
+                else:
+                    indiv.min_ag25 = obj.min_ag
+        # for
+
+        return objs
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+        menu_dynamics(self.request, context, actief='competitie')
+        return context
 
 # end of file
