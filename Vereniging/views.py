@@ -14,7 +14,7 @@ from Functie.rol import rol_get_huidige_functie
 from BasisTypen.models import LeeftijdsKlasse, MAXIMALE_LEEFTIJD_JEUGD
 from NhbStructuur.models import NhbLid
 from Schutter.models import SchutterBoog
-from Competitie.models import AG_NUL, regiocompetities_schutterboog_aanmelden
+from Competitie.models import AG_NUL, RegioCompetitieSchutterBoog, regiocompetities_schutterboog_aanmelden
 from Score.models import Score
 import copy
 
@@ -79,34 +79,49 @@ class LedenLijstView(UserPassesTestMixin, ListView):
 
         objs = list()
 
+        prev_lkl = None
+        prev_wedstrijdleeftijd = 0
+
         # sorteer op geboorte jaar en daarna naam
-        for obj in qset.filter(geboorte_datum__year__gte=jeugdgrens).order_by('-geboorte_datum__year', 'achternaam', 'voornaam'):
-            objs.append(obj)
+        for obj in NhbLid.objects.\
+                filter(bij_vereniging=functie_nu.nhb_ver).\
+                filter(geboorte_datum__year__gte=jeugdgrens).\
+                order_by('-geboorte_datum__year', 'achternaam', 'voornaam'):
 
             # de wedstrijdleeftijd voor dit hele jaar
             wedstrijdleeftijd = huidige_jaar - obj.geboorte_datum.year
             obj.leeftijd = wedstrijdleeftijd
 
             # de wedstrijdklasse voor dit hele jaar
-            obj.leeftijdsklasse = LeeftijdsKlasse.objects.filter(
-                            max_wedstrijdleeftijd__gte=wedstrijdleeftijd,
-                            geslacht='M').order_by('max_wedstrijdleeftijd')[0]
+            if wedstrijdleeftijd == prev_wedstrijdleeftijd:
+                obj.leeftijdsklasse = prev_lkl
+            else:
+                obj.leeftijdsklasse = LeeftijdsKlasse.objects.filter(
+                                max_wedstrijdleeftijd__gte=wedstrijdleeftijd,
+                                geslacht='M').order_by('max_wedstrijdleeftijd')[0]
+                prev_lkl = obj.leeftijdsklasse
+                prev_wedstrijdleeftijd = wedstrijdleeftijd
+
+            objs.append(obj)
         # for
 
         # volwassenen
         # sorteer op naam
-        for obj in qset.filter(geboorte_datum__year__lt=jeugdgrens).order_by('achternaam', 'voornaam'):
-            objs.append(obj)
+        for obj in NhbLid.objects.\
+                        filter(bij_vereniging=functie_nu.nhb_ver).\
+                        filter(geboorte_datum__year__lt=jeugdgrens).\
+                        order_by('achternaam', 'voornaam'):
             obj.leeftijdsklasse = None
 
             if not obj.is_actief_lid:
                 obj.leeftijd = huidige_jaar - obj.geboorte_datum.year
+
+            objs.append(obj)
         # for
 
-        # zoek de schutter-boog informatie en laatste-inlog bij elk lid
+        # zoek de laatste-inlog bij elk lid
         for nhblid in objs:
             nhblid.wijzig_url = reverse('Schutter:voorkeuren-nhblid', kwargs={'nhblid_pk': nhblid.pk})
-            nhblid.wedstrijdbogen = [schutterboog.boogtype for schutterboog in nhblid.schutterboog_set.all().order_by('boogtype__volgorde') if schutterboog.voor_wedstrijd]
 
             if nhblid.account:
                 nhblid.laatste_inlog = nhblid.account.last_login
@@ -152,6 +167,31 @@ class LedenVoorkeurenView(LedenLijstView):
     # class variables shared by all instances
     template_name = TEMPLATE_LEDEN_VOORKEUREN
 
+    def get_queryset(self):
+        objs = super().get_queryset()
+
+        nhblid_dict = dict()
+        for nhblid in objs:
+            nhblid.wedstrijdbogen = list()
+            nhblid_dict[nhblid.nhb_nr] = nhblid
+        # for
+
+        # zoek de bogen informatie bij elk lid
+        for schutterboog in SchutterBoog.objects.\
+                filter(voor_wedstrijd=True).\
+                select_related('nhblid', 'boogtype').\
+                only('nhblid__nhb_nr', 'boogtype__beschrijving'):
+            try:
+                nhblid = nhblid_dict[schutterboog.nhblid.nhb_nr]
+            except KeyError:
+                # nhblid niet van deze vereniging
+                pass
+            else:
+                nhblid.wedstrijdbogen.append(schutterboog.boogtype.beschrijving)
+        # for
+
+        return objs
+
 
 class LedenAanmeldenView(UserPassesTestMixin, ListView):
 
@@ -169,13 +209,6 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
         return HttpResponseRedirect(reverse('Plein:plein'))
 
-    @staticmethod
-    def _get_schutterboog_ag(schutterboog, afstand):
-        ags = Score.objects.filter(schutterboog=schutterboog, afstand_meter=afstand)
-        if len(ags) >= 1:       # zou er maar 1 moeten zijn
-            return ags[0].waarde / 1000
-        return AG_NUL
-
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
 
@@ -184,53 +217,100 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
         self._huidige_jaar = huidige_jaar
 
         _, functie_nu = rol_get_huidige_functie(self.request)
-        qset = NhbLid.objects.filter(bij_vereniging=functie_nu.nhb_ver, is_actief_lid=True)
         objs = list()
 
+        prev_lkl = None
+        prev_wedstrijdleeftijd = 0
+
         # sorteer jeugd op geboorte jaar en daarna naam
-        for obj in qset.filter(geboorte_datum__year__gte=jeugdgrens).order_by('-geboorte_datum__year', 'achternaam', 'voornaam'):
-            objs.append(obj)
+        for obj in NhbLid.objects.\
+                filter(bij_vereniging=functie_nu.nhb_ver).\
+                filter(geboorte_datum__year__gte=jeugdgrens).\
+                order_by('-geboorte_datum__year', 'achternaam', 'voornaam'):
 
             # de wedstrijdleeftijd voor dit hele jaar
             wedstrijdleeftijd = huidige_jaar - obj.geboorte_datum.year
             obj.leeftijd = wedstrijdleeftijd
 
             # de wedstrijdklasse voor dit hele jaar
-            obj.leeftijdsklasse = LeeftijdsKlasse.objects.filter(
-                            max_wedstrijdleeftijd__gte=wedstrijdleeftijd,
-                            geslacht='M').order_by('max_wedstrijdleeftijd')[0]
+            if wedstrijdleeftijd == prev_wedstrijdleeftijd:
+                obj.leeftijdsklasse = prev_lkl
+            else:
+                obj.leeftijdsklasse = LeeftijdsKlasse.objects.filter(
+                                max_wedstrijdleeftijd__gte=wedstrijdleeftijd,
+                                geslacht='M').order_by('max_wedstrijdleeftijd')[0]
+                prev_lkl = obj.leeftijdsklasse
+                prev_wedstrijdleeftijd = wedstrijdleeftijd
+
+            objs.append(obj)
         # for
 
         # sorteer volwassenen op naam
-        for obj in qset.filter(geboorte_datum__year__lt=jeugdgrens).order_by('achternaam', 'voornaam'):
-            objs.append(obj)
+        for obj in NhbLid.objects.\
+                        filter(bij_vereniging=functie_nu.nhb_ver).\
+                        filter(geboorte_datum__year__lt=jeugdgrens).\
+                        order_by('achternaam', 'voornaam'):
             obj.leeftijdsklasse = None
+            objs.append(obj)
         # for
 
-        # zoek de schutter-boog informatie bij elk lid
-        objs2 = list()
+        # maak een paar tabellen om database toegangen te verminderen
+        nhblid_dict = dict()    # [nhb_nr] = NhbLid
         for nhblid in objs:
-            heeft_wedstrijdboog = False
-            for schutterboog in nhblid.schutterboog_set.all().order_by('boogtype__volgorde'):
-                if schutterboog.voor_wedstrijd:
-                    # maak een kopie van het nhblid en maak het uniek voor dit boogtype
-                    obj = copy.copy(nhblid)
-                    obj.boogtype = schutterboog.boogtype
-                    obj.check = "lid_%s_boogtype_%s" % (nhblid.nhb_nr, schutterboog.boogtype.pk)
-                    heeft_wedstrijdboog = True
+            nhblid.wedstrijdbogen = list()
+            nhblid_dict[nhblid.nhb_nr] = nhblid
+        # for
 
-                    # zoek de aanvangsgemiddelden er bij
-                    obj.ag_18 = self._get_schutterboog_ag(schutterboog, 18)
-                    obj.ag_25 = self._get_schutterboog_ag(schutterboog, 25)
+        ag_dict = dict()        # (afstand, schutterboog_pk) = Score
+        for score in Score.objects.select_related('schutterboog').filter(is_ag=True):
+            tup = (score.afstand_meter, score.schutterboog.pk)
+            ag = score.waarde / 1000
+            ag_dict[tup] = ag
+        # for
 
-                    # kijk of de schutter al aangemeld is
-                    obj.is_aangemeld = schutterboog.regiocompetitieschutterboog_set.count() > 0
+        is_aangemeld_dict = dict()   # [schutterboog.pk] = True/False
+        for deelnemer in RegioCompetitieSchutterBoog.objects.\
+                select_related('schutterboog').\
+                filter(bij_vereniging=functie_nu.nhb_ver):
+            is_aangemeld_dict[deelnemer.schutterboog.pk] = True
+        # for
 
-                    objs2.append(obj)
-            # for
-            #if not heeft_wedstrijdboog:
-            #    nhblid.geen_wedstrijdboog = True
-            #    objs2.append(nhblid)
+        # zoek de bogen informatie bij elk lid
+        # split per schutter-boog
+        objs2 = list()
+        for schutterboog in SchutterBoog.objects.\
+                filter(voor_wedstrijd=True).\
+                select_related('nhblid', 'boogtype').\
+                order_by('boogtype__volgorde').\
+                only('nhblid__nhb_nr', 'boogtype__beschrijving'):
+            try:
+                nhblid = nhblid_dict[schutterboog.nhblid.nhb_nr]
+            except KeyError:
+                # schutterboog niet van deze vereniging
+                pass
+            else:
+                # maak een kopie van het nhblid en maak het uniek voor dit boogtype
+                obj = copy.copy(nhblid)
+                obj.boogtype = schutterboog.boogtype.beschrijving
+                obj.check = "lid_%s_boogtype_%s" % (nhblid.nhb_nr, schutterboog.boogtype.pk)
+
+                try:
+                    obj.ag_18 = ag_dict[(18, schutterboog.pk)]
+                except KeyError:
+                    obj.ag_18 = AG_NUL
+
+                try:
+                    obj.ag_25 = ag_dict[(25, schutterboog.pk)]
+                except KeyError:
+                    obj.ag_25 = AG_NUL
+
+                # kijk of de schutter al aangemeld is
+                try:
+                    obj.is_aangemeld = is_aangemeld_dict[schutterboog.pk]
+                except KeyError:
+                    obj.is_aangemeld = False
+
+                objs2.append(obj)
         # for
 
         return objs2
@@ -290,8 +370,16 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                         raise Resolver404()
 
                 # zoek de aanvangsgemiddelden er bij
-                gem18 = self._get_schutterboog_ag(schutterboog, 18)
-                gem25 = self._get_schutterboog_ag(schutterboog, 25)
+                gem18 = AG_NUL
+                gem25 = AG_NUL
+                for score in Score.objects.\
+                        select_related('schutterboog').\
+                        filter(is_ag=True, schutterboog=schutterboog):
+                    if score.afstand_meter == 18:
+                        gem18 = score.waarde / 1000
+                    elif score.afstand_meter == 25:
+                        gem25 = score.waarde / 1000
+                # for
 
                 regiocompetities_schutterboog_aanmelden(schutterboog, gem18, gem25)
 
