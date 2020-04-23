@@ -61,7 +61,7 @@
                                 <span><!-- noodzakelijk --></span>
                             </label>
                         </td>
-                        <td>{{ obj.boogtype.beschrijving }}</td>
+                        <td>{{ obj.boogtype }}</td>
                         <td>{{ obj.ag_18|floatformat:3 }}</td>
                         <td>{{ obj.ag_25|floatformat:3 }}</td>
                         <td>{{ obj.volledige_naam }}</td>
@@ -107,7 +107,7 @@
                             <span><!-- noodzakelijk --></span>
                         </label>
                     </td>
-                    <td>{{ obj.boogtype.beschrijving }}</td>
+                    <td>{{ obj.boogtype }}</td>
                     <td>{{ obj.ag_18|floatformat:3 }}</td>
                     <td>{{ obj.ag_25|floatformat:3 }}</td>
                     <td>{{ obj.volledige_naam }}</td>
