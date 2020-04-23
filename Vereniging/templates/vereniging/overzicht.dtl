@@ -9,16 +9,15 @@
 {% block title %}Vereniging{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vereniging-overzicht" %}
 
 <h4>Vereniging</h4>
 
-<p>&nbsp;</p>
+<!--<p>&nbsp;</p>-->
 
 <div class="row">
 
     <!-- toon gegevens van de vereniging in een blauw box -->
-    <div class="col s12 m10 l8 xl6">
+    <div class="col s12 m10 l8 xl6 offset-m1 offset-l2 offset-xl3">
         <div class="white-text blue z-depth-2">
             <!-- <div class="row">
                 <div class="col s1">1</div>
@@ -50,7 +49,7 @@
     </div>
 </div>
 
-&nbsp;
+<!--&nbsp;-->
 <h5>Beheerder</h5>
 
 <p>Als beheerder van de vereniging heb je toegang tot onderstaande functies.</p>
@@ -126,6 +125,8 @@
     </div>
 
 </div>
+
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vereniging-overzicht" %}
 
 {% endblock %}
 
