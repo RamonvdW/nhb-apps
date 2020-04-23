@@ -57,7 +57,7 @@
             <p>Vanuit je <i>huidige</i> rol heb je de mogelijkheid om andere beheerders te helpen door naar <b>hun rol</b> te wisselen.<br>Na het wisselen zie je de website precies zoals zij hem zien. Je kan altijd weer terug.</p>
             <p>De keuzes hieronder veranderen dus steeds, afhankelijk van je gekozen rol.<br>
                     <!-- hierarchie -->
-                <span>De hi&euml;rarchie is Manager Competitiezaken</span>
+                <span>De hi&euml;rarchie is BB</span>
                 <span style="position: relative; bottom: .15em;"> &rarr; </span>
                 <span>BKO</span>
                 <span style="position: relative; bottom: .15em;"> &rarr; </span>
@@ -65,7 +65,8 @@
                 <span style="position: relative; bottom: .15em;"> &rarr; </span>
                 <span>RCL</span>
                 <span style="position: relative; bottom: .15em;"> &rarr; </span>
-                <span>CWZ.</span></p>
+                <span>CWZ.&nbsp;&nbsp;&nbsp;</span><a class="btn-small btn-nhb-blauw" href="{{ url_handleiding_rollen }}"><i class="material-icons-round white-text">help_outline</i></a>
+            </p>
         {% else %}
             <a class="btn-nhb-blauw" href="{{ obj.url }}">{{ obj.titel }}</a>
             {% if obj.ver_naam %}

@@ -554,6 +554,8 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
         else:
             context['meta_functie'] = ""
 
+        context['url_handleiding_rollen'] = settings.WIKI_URL_ROLLEN
+
         menu_dynamics(self.request, context, actief='wissel-van-rol')
         return context
 
