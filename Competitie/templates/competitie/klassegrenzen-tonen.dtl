@@ -13,6 +13,8 @@
 
 <h4>Klassegrenzen</h4>
 
+{% if object_list %}
+
 <p>Hieronder staan de vastgestelde klassegrenzen voor de individuele wedstrijdklassen voor de competities.</p>
 
 <div class="row">
@@ -43,6 +45,12 @@
         {% endfor %}
     </table>
 </div>
+
+{% else %}
+
+<p>De klassegrenzen zijn nog niet vastgesteld.</p>
+
+{% endif %}
 
 <a class="btn-nhb-blauw" href="{% url 'Competitie:overzicht' %}"><i class="material-icons-round left">close</i>Sluiten</a>
 

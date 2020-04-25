@@ -756,8 +756,11 @@ class KlassegrenzenTonenView(ListView):
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
 
-        indiv_dict = dict()     # [indiv.pk] = IndivWedstrijdklasse
         objs = list()
+        if CompetitieKlasse.objects.filter(team=None).count() == 0:
+            return objs
+
+        indiv_dict = dict()     # [indiv.pk] = IndivWedstrijdklasse
         for obj in IndivWedstrijdklasse.objects.order_by('volgorde'):
             indiv_dict[obj.pk] = obj
             objs.append(obj)
