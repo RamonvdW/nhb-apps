@@ -84,6 +84,23 @@ class TestCompetitie(E2EHelpers, TestCase):
         schutterboog.save()
         self.schutterboog_100002 = schutterboog
 
+        lid = NhbLid()
+        lid.nhb_nr = 100003
+        lid.geslacht = "V"
+        lid.voornaam = "Zus"
+        lid.achternaam = "de Testerin"
+        lid.email = "zus@gmail.not"
+        lid.geboorte_datum = datetime.date(year=2008, month=3, day=4)
+        lid.sinds_datum = datetime.date(year=2015, month=11, day=12)
+        lid.bij_vereniging = ver
+        lid.save()
+        self.lid_100003 = lid
+
+        # maak een schutterboog aan voor het jeugdlid (nodig om aan te melden)
+        schutterboog = SchutterBoog(nhblid=self.lid_100003, boogtype=boog_bb, voor_wedstrijd=True)
+        schutterboog.save()
+        self.schutterboog_100003 = schutterboog
+
         # (strategisch gekozen) historische data om klassegrenzen uit te bepalen
         histcomp = HistCompetitie()
         histcomp.seizoen = '2018/2019'
@@ -137,8 +154,10 @@ class TestCompetitie(E2EHelpers, TestCase):
         self.url_instellingen = '/competitie/instellingen-volgende-competitie/'
         self.url_aanmaken = '/competitie/aanmaken/'
         self.url_ag_vaststellen = '/competitie/ag-vaststellen/'
-        self.url_klassegrenzen_18 = '/competitie/klassegrenzen/18/'
-        self.url_klassegrenzen_25 = '/competitie/klassegrenzen/25/'
+        self.url_klassegrenzen_vaststellen_18 = '/competitie/klassegrenzen/vaststellen/18/'
+        self.url_klassegrenzen_vaststellen_25 = '/competitie/klassegrenzen/vaststellen/25/'
+        self.url_klassegrenzen_tonen = '/competitie/klassegrenzen/tonen/'
+        self.url_aangemeld = '/competitie/lijst-regio/%s/'  # % comp_pk
 
     def test_anon(self):
         self.e2e_logout()
@@ -152,10 +171,10 @@ class TestCompetitie(E2EHelpers, TestCase):
         resp = self.client.post(self.url_aanmaken)
         self.assert_is_redirect(resp, '/plein/')
 
-        resp = self.client.get(self.url_klassegrenzen_18)
+        resp = self.client.get(self.url_klassegrenzen_vaststellen_18)
         self.assert_is_redirect(resp, '/plein/')
 
-        resp = self.client.get(self.url_klassegrenzen_25)
+        resp = self.client.get(self.url_klassegrenzen_vaststellen_25)
         self.assert_is_redirect(resp, '/plein/')
 
     def test_instellingen(self):
@@ -262,21 +281,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         resp = self.client.post(self.url_ag_vaststellen)
         self.assert_is_redirect(resp, self.url_overzicht)
 
-    def test_klassegrenzen_cornercases(self):
-        self.e2e_login_and_pass_otp(self.account_bb)
-        self.e2e_wisselnaarrol_bb()
-        self.e2e_check_rol('BB')
-
-        # gebruik een POST om de competitie aan te maken
-        # daarna is het mogelijk om klassegrenzen in te stellen
-        resp = self.client.post(self.url_aanmaken)
-        self.assert_is_redirect(resp, self.url_overzicht)
-
-        # illegale competitie
-        resp = self.client.get(self.url_klassegrenzen_18.replace('18', 'xx'))
-        self.assertEqual(resp.status_code, 404)
-
-    def test_klassegrenzen(self):
+    def test_klassegrenzen_vaststellen(self):
         self.e2e_login_and_pass_otp(self.account_bb)
         self.e2e_wisselnaarrol_bb()
         self.e2e_check_rol('BB')
@@ -287,7 +292,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_overzicht)
 
         # 18m competitie
-        resp = self.client.get(self.url_klassegrenzen_18)
+        resp = self.client.get(self.url_klassegrenzen_vaststellen_18)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/klassegrenzen-vaststellen.dtl', 'plein/site_layout.dtl'))
@@ -295,7 +300,7 @@ class TestCompetitie(E2EHelpers, TestCase):
 
         # nu kunnen we met een POST de klassegrenzen vaststellen
         self.assertEqual(CompetitieKlasse.objects.count(), 0)       # TODO: filter op Competitie
-        resp = self.client.post(self.url_klassegrenzen_18)
+        resp = self.client.post(self.url_klassegrenzen_vaststellen_18)
         self.assert_is_redirect(resp, self.url_overzicht)
         self.assertNotEqual(CompetitieKlasse.objects.count(), 0)    # TODO: filter op Competitie
         # TODO: check nog meer velden van de aangemaakte objecten
@@ -303,6 +308,58 @@ class TestCompetitie(E2EHelpers, TestCase):
         # coverage
         obj = CompetitieKlasse.objects.all()[0]
         self.assertTrue(str(obj) != "")
+
+    def test_klassegrenzen_vaststellen_cornercases(self):
+        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_wisselnaarrol_bb()
+        self.e2e_check_rol('BB')
+
+        # gebruik een POST om de competitie aan te maken
+        # daarna is het mogelijk om klassegrenzen in te stellen
+        resp = self.client.post(self.url_aanmaken)
+        self.assert_is_redirect(resp, self.url_overzicht)
+
+        # illegale competitie
+        resp = self.client.get(self.url_klassegrenzen_vaststellen_18.replace('18', 'xx'))
+        self.assertEqual(resp.status_code, 404)
+
+    def test_klassegrenzen_tonen(self):
+        resp = self.client.get(self.url_klassegrenzen_tonen)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/klassegrenzen-tonen.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, 'De klassegrenzen zijn nog niet vastgesteld')
+
+        # competitie opstarten
+        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_wisselnaarrol_bb()
+        self.e2e_check_rol('BB')
+
+        # gebruik een POST om de competitie aan te maken
+        resp = self.client.post(self.url_aanmaken)
+        self.assert_is_redirect(resp, self.url_overzicht)
+
+        resp = self.client.get(self.url_klassegrenzen_tonen)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/klassegrenzen-tonen.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, 'De klassegrenzen zijn nog niet vastgesteld')
+
+        # daarna is het mogelijk om AG's vast te stellen?
+
+        # klassegrenzen vaststellen (18m en 25m)
+        resp = self.client.post(self.url_klassegrenzen_vaststellen_18)
+        self.assert_is_redirect(resp, self.url_overzicht)
+        resp = self.client.post(self.url_klassegrenzen_vaststellen_25)
+        self.assert_is_redirect(resp, self.url_overzicht)
+        self.e2e_logout()
+
+        # nog een keer
+        resp = self.client.get(self.url_klassegrenzen_tonen)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/klassegrenzen-tonen.dtl', 'plein/site_layout.dtl'))
+        self.assertNotContains(resp, 'De klassegrenzen zijn nog niet vastgesteld')
 
     def test_schutterboog_aanmelden(self):
         self.e2e_login_and_pass_otp(self.account_bb)
@@ -313,16 +370,16 @@ class TestCompetitie(E2EHelpers, TestCase):
         resp = self.client.post(self.url_aanmaken)
         self.assert_is_redirect(resp, self.url_overzicht)
 
-        resp = self.client.post(self.url_klassegrenzen_18)
+        resp = self.client.post(self.url_klassegrenzen_vaststellen_18)
         self.assert_is_redirect(resp, self.url_overzicht)
-        resp = self.client.post(self.url_klassegrenzen_25)
+        resp = self.client.post(self.url_klassegrenzen_vaststellen_25)
         self.assert_is_redirect(resp, self.url_overzicht)
 
         # wissel naar CWZ
         self.e2e_wissel_naar_functie(self.functie_cwz)
 
         # meld de schutterboog aan
-        self.assertEqual(SchutterBoog.objects.count(), 1)
+        self.assertEqual(SchutterBoog.objects.count(), 2)
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
 
         comp = Competitie.objects.filter(is_afgesloten=False)[0]
@@ -341,6 +398,31 @@ class TestCompetitie(E2EHelpers, TestCase):
             afk = [lkl.afkorting for lkl in obj.klasse.indiv.leeftijdsklassen.all()]
             self.assertTrue('CH' in afk)
         # for
+
+        # lijst aangemeld regiocompetitie ophalen
+        resp = self.client.get(self.url_aangemeld % comp.pk)
+        self.assertEqual(resp.status_code, 200)
+
+        # maak nog een cadet aan
+        self.lid_100003.geboorte_datum = datetime.date(comp.begin_jaar-15, month=3, day=5)
+        self.lid_100003.save()
+
+        regiocompetities_schutterboog_aanmelden(self.schutterboog_100003, 9.19, None)
+
+        for obj in RegioCompetitieSchutterBoog.objects.filter(schutterboog=self.schutterboog_100003):
+            self.assertEqual(obj.bij_vereniging.nhb_nr, self.lid_100003.bij_vereniging.nhb_nr)
+            self.assertEqual(obj.klasse.indiv.boogtype, self.schutterboog_100003.boogtype)
+            afk = [lkl.afkorting for lkl in obj.klasse.indiv.leeftijdsklassen.all()]
+            self.assertTrue('CV' in afk)
+        # for
+
+        # lijst aangemeld regiocompetitie ophalen
+        resp = self.client.get(self.url_aangemeld % comp.pk)
+        self.assertEqual(resp.status_code, 200)
+
+        # corner case
+        resp = self.client.get(self.url_aangemeld % 999999)
+        self.assertEqual(resp.status_code, 404)
 
     def test_team(self):
         # slechts een test van een CompetitieKlasse() gekoppeld aan een TeamWedstrijdKlasse

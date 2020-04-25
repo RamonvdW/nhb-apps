@@ -15,5 +15,26 @@
 
 <p>Nog even geduld, dit stukje van de site is nog niet af.</p>
 
+<div class="row">
+
+    <!-- toon klassegrenzen regiocompetitie -->
+    <div class="col s12 m6 l4">
+        <div class="card">
+            <div class="card-content">
+                <div class="card-title center-align">Klassegrenzen<br>
+                    <br><i class="material-icons-round large">equalizer</i>
+                </div>
+                <p>Toon de klassengrenzen voor de competities.</p>
+            </div>
+            <a href="{% url 'Competitie:klassegrenzen-tonen' %}" class="nhb-klikbare-balk">
+                <div class="card-action center-align">
+                    <span class="nhb-klikbare-link">Toon klassengrenzen</span>
+                </div>
+            </a>
+        </div>
+    </div>
+
+</div>
+
 {% endblock %}
 
