@@ -158,8 +158,8 @@ class TestVerenigingCWZ(E2EHelpers, TestCase):
 
         url_overzicht = '/competitie/'
         url_aanmaken = '/competitie/aanmaken/'
-        url_klassegrenzen_18 = '/competitie/klassegrenzen/18/'
-        url_klassegrenzen_25 = '/competitie/klassegrenzen/25/'
+        url_klassegrenzen_18 = '/competitie/klassegrenzen/vaststellen/18/'
+        url_klassegrenzen_25 = '/competitie/klassegrenzen/vaststellen/25/'
 
         self.assertEqual(CompetitieKlasse.objects.count(), 0)
 
