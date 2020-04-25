@@ -297,6 +297,7 @@ SAML_IDP_SPCONFIG = {
     # configuration of trusted service providers
     # entry name = entity_id
     'https://wiki.handboogsport.st-visir.nl/saml/module.php/saml/sp/metadata.php/default-sp': {
+        'processor': 'Functie.idp_accesscheck.WikiAccessCheck',
         'sign_response': True,
         'sign_assertion': True,
         'attribute_mapping': {
