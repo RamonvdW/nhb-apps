@@ -88,6 +88,12 @@ class Account(AbstractUser):
         return self.first_name or self.username
 
     def volledige_naam(self):
+        """ Geef de volledige naam (voornaam achternaam) van het account terug
+            als beide niet ingevuld zijn, geef dan de username terug
+
+            Wordt ook gebruikt vanuit djangosaml2idp
+            in settings.py staat de referentie naar deze methode naam
+        """
         if self.first_name or self.last_name:
             name = self.first_name + " " + self.last_name
             return name.strip()
@@ -97,22 +103,15 @@ class Account(AbstractUser):
     def get_account_full_name(self):
         """ Deze functie wordt aangeroepen vanuit de site feedback om een volledige
             referentie aan de gebruiker te krijgen.
+
             Vanuit template: user.get_account_full_name
         """
         return "%s (%s)" % (self.volledige_naam(), self.username)
 
-    def get_real_name(self):
-        """ Deze functie geeft de volledige naam van de gebruiker terug, indien beschikbaar.
-
-            Wordt gebruikt vanuit djangosaml2idp
-            in settings.py staat de referentie naar deze methode naam
-        """
-        # TODO: djangosaml2idp get_real_name herzien
-        return self.volledige_naam()
-
     def get_email(self):
         """ helper om de email van de gebruiker te krijgen voor djangosaml2idp
             zodat deze doorgegeven kan worden aan een Service Provider zoals de Wiki server
+            in settings.py staat de referentie naar deze methode naam
         """
         if self.accountemail_set.count() == 1:
             email = self.accountemail_set.all()[0].bevestigde_email

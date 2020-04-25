@@ -94,7 +94,6 @@ class TestAccountAanmaken(E2EHelpers, TestCase):
         account.save()
         self.assertEqual(account.get_first_name(), 'Normale')
         self.assertEqual(account.volledige_naam(), 'Normale Tester')
-        self.assertEqual(account.get_real_name(), 'Normale Tester')
         self.assertEqual(account.get_account_full_name(), 'Normale Tester (normaal)')
 
         account.first_name = ""
@@ -102,7 +101,6 @@ class TestAccountAanmaken(E2EHelpers, TestCase):
         account.save()
         self.assertEqual(account.get_first_name(), 'normaal')
         self.assertEqual(account.volledige_naam(), 'Tester')
-        self.assertEqual(account.get_real_name(), 'Tester')
         self.assertEqual(account.get_account_full_name(), 'Tester (normaal)')
 
         account.first_name = "Normale"
@@ -110,7 +108,6 @@ class TestAccountAanmaken(E2EHelpers, TestCase):
         account.save()
         self.assertEqual(account.get_first_name(), 'Normale')
         self.assertEqual(account.volledige_naam(), 'Normale')
-        self.assertEqual(account.get_real_name(), 'Normale')
         self.assertEqual(account.get_account_full_name(), 'Normale (normaal)')
 
         account.first_name = ""
@@ -118,7 +115,6 @@ class TestAccountAanmaken(E2EHelpers, TestCase):
         account.save()
         self.assertEqual(account.get_first_name(), 'normaal')
         self.assertEqual(account.volledige_naam(), 'normaal')
-        self.assertEqual(account.get_real_name(), 'normaal')
         self.assertEqual(account.get_account_full_name(), 'normaal (normaal)')
 
     def test_email(self):

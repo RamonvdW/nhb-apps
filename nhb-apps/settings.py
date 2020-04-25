@@ -25,7 +25,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2020-04-23'
+SITE_VERSIE = '2020-04-25'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -268,7 +268,7 @@ SAML_IDP_CONFIG = {
     'entityid': 'NHB IT applications SAML2 Identity Provider',
 
     # metadata for trusted service providers (like mediawiki)
-    'metadata': { 'local': [os.path.join(BASE_DIR, 'data_private/saml2/saml2_sp_metadata.xml'),] },
+    'metadata': {'local': [os.path.join(BASE_DIR, 'data_private/saml2/saml2_sp_metadata.xml'),]},
 
     # our service description (the identity provider)
     'service': {
@@ -283,30 +283,28 @@ SAML_IDP_CONFIG = {
              'name_id_format': [NAMEID_FORMAT_UNSPECIFIED],
              # signing assertion and responses is mandatory in SAML 2.0
              'sign_response': True,
-             'sign_assertion': True,
-        },
+             'sign_assertion': True
+        }
     },
 
     # signing keys
     'key_file': os.path.join(BASE_DIR, 'data_private/saml2/private.key'),
     'cert_file': os.path.join(BASE_DIR, 'data_private/saml2/cert.crt'),
-    'valid_for': 100*24,
+    'valid_for': 100*24
 }
 
 SAML_IDP_SPCONFIG = {
     # configuration of trusted service providers
     # entry name = entity_id
     'https://wiki.handboogsport.st-visir.nl/saml/module.php/saml/sp/metadata.php/default-sp': {
-        'processor': 'djangosaml2idp.processors.BaseProcessor',
-        #'nameid_field': 'staffID',
         'sign_response': True,
         'sign_assertion': True,
         'attribute_mapping': {
-            # Account.fieldname --> expose as
-            # Account.method() --> expose as
+            # Account.field_name --> expose as
+            # Account.method_name --> expose as
             'username': 'username',
             'get_email': 'emailAddress',
-            'get_real_name': 'real_name',
+            'volledige_naam': 'real_name',
         }
     },
 }

@@ -147,13 +147,13 @@ class TestSchutterRegistreer(E2EHelpers, TestCase):
 
         # controleer dat de volledige naam meteen al overgenomen is
         account = Account.objects.get(username='100001')
-        self.assertEqual(account.get_real_name(), 'Ramon de Tester')
+        self.assertEqual(account.volledige_naam(), 'Ramon de Tester')
 
         # verander de naam, om te testen dat de volledige naam later uit het NhbLid overgenomen wordt
         account.first_name = '100001'
         account.last_name = ''
         account.save()
-        self.assertEqual(account.get_real_name(), '100001')
+        self.assertEqual(account.volledige_naam(), '100001')
 
         nhblid = NhbLid.objects.get(nhb_nr=self.nhblid1.nhb_nr)
         self.assertEqual(nhblid.account, account)
@@ -179,7 +179,7 @@ class TestSchutterRegistreer(E2EHelpers, TestCase):
         # tijdens inlog wordt de volledige naam overgenomen
         self.e2e_login(account)
         account = Account.objects.get(username='100001')
-        self.assertEqual(account.get_real_name(), 'Ramon de Tester')
+        self.assertEqual(account.volledige_naam(), 'Ramon de Tester')
 
     def test_bestaat_al(self):
         resp = self.client.post('/schutter/registreer/',
