@@ -401,6 +401,13 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         resp = self.client.get('/plein/')
         self.assertContains(resp, "CWZ test")
 
+        # haal het overzicht voor bestuurders op
+        resp = self.client.get(self.url_overzicht)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('functie/overzicht.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, 'relevante functies en de beheerders')    # reduced list for CWZ
+
         # haal het overzicht van verenigingsbestuurders op
         resp = self.client.get('/functie/overzicht/vereniging/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK

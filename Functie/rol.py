@@ -176,11 +176,14 @@ def rol_zet_sessionvars(account, request):
                     nwe_functies = rol_bepaal_hulp_rechten(functie_cache, nhbver_cache, *child_tup)
 
                     # voorkom dupes
-                    for nwe_tup in nwe_functies:
-                        if nwe_tup not in rollen_functies:
-                            rollen_functies.append(nwe_tup)
-                            next_doorzoeken.append(nwe_tup)
-                    # for
+                    # for nwe_tup in nwe_functies:
+                    #     if nwe_tup not in rollen_functies:
+                    #         rollen_functies.append(nwe_tup)
+                    #         next_doorzoeken.append(nwe_tup)
+                    # # for
+                    # op dit moment komen dubbele rollen nog niet voor
+                    rollen_functies.extend(nwe_functies)
+                    next_doorzoeken.extend(nwe_functies)
                 # for
                 te_doorzoeken = next_doorzoeken
             # while

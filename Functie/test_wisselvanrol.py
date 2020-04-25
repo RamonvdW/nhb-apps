@@ -279,7 +279,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.assertIn(self.url_wisselvanrol + 'functie/%s/' % self.functie_cwz.pk, urls)
         self.assertIn(self.url_wisselvanrol + 'schutter/', urls)
 
-    def test_funtie_geen_rol(self):
+    def test_functie_geen_rol(self):
         # test van een functie die niet resulteert in een rol
         functie = maak_functie('Haha', 'HAHA')
         functie.accounts.add(self.account_normaal)
@@ -299,6 +299,23 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         # probeer van rol te wisselen
         resp = self.client.get(self.url_wisselvanrol + 'beheerder/')
         self.assertEqual(resp.status_code, 302)     # 302 = Redirect (to login)
+
+    def test_delete_functie(self):
+        # corner case: activeer functie, verwijder functie, get_huidige_functie
+        self.functie_cwz.accounts.add(self.account_normaal)
+        self.e2e_account_accepteert_vhpg(self.account_normaal)
+        self.e2e_login_and_pass_otp(self.account_normaal)
+
+        # wordt cwz
+        self.e2e_wissel_naar_functie(self.functie_cwz)
+
+        # verwijder cwz
+        self.functie_cwz.delete()
+
+        # wat is de huidige functie?
+        resp = self.client.get(self.url_wisselvanrol)
+        self.assert_is_redirect(resp, '/plein/')
+
 
 # TODO: gebruik assert_other_http_commands_not_supported
 

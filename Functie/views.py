@@ -412,7 +412,7 @@ class OverzichtView(UserPassesTestMixin, ListView):
                 break   # from the for
         # for
 
-        rol_nu = rol_get_huidige_functie(self.request)
+        rol_nu = rol_get_huidige(self.request)
         if rol_nu == Rollen.ROL_CWZ:
             context['rol_is_cwz'] = True
 
