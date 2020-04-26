@@ -46,7 +46,7 @@ class TestSchutterRegistreer(E2EHelpers, TestCase):
         lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
         lid.bij_vereniging = ver
         lid.save()
-        self.nhblid1 = lid
+        self.nhblid_100001 = lid
 
         # maak een test lid aan
         lid = NhbLid()
@@ -155,7 +155,7 @@ class TestSchutterRegistreer(E2EHelpers, TestCase):
         account.save()
         self.assertEqual(account.volledige_naam(), '100001')
 
-        nhblid = NhbLid.objects.get(nhb_nr=self.nhblid1.nhb_nr)
+        nhblid = NhbLid.objects.get(nhb_nr=self.nhblid_100001.nhb_nr)
         self.assertEqual(nhblid.account, account)
 
         # volg de link om de email te bevestigen
@@ -323,5 +323,19 @@ class TestSchutterRegistreer(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('schutter/registreer-nhb-account.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, "Wachtwoord bevat te veel gelijke tekens")
+
+    def test_inactief(self):
+        self.nhblid_100001.is_actief_lid = False
+        self.nhblid_100001.save()
+
+        resp = self.client.post('/schutter/registreer/',
+                                {'nhb_nummer': '100001',
+                                 'email': self.nhblid_100001.email,
+                                 'nieuw_wachtwoord': E2EHelpers.WACHTWOORD},
+                                follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('schutter/registreer-nhb-account.dtl', 'plein/site_layout.dtl'))
+        self.assertFormError(resp, 'form', None, 'Gebruik van NHB diensten is geblokkeerd. Neem contact op met de secretaris van je vereniging.')
 
 # end of file

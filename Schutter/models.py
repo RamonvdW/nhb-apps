@@ -17,6 +17,11 @@ class SchutterNhbLidGeenEmail(Exception):
     pass
 
 
+class SchutterNhbLidInactief(Exception):
+    """ Specifieke foutmelding omdat het NHB lid inactief is """
+    pass
+
+
 class SchutterBoog(models.Model):
     """ Schutter met een specifiek type boog en zijn voorkeuren
         voor elk type boog waar de schutter interesse in heeft is er een entry

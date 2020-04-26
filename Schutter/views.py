@@ -21,9 +21,8 @@ from Account.models import AccountCreateError, account_create
 from Account.views import account_vraag_email_bevestiging
 from Score.models import Score, ScoreHist
 from NhbStructuur.models import NhbLid
-from Overig.tijdelijke_url import maak_tijdelijke_url_accountemail
 from .leeftijdsklassen import get_sessionvars_leeftijdsklassen
-from .models import SchutterBoog, SchutterNhbLidGeenEmail
+from .models import SchutterBoog, SchutterNhbLidGeenEmail, SchutterNhbLidInactief
 from .forms import RegistreerForm
 import logging
 
@@ -319,6 +318,9 @@ def schutter_create_account_nhb(nhb_nummer, email, nieuw_wachtwoord):
     if email != nhblid.email:
         raise AccountCreateError('De combinatie van NHB nummer en email worden niet herkend. Probeer het nog eens.')
 
+    if not nhblid.is_actief_lid:
+        raise SchutterNhbLidInactief()
+
     # maak het account aan
     account, accountmail = account_create(nhb_nummer, nhblid.voornaam, nhblid.achternaam, nieuw_wachtwoord, email, False)
 
@@ -352,6 +354,7 @@ class RegistreerNhbNummerView(TemplateView):
                                    activiteit='NHB lid %s heeft geen email adres.' % nhb_nummer)
 
                 form.add_error(None, 'Geen email adres bekend. Neem contact op met de secretaris van je vereniging.')
+                my_logger.info('%s REGISTREER Geblokkeerd voor NHB nummer %s (geen email)' % (from_ip, repr(nhb_nummer)))
                 # TODO: redirect naar een pagina met een uitgebreider duidelijk bericht
             except AccountCreateError as exc:
                 form.add_error(None, str(exc))
@@ -361,6 +364,14 @@ class RegistreerNhbNummerView(TemplateView):
                                    gebruikte_functie="Registreer met NHB nummer",
                                    activiteit="Mislukt voor nhb nummer %s vanaf IP %s: %s" % (repr(nhb_nummer), from_ip, str(exc)))
                 my_logger.info('%s REGISTREER Mislukt voor NHB nummer %s (reden: %s)' % (from_ip, repr(nhb_nummer), str(exc)))
+            except SchutterNhbLidInactief:
+                # NHB lid is mag niet gebruik maken van de diensten van de NHB, inclusief deze website
+                schrijf_in_logboek(account=None,
+                                   gebruikte_functie="Registreer met NHB nummer",
+                                   activiteit='NHB lid %s is inactief (geblokkeerd van gebruik NHB diensten).' % nhb_nummer)
+                form.add_error(None, 'Gebruik van NHB diensten is geblokkeerd. Neem contact op met de secretaris van je vereniging.')
+                my_logger.info('%s REGISTREER Geblokkeerd voor NHB nummer %s (inactief)' % (from_ip, repr(nhb_nummer)))
+                # TODO: redirect naar een pagina met een uitgebreider duidelijk bericht
             else:
                 # schrijf in het logboek
                 schrijf_in_logboek(account=None,
