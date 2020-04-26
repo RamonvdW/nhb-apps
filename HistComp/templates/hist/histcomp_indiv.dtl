@@ -34,7 +34,7 @@
             <div class="center-align">
                 <button class="btn-nhb-blauw" type="submit"><i class="material-icons-round left">search</i>Zoek</button>
                 {% if unfiltered_url %}
-                    <span>&nbsp;&nbsp;</span><a class="btn nhb-blue" href="{{ unfiltered_url }}"><i class="material-icons-round left">backspace</i>Leeg maken</a>
+                    <span>&nbsp;&nbsp;</span><a class="btn-nhb-blauw" href="{{ unfiltered_url }}"><i class="material-icons-round left">backspace</i>Leeg maken</a>
                 {% endif %}
             </div>
         </div>

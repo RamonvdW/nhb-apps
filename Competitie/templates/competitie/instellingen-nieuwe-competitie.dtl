@@ -20,7 +20,7 @@ Onder aan deze pagina vindt je een knop om de nieuwe competitie aan te maken.</p
 <div class="row">
     <h5>Wedstrijdklassen voor de individuele competities</h5>
     <div class="col s12 m12 l12 xl12">
-        <div class="white-text blue z-depth-2">
+        <div class="white-text nhb-blauw z-depth-2">
             <div class="row small-row">
                 <div class="col s5"><b>Beschrijving</b></div>
                 <div class="col s2"><b>Boogtype</b></div>
@@ -47,7 +47,7 @@ Onder aan deze pagina vindt je een knop om de nieuwe competitie aan te maken.</p
 <div class="row">
     <h5>Wedstrijdklassen voor de team competities</h5>
     <div class="col s12 m12 l12 xl12">
-        <div class="white-text blue z-depth-2">
+        <div class="white-text nhb-blauw z-depth-2">
             <div class="row small-row">
                 <div class="col s5"><b>Beschrijving</b></div>
                 <div class="col s3"><b>Boogtypen</b></div>
@@ -73,7 +73,7 @@ Onder aan deze pagina vindt je een knop om de nieuwe competitie aan te maken.</p
 <div class="row">
     <h5>Team typen</h5>
     <div class="col s12 m10 l10 xl10">
-        <div class="white-text blue z-depth-2">
+        <div class="white-text nhb-blauw z-depth-2">
             <div class="row small-row">
                 <div class="col s5"><b>Team type</b></div>
                 <div class="col s3"><b>Boogtypen</b></div>

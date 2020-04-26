@@ -35,11 +35,11 @@
         </ul>
     </div>
 
-    <!-- show the actual record in a blue box -->
+    <!-- show the actual record in een blauw box -->
     <div class="col s12 m10 l8 xl6">
         <p>Record {{ obj_record.discipline }}-{{ obj_record.volg_nr }}</p>
 
-        <div class="white-text blue z-depth-2">
+        <div class="white-text nhb-blauw z-depth-2">
             <!-- <div class="row">
                 <div class="col s1">1</div>
                 <div class="col s1">2</div>

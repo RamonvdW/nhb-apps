@@ -17,7 +17,7 @@
 
     <p>Hoe we omgaan met jouw privacy staat beschreven in een apart document.</p>
 
-    <a class="btn nhb-blue" href="{{ url_privacyverklaring }}" target="_blank"><i class="material-icons-round left">open_in_new</i>document openen</a>
+    <a class="btn-nhb-blauw" href="{{ url_privacyverklaring }}" target="_blank"><i class="material-icons-round left">open_in_new</i>document openen</a>
 
     <!--
     <h5>Cookies</h5>

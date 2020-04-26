@@ -38,7 +38,7 @@
             <td class="green-text">Afgerond</td>
         </tr>
         <tr>
-            <td{% if obj.fase == 'A1' %} class="blue"{% endif %}>A1</td>
+            <td{% if obj.fase == 'A1' %} class="nhb-blauw white-text"{% endif %}>A1</td>
             <td>Vaststellen aanvangsgemiddelden en klassegrenzen (Bondsburo)</td>
             <td>
                 {% if obj.fase > 'A1' %}
@@ -49,7 +49,7 @@
             </td>
         </tr>
         <tr>
-            <td{% if obj.fase == 'A2' %} class="blue"{% endif %}>A2</td>
+            <td{% if obj.fase == 'A2' %} class="nhb-blauw white-text"{% endif %}>A2</td>
             <td>Instellingen regio (RCL)</td>
             <td>
                 {% if obj.fase > 'A2' %}
@@ -60,7 +60,7 @@
             </td>
         </tr>
         <tr>
-            <td{% if obj.fase == 'B' %} class="blue"{% endif %}>B</td>
+            <td{% if obj.fase == 'B' %} class="nhb-blauw white-text"{% endif %}>B</td>
             <td>Open voor inschrijvingen individueel en teams (indien lid voor {{ obj.uiterste_datum_lid }})</td>
             <td>
                 {% if obj.fase > 'B' %}
@@ -71,7 +71,7 @@
             </td>
         </tr>
         <tr>
-            <td{% if obj.fase == 'C' %} class="blue"{% endif %}>C</td>
+            <td{% if obj.fase == 'C' %} class="nhb-blauw white-text"{% endif %}>C</td>
             <td>Samenstellen vaste teams (CWZ)</td>
             <td>
                 {% if obj.fase > 'C' %}
@@ -82,7 +82,7 @@
             </td>
         </tr>
         <tr>
-            <td{% if obj.fase == 'D' %} class="blue"{% endif %}>D</td>
+            <td{% if obj.fase == 'D' %} class="nhb-blauw white-text"{% endif %}>D</td>
             <td>Aanmaken poules (RCL)</td>
             <td>
                 {% if obj.fase > 'D' %}
@@ -93,7 +93,7 @@
             </td>
         </tr>
         <tr>
-            <td{% if obj.fase == 'E' %} class="blue"{% endif %}>E</td>
+            <td{% if obj.fase == 'E' %} class="nhb-blauw white-text"{% endif %}>E</td>
             <td>Wedstrijden</td>
             <td>
                 {% if obj.fase > 'E' %}
@@ -104,7 +104,7 @@
             </td>
         </tr>
         <tr>
-            <td{% if obj.fase == 'F' %} class="blue"{% endif %}>F</td>
+            <td{% if obj.fase == 'F' %} class="nhb-blauw white-text"{% endif %}>F</td>
             <td>Vaststellen uitslag regiocompetitie</td>
             <td>
                 {% if obj.fase > 'F' %}
