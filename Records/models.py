@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019 Ramon van der Winkel.
+#  Copyright (c) 2019-2020 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -132,5 +132,8 @@ class IndivRecord(models.Model):
                    'gesl': url2gesl,
                    'makl': url2makl,
                    'lcat': url2lcat}
+
+    objects = models.Manager()      # for the editor only
+
 
 # end of file

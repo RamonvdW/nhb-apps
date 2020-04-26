@@ -31,6 +31,8 @@ class Score(models.Model):
     def __str__(self):
         return "%s %sm - %s" % (self.waarde, self.afstand_meter, self.schutterboog)
 
+    objects = models.Manager()      # for the editor only
+
 
 class ScoreHist(models.Model):
     """ Bijhouden van de geschiedenis van een score: invoer en wijzigingen """
@@ -51,6 +53,8 @@ class ScoreHist(models.Model):
 
     def __str__(self):
         return "[%s] (%s) %s --> %s: %s" % (self.datum, self.door_account, self.oude_waarde, self.nieuwe_waarde, self.notitie)
+
+    objects = models.Manager()      # for the editor only
 
 
 def aanvangsgemiddelde_opslaan(schutterboog, afstand, gemiddelde, datum, door_account, notitie):

@@ -34,6 +34,8 @@ class BoogType(models.Model):
         verbose_name = "Boog type"
         verbose_name_plural = "Boog types"
 
+    objects = models.Manager()      # for the editor only
+
 
 class LeeftijdsKlasse(models.Model):
     """ definitie van een leeftijdsklasse """
@@ -55,6 +57,8 @@ class LeeftijdsKlasse(models.Model):
         verbose_name = "Leeftijdsklasse"
         verbose_name_plural = "Leeftijdsklassen"
 
+    objects = models.Manager()      # for the editor only
+
 
 class IndivWedstrijdklasse(models.Model):
     """ definitie van een wedstrijdklasse """
@@ -75,6 +79,8 @@ class IndivWedstrijdklasse(models.Model):
         verbose_name = "Wedstrijdklasse"
         verbose_name_plural = "Wedstrijdklassen"
 
+    objects = models.Manager()      # for the editor only
+
 
 class TeamWedstrijdklasse(models.Model):
     """ definitie van een team wedstrijdklasse """
@@ -91,5 +97,8 @@ class TeamWedstrijdklasse(models.Model):
         """ meta data voor de admin interface """
         verbose_name = "Team Wedstrijdklasse"
         verbose_name_plural = "Team Wedstrijdklassen"
+
+    objects = models.Manager()      # for the editor only
+
 
 # end of file

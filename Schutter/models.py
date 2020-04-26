@@ -52,5 +52,7 @@ class SchutterBoog(models.Model):
     def __str__(self):
         return "%s - %s" % (self.nhblid.nhb_nr, self.boogtype.beschrijving)
 
+    objects = models.Manager()      # for the editor only
+
 
 # end of file

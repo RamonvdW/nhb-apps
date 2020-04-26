@@ -70,6 +70,8 @@ class Functie(models.Model):
         """ Geef een string terug voor gebruik in de admin interface """
         return self.beschrijving
 
+    objects = models.Manager()      # for the editor only
+
 
 def maak_functie(beschrijving, rol):
 

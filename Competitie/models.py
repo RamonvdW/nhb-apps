@@ -50,6 +50,8 @@ class Competitie(models.Model):
         """ geef een tekstuele afkorting van dit object, voor in de admin interface """
         return self.beschrijving
 
+    objects = models.Manager()      # for the editor only
+
 
 class CompetitieKlasse(models.Model):
     """ Deze database tabel bevat de klassen voor een competitie,
@@ -77,6 +79,8 @@ class CompetitieKlasse(models.Model):
     class Meta:
         verbose_name = "Competitie klasse"
         verbose_name_plural = "Competitie klassen"
+
+    objects = models.Manager()      # for the editor only
 
 
 def maak_competitieklasse_indiv(comp, indiv_wedstrijdklasse, min_ag):
@@ -131,6 +135,8 @@ class DeelCompetitie(models.Model):
         else:
             substr = "BK"
         return "%s - %s" % (self.competitie, substr)
+
+    objects = models.Manager()      # for the editor only
 
 
 def competitie_aanmaken(jaar):
@@ -238,6 +244,8 @@ class RegioCompetitieSchutterBoog(models.Model):
     class Meta:
         verbose_name = "Regiocompetitie Schutterboog"
         verbose_name_plural = "Regiocompetitie Schuttersboog"
+
+    objects = models.Manager()      # for the editor only
 
 
 def regiocompetities_schutterboog_aanmelden(schutterboog, gem18, gem25):

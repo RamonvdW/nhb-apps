@@ -35,6 +35,8 @@ class NhbRayon(models.Model):
         verbose_name = "Nhb rayon"
         verbose_name_plural = "Nhb rayons"
 
+    objects = models.Manager()      # for the editor only
+
 
 class NhbRegio(models.Model):
     """Tabel waarin de Regio definities van de NHB staan"""
@@ -50,6 +52,8 @@ class NhbRegio(models.Model):
         """ meta data voor de admin interface """
         verbose_name = "Nhb regio"
         verbose_name_plural = "Nhb regios"
+
+    objects = models.Manager()      # for the editor only
 
 
 class NhbVereniging(models.Model):
@@ -72,6 +76,8 @@ class NhbVereniging(models.Model):
         """ meta data voor de admin interface """
         verbose_name = "Nhb vereniging"
         verbose_name_plural = "Nhb verenigingen"
+
+    objects = models.Manager()      # for the editor only
 
 
 def validate_geboorte_datum(datum):
@@ -150,6 +156,8 @@ class NhbLid(models.Model):
         """ meta data voor de admin interface """
         verbose_name = 'Nhb lid'
         verbose_name_plural = 'Nhb leden'
+
+    objects = models.Manager()      # for the editor only
 
 
 # end of file

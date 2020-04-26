@@ -34,6 +34,8 @@ class MailQueue(models.Model):
         """ meta data voor de admin interface """
         verbose_name = verbose_name_plural = "Mail queue"
 
+    objects = models.Manager()      # for the editor only
+
 
 def mailer_queue_email(to_address, onderwerp, text_body):
     """ Deze functie accepteert het verzoek om een mail te versturen en slaat deze op in de database

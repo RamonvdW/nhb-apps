@@ -58,6 +58,8 @@ class SiteFeedback(models.Model):
         """ meta data voor de admin interface """
         verbose_name = verbose_name_plural = "Site feedback"
 
+    objects = models.Manager()      # for the editor only
+
 
 def store_feedback(gebruiker, op_pagina, bevinding, feedback):
     """ Deze functie wordt aangeroepen vanuit de view waarin de feedback van de gebruiker
@@ -102,6 +104,8 @@ class SiteTijdelijkeUrl(models.Model):
                                               on_delete=models.CASCADE,
                                               blank=True, null=True)        # optional
     # in de toekomst meer mogelijkheden, zoals taken
+
+    objects = models.Manager()      # for the editor only
 
 
 def save_tijdelijke_url(url_code, dispatch_to, geldig_dagen=0, geldig_seconden=0, accountemail=None):

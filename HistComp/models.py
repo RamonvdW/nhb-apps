@@ -39,6 +39,8 @@ class HistCompetitie(models.Model):
         """ meta data voor de admin interface """
         verbose_name = verbose_name_plural = "Historie competitie"
 
+    objects = models.Manager()      # for the editor only
+
 
 class HistCompetitieIndividueel(models.Model):
     """ Deze database tabel bevat alle resultaten van de individuele competitie
@@ -73,6 +75,8 @@ class HistCompetitieIndividueel(models.Model):
         # TODO: Historie --> Historische
         verbose_name = verbose_name_plural = "Historie individuele competitie"
 
+    objects = models.Manager()      # for the editor only
+
 
 class HistCompetitieTeam(models.Model):
     """ Deze database tabel bevat alle resultaten van de teamcompetitie
@@ -105,6 +109,8 @@ class HistCompetitieTeam(models.Model):
         """ meta data voor de admin interface """
         # TODO: Historie --> Historische
         verbose_name = verbose_name_plural = "Historie team competitie"
+
+    objects = models.Manager()      # for the editor only
 
 
 # end of file

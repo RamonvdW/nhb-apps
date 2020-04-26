@@ -39,7 +39,7 @@ class Account(AbstractUser):
     # (inherited, not used) email
     # (inherited) user_permissions: ManyToMany
     # (inherited) groups: ManyToMany
-    vraag_nieuw_wachtwoord = models.BooleanField(   # TODO: implement
+    vraag_nieuw_wachtwoord = models.BooleanField(
                                     default=False,
                                     help_text="Moet de gebruiker een nieuw wachtwoord opgeven bij volgende inlog?")
 
@@ -150,6 +150,8 @@ class AccountEmail(models.Model):
         verbose_name = "AccountEmail"
         verbose_name_plural = "AccountEmails"
 
+    objects = models.Manager()      # for the editor only
+
 
 class HanterenPersoonsgegevens(models.Model):
     """ status van de vraag om juist om te gaan met persoonsgegevens,
@@ -171,6 +173,8 @@ class HanterenPersoonsgegevens(models.Model):
         """ meta data voor de admin interface """
         verbose_name = "Hanteren Persoonsgegevens"
         verbose_name_plural = "Hanteren Persoonsgegevens"
+
+    objects = models.Manager()      # for the editor only
 
 
 def account_create(username, voornaam, achternaam, wachtwoord, email, email_is_bevestigd):

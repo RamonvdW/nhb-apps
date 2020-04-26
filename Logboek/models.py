@@ -40,6 +40,8 @@ class LogboekRegel(models.Model):
         verbose_name = "Logboek regel"
         verbose_name_plural = "Logboek regels"
 
+    objects = models.Manager()      # for the editor only
+
 
 def schrijf_in_logboek(account, gebruikte_functie, activiteit):
     """ Deze functie wordt aangeroepen vanuit de view waarin de feedback van de gebruiker
