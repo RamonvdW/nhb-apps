@@ -29,6 +29,10 @@ urlpatterns = [
     path('crm-import/',
          views.LogboekNhbStructuurView.as_view(),
          name='nhbstructuur'),
+
+    path('competitie/',
+         views.LogboekCompetitieView.as_view(),
+         name='competitie'),
 ]
 
 # end of file

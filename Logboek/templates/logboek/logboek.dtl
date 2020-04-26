@@ -20,7 +20,29 @@
     <a class="btn-nhb-blauw" href="{% url 'Logboek:rollen' %}">Rollen</a>
     <span>&nbsp;</span>
     <a class="btn-nhb-blauw" href="{% url 'Logboek:nhbstructuur' %}">CRM import</a>
+    <span>&nbsp;</span>
+    <a class="btn-nhb-blauw" href="{% url 'Logboek:competitie' %}">Competitie</a>
 </p>
+
+{% if is_paginated %}
+    <ul class="pagination">
+        {% for linkname, url in page_links %}
+            {% if linkname == active %}
+                <li class="active"><a href="{{ url }}">{{ linkname }}</a></li>
+            {% elif linkname == "vorige_disable" %}
+                <li class="disabled"><a href="#!"><i class="material-icons-round">chevron_left</i></a></li>
+            {% elif linkname == "vorige" %}
+                <li class="waves-effect"><a href="{{ url }}"><i class="material-icons-round">chevron_left</i></a></li>
+            {% elif linkname == "volgende" %}
+                <li class="waves-effect"><a href="{{ url }}"><i class="material-icons-round">chevron_right</i></a></li>
+            {% elif linkname == "volgende_disable" %}
+                <li class="disabled"><a href="#!"><i class="material-icons-round">chevron_right</i></a></li>
+            {% else %}
+                <li class="waves-effect"><a href="{{ url }}">{{ linkname }}</a></li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+{% endif %}
 
 <ul class="collapsible white">
     {% for obj in object_list %}

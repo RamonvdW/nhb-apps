@@ -6,11 +6,11 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}Logboek - Rollen{% endblock %}
+{% block title %}Logboek - Competitie{% endblock %}
 
 {% block pagina %}
 
-<h4>Logboek - Rollen</h4>
+<h4>Logboek - Competitie</h4>
 
 {% if is_paginated %}
     <ul class="pagination">

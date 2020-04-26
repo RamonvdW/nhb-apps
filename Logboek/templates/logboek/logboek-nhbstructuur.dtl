@@ -12,6 +12,26 @@
 
 <h4>Logboek - CRM import</h4>
 
+{% if is_paginated %}
+    <ul class="pagination">
+        {% for linkname, url in page_links %}
+            {% if linkname == active %}
+                <li class="active"><a href="{{ url }}">{{ linkname }}</a></li>
+            {% elif linkname == "vorige_disable" %}
+                <li class="disabled"><a href="#!"><i class="material-icons-round">chevron_left</i></a></li>
+            {% elif linkname == "vorige" %}
+                <li class="waves-effect"><a href="{{ url }}"><i class="material-icons-round">chevron_left</i></a></li>
+            {% elif linkname == "volgende" %}
+                <li class="waves-effect"><a href="{{ url }}"><i class="material-icons-round">chevron_right</i></a></li>
+            {% elif linkname == "volgende_disable" %}
+                <li class="disabled"><a href="#!"><i class="material-icons-round">chevron_right</i></a></li>
+            {% else %}
+                <li class="waves-effect"><a href="{{ url }}">{{ linkname }}</a></li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+{% endif %}
+
 <ul class="collection white">
     {% for obj in object_list %}
     <li class="collection-item">

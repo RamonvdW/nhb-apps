@@ -11,6 +11,7 @@ from Logboek.apps import post_migration_callback
 from NhbStructuur.models import NhbLid
 from Overig.e2ehelpers import E2EHelpers
 from .models import LogboekRegel, schrijf_in_logboek
+from .views import RESULTS_PER_PAGE
 import datetime
 
 
@@ -46,6 +47,7 @@ class TestLogboek(E2EHelpers, TestCase):
         schrijf_in_logboek(None, 'NhbStructuur', 'weer een nieuw lid')
         schrijf_in_logboek(self.account_normaal, 'OTP controle', 'alweer verkeerd')
         schrijf_in_logboek(self.account_same, 'Testafdeling', 'Afdeling gesloten')
+        schrijf_in_logboek(self.account_same, 'Competitie', 'Klassegrenzen vastgesteld')
 
         self.logboek_url = '/logboek/'
 
@@ -110,6 +112,62 @@ class TestLogboek(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('logboek/logboek-nhbstructuur.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
         self.assertContains(resp, 'weer een nieuw lid')
+
+        # competitie
+        resp = self.client.get(self.logboek_url + 'competitie/')
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_template_used(resp, ('logboek/logboek-competitie.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
+        self.assertContains(resp, 'Klassegrenzen vastgesteld')
+
+    def test_pagination(self):
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.assertTrue(self.account_admin.is_staff)
+        self.e2e_wisselnaarrol_bb()
+        self.e2e_check_rol('BB')
+
+        # pagina 1 is altijd op te vragen
+        # check that pagination niet aan staat (niet nodig, te weinig regels)
+        resp = self.client.get(self.logboek_url + 'crm-import/?page=1')
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_template_used(resp, ('logboek/logboek-nhbstructuur.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
+        self.assertContains(resp, 'weer een nieuw lid')
+        self.assertNotContains(resp, 'chevron_')      # icoon van pagination pijltje
+
+        # test illegale pagina nummers
+        resp = self.client.get(self.logboek_url + 'crm-import/?page=999999')
+        self.assertEqual(resp.status_code, 404)  # 404 = Not found
+        resp = self.client.get(self.logboek_url + 'crm-import/?page=test')
+        self.assertEqual(resp.status_code, 404)  # 404 = Not found
+
+        # voeg wat extra regels toe aan het logboek
+        # zorg voor 10+ pagina's
+        for regel in range(11 * RESULTS_PER_PAGE):
+            schrijf_in_logboek(self.account_same, 'NhbStructuur', 'CRM import nummer %s' % regel)
+        # for
+
+        # haal pagina 1 op en check dat de pagination nu getoond wordt
+        resp = self.client.get(self.logboek_url + 'crm-import/?page=1')
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_template_used(resp, ('logboek/logboek-nhbstructuur.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
+        self.assertContains(resp, 'chevron_')      # icoon van pagination pijltje
+
+        # haal pagina 2 op voor alternatieve coverage ('previous' wordt actief)
+        resp = self.client.get(self.logboek_url + 'crm-import/?page=2')
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+
+        # haal pagina 10 op voor alternatieve coverage (de pagina nummers schuiven)
+        resp = self.client.get(self.logboek_url + 'crm-import/?page=10')
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+
+        # haal de hoogste pagina op voor alternatieve coverage (geen 'next')
+        resp = self.client.get(self.logboek_url + 'crm-import/?page=12')
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
 
     def test_log_versie(self):
         # trigger de init code die in het logboek schrijft
