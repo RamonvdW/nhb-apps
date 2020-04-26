@@ -18,8 +18,26 @@
 <span>&nbsp;</span>
 <h5>Basics</h5>
 
-<p>Je NHB nummer is <b>{{ nhblid.nhb_nr }}</b>.</p>
-<p>Je bent lid bij vereniging [{{ nhblid.bij_vereniging.nhb_nr }}] <b>{{ nhblid.bij_vereniging.naam }}</b>, in {{ nhblid.bij_vereniging.plaats }}.</p>
+<div class="row">
+
+    <!-- toon gegevens van de vereniging in een blauw box -->
+    <div class="col s12 m9 l8 xl7 offset-m1 offset-l2 offset-xl3">
+        <div class="white-text nhb-blauw z-depth-2">
+            <div class="row small-row">
+                <div class="col s5">Jouw NHB nummer:</div>
+                <div class="col s6">{{ nhblid.nhb_nr }}</div>
+            </div>
+            <div class="row small-row">
+                <div class="col s5">Lid bij vereniging:</div>
+                <div class="col s6">[{{ nhblid.bij_vereniging.nhb_nr }}] {{ nhblid.bij_vereniging.naam }}</div>
+            </div>
+            <div class="row small-row">
+                <div class="col s5">Plaats:</div>
+                <div class="col s6">{{ nhblid.bij_vereniging.plaats }}</div>
+            </div>
+        </div>
+    </div>
+</div>
 
 
 <span>&nbsp;</span>
@@ -39,6 +57,60 @@
     <p>Op wedstrijden en in de (winter)competitie wordt je aan de hand van je leeftijd ingedeeld in een wedstrijdklasse.</p>
     <p><a class="btn-nhb-blauw" href="{% url 'Schutter:leeftijdsklassen' %}"><i class="material-icons-round left">grade</i>Mijn leeftijdsklassen</a></p>
     <p>Gebruik de knop om te zien in welke klassen jij uit moet komen.</p>
+
+{% endif %}
+
+
+{% if regiocompetities %}
+
+    <span>&nbsp;</span>
+    <h5>Regiocompetities</h5>
+
+    <p>Meer informatie over de competitie:&nbsp;<a class="btn-small btn-nhb-blauw" href="{% url 'Competitie:info-competitie' %}"><i class="material-icons-round white-text">help_outline</i></a></p>
+
+    <p>De volgende regiocompetitie zijn mogelijk van interesse:</p>
+
+    <table class="white">
+        <thead>
+            <th>Regiocompetitie</th>
+            <th>Wedstrijdboog</th>
+            <th>Status</th>
+            <th><!-- kolom voor knopje --></th>
+        </thead>
+
+        {% for deelcomp in regiocompetities %}
+
+            {% if deelcomp.separator_before %}
+            <tr class="grey lighten-2">     <!-- gelijk houden aan plein/site_layout.dtl -->
+                <td colspan="4">Ter info: overige regiocompetities die gehouden worden:</td>
+            </tr>
+            <tr>
+                <th>Regiocompetitie</th>
+                <th>Wedstrijdboog</th>
+                <th colspan="2"></th>
+            </tr>
+            {% endif %}
+
+            <tr>
+                <td>{{ deelcomp.competitie.beschrijving }}</td>
+                <td>{{ deelcomp.boog_beschrijving }}</td>
+                {% if deelcomp.is_voor_wedstrijd %}
+                    {% if deelcomp.is_ingeschreven %}
+                        <td>Je bent ingeschreven&nbsp;</td>
+                        <td><a class="btn-nhb-blauw btn-small" href="">Afmelden</a></td>
+                    {% else %}
+                        <td>Inschrijven tot {{ deelcomp.competitie.einde_aanmeldingen }}</td>
+                        <td><a class="btn-nhb-blauw" href="">Inschrijven</a></td>
+                    {% endif %}
+                {% else %}
+                    <td>Inschrijven tot {{ deelcomp.competitie.einde_aanmeldingen }}</td>
+                    <td></td>
+                {% endif %}
+            </tr>
+
+        {% endfor %}
+
+    </table>
 
 {% endif %}
 

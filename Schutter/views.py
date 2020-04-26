@@ -13,6 +13,7 @@ from Plein.menu import menu_dynamics
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from BasisTypen.models import BoogType
+from Competitie.models import Competitie, CompetitieKlasse, DeelCompetitie, RegioCompetitieSchutterBoog, LAAG_REGIO
 from Records.models import IndivRecord
 from Mailer.models import mailer_email_is_valide, mailer_obfuscate_email
 from Logboek.models import schrijf_in_logboek
@@ -25,6 +26,8 @@ from .leeftijdsklassen import get_sessionvars_leeftijdsklassen
 from .models import SchutterBoog, SchutterNhbLidGeenEmail, SchutterNhbLidInactief
 from .forms import RegistreerForm
 import logging
+import copy
+
 
 TEMPLATE_PROFIEL = 'schutter/profiel.dtl'
 TEMPLATE_REGISTREER = 'schutter/registreer-nhb-account.dtl'
@@ -82,11 +85,89 @@ class ProfielView(UserPassesTestMixin, TemplateView):
 
     @staticmethod
     def _find_records(nhblid):
+        """ Zoek de records van deze schutter """
         objs = list()
         for rec in IndivRecord.objects.filter(nhb_lid=nhblid).order_by('-datum'):
             rec.url = reverse('Records:specifiek', kwargs={'discipline': rec.discipline, 'nummer': rec.volg_nr})
             objs.append(rec)
         # for
+        return objs
+
+    @staticmethod
+    def _find_regiocompetities(nhblid):
+        """ Zoek regiocompetities waar de schutter zich op aan kan melden """
+
+        # toon alle deelcompetities waarop ingeschreven kan worden met de bogen van de schutter
+        # oftewel (deelcompetitie, schutterboog, is_ingeschreven)
+
+        # stel vast welke boogtypen de schutter mee wil schieten (opt-in)
+        # en welke hij informatie over wil hebben (opt-out)
+        boog_afkorting_wedstrijd = list()
+        boog_afkorting_info = list()
+
+        boog_dict = dict()      # [afkorting] = BoogType()
+        for boogtype in BoogType.objects.all():
+            boog_dict[boogtype.afkorting] = boogtype
+            boog_afkorting_info.append(boogtype.afkorting)
+        # for
+
+        schutterboog_dict = dict()  # [boog_afkorting] = SchutterBoog()
+        # typische 0 tot 5 records
+        for schutterboog in nhblid.schutterboog_set.select_related('boogtype').all():
+            afkorting = schutterboog.boogtype.afkorting
+            schutterboog_dict[afkorting] = schutterboog
+            if schutterboog.voor_wedstrijd:
+                boog_afkorting_wedstrijd.append(afkorting)
+                boog_afkorting_info.remove(afkorting)
+            elif not schutterboog.heeft_interesse:
+                boog_afkorting_info.remove(afkorting)
+        # for
+
+        boog_afkorting_all = set(boog_afkorting_info + boog_afkorting_wedstrijd)
+
+        # print("wedstrijdbogen: %s" % repr(boog_afkorting_wedstrijd))
+        # print("info: %s" % repr(boog_afkorting_info))
+        # print("all: %s" % repr(boog_afkorting_all))
+
+        objs_info = list()
+        objs_wedstrijd = list()
+
+        # zoek deelcompetities in deze regio (typisch zijn er 2 x 5 bogen = 10)
+        regio = nhblid.bij_vereniging.regio
+        for deelcompetitie in DeelCompetitie.objects.filter(laag=LAAG_REGIO, nhb_regio=regio, is_afgesloten=False):
+            afkortingen = list(boog_afkorting_all)
+
+            # zoek de klassen erbij die de schutter interessant vindt
+            for klasse in CompetitieKlasse.objects.filter(indiv__boogtype__afkorting__in=boog_afkorting_all):
+                afk = klasse.indiv.boogtype.afkorting
+                if afk in afkortingen:
+                    # dit boogtype nog niet gehad
+                    afkortingen.remove(afk)
+                    obj = copy.copy(deelcompetitie)
+                    obj.boog_afkorting = afk
+                    obj.boog_beschrijving = boog_dict[afk].beschrijving
+                    obj.is_ingeschreven = False
+                    if afk in boog_afkorting_wedstrijd:
+                        obj.is_voor_wedstrijd = True
+                        objs_wedstrijd.append(obj)
+                    else:
+                        obj.is_voor_wedstrijd = False
+                        objs_info.append(obj)
+            # for
+        # for
+
+        # zoek uit of de schutter al ingeschreven is
+        for obj in objs_wedstrijd:
+            schutterboog = schutterboog_dict[obj.boog_afkorting]
+            if RegioCompetitieSchutterBoog.objects.filter(deelcompetitie=obj, schutterboog=schutterboog).count() > 0:
+                obj.is_ingeschreven = True
+
+            # print("obj: boog_afk=%s, is_voor_wedstrijd=%s, is_ingeschreven: %s, %s" % (obj.boog_afkorting, obj.is_voor_wedstrijd, obj.is_ingeschreven, obj))
+        # for
+
+        objs = objs_wedstrijd
+        objs_info[0].separator_before = True
+        objs.extend(objs_info)
         return objs
 
     def get_context_data(self, **kwargs):
@@ -102,6 +183,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         context['nhblid'] = nhblid
         context['records'] = self._find_records(nhblid)
         context['scores'] = self._find_scores(nhblid)
+        context['regiocompetities'] = self._find_regiocompetities(nhblid)
 
         menu_dynamics(self.request, context, actief='schutter')
         return context
