@@ -15,6 +15,6 @@
 
 <p>Je voorkeuren zijn opgeslagen.</p>
 
-<a class="btn-nhb-blauw" href="{% url 'Schutter:profiel' %}">Sluiten</a>
+<a class="btn-nhb-blauw" href="{% url 'Schutter:profiel' %}"><i class="material-icons-round left">close</i>Sluiten</a>
 
 {% endblock %}
