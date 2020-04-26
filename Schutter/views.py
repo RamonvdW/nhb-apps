@@ -7,13 +7,14 @@
 from django.http import HttpResponseRedirect
 from django.urls import reverse, Resolver404
 from django.shortcuts import render
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Plein.menu import menu_dynamics
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from BasisTypen.models import BoogType
-from Competitie.models import Competitie, CompetitieKlasse, DeelCompetitie, RegioCompetitieSchutterBoog, LAAG_REGIO
+from Competitie.models import CompetitieKlasse, DeelCompetitie, RegioCompetitieSchutterBoog,\
+                              LAAG_REGIO, AG_NUL, regiocompetitie_schutterboog_aanmelden
 from Records.models import IndivRecord
 from Mailer.models import mailer_email_is_valide, mailer_obfuscate_email
 from Logboek.models import schrijf_in_logboek
@@ -129,16 +130,27 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         # print("info: %s" % repr(boog_afkorting_info))
         # print("all: %s" % repr(boog_afkorting_all))
 
+        # zoek alle inschrijvingen erbij
+        inschrijvingen = list()
+        schutterbogen = [schutterboog for _, schutterboog in schutterboog_dict.items()]
+        for obj in RegioCompetitieSchutterBoog.objects.filter(schutterboog__in=schutterbogen):
+            inschrijvingen.append(obj)
+        # for
+
         objs_info = list()
         objs_wedstrijd = list()
 
-        # zoek deelcompetities in deze regio (typisch zijn er 2 x 5 bogen = 10)
+        # zoek deelcompetities in deze regio (typisch zijn er 2 in de regio: 18m en 25m)
         regio = nhblid.bij_vereniging.regio
-        for deelcompetitie in DeelCompetitie.objects.filter(laag=LAAG_REGIO, nhb_regio=regio, is_afgesloten=False):
-            afkortingen = list(boog_afkorting_all)
-
+        for deelcompetitie in DeelCompetitie.objects.\
+                                select_related('competitie').\
+                                filter(laag=LAAG_REGIO, nhb_regio=regio, is_afgesloten=False):
             # zoek de klassen erbij die de schutter interessant vindt
-            for klasse in CompetitieKlasse.objects.filter(indiv__boogtype__afkorting__in=boog_afkorting_all):
+            afkortingen = list(boog_afkorting_all)
+            for klasse in CompetitieKlasse.objects.\
+                                select_related('indiv__boogtype').\
+                                filter(indiv__boogtype__afkorting__in=boog_afkorting_all,
+                                       competitie=deelcompetitie.competitie):
                 afk = klasse.indiv.boogtype.afkorting
                 if afk in afkortingen:
                     # dit boogtype nog niet gehad
@@ -159,15 +171,34 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         # zoek uit of de schutter al ingeschreven is
         for obj in objs_wedstrijd:
             schutterboog = schutterboog_dict[obj.boog_afkorting]
-            if RegioCompetitieSchutterBoog.objects.filter(deelcompetitie=obj, schutterboog=schutterboog).count() > 0:
+            try:
+                inschrijving = RegioCompetitieSchutterBoog.objects.get(deelcompetitie=obj, schutterboog=schutterboog)
+            except RegioCompetitieSchutterBoog.DoesNotExist:
+                # niet ingeschreven
+                obj.url_inschrijven = reverse('Schutter:inschrijven', kwargs={'schutterboog_pk': schutterboog.pk, 'deelcomp_pk': obj.pk})
+            else:
                 obj.is_ingeschreven = True
+                obj.url_uitschrijven = reverse('Schutter:uitschrijven', kwargs={'regiocomp_pk': inschrijving.pk})
+                inschrijvingen.remove(inschrijving)
+        # for
 
-            # print("obj: boog_afk=%s, is_voor_wedstrijd=%s, is_ingeschreven: %s, %s" % (obj.boog_afkorting, obj.is_voor_wedstrijd, obj.is_ingeschreven, obj))
+        # voeg alle inschrijvingen toe waar geen boog meer voor gekozen is,
+        # zodat uitgeschreven kan worden
+        for obj in inschrijvingen:
+            afk = obj.schutterboog.boogtype.afkorting
+            deelcomp = obj.deelcompetitie
+            deelcomp.is_ingeschreven = True
+            deelcomp.is_voor_wedstrijd = True
+            deelcomp.boog_niet_meer = True
+            deelcomp.boog_beschrijving = boog_dict[afk].beschrijving
+            deelcomp.url_uitschrijven = reverse('Schutter:uitschrijven', kwargs={'regiocomp_pk': obj.pk})
+            objs_wedstrijd.append(deelcomp)
         # for
 
         objs = objs_wedstrijd
-        objs_info[0].separator_before = True
-        objs.extend(objs_info)
+        if len(objs_info):
+            objs_info[0].separator_before = True
+            objs.extend(objs_info)
         return objs
 
     def get_context_data(self, **kwargs):
@@ -480,5 +511,93 @@ class RegistreerNhbNummerView(TemplateView):
         return render(request, TEMPLATE_REGISTREER, context)
 
 
+class RegiocompetitieInschrijvenView(View):
+
+    def post(self, request, *args, **kwargs):
+        """ Deze functie wordt aangeroepen als de schutter op zijn profiel pagina
+            de knop Inschrijven gebruikt voor een specifieke regiocompetitie en boogtype.
+        """
+        # voorkom misbruik: ingelogd als niet geblokkeerd nhblid vereist
+        nhblid = None
+        account = request.user
+        if account.is_authenticated:
+            if account.nhblid_set.count() > 0:
+                nhblid = account.nhblid_set.all()[0]
+                if not (nhblid.is_actief_lid and nhblid.bij_vereniging):
+                    nhblid = None
+        if not nhblid:
+            raise Resolver404()
+
+        # converteer en doe eerste controle op de parameters
+        try:
+            deelcomp_pk = int(kwargs['deelcomp_pk'][:10])
+            schutterboog_pk = int(kwargs['schutterboog_pk'][:10])
+
+            schutterboog = SchutterBoog.objects.get(pk=schutterboog_pk)
+            deelcomp = DeelCompetitie.objects.get(pk=deelcomp_pk)
+        except (ValueError, KeyError):
+            # vuilnis
+            raise Resolver404()
+        except (SchutterBoog.DoesNotExist, DeelCompetitie.DoesNotExist):
+            # niet bestaand record
+            raise Resolver404()
+
+        # controleer dat schutterboog bij de ingelogde gebruiker hoort
+        # controleer dat deelcompetitie bij de juist regio hoort
+        if schutterboog.nhblid != nhblid or deelcomp.laag != LAAG_REGIO or deelcomp.nhb_regio != nhblid.bij_vereniging.regio:
+            raise Resolver404()
+
+        # invoer geaccepteerd
+
+        # zoek het aanvangsgemiddelde erbij
+        afstand = deelcomp.competitie.afstand
+        try:
+            score = Score.objects.get(is_ag=True, schutterboog=schutterboog, afstand_meter=deelcomp.competitie.afstand)
+        except Score.DoesNotExist:
+            ag = None
+        else:
+            ag = score.waarde / 1000
+
+        regiocompetitie_schutterboog_aanmelden(deelcomp.competitie, schutterboog, ag)
+
+        return HttpResponseRedirect(reverse('Schutter:profiel'))
+
+
+class RegiocompetitieUitschrijvenView(View):
+
+    def post(self, request, *args, **kwargs):
+        """ Deze functie wordt aangeroepen als de schutter op zijn profiel pagina
+            de knop Uitschrijven gebruikt voor een specifieke regiocompetitie.
+        """
+        # voorkom misbruik: ingelogd als niet geblokkeerd nhblid vereist
+        nhblid = None
+        account = request.user
+        if account.is_authenticated:
+            if account.nhblid_set.count() > 0:
+                nhblid = account.nhblid_set.all()[0]
+                if not (nhblid.is_actief_lid and nhblid.bij_vereniging):
+                    nhblid = None
+        if not nhblid:
+            raise Resolver404()
+
+        # converteer en doe eerste controle op de parameters
+        try:
+            regiocomp_pk = int(kwargs['regiocomp_pk'][:10])
+            inschrijving = RegioCompetitieSchutterBoog.objects.get(pk=regiocomp_pk)
+        except (ValueError, KeyError):
+            # vuilnis
+            raise Resolver404()
+        except RegioCompetitieSchutterBoog.DoesNotExist:
+            # niet bestaand record
+            raise Resolver404()
+
+        # controleer dat deze inschrijving bij het nhblid hoort
+        if inschrijving.schutterboog.nhblid != nhblid:
+            raise Resolver404()
+
+        # schrijf de schutter uit
+        inschrijving.delete()
+
+        return HttpResponseRedirect(reverse('Schutter:profiel'))
 
 # end of file

@@ -29,6 +29,14 @@ urlpatterns = [
     path('leeftijdsklassen/',
          views.LeeftijdsklassenView.as_view(),
          name='leeftijdsklassen'),
+
+    path('regiocompetitie/inschrijven/<deelcomp_pk>/<schutterboog_pk>/',
+         views.RegiocompetitieInschrijvenView.as_view(),
+         name='inschrijven'),
+
+    path('regiocompetitie/uitschrijven/<regiocomp_pk>/',
+         views.RegiocompetitieUitschrijvenView.as_view(),
+         name='uitschrijven'),
 ]
 
 # end of file

@@ -21,7 +21,7 @@
 <div class="row">
 
     <!-- toon gegevens van de vereniging in een blauw box -->
-    <div class="col s12 m9 l8 xl7 offset-m1 offset-l2 offset-xl3">
+    <div class="col s12 m9 l8 xl7">
         <div class="white-text nhb-blauw z-depth-2">
             <div class="row small-row">
                 <div class="col s5">Jouw NHB nummer:</div>
@@ -93,14 +93,24 @@
 
             <tr>
                 <td>{{ deelcomp.competitie.beschrijving }}</td>
-                <td>{{ deelcomp.boog_beschrijving }}</td>
+                <td {% if deelcomp.boog_niet_meer %}class="red-text"{% endif %}>{{ deelcomp.boog_beschrijving }}</td>
                 {% if deelcomp.is_voor_wedstrijd %}
                     {% if deelcomp.is_ingeschreven %}
-                        <td>Je bent ingeschreven&nbsp;</td>
-                        <td><a class="btn-nhb-blauw btn-small" href="">Afmelden</a></td>
+                        <td {% if deelcomp.boog_niet_meer %}class="red-text"{% else %}class="green-text"{% endif %}>Je bent ingeschreven</td>
+                        <td>
+                            <form method="post" action="{{ deelcomp.url_uitschrijven }}">
+                                {% csrf_token %}
+                                <input class="btn-nhb-blauw" type="submit" value="Uitschrijven">
+                            </form>
+                        </td>
                     {% else %}
-                        <td>Inschrijven tot {{ deelcomp.competitie.einde_aanmeldingen }}</td>
-                        <td><a class="btn-nhb-blauw" href="">Inschrijven</a></td>
+                        <td>Inschrijven kan tot {{ deelcomp.competitie.einde_aanmeldingen }}</td>
+                        <td>
+                            <form method="post" action="{{ deelcomp.url_inschrijven }}">
+                                {% csrf_token %}
+                                <input class="btn-nhb-blauw" type="submit" value="Inschrijven">
+                            </form>
+                        </td>
                     {% endif %}
                 {% else %}
                     <td>Inschrijven tot {{ deelcomp.competitie.einde_aanmeldingen }}</td>

@@ -251,19 +251,15 @@ class RegioCompetitieSchutterBoog(models.Model):
     objects = models.Manager()      # for the editor only
 
 
-def regiocompetities_schutterboog_aanmelden(schutterboog, gem18, gem25):
+def regiocompetitie_schutterboog_aanmelden(competitie, schutterboog, aanvangsgemiddelde):
     """ Meld schutterboog aan voor de regiocompetities """
+
+    if not aanvangsgemiddelde:
+        aanvangsgemiddelde = AG_NUL
 
     # schutterboog is nhblid van een vereniging in een bepaalde regio
     regio = schutterboog.nhblid.bij_vereniging.regio
-    for deelcompetitie in DeelCompetitie.objects.filter(laag=LAAG_REGIO, nhb_regio=regio, is_afgesloten=False):
-        if deelcompetitie.competitie.afstand == '18':
-            gem = gem18
-        else:
-            gem = gem25
-
-        if not gem:
-            gem = AG_NUL
+    for deelcompetitie in DeelCompetitie.objects.filter(competitie=competitie, laag=LAAG_REGIO, nhb_regio=regio, is_afgesloten=False):
 
         # voorkom dubbele aanmelding
         if RegioCompetitieSchutterBoog.objects.filter(deelcompetitie=deelcompetitie, schutterboog=schutterboog).count() == 0:
@@ -271,19 +267,20 @@ def regiocompetities_schutterboog_aanmelden(schutterboog, gem18, gem25):
             aanmelding.deelcompetitie = deelcompetitie
             aanmelding.schutterboog = schutterboog
             aanmelding.bij_vereniging = schutterboog.nhblid.bij_vereniging
-            aanmelding.aanvangsgemiddelde = gem
+            aanmelding.aanvangsgemiddelde = aanvangsgemiddelde
 
             # bepaald de wedstrijdklasse
             age = schutterboog.nhblid.bereken_wedstrijdleeftijd(deelcompetitie.competitie.begin_jaar)
 
             # zoek alle wedstrijdklassen van deze competitie met het juiste boogtype
             qset = CompetitieKlasse.objects.filter(competitie=deelcompetitie.competitie,
-                                                   indiv__boogtype=schutterboog.boogtype).order_by('indiv__volgorde')
+                                                   indiv__boogtype=schutterboog.boogtype).\
+                                            order_by('indiv__volgorde')
 
             # zoek een toepasselijke klasse aan de hand van de leeftijd
             done = False
             for obj in qset:
-                if gem >= obj.min_ag or obj.indiv.is_onbekend:
+                if aanvangsgemiddelde >= obj.min_ag or obj.indiv.is_onbekend:
                     for lkl in obj.indiv.leeftijdsklassen.all():
                         if lkl.geslacht == schutterboog.nhblid.geslacht:
                             if lkl.min_wedstrijdleeftijd <= age <= lkl.max_wedstrijdleeftijd:
@@ -297,8 +294,8 @@ def regiocompetities_schutterboog_aanmelden(schutterboog, gem18, gem25):
             # for
 
             if not done:
-                print("regiocompetities_schutterboog_aanmelden: lukt niet om een competitieklasse te kiezen voor schutterboog")
-                print("     schutterboog=%s (age %s, boogtype %s, gem=%s)" % (repr(schutterboog), age, repr(schutterboog.boogtype), gem))
+                print("regiocompetitie_schutterboog_aanmelden: lukt niet om een competitieklasse te kiezen voor schutterboog")
+                print("     schutterboog=%s (age %s, boogtype %s, gem=%s)" % (repr(schutterboog), age, repr(schutterboog.boogtype), aanvangsgemiddelde))
                 print("     deelcompetitie=%s" % repr(deelcompetitie))
                 print("     alle klassen:")
                 for obj in qset:
