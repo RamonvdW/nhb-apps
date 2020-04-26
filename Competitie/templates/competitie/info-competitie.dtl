@@ -37,7 +37,7 @@
 
     <tr>
         <td>25m 1pijl</td>
-        <td>25 meter<br>(aspiranten: 18 meter)</td>
+        <td>25 meter</td>
         <td>25</td>
         <td>1 pijl</td>
         <td>60cm kaart</td>
@@ -45,6 +45,7 @@
     </tr>
 </table>
 
+<p>Aspiranten schieten beide competities 18 meter en 60cm kaart.</p>
 
 <p>&nbsp;</p>
 <h5>Geografische opdeling</h5>
@@ -149,9 +150,11 @@ Nieuwe schutters krijgen na 3 scores hun speelsterkte vastgesteld.</p>
 <p>Aspiranten schieten maar 1 ronde.</p>
 <p>Compound en Recurve klasse 1 en 2 schieten de Indoor Rayonkampioenschappen op Dutch Target blazoen.</p>
 
+<h6>Knock-out finales</h6>
 <p>De knock-out finales zijn volgens het best-of-5 set-systeem en beginnen met de beste 16 schutters, waarvan er 8 door gaan naar de kwartfinale.
-Uit de kwartfinale gaan 4 schutters door naar de halve finale. Zie het schema hier onder.
-De winnaars van de halve finales gaan naar de gouden finale voor plaats 1 en 2.
+Uit de kwartfinale gaan 4 schutters door naar de halve finale. Zie het schema hier onder.</p>
+
+<p>De winnaars van de halve finales gaan naar de gouden finale voor plaats 1 en 2.
 De overige twee schutters uit de halve finales gaan naar de brozen finale voor plaats 3 en 4.</p>
 
 <table class="white">
@@ -159,17 +162,19 @@ De overige twee schutters uit de halve finales gaan naar de brozen finale voor p
         <td class="center-align"><b>Achtste finale</b><br>(16 schutters)</td>
         <td class="center-align"><b>Kwart finale</b><br>(8 schutters)</td>
         <td class="center-align"><b>Halve finale</b><br>(4 schutters)</td>
-        <td class="center-align"><b>Finale</b><br>(4 schutters)</td>
+        <td class="center-align"><b>Bronzen finale</b><br>(2 schutters)</td>
+        <td class="center-align"><b>Gouden finale</b><br>(2 schutters)</td>
     </tr>
 
     <tr>
-        <td class="center-align">#1 tegen #16</td>
+        <td class="center-align"><span class="blue-text">#1</span> tegen #16</td>
         <td class="center-align" rowspan="2">2 schutters</td>
         <td class="center-align" rowspan="4">2 schutters</td>
-        <td class="center-align" rowspan="4">Gouden finale</td>
+        <td class="center-align" rowspan="8">2 schutters</td>
+        <td class="center-align" rowspan="8">2 schutters</td>
     </tr>
     <tr>
-        <td class="center-align">#9 tegen #8</td>
+        <td class="center-align">#8 tegen #9</td>
     </tr>
 
     <tr>
@@ -177,17 +182,16 @@ De overige twee schutters uit de halve finales gaan naar de brozen finale voor p
         <td class="center-align" rowspan="2">2 schutters</td>
     </tr>
     <tr>
-        <td class="center-align">#13 tegen #4</td>
+        <td class="center-align"><span class="blue-text">#4</span> tegen #13</td>
     </tr>
 
     <tr>
-        <td class="center-align">#3 tegen #14</td>
+        <td class="center-align"><span class="blue-text">#3</span> tegen #14</td>
         <td class="center-align" rowspan="2">2 schutters</td>
         <td class="center-align" rowspan="4">2 schutters</td>
-        <td class="center-align" rowspan="4">Bronze finale</td>
     </tr>
     <tr>
-        <td class="center-align">#11 tegen #6</td>
+        <td class="center-align">#6 tegen #11</td>
     </tr>
 
     <tr>
@@ -195,7 +199,7 @@ De overige twee schutters uit de halve finales gaan naar de brozen finale voor p
         <td class="center-align" rowspan="2">2 schutters</td>
     </tr>
     <tr>
-        <td class="center-align">#15 tegen #2</td>
+        <td class="center-align"><span class="blue-text">#2</span> tegen #15</td>
     </tr>
 
 </table>

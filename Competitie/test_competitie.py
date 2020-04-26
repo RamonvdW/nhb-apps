@@ -8,12 +8,12 @@ from django.test import TestCase
 from django.utils import timezone
 from BasisTypen.models import BoogType, TeamWedstrijdklasse, IndivWedstrijdklasse
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
-from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
+from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
 from Overig.e2ehelpers import E2EHelpers
 from Schutter.models import SchutterBoog
 from Functie.models import maak_functie
 from .models import Competitie, DeelCompetitie, CompetitieKlasse, maak_competitieklasse_indiv,\
-                    RegioCompetitieSchutterBoog, regiocompetities_schutterboog_aanmelden
+                    RegioCompetitieSchutterBoog, regiocompetitie_schutterboog_aanmelden
 from .views import zet_fase
 import datetime
 
@@ -396,6 +396,8 @@ class TestCompetitie(E2EHelpers, TestCase):
         resp = self.client.post(self.url_aanmaken)
         self.assert_is_redirect(resp, self.url_overzicht)
 
+        competitie_18 = Competitie.objects.get(afstand=18)
+
         resp = self.client.post(self.url_klassegrenzen_vaststellen_18)
         self.assert_is_redirect(resp, self.url_overzicht)
         resp = self.client.post(self.url_klassegrenzen_vaststellen_25)
@@ -408,14 +410,12 @@ class TestCompetitie(E2EHelpers, TestCase):
         self.assertEqual(SchutterBoog.objects.count(), 2)
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
 
-        comp = Competitie.objects.filter(is_afgesloten=False)[0]
-
         # maak een cadet
-        self.lid_100002.geboorte_datum = datetime.date(comp.begin_jaar-15, month=3, day=4)
+        self.lid_100002.geboorte_datum = datetime.date(competitie_18.begin_jaar-15, month=3, day=4)
         self.lid_100002.save()
 
-        regiocompetities_schutterboog_aanmelden(self.schutterboog_100002, 8.18, None)
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 2)    # 18 en 25 apart
+        regiocompetitie_schutterboog_aanmelden(competitie_18, self.schutterboog_100002, 8.18)
+        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 1)
 
         for obj in RegioCompetitieSchutterBoog.objects.all():
             self.assertEqual(obj.schutterboog, self.schutterboog_100002)
@@ -428,14 +428,14 @@ class TestCompetitie(E2EHelpers, TestCase):
         # for
 
         # lijst aangemeld regiocompetitie ophalen
-        resp = self.client.get(self.url_aangemeld % comp.pk)
+        resp = self.client.get(self.url_aangemeld % competitie_18.pk)
         self.assertEqual(resp.status_code, 200)
 
         # maak nog een cadet aan
-        self.lid_100003.geboorte_datum = datetime.date(comp.begin_jaar-15, month=3, day=5)
+        self.lid_100003.geboorte_datum = datetime.date(competitie_18.begin_jaar-15, month=3, day=5)
         self.lid_100003.save()
 
-        regiocompetities_schutterboog_aanmelden(self.schutterboog_100003, 9.19, None)
+        regiocompetitie_schutterboog_aanmelden(competitie_18, self.schutterboog_100003, 9.18)
 
         for obj in RegioCompetitieSchutterBoog.objects.filter(schutterboog=self.schutterboog_100003):
             self.assertEqual(obj.bij_vereniging.nhb_nr, self.lid_100003.bij_vereniging.nhb_nr)
@@ -445,12 +445,15 @@ class TestCompetitie(E2EHelpers, TestCase):
         # for
 
         # lijst aangemeld regiocompetitie ophalen
-        resp = self.client.get(self.url_aangemeld % comp.pk)
+        resp = self.client.get(self.url_aangemeld % competitie_18.pk)
         self.assertEqual(resp.status_code, 200)
 
         # corner case
         resp = self.client.get(self.url_aangemeld % 999999)
         self.assertEqual(resp.status_code, 404)
+
+        # probeer dubbel aan te melden
+        regiocompetitie_schutterboog_aanmelden(competitie_18, self.schutterboog_100003, None)
 
     def test_team(self):
         # slechts een test van een CompetitieKlasse() gekoppeld aan een TeamWedstrijdKlasse

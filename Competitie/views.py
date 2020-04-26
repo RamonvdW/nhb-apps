@@ -797,7 +797,10 @@ class InfoCompetitieView(TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        context['regios'] = NhbRegio.objects.exclude(regio_nr=ADMINISTRATIEVE_REGIO).order_by('regio_nr')
+        context['regios'] = NhbRegio.objects.\
+                                select_related('rayon').\
+                                exclude(regio_nr=ADMINISTRATIEVE_REGIO).\
+                                order_by('regio_nr')
 
         account = self.request.user
         if account and account.is_authenticated:
