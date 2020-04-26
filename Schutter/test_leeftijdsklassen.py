@@ -6,11 +6,9 @@
 
 from django.utils import timezone
 from django.test import TestCase
-from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
-from NhbStructuur.migrations.m0002_nhbstructuur_2018 import maak_rayons_2018, maak_regios_2018
+from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
 from Overig.e2ehelpers import E2EHelpers
-from .leeftijdsklassen import leeftijdsklassen_plugin_na_login, \
-                              get_sessionvars_leeftijdsklassen
+from .leeftijdsklassen import leeftijdsklassen_plugin_na_login, get_sessionvars_leeftijdsklassen
 from types import SimpleNamespace
 import datetime
 
@@ -23,10 +21,6 @@ class TestSchutterLeeftijdsklassen(E2EHelpers, TestCase):
         self.account_admin = self.e2e_create_account_admin()
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
         self.account_geenlid = self.e2e_create_account('geenlid', 'geenlid@test.com', 'Geen')
-
-        # maak de standard rayon/regio structuur aan
-        maak_rayons_2018(NhbRayon)
-        maak_regios_2018(NhbRayon, NhbRegio)
 
         # maak een test vereniging
         ver = NhbVereniging()

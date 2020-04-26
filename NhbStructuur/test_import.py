@@ -8,8 +8,7 @@ from django.test import TestCase
 from django.core import management
 from Functie.models import Functie
 from Overig.e2ehelpers import E2EHelpers
-from .models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
-from .migrations.m0002_nhbstructuur_2018 import maak_rayons_2018, maak_regios_2018
+from .models import NhbRegio, NhbVereniging, NhbLid
 import datetime
 import io
 
@@ -19,9 +18,6 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
 
     def setUp(self):
         """ initialisatie van de test case """
-        # maak de standard rayon/regio structuur aan
-        maak_rayons_2018(NhbRayon)
-        maak_regios_2018(NhbRayon, NhbRegio)
 
         # maak een test vereniging
         ver = NhbVereniging()

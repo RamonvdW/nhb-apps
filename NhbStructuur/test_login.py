@@ -5,11 +5,9 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from Account.models import Account, AccountEmail
-from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
-from NhbStructuur.migrations.m0002_nhbstructuur_2018 import maak_rayons_2018, maak_regios_2018
+from Account.models import Account
+from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
 from Overig.e2ehelpers import E2EHelpers
-from Overig.models import SiteTijdelijkeUrl
 import datetime
 
 

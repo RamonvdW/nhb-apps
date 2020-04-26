@@ -6,8 +6,7 @@
 
 from django.test import TestCase
 from Account.models import Account, AccountEmail
-from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
-from NhbStructuur.migrations.m0002_nhbstructuur_2018 import maak_rayons_2018, maak_regios_2018
+from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
 from Overig.e2ehelpers import E2EHelpers
 from Overig.models import SiteTijdelijkeUrl
 import datetime
@@ -22,10 +21,6 @@ class TestSchutterRegistreer(E2EHelpers, TestCase):
         """ initialisatie van de test case """
         self.account_admin = self.e2e_create_account_admin()
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
-
-        # maak de standard rayon/regio structuur aan
-        maak_rayons_2018(NhbRayon)
-        maak_regios_2018(NhbRayon, NhbRegio)
 
         # maak een test vereniging
         ver = NhbVereniging()

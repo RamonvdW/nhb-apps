@@ -6,12 +6,10 @@
 
 from django.test import TestCase
 from BasisTypen.models import BoogType
-from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
-from NhbStructuur.migrations.m0002_nhbstructuur_2018 import maak_rayons_2018, maak_regios_2018
+from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
 from Overig.e2ehelpers import E2EHelpers
 from Functie.models import maak_functie
 from .models import SchutterBoog
-from .leeftijdsklassen import leeftijdsklassen_plugin_na_login
 import datetime
 
 
@@ -24,10 +22,6 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
         self.account_cwz = self.e2e_create_account('cwz', 'cwz@test.com', 'Secretaris')
         self.e2e_account_accepteert_vhpg(self.account_cwz)
-
-        # maak de standard rayon/regio structuur aan
-        maak_rayons_2018(NhbRayon)
-        maak_regios_2018(NhbRayon, NhbRegio)
 
         # maak een test vereniging
         ver = NhbVereniging()

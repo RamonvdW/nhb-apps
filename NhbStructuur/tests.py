@@ -9,7 +9,6 @@ from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
 from .models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
 from Account.models import Account
-from .migrations.m0002_nhbstructuur_2018 import maak_rayons_2018, maak_regios_2018
 import datetime
 from dateutil.relativedelta import relativedelta
 
@@ -24,10 +23,6 @@ class TestNhbStructuur(TestCase):
         account = Account.objects.get(username='100001')
         account.save()
         self.account_100001 = account
-
-        # maak de standard rayon/regio structuur aan
-        maak_rayons_2018(NhbRayon)
-        maak_regios_2018(NhbRayon, NhbRegio)
 
         # maak een test vereniging
         ver = NhbVereniging()

@@ -4,13 +4,9 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.contrib.auth.models import AnonymousUser
 from django.test import TestCase
 from Account.models import Account
-from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
-from NhbStructuur.migrations.m0002_nhbstructuur_2018 import maak_rayons_2018, maak_regios_2018
 from Overig.e2ehelpers import E2EHelpers
-import datetime
 import pyotp
 
 
@@ -36,43 +32,6 @@ class TestAccount2FA(E2EHelpers, TestCase):
         self.account_normaal.otp_code = ""
         self.account_normaal.otp_is_actief = False
         self.account_normaal.save()
-
-        # maak de standard rayon/regio structuur aan
-        maak_rayons_2018(NhbRayon)
-        maak_regios_2018(NhbRayon, NhbRegio)
-
-        # maak een test vereniging
-        ver = NhbVereniging()
-        ver.naam = "Grote Club"
-        ver.nhb_nr = "1000"
-        ver.regio = NhbRegio.objects.get(pk=111)
-        # secretaris kan nog niet ingevuld worden
-        ver.save()
-
-        # maak een test lid aan
-        lid = NhbLid()
-        lid.nhb_nr = 100001
-        lid.geslacht = "M"
-        lid.voornaam = "Ramon"
-        lid.achternaam = "de Tester"
-        lid.email = "rdetester@gmail.not"
-        lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        lid.bij_vereniging = ver
-        lid.save()
-        self.nhblid1 = lid
-
-        # maak een test lid aan
-        lid = NhbLid()
-        lid.nhb_nr = 100002
-        lid.geslacht = "V"
-        lid.voornaam = "Ramona"
-        lid.achternaam = "de Testerin"
-        lid.email = ""
-        lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        lid.bij_vereniging = ver
-        lid.save()
 
         self.url_koppel = '/functie/otp-koppelen/'
         self.url_controle = '/functie/otp-controle/'

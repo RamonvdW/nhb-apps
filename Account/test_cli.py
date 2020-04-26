@@ -9,8 +9,6 @@ from django.utils import timezone
 from django.test import TestCase
 from django.core import management
 from .models import Account, AccountEmail
-from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
-from NhbStructuur.migrations.m0002_nhbstructuur_2018 import maak_rayons_2018, maak_regios_2018
 import datetime
 import io
 
@@ -26,48 +24,11 @@ class TestAccountCLI(TestCase):
         self.account_admin = Account.objects.get(username='admin')
         self.account_normaal = Account.objects.get(username='normaal')
 
-        # maak de standard rayon/regio structuur aan
-        maak_rayons_2018(NhbRayon)
-        maak_regios_2018(NhbRayon, NhbRegio)
-
-        # maak een test vereniging
-        ver = NhbVereniging()
-        ver.naam = "Grote Club"
-        ver.nhb_nr = "1000"
-        ver.regio = NhbRegio.objects.get(pk=111)
-        # secretaris kan nog niet ingevuld worden
-        ver.save()
-
-        # maak een test lid aan
-        lid = NhbLid()
-        lid.nhb_nr = 100001
-        lid.geslacht = "M"
-        lid.voornaam = "Ramon"
-        lid.achternaam = "de Tester"
-        lid.email = "rdetester@gmail.not"
-        lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        lid.bij_vereniging = ver
-        lid.save()
-        self.nhblid1 = lid
-
-        # maak een test lid aan
-        lid = NhbLid()
-        lid.nhb_nr = 100002
-        lid.geslacht = "V"
-        lid.voornaam = "Ramona"
-        lid.achternaam = "de Testerin"
-        lid.email = ""
-        lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        lid.bij_vereniging = ver
-        lid.save()
-
     def test_deblok_account(self):
         # validate precondition
         self.assertIsNone(self.account_normaal.is_geblokkeerd_tot)
 
-        # deblock when not blocked
+        # de-block when not blocked
         f1 = io.StringIO()
         f2 = io.StringIO()
         management.call_command('deblok_account', 'normaal', stderr=f1, stdout=f2)
@@ -78,7 +39,7 @@ class TestAccountCLI(TestCase):
         self.account_normaal.is_geblokkeerd_tot = timezone.now() + datetime.timedelta(hours=1)
         self.account_normaal.save()
 
-        # deblock
+        # de-block
         f1 = io.StringIO()
         f2 = io.StringIO()
         management.call_command('deblok_account', 'normaal', stderr=f1, stdout=f2)

@@ -8,10 +8,7 @@ from django.test import TestCase
 from Account.models import HanterenPersoonsgegevens
 from Functie.models import  account_needs_vhpg
 from Functie.views import account_vhpg_is_geaccepteerd
-from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
-from NhbStructuur.migrations.m0002_nhbstructuur_2018 import maak_rayons_2018, maak_regios_2018
 from Overig.e2ehelpers import E2EHelpers
-import datetime
 
 
 class TestFunctieVHPG(E2EHelpers, TestCase):
@@ -24,43 +21,6 @@ class TestFunctieVHPG(E2EHelpers, TestCase):
         self.account_admin = self.e2e_create_account_admin(accepteer_vhpg=False)
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
 
-        # maak de standard rayon/regio structuur aan
-        maak_rayons_2018(NhbRayon)
-        maak_regios_2018(NhbRayon, NhbRegio)
-
-        # maak een test vereniging
-        ver = NhbVereniging()
-        ver.naam = "Grote Club"
-        ver.nhb_nr = "1000"
-        ver.regio = NhbRegio.objects.get(pk=111)
-        # secretaris kan nog niet ingevuld worden
-        ver.save()
-
-        # maak een test lid aan
-        lid = NhbLid()
-        lid.nhb_nr = 100001
-        lid.geslacht = "M"
-        lid.voornaam = "Ramon"
-        lid.achternaam = "de Tester"
-        lid.email = "rdetester@gmail.not"
-        lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        lid.bij_vereniging = ver
-        lid.save()
-        self.nhblid1 = lid
-
-        # maak een test lid aan
-        lid = NhbLid()
-        lid.nhb_nr = 100002
-        lid.geslacht = "V"
-        lid.voornaam = "Ramona"
-        lid.achternaam = "de Testerin"
-        lid.email = ""
-        lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        lid.bij_vereniging = ver
-        lid.save()
-        
         self.url_acceptatie = '/functie/vhpg-acceptatie/'
         self.url_afspraken = '/functie/vhpg-afspraken/'
         self.url_overzicht = '/functie/vhpg-overzicht/'

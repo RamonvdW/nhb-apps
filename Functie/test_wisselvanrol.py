@@ -7,7 +7,6 @@
 from django.test import TestCase
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
-from NhbStructuur.migrations.m0002_nhbstructuur_2018 import maak_rayons_2018, maak_regios_2018
 from Overig.e2ehelpers import E2EHelpers
 import datetime
 
@@ -23,10 +22,6 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.account_admin = self.e2e_create_account_admin(accepteer_vhpg=False)
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
         self.account_geenlid = self.e2e_create_account('geenlid', 'geenlid@test.com', 'Geen')
-
-        # maak de standard rayon/regio structuur aan
-        maak_rayons_2018(NhbRayon)
-        maak_regios_2018(NhbRayon, NhbRegio)
 
         regio_111 = NhbRegio.objects.get(regio_nr=111)
 
@@ -58,25 +53,12 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         lid.bij_vereniging = ver
         lid.account = self.account_normaal
         lid.save()
-        self.nhblid1 = lid
-
-        # maak een test lid aan
-        lid = NhbLid()
-        lid.nhb_nr = 100002
-        lid.geslacht = "V"
-        lid.voornaam = "Ramona"
-        lid.achternaam = "de Testerin"
-        lid.email = ""
-        lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        lid.bij_vereniging = ver
-        lid.save()
 
         # maak een test vereniging zonder CWZ rol
         ver2 = NhbVereniging()
         ver2.naam = "Grote Club"
         ver2.nhb_nr = "1001"
-        ver2.regio = NhbRegio.objects.get(pk=111)
+        ver2.regio = regio_111
         # secretaris kan nog niet ingevuld worden
         ver2.save()
 

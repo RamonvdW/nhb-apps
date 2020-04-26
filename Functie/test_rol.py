@@ -10,10 +10,8 @@ from Functie.rol import SESSIONVAR_ROL_HUIDIGE, SESSIONVAR_ROL_MAG_WISSELEN, \
                         rol_mag_wisselen, rol_enum_pallet, \
                         rol_activeer_rol, rol_activeer_functie
 from Functie.models import maak_functie, maak_cwz
-from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
-from NhbStructuur.migrations.m0002_nhbstructuur_2018 import maak_rayons_2018, maak_regios_2018
+from NhbStructuur.models import NhbRegio, NhbVereniging
 from Overig.e2ehelpers import E2EHelpers
-import datetime
 
 
 class TestFunctieRol(E2EHelpers, TestCase):
@@ -28,10 +26,6 @@ class TestFunctieRol(E2EHelpers, TestCase):
         self.functie_cwz = maak_functie("CWZ test", "CWZ")
         self.functie_tst = maak_functie("Test test", "x")
 
-        # maak de standard rayon/regio structuur aan
-        maak_rayons_2018(NhbRayon)
-        maak_regios_2018(NhbRayon, NhbRegio)
-
         # maak een test vereniging
         ver = NhbVereniging()
         ver.naam = "Grote Club"
@@ -43,31 +37,6 @@ class TestFunctieRol(E2EHelpers, TestCase):
 
         self.functie_cwz.nhb_ver = ver
         self.functie_cwz.save()
-
-        # maak een test lid aan
-        lid = NhbLid()
-        lid.nhb_nr = 100001
-        lid.geslacht = "M"
-        lid.voornaam = "Ramon"
-        lid.achternaam = "de Tester"
-        lid.email = "rdetester@gmail.not"
-        lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        lid.bij_vereniging = ver
-        lid.save()
-        self.nhblid1 = lid
-
-        # maak een test lid aan
-        lid = NhbLid()
-        lid.nhb_nr = 100002
-        lid.geslacht = "V"
-        lid.voornaam = "Ramona"
-        lid.achternaam = "de Testerin"
-        lid.email = ""
-        lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        lid.bij_vereniging = ver
-        lid.save()
 
     def test_maak_cwz(self):
         self.assertEqual(self.functie_cwz.accounts.count(), 0)

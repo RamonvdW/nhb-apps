@@ -8,7 +8,6 @@ from django.test import TestCase
 from .menu import menu_dynamics
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
-from NhbStructuur.migrations.m0002_nhbstructuur_2018 import maak_rayons_2018, maak_regios_2018
 from Overig.e2ehelpers import E2EHelpers
 from types import SimpleNamespace
 import datetime
@@ -24,10 +23,6 @@ class TestPlein(E2EHelpers, TestCase):
         self.account_admin.save()
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
         self.account_100001 = self.e2e_create_account('100001', 'nhb100001@test.com', 'Ramon')
-
-        # maak de standard rayon/regio structuur aan
-        maak_rayons_2018(NhbRayon)
-        maak_regios_2018(NhbRayon, NhbRegio)
 
         self.functie_bko = maak_functie('BKO Test', 'BKO')
 
