@@ -56,23 +56,6 @@
 
 <div class="row">
 
-    <!-- beheerders vereniging -->
-    <div class="col s12 m6 xl4">
-        <div class="card">
-            <div class="card-content">
-                <table class="simple"><tr style="border:0px">
-                    <td><i class="material-icons-round large">supervisor_account</i></td>
-                    <td>Koppel leden van de vereniging aan functies.</td>
-                </tr></table>
-            </div>
-            <a href="{% url 'Functie:overzicht-vereniging' %}" class="nhb-klikbare-balk">
-                <div class="card-action center-align">
-                    <span class="nhb-klikbare-link">Toon beheerders</span>
-                </div>
-            </a>
-        </div>
-    </div>
-
     <!-- ledenlijst -->
     <div class="col s12 m6 xl4">
         <div class="card">
@@ -101,7 +84,7 @@
             </div>
             <a href="{% url 'Vereniging:leden-voorkeuren' %}" class="nhb-klikbare-balk">
                 <div class="card-action center-align">
-                    <span class="nhb-klikbare-link">Voorkeuren leden</span>
+                    <span class="nhb-klikbare-link">Voorkeuren</span>
                 </div>
             </a>
         </div>
@@ -113,7 +96,7 @@
             <div class="card">
                 <div class="card-content">
                     <table class="simple"><tr style="border:0px">
-                        <td><img src="{{ comp.icon }}" height="80" alt="logo"></td>
+                        <td><img src="{{ comp.icon }}" height="90" alt="logo"></td>
                         <td>Leden aanmelden voor de {{ comp.beschrijving }}.</td>
                     </tr></table>
                 </div>
@@ -125,6 +108,23 @@
             </div>
         </div>
     {% endfor %}
+
+    <!-- beheerders vereniging -->
+    <div class="col s12 m6 xl4">
+        <div class="card">
+            <div class="card-content">
+                <table class="simple"><tr style="border:0px">
+                    <td><i class="material-icons-round large">supervisor_account</i></td>
+                    <td>Koppel leden van de vereniging aan functies.</td>
+                </tr></table>
+            </div>
+            <a href="{% url 'Functie:overzicht-vereniging' %}" class="nhb-klikbare-balk">
+                <div class="card-action center-align">
+                    <span class="nhb-klikbare-link">Beheerders</span>
+                </div>
+            </a>
+        </div>
+    </div>
 
 </div>
 
