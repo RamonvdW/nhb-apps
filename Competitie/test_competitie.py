@@ -218,6 +218,32 @@ class TestCompetitie(E2EHelpers, TestCase):
                 self.assertTrue("BK" in msg)
         # for
 
+    def test_dubbel_aanmaken(self):
+        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_wisselnaarrol_bb()
+        self.e2e_check_rol('BB')
+
+        # gebruik een post om de competitie aan te laten maken
+        resp = self.client.post(self.url_aanmaken)
+        self.assert_is_redirect(resp, self.url_overzicht)
+
+        # probeer de competities nog een keer aan te maken
+        # verifieer geen effect
+        self.assertEqual(Competitie.objects.count(), 2)
+        self.assertEqual(DeelCompetitie.objects.count(), 2*(1 + 4 + 16))
+
+        resp = self.client.get(self.url_aanmaken)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/competities-aanmaken.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, "Wat doe je hier?")
+
+        resp = self.client.post(self.url_aanmaken)
+        self.assert_is_redirect(resp, self.url_overzicht)
+
+        self.assertEqual(Competitie.objects.count(), 2)
+        self.assertEqual(DeelCompetitie.objects.count(), 2*(1 + 4 + 16))
+
     def test_ag_vaststellen(self):
         self.e2e_login_and_pass_otp(self.account_bb)
 
@@ -397,6 +423,8 @@ class TestCompetitie(E2EHelpers, TestCase):
             self.assertEqual(obj.klasse.indiv.boogtype, self.schutterboog_100002.boogtype)
             afk = [lkl.afkorting for lkl in obj.klasse.indiv.leeftijdsklassen.all()]
             self.assertTrue('CH' in afk)
+
+            self.assertTrue(str(obj) != "")      # just to cover the code
         # for
 
         # lijst aangemeld regiocompetitie ophalen

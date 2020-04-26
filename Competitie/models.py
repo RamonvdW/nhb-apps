@@ -194,6 +194,9 @@ class RegioCompetitieSchutterBoog(models.Model):
     deelcompetitie = models.ForeignKey(DeelCompetitie, on_delete=models.CASCADE)
 
     schutterboog = models.ForeignKey(SchutterBoog, on_delete=models.CASCADE)
+
+    # vereniging wordt hier apart bijgehouden omdat de schutter over kan stappen
+    # midden in het seizoen
     bij_vereniging = models.ForeignKey(NhbVereniging, on_delete=models.PROTECT)
 
     is_handmatig_ag = models.BooleanField(default=False)

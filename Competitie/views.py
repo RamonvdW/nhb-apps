@@ -18,7 +18,7 @@ from Functie.models import Functie
 from Functie.rol import Rollen, rol_get_huidige_functie, rol_get_beschrijving, rol_get_huidige
 from BasisTypen.models import IndivWedstrijdklasse, TeamWedstrijdklasse, MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
-from NhbStructuur.models import NhbLid, NhbVereniging
+from NhbStructuur.models import NhbLid, NhbVereniging, NhbRegio, ADMINISTRATIEVE_REGIO
 from Schutter.models import SchutterBoog
 from Score.models import Score, ScoreHist, zoek_meest_recente_automatisch_vastgestelde_ag
 from .models import Competitie, AG_NUL, AG_LAAGSTE_NIET_NUL, CompetitieKlasse, DeelCompetitie,\
@@ -36,6 +36,7 @@ TEMPLATE_COMPETITIE_KLASSEGRENZEN_TONEN = 'competitie/klassegrenzen-tonen.dtl'
 TEMPLATE_COMPETITIE_LIJST_VERENIGINGEN = 'competitie/lijst-verenigingen.dtl'
 TEMPLATE_COMPETITIE_AANGEMELD_REGIO = 'competitie/lijst-aangemeld-regio.dtl'
 TEMPLATE_COMPETITIE_AG_VASTSTELLEN = 'competitie/ag-vaststellen.dtl'
+TEMPLATE_COMPETITIE_INFO_COMPETITIE = 'competitie/info-competitie.dtl'
 
 JA_NEE = {False: 'Nee', True: 'Ja'}
 
@@ -783,5 +784,37 @@ class KlassegrenzenTonenView(ListView):
         context = super().get_context_data(**kwargs)
         menu_dynamics(self.request, context, actief='competitie')
         return context
+
+
+class InfoCompetitieView(TemplateView):
+
+    """ Django class-based view voor het Privacy bericht """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_COMPETITIE_INFO_COMPETITIE
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        context['regios'] = NhbRegio.objects.exclude(regio_nr=ADMINISTRATIEVE_REGIO).order_by('regio_nr')
+
+        account = self.request.user
+        if account and account.is_authenticated:
+            if account.nhblid_set.count() > 0:
+                nhblid = account.nhblid_set.all()[0]
+                nhb_ver = nhblid.bij_vereniging
+                if nhb_ver:
+                    context['mijn_vereniging'] = nhb_ver
+                    for obj in context['regios']:
+                        if obj == nhb_ver.regio:
+                            obj.mijn_regio = True
+                    # for
+
+        context['klassen_count'] = IndivWedstrijdklasse.objects.exclude(is_onbekend=True).count()
+
+        menu_dynamics(self.request, context, actief='competitie')
+        return context
+
 
 # end of file

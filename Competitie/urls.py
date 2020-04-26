@@ -42,6 +42,10 @@ urlpatterns = [
     path('lijst-regio/<comp_pk>/',
          views.LijstAangemeldRegioView.as_view(),
          name='lijst-regio'),
+
+    path('info/',
+         views.InfoCompetitieView.as_view(),
+         name='info-competitie')
 ]
 
 # end of file
