@@ -23,7 +23,7 @@ urlpatterns = [
          views.LedenVoorkeurenView.as_view(),
          name='leden-voorkeuren'),
 
-    path('leden-aanmelden/',
+    path('leden-aanmelden/competitie/<comp_pk>/',
          views.LedenAanmeldenView.as_view(),
          name='leden-aanmelden')
 ]

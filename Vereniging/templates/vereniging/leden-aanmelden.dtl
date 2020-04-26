@@ -13,7 +13,7 @@
 
 <h4>Leden aanmelden</h4>
 
-<p>Als CWZ kan je via deze pagina leden van vereniging [{{ nhb_ver.nhb_nr }}] {{ nhb_ver.naam }} te {{ nhb_ver.plaats }} aanmelden voor de competities van <b>seizoen {{ seizoen }}</b> (Indoor en 25m 1pijl).</p>
+<p>Als CWZ kan je via deze pagina leden van vereniging [{{ nhb_ver.nhb_nr }}] {{ nhb_ver.naam }} te {{ nhb_ver.plaats }} aanmelden voor de <b>{{ comp.beschrijving }}</b>.</p>
 
 <p>Onderstaande lijst toont alleen leden die ingesteld hebben met welke boog ze schieten. Je kan ze hier bij helpen via het kaartje "voorkeuren leden".</p>
 
@@ -29,17 +29,17 @@
         <table class="white" id="table1">
             <thead>
                 <tr>        <!-- filter veld -->
-                    <td colspan="4"></td>
+                    <td colspan="3"></td>
                     <td class="table-filter"><input class="table-filter" oninput="myTableFilter(this, 'table1')" placeholder="Zoeken"/></td>
                     <td colspan="2"></td>
                 </tr>
                 <tr>
                     <th><!-- kolom voor vinkje --></th>
                     <th>Wedstrijd<wbr/>boog</th>
-                    <th colspan="2">Aanvangsgemiddelden 18m/25m</th>
+                    <th>Aanvangsgemiddelde</th>
                     <th filter="on">Naam</th>
                     <th>Leeftijd</th>
-                    <th>Wedstrijdklasse {{ wedstrijdklasse_jaar }}</th>
+                    <th>Wedstrijdklasse {{ seizoen }}</th>
                 </tr>
             </thead>
 
@@ -49,7 +49,6 @@
                         <!-- geen bogen gekozen, dus kan niet aanmelden -->
                         <td><!-- geen checkbox --></td>
                         <td class="grey-text"><i>Geen</i></td>
-                        <td class="gray-text">-</td>
                         <td class="gray-text">-</td>
                         <td class="grey-text">{{ obj.volledige_naam }}</td>
                         <td class="grey-text">{{ obj.leeftijd }}</td>
@@ -62,8 +61,7 @@
                             </label>
                         </td>
                         <td>{{ obj.boogtype }}</td>
-                        <td>{{ obj.ag_18|floatformat:3 }}</td>
-                        <td>{{ obj.ag_25|floatformat:3 }}</td>
+                        <td>{{ obj.ag|floatformat:3 }}</td>
                         <td>{{ obj.volledige_naam }}</td>
                         <td>{{ obj.leeftijd }}</td>
                         <td>{{ obj.leeftijdsklasse.klasse_kort }}</td>
@@ -80,13 +78,13 @@
     <table class="white" id="table2">
         <thead>
             <tr>        <!-- filter veld -->
-                <td colspan="4"></td>
+                <td colspan="3"></td>
                 <td class="table-filter"><input class="table-filter" oninput="myTableFilter(this, 'table2')" placeholder="Zoeken"/></td>
             </tr>
             <tr>
                 <th><!-- kolom voor vinkje --></th>
                 <th>Wedstrijdboog</th>
-                <th colspan="2">Aanvangsgemiddelden 18m/25m</th>
+                <th>Aanvangsgemiddelde</th>
                 <th filter="on">Naam</th>
             </tr>
         </thead>
@@ -98,7 +96,6 @@
                     <td><!-- geen checkbox --></td>
                     <td class="grey-text"><i>Geen</i></td>
                     <td class="gray-text">-</td>
-                    <td class="gray-text">-</td>
                     <td class="grey-text">{{ obj.volledige_naam }}</td>
                 {% else %}
                     <td class="center-align">
@@ -108,8 +105,7 @@
                         </label>
                     </td>
                     <td>{{ obj.boogtype }}</td>
-                    <td>{{ obj.ag_18|floatformat:3 }}</td>
-                    <td>{{ obj.ag_25|floatformat:3 }}</td>
+                    <td>{{ obj.ag|floatformat:3 }}</td>
                     <td>{{ obj.volledige_naam }}</td>
                 {% endif %}
             </tr>

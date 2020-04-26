@@ -107,22 +107,24 @@
         </div>
     </div>
 
-    <!-- leden aanmeldingen voor de competitie -->
-    <div class="col s12 m6 xl4">
-        <div class="card">
-            <div class="card-content">
-                <table class="simple"><tr style="border:0px">
-                    <td><i class="material-icons-round large">playlist_add</i></td>
-                    <td>Leden aanmelden voor de competities.</td>
-                </tr></table>
-            </div>
-            <a href="{% url 'Vereniging:leden-aanmelden' %}" class="nhb-klikbare-balk">
-                <div class="card-action center-align">
-                    <span class="nhb-klikbare-link">Leden aanmelden</span>
+    <!-- leden aanmelden voor de competitie -->
+    {% for comp in competities %}
+        <div class="col s12 m6 xl4">
+            <div class="card">
+                <div class="card-content">
+                    <table class="simple"><tr style="border:0px">
+                        <td><img src="{{ comp.icon }}" height="80" alt="logo"></td>
+                        <td>Leden aanmelden voor de {{ comp.beschrijving }}.</td>
+                    </tr></table>
                 </div>
-            </a>
+                <a href="{% url 'Vereniging:leden-aanmelden' comp_pk=comp.pk %}" class="nhb-klikbare-balk">
+                    <div class="card-action center-align">
+                        <span class="nhb-klikbare-link">Aanmelden</span>
+                    </div>
+                </a>
+            </div>
         </div>
-    </div>
+    {% endfor %}
 
 </div>
 

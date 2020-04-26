@@ -7,7 +7,7 @@
 from django.test import TestCase
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
-from Competitie.models import RegioCompetitieSchutterBoog, CompetitieKlasse
+from Competitie.models import Competitie, CompetitieKlasse, RegioCompetitieSchutterBoog
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Schutter.models import SchutterBoog
 from Score.models import aanvangsgemiddelde_opslaan
@@ -91,14 +91,14 @@ class TestVerenigingCWZ(E2EHelpers, TestCase):
         lid.save()
         self.nhblid_100003 = lid
 
-        self.url_overzicht = '/vereniging/'
-        self.url_ledenlijst = '/vereniging/leden-lijst/'
-        self.url_voorkeuren = '/vereniging/leden-voorkeuren/'
-        self.url_aanmelden = '/vereniging/leden-aanmelden/'
-
         # maak de competitie aan die nodig is voor deze tests
         self._create_histcomp()
         self._create_competitie()
+
+        self.url_overzicht = '/vereniging/'
+        self.url_ledenlijst = '/vereniging/leden-lijst/'
+        self.url_voorkeuren = '/vereniging/leden-voorkeuren/'
+        self.url_aanmelden = '/vereniging/leden-aanmelden/competitie/%s/'
 
     def _create_histcomp(self):
         # (strategisch gekozen) historische data om klassegrenzen uit te bepalen
@@ -174,6 +174,9 @@ class TestVerenigingCWZ(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, url_overzicht)
         resp = self.client.post(url_klassegrenzen_25)
         self.assert_is_redirect(resp, url_overzicht)
+
+        self.comp_18 = Competitie.objects.get(afstand=18)
+        self.comp_25 = Competitie.objects.get(afstand=25)
 
     def _zet_schutter_voorkeuren(self, nhb_nr):
         # deze functie kan alleen gebruikt worden als CWZ
@@ -267,9 +270,11 @@ class TestVerenigingCWZ(E2EHelpers, TestCase):
         # inhoudelijk is de pagina gelijk aan ledenlijst
 
     def test_aanmelden(self):
+        url = self.url_aanmelden % self.comp_18.pk
+
         # anon
         self.e2e_logout()
-        resp = self.client.get(self.url_aanmelden)
+        resp = self.client.get(url)
         self.assert_is_redirect(resp, '/plein/')
 
         # login als CWZ
@@ -284,33 +289,44 @@ class TestVerenigingCWZ(E2EHelpers, TestCase):
         self._zet_ag(100002, 18)
         self._zet_ag(100003, 25)
 
-        resp = self.client.get(self.url_aanmelden)
+        resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('vereniging/leden-aanmelden.dtl', 'plein/site_layout.dtl'))
 
         # nu de POST om een paar leden aan te melden
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
-        resp = self.client.post(self.url_aanmelden, {'lid_100002_boogtype_1': 'on',        # 1=R
-                                                     'lid_100003_boogtype_3': 'on'})       # 3=BB
-        self.assert_is_redirect(resp, self.url_aanmelden)
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 4)        # 2 schutters, 2 competities
+        resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',        # 1=R
+                                      'lid_100003_boogtype_3': 'on'})       # 3=BB
+        self.assert_is_redirect(resp, url)
+        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 2)    # 2 schutters, 1 competitie
 
-        resp = self.client.post(self.url_aanmelden, {'garbage': 'oh',
-                                                     'lid_GEENGETAL_boogtype_3': 'on'})
+        resp = self.client.post(url, {'garbage': 'oh',
+                                      'lid_GEENGETAL_boogtype_3': 'on'})
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
 
-        resp = self.client.post(self.url_aanmelden, {'garbage': 'oh',
-                                                     'lid_999999_boogtype_GEENGETAL': 'on'})
+        resp = self.client.post(url, {'garbage': 'oh',
+                                      'lid_999999_boogtype_GEENGETAL': 'on'})
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
 
-        resp = self.client.post(self.url_aanmelden, {'lid_999999_boogtype_3': 'on'})       # 3=BB
+        resp = self.client.post(url, {'lid_999999_boogtype_3': 'on'})       # 3=BB
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
 
-        resp = self.client.post(self.url_aanmelden, {'lid_100003_boogtype_1': 'on'})       # 1=R = geen wedstrijdboog
+        resp = self.client.post(url, {'lid_100003_boogtype_1': 'on'})       # 1=R = geen wedstrijdboog
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
 
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 4)        # 2 schutters, 2 competities
+        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 2)    # 2 schutters, 1 competitie
 
+    def test_aanmelden_cornercase(self):
+        # login als CWZ
+        self.e2e_login_and_pass_otp(self.account_cwz)
+        self.e2e_wissel_naar_functie(self.functie_cwz)
+        self.e2e_check_rol('CWZ')
+
+        resp = self.client.get(self.url_aanmelden % 9999999)
+        self.assertEqual(resp.status_code, 404)         # 404 = Not found
+
+        resp = self.client.post(self.url_aanmelden % 9999999)
+        self.assertEqual(resp.status_code, 404)         # 404 = Not found
 
 
 # end of file

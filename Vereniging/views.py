@@ -8,13 +8,14 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse, Resolver404
 from django.views.generic import TemplateView, ListView
 from django.contrib.auth.mixins import UserPassesTestMixin
+from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.utils import timezone
 from Plein.menu import menu_dynamics
 from Functie.rol import rol_get_huidige_functie
 from BasisTypen.models import LeeftijdsKlasse, MAXIMALE_LEEFTIJD_JEUGD
 from NhbStructuur.models import NhbLid
 from Schutter.models import SchutterBoog
-from Competitie.models import AG_NUL, RegioCompetitieSchutterBoog, regiocompetities_schutterboog_aanmelden
+from Competitie.models import Competitie, AG_NUL, RegioCompetitieSchutterBoog, regiocompetitie_schutterboog_aanmelden
 from Score.models import Score
 import copy
 
@@ -46,6 +47,15 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
 
         _, functie_nu = rol_get_huidige_functie(self.request)
         context['nhb_ver'] = functie_nu.nhb_ver
+
+        context['competities'] = Competitie.objects.filter(is_afgesloten=False)
+
+        for comp in context['competities']:
+            if comp.afstand == '18':
+                comp.icon = static('plein/badge_nhb_indoor.png')
+            else:
+                comp.icon = static('plein/badge_nhb_25m1p.png')
+        # for
 
         menu_dynamics(self.request, context, actief='vereniging')
         return context
@@ -212,9 +222,14 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
 
-        huidige_jaar = timezone.now().year  # TODO: check for correctness in last hours of the year (due to timezone)
-        jeugdgrens = huidige_jaar - MAXIMALE_LEEFTIJD_JEUGD
-        self._huidige_jaar = huidige_jaar
+        try:
+            comp_pk = int(self.kwargs['comp_pk'][:10])
+            comp = Competitie.objects.get(pk=comp_pk)
+        except (ValueError, TypeError, Competitie.DoesNotExist):
+            raise Resolver404()
+
+        self.comp = comp
+        jeugdgrens = comp.begin_jaar - MAXIMALE_LEEFTIJD_JEUGD
 
         _, functie_nu = rol_get_huidige_functie(self.request)
         objs = list()
@@ -229,7 +244,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                 order_by('-geboorte_datum__year', 'achternaam', 'voornaam'):
 
             # de wedstrijdleeftijd voor dit hele jaar
-            wedstrijdleeftijd = huidige_jaar - obj.geboorte_datum.year
+            wedstrijdleeftijd = comp.begin_jaar - obj.geboorte_datum.year
             obj.leeftijd = wedstrijdleeftijd
 
             # de wedstrijdklasse voor dit hele jaar
@@ -261,17 +276,19 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
             nhblid_dict[nhblid.nhb_nr] = nhblid
         # for
 
-        ag_dict = dict()        # (afstand, schutterboog_pk) = Score
-        for score in Score.objects.select_related('schutterboog').filter(is_ag=True):
-            tup = (score.afstand_meter, score.schutterboog.pk)
+        ag_dict = dict()        # [schutterboog_pk] = Score
+        for score in Score.objects.\
+                        select_related('schutterboog').\
+                        filter(is_ag=True, afstand_meter=comp.afstand):
             ag = score.waarde / 1000
-            ag_dict[tup] = ag
+            ag_dict[score.schutterboog.pk] = ag
         # for
 
         is_aangemeld_dict = dict()   # [schutterboog.pk] = True/False
         for deelnemer in RegioCompetitieSchutterBoog.objects.\
-                select_related('schutterboog').\
-                filter(bij_vereniging=functie_nu.nhb_ver):
+                select_related('schutterboog', 'deelcompetitie').\
+                filter(bij_vereniging=functie_nu.nhb_ver,
+                       deelcompetitie__competitie=comp):
             is_aangemeld_dict[deelnemer.schutterboog.pk] = True
         # for
 
@@ -295,14 +312,9 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                 obj.check = "lid_%s_boogtype_%s" % (nhblid.nhb_nr, schutterboog.boogtype.pk)
 
                 try:
-                    obj.ag_18 = ag_dict[(18, schutterboog.pk)]
+                    obj.ag = ag_dict[schutterboog.pk]
                 except KeyError:
                     obj.ag_18 = AG_NUL
-
-                try:
-                    obj.ag_25 = ag_dict[(25, schutterboog.pk)]
-                except KeyError:
-                    obj.ag_25 = AG_NUL
 
                 # kijk of de schutter al aangemeld is
                 try:
@@ -334,8 +346,9 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
 
         context['leden_jeugd'] = jeugd
         context['leden_senior'] = senior
-        context['wedstrijdklasse_jaar'] = self._huidige_jaar
-        context['seizoen'] = '%s/%s' % (self._huidige_jaar, self._huidige_jaar+1)
+        context['comp'] = self.comp
+        context['seizoen'] = '%s/%s' % (self.comp.begin_jaar, self.comp.begin_jaar + 1)
+        context['aanmelden_url'] = reverse('Vereniging:leden-aanmelden', kwargs={'comp_pk': self.comp.pk})
 
         menu_dynamics(self.request, context, actief='vereniging')
         return context
@@ -344,6 +357,12 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
         """ Deze functie wordt aangeroepen als de knop 'Geselecteerde schutters aanmelden' wordt gebruikt
             het csrf token is al gecontroleerd
         """
+        try:
+            comp_pk = int(self.kwargs['comp_pk'][:10])
+            comp = Competitie.objects.get(pk=comp_pk)
+        except (ValueError, TypeError, Competitie.DoesNotExist):
+            raise Resolver404()
+
         # all checked boxes are in the post request as keys, typically with value 'on'
         for key, _ in request.POST.items():
             # key = 'lid_NNNNNN_boogtype_MM' (of iets anders)
@@ -369,23 +388,19 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                         # iemand loopt te klooien
                         raise Resolver404()
 
-                # zoek de aanvangsgemiddelden er bij
-                gem18 = AG_NUL
-                gem25 = AG_NUL
-                for score in Score.objects.\
-                        select_related('schutterboog').\
-                        filter(is_ag=True, schutterboog=schutterboog):
-                    if score.afstand_meter == 18:
-                        gem18 = score.waarde / 1000
-                    elif score.afstand_meter == 25:
-                        gem25 = score.waarde / 1000
+                # zoek de aanvangsgemiddelden er bij, indien beschikbaar
+                ag = AG_NUL
+                for score in Score.objects.filter(schutterboog=schutterboog,
+                                                  afstand_meter=comp.afstand,
+                                                  is_ag=True):
+                    ag = score.waarde / 1000
                 # for
 
-                regiocompetities_schutterboog_aanmelden(schutterboog, gem18, gem25)
+                regiocompetitie_schutterboog_aanmelden(comp, schutterboog, ag)
 
             # else: silently ignore
         # for
 
-        return HttpResponseRedirect(reverse('Vereniging:leden-aanmelden'))
+        return HttpResponseRedirect(reverse('Vereniging:leden-aanmelden', kwargs={'comp_pk': comp.pk}))
 
 # end of file
