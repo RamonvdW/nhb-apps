@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019 Ramon van der Winkel.
+#  Copyright (c) 2019-2020 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -10,6 +10,9 @@ from .models import HistCompetitie, HistCompetitieIndividueel, HistCompetitieTea
 
 class HistCompetitieIndividueelAdmin(admin.ModelAdmin):
     search_fields = ('schutter_nr', 'schutter_naam')
+
+    # filter mogelijkheid
+    list_filter = ('histcompetitie', 'boogtype')
 
 
 admin.site.register(HistCompetitie)
