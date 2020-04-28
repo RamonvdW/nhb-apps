@@ -75,13 +75,13 @@
 
                 <td>
                     {% if obj.ag_18_waarde %}
-                        <span>{{ obj.ag_18_waarde }}</span>
+                        <span>{{ obj.ag_18_waarde|floatformat:3 }}</span>
                     {% else %}
                         <span><i>Onbekend</i></span>
                     {% endif %}
                     <br>
                     {% if obj.ag_25_waarde %}
-                        <span>{{ obj.ag_25_waarde }}</span>
+                        <span>{{ obj.ag_25_waarde|floatformat:3 }}</span>
                     {% else %}
                         <span><i>Onbekend</i></span>
                     {% endif %}
@@ -118,11 +118,11 @@
         {% endfor %}
 
         <tr>
-            <td colspan="5"><b>Andere instellingen</b></td>
+            <td colspan="6"><b>Andere instellingen</b></td>
         </tr>
 
         <tr>
-            <td colspan="5">
+            <td colspan="6">
                 <label>
                     <input type="checkbox" class="filled-in" name="voorkeur_DT_18m" {% if voorkeur_dt %}checked{% endif %}>
                     <span class="black-text">Voorkeur voor Dutch Target</span>
@@ -131,7 +131,7 @@
         </tr>
 
         <tr>
-            <td colspan="5" class="center-align">
+            <td colspan="6" class="center-align">
                 <input class="btn-nhb-blauw" type="submit" value="Wijzigingen opslaan">
             </td>
         </tr>
