@@ -70,8 +70,8 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         f1 = io.StringIO()
         f2 = io.StringIO()
         management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_03.json', stderr=f1, stdout=f2)
-        #print("f1: %s" % f1.getvalue())
-        #print("f2: %s" % f2.getvalue())
+        # print("f1: %s" % f1.getvalue())
+        # print("f2: %s" % f2.getvalue())
         self.assertTrue("[WARNING] Vereniging 1000 (Grote Club) heeft geen secretaris!" in f1.getvalue())
         self.assertTrue("[ERROR] Kan secretaris 1 van vereniging 1001 niet vinden" in f1.getvalue())
         self.assertTrue("[INFO] Wijziging naam rayon 4: 'Rayon 4' --> 'Rayon 99'" in f2.getvalue())
@@ -103,7 +103,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         self.assertTrue("[WARNING] Extra sleutel aanwezig in de 'regio' data: ['name2']" in f1.getvalue())
         self.assertTrue("[WARNING] Extra sleutel aanwezig in de 'club' data: ['name3']" in f1.getvalue())
         self.assertTrue("[WARNING] Extra sleutel aanwezig in de 'member' data: ['name4']" in f1.getvalue())
-        #self.assertEqual(f2.getvalue(), '')
+        # self.assertEqual(f2.getvalue(), '')
 
     def test_extra_geo_structuur(self):
         # extra rayon/regio
@@ -112,7 +112,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_06.json', stderr=f1, stdout=f2)
         self.assertTrue("[ERROR] Onbekend rayon {'rayon_number': 0, 'name': 'Rayon 0'}" in f1.getvalue())
         self.assertTrue("[ERROR] Onbekende regio {'region_number': 0, 'name': 'Regio 0', 'rayon_number': 1}" in f1.getvalue())
-        #self.assertEqual(f2.getvalue(), '')
+        # self.assertEqual(f2.getvalue(), '')
 
     def test_geen_data(self):
         # lege dataset
@@ -130,8 +130,8 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         f1 = io.StringIO()
         f2 = io.StringIO()
         management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_08.json', stderr=f1, stdout=f2)
-        #print("f1: %s" % f1.getvalue())
-        #print("f2: %s" % f2.getvalue())
+        # print("f1: %s" % f1.getvalue())
+        # print("f2: %s" % f2.getvalue())
         self.assertTrue("[INFO] Wijziging van regio voor vereniging 1000: 111 --> 112" in f2.getvalue())
         self.assertTrue('[INFO] Wijziging van naam voor vereniging 1000: "Grote Club" --> "Nieuwe Grote Club"' in f2.getvalue())
         self.assertTrue("[ERROR] Kan vereniging 1001 niet wijzigen naar onbekende regio 199" in f1.getvalue())
@@ -159,13 +159,19 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         self.assertTrue("[INFO] Lid 100025: is_actief_lid ja --> nee (want blocked)", f2.getvalue())
         self.assertTrue("[INFO] Lid 100025: vereniging 1000 Grote Club --> 1001 HBS Dichtbij", f2.getvalue())
 
-    def test_erelid(self):
-        # sommige leden hebben de toevoegen " (Erelid NHB)" aan hun achternaam toegevoegd
+    def test_haakjes(self):
+        # sommige leden hebben de toevoeging " (Erelid NHB)" aan hun achternaam toegevoegd
+        # andere leden hebben een toevoeging achter hun voornaam: "Tineke (Tini)" - niet over klagen
+        # some ontbreekt er een haakje
         # import verwijderd dit
         f1 = io.StringIO()
         f2 = io.StringIO()
         management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_10.json', stderr=f1, stdout=f2)
-        self.assertTrue("[INFO] Lid 100999: verwijder toevoeging erelid: 'Dienbaar (Erelid NHB)' --> 'Dienbaar'" in f2.getvalue())
+        # print(f2.getvalue())
+        self.assertTrue("[WARNING] Lid 100999: verwijder toevoeging achternaam: 'Dienbaar (Erelid NHB)' --> 'Dienbaar'" in f2.getvalue())
+        self.assertTrue("Lid 100998" not in f2.getvalue())
+        self.assertTrue("[WARNING] Lid 100997: onbalans in haakjes in " in f2.getvalue())
+        self.assertTrue("[WARNING] Lid 100996: rare tekens in naam " in f2.getvalue())
 
     def test_datum_zonder_eeuw(self):
         # sommige leden hebben een geboortedatum zonder eeuw
@@ -173,7 +179,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         f2 = io.StringIO()
         management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_11.json', stderr=f1, stdout=f2)
 
-        #print(f1.getvalue(), f2.getvalue())
+        # print(f1.getvalue(), f2.getvalue())
         self.assertTrue("[WARNING] Lid 100999 geboortedatum gecorrigeerd van 0030-05-05 naar 1930-05-05" in f1.getvalue())
         lid = NhbLid.objects.get(nhb_nr=100999)
         self.assertEqual(lid.geboorte_datum.year, 1930)
@@ -190,7 +196,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         f2 = io.StringIO()
         management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_12.json', stderr=f1, stdout=f2)
         with self.assertRaises(NhbLid.DoesNotExist):
-            lid = NhbLid.objects.get(nhb_nr=101711)
+            NhbLid.objects.get(nhb_nr=101711)
 
     def test_del_vereniging(self):
         # test het verwijderen van een lege vereniging
@@ -267,8 +273,8 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         f1 = io.StringIO()
         f2 = io.StringIO()
         management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_15.json', stderr=f1, stdout=f2)
-        #print("f1: %s" % f1.getvalue())
-        #print("f2: %s" % f2.getvalue())
+        # print("f1: %s" % f1.getvalue())
+        # print("f2: %s" % f2.getvalue())
 
         # verifieer verwijderen van "(geen deelname wedstrijden)" uit de naam
         ver = NhbVereniging.objects.get(nhb_nr=1377)
@@ -301,8 +307,8 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_16.json', stderr=f1, stdout=f2)
 
         # verwijderen van leden staat op dit moment uit - zie import commando
-        #self.assertTrue("[INFO] Lid 100024 Voornaam van der Achternaam [V, 2000] wordt nu verwijderd" in f2.getvalue())
-        #self.assertTrue("[ERROR] Onverwachte fout bij het verwijderen van een lid: " in f1.getvalue())
+        # self.assertTrue("[INFO] Lid 100024 Voornaam van der Achternaam [V, 2000] wordt nu verwijderd" in f2.getvalue())
+        # self.assertTrue("[ERROR] Onverwachte fout bij het verwijderen van een lid: " in f1.getvalue())
         self.assertFalse("[INFO] Lid 100024 Voornaam van der Achternaam [V, 2000] wordt nu verwijderd" in f2.getvalue())
 
     def test_import_nhb_crm_dryrun(self):

@@ -421,13 +421,26 @@ class Command(BaseCommand):
                     self._count_warnings += 1
 
             lid_achternaam = member['name']
-            if lid_achternaam.endswith(" (Erelid NHB)"):
-                new_achternaam = lid_achternaam[:-13]
-                self.stdout.write("[INFO] Lid %s: verwijder toevoeging erelid: %s --> %s" % (lid_nhb_nr, repr(lid_achternaam), repr(new_achternaam)))
+            pos = lid_achternaam.find('(')
+            if pos > 0:
+                new_achternaam = lid_achternaam[:pos].strip()
+                self.stdout.write("[WARNING] Lid %s: verwijder toevoeging achternaam: %s --> %s" % (lid_nhb_nr, repr(lid_achternaam), repr(new_achternaam)))
+                self._count_warnings += 1
                 lid_achternaam = new_achternaam
 
             if member['prefix']:
                 lid_achternaam = member['prefix'] + ' ' + lid_achternaam
+
+            naam = lid_voornaam + ' ' + lid_achternaam
+            if naam.count('(') != naam.count(')'):
+                self.stdout.write('[WARNING] Lid %s: onbalans in haakjes in %s' % (lid_nhb_nr, repr(naam)))
+                self._count_warnings += 1
+
+            for chr in "!@#$%^&*[]{}=_+\\|\":;,<>/?~`":
+                if chr in naam:
+                    self.stdout.write("[WARNING] Lid %s: rare tekens in naam %s" % (lid_nhb_nr, repr(naam)))
+                    self._count_warnings += 1
+            # for
 
             lid_blocked = member['blocked']
 
