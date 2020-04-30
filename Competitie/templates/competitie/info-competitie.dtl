@@ -20,8 +20,8 @@
     <thead>
         <th>Competitie</th>
         <th>Schietafstand</th>
-        <th>Aantal rondes</th>
-        <th>Per schietbeurt</th>
+        <th>Pijlen per schietbeurt</th>
+        <th>Schietbeurten</th>
         <th>Blazoen</th>
         <th>Maximale score</th>
     </thead>
@@ -29,8 +29,8 @@
     <tr>
         <td>Indoor</td>
         <td>18 meter</td>
-        <td>10</td>
         <td>3 pijlen</td>
+        <td>10</td>
         <td>40cm kaart</td>
         <td>300</td>
     </tr>
@@ -38,14 +38,14 @@
     <tr>
         <td>25m 1pijl</td>
         <td>25 meter</td>
-        <td>25</td>
         <td>1 pijl</td>
+        <td>25</td>
         <td>60cm kaart</td>
         <td>250</td>
     </tr>
 </table>
 
-<p>Aspiranten schieten beide competities 18 meter en 60cm kaart.</p>
+<p>Aspiranten schieten beide competities op 18 meter, op een 60cm kaart.</p>
 
 <p>&nbsp;</p>
 <h5>Geografische opdeling</h5>
