@@ -34,8 +34,8 @@
                 <td>{{ obj.beschrijving }}</td>
 
                 <td>
-                {% if obj.account_set.all.count %}
-                    {% for beheerder in obj.account_set.all %}
+                {% if obj.accounts.count %}
+                    {% for beheerder in obj.accounts.all %}
                         {% if not forloop.first %}
                             <br>
                         {% endif %}

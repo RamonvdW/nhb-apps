@@ -421,6 +421,13 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertEqual(self.functie_cwz.accounts.count(), 2)
 
+        # controleer dat de naam getoond wordt
+        resp = self.client.get('/functie/overzicht/vereniging/')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('functie/overzicht-vereniging.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, self.account_beh2.volledige_naam())
+
         # poog een NHB lid te koppelen dat niet lid is van de vereniging
         resp = self.client.post(url, {'add': self.account_ander.pk}, follow=True)
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
