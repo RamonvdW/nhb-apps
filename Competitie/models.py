@@ -143,7 +143,7 @@ def competitie_aanmaken(jaar):
     """ Deze functie wordt aangeroepen als de BKO de nieuwe competitie op wil starten
         We maken de 18m en 25m competitie aan en daaronder de deelcompetities voor regio, rayon en bond
 
-        Wedstrijdklassen volgen later, tijdens het bepalen van de klassengrenzen
+        Wedstrijdklassen volgen later, tijdens het bepalen van de klassegrenzen
     """
     yearend = date(year=jaar, month=12, day=31)     # 31 december
     udvl = date(year=jaar, month=8, day=1)          # 1 augustus = uiterste datum van lidmaatschap voor deelname teamcompetitie

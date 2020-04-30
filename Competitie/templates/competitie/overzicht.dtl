@@ -24,11 +24,11 @@
                 <div class="card-title center-align">Klassegrenzen<br>
                     <br><i class="material-icons-round large">equalizer</i>
                 </div>
-                <p>Toon de klassengrenzen voor de competities.</p>
+                <p>Toon de klassegrenzen voor de competities.</p>
             </div>
             <a href="{% url 'Competitie:klassegrenzen-tonen' %}" class="nhb-klikbare-balk">
                 <div class="card-action center-align">
-                    <span class="nhb-klikbare-link">Toon klassengrenzen</span>
+                    <span class="nhb-klikbare-link">Toon klassegrenzen</span>
                 </div>
             </a>
         </div>

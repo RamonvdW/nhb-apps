@@ -59,7 +59,7 @@ def zet_fase(comp):
             comp.fase = 'A1'
             return
 
-        # A2 = klassengrenzen zijn bepaald
+        # A2 = klassegrenzen zijn bepaald
         comp.fase = 'A2'
         return
 
