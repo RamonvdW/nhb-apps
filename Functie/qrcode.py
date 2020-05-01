@@ -8,13 +8,12 @@
 
 from django.conf import settings
 from django.utils.encoding import force_text
-from django.utils.html import escape
 from django.utils.safestring import mark_safe
 import io
 import pyotp
 import qrcode
 from qrcode.image.svg import SvgPathImage
-from xml.etree.ElementTree import ElementTree
+import xml.etree.ElementTree as ET
 
 
 # the QR code versie bepaalt het aantal data plekken in de code
@@ -31,7 +30,11 @@ QRCODE_VERSION = 8
 class SvgEmbeddedInHtmlImage(SvgPathImage):
     def _write(self, stream):
         self._img.append(self.make_path())
-        ElementTree(self._img).write(stream, encoding="UTF-8", xml_declaration=False, default_namespace=None, method='html')
+        ET.ElementTree(self._img).write(stream,
+                                        encoding="utf-8",
+                                        xml_declaration=False,
+                                        default_namespace=None,
+                                        method='html')
 
 
 def make_qr_code_image(text):
@@ -50,7 +53,8 @@ def qrcode_get(account):
     """ Genereer een QR code voor het account
         de QR code wordt als html-embedded SVG plaatje terug gegeven
     """
-    uri = pyotp.TOTP(account.otp_code).provisioning_uri(name=account.username, issuer_name=settings.OTP_ISSUER_NAME)
+    uri = pyotp.TOTP(account.otp_code).provisioning_uri(name=account.username,
+                                                        issuer_name=settings.OTP_ISSUER_NAME)
     #print("provisioning uri: %s" % repr(uri))
     stream = io.BytesIO()
     make_qr_code_image(uri).save(stream, kind="SVG")
