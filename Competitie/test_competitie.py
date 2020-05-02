@@ -267,7 +267,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         # controleer dat het "ag vaststellen" kaartje er is
         # om te beginnen zonder "voor het laatst gedaan"
         resp = self.client.get(self.url_overzicht)
-        urls = self.extract_all_href_urls(resp)
+        urls = self.extract_all_urls(resp)
         self.assertTrue(self.url_ag_vaststellen in urls)
         self.assertNotContains(resp, "voor het laatst gedaan")
 
@@ -284,7 +284,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         # controleer dat het "ag vaststellen" kaartje er nog steeds is
         # dit keer met de "voor het laatst gedaan" notitie
         resp = self.client.get(self.url_overzicht)
-        urls = self.extract_all_href_urls(resp)
+        urls = self.extract_all_urls(resp)
         self.assertTrue(self.url_ag_vaststellen in urls)
         self.assertContains(resp, "voor het laatst gedaan")
 

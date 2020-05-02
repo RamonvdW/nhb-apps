@@ -131,7 +131,7 @@ class E2EHelpers(object):
             print(soup.prettify())
 
     @staticmethod
-    def extract_all_href_urls(resp):
+    def extract_all_urls(resp):
         # TODO: consider using Beautifulsoup to extract all href urls
         #   for link in soup.find_all('a'):
         #       print(link.get('href'))
@@ -141,14 +141,21 @@ class E2EHelpers(object):
             content = content[pos:]             # strip head
         urls = list()
         while len(content):
-            pos = content.find('href="')
-            if pos > 0:
-                content = content[pos+6:]       # strip all before href
-                pos = content.find('"')
-                urls.append(content[:pos])
-                content = content[pos:]
+            # find the start of a new url
+            pos1 = content.find('href="')
+            pos2 = content.find('action="')
+            if pos1 >= 0 and (pos2 == -1 or pos2 > pos1):
+                content = content[pos1+6:]       # strip all before href
+            elif pos2 >= 0 and (pos1 == -1 or pos1 > pos2):
+                content = content[pos2+8:]       # strip all before action
             else:
                 content = ""
+
+            # find the end of the new url
+            pos = content.find('"')
+            if pos > 0:
+                urls.append(content[:pos])
+                content = content[pos:]
         # while
         return urls
 

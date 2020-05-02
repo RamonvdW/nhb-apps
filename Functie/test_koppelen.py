@@ -123,7 +123,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/overzicht.dtl', 'plein/site_layout.dtl'))
-        urls = [url for url in self.extract_all_href_urls(resp) if url.startswith('/functie/wijzig/')]
+        urls = [url for url in self.extract_all_urls(resp) if url.startswith('/functie/wijzig/')]
         self.assertEqual(len(urls), 2)      # BKO 18m en 25m
 
         # controleer de Wijzig knoppen op de functie-overzicht pagina voor verschillende rollen
@@ -136,7 +136,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/overzicht.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, "BKO Indoor")
-        urls = [url for url in self.extract_all_href_urls(resp) if url.startswith(self.url_wijzig)]
+        urls = [url for url in self.extract_all_urls(resp) if url.startswith(self.url_wijzig)]
         self.assertEqual(len(urls), 4)      # 4x RKO
 
         # neem de RKO Rayon 3 Indoor rol aan
@@ -147,7 +147,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/overzicht.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, "RKO Rayon 3 Indoor")
-        urls = [url for url in self.extract_all_href_urls(resp) if url.startswith(self.url_wijzig)]
+        urls = [url for url in self.extract_all_urls(resp) if url.startswith(self.url_wijzig)]
         self.assertEqual(len(urls), 4)      # 4x RCL
 
         # neem de RCL Rayon 111 Indoor aan
@@ -160,7 +160,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/overzicht.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, "RCL Regio 111 Indoor")
-        urls = [url for url in self.extract_all_href_urls(resp) if url.startswith(self.url_wijzig)]
+        urls = [url for url in self.extract_all_urls(resp) if url.startswith(self.url_wijzig)]
         self.assertEqual(len(urls), 0)      # geen wijzig knoppen voor de RCL
 
         self.e2e_assert_other_http_commands_not_supported(self.url_overzicht)
@@ -180,7 +180,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/overzicht.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, "CWZ")
-        urls = [url for url in self.extract_all_href_urls(resp) if url.startswith(self.url_wijzig)]
+        urls = [url for url in self.extract_all_urls(resp) if url.startswith(self.url_wijzig)]
         self.assertEqual(len(urls), 0)      # geen wijzig knoppen voor de CWZ
 
         # controleer inhoudelijk op 2xRCL, 2xRKO en 2xBKO (18m en 25m)

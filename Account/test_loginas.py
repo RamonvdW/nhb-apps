@@ -76,7 +76,7 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('account/login-as-go.dtl', 'plein/site_layout.dtl'))
 
         # pik de tijdelijke URL op
-        urls = [url for url in self.extract_all_href_urls(resp) if '/overig/url/' in url]
+        urls = [url for url in self.extract_all_urls(resp) if '/overig/url/' in url]
         # hak het https deel eraf
         tijdelijke_url = urls[0][urls[0].find('/overig/url/'):]
 
@@ -109,7 +109,7 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('account/login-as-go.dtl', 'plein/site_layout.dtl'))
 
         # pik de tijdelijke URL op
-        urls = [url for url in self.extract_all_href_urls(resp) if '/overig/url/' in url]
+        urls = [url for url in self.extract_all_urls(resp) if '/overig/url/' in url]
         # hak het https deel eraf
         tijdelijke_url = urls[0][urls[0].find('/overig/url/'):]
 
@@ -143,7 +143,7 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('account/login-as-go.dtl', 'plein/site_layout.dtl'))
 
         # pik de tijdelijke URL op
-        urls = [url for url in self.extract_all_href_urls(resp) if '/overig/url/' in url]
+        urls = [url for url in self.extract_all_urls(resp) if '/overig/url/' in url]
         # hak het https deel eraf
         tijdelijke_url = urls[0][urls[0].find('/overig/url/'):]
 
@@ -206,7 +206,7 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('account/login-as-go.dtl', 'plein/site_layout.dtl'))
 
         # pik de tijdelijke URL op
-        urls = [url for url in self.extract_all_href_urls(resp) if '/overig/url/' in url]
+        urls = [url for url in self.extract_all_urls(resp) if '/overig/url/' in url]
         # hak het https deel eraf
         tijdelijke_url = urls[0][urls[0].find('/overig/url/'):]
 
