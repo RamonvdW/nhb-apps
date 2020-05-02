@@ -151,6 +151,7 @@ class Command(BaseCommand):
                 lid = NhbLid.objects.get(nhb_nr=nhb_nr)
             except NhbLid.DoesNotExist:
                 # kan naam nu niet vonden - toch importeren en later aanvullen
+                print("[WARNING] Kan naam niet vinden bij nhb nummer %s" % repr(nhb_nr))
                 lid = None
                 self._count_noname += 1
 
