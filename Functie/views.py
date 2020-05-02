@@ -370,7 +370,6 @@ class OverzichtView(UserPassesTestMixin, ListView):
             Hier doen we het iets efficienter.
         """
         for obj in objs:
-            # TODO: ongewenste kennis over Account
             obj.beheerders = [account.volledige_naam() for account in obj.accounts.only('username', 'first_name', 'last_name').all()]
         # for
 
@@ -469,7 +468,7 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
 
             elif parent_tup == (None, None):
                 # top-level rol voor deze gebruiker - deze altijd tonen
-                url = reverse('Functie:activeer-rol-functie', kwargs={'functie_pk': functie_pk})
+                url = reverse('Functie:activeer-functie', kwargs={'functie_pk': functie_pk})
                 functie = Functie.objects.\
                             select_related('nhb_ver').\
                             only('beschrijving', 'nhb_ver__naam').\
@@ -487,11 +486,6 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
                 except KeyError:
                     hierarchy2[parent_tup] = [child_tup,]
         # for
-
-        # afhankelijk van de huidige rol
-        if rol_get_huidige(self.request) == Rollen.ROL_IT:
-            url = reverse('Account:account-wissel')
-            objs.append({'titel': 'Account wissel', 'url': url})
 
         # zet 'lage' functies onderaan
         objs.extend(objs2)
@@ -514,7 +508,7 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
         else:
             objs.append({'separator': True})
             for rol, functie_pk in child_tups:
-                url = reverse('Functie:activeer-rol-functie', kwargs={'functie_pk': functie_pk})
+                url = reverse('Functie:activeer-functie', kwargs={'functie_pk': functie_pk})
                 if rol == Rollen.ROL_CWZ:
                     functie = Functie.objects.select_related('nhb_ver').only('beschrijving', 'nhb_ver__naam').get(pk=functie_pk)
                     objs.append({'titel': functie.beschrijving, 'ver_naam': functie.nhb_ver.naam, 'url': url})
@@ -545,6 +539,12 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
         context['wiki_2fa_url'] = settings.WIKI_URL_2FA
         context['wiki_2fa_titel'] = 'Tweede-factor authenticatie'
 
+        context['url_handleiding_rollen'] = settings.WIKI_URL_ROLLEN
+
+        # login-as functie voor IT beheerder
+        if rol_get_huidige(self.request) == Rollen.ROL_IT:
+            context['url_login_as'] = reverse('Account:account-wissel')
+
         # TODO: volgende code is alleen voor de testsuite - willen we dit live terug zien?
         context['insert_meta'] = True
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
@@ -553,8 +553,6 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
             context['meta_functie'] = functie_nu.beschrijving       # template doet html escaping
         else:
             context['meta_functie'] = ""
-
-        context['url_handleiding_rollen'] = settings.WIKI_URL_ROLLEN
 
         menu_dynamics(self.request, context, actief='wissel-van-rol')
         return context
@@ -573,8 +571,7 @@ class ActiveerRolView(UserPassesTestMixin, View):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
         return HttpResponseRedirect(reverse('Plein:plein'))
 
-    # TODO: verbouw naar een POST (want: wijzigt iets)
-    def get(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         from_ip = get_safe_from_ip(self.request)
 
         if 'rol' in kwargs:
@@ -589,6 +586,8 @@ class ActiveerRolView(UserPassesTestMixin, View):
         rol_beschrijving = rol_get_beschrijving(request)
         my_logger.info('%s ROL account %s is nu %s' % (from_ip, self.request.user.username, rol_beschrijving))
 
+        # stuur een aantal rollen door naar een functionele pagina
+        # de rest blijft in Wissel van Rol
         rol = rol_get_huidige(request)
         if rol == Rollen.ROL_BB:
             return redirect('Competitie:overzicht')

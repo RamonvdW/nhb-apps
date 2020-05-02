@@ -69,13 +69,20 @@
                 <a class="btn-small btn-nhb-blauw" href="{{ url_handleiding_rollen }}"><i class="material-icons-round white-text">help_outline</i></a>
             </p>
         {% else %}
-            <a class="btn-nhb-blauw" href="{{ obj.url }}">{{ obj.titel }}</a>
-            {% if obj.ver_naam %}
-                <span>&nbsp;&nbsp;{{ obj.ver_naam }}</span>
-            {% endif %}
+            <form method="post" action="{{ obj.url }}">
+                {% csrf_token %}
+                <input class="btn-nhb-blauw" type="submit" value="{{ obj.titel }}">
+                {% if obj.ver_naam %}
+                    <span>&nbsp;&nbsp;{{ obj.ver_naam }}</span>
+                {% endif %}
+            </form>
         {% endif %}
     </p>
 {% endfor %}
+
+{% if url_login_as %}
+    <a class="btn-nhb-blauw" href="{{ url_login_as }}">Account wissel</a>
+{% endif %}
 
 {% if not show_vhpg %}
 

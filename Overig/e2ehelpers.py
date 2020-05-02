@@ -75,7 +75,7 @@ class E2EHelpers(object):
 
     def _wissel_naar_rol(self, rol, expected_redirect):
         assert isinstance(self, TestCase)
-        resp = self.client.get('/functie/wissel-van-rol/%s/' % rol)
+        resp = self.client.post('/functie/activeer-rol/%s/' % rol)
         self.assert_is_redirect(resp, expected_redirect)
 
     def e2e_wisselnaarrol_beheerder(self):
@@ -92,7 +92,7 @@ class E2EHelpers(object):
 
     def e2e_wissel_naar_functie(self, functie):
         assert isinstance(self, TestCase)
-        resp = self.client.get('/functie/wissel-van-rol/functie/%s/' % functie.pk)
+        resp = self.client.post('/functie/activeer-functie/%s/' % functie.pk)
         if functie.rol == 'CWZ':
             expected_redirect = '/vereniging/'
         else:

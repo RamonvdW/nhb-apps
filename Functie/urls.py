@@ -36,11 +36,11 @@ urlpatterns = [
          views.OTPKoppelenView.as_view(),
          name="otp-koppelen"),
 
-    path('wissel-van-rol/functie/<functie_pk>/',
+    path('activeer-functie/<str:functie_pk>/',
          views.ActiveerRolView.as_view(),
-         name='activeer-rol-functie'),
+         name='activeer-functie'),
 
-    path('wissel-van-rol/<str:rol>/',
+    path('activeer-rol/<str:rol>/',
          views.ActiveerRolView.as_view(),
          name='activeer-rol'),
 

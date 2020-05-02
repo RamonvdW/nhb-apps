@@ -85,6 +85,8 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
 
         self.url_overzicht = '/functie/overzicht/'
         self.url_wijzig = '/functie/wijzig/'
+        self.url_activeer_functie = '/functie/activeer-functie/%s/'
+        self.url_activeer_rol = '/functie/activeer-rol/%s/'
 
     def test_anon(self):
         self.e2e_logout()
@@ -246,7 +248,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.functie_cwz.accounts.add(self.account_beh1)
         self.e2e_login_and_pass_otp(self.account_beh1)
 
-        resp = self.client.get('/functie/wissel-van-rol/functie/%s/' % self.functie_cwz.pk, follow=True)
+        resp = self.client.post(self.url_activeer_functie % self.functie_cwz.pk, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, "CWZ")
 
@@ -266,7 +268,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_admin)
 
         # neem de BB rol aan
-        resp = self.client.get('/functie/wissel-van-rol/BB/', follow=True)
+        resp = self.client.post(self.url_activeer_rol % 'BB', follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, "Manager competitiezaken")
 
@@ -319,7 +321,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_admin)
 
         # neem de BKO rol aan
-        resp = self.client.get('/functie/wissel-van-rol/functie/%s/' % self.functie_bko.pk, follow=True)
+        resp = self.client.post('/functie/activeer-functie/%s/' % self.functie_bko.pk, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, "BKO ")
 
@@ -341,7 +343,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         # probeer als bezoeker (corner case coverage)
         # (admin kan geen schutter worden)
         url = '/functie/wijzig/%s/ontvang/' % self.functie_rko3.pk
-        resp = self.client.get('/functie/wissel-van-rol/geen/', follow=True)
+        resp = self.client.post(self.url_activeer_rol % 'geen', follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         resp = self.client.post(url, {'add': self.account_beh2.pk}, follow=False)
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
@@ -350,7 +352,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_admin)
 
         # neem de RKO rol aan
-        resp = self.client.get('/functie/wissel-van-rol/functie/%s/' % self.functie_rko3.pk, follow=True)
+        resp = self.client.post(self.url_activeer_functie % self.functie_rko3.pk, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, "RKO ")
 
@@ -380,7 +382,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_admin)
 
         # neem de RCL rol aan
-        resp = self.client.get('/functie/wissel-van-rol/functie/%s/' % self.functie_rcl111.pk, follow=True)
+        resp = self.client.post(self.url_activeer_functie % self.functie_rcl111.pk, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, "RCL ")
 

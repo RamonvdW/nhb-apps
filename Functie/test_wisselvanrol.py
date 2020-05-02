@@ -69,6 +69,12 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.functie_rko.save()
 
         self.url_wisselvanrol = '/functie/wissel-van-rol/'
+        self.url_activeer_rol = '/functie/activeer-rol/%s/'
+        self.url_activeer_functie = '/functie/activeer-functie/%s/'
+        self.url_accountwissel = '/account/account-wissel/'
+
+    def _get_wissel_urls(self, resp):
+        return [url for url in self.extract_all_urls(resp) if url.startswith('/functie/') or url == self.url_accountwissel]
 
     def test_admin(self):
         # controleer dat de link naar het wisselen van rol op de pagina staat
@@ -140,7 +146,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
 
         # activeer nu de rol van RCL
         # dan komen de CWZ rollen te voorschijn
-        resp = self.client.get(self.url_wisselvanrol + 'functie/%s/' % self.functie_rcl.pk)
+        resp = self.client.post(self.url_activeer_rol % self.functie_rcl.pk)
         self.assert_is_redirect(resp, self.url_wisselvanrol)
 
         resp = self.client.get(self.url_wisselvanrol)
@@ -152,11 +158,11 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.assertContains(resp, "CWZ test")
 
         # niet bestaande functie
-        resp = self.client.get(self.url_wisselvanrol + 'functie/999999/')
+        resp = self.client.post(self.url_activeer_functie % 999999)
         self.assert_is_redirect(resp, self.url_wisselvanrol)
         # TODO: check functie ongewijzigd
 
-        resp = self.client.get(self.url_wisselvanrol + 'functie/getal/')
+        resp = self.client.post(self.url_activeer_functie % 'getal')
         self.assert_is_redirect(resp, self.url_wisselvanrol)
         # TODO: check functie ongewijzigd
 
@@ -169,40 +175,40 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         resp = self.client.get(self.url_wisselvanrol)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, "Gebruiker")
-        urls = [url for url in self.extract_all_href_urls(resp) if url.startswith(self.url_wisselvanrol)]
-        self.assertIn(self.url_wisselvanrol + 'beheerder/', urls)   # IT beheerder
-        self.assertIn(self.url_wisselvanrol + 'BB/', urls)          # Manager competitiezaken
-        self.assertIn(self.url_wisselvanrol + 'geen/', urls)        # Gebruiker
-        self.assertNotIn('/account/account-wissel/', urls)
+        urls = self._get_wissel_urls(resp)
+        self.assertIn(self.url_activeer_rol % 'beheerder', urls)   # IT beheerder
+        self.assertIn(self.url_activeer_rol % 'BB', urls)          # Manager competitiezaken
+        self.assertIn(self.url_activeer_rol % 'geen', urls)        # Gebruiker
+        self.assertNotIn(self.url_accountwissel, urls)
 
-        resp = self.client.get(self.url_wisselvanrol + 'BB/', follow=True)
+        resp = self.client.post(self.url_activeer_rol % 'BB', follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, "Manager competitiezaken")
-        urls = [url for url in self.extract_all_href_urls(resp) if url.startswith(self.url_wisselvanrol)]
-        self.assertNotIn('/account/account-wissel/', urls)
+        urls = self._get_wissel_urls(resp)
+        self.assertNotIn(self.url_accountwissel, urls)
 
-        resp = self.client.get(self.url_wisselvanrol + 'beheerder/', follow=True)
+        resp = self.client.post(self.url_activeer_rol % 'beheerder', follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, "IT beheerder")
-        urls = [url for url in self.extract_all_href_urls(resp) if url.startswith('/account/')]
-        self.assertIn('/account/account-wissel/', urls)
+        urls = self._get_wissel_urls(resp)
+        self.assertIn(self.url_accountwissel, urls)
 
         # controleer dat een niet valide rol wissel geen effect heeft
         # dit raakt een exception in Account.rol:rol_activeer
-        resp = self.client.get(self.url_wisselvanrol + 'huh/', follow=True)
+        resp = self.client.post(self.url_activeer_rol % 'huh', follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, "IT beheerder")
 
         # controleer dat een rol wissel die met een functie moet geen effect heeft
-        resp = self.client.get(self.url_wisselvanrol + 'BKO/', follow=True)
+        resp = self.client.post(self.url_activeer_rol % 'BKO', follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, "IT beheerder")
 
-        resp = self.client.get(self.url_wisselvanrol + 'geen/', follow=True)
+        resp = self.client.post(self.url_activeer_rol % 'geen', follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, "Gebruiker")
-        urls = [url for url in self.extract_all_href_urls(resp) if url.startswith(self.url_wisselvanrol)]
-        self.assertNotIn('/account/account-wissel', urls)
+        urls = self._get_wissel_urls(resp)
+        self.assertNotIn(self.url_accountwissel, urls)
 
     def test_bb(self):
         # maak een BB die geen NHB lid is
@@ -214,10 +220,10 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         resp = self.client.get(self.url_wisselvanrol)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, "Gebruiker")
-        urls = [url for url in self.extract_all_href_urls(resp) if url.startswith(self.url_wisselvanrol)]
-        self.assertNotIn('/account/account-wissel', urls)           # Account wissel
-        self.assertIn(self.url_wisselvanrol + 'BB/', urls)          # Manager competitiezaken
-        self.assertIn(self.url_wisselvanrol + 'geen/', urls)        # Gebruiker
+        urls = self._get_wissel_urls(resp)
+        self.assertNotIn(self.url_accountwissel, urls)           # Account wissel
+        self.assertIn(self.url_activeer_rol % 'BB', urls)           # Manager competitiezaken
+        self.assertIn(self.url_activeer_rol % 'geen', urls)         # Gebruiker
 
         with self.assertRaises(ValueError):
             self.e2e_check_rol('deze-rol-is-het-niet')
@@ -230,9 +236,9 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         resp = self.client.get(self.url_wisselvanrol)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, "Schutter")
-        urls = [url for url in self.extract_all_href_urls(resp) if url.startswith(self.url_wisselvanrol)]
-        self.assertIn(self.url_wisselvanrol + 'functie/%s/' % self.functie_bko.pk, urls)
-        self.assertIn(self.url_wisselvanrol + 'schutter/', urls)
+        urls = self._get_wissel_urls(resp)
+        self.assertIn(self.url_activeer_functie % self.functie_bko.pk, urls)
+        self.assertIn(self.url_activeer_rol % 'schutter', urls)
 
         self.e2e_wisselnaarrol_schutter()
         self.e2e_check_rol('schutter')
@@ -245,9 +251,9 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         resp = self.client.get(self.url_wisselvanrol)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, "Schutter")
-        urls = [url for url in self.extract_all_href_urls(resp) if url.startswith(self.url_wisselvanrol)]
-        self.assertIn(self.url_wisselvanrol + 'functie/%s/' % self.functie_rko.pk, urls)
-        self.assertIn(self.url_wisselvanrol + 'schutter/', urls)
+        urls = self._get_wissel_urls(resp)
+        self.assertIn(self.url_activeer_functie % self.functie_rko.pk, urls)
+        self.assertIn(self.url_activeer_rol % 'schutter', urls)
 
     def test_cwz(self):
         self.functie_cwz.accounts.add(self.account_normaal)
@@ -257,9 +263,9 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         resp = self.client.get(self.url_wisselvanrol)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, "Schutter")
-        urls = [url for url in self.extract_all_href_urls(resp) if url.startswith(self.url_wisselvanrol)]
-        self.assertIn(self.url_wisselvanrol + 'functie/%s/' % self.functie_cwz.pk, urls)
-        self.assertIn(self.url_wisselvanrol + 'schutter/', urls)
+        urls = self._get_wissel_urls(resp)
+        self.assertIn(self.url_activeer_functie % self.functie_cwz.pk, urls)
+        self.assertIn(self.url_activeer_rol % 'schutter', urls)
 
     def test_functie_geen_rol(self):
         # test van een functie die niet resulteert in een rol
@@ -279,7 +285,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 302)     # 302 = Redirect (to login)
 
         # probeer van rol te wisselen
-        resp = self.client.get(self.url_wisselvanrol + 'beheerder/')
+        resp = self.client.post(self.url_activeer_rol % 'beheerder')
         self.assertEqual(resp.status_code, 302)     # 302 = Redirect (to login)
 
     def test_delete_functie(self):
