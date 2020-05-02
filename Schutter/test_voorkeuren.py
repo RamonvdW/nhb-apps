@@ -9,6 +9,7 @@ from BasisTypen.models import BoogType
 from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
 from Overig.e2ehelpers import E2EHelpers
 from Functie.models import maak_functie
+from Score.models import aanvangsgemiddelde_opslaan
 from .models import SchutterBoog
 import datetime
 
@@ -133,6 +134,19 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
         self.assertFalse(obj.heeft_interesse)
         self.assertTrue(obj.voor_wedstrijd)
         self.assertFalse(obj.voorkeur_dutchtarget_18m)
+
+        # zet aanvangsgemiddelden voor 18m en 25m
+        datum = datetime.date(year=2020, month=5, day=2)
+        datum_str = "2 mei 2020"
+        aanvangsgemiddelde_opslaan(obj, 18, 9.018, datum, None, 'Test opmerking A')
+        aanvangsgemiddelde_opslaan(obj, 25, 2.5, datum, None, 'Test opmerking B')
+
+        resp = self.client.get(self.url_voorkeuren)
+        self.assertContains(resp, "2,500")
+        self.assertContains(resp, "9,018")
+        self.assertContains(resp, "Test opmerking A")
+        self.assertContains(resp, "Test opmerking B")
+        self.assertContains(resp, datum_str)
 
         self.e2e_assert_other_http_commands_not_supported(self.url_voorkeuren, post=False)
 
