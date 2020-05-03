@@ -25,7 +25,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2020-05-02'
+SITE_VERSIE = '2020-05-03'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -260,15 +260,12 @@ BINDING_HTTP_POST = 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST'
 SAML_BASE_URL = SITE_URL + '/idp'
 
 SAML_IDP_CONFIG = {
-    'debug' : DEBUG,
+    'debug': DEBUG,
     'xmlsec_binary': '/usr/bin/xmlsec1',
 
     # the SAML entity id of this side, the Identity Provider
     # just a globally unique string
     'entityid': 'NHB IT applications SAML2 Identity Provider',
-
-    # metadata for trusted service providers (like mediawiki)
-    'metadata': {'local': [os.path.join(BASE_DIR, 'data_private/saml2/saml2_sp_metadata.xml'),]},
 
     # our service description (the identity provider)
     'service': {
@@ -293,23 +290,20 @@ SAML_IDP_CONFIG = {
     'valid_for': 100*24
 }
 
-SAML_IDP_SPCONFIG = {
-    # configuration of trusted service providers
-    # entry name = entity_id
-    'https://wiki.handboogsport.st-visir.nl/saml/module.php/saml/sp/metadata.php/default-sp': {
-        'processor': 'Functie.idp_accesscheck.WikiAccessCheck',
-        'sign_response': True,
-        'sign_assertion': True,
-        'attribute_mapping': {
-            # Account.field_name --> expose as
-            # Account.method_name --> expose as
-            'username': 'username',
-            'get_email': 'emailAddress',
-            'volledige_naam': 'real_name',
-        }
-    },
+# SP to be entered into the database using admin interface
+# details:
+#   EntityId  https://wiki.handboogsport.st-visir.nl/saml/module.php/saml/sp/metadata.php/default-sp
+#   processor Functie.idp_accesscheck.WikiAccessCheck
+#   Attribute-mapping (JSON)
+#       (Account.field_name: expose as)
+#       (Account.method_name: expose as)
+"""
+{
+"username": "username",
+"get_email": "emailAddress",
+"volledige_naam": "real_name"
 }
-
+"""
 
 # pagina's van de wiki
 WIKI_URL_TOP = WIKI_URL + '/Hoofdpagina'
