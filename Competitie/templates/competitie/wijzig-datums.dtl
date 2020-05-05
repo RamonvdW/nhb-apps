@@ -11,11 +11,6 @@
 {% block pagina %}
 {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-overzicht" %}
 
-<h4>Competitie datums</h4>
-
-<p>Op deze pagina kan je de belangrijke datums aanpassen voor de <b>{{ competitie }}</b>.</p>
-<p>&nbsp;</p>
-
 <script>
 function post_datums() {
     // voer een POST uit om toe te voegen
@@ -43,6 +38,12 @@ function post_datums() {
     form.submit();
 }
 </script>
+
+<h4>Competitie datums</h4>
+
+<p>Op deze pagina kan je de belangrijke datums aanpassen voor de <b>{{ competitie }}</b>.</p>
+
+<p>Klik op de datum om deze te wijzigen.</p>
 
 <table class="white">
     <thead>
