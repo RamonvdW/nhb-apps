@@ -61,26 +61,32 @@
             </div>
         </div>
 
-        <script src="{% static 'materialize/materialize.min.js' %}"></script>
+        <!-- TODO: minimized javascript -->
+        <script src="{% static 'materialize/materialize.js' %}"></script>
+        <!--<script src="{% static 'materialize/materialize.min.js' %}"></script>-->
 
-        <!-- configure the sidenav after everything has loaded and has been instantiated -->
+        <!-- framework init, after everything has been loaded and instantiated -->
         <script>
             document.addEventListener('DOMContentLoaded', function() {
+                // sidenav
                 var elems = document.querySelectorAll('.sidenav');
                 var insts = M.Sidenav.init(elems, {});
 
-                var elems = document.querySelectorAll('.collapsible');
+                // accordeons
                 // TODO: defaults statisch aanpassen
                 options = { inDuration: 100,    // default is 300
                             outDuration: 100    // default is 300
                           };
+                var elems = document.querySelectorAll('.collapsible');
                 var insts = M.Collapsible.init(elems, options);
 
+                // rolgordijnen
                 var elems = document.querySelectorAll('select');
                 var insts = M.FormSelect.init(elems, {});
             })
         </script>
 
+        <!-- helper functie om een opgeslagen cookie in te lezen -->
         <script>
             function getCookie(name) {
                 var cookieValue = null;
@@ -99,6 +105,7 @@
             }
         </script>
 
+        <!-- tabel filter -->
         <script>
             // wordt gebruikt om te reageren op de input van een gebruiker in een zoekveld
             // en regels van de tabel wel/niet zichtbaar te maken
