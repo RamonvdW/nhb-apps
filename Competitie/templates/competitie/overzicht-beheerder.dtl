@@ -9,6 +9,7 @@
 {% block title %}Competitie{% endblock %}
 
 {% block pagina %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-overzicht-beheerder" %}
 
 <h4>Competitie</h4>
 
@@ -28,17 +29,17 @@
 
     <table class="white">
         <thead>
-            <th>Fase</th>
+            <th class="center-align">Fase</th>
             <th>Activiteit</th>
             <th>Periode</th>
         </thead>
         <tr>
-            <td>A</td>
+            <td class="center-align">A</td>
             <td>Competitie opstarten (Bondsburo)</td>
             <td class="green-text">Afgerond</td>
         </tr>
         <tr>
-            <td{% if obj.fase == 'A1' %} class="nhb-blauw white-text"{% endif %}>A1</td>
+            <td {% if obj.fase == 'A1' %}class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>A1</td>
             <td>Vaststellen aanvangsgemiddelden en klassegrenzen (Bondsburo)</td>
             <td>
                 {% if obj.fase > 'A1' %}
@@ -49,7 +50,7 @@
             </td>
         </tr>
         <tr>
-            <td{% if obj.fase == 'A2' %} class="nhb-blauw white-text"{% endif %}>A2</td>
+            <td {% if obj.fase == 'A2' %}class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>A2</td>
             <td>Instellingen regio (RCL)</td>
             <td>
                 {% if obj.fase > 'A2' %}
@@ -60,7 +61,7 @@
             </td>
         </tr>
         <tr>
-            <td{% if obj.fase == 'B' %} class="nhb-blauw white-text"{% endif %}>B</td>
+            <td {% if obj.fase == 'B' %}class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>B</td>
             <td>Open voor inschrijvingen individueel en teams (indien lid voor {{ obj.uiterste_datum_lid }})</td>
             <td>
                 {% if obj.fase > 'B' %}
@@ -71,7 +72,7 @@
             </td>
         </tr>
         <tr>
-            <td{% if obj.fase == 'C' %} class="nhb-blauw white-text"{% endif %}>C</td>
+            <td {% if obj.fase == 'C' %} class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>C</td>
             <td>Samenstellen vaste teams (CWZ)</td>
             <td>
                 {% if obj.fase > 'C' %}
@@ -82,7 +83,7 @@
             </td>
         </tr>
         <tr>
-            <td{% if obj.fase == 'D' %} class="nhb-blauw white-text"{% endif %}>D</td>
+            <td {% if obj.fase == 'D' %} class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>D</td>
             <td>Aanmaken poules (RCL)</td>
             <td>
                 {% if obj.fase > 'D' %}
@@ -93,7 +94,7 @@
             </td>
         </tr>
         <tr>
-            <td{% if obj.fase == 'E' %} class="nhb-blauw white-text"{% endif %}>E</td>
+            <td {% if obj.fase == 'E' %} class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>E</td>
             <td>Wedstrijden</td>
             <td>
                 {% if obj.fase > 'E' %}
@@ -104,7 +105,7 @@
             </td>
         </tr>
         <tr>
-            <td{% if obj.fase == 'F' %} class="nhb-blauw white-text"{% endif %}>F</td>
+            <td {% if obj.fase == 'F' %} class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>F</td>
             <td>Vaststellen uitslag regiocompetitie</td>
             <td>
                 {% if obj.fase > 'F' %}
@@ -122,6 +123,23 @@
 <h5>Volgende stappen</h5>
 
 <div class="row">
+
+    <!-- toon klassegrenzen regiocompetitie -->
+    <div class="col s12 m6 l4">
+        <div class="card">
+            <div class="card-content">
+                <div class="card-title center-align">Klassegrenzen<br>
+                    <br><i class="material-icons-round large">equalizer</i>
+                </div>
+                <p>Toon de klassegrenzen voor de competities.</p>
+            </div>
+            <a href="{% url 'Competitie:klassegrenzen-tonen' %}" class="nhb-klikbare-balk">
+                <div class="card-action center-align">
+                    <span class="nhb-klikbare-link">Toon klassegrenzen</span>
+                </div>
+            </a>
+        </div>
+    </div>
 
     <!-- toon inschrijvingen regiocompetitie -->
     {% for comp in competities %}
@@ -209,31 +227,34 @@
             {% endif %}
         {% endfor %}
 
-    {% endif %}
+        <!-- datums wijzigen -->
+        {% if show_wijzig_datums %}
+            {% for obj in object_list %}
+                <div class="col s12 m6 l4">
+                    <div class="card">
+                        <div class="card-content">
+                            <div class="card-title center-align">Datums aanpassen<br>
+                                <br><i class="material-icons-round large">date_range</i>
+                            </div>
+                            <p>Datums aanpassen voor de {{ obj.beschrijving }}.</p>
+                        </div>
+                        <a href="{{ obj.url_wijzig_datums }}" class="nhb-klikbare-balk">
+                            <div class="card-action center-align">
+                                <span class="nhb-klikbare-link">Aanpassen</span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
 
-    <!-- toon klassegrenzen regiocompetitie -->
-    <div class="col s12 m6 l4">
-        <div class="card">
-            <div class="card-content">
-                <div class="card-title center-align">Klassegrenzen<br>
-                    <br><i class="material-icons-round large">equalizer</i>
-                </div>
-                <p>Toon de klassegrenzen voor de competities.</p>
-            </div>
-            <a href="{% url 'Competitie:klassegrenzen-tonen' %}" class="nhb-klikbare-balk">
-                <div class="card-action center-align">
-                    <span class="nhb-klikbare-link">Toon klassegrenzen</span>
-                </div>
-            </a>
-        </div>
-    </div>
+
+    {% endif %}
 
 </div>
 
 <p>Kan je niet vinden wat je zoekt? Misschien moet je eerst van rol wisselen.</p>
 <p>Je huidige rol is: <b>{{ huidige_rol }}</b>.</p>
-
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-overzicht-beheerder" %}
 
 {% endblock %}
 

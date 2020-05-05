@@ -23,7 +23,7 @@ from Schutter.models import SchutterBoog
 from Score.models import Score, ScoreHist, zoek_meest_recente_automatisch_vastgestelde_ag
 from .models import Competitie, AG_NUL, AG_LAAGSTE_NIET_NUL, CompetitieKlasse, DeelCompetitie,\
                     competitie_aanmaken, maak_competitieklasse_indiv, RegioCompetitieSchutterBoog
-from datetime import date
+import datetime
 
 
 TEMPLATE_COMPETITIE_OVERZICHT = 'competitie/overzicht.dtl'
@@ -37,6 +37,7 @@ TEMPLATE_COMPETITIE_LIJST_VERENIGINGEN = 'competitie/lijst-verenigingen.dtl'
 TEMPLATE_COMPETITIE_AANGEMELD_REGIO = 'competitie/lijst-aangemeld-regio.dtl'
 TEMPLATE_COMPETITIE_AG_VASTSTELLEN = 'competitie/ag-vaststellen.dtl'
 TEMPLATE_COMPETITIE_INFO_COMPETITIE = 'competitie/info-competitie.dtl'
+TEMPLATE_COMPETITIE_WIJZIG_DATUMS = 'competitie/wijzig-datums.dtl'
 
 JA_NEE = {False: 'Nee', True: 'Ja'}
 
@@ -50,7 +51,7 @@ def zet_fase(comp):
     # fase A was totdat dit object gemaakt werd
 
     now = timezone.now()
-    now = date(year=now.year, month=now.month, day=now.day)
+    now = datetime.date(year=now.year, month=now.month, day=now.day)
 
     if now < comp.begin_aanmeldingen:
         # zijn de wedstrijdklassen vastgesteld?
@@ -126,7 +127,7 @@ class CompetitieOverzichtView(View):
         # kies de competities waarvoor de beheerder getoond kunnen worden
         for obj in objs:
             zet_fase(obj)
-            obj.is_afgesloten_str = JA_NEE[obj.is_afgesloten]
+            obj.is_afgesloten_str = JA_NEE[obj.is_afgesloten]       # TODO: wordt niet gebruikt
         # for
 
         if rol_nu == Rollen.ROL_BB:
@@ -134,13 +135,18 @@ class CompetitieOverzichtView(View):
             # als er nog geen competitie is voor het huidige jaar, geeft de BB dan de optie om deze op te starten
             beginjaar = models_bepaal_startjaar_nieuwe_competitie()
             context['nieuwe_seizoen'] = "%s/%s" % (beginjaar, beginjaar+1)
-            context['bb_kan_competitie_aanmaken'] = (objs.filter(begin_jaar=beginjaar).count() == 0)
+            context['bb_kan_competitie_aanmaken'] = (0 == objs.filter(begin_jaar=beginjaar).count())
 
             if context['bb_kan_ag_vaststellen']:
                 # zoek uit wanneer dit voor het laatste gedaan is
                 datum = zoek_meest_recente_automatisch_vastgestelde_ag()
                 if datum:
                     context['bb_ag_nieuwste_datum'] = datum
+
+            context['show_wijzig_datums'] = True
+            for obj in objs:
+                obj.url_wijzig_datums = reverse('Competitie:wijzig-datums', kwargs={'comp_pk': obj.pk})
+            # for
 
         return context, TEMPLATE_COMPETITIE_OVERZICHT_BEHEERDER
 
@@ -352,7 +358,7 @@ class AGVaststellenView(UserPassesTestMixin, TemplateView):
             bulk_score = list()
 
             now = timezone.now()
-            datum = date(year=now.year, month=now.month, day=now.day)
+            datum = datetime.date(year=now.year, month=now.month, day=now.day)
 
             # doorloop alle individuele histcomp records die bij dit seizoen horen
             for obj in HistCompetitieIndividueel.objects.\
@@ -788,7 +794,7 @@ class KlassegrenzenTonenView(ListView):
 
 class InfoCompetitieView(TemplateView):
 
-    """ Django class-based view voor het Privacy bericht """
+    """ Django class-based view voor de Competitie Info """
 
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_INFO_COMPETITIE
@@ -818,6 +824,79 @@ class InfoCompetitieView(TemplateView):
 
         menu_dynamics(self.request, context, actief='competitie')
         return context
+
+
+class WijzigDatumsView(UserPassesTestMixin, TemplateView):
+
+    """ Django class-based view voor het wijzigen van de competitie datums """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_COMPETITIE_WIJZIG_DATUMS
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        rol_nu = rol_get_huidige(self.request)
+        return rol_nu == Rollen.ROL_BB
+
+    def handle_no_permission(self):
+        """ gebruiker heeft geen toegang --> redirect naar het plein """
+        return HttpResponseRedirect(reverse('Plein:plein'))
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        comp_pk = kwargs['comp_pk'][:6]     # afkappen geeft beveiliging
+        try:
+            competitie = Competitie.objects.get(pk=comp_pk)
+        except Competitie.DoesNotExist:
+            raise Resolver404()
+
+        context['competitie'] = competitie
+        competitie.datum1 = competitie.begin_aanmeldingen
+        competitie.datum2 = competitie.einde_aanmeldingen
+        competitie.datum3 = competitie.einde_teamvorming
+        competitie.datum4 = competitie.eerste_wedstrijd
+
+        context['wijzig_url'] = reverse('Competitie:wijzig-datums', kwargs={'comp_pk': competitie.pk})
+
+        menu_dynamics(self.request, context, actief='competitie')
+        return context
+
+    def post(self, request, *args, **kwargs):
+        """ deze functie wordt aangeroepen als een POST request ontvangen is.
+            --> de beheerder wil deze klassegrenzen vaststellen
+        """
+        comp_pk = kwargs['comp_pk'][:6]     # afkappen geeft beveiliging
+        try:
+            competitie = Competitie.objects.get(pk=comp_pk)
+        except Competitie.DoesNotExist:
+            raise Resolver404()
+
+        datum1 = request.POST.get('datum1', None)
+        datum2 = request.POST.get('datum2', None)
+        datum3 = request.POST.get('datum3', None)
+        datum4 = request.POST.get('datum4', None)
+
+        # alle vier datums zijn verplicht
+        if not (datum1 and datum2 and datum3 and datum4):
+            raise Resolver404()
+
+        try:
+            datum1 = datetime.datetime.strptime(datum1, '%Y-%m-%d')
+            datum2 = datetime.datetime.strptime(datum2, '%Y-%m-%d')
+            datum3 = datetime.datetime.strptime(datum3, '%Y-%m-%d')
+            datum4 = datetime.datetime.strptime(datum4, '%Y-%m-%d')
+        except ValueError:
+            raise Resolver404()
+
+        competitie.begin_aanmeldingen = datum1.date()
+        competitie.einde_aanmeldingen = datum2.date()
+        competitie.einde_teamvorming = datum3.date()
+        competitie.eerste_wedstrijd = datum4.date()
+        competitie.save()
+
+        return HttpResponseRedirect(reverse('Competitie:overzicht'))
 
 
 # end of file

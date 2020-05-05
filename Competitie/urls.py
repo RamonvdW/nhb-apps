@@ -27,6 +27,7 @@ urlpatterns = [
          views.AGVaststellenView.as_view(),
          name='ag-vaststellen'),
 
+    # TODO: afstand vervangen door comp_pk
     path('klassegrenzen/vaststellen/<afstand>/',
          views.KlassegrenzenVaststellenView.as_view(),
          name='klassegrenzen-vaststellen'),
@@ -45,7 +46,11 @@ urlpatterns = [
 
     path('info/',
          views.InfoCompetitieView.as_view(),
-         name='info-competitie')
+         name='info-competitie'),
+
+    path('wijzig-datums/<comp_pk>/',
+         views.WijzigDatumsView.as_view(),
+         name='wijzig-datums')
 ]
 
 # end of file

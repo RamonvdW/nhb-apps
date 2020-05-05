@@ -1,0 +1,98 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2020 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Competitie datums{% endblock %}
+
+{% block pagina %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-overzicht" %}
+
+<h4>Competitie datums</h4>
+
+<p>Op deze pagina kan je de belangrijke datums aanpassen voor de <b>{{ competitie }}</b>.</p>
+<p>&nbsp;</p>
+
+<script>
+function post_datums() {
+    // voer een POST uit om toe te voegen
+    var form = document.createElement('form');
+    form.setAttribute('method', 'post');
+    form.setAttribute('action', '{{ wijzig_url }}');
+
+    for (let nr = 1; nr <= 4; nr++) {
+        var el = document.querySelector('#datum' + nr);
+        var inp = document.createElement('input');
+        inp.type = "hidden";
+        inp.name = "datum" + nr;
+        inp.value = el.M_Datepicker.toString('yyyy-mm-dd');
+        form.appendChild(inp);
+    }
+
+    var inp = document.createElement('input');
+    inp.type = "hidden";
+    inp.name = "csrfmiddlewaretoken";
+    inp.value = getCookie('csrftoken');
+    form.appendChild(inp);
+
+    form.style.display = 'hidden';
+    document.body.appendChild(form);
+    form.submit();
+}
+</script>
+
+<table class="white">
+    <thead>
+        <th>Beschrijving</th>
+        <th>Datum</th>
+    </thead>
+    <tr>
+        <td>Inschrijven openen op</td>
+        <td><input type="text" class="nl_datepicker" id="datum1"></td>
+    </tr>
+    <tr>
+        <td>Inschrijvingen sluiten op</td>
+        <td><input type="text" class="nl_datepicker" id="datum2"></td>
+    </tr>
+    <tr>
+        <td>Samenstellen vaste teams kan tot</td>
+        <td><input type="text" class="nl_datepicker" id="datum3"></td>
+    </tr>
+    <tr>
+        <td>Aanmaken poules tot</td>
+        <td><input type="text" class="nl_datepicker" id="datum4"></td>
+    </tr>
+</table>
+
+<p>
+    <a class="btn-nhb-blauw" href="{% url 'Competitie:overzicht' %}"><i class="material-icons-round left">close</i>Terug</a>
+    <span>&nbsp;&nbsp;</span>
+    <button class="btn-nhb-rood" onclick="post_datums()"><i class="material-icons-round left">check</i>Opslaan</button>
+</p>
+
+<!-- initialisatie van de datum pickers -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var el = document.querySelector('#datum1');
+        M.Datepicker.init(el, { defaultDate: new Date("{{ competitie.datum1|date:'Y-m-d' }}"),
+                                setDefaultDate: true });
+
+        var el = document.querySelector('#datum2');
+        M.Datepicker.init(el, { defaultDate: new Date("{{ competitie.datum2|date:'Y-m-d' }}"),
+                                setDefaultDate: true });
+
+        var el = document.querySelector('#datum3');
+        M.Datepicker.init(el, { defaultDate: new Date("{{ competitie.datum3|date:'Y-m-d' }}"),
+                                setDefaultDate: true });
+
+        var el = document.querySelector('#datum4');
+        M.Datepicker.init(el, { defaultDate: new Date("{{ competitie.datum4|date:'Y-m-d' }}"),
+                                setDefaultDate: true });
+    })
+</script>
+
+{% endblock %}
+
