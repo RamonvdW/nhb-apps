@@ -6,7 +6,7 @@
 
 from django.conf import settings
 from django.urls import Resolver404, reverse
-from django.views.generic import TemplateView, ListView
+from django.views.generic import ListView
 from django.db.models import Q
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.staticfiles.templatetags.staticfiles import static
@@ -56,7 +56,6 @@ class RecordsOverzichtView(ListView):
         # recurve etc.
         if obj.para_klasse:
             obj.descr2_str += " para " + obj.para_klasse
-
 
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
@@ -161,7 +160,7 @@ class RecordsIndivZoomBaseView(ListView):
         sel2url = IndivRecord.sel2url4arg[arg]
         for sel, sel_str in sel2str.items():
             self.params[arg] = sel2url[sel]
-            sub_params = { k: self.params[k] for k in keys}
+            sub_params = {k: self.params[k] for k in keys}
             obj = SelObject()
             obj.sel_url = reverse(url_name, kwargs=sub_params)
             obj.sel_str = sel_str
@@ -191,9 +190,9 @@ class RecordsIndivZoom1234View(RecordsIndivZoomBaseView):
             self.make_items(objs, 'disc', 'Records:indiv-gd', ('gesl', 'disc'))
         elif not self.sel_lcat:
             self.make_items(objs, 'lcat', 'Records:indiv-gdl', ('gesl', 'disc', 'lcat'))
-        elif not self.sel_makl:
+        else:   # (not self.sel_makl)
             self.make_items(objs, 'makl', 'Records:indiv-gdlm', ('gesl', 'disc', 'lcat', 'makl'))
-        # else:  alle 4 de selectiecriteria aanwezig kan niet (urlconf pakt dan RecordsIndivZoom5View)
+        # alle 4 de selectiecriteria aanwezig kan niet (urlconf pakt dan RecordsIndivZoom5View)
         return objs
 
     def get_context_data(self, **kwargs):
@@ -221,25 +220,23 @@ class RecordsIndivZoom5View(RecordsIndivZoomBaseView):
         self.set_urls()
 
         # vind de verschillende afstanden waarop records bestaan
-        soorten = IndivRecord.objects.filter(
-                            geslacht=self.sel_gesl,
-                            discipline=self.sel_disc,
-                            leeftijdscategorie=self.sel_lcat,
-                            materiaalklasse=self.sel_makl).\
-                                    distinct('soort_record').\
-                                    order_by('-soort_record').\
-                                    values_list('soort_record', flat=True)
+        soorten = IndivRecord.objects.filter(geslacht=self.sel_gesl,
+                                             discipline=self.sel_disc,
+                                             leeftijdscategorie=self.sel_lcat,
+                                             materiaalklasse=self.sel_makl).\
+                                      distinct('soort_record').\
+                                      order_by('-soort_record').\
+                                      values_list('soort_record', flat=True)
 
-        # voor elk van de afstandard (soort records) zoek het meest recente (dus beste) record op
+        # voor elk van de afstanden (soort records) zoek het meest recente (dus beste) record op
         objs = list()
         for soort in soorten:
-            best = IndivRecord.objects.filter(
-                            geslacht=self.sel_gesl,
-                            discipline=self.sel_disc,
-                            leeftijdscategorie=self.sel_lcat,
-                            materiaalklasse=self.sel_makl,
-                            soort_record=soort).\
-                                    order_by('-datum')[0:0+1]
+            best = IndivRecord.objects.filter(geslacht=self.sel_gesl,
+                                              discipline=self.sel_disc,
+                                              leeftijdscategorie=self.sel_lcat,
+                                              materiaalklasse=self.sel_makl,
+                                              soort_record=soort).\
+                                       order_by('-datum')[0:0+1]
             objs.extend(best)
         # for
 
@@ -359,12 +356,11 @@ class RecordsZoekView(ListView):
 
             try:
                 filter_nr = int(zoekterm)
-                filter_is_nr = True
             except ValueError:
-                filter_is_nr = False
+                filter_nr = 0
 
-            if filter_is_nr and len(str(filter_nr)) == 6:
-                # zoek het NHB lid met dit nummber
+            if filter_nr and len(str(filter_nr)) == 6:
+                # zoek het NHB lid met dit nummer
                 try:
                     lid = NhbLid.objects.get(nhb_nr=filter_nr)
                 except NhbLid.DoesNotExist:
