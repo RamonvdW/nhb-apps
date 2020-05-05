@@ -20,16 +20,16 @@
 <p>Kijk eens in het menu onder Competities en Wissel van rol.</p>
 
 <div class="row">
+    <div class="col s12 cards-container">
 
-    {% if toon_nieuwe_accounts %}
         <!-- nieuwe accounts -->
-        <div class="col s12 m6 xl4">
+        {% if toon_nieuwe_accounts %}
             <div class="card">
                 <div class="card-content">
-                    <table class="simple"><tr style="border:0px">
-                        <td><i class="material-icons-round large">recent_actors</i></td>
-                        <td>Toon overzicht van de recente gebruikte en aangemaakte accounts.</td>
-                    </tr></table>
+                    <div class="card-title center-align">Account activiteit<br>
+                        <br><i class="material-icons-round large">recent_actors</i>
+                    </div>
+                    <p>Toon overzicht van de recent gebruikte en aangemaakte accounts.</p>
                 </div>
                 <a href="{% url 'Account:activiteit' %}" class="nhb-klikbare-balk">
                     <div class="card-action center-align">
@@ -37,18 +37,16 @@
                     </div>
                 </a>
             </div>
-        </div>
-    {% endif %}
+        {% endif %}
 
-    {% if toon_functies %}
         <!-- toon en koppel beheerders -->
-        <div class="col s12 m6 xl4">
+        {% if toon_functies %}
             <div class="card">
                 <div class="card-content">
-                    <table class="simple"><tr style="border:0px">
-                        <td><i class="material-icons-round large">face</i></td>
-                        <td>De functies en de gekoppelde beheerders.</td>
-                    </tr></table>
+                    <div class="card-title center-align">Beheerders<br>
+                        <br><i class="material-icons-round large">face</i>
+                    </div>
+                    <p>De functies en de gekoppelde beheerders.</p>
                 </div>
                 <a href="{% url 'Functie:overzicht' %}" class="nhb-klikbare-balk">
                     <div class="card-action center-align">
@@ -56,18 +54,16 @@
                     </div>
                 </a>
             </div>
-        </div>
-    {% endif %}
+        {% endif %}
 
-    {% if rol_is_bb %}
         <!-- overzicht VHPG acceptatie -->
-        <div class="col s12 m6 xl4">
+        {% if rol_is_bb %}
             <div class="card">
                 <div class="card-content">
-                    <table class="simple"><tr style="border:0px">
-                        <td><i class="material-icons-round large">verified_user</i></td>
-                        <td>Toon overzicht van beheerders die de Verklaring Hanteren Persoonsgegevens (VHPG) geaccepteerd hebben.</td>
-                    </tr></table>
+                    <div class="card-title center-align">VHPG status<br>
+                        <br><i class="material-icons-round large">verified_user</i>
+                    </div>
+                    <p>Toon overzicht van beheerders die de Verklaring Hanteren Persoonsgegevens (VHPG) geaccepteerd hebben.</p>
                 </div>
                 <a href="{% url 'Functie:vhpg-overzicht' %}" class="nhb-klikbare-balk">
                     <div class="card-action center-align">
@@ -75,17 +71,16 @@
                     </div>
                 </a>
             </div>
-        </div>
-    {% endif %}
+        {% endif %}
 
-    {% if rol_is_bko or rol_is_bb or rol_is_it %}
-        <div class="col s12 m6 xl4">
+        <!-- verenigingen overzicht IT/BB/BKO -->
+        {% if rol_is_bko or rol_is_bb or rol_is_it %}
             <div class="card">
                 <div class="card-content">
-                    <table class="simple"><tr style="border:0px">
-                        <td><i class="material-icons-round large">view_list</i></td>
-                        <td>Toon overzicht van de verenigingen (landelijk).</td>
-                    </tr></table>
+                    <div class="card-title center-align">Verenigingen<br>
+                        <br><i class="material-icons-round large">view_list</i>
+                    </div>
+                    <p>Toon overzicht van de verenigingen (landelijk).</p>
                 </div>
                 <a href="{% url 'Competitie:lijst-verenigingen' %}" class="nhb-klikbare-balk">
                     <div class="card-action center-align">
@@ -93,17 +88,16 @@
                     </div>
                 </a>
             </div>
-        </div>
-    {% endif %}
+        {% endif %}
 
-    {% if rol_is_rko %}
-        <div class="col s12 m6 xl4">
+        <!-- verenigingen overzicht RKO -->
+        {% if rol_is_rko %}
             <div class="card">
                 <div class="card-content">
-                    <table class="simple"><tr style="border:0px">
-                        <td><i class="material-icons-round large">view_list</i></td>
-                        <td>Toon overzicht van de verenigingen (in jouw rayon).</td>
-                    </tr></table>
+                    <div class="card-title center-align">Verenigingen<br>
+                        <br><i class="material-icons-round large">view_list</i>
+                    </div>
+                    <p>Toon overzicht van de verenigingen (in jouw rayon).</p>
                 </div>
                 <a href="{% url 'Competitie:lijst-verenigingen' %}" class="nhb-klikbare-balk">
                     <div class="card-action center-align">
@@ -111,17 +105,16 @@
                     </div>
                 </a>
             </div>
-        </div>
-    {% endif %}
+        {% endif %}
 
-    {% if rol_is_rcl %}
-        <div class="col s12 m6 xl4">
+        <!-- verenigingen overzicht RCL -->
+        {% if rol_is_rcl %}
             <div class="card">
                 <div class="card-content">
-                    <table class="simple"><tr style="border:0px">
-                        <td><i class="material-icons-round large">view_list</i></td>
-                        <td>Toon overzicht van de verenigingen (in jouw regio).</td>
-                    </tr></table>
+                    <div class="card-title center-align">Verenigingen<br>
+                        <br><i class="material-icons-round large">view_list</i>
+                    </div>
+                    <p>Toon overzicht van de verenigingen (in jouw regio).</p>
                 </div>
                 <a href="{% url 'Competitie:lijst-verenigingen' %}" class="nhb-klikbare-balk">
                     <div class="card-action center-align">
@@ -129,13 +122,13 @@
                     </div>
                 </a>
             </div>
-        </div>
-    {% endif %}
+        {% endif %}
 
-    {% if rol_is_cwz %}
-        <p>..en Vereniging</p>
-    {% endif %}
+        {% if rol_is_cwz %}
+            <p>..en Vereniging</p>
+        {% endif %}
 
+    </div>
 </div>
 
 {% endblock %}

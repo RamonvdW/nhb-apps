@@ -67,7 +67,7 @@
                 {% if obj.fase > 'B' %}
                     <span class="green-text">Afgerond</span>
                 {% else %}
-                    <span>vanaf {{ obj.begin_aanmeldingen }}{% if obj.einde_aanmeldingen > obj.begin_aanmeldingen %}<br>tot {{ obj.einde_aanmeldingen }}{% endif %}</span>
+                    <span>{{ obj.begin_aanmeldingen }}{% if obj.einde_aanmeldingen > obj.begin_aanmeldingen %} tot <br>{{ obj.einde_aanmeldingen }}{% endif %}</span>
                 {% endif %}
             </td>
         </tr>
@@ -123,15 +123,15 @@
 <h5>Volgende stappen</h5>
 
 <div class="row">
+    <div class="col s12 cards-container">
 
-    <!-- toon klassegrenzen regiocompetitie -->
-    <div class="col s12 m6 l4">
+        <!-- toon klassegrenzen regiocompetitie -->
         <div class="card">
             <div class="card-content">
                 <div class="card-title center-align">Klassegrenzen<br>
                     <br><i class="material-icons-round large">equalizer</i>
                 </div>
-                <p>Toon de klassegrenzen voor de competities.</p>
+                <p>Toon de vastgestelde klassegrenzen voor de individuele wedstrijdklassen voor de competities.</p>
             </div>
             <a href="{% url 'Competitie:klassegrenzen-tonen' %}" class="nhb-klikbare-balk">
                 <div class="card-action center-align">
@@ -139,12 +139,10 @@
                 </div>
             </a>
         </div>
-    </div>
 
-    <!-- toon inschrijvingen regiocompetitie -->
-    {% for comp in competities %}
-        {% if comp.fase != 'A1' and comp.fase != 'A1' %}    <!-- TODO: change to !=A1 and !=A2 -->
-            <div class="col s12 m6 l4">
+        <!-- toon inschrijvingen regiocompetitie -->
+        {% for comp in competities %}
+            {% if comp.fase != 'A1' and comp.fase != 'A1' %}    <!-- TODO: change to !=A1 and !=A2 -->
                 <div class="card">
                     <div class="card-content">
                         <div class="card-title center-align">Inschrijvingen<br>
@@ -158,13 +156,11 @@
                         </div>
                     </a>
                 </div>
-            </div>
-        {% endif %}
-    {% endfor %}
+            {% endif %}
+        {% endfor %}
 
-    <!-- competities aanmaken -->
-    {% if bb_kan_competitie_aanmaken %}
-        <div class="col s12 m6 l4">
+        <!-- competities aanmaken -->
+        {% if bb_kan_competitie_aanmaken %}
             <div class="card">
                 <div class="card-content">
                     <div class="card-title center-align">Competitie opstarten<br>
@@ -178,14 +174,12 @@
                     </div>
                 </a>
             </div>
-        </div>
-    {% endif %}
+        {% endif %}
 
-    {% if rol_is_bb %}
+        {% if rol_is_bb %}
 
-        <!-- aanvangsgemiddelden vaststellen -->
-        {% if bb_kan_ag_vaststellen %}
-            <div class="col s12 m6 l4">
+            <!-- aanvangsgemiddelden vaststellen -->
+            {% if bb_kan_ag_vaststellen %}
                 <div class="card">
                     <div class="card-content">
                         <div class="card-title center-align">Aanvangs<wbr/>gemiddelden<br>
@@ -203,13 +197,11 @@
                         </div>
                     </a>
                 </div>
-            </div>
-        {% endif %}
+            {% endif %}
 
-        <!-- klassegrenzen vaststellen -->
-        {% for obj in object_list %}
-            {% if obj.fase == 'A1' %}
-                <div class="col s12 m6 l4">
+            <!-- klassegrenzen vaststellen -->
+            {% for obj in object_list %}
+                {% if obj.fase == 'A1' %}
                     <div class="card">
                         <div class="card-content">
                             <div class="card-title center-align">Klasse<wbr/>grenzen {{ obj.afstand }}m<br>
@@ -223,17 +215,15 @@
                             </div>
                         </a>
                     </div>
-                </div>
-            {% endif %}
-        {% endfor %}
+                {% endif %}
+            {% endfor %}
 
-        <!-- datums wijzigen -->
-        {% if show_wijzig_datums %}
-            {% for obj in object_list %}
-                <div class="col s12 m6 l4">
+            <!-- datums wijzigen -->
+            {% if show_wijzig_datums %}
+                {% for obj in object_list %}
                     <div class="card">
                         <div class="card-content">
-                            <div class="card-title center-align">Datums aanpassen<br>
+                            <div class="card-title center-align">Datums<br>
                                 <br><i class="material-icons-round large">date_range</i>
                             </div>
                             <p>Datums aanpassen voor de {{ obj.beschrijving }}.</p>
@@ -244,13 +234,11 @@
                             </div>
                         </a>
                     </div>
-                </div>
-            {% endfor %}
-        {% endif %}
+                {% endfor %}
+            {% endif %}
 
-
-    {% endif %}
-
+        {% endif %}     <!-- rol_is_bb -->
+    </div>
 </div>
 
 <p>Kan je niet vinden wat je zoekt? Misschien moet je eerst van rol wisselen.</p>

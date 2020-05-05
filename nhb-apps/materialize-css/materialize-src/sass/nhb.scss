@@ -74,6 +74,43 @@ $nhb-collection-hover-background: $nhb-card-hover-background;
 
 
 //-----------------------------------
+// cards-container
+//
+// based on https://codepen.io/aglio/pen/eGdVdQ
+//
+.cards-container {
+    column-break-inside: avoid;
+    .card {
+        display: inline-block;
+        overflow: visible;
+    }
+}
+
+@mixin column-count($ct) {
+    -webkit-column-count: $ct;
+    -moz-column-count: $ct;
+    column-count: $ct;
+}
+
+// select 1, 2 or 3 columns depending on screen size
+@media #{$small-and-down} {
+  .cards-container {
+    @include column-count(1);
+  }
+}
+@media #{$medium-and-up} {
+  .cards-container {
+    @include column-count(2);
+  }
+}
+@media #{$extra-large-and-up} {
+  .cards-container {
+    @include column-count(3);
+  }
+}
+
+
+//-----------------------------------
 // grote klikbare oppervlakten
 //
 // zoals card-action en collection-item
