@@ -63,7 +63,9 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         # for
 
         objs = list()
-        for obj in HistCompetitieIndividueel.objects.filter(schutter_nr=nhblid.nhb_nr):
+        for obj in HistCompetitieIndividueel.objects.\
+                            filter(schutter_nr=nhblid.nhb_nr).\
+                            order_by('-histcompetitie__seizoen'):
             wedstrijd = HistCompetitie.comptype2str[obj.histcompetitie.comp_type]
             datum_str = 'Seizoen ' + obj.histcompetitie.seizoen
             try:
