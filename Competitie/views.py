@@ -549,7 +549,7 @@ class LijstAangemeldRegioView(TemplateView):
 
 class KlassegrenzenVaststellenView(UserPassesTestMixin, TemplateView):
 
-    """ deze view laat de aanvangsgemiddelden voor de volgende competitie zien,
+    """ deze view laat de klassengrenzen voor de volgende competitie zien,
         aan de hand van de al vastgestelde aanvangsgemiddelden
         De BKO kan deze bevestigen, waarna ze aan de competitie toegevoegd worden
     """

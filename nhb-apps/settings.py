@@ -53,7 +53,7 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',  # permission association to models
     'django.contrib.messages',
     # 'debug_toolbar',                # DEV ONLY
-    # 'django_extensions'             # DEV ONLY
+    # 'django_extensions'             # DEV ONLY (provides show_urls)
 ]
 
 
