@@ -108,7 +108,7 @@ class E2EHelpers(object):
         pos = page.find('<meta rol_nu=')
         if pos < 0:
             # informatie is niet aanwezig
-            rol_nu = "geen meta"
+            rol_nu = "geen meta"            # pragma: no cover
         else:
             spl = page[pos+14:pos+100].split('"')
             rol_nu = spl[0]
