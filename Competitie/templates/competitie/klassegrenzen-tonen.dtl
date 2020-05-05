@@ -21,9 +21,13 @@
     <table class="white">
         <thead>
             <tr>
+                <th></th>
+                <th colspan="2">Minimaal aanvangs<wbr/>gemiddelde</th>
+            </tr>
+            <tr>
                 <th>Materiaalklasse</th>
-                <th>Indoor minimaal aanvangs<wbr/>gemiddelde</th>
-                <th>25m 1pijl minimaal aanvangs<wbr/>gemiddelde</th>
+                <th>Indoor</th>
+                <th>25m 1pijl</th>
             </tr>
         </thead>
 
