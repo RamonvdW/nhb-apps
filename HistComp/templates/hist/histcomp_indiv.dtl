@@ -14,6 +14,28 @@
 
 <h4>Uitslag individuele competitie</h4>
 
+<!-- toon gekozen competitie in een blauwe box -->
+<div class="row">
+    <div class="col s9 m8 l8 xl6 offset-s1 offset-m2 offset-l2 offset-xl3">
+        <div class="white-text nhb-blauw z-depth-2">
+            <div class="row small-row">
+                <div class="col s4">Competitie:</div>
+                <div class="col s5">{{ histcomp.comp_type_str }}</div>
+            </div>
+            <div class="row small-row">
+                <div class="col s4">Seizoen:</div>
+                <div class="col s5">{{ histcomp.seizoen }}</div>
+            </div>
+            <div class="row small-row">
+                <div class="col s4">Klasse:</div>
+                <div class="col s5">{{ histcomp.klasse }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<p>&nbsp;</p>
+
 <div class="container white z-depth-2">
     <div class="row nhb-blauw white-text">
         <div class="col s12 center-align">
@@ -41,8 +63,7 @@
     </form>
 </div>
 
-<p>Uitslag van de {{ histcomp.comp_type_str }} individuele competitie, seizoen {{ histcomp.seizoen }}, klasse {{ histcomp.klasse }}.</p>
-<p>De gemiddelde pijl is berekend over de 6 hoogste scores. De laagste van de 7 scores staat tussen haakjes.</p>
+<p>De gemiddelde pijl is berekend over de 6 hoogste scores. De laagste score staat tussen haakjes.</p>
 
 {% if is_paginated %}
     <ul class="pagination">

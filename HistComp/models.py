@@ -30,10 +30,11 @@ class HistCompetitie(models.Model):
 
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
-        return "%s (%s) %s (team=%s)" % (self.seizoen,
-                                         self.comp_type,
-                                         self.klasse,
-                                         self.is_team)
+        return "%s: %s (%s) %s (team=%s)" % (self.pk,
+                                             self.seizoen,
+                                             self.comp_type,
+                                             self.klasse,
+                                             self.is_team)
 
     class Meta:
         """ meta data voor de admin interface """
@@ -68,7 +69,7 @@ class HistCompetitieIndividueel(models.Model):
 
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
-        return "%s, %s" % (self.rank, self.schutter_nr)
+        return "rank %s: %s %s" % (self.rank, self.schutter_naam, self.gemiddelde)
 
     class Meta:
         """ meta data voor de admin interface """

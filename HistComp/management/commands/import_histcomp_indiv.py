@@ -222,11 +222,12 @@ class Command(BaseCommand):
                 self._count_dupe += 1
             else:
                 bulk.append(hist)
-                rank[klasse] += 1
                 self._count_added += 1
                 if len(bulk) >= 100:
                     HistCompetitieIndividueel.objects.bulk_create(bulk)
                     bulk = list()
+
+            rank[klasse] += 1
         # for
 
         if len(bulk):

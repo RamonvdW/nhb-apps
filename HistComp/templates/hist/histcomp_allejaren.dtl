@@ -17,6 +17,7 @@
 {% if object_list %}
 
     <p>Op deze pagina tonen we de uitslag van de regiocompetitie {{ seizoen }}.</p>
+    <p>Kies een boogtype om de uitslag te zien.</p>
 
     <h5>Individuele competitie 18m Indoor</h5>
 
