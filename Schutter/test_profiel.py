@@ -171,7 +171,7 @@ class TestSchutterProfiel(E2EHelpers, TestCase):
         schutterboog_bb.voor_wedstrijd = False
         schutterboog_bb.save()
         inschrijving = RegioCompetitieSchutterBoog.objects.get(schutterboog=schutterboog)
-        url_inschrijven_25bb = self.url_uitschrijven % inschrijving
+        url_uitschrijven_25bb = self.url_uitschrijven % inschrijving
 
         # haal de profiel pagina op
         resp = self.client.get(self.url_profiel)
@@ -187,7 +187,6 @@ class TestSchutterProfiel(E2EHelpers, TestCase):
         self.assertTrue(url_uitschrijven_25bb in urls)
 
     def test_profile_geen_competities(self):
-
         # log in as schutter
         self.e2e_login(self.account_normaal)
         # self._prep_voorkeuren()       --> niet aanroepen, dan geen schutterboog
