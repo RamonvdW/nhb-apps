@@ -84,6 +84,7 @@ class TestOverigTijdelijkeUrl(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assert_template_used(resp, ('overig/site-feedback-bedankt.dtl', 'plein/site_layout.dtl'))
 
-# TODO: add use of assert_other_http_commands_not_supported
+    def test_other_http(self):
+        self.e2e_assert_other_http_commands_not_supported('/overig/url/0/')
 
 # end of file

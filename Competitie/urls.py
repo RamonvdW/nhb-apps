@@ -27,7 +27,6 @@ urlpatterns = [
          views.AGVaststellenView.as_view(),
          name='ag-vaststellen'),
 
-    # TODO: afstand vervangen door comp_pk
     path('klassegrenzen/vaststellen/<afstand>/',
          views.KlassegrenzenVaststellenView.as_view(),
          name='klassegrenzen-vaststellen'),
