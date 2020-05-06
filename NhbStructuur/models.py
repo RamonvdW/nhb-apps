@@ -70,7 +70,7 @@ class NhbVereniging(models.Model):
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
         # selectie in de admin interface gaat op deze string, dus nhb_nr eerst
-        return "%s %s" % (self.nhb_nr, self.naam)
+        return "[%s] %s" % (self.nhb_nr, self.naam)
 
     class Meta:
         """ meta data voor de admin interface """
