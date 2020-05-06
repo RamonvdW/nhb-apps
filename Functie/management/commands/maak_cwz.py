@@ -55,16 +55,18 @@ class Command(BaseCommand):
             functie = self.get_functie_cwz(nhb_ver)
 
             if functie:
-                # maak deze account CWZ
-                functie.accounts.add(account)
+                if functie.accounts.filter(pk=account.pk).count():
+                    self.stderr.write('[WARNING] Account %s is al CWZ van vereniging %s' % (repr(username), nhb_ver))
+                else:
+                    # maak dit account CWZ
+                    functie.accounts.add(account)
 
-            activiteit = "Account %s is CWZ gemaakt van vereniging [%s] %s" % (repr(username), nhb_ver.nhb_nr, nhb_ver.naam)
+                    activiteit = "Account %s is CWZ gemaakt van vereniging %s" % (repr(username), nhb_ver)
 
-            # schrijf in het logboek
-            schrijf_in_logboek(account=None,
-                               gebruikte_functie='maak_cwz (command line)',
-                               activiteit=activiteit)
-
-            self.stdout.write(activiteit)
+                    # schrijf in het logboek
+                    schrijf_in_logboek(account=None,
+                                       gebruikte_functie='maak_cwz (command line)',
+                                       activiteit=activiteit)
+                    self.stdout.write(activiteit)
 
 # end of file
