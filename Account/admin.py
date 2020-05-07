@@ -40,6 +40,8 @@ class AccountEmailAdmin(admin.ModelAdmin):
     # velden om in te zoeken (in de lijst)
     search_fields = ('account__username',)
 
+    list_filter = ('email_is_bevestigd',)
+
 
 admin.site.register(Account, AccountAdmin)
 admin.site.register(AccountEmail, AccountEmailAdmin)
