@@ -15,7 +15,7 @@
 
 <p>Het account voor NHB nummer <b>{{ login_naam }}</b> is aangemaakt. Dit nummer is je inlog naam.</p>
 
-<p>We hebben een email gestuurd naar <b>{{ partial_email }}</b> om zeker te zijn dat we je kunnen bereiken.</p>
+<p>We hebben een e-mail gestuurd naar <b>{{ partial_email }}</b> om zeker te zijn dat we je kunnen bereiken.</p>
 
 <p>Volg de instructies in de e-mail om het aanmaken van je account af te ronden. Daarna kan je inloggen.</p>
 
