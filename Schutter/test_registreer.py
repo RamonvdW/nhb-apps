@@ -168,7 +168,6 @@ class TestSchutterRegistreer(E2EHelpers, TestCase):
         account = Account.objects.get(username='100001')
         email = AccountEmail.objects.get(account=account)
         self.assertTrue(email.email_is_bevestigd)
-
         self.assertEqual(account.get_email(), 'rdetester@gmail.not')
 
         # tijdens inlog wordt de volledige naam overgenomen
