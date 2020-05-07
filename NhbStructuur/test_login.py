@@ -19,9 +19,6 @@ class TestNhbStructuurLogin(E2EHelpers, TestCase):
     def setUp(self):
         """ initialisatie van de test case """
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
-        self.account_metmail = self.e2e_create_account('metmail', 'metmail@test.com', 'MetMail')
-
-        self.email_metmail = self.account_metmail.accountemail_set.all()[0]
 
         # maak een test vereniging
         ver = NhbVereniging()
@@ -37,7 +34,7 @@ class TestNhbStructuurLogin(E2EHelpers, TestCase):
         lid.geslacht = "M"
         lid.voornaam = "Ramon"
         lid.achternaam = "de Tester"
-        lid.email = "rdetester@gmail.not"
+        lid.email = ""      # belangrijk: leeg laten!
         lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
         lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
         lid.bij_vereniging = ver
@@ -89,48 +86,36 @@ class TestNhbStructuurLogin(E2EHelpers, TestCase):
         self.e2e_login(self.account_normaal)
 
     def test_nieuwe_email(self):
-        # na login with accountemail.nieuwe_email gezet
-        self.e2e_login(self.account_normaal)
+        # nieuwe email in CRM
+        # tijdens login word accountemail.nieuwe_email gezet
+        # gebruiker mag niet inloggen totdat email bevestigd is
+        self.nhblid1.email = 'nieuwe@test.com'
+        self.nhblid1.save()
+
+        obj = self.account_normaal.accountemail_set.all()[0]
+        self.assertEqual(obj.nieuwe_email, '')
+        self.assertTrue(obj.email_is_bevestigd)
+
+        resp = self.e2e_login_no_check(self.account_normaal)
+        self.assertEqual(resp.status_code, 200)
+        # check niet ingelogd
+        self.assertContains(resp, '/account/login/')
+        self.assertNotContains(resp, '/account/logout/')
+        self.assertContains(resp, 'We hebben een nieuw e-mailadres doorgekregen uit de administratie van de NHB')
+        self.assertContains(resp, 'ni###e@test.com')
+
+        # check propagatie is gedaan
         obj = self.account_normaal.accountemail_set.all()[0]
         self.assertEqual(obj.nieuwe_email, self.nhblid1.email)
+        self.assertFalse(obj.email_is_bevestigd)
 
-        # dit gebeurt niet als het email al bevestigd is
-        obj.bevestigde_email = self.nhblid1.email
-        obj.nieuwe_email = ""
-        obj.save()
-        self.e2e_logout()
-        self.e2e_login(self.account_normaal)
-        self.assertEqual(obj.nieuwe_email, "")
-
-    def test_login_nieuwe_email_uit_crm(self):
-        # koppel account metmail aan NHB lid met ander email en log in
-        self.nhblid1.account = self.account_metmail
+    def test_geen_nieuwe_email(self):
+        # geen trigger als het e-mailadres niet gewijzigd is
+        obj = self.account_normaal.accountemail_set.all()[0]
+        self.assertTrue(obj.email_is_bevestigd)
+        self.nhblid1.email = obj.bevestigde_email
         self.nhblid1.save()
 
-        # test inlog via het inlog formulier, met een email adres
-        resp = self.client.post('/account/login/', {'login_naam': 'metmail@test.com',
-                                                    'wachtwoord': E2EHelpers.WACHTWOORD}, follow=True)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        # redirect is naar de nieuwe-email pagina
-        self.assert_template_used(resp, ('account/nieuwe-email.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, 'rd#')            # email abbreviation
-        self.assertContains(resp, '@gmail.not')     # was: @test.com
-
-    def test_login_ongewijzigde_email_uit_crm(self):
-        # koppel account metmail aan NHB lid met ander email en log in
-        self.nhblid1.account = self.account_metmail
-        self.nhblid1.save()
-        self.email_metmail.bevestigde_email = self.nhblid1.email
-        self.email_metmail.save()
-
-        # test inlog via het inlog formulier, met een email adres
-        resp = self.client.post('/account/login/', {'login_naam': self.account_metmail.username,
-                                                    'wachtwoord': E2EHelpers.WACHTWOORD}, follow=True)
-        self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_html_ok(resp)
-        # redirect is naar het plein
-        self.assert_template_used(resp, ('plein/plein-schutter.dtl', 'plein/site_layout.dtl'))
-
+        self.e2e_login(self.account_normaal)    # checkt login success
 
 # end of file

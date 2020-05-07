@@ -6,16 +6,14 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}E-mail bevestigen{% endblock %}
+{% block title %}E-mail nog niet bevestigd{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="account-nieuwe-email" %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="account-bevestig-email" %}
 
-<h4>E-mail bevestigen</h4>
+<h4>E-mail nog niet bevestigd</h4>
 
-<p>We hebben een nieuw e-mailadres doorgekregen uit de administratie van de NHB.</p>
-
-<p>We hebben een e-mail gestuurd naar <b>{{ partial_email }}</b> om zeker te zijn dat we je kunnen bereiken.</p>
+<p>We hebben eerder een e-mail gestuurd naar <b>{{ partial_email }}</b> om zeker te zijn dat we je kunnen bereiken.</p>
 
 <p>Volg de instructies in de e-mail om de bevestiging af te ronden.</p>
 

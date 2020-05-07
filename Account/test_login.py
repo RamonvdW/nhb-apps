@@ -25,9 +25,11 @@ class TestAccountLogin(E2EHelpers, TestCase):
         self.email_normaal = self.account_normaal.accountemail_set.all()[0]
         self.email_metmail = self.account_metmail.accountemail_set.all()[0]
 
+        self.url_login = '/account/login/'
+        
     def test_inlog_form_get(self):
         # test ophalen van het inlog formulier
-        resp = self.client.get('/account/login/')
+        resp = self.client.get(self.url_login)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/login.dtl', 'plein/site_layout.dtl'))
@@ -36,7 +38,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
         # test inlog via het inlog formulier
         self.account_normaal.verkeerd_wachtwoord_teller = 3
         self.account_normaal.save()
-        resp = self.client.post('/account/login/', {'login_naam': 'normaal', 'wachtwoord':  E2EHelpers.WACHTWOORD}, follow=True)
+        resp = self.client.post(self.url_login, {'login_naam': 'normaal', 'wachtwoord':  E2EHelpers.WACHTWOORD}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         # redirect is naar het plein
@@ -45,11 +47,11 @@ class TestAccountLogin(E2EHelpers, TestCase):
         self.account_normaal = Account.objects.get(username='normaal')
         self.assertEqual(self.account_normaal.verkeerd_wachtwoord_teller, 0)
 
-        self.e2e_assert_other_http_commands_not_supported('/account/login/', post=False)
+        self.e2e_assert_other_http_commands_not_supported(self.url_login, post=False)
 
     def test_inlog_form_post_bad_login_naam(self):
         # test inlog via het inlog formulier, met onbekende login naam
-        resp = self.client.post('/account/login/', {'login_naam': 'onbekend', 'wachtwoord':  E2EHelpers.WACHTWOORD})
+        resp = self.client.post(self.url_login, {'login_naam': 'onbekend', 'wachtwoord':  E2EHelpers.WACHTWOORD})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/login.dtl', 'plein/site_layout.dtl'))
@@ -57,7 +59,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
 
     def test_inlog_form_niet_compleet(self):
         # test inlog via het inlog formulier, met niet complete parameters
-        resp = self.client.post('/account/login/', {'wachtwoord': 'ja'})
+        resp = self.client.post(self.url_login, {'wachtwoord': 'ja'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/login.dtl', 'plein/site_layout.dtl'))
@@ -71,7 +73,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
     def test_inlog_form_post_bad_wachtwoord(self):
         # test inlog via het inlog formulier, met verkeerd wachtwoord
         self.assertEqual(self.account_normaal.verkeerd_wachtwoord_teller, 0)
-        resp = self.client.post('/account/login/', {'login_naam': 'normaal', 'wachtwoord': 'huh'})
+        resp = self.client.post(self.url_login, {'login_naam': 'normaal', 'wachtwoord': 'huh'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/login.dtl', 'plein/site_layout.dtl'))
@@ -82,7 +84,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
     def test_inlog_is_geblokkeerd(self):
         self.account_normaal.is_geblokkeerd_tot = timezone.now() + datetime.timedelta(hours=1)
         self.account_normaal.save()
-        resp = self.client.post('/account/login/', {'login_naam': 'normaal', 'wachtwoord': 'huh'})
+        resp = self.client.post(self.url_login, {'login_naam': 'normaal', 'wachtwoord': 'huh'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/geblokkeerd.dtl', 'plein/site_layout.dtl'))
@@ -90,7 +92,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
     def test_inlog_was_geblokkeerd(self):
         self.account_normaal.is_geblokkeerd_tot = timezone.now() + datetime.timedelta(hours=-1)
         self.account_normaal.save()
-        resp = self.client.post('/account/login/', {'login_naam': 'normaal', 'wachtwoord':  E2EHelpers.WACHTWOORD}, follow=True)
+        resp = self.client.post(self.url_login, {'login_naam': 'normaal', 'wachtwoord':  E2EHelpers.WACHTWOORD}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         # redirect is naar het plein
         self.assert_template_used(resp, ('plein/plein-gebruiker.dtl', 'plein/site_layout.dtl'))
@@ -100,7 +102,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
         # te vaak een verkeerd wachtwoord
         self.account_normaal.verkeerd_wachtwoord_teller = settings.AUTH_BAD_PASSWORD_LIMIT - 1
         self.account_normaal.save()
-        resp = self.client.post('/account/login/', {'login_naam': 'normaal', 'wachtwoord': 'huh'})
+        resp = self.client.post(self.url_login, {'login_naam': 'normaal', 'wachtwoord': 'huh'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/geblokkeerd.dtl', 'plein/site_layout.dtl'))
@@ -111,7 +113,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
 
     def test_inlog_partialfields(self):
         # test inlog via het inlog formulier, met verkeerd wachtwoord
-        resp = self.client.post('/account/login/', {'login_naam': 'normaal', 'wachtwoord': ''})
+        resp = self.client.post(self.url_login, {'login_naam': 'normaal', 'wachtwoord': ''})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/login.dtl', 'plein/site_layout.dtl'))
@@ -119,25 +121,25 @@ class TestAccountLogin(E2EHelpers, TestCase):
 
     def test_inlog_form_post_next_good(self):
         # controleer dat de next parameter gebruikt wordt
-        resp = self.client.post('/account/login/', {'login_naam': 'normaal', 'wachtwoord':  E2EHelpers.WACHTWOORD, 'next': '/account/logout/'}, follow=True)
+        resp = self.client.post(self.url_login, {'login_naam': 'normaal', 'wachtwoord':  E2EHelpers.WACHTWOORD, 'next': '/account/logout/'}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/uitloggen.dtl', 'plein/site_layout.dtl'))
 
     def test_inlog_form_post_next_bad(self):
         # controleer dat een slechte next parameter naar het Plein gaat
-        resp = self.client.post('/account/login/', {'login_naam': 'normaal', 'wachtwoord':  E2EHelpers.WACHTWOORD, 'next': '/bla/bla/'}, follow=True)
+        resp = self.client.post(self.url_login, {'login_naam': 'normaal', 'wachtwoord':  E2EHelpers.WACHTWOORD, 'next': '/bla/bla/'}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('plein/plein-gebruiker.dtl', 'plein/site_layout.dtl'))
 
-        resp = self.client.post('/account/login/', {'login_naam': 'normaal', 'wachtwoord':  E2EHelpers.WACHTWOORD, 'next': 'www.handboogsport.nl'}, follow=True)
+        resp = self.client.post(self.url_login, {'login_naam': 'normaal', 'wachtwoord':  E2EHelpers.WACHTWOORD, 'next': 'www.handboogsport.nl'}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('plein/plein-gebruiker.dtl', 'plein/site_layout.dtl'))
 
     def test_logout(self):
-        resp = self.client.post('/account/login/', {'login_naam': 'normaal', 'wachtwoord': E2EHelpers.WACHTWOORD}, follow=True)
+        resp = self.client.post(self.url_login, {'login_naam': 'normaal', 'wachtwoord': E2EHelpers.WACHTWOORD}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, 'Uitloggen')
 
@@ -162,7 +164,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
 
     def test_login_met_email(self):
         # test inlog via het inlog formulier, met een email adres
-        resp = self.client.post('/account/login/', {'login_naam': 'metmail@test.com', 'wachtwoord': E2EHelpers.WACHTWOORD})
+        resp = self.client.post(self.url_login, {'login_naam': 'metmail@test.com', 'wachtwoord': E2EHelpers.WACHTWOORD})
         self.assert_is_redirect(resp, '/plein/')
 
         # check aanwezigheid van Uitloggen optie in menu als teken van inlog succes
@@ -174,7 +176,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
 
     def test_login_aangemeld_blijven(self):
         # test inlog via het inlog formulier, met het 'aangemeld blijven' vinkje gezet
-        resp = self.client.post('/account/login/', {'login_naam': 'metmail@test.com', 'wachtwoord': E2EHelpers.WACHTWOORD, 'aangemeld_blijven': True})
+        resp = self.client.post(self.url_login, {'login_naam': 'metmail@test.com', 'wachtwoord': E2EHelpers.WACHTWOORD, 'aangemeld_blijven': True})
         self.assert_is_redirect(resp, '/plein/')
 
         # check aanwezigheid van Uitloggen optie in menu als teken van inlog succes
@@ -193,7 +195,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
 
         # probeer in te loggen met email
         # check de foutmelding
-        resp = self.client.post('/account/login/', {'login_naam': 'metmail@test.com', 'wachtwoord': E2EHelpers.WACHTWOORD})
+        resp = self.client.post(self.url_login, {'login_naam': 'metmail@test.com', 'wachtwoord': E2EHelpers.WACHTWOORD})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/login.dtl', 'plein/site_layout.dtl'))
@@ -205,7 +207,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
         self.email_metmail.save()
 
         # test inlog via het inlog formulier, met een email adres
-        resp = self.client.post('/account/login/', {'login_naam': 'metmail@test.com', 'wachtwoord': E2EHelpers.WACHTWOORD}, follow=True)
+        resp = self.client.post(self.url_login, {'login_naam': 'metmail@test.com', 'wachtwoord': E2EHelpers.WACHTWOORD}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         # redirect is naar de nieuwe-email pagina
@@ -218,7 +220,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
         self.email_metmail.save()
 
         # test inlog via het inlog formulier, met een email adres
-        resp = self.client.post('/account/login/', {'login_naam': 'metmail@test.com', 'wachtwoord': E2EHelpers.WACHTWOORD}, follow=True)
+        resp = self.client.post(self.url_login, {'login_naam': 'metmail@test.com', 'wachtwoord': E2EHelpers.WACHTWOORD}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         # redirect is naar het plein, want er is geen nieuw email adres
@@ -226,7 +228,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
 
     def test_login_next(self):
         # test een login met een 'next' parameter die na de login gevolgd wordt
-        resp = self.client.post('/account/login/', {'login_naam': 'metmail@test.com', 'wachtwoord': E2EHelpers.WACHTWOORD, 'next': '/account/logout'}, follow=True)
+        resp = self.client.post(self.url_login, {'login_naam': 'metmail@test.com', 'wachtwoord': E2EHelpers.WACHTWOORD, 'next': '/account/logout'}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         # redirect is naar de 'next' pagina
@@ -236,14 +238,14 @@ class TestAccountLogin(E2EHelpers, TestCase):
         self.e2e_login(self.account_admin)
 
         # test een login met een 'next' parameter die na de login gevolgd wordt
-        resp = self.client.get('/account/login/', {'next': '/account/bestaat-helemaal-zeker-weten-niet'}, follow=False)
+        resp = self.client.get(self.url_login, {'next': '/account/bestaat-helemaal-zeker-weten-niet'}, follow=False)
         self.assert_is_redirect(resp, '/plein/')
 
     def test_login_al_ingelogd(self):
         self.e2e_login(self.account_admin)
 
         # simuleer een redirect naar het login scherm met een 'next' parameter
-        resp = self.client.get('/account/login/', follow=True)
+        resp = self.client.get(self.url_login, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         # redirect is naar het plein
@@ -254,27 +256,12 @@ class TestAccountLogin(E2EHelpers, TestCase):
         self.e2e_login(self.account_admin)
 
         # simuleer een redirect naar het login scherm met een 'next' parameter
-        resp = self.client.get('/account/login/', {'next': '/account/logout/'}, follow=True)
+        resp = self.client.get(self.url_login, {'next': '/account/logout/'}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         # redirect is naar het plein
         self.assert_template_used(resp, ('account/uitloggen.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'Uitloggen')
-
-    def test_nieuwe_email_bad(self):
-        # nieuwe-email pagina ophalen zonder inlog
-        self.e2e_logout()
-        resp = self.client.get('/account/nieuwe-email/')
-        self.assert_is_redirect(resp, '/plein/')
-
-        # nieuwe-email pagina ophalen als er geen email is
-        AccountEmail.objects.get(account=self.account_normaal).delete()
-        self.e2e_login(self.account_normaal)
-
-        resp = self.client.get('/account/nieuwe-email/')
-        self.assert_is_redirect(resp, '/plein/')
-
-        self.e2e_assert_other_http_commands_not_supported('/account/nieuwe-email/')
 
 
 # end of file

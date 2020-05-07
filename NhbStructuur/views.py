@@ -19,7 +19,8 @@ def nhblid_login_plugin(request, from_ip, account):
     """ Deze functie wordt aangeroepen vanuit de Account login view
         (de koppeling wordt gelegd in NhbStructuur.apps.ready)
 
-        Hier controleren we of het NHB wel in mag loggen
+        Hier controleren we of het NHB lid wel in mag loggen
+        ook zetten we het AccountEmail nieuwe_email veld indien nodig
 
         Return: None = mag wel inloggen
     """
@@ -64,7 +65,7 @@ def nhblid_login_plugin(request, from_ip, account):
 
 
 # registreer de plugin
-account_add_plugin_login(nhblid_login_plugin)
+account_add_plugin_login(20, nhblid_login_plugin)
 
 
 # end of file

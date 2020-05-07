@@ -125,7 +125,7 @@ class AccountEmail(models.Model):
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
 
     # e-mail
-    email_is_bevestigd = models.BooleanField(default=False)
+    email_is_bevestigd = models.BooleanField(default=False)     # == mag inloggen
     bevestigde_email = models.EmailField(blank=True)
     nieuwe_email = models.EmailField(blank=True)
 
@@ -212,7 +212,7 @@ def account_create(username, voornaam, achternaam, wachtwoord, email, email_is_b
     return account, mail
 
 
-def account_email_is_bevestigd(mail):
+def account_email_bevestiging_ontvangen(mail):
     """ Deze functie wordt vanuit de tijdelijke url receiver functie (zie view)
         aanroepen met mail = AccountEmail object waar dit op van toepassing is
     """
@@ -231,7 +231,7 @@ def account_check_gewijzigde_email(account):
                  of: None, None
     """
 
-    if account.accountemail_set.count() == 1:
+    if account.accountemail_set.count() > 0:
         email = account.accountemail_set.all()[0]
 
         if email.nieuwe_email:
@@ -240,11 +240,15 @@ def account_check_gewijzigde_email(account):
                 # email kan eerder overgenomen zijn uit de NHB administratie
                 # of handmatig ingevoerd zijn
 
+                # blokkeer inlog totdat dit nieuwe emailadres bevestigd is
+                email.email_is_bevestigd = False
+                email.save()
+
                 # maak de url aan om het emailadres te bevestigen
                 # extra parameters are just to make the url unique
-                mail = email.nieuwe_email
-                url = maak_tijdelijke_url_accountemail(email, username=account.username, email=mail)
-                return url, mail
+                mailadres = email.nieuwe_email
+                url = maak_tijdelijke_url_accountemail(email, username=account.username, email=mailadres)
+                return url, mailadres
 
     # geen gewijzigde email
     return None, None

@@ -15,7 +15,7 @@ from django.db.models import F, Q, Value
 from django.db.models.functions import Concat
 from django.utils import timezone
 from .forms import LoginForm, ZoekAccountForm, KiesAccountForm
-from .models import Account, AccountEmail, account_email_is_bevestigd, account_check_gewijzigde_email
+from .models import Account, AccountEmail, account_email_bevestiging_ontvangen, account_check_gewijzigde_email
 from .rechten import account_rechten_otp_controle_gelukt, account_rechten_login_gelukt
 from Overig.tijdelijke_url import set_tijdelijke_url_receiver, RECEIVER_BEVESTIG_EMAIL, RECEIVER_ACCOUNT_WISSEL,\
                                   maak_tijdelijke_url_accountwissel, maak_tijdelijke_url_accountemail
@@ -35,6 +35,7 @@ TEMPLATE_AANGEMAAKT = 'account/aangemaakt.dtl'
 TEMPLATE_ACTIVITEIT = 'account/activiteit.dtl'
 TEMPLATE_GEBLOKKEERD = 'account/geblokkeerd.dtl'
 TEMPLATE_NIEUWEEMAIL = 'account/nieuwe-email.dtl'
+TEMPLATE_BEVESTIG_EMAIL = 'account/bevestig-email.dtl'
 TEMPLATE_LOGINAS_ZOEK = 'account/login-as-zoek.dtl'
 TEMPLATE_LOGINAS_GO = 'account/login-as-go.dtl'
 
@@ -53,8 +54,75 @@ account_plugins_login = list()
 # de plugin wordt aangeroepen na succesvolle authenticatie van username+password
 # de functie render (uit django.shortcuts) produceert een HttpResponse object
 
-def account_add_plugin_login(func):
-    account_plugins_login.append(func)
+# plugins are sorted on prio, lowest first
+# the following blocks are defined
+# 10-19: Account block 1 checks (is blocked)
+# 20-29: other   block 1 checks (pass on new email from CRM)
+# 30-39: Account block 2 checks (email not accepted check)
+# 40-49: other   block 2 checks (leeftijdsklassen check)
+def account_add_plugin_login(prio, func):
+    account_plugins_login.append( (prio, func) )
+    account_plugins_login.sort(key=lambda x: x[0])
+
+
+def account_check_nieuwe_email(request, from_ip, account):
+    """ detecteer wissel van email in CRM; stuur bevestig verzoek mail """
+
+    # kijk of een nieuw emailadres bevestigd moet worden
+    ack_url, mailadres = account_check_gewijzigde_email(account)
+    if ack_url:
+        # schrijf in het logboek
+        schrijf_in_logboek(account=None,
+                           gebruikte_functie="Inloggen",
+                           activiteit="Bevestiging van nieuwe email gevraagd voor account %s" % repr(
+                               account.username))
+
+        text_body = "Hallo!\n\n" + \
+                    "Dit is een verzoek vanuit de website van de NHB om toegang tot je email te bevestigen.\n" + \
+                    "Klik op onderstaande link om dit te bevestigen.\n\n" + \
+                    ack_url + "\n\n" + \
+                    "Als je dit verzoek onverwacht ontvangen hebt, neem dan contact met ons op via info@handboogsport.nl\n\n" + \
+                    "Veel plezier met de site!\n" + \
+                    "Het bondsburo\n"
+
+        mailer_queue_email(mailadres, 'Email adres bevestigen', text_body)
+
+        context = {'partial_email': mailer_obfuscate_email(mailadres)}
+        menu_dynamics(request, context, actief='inloggen')
+        return render(request, TEMPLATE_NIEUWEEMAIL, context)
+
+    # geen wijziging van emailadres - gewoon doorgaan
+    return None
+
+account_add_plugin_login(30, account_check_nieuwe_email)
+
+
+def account_check_geblokkeerd(request, from_ip, account):
+    """ voorkom login op een account totdat het email adres bevestigd is """
+
+    if account.accountemail_set.count() < 1:
+        # onverwacht geen email bij dit account
+        return None     # inloggen mag gewoon
+
+    email = account.accountemail_set.all()[0]
+
+    if not email.email_is_bevestigd:
+        schrijf_in_logboek(account, 'Inloggen',
+                           'Mislukte inlog vanaf IP %s voor account %s met onbevestigde email' % (
+                               from_ip, repr(account.username)))
+
+        my_logger.info('%s LOGIN Mislukte inlog voor account %s met onbevestigde email' % (
+                               from_ip, repr(account.username)))
+
+        # TODO: knop maken om na X uur een nieuwe mail te kunnen krijgen
+        context = {'partial_email': mailer_obfuscate_email(email.nieuwe_email)}
+        menu_dynamics(request, context, actief='inloggen')
+        return render(request, TEMPLATE_BEVESTIG_EMAIL, context)
+
+    # we wachten niet op bevestiging email - ga gewoon door
+    return None
+
+account_add_plugin_login(10, account_check_geblokkeerd)
 
 
 class LoginView(TemplateView):
@@ -111,29 +179,30 @@ class LoginView(TemplateView):
             if account:
                 # account bestaat wel
 
-                # kijk of het geblokkeerd is
+                # blokkeer inlog als het account geblokkeerd is door te veel wachtwoord pogingen
                 now = timezone.now()
                 if account.is_geblokkeerd_tot:
                     if account.is_geblokkeerd_tot > now:
                         schrijf_in_logboek(account, 'Inloggen',
-                                           'Mislukte inlog vanaf IP %s voor geblokkeerd account %s' % (from_ip, repr(login_naam)))
-                        my_logger.info('%s LOGIN Mislukte inlog voor geblokkeerd account %s' % (from_ip, repr(login_naam)))
+                                           'Mislukte inlog vanaf IP %s voor geblokkeerd account %s' % (
+                                           from_ip, repr(login_naam)))
+                        my_logger.info(
+                            '%s LOGIN Mislukte inlog voor geblokkeerd account %s' % (from_ip, repr(login_naam)))
                         context = {'account': account}
                         menu_dynamics(request, context, actief='inloggen')
                         return render(request, TEMPLATE_GEBLOKKEERD, context)
 
-                # niet geblokkeerd
+                # controleer het wachtwoord
                 if authenticate(username=account.username, password=wachtwoord):
-                    # authenticatie is gelukt
+                    # wachtwoord is goed
 
-                    for func in account_plugins_login:
+                    # kijk of er een reden is om gebruik van het account te weren
+                    for _, func in account_plugins_login:
                         httpresp = func(request, from_ip, account)
                         if httpresp:
                             # plugin has decided that the user may not login
                             # and has generated/rendered an HttpResponse
                             return httpresp
-
-                    # TODO: blokkeer inlog als email nog niet bevestigd is
 
                     # integratie met de authenticatie laag van Django
                     login(request, account)
@@ -151,32 +220,6 @@ class LoginView(TemplateView):
                         request.session.set_expiry(0)
 
                     account_rechten_login_gelukt(request)
-
-                    # kijk of een nieuw emailadres bevestigd moet worden
-                    try:
-                        ack_url, mail = account_check_gewijzigde_email(account)
-                        if ack_url:
-                            # schrijf in het logboek
-                            schrijf_in_logboek(account=None,
-                                               gebruikte_functie="Inloggen",
-                                               activiteit="Bevestiging van nieuwe email gevraagd voor account %s" % repr(account.username))
-
-                            text_body = "Hallo!\n\n" + \
-                                        "Dit is een verzoek vanuit de website van de NHB om toegang tot je email te bevestigen.\n" + \
-                                        "Klik op onderstaande link om dit te bevestigen.\n\n" + \
-                                        ack_url + "\n\n" + \
-                                        "Als je dit verzoek onverwacht ontvangen hebt, neem dan contact met ons op via info@handboogsport.nl\n\n" + \
-                                        "Veel plezier met de site!\n" + \
-                                        "Het bondsburo\n"
-
-                            mailer_queue_email(mail, 'Email adres bevestigen', text_body)
-
-                            return redirect(reverse('Account:nieuwe-email'))
-                        # else:
-                        #   geen wijziging in de email - gewoon doorgaan
-                    except AccountEmail.DoesNotExist:                       # pragma: no cover
-                        # onverwachte fout
-                        pass
 
                     # voer de automatische redirect uit, indien gevraagd
                     if next:
@@ -344,28 +387,6 @@ class AangemaaktView(TemplateView):
         return render(request, TEMPLATE_AANGEMAAKT, context)
 
 
-class EmailGewijzigdView(TemplateView):     # TODO: change to View?
-    """ Deze view vertelt de gebruiker dat zijn nieuwe email bevestigd moet worden.
-    """
-
-    def get(self, request, *args, **kwargs):
-        """ deze functie wordt aangeroepen als een GET request ontvangen is """
-        context = dict()
-
-        if request.user.is_authenticated:
-            try:
-                email = AccountEmail.objects.get(account=request.user)
-            except AccountEmail.DoesNotExist:
-                # onverwachte fout
-                pass
-            else:
-                context['partial_email'] = mailer_obfuscate_email(email.nieuwe_email)
-                menu_dynamics(request, context, actief='inloggen')
-                return render(request, TEMPLATE_NIEUWEEMAIL, context)
-
-        return HttpResponseRedirect(reverse('Plein:plein'))
-
-
 class ActiviteitView(UserPassesTestMixin, TemplateView):
 
     """ Django class-based view voor de activiteiten van de gebruikers """
@@ -505,7 +526,7 @@ def receive_bevestiging_accountemail(request, obj):
             obj is een AccountEmail object.
         We moeten een url teruggeven waar een http-redirect naar gedaan kan worden.
     """
-    account_email_is_bevestigd(obj)
+    account_email_bevestiging_ontvangen(obj)
 
     # schrijf in het logboek
     from_ip = get_safe_from_ip(request)
@@ -538,7 +559,7 @@ def receiver_account_wissel(request, obj):
     from_ip = get_safe_from_ip(request)
     my_logger.info('%s LOGIN automatische inlog als schutter %s' % (from_ip, repr(account.username)))
 
-    for func in account_plugins_login:
+    for _, func in account_plugins_login:
         httpresp = func(request, from_ip, account)
         if httpresp:
             # plugin has decided that the user may not login

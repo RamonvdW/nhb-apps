@@ -30,7 +30,7 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
         self.wissel_url = '/account/account-wissel/'
 
         self._login_plugin_mode = 0
-        account_add_plugin_login(self._login_plugin)
+        account_add_plugin_login(10, self._login_plugin)
 
     def tearDown(self):
         self._login_plugin_mode = 0

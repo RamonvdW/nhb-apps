@@ -88,7 +88,7 @@ def get_sessionvars_leeftijdsklassen(request):
 
 
 # installeer de plugin
-account_add_plugin_login(leeftijdsklassen_plugin_na_login)
+account_add_plugin_login(40, leeftijdsklassen_plugin_na_login)
 
 
 # end of file
