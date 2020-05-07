@@ -48,11 +48,11 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         lid.geslacht = "M"
         lid.voornaam = "Beh"
         lid.achternaam = "eerder"
-        lid.email = "beh2@test.com"
         lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
         lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
         lid.bij_vereniging = ver
         lid.account = self.account_beh2
+        lid.email = lid.account.email
         lid.save()
 
         self.functie_cwz = maak_functie("CWZ test", "CWZ")
@@ -76,11 +76,11 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         lid2.geslacht = "V"
         lid2.voornaam = "Ander"
         lid2.achternaam = "Lid"
-        lid2.email = "anderlid@test.com"
         lid2.geboorte_datum = datetime.date(year=1972, month=3, day=5)
         lid2.sinds_datum = datetime.date(year=2010, month=11, day=11)
         lid2.bij_vereniging = ver2
         lid2.account = self.account_ander
+        lid2.email = lid.account.email
         lid2.save()
 
         self.url_overzicht = '/functie/overzicht/'

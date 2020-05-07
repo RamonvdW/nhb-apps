@@ -42,11 +42,11 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         lid.geslacht = "M"
         lid.voornaam = "Ramon"
         lid.achternaam = "de Tester"
-        lid.email = "rdetester@gmail.not"
         lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
         lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
         lid.bij_vereniging = ver
         lid.account = self.account_normaal
+        lid.email = lid.account.email
         lid.save()
         self.nhblid1 = lid
 
@@ -56,11 +56,11 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         lid.geslacht = "V"
         lid.voornaam = "Twee"
         lid.achternaam = "de Tester"
-        lid.email = ""
         lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
         lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
         lid.bij_vereniging = ver
         lid.account = self.account_twee
+        lid.email = lid.account.email
         lid.save()
 
         # maak een test lid aan
@@ -69,11 +69,11 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         lid.geslacht = "V"
         lid.voornaam = "Geen"
         lid.achternaam = "Lid"
-        lid.email = ""
         lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
         lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
         #lid.bij_vereniging =
         lid.account = self.account_geenlid
+        lid.email = lid.account.email
         lid.save()
 
         self.url_profiel = '/schutter/'

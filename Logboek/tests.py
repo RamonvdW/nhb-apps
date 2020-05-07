@@ -32,10 +32,10 @@ class TestLogboek(E2EHelpers, TestCase):
         lid.geslacht = "M"
         lid.voornaam = "Beh"
         lid.achternaam = "eerder"
-        lid.email = "beh2@test.com"
         lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
         lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
         lid.account = self.account_normaal
+        lid.email = lid.account.email
         lid.save()
 
         LogboekRegel.objects.all().delete()

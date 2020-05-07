@@ -51,4 +51,29 @@ class TestAccountCLI(E2EHelpers, TestCase):
         self.assertTrue("[WARNING] Account 'normaal' is al CWZ van vereniging [1001] Grote Club" in f1.getvalue())
         self.assertTrue(f2.getvalue() == '')
 
+    def test_bad_account(self):
+        # niet bestaand account
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('maak_cwz', 'abnormaal', '1001', stderr=f1, stdout=f2)
+        self.assertTrue("Account matching query does not exist" in f1.getvalue())
+        self.assertTrue(f2.getvalue() == '')
+
+    def test_bad_vereniging(self):
+        # niet bestaande vereniging
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('maak_cwz', 'normaal', '9999', stderr=f1, stdout=f2)
+        self.assertTrue("NhbVereniging matching query does not exist" in f1.getvalue())
+        self.assertTrue(f2.getvalue() == '')
+
+    def test_bad_functie(self):
+        # niet bestaande functie
+        self.functie_cwz.delete()
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('maak_cwz', 'normaal', '1001', stderr=f1, stdout=f2)
+        self.assertTrue("Functie matching query does not exist" in f1.getvalue())
+        self.assertTrue(f2.getvalue() == '')
+
 # end of file
