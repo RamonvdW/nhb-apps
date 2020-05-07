@@ -17,7 +17,7 @@ class TestAccountCLI(TestCase):
     """ unit tests voor de Account command line interface (CLI) applicatie """
 
     def setUp(self):
-        """ initializatie van de test case """
+        """ initialisatie van de test case """
         usermodel = get_user_model()
         usermodel.objects.create_user('normaal', 'normaal@test.com', 'wachtwoord')
         usermodel.objects.create_superuser('admin', 'admin@test.com', 'wachtwoord')
