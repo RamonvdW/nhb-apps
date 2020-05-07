@@ -211,7 +211,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         f1 = io.StringIO()
         f2 = io.StringIO()
         management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_12.json', stderr=f1, stdout=f2)
-        self.assertTrue("[INFO] Vereniging 1999 Wegisweg Club wordt nu verwijderd" in f2.getvalue())
+        self.assertTrue("[INFO] Vereniging [1999] Wegisweg Club wordt nu verwijderd" in f2.getvalue())
 
     def test_inactief(self):
         # inactief maken nadat al geen lid meer van een vereniging
