@@ -158,7 +158,7 @@ class TestSchutterProfiel(E2EHelpers, TestCase):
         resp = self.client.post(self.url_inschrijven % (deelcomp.pk, schutterboog.pk))
         self.assert_is_redirect(resp, self.url_profiel)
         inschrijving = RegioCompetitieSchutterBoog.objects.get(schutterboog=schutterboog)
-        url_uitschrijven_18r = self.url_uitschrijven % inschrijving
+        url_uitschrijven_18r = self.url_uitschrijven % inschrijving.pk
 
         # zet de BB tijdelijk 'aan' en schrijf in voor 25m BB
         deelcomp = DeelCompetitie.objects.get(competitie__afstand='25', nhb_regio=self.nhbver.regio)
@@ -171,7 +171,7 @@ class TestSchutterProfiel(E2EHelpers, TestCase):
         schutterboog_bb.voor_wedstrijd = False
         schutterboog_bb.save()
         inschrijving = RegioCompetitieSchutterBoog.objects.get(schutterboog=schutterboog)
-        url_uitschrijven_25bb = self.url_uitschrijven % inschrijving
+        url_uitschrijven_25bb = self.url_uitschrijven % inschrijving.pk
 
         # haal de profiel pagina op
         resp = self.client.get(self.url_profiel)
