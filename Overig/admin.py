@@ -42,7 +42,7 @@ class IsAfgehandeldListFilter(admin.SimpleListFilter):      # pragma: no cover
         # filter de All optie eruit
         val = self.value()
         for opt in super().choices(cl):
-            # zorg voor highlight op 'Nog niet' als initiele waarde
+            # zorg voor highlight op 'Nog niet' als initiële waarde
             if not val:
                 if opt['display'] == 'Nog niet':
                     opt['selected'] = True
