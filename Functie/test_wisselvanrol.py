@@ -304,6 +304,68 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         resp = self.client.get(self.url_wisselvanrol)
         self.assert_is_redirect(resp, '/plein/')
 
+    def test_dubbele_rol_rko(self):
+        # voorkom dat dit probleem terug komt:
+        # je hebt een rol en je erft deze
+        # voorbeeld: BKO Indoor --> RKO Rayon2 Indoor (welke je ook expliciet hebt)
+        # hierdoor krijg je dubbele rollen: 2x alle RCL in Rayon2
+
+        bko18 = maak_functie("BKO Indoor", "BKO")
+        rko18r2 = maak_functie("RKO Rayon 2 Indoor", "RKO")
+
+        bko18.accounts.add(self.account_normaal)
+        rko18r2.accounts.add(self.account_normaal)
+
+        self.e2e_account_accepteert_vhpg(self.account_normaal)
+        self.e2e_login_and_pass_otp(self.account_normaal)
+
+        self.e2e_wissel_naar_functie(rko18r2)
+
+        # nu krijg je 2x alle RCL in rayon 2
+        resp = self.client.get(self.url_wisselvanrol)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        urls = self._get_wissel_urls(resp)
+
+        urls_no_dupes = list(set(urls))
+        for url in urls_no_dupes:
+            urls.remove(url)
+        # for
+        if len(urls) > 0:
+            msg = "Dubbele mogelijkheden gevonden in WisselVanRol:\n  "
+            msg += "\n  ".join(urls)
+            self.fail(msg)
+
+    def test_dubbele_rol_rcl(self):
+        # voorkom dat dit probleem terug komt:
+        # je hebt een rol en je erft deze
+        # voorbeeld: RKO Rayon3 Indoor --> RCL Regio 111 (welke je ook expliciet hebt)
+        # hierdoor krijg je dubbele rollen: 2x alle CWZ in je regio
+
+        rko18r3 = maak_functie("RKO Rayon 3 Indoor", "RKO")
+        rcl18r111 = maak_functie("RCL Regio 111 Indoor", "RCL")     # omdat 2x NhbVereniging in regio 111
+
+        rko18r3.accounts.add(self.account_normaal)
+        rcl18r111.accounts.add(self.account_normaal)
+
+        self.e2e_account_accepteert_vhpg(self.account_normaal)
+        self.e2e_login_and_pass_otp(self.account_normaal)
+
+        self.e2e_wissel_naar_functie(rcl18r111)
+
+        # nu krijg je 2x alle CWZ in regio 111
+        resp = self.client.get(self.url_wisselvanrol)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        urls = self._get_wissel_urls(resp)
+
+        urls_no_dupes = list(set(urls))
+        for url in urls_no_dupes:
+            urls.remove(url)
+        # for
+        if len(urls) > 0:
+            msg = "Dubbele mogelijkheden gevonden in WisselVanRol:\n  "
+            msg += "\n  ".join(urls)
+            self.fail(msg)
+
 
 # TODO: gebruik assert_other_http_commands_not_supported
 

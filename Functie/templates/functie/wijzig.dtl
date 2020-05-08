@@ -118,6 +118,7 @@ function do_wijzig(actie, id) {
                 </li>
             {% endfor %}
         </ul>
+        <p>Om een beheerder te koppelen: klik op de naam, daarna op de knop 'maak beheerder'.</p>
     {% else %}
         <p class="red-text">Niets gevonden</p>
     {% endif %}

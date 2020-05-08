@@ -118,7 +118,7 @@ def rol_zet_sessionvars(account, request):
         func.rol = obj.rol
         if func.rol == "BKO":
             func.comp_type = obj.comp_type
-        if func.rol == "RKO":
+        elif func.rol == "RKO":
             func.rayon_nr = obj.nhb_rayon.rayon_nr
             func.comp_type = obj.comp_type
         elif func.rol == "RCL":
@@ -175,15 +175,12 @@ def rol_zet_sessionvars(account, request):
                     # print("\nexpanding: child=%s, parent=%s" % (repr(child_tup), (parent_tup)))
                     nwe_functies = rol_bepaal_hulp_rechten(functie_cache, nhbver_cache, *child_tup)
 
-                    # voorkom dupes
-                    # for nwe_tup in nwe_functies:
-                    #     if nwe_tup not in rollen_functies:
-                    #         rollen_functies.append(nwe_tup)
-                    #         next_doorzoeken.append(nwe_tup)
-                    # # for
-                    # op dit moment komen dubbele rollen nog niet voor
-                    rollen_functies.extend(nwe_functies)
-                    next_doorzoeken.extend(nwe_functies)
+                    # voorkom dupes (zoals expliciete koppeling en erven van een rol)
+                    for nwe_tup in nwe_functies:
+                        if nwe_tup not in rollen_functies:
+                            rollen_functies.append(nwe_tup)
+                            next_doorzoeken.append(nwe_tup)
+                    # for
                 # for
                 te_doorzoeken = next_doorzoeken
             # while
