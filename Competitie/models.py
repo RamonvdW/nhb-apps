@@ -11,6 +11,9 @@ from Functie.models import Functie
 from Schutter.models import SchutterBoog
 from decimal import Decimal
 from datetime import date
+import logging
+
+my_logger = logging.getLogger('NHBApps.Competitie')
 
 AG_NUL = Decimal('0.000')
 AG_LAAGSTE_NIET_NUL = Decimal('0.001')
@@ -294,12 +297,13 @@ def regiocompetitie_schutterboog_aanmelden(competitie, schutterboog, aanvangsgem
             # for
 
             if not done:
-                print("regiocompetitie_schutterboog_aanmelden: lukt niet om een competitieklasse te kiezen voor schutterboog")
-                print("     schutterboog=%s (age %s, boogtype %s, gem=%s)" % (repr(schutterboog), age, repr(schutterboog.boogtype), aanvangsgemiddelde))
-                print("     deelcompetitie=%s" % repr(deelcompetitie))
-                print("     alle klassen:")
+                msg = "regiocompetitie_schutterboog_aanmelden: lukt niet om een competitieklasse te kiezen voor schutterboog\n"
+                msg += "   schutterboog=%s (age %s, boogtype %s, gem=%s)\n" % (repr(schutterboog), age, repr(schutterboog.boogtype), aanvangsgemiddelde)
+                msg += "   deelcompetitie=%s\n" % repr(deelcompetitie)
+                msg += "     alle klassen:\n"
                 for obj in qset:
-                    print("        %s" % obj)
+                    msg += "        %s" % obj
+                my_logger.error(msg)
                 aanmelding.save()       # zorgt voor een foutmelding
     # for
 
