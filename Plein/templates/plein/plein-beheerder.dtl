@@ -129,10 +129,6 @@
             </div>
         {% endif %}
 
-        {% if rol_is_cwz %}
-            <p>..en Vereniging</p>
-        {% endif %}
-
     </div>
 </div>
 
