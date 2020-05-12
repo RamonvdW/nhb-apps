@@ -51,7 +51,7 @@
                     <div class="card-title center-align">Beheerders<br>
                         <br><i class="material-icons-round large">face</i>
                     </div>
-                    <p>De functies en de gekoppelde beheerders.</p>
+                    <p>Toon of wijzig de functies, gekoppelde beheerders en contactgegevens.</p>
                 </div>
                 <a href="{% url 'Functie:overzicht' %}" class="nhb-klikbare-balk">
                     <div class="card-action center-align">

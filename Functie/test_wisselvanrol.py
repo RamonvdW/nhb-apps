@@ -330,7 +330,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         for url in urls_no_dupes:
             urls.remove(url)
         # for
-        if len(urls) > 0:
+        if len(urls) > 0:       # pragma: no cover
             msg = "Dubbele mogelijkheden gevonden in WisselVanRol:\n  "
             msg += "\n  ".join(urls)
             self.fail(msg)
@@ -361,7 +361,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         for url in urls_no_dupes:
             urls.remove(url)
         # for
-        if len(urls) > 0:
+        if len(urls) > 0:       # pragma: no cover
             msg = "Dubbele mogelijkheden gevonden in WisselVanRol:\n  "
             msg += "\n  ".join(urls)
             self.fail(msg)

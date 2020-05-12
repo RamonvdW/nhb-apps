@@ -54,6 +54,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         lid.account = self.account_beh2
         lid.email = lid.account.email
         lid.save()
+        self.nhblid1 = lid
 
         self.functie_cwz = maak_functie("CWZ test", "CWZ")
         self.functie_cwz.nhb_ver = ver
@@ -71,17 +72,18 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.functie_cwz2.nhb_ver = ver2
         self.functie_cwz2.save()
 
-        lid2 = NhbLid()
-        lid2.nhb_nr = 100024
-        lid2.geslacht = "V"
-        lid2.voornaam = "Ander"
-        lid2.achternaam = "Lid"
-        lid2.geboorte_datum = datetime.date(year=1972, month=3, day=5)
-        lid2.sinds_datum = datetime.date(year=2010, month=11, day=11)
-        lid2.bij_vereniging = ver2
-        lid2.account = self.account_ander
-        lid2.email = lid.account.email
-        lid2.save()
+        lid = NhbLid()
+        lid.nhb_nr = 100024
+        lid.geslacht = "V"
+        lid.voornaam = "Ander"
+        lid.achternaam = "Lid"
+        lid.geboorte_datum = datetime.date(year=1972, month=3, day=5)
+        lid.sinds_datum = datetime.date(year=2010, month=11, day=11)
+        lid.bij_vereniging = ver2
+        lid.account = self.account_ander
+        lid.email = lid.account.email
+        lid.save()
+        self.nhblid2 = lid
 
         self.url_overzicht = '/functie/overzicht/'
         self.url_wijzig = '/functie/wijzig/'
@@ -205,6 +207,15 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.e2e_wisselnaarrol_bb()
         self.e2e_check_rol('BB')
 
+        self.nhblid1.voornaam = "Test1"
+        self.nhblid1.achternaam = "Beheerder"
+        self.nhblid1.save()
+
+        self.nhblid2.voornaam = "Test2"
+        self.nhblid2.achternaam = "Beheerder"
+        self.nhblid2.account = self.account_beh2
+        self.nhblid2.save()
+
         # probeer een niet-bestaande functie
         resp = self.client.get(self.url_wijzig + '999999/')
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
@@ -218,7 +229,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.assertContains(resp, "Manager competitiezaken")
 
         # probeer de zoek functie
-        resp = self.client.get(url + '?zoekterm=testbeheerder')
+        resp = self.client.get(url + '?zoekterm=beheerder')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/wijzig.dtl', 'plein/site_layout.dtl'))

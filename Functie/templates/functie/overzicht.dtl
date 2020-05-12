@@ -25,42 +25,63 @@
 <div class="row">
     <table class="white" id="table1">
         <thead>
-            <tr>        <!-- filter veld -->
+            <tr>        <!-- filter rij -->
                 <td colspan="2" class="table-filter"><input class="table-filter" oninput="myTableFilter(this, 'table1')" placeholder="Zoeken"/></td>
-                {% if show_wijzig_kolom %}
-                    <td/>
-                {% endif %}
+                <td/>       <!-- email -->
             </tr>
             <tr>
                 <th filter="on">Functie / Rol</th>
                 <th filter="on">Beheerder(s)</th>
-                {% if show_wijzig_kolom %}
-                <th></th>   <!-- kolom voor de 'wijzig' knoppen -->
-                {% endif %}
+                <th>E-mailadres</th>
             </tr>
         </thead>
         {% for obj in object_list %}
             <tr>
-                <td>{{ obj.beschrijving }}</td>
+                <td style="vertical-align: top">{{ obj.beschrijving }}</td>
 
-                <td>
-                {% for beheerder in obj.beheerders %}
-                    {% if not forloop.first %}
-                        <br>
-                    {% endif %}
-                    <span>{{ beheerder }}</span>
-                {% empty %}
-                    <i class="grey-text">Nog niet gekoppeld</i>
-                {% endfor %}
-                </td>
+                <td style="vertical-align: top">
+                    {% for beheerder in obj.beheerders %}
+                        {% if not forloop.first %}
+                            <br>
+                        {% endif %}
+                        <span>{{ beheerder }}</span>
+                    {% empty %}
+                        {% if obj.wijzig_url %}
+                            <i class="red-text">Nog niet gekoppeld</i>
+                        {% else %}
+                            <i class="grey-text">Nog niet gekoppeld</i>
+                        {% endif %}
+                    {% endfor %}
 
-                {% if show_wijzig_kolom %}
-                <td>
                     {% if obj.wijzig_url %}
-                        <a class="btn-nhb-blauw" href="{{ obj.wijzig_url }}">Wijzig</a>
+                        <br><br>
+                        <a class="btn-nhb-blauw" href="{{ obj.wijzig_url }}"><i class="material-icons-round left">group_add</i>Koppel beheerders</a>
                     {% endif %}
                 </td>
-                {% endif %}
+
+                <td style="vertical-align: top">
+                    {% if obj.bevestigde_email %}
+                        <code>{{ obj.bevestigde_email }}</code>
+                    {% else %}
+                        {% if obj.email_url %}
+                            <i class="red-text">Geen</i>
+                        {% else %}
+                            <i class="grey-text">Geen</i>
+                        {% endif %}
+                    {% endif %}
+
+                    <!-- in geval van 2, 3, 4 beheerders: voeg extra breaks toe voor het e-mailadres -->
+                    {% for beheerder in obj.beheerders %}
+                        {% if not forloop.first %}
+                            <br>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if obj.email_url %}
+                        <br><br>
+                        <a class="btn-nhb-blauw" href="{{ obj.email_url }}"><i class="material-icons-round left">alternate_email</i>Wijzig e-mail</a>
+                    {% endif %}
+                </td>
             </tr>
         {% endfor %}
     </table>

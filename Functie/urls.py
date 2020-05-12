@@ -13,12 +13,16 @@ urlpatterns = [
 
     # post-only, alle data gaat via parameters in de body ipv de url
     path('wijzig/<functie_pk>/ontvang/',
-         views.OntvangWijzigingenView.as_view(),
+         views.OntvangBeheerderWijzigingenView.as_view(),
          name='ontvang-wijzigingen'),
 
     path('wijzig/<functie_pk>/',
-         views.WijzigView.as_view(),
-         name='wijzig'),
+         views.WijzigBeheerdersView.as_view(),
+         name='wijzig-beheerders'),
+
+    path('wijzig-email/<functie_pk>/',
+         views.WijzigEmailView.as_view(),
+         name='wijzig-email'),
 
     path('overzicht/vereniging/',
          views.OverzichtVerenigingView.as_view(),

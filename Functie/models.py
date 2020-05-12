@@ -53,6 +53,10 @@ class Functie(models.Model):
     # BKO, RKO, RCL, CWZ, BKWL, RKWL, WL
     rol = models.CharField(max_length=5)
 
+    # email adres wat bij deze functie hoort
+    bevestigde_email = models.EmailField(blank=True)
+    nieuwe_email = models.EmailField(blank=True)
+
     # BKO/RKO/RCL: voor de 18 (Indoor) of 25 (25m 1pijl) competitie?
     # leeg voor CWZ
     comp_type = models.CharField(max_length=2, default="", blank=True)

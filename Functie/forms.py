@@ -67,4 +67,10 @@ class OTPControleForm(forms.Form):
         return valid
 
 
+class WijzigEmailForm(forms.Form):
+    """ Dit formulier wordt gebruikt om het e-mailadres van een rol aan te passen """
+
+    email = forms.EmailField()
+
+
 # end of file

@@ -44,17 +44,16 @@ function do_wijzig(actie, id) {
 {% if huidige_beheerders.count %}
     <h5>Huidige beheerders ({{ huidige_beheerders.count }})</h5>
     <ul class="collapsible">
-        {% for obj in huidige_beheerders %}
+        {% for account in huidige_beheerders %}
             <li>
                 <div class="collapsible-header white">
-                    {% if is_rol_cwz %}
-                        <span>{{ obj.volledige_naam }}</span>
-                    {% else %}
-                        <span>{{ obj.volledige_naam }} (regio {{ obj.nhblid.bij_vereniging.regio.regio_nr }} / rayon {{ obj.nhblid.bij_vereniging.regio.rayon.rayon_nr }})</span>
+                    <span>{{ account.volledige_naam }}</span>
+                    {% if account.geo_beschrijving %}
+                        <span>&nbsp;({{ account.geo_beschrijving }})</span>
                     {% endif %}
                 </div>
                 <div class="collapsible-body white">
-                    <button class="btn-nhb-rood" onclick="do_wijzig('drop', this)" data-pk="{{ obj.pk }}"><i class="material-icons-round left">delete</i>Verwijder beheerder</button>
+                    <button class="btn-nhb-rood" onclick="do_wijzig('drop', this)" data-pk="{{ account.pk }}"><i class="material-icons-round left">delete</i>Verwijder beheerder</button>
                 </div>
             </li>
         {% endfor %}
@@ -94,26 +93,25 @@ function do_wijzig(actie, id) {
 
 
 {% if zoekterm %}
-    {% if object_list.count %}
-        <h5>Gevonden leden ({{ object_list.count }})</h5>
+    {% if object_list|length > 0 %}
+        <h5>Gevonden leden ({{ object_list|length }})</h5>
         <ul class="collapsible">
-            {% for obj in object_list %}
+            {% for account in object_list %}
                 <li>
                     <div class="collapsible-header white">
-                        {% if is_rol_cwz %}
-                            <span>{{ obj.volledige_naam|highlight:zoekterm }}</span>
-                        {% else %}
-                            <span>{{ obj.volledige_naam|highlight:zoekterm }} (regio {{ obj.nhblid.bij_vereniging.regio.regio_nr }} / rayon {{ obj.nhblid.bij_vereniging.regio.rayon.rayon_nr }})</span>
+                        <span>{{ account.volledige_naam|highlight:zoekterm }}</span>
+                        {% if account.geo_beschrijving %}
+                            <span>&nbsp;({{ account.geo_beschrijving }})</span>
                         {% endif %}
                     </div>
                     <div class="collapsible-body white">
                         {% if is_rol_cwz %}
-                        <span>Lid van {{ obj.nhblid.bij_vereniging.naam }}</span>
-                        <p>NHB nummer: {{ obj.username|highlight:zoekterm }}</p>
+                            <span>Lid van {{ vereniging_naam }}</span>
+                            <p>NHB nummer: {{ account.nhb_nr_str|highlight:zoekterm }}</p>
                         {% else %}
-                        <p style="margin-top:0px">NHB nummer: {{ obj.username|highlight:zoekterm }}</p>
+                            <p style="margin-top:0px">NHB nummer: {{ account.nhb_nr_str|highlight:zoekterm }}</p>
                         {% endif %}
-                        <button class="btn-nhb-blauw" onclick="do_wijzig('add', this)" data-pk="{{ obj.pk }}"><i class="material-icons-round left">add</i>Maak beheerder</button>
+                        <button class="btn-nhb-blauw" onclick="do_wijzig('add', this)" data-pk="{{ account.pk }}"><i class="material-icons-round left">add</i>Maak beheerder</button>
                     </div>
                 </li>
             {% endfor %}
