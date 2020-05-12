@@ -34,6 +34,6 @@
 
 <p>Een keer per jaar zullen we je vragen om deze afspraken opnieuw te bevestigen.</p>
 
-<p><a class="btn-nhb-blauw" href="{% url 'Plein:plein' %}">Sluiten</a></p>
+<p><a class="btn-nhb-blauw" href="{% url 'Plein:plein' %}"><i class="material-icons-round left">close</i>Sluiten</a></p>
 
 {% endblock %}
