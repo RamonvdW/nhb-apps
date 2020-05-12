@@ -17,8 +17,8 @@ from django.utils import timezone
 from .forms import LoginForm, ZoekAccountForm, KiesAccountForm
 from .models import Account, AccountEmail, account_email_bevestiging_ontvangen, account_check_gewijzigde_email
 from .rechten import account_rechten_otp_controle_gelukt, account_rechten_login_gelukt
-from Overig.tijdelijke_url import set_tijdelijke_url_receiver, RECEIVER_BEVESTIG_EMAIL, RECEIVER_ACCOUNT_WISSEL,\
-                                  maak_tijdelijke_url_accountwissel, maak_tijdelijke_url_accountemail
+from Overig.tijdelijke_url import set_tijdelijke_url_receiver, RECEIVER_BEVESTIG_ACCOUNT_EMAIL, RECEIVER_ACCOUNT_WISSEL,\
+                                  maak_tijdelijke_url_accountwissel, maak_tijdelijke_url_account_email
 from Plein.menu import menu_dynamics
 from Logboek.models import schrijf_in_logboek
 from Overig.helpers import get_safe_from_ip
@@ -507,7 +507,7 @@ def account_vraag_email_bevestiging(accountmail, **kwargs):
     """
 
     # maak de url aan om het e-mailadres te bevestigen
-    url = maak_tijdelijke_url_accountemail(accountmail, **kwargs)
+    url = maak_tijdelijke_url_account_email(accountmail, **kwargs)
 
     text_body = "Hallo!\n\n" + \
                 "Je hebt een account aangemaakt op de website van de NHB.\n" + \
@@ -521,7 +521,7 @@ def account_vraag_email_bevestiging(accountmail, **kwargs):
 
 
 def receive_bevestiging_accountemail(request, obj):
-    """ deze functie wordt aangeroepen als een tijdelijke url gevolgt wordt
+    """ deze functie wordt aangeroepen als een tijdelijke url gevolgd wordt
         om een email adres te bevestigen, zowel de eerste keer als wijziging van email.
             obj is een AccountEmail object.
         We moeten een url teruggeven waar een http-redirect naar gedaan kan worden.
@@ -540,7 +540,7 @@ def receive_bevestiging_accountemail(request, obj):
     return reverse('Account:bevestigd')
 
 
-set_tijdelijke_url_receiver(RECEIVER_BEVESTIG_EMAIL, receive_bevestiging_accountemail)
+set_tijdelijke_url_receiver(RECEIVER_BEVESTIG_ACCOUNT_EMAIL, receive_bevestiging_accountemail)
 
 
 def receiver_account_wissel(request, obj):

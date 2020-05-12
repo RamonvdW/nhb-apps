@@ -8,7 +8,7 @@ from django.db import models
 from django.conf import settings
 from django.utils import timezone
 from django.contrib.auth.models import AbstractUser
-from Overig.tijdelijke_url import set_tijdelijke_url_receiver, maak_tijdelijke_url_accountemail
+from Overig.tijdelijke_url import set_tijdelijke_url_receiver, maak_tijdelijke_url_account_email
 from Account.rechten import account_rechten_otp_controle_gelukt
 from Mailer.models import mailer_email_is_valide
 import datetime
@@ -247,7 +247,7 @@ def account_check_gewijzigde_email(account):
                 # maak de url aan om het emailadres te bevestigen
                 # extra parameters are just to make the url unique
                 mailadres = email.nieuwe_email
-                url = maak_tijdelijke_url_accountemail(email, username=account.username, email=mailadres)
+                url = maak_tijdelijke_url_account_email(email, username=account.username, email=mailadres)
                 return url, mailadres
 
     # geen gewijzigde email

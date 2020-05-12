@@ -9,7 +9,7 @@ from django.test import TestCase
 from Overig.e2ehelpers import E2EHelpers
 from .models import save_tijdelijke_url
 from .tijdelijke_url import tijdelijkeurl_dispatcher, set_tijdelijke_url_receiver, \
-                            RECEIVER_BEVESTIG_EMAIL, maak_tijdelijke_url_accountemail, \
+                            RECEIVER_BEVESTIG_ACCOUNT_EMAIL, maak_tijdelijke_url_account_email, \
                             RECEIVER_ACCOUNT_WISSEL, maak_tijdelijke_url_accountwissel
 from Account.models import AccountEmail
 
@@ -63,8 +63,8 @@ class TestOverigTijdelijkeUrl(E2EHelpers, TestCase):
         return "/overig/feedback/bedankt/"
 
     def test_accountemail(self):
-        set_tijdelijke_url_receiver(RECEIVER_BEVESTIG_EMAIL, self._my_receiver_func)
-        url = maak_tijdelijke_url_accountemail(self.email_normaal, test="een")
+        set_tijdelijke_url_receiver(RECEIVER_BEVESTIG_ACCOUNT_EMAIL, self._my_receiver_func)
+        url = maak_tijdelijke_url_account_email(self.email_normaal, test="een")
         self.assertTrue("/overig/url/" in url)
         self.callback_count = 0
         resp = self.client.get(url, follow=True)

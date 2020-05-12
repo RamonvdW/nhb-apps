@@ -9,6 +9,7 @@ from django.conf import settings
 from django.utils import timezone
 from datetime import timedelta
 from Account.models import AccountEmail
+from Functie.models import Functie
 from .tijdelijke_url import set_tijdelijke_url_saver
 
 
@@ -101,15 +102,22 @@ class SiteTijdelijkeUrl(models.Model):
     dispatch_to = models.CharField(max_length=20, default="")
 
     # extra velden voor de dispatcher
-    hoortbij_accountemail = models.ForeignKey(AccountEmail,
-                                              on_delete=models.CASCADE,
-                                              blank=True, null=True)        # optional
+    hoortbij_accountemail = models.ForeignKey(
+                                AccountEmail,
+                                on_delete=models.CASCADE,
+                                blank=True, null=True)        # optional
+
+    hoortbij_functie = models.ForeignKey(
+                                Functie,
+                                on_delete=models.CASCADE,
+                                blank=True, null=True)        # optional
+
     # in de toekomst meer mogelijkheden, zoals taken
 
     objects = models.Manager()      # for the editor only
 
 
-def save_tijdelijke_url(url_code, dispatch_to, geldig_dagen=0, geldig_seconden=0, accountemail=None):
+def save_tijdelijke_url(url_code, dispatch_to, geldig_dagen=0, geldig_seconden=0, accountemail=None, functie=None):
     obj = SiteTijdelijkeUrl()
     obj.url_code = url_code
     obj.aangemaakt_op = timezone.now()
@@ -119,6 +127,7 @@ def save_tijdelijke_url(url_code, dispatch_to, geldig_dagen=0, geldig_seconden=0
         obj.geldig_tot = obj.aangemaakt_op + timedelta(days=geldig_dagen)
     obj.dispatch_to = dispatch_to
     obj.hoortbij_accountemail = accountemail
+    obj.hoortbij_functie = functie
     obj.save()
 
 

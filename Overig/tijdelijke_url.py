@@ -10,19 +10,20 @@ from uuid import uuid5, NAMESPACE_URL
 
 uuid_namespace = uuid5(NAMESPACE_URL, 'Overig.Models.SiteUrls')
 
-
-# dit gedoe met de dispatcher is om geen last te hebben van circulaire dependencies
-# Overig.models gebruikt Account.Account en Account.AccountEmail
-# als Account deze file importeert en wij Overig.models dan hebben we een circulaire dependency
-RECEIVER_BEVESTIG_EMAIL = 'bevestig_email'
+# limiet: 20 tekens                12345678901234567890
+RECEIVER_BEVESTIG_ACCOUNT_EMAIL = 'account_email'
+RECEIVER_BEVESTIG_FUNCTIE_EMAIL = 'functie_email'
 RECEIVER_ACCOUNT_WISSEL = 'account_wissel'
 
 
 class TijdelijkeUrlDispatcher(object):
 
+    """ de dispatcher voorkomt circulaire dependencies tussen models """
+
     def __init__(self):
         self._dispatcher = dict()       # [entry] = func
         self._backup = None
+        self._saver = None
 
     def test_backup(self):
         self._backup = dict(self._dispatcher)
@@ -69,16 +70,29 @@ def _maak_url_code(**kwargs):
     return uuid5(uuid_namespace, repr(kwargs)).hex
 
 
-def maak_tijdelijke_url_accountemail(accountemail, **kwargs):
+def maak_tijdelijke_url_account_email(accountemail, **kwargs):
     """ Maak een tijdelijke URL aan die gebruikt kan worden om een
         account e-mail te bevestigen.
         Een SiteTijdelijkeUrl record wordt in de database gezet met de
         url_code en waar deze voor bedoeld is.
         De volledige url wordt terug gegeven.
     """
-    url_code = _maak_url_code(**kwargs)
+    url_code = _maak_url_code(**kwargs, pk=accountemail.pk)
     func = tijdelijkeurl_dispatcher.get_saver()
-    func(url_code, dispatch_to=RECEIVER_BEVESTIG_EMAIL, geldig_dagen=7, accountemail=accountemail)
+    func(url_code, dispatch_to=RECEIVER_BEVESTIG_ACCOUNT_EMAIL, geldig_dagen=7, accountemail=accountemail)
+    return settings.SITE_URL + reverse('Overig:tijdelijke-url', args=[url_code])
+
+
+def maak_tijdelijke_url_functie_email(functie):
+    """ Maak een tijdelijke URL aan die gebruikt kan worden om een
+        functie e-mail te bevestigen.
+        Een SiteTijdelijkeUrl record wordt in de database gezet met de
+        url_code en waar deze voor bedoeld is.
+        De volledige url wordt terug gegeven.
+    """
+    url_code = _maak_url_code(pk=functie.pk, email=functie.nieuwe_email)
+    func = tijdelijkeurl_dispatcher.get_saver()
+    func(url_code, dispatch_to=RECEIVER_BEVESTIG_FUNCTIE_EMAIL, geldig_dagen=7, functie=functie)
     return settings.SITE_URL + reverse('Overig:tijdelijke-url', args=[url_code])
 
 
@@ -86,7 +100,7 @@ def maak_tijdelijke_url_accountwissel(accountemail, **kwargs):
     """ Maak een tijdelijke URL aan die gebruikt kan worden om eenmalig
         in te loggen als het gekozen account.
     """
-    url_code = _maak_url_code(**kwargs)
+    url_code = _maak_url_code(**kwargs, pk=accountemail.pk)
     func = tijdelijkeurl_dispatcher.get_saver()
     func(url_code, dispatch_to=RECEIVER_ACCOUNT_WISSEL, geldig_seconden=60, accountemail=accountemail)
     return settings.SITE_URL + reverse('Overig:tijdelijke-url', args=[url_code])
@@ -99,9 +113,13 @@ def do_dispatch(request, obj):
     """
     redirect = None
 
-    if obj.dispatch_to in (RECEIVER_ACCOUNT_WISSEL, RECEIVER_BEVESTIG_EMAIL):
+    if obj.dispatch_to in (RECEIVER_ACCOUNT_WISSEL, RECEIVER_BEVESTIG_ACCOUNT_EMAIL):
         func = tijdelijkeurl_dispatcher.get_receiver(obj.dispatch_to)
         redirect = func(request, obj.hoortbij_accountemail)
+
+    elif obj.dispatch_to == RECEIVER_BEVESTIG_FUNCTIE_EMAIL:
+        func = tijdelijkeurl_dispatcher.get_receiver(obj.dispatch_to)
+        redirect = func(request, obj.hoortbij_functie)
 
     return redirect
 
