@@ -13,15 +13,15 @@
 <h4>Logboek</h4>
 
 <p>Focus:
-    <a class="btn-nhb-blauw" href="{% url 'Logboek:records' %}">Records</a>
+    <a class="btn-nhb-blauw margin-5" href="{% url 'Logboek:records' %}">Records</a>
     <span>&nbsp;</span>
-    <a class="btn-nhb-blauw" href="{% url 'Logboek:accounts' %}">Accounts</a>
+    <a class="btn-nhb-blauw margin-5" href="{% url 'Logboek:accounts' %}">Accounts</a>
     <span>&nbsp;</span>
-    <a class="btn-nhb-blauw" href="{% url 'Logboek:rollen' %}">Rollen</a>
+    <a class="btn-nhb-blauw margin-5" href="{% url 'Logboek:rollen' %}">Rollen</a>
     <span>&nbsp;</span>
-    <a class="btn-nhb-blauw" href="{% url 'Logboek:nhbstructuur' %}">CRM import</a>
+    <a class="btn-nhb-blauw margin-5" href="{% url 'Logboek:nhbstructuur' %}">CRM import</a>
     <span>&nbsp;</span>
-    <a class="btn-nhb-blauw" href="{% url 'Logboek:competitie' %}">Competitie</a>
+    <a class="btn-nhb-blauw margin-5" href="{% url 'Logboek:competitie' %}">Competitie</a>
 </p>
 
 {% if is_paginated %}
