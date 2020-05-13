@@ -154,13 +154,14 @@ class TestSchutterRegistreer(E2EHelpers, TestCase):
         self.assertEqual(nhblid.account, account)
 
         # volg de link om de email te bevestigen
+        # (dit test een stukje functionaliteit aangeboden door Account)
         objs = SiteTijdelijkeUrl.objects.all().order_by('-aangemaakt_op')       # nieuwste eerst
         self.assertTrue(len(objs) > 0)
         obj = objs[0]
         self.assertEqual(obj.hoortbij_accountemail.nieuwe_email, 'rdetester@gmail.not')
         self.assertFalse(obj.hoortbij_accountemail.email_is_bevestigd)
         url = '/overig/url/' + obj.url_code + '/'
-        resp = self.client.get(url, follow=True)    # temporary url redirects
+        resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/bevestigd.dtl', 'plein/site_layout.dtl'))
