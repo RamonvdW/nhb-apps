@@ -7,14 +7,17 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import Group
+from django.contrib.auth import get_user_model      # avoid circular dependency with Account.models
 from django.conf import settings
+from Account.models import Account
+from BasisTypen.models import GESLACHT
 import datetime
 
 
 # global
 maximum_geboortejaar = datetime.datetime.now().year - settings.MINIMUM_LEEFTIJD_LID
 
-ADMINISTRATIEVE_REGIO = 100      # TOOD: make een boolean field?
+ADMINISTRATIEVE_REGIO = 100      # TODO: make een boolean field?
 
 
 class NhbRayon(models.Model):
@@ -32,6 +35,8 @@ class NhbRayon(models.Model):
         verbose_name = "Nhb rayon"
         verbose_name_plural = "Nhb rayons"
 
+    objects = models.Manager()      # for the editor only
+
 
 class NhbRegio(models.Model):
     """Tabel waarin de Regio definities van de NHB staan"""
@@ -48,47 +53,31 @@ class NhbRegio(models.Model):
         verbose_name = "Nhb regio"
         verbose_name_plural = "Nhb regios"
 
+    objects = models.Manager()      # for the editor only
+
 
 class NhbVereniging(models.Model):
     """Tabel waarin gegevens van de Verenigingen van de NHB staan"""
     nhb_nr = models.PositiveIntegerField(primary_key=True)
     naam = models.CharField(max_length=200)
+    plaats = models.CharField(max_length=100, blank=True)
+    contact_email = models.CharField(max_length=150, blank=True)
     regio = models.ForeignKey(NhbRegio, on_delete=models.PROTECT)
-    secretaris_lid = models.ForeignKey('NhbLid', on_delete=models.PROTECT,
+    secretaris_lid = models.ForeignKey('NhbLid', on_delete=models.SET_NULL,
                                        blank=True,  # allow access input in form
                                        null=True)   # allow NULL relation in database
-
-    # de groep waar je als gebruiker lid van moet zijn om CWZ te zijn van deze vereniging
-    cwz_group = models.ForeignKey(Group, on_delete=models.PROTECT,
-                                  blank=True, null=True)
 
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
         # selectie in de admin interface gaat op deze string, dus nhb_nr eerst
-        return "%s %s" % (self.nhb_nr, self.naam)
-
-    def make_cwz(self, nhb_nr):
-        # kijk of dit lid al in de groep zit
-        if self.cwz_group:
-            if len(self.cwz_group.user_set.filter(nhblid__nhb_nr=nhb_nr)) == 0:
-                # nog niet in de groep --> zoek het user account erbij
-                try:
-                    account = Account.objects.get(nhblid__nhb_nr=nhb_nr)
-                except Account.DoesNotExist:
-                    # CWZ heeft nog geen account
-                    print("[WARNING] CWZ %s heeft nog geen account" % nhb_nr)
-                    pass
-                else:
-                    # voeg dit account toe aan de groep
-                    print("[INFO] CWZ %s gekoppeld aan vereninging %s" % (nhb_nr, self.nhb_nr))
-                    self.cwz_group.user_set.add(account)
-        else:
-            print("[ERROR] NhbVereniging.make_cwz: no cwz_group!")
+        return "[%s] %s" % (self.nhb_nr, self.naam)
 
     class Meta:
         """ meta data voor de admin interface """
         verbose_name = "Nhb vereniging"
         verbose_name_plural = "Nhb verenigingen"
+
+    objects = models.Manager()      # for the editor only
 
 
 def validate_geboorte_datum(datum):
@@ -123,8 +112,6 @@ def validate_sinds_datum(datum):
 class NhbLid(models.Model):
     """Tabel om gegevens van een lid van de NHB bij te houden"""
 
-    GESLACHT = [('M', 'Man'), ('V', 'Vrouw')]
-
     nhb_nr = models.PositiveIntegerField(primary_key=True)
     voornaam = models.CharField(max_length=100)
     achternaam = models.CharField(max_length=100)
@@ -139,6 +126,7 @@ class NhbLid(models.Model):
                                 on_delete=models.PROTECT,
                                 blank=True,  # allow access input in form
                                 null=True)   # allow NULL relation in database
+    account = models.ForeignKey(Account, on_delete=models.SET_NULL, blank=True, null=True)
 
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
@@ -168,6 +156,8 @@ class NhbLid(models.Model):
         """ meta data voor de admin interface """
         verbose_name = 'Nhb lid'
         verbose_name_plural = 'Nhb leden'
+
+    objects = models.Manager()      # for the editor only
 
 
 # end of file

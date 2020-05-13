@@ -5,26 +5,40 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib.auth import get_user_model
+from django.conf import settings
 from django.test import TestCase
-from Plein.tests import assert_html_ok, assert_other_http_commands_not_supported, assert_template_used
-from django.utils import timezone
+from Logboek.apps import post_migration_callback
+from NhbStructuur.models import NhbLid
+from Overig.e2ehelpers import E2EHelpers
 from .models import LogboekRegel, schrijf_in_logboek
-from Account.models import Account, account_vhpg_is_geaccepteerd, account_zet_sessionvars_na_otp_controle
-from Account.rol import rol_zet_sessionvars_na_otp_controle, rol_activeer_rol, rol_activeer_functie, rol_is_bestuurder
+from .views import RESULTS_PER_PAGE
+import datetime
 
 
-class TestLogboek(TestCase):
+class TestLogboek(E2EHelpers, TestCase):
     """ unit tests voor de Logboek applicatie """
 
-    def setUp(self):
-        """ initializatie van de test case """
-        usermodel = get_user_model()
-        usermodel.objects.create_user('normaal', 'normaal@test.com', 'wachtwoord')
-        usermodel.objects.create_superuser('admin', 'admin@test.com', 'wachtwoord')
+    test_after = ('Functie',)
 
-        self.account_normaal = Account.objects.get(username='normaal')
-        self.account_admin = Account.objects.get(username='admin')
-        account_vhpg_is_geaccepteerd(self.account_admin)
+    def setUp(self):
+        """ initialisatie van de test case """
+
+        self.account_admin = self.e2e_create_account_admin()
+        self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
+        self.account_same = self.e2e_create_account('same', 'same@test.com', 'same')
+
+        lid = NhbLid()
+        lid.nhb_nr = 100042
+        lid.geslacht = "M"
+        lid.voornaam = "Beh"
+        lid.achternaam = "eerder"
+        lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
+        lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
+        lid.account = self.account_normaal
+        lid.email = lid.account.email
+        lid.save()
+
+        LogboekRegel.objects.all().delete()
 
         schrijf_in_logboek(self.account_normaal, 'Logboek unittest', 'test setUp')
         schrijf_in_logboek(None, 'Logboek unittest', 'zonder account')
@@ -32,76 +46,154 @@ class TestLogboek(TestCase):
         schrijf_in_logboek(None, 'Rollen', 'Jantje is de baas')
         schrijf_in_logboek(None, 'NhbStructuur', 'weer een nieuw lid')
         schrijf_in_logboek(self.account_normaal, 'OTP controle', 'alweer verkeerd')
+        schrijf_in_logboek(self.account_same, 'Testafdeling', 'Afdeling gesloten')
+        schrijf_in_logboek(self.account_same, 'Competitie', 'Klassegrenzen vastgesteld')
 
         self.logboek_url = '/logboek/'
 
-    def test_logboek_annon_redirect_login(self):
+    def test_anon(self):
         # do een get van het logboek zonder ingelogd te zijn
-        # resulteert in een redirect naar de login pagina
-        self.client.logout()
+        # resulteert in een redirect naar het plein
+        self.e2e_logout()
         resp = self.client.get(self.logboek_url)
-        self.assertRedirects(resp, '/account/login/?next=' + self.logboek_url)
+        self.assertRedirects(resp, '/plein/')
 
-    def test_logboek_str(self):
+    def test_str(self):
         # gebruik de str functie op de Logboek class
         log = LogboekRegel.objects.all()[0]
         msg = str(log)
         self.assertTrue("Logboek unittest" in msg and "normaal" in msg)
 
-    def test_logboek_users_forbidden(self):
+    def test_users_forbidden(self):
         # do een get van het logboek met een gebruiker die daar geen rechten toe heeft
         # resulteert rauwe Forbidden
-        self.client.login(username='normaal', password='wachtwoord')
-        account_zet_sessionvars_na_otp_controle(self.client).save()
-        rol_zet_sessionvars_na_otp_controle(self.account_normaal, self.client).save()
-        #sessionvars = rol_zet_sessionvars_na_login(self.account_normaal, self.client)
-        #sessionvars.save()      # required for unittest only
+        self.e2e_login_and_pass_otp(self.account_normaal)
         resp = self.client.get(self.logboek_url)
-        self.assertEqual(resp.status_code, 403)  # 403 = Forbidden
+        self.assertEqual(resp.status_code, 302)  # 302 = Redirect (naar het plein)
 
-    def test_logboek_user_allowed(self):
-        self.client.login(username='admin', password='wachtwoord')
-        account_zet_sessionvars_na_otp_controle(self.client).save()
-        rol_zet_sessionvars_na_otp_controle(self.account_admin, self.client).save()
+    def test_user_allowed(self):
+        self.e2e_login_and_pass_otp(self.account_admin)
         self.assertTrue(self.account_admin.is_staff)
-        rol_activeer_rol(self.client, 'BB').save()
-        self.assertTrue(rol_is_bestuurder(self.client))
+        self.e2e_wisselnaarrol_bb()
+        self.e2e_check_rol('BB')
 
         # alles
         resp = self.client.get(self.logboek_url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        assert_template_used(self, resp, ('logboek/logboek.dtl', 'plein/site_layout.dtl'))
-        assert_html_ok(self, resp)
+        self.assert_template_used(resp, ('logboek/logboek.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
         self.assertContains(resp, 'test setUp')
         self.assertContains(resp, 'IT beheerder')
-        assert_other_http_commands_not_supported(self, self.logboek_url)
 
         # records import
         resp = self.client.get(self.logboek_url + 'records/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        assert_template_used(self, resp, ('logboek/logboek-records.dtl', 'plein/site_layout.dtl'))
-        assert_html_ok(self, resp)
+        self.assert_template_used(resp, ('logboek/logboek-records.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
         self.assertContains(resp, 'import gelukt')
 
         # accounts
         resp = self.client.get(self.logboek_url + 'accounts/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        assert_template_used(self, resp, ('logboek/logboek-accounts.dtl', 'plein/site_layout.dtl'))
-        assert_html_ok(self, resp)
+        self.assert_template_used(resp, ('logboek/logboek-accounts.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
         self.assertContains(resp, 'alweer verkeerd')
 
         # rollen
         resp = self.client.get(self.logboek_url + 'rollen/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        assert_template_used(self, resp, ('logboek/logboek-rollen.dtl', 'plein/site_layout.dtl'))
-        assert_html_ok(self, resp)
+        self.assert_template_used(resp, ('logboek/logboek-rollen.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
         self.assertContains(resp, 'Jantje is de baas')
 
         # nhbstructuur / crm import
         resp = self.client.get(self.logboek_url + 'crm-import/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        assert_template_used(self, resp, ('logboek/logboek-nhbstructuur.dtl', 'plein/site_layout.dtl'))
-        assert_html_ok(self, resp)
+        self.assert_template_used(resp, ('logboek/logboek-nhbstructuur.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
         self.assertContains(resp, 'weer een nieuw lid')
+
+        # competitie
+        resp = self.client.get(self.logboek_url + 'competitie/')
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_template_used(resp, ('logboek/logboek-competitie.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
+        self.assertContains(resp, 'Klassegrenzen vastgesteld')
+
+    def test_pagination(self):
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.assertTrue(self.account_admin.is_staff)
+        self.e2e_wisselnaarrol_bb()
+        self.e2e_check_rol('BB')
+
+        # pagina 1 is altijd op te vragen
+        # check that pagination niet aan staat (niet nodig, te weinig regels)
+        resp = self.client.get(self.logboek_url + 'crm-import/?page=1')
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_template_used(resp, ('logboek/logboek-nhbstructuur.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
+        self.assertContains(resp, 'weer een nieuw lid')
+        self.assertNotContains(resp, 'chevron_')      # icoon van pagination pijltje
+
+        # test illegale pagina nummers
+        resp = self.client.get(self.logboek_url + 'crm-import/?page=999999')
+        self.assertEqual(resp.status_code, 404)  # 404 = Not found
+        resp = self.client.get(self.logboek_url + 'crm-import/?page=test')
+        self.assertEqual(resp.status_code, 404)  # 404 = Not found
+
+        # voeg wat extra regels toe aan het logboek
+        # zorg voor 10+ pagina's
+        for regel in range(11 * RESULTS_PER_PAGE):
+            schrijf_in_logboek(self.account_same, 'NhbStructuur', 'CRM import nummer %s' % regel)
+        # for
+
+        # haal pagina 1 op en check dat de pagination nu getoond wordt
+        resp = self.client.get(self.logboek_url + 'crm-import/?page=1')
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_template_used(resp, ('logboek/logboek-nhbstructuur.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
+        self.assertContains(resp, 'chevron_')      # icoon van pagination pijltje
+
+        # haal pagina 2 op voor alternatieve coverage ('previous' wordt actief)
+        resp = self.client.get(self.logboek_url + 'crm-import/?page=2')
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+
+        # haal pagina 10 op voor alternatieve coverage (de pagina nummers schuiven)
+        resp = self.client.get(self.logboek_url + 'crm-import/?page=10')
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+
+        # haal de hoogste pagina op voor alternatieve coverage (geen 'next')
+        resp = self.client.get(self.logboek_url + 'crm-import/?page=12')
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+
+    def test_log_versie(self):
+        # trigger de init code die in het logboek schrijft
+        post_migration_callback(None)
+
+        # controleer dat er 1 regel met het versienummer toegevoegd is in het logboek
+        qset = LogboekRegel.objects.filter(gebruikte_functie='Uitrol', activiteit__contains=settings.SITE_VERSIE)
+        self.assertEqual(len(qset), 1)
+
+    def test_other_http(self):
+        # als BB
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_wisselnaarrol_bb()
+        self.e2e_check_rol('BB')
+        self.e2e_assert_other_http_commands_not_supported(self.logboek_url)
+        self.e2e_assert_other_http_commands_not_supported(self.logboek_url + 'crm-import/')
+        self.e2e_assert_other_http_commands_not_supported(self.logboek_url + 'rollen/')
+        self.e2e_assert_other_http_commands_not_supported(self.logboek_url + 'accounts/')
+        self.e2e_assert_other_http_commands_not_supported(self.logboek_url + 'records/')
+
+    def test_same(self):
+        obj = LogboekRegel.objects.filter(actie_door_account=self.account_same)[0]
+        self.assertEqual(obj.bepaal_door(), 'same')
+
+        obj = LogboekRegel.objects.filter(actie_door_account=self.account_normaal)[0]
+        self.assertEqual(obj.bepaal_door(), 'normaal (Normaal)')
+
 
 # end of file

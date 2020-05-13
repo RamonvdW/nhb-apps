@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019 Ramon van der Winkel.
+#  Copyright (c) 2019-2020 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -15,12 +15,12 @@ class FilterForm(forms.Form):
 
     # een simpel tekstveld waarin de gebruiker de zoek/filter tekst in kan voeren
     filter = forms.CharField(
-                    label='Filtreer op:',
+                    label='Zoek naar:',
                     max_length=50,
                     required=False)
 
     # gevraagde pagina nummer
-    pg = forms.IntegerField(
+    pg = forms.IntegerField(        # TODO: is deze nodig?
                     min_value=1, max_value=1000,
                     required=False,
                     widget=forms.HiddenInput())

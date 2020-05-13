@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from django.core import management
-from .models import queue_email, MailQueue
+from .models import MailQueue, mailer_queue_email, mailer_obfuscate_email, mailer_email_is_valide
 from .mailer import send_mail
 import io
 
@@ -32,7 +32,7 @@ class TestMailer(TestCase):
         objs = MailQueue.objects.all()
         self.assertEqual(len(objs), 0)
 
-        queue_email('schutter@nhb.test', 'onderwerp', 'body\ndoei!\n')
+        mailer_queue_email('schutter@nhb.test', 'onderwerp', 'body\ndoei!\n')
 
         # valideer dat de mail nu in de queue staat
         objs = MailQueue.objects.all()
@@ -57,7 +57,7 @@ class TestMailer(TestCase):
         # stop een mail in de queue
         objs = MailQueue.objects.all()
         self.assertEqual(len(objs), 0)
-        queue_email('schutter@nhb.test', 'onderwerp', 'body\ndoei!\n')
+        mailer_queue_email('schutter@nhb.test', 'onderwerp', 'body\ndoei!\n')
 
         # probeer te versturen
         obj = MailQueue.objects.all()[0]
@@ -73,7 +73,7 @@ class TestMailer(TestCase):
         # stop een mail in de queue
         objs = MailQueue.objects.all()
         self.assertEqual(len(objs), 0)
-        queue_email('schutter@nhb.test', 'onderwerp', 'body\ndoei!\n')
+        mailer_queue_email('schutter@nhb.test', 'onderwerp', 'body\ndoei!\n')
 
         # probeer te versturen
         obj = MailQueue.objects.all()[0]
@@ -92,7 +92,7 @@ class TestMailer(TestCase):
         # stop een mail in de queue
         objs = MailQueue.objects.all()
         self.assertEqual(len(objs), 0)
-        queue_email('schutter@nhb.test', 'onderwerp', 'body\ndoei!\n')
+        mailer_queue_email('schutter@nhb.test', 'onderwerp', 'body\ndoei!\n')
 
         # probeer te versturen
         obj = MailQueue.objects.all()[0]
@@ -111,7 +111,7 @@ class TestMailer(TestCase):
         # stop een mail in de queue
         objs = MailQueue.objects.all()
         self.assertEqual(len(objs), 0)
-        queue_email('schutter@nhb.test', 'onderwerp faal', 'body\ndoei!\n')
+        mailer_queue_email('schutter@nhb.test', 'onderwerp faal', 'body\ndoei!\n')
 
         # probeer te versturen
         obj = MailQueue.objects.all()[0]
@@ -130,7 +130,7 @@ class TestMailer(TestCase):
         # stop een mail in de queue
         objs = MailQueue.objects.all()
         self.assertEqual(len(objs), 0)
-        queue_email('schutter@nhb.test', 'onderwerp faal', 'body\ndoei!\n')
+        mailer_queue_email('schutter@nhb.test', 'onderwerp faal', 'body\ndoei!\n')
 
         # probeer te versturen
         obj = MailQueue.objects.all()[0]
@@ -152,7 +152,7 @@ class TestMailer(TestCase):
         # stop een mail in de queue
         objs = MailQueue.objects.all()
         self.assertEqual(len(objs), 0)
-        queue_email('schutter@nhb.test', 'onderwerp', 'body\ndoei!\n')
+        mailer_queue_email('schutter@nhb.test', 'onderwerp', 'body\ndoei!\n')
 
         # controleer dat we ophouden te proberen na 25 pogingen
         obj = MailQueue.objects.all()[0]
@@ -183,7 +183,7 @@ class TestMailer(TestCase):
         # stop een mail in de queue
         objs = MailQueue.objects.all()
         self.assertEqual(len(objs), 0)
-        queue_email('schutter@nhb.test', 'onderwerp_1', 'body\ndoei!\n')
+        mailer_queue_email('schutter@nhb.test', 'onderwerp_1', 'body\ndoei!\n')
 
         f1 = io.StringIO()
         f2 = io.StringIO()
@@ -205,7 +205,7 @@ class TestMailer(TestCase):
         # stop een mail in de queue
         objs = MailQueue.objects.all()
         self.assertEqual(len(objs), 0)
-        queue_email('schutter@nhb.test', 'onderwerp delay', 'body\ndoei!\n')
+        mailer_queue_email('schutter@nhb.test', 'onderwerp delay', 'body\ndoei!\n')
 
         f1 = io.StringIO()
         f2 = io.StringIO()
@@ -223,5 +223,24 @@ class TestMailer(TestCase):
         self.assertTrue(obj.is_verstuurd)
         self.assertTrue('(verstuurd)' in str(obj))
 
+    def test_obfuscate_email(self):
+        self.assertEqual(mailer_obfuscate_email(''), '')
+        self.assertEqual(mailer_obfuscate_email('x'), 'x')
+        self.assertEqual(mailer_obfuscate_email('x@test.nhb'), 'x@test.nhb')
+        self.assertEqual(mailer_obfuscate_email('do@test.nhb'), 'd#@test.nhb')
+        self.assertEqual(mailer_obfuscate_email('tre@test.nhb'), 't#e@test.nhb')
+        self.assertEqual(mailer_obfuscate_email('vier@test.nhb'), 'v##r@test.nhb')
+        self.assertEqual(mailer_obfuscate_email('zeven@test.nhb'), 'ze##n@test.nhb')
+        self.assertEqual(mailer_obfuscate_email('hele.lange@maaktnietuit.nl'), 'he#######e@maaktnietuit.nl')
+
+    def test_email_is_valide(self):
+        self.assertTrue(mailer_email_is_valide('test@nhb.nl'))
+        self.assertTrue(mailer_email_is_valide('jan.de.tester@nhb.nl'))
+        self.assertTrue(mailer_email_is_valide('jan.de.tester@hb.nl'))
+        self.assertTrue(mailer_email_is_valide('r@hb.nl'))
+        self.assertFalse(mailer_email_is_valide('tester@nhb'))
+        self.assertFalse(mailer_email_is_valide('test er@nhb.nl'))
+        self.assertFalse(mailer_email_is_valide('test\ter@nhb.nl'))
+        self.assertFalse(mailer_email_is_valide('test\ner@nhb.nl'))
 
 # end of file

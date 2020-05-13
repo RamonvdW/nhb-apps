@@ -21,16 +21,20 @@ urlpatterns = [
     path('account/',    include('Account.urls')),
     path('beheer/',     admin.site.urls),
     path('competitie/', include('Competitie.urls')),
+    path('functie/',    include('Functie.urls')),
     path('hist/',       include('HistComp.urls')),
     path('overig/',     include('Overig.urls')),
     path('plein/',      include('Plein.urls')),
     path('logboek/',    include('Logboek.urls')),
     path('records/',    include('Records.urls')),
+    path('schutter/',   include('Schutter.urls')),
+    path('vereniging/', include('Vereniging.urls')),
     path('idp/',        include('djangosaml2idp.urls')),        # single sign-on
 ]
 
-if settings.DEBUG:
+if settings.DEBUG:          # pragma: no cover
     import debug_toolbar
     urlpatterns = [path('__debug__', include(debug_toolbar.urls)), ] + urlpatterns
+
 
 # end of file

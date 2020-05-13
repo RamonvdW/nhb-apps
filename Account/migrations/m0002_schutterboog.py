@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019 Ramon van der Winkel.
+#  Copyright (c) 2019-2020 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -12,11 +12,13 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
     """ Migratie class voor dit deel van de applicatie """
 
+    # volgorde afdwingen
     dependencies = [
         ('BasisTypen', 'm0002_basistypen_2018'),
         ('Account', 'm0001_initial'),
     ]
 
+    # migratie functies
     operations = [
         migrations.CreateModel(
             name='SchutterBoog',

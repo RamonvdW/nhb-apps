@@ -10,12 +10,12 @@
 {% block title %}Handboogsport records doorzoeken{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="records zoek formulier" %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="records-zoek-formulier" %}
 
 <h4>Records doorzoeken</h4>
 
 <div class="container z-depth-2 white">
-    <div class="row nav blue white-text">
+    <div class="row nav nhb-blauw white-text">
         <div class="col s12 center">
             <h5>Zoeken</h5>
             <p>in de handboogsport records</p>
@@ -34,7 +34,7 @@
             {{ form.zoekterm.label_tag }} {{ form.zoekterm }}
             <p>&nbsp;</p>
             <div class="center-align">
-                <input class="btn-nhb-blauw" type="submit" value="Zoeken">
+                <button class="btn-nhb-blauw" type="submit"><i class="material-icons-round left">search</i>Zoek</button>
             </div>
         </form>
     </div>
@@ -44,30 +44,31 @@
 
 {% if object_list.count %}
     <div class="row">
-        <div class="col s12 m10 l8 xl6">
+        <div class="col s12 m10 l8 xl7">
             <ul class="collection with-header">
                 <li class="collection-header"><h5>Gevonden records ({{ object_list.count }})</h5></li>
                 {% for obj in object_list %}
-                    <a href="{% url 'Records:specifiek' obj.discipline obj.volg_nr %}" class="nhb-klikbare-balk">
-                        <li class="collection-item">
-                            <i class="material-icons-round secondary-content">visibility</i>
-                            <span>{{ obj.naam|highlight:zoekterm }}</span>
-                            {% if obj.datum.year >= 1950 %}
-                                <span> op {{ obj.datum }}</span>
-                            {% endif %}
-                            {% if obj.plaats %}
-                                <span> in {{ obj.plaats|highlight:zoekterm }}</span>
-                            {% endif %}
-                            <span>, {{ obj.soort_record }}</span>
-                            {% if obj.para_klasse %}
-                                {% if obj.para_klasse == "Ja" %}
-                                <span> - Para</span>
-                                {% else %}
-                                <span> - Para {{ obj.para_klasse }}</span>
+                    <li class="collection-item">
+                        <a href="{% url 'Records:specifiek' obj.discipline obj.volg_nr %}" class="nhb-klikbare-balk">
+                            <div>
+                                <span>{{ obj.naam|highlight:zoekterm }}</span>
+                                {% if obj.datum.year >= 1950 %}
+                                    <span> op {{ obj.datum }}</span>
                                 {% endif %}
-                            {% endif %}
-                        </li>
-                    </a>
+                                {% if obj.plaats %}
+                                    <span> in {{ obj.plaats|highlight:zoekterm }}</span>
+                                {% endif %}
+                                <span>, {{ obj.soort_record }}</span>
+                                {% if obj.para_klasse %}
+                                    {% if obj.para_klasse == "Ja" %}
+                                    <span> - Para</span>
+                                    {% else %}
+                                    <span> - Para {{ obj.para_klasse }}</span>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                        </a>
+                    </li>
                 {% endfor %}
             </ul>
         </div>

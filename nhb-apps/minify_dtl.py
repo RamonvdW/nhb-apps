@@ -37,6 +37,24 @@ class Loader(AppDirectoriesLoader):
                     script = re.sub(r'\n\s+', '\n', script)
                     # remove whitespace at end of the line
                     script = re.sub(r'\s+\n', '\n', script)
+                    # remove whitespace around certain operators
+                    script = re.sub(r' = ', '=', script)
+                    script = re.sub(r' == ', '==', script)
+                    script = re.sub(r' != ', '!=', script)
+                    script = re.sub(r' === ', '===', script)
+                    script = re.sub(r' !== ', '!==', script)
+                    script = re.sub(r' \+ ', '+', script)
+                    script = re.sub(r' - ', '-', script)
+                    script = re.sub(r' < ', '<', script)
+                    script = re.sub(r' && ', '&&', script)
+                    script = re.sub(r', ', ',', script)
+                    script = re.sub(r': ', ':', script)
+                    script = re.sub(r'; ', ';', script)
+                    script = re.sub(r'\) {', '){', script)
+                    script = re.sub(r'{ ', '{', script)
+                    script = re.sub(r' \(', '(', script)
+                    # remove newlines
+                    script = re.sub(r'\n', '', script)
                 # else: pass-through variant: <script src=".." variant
                 clean += contents[:pos+8]   # includes script start tag
                 clean += script
@@ -86,28 +104,32 @@ class Loader(AppDirectoriesLoader):
             # TODO: zoek uit of het minder cpu kost als de reg-exps gecompileerd worden
             # TODO: zoek uit of het minder cpu kost als de reg-exps gecombineerd worden
 
-            # remove whitespace between html tags
-            contents = re.sub(r'>\s+<', '><', contents, flags=re.MULTILINE)
+            # remove /* css block comments */
+            contents = re.sub(r'/\*(.*?)\*/', '', contents, flags=re.MULTILINE)
 
             # remove whitespace between template tags
-            contents = re.sub(r'\%}\s+{%', '%}{%', contents, flags=re.MULTILINE)
+            contents = re.sub(r'%}\s+{%', '%}{%', contents, flags=re.MULTILINE)
 
-            # remove whitespace between template tags en html tags
-            contents = re.sub(r'\%}\s+<', '%}<', contents, flags=re.MULTILINE)
+            # remove whitespace between template tags and html tags
+            contents = re.sub(r'%}\s+<', '%}<', contents, flags=re.MULTILINE)
             contents = re.sub(r'>\s+{%', '>{%', contents, flags=re.MULTILINE)
 
             # remove whitespace between template context variables and html tags
             contents = re.sub(r'>\s+{{', '>{{', contents, flags=re.MULTILINE)
             contents = re.sub(r'}}\s+<', '}}<', contents, flags=re.MULTILINE)
 
-            # remove /* css block comments */
-            contents = re.sub(r'/\*(.*?)\*/', '', contents, flags=re.MULTILINE)
+            # remove whitespace between html tags
+            contents = re.sub(r'>\s+<', '><', contents, flags=re.MULTILINE)
 
             # remove empty lines
             contents = re.sub(r'\n\n', '\n', contents)
 
             # handling inline javascript
             contents = self.minify_scripts(contents)
+
+            # remove terminating newline
+            while len(contents) > 0 and contents[-1] == '\n':
+                contents = contents[:-1]
 
         return contents
 

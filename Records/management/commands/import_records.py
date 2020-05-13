@@ -38,8 +38,10 @@ class Command(BaseCommand):
         reported_nhbnrs = list()
 
         # houd bij welke volg_nrs als in de database zitten
-        # als deze niet meer voorkomen, dan zijn ze verwijderd
-        volg_nrs = [tup[0] for tup in IndivRecord.objects.filter(discipline=blad).values_list('volg_nr')]
+        # als deze niet meer voorkomen, dan moeten we ze verwijderen
+        oude_volg_nrs = [tup[0] for tup in IndivRecord.objects.filter(discipline=blad).values_list('volg_nr')]
+
+        nieuwe_volg_nrs = list()    # voor detecteren dubbel gebruik volgnummers
 
         for row in sheet['values'][1:]:
             self.count_read += 1
@@ -60,6 +62,10 @@ class Command(BaseCommand):
             except ValueError:
                 errors.append("Foute index (geen nummer): %s" % repr(row[0]))
             else:
+                if val in nieuwe_volg_nrs:
+                    errors.append('Volgnummer %s komt meerdere keren voor' % val)
+                nieuwe_volg_nrs.append(val)
+
                 try:
                     curr_record = IndivRecord.objects.get(volg_nr=val, discipline=blad)
                 except IndivRecord.DoesNotExist:
@@ -68,9 +74,9 @@ class Command(BaseCommand):
                 except IndivRecord.MultipleObjectsReturned:     # pragma: no coverage
                     errors.append('Meerdere records voor %s-%s' % (blad, val))
                 else:
-                    # gevonden
-                    if val in volg_nrs:
-                        volg_nrs.remove(val)
+                    # gevonden, dus voorkom verwijderen
+                    if val in oude_volg_nrs:
+                        oude_volg_nrs.remove(val)
 
                 if curr_record:
                     record.volg_nr = curr_record.volg_nr
@@ -158,7 +164,7 @@ class Command(BaseCommand):
                         wijzigingen.append('para_klasse: %s --> %s' % (repr(curr_record.para_klasse), repr(record.para_klasse)))
                         curr_record.para_klasse = record.para_klasse
 
-                # 7 = Afstand
+                # 7 = Verbeterbaar
                 #val = row[7]
                 #if blad == '18':
                 #    if val not in ('18', '25', '25+18'):
@@ -333,7 +339,9 @@ class Command(BaseCommand):
                             wijzigingen.append('score_notitie: %s --> %s' % (repr(curr_record.score_notitie), repr(record.score_notitie)))
                             curr_record.score_notitie = record.score_notitie
 
-                elif blad == '25':
+                else:
+                    # blad '25'
+
                     # 15 = Notities
                     val = row[15][:30]
                     record.score_notitie = val
@@ -365,8 +373,8 @@ class Command(BaseCommand):
                         record.save()
         # for
 
-        # alle overgebleven volg_nrs zijn verwijderd
-        for volg_nr in volg_nrs:
+        # alle overgebleven oude_volg_nrs zijn verwijderd
+        for volg_nr in oude_volg_nrs:
             IndivRecord.objects.get(discipline=blad, volg_nr=volg_nr).delete()
             self.count_verwijderd += 1
             self.stdout.write("[INFO] Record %s-%s verwijderd" % (blad, volg_nr))
@@ -414,21 +422,21 @@ class Command(BaseCommand):
             if 'Data individueel outdoor' in naam:
                 blad = 'OD'
                 COLS = ['Index', 'Geslacht', 'Leeftijd', 'Materiaalklasse', 'Discipline', 'Soort_record', 'Para klasse',
-                        'Afstand (m)', 'Pijlen', 'Bondsnummer', 'Naam', 'Datum', 'Plaats', 'Land', 'Score', 'X-count',
+                        'Verbeterbaar', 'Pijlen', 'Bondsnummer', 'Naam', 'Datum', 'Plaats', 'Land', 'Score', 'X-count',
                         'Ook ER', 'Ook WR', 'Notities']
             elif 'Data individueel indoor' in naam:
                 blad = '18'
                 COLS = ['Index', 'Geslacht', 'Leeftijd', 'Materiaalklasse', 'Discipline', 'Soort_record', 'Para klasse',
-                        'Afstand (m)', 'Pijlen', 'Bondsnummer', 'Naam', 'Datum', 'Plaats', 'Land', 'Score', 'X-count',
+                        'Verbeterbaar', 'Pijlen', 'Bondsnummer', 'Naam', 'Datum', 'Plaats', 'Land', 'Score', 'X-count',
                         'Ook ER', 'Ook WR', 'Notities']
             elif 'Data individueel 25m1pijl' in naam:
                 blad = '25'
                 COLS = ['Index', 'Geslacht', 'Leeftijd', 'Materiaalklasse', 'Discipline', 'Soort_record', 'Para klasse',
-                        'Afstand (m)', 'Pijlen', 'Bondsnummer', 'Naam', 'Datum', 'Plaats', 'Land', 'Score', 'Notities']
+                        'Verbeterbaar', 'Pijlen', 'Bondsnummer', 'Naam', 'Datum', 'Plaats', 'Land', 'Score', 'Notities']
             elif 'Data team' in naam:
                 blad = 'team'
-                COLS = ['Geslacht', 'Leeftijd', 'Materiaalklasse', 'Discipline', 'Soort_record', 'Afstand (m)', 'Pijlen', 'Bondsnummer',
-                        'Naam', 'Datum', 'Plaats', 'Land', 'Score', 'Notities']
+                COLS = ['Geslacht', 'Leeftijd', 'Materiaalklasse', 'Discipline', 'Soort_record',
+                        'Verbeterbaar', 'Pijlen', 'Bondsnummer', 'Naam', 'Datum', 'Plaats', 'Land', 'Score', 'Notities']
             else:
                 self.stderr.write('[ERROR] Niet ondersteunde tabblad naam: %s' % naam)
                 continue    # with the for

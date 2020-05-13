@@ -7,7 +7,7 @@
 from django.contrib.admin.sites import AdminSite
 from django.urls import reverse
 from django.http import HttpResponseRedirect
-from Account.models import user_is_otp_verified
+from Account.rechten import account_rechten_is_otp_verified
 
 # aanpassingen van de ingebouwde Admin site
 # hiermee kunnen we 2FA checks doen
@@ -15,6 +15,7 @@ from Account.models import user_is_otp_verified
 
 # django.contrib.admin.sites levert de urls en views
 # maak een aangepaste versie
+
 
 class BeheerAdminSite(AdminSite):
 
@@ -24,15 +25,31 @@ class BeheerAdminSite(AdminSite):
     #def password_change(self, request, extra_context=None):
     #    return HttpResponseRedirect(reverse('Plein:plein'))
 
-
-    # TODO: deze view verwijst naar de login pagina als wissel-van-rol nodig is --> oneindige inlog lus
-
     def logout(self, request, extra_context=None):
         return HttpResponseRedirect(reverse('Account:logout'))
 
     def login(self, request, extra_context=None):
-        url = reverse('Account:login')
+
         next = request.GET.get('next', '')
+
+        # send the user to the login page only when required
+        # send the 2FA page otherwise
+        if request.user.is_active and request.user.is_staff and request.user.is_authenticated:
+            # well, login is not needed
+            if account_rechten_is_otp_verified(request):
+                # what are we doing here?
+                if next:
+                    return HttpResponseRedirect(next)
+
+                # reason for login unknown (no 'next') so send to main page
+                return HttpResponseRedirect(reverse('Plein:plein'))
+
+            # send to 2FA page
+            url = reverse('Functie:otp-controle')
+        else:
+            # send to login page
+            url = reverse('Account:login')
+
         if next:
             url += '?next=' + next
         return HttpResponseRedirect(url)
@@ -45,6 +62,6 @@ class BeheerAdminSite(AdminSite):
 
     def has_permission(self, request):
         """ geef True terug als de gebruiker bij de admin pagina mag """
-        return request.user.is_active and request.user.is_staff and request.user.is_authenticated and user_is_otp_verified(request)
+        return request.user.is_active and request.user.is_staff and request.user.is_authenticated and account_rechten_is_otp_verified(request)
 
 # end of file

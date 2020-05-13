@@ -1,0 +1,127 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2020 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Account activiteit{% endblock %}
+
+{% block pagina %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="account-activiteit" %}
+
+<h4>Account activiteit</h4>
+
+<p>Focus:</p>
+<p><a class="btn-nhb-blauw" href="#nieuwe">Nieuwe accounts</a></p>
+<p><a class="btn-nhb-blauw" href="#recent">Recente activiteit</a></p>
+<p><a class="btn-nhb-blauw" href="#poging">Mislukte inlog pogingen</a></p>
+
+<h5 id="nieuwe">Nieuwste accounts</h5>
+
+<p>Hieronder volgende nieuwe accounts (maximaal 50)</p>
+
+<table class="white" id="table1">
+    <thead>
+        <tr>        <!-- filter veld -->
+            <td></td>
+            <td colspan="2" class="table-filter"><input class="table-filter" oninput="myTableFilter(this, 'table1')" placeholder="Zoeken"/></td>
+            <td colspan="4"></td>
+        </tr>
+        <tr>
+            <th>Aangemaakt</th>
+            <th filter="on">Inlog</th>
+            <th filter="on">Naam</th>
+            <th>Email is bevestigd</th>
+            <th>Laatste inlog</th>
+            <th>Laatste poging</th>
+            <th>Tweede factor</th>
+        </tr>
+    </thead>
+
+    <tbody>
+    {% for obj in nieuwe_accounts %}
+        <tr>
+            <td>{{ obj.account.date_joined|date:"j b H:i" }}</td>
+            <td>{{ obj.account.username }}</td>
+            <td>{{ obj.account.volledige_naam }}</td>
+            <td>{% if obj.email_is_bevestigd %}Ja{% else %}Nee{% endif %}</td>
+            <td>{{ obj.account.last_login|date:"j b H:i" }}</td>
+            <td>{{ obj.account.laatste_inlog_poging|date:"j b H:i" }}</td>
+            <td>{% if obj.account.otp_is_actief %}Ja{% else %}Nee{% endif %}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<h5 id="recent">Recente activiteit</h5>
+
+<p>Hieronder staan accounts waar recent op ingelogd is (maximaal 50)</p>
+
+<table class="white" id="table2">
+    <thead>
+        <tr>        <!-- filter veld -->
+            <td></td>
+            <td colspan="2" class="table-filter"><input class="table-filter" oninput="myTableFilter(this, 'table2')" placeholder="Zoeken"/></td>
+            <td colspan="3"></td>
+        </tr>
+        <tr>
+            <th>Laatste login</th>
+            <th filter="on">Inlog</th>
+            <th filter="on">Naam</th>
+            <th>Email is bevestigd</th>
+            <th>Tweede factor</th>
+            <th>Aangemaakt</th>
+        </tr>
+    </thead>
+
+    {% for obj in recente_activiteit %}
+        <tr>
+            <td>{{ obj.account.last_login|date:"j b H:i" }}</td>
+            <td>{{ obj.account.username }}</td>
+            <td>{{ obj.account.volledige_naam }}</td>
+            <td>{% if obj.email_is_bevestigd %}Ja{% else %}Nee{% endif %}</td>
+            <td>{% if obj.account.otp_is_actief %}Ja{% else %}Nee{% endif %}</td>
+            <td>{{ obj.account.date_joined|date:"j b H:i" }}</td>
+        </tr>
+    {% endfor %}
+</table>
+
+<h5 id="poging">Mislukte inlog pogingen</h5>
+
+<p>Hieronder staan accounts waar recent geprobeerd is op in te loggen (maximaal 50). Dit zijn accounts waar de ooit op ingelogd is en daarna een mislukte inlogpoging.</p>
+
+<table class="white" id="table3">
+    <thead>
+        <tr>        <!-- filter veld -->
+            <td colspan="2"></td>
+            <td colspan="2" class="table-filter"><input class="table-filter" oninput="myTableFilter(this, 'table3')" placeholder="Zoeken"/></td>
+            <td colspan="3"></td>
+        </tr>
+        <tr>
+            <th>Laatste poging</th>
+            <th>Laatste inlog</th>
+            <th filter="on">Inlog</th>
+            <th filter="on">Naam</th>
+            <th>Email is bevestigd</th>
+            <th>Tweede factor</th>
+            <th>Aangemaakt</th>
+        </tr>
+    </thead>
+
+    {% for obj in inlog_pogingen %}
+        <tr>
+            <td>{{ obj.account.laatste_inlog_poging|date:"j b H:i" }}</td>
+            <td>{{ obj.account.last_login|date:"j b H:i" }}</td>
+            <td>{{ obj.account.username }}</td>
+            <td>{{ obj.account.volledige_naam }}</td>
+            <td>{% if obj.email_is_bevestigd %}Ja{% else %}Nee{% endif %}</td>
+            <td>{% if obj.account.otp_is_actief %}Ja{% else %}Nee{% endif %}</td>
+            <td>{{ obj.account.date_joined|date:"j b H:i" }}</td>
+        </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}
+

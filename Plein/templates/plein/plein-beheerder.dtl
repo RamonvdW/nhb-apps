@@ -1,0 +1,135 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2020 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Welkom Beheerder!{% endblock %}
+
+{% block pagina %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="plein-beheerder" %}
+
+<h4>Hallo, beheerder!</h4>
+
+<p>Op deze pagina verzamelen we informatie die voor jou interessant is.</p>
+
+<p>Je huidige rol is: <b>{{ huidige_rol }}</b>.</p>
+
+<p>Kijk eens in het menu onder Competities en Wissel van rol.</p>
+
+{% if rol_is_cwz %}
+    <p>..en Vereniging</p>
+{% endif %}
+
+
+<div class="row">
+    <div class="col s12 cards-container">
+
+        <!-- nieuwe accounts -->
+        {% if toon_nieuwe_accounts %}
+            <div class="card">
+                <div class="card-content">
+                    <div class="card-title center-align">Account activiteit<br>
+                        <br><i class="material-icons-round large">recent_actors</i>
+                    </div>
+                    <p>Toon overzicht van de recent gebruikte en aangemaakte accounts.</p>
+                </div>
+                <a href="{% url 'Account:activiteit' %}" class="nhb-klikbare-balk">
+                    <div class="card-action center-align">
+                        <span class="nhb-klikbare-link">Overzicht tonen</span>
+                    </div>
+                </a>
+            </div>
+        {% endif %}
+
+        <!-- toon en koppel beheerders -->
+        {% if toon_functies %}
+            <div class="card">
+                <div class="card-content">
+                    <div class="card-title center-align">Beheerders<br>
+                        <br><i class="material-icons-round large">face</i>
+                    </div>
+                    <p>Toon of wijzig de functies, gekoppelde beheerders en contactgegevens.</p>
+                </div>
+                <a href="{% url 'Functie:overzicht' %}" class="nhb-klikbare-balk">
+                    <div class="card-action center-align">
+                        <span class="nhb-klikbare-link">Toon beheerders</span>
+                    </div>
+                </a>
+            </div>
+        {% endif %}
+
+        <!-- overzicht VHPG acceptatie -->
+        {% if rol_is_bb %}
+            <div class="card">
+                <div class="card-content">
+                    <div class="card-title center-align">VHPG status<br>
+                        <br><i class="material-icons-round large">verified_user</i>
+                    </div>
+                    <p>Toon overzicht van beheerders die de Verklaring Hanteren Persoonsgegevens (VHPG) geaccepteerd hebben.</p>
+                </div>
+                <a href="{% url 'Functie:vhpg-overzicht' %}" class="nhb-klikbare-balk">
+                    <div class="card-action center-align">
+                        <span class="nhb-klikbare-link">Overzicht tonen</span>
+                    </div>
+                </a>
+            </div>
+        {% endif %}
+
+        <!-- verenigingen overzicht IT/BB/BKO -->
+        {% if rol_is_bko or rol_is_bb or rol_is_it %}
+            <div class="card">
+                <div class="card-content">
+                    <div class="card-title center-align">Verenigingen<br>
+                        <br><i class="material-icons-round large">view_list</i>
+                    </div>
+                    <p>Toon overzicht van de verenigingen (landelijk).</p>
+                </div>
+                <a href="{% url 'Competitie:lijst-verenigingen' %}" class="nhb-klikbare-balk">
+                    <div class="card-action center-align">
+                        <span class="nhb-klikbare-link">Overzicht tonen</span>
+                    </div>
+                </a>
+            </div>
+        {% endif %}
+
+        <!-- verenigingen overzicht RKO -->
+        {% if rol_is_rko %}
+            <div class="card">
+                <div class="card-content">
+                    <div class="card-title center-align">Verenigingen<br>
+                        <br><i class="material-icons-round large">view_list</i>
+                    </div>
+                    <p>Toon overzicht van de verenigingen (in jouw rayon).</p>
+                </div>
+                <a href="{% url 'Competitie:lijst-verenigingen' %}" class="nhb-klikbare-balk">
+                    <div class="card-action center-align">
+                        <span class="nhb-klikbare-link">Overzicht tonen</span>
+                    </div>
+                </a>
+            </div>
+        {% endif %}
+
+        <!-- verenigingen overzicht RCL -->
+        {% if rol_is_rcl %}
+            <div class="card">
+                <div class="card-content">
+                    <div class="card-title center-align">Verenigingen<br>
+                        <br><i class="material-icons-round large">view_list</i>
+                    </div>
+                    <p>Toon overzicht van de verenigingen (in jouw regio).</p>
+                </div>
+                <a href="{% url 'Competitie:lijst-verenigingen' %}" class="nhb-klikbare-balk">
+                    <div class="card-action center-align">
+                        <span class="nhb-klikbare-link">Overzicht tonen</span>
+                    </div>
+                </a>
+            </div>
+        {% endif %}
+
+    </div>
+</div>
+
+{% endblock %}

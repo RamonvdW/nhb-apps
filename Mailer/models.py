@@ -6,7 +6,6 @@
 
 from django.db import models
 from django.utils import timezone
-from Mailer.mailer import send_mail
 
 
 class MailQueue(models.Model):
@@ -35,8 +34,10 @@ class MailQueue(models.Model):
         """ meta data voor de admin interface """
         verbose_name = verbose_name_plural = "Mail queue"
 
+    objects = models.Manager()      # for the editor only
 
-def queue_email(to_address, onderwerp, text_body):
+
+def mailer_queue_email(to_address, onderwerp, text_body):
     """ Deze functie accepteert het verzoek om een mail te versturen en slaat deze op in de database
         Het feitelijk versturen van de email wordt door een achtergrondprocess gedaan
     """
@@ -57,5 +58,49 @@ def queue_email(to_address, onderwerp, text_body):
     obj.mail_text = text_body
     obj.laaatste_poging = "-"
     obj.save()
+
+
+def mailer_obfuscate_email(email):
+    """ Helper functie om een email adres te maskeren
+        voorbeeld: nhb.ramonvdw@gmail.com --> nh####w@gmail.com
+    """
+    try:
+        user, domein = email.rsplit("@", 1)
+    except ValueError:
+        return email
+    voor = 2
+    achter = 1
+    if len(user) <= 4:
+        voor = 1
+        achter = 1
+        if len(user) <= 2:
+            achter = 0
+    hekjes = (len(user) - voor - achter)*'#'
+    new_email = user[0:voor] + hekjes
+    if achter > 0:
+        new_email += user[-achter:]
+    new_email = new_email + '@' + domein
+    return new_email
+
+
+def mailer_email_is_valide(adres):
+    """ Basic check of dit een valide e-mail adres is:
+        - niet leeg
+        - bevat @
+        - bevat geen spatie
+        - domein bevat een .
+        Uiteindelijk weet je pas of het een valide adres is als je er een e-mail naartoe kon sturen
+        We proberen lege velden en velden met opmerkingen als "geen" of "niet bekend" te ontdekken.
+    """
+    # full rules: https://stackoverflow.com/questions/2049502/what-characters-are-allowed-in-an-email-address
+    if adres and len(adres) >= 4 and '@' in adres and ' ' not in adres:
+        for char in ('\t', '\n', '\r'):
+            if char in adres:
+                return False
+        user, domein = adres.rsplit('@', 1)
+        if '.' in domein:
+            return True
+    return False
+
 
 # end of file

@@ -1,0 +1,134 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2020 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Vereniging{% endblock %}
+
+{% block pagina %}
+
+<h4>Vereniging</h4>
+
+<!--<p>&nbsp;</p>-->
+
+<div class="row">
+
+    <!-- toon gegevens van de vereniging in een blauwe box -->
+    <div class="col s12 m10 l8 xl6 offset-m1 offset-l2 offset-xl3">
+        <div class="white-text nhb-blauw z-depth-2">
+            <!-- <div class="row">
+                <div class="col s1">1</div>
+                <div class="col s1">2</div>
+                <div class="col s1">3</div>
+                <div class="col s1">4</div>
+                <div class="col s1">5</div>
+                <div class="col s1">6</div>
+                <div class="col s1">7</div>
+                <div class="col s1">8</div>
+                <div class="col s1">9</div>
+                <div class="col s1">10</div>
+                <div class="col s1">11</div>
+                <div class="col s1">12</div>
+            </div> -->
+            <div class="row small-row">
+                <div class="col s4">NHB nummer:</div>
+                <div class="col s6">{{ nhb_ver.nhb_nr }}</div>
+            </div>
+            <div class="row small-row">
+                <div class="col s4">Naam:</div>
+                <div class="col s6">{{ nhb_ver.naam }}</div>
+            </div>
+            <div class="row small-row">
+                <div class="col s4">Plaats:</div>
+                <div class="col s6">{{ nhb_ver.plaats }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--&nbsp;-->
+<h5>Beheerder</h5>
+
+<p>Als beheerder van de vereniging heb je toegang tot onderstaande functies.</p>
+
+<div class="row">
+
+    <!-- ledenlijst -->
+    <div class="col s12 m6 xl4">
+        <div class="card">
+            <div class="card-content">
+                <table class="simple"><tr style="border:0px">
+                    <td><i class="material-icons-round large">list</i></td>
+                    <td>Toon de ledenlijst van jouw vereniging.</td>
+                </tr></table>
+            </div>
+            <a href="{% url 'Vereniging:ledenlijst' %}" class="nhb-klikbare-balk">
+                <div class="card-action center-align">
+                    <span class="nhb-klikbare-link">Ledenlijst</span>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- instellingen leden -->
+    <div class="col s12 m6 xl4">
+        <div class="card">
+            <div class="card-content">
+                <table class="simple"><tr style="border:0px">
+                    <td><i class="material-icons-round large">tune</i></td>
+                    <td>Voorkeuren van de leden inzien en aanpassen.</td>
+                </tr></table>
+            </div>
+            <a href="{% url 'Vereniging:leden-voorkeuren' %}" class="nhb-klikbare-balk">
+                <div class="card-action center-align">
+                    <span class="nhb-klikbare-link">Voorkeuren</span>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- leden aanmelden voor de competitie -->
+    {% for comp in competities %}
+        <div class="col s12 m6 xl4">
+            <div class="card">
+                <div class="card-content">
+                    <table class="simple"><tr style="border:0px">
+                        <td><img src="{{ comp.icon }}" height="90" alt="logo"></td>
+                        <td>Leden aanmelden voor de {{ comp.beschrijving }}.</td>
+                    </tr></table>
+                </div>
+                <a href="{% url 'Vereniging:leden-aanmelden' comp_pk=comp.pk %}" class="nhb-klikbare-balk">
+                    <div class="card-action center-align">
+                        <span class="nhb-klikbare-link">Aanmelden</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+    {% endfor %}
+
+    <!-- beheerders vereniging -->
+    <div class="col s12 m6 xl4">
+        <div class="card">
+            <div class="card-content">
+                <table class="simple"><tr style="border:0px">
+                    <td><i class="material-icons-round large">supervisor_account</i></td>
+                    <td>Koppel leden van de vereniging aan functies.</td>
+                </tr></table>
+            </div>
+            <a href="{% url 'Functie:overzicht-vereniging' %}" class="nhb-klikbare-balk">
+                <div class="card-action center-align">
+                    <span class="nhb-klikbare-link">Beheerders</span>
+                </div>
+            </a>
+        </div>
+    </div>
+
+</div>
+
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vereniging-overzicht" %}
+
+{% endblock %}
+

@@ -5,25 +5,17 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
-from django.urls import reverse
 from django.shortcuts import redirect, render
-from django.views.generic import TemplateView, ListView, View
-from django.contrib.auth.mixins import UserPassesTestMixin
-from django.contrib.auth.models import Group
-from Plein.menu import menu_dynamics
-from Account.leeftijdsklassen import get_leeftijdsklassen
-from Account.rol import Rollen, rol_get_huidige_functie, rol_get_huidige, rol_get_beschrijving
+from django.views.generic import TemplateView, View
+from Functie.rol import Rollen, rol_get_huidige, rol_get_beschrijving
+from .menu import menu_dynamics
 
 
 TEMPLATE_PLEIN_BEZOEKER = 'plein/plein-bezoeker.dtl'            # niet ingelogd
 TEMPLATE_PLEIN_GEBRUIKER = 'plein/plein-gebruiker.dtl'          # special (ROL_NONE)
 TEMPLATE_PLEIN_SCHUTTER = 'plein/plein-schutter.dtl'            # schutter (ROL_SCHUTTER)
-TEMPLATE_PLEIN_BESTUURDER = 'plein/plein-bestuurder.dtl'        # bestuurder (ROL_BB/BKO/RKO/RCL/CWZ)
-
-TEMPLATE_LEEFTIJDSKLASSEN = 'plein/leeftijdsklassen.dtl'
+TEMPLATE_PLEIN_BEHEERDER = 'plein/plein-beheerder.dtl'          # beheerder (ROL_BB/BKO/RKO/RCL/CWZ)
 TEMPLATE_PRIVACY = 'plein/privacy.dtl'
-
-JA_NEE = {False: 'Nee', True: 'Ja'}
 
 
 def site_root_view(request):
@@ -44,45 +36,47 @@ class PleinView(View):
         context = dict()
 
         if request.user.is_authenticated:
-            rol_nu, functie_nu = rol_get_huidige_functie(request)
+            account = self.request.user
+            rol_nu = rol_get_huidige(request)
 
-            if rol_nu == Rollen.ROL_NONE or rol_nu == None:
+            context['menu_show_plein'] = True
+
+            if rol_nu == Rollen.ROL_NONE or rol_nu is None:
                 template = TEMPLATE_PLEIN_GEBRUIKER
 
             elif rol_nu == Rollen.ROL_SCHUTTER:
                 template = TEMPLATE_PLEIN_SCHUTTER
-                huidige_jaar, leeftijd, is_jong, wlst, clst = get_leeftijdsklassen(request)
-                if True: #is_jong:
-                    context['plein_toon_leeftijdsklassen'] = True
-                    context['plein_is_jonge_schutter'] = is_jong
-                    context['plein_huidige_jaar'] = huidige_jaar
-                    context['plein_leeftijd'] = leeftijd
-                    context['plein_wlst'] = wlst
-                    context['plein_clst'] = clst
-                else:
-                    # ouder lid
-                    context['plein_toon_leeftijdsklassen'] = False
 
-            else:   # rol_nu < Rollen.ROL_SCHUTTER:
-                # bestuurder
-                template = TEMPLATE_PLEIN_BESTUURDER
+            else:
+                # rol_nu < Rollen.ROL_SCHUTTER:
+                # beheerder
+                template = TEMPLATE_PLEIN_BEHEERDER
 
-                if rol_nu == Rollen.ROL_BB:
-                    context['rol_is_bb'] = True;
+                if rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB):
+                    context['toon_nieuwe_accounts'] = True
+
+                if rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL):
+                    context['toon_functies'] = True
+
+                if rol_nu == Rollen.ROL_IT:
+                    context['rol_is_it'] = True
+                elif rol_nu == Rollen.ROL_BB:
+                    context['rol_is_bb'] = True
                 elif rol_nu == Rollen.ROL_BKO:
-                    context['rol_is_bko'] = True;
+                    context['rol_is_bko'] = True
                 elif rol_nu == Rollen.ROL_RKO:
-                    context['rol_is_rko'] = True;
+                    context['rol_is_rko'] = True
                 elif rol_nu == Rollen.ROL_RCL:
-                    context['rol_is_rcl'] = True;
+                    context['rol_is_rcl'] = True
+                elif rol_nu == Rollen.ROL_CWZ:
+                    context['rol_is_cwz'] = True
+                else:                               # pragma: no cover
+                    # vangnet voor nieuwe rollen
+                    raise ValueError("PleinView: onbekende rol %s" % rol_nu)
 
-                if functie_nu:
-                    context['huidige_rol'] = Group.objects.get(pk=functie_nu).name
-                else:
-                    context['huidige_rol'] = rol_get_beschrijving(request)
+                context['huidige_rol'] = rol_get_beschrijving(request)
 
-
-        menu_dynamics(self.request, context)
+        menu_dynamics(self.request, context, actief='hetplein')
         return render(request, template, context)
 
 
@@ -100,30 +94,5 @@ class PrivacyView(TemplateView):
         menu_dynamics(self.request, context, actief='privacy')
         return context
 
-
-class LeeftijdsklassenView(UserPassesTestMixin, TemplateView):
-    """ Django class-based view voor de leeftijdsklassen """
-
-    # class variables shared by all instances
-    template_name = TEMPLATE_LEEFTIJDSKLASSEN
-
-    def test_func(self):
-        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        rol = rol_get_huidige(self.request)
-        return rol == Rollen.ROL_SCHUTTER
-
-    def get_context_data(self, **kwargs):
-        """ called by the template system to get the context data for the template """
-        context = super().get_context_data(**kwargs)
-
-        huidige_jaar, leeftijd, is_jong, wlst, clst = get_leeftijdsklassen(self.request)
-        context['plein_is_jonge_schutter'] = is_jong
-        context['plein_huidige_jaar'] = huidige_jaar
-        context['plein_leeftijd'] = leeftijd
-        context['plein_wlst'] = wlst
-        context['plein_clst'] = clst
-
-        menu_dynamics(self.request, context)
-        return context
 
 # end of file

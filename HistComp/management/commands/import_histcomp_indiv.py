@@ -19,6 +19,17 @@ class Command(BaseCommand):
     help = "Importeer competitie historie"
     verbose = False
 
+    def __init__(self, stdout=None, stderr=None, no_color=False, force_color=False):
+        super().__init__(stdout, stderr, no_color, force_color)
+        self._count_not6scores = 0
+        self._count_noname = 0
+        self._count_skip = 0
+        self._count_error = 0
+        self._count_added  =0
+        self._count_dupe = 0
+        self._count_dupebow = 0
+        self._boogtype2histcomp = dict()     # [boogtype] = HistCompetitie
+
     def add_arguments(self, parser):
         parser.add_argument('filename', nargs=1, type=argparse.FileType("r"),
                             help="in te lezen file")
@@ -50,7 +61,8 @@ class Command(BaseCommand):
 
         return histcompetitie
 
-    def _convert_scores(self, scores):
+    @staticmethod
+    def _convert_scores(scores):
         count = 0
         totaal = 0
         getallen = list()
@@ -61,7 +73,7 @@ class Command(BaseCommand):
                 count += 1
                 totaal += getal
             # for
-        return scores, count, totaal
+        return getallen, count, totaal
 
     def _import(self, lines, seizoen, comptype):
         # sanity-check voor de hele file
@@ -94,7 +106,6 @@ class Command(BaseCommand):
         for line in lines:
             line_nr += 1
             spl = line.strip().split(";")
-            #self.stdout.write(repr(spl))
             # spl = [nhb_nr, klasse, score1..7, gemiddelde]
 
             nhb_nr = spl[0]
@@ -108,11 +119,8 @@ class Command(BaseCommand):
                 # nieuwe klasse
                 histcomps[klasse] = histcompetitie = self.make_or_find_histcompetitie(seizoen, comptype, klasse)
                 rank[klasse] = 1
-            else:
-                rank[klasse] += 1
 
-            # fataseer een redelijk boogtype voor elke klasse
-            # dit helpt in het bepalen van het aanvangsgemiddelde voor een competitieklasse
+            # fantaseer een redelijk boogtype voor elke klasse
             if "Recurve" in klasse:
                 boogtype = "R"
             elif "Compound" in klasse:
@@ -129,20 +137,25 @@ class Command(BaseCommand):
                 self._count_skip += 1
                 continue
 
+            self._boogtype2histcomp[boogtype] = histcompetitie
+
             # overslaan als er niet ten minste 6 scores zijn
             scores, count, totaal = self._convert_scores(spl[3:3+7])
             if count < 6:
                 # silently skip
+                self._count_not6scores += 1
                 continue
 
-            # lid erbij zoeken voor de schutter naam en vereniging
+            # naam van het lid erbij zoeken (spelling in CRM is leidend)
             try:
                 lid = NhbLid.objects.get(nhb_nr=nhb_nr)
             except NhbLid.DoesNotExist:
-                self.stdout.write("[WARNING] Lid %s wordt overgeslagen kan naam niet opzoeken (geen lid meer)" % nhb_nr)
-                self._count_skip += 1
-                continue
+                # kan naam nu niet vonden - toch importeren en later aanvullen
+                print("[WARNING] Kan naam niet vinden bij nhb nummer %s" % repr(nhb_nr))
+                lid = None
+                self._count_noname += 1
 
+            # naam van de vereniging opzoeken en opslaan
             try:
                 ver = NhbVereniging.objects.get(nhb_nr=ver_nr)
                 ver_naam = ver.naam
@@ -156,6 +169,8 @@ class Command(BaseCommand):
                     ver_naam = 'Diana'
                 elif ver_nr == '1170':
                     ver_naam = 'Batavieren Treffers'
+                elif ver_nr == '1191':
+                    ver_naam = 'Eendracht St Sebast'
                 else:
                     ver_naam = '?'
                     self.stdout.write('[WARNING] Kan geen naam opzoeken voor verwijderde vereniging %s' % ver_nr)
@@ -166,7 +181,8 @@ class Command(BaseCommand):
             hist.histcompetitie = histcompetitie
             hist.rank = rank[klasse]
             hist.schutter_nr = nhb_nr
-            hist.schutter_naam = " ".join([lid.voornaam, lid.achternaam])
+            if lid:
+                hist.schutter_naam = " ".join([lid.voornaam, lid.achternaam])
             hist.boogtype = boogtype
             hist.vereniging_nr = ver_nr
             hist.vereniging_naam = ver_naam
@@ -179,6 +195,23 @@ class Command(BaseCommand):
             hist.score7 = scores[6]
             hist.gemiddelde = gemiddelde
             hist.totaal = totaal
+
+            scores.sort()
+            lowest = scores[0]
+            if hist.score7 == lowest:
+                hist.laagste_score_nr = 7
+            elif hist.score6 == lowest:
+                hist.laagste_score_nr = 6
+            elif hist.score5 == lowest:
+                hist.laagste_score_nr = 5
+            elif hist.score4 == lowest:
+                hist.laagste_score_nr = 4
+            elif hist.score3 == lowest:
+                hist.laagste_score_nr = 3
+            elif hist.score2 == lowest:
+                hist.laagste_score_nr = 2
+            else:
+                hist.laagste_score_nr = 1
 
             # check if the record already exists
             dupe = HistCompetitieIndividueel.objects.filter(
@@ -193,18 +226,65 @@ class Command(BaseCommand):
                 if len(bulk) >= 100:
                     HistCompetitieIndividueel.objects.bulk_create(bulk)
                     bulk = list()
+
+            rank[klasse] += 1
         # for
 
         if len(bulk):
             HistCompetitieIndividueel.objects.bulk_create(bulk)
 
+    def _delete_dupes(self):
+        """ Sommige BB/IB/LB schutters staan in de geimporteerde data OOK genoemd
+                in de recurve klasse, met exact dezelfde scores.
+            Dit was nodig in het oude programma voor het team schieten waarbij een
+                Recurve team ook BB/IB/LB schutters mag bevatten.
+            Andere schutters schieten zowel de R als C klasse of the BB en R klasse
+                en hebben dan niet dezelfde scores.
+
+            Zoek de NHB nummers van R schutters die ook in de BB/IB/LB voorkomen
+            Als de scores ook overeen komen, verwijder dan het records in de R klasse.
+        """
+        self.stdout.write("[INFO] Removing duplicates from Recurve results (dupe with BB/IB/LB)")
+
+        histcomp_r = self._boogtype2histcomp['R']
+
+        # doorloop de kleinste klassen
+        for boogtype in ('BB', 'IB', 'LB'):
+            for houtobj in HistCompetitieIndividueel.objects.filter(boogtype=boogtype,
+                                                                    histcompetitie=self._boogtype2histcomp[boogtype]):
+                # zoek dit nummer op in de Recurve klasse
+                try:
+                    robj = HistCompetitieIndividueel.objects.get(boogtype='R',
+                                                                 histcompetitie=histcomp_r,
+                                                                 schutter_nr=houtobj.schutter_nr)
+                except HistCompetitieIndividueel.DoesNotExist:
+                    pass
+                else:
+                    if houtobj.totaal == robj.totaal:
+                        # controleer dat alle scores overeen komen
+                        if (houtobj.score1 == robj.score1 and houtobj.score2 == robj.score2 and
+                            houtobj.score3 == robj.score3 and houtobj.score4 == robj.score4 and
+                            houtobj.score5 == robj.score5 and houtobj.score6 == robj.score6 and
+                            houtobj.score7 == robj.score7
+                           ):
+                            # gevonden
+                            # verwijder het recurve object
+                            # hierdoor valt helaas een gat in de ranking
+                            self._count_dupebow += 1
+                            robj.delete()
+                            #print("nhb_nr:%s, hout:%s, totaal_1:%s, totaal_2:%s" % (houtobj.schutter_nr, houtobj.boogtype, houtobj.totaal, robj.totaal))
+                        # if
+            # for
+        # for
+
     def handle(self, *args, **options):
         # self.stderr.write("import individuele competitie historie. args=%s, options=%s" % (repr(args), repr(options)))
         self.verbose = options['verbose']
 
+        comptype = options['comptype'][0]
         seizoen = options['seizoen'][0]
-        if len(seizoen) != 9 or seizoen[4] != "-":
-            self.stderr.write("[ERROR] Seizoen moet een range zijn, bijvoorbeeld 2010-2011 (was %s)" % repr(jaar))
+        if len(seizoen) != 9 or seizoen[4] != "/":
+            self.stderr.write("[ERROR] Seizoen moet het formaat 'jaar/jaar+1' hebben, bijvoorbeeld '2010/2011' (was %s)" % repr(seizoen))
             return
 
         try:
@@ -213,15 +293,17 @@ class Command(BaseCommand):
             self.stderr.write("File has format issues (%s)" % str(exc))
             return
 
-        self._count_dupe = 0
-        self._count_added  =0
-        self._count_error = 0
-        self._count_skip = 0
         linecount = len(lines)
 
-        self._import(lines, options['seizoen'][0], options['comptype'][0])
+        self._import(lines, seizoen, comptype)
+        self._delete_dupes()
 
-        self.stdout.write("Read %s lines; skipped %s dupes; %s skipped; %s skip with errors; added %s records" % (linecount, self._count_dupe, self._count_skip, self._count_error, self._count_added))
+        self.stdout.write("Read %s lines; skipped %s dupes; %s skipped; %s too few scores;"\
+                          " %s skip with errors; %s skip dupe bow score; added %s records;"
+                          " %s without name" % (linecount, self._count_dupe, self._count_skip,
+                                                self._count_not6scores, self._count_error,
+                                                self._count_dupebow, self._count_added - self._count_dupebow,
+                                                self._count_noname))
 
 # end of file
 

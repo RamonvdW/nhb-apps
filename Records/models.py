@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019 Ramon van der Winkel.
+#  Copyright (c) 2019-2020 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -60,7 +60,22 @@ class IndivRecord(models.Model):
                 self.materiaalklasse,
                 self.para_klasse,
                 self.naam,
-                self.score)
+                self.score_str())
+
+    def score_str(self):
+        """  make score beschrijving, inclusief X-count indien relevant """
+        msg = str(self.score)
+        if self.x_count:
+            msg += " (%sX)" % self.x_count
+        return msg
+
+    def max_score_str(self):
+        msg = "%s" % self.max_score
+        if self.x_count:
+            # add maximum X-count to maximum score
+            max_x_count = int(self.max_score / 10)
+            msg += " (%sX)" % max_x_count
+        return msg
 
     class Meta:
         """ meta data voor de admin interface """
@@ -117,5 +132,8 @@ class IndivRecord(models.Model):
                    'gesl': url2gesl,
                    'makl': url2makl,
                    'lcat': url2lcat}
+
+    objects = models.Manager()      # for the editor only
+
 
 # end of file

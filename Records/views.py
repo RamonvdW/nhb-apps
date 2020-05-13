@@ -6,7 +6,7 @@
 
 from django.conf import settings
 from django.urls import Resolver404, reverse
-from django.views.generic import TemplateView, ListView
+from django.views.generic import ListView
 from django.db.models import Q
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.staticfiles.templatetags.staticfiles import static
@@ -29,22 +29,6 @@ DISCIPLINE_TO_ICON = {
 }
 
 
-def make_score_str(obj):
-    """  make score beschrijving, inclusief X-count indien relevant """
-    msg = str(obj.score)
-    if obj.x_count:
-        msg += " (%sX)" % obj.x_count
-    return msg
-
-def make_max_score_str(obj):
-    msg = "%s" % obj.max_score
-    if obj.x_count:
-        # add maximum X-count to maximum score
-        max_x_count = int(obj.max_score / 10)
-        msg += " (%sX)" % max_x_count
-    return msg
-
-
 class RecordsOverzichtView(ListView):
     """ Dit is de top-level pagina van de records met een overzicht van de meest
         recente records
@@ -58,27 +42,26 @@ class RecordsOverzichtView(ListView):
         obj.url = reverse('Records:specifiek', kwargs={'nummer': obj.volg_nr, 'discipline': obj.discipline})
         obj.icon = DISCIPLINE_TO_ICON[obj.discipline]
 
-        obj.descr1_str = (IndivRecord.disc2str[obj.discipline] +             # indoor/outdoor
+        # heren/dames
+        obj.descr1_str = IndivRecord.gesl2str[obj.geslacht] + " "
+
+        # junioren, etc.
+        obj.descr1_str += IndivRecord.lcat2str[obj.leeftijdscategorie]
+
+        # type wedstrijd
+        obj.descr2_str = (IndivRecord.disc2str[obj.discipline] +             # indoor/outdoor
                           " " + IndivRecord.makl2str[obj.materiaalklasse] +  # longbow/recurve
                           " " + obj.soort_record)                            # 70m (72p)
 
         # recurve etc.
         if obj.para_klasse:
-            obj.descr1_str += " para " + obj.para_klasse
-
-        # heren/dames
-        obj.descr2_str = IndivRecord.gesl2str[obj.geslacht] + " "
-
-        # junioren, etc.
-        obj.descr2_str += IndivRecord.lcat2str[obj.leeftijdscategorie]
-
-        obj.score_str = make_score_str(obj)
-        obj.max_score_str = make_max_score_str(obj)
+            obj.descr2_str += " para " + obj.para_klasse
 
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
-        # 10 nieuwste records (alle disciplines), op datum
-        objs = IndivRecord.objects.all().order_by('-datum')[:10]
+        # 10 nieuwste records (alle disciplines)
+        # op datum (nieuwste boven) en volg_nr (hoogste boven)
+        objs = IndivRecord.objects.all().order_by('-datum', '-volg_nr')[:10]
         for obj in objs:
             self.set_url_specifiek(obj)
         # for
@@ -177,7 +160,7 @@ class RecordsIndivZoomBaseView(ListView):
         sel2url = IndivRecord.sel2url4arg[arg]
         for sel, sel_str in sel2str.items():
             self.params[arg] = sel2url[sel]
-            sub_params = { k: self.params[k] for k in keys}
+            sub_params = {k: self.params[k] for k in keys}
             obj = SelObject()
             obj.sel_url = reverse(url_name, kwargs=sub_params)
             obj.sel_str = sel_str
@@ -207,9 +190,9 @@ class RecordsIndivZoom1234View(RecordsIndivZoomBaseView):
             self.make_items(objs, 'disc', 'Records:indiv-gd', ('gesl', 'disc'))
         elif not self.sel_lcat:
             self.make_items(objs, 'lcat', 'Records:indiv-gdl', ('gesl', 'disc', 'lcat'))
-        elif not self.sel_makl:
+        else:   # (not self.sel_makl)
             self.make_items(objs, 'makl', 'Records:indiv-gdlm', ('gesl', 'disc', 'lcat', 'makl'))
-        # else:  alle 4 de selectiecriteria aanwezig kan niet (urlconf pakt dan RecordsIndivZoom5View)
+        # alle 4 de selectiecriteria aanwezig kan niet (urlconf pakt dan RecordsIndivZoom5View)
         return objs
 
     def get_context_data(self, **kwargs):
@@ -237,25 +220,23 @@ class RecordsIndivZoom5View(RecordsIndivZoomBaseView):
         self.set_urls()
 
         # vind de verschillende afstanden waarop records bestaan
-        soorten = IndivRecord.objects.filter(
-                            geslacht=self.sel_gesl,
-                            discipline=self.sel_disc,
-                            leeftijdscategorie=self.sel_lcat,
-                            materiaalklasse=self.sel_makl).\
-                                    distinct('soort_record').\
-                                    order_by('-soort_record').\
-                                    values_list('soort_record', flat=True)
+        soorten = IndivRecord.objects.filter(geslacht=self.sel_gesl,
+                                             discipline=self.sel_disc,
+                                             leeftijdscategorie=self.sel_lcat,
+                                             materiaalklasse=self.sel_makl).\
+                                      distinct('soort_record').\
+                                      order_by('-soort_record').\
+                                      values_list('soort_record', flat=True)
 
-        # voor elk van de afstandard (soort records) zoek het meest recente (dus beste) record op
+        # voor elk van de afstanden (soort records) zoek het meest recente (dus beste) record op
         objs = list()
         for soort in soorten:
-            best = IndivRecord.objects.filter(
-                            geslacht=self.sel_gesl,
-                            discipline=self.sel_disc,
-                            leeftijdscategorie=self.sel_lcat,
-                            materiaalklasse=self.sel_makl,
-                            soort_record=soort).\
-                                    order_by('-datum')[0:0+1]
+            best = IndivRecord.objects.filter(geslacht=self.sel_gesl,
+                                              discipline=self.sel_disc,
+                                              leeftijdscategorie=self.sel_lcat,
+                                              materiaalklasse=self.sel_makl,
+                                              soort_record=soort).\
+                                       order_by('-datum')[0:0+1]
             objs.extend(best)
         # for
 
@@ -292,8 +273,6 @@ class RecordsIndivSpecifiekView(ListView):
     @staticmethod
     def set_url_specifiek(obj):
         obj.url = reverse('Records:specifiek', kwargs={'nummer': obj.volg_nr, 'discipline': obj.discipline})
-        obj.score_str = make_score_str(obj)
-        obj.max_score_str = make_max_score_str(obj)
 
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
@@ -313,9 +292,6 @@ class RecordsIndivSpecifiekView(ListView):
         spec.disc_str = IndivRecord.disc2str[spec.discipline]
         spec.lcat_str = IndivRecord.lcat2str[spec.leeftijdscategorie]
         spec.makl_str = IndivRecord.makl2str[spec.materiaalklasse]
-
-        spec.score_str = make_score_str(spec)
-        spec.max_score_str = make_max_score_str(spec)
 
         spec.op_pagina = "specifiek record: %s-%s" % (discipline, volg_nr)
 
@@ -370,41 +346,36 @@ class RecordsZoekView(ListView):
         # retourneer een QuerySet voor de template
         # onthoud zaken in de object instantie
 
-        # haal de GET parameters uit de request
+        # haal de zoekterm op
         self.form = ZoekForm(self.request.GET)
+        self.form.full_clean()  # vult cleaned_data
+        self.get_zoekterm = self.form.cleaned_data['zoekterm']
 
-        self.have_searched = False
+        if self.get_zoekterm:
+            zoekterm = self.get_zoekterm
 
-        if self.form.is_valid():
-            self.get_zoekterm = self.form.cleaned_data['zoekterm']
+            try:
+                filter_nr = int(zoekterm)
+            except ValueError:
+                filter_nr = 0
 
-            if self.get_zoekterm:
-                zoekterm = self.get_zoekterm
-                self.have_searched = True
-
+            if filter_nr and len(str(filter_nr)) == 6:
+                # zoek het NHB lid met dit nummer
                 try:
-                    filter_nr = int(zoekterm)
-                    filter_is_nr = True
-                except ValueError:
-                    filter_is_nr = False
-
-                if filter_is_nr and len(str(filter_nr)) == 6:
-                    # zoek het NHB lid met dit nummber
-                    try:
-                        lid = NhbLid.objects.get(nhb_nr=filter_nr)
-                    except NhbLid.DoesNotExist:
-                        # geen lid met dit nummer
-                        # of slecht getal
-                        pass
-                    else:
-                        # zoek alle records van dit lid
-                        return IndivRecord.objects.filter(nhb_lid=lid)
+                    lid = NhbLid.objects.get(nhb_nr=filter_nr)
+                except NhbLid.DoesNotExist:
+                    # geen lid met dit nummer
+                    # of slecht getal
+                    pass
                 else:
-                    return IndivRecord.objects.filter(
-                                    Q(soort_record__icontains=zoekterm) |
-                                    Q(naam__icontains=zoekterm) |
-                                    Q(plaats__icontains=zoekterm) |
-                                    Q(land__icontains=zoekterm)).order_by('-datum', 'soort_record')[:settings.RECORDS_MAX_ZOEKRESULTATEN]
+                    # zoek alle records van dit lid
+                    return IndivRecord.objects.filter(nhb_lid=lid)
+            else:
+                return IndivRecord.objects.filter(
+                                Q(soort_record__icontains=zoekterm) |
+                                Q(naam__icontains=zoekterm) |
+                                Q(plaats__icontains=zoekterm) |
+                                Q(land__icontains=zoekterm)).order_by('-datum', 'soort_record')[:settings.RECORDS_MAX_ZOEKRESULTATEN]
 
         return None
 
@@ -412,8 +383,9 @@ class RecordsZoekView(ListView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
         context['form'] = self.form
-        context['have_searched'] = self.have_searched
+        context['have_searched'] = self.get_zoekterm != ""
         context['zoekterm'] = self.get_zoekterm
+        context['records_zoek_url'] = reverse('Records:zoek')
         menu_dynamics(self.request, context, actief='records')
         return context
 

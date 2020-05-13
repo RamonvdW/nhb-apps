@@ -1,0 +1,22 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2019-2020 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Tweede factor gelukt{% endblock %}
+
+{% block pagina %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="otp-koppelen-gelukt" %}
+
+<h4>Gelukt!</h4>
+
+<p>De registratie van de twee-factor authenticatie was succesvol.</p>
+
+<p>Naast de inlog met gebruikersnaam en wachtwoord vraagt deze website vanaf nu bij een rol wissel ook om de tweede-factor code.</p>
+
+<p><a class="btn-nhb-blauw" href="{% url 'Functie:wissel-van-rol' %}">Wissel van rol</a></p>
+
+{% endblock %}

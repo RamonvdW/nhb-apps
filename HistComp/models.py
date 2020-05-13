@@ -17,8 +17,11 @@ class HistCompetitie(models.Model):
     COMP_TYPE = [('18', '18m Indoor'),      # note: 18, 25 must be in sync with Competitie.AFSTAND
                  ('25', '25m1pijl')]
 
+    comptype2str = {'18': '18m Indoor',
+                    '25': '25m 1pijl'}
+
     # primary key = los uniek nummer
-    seizoen = models.CharField(max_length=9)          # 20xx-20yy
+    seizoen = models.CharField(max_length=9)          # 20xx/20yy
     comp_type = models.CharField(max_length=2, choices=COMP_TYPE)  # 18/25
     klasse = models.CharField(max_length=20)          # Recurve / Compound
     is_team = models.BooleanField(default=False)
@@ -27,14 +30,17 @@ class HistCompetitie(models.Model):
 
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
-        return "%s (%s) %s (team=%s)" % (self.seizoen,
-                                         self.comp_type,
-                                         self.klasse,
-                                         self.is_team)
+        return "%s: %s (%s) %s (team=%s)" % (self.pk,
+                                             self.seizoen,
+                                             self.comp_type,
+                                             self.klasse,
+                                             self.is_team)
 
     class Meta:
         """ meta data voor de admin interface """
         verbose_name = verbose_name_plural = "Historie competitie"
+
+    objects = models.Manager()      # for the editor only
 
 
 class HistCompetitieIndividueel(models.Model):
@@ -57,16 +63,20 @@ class HistCompetitieIndividueel(models.Model):
     score5 = models.PositiveIntegerField()
     score6 = models.PositiveIntegerField()
     score7 = models.PositiveIntegerField()
+    laagste_score_nr = models.PositiveIntegerField(default=0)  # 1..7
     totaal = models.PositiveIntegerField()
     gemiddelde = models.DecimalField(max_digits=5, decimal_places=3)    # 10.000
 
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
-        return "%s, %s" % (self.rank, self.schutter_nr)
+        return "rank %s: %s %s" % (self.rank, self.schutter_naam, self.gemiddelde)
 
     class Meta:
         """ meta data voor de admin interface """
+        # TODO: Historie --> Historische
         verbose_name = verbose_name_plural = "Historie individuele competitie"
+
+    objects = models.Manager()      # for the editor only
 
 
 class HistCompetitieTeam(models.Model):
@@ -98,7 +108,10 @@ class HistCompetitieTeam(models.Model):
 
     class Meta:
         """ meta data voor de admin interface """
+        # TODO: Historie --> Historische
         verbose_name = verbose_name_plural = "Historie team competitie"
+
+    objects = models.Manager()      # for the editor only
 
 
 # end of file

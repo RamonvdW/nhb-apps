@@ -24,41 +24,46 @@ PROJ_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
-# this is used to keep site feedback separated to version
-SITE_VERSIE = 'test 2020-02-20'
+# this is used to keep site feedback separated by version
+SITE_VERSIE = '2020-05-13'
 
 # modules van de site
 INSTALLED_APPS = [
     'Plein.apps.PleinConfig',
-    'Beheer.apps.BeheerConfig',
+    'Beheer.apps.BeheerConfig',             # replaces admin
     'NhbStructuur.apps.NhbStructuurConfig',
     'Account.apps.AccountConfig',
     'BasisTypen.apps.BasisTypenConfig',
+    'Functie.apps.FunctieConfig',
     'Competitie.apps.CompetitieConfig',
     'HistComp.apps.HistCompConfig',
     'Records.apps.RecordsConfig',
     'Overig.apps.OverigConfig',
     'Logboek.apps.LogboekConfig',
     'Mailer.apps.MailerConfig',
-    'djangosaml2idp',               # single sign-on Identity Provider (IP) using SAML2 (Security Assertion Markup Language)
+    'Vereniging.apps.VerenigingConfig',
+    'Schutter.apps.SchutterConfig',
+    'Score.apps.ScoreConfig',
+    'djangosaml2idp',               # single sign-on Identity Provider (IP)
+                                    #   using SAML2 (Security Assertion Markup Language)
     'django.contrib.staticfiles',   # gather static files from modules helper
     'django.contrib.sessions',      # support for database-backed sessions; needed for logged-in user
     'django.contrib.admin',         # see-all/fix-all admin pages
     'django.contrib.auth',          # authenticatie framework
     'django.contrib.contenttypes',  # permission association to models
     'django.contrib.messages',
-    #'debug_toolbar',                # DEV ONLY
-    #'django_extensions'             # DEV ONLY
+    # 'debug_toolbar',                # DEV ONLY
+    # 'django_extensions'             # DEV ONLY (provides show_urls)
 ]
 
 
 MIDDLEWARE = [
-    #'debug_toolbar.middleware.DebugToolbarMiddleware',          # DEV ONLY
+    # 'debug_toolbar.middleware.DebugToolbarMiddleware',          # DEV ONLY
     'django.middleware.security.SecurityMiddleware',                # security (https improvements)
     'django.contrib.sessions.middleware.SessionMiddleware',         # manage sessions across requests
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',                    # security (cross-site scripting)
+    'django.middleware.csrf.CsrfViewMiddleware',                    # security (cross-site request forgery)
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',       # security
 ]
@@ -86,8 +91,8 @@ AUTH_BAD_PASSWORD_LOCKOUT_MINS = 15
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        #'DIRS': [ str(APPS_DIR.path('templates')), ],
-        #'APP_DIRS': True,
+        # 'DIRS': [ str(APPS_DIR.path('templates')), ],
+        # 'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
@@ -134,7 +139,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
-#LANGUAGE_CODE = 'en-us'
+# LANGUAGE_CODE = 'en-us'
 LANGUAGE_CODE = 'nl-NL'     # provides wanted date/time output format
 TIME_ZONE = 'Europe/Amsterdam'
 USE_I18N = True
@@ -166,7 +171,7 @@ STATICFILES_FINDER = [
 
 
 # wordt gebruikt door LoginView als er geen 'next' veld bij de POST zit
-#LOGIN_REDIRECT_URL = '/plein/'
+# LOGIN_REDIRECT_URL = '/plein/'
 
 # wordt gebruikt door de permission_required decorator en UserPassesTextMixin
 # om de gebruiker door te sturen als een view geen toegang verleend
@@ -178,6 +183,9 @@ INTERNAL_IPS = [
     '127.0.0.1',
 ]
 
+# our own test runner that executes the tests ordered by application hierarchy indicators to ensure that
+# low-level errors are reported before applications depending that (broken) functionality report failures
+TEST_RUNNER = 'nhb-apps.app-hierarchy-testrunner.HierarchyRunner'
 
 # applicatie specifieke settings
 MINIMUM_LEEFTIJD_LID = 5
@@ -245,25 +253,22 @@ from .settings_local import *
 # definitions taken from saml2.saml to avoid importing saml2
 # because it replaces ElementTree with cElementTree, which gives problems with QR code generation
 NAMEID_FORMAT_UNSPECIFIED = 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified'
-#NAMEID_FORMAT_EMAILADDRESS = 'urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress'
+# NAMEID_FORMAT_EMAILADDRESS = 'urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress'
 BINDING_HTTP_REDIRECT = 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect'
 BINDING_HTTP_POST = 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST'
 
 SAML_BASE_URL = SITE_URL + '/idp'
 
 SAML_IDP_CONFIG = {
-     'debug' : DEBUG,
-     'xmlsec_binary': '/usr/bin/xmlsec1',
+    'debug': DEBUG,
+    'xmlsec_binary': '/usr/bin/xmlsec1',
 
-     # the SAML entity id of this side, the Identity Provider
-     # just a globally unique string
-     'entityid': 'NHB IT applications SAML2 Identity Provider',
+    # the SAML entity id of this side, the Identity Provider
+    # just a globally unique string
+    'entityid': 'NHB IT applications SAML2 Identity Provider',
 
-     # metadata for trusted service providers (like mediawiki)
-     'metadata': { 'local': [os.path.join(BASE_DIR, 'data_private/saml2/saml2_sp_metadata.xml'),] },
-
-     # our service description (the identity provider)
-     'service': {
+    # our service description (the identity provider)
+    'service': {
          'idp': {
              'name': 'NHB IT applications IdP',
              'endpoints': {
@@ -275,34 +280,30 @@ SAML_IDP_CONFIG = {
              'name_id_format': [NAMEID_FORMAT_UNSPECIFIED],
              # signing assertion and responses is mandatory in SAML 2.0
              'sign_response': True,
-             'sign_assertion': True,
-        },
+             'sign_assertion': True
+        }
     },
 
     # signing keys
     'key_file': os.path.join(BASE_DIR, 'data_private/saml2/private.key'),
     'cert_file': os.path.join(BASE_DIR, 'data_private/saml2/cert.crt'),
-    'valid_for': 100*24,
+    'valid_for': 100*24
 }
 
-SAML_IDP_SPCONFIG = {
-     # configuration of trusted service providers
-     # entry name = entity_id
-     'https://wiki.handboogsport.st-visir.nl/saml/module.php/saml/sp/metadata.php/default-sp': {
-         'processor': 'djangosaml2idp.processors.BaseProcessor',
-         #'nameid_field': 'staffID',
-         'sign_response': True,
-         'sign_assertion': True,
-         'attribute_mapping': {
-             # Account.fieldname --> expose as
-             # Account.method() --> expose as
-             'username': 'username',
-             'get_email': 'emailAddress',
-             'get_real_name': 'real_name',
-         }
-     },
+# SP to be entered into the database using admin interface
+# details:
+#   EntityId  https://wiki.handboogsport.st-visir.nl/saml/module.php/saml/sp/metadata.php/default-sp
+#   processor Functie.idp_accesscheck.WikiAccessCheck
+#   Attribute-mapping (JSON)
+#       (Account.field_name: expose as)
+#       (Account.method_name: expose as)
+"""
+{
+"username": "username",
+"get_email": "emailAddress",
+"volledige_naam": "real_name"
 }
-
+"""
 
 # pagina's van de wiki
 WIKI_URL_TOP = WIKI_URL + '/Hoofdpagina'
@@ -311,5 +312,48 @@ WIKI_URL_RCL = WIKI_URL + '/Handleiding_RCL'
 WIKI_URL_RKO = WIKI_URL + '/Handleiding_RKO'
 WIKI_URL_BKO = WIKI_URL + '/Handleiding_BKO'
 WIKI_URL_2FA = WIKI_URL + '/Twee-factor_authenticatie'
+WIKI_URL_ROLLEN = WIKI_URL + '/Rollen'
+
+
+# logging to syslog
+# zie https://docs.djangoproject.com/en/3.0/topics/logging/
+# en  https://docs.python.org/3/howto/logging-cookbook.html#logging-to-a-single-file-from-multiple-processes
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': "[django] %(asctime)s %(name)s [%(levelname)s] %(message)s",
+            'datefmt': "%Y-%b-%d %H:%M:%S"
+        }
+    },
+    'handlers': {
+        'syslog': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.SysLogHandler',
+            'formatter': 'verbose',
+            'facility': 'user',
+            'address': '/dev/log'
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['syslog'],
+            'level': 'ERROR'
+        },
+        'saml2': {
+            'handlers': ['syslog'],
+            'level': 'WARNING'
+        },
+        'djangosaml2idp': {
+            'handlers': ['syslog'],
+            'level': 'WARNING'
+        },
+        '': {
+            'handlers': ['syslog'],
+            'level': 'DEBUG'
+        }
+    }
+}
 
 # end of file

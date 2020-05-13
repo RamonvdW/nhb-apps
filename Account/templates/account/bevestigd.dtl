@@ -9,13 +9,17 @@
 {% block title %}E-mail bevestigd{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="email bevestigd" %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="account-email-bevestigd" %}
 
 <h4>Bevestigd</h4>
 
 <p>Je hebt laten zien dat je toegang hebt tot je e-mail.</p>
-<p>Je kan nu inloggen.</p>
 
-<p><a class="btn-nhb-blauw" href="{% url 'Account:login' %}">inloggen</a></p>
+{% if show_login %}
+    <p>Je kan nu inloggen.</p>
+    <p><a class="btn-nhb-blauw" href="{% url 'Account:login' %}"><i class="material-icons-round left">person</i>inloggen</a></p>
+{% else %}
+    <p><a class="btn-nhb-blauw" href="{% url 'Plein:plein' %}"><i class="material-icons-round left">close</i>Sluiten</a></p>
+{% endif %}
 
 {% endblock %}

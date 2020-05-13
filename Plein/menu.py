@@ -5,18 +5,22 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
-from Account.rol import Rollen, rol_get_huidige, rol_mag_wisselen, rol_get_beschrijving
+from Functie.rol import Rollen, rol_get_huidige, rol_mag_wisselen, rol_get_beschrijving
 
 
 ACTIEF_OPTIES = (
     'inloggen',
     'uitloggen',
+    'hetplein',
     'privacy',
     'records',
     'logboek',
     'site-feedback-inzicht',
     'wissel-van-rol',
-    'competitie'
+    'competitie',
+    'histcomp',
+    'schutter',
+    'vereniging'
 )
 
 
@@ -57,15 +61,22 @@ def menu_dynamics(request, context, actief=None):
         if rol == Rollen.ROL_IT:
             context['menu_show_admin'] = True
 
-        # logboek en sitefeedback
+        # logboek en site feedback
         if rol in (Rollen.ROL_IT, Rollen.ROL_BB):
             context['menu_show_logboek'] = True
             context['menu_show_sitefeedback'] = True
+
+        if rol == Rollen.ROL_SCHUTTER:
+            context['menu_show_schutter'] = True
+
+        if rol == Rollen.ROL_CWZ:
+            context['menu_show_vereniging'] = True
     else:
         # inloggen
         context['menu_show_login'] = True
 
     context['menu_rol_beschrijving'] = rol_get_beschrijving(request)
+    context['is_debug'] = settings.DEBUG
 
 
 # end of file

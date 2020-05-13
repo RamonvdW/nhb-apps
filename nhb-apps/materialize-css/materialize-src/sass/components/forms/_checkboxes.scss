@@ -136,14 +136,14 @@
     width: 20px;
     background-color: transparent;
     border: 2px solid $radio-empty-color;
-    top: 0px;
+    top: 2px;
     z-index: 0;
   }
 
   // Checked style
   &:checked {
     + span:not(.lever):before {
-      top: 0;
+      top: 2px;
       left: 1px;
       width: 8px;
       height: 13px;
@@ -156,7 +156,7 @@
     }
 
     + span:not(.lever):after {
-      top: 0;
+      top: 2px;
       width: 20px;
       height: 20px;
       border: 2px solid $secondary-color;

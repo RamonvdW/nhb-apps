@@ -17,10 +17,6 @@ urlpatterns = [
     path('privacy/',
          views.PrivacyView.as_view(),
          name='privacy'),
-
-    path('leeftijdsklassen/',
-         views.LeeftijdsklassenView.as_view(),
-         name='leeftijdsklassen')
 ]
 
 # end of file

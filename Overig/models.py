@@ -5,12 +5,11 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import models
-from django.urls import reverse
 from django.conf import settings
 from django.utils import timezone
 from datetime import timedelta
-from django.core.exceptions import ObjectDoesNotExist
-from Account.models import Account, AccountEmail
+from Account.models import AccountEmail
+from Functie.models import Functie
 from .tijdelijke_url import set_tijdelijke_url_saver
 
 
@@ -46,7 +45,8 @@ class SiteFeedback(models.Model):
         short_feedback = self.feedback[:60]
         if len(self.feedback) > 60:
             short_feedback += "..."
-        msg = "[%s] %s (%s) pagina '%s': [%s] %s" % (self.site_versie,
+        msg = "#%s [%s] %s (%s) pagina '%s': [%s] %s" % (self.pk,
+                                        self.site_versie,
                                         self.toegevoegd_op.strftime('%Y-%m-%d %H:%M utc'),
                                         self.gebruiker,
                                         self.op_pagina,
@@ -59,6 +59,8 @@ class SiteFeedback(models.Model):
     class Meta:
         """ meta data voor de admin interface """
         verbose_name = verbose_name_plural = "Site feedback"
+
+    objects = models.Manager()      # for the editor only
 
 
 def store_feedback(gebruiker, op_pagina, bevinding, feedback):
@@ -84,21 +86,53 @@ def store_feedback(gebruiker, op_pagina, bevinding, feedback):
 
 class SiteTijdelijkeUrl(models.Model):
     """ Database tabel waarin de URLs staan die we naar buiten toe beschikbaar maken """
+
+    # de code die in de url gebruikt kan worden
+    # om deze uniek te maken is het een hash over een aantal keywords die specifiek voor een gebruik zijn
     url_code = models.CharField(max_length=32)
+
+    # wanneer aangemaakt door de website
     aangemaakt_op = models.DateTimeField()
+
+    # tot wanneer mag deze tijdelijke code gebruikt worden?
+    # verlopen codes kunnen niet meer gebruikt worden
     geldig_tot = models.DateTimeField()
-    hoortbij_accountemail = models.ForeignKey(AccountEmail,
-                                              on_delete=models.CASCADE,
-                                              blank=True, null=True)        # optional
-    # in the toekomst meer mogelijkheden, zoals taken
+
+    # zie do_dispatch in tijdelijke_url.py
+    dispatch_to = models.CharField(max_length=20, default="")
+
+    # extra velden voor de dispatcher
+    hoortbij_accountemail = models.ForeignKey(
+                                AccountEmail,
+                                on_delete=models.CASCADE,
+                                blank=True, null=True)        # optional
+
+    hoortbij_functie = models.ForeignKey(
+                                Functie,
+                                on_delete=models.CASCADE,
+                                blank=True, null=True)        # optional
+
+    # in de toekomst meer mogelijkheden, zoals taken
+
+    objects = models.Manager()      # for the editor only
+
+    def __str__(self):
+        """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
+        return "(%s) tot %s %s (accountemail %s, functie %s)" % (self.pk,
+                    self.geldig_tot, self.dispatch_to, self.hoortbij_accountemail, self.hoortbij_functie)
 
 
-def save_tijdelijke_url(url_code, geldig_dagen=0, accountemail=None):
+def save_tijdelijke_url(url_code, dispatch_to, geldig_dagen=0, geldig_seconden=0, accountemail=None, functie=None):
     obj = SiteTijdelijkeUrl()
     obj.url_code = url_code
     obj.aangemaakt_op = timezone.now()
-    obj.geldig_tot = obj.aangemaakt_op + timedelta(days=geldig_dagen)
+    if geldig_seconden > 0:
+        obj.geldig_tot = obj.aangemaakt_op + timedelta(seconds=geldig_seconden)
+    else:
+        obj.geldig_tot = obj.aangemaakt_op + timedelta(days=geldig_dagen)
+    obj.dispatch_to = dispatch_to
     obj.hoortbij_accountemail = accountemail
+    obj.hoortbij_functie = functie
     obj.save()
 
 

@@ -6,26 +6,12 @@
 
 from django.contrib import admin
 
-from .models import Competitie, DeelCompetitie, CompetitieWedstrijdKlasse, FavorieteBestuurders
+from .models import Competitie, DeelCompetitie, CompetitieKlasse, RegioCompetitieSchutterBoog
 
 
-class CompetitieWedstrijdKlasseAdmin(admin.ModelAdmin):
-    # filter mogelijkheid
-    list_filter = ('is_afgesloten',)
-
-class CompetitieAdmin(admin.ModelAdmin):
-
-    def formfield_for_manytomany(self, db_field, request, **kwargs):    # pragma: no coverage
-        if db_field.name == 'klassen_indiv':
-            kwargs['queryset'] = CompetitieWedstrijdKlasse.objects.filter(wedstrijdklasse__is_voor_teams=False)
-        elif db_field.name == 'klassen_team':
-            kwargs['queryset'] = CompetitieWedstrijdKlasse.objects.filter(wedstrijdklasse__is_voor_teams=True)
-        return super(CompetitieAdmin, self).formfield_for_manytomany(db_field, request, **kwargs)
-
-
-admin.site.register(Competitie, CompetitieAdmin)
+admin.site.register(Competitie)
 admin.site.register(DeelCompetitie)
-admin.site.register(CompetitieWedstrijdKlasse, CompetitieWedstrijdKlasseAdmin)
-admin.site.register(FavorieteBestuurders)
+admin.site.register(CompetitieKlasse)
+admin.site.register(RegioCompetitieSchutterBoog)
 
 # end of file

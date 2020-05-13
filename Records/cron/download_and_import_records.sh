@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#  Copyright (c) 2019 Ramon van der Winkel.
+#  Copyright (c) 2019-2020 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -13,15 +13,20 @@ TMPDIR="/tmp/downloader"
 RECORDS="/tmp/downloader/records.json"      # note: download_gsheet.py contains the same path
 
 ID=$(id -u)
-if [ $ID -ne 0 ]
+ID_ROOT=$(id -u root)
+ID_WWW=$(id -u apache)
+if [ $ID -ne $ID_ROOT -a $ID -ne $ID_WWW ]
 then
     echo "Please run with sudo"
     exit 1
 fi
 
+# everything sent to stdout/stderr will be picked up by crontab and sent in an email
+# avoid this by writing to a logfile
+
 STAMP=$(date +"%Y%m%d_%H%M%S")
 LOG="$LOGDIR/${STAMP}_download_and_import_records.log"
-echo "Logging to: $LOG"
+#echo "Logging to: $LOG"
 echo "[INFO] Started" > "$LOG"
 
 # prepare to download

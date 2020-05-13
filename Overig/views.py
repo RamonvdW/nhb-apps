@@ -8,10 +8,10 @@ from django.views import View
 from django.views.generic import TemplateView, ListView
 from django.shortcuts import render, redirect
 from django.urls import Resolver404, reverse
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.utils import timezone
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Account.rol import Rollen, rol_get_huidige
+from Functie.rol import Rollen, rol_get_huidige
 from Plein.menu import menu_dynamics
 from .forms import SiteFeedbackForm
 from .models import SiteFeedback, store_feedback, SiteTijdelijkeUrl
@@ -113,11 +113,15 @@ class SiteFeedbackInzichtView(UserPassesTestMixin, ListView):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         return rol_get_huidige(self.request) in (Rollen.ROL_IT, Rollen.ROL_BB)
 
+    def handle_no_permission(self):
+        """ gebruiker heeft geen toegang --> redirect naar het plein """
+        return HttpResponseRedirect(reverse('Plein:plein'))
+
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
-        # 50 nieuwste onafgehandelde site feedback items
-        self.count_aanwezig = len(SiteFeedback.objects.all())
-        self.count_niet_afgehandeld = len(SiteFeedback.objects.filter(is_afgehandeld=False))
+        # 50 nieuwste niet-afgehandelde site feedback items
+        self.count_aanwezig = SiteFeedback.objects.count()
+        self.count_niet_afgehandeld = SiteFeedback.objects.filter(is_afgehandeld=False).count()
         return SiteFeedback.objects.filter(is_afgehandeld=False).order_by('-toegevoegd_op')[:50]
 
     def get_context_data(self, **kwargs):
@@ -140,31 +144,28 @@ class SiteTijdelijkeUrlView(View):
             zoekt de bijbehorende data op en roept de juiste dispatcher aan.
         """
         url_code = kwargs['code']
-        # print("SiteTijdelijkeUrlView: url_code=%s" % repr(url_code))
-
-        try:
-            obj = SiteTijdelijkeUrl.objects.get(url_code=url_code)
-        except SiteTijdelijkeUrl.DoesNotExist:
-            # onbekende url code
-            raise Resolver404()
+        objs = SiteTijdelijkeUrl.objects.filter(url_code=url_code)
 
         # kijk of deze tijdelijke url al verlopen is
-        if obj.geldig_tot < timezone.now():
+        url_or_response = None
+        now = timezone.now()
+        for obj in objs:
+            if obj.geldig_tot > now:
+                # dispatch naar de juiste applicatie waar deze bij hoort
+                # de callbacks staan in de dispatcher
+                url_or_response = do_dispatch(request, obj)
+
+            # verwijder de gebruikte tijdelijke url
             obj.delete()
-            raise Resolver404()
+        # for
 
-        # dispatch naar de juiste applicatie waar deze bij hoort
-        # de callbacks staan in de dispatcher
-        redirect = do_dispatch(request, obj.hoortbij_accountemail)
+        if url_or_response:
+            if isinstance(url_or_response, HttpResponse):
+                http_response = url_or_response
+            else:
+                http_response = HttpResponseRedirect(url_or_response)
+            return http_response
 
-        # verwijder de gebruikte tijdelijke url
-        obj.delete()
-
-        if redirect:
-            # print("redirect: %s" % repr(redirect))
-            return HttpResponseRedirect(redirect)
-
-        # print("SiteTijdelijkeUrlView: No valid redirect")
         raise Resolver404()
 
 # end of file

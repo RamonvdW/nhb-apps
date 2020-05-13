@@ -22,7 +22,12 @@ class LogboekRegel(models.Model):
         """ bepaal door wie actie uitgevoerd is """
         if not self.actie_door_account:
             return 'Systeem of IT beheerder'
-        return self.actie_door_account.username
+        naam = self.actie_door_account.volledige_naam()
+        # voeg inlog naam toe, indien verschillend
+        # voorkom: ramon (ramon)
+        if naam != self.actie_door_account.username:
+            naam = "%s (%s)" % (self.actie_door_account.username, naam)
+        return naam
 
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
@@ -34,6 +39,8 @@ class LogboekRegel(models.Model):
         """ meta data voor de admin interface """
         verbose_name = "Logboek regel"
         verbose_name_plural = "Logboek regels"
+
+    objects = models.Manager()      # for the editor only
 
 
 def schrijf_in_logboek(account, gebruikte_functie, activiteit):

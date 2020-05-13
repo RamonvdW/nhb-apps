@@ -9,14 +9,14 @@
 {% block title %}Handboogsport Records{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="records_indiv_zoom5" %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="records-indiv-zoom5" %}
 
 <h4>Nederlandse Handboogsport Records</h4>
 
 <p>Gemaakte keuzes:</p>
 
 <div class="row"><div class="col s12 m10 l8 xl6">
-    <div class="white-text blue z-depth-2">
+    <div class="white-text nhb-blauw z-depth-2">
         <div class="row small-row">
             <div class="col s4">Discipline:</div>
             <div class="col s6">{{ discipline }}</div>
@@ -36,10 +36,22 @@
     </div>
 </div></div>
 
-<p>Kies nu het soort record (dit is typisch de afstand en aantal pijlen):</p>
 
-{% for obj in object_list %}
-<p><a class="btn white blue-text" href="{{ obj.url }}">{{ obj.soort_record }}</a></p>
-{% endfor %}
+{% if object_list %}
+
+    <p>Kies nu het soort record (dit is typisch de afstand en aantal pijlen):</p>
+
+    {% for obj in object_list %}
+    <p><a class="btn white blue-text" href="{{ obj.url }}">{{ obj.soort_record }}</a></p>
+    {% endfor %}
+
+{% else %}
+
+    <p class="red-text">Er zijn geen records gevonden in deze categorie.</p>
+
+    <a class="btn-nhb-blauw" href="{% url 'Records:overzicht' %}">Terug</a>
+
+{% endif %}
+
 
 {% endblock %}

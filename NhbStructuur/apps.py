@@ -11,4 +11,8 @@ class NhbStructuurConfig(AppConfig):
     name = 'NhbStructuur'
     verbose_name = "Nhb structuur"
 
+    def ready(self):
+        # geef de view code een kans de plugins te registreren
+        import NhbStructuur.views
+
 # end of file

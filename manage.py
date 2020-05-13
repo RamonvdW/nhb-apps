@@ -13,6 +13,7 @@ import os
 import sys
 from django.core.management import execute_from_command_line
 
+
 def main():
     # print a clear separator on the terminal when using runserver or test
     stars = None

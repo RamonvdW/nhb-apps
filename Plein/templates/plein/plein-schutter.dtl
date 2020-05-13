@@ -6,24 +6,13 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}Welkom Schutter!{% endblock %}
+{% block title %}Welkom{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="plein schutter" %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="plein-schutter" %}
 
-<h4>Hallo, schutter!</h4>
+<h4>Welkom op het Plein</h4>
 
-<p>Op deze pagina verzamelen we informatie die voor jou interessant is.</p>
-
-{% if plein_toon_leeftijdsklassen %}
-<p>&nbsp;</p>
-<h5>Leeftijdsklasse</h5>
-<p><a href="{% url 'Plein:leeftijdsklassen' %}">Klik hier</a> om te zien in welke klasse je uit moet komen op wedstrijden en voor de competitie.</p>
-{% endif %}
-
-<p>&nbsp;</p>
-<h5>Binnenkort meer</h5>
-<p>Deze website is nog in ontwikkeling. We proberen regelmatig nieuwe informatie beschikbaar te maken.</p>
-<p>Voorstellen: instellingen (boog type, interesse), jouw scores/uitslagen, jouw nederlandse records, etc.</p>
+<p>Zie Schutter in het menu.</p>
 
 {% endblock %}

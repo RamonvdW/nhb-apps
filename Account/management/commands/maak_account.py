@@ -31,7 +31,7 @@ class Command(BaseCommand):
         email = options['email'][0]
 
         try:
-            account_create(username, password, email, voornaam)
+            account_create(username, voornaam, '', password, email, True)
         except AccountCreateError as exc:
             self.stderr.write("%s" % str(exc))
         else:

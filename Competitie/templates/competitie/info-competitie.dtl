@@ -1,0 +1,268 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2020 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Info Competitie{% endblock %}
+
+{% block pagina %}
+
+<h4>Informatie over de competities</h4>
+
+<p>Op deze pagina staat algemene informatie over de (winter-)competities.</p>
+
+<p>Elk jaar organiseert de NHB twee competities tijdens het winterseizoen, met verschillende uitdagingen.</p>
+
+<table class="white">
+    <thead>
+        <th>Competitie</th>
+        <th>Schietafstand</th>
+        <th>Pijlen per schietbeurt</th>
+        <th>Schietbeurten</th>
+        <th>Blazoen</th>
+        <th>Maximale score</th>
+    </thead>
+
+    <tr>
+        <td>Indoor</td>
+        <td>18 meter</td>
+        <td>3 pijlen</td>
+        <td>10</td>
+        <td>40cm kaart</td>
+        <td>300</td>
+    </tr>
+
+    <tr>
+        <td>25m 1pijl</td>
+        <td>25 meter</td>
+        <td>1 pijl</td>
+        <td>25</td>
+        <td>60cm kaart</td>
+        <td>250</td>
+    </tr>
+</table>
+
+<p>Aspiranten schieten beide competities op 18 meter, op een 60cm kaart.</p>
+
+<p>&nbsp;</p>
+<h5>Geografische opdeling</h5>
+
+<p>Bij de NHB is Nederland geografisch verdeeld in 4 rayons met elk 4 regio's:</p>
+
+<table class="white">
+    <thead>
+        <th>Rayon</th>
+        <th>Regio</th>
+    </thead>
+    {% for regio in regios %}
+    <tr {% if regio.mijn_regio %}class="nhb-blauw white-text"{% endif %}>
+        <td>{{ regio.rayon.naam }}</td>
+        <td>{{ regio.naam }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+
+{% if mijn_vereniging %}
+
+    <p>&nbsp;</p>
+    <p>Jouw vereniging:</p>
+
+    <div class="row">
+
+        <!-- toon gegevens van de vereniging in een blauw box -->
+        <div class="col s12 m10 l8 xl6 offset-m1 offset-l2 offset-xl3">
+            <div class="white-text nhb-blauw z-depth-2">
+                <div class="row small-row">
+                    <div class="col s4">Naam:</div>
+                    <div class="col s6">{{ mijn_vereniging.naam }}</div>
+                </div>
+                <div class="row small-row">
+                    <div class="col s4">Plaats:</div>
+                    <div class="col s6">{{ mijn_vereniging.plaats }}</div>
+                </div>
+
+                <div class="row small-row">
+                    <div class="col s4">Regio:</div>
+                    <div class="col s6">{{ mijn_vereniging.regio.naam }}</div>
+                </div>
+
+                <div class="row small-row">
+                    <div class="col s4">Rayon:</div>
+                    <div class="col s6">{{ mijn_vereniging.regio.rayon.naam }}</div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+{% endif %}
+
+
+<p>&nbsp;</p>
+<h5>Regiocompetitie</h5>
+
+<p>De competitie begint met de regiocompetities in elk van de 16 regio's. Je schiet <b>7 rondes</b>, waarvan de beste 6 tellend zijn.</p>
+<p>Vraag op je vereniging waar en wanneer de wedstrijden in jouw regio gehouden worden.</p>
+
+<p>De regiocompetitie is per boog type, leeftijdsgroep en speelsterkte opgedeeld in wedstrijdklassen.</p>
+
+<p>Schutters die vorige seizoen 6 scores neergezet hebben krijgen aan de hand van dat gemiddelde een <i>aanvangsgemiddelde</i> waarmee de indeling op speelsterkte gedaan wordt.
+Nieuwe schutters krijgen na 3 scores hun speelsterkte vastgesteld.</p>
+
+<p>In elke van de {{ klassen_count }} wedstrijdklassen wordt de schutter met de hoogste score gekroond tot <b>regiokampioen</b>.</p>
+
+
+<p>&nbsp;</p>
+<h5>Rayonkampioenschappen (RK)</h5>
+
+<p>De Rayonkampioenschappen worden in elk van de 4 rayons georganiseerd voor de schutters uit de 4 regio's van het rayon.</p>
+<p>In elke wedstrijdklasse nemen 24 schutters het tegen elkaar op, bestaande uit de 4 regiokampioenen aangevuld met de 20 beste schutters uit de regiocompetities.</p>
+
+<p>Voor aspiranten geldt een open inschrijving (iedereen die wil mag meedoen).</p>
+
+<table class="white">
+    <thead>
+        <th>Competitie</th>
+        <th>Rondes</th>
+        <th>Pijlen per ronde</th>
+        <th>Knock-out finales</th>
+    </thead>
+
+    <tr>
+        <td>Indoor</td>
+        <td>2</td>
+        <td>30</td>
+        <td>Ja</td>
+    </tr>
+
+    <tr>
+        <td>25m 1pijl</td>
+        <td>2</td>
+        <td>25</td>
+        <td>Nee</td>
+    </tr>
+</table>
+
+<p>Aspiranten schieten maar 1 ronde.</p>
+<p>Compound en Recurve klasse 1 en 2 schieten de Indoor Rayonkampioenschappen op Dutch Target blazoen.</p>
+
+<h6>Knock-out finales</h6>
+<p>De knock-out finales zijn volgens het best-of-5 set-systeem en beginnen met de beste 16 schutters, waarvan er 8 door gaan naar de kwartfinale.
+Uit de kwartfinale gaan 4 schutters door naar de halve finale. Zie het schema hier onder.</p>
+
+<p>De winnaars van de halve finales gaan naar de gouden finale voor plaats 1 en 2.
+De overige twee schutters uit de halve finales gaan naar de brozen finale voor plaats 3 en 4.</p>
+
+<table class="white">
+    <tr>
+        <td class="center-align"><b>Achtste finale</b><br>(16 schutters)</td>
+        <td class="center-align"><b>Kwart finale</b><br>(8 schutters)</td>
+        <td class="center-align"><b>Halve finale</b><br>(4 schutters)</td>
+        <td class="center-align"><b>Bronzen finale</b><br>(2 schutters)</td>
+        <td class="center-align"><b>Gouden finale</b><br>(2 schutters)</td>
+    </tr>
+
+    <tr>
+        <td class="center-align"><span class="blue-text">#1</span> tegen #16</td>
+        <td class="center-align" rowspan="2">2 schutters</td>
+        <td class="center-align" rowspan="4">2 schutters</td>
+        <td class="center-align" rowspan="8">2 schutters</td>
+        <td class="center-align" rowspan="8">2 schutters</td>
+    </tr>
+    <tr>
+        <td class="center-align">#8 tegen #9</td>
+    </tr>
+
+    <tr>
+        <td class="center-align">#5 tegen #12</td>
+        <td class="center-align" rowspan="2">2 schutters</td>
+    </tr>
+    <tr>
+        <td class="center-align"><span class="blue-text">#4</span> tegen #13</td>
+    </tr>
+
+    <tr>
+        <td class="center-align"><span class="blue-text">#3</span> tegen #14</td>
+        <td class="center-align" rowspan="2">2 schutters</td>
+        <td class="center-align" rowspan="4">2 schutters</td>
+    </tr>
+    <tr>
+        <td class="center-align">#6 tegen #11</td>
+    </tr>
+
+    <tr>
+        <td class="center-align">#7 tegen #10</td>
+        <td class="center-align" rowspan="2">2 schutters</td>
+    </tr>
+    <tr>
+        <td class="center-align"><span class="blue-text">#2</span> tegen #15</td>
+    </tr>
+
+</table>
+
+
+<p>&nbsp;</p>
+<h5>Bondskampioenschappen (BK)</h5>
+
+<p>De Bondskampioenschappen worden landelijk georganiseerd.</p>
+<p>In elke wedstrijdklasse nemen 24 schutters het tegen elkaar op, bestaande uit de 4 rayonkampioenen aangevuld met de 20 beste schutters uit de rayonkampioenschappen.</p>
+
+<p>Voor aspiranten geldt een open inschrijving (iedereen die wil mag meedoen).</p>
+
+<p>Overige details zijn gelijk aan de Rayonkampioenschappen.</p>
+
+
+<p>&nbsp;</p>
+<h5>Kalender</h5>
+
+<table class="white">
+    <thead>
+        <th>Activiteit</th>
+        <th>Indoor</th>
+        <th>25m 1pijl</th>
+    </thead>
+
+    <tr>
+        <td>Inschrijven</td>
+        <td>vanaf 15 juli</td>
+        <td>vanaf 15 juli</td>
+    </tr>
+
+    <tr>
+        <td>Regiocompetitie</td>
+        <td>september tot december</td>
+        <td>september tot maart</td>
+    </tr>
+
+    <tr>
+        <td>Rayonkampioenschappen</td>
+        <td>februari</td>
+        <td>april / mei</td>
+    </tr>
+
+    <tr>
+        <td>Bondskampioenschappen</td>
+        <td>februari / maart</td>
+        <td>mei / juni</td>
+    </tr>
+
+</table>
+
+
+<p>&nbsp;</p>
+<h5>Overige regels</h5>
+
+<p>Als je voor het einde van de regiocompetitie begint met schieten, dan kan je individueel altijd nog inschrijven.</p>
+
+<p>Om mee te doen in een team of het RK/BK moet je uiterlijk 15 juli lid zijn bij een vereniging.</p>
+
+<p>De bondskampioenschappen staan los van de Nederlandse Kampioenschappen met open inschrijving.</p>
+
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="info-competitie" %}
+
+{% endblock %}
+

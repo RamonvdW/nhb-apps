@@ -10,7 +10,7 @@
     Dit document is de blauwdruk voor alle pagina's van de site.
     Andere template's beginnen met een 'extends' op deze template
     en kunnen de volgende block tags gebruiken om delen te vervangen:
-        extrastyle    extra stijlsheets (komen in de header)
+        extraheader   uitbreiding in de head sectie
         title         pagina titel instellen
         pagina        de body van de pagina
 
@@ -28,7 +28,7 @@
         <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Round">
         <link rel="stylesheet" href="{% static 'materialize/materialize-new.css' %}">
         <link rel="stylesheet" href="{% static 'plein/site_layout.css' %}"> <!-- moet ná materialize css -->
-        {% block extrastyle %}{% endblock %}
+        {% block extraheader %}{% endblock %}
     </head>
 
     <body class="grey lighten-2">   <!-- grey lighten-4 is identical to #f5f5f5 from NHB style -->
@@ -45,36 +45,48 @@
             <div id="content">      <!-- css manipulates this -->
                 <!-- button to call-up the sidenav; hidden when not needed -->
                 <a href="#" data-target="slide-out" class="sidenav-trigger hide-on-large-only"><i class="material-icons-round">menu</i></a>
+
+                <!-- screen-size indicator labels -->
+                {% if is_debug %}
+                    <div style="position: fixed; left: 320px; top: 2px; font-size:10px">
+                        <span class="hide-unless-small">Small</span>
+                        <span class="hide-unless-medium">Medium</span>
+                        <span class="hide-unless-large">Large</span>
+                        <span class="hide-unless-xlarge">Extra-large</span>
+                    </div>
+                {% endif %}
+
+                <!-- echt pagina komt hier, vanuit de template -->
                 {% block pagina %}{% endblock %}
             </div>
         </div>
 
-        <script src="{% static 'materialize/materialize.min.js' %}"></script>
+        <!-- TODO: minimized javascript -->
+        <script src="{% static 'materialize/materialize.js' %}"></script>
+        <!--<script src="{% static 'materialize/materialize.min.js' %}"></script>-->
 
-        <!-- configure the sidenav after everything has loaded and has been instantiated -->
+        <!-- framework init, after everything has been loaded and instantiated -->
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                var elems = document.querySelectorAll('.sidenav')
-                options = { menuWidth: 250,       // Default is 300
-                            edge: 'left',         // Choose the horizontal origin
-                            closeOnClick: false,  // Closes side-nav on <a> clicks, useful for Angular/Meteor
-                            draggable: true       // Choose whether you can drag to open on touch screens,
-                          };
-                var insts = M.Sidenav.init(elems, options)
+                // sidenav
+                var elems = document.querySelectorAll('.sidenav');
+                var insts = M.Sidenav.init(elems, {});
 
-                var elems = document.querySelectorAll('.collapsible')
+                // accordeons
+                // TODO: defaults statisch aanpassen
                 options = { inDuration: 100,    // default is 300
                             outDuration: 100    // default is 300
                           };
-                var insts = M.Collapsible.init(elems, options)
+                var elems = document.querySelectorAll('.collapsible');
+                var insts = M.Collapsible.init(elems, options);
 
-                var elems = document.querySelectorAll('select')
-                options = {};
-                var insts = M.FormSelect.init(elems, options)
-
+                // rolgordijnen
+                var elems = document.querySelectorAll('select');
+                var insts = M.FormSelect.init(elems, {});
             })
         </script>
 
+        <!-- helper functie om een opgeslagen cookie in te lezen -->
         <script>
             function getCookie(name) {
                 var cookieValue = null;
@@ -92,5 +104,96 @@
                 return cookieValue;
             }
         </script>
+
+        <!-- tabel filter -->
+        <script>
+            // wordt gebruikt om te reageren op de input van een gebruiker in een zoekveld
+            // en regels van de tabel wel/niet zichtbaar te maken
+            // kolommen waarin gezocht mag worden moeten het 'filter' attribuut hebben
+            //          <thead>
+            //              <th filter="on">Header1</th>
+            //              <th>Header2<th>
+
+            // Uitgebreider voorbeeld:
+            //   <table class="white" id="table3">
+            //     <thead>
+            //       <tr>        <!-- filter veld -->
+            //         <td colspan="2"></td>
+            //         <td colspan="2" class="table-filter">
+            //            <input class="table-filter" oninput="myTableFilter(this, 'table3')" placeholder="Zoeken"/>
+            //         </td>
+            //         <td colspan="3"></td>
+            //       </tr>
+            //       <tr>
+            //         <th>Laatste poging</th>
+            //         <th>Laatste inlog</th>
+            //         <th filter="on">Inlog</th>
+            //         <th filter="on">Naam</th>
+            //         <th>Email is bevestigd</th>
+            //         <th>Tweede factor</th>
+            //          <th>Aangemaakt</th>
+            //       </tr>
+            //     </thead>
+
+            function myTableFilter(zoekveld, tableId)
+            {
+                //console.log("myTableFilter: ", zoekveld);
+                var table = document.getElementById(tableId);
+                if (table == undefined) return;
+                //console.log('  table: ', table);
+
+                filter_tekst = zoekveld.value;
+                //console.log('  filter_tekst: ', filter_tekst);
+
+                // doorzoek de header kolommen op filter=on
+                var filter_kolommen = new Array();
+                for (var i=0, row; row = table.tHead.rows[i]; i++) {        // stops when row=null
+                    for (var j=0, col_nr=0, cell; cell = row.cells[j]; j++) {         // stops when cell=null
+                        if (cell.hasAttribute('filter')) filter_kolommen.push(col_nr);
+                        if (cell.hasAttribute('colSpan')) {
+                            //console.log('cell with colSpan: ', cell.colSpan);
+                            col_nr += cell.colSpan;
+                        } else {
+                            col_nr += 1;
+                        }
+                    }
+                }
+                //console.log('kolom nummers met filter: ', filter_kolommen);
+
+                var body = table.tBodies[0];
+                //console.log("body: ", body);        // for debug
+                for (var i=0, row; row = body.rows[i]; i++) {               // stops when row=null
+                    // besluit om deze regel te tonen, of niet
+                    var show = false;
+                    // kijk of de zoekterm in een van de kozen kolommen voorkomt
+                    filter_kolommen.forEach(kolom_nr => {
+                            // TODO: dit is nog niet case-insensitive of accent-insensitive
+                            if (row.cells[kolom_nr].innerText.indexOf(filter_tekst) != -1) show = true;
+                        });
+                    row.style.display = show ? 'table-row' : 'none';
+                }
+            }
+
+            // zoek alle tabellen met een zoekveld en trigger de oninput method
+            // dit is noodzakelijk bij gebruik van de browser 'back' knop
+            // anders zijn de tabellen niet meer gefiltreerd
+            window.addEventListener("load", function(){
+                //console.log("load!");
+                var tables = document.getElementsByTagName('table');
+                //console.log('tables: ', tables);
+                for (var i=0, table; table = tables[i]; i++) {
+                    //console.log('  table: ', table);
+                    inputs = table.getElementsByTagName('input');
+                    if (inputs.length >= 1) {
+                        myTableFilter(inputs[0], table.id);
+                    }
+                }
+
+                // evalueer de posities van de labels van de forms
+                // zodat het label niet over het ingevulde input veld staat
+                M.updateTextFields();
+            });
+        </script>
+
     </body>
 </html>
