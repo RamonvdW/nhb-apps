@@ -29,6 +29,12 @@
     </div>
 </div>
 
+{% if functie.nieuwe_email %}
+    <h5>Let op!</h5>
+    <p>Er is al een nieuw e-mailadres ingevoerd (<code>{{ functie.nieuwe_email }}</code>), maar deze is nog niet bevestigd. Volg de instructies in de e-mail om de bevestiging af te ronden.</p>
+    <p>Ondanks dit is het is ook mogelijk om een nieuw e-mailadres op te geven.</p>
+{% endif %}
+
 <div class="container z-depth-2 white">
 
     <div class="row nav nhb-blauw white-text">
@@ -73,12 +79,6 @@
     </div>
 
 </div>
-
-{% if functie.nieuwe_email %}
-    <h5>Let op!</h5>
-    <p>Er is al een nieuw e-mailadres ingevoerd (<code>{{ functie.nieuwe_email }}</code>), maar deze is nog niet bevestigd. Volg de instructies in de e-mail om de bevestiging af te ronden.</p>
-    <p>Ondanks dit is het is ook mogelijk om een nieuw e-mailadres op te geven.</p>
-{% endif %}
 
 <p><a class="btn-nhb-blauw margin-5" href="{{ terug_url }}"><i class="material-icons-round left">arrow_back</i>Terug (niet opslaan)</a></p>
 

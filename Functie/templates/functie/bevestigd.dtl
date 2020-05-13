@@ -6,15 +6,17 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}E-mail bevestigd{% endblock %}
+{% block title %}E-mail is bevestigd{% endblock %}
 
 {% block pagina %}
 {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="functie-email-bevestigd" %}
 
-<h4>Bevestigd</h4>
+<h4>E-mail is bevestigd</h4>
 
-<p>Je hebt toegang tot de e-mail bevestigd en gebruik voor de website bevestigd.</p>
+<p>Je hebt toegang tot de e-mail bevestigd.<p>
 
-<p><a class="btn-nhb-blauw" href="{% url 'Plein:plein' %}"><i class="material-icons-round left">close</i>Sluiten</a></p>
+<p>Het e-mailadres is nu gekoppeld aan de functie <b>{{ functie.beschrijving }}</b>.</p>
+
+<p>Dit venster mag je sluiten.</p>
 
 {% endblock %}

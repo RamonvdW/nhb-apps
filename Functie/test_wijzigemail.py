@@ -7,7 +7,7 @@
 from django.test import TestCase
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
 from Competitie.models import competitie_aanmaken, DeelCompetitie
-from Functie.models import maak_functie
+from Functie.models import maak_functie, Functie
 from Mailer.models import MailQueue
 from Overig.e2ehelpers import E2EHelpers
 
@@ -58,8 +58,9 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('functie/wijzig-email.dtl', 'plein/site_layout.dtl'))
 
         resp = self.client.post(url, {'email': 'nieuweemail@test.com'})
-        self.assertEqual(resp.status_code, 302)
-        # precies waar de redirect heen gaat is niet belangrijk
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('functie/bevestig.dtl', 'plein/site_layout.dtl'))
 
     def _check_niet_wijzigbaar(self, functie):
         url = self.url_wijzig_email % functie.pk
@@ -101,7 +102,7 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
         url = text[pos:pos+12+32+1]        # 32 = code
 
         resp = self.client.get(url)
-        self.assert_equal(resp.status_code, 200)
+        self.assertEqual(resp.status_code, 200)
         self.assert_template_used(resp, ('functie/bevestigd.dtl', 'plein/site_layout.dtl'))
 
     def test_bko1(self):
@@ -187,6 +188,54 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
         self._check_niet_wijzigbaar(self.functie_rcl101)
         self._check_niet_wijzigbaar(self.functie_rcl105)
         self._check_wijzigbaar(self.functie_cwz)
+
+    def test_multi_change(self):
+        # voer meerdere malen een e-mailadres is
+        # volg daarna een van de tijdelijke urls
+
+        # log in en wissel naar RCL regio 105
+        self.functie_rcl105.accounts.add(self.account_normaal)
+        self.e2e_login_and_pass_otp(self.account_normaal)
+        self.e2e_wissel_naar_functie(self.functie_rcl105)
+
+        url = self.url_wijzig_email % self.functie_rcl105.pk
+
+        # eerste invoer
+        resp = self.client.post(url, {'email': 'nieuweemail1@test.com'})
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('functie/bevestig.dtl', 'plein/site_layout.dtl'))
+
+        # controleer dat het nieuwe e-mailadres gezet is
+        functie = Functie.objects.get(pk=self.functie_rcl105.pk)
+        self.assertEqual(functie.nieuwe_email, 'nieuweemail1@test.com')
+        self.assertEqual(functie.bevestigde_email, '')
+
+        # tweede invoer
+        resp = self.client.post(url, {'email': 'nieuweemail2@test.com'})
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('functie/bevestig.dtl', 'plein/site_layout.dtl'))
+
+        # controleer dat het nieuwe e-mailadres gezet is
+        functie = Functie.objects.get(pk=self.functie_rcl105.pk)
+        self.assertEqual(functie.nieuwe_email, 'nieuweemail2@test.com')
+        self.assertEqual(functie.bevestigde_email, '')
+
+        # volg de tijdelijke URL in de email
+        mail = MailQueue.objects.all()[0]
+        text = mail.mail_text
+        pos = text.find('/overig/url/')     # 12 lang
+        url = text[pos:pos+12+32+1]        # 32 = code
+
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_template_used(resp, ('functie/bevestigd.dtl', 'plein/site_layout.dtl'))
+
+        # controleer dat het laatste nieuwe e-mailadres gezet is
+        functie = Functie.objects.get(pk=self.functie_rcl105.pk)
+        self.assertEqual(functie.nieuwe_email, '')
+        self.assertEqual(functie.bevestigde_email, 'nieuweemail2@test.com')
 
     def test_bad(self):
         # log in en wissel naar RKO rol

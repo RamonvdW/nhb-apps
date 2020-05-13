@@ -36,6 +36,7 @@ TEMPLATE_OVERZICHT = 'functie/overzicht.dtl'
 TEMPLATE_OVERZICHT_VERENIGING = 'functie/overzicht-vereniging.dtl'
 TEMPLATE_WIJZIG = 'functie/wijzig.dtl'
 TEMPLATE_WIJZIG_EMAIL = 'functie/wijzig-email.dtl'
+TEMPLATE_BEVESTIG_EMAIL = 'functie/bevestig.dtl'
 TEMPLATE_EMAIL_BEVESTIGD = 'functie/bevestigd.dtl'
 TEMPLATE_WISSELVANROL = 'functie/wissel-van-rol.dtl'
 TEMPLATE_VHPG_ACCEPTATIE = 'functie/vhpg-acceptatie.dtl'
@@ -157,23 +158,34 @@ def mag_email_wijzigen_of_404(request, functie):
     raise Resolver404()
 
 
-def receive_bevestiging_functie_email(request, obj):
+def receive_bevestiging_functie_email(request, functie):
     """ deze functie wordt aangeroepen als een tijdelijke url gevolgd wordt
         om een nieuw email adres te bevestigen voor een functie.
-            obj is een Functie object.
-        We moeten een url teruggeven waar een http-redirect naar gedaan kan worden.
+
+        We moeten een url teruggeven waar een http-redirect naar gedaan kan worden
+        of een HttpResponse object.
     """
 
-    # schrijf in het logboek
-    from_ip = get_safe_from_ip(request)
-    account = obj.account
+    # het is mogelijk om meerdere keren hetzelfde e-mailadres te koppelen
+    # je hebt dan meerdere mails met tijdelijke urls om te volgen
+    # bij gebruik van de 1e worden alle tijdelijke urls geconsumeerd
+    # maar dan wordt deze functie ook meerdere keren aangeroepen
+    # na de eerste keer is nieuwe_email leeg en zou het mis gaan
+    # we moeten wel steeds dezelfde template invullen en terug geven
+    if functie.nieuwe_email:
+        # schrijf in het logboek
+        from_ip = get_safe_from_ip(request)
+        msg = "Bevestigd vanaf IP %s voor functie %s" % (from_ip, functie.beschrijving)
+        schrijf_in_logboek(account=None,
+                           gebruikte_functie="Bevestig e-mail",
+                           activiteit=msg)
 
-    msg = "Bevestigd vanaf IP %s voor account %s" % (from_ip, account.get_account_full_name())
-    schrijf_in_logboek(account=account,
-                       gebruikte_functie="Bevestig e-mail",
-                       activiteit=msg)
+        # zet het e-mailadres door
+        functie.bevestigde_email = functie.nieuwe_email
+        functie.nieuwe_email = ''
+        functie.save()
 
-    context = {}
+    context = {'functie': functie}
     return render(request, TEMPLATE_EMAIL_BEVESTIGD, context)
 
 
@@ -245,6 +257,8 @@ class WijzigEmailView(UserPassesTestMixin, View):
         """
         functie = self._get_functie_or_404()
 
+        # TODO: functie.nieuwe_email opruimen als SiteTijdelijkeUrl verlopen is (of opgeruimd is)
+
         # BKO, RKO, RCL, CWZ mogen hun eigen contactgegevens wijzigen
         # als ze de rol aangenomen hebben
         # verder mogen ze altijd de onderliggende laag aanpassen (net als beheerders koppelen)
@@ -276,14 +290,17 @@ class WijzigEmailView(UserPassesTestMixin, View):
         # (extra args zijn input voor hash, om unieke url te krijgen)
         functie_vraag_email_bevestiging(functie)
 
+        context = dict()
+        context['functie'] = functie
+
         # stuur terug naar het overzicht
         rol = rol_get_huidige(self.request)
         if rol == Rollen.ROL_CWZ:
-            terug_url = reverse('Functie:overzicht-vereniging')
+            context['terug_url'] = reverse('Functie:overzicht-vereniging')
         else:
-            terug_url = reverse('Functie:overzicht')
+            context['terug_url'] = reverse('Functie:overzicht')
 
-        return HttpResponseRedirect(terug_url)
+        return render(request, TEMPLATE_BEVESTIG_EMAIL, context)
 
 
 class OntvangBeheerderWijzigingenView(View):
