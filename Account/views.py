@@ -521,7 +521,11 @@ def receive_bevestiging_accountemail(request, obj):
                        gebruikte_functie="Bevestig e-mail",
                        activiteit=msg)
 
-    return reverse('Account:bevestigd')
+    context = dict()
+    if not request.user.is_authenticated:
+        context['show_login'] = True
+    menu_dynamics(request, context)
+    return render(request, TEMPLATE_BEVESTIGD, context)
 
 
 set_tijdelijke_url_receiver(RECEIVER_BEVESTIG_ACCOUNT_EMAIL, receive_bevestiging_accountemail)
