@@ -116,6 +116,11 @@ class SiteTijdelijkeUrl(models.Model):
 
     objects = models.Manager()      # for the editor only
 
+    def __str__(self):
+        """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
+        return "(%s) tot %s %s (accountemail %s, functie %s)" % (self.pk,
+                    self.geldig_tot, self.dispatch_to, self.hoortbij_accountemail, self.hoortbij_functie)
+
 
 def save_tijdelijke_url(url_code, dispatch_to, geldig_dagen=0, geldig_seconden=0, accountemail=None, functie=None):
     obj = SiteTijdelijkeUrl()
