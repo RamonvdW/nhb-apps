@@ -346,22 +346,6 @@ class WachtwoordVergetenView(TemplateView):
         return context
 
 
-class BevestigdView(TemplateView):
-    """
-        Deze view wordt gebruikt om een bericht te tonen als de gebruiker de link
-        in de e-mail gevolgd heeft.
-        Zie ook receive_bevestiging_accountemail
-    """
-
-    def get(self, request, *args, **kwargs):
-        """ deze functie wordt aangeroepen als een GET request ontvangen is """
-        context = dict()
-        if not request.user.is_authenticated:
-            context['show_login'] = True
-        menu_dynamics(request, context)
-        return render(request, TEMPLATE_BEVESTIGD, context)
-
-
 class AangemaaktView(TemplateView):
     """ Deze view geeft de laatste feedback naar de gebruiker
         nadat het account volledig aangemaakt is.

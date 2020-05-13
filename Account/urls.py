@@ -22,10 +22,6 @@ urlpatterns = [
          views.AangemaaktView.as_view(),
          name='aangemaakt'),
 
-    path('bevestigd/',
-         views.BevestigdView.as_view(),
-         name='bevestigd'),
-
     path('wachtwoord-vergeten/',
          views.WachtwoordVergetenView.as_view(),
          name='wachtwoord-vergeten'),

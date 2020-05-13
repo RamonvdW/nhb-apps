@@ -28,25 +28,6 @@ class TestAccountAanmaken(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 302)     # 302 = Redirect
         self.assertEqual(resp.url, '/plein/')
 
-    def test_email_bevestigd(self):
-        # haal de bevestigd view direct op
-
-        # uitgelogd --> login knop moet aanwezig zijn
-        self.e2e_logout()
-        resp = self.client.get('/account/bevestigd/')
-        self.assertEqual(resp.status_code, 200)
-        self.assert_template_used(resp, ('account/bevestigd.dtl', 'plein/site_layout.dtl'))
-        self.assertTrue('show_login' in resp.context)
-
-        # al ingelogd
-        self.e2e_login(self.account_normaal)
-        resp = self.client.get('/account/bevestigd/')
-        self.assertEqual(resp.status_code, 200)
-        self.assert_template_used(resp, ('account/bevestigd.dtl', 'plein/site_layout.dtl'))
-        self.assertFalse('show_login' in resp.context)
-
-        self.e2e_assert_other_http_commands_not_supported('/account/bevestigd/')
-
     def test_account_helpers(self):
         account = self.account_normaal
         account.first_name = "Normale"
@@ -127,5 +108,8 @@ class TestAccountAanmaken(E2EHelpers, TestCase):
 
         res, msg = account_test_wachtwoord_sterkte('passWORD!', '123456')
         self.assertEqual((res, msg), (False, "Wachtwoord is niet sterk genoeg"))
+
+    # er is geen view om een account direct aan te maken
+    # dit wordt via Schutter gedaan
 
 # end of file
