@@ -109,6 +109,7 @@ def maak_tijdelijke_url_accountwissel(accountemail, **kwargs):
 def do_dispatch(request, obj):
     """ Deze functie wordt aangeroepen vanuit de view die de ontvangen url_code
         opgezocht heeft in de database.
+            obj is een SiteTijdelijkeUrl
         Deze functie zoekt de callback van de juiste ontvanger op en roept deze aan.
     """
     redirect = None
