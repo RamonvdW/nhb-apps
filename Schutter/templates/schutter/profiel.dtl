@@ -68,7 +68,7 @@
 
     <p>Meer informatie over de competitie:&nbsp;<a class="btn-small btn-nhb-blauw" href="{% url 'Competitie:info-competitie' %}"><i class="material-icons-round white-text">help_outline</i></a></p>
 
-    <p>De volgende regiocompetitie zijn mogelijk van interesse:</p>
+    <p>De volgende regiocompetities zijn mogelijk van interesse:</p>
 
     <table class="white">
         <thead>

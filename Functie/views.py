@@ -547,6 +547,8 @@ class OverzichtView(UserPassesTestMixin, ListView):
 
     """ Via deze view worden de huidige beheerders getoond
         met Wijzig knoppen waar de gebruiker dit mag, aan de hand van de huidige rol
+
+        Wordt ook gebruikt om de CWZ relevante bestuurders te tonen
     """
 
     # class variables shared by all instances
