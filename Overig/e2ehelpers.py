@@ -202,15 +202,14 @@ class E2EHelpers(object):
             if pos >= 0:
                 content = content[pos:]
                 pos = content.find('</a>')
-                if pos:
-                    link = content[:pos+4]
-                    content = content[pos+4:]
-                    # filter out website-internal links
-                    if link.find('href="/') < 0 and link.find('href="#') < 0 and link.find('href="mailto:') < 0:
-                        # remainder must be links that leave the website
-                        # these must target a blank window
-                        if 'target="_blank"' not in link:
-                            self.fail(msg='Missing target="_blank" in link %s on page %s' % (link, template_name))
+                link = content[:pos+4]
+                content = content[pos+4:]
+                # filter out website-internal links
+                if link.find('href="/') < 0 and link.find('href="#') < 0 and link.find('href="mailto:') < 0:
+                    # remainder must be links that leave the website
+                    # these must target a blank window
+                    if 'target="_blank"' not in link:       # pragma: no cover
+                        self.fail(msg='Missing target="_blank" in link %s on page %s' % (link, template_name))
             else:
                 content = ''
         # while
