@@ -7,6 +7,7 @@
 from django.test import TestCase
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
+from Functie.models import Functie
 from Overig.e2ehelpers import E2EHelpers
 import datetime
 
@@ -144,27 +145,19 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.assertContains(resp, "CWZ test")
         self.assertContains(resp, "Grote Club")
 
-        # activeer nu de rol van RCL
-        # dan komen de CWZ rollen te voorschijn
-        resp = self.client.post(self.url_activeer_rol % self.functie_rcl.pk)
+        # niet een niet- bestaande functie vanuit de RCL functie
+        resp = self.client.post(self.url_activeer_functie % self.functie_rcl.pk)
         self.assert_is_redirect(resp, self.url_wisselvanrol)
+        self.e2e_check_rol('RCL')
 
-        resp = self.client.get(self.url_wisselvanrol)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assertNotContains(resp, "BKO test")
-        self.assertNotContains(resp, "RKO test")
-        self.assertContains(resp, "RCL test")
-        self.assertContains(resp, "CWZ test")
-
-        # niet bestaande functie
         resp = self.client.post(self.url_activeer_functie % 999999)
         self.assert_is_redirect(resp, self.url_wisselvanrol)
-        # TODO: check functie ongewijzigd
+
+        self.e2e_check_rol('RCL')
 
         resp = self.client.post(self.url_activeer_functie % 'getal')
         self.assert_is_redirect(resp, self.url_wisselvanrol)
-        # TODO: check functie ongewijzigd
+        self.e2e_check_rol('RCL')
 
         self.e2e_assert_other_http_commands_not_supported(self.url_wisselvanrol)
 
@@ -365,6 +358,35 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
             msg = "Dubbele mogelijkheden gevonden in WisselVanRol:\n  "
             msg += "\n  ".join(urls)
             self.fail(msg)
+
+    def test_help_anderen(self):
+        # probeer het helpen van andere rollen
+        # hiervoor moeten we de ingebouwde rollen gebruiken, met herkende hierarchy
+        bko18 = Functie.objects.get(beschrijving="BKO Indoor")
+        rko18r2 = Functie.objects.get(beschrijving="RKO Rayon 2 Indoor")
+        rcl18r105 = Functie.objects.get(beschrijving="RCL Regio 105 Indoor")
+
+        bko18.accounts.add(self.account_normaal)
+
+        # log in en wordt BKO
+        self.e2e_account_accepteert_vhpg(self.account_normaal)
+        self.e2e_login_and_pass_otp(self.account_normaal)
+        self.e2e_wissel_naar_functie(bko18)
+        self.e2e_check_rol('BKO')
+
+        # wissel naar RKO rol
+        self.e2e_wissel_naar_functie(rko18r2)
+        self.e2e_check_rol('RKO')
+        resp = self.client.get(self.url_wisselvanrol)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)       # checkt ook href's
+
+        # wissel door naar de RCL rol
+        self.e2e_wissel_naar_functie(rcl18r105)
+        self.e2e_check_rol('RCL')
+        resp = self.client.get(self.url_wisselvanrol)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)       # checkt ook href's
 
 
 # TODO: gebruik assert_other_http_commands_not_supported
