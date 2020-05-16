@@ -716,10 +716,22 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
         return HttpResponseRedirect(reverse('Plein:plein'))
 
-    def get_queryset(self):
-        """ called by the template system to get the queryset or list of objects for the template """
+    @staticmethod
+    def _functie_volgorde(functie):
+        if functie.rol == "BKO":
+            volgorde = 10  # 10
+        elif functie.rol == "RKO":
+            volgorde = 20 + functie.nhb_rayon.rayon_nr  # 21-24
+        elif functie.rol == "RCL":
+            volgorde = functie.nhb_regio.regio_nr  # 101-116
+        elif functie.rol == "CWZ":
+            volgorde = functie.nhb_ver.nhb_nr  # 1000-9999
+        else:
+            volgorde = 0  # valt meteen op dat 'ie bovenaan komt
+        return volgorde
+
+    def _get_functies_eigen(self):
         objs = list()
-        objs2 = list()
 
         hierarchy2 = dict()      # [parent_tup] = list of child_tup
         for child_tup, parent_tup in rol_enum_pallet(self.request):
@@ -728,19 +740,19 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
             # rollen die je altijd aan moet kunnen nemen als je ze hebt
             if rol == Rollen.ROL_IT:
                 url = reverse('Functie:activeer-rol', kwargs={'rol': rol2url[rol]})
-                objs.append({'titel': 'IT beheerder', 'url': url})
+                objs.append({'titel': 'IT beheerder', 'url': url, 'volgorde': 1})
 
             elif rol == Rollen.ROL_BB:
                 url = reverse('Functie:activeer-rol', kwargs={'rol': rol2url[rol]})
-                objs.append({'titel': 'Manager competitiezaken', 'url': url})
+                objs.append({'titel': 'Manager competitiezaken', 'url': url, 'volgorde': 2})
 
             elif rol == Rollen.ROL_SCHUTTER:
                 url = reverse('Functie:activeer-rol', kwargs={'rol': rol2url[rol]})
-                objs2.append({'titel': 'Schutter', 'url': url})
+                objs.append({'titel': 'Schutter', 'url': url, 'volgorde': 10000})
 
             elif rol == Rollen.ROL_NONE:
                 url = reverse('Functie:activeer-rol', kwargs={'rol': rol2url[rol]})
-                objs2.append({'titel': 'Gebruiker', 'url': url})
+                objs.append({'titel': 'Gebruiker', 'url': url, 'volgorde': 10001})
 
             elif parent_tup == (None, None):
                 # top-level rol voor deze gebruiker - deze altijd tonen
@@ -750,12 +762,11 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
                             only('beschrijving', 'nhb_ver__naam').\
                             get(pk=functie_pk)
                 title = functie.beschrijving
+                ver_naam = ''
                 if functie.nhb_ver:
                     ver_naam = functie.nhb_ver.naam
-                else:
-                    ver_naam = ''
-                objs.append({'titel': title, 'ver_naam': ver_naam, 'url': url})
-
+                volgorde = self._functie_volgorde(functie)
+                objs.append({'titel': title, 'ver_naam': ver_naam, 'url': url, 'volgorde': volgorde})
             else:
                 try:
                     hierarchy2[parent_tup].append(child_tup)
@@ -763,9 +774,11 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
                     hierarchy2[parent_tup] = [child_tup,]
         # for
 
-        # zet 'lage' functies onderaan
-        objs.extend(objs2)
-        del objs2
+        objs.sort(key=lambda x: x['volgorde'])
+        return objs, hierarchy2
+
+    def _get_functies_help_anderen(self, hierarchy2):
+        objs = list()
 
         # nu nog uitzoeken welke ge-erfde functies we willen tonen
         # deze staan in hierarchy
@@ -782,16 +795,30 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
             # geen ge-erfde functies
             pass
         else:
-            objs.append({'separator': True})
             for rol, functie_pk in child_tups:
                 url = reverse('Functie:activeer-functie', kwargs={'functie_pk': functie_pk})
                 if rol == Rollen.ROL_CWZ:
                     functie = Functie.objects.select_related('nhb_ver').only('beschrijving', 'nhb_ver__naam').get(pk=functie_pk)
-                    objs.append({'titel': functie.beschrijving, 'ver_naam': functie.nhb_ver.naam, 'url': url})
+                    volgorde = self._functie_volgorde(functie)
+                    objs.append({'titel': functie.beschrijving, 'ver_naam': functie.nhb_ver.naam, 'url': url, 'volgorde': volgorde})
                 else:
                     functie = Functie.objects.only('beschrijving').get(pk=functie_pk)
-                    objs.append({'titel': functie.beschrijving, 'ver_naam': "", 'url': url})
+                    volgorde = self._functie_volgorde(functie)
+                    objs.append({'titel': functie.beschrijving, 'ver_naam': "", 'url': url, 'volgorde': volgorde})
             # for
+
+        objs.sort(key=lambda x: x['volgorde'])
+        return objs
+
+    def get_queryset(self):
+        """ called by the template system to get the queryset or list of objects for the template """
+
+        objs, hierarchy = self._get_functies_eigen()
+        objs2 = self._get_functies_help_anderen(hierarchy)
+
+        if len(objs2):
+            objs.append({'separator': True})
+            objs.extend(objs2)
 
         return objs
 
@@ -815,7 +842,7 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
         context['wiki_2fa_url'] = settings.WIKI_URL_2FA
         context['wiki_2fa_titel'] = 'Tweede-factor authenticatie'
 
-        context['url_handleiding_rollen'] = settings.WIKI_URL_ROLLEN
+        context['wiki_rollen'] = settings.WIKI_URL_ROLLEN
 
         # login-as functie voor IT beheerder
         if rol_get_huidige(self.request) == Rollen.ROL_IT:
