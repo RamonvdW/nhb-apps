@@ -66,7 +66,7 @@
                 <span>RCL</span>
                 <span style="position: relative; bottom: .15em;"> &rarr; </span>
                 <span>CWZ.&nbsp;&nbsp;&nbsp;</span>
-                <a class="btn-small btn-nhb-blauw" href="{{ url_handleiding_rollen }}"><i class="material-icons-round white-text">help_outline</i></a>
+                <a class="btn-small btn-nhb-blauw" href="{{ wiki_rollen }}" target="_blank"><i class="material-icons-round white-text">help_outline</i></a>
             </p>
         {% else %}
             <form method="post" action="{{ obj.url }}">
