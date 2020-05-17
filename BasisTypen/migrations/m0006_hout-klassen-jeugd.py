@@ -53,30 +53,31 @@ def create_wedstrijdklasse_individueel(apps, beschrijving, boogtypen, leeftijdsk
     # for
 
 
-def wijzig_wedstrijdklassen_hout_jeugd(apps, schema_editor):
+# gewijzigde en nieuwe klassen:
+WKL_INDIV = (
+    ('Barebow klasse 1', ('BB',), ('SH', 'SV')),
+    ('Barebow klasse 2', ('BB',), ('SH', 'SV')),
+    ('Barebow Jeugd klasse 1', ('BB',), ('JH', 'JV', 'CH', 'CV')),
+    ('Barebow Aspiranten < 11 jaar', ('BB',), ('AH1', 'AV1'), True),
+    ('Barebow Aspiranten 11-12 jaar', ('BB',), ('AH2', 'AV2'), True),
+
+    ('Instinctive Bow klasse 1', ('IB',), ('SH', 'SV')),
+    ('Instinctive Bow klasse 2', ('IB',), ('SH', 'SV')),
+    ('Instinctive Bow Jeugd klasse 1', ('IB',), ('JH', 'JV', 'CH', 'CV')),
+    ('Instinctive Bow Aspiranten < 11 jaar', ('IB',), ('AH1', 'AV1'), True),
+    ('Instinctive Bow Aspiranten 11-12 jaar', ('IB',), ('AH2', 'AV2'), True),
+
+    ('Longbow klasse 1', ('LB',), ('SH', 'SV')),
+    ('Longbow klasse 2', ('LB',), ('SH', 'SV')),
+    ('Longbow Jeugd klasse 1', ('LB',), ('JH', 'JV', 'CH', 'CV')),
+    ('Longbow Aspiranten < 11 jaar', ('LB',), ('AH1', 'AV1'), True),
+    ('Longbow Aspiranten 11-12 jaar', ('LB',), ('AH2', 'AV2'), True),
+)
+
+
+def wijzig_wedstrijdklassen_hout_jeugd(apps, _):
     # wijzig de wedstrijdklassen jaar 2018 volgens spec v1.2, tabel 2.4
     #   naar de wedstrijdklassen jaar 2019 volgens spec v1.3, tabel 2.4
-
-    # gewijzigde en nieuwe klassen:
-    WKL_INDIV = (
-        ('Barebow klasse 1',                       ('BB',), ('SH', 'SV')),
-        ('Barebow klasse 2',                       ('BB',), ('SH', 'SV')),
-        ('Barebow Jeugd klasse 1',                 ('BB',), ('JH', 'JV', 'CH', 'CV')),
-        ('Barebow Aspiranten < 11 jaar',           ('BB',), ('AH1', 'AV1'), True),
-        ('Barebow Aspiranten 11-12 jaar',          ('BB',), ('AH2', 'AV2'), True),
-
-        ('Instinctive Bow klasse 1',               ('IB',), ('SH', 'SV')),
-        ('Instinctive Bow klasse 2',               ('IB',), ('SH', 'SV')),
-        ('Instinctive Bow Jeugd klasse 1',         ('IB',), ('JH', 'JV', 'CH', 'CV')),
-        ('Instinctive Bow Aspiranten < 11 jaar',   ('IB',), ('AH1', 'AV1'), True),
-        ('Instinctive Bow Aspiranten 11-12 jaar',  ('IB',), ('AH2', 'AV2'), True),
-
-        ('Longbow klasse 1',                       ('LB',), ('SH', 'SV')),
-        ('Longbow klasse 2',                       ('LB',), ('SH', 'SV')),
-        ('Longbow Jeugd klasse 1',                 ('LB',), ('JH', 'JV', 'CH', 'CV')),
-        ('Longbow Aspiranten < 11 jaar',           ('LB',), ('AH1', 'AV1'), True),
-        ('Longbow Aspiranten 11-12 jaar',          ('LB',), ('AH2', 'AV2'), True),
-    )
 
     for tup in WKL_INDIV:
         # neem een eventuele wedstrijdklasse met dezelfde beschrijving buiten gebruik

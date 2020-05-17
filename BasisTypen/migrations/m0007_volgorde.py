@@ -7,7 +7,7 @@
 from django.db import migrations, models
 
 
-def zet_volgorde(apps, beschrijving):
+def zet_volgorde(apps, _):
     """ sorteervolgorde voor de bekende boogtypen """
 
     # haal de klassen op die van toepassing zijn tijdens deze migratie

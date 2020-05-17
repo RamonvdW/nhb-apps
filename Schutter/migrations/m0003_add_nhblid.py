@@ -9,7 +9,7 @@ from django.db import migrations, models
 import django.db.models.deletion
 
 
-def zet_nhblid(apps, schema_editor):
+def zet_nhblid(apps, _):
 
     # haal de klassen op die van toepassing zijn tijdens deze migratie
     schutterboog_klas = apps.get_model('Schutter', 'SchutterBoog')

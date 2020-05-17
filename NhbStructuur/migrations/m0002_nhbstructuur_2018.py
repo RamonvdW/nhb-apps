@@ -28,7 +28,7 @@ def maak_rayons_2018(rayon_klas):
     # for
 
 
-def init_rayons_2018(apps, schema_editor):
+def init_rayons_2018(apps, _):
     """ Standaard rayons 2018 """
 
     # haal de klassen op die van toepassing zijn vóór de migratie
@@ -60,7 +60,7 @@ def maak_regios_2018(rayon_klas, regio_klas):
     # for
 
 
-def init_regios_2018(apps, schema_editor):
+def init_regios_2018(apps, _):
     """ Standard regios 2018 """
 
     # haal de klassen op die van toepassing zijn vóór de migratie
