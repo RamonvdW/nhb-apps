@@ -78,7 +78,7 @@
             </div>
         {% endif %}
 
-        <!-- verenigingen overzicht IT/BB/BKO -->
+        <!-- verenigingen/locaties overzicht IT/BB/BKO -->
         {% if rol_is_bko or rol_is_bb or rol_is_it %}
             <div class="card">
                 <div class="card-content">
@@ -93,9 +93,23 @@
                     </div>
                 </a>
             </div>
+
+            <div class="card">
+                <div class="card-content">
+                    <div class="card-title center-align">Locaties<br>
+                        <br><i class="material-icons-round large">home</i>
+                    </div>
+                    <p>Toon overzicht van de locaties (landelijk).</p>
+                </div>
+                <a href="{% url 'Wedstrijden:locaties' %}" class="nhb-klikbare-balk">
+                    <div class="card-action center-align">
+                        <span class="nhb-klikbare-link">Overzicht tonen</span>
+                    </div>
+                </a>
+            </div>
         {% endif %}
 
-        <!-- verenigingen overzicht RKO -->
+        <!-- verenigingen/locaties overzicht RKO -->
         {% if rol_is_rko %}
             <div class="card">
                 <div class="card-content">
@@ -110,9 +124,23 @@
                     </div>
                 </a>
             </div>
+
+            <div class="card">
+                <div class="card-content">
+                    <div class="card-title center-align">Locaties<br>
+                        <br><i class="material-icons-round large">home</i>
+                    </div>
+                    <p>Toon overzicht van de locaties (in jouw rayon).</p>
+                </div>
+                <a href="{% url 'Wedstrijden:locaties' %}" class="nhb-klikbare-balk">
+                    <div class="card-action center-align">
+                        <span class="nhb-klikbare-link">Overzicht tonen</span>
+                    </div>
+                </a>
+            </div>
         {% endif %}
 
-        <!-- verenigingen overzicht RCL -->
+        <!-- verenigingen/locaties overzicht RCL -->
         {% if rol_is_rcl %}
             <div class="card">
                 <div class="card-content">
@@ -122,6 +150,20 @@
                     <p>Toon overzicht van de verenigingen (in jouw regio).</p>
                 </div>
                 <a href="{% url 'Competitie:lijst-verenigingen' %}" class="nhb-klikbare-balk">
+                    <div class="card-action center-align">
+                        <span class="nhb-klikbare-link">Overzicht tonen</span>
+                    </div>
+                </a>
+            </div>
+
+            <div class="card">
+                <div class="card-content">
+                    <div class="card-title center-align">Locaties<br>
+                        <br><i class="material-icons-round large">home</i>
+                    </div>
+                    <p>Toon overzicht van de locaties (in jouw regio).</p>
+                </div>
+                <a href="{% url 'Wedstrijden:locaties' %}" class="nhb-klikbare-balk">
                     <div class="card-action center-align">
                         <span class="nhb-klikbare-link">Overzicht tonen</span>
                     </div>
