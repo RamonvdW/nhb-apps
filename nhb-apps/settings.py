@@ -25,7 +25,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2020-05-17'
+SITE_VERSIE = '2020-05-18'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'Vereniging.apps.VerenigingConfig',
     'Schutter.apps.SchutterConfig',
     'Score.apps.ScoreConfig',
+    'Wedstrijden.apps.WedstrijdenConfig',
     'djangosaml2idp',               # single sign-on Identity Provider (IP)
                                     #   using SAML2 (Security Assertion Markup Language)
     'django.contrib.staticfiles',   # gather static files from modules helper

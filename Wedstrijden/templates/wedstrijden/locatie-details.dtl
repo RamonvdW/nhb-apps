@@ -1,0 +1,109 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2020 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Locatie details{% endblock %}
+
+{% block pagina %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="wedstrijd-locatie-details" %}
+
+<h4>Locatie details</h4>
+
+<p>Op deze pagina staan de details van een wedstrijdlocatie.</p>
+
+<form action="{{ opslaan_url }}" method="post">
+    {% csrf_token %}
+
+    <table class="white">
+        <tr>
+            <td style="vertical-align: top">Adres:</td>
+            <td style="vertical-align: top">{{ locatie.adres|linebreaksbr }}</td>
+        </tr>
+
+        <tr>
+            <td>Typering:</td>
+            <td>
+                <span>{{ locatie.baan_type_str }}<br></span>
+                <!-- TODO: toon onderstaand alleen als er gewijzigd mag worden -->
+                <select name="baan_type">
+                    <option value="X"{%if locatie.volledig_overdekt == "X" %} selected{% endif %}>Onbekend</option>
+                    <option value="O"{%if locatie.volledig_overdekt == "O" %} selected{% endif %}>Binnen, volledig overdekt</option>
+                    <option value="H"{%if locatie.volledig_overdekt == "H" %} selected{% endif %}>Half overdekt (binnen-buiten schieten)</option>
+                </select>
+            </td>
+        </tr>
+
+        <tr>
+            <td>Aantal banen 18 meter:</td>
+            <td><span>{{ locatie.banen_18m }}<br></span>
+                <!-- TODO: toon onderstaand alleen als er gewijzigd mag worden -->
+                <select name="banen_18m">
+                    <option value="0"{%if locatie.banen_18m == 0 %} selected{% endif %}>Geen banen</option>
+                    <option value="1"{%if locatie.banen_18m == 1 %} selected{% endif %}>1 baan</option>
+                    {% for baan in banen %}
+                        <option value="{{ baan }}"{%if locatie.banen_18m == baan %} selected{% endif %}>{{ baan }} banen</option>
+                    {% endfor %}
+                </select>
+            </td>
+        </tr>
+
+        <tr>
+            <td>Aantal banen 25 meter:</td>
+            <td><span>{{ locatie.banen_25m }}<br></span>
+                <!-- TODO: toon onderstaand alleen als er gewijzigd mag worden -->
+                <select name="banen_25m">
+                    <option value="0"{%if locatie.banen_25m == 0 %} selected{% endif %}>Geen banen</option>
+                    <option value="1"{%if locatie.banen_25m == 1 %} selected{% endif %}>1 baan</option>
+                    {% for baan in banen %}
+                        <option value="{{ baan }}"{%if locatie.banen_25m == baan %} selected{% endif %}>{{ baan }} banen</option>
+                    {% endfor %}
+                </select>
+            </td>
+        </tr>
+
+        <tr>
+            <td>Maximum aantal Dutch Targets op 1 baan:</td>
+            <td><span>{{ locatie.max_dt_per_baan }}<br></span>
+                <select name="max_dt">
+                    <option value="3"{%if locatie.max_dt_per_baan == 3 %} selected{% endif %}>3 blazoenen</option>
+                    <option value="4"{%if locatie.max_dt_per_baan == 4 %} selected{% endif %}>4 blazoenen</option>
+                </select>
+            </td>
+        </tr>
+
+        <tr>
+            <td style="vertical-align: top">Notities:</td>
+            <td style="vertical-align: top">
+                <textarea name="notities" class="materialize-textarea">{{ locatie.notities }}</textarea>
+            </td>
+        </tr>
+
+        <tr>
+            <td style="vertical-align: top">Verenigingen die hier schieten:</td>
+            <td style="vertical-align: top">
+                {% for nhbver in locatie.nhb_ver %}
+                    {% if not forloop.first %}
+                    <br>
+                    {% endif %}
+                    <span>{{ nhbver }}</span>
+                {% endfor %}
+            </td>
+        </tr>
+    </table>
+
+    <p>
+        <a class="btn-nhb-blauw margin-5" href="{{ terug_url }}">
+            <i class="material-icons-round left">arrow_back</i>Terug (niet opslaan)</a>
+
+        <!-- TODO: knop om wijzigingen op te slaan -->
+        <button class="btn-nhb-rood margin-5" type="submit"><i class="material-icons-round left">save</i>Wijzigingen opslaan</button>
+    </p>
+
+</form>
+
+{% endblock %}
+

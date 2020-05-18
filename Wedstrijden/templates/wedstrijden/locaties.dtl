@@ -1,0 +1,76 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2020 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Locaties{% endblock %}
+
+{% block pagina %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="wedstrijd-locaties" %}
+
+<h4>Locaties</h4>
+
+<p>Deze pagina toont een overzicht van de locaties waar wedstrijden gehouden kunnen worden.</p>
+
+<table class="white" id="table1">
+    <thead>
+        <tr>        <!-- filter veld -->
+            <td colspan="2" class="table-filter"><input class="table-filter" oninput="myTableFilter(this, 'table1')" placeholder="Zoeken"/></td>
+            <td colspan="2"></td>
+        </tr>
+        <tr>
+            <th filter="on">Adres</th>
+            <th filter="on">Vereniging(en)</th>
+            <th>Info</th>
+            <th><!-- kolom voor de details knop --></th>
+        </tr>
+    </thead>
+
+    {% for obj in locaties %}
+        <tr>
+            <td>{{ obj.adres|linebreaksbr }}</td>
+
+            <td>
+                {% for nhbver in obj.nhb_ver %}
+                    {% if not forloop.first %}
+                    <br>
+                    {% endif %}
+                    <span>{{ nhbver }}</span>
+                {% endfor %}
+            </td>
+
+            <td>
+                {% if obj.baan_type == 'X' %}
+                    <!-- ga er vanuit dat nog niets ingevuld is -->
+                    <i class="material-icons-round red-text">error_outline</i><br>
+                {% else %}
+                    <!-- toon aantal banen -->
+                    <span>{{ obj.banen_18m }} | {{ obj.banen_25m }}</span>
+
+                    <br>
+                    <!-- toon binnen-buiten icoon -->
+                    {% if obj.baan_type == 'H' %}
+                        <i class="material-icons-round">flip</i>
+                    {% endif %}
+                    {% if obj.baan_type == 'O' %}
+                        <i class="material-icons-round">crop_din</i>
+                    {% endif %}
+                {% endif %}
+
+                {% if obj.notities != '' %}
+                    <i class="material-icons-round">notifications_none</i>
+                {% endif %}
+            </td>
+
+            <td>
+                <a class="btn-nhb-blauw" href="{{ obj.details_url }}">Details</a>
+            </td>
+        </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}
+

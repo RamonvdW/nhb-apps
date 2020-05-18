@@ -23,13 +23,14 @@ urlpatterns = [
     path('competitie/', include('Competitie.urls')),
     path('functie/',    include('Functie.urls')),
     path('hist/',       include('HistComp.urls')),
+    path('idp/',        include('djangosaml2idp.urls')),        # single sign-on
+    path('logboek/',    include('Logboek.urls')),
     path('overig/',     include('Overig.urls')),
     path('plein/',      include('Plein.urls')),
-    path('logboek/',    include('Logboek.urls')),
     path('records/',    include('Records.urls')),
     path('schutter/',   include('Schutter.urls')),
     path('vereniging/', include('Vereniging.urls')),
-    path('idp/',        include('djangosaml2idp.urls')),        # single sign-on
+    path('wedstrijd/',  include('Wedstrijden.urls')),
 ]
 
 if settings.DEBUG:          # pragma: no cover
