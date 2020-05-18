@@ -15,6 +15,7 @@ from Account.models import Account
 from Mailer.models import mailer_email_is_valide
 from Logboek.models import schrijf_in_logboek
 from Functie.models import maak_functie, maak_cwz
+from Wedstrijden.models import WedstrijdLocatie
 import argparse
 import datetime
 import json
@@ -70,6 +71,11 @@ EXPECTED_MEMBER_KEYS = ('club_number', 'member_number', 'name', 'prefix', 'first
 SKIP_MEMBERS = (101711,)        # CRM developer
 
 GEEN_SECRETARIS_NODIG = (1377,)
+
+GEEN_WEDSTRIJDLOCATIE = (1368,      # bondsbureau NHB
+                         1377,      # persoonlijk lid, geen wedstrijden
+                         )
+
 
 class Command(BaseCommand):
 
@@ -226,8 +232,7 @@ class Command(BaseCommand):
                 self._count_warnings += 1
                 ver_email = ""      # voorkom None
 
-            # TODO: verdere velden: website
-            # TODO: wedstrijdlocatie velden verwerken: address, postal_code, has_disabled_facilities
+            # TODO: verdere velden: website, email, has_disabled_facilities, lat/lon
 
             # zoek de vereniging op
             is_nieuw = False
@@ -650,6 +655,82 @@ class Command(BaseCommand):
             #             self.stderr.write('[ERROR] Onverwachte fout bij het verwijderen van een lid: %s' % str(exc))
         # while
 
+    def _import_wedstrijdlocaties(self, data):
+        """ Importeert data van verenigingen als basis voor wedstrijdlocaties """
+
+        if self._check_keys(data[0].keys(), EXPECTED_CLUB_KEYS, "club"):
+            return
+
+        # houd bij welke vereniging nhb_nrs in de database zitten
+        # als deze niet meer voorkomen, dan zijn ze verwijderd
+        nhb_nrs = [tup[0] for tup in NhbVereniging.objects.values_list('nhb_nr')]
+
+        # voor overige velden, zie _import_clubs
+        """ JSON velden (string, except):
+         'club_number':             int
+         'phone_business',
+         'phone_private',
+         'phone_mobile': None,      ???
+         'email', 'website',
+         'has_disabled_facilities': boolean
+         'address':                 string with newlines
+         'postal_code',
+         'location_name',
+         'latitude', 'longitude',
+        }
+        """
+
+        for club in data:
+            nhb_nr = club['club_number']
+
+            if nhb_nr in GEEN_WEDSTRIJDLOCATIE:
+                continue
+
+            nhb_ver = vind_vereniging(nhb_nr)
+            if not nhb_ver:
+                continue
+
+            # een vereniging zonder doel heeft een lege location_name
+            adres = ""
+            if club['location_name']:
+                adres = club['address']
+                if adres:
+                    adres = adres.strip()     # remove terminating \n
+
+            if not adres:
+                # verwijder de koppeling met wedstrijdlocatie uit crm
+                for obj in nhb_ver.wedstrijdlocatie_set.filter(adres_uit_crm=True):
+                    nhb_ver.wedstrijdlocatie_set.remove(obj)
+                    self.stdout.write('[INFO] Wedstrijdlocatie %s ontkoppeld voor vereniging %s' % (repr(obj.adres), nhb_nr))
+                    self._count_wijzigingen += 1
+                continue
+
+            # zoek de wedstrijdlocatie bij dit adres
+            try:
+                wedstrijdlocatie = WedstrijdLocatie.objects.get(adres=adres)
+            except WedstrijdLocatie.DoesNotExist:
+                # nieuw aanmaken
+                wedstrijdlocatie = WedstrijdLocatie()
+                wedstrijdlocatie.adres = adres
+                wedstrijdlocatie.adres_uit_crm = True
+                wedstrijdlocatie.save()
+                self.stdout.write('[INFO] Nieuwe wedstrijdlocatie voor adres %s' % repr(adres))
+                self._count_toevoegingen += 1
+
+            # bij adreswijzigingen moet de oude locatie ontkoppeld worden
+            for obj in nhb_ver.wedstrijdlocatie_set.exclude(adres_uit_crm=False).exclude(pk=wedstrijdlocatie.pk):
+                nhb_ver.wedstrijdlocatie_set.remove(obj)
+                self.stdout.write('[INFO] Vereniging %s ontkoppeld van wedstrijdlocatie met adres %s' % (nhb_ver, repr(obj.adres)))
+                self._count_wijzigingen += 1
+            # for
+
+            if wedstrijdlocatie.verenigingen.filter(nhb_nr=nhb_nr).count() == 0:
+                # maak koppeling tussen vereniging en wedstrijdlocatie
+                wedstrijdlocatie.verenigingen.add(nhb_ver)
+                self.stdout.write('[INFO] Vereniging %s gekoppeld aan wedstrijdlocatie %s' % (nhb_ver, repr(adres)))
+                self._count_toevoegingen += 1
+        # for
+
     def handle(self, *args, **options):
         self.dryrun = options['dryrun']
 
@@ -684,6 +765,7 @@ class Command(BaseCommand):
             self._import_clubs(data['clubs'])
             self._import_members(data['members'])
             self._import_clubs_secretaris(data['clubs'])
+            self._import_wedstrijdlocaties(data['clubs'])
         except django.db.utils.DataError as exc:        # pragma: no coverage
             self.stderr.write('[ERROR] Overwachte database fout: %s' % str(exc))
 

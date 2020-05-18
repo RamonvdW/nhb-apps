@@ -127,6 +127,11 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         f1 = io.StringIO()
         f2 = io.StringIO()
         management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_03.json', stderr=f1, stdout=f2)
+        # print("f1: %s" % f1.getvalue())
+        # print("f2: %s" % f2.getvalue())
+        self.assertTrue("[INFO] Nieuwe wedstrijdlocatie voor adres 'Oude pijlweg 1, 1234 AB Doelstad'" in f2.getvalue())
+        self.assertTrue("[INFO] Vereniging [1000] Grote Club gekoppeld aan wedstrijdlocatie 'Oude pijlweg 1, 1234 AB Doelstad'" in f2.getvalue())
+
         f1 = io.StringIO()
         f2 = io.StringIO()
         management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_08.json', stderr=f1, stdout=f2)
@@ -139,6 +144,9 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         self.assertTrue("[INFO] Wijziging van secretaris voor vereniging 1001: geen --> 100001" in f2.getvalue())
         self.assertTrue('[INFO] Wijziging van plaats voor vereniging 1000: "Stad" --> "Stadia"' in f2.getvalue())
         self.assertTrue('[INFO] Wijziging van contact email voor vereniging 1000: "test@groteclub.archery" --> "andere@groteclub.archery"' in f2.getvalue())
+        self.assertTrue("[INFO] Nieuwe wedstrijdlocatie voor adres 'Nieuwe pijlweg 1, 1234 AB Doelstad'" in f2.getvalue())
+        self.assertTrue("[INFO] Vereniging [1000] Nieuwe Grote Club ontkoppeld van wedstrijdlocatie met adres 'Oude pijlweg 1, 1234 AB Doelstad'" in f2.getvalue())
+        self.assertTrue("[INFO] Vereniging [1000] Nieuwe Grote Club gekoppeld aan wedstrijdlocatie 'Nieuwe pijlweg 1, 1234 AB Doelstad'" in f2.getvalue())
 
     def test_lid_mutaties(self):
         # lid mutaties
@@ -191,7 +199,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         self.assertTrue("[ERROR] Lid 100997 heeft geen valide datum lidmaatschap: 1815-06-06" in f1.getvalue())
 
     def test_skip_member(self):
-        # sommige leden worden niet geimporteerd
+        # sommige leden worden niet geïmporteerd
         f1 = io.StringIO()
         f2 = io.StringIO()
         management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_12.json', stderr=f1, stdout=f2)
