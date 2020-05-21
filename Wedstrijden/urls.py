@@ -15,6 +15,10 @@ urlpatterns = [
          views.WedstrijdLocatieDetailsView.as_view(),
          name='locatie-details'),
 
+    path('locatie/details/vereniging/<locatie_pk>/',
+         views.WedstrijdLocatieDetailsVerenigingView.as_view(),
+         name='locatie-details-vereniging'),
+
     path('locaties/',
          views.WedstrijdLocatiesView.as_view(),
          name='locaties'),

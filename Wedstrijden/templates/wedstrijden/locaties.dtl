@@ -15,6 +15,10 @@
 
 <p>Deze pagina toont een overzicht van de locaties waar wedstrijden gehouden kunnen worden.</p>
 
+{% if filter %}
+<p>Locaties in gebruik door verenigingen in <b>{{ filter }}</b> worden getoond.
+{% endif %}
+
 <table class="white" id="table1">
     <thead>
         <tr>        <!-- filter veld -->
@@ -42,26 +46,25 @@
                 {% endfor %}
             </td>
 
-            <td>
+            <td style="vertical-align: center">
                 {% if obj.baan_type == 'X' %}
                     <!-- ga er vanuit dat nog niets ingevuld is -->
-                    <i class="material-icons-round red-text">error_outline</i><br>
+                    <i class="material-icons-round red-text" style="vertical-align: bottom; font-size: 20px">error_outline</i>
                 {% else %}
-                    <!-- toon aantal banen -->
-                    <span>{{ obj.banen_18m }} | {{ obj.banen_25m }}</span>
-
-                    <br>
                     <!-- toon binnen-buiten icoon -->
                     {% if obj.baan_type == 'H' %}
-                        <i class="material-icons-round">flip</i>
+                        <i class="material-icons-round" style="vertical-align: bottom; font-size: 20px">flip</i>
                     {% endif %}
                     {% if obj.baan_type == 'O' %}
-                        <i class="material-icons-round">crop_din</i>
+                        <i class="material-icons-round" style="vertical-align: bottom; font-size: 20px">crop_din</i>
                     {% endif %}
+
+                    <!-- toon aantal banen -->
+                    <span>&nbsp;{{ obj.banen_18m }}|{{ obj.banen_25m }}</span>
                 {% endif %}
 
                 {% if obj.notities != '' %}
-                    <i class="material-icons-round">notifications_none</i>
+                    <span>&nbsp;<i class="material-icons-round" style="vertical-align: bottom; font-size: 20px">notifications_none</i></span>
                 {% endif %}
             </td>
 

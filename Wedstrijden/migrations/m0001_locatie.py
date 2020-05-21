@@ -22,20 +22,6 @@ class Migration(migrations.Migration):
     # migratie functies
     operations = [
         migrations.CreateModel(
-            name='Wedstrijd',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('beschrijving', models.CharField(blank=True, max_length=100)),
-                ('preliminair', models.BooleanField(default=True)),
-                ('datum', models.DateField()),
-                ('tijd_begin_aanmelden', models.TimeField()),
-                ('tijd_begin_wedstrijd', models.TimeField()),
-                ('tijd_einde_wedstrijd', models.TimeField()),
-                ('indiv_klassen', models.ManyToManyField(to='BasisTypen.IndivWedstrijdklasse')),
-            ],
-            options={'verbose_name': 'Wedstrijd', 'verbose_name_plural': 'Wedstrijden'},
-        ),
-        migrations.CreateModel(
             name='WedstrijdLocatie',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
@@ -50,25 +36,6 @@ class Migration(migrations.Migration):
                 ('notities', models.TextField(blank=True, max_length=1024)),
             ],
             options={'verbose_name': 'Wedstrijdlocatie', 'verbose_name_plural': 'Wedstrijdlocaties'},
-        ),
-        migrations.CreateModel(
-            name='WedstrijdenPlan',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('hiaat', models.BooleanField(default=True)),
-                ('wedstrijden', models.ManyToManyField(to='Wedstrijden.Wedstrijd')),
-            ],
-            options={'verbose_name': 'Wedstrijdenplan', 'verbose_name_plural': 'Wedstrijdenplannen'},
-        ),
-        migrations.AddField(
-            model_name='wedstrijd',
-            name='locatie',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='Wedstrijden.WedstrijdLocatie'),
-        ),
-        migrations.AddField(
-            model_name='wedstrijd',
-            name='team_klassen',
-            field=models.ManyToManyField(to='BasisTypen.TeamWedstrijdklasse'),
         ),
     ]
 

@@ -99,7 +99,7 @@
                     <div class="card-title center-align">Locaties<br>
                         <br><i class="material-icons-round large">home</i>
                     </div>
-                    <p>Toon overzicht van de locaties (landelijk).</p>
+                    <p>Gegevens over de doelen (landelijk) die van belang zijn voor wedstrijden.</p>
                 </div>
                 <a href="{% url 'Wedstrijden:locaties' %}" class="nhb-klikbare-balk">
                     <div class="card-action center-align">
@@ -130,7 +130,7 @@
                     <div class="card-title center-align">Locaties<br>
                         <br><i class="material-icons-round large">home</i>
                     </div>
-                    <p>Toon overzicht van de locaties (in jouw rayon).</p>
+                    <p>Gegevens over de doelen (in jouw rayon) die van belang zijn voor wedstrijden.</p>
                 </div>
                 <a href="{% url 'Wedstrijden:locaties' %}" class="nhb-klikbare-balk">
                     <div class="card-action center-align">
@@ -155,13 +155,16 @@
                     </div>
                 </a>
             </div>
+        {% endif %}
 
+        <!-- locaties overzicht RCL / CWZ -->
+        {% if rol_is_cwz or rol_is_rcl %}
             <div class="card">
                 <div class="card-content">
                     <div class="card-title center-align">Locaties<br>
                         <br><i class="material-icons-round large">home</i>
                     </div>
-                    <p>Toon overzicht van de locaties (in jouw regio).</p>
+                    <p>Gegevens over de doelen (in jouw regio) die van belang zijn voor wedstrijden.</p>
                 </div>
                 <a href="{% url 'Wedstrijden:locaties' %}" class="nhb-klikbare-balk">
                     <div class="card-action center-align">

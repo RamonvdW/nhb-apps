@@ -126,6 +126,25 @@
         </div>
     </div>
 
+    <!-- details locatie -->
+    {% if locatie_details_url %}
+        <div class="col s12 m6 xl4">
+            <div class="card">
+                <div class="card-content">
+                    <table class="simple"><tr style="border:0px">
+                        <td><i class="material-icons-round large">home</i></td>
+                        <td>Gegevens over het doel die van belang zijn voor wedstrijden.</td>
+                    </tr></table>
+                </div>
+                <a href="{{ locatie_details_url }}" class="nhb-klikbare-balk">
+                    <div class="card-action center-align">
+                        <span class="nhb-klikbare-link">Details</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+    {% endif %}
+
 </div>
 
 {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vereniging-overzicht" %}

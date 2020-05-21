@@ -11,6 +11,7 @@ from Competitie.models import Competitie, CompetitieKlasse, RegioCompetitieSchut
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Schutter.models import SchutterBoog
 from Score.models import aanvangsgemiddelde_opslaan
+from Wedstrijden.models import WedstrijdLocatie
 from Overig.e2ehelpers import E2EHelpers
 import datetime
 
@@ -77,6 +78,19 @@ class TestVerenigingCWZ(E2EHelpers, TestCase):
         lid.bij_vereniging = ver
         lid.save()
         self.nhblid_100002 = lid
+
+        # maak nog een jeugdlid aan, in dezelfde leeftijdsklasse
+        lid = NhbLid()
+        lid.nhb_nr = 100012
+        lid.geslacht = "V"
+        lid.voornaam = "Andrea"
+        lid.achternaam = "de Jeugdschutter"
+        lid.email = ""
+        lid.geboorte_datum = datetime.date(year=2010, month=3, day=4)
+        lid.sinds_datum = datetime.date(year=2010, month=10, day=10)
+        lid.bij_vereniging = ver
+        lid.save()
+        self.nhblid_100012 = lid
 
         # maak een senior lid aan, om inactief te maken
         lid = NhbLid()
@@ -328,5 +342,22 @@ class TestVerenigingCWZ(E2EHelpers, TestCase):
         resp = self.client.post(self.url_aanmelden % 9999999)
         self.assertEqual(resp.status_code, 404)         # 404 = Not found
 
+    def test_wedstrijdlocatie(self):
+        # maak een locatie en koppel aan de vereniging
+        loc = WedstrijdLocatie()
+        # loc.adres = "Dubbelbaan 16\n1234AB Schietbuurt"
+        loc.save()
+        loc.verenigingen.add(self.nhbver)
+
+        # login als CWZ
+        self.e2e_login_and_pass_otp(self.account_cwz)
+        self.e2e_wissel_naar_functie(self.functie_cwz)
+        self.e2e_check_rol('CWZ')
+
+        # check voor het kaartje om de doel details aan te passen
+        resp = self.client.get(self.url_overzicht)
+        urls = self.extract_all_urls(resp)
+        urls2 = [url for url in urls if url.startswith('/wedstrijd/locatie/details/vereniging/')]
+        self.assertEqual(len(urls2), 1)
 
 # end of file

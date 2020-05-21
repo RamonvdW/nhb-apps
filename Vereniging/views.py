@@ -11,7 +11,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.utils import timezone
 from Plein.menu import menu_dynamics
-from Functie.rol import rol_get_huidige_functie
+from Functie.rol import Rollen, rol_get_huidige_functie
 from BasisTypen.models import LeeftijdsKlasse, MAXIMALE_LEEFTIJD_JEUGD
 from NhbStructuur.models import NhbLid
 from Schutter.models import SchutterBoog
@@ -34,8 +34,8 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        _, functie_nu = rol_get_huidige_functie(self.request)
-        return functie_nu and functie_nu.rol == "CWZ"
+        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
+        return functie_nu and rol_nu == Rollen.ROL_CWZ
 
     def handle_no_permission(self):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
@@ -47,6 +47,10 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
 
         _, functie_nu = rol_get_huidige_functie(self.request)
         context['nhb_ver'] = functie_nu.nhb_ver
+
+        if functie_nu.nhb_ver.wedstrijdlocatie_set.count() > 0:
+            locatie = functie_nu.nhb_ver.wedstrijdlocatie_set.all()[0]
+            context['locatie_details_url'] = reverse('Wedstrijden:locatie-details-vereniging', kwargs={'locatie_pk': locatie.pk})
 
         context['competities'] = Competitie.objects.filter(is_afgesloten=False)
 

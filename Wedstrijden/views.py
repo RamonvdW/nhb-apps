@@ -28,7 +28,7 @@ class WedstrijdLocatiesView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
-        return rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_CWZ)
+        return rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_CWZ)
 
     def handle_no_permission(self):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
@@ -40,12 +40,53 @@ class WedstrijdLocatiesView(UserPassesTestMixin, TemplateView):
 
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
 
-        objs = WedstrijdLocatie.objects.exclude(zichtbaar=False).order_by('pk')
+        # BB/BKO krijgt alle locaties (geen filter)
+
+        # RKO krijgt locaties in eigen rayon
+        if rol_nu == Rollen.ROL_RKO:
+            rayon_nr = functie_nu.nhb_rayon.rayon_nr
+            context['filter'] = str(functie_nu.nhb_rayon)
+        else:
+            rayon_nr = None
+
+        # RCL en CWZ krijgen locaties in eigen regio
+        if rol_nu == Rollen.ROL_RCL:
+            regio_nr = functie_nu.nhb_regio.regio_nr
+            context['filter'] = str(functie_nu.nhb_regio)
+        elif rol_nu == Rollen.ROL_CWZ:
+            regio_nr = functie_nu.nhb_ver.regio.regio_nr
+            context['filter'] = str(functie_nu.nhb_ver.regio)
+        else:
+            regio_nr = None
+
+        objs = WedstrijdLocatie.objects.\
+                    exclude(zichtbaar=False).\
+                    order_by('pk').\
+                    prefetch_related('verenigingen')        # database access booster
+
+        context['locaties'] = lijst = list()
         for obj in objs:
-            obj.nhb_ver = [str(ver) for ver in obj.verenigingen.order_by('nhb_nr')]
-            obj.details_url = reverse('Wedstrijden:locatie-details', kwargs={'locatie_pk': obj.pk})
+            keep = False
+            obj.nhb_ver = list()
+            for ver in obj.verenigingen.all():
+                obj.nhb_ver.append(str(ver))
+                if rayon_nr:
+                    # rayon filter voor RKO
+                    if ver.regio.rayon.rayon_nr == rayon_nr:
+                        keep = True
+                elif regio_nr:
+                    # regio filter voor RCL/CWZ
+                    if ver.regio.regio_nr == regio_nr:
+                        keep = True
+                else:
+                    # geen filter
+                    keep = True
+            # for
+            if keep:
+                obj.nhb_ver.sort()      # obj.verenigingen.order_by('nhb_nr') is much more expensive
+                obj.details_url = reverse('Wedstrijden:locatie-details', kwargs={'locatie_pk': obj.pk})
+                lijst.append(obj)
         # for
-        context['locaties'] = objs
 
         menu_dynamics(self.request, context, actief='hetplein')
         return context
@@ -78,19 +119,44 @@ class WedstrijdLocatieDetailsView(UserPassesTestMixin, TemplateView):
             raise Resolver404()
 
         if locatie.baan_type == 'O':
-            locatie.baan_type_str = 'Binnen, volledig overdekt'
+            locatie.baan_type_str = 'Volledig overdekte binnenbaan'
         elif locatie.baan_type == 'H':
             locatie.baan_type_str = 'Half overdekt (binnen-buiten schieten)'
         else:
             locatie.baan_type_str = 'Onbekend'
 
-        locatie.nhb_ver = [str(ver) for ver in locatie.verenigingen.order_by('nhb_nr')]
+        locatie.nhb_ver = list()
+        regio = None
+        for ver in locatie.verenigingen.order_by('nhb_nr'):
+            regio = ver.regio
+            locatie.nhb_ver.append(str(ver))
+        # for
+        if regio:
+            # regio van de locatie afhankelijk van 1e vereniging
+            context['regio'] = str(regio)
 
-        context['opslaan_url'] = reverse('Wedstrijden:locatie-details', kwargs=kwargs)
-        context['terug_url'] = reverse('Wedstrijden:locaties')
+        if 'is_ver' in kwargs:
+            context['terug_url'] = reverse('Vereniging:overzicht')
+            context['opslaan_url'] = reverse('Wedstrijden:locatie-details-vereniging', kwargs={'locatie_pk': locatie.pk})
+        else:
+            context['terug_url'] = reverse('Wedstrijden:locaties')
+            context['opslaan_url'] = reverse('Wedstrijden:locatie-details', kwargs={'locatie_pk': locatie.pk})
 
         # aantal banen waar uit gekozen kan worden
         context['banen'] = [nr for nr in range(2, 25)]
+
+        context['readonly'] = True
+        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
+        if functie_nu:
+            if rol_nu == Rollen.ROL_CWZ:
+                if locatie.verenigingen.filter(nhb_nr=functie_nu.nhb_ver.nhb_nr).count() > 0:
+                    # CWZ mag deze vereniging wijzigen
+                    context['readonly'] = False
+            elif rol_nu == Rollen.ROL_RCL:
+                for ver in locatie.verenigingen.all():
+                    if ver.regio == functie_nu.nhb_regio:
+                        # dit is een vereniging in de regio van de RCL
+                        context['readonly'] = False
 
         menu_dynamics(self.request, context, actief='hetplein')
         return context
@@ -106,6 +172,8 @@ class WedstrijdLocatieDetailsView(UserPassesTestMixin, TemplateView):
         if not form.is_valid():
             raise Resolver404()
 
+        # TODO: controleer dat de gebruiker deze locatie mag wijzigen
+
         locatie.baan_type = form.cleaned_data.get('baan_type')
         locatie.banen_18m = form.cleaned_data.get('banen_18m')
         locatie.banen_25m = form.cleaned_data.get('banen_25m')
@@ -113,6 +181,22 @@ class WedstrijdLocatieDetailsView(UserPassesTestMixin, TemplateView):
         locatie.notities = form.cleaned_data.get('notities')
         locatie.save()
 
-        return HttpResponseRedirect(reverse('Wedstrijden:locaties'))
+        if 'is_ver' in kwargs:
+            url = reverse('Vereniging:overzicht')
+        else:
+            url = reverse('Wedstrijden:locaties')
+
+        return HttpResponseRedirect(url)
+
+
+class WedstrijdLocatieDetailsVerenigingView(WedstrijdLocatieDetailsView):
+
+    def get_context_data(self, **kwargs):
+        kwargs['is_ver'] = True
+        return super().get_context_data(**kwargs)
+
+    def post(self, request, *args, **kwargs):
+        kwargs['is_ver'] = True
+        return super().post(request, *args, **kwargs)
 
 # end of file
