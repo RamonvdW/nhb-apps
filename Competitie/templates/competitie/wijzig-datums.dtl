@@ -9,7 +9,7 @@
 {% block title %}Competitie datums{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-overzicht" %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-wijzig-datums" %}
 
 <script>
 function post_datums() {
