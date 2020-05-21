@@ -131,9 +131,13 @@ class E2EHelpers(object):
             print(soup.prettify())
 
     @staticmethod
-    def extract_all_urls(resp):
+    def extract_all_urls(resp, skip_menu=False):
         content = str(resp.content)
-        pos = content.find('<body')
+        if skip_menu:
+            # menu is the first part of the body
+            pos = content.find('<div id="content">')
+        else:
+            pos = content.find('<body')
         if pos > 0:                             # pragma: no branch
             content = content[pos:]             # strip head
         urls = list()
@@ -151,8 +155,10 @@ class E2EHelpers(object):
             # find the end of the new url
             pos = content.find('"')
             if pos > 0:
-                urls.append(content[:pos])
+                url = content[:pos]
                 content = content[pos:]
+                if url != "#":
+                    urls.append(url)
         # while
         return urls
 
