@@ -13,6 +13,39 @@
 
 <h4>Welkom op het Plein</h4>
 
-<p>Zie Schutter in het menu.</p>
+<p>Naast de inhoud van deze website (te bereiken via het menu) zijn de volgende sites misschien ook van interesse.</p>
+
+<table class="white">
+    <thead>
+        <tr>
+            <th>Andere websites van de NHB</th>
+            <th><!-- kolom met de knoppen --></th>
+        </tr>
+    </thead>
+
+    <body>
+        <tr>
+            <td>
+                <img src="{% static 'plein/logo_nhb_192x192.png' %}" width="128" alt="Logo Hero">
+            </td>
+            <td>
+                <a class="btn-nhb-blauw" target="_blank" href="https://www.handboogsport.nl">
+                    <i class="material-icons-round left">open_in_new</i>Handboogsport Nederland</a>
+            </td>
+        </tr>
+
+        <tr>
+            <td>
+                <img src="{% static 'plein/logo_hero_512x512.png' %}" width="128" alt="Logo Hero">
+            </td>
+            <td>
+                <a class="btn-nhb-blauw" target="_blank" href="https://www.handboogsport.nl/freeyourmind/zelf-schieten/">
+                    <i class="material-icons-round left">open_in_new</i>Locaties van de verenigingen</a>
+            </td>
+        </tr>
+
+    </body>
+</table>
+
 
 {% endblock %}

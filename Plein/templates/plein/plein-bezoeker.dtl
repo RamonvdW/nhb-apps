@@ -13,16 +13,50 @@
 
 <h4>Welkom</h4>
 
+<p>Op deze website kan je informatie vinden over de Handboogsport, zoals uitslagen van de competities en de Nederlandse Records.</p>
+
+<!-- TODO: deze opmerking verwijderen -->
 <p>Deze site is van de Nederlandse Handboog Bond (NHB) en is nog in ontwikkeling.</p>
 
-<h5>Menu</h5>
-
-<!-- hide-on-large-only werkt als hide-on-large-and-up -->
-<div class="hide-on-large-only">Klik of druk op het plaatje met drie-streepjes (linksboven op deze pagina) om het menu <b>op te roepen</b>.</div>
-
-<p>Via het menu kan je informatie vinden over de Handboogsport zoals uitslagen van de competities en de Nederlandse Records.</p>
-
 <h5>Account aanmaken</h5>
-<p>Ben je lid van de NHB (heb je een NHB nummer?), maak dan een account aan en log in, dan tonen we informatie die voor jou relevant is.</p>
+<p>Ben je lid van de NHB (heb je een NHB nummer?) maak dan een account aan en log in, dan tonen we informatie die voor jou relevant is.</p>
+<p><a class="btn-nhb-blauw" href="{% url 'Schutter:registreer' %}">Account aanmaken</a></p>
+
+<h5>Verder</h5>
+
+<p>De volgende sites zijn misschien ook van interesse.</p>
+
+<table class="white">
+    <thead>
+        <tr>
+            <th>Andere websites van de NHB</th>
+            <th><!-- kolom met de knoppen --></th>
+        </tr>
+    </thead>
+
+    <body>
+        <tr>
+            <td>
+                <img src="{% static 'plein/logo_nhb_192x192.png' %}" width="128" alt="Logo Hero">
+            </td>
+            <td>
+                <a class="btn-nhb-blauw" target="_blank" href="https://www.handboogsport.nl">
+                    <i class="material-icons-round left">open_in_new</i>Handboogsport Nederland</a>
+            </td>
+        </tr>
+
+        <tr>
+            <td>
+                <img src="{% static 'plein/logo_hero_512x512.png' %}" width="128" alt="Logo Hero">
+            </td>
+            <td>
+                <a class="btn-nhb-blauw" target="_blank" href="https://www.handboogsport.nl/freeyourmind/zelf-schieten/">
+                    <i class="material-icons-round left">open_in_new</i>Locaties van de verenigingen</a>
+            </td>
+        </tr>
+
+    </body>
+</table>
+
 
 {% endblock %}
