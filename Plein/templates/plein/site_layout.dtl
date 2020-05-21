@@ -44,7 +44,16 @@
             <!-- main contents -->
             <div id="content">      <!-- css manipulates this -->
                 <!-- button to call-up the sidenav; hidden when not needed -->
-                <a href="#" data-target="slide-out" class="sidenav-trigger hide-on-large-only"><i class="material-icons-round">menu</i></a>
+                <a id="discover-menu" href="#" data-target="slide-out" class="sidenav-trigger hide-on-large-only">
+                    <i class="material-icons-round black-text">menu</i>
+                </a>
+
+                <div class="tap-target" data-target="discover-menu">
+                    <div class="tap-target-content white-text">
+                        <h5>Toegang tot het menu</h5>
+                        <p>Gebruik de drie streepjes om het menu op te roepen</p>
+                    </div>
+                </div>
 
                 <!-- screen-size indicator labels -->
                 {% if is_debug %}
@@ -67,6 +76,36 @@
 
         <!-- framework init, after everything has been loaded and instantiated -->
         <script>
+            function discover_popup_delayed_open() {
+                // in de tussentijd kan het scherm al weer groter zijn geworden
+                var menu_is_hidden = window.matchMedia("(max-width: 992px)");
+                if (menu_is_hidden.matches) {
+                    var elem = document.querySelector('.tap-target');
+                    M.TapTarget.getInstance(elem).open();
+                }
+            }
+
+            function discover_popup_show(mq_event) {
+                // scherm is kleiner geworden (of initieel klein), dus toon de tap target
+                if (mq_event == null || mq_event.matches) {
+                    // cookie zorgt ervoor dat de pop-up maar 5x tonen
+                    var count = getCookieNumber('menu_discover');
+                    if (count < 3) {
+                        document.cookie = 'menu_discover=' + (count + 1) + '; path=/';
+                        // toon met een kleine vertraging
+                        setTimeout(discover_popup_delayed_open, 2000);
+                    }
+                }
+            }
+
+            function discover_popup_hide(mq_event) {
+                // scherm is kleiner geworden, dus haal de tap-target uit beeld
+                if (mq_event.matches) {
+                    var elem = document.querySelector('.tap-target');
+                    M.TapTarget.getInstance(elem).close();
+                }
+            }
+
             document.addEventListener('DOMContentLoaded', function() {
                 // sidenav
                 var elems = document.querySelectorAll('.sidenav');
@@ -79,6 +118,23 @@
                           };
                 var elems = document.querySelectorAll('.collapsible');
                 var insts = M.Collapsible.init(elems, options);
+
+                // feature discovery
+                var elems = document.querySelectorAll('.tap-target');
+                var insts = M.TapTarget.init(elems, {});
+
+                var count = getCookieNumber('menu_discover');
+                if (count < 3) {
+                    var menu_is_shown = window.matchMedia("(min-width: 992px)");
+                    menu_is_shown.addListener(discover_popup_hide);
+
+                    var menu_is_hidden = window.matchMedia("(max-width: 992px)");
+                    menu_is_hidden.addListener(discover_popup_show);
+                    if (menu_is_hidden.matches) {
+                        // show immediately
+                        discover_popup_show(null);
+                    }
+                }
 
                 // rolgordijnen
                 var elems = document.querySelectorAll('select');
@@ -102,6 +158,16 @@
                     }
                 }
                 return cookieValue;
+            }
+
+            function getCookieNumber(name) {
+                var value = getCookie(name);
+                var number = 0;
+                if (value != null) {
+                    number = parseInt(value, 10);
+                    if (isNaN(number)) number = 0;
+                }
+                return number;
             }
         </script>
 
