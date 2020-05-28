@@ -17,18 +17,54 @@
 
 <p>Naast de inhoud van deze website (te bereiken via het menu) zijn de volgende sites misschien ook van interesse.</p>
 
+<div class="row">
+    <div class="col s12 cards-container">
+
+        <!-- andere sites van de NHB -->
+        <div class="card">
+            <div class="card-content">
+                <div class="card-title center-align">Handboogsport Nederland<br>
+                    <br><img src="{% static 'plein/logo_nhb_192x192.png' %}" width="128" alt="Logo NHB">
+                </div>
+                <p>Website van de NHB: <code>www.handboogsport.nl</code></p>
+            </div>
+            <a class="nhb-klikbare-balk" href="https://www.handboogsport.nl" target="_blank">
+                <div class="card-action center-align">
+                    <span class="nhb-klikbare-link">Open de website</span>
+                </div>
+            </a>
+        </div>
+
+        <div class="card">
+            <div class="card-content">
+                <div class="card-title center-align">Free your mind<br>
+                    <br><img src="{% static 'plein/logo_hero_512x512.png' %}" width="128" alt="Logo NHB">
+                </div>
+                <p>Kaart met de locaties in Nederland waar je kan schieten.</p>
+            </div>
+            <a class="nhb-klikbare-balk" href="https://www.handboogsport.nl/freeyourmind/zelf-schieten/" target="_blank">
+                <div class="card-action center-align">
+                    <span class="nhb-klikbare-link">Open de website</span>
+                </div>
+            </a>
+        </div>
+
+    </div>
+</div>
+
+<!--
 <table class="white">
     <thead>
         <tr>
             <th>Andere websites van de NHB</th>
-            <th><!-- kolom met de knoppen --></th>
+            <th></th>
         </tr>
     </thead>
 
     <body>
         <tr>
             <td>
-                <img src="{% static 'plein/logo_nhb_192x192.png' %}" width="128" alt="Logo Hero">
+                <img src="{% static 'plein/logo_nhb_192x192.png' %}" width="128" alt="Logo NHB">
             </td>
             <td>
                 <a class="btn-nhb-blauw" target="_blank" href="https://www.handboogsport.nl">
@@ -48,5 +84,7 @@
 
     </body>
 </table>
+-->
+
 {% endblock %}
 
