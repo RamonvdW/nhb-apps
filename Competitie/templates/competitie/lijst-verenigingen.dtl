@@ -51,7 +51,7 @@
                 <th class="center-align">Regio</th>
             {% endif %}
 
-            <th filter="on">Plaats doel</th>
+            <th filter="on">Plaats accommodatie</th>
 
             <th filter="on">Vereniging</th>
 

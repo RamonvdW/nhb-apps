@@ -133,7 +133,7 @@
                 <div class="card-content">
                     <table class="simple"><tr style="border:0px">
                         <td><i class="material-icons-round large">home</i></td>
-                        <td>Gegevens over het doel die van belang zijn voor wedstrijden.</td>
+                        <td>Gegevens over de accommodatie die van belang zijn voor wedstrijden.</td>
                     </tr></table>
                 </div>
                 <a href="{{ locatie_details_url }}" class="nhb-klikbare-balk">

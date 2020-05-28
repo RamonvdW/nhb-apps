@@ -96,10 +96,10 @@
 
             <div class="card">
                 <div class="card-content">
-                    <div class="card-title center-align">Locaties<br>
+                    <div class="card-title center-align">Accommodaties<br>
                         <br><i class="material-icons-round large">home</i>
                     </div>
-                    <p>Gegevens over de doelen (landelijk) die van belang zijn voor wedstrijden.</p>
+                    <p>Gegevens over de accommodaties (landelijk) die van belang zijn voor wedstrijden.</p>
                 </div>
                 <a href="{% url 'Wedstrijden:locaties' %}" class="nhb-klikbare-balk">
                     <div class="card-action center-align">
@@ -127,10 +127,10 @@
 
             <div class="card">
                 <div class="card-content">
-                    <div class="card-title center-align">Locaties<br>
+                    <div class="card-title center-align">Accommodaties<br>
                         <br><i class="material-icons-round large">home</i>
                     </div>
-                    <p>Gegevens over de doelen (in jouw rayon) die van belang zijn voor wedstrijden.</p>
+                    <p>Gegevens over de accommodaties (in jouw rayon) die van belang zijn voor wedstrijden.</p>
                 </div>
                 <a href="{% url 'Wedstrijden:locaties' %}" class="nhb-klikbare-balk">
                     <div class="card-action center-align">
@@ -161,10 +161,10 @@
         {% if rol_is_cwz or rol_is_rcl %}
             <div class="card">
                 <div class="card-content">
-                    <div class="card-title center-align">Locaties<br>
+                    <div class="card-title center-align">Accommodaties<br>
                         <br><i class="material-icons-round large">home</i>
                     </div>
-                    <p>Gegevens over de doelen (in jouw regio) die van belang zijn voor wedstrijden.</p>
+                    <p>Gegevens over de accommodaties (in jouw regio) die van belang zijn voor wedstrijden.</p>
                 </div>
                 <a href="{% url 'Wedstrijden:locaties' %}" class="nhb-klikbare-balk">
                     <div class="card-action center-align">
