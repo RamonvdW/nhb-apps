@@ -7,6 +7,7 @@
 from django.test import TestCase
 from .models import maak_functie, Functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
+from Logboek.models import LogboekRegel
 from Overig.e2ehelpers import E2EHelpers
 import datetime
 
@@ -336,12 +337,19 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, "BKO ")
 
+        LogboekRegel.objects.all().delete()
+
         # koppel de RKO
         url = '/functie/wijzig/%s/ontvang/' % self.functie_rko3.pk
         self.assertEqual(self.functie_rko3.accounts.count(), 0)
         resp = self.client.post(url, {'add': self.account_beh2.pk}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertEqual(self.functie_rko3.accounts.count(), 1)
+
+        # controleer correctheid toevoeging in het logboek
+        regel = LogboekRegel.objects.all()[0]
+        self.assertEqual(regel.gebruikte_functie, 'Rollen')
+        self.assertEqual(regel.activiteit, 'NHB lid 100042 (Beh eerder) is beheerder gemaakt voor functie RKO Rayon 3 Indoor')
 
         # check dat de BKO geen RCL kan koppelen
         # juiste URL om RCL te koppelen
@@ -367,12 +375,20 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, "RKO ")
 
+        LogboekRegel.objects.all().delete()
+
         # koppel een RCL van het juiste rayon
         url = '/functie/wijzig/%s/ontvang/' % self.functie_rcl111.pk
         self.assertEqual(self.functie_rcl111.accounts.count(), 0)
         resp = self.client.post(url, {'add': self.account_beh1.pk}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertEqual(self.functie_rcl111.accounts.count(), 1)
+
+        # controleer correctheid toevoeging in het logboek
+        regel = LogboekRegel.objects.all()[0]
+        self.assertEqual(regel.gebruikte_functie, 'Rollen')
+        # beh1 is geen nhb lid
+        self.assertEqual(regel.activiteit, 'Account Beheerder1 (testbeheerder1) is beheerder gemaakt voor functie RCL Regio 111 Indoor')
 
         # koppel een RCL van het verkeerde rayon
         url = '/functie/wijzig/%s/ontvang/' % self.functie_rcl101.pk

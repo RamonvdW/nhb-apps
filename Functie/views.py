@@ -341,10 +341,10 @@ class OntvangBeheerderWijzigingenView(View):
 
         if account.nhblid_set.count() > 0:
             nhblid = account.nhblid_set.all()[0]
-            wie = "NHB lid %s (%s)" % (nhblid.nhb_nr, nhblid.volledige_naam)
+            wie = "NHB lid %s (%s)" % (nhblid.nhb_nr, nhblid.volledige_naam())
         else:
             nhblid = None
-            wie = "Account %s" % account.volledige_naam()
+            wie = "Account %s" % account.get_account_full_name()
 
         if add:
             rol_nu, functie_nu = rol_get_huidige_functie(request)
