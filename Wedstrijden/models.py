@@ -13,6 +13,12 @@ BAAN_TYPE = (('X', 'Onbekend'),
              ('O', 'Volledig overdekte binnenbaan'),
              ('H', 'Binnen-buiten schieten'))
 
+BAANTYPE2STR = {
+    'X': 'Onbekend',
+    'O': 'Volledig overdekte binnenbaan',
+    'H': 'Binnen-buiten schieten',
+}
+
 
 class WedstrijdLocatie(models.Model):
     """ Een locatie waarop een wedstrijd gehouden kan worden

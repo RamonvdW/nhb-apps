@@ -6,14 +6,14 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}Locaties{% endblock %}
+{% block title %}Accommodaties{% endblock %}
 
 {% block pagina %}
 {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="wedstrijd-locaties" %}
 
-<h4>Locaties</h4>
+<h4>Accommodaties</h4>
 
-<p>Deze pagina toont een overzicht van de locaties waar wedstrijden gehouden kunnen worden.</p>
+<p>Deze pagina toont een overzicht van de accommodaties waar wedstrijden gehouden kunnen worden.</p>
 
 {% if filter %}
 <p>Locaties in gebruik door verenigingen in <b>{{ filter }}</b> worden getoond.

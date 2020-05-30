@@ -182,6 +182,41 @@ class TestWedstrijdenLocatie(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('wedstrijden/locatie-details.dtl', 'plein/site_layout.dtl'))
 
+        # wijziging aanbrengen
+        url = self.url_locatie_details % self.loc2.pk
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('wedstrijden/locatie-details.dtl', 'plein/site_layout.dtl'))
+
+        # probeer een wijziging te doen
+        resp = self.client.post(url, {'baan_type': 'X',
+                                      'banen_18m': 1,
+                                      'banen_25m': 0,
+                                      'max_dt': 3,
+                                      'notities': 'hoi'})
+        self.assert_is_redirect(resp, '/wedstrijd/locaties/')
+        loc2 = WedstrijdLocatie.objects.get(pk=self.loc2.pk)
+        self.assertEqual(loc2.baan_type, 'X')
+        self.assertEqual(loc2.banen_18m, 1)
+        self.assertEqual(loc2.banen_25m, 0)
+        self.assertEqual(loc2.max_dt_per_baan, 3)
+        self.assertEqual(loc2.notities, 'hoi')
+
+        # doe een niet-wijziging voor de coverage
+        resp = self.client.post(url, {'baan_type': 'X',
+                                      'banen_18m': 1,
+                                      'banen_25m': 0,
+                                      'max_dt': 3,
+                                      'notities': 'hoi'})
+        self.assert_is_redirect(resp, '/wedstrijd/locaties/')
+        loc2 = WedstrijdLocatie.objects.get(pk=self.loc2.pk)
+        self.assertEqual(loc2.baan_type, 'X')
+        self.assertEqual(loc2.banen_18m, 1)
+        self.assertEqual(loc2.banen_25m, 0)
+        self.assertEqual(loc2.max_dt_per_baan, 3)
+        self.assertEqual(loc2.notities, 'hoi')
+
     def test_cwz(self):
         # login als CWZ van ver2 op loc2
         self.e2e_login_and_pass_otp(self.account_cwz)
@@ -231,12 +266,12 @@ class TestWedstrijdenLocatie(E2EHelpers, TestCase):
         resp = self.client.get(url)
         self.assertContains(resp, 'Volledig overdekt')
 
-        url = self.url_locatie_details % self.loc2.pk
         resp = self.client.post(url, {'baan_type': 'H',
                                       'banen_18m': 5,
                                       'banen_25m': 6,
                                       'max_dt': 3,
                                       'notities': 'dit is een test'})
+        self.assert_is_redirect(resp, '/vereniging/')
         loc2 = WedstrijdLocatie.objects.get(pk=self.loc2.pk)
         self.assertEqual(loc2.baan_type, 'H')
         resp = self.client.get(url)

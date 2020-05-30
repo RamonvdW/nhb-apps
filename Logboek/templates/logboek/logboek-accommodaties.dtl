@@ -1,30 +1,16 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019-2020 Ramon van der Winkel.
+                Copyright (c) 2020 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
 
-{% block title %}Logboek{% endblock %}
+{% block title %}Logboek - Accommodaties{% endblock %}
 
 {% block pagina %}
 
-<h4>Logboek</h4>
-
-<p>Focus:
-    <a class="btn-nhb-blauw margin-5" href="{% url 'Logboek:records' %}">Records</a>
-    <span>&nbsp;</span>
-    <a class="btn-nhb-blauw margin-5" href="{% url 'Logboek:accounts' %}">Accounts</a>
-    <span>&nbsp;</span>
-    <a class="btn-nhb-blauw margin-5" href="{% url 'Logboek:rollen' %}">Rollen</a>
-    <span>&nbsp;</span>
-    <a class="btn-nhb-blauw margin-5" href="{% url 'Logboek:accommodaties' %}">Accommodaties</a>
-    <span>&nbsp;</span>
-    <a class="btn-nhb-blauw margin-5" href="{% url 'Logboek:nhbstructuur' %}">CRM import</a>
-    <span>&nbsp;</span>
-    <a class="btn-nhb-blauw margin-5" href="{% url 'Logboek:competitie' %}">Competitie</a>
-</p>
+<h4>Logboek - Accommodaties</h4>
 
 {% if is_paginated %}
     <ul class="pagination">
@@ -46,17 +32,12 @@
     </ul>
 {% endif %}
 
-<ul class="collapsible white">
+<ul class="collection white">
     {% for obj in object_list %}
-    <li>
-        <div class="collapsible-header white-text">
-            {{ obj.toegevoegd_op|date:"l j F Y" }} om {{ obj.toegevoegd_op|date:"H:i" }}: {{ obj.gebruikte_functie }}
-        </div>
-        <div class="collapsible-body">
-            <span>Door: {{ obj.door }}</span>
-            <p>Functie: {{ obj.gebruikte_functie }}</p>
-            <p>Activiteit: {{ obj.activiteit|linebreaksbr }}</p>
-        </div>
+    <li class="collection-item">
+        <span>{{ obj.toegevoegd_op|date:"l j F Y" }} om {{ obj.toegevoegd_op|date:"H:i" }}</span><br>
+        <span>Door account: {{ obj.door }}</span><br>
+        <span>{{ obj.activiteit|linebreaksbr }}</span>
     </li>
     {% endfor %}
 </ul>

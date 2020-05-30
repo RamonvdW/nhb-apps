@@ -33,6 +33,10 @@ urlpatterns = [
     path('competitie/',
          views.LogboekCompetitieView.as_view(),
          name='competitie'),
+
+    path('accommodaties/',
+         views.LogboekAccommodatiesView.as_view(),
+         name='accommodaties'),
 ]
 
 # end of file

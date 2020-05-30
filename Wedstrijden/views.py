@@ -9,8 +9,9 @@ from django.views.generic import TemplateView, View
 from django.http import HttpResponseRedirect
 from django.urls import reverse, Resolver404
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
+from Logboek.models import schrijf_in_logboek
 from Plein.menu import menu_dynamics
-from .models import WedstrijdLocatie
+from .models import WedstrijdLocatie, BAANTYPE2STR
 from .forms import WedstrijdLocatieForm
 
 
@@ -102,7 +103,7 @@ class WedstrijdLocatieDetailsView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
-        return rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_CWZ)
+        return rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_CWZ)
 
     def handle_no_permission(self):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
@@ -118,12 +119,7 @@ class WedstrijdLocatieDetailsView(UserPassesTestMixin, TemplateView):
         except WedstrijdLocatie.DoesNotExist:
             raise Resolver404()
 
-        if locatie.baan_type == 'O':
-            locatie.baan_type_str = 'Volledig overdekte binnenbaan'
-        elif locatie.baan_type == 'H':
-            locatie.baan_type_str = 'Half overdekt (binnen-buiten schieten)'
-        else:
-            locatie.baan_type_str = 'Onbekend'
+        locatie.baan_type_str = BAANTYPE2STR[locatie.baan_type]
 
         locatie.nhb_ver = list()
         regio = None
@@ -174,11 +170,39 @@ class WedstrijdLocatieDetailsView(UserPassesTestMixin, TemplateView):
 
         # TODO: controleer dat de gebruiker deze locatie mag wijzigen
 
-        locatie.baan_type = form.cleaned_data.get('baan_type')
-        locatie.banen_18m = form.cleaned_data.get('banen_18m')
-        locatie.banen_25m = form.cleaned_data.get('banen_25m')
-        locatie.max_dt_per_baan = form.cleaned_data.get('max_dt')
-        locatie.notities = form.cleaned_data.get('notities')
+        msgs = list()
+        data = form.cleaned_data.get('baan_type')
+        if locatie.baan_type != data:
+            old_str = BAANTYPE2STR[locatie.baan_type]
+            new_str = BAANTYPE2STR[data]
+            msgs.append("baan type aangepast van '%s' naar '%s'" % (old_str, new_str))
+            locatie.baan_type = data
+
+        data = form.cleaned_data.get('banen_18m')
+        if locatie.banen_18m != data:
+            msgs.append("Aantal 18m banen aangepast van %s naar %s" % (locatie.banen_18m, data))
+            locatie.banen_18m = data
+
+        data = form.cleaned_data.get('banen_25m')
+        if locatie.banen_25m != data:
+            msgs.append("Aantal 25m banen aangepast van %s naar %s" % (locatie.banen_25m, data))
+            locatie.banen_25m = data
+
+        data = form.cleaned_data.get('max_dt')
+        if locatie.max_dt_per_baan != data:
+            msgs.append("Max DT per baan aangepast van %s naar %s" % (locatie.max_dt_per_baan, data))
+            locatie.max_dt_per_baan = data
+
+        if len(msgs) > 0:
+            activiteit = "Aanpassingen aan locatie %s: %s" % (str(locatie), "; ".join(msgs))
+            schrijf_in_logboek(request.user, 'Accommodaties', activiteit)
+
+        data = form.cleaned_data.get('notities')
+        if locatie.notities != data:
+            activiteit = "Aanpassing notitie van locatie %s: %s (was %s)" % (str(locatie), repr(data), repr(locatie.notities))
+            schrijf_in_logboek(request.user, 'Accommodaties', activiteit)
+            locatie.notities = data
+
         locatie.save()
 
         if 'is_ver' in kwargs:

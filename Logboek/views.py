@@ -19,6 +19,7 @@ TEMPLATE_LOGBOEK_ACCOUNTS = 'logboek/logboek-accounts.dtl'
 TEMPLATE_LOGBOEK_NHBSTRUCTUUR = 'logboek/logboek-nhbstructuur.dtl'
 TEMPLATE_LOGBOEK_RECORDS = 'logboek/logboek-records.dtl'
 TEMPLATE_LOGBOEK_ROLLEN = 'logboek/logboek-rollen.dtl'
+TEMPLATE_LOGBOEK_ACCOMMODATIES = 'logboek/logboek-accommodaties.dtl'
 TEMPLATE_LOGBOEK_COMPETITIE = 'logboek/logboek-competitie.dtl'
 
 RESULTS_PER_PAGE = 50
@@ -182,6 +183,19 @@ class LogboekCompetitieView(LogboekBasisView):
     def get_queryset(self):
         """ retourneer de data voor de template view """
         return LogboekRegel.objects.all().filter(gebruikte_functie='Competitie').order_by('-toegevoegd_op')
+
+
+class LogboekAccommodatiesView(LogboekBasisView):
+    """ Deze view toont de logboek regels die met het beheer van de accommodaties te maken hebben """
+    template_name = TEMPLATE_LOGBOEK_ACCOMMODATIES
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.base_url = reverse('Logboek:accommodaties')
+
+    def get_queryset(self):
+        """ retourneer de data voor de template view """
+        return LogboekRegel.objects.all().filter(gebruikte_functie='Accommodaties').order_by('-toegevoegd_op')
 
 
 # end of file
