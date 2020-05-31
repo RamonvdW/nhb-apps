@@ -7,7 +7,7 @@
 from django import forms
 
 
-class WedstrijdLocatieForm(forms.Form):
+class AccommodatieDetailsForm(forms.Form):
     """ Dit formulier wordt gebruikt om de details van een wedstrijdlocatie te ontvangen
     """
 

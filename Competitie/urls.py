@@ -35,10 +35,6 @@ urlpatterns = [
          views.KlassegrenzenTonenView.as_view(),
          name='klassegrenzen-tonen'),
 
-    path('lijst-verenigingen/',
-         views.LijstVerenigingenView.as_view(),
-         name='lijst-verenigingen'),
-
     path('lijst-regio/<comp_pk>/',
          views.LijstAangemeldRegioView.as_view(),
          name='lijst-regio'),

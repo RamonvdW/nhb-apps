@@ -33,7 +33,6 @@ TEMPLATE_COMPETITIE_INSTELLINGEN = 'competitie/instellingen-nieuwe-competitie.dt
 TEMPLATE_COMPETITIE_AANMAKEN = 'competitie/competities-aanmaken.dtl'
 TEMPLATE_COMPETITIE_KLASSEGRENZEN_VASTSTELLEN = 'competitie/klassegrenzen-vaststellen.dtl'
 TEMPLATE_COMPETITIE_KLASSEGRENZEN_TONEN = 'competitie/klassegrenzen-tonen.dtl'
-TEMPLATE_COMPETITIE_LIJST_VERENIGINGEN = 'competitie/lijst-verenigingen.dtl'
 TEMPLATE_COMPETITIE_AANGEMELD_REGIO = 'competitie/lijst-aangemeld-regio.dtl'
 TEMPLATE_COMPETITIE_AG_VASTSTELLEN = 'competitie/ag-vaststellen.dtl'
 TEMPLATE_COMPETITIE_INFO_COMPETITIE = 'competitie/info-competitie.dtl'
@@ -437,81 +436,6 @@ class AGVaststellenView(UserPassesTestMixin, TemplateView):
                 ScoreHist.objects.bulk_create(bulk_scorehist)
 
         return redirect('Competitie:overzicht')
-
-
-class LijstVerenigingenView(UserPassesTestMixin, ListView):
-
-    """ Via deze view worden kan een BKO, RKO of RCL
-          de lijst van verenigingen zien, in zijn werkgebied
-    """
-
-    template_name = TEMPLATE_COMPETITIE_LIJST_VERENIGINGEN
-
-    def test_func(self):
-        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        rol_nu = rol_get_huidige(self.request)
-        return rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL)
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
-
-    def get_queryset(self):
-        """ called by the template system to get the queryset or list of objects for the template """
-
-        rol_nu, functie = rol_get_huidige_functie(self.request)
-
-        if rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB, Rollen.ROL_BKO):
-            # toon de landelijke lijst
-            objs = NhbVereniging.objects.all().exclude(regio__regio_nr=100).order_by('regio__regio_nr', 'nhb_nr')
-            if rol_nu == Rollen.ROL_IT:
-                for obj in objs:
-                    obj.aantal_leden = NhbLid.objects.filter(bij_vereniging=obj).count()
-                # for
-            return objs
-
-        if rol_nu == Rollen.ROL_RKO:
-            # toon de lijst van verenigingen in het rayon van de RKO
-            # het rayonnummer is verkrijgbaar via de deelcompetitie van de functie
-            return NhbVereniging.objects.filter(regio__rayon=functie.nhb_rayon).exclude(regio__regio_nr=100).order_by('regio__regio_nr', 'nhb_nr')
-
-        # (rol_nu == Rollen.ROL_RCL)
-        # toon de lijst van verenigingen in de regio van de RCL
-        # het regionummer is verkrijgbaar via de deelcompetitie van de functie
-        objs = NhbVereniging.objects.filter(regio=functie.nhb_regio)
-        for obj in objs:
-            try:
-                functie_cwz = Functie.objects.get(rol='CWZ', nhb_ver=obj)
-            except Functie.DoesNotExist:
-                obj.cwzs = list()
-            else:
-                obj.cwzs = functie_cwz.accounts.all()
-        # for
-        return objs
-
-    def get_context_data(self, **kwargs):
-        """ called by the template system to get the context data for the template """
-        context = super().get_context_data(**kwargs)
-
-        context['toon_rayon'] = True
-        context['toon_regio'] = True
-
-        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
-        context['huidige_rol'] = rol_get_beschrijving(self.request)
-
-        if rol_nu == Rollen.ROL_IT:
-            context['toon_ledental'] = True
-
-        if rol_nu == Rollen.ROL_RKO:
-            context['toon_rayon'] = False
-
-        if rol_nu == Rollen.ROL_RCL:
-            context['toon_rayon'] = False
-            context['toon_regio'] = False
-            context['toon_cwzs'] = True
-
-        menu_dynamics(self.request, context, actief='competitie')
-        return context
 
 
 class LijstAangemeldRegioView(TemplateView):

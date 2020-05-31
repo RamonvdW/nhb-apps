@@ -25,7 +25,19 @@ urlpatterns = [
 
     path('leden-aanmelden/competitie/<comp_pk>/',
          views.LedenAanmeldenView.as_view(),
-         name='leden-aanmelden')
+         name='leden-aanmelden'),
+
+    path('accommodaties/lijst/',
+         views.LijstVerenigingenView.as_view(),
+         name='lijst-verenigingen'),
+
+    path('accommodaties/details/<locatie_pk>/',
+         views.AccommodatieDetailsView.as_view(),
+         name='accommodatie-details'),
+
+    path('accommodatie-details/<locatie_pk>/',
+         views.VerenigingAccommodatieDetailsView.as_view(),
+         name='vereniging-accommodatie-details'),
 ]
 
 # end of file

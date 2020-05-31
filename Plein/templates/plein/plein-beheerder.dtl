@@ -78,30 +78,16 @@
             </div>
         {% endif %}
 
-        <!-- verenigingen/locaties overzicht IT/BB/BKO -->
+        <!-- verenigingen/accommodaties overzicht IT/BB/BKO -->
         {% if rol_is_bko or rol_is_bb or rol_is_it %}
             <div class="card">
                 <div class="card-content">
                     <div class="card-title center-align">Verenigingen<br>
                         <br><i class="material-icons-round large">view_list</i>
                     </div>
-                    <p>Toon overzicht van de verenigingen (landelijk).</p>
+                    <p>Toon landelijk overzicht van de verenigingen en accommodaties.</p>
                 </div>
-                <a href="{% url 'Competitie:lijst-verenigingen' %}" class="nhb-klikbare-balk">
-                    <div class="card-action center-align">
-                        <span class="nhb-klikbare-link">Overzicht tonen</span>
-                    </div>
-                </a>
-            </div>
-
-            <div class="card">
-                <div class="card-content">
-                    <div class="card-title center-align">Accommodaties<br>
-                        <br><i class="material-icons-round large">home</i>
-                    </div>
-                    <p>Gegevens over de accommodaties (landelijk) die van belang zijn voor wedstrijden.</p>
-                </div>
-                <a href="{% url 'Wedstrijden:locaties' %}" class="nhb-klikbare-balk">
+                <a href="{% url 'Vereniging:lijst-verenigingen' %}" class="nhb-klikbare-balk">
                     <div class="card-action center-align">
                         <span class="nhb-klikbare-link">Overzicht tonen</span>
                     </div>
@@ -109,30 +95,16 @@
             </div>
         {% endif %}
 
-        <!-- verenigingen/locaties overzicht RKO -->
+        <!-- verenigingen/accommodaties overzicht RKO -->
         {% if rol_is_rko %}
             <div class="card">
                 <div class="card-content">
                     <div class="card-title center-align">Verenigingen<br>
                         <br><i class="material-icons-round large">view_list</i>
                     </div>
-                    <p>Toon overzicht van de verenigingen (in jouw rayon).</p>
+                    <p>Toon overzicht van de verenigingen en accommodaties in jouw rayon.</p>
                 </div>
-                <a href="{% url 'Competitie:lijst-verenigingen' %}" class="nhb-klikbare-balk">
-                    <div class="card-action center-align">
-                        <span class="nhb-klikbare-link">Overzicht tonen</span>
-                    </div>
-                </a>
-            </div>
-
-            <div class="card">
-                <div class="card-content">
-                    <div class="card-title center-align">Accommodaties<br>
-                        <br><i class="material-icons-round large">home</i>
-                    </div>
-                    <p>Gegevens over de accommodaties (in jouw rayon) die van belang zijn voor wedstrijden.</p>
-                </div>
-                <a href="{% url 'Wedstrijden:locaties' %}" class="nhb-klikbare-balk">
+                <a href="{% url 'Vereniging:lijst-verenigingen' %}" class="nhb-klikbare-balk">
                     <div class="card-action center-align">
                         <span class="nhb-klikbare-link">Overzicht tonen</span>
                     </div>
@@ -140,33 +112,16 @@
             </div>
         {% endif %}
 
-        <!-- verenigingen/locaties overzicht RCL -->
-        {% if rol_is_rcl %}
+        <!-- verenigingen/accommodaties overzicht RCL en CWZ -->
+        {% if rol_is_cwz or rol_is_rcl %}
             <div class="card">
                 <div class="card-content">
                     <div class="card-title center-align">Verenigingen<br>
                         <br><i class="material-icons-round large">view_list</i>
                     </div>
-                    <p>Toon overzicht van de verenigingen (in jouw regio).</p>
+                    <p>Toon overzicht van de verenigingen en accommodaties in jouw regio.</p>
                 </div>
-                <a href="{% url 'Competitie:lijst-verenigingen' %}" class="nhb-klikbare-balk">
-                    <div class="card-action center-align">
-                        <span class="nhb-klikbare-link">Overzicht tonen</span>
-                    </div>
-                </a>
-            </div>
-        {% endif %}
-
-        <!-- locaties overzicht RCL / CWZ -->
-        {% if rol_is_cwz or rol_is_rcl %}
-            <div class="card">
-                <div class="card-content">
-                    <div class="card-title center-align">Accommodaties<br>
-                        <br><i class="material-icons-round large">home</i>
-                    </div>
-                    <p>Gegevens over de accommodaties (in jouw regio) die van belang zijn voor wedstrijden.</p>
-                </div>
-                <a href="{% url 'Wedstrijden:locaties' %}" class="nhb-klikbare-balk">
+                <a href="{% url 'Vereniging:lijst-verenigingen' %}" class="nhb-klikbare-balk">
                     <div class="card-action center-align">
                         <span class="nhb-klikbare-link">Overzicht tonen</span>
                     </div>

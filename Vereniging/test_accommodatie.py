@@ -12,9 +12,9 @@ from Overig.e2ehelpers import E2EHelpers
 import datetime
 
 
-class TestWedstrijdenLocatie(E2EHelpers, TestCase):
+class TestVerenigingAccommodatie(E2EHelpers, TestCase):
 
-    """ Tests voor de Wedstrijden applicatie, ondersteuning WedstrijdLocatie """
+    """ Tests voor de Verenigingen applicatie, ondersteuning WedstrijdLocatie """
 
     test_after = ('BasisTypen', 'NhbStructuur', 'Functie')
 
@@ -95,17 +95,17 @@ class TestWedstrijdenLocatie(E2EHelpers, TestCase):
         lid.save()
         self.nhblid_100001 = lid
 
-        self.url_locaties = '/wedstrijd/locaties/'
-        self.url_locatie_details = '/wedstrijd/locatie/details/%s/'     # <locatie_pk>
-        self.url_locatie_vereniging = '/wedstrijd/locatie/details/vereniging/%s/'     # <locatie_pk>
+        self.url_lijst = '/vereniging/accommodaties/lijst/'
+        self.url_accommodatie_details = '/vereniging/accommodaties/details/%s/'       # <locatie_pk>
+        self.url_accommodatie_vereniging = '/vereniging/accommodatie-details/%s/'     # <locatie_pk>
 
     def test_anon(self):
         # anon
         self.e2e_logout()
-        resp = self.client.get(self.url_locaties)
+        resp = self.client.get(self.url_lijst)
         self.assert_is_redirect(resp, '/plein/')
 
-        url = self.url_locatie_details % self.loc1.pk
+        url = self.url_accommodatie_details % self.loc1.pk
         resp = self.client.get(url)
         self.assert_is_redirect(resp, '/plein/')
 
@@ -116,22 +116,22 @@ class TestWedstrijdenLocatie(E2EHelpers, TestCase):
         self.e2e_check_rol('BB')
 
         # grote lijst - alle locaties
-        resp = self.client.get(self.url_locaties)
+        resp = self.client.get(self.url_lijst)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijden/locaties.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/lijst-verenigingen.dtl', 'plein/site_layout.dtl'))
 
-        self.e2e_assert_other_http_commands_not_supported(self.url_locaties)
+        self.e2e_assert_other_http_commands_not_supported(self.url_lijst)
 
         # specifieke locatie
-        url = self.url_locatie_details % self.loc1.pk
+        url = self.url_accommodatie_details % self.loc1.pk
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijden/locatie-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/accommodatie-details.dtl', 'plein/site_layout.dtl'))
 
         # niet bestaande locatie
-        url = self.url_locatie_details % "999999"
+        url = self.url_accommodatie_details % "999999"
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 404)     # 404 = Not found
 
@@ -149,18 +149,18 @@ class TestWedstrijdenLocatie(E2EHelpers, TestCase):
         self.e2e_check_rol('RKO')
 
         # grote lijst - alleen binnen het rayon
-        resp = self.client.get(self.url_locaties)
+        resp = self.client.get(self.url_lijst)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijden/locaties.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/lijst-verenigingen.dtl', 'plein/site_layout.dtl'))
         # TODO: check alleen rayon
 
         # details van een vereniging binnen de rayon
-        url = self.url_locatie_details % self.loc2.pk
+        url = self.url_accommodatie_details % self.loc2.pk
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijden/locatie-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/accommodatie-details.dtl', 'plein/site_layout.dtl'))
 
     def test_rcl(self):
         # login als RCL
@@ -169,25 +169,32 @@ class TestWedstrijdenLocatie(E2EHelpers, TestCase):
         self.e2e_check_rol('RCL')
 
         # grote lijst - alleen binnen de regio
-        resp = self.client.get(self.url_locaties)
+        resp = self.client.get(self.url_lijst)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijden/locaties.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/lijst-verenigingen.dtl', 'plein/site_layout.dtl'))
         # TODO: check alleen regio
 
         # details van een vereniging binnen de regio
-        url = self.url_locatie_details % self.loc2.pk
+        url = self.url_accommodatie_details % self.loc2.pk
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijden/locatie-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/accommodatie-details.dtl', 'plein/site_layout.dtl'))
+
+        # details van een vereniging buiten de regio
+        url = self.url_accommodatie_details % self.loc1.pk
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('vereniging/accommodatie-details.dtl', 'plein/site_layout.dtl'))
 
         # wijziging aanbrengen
-        url = self.url_locatie_details % self.loc2.pk
+        url = self.url_accommodatie_details % self.loc2.pk
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijden/locatie-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/accommodatie-details.dtl', 'plein/site_layout.dtl'))
 
         # probeer een wijziging te doen
         resp = self.client.post(url, {'baan_type': 'X',
@@ -195,7 +202,7 @@ class TestWedstrijdenLocatie(E2EHelpers, TestCase):
                                       'banen_25m': 0,
                                       'max_dt': 3,
                                       'notities': 'hoi'})
-        self.assert_is_redirect(resp, '/wedstrijd/locaties/')
+        self.assert_is_redirect(resp, self.url_lijst)
         loc2 = WedstrijdLocatie.objects.get(pk=self.loc2.pk)
         self.assertEqual(loc2.baan_type, 'X')
         self.assertEqual(loc2.banen_18m, 1)
@@ -209,7 +216,7 @@ class TestWedstrijdenLocatie(E2EHelpers, TestCase):
                                       'banen_25m': 0,
                                       'max_dt': 3,
                                       'notities': 'hoi'})
-        self.assert_is_redirect(resp, '/wedstrijd/locaties/')
+        self.assert_is_redirect(resp, self.url_lijst)
         loc2 = WedstrijdLocatie.objects.get(pk=self.loc2.pk)
         self.assertEqual(loc2.baan_type, 'X')
         self.assertEqual(loc2.banen_18m, 1)
@@ -224,31 +231,33 @@ class TestWedstrijdenLocatie(E2EHelpers, TestCase):
         self.e2e_check_rol('CWZ')
 
         # CWZ krijgt dezelfde lijst als de RCL
-        resp = self.client.get(self.url_locaties)
+        resp = self.client.get(self.url_lijst)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijden/locaties.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/lijst-verenigingen.dtl', 'plein/site_layout.dtl'))
         # TODO: check alleen regio
 
-        # details van zijn eigen vereniging mag de CWZ wel ophalen
-        url = self.url_locatie_details % self.loc2.pk
+        # check accommodatie detail pagina
+        url = self.url_accommodatie_details % self.loc2.pk
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijden/locatie-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/accommodatie-details.dtl', 'plein/site_layout.dtl'))
+        # check dat de CWZ de opslaan-knop aangeboden krijgt
         urls = self.extract_all_urls(resp, skip_menu=True)
-        urls2 = [url for url in urls if url.startswith('/vereniging/')]
-        self.assertEqual(len(urls2), 0)
+        self.assertTrue(url in urls)                                    # opslaan url
+        self.assertTrue('/vereniging/accommodaties/lijst/' in urls)     # terug url
 
-        # specifieke url voor vereniging details, met terug_url
-        url = self.url_locatie_vereniging % self.loc2.pk
+        # check the specifieke accommodatie pagina voor de CWZ, met andere terug url
+        url = self.url_accommodatie_vereniging % self.loc2.pk
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijden/locatie-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/accommodatie-details.dtl', 'plein/site_layout.dtl'))
+        # check dat de CWZ de opslaan-knop aangeboden krijgt
         urls = self.extract_all_urls(resp, skip_menu=True)
-        urls2 = [url for url in urls if url.startswith('/vereniging/')]
-        self.assertEqual(len(urls2), 1)
+        self.assertTrue(url in urls)                # opslaan url
+        self.assertTrue('/vereniging/' in urls)     # terug url
 
         # probeer een wijziging te doen
         resp = self.client.post(url, {'baan_type': 'O',
@@ -256,7 +265,7 @@ class TestWedstrijdenLocatie(E2EHelpers, TestCase):
                                       'banen_25m': 6,
                                       'max_dt': 3,
                                       'notities': 'dit is een test'})
-        self.assert_is_redirect(resp, '/vereniging/')
+        self.assert_is_redirect(resp, '/vereniging/')       # stuur CWZ terug naar vereniging pagina
         loc2 = WedstrijdLocatie.objects.get(pk=self.loc2.pk)
         self.assertEqual(loc2.baan_type, 'O')
         self.assertEqual(loc2.banen_18m, 5)
@@ -271,7 +280,7 @@ class TestWedstrijdenLocatie(E2EHelpers, TestCase):
                                       'banen_25m': 6,
                                       'max_dt': 3,
                                       'notities': 'dit is een test'})
-        self.assert_is_redirect(resp, '/vereniging/')
+        self.assert_is_redirect(resp, '/vereniging/')       # stuur CWZ terug naar vereniging pagina
         loc2 = WedstrijdLocatie.objects.get(pk=self.loc2.pk)
         self.assertEqual(loc2.baan_type, 'H')
         resp = self.client.get(url)
@@ -290,31 +299,31 @@ class TestWedstrijdenLocatie(E2EHelpers, TestCase):
                                       'banen_18m': 40,
                                       'banen_25m': 6,
                                       'max_dt': 3})
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found,
+        self.assertEqual(resp.status_code, 404)     # 404 = Not found
 
         resp = self.client.post(url, {'baan_type': 'O',
                                       'banen_18m': 4,
                                       'banen_25m': 40,
                                       'max_dt': 3})
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found,
+        self.assertEqual(resp.status_code, 404)     # 404 = Not found
 
         resp = self.client.post(url, {'baan_type': 'O',
                                       'banen_18m': 4,
                                       'banen_25m': 4,
                                       'max_dt': 2})
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found,
+        self.assertEqual(resp.status_code, 404)     # 404 = Not found
 
         resp = self.client.post(url, {'baan_type': 'O',
                                       'banen_18m': 4,
                                       'banen_25m': 4,
                                       'max_dt': 5})
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found,
+        self.assertEqual(resp.status_code, 404)     # 404 = Not found
 
         resp = self.client.post(url, {'baan_type': 'y',
                                       'banen_18m': 4,
                                       'banen_25m': 4,
                                       'max_dt': 4})
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found,
+        self.assertEqual(resp.status_code, 404)     # 404 = Not found
 
         # cwz zonder locatie
         self.loc2.verenigingen.remove(self.nhbver2)
@@ -322,12 +331,12 @@ class TestWedstrijdenLocatie(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)  # 200 = OK
 
         # illegale location_pk
-        url = self.url_locatie_vereniging % '999999'
+        url = self.url_accommodatie_vereniging % '999999'
         resp = self.client.post(url, {'baan_type': 'O',
                                       'banen_18m': 4,
                                       'banen_25m': 4,
                                       'max_dt': 4})
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found,
+        self.assertEqual(resp.status_code, 404)     # 404 = Not found
 
     def test_geen_ver(self):
         # login als BB
@@ -337,12 +346,31 @@ class TestWedstrijdenLocatie(E2EHelpers, TestCase):
 
         # maak een locatie ongebruikt
         self.loc2.verenigingen.clear()
-        url = self.url_locatie_details % self.loc2.pk
+        url = self.url_accommodatie_details % self.loc2.pk
 
         # haal de details op
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijden/locatie-details.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/accommodatie-details.dtl', 'plein/site_layout.dtl'))
+
+    def test_gedeelde_locatie(self):
+        # login als BB
+        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_wisselnaarrol_bb()
+        self.e2e_check_rol('BB')
+
+        # maak een locatie aan die door twee verenigingen gedeeld wordt
+        loc = WedstrijdLocatie()
+        loc.save()
+        loc.verenigingen.add(self.nhbver1)
+        loc.verenigingen.add(self.nhbver2)
+
+        # haal de details op
+        url = self.url_accommodatie_details % loc.pk
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('vereniging/accommodatie-details.dtl', 'plein/site_layout.dtl'))
 
 # end of file

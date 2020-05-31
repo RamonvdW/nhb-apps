@@ -8,13 +8,13 @@ from django.test import TestCase
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
 from Overig.e2ehelpers import E2EHelpers
-from .models import DeelCompetitie, competitie_aanmaken
+from Competitie.models import DeelCompetitie, competitie_aanmaken
 import datetime
 
 
-class TestCompetitieLijstVerenigingen(E2EHelpers, TestCase):
+class TestVerenigingenLijst(E2EHelpers, TestCase):
 
-    """ unit tests voor de Competitie applicatie, Koppel Beheerders functie """
+    """ unit tests voor de Vereniging applicatie, Lijst Verenigingen """
 
     def _prep_beheerder_lid(self, voornaam):
         nhb_nr = self._next_nhbnr
@@ -88,57 +88,71 @@ class TestCompetitieLijstVerenigingen(E2EHelpers, TestCase):
         # secretaris kan nog niet ingevuld worden
         ver.save()
 
+        self.url_lijst = '/vereniging/accommodaties/lijst/'
+
     def test_lijst_verenigingen_anon(self):
         self.e2e_logout()
-        resp = self.client.get('/competitie/lijst-verenigingen/')
+        resp = self.client.get(self.url_lijst)
         self.assert_is_redirect(resp, '/plein/')
-        self.e2e_assert_other_http_commands_not_supported('/competitie/lijst-verenigingen/')
+        self.e2e_assert_other_http_commands_not_supported(self.url_lijst)
 
-    def test_lijst_verenigingen_admin(self):
+    def test_lijst_verenigingen_it(self):
+        # landelijke lijst + leden aantal
         self.e2e_login_and_pass_otp(self.account_admin)
         self.e2e_wisselnaarrol_beheerder()
         self.e2e_check_rol('beheerder')
-        resp = self.client.get('/competitie/lijst-verenigingen/')
+        with self.assertNumQueries(5):
+            resp = self.client.get(self.url_lijst)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/lijst-verenigingen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/lijst-verenigingen.dtl', 'plein/site_layout.dtl'))
 
     def test_lijst_verenigingen_bb(self):
+        # landelijke lijst met rayon & regio
         self.e2e_login_and_pass_otp(self.account_bb)
         self.e2e_wisselnaarrol_bb()
         self.e2e_check_rol('BB')
-        resp = self.client.get('/competitie/lijst-verenigingen/')
+        with self.assertNumQueries(4):
+            resp = self.client.get(self.url_lijst)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/lijst-verenigingen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/lijst-verenigingen.dtl', 'plein/site_layout.dtl'))
 
     def test_lijst_verenigingen_bko(self):
+        # landelijke lijst met rayon & regio
         self.e2e_login_and_pass_otp(self.account_bko)
         self.e2e_wissel_naar_functie(self.functie_bko)
         self.e2e_check_rol('BKO')
-        resp = self.client.get('/competitie/lijst-verenigingen/')
+        with self.assertNumQueries(6):
+            resp = self.client.get(self.url_lijst)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/lijst-verenigingen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/lijst-verenigingen.dtl', 'plein/site_layout.dtl'))
 
     def test_lijst_verenigingen_rko(self):
+        # rayon lijst met regio kolom (geen rayon kolom)
         self.e2e_login_and_pass_otp(self.account_rko)
         self.e2e_wissel_naar_functie(self.functie_rko)
         self.e2e_check_rol('RKO')
-        resp = self.client.get('/competitie/lijst-verenigingen/')
+        with self.assertNumQueries(6):
+            resp = self.client.get(self.url_lijst)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/lijst-verenigingen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/lijst-verenigingen.dtl', 'plein/site_layout.dtl'))
 
     def test_lijst_verenigingen_rcl(self):
+        # regio lijst met cwzs (zonder rayon/regio kolommen)
         self.e2e_login_and_pass_otp(self.account_rcl)
         self.e2e_wissel_naar_functie(self.functie_rcl)
         self.e2e_check_rol('RCL')
-        resp = self.client.get('/competitie/lijst-verenigingen/')
+        with self.assertNumQueries(9):
+            resp = self.client.get(self.url_lijst)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/lijst-verenigingen.dtl', 'plein/site_layout.dtl'))
-        self.e2e_assert_other_http_commands_not_supported('/competitie/lijst-verenigingen/')
+        self.assert_template_used(resp, ('vereniging/lijst-verenigingen.dtl', 'plein/site_layout.dtl'))
+        self.e2e_assert_other_http_commands_not_supported(self.url_lijst)
+
+    # TODO: CWZ --> toon lijst relevante verenigingen in regio
 
     def test_overzicht_anon(self):
         resp = self.client.get('/competitie/')

@@ -9,7 +9,7 @@
 {% block title %}Accommodatie details{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="wedstrijd-locatie-details" %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vereniging-locatie-details" %}
 
 <h4>Accommodatie details</h4>
 
@@ -104,12 +104,10 @@
         </tr>
 
         <tr>
-            <td style="vertical-align: top">Verenigingen die hier schieten:</td>
+            <td style="vertical-align: top">Gebruikt door vereniging(en):</td>
             <td style="vertical-align: top">
                 {% for nhbver in locatie.nhb_ver %}
-                    {% if not forloop.first %}
-                    <br>
-                    {% endif %}
+                    {% if not forloop.first %}<br>{% endif %}
                     <span>{{ nhbver }}</span>
                 {% endfor %}
             </td>
