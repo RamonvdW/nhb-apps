@@ -131,7 +131,7 @@ class E2EHelpers(object):
             print(soup.prettify())
 
     @staticmethod
-    def extract_all_urls(resp, skip_menu=False):
+    def extract_all_urls(resp, skip_menu=False, skip_smileys=True):
         content = str(resp.content)
         if skip_menu:
             # menu is the first part of the body
@@ -158,7 +158,8 @@ class E2EHelpers(object):
                 url = content[:pos]
                 content = content[pos:]
                 if url != "#":
-                    urls.append(url)
+                    if not (skip_smileys and url.startswith('/overig/feedback/')):
+                        urls.append(url)
         # while
         return urls
 
