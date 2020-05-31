@@ -22,6 +22,9 @@ class NhbVerenigingAdmin(admin.ModelAdmin):
     ordering = ('nhb_nr',)
     search_fields = ('naam', 'nhb_nr')
 
+    # filter mogelijkheid
+    list_filter = ('regio',)
+
 
 class NhbRayonAdmin(admin.ModelAdmin):
     """ Admin configuratie voor NhbRayon klasse """
