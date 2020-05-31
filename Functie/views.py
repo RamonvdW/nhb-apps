@@ -245,7 +245,7 @@ class WijzigEmailView(UserPassesTestMixin, View):
             menu_dynamics(self.request, context, actief='vereniging')
         else:
             context['terug_url'] = reverse('Functie:overzicht')
-            menu_dynamics(self.request, context, actief='competitie')
+            menu_dynamics(self.request, context, actief='hetplein')
 
         context['form'] = form
         context['form_submit_url'] = reverse('Functie:wijzig-email', kwargs={'functie_pk': functie.pk})
@@ -476,7 +476,7 @@ class WijzigBeheerdersView(UserPassesTestMixin, ListView):
             menu_dynamics(self.request, context, actief='vereniging')
         else:
             context['terug_url'] = reverse('Functie:overzicht')
-            menu_dynamics(self.request, context, actief='competitie')
+            menu_dynamics(self.request, context, actief='hetplein')
         return context
 
 
@@ -691,7 +691,7 @@ class OverzichtView(UserPassesTestMixin, ListView):
         if rol_nu == Rollen.ROL_CWZ:
             context['rol_is_cwz'] = True
 
-        menu_dynamics(self.request, context, actief='competitie')
+        menu_dynamics(self.request, context, actief='hetplein')
         return context
 
 
