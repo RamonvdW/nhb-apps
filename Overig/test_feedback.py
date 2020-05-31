@@ -20,6 +20,16 @@ class TestOverigFeedback(E2EHelpers, TestCase):
 
         # TODO: add real feedback to the database, for better tests
 
+    def test_smileys(self):
+        # controleer de links vanuit de drie smileys
+        url = '/plein/'
+        resp = self.client.get(url)
+        self.assertContains(resp, 'Wat vind je van deze pagina?')
+        urls = self.extract_all_urls(resp, skip_menu=True, skip_smileys=False)
+        self.assertTrue('/overig/feedback/min/plein-bezoeker/' in urls)
+        self.assertTrue('/overig/feedback/nul/plein-bezoeker/' in urls)
+        self.assertTrue('/overig/feedback/plus/plein-bezoeker/' in urls)
+
     def test_feedback_get(self):
         resp = self.client.get('/overig/feedback/min/plein/')
         self.assertEqual(resp.status_code, 200)
@@ -40,6 +50,8 @@ class TestOverigFeedback(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assert_template_used(resp, ('overig/site-feedback-formulier.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
+
+        self.e2e_assert_other_http_commands_not_supported('/overig/feedback/nul/plein/', post=False)
 
     def test_feedback_bedankt(self):
         resp = self.client.get('/overig/feedback/bedankt/')
