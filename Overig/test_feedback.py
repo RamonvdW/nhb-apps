@@ -161,6 +161,4 @@ class TestOverigFeedback(E2EHelpers, TestCase):
         self.assertContains(resp, "door de ontwikkelaar afgehandeld")
         self.e2e_assert_other_http_commands_not_supported('/overig/feedback/inzicht/')
 
-# TODO: add use of assert_other_http_commands_not_supported
-
 # end of file
