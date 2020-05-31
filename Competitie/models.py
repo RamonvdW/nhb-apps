@@ -22,15 +22,15 @@ LAAG_REGIO = 'Regio'
 LAAG_RK = 'RK'
 LAAG_BK = 'BK'
 
+AFSTAND = [('18', 'Indoor'),
+           ('25', '25m 1pijl')]
+
 
 class Competitie(models.Model):
     """ Deze database tabel bevat een van de jaarlijkse competities voor 18m of 25m
         Elke competitie heeft een beschrijving, een aantal belangrijke datums
         en een lijst van wedstrijdklassen met aanvangsgemiddelden
     """
-    AFSTAND = [('18', 'Indoor'),
-               ('25', '25m 1pijl')]
-
     beschrijving = models.CharField(max_length=40)
 
     # 18m of 25m
@@ -152,7 +152,7 @@ def competitie_aanmaken(jaar):
     udvl = date(year=jaar, month=8, day=1)          # 1 augustus = uiterste datum van lidmaatschap voor deelname teamcompetitie
 
     # maak de Competitie aan voor 18m en 25m
-    for afstand, beschrijving in Competitie.AFSTAND:
+    for afstand, beschrijving in AFSTAND:
         comp = Competitie()
         comp.beschrijving = '%s competitie %s/%s' % (beschrijving, jaar, jaar+1)
         comp.afstand = afstand      # 18/25
