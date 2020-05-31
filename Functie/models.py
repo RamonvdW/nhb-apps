@@ -78,7 +78,9 @@ class Functie(models.Model):
 
 
 def maak_functie(beschrijving, rol):
-
+    """ Deze helper geeft het Functie object terug met de gevraagde parameters
+        De eerste keer wordt deze aangemaakt.
+    """
     try:
         functie = Functie.objects.get(beschrijving=beschrijving, rol=rol)
     except Functie.DoesNotExist:
