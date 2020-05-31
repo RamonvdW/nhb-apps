@@ -14,7 +14,7 @@ class HistCompetitie(models.Model):
         De tabel bevat velden die anders heel vaak herhaald zouden worden in een andere tabel
         en het voorkomt zoeken naar deze informatie uit de grote tabel.
     """
-    COMP_TYPE = [('18', '18m Indoor'),      # note: 18, 25 must be in sync with Competitie.AFSTAND
+    COMP_TYPE = [('18', '18m Indoor'),      # note: 18, 25 must be in sync with Competitie.models.AFSTAND
                  ('25', '25m1pijl')]
 
     comptype2str = {'18': '18m Indoor',
