@@ -49,6 +49,7 @@ class TestLogboek(E2EHelpers, TestCase):
         schrijf_in_logboek(self.account_same, 'Testafdeling', 'Afdeling gesloten')
         schrijf_in_logboek(self.account_same, 'Competitie', 'Klassegrenzen vastgesteld')
         schrijf_in_logboek(self.account_same, 'Accommodaties', 'Weer een clubhuis')
+        schrijf_in_logboek(self.account_same, 'Clusters', 'Groepeer ze maar')
 
         self.logboek_url = '/logboek/'
 
@@ -127,6 +128,13 @@ class TestLogboek(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('logboek/logboek-accommodaties.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
         self.assertContains(resp, 'Weer een clubhuis')
+
+        # clusters
+        resp = self.client.get(self.logboek_url + 'clusters/')
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_template_used(resp, ('logboek/logboek-clusters.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
+        self.assertContains(resp, 'Groepeer ze maar')
 
     def test_pagination(self):
         self.e2e_login_and_pass_otp(self.account_admin)

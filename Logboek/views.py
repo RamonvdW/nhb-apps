@@ -21,6 +21,7 @@ TEMPLATE_LOGBOEK_RECORDS = 'logboek/logboek-records.dtl'
 TEMPLATE_LOGBOEK_ROLLEN = 'logboek/logboek-rollen.dtl'
 TEMPLATE_LOGBOEK_ACCOMMODATIES = 'logboek/logboek-accommodaties.dtl'
 TEMPLATE_LOGBOEK_COMPETITIE = 'logboek/logboek-competitie.dtl'
+TEMPLATE_LOGBOEK_CLUSTERS = 'logboek/logboek-clusters.dtl'
 
 RESULTS_PER_PAGE = 50
 
@@ -196,6 +197,19 @@ class LogboekAccommodatiesView(LogboekBasisView):
     def get_queryset(self):
         """ retourneer de data voor de template view """
         return LogboekRegel.objects.all().filter(gebruikte_functie='Accommodaties').order_by('-toegevoegd_op')
+
+
+class LogboekClustersView(LogboekBasisView):
+    """ Deze view toont de logboek regels die met het beheer van de clusters te maken hebben """
+    template_name = TEMPLATE_LOGBOEK_CLUSTERS
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.base_url = reverse('Logboek:clusters')
+
+    def get_queryset(self):
+        """ retourneer de data voor de template view """
+        return LogboekRegel.objects.all().filter(gebruikte_functie='Clusters').order_by('-toegevoegd_op')
 
 
 # end of file

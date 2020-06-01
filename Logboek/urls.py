@@ -37,6 +37,10 @@ urlpatterns = [
     path('accommodaties/',
          views.LogboekAccommodatiesView.as_view(),
          name='accommodaties'),
+
+    path('clusters/',
+         views.LogboekClustersView.as_view(),
+         name='clusters'),
 ]
 
 # end of file
