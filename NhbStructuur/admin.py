@@ -54,9 +54,13 @@ class NhbRegioAdmin(admin.ModelAdmin):
         return False
 
 
+class NhbClusterAdmin(admin.ModelAdmin):
+    list_select_related = ('regio',)
+
+
 admin.site.register(NhbLid, NhbLidAdmin)
 admin.site.register(NhbVereniging, NhbVerenigingAdmin)
-admin.site.register(NhbCluster)
+admin.site.register(NhbCluster, NhbClusterAdmin)
 
 # NhbRayon en NhbRegio zijn hard-coded, dus geen admin interface
 # hard-coded data: zie NhbStructuur/migrations/m00??_nhbstructuur_20??

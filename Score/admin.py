@@ -12,6 +12,8 @@ class ScoreAdmin(admin.ModelAdmin):
     """ Admin configuratie voor Score klasse """
     list_filter = ('afstand_meter', 'is_ag', 'schutterboog__boogtype', 'schutterboog__nhblid__bij_vereniging')
 
+    list_select_related = ('schutterboog', 'schutterboog__nhblid', 'schutterboog__boogtype')
+
 
 class ScoreHistAdmin(admin.ModelAdmin):
     """ Admin configuratie voor ScoreHist klasse """

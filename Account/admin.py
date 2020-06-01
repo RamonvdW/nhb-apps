@@ -42,9 +42,15 @@ class AccountEmailAdmin(admin.ModelAdmin):
 
     list_filter = ('email_is_bevestigd',)
 
+    list_select_related = ('account',)
+
+
+class VHPGAdmin(admin.ModelAdmin):
+    list_select_related = ('account',)
+
 
 admin.site.register(Account, AccountAdmin)
 admin.site.register(AccountEmail, AccountEmailAdmin)
-admin.site.register(HanterenPersoonsgegevens)
+admin.site.register(HanterenPersoonsgegevens, VHPGAdmin)
 
 # end of file
