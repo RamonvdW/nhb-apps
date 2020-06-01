@@ -106,13 +106,18 @@ class TestNhbStructuur(TestCase):
         # maak een cluster aan
         cluster = NhbCluster()
         cluster.regio = ver.regio
-        cluster.letter = 'c'
+        cluster.letter = 'Z'        # mag niet overeen komen met standaard clusters
         cluster.gebruik = '18'
         cluster.naam = "Testje"
         cluster.save()
-        self.assertEqual(str(cluster), '111c voor Indoor (Testje)')
+        self.assertEqual(str(cluster), '111Z voor Indoor (Testje)')
 
         # stop the vereniging in het cluster
         ver.clusters.add(cluster)
+
+        # naam is optioneel
+        cluster.naam = ""
+        self.assertEqual(str(cluster), '111Z voor Indoor')
+
 
 # end of file

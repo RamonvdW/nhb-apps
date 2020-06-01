@@ -11,14 +11,13 @@ from django.views.generic import TemplateView, ListView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.shortcuts import redirect
 from django.utils import timezone
-from BasisTypen.models import BoogType, LeeftijdsKlasse
+from BasisTypen.models import BoogType
 from Plein.menu import menu_dynamics
 from Logboek.models import schrijf_in_logboek
-from Functie.models import Functie
 from Functie.rol import Rollen, rol_get_huidige_functie, rol_get_beschrijving, rol_get_huidige
 from BasisTypen.models import IndivWedstrijdklasse, TeamWedstrijdklasse, MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
-from NhbStructuur.models import NhbLid, NhbVereniging, NhbRegio, ADMINISTRATIEVE_REGIO
+from NhbStructuur.models import NhbLid, NhbRegio
 from Schutter.models import SchutterBoog
 from Score.models import Score, ScoreHist, zoek_meest_recente_automatisch_vastgestelde_ag
 from .models import Competitie, AG_NUL, AG_LAAGSTE_NIET_NUL, CompetitieKlasse, DeelCompetitie,\
@@ -728,8 +727,8 @@ class InfoCompetitieView(TemplateView):
         context = super().get_context_data(**kwargs)
 
         context['regios'] = NhbRegio.objects.\
+                                filter(is_administratief=False).\
                                 select_related('rayon').\
-                                exclude(regio_nr=ADMINISTRATIEVE_REGIO).\
                                 order_by('regio_nr')
 
         account = self.request.user

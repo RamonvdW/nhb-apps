@@ -17,8 +17,6 @@ import datetime
 # global
 maximum_geboortejaar = datetime.datetime.now().year - settings.MINIMUM_LEEFTIJD_LID
 
-ADMINISTRATIEVE_REGIO = 100      # TODO: make een boolean field?
-
 GEBRUIK = [('18', 'Indoor'),
            ('25', '25m 1pijl')]
 
@@ -55,6 +53,9 @@ class NhbRegio(models.Model):
     # rayon waar deze regio bij hoort
     rayon = models.ForeignKey(NhbRayon, on_delete=models.PROTECT)
 
+    # is dit een administratieve regio die niet mee doet voor de wedstrijden / competities?
+    is_administratief = models.BooleanField(default=False)
+
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
         return self.naam
@@ -77,14 +78,20 @@ class NhbCluster(models.Model):
     letter = models.CharField(max_length=1, default='x')
 
     # beschrijving het cluster
-    naam = models.CharField(max_length=50, default='')
+    naam = models.CharField(max_length=50, default='', blank=True)
 
     # aparte clusters voor 18m en 25m
     gebruik = models.CharField(max_length=2, choices=GEBRUIK)
 
+    def cluster_code_str(self):
+        return "%s%s voor %s" % (self.regio.regio_nr, self.letter, GEBRUIK2STR[self.gebruik])
+
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
-        return "%s%s voor %s (%s)" % (self.regio.regio_nr, self.letter, GEBRUIK2STR[self.gebruik], self.naam)
+        msg = self.cluster_code_str()
+        if self.naam:
+            msg += " (%s)" % self.naam
+        return msg
 
     class Meta:
         """ meta data voor de admin interface """

@@ -6,7 +6,7 @@
 
 from django.db import models
 from BasisTypen.models import IndivWedstrijdklasse, TeamWedstrijdklasse
-from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, ADMINISTRATIEVE_REGIO
+from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
 from Functie.models import Functie
 from Schutter.models import SchutterBoog
 from decimal import Decimal
@@ -168,12 +168,11 @@ def competitie_aanmaken(jaar):
             deel.competitie = comp
             if laag == LAAG_REGIO:
                 # Regio
-                for obj in NhbRegio.objects.all():
-                    if obj.regio_nr != ADMINISTRATIEVE_REGIO:
-                        deel.nhb_regio = obj
-                        deel.pk = None
-                        deel.functie = Functie.objects.get(rol="RCL", comp_type=afstand, nhb_regio=obj)
-                        deel.save()
+                for obj in NhbRegio.objects.filter(is_administratief=False):
+                    deel.nhb_regio = obj
+                    deel.pk = None
+                    deel.functie = Functie.objects.get(rol="RCL", comp_type=afstand, nhb_regio=obj)
+                    deel.save()
                 # for
             elif laag == LAAG_RK:
                 # RK
