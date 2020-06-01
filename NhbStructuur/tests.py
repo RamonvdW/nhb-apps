@@ -7,7 +7,7 @@
 from django.test import TestCase
 from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
-from .models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
+from .models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging, NhbLid
 from Account.models import Account
 import datetime
 from dateutil.relativedelta import relativedelta
@@ -30,6 +30,7 @@ class TestNhbStructuur(TestCase):
         ver.nhb_nr = "1000"
         ver.regio = NhbRegio.objects.get(pk=111)
         ver.save()
+        self.nhbver1 = ver
 
         # maak een test lid aan
         lid = NhbLid()
@@ -98,5 +99,20 @@ class TestNhbStructuur(TestCase):
     def test_bereken_wedstrijdleeftijd(self):
         lid = NhbLid.objects.get(nhb_nr=100001)     # geboren 1972; bereikt leeftijd 40 in 2012
         self.assertEqual(lid.bereken_wedstrijdleeftijd(2012), 40)
+
+    def test_cluster(self):
+        ver = self.nhbver1
+
+        # maak een cluster aan
+        cluster = NhbCluster()
+        cluster.regio = ver.regio
+        cluster.letter = 'c'
+        cluster.gebruik = '18'
+        cluster.naam = "Testje"
+        cluster.save()
+        self.assertEqual(str(cluster), '111c voor Indoor (Testje)')
+
+        # stop the vereniging in het cluster
+        ver.clusters.add(cluster)
 
 # end of file

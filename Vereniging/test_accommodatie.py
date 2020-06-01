@@ -96,8 +96,8 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.nhblid_100001 = lid
 
         self.url_lijst = '/vereniging/accommodaties/lijst/'
-        self.url_accommodatie_details = '/vereniging/accommodaties/details/%s/'       # <locatie_pk>
-        self.url_accommodatie_vereniging = '/vereniging/accommodatie-details/%s/'     # <locatie_pk>
+        self.url_accommodatie_details = '/vereniging/accommodaties/details/%s/%s/'       # <locatie_pk>, <vereniging_pk>
+        self.url_accommodatie_vereniging = '/vereniging/accommodatie-details/%s/%s/'     # <locatie_pk>, <vereniging_pk>
 
     def test_anon(self):
         # anon
@@ -105,7 +105,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         resp = self.client.get(self.url_lijst)
         self.assert_is_redirect(resp, '/plein/')
 
-        url = self.url_accommodatie_details % self.loc1.pk
+        url = self.url_accommodatie_details % (self.loc1.pk, self.nhbver1.pk)
         resp = self.client.get(url)
         self.assert_is_redirect(resp, '/plein/')
 
@@ -124,14 +124,19 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.e2e_assert_other_http_commands_not_supported(self.url_lijst)
 
         # specifieke locatie
-        url = self.url_accommodatie_details % self.loc1.pk
+        url = self.url_accommodatie_details % (self.loc1.pk, self.nhbver1.pk)
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('vereniging/accommodatie-details.dtl', 'plein/site_layout.dtl'))
 
         # niet bestaande locatie
-        url = self.url_accommodatie_details % "999999"
+        url = self.url_accommodatie_details % (999999, self.nhbver1.pk)
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+
+        # vereniging die niet bij de locatie hoort
+        url = self.url_accommodatie_details % (self.loc1.pk, 999999)
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 404)     # 404 = Not found
 
@@ -156,7 +161,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         # TODO: check alleen rayon
 
         # details van een vereniging binnen de rayon
-        url = self.url_accommodatie_details % self.loc2.pk
+        url = self.url_accommodatie_details % (self.loc2.pk, self.nhbver2.pk)
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
@@ -176,21 +181,21 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         # TODO: check alleen regio
 
         # details van een vereniging binnen de regio
-        url = self.url_accommodatie_details % self.loc2.pk
+        url = self.url_accommodatie_details % (self.loc2.pk, self.nhbver2.pk)
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('vereniging/accommodatie-details.dtl', 'plein/site_layout.dtl'))
 
         # details van een vereniging buiten de regio
-        url = self.url_accommodatie_details % self.loc1.pk
+        url = self.url_accommodatie_details % (self.loc1.pk, self.nhbver1.pk)
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('vereniging/accommodatie-details.dtl', 'plein/site_layout.dtl'))
 
         # wijziging aanbrengen
-        url = self.url_accommodatie_details % self.loc2.pk
+        url = self.url_accommodatie_details % (self.loc2.pk, self.nhbver2.pk)
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
@@ -238,7 +243,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         # TODO: check alleen regio
 
         # check accommodatie detail pagina
-        url = self.url_accommodatie_details % self.loc2.pk
+        url = self.url_accommodatie_details % (self.loc2.pk, self.nhbver2.pk)
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
@@ -249,7 +254,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.assertTrue('/vereniging/accommodaties/lijst/' in urls)     # terug url
 
         # check the specifieke accommodatie pagina voor de CWZ, met andere terug url
-        url = self.url_accommodatie_vereniging % self.loc2.pk
+        url = self.url_accommodatie_vereniging % (self.loc2.pk, self.nhbver2.pk)
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
@@ -325,34 +330,13 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
                                       'max_dt': 4})
         self.assertEqual(resp.status_code, 404)     # 404 = Not found
 
-        # cwz zonder locatie
-        self.loc2.verenigingen.remove(self.nhbver2)
-        resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)  # 200 = OK
-
         # illegale location_pk
-        url = self.url_accommodatie_vereniging % '999999'
+        url = self.url_accommodatie_vereniging % (999999, 888888)
         resp = self.client.post(url, {'baan_type': 'O',
                                       'banen_18m': 4,
                                       'banen_25m': 4,
                                       'max_dt': 4})
         self.assertEqual(resp.status_code, 404)     # 404 = Not found
-
-    def test_geen_ver(self):
-        # login als BB
-        self.e2e_login_and_pass_otp(self.account_bb)
-        self.e2e_wisselnaarrol_bb()
-        self.e2e_check_rol('BB')
-
-        # maak een locatie ongebruikt
-        self.loc2.verenigingen.clear()
-        url = self.url_accommodatie_details % self.loc2.pk
-
-        # haal de details op
-        resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/accommodatie-details.dtl', 'plein/site_layout.dtl'))
 
     def test_gedeelde_locatie(self):
         # login als BB
@@ -367,7 +351,14 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         loc.verenigingen.add(self.nhbver2)
 
         # haal de details op
-        url = self.url_accommodatie_details % loc.pk
+        url = self.url_accommodatie_details % (loc.pk, self.nhbver1.pk)
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('vereniging/accommodatie-details.dtl', 'plein/site_layout.dtl'))
+
+        # haal de details op
+        url = self.url_accommodatie_details % (loc.pk, self.nhbver2.pk)
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)

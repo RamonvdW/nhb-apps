@@ -45,6 +45,17 @@
                 <div class="col s4">Plaats:</div>
                 <div class="col s6">{{ nhb_ver.plaats }}</div>
             </div>
+            <div class="row small-row">
+                <div class="col s4">Regio:</div>
+                <div class="col s6">{{ nhb_ver.regio }}</div>
+            </div>
+
+            {% if nhb_ver.cluster %}
+                <div class="row small-row">
+                    <div class="col s4">Cluster:</div>
+                    <div class="col s6">{{ nhb_ver.cluster }}</div>
+                </div>
+            {% endif %}
         </div>
     </div>
 </div>

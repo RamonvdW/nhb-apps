@@ -57,7 +57,9 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
 
         if functie_nu.nhb_ver.wedstrijdlocatie_set.count() > 0:
             locatie = functie_nu.nhb_ver.wedstrijdlocatie_set.all()[0]
-            context['accommodatie_details_url'] = reverse('Vereniging:vereniging-accommodatie-details', kwargs={'locatie_pk': locatie.pk})
+            context['accommodatie_details_url'] = reverse('Vereniging:vereniging-accommodatie-details',
+                                                          kwargs={'locatie_pk': locatie.pk,
+                                                                  'vereniging_pk': functie_nu.nhb_ver.pk})
 
         context['competities'] = Competitie.objects.filter(is_afgesloten=False)
 
@@ -444,7 +446,7 @@ class LijstVerenigingenView(UserPassesTestMixin, ListView):
                         select_related('regio', 'regio__rayon').\
                         exclude(regio__regio_nr=100).\
                         filter(regio__rayon=functie_nu.nhb_rayon).\
-                        prefetch_related('wedstrijdlocatie_set').\
+                        prefetch_related('wedstrijdlocatie_set', 'clusters').\
                         order_by('regio__regio_nr', 'nhb_nr')
 
         if rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO):
@@ -452,7 +454,7 @@ class LijstVerenigingenView(UserPassesTestMixin, ListView):
             return NhbVereniging.objects.all().\
                         select_related('regio', 'regio__rayon').\
                         exclude(regio__regio_nr=100).\
-                        prefetch_related('wedstrijdlocatie_set').\
+                        prefetch_related('wedstrijdlocatie_set', 'clusters').\
                         order_by('regio__regio_nr', 'nhb_nr')
 
         if rol_nu == Rollen.ROL_IT:
@@ -460,7 +462,7 @@ class LijstVerenigingenView(UserPassesTestMixin, ListView):
             objs = NhbVereniging.objects.all().\
                         select_related('regio', 'regio__rayon').\
                         exclude(regio__regio_nr=100).\
-                        prefetch_related('nhblid_set', 'wedstrijdlocatie_set').\
+                        prefetch_related('nhblid_set', 'wedstrijdlocatie_set', 'clusters').\
                         order_by('regio__regio_nr', 'nhb_nr')
 
             for obj in objs:
@@ -480,15 +482,19 @@ class LijstVerenigingenView(UserPassesTestMixin, ListView):
         # toon de lijst van verenigingen in de regio
         if rol_nu == Rollen.ROL_RCL:
             # het regionummer is verkrijgbaar via de deelcompetitie van de functie
-            objs = NhbVereniging.objects. \
-                filter(regio=functie_nu.nhb_regio). \
-                prefetch_related('wedstrijdlocatie_set')
+            objs = NhbVereniging.objects.\
+                        filter(regio=functie_nu.nhb_regio).\
+                        select_related('regio').\
+                        prefetch_related('wedstrijdlocatie_set', 'clusters').\
+                        order_by('nhb_nr')
         else:
             # rol_nu == Rollen.ROL_CWZ
             # het regionummer is verkrijgbaar via de vereniging
             objs = NhbVereniging.objects.\
                             filter(regio=functie_nu.nhb_ver.regio).\
-                            prefetch_related('wedstrijdlocatie_set')
+                            select_related('regio').\
+                            prefetch_related('wedstrijdlocatie_set', 'clusters').\
+                            order_by('nhb_nr')
 
         for obj in objs:
             try:
@@ -505,14 +511,9 @@ class LijstVerenigingenView(UserPassesTestMixin, ListView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        # voeg de url toe voor de "details" knoppen
-        for obj in context['object_list']:
-            for loc in obj.wedstrijdlocatie_set.all():
-                loc.details_url = reverse('Vereniging:accommodatie-details', kwargs={'locatie_pk': loc.pk})
-        # for
-
         context['toon_rayon'] = True
         context['toon_regio'] = True
+        context['toon_cluster'] = False
         context['toon_details'] = True
         context['toon_ledental'] = False
         menu_actief = 'hetplein'
@@ -535,6 +536,22 @@ class LijstVerenigingenView(UserPassesTestMixin, ListView):
             if rol_nu == Rollen.ROL_CWZ:
                 menu_actief = 'vereniging'
 
+        # voeg de url toe voor de "details" knoppen
+        for nhbver in context['object_list']:
+            for loc in nhbver.wedstrijdlocatie_set.all():
+                loc.details_url = reverse('Vereniging:accommodatie-details', kwargs={'locatie_pk': loc.pk, 'vereniging_pk': nhbver.pk})
+            # for
+            if nhbver.clusters.count() > 0:
+                context['toon_cluster'] = True
+                letters = [cluster.letter for cluster in nhbver.clusters.all()]
+                letters.sort()
+                nhbver.cluster_letters = ",".join(letters)
+
+                if not context['toon_regio']:
+                    # verander in 101a,b
+                    nhbver.cluster_letters = str(nhbver.regio.regio_nr) + nhbver.cluster_letters
+        # for
+
         menu_dynamics(self.request, context, actief=menu_actief)
         return context
 
@@ -555,57 +572,75 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
         return HttpResponseRedirect(reverse('Plein:plein'))
 
+    def _get_locatie_nhver_or_404(self, **kwargs):
+        locatie_pk = kwargs['locatie_pk']
+        try:
+            locatie = WedstrijdLocatie.objects.get(pk=locatie_pk)
+        except WedstrijdLocatie.DoesNotExist:
+            raise Resolver404()
+
+        nhbver_pk = kwargs['vereniging_pk']
+        try:
+            nhbver = NhbVereniging.objects.get(pk=nhbver_pk)
+        except NhbVereniging.DoesNotExist:
+            raise Resolver404()
+
+        # controleer dat de twee coherent zijn
+        if locatie.verenigingen.filter(nhb_nr=nhbver.nhb_nr).count() == 0:
+            # vereniging hoort niet bij deze locatie
+            raise Resolver404()
+
+        return locatie, nhbver
+
+    def _mag_wijzigen(self, nhbver):
+        """ Controleer of de huidige rol de instellingen van de accommodatie mag wijzigen """
+        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
+
+        if functie_nu:
+            if rol_nu == Rollen.ROL_CWZ:
+                # CWZ mag van zijn eigen vereniging wijzigen
+                if functie_nu.nhb_ver == nhbver:
+                    return True
+            elif rol_nu == Rollen.ROL_RCL:
+                # RCL mag van alle verenigingen in zijn regio wijzigen
+                if functie_nu.nhb_regio == nhbver.regio:
+                    return True
+
+        return False
+
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        # zoek de specifieke locatie erbij
-        locatie_pk = kwargs['locatie_pk']
-        try:
-            context['locatie'] = locatie = WedstrijdLocatie.objects.get(pk=locatie_pk)
-        except WedstrijdLocatie.DoesNotExist:
-            raise Resolver404()
+        locatie, nhbver = self._get_locatie_nhver_or_404(**kwargs)
+        context['locatie'] = locatie
+        context['nhbver'] = nhbver
 
         # beschrijving voor de template
         locatie.baan_type_str = BAANTYPE2STR[locatie.baan_type]
 
         # lijst van verenigingen voor de template
-        locatie.nhb_ver = list()
-        regio = None
-        for ver in locatie.verenigingen.select_related('regio').order_by('nhb_nr'):
-            # regio van de locatie afhankelijk van 1e vereniging
-            if not regio:
-                regio = ver.regio
-                context['regio'] = str(regio)
-            locatie.nhb_ver.append(str(ver))
-        # for
+        locatie.other_ver = locatie.verenigingen.exclude(nhb_nr=nhbver.nhb_nr).order_by('nhb_nr')
 
         # terug en opslaan knoppen voor in de template
         if 'is_ver' in kwargs:
             context['terug_url'] = reverse('Vereniging:overzicht')
-            context['opslaan_url'] = reverse('Vereniging:vereniging-accommodatie-details', kwargs={'locatie_pk': locatie.pk})
+            opslaan_urlconf = 'Vereniging:vereniging-accommodatie-details'
             menu_actief = 'vereniging'
         else:
             context['terug_url'] = reverse('Vereniging:lijst-verenigingen')
-            context['opslaan_url'] = reverse('Vereniging:accommodatie-details', kwargs={'locatie_pk': locatie.pk})
+            opslaan_urlconf = 'Vereniging:accommodatie-details'
             menu_actief = 'hetplein'
+
+        if self._mag_wijzigen(nhbver):
+            context['readonly'] = False
+            context['opslaan_url'] = reverse(opslaan_urlconf, kwargs={'locatie_pk': locatie.pk,
+                                                                      'vereniging_pk': nhbver.pk})
+        else:
+            context['readonly'] = True
 
         # aantal banen waar uit gekozen kan worden, voor gebruik in de template
         context['banen'] = [nr for nr in range(2, 25)]
-
-        # readonly vlag voor de template: mag de huidige gebruiker wijzigen?
-        context['readonly'] = True
-        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
-        if functie_nu:
-            if rol_nu == Rollen.ROL_CWZ:
-                if locatie.verenigingen.filter(nhb_nr=functie_nu.nhb_ver.nhb_nr).count() > 0:
-                    # CWZ mag deze vereniging wijzigen
-                    context['readonly'] = False
-            elif rol_nu == Rollen.ROL_RCL:
-                for ver in locatie.verenigingen.all():
-                    if ver.regio == functie_nu.nhb_regio:
-                        # dit is een vereniging in de regio van de RCL
-                        context['readonly'] = False
 
         menu_dynamics(self.request, context, actief=menu_actief)
         return context
@@ -614,18 +649,14 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
         """ Deze functie wordt aangeroepen als de gebruik op de 'opslaan' knop drukt
             op het accommodatie-details formulier.
         """
-        # zoek de specifieke locatie erbij
-        locatie_pk = kwargs['locatie_pk']
-        try:
-            locatie = WedstrijdLocatie.objects.get(pk=locatie_pk)
-        except WedstrijdLocatie.DoesNotExist:
-            raise Resolver404()
+        locatie, nhbver = self._get_locatie_nhver_or_404(**kwargs)
 
         form = AccommodatieDetailsForm(request.POST)
         if not form.is_valid():
             raise Resolver404()
 
-        # TODO: controleer dat de gebruiker deze locatie mag wijzigen
+        if not self._mag_wijzigen(nhbver):
+            raise Resolver404()
 
         msgs = list()
         data = form.cleaned_data.get('baan_type')

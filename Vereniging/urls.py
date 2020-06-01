@@ -31,11 +31,11 @@ urlpatterns = [
          views.LijstVerenigingenView.as_view(),
          name='lijst-verenigingen'),
 
-    path('accommodaties/details/<locatie_pk>/',
+    path('accommodaties/details/<locatie_pk>/<vereniging_pk>/',
          views.AccommodatieDetailsView.as_view(),
          name='accommodatie-details'),
 
-    path('accommodatie-details/<locatie_pk>/',
+    path('accommodatie-details/<locatie_pk>/<vereniging_pk>/',
          views.VerenigingAccommodatieDetailsView.as_view(),
          name='vereniging-accommodatie-details'),
 ]

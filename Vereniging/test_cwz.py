@@ -40,7 +40,7 @@ class TestVerenigingCWZ(E2EHelpers, TestCase):
         ver.regio = regio_111
         # secretaris kan nog niet ingevuld worden
         ver.save()
-        self.nhbver = ver
+        self.nhbver1 = ver
 
         # maak de CWZ functie
         self.functie_cwz = maak_functie("CWZ test", "CWZ")
@@ -105,6 +105,16 @@ class TestVerenigingCWZ(E2EHelpers, TestCase):
         lid.save()
         self.nhblid_100003 = lid
 
+        # maak een lid aan van een andere vereniging
+        # maak een test vereniging
+        ver2 = NhbVereniging()
+        ver2.naam = "Andere Club"
+        ver2.nhb_nr = "1222"
+        ver2.regio = regio_111
+        # secretaris kan nog niet ingevuld worden
+        ver2.save()
+        self.nhbver2 = ver2
+
         # maak de competitie aan die nodig is voor deze tests
         self._create_histcomp()
         self._create_competitie()
@@ -112,7 +122,8 @@ class TestVerenigingCWZ(E2EHelpers, TestCase):
         self.url_overzicht = '/vereniging/'
         self.url_ledenlijst = '/vereniging/leden-lijst/'
         self.url_voorkeuren = '/vereniging/leden-voorkeuren/'
-        self.url_aanmelden = '/vereniging/leden-aanmelden/competitie/%s/'
+        self.url_aanmelden = '/vereniging/leden-aanmelden/competitie/%s/'   # <comp_pk>
+        self.url_schutter_voorkeuren = '/schutter/voorkeuren/%s/'           # <nhblid_pk>
 
     def _create_histcomp(self):
         # (strategisch gekozen) historische data om klassegrenzen uit te bepalen
@@ -129,8 +140,8 @@ class TestVerenigingCWZ(E2EHelpers, TestCase):
         rec.rank = 1
         rec.schutter_nr = self.nhblid_100001.nhb_nr
         rec.schutter_naam = self.nhblid_100001.volledige_naam()
-        rec.vereniging_nr = self.nhbver.nhb_nr
-        rec.vereniging_naam = self.nhbver.naam
+        rec.vereniging_nr = self.nhbver1.nhb_nr
+        rec.vereniging_naam = self.nhbver1.naam
         rec.boogtype = 'R'
         rec.score1 = 10
         rec.score2 = 20
@@ -150,8 +161,8 @@ class TestVerenigingCWZ(E2EHelpers, TestCase):
         rec.rank = 1
         rec.schutter_nr = self.nhblid_100002.nhb_nr
         rec.schutter_naam = self.nhblid_100002.volledige_naam()
-        rec.vereniging_nr = self.nhbver.nhb_nr
-        rec.vereniging_naam = self.nhbver.naam
+        rec.vereniging_nr = self.nhbver1.nhb_nr
+        rec.vereniging_naam = self.nhbver1.naam
         rec.boogtype = 'BB'
         rec.score1 = 10
         rec.score2 = 20
@@ -273,15 +284,46 @@ class TestVerenigingCWZ(E2EHelpers, TestCase):
         self.e2e_assert_other_http_commands_not_supported(self.url_ledenlijst)
 
     def test_voorkeuren(self):
+        # haal de lijst met leden voorkeuren op
+        # view is gebaseerd op ledenlijst, dus niet veel te testen
+
         # login als CWZ
         self.e2e_login_and_pass_otp(self.account_cwz)
         self.e2e_wissel_naar_functie(self.functie_cwz)
         self.e2e_check_rol('CWZ')
 
+        # eerste keer, zonder schutterboog records
+        self.assertEqual(SchutterBoog.objects.count(), 0)
         resp = self.client.get(self.url_voorkeuren)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('vereniging/leden-voorkeuren.dtl', 'plein/site_layout.dtl'))
-        # inhoudelijk is de pagina gelijk aan ledenlijst
+
+        # nog een keer, nu met schutterboog records aanwezig
+        # zowel van de vereniging van de CWZ als van andere verenigingen
+        for nhblid in (self.nhblid_100001, self.nhblid_100002, self.nhblid_100003):
+            # get operatie maakt de schutterboog records aan
+            url = self.url_schutter_voorkeuren % nhblid.pk
+            resp = self.client.get(url)
+            self.assertEqual(resp.status_code, 200)
+        # for
+        self.assertEqual(SchutterBoog.objects.count(), 15)
+
+        # zet een aantal schutterboog records op gebruik voor wedstrijd
+        # dit maakt een schutter-boog
+        for obj in SchutterBoog.objects.all():
+            if obj.pk & 1:  # odd?
+                obj.voor_wedstrijd = True
+                obj.save()
+        # for
+
+        # nu de schutterboog records gemaakt zijn (CWZ had toestemming)
+        # stoppen we 1 lid in een andere vereniging
+        self.nhblid_100003.bij_vereniging = self.nhbver2
+        self.nhblid_100003.save()
+
+        resp = self.client.get(self.url_voorkeuren)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_template_used(resp, ('vereniging/leden-voorkeuren.dtl', 'plein/site_layout.dtl'))
 
     def test_aanmelden(self):
         url = self.url_aanmelden % self.comp_18.pk
@@ -347,7 +389,7 @@ class TestVerenigingCWZ(E2EHelpers, TestCase):
         loc = WedstrijdLocatie()
         # loc.adres = "Dubbelbaan 16\n1234AB Schietbuurt"
         loc.save()
-        loc.verenigingen.add(self.nhbver)
+        loc.verenigingen.add(self.nhbver1)
 
         # login als CWZ
         self.e2e_login_and_pass_otp(self.account_cwz)
@@ -359,5 +401,6 @@ class TestVerenigingCWZ(E2EHelpers, TestCase):
         urls = self.extract_all_urls(resp)
         urls2 = [url for url in urls if url.startswith('/vereniging/accommodatie-details/')]
         self.assertEqual(len(urls2), 1)
+
 
 # end of file

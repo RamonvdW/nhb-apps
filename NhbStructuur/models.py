@@ -19,9 +19,14 @@ maximum_geboortejaar = datetime.datetime.now().year - settings.MINIMUM_LEEFTIJD_
 
 ADMINISTRATIEVE_REGIO = 100      # TODO: make een boolean field?
 
+GEBRUIK = [('18', 'Indoor'),
+           ('25', '25m 1pijl')]
+
+GEBRUIK2STR = {'18': 'Indoor',
+               '25': '25m 1pijl'}
 
 class NhbRayon(models.Model):
-    """Tabel waarin de Rayon definities van de NHB staan"""
+    """ Tabel waarin de Rayon definities van de NHB staan """
     rayon_nr = models.PositiveIntegerField(primary_key=True)
     naam = models.CharField(max_length=20)      # Rayon 3
     geografisch_gebied = models.CharField(max_length=50)
@@ -39,9 +44,15 @@ class NhbRayon(models.Model):
 
 
 class NhbRegio(models.Model):
-    """Tabel waarin de Regio definities van de NHB staan"""
+    """ Tabel waarin de Regio definities van de NHB staan """
+
+    # 3-cijferig NHB nummer van deze regio
     regio_nr = models.PositiveIntegerField(primary_key=True)
+
+    # beschrijving van de regio
     naam = models.CharField(max_length=50)
+
+    # rayon waar deze regio bij hoort
     rayon = models.ForeignKey(NhbRayon, on_delete=models.PROTECT)
 
     def __str__(self):
@@ -53,16 +64,59 @@ class NhbRegio(models.Model):
         verbose_name = "Nhb regio"
         verbose_name_plural = "Nhb regios"
 
-    objects = models.Manager()      # for the editor only
+    objects = models.Manager()      # for the source code editor only
+
+
+class NhbCluster(models.Model):
+    """ Tabel waarin de definitie van een cluster staat """
+
+    # regio waar dit cluster bij hoort
+    regio = models.ForeignKey(NhbRegio, on_delete=models.PROTECT)
+
+    # letter voor unieke identificatie van het cluster
+    letter = models.CharField(max_length=1, default='x')
+
+    # beschrijving het cluster
+    naam = models.CharField(max_length=50, default='')
+
+    # aparte clusters voor 18m en 25m
+    gebruik = models.CharField(max_length=2, choices=GEBRUIK)
+
+    def __str__(self):
+        """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
+        return "%s%s voor %s (%s)" % (self.regio.regio_nr, self.letter, GEBRUIK2STR[self.gebruik], self.naam)
+
+    class Meta:
+        """ meta data voor de admin interface """
+        verbose_name = "Nhb cluster"
+        verbose_name_plural = "Nhb clusters"
+
+        # zorg dat elk cluster uniek is
+        unique_together = ('regio', 'letter')
 
 
 class NhbVereniging(models.Model):
-    """Tabel waarin gegevens van de Verenigingen van de NHB staan"""
+    """ Tabel waarin gegevens van de Verenigingen van de NHB staan """
+
+    # 4-cijferig NHB nummer van de verenigiging
     nhb_nr = models.PositiveIntegerField(primary_key=True)
+
+    # naam van de vereniging
     naam = models.CharField(max_length=200)
+
+    # locatie van het doel van de vereniging
     plaats = models.CharField(max_length=100, blank=True)
+
+    # TODO: kan dit e-mailadres in de CWZ functie opgeslagen worden?
     contact_email = models.CharField(max_length=150, blank=True)
+
+    # de regio waarin de vereniging zit
     regio = models.ForeignKey(NhbRegio, on_delete=models.PROTECT)
+
+    # de optionele clusters waar deze vereniging bij hoort
+    clusters = models.ManyToManyField(NhbCluster)
+
+    # wie is de secretaris van de vereniging
     secretaris_lid = models.ForeignKey('NhbLid', on_delete=models.SET_NULL,
                                        blank=True,  # allow access input in form
                                        null=True)   # allow NULL relation in database
@@ -110,8 +164,7 @@ def validate_sinds_datum(datum):
 
 
 class NhbLid(models.Model):
-    """Tabel om gegevens van een lid van de NHB bij te houden"""
-
+    """ Tabel om gegevens van een lid van de NHB bij te houden """
     nhb_nr = models.PositiveIntegerField(primary_key=True)
     voornaam = models.CharField(max_length=100)
     achternaam = models.CharField(max_length=100)

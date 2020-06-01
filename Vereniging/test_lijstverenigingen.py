@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from Functie.models import maak_functie
-from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
+from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging, NhbLid
 from Overig.e2ehelpers import E2EHelpers
 from Competitie.models import DeelCompetitie, competitie_aanmaken
 import datetime
@@ -52,6 +52,7 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         # secretaris kan nog niet ingevuld worden
         ver.save()
         self._ver = ver
+        self.nhb_ver1 = ver
 
         # maak CWZ functie aan voor deze vereniging
         self.functie_cwz = maak_functie("CWZ Vereniging %s" % ver.nhb_nr, "CWZ")
@@ -67,6 +68,7 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         self.account_bko = self._prep_beheerder_lid('BKO')
         self.account_rko = self._prep_beheerder_lid('RKO')
         self.account_rcl = self._prep_beheerder_lid('RCL')
+        self.account_cwz = self._prep_beheerder_lid('CWZ')
         self.account_schutter = self._prep_beheerder_lid('Schutter')
 
         # creëer een competitie met deelcompetities
@@ -79,6 +81,7 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         self.functie_bko.accounts.add(self.account_bko)
         self.functie_rko.accounts.add(self.account_rko)
         self.functie_rcl.accounts.add(self.account_rcl)
+        self.functie_cwz.accounts.add(self.account_cwz)
 
         # maak nog een test vereniging, zonder CWZ functie
         ver = NhbVereniging()
@@ -87,49 +90,50 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         ver.regio = self.regio_101
         # secretaris kan nog niet ingevuld worden
         ver.save()
+        self.nhb_ver2 = ver
 
         self.url_lijst = '/vereniging/accommodaties/lijst/'
 
-    def test_lijst_verenigingen_anon(self):
+    def test_anon(self):
         self.e2e_logout()
         resp = self.client.get(self.url_lijst)
         self.assert_is_redirect(resp, '/plein/')
         self.e2e_assert_other_http_commands_not_supported(self.url_lijst)
 
-    def test_lijst_verenigingen_it(self):
+    def test_it(self):
         # landelijke lijst + leden aantal
         self.e2e_login_and_pass_otp(self.account_admin)
         self.e2e_wisselnaarrol_beheerder()
         self.e2e_check_rol('beheerder')
-        with self.assertNumQueries(5):
-            resp = self.client.get(self.url_lijst)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/lijst-verenigingen.dtl', 'plein/site_layout.dtl'))
-
-    def test_lijst_verenigingen_bb(self):
-        # landelijke lijst met rayon & regio
-        self.e2e_login_and_pass_otp(self.account_bb)
-        self.e2e_wisselnaarrol_bb()
-        self.e2e_check_rol('BB')
-        with self.assertNumQueries(4):
-            resp = self.client.get(self.url_lijst)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/lijst-verenigingen.dtl', 'plein/site_layout.dtl'))
-
-    def test_lijst_verenigingen_bko(self):
-        # landelijke lijst met rayon & regio
-        self.e2e_login_and_pass_otp(self.account_bko)
-        self.e2e_wissel_naar_functie(self.functie_bko)
-        self.e2e_check_rol('BKO')
         with self.assertNumQueries(6):
             resp = self.client.get(self.url_lijst)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('vereniging/lijst-verenigingen.dtl', 'plein/site_layout.dtl'))
 
-    def test_lijst_verenigingen_rko(self):
+    def test_bb(self):
+        # landelijke lijst met rayon & regio
+        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_wisselnaarrol_bb()
+        self.e2e_check_rol('BB')
+        with self.assertNumQueries(5):
+            resp = self.client.get(self.url_lijst)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('vereniging/lijst-verenigingen.dtl', 'plein/site_layout.dtl'))
+
+    def test_bko(self):
+        # landelijke lijst met rayon & regio
+        self.e2e_login_and_pass_otp(self.account_bko)
+        self.e2e_wissel_naar_functie(self.functie_bko)
+        self.e2e_check_rol('BKO')
+        with self.assertNumQueries(7):
+            resp = self.client.get(self.url_lijst)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('vereniging/lijst-verenigingen.dtl', 'plein/site_layout.dtl'))
+
+    def test_rko(self):
         # rayon lijst met regio kolom (geen rayon kolom)
         self.e2e_login_and_pass_otp(self.account_rko)
         self.e2e_wissel_naar_functie(self.functie_rko)
@@ -140,19 +144,78 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('vereniging/lijst-verenigingen.dtl', 'plein/site_layout.dtl'))
 
-    def test_lijst_verenigingen_rcl(self):
+    def test_rcl(self):
         # regio lijst met cwzs (zonder rayon/regio kolommen)
         self.e2e_login_and_pass_otp(self.account_rcl)
         self.e2e_wissel_naar_functie(self.functie_rcl)
         self.e2e_check_rol('RCL')
-        with self.assertNumQueries(9):
+        with self.assertNumQueries(10):
             resp = self.client.get(self.url_lijst)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('vereniging/lijst-verenigingen.dtl', 'plein/site_layout.dtl'))
         self.e2e_assert_other_http_commands_not_supported(self.url_lijst)
 
-    # TODO: CWZ --> toon lijst relevante verenigingen in regio
+    def test_rcl_met_clusters(self):
+        # test de lijst met clusters erin
+
+        # log in als RCL
+        self.e2e_login_and_pass_otp(self.account_rcl)
+        self.e2e_wissel_naar_functie(self.functie_rcl)
+        self.e2e_check_rol('RCL')
+
+        # verenigingen 1 en 2 horen beide bij regio 101
+        # stop ze een voor een in een eigen cluster
+
+        # maak een cluster aan en stop nhb_ver1 erin
+        cluster = NhbCluster()
+        cluster.regio = self.nhb_ver1.regio
+        cluster.letter = 'a'
+        cluster.naam = "Bovenlijns"
+        cluster.gebruik = '18'
+        cluster.save()
+        self.nhb_ver1.cluster = cluster
+        self.nhb_ver1.save()
+
+        with self.assertNumQueries(10):
+            resp = self.client.get(self.url_lijst)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+
+        # stop nhb_ver2 in hetzelfde cluster
+        self.nhb_ver2.cluster = cluster
+        self.nhb_ver2.save()
+
+        with self.assertNumQueries(10):
+            resp = self.client.get(self.url_lijst)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+
+        # stop nhb_ver2 in een apart cluster
+        cluster = NhbCluster()
+        cluster.regio = self.nhb_ver1.regio
+        cluster.letter = 'b'
+        cluster.naam = "Onderlijns"
+        cluster.gebruik = '18'
+        cluster.save()
+        self.nhb_ver2.cluster = cluster
+        self.nhb_ver2.save()
+
+        with self.assertNumQueries(10):
+            resp = self.client.get(self.url_lijst)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+
+    def test_cwz(self):
+        # de cwz krijgt dezelfde lijst als de rcl
+        self.e2e_login_and_pass_otp(self.account_cwz)
+        self.e2e_wissel_naar_functie(self.functie_cwz)
+        self.e2e_check_rol('CWZ')
+        with self.assertNumQueries(11):
+            resp = self.client.get(self.url_lijst)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('vereniging/lijst-verenigingen.dtl', 'plein/site_layout.dtl'))
 
     def test_overzicht_anon(self):
         resp = self.client.get('/competitie/')
@@ -160,6 +223,5 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/overzicht.dtl', 'plein/site_layout.dtl'))
         self.assertNotContains(resp, '/competitie/beheer-favorieten/')
-
 
 # end of file

@@ -76,7 +76,7 @@ class WedstrijdLocatie(models.Model):
 #     locatie = models.ForeignKey(WedstrijdLocatie, on_delete=models.PROTECT)
 #
 #     # datum en tijdstippen
-#     datum = models.DateField()
+#     datum_wanneer = models.DateField()
 #     tijd_begin_aanmelden = models.TimeField()
 #     tijd_begin_wedstrijd = models.TimeField()
 #     tijd_einde_wedstrijd = models.TimeField()
@@ -98,7 +98,7 @@ class WedstrijdLocatie(models.Model):
 #     wedstrijden = models.ManyToManyField(Wedstrijd)
 #
 #     # de hiaat vlag geeft snel weer of er een probleem in de planning zit
-#     hiaat = models.BooleanField(default=True)
+#     bevat_hiaat = models.BooleanField(default=True)
 #
 #     class Meta:
 #         """ meta data voor de admin interface """

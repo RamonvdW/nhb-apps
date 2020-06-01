@@ -11,23 +11,37 @@
 {% block pagina %}
 {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vereniging-locatie-details" %}
 
-<h4>Accommodatie details</h4>
+<h4>Vereniging en Accommodatie</h4>
 
-<p>Op deze pagina staan de details van een accommodatie.</p>
+<p>Op deze pagina staan de details van de accommodatie van een vereniging.</p>
 
 <form action="{{ opslaan_url }}" method="post">
     {% csrf_token %}
 
     <table class="white">
         <tr>
-            <td style="vertical-align: top">Adres:</td>
+            <td>Vereniging:</td>
+            <td>{{ nhbver }}</td>
+        </tr>
+
+        <tr>
+            <td style="vertical-align: top">Adres van de accommodatie:</td>
             <td style="vertical-align: top">{{ locatie.adres|linebreaksbr }}</td>
         </tr>
 
         <tr>
             <td>Regio:</td>
-            <td>{{ regio }}</td>
+            <td>{{ nhbver.regio }}</td>
         </tr>
+
+        {% if nhbver.clusters.count %}
+            <td>Cluster(s):</td>
+            <td>
+                {% for cluster in nhbver.clusters.all %}
+                    <span>{{ cluster }}</span><br>
+                {% endfor %}
+            </td>
+        {% endif %}
 
         <tr>
             <td>Typering:</td>
@@ -103,15 +117,16 @@
             </td>
         </tr>
 
+        {% if locatie.other_ver.count %}
         <tr>
-            <td style="vertical-align: top">Gebruikt door vereniging(en):</td>
+            <td style="vertical-align: top">Accommodatie wordt ook gebruikt door vereniging:</td>
             <td style="vertical-align: top">
-                {% for nhbver in locatie.nhb_ver %}
-                    {% if not forloop.first %}<br>{% endif %}
-                    <span>{{ nhbver }}</span>
+                {% for nhbver in locatie.other_ver.all %}
+                    <span>{{ nhbver }}</span><br>
                 {% endfor %}
             </td>
         </tr>
+        {% endif %}
     </table>
 
     <p>
