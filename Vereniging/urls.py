@@ -38,6 +38,10 @@ urlpatterns = [
     path('accommodatie-details/<locatie_pk>/<vereniging_pk>/',
          views.VerenigingAccommodatieDetailsView.as_view(),
          name='vereniging-accommodatie-details'),
+
+    path('regio-clusters/',
+         views.WijzigClustersView.as_view(),
+         name='clusters'),
 ]
 
 # end of file

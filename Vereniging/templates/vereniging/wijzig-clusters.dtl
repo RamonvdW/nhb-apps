@@ -1,0 +1,118 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2020 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Clusters instellen{% endblock %}
+
+{% block pagina %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="wijzig-clusters" %}
+
+<h4>Clusters instellen</h4>
+
+<p>De clusters kunnen optioneel gebruikt worden om een regio op te delen in kleinere geografische gebieden.</p>
+<p>Dit kan om praktische redenen nodig zijn in jouw regio, bijvoorbeeld in verband met onredelijke reistijden.</p>
+
+<p>Je rol is <b>{{ huidige_rol }}</b>.</p>
+
+<p>Bij gebruik van clusters wordt voor de regiocompetitie voor elk cluster een aparte wedstrijdplanning gemaakt.<br>De Indoor en 25m 1pijl competities hebben onafhankelijke clusters.</p>
+
+<!-- TODO: opmerking toevoegen of schutters van een vereniging alleen binnen het cluster mogen schieten/inhalen -->
+
+{% if regio_heeft_clusters %}
+    <form action="{{ opslaan_url }}" method="post">
+        {% csrf_token %}
+
+        <!-- naam van elk cluster in de regio -->
+        <p>&nbsp;</p>
+        <h5>Cluster namen</h5>
+
+        <p>Hieronder kan je voor elk cluster een naam invoeren.</p>
+
+        <table class="white">
+            <thead>
+                <th>Cluster</th>
+                <th>Zelf gekozen beschrijving / naam</th>
+            </thead>
+
+            {% for obj in cluster_list %}
+                <tr>
+                    <td>{{ obj.cluster_code_str }}</td>
+
+                    <td class="input-field">
+                        <input type="text" name="{{ obj.cluster_veld }}" placeholder="Hier invoeren" value="{{ obj.naam }}">
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+
+        <p>
+            <a class="btn-nhb-blauw" href="{{ terug_url }}">
+                <i class="material-icons-round left">arrow_back</i>Terug (niet opslaan)</a>
+            <span>&nbsp;&nbsp;</span>
+            <button class="btn-nhb-rood" type="submit"><i class="material-icons-round left">check</i>Opslaan</button>
+        </p>
+
+        <!-- clusters voor elke vereniging in de regio -->
+        <p>&nbsp;</p>
+        <h5>Plaats verenigingen in de clusters</h5>
+
+        <p>Hieronder kan je voor elke vereniging in de regio instellen in welke clusters je deze wilt plaatsen.</p>
+
+        <table class="white">
+            <thead>
+                <tr>
+                    <th>Vereniging</th>
+                    <th>Cluster Indoor</th>
+                    <th>Cluster 25m1pijl</th>
+                </tr>
+            </thead>
+
+            {% for obj in object_list %}
+                <tr>
+                    <td>[{{ obj.nhb_nr }}] {{ obj.naam }}</td>
+
+                    <td>
+                        <select name="{{ obj.cluster_18 }}">
+                            {% for opt in obj.cluster_18_options %}
+                                <option value="{{ opt.choice_name }}"{% if opt.actief %} selected{% endif %}>{{ opt.tekst }}</option>
+                            {% endfor %}
+                        </select>
+                    </td>
+
+                    <td>
+                        <select name="{{ obj.cluster_25 }}">
+                            {% for opt in obj.cluster_25_options %}
+                                <option value="{{ opt.choice_name }}"{% if opt.actief %} selected{% endif %}>{{ opt.tekst }}</option>
+                            {% endfor %}
+                        </select>
+                    </td>
+                </tr>
+            {% endfor %}
+
+        </table>
+
+        <p>
+            <a class="btn-nhb-blauw" href="{{ terug_url }}">
+                <i class="material-icons-round left">arrow_back</i>Terug (niet opslaan)</a>
+            <span>&nbsp;&nbsp;</span>
+            <button class="btn-nhb-rood" type="submit"><i class="material-icons-round left">check</i>Opslaan</button>
+        </p>
+
+    </form>
+{% endif %}
+
+<p>&nbsp;</p>
+<h5>Meer clusters aanvragen</h5>
+
+<p>Heb je meer clusters nodig?</p>
+<p>Neem dan contact op met de Manager Competitiezaken van het bondsbureau om cluster(s) aan te laten maken:</p>
+    <a class="btn-nhb-blauw" href="mailto:info@handboogsport.nl">
+        <i class="material-icons-round left">email</i>info@handboogsport.nl</a>
+
+
+{% endblock %}
+

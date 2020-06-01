@@ -14,7 +14,7 @@ from Plein.menu import menu_dynamics
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving
 from Functie.models import Functie
 from BasisTypen.models import LeeftijdsKlasse, MAXIMALE_LEEFTIJD_JEUGD
-from NhbStructuur.models import NhbLid, NhbVereniging
+from NhbStructuur.models import NhbCluster, NhbVereniging, NhbLid
 from Schutter.models import SchutterBoog
 from Competitie.models import Competitie, AG_NUL, RegioCompetitieSchutterBoog, regiocompetitie_schutterboog_aanmelden
 from Score.models import Score
@@ -30,6 +30,7 @@ TEMPLATE_LEDEN_VOORKEUREN = 'vereniging/leden-voorkeuren.dtl'
 TEMPLATE_LEDEN_AANMELDEN = 'vereniging/leden-aanmelden.dtl'
 TEMPLATE_LIJST_VERENIGINGEN = 'vereniging/lijst-verenigingen.dtl'
 TEMPLATE_ACCOMMODATIE_DETAILS = 'vereniging/accommodatie-details.dtl'
+TEMPLATE_WIJZIG_CLUSTERS = 'vereniging/wijzig-clusters.dtl'
 
 
 class OverzichtView(UserPassesTestMixin, TemplateView):
@@ -712,6 +713,170 @@ class VerenigingAccommodatieDetailsView(AccommodatieDetailsView):
     def post(self, request, *args, **kwargs):
         kwargs['is_ver'] = True
         return super().post(request, *args, **kwargs)
+
+
+class WijzigClustersView(UserPassesTestMixin, TemplateView):
+
+    """ Via deze view kunnen verenigingen in de clusters geplaatst worden """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_WIJZIG_CLUSTERS
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._pk2cluster = dict()
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        rol_nu = rol_get_huidige(self.request)
+        return rol_nu == Rollen.ROL_RCL
+
+    def handle_no_permission(self):
+        """ gebruiker heeft geen toegang --> redirect naar het plein """
+        return HttpResponseRedirect(reverse('Plein:plein'))
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
+        context['huidige_rol'] = rol_get_beschrijving(self.request)
+
+        # cluster namen
+        objs = NhbCluster.objects.\
+                    filter(regio=functie_nu.nhb_regio).\
+                    select_related('regio').\
+                    order_by('gebruik', 'letter')
+        context['cluster_list'] = objs
+        context['regio_heeft_clusters'] = objs.count() > 0
+
+        for obj in objs:
+            obj.cluster_veld = "cluster_%s" % obj.pk
+        # for
+
+        # maak lijstje voor het formulier met de keuze opties van de pull-down lijstjes
+        opt_18 = [obj for obj in objs if obj.gebruik == '18']
+        opt_25 = [obj for obj in objs if obj.gebruik == '25']
+        for opt in opt_18 + opt_25:
+            opt.tekst = opt.cluster_code_str()
+            opt.choice_name = str(opt.pk)       # gebruik de cluster pk als selector
+        # for
+
+        # voeg de "geen cluster" opties toe
+        opt_geen = NhbCluster()
+        opt_geen.tekst = "Geen"
+        opt_geen.choice_name = "0"
+        opt_18.insert(0, opt_geen)
+        opt_25.insert(0, opt_geen)
+
+        # vereniging in de regio
+        objs = NhbVereniging.objects.\
+                    filter(regio=functie_nu.nhb_regio).\
+                    prefetch_related('clusters').\
+                    order_by('nhb_nr')
+        context['object_list'] = objs
+
+        for obj in objs:
+            # voeg form-fields toe die voor de post gebruikt kunnen worden
+            ver_str = 'ver_' + str(obj.nhb_nr)
+            obj.cluster_18 = ver_str + '_18'
+            obj.cluster_25 = ver_str + '_25'
+
+            # maak een kopie om een vlag te kunnen zetten op de huidige optie
+            obj.cluster_18_options = copy.deepcopy(opt_18)
+            obj.cluster_25_options = copy.deepcopy(opt_25)
+
+            # zet de 'selected' vlag op de huidige cluster keuzes voor de vereniging
+            for cluster in obj.clusters.all():
+                # zoek dit cluster op
+                for opt in obj.cluster_18_options + obj.cluster_25_options:
+                    if opt.pk == cluster.pk:
+                        opt.actief = True
+                # for
+            # for
+        # for
+
+        context['terug_url'] = reverse('Plein:plein')
+
+        menu_dynamics(self.request, context, actief='hetplein')
+        return context
+
+    def _swap_cluster(self, nhbver, gebruik):
+        # vertaal de post value naar een NhbCluster object
+        # checkt ook meteen dat het een valide cluster is voor deze regio
+
+        param_name = 'ver_%s_%s' % (str(nhbver.nhb_nr), gebruik)
+        post_param = self.request.POST.get(param_name, None)
+
+        cluster_pk = None
+        if post_param is not None:
+            try:
+                cluster_pk = int(post_param)
+            except (ValueError, TypeError):
+                return
+
+        if cluster_pk is not None:
+            try:
+                new_cluster = self._pk2cluster[cluster_pk]
+            except KeyError:
+                new_cluster = None
+
+            try:
+                huidige = nhbver.clusters.get(gebruik=gebruik)
+            except NhbCluster.DoesNotExist:
+                # vereniging zit niet in een cluster voor de 18m
+                # stop de vereniging in het gevraagde cluster
+                if new_cluster:
+                    activiteit = "Vereniging %s toegevoegd aan cluster %s" % (nhbver, new_cluster)
+                    schrijf_in_logboek(self.request.user, 'Clusters', activiteit)
+
+                    print('nhbver %s toegevoegd aan cluster %s' % (nhbver, new_cluster))
+                    nhbver.clusters.add(new_cluster)
+                return
+
+            # vereniging zit al in een cluster voor dit gebruik
+            if huidige != new_cluster:
+                # nieuwe keuze is anders, dus verwijder de vereniging uit dit cluster
+                print('nhbver %s verwijderd uit cluster %s' % (nhbver, huidige))
+                nhbver.clusters.remove(huidige)
+                # stop de vereniging in het gevraagde cluster (if any)
+                if new_cluster:
+                    print('nhbver %s toegevoegd aan cluster %s' % (nhbver, new_cluster))
+                    nhbver.clusters.add(new_cluster)
+
+    def post(self, request, *args, **kwargs):
+        """ Deze functie wordt aangeroepen als de gebruik op de 'opslaan' knop drukt
+            op het wijzig-clusters formulier.
+        """
+
+        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
+
+        clusters = NhbCluster.objects.filter(regio=functie_nu.nhb_regio)
+
+        # neem de cluster namen over
+        for obj in clusters:
+            self._pk2cluster[obj.pk] = obj
+
+            # haal de ingevoerde naam van het cluster op
+            cluster_veld = "cluster_%s" % obj.pk
+            naam = request.POST.get(cluster_veld, obj.naam)
+            if naam != obj.naam:
+                # wijziging opslaan
+                obj.naam = naam[:50]        # te lang kan niet opgeslagen worden
+                obj.save()
+        # for
+
+        # neem de cluster keuzes voor de verenigingen over
+        for obj in NhbVereniging.objects.\
+                        filter(regio=functie_nu.nhb_regio).\
+                        prefetch_related('clusters'):
+
+            self._swap_cluster(obj, '18')
+            self._swap_cluster(obj, '25')
+        # for
+
+        url = reverse('Plein:plein')
+        return HttpResponseRedirect(url)
 
 
 # end of file
