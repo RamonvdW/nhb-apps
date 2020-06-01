@@ -170,7 +170,7 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         # maak een cluster aan en stop nhb_ver1 erin
         cluster = NhbCluster()
         cluster.regio = self.nhb_ver1.regio
-        cluster.letter = 'a'
+        cluster.letter = 'Y'
         cluster.naam = "Bovenlijns"
         cluster.gebruik = '18'
         cluster.save()
@@ -194,7 +194,7 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         # stop nhb_ver2 in een apart cluster
         cluster = NhbCluster()
         cluster.regio = self.nhb_ver1.regio
-        cluster.letter = 'b'
+        cluster.letter = 'Z'
         cluster.naam = "Onderlijns"
         cluster.gebruik = '18'
         cluster.save()
