@@ -827,22 +827,23 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
                 # vereniging zit niet in een cluster voor de 18m
                 # stop de vereniging in het gevraagde cluster
                 if new_cluster:
+                    nhbver.clusters.add(new_cluster)
                     activiteit = "Vereniging %s toegevoegd aan cluster %s" % (nhbver, new_cluster)
                     schrijf_in_logboek(self.request.user, 'Clusters', activiteit)
-
-                    print('nhbver %s toegevoegd aan cluster %s' % (nhbver, new_cluster))
-                    nhbver.clusters.add(new_cluster)
                 return
 
             # vereniging zit al in een cluster voor dit gebruik
             if huidige != new_cluster:
                 # nieuwe keuze is anders, dus verwijder de vereniging uit dit cluster
-                print('nhbver %s verwijderd uit cluster %s' % (nhbver, huidige))
                 nhbver.clusters.remove(huidige)
+                activiteit = "Vereniging %s verwijderd uit cluster %s" % (nhbver, huidige)
+                schrijf_in_logboek(self.request.user, 'Clusters', activiteit)
+
                 # stop de vereniging in het gevraagde cluster (if any)
                 if new_cluster:
-                    print('nhbver %s toegevoegd aan cluster %s' % (nhbver, new_cluster))
                     nhbver.clusters.add(new_cluster)
+                    activiteit = "Vereniging %s toegevoegd aan cluster %s" % (nhbver, new_cluster)
+                    schrijf_in_logboek(self.request.user, 'Clusters', activiteit)
 
     def post(self, request, *args, **kwargs):
         """ Deze functie wordt aangeroepen als de gebruik op de 'opslaan' knop drukt
