@@ -16,7 +16,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import Account, HanterenPersoonsgegevens
 from Account.otp import account_otp_prepare_koppelen, account_otp_koppel, account_otp_is_gekoppeld, account_otp_controleer
 from Account.rechten import account_rechten_eval_now, account_rechten_is_otp_verified
-from NhbStructuur.models import ADMINISTRATIEVE_REGIO, NhbLid
+from NhbStructuur.models import NhbLid
 from Plein.menu import menu_dynamics
 from Logboek.models import schrijf_in_logboek
 from Overig.tijdelijke_url import maak_tijdelijke_url_functie_email
@@ -409,7 +409,7 @@ class WijzigBeheerdersView(UserPassesTestMixin, ListView):
             if account.nhblid_set.count() > 0:
                 nhblid = account.nhblid_set.all()[0]
                 regio = nhblid.bij_vereniging.regio
-                if regio.regio_nr != ADMINISTRATIEVE_REGIO:
+                if not regio.is_administratief:
                     account.geo_beschrijving = "regio %s / rayon %s" % (regio.regio_nr, regio.rayon.rayon_nr)
         self._huidige_beheerders = beheerder_accounts
 
@@ -448,7 +448,7 @@ class WijzigBeheerdersView(UserPassesTestMixin, ListView):
                     account.vereniging_naam = nhblid.bij_vereniging.naam
                 else:
                     regio = nhblid.bij_vereniging.regio
-                    if regio.regio_nr != ADMINISTRATIEVE_REGIO:
+                    if not regio.is_administratief:
                         account.geo_beschrijving = "regio %s / rayon %s" % (regio.regio_nr, regio.rayon.rayon_nr)
 
                 objs.append(account)
