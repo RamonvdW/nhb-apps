@@ -6,12 +6,12 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}Verenigingen{% endblock %}
+{% block title %}Verenigingen en Accommodaties{% endblock %}
 
 {% block pagina %}
 {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="lijst-verenigingen" %}
 
-<h4>Verenigingen</h4>
+<h4>Verenigingen en Accommodaties</h4>
 
 {% if landelijk %}
     <p>Hieronder volgt de landelijke lijst van {{ object_list.count }} verenigingen.</p>
