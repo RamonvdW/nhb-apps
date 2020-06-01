@@ -102,7 +102,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.assertNotContains(resp, 'Manager competitiezaken')
         self.assertContains(resp, 'Gebruiker')
         self.assertContains(resp, 'Voordat je aan de slag kan moeten we eerst een paar afspraken maken over het omgaan met persoonsgegevens.')
-        #print(str(resp.content).replace('>', '>\n'))
+        # print(str(resp.content).replace('>', '>\n'))
         self.assertContains(resp, 'Een aantal rollen komt beschikbaar nadat de controle van de tweede factor uitgevoerd is.')
 
         # accepteer VHPG en login met OTP controle
@@ -110,7 +110,8 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.e2e_account_accepteert_vhpg(self.account_admin)
 
         # controleer dat de complete keuzemogelijkheden op de pagina staan
-        resp = self.client.get(self.url_wisselvanrol)
+        with self.assertNumQueries(11):
+            resp = self.client.get(self.url_wisselvanrol)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assertContains(resp, 'IT beheerder')

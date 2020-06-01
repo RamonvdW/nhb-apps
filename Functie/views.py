@@ -654,7 +654,7 @@ class OverzichtView(UserPassesTestMixin, ListView):
             Hier doen we het iets efficienter.
         """
         for obj in objs:
-            obj.beheerders = [account.volledige_naam() for account in obj.accounts.only('username', 'first_name', 'last_name').all()]
+            obj.beheerders = [account.volledige_naam() for account in obj.accounts.all()]
         # for
 
     def get_queryset(self):
@@ -666,13 +666,18 @@ class OverzichtView(UserPassesTestMixin, ListView):
         if rol_nu == Rollen.ROL_CWZ:
             # toon alleen de hierarchy vanuit deze vereniging omhoog
             functie_cwz = functie_nu
-            objs = Functie.objects.select_related('nhb_rayon', 'nhb_regio').\
-                                   filter(Q(rol='RCL', nhb_regio=functie_cwz.nhb_ver.regio) |
-                                          Q(rol='RKO', nhb_rayon=functie_cwz.nhb_ver.regio.rayon) |
-                                          Q(rol='BKO'))
+            objs = Functie.objects.\
+                        filter(Q(rol='RCL', nhb_regio=functie_cwz.nhb_ver.regio) |
+                               Q(rol='RKO', nhb_rayon=functie_cwz.nhb_ver.regio.rayon) |
+                               Q(rol='BKO')).\
+                        select_related('nhb_rayon', 'nhb_regio').\
+                        prefetch_related('accounts')
         else:
-            objs = Functie.objects.select_related('nhb_rayon', 'nhb_regio').\
-                                   exclude(rol='CWZ')       # TODO: verander in filter(rol__in [BKO, RKO, RCL]")
+            # TODO: verander in exclude(CWZ) in filter(rol__in [BKO, RKO, RCL]")
+            objs = Functie.objects.\
+                        exclude(rol='CWZ'). \
+                        select_related('nhb_rayon', 'nhb_regio').\
+                        prefetch_related('accounts')
 
         objs = self._sorteer_functies(objs)
 
@@ -733,6 +738,8 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
     def _get_functies_eigen(self):
         objs = list()
 
+        pks = list()
+
         hierarchy2 = dict()      # [parent_tup] = list of child_tup
         for child_tup, parent_tup in rol_enum_pallet(self.request):
             rol, functie_pk = child_tup
@@ -756,22 +763,32 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
 
             elif parent_tup == (None, None):
                 # top-level rol voor deze gebruiker - deze altijd tonen
-                url = reverse('Functie:activeer-functie', kwargs={'functie_pk': functie_pk})
-                functie = Functie.objects.\
-                            select_related('nhb_ver').\
-                            only('beschrijving', 'nhb_ver__naam').\
-                            get(pk=functie_pk)
-                title = functie.beschrijving
-                ver_naam = ''
-                if functie.nhb_ver:
-                    ver_naam = functie.nhb_ver.naam
-                volgorde = self._functie_volgorde(functie)
-                objs.append({'titel': title, 'ver_naam': ver_naam, 'url': url, 'volgorde': volgorde})
+                pks.append(functie_pk)
             else:
                 try:
                     hierarchy2[parent_tup].append(child_tup)
                 except KeyError:
                     hierarchy2[parent_tup] = [child_tup,]
+        # for
+
+        # haal alle functies met 1 database query op
+        pk2func = dict()
+        for obj in Functie.objects.\
+                filter(pk__in=pks).\
+                select_related('nhb_ver', 'nhb_regio', 'nhb_rayon').\
+                only('beschrijving', 'rol', 'nhb_ver__nhb_nr', 'nhb_ver__naam', 'nhb_rayon__rayon_nr', 'nhb_regio__regio_nr'):
+            pk2func[obj.pk] = obj
+        # for
+
+        for functie_pk in pks:
+            url = reverse('Functie:activeer-functie', kwargs={'functie_pk': functie_pk})
+            functie = pk2func[functie_pk]
+            title = functie.beschrijving
+            ver_naam = ''
+            if functie.nhb_ver:
+                ver_naam = functie.nhb_ver.naam
+            volgorde = self._functie_volgorde(functie)
+            objs.append({'titel': title, 'ver_naam': ver_naam, 'url': url, 'volgorde': volgorde})
         # for
 
         objs.sort(key=lambda x: x['volgorde'])
@@ -795,14 +812,24 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
             # geen ge-erfde functies
             pass
         else:
+            # haal alle benodigde functies met 1 query op
+            pks = [pk for _, pk in child_tups]
+            pk2func = dict()
+            for obj in Functie.objects.\
+                    filter(pk__in=pks).\
+                    select_related('nhb_ver', 'nhb_regio', 'nhb_rayon').\
+                    only('beschrijving', 'rol', 'nhb_ver__nhb_nr', 'nhb_ver__naam', 'nhb_rayon__rayon_nr', 'nhb_regio__regio_nr'):
+                pk2func[obj.pk] = obj
+            # for
+
             for rol, functie_pk in child_tups:
                 url = reverse('Functie:activeer-functie', kwargs={'functie_pk': functie_pk})
                 if rol == Rollen.ROL_CWZ:
-                    functie = Functie.objects.select_related('nhb_ver').only('beschrijving', 'nhb_ver__naam').get(pk=functie_pk)
+                    functie = pk2func[functie_pk]
                     volgorde = self._functie_volgorde(functie)
                     objs.append({'titel': functie.beschrijving, 'ver_naam': functie.nhb_ver.naam, 'url': url, 'volgorde': volgorde})
                 else:
-                    functie = Functie.objects.only('beschrijving').get(pk=functie_pk)
+                    functie = pk2func[functie_pk]
                     volgorde = self._functie_volgorde(functie)
                     objs.append({'titel': functie.beschrijving, 'ver_naam': "", 'url': url, 'volgorde': volgorde})
             # for

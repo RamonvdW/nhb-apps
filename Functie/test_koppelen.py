@@ -124,7 +124,8 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.assertContains(resp, "Manager competitiezaken")
 
         # controleer de Wijzig knoppen op de functie-overzicht pagina
-        resp = self.client.get(self.url_overzicht)
+        with self.assertNumQueries(4):
+            resp = self.client.get(self.url_overzicht)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/overzicht.dtl', 'plein/site_layout.dtl'))
@@ -223,7 +224,8 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
 
         # haal het wijzig scherm op voor de BKO
         url = '/functie/wijzig/%s/' % self.functie_bko.pk
-        resp = self.client.get(url)
+        with self.assertNumQueries(4):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/wijzig.dtl', 'plein/site_layout.dtl'))
