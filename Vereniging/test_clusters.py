@@ -31,6 +31,7 @@ class TestVerenigingClusters(E2EHelpers, TestCase):
         # maak de CWZ functie
         self.functie_rcl111 = maak_functie("RCL Regio 111 test", "RCL")
         self.functie_rcl111.nhb_regio = regio_111
+        self.functie_rcl111.comp_type = '18'
         self.functie_rcl111.save()
         self.functie_rcl111.accounts.add(self.account_rcl111)
 
@@ -89,10 +90,10 @@ class TestVerenigingClusters(E2EHelpers, TestCase):
         # plaats nhbver1 in een ander cluster
         # haal nhbver2 uit zijn cluster
         # stop nhbver3 in een cluster
-        resp = self.client.post(self.url_clusters, {'cluster_%s' % self.cluster1.pk: 'Hallo!',
-                                                    'ver_1001_18': self.cluster2.pk,
-                                                    'ver_1002_18': '0',
-                                                    'ver_1003_18': self.cluster1.pk})
+        resp = self.client.post(self.url_clusters, {'naam_%s' % self.cluster1.pk: 'Hallo!',
+                                                    'ver_1001': self.cluster2.pk,
+                                                    'ver_1002': '0',
+                                                    'ver_1003': self.cluster1.pk})
         self.assert_is_redirect(resp, '/plein/')
 
         cluster = NhbCluster.objects.get(pk=self.cluster1.pk)
@@ -100,15 +101,20 @@ class TestVerenigingClusters(E2EHelpers, TestCase):
 
         # tweede set transacties, identiek aan de eerste
         # dit resulteert in alle "geen wijzigingen"
-        resp = self.client.post(self.url_clusters, {'cluster_%s' % self.cluster1.pk: 'Hallo!',
-                                                    'ver_1001_18': self.cluster2.pk,
-                                                    'ver_1002_18': '0',
-                                                    'ver_1003_18': self.cluster1.pk})
+        resp = self.client.post(self.url_clusters, {'naam_%s' % self.cluster1.pk: 'Hallo!',
+                                                    'ver_1001': self.cluster2.pk,
+                                                    'ver_1002': '0',
+                                                    'ver_1003': self.cluster1.pk})
         self.assert_is_redirect(resp, '/plein/')
 
         # stuur nog wat illegale parameters
-        resp = self.client.post(self.url_clusters, {'ver_1001_25': 'x'})
+        lange_tekst = 'Dit is een veel te lange tekst die ergens afgekapt gaat worden maar wel opgeslagen wordt.'
+        resp = self.client.post(self.url_clusters, {'ver_1001': 'x',
+                                                    'naam_%s' % self.cluster1.pk: lange_tekst})
         self.assert_is_redirect(resp, '/plein/')
+
+        cluster = NhbCluster.objects.get(pk=self.cluster1.pk)
+        self.assertEqual(cluster.naam, lange_tekst[:50])
 
         self.e2e_assert_other_http_commands_not_supported(self.url_clusters, post=False)
 

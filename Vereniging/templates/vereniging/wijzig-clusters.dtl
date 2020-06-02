@@ -43,7 +43,7 @@
                     <td>{{ obj.cluster_code_str }}</td>
 
                     <td class="input-field">
-                        <input type="text" name="{{ obj.cluster_veld }}" placeholder="Hier invoeren" value="{{ obj.naam }}">
+                        <input type="text" name="{{ obj.veld_naam }}" placeholder="Hier invoeren" value="{{ obj.naam }}">
                     </td>
                 </tr>
             {% endfor %}
@@ -66,8 +66,13 @@
             <thead>
                 <tr>
                     <th>Vereniging</th>
-                    <th>Cluster Indoor</th>
-                    <th>Cluster 25m1pijl</th>
+                    <th>
+                        {% if gebruik == '18' %}
+                            <span>Cluster Indoor</span>
+                        {% else %}
+                            <span>Cluster 25m1pijl</span>
+                        {% endif %}
+                    </th>
                 </tr>
             </thead>
 
@@ -76,16 +81,8 @@
                     <td>[{{ obj.nhb_nr }}] {{ obj.naam }}</td>
 
                     <td>
-                        <select name="{{ obj.cluster_18 }}">
-                            {% for opt in obj.cluster_18_options %}
-                                <option value="{{ opt.choice_name }}"{% if opt.actief %} selected{% endif %}>{{ opt.tekst }}</option>
-                            {% endfor %}
-                        </select>
-                    </td>
-
-                    <td>
-                        <select name="{{ obj.cluster_25 }}">
-                            {% for opt in obj.cluster_25_options %}
+                        <select name="{{ obj.veld_naam }}">
+                            {% for opt in obj.cluster_opties %}
                                 <option value="{{ opt.choice_name }}"{% if opt.actief %} selected{% endif %}>{{ opt.tekst }}</option>
                             {% endfor %}
                         </select>

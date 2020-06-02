@@ -742,22 +742,25 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
         context['huidige_rol'] = rol_get_beschrijving(self.request)
 
+        # filter clusters die aangepast mogen worden op competitie type
+        # waarvan de definitie heel handig overeen komt met cluster.gebruik
+        context['gebruik'] = gebruik_filter = functie_nu.comp_type
+
         # cluster namen
         objs = NhbCluster.objects.\
-                    filter(regio=functie_nu.nhb_regio).\
+                    filter(regio=functie_nu.nhb_regio, gebruik=gebruik_filter).\
                     select_related('regio').\
-                    order_by('gebruik', 'letter')
+                    order_by('letter')
         context['cluster_list'] = objs
         context['regio_heeft_clusters'] = objs.count() > 0
 
         for obj in objs:
-            obj.cluster_veld = "cluster_%s" % obj.pk
+            obj.veld_naam = "naam_%s" % obj.pk
         # for
 
         # maak lijstje voor het formulier met de keuze opties van de pull-down lijstjes
-        opt_18 = [obj for obj in objs if obj.gebruik == '18']
-        opt_25 = [obj for obj in objs if obj.gebruik == '25']
-        for opt in opt_18 + opt_25:
+        opts = objs[:]
+        for opt in opts:
             opt.tekst = opt.cluster_code_str()
             opt.choice_name = str(opt.pk)       # gebruik de cluster pk als selector
         # for
@@ -766,8 +769,7 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
         opt_geen = NhbCluster()
         opt_geen.tekst = "Geen"
         opt_geen.choice_name = "0"
-        opt_18.insert(0, opt_geen)
-        opt_25.insert(0, opt_geen)
+        opts.insert(0, opt_geen)
 
         # vereniging in de regio
         objs = NhbVereniging.objects.\
@@ -778,18 +780,15 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
 
         for obj in objs:
             # voeg form-fields toe die voor de post gebruikt kunnen worden
-            ver_str = 'ver_' + str(obj.nhb_nr)
-            obj.cluster_18 = ver_str + '_18'
-            obj.cluster_25 = ver_str + '_25'
+            obj.veld_naam = 'ver_' + str(obj.nhb_nr)
 
             # maak een kopie om een vlag te kunnen zetten op de huidige optie
-            obj.cluster_18_options = copy.deepcopy(opt_18)
-            obj.cluster_25_options = copy.deepcopy(opt_25)
+            obj.cluster_opties = copy.deepcopy(opts)
 
             # zet de 'selected' vlag op de huidige cluster keuzes voor de vereniging
             for cluster in obj.clusters.all():
                 # zoek dit cluster op
-                for opt in obj.cluster_18_options + obj.cluster_25_options:
+                for opt in obj.cluster_opties:
                     if opt.pk == cluster.pk:
                         opt.actief = True
                 # for
@@ -805,7 +804,7 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
         # vertaal de post value naar een NhbCluster object
         # checkt ook meteen dat het een valide cluster is voor deze regio
 
-        param_name = 'ver_%s_%s' % (str(nhbver.nhb_nr), gebruik)
+        param_name = 'ver_' + str(nhbver.nhb_nr)
         post_param = self.request.POST.get(param_name, None)
 
         cluster_pk = None
@@ -846,24 +845,28 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
                     schrijf_in_logboek(self.request.user, 'Clusters', activiteit)
 
     def post(self, request, *args, **kwargs):
-        """ Deze functie wordt aangeroepen als de gebruik op de 'opslaan' knop drukt
-            op het wijzig-clusters formulier.
+        """ Deze functie wordt aangeroepen als de RCL op de 'opslaan' knop drukt
+            in het wijzig-clusters formulier.
         """
 
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
 
-        clusters = NhbCluster.objects.filter(regio=functie_nu.nhb_regio)
+        # filter clusters die aangepast mogen worden op competitie type
+        # waarvan de definitie heel handig overeen komt met cluster.gebruik
+        gebruik_filter = functie_nu.comp_type
+
+        clusters = NhbCluster.objects.filter(regio=functie_nu.nhb_regio, gebruik=gebruik_filter)
 
         # neem de cluster namen over
         for obj in clusters:
             self._pk2cluster[obj.pk] = obj
 
             # haal de ingevoerde naam van het cluster op
-            cluster_veld = "cluster_%s" % obj.pk
+            cluster_veld = "naam_%s" % obj.pk
             naam = request.POST.get(cluster_veld, obj.naam)
             if naam != obj.naam:
                 # wijziging opslaan
-                obj.naam = naam[:50]        # te lang kan niet opgeslagen worden
+                obj.naam = naam[:50]        # te lang kan anders niet opgeslagen worden
                 obj.save()
         # for
 
@@ -872,8 +875,7 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
                         filter(regio=functie_nu.nhb_regio).\
                         prefetch_related('clusters'):
 
-            self._swap_cluster(obj, '18')
-            self._swap_cluster(obj, '25')
+            self._swap_cluster(obj, gebruik_filter)
         # for
 
         url = reverse('Plein:plein')
