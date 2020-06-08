@@ -198,7 +198,11 @@ class E2EHelpers(object):
         # while
         return checked, unchecked
 
-    def assert_external_links_in_separate_window(self, content, template_name):
+    def assert_link_quality(self, content, template_name):
+        """ assert the quality of links
+            - links to external sites must have target="_blank"
+            - links should not be empty
+        """
         # strip head
         pos = content.find('<body')
         content = content[pos:]
@@ -213,10 +217,13 @@ class E2EHelpers(object):
                 content = content[pos+4:]
                 # filter out website-internal links
                 if link.find('href="/') < 0 and link.find('href="#') < 0 and link.find('href="mailto:') < 0:
-                    # remainder must be links that leave the website
-                    # these must target a blank window
-                    if 'target="_blank"' not in link:       # pragma: no cover
-                        self.fail(msg='Missing target="_blank" in link %s on page %s' % (link, template_name))
+                    if link.find('href=""') >= 0:
+                        self.fail(msg='Unexpected empty link %s on page %s' % (link, template_name))
+                    else:
+                        # remainder must be links that leave the website
+                        # these must target a blank window
+                        if 'target="_blank"' not in link:       # pragma: no cover
+                            self.fail(msg='Missing target="_blank" in link %s on page %s' % (link, template_name))
             else:
                 content = ''
         # while
@@ -233,7 +240,7 @@ class E2EHelpers(object):
         self.assertIn("<body ", html)
         self.assertIn("</body>", html)
         self.assertIn("<!DOCTYPE html>", html)
-        self.assert_external_links_in_separate_window(html, response.templates[0].name)
+        self.assert_link_quality(html, response.templates[0].name)
 
     def assert_template_used(self, response, template_names):
         """ Controleer dat de gevraagde templates gebruikt zijn """
