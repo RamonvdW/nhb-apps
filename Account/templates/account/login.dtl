@@ -75,9 +75,12 @@
     </div>
 </div>
 
+
+<p>&nbsp;</p>
 <h5>Nog geen account?</h5>
 <p>Ben je lid bij een handboogvereniging, dan kan je een account aanmaken.</p>
 <p>De vereniging moet aangesloten zijn bij de Nederlandse Handboog Bond (NHB).</p>
-<p><a class="btn-nhb-blauw" href="{% url 'Schutter:registreer' %}">Aanmaken</a></p>
+<p><a class="btn-nhb-blauw" href="{% url 'Schutter:registreer' %}">
+    <i class="material-icons-round left">add</i>Account aanmaken</a></p>
 
 {% endblock %}
