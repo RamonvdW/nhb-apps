@@ -42,7 +42,7 @@
 {% if menu_show_login %}
 <li{% if menu_actief == "inloggen" %} class="actief"{% endif %}>
     <a href="{% url 'Account:login' %}" class="white-text">
-    <i class="material-icons-round white-text">person</i>Inloggen</a>
+    <i class="material-icons-round white-text">login</i>Inloggen</a>
 </li>
 {% endif %}
 
