@@ -267,7 +267,11 @@ def rol_get_huidige_functie(request):
     else:
         if functie_pk:
             try:
-                functie = Functie.objects.get(pk=functie_pk)
+                functie = Functie.objects.\
+                            select_related('nhb_rayon',
+                                           'nhb_regio', 'nhb_regio__rayon',
+                                           'nhb_ver', 'nhb_ver__regio').\
+                            get(pk=functie_pk)
             except Functie.DoesNotExist:
                 # onverwacht!
                 pass

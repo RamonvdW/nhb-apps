@@ -82,7 +82,7 @@ class TestVerenigingClusters(E2EHelpers, TestCase):
         self.e2e_check_rol('RCL')
 
         # haal het overzicht op
-        with self.assertNumQueries(8):
+        with self.assertNumQueries(7):
             resp = self.client.get(self.url_clusters)
         self.assertTrue(resp.status_code, 200)
 

@@ -138,7 +138,7 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_rko)
         self.e2e_wissel_naar_functie(self.functie_rko)
         self.e2e_check_rol('RKO')
-        with self.assertNumQueries(6):
+        with self.assertNumQueries(5):
             resp = self.client.get(self.url_lijst)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -149,7 +149,7 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_rcl)
         self.e2e_wissel_naar_functie(self.functie_rcl)
         self.e2e_check_rol('RCL')
-        with self.assertNumQueries(10):
+        with self.assertNumQueries(9):
             resp = self.client.get(self.url_lijst)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -177,7 +177,7 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         self.nhb_ver1.cluster = cluster
         self.nhb_ver1.save()
 
-        with self.assertNumQueries(10):
+        with self.assertNumQueries(9):
             resp = self.client.get(self.url_lijst)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -186,7 +186,7 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         self.nhb_ver2.cluster = cluster
         self.nhb_ver2.save()
 
-        with self.assertNumQueries(10):
+        with self.assertNumQueries(9):
             resp = self.client.get(self.url_lijst)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -201,7 +201,7 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         self.nhb_ver2.cluster = cluster
         self.nhb_ver2.save()
 
-        with self.assertNumQueries(10):
+        with self.assertNumQueries(9):
             resp = self.client.get(self.url_lijst)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -211,7 +211,7 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_cwz)
         self.e2e_wissel_naar_functie(self.functie_cwz)
         self.e2e_check_rol('CWZ')
-        with self.assertNumQueries(11):
+        with self.assertNumQueries(9):
             resp = self.client.get(self.url_lijst)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
