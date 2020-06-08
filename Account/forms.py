@@ -12,7 +12,7 @@ class LoginForm(forms.Form):
         Dit formulier wordt gebruikt om in te loggen
     """
     login_naam = forms.CharField(
-                        label='Inlog naam',
+                        label='Inlog naam (NHB nummer of e-mailadres)',
                         max_length=50,
                         required=False,
                         widget=forms.TextInput(attrs={'autofocus': True}))
