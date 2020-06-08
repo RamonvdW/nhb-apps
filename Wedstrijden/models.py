@@ -63,47 +63,51 @@ class WedstrijdLocatie(models.Model):
         verbose_name_plural = "Wedstrijdlocaties"
 
 
-# class Wedstrijd(models.Model):
-#     """ Wedstrijd is de kleinste planbare eenheid """
-#
-#     # beschrijving
-#     beschrijving = models.CharField(max_length=100, blank=True)
-#
-#     # plan status
-#     preliminair = models.BooleanField(default=True)
-#
-#     # waar
-#     locatie = models.ForeignKey(WedstrijdLocatie, on_delete=models.PROTECT)
-#
-#     # datum en tijdstippen
-#     datum_wanneer = models.DateField()
-#     tijd_begin_aanmelden = models.TimeField()
-#     tijd_begin_wedstrijd = models.TimeField()
-#     tijd_einde_wedstrijd = models.TimeField()
-#
-#     # wedstrijdklassen individueel en teams
-#     indiv_klassen = models.ManyToManyField(IndivWedstrijdklasse)
-#     team_klassen = models.ManyToManyField(TeamWedstrijdklasse)
-#
-#     class Meta:
-#         """ meta data voor de admin interface """
-#         verbose_name = "Wedstrijd"
-#         verbose_name_plural = "Wedstrijden"
-#
-#
-# class WedstrijdenPlan(models.Model):
-#     """ Planning voor een serie wedstrijden, zoals de competitierondes """
-#
-#     # lijst van wedstrijden
-#     wedstrijden = models.ManyToManyField(Wedstrijd)
-#
-#     # de hiaat vlag geeft snel weer of er een probleem in de planning zit
-#     bevat_hiaat = models.BooleanField(default=True)
-#
-#     class Meta:
-#         """ meta data voor de admin interface """
-#         verbose_name = "Wedstrijdenplan"
-#         verbose_name_plural = "Wedstrijdenplannen"
+class Wedstrijd(models.Model):
+    """ Wedstrijd is de kleinste planbare eenheid """
 
+    # beschrijving
+    beschrijving = models.CharField(max_length=100, blank=True)
+
+    # plan status
+    preliminair = models.BooleanField(default=True)
+
+    # organiserende vereniging
+    vereniging = models.ForeignKey(NhbVereniging, on_delete=models.PROTECT,
+                                   blank=True, null=True)   # mag later ingevuld worden
+
+    # waar
+    locatie = models.ForeignKey(WedstrijdLocatie, on_delete=models.PROTECT,
+                                blank=True, null=True)      # mag later ingevuld worden
+
+    # datum en tijdstippen
+    datum_wanneer = models.DateField()
+    tijd_begin_aanmelden = models.TimeField()
+    tijd_begin_wedstrijd = models.TimeField()
+    tijd_einde_wedstrijd = models.TimeField()
+
+    # wedstrijdklassen individueel en teams
+    indiv_klassen = models.ManyToManyField(IndivWedstrijdklasse)
+    team_klassen = models.ManyToManyField(TeamWedstrijdklasse)
+
+    class Meta:
+        """ meta data voor de admin interface """
+        verbose_name = "Wedstrijd"
+        verbose_name_plural = "Wedstrijden"
+
+
+class WedstrijdenPlan(models.Model):
+    """ Planning voor een serie wedstrijden, zoals de competitierondes """
+
+    # lijst van wedstrijden
+    wedstrijden = models.ManyToManyField(Wedstrijd)
+
+    # de hiaat vlag geeft snel weer of er een probleem in de planning zit
+    bevat_hiaat = models.BooleanField(default=True)
+
+    class Meta:
+        """ meta data voor de admin interface """
+        verbose_name = "Wedstrijdenplan"
+        verbose_name_plural = "Wedstrijdenplannen"
 
 # end of file
