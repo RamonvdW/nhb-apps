@@ -18,9 +18,16 @@
 <!-- TODO: deze opmerking verwijderen -->
 <p>Deze site is van de Nederlandse Handboog Bond (NHB) en is nog in ontwikkeling.</p>
 
+<h5>Inloggen</h5>
+
+<p>Heb je al een account?</p>
+<a class="btn-nhb-blauw" href="{% url 'Account:login' %}">
+        <i class="material-icons-round left">login</i>Inloggen</a></p>
+
 <h5>Account aanmaken</h5>
 <p>Ben je lid van de NHB (heb je een NHB nummer?) maak dan een account aan en log in, dan tonen we informatie die voor jou relevant is.</p>
-<p><a class="btn-nhb-blauw" href="{% url 'Schutter:registreer' %}">Account aanmaken</a></p>
+<p><a class="btn-nhb-blauw" href="{% url 'Schutter:registreer' %}">
+    <i class="material-icons-round left">add</i>Account aanmaken</a></p>
 
 <h5>Verder</h5>
 
