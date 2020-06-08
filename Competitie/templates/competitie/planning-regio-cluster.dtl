@@ -1,0 +1,103 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2020 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Planning Cluster{% endblock %}
+
+{% block pagina %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-planning-cluster" %}
+
+<h4>Planning Cluster</h4>
+
+<div class="row">
+
+    <!-- toon gegevens van de regio en competitie in een blauwe box -->
+    <div class="col s12 m10 l8 xl6 offset-m1 offset-l2 offset-xl3">
+        <div class="white-text nhb-blauw z-depth-2">
+
+            <div class="row small-row">
+                <div class="col s3">Competitie:</div>
+                <div class="col s8">{{ deelcomp.competitie.beschrijving }}</div>
+            </div>
+
+            <div class="row small-row">
+                <div class="col s3">Rayon:</div>
+                <div class="col s8">{{ cluster.regio.rayon }}</div>
+            </div>
+
+            <div class="row small-row">
+                <div class="col s3">Regio:</div>
+                <div class="col s8">{{ cluster.regio }}</div>
+            </div>
+
+            <div class="row small-row">
+                <div class="col s3">Cluster:</div>
+                <div class="col s8">{{ cluster }}</div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<p>&nbsp;</p>
+<p><a class="btn-nhb-blauw" href="{{ terug_url }}">
+    <i class="material-icons-round left">arrow_upward</i>Naar de regio planning</a></p>
+
+
+<p>&nbsp;</p>
+<p>De RCL kan deze planning aanpassen.</p>
+
+
+<p>&nbsp;</p>
+<h5>Regiocompetitie wedstrijd blokken (cluster)</h5>
+
+<table class="white">
+    <thead>
+        <tr>
+            <th>Week</th>
+            <th>Beschrijving</th>
+            <th>Wedstrijden</th>
+            <th><!-- kolom voor knoppen --></th>
+        </tr>
+    </thead>
+
+    {% for ronde in rondes %}
+        <tr>
+            <td>{{ ronde.week_nr }}</td>
+            <td>{{ ronde.beschrijving }}</td>
+            <td>{{ ronde.wedstrijd_count }}</td>
+
+            <!-- knop naar de ronde van de regioplanning -->
+            <td>
+                <a class="btn-nhb-blauw" href="{% url 'Competitie:regio-ronde-planning' ronde.pk %}">
+                    <i class="material-icons-round left">arrow_forward</i>Bekijk</a>
+            </td>
+        </tr>
+    {% empty %}
+        <tr>
+            <td colspan="4"><i>Nog geen planning aanwezig</i></td>
+        </tr>
+    {% endfor %}
+
+    <!-- knop om een regel toe te voegen -->
+    {% if url_nieuwe_week %}
+        <tr>
+            <td colspan="4">
+                <form action="{{ url_nieuwe_week }}" method="post">
+                    {% csrf_token %}
+                    <button class="btn-nhb-blauw" type="submit">
+                        <i class="material-icons-round left">add</i>Regel toevoegen</button>
+                </form>
+            </td>
+        </tr>
+    {% endif %}
+
+</table>
+
+{% endblock %}
+

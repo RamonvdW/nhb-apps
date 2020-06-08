@@ -6,11 +6,18 @@
 
 from django.contrib import admin
 
-from .models import Competitie, DeelCompetitie, CompetitieKlasse, RegioCompetitieSchutterBoog
+from .models import (Competitie, DeelCompetitie, DeelcompetitieRonde,
+                     CompetitieKlasse, RegioCompetitieSchutterBoog)
 
 
 class DeelCompetitieAdmin(admin.ModelAdmin):
     list_select_related = ('competitie', 'nhb_regio', 'nhb_rayon')
+
+
+class DeelcompetitieRondeAdmin(admin.ModelAdmin):
+    list_filter = ('deelcompetitie__is_afgesloten', 'deelcompetitie__nhb_regio')
+
+    list_select_related = ('deelcompetitie', 'deelcompetitie__nhb_regio', 'cluster', 'cluster__regio')
 
 
 class CompetitieKlasseAdmin(admin.ModelAdmin):
@@ -26,6 +33,7 @@ class RegioCompetitieSchutterBoogAdmin(admin.ModelAdmin):
 
 admin.site.register(Competitie)
 admin.site.register(DeelCompetitie, DeelCompetitieAdmin)
+admin.site.register(DeelcompetitieRonde, DeelcompetitieRondeAdmin)
 admin.site.register(CompetitieKlasse, CompetitieKlasseAdmin)
 admin.site.register(RegioCompetitieSchutterBoog, RegioCompetitieSchutterBoogAdmin)
 

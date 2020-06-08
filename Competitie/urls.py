@@ -45,7 +45,31 @@ urlpatterns = [
 
     path('wijzig-datums/<comp_pk>/',
          views.WijzigDatumsView.as_view(),
-         name='wijzig-datums')
+         name='wijzig-datums'),
+
+    path('planning/regiocompetitie/ronde/<ronde_pk>/',
+         views.RegioRondePlanningView.as_view(),
+         name='regio-ronde-planning'),
+
+    path('planning/regiocompetitie/cluster/<cluster_pk>/',
+         views.RegioClusterPlanningView.as_view(),
+         name='regio-cluster-planning'),
+
+    path('planning/regiocompetitie/<deelcomp_pk>/',
+         views.RegioPlanningView.as_view(),
+         name='regio-planning'),
+
+    path('planning/rayoncompetitie/<deelcomp_pk>/',
+         views.RayonPlanningView.as_view(),
+         name='rayon-planning'),
+
+    path('planning/bondscompetitie/<deelcomp_pk>/',
+         views.BondPlanningView.as_view(),
+         name='bond-planning'),
+
+    path('planning/wedstrijd/<wedstrijd_pk>/',
+         views.WijzigWedstrijdView.as_view(),
+         name='wijzig-wedstrijd')
 ]
 
 # end of file

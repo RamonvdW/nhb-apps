@@ -119,6 +119,26 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('competitie/overzicht-beheerder.dtl', 'plein/site_layout.dtl'))
         self.assertNotContains(resp, '/competitie/beheer-favorieten/')
 
+    def test_overzicht_bko(self):
+        self.e2e_login_and_pass_otp(self.account_bko)
+        self.e2e_wissel_naar_functie(self.functie_bko)
+
+        resp = self.client.get(self.url_overzicht)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/overzicht-beheerder.dtl', 'plein/site_layout.dtl'))
+        self.assertNotContains(resp, '/competitie/beheer-favorieten/')
+
+    def test_overzicht_rko(self):
+        self.e2e_login_and_pass_otp(self.account_rko)
+        self.e2e_wissel_naar_functie(self.functie_rko)
+
+        resp = self.client.get(self.url_overzicht)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/overzicht-beheerder.dtl', 'plein/site_layout.dtl'))
+        self.assertNotContains(resp, '/competitie/beheer-favorieten/')
+
     def test_overzicht_rcl(self):
         self.e2e_login_and_pass_otp(self.account_rcl)
         self.e2e_wissel_naar_functie(self.functie_rcl)
@@ -130,7 +150,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.assertNotContains(resp, '/competitie/beheer-favorieten/')
 
     def test_overzicht_cwz(self):
-        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_login_and_pass_otp(self.account_bb)        # geen account_cwz
         self.e2e_wissel_naar_functie(self.functie_cwz)
 
         resp = self.client.get(self.url_overzicht)

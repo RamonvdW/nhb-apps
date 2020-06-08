@@ -6,9 +6,10 @@
 
 from django.db import models
 from BasisTypen.models import IndivWedstrijdklasse, TeamWedstrijdklasse
-from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
+from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
 from Functie.models import Functie
 from Schutter.models import SchutterBoog
+from Wedstrijden.models import WedstrijdenPlan
 from decimal import Decimal
 from datetime import date
 import logging
@@ -129,6 +130,10 @@ class DeelCompetitie(models.Model):
     # is de beheerder klaar?
     is_afgesloten = models.BooleanField(default=False)
 
+    # wedstrijdenplan - alleen voor de RK en BK
+    plan = models.ForeignKey(WedstrijdenPlan, on_delete=models.PROTECT,
+                             null=True, blank=True)         # optioneel (alleen RK en BK)
+
     def __str__(self):
         """ geef een tekstuele afkorting van dit object, voor in de admin interface """
         if self.nhb_regio:
@@ -140,6 +145,73 @@ class DeelCompetitie(models.Model):
         return "%s - %s" % (self.competitie, substr)
 
     objects = models.Manager()      # for the editor only
+
+
+class DeelcompetitieRonde(models.Model):
+    """ Definitie van een competitieronde """
+
+    # bij welke deelcompetitie hoort deze (geeft 18m / 25m) + regio_nr + functie + is_afgesloten
+    deelcompetitie = models.ForeignKey(DeelCompetitie, on_delete=models.CASCADE)
+
+    # het cluster waar deze planning specifiek bij hoort (optioneel)
+    cluster = models.ForeignKey(NhbCluster, on_delete=models.PROTECT,
+                                            null=True, blank=True)      # cluster is optioneel
+
+    # het week nummer van deze ronde
+    # moet liggen in een toegestane reeks (afhankelijk van 18m/25m)
+    week_nr = models.PositiveSmallIntegerField()
+
+    # een eigen beschrijving van deze ronde
+    # om gewone rondes en inhaalrondes uit elkaar te houden
+    beschrijving = models.CharField(max_length=20)
+
+    # wedstrijdenplan voor deze competitie ronde
+    plan = models.ForeignKey(WedstrijdenPlan, on_delete=models.PROTECT)
+
+    def __str__(self):
+        """ geef een tekstuele afkorting van dit object, voor in de admin interface """
+        if self.cluster:
+            msg = str(self.cluster)
+        else:
+            msg = str(self.deelcompetitie.nhb_regio)
+
+        msg += " week %s" % self.week_nr
+
+        msg += " (%s)" % self.beschrijving
+        return msg
+
+
+def maak_deelcompetitie_ronde(deelcomp, cluster=None):
+    """ Maak een nieuwe deelcompetitie ronde object aan
+        geef er een uniek week nummer aan.
+    """
+
+    # zoek de bestaande records
+    objs = DeelcompetitieRonde.objects.\
+                filter(deelcompetitie=deelcomp, cluster=cluster).\
+                order_by('-week_nr')
+
+    if len(objs) > 0:
+        nieuwe_week_nr = objs[0].week_nr + 1
+
+        # maximum bereikt?
+        if len(objs) >= 10:
+            return
+    else:
+        nieuwe_week_nr = 37
+
+    # maak een eigen wedstrijdenplan aan voor deze ronde
+    plan = WedstrijdenPlan()
+    plan.save()
+
+    ronde = DeelcompetitieRonde()
+    ronde.deelcompetitie = deelcomp
+    ronde.cluster = cluster
+    ronde.week_nr = nieuwe_week_nr
+    ronde.plan = plan
+    ronde.save()
+
+    return ronde
 
 
 def competitie_aanmaken(jaar):
