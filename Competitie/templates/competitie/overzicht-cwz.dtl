@@ -79,6 +79,21 @@
             </div>
         {% endfor %}
 
+        <!-- algemene informatie over de competities -->
+        <div class="card">
+            <div class="card-content">
+                <div class="card-title center-align">Informatie<br>
+                    <br><i class="material-icons-round large">info</i>
+                </div>
+                <p>Algemene informatie over de competities.</p>
+            </div>
+            <a href="{% url 'Competitie:info-competitie' %}" class="nhb-klikbare-balk">
+                <div class="card-action center-align">
+                    <span class="nhb-klikbare-link">Tonen</span>
+                </div>
+            </a>
+        </div>
+
     </div>
 </div>
 

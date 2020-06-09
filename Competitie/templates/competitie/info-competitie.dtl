@@ -14,14 +14,27 @@
 
 <p>Op deze pagina staat algemene informatie over de (winter-)competities.</p>
 
+<table class="striped">
+    <tr>
+        <td class="center-align">
+            <img src="{% static 'plein/indoor_sfeer_1.jpg' %}" height="300px"><br>
+            <code style="font-size:12px">Sfeerfoto van een indoor wedstrijd</code>
+        </td>
+        <td>
+            <a class="btn-nhb-blauw float right" href="https://handboogsport.smugmug.com/Indoor/" target="_blank">
+                <i class="material-icons-round left">open_in_new</i>Meer foto's</a>
+        </td>
+    </tr>
+</table>
+
 <p>Elk jaar organiseert de NHB twee competities tijdens het winterseizoen, met verschillende uitdagingen.</p>
 
 <table class="white">
     <thead>
         <th>Competitie</th>
-        <th>Schietafstand</th>
+        <th>Schiet<wbr/>afstand</th>
         <th>Pijlen per schietbeurt</th>
-        <th>Schietbeurten</th>
+        <th>Schiet<wbr/>beurten</th>
         <th>Blazoen</th>
         <th>Maximale score</th>
     </thead>
@@ -46,6 +59,19 @@
 </table>
 
 <p>Aspiranten schieten beide competities op 18 meter, op een 60cm blazoen.</p>
+
+<table class="striped">
+    <tr>
+        <td class="center-align">
+            <img src="{% static 'plein/indoor_sfeer_2.jpg' %}" height="300px"><br>
+            <code style="font-size:12px">Sfeerfoto van een indoor wedstrijd</code>
+        </td>
+        <td>
+            <a class="btn-nhb-blauw float right" href="https://handboogsport.smugmug.com/Indoor/" target="_blank">
+                <i class="material-icons-round left">open_in_new</i>Meer foto's</a>
+        </td>
+    </tr>
+</table>
 
 <p>&nbsp;</p>
 <h5>Geografische opdeling</h5>
@@ -101,6 +127,20 @@
 
 {% endif %}
 
+<p></p>
+<table class="striped">
+    <tr>
+        <td class="center-align">
+            <img src="{% static 'plein/indoor_sfeer_4.jpg' %}" height="300px"><br>
+            <code style="font-size:12px">Sfeerfoto van een indoor wedstrijd</code>
+        </td>
+        <td>
+            <a class="btn-nhb-blauw float right" href="https://handboogsport.smugmug.com/Indoor/" target="_blank">
+                <i class="material-icons-round left">open_in_new</i>Meer foto's</a>
+        </td>
+    </tr>
+</table>
+
 
 <p>&nbsp;</p>
 <h5>Regiocompetitie</h5>
@@ -114,6 +154,20 @@
 Nieuwe schutters krijgen na 3 scores hun speelsterkte vastgesteld.</p>
 
 <p>In elke van de {{ klassen_count }} wedstrijdklassen wordt de schutter met de hoogste score gekroond tot <b>regiokampioen</b>.</p>
+
+
+<table class="striped">
+    <tr>
+        <td class="center-align">
+            <img src="{% static 'plein/indoor_sfeer_3.jpg' %}" height="300px"><br>
+            <code style="font-size:12px">Sfeerfoto van een indoor wedstrijd</code>
+        </td>
+        <td>
+            <a class="btn-nhb-blauw float right" href="https://handboogsport.smugmug.com/Indoor/" target="_blank">
+                <i class="material-icons-round left">open_in_new</i>Meer foto's</a>
+        </td>
+    </tr>
+</table>
 
 
 <p>&nbsp;</p>
@@ -149,6 +203,37 @@ Nieuwe schutters krijgen na 3 scores hun speelsterkte vastgesteld.</p>
 
 <p>Aspiranten schieten 1 ronde.</p>
 <p>Compound en Recurve klasse 1 en 2 schieten de Indoor Rayonkampioenschappen op Dutch Target blazoen.</p>
+
+<table class="white">
+    <tr>
+        <td colspan="2">
+            <span>Hieronder volgen voorbeelden van de belangrijkste blazoenen voor de competities.</span>
+        </td>
+    </tr>
+    <tr>
+        <td class="center-align">
+            <img src="{% static 'plein/blazoen_dt.png' %}" height="300px" alt="Dutch Target blazoen">
+        </td>
+        <td class="center-align">
+            <img src="{% static 'plein/blazoen_40cm.png' %}" height="220px" alt="40cm / 60cm blazoen" style="border:1px solid gray">
+        </td>
+    </tr>
+    <tr>
+        <td class="center-align">
+            <code style="font-size:12px">het Dutch Target (DT) blazoen</code>
+        </td>
+        <td class="center-align">
+            <code style="font-size:12px">het 40cm / 60cm blazoen</code>
+        </td>
+    </tr>
+
+    <tr>
+        <td colspan="2" class="center-align">
+            <span>Het linker blazoen heeft 10 scorende ringen van 1 (buitenste) tot 10 (binnenste) punten.</span>
+            <br><span>Het DT heeft dezelfde maat als de binnenste 5 ringen van het 40cm blazoen.</span>
+        </td>
+    </tr>
+</table>
 
 <h6>Knock-out finales</h6>
 <p>De knock-out finales zijn volgens het best-of-5 set-systeem en beginnen met de beste 16 schutters, waarvan de 8 winnaars doorgaan naar de kwartfinale.
@@ -215,6 +300,23 @@ De overige twee schutters uit de halve finales gaan naar de brozen finale voor p
 
 <p>Overige details zijn gelijk aan de Rayonkampioenschappen.</p>
 
+<h6>Nederlands Kampioenschappen (NK)</h6>
+<p>Het BK 25m 1pijl is het Nederlands Kampioenschap 25m 1pijl.</p>
+<p>Het BK Indoor staat los van de Nederlandse Kampioenschappen Indoor met open inschrijving.</p>
+
+<table class="striped">
+    <tr>
+        <td class="center-align">
+            <img src="{% static 'plein/indoor_sfeer_5.jpg' %}" height="300px"><br>
+            <code style="font-size:12px">Sfeerfoto van een indoor wedstrijd</code>
+        </td>
+        <td>
+            <a class="btn-nhb-blauw float right" href="https://handboogsport.smugmug.com/Indoor/" target="_blank">
+                <i class="material-icons-round left">open_in_new</i>Meer foto's</a>
+        </td>
+    </tr>
+</table>
+
 
 <p>&nbsp;</p>
 <h5>Kalender</h5>
@@ -245,8 +347,14 @@ De overige twee schutters uit de halve finales gaan naar de brozen finale voor p
     </tr>
 
     <tr>
-        <td>Bondskampioenschappen</td>
+        <td>Bondskampioenschappen Indoor</td>
         <td>februari / maart</td>
+        <td/>
+    </tr>
+
+    <tr>
+        <td>Nederlandse Kampioenschappen 25m1 pijl</td>
+        <td/>
         <td>mei / juni</td>
     </tr>
 
@@ -260,7 +368,15 @@ De overige twee schutters uit de halve finales gaan naar de brozen finale voor p
 
 <p>Om mee te doen in een team of het RK/BK moet je uiterlijk 15 juli lid zijn bij een vereniging.</p>
 
-<p>De bondskampioenschappen staan los van de Nederlandse Kampioenschappen met open inschrijving.</p>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var elems = document.querySelectorAll('.carousel');
+        var instances = M.Carousel.init(elems, { fullWidth: true,
+                                                 indicators: true,
+                                                 noWrap: true });
+    });
+</script>
 
 {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="info-competitie" %}
 

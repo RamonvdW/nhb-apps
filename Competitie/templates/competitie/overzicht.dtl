@@ -16,9 +16,24 @@
 <p>Nog even geduld, dit stukje van de site is nog niet af.</p>
 
 <div class="row">
+    <div class="col s12 cards-container">
 
-    <!-- toon klassegrenzen regiocompetitie -->
-    <div class="col s12 m6 l4">
+        <!-- algemene informatie over de competities -->
+        <div class="card">
+            <div class="card-content">
+                <div class="card-title center-align">Informatie<br>
+                    <br><i class="material-icons-round large">info</i>
+                </div>
+                <p>Algemene informatie over de competities.</p>
+            </div>
+            <a href="{% url 'Competitie:info-competitie' %}" class="nhb-klikbare-balk">
+                <div class="card-action center-align">
+                    <span class="nhb-klikbare-link">Tonen</span>
+                </div>
+            </a>
+        </div>
+
+        <!-- toon klassegrenzen regiocompetitie -->
         <div class="card">
             <div class="card-content">
                 <div class="card-title center-align">Klassegrenzen<br>
@@ -28,12 +43,12 @@
             </div>
             <a href="{% url 'Competitie:klassegrenzen-tonen' %}" class="nhb-klikbare-balk">
                 <div class="card-action center-align">
-                    <span class="nhb-klikbare-link">Toon klassegrenzen</span>
+                    <span class="nhb-klikbare-link">Tonen</span>
                 </div>
             </a>
         </div>
-    </div>
 
+    </div>
 </div>
 
 {% endblock %}
