@@ -411,13 +411,13 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
 
         # wijziging van week wijziging ook wedstrijden met hetzelfde aantal dagen
         wedstrijd_datum = Wedstrijd.objects.get(pk=wedstrijd_pk).datum_wanneer
-        self.assertEqual(str(wedstrijd_datum), "2019-12-23")
+        self.assertEqual(str(wedstrijd_datum), "2019-12-16")
         resp = self.client.post(self.url_planning_regio_ronde % ronde_pk,
                                 {'ronde_week_nr': 40, 'ronde_naam': 'tweede rondje gaat snel'})
         url_regio_planning = self.url_planning_regio % self.deelcomp_regio_18.pk
         self.assert_is_redirect(resp, url_regio_planning)
         wedstrijd_datum = Wedstrijd.objects.get(pk=wedstrijd_pk).datum_wanneer
-        self.assertEqual(str(wedstrijd_datum), "2019-10-07")
+        self.assertEqual(str(wedstrijd_datum), "2019-09-30")
 
         # haal de wedstrijd op
         resp = self.client.get(self.url_planning_wedstrijd % wedstrijd_pk)
@@ -479,13 +479,13 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
 
         # wijziging van week wijziging ook wedstrijden met hetzelfde aantal dagen
         wedstrijd_datum = Wedstrijd.objects.get(pk=wedstrijd_pk).datum_wanneer
-        self.assertEqual(str(wedstrijd_datum), "2020-01-06")
+        self.assertEqual(str(wedstrijd_datum), "2019-12-30")        # week 1 begon op maandag 2019-12-30
         resp = self.client.post(self.url_planning_regio_ronde % ronde_pk,
                                 {'ronde_week_nr': 5, 'ronde_naam': 'tweede rondje gaat snel'})
         url_regio_planning = self.url_planning_regio % self.deelcomp_regio_25.pk
         self.assert_is_redirect(resp, url_regio_planning)
         wedstrijd_datum = Wedstrijd.objects.get(pk=wedstrijd_pk).datum_wanneer
-        self.assertEqual(str(wedstrijd_datum), "2020-02-03")
+        self.assertEqual(str(wedstrijd_datum), "2020-01-27")
 
     def test_rcl_maakt_cluster_planning(self):
         self.e2e_login_and_pass_otp(self.account_rcl)
@@ -629,7 +629,7 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
         wedstrijd_pk = Wedstrijd.objects.all()[0].pk
 
         wedstrijd = Wedstrijd.objects.get(pk=wedstrijd_pk)
-        self.assertEqual(str(wedstrijd.datum_wanneer), '2020-02-03')
+        self.assertEqual(str(wedstrijd.datum_wanneer), '2020-01-27')
 
         # pas de instellingen van de wedstrijd aan
         resp = self.client.post(self.url_planning_wedstrijd % wedstrijd_pk,
@@ -638,7 +638,7 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
 
         wedstrijd = Wedstrijd.objects.get(pk=wedstrijd_pk)
         self.assertEqual(str(wedstrijd.tijd_begin_wedstrijd), "12:34:00")
-        self.assertEqual(str(wedstrijd.datum_wanneer), '2020-02-03')
+        self.assertEqual(str(wedstrijd.datum_wanneer), '2020-01-27')
 
         # pas de weekdag aan
         resp = self.client.post(self.url_planning_wedstrijd % wedstrijd_pk,
@@ -647,6 +647,6 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
 
         wedstrijd = Wedstrijd.objects.get(pk=wedstrijd_pk)
         self.assertEqual(str(wedstrijd.tijd_begin_wedstrijd), "12:34:00")
-        self.assertEqual(str(wedstrijd.datum_wanneer), '2020-02-05')
+        self.assertEqual(str(wedstrijd.datum_wanneer), '2020-01-29')
 
 # end of file

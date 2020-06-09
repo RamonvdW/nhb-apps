@@ -1184,7 +1184,8 @@ def competitie_week_nr_to_date(jaar, week_nr):
     if week_nr <= 26:
         jaar += 1
 
-    when = datetime.datetime.strptime("%s-%s-1" % (jaar, week_nr), "%Y-%W-%w")   # 1 = maandag
+    # let op: week nummers zijn 0-based in strptime!
+    when = datetime.datetime.strptime("%s-%s-1" % (jaar, week_nr-1), "%Y-%W-%w")   # 1 = maandag
 
     return datetime.date(year=when.year, month=when.month, day=when.day)
 
@@ -1235,12 +1236,12 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
         start_week = 37
         eind_week = 11+1
         if ronde.deelcompetitie.competitie.afstand == '18':
-            eind_week = 51+1
+            eind_week = 50+1
         jaar = ronde.deelcompetitie.competitie.begin_jaar
 
         context['opt_week_nrs'] = opt_week_nrs = list()
         while start_week != eind_week:
-            when = datetime.datetime.strptime("%s-%s-1" % (jaar, start_week), "%Y-%W-%w")  # 1 = maandag
+            when = competitie_week_nr_to_date(jaar, start_week)
             obj = SimpleNamespace()
             obj.week_nr = start_week
             obj.choice_name = start_week
@@ -1311,15 +1312,8 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
                 # nieuw week nummer
                 # reken uit hoeveel het verschil is
                 jaar = ronde.deelcompetitie.competitie.begin_jaar
-                when_jaar = jaar
-                if ronde.week_nr < 37:
-                    when_jaar = jaar + 1
-                when1 = datetime.datetime.strptime("%s-%s-1" % (when_jaar, ronde.week_nr), "%Y-%W-%w")  # 1 = maandag
-
-                when_jaar = jaar
-                if week_nr < 37:
-                    when_jaar = jaar + 1
-                when2 = datetime.datetime.strptime("%s-%s-1" % (when_jaar, week_nr), "%Y-%W-%w")  # 1 = maandag
+                when1 = competitie_week_nr_to_date(jaar, ronde.week_nr)
+                when2 = competitie_week_nr_to_date(jaar, week_nr)
 
                 diff = when2 - when1
 
@@ -1341,10 +1335,9 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
                                     kwargs={'deelcomp_pk': ronde.deelcompetitie.pk})
         else:
             # voeg een wedstrijd toe
+            jaar = ronde.deelcompetitie.competitie.begin_jaar
             wedstrijd = Wedstrijd()
-            wedstrijd.datum_wanneer = competitie_week_nr_to_date(ronde.deelcompetitie.competitie.begin_jaar,
-                                                                 ronde.week_nr)
-
+            wedstrijd.datum_wanneer = competitie_week_nr_to_date(jaar, ronde.week_nr)
             wedstrijd.tijd_begin_aanmelden = datetime.time(hour=0, minute=0, second=0)
             wedstrijd.tijd_begin_wedstrijd = wedstrijd.tijd_begin_aanmelden
             wedstrijd.tijd_einde_wedstrijd = wedstrijd.tijd_begin_aanmelden
@@ -1398,11 +1391,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
 
         # bepaal de weekdag uit de huidige wedstrijd datum
         jaar = ronde.deelcompetitie.competitie.begin_jaar
-        when_jaar = jaar
-        if ronde.week_nr < 37:
-            when_jaar = jaar + 1
-        when = datetime.datetime.strptime("%s-%s-1" % (when_jaar, ronde.week_nr), "%Y-%W-%w")  # 1 = maandag
-        when = datetime.date(year=when.year, month=when.month, day=when.day)
+        when = competitie_week_nr_to_date(jaar, ronde.week_nr)
         ronde.maandag = when
 
         verschil = wedstrijd.datum_wanneer - when
@@ -1472,10 +1461,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         plan = wedstrijd.wedstrijdenplan_set.all()[0]
         ronde = DeelcompetitieRonde.objects.get(plan=plan)
         jaar = ronde.deelcompetitie.competitie.begin_jaar
-        when_jaar = jaar
-        if ronde.week_nr < 37:
-            when_jaar = jaar + 1
-        when = datetime.datetime.strptime("%s-%s-1" % (when_jaar, ronde.week_nr), "%Y-%W-%w")  # 1 = maandag
+        when = competitie_week_nr_to_date(jaar, ronde.week_nr)
         # voeg nu de offset toe uit de weekdag
         when += datetime.timedelta(days=weekdag)
 
