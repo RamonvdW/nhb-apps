@@ -28,11 +28,7 @@
     {% for obj in object_list %}
         <tr>
             <td>{{ obj.account.username }}</td>
-            {% if obj.account.nhblid %}
-                <td>{{ obj.account.nhblid.volledige_naam }}</td>
-            {% else %}
-                <td>{{ obj.account.get_real_name }}</td>
-            {% endif %}
+            <td>{{ obj.account.volledige_naam }}</td>
             <td>{{ obj.acceptatie_datum|date:"l j F Y" }} om {{ obj.acceptatie_datum|date:"H:i" }}</td>
         </tr>
     {% endfor %}
