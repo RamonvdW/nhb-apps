@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import admin
-from .models import WedstrijdLocatie#, Wedstrijd, WedstrijdenPlan
+from .models import WedstrijdLocatie, Wedstrijd, WedstrijdenPlan
 
 
 class WedstrijdLocatieAdmin(admin.ModelAdmin):
@@ -21,7 +21,7 @@ class WedstrijdLocatieAdmin(admin.ModelAdmin):
 
 
 admin.site.register(WedstrijdLocatie, WedstrijdLocatieAdmin)
-#admin.site.register(Wedstrijd)
-#admin.site.register(WedstrijdenPlan)
+admin.site.register(Wedstrijd)
+admin.site.register(WedstrijdenPlan)
 
 # end of file
