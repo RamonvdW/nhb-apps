@@ -131,9 +131,8 @@
             {% if comp.fase != 'A1' and comp.fase != 'A1' %}    <!-- TODO: change to !=A1 and !=A2 -->
                 <div class="card">
                     <div class="card-content">
-                        <div class="card-title center-align">Inschrijvingen {{ comp.afstand }}m<br>
-                            <br><i class="material-icons-round large">receipt</i>
-                        </div>
+                        <div class="card-title center-align">Inschrijvingen {{ comp.afstand }}m</div>
+                        <div class="center-align"><i class="material-icons-round medium">receipt</i></div>
                         <p>Toon lijst met schutters ingeschreven voor de {{ comp.beschrijving }}.</p>
                     </div>
                     <a href="{{ comp.url_inschrijvingen }}" class="nhb-klikbare-balk">
@@ -149,9 +148,8 @@
         {% if bb_kan_competitie_aanmaken %}
             <div class="card">
                 <div class="card-content">
-                    <div class="card-title center-align">Competitie opstarten<br>
-                        <br><i class="material-icons-round large">playlist_add</i>
-                    </div>
+                    <div class="card-title center-align">Competitie opstarten</div>
+                    <div class="center-align"><i class="material-icons-round medium">playlist_add</i></div>
                     <p>Instellingen voor de seizoen {{ nieuwe_seizoen }} controleren en competities aanmaken.</p>
                 </div>
                 <a href="{% url 'Competitie:instellingen-volgende-competitie' %}" class="nhb-klikbare-balk">
@@ -168,9 +166,8 @@
             {% if bb_kan_ag_vaststellen %}
                 <div class="card">
                     <div class="card-content">
-                        <div class="card-title center-align">Aanvangs<wbr/>gemiddelden<br>
-                            <br><i class="material-icons-round large">how_to_reg</i>
-                        </div>
+                        <div class="card-title center-align">Aanvangs<wbr/>gemiddelden</div>
+                        <div class="center-align"><i class="material-icons-round medium">how_to_reg</i></div>
                         {% if bb_ag_nieuwste_datum %}
                             <p class="center-align">(op {{ bb_ag_nieuwste_datum }} voor het laatst gedaan)</p>
                             <br>
@@ -190,9 +187,8 @@
                 {% if comp.fase == 'A1' %}
                     <div class="card">
                         <div class="card-content">
-                            <div class="card-title center-align">Klasse<wbr/>grenzen {{ comp.afstand }}m<br>
-                                <br><i class="material-icons-round large">equalizer</i>
-                            </div>
+                            <div class="card-title center-align">Klasse<wbr/>grenzen {{ comp.afstand }}m</div>
+                            <div class="center-align"><i class="material-icons-round medium">equalizer</i></div>
                             <p>Klasse<wbr/>grenzen vaststellen voor de <b>{{ comp.beschrijving }}</b> aan de hand van de vastgestelde aanvangs<wbr/>gemiddelden.</p>
                         </div>
                         <a href="{% url 'Competitie:klassegrenzen-vaststellen' afstand=comp.afstand %}" class="nhb-klikbare-balk">
@@ -209,9 +205,8 @@
                 {% for comp in object_list %}
                     <div class="card">
                         <div class="card-content">
-                            <div class="card-title center-align">Datums {{ comp.afstand }}m<br>
-                                <br><i class="material-icons-round large">date_range</i>
-                            </div>
+                            <div class="card-title center-align">Datums {{ comp.afstand }}m</div>
+                            <div class="center-align"><i class="material-icons-round medium">date_range</i></div>
                             <p>Datums aanpassen voor de {{ comp.beschrijving }}.</p>
                         </div>
                         <a href="{{ comp.url_wijzig_datums }}" class="nhb-klikbare-balk">
@@ -228,9 +223,8 @@
         {% for deelcomp in planning_deelcomp %}
             <div class="card">
                 <div class="card-content">
-                    <div class="card-title center-align">{{ deelcomp.titel }}<br>
-                        <br><i class="material-icons-round large">date_range</i>
-                    </div>
+                    <div class="card-title center-align">{{ deelcomp.titel }}</div>
+                    <div class="center-align"><i class="material-icons-round medium">date_range</i></div>
                     <p>{{ deelcomp.tekst }}</p>
                 </div>
                 <a href="{{ deelcomp.url }}" class="nhb-klikbare-balk">
@@ -244,9 +238,8 @@
         <!-- toon klassegrenzen regiocompetitie -->
         <div class="card">
             <div class="card-content">
-                <div class="card-title center-align">Klassegrenzen<br>
-                    <br><i class="material-icons-round large">equalizer</i>
-                </div>
+                <div class="card-title center-align">Klassegrenzen</div>
+                <div class="center-align"><i class="material-icons-round medium">equalizer</i></div>
                 <p>Toon de vastgestelde klassegrenzen voor de individuele wedstrijdklassen voor de competities.</p>
             </div>
             <a href="{% url 'Competitie:klassegrenzen-tonen' %}" class="nhb-klikbare-balk">
@@ -259,9 +252,8 @@
         <!-- algemene informatie over de competities -->
         <div class="card">
             <div class="card-content">
-                <div class="card-title center-align">Informatie<br>
-                    <br><i class="material-icons-round large">info</i>
-                </div>
+                <div class="card-title center-align">Informatie</div>
+                <div class="center-align"><i class="material-icons-round medium">info</i></div>
                 <p>Algemene informatie over de competities.</p>
             </div>
             <a href="{% url 'Competitie:info-competitie' %}" class="nhb-klikbare-balk">
