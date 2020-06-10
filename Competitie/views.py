@@ -963,12 +963,15 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
         if deelcomp_rk.laag != LAAG_RK:
             raise Resolver404()
 
+        rol_nu = rol_get_huidige(self.request)
+
         context['deelcomp_rk'] = deelcomp_rk
         context['rayon'] = deelcomp_rk.nhb_rayon
 
-        deelcomp_bk = DeelCompetitie.objects.get(laag=LAAG_BK,
-                                                 competitie=deelcomp_rk.competitie)
-        context['url_bond'] = reverse('Competitie:bond-planning', kwargs={'deelcomp_pk': deelcomp_bk.pk})
+        if rol_nu == Rollen.ROL_BKO:
+            deelcomp_bk = DeelCompetitie.objects.get(laag=LAAG_BK,
+                                                     competitie=deelcomp_rk.competitie)
+            context['url_bond'] = reverse('Competitie:bond-planning', kwargs={'deelcomp_pk': deelcomp_bk.pk})
 
         context['regio_deelcomps'] = DeelCompetitie.objects.\
                                         filter(laag=LAAG_REGIO,
