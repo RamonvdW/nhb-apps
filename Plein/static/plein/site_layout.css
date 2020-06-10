@@ -34,6 +34,7 @@ h1, h2, h3, h4, h5, h6 {
     background-color: #f94137;     /* NHB medium rood */
 }
 
+/* TODO: uitleg */
 .collection-button {
     background: none;
     border: none;
@@ -92,15 +93,15 @@ input.table-filter {
 }
 
 
-/* small: <600 */
-@media only screen and (min-width: 601px) {
+/* small: <650 */
+@media only screen and (min-width: 650px) {
     .hide-unless-small {
         display: none;
     }
 }
 
-/* medium: 600-991 */
-@media only screen and (max-width : 600px) {
+/* medium: 650-991 */
+@media only screen and (max-width : 649px) {
     .hide-unless-medium {
         display: none;
     }

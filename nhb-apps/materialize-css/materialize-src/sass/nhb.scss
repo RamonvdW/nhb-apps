@@ -100,12 +100,12 @@ $nhb-collection-hover-background: $nhb-card-hover-background;
 }
 @media #{$medium-and-up} {
   .cards-container {
-    @include column-count(2);
+    @include column-count(3);
   }
 }
 @media #{$extra-large-and-up} {
   .cards-container {
-    @include column-count(3);
+    @include column-count(4);
   }
 }
 
