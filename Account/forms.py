@@ -11,6 +11,11 @@ class LoginForm(forms.Form):
     """
         Dit formulier wordt gebruikt om in te loggen
     """
+
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault('label_suffix', '')   # voorkom de dubbele punt
+        super().__init__(*args, **kwargs)
+
     login_naam = forms.CharField(
                         label='Inlog naam (NHB nummer of e-mailadres)',
                         max_length=50,
