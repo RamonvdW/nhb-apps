@@ -181,22 +181,19 @@ Nieuwe schutters krijgen na 3 scores hun speelsterkte vastgesteld.</p>
 <table class="white">
     <thead>
         <th>Competitie</th>
-        <th>Rondes</th>
-        <th>Pijlen per ronde</th>
+        <th>Pijlen</th>
         <th>Knock-out finales</th>
     </thead>
 
     <tr>
         <td>Indoor</td>
-        <td>2</td>
-        <td>30</td>
+        <td>60</td>
         <td>Ja</td>
     </tr>
 
     <tr>
         <td>25m 1pijl</td>
-        <td>2</td>
-        <td>25</td>
+        <td>50</td>
         <td>Nee</td>
     </tr>
 </table>
@@ -236,7 +233,7 @@ Nieuwe schutters krijgen na 3 scores hun speelsterkte vastgesteld.</p>
 </table>
 
 <h6>Knock-out finales</h6>
-<p>De knock-out finales zijn volgens het best-of-5 set-systeem en beginnen met de beste 16 schutters, waarvan de 8 winnaars doorgaan naar de kwartfinale.
+<p>De knock-out finales (alleen voor de Indoor competitie) zijn volgens het best-of-5 set-systeem en beginnen met de beste 16 schutters, waarvan de 8 winnaars doorgaan naar de kwartfinale.
 Uit de kwartfinale gaan de 4 winnaars door naar de halve finale. Zie het schema hier onder.</p>
 
 <p>De winnaars van de halve finales gaan naar de gouden finale voor plaats 1 en 2.
@@ -301,8 +298,8 @@ De overige twee schutters uit de halve finales gaan naar de brozen finale voor p
 <p>Overige details zijn gelijk aan de Rayonkampioenschappen.</p>
 
 <h6>Nederlands Kampioenschappen (NK)</h6>
-<p>Het BK 25m 1pijl is het Nederlands Kampioenschap 25m 1pijl.</p>
-<p>Het BK Indoor staat los van de Nederlandse Kampioenschappen Indoor met open inschrijving.</p>
+<p>De winnaars in de hoogste wedstrijdklassen van het BK 25m 1pijl mogen zich Nederlands Kampioen noemen.</p>
+<p>Het BK Indoor staat los van de Nederlandse Kampioenschappen Indoor (met open inschrijving).</p>
 
 <table class="striped">
     <tr>
