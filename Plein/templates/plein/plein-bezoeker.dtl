@@ -43,7 +43,7 @@
                 <div class="center-align"><img src="{% static 'plein/logo_nhb_192x192.png' %}" width="128" alt="Logo NHB"></div>
                 <p>Website van de NHB: <code>www.handboogsport.nl</code></p>
             </div>
-            <a class="nhb-klikbare-balk" href="https://www.handboogsport.nl" target="_blank">
+            <a class="nhb-klikbare-balk" href="https://www.handboogsport.nl" target="_blank" rel="noopener noreferrer">
                 <div class="card-action center-align">
                     <span class="nhb-klikbare-link">Bezoek de website</span>
                 </div>
@@ -56,7 +56,7 @@
                 <div class="center-align"><img src="{% static 'plein/logo_hero_512x512.png' %}" width="128" alt="Logo NHB"></div>
                 <p>Kaart met de locaties in Nederland waar je kan schieten.</p>
             </div>
-            <a class="nhb-klikbare-balk" href="https://www.handboogsport.nl/freeyourmind/zelf-schieten/" target="_blank">
+            <a class="nhb-klikbare-balk" href="https://www.handboogsport.nl/freeyourmind/zelf-schieten/" target="_blank" rel="noopener noreferrer">
                 <div class="card-action center-align">
                     <span class="nhb-klikbare-link">Bezoek de website</span>
                 </div>

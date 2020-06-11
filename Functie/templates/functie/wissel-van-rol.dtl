@@ -27,7 +27,7 @@
 <p>&nbsp;</p>
 <h5>Veiligheid</h5>
 <p>Controle met een tweede factor is verplicht voor gebruikers met toegang tot persoonsgegevens.</p>
-<p>Meer informatie: <a href="{{ wiki_2fa_url }}" target="_blank">{{ wiki_2fa_titel }}</a>.</p>
+<p>Meer informatie: <a href="{{ wiki_2fa_url }}" target="_blank" rel="noopener noreferrer">{{ wiki_2fa_titel }}</a>.</p>
 <p><a class="btn-nhb-rood" href="{% url 'Functie:otp-koppelen' %}">Nu Koppelen</a></p>
 {% endif %}
 
@@ -66,7 +66,7 @@
                 <span>RCL</span>
                 <span style="position: relative; bottom: .15em;"> &rarr; </span>
                 <span>CWZ.&nbsp;&nbsp;&nbsp;</span>
-                <a class="btn-small btn-nhb-blauw" href="{{ wiki_rollen }}" target="_blank"><i class="material-icons-round white-text">help_outline</i></a>
+                <a class="btn-small btn-nhb-blauw" href="{{ wiki_rollen }}" target="_blank" rel="noopener noreferrer"><i class="material-icons-round white-text">help_outline</i></a>
             </p>
         {% else %}
             <form method="post" action="{{ obj.url }}">

@@ -111,7 +111,8 @@
 <!-- handleiding, alleen voor gebruikers die toegang hebben -->
 {% if wiki_url %}
 <li>
-    <a href="{{ wiki_url }}" class="white-text" target="_blank"><i class="material-icons-round white-text">help_outline</i>{{ wiki_titel }}</a>
+    <a href="{{ wiki_url }}" class="white-text" target="_blank" rel="noopener noreferrer">
+        <i class="material-icons-round white-text">help_outline</i>{{ wiki_titel }}</a>
 </li>
 {% endif %}
 

@@ -200,7 +200,7 @@ class E2EHelpers(object):
 
     def assert_link_quality(self, content, template_name):
         """ assert the quality of links
-            - links to external sites must have target="_blank"
+            - links to external sites must have target="_blank" and rel="noopener noreferrer"
             - links should not be empty
         """
         # strip head
@@ -222,8 +222,10 @@ class E2EHelpers(object):
                     else:
                         # remainder must be links that leave the website
                         # these must target a blank window
-                        if 'target="_blank"' not in link:       # pragma: no cover
+                        if 'target="_blank"' not in link:            # pragma: no cover
                             self.fail(msg='Missing target="_blank" in link %s on page %s' % (link, template_name))
+                        if 'rel="noopener noreferrer"' not in link:  # pragma: no cover
+                            self.fail(msg='Missing rel="noopener noreferrer" in link %s on page %s' % (link, template_name))
             else:
                 content = ''
         # while

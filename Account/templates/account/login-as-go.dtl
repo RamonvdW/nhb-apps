@@ -23,7 +23,8 @@
 
 <p>De knop moet binnen 60 seconden gebruikt worden.</p>
 
-<a class="btn-nhb-rood" href="{{ login_as_url }}" target="_blank"><i class="material-icons-round right">open_in_new</i>Inloggen</a>
+<a class="btn-nhb-rood" href="{{ login_as_url }}" target="_blank" rel="noopener noreferrer">
+    <i class="material-icons-round right">open_in_new</i>Inloggen</a>
 
 <p>Advies: rechts-klikken en openen in een 'incognito window' (Chrome) of 'private window' (Firefox), anders wordt je hier uitgelogd.</p>
 

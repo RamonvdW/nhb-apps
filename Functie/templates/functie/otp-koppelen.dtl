@@ -14,7 +14,7 @@
 <h4>Registreer tweede factor</h4>
 
 <p>Als beheerder kan je op deze pagina je account koppelen met een applicatie die je gebruikt voor twee-factor authenticatie.</p>
-<p>Bekende voorbeelden zijn de gratis <a href="https://en.wikipedia.org/wiki/Google_Authenticator" target="_blank">Google Authenticator</a> (Play store, Apple store, etc.) en <a href="https://authy.com" target="_blank">Authy</a>.</p>
+<p>Bekende voorbeelden zijn de gratis <a href="https://en.wikipedia.org/wiki/Google_Authenticator" target="_blank">Google Authenticator</a> (Play store, Apple store, etc.) en <a href="https://authy.com" target="_blank" rel="noopener noreferrer">Authy</a>.</p>
 
 <div class="container z-depth-2 white center-align">
     <div class="row">
