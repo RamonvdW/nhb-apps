@@ -8,7 +8,7 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse, Resolver404
 from django.views.generic import TemplateView, ListView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from django.contrib.staticfiles.templatetags.staticfiles import static
+from django.templatetags.static import static
 from django.utils import timezone
 from Plein.menu import menu_dynamics
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving

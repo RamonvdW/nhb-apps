@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019 Ramon van der Winkel.
+#  Copyright (c) 2019-2020 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,7 +9,7 @@ from django.urls import Resolver404, reverse
 from django.views.generic import ListView
 from django.db.models import Q
 from django.core.exceptions import ObjectDoesNotExist
-from django.contrib.staticfiles.templatetags.staticfiles import static
+from django.templatetags.static import static
 from Plein.menu import menu_dynamics
 from NhbStructuur.models import NhbLid
 from .models import IndivRecord
