@@ -177,15 +177,14 @@ class E2EHelpers(object):
             is_checked = False
             name = ""
             for part in content[:pos].split(' '):
-                spl = part.split('=')
+                spl = part.split('=')       # geeft altijd lijst, minimaal 1 entry
                 if len(spl) == 2:
                     if spl[0] == "type" and "checkbox" in spl[1]:
                         is_checkbox = True
                     elif spl[0] == "name":
                         name = spl[1].replace('"', '')  # strip doublequotes
-                elif len(spl) == 1:
-                    if spl[0] == "checked":
-                        is_checked = True
+                elif spl[0] == "checked":
+                    is_checked = True
             # for
 
             if is_checkbox:

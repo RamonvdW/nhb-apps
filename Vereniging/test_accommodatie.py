@@ -56,6 +56,23 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         loc.verenigingen.add(ver)
         self.loc1 = loc
 
+        # maak de SEC, HWL en WL functies aan voor deze vereniging
+        for rol in ('SEC', 'HWL', 'WL'):
+            tmp_func = maak_functie(rol + " nhbver1", rol)
+            tmp_func.nhb_ver = ver
+            tmp_func.save()
+        # for
+
+        # maak de HWL functie
+        self.functie_hwl = maak_functie("HWL test", "HWL")
+        self.functie_hwl.nhb_ver = ver
+        self.functie_hwl.save()
+
+        # maak de WL functie
+        self.functie_wl = maak_functie("WL test", "WL")
+        self.functie_wl.nhb_ver = ver
+        self.functie_wl.save()
+
         # maak een test vereniging
         ver = NhbVereniging()
         ver.naam = "Grote Club"
@@ -65,10 +82,20 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         ver.save()
         self.nhbver2 = ver
 
+        # maak de SEC functie
+        self.functie_sec = maak_functie("SEC test", "SEC")
+        self.functie_sec.nhb_ver = ver
+        self.functie_sec.save()
+
         # maak de HWL functie
         self.functie_hwl = maak_functie("HWL test", "HWL")
         self.functie_hwl.nhb_ver = ver
         self.functie_hwl.save()
+
+        # maak de WL functie
+        self.functie_wl = maak_functie("WL test", "WL")
+        self.functie_wl.nhb_ver = ver
+        self.functie_wl.save()
 
         # maak een locatie aan
         loc = WedstrijdLocatie()
@@ -94,6 +121,25 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         lid.account = self.account_hwl
         lid.save()
         self.nhblid_100001 = lid
+
+        # maak het lid aan dat SEC wordt
+        lid = NhbLid()
+        lid.nhb_nr = 100002
+        lid.geslacht = "M"
+        lid.voornaam = "Ramon"
+        lid.achternaam = "de Secretaris"
+        lid.email = "rdesecretaris@gmail.not"
+        lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
+        lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
+        lid.bij_vereniging = ver
+        lid.save()
+
+        self.account_sec = self.e2e_create_account(lid.nhb_nr, lid.email, lid.voornaam, accepteer_vhpg=True)
+        self.functie_sec.accounts.add(self.account_sec)
+
+        lid.account = self.account_sec
+        lid.save()
+        self.nhblid_100002 = lid
 
         self.url_lijst = '/vereniging/accommodaties/lijst/'
         self.url_accommodatie_details = '/vereniging/accommodaties/details/%s/%s/'       # <locatie_pk>, <vereniging_pk>
@@ -337,6 +383,70 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
                                       'banen_25m': 4,
                                       'max_dt': 4})
         self.assertEqual(resp.status_code, 404)     # 404 = Not found
+
+    def test_wl(self):
+        # login als HWL van ver2 op loc2
+        # en wordt daarna WL
+        self.e2e_login_and_pass_otp(self.account_hwl)
+        self.e2e_wissel_naar_functie(self.functie_wl)
+        self.e2e_check_rol('WL')
+
+        # WL mag de hele lijst met verenigingen niet ophalen
+        resp = self.client.get(self.url_lijst)
+        self.assert_is_redirect(resp, '/plein/')
+
+        # check accommodatie detail pagina
+        url = self.url_accommodatie_details % (self.loc2.pk, self.nhbver2.pk)
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('vereniging/accommodatie-details.dtl', 'plein/site_layout.dtl'))
+        # check dat de WL de opslaan-knop NIET aangeboden krijgt
+        urls = self.extract_all_urls(resp, skip_menu=True)
+        self.assertTrue(url not in urls)        # opslaan url moet ontbreken
+
+    def test_sec(self):
+        # login als SEC van ver2 op loc2
+        self.e2e_login_and_pass_otp(self.account_sec)
+        self.e2e_wissel_naar_functie(self.functie_sec)
+        self.e2e_check_rol('SEC')
+
+        # SEC krijgt dezelfde lijst als de RCL?
+        resp = self.client.get(self.url_lijst)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('vereniging/lijst-verenigingen.dtl', 'plein/site_layout.dtl'))
+
+        # check accommodatie detail pagina
+        url = self.url_accommodatie_details % (self.loc2.pk, self.nhbver2.pk)
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('vereniging/accommodatie-details.dtl', 'plein/site_layout.dtl'))
+        # check dat de HWL de opslaan-knop aangeboden krijgt
+        urls = self.extract_all_urls(resp, skip_menu=True)
+        self.assertTrue(url in urls)                                    # opslaan url
+        self.assertTrue('/vereniging/accommodaties/lijst/' in urls)     # terug url
+
+    def test_bad(self):
+        # login als SEC van ver2 op loc2
+        self.e2e_login_and_pass_otp(self.account_sec)
+        self.e2e_wissel_naar_functie(self.functie_sec)
+        self.e2e_check_rol('SEC')
+
+        # probeer van andere vereniging te wijzigen
+        url = self.url_accommodatie_details % (self.loc1.pk, self.nhbver1.pk)
+        resp = self.client.post(url, {'baan_type': 'H',
+                                      'banen_18m': 5,
+                                      'banen_25m': 6,
+                                      'max_dt': 3,
+                                      'notities': 'dit is een test'})
+        self.assertEqual(resp.status_code, 404)
+
+        # geef een inconsistente locatie - vereniging
+        url = self.url_accommodatie_details % (self.loc1.pk, self.nhbver2.pk)
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 404)
 
     def test_gedeelde_locatie(self):
         # login als BB

@@ -775,7 +775,7 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
             volgorde = functie.nhb_ver.nhb_nr + 10000   # 11000-19999
         elif functie.rol == "WL":
             volgorde = functie.nhb_ver.nhb_nr + 20000   # 21000-29999
-        else:
+        else:             # pragma: no cover
             volgorde = 0  # valt meteen op dat 'ie bovenaan komt
         return volgorde
 

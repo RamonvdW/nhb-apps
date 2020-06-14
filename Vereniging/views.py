@@ -655,33 +655,21 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
         qset = Functie.objects.filter(nhb_ver=nhbver).prefetch_related('accounts')
         try:
             functie_sec = qset.filter(rol='SEC')[0]
-        except IndexError:
-            # only in autotest environment
-            functie_sec = None
-
-        try:
             functie_hwl = qset.filter(rol='HWL')[0]
-        except IndexError:
-            # only in autotest environment
-            functie_hwl = None
-
-        try:
             functie_wl = qset.filter(rol='WL')[0]
-        except IndexError:
+        except IndexError:                  # pragma: no cover
             # only in autotest environment
-            functie_wl = None
+            print("Vereniging.views.AccommodatieDetailsView: autotest ontbreekt rol SEC, HWL of WL")
+            raise Resolver404()
 
-        if functie_sec:
-            context['sec_names'] = self.get_all_names(functie_sec)
-            context['sec_email'] = functie_sec.bevestigde_email
+        context['sec_names'] = self.get_all_names(functie_sec)
+        context['sec_email'] = functie_sec.bevestigde_email
 
-        if functie_hwl:
-            context['hwl_names'] = self.get_all_names(functie_hwl)
-            context['hwl_email'] = functie_hwl.bevestigde_email
+        context['hwl_names'] = self.get_all_names(functie_hwl)
+        context['hwl_email'] = functie_hwl.bevestigde_email
 
-        if functie_wl:
-            context['wl_names'] = self.get_all_names(functie_wl)
-            context['wl_email'] = functie_wl.bevestigde_email
+        context['wl_names'] = self.get_all_names(functie_wl)
+        context['wl_email'] = functie_wl.bevestigde_email
 
         # beschrijving voor de template
         locatie.baan_type_str = BAANTYPE2STR[locatie.baan_type]
@@ -705,21 +693,13 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
                                                                       'vereniging_pk': nhbver.pk})
 
             # geef ook meteen de mogelijkheid om leden te koppelen aan rollen
-            if functie_sec:
-                context['url_koppel_sec'] = reverse('Functie:wijzig-beheerders', kwargs={'functie_pk': functie_sec.pk})
-
-            if functie_hwl:
-                context['url_koppel_hwl'] = reverse('Functie:wijzig-beheerders', kwargs={'functie_pk': functie_hwl.pk})
-
-            if functie_wl:
-                context['url_koppel_wl'] = reverse('Functie:wijzig-beheerders', kwargs={'functie_pk': functie_wl.pk})
+            context['url_koppel_sec'] = reverse('Functie:wijzig-beheerders', kwargs={'functie_pk': functie_sec.pk})
+            context['url_koppel_hwl'] = reverse('Functie:wijzig-beheerders', kwargs={'functie_pk': functie_hwl.pk})
+            context['url_koppel_wl'] = reverse('Functie:wijzig-beheerders', kwargs={'functie_pk': functie_wl.pk})
 
             # geef ook meteen de mogelijkheid om de e-mailadressen van een functie aan te passen
-            if functie_hwl:
-                context['url_email_hwl'] = reverse('Functie:wijzig-email', kwargs={'functie_pk': functie_hwl.pk})
-
-            if functie_wl:
-                context['url_email_wl'] = reverse('Functie:wijzig-email', kwargs={'functie_pk': functie_wl.pk})
+            context['url_email_hwl'] = reverse('Functie:wijzig-email', kwargs={'functie_pk': functie_hwl.pk})
+            context['url_email_wl'] = reverse('Functie:wijzig-email', kwargs={'functie_pk': functie_wl.pk})
         else:
             context['readonly'] = True
 
