@@ -22,16 +22,17 @@
         <tr>
             <td>Vereniging:</td>
             <td>{{ nhbver }}</td>
-        </tr>
-
-        <tr>
-            <td style="vertical-align: top">Adres van de accommodatie:</td>
-            <td style="vertical-align: top">{{ locatie.adres|linebreaksbr }}</td>
+            {% if not readonly %}
+                <td><!-- kolom voor de wijzig knoppen --></td>
+            {% endif %}
         </tr>
 
         <tr>
             <td>Regio:</td>
             <td>{{ nhbver.regio }}</td>
+            {% if not readonly %}
+                <td><!-- kolom voor de wijzig knoppen --></td>
+            {% endif %}
         </tr>
 
         {% if nhbver.clusters.count %}
@@ -41,7 +42,123 @@
                     <span>{{ cluster }}</span><br>
                 {% endfor %}
             </td>
+            {% if not readonly %}
+                <td><!-- kolom voor de wijzig knoppen --></td>
+            {% endif %}
         {% endif %}
+
+        <tr>
+            <td style="vertical-align: top">Adres van de accommodatie:</td>
+            <td style="vertical-align: top">{{ locatie.adres|linebreaksbr }}</td>
+            {% if not readonly %}
+                <td><!-- kolom voor de wijzig knoppen --></td>
+            {% endif %}
+        </tr>
+
+        <tr>
+            <td style="vertical-align: top">Secretaris</td>
+            <td style="vertical-align: top">
+                {% for name in sec_names %}
+                    <span>{{ name }}</span><br>
+                {% empty %}
+                    <i>Onbekend</i>
+                {% endfor %}
+            </td>
+            {% if not readonly %}
+                <td>
+                    {% if url_koppel_sec %}
+                        <a class="btn-nhb-blauw" href="{{ url_koppel_sec }}"><i class="material-icons-round left">group_add</i>Koppel beheerders</a>
+                    {% endif %}
+                </td>
+            {% endif %}
+        </tr>
+
+        <tr>
+            <td style="vertical-align: top">Hoofdwedstrijdleider</td>
+            <td style="vertical-align: top">
+                {% for name in hwl_names %}
+                    <span>{{ name }}</span><br>
+                {% empty %}
+                    <i>Onbekend</i>
+                {% endfor %}
+            </td>
+            {% if not readonly %}
+                <td>
+                    {% if url_koppel_hwl %}
+                        <a class="btn-nhb-blauw" href="{{ url_koppel_hwl }}"><i class="material-icons-round left">group_add</i>Koppel beheerders</a>
+                    {% endif %}
+                </td>
+            {% endif %}
+        </tr>
+
+        <tr>
+            <td style="vertical-align: top">Wedstrijdleider</td>
+            <td style="vertical-align: top">
+                {% for name in wl_names %}
+                    <span>{{ name }}</span><br>
+                {% empty %}
+                    <i>Geen</i>
+                {% endfor %}
+            </td>
+            {% if not readonly %}
+                <td>
+                    {% if url_koppel_wl %}
+                        <a class="btn-nhb-blauw" href="{{ url_koppel_wl }}"><i class="material-icons-round left">group_add</i>Koppel beheerders</a>
+                    {% endif %}
+                </td>
+            {% endif %}
+        </tr>
+
+        <tr>
+            <td>E-mailadres secretaris</td>
+            <td>
+                {% if sec_email %}
+                    <code>{{ sec_email }}</code>
+                {% else %}
+                    <i>Onbekend</i>
+                {% endif %}
+            </td>
+            {% if not readonly %}
+                <!-- email van SEC moet gewijzigd worden in Onze Relaties -->
+                <td><!-- kolom voor de wijzig knoppen --></td>
+            {% endif %}
+        </tr>
+
+        <tr>
+            <td>E-mailadres hoofdwedstrijdleider</td>
+            <td>
+                {% if hwl_email %}
+                    <code>{{ hwl_email }}</code>
+                {% else %}
+                    <i>Onbekend</i>
+                {% endif %}
+            </td>
+            {% if not readonly %}
+                <td>
+                    {% if url_email_hwl %}
+                        <a class="btn-nhb-blauw" href="{{ url_email_hwl }}"><i class="material-icons-round left">alternate_email</i>Wijzig e-mail</a>
+                    {% endif %}
+                </td>
+            {% endif %}
+        </tr>
+
+        <tr>
+            <td>E-mailadres wedstrijdleider</td>
+            <td>
+                {% if wl_email %}
+                    <code>{{ wl_email }}</code>
+                {% else %}
+                    <i>Onbekend</i>
+                {% endif %}
+            </td>
+            {% if not readonly %}
+                <td>
+                    {% if url_email_wl %}
+                        <a class="btn-nhb-blauw" href="{{ url_email_wl }}"><i class="material-icons-round left">alternate_email</i>Wijzig e-mail</a>
+                    {% endif %}
+                </td>
+            {% endif %}
+        </tr>
 
         <tr>
             <td>Typering:</td>
@@ -56,6 +173,9 @@
                     </select>
                 {% endif %}
             </td>
+            {% if not readonly %}
+                <td><!-- kolom voor de wijzig knoppen --></td>
+            {% endif %}
         </tr>
 
         <tr>
@@ -73,6 +193,9 @@
                     </select>
                 {% endif %}
             </td>
+            {% if not readonly %}
+                <td><!-- kolom voor de wijzig knoppen --></td>
+            {% endif %}
         </tr>
 
         <tr>
@@ -90,6 +213,9 @@
                     </select>
                 {% endif %}
             </td>
+            {% if not readonly %}
+                <td><!-- kolom voor de wijzig knoppen --></td>
+            {% endif %}
         </tr>
 
         <tr>
@@ -104,6 +230,9 @@
                     </select>
                 {% endif %}
             </td>
+            {% if not readonly %}
+                <td><!-- kolom voor de wijzig knoppen --></td>
+            {% endif %}
         </tr>
 
         <tr>
@@ -115,6 +244,9 @@
                     <textarea name="notities" class="materialize-textarea">{{ locatie.notities }}</textarea>
                 {% endif %}
             </td>
+            {% if not readonly %}
+                <td><!-- kolom voor de wijzig knoppen --></td>
+            {% endif %}
         </tr>
 
         {% if locatie.other_ver.count %}
@@ -125,14 +257,16 @@
                     <span>{{ nhbver }}</span><br>
                 {% endfor %}
             </td>
+            {% if not readonly %}
+                <td><!-- kolom voor de wijzig knoppen --></td>
+            {% endif %}
         </tr>
         {% endif %}
     </table>
 
+    <p>Deze gegevens kunnen aangepast worden door de vereniging zelf (secretaris of hoofdwedstrijdleider) en door de regiocompetitieleider.</p>
     <p>
         {% if readonly %}
-            <p>De secretaris van de vereniging en de regiocompetitieleider kunnen deze gegevens aanpassen.</p>
-
             <a class="btn-nhb-blauw margin-5" href="{{ terug_url }}">
                 <i class="material-icons-round left">arrow_back</i>Terug</a>
         {% else %}
