@@ -15,7 +15,7 @@ import datetime
 class TestFunctieKoppelen(E2EHelpers, TestCase):
     """ unit tests voor de Functie applicatie, functionaliteit Koppel bestuurders """
 
-    test_after = ('Account', 'Functie.test_2fa')
+    test_after = ('Account', 'Functie.test_2fa', 'Functie.test_overzicht')
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -98,117 +98,6 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.url_wijzig = '/functie/wijzig/'
         self.url_activeer_functie = '/functie/activeer-functie/%s/'
         self.url_activeer_rol = '/functie/activeer-rol/%s/'
-
-    def test_anon(self):
-        self.e2e_logout()
-
-        # geen rechten om dit overzicht in te zien
-        resp = self.client.get(self.url_overzicht)
-        self.assert_is_redirect(resp, '/plein/')
-
-        # geen rechten om beheerders te kiezen
-        resp = self.client.get(self.url_wijzig + '123/')
-        self.assert_is_redirect(resp, '/plein/')
-
-    def test_overzicht_view_normaal(self):
-        # geen rechten om dit overzicht in te zien
-        # zelf niet na acceptatie VHPG en OTP controle
-        self.e2e_login_and_pass_otp(self.account_normaal)
-
-        resp = self.client.get(self.url_overzicht)
-        self.assert_is_redirect(resp, '/plein/')
-
-        resp = self.client.get(self.url_overzicht + 'vereniging/')
-        self.assert_is_redirect(resp, '/plein/')
-
-    def test_overzicht_view_admin(self):
-        self.e2e_login_and_pass_otp(self.account_admin)
-
-        # neem de BB rol aan
-        self.e2e_wisselnaarrol_bb()
-        self.e2e_check_rol('BB')
-        resp = self.client.get('/plein/')
-        self.assert_html_ok(resp)
-        self.assertContains(resp, "Manager competitiezaken")
-
-        # controleer de Wijzig knoppen op de functie-overzicht pagina
-        with self.assertNumQueries(4):
-            resp = self.client.get(self.url_overzicht)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('functie/overzicht.dtl', 'plein/site_layout.dtl'))
-        urls = [url for url in self.extract_all_urls(resp) if url.startswith('/functie/wijzig/')]
-        self.assertEqual(len(urls), 2)      # BKO 18m en 25m
-
-        # controleer de Wijzig knoppen op de functie-overzicht pagina voor verschillende rollen
-
-        # neem de BKO 18m rol aan
-        self.e2e_wissel_naar_functie(self.functie_bko)
-        self.e2e_check_rol('BKO')
-        resp = self.client.get(self.url_overzicht)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('functie/overzicht.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, "BKO Indoor")
-        urls = [url for url in self.extract_all_urls(resp) if url.startswith(self.url_wijzig)]
-        self.assertEqual(len(urls), 4)      # 4x RKO
-
-        # neem de RKO Rayon 3 Indoor rol aan
-        self.e2e_wissel_naar_functie(self.functie_rko3)
-        self.e2e_check_rol('RKO')
-        resp = self.client.get(self.url_overzicht)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('functie/overzicht.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, "RKO Rayon 3 Indoor")
-        urls = [url for url in self.extract_all_urls(resp) if url.startswith(self.url_wijzig)]
-        self.assertEqual(len(urls), 4)      # 4x RCL
-
-        # neem de RCL Rayon 111 Indoor aan
-        self.e2e_wissel_naar_functie(self.functie_rcl111)
-        self.e2e_check_rol('RCL')
-
-        # controleer de Wijzig knoppen op de functie-overzicht pagina
-        resp = self.client.get(self.url_overzicht)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('functie/overzicht.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, "RCL Regio 111 Indoor")
-        urls = [url for url in self.extract_all_urls(resp) if url.startswith(self.url_wijzig)]
-        self.assertEqual(len(urls), 0)      # geen wijzig knoppen voor de RCL
-
-        self.e2e_assert_other_http_commands_not_supported(self.url_overzicht)
-
-    def test_overzicht_view_hwl(self):
-        # de HWL krijgt niet het hele overzicht te zien
-        # alleen de RCL, RKO, BKO worden getoond die aan de regio gerelateerd zijn
-        self.functie_hwl.accounts.add(self.account_beh1)
-        self.e2e_login_and_pass_otp(self.account_beh1)
-
-        self.e2e_wissel_naar_functie(self.functie_hwl)
-        self.e2e_check_rol('HWL')
-
-        # vraag het overzicht van competitie-bestuurders op
-        resp = self.client.get(self.url_overzicht)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('functie/overzicht.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, "HWL")
-        urls = [url for url in self.extract_all_urls(resp) if url.startswith(self.url_wijzig)]
-        self.assertEqual(len(urls), 0)      # geen wijzig knoppen voor de HWL
-
-        # controleer inhoudelijk op 2xRCL, 2xRKO en 2xBKO (18m en 25m)
-        self.assertContains(resp, "BKO", count=2)
-        self.assertContains(resp, "RKO", count=2)
-        self.assertContains(resp, "RCL", count=2)
-
-        # haal het overzicht van verenigingsbestuurders op
-        resp = self.client.get(self.url_overzicht + 'vereniging/')
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('functie/overzicht-vereniging.dtl', 'plein/site_layout.dtl'))
-
-        self.e2e_assert_other_http_commands_not_supported(self.url_overzicht + 'vereniging/')
 
     def test_wijzig_view(self):
         self.e2e_login_and_pass_otp(self.account_admin)

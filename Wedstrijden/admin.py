@@ -8,7 +8,7 @@ from django.contrib import admin
 from .models import WedstrijdLocatie, Wedstrijd, WedstrijdenPlan
 
 
-class WedstrijdLocatieAdmin(admin.ModelAdmin):
+class WedstrijdLocatieAdmin(admin.ModelAdmin):      # pragma: no cover
     list_filter = ('zichtbaar',)
     search_fields = ('adres', 'verenigingen__nhb_nr')
 

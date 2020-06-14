@@ -519,10 +519,9 @@ class OverzichtVerenigingView(UserPassesTestMixin, ListView):
                 nr = 1
             elif obj.rol == "HWL":
                 nr = 2
-            elif obj.rol == "WL":
-                nr = 3
             else:
-                nr = 0
+                # obj.rol == "WL":
+                nr = 3
             tup = (nr, obj)
             lst.append(tup)
         # for
