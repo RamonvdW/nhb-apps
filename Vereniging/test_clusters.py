@@ -28,7 +28,7 @@ class TestVerenigingClusters(E2EHelpers, TestCase):
         rcl.save()
         self.account_rcl111 = rcl
 
-        # maak de CWZ functie
+        # maak de HWL functie
         self.functie_rcl111 = maak_functie("RCL Regio 111 test", "RCL")
         self.functie_rcl111.nhb_regio = regio_111
         self.functie_rcl111.comp_type = '18'

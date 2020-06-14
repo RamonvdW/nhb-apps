@@ -31,7 +31,9 @@
                 <th>Leeftijd</th>
                 <th>Wedstrijdklasse {{ wedstrijdklasse_jaar }}</th>
                 <th>Schiet met</th>
-                <th></th>
+                {% if toon_wijzig_kolom %}
+                    <th><!-- kolom voor de Voorkeuren knop --></th>
+                {% endif %}
             </tr>
         </thead>
 
@@ -50,7 +52,13 @@
                     {% endfor %}
                 </td>
 
-                <td align="right"><a class="btn-nhb-blauw" href="{{ obj.wijzig_url }}"><i class="material-icons-round left">tune</i>Voorkeuren</a>
+                {% if toon_wijzig_kolom %}
+                    <td align="right">
+                        {% if obj.wijzig_url %}
+                            <a class="btn-nhb-blauw" href="{{ obj.wijzig_url }}"><i class="material-icons-round left">tune</i>Voorkeuren</a>
+                        {% endif %}
+                    </td>
+                {% endif %}
             </tr>
         {% endfor %}
     </table>
@@ -70,7 +78,9 @@
             <th filter="on">Naam</th>
             <th>M/V</th>
             <th>Schiet met</th>
-            <th></th>
+            {% if toon_wijzig_kolom %}
+                <th><!-- kolom voor de Voorkeuren knop --></th>
+            {% endif %}
         </tr>
     </thead>
 
@@ -87,7 +97,13 @@
                 {% endfor %}
             </td>
 
-            <td align="right"><a class="btn-nhb-blauw" href="{{ obj.wijzig_url }}"><i class="material-icons-round left">tune</i>Voorkeuren</a>
+            {% if toon_wijzig_kolom %}
+                <td align="right">
+                    {% if obj.wijzig_url %}
+                        <a class="btn-nhb-blauw" href="{{ obj.wijzig_url }}"><i class="material-icons-round left">tune</i>Voorkeuren</a>
+                    {% endif %}
+                </td>
+            {% endif %}
         </tr>
     {% endfor %}
 </table>

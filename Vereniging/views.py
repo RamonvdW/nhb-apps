@@ -43,7 +43,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
-        return functie_nu and rol_nu == Rollen.ROL_CWZ
+        return functie_nu and rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_WL)
 
     def handle_no_permission(self):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
@@ -77,7 +77,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
 
 class LedenLijstView(UserPassesTestMixin, ListView):
 
-    """ Deze view laat de CWZ zijn ledenlijst zien """
+    """ Deze view laat de HWL zijn ledenlijst zien """
 
     # class variables shared by all instances
     template_name = TEMPLATE_LEDENLIJST
@@ -85,7 +85,7 @@ class LedenLijstView(UserPassesTestMixin, ListView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         _, functie_nu = rol_get_huidige_functie(self.request)
-        return functie_nu and functie_nu.rol == "CWZ"
+        return functie_nu and functie_nu.rol in ('SEC', 'HWL', 'WL')
 
     def handle_no_permission(self):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
@@ -98,7 +98,7 @@ class LedenLijstView(UserPassesTestMixin, ListView):
         jeugdgrens = huidige_jaar - MAXIMALE_LEEFTIJD_JEUGD
         self._huidige_jaar = huidige_jaar
 
-        _, functie_nu = rol_get_huidige_functie(self.request)
+        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
         qset = NhbLid.objects.filter(bij_vereniging=functie_nu.nhb_ver)
 
         objs = list()
@@ -145,7 +145,9 @@ class LedenLijstView(UserPassesTestMixin, ListView):
 
         # zoek de laatste-inlog bij elk lid
         for nhblid in objs:
-            nhblid.wijzig_url = reverse('Schutter:voorkeuren-nhblid', kwargs={'nhblid_pk': nhblid.pk})
+            # HWL mag de voorkeuren van de schutters aanpassen
+            if rol_nu == Rollen.ROL_HWL:
+                nhblid.wijzig_url = reverse('Schutter:voorkeuren-nhblid', kwargs={'nhblid_pk': nhblid.pk})
 
             if nhblid.account:
                 nhblid.laatste_inlog = nhblid.account.last_login
@@ -159,7 +161,7 @@ class LedenLijstView(UserPassesTestMixin, ListView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        _, functie_nu = rol_get_huidige_functie(self.request)
+        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
         context['nhb_ver'] = functie_nu.nhb_ver
 
         # splits the ledenlijst op in jeugd, senior en inactief
@@ -179,6 +181,7 @@ class LedenLijstView(UserPassesTestMixin, ListView):
         context['leden_senior'] = senior
         context['leden_inactief'] = inactief
         context['wedstrijdklasse_jaar'] = self._huidige_jaar
+        context['toon_wijzig_kolom'] = (rol_nu == Rollen.ROL_HWL)
 
         menu_dynamics(self.request, context, actief='vereniging')
         return context
@@ -186,7 +189,11 @@ class LedenLijstView(UserPassesTestMixin, ListView):
 
 class LedenVoorkeurenView(LedenLijstView):
 
-    """ Deze view laat de CWZ de voorkeuren van de zijn leden aanpassen """
+    """ Deze view laat de HWL de voorkeuren van de zijn leden aanpassen
+        en geeft de SEC en WL inzicht in de voorkeuren
+    """
+
+    # NOTE: UserPassesTestMixin wordt gedaan door LedenLijstView
 
     # class variables shared by all instances
     template_name = TEMPLATE_LEDEN_VOORKEUREN
@@ -219,7 +226,7 @@ class LedenVoorkeurenView(LedenLijstView):
 
 class LedenAanmeldenView(UserPassesTestMixin, ListView):
 
-    """ Deze view laat de CWZ zijn ledenlijst zien """
+    """ Deze view laat de HWL zijn ledenlijst zien """
 
     # class variables shared by all instances
     template_name = TEMPLATE_LEDEN_AANMELDEN
@@ -227,7 +234,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         _, functie_nu = rol_get_huidige_functie(self.request)
-        return functie_nu and functie_nu.rol == "CWZ"
+        return functie_nu and functie_nu.rol in ('SEC', 'HWL', 'WL')
 
     def handle_no_permission(self):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
@@ -345,7 +352,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        _, functie_nu = rol_get_huidige_functie(self.request)
+        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
         context['nhb_ver'] = functie_nu.nhb_ver
 
         # splits the ledenlijst op in jeugd, senior en inactief
@@ -362,7 +369,9 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
         context['leden_senior'] = senior
         context['comp'] = self.comp
         context['seizoen'] = '%s/%s' % (self.comp.begin_jaar, self.comp.begin_jaar + 1)
-        context['aanmelden_url'] = reverse('Vereniging:leden-aanmelden', kwargs={'comp_pk': self.comp.pk})
+        if rol_nu == Rollen.ROL_HWL:
+            context['aanmelden_url'] = reverse('Vereniging:leden-aanmelden', kwargs={'comp_pk': self.comp.pk})
+            context['mag_aanmelden'] = True
 
         menu_dynamics(self.request, context, actief='vereniging')
         return context
@@ -375,6 +384,10 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
             comp_pk = int(self.kwargs['comp_pk'][:10])
             comp = Competitie.objects.get(pk=comp_pk)
         except (ValueError, TypeError, Competitie.DoesNotExist):
+            raise Resolver404()
+
+        rol_nu = rol_get_huidige(self.request)
+        if rol_nu != Rollen.ROL_HWL:
             raise Resolver404()
 
         # all checked boxes are in the post request as keys, typically with value 'on'
@@ -401,6 +414,8 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                     if not schutterboog.voor_wedstrijd:
                         # iemand loopt te klooien
                         raise Resolver404()
+
+                # TODO: controleer lid bij vereniging HWL
 
                 # zoek de aanvangsgemiddelden er bij, indien beschikbaar
                 ag = AG_NUL
@@ -429,7 +444,7 @@ class LijstVerenigingenView(UserPassesTestMixin, ListView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
-        return rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_CWZ)
+        return rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL)
 
     def handle_no_permission(self):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
@@ -472,12 +487,12 @@ class LijstVerenigingenView(UserPassesTestMixin, ListView):
             return objs
 
         # vul een kleine cache om vele database verzoeken te voorkomen
-        cwz_functies = dict()  # [nhb_ver] = Functie()
+        hwl_functies = dict()  # [nhb_ver] = Functie()
         for functie in Functie.objects.\
-                            filter(rol='CWZ').\
+                            filter(rol='HWL').\
                             select_related('nhb_ver').\
                             prefetch_related('accounts'):
-            cwz_functies[functie.nhb_ver.nhb_nr] = functie
+            hwl_functies[functie.nhb_ver.nhb_nr] = functie
         # for
 
         # toon de lijst van verenigingen in de regio
@@ -489,7 +504,7 @@ class LijstVerenigingenView(UserPassesTestMixin, ListView):
                         prefetch_related('wedstrijdlocatie_set', 'clusters').\
                         order_by('nhb_nr')
         else:
-            # rol_nu == Rollen.ROL_CWZ
+            # rol_nu == Rollen.ROL_HWL
             # het regionummer is verkrijgbaar via de vereniging
             objs = NhbVereniging.objects.\
                             filter(regio=functie_nu.nhb_ver.regio).\
@@ -499,12 +514,12 @@ class LijstVerenigingenView(UserPassesTestMixin, ListView):
 
         for obj in objs:
             try:
-                functie_cwz = cwz_functies[obj.nhb_nr]
+                functie_hwl = hwl_functies[obj.nhb_nr]
             except KeyError:
-                # deze vereniging heeft geen CWZ functie
-                obj.cwzs = list()
+                # deze vereniging heeft geen HWL functie
+                obj.hwls = list()
             else:
-                obj.cwzs = functie_cwz.accounts.all()
+                obj.hwls = functie_hwl.accounts.all()
         # for
         return objs
 
@@ -530,11 +545,11 @@ class LijstVerenigingenView(UserPassesTestMixin, ListView):
         if rol_nu == Rollen.ROL_RKO:
             context['toon_rayon'] = False
 
-        if rol_nu in (Rollen.ROL_RCL, Rollen.ROL_CWZ):
+        if rol_nu in (Rollen.ROL_RCL, Rollen.ROL_HWL):
             context['toon_rayon'] = False
             context['toon_regio'] = False
-            context['toon_cwzs'] = True
-            if rol_nu == Rollen.ROL_CWZ:
+            context['toon_hwls'] = True
+            if rol_nu == Rollen.ROL_HWL:
                 menu_actief = 'vereniging'
 
         # voeg de url toe voor de "details" knoppen
@@ -567,7 +582,7 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
-        return rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_CWZ)
+        return rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_WL, Rollen.ROL_SEC)
 
     def handle_no_permission(self):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
@@ -598,8 +613,8 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
 
         if functie_nu:
-            if rol_nu == Rollen.ROL_CWZ:
-                # CWZ mag van zijn eigen vereniging wijzigen
+            if rol_nu in (Rollen.ROL_HWL, Rollen.ROL_SEC):
+                # HWL mag van zijn eigen vereniging wijzigen
                 if functie_nu.nhb_ver == nhbver:
                     return True
             elif rol_nu == Rollen.ROL_RCL:
@@ -704,7 +719,7 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
 
 class VerenigingAccommodatieDetailsView(AccommodatieDetailsView):
     """ uitbreiding op AccommodatieDetailsView voor gebruik vanuit de vereniging
-        overzicht pagina voor de CWZ. De vlag 'is_ver' resulteer in andere "terug" urls.
+        overzicht pagina voor de SEC/HWL. De vlag 'is_ver' resulteer in andere "terug" urls.
     """
     def get_context_data(self, **kwargs):
         kwargs['is_ver'] = True

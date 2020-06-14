@@ -28,7 +28,9 @@ WIKI = {
     Rollen.ROL_BKO: (settings.WIKI_URL_BKO, 'Handleiding BKO'),
     Rollen.ROL_RKO: (settings.WIKI_URL_RKO, 'Handleiding RKO'),
     Rollen.ROL_RCL: (settings.WIKI_URL_RCL, 'Handleiding RCL'),
-    Rollen.ROL_CWZ: (settings.WIKI_URL_CWZ, 'Handleiding CWZ'),
+    Rollen.ROL_HWL: (settings.WIKI_URL_HWL, 'Handleiding HWL'),
+    Rollen.ROL_WL:  (settings.WIKI_URL_WL,  'Handleiding WL'),
+    Rollen.ROL_SEC: (settings.WIKI_URL_SEC, 'Handleiding SEC'),
 }
 
 
@@ -69,7 +71,7 @@ def menu_dynamics(request, context, actief=None):
         if rol == Rollen.ROL_SCHUTTER:
             context['menu_show_schutter'] = True
 
-        if rol == Rollen.ROL_CWZ:
+        if rol in (Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_WL):
             context['menu_show_vereniging'] = True
     else:
         # inloggen

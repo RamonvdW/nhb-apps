@@ -4,7 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-# maak een account CWZ van specifieke vereniging, vanaf de commandline
+# maak een account HWL van specifieke vereniging, vanaf de commandline
 
 from django.core.management.base import BaseCommand
 from Account.models import Account
@@ -14,7 +14,7 @@ from Logboek.models import schrijf_in_logboek
 
 
 class Command(BaseCommand):
-    help = "Maak account CWZ voor specifieke vereniging"
+    help = "Maak account HWL voor specifieke vereniging"
 
     def add_arguments(self, parser):
         parser.add_argument('username', nargs=1, help="inlog naam")
@@ -36,9 +36,9 @@ class Command(BaseCommand):
             nhb_ver = None
         return nhb_ver
 
-    def get_functie_cwz(self, nhb_ver):
+    def get_functie_hwl(self, nhb_ver):
         try:
-            functie = Functie.objects.get(rol='CWZ', nhb_ver=nhb_ver)
+            functie = Functie.objects.get(rol='HWL', nhb_ver=nhb_ver)
         except Functie.DoesNotExist as exc:
             self.stderr.write("%s" % str(exc))
             functie = None
@@ -52,20 +52,20 @@ class Command(BaseCommand):
         nhb_ver = self.get_vereniging(vereniging_nhb_nr)
 
         if account and nhb_ver:
-            functie = self.get_functie_cwz(nhb_ver)
+            functie = self.get_functie_hwl(nhb_ver)
 
             if functie:
                 if functie.accounts.filter(pk=account.pk).count():
-                    self.stderr.write('[WARNING] Account %s is al CWZ van vereniging %s' % (repr(username), nhb_ver))
+                    self.stderr.write('[WARNING] Account %s is al HWL van vereniging %s' % (repr(username), nhb_ver))
                 else:
-                    # maak dit account CWZ
+                    # maak dit account HWL
                     functie.accounts.add(account)
 
-                    activiteit = "Account %s is CWZ gemaakt van vereniging %s" % (repr(username), nhb_ver)
+                    activiteit = "Account %s is HWL gemaakt van vereniging %s" % (repr(username), nhb_ver)
 
                     # schrijf in het logboek
                     schrijf_in_logboek(account=None,
-                                       gebruikte_functie='maak_cwz (command line)',
+                                       gebruikte_functie='maak_hwl (command line)',
                                        activiteit=activiteit)
                     self.stdout.write(activiteit)
 

@@ -53,10 +53,10 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         ver.save()
         self._ver = ver
 
-        # maak CWZ functie aan voor deze vereniging
-        self.functie_cwz = maak_functie("CWZ Vereniging %s" % ver.nhb_nr, "CWZ")
-        self.functie_cwz.nhb_ver = ver
-        self.functie_cwz.save()
+        # maak HWL functie aan voor deze vereniging
+        self.functie_hwl = maak_functie("HWL Vereniging %s" % ver.nhb_nr, "HWL")
+        self.functie_hwl.nhb_ver = ver
+        self.functie_hwl.save()
 
         # maak een BB aan (geen NHB lid)
         self.account_bb = self.e2e_create_account('bb', 'bko@nhb.test', 'BB', accepteer_vhpg=True)
@@ -80,7 +80,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.functie_rko.accounts.add(self.account_rko)
         self.functie_rcl.accounts.add(self.account_rcl)
 
-        # maak nog een test vereniging, zonder CWZ functie
+        # maak nog een test vereniging, zonder HWL functie
         ver = NhbVereniging()
         ver.naam = "Kleine Club"
         ver.nhb_nr = "1100"
@@ -101,7 +101,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
 
     def test_overzicht_it(self):
         self.e2e_login_and_pass_otp(self.account_admin)
-        self.e2e_wisselnaarrol_beheerder()
+        self.e2e_wisselnaarrol_it()
 
         resp = self.client.get(self.url_overzicht)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -149,14 +149,14 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('competitie/overzicht-beheerder.dtl', 'plein/site_layout.dtl'))
         self.assertNotContains(resp, '/competitie/beheer-favorieten/')
 
-    def test_overzicht_cwz(self):
-        self.e2e_login_and_pass_otp(self.account_bb)        # geen account_cwz
-        self.e2e_wissel_naar_functie(self.functie_cwz)
+    def test_overzicht_hwl(self):
+        self.e2e_login_and_pass_otp(self.account_bb)        # geen account_hwl
+        self.e2e_wissel_naar_functie(self.functie_hwl)
 
         resp = self.client.get(self.url_overzicht)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/overzicht-cwz.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/overzicht-hwl.dtl', 'plein/site_layout.dtl'))
         self.assertNotContains(resp, '/competitie/beheer-favorieten/')
 
     def test_wijzig_datums_not_bb(self):

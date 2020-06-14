@@ -137,7 +137,7 @@ class TestOverigFeedback(E2EHelpers, TestCase):
     def test_feedback_inzicht_admin(self):
         # do een get van alle feedback als IT beheerder
         self.e2e_login_and_pass_otp(self.account_admin)
-        self.e2e_wisselnaarrol_beheerder()
+        self.e2e_wisselnaarrol_it()
 
         resp = self.client.get('/overig/feedback/inzicht/')
         self.assertEqual(resp.status_code, 200)

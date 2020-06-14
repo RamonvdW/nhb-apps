@@ -79,7 +79,7 @@ $nhb-collection-hover-background: $nhb-card-hover-background;
 // based on https://codepen.io/aglio/pen/eGdVdQ
 //
 .cards-container {
-    column-break-inside: avoid;
+    -webkit-column-break-inside: avoid;
     .card {
         display: inline-block;
         overflow: visible;

@@ -14,7 +14,7 @@ from .menu import menu_dynamics
 TEMPLATE_PLEIN_BEZOEKER = 'plein/plein-bezoeker.dtl'            # niet ingelogd
 TEMPLATE_PLEIN_GEBRUIKER = 'plein/plein-gebruiker.dtl'          # special (ROL_NONE)
 TEMPLATE_PLEIN_SCHUTTER = 'plein/plein-schutter.dtl'            # schutter (ROL_SCHUTTER)
-TEMPLATE_PLEIN_BEHEERDER = 'plein/plein-beheerder.dtl'          # beheerder (ROL_BB/BKO/RKO/RCL/CWZ)
+TEMPLATE_PLEIN_BEHEERDER = 'plein/plein-beheerder.dtl'          # beheerder (ROL_BB/BKO/RKO/RCL/SEC/HWL/WL)
 TEMPLATE_PRIVACY = 'plein/privacy.dtl'
 
 
@@ -68,8 +68,12 @@ class PleinView(View):
                     context['rol_is_rko'] = True
                 elif rol_nu == Rollen.ROL_RCL:
                     context['rol_is_rcl'] = True
-                elif rol_nu == Rollen.ROL_CWZ:
-                    context['rol_is_cwz'] = True
+                elif rol_nu == Rollen.ROL_HWL:
+                    context['rol_is_hwl'] = True
+                elif rol_nu == Rollen.ROL_WL:
+                    context['rol_is_wl'] = True
+                elif rol_nu == Rollen.ROL_SEC:
+                    context['rol_is_sec'] = True
                 else:                               # pragma: no cover
                     # vangnet voor nieuwe rollen
                     raise ValueError("PleinView: onbekende rol %s" % rol_nu)

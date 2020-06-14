@@ -74,7 +74,7 @@
         </tr>
         <tr>
             <td {% if obj.fase == 'C' %} class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>C</td>
-            <td>Samenstellen vaste teams (CWZ)</td>
+            <td>Samenstellen vaste teams (HWL)</td>
             <td>
                 {% if obj.fase > 'C' %}
                     <span class="green-text">Afgerond</span>

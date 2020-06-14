@@ -13,9 +13,9 @@
 
 <h4>Voorkeuren</h4>
 
-{% if is_cwz %}
+{% if is_hwl %}
 
-    <p>Als CWZ kan je op deze pagina de voorkeuren van lid <b>{{ nhblid.volledige_naam }}</b> aanpassen.</p>
+    <p>Als HWL kan je op deze pagina de voorkeuren van lid <b>{{ nhblid.volledige_naam }}</b> aanpassen.</p>
 
 {% else %}
 
@@ -26,7 +26,7 @@
 
 <h5>Bogen</h5>
 
-{% if not is_cwz %}
+{% if not is_hwl %}
 
     <p>Door aan te geven welke bogen jouw voorkeur hebben kunnen we beschikbare informatie aanpassen aan jouw wensen en hoef je minder handelingen te verrichten.</p>
 

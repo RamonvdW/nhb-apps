@@ -65,10 +65,10 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         ver.save()
         self.nhbver2 = ver
 
-        # maak de CWZ functie
-        self.functie_cwz = maak_functie("CWZ test", "CWZ")
-        self.functie_cwz.nhb_ver = ver
-        self.functie_cwz.save()
+        # maak de HWL functie
+        self.functie_hwl = maak_functie("HWL test", "HWL")
+        self.functie_hwl.nhb_ver = ver
+        self.functie_hwl.save()
 
         # maak een locatie aan
         loc = WedstrijdLocatie()
@@ -76,7 +76,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         loc.verenigingen.add(ver)
         self.loc2 = loc
 
-        # maak het lid aan dat CWZ wordt
+        # maak het lid aan dat HWL wordt
         lid = NhbLid()
         lid.nhb_nr = 100001
         lid.geslacht = "M"
@@ -88,10 +88,10 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         lid.bij_vereniging = ver
         lid.save()
 
-        self.account_cwz = self.e2e_create_account(lid.nhb_nr, lid.email, lid.voornaam, accepteer_vhpg=True)
-        self.functie_cwz.accounts.add(self.account_cwz)
+        self.account_hwl = self.e2e_create_account(lid.nhb_nr, lid.email, lid.voornaam, accepteer_vhpg=True)
+        self.functie_hwl.accounts.add(self.account_hwl)
 
-        lid.account = self.account_cwz
+        lid.account = self.account_hwl
         lid.save()
         self.nhblid_100001 = lid
 
@@ -229,13 +229,13 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.assertEqual(loc2.max_dt_per_baan, 3)
         self.assertEqual(loc2.notities, 'hoi')
 
-    def test_cwz(self):
-        # login als CWZ van ver2 op loc2
-        self.e2e_login_and_pass_otp(self.account_cwz)
-        self.e2e_wissel_naar_functie(self.functie_cwz)
-        self.e2e_check_rol('CWZ')
+    def test_hwl(self):
+        # login als HWL van ver2 op loc2
+        self.e2e_login_and_pass_otp(self.account_hwl)
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+        self.e2e_check_rol('HWL')
 
-        # CWZ krijgt dezelfde lijst als de RCL
+        # HWL krijgt dezelfde lijst als de RCL
         resp = self.client.get(self.url_lijst)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
@@ -248,18 +248,18 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('vereniging/accommodatie-details.dtl', 'plein/site_layout.dtl'))
-        # check dat de CWZ de opslaan-knop aangeboden krijgt
+        # check dat de HWL de opslaan-knop aangeboden krijgt
         urls = self.extract_all_urls(resp, skip_menu=True)
         self.assertTrue(url in urls)                                    # opslaan url
         self.assertTrue('/vereniging/accommodaties/lijst/' in urls)     # terug url
 
-        # check the specifieke accommodatie pagina voor de CWZ, met andere terug url
+        # check the specifieke accommodatie pagina voor de HWL, met andere terug url
         url = self.url_accommodatie_vereniging % (self.loc2.pk, self.nhbver2.pk)
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('vereniging/accommodatie-details.dtl', 'plein/site_layout.dtl'))
-        # check dat de CWZ de opslaan-knop aangeboden krijgt
+        # check dat de HWL de opslaan-knop aangeboden krijgt
         urls = self.extract_all_urls(resp, skip_menu=True)
         self.assertTrue(url in urls)                # opslaan url
         self.assertTrue('/vereniging/' in urls)     # terug url
@@ -270,7 +270,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
                                       'banen_25m': 6,
                                       'max_dt': 3,
                                       'notities': 'dit is een test'})
-        self.assert_is_redirect(resp, '/vereniging/')       # stuur CWZ terug naar vereniging pagina
+        self.assert_is_redirect(resp, '/vereniging/')       # stuur HWL terug naar vereniging pagina
         loc2 = WedstrijdLocatie.objects.get(pk=self.loc2.pk)
         self.assertEqual(loc2.baan_type, 'O')
         self.assertEqual(loc2.banen_18m, 5)
@@ -285,7 +285,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
                                       'banen_25m': 6,
                                       'max_dt': 3,
                                       'notities': 'dit is een test'})
-        self.assert_is_redirect(resp, '/vereniging/')       # stuur CWZ terug naar vereniging pagina
+        self.assert_is_redirect(resp, '/vereniging/')       # stuur HWL terug naar vereniging pagina
         loc2 = WedstrijdLocatie.objects.get(pk=self.loc2.pk)
         self.assertEqual(loc2.baan_type, 'H')
         resp = self.client.get(url)

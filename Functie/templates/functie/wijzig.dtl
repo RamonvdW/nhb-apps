@@ -105,7 +105,7 @@ function do_wijzig(actie, id) {
                         {% endif %}
                     </div>
                     <div class="collapsible-body white">
-                        {% if is_rol_cwz %}
+                        {% if is_rol_hwl %}
                             <span>Lid van {{ vereniging_naam }}</span>
                             <p>NHB nummer: {{ account.nhb_nr_str|highlight:zoekterm }}</p>
                         {% else %}

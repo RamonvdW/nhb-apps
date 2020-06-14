@@ -36,7 +36,7 @@
                 <td></td>
             {% endif %}
 
-            {% if toon_cwzs %}
+            {% if toon_hwls %}
                 <td colspan="3" class="table-filter"><input class="table-filter" oninput="myTableFilter(this, 'table1')" placeholder="Zoeken"/></td>
             {% else %}
                 <td colspan="2" class="table-filter"><input class="table-filter" oninput="myTableFilter(this, 'table1')" placeholder="Zoeken"/></td>
@@ -67,8 +67,8 @@
 
             <th filter="on">Vereniging</th>
 
-            {% if toon_cwzs %}
-                <th filter="on">CWZ(s)</th>
+            {% if toon_hwls %}
+                <th filter="on">HWL(s)</th>
             {% endif %}
 
             <th filter="on">Accommodatie<br>adres</th>
@@ -101,11 +101,11 @@
             <!-- vereniging -->
             <td>[{{ obj.nhb_nr }}] {{ obj.naam }}</td>
 
-            <!-- cwzs -->
-            {% if toon_cwzs %}
+            <!-- HWLs -->
+            {% if toon_hwls %}
                 <td>
-                    {% for cwz in obj.cwzs %}
-                        <span>{{ cwz.volledige_naam }}</span><br>
+                    {% for hwl in obj.hwls %}
+                        <span>{{ hwl.volledige_naam }}</span><br>
                     {% endfor %}
                 </td>
             {% endif %}

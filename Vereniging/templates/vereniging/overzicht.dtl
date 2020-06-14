@@ -100,13 +100,13 @@
         {% for comp in competities %}
             <div class="card">
                 <div class="card-content">
-                    <div class="card-title center-align">Aanmelden</div>
+                    <div class="card-title center-align">Aanmeldingen</div>
                     <div class="center-align"><img src="{{ comp.icon }}" height="90" alt="logo"></div>
-                    <p>Leden aanmelden voor de <b>{{ comp.beschrijving }}</b>.</p>
+                    <p>Leden aanmelden / aangemeld voor de <b>{{ comp.beschrijving }}</b>.</p>
                 </div>
                 <a href="{% url 'Vereniging:leden-aanmelden' comp_pk=comp.pk %}" class="nhb-klikbare-balk">
                     <div class="card-action center-align">
-                        <span class="nhb-klikbare-link">Aanmelden</span>
+                        <span class="nhb-klikbare-link">Tonen</span>
                     </div>
                 </a>
             </div>
@@ -117,7 +117,7 @@
             <div class="card-content">
                 <div class="card-title center-align">Beheerders</div>
                 <div class="center-align"><i class="material-icons-round medium">supervisor_account</i></div>
-                <p>E-mailadressen van de CWZ / WL functies en eraan gekoppelde leden.</p>
+                <p>E-mailadressen van de (hoofd-)wedstrijdleider functies en eraan gekoppelde leden.</p>
             </div>
             <a href="{% url 'Functie:overzicht-vereniging' %}" class="nhb-klikbare-balk">
                 <div class="card-action center-align">

@@ -54,10 +54,10 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
         ver.save()
         self.nhbver = ver
 
-        # maak CWZ functie aan voor deze vereniging
-        self.functie_cwz = maak_functie("CWZ Vereniging %s" % ver.nhb_nr, "CWZ")
-        self.functie_cwz.nhb_ver = ver
-        self.functie_cwz.save()
+        # maak HWL functie aan voor deze vereniging
+        self.functie_hwl = maak_functie("HWL Vereniging %s" % ver.nhb_nr, "HWL")
+        self.functie_hwl.nhb_ver = ver
+        self.functie_hwl.save()
 
         # maak een BB aan (geen NHB lid)
         self.account_bb = self.e2e_create_account('bb', 'bko@nhb.test', 'BB', accepteer_vhpg=True)
@@ -90,7 +90,7 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
         self.functie_rko.accounts.add(self.account_rko)
         self.functie_rcl.accounts.add(self.account_rcl)
 
-        # maak nog een test vereniging, zonder CWZ functie
+        # maak nog een test vereniging, zonder HWL functie
         ver = NhbVereniging()
         ver.naam = "Kleine Club"
         ver.nhb_nr = "1100"
@@ -126,7 +126,7 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
 
     def test_overzicht_it(self):
         self.e2e_login_and_pass_otp(self.account_admin)
-        self.e2e_wisselnaarrol_beheerder()
+        self.e2e_wisselnaarrol_it()
 
         resp = self.client.get(self.url_planning_bond % self.deelcomp_bond.pk)
         self.assert_is_redirect(resp, '/plein/')      # not allowed
@@ -272,9 +272,9 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
         resp = self.client.get(self.url_planning_regio_cluster % self.cluster_101a.pk)
         self.assertEqual(resp.status_code, 404)     # 404 = Not found
 
-    def test_overzicht_cwz(self):
-        self.e2e_login_and_pass_otp(self.account_bb)        # geen account_cwz
-        self.e2e_wissel_naar_functie(self.functie_cwz)
+    def test_overzicht_hwl(self):
+        self.e2e_login_and_pass_otp(self.account_bb)        # geen account_hwl
+        self.e2e_wissel_naar_functie(self.functie_hwl)
 
         resp = self.client.get(self.url_planning_bond % self.deelcomp_bond.pk)
         self.assert_is_redirect(resp, '/plein/')      # not allowed
@@ -292,7 +292,7 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/planning-regio-cluster.dtl', 'plein/site_layout.dtl'))
 
-        # check dat de CWZ geen wijzigingen mag maken
+        # check dat de HWL geen wijzigingen mag maken
         resp = self.client.post(self.url_planning_regio % self.deelcomp_regio_18.pk)
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
 
@@ -429,14 +429,14 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
         resp = self.client.get(self.url_planning_wedstrijd % 99999)
         self.assertEqual(resp.status_code, 404)  # 404 = Not found
 
-        # wissel naar CWZ en haal planning op
-        self.e2e_wissel_naar_functie(self.functie_cwz)
+        # wissel naar HWL en haal planning op
+        self.e2e_wissel_naar_functie(self.functie_hwl)
         resp = self.client.get(self.url_planning_regio_ronde % ronde_pk)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/planning-regio-ronde.dtl', 'plein/site_layout.dtl'))
 
-        # probeer een wijziging te doen als CWZ
+        # probeer een wijziging te doen als HWL
         resp = self.client.post(self.url_planning_regio_ronde % ronde_pk,
                                 {'ronde_week_nr': 51, 'ronde_naam': 'eerste rondje is gratis'})
         self.assertEqual(resp.status_code, 404)  # 404 = Not found
@@ -599,8 +599,8 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
                                 {'weekdag': 1, 'nhbver_pk': 9999999, 'aanvang': '12:34'})
         self.assertEqual(resp.status_code, 404)  # 404 = Not found
 
-        # probeer een wijziging te doen als CWZ
-        self.e2e_wissel_naar_functie(self.functie_cwz)
+        # probeer een wijziging te doen als HWL
+        self.e2e_wissel_naar_functie(self.functie_hwl)
         resp = self.client.post(self.url_planning_wedstrijd % wedstrijd_pk)
         self.assertEqual(resp.status_code, 404)  # 404 = Not found
 

@@ -14,7 +14,7 @@ from NhbStructuur.models import NhbRayon, NhbRegio, NhbLid, NhbVereniging
 from Account.models import Account
 from Mailer.models import mailer_email_is_valide
 from Logboek.models import schrijf_in_logboek
-from Functie.models import maak_functie, maak_cwz
+from Functie.models import maak_functie, maak_account_verenigings_secretaris
 from Wedstrijden.models import WedstrijdLocatie
 import argparse
 import datetime
@@ -94,7 +94,7 @@ class Command(BaseCommand):
         self._count_verwijderingen = 0
         self._count_toevoegingen = 0
         self._count_lid_no_email = 0
-        self._count_cwz_no_account = 0
+        self._count_sec_no_account = 0
 
         self._nieuwe_clubs = list()
 
@@ -299,12 +299,17 @@ class Command(BaseCommand):
                     self._nieuwe_clubs.append(ver_nhb_nr)   # voor onderdrukken 'wijziging' secretaris
                     obj = ver
 
-            # maak de cwz functie aan
+            # maak de sec functie aan
             if obj:
-                functie = maak_functie("CWZ vereniging %s" % obj.nhb_nr, "CWZ")
-                functie.nhb_ver = obj
-                if not self.dryrun:
-                    functie.save()
+                # let op: in sync houden met migratie m0012_migrate_cwz_hwl
+                for rol, beschr in (('WL', 'Wedstrijdleider %s'),
+                                    ('HWL', 'Hoofdwedstrijdleider %s'),
+                                    ('SEC', 'Secretaris vereniging %s')):
+                    functie = maak_functie(beschr % obj.nhb_nr, rol)
+                    functie.nhb_ver = obj
+                    if not self.dryrun:
+                        functie.save()
+                # for
         # for
 
         # kijk of er verenigingen verwijderd moeten worden
@@ -366,17 +371,17 @@ class Command(BaseCommand):
                             '[WARNING] Vereniging %s (%s) heeft geen secretaris!' % (ver_nhb_nr, ver_naam))
                         self._count_warnings += 1
 
-                # forceer de secretaris in de CWZ groep
+                # forceer de secretaris in de SEC groep
                 if ver_secretaris_nhblid:
                     try:
                         account = Account.objects.get(nhblid=ver_secretaris_nhblid)
                     except Account.DoesNotExist:
-                        # CWZ heeft nog geen account
+                        # SEC heeft nog geen account
                         self.stdout.write("[WARNING] Secretaris %s van vereniging %s heeft nog geen account" % (ver_secretaris_nhblid.nhb_nr, obj.nhb_nr))
-                        self._count_cwz_no_account += 1
+                        self._count_sec_no_account += 1
                     else:
-                        if maak_cwz(obj, account):
-                            self.stdout.write("[INFO] Secretaris %s van vereniging %s is gekoppeld aan CWZ functie" % (ver_secretaris_nhblid.nhb_nr, obj.nhb_nr))
+                        if maak_account_verenigings_secretaris(obj, account):
+                            self.stdout.write("[INFO] Secretaris %s van vereniging %s is gekoppeld aan SEC functie" % (ver_secretaris_nhblid.nhb_nr, obj.nhb_nr))
         # for
 
     def _import_members(self, data):
@@ -774,7 +779,7 @@ class Command(BaseCommand):
 
         # rapporteer de samenvatting en schrijf deze ook in het logboek
         samenvatting = "Samenvatting: %s fouten; %s waarschuwingen; %s nieuw; %s wijzigingen; %s verwijderingen; "\
-                        "%s leden, %s inactief; %s verenigingen; %s cwz's zonder account; %s regios; %s rayons; %s actieve leden zonder e-mail" %\
+                        "%s leden, %s inactief; %s verenigingen; %s secretarissen zonder account; %s regios; %s rayons; %s actieve leden zonder e-mail" %\
                           (self._count_errors,
                            self._count_warnings,
                            self._count_toevoegingen,
@@ -783,7 +788,7 @@ class Command(BaseCommand):
                            self._count_members - self._count_blocked,
                            self._count_blocked,
                            self._count_clubs,
-                           self._count_cwz_no_account,
+                           self._count_sec_no_account,
                            self._count_regios,
                            self._count_rayons,
                            self._count_lid_no_email)

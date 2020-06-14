@@ -65,7 +65,9 @@
                 <span style="position: relative; bottom: .15em;"> &rarr; </span>
                 <span>RCL</span>
                 <span style="position: relative; bottom: .15em;"> &rarr; </span>
-                <span>CWZ.&nbsp;&nbsp;&nbsp;</span>
+                <span>HWL</span>
+                <span style="position: relative; bottom: .15em;"> &rarr; </span>
+                <span>WL.&nbsp;&nbsp;&nbsp;</span>
                 <a class="btn-small btn-nhb-blauw" href="{{ wiki_rollen }}" target="_blank" rel="noopener noreferrer"><i class="material-icons-round white-text">help_outline</i></a>
             </p>
         {% else %}

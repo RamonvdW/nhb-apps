@@ -58,10 +58,10 @@ class TestCompetitie(E2EHelpers, TestCase):
         lid.save()
         self.lid_100001 = lid
 
-        self.functie_cwz = maak_functie('CWZ test', 'CWZ')
-        self.functie_cwz.nhb_ver = ver
-        self.functie_cwz.save()
-        self.functie_cwz.accounts.add(self.account_lid)
+        self.functie_hwl = maak_functie('HWL test', 'HWL')
+        self.functie_hwl.nhb_ver = ver
+        self.functie_hwl.save()
+        self.functie_hwl.accounts.add(self.account_lid)
 
         # maak een jeugdlid aan (komt in BB jeugd zonder klasse onbekend)
         lid = NhbLid()
@@ -403,8 +403,8 @@ class TestCompetitie(E2EHelpers, TestCase):
         resp = self.client.post(self.url_klassegrenzen_vaststellen_25)
         self.assert_is_redirect(resp, self.url_overzicht)
 
-        # wissel naar CWZ
-        self.e2e_wissel_naar_functie(self.functie_cwz)
+        # wissel naar HWL
+        self.e2e_wissel_naar_functie(self.functie_hwl)
 
         # meld de schutterboog aan
         self.assertEqual(SchutterBoog.objects.count(), 2)

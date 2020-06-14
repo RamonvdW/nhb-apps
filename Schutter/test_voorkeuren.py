@@ -21,8 +21,8 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
         """ initialisatie van de test case """
         self.account_admin = self.e2e_create_account_admin()
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
-        self.account_cwz = self.e2e_create_account('cwz', 'cwz@test.com', 'Secretaris')
-        self.e2e_account_accepteert_vhpg(self.account_cwz)
+        self.account_hwl = self.e2e_create_account('hwl', 'hwl@test.com', 'Secretaris')
+        self.e2e_account_accepteert_vhpg(self.account_hwl)
 
         # maak een test vereniging
         ver = NhbVereniging()
@@ -31,10 +31,10 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
         ver.regio = NhbRegio.objects.get(pk=111)
         ver.save()
 
-        self.functie_cwz = maak_functie('CWZ 1000', 'CWZ')
-        self.functie_cwz.nhb_ver = ver
-        self.functie_cwz.save()
-        self.functie_cwz.accounts.add(self.account_cwz)
+        self.functie_hwl = maak_functie('HWL 1000', 'HWL')
+        self.functie_hwl.nhb_ver = ver
+        self.functie_hwl.save()
+        self.functie_hwl.accounts.add(self.account_hwl)
 
         # maak een test lid aan
         lid = NhbLid()
@@ -150,18 +150,18 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
 
         self.e2e_assert_other_http_commands_not_supported(self.url_voorkeuren, post=False)
 
-    def test_cwz(self):
-        # login as CWZ
-        self.e2e_login_and_pass_otp(self.account_cwz)
-        self.e2e_wissel_naar_functie(self.functie_cwz)
-        self.e2e_check_rol('CWZ')
+    def test_hwl(self):
+        # login as HWL
+        self.e2e_login_and_pass_otp(self.account_hwl)
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+        self.e2e_check_rol('HWL')
 
-        # haal als CWZ de voorkeuren pagina op van een lid van de vereniging
+        # haal als HWL de voorkeuren pagina op van een lid van de vereniging
         # dit maakt ook de SchutterBoog records aan
         resp = self.client.get(self.url_voorkeuren + '100001/')
         self.assertEqual(resp.status_code, 200)
 
-        # controleer de stand van zaken voordat de CWZ iets wijzigt
+        # controleer de stand van zaken voordat de HWL iets wijzigt
         obj_r = SchutterBoog.objects.get(nhblid__pk=100001, boogtype__afkorting='R')
         obj_c = SchutterBoog.objects.get(nhblid__pk=100001, boogtype__afkorting='C')
         self.assertFalse(obj_r.voor_wedstrijd)
@@ -181,25 +181,25 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
         self.assertFalse(obj_r.heeft_interesse)
         self.assertTrue(obj_c.heeft_interesse)
 
-    def test_cwz_bad(self):
-        # login as CWZ
-        self.e2e_login_and_pass_otp(self.account_cwz)
-        self.e2e_wissel_naar_functie(self.functie_cwz)
-        self.e2e_check_rol('CWZ')
+    def test_hwl_bad(self):
+        # login as HWL
+        self.e2e_login_and_pass_otp(self.account_hwl)
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+        self.e2e_check_rol('HWL')
 
-        # haal als CWZ 'de' voorkeuren pagina op, zonder specifiek nhblid_pk
+        # haal als HWL 'de' voorkeuren pagina op, zonder specifiek nhblid_pk
         resp = self.client.get(self.url_voorkeuren)
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
 
-        # haal als CWZ de voorkeuren pagina op met een niet-numeriek nhblid_pk
+        # haal als HWL de voorkeuren pagina op met een niet-numeriek nhblid_pk
         resp = self.client.get(self.url_voorkeuren + 'snuiter/')
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
 
-        # haal als CWZ de voorkeuren pagina op met een niet bestaand nhblid_pk
+        # haal als HWL de voorkeuren pagina op met een niet bestaand nhblid_pk
         resp = self.client.get(self.url_voorkeuren + '999999/')
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
 
-        # haal als CWZ de voorkeuren pagina op van een lid van een andere vereniging
+        # haal als HWL de voorkeuren pagina op van een lid van een andere vereniging
         resp = self.client.get(self.url_voorkeuren + '100002/')
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
 

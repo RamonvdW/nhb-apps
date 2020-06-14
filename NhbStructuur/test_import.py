@@ -241,8 +241,8 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_13.json', stderr=f1, stdout=f2)
         self.assertTrue("[INFO] Lid 110000: vereniging geen --> 1000 Grote Club" in f2.getvalue())
 
-    def test_maak_cwz(self):
-        # secretaris-lid cwz maken
+    def test_maak_secretaris(self):
+        # een lid secretaris maken
         f1 = io.StringIO()
         f2 = io.StringIO()
         management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_14.json', stderr=f1, stdout=f2)
@@ -252,14 +252,14 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
 
         lid = NhbLid.objects.get(nhb_nr="100001")
         ver = NhbVereniging.objects.get(nhb_nr="1000")
-        functie = Functie.objects.get(rol="CWZ", nhb_ver=ver)
+        functie = Functie.objects.get(rol="SEC", nhb_ver=ver)
         self.assertEqual(functie.accounts.count(), 1)
 
         lid = NhbLid.objects.get(nhb_nr="100024")
         ver = NhbVereniging.objects.get(nhb_nr="2000")
-        functie = Functie.objects.get(rol="CWZ", nhb_ver=ver)
+        functie = Functie.objects.get(rol="SEC", nhb_ver=ver)
         self.assertEqual(functie.accounts.count(), 0)
-        # 100024 is nog geen CWZ omdat ze geen account heeft
+        # 100024 is nog geen SEC omdat ze geen account heeft
 
         # maak het account van 100024 aan en probeer het nog een keer
         lid.account = self.e2e_create_account(lid.nhb_nr, 'maakt.niet.uit@gratis.net', lid.voornaam)
@@ -269,10 +269,10 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         f2 = io.StringIO()
         management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_14.json', stderr=f1, stdout=f2)
         self.assertEqual(f1.getvalue(), '')
-        self.assertTrue("[INFO] Secretaris 100024 van vereniging 2000 is gekoppeld aan CWZ functie" in f2.getvalue())
+        self.assertTrue("[INFO] Secretaris 100024 van vereniging 2000 is gekoppeld aan SEC functie" in f2.getvalue())
 
         ver = NhbVereniging.objects.get(nhb_nr="2000")
-        functie = Functie.objects.get(rol="CWZ", nhb_ver=ver)
+        functie = Functie.objects.get(rol="SEC", nhb_ver=ver)
         self.assertEqual(functie.accounts.count(), 1)
 
     def test_club_1377(self):
@@ -307,7 +307,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         f2 = io.StringIO()
         management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_14.json', stderr=f1, stdout=f2)
         self.assertEqual(f1.getvalue(), '')
-        self.assertTrue("[INFO] Secretaris 100024 van vereniging 2000 is gekoppeld aan CWZ functie" in f2.getvalue())
+        self.assertTrue("[INFO] Secretaris 100024 van vereniging 2000 is gekoppeld aan SEC functie" in f2.getvalue())
 
         # probeer 100024 te verwijderen
         f1 = io.StringIO()

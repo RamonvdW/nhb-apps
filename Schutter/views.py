@@ -231,7 +231,7 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         # gebruiker moet ingelogd zijn en schutter rol gekozen hebben
-        return rol_get_huidige(self.request) in (Rollen.ROL_SCHUTTER, Rollen.ROL_CWZ)
+        return rol_get_huidige(self.request) in (Rollen.ROL_SCHUTTER, Rollen.ROL_HWL)
 
     def handle_no_permission(self):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
@@ -240,10 +240,10 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
     @staticmethod
     def _get_nhblid_or_404(request, nhblid_pk):
         """ Geeft het nhblid record terug van de schutter zelf,
-            of in geval van de CWZ de gekozen schutter """
+            of in geval van de HWL de gekozen schutter """
 
         rol_nu, functie_nu = rol_get_huidige_functie(request)
-        if rol_nu == Rollen.ROL_CWZ:
+        if rol_nu == Rollen.ROL_HWL:
             try:
                 # conversie naar integer geef input-controle
                 nhblid_pk = int(nhblid_pk)
@@ -256,7 +256,7 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
             except NhbLid.DoesNotExist:
                 raise Resolver404()
 
-            # laatste control: het nhblid moet lid zijn bij de vereniging van de CWZ
+            # laatste control: het nhblid moet lid zijn bij de vereniging van de HWL
             if nhblid.bij_vereniging != functie_nu.nhb_ver:
                 raise Resolver404()
 
@@ -297,8 +297,8 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
                 obj.save()
         # for
 
-        if rol_get_huidige(request) == Rollen.ROL_CWZ:
-            # stuur de CWZ terug naar zijn ledenlijst
+        if rol_get_huidige(request) == Rollen.ROL_HWL:
+            # stuur de HWL terug naar zijn ledenlijst
             return HttpResponseRedirect(reverse('Vereniging:leden-voorkeuren'))
 
         context = dict()
@@ -365,10 +365,10 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
         context['bogen'] = bogen
         context['voorkeur_dt'] = voorkeur_dt
 
-        if rol_get_huidige(self.request) == Rollen.ROL_CWZ:
+        if rol_get_huidige(self.request) == Rollen.ROL_HWL:
             context['nhblid_pk'] = nhblid.pk
             context['nhblid'] = nhblid
-            context['is_cwz'] = True
+            context['is_hwl'] = True
 
         context['opslaan_url'] = reverse('Schutter:voorkeuren')
 

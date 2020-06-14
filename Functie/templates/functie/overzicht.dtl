@@ -13,7 +13,7 @@
 
 <h4>Beheerders</h4>
 
-{% if rol_is_cwz %}
+{% if rol_is_hwl %}
     <p>Hieronder staan relevante functies en de beheerders.</p>
 {% else %}
     <p>Hieronder staan globale functies en de gekoppelde beheerders. Afhankelijk van je rol mag je hier wijzigingen in aanbrengen.</p>

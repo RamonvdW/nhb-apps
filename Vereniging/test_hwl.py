@@ -16,9 +16,9 @@ from Overig.e2ehelpers import E2EHelpers
 import datetime
 
 
-class TestVerenigingCWZ(E2EHelpers, TestCase):
+class TestVerenigingHWL(E2EHelpers, TestCase):
 
-    """ Tests voor de Vereniging applicatie, functies voor de CWZ """
+    """ Tests voor de Vereniging applicatie, functies voor de HWL """
 
     test_after = ('BasisTypen', 'NhbStructuur', 'Functie', 'Schutter', 'Competitie')
 
@@ -42,12 +42,12 @@ class TestVerenigingCWZ(E2EHelpers, TestCase):
         ver.save()
         self.nhbver1 = ver
 
-        # maak de CWZ functie
-        self.functie_cwz = maak_functie("CWZ test", "CWZ")
-        self.functie_cwz.nhb_ver = ver
-        self.functie_cwz.save()
+        # maak de HWL functie
+        self.functie_hwl = maak_functie("HWL test", "HWL")
+        self.functie_hwl.nhb_ver = ver
+        self.functie_hwl.save()
 
-        # maak het lid aan dat CWZ wordt
+        # maak het lid aan dat HWL wordt
         lid = NhbLid()
         lid.nhb_nr = 100001
         lid.geslacht = "M"
@@ -59,10 +59,10 @@ class TestVerenigingCWZ(E2EHelpers, TestCase):
         lid.bij_vereniging = ver
         lid.save()
 
-        self.account_cwz = self.e2e_create_account(lid.nhb_nr, lid.email, lid.voornaam, accepteer_vhpg=True)
-        self.functie_cwz.accounts.add(self.account_cwz)
+        self.account_hwl = self.e2e_create_account(lid.nhb_nr, lid.email, lid.voornaam, accepteer_vhpg=True)
+        self.functie_hwl.accounts.add(self.account_hwl)
 
-        lid.account = self.account_cwz
+        lid.account = self.account_hwl
         lid.save()
         self.nhblid_100001 = lid
 
@@ -204,10 +204,10 @@ class TestVerenigingCWZ(E2EHelpers, TestCase):
         self.comp_25 = Competitie.objects.get(afstand=25)
 
     def _zet_schutter_voorkeuren(self, nhb_nr):
-        # deze functie kan alleen gebruikt worden als CWZ
+        # deze functie kan alleen gebruikt worden als HWL
         url_schutter_voorkeuren = '/schutter/voorkeuren/'
 
-        # haal als CWZ de voorkeuren pagina op van een lid van de vereniging
+        # haal als HWL de voorkeuren pagina op van een lid van de vereniging
         # dit maakt ook de SchutterBoog records aan
         resp = self.client.get(url_schutter_voorkeuren + '%s/' % nhb_nr)
         self.assertEqual(resp.status_code, 200)
@@ -227,7 +227,7 @@ class TestVerenigingCWZ(E2EHelpers, TestCase):
             afkorting = 'R'
         schutterboog = SchutterBoog.objects.get(nhblid__nhb_nr=nhb_nr, boogtype__afkorting=afkorting)
         datum = datetime.date(year=2020, month=4, day=1)
-        aanvangsgemiddelde_opslaan(schutterboog, afstand, 7.42, datum, self.account_cwz, 'Test AG %s' % afstand)
+        aanvangsgemiddelde_opslaan(schutterboog, afstand, 7.42, datum, self.account_hwl, 'Test AG %s' % afstand)
 
     def test_overzicht(self):
         # anon
@@ -235,10 +235,10 @@ class TestVerenigingCWZ(E2EHelpers, TestCase):
         resp = self.client.get(self.url_overzicht)
         self.assert_is_redirect(resp, '/plein/')
 
-        # login als CWZ
-        self.e2e_login_and_pass_otp(self.account_cwz)
-        self.e2e_wissel_naar_functie(self.functie_cwz)
-        self.e2e_check_rol('CWZ')
+        # login als HWL
+        self.e2e_login_and_pass_otp(self.account_hwl)
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+        self.e2e_check_rol('HWL')
 
         resp = self.client.get(self.url_overzicht)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -253,10 +253,10 @@ class TestVerenigingCWZ(E2EHelpers, TestCase):
         resp = self.client.get(self.url_ledenlijst)
         self.assert_is_redirect(resp, '/plein/')
 
-        # login als CWZ
-        self.e2e_login_and_pass_otp(self.account_cwz)
-        self.e2e_wissel_naar_functie(self.functie_cwz)
-        self.e2e_check_rol('CWZ')
+        # login als HWL
+        self.e2e_login_and_pass_otp(self.account_hwl)
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+        self.e2e_check_rol('HWL')
 
         resp = self.client.get(self.url_ledenlijst)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -287,10 +287,10 @@ class TestVerenigingCWZ(E2EHelpers, TestCase):
         # haal de lijst met leden voorkeuren op
         # view is gebaseerd op ledenlijst, dus niet veel te testen
 
-        # login als CWZ
-        self.e2e_login_and_pass_otp(self.account_cwz)
-        self.e2e_wissel_naar_functie(self.functie_cwz)
-        self.e2e_check_rol('CWZ')
+        # login als HWL
+        self.e2e_login_and_pass_otp(self.account_hwl)
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+        self.e2e_check_rol('HWL')
 
         # eerste keer, zonder schutterboog records
         self.assertEqual(SchutterBoog.objects.count(), 0)
@@ -299,7 +299,7 @@ class TestVerenigingCWZ(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('vereniging/leden-voorkeuren.dtl', 'plein/site_layout.dtl'))
 
         # nog een keer, nu met schutterboog records aanwezig
-        # zowel van de vereniging van de CWZ als van andere verenigingen
+        # zowel van de vereniging van de HWL als van andere verenigingen
         for nhblid in (self.nhblid_100001, self.nhblid_100002, self.nhblid_100003):
             # get operatie maakt de schutterboog records aan
             url = self.url_schutter_voorkeuren % nhblid.pk
@@ -316,7 +316,7 @@ class TestVerenigingCWZ(E2EHelpers, TestCase):
                 obj.save()
         # for
 
-        # nu de schutterboog records gemaakt zijn (CWZ had toestemming)
+        # nu de schutterboog records gemaakt zijn (HWL had toestemming)
         # stoppen we 1 lid in een andere vereniging
         self.nhblid_100003.bij_vereniging = self.nhbver2
         self.nhblid_100003.save()
@@ -333,10 +333,10 @@ class TestVerenigingCWZ(E2EHelpers, TestCase):
         resp = self.client.get(url)
         self.assert_is_redirect(resp, '/plein/')
 
-        # login als CWZ
-        self.e2e_login_and_pass_otp(self.account_cwz)
-        self.e2e_wissel_naar_functie(self.functie_cwz)
-        self.e2e_check_rol('CWZ')
+        # login als HWL
+        self.e2e_login_and_pass_otp(self.account_hwl)
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+        self.e2e_check_rol('HWL')
 
         # stel een paar bogen in
         self._zet_schutter_voorkeuren(100002)
@@ -373,10 +373,10 @@ class TestVerenigingCWZ(E2EHelpers, TestCase):
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 2)    # 2 schutters, 1 competitie
 
     def test_aanmelden_cornercase(self):
-        # login als CWZ
-        self.e2e_login_and_pass_otp(self.account_cwz)
-        self.e2e_wissel_naar_functie(self.functie_cwz)
-        self.e2e_check_rol('CWZ')
+        # login als HWL
+        self.e2e_login_and_pass_otp(self.account_hwl)
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+        self.e2e_check_rol('HWL')
 
         resp = self.client.get(self.url_aanmelden % 9999999)
         self.assertEqual(resp.status_code, 404)         # 404 = Not found
@@ -391,10 +391,10 @@ class TestVerenigingCWZ(E2EHelpers, TestCase):
         loc.save()
         loc.verenigingen.add(self.nhbver1)
 
-        # login als CWZ
-        self.e2e_login_and_pass_otp(self.account_cwz)
-        self.e2e_wissel_naar_functie(self.functie_cwz)
-        self.e2e_check_rol('CWZ')
+        # login als HWL
+        self.e2e_login_and_pass_otp(self.account_hwl)
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+        self.e2e_check_rol('HWL')
 
         # check voor het kaartje om de doel details aan te passen
         resp = self.client.get(self.url_overzicht)

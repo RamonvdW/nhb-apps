@@ -44,9 +44,9 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
         ver.save()
         self.nhbver1 = ver
 
-        self.functie_cwz = maak_functie("CWZ test", "CWZ")
-        self.functie_cwz.nhb_ver = ver
-        self.functie_cwz.save()
+        self.functie_hwl = maak_functie("HWL test", "HWL")
+        self.functie_hwl.nhb_ver = ver
+        self.functie_hwl.save()
 
         self.url_wijzig_email = '/functie/wijzig-email/%s/'  # % functie_pk
 
@@ -90,7 +90,7 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
         self._check_niet_wijzigbaar(self.functie_rko1)
         self._check_niet_wijzigbaar(self.functie_rcl101)
         self._check_niet_wijzigbaar(self.functie_rcl105)
-        self._check_niet_wijzigbaar(self.functie_cwz)
+        self._check_niet_wijzigbaar(self.functie_hwl)
 
         count_post = len(MailQueue.objects.all())
         self.assertEqual(count_pre + 2, count_post)
@@ -117,7 +117,7 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
         self._check_wijzigbaar(self.functie_rko1)           # want zelfde comp_type als bko1
         self._check_niet_wijzigbaar(self.functie_rcl101)
         self._check_niet_wijzigbaar(self.functie_rcl105)
-        self._check_niet_wijzigbaar(self.functie_cwz)
+        self._check_niet_wijzigbaar(self.functie_hwl)
 
     def test_bko2(self):
         # log in en wissel naar BKO 2
@@ -131,7 +131,7 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
         self._check_niet_wijzigbaar(self.functie_rko1)      # want NIET zelfde comp_type als bko1
         self._check_niet_wijzigbaar(self.functie_rcl101)
         self._check_niet_wijzigbaar(self.functie_rcl105)
-        self._check_niet_wijzigbaar(self.functie_cwz)
+        self._check_niet_wijzigbaar(self.functie_hwl)
 
     def test_rko1(self):
         # log in en wissel naar RKO Rayon 1 rol
@@ -145,7 +145,7 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
         self._check_wijzigbaar(self.functie_rko1)
         self._check_wijzigbaar(self.functie_rcl101)
         self._check_niet_wijzigbaar(self.functie_rcl105)
-        self._check_niet_wijzigbaar(self.functie_cwz)
+        self._check_niet_wijzigbaar(self.functie_hwl)
 
     def test_rcl101(self):
         # log in en wissel naar RCL regio 101
@@ -159,7 +159,7 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
         self._check_niet_wijzigbaar(self.functie_rko1)
         self._check_wijzigbaar(self.functie_rcl101)
         self._check_niet_wijzigbaar(self.functie_rcl105)
-        self._check_niet_wijzigbaar(self.functie_cwz)
+        self._check_niet_wijzigbaar(self.functie_hwl)
 
     def test_rcl105(self):
         # log in en wissel naar RCL regio 105
@@ -173,13 +173,13 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
         self._check_niet_wijzigbaar(self.functie_rko1)
         self._check_niet_wijzigbaar(self.functie_rcl101)
         self._check_wijzigbaar(self.functie_rcl105)
-        self._check_niet_wijzigbaar(self.functie_cwz)
+        self._check_niet_wijzigbaar(self.functie_hwl)
 
-    def test_cwz(self):
-        # log in en wissel naar CWZ
-        self.functie_cwz.accounts.add(self.account_normaal)
+    def test_hwl(self):
+        # log in en wissel naar HWL
+        self.functie_hwl.accounts.add(self.account_normaal)
         self.e2e_login_and_pass_otp(self.account_normaal)
-        self.e2e_wissel_naar_functie(self.functie_cwz)
+        self.e2e_wissel_naar_functie(self.functie_hwl)
 
         # controleer dat de juiste e-mailadressen wel/niet wijzigbaar zijn
         self._check_niet_wijzigbaar(self.functie_bko1)
@@ -187,7 +187,7 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
         self._check_niet_wijzigbaar(self.functie_rko1)
         self._check_niet_wijzigbaar(self.functie_rcl101)
         self._check_niet_wijzigbaar(self.functie_rcl105)
-        self._check_wijzigbaar(self.functie_cwz)
+        self._check_wijzigbaar(self.functie_hwl)
 
     def test_multi_change(self):
         # voer meerdere malen een e-mailadres is

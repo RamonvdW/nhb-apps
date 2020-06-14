@@ -50,7 +50,7 @@ class Functie(models.Model):
 
     # een aantal velden om de juiste Functie te kunnen koppelen
 
-    # BKO, RKO, RCL, CWZ, BKWL, RKWL, WL
+    # BKO, RKO, RCL, SEC, HWL, WL (mogelijk later RKWL, BKWL)
     rol = models.CharField(max_length=5)
 
     # email adres wat bij deze functie hoort
@@ -58,7 +58,7 @@ class Functie(models.Model):
     nieuwe_email = models.EmailField(blank=True)
 
     # BKO/RKO/RCL: voor de 18 (Indoor) of 25 (25m 1pijl) competitie?
-    # leeg voor CWZ
+    # leeg voor functies op verenigingsniveau (SEC, HWL, WL)
     comp_type = models.CharField(max_length=2, default="", blank=True)
 
     # RKO only: rayon
@@ -67,7 +67,7 @@ class Functie(models.Model):
     # RCL only: regio
     nhb_regio = models.ForeignKey(NhbRegio, on_delete=models.PROTECT, null=True, blank=True)
 
-    # CWZ/WL only: vereniging
+    # SEC/HWL/WL only: vereniging
     nhb_ver = models.ForeignKey(NhbVereniging, on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
@@ -93,13 +93,13 @@ def maak_functie(beschrijving, rol):
     return functie      # caller kan zelf andere velden invullen
 
 
-def maak_cwz(nhb_ver, account):
-    """ Maak het NHB lid een CWZ van de NHB vereniging
-        Retourneert True als het NHB lid aan de CWZ functie toegevoegd is
+def maak_account_verenigings_secretaris(nhb_ver, account):
+    """ Maak het NHB lid de secretaris van de NHB vereniging
+        Retourneert True als het NHB lid aan de SEC functie toegevoegd is
     """
 
-    # zoek de CWZ functie van de vereniging erbij
-    functie = Functie.objects.get(rol="CWZ", nhb_ver=nhb_ver)
+    # zoek de SEC functie van de vereniging erbij
+    functie = Functie.objects.get(rol='SEC', nhb_ver=nhb_ver)
 
     # kijk of dit lid al in de groep zit
     if functie.accounts.filter(pk=account.pk).count() == 0:

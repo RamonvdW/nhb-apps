@@ -78,8 +78,8 @@ class E2EHelpers(object):
         resp = self.client.post('/functie/activeer-rol/%s/' % rol)
         self.assert_is_redirect(resp, expected_redirect)
 
-    def e2e_wisselnaarrol_beheerder(self):
-        self._wissel_naar_rol('beheerder', '/functie/wissel-van-rol/')
+    def e2e_wisselnaarrol_it(self):
+        self._wissel_naar_rol('IT', '/functie/wissel-van-rol/')
 
     def e2e_wisselnaarrol_bb(self):
         self._wissel_naar_rol('BB', '/competitie/')
@@ -93,7 +93,7 @@ class E2EHelpers(object):
     def e2e_wissel_naar_functie(self, functie):
         assert isinstance(self, TestCase)
         resp = self.client.post('/functie/activeer-functie/%s/' % functie.pk)
-        if functie.rol == 'CWZ':
+        if functie.rol in ('SEC', 'HWL', 'WL'):
             expected_redirect = '/vereniging/'
         else:
             expected_redirect = '/functie/wissel-van-rol/'
@@ -103,7 +103,7 @@ class E2EHelpers(object):
         resp = self.client.get('/functie/wissel-van-rol/')
         self.assertEqual(resp.status_code, 200)
 
-        # <meta rol_nu="CWZ" functie_nu="CWZ vereniging 4444">
+        # <meta rol_nu="SEC" functie_nu="Secretaris vereniging 4444">
         page = str(resp.content)
         pos = page.find('<meta rol_nu=')
         if pos < 0:
@@ -217,7 +217,7 @@ class E2EHelpers(object):
                 content = content[pos+4:]
                 # filter out website-internal links
                 if link.find('href="/') < 0 and link.find('href="#') < 0 and link.find('href="mailto:') < 0:
-                    if link.find('href=""') >= 0:
+                    if link.find('href=""') >= 0:   # pragma: no cover
                         self.fail(msg='Unexpected empty link %s on page %s' % (link, template_name))
                     else:
                         # remainder must be links that leave the website

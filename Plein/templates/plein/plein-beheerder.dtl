@@ -19,7 +19,7 @@
 
 <p>Kijk eens in het menu onder Competities en Wissel van rol.</p>
 
-{% if rol_is_cwz %}
+{% if rol_is_sec or rol_is_hwl or rol_is_wl %}
     <p>..en Vereniging</p>
 {% endif %}
 
@@ -107,8 +107,8 @@
             </div>
         {% endif %}
 
-        <!-- verenigingen/accommodaties overzicht RCL en CWZ -->
-        {% if rol_is_cwz or rol_is_rcl %}
+        <!-- verenigingen/accommodaties overzicht RCL en HWL -->
+        {% if rol_is_hwl or rol_is_rcl %}
             <div class="card">
                 <div class="card-content">
                     <div class="card-title center-align">Verenigingen</div>

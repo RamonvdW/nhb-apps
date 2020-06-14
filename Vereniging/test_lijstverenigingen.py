@@ -54,10 +54,10 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         self._ver = ver
         self.nhb_ver1 = ver
 
-        # maak CWZ functie aan voor deze vereniging
-        self.functie_cwz = maak_functie("CWZ Vereniging %s" % ver.nhb_nr, "CWZ")
-        self.functie_cwz.nhb_ver = ver
-        self.functie_cwz.save()
+        # maak HWL functie aan voor deze vereniging
+        self.functie_hwl = maak_functie("HWL Vereniging %s" % ver.nhb_nr, "HWL")
+        self.functie_hwl.nhb_ver = ver
+        self.functie_hwl.save()
 
         # maak een BB aan (geen NHB lid)
         self.account_bb = self.e2e_create_account('bb', 'bko@nhb.test', 'BB', accepteer_vhpg=True)
@@ -68,7 +68,7 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         self.account_bko = self._prep_beheerder_lid('BKO')
         self.account_rko = self._prep_beheerder_lid('RKO')
         self.account_rcl = self._prep_beheerder_lid('RCL')
-        self.account_cwz = self._prep_beheerder_lid('CWZ')
+        self.account_hwl = self._prep_beheerder_lid('HWL')
         self.account_schutter = self._prep_beheerder_lid('Schutter')
 
         # creëer een competitie met deelcompetities
@@ -81,9 +81,9 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         self.functie_bko.accounts.add(self.account_bko)
         self.functie_rko.accounts.add(self.account_rko)
         self.functie_rcl.accounts.add(self.account_rcl)
-        self.functie_cwz.accounts.add(self.account_cwz)
+        self.functie_hwl.accounts.add(self.account_hwl)
 
-        # maak nog een test vereniging, zonder CWZ functie
+        # maak nog een test vereniging, zonder HWL functie
         ver = NhbVereniging()
         ver.naam = "Kleine Club"
         ver.nhb_nr = "1100"
@@ -103,8 +103,8 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
     def test_it(self):
         # landelijke lijst + leden aantal
         self.e2e_login_and_pass_otp(self.account_admin)
-        self.e2e_wisselnaarrol_beheerder()
-        self.e2e_check_rol('beheerder')
+        self.e2e_wisselnaarrol_it()
+        self.e2e_check_rol('IT')
         with self.assertNumQueries(6):
             resp = self.client.get(self.url_lijst)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -145,7 +145,7 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('vereniging/lijst-verenigingen.dtl', 'plein/site_layout.dtl'))
 
     def test_rcl(self):
-        # regio lijst met cwzs (zonder rayon/regio kolommen)
+        # regio lijst met hwls (zonder rayon/regio kolommen)
         self.e2e_login_and_pass_otp(self.account_rcl)
         self.e2e_wissel_naar_functie(self.functie_rcl)
         self.e2e_check_rol('RCL')
@@ -206,11 +206,11 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
 
-    def test_cwz(self):
-        # de cwz krijgt dezelfde lijst als de rcl
-        self.e2e_login_and_pass_otp(self.account_cwz)
-        self.e2e_wissel_naar_functie(self.functie_cwz)
-        self.e2e_check_rol('CWZ')
+    def test_hwl(self):
+        # de hwl krijgt dezelfde lijst als de rcl
+        self.e2e_login_and_pass_otp(self.account_hwl)
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+        self.e2e_check_rol('HWL')
         with self.assertNumQueries(9):
             resp = self.client.get(self.url_lijst)
         self.assertEqual(resp.status_code, 200)     # 200 = OK

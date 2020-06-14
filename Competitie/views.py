@@ -31,7 +31,7 @@ import datetime
 
 
 TEMPLATE_COMPETITIE_OVERZICHT = 'competitie/overzicht.dtl'
-TEMPLATE_COMPETITIE_OVERZICHT_CWZ = 'competitie/overzicht-cwz.dtl'
+TEMPLATE_COMPETITIE_OVERZICHT_HWL = 'competitie/overzicht-hwl.dtl'
 TEMPLATE_COMPETITIE_OVERZICHT_BEHEERDER = 'competitie/overzicht-beheerder.dtl'
 TEMPLATE_COMPETITIE_INSTELLINGEN = 'competitie/instellingen-nieuwe-competitie.dtl'
 TEMPLATE_COMPETITIE_AANMAKEN = 'competitie/competities-aanmaken.dtl'
@@ -209,9 +209,9 @@ class CompetitieOverzichtView(View):
 
         return context, TEMPLATE_COMPETITIE_OVERZICHT_BEHEERDER
 
-    def _get_competitie_overzicht_cwz(self, request):
+    def _get_competitie_overzicht_hwl(self, request):
         context = dict()
-        self._get_competities(context, Rollen.ROL_CWZ)
+        self._get_competities(context, Rollen.ROL_HWL)
 
         rol_nu, functie_nu = rol_get_huidige_functie(request)
 
@@ -219,7 +219,7 @@ class CompetitieOverzichtView(View):
                                         filter(laag=LAAG_REGIO,
                                                nhb_regio=functie_nu.nhb_ver.regio)
 
-        return context, TEMPLATE_COMPETITIE_OVERZICHT_CWZ
+        return context, TEMPLATE_COMPETITIE_OVERZICHT_HWL
 
     @staticmethod
     def _get_competitie_overzicht_schutter():
@@ -233,8 +233,8 @@ class CompetitieOverzichtView(View):
         rol_nu = rol_get_huidige(self.request)
         if rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL):
             context, template = self._get_competitie_overzicht_beheerder(request)
-        elif rol_nu == Rollen.ROL_CWZ:
-            context, template = self._get_competitie_overzicht_cwz(request)
+        elif rol_nu == Rollen.ROL_HWL:
+            context, template = self._get_competitie_overzicht_hwl(request)
         else:
             context, template = self._get_competitie_overzicht_schutter()
 
@@ -993,7 +993,7 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
-        return rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_CWZ)
+        return rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL)
 
     def handle_no_permission(self):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
@@ -1095,7 +1095,7 @@ class RegioClusterPlanningView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
-        return rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_CWZ)
+        return rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL)
 
     def handle_no_permission(self):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
@@ -1203,7 +1203,7 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
-        return rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_CWZ)
+        return rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL)
 
     def handle_no_permission(self):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
@@ -1364,7 +1364,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
-        return rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_CWZ)
+        return rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL)
 
     def handle_no_permission(self):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
