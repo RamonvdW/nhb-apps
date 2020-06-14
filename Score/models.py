@@ -4,9 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-
 from django.db import models
-from BasisTypen.models import BoogType
 from Account.models import Account
 from Schutter.models import SchutterBoog
 
@@ -102,10 +100,11 @@ def aanvangsgemiddelde_opslaan(schutterboog, afstand, gemiddelde, datum, door_ac
 
 
 def zoek_meest_recente_automatisch_vastgestelde_ag():
-    scorehist = ScoreHist.objects.\
-                    select_related('score').\
-                    filter(door_account=None, score__is_ag=True).\
-                    order_by('-datum')[:1]
+    scorehist = (ScoreHist
+                 .objects
+                 .select_related('score')
+                 .filter(door_account=None, score__is_ag=True)
+                 .order_by('-datum'))[:1]
     if len(scorehist) > 0:
         return scorehist[0].datum
     return None

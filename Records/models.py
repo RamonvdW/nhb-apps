@@ -52,15 +52,14 @@ class IndivRecord(models.Model):
     is_world_record = models.BooleanField(default=False)
 
     def __str__(self):
-        return "%s: %s - %s - %s - %s - %s - %s - %s" %\
-               (self.volg_nr,
-                self.discipline,
-                self.geslacht,
-                self.leeftijdscategorie,
-                self.materiaalklasse,
-                self.para_klasse,
-                self.naam,
-                self.score_str())
+        return "%s: %s - %s - %s - %s - %s - %s - %s" % (self.volg_nr,
+                                                         self.discipline,
+                                                         self.geslacht,
+                                                         self.leeftijdscategorie,
+                                                         self.materiaalklasse,
+                                                         self.para_klasse,
+                                                         self.naam,
+                                                         self.score_str())
 
     def score_str(self):
         """  make score beschrijving, inclusief X-count indien relevant """

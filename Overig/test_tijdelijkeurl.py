@@ -8,9 +8,9 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from Overig.e2ehelpers import E2EHelpers
 from .models import save_tijdelijke_url, SiteTijdelijkeUrl
-from .tijdelijke_url import tijdelijkeurl_dispatcher, set_tijdelijke_url_receiver, \
-                            RECEIVER_BEVESTIG_ACCOUNT_EMAIL, maak_tijdelijke_url_account_email, \
-                            RECEIVER_ACCOUNT_WISSEL, maak_tijdelijke_url_accountwissel
+from .tijdelijke_url import (tijdelijkeurl_dispatcher, set_tijdelijke_url_receiver,
+                             RECEIVER_BEVESTIG_ACCOUNT_EMAIL, maak_tijdelijke_url_account_email,
+                             RECEIVER_ACCOUNT_WISSEL, maak_tijdelijke_url_accountwissel)
 from Account.models import AccountEmail
 
 

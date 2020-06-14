@@ -187,9 +187,10 @@ def maak_deelcompetitie_ronde(deelcomp, cluster=None):
     """
 
     # zoek de bestaande records
-    objs = DeelcompetitieRonde.objects.\
-                filter(deelcompetitie=deelcomp, cluster=cluster).\
-                order_by('-week_nr')
+    objs = (DeelcompetitieRonde
+            .objects
+            .filter(deelcompetitie=deelcomp, cluster=cluster)
+            .order_by('-week_nr'))
 
     if len(objs) > 0:
         nieuwe_week_nr = objs[0].week_nr + 1
@@ -347,9 +348,11 @@ def regiocompetitie_schutterboog_aanmelden(competitie, schutterboog, aanvangsgem
             age = schutterboog.nhblid.bereken_wedstrijdleeftijd(deelcompetitie.competitie.begin_jaar)
 
             # zoek alle wedstrijdklassen van deze competitie met het juiste boogtype
-            qset = CompetitieKlasse.objects.filter(competitie=deelcompetitie.competitie,
-                                                   indiv__boogtype=schutterboog.boogtype).\
-                                            order_by('indiv__volgorde')
+            qset = (CompetitieKlasse
+                    .objects
+                    .filter(competitie=deelcompetitie.competitie,
+                            indiv__boogtype=schutterboog.boogtype)
+                    .order_by('indiv__volgorde'))
 
             # zoek een toepasselijke klasse aan de hand van de leeftijd
             done = False

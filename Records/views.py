@@ -220,23 +220,27 @@ class RecordsIndivZoom5View(RecordsIndivZoomBaseView):
         self.set_urls()
 
         # vind de verschillende afstanden waarop records bestaan
-        soorten = IndivRecord.objects.filter(geslacht=self.sel_gesl,
-                                             discipline=self.sel_disc,
-                                             leeftijdscategorie=self.sel_lcat,
-                                             materiaalklasse=self.sel_makl).\
-                                      distinct('soort_record').\
-                                      order_by('-soort_record').\
-                                      values_list('soort_record', flat=True)
+        soorten = (IndivRecord
+                   .objects
+                   .filter(geslacht=self.sel_gesl,
+                           discipline=self.sel_disc,
+                           leeftijdscategorie=self.sel_lcat,
+                           materiaalklasse=self.sel_makl)
+                   .distinct('soort_record')
+                   .order_by('-soort_record')
+                   .values_list('soort_record', flat=True))
 
         # voor elk van de afstanden (soort records) zoek het meest recente (dus beste) record op
         objs = list()
         for soort in soorten:
-            best = IndivRecord.objects.filter(geslacht=self.sel_gesl,
-                                              discipline=self.sel_disc,
-                                              leeftijdscategorie=self.sel_lcat,
-                                              materiaalklasse=self.sel_makl,
-                                              soort_record=soort).\
-                                       order_by('-datum')[0:0+1]
+            best = (IndivRecord
+                    .objects
+                    .filter(geslacht=self.sel_gesl,
+                            discipline=self.sel_disc,
+                            leeftijdscategorie=self.sel_lcat,
+                            materiaalklasse=self.sel_makl,
+                            soort_record=soort)
+                    .order_by('-datum'))[0:0+1]
             objs.extend(best)
         # for
 

@@ -14,7 +14,8 @@ from django.db.models.functions import Concat, Cast
 from django.views.generic import ListView, View, TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import Account, HanterenPersoonsgegevens
-from Account.otp import account_otp_prepare_koppelen, account_otp_koppel, account_otp_is_gekoppeld, account_otp_controleer
+from Account.otp import (account_otp_prepare_koppelen, account_otp_koppel,
+                         account_otp_is_gekoppeld, account_otp_controleer)
 from Account.rechten import account_rechten_eval_now, account_rechten_is_otp_verified
 from NhbStructuur.models import NhbLid
 from Plein.menu import menu_dynamics
@@ -23,11 +24,12 @@ from Overig.tijdelijke_url import maak_tijdelijke_url_functie_email
 from Mailer.models import mailer_queue_email
 from Overig.tijdelijke_url import set_tijdelijke_url_receiver, RECEIVER_BEVESTIG_FUNCTIE_EMAIL
 from Overig.helpers import get_safe_from_ip
-from .rol import Rollen, rol_mag_wisselen, rol_enum_pallet, rol2url,\
-                 rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving, \
-                 rol_activeer_rol, rol_activeer_functie, rol_evalueer_opnieuw
+from .rol import (Rollen, rol_mag_wisselen, rol_enum_pallet, rol2url,
+                  rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving,
+                  rol_activeer_rol, rol_activeer_functie, rol_evalueer_opnieuw)
 from .models import Functie, account_needs_vhpg, account_needs_otp
-from .forms import ZoekBeheerdersForm, WijzigBeheerdersForm, OTPControleForm, AccepteerVHPGForm, WijzigEmailForm
+from .forms import (ZoekBeheerdersForm, WijzigBeheerdersForm, OTPControleForm,
+                    AccepteerVHPGForm, WijzigEmailForm)
 from .qrcode import qrcode_get
 import logging
 
@@ -200,12 +202,12 @@ def functie_vraag_email_bevestiging(functie):
     # maak de url aan om het e-mailadres te bevestigen
     url = maak_tijdelijke_url_functie_email(functie)
 
-    text_body = "Hallo!\n\n" + \
-                "Een beheerder heeft dit e-mailadres gekoppeld op de website van de NHB.\n" + \
-                "Klik op onderstaande link om dit te bevestigen.\n\n" + \
-                url + "\n\n" + \
-                "Als je dit niet herkent, neem dan contact met ons op via info@handboogsport.nl\n\n" + \
-                "Het bondsburo\n"
+    text_body = ("Hallo!\n\n"
+                 + "Een beheerder heeft dit e-mailadres gekoppeld op de website van de NHB.\n"
+                 + "Klik op onderstaande link om dit te bevestigen.\n\n"
+                 + url + "\n\n"
+                 + "Als je dit niet herkent, neem dan contact met ons op via info@handboogsport.nl\n\n"
+                 + "Het bondsburo\n")
 
     mailer_queue_email(functie.nieuwe_email, 'Bevestig gebruik e-mail voor rol', text_body)
 
@@ -420,18 +422,18 @@ class WijzigBeheerdersView(UserPassesTestMixin, ListView):
             # let op: we koppelen een account, maar zoeken een NHB lid,
             #         om te kunnen filteren op vereniging
             #         accounts die geen NhbLid zijn worden hier niet gevonden
-            qset = NhbLid.objects.\
-                exclude(account=None).\
-                exclude(is_actief_lid=False).\
-                exclude(account__in=beheerder_accounts).\
-                annotate(hele_reeks=Concat('voornaam', Value(' '), 'achternaam')).\
-                annotate(nhb_nr_str=Cast('nhb_nr', CharField())).\
-                filter(
-                    Q(nhb_nr_str__contains=zoekterm) |
-                    Q(voornaam__icontains=zoekterm) |
-                    Q(achternaam__icontains=zoekterm) |
-                    Q(hele_reeks__icontains=zoekterm)). \
-                order_by('nhb_nr')
+            qset = (NhbLid
+                    .objects
+                    .exclude(account=None)
+                    .exclude(is_actief_lid=False)
+                    .exclude(account__in=beheerder_accounts)
+                    .annotate(hele_reeks=Concat('voornaam', Value(' '), 'achternaam'))
+                    .annotate(nhb_nr_str=Cast('nhb_nr', CharField()))
+                    .filter(Q(nhb_nr_str__contains=zoekterm) |
+                            Q(voornaam__icontains=zoekterm) |
+                            Q(achternaam__icontains=zoekterm) |
+                            Q(hele_reeks__icontains=zoekterm))
+                    .order_by('nhb_nr'))
 
             rol_nu, functie_nu = rol_get_huidige_functie(self.request)
             if rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL):
@@ -804,10 +806,13 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
 
         # haal alle functies met 1 database query op
         pk2func = dict()
-        for obj in Functie.objects.\
-                filter(pk__in=pks).\
-                select_related('nhb_ver', 'nhb_regio', 'nhb_rayon').\
-                only('beschrijving', 'rol', 'nhb_ver__nhb_nr', 'nhb_ver__naam', 'nhb_rayon__rayon_nr', 'nhb_regio__regio_nr'):
+        for obj in (Functie
+                    .objects
+                    .filter(pk__in=pks)
+                    .select_related('nhb_ver', 'nhb_regio', 'nhb_rayon')
+                    .only('beschrijving', 'rol',
+                          'nhb_ver__nhb_nr', 'nhb_ver__naam',
+                          'nhb_rayon__rayon_nr', 'nhb_regio__regio_nr')):
             pk2func[obj.pk] = obj
         # for
 
@@ -845,13 +850,15 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
             pass
         else:
             # haal alle benodigde functies met 1 query op
-            print("nu_tup=%s, child_tups=%s" % (repr(nu_tup), repr(child_tups)))
             pks = [pk for _, pk in child_tups]
             pk2func = dict()
-            for obj in Functie.objects.\
-                    filter(pk__in=pks).\
-                    select_related('nhb_ver', 'nhb_regio', 'nhb_rayon').\
-                    only('beschrijving', 'rol', 'nhb_ver__nhb_nr', 'nhb_ver__naam', 'nhb_rayon__rayon_nr', 'nhb_regio__regio_nr'):
+            for obj in (Functie
+                        .objects
+                        .filter(pk__in=pks)
+                        .select_related('nhb_ver', 'nhb_regio', 'nhb_rayon')
+                        .only('beschrijving', 'rol',
+                              'nhb_ver__nhb_nr', 'nhb_ver__naam',
+                              'nhb_rayon__rayon_nr', 'nhb_regio__regio_nr')):
                 pk2func[obj.pk] = obj
             # for
 

@@ -15,10 +15,12 @@ from django.db.models import F, Q, Value
 from django.db.models.functions import Concat
 from django.utils import timezone
 from .forms import LoginForm, ZoekAccountForm, KiesAccountForm
-from .models import Account, AccountEmail, account_email_bevestiging_ontvangen, account_check_gewijzigde_email
+from .models import (Account, AccountEmail,
+                     account_email_bevestiging_ontvangen, account_check_gewijzigde_email)
 from .rechten import account_rechten_otp_controle_gelukt, account_rechten_login_gelukt
-from Overig.tijdelijke_url import set_tijdelijke_url_receiver, RECEIVER_BEVESTIG_ACCOUNT_EMAIL, RECEIVER_ACCOUNT_WISSEL,\
-                                  maak_tijdelijke_url_accountwissel, maak_tijdelijke_url_account_email
+from Overig.tijdelijke_url import (set_tijdelijke_url_receiver,
+                                   RECEIVER_BEVESTIG_ACCOUNT_EMAIL, RECEIVER_ACCOUNT_WISSEL,
+                                   maak_tijdelijke_url_accountwissel, maak_tijdelijke_url_account_email)
 from Plein.menu import menu_dynamics
 from Logboek.models import schrijf_in_logboek
 from Overig.helpers import get_safe_from_ip
@@ -77,13 +79,13 @@ def account_check_nieuwe_email(request, from_ip, account):
                            activiteit="Bevestiging van nieuwe email gevraagd voor account %s" % repr(
                                account.username))
 
-        text_body = "Hallo!\n\n" + \
-                    "Dit is een verzoek vanuit de website van de NHB om toegang tot je email te bevestigen.\n" + \
-                    "Klik op onderstaande link om dit te bevestigen.\n\n" + \
-                    ack_url + "\n\n" + \
-                    "Als je dit verzoek onverwacht ontvangen hebt, neem dan contact met ons op via info@handboogsport.nl\n\n" + \
-                    "Veel plezier met de site!\n" + \
-                    "Het bondsburo\n"
+        text_body = ("Hallo!\n\n"
+                     + "Dit is een verzoek vanuit de website van de NHB om toegang tot je email te bevestigen.\n"
+                     + "Klik op onderstaande link om dit te bevestigen.\n\n"
+                     + ack_url + "\n\n"
+                     + "Als je dit verzoek onverwacht ontvangen hebt, neem dan contact met ons op via info@handboogsport.nl\n\n"
+                     + "Veel plezier met de site!\n"
+                     + "Het bondsburo\n")
 
         mailer_queue_email(mailadres, 'Email adres bevestigen', text_body)
 
@@ -429,14 +431,15 @@ class LoginAsZoekView(UserPassesTestMixin, ListView):
         zoekterm = self.form.cleaned_data['zoekterm']
         if len(zoekterm) >= 2:  # minimaal twee tekens van de naam/nummer
             self.zoekterm = zoekterm
-            qset = Account.objects.\
-                       exclude(is_staff=True).\
-                       annotate(hele_naam=Concat('first_name', Value(' '), 'last_name')).\
-                       filter(
-                            Q(username__icontains=zoekterm) |  # dekt nhb_nr
+            qset = (Account
+                    .objects
+                    .exclude(is_staff=True)
+                    .annotate(hele_naam=Concat('first_name', Value(' '), 'last_name'))
+                    .filter(Q(username__icontains=zoekterm) |  # dekt nhb_nr
                             Q(first_name__icontains=zoekterm) |
                             Q(last_name__icontains=zoekterm) |
-                            Q(hele_naam__icontains=zoekterm)).order_by('username')
+                            Q(hele_naam__icontains=zoekterm))
+                    .order_by('username'))
             return qset[:50]
 
         self.zoekterm = ""
@@ -493,13 +496,13 @@ def account_vraag_email_bevestiging(accountmail, **kwargs):
     # maak de url aan om het e-mailadres te bevestigen
     url = maak_tijdelijke_url_account_email(accountmail, **kwargs)
 
-    text_body = "Hallo!\n\n" + \
-                "Je hebt een account aangemaakt op de website van de NHB.\n" + \
-                "Klik op onderstaande link om dit te bevestigen.\n\n" + \
-                url + "\n\n" + \
-                "Als jij dit niet was, neem dan contact met ons op via info@handboogsport.nl\n\n" + \
-                "Veel plezier met de site!\n" + \
-                "Het bondsburo\n"
+    text_body = ("Hallo!\n\n"
+                 + "Je hebt een account aangemaakt op de website van de NHB.\n"
+                 + "Klik op onderstaande link om dit te bevestigen.\n\n"
+                 + url + "\n\n"
+                 + "Als jij dit niet was, neem dan contact met ons op via info@handboogsport.nl\n\n"
+                 + "Veel plezier met de site!\n"
+                 + "Het bondsburo\n")
 
     mailer_queue_email(accountmail.nieuwe_email, 'Aanmaken account voltooien', text_body)
 

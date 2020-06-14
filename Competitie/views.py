@@ -15,17 +15,18 @@ from BasisTypen.models import BoogType
 from Plein.menu import menu_dynamics
 from Logboek.models import schrijf_in_logboek
 from Functie.rol import Rollen, rol_get_huidige_functie, rol_get_beschrijving, rol_get_huidige
-from BasisTypen.models import IndivWedstrijdklasse, TeamWedstrijdklasse, MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
+from BasisTypen.models import (IndivWedstrijdklasse, TeamWedstrijdklasse,
+                               MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT)
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from NhbStructuur.models import NhbLid, NhbRegio, NhbCluster, NhbVereniging
 from Schutter.models import SchutterBoog
 from Score.models import Score, ScoreHist, zoek_meest_recente_automatisch_vastgestelde_ag
 from Wedstrijden.models import WedstrijdLocatie, Wedstrijd
-from .models import AG_NUL, AG_LAAGSTE_NIET_NUL, LAAG_REGIO, LAAG_RK, LAAG_BK,\
-                    Competitie, competitie_aanmaken, \
-                    CompetitieKlasse, maak_competitieklasse_indiv, \
-                    DeelCompetitie, DeelcompetitieRonde, maak_deelcompetitie_ronde, \
-                    RegioCompetitieSchutterBoog
+from .models import (AG_NUL, AG_LAAGSTE_NIET_NUL, LAAG_REGIO, LAAG_RK, LAAG_BK,
+                     Competitie, competitie_aanmaken,
+                     CompetitieKlasse, maak_competitieklasse_indiv,
+                     DeelCompetitie, DeelcompetitieRonde, maak_deelcompetitie_ronde,
+                     RegioCompetitieSchutterBoog)
 from types import SimpleNamespace
 import datetime
 
@@ -134,14 +135,16 @@ class CompetitieOverzichtView(View):
         objs = list()
         if rol_nu == Rollen.ROL_BB:
             # toon alle competities
-            objs = Competitie.objects.\
-                        filter(is_afgesloten=False).\
-                        order_by('begin_jaar', 'afstand')
+            objs = (Competitie
+                    .objects
+                    .filter(is_afgesloten=False)
+                    .order_by('begin_jaar', 'afstand'))
         elif functie_nu:
             # toon de competitie waar de functie een rol in heeft
-            for deelcomp in DeelCompetitie.objects.\
-                                filter(is_afgesloten=False,
-                                       functie=functie_nu):
+            for deelcomp in (DeelCompetitie
+                             .objects
+                             .filter(is_afgesloten=False,
+                                     functie=functie_nu)):
                 objs.append(deelcomp.competitie)
             # for
 
@@ -173,11 +176,12 @@ class CompetitieOverzichtView(View):
             # for
 
         if rol_nu == Rollen.ROL_RCL:
-            context['planning_deelcomp'] = DeelCompetitie.objects.\
-                                            filter(laag=LAAG_REGIO,
-                                                   nhb_regio=functie_nu.nhb_regio,
-                                                   competitie__afstand=functie_nu.comp_type).\
-                                            select_related('nhb_regio', 'competitie')
+            context['planning_deelcomp'] = (DeelCompetitie
+                                            .objects
+                                            .filter(laag=LAAG_REGIO,
+                                                    nhb_regio=functie_nu.nhb_regio,
+                                                    competitie__afstand=functie_nu.comp_type)
+                                            .select_related('nhb_regio', 'competitie'))
             for obj in context['planning_deelcomp']:
                 obj.titel = 'Planning Regio'
                 obj.tekst = 'Planning voor %s voor de %s.' % (obj.nhb_regio.naam, obj.competitie.beschrijving)
@@ -185,11 +189,12 @@ class CompetitieOverzichtView(View):
             # for
 
         elif rol_nu == Rollen.ROL_RKO:
-            context['planning_deelcomp'] = DeelCompetitie.objects.\
-                                            filter(laag=LAAG_RK,
-                                                   nhb_rayon=functie_nu.nhb_rayon,
-                                                   competitie__afstand=functie_nu.comp_type).\
-                                            select_related('nhb_rayon', 'competitie')
+            context['planning_deelcomp'] = (DeelCompetitie
+                                            .objects
+                                            .filter(laag=LAAG_RK,
+                                                    nhb_rayon=functie_nu.nhb_rayon,
+                                                    competitie__afstand=functie_nu.comp_type)
+                                            .select_related('nhb_rayon', 'competitie'))
             for obj in context['planning_deelcomp']:
                 obj.titel = 'Planning %s' % obj.nhb_rayon.naam
                 obj.tekst = 'Planning voor %s voor de %s.' % (obj.nhb_rayon.naam, obj.competitie.beschrijving)
@@ -197,10 +202,11 @@ class CompetitieOverzichtView(View):
             # for
 
         elif rol_nu == Rollen.ROL_BKO:
-            context['planning_deelcomp'] = DeelCompetitie.objects.\
-                                            filter(laag=LAAG_BK,
-                                                   competitie__afstand=functie_nu.comp_type).\
-                                            select_related('competitie')
+            context['planning_deelcomp'] = (DeelCompetitie
+                                            .objects
+                                            .filter(laag=LAAG_BK,
+                                                    competitie__afstand=functie_nu.comp_type)
+                                            .select_related('competitie'))
             for obj in context['planning_deelcomp']:
                 obj.titel = 'Planning %sm' % obj.competitie.afstand
                 obj.tekst = 'Landelijke planning voor de %s.' % obj.competitie.beschrijving
@@ -215,9 +221,10 @@ class CompetitieOverzichtView(View):
 
         rol_nu, functie_nu = rol_get_huidige_functie(request)
 
-        context['planning_deelcomp'] = DeelCompetitie.objects.\
-                                        filter(laag=LAAG_REGIO,
-                                               nhb_regio=functie_nu.nhb_ver.regio)
+        context['planning_deelcomp'] = (DeelCompetitie
+                                        .objects
+                                        .filter(laag=LAAG_REGIO,
+                                                nhb_regio=functie_nu.nhb_ver.regio))
 
         return context, TEMPLATE_COMPETITIE_OVERZICHT_HWL
 
@@ -260,10 +267,11 @@ class InstellingenVolgendeCompetitieView(UserPassesTestMixin, TemplateView):
 
     @staticmethod
     def _get_queryset_indivklassen():
-        objs = IndivWedstrijdklasse.objects.\
-                        filter(buiten_gebruik=False).\
-                        order_by('volgorde').\
-                        select_related('boogtype')
+        objs = (IndivWedstrijdklasse
+                .objects
+                .filter(buiten_gebruik=False)
+                .order_by('volgorde')
+                .select_related('boogtype'))
         prev = 0
         for klasse in objs:
             groep = klasse.volgorde // 10
@@ -275,9 +283,10 @@ class InstellingenVolgendeCompetitieView(UserPassesTestMixin, TemplateView):
 
     @staticmethod
     def _get_queryset_teamklassen():
-        objs = TeamWedstrijdklasse.objects.\
-                        filter(buiten_gebruik=False).\
-                        order_by('volgorde')
+        objs = (TeamWedstrijdklasse
+                .objects
+                .filter(buiten_gebruik=False)
+                .order_by('volgorde'))
         prev = 0
         for klasse in objs:
             groep = klasse.volgorde // 10
@@ -427,9 +436,10 @@ class AGVaststellenView(UserPassesTestMixin, TemplateView):
             datum = datetime.date(year=now.year, month=now.month, day=now.day)
 
             # doorloop alle individuele histcomp records die bij dit seizoen horen
-            for obj in HistCompetitieIndividueel.objects.\
-                            select_related('histcompetitie').\
-                            filter(histcompetitie__seizoen=seizoen):
+            for obj in (HistCompetitieIndividueel
+                        .objects
+                        .select_related('histcompetitie')
+                        .filter(histcompetitie__seizoen=seizoen)):
                 afstand_meter = int(obj.histcompetitie.comp_type)
                 if obj.gemiddelde > AG_NUL and obj.boogtype in boogtype_dict:
                     # haal het schutterboog record op, of maak een nieuwe aan
@@ -522,10 +532,11 @@ class LijstAangemeldRegioView(TemplateView):
         except Competitie.DoesNotExist:
             raise Resolver404()
 
-        context['object_list'] = RegioCompetitieSchutterBoog.objects.\
-                                        select_related('klasse', 'klasse__indiv', 'deelcompetitie', 'schutterboog', 'schutterboog__nhblid', 'schutterboog__nhblid__bij_vereniging').\
-                                        filter(deelcompetitie__competitie=comp_pk).\
-                                        order_by('klasse__indiv__volgorde', 'aanvangsgemiddelde')
+        context['object_list'] = (RegioCompetitieSchutterBoog
+                                  .objects
+                                  .select_related('klasse', 'klasse__indiv', 'deelcompetitie', 'schutterboog', 'schutterboog__nhblid', 'schutterboog__nhblid__bij_vereniging')
+                                  .filter(deelcompetitie__competitie=comp_pk)
+                                  .order_by('klasse__indiv__volgorde', 'aanvangsgemiddelde'))
 
         volgorde = -1
         for obj in context['object_list']:
@@ -569,10 +580,11 @@ class KlassegrenzenVaststellenView(UserPassesTestMixin, TemplateView):
                          (14, 17,'C',False): [obj20,]  }
         """
         targets = dict()        # [ (min_age, max_age, boogtype) ] = list(wedstrijdklassen)
-        for wedstrklasse in IndivWedstrijdklasse.objects.\
-                                    select_related('boogtype').\
-                                    filter(buiten_gebruik=False).\
-                                    order_by('volgorde'):
+        for wedstrklasse in (IndivWedstrijdklasse
+                             .objects
+                             .select_related('boogtype')
+                             .filter(buiten_gebruik=False)
+                             .order_by('volgorde')):
             # zoek de minimale en maximaal toegestane leeftijden voor deze wedstrijdklasse
             age_min = 999
             age_max = 0
@@ -619,9 +631,10 @@ class KlassegrenzenVaststellenView(UserPassesTestMixin, TemplateView):
 
             # zoek alle schutters-boog die hier in passen (boog, leeftijd)
             gemiddelden = list()
-            for score in Score.objects.\
-                    select_related('schutterboog', 'schutterboog__boogtype', 'schutterboog__nhblid').\
-                    filter(is_ag=True, afstand_meter=afstand, schutterboog__boogtype=boogtype):
+            for score in (Score
+                          .objects
+                          .select_related('schutterboog', 'schutterboog__boogtype', 'schutterboog__nhblid')
+                          .filter(is_ag=True, afstand_meter=afstand, schutterboog__boogtype=boogtype)):
                 age = schutternr2age[score.schutterboog.nhblid.nhb_nr]
                 if min_age <= age <= max_age:
                     gemiddelden.append(score.waarde)        # is AG*1000
@@ -794,10 +807,11 @@ class InfoCompetitieView(TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        context['regios'] = NhbRegio.objects.\
-                                filter(is_administratief=False).\
-                                select_related('rayon').\
-                                order_by('regio_nr')
+        context['regios'] = (NhbRegio
+                             .objects
+                             .filter(is_administratief=False)
+                             .select_related('rayon')
+                             .order_by('regio_nr'))
 
         account = self.request.user
         if account and account.is_authenticated:
@@ -912,9 +926,10 @@ class BondPlanningView(UserPassesTestMixin, TemplateView):
 
         deelcomp_pk = kwargs['deelcomp_pk'][:6]     # afkappen geeft beveiliging
         try:
-            deelcomp_bk = DeelCompetitie.objects.\
-                                select_related('competitie').\
-                                get(pk=deelcomp_pk)
+            deelcomp_bk = (DeelCompetitie
+                           .objects
+                           .select_related('competitie')
+                           .get(pk=deelcomp_pk))
         except DeelCompetitie.DoesNotExist:
             raise Resolver404()
 
@@ -923,10 +938,11 @@ class BondPlanningView(UserPassesTestMixin, TemplateView):
 
         context['deelcomp_bk'] = deelcomp_bk
 
-        context['rayon_deelcomps'] = DeelCompetitie.objects.\
-                                        filter(laag=LAAG_RK,
-                                               competitie=deelcomp_bk.competitie).\
-                                        order_by('nhb_rayon__rayon_nr')
+        context['rayon_deelcomps'] = (DeelCompetitie
+                                      .objects
+                                      .filter(laag=LAAG_RK,
+                                              competitie=deelcomp_bk.competitie)
+                                      .order_by('nhb_rayon__rayon_nr'))
 
         menu_dynamics(self.request, context, actief='competitie')
         return context
@@ -954,9 +970,10 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
 
         deelcomp_pk = kwargs['deelcomp_pk'][:6]     # afkappen geeft beveiliging
         try:
-            deelcomp_rk = DeelCompetitie.objects. \
-                                select_related('competitie', 'nhb_rayon').\
-                                get(pk=deelcomp_pk)
+            deelcomp_rk = (DeelCompetitie
+                           .objects
+                           .select_related('competitie', 'nhb_rayon')
+                           .get(pk=deelcomp_pk))
         except DeelCompetitie.DoesNotExist:
             raise Resolver404()
 
@@ -973,11 +990,12 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
                                                      competitie=deelcomp_rk.competitie)
             context['url_bond'] = reverse('Competitie:bond-planning', kwargs={'deelcomp_pk': deelcomp_bk.pk})
 
-        context['regio_deelcomps'] = DeelCompetitie.objects.\
-                                        filter(laag=LAAG_REGIO,
-                                               competitie=deelcomp_rk.competitie,
-                                               nhb_regio__rayon=deelcomp_rk.nhb_rayon).\
-                                        order_by('nhb_regio__regio_nr')
+        context['regio_deelcomps'] = (DeelCompetitie
+                                      .objects
+                                      .filter(laag=LAAG_REGIO,
+                                              competitie=deelcomp_rk.competitie,
+                                              nhb_regio__rayon=deelcomp_rk.nhb_rayon)
+                                      .order_by('nhb_regio__regio_nr'))
 
         menu_dynamics(self.request, context, actief='competitie')
         return context
@@ -1005,9 +1023,10 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
 
         deelcomp_pk = kwargs['deelcomp_pk'][:6]     # afkappen geeft beveiliging
         try:
-            deelcomp = DeelCompetitie.objects. \
-                            select_related('competitie', 'nhb_regio', 'nhb_regio__rayon').\
-                            get(pk=deelcomp_pk)
+            deelcomp = (DeelCompetitie
+                        .objects
+                        .select_related('competitie', 'nhb_regio', 'nhb_regio__rayon')
+                        .get(pk=deelcomp_pk))
         except DeelCompetitie.DoesNotExist:
             raise Resolver404()
 
@@ -1017,9 +1036,10 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
         context['deelcomp'] = deelcomp
         context['regio'] = deelcomp.nhb_regio
 
-        context['rondes'] = DeelcompetitieRonde.objects.\
-                                filter(deelcompetitie=deelcomp, cluster=None).\
-                                order_by('week_nr')
+        context['rondes'] = (DeelcompetitieRonde
+                             .objects
+                             .filter(deelcompetitie=deelcomp, cluster=None)
+                             .order_by('week_nr'))
 
         for ronde in context['rondes']:
             ronde.wedstrijd_count = ronde.plan.wedstrijden.count()
@@ -1032,12 +1052,13 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
                                                  kwargs={'deelcomp_pk': deelcomp.pk})
 
         # zoek de bruikbare clusters
-        clusters = NhbCluster.objects.\
-                        filter(regio=deelcomp.nhb_regio,
-                               gebruik=deelcomp.competitie.afstand).\
-                        prefetch_related('nhbvereniging_set', 'deelcompetitieronde_set').\
-                        select_related('regio').\
-                        order_by('letter')
+        clusters = (NhbCluster
+                    .objects
+                    .filter(regio=deelcomp.nhb_regio,
+                            gebruik=deelcomp.competitie.afstand)
+                    .prefetch_related('nhbvereniging_set', 'deelcompetitieronde_set')
+                    .select_related('regio')
+                    .order_by('letter'))
         context['clusters'] = list()
         for cluster in clusters:
             if cluster.nhbvereniging_set.count() > 0:
@@ -1069,9 +1090,10 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
 
         deelcomp_pk = kwargs['deelcomp_pk'][:6]     # afkappen geeft beveiliging
         try:
-            deelcomp = DeelCompetitie.objects. \
-                            select_related('competitie', 'nhb_regio').\
-                            get(pk=deelcomp_pk)
+            deelcomp = (DeelCompetitie
+                        .objects
+                        .select_related('competitie', 'nhb_regio')
+                        .get(pk=deelcomp_pk))
         except DeelCompetitie.DoesNotExist:
             raise Resolver404()
 
@@ -1107,9 +1129,10 @@ class RegioClusterPlanningView(UserPassesTestMixin, TemplateView):
 
         cluster_pk = kwargs['cluster_pk'][:6]     # afkappen geeft beveiliging
         try:
-            cluster = NhbCluster.objects.\
-                        select_related('regio', 'regio__rayon').\
-                        get(pk=cluster_pk)
+            cluster = (NhbCluster
+                       .objects
+                       .select_related('regio', 'regio__rayon')
+                       .get(pk=cluster_pk))
         except NhbCluster.DoesNotExist:
             raise Resolver404()
 
@@ -1117,20 +1140,22 @@ class RegioClusterPlanningView(UserPassesTestMixin, TemplateView):
         context['regio'] = cluster.regio
 
         try:
-            deelcomp = DeelCompetitie.objects. \
-                            select_related('competitie').\
-                            get(laag=LAAG_REGIO,
-                                   nhb_regio=cluster.regio,
-                                   competitie__afstand=cluster.gebruik)
+            deelcomp = (DeelCompetitie
+                        .objects
+                        .select_related('competitie')
+                        .get(laag=LAAG_REGIO,
+                             nhb_regio=cluster.regio,
+                             competitie__afstand=cluster.gebruik))
         except DeelCompetitie.DoesNotExist:
             raise Resolver404()
 
         context['deelcomp'] = deelcomp
 
-        context['rondes'] = DeelcompetitieRonde.objects.\
-                                filter(deelcompetitie=deelcomp,
-                                       cluster=cluster).\
-                                order_by('week_nr')
+        context['rondes'] = (DeelcompetitieRonde
+                             .objects
+                             .filter(deelcompetitie=deelcomp,
+                                     cluster=cluster)
+                             .order_by('week_nr'))
 
         for ronde in context['rondes']:
             ronde.wedstrijd_count = ronde.plan.wedstrijden.count()
@@ -1159,18 +1184,20 @@ class RegioClusterPlanningView(UserPassesTestMixin, TemplateView):
 
         cluster_pk = kwargs['cluster_pk'][:6]     # afkappen geeft beveiliging
         try:
-            cluster = NhbCluster.objects.\
-                        select_related('regio', 'regio__rayon').\
-                        get(pk=cluster_pk)
+            cluster = (NhbCluster
+                       .objects
+                       .select_related('regio', 'regio__rayon')
+                       .get(pk=cluster_pk))
         except NhbCluster.DoesNotExist:
             raise Resolver404()
 
         try:
-            deelcomp = DeelCompetitie.objects. \
-                            select_related('competitie').\
-                            get(laag=LAAG_REGIO,
-                                nhb_regio=cluster.regio,
-                                competitie__afstand=cluster.gebruik)
+            deelcomp = (DeelCompetitie
+                        .objects
+                        .select_related('competitie')
+                        .get(laag=LAAG_REGIO,
+                             nhb_regio=cluster.regio,
+                             competitie__afstand=cluster.gebruik))
         except DeelCompetitie.DoesNotExist:
             raise Resolver404()
 
@@ -1215,17 +1242,20 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
 
         ronde_pk = kwargs['ronde_pk'][:6]     # afkappen geeft beveiliging
         try:
-            ronde = DeelcompetitieRonde.objects.\
-                            select_related('deelcompetitie__competitie', 'deelcompetitie__nhb_regio__rayon', 'cluster__regio').\
-                            get(pk=ronde_pk)
+            ronde = (DeelcompetitieRonde
+                     .objects
+                     .select_related('deelcompetitie__competitie',
+                                     'deelcompetitie__nhb_regio__rayon',
+                                     'cluster__regio')
+                     .get(pk=ronde_pk))
         except DeelcompetitieRonde.DoesNotExist:
             raise Resolver404()
 
         context['ronde'] = ronde
 
-        context['wedstrijden'] = ronde.plan.wedstrijden.\
-                                        order_by('datum_wanneer', 'tijd_begin_aanmelden').\
-                                        select_related('vereniging')
+        context['wedstrijden'] = (ronde.plan.wedstrijden
+                                  .order_by('datum_wanneer', 'tijd_begin_aanmelden')
+                                  .select_related('vereniging'))
 
         rol_nu = rol_get_huidige(self.request)
         if rol_nu == Rollen.ROL_RCL:

@@ -114,10 +114,13 @@ def rol_zet_sessionvars(account, request):
     # lees de functie tabel eenmalig in en kopieer alle informatie
     # om verdere queries te voorkomen
     functie_cache = dict()
-    for obj in Functie.objects.\
-                   select_related('nhb_rayon', 'nhb_regio', 'nhb_regio__rayon', 'nhb_ver').\
-                   only('rol', 'comp_type', 'nhb_rayon__rayon_nr', 'nhb_regio__rayon__rayon_nr', 'nhb_ver__nhb_nr').\
-                   all():
+    for obj in (Functie
+                .objects
+                .select_related('nhb_rayon', 'nhb_regio', 'nhb_regio__rayon', 'nhb_ver')
+                .only('rol', 'comp_type',
+                      'nhb_rayon__rayon_nr',
+                      'nhb_regio__rayon__rayon_nr',
+                      'nhb_ver__nhb_nr')):
         func = SimpleNamespace()
         func.pk = obj.pk
         func.obj = obj
@@ -277,11 +280,12 @@ def rol_get_huidige_functie(request):
     else:
         if functie_pk:
             try:
-                functie = Functie.objects.\
-                            select_related('nhb_rayon',
+                functie = (Functie
+                           .objects
+                           .select_related('nhb_rayon',
                                            'nhb_regio', 'nhb_regio__rayon',
-                                           'nhb_ver', 'nhb_ver__regio').\
-                            get(pk=functie_pk)
+                                           'nhb_ver', 'nhb_ver__regio')
+                           .get(pk=functie_pk))
             except Functie.DoesNotExist:
                 # onverwacht!
                 pass
@@ -430,10 +434,10 @@ def functie_expandeer_rol(functie_cache, nhbver_cache, rol_in, functie_in):
             # expandeer naar de HWL rollen van de verenigingen binnen de regio
             # vind alle verenigingen in deze regio
             if len(nhbver_cache) == 0:
-                for ver in NhbVereniging.objects.\
-                                select_related('regio').\
-                                only('nhb_nr', 'regio__regio_nr').\
-                                all():
+                for ver in (NhbVereniging
+                            .objects
+                            .select_related('regio')
+                            .only('nhb_nr', 'regio__regio_nr')):
                     store = SimpleNamespace()
                     store.pk = ver.pk
                     store.nhb_nr = ver.nhb_nr

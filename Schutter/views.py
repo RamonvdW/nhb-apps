@@ -13,8 +13,8 @@ from Plein.menu import menu_dynamics
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from BasisTypen.models import BoogType
-from Competitie.models import CompetitieKlasse, DeelCompetitie, RegioCompetitieSchutterBoog,\
-                              LAAG_REGIO, AG_NUL, regiocompetitie_schutterboog_aanmelden
+from Competitie.models import (CompetitieKlasse, DeelCompetitie, RegioCompetitieSchutterBoog,
+                               LAAG_REGIO, regiocompetitie_schutterboog_aanmelden)
 from Records.models import IndivRecord
 from Mailer.models import mailer_email_is_valide, mailer_obfuscate_email
 from Logboek.models import schrijf_in_logboek
@@ -63,9 +63,10 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         # for
 
         objs = list()
-        for obj in HistCompetitieIndividueel.objects.\
-                            filter(schutter_nr=nhblid.nhb_nr).\
-                            order_by('-histcompetitie__seizoen'):
+        for obj in (HistCompetitieIndividueel
+                    .objects
+                    .filter(schutter_nr=nhblid.nhb_nr)
+                    .order_by('-histcompetitie__seizoen')):
             wedstrijd = HistCompetitie.comptype2str[obj.histcompetitie.comp_type]
             datum_str = 'Seizoen ' + obj.histcompetitie.seizoen
             try:
@@ -144,15 +145,17 @@ class ProfielView(UserPassesTestMixin, TemplateView):
 
         # zoek deelcompetities in deze regio (typisch zijn er 2 in de regio: 18m en 25m)
         regio = nhblid.bij_vereniging.regio
-        for deelcompetitie in DeelCompetitie.objects.\
-                                select_related('competitie').\
-                                filter(laag=LAAG_REGIO, nhb_regio=regio, is_afgesloten=False):
+        for deelcompetitie in (DeelCompetitie
+                               .objects
+                               .select_related('competitie')
+                               .filter(laag=LAAG_REGIO, nhb_regio=regio, is_afgesloten=False)):
             # zoek de klassen erbij die de schutter interessant vindt
             afkortingen = list(boog_afkorting_all)
-            for klasse in CompetitieKlasse.objects.\
-                                select_related('indiv__boogtype').\
-                                filter(indiv__boogtype__afkorting__in=boog_afkorting_all,
-                                       competitie=deelcompetitie.competitie):
+            for klasse in (CompetitieKlasse
+                           .objects
+                           .select_related('indiv__boogtype')
+                           .filter(indiv__boogtype__afkorting__in=boog_afkorting_all,
+                                   competitie=deelcompetitie.competitie)):
                 afk = klasse.indiv.boogtype.afkorting
                 if afk in afkortingen:
                     # dit boogtype nog niet gehad

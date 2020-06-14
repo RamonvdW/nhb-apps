@@ -107,10 +107,11 @@ class LedenLijstView(UserPassesTestMixin, ListView):
         prev_wedstrijdleeftijd = 0
 
         # sorteer op geboorte jaar en daarna naam
-        for obj in NhbLid.objects.\
-                filter(bij_vereniging=functie_nu.nhb_ver).\
-                filter(geboorte_datum__year__gte=jeugdgrens).\
-                order_by('-geboorte_datum__year', 'achternaam', 'voornaam'):
+        for obj in (NhbLid
+                    .objects
+                    .filter(bij_vereniging=functie_nu.nhb_ver)
+                    .filter(geboorte_datum__year__gte=jeugdgrens)
+                    .order_by('-geboorte_datum__year', 'achternaam', 'voornaam')):
 
             # de wedstrijdleeftijd voor dit hele jaar
             wedstrijdleeftijd = huidige_jaar - obj.geboorte_datum.year
@@ -131,10 +132,11 @@ class LedenLijstView(UserPassesTestMixin, ListView):
 
         # volwassenen
         # sorteer op naam
-        for obj in NhbLid.objects.\
-                        filter(bij_vereniging=functie_nu.nhb_ver).\
-                        filter(geboorte_datum__year__lt=jeugdgrens).\
-                        order_by('achternaam', 'voornaam'):
+        for obj in (NhbLid
+                    .objects
+                    .filter(bij_vereniging=functie_nu.nhb_ver)
+                    .filter(geboorte_datum__year__lt=jeugdgrens)
+                    .order_by('achternaam', 'voornaam')):
             obj.leeftijdsklasse = None
 
             if not obj.is_actief_lid:
@@ -208,10 +210,11 @@ class LedenVoorkeurenView(LedenLijstView):
         # for
 
         # zoek de bogen informatie bij elk lid
-        for schutterboog in SchutterBoog.objects.\
-                filter(voor_wedstrijd=True).\
-                select_related('nhblid', 'boogtype').\
-                only('nhblid__nhb_nr', 'boogtype__beschrijving'):
+        for schutterboog in (SchutterBoog
+                             .objects
+                             .filter(voor_wedstrijd=True)
+                             .select_related('nhblid', 'boogtype')
+                             .only('nhblid__nhb_nr', 'boogtype__beschrijving')):
             try:
                 nhblid = nhblid_dict[schutterboog.nhblid.nhb_nr]
             except KeyError:
@@ -259,10 +262,11 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
         prev_wedstrijdleeftijd = 0
 
         # sorteer jeugd op geboorte jaar en daarna naam
-        for obj in NhbLid.objects.\
-                filter(bij_vereniging=functie_nu.nhb_ver).\
-                filter(geboorte_datum__year__gte=jeugdgrens).\
-                order_by('-geboorte_datum__year', 'achternaam', 'voornaam'):
+        for obj in (NhbLid
+                    .objects
+                    .filter(bij_vereniging=functie_nu.nhb_ver)
+                    .filter(geboorte_datum__year__gte=jeugdgrens)
+                    .order_by('-geboorte_datum__year', 'achternaam', 'voornaam')):
 
             # de wedstrijdleeftijd voor dit hele jaar
             wedstrijdleeftijd = comp.begin_jaar - obj.geboorte_datum.year
@@ -272,9 +276,11 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
             if wedstrijdleeftijd == prev_wedstrijdleeftijd:
                 obj.leeftijdsklasse = prev_lkl
             else:
-                obj.leeftijdsklasse = LeeftijdsKlasse.objects.filter(
-                                max_wedstrijdleeftijd__gte=wedstrijdleeftijd,
-                                geslacht='M').order_by('max_wedstrijdleeftijd')[0]
+                obj.leeftijdsklasse = (LeeftijdsKlasse
+                                       .objects
+                                       .filter(max_wedstrijdleeftijd__gte=wedstrijdleeftijd,
+                                               geslacht='M')
+                                       .order_by('max_wedstrijdleeftijd'))[0]
                 prev_lkl = obj.leeftijdsklasse
                 prev_wedstrijdleeftijd = wedstrijdleeftijd
 
@@ -282,10 +288,11 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
         # for
 
         # sorteer volwassenen op naam
-        for obj in NhbLid.objects.\
-                        filter(bij_vereniging=functie_nu.nhb_ver).\
-                        filter(geboorte_datum__year__lt=jeugdgrens).\
-                        order_by('achternaam', 'voornaam'):
+        for obj in (NhbLid
+                    .objects
+                    .filter(bij_vereniging=functie_nu.nhb_ver)
+                    .filter(geboorte_datum__year__lt=jeugdgrens)
+                    .order_by('achternaam', 'voornaam')):
             obj.leeftijdsklasse = None
             objs.append(obj)
         # for
@@ -298,29 +305,32 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
         # for
 
         ag_dict = dict()        # [schutterboog_pk] = Score
-        for score in Score.objects.\
-                        select_related('schutterboog').\
-                        filter(is_ag=True, afstand_meter=comp.afstand):
+        for score in (Score
+                      .objects
+                      .select_related('schutterboog')
+                      .filter(is_ag=True, afstand_meter=comp.afstand)):
             ag = score.waarde / 1000
             ag_dict[score.schutterboog.pk] = ag
         # for
 
         is_aangemeld_dict = dict()   # [schutterboog.pk] = True/False
-        for deelnemer in RegioCompetitieSchutterBoog.objects.\
-                select_related('schutterboog', 'deelcompetitie').\
-                filter(bij_vereniging=functie_nu.nhb_ver,
-                       deelcompetitie__competitie=comp):
+        for deelnemer in (RegioCompetitieSchutterBoog
+                          .objects
+                          .select_related('schutterboog', 'deelcompetitie')
+                          .filter(bij_vereniging=functie_nu.nhb_ver,
+                                  deelcompetitie__competitie=comp)):
             is_aangemeld_dict[deelnemer.schutterboog.pk] = True
         # for
 
         # zoek de bogen informatie bij elk lid
         # split per schutter-boog
         objs2 = list()
-        for schutterboog in SchutterBoog.objects.\
-                filter(voor_wedstrijd=True).\
-                select_related('nhblid', 'boogtype').\
-                order_by('boogtype__volgorde').\
-                only('nhblid__nhb_nr', 'boogtype__beschrijving'):
+        for schutterboog in (SchutterBoog
+                             .objects
+                             .filter(voor_wedstrijd=True)
+                             .select_related('nhblid', 'boogtype')
+                             .order_by('boogtype__volgorde')
+                             .only('nhblid__nhb_nr', 'boogtype__beschrijving')):
             try:
                 nhblid = nhblid_dict[schutterboog.nhblid.nhb_nr]
             except KeyError:
@@ -458,28 +468,31 @@ class LijstVerenigingenView(UserPassesTestMixin, ListView):
         if rol_nu == Rollen.ROL_RKO:
             # toon de lijst van verenigingen in het rayon van de RKO
             # het rayonnummer is verkrijgbaar via de deelcompetitie van de functie
-            return NhbVereniging.objects.\
-                        select_related('regio', 'regio__rayon').\
-                        exclude(regio__regio_nr=100).\
-                        filter(regio__rayon=functie_nu.nhb_rayon).\
-                        prefetch_related('wedstrijdlocatie_set', 'clusters').\
-                        order_by('regio__regio_nr', 'nhb_nr')
+            return (NhbVereniging
+                    .objects
+                    .select_related('regio', 'regio__rayon')
+                    .exclude(regio__regio_nr=100)
+                    .filter(regio__rayon=functie_nu.nhb_rayon)
+                    .prefetch_related('wedstrijdlocatie_set', 'clusters')
+                    .order_by('regio__regio_nr', 'nhb_nr'))
 
         if rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO):
             # toon de landelijke lijst
-            return NhbVereniging.objects.all().\
-                        select_related('regio', 'regio__rayon').\
-                        exclude(regio__regio_nr=100).\
-                        prefetch_related('wedstrijdlocatie_set', 'clusters').\
-                        order_by('regio__regio_nr', 'nhb_nr')
+            return (NhbVereniging
+                    .objects
+                    .select_related('regio', 'regio__rayon')
+                    .exclude(regio__regio_nr=100)
+                    .prefetch_related('wedstrijdlocatie_set', 'clusters')
+                    .order_by('regio__regio_nr', 'nhb_nr'))
 
         if rol_nu == Rollen.ROL_IT:
             # landelijke lijst + telling aantal leden
-            objs = NhbVereniging.objects.all().\
-                        select_related('regio', 'regio__rayon').\
-                        exclude(regio__regio_nr=100).\
-                        prefetch_related('nhblid_set', 'wedstrijdlocatie_set', 'clusters').\
-                        order_by('regio__regio_nr', 'nhb_nr')
+            objs = (NhbVereniging
+                    .objects
+                    .select_related('regio', 'regio__rayon')
+                    .exclude(regio__regio_nr=100)
+                    .prefetch_related('nhblid_set', 'wedstrijdlocatie_set', 'clusters')
+                    .order_by('regio__regio_nr', 'nhb_nr'))
 
             for obj in objs:
                 obj.aantal_leden = obj.nhblid_set.count()
@@ -488,29 +501,32 @@ class LijstVerenigingenView(UserPassesTestMixin, ListView):
 
         # vul een kleine cache om vele database verzoeken te voorkomen
         hwl_functies = dict()  # [nhb_ver] = Functie()
-        for functie in Functie.objects.\
-                            filter(rol='HWL').\
-                            select_related('nhb_ver').\
-                            prefetch_related('accounts'):
+        for functie in (Functie
+                        .objects
+                        .filter(rol='HWL')
+                        .select_related('nhb_ver')
+                        .prefetch_related('accounts')):
             hwl_functies[functie.nhb_ver.nhb_nr] = functie
         # for
 
         # toon de lijst van verenigingen in de regio
         if rol_nu == Rollen.ROL_RCL:
             # het regionummer is verkrijgbaar via de deelcompetitie van de functie
-            objs = NhbVereniging.objects.\
-                        filter(regio=functie_nu.nhb_regio).\
-                        select_related('regio').\
-                        prefetch_related('wedstrijdlocatie_set', 'clusters').\
-                        order_by('nhb_nr')
+            objs = (NhbVereniging
+                    .objects
+                    .filter(regio=functie_nu.nhb_regio)
+                    .select_related('regio')
+                    .prefetch_related('wedstrijdlocatie_set', 'clusters')
+                    .order_by('nhb_nr'))
         else:
             # rol_nu == Rollen.ROL_HWL
             # het regionummer is verkrijgbaar via de vereniging
-            objs = NhbVereniging.objects.\
-                            filter(regio=functie_nu.nhb_ver.regio).\
-                            select_related('regio').\
-                            prefetch_related('wedstrijdlocatie_set', 'clusters').\
-                            order_by('nhb_nr')
+            objs = (NhbVereniging
+                    .objects
+                    .filter(regio=functie_nu.nhb_ver.regio)
+                    .select_related('regio')
+                    .prefetch_related('wedstrijdlocatie_set', 'clusters')
+                    .order_by('nhb_nr'))
 
         for obj in objs:
             try:
@@ -762,10 +778,11 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
         context['gebruik'] = gebruik_filter = functie_nu.comp_type
 
         # cluster namen
-        objs = NhbCluster.objects.\
-                    filter(regio=functie_nu.nhb_regio, gebruik=gebruik_filter).\
-                    select_related('regio').\
-                    order_by('letter')
+        objs = (NhbCluster
+                .objects
+                .filter(regio=functie_nu.nhb_regio, gebruik=gebruik_filter)
+                .select_related('regio')
+                .order_by('letter'))
         context['cluster_list'] = objs
         context['regio_heeft_clusters'] = objs.count() > 0
 
@@ -787,10 +804,11 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
         opts.insert(0, opt_geen)
 
         # vereniging in de regio
-        objs = NhbVereniging.objects.\
-                    filter(regio=functie_nu.nhb_regio).\
-                    prefetch_related('clusters').\
-                    order_by('nhb_nr')
+        objs = (NhbVereniging
+                .objects
+                .filter(regio=functie_nu.nhb_regio)
+                .prefetch_related('clusters')
+                .order_by('nhb_nr'))
         context['object_list'] = objs
 
         for obj in objs:
@@ -870,7 +888,10 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
         # waarvan de definitie heel handig overeen komt met cluster.gebruik
         gebruik_filter = functie_nu.comp_type
 
-        clusters = NhbCluster.objects.filter(regio=functie_nu.nhb_regio, gebruik=gebruik_filter)
+        clusters = (NhbCluster
+                    .objects
+                    .filter(regio=functie_nu.nhb_regio,
+                            gebruik=gebruik_filter))
 
         # neem de cluster namen over
         for obj in clusters:
@@ -886,9 +907,10 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
         # for
 
         # neem de cluster keuzes voor de verenigingen over
-        for obj in NhbVereniging.objects.\
-                        filter(regio=functie_nu.nhb_regio).\
-                        prefetch_related('clusters'):
+        for obj in (NhbVereniging
+                    .objects
+                    .filter(regio=functie_nu.nhb_regio)
+                    .prefetch_related('clusters')):
 
             self._swap_cluster(obj, gebruik_filter)
         # for
