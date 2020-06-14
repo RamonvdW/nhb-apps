@@ -114,8 +114,7 @@ class NhbVereniging(models.Model):
     # locatie van het doel van de vereniging
     plaats = models.CharField(max_length=100, blank=True)
 
-    # TODO: kan dit e-mailadres in de CWZ functie opgeslagen worden?
-    contact_email = models.CharField(max_length=150, blank=True)
+    contact_email = models.CharField(max_length=150, blank=True)    # TODO: consider removing
 
     # de regio waarin de vereniging zit
     regio = models.ForeignKey(NhbRegio, on_delete=models.PROTECT)

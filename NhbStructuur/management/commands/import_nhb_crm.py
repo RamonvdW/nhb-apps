@@ -232,7 +232,7 @@ class Command(BaseCommand):
                 self._count_warnings += 1
                 ver_email = ""      # voorkom None
 
-            # TODO: verdere velden: website, email, has_disabled_facilities, lat/lon
+            # FUTURE: verdere velden: website, has_disabled_facilities, lat/lon
 
             # zoek de vereniging op
             is_nieuw = False
@@ -272,20 +272,12 @@ class Command(BaseCommand):
                     if not self.dryrun:
                         obj.save()
 
-                if obj.contact_email != ver_email:
-                    self.stdout.write('[INFO] Wijziging van contact email voor vereniging %s: "%s" --> "%s"' % (ver_nhb_nr, obj.contact_email, ver_email))
-                    self._count_wijzigingen += 1
-                    obj.contact_email = ver_email
-                    if not self.dryrun:
-                        obj.save()
-
             if is_nieuw:
                 obj = None
                 ver = NhbVereniging()
                 ver.nhb_nr = ver_nhb_nr
                 ver.naam = ver_naam
                 ver.plaats = ver_plaats
-                ver.contact_email = ver_email
                 regio_obj = vind_regio(ver_regio)
                 if not regio_obj:
                     self._count_errors += 1
@@ -299,7 +291,7 @@ class Command(BaseCommand):
                     self._nieuwe_clubs.append(ver_nhb_nr)   # voor onderdrukken 'wijziging' secretaris
                     obj = ver
 
-            # maak de sec functie aan
+            # maak de functies aan voor deze vereniging
             if obj:
                 # let op: in sync houden met migratie m0012_migrate_cwz_hwl
                 for rol, beschr in (('WL', 'Wedstrijdleider %s'),
@@ -307,6 +299,16 @@ class Command(BaseCommand):
                                     ('SEC', 'Secretaris vereniging %s')):
                     functie = maak_functie(beschr % obj.nhb_nr, rol)
                     functie.nhb_ver = obj
+
+                    if rol == 'SEC':
+                        # secretaris functie krijgt email uit CRM
+                        if functie.bevestigde_email != ver_email:
+                            self.stdout.write('[INFO] Wijziging van secretaris email voor vereniging %s: "%s" --> "%s"' % (
+                                                    ver_nhb_nr, functie.bevestigde_email, ver_email))
+                            self._count_wijzigingen += 1
+                            functie.bevestigde_email = ver_email
+                            functie.nieuwe_email = ''       # voor de zekerheid opruimen
+
                     if not self.dryrun:
                         functie.save()
                 # for
