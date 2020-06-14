@@ -108,7 +108,7 @@
         {% endif %}
 
         <!-- verenigingen/accommodaties overzicht RCL en HWL -->
-        {% if rol_is_hwl or rol_is_rcl %}
+        {% if rol_is_sec or rol_is_hwl or rol_is_rcl %}
             <div class="card">
                 <div class="card-content">
                     <div class="card-title center-align">Verenigingen</div>
