@@ -16,9 +16,9 @@ from Overig.e2ehelpers import E2EHelpers
 import datetime
 
 
-class TestVerenigingHWL(E2EHelpers, TestCase):
+class TestVerenigingWL(E2EHelpers, TestCase):
 
-    """ Tests voor de Vereniging applicatie, functies voor de HWL """
+    """ Tests voor de Vereniging applicatie, functies voor de WL """
 
     test_after = ('BasisTypen', 'NhbStructuur', 'Functie', 'Schutter', 'Competitie')
 
@@ -47,7 +47,12 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.functie_hwl.nhb_ver = ver
         self.functie_hwl.save()
 
-        # maak het lid aan dat HWL wordt
+        # maak de WL functie
+        self.functie_wl = maak_functie("WL test", "WL")
+        self.functie_wl.nhb_ver = ver
+        self.functie_wl.save()
+
+        # maak het lid aan dat WL wordt
         lid = NhbLid()
         lid.nhb_nr = 100001
         lid.geslacht = "M"
@@ -59,10 +64,10 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         lid.bij_vereniging = ver
         lid.save()
 
-        self.account_hwl = self.e2e_create_account(lid.nhb_nr, lid.email, lid.voornaam, accepteer_vhpg=True)
-        self.functie_hwl.accounts.add(self.account_hwl)
+        self.account_wl = self.e2e_create_account(lid.nhb_nr, lid.email, lid.voornaam, accepteer_vhpg=True)
+        self.functie_wl.accounts.add(self.account_wl)
 
-        lid.account = self.account_hwl
+        lid.account = self.account_wl
         lid.save()
         self.nhblid_100001 = lid
 
@@ -227,25 +232,18 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
             afkorting = 'R'
         schutterboog = SchutterBoog.objects.get(nhblid__nhb_nr=nhb_nr, boogtype__afkorting=afkorting)
         datum = datetime.date(year=2020, month=4, day=1)
-        aanvangsgemiddelde_opslaan(schutterboog, afstand, 7.42, datum, self.account_hwl, 'Test AG %s' % afstand)
+        aanvangsgemiddelde_opslaan(schutterboog, afstand, 7.42, datum, self.account_bb, 'Test AG %s' % afstand)
 
     def test_overzicht(self):
-        # anon
-        self.e2e_logout()
-        resp = self.client.get(self.url_overzicht)
-        self.assert_is_redirect(resp, '/plein/')
-
-        # login als HWL
-        self.e2e_login_and_pass_otp(self.account_hwl)
-        self.e2e_wissel_naar_functie(self.functie_hwl)
-        self.e2e_check_rol('HWL')
+        # login als WL
+        self.e2e_login_and_pass_otp(self.account_wl)
+        self.e2e_wissel_naar_functie(self.functie_wl)
+        self.e2e_check_rol('WL')
 
         resp = self.client.get(self.url_overzicht)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('vereniging/overzicht.dtl', 'plein/site_layout.dtl'))
-
-        self.e2e_assert_other_http_commands_not_supported(self.url_overzicht)
 
     def test_ledenlijst(self):
         # anon
@@ -253,10 +251,10 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         resp = self.client.get(self.url_ledenlijst)
         self.assert_is_redirect(resp, '/plein/')
 
-        # login als HWL
-        self.e2e_login_and_pass_otp(self.account_hwl)
-        self.e2e_wissel_naar_functie(self.functie_hwl)
-        self.e2e_check_rol('HWL')
+        # login als WL
+        self.e2e_login_and_pass_otp(self.account_wl)
+        self.e2e_wissel_naar_functie(self.functie_wl)
+        self.e2e_check_rol('WL')
 
         resp = self.client.get(self.url_ledenlijst)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -267,74 +265,35 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.assertContains(resp, 'Senioren')
         self.assertNotContains(resp, 'Inactieve leden')
 
-        # maak een lid inactief
-        self.nhblid_100003.is_actief_lid = False
-        self.nhblid_100003.save()
-
-        # stel ook een paar bogen in
-        self._zet_schutter_voorkeuren(100002)
-
-        resp = self.client.get(self.url_ledenlijst)
-        self.assertEqual(resp.status_code, 200)  # 200 = OK
-
-        self.assertContains(resp, 'Jeugd')
-        self.assertContains(resp, 'Senioren')
-        self.assertContains(resp, 'Inactieve leden')
-
-        self.e2e_assert_other_http_commands_not_supported(self.url_ledenlijst)
-
     def test_voorkeuren(self):
         # haal de lijst met leden voorkeuren op
         # view is gebaseerd op ledenlijst, dus niet veel te testen
 
-        # login als HWL
-        self.e2e_login_and_pass_otp(self.account_hwl)
-        self.e2e_wissel_naar_functie(self.functie_hwl)
-        self.e2e_check_rol('HWL')
+        # login als WL
+        self.e2e_login_and_pass_otp(self.account_wl)
+        self.e2e_wissel_naar_functie(self.functie_wl)
+        self.e2e_check_rol('WL')
 
-        # eerste keer, zonder schutterboog records
+        # het overzicht mag de WL ophalen
         self.assertEqual(SchutterBoog.objects.count(), 0)
         resp = self.client.get(self.url_voorkeuren)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('vereniging/leden-voorkeuren.dtl', 'plein/site_layout.dtl'))
 
-        # nog een keer, nu met schutterboog records aanwezig
-        # zowel van de vereniging van de HWL als van andere verenigingen
+        # probeer de schutterboog instellingen van schutters te veranderen
+        # maar dat mag de WL niet, dus gebeurt er niets
         for nhblid in (self.nhblid_100001, self.nhblid_100002, self.nhblid_100003):
-            # get operatie maakt de schutterboog records aan
             url = self.url_schutter_voorkeuren % nhblid.pk
             resp = self.client.get(url)
-            self.assertEqual(resp.status_code, 200)
+            self.assertEqual(resp.status_code, 302)     # 302 = Redirect == mag niet
         # for
-        self.assertEqual(SchutterBoog.objects.count(), 15)
-
-        # zet een aantal schutterboog records op gebruik voor wedstrijd
-        # dit maakt een schutter-boog
-        for obj in SchutterBoog.objects.all():
-            if obj.pk & 1:  # odd?
-                obj.voor_wedstrijd = True
-                obj.save()
-        # for
-
-        # nu de schutterboog records gemaakt zijn (HWL had toestemming)
-        # stoppen we 1 lid in een andere vereniging
-        self.nhblid_100003.bij_vereniging = self.nhbver2
-        self.nhblid_100003.save()
-
-        resp = self.client.get(self.url_voorkeuren)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('vereniging/leden-voorkeuren.dtl', 'plein/site_layout.dtl'))
+        self.assertEqual(SchutterBoog.objects.count(), 0)
 
     def test_aanmelden(self):
         url = self.url_aanmelden % self.comp_18.pk
 
-        # anon
-        self.e2e_logout()
-        resp = self.client.get(url)
-        self.assert_is_redirect(resp, '/plein/')
-
-        # login als HWL
-        self.e2e_login_and_pass_otp(self.account_hwl)
+        # login als BB om wat voorbereidingen te doen
+        self.e2e_login_and_pass_otp(self.account_bb)
         self.e2e_wissel_naar_functie(self.functie_hwl)
         self.e2e_check_rol('HWL')
 
@@ -345,6 +304,11 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self._zet_ag(100002, 18)
         self._zet_ag(100003, 25)
 
+        # login als WL
+        self.e2e_login_and_pass_otp(self.account_wl)
+        self.e2e_wissel_naar_functie(self.functie_wl)
+        self.e2e_check_rol('WL')
+
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('vereniging/leden-aanmelden.dtl', 'plein/site_layout.dtl'))
@@ -353,30 +317,15 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
         resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',        # 1=R
                                       'lid_100003_boogtype_3': 'on'})       # 3=BB
-        self.assert_is_redirect(resp, url)
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 2)    # 2 schutters, 1 competitie
-
-        resp = self.client.post(url, {'garbage': 'oh',
-                                      'lid_GEENGETAL_boogtype_3': 'on'})
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
 
-        resp = self.client.post(url, {'garbage': 'oh',
-                                      'lid_999999_boogtype_GEENGETAL': 'on'})
-        self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
-
-        resp = self.client.post(url, {'lid_999999_boogtype_3': 'on'})       # 3=BB
-        self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
-
-        resp = self.client.post(url, {'lid_100003_boogtype_1': 'on'})       # 1=R = geen wedstrijdboog
-        self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
-
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 2)    # 2 schutters, 1 competitie
+        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
 
     def test_aanmelden_cornercase(self):
-        # login als HWL
-        self.e2e_login_and_pass_otp(self.account_hwl)
-        self.e2e_wissel_naar_functie(self.functie_hwl)
-        self.e2e_check_rol('HWL')
+        # login als WL
+        self.e2e_login_and_pass_otp(self.account_wl)
+        self.e2e_wissel_naar_functie(self.functie_wl)
+        self.e2e_check_rol('WL')
 
         resp = self.client.get(self.url_aanmelden % 9999999)
         self.assertEqual(resp.status_code, 404)         # 404 = Not found
@@ -391,12 +340,12 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         loc.save()
         loc.verenigingen.add(self.nhbver1)
 
-        # login als HWL
-        self.e2e_login_and_pass_otp(self.account_hwl)
-        self.e2e_wissel_naar_functie(self.functie_hwl)
-        self.e2e_check_rol('HWL')
+        # login als WL
+        self.e2e_login_and_pass_otp(self.account_wl)
+        self.e2e_wissel_naar_functie(self.functie_wl)
+        self.e2e_check_rol('WL')
 
-        # check voor het kaartje om de doel details aan te passen
+        # check dat het kaartje er is om de accommodatie details op te vragen
         resp = self.client.get(self.url_overzicht)
         urls = self.extract_all_urls(resp)
         urls2 = [url for url in urls if url.startswith('/vereniging/accommodatie-details/')]

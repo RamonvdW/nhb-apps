@@ -38,9 +38,17 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         # secretaris kan nog niet ingevuld worden
         ver.save()
 
+        self.functie_sec = maak_functie("SEC test", "SEC")
+        self.functie_sec.nhb_ver = ver
+        self.functie_sec.save()
+
         self.functie_hwl = maak_functie("HWL test", "HWL")
         self.functie_hwl.nhb_ver = ver
         self.functie_hwl.save()
+
+        self.functie_wl = maak_functie("WL test", "WL")
+        self.functie_wl.nhb_ver = ver
+        self.functie_wl.save()
 
         # maak een test lid aan
         lid = NhbLid()
@@ -75,7 +83,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.url_accountwissel = '/account/account-wissel/'
 
     def _get_wissel_urls(self, resp):
-        return [url for url in self.extract_all_urls(resp) if url.startswith('/functie/') or url == self.url_accountwissel]
+        return [url for url in self.extract_all_urls(resp) if url.startswith('/functie/activeer') or url == self.url_accountwissel]
 
     def test_admin(self):
         # controleer dat de link naar het wisselen van rol op de pagina staat
@@ -215,7 +223,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, "Gebruiker")
         urls = self._get_wissel_urls(resp)
-        self.assertNotIn(self.url_accountwissel, urls)           # Account wissel
+        self.assertNotIn(self.url_accountwissel, urls)              # Account wissel
         self.assertIn(self.url_activeer_rol % 'BB', urls)           # Manager competitiezaken
         self.assertIn(self.url_activeer_rol % 'geen', urls)         # Gebruiker
 
@@ -249,16 +257,49 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.assertIn(self.url_activeer_functie % self.functie_rko.pk, urls)
         self.assertIn(self.url_activeer_rol % 'schutter', urls)
 
-    def test_hwl(self):
-        self.functie_hwl.accounts.add(self.account_normaal)
+    def test_rcl(self):
+        self.functie_rcl.accounts.add(self.account_normaal)
         self.e2e_account_accepteert_vhpg(self.account_normaal)
         self.e2e_login_and_pass_otp(self.account_normaal)
+        self.e2e_wissel_naar_functie(self.functie_rcl)
 
         resp = self.client.get(self.url_wisselvanrol)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, "Schutter")
         urls = self._get_wissel_urls(resp)
+        self.assertNotIn(self.url_activeer_functie % self.functie_sec.pk, urls)
+        self.assertIn(self.url_activeer_functie % self.functie_rcl.pk, urls)
         self.assertIn(self.url_activeer_functie % self.functie_hwl.pk, urls)
+        self.assertIn(self.url_activeer_rol % 'schutter', urls)
+
+    def test_hwl(self):
+        self.functie_hwl.accounts.add(self.account_normaal)
+        self.e2e_account_accepteert_vhpg(self.account_normaal)
+        self.e2e_login_and_pass_otp(self.account_normaal)
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+
+        resp = self.client.get(self.url_wisselvanrol)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assertContains(resp, "Schutter")
+        urls = self._get_wissel_urls(resp)
+        self.assertNotIn(self.url_activeer_functie % self.functie_sec.pk, urls)
+        self.assertIn(self.url_activeer_functie % self.functie_hwl.pk, urls)
+        self.assertIn(self.url_activeer_functie % self.functie_wl.pk, urls)
+        self.assertIn(self.url_activeer_rol % 'schutter', urls)
+
+    def test_wl(self):
+        self.functie_wl.accounts.add(self.account_normaal)
+        self.e2e_account_accepteert_vhpg(self.account_normaal)
+        self.e2e_login_and_pass_otp(self.account_normaal)
+        self.e2e_wissel_naar_functie(self.functie_wl)
+
+        resp = self.client.get(self.url_wisselvanrol)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assertContains(resp, "Schutter")
+        urls = self._get_wissel_urls(resp)
+        self.assertNotIn(self.url_activeer_functie % self.functie_sec.pk, urls)
+        self.assertNotIn(self.url_activeer_functie % self.functie_hwl.pk, urls)
+        self.assertIn(self.url_activeer_functie % self.functie_wl.pk, urls)
         self.assertIn(self.url_activeer_rol % 'schutter', urls)
 
     def test_functie_geen_rol(self):

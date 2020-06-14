@@ -111,7 +111,7 @@ def mag_email_wijzigen_of_404(request, functie):
             WijzigEmailView - tijdens GET en POST
     """
 
-    # test_func van WijzigEmailView laat alleen BB, BKO, RKO, RCL of HWL door
+    # test_func van WijzigEmailView laat alleen BB, BKO, RKO, RCL, SEC en HWL door
 
     rol_nu, functie_nu = rol_get_huidige_functie(request)
 
@@ -120,17 +120,31 @@ def mag_email_wijzigen_of_404(request, functie):
     #   BKO (comp_type) --> alle RKO (comp_type)
     #   RKO (comp_type) --> alle RCL (comp_type) in zijn rayon
 
+    # special voor BB, want dat is geen functie
     if rol_nu == Rollen.ROL_BB:
         # BB mag BKO email aanpassen
         if functie.rol != 'BKO':
             raise Resolver404()
         return
 
-    # de rest is gekoppeld aan een functie
+    # voor de rest moet de gebruiker een functie bezitten
     if not functie_nu:
         raise Resolver404()     # pragma: no cover
 
-    # rol mag zijn eigen e-mailadres aanpassen
+    # SEC en HWL mogen email van HWL en WL aanpassen
+    if rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL):
+        # alleen binnen eigen vereniging
+        if functie_nu.nhb_ver != functie.nhb_ver:
+            raise Resolver404()
+
+        if functie.rol not in ('HWL', 'WL'):
+            # hier verdwijnt SEC in het putje
+            # secretaris email is alleen aan te passen via Onze Relaties
+            raise Resolver404()
+
+        return
+
+    # alle rollen mogen hun eigen e-mailadres aanpassen
     if functie_nu == functie:
         return
 
@@ -139,7 +153,6 @@ def mag_email_wijzigen_of_404(request, functie):
     # controleer dat deze wijziging voor de juiste competitie is
     # (voorkomt BKO 25m 1pijl probeert RKO Indoor te koppelen)
     if functie_nu.comp_type != functie.comp_type:
-        # SEC/HWL/WL verdwijnt hier ook
         raise Resolver404()
 
     if rol_nu == Rollen.ROL_BKO:
@@ -170,10 +183,9 @@ def receive_bevestiging_functie_email(request, functie):
 
     # het is mogelijk om meerdere keren hetzelfde e-mailadres te koppelen
     # je hebt dan meerdere mails met tijdelijke urls om te volgen
-    # bij gebruik van de 1e worden alle tijdelijke urls geconsumeerd
-    # maar dan wordt deze functie ook meerdere keren aangeroepen
-    # na de eerste keer is nieuwe_email leeg en zou het mis gaan
-    # we moeten wel steeds dezelfde template invullen en terug geven
+    # deze functie wordt voor elke gevolgde url aangeroepen
+    # na de eerste keer is nieuwe_email leeg en gebeurt er niets
+    # we geven wel steeds het succes verhaal terug
     if functie.nieuwe_email:
         # schrijf in het logboek
         from_ip = get_safe_from_ip(request)
@@ -221,7 +233,7 @@ class WijzigEmailView(UserPassesTestMixin, View):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol = rol_get_huidige(self.request)
-        return rol in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL)
+        return rol in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_SEC, Rollen.ROL_HWL)
 
     def handle_no_permission(self):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
@@ -261,7 +273,7 @@ class WijzigEmailView(UserPassesTestMixin, View):
 
         # TODO: functie.nieuwe_email opruimen als SiteTijdelijkeUrl verlopen is (of opgeruimd is)
 
-        # BKO, RKO, RCL, HWL en WL mogen hun eigen contactgegevens wijzigen
+        # BKO, RKO, RCL, HWL mogen hun eigen contactgegevens wijzigen
         # als ze de rol aangenomen hebben
         # verder mogen ze altijd de onderliggende laag aanpassen (net als beheerders koppelen)
         mag_email_wijzigen_of_404(self.request, functie)
@@ -864,7 +876,7 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
 
             for rol, functie_pk in child_tups:
                 url = reverse('Functie:activeer-functie', kwargs={'functie_pk': functie_pk})
-                if rol == Rollen.ROL_HWL:
+                if rol in (Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_WL):
                     functie = pk2func[functie_pk]
                     volgorde = self._functie_volgorde(functie)
                     objs.append({'titel': functie.beschrijving, 'ver_naam': functie.nhb_ver.naam, 'url': url, 'volgorde': volgorde})

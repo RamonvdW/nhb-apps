@@ -9,6 +9,7 @@ from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
 from Competitie.models import competitie_aanmaken, DeelCompetitie
 from Functie.models import maak_functie, Functie
 from Mailer.models import MailQueue
+from Overig.models import SiteTijdelijkeUrl
 from Overig.e2ehelpers import E2EHelpers
 
 
@@ -44,9 +45,17 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
         ver.save()
         self.nhbver1 = ver
 
+        self.functie_sec = maak_functie("SEC test", "SEC")
+        self.functie_sec.nhb_ver = ver
+        self.functie_sec.save()
+
         self.functie_hwl = maak_functie("HWL test", "HWL")
         self.functie_hwl.nhb_ver = ver
         self.functie_hwl.save()
+
+        self.functie_wl = maak_functie("WL test", "WL")
+        self.functie_wl.nhb_ver = ver
+        self.functie_wl.save()
 
         self.url_wijzig_email = '/functie/wijzig-email/%s/'  # % functie_pk
 
@@ -187,7 +196,36 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
         self._check_niet_wijzigbaar(self.functie_rko1)
         self._check_niet_wijzigbaar(self.functie_rcl101)
         self._check_niet_wijzigbaar(self.functie_rcl105)
+        self._check_niet_wijzigbaar(self.functie_sec)
         self._check_wijzigbaar(self.functie_hwl)
+        self._check_wijzigbaar(self.functie_wl)
+
+    def test_sec(self):
+        # log in en wissel naar SEC
+        self.functie_sec.accounts.add(self.account_normaal)
+        self.e2e_login_and_pass_otp(self.account_normaal)
+        self.e2e_wissel_naar_functie(self.functie_sec)
+
+        # controleer dat de juiste e-mailadressen wel/niet wijzigbaar zijn
+        self._check_niet_wijzigbaar(self.functie_bko1)
+        self._check_niet_wijzigbaar(self.functie_bko2)
+        self._check_niet_wijzigbaar(self.functie_rko1)
+        self._check_niet_wijzigbaar(self.functie_rcl101)
+        self._check_niet_wijzigbaar(self.functie_rcl105)
+        self._check_niet_wijzigbaar(self.functie_sec)
+        self._check_wijzigbaar(self.functie_hwl)
+        self._check_wijzigbaar(self.functie_wl)
+
+    def test_wl(self):
+        # log in en wissel naar WL
+        self.functie_wl.accounts.add(self.account_normaal)
+        self.e2e_login_and_pass_otp(self.account_normaal)
+        self.e2e_wissel_naar_functie(self.functie_wl)
+
+        # controleer dat wijzig-email niet gebruikt mag worden
+        url = '/functie/wijzig-email/%s/' % self.functie_wl.pk
+        resp = self.client.get(url)
+        self.assert_is_redirect(resp, '/plein/')
 
     def test_multi_change(self):
         # voer meerdere malen een e-mailadres is
@@ -200,16 +238,26 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
 
         url = self.url_wijzig_email % self.functie_rcl105.pk
 
+        self.assertEqual(SiteTijdelijkeUrl.objects.count(), 0)
+
         # eerste invoer
         resp = self.client.post(url, {'email': 'nieuweemail1@test.com'})
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/bevestig.dtl', 'plein/site_layout.dtl'))
 
+        self.assertEqual(SiteTijdelijkeUrl.objects.count(), 1)
+
         # controleer dat het nieuwe e-mailadres gezet is
         functie = Functie.objects.get(pk=self.functie_rcl105.pk)
         self.assertEqual(functie.nieuwe_email, 'nieuweemail1@test.com')
         self.assertEqual(functie.bevestigde_email, '')
+
+        # haal de 1e tijdelijke url op
+        mail = MailQueue.objects.order_by('-toegevoegd_op')[0]
+        text = mail.mail_text
+        pos = text.find('/overig/url/')     # 12 = deze url lengte
+        url1 = text[pos:pos+12+32+1]         # 32 = code
 
         # tweede invoer
         resp = self.client.post(url, {'email': 'nieuweemail2@test.com'})
@@ -217,20 +265,37 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/bevestig.dtl', 'plein/site_layout.dtl'))
 
+        self.assertEqual(SiteTijdelijkeUrl.objects.count(), 2)
+
         # controleer dat het nieuwe e-mailadres gezet is
         functie = Functie.objects.get(pk=self.functie_rcl105.pk)
         self.assertEqual(functie.nieuwe_email, 'nieuweemail2@test.com')
         self.assertEqual(functie.bevestigde_email, '')
 
-        # volg de tijdelijke URL in de email
-        mail = MailQueue.objects.all()[0]
+        # haal de 2e tijdelijke url op
+        mail = MailQueue.objects.order_by('-toegevoegd_op')[0]
         text = mail.mail_text
-        pos = text.find('/overig/url/')     # 12 lang
-        url = text[pos:pos+12+32+1]        # 32 = code
+        pos = text.find('/overig/url/')     # 12 = deze url lengte
+        url2 = text[pos:pos+12+32+1]         # 32 = code
 
-        resp = self.client.get(url)
+        # volg de 1e url
+        resp = self.client.get(url1)
         self.assertEqual(resp.status_code, 200)
         self.assert_template_used(resp, ('functie/bevestigd.dtl', 'plein/site_layout.dtl'))
+
+        self.assertEqual(SiteTijdelijkeUrl.objects.count(), 1)
+
+        # controleer dat het laatste nieuwe e-mailadres gezet is
+        functie = Functie.objects.get(pk=self.functie_rcl105.pk)
+        self.assertEqual(functie.nieuwe_email, '')
+        self.assertEqual(functie.bevestigde_email, 'nieuweemail2@test.com')
+
+        # volg de 2e url
+        resp = self.client.get(url2)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_template_used(resp, ('functie/bevestigd.dtl', 'plein/site_layout.dtl'))
+
+        self.assertEqual(SiteTijdelijkeUrl.objects.count(), 0)
 
         # controleer dat het laatste nieuwe e-mailadres gezet is
         functie = Functie.objects.get(pk=self.functie_rcl105.pk)

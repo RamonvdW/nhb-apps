@@ -14,7 +14,7 @@ def hernoem_cwz_hwl(apps, _):
 
     # hernoem alle CWZ functies naar HWL
     # behoud de gebruikers die eraan gekoppeld zijn
-    for obj in functie_klas.objects.filter(rol='CWZ'):
+    for obj in functie_klas.objects.filter(rol='CWZ'):                   # pragma: no cover
         obj.rol = 'HWL'
         # let op: in sync houden met management command import_nhb_crm
         obj.beschrijving = "Hoofdwedstrijdleider %s" % obj.nhb_ver.nhb_nr
