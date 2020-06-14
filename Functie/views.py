@@ -1140,7 +1140,7 @@ class OTPControleView(TemplateView):
             else:
                 # controle is mislukt (is al gelogd en in het logboek geschreven)
                 form.add_error(None, 'Verkeerde code. Probeer het nog eens.')
-                # TODO: blokkeer na X pogingen
+                # FUTURE: blokkeer na X pogingen
 
         # still here --> re-render with error message
         context = {'form': form}
@@ -1212,7 +1212,7 @@ class OTPKoppelenView(TemplateView):
 
             # controle is mislukt - is al gelogd
             form.add_error(None, 'Verkeerde code. Probeer het nog eens.')
-            # TODO: blokkeer na X pogingen
+            # FUTURE: blokkeer na X pogingen
 
         # still here --> re-render with error message
         qrcode = qrcode_get(account)

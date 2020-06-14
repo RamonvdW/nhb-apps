@@ -11,7 +11,7 @@ LOGDIR="/var/log/www"
 SPOOLDIR="/var/spool/crm"
 CONFIGFILE="download_crm_config.txt"
 
-# TODO: cleanup of spool directory
+# FUTURE: cleanup of spool directory
 
 ID=$(id -u)
 ID_ROOT=$(id -u root)

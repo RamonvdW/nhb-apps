@@ -8,7 +8,7 @@ from django.db import models
 from BasisTypen.models import IndivWedstrijdklasse, TeamWedstrijdklasse
 from NhbStructuur.models import NhbVereniging
 
-# TODO: uitbreiden met meer mogelijkheden zoals buitenbaan, veld, 3D, etc.
+# FUTURE: uitbreiden met meer mogelijkheden zoals buitenbaan, veld, 3D, etc.
 BAAN_TYPE = (('X', 'Onbekend'),
              ('O', 'Volledig overdekte binnenbaan'),
              ('H', 'Binnen-buiten schieten'))

@@ -116,7 +116,7 @@ def account_check_geblokkeerd(request, from_ip, account):
         my_logger.info('%s LOGIN Mislukte inlog voor account %s met onbevestigde email' % (
                                from_ip, repr(account.username)))
 
-        # TODO: knop maken om na X uur een nieuwe mail te kunnen krijgen
+        # FUTURE: knop maken om na X uur een nieuwe mail te kunnen krijgen
         context = {'partial_email': mailer_obfuscate_email(email.nieuwe_email)}
         menu_dynamics(request, context, actief='inloggen')
         return render(request, TEMPLATE_BEVESTIG_EMAIL, context)

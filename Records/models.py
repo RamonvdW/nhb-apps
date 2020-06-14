@@ -8,7 +8,7 @@ from django.db import models
 from NhbStructuur.models import NhbLid
 
 
-# TODO: support voor team records toevoegen
+# FUTURE: support voor team records toevoegen
 
 
 class IndivRecord(models.Model):

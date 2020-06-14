@@ -58,7 +58,7 @@
         </tr>
     </thead>
 
-    <!-- TODO: RK wedstrijden toevoegen -->
+    <!-- FUTURE: RK wedstrijden toevoegen -->
 
     {% for deelcomp in regio_deelcomps %}
         <tr>

@@ -20,8 +20,6 @@
 
 <p>Bij gebruik van clusters wordt voor de regiocompetitie voor elk cluster een aparte wedstrijdplanning gemaakt.<br>De Indoor en 25m 1pijl competities hebben onafhankelijke clusters.</p>
 
-<!-- TODO: opmerking toevoegen of schutters van een vereniging alleen binnen het cluster mogen schieten/inhalen -->
-
 {% if regio_heeft_clusters %}
     <form action="{{ opslaan_url }}" method="post">
         {% csrf_token %}
