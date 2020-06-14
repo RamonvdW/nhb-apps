@@ -45,7 +45,7 @@ h1, h2, h3, h4, h5, h6 {
     color: blue;
 }
 
-/* vertikale verkleiner in een grid */
+/* lagere regel in een grid */
 .small-row {
     padding: 5px 10px 5px 10px;
     margin-bottom: 0px;
