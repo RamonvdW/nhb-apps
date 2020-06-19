@@ -164,7 +164,6 @@ class MaakHandleiding(object):
 
                     # TODO: check dat static content beschikbaar is
 
-
                 else:
                     if self.debug_pagina:
                         print('[DEBUG] Interne link gevonden: %s' % repr(link))
