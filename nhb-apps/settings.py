@@ -313,29 +313,31 @@ SAML_IDP_CONFIG = {
 
 # pagina's van de handleiding
 HANDLEIDING_TOP = 'Hoofdpagina'
-HANDLEIDING_SEC = 'Handleiding_SEC'
-HANDLEIDING_WL = 'Handleiding_WL'
-HANDLEIDING_HWL = 'Handleiding_HWL'
+#HANDLEIDING_SEC = 'Handleiding_SEC'
+HANDLEIDING_WL = 'Handleiding_Wedstrijdleider'
+HANDLEIDING_HWL = 'Handleiding_Hoofdwedstrijdleider'
 HANDLEIDING_RCL = 'Handleiding_RCL'
 HANDLEIDING_RKO = 'Handleiding_RKO'
 HANDLEIDING_BKO = 'Handleiding_BKO'
+HANDLEIDING_BB = 'Handleiding_BB'
 HANDLEIDING_2FA = 'Twee-factor_authenticatie'
 HANDLEIDING_ROLLEN = 'Rollen'
 
 HANDLEIDING_PAGINAS = [
     HANDLEIDING_TOP,
-    HANDLEIDING_SEC,
+    #HANDLEIDING_SEC,
     HANDLEIDING_WL,
     HANDLEIDING_HWL,
     HANDLEIDING_RCL,
     HANDLEIDING_RKO,
     HANDLEIDING_BKO,
+    HANDLEIDING_BB,
     HANDLEIDING_2FA,
     HANDLEIDING_ROLLEN,
     # pagina's van de handleiding die intern gerefereerd worden
     'Tips_voor_wiki_gebruik',
-    'RKO_opleiden',
-    'Handleiding_CWZ'
+    'Handleiding_CWZ',
+    'Koppelen_beheerders'
 ]
 
 
