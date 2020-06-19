@@ -189,6 +189,8 @@ class LoginView(TemplateView):
 
     def _probeer_login(self, form, account):
 
+        """ Kijk of het wachtwoord goed is en het account niet geblokkeerd is """
+
         from_ip = get_safe_from_ip(self.request)
         login_naam = form.cleaned_data.get('login_naam')
         wachtwoord = form.cleaned_data.get('wachtwoord')
@@ -221,6 +223,9 @@ class LoginView(TemplateView):
                 context = {'account': account}
                 menu_dynamics(self.request, context, actief='inloggen')
                 return render(self.request, TEMPLATE_GEBLOKKEERD, context)
+
+            # wachtwoord klopt niet, doe opnieuw
+            return None
 
         # wachtwoord is goed
 
@@ -282,7 +287,7 @@ class LoginView(TemplateView):
 
                 response = self._probeer_login(form, account)
                 if response:
-                    # inlog gelukt
+                    # inlog gelukt of eruit geknikkerd met foutmelding
                     return response
 
             # gebruiker mag het nog een keer proberen
