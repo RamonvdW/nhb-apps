@@ -11,6 +11,7 @@ from django.views.generic import TemplateView, ListView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.shortcuts import redirect
 from django.utils import timezone
+from django.conf import settings
 from BasisTypen.models import BoogType
 from Plein.menu import menu_dynamics
 from Logboek.models import schrijf_in_logboek
@@ -389,6 +390,9 @@ class AGVaststellenView(UserPassesTestMixin, TemplateView):
         else:
             context['seizoen'] = histcomps[0].seizoen
 
+        context['aantal_scores_18'] = settings.COMPETITIE_18M_MINIMUM_SCORES_VOOR_AG
+        context['aantal_scores_25'] = settings.COMPETITIE_25M_MINIMUM_SCORES_VOOR_AG
+
         menu_dynamics(self.request, context, actief='competitie')
         return render(request, self.template_name, context)
 
@@ -435,13 +439,20 @@ class AGVaststellenView(UserPassesTestMixin, TemplateView):
             now = timezone.now()
             datum = datetime.date(year=now.year, month=now.month, day=now.day)
 
+            minimum_aantal_scores = {18: settings.COMPETITIE_18M_MINIMUM_SCORES_VOOR_AG,
+                                     25: settings.COMPETITIE_25M_MINIMUM_SCORES_VOOR_AG}
+
             # doorloop alle individuele histcomp records die bij dit seizoen horen
             for obj in (HistCompetitieIndividueel
                         .objects
                         .select_related('histcompetitie')
                         .filter(histcompetitie__seizoen=seizoen)):
                 afstand_meter = int(obj.histcompetitie.comp_type)
-                if obj.gemiddelde > AG_NUL and obj.boogtype in boogtype_dict:
+
+                if (obj.gemiddelde > AG_NUL
+                        and obj.boogtype in boogtype_dict
+                        and obj.tel_aantal_scores() >= minimum_aantal_scores[afstand_meter]):
+
                     # haal het schutterboog record op, of maak een nieuwe aan
                     try:
                         tup = (obj.schutter_nr, obj.boogtype)
@@ -475,7 +486,7 @@ class AGVaststellenView(UserPassesTestMixin, TemplateView):
 
                         # zoek het score record erbij
                         if not was_aspirant:
-                            # eerste aanvangsgemiddelde voor deze afstand
+                            # aanvangsgemiddelde voor deze afstand
                             waarde = int(obj.gemiddelde * 1000)
 
                             score = Score(schutterboog=schutterboog,

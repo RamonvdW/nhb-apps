@@ -5,6 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import models
+from decimal import Decimal
 
 
 class HistCompetitie(models.Model):
@@ -70,6 +71,25 @@ class HistCompetitieIndividueel(models.Model):
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
         return "rank %s: %s %s" % (self.rank, self.schutter_naam, self.gemiddelde)
+
+    def tel_aantal_scores(self):
+        count = 0
+        NUL = Decimal('0.000')
+        if self.score1 > NUL:
+            count += 1
+        if self.score2 > NUL:
+            count += 1
+        if self.score3 > NUL:
+            count += 1
+        if self.score4 > NUL:
+            count += 1
+        if self.score5 > NUL:
+            count += 1
+        if self.score6 > NUL:
+            count += 1
+        if self.score7 > NUL:
+            count += 1
+        return count
 
     class Meta:
         """ meta data voor de admin interface """
