@@ -137,6 +137,134 @@ class LoginView(TemplateView):
     # class variables shared by all instances
     form_class = LoginForm
 
+    def _zoek_account(self, form):
+        # zoek een bestaand account
+
+        # we doen hier alvast een stukje voorwerk dat normaal door het backend gedaan wordt
+        # ondersteunen inlog met Account.username en Account.bevestigde_email
+
+        from_ip = get_safe_from_ip(self.request)
+        login_naam = form.cleaned_data.get('login_naam')
+
+        account = None
+        try:
+            account = Account.objects.get(username=login_naam)
+        except Account.DoesNotExist:
+            # account met deze username bestaat niet
+            # sta ook toe dat met het email adres ingelogd wordt
+            try:
+                email = AccountEmail.objects.get(bevestigde_email=login_naam)
+            except AccountEmail.DoesNotExist:
+                # email is ook niet bekend
+                # LET OP! dit kan heel snel heel veel data worden! - voorkom storage overflow!!
+                # my_logger.info('%s LOGIN Mislukte inlog voor onbekend inlog naam %s' % (from_ip, repr(login_naam)))
+                # schrijf_in_logboek(None, 'Inloggen', 'Mislukte inlog vanaf IP %s: onbekende inlog naam %s' % (from_ip, repr(login_naam)))
+                pass
+            except AccountEmail.MultipleObjectsReturned:
+                # kan niet kiezen tussen verschillende accounts
+                # werkt dus niet als het email hergebruikt is voor meerdere accounts
+                form.add_error(None,
+                               'Inloggen met e-mail is niet mogelijk. Probeer het nog eens.')
+                account = None
+            else:
+                # email gevonden
+                # pak het account erbij
+                account = email.account
+
+        if account:
+            # blokkeer inlog als het account geblokkeerd is door te veel wachtwoord pogingen
+            now = timezone.now()
+            if account.is_geblokkeerd_tot:
+                if account.is_geblokkeerd_tot > now:
+                    schrijf_in_logboek(account, 'Inloggen',
+                                       'Mislukte inlog vanaf IP %s voor geblokkeerd account %s' % (
+                                           from_ip, repr(login_naam)))
+                    my_logger.info(
+                        '%s LOGIN Mislukte inlog voor geblokkeerd account %s' % (from_ip, repr(login_naam)))
+                    context = {'account': account}
+                    menu_dynamics(self.request, context, actief='inloggen')
+                    return render(self.request, TEMPLATE_GEBLOKKEERD, context), None
+
+        return None, account
+
+    def _probeer_login(self, form, account):
+
+        from_ip = get_safe_from_ip(self.request)
+        login_naam = form.cleaned_data.get('login_naam')
+        wachtwoord = form.cleaned_data.get('wachtwoord')
+        next = form.cleaned_data.get('next')
+
+        # controleer het wachtwoord
+        if not authenticate(username=account.username, password=wachtwoord):
+            # authenticatie is niet gelukt
+            # reden kan zijn: verkeerd wachtwoord of is_active=False
+
+            # onthoudt precies wanneer dit was
+            account.laatste_inlog_poging = timezone.now()
+            schrijf_in_logboek(account, 'Inloggen',
+                               'Mislukte inlog vanaf IP %s voor account %s' % (from_ip, repr(login_naam)))
+            my_logger.info('%s LOGIN Mislukte inlog voor account %s' % (from_ip, repr(login_naam)))
+
+            # onthoudt hoe vaak dit verkeerd gegaan is
+            account.verkeerd_wachtwoord_teller += 1
+            account.save()
+
+            # bij te veel pogingen, blokkeer het account
+            if account.verkeerd_wachtwoord_teller >= settings.AUTH_BAD_PASSWORD_LIMIT:
+                account.is_geblokkeerd_tot = timezone.now() + timedelta(
+                    minutes=settings.AUTH_BAD_PASSWORD_LOCKOUT_MINS)
+                account.verkeerd_wachtwoord_teller = 0  # daarna weer volle mogelijkheden
+                account.save()
+                schrijf_in_logboek(account, 'Inlog geblokkeerd',
+                                   'Account %s wordt geblokkeerd tot %s' % (
+                                       repr(login_naam), account.is_geblokkeerd_tot.strftime('%Y-%m-%d %H:%M:%S')))
+                context = {'account': account}
+                menu_dynamics(self.request, context, actief='inloggen')
+                return render(self.request, TEMPLATE_GEBLOKKEERD, context)
+
+        # wachtwoord is goed
+
+        # kijk of er een reden is om gebruik van het account te weren
+        for _, func in account_plugins_login:
+            httpresp = func(self.request, from_ip, account)
+            if httpresp:
+                # plugin has decided that the user may not login
+                # and has generated/rendered an HttpResponse
+                return httpresp
+
+        # integratie met de authenticatie laag van Django
+        login(self.request, account)
+
+        my_logger.info('%s LOGIN op account %s' % (from_ip, repr(account.username)))
+
+        if account.verkeerd_wachtwoord_teller > 0:
+            account.verkeerd_wachtwoord_teller = 0
+            account.save()
+
+        # Aangemeld blijven checkbox
+        if not form.cleaned_data.get('aangemeld_blijven', False):
+            # gebruiker wil NIET aangemeld blijven
+            # zorg dat de session-cookie snel verloopt
+            self.request.session.set_expiry(0)
+
+        account_rechten_login_gelukt(self.request)
+
+        # voer de automatische redirect uit, indien gevraagd
+        if next:
+            # reject niet bestaande urls
+            # resolve zoekt de view die de url af kan handelen
+            if next[-1] != '/':
+                next += '/'
+            try:
+                resolve(next)
+            except Resolver404:
+                pass
+            else:
+                # is valide url
+                return HttpResponseRedirect(next)
+
+        return HttpResponseRedirect(reverse('Plein:plein'))
+
     def post(self, request, *args, **kwargs):
         """ deze functie wordt aangeroepen als een POST request ontvangen is.
             dit is gekoppeld aan het drukken op de LOG IN knop.
@@ -144,123 +272,18 @@ class LoginView(TemplateView):
         # https://stackoverflow.com/questions/5868786/what-method-should-i-use-for-a-login-authentication-request
         form = LoginForm(request.POST)
         if form.is_valid():
-            from_ip = get_safe_from_ip(request)
-            login_naam = form.cleaned_data.get('login_naam')
-            wachtwoord = form.cleaned_data.get('wachtwoord')
-            next = form.cleaned_data.get('next')
 
-            # we doen hier alvast een stukje voorwerk dat normaal door het backend gedaan wordt
-            # ondersteunen inlog met Account.username en Account.bevestigde_email
-
-            # zoek een bestaand account
-            account = None
-            try:
-                account = Account.objects.get(username=login_naam)
-            except Account.DoesNotExist:
-                # account met deze username bestaat niet
-                # sta ook toe dat met het email adres ingelogd wordt
-                try:
-                    email = AccountEmail.objects.get(bevestigde_email=login_naam)
-                except AccountEmail.DoesNotExist:
-                    # email is ook niet bekend
-                    # LET OP! dit kan heel snel heel veel data worden! - voorkom storage overflow!!
-                    #my_logger.info('%s LOGIN Mislukte inlog voor onbekend inlog naam %s' % (from_ip, repr(login_naam)))
-                    #schrijf_in_logboek(None, 'Inloggen', 'Mislukte inlog vanaf IP %s: onbekende inlog naam %s' % (from_ip, repr(login_naam)))
-                    pass
-                except AccountEmail.MultipleObjectsReturned:
-                    # kan niet kiezen tussen verschillende accounts
-                    # werkt dus niet als het email hergebruikt is voor meerdere accounts
-                    form.add_error(None,
-                                   'Inloggen met e-mail is niet mogelijk. Probeer het nog eens.')
-                    account = None
-                else:
-                    # email gevonden
-                    # pak het account erbij
-                    account = email.account
-
+            response, account = self._zoek_account(form)
             if account:
-                # account bestaat wel
+                # account bestaat
+                if response:
+                    # account is geblokkeerd
+                    return response
 
-                # blokkeer inlog als het account geblokkeerd is door te veel wachtwoord pogingen
-                now = timezone.now()
-                if account.is_geblokkeerd_tot:
-                    if account.is_geblokkeerd_tot > now:
-                        schrijf_in_logboek(account, 'Inloggen',
-                                           'Mislukte inlog vanaf IP %s voor geblokkeerd account %s' % (
-                                           from_ip, repr(login_naam)))
-                        my_logger.info(
-                            '%s LOGIN Mislukte inlog voor geblokkeerd account %s' % (from_ip, repr(login_naam)))
-                        context = {'account': account}
-                        menu_dynamics(request, context, actief='inloggen')
-                        return render(request, TEMPLATE_GEBLOKKEERD, context)
-
-                # controleer het wachtwoord
-                if authenticate(username=account.username, password=wachtwoord):
-                    # wachtwoord is goed
-
-                    # kijk of er een reden is om gebruik van het account te weren
-                    for _, func in account_plugins_login:
-                        httpresp = func(request, from_ip, account)
-                        if httpresp:
-                            # plugin has decided that the user may not login
-                            # and has generated/rendered an HttpResponse
-                            return httpresp
-
-                    # integratie met de authenticatie laag van Django
-                    login(request, account)
-
-                    my_logger.info('%s LOGIN op account %s' % (from_ip, repr(account.username)))
-
-                    if account.verkeerd_wachtwoord_teller > 0:
-                        account.verkeerd_wachtwoord_teller = 0
-                        account.save()
-
-                    # Aangemeld blijven checkbox
-                    if not form.cleaned_data.get('aangemeld_blijven', False):
-                        # gebruiker wil NIET aangemeld blijven
-                        # zorg dat de session-cookie snel verloopt
-                        request.session.set_expiry(0)
-
-                    account_rechten_login_gelukt(request)
-
-                    # voer de automatische redirect uit, indien gevraagd
-                    if next:
-                        # reject niet bestaande urls
-                        # resolve zoekt de view die de url af kan handelen
-                        if next[-1] != '/':
-                            next += '/'
-                        try:
-                            resolve(next)
-                        except Resolver404:
-                            pass
-                        else:
-                            # is valide url
-                            return HttpResponseRedirect(next)
-
-                    return HttpResponseRedirect(reverse('Plein:plein'))
-                else:
-                    # authenticatie is niet gelukt
-                    # reden kan zijn: verkeerd wachtwoord of is_active=False
-
-                    # onthoudt precies wanneer dit was
-                    account.laatste_inlog_poging = timezone.now()
-                    schrijf_in_logboek(account, 'Inloggen', 'Mislukte inlog vanaf IP %s voor account %s' % (from_ip, repr(login_naam)))
-                    my_logger.info('%s LOGIN Mislukte inlog voor account %s' % (from_ip, repr(login_naam)))
-
-                    # onthoudt hoe vaak dit verkeerd gegaan is
-                    account.verkeerd_wachtwoord_teller += 1
-                    account.save()
-
-                    # bij te veel pogingen, blokkeer het account
-                    if account.verkeerd_wachtwoord_teller >= settings.AUTH_BAD_PASSWORD_LIMIT:
-                        account.is_geblokkeerd_tot = timezone.now() + timedelta(minutes=settings.AUTH_BAD_PASSWORD_LOCKOUT_MINS)
-                        account.verkeerd_wachtwoord_teller = 0      # daarna weer volle mogelijkheden
-                        account.save()
-                        schrijf_in_logboek(account, 'Inlog geblokkeerd',
-                                           'Account %s wordt geblokkeerd tot %s' % (repr(login_naam), account.is_geblokkeerd_tot.strftime('%Y-%m-%d %H:%M:%S')))
-                        context = {'account': account}
-                        menu_dynamics(request, context, actief='inloggen')
-                        return render(request, TEMPLATE_GEBLOKKEERD, context)
+                response = self._probeer_login(form, account)
+                if response:
+                    # inlog gelukt
+                    return response
 
             # gebruiker mag het nog een keer proberen
             if len(form.errors) == 0:
