@@ -917,16 +917,18 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
                 context['show_otp_koppelen'] = True
                 context['show_otp_controle'] = False
 
-        context['wiki_2fa_url'] = settings.WIKI_URL_2FA
-        context['wiki_2fa_titel'] = 'Tweede-factor authenticatie'
-
-        context['wiki_rollen'] = settings.WIKI_URL_ROLLEN
+        if settings.ENABLE_WIKI:
+            context['wiki_2fa_url'] = settings.WIKI_URL + '/' + settings.HANDLEIDING_2FA
+            context['wiki_rollen'] = settings.WIKI_URL + '/' + settings.HANDLEIDING_ROLLEN
+        else:
+            context['wiki_2fa_url'] = reverse('Handleiding:' + settings.HANDLEIDING_2FA)
+            context['wiki_rollen'] = reverse('Handleiding:' + settings.HANDLEIDING_ROLLEN)
 
         # login-as functie voor IT beheerder
         if rol_get_huidige(self.request) == Rollen.ROL_IT:
             context['url_login_as'] = reverse('Account:account-wissel')
 
-        # TODO: volgende code is alleen voor de testsuite - willen we dit live terug zien?
+        # bedoeld voor de testsuite, maar kan geen kwaad
         context['insert_meta'] = True
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
         context['meta_rol'] = rol2url[rol_nu]
