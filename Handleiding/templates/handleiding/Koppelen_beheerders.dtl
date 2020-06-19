@@ -10,7 +10,34 @@
 {% block pagina %}
 <div class="white" style="padding:10px 30px 10px 30px">
 <h4>Koppelen beheerders</h4>
-<p>== Koppel beheerders ==</p><p></p><p></p><p>=== Beheerders competitie ===</p><p></p><p>Leden van de NHB kunnen gekoppeld worden aan een functie, bijvoorbeeld RCL.</p><p></p><p>De koppeling moet uitgevoerd worden door de hiërarchisch direct bovenliggende rol. In het geval van de RCL Indoor voor een regio is dat dus de RKO Indoor voor het rayon.</p><p></p><p>Het kaartje om beheerders in te zien en aan te passen kan gevonden worden op Het Plein.</p><p></p><p></p><p>=== Beheerders binnen een vereniging ===</p><p></p><p>Aan functies binnen een vereniging (SEC, HWL, WL) kunnen alleen leden van de vereniging gekoppeld worden. Dit kan gedaan worden door de SEC of HWL.</p><p></p><p>Het kaartje om beheerders van de vereniging in te zien is te vinden in het Vereniging menu.</p><p></p><p></p><p>=== Hoe koppelen ===</p><p></p><p>Kies de WIJZIG knop voor de functie die je wilt wijzigen.</p><p></p><p>Boven aan het scherm staan de gekoppelde leden. Druk op de naam om de ontkoppel knop te zien.</p><p></p><p>Via het zoekveld kan gezocht worden naar een lid, op naam of NHB nummer. Het lid moet een account aangemaakt hebben.</p><p></p><p>Klik op de naam van het gevonden lid, controleer dat het de juiste persoon is aan de hand van de extra informatie die getoond wordt en klik daarna op de knop om te koppelen.</p>
+<p><h5>Beheerders competitie </h5></p>
+<p></p>
+<p>Leden van de NHB kunnen gekoppeld worden aan een functie, bijvoorbeeld RCL.</p>
+<p></p>
+<p>De koppeling moet uitgevoerd worden door de hiërarchisch direct bovenliggende rol. In het geval van de RCL Indoor voor een regio is dat dus de RKO Indoor voor het rayon.</p>
+<p></p>
+<p>Het kaartje om beheerders in te zien en aan te passen kan gevonden worden op Het Plein.</p>
+<p></p>
+<p></p>
+<p><h5>Beheerders binnen een vereniging </h5></p>
+<p></p>
+<p>Aan functies binnen een vereniging (SEC, HWL, WL) kunnen alleen leden van de vereniging gekoppeld worden. Dit kan gedaan worden door de SEC of HWL.</p>
+<p></p>
+<p>Het kaartje om beheerders van de vereniging in te zien is te vinden in het Vereniging menu.</p>
+<p></p>
+<p></p>
+<p><h5>Hoe koppelen </h5></p>
+<p></p>
+<p>Kies de WIJZIG knop voor de functie die je wilt wijzigen.</p>
+<p></p>
+<p>Boven aan het scherm staan de gekoppelde leden. Druk op de naam om de ontkoppel knop te zien.</p>
+<p></p>
+<p>Via het zoekveld kan gezocht worden naar een lid, op naam of NHB nummer. Het lid moet een account aangemaakt hebben.</p>
+<p></p>
+<p>Klik op de naam van het gevonden lid, controleer dat het de juiste persoon is aan de hand van de extra informatie die getoond wordt en klik daarna op de knop om te koppelen.</p>
+<p></p>
+<p>Terug naar de <a href="/handleiding/Hoofdpagina">Hoofdpagina</a>.</p>
+
 </div>
 
 {% endblock %}

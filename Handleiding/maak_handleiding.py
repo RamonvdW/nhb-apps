@@ -123,74 +123,6 @@ class MaakHandleiding(object):
             if self.debug_pagina:
                 print('[DEBUG] wiki line: %s' % line)
 
-            # interne links
-            pos = line.find('[[')
-            if pos >= 0:
-                temp = line[:pos]
-                line = line[pos+2:]
-                pos = line.find(']]')
-                link = line[:pos]
-                line = temp + line[pos+2:]
-                if link[:7].lower() == 'http://' or link[:8].lower() == 'https://':
-                    print('[WARNING] Interne link zou externe link moeten zijn (enkele brackets): %s' % link)
-                    url = link.split(' ')[0]
-                    label = link[len(url)+1:]
-                    out += ('<a class="btn-nhb-blauw" href="' + url + '" target="_blank" rel="noopener noreferrer">'
-                            + '<i class="material-icons-round left">open_in_new</i>'
-                            + label + '</a>')
-                elif link[:5] == 'File:':
-                    # display image
-                    if self.debug_pagina:
-                        print('[DEBUG] Referentie naar plaatje gevonden: %s' % repr(link))
-                    link = link[5:]
-                    url = link.split('|')[0]
-                    label = link[len(url)+1:]
-                    width = None
-                    if "px|" in label:
-                        spl = label.split('|')
-                        if len(spl) != 2 or spl[0][:-2] == 'px':
-                            print('[WARNING] Expected width in %s --> got %s' % (label, repr(spl)))
-                        else:
-                            width = spl[0][:-2]
-                            label = spl[1]
-
-                    out += '<img src="{% static '
-                    out += "'handleiding/" + url + "'"
-                    out += ' %}"'
-
-                    if width:
-                        out += ' width="%s"' % width
-                    out += ' alt="%s">' % label
-
-                    # TODO: check dat static content beschikbaar is
-
-                else:
-                    if self.debug_pagina:
-                        print('[DEBUG] Interne link gevonden: %s' % repr(link))
-                    # converteer interne link naar andere handleiding pagina
-                    fname = link.replace(' ', '_')
-                    try:
-                        self.aangemaakte_interne_links[fname].append(voor_pagina)
-                    except KeyError:
-                        self.aangemaakte_interne_links[fname] = [voor_pagina]
-                    out += '<a href="/handleiding/' + fname + '">' + link + '</a>'
-
-            # externe links
-            pos = line.find('[')
-            if pos >= 0:
-                temp = line[:pos]
-                line = line[pos+1:]
-                pos = line.find(']')
-                link = line[:pos]
-                line = temp + line[pos+1:]
-                if self.debug_pagina:
-                    print('[DEBUG] Externe link gevonden: %s' % repr(link))
-                url = link.split(' ')[0]
-                label = link[len(url) + 1:]
-                out += ('<a class="btn-nhb-blauw" href="' + url + '" target="_blank" rel="noopener noreferrer">'
-                        + '<i class="material-icons-round left">open_in_new</i>'
-                        + label + '</a>')
-
             # vetdruk
             line = line.replace("'''''", '{%b%}{%i%}')
             line = line.replace("'''", '{%b%}')
@@ -231,11 +163,80 @@ class MaakHandleiding(object):
             line = line.replace('{%', '<')
             line = line.replace('%}', '>')
 
+            # interne links
+            pos = line.find('[[')
+            if pos >= 0:
+                temp1 = line[:pos]
+                line = line[pos+2:]
+                pos = line.find(']]')
+                link = line[:pos]
+                temp3 = line[pos+2:]
+                if link[:7].lower() == 'http://' or link[:8].lower() == 'https://':
+                    print('[WARNING] Interne link zou externe link moeten zijn (enkele brackets): %s' % link)
+                    url = link.split(' ')[0]
+                    label = link[len(url)+1:]
+                    temp2 = ('<a class="btn-nhb-blauw" href="' + url + '" target="_blank" rel="noopener noreferrer">'
+                             + '<i class="material-icons-round left">open_in_new</i>'
+                             + label + '</a>')
+                elif link[:5] == 'File:':
+                    # display image
+                    if self.debug_pagina:
+                        print('[DEBUG] Referentie naar plaatje gevonden: %s' % repr(link))
+                    link = link[5:]
+                    url = link.split('|')[0]
+                    label = link[len(url)+1:]
+                    width = None
+                    if "px|" in label:
+                        spl = label.split('|')
+                        if len(spl) != 2 or spl[0][:-2] == 'px':
+                            print('[WARNING] Expected width in %s --> got %s' % (label, repr(spl)))
+                        else:
+                            width = spl[0][:-2]
+                            label = spl[1]
+
+                    temp2 = '<img src="{% static ' + "'handleiding/" + url + "'" + ' %}"'
+
+                    if width:
+                        temp2 += ' width="%s"' % width
+                    temp2 += ' alt="%s">' % label
+
+                    # TODO: check dat static content beschikbaar is
+
+                else:
+                    if self.debug_pagina:
+                        print('[DEBUG] Interne link gevonden: %s' % repr(link))
+                    # converteer interne link naar andere handleiding pagina
+                    fname = link.replace(' ', '_')
+                    try:
+                        self.aangemaakte_interne_links[fname].append(voor_pagina)
+                    except KeyError:
+                        self.aangemaakte_interne_links[fname] = [voor_pagina]
+                    temp2 = '<a href="/handleiding/' + fname + '">' + link + '</a>'
+
+                line = temp1 + temp2 + temp3
+                # continue processing
+
+            # externe links
+            pos = line.find('[')
+            if pos >= 0:
+                temp = line[:pos]
+                line = line[pos+1:]
+                pos = line.find(']')
+                link = line[:pos]
+                line = temp + line[pos+1:]
+                if self.debug_pagina:
+                    print('[DEBUG] Externe link gevonden: %s' % repr(link))
+                url = link.split(' ')[0]
+                label = link[len(url) + 1:]
+                out += ('<a class="btn-nhb-blauw" href="' + url + '" target="_blank" rel="noopener noreferrer">'
+                        + '<i class="material-icons-round left">open_in_new</i>'
+                        + label + '</a>')
+
             # headings
             if line[:2] == '==':
                 for marker, heading in (('==', 'h4'), ('===', 'h5'), ('====', 'h6')):
                     mlen = len(marker)
-                    if line[:mlen+1] == marker + ' ' and line[-mlen:] == ' ' + marker:
+                    if line[:mlen+1] == marker + ' ' and line[-mlen-1:] == ' ' + marker:
                         line = '<' + heading + '>' + line[mlen+1:0-mlen] + '</' + heading + '>'
                 # for
 
@@ -252,7 +253,7 @@ class MaakHandleiding(object):
                 out += '</ul>\n'
                 in_lijstje = False
 
-            out += '<p>' + line + '</p>'
+            out += '<p>' + line + '</p>\n'
         # for
 
         if out:

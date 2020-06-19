@@ -10,11 +10,15 @@
 {% block pagina %}
 <div class="white" style="padding:10px 30px 10px 30px">
 <h4>Handleiding RCL</h4>
-<p>== Handleiding RCL ==</p><p></p><p>Als Regiocompetitieleider (RCL) ben je verantwoordelijk voor:</p><ul style="padding-left: 20px">
+<p>Als Regiocompetitieleider (RCL) ben je verantwoordelijk voor:</p>
+<ul style="padding-left: 20px">
 <li  style="list-style-type: disc; padding-left: 0px">Het organiseren van een regiocompetitie voor de Indoor of de 25m 1pijl competitie</li>
 <li  style="list-style-type: disc; padding-left: 0px">Een van de 16 rego's waarin Nederland opgedeeld is door de NHB</li>
 <li  style="list-style-type: disc; padding-left: 0px">Afspraken maken voor het opstellen van de wedstrijdkalender: in welke weeknummers en op welke locaties kan er geschoten worden?</li>
 <li  style="list-style-type: disc; padding-left: 0px">Zorgen dat elke schutter 7 scores neer kan zetten</li>
+</ul>
+<p></p>
+<p>Terug naar de <a href="/handleiding/Hoofdpagina">Hoofdpagina</a>.</p>
 
 </div>
 

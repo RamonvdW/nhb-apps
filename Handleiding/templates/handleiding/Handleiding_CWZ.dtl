@@ -10,7 +10,12 @@
 {% block pagina %}
 <div class="white" style="padding:10px 30px 10px 30px">
 <h4>Handleiding CWZ</h4>
-<p>Dit wordt de handleiding voor de CWZ.</p><p></p><p>De secretaris van een vereniging (zoals bekend in Onze Relaties) is de initiële <b>Coordinator Wedstrijdzaken</b>, afgekort CWZ. Binnenkort kan de CWZ andere leden van de vereniging koppelen als hulp-CWZ. Leden die deze rol toegekend hebben kunnen straks aanmeldingen doen voor de competitie, inclusief teams maken, aanvangsgemiddelden invoeren/controleren, etc.</p><p></p><p>De CWZ kan ook worden benoemd door de "Regio Competitie Leider", afgekort RCL</p>
+<p>Dit wordt de handleiding voor de CWZ.</p>
+<p></p>
+<p>De secretaris van een vereniging (zoals bekend in Onze Relaties) is de initiële <b>Coordinator Wedstrijdzaken</b>, afgekort CWZ. Binnenkort kan de CWZ andere leden van de vereniging koppelen als hulp-CWZ. Leden die deze rol toegekend hebben kunnen straks aanmeldingen doen voor de competitie, inclusief teams maken, aanvangsgemiddelden invoeren/controleren, etc.</p>
+<p></p>
+<p>De CWZ kan ook worden benoemd door de "Regio Competitie Leider", afgekort RCL</p>
+
 </div>
 
 {% endblock %}

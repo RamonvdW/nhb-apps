@@ -10,7 +10,14 @@
 {% block pagina %}
 <div class="white" style="padding:10px 30px 10px 30px">
 <h4>Tips voor wiki gebruik</h4>
-<p>Een wiki is bedoeld om samen te werken aan de inhoud. Het is mogelijk om een pagina te wijzigen en nieuwe pagina's aan te maken. Volledige vrijheid dus. Elke pagina heeft een geschiedenis van de wijzigingen die gemaakt zijn.</p><p></p><p>Deze wiki is gebaseerd op MediaWiki, net als de bekende Wikipedia. Via 'Hulp' in het menu aan de linker kant kan je meer informatie vinden over het wijzigen van pagina's en mogelijkheden voor opmaak zoals verwijzingen naar andere pagina's, het toevoegen van plaatjes en het formatteren van tabellen.</p><p></p><p>En voel je vrij om deze pagina uit te breiden ;-)</p>
+<p>Een wiki is bedoeld om samen te werken aan de inhoud. Het is mogelijk om een pagina te wijzigen en nieuwe pagina's aan te maken. Volledige vrijheid dus. Elke pagina heeft een geschiedenis van de wijzigingen die gemaakt zijn.</p>
+<p></p>
+<p>Deze wiki is gebaseerd op MediaWiki, net als de bekende Wikipedia. Via 'Hulp' in het menu aan de linker kant kan je meer informatie vinden over het wijzigen van pagina's en mogelijkheden voor opmaak zoals verwijzingen naar andere pagina's, het toevoegen van plaatjes en het formatteren van tabellen.</p>
+<p></p>
+<p>En voel je vrij om deze pagina uit te breiden ;-)</p>
+<p></p>
+<p>Terug naar de <a href="/handleiding/Hoofdpagina">Hoofdpagina</a>.</p>
+
 </div>
 
 {% endblock %}

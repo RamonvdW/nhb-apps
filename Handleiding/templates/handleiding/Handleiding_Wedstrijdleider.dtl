@@ -10,7 +10,10 @@
 {% block pagina %}
 <div class="white" style="padding:10px 30px 10px 30px">
 <h4>Handleiding Wedstrijdleider</h4>
-<p>== Handleiding Wedstrijdleider ==</p><p></p><p>Dit wordt de handleiding voor de WL</p>
+<p>Dit wordt de handleiding voor de WL</p>
+<p></p>
+<p>Terug naar de <a href="/handleiding/Hoofdpagina">Hoofdpagina</a>.</p>
+
 </div>
 
 {% endblock %}
