@@ -55,7 +55,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         return HttpResponseRedirect(reverse('Plein:plein'))
 
     @staticmethod
-    def _find_scores(nhblid):
+    def _find_histcomp_scores(nhblid):
         """ Zoek alle scores van deze schutter """
         boogtype2str = dict()
         for boog in BoogType.objects.all():
@@ -66,25 +66,24 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         for obj in (HistCompetitieIndividueel
                     .objects
                     .filter(schutter_nr=nhblid.nhb_nr)
+                    .select_related('histcompetitie')
                     .order_by('-histcompetitie__seizoen')):
-            wedstrijd = HistCompetitie.comptype2str[obj.histcompetitie.comp_type]
-            datum_str = 'Seizoen ' + obj.histcompetitie.seizoen
+            obj.competitie_str = HistCompetitie.comptype2str[obj.histcompetitie.comp_type]
+            obj.seizoen_str = 'Seizoen ' + obj.histcompetitie.seizoen
             try:
-                boog_str = boogtype2str[obj.boogtype]
+                obj.boog_str = boogtype2str[obj.boogtype]
             except KeyError:
-                boog_str = "?"
+                obj.boog_str = "?"
+
+            scores = list()
             for score in (obj.score1, obj.score2, obj.score3, obj.score4, obj.score5, obj.score6, obj.score7):
                 if score:
-                    entry = dict()
-                    entry['score'] = score
-                    entry['datum'] = datum_str
-                    entry['wedstrijd'] = wedstrijd
-                    entry['boog'] = boog_str
-                    objs.append(entry)
+                    scores.append(str(score))
             # for
+            obj.scores_str = ", ".join(scores)
+            objs.append(obj)
         # for
 
-        # records niet toevoegen, want dan wordt het dubbel getoond
         return objs
 
     @staticmethod
@@ -117,7 +116,9 @@ class ProfielView(UserPassesTestMixin, TemplateView):
 
         schutterboog_dict = dict()  # [boog_afkorting] = SchutterBoog()
         # typische 0 tot 5 records
-        for schutterboog in nhblid.schutterboog_set.select_related('boogtype').all():
+        for schutterboog in (nhblid.schutterboog_set
+                             .select_related('boogtype')
+                             .all()):
             afkorting = schutterboog.boogtype.afkorting
             schutterboog_dict[afkorting] = schutterboog
             if schutterboog.voor_wedstrijd:
@@ -218,7 +219,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         nhblid = account.nhblid_set.all()[0]
         context['nhblid'] = nhblid
         context['records'] = self._find_records(nhblid)
-        context['scores'] = self._find_scores(nhblid)
+        context['histcomp'] = self._find_histcomp_scores(nhblid)
         context['regiocompetities'] = self._find_regiocompetities(nhblid)
 
         menu_dynamics(self.request, context, actief='schutter')
@@ -274,7 +275,10 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
 
         # sla de nieuwe voorkeuren op in SchutterBoog records (1 per boogtype)
         # werkt alleen na een GET (maakt de SchutterBoog records aan)
-        for obj in SchutterBoog.objects.filter(nhblid=nhblid):
+        for obj in (SchutterBoog
+                    .objects
+                    .filter(nhblid=nhblid)
+                    .select_related('boogtype')):
             check_info = 'info_' + obj.boogtype.afkorting
 
             old_voor_wedstrijd = obj.voor_wedstrijd
@@ -313,7 +317,11 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
         """ Retourneer een lijst met SchutterBoog objecten, aangevuld met hulpvelden """
 
         # haal de SchutterBoog records op van deze gebruiker
-        objs = SchutterBoog.objects.filter(nhblid=nhblid).order_by('boogtype__volgorde')
+        objs = (SchutterBoog
+                .objects
+                .filter(nhblid=nhblid)
+                .select_related('boogtype')
+                .order_by('boogtype__volgorde'))
 
         # maak ontbrekende SchutterBoog records aan, indien nodig
         boogtypen = BoogType.objects.all()
@@ -325,7 +333,14 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
                 schutterboog.boogtype = boogtype
                 schutterboog.save()
             # for
-            objs = SchutterBoog.objects.filter(nhblid=nhblid).order_by('boogtype__volgorde')
+            objs = (SchutterBoog
+                    .objects
+                    .filter(nhblid=nhblid)
+                    .select_related('boogtype')
+                    .order_by('boogtype__volgorde'))
+
+        # TODO: alle Scores met 1 query ophalen (schutterboot__in=alle SchutterBoog pk's)
+        # TODO: alle ScoreHist met 1 query ophalen (score__in=alle Score pk's)
 
         # voeg de checkbox velden toe en AG informatie
         voorkeur_dt = False

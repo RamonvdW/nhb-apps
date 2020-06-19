@@ -174,7 +174,8 @@ class TestSchutterProfiel(E2EHelpers, TestCase):
         url_uitschrijven_25bb = self.url_uitschrijven % inschrijving.pk
 
         # haal de profiel pagina op
-        resp = self.client.get(self.url_profiel)
+        with self.assertNumQueries(20):
+            resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('schutter/profiel.dtl', 'plein/site_layout.dtl'))
@@ -192,7 +193,8 @@ class TestSchutterProfiel(E2EHelpers, TestCase):
         # self._prep_voorkeuren()       --> niet aanroepen, dan geen schutterboog
 
         # haal de profiel pagina op
-        resp = self.client.get(self.url_profiel)
+        with self.assertNumQueries(11):
+            resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('schutter/profiel.dtl', 'plein/site_layout.dtl'))

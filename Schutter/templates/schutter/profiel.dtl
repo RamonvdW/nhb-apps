@@ -153,24 +153,26 @@
 {% endif %}
 
 
-{% if scores %}
+{% if histcomp %}
     <p>&nbsp;</p>
-    <h5>Jouw scores</h5>
+    <h5>Jouw competitie scores</h5>
 
     <table class="white">
         <thead>
-            <th>Datum</th>
-            <th>Score</th>
-            <th>Wedstrijd</th>
+            <th>Competitie</th>
+            <th>Seizoen</th>
             <th>Boog</th>
+            <th>Scores</th>
+            <th>Gemiddelde pijl</th>
         </thead>
 
-        {% for obj in scores %}
+        {% for obj in histcomp %}
             <tr>
-                <td>{{ obj.datum }}</td>
-                <td>{{ obj.score }}</td>
-                <td>{{ obj.wedstrijd }}</td>
-                <td>{{ obj.boog }}</td>
+                <td>{{ obj.competitie_str }}</td>
+                <td>{{ obj.seizoen_str }}</td>
+                <td>{{ obj.boog_str }}</td>
+                <td>{{ obj.scores_str }}</td>
+                <td>{{ obj.gemiddelde }}</td>
             </tr>
         {% endfor %}
     </table>
