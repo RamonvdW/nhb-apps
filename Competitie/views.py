@@ -1254,7 +1254,7 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
         context['ronde'] = ronde
 
         context['wedstrijden'] = (ronde.plan.wedstrijden
-                                  .order_by('datum_wanneer', 'tijd_begin_aanmelden')
+                                  .order_by('datum_wanneer', 'tijd_begin_wedstrijd')
                                   .select_related('vereniging'))
 
         rol_nu = rol_get_huidige(self.request)
