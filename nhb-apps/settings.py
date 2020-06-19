@@ -192,6 +192,10 @@ TEST_RUNNER = 'nhb-apps.app-hierarchy-testrunner.HierarchyRunner'
 # applicatie specifieke settings
 MINIMUM_LEEFTIJD_LID = 5
 
+# minimum aantal scores in uitslag vorige seizoen nodig om te gebruiken als AG voor nieuwe seizoen
+COMPETITIE_18M_MINIMUM_SCORES_VOOR_AG = 6
+COMPETITIE_25M_MINIMUM_SCORES_VOOR_AG = 5   # uitzondering voor 2020/2021 in verband met corona
+
 # maximum aantal resultaten dat een doorzoeking van de records terug geeft
 # dit voorkomt honderden resultaten bij het zoeken naar de letter e
 # 150 omdat bepaalde plaatsen veel records hebben, zoals Schijndel (93 in Okt 2019)
