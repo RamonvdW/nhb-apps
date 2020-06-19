@@ -27,7 +27,7 @@
 <p>&nbsp;</p>
 <h5>Veiligheid</h5>
 <p>Controle met een tweede factor is verplicht voor gebruikers met toegang tot persoonsgegevens.</p>
-<p>Meer informatie: <a href="{{ wiki_2fa_url }}" target="_blank" rel="noopener noreferrer">{{ wiki_2fa_titel }}</a>.</p>
+<p>Meer informatie: <a href="{{ wiki_2fa_url }}" target="_blank" rel="noopener noreferrer">Tweede-factor authenticatie</a>.</p>
 <p><a class="btn-nhb-rood" href="{% url 'Functie:otp-koppelen' %}">Nu Koppelen</a></p>
 {% endif %}
 
