@@ -25,8 +25,7 @@
 
     <div class="row">
         <form class="col s12" action="{% url 'Account:login' %}" method="post">
-            {% csrf_token %}
-            {{ form.next }}
+{{ form.next }}{% csrf_token %}<!-- dit compact formaat zorgt voor juiste minify -->
 
             {% if form.errors %}
                 {% for error in form.non_field_errors %}
