@@ -27,12 +27,13 @@ ACTIEF_OPTIES = (
 
 
 ROL2HANDLEIDING_PAGINA = {
+    Rollen.ROL_BB: settings.HANDLEIDING_BB,
     Rollen.ROL_BKO: settings.HANDLEIDING_BKO,
     Rollen.ROL_RKO: settings.HANDLEIDING_RKO,
     Rollen.ROL_RCL: settings.HANDLEIDING_RCL,
     Rollen.ROL_HWL: settings.HANDLEIDING_HWL,
     Rollen.ROL_WL:  settings.HANDLEIDING_WL,
-    Rollen.ROL_SEC: settings.HANDLEIDING_SEC,
+    #Rollen.ROL_SEC: settings.HANDLEIDING_SEC,
 }
 
 
