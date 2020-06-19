@@ -10,7 +10,12 @@
 {% block pagina %}
 <div class="white" style="padding:10px 30px 10px 30px">
 <h4>Handleiding RCL</h4>
-<p></p><p>== Deelonderwerp ==</p><p>Dit wordt de handleiding voor de RCL.</p><p>Sw dt je dfdfggggffff</p><p>Iuytr445567hg</p><p></p><p></p><p></p><p><strong>Welkom op de Wiki van de NHB.</strong></p><a href="/handleiding/nee">nee</a><p></p><p>valt niet mee om hier iets te doen.</p><p>ik heb nu iets opgeslagen.</p>
+<p>== Handleiding RCL ==</p><p></p><p>Als Regiocompetitieleider (RCL) ben je verantwoordelijk voor:</p><ul style="padding-left: 20px">
+<li  style="list-style-type: disc; padding-left: 0px">Het organiseren van een regiocompetitie voor de Indoor of de 25m 1pijl competitie</li>
+<li  style="list-style-type: disc; padding-left: 0px">Een van de 16 rego's waarin Nederland opgedeeld is door de NHB</li>
+<li  style="list-style-type: disc; padding-left: 0px">Afspraken maken voor het opstellen van de wedstrijdkalender: in welke weeknummers en op welke locaties kan er geschoten worden?</li>
+<li  style="list-style-type: disc; padding-left: 0px">Zorgen dat elke schutter 7 scores neer kan zetten</li>
+
 </div>
 
 {% endblock %}

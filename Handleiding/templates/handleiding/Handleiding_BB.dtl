@@ -1,0 +1,23 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2020 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+{% block title %}Handleiding BB{% endblock %}
+
+{% block pagina %}
+<div class="white" style="padding:10px 30px 10px 30px">
+<h4>Handleiding BB</h4>
+<p>== Handleiding BB ==</p><p></p><p>Deze pagina beschrijft de mogelijkheden voor de Manager Competitiezaken.</p><p></p><p>=== Opstarten nieuwe competitie ===</p><p></p><p>Opstarten van de nieuwe competitie bestaat uit de volgende stappen:</p><ul style="padding-left: 20px">
+<li  style="list-style-type: disc; padding-left: 0px">Afsluiten van de competitie van vorige seizoen; uitslagen definitie</li>
+<li  style="list-style-type: disc; padding-left: 0px">Vaststellen van de aanvangsgemiddelden voor elke schutter-boog met voldoende scores</li>
+<li  style="list-style-type: disc; padding-left: 0px">Aanmaken van de nieuwe competities (Indoor + 25m1pijl)</li>
+<li  style="list-style-type: disc; padding-left: 0px">Vaststellen van de wedstrijdklassen</li>
+<li  style="list-style-type: disc; padding-left: 0px">Vaststellen van de klassegrenzen per competitie, aan de hand van de aanvangsgemiddelden</li>
+<li  style="list-style-type: disc; padding-left: 0px">Aanpassen van de kalenderdatums</li>
+
+</div>
+
+{% endblock %}

@@ -10,7 +10,13 @@
 {% block pagina %}
 <div class="white" style="padding:10px 30px 10px 30px">
 <h4>Handleiding BKO</h4>
-<p>Dit wordt de handleiding voor de BKO.</p><p></p><p>Dat wordt typen Bart:(</p>
+<p>== Handleiding BKO ==</p><p></p><p>Dit is de handleiding voor de Bondskampioenschap Organisator een competitie (Indoor of 25m1pijl).</p><p></p><p>De BKO is verantwoordelijk voor het organiseren van het BK in elke wedstrijdklasse en deze door een vereniging uit te laten voeren.</p><p></p><p>De website bied ondersteuning voor:</p><ul style="padding-left: 20px">
+<li  style="list-style-type: disc; padding-left: 0px">Het vaststellen van de deelnemers</li>
+<li  style="list-style-type: disc; padding-left: 0px">Het oproepen van reserve schutters</li>
+<li  style="list-style-type: disc; padding-left: 0px">Vragen aan de schutters / reserves om deelname te bevestigen</li>
+<li  style="list-style-type: disc; padding-left: 0px">Informeren van deelnemers en reserves over hun plaats op de deelnemerslijst</li>
+<li  style="list-style-type: disc; padding-left: 0px">Het maken van een planning met verdeling van de wedstrijdklassen over de accommodaties</li>
+
 </div>
 
 {% endblock %}
