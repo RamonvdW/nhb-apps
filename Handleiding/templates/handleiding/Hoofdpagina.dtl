@@ -1,0 +1,16 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2020 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+{% block title %}Hoofdpagina{% endblock %}
+
+{% block pagina %}
+<div class="white" style="padding:10px 30px 10px 30px">
+<h4>Hoofdpagina</h4>
+<p><strong>Welkom op de Wiki van de NHB.</strong></p><p></p><p>Deze wiki is voor intern gebruik door werkgroepen binnen de NHB.</p><p></p><p>Tip: Het menu aan de linker kant geeft toegang tot een lijst met interessante lijstjes.</p><p></p><a href="/handleiding/Tips_voor_wiki_gebruik">Tips voor wiki gebruik</a><p></p><p></p><p>Even kijken welke wijziging als laatste is doorgevoerd.</p>
+</div>
+
+{% endblock %}

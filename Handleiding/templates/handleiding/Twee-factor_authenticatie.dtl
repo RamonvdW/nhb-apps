@@ -1,0 +1,16 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2020 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+{% block title %}Twee-factor authenticatie{% endblock %}
+
+{% block pagina %}
+<div class="white" style="padding:10px 30px 10px 30px">
+<h4>Twee-factor authenticatie</h4>
+<p>Tweestapsverificatie (2FA: 2e Factor Authenticatie / Two-factor Authentication) voorkomt misbruik van een account.</p><p></p><p>Iemand met je inlognaam en wachtwoord heeft nog iets meer nodig: een 6-cijferige code die typisch door een app op je mobiel gemaakt wordt. Je kan bijvoorbeeld Google Authenticator of Authy gebruiken - zie de app-store van je mobiele merk.</p><p></p><p>Zo kunnen de codes er uit zien in Google Authenticator op je mobiel:<br></p><img src="{% static 'handleiding/Google-authenticator-mainscreen.jpg' %}" width="400" alt="Google Authenticator"><p></p><p></p><p>Na het inloggen kan je onder 'Wissel van rol' op de knop 'NU CONTROLEREN' drukken en de code opgeven. Daarna komen meer opties beschikbaar in het menu - en extra rollen onder 'Wissel van rol'.</p><p></p><p>Het controlescherm waar de code ingevoerd moet worden:<br></p><img src="{% static 'handleiding/2fa-controle.png' %}" alt="Het controlescherm"><p></p><p></p><p>De eerste keer moet de koppeling met de app gemaakt worden. De tekst op de knop is dan 'NU KOPPELEN'. De website toont een QR-code (zie hieronder) die de informatie bevat voor de app op je mobiel. Kies in de app de optie om een koppeling te maken (in Google Authenticator is dit de rode plus knop) en kies "barcode scannen". Scan de barcode met de camera van je mobiel.</p><p></p><img src="{% static 'handleiding/2FA-koppelen.png' %}" alt="QR-code om te scannen"><p></p><p></p><p>Als je de QR code niet kunt scannen, dan kan je de code handmatig invoeren. Kies in de app de optie om een koppeling te maken en kies dan "Voer een code in" / "Enter a provided key". Je moet nu twee velden invullen: een beschrijving die je zelf mag kiezen en de code. Tik de letters en cijfers over - kleine letter/hoofdletters en spaties maken niet uit. Kies 'Time-based' want de website gebruikt Time-based OTP, want betekent dat elke 30 seconden een nieuwe 6-cijferige code gegenereerd wordt.</p><p></p><a class="btn-nhb-blauw" href="https://chrome.google.com/webstore/detail/authenticator/bhghoamapcdpbohphigoooaddinpkbai" target="_blank" rel="noopener noreferrer"><i class="material-icons-round left">open_in_new</i>Authenticator voor Chrome</a><p>Er bestaan ook browser plug-ins zoals .</p>
+</div>
+
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2020 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+{% block title %}Handleiding RCL{% endblock %}
+
+{% block pagina %}
+<div class="white" style="padding:10px 30px 10px 30px">
+<h4>Handleiding RCL</h4>
+<p></p><p>== Deelonderwerp ==</p><p>Dit wordt de handleiding voor de RCL.</p><p>Sw dt je dfdfggggffff</p><p>Iuytr445567hg</p><p></p><p></p><p></p><p><strong>Welkom op de Wiki van de NHB.</strong></p><a href="/handleiding/nee">nee</a><p></p><p>valt niet mee om hier iets te doen.</p><p>ik heb nu iets opgeslagen.</p>
+</div>
+
+{% endblock %}

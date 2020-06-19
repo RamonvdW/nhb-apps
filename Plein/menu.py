@@ -5,6 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
+from django.urls import reverse
 from Functie.rol import Rollen, rol_get_huidige, rol_mag_wisselen, rol_get_beschrijving
 
 
@@ -20,17 +21,18 @@ ACTIEF_OPTIES = (
     'competitie',
     'histcomp',
     'schutter',
-    'vereniging'
+    'vereniging',
+    'handleiding'
 )
 
 
-WIKI = {
-    Rollen.ROL_BKO: (settings.WIKI_URL_BKO, 'Handleiding BKO'),
-    Rollen.ROL_RKO: (settings.WIKI_URL_RKO, 'Handleiding RKO'),
-    Rollen.ROL_RCL: (settings.WIKI_URL_RCL, 'Handleiding RCL'),
-    Rollen.ROL_HWL: (settings.WIKI_URL_HWL, 'Handleiding HWL'),
-    Rollen.ROL_WL:  (settings.WIKI_URL_WL,  'Handleiding WL'),
-    Rollen.ROL_SEC: (settings.WIKI_URL_SEC, 'Handleiding SEC'),
+ROL2HANDLEIDING_PAGINA = {
+    Rollen.ROL_BKO: settings.HANDLEIDING_BKO,
+    Rollen.ROL_RKO: settings.HANDLEIDING_RKO,
+    Rollen.ROL_RCL: settings.HANDLEIDING_RCL,
+    Rollen.ROL_HWL: settings.HANDLEIDING_HWL,
+    Rollen.ROL_WL:  settings.HANDLEIDING_WL,
+    Rollen.ROL_SEC: settings.HANDLEIDING_SEC,
 }
 
 
@@ -54,10 +56,17 @@ def menu_dynamics(request, context, actief=None):
             context['menu_show_wisselvanrol'] = True
 
             try:
-                context['wiki_url'], context['wiki_titel'] = WIKI[rol]
+                handleiding_pagina = ROL2HANDLEIDING_PAGINA[rol]
             except KeyError:
-                context['wiki_url'] = settings.WIKI_URL_TOP
-                context['wiki_titel'] = 'Handleiding'
+                handleiding_pagina = settings.HANDLEIDING_TOP
+                context['handleiding_titel'] = 'Handleiding'        # ipv 'Hoofdpagina'
+            else:
+                context['handleiding_titel'] = handleiding_pagina.replace('_', ' ')
+
+            if settings.ENABLE_WIKI:
+                context['handleiding_url'] = settings.WIKI_URL + '/' + handleiding_pagina
+            else:
+                context['handleiding_url'] = reverse('Handleiding:' + handleiding_pagina)
 
         # admin menu
         if rol == Rollen.ROL_IT:

@@ -104,6 +104,13 @@ class Loader(AppDirectoriesLoader):
             # TODO: zoek uit of het minder cpu kost als de reg-exps gecompileerd worden
             # TODO: zoek uit of het minder cpu kost als de reg-exps gecombineerd worden
 
+            # TODO: voeg minify rule toe %}\s+{{
+            # voorbeeld (login.dtl in Account)
+            #   {% csrf_token %}
+            #   {{ form.next }}
+
+            # TODO: zorg voor minify van debug toolbar
+
             # remove /* css block comments */
             contents = re.sub(r'/\*(.*?)\*/', '', contents, flags=re.MULTILINE)
 

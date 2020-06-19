@@ -25,7 +25,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2020-06-14'
+SITE_VERSIE = '2020-06-19'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'Schutter.apps.SchutterConfig',
     'Score.apps.ScoreConfig',
     'Wedstrijden.apps.WedstrijdenConfig',
+    'Handleiding.apps.HandleidingConfig',
     'djangosaml2idp',               # single sign-on Identity Provider (IP)
                                     #   using SAML2 (Security Assertion Markup Language)
     'django.contrib.staticfiles',   # gather static files from modules helper
@@ -306,14 +307,32 @@ SAML_IDP_CONFIG = {
 }
 """
 
-# pagina's van de wiki
-WIKI_URL_TOP = WIKI_URL + '/Hoofdpagina'
-WIKI_URL_CWZ = WIKI_URL + '/Handleiding_CWZ'
-WIKI_URL_RCL = WIKI_URL + '/Handleiding_RCL'
-WIKI_URL_RKO = WIKI_URL + '/Handleiding_RKO'
-WIKI_URL_BKO = WIKI_URL + '/Handleiding_BKO'
-WIKI_URL_2FA = WIKI_URL + '/Twee-factor_authenticatie'
-WIKI_URL_ROLLEN = WIKI_URL + '/Rollen'
+# pagina's van de handleiding
+HANDLEIDING_TOP = 'Hoofdpagina'
+HANDLEIDING_SEC = 'Handleiding_SEC'
+HANDLEIDING_WL = 'Handleiding_WL'
+HANDLEIDING_HWL = 'Handleiding_HWL'
+HANDLEIDING_RCL = 'Handleiding_RCL'
+HANDLEIDING_RKO = 'Handleiding_RKO'
+HANDLEIDING_BKO = 'Handleiding_BKO'
+HANDLEIDING_2FA = 'Twee-factor_authenticatie'
+HANDLEIDING_ROLLEN = 'Rollen'
+
+HANDLEIDING_PAGINAS = [
+    HANDLEIDING_TOP,
+    HANDLEIDING_SEC,
+    HANDLEIDING_WL,
+    HANDLEIDING_HWL,
+    HANDLEIDING_RCL,
+    HANDLEIDING_RKO,
+    HANDLEIDING_BKO,
+    HANDLEIDING_2FA,
+    HANDLEIDING_ROLLEN,
+    # pagina's van de handleiding die intern gerefereerd worden
+    'Tips_voor_wiki_gebruik',
+    'RKO_opleiden',
+    'Handleiding_CWZ'
+]
 
 
 # logging to syslog

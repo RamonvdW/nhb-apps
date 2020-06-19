@@ -109,10 +109,10 @@
 {% endif %}
 
 <!-- handleiding, alleen voor gebruikers die toegang hebben -->
-{% if wiki_url %}
-<li>
-    <a href="{{ wiki_url }}" class="white-text" target="_blank" rel="noopener noreferrer">
-        <i class="material-icons-round white-text">help_outline</i>{{ wiki_titel }}</a>
+{% if handleiding_url %}
+<li {% if menu_actief == "handleiding" %} class="actief"{% endif %}>
+    <a href="{{ handleiding_url }}" class="white-text" target="_blank" rel="noopener noreferrer">
+        <i class="material-icons-round white-text">help_outline</i>{{ handleiding_titel }}</a>
 </li>
 {% endif %}
 
