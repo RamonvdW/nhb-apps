@@ -28,6 +28,7 @@ class Rollen(enum.IntEnum):
     """ definitie van de rollen met codes
         vertaling naar beschrijvingen in Plein.views
     """
+
     # rollen staan in prio volgorde
     # dus als je 3 hebt mag je kiezen uit 3 of hoger
     ROL_IT = 1          # IT beheerder
@@ -40,6 +41,13 @@ class Rollen(enum.IntEnum):
     ROL_SEC = 10        # Secretaris van een vereniging
     ROL_SCHUTTER = 20   # Individuele schutter en NHB lid
     ROL_NONE = 99       # geen rol
+
+    """ LET OP!
+        rol nummers worden opgeslagen in de sessie
+            verwijderen = probleem voor terugkerende gebruiker
+            hergebruiken = gevaarlijk: gebruiker 'springt' naar nieuwe rol! 
+        indien nodig alle sessies verwijderen
+    """
 
 
 url2rol = {
