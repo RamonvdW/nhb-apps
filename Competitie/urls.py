@@ -67,9 +67,13 @@ urlpatterns = [
          views_planning.BondPlanningView.as_view(),
          name='bond-planning'),
 
-    path('planning/wedstrijd/<wedstrijd_pk>/',
+    path('planning/wedstrijd/wijzig/<wedstrijd_pk>/',
          views_planning.WijzigWedstrijdView.as_view(),
-         name='wijzig-wedstrijd')
+         name='wijzig-wedstrijd'),
+
+    path('planning/wedstrijd/verwijder/<wedstrijd_pk>/',
+         views_planning.VerwijderWedstrijdView.as_view(),
+         name='verwijder-wedstrijd')
 ]
 
 # end of file

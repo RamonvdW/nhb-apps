@@ -116,6 +116,25 @@
 
 </form>
 
+{% if url_verwijderen %}
+    <p>&nbsp;</p>
+    <form method="post" action="{{ url_verwijderen }}">
+        {% csrf_token %}
+        <ul class="collapsible">
+            <li>
+                <div class="collapsible-header white">
+                    <span>Klik hier als je de wedstrijd wilt verwijderen</span>
+                </div>
+                <div class="collapsible-body white">
+                    <p>Heb je deze wedstrijd echt niet meer nodig?</p>
+                    <button class="btn-nhb-rood" type="submit">
+                        <i class="material-icons-round left">delete</i>Verwijder deze wedstrijd</button>
+                </div>
+            </li>
+        </ul>
+    </form>
+{% endif %}
+
 <!-- initialisatie van de time pickers -->
 <script>
     document.addEventListener('DOMContentLoaded', function() {

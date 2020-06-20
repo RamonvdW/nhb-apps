@@ -6,7 +6,7 @@
 
 from django.http import HttpResponseRedirect
 from django.urls import Resolver404, reverse
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Plein.menu import menu_dynamics
 from Functie.rol import Rollen, rol_get_huidige
@@ -234,8 +234,13 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
             raise Resolver404()
 
         ronde = maak_deelcompetitie_ronde(deelcomp=deelcomp)
-
-        next_url = reverse('Competitie:regio-ronde-planning', kwargs={'ronde_pk': ronde.pk})
+        if ronde:
+            # nieuwe ronde is aangemaakt
+            next_url = reverse('Competitie:regio-ronde-planning', kwargs={'ronde_pk': ronde.pk})
+        else:
+            # er kan geen ronde meer bij
+            # TODO: nette melding geven
+            next_url = reverse('Competitie:regio-planning', kwargs={'deelcomp_pk': deelcomp.pk})
 
         return HttpResponseRedirect(next_url)
 
@@ -517,6 +522,29 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
         return HttpResponseRedirect(next_url)
 
 
+def plan_wedstrijd_rechten(request, wedstrijd):
+    """ Retourneert:
+            mag_wijzigen, mag_verwijderen
+    """
+    rol_nu = rol_get_huidige(request)
+    if rol_nu in (Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL):
+        # TODO: error handling
+        plan = wedstrijd.wedstrijdenplan_set.all()[0]
+        ronde = DeelcompetitieRonde.objects.get(plan=plan)
+        laag = ronde.deelcompetitie.laag
+
+        if rol_nu == Rollen.ROL_BKO and laag == LAAG_BK:
+            return True, True
+
+        if rol_nu == Rollen.ROL_RKO and laag == LAAG_RK:
+            return True, True
+
+        if rol_nu == Rollen.ROL_RCL and laag == LAAG_REGIO:
+            return True, True
+
+    return False, False
+
+
 class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
 
     """ Deze view laat de planning van een wedstrijd aanpassen """
@@ -543,12 +571,15 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         except Wedstrijd.DoesNotExist:
             raise Resolver404()
 
-        context['wedstrijd'] = wedstrijd
+        mag_wijzigen, mag_verwijderen = plan_wedstrijd_rechten(self.request, wedstrijd)
+        if not mag_wijzigen:
+            raise Resolver404()
 
         # zoek het weeknummer waarin deze wedstrijd gehouden moet worden
         plan = wedstrijd.wedstrijdenplan_set.all()[0]
         ronde = DeelcompetitieRonde.objects.get(plan=plan)
 
+        context['wedstrijd'] = wedstrijd
         context['ronde'] = ronde
         context['regio'] = ronde.deelcompetitie.nhb_regio
         context['competitie'] = competitie = ronde.deelcompetitie.competitie
@@ -584,9 +615,13 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
             verenigingen = ronde.deelcompetitie.nhb_regio.nhbvereniging_set.all()
         context['verenigingen'] = verenigingen
 
-        context['url_opslaan'] = reverse('Competitie:wijzig-wedstrijd', kwargs={'wedstrijd_pk': wedstrijd.pk})
         context['url_terug'] = reverse('Competitie:regio-ronde-planning', kwargs={'ronde_pk': ronde.pk})
+        context['url_opslaan'] = reverse('Competitie:wijzig-wedstrijd', kwargs={'wedstrijd_pk': wedstrijd.pk})
 
+        if mag_verwijderen:     # pragma: no branch
+            context['url_verwijderen'] = reverse('Competitie:verwijder-wedstrijd', kwargs={'wedstrijd_pk': wedstrijd.pk})
+
+        menu_dynamics(self.request, context, actief='competitie')
         return context
 
     def post(self, request, *args, **kwargs):
@@ -598,12 +633,12 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         except Wedstrijd.DoesNotExist:
             raise Resolver404()
 
-        # print("WijzigWedstrijdView::post kwargs=%s, items=%s" % (repr(kwargs), repr([(key, value) for key, value in request.POST.items()])))
+        plan = wedstrijd.wedstrijdenplan_set.all()[0]
+        ronde = DeelcompetitieRonde.objects.get(plan=plan)
+        jaar = ronde.deelcompetitie.competitie.begin_jaar
 
-        # alleen de RCL mag een wedstrijd wijzigen
-        # TODO: laat de WL de overige datums aanpassen
-        rol_nu = rol_get_huidige(self.request)
-        if rol_nu != Rollen.ROL_RCL:
+        mag_wijzigen, _ = plan_wedstrijd_rechten(request, wedstrijd)
+        if not mag_wijzigen:
             raise Resolver404()
 
         # weekdag is een cijfer van 0 tm 6
@@ -624,9 +659,6 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
             raise Resolver404()
 
         # bepaal de begin datum van de ronde-week
-        plan = wedstrijd.wedstrijdenplan_set.all()[0]
-        ronde = DeelcompetitieRonde.objects.get(plan=plan)
-        jaar = ronde.deelcompetitie.competitie.begin_jaar
         when = competitie_week_nr_to_date(jaar, ronde.week_nr)
         # voeg nu de offset toe uit de weekdag
         when += datetime.timedelta(days=weekdag)
@@ -648,6 +680,41 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         wedstrijd.save()
 
         url = reverse('Competitie:regio-ronde-planning', kwargs={'ronde_pk': ronde.pk})
+        return HttpResponseRedirect(url)
+
+
+class VerwijderWedstrijdView(UserPassesTestMixin, View):
+
+    """ Deze view laat een wedstrijd verwijderen """
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        rol_nu = rol_get_huidige(self.request)
+        return rol_nu in (Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL)
+
+    def handle_no_permission(self):
+        """ gebruiker heeft geen toegang --> redirect naar het plein """
+        return HttpResponseRedirect(reverse('Plein:plein'))
+
+    def post(self, request, *args, **kwargs):
+        """ Deze functie wordt aangeroepen als de knop 'Opslaan' gebruikt wordt
+        """
+        wedstrijd_pk = kwargs['wedstrijd_pk'][:6]     # afkappen geeft beveiliging
+        try:
+            wedstrijd = Wedstrijd.objects.get(pk=wedstrijd_pk)
+        except Wedstrijd.DoesNotExist:
+            raise Resolver404()
+
+        _, mag_verwijderen = plan_wedstrijd_rechten(request, wedstrijd)
+        if not mag_verwijderen:
+            raise Resolver404()
+
+        plan = wedstrijd.wedstrijdenplan_set.all()[0]
+        ronde = DeelcompetitieRonde.objects.get(plan=plan)
+        url = reverse('Competitie:regio-ronde-planning', kwargs={'ronde_pk': ronde.pk})
+
+        wedstrijd.delete()
+
         return HttpResponseRedirect(url)
 
 # end of file
