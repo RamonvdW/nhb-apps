@@ -78,9 +78,11 @@ class TestCompetitie(E2EHelpers, TestCase):
         lid.save()
         self.lid_100002 = lid
 
-        # maak een schutterboog aan voor het jeugdlid (nodig om aan te melden)
         boog_bb = BoogType.objects.get(afkorting='BB')
-        schutterboog = SchutterBoog(nhblid=self.lid_100002, boogtype=boog_bb, voor_wedstrijd=True)
+        boog_ib = BoogType.objects.get(afkorting='IB')
+
+        # maak een schutterboog aan voor het jeugdlid (nodig om aan te melden)
+        schutterboog = SchutterBoog(nhblid=self.lid_100002, boogtype=boog_bb, voor_wedstrijd=False)
         schutterboog.save()
         self.schutterboog_100002 = schutterboog
 
@@ -96,10 +98,14 @@ class TestCompetitie(E2EHelpers, TestCase):
         lid.save()
         self.lid_100003 = lid
 
-        # maak een schutterboog aan voor het jeugdlid (nodig om aan te melden)
+        # maak een schutterboog aan voor het lid (nodig om aan te melden)
         schutterboog = SchutterBoog(nhblid=self.lid_100003, boogtype=boog_bb, voor_wedstrijd=True)
         schutterboog.save()
         self.schutterboog_100003 = schutterboog
+
+        # maak een schutterboog aan voor het lid (nodig om aan te melden)
+        schutterboog = SchutterBoog(nhblid=self.lid_100001, boogtype=boog_ib, voor_wedstrijd=True)
+        schutterboog.save()
 
         # (strategisch gekozen) historische data om klassegrenzen uit te bepalen
         histcomp = HistCompetitie()
@@ -108,6 +114,14 @@ class TestCompetitie(E2EHelpers, TestCase):
         histcomp.klasse = 'Testcurve1'       # TODO: kan de klasse een spatie bevatten?
         histcomp.is_team = False
         histcomp.save()
+
+        # (strategisch gekozen) historische data om klassegrenzen uit te bepalen
+        histcomp2 = HistCompetitie()
+        histcomp2.seizoen = '2017/2018'
+        histcomp2.comp_type = '18'
+        histcomp2.klasse = 'Testcurve2'
+        histcomp2.is_team = False
+        histcomp2.save()
 
         # record voor het volwassen lid
         rec = HistCompetitieIndividueel()
@@ -129,13 +143,92 @@ class TestCompetitie(E2EHelpers, TestCase):
         rec.gemiddelde = 5.321
         rec.save()
 
-        # record voor het jeugdlid
-        # record voor het volwassen lid
+        # nog een record voor het volwassen lid
+        rec = HistCompetitieIndividueel()
+        rec.histcompetitie = histcomp2
+        rec.rank = 1
+        rec.schutter_nr = self.lid_100001.nhb_nr
+        rec.schutter_naam = self.lid_100001.volledige_naam()
+        rec.vereniging_nr = ver.nhb_nr
+        rec.vereniging_naam = ver.naam
+        rec.boogtype = 'R'
+        rec.score1 = 11
+        rec.score2 = 21
+        rec.score3 = 31
+        rec.score4 = 41
+        rec.score5 = 51
+        rec.score6 = 61
+        rec.score7 = 71
+        rec.totaal = 81
+        rec.gemiddelde = 6.12
+        rec.save()
+
+        # nog een record voor het volwassen lid
+        rec = HistCompetitieIndividueel()
+        rec.histcompetitie = histcomp
+        rec.rank = 100
+        rec.schutter_nr = self.lid_100001.nhb_nr
+        rec.schutter_naam = self.lid_100001.volledige_naam()
+        rec.vereniging_nr = ver.nhb_nr
+        rec.vereniging_naam = ver.naam
+        rec.boogtype = 'IB'
+        rec.score1 = 11
+        rec.score2 = 21
+        rec.score3 = 31
+        rec.score4 = 41
+        rec.score5 = 51
+        rec.score6 = 61
+        rec.score7 = 71
+        rec.totaal = 81
+        rec.gemiddelde = 6.12
+        rec.save()
+
+        # maak een record aan zonder eindgemiddelde
         rec = HistCompetitieIndividueel()
         rec.histcompetitie = histcomp
         rec.rank = 1
         rec.schutter_nr = self.lid_100002.nhb_nr
         rec.schutter_naam = self.lid_100002.volledige_naam()
+        rec.vereniging_nr = ver.nhb_nr
+        rec.vereniging_naam = ver.naam
+        rec.boogtype = 'C'
+        rec.score1 = 0
+        rec.score2 = 0
+        rec.score3 = 0
+        rec.score4 = 0
+        rec.score5 = 0
+        rec.score6 = 0
+        rec.score7 = 0
+        rec.totaal = 0
+        rec.gemiddelde = 0.0
+        rec.save()
+
+        # record voor het jeugdlid
+        rec = HistCompetitieIndividueel()
+        rec.histcompetitie = histcomp
+        rec.rank = 1
+        rec.schutter_nr = self.lid_100002.nhb_nr
+        rec.schutter_naam = self.lid_100002.volledige_naam()
+        rec.vereniging_nr = ver.nhb_nr
+        rec.vereniging_naam = ver.naam
+        rec.boogtype = 'BB'
+        rec.score1 = 10
+        rec.score2 = 20
+        rec.score3 = 30
+        rec.score4 = 40
+        rec.score5 = 50
+        rec.score6 = 60
+        rec.score7 = 70
+        rec.totaal = 80
+        rec.gemiddelde = 5.321
+        rec.save()
+
+        # maak een record aan voor iemand die geen nhblid meer is
+        rec = HistCompetitieIndividueel()
+        rec.histcompetitie = histcomp
+        rec.rank = 1
+        rec.schutter_nr = 991111
+        rec.schutter_naam = "Die is weg"
         rec.vereniging_nr = ver.nhb_nr
         rec.vereniging_naam = ver.naam
         rec.boogtype = 'BB'
@@ -281,6 +374,11 @@ class TestCompetitie(E2EHelpers, TestCase):
         # gebruik een POST om de AG's vast te stellen
         resp = self.client.post(self.url_ag_vaststellen)
 
+        # controleer dat er geen dubbele SchutterBoog records aangemaakt zijn
+        self.assertEqual(1, SchutterBoog.objects.filter(nhblid=self.lid_100001, boogtype__afkorting='R').count())
+        self.assertEqual(1, SchutterBoog.objects.filter(nhblid=self.lid_100002, boogtype__afkorting='BB').count())
+        self.assertEqual(4, SchutterBoog.objects.count())
+
         # controleer dat het "ag vaststellen" kaartje er nog steeds is
         # dit keer met de "voor het laatst gedaan" notitie
         resp = self.client.get(self.url_overzicht)
@@ -407,8 +505,8 @@ class TestCompetitie(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_hwl)
 
         # meld de schutterboog aan
-        self.assertEqual(SchutterBoog.objects.count(), 2)
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
+        self.assertEqual(3, SchutterBoog.objects.count())
+        self.assertEqual(0, RegioCompetitieSchutterBoog.objects.count())
 
         # maak een cadet
         self.lid_100002.geboorte_datum = datetime.date(competitie_18.begin_jaar-15, month=3, day=4)

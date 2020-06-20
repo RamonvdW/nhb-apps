@@ -470,6 +470,9 @@ class AGVaststellenView(UserPassesTestMixin, TemplateView):
                             schutterboog = None
                         else:
                             schutterboog.save()
+                            # zet het nieuwe record in de cache, anders krijgen we dupes
+                            tup = (schutterboog.nhblid.nhb_nr, schutterboog.boogtype.afkorting)
+                            schutterboog_cache[tup] = schutterboog
                     else:
                         if not schutterboog.voor_wedstrijd:
                             schutterboog.voor_wedstrijd = True
