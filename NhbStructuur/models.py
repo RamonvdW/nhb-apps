@@ -120,7 +120,8 @@ class NhbVereniging(models.Model):
     regio = models.ForeignKey(NhbRegio, on_delete=models.PROTECT)
 
     # de optionele clusters waar deze vereniging bij hoort
-    clusters = models.ManyToManyField(NhbCluster)
+    clusters = models.ManyToManyField(NhbCluster,
+                                      blank=True)   # mag leeg zijn / gemaakt worden
 
     # wie is de secretaris van de vereniging
     secretaris_lid = models.ForeignKey('NhbLid', on_delete=models.SET_NULL,

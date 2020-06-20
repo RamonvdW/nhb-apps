@@ -43,7 +43,8 @@ class Functie(models.Model):
     """ Deze klasse representeert een Functie met rechten """
 
     # welke accounts zijn gekoppeld aan deze functie
-    accounts = models.ManyToManyField(Account)
+    accounts = models.ManyToManyField(Account,
+                                      blank=True)   # mag leeg zijn / gemaakt worden
 
     # in principe vrije tekst
     beschrijving = models.CharField(max_length=50)

@@ -30,7 +30,8 @@ class WedstrijdLocatie(models.Model):
     zichtbaar = models.BooleanField(default=True)
 
     # verenigingen die deze locatie gebruiken (kan gedeeld doel zijn)
-    verenigingen = models.ManyToManyField(NhbVereniging)
+    verenigingen = models.ManyToManyField(NhbVereniging,
+                                          blank=True)       # mag leeg zijn / gemaakt worden
 
     baan_type = models.CharField(max_length=1, choices=BAAN_TYPE, default='X')
 
@@ -87,8 +88,11 @@ class Wedstrijd(models.Model):
     tijd_einde_wedstrijd = models.TimeField()
 
     # wedstrijdklassen individueel en teams
-    indiv_klassen = models.ManyToManyField(IndivWedstrijdklasse)
-    team_klassen = models.ManyToManyField(TeamWedstrijdklasse)
+    indiv_klassen = models.ManyToManyField(IndivWedstrijdklasse,
+                                           blank=True)  # mag leeg zijn / gemaakt worden
+
+    team_klassen = models.ManyToManyField(TeamWedstrijdklasse,
+                                          blank=True)  # mag leeg zijn / gemaakt worden
 
     class Meta:
         """ meta data voor de admin interface """
@@ -100,7 +104,8 @@ class WedstrijdenPlan(models.Model):
     """ Planning voor een serie wedstrijden, zoals de competitierondes """
 
     # lijst van wedstrijden
-    wedstrijden = models.ManyToManyField(Wedstrijd)
+    wedstrijden = models.ManyToManyField(Wedstrijd,
+                                         blank=True)  # mag leeg zijn / gemaakt worden
 
     # de hiaat vlag geeft snel weer of er een probleem in de planning zit
     bevat_hiaat = models.BooleanField(default=True)

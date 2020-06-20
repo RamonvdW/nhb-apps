@@ -8,22 +8,23 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.utils.translation import gettext_lazy as _
 from .models import Account, AccountEmail, HanterenPersoonsgegevens
+from Functie.models import Functie
 
 
 class AccountAdmin(UserAdmin):
+
     # volgorde van de velden in de admin site
     exclude = ('email', )
 
     # velden die niet gewijzigd mogen worden via de admin interface
-    readonly_fields = ('is_staff', )
+    readonly_fields = ('is_staff', 'gekoppelde_functies')
 
     # volgorde van de te tonen velden
     fieldsets = (
-        (None, {'fields': ('username', 'password', 'vraag_nieuw_wachtwoord')}),
+        (None, {'fields': ('username',)}),
         (_('Personal info'), {'fields': ('first_name', 'last_name')}),
-        (_('2FA'), {'fields': ('otp_code', 'otp_is_actief')}),
-        (_('Permissions'), {'fields': ('is_active', 'is_BB', 'is_Observer', 'is_staff')}),
-        (_('Beveiliging'), {'fields': ('verkeerd_wachtwoord_teller', 'is_geblokkeerd_tot')}),
+        (_('Permissions'), {'fields': ('is_active', 'is_BB', 'is_Observer', 'is_staff', 'gekoppelde_functies')}),
+        (_('Beveiliging'), {'fields': ( 'password', 'vraag_nieuw_wachtwoord', 'verkeerd_wachtwoord_teller', 'is_geblokkeerd_tot', 'otp_code', 'otp_is_actief')}),
         (_('Important dates'), {'fields': ('laatste_inlog_poging', 'last_login', 'date_joined')}),
     )
 
@@ -33,6 +34,9 @@ class AccountAdmin(UserAdmin):
 
     # velden om in te zoeken (in de lijst)
     search_fields = ('username', 'nhblid__voornaam', 'nhblid__achternaam')
+
+    def gekoppelde_functies(self, obj):
+        return "\n".join([functie.beschrijving for functie in obj.functie_set.all()])
 
 
 class AccountEmailAdmin(admin.ModelAdmin):
@@ -46,6 +50,7 @@ class AccountEmailAdmin(admin.ModelAdmin):
 
 
 class VHPGAdmin(admin.ModelAdmin):
+
     list_select_related = ('account',)
 
 
