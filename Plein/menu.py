@@ -60,9 +60,6 @@ def menu_dynamics(request, context, actief=None):
                 handleiding_pagina = ROL2HANDLEIDING_PAGINA[rol]
             except KeyError:
                 handleiding_pagina = settings.HANDLEIDING_TOP
-                context['handleiding_titel'] = 'Handleiding'        # ipv 'Hoofdpagina'
-            else:
-                context['handleiding_titel'] = handleiding_pagina.replace('_', ' ')
 
             if settings.ENABLE_WIKI:
                 context['handleiding_url'] = settings.WIKI_URL + '/' + handleiding_pagina

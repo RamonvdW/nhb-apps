@@ -112,7 +112,7 @@
 {% if handleiding_url %}
 <li {% if menu_actief == "handleiding" %} class="actief"{% endif %}>
     <a href="{{ handleiding_url }}" class="white-text" target="_blank" rel="noopener noreferrer">
-        <i class="material-icons-round white-text">help_outline</i>{{ handleiding_titel }}</a>
+        <i class="material-icons-round white-text">help_outline</i>Handleiding</a>
 </li>
 {% endif %}
 
