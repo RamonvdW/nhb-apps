@@ -45,42 +45,44 @@
 <a class="btn-nhb-rood" href="{% url 'Functie:otp-controle' %}">Nu controleren</a>
 {% endif %}
 
-<p>&nbsp;</p>
-<h5>Eigen rollen</h5>
+{% if object_list %}
+    <p>&nbsp;</p>
+    <h5>Eigen rollen</h5>
 
-{% for obj in object_list %}
-    <p>
-        {% if obj.separator %}
-            <p>&nbsp;</p>
-            <h5>Help anderen</h5>
+    {% for obj in object_list %}
+        <p>
+            {% if obj.separator %}
+                <p>&nbsp;</p>
+                <h5>Help anderen</h5>
 
-            <p>Vanuit je <i>huidige</i> rol heb je de mogelijkheid om andere beheerders te helpen door naar <b>hun rol</b> te wisselen.<br>Na het wisselen zie je de website precies zoals zij hem zien. Je kan altijd weer terug.</p>
-            <p>De keuzes hieronder veranderen dus steeds, afhankelijk van je gekozen rol.<br>
-                    <!-- hierarchie -->
-                <span>De hi&euml;rarchie is BB</span>
-                <span style="position: relative; bottom: .15em;"> &rarr; </span>
-                <span>BKO</span>
-                <span style="position: relative; bottom: .15em;"> &rarr; </span>
-                <span>RKO</span>
-                <span style="position: relative; bottom: .15em;"> &rarr; </span>
-                <span>RCL</span>
-                <span style="position: relative; bottom: .15em;"> &rarr; </span>
-                <span>HWL</span>
-                <span style="position: relative; bottom: .15em;"> &rarr; </span>
-                <span>WL.&nbsp;&nbsp;&nbsp;</span>
-                <a class="btn-small btn-nhb-blauw" href="{{ wiki_rollen }}" target="_blank" rel="noopener noreferrer"><i class="material-icons-round white-text">help_outline</i></a>
-            </p>
-        {% else %}
-            <form method="post" action="{{ obj.url }}">
-                {% csrf_token %}
-                <input class="btn-nhb-blauw" type="submit" value="{{ obj.titel }}">
-                {% if obj.ver_naam %}
-                    <span>&nbsp;&nbsp;{{ obj.ver_naam }}</span>
-                {% endif %}
-            </form>
-        {% endif %}
-    </p>
-{% endfor %}
+                <p>Vanuit je <i>huidige</i> rol heb je de mogelijkheid om andere beheerders te helpen door naar <b>hun rol</b> te wisselen.<br>Na het wisselen zie je de website precies zoals zij hem zien. Je kan altijd weer terug.</p>
+                <p>De keuzes hieronder veranderen dus steeds, afhankelijk van je gekozen rol.<br>
+                        <!-- hierarchie -->
+                    <span>De hi&euml;rarchie is BB</span>
+                    <span style="position: relative; bottom: .15em;"> &rarr; </span>
+                    <span>BKO</span>
+                    <span style="position: relative; bottom: .15em;"> &rarr; </span>
+                    <span>RKO</span>
+                    <span style="position: relative; bottom: .15em;"> &rarr; </span>
+                    <span>RCL</span>
+                    <span style="position: relative; bottom: .15em;"> &rarr; </span>
+                    <span>HWL</span>
+                    <span style="position: relative; bottom: .15em;"> &rarr; </span>
+                    <span>WL.&nbsp;&nbsp;&nbsp;</span>
+                    <a class="btn-small btn-nhb-blauw" href="{{ wiki_rollen }}" target="_blank" rel="noopener noreferrer"><i class="material-icons-round white-text">help_outline</i></a>
+                </p>
+            {% else %}
+                <form method="post" action="{{ obj.url }}">
+                    {% csrf_token %}
+                    <input class="btn-nhb-blauw" type="submit" value="{{ obj.titel }}">
+                    {% if obj.ver_naam %}
+                        <span>&nbsp;&nbsp;{{ obj.ver_naam }}</span>
+                    {% endif %}
+                </form>
+            {% endif %}
+        </p>
+    {% endfor %}
+{% endif %}
 
 {% if url_login_as %}
     <a class="btn-nhb-blauw" href="{{ url_login_as }}">Account wissel</a>
