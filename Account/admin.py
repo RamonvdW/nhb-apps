@@ -35,7 +35,7 @@ class AccountAdmin(UserAdmin):
     # velden om in te zoeken (in de lijst)
     search_fields = ('username', 'nhblid__voornaam', 'nhblid__achternaam')
 
-    def gekoppelde_functies(self, obj):
+    def gekoppelde_functies(self, obj):     # pragma: no cover
         return "\n".join([functie.beschrijving for functie in obj.functie_set.all()])
 
 

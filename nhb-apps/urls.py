@@ -32,7 +32,7 @@ urlpatterns = [
     path('vereniging/',  include('Vereniging.urls'))
 ]
 
-if settings.ENABLE_WIKI:
+if settings.ENABLE_WIKI:    # pragma: no cover
     # activeer single sign-on functionaliteit
     urlpatterns.append(path('idp/',    include('djangosaml2idp.urls')))
 

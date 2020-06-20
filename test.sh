@@ -59,7 +59,7 @@ wait $! 2>/dev/null
 echo
 if [ -z "$FOCUS" ]
 then
-    python3.6 -m coverage report --skip-covered --fail-under=90 $OMIT
+    python3.6 -m coverage report --skip-covered --fail-under=98 $OMIT
     res=$?
 else
     python3.6 -m coverage report $OMIT | grep -E "$FOCUS|----|Cover"
