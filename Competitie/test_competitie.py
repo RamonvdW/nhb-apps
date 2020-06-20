@@ -14,7 +14,7 @@ from Schutter.models import SchutterBoog
 from Functie.models import maak_functie
 from .models import (Competitie, DeelCompetitie, CompetitieKlasse, maak_competitieklasse_indiv,
                      RegioCompetitieSchutterBoog, regiocompetitie_schutterboog_aanmelden)
-from .views import zet_fase
+from .views_overzicht import zet_fase
 import datetime
 
 
