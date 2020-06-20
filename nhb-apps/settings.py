@@ -16,8 +16,9 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 
 import os
 
-# NOTE: some setting have been moved to settings_local.py
-#       see end of this file
+# import install-specific settings from a separate file
+# that is easy to replace as part of the deployment process
+from .settings_local import *
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 PROJ_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -54,13 +55,10 @@ INSTALLED_APPS = [
     'django.contrib.auth',          # authenticatie framework
     'django.contrib.contenttypes',  # permission association to models
     'django.contrib.messages',
-    # 'debug_toolbar',                # DEV ONLY
-    # 'django_extensions'             # DEV ONLY (provides show_urls)
 ]
 
 
 MIDDLEWARE = [
-    # 'debug_toolbar.middleware.DebugToolbarMiddleware',          # DEV ONLY
     'django.middleware.security.SecurityMiddleware',                # security (https improvements)
     'django.contrib.sessions.middleware.SessionMiddleware',         # manage sessions across requests
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -70,6 +68,9 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',       # security
 ]
 
+if ENABLE_DEBUG_TOOLBAR:
+    INSTALLED_APPS.append('debug_toolbar')
+    MIDDLEWARE.insert(0, 'debug_toolbar.middleware.DebugToolbarMiddleware')
 
 # gebruik ingebouwde authenticatie / login laag
 # inclusief permissions en groepen
@@ -251,10 +252,6 @@ RECORDS_TOEGESTANE_PARA_KLASSEN = (
     "W2",
     "Ja"        # aka Onbekend
 )
-
-# import install-specific settings from a separate file
-# that is easy to replace as part of the deployment process
-from .settings_local import *
 
 # definitions taken from saml2.saml to avoid importing saml2
 # because it replaces ElementTree with cElementTree, which gives problems with QR code generation
