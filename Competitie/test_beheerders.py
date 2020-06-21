@@ -16,6 +16,8 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
 
     """ unit tests voor de Competitie applicatie, Koppel Beheerders functie """
 
+    test_after = ('Competitie.test_planning',)
+
     def _prep_beheerder_lid(self, voornaam):
         nhb_nr = self._next_nhbnr
         self._next_nhbnr += 1
@@ -90,6 +92,9 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
 
         self.url_overzicht = '/competitie/'
         self.url_wijzigdatums = '/competitie/wijzig-datums/%s/'
+        self.url_aangemeld_alles = '/competitie/lijst-regiocompetitie/%s/alles/'  # % comp_pk
+        self.url_aangemeld_rayon = '/competitie/lijst-regiocompetitie/%s/rayon-%s/'  # % comp_pk, rayon_pk
+        self.url_aangemeld_regio = '/competitie/lijst-regiocompetitie/%s/regio-%s/'  # % comp_pk, regio_pk
 
     def test_overzicht_anon(self):
         resp = self.client.get(self.url_overzicht)
@@ -219,6 +224,54 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         resp = self.client.post(url)
         self.assertEqual(resp.status_code, 404)     # 404 = Not found
 
+    def test_aangemeld(self):
+        # schutters aangemeld voor de regiocompetitie
+
+        # creëer een competitie met deelcompetities
+        competitie_aanmaken(jaar=2019)
+        comp_pk = Competitie.objects.all()[0].pk
+
+        # landelijk
+        url = self.url_aangemeld_alles % comp_pk
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/lijst-aangemeld-regio.dtl', 'plein/site_layout.dtl'))
+
+        # rayon 2
+        url = self.url_aangemeld_rayon % (comp_pk, self.rayon_2.pk)
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/lijst-aangemeld-regio.dtl', 'plein/site_layout.dtl'))
+
+        # regio 101
+        url = self.url_aangemeld_regio % (comp_pk, self.regio_101.pk)
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/lijst-aangemeld-regio.dtl', 'plein/site_layout.dtl'))
+
+        # bad keys
+        url = self.url_aangemeld_alles % 999999
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+
+        url = self.url_aangemeld_rayon % (999999, 999999)
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+
+        url = self.url_aangemeld_rayon % (comp_pk, 999999)
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+
+        url = self.url_aangemeld_regio % (999999, 999999)
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+
+        url = self.url_aangemeld_regio % (comp_pk, 999999)
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 404)     # 404 = Not found
 
 
 # end of file

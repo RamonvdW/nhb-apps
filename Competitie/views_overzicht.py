@@ -11,7 +11,7 @@ from django.utils import timezone
 from Plein.menu import menu_dynamics
 from Functie.rol import Rollen, rol_get_huidige_functie, rol_get_beschrijving, rol_get_huidige
 from BasisTypen.models import IndivWedstrijdklasse
-from NhbStructuur.models import NhbRegio
+from NhbStructuur.models import NhbRayon, NhbRegio
 from Score.models import zoek_meest_recente_automatisch_vastgestelde_ag
 from .models import (AG_NUL, LAAG_REGIO, LAAG_RK, LAAG_BK,
                      Competitie, DeelCompetitie, CompetitieKlasse, RegioCompetitieSchutterBoog)
@@ -80,7 +80,7 @@ class CompetitieOverzichtView(View):
     def _get_competities(self, context, rol_nu):
         comps = Competitie.objects.filter(is_afgesloten=False).order_by('begin_jaar', 'afstand')
         for comp in comps:
-            comp.url_inschrijvingen = reverse('Competitie:lijst-regio', kwargs={'comp_pk': comp.pk})
+            comp.url_inschrijvingen = reverse('Competitie:lijst-regiocomp-alles', kwargs={'comp_pk': comp.pk})
             zet_fase(comp)
             if comp.fase == 'A1' and rol_nu == Rollen.ROL_BB:
                 context['bb_kan_ag_vaststellen'] = True
@@ -255,7 +255,39 @@ class KlassegrenzenTonenView(ListView):
         return context
 
 
-class LijstAangemeldRegioView(TemplateView):
+def maak_regiocomp_zoom_knoppen(context, comp_pk, rayon=None, regio=None):
+
+    """ Maak de zoom knoppen structuur voor de regiocompetitie deelnemers lijst """
+
+    context['zoom_alles_url'] = reverse('Competitie:lijst-regiocomp-alles', kwargs={'comp_pk': comp_pk})
+
+    regios = (NhbRegio
+              .objects
+              .select_related('rayon')
+              .filter(is_administratief=False))
+
+    rayons = NhbRayon.objects.all()
+
+    context['zoom_rayons'] = list()
+    for obj in rayons:
+        context['zoom_rayons'].append(obj)
+
+        if obj != rayon:
+            obj.zoom_url = reverse('Competitie:lijst-regiocomp-rayon',
+                                   kwargs={'comp_pk': comp_pk, 'rayon_pk': obj.pk})
+
+        obj.regios = list()
+        for obj2 in regios:
+            if obj2.rayon == obj:
+                obj.regios.append(obj2)
+                obj2.title_str = 'Regio %s' % obj2.regio_nr
+                if obj2 != regio:
+                    obj2.zoom_url = reverse('Competitie:lijst-regiocomp-regio',
+                                            kwargs={'comp_pk': comp_pk, 'regio_pk': obj2.pk})
+    # for
+
+
+class LijstAangemeldRegiocompAllesView(TemplateView):
 
     """ Toon een lijst van SchutterBoog die aangemeld zijn voor de regiocompetitie """
 
@@ -266,7 +298,6 @@ class LijstAangemeldRegioView(TemplateView):
         context = super().get_context_data(**kwargs)
 
         comp_pk = kwargs['comp_pk']
-
         try:
             context['competitie'] = Competitie.objects.get(pk=comp_pk)
         except Competitie.DoesNotExist:
@@ -274,8 +305,12 @@ class LijstAangemeldRegioView(TemplateView):
 
         context['object_list'] = (RegioCompetitieSchutterBoog
                                   .objects
-                                  .select_related('klasse', 'klasse__indiv', 'deelcompetitie', 'schutterboog', 'schutterboog__nhblid', 'schutterboog__nhblid__bij_vereniging')
-                                  .filter(deelcompetitie__competitie=comp_pk)
+                                  .select_related('klasse', 'klasse__indiv',
+                                                  'deelcompetitie', 'deelcompetitie__nhb_regio',
+                                                  'schutterboog', 'schutterboog__nhblid',
+                                                  'schutterboog__nhblid__bij_vereniging')
+                                  .filter(deelcompetitie__competitie=comp_pk,
+                                          deelcompetitie__laag=LAAG_REGIO)
                                   .order_by('klasse__indiv__volgorde', 'aanvangsgemiddelde'))
 
         volgorde = -1
@@ -284,6 +319,102 @@ class LijstAangemeldRegioView(TemplateView):
                 obj.nieuwe_klasse = True
                 volgorde = obj.klasse.indiv.volgorde
         # for
+
+        context['inhoud'] = 'landelijk'
+        maak_regiocomp_zoom_knoppen(context, comp_pk)
+
+        menu_dynamics(self.request, context, actief='competitie')
+        return context
+
+
+class LijstAangemeldRegiocompRayonView(TemplateView):
+
+    """ Toon een lijst van SchutterBoog die aangemeld zijn voor de regiocompetitie """
+
+    template_name = TEMPLATE_COMPETITIE_AANGEMELD_REGIO
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        comp_pk = kwargs['comp_pk']
+        try:
+            context['competitie'] = Competitie.objects.get(pk=comp_pk)
+        except Competitie.DoesNotExist:
+            raise Resolver404()
+
+        rayon_pk = kwargs['rayon_pk']
+        try:
+            rayon = NhbRayon.objects.get(pk=rayon_pk)
+        except NhbRayon.DoesNotExist:
+            raise Resolver404()
+
+        context['object_list'] = (RegioCompetitieSchutterBoog
+                                  .objects
+                                  .select_related('klasse', 'klasse__indiv',
+                                                  'deelcompetitie', 'deelcompetitie__nhb_regio__rayon',
+                                                  'schutterboog', 'schutterboog__nhblid', 'schutterboog__nhblid__bij_vereniging')
+                                  .filter(deelcompetitie__competitie=comp_pk,
+                                          deelcompetitie__laag=LAAG_REGIO,
+                                          deelcompetitie__nhb_regio__rayon=rayon)
+                                  .order_by('klasse__indiv__volgorde', 'aanvangsgemiddelde'))
+
+        volgorde = -1
+        for obj in context['object_list']:
+            if volgorde != obj.klasse.indiv.volgorde:
+                obj.nieuwe_klasse = True
+                volgorde = obj.klasse.indiv.volgorde
+        # for
+
+        context['inhoud'] = 'in ' + str(rayon)
+        maak_regiocomp_zoom_knoppen(context, comp_pk, rayon=rayon)
+
+        menu_dynamics(self.request, context, actief='competitie')
+        return context
+
+
+class LijstAangemeldRegiocompRegioView(TemplateView):
+
+    """ Toon een lijst van SchutterBoog die aangemeld zijn voor de regiocompetitie """
+
+    template_name = TEMPLATE_COMPETITIE_AANGEMELD_REGIO
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        comp_pk = kwargs['comp_pk']
+        try:
+            context['competitie'] = Competitie.objects.get(pk=comp_pk)
+        except Competitie.DoesNotExist:
+            raise Resolver404()
+
+        regio_pk = kwargs['regio_pk']
+        try:
+            regio = (NhbRegio
+                     .objects
+                     .select_related('rayon')
+                     .get(pk=regio_pk))
+        except NhbRegio.DoesNotExist:
+            raise Resolver404()
+
+        context['object_list'] = (RegioCompetitieSchutterBoog
+                                  .objects
+                                  .select_related('klasse', 'klasse__indiv', 'deelcompetitie', 'schutterboog', 'schutterboog__nhblid', 'schutterboog__nhblid__bij_vereniging')
+                                  .filter(deelcompetitie__competitie=comp_pk,
+                                          deelcompetitie__laag=LAAG_REGIO,
+                                          deelcompetitie__nhb_regio=regio)
+                                  .order_by('klasse__indiv__volgorde', 'aanvangsgemiddelde'))
+
+        volgorde = -1
+        for obj in context['object_list']:
+            if volgorde != obj.klasse.indiv.volgorde:
+                obj.nieuwe_klasse = True
+                volgorde = obj.klasse.indiv.volgorde
+        # for
+
+        context['inhoud'] = 'in ' + str(regio)
+        maak_regiocomp_zoom_knoppen(context, comp_pk, regio=regio)
 
         menu_dynamics(self.request, context, actief='competitie')
         return context

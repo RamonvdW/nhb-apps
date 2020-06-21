@@ -13,7 +13,31 @@
 
 <h4>Aanmeldingen regiocompetitie</h4>
 
-<p>Hieronder volgt de lijst schutters die <u>landelijk</u> ingeschreven zijn voor deelname aan de regiocompetitie <b>{{ competitie.beschrijving }}</b>.</p>
+<p>Filter mogelijkheden:</p>
+
+<a class="margin-5 btn-nhb-blauw btn-small" href="{{ zoom_alles_url }}">Alles</a>
+
+{% for rayon in zoom_rayons %}
+
+    <br>
+
+    {% if rayon.zoom_url %}
+        <a class="margin-5 btn-nhb-blauw btn-small" href="{{ rayon.zoom_url }}">{{ rayon.naam }}</a>
+    {% else %}
+        <a class="margin-5 btn-nhb-blauw btn-small disabled" href="#">{{ rayon.naam }}</a>
+    {% endif %}
+
+    {% for regio in rayon.regios %}
+        {% if regio.zoom_url %}
+            <a class="margin-5 btn-nhb-blauw btn-small" href="{{ regio.zoom_url }}">{{ regio.title_str }}</a>
+        {% else %}
+            <a class="margin-5 btn-nhb-blauw btn-small disabled" href="#">{{ regio.title_str }}</a>
+        {% endif %}
+    {% endfor %}
+
+{% endfor %}
+
+<p>Hieronder volgt de lijst schutters die <b>{{ inhoud }}</b> ingeschreven zijn voor deelname aan de regiocompetitie <b>{{ competitie.beschrijving }}</b>.</p>
 
 {% if object_list.count %}
 

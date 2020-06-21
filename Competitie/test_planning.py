@@ -502,6 +502,11 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
         wedstrijd_datum = Wedstrijd.objects.get(pk=wedstrijd_pk).datum_wanneer
         self.assertEqual(str(wedstrijd_datum), "2020-01-27")
 
+        # haal de ronde planning op inclusief knoppen om de wedstrijden te wijzigen
+        resp = self.client.get(self.url_planning_regio_ronde % ronde_pk)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+
     def test_rcl_maakt_cluster_planning(self):
         self.e2e_login_and_pass_otp(self.account_rcl)
         self.e2e_wissel_naar_functie(self.functie_rcl)
@@ -547,6 +552,11 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
 
         # haal de regioplanning op, inclusief de clusterplanning
         resp = self.client.get(self.url_planning_regio % self.deelcomp_regio_18.pk)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+
+        # haal de cluster planning op, inclusief telling wedstrijden in een ronde
+        resp = self.client.get(self.url_planning_regio_cluster % self.cluster_101a.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
 

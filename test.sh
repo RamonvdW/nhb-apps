@@ -36,9 +36,11 @@ then
     echo "[INFO] Focus set to: $FOCUS"
 fi
 
-python3.6 ./websim.py &
+# delete old coverage report - in the background
+rm -rf "$REPORT_DIR" &
 
-rm -rf "$REPORT_DIR"
+# start the simulator (for the mailer)
+python3.6 ./websim.py &
 
 python3.6 -m coverage erase
 

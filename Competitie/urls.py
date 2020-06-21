@@ -15,6 +15,31 @@ urlpatterns = [
          views_overzicht.CompetitieOverzichtView.as_view(),
          name='overzicht'),
 
+    path('klassegrenzen/tonen/',
+         views_overzicht.KlassegrenzenTonenView.as_view(),
+         name='klassegrenzen-tonen'),
+
+    path('lijst-regiocompetitie/<comp_pk>/alles/',
+         views_overzicht.LijstAangemeldRegiocompAllesView.as_view(),
+         name='lijst-regiocomp-alles'),
+
+    path('lijst-regiocompetitie/<comp_pk>/rayon-<rayon_pk>/',
+         views_overzicht.LijstAangemeldRegiocompRayonView.as_view(),
+         name='lijst-regiocomp-rayon'),
+
+    path('lijst-regiocompetitie/<comp_pk>/regio-<regio_pk>/',
+         views_overzicht.LijstAangemeldRegiocompRegioView.as_view(),
+         name='lijst-regiocomp-regio'),
+
+    path('info/',
+         views_overzicht.InfoCompetitieView.as_view(),
+         name='info-competitie'),
+
+    path('tussenstand/',
+         views_overzicht.TussenstandView.as_view(),
+         name='tussenstand'),
+
+
     path('instellingen-volgende-competitie/',
          views_bb.InstellingenVolgendeCompetitieView.as_view(),
          name='instellingen-volgende-competitie'),
@@ -31,25 +56,10 @@ urlpatterns = [
          views_bb.KlassegrenzenVaststellenView.as_view(),
          name='klassegrenzen-vaststellen'),
 
-    path('klassegrenzen/tonen/',
-         views_overzicht.KlassegrenzenTonenView.as_view(),
-         name='klassegrenzen-tonen'),
-
-    path('lijst-regio/<comp_pk>/',
-         views_overzicht.LijstAangemeldRegioView.as_view(),
-         name='lijst-regio'),
-
-    path('info/',
-         views_overzicht.InfoCompetitieView.as_view(),
-         name='info-competitie'),
-
-    path('tussenstand/',
-         views_overzicht.TussenstandView.as_view(),
-         name='tussenstand'),
-
     path('wijzig-datums/<comp_pk>/',
          views_bb.WijzigDatumsView.as_view(),
          name='wijzig-datums'),
+
 
     path('planning/regiocompetitie/ronde/<ronde_pk>/',
          views_planning.RegioRondePlanningView.as_view(),

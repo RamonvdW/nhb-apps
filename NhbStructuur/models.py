@@ -25,8 +25,14 @@ GEBRUIK2STR = {'18': 'Indoor',
 
 class NhbRayon(models.Model):
     """ Tabel waarin de Rayon definities van de NHB staan """
+
+    # 1-cijferige NHB nummer van dit rayon
     rayon_nr = models.PositiveIntegerField(primary_key=True)
+
+    # korte naam van het rayon (Rayon 1)
     naam = models.CharField(max_length=20)      # Rayon 3
+
+    # beschrijving van het gebied dat dit rayon dekt
     geografisch_gebied = models.CharField(max_length=50)
 
     def __str__(self):

@@ -33,7 +33,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         self.account_bb.save()
 
         # deze test is afhankelijk van de standaard regio's
-        regio = NhbRegio.objects.get(regio_nr=101)
+        self.regio_101 = regio = NhbRegio.objects.get(regio_nr=101)
 
         # maak een test vereniging
         ver = NhbVereniging()
@@ -114,8 +114,9 @@ class TestCompetitie(E2EHelpers, TestCase):
         histcomp.klasse = 'Testcurve1'       # TODO: kan de klasse een spatie bevatten?
         histcomp.is_team = False
         histcomp.save()
+        self.histcomp = histcomp
 
-        # (strategisch gekozen) historische data om klassegrenzen uit te bepalen
+        # een ouder seizoen dat niet gebruikt moet worden
         histcomp2 = HistCompetitie()
         histcomp2.seizoen = '2017/2018'
         histcomp2.comp_type = '18'
@@ -250,7 +251,47 @@ class TestCompetitie(E2EHelpers, TestCase):
         self.url_klassegrenzen_vaststellen_18 = '/competitie/klassegrenzen/vaststellen/18/'
         self.url_klassegrenzen_vaststellen_25 = '/competitie/klassegrenzen/vaststellen/25/'
         self.url_klassegrenzen_tonen = '/competitie/klassegrenzen/tonen/'
-        self.url_aangemeld = '/competitie/lijst-regio/%s/'  # % comp_pk
+        self.url_aangemeld_alles = '/competitie/lijst-regiocompetitie/%s/alles/'  # % comp_pk
+        self.url_aangemeld_rayon = '/competitie/lijst-regiocompetitie/%s/rayon-%s/'  # % comp_pk, rayon_pk
+        self.url_aangemeld_regio = '/competitie/lijst-regiocompetitie/%s/regio-%s/'  # % comp_pk, regio_pk
+
+    def _maak_many_histcomp(self):
+        # maak veel histcomp records aan
+        # zodat de AG-vaststellen bulk-create limiet van 500 gehaald wordt
+
+        nhb_nr = 190000
+        records = list()
+        leden = list()
+
+        geboorte_datum = datetime.date(year=1970, month=3, day=4)
+        sinds_datum = datetime.date(year=2001, month=11, day=12)
+
+        for lp in range(550):
+            lid = NhbLid(nhb_nr=nhb_nr + lp,
+                         geslacht='V',
+                         geboorte_datum=geboorte_datum,
+                         sinds_datum=sinds_datum)
+            leden.append(lid)
+
+            rec = HistCompetitieIndividueel(histcompetitie=self.histcomp,
+                                            boogtype='R',
+                                            rank=lp,
+                                            schutter_nr=lid.nhb_nr,
+                                            vereniging_nr=1000,
+                                            score1=1,
+                                            score2=2,
+                                            score3=3,
+                                            score4=4,
+                                            score5=5,
+                                            score6=6,
+                                            score7=250,
+                                            totaal=270,
+                                            gemiddelde= 5.5)
+            records.append(rec)
+        # for
+
+        NhbLid.objects.bulk_create(leden)
+        HistCompetitieIndividueel.objects.bulk_create(records)
 
     def test_anon(self):
         self.e2e_logout()
@@ -368,8 +409,13 @@ class TestCompetitie(E2EHelpers, TestCase):
         comp = Competitie.objects.get(afstand=25, is_afgesloten=False)
         CompetitieKlasse(competitie=comp, min_ag=25.0).save()
 
+        # maak nog een hele bak AG's aan
+        self._maak_many_histcomp()
+
         # haal het AG scherm op
         resp = self.client.get(self.url_ag_vaststellen)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
 
         # gebruik een POST om de AG's vast te stellen
         resp = self.client.post(self.url_ag_vaststellen)
@@ -377,7 +423,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         # controleer dat er geen dubbele SchutterBoog records aangemaakt zijn
         self.assertEqual(1, SchutterBoog.objects.filter(nhblid=self.lid_100001, boogtype__afkorting='R').count())
         self.assertEqual(1, SchutterBoog.objects.filter(nhblid=self.lid_100002, boogtype__afkorting='BB').count())
-        self.assertEqual(4, SchutterBoog.objects.count())
+        self.assertEqual(554, SchutterBoog.objects.count())
 
         # controleer dat het "ag vaststellen" kaartje er nog steeds is
         # dit keer met de "voor het laatst gedaan" notitie
@@ -395,11 +441,25 @@ class TestCompetitie(E2EHelpers, TestCase):
         resp = self.client.post(self.url_aanmaken)
         self.assert_is_redirect(resp, self.url_overzicht)
 
+        # geen HistCompIndividueel
+        HistCompetitieIndividueel.objects.all().delete()
+
+        # haal het AG scherm op
+        resp = self.client.get(self.url_ag_vaststellen)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+
+        # probeer de POST
+        resp = self.client.post(self.url_ag_vaststellen)
+        self.assert_is_redirect(resp, self.url_overzicht)
+
         # geen HistComp
         HistCompetitie.objects.all().delete()
 
         # haal het AG scherm op
         resp = self.client.get(self.url_ag_vaststellen)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
 
         # probeer de POST
         resp = self.client.post(self.url_ag_vaststellen)
@@ -526,7 +586,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         # for
 
         # lijst aangemeld regiocompetitie ophalen
-        resp = self.client.get(self.url_aangemeld % competitie_18.pk)
+        resp = self.client.get(self.url_aangemeld_alles % competitie_18.pk)
         self.assertEqual(resp.status_code, 200)
 
         # maak nog een cadet aan
@@ -543,15 +603,19 @@ class TestCompetitie(E2EHelpers, TestCase):
         # for
 
         # lijst aangemeld regiocompetitie ophalen
-        resp = self.client.get(self.url_aangemeld % competitie_18.pk)
+        resp = self.client.get(self.url_aangemeld_alles % competitie_18.pk)
         self.assertEqual(resp.status_code, 200)
-
-        # corner case
-        resp = self.client.get(self.url_aangemeld % 999999)
-        self.assertEqual(resp.status_code, 404)
 
         # probeer dubbel aan te melden
         regiocompetitie_schutterboog_aanmelden(competitie_18, self.schutterboog_100003, None)
+
+        # voor de coverage, haal ook de aangemeld-lijsten op
+        # lijst aangemeld regiocompetitie ophalen
+        resp = self.client.get(self.url_aangemeld_rayon % (competitie_18.pk, self.regio_101.rayon.pk))
+        self.assertEqual(resp.status_code, 200)
+
+        resp = self.client.get(self.url_aangemeld_regio % (competitie_18.pk, self.regio_101.pk))
+        self.assertEqual(resp.status_code, 200)
 
     def test_team(self):
         # slechts een test van een CompetitieKlasse() gekoppeld aan een TeamWedstrijdKlasse
