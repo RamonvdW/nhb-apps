@@ -103,17 +103,18 @@ class TestPlein(E2EHelpers, TestCase):
         self.e2e_login(self.account_admin)
         resp = self.client.get('/plein/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertNotContains(resp, '/beheer/')
-        self.assertNotContains(resp, '/admin/')
         self.assertContains(resp, 'Wissel van rol')
+        urls = [url for url in self.extract_all_urls(resp) if "admin" in url or "beheer" in url]
+        self.assertEqual(0, len(urls))
 
         # simuleer 2FA
         self.e2e_login_and_pass_otp(self.account_admin)
         resp = self.client.get('/plein/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertNotContains(resp, '/beheer/')    # komt pas in beeld na kiezen rol IT
         self.assertContains(resp, 'Wissel van rol')
         self.assert_template_used(resp, ('plein/plein-gebruiker.dtl', 'plein/site_layout.dtl'))
+        urls = [url for url in self.extract_all_urls(resp) if "beheer" in url]
+        self.assertEqual(0, len(urls))  # komt pas in beeld na kiezen rol IT
 
         # wissel naar IT beheerder
         self.e2e_wisselnaarrol_it()
@@ -121,9 +122,10 @@ class TestPlein(E2EHelpers, TestCase):
 
         resp = self.client.get('/plein/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, '/beheer/')
         self.assertContains(resp, 'Wissel van rol')
         self.assert_template_used(resp, ('plein/plein-beheerder.dtl', 'plein/site_layout.dtl'))
+        urls = [url for url in self.extract_all_urls(resp) if "beheer" in url]
+        self.assertEqual(1, len(urls))
 
         # wissel naar elk van de functies
 
@@ -205,5 +207,12 @@ class TestPlein(E2EHelpers, TestCase):
         request.user.is_authenticated = False
         with self.assertRaises(AssertionError):
             menu_dynamics(request, context, actief='test-bestaat-niet')
+
+    def test_quick(self):
+        # voor test.sh om met een snelle run in debug mode
+        self.e2e_login(self.account_admin)
+        resp = self.client.get('/plein/')
+        self.assertEqual(resp.status_code, 200)
+        urls = self.extract_all_urls(resp)      # for coverage
 
 # end of file

@@ -47,9 +47,9 @@ python3.6 -m coverage erase
 python3.6 -m coverage run --append --branch ./manage.py test --noinput $*  # note: double quotes not supported around $*
 if [ $? -eq 0 -a $# -eq 0 ]
 then
-    # add coverage with debug enabled
-    echo "[INFO] Performing quick debug run"
-    coverage run --append --branch ./manage.py test --noinput --debug-mode Plein.tests.TestPlein.test_plein_normaal &>/dev/null
+    # add coverage with debug and wiki enabled
+    echo "[INFO] Performing run with debug + wiki run"
+    python3.6 -m coverage run --append --branch ./manage.py test --noinput --debug-mode --enable-wiki Plein.tests.TestPlein.test_quick Functie.test_saml2idp &>/dev/null
 fi
 
 # stop the http simulator

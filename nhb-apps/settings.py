@@ -15,10 +15,16 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
+import sys
 
 # import install-specific settings from a separate file
 # that is easy to replace as part of the deployment process
 from .settings_local import *
+
+# for testing
+if "--enable-wiki" in sys.argv:
+    ENABLE_WIKI = True
+    sys.argv.remove("--enable-wiki")
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 PROJ_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -68,7 +74,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',       # security
 ]
 
-if ENABLE_DEBUG_TOOLBAR:    # pragma: no branch
+if ENABLE_DEBUG_TOOLBAR and "test" not in sys.argv:    # pragma: no branch
     INSTALLED_APPS.append('debug_toolbar')
     MIDDLEWARE.insert(0, 'debug_toolbar.middleware.DebugToolbarMiddleware')
 

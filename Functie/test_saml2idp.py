@@ -10,7 +10,7 @@ from Overig.e2ehelpers import E2EHelpers
 
 # tests van de SAML2 Identity Provider voor single sign-on ondersteuning
 
-if settings.ENABLE_WIKI:    # pragma: no cover
+if settings.ENABLE_WIKI:
 
     class TestSingleSignOn(E2EHelpers, TestCase):
         """ unit tests voor de het SSO deel van de Beheer applicatie """

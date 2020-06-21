@@ -30,6 +30,14 @@ class E2EHelpers(object):
     def e2e_account_accepteert_vhpg(account):
         account_vhpg_is_geaccepteerd(account)
 
+    @staticmethod
+    def _remove_debugtoolbar(html):
+        """ removes the debug toolbar code """
+        pos = html.find('<link rel="stylesheet" href="/static/debug_toolbar/css/print.css"')
+        if pos > 0:     # pragma: no cover
+            html = html[:pos] + '<!-- removed debug toolbar --></body></html>'
+        return html
+
     def e2e_create_account(self, username, email, voornaam, accepteer_vhpg=False):
         """ Maak een Account met AccountEmail aan in de database van de website """
         account_create(username, voornaam, '', self.WACHTWOORD, email, True)
@@ -117,22 +125,22 @@ class E2EHelpers(object):
             # print("e2e_check_rol: rol_nu=%s, functie_nu=%s" % (rol_nu, functie_nu))
             raise ValueError('Rol mismatch: rol_nu=%s, rol_verwacht=%s' % (rol_nu, rol_verwacht))
 
-    @staticmethod
-    def e2e_dump_resp(resp):                        # pragma: no cover
+    def e2e_dump_resp(self, resp):                        # pragma: no cover
         print("status code:", resp.status_code)
         print(repr(resp))
         if resp.status_code == 302:
             print("redirect to url:", resp.url)
         content = str(resp.content)
+        content = self._remove_debugtoolbar(content)
         if len(content) < 50:
             print("very short content:", content)
         else:
             soup = BeautifulSoup(content, features="html.parser")
             print(soup.prettify())
 
-    @staticmethod
-    def extract_all_urls(resp, skip_menu=False, skip_smileys=True):
+    def extract_all_urls(self, resp, skip_menu=False, skip_smileys=True):
         content = str(resp.content)
+        content = self._remove_debugtoolbar(content)
         if skip_menu:
             # menu is the first part of the body
             pos = content.find('<div id="content">')
@@ -163,9 +171,9 @@ class E2EHelpers(object):
         # while
         return urls
 
-    @staticmethod
-    def extract_checkboxes(resp):
+    def extract_checkboxes(self, resp):
         content = str(resp.content)
+        content = self._remove_debugtoolbar(content)
         checked = list()
         unchecked = list()
         pos = content.find('<input ')
@@ -233,6 +241,7 @@ class E2EHelpers(object):
         """ Doe een aantal basic checks op een html response """
         assert isinstance(self, TestCase)
         html = str(response.content)
+        html = self._remove_debugtoolbar(html)
         self.assertContains(response, "<html")
         self.assertIn("lang=", html)
         self.assertIn("</html>", html)
