@@ -17,7 +17,7 @@
 <table class="striped">
     <tr>
         <td class="center-align">
-            <img src="{% static 'plein/indoor_sfeer_1.jpg' %}" style="width:100%; height:auto"><br>
+            <img src="{% static 'plein/indoor_sfeer_1.jpg' %}" style="width:100%; height:auto" loading="lazy"><br>
             <code style="font-size:12px">Sfeerfoto van een wedstrijd binnenshuis</code>
         </td>
     </tr>
@@ -66,7 +66,7 @@
 <table class="striped">
     <tr>
         <td class="center-align">
-            <img src="{% static 'plein/indoor_sfeer_2.jpg' %}" style="width:100%; height:auto"><br>
+            <img src="{% static 'plein/indoor_sfeer_2.jpg' %}" style="width:100%; height:auto" loading="lazy"><br>
             <code style="font-size:12px">Sfeerfoto van een wedstrijd binnenshuis</code>
         </td>
     </tr>
@@ -130,7 +130,7 @@
 <table class="striped">
     <tr>
         <td class="center-align">
-            <img src="{% static 'plein/indoor_sfeer_4.jpg' %}" style="width:100%; height:auto"><br>
+            <img src="{% static 'plein/indoor_sfeer_4.jpg' %}" style="width:100%; height:auto" loading="lazy"><br>
             <code style="font-size:12px">Sfeerfoto van een wedstrijd binnenshuis</code>
         </td>
     </tr>
@@ -154,7 +154,7 @@ Nieuwe schutters krijgen na 3 scores hun speelsterkte vastgesteld.</p>
 <table class="striped">
     <tr>
         <td class="center-align">
-            <img src="{% static 'plein/indoor_sfeer_3.jpg' %}" style="width:100%; height:auto"><br>
+            <img src="{% static 'plein/indoor_sfeer_3.jpg' %}" style="width:100%; height:auto" loading="lazy"><br>
             <code style="font-size:12px">Sfeerfoto van een wedstrijd binnenshuis</code>
         </td>
     </tr>
@@ -200,10 +200,10 @@ Nieuwe schutters krijgen na 3 scores hun speelsterkte vastgesteld.</p>
     </tr>
     <tr>
         <td class="center-align">
-            <img src="{% static 'plein/blazoen_dt.png' %}" height="300px" alt="Dutch Target blazoen">
+            <img src="{% static 'plein/blazoen_dt.png' %}" height="300px" alt="Dutch Target blazoen" loading="lazy">
         </td>
         <td class="center-align">
-            <img src="{% static 'plein/blazoen_40cm.png' %}" height="220px" alt="40cm / 60cm blazoen" style="border:1px solid gray">
+            <img src="{% static 'plein/blazoen_40cm.png' %}" height="220px" alt="40cm / 60cm blazoen" style="border:1px solid gray" loading="lazy">
         </td>
     </tr>
     <tr>
@@ -304,7 +304,7 @@ In de shoot-off wordt 1 pijl gesloten en beslist de scheidsrechter welke pijl he
 <table class="striped">
     <tr>
         <td class="center-align">
-            <img src="{% static 'plein/indoor_sfeer_5.jpg' %}" style="width:100%; height:auto"><br>
+            <img src="{% static 'plein/indoor_sfeer_5.jpg' %}" style="width:100%; height:auto" loading="lazy"><br>
             <code style="font-size:12px">Sfeerfoto van een wedstrijd binnenshuis</code>
         </td>
     </tr>
