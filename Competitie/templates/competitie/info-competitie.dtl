@@ -36,28 +36,29 @@
     <thead>
         <th>Competitie</th>
         <th>Schiet<wbr/>afstand</th>
-        <th>Pijlen per schietbeurt</th>
+        <th><span class="hide-on-small-only">Pijlen per schietbeurt</span>
+            <span class="hide-on-med-and-up">Per beurt</span></th>
         <th>Schiet<wbr/>beurten</th>
-        <th>Blazoen</th>
-        <th>Maximale score</th>
+        <th class="hide-on-small-only">Blazoen</th>
+        <th class="hide-on-small-only">Maximale score</th>
     </thead>
 
     <tr>
         <td>Indoor</td>
-        <td>18 meter</td>
+        <td>18 m<span class="hide-on-small-only">eter</span></td>
         <td>3 pijlen</td>
         <td>10</td>
-        <td>40cm</td>
-        <td>300</td>
+        <td class="hide-on-small-only">40cm</td>
+        <td class="hide-on-small-only">300</td>
     </tr>
 
     <tr>
         <td>25m 1pijl</td>
-        <td>25 meter</td>
+        <td>25 m<span class="hide-on-small-only">eter</span></td>
         <td>1 pijl</td>
         <td>25</td>
-        <td>60cm</td>
-        <td>250</td>
+        <td class="hide-on-small-only">60cm</td>
+        <td class="hide-on-small-only">250</td>
     </tr>
 </table>
 
@@ -79,12 +80,12 @@
 
 <table class="white">
     <thead>
-        <th>Rayon</th>
+        <th class="hide-on-small-only">Rayon</th>
         <th>Regio</th>
     </thead>
     {% for regio in regios %}
     <tr {% if regio.mijn_regio %}class="nhb-blauw white-text"{% endif %}>
-        <td>{{ regio.rayon.naam }}</td>
+        <td class="hide-on-small-only">{{ regio.rayon.naam }}</td>
         <td>{{ regio.naam }}</td>
     </tr>
     {% endfor %}
@@ -140,10 +141,11 @@
 <p>&nbsp;</p>
 <h5>Regiocompetitie</h5>
 
-<p>De competitie begint met de regiocompetities in elk van de 16 regio's. Je schiet <b>7 rondes</b>, waarvan de beste 6 tellend zijn.</p>
-<p>Vraag op je vereniging waar en wanneer de wedstrijden in jouw regio gehouden worden.</p>
+<p>De competitie begint met de regiocompetities in elk van de 16 regio's.
+Vraag op je vereniging waar en wanneer de wedstrijden in jouw regio gehouden worden.</p>
 
-<p>De regiocompetitie is per boog type, leeftijdsgroep en speelsterkte opgedeeld in wedstrijdklassen.</p>
+<p>De regiocompetitie is per boog type, leeftijdsgroep en speelsterkte opgedeeld in wedstrijdklassen.
+Je schiet <b>7 rondes</b>, waarvan de beste 6 tellend zijn.</p>
 
 <p>Schutters die vorige seizoen 6 scores neergezet hebben krijgen aan de hand van dat gemiddelde een <i>aanvangsgemiddelde</i> waarmee de indeling op speelsterkte gedaan wordt.
 Nieuwe schutters krijgen na 3 scores hun speelsterkte vastgesteld.</p>
@@ -200,10 +202,10 @@ Nieuwe schutters krijgen na 3 scores hun speelsterkte vastgesteld.</p>
     </tr>
     <tr>
         <td class="center-align">
-            <img src="{% static 'plein/blazoen_dt.png' %}" height="300px" alt="Dutch Target blazoen" loading="lazy">
+            <img src="{% static 'plein/blazoen_dt.png' %}" style="max-height: 300px; height: auto" alt="Dutch Target blazoen" loading="lazy">
         </td>
         <td class="center-align">
-            <img src="{% static 'plein/blazoen_40cm.png' %}" height="220px" alt="40cm / 60cm blazoen" style="border:1px solid gray" loading="lazy">
+            <img src="{% static 'plein/blazoen_40cm.png' %}" style="max-height: 220px; height: auto" alt="40cm / 60cm blazoen" style="border:1px solid gray" loading="lazy">
         </td>
     </tr>
     <tr>
@@ -233,47 +235,47 @@ De overige twee schutters uit de halve finales gaan naar de brozen finale voor p
 
 <table class="white">
     <tr>
-        <td class="center-align"><b>Achtste finale</b><br>(16 schutters)</td>
-        <td class="center-align"><b>Kwart finale</b><br>(8 schutters)</td>
-        <td class="center-align"><b>Halve finale</b><br>(4 schutters)</td>
-        <td class="center-align"><b>Bronzen finale</b><br>(2 schutters)</td>
-        <td class="center-align"><b>Gouden finale</b><br>(2 schutters)</td>
+        <td class="center-align"><b>Achtste finale</b><br>(16<span class="hide-on-small-only"> schutters</span>)</td>
+        <td class="center-align"><b>Kwart finale</b><br>(8<span class="hide-on-small-only"> schutters</span>)</td>
+        <td class="center-align"><b>Halve finale</b><br>(4<span class="hide-on-small-only"> schutters</span>)</td>
+        <td class="center-align"><b>Bronzen finale</b><br>(2<span class="hide-on-small-only"> schutters</span>)</td>
+        <td class="center-align"><b>Gouden finale</b><br>(2<span class="hide-on-small-only"> schutters</span>)</td>
     </tr>
 
     <tr>
-        <td class="center-align"><span class="blue-text">#1</span> tegen #16</td>
-        <td class="center-align" rowspan="2">2 schutters</td>
-        <td class="center-align" rowspan="4">2 schutters</td>
-        <td class="center-align" rowspan="8">2 schutters</td>
-        <td class="center-align" rowspan="8">2 schutters</td>
+        <td class="center-align"><span class="blue-text">#1</span><span class="hide-on-small-only"> tegen</span><br class="show-on-med-and-up"/>#16</td>
+        <td class="center-align" rowspan="2">2<span class="hide-on-small-only"> schutters</span></td>
+        <td class="center-align" rowspan="4">2<span class="hide-on-small-only"> schutters</span></td>
+        <td class="center-align" rowspan="8">2<span class="hide-on-small-only"> schutters</span></td>
+        <td class="center-align" rowspan="8">2<span class="hide-on-small-only"> schutters</span></td>
     </tr>
     <tr>
-        <td class="center-align">#8 tegen #9</td>
-    </tr>
-
-    <tr>
-        <td class="center-align">#5 tegen #12</td>
-        <td class="center-align" rowspan="2">2 schutters</td>
-    </tr>
-    <tr>
-        <td class="center-align"><span class="blue-text">#4</span> tegen #13</td>
+        <td class="center-align">#8<span class="hide-on-small-only"> tegen</span><br class="show-on-med-and-up"/>#9</td>
     </tr>
 
     <tr>
-        <td class="center-align"><span class="blue-text">#3</span> tegen #14</td>
-        <td class="center-align" rowspan="2">2 schutters</td>
-        <td class="center-align" rowspan="4">2 schutters</td>
+        <td class="center-align">#5<span class="hide-on-small-only"> tegen</span><br class="show-on-med-and-up"/>#12</td>
+        <td class="center-align" rowspan="2">2<span class="hide-on-small-only"> schutters</span></td>
     </tr>
     <tr>
-        <td class="center-align">#6 tegen #11</td>
+        <td class="center-align"><span class="blue-text">#4</span><span class="hide-on-small-only"> tegen</span><br class="show-on-med-and-up"/>#13</td>
     </tr>
 
     <tr>
-        <td class="center-align">#7 tegen #10</td>
-        <td class="center-align" rowspan="2">2 schutters</td>
+        <td class="center-align"><span class="blue-text">#3</span><span class="hide-on-small-only"> tegen</span><br class="show-on-med-and-up"/>#14</td>
+        <td class="center-align" rowspan="2">2<span class="hide-on-small-only"> schutters</span></td>
+        <td class="center-align" rowspan="4">2<span class="hide-on-small-only"> schutters</span></td>
     </tr>
     <tr>
-        <td class="center-align"><span class="blue-text">#2</span> tegen #15</td>
+        <td class="center-align">#6<span class="hide-on-small-only"> tegen</span><br class="show-on-med-and-up"/>#11</td>
+    </tr>
+
+    <tr>
+        <td class="center-align">#7<span class="hide-on-small-only"> tegen</span><br class="show-on-med-and-up"/>#10</td>
+        <td class="center-align" rowspan="2">2<span class="hide-on-small-only"> schutters</span></td>
+    </tr>
+    <tr>
+        <td class="center-align"><span class="blue-text">#2</span><span class="hide-on-small-only"> tegen</span><br class="show-on-med-and-up"/>#15</td>
     </tr>
 
 </table>
@@ -328,25 +330,28 @@ In de shoot-off wordt 1 pijl gesloten en beslist de scheidsrechter welke pijl he
     </tr>
 
     <tr>
-        <td>Regiocompetitie</td>
+        <td>Regio<span class="hide-on-small-only">competitie</span></td>
         <td>september tot december</td>
         <td>september tot maart</td>
     </tr>
 
     <tr>
-        <td>Rayonkampioenschappen</td>
+        <td><span class="hide-on-small-only">Rayonkampioenschappen</span>
+            <span class="hide-on-med-and-up">RK</span></td>
         <td>februari</td>
         <td>april / mei</td>
     </tr>
 
     <tr>
-        <td>Bondskampioenschappen Indoor</td>
+        <td><span class="hide-on-small-only">Bondskampioenschappen Indoor</span>
+            <span class="hide-on-med-and-up">BK Indoor</span></td>
         <td>februari / maart</td>
         <td/>
     </tr>
 
     <tr>
-        <td>Nederlandse Kampioenschappen 25m1 pijl</td>
+        <td><span class="hide-on-small-only">Nederlandse Kampioenschappen 25m1 pijl</span>
+            <span class="hide-on-med-and-up">NK 25m1 pijl</span></td>
         <td/>
         <td>mei / juni</td>
     </tr>
