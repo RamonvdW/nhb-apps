@@ -17,15 +17,18 @@
 <table class="striped">
     <tr>
         <td class="center-align">
-            <img src="{% static 'plein/indoor_sfeer_1.jpg' %}" height="300px"><br>
-            <code style="font-size:12px">Sfeerfoto van een indoor wedstrijd</code>
+            <img src="{% static 'plein/indoor_sfeer_1.jpg' %}" style="width:100%; height:auto"><br>
+            <code style="font-size:12px">Sfeerfoto van een wedstrijd binnenshuis</code>
         </td>
-        <td>
-            <a class="btn-nhb-blauw float right" href="https://handboogsport.smugmug.com/Indoor/" target="_blank" rel="noopener noreferrer">
+    </tr>
+    <tr>
+        <td class="center-align">
+            <a class="btn-nhb-blauw" href="https://handboogsport.smugmug.com/Indoor/" target="_blank" rel="noopener noreferrer">
                 <i class="material-icons-round left">open_in_new</i>Meer foto's</a>
         </td>
     </tr>
 </table>
+
 
 <p>Elk jaar organiseert de NHB twee competities tijdens het winterseizoen, met verschillende uitdagingen.</p>
 
@@ -63,12 +66,8 @@
 <table class="striped">
     <tr>
         <td class="center-align">
-            <img src="{% static 'plein/indoor_sfeer_2.jpg' %}" height="300px"><br>
-            <code style="font-size:12px">Sfeerfoto van een indoor wedstrijd</code>
-        </td>
-        <td>
-            <a class="btn-nhb-blauw float right" href="https://handboogsport.smugmug.com/Indoor/" target="_blank" rel="noopener noreferrer">
-                <i class="material-icons-round left">open_in_new</i>Meer foto's</a>
+            <img src="{% static 'plein/indoor_sfeer_2.jpg' %}" style="width:100%; height:auto"><br>
+            <code style="font-size:12px">Sfeerfoto van een wedstrijd binnenshuis</code>
         </td>
     </tr>
 </table>
@@ -131,12 +130,8 @@
 <table class="striped">
     <tr>
         <td class="center-align">
-            <img src="{% static 'plein/indoor_sfeer_4.jpg' %}" height="300px"><br>
-            <code style="font-size:12px">Sfeerfoto van een indoor wedstrijd</code>
-        </td>
-        <td>
-            <a class="btn-nhb-blauw float right" href="https://handboogsport.smugmug.com/Indoor/" target="_blank" rel="noopener noreferrer">
-                <i class="material-icons-round left">open_in_new</i>Meer foto's</a>
+            <img src="{% static 'plein/indoor_sfeer_4.jpg' %}" style="width:100%; height:auto"><br>
+            <code style="font-size:12px">Sfeerfoto van een wedstrijd binnenshuis</code>
         </td>
     </tr>
 </table>
@@ -159,12 +154,8 @@ Nieuwe schutters krijgen na 3 scores hun speelsterkte vastgesteld.</p>
 <table class="striped">
     <tr>
         <td class="center-align">
-            <img src="{% static 'plein/indoor_sfeer_3.jpg' %}" height="300px"><br>
-            <code style="font-size:12px">Sfeerfoto van een indoor wedstrijd</code>
-        </td>
-        <td>
-            <a class="btn-nhb-blauw float right" href="https://handboogsport.smugmug.com/Indoor/" target="_blank" rel="noopener noreferrer">
-                <i class="material-icons-round left">open_in_new</i>Meer foto's</a>
+            <img src="{% static 'plein/indoor_sfeer_3.jpg' %}" style="width:100%; height:auto"><br>
+            <code style="font-size:12px">Sfeerfoto van een wedstrijd binnenshuis</code>
         </td>
     </tr>
 </table>
@@ -226,14 +217,15 @@ Nieuwe schutters krijgen na 3 scores hun speelsterkte vastgesteld.</p>
 
     <tr>
         <td colspan="2" class="center-align">
-            <span>Het linker blazoen heeft 10 scorende ringen van 1 (buitenste) tot 10 (binnenste) punten.</span>
+            <span>Het blazoen rechts heeft 10 scorende ringen van 1 (buitenste) tot 10 (binnenste) punten.</span>
             <br><span>Het DT heeft dezelfde maat als de binnenste 5 ringen van het 40cm blazoen.</span>
         </td>
     </tr>
 </table>
 
-<h6>Knock-out finales</h6>
-<p>De knock-out finales (alleen voor de Indoor competitie) zijn volgens het best-of-5 set-systeem en beginnen met de beste 16 schutters, waarvan de 8 winnaars doorgaan naar de kwartfinale.
+<p>&nbsp;</p>
+<h6>Indoor knock-out finales</h6>
+<p>De knock-out finales (alleen voor de Indoor competitie) begint met de beste 16 schutters, waarvan de 8 winnaars doorgaan naar de kwartfinale.
 Uit de kwartfinale gaan de 4 winnaars door naar de halve finale. Zie het schema hier onder.</p>
 
 <p>De winnaars van de halve finales gaan naar de gouden finale voor plaats 1 en 2.
@@ -286,6 +278,14 @@ De overige twee schutters uit de halve finales gaan naar de brozen finale voor p
 
 </table>
 
+<p>Compound schutters schieten in de finale 5x3 pijlen en vergelijken hun totale score.
+Alle andere schutters schieten de finale volgens het set-systeem over 5 sets van 3 pijlen.
+Na elke set krijgen de schutters setpunten: 0 (laagste score), 1 (gelijke score) of 2 (hoogste score).</p>
+
+<p>Als de compound schutters met gelijke score eindigen, dan volgt een shoot-off.
+De set-systeem schutters schieten een shoot-off als na 5 sets the score gelijk is (5-5).
+In de shoot-off wordt 1 pijl gesloten en beslist de scheidsrechter welke pijl het dichts bij het midden zit.</p>
+
 
 <p>&nbsp;</p>
 <h5>Bondskampioenschappen (BK)</h5>
@@ -304,12 +304,8 @@ De overige twee schutters uit de halve finales gaan naar de brozen finale voor p
 <table class="striped">
     <tr>
         <td class="center-align">
-            <img src="{% static 'plein/indoor_sfeer_5.jpg' %}" height="300px"><br>
-            <code style="font-size:12px">Sfeerfoto van een indoor wedstrijd</code>
-        </td>
-        <td>
-            <a class="btn-nhb-blauw float right" href="https://handboogsport.smugmug.com/Indoor/" target="_blank" rel="noopener noreferrer">
-                <i class="material-icons-round left">open_in_new</i>Meer foto's</a>
+            <img src="{% static 'plein/indoor_sfeer_5.jpg' %}" style="width:100%; height:auto"><br>
+            <code style="font-size:12px">Sfeerfoto van een wedstrijd binnenshuis</code>
         </td>
     </tr>
 </table>
@@ -356,10 +352,6 @@ De overige twee schutters uit de halve finales gaan naar de brozen finale voor p
     </tr>
 
 </table>
-
-
-<p>&nbsp;</p>
-<h5>Overige regels</h5>
 
 <p>Als je voor het einde van de regiocompetitie begint met schieten, dan kan je individueel altijd nog inschrijven.</p>
 
