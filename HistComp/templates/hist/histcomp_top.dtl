@@ -6,17 +6,18 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}Uitslag regiocompetitie{% endblock %}
+{% block title %}Uitslag vorige regiocompetitie{% endblock %}
 
 {% block pagina %}
 
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="histcomp_allejaren" %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="histcomp_top" %}
 
-<h4>Uitslag regiocompetitie</h4>
+<h4>Uitslag vorige regiocompetitie</h4>
 
 {% if object_list %}
 
-    <p>Op deze pagina tonen we de uitslag van de regiocompetitie {{ seizoen }}.</p>
+    <p>Op deze pagina tonen we de uitslag van de <b>regiocompetities {{ seizoen }}</b>.</p>
+
     <p>Kies een boogtype om de uitslag te zien.</p>
 
     <h5>Individuele competitie 18m Indoor</h5>

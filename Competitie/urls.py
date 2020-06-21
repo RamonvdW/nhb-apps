@@ -43,6 +43,10 @@ urlpatterns = [
          views_overzicht.InfoCompetitieView.as_view(),
          name='info-competitie'),
 
+    path('tussenstand/',
+         views_overzicht.TussenstandView.as_view(),
+         name='tussenstand'),
+
     path('wijzig-datums/<comp_pk>/',
          views_bb.WijzigDatumsView.as_view(),
          name='wijzig-datums'),

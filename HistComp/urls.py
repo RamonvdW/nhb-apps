@@ -12,7 +12,7 @@ app_name = 'HistComp'
 urlpatterns = [
     path('',
          views.HistCompAlleJarenView.as_view(),
-         name='allejaren'),
+         name='top'),
 
     path('indiv/<histcomp_pk>/',
          views.HistCompIndivView.as_view(),

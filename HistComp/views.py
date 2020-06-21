@@ -11,7 +11,7 @@ from .models import HistCompetitie, HistCompetitieIndividueel, HistCompetitieTea
 from .forms import FilterForm
 from Plein.menu import menu_dynamics
 
-TEMPLATE_HISTCOMP_ALLEJAREN = 'hist/histcomp_allejaren.dtl'
+TEMPLATE_HISTCOMP_ALLEJAREN = 'hist/histcomp_top.dtl'
 TEMPLATE_HISTCOMP_INDIV = 'hist/histcomp_indiv.dtl'
 TEMPLATE_HISTCOMP_TEAM = 'hist/histcomp_team.dtl'
 

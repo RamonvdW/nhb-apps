@@ -24,6 +24,7 @@ TEMPLATE_COMPETITIE_OVERZICHT_BEHEERDER = 'competitie/overzicht-beheerder.dtl'
 TEMPLATE_COMPETITIE_KLASSEGRENZEN_TONEN = 'competitie/klassegrenzen-tonen.dtl'
 TEMPLATE_COMPETITIE_AANGEMELD_REGIO = 'competitie/lijst-aangemeld-regio.dtl'
 TEMPLATE_COMPETITIE_INFO_COMPETITIE = 'competitie/info-competitie.dtl'
+TEMPLATE_COMPETITIE_TUSSENSTAND = 'competitie/tussenstand.dtl'
 
 
 JA_NEE = {False: 'Nee', True: 'Ja'}
@@ -320,6 +321,35 @@ class InfoCompetitieView(TemplateView):
         context['klassen_count'] = IndivWedstrijdklasse.objects.exclude(is_onbekend=True).count()
 
         menu_dynamics(self.request, context, actief='competitie')
+        return context
+
+
+class TussenstandView(TemplateView):
+
+    """ Django class-based view voor de de tussenstand van de competitie """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_COMPETITIE_TUSSENSTAND
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        context['toon_details'] = False
+        context['toon_histcomp'] = False
+
+        comps = Competitie.objects.filter(is_afgesloten=False).order_by('begin_jaar', 'afstand')
+        context['competities'] = comps
+        for comp in comps:
+            zet_fase(comp)
+            if comp.fase >= 'B':        # inschrijving is open
+                context['toon_details'] = True
+
+            if comp.fase < 'E':         # competitie is begonnen
+                context['toon_histcomp'] = True
+        # for
+
+        menu_dynamics(self.request, context, actief='histcomp')
         return context
 
 

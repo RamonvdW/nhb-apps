@@ -66,7 +66,7 @@
 </li>
 
 <li{% if menu_actief == "histcomp" %} class="actief"{% endif %}>
-    <a href="{% url 'HistComp:allejaren' %}" class="white-text">
+    <a href="{% url 'Competitie:tussenstand' %}" class="white-text">
     <i class="material-icons-round white-text">account_balance</i>Competitie uitslagen</a>
 </li>
 
