@@ -9,9 +9,9 @@
 cd $(dirname $0)
 
 OUT="$PWD/../global_static/materialize/"
-OUTFILE="$OUT/materialize-new.css"
 INFILE="$PWD/materialize-src/sass/materialize.scss"
 MINIFY="--style compressed"
+DTLFILE="$PWD/../../Plein/templates/plein/site_layout.dtl"
 
 if [ ! -e "$INFILE" ]
 then
@@ -39,7 +39,35 @@ then
     exit 1
 fi
 
+if [ ! -e "$DTLFILE" ]
+then
+    echo "[ERROR] Failed to locate dtl file $DTLFILE"
+    exit 1
+fi
+
+# get the sequence number
+LINE=$(grep -m1 'materialize/materialize' "$DTLFILE")
+# <link rel="stylesheet" href="{% static 'materialize/materialize-new-1.css' %}">
+NR=$(echo "$LINE" | cut -d. -f1 | cut -d/ -f2 | cut -d- -f3)
+echo "[INFO] Found current sequence number: $NR"
+NEWNR=$(( NR + 1 ))
+echo "[INFO] Decided sequence number: $NEWNR"
+
+# delete the old outfile
+rm "$OUT"/materialize-new*.css
+OUTFILE="$OUT/materialize-new-$NEWNR.css"
+
+# run the compiler
 sass --no-cache --sourcemap=none $MINIFY $INFILE $OUTFILE
+
+if [ $? -ne 0 ]
+then
+    echo "[ERROR] Detected compilation error - keeping current file"
+    exit 1
+fi
+
+cat "$DTLFILE" | sed "s/materialize-new-.*\.css/materialize-new-$NEWNR.css/" > "$DTLFILE.new"
+mv "$DTLFILE.new" "$DTLFILE"
 
 # end of file
 
