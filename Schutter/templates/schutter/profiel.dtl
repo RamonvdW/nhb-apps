@@ -81,7 +81,7 @@
         {% for deelcomp in regiocompetities %}
 
             {% if deelcomp.separator_before %}
-            <tr class="grey lighten-2">     <!-- gelijk houden aan plein/site_layout.dtl -->
+            <tr class="nhb-grijs">
                 <td colspan="4">Ter info: overige regiocompetities die gehouden worden:</td>
             </tr>
             <tr>

@@ -254,11 +254,12 @@ $navbar-font-size: 1rem !default;
 $navbar-font-color: #fff !default;
 $navbar-brand-font-size: 2.1rem !default;
 
+
 // 14. Side Navigation
 // ==========================================================================
 
 $sidenav-width: 300px !default;
-$sidenav-font-size: 14px !default;
+$sidenav-font-size: 16px !default;
 $sidenav-font-color: rgba(0,0,0,.87) !default;
 $sidenav-bg-color: $primary-color-dark !default;
 $sidenav-padding: 16px !default;
@@ -308,7 +309,8 @@ $toast-action-color: #eeff41;
 // ==========================================================================
 
 $font-stack: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif !default;
-$off-black: rgba(0, 0, 0, 0.87) !default;
+//$off-black: rgba(0, 0, 0, 0.87) !default;
+$off-black: rgba(0, 0, 0, 1) !default;  // need the contrast on grey background
 // Header Styles
 $h1-fontsize: 4.2rem !default;
 $h2-fontsize: 3.56rem !default;

@@ -22,7 +22,7 @@
     {% for obj in object_list %}
 
         {% if obj.nieuwe_klasse %}
-            <tr class="grey lighten-2">     <!-- gelijk houden aan plein/site_layout.dtl -->
+            <tr class="nhb-grijs">
                 <td colspan="3" style="padding-bottom: 0px"><h5>{{ obj.klasse.indiv.beschrijving }}</h5></td>
             </tr>
 
