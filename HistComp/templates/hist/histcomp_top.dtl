@@ -16,43 +16,56 @@
 
 {% if object_list %}
 
-    <p>Op deze pagina tonen we de uitslag van de <b>regiocompetities {{ seizoen }}</b>.</p>
+    <p>Op deze pagina tonen we de uitslag van de <b>regiocompetitie {{ seizoen }}</b>.</p>
 
-    <p>Kies een boogtype om de uitslag te zien.</p>
-
+    <p>&nbsp;</p>
     <h5>Individuele competitie 18m Indoor</h5>
 
-    <ul class="collection with-header">
-        <li class="collection-header"><h6>Klassen</h6></li>
-        {% for obj in object_list %}
-            {% if obj.comp_type == '18' %}
-                {% if obj.is_team is False %}
-                    <li class="collection-item">
-                        <a href="{{ obj.url }}" class="nhb-klikbare-balk">
-                            <div>{{ obj.klasse }}</div>
-                        </a>
-                    </li>
-                {% endif %}
-            {% endif %}
-        {% endfor %}
-    </ul>
+    <table>
+        <tr style="border-bottom: none">
+            <td>
+                <ul class="collection with-header">
+                    <li class="collection-header"><h6>Klassen</h6></li>
+                    {% for obj in object_list %}
+                        {% if obj.comp_type == '18' %}
+                            {% if obj.is_team is False %}
+                                <li class="collection-item">
+                                    <a href="{{ obj.url }}" class="nhb-klikbare-balk">
+                                        <div>{{ obj.klasse }}</div>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            </td>
+            <td>Kies een boogtype om de uitslag te zien.</td>
+        </tr>
+    </table>
 
     <h5>Individuele competitie 25m 1pijl</h5>
 
-    <ul class="collection with-header">
-        <li class="collection-header"><h6>Klassen</h6></li>
-        {% for obj in object_list %}
-            {% if obj.comp_type == '25' %}
-                {% if obj.is_team is False %}
-                    <li class="collection-item">
-                        <a href="{{ obj.url }}" class="nhb-klikbare-balk">
-                            <div>{{ obj.klasse }}</div>
-                        </a>
-                    </li>
-                {% endif %}
-            {% endif %}
-        {% endfor %}
-    </ul>
+    <table>
+        <tr style="border-bottom: none">
+            <td>
+                <ul class="collection with-header">
+                    <li class="collection-header"><h6>Klassen</h6></li>
+                    {% for obj in object_list %}
+                        {% if obj.comp_type == '25' %}
+                            {% if obj.is_team is False %}
+                                <li class="collection-item">
+                                    <a href="{{ obj.url }}" class="nhb-klikbare-balk">
+                                        <div>{{ obj.klasse }}</div>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            </td>
+            <td>Kies een boogtype om de uitslag te zien.</td>
+        </tr>
+    </table>
 
     {% if show_team %}
         <h5>Team competitie 18m Indoor</h5>
