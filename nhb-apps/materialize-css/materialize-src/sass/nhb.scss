@@ -73,6 +73,15 @@ $nhb-collection-hover-background: $nhb-card-hover-background;
 }
 
 
+// als er geschakeld wordt naar een witte achtergrondkleur,
+// dan het hard zwart (ivm contrast grijze achtergrond)
+// omzetten naar het wat zachtere off-black
+.white {
+    @extend .white;
+    color: $off-black;
+}
+
+
 //-----------------------------------
 // cards-container
 //
