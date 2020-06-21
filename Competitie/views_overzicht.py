@@ -77,30 +77,40 @@ class CompetitieOverzichtView(View):
     # class variables shared by all instances
     # (none)
 
-    def _get_competities(self, context, rol_nu):
+    def _get_competities(self, context, rol_nu, functie_nu):
         comps = Competitie.objects.filter(is_afgesloten=False).order_by('begin_jaar', 'afstand')
         for comp in comps:
-            comp.url_inschrijvingen = reverse('Competitie:lijst-regiocomp-alles', kwargs={'comp_pk': comp.pk})
+            if rol_nu == Rollen.ROL_HWL:
+                comp.url_inschrijvingen = reverse('Competitie:lijst-regiocomp-regio',
+                                                  kwargs={'comp_pk': comp.pk, 'regio_pk': functie_nu.nhb_ver.regio.pk})
+            elif rol_nu == Rollen.ROL_RCL:
+                comp.url_inschrijvingen = reverse('Competitie:lijst-regiocomp-regio',
+                                                  kwargs={'comp_pk': comp.pk, 'regio_pk': functie_nu.nhb_regio.pk})
+            elif rol_nu == Rollen.ROL_RKO:
+                comp.url_inschrijvingen = reverse('Competitie:lijst-regiocomp-rayon',
+                                                  kwargs={'comp_pk': comp.pk, 'rayon_pk': functie_nu.nhb_rayon.pk})
+            else:
+                comp.url_inschrijvingen = reverse('Competitie:lijst-regiocomp-alles',
+                                                  kwargs={'comp_pk': comp.pk})
+
             zet_fase(comp)
             if comp.fase == 'A1' and rol_nu == Rollen.ROL_BB:
                 context['bb_kan_ag_vaststellen'] = True
         # for
         context['competities'] = comps
 
-    def _get_competitie_overzicht_beheerder(self, request):
+    def _get_competitie_overzicht_beheerder(self, request, rol_nu, functie_nu):
         context = dict()
-
-        rol_nu, functie_nu = rol_get_huidige_functie(request)
 
         context['huidige_rol'] = rol_get_beschrijving(request)
         context['toon_functies'] = rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO)
         context['bb_kan_ag_vaststellen'] = False
 
-        self._get_competities(context, rol_nu)
+        self._get_competities(context, rol_nu, functie_nu)
 
         # kies de competities om het tijdschema van de tonen
         objs = list()
-        if rol_nu == Rollen.ROL_BB:
+        if rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB):
             # toon alle competities
             objs = (Competitie
                     .objects
@@ -182,9 +192,9 @@ class CompetitieOverzichtView(View):
 
         return context, TEMPLATE_COMPETITIE_OVERZICHT_BEHEERDER
 
-    def _get_competitie_overzicht_hwl(self, request):
+    def _get_competitie_overzicht_hwl(self, request, rol_nu, functie_nu):
         context = dict()
-        self._get_competities(context, Rollen.ROL_HWL)
+        self._get_competities(context, rol_nu, functie_nu)
 
         rol_nu, functie_nu = rol_get_huidige_functie(request)
 
@@ -204,11 +214,12 @@ class CompetitieOverzichtView(View):
     def get(self, request, *args, **kwargs):
         """ called by the template system to get the context data for the template """
 
-        rol_nu = rol_get_huidige(self.request)
+        rol_nu, functie_nu = rol_get_huidige_functie(request)
+
         if rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL):
-            context, template = self._get_competitie_overzicht_beheerder(request)
+            context, template = self._get_competitie_overzicht_beheerder(request, rol_nu, functie_nu)
         elif rol_nu == Rollen.ROL_HWL:
-            context, template = self._get_competitie_overzicht_hwl(request)
+            context, template = self._get_competitie_overzicht_hwl(request, rol_nu, functie_nu)
         else:
             context, template = self._get_competitie_overzicht_schutter()
 
@@ -259,7 +270,8 @@ def maak_regiocomp_zoom_knoppen(context, comp_pk, rayon=None, regio=None):
 
     """ Maak de zoom knoppen structuur voor de regiocompetitie deelnemers lijst """
 
-    context['zoom_alles_url'] = reverse('Competitie:lijst-regiocomp-alles', kwargs={'comp_pk': comp_pk})
+    if rayon != regio:
+        context['zoom_alles_url'] = reverse('Competitie:lijst-regiocomp-alles', kwargs={'comp_pk': comp_pk})
 
     regios = (NhbRegio
               .objects
@@ -272,6 +284,7 @@ def maak_regiocomp_zoom_knoppen(context, comp_pk, rayon=None, regio=None):
     for obj in rayons:
         context['zoom_rayons'].append(obj)
 
+        obj.title_str = 'Rayon %s' % obj.rayon_nr
         if obj != rayon:
             obj.zoom_url = reverse('Competitie:lijst-regiocomp-rayon',
                                    kwargs={'comp_pk': comp_pk, 'rayon_pk': obj.pk})

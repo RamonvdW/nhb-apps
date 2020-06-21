@@ -37,7 +37,7 @@ class NhbRayon(models.Model):
 
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
-        return self.naam
+        return self.naam + ' ' + self.geografisch_gebied
 
     class Meta:
         """ meta data voor de admin interface """

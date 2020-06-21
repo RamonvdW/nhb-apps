@@ -15,109 +15,110 @@
 
 {% if not have_active_comps %}
 
-    <p>Er zijn geen competities om te tonen.</p>
+    <p>Er zijn geen actieve competities om te tonen.</p>
+
+{% else %}
+
+    <p>Deze pagina toont de actieve competities.</p>
+
+    {% for obj in object_list %}
+
+        <p>&nbsp;</p>
+        <h5>Overzicht {{ obj.beschrijving }}</h5>
+
+        <table class="white">
+            <thead>
+                <th class="center-align">Fase</th>
+                <th>Activiteit</th>
+                <th>Periode</th>
+            </thead>
+            <tr>
+                <td class="center-align">A</td>
+                <td>Competitie opstarten (Bondsburo)</td>
+                <td class="green-text">Afgerond</td>
+            </tr>
+            <tr>
+                <td {% if obj.fase == 'A1' %}class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>A1</td>
+                <td>Vaststellen aanvangsgemiddelden<br>en klassegrenzen (Bondsburo)</td>
+                <td>
+                    {% if obj.fase > 'A1' %}
+                    <span class="green-text">Afgerond</span>
+                    {% else %}
+                    <span>tot 15 juli</span>
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <td {% if obj.fase == 'A2' %}class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>A2</td>
+                <td>Instellingen regio (RCL)</td>
+                <td>
+                    {% if obj.fase > 'A2' %}
+                    <span class="green-text">Afgerond</span>
+                    {% else %}
+                    <span>tot 15 juli</span>
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <td {% if obj.fase == 'B' %}class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>B</td>
+                <!-- {{ obj.uiterste_datum_lid }} is 1 augustus om praktische redenen, maar reglement zegt 15 juli -->
+                <td>Open voor inschrijvingen individueel en teams<br>(indien lid voor 15 juli {{ obj.uiterste_datum_lid|date:"Y" }})</td>
+                <td>
+                    {% if obj.fase > 'B' %}
+                        <span class="green-text">Afgerond</span>
+                    {% else %}
+                        <span>{{ obj.begin_aanmeldingen }}{% if obj.einde_aanmeldingen > obj.begin_aanmeldingen %} tot <br>{{ obj.einde_aanmeldingen }}{% endif %}</span>
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <td {% if obj.fase == 'C' %} class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>C</td>
+                <td>Samenstellen vaste teams (HWL)</td>
+                <td>
+                    {% if obj.fase > 'C' %}
+                        <span class="green-text">Afgerond</span>
+                    {% else %}
+                        <span>tot {{ obj.einde_teamvorming }}</span>
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <td {% if obj.fase == 'D' %} class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>D</td>
+                <td>Aanmaken poules (RCL)</td>
+                <td>
+                    {% if obj.fase > 'D' %}
+                        <span class="green-text">Afgerond</span>
+                    {% else %}
+                        <span>tot {{ obj.eerste_wedstrijd }}</span>
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <td {% if obj.fase == 'E' %} class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>E</td>
+                <td>Wedstrijden</td>
+                <td>
+                    {% if obj.fase > 'E' %}
+                        <span class="green-text">Afgerond</span>
+                    {% else %}
+                        <span>vanaf {{ obj.eerste_wedstrijd }}</span>
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <td {% if obj.fase == 'F' %} class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>F</td>
+                <td>Vaststellen uitslag regiocompetitie</td>
+                <td>
+                    {% if obj.fase > 'F' %}
+                        <span class="green-text">Afgerond</span>
+                    {% else %}
+                        <span>?</span>
+                    {% endif %}
+                </td>
+            </tr>
+        </table>
+    {% endfor %}
 
 {% endif %}
-
-
-<p>Deze pagina toont de actieve competities.</p>
-
-{% for obj in object_list %}
-
-    <p>&nbsp;</p>
-    <h5>Overzicht {{ obj.beschrijving }}</h5>
-
-    <table class="white">
-        <thead>
-            <th class="center-align">Fase</th>
-            <th>Activiteit</th>
-            <th>Periode</th>
-        </thead>
-        <tr>
-            <td class="center-align">A</td>
-            <td>Competitie opstarten (Bondsburo)</td>
-            <td class="green-text">Afgerond</td>
-        </tr>
-        <tr>
-            <td {% if obj.fase == 'A1' %}class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>A1</td>
-            <td>Vaststellen aanvangsgemiddelden en klassegrenzen (Bondsburo)</td>
-            <td>
-                {% if obj.fase > 'A1' %}
-                <span class="green-text">Afgerond</span>
-                {% else %}
-                <span>tot 15 juli</span>
-                {% endif %}
-            </td>
-        </tr>
-        <tr>
-            <td {% if obj.fase == 'A2' %}class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>A2</td>
-            <td>Instellingen regio (RCL)</td>
-            <td>
-                {% if obj.fase > 'A2' %}
-                <span class="green-text">Afgerond</span>
-                {% else %}
-                <span>tot 15 juli</span>
-                {% endif %}
-            </td>
-        </tr>
-        <tr>
-            <td {% if obj.fase == 'B' %}class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>B</td>
-            <!-- {{ obj.uiterste_datum_lid }} is 1 augustus om praktische redenen, maar reglement zegt 15 juli -->
-            <td>Open voor inschrijvingen individueel en teams (indien lid voor 15 juli {{ obj.uiterste_datum_lid|date:"Y" }})</td>
-            <td>
-                {% if obj.fase > 'B' %}
-                    <span class="green-text">Afgerond</span>
-                {% else %}
-                    <span>{{ obj.begin_aanmeldingen }}{% if obj.einde_aanmeldingen > obj.begin_aanmeldingen %} tot <br>{{ obj.einde_aanmeldingen }}{% endif %}</span>
-                {% endif %}
-            </td>
-        </tr>
-        <tr>
-            <td {% if obj.fase == 'C' %} class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>C</td>
-            <td>Samenstellen vaste teams (HWL)</td>
-            <td>
-                {% if obj.fase > 'C' %}
-                    <span class="green-text">Afgerond</span>
-                {% else %}
-                    <span>tot {{ obj.einde_teamvorming }}</span>
-                {% endif %}
-            </td>
-        </tr>
-        <tr>
-            <td {% if obj.fase == 'D' %} class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>D</td>
-            <td>Aanmaken poules (RCL)</td>
-            <td>
-                {% if obj.fase > 'D' %}
-                    <span class="green-text">Afgerond</span>
-                {% else %}
-                    <span>tot {{ obj.eerste_wedstrijd }}</span>
-                {% endif %}
-            </td>
-        </tr>
-        <tr>
-            <td {% if obj.fase == 'E' %} class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>E</td>
-            <td>Wedstrijden</td>
-            <td>
-                {% if obj.fase > 'E' %}
-                    <span class="green-text">Afgerond</span>
-                {% else %}
-                    <span>vanaf {{ obj.eerste_wedstrijd }}</span>
-                {% endif %}
-            </td>
-        </tr>
-        <tr>
-            <td {% if obj.fase == 'F' %} class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>F</td>
-            <td>Vaststellen uitslag regiocompetitie</td>
-            <td>
-                {% if obj.fase > 'F' %}
-                    <span class="green-text">Afgerond</span>
-                {% else %}
-                    <span>?</span>
-                {% endif %}
-            </td>
-        </tr>
-    </table>
-{% endfor %}
 
 
 <p>&nbsp;</p>

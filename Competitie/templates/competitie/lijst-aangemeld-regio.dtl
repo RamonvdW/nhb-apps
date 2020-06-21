@@ -13,31 +13,60 @@
 
 <h4>Aanmeldingen regiocompetitie</h4>
 
+<p>Op deze pagina tonen we inschrijving voor de regiocompetitie <b>{{ competitie.beschrijving }}</b>.</p>
+
 <p>Filter mogelijkheden:</p>
 
-<a class="margin-5 btn-nhb-blauw btn-small" href="{{ zoom_alles_url }}">Alles</a>
+<div class="white">
 
-{% for rayon in zoom_rayons %}
-
-    <br>
-
-    {% if rayon.zoom_url %}
-        <a class="margin-5 btn-nhb-blauw btn-small" href="{{ rayon.zoom_url }}">{{ rayon.naam }}</a>
+    {% if zoom_alles_url %}
+        <a class="margin-5 btn-nhb-blauw btn-small" href="{{ zoom_alles_url }}">Alles</a>
     {% else %}
-        <a class="margin-5 btn-nhb-blauw btn-small disabled" href="#">{{ rayon.naam }}</a>
+        <a class="margin-5 btn-nhb-blauw btn-small disabled" href="#">Alles</a>
     {% endif %}
 
-    {% for regio in rayon.regios %}
-        {% if regio.zoom_url %}
-            <a class="margin-5 btn-nhb-blauw btn-small" href="{{ regio.zoom_url }}">{{ regio.title_str }}</a>
+    <!-- begin rayon knoppen voor small -->
+    <br class="hide-on-med-and-up">
+
+    {% for rayon in zoom_rayons %}
+
+        {% if rayon.zoom_url %}
+            <a class="hide-on-med-and-up margin-5 btn-nhb-blauw btn-small" href="{{ rayon.zoom_url }}">{{ rayon.title_str }}</a>
         {% else %}
-            <a class="margin-5 btn-nhb-blauw btn-small disabled" href="#">{{ regio.title_str }}</a>
+            <a class="hide-on-med-and-up margin-5 btn-nhb-blauw btn-small disabled" href="#">{{ rayon.title_str }}</a>
         {% endif %}
+
     {% endfor %}
+    <!-- einde rayon knoppen voor small -->
 
-{% endfor %}
+    {% for rayon in zoom_rayons %}
 
-<p>Hieronder volgt de lijst schutters die <b>{{ inhoud }}</b> ingeschreven zijn voor deelname aan de regiocompetitie <b>{{ competitie.beschrijving }}</b>.</p>
+        <br>
+
+        {% if rayon.zoom_url %}
+            <a class="hide-on-small-only margin-5 btn-nhb-blauw btn-small" href="{{ rayon.zoom_url }}">{{ rayon.title_str }}</a>
+        {% else %}
+            <a class="hide-on-small-only margin-5 btn-nhb-blauw btn-small disabled" href="#">{{ rayon.title_str }}</a>
+        {% endif %}
+        <span class="hide-on-small-only">&nbsp;:&nbsp;</span>
+
+        {% for regio in rayon.regios %}
+
+            {% if regio.zoom_url %}
+                <a class="margin-5 btn-nhb-blauw btn-small" href="{{ regio.zoom_url }}">{{ regio.title_str }}</a>
+            {% else %}
+                <a class="margin-5 btn-nhb-blauw btn-small disabled" href="#">{{ regio.title_str }}</a>
+            {% endif %}
+        {% endfor %}
+
+    {% endfor %}
+</div>
+
+
+<p>Schutters die <b>{{ inhoud }}</b> ingeschreven zijn.</p>
+
+<p>Aantal: {{ object_list.count }}</p>
+
 
 {% if object_list.count %}
 
@@ -67,10 +96,6 @@
     {% endfor %}
 
     </table>
-
-{% else %}
-
-    <p>Er zijn nog geen aanmeldingen.</p>
 
 {% endif %}
 
