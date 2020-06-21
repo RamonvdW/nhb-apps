@@ -74,7 +74,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',       # security
 ]
 
-if ENABLE_DEBUG_TOOLBAR and "test" not in sys.argv:    # pragma: no branch
+if ENABLE_DEBUG_TOOLBAR and "test" not in sys.argv:    # pragma: no cover
     INSTALLED_APPS.append('debug_toolbar')
     MIDDLEWARE.insert(0, 'debug_toolbar.middleware.DebugToolbarMiddleware')
 
