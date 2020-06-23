@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import admin
-from .models import SchutterBoog
+from .models import SchutterVoorkeuren, SchutterBoog
 
 
 class SchutterBoogAdmin(admin.ModelAdmin):
@@ -14,5 +14,6 @@ class SchutterBoogAdmin(admin.ModelAdmin):
 
 
 admin.site.register(SchutterBoog, SchutterBoogAdmin)
+admin.site.register(SchutterVoorkeuren)
 
 # end of file
