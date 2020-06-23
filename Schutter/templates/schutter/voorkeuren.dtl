@@ -71,7 +71,7 @@
                     </label>
                 </td>
 
-                <td>Indoor (18m):<br>25m 1pijl:</td>
+                <td>Indoor&nbsp;(18m):<br>25m&nbsp;1pijl:</td>
 
                 <td>
                     {% if obj.ag_18_waarde %}
@@ -124,15 +124,34 @@
         <tr>
             <td colspan="6">
                 <label>
-                    <input type="checkbox" class="filled-in" name="voorkeur_DT_18m" {% if voorkeur_dt %}checked{% endif %}>
+                    <input type="checkbox" class="filled-in" name="voorkeur_dt"{% if voorkeuren.voorkeur_dutchtarget_18m %} checked{% endif %}>
                     <span class="black-text">Voorkeur voor Dutch Target</span>
                 </label>
             </td>
         </tr>
 
         <tr>
+            <td colspan="6">
+                <label>
+                    <input type="checkbox" class="filled-in" name="voorkeur_meedoen_competitie"{% if voorkeuren.voorkeur_meedoen_competitie %} checked{% endif %}>
+                    <span class="black-text">Voorkeur voor de (winter-)competities</span>
+                </label>
+            </td>
+        </tr>
+
+        <tr>
+            <td colspan="6">
+                <label>
+                    <input type="checkbox" class="filled-in" name="voorkeur_team_schieten"{% if voorkeuren.voorkeur_team_schieten %} checked{% endif %}>
+                    <span class="black-text">Voorkeur voor meedoen in een team</span>
+                </label>
+            </td>
+        </tr>
+
+        <tr>
             <td colspan="6" class="center-align">
-                <input class="btn-nhb-blauw" type="submit" value="Wijzigingen opslaan">
+                <button class="btn-nhb-blauw" type="submit">
+                    <i class="material-icons-round left">save</i>Wijzigingen opslaan</button>
             </td>
         </tr>
 

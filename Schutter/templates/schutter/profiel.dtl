@@ -81,14 +81,14 @@
         {% for deelcomp in regiocompetities %}
 
             {% if deelcomp.separator_before %}
-            <tr class="nhb-grijs">
-                <td colspan="4">Ter info: overige regiocompetities die gehouden worden:</td>
-            </tr>
-            <tr>
-                <th>Regiocompetitie</th>
-                <th>Wedstrijdboog</th>
-                <th colspan="2"></th>
-            </tr>
+                <tr class="nhb-grijs">
+                    <td colspan="4">Ter info: overige regiocompetities die gehouden worden:</td>
+                </tr>
+                <tr>
+                    <th>Regiocompetitie</th>
+                    <th>Wedstrijdboog</th>
+                    <th colspan="2"></th>
+                </tr>
             {% endif %}
 
             <tr>
@@ -106,10 +106,13 @@
                     {% else %}
                         <td>Inschrijven kan tot {{ deelcomp.competitie.einde_aanmeldingen }}</td>
                         <td>
+                            <!--
                             <form method="post" action="{{ deelcomp.url_inschrijven }}">
                                 {% csrf_token %}
                                 <input class="btn-nhb-blauw" type="submit" value="Inschrijven">
                             </form>
+                            -->
+                            <a class="btn-nhb-blauw" href="{{ deelcomp.url_inschrijven }}">Inschrijven</a>
                         </td>
                     {% endif %}
                 {% else %}

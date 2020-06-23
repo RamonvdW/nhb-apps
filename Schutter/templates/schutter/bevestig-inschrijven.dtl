@@ -1,0 +1,119 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2020 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Inschrijven competitie{% endblock %}
+
+{% block pagina %}
+
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="schutter-inschrijven-competitie" %}
+
+<h4>Inschrijven competitie</h4>
+
+<p>Via dit formulier kan je je aanmelden voor de <b>{{ deelcomp.competitie.beschrijving }}</b> in jouw regio.</p>
+
+<form class="white" method="post" action="{{ bevestig_url }}">
+    {% csrf_token %}
+    <input type="hidden" name="schutterboog_pk" value="{{ schutterboog.pk }}">
+    <input type="hidden" name="deelcomp_pk" value="{{ deelcomp.pk }}">
+
+    <table>
+        <tr>
+            <td>Je wil deelnemen met je <b>{{ schutterboog.boogtype.beschrijving }}</b> boog.</td>
+        </tr>
+
+        {% if schutterboog.boogtype.afkorting == 'R' %}
+            <tr>
+                <td><span>Voorkeur voor Dutch Target: </span>
+                {% if voorkeuren.voorkeur_dutchtarget_18m %}
+                    <span><b>Ja</b></span>
+                {% else %}
+                    <span><b>Nee</b></span>
+                {% endif %}
+                </td>
+            </tr>
+        {% endif %}
+
+        <tr>
+            {% if voorkeuren.voorkeur_team_schieten %}
+                <td>Team schieten: <b>Ja</b></td>
+            {% else %}
+                <td>Team schieten: <b>Nee</b></td>
+            {% endif %}
+        </tr>
+
+        <tr>
+            <td>Voorkeur voor schietmoment:<br>
+
+                <label style="margin-left: 20px">
+                    <input type="checkbox" class="filled-in" name="dag_geen">
+                    <span class="black-text">Geen</span>
+                </label>
+
+                <br>
+
+                <label style="margin-left: 20px">
+                    <input type="checkbox" class="filled-in" name="dag_avond">
+                    <span class="black-text">'s Avonds</span>
+                </label>
+
+                <br>
+
+                <label style="margin-left: 20px">
+                    <input type="checkbox" class="filled-in" name="dag_zaterdag">
+                    <span class="black-text">Zaterdag</span>
+                </label>
+
+                <br>
+
+                <label style="margin-left: 20px">
+                    <input type="checkbox" class="filled-in" name="dag_zondag">
+                    <span class="black-text">Zondag</span>
+                </label>
+            </td>
+        </tr>
+
+        <!-- team: AG -->
+        <!-- voorkeur teamleden -->
+        <!-- opmerkingen -->
+
+        <tr>
+            <!--
+                <label>Opmerkingen</label>
+                <input type="textarea" cols="40" rows="10" placeholder="Tik hier je bericht" data-length="2500" class="materialize-textarea" maxlength="2500" name="opmerkingen">
+            -->
+
+            <!--
+
+                <div class="input-text col s12">
+                    <label for="id_feedback">Bericht aan het ontwikkelteam:</label>
+                    <textarea name="feedback" cols="40" rows="10" placeholder="Tik hier je bericht" data-length="2500" class="materialize-textarea" maxlength="2500" required id="id_feedback"></textarea>
+                </div>
+
+            -->
+
+            <td>
+                <span>Opmerkingen:</span><br>
+                <div class="input-text">
+                    <textarea name="opmerking" cols="40" rows="10" placeholder="Tik hier je bericht" data-length="2500" class="materialize-textarea" maxlength="2500" id="id_opmerkingen"></textarea>
+                </div>
+            </td>
+        </tr>
+    </table>
+
+    <!-- TODO: submit button toevoegen -->
+</form>
+
+<!-- oude methode -->
+<p>&nbsp;</p>
+<form method="post" action="{{ bevestig_url }}">
+    {% csrf_token %}
+    <input class="btn-nhb-rood" type="submit" value="Inschrijf mij in">
+</form>
+
+{% endblock %}
+
