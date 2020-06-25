@@ -25,6 +25,13 @@ class CompetitieKlasseAdmin(admin.ModelAdmin):
 
 
 class RegioCompetitieSchutterBoogAdmin(admin.ModelAdmin):
+
+    readonly_fields = ('deelcompetitie', 'schutterboog', 'bij_vereniging')
+
+    search_fields = ('schutterboog__nhblid__voornaam', 'schutterboog__nhblid__achternaam')
+
+    list_filter = ('deelcompetitie',)
+
     list_select_related = ('deelcompetitie', 'deelcompetitie__nhb_regio', 'deelcompetitie__nhb_rayon',
                            'deelcompetitie__competitie',
                            'klasse', 'klasse__indiv', 'klasse__team',
