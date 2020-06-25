@@ -99,6 +99,7 @@ class TestSchutterProfiel(E2EHelpers, TestCase):
         self.url_profiel = '/schutter/'
         self.url_voorkeuren = '/schutter/voorkeuren/'
         self.url_inschrijven = '/schutter/regiocompetitie/inschrijven/%s/%s/'   # deelcomp_pk, schutterboog_pk
+        self.url_bevestig_inschrijven = self.url_inschrijven + 'bevestig/'
         self.url_uitschrijven = '/schutter/regiocompetitie/uitschrijven/%s/'    # regiocomp_pk
 
     def _prep_voorkeuren(self):
@@ -155,18 +156,22 @@ class TestSchutterProfiel(E2EHelpers, TestCase):
         deelcomp = DeelCompetitie.objects.get(competitie__afstand='18', nhb_regio=self.nhbver.regio)
         res = aanvangsgemiddelde_opslaan(schutterboog, 18, 8.18, '2020-01-01', None, 'Test')
         self.assertTrue(res)
-        resp = self.client.post(self.url_inschrijven % (deelcomp.pk, schutterboog.pk))
+        url = self.url_inschrijven % (deelcomp.pk, schutterboog.pk)
+        resp = self.client.post(url, {'opmerking': 'test van de 18m'})
         self.assert_is_redirect(resp, self.url_profiel)
+
         inschrijving = RegioCompetitieSchutterBoog.objects.get(schutterboog=schutterboog)
         url_uitschrijven_18r = self.url_uitschrijven % inschrijving.pk
 
-        # zet de BB tijdelijk 'aan' en schrijf in voor 25m BB
         deelcomp = DeelCompetitie.objects.get(competitie__afstand='25', nhb_regio=self.nhbver.regio)
-        url_inschrijven_25r = self.url_inschrijven % (deelcomp.pk, schutterboog.pk)
+        url_inschrijven_25r = self.url_bevestig_inschrijven % (deelcomp.pk, schutterboog.pk)
+
+        # zet de barebow boog 'aan' en schrijf in voor 25m BB
         schutterboog_bb = SchutterBoog.objects.get(boogtype__afkorting='BB')
         schutterboog_bb.voor_wedstrijd = True
         schutterboog_bb.save()
-        resp = self.client.post(self.url_inschrijven % (deelcomp.pk, schutterboog_bb.pk))
+        url = self.url_inschrijven % (deelcomp.pk, schutterboog_bb.pk)
+        resp = self.client.post(url, {'wil_in_team': 'on'})
         self.assert_is_redirect(resp, self.url_profiel)
         schutterboog_bb.voor_wedstrijd = False
         schutterboog_bb.save()

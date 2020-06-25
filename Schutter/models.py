@@ -33,9 +33,6 @@ class SchutterVoorkeuren(models.Model):
     # (opt-out) wel/niet aanbieden om mee te doen met de competitie
     voorkeur_meedoen_competitie = models.BooleanField(default=True)
 
-    # (opt-in) wel/niet vragen om mee te doen in een team
-    voorkeur_team_schieten = models.BooleanField(default=False)
-
     # het account waar dit record bij hoort
     # (niet gebruiken!)
     account = models.ForeignKey(Account, on_delete=models.CASCADE, null=True)

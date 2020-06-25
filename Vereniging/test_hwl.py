@@ -5,9 +5,11 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
+from django.utils import timezone
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
-from Competitie.models import Competitie, CompetitieKlasse, RegioCompetitieSchutterBoog
+from Competitie.models import (Competitie, DeelCompetitie, CompetitieKlasse,
+                               RegioCompetitieSchutterBoog, INSCHRIJF_METHODE_3)
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Schutter.models import SchutterBoog
 from Score.models import aanvangsgemiddelde_opslaan
@@ -31,13 +33,13 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.account_bb.is_BB = True
         self.account_bb.save()
 
-        regio_111 = NhbRegio.objects.get(regio_nr=111)
+        self.regio_111 = NhbRegio.objects.get(regio_nr=111)
 
         # maak een test vereniging
         ver = NhbVereniging()
         ver.naam = "Grote Club"
         ver.nhb_nr = "1000"
-        ver.regio = regio_111
+        ver.regio = self.regio_111
         # secretaris kan nog niet ingevuld worden
         ver.save()
         self.nhbver1 = ver
@@ -46,6 +48,10 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.functie_hwl = maak_functie("HWL test", "HWL")
         self.functie_hwl.nhb_ver = ver
         self.functie_hwl.save()
+
+        self.functie_wl = maak_functie("WL test", "WL")
+        self.functie_wl.nhb_ver = ver
+        self.functie_wl.save()
 
         # maak het lid aan dat HWL wordt
         lid = NhbLid()
@@ -66,6 +72,8 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         lid.save()
         self.nhblid_100001 = lid
 
+        jaar = timezone.now().year
+
         # maak een jeugdlid aan
         lid = NhbLid()
         lid.nhb_nr = 100002
@@ -73,8 +81,8 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         lid.voornaam = "Ramona"
         lid.achternaam = "de Jeugdschutter"
         lid.email = ""
-        lid.geboorte_datum = datetime.date(year=2010, month=3, day=4)
-        lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
+        lid.geboorte_datum = datetime.date(year=jaar-10, month=3, day=4)
+        lid.sinds_datum = datetime.date(year=jaar-3, month=11, day=12)
         lid.bij_vereniging = ver
         lid.save()
         self.nhblid_100002 = lid
@@ -86,11 +94,24 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         lid.voornaam = "Andrea"
         lid.achternaam = "de Jeugdschutter"
         lid.email = ""
-        lid.geboorte_datum = datetime.date(year=2010, month=3, day=4)
-        lid.sinds_datum = datetime.date(year=2010, month=10, day=10)
+        lid.geboorte_datum = datetime.date(year=jaar-10, month=3, day=4)
+        lid.sinds_datum = datetime.date(year=jaar-3, month=10, day=10)
         lid.bij_vereniging = ver
         lid.save()
         self.nhblid_100012 = lid
+
+        # maak een jeugd lid aan
+        lid = NhbLid()
+        lid.nhb_nr = 100004
+        lid.geslacht = "M"
+        lid.voornaam = "Cadet"
+        lid.achternaam = "de Jeugd"
+        lid.email = ""
+        lid.geboorte_datum = datetime.date(year=jaar-15, month=3, day=4)
+        lid.sinds_datum = datetime.date(year=jaar-3, month=11, day=12)
+        lid.bij_vereniging = ver
+        lid.save()
+        self.nhblid_100004 = lid
 
         # maak een senior lid aan, om inactief te maken
         lid = NhbLid()
@@ -100,7 +121,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         lid.achternaam = "de Testerin"
         lid.email = ""
         lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
+        lid.sinds_datum = datetime.date(year=jaar-3, month=11, day=12)
         lid.bij_vereniging = ver
         lid.save()
         self.nhblid_100003 = lid
@@ -110,7 +131,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         ver2 = NhbVereniging()
         ver2.naam = "Andere Club"
         ver2.nhb_nr = "1222"
-        ver2.regio = regio_111
+        ver2.regio = self.regio_111
         # secretaris kan nog niet ingevuld worden
         ver2.save()
         self.nhbver2 = ver2
@@ -356,6 +377,104 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, url)
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 2)    # 2 schutters, 1 competitie
 
+    def test_aanmelden_methode3(self):
+
+        deelcomp = DeelCompetitie.objects.get(competitie__afstand='18', nhb_regio=self.regio_111)
+        deelcomp.inschrijf_methode = INSCHRIJF_METHODE_3
+        deelcomp.toegestane_dagdelen = 'AV,ZO'
+        deelcomp.save()
+
+        # login als HWL
+        self.e2e_login_and_pass_otp(self.account_hwl)
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+        self.e2e_check_rol('HWL')
+
+        # stel een paar bogen in
+        self._zet_schutter_voorkeuren(100002)
+        self._zet_schutter_voorkeuren(100003)
+
+        self._zet_ag(100002, 18)
+        self._zet_ag(100003, 25)
+
+        url = self.url_aanmelden % self.comp_18.pk
+
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_template_used(resp, ('vereniging/leden-aanmelden.dtl', 'plein/site_layout.dtl'))
+
+        # nu de POST om een paar leden aan te melden
+        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
+        resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',        # 1=R
+                                      'lid_100003_boogtype_3': 'on',        # 3=BB
+                                      'dagdeel': 'AV',
+                                      'opmerking': 'methode 3'})
+        self.assert_is_redirect(resp, url)
+        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 2)    # 2 schutters, 1 competitie
+
+        for obj in RegioCompetitieSchutterBoog.objects.all():
+            self.assertEqual(obj.inschrijf_notitie, 'methode 3')
+            self.assertTrue(obj.inschrijf_voorkeur_dagdeel, 'AV')
+        # for
+
+        # haal de lijst op als WL
+        self.e2e_wissel_naar_functie(self.functie_wl)
+        self.e2e_check_rol('WL')
+
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_template_used(resp, ('vereniging/leden-aanmelden.dtl', 'plein/site_layout.dtl'))
+
+    def test_aanmelden_team(self):
+        url = self.url_aanmelden % self.comp_18.pk
+
+        # anon
+        self.e2e_logout()
+        resp = self.client.get(url)
+        self.assert_is_redirect(resp, '/plein/')
+
+        # login als HWL
+        self.e2e_login_and_pass_otp(self.account_hwl)
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+        self.e2e_check_rol('HWL')
+
+        # stel een paar bogen in
+        self._zet_schutter_voorkeuren(100004)
+        self._zet_schutter_voorkeuren(100003)
+
+        self._zet_ag(100004, 18)
+        self._zet_ag(100003, 25)
+
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_template_used(resp, ('vereniging/leden-aanmelden.dtl', 'plein/site_layout.dtl'))
+
+        # nu de POST om een paar leden aan te melden
+        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
+        resp = self.client.post(url, {'lid_100004_boogtype_1': 'on',        # 1=R
+                                      'lid_100003_boogtype_3': 'on',        # 3=BB
+                                      'wil_in_team': 'ja',
+                                      'opmerking': 'door de hwl'})
+        self.assert_is_redirect(resp, url)
+        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 2)    # 2 schutters, 1 competitie
+
+        for obj in RegioCompetitieSchutterBoog.objects.all():
+            self.assertEqual(obj.inschrijf_notitie, 'door de hwl')
+            self.assertTrue(obj.inschrijf_voorkeur_team)
+        # for
+
+    def test_aanmelden_cornercase(self):
+        # login als HWL
+        self.e2e_login_and_pass_otp(self.account_hwl)
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+        self.e2e_check_rol('HWL')
+
+        resp = self.client.get(self.url_aanmelden % 9999999)
+        self.assertEqual(resp.status_code, 404)         # 404 = Not found
+
+        resp = self.client.post(self.url_aanmelden % 9999999)
+        self.assertEqual(resp.status_code, 404)         # 404 = Not found
+
+        url = self.url_aanmelden % self.comp_18.pk
         resp = self.client.post(url, {'garbage': 'oh',
                                       'lid_GEENGETAL_boogtype_3': 'on'})
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
@@ -370,19 +489,13 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         resp = self.client.post(url, {'lid_100003_boogtype_1': 'on'})       # 1=R = geen wedstrijdboog
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
 
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 2)    # 2 schutters, 1 competitie
+        # wissel naar WL rol
+        self.e2e_wissel_naar_functie(self.functie_wl)
+        self.e2e_check_rol('WL')
 
-    def test_aanmelden_cornercase(self):
-        # login als HWL
-        self.e2e_login_and_pass_otp(self.account_hwl)
-        self.e2e_wissel_naar_functie(self.functie_hwl)
-        self.e2e_check_rol('HWL')
-
-        resp = self.client.get(self.url_aanmelden % 9999999)
-        self.assertEqual(resp.status_code, 404)         # 404 = Not found
-
-        resp = self.client.post(self.url_aanmelden % 9999999)
-        self.assertEqual(resp.status_code, 404)         # 404 = Not found
+        # nu de POST om een paar leden aan te melden
+        resp = self.client.post(url)
+        self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
 
     def test_wedstrijdlocatie(self):
         # maak een locatie en koppel aan de vereniging

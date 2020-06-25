@@ -24,7 +24,7 @@ def migreer_dt(apps, _):
     for obj in (schutterboog_klas
                 .objects
                 .filter(voorkeur_dutchtarget_18m=True)
-                .distinct('nhblid')):
+                .distinct('nhblid')):                       # pragma: no cover
 
         # maak een SchutterVoorkeuren object aan voor dit NhbLid
         voorkeuren = voorkeuren_klas(nhblid=obj.nhblid,

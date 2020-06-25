@@ -10,7 +10,7 @@ from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
 from Overig.e2ehelpers import E2EHelpers
 from Functie.models import maak_functie
 from Score.models import aanvangsgemiddelde_opslaan
-from .models import SchutterBoog
+from .models import SchutterBoog, SchutterVoorkeuren
 import datetime
 
 
@@ -84,6 +84,7 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
 
         # initieel zijn er geen voorkeuren opgeslagen
         self.assertEqual(SchutterBoog.objects.count(), 0)
+        self.assertEqual(SchutterVoorkeuren.objects.count(), 0)
         resp = self.client.get(self.url_voorkeuren)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -100,29 +101,36 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
         obj = SchutterBoog.objects.get(nhblid=self.nhblid1, boogtype=self.boog_R)
         self.assertTrue(obj.heeft_interesse)
         self.assertFalse(obj.voor_wedstrijd)
-        self.assertFalse(obj.voorkeur_dutchtarget_18m)
 
         # maak wat wijzigingen
-        resp = self.client.post(self.url_voorkeuren, {'schiet_R': 'on', 'info_BB': 'on', 'voorkeur_DT_18m': 'on'})
+        resp = self.client.post(self.url_voorkeuren, {'schiet_R': 'on',
+                                                      'info_BB': 'on',
+                                                      'voorkeur_dt': 'on'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('schutter/voorkeuren-opgeslagen.dtl', 'plein/site_layout.dtl'))
         self.assertEqual(SchutterBoog.objects.count(), 5)
+        self.assertEqual(SchutterVoorkeuren.objects.count(), 1)
 
         obj = SchutterBoog.objects.get(nhblid=self.nhblid1, boogtype=self.boog_R)
         self.assertFalse(obj.heeft_interesse)
         self.assertTrue(obj.voor_wedstrijd)
-        self.assertTrue(obj.voorkeur_dutchtarget_18m)
+
+        voorkeuren = SchutterVoorkeuren.objects.all()[0]
+        self.assertTrue(voorkeuren.voorkeur_dutchtarget_18m)
+        self.assertTrue(voorkeuren.voorkeur_meedoen_competitie)
+        self.assertEqual(voorkeuren.nhblid, self.nhblid1)
 
         # coverage
         self.assertTrue(str(obj) != "")
+        self.assertTrue(str(voorkeuren) != "")
 
         # GET met DT=aan
         resp = self.client.get(self.url_voorkeuren)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         # check DT=aan
         checked, unchecked = self.extract_checkboxes(resp)
-        self.assertTrue("voorkeur_DT_18m" in checked)
+        self.assertTrue("voorkeur_dt" in checked)
 
         # DT voorkeur uitzetten
         resp = self.client.post(self.url_voorkeuren, {'schiet_R': 'on', 'info_BB': 'on'})
@@ -133,7 +141,9 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
         obj = SchutterBoog.objects.get(nhblid=self.nhblid1, boogtype=self.boog_R)
         self.assertFalse(obj.heeft_interesse)
         self.assertTrue(obj.voor_wedstrijd)
-        self.assertFalse(obj.voorkeur_dutchtarget_18m)
+
+        voorkeuren = SchutterVoorkeuren.objects.all()[0]
+        self.assertFalse(voorkeuren.voorkeur_dutchtarget_18m)
 
         # zet aanvangsgemiddelden voor 18m en 25m
         datum = datetime.date(year=2020, month=5, day=2)

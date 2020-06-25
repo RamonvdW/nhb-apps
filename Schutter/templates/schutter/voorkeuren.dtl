@@ -140,15 +140,6 @@
         </tr>
 
         <tr>
-            <td colspan="6">
-                <label>
-                    <input type="checkbox" class="filled-in" name="voorkeur_team_schieten"{% if voorkeuren.voorkeur_team_schieten %} checked{% endif %}>
-                    <span class="black-text">Voorkeur voor meedoen in een team</span>
-                </label>
-            </td>
-        </tr>
-
-        <tr>
             <td colspan="6" class="center-align">
                 <button class="btn-nhb-blauw" type="submit">
                     <i class="material-icons-round left">save</i>Wijzigingen opslaan</button>

@@ -26,6 +26,24 @@ LAAG_BK = 'BK'
 AFSTAND = [('18', 'Indoor'),
            ('25', '25m 1pijl')]
 
+DAGDEEL = [('GN', "Geen voorkeur"),
+           ('AV', "'s Avonds"),
+           ('ZA', "Zaterdag"),
+           ('ZO', "Zondag"),
+           ('WE', "Weekend")]
+
+DAGDEEL_AFKORTINGEN = ('GN', 'AV', 'ZA', 'ZO', 'WE')
+
+INSCHRIJF_METHODE_1 = '1'       # direct inschrijven op wedstrijd
+INSCHRIJF_METHODE_2 = '2'       # verdeel wedstrijdklassen over locaties
+INSCHRIJF_METHODE_3 = '3'       # dagdeel voorkeur en quota-plaatsen
+
+INSCHRIJF_METHODES = (
+    (INSCHRIJF_METHODE_1, 'Kies wedstrijden'),
+    (INSCHRIJF_METHODE_2, 'Naar locatie wedstrijdklasse'),
+    (INSCHRIJF_METHODE_3, 'Voorkeur dagdelen')
+)
+
 
 class Competitie(models.Model):
     """ Deze database tabel bevat een van de jaarlijkse competities voor 18m of 25m
@@ -77,7 +95,7 @@ class CompetitieKlasse(models.Model):
             msg = self.indiv.beschrijving
         if self.team:
             msg = self.team.beschrijving
-        msg += " (%s) %s" % (self.min_ag, self.competitie.beschrijving)
+        msg += " (%s)" % self.min_ag
         return msg
 
     class Meta:
@@ -133,6 +151,15 @@ class DeelCompetitie(models.Model):
     # wedstrijdenplan - alleen voor de RK en BK
     plan = models.ForeignKey(WedstrijdenPlan, on_delete=models.PROTECT,
                              null=True, blank=True)         # optioneel (alleen RK en BK)
+
+    # specifieke instellingen voor deze regio
+    inschrijf_methode = models.CharField(max_length=1, default='2', choices=INSCHRIJF_METHODES)
+
+    # methode 3: toegestane dagdelen
+    # komma-gescheiden lijstje met DAGDEEL: GE,AV
+    toegestane_dagdelen = models.CharField(max_length=20, default='', blank=True)
+
+    # TODO: VSG/Vast, etc.
 
     def __str__(self):
         """ geef een tekstuele afkorting van dit object, voor in de admin interface """
@@ -295,6 +322,15 @@ class RegioCompetitieSchutterBoog(models.Model):
     # gemiddelde over de 6 beste scores, dus exclusief laatste_score_nr
     gemiddelde = models.DecimalField(max_digits=5, decimal_places=3, default=0.0)  # 10,000
 
+    # voorkeuren opgegeven bij het inschrijven
+    inschrijf_voorkeur_team = models.BooleanField(default=False)
+
+    # opmerking vrije tekst
+    inschrijf_notitie = models.TextField(default="", blank=True)
+
+    # voorkeur dagdelen
+    inschrijf_voorkeur_dagdeel = models.CharField(max_length=2, choices=DAGDEEL, default="GN")
+
     def __str__(self):
         # deelcompetitie (komt achteraan)
         if self.deelcompetitie.nhb_regio:
@@ -334,10 +370,20 @@ def regiocompetitie_schutterboog_aanmelden(competitie, schutterboog, aanvangsgem
 
     # schutterboog is nhblid van een vereniging in een bepaalde regio
     regio = schutterboog.nhblid.bij_vereniging.regio
-    for deelcompetitie in DeelCompetitie.objects.filter(competitie=competitie, laag=LAAG_REGIO, nhb_regio=regio, is_afgesloten=False):
+    for deelcompetitie in (DeelCompetitie
+                           .objects
+                           .filter(competitie=competitie,
+                                   laag=LAAG_REGIO,
+                                   nhb_regio=regio,
+                                   is_afgesloten=False)):
 
         # voorkom dubbele aanmelding
-        if RegioCompetitieSchutterBoog.objects.filter(deelcompetitie=deelcompetitie, schutterboog=schutterboog).count() == 0:
+        if (RegioCompetitieSchutterBoog
+                .objects
+                .filter(deelcompetitie=deelcompetitie,
+                        schutterboog=schutterboog)
+                .count() == 0):
+
             aanmelding = RegioCompetitieSchutterBoog()
             aanmelding.deelcompetitie = deelcompetitie
             aanmelding.schutterboog = schutterboog

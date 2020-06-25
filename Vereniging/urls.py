@@ -5,42 +5,42 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from . import views
+from . import view_accommodatie, view_overzicht, view_ledenlijst, view_aanmelden
 
 app_name = 'Vereniging'
 
 urlpatterns = [
 
     path('',
-         views.OverzichtView.as_view(),
+         view_overzicht.OverzichtView.as_view(),
          name='overzicht'),
 
     path('leden-lijst/',
-         views.LedenLijstView.as_view(),
+         view_ledenlijst.LedenLijstView.as_view(),
          name='ledenlijst'),
 
     path('leden-voorkeuren/',
-         views.LedenVoorkeurenView.as_view(),
+         view_ledenlijst.LedenVoorkeurenView.as_view(),
          name='leden-voorkeuren'),
 
     path('leden-aanmelden/competitie/<comp_pk>/',
-         views.LedenAanmeldenView.as_view(),
+         view_aanmelden.LedenAanmeldenView.as_view(),
          name='leden-aanmelden'),
 
     path('accommodaties/lijst/',
-         views.LijstVerenigingenView.as_view(),
+         view_accommodatie.LijstVerenigingenView.as_view(),
          name='lijst-verenigingen'),
 
     path('accommodaties/details/<locatie_pk>/<vereniging_pk>/',
-         views.AccommodatieDetailsView.as_view(),
+         view_accommodatie.AccommodatieDetailsView.as_view(),
          name='accommodatie-details'),
 
     path('accommodatie-details/<locatie_pk>/<vereniging_pk>/',
-         views.VerenigingAccommodatieDetailsView.as_view(),
+         view_accommodatie.VerenigingAccommodatieDetailsView.as_view(),
          name='vereniging-accommodatie-details'),
 
     path('regio-clusters/',
-         views.WijzigClustersView.as_view(),
+         view_accommodatie.WijzigClustersView.as_view(),
          name='clusters'),
 ]
 

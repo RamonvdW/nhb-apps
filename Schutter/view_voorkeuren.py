@@ -106,19 +106,7 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
         if request.POST.get('voorkeur_dt', None):
             voorkeuren.voorkeur_dutchtarget_18m = True
 
-        old_meedoen_competitie = voorkeuren.voorkeur_meedoen_competitie
-        voorkeuren.voorkeur_meedoen_competitie = False
-        if request.POST.get('voorkeur_competitie', None):
-            voorkeuren.voorkeur_meedoen_competitie = True
-
-        old_team_schieten = voorkeuren.voorkeur_team_schieten
-        voorkeuren.voorkeur_team_schieten = False
-        if request.POST.get('voorkeur_team_schieten', None):
-            voorkeuren.voorkeur_team_schieten = True
-
-        if (old_dutchtarget_18m != voorkeuren.voorkeur_dutchtarget_18m or
-                old_meedoen_competitie != voorkeuren.voorkeur_meedoen_competitie or
-                old_team_schieten != voorkeuren.voorkeur_team_schieten):
+        if old_dutchtarget_18m != voorkeuren.voorkeur_dutchtarget_18m:
             # wijzigingen opslaan
             voorkeuren.save()
         del voorkeuren
@@ -158,7 +146,7 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
                     .select_related('boogtype')
                     .order_by('boogtype__volgorde'))
 
-        # TODO: alle Scores met 1 query ophalen (schutterboot__in=alle SchutterBoog pk's)
+        # TODO: alle Scores met 1 query ophalen (schutterboog__in=alle SchutterBoog pk's)
         # TODO: alle ScoreHist met 1 query ophalen (score__in=alle Score pk's)
 
         # voeg de checkbox velden toe en AG informatie
