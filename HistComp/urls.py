@@ -24,7 +24,11 @@ urlpatterns = [
 
     path('interland/',
          views.InterlandView.as_view(),
-         name='interland')
+         name='interland'),
+
+    path('interland/als-bestand/<klasse_pk>/',
+         views.InterlandAlsBestandView.as_view(),
+         name='interland-als-bestand')
 ]
 
 # end of file

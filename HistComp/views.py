@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import Resolver404, reverse
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.views.generic import ListView, TemplateView
 from django.db.models import Q
 from django.contrib.auth.mixins import UserPassesTestMixin
@@ -15,6 +15,7 @@ from .models import HistCompetitie, HistCompetitieIndividueel, HistCompetitieTea
 from .forms import FilterForm
 from Plein.menu import menu_dynamics
 from decimal import Decimal
+import csv
 
 TEMPLATE_HISTCOMP_ALLEJAREN = 'hist/histcomp_top.dtl'
 TEMPLATE_HISTCOMP_INDIV = 'hist/histcomp_indiv.dtl'
@@ -281,14 +282,15 @@ class InterlandView(UserPassesTestMixin, TemplateView):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
         return HttpResponseRedirect(reverse('Plein:plein'))
 
-    def get_context_data(self, **kwargs):
-        """ called by the template system to get the context data for the template """
-        context = super().get_context_data(**kwargs)
+    def maak_data(self, context):
 
         # maak een cache aan van nhb leden
         # we filteren hier niet op inactieve leden
         nhblid_dict = dict()  # [nhb_nr] = NhbLid
-        for obj in NhbLid.objects.all():
+        for obj in (NhbLid
+                    .objects
+                    .select_related('bij_vereniging')
+                    .all()):
             nhblid_dict[obj.nhb_nr] = obj
         # for
 
@@ -310,6 +312,8 @@ class InterlandView(UserPassesTestMixin, TemplateView):
                            .objects
                            .filter(comp_type='25', seizoen=seizoen, is_team=False)):
                 context['klassen'].append(klasse)
+
+                klasse.url_download = reverse('HistComp:interland-als-bestand', kwargs={'klasse_pk': klasse.pk})
 
                 # zoek alle schutters erbij met minimaal 5 scores
                 klasse.schutters = list()
@@ -338,7 +342,61 @@ class InterlandView(UserPassesTestMixin, TemplateView):
                                 klasse.schutters.append(obj)
             # for
 
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        self.maak_data(context)
+
         menu_dynamics(self.request, context, actief='histcomp')
         return context
+
+
+class InterlandAlsBestandView(InterlandView):
+
+    def get(self, request, *args, **kwargs):
+
+        klasse_pk = kwargs['klasse_pk']
+        del kwargs['klasse_pk']
+        try:
+            klasse = HistCompetitie.objects.get(pk=klasse_pk)
+        except HistCompetitie.DoesNotExist:
+            raise Resolver404()
+
+        context = dict()
+        self.maak_data(context)
+
+        schutters = None
+        for context_klasse in context['klassen']:
+            if context_klasse.pk == klasse.pk:
+                schutters = context_klasse.schutters
+                break   # from the for
+        # for
+
+        if not schutters:
+            raise Resolver404()
+
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="interland.csv"'
+
+        writer = csv.writer(response)
+        writer.writerow(['Gemiddelde', 'Wedstrijdleeftijd', 'Geslacht', 'NHB nummer', 'Naam', 'Vereniging'])
+
+        for schutter in schutters:
+
+            if schutter.is_jeugd:
+                leeftijd_str = "%s (jeugd)" % schutter.wedstrijd_leeftijd
+            else:
+                leeftijd_str = "Senior"
+
+            writer.writerow([schutter.gemiddelde,
+                             leeftijd_str,
+                             schutter.nhblid.geslacht,
+                             schutter.nhblid.nhb_nr,
+                             schutter.nhblid.volledige_naam(),
+                             schutter.nhblid.bij_vereniging])
+        # for
+
+        return response
 
 # end of file

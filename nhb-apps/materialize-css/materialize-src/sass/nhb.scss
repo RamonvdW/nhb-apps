@@ -59,6 +59,19 @@ $nhb-collection-hover-background: $nhb-card-hover-background;
 
 
 //-----------------------------------
+// download button
+//
+.btn-nhb-download {
+  @extend .btn-nhb-blauw;
+
+  width: 30px;
+  height: 30px;
+  padding: 0px;
+  font-size: 10px;
+}
+
+
+//-----------------------------------
 // card
 //
 .card-action {
