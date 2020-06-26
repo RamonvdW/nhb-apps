@@ -75,6 +75,22 @@
             </div>
         {% endif %}
 
+        <!-- Interland lijst -->
+        {% if rol_is_bb %}
+            <div class="card">
+                <div class="card-content">
+                    <div class="card-title center-align">Interland lijst</div>
+                    <div class="center-align"><i class="material-icons-round medium">outlined_flag</i></div>
+                    <p>Toon de lijst met kandidaat deelnemers voor de Interland.</p>
+                </div>
+                <a href="{% url 'HistComp:interland' %}" class="nhb-klikbare-balk">
+                    <div class="card-action center-align">
+                        <span class="nhb-klikbare-link">Tonen</span>
+                    </div>
+                </a>
+            </div>
+        {% endif %}
+
         <!-- verenigingen/accommodaties overzicht IT/BB/BKO -->
         {% if rol_is_bko or rol_is_bb or rol_is_it %}
             <div class="card">
