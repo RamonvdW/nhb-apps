@@ -10,6 +10,7 @@ from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging, N
 from Wedstrijden.models import Wedstrijd
 from Overig.e2ehelpers import E2EHelpers
 from .models import Competitie, DeelCompetitie, DeelcompetitieRonde, competitie_aanmaken
+from .views_planning import competitie_week_nr_to_date
 import datetime
 
 
@@ -766,5 +767,34 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
 
+    def test_competitie_week_nr_to_date(self):
+        # test een paar corner-cases
+
+        # 2019wk52 = 2019-12-23
+        when = competitie_week_nr_to_date(2019, 52)
+        self.assertEqual(when.year, 2019)
+        self.assertEqual(when.month, 12)
+        self.assertEqual(when.day, 23)
+
+        # 2020wk1 = 2019-12-30
+        when = competitie_week_nr_to_date(2019, 1)
+        self.assertEqual(when.year, 2019)
+        self.assertEqual(when.month, 12)
+        self.assertEqual(when.day, 30)
+
+        # 2019wk53 bestaat niet, dus gelijk aan 2020wk1
+        when1 = competitie_week_nr_to_date(2019, 53)
+        self.assertEqual(when1, when)
+
+        # 2020wk2 = 2020-01-06
+        when = competitie_week_nr_to_date(2019, 2)
+        self.assertEqual(when.year, 2020)
+        self.assertEqual(when.month, 1)
+        self.assertEqual(when.day, 6)
+
+        # 2020 kent wel een wk53
+        when1 = competitie_week_nr_to_date(2020, 53)
+        when2 = competitie_week_nr_to_date(2020, 1)
+        self.assertNotEqual(when1, when2)
 
 # end of file

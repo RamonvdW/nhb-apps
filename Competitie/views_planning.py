@@ -134,6 +134,19 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
         return context
 
 
+def planning_sorteer_weeknummers(rondes):
+    lijst = list()
+    for ronde in rondes:
+        nr = ronde.week_nr
+        if nr < 26:
+            nr += 100
+        tup = (nr, ronde)
+        lijst.append(tup)
+    # for
+    lijst.sort()
+    return [ronde for _, ronde in lijst]
+
+
 class RegioPlanningView(UserPassesTestMixin, TemplateView):
 
     """ Deze view geeft de planning voor een competitie in een regio """
@@ -169,10 +182,10 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
         context['deelcomp'] = deelcomp
         context['regio'] = deelcomp.nhb_regio
 
-        context['rondes'] = (DeelcompetitieRonde
-                             .objects
-                             .filter(deelcompetitie=deelcomp, cluster=None)
-                             .order_by('week_nr'))
+        context['rondes'] = planning_sorteer_weeknummers(
+                                DeelcompetitieRonde
+                                .objects
+                                .filter(deelcompetitie=deelcomp, cluster=None))
 
         for ronde in context['rondes']:
             ronde.wedstrijd_count = ronde.plan.wedstrijden.count()
@@ -180,7 +193,7 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
 
         # alleen de RCL mag de planning uitbreiden
         rol_nu = rol_get_huidige(self.request)
-        if rol_nu == Rollen.ROL_RCL and context['rondes'].count() < 10:
+        if rol_nu == Rollen.ROL_RCL and len(context['rondes']) < 10:
             context['url_nieuwe_week'] = reverse('Competitie:regio-planning',
                                                  kwargs={'deelcomp_pk': deelcomp.pk})
 
@@ -289,11 +302,11 @@ class RegioClusterPlanningView(UserPassesTestMixin, TemplateView):
 
         context['deelcomp'] = deelcomp
 
-        context['rondes'] = (DeelcompetitieRonde
-                             .objects
-                             .filter(deelcompetitie=deelcomp,
-                                     cluster=cluster)
-                             .order_by('week_nr'))
+        context['rondes'] = planning_sorteer_weeknummers(
+                                DeelcompetitieRonde
+                                .objects
+                                .filter(deelcompetitie=deelcomp,
+                                        cluster=cluster))
 
         for ronde in context['rondes']:
             ronde.wedstrijd_count = ronde.plan.wedstrijden.count()
@@ -301,7 +314,7 @@ class RegioClusterPlanningView(UserPassesTestMixin, TemplateView):
 
         # alleen de RCL mag de planning uitbreiden
         rol_nu = rol_get_huidige(self.request)
-        if rol_nu == Rollen.ROL_RCL and context['rondes'].count() < 10:
+        if rol_nu == Rollen.ROL_RCL and len(context['rondes']) < 10:
             context['url_nieuwe_week'] = reverse('Competitie:regio-cluster-planning',
                                                  kwargs={'cluster_pk': cluster.pk})
 
@@ -352,10 +365,14 @@ def competitie_week_nr_to_date(jaar, week_nr):
     if week_nr <= 26:
         jaar += 1
 
-    # let op: week nummers zijn 0-based in strptime!
-    when = datetime.datetime.strptime("%s-%s-1" % (jaar, week_nr-1), "%Y-%W-%w")   # 1 = maandag
-
-    return datetime.date(year=when.year, month=when.month, day=when.day)
+    # conversie volgen ISO 8601
+    # details: https://docs.python.org/3/library/datetime.html
+    # %G = jaar
+    # %V = met maandag als eerste dag van de week + week 1 bevat 4 januari
+    # %u = dag van de week met 1=maandag
+    when = datetime.datetime.strptime("%s-%s-1" % (jaar, week_nr), "%G-%V-%u")
+    when2 = datetime.date(year=when.year, month=when.month, day=when.day)
+    return when2
 
 
 class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
@@ -408,11 +425,19 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
         eind_week = 11+1
         if ronde.deelcompetitie.competitie.afstand == '18':
             eind_week = 50+1
-        jaar = ronde.deelcompetitie.competitie.begin_jaar
+        begin_jaar = ronde.deelcompetitie.competitie.begin_jaar
+
+        last_week_in_year = 52
+        when_wk53 = competitie_week_nr_to_date(begin_jaar, 53)
+        when_wk1 = competitie_week_nr_to_date(begin_jaar, 1)
+        if when_wk53 != when_wk1:
+            # wk53 does exist
+            last_week_in_year = 53
 
         context['opt_week_nrs'] = opt_week_nrs = list()
+
         while start_week != eind_week:
-            when = competitie_week_nr_to_date(jaar, start_week)
+            when = competitie_week_nr_to_date(begin_jaar, start_week)
             obj = SimpleNamespace()
             obj.week_nr = start_week
             obj.choice_name = start_week
@@ -420,9 +445,9 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
             obj.actief = (start_week == ronde.week_nr)
             opt_week_nrs.append(obj)
 
-            if start_week >= 53:
+            if start_week >= last_week_in_year:
                 start_week = 1
-                jaar += 1
+                # let op: begin_jaar niet aanpassen (dat doen competitie_week_nr_to_date)
             else:
                 start_week += 1
         # while
@@ -602,7 +627,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
             obj.actief = (dag_nr == weekdag_nr)
             opt_weekdagen.append(obj)
 
-            when = when + datetime.timedelta(days=1)
+            when += datetime.timedelta(days=1)
         # for
 
         wedstrijd.tijd_begin_wedstrijd_str = wedstrijd.tijd_begin_wedstrijd.strftime("%H:%M")
