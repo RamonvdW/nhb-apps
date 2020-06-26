@@ -287,26 +287,28 @@ class InterlandView(UserPassesTestMixin, TemplateView):
         # maak een cache aan van nhb leden
         # we filteren hier niet op inactieve leden
         nhblid_dict = dict()  # [nhb_nr] = NhbLid
-        for obj in (NhbLid
+        for schutter in (NhbLid
                     .objects
+                    .filter(is_actief_lid=True)
                     .select_related('bij_vereniging')
                     .all()):
-            nhblid_dict[obj.nhb_nr] = obj
+            nhblid_dict[schutter.nhb_nr] = schutter
         # for
+
+        context['jeugd_min'] = MINIMALE_LEEFTIJD_JEUGD_INTERLAND
+        context['jeugd_max'] = MAXIMALE_LEEFTIJD_JEUGD_INTERLAND
+
+        context['klassen'] = list()
 
         # zoek het nieuwste seizoen beschikbaar
         qset = HistCompetitie.objects.order_by('-seizoen').distinct('seizoen')
         if len(qset) > 0:
             # neem de data van het nieuwste seizoen
             context['seizoen'] = seizoen = qset[0].seizoen
-            context['klassen'] = list()
 
             # bepaal het jaar waarin de wedstrijdleeftijd bepaald moet worden
             # dit is het tweede jaar van het seizoen
             context['wedstrijd_jaar'] = wedstrijd_jaar = int(seizoen.split('/')[1])
-
-            context['jeugd_min'] = MINIMALE_LEEFTIJD_JEUGD_INTERLAND
-            context['jeugd_max'] = MAXIMALE_LEEFTIJD_JEUGD_INTERLAND
 
             for klasse in (HistCompetitie
                            .objects
@@ -318,28 +320,29 @@ class InterlandView(UserPassesTestMixin, TemplateView):
                 # zoek alle schutters erbij met minimaal 5 scores
                 klasse.schutters = list()
 
-                for obj in (HistCompetitieIndividueel
+                for schutter in (HistCompetitieIndividueel
                             .objects
                             .filter(histcompetitie=klasse, gemiddelde__gt=Decimal('0.000'))
                             .order_by('-gemiddelde')):
 
-                    if obj.tel_aantal_scores() >= 5:
+                    if schutter.tel_aantal_scores() >= 5:
 
                         # zoek het nhb lid erbij
                         try:
-                            nhblid = nhblid_dict[obj.schutter_nr]
+                            nhblid = nhblid_dict[schutter.schutter_nr]
                         except KeyError:
                             nhblid = None
-                        else:
-                            if not nhblid.is_actief_lid:
-                                nhblid = None
 
                         if nhblid:
-                            obj.nhblid = nhblid
-                            obj.wedstrijd_leeftijd = nhblid.bereken_wedstrijdleeftijd(wedstrijd_jaar)
-                            if obj.wedstrijd_leeftijd >= MINIMALE_LEEFTIJD_JEUGD_INTERLAND:
-                                obj.is_jeugd = (obj.wedstrijd_leeftijd <= MAXIMALE_LEEFTIJD_JEUGD_INTERLAND)
-                                klasse.schutters.append(obj)
+                            schutter.nhblid = nhblid
+                            schutter.wedstrijd_leeftijd = nhblid.bereken_wedstrijdleeftijd(wedstrijd_jaar)
+                            if schutter.wedstrijd_leeftijd >= MINIMALE_LEEFTIJD_JEUGD_INTERLAND:
+                                if schutter.wedstrijd_leeftijd <= MAXIMALE_LEEFTIJD_JEUGD_INTERLAND:
+                                    schutter.leeftijd_str = "%s (jeugd)" % schutter.wedstrijd_leeftijd
+                                else:
+                                    schutter.leeftijd_str = "Senior"
+
+                                klasse.schutters.append(schutter)
             # for
 
     def get_context_data(self, **kwargs):
@@ -354,9 +357,13 @@ class InterlandView(UserPassesTestMixin, TemplateView):
 
 class InterlandAlsBestandView(InterlandView):
 
+    """ Deze klasse wordt gebruikt om de interland deelnemers lijst
+        te downloaden als csv bestand
+    """
+
     def get(self, request, *args, **kwargs):
 
-        klasse_pk = kwargs['klasse_pk']
+        klasse_pk = kwargs['klasse_pk'][:6]     # afkappen geeft beveiliging
         del kwargs['klasse_pk']
         try:
             klasse = HistCompetitie.objects.get(pk=klasse_pk)
@@ -373,7 +380,7 @@ class InterlandAlsBestandView(InterlandView):
                 break   # from the for
         # for
 
-        if not schutters:
+        if schutters is None:
             raise Resolver404()
 
         response = HttpResponse(content_type='text/csv')
@@ -383,14 +390,8 @@ class InterlandAlsBestandView(InterlandView):
         writer.writerow(['Gemiddelde', 'Wedstrijdleeftijd', 'Geslacht', 'NHB nummer', 'Naam', 'Vereniging'])
 
         for schutter in schutters:
-
-            if schutter.is_jeugd:
-                leeftijd_str = "%s (jeugd)" % schutter.wedstrijd_leeftijd
-            else:
-                leeftijd_str = "Senior"
-
             writer.writerow([schutter.gemiddelde,
-                             leeftijd_str,
+                             schutter.leeftijd_str,
                              schutter.nhblid.geslacht,
                              schutter.nhblid.nhb_nr,
                              schutter.nhblid.volledige_naam(),

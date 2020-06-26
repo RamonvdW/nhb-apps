@@ -74,21 +74,17 @@ class HistCompetitieIndividueel(models.Model):
 
     def tel_aantal_scores(self):
         count = 0
-        NUL = Decimal('0.000')
-        if self.score1 > NUL:
-            count += 1
-        if self.score2 > NUL:
-            count += 1
-        if self.score3 > NUL:
-            count += 1
-        if self.score4 > NUL:
-            count += 1
-        if self.score5 > NUL:
-            count += 1
-        if self.score6 > NUL:
-            count += 1
-        if self.score7 > NUL:
-            count += 1
+        nul = Decimal('0.000')
+        for score in (self.score1,
+                      self.score2,
+                      self.score3,
+                      self.score4,
+                      self.score5,
+                      self.score6,
+                      self.score7):
+            if score > nul:
+                count += 1
+        # for
         return count
 
     class Meta:

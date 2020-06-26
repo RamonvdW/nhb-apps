@@ -252,6 +252,19 @@ class E2EHelpers(object):
         self.assertIn("<!DOCTYPE html>", html)
         self.assert_link_quality(html, response.templates[0].name)
 
+    def assert_is_bestand(self, response):
+        assert isinstance(self, TestCase)
+
+        # check the headers that make this a download
+        # print("response: ", repr([(a,b) for a,b in response.items()]))
+        content_type_header = response['Content-Type']
+        self.assertEqual(content_type_header, 'text/csv')
+        content_disposition_header = response['Content-Disposition']
+        self.assertTrue(content_disposition_header.startswith('attachment; filename='))
+
+        # ensure the file is not empty
+        self.assertTrue(len(str(response.content)) > 30)
+
     def assert_template_used(self, response, template_names):
         """ Controleer dat de gevraagde templates gebruikt zijn """
         assert isinstance(self, TestCase)

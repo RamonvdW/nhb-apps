@@ -59,13 +59,7 @@
         {% for schutter in klasse.schutters %}
             <tr>
                 <td>{{ schutter.gemiddelde }}</td>
-                <td>
-                    {% if schutter.is_jeugd %}
-                        <span>{{ schutter.wedstrijd_leeftijd }} (jeugd)</span>
-                    {% else %}
-                        <span>Senior</span>
-                    {% endif %}
-                </td>
+                <td>{{ schutter.leeftijd_str }}</td>
                 <td>{{ schutter.nhblid.geslacht }}</td>
                 <td>{{ schutter.nhblid.nhb_nr }}</td>
                 <td>{{ schutter.nhblid.volledige_naam }}</td>
