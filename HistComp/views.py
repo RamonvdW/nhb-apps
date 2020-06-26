@@ -9,7 +9,6 @@ from django.http import HttpResponseRedirect
 from django.views.generic import ListView, TemplateView
 from django.db.models import Q
 from django.contrib.auth.mixins import UserPassesTestMixin
-from BasisTypen.models import MAXIMALE_LEEFTIJD_JEUGD
 from Functie.rol import Rollen, rol_get_huidige
 from NhbStructuur.models import NhbLid
 from .models import HistCompetitie, HistCompetitieIndividueel, HistCompetitieTeam
@@ -25,6 +24,10 @@ TEMPLATE_HISTCOMP_INTERLAND = 'hist/interland.dtl'
 RESULTS_PER_PAGE = 100
 
 KLASSEN_VOLGORDE = ("Recurve", "Compound", "Barebow", "Longbow", "Instinctive")
+
+
+MINIMALE_LEEFTIJD_JEUGD_INTERLAND = 13      # alles jonger wordt niet getoond
+MAXIMALE_LEEFTIJD_JEUGD_INTERLAND = 20      # boven deze leeftijd Senior
 
 
 class HistCompAlleJarenView(ListView):
@@ -298,7 +301,10 @@ class InterlandView(UserPassesTestMixin, TemplateView):
 
             # bepaal het jaar waarin de wedstrijdleeftijd bepaald moet worden
             # dit is het tweede jaar van het seizoen
-            context['wedstrijdjaar'] = wedstrijd_jaar = int(seizoen.split('/')[1])
+            context['wedstrijd_jaar'] = wedstrijd_jaar = int(seizoen.split('/')[1])
+
+            context['jeugd_min'] = MINIMALE_LEEFTIJD_JEUGD_INTERLAND
+            context['jeugd_max'] = MAXIMALE_LEEFTIJD_JEUGD_INTERLAND
 
             for klasse in (HistCompetitie
                            .objects
@@ -327,8 +333,9 @@ class InterlandView(UserPassesTestMixin, TemplateView):
                         if nhblid:
                             obj.nhblid = nhblid
                             obj.wedstrijd_leeftijd = nhblid.bereken_wedstrijdleeftijd(wedstrijd_jaar)
-                            obj.is_jeugd = (obj.wedstrijd_leeftijd <= MAXIMALE_LEEFTIJD_JEUGD)
-                            klasse.schutters.append(obj)
+                            if obj.wedstrijd_leeftijd >= MINIMALE_LEEFTIJD_JEUGD_INTERLAND:
+                                obj.is_jeugd = (obj.wedstrijd_leeftijd <= MAXIMALE_LEEFTIJD_JEUGD_INTERLAND)
+                                klasse.schutters.append(obj)
             # for
 
         menu_dynamics(self.request, context, actief='histcomp')

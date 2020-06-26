@@ -14,8 +14,15 @@
 <h4>Interland</h4>
 
 <p>Uitslag competitie van 25m1pijl seizoen: <b>{{ seizoen }}</b>.</p>
-<p>Wedstrijd leeftijd is berekend voor wedstrijd jaar: <b>{{ wedstrijd_jaar }}</b>.</p>
-<p>Onderstaande schutters hebben minimaal <b>5</b> scores neergezet.</p>
+
+<p>Onderstaande schutters hebben minimaal <b>5</b> scores neergezet in het seizoen.</p>
+
+<p>De wedstrijdleeftijd is berekend voor het jaar: <b>{{ wedstrijd_jaar }}</b>.</p>
+
+<p>Schutters met een wedstrijdleeftijd:<br>
+.. lager dan <b>{{ jeugd_min}}</b> zijn niet in de lijst opgenomen.<br>
+.. vanaf <b>{{ jeugd_min }}</b> tot en met <b>{{ jeugd_max }}</b> worden als <b>Jeugd</b> gemarkeerd.<br>
+.. boven de <b>{{ jeugd_max }}</b> krijgen simpelweg de opmerking <b>Senior</b>.</p>
 
 <p>&nbsp;</p>
 <p>Spring naar klasse:</p>
@@ -26,7 +33,6 @@
 {% for klasse in klassen %}
     <p>&nbsp;</p>
     <h5 id="{{ klasse.klasse }}">Klasse: {{ klasse.klasse }}</h5>
-
     <table class="white" id="table_{{ klasse.klasse }}">
         <thead>
             <tr>        <!-- filter rij -->
@@ -37,7 +43,7 @@
             </tr>
             <tr>
                 <th>Gemiddelde</th>
-                <th filter="on">Wedstrijd leeftijd</th>
+                <th filter="on">Wedstrijdleeftijd</th>
                 <th filter="on">Geslacht</th>
                 <th>NHB nummer</th>
                 <th>Naam</th>
