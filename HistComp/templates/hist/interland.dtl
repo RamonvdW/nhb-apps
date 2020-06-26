@@ -1,0 +1,59 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2020 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Interland{% endblock %}
+
+{% block pagina %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="histcomp-interland" %}
+
+<h4>Interland</h4>
+
+<p>Uitslag competitie van 25m1pijl seizoen: <b>{{ seizoen }}</b>.</p>
+<p>Wedstrijd leeftijd is berekend voor wedstrijd jaar: <b>{{ wedstrijd_jaar }}</b>.</p>
+<p>Onderstaande schutters hebben minimaal <b>5</b> scores neergezet.</p>
+
+<p>&nbsp;</p>
+<p>Spring naar klasse:</p>
+{% for klasse in klassen %}
+    <a class="btn-nhb-blauw margin-5" href="#{{ klasse.klasse }}">{{ klasse.klasse }}</a>
+{% endfor %}
+
+{% for klasse in klassen %}
+    <p>&nbsp;</p>
+    <h5 id="{{ klasse.klasse }}">Klasse: {{ klasse.klasse }}</h5>
+
+    <table class="white">
+        <thead>
+            <tr>
+                <th>Gemiddelde</th>
+                <th>Wedstrijd leeftijd</th>
+                <th>Geslacht</th>
+                <th>NHB nummer</th>
+                <th>Naam</th>
+            </tr>
+        </thead>
+
+        {% for schutter in klasse.schutters %}
+            <tr>
+                <td>{{ schutter.gemiddelde }}</td>
+                <td>
+                    {% if schutter.is_jeugd %}
+                        <span>{{ schutter.wedstrijd_leeftijd }} (jeugd)</span>
+                    {% else %}
+                        <span>Senior</span>
+                    {% endif %}
+                </td>
+                <td>{{ schutter.nhblid.geslacht }}</td>
+                <td>{{ schutter.nhblid.nhb_nr }}</td>
+                <td>{{ schutter.nhblid.volledige_naam }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endfor %}
+
+{% endblock %}

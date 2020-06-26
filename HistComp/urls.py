@@ -20,7 +20,11 @@ urlpatterns = [
 
     path('team/<histcomp_pk>/',
          views.HistCompTeamView.as_view(),
-         name='team')
+         name='team'),
+
+    path('interland/',
+         views.InterlandView.as_view(),
+         name='interland')
 ]
 
 # end of file

@@ -5,15 +5,22 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import Resolver404, reverse
-from django.views.generic import ListView
+from django.http import HttpResponseRedirect
+from django.views.generic import ListView, TemplateView
 from django.db.models import Q
+from django.contrib.auth.mixins import UserPassesTestMixin
+from BasisTypen.models import MAXIMALE_LEEFTIJD_JEUGD
+from Functie.rol import Rollen, rol_get_huidige
+from NhbStructuur.models import NhbLid
 from .models import HistCompetitie, HistCompetitieIndividueel, HistCompetitieTeam
 from .forms import FilterForm
 from Plein.menu import menu_dynamics
+from decimal import Decimal
 
 TEMPLATE_HISTCOMP_ALLEJAREN = 'hist/histcomp_top.dtl'
 TEMPLATE_HISTCOMP_INDIV = 'hist/histcomp_indiv.dtl'
 TEMPLATE_HISTCOMP_TEAM = 'hist/histcomp_team.dtl'
+TEMPLATE_HISTCOMP_INTERLAND = 'hist/interland.dtl'
 
 RESULTS_PER_PAGE = 100
 
@@ -254,5 +261,77 @@ class HistCompTeamView(HistCompBaseView):
     query_class = HistCompetitieTeam
     is_team = True
 
+
+class InterlandView(UserPassesTestMixin, TemplateView):
+
+    """ Deze view geeft de resultaten van de 25m1pijl die nodig zijn voor de Interland """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_HISTCOMP_INTERLAND
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        rol_nu = rol_get_huidige(self.request)
+        return rol_nu == Rollen.ROL_BB
+
+    def handle_no_permission(self):
+        """ gebruiker heeft geen toegang --> redirect naar het plein """
+        return HttpResponseRedirect(reverse('Plein:plein'))
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        # maak een cache aan van nhb leden
+        # we filteren hier niet op inactieve leden
+        nhblid_dict = dict()  # [nhb_nr] = NhbLid
+        for obj in NhbLid.objects.all():
+            nhblid_dict[obj.nhb_nr] = obj
+        # for
+
+        # zoek het nieuwste seizoen beschikbaar
+        qset = HistCompetitie.objects.order_by('-seizoen').distinct('seizoen')
+        if len(qset) > 0:
+            # neem de data van het nieuwste seizoen
+            context['seizoen'] = seizoen = qset[0].seizoen
+            context['klassen'] = list()
+
+            # bepaal het jaar waarin de wedstrijdleeftijd bepaald moet worden
+            # dit is het tweede jaar van het seizoen
+            context['wedstrijdjaar'] = wedstrijd_jaar = int(seizoen.split('/')[1])
+
+            for klasse in (HistCompetitie
+                           .objects
+                           .filter(comp_type='25', seizoen=seizoen, is_team=False)):
+                context['klassen'].append(klasse)
+
+                # zoek alle schutters erbij met minimaal 5 scores
+                klasse.schutters = list()
+
+                for obj in (HistCompetitieIndividueel
+                            .objects
+                            .filter(histcompetitie=klasse, gemiddelde__gt=Decimal('0.000'))
+                            .order_by('-gemiddelde')):
+
+                    if obj.tel_aantal_scores() >= 5:
+
+                        # zoek het nhb lid erbij
+                        try:
+                            nhblid = nhblid_dict[obj.schutter_nr]
+                        except KeyError:
+                            nhblid = None
+                        else:
+                            if not nhblid.is_actief_lid:
+                                nhblid = None
+
+                        if nhblid:
+                            obj.nhblid = nhblid
+                            obj.wedstrijd_leeftijd = nhblid.bereken_wedstrijdleeftijd(wedstrijd_jaar)
+                            obj.is_jeugd = (obj.wedstrijd_leeftijd <= MAXIMALE_LEEFTIJD_JEUGD)
+                            klasse.schutters.append(obj)
+            # for
+
+        menu_dynamics(self.request, context, actief='histcomp')
+        return context
 
 # end of file
