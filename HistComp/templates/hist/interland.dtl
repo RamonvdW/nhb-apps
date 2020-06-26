@@ -27,12 +27,18 @@
     <p>&nbsp;</p>
     <h5 id="{{ klasse.klasse }}">Klasse: {{ klasse.klasse }}</h5>
 
-    <table class="white">
+    <table class="white" id="table_{{ klasse.klasse }}">
         <thead>
+            <tr>        <!-- filter rij -->
+                <td></td>
+                <td colspan="2" class="table-filter"><input class="table-filter" oninput="myTableFilter(this, 'table_{{ klasse.klasse }}')" placeholder="Zoeken"/></td>
+                <td></td>
+                <td></td>
+            </tr>
             <tr>
                 <th>Gemiddelde</th>
-                <th>Wedstrijd leeftijd</th>
-                <th>Geslacht</th>
+                <th filter="on">Wedstrijd leeftijd</th>
+                <th filter="on">Geslacht</th>
                 <th>NHB nummer</th>
                 <th>Naam</th>
             </tr>
