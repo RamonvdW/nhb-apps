@@ -36,9 +36,6 @@ then
     echo "[INFO] Focus set to: $FOCUS"
 fi
 
-# delete old coverage report - in the background
-rm -rf "$REPORT_DIR" &
-
 # start the simulator (for the mailer)
 python3.6 ./websim.py &
 
@@ -57,6 +54,11 @@ fi
 # and use bash construct to prevent the Terminated message on the console
 kill $!
 wait $! 2>/dev/null
+
+echo "[INFO] Generating reports"
+
+# delete old coverage report
+rm -rf "$REPORT_DIR"
 
 echo
 if [ -z "$FOCUS" ]

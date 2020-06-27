@@ -128,8 +128,9 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.url_overzicht = '/vereniging/'
         self.url_ledenlijst = '/vereniging/leden-lijst/'
         self.url_voorkeuren = '/vereniging/leden-voorkeuren/'
-        self.url_aanmelden = '/vereniging/leden-aanmelden/competitie/%s/'   # <comp_pk>
-        self.url_schutter_voorkeuren = '/schutter/voorkeuren/%s/'           # <nhblid_pk>
+        self.url_inschrijven = '/vereniging/leden-inschrijven/competitie/%s/'    # <comp_pk>
+        self.url_ingeschreven = '/vereniging/leden-ingeschreven/competitie/%s/'  # <deelcomp_pk>
+        self.url_schutter_voorkeuren = '/schutter/voorkeuren/%s/'                # <nhblid_pk>
 
     def _create_histcomp(self):
         # (strategisch gekozen) historische data om klassegrenzen uit te bepalen
@@ -285,20 +286,8 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         # for
         self.assertEqual(SchutterBoog.objects.count(), 0)
 
-    def test_aanmelden(self):
-        url = self.url_aanmelden % self.comp_18.pk
-
-        # login als BB om wat voorbereidingen te doen
-        self.e2e_login_and_pass_otp(self.account_bb)
-        self.e2e_wissel_naar_functie(self.functie_hwl)
-        self.e2e_check_rol('HWL')
-
-        # stel een paar bogen in
-        self._zet_schutter_voorkeuren(100002)
-        self._zet_schutter_voorkeuren(100003)
-
-        self._zet_ag(100002, 18)
-        self._zet_ag(100003, 25)
+    def test_inschrijven(self):
+        url = self.url_inschrijven % self.comp_18.pk
 
         # login als SEC
         self.e2e_login_and_pass_otp(self.account_sec)
@@ -306,16 +295,19 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.e2e_check_rol('SEC')
 
         resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('vereniging/leden-aanmelden.dtl', 'plein/site_layout.dtl'))
+        self.assert_is_redirect(resp, '/plein/')          # SEC mag dit niet
 
-        # nu de POST om een paar leden aan te melden
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
-        resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',        # 1=R
-                                      'lid_100003_boogtype_3': 'on'})       # 3=BB
-        self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
+    def test_ingeschreven(self):
+        url = self.url_ingeschreven % 1
 
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
+        # login als SEC
+        self.e2e_login_and_pass_otp(self.account_sec)
+        self.e2e_wissel_naar_functie(self.functie_sec)
+        self.e2e_check_rol('SEC')
+
+        # SEC mag de lijst met ingeschreven schutters niet ophalen
+        resp = self.client.get(url)
+        self.assert_is_redirect(resp, '/plein/')          # SEC mag dit niet
 
     def test_wedstrijdlocatie(self):
         # maak een locatie en koppel aan de vereniging

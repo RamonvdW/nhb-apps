@@ -96,15 +96,31 @@
             </a>
         </div>
 
-        <!-- leden aanmelden voor de competitie -->
+        <!-- leden inschrijven voor de competitie -->
         {% for comp in competities %}
             <div class="card">
                 <div class="card-content">
-                    <div class="card-title center-align">Aanmeldingen</div>
+                    <div class="card-title center-align">Inschrijven {{ comp.afstand }}m</div>
                     <div class="center-align"><img src="{{ comp.icon }}" height="90" alt="logo"></div>
-                    <p>Leden aanmelden / aangemeld voor de <b>{{ comp.beschrijving }}</b>.</p>
+                    <p>Leden inschrijven voor de <b>{{ comp.beschrijving }}</b>.</p>
                 </div>
-                <a href="{% url 'Vereniging:leden-aanmelden' comp_pk=comp.pk %}" class="nhb-klikbare-balk">
+                <a href="{% url 'Vereniging:leden-inschrijven' comp_pk=comp.pk %}" class="nhb-klikbare-balk">
+                    <div class="card-action center-align">
+                        <span class="nhb-klikbare-link">Tonen</span>
+                    </div>
+                </a>
+            </div>
+        {% endfor %}
+
+        <!-- leden inschrijven voor de competitie -->
+        {% for deelcomp in deelcomps %}
+            <div class="card">
+                <div class="card-content">
+                    <div class="card-title center-align">Ingeschreven {{ deelcomp.competitie.afstand }}m</div>
+                    <div class="center-align"><img src="{{ deelcomp.icon }}" height="90" alt="logo"></div>
+                    <p>Overzicht leden ingeschreven zijn voor de <b>{{ deelcomp.competitie.beschrijving }}</b>.</p>
+                </div>
+                <a href="{% url 'Vereniging:leden-ingeschreven' deelcomp_pk=deelcomp.pk %}" class="nhb-klikbare-balk">
                     <div class="card-action center-align">
                         <span class="nhb-klikbare-link">Tonen</span>
                     </div>

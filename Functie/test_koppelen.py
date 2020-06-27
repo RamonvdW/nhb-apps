@@ -312,6 +312,11 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, "RCL ")
 
+        # controleer dat de RCL niemand mag koppelen
+        url = '/functie/wijzig/%s/' % self.functie_wl.pk
+        resp = self.client.get(url)
+        self.assert_is_redirect(resp, '/plein/')
+
         # poog een andere rol te koppelen
         url = '/functie/wijzig/%s/ontvang/' % self.functie_rcl101.pk
         self.assertEqual(self.functie_rcl101.accounts.count(), 0)
@@ -357,18 +362,38 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.assertContains(resp, self.account_beh2.volledige_naam())
 
         # poog een NHB lid te koppelen dat niet lid is van de vereniging
-        resp = self.client.post(url, {'add': self.account_ander.pk}, follow=True)
+        resp = self.client.post(url, {'add': self.account_ander.pk})
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
         self.assertEqual(self.functie_hwl.accounts.count(), 2)
 
         # poog een niet-NHB lid account te koppelen
-        resp = self.client.post(url, {'add': self.account_admin.pk}, follow=True)
+        resp = self.client.post(url, {'add': self.account_admin.pk})
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
         self.assertEqual(self.functie_hwl.accounts.count(), 2)
 
         # probeer een verkeerde vereniging te wijzigen
         url = '/functie/wijzig/%s/ontvang/' % self.functie_hwl2.pk
-        resp = self.client.post(url, {'add': self.account_beh2.pk}, follow=True)
+        resp = self.client.post(url, {'add': self.account_beh2.pk})
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
+
+        url = '/functie/wijzig/%s/' % self.functie_sec.pk
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 404)
+
+        # poog sec SEC rol te koppelen (mag niet)
+        url = '/functie/wijzig/%s/ontvang/' % self.functie_sec.pk
+        self.assertEqual(self.functie_sec.accounts.count(), 0)
+        resp = self.client.post(url, {'add': self.account_beh2.pk})
+        self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
+        self.assertEqual(self.functie_sec.accounts.count(), 0)
+
+        url = '/functie/wijzig/%s/' % self.functie_wl.pk
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+
+        url = '/functie/wijzig/%s/' % self.functie_hwl.pk
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+
 
 # end of file

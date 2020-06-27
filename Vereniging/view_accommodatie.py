@@ -213,7 +213,7 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
                 if functie_nu.nhb_ver == nhbver:
                     return True
             elif rol_nu == Rollen.ROL_RCL:
-                # RCL mag van alle verenigingen in zijn regio wijzigen
+                # RCL mag van alle verenigingen in zijn regio de accommodatie instellingen wijzigen
                 if functie_nu.nhb_regio == nhbver.regio:
                     return True
 
@@ -272,8 +272,11 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
             context['opslaan_url'] = reverse(opslaan_urlconf, kwargs={'locatie_pk': locatie.pk,
                                                                       'vereniging_pk': nhbver.pk})
 
+            rol_nu = rol_get_huidige(self.request)
+
             # geef ook meteen de mogelijkheid om leden te koppelen aan rollen
-            context['url_koppel_sec'] = reverse('Functie:wijzig-beheerders', kwargs={'functie_pk': functie_sec.pk})
+            if rol_nu == Rollen.ROL_SEC:
+                context['url_koppel_sec'] = reverse('Functie:wijzig-beheerders', kwargs={'functie_pk': functie_sec.pk})
             context['url_koppel_hwl'] = reverse('Functie:wijzig-beheerders', kwargs={'functie_pk': functie_hwl.pk})
             context['url_koppel_wl'] = reverse('Functie:wijzig-beheerders', kwargs={'functie_pk': functie_wl.pk})
 

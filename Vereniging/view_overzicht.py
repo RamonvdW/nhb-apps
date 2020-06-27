@@ -11,7 +11,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from django.templatetags.static import static
 from Plein.menu import menu_dynamics
 from Functie.rol import Rollen, rol_get_huidige_functie
-from Competitie.models import Competitie
+from Competitie.models import Competitie, DeelCompetitie, LAAG_REGIO
 
 
 TEMPLATE_OVERZICHT = 'vereniging/overzicht.dtl'
@@ -46,13 +46,30 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                                                           kwargs={'locatie_pk': locatie.pk,
                                                                   'vereniging_pk': functie_nu.nhb_ver.pk})
 
-        context['competities'] = Competitie.objects.filter(is_afgesloten=False)
+        context['competities'] = (Competitie
+                                  .objects
+                                  .filter(is_afgesloten=False)
+                                  .order_by('afstand'))
+
+        context['deelcomps'] = (DeelCompetitie
+                                .objects
+                                .filter(laag=LAAG_REGIO,
+                                        competitie__is_afgesloten=False,
+                                        nhb_regio=functie_nu.nhb_ver.regio)
+                                .order_by('competitie__afstand'))
 
         for comp in context['competities']:
             if comp.afstand == '18':
                 comp.icon = static('plein/badge_nhb_indoor.png')
             else:
                 comp.icon = static('plein/badge_nhb_25m1p.png')
+        # for
+
+        for deelcomp in context['deelcomps']:
+            if deelcomp.competitie.afstand == '18':
+                deelcomp.icon = static('plein/badge_nhb_indoor.png')
+            else:
+                deelcomp.icon = static('plein/badge_nhb_25m1p.png')
         # for
 
         menu_dynamics(self.request, context, actief='vereniging')

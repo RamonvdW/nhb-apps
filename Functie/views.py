@@ -75,6 +75,10 @@ def mag_beheerder_wijzigen_of_404(request, functie):
             # verkeerde vereniging
             raise Resolver404()
 
+        if functie.rol not in ('HWL', 'WL'):
+            # niet een rol die de HWL mag wijzigen
+            raise Resolver404()
+
         # HWL
         return
 

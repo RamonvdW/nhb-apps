@@ -82,14 +82,14 @@
             <tr>
                 <th>Vereniging</th>
                 <th>Aanvangsgemiddelde</th>
-                <th>Schutter naam</th>
+                <th>Naam schutter</th>
             </tr>
 
         {% endif %}
 
         <tr>
             <td>[{{ obj.schutterboog.nhblid.bij_vereniging.nhb_nr }}] {{ obj.schutterboog.nhblid.bij_vereniging.naam }}</td>
-            <td>{{ obj.aanvangsgemiddelde }}<!--{% if obj.is_handmatig_ag %}<i> (handmatig)</i>{% endif %}--></td>
+            <td>{{ obj.aanvangsgemiddelde }}{% if obj.is_handmatig_ag %}<i> (handmatig)</i>{% endif %}</td>
             <td>{{ obj.schutterboog.nhblid.volledige_naam }}</td>
         </tr>
 

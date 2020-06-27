@@ -9,19 +9,20 @@
 {% block title %}Aanmeldingen{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vereniging-leden-aanmelden" %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vereniging-leden-inschrijven" %}
 
 <h4>Aanmeldingen</h4>
 
-<form method="post" action="{{ aanmelden_url }}">
+<form method="post" action="{{ inschrijven_url }}">
     {% csrf_token %}
 
-    {% if mag_aanmelden %}
+    {% if mag_inschrijven %}
         <p>Als hoofdwedstrijdleider kan je via deze pagina leden van vereniging [{{ nhb_ver.nhb_nr }}] {{ nhb_ver.naam }} te {{ nhb_ver.plaats }} aanmelden voor de <b>{{ comp.beschrijving }}</b>.</p>
 
         <p>Onderstaande lijst toont alleen leden die ingesteld hebben met welke boog ze schieten. Je kan ze hier bij helpen via het kaartje "voorkeuren leden".</p>
 
         <p>Aanmelden gaat in bulk: kies de voorkeuren, zet daarna een vinkje bij de schutters die je aan wilt melden en druk dan rode knop in de rechter onderhoek. Leden die al aangemeld zijn hebben een grijs vinkje.</p>
+        <p>Leden die aangegeven hebben niet mee te willen doen met de (winter-)competities zijn helemaal grijs.</p>
 
         <table class="white">
             <tr>
@@ -85,28 +86,28 @@
                     <td colspan="2"></td>
                 </tr>
                 <tr>
-                    <th class="center-align">{% if mag_aanmelden %}<!-- kolom voor vinkje -->{% else %}Aangemeld{% endif %}</th>
+                    <th class="center-align">{% if mag_inschrijven %}<!-- kolom voor vinkje -->{% else %}Aangemeld{% endif %}</th>
                     <th>Wedstrijd<wbr/>boog</th>
                     <th>Aanvangsgemiddelde</th>
                     <th filter="on">Naam</th>
                     <th>Leeftijd</th>
-                    <th>Wedstrijdklasse {{ seizoen }}</th>
+                    <th>Leeftijdsklasse {{ seizoen }}</th>
                 </tr>
             </thead>
 
             {% for obj in leden_jeugd %}
                 <tr>
-                    {% if obj.geen_wedstrijdboog %}     <!-- dead code -->
-                        <!-- geen bogen gekozen, dus kan niet aanmelden -->
+                    {% if not obj.wil_competitie %}
+                        <!-- schutter wil niet meedoen -->
                         <td><!-- geen checkbox --></td>
-                        <td class="grey-text"><i>Geen</i></td>
-                        <td class="gray-text">-</td>
+                        <td class="grey-text">{{ obj.boogtype }}</td>
+                        <td><!-- geen aanvangsgemiddelde --></td>
                         <td class="grey-text">{{ obj.volledige_naam }}</td>
                         <td class="grey-text">{{ obj.leeftijd }}</td>
                         <td class="grey-text">{{ obj.leeftijdsklasse.klasse_kort }}</td>
                     {% else %}
                         <td class="center-align">
-                            {% if mag_aanmelden %}
+                            {% if mag_inschrijven %}
                                 <label>
                                     <input type="checkbox" name="{{ obj.check }}" {% if obj.is_aangemeld %}disabled checked{% else %}class="filled-in"{%endif%}>
                                     <span><!-- noodzakelijk --></span>
@@ -139,7 +140,7 @@
                 <td class="table-filter"><input class="table-filter" oninput="myTableFilter(this, 'table2')" placeholder="Zoeken"/></td>
             </tr>
             <tr>
-                <th class="center-align">{% if mag_aanmelden %}<!-- kolom voor vinkje -->{% else %}Aangemeld{% endif %}</th>
+                <th class="center-align">{% if mag_inschrijven %}<!-- kolom voor vinkje -->{% else %}Aangemeld{% endif %}</th>
                 <th>Wedstrijdboog</th>
                 <th>Aanvangsgemiddelde</th>
                 <th filter="on">Naam</th>
@@ -148,15 +149,15 @@
 
         {% for obj in leden_senior %}
             <tr>
-                {% if obj.geen_wedstrijdboog %}
+                    {% if not obj.wil_competitie %}
                     <!-- geen bogen gekozen, dus kan niet aanmelden -->
                     <td><!-- geen checkbox --></td>
-                    <td class="grey-text"><i>Geen</i></td>
-                    <td class="gray-text">-</td>
+                    <td class="grey-text">{{ obj.boogtype }}</td>
+                    <td><!-- geen aanvangsgemiddelde --></td>
                     <td class="grey-text">{{ obj.volledige_naam }}</td>
                 {% else %}
                     <td class="center-align">
-                        {% if mag_aanmelden %}
+                        {% if mag_inschrijven %}
                             <label>
                                 <input type="checkbox" name="{{ obj.check }}" {% if obj.is_aangemeld %}disabled checked{% else %}class="filled-in"{%endif%}>
                                 <span><!-- noodzakelijk --></span>
@@ -175,7 +176,7 @@
         {% endfor %}
     </table>
 
-    {% if mag_aanmelden %}
+    {% if mag_inschrijven %}
         <div class="fixed-action-btn">
             <input class="btn-nhb-rood" type="submit" value="Geselecteerde schutters aanmelden">
         </div>

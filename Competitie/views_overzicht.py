@@ -421,6 +421,7 @@ class LijstAangemeldRegiocompRegioView(TemplateView):
 
         volgorde = -1
         for obj in context['object_list']:
+            obj.team_ja_nee = JA_NEE[obj.inschrijf_voorkeur_team]
             if volgorde != obj.klasse.indiv.volgorde:
                 obj.nieuwe_klasse = True
                 volgorde = obj.klasse.indiv.volgorde

@@ -61,7 +61,7 @@
                 {% for name in sec_names %}
                     <span>{{ name }}</span><br>
                 {% empty %}
-                    <i>Onbekend</i>
+                    <i>Nog geen account</i>
                 {% endfor %}
             </td>
             {% if not readonly %}
@@ -79,7 +79,7 @@
                 {% for name in hwl_names %}
                     <span>{{ name }}</span><br>
                 {% empty %}
-                    <i>Onbekend</i>
+                    <i>Nog niet gekoppeld</i>
                 {% endfor %}
             </td>
             {% if not readonly %}

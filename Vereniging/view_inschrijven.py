@@ -13,7 +13,7 @@ from Functie.rol import Rollen, rol_get_huidige_functie
 from BasisTypen.models import (LeeftijdsKlasse,
                                MAXIMALE_LEEFTIJD_JEUGD, MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT)
 from NhbStructuur.models import NhbLid
-from Schutter.models import SchutterBoog
+from Schutter.models import SchutterBoog, SchutterVoorkeuren
 from Competitie.models import (AG_NUL, DAGDEEL, DAGDEEL_AFKORTINGEN, INSCHRIJF_METHODE_3,
                                Competitie, DeelCompetitie, CompetitieKlasse,
                                RegioCompetitieSchutterBoog)
@@ -21,20 +21,23 @@ from Score.models import Score
 import copy
 
 
-TEMPLATE_LEDEN_AANMELDEN = 'vereniging/leden-aanmelden.dtl'
+TEMPLATE_LEDEN_INSCHRIJVEN = 'vereniging/competitie-inschrijven.dtl'
+TEMPLATE_LEDEN_INGESCHREVEN = 'vereniging/competitie-ingeschreven.dtl'
+
+JA_NEE = {False: 'Nee', True: 'Ja'}
 
 
-class LedenAanmeldenView(UserPassesTestMixin, ListView):
+class LedenInschrijvenView(UserPassesTestMixin, ListView):
 
-    """ Deze view laat de HWL zijn ledenlijst zien """
+    """ Deze view laat de HWL leden inschrijven voor een competitie """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_LEDEN_AANMELDEN
+    template_name = TEMPLATE_LEDEN_INSCHRIJVEN
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         _, functie_nu = rol_get_huidige_functie(self.request)
-        return functie_nu and functie_nu.rol in ('SEC', 'HWL', 'WL')
+        return functie_nu and functie_nu.rol == 'HWL'
 
     def handle_no_permission(self):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
@@ -65,11 +68,11 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                     .filter(geboorte_datum__year__gte=jeugdgrens)
                     .order_by('-geboorte_datum__year', 'achternaam', 'voornaam')):
 
-            # de wedstrijdleeftijd voor dit hele jaar
+            # de wedstrijdleeftijd voor dit hele seizoen
             wedstrijdleeftijd = comp.begin_jaar - obj.geboorte_datum.year
             obj.leeftijd = wedstrijdleeftijd
 
-            # de wedstrijdklasse voor dit hele jaar
+            # de wedstrijdklasse voor dit hele seizoen
             if wedstrijdleeftijd == prev_wedstrijdleeftijd:
                 obj.leeftijdsklasse = prev_lkl
             else:
@@ -108,6 +111,14 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                       .filter(is_ag=True, afstand_meter=comp.afstand)):
             ag = score.waarde / 1000
             ag_dict[score.schutterboog.pk] = ag
+        # for
+
+        wil_competitie = dict()     # [nhb_nr] = True/False
+        for voorkeuren in (SchutterVoorkeuren
+                           .objects
+                           .select_related('nhblid')
+                           .filter(nhblid__bij_vereniging=functie_nu.nhb_ver)):
+            wil_competitie[voorkeuren.nhblid.nhb_nr] = voorkeuren.voorkeur_meedoen_competitie
         # for
 
         is_aangemeld_dict = dict()   # [schutterboog.pk] = True/False
@@ -150,6 +161,14 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                 except KeyError:
                     obj.is_aangemeld = False
 
+                # kijk of de schutter wel mee wil doen met de competitie
+                try:
+                    obj.wil_competitie = wil_competitie[schutterboog.nhblid.nhb_nr]
+                except KeyError:
+                    # schutter had geen voorkeuren
+                    # dit is een opt-out, dus standaard True
+                    obj.wil_competitie = True
+
                 objs2.append(obj)
         # for
 
@@ -177,8 +196,8 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
         context['comp'] = self.comp
         context['seizoen'] = '%s/%s' % (self.comp.begin_jaar, self.comp.begin_jaar + 1)
         if rol_nu == Rollen.ROL_HWL:
-            context['aanmelden_url'] = reverse('Vereniging:leden-aanmelden', kwargs={'comp_pk': self.comp.pk})
-            context['mag_aanmelden'] = True
+            context['inschrijven_url'] = reverse('Vereniging:leden-inschrijven', kwargs={'comp_pk': self.comp.pk})
+            context['mag_inschrijven'] = True
 
             # bepaal de inschrijfmethode voor deze regio
             mijn_regio = functie_nu.nhb_ver.regio.regio_nr
@@ -339,7 +358,106 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
             # else: silently ignore
         # for
 
-        return HttpResponseRedirect(reverse('Vereniging:leden-aanmelden', kwargs={'comp_pk': comp.pk}))
+        return HttpResponseRedirect(reverse('Vereniging:leden-ingeschreven', kwargs={'deelcomp_pk': deelcomp.pk}))
 
+
+class LedenIngeschrevenView(UserPassesTestMixin, ListView):
+
+    """ Deze view laat de HWL/WL zien welke leden ingeschreven zijn voor een competitie """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_LEDEN_INGESCHREVEN
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        _, functie_nu = rol_get_huidige_functie(self.request)
+        return functie_nu and functie_nu.rol in ('HWL', 'WL')
+
+    def handle_no_permission(self):
+        """ gebruiker heeft geen toegang --> redirect naar het plein """
+        return HttpResponseRedirect(reverse('Plein:plein'))
+
+    def get_queryset(self):
+        """ called by the template system to get the queryset or list of objects for the template """
+
+        try:
+            deelcomp_pk = int(self.kwargs['deelcomp_pk'][:6])       # afkappen geeft veiligheid
+            deelcomp = (DeelCompetitie
+                        .objects
+                        .select_related('competitie')
+                        .get(pk=deelcomp_pk))
+        except (ValueError, TypeError, DeelCompetitie.DoesNotExist):
+            raise Resolver404()
+
+        self.deelcomp = deelcomp
+
+        dagdeel_str = dict()
+        for afkorting, beschrijving in DAGDEEL:
+            dagdeel_str[afkorting] = beschrijving
+        # for
+        dagdeel_str[''] = ''
+
+        _, functie_nu = rol_get_huidige_functie(self.request)
+        objs = (RegioCompetitieSchutterBoog
+                .objects
+                .select_related('schutterboog', 'schutterboog__nhblid',
+                                'bij_vereniging', 'klasse', 'klasse__indiv')
+                .filter(deelcompetitie=deelcomp,
+                        bij_vereniging=functie_nu.nhb_ver)
+                .order_by('klasse__indiv__volgorde'))
+
+        for obj in objs:
+            obj.team_ja_nee = JA_NEE[obj.inschrijf_voorkeur_team]
+            obj.dagdeel_str = dagdeel_str[obj.inschrijf_voorkeur_dagdeel]
+            obj.check = "pk_%s" % obj.pk
+        # for
+
+        return objs
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
+        context['nhb_ver'] = functie_nu.nhb_ver
+
+        context['deelcomp'] = deelcomp = self.deelcomp
+
+        if rol_nu == Rollen.ROL_HWL:
+            context['uitschrijven_url'] = reverse('Vereniging:leden-ingeschreven', kwargs={'deelcomp_pk': deelcomp.pk})
+            context['mag_uitschrijven'] = True
+
+        methode = deelcomp.inschrijf_methode
+        if methode == INSCHRIJF_METHODE_3:
+            context['toon_dagdeel'] = DAGDEEL
+
+        menu_dynamics(self.request, context, actief='vereniging')
+        return context
+
+    def post(self, request, *args, **kwargs):
+        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
+
+        if rol_nu != Rollen.ROL_HWL:
+            raise Resolver404()
+
+        # all checked boxes are in the post request as keys, typically with value 'on'
+        for key, _ in request.POST.items():
+            if key[0:0+3] == 'pk_':
+                pk = key[3:3+7]   # afkappen geeft bescherming
+                try:
+                    inschrijving = RegioCompetitieSchutterBoog.objects.get(pk=pk)
+                except (ValueError, TypeError, RegioCompetitieSchutterBoog.DoesNotExist):
+                    # niet normaal
+                    raise Resolver404()
+
+                # controleer dat deze inschrijving bij de vereniging hoort
+                if inschrijving.schutterboog.nhblid.bij_vereniging != functie_nu.nhb_ver:
+                    raise Resolver404()
+
+                # schrijf de schutter uit
+                inschrijving.delete()
+        # for
+
+        return HttpResponseRedirect(reverse('Vereniging:overzicht'))
 
 # end of file

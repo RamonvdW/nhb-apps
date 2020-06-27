@@ -286,7 +286,7 @@ class RegiocompetitieUitschrijvenView(View):
 
         # converteer en doe eerste controle op de parameters
         try:
-            regiocomp_pk = int(kwargs['regiocomp_pk'][:10])
+            regiocomp_pk = int(kwargs['regiocomp_pk'][:6])     # afkappen geeft bescherming
             inschrijving = RegioCompetitieSchutterBoog.objects.get(pk=regiocomp_pk)
         except (ValueError, KeyError):
             # vuilnis

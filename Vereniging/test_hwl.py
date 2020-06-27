@@ -9,7 +9,8 @@ from django.utils import timezone
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
 from Competitie.models import (Competitie, DeelCompetitie, CompetitieKlasse,
-                               RegioCompetitieSchutterBoog, INSCHRIJF_METHODE_3)
+                               RegioCompetitieSchutterBoog,
+                               INSCHRIJF_METHODE_3, LAAG_REGIO)
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Schutter.models import SchutterBoog
 from Score.models import aanvangsgemiddelde_opslaan
@@ -143,8 +144,9 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.url_overzicht = '/vereniging/'
         self.url_ledenlijst = '/vereniging/leden-lijst/'
         self.url_voorkeuren = '/vereniging/leden-voorkeuren/'
-        self.url_aanmelden = '/vereniging/leden-aanmelden/competitie/%s/'   # <comp_pk>
-        self.url_schutter_voorkeuren = '/schutter/voorkeuren/%s/'           # <nhblid_pk>
+        self.url_inschrijven = '/vereniging/leden-inschrijven/competitie/%s/'    # <comp_pk>
+        self.url_ingeschreven = '/vereniging/leden-ingeschreven/competitie/%s/'  # <deelcomp_pk>
+        self.url_schutter_voorkeuren = '/schutter/voorkeuren/%s/'                # <nhblid_pk>
 
     def _create_histcomp(self):
         # (strategisch gekozen) historische data om klassegrenzen uit te bepalen
@@ -223,6 +225,10 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
         self.comp_18 = Competitie.objects.get(afstand=18)
         self.comp_25 = Competitie.objects.get(afstand=25)
+
+        self.deelcomp_regio = DeelCompetitie.objects.get(laag=LAAG_REGIO,
+                                                         nhb_regio=self.regio_111,
+                                                         competitie__afstand=18)
 
     def _zet_schutter_voorkeuren(self, nhb_nr):
         # deze functie kan alleen gebruikt worden als HWL
@@ -346,8 +352,8 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('vereniging/leden-voorkeuren.dtl', 'plein/site_layout.dtl'))
 
-    def test_aanmelden(self):
-        url = self.url_aanmelden % self.comp_18.pk
+    def test_inschrijven(self):
+        url = self.url_inschrijven % self.comp_18.pk
 
         # anon
         self.e2e_logout()
@@ -368,21 +374,28 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('vereniging/leden-aanmelden.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('vereniging/competitie-inschrijven.dtl', 'plein/site_layout.dtl'))
 
         # nu de POST om een paar leden aan te melden
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
         resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',        # 1=R
                                       'lid_100003_boogtype_3': 'on'})       # 3=BB
-        self.assert_is_redirect(resp, url)
+        self.assertEqual(resp.status_code, 302)     # 302 = Redirect
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 2)    # 2 schutters, 1 competitie
 
-    def test_aanmelden_methode3(self):
+        # haal de lijst met ingeschreven schutters op
+        url = self.url_ingeschreven % self.deelcomp_regio.pk
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('vereniging/competitie-ingeschreven.dtl', 'plein/site_layout.dtl'))
 
-        deelcomp = DeelCompetitie.objects.get(competitie__afstand='18', nhb_regio=self.regio_111)
-        deelcomp.inschrijf_methode = INSCHRIJF_METHODE_3
-        deelcomp.toegestane_dagdelen = 'AV,ZO'
-        deelcomp.save()
+    def test_inschrijven_methode3(self):
+
+        self.deelcomp_regio.inschrijf_methode = INSCHRIJF_METHODE_3
+        self.deelcomp_regio.toegestane_dagdelen = 'AV,ZO'
+        self.deelcomp_regio.save()
 
         # login als HWL
         self.e2e_login_and_pass_otp(self.account_hwl)
@@ -396,11 +409,11 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self._zet_ag(100002, 18)
         self._zet_ag(100003, 25)
 
-        url = self.url_aanmelden % self.comp_18.pk
+        url = self.url_inschrijven % self.comp_18.pk
 
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('vereniging/leden-aanmelden.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/competitie-inschrijven.dtl', 'plein/site_layout.dtl'))
 
         # nu de POST om een paar leden aan te melden
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
@@ -408,7 +421,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
                                       'lid_100003_boogtype_3': 'on',        # 3=BB
                                       'dagdeel': 'AV',
                                       'opmerking': 'methode 3'})
-        self.assert_is_redirect(resp, url)
+        self.assertEqual(resp.status_code, 302)     # 302 = Redirect
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 2)    # 2 schutters, 1 competitie
 
         for obj in RegioCompetitieSchutterBoog.objects.all():
@@ -416,16 +429,15 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
             self.assertTrue(obj.inschrijf_voorkeur_dagdeel, 'AV')
         # for
 
-        # haal de lijst op als WL
-        self.e2e_wissel_naar_functie(self.functie_wl)
-        self.e2e_check_rol('WL')
-
+        # haal de lijst met ingeschreven schutters op
+        url = self.url_ingeschreven % self.deelcomp_regio.pk
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('vereniging/leden-aanmelden.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('vereniging/competitie-ingeschreven.dtl', 'plein/site_layout.dtl'))
 
-    def test_aanmelden_team(self):
-        url = self.url_aanmelden % self.comp_18.pk
+    def test_inschrijven_team(self):
+        url = self.url_inschrijven % self.comp_18.pk
 
         # anon
         self.e2e_logout()
@@ -446,7 +458,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('vereniging/leden-aanmelden.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/competitie-inschrijven.dtl', 'plein/site_layout.dtl'))
 
         # nu de POST om een paar leden aan te melden
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
@@ -454,7 +466,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
                                       'lid_100003_boogtype_3': 'on',        # 3=BB
                                       'wil_in_team': 'ja',
                                       'opmerking': 'door de hwl'})
-        self.assert_is_redirect(resp, url)
+        self.assertEqual(resp.status_code, 302)     # 302 = Redirect
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 2)    # 2 schutters, 1 competitie
 
         for obj in RegioCompetitieSchutterBoog.objects.all():
@@ -462,19 +474,61 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
             self.assertTrue(obj.inschrijf_voorkeur_team)
         # for
 
-    def test_aanmelden_cornercase(self):
+    def test_uitschrijven(self):
         # login als HWL
         self.e2e_login_and_pass_otp(self.account_hwl)
         self.e2e_wissel_naar_functie(self.functie_hwl)
         self.e2e_check_rol('HWL')
 
-        resp = self.client.get(self.url_aanmelden % 9999999)
-        self.assertEqual(resp.status_code, 404)         # 404 = Not found
+        # stel een paar bogen in
+        self._zet_schutter_voorkeuren(100004)
+        self._zet_schutter_voorkeuren(100003)
 
-        resp = self.client.post(self.url_aanmelden % 9999999)
-        self.assertEqual(resp.status_code, 404)         # 404 = Not found
+        self._zet_ag(100004, 18)
+        self._zet_ag(100003, 25)
 
-        url = self.url_aanmelden % self.comp_18.pk
+        url = self.url_inschrijven % self.comp_18.pk
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_template_used(resp, ('vereniging/competitie-inschrijven.dtl', 'plein/site_layout.dtl'))
+
+        # nu de POST om een paar leden aan te melden
+        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
+        resp = self.client.post(url, {'lid_100004_boogtype_1': 'on',        # 1=R
+                                      'lid_100003_boogtype_3': 'on',        # 3=BB
+                                      'wil_in_team': 'ja',
+                                      'opmerking': 'door de hwl'})
+        self.assertEqual(resp.status_code, 302)     # 302 = Redirect
+        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 2)    # 2 schutters, 1 competitie
+
+        # schrijf de schutters weer uit
+        pk = RegioCompetitieSchutterBoog.objects.all()[0].pk
+        url = self.url_ingeschreven % 0
+        resp = self.client.post(url, {'pk_%s' % pk: 'on'})
+        self.assert_is_redirect(resp, self.url_overzicht)
+        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 1)    # 1 schutter
+
+        # schrijf een schutter uit van een andere vereniging
+        inschrijving = RegioCompetitieSchutterBoog.objects.all()[0]
+        inschrijving.schutterboog.nhblid.bij_vereniging = self.nhbver2
+        inschrijving.schutterboog.nhblid.save()
+        resp = self.client.post(url, {'pk_%s' % inschrijving.pk: 'on'})
+        self.assertEqual(resp.status_code, 404)         # 404 = Not allowed
+        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 1)    # 1 schutter
+
+    def test_cornercases(self):
+        # login als HWL
+        self.e2e_login_and_pass_otp(self.account_hwl)
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+        self.e2e_check_rol('HWL')
+
+        resp = self.client.get(self.url_inschrijven % 9999999)
+        self.assertEqual(resp.status_code, 404)         # 404 = Not allowed
+
+        resp = self.client.post(self.url_inschrijven % 9999999)
+        self.assertEqual(resp.status_code, 404)         # 404 = Not allowed
+
+        url = self.url_inschrijven % self.comp_18.pk
         resp = self.client.post(url, {'garbage': 'oh',
                                       'lid_GEENGETAL_boogtype_3': 'on'})
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
@@ -489,13 +543,18 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         resp = self.client.post(url, {'lid_100003_boogtype_1': 'on'})       # 1=R = geen wedstrijdboog
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
 
-        # wissel naar WL rol
-        self.e2e_wissel_naar_functie(self.functie_wl)
-        self.e2e_check_rol('WL')
-
-        # nu de POST om een paar leden aan te melden
-        resp = self.client.post(url)
+        url = self.url_ingeschreven % 999999
+        resp = self.client.get(url)
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
+
+        resp = self.client.post(url)
+        self.assertEqual(resp.status_code, 302)     # redirect want POST kijkt niet naar deelcomp_pk
+
+        resp = self.client.post(url, {'pk_hallo': 'on'})
+        self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
+
+        resp = self.client.post(url, {'ignore': 'jaja', 'pk_null': 'on'})
+        self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
 
     def test_wedstrijdlocatie(self):
         # maak een locatie en koppel aan de vereniging
