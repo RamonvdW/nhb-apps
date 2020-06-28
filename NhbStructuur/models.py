@@ -134,6 +134,10 @@ class NhbVereniging(models.Model):
                                        blank=True,  # allow access input in form
                                        null=True)   # allow NULL relation in database
 
+    # er is een vereniging voor persoonlijk lidmaatschap
+    # deze leden mogen geen wedstijden schieten
+    geen_wedstrijden = models.BooleanField(default=False)
+
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
         # selectie in de admin interface gaat op deze string, dus nhb_nr eerst

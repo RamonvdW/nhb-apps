@@ -70,7 +70,9 @@ EXPECTED_MEMBER_KEYS = ('club_number', 'member_number', 'name', 'prefix', 'first
 # administratieve entries (met fouten) die overslagen moeten worden
 SKIP_MEMBERS = (101711,)        # CRM developer
 
-GEEN_SECRETARIS_NODIG = (1377,)
+GEEN_SECRETARIS_NODIG = (1377,)     # persoonlijk lid
+
+GEEN_WEDSTRIJDEN = (1377,)          # persoonlijk lid, geen wedstrijden
 
 GEEN_WEDSTRIJDLOCATIE = (1368,      # bondsbureau NHB
                          1377,      # persoonlijk lid, geen wedstrijden
@@ -232,6 +234,8 @@ class Command(BaseCommand):
                 self._count_warnings += 1
                 ver_email = ""      # voorkom None
 
+            ver_geen_wedstrijden = (ver_nhb_nr in GEEN_WEDSTRIJDEN)
+
             # FUTURE: verdere velden: website, has_disabled_facilities, lat/lon
 
             # zoek de vereniging op
@@ -272,12 +276,20 @@ class Command(BaseCommand):
                     if not self.dryrun:
                         obj.save()
 
+                if obj.geen_wedstrijden != ver_geen_wedstrijden:
+                    self.stdout.write("[INFO] Wijziging van 'geen wedstrijden' voor vereniging %s: %s --> %s" % (ver_nhb_nr, obj.geen_wedstrijden, ver_geen_wedstrijden))
+                    self._count_wijzigingen += 1
+                    obj.geen_wedstrijden = ver_geen_wedstrijden
+                    if not self.dryrun:
+                        obj.save()
+
             if is_nieuw:
                 obj = None
                 ver = NhbVereniging()
                 ver.nhb_nr = ver_nhb_nr
                 ver.naam = ver_naam
                 ver.plaats = ver_plaats
+                ver.geen_wedstrijden = ver_geen_wedstrijden
                 regio_obj = vind_regio(ver_regio)
                 if not regio_obj:
                     self._count_errors += 1
