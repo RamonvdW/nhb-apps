@@ -797,4 +797,69 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
         when2 = competitie_week_nr_to_date(2020, 1)
         self.assertNotEqual(when1, when2)
 
+    def test_sortering_week_nummers(self):
+        # log in als RCL
+        self.e2e_login_and_pass_otp(self.account_rcl)
+        self.e2e_wissel_naar_functie(self.functie_rcl)
+
+        url = self.url_planning_regio % self.deelcomp_regio_25.pk
+
+        # maak 4 rondes aan
+        self.assertEqual(DeelcompetitieRonde.objects.count(), 0)
+        resp = self.client.post(url)
+        resp = self.client.post(url)
+        resp = self.client.post(url)
+        resp = self.client.post(url)
+        resp = self.client.post(url)
+        self.assertEqual(resp.status_code, 302)  # 302 = Redirect = success
+        self.assertEqual(DeelcompetitieRonde.objects.count(), 5)
+
+        pks = [obj.pk for obj in DeelcompetitieRonde.objects.all()]
+
+        ronde = DeelcompetitieRonde.objects.get(pk=pks[0])
+        ronde.week_nr = 8
+        ronde.beschrijving = 'Vierde'
+        ronde.save()
+
+        ronde = DeelcompetitieRonde.objects.get(pk=pks[1])
+        ronde.week_nr = 40
+        ronde.beschrijving = 'Eerste'
+        ronde.save()
+
+        ronde = DeelcompetitieRonde.objects.get(pk=pks[2])
+        ronde.week_nr = 50
+        ronde.beschrijving = 'Tweede een'
+        ronde.save()
+
+        # stop er ook meteen eenzelfde weeknummer in
+        ronde = DeelcompetitieRonde.objects.get(pk=pks[4])
+        ronde.week_nr = 50
+        ronde.beschrijving = 'Tweede twee'
+        ronde.save()
+
+        ronde = DeelcompetitieRonde.objects.get(pk=pks[3])
+        ronde.week_nr = 2
+        ronde.beschrijving = 'Derde'
+        ronde.save()
+
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/planning-regio.dtl', 'plein/site_layout.dtl'))
+
+        parts = list()
+        html = str(resp.content)
+        while len(html):
+            pos = html.find('<tr><td>')
+            if pos < 0:
+                html = ''
+            else:
+                html = html[pos+8:]
+                pos = html.find('</td>')
+                part = html[:pos]
+                parts.append(part)
+        # while
+
+        self.assertEqual(parts, ['40', '50', '50', '2', '8'])
+
 # end of file

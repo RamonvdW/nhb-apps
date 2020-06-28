@@ -135,16 +135,27 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
 
 
 def planning_sorteer_weeknummers(rondes):
-    lijst = list()
+    # sorteer op week nummer
+    # en ondersteun dat meerdere rondes hetzelfde nummer hebben
+    nr2rondes = dict()      # [nr] = [ronde, ronde, ..]
+    nrs = list()
     for ronde in rondes:
         nr = ronde.week_nr
         if nr < 26:
             nr += 100
-        tup = (nr, ronde)
-        lijst.append(tup)
+        if nr not in nrs:
+            nrs.append(nr)
+        try:
+            nr2rondes[nr].append(ronde)
+        except KeyError:
+            nr2rondes[nr] = [ronde]
     # for
-    lijst.sort()
-    return [ronde for _, ronde in lijst]
+    nrs.sort()
+    nieuw = list()
+    for nr in nrs:
+        nieuw.extend(nr2rondes[nr])
+    # for
+    return nieuw
 
 
 class RegioPlanningView(UserPassesTestMixin, TemplateView):
