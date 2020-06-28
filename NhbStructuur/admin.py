@@ -16,6 +16,8 @@ class NhbLidAdmin(admin.ModelAdmin):
     # filter mogelijkheid
     list_filter = ('geslacht', 'para_classificatie', 'is_actief_lid')
 
+    list_select_related = True
+
 
 class NhbVerenigingAdmin(admin.ModelAdmin):
     """ Admin configuratie voor NhbVereniging klasse """
@@ -25,10 +27,32 @@ class NhbVerenigingAdmin(admin.ModelAdmin):
     # filter mogelijkheid
     list_filter = ('regio',)
 
+    list_select_related = True
+
+    def __init__(self, model, admin_site):
+        super().__init__(model, admin_site)
+        self._nhbver_regio = None
+
+    def get_object(self, request, object_id, from_field=None):
+        obj = super().get_object(request, object_id, from_field)
+        self._nhbver_regio = obj.regio
+        return obj
+
+    def formfield_for_manytomany(self, db_field, request, **kwargs):
+        if db_field.name == 'clusters':
+            regio_clusters = (NhbCluster
+                              .objects
+                              .select_related('regio')
+                              .filter(regio=self._nhbver_regio)
+                              .order_by('letter'))
+            kwargs['queryset'] = regio_clusters
+        return super().formfield_for_manytomany(db_field, request, **kwargs)
+
 
 class NhbRayonAdmin(admin.ModelAdmin):
     """ Admin configuratie voor NhbRayon klasse """
     ordering = ('rayon_nr',)
+    list_select_related = True
 
     def has_change_permission(self, request, obj=None):
         return False
@@ -43,6 +67,7 @@ class NhbRayonAdmin(admin.ModelAdmin):
 class NhbRegioAdmin(admin.ModelAdmin):
     """ Admin configuratie voor NhbRegio klasse """
     ordering = ('regio_nr',)
+    list_select_related = True
 
     def has_change_permission(self, request, obj=None):
         return False

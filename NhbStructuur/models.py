@@ -107,6 +107,8 @@ class NhbCluster(models.Model):
         # zorg dat elk cluster uniek is
         unique_together = ('regio', 'letter')
 
+    objects = models.Manager()      # for the source code editor only
+
 
 class NhbVereniging(models.Model):
     """ Tabel waarin gegevens van de Verenigingen van de NHB staan """
