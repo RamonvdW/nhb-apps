@@ -45,11 +45,13 @@ class TestLogboek(E2EHelpers, TestCase):
         schrijf_in_logboek(None, 'Records', 'import gelukt')
         schrijf_in_logboek(None, 'Rollen', 'Jantje is de baas')
         schrijf_in_logboek(None, 'NhbStructuur', 'weer een nieuw lid')
+        schrijf_in_logboek(None, 'Uitrol', 'Rollen met die hap')
         schrijf_in_logboek(self.account_normaal, 'OTP controle', 'alweer verkeerd')
         schrijf_in_logboek(self.account_same, 'Testafdeling', 'Afdeling gesloten')
         schrijf_in_logboek(self.account_same, 'Competitie', 'Klassegrenzen vastgesteld')
         schrijf_in_logboek(self.account_same, 'Accommodaties', 'Weer een clubhuis')
         schrijf_in_logboek(self.account_same, 'Clusters', 'Groepeer ze maar')
+        schrijf_in_logboek(None, 'Iets anders', 'Valt onder Rest')
 
         self.logboek_url = '/logboek/'
 
@@ -82,59 +84,80 @@ class TestLogboek(E2EHelpers, TestCase):
         # alles
         resp = self.client.get(self.logboek_url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_template_used(resp, ('logboek/logboek.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
+
+        # rest
+        with self.assertNumQueries(6):
+            resp = self.client.get(self.logboek_url + 'rest/')
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_template_used(resp, ('logboek/rest.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
         self.assertContains(resp, 'test setUp')
         self.assertContains(resp, 'IT beheerder')
 
         # records import
-        resp = self.client.get(self.logboek_url + 'records/')
+        with self.assertNumQueries(4):
+            resp = self.client.get(self.logboek_url + 'records/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_template_used(resp, ('logboek/logboek-records.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('logboek/records.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
         self.assertContains(resp, 'import gelukt')
 
         # accounts
-        resp = self.client.get(self.logboek_url + 'accounts/')
+        with self.assertNumQueries(4):
+            resp = self.client.get(self.logboek_url + 'accounts/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_template_used(resp, ('logboek/logboek-accounts.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('logboek/accounts.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
         self.assertContains(resp, 'alweer verkeerd')
 
         # rollen
-        resp = self.client.get(self.logboek_url + 'rollen/')
+        with self.assertNumQueries(4):
+            resp = self.client.get(self.logboek_url + 'rollen/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_template_used(resp, ('logboek/logboek-rollen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('logboek/rollen.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
         self.assertContains(resp, 'Jantje is de baas')
 
         # nhbstructuur / crm import
-        resp = self.client.get(self.logboek_url + 'crm-import/')
+        with self.assertNumQueries(4):
+            resp = self.client.get(self.logboek_url + 'crm-import/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_template_used(resp, ('logboek/logboek-nhbstructuur.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('logboek/nhbstructuur.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
         self.assertContains(resp, 'weer een nieuw lid')
 
         # competitie
-        resp = self.client.get(self.logboek_url + 'competitie/')
+        with self.assertNumQueries(4):
+            resp = self.client.get(self.logboek_url + 'competitie/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_template_used(resp, ('logboek/logboek-competitie.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('logboek/competitie.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
         self.assertContains(resp, 'Klassegrenzen vastgesteld')
 
         # accommodaties
-        resp = self.client.get(self.logboek_url + 'accommodaties/')
+        with self.assertNumQueries(4):
+            resp = self.client.get(self.logboek_url + 'accommodaties/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_template_used(resp, ('logboek/logboek-accommodaties.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('logboek/accommodaties.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
         self.assertContains(resp, 'Weer een clubhuis')
 
         # clusters
-        resp = self.client.get(self.logboek_url + 'clusters/')
+        with self.assertNumQueries(4):
+            resp = self.client.get(self.logboek_url + 'clusters/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_template_used(resp, ('logboek/logboek-clusters.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('logboek/clusters.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
         self.assertContains(resp, 'Groepeer ze maar')
+
+        # uitrol
+        with self.assertNumQueries(4):
+            resp = self.client.get(self.logboek_url + 'uitrol/')
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_template_used(resp, ('logboek/uitrol.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
+        self.assertContains(resp, 'Rollen met die hap')
 
     def test_pagination(self):
         self.e2e_login_and_pass_otp(self.account_admin)
@@ -146,7 +169,7 @@ class TestLogboek(E2EHelpers, TestCase):
         # check that pagination niet aan staat (niet nodig, te weinig regels)
         resp = self.client.get(self.logboek_url + 'crm-import/?page=1')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_template_used(resp, ('logboek/logboek-nhbstructuur.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('logboek/nhbstructuur.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
         self.assertContains(resp, 'weer een nieuw lid')
         self.assertNotContains(resp, 'chevron_')      # icoon van pagination pijltje
@@ -166,7 +189,7 @@ class TestLogboek(E2EHelpers, TestCase):
         # haal pagina 1 op en check dat de pagination nu getoond wordt
         resp = self.client.get(self.logboek_url + 'crm-import/?page=1')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_template_used(resp, ('logboek/logboek-nhbstructuur.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('logboek/nhbstructuur.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
         self.assertContains(resp, 'chevron_')      # icoon van pagination pijltje
 

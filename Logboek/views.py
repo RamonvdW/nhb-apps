@@ -14,14 +14,15 @@ from Plein.menu import menu_dynamics
 from .models import LogboekRegel
 
 
-TEMPLATE_LOGBOEK_ALLES = 'logboek/logboek.dtl'
-TEMPLATE_LOGBOEK_ACCOUNTS = 'logboek/logboek-accounts.dtl'
-TEMPLATE_LOGBOEK_NHBSTRUCTUUR = 'logboek/logboek-nhbstructuur.dtl'
-TEMPLATE_LOGBOEK_RECORDS = 'logboek/logboek-records.dtl'
-TEMPLATE_LOGBOEK_ROLLEN = 'logboek/logboek-rollen.dtl'
-TEMPLATE_LOGBOEK_ACCOMMODATIES = 'logboek/logboek-accommodaties.dtl'
-TEMPLATE_LOGBOEK_COMPETITIE = 'logboek/logboek-competitie.dtl'
-TEMPLATE_LOGBOEK_CLUSTERS = 'logboek/logboek-clusters.dtl'
+TEMPLATE_LOGBOEK_REST = 'logboek/rest.dtl'
+TEMPLATE_LOGBOEK_ROLLEN = 'logboek/rollen.dtl'
+TEMPLATE_LOGBOEK_UITROL = 'logboek/uitrol.dtl'
+TEMPLATE_LOGBOEK_RECORDS = 'logboek/records.dtl'
+TEMPLATE_LOGBOEK_ACCOUNTS = 'logboek/accounts.dtl'
+TEMPLATE_LOGBOEK_CLUSTERS = 'logboek/clusters.dtl'
+TEMPLATE_LOGBOEK_COMPETITIE = 'logboek/competitie.dtl'
+TEMPLATE_LOGBOEK_NHBSTRUCTUUR = 'logboek/nhbstructuur.dtl'
+TEMPLATE_LOGBOEK_ACCOMMODATIES = 'logboek/accommodaties.dtl'
 
 RESULTS_PER_PAGE = 50
 
@@ -91,6 +92,8 @@ class LogboekBasisView(UserPassesTestMixin, ListView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
+        context['filter'] = self.filter
+
         if context['is_paginated']:
             context['page_links'] = self._make_link_urls(context)
             context['active'] = str(context['page_obj'].number)
@@ -104,9 +107,11 @@ class LogboekBasisView(UserPassesTestMixin, ListView):
         return context
 
 
-class LogboekAllesView(LogboekBasisView):
+class LogboekRestView(LogboekBasisView):
     """ Deze view toont de het hele logboek """
-    template_name = TEMPLATE_LOGBOEK_ALLES
+
+    template_name = TEMPLATE_LOGBOEK_REST
+    filter = 'rest'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -114,12 +119,28 @@ class LogboekAllesView(LogboekBasisView):
 
     def get_queryset(self):
         """ retourneer de data voor de template view """
-        return LogboekRegel.objects.all().order_by('-toegevoegd_op')
+        return (LogboekRegel
+                .objects
+                .exclude(Q(gebruikte_functie='Records') |           # Records
+                         Q(gebruikte_functie='maak_beheerder') |    # Accounts
+                         Q(gebruikte_functie='Inloggen') |
+                         Q(gebruikte_functie='OTP controle') |
+                         Q(gebruikte_functie='Bevestig e-mail') |
+                         Q(gebruikte_functie='Registreer met NHB nummer') |
+                         Q(gebruikte_functie='Rollen') |            # Rollen
+                         Q(gebruikte_functie='NhbStructuur') |      # NhbStructuur
+                         Q(gebruikte_functie='Competitie') |        # Competitie
+                         Q(gebruikte_functie='Accommodaties') |     # Accommodatie
+                         Q(gebruikte_functie='Clusters') |          # Clusters
+                         Q(gebruikte_functie='Uitrol'))             # Uitrol
+                .order_by('-toegevoegd_op'))
 
 
 class LogboekRecordsView(LogboekBasisView):
     """ Deze view toont de regels uit het logboek die met het importeren van de records te maken hebben """
+
     template_name = TEMPLATE_LOGBOEK_RECORDS
+    filter = 'records'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -127,12 +148,17 @@ class LogboekRecordsView(LogboekBasisView):
 
     def get_queryset(self):
         """ retourneer de data voor de template view """
-        return LogboekRegel.objects.all().filter(gebruikte_functie='Records').order_by('-toegevoegd_op')
+        return (LogboekRegel
+                .objects
+                .filter(gebruikte_functie='Records')
+                .order_by('-toegevoegd_op'))
 
 
 class LogboekAccountsView(LogboekBasisView):
     """ Deze view toont de logboek regels die met Accounts te maken hebben: aanmaken, inloggen, OTP, etc. """
+
     template_name = TEMPLATE_LOGBOEK_ACCOUNTS
+    filter = 'accounts'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -140,16 +166,22 @@ class LogboekAccountsView(LogboekBasisView):
 
     def get_queryset(self):
         """ retourneer de data voor de template view """
-        return LogboekRegel.objects.all().filter(Q(gebruikte_functie='maak_beheerder') |
-                                                 Q(gebruikte_functie='Inloggen') |
-                                                 Q(gebruikte_functie='OTP controle') |
-                                                 Q(gebruikte_functie='Bevestig e-mail') |
-                                                 Q(gebruikte_functie='Registreer met NHB nummer')).order_by('-toegevoegd_op')
+        return (LogboekRegel
+                .objects
+                .filter(Q(gebruikte_functie='maak_beheerder') |
+                        Q(gebruikte_functie='Inloggen') |
+                        Q(gebruikte_functie='OTP controle') |
+                        Q(gebruikte_functie='Bevestig e-mail') |
+                        Q(gebruikte_functie='Registreer met NHB nummer'))
+                .select_related('actie_door_account')
+                .order_by('-toegevoegd_op'))
 
 
 class LogboekRollenView(LogboekBasisView):
     """ Deze view toont de logboek regels die met het koppelen van rollen te maken hebben """
+
     template_name = TEMPLATE_LOGBOEK_ROLLEN
+    filter = 'rollen'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -157,12 +189,18 @@ class LogboekRollenView(LogboekBasisView):
 
     def get_queryset(self):
         """ retourneer de data voor de template view """
-        return LogboekRegel.objects.all().filter(gebruikte_functie='Rollen').order_by('-toegevoegd_op')
+        return (LogboekRegel
+                .objects
+                .filter(gebruikte_functie='Rollen')
+                .select_related('actie_door_account')
+                .order_by('-toegevoegd_op'))
 
 
 class LogboekNhbStructuurView(LogboekBasisView):
     """ Deze view toont de logboek regels die met het importeren van de CRM data te maken hebben """
+
     template_name = TEMPLATE_LOGBOEK_NHBSTRUCTUUR
+    filter = 'nhbstructuur'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -170,12 +208,18 @@ class LogboekNhbStructuurView(LogboekBasisView):
 
     def get_queryset(self):
         """ retourneer de data voor de template view """
-        return LogboekRegel.objects.all().filter(gebruikte_functie='NhbStructuur').order_by('-toegevoegd_op')
+        return (LogboekRegel
+                .objects
+                .filter(gebruikte_functie='NhbStructuur')
+                .select_related('actie_door_account')
+                .order_by('-toegevoegd_op'))
 
 
 class LogboekCompetitieView(LogboekBasisView):
     """ Deze view toont de logboek regels die met het beheer van de competitie te maken hebben """
+
     template_name = TEMPLATE_LOGBOEK_COMPETITIE
+    filter = 'competitie'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -183,12 +227,18 @@ class LogboekCompetitieView(LogboekBasisView):
 
     def get_queryset(self):
         """ retourneer de data voor de template view """
-        return LogboekRegel.objects.all().filter(gebruikte_functie='Competitie').order_by('-toegevoegd_op')
+        return (LogboekRegel
+                .objects
+                .filter(gebruikte_functie='Competitie')
+                .select_related('actie_door_account')
+                .order_by('-toegevoegd_op'))
 
 
 class LogboekAccommodatiesView(LogboekBasisView):
     """ Deze view toont de logboek regels die met het beheer van de accommodaties te maken hebben """
+
     template_name = TEMPLATE_LOGBOEK_ACCOMMODATIES
+    filter = 'accommodaties'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -196,12 +246,18 @@ class LogboekAccommodatiesView(LogboekBasisView):
 
     def get_queryset(self):
         """ retourneer de data voor de template view """
-        return LogboekRegel.objects.all().filter(gebruikte_functie='Accommodaties').order_by('-toegevoegd_op')
+        return (LogboekRegel
+                .objects
+                .filter(gebruikte_functie='Accommodaties')
+                .select_related('actie_door_account')
+                .order_by('-toegevoegd_op'))
 
 
 class LogboekClustersView(LogboekBasisView):
     """ Deze view toont de logboek regels die met het beheer van de clusters te maken hebben """
+
     template_name = TEMPLATE_LOGBOEK_CLUSTERS
+    filter = 'clusters'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -209,7 +265,29 @@ class LogboekClustersView(LogboekBasisView):
 
     def get_queryset(self):
         """ retourneer de data voor de template view """
-        return LogboekRegel.objects.all().filter(gebruikte_functie='Clusters').order_by('-toegevoegd_op')
+        return (LogboekRegel
+                .objects
+                .filter(gebruikte_functie='Clusters')
+                .select_related('actie_door_account')
+                .order_by('-toegevoegd_op'))
+
+
+class LogboekUitrolView(LogboekBasisView):
+    """ Deze view toont de logboek regels die met de uitrol van software te maken hebben """
+
+    template_name = TEMPLATE_LOGBOEK_UITROL
+    filter = 'uitrol'
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.base_url = reverse('Logboek:clusters')
+
+    def get_queryset(self):
+        """ retourneer de data voor de template view """
+        return (LogboekRegel
+                .objects
+                .filter(gebruikte_functie='Uitrol')
+                .order_by('-toegevoegd_op'))
 
 
 # end of file

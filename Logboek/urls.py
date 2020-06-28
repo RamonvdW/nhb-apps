@@ -11,8 +11,12 @@ app_name = 'Logboek'
 
 urlpatterns = [
     path('',
-         views.LogboekAllesView.as_view(),
+         views.LogboekRestView.as_view(),
          name='alles'),
+
+    path('rest/',
+         views.LogboekRestView.as_view(),
+         name='rest'),
 
     path('records/',
          views.LogboekRecordsView.as_view(),
@@ -41,6 +45,10 @@ urlpatterns = [
     path('clusters/',
          views.LogboekClustersView.as_view(),
          name='clusters'),
+
+    path('uitrol/',
+         views.LogboekUitrolView.as_view(),
+         name='uitrol'),
 ]
 
 # end of file
