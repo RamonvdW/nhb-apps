@@ -25,6 +25,9 @@ echo
 echo "****************************** START OF TEST RUN ******************************"
 echo
 
+echo "[INFO] Checking application is free of fatal errors"
+python3.6 ./manage.py check || exit $?
+
 FOCUS=""
 if [ ! -z "$ARGS" ]
 then
