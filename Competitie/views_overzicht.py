@@ -40,18 +40,36 @@ class CompetitieOverzichtView(View):
     # class variables shared by all instances
     # (none)
 
-    def _get_competities(self, context, rol_nu, functie_nu):
-        comps = Competitie.objects.filter(is_afgesloten=False).order_by('begin_jaar', 'afstand')
+    @staticmethod
+    def _get_competities(context, rol_nu, functie_nu):
+        if functie_nu and functie_nu.comp_type != '':
+            # haal alleen specifieke competities op (18m of 25m)
+            # afhankelijk van de huidige functie
+            comps = (Competitie
+                     .objects
+                     .filter(is_afgesloten=False,
+                             afstand=functie_nu.comp_type)
+                     .order_by('begin_jaar', 'afstand'))
+        else:
+            # haal alle competities op (18m en 25m)
+            comps = (Competitie
+                     .objects
+                     .filter(is_afgesloten=False)
+                     .order_by('begin_jaar', 'afstand'))
+
         for comp in comps:
             if rol_nu == Rollen.ROL_HWL:
                 comp.url_inschrijvingen = reverse('Competitie:lijst-regiocomp-regio',
-                                                  kwargs={'comp_pk': comp.pk, 'regio_pk': functie_nu.nhb_ver.regio.pk})
+                                                  kwargs={'comp_pk': comp.pk,
+                                                          'regio_pk': functie_nu.nhb_ver.regio.pk})
             elif rol_nu == Rollen.ROL_RCL:
                 comp.url_inschrijvingen = reverse('Competitie:lijst-regiocomp-regio',
-                                                  kwargs={'comp_pk': comp.pk, 'regio_pk': functie_nu.nhb_regio.pk})
+                                                  kwargs={'comp_pk': comp.pk,
+                                                          'regio_pk': functie_nu.nhb_regio.pk})
             elif rol_nu == Rollen.ROL_RKO:
                 comp.url_inschrijvingen = reverse('Competitie:lijst-regiocomp-rayon',
-                                                  kwargs={'comp_pk': comp.pk, 'rayon_pk': functie_nu.nhb_rayon.pk})
+                                                  kwargs={'comp_pk': comp.pk,
+                                                          'rayon_pk': functie_nu.nhb_rayon.pk})
             else:
                 comp.url_inschrijvingen = reverse('Competitie:lijst-regiocomp-alles',
                                                   kwargs={'comp_pk': comp.pk})
@@ -76,20 +94,20 @@ class CompetitieOverzichtView(View):
 
         # kies de competities om het tijdschema van de tonen
         objs = list()
-        if rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB):
-            # toon alle competities
-            objs = (Competitie
-                    .objects
-                    .filter(is_afgesloten=False)
-                    .order_by('begin_jaar', 'afstand'))
-        elif functie_nu:
-            # toon de competitie waar de functie een rol in heeft
+        if functie_nu:
+            # toon de competitie waar de functie een rol in heeft (BKO/RKO/RCL)
             for deelcomp in (DeelCompetitie
                              .objects
                              .filter(is_afgesloten=False,
                                      functie=functie_nu)):
                 objs.append(deelcomp.competitie)
             # for
+        else:
+            # toon alle competities (IT/BB)
+            objs = (Competitie
+                    .objects
+                    .filter(is_afgesloten=False)
+                    .order_by('begin_jaar', 'afstand'))
 
         context['object_list'] = objs
         context['have_active_comps'] = len(objs) > 0
