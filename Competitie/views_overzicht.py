@@ -96,6 +96,9 @@ class CompetitieOverzichtView(View):
             zet_fase(comp)
             if comp.fase == 'A1' and rol_nu == Rollen.ROL_BB:
                 context['bb_kan_ag_vaststellen'] = True
+
+            if comp.fase >= 'A2':
+                context['toon_klassegrenzen'] = True
         # for
         context['competities'] = comps
 

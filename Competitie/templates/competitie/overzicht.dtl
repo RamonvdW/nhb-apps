@@ -33,18 +33,20 @@
         </div>
 
         <!-- toon klassegrenzen regiocompetitie -->
-        <div class="card">
-            <div class="card-content">
-                <div class="card-title center-align">Klassegrenzen</div>
-                <div class="center-align"><i class="material-icons-round medium">equalizer</i></div>
-                <p>Toon de klassegrenzen voor de competities.</p>
-            </div>
-            <a href="{% url 'Competitie:klassegrenzen-tonen' %}" class="nhb-klikbare-balk">
-                <div class="card-action center-align">
-                    <span class="nhb-klikbare-link">Tonen</span>
+        {% if toon_klassegrenzen %}
+            <div class="card">
+                <div class="card-content">
+                    <div class="card-title center-align">Klassegrenzen</div>
+                    <div class="center-align"><i class="material-icons-round medium">equalizer</i></div>
+                    <p>Toon de klassegrenzen voor de competities.</p>
                 </div>
-            </a>
-        </div>
+                <a href="{% url 'Competitie:klassegrenzen-tonen' %}" class="nhb-klikbare-balk">
+                    <div class="card-action center-align">
+                        <span class="nhb-klikbare-link">Tonen</span>
+                    </div>
+                </a>
+            </div>
+        {% endif %}
 
     </div>
 </div>
