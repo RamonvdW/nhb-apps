@@ -40,14 +40,17 @@
 </div>
 
 
-<span>&nbsp;</span>
-<h5>Voorkeuren</h5>
+{% if show_voorkeuren %}
+    <span>&nbsp;</span>
+    <h5>Voorkeuren</h5>
 
-<p>Je persoonlijke voorkeuren instellen, zoals welke boog je hebt.</p>
+    <p>Je persoonlijke voorkeuren instellen, zoals welke boog je hebt.</p>
 
-<p><a class="btn-nhb-blauw" href="{% url 'Schutter:voorkeuren' %}"><i class="material-icons-round left">tune</i>Mijn voorkeuren</a></p>
+    <p><a class="btn-nhb-blauw" href="{% url 'Schutter:voorkeuren' %}"><i class="material-icons-round left">tune</i>Mijn voorkeuren</a></p>
 
-<p>Gebruik de knop om naar de voorkeuren pagina te gaan.</p>
+    <p>Gebruik de knop om naar de voorkeuren pagina te gaan.</p>
+{% endif %}
+
 
 {% if toon_leeftijdsklassen %}
 

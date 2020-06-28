@@ -201,7 +201,8 @@ class ProfielView(UserPassesTestMixin, TemplateView):
             objs.extend(objs_info)
         return objs
 
-    def _find_gemiddelden(self, nhblid):
+    @staticmethod
+    def _find_gemiddelden(nhblid):
         # haal de SchutterBoog records op van deze gebruiker
         objs = (SchutterBoog
                 .objects
@@ -265,14 +266,17 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                   .all())[0]
         voorkeuren, _ = SchutterVoorkeuren.objects.get_or_create(nhblid=nhblid)
 
-        _, _, is_jong, _, _ = get_sessionvars_leeftijdsklassen(self.request)
-        context['toon_leeftijdsklassen'] = is_jong
-
         context['nhblid'] = nhblid
         context['records'] = self._find_records(nhblid)
         context['histcomp'] = self._find_histcomp_scores(nhblid)
-        context['regiocompetities'] = self._find_regiocompetities(nhblid, voorkeuren)
-        context['gemiddelden'] = self._find_gemiddelden(nhblid)
+
+        if not nhblid.bij_vereniging.geen_wedstrijden:
+            _, _, is_jong, _, _ = get_sessionvars_leeftijdsklassen(self.request)
+            context['toon_leeftijdsklassen'] = is_jong
+
+            context['show_voorkeuren'] = True
+            context['regiocompetities'] = self._find_regiocompetities(nhblid, voorkeuren)
+            context['gemiddelden'] = self._find_gemiddelden(nhblid)
 
         menu_dynamics(self.request, context, actief='schutter')
         return context

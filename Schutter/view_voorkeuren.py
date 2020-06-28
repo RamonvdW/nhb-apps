@@ -63,7 +63,13 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
             return nhblid
 
         account = request.user
-        return account.nhblid_set.all()[0]      # ROL_SCHUTTER geeft bescherming tegen geen nhblid
+        nhblid = account.nhblid_set.all()[0]  # ROL_SCHUTTER geeft bescherming tegen geen nhblid
+
+        # stuur persoonlijke leden weg van de instellingen
+        if nhblid.bij_vereniging.geen_wedstrijden:
+            raise Resolver404()
+
+        return nhblid
 
     def post(self, request, *args, **kwargs):
         """ Deze functie wordt aangeroepen als een POST request ontvangen is."""
