@@ -921,7 +921,7 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
                 context['show_otp_koppelen'] = True
                 context['show_otp_controle'] = False
 
-        if settings.ENABLE_WIKI:
+        if settings.ENABLE_WIKI:        # pragma: no cover
             context['wiki_2fa_url'] = settings.WIKI_URL + '/' + settings.HANDLEIDING_2FA
             context['wiki_rollen'] = settings.WIKI_URL + '/' + settings.HANDLEIDING_ROLLEN
         else:
