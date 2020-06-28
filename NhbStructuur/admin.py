@@ -33,12 +33,12 @@ class NhbVerenigingAdmin(admin.ModelAdmin):
         super().__init__(model, admin_site)
         self._nhbver_regio = None
 
-    def get_object(self, request, object_id, from_field=None):
+    def get_object(self, request, object_id, from_field=None):          # pragma: no cover
         obj = super().get_object(request, object_id, from_field)
         self._nhbver_regio = obj.regio
         return obj
 
-    def formfield_for_manytomany(self, db_field, request, **kwargs):
+    def formfield_for_manytomany(self, db_field, request, **kwargs):    # pragma: no cover
         if db_field.name == 'clusters':
             regio_clusters = (NhbCluster
                               .objects

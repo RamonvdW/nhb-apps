@@ -69,11 +69,13 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.functie_wl.nhb_ver = ver
         self.functie_wl.save()
 
+        self.regio_112 = NhbRegio.objects.get(regio_nr=112)
+
         # maak nog een test vereniging
         ver2 = NhbVereniging()
         ver2.naam = "Extra Club"
         ver2.nhb_nr = "1900"
-        ver2.regio = NhbRegio.objects.get(regio_nr=112)
+        ver2.regio = self.regio_112
         # secretaris kan nog niet ingevuld worden
         ver2.save()
 
@@ -395,5 +397,30 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
 
+    def test_administratieve_regio(self):
+        # neem de BB rol aan
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_wisselnaarrol_bb()
+        self.e2e_check_rol('BB')
+
+        # maak regio 112 administratief
+        self.regio_112.is_administratief = True
+        self.regio_112.save()
+
+        url = '/functie/wijzig/%s/' % self.functie_bko.pk
+
+        # haal de pagina op - het gevonden lid heeft geen regio vermelding
+        resp = self.client.get(url + '?zoekterm=100')       # matcht alle nhb nummers
+        self.assertEqual(resp.status_code, 200)
+        self.assertNotContains(resp, 'regio 112')
+
+        # voeg het lid van de vereniging in regio 112 toe als beheerder
+        self.functie_bko.accounts.add(self.account_ander)
+
+        # haal de pagina opnieuw op - de gekoppelde beheerder heeft geen regio
+        url = '/functie/wijzig/%s/' % self.functie_bko.pk
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assertNotContains(resp, 'regio 112')
 
 # end of file
