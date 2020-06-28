@@ -302,5 +302,22 @@ class TestSchutterProfiel(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('schutter/profiel.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'Regiocompetities')
 
+    def test_geen_wedstrijden(self):
+        # doe een test met een persoonlijk lid - mag geen wedstrijden doen
+
+        self.nhbver.geen_wedstrijden = True
+        self.nhbver.save()
+
+        # log in as schutter
+        # account_normaal is lid bij nhbver
+        self.e2e_login(self.account_normaal)
+
+        resp = self.client.get(self.url_profiel)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('schutter/profiel.dtl', 'plein/site_layout.dtl'))
+        self.assertNotContains(resp, 'Regiocompetities')
+        urls = self.extract_all_urls(resp)
+        self.assertFalse(self.url_voorkeuren in urls)
 
 # end of file
