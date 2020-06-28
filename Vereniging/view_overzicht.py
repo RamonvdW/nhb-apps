@@ -56,16 +56,21 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                                 .filter(laag=LAAG_REGIO,
                                         competitie__is_afgesloten=False,
                                         nhb_regio=functie_nu.nhb_ver.regio)
+                                .select_related('competitie')
                                 .order_by('competitie__afstand'))
 
+        # comp is nodig voor inschrijven
         for comp in context['competities']:
+            comp.zet_fase()
             if comp.afstand == '18':
                 comp.icon = static('plein/badge_nhb_indoor.png')
             else:
                 comp.icon = static('plein/badge_nhb_25m1p.png')
         # for
 
+        # deelcomp is nodig voor uitschrijven
         for deelcomp in context['deelcomps']:
+            deelcomp.competitie.zet_fase()
             if deelcomp.competitie.afstand == '18':
                 deelcomp.icon = static('plein/badge_nhb_indoor.png')
             else:

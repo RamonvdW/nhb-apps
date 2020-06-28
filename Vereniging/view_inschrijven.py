@@ -53,13 +53,14 @@ class LedenInschrijvenView(UserPassesTestMixin, ListView):
             raise Resolver404()
 
         self.comp = comp
-        jeugdgrens = comp.begin_jaar - MAXIMALE_LEEFTIJD_JEUGD
+        comp.zet_fase()
 
         _, functie_nu = rol_get_huidige_functie(self.request)
         objs = list()
 
         prev_lkl = None
         prev_wedstrijdleeftijd = 0
+        jeugdgrens = comp.begin_jaar - MAXIMALE_LEEFTIJD_JEUGD
 
         # sorteer jeugd op geboorte jaar en daarna naam
         for obj in (NhbLid
