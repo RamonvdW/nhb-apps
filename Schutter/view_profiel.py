@@ -15,7 +15,9 @@ from BasisTypen.models import BoogType
 from Competitie.models import (CompetitieKlasse, DeelCompetitie, RegioCompetitieSchutterBoog,
                                LAAG_REGIO)
 from Records.models import IndivRecord
+from Score.models import Score, ScoreHist
 from .leeftijdsklassen import get_sessionvars_leeftijdsklassen
+from .models import SchutterVoorkeuren, SchutterBoog
 import logging
 import copy
 
@@ -83,7 +85,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         return objs
 
     @staticmethod
-    def _find_regiocompetities(nhblid):
+    def _find_regiocompetities(nhblid, voorkeuren):
         """ Zoek regiocompetities waar de schutter zich op aan kan melden """
 
         # toon alle deelcompetities waarop ingeschreven kan worden met de bogen van de schutter
@@ -116,16 +118,16 @@ class ProfielView(UserPassesTestMixin, TemplateView):
 
         boog_afkorting_all = set(boog_afkorting_info + boog_afkorting_wedstrijd)
 
-        # print("wedstrijdbogen: %s" % repr(boog_afkorting_wedstrijd))
-        # print("info: %s" % repr(boog_afkorting_info))
-        # print("all: %s" % repr(boog_afkorting_all))
-
-        # zoek alle inschrijvingen erbij
+        # zoek alle inschrijvingen van deze schutter erbij
         inschrijvingen = list()
         schutterbogen = [schutterboog for _, schutterboog in schutterboog_dict.items()]
         for obj in RegioCompetitieSchutterBoog.objects.filter(schutterboog__in=schutterbogen):
             inschrijvingen.append(obj)
         # for
+
+        if not voorkeuren.voorkeur_meedoen_competitie:
+            if len(inschrijvingen) == 0:
+                return None
 
         objs_info = list()
         objs_wedstrijd = list()
@@ -135,7 +137,11 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         for deelcompetitie in (DeelCompetitie
                                .objects
                                .select_related('competitie')
-                               .filter(laag=LAAG_REGIO, nhb_regio=regio, is_afgesloten=False)):
+                               .filter(laag=LAAG_REGIO,
+                                       nhb_regio=regio,
+                                       is_afgesloten=False)):
+            deelcompetitie.competitie.zet_fase()
+
             # zoek de klassen erbij die de schutter interessant vindt
             afkortingen = list(boog_afkorting_all)
             for klasse in (CompetitieKlasse
@@ -164,7 +170,9 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         for obj in objs_wedstrijd:
             schutterboog = schutterboog_dict[obj.boog_afkorting]
             try:
-                inschrijving = RegioCompetitieSchutterBoog.objects.get(deelcompetitie=obj, schutterboog=schutterboog)
+                # beetje onnodig om opnieuw te zoeken: 'inschrijvingen' bevat alles
+                inschrijving = RegioCompetitieSchutterBoog.objects.get(deelcompetitie=obj,
+                                                                       schutterboog=schutterboog)
             except RegioCompetitieSchutterBoog.DoesNotExist:
                 # niet ingeschreven
                 obj.url_inschrijven = reverse('Schutter:bevestig-inschrijven', kwargs={'schutterboog_pk': schutterboog.pk, 'deelcomp_pk': obj.pk})
@@ -193,20 +201,78 @@ class ProfielView(UserPassesTestMixin, TemplateView):
             objs.extend(objs_info)
         return objs
 
+    def _find_gemiddelden(self, nhblid):
+        # haal de SchutterBoog records op van deze gebruiker
+        objs = (SchutterBoog
+                .objects
+                .filter(nhblid=nhblid)
+                .select_related('boogtype')
+                .order_by('boogtype__volgorde'))
+
+        # maak ontbrekende SchutterBoog records aan, indien nodig
+        boogtypen = BoogType.objects.all()
+        aantal_boogtypen = boogtypen.count()
+        if len(objs) < aantal_boogtypen:
+            aanwezig = objs.values_list('boogtype__pk', flat=True)
+            for boogtype in boogtypen.exclude(pk__in=aanwezig):
+                schutterboog = SchutterBoog()
+                schutterboog.nhblid = nhblid
+                schutterboog.boogtype = boogtype
+                schutterboog.save()
+            # for
+            objs = (SchutterBoog
+                    .objects
+                    .filter(nhblid=nhblid)
+                    .select_related('boogtype')
+                    .order_by('boogtype__volgorde'))
+
+        # zoek de AG informatie erbij
+        pks = [obj.pk for obj in objs]
+        # haal AG's voor dit boogtype op, van 18m en 25m op, indien aanwezig
+        scores = (Score
+                  .objects
+                  .filter(schutterboog__in=pks,
+                          is_ag=True)
+                  .select_related('schutterboog')
+                  .order_by('afstand_meter'))
+
+        # TODO: alle ScoreHist met 1 query ophalen (score__in=alle Score pk's)
+        for score in scores:
+            score.ag = score.waarde / 1000
+            hist = ScoreHist.objects.filter(score=score).order_by('-datum')
+            if len(hist):
+                score.scorehist = hist[0]       # nieuwste
+        # for
+
+        # koppel de boog typen aan de schutterboog
+        for obj in objs:
+            obj.ags = list()
+            for score in scores:
+                if score.schutterboog == obj:
+                    obj.ags.append(score)
+            # for
+        # for
+        return objs
+
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
         account = self.request.user
+        nhblid = (account
+                  .nhblid_set
+                  .select_related('bij_vereniging')
+                  .all())[0]
+        voorkeuren, _ = SchutterVoorkeuren.objects.get_or_create(nhblid=nhblid)
 
         _, _, is_jong, _, _ = get_sessionvars_leeftijdsklassen(self.request)
         context['toon_leeftijdsklassen'] = is_jong
 
-        nhblid = account.nhblid_set.all()[0]
         context['nhblid'] = nhblid
         context['records'] = self._find_records(nhblid)
         context['histcomp'] = self._find_histcomp_scores(nhblid)
-        context['regiocompetities'] = self._find_regiocompetities(nhblid)
+        context['regiocompetities'] = self._find_regiocompetities(nhblid, voorkeuren)
+        context['gemiddelden'] = self._find_gemiddelden(nhblid)
 
         menu_dynamics(self.request, context, actief='schutter')
         return context

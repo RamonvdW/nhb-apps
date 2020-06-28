@@ -66,7 +66,10 @@
     <span>&nbsp;</span>
     <h5>Regiocompetities</h5>
 
-    <p>Meer informatie over de competitie:&nbsp;<a class="btn-small btn-nhb-blauw" href="{% url 'Competitie:info-competitie' %}"><i class="material-icons-round white-text">help_outline</i></a></p>
+    <p><span>Meer informatie over de competitie:&nbsp;</span>
+        <a class="btn-small btn-nhb-blauw" href="{% url 'Competitie:info-competitie' %}">
+            <i class="material-icons-round white-text">help_outline</i></a>
+    </p>
 
     <p>De volgende regiocompetities zijn mogelijk van interesse:</p>
 
@@ -95,25 +98,31 @@
                 <td>{{ deelcomp.competitie.beschrijving }}</td>
                 <td {% if deelcomp.boog_niet_meer %}class="red-text"{% endif %}>{{ deelcomp.boog_beschrijving }}</td>
                 {% if deelcomp.is_voor_wedstrijd %}
-                    {% if deelcomp.is_ingeschreven %}
-                        <td {% if deelcomp.boog_niet_meer %}class="red-text"{% else %}class="green-text"{% endif %}>Je bent ingeschreven</td>
-                        <td>
-                            <form method="post" action="{{ deelcomp.url_uitschrijven }}">
-                                {% csrf_token %}
-                                <input class="btn-nhb-blauw" type="submit" value="Uitschrijven">
-                            </form>
-                        </td>
+                    {% if deelcomp.competitie.fase < 'B' %}
+                        <td>De inschrijving opent op {{ deelcomp.competitie.begin_aanmeldingen }}</td>
+                        <td><!-- ruimte voor de knop/status --></td>
+                    {% elif deelcomp.competitie.fase > 'B' %}
+                        <td>De inschrijving is gesloten</td>
+                        {% if deelcomp.is_ingeschreven %}
+                            <td class="green-text">Je bent ingeschreven</td>
+                        {% else %}
+                            <td>Je bent niet ingeschreven</td>
+                        {% endif %}
                     {% else %}
-                        <td>Inschrijven kan tot {{ deelcomp.competitie.einde_aanmeldingen }}</td>
-                        <td>
-                            <!--
-                            <form method="post" action="{{ deelcomp.url_inschrijven }}">
-                                {% csrf_token %}
-                                <input class="btn-nhb-blauw" type="submit" value="Inschrijven">
-                            </form>
-                            -->
-                            <a class="btn-nhb-blauw" href="{{ deelcomp.url_inschrijven }}">Inschrijven</a>
-                        </td>
+                        {% if deelcomp.is_ingeschreven %}
+                            <td {% if deelcomp.boog_niet_meer %}class="red-text"{% else %}class="green-text"{% endif %}>Je bent ingeschreven</td>
+                            <td>
+                                <form method="post" action="{{ deelcomp.url_uitschrijven }}">
+                                    {% csrf_token %}
+                                    <input class="btn-nhb-blauw" type="submit" value="Uitschrijven">
+                                </form>
+                            </td>
+                        {% else %}
+                            <td>Inschrijven kan tot {{ deelcomp.competitie.einde_aanmeldingen }}</td>
+                            <td>
+                                <a class="btn-nhb-blauw" href="{{ deelcomp.url_inschrijven }}">Inschrijven</a>
+                            </td>
+                        {% endif %}
                     {% endif %}
                 {% else %}
                     <td>Inschrijven tot {{ deelcomp.competitie.einde_aanmeldingen }}</td>
@@ -177,6 +186,35 @@
                 <td>{{ obj.scores_str }}</td>
                 <td>{{ obj.gemiddelde }}</td>
             </tr>
+        {% endfor %}
+    </table>
+{% endif %}
+
+
+{% if gemiddelden %}
+
+    <p>&nbsp;</p>
+    <h5>Jouw gemiddelden</h5>
+
+    <table class="white">
+        <thead>
+            <th>Boog</th>
+            <th>Afstand</th>
+            <th>Gemiddelde</th>
+            <th>Vastgesteld op</th>
+            <th>Bron</th>
+        </thead>
+
+        {% for schutterboog in gemiddelden %}
+            {% for ag in schutterboog.ags %}
+                <tr>
+                    <td>{{ schutterboog.boogtype.beschrijving }}</td>
+                    <td>{{ ag.afstand_meter }} meter</td>
+                    <td>{{ ag.ag|floatformat:3 }}</td>
+                    <td>{{ ag.scorehist.datum }}</td>
+                    <td>{{ ag.scorehist.notitie }}</td>
+                </tr>
+            {% endfor %}
         {% endfor %}
     </table>
 {% endif %}

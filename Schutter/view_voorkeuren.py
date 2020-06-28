@@ -6,13 +6,11 @@
 
 from django.http import HttpResponseRedirect
 from django.urls import reverse, Resolver404
-from django.shortcuts import render
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Plein.menu import menu_dynamics
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
 from BasisTypen.models import BoogType
-from Score.models import Score, ScoreHist
 from NhbStructuur.models import NhbLid
 from .models import SchutterVoorkeuren, SchutterBoog
 import logging
@@ -106,7 +104,13 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
         if request.POST.get('voorkeur_dt', None):
             voorkeuren.voorkeur_dutchtarget_18m = True
 
-        if old_dutchtarget_18m != voorkeuren.voorkeur_dutchtarget_18m:
+        old_voorkeur_meedoen_competitie = voorkeuren.voorkeur_meedoen_competitie
+        voorkeuren.voorkeur_meedoen_competitie = False
+        if request.POST.get('voorkeur_meedoen_competitie', None):
+            voorkeuren.voorkeur_meedoen_competitie = True
+
+        if (old_voorkeur_meedoen_competitie != voorkeuren.voorkeur_meedoen_competitie or
+                old_dutchtarget_18m != voorkeuren.voorkeur_dutchtarget_18m):
             # wijzigingen opslaan
             voorkeuren.save()
         del voorkeuren
@@ -115,9 +119,7 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
             # stuur de HWL terug naar zijn ledenlijst
             return HttpResponseRedirect(reverse('Vereniging:leden-voorkeuren'))
 
-        context = dict()
-        menu_dynamics(request, context, actief='schutter')
-        return render(request, TEMPLATE_VOORKEUREN_OPGESLAGEN, context)
+        return HttpResponseRedirect(reverse('Schutter:profiel'))
 
     @staticmethod
     def _get_bogen(nhblid):
@@ -146,30 +148,10 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
                     .select_related('boogtype')
                     .order_by('boogtype__volgorde'))
 
-        # TODO: alle Scores met 1 query ophalen (schutterboog__in=alle SchutterBoog pk's)
-        # TODO: alle ScoreHist met 1 query ophalen (score__in=alle Score pk's)
-
-        # voeg de checkbox velden toe en AG informatie
+        # voeg de checkbox velden toe
         for obj in objs:
             obj.check_schiet = 'schiet_' + obj.boogtype.afkorting
             obj.check_info = 'info_' + obj.boogtype.afkorting
-
-            # haal AG van 18m en 25m op, indien aanwezig
-            scores = Score.objects.filter(schutterboog=obj, is_ag=True, afstand_meter=18)
-            if len(scores):
-                score = scores[0]
-                obj.ag_18_waarde = score.waarde / 1000
-                hist = ScoreHist.objects.filter(score=score).order_by('-datum')
-                if len(hist):
-                    obj.ag_18_scorehist = hist[0]
-
-            scores = Score.objects.filter(schutterboog=obj, is_ag=True, afstand_meter=25)
-            if len(scores):
-                score = scores[0]
-                obj.ag_25_waarde = score.waarde / 1000
-                hist = ScoreHist.objects.filter(score=score).order_by('-datum')
-                if len(hist):
-                    obj.ag_25_scorehist = hist[0]
         # for
         return objs
 

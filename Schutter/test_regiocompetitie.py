@@ -156,6 +156,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         self.assertFalse(inschrijving.inschrijf_voorkeur_team)
         self.assertEqual(inschrijving.inschrijf_notitie, '')
         self.assertEqual(inschrijving.inschrijf_voorkeur_dagdeel, 'GN')
+        self.assertTrue(str(RegioCompetitieSchutterBoog) != '')     # coverage only
 
         # geen bevestig formulier indien al ingeschreven
         url = self.url_bevestig_inschrijven % (deelcomp.pk, schutterboog.pk)

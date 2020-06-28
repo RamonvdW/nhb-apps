@@ -106,9 +106,7 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
         resp = self.client.post(self.url_voorkeuren, {'schiet_R': 'on',
                                                       'info_BB': 'on',
                                                       'voorkeur_dt': 'on'})
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('schutter/voorkeuren-opgeslagen.dtl', 'plein/site_layout.dtl'))
+        self.assert_is_redirect(resp, '/schutter/')     # naar profiel
         self.assertEqual(SchutterBoog.objects.count(), 5)
         self.assertEqual(SchutterVoorkeuren.objects.count(), 1)
 
@@ -118,7 +116,7 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
 
         voorkeuren = SchutterVoorkeuren.objects.all()[0]
         self.assertTrue(voorkeuren.voorkeur_dutchtarget_18m)
-        self.assertTrue(voorkeuren.voorkeur_meedoen_competitie)
+        self.assertFalse(voorkeuren.voorkeur_meedoen_competitie)
         self.assertEqual(voorkeuren.nhblid, self.nhblid1)
 
         # coverage
@@ -131,12 +129,11 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
         # check DT=aan
         checked, unchecked = self.extract_checkboxes(resp)
         self.assertTrue("voorkeur_dt" in checked)
+        self.assertTrue("voorkeur_meedoen_competitie" in unchecked)
 
         # DT voorkeur uitzetten
         resp = self.client.post(self.url_voorkeuren, {'schiet_R': 'on', 'info_BB': 'on'})
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('schutter/voorkeuren-opgeslagen.dtl', 'plein/site_layout.dtl'))
+        self.assert_is_redirect(resp, '/schutter/')     # naar profiel
 
         obj = SchutterBoog.objects.get(nhblid=self.nhblid1, boogtype=self.boog_R)
         self.assertFalse(obj.heeft_interesse)
@@ -145,18 +142,21 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
         voorkeuren = SchutterVoorkeuren.objects.all()[0]
         self.assertFalse(voorkeuren.voorkeur_dutchtarget_18m)
 
-        # zet aanvangsgemiddelden voor 18m en 25m
-        datum = datetime.date(year=2020, month=5, day=2)
-        datum_str = "2 mei 2020"
-        aanvangsgemiddelde_opslaan(obj, 18, 9.018, datum, None, 'Test opmerking A')
-        aanvangsgemiddelde_opslaan(obj, 25, 2.5, datum, None, 'Test opmerking B')
+        # voorkeur competitie weer aan zetten
+        resp = self.client.post(self.url_voorkeuren, {'voorkeur_meedoen_competitie': 'on'})
+        self.assert_is_redirect(resp, '/schutter/')     # naar profiel
+
+        voorkeuren = SchutterVoorkeuren.objects.all()[0]
+        self.assertTrue(voorkeuren.voorkeur_meedoen_competitie)
 
         resp = self.client.get(self.url_voorkeuren)
-        self.assertContains(resp, "2,500")
-        self.assertContains(resp, "9,018")
-        self.assertContains(resp, "Test opmerking A")
-        self.assertContains(resp, "Test opmerking B")
-        self.assertContains(resp, datum_str)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        checked, unchecked = self.extract_checkboxes(resp)
+        self.assertTrue("voorkeur_meedoen_competitie" in checked)
+
+        # does een post zonder wijzigingen (voor de coverage)
+        resp = self.client.post(self.url_voorkeuren, {'voorkeur_meedoen_competitie': 'on'})
+        self.assert_is_redirect(resp, '/schutter/')     # naar profiel
 
         self.e2e_assert_other_http_commands_not_supported(self.url_voorkeuren, post=False)
 

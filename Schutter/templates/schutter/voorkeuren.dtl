@@ -48,22 +48,12 @@
     <table class="white">
 
         <thead>
-            <th>Alleen informatie</th>
             <th>Hier schiet ik mee</th>
-            <th colspan="2">Aanvangsgemiddelden</th>
-            <th>Vastgesteld op</th>
-            <th>Bron</th>
+            <th>Alleen informatie</th>
         </thead>
 
         {% for obj in bogen %}
             <tr>
-                <td>
-                    <label>
-                        <input type="checkbox" class="filled-in" name="{{ obj.check_info }}" {% if obj.heeft_interesse %}checked{% endif %}>
-                        <span class="black-text">{{ obj.boogtype.beschrijving }}</span>
-                    </label>
-                </td>
-
                 <td>
                     <label>
                         <input type="checkbox" class="filled-in" name="{{ obj.check_schiet }}" {% if obj.voor_wedstrijd %}checked{% endif %}>
@@ -71,48 +61,11 @@
                     </label>
                 </td>
 
-                <td>Indoor&nbsp;(18m):<br>25m&nbsp;1pijl:</td>
-
                 <td>
-                    {% if obj.ag_18_waarde %}
-                        <span>{{ obj.ag_18_waarde|floatformat:3 }}</span>
-                    {% else %}
-                        <span><i>Onbekend</i></span>
-                    {% endif %}
-                    <br>
-                    {% if obj.ag_25_waarde %}
-                        <span>{{ obj.ag_25_waarde|floatformat:3 }}</span>
-                    {% else %}
-                        <span><i>Onbekend</i></span>
-                    {% endif %}
-                </td>
-
-                <td>
-                    {% if obj.ag_18_waarde %}
-                        <span>{{ obj.ag_18_scorehist.datum }}</span>
-                    {% else %}
-                        <span>&nbsp;</span>
-                    {% endif %}
-                    <br>
-                    {% if obj.ag_25_waarde %}
-                        <span>{{ obj.ag_25_scorehist.datum }}</span>
-                    {% else %}
-                        <span>&nbsp;</span>
-                    {% endif %}
-                </td>
-
-                <td>
-                    {% if obj.ag_18_waarde %}
-                        <span>{{ obj.ag_18_scorehist.notitie }}</span>
-                    {% else %}
-                        <span>&nbsp;</span>
-                    {% endif %}
-                    <br>
-                    {% if obj.ag_25_waarde %}
-                        <span>{{ obj.ag_25_scorehist.notitie }}</span>
-                    {% else %}
-                        <span>&nbsp;</span>
-                    {% endif %}
+                    <label>
+                        <input type="checkbox" class="filled-in" name="{{ obj.check_info }}" {% if obj.heeft_interesse %}checked{% endif %}>
+                        <span class="black-text">{{ obj.boogtype.beschrijving }}</span>
+                    </label>
                 </td>
             </tr>
         {% endfor %}
