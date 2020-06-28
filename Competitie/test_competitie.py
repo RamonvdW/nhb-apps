@@ -12,9 +12,7 @@ from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
 from Overig.e2ehelpers import E2EHelpers
 from Schutter.models import SchutterBoog
 from Functie.models import maak_functie
-from .models import (Competitie, DeelCompetitie, CompetitieKlasse, maak_competitieklasse_indiv,
-                     RegioCompetitieSchutterBoog, regiocompetitie_schutterboog_aanmelden)
-from .views_overzicht import zet_fase
+from .models import Competitie, DeelCompetitie, CompetitieKlasse, maak_competitieklasse_indiv
 import datetime
 
 
@@ -544,78 +542,6 @@ class TestCompetitie(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/klassegrenzen-tonen.dtl', 'plein/site_layout.dtl'))
         self.assertNotContains(resp, 'De klassegrenzen zijn nog niet vastgesteld')
-
-    def test_schutterboog_aanmelden(self):
-        self.e2e_login_and_pass_otp(self.account_bb)
-        self.e2e_wisselnaarrol_bb()
-        self.e2e_check_rol('BB')
-
-        # gebruik een POST om de competitie aan te maken en de klassegrenzen vast te stellen
-        resp = self.client.post(self.url_aanmaken)
-        self.assert_is_redirect(resp, self.url_overzicht)
-
-        competitie_18 = Competitie.objects.get(afstand=18)
-
-        resp = self.client.post(self.url_klassegrenzen_vaststellen_18)
-        self.assert_is_redirect(resp, self.url_overzicht)
-        resp = self.client.post(self.url_klassegrenzen_vaststellen_25)
-        self.assert_is_redirect(resp, self.url_overzicht)
-
-        # wissel naar HWL
-        self.e2e_wissel_naar_functie(self.functie_hwl)
-
-        # meld de schutterboog aan
-        self.assertEqual(3, SchutterBoog.objects.count())
-        self.assertEqual(0, RegioCompetitieSchutterBoog.objects.count())
-
-        # maak een cadet
-        self.lid_100002.geboorte_datum = datetime.date(competitie_18.begin_jaar-15, month=3, day=4)
-        self.lid_100002.save()
-
-        regiocompetitie_schutterboog_aanmelden(competitie_18, self.schutterboog_100002, 8.18)
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 1)
-
-        for obj in RegioCompetitieSchutterBoog.objects.all():
-            self.assertEqual(obj.schutterboog, self.schutterboog_100002)
-            self.assertEqual(obj.bij_vereniging.nhb_nr, self.lid_100002.bij_vereniging.nhb_nr)
-            self.assertEqual(obj.klasse.indiv.boogtype, self.schutterboog_100002.boogtype)
-            afk = [lkl.afkorting for lkl in obj.klasse.indiv.leeftijdsklassen.all()]
-            self.assertTrue('CH' in afk)
-
-            self.assertTrue(str(obj) != "")      # just to cover the code
-        # for
-
-        # lijst aangemeld regiocompetitie ophalen
-        resp = self.client.get(self.url_aangemeld_alles % competitie_18.pk)
-        self.assertEqual(resp.status_code, 200)
-
-        # maak nog een cadet aan
-        self.lid_100003.geboorte_datum = datetime.date(competitie_18.begin_jaar-15, month=3, day=5)
-        self.lid_100003.save()
-
-        regiocompetitie_schutterboog_aanmelden(competitie_18, self.schutterboog_100003, 9.18)
-
-        for obj in RegioCompetitieSchutterBoog.objects.filter(schutterboog=self.schutterboog_100003):
-            self.assertEqual(obj.bij_vereniging.nhb_nr, self.lid_100003.bij_vereniging.nhb_nr)
-            self.assertEqual(obj.klasse.indiv.boogtype, self.schutterboog_100003.boogtype)
-            afk = [lkl.afkorting for lkl in obj.klasse.indiv.leeftijdsklassen.all()]
-            self.assertTrue('CV' in afk)
-        # for
-
-        # lijst aangemeld regiocompetitie ophalen
-        resp = self.client.get(self.url_aangemeld_alles % competitie_18.pk)
-        self.assertEqual(resp.status_code, 200)
-
-        # probeer dubbel aan te melden
-        regiocompetitie_schutterboog_aanmelden(competitie_18, self.schutterboog_100003, None)
-
-        # voor de coverage, haal ook de aangemeld-lijsten op
-        # lijst aangemeld regiocompetitie ophalen
-        resp = self.client.get(self.url_aangemeld_rayon % (competitie_18.pk, self.regio_101.rayon.pk))
-        self.assertEqual(resp.status_code, 200)
-
-        resp = self.client.get(self.url_aangemeld_regio % (competitie_18.pk, self.regio_101.pk))
-        self.assertEqual(resp.status_code, 200)
 
     def test_team(self):
         # slechts een test van een CompetitieKlasse() gekoppeld aan een TeamWedstrijdKlasse
