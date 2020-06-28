@@ -44,42 +44,6 @@ def models_bepaal_startjaar_nieuwe_competitie():
     return timezone.now().year
 
 
-def zet_fase(comp):
-    # fase A was totdat dit object gemaakt werd
-
-    now = timezone.now()
-    now = datetime.date(year=now.year, month=now.month, day=now.day)
-
-    if now < comp.begin_aanmeldingen:
-        # zijn de wedstrijdklassen vastgesteld?
-        if CompetitieKlasse.objects.filter(competitie=comp).count() == 0:
-            # A1 = aanvangsgemiddelden en klassegrenzen zijn vastgesteld
-            comp.fase = 'A1'
-            return
-
-        # A2 = klassegrenzen zijn bepaald
-        comp.fase = 'A2'
-        return
-
-    # B = open voor inschrijvingen
-    if now < comp.einde_aanmeldingen:
-        comp.fase = 'B'
-        return
-
-    # C = aanmaken teams; gesloten voor individuele inschrijvingen
-    if now < comp.einde_teamvorming:
-        comp.fase = 'C'
-        return
-
-    # D = aanmaken poules en afronden wedstrijdschema's
-    if now < comp.eerste_wedstrijd:
-        comp.fase = 'D'
-        return
-
-    # E = Begin wedstrijden
-    comp.fase = 'E'
-
-
 class InstellingenVolgendeCompetitieView(UserPassesTestMixin, TemplateView):
 
     """ deze view laat de defaults voor de volgende competitie zien """
@@ -198,7 +162,7 @@ class AGVaststellenView(UserPassesTestMixin, TemplateView):
         # alleen toestaan als een van de competities in fase A1 is
         kan_ag_vaststellen = False
         for comp in Competitie.objects.filter(is_afgesloten=False):
-            zet_fase(comp)
+            comp.zet_fase()
             if comp.fase == 'A1':
                 kan_ag_vaststellen = True
         # for

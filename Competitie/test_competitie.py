@@ -647,33 +647,33 @@ class TestCompetitie(E2EHelpers, TestCase):
         comp.uiterste_datum_lid = datetime.date(year=2000, month=1, day=1)
         comp.begin_aanmeldingen = comp.einde_aanmeldingen = comp.einde_teamvorming = comp.eerste_wedstrijd = einde_jaar
         comp.save()
-        zet_fase(comp)
+        comp.zet_fase()
         self.assertEqual(comp.fase, 'A1')
 
         # maak de klassen aan en controleer de fase weer
         indiv = IndivWedstrijdklasse.objects.all()[0]
         maak_competitieklasse_indiv(comp, indiv, 0.0)
-        zet_fase(comp)
+        comp.zet_fase()
         self.assertEqual(comp.fase, 'A2')
 
         # tussen begin en einde aanmeldingen = B
         comp.begin_aanmeldingen = gisteren
-        zet_fase(comp)
+        comp.zet_fase()
         self.assertEqual(comp.fase, 'B')
 
         # na einde aanmeldingen tot einde_teamvorming = C
         comp.einde_aanmeldingen = gisteren
-        zet_fase(comp)
+        comp.zet_fase()
         self.assertEqual(comp.fase, 'C')
 
         # na einde teamvorming tot eerste wedstrijd = D
         comp.einde_teamvorming = gisteren
-        zet_fase(comp)
+        comp.zet_fase()
         self.assertEqual(comp.fase, 'D')
 
         # na eerste wedstrijd = E
         comp.eerste_wedstrijd = gisteren
-        zet_fase(comp)
+        comp.zet_fase()
         self.assertEqual(comp.fase, 'E')
 
 

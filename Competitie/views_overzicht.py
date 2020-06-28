@@ -26,49 +26,12 @@ TEMPLATE_COMPETITIE_AANGEMELD_REGIO = 'competitie/lijst-aangemeld-regio.dtl'
 TEMPLATE_COMPETITIE_INFO_COMPETITIE = 'competitie/info-competitie.dtl'
 TEMPLATE_COMPETITIE_TUSSENSTAND = 'competitie/tussenstand.dtl'
 
-
 JA_NEE = {False: 'Nee', True: 'Ja'}
 
 
 def models_bepaal_startjaar_nieuwe_competitie():
     """ bepaal het start jaar van de nieuwe competitie """
     return timezone.now().year
-
-
-def zet_fase(comp):
-    # fase A was totdat dit object gemaakt werd
-
-    now = timezone.now()
-    now = datetime.date(year=now.year, month=now.month, day=now.day)
-
-    if now < comp.begin_aanmeldingen:
-        # zijn de wedstrijdklassen vastgesteld?
-        if CompetitieKlasse.objects.filter(competitie=comp).count() == 0:
-            # A1 = aanvangsgemiddelden en klassegrenzen zijn vastgesteld
-            comp.fase = 'A1'
-            return
-
-        # A2 = klassegrenzen zijn bepaald
-        comp.fase = 'A2'
-        return
-
-    # B = open voor inschrijvingen
-    if now < comp.einde_aanmeldingen:
-        comp.fase = 'B'
-        return
-
-    # C = aanmaken teams; gesloten voor individuele inschrijvingen
-    if now < comp.einde_teamvorming:
-        comp.fase = 'C'
-        return
-
-    # D = aanmaken poules en afronden wedstrijdschema's
-    if now < comp.eerste_wedstrijd:
-        comp.fase = 'D'
-        return
-
-    # E = Begin wedstrijden
-    comp.fase = 'E'
 
 
 class CompetitieOverzichtView(View):
@@ -93,7 +56,7 @@ class CompetitieOverzichtView(View):
                 comp.url_inschrijvingen = reverse('Competitie:lijst-regiocomp-alles',
                                                   kwargs={'comp_pk': comp.pk})
 
-            zet_fase(comp)
+            comp.zet_fase()
             if comp.fase == 'A1' and rol_nu == Rollen.ROL_BB:
                 context['bb_kan_ag_vaststellen'] = True
 
@@ -133,7 +96,7 @@ class CompetitieOverzichtView(View):
 
         # kies de competities waarvoor de beheerder getoond kunnen worden
         for obj in objs:
-            zet_fase(obj)
+            obj.zet_fase()
             obj.is_afgesloten_str = JA_NEE[obj.is_afgesloten]       # TODO: wordt niet gebruikt
         # for
 
@@ -199,8 +162,7 @@ class CompetitieOverzichtView(View):
         context = dict()
         self._get_competities(context, rol_nu, functie_nu)
 
-        rol_nu, functie_nu = rol_get_huidige_functie(request)
-
+        # haal zowel de 18m als 25m deelcompetities op in de regio van de HWL
         context['planning_deelcomp'] = (DeelCompetitie
                                         .objects
                                         .filter(laag=LAAG_REGIO,
@@ -489,7 +451,7 @@ class TussenstandView(TemplateView):
         comps = Competitie.objects.filter(is_afgesloten=False).order_by('begin_jaar', 'afstand')
         context['competities'] = comps
         for comp in comps:
-            zet_fase(comp)
+            comp.zet_fase()
             if comp.fase >= 'B':        # inschrijving is open
                 context['toon_details'] = True
 

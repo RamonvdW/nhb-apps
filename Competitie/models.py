@@ -5,6 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import models
+from django.utils import timezone
 from BasisTypen.models import IndivWedstrijdklasse, TeamWedstrijdklasse
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
 from Functie.models import Functie
@@ -12,6 +13,7 @@ from Schutter.models import SchutterBoog
 from Wedstrijden.models import WedstrijdenPlan
 from decimal import Decimal
 from datetime import date
+import datetime
 import logging
 
 my_logger = logging.getLogger('NHBApps.Competitie')
@@ -71,6 +73,41 @@ class Competitie(models.Model):
     def __str__(self):
         """ geef een tekstuele afkorting van dit object, voor in de admin interface """
         return self.beschrijving
+
+    def zet_fase(self):
+        # fase A was totdat dit object gemaakt werd
+
+        now = timezone.now()
+        now = datetime.date(year=now.year, month=now.month, day=now.day)
+
+        if now < self.begin_aanmeldingen:
+            # zijn de wedstrijdklassen vastgesteld?
+            if CompetitieKlasse.objects.filter(competitie=self).count() == 0:
+                # A1 = aanvangsgemiddelden en klassegrenzen zijn vastgesteld
+                self.fase = 'A1'
+                return
+
+            # A2 = klassegrenzen zijn bepaald
+            self.fase = 'A2'
+            return
+
+        # B = open voor inschrijvingen
+        if now < self.einde_aanmeldingen:
+            self.fase = 'B'
+            return
+
+        # C = aanmaken teams; gesloten voor individuele inschrijvingen
+        if now < self.einde_teamvorming:
+            self.fase = 'C'
+            return
+
+        # D = aanmaken poules en afronden wedstrijdschema's
+        if now < self.eerste_wedstrijd:
+            self.fase = 'D'
+            return
+
+        # E = Begin wedstrijden
+        self.fase = 'E'
 
     objects = models.Manager()      # for the editor only
 
