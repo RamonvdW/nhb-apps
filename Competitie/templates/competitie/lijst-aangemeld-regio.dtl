@@ -13,7 +13,60 @@
 
 <h4>Aanmeldingen regiocompetitie</h4>
 
-<p>Hieronder volgt de lijst schutters die <u>landelijk</u> ingeschreven zijn voor deelname aan de regiocompetitie <b>{{ competitie.beschrijving }}</b>.</p>
+<p>Op deze pagina tonen we inschrijving voor de regiocompetitie <b>{{ competitie.beschrijving }}</b>.</p>
+
+<p>Filter mogelijkheden:</p>
+
+<div class="white">
+
+    {% if zoom_alles_url %}
+        <a class="margin-5 btn-nhb-blauw btn-small" href="{{ zoom_alles_url }}">Alles</a>
+    {% else %}
+        <a class="margin-5 btn-nhb-blauw btn-small disabled" href="#">Alles</a>
+    {% endif %}
+
+    <!-- begin rayon knoppen voor small -->
+    <br class="hide-on-med-and-up">
+
+    {% for rayon in zoom_rayons %}
+
+        {% if rayon.zoom_url %}
+            <a class="hide-on-med-and-up margin-5 btn-nhb-blauw btn-small" href="{{ rayon.zoom_url }}">{{ rayon.title_str }}</a>
+        {% else %}
+            <a class="hide-on-med-and-up margin-5 btn-nhb-blauw btn-small disabled" href="#">{{ rayon.title_str }}</a>
+        {% endif %}
+
+    {% endfor %}
+    <!-- einde rayon knoppen voor small -->
+
+    {% for rayon in zoom_rayons %}
+
+        <br>
+
+        {% if rayon.zoom_url %}
+            <a class="hide-on-small-only margin-5 btn-nhb-blauw btn-small" href="{{ rayon.zoom_url }}">{{ rayon.title_str }}</a>
+        {% else %}
+            <a class="hide-on-small-only margin-5 btn-nhb-blauw btn-small disabled" href="#">{{ rayon.title_str }}</a>
+        {% endif %}
+        <span class="hide-on-small-only">&nbsp;:&nbsp;</span>
+
+        {% for regio in rayon.regios %}
+
+            {% if regio.zoom_url %}
+                <a class="margin-5 btn-nhb-blauw btn-small" href="{{ regio.zoom_url }}">{{ regio.title_str }}</a>
+            {% else %}
+                <a class="margin-5 btn-nhb-blauw btn-small disabled" href="#">{{ regio.title_str }}</a>
+            {% endif %}
+        {% endfor %}
+
+    {% endfor %}
+</div>
+
+
+<p>Schutters die <b>{{ inhoud }}</b> ingeschreven zijn.</p>
+
+<p>Aantal: {{ object_list.count }}</p>
+
 
 {% if object_list.count %}
 
@@ -22,31 +75,27 @@
     {% for obj in object_list %}
 
         {% if obj.nieuwe_klasse %}
-            <tr class="grey lighten-2">     <!-- gelijk houden aan plein/site_layout.dtl -->
+            <tr class="nhb-grijs">
                 <td colspan="3" style="padding-bottom: 0px"><h5>{{ obj.klasse.indiv.beschrijving }}</h5></td>
             </tr>
 
             <tr>
                 <th>Vereniging</th>
                 <th>Aanvangsgemiddelde</th>
-                <th>Schutter naam</th>
+                <th>Naam schutter</th>
             </tr>
 
         {% endif %}
 
         <tr>
             <td>[{{ obj.schutterboog.nhblid.bij_vereniging.nhb_nr }}] {{ obj.schutterboog.nhblid.bij_vereniging.naam }}</td>
-            <td>{{ obj.aanvangsgemiddelde }}<!--{% if obj.is_handmatig_ag %}<i> (handmatig)</i>{% endif %}--></td>
+            <td>{{ obj.aanvangsgemiddelde }}{% if obj.is_handmatig_ag %}<i> (handmatig)</i>{% endif %}</td>
             <td>{{ obj.schutterboog.nhblid.volledige_naam }}</td>
         </tr>
 
     {% endfor %}
 
     </table>
-
-{% else %}
-
-    <p>Er zijn nog geen aanmeldingen.</p>
 
 {% endif %}
 

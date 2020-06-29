@@ -7,6 +7,12 @@
 from django.db import migrations
 
 
+AFSTAND = [('18', 'Indoor'),
+           ('25', '25m 1pijl')]
+
+ADMINISTRATIEVE_REGIO = 100
+
+
 def maak_functie(functie_klas, beschrijving, rol, comp_type):
 
     functie = functie_klas()
@@ -18,18 +24,13 @@ def maak_functie(functie_klas, beschrijving, rol, comp_type):
     return functie
 
 
-def init_functies_2019(apps, schema_editor):
+def init_functies_2019(apps, _):
     """ Functies voor de NHB structuur van 2019 """
 
     # haal de klassen op die van toepassing zijn op het moment van migratie
     regio_klas = apps.get_model('NhbStructuur', 'NhbRegio')
     rayon_klas = apps.get_model('NhbStructuur', 'NhbRayon')
     functie_klas = apps.get_model('Functie', 'Functie')
-
-    AFSTAND = [('18', 'Indoor'),
-               ('25', '25m 1pijl')]
-
-    ADMINISTRATIEVE_REGIO = 100
 
     for comp_type, comp_descr in AFSTAND:
         # BKO

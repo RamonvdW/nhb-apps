@@ -22,6 +22,31 @@ class SchutterNhbLidInactief(Exception):
     pass
 
 
+class SchutterVoorkeuren(models.Model):
+    """ Globale voorkeuren voor een Schutter, onafhankelijk van zijn boog """
+
+    nhblid = models.ForeignKey(NhbLid, on_delete=models.CASCADE, null=True)
+
+    # (opt-in) voorkeur voor DT ipv 40cm blazoen (alleen voor 18m Recurve)
+    voorkeur_dutchtarget_18m = models.BooleanField(default=False)
+
+    # (opt-out) wel/niet aanbieden om mee te doen met de competitie
+    voorkeur_meedoen_competitie = models.BooleanField(default=True)
+
+    # het account waar dit record bij hoort
+    # (niet gebruiken!)
+    account = models.ForeignKey(Account, on_delete=models.CASCADE, null=True)
+
+    class Meta:
+        """ meta data voor de admin interface """
+        verbose_name_plural = verbose_name = "Schutter voorkeuren"
+
+    def __str__(self):
+        return "%s" % self.nhblid.nhb_nr
+
+    objects = models.Manager()      # for the editor only
+
+
 class SchutterBoog(models.Model):
     """ Schutter met een specifiek type boog en zijn voorkeuren
         voor elk type boog waar de schutter interesse in heeft is er een entry
@@ -34,9 +59,6 @@ class SchutterBoog(models.Model):
     # voorkeuren van de schutter: alleen interesse, of ook actief schieten?
     heeft_interesse = models.BooleanField(default=True)
     voor_wedstrijd = models.BooleanField(default=False)
-
-    # voorkeur voor DT ipv 40cm blazoen (alleen voor 18m Recurve)
-    voorkeur_dutchtarget_18m = models.BooleanField(default=False)
 
     # het account waar dit record bij hoort
     # (niet gebruiken!)

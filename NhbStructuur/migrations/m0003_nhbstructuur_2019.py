@@ -20,7 +20,7 @@ def maak_regios_2019(rayon_klas, regio_klas):
     regio.save()
 
 
-def init_regios_2019(apps, schema_editor):
+def init_regios_2019(apps, _):
     """ Wijziging regios 2019 """
 
     # haal de klassen op die van toepassing zijn vóór de migratie

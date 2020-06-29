@@ -14,20 +14,22 @@ from django.db.models.functions import Concat, Cast
 from django.views.generic import ListView, View, TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import Account, HanterenPersoonsgegevens
-from Account.otp import account_otp_prepare_koppelen, account_otp_koppel, account_otp_is_gekoppeld, account_otp_controleer
+from Account.otp import (account_otp_prepare_koppelen, account_otp_koppel,
+                         account_otp_is_gekoppeld, account_otp_controleer)
 from Account.rechten import account_rechten_eval_now, account_rechten_is_otp_verified
-from NhbStructuur.models import ADMINISTRATIEVE_REGIO, NhbLid
+from NhbStructuur.models import NhbLid
 from Plein.menu import menu_dynamics
 from Logboek.models import schrijf_in_logboek
 from Overig.tijdelijke_url import maak_tijdelijke_url_functie_email
 from Mailer.models import mailer_queue_email
 from Overig.tijdelijke_url import set_tijdelijke_url_receiver, RECEIVER_BEVESTIG_FUNCTIE_EMAIL
 from Overig.helpers import get_safe_from_ip
-from .rol import Rollen, rol_mag_wisselen, rol_enum_pallet, rol2url,\
-                 rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving, \
-                 rol_activeer_rol, rol_activeer_functie, rol_evalueer_opnieuw
+from .rol import (Rollen, rol_mag_wisselen, rol_enum_pallet, rol2url,
+                  rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving,
+                  rol_activeer_rol, rol_activeer_functie, rol_evalueer_opnieuw)
 from .models import Functie, account_needs_vhpg, account_needs_otp
-from .forms import ZoekBeheerdersForm, WijzigBeheerdersForm, OTPControleForm, AccepteerVHPGForm, WijzigEmailForm
+from .forms import (ZoekBeheerdersForm, WijzigBeheerdersForm, OTPControleForm,
+                    AccepteerVHPGForm, WijzigEmailForm)
 from .qrcode import qrcode_get
 import logging
 
@@ -57,7 +59,7 @@ def mag_beheerder_wijzigen_of_404(request, functie):
             OntvangWijzigingenView - vroeg in afhandelen POST verzoek
     """
 
-    # test_func van WijzigView laat alleen BB, BKO, RKO of CWZ door
+    # test_func van WijzigView laat alleen BB, BKO, RKO of HWL door
     # OntvangWijzigingenView heeft niet zo'n filter
 
     rol_nu, functie_nu = rol_get_huidige_functie(request)
@@ -68,12 +70,16 @@ def mag_beheerder_wijzigen_of_404(request, functie):
             raise Resolver404()
         return
 
-    if rol_nu == Rollen.ROL_CWZ:
+    if rol_nu == Rollen.ROL_HWL:
         if functie.nhb_ver != functie_nu.nhb_ver:
             # verkeerde vereniging
             raise Resolver404()
 
-        # CWZ or WL
+        if functie.rol not in ('HWL', 'WL'):
+            # niet een rol die de HWL mag wijzigen
+            raise Resolver404()
+
+        # HWL
         return
 
     # BKO, RKO, RCL
@@ -81,7 +87,7 @@ def mag_beheerder_wijzigen_of_404(request, functie):
     # controleer dat deze wijziging voor de juiste competitie is
     # (voorkomt BKO 25m 1pijl probeert RKO Indoor te koppelen)
     if not functie_nu or functie_nu.comp_type != functie.comp_type:
-        # CWZ verdwijnt hier ook
+        # SEC/HWL/WL verdwijnt hier ook
         raise Resolver404()
 
     if rol_nu == Rollen.ROL_BKO:
@@ -109,7 +115,7 @@ def mag_email_wijzigen_of_404(request, functie):
             WijzigEmailView - tijdens GET en POST
     """
 
-    # test_func van WijzigEmailView laat alleen BB, BKO, RKO, RCL of CWZ door
+    # test_func van WijzigEmailView laat alleen BB, BKO, RKO, RCL, SEC en HWL door
 
     rol_nu, functie_nu = rol_get_huidige_functie(request)
 
@@ -118,17 +124,31 @@ def mag_email_wijzigen_of_404(request, functie):
     #   BKO (comp_type) --> alle RKO (comp_type)
     #   RKO (comp_type) --> alle RCL (comp_type) in zijn rayon
 
+    # special voor BB, want dat is geen functie
     if rol_nu == Rollen.ROL_BB:
         # BB mag BKO email aanpassen
         if functie.rol != 'BKO':
             raise Resolver404()
         return
 
-    # de rest is gekoppeld aan een functie
+    # voor de rest moet de gebruiker een functie bezitten
     if not functie_nu:
         raise Resolver404()     # pragma: no cover
 
-    # rol mag zijn eigen e-mailadres aanpassen
+    # SEC en HWL mogen email van HWL en WL aanpassen
+    if rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL):
+        # alleen binnen eigen vereniging
+        if functie_nu.nhb_ver != functie.nhb_ver:
+            raise Resolver404()
+
+        if functie.rol not in ('HWL', 'WL'):
+            # hier verdwijnt SEC in het putje
+            # secretaris email is alleen aan te passen via Onze Relaties
+            raise Resolver404()
+
+        return
+
+    # alle rollen mogen hun eigen e-mailadres aanpassen
     if functie_nu == functie:
         return
 
@@ -137,7 +157,6 @@ def mag_email_wijzigen_of_404(request, functie):
     # controleer dat deze wijziging voor de juiste competitie is
     # (voorkomt BKO 25m 1pijl probeert RKO Indoor te koppelen)
     if functie_nu.comp_type != functie.comp_type:
-        # CWZ verdwijnt hier ook
         raise Resolver404()
 
     if rol_nu == Rollen.ROL_BKO:
@@ -168,10 +187,9 @@ def receive_bevestiging_functie_email(request, functie):
 
     # het is mogelijk om meerdere keren hetzelfde e-mailadres te koppelen
     # je hebt dan meerdere mails met tijdelijke urls om te volgen
-    # bij gebruik van de 1e worden alle tijdelijke urls geconsumeerd
-    # maar dan wordt deze functie ook meerdere keren aangeroepen
-    # na de eerste keer is nieuwe_email leeg en zou het mis gaan
-    # we moeten wel steeds dezelfde template invullen en terug geven
+    # deze functie wordt voor elke gevolgde url aangeroepen
+    # na de eerste keer is nieuwe_email leeg en gebeurt er niets
+    # we geven wel steeds het succes verhaal terug
     if functie.nieuwe_email:
         # schrijf in het logboek
         from_ip = get_safe_from_ip(request)
@@ -200,12 +218,12 @@ def functie_vraag_email_bevestiging(functie):
     # maak de url aan om het e-mailadres te bevestigen
     url = maak_tijdelijke_url_functie_email(functie)
 
-    text_body = "Hallo!\n\n" + \
-                "Een beheerder heeft dit e-mailadres gekoppeld op de website van de NHB.\n" + \
-                "Klik op onderstaande link om dit te bevestigen.\n\n" + \
-                url + "\n\n" + \
-                "Als je dit niet herkent, neem dan contact met ons op via info@handboogsport.nl\n\n" + \
-                "Het bondsburo\n"
+    text_body = ("Hallo!\n\n"
+                 + "Een beheerder heeft dit e-mailadres gekoppeld op de website van de NHB.\n"
+                 + "Klik op onderstaande link om dit te bevestigen.\n\n"
+                 + url + "\n\n"
+                 + "Als je dit niet herkent, neem dan contact met ons op via info@handboogsport.nl\n\n"
+                 + "Het bondsburo\n")
 
     mailer_queue_email(functie.nieuwe_email, 'Bevestig gebruik e-mail voor rol', text_body)
 
@@ -219,7 +237,7 @@ class WijzigEmailView(UserPassesTestMixin, View):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol = rol_get_huidige(self.request)
-        return rol in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_CWZ)
+        return rol in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_SEC, Rollen.ROL_HWL)
 
     def handle_no_permission(self):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
@@ -239,13 +257,13 @@ class WijzigEmailView(UserPassesTestMixin, View):
         context['functie'] = functie
 
         rol = rol_get_huidige(self.request)
-        if rol == Rollen.ROL_CWZ:
-            context['is_rol_cwz'] = True
+        if rol == Rollen.ROL_HWL:
+            context['is_rol_hwl'] = True        # TODO: lijkt niet gebruik in wijzig-email.dtl
             context['terug_url'] = reverse('Functie:overzicht-vereniging')
             menu_dynamics(self.request, context, actief='vereniging')
         else:
             context['terug_url'] = reverse('Functie:overzicht')
-            menu_dynamics(self.request, context, actief='competitie')
+            menu_dynamics(self.request, context, actief='hetplein')
 
         context['form'] = form
         context['form_submit_url'] = reverse('Functie:wijzig-email', kwargs={'functie_pk': functie.pk})
@@ -259,7 +277,7 @@ class WijzigEmailView(UserPassesTestMixin, View):
 
         # TODO: functie.nieuwe_email opruimen als SiteTijdelijkeUrl verlopen is (of opgeruimd is)
 
-        # BKO, RKO, RCL, CWZ mogen hun eigen contactgegevens wijzigen
+        # BKO, RKO, RCL, HWL mogen hun eigen contactgegevens wijzigen
         # als ze de rol aangenomen hebben
         # verder mogen ze altijd de onderliggende laag aanpassen (net als beheerders koppelen)
         mag_email_wijzigen_of_404(self.request, functie)
@@ -295,7 +313,7 @@ class WijzigEmailView(UserPassesTestMixin, View):
 
         # stuur terug naar het overzicht
         rol = rol_get_huidige(self.request)
-        if rol == Rollen.ROL_CWZ:
+        if rol == Rollen.ROL_HWL:
             context['terug_url'] = reverse('Functie:overzicht-vereniging')
         else:
             context['terug_url'] = reverse('Functie:overzicht')
@@ -341,14 +359,14 @@ class OntvangBeheerderWijzigingenView(View):
 
         if account.nhblid_set.count() > 0:
             nhblid = account.nhblid_set.all()[0]
-            wie = "NHB lid %s (%s)" % (nhblid.nhb_nr, nhblid.volledige_naam)
+            wie = "NHB lid %s (%s)" % (nhblid.nhb_nr, nhblid.volledige_naam())
         else:
             nhblid = None
-            wie = "Account %s" % account.volledige_naam()
+            wie = "Account %s" % account.get_account_full_name()
 
         if add:
             rol_nu, functie_nu = rol_get_huidige_functie(request)
-            if rol_nu == Rollen.ROL_CWZ:
+            if rol_nu == Rollen.ROL_HWL:
                 # stel zeker dat nhblid lid is bij de vereniging van functie
                 if not nhblid or nhblid.bij_vereniging != functie.nhb_ver:
                     raise Resolver404()
@@ -381,7 +399,7 @@ class WijzigBeheerdersView(UserPassesTestMixin, ListView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol = rol_get_huidige(self.request)
-        return rol in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_CWZ)
+        return rol in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_SEC, Rollen.ROL_HWL)
 
     def handle_no_permission(self):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
@@ -409,7 +427,7 @@ class WijzigBeheerdersView(UserPassesTestMixin, ListView):
             if account.nhblid_set.count() > 0:
                 nhblid = account.nhblid_set.all()[0]
                 regio = nhblid.bij_vereniging.regio
-                if regio.regio_nr != ADMINISTRATIEVE_REGIO:
+                if not regio.is_administratief:
                     account.geo_beschrijving = "regio %s / rayon %s" % (regio.regio_nr, regio.rayon.rayon_nr)
         self._huidige_beheerders = beheerder_accounts
 
@@ -420,22 +438,22 @@ class WijzigBeheerdersView(UserPassesTestMixin, ListView):
             # let op: we koppelen een account, maar zoeken een NHB lid,
             #         om te kunnen filteren op vereniging
             #         accounts die geen NhbLid zijn worden hier niet gevonden
-            qset = NhbLid.objects.\
-                exclude(account=None).\
-                exclude(is_actief_lid=False).\
-                exclude(account__in=beheerder_accounts).\
-                annotate(hele_reeks=Concat('voornaam', Value(' '), 'achternaam')).\
-                annotate(nhb_nr_str=Cast('nhb_nr', CharField())).\
-                filter(
-                    Q(nhb_nr_str__contains=zoekterm) |
-                    Q(voornaam__icontains=zoekterm) |
-                    Q(achternaam__icontains=zoekterm) |
-                    Q(hele_reeks__icontains=zoekterm)). \
-                order_by('nhb_nr')
+            qset = (NhbLid
+                    .objects
+                    .exclude(account=None)
+                    .exclude(is_actief_lid=False)
+                    .exclude(account__in=beheerder_accounts)
+                    .annotate(hele_reeks=Concat('voornaam', Value(' '), 'achternaam'))
+                    .annotate(nhb_nr_str=Cast('nhb_nr', CharField()))
+                    .filter(Q(nhb_nr_str__contains=zoekterm) |
+                            Q(voornaam__icontains=zoekterm) |
+                            Q(achternaam__icontains=zoekterm) |
+                            Q(hele_reeks__icontains=zoekterm))
+                    .order_by('nhb_nr'))
 
             rol_nu, functie_nu = rol_get_huidige_functie(self.request)
-            if rol_nu == Rollen.ROL_CWZ:
-                # CWZ en WL alleen uit de eigen gelederen laten kiezen
+            if rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL):
+                # alleen uit de eigen gelederen laten kiezen
                 qset = qset.filter(bij_vereniging=functie_nu.nhb_ver)
 
             objs = list()
@@ -444,11 +462,11 @@ class WijzigBeheerdersView(UserPassesTestMixin, ListView):
                 account.geo_beschrijving = ''
                 account.nhb_nr_str = str(nhblid.nhb_nr)
 
-                if rol_nu == Rollen.ROL_CWZ:
+                if rol_nu == Rollen.ROL_HWL:
                     account.vereniging_naam = nhblid.bij_vereniging.naam
                 else:
                     regio = nhblid.bij_vereniging.regio
-                    if regio.regio_nr != ADMINISTRATIEVE_REGIO:
+                    if not regio.is_administratief:
                         account.geo_beschrijving = "regio %s / rayon %s" % (regio.regio_nr, regio.rayon.rayon_nr)
 
                 objs.append(account)
@@ -470,13 +488,13 @@ class WijzigBeheerdersView(UserPassesTestMixin, ListView):
         context['zoekterm'] = self._zoekterm
         context['form'] = self._form
 
-        if self._functie.rol == "CWZ":
-            context['is_rol_cwz'] = True
+        if self._functie.rol in ('SEC', 'HWL', 'WL'):
+            context['is_rol_hwl'] = True
             context['terug_url'] = reverse('Functie:overzicht-vereniging')
             menu_dynamics(self.request, context, actief='vereniging')
         else:
             context['terug_url'] = reverse('Functie:overzicht')
-            menu_dynamics(self.request, context, actief='competitie')
+            menu_dynamics(self.request, context, actief='hetplein')
         return context
 
 
@@ -491,11 +509,28 @@ class OverzichtVerenigingView(UserPassesTestMixin, ListView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
-        return rol_nu == Rollen.ROL_CWZ     # TODO: voeg ondersteuning toe voor WL
+        return rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_WL)
 
     def handle_no_permission(self):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
         return HttpResponseRedirect(reverse('Plein:plein'))
+
+    @staticmethod
+    def _sorteer(objs):
+        lst = list()
+        for obj in objs:
+            if obj.rol == "SEC":
+                nr = 1
+            elif obj.rol == "HWL":
+                nr = 2
+            else:
+                # obj.rol == "WL":
+                nr = 3
+            tup = (nr, obj)
+            lst.append(tup)
+        # for
+        lst.sort()
+        return [obj for _, obj in lst]
 
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
@@ -515,13 +550,22 @@ class OverzichtVerenigingView(UserPassesTestMixin, ListView):
             obj.wijzig_url = None
             obj.email_url = None
 
-            # alleen CWZ mag wijzigingen doen; WL niet
-            if rol_nu == Rollen.ROL_CWZ:
+            mag_wijzigen = False
+            if rol_nu == Rollen.ROL_SEC and obj.rol in ('SEC', 'HWL'):
+                # SEC mag andere SEC and HWL koppelen
+                mag_wijzigen = True
+            elif rol_nu == Rollen.ROL_HWL and obj.rol in ('HWL', 'WL'):
+                # HWL mag andere HWL en WL koppelen
+                mag_wijzigen = True
+
+            if mag_wijzigen:
                 obj.wijzig_url = reverse('Functie:wijzig-beheerders', kwargs={'functie_pk': obj.pk})
-                obj.email_url = reverse('Functie:wijzig-email', kwargs={'functie_pk': obj.pk})
+                # email voor secretaris komt uit Onze Relaties
+                if obj.rol != 'SEC':
+                    obj.email_url = reverse('Functie:wijzig-email', kwargs={'functie_pk': obj.pk})
         # for
 
-        return objs
+        return self._sorteer(objs)
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -547,6 +591,8 @@ class OverzichtView(UserPassesTestMixin, ListView):
 
     """ Via deze view worden de huidige beheerders getoond
         met Wijzig knoppen waar de gebruiker dit mag, aan de hand van de huidige rol
+
+        Wordt ook gebruikt om de HWL relevante bestuurders te tonen
     """
 
     # class variables shared by all instances
@@ -555,8 +601,8 @@ class OverzichtView(UserPassesTestMixin, ListView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol = rol_get_huidige(self.request)
-        # alle competitie beheerders + CWZ
-        return rol in (Rollen.ROL_IT, Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_CWZ)
+        # alle competitie beheerders + HWL
+        return rol in (Rollen.ROL_IT, Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL)
 
     def handle_no_permission(self):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
@@ -569,7 +615,7 @@ class OverzichtView(UserPassesTestMixin, ListView):
             BKO < RKO < RCL
             op volgorde van rayon- of regionummer (oplopend)
         """
-        SORT_LEVEL = {'BKO': 1,  'RKO': 2, 'RCL': 3}
+        sort_level = {'BKO': 1,  'RKO': 2, 'RCL': 3}
         tup2obj = dict()
         sort_me = list()
         for obj in objs:
@@ -580,7 +626,7 @@ class OverzichtView(UserPassesTestMixin, ListView):
             else:
                 deel = 0
 
-            tup = (obj.comp_type, SORT_LEVEL[obj.rol], deel)
+            tup = (obj.comp_type, sort_level[obj.rol], deel)
             sort_me.append(tup)
             tup2obj[tup] = obj
         # for
@@ -594,6 +640,7 @@ class OverzichtView(UserPassesTestMixin, ListView):
         # de huidige rol bepaalt welke functies gewijzigd mogen worden
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
 
+        rko_rayon_nr = None
         if rol_nu == Rollen.ROL_BB:
             wijzigbare_functie_rol = 'BKO'
         elif rol_nu == Rollen.ROL_BKO:
@@ -652,7 +699,7 @@ class OverzichtView(UserPassesTestMixin, ListView):
             Hier doen we het iets efficienter.
         """
         for obj in objs:
-            obj.beheerders = [account.volledige_naam() for account in obj.accounts.only('username', 'first_name', 'last_name').all()]
+            obj.beheerders = [account.volledige_naam() for account in obj.accounts.all()]
         # for
 
     def get_queryset(self):
@@ -661,16 +708,20 @@ class OverzichtView(UserPassesTestMixin, ListView):
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
 
         # maak een lijst van de functies
-        if rol_nu == Rollen.ROL_CWZ:
+        if rol_nu == Rollen.ROL_HWL:
             # toon alleen de hierarchy vanuit deze vereniging omhoog
-            functie_cwz = functie_nu
-            objs = Functie.objects.select_related('nhb_rayon', 'nhb_regio').\
-                                   filter(Q(rol='RCL', nhb_regio=functie_cwz.nhb_ver.regio) |
-                                          Q(rol='RKO', nhb_rayon=functie_cwz.nhb_ver.regio.rayon) |
-                                          Q(rol='BKO'))
+            functie_hwl = functie_nu
+            objs = (Functie.objects
+                    .filter(Q(rol='RCL', nhb_regio=functie_hwl.nhb_ver.regio) |
+                            Q(rol='RKO', nhb_rayon=functie_hwl.nhb_ver.regio.rayon) |
+                            Q(rol='BKO'))
+                    .select_related('nhb_rayon', 'nhb_regio')
+                    .prefetch_related('accounts'))
         else:
-            objs = Functie.objects.select_related('nhb_rayon', 'nhb_regio').\
-                                   exclude(rol='CWZ')       # TODO: verander in filter(rol__in [BKO, RKO, RCL]")
+            objs = (Functie.objects
+                    .filter(Q(rol='BKO') | Q(rol='RKO') | Q(rol='RCL'))
+                    .select_related('nhb_rayon', 'nhb_regio')
+                    .prefetch_related('accounts'))
 
         objs = self._sorteer_functies(objs)
 
@@ -686,10 +737,10 @@ class OverzichtView(UserPassesTestMixin, ListView):
         context['huidige_rol'] = rol_get_beschrijving(self.request)
 
         rol_nu = rol_get_huidige(self.request)
-        if rol_nu == Rollen.ROL_CWZ:
-            context['rol_is_cwz'] = True
+        if rol_nu == Rollen.ROL_HWL:
+            context['rol_is_hwl'] = True
 
-        menu_dynamics(self.request, context, actief='competitie')
+        menu_dynamics(self.request, context, actief='hetplein')
         return context
 
 
@@ -714,10 +765,28 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
         return HttpResponseRedirect(reverse('Plein:plein'))
 
-    def get_queryset(self):
-        """ called by the template system to get the queryset or list of objects for the template """
+    @staticmethod
+    def _functie_volgorde(functie):
+        if functie.rol == "BKO":
+            volgorde = 10  # 10
+        elif functie.rol == "RKO":
+            volgorde = 20 + functie.nhb_rayon.rayon_nr  # 21-24
+        elif functie.rol == "RCL":
+            volgorde = functie.nhb_regio.regio_nr       # 101-116
+        elif functie.rol == "SEC":
+            volgorde = functie.nhb_ver.nhb_nr           # 1000-9999
+        elif functie.rol == "HWL":
+            volgorde = functie.nhb_ver.nhb_nr + 10000   # 11000-19999
+        elif functie.rol == "WL":
+            volgorde = functie.nhb_ver.nhb_nr + 20000   # 21000-29999
+        else:             # pragma: no cover
+            volgorde = 0  # valt meteen op dat 'ie bovenaan komt
+        return volgorde
+
+    def _get_functies_eigen(self):
         objs = list()
-        objs2 = list()
+
+        pks = list()
 
         hierarchy2 = dict()      # [parent_tup] = list of child_tup
         for child_tup, parent_tup in rol_enum_pallet(self.request):
@@ -726,34 +795,23 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
             # rollen die je altijd aan moet kunnen nemen als je ze hebt
             if rol == Rollen.ROL_IT:
                 url = reverse('Functie:activeer-rol', kwargs={'rol': rol2url[rol]})
-                objs.append({'titel': 'IT beheerder', 'url': url})
+                objs.append({'titel': 'IT beheerder', 'url': url, 'volgorde': 1})
 
             elif rol == Rollen.ROL_BB:
                 url = reverse('Functie:activeer-rol', kwargs={'rol': rol2url[rol]})
-                objs.append({'titel': 'Manager competitiezaken', 'url': url})
+                objs.append({'titel': 'Manager competitiezaken', 'url': url, 'volgorde': 2})
 
             elif rol == Rollen.ROL_SCHUTTER:
                 url = reverse('Functie:activeer-rol', kwargs={'rol': rol2url[rol]})
-                objs2.append({'titel': 'Schutter', 'url': url})
+                objs.append({'titel': 'Schutter', 'url': url, 'volgorde': 90000})
 
             elif rol == Rollen.ROL_NONE:
                 url = reverse('Functie:activeer-rol', kwargs={'rol': rol2url[rol]})
-                objs2.append({'titel': 'Gebruiker', 'url': url})
+                objs.append({'titel': 'Gebruiker', 'url': url, 'volgorde': 90001})
 
             elif parent_tup == (None, None):
                 # top-level rol voor deze gebruiker - deze altijd tonen
-                url = reverse('Functie:activeer-functie', kwargs={'functie_pk': functie_pk})
-                functie = Functie.objects.\
-                            select_related('nhb_ver').\
-                            only('beschrijving', 'nhb_ver__naam').\
-                            get(pk=functie_pk)
-                title = functie.beschrijving
-                if functie.nhb_ver:
-                    ver_naam = functie.nhb_ver.naam
-                else:
-                    ver_naam = ''
-                objs.append({'titel': title, 'ver_naam': ver_naam, 'url': url})
-
+                pks.append(functie_pk)
             else:
                 try:
                     hierarchy2[parent_tup].append(child_tup)
@@ -761,12 +819,38 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
                     hierarchy2[parent_tup] = [child_tup,]
         # for
 
-        # zet 'lage' functies onderaan
-        objs.extend(objs2)
-        del objs2
+        # haal alle functies met 1 database query op
+        pk2func = dict()
+        for obj in (Functie
+                    .objects
+                    .filter(pk__in=pks)
+                    .select_related('nhb_ver', 'nhb_regio', 'nhb_rayon')
+                    .only('beschrijving', 'rol',
+                          'nhb_ver__nhb_nr', 'nhb_ver__naam',
+                          'nhb_rayon__rayon_nr', 'nhb_regio__regio_nr')):
+            pk2func[obj.pk] = obj
+        # for
+
+        for functie_pk in pks:
+            url = reverse('Functie:activeer-functie', kwargs={'functie_pk': functie_pk})
+            functie = pk2func[functie_pk]
+            title = functie.beschrijving
+            ver_naam = ''
+            if functie.nhb_ver:
+                ver_naam = functie.nhb_ver.naam
+            volgorde = self._functie_volgorde(functie)
+            objs.append({'titel': title, 'ver_naam': ver_naam, 'url': url, 'volgorde': volgorde})
+        # for
+
+        objs.sort(key=lambda x: x['volgorde'])
+        return objs, hierarchy2
+
+    def _get_functies_help_anderen(self, hierarchy2):
+        objs = list()
 
         # nu nog uitzoeken welke ge-erfde functies we willen tonen
         # deze staan in hierarchy
+        # TODO: minder vaak rol_get_huidige_functie aanroepen
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
 
         if functie_nu:
@@ -780,16 +864,43 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
             # geen ge-erfde functies
             pass
         else:
-            objs.append({'separator': True})
+            # haal alle benodigde functies met 1 query op
+            pks = [pk for _, pk in child_tups]
+            pk2func = dict()
+            for obj in (Functie
+                        .objects
+                        .filter(pk__in=pks)
+                        .select_related('nhb_ver', 'nhb_regio', 'nhb_rayon')
+                        .only('beschrijving', 'rol',
+                              'nhb_ver__nhb_nr', 'nhb_ver__naam',
+                              'nhb_rayon__rayon_nr', 'nhb_regio__regio_nr')):
+                pk2func[obj.pk] = obj
+            # for
+
             for rol, functie_pk in child_tups:
                 url = reverse('Functie:activeer-functie', kwargs={'functie_pk': functie_pk})
-                if rol == Rollen.ROL_CWZ:
-                    functie = Functie.objects.select_related('nhb_ver').only('beschrijving', 'nhb_ver__naam').get(pk=functie_pk)
-                    objs.append({'titel': functie.beschrijving, 'ver_naam': functie.nhb_ver.naam, 'url': url})
+                if rol in (Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_WL):
+                    functie = pk2func[functie_pk]
+                    volgorde = self._functie_volgorde(functie)
+                    objs.append({'titel': functie.beschrijving, 'ver_naam': functie.nhb_ver.naam, 'url': url, 'volgorde': volgorde})
                 else:
-                    functie = Functie.objects.only('beschrijving').get(pk=functie_pk)
-                    objs.append({'titel': functie.beschrijving, 'ver_naam': "", 'url': url})
+                    functie = pk2func[functie_pk]
+                    volgorde = self._functie_volgorde(functie)
+                    objs.append({'titel': functie.beschrijving, 'ver_naam': "", 'url': url, 'volgorde': volgorde})
             # for
+
+        objs.sort(key=lambda x: x['volgorde'])
+        return objs
+
+    def get_queryset(self):
+        """ called by the template system to get the queryset or list of objects for the template """
+
+        objs, hierarchy = self._get_functies_eigen()
+        objs2 = self._get_functies_help_anderen(hierarchy)
+
+        if len(objs2):
+            objs.append({'separator': True})
+            objs.extend(objs2)
 
         return objs
 
@@ -810,16 +921,18 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
                 context['show_otp_koppelen'] = True
                 context['show_otp_controle'] = False
 
-        context['wiki_2fa_url'] = settings.WIKI_URL_2FA
-        context['wiki_2fa_titel'] = 'Tweede-factor authenticatie'
-
-        context['url_handleiding_rollen'] = settings.WIKI_URL_ROLLEN
+        if settings.ENABLE_WIKI:        # pragma: no cover
+            context['wiki_2fa_url'] = settings.WIKI_URL + '/' + settings.HANDLEIDING_2FA
+            context['wiki_rollen'] = settings.WIKI_URL + '/' + settings.HANDLEIDING_ROLLEN
+        else:
+            context['wiki_2fa_url'] = reverse('Handleiding:' + settings.HANDLEIDING_2FA)
+            context['wiki_rollen'] = reverse('Handleiding:' + settings.HANDLEIDING_ROLLEN)
 
         # login-as functie voor IT beheerder
         if rol_get_huidige(self.request) == Rollen.ROL_IT:
             context['url_login_as'] = reverse('Account:account-wissel')
 
-        # TODO: volgende code is alleen voor de testsuite - willen we dit live terug zien?
+        # bedoeld voor de testsuite, maar kan geen kwaad
         context['insert_meta'] = True
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
         context['meta_rol'] = rol2url[rol_nu]
@@ -866,7 +979,7 @@ class ActiveerRolView(UserPassesTestMixin, View):
         if rol == Rollen.ROL_BB:
             return redirect('Competitie:overzicht')
 
-        if rol == Rollen.ROL_CWZ:
+        if rol in (Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_WL):
             return redirect('Vereniging:overzicht')
 
         return redirect('Functie:wissel-van-rol')
@@ -1033,7 +1146,7 @@ class OTPControleView(TemplateView):
             else:
                 # controle is mislukt (is al gelogd en in het logboek geschreven)
                 form.add_error(None, 'Verkeerde code. Probeer het nog eens.')
-                # TODO: blokkeer na X pogingen
+                # FUTURE: blokkeer na X pogingen
 
         # still here --> re-render with error message
         context = {'form': form}
@@ -1105,7 +1218,7 @@ class OTPKoppelenView(TemplateView):
 
             # controle is mislukt - is al gelogd
             form.add_error(None, 'Verkeerde code. Probeer het nog eens.')
-            # TODO: blokkeer na X pogingen
+            # FUTURE: blokkeer na X pogingen
 
         # still here --> re-render with error message
         qrcode = qrcode_get(account)
@@ -1113,7 +1226,7 @@ class OTPKoppelenView(TemplateView):
         secret = " ".join([tmp[i:i+4] for i in range(0, 16, 4)])
         context = {'form': form,
                    'qrcode': qrcode,
-                   'otp_secret': secret }
+                   'otp_secret': secret}
         menu_dynamics(request, context, actief="inloggen")
         return render(request, TEMPLATE_OTP_KOPPELEN, context)
 

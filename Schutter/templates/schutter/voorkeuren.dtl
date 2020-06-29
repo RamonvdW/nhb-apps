@@ -13,9 +13,9 @@
 
 <h4>Voorkeuren</h4>
 
-{% if is_cwz %}
+{% if is_hwl %}
 
-    <p>Als CWZ kan je op deze pagina de voorkeuren van lid <b>{{ nhblid.volledige_naam }}</b> aanpassen.</p>
+    <p>Als HWL kan je op deze pagina de voorkeuren van lid <b>{{ nhblid.volledige_naam }}</b> aanpassen.</p>
 
 {% else %}
 
@@ -26,7 +26,7 @@
 
 <h5>Bogen</h5>
 
-{% if not is_cwz %}
+{% if not is_hwl %}
 
     <p>Door aan te geven welke bogen jouw voorkeur hebben kunnen we beschikbare informatie aanpassen aan jouw wensen en hoef je minder handelingen te verrichten.</p>
 
@@ -48,22 +48,12 @@
     <table class="white">
 
         <thead>
-            <th>Alleen informatie</th>
             <th>Hier schiet ik mee</th>
-            <th colspan="2">Aanvangsgemiddelden</th>
-            <th>Vastgesteld op</th>
-            <th>Bron</th>
+            <th>Alleen informatie</th>
         </thead>
 
         {% for obj in bogen %}
             <tr>
-                <td>
-                    <label>
-                        <input type="checkbox" class="filled-in" name="{{ obj.check_info }}" {% if obj.heeft_interesse %}checked{% endif %}>
-                        <span class="black-text">{{ obj.boogtype.beschrijving }}</span>
-                    </label>
-                </td>
-
                 <td>
                     <label>
                         <input type="checkbox" class="filled-in" name="{{ obj.check_schiet }}" {% if obj.voor_wedstrijd %}checked{% endif %}>
@@ -71,48 +61,11 @@
                     </label>
                 </td>
 
-                <td>Indoor (18m):<br>25m 1pijl:</td>
-
                 <td>
-                    {% if obj.ag_18_waarde %}
-                        <span>{{ obj.ag_18_waarde|floatformat:3 }}</span>
-                    {% else %}
-                        <span><i>Onbekend</i></span>
-                    {% endif %}
-                    <br>
-                    {% if obj.ag_25_waarde %}
-                        <span>{{ obj.ag_25_waarde|floatformat:3 }}</span>
-                    {% else %}
-                        <span><i>Onbekend</i></span>
-                    {% endif %}
-                </td>
-
-                <td>
-                    {% if obj.ag_18_waarde %}
-                        <span>{{ obj.ag_18_scorehist.datum }}</span>
-                    {% else %}
-                        <span>&nbsp;</span>
-                    {% endif %}
-                    <br>
-                    {% if obj.ag_25_waarde %}
-                        <span>{{ obj.ag_25_scorehist.datum }}</span>
-                    {% else %}
-                        <span>&nbsp;</span>
-                    {% endif %}
-                </td>
-
-                <td>
-                    {% if obj.ag_18_waarde %}
-                        <span>{{ obj.ag_18_scorehist.notitie }}</span>
-                    {% else %}
-                        <span>&nbsp;</span>
-                    {% endif %}
-                    <br>
-                    {% if obj.ag_25_waarde %}
-                        <span>{{ obj.ag_25_scorehist.notitie }}</span>
-                    {% else %}
-                        <span>&nbsp;</span>
-                    {% endif %}
+                    <label>
+                        <input type="checkbox" class="filled-in" name="{{ obj.check_info }}" {% if obj.heeft_interesse %}checked{% endif %}>
+                        <span class="black-text">{{ obj.boogtype.beschrijving }}</span>
+                    </label>
                 </td>
             </tr>
         {% endfor %}
@@ -124,15 +77,25 @@
         <tr>
             <td colspan="6">
                 <label>
-                    <input type="checkbox" class="filled-in" name="voorkeur_DT_18m" {% if voorkeur_dt %}checked{% endif %}>
+                    <input type="checkbox" class="filled-in" name="voorkeur_dt"{% if voorkeuren.voorkeur_dutchtarget_18m %} checked{% endif %}>
                     <span class="black-text">Voorkeur voor Dutch Target</span>
                 </label>
             </td>
         </tr>
 
         <tr>
+            <td colspan="6">
+                <label>
+                    <input type="checkbox" class="filled-in" name="voorkeur_meedoen_competitie"{% if voorkeuren.voorkeur_meedoen_competitie %} checked{% endif %}>
+                    <span class="black-text">Voorkeur voor de (winter-)competities</span>
+                </label>
+            </td>
+        </tr>
+
+        <tr>
             <td colspan="6" class="center-align">
-                <input class="btn-nhb-blauw" type="submit" value="Wijzigingen opslaan">
+                <button class="btn-nhb-blauw" type="submit">
+                    <i class="material-icons-round left">save</i>Wijzigingen opslaan</button>
             </td>
         </tr>
 
@@ -146,7 +109,7 @@
         <h6 class="center-align">Uitleg 'Voorkeur voor Dutch Target'</h6>
         <p>De voorkeur voor Dutch Target / 3-spot is alleen van toepassing op Indoor wedstrijden op 18 meter waar normaal op 40cm blazoen geschoten wordt, zoals de Individuele Competitie.</p>
         <p>Als je het vakje aankruist zal, waar mogelijk, jouw voorkeur worden doorgegeven aan de wedstrijdleider.</p>
-        <p>Noteer dat dit een voorkeur is, maar geen recht. Als er bijvoorbeeld geen ruimte is op het doel, dan moet je toch op een 40cm blazoen schieten.</p>
+        <p>Noteer dat dit een voorkeur is, maar geen recht. Als er bijvoorbeeld geen ruimte is op de accommodatie, dan moet je toch op een 40cm blazoen schieten.</p>
     </div>
 
 </div>

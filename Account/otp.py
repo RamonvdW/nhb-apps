@@ -83,6 +83,9 @@ def account_otp_koppel(request, account, code):
         account.otp_is_actief = True
         account.save()
         my_logger.info('%s 2FA koppeling gelukt voor account %s' % (from_ip, account.username))
+
+        # propageer het succes zodat de gebruiker meteen aan de slag kan
+        account_rechten_otp_controle_gelukt(request)
         return True
 
     # controle is mislukt - schrijf dit in het logboek

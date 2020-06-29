@@ -1,0 +1,87 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2020 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Planning Rayon{% endblock %}
+
+{% block pagina %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-planning-rayon" %}
+
+<h4>Planning Rayon</h4>
+
+<div class="row">
+
+    <!-- toon gegevens van de regio en competitie in een blauwe box -->
+    <div class="col s12 m10 l8 xl6 offset-m1 offset-l2 offset-xl3">
+        <div class="white-text nhb-blauw z-depth-2">
+
+            <div class="row small-row">
+                <div class="col s3">Competitie:</div>
+                <div class="col s7">{{ deelcomp_rk.competitie.beschrijving }}</div>
+            </div>
+
+            <div class="row small-row">
+                <div class="col s3">Rayon:</div>
+                <div class="col s7">{{ rayon }}</div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+{% if url_bond %}
+    <p>&nbsp;</p>
+    <p><a class="btn-nhb-blauw" href="{{ url_bond }}">
+    <i class="material-icons-round left">arrow_upward</i>Naar de landelijke planning</a></p>
+{% endif %}
+
+
+<p>&nbsp;</p>
+<h5>RK wedstrijden</h5>
+<p>Hier volgt later de planning van de RK wedstrijden.</p>
+
+
+<p>&nbsp;</p>
+<h5>Regiocompetitie</h5>
+<table class="white">
+
+    <thead>
+        <tr>
+            <th>Status</th>
+            <th>Gebied</th>
+            <th><!-- kolom voor button --></th>
+        </tr>
+    </thead>
+
+    <!-- FUTURE: RK wedstrijden toevoegen -->
+
+    {% for deelcomp in regio_deelcomps %}
+        <tr>
+            <td>
+                {% if deelcomp.is_afgesloten %}
+                    <span>Afgesloten</span>
+                {% else %}
+                    <span>Actief</span>
+                {% endif %}
+            </td>
+
+            <td>{{ deelcomp.nhb_regio }}</td>
+
+            <!-- knop naar de details van de regioplanning -->
+            <td>
+                <a class="btn-nhb-blauw" href="{% url 'Competitie:regio-planning' deelcomp.pk %}">
+                    <i class="material-icons-round left">arrow_forward</i>Bekijk</a>
+            </td>
+        </tr>
+    {% endfor %}
+
+
+</table>
+
+{% endblock %}
+

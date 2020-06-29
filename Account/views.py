@@ -15,10 +15,12 @@ from django.db.models import F, Q, Value
 from django.db.models.functions import Concat
 from django.utils import timezone
 from .forms import LoginForm, ZoekAccountForm, KiesAccountForm
-from .models import Account, AccountEmail, account_email_bevestiging_ontvangen, account_check_gewijzigde_email
+from .models import (Account, AccountEmail,
+                     account_email_bevestiging_ontvangen, account_check_gewijzigde_email)
 from .rechten import account_rechten_otp_controle_gelukt, account_rechten_login_gelukt
-from Overig.tijdelijke_url import set_tijdelijke_url_receiver, RECEIVER_BEVESTIG_ACCOUNT_EMAIL, RECEIVER_ACCOUNT_WISSEL,\
-                                  maak_tijdelijke_url_accountwissel, maak_tijdelijke_url_account_email
+from Overig.tijdelijke_url import (set_tijdelijke_url_receiver,
+                                   RECEIVER_BEVESTIG_ACCOUNT_EMAIL, RECEIVER_ACCOUNT_WISSEL,
+                                   maak_tijdelijke_url_accountwissel, maak_tijdelijke_url_account_email)
 from Plein.menu import menu_dynamics
 from Logboek.models import schrijf_in_logboek
 from Overig.helpers import get_safe_from_ip
@@ -77,13 +79,13 @@ def account_check_nieuwe_email(request, from_ip, account):
                            activiteit="Bevestiging van nieuwe email gevraagd voor account %s" % repr(
                                account.username))
 
-        text_body = "Hallo!\n\n" + \
-                    "Dit is een verzoek vanuit de website van de NHB om toegang tot je email te bevestigen.\n" + \
-                    "Klik op onderstaande link om dit te bevestigen.\n\n" + \
-                    ack_url + "\n\n" + \
-                    "Als je dit verzoek onverwacht ontvangen hebt, neem dan contact met ons op via info@handboogsport.nl\n\n" + \
-                    "Veel plezier met de site!\n" + \
-                    "Het bondsburo\n"
+        text_body = ("Hallo!\n\n"
+                     + "Dit is een verzoek vanuit de website van de NHB om toegang tot je email te bevestigen.\n"
+                     + "Klik op onderstaande link om dit te bevestigen.\n\n"
+                     + ack_url + "\n\n"
+                     + "Als je dit verzoek onverwacht ontvangen hebt, neem dan contact met ons op via info@handboogsport.nl\n\n"
+                     + "Veel plezier met de site!\n"
+                     + "Het bondsburo\n")
 
         mailer_queue_email(mailadres, 'Email adres bevestigen', text_body)
 
@@ -114,7 +116,7 @@ def account_check_geblokkeerd(request, from_ip, account):
         my_logger.info('%s LOGIN Mislukte inlog voor account %s met onbevestigde email' % (
                                from_ip, repr(account.username)))
 
-        # TODO: knop maken om na X uur een nieuwe mail te kunnen krijgen
+        # FUTURE: knop maken om na X uur een nieuwe mail te kunnen krijgen
         context = {'partial_email': mailer_obfuscate_email(email.nieuwe_email)}
         menu_dynamics(request, context, actief='inloggen')
         return render(request, TEMPLATE_BEVESTIG_EMAIL, context)
@@ -135,6 +137,139 @@ class LoginView(TemplateView):
     # class variables shared by all instances
     form_class = LoginForm
 
+    def _zoek_account(self, form):
+        # zoek een bestaand account
+
+        # we doen hier alvast een stukje voorwerk dat normaal door het backend gedaan wordt
+        # ondersteunen inlog met Account.username en Account.bevestigde_email
+
+        from_ip = get_safe_from_ip(self.request)
+        login_naam = form.cleaned_data.get('login_naam')
+
+        account = None
+        try:
+            account = Account.objects.get(username=login_naam)
+        except Account.DoesNotExist:
+            # account met deze username bestaat niet
+            # sta ook toe dat met het email adres ingelogd wordt
+            try:
+                email = AccountEmail.objects.get(bevestigde_email=login_naam)
+            except AccountEmail.DoesNotExist:
+                # email is ook niet bekend
+                # LET OP! dit kan heel snel heel veel data worden! - voorkom storage overflow!!
+                # my_logger.info('%s LOGIN Mislukte inlog voor onbekend inlog naam %s' % (from_ip, repr(login_naam)))
+                # schrijf_in_logboek(None, 'Inloggen', 'Mislukte inlog vanaf IP %s: onbekende inlog naam %s' % (from_ip, repr(login_naam)))
+                pass
+            except AccountEmail.MultipleObjectsReturned:
+                # kan niet kiezen tussen verschillende accounts
+                # werkt dus niet als het email hergebruikt is voor meerdere accounts
+                form.add_error(None,
+                               'Inloggen met e-mail is niet mogelijk. Probeer het nog eens.')
+                account = None
+            else:
+                # email gevonden
+                # pak het account erbij
+                account = email.account
+
+        if account:
+            # blokkeer inlog als het account geblokkeerd is door te veel wachtwoord pogingen
+            now = timezone.now()
+            if account.is_geblokkeerd_tot:
+                if account.is_geblokkeerd_tot > now:
+                    schrijf_in_logboek(account, 'Inloggen',
+                                       'Mislukte inlog vanaf IP %s voor geblokkeerd account %s' % (
+                                           from_ip, repr(login_naam)))
+                    my_logger.info(
+                        '%s LOGIN Mislukte inlog voor geblokkeerd account %s' % (from_ip, repr(login_naam)))
+                    context = {'account': account}
+                    menu_dynamics(self.request, context, actief='inloggen')
+                    return render(self.request, TEMPLATE_GEBLOKKEERD, context), None
+
+        return None, account
+
+    def _probeer_login(self, form, account):
+
+        """ Kijk of het wachtwoord goed is en het account niet geblokkeerd is """
+
+        from_ip = get_safe_from_ip(self.request)
+        login_naam = form.cleaned_data.get('login_naam')
+        wachtwoord = form.cleaned_data.get('wachtwoord')
+        next = form.cleaned_data.get('next')
+
+        # controleer het wachtwoord
+        if not authenticate(username=account.username, password=wachtwoord):
+            # authenticatie is niet gelukt
+            # reden kan zijn: verkeerd wachtwoord of is_active=False
+
+            # onthoudt precies wanneer dit was
+            account.laatste_inlog_poging = timezone.now()
+            schrijf_in_logboek(account, 'Inloggen',
+                               'Mislukte inlog vanaf IP %s voor account %s' % (from_ip, repr(login_naam)))
+            my_logger.info('%s LOGIN Mislukte inlog voor account %s' % (from_ip, repr(login_naam)))
+
+            # onthoudt hoe vaak dit verkeerd gegaan is
+            account.verkeerd_wachtwoord_teller += 1
+            account.save()
+
+            # bij te veel pogingen, blokkeer het account
+            if account.verkeerd_wachtwoord_teller >= settings.AUTH_BAD_PASSWORD_LIMIT:
+                account.is_geblokkeerd_tot = timezone.now() + timedelta(
+                    minutes=settings.AUTH_BAD_PASSWORD_LOCKOUT_MINS)
+                account.verkeerd_wachtwoord_teller = 0  # daarna weer volle mogelijkheden
+                account.save()
+                schrijf_in_logboek(account, 'Inlog geblokkeerd',
+                                   'Account %s wordt geblokkeerd tot %s' % (
+                                       repr(login_naam), account.is_geblokkeerd_tot.strftime('%Y-%m-%d %H:%M:%S')))
+                context = {'account': account}
+                menu_dynamics(self.request, context, actief='inloggen')
+                return render(self.request, TEMPLATE_GEBLOKKEERD, context)
+
+            # wachtwoord klopt niet, doe opnieuw
+            return None
+
+        # wachtwoord is goed
+
+        # kijk of er een reden is om gebruik van het account te weren
+        for _, func in account_plugins_login:
+            httpresp = func(self.request, from_ip, account)
+            if httpresp:
+                # plugin has decided that the user may not login
+                # and has generated/rendered an HttpResponse
+                return httpresp
+
+        # integratie met de authenticatie laag van Django
+        login(self.request, account)
+
+        my_logger.info('%s LOGIN op account %s' % (from_ip, repr(account.username)))
+
+        if account.verkeerd_wachtwoord_teller > 0:
+            account.verkeerd_wachtwoord_teller = 0
+            account.save()
+
+        # Aangemeld blijven checkbox
+        if not form.cleaned_data.get('aangemeld_blijven', False):
+            # gebruiker wil NIET aangemeld blijven
+            # zorg dat de session-cookie snel verloopt
+            self.request.session.set_expiry(0)
+
+        account_rechten_login_gelukt(self.request)
+
+        # voer de automatische redirect uit, indien gevraagd
+        if next:
+            # reject niet bestaande urls
+            # resolve zoekt de view die de url af kan handelen
+            if next[-1] != '/':
+                next += '/'
+            try:
+                resolve(next)
+            except Resolver404:
+                pass
+            else:
+                # is valide url
+                return HttpResponseRedirect(next)
+
+        return HttpResponseRedirect(reverse('Plein:plein'))
+
     def post(self, request, *args, **kwargs):
         """ deze functie wordt aangeroepen als een POST request ontvangen is.
             dit is gekoppeld aan het drukken op de LOG IN knop.
@@ -142,123 +277,18 @@ class LoginView(TemplateView):
         # https://stackoverflow.com/questions/5868786/what-method-should-i-use-for-a-login-authentication-request
         form = LoginForm(request.POST)
         if form.is_valid():
-            from_ip = get_safe_from_ip(request)
-            login_naam = form.cleaned_data.get('login_naam')
-            wachtwoord = form.cleaned_data.get('wachtwoord')
-            next = form.cleaned_data.get('next')
 
-            # we doen hier alvast een stukje voorwerk dat normaal door het backend gedaan wordt
-            # ondersteunen inlog met Account.username en Account.bevestigde_email
-
-            # zoek een bestaand account
-            account = None
-            try:
-                account = Account.objects.get(username=login_naam)
-            except Account.DoesNotExist:
-                # account met deze username bestaat niet
-                # sta ook toe dat met het email adres ingelogd wordt
-                try:
-                    email = AccountEmail.objects.get(bevestigde_email=login_naam)
-                except AccountEmail.DoesNotExist:
-                    # email is ook niet bekend
-                    # LET OP! dit kan heel snel heel veel data worden! - voorkom storage overflow!!
-                    #my_logger.info('%s LOGIN Mislukte inlog voor onbekend inlog naam %s' % (from_ip, repr(login_naam)))
-                    #schrijf_in_logboek(None, 'Inloggen', 'Mislukte inlog vanaf IP %s: onbekende inlog naam %s' % (from_ip, repr(login_naam)))
-                    pass
-                except AccountEmail.MultipleObjectsReturned:
-                    # kan niet kiezen tussen verschillende accounts
-                    # werkt dus niet als het email hergebruikt is voor meerdere accounts
-                    form.add_error(None,
-                                   'Inloggen met e-mail is niet mogelijk. Probeer het nog eens.')
-                    account = None
-                else:
-                    # email gevonden
-                    # pak het account erbij
-                    account = email.account
-
+            response, account = self._zoek_account(form)
             if account:
-                # account bestaat wel
+                # account bestaat
+                if response:
+                    # account is geblokkeerd
+                    return response
 
-                # blokkeer inlog als het account geblokkeerd is door te veel wachtwoord pogingen
-                now = timezone.now()
-                if account.is_geblokkeerd_tot:
-                    if account.is_geblokkeerd_tot > now:
-                        schrijf_in_logboek(account, 'Inloggen',
-                                           'Mislukte inlog vanaf IP %s voor geblokkeerd account %s' % (
-                                           from_ip, repr(login_naam)))
-                        my_logger.info(
-                            '%s LOGIN Mislukte inlog voor geblokkeerd account %s' % (from_ip, repr(login_naam)))
-                        context = {'account': account}
-                        menu_dynamics(request, context, actief='inloggen')
-                        return render(request, TEMPLATE_GEBLOKKEERD, context)
-
-                # controleer het wachtwoord
-                if authenticate(username=account.username, password=wachtwoord):
-                    # wachtwoord is goed
-
-                    # kijk of er een reden is om gebruik van het account te weren
-                    for _, func in account_plugins_login:
-                        httpresp = func(request, from_ip, account)
-                        if httpresp:
-                            # plugin has decided that the user may not login
-                            # and has generated/rendered an HttpResponse
-                            return httpresp
-
-                    # integratie met de authenticatie laag van Django
-                    login(request, account)
-
-                    my_logger.info('%s LOGIN op account %s' % (from_ip, repr(account.username)))
-
-                    if account.verkeerd_wachtwoord_teller > 0:
-                        account.verkeerd_wachtwoord_teller = 0
-                        account.save()
-
-                    # Aangemeld blijven checkbox
-                    if not form.cleaned_data.get('aangemeld_blijven', False):
-                        # gebruiker wil NIET aangemeld blijven
-                        # zorg dat de session-cookie snel verloopt
-                        request.session.set_expiry(0)
-
-                    account_rechten_login_gelukt(request)
-
-                    # voer de automatische redirect uit, indien gevraagd
-                    if next:
-                        # reject niet bestaande urls
-                        # resolve zoekt de view die de url af kan handelen
-                        if next[-1] != '/':
-                            next += '/'
-                        try:
-                            resolve(next)
-                        except Resolver404:
-                            pass
-                        else:
-                            # is valide url
-                            return HttpResponseRedirect(next)
-
-                    return HttpResponseRedirect(reverse('Plein:plein'))
-                else:
-                    # authenticatie is niet gelukt
-                    # reden kan zijn: verkeerd wachtwoord of is_active=False
-
-                    # onthoudt precies wanneer dit was
-                    account.laatste_inlog_poging = timezone.now()
-                    schrijf_in_logboek(account, 'Inloggen', 'Mislukte inlog vanaf IP %s voor account %s' % (from_ip, repr(login_naam)))
-                    my_logger.info('%s LOGIN Mislukte inlog voor account %s' % (from_ip, repr(login_naam)))
-
-                    # onthoudt hoe vaak dit verkeerd gegaan is
-                    account.verkeerd_wachtwoord_teller += 1
-                    account.save()
-
-                    # bij te veel pogingen, blokkeer het account
-                    if account.verkeerd_wachtwoord_teller >= settings.AUTH_BAD_PASSWORD_LIMIT:
-                        account.is_geblokkeerd_tot = timezone.now() + timedelta(minutes=settings.AUTH_BAD_PASSWORD_LOCKOUT_MINS)
-                        account.verkeerd_wachtwoord_teller = 0      # daarna weer volle mogelijkheden
-                        account.save()
-                        schrijf_in_logboek(account, 'Inlog geblokkeerd',
-                                           'Account %s wordt geblokkeerd tot %s' % (repr(login_naam), account.is_geblokkeerd_tot.strftime('%Y-%m-%d %H:%M:%S')))
-                        context = {'account': account}
-                        menu_dynamics(request, context, actief='inloggen')
-                        return render(request, TEMPLATE_GEBLOKKEERD, context)
+                response = self._probeer_login(form, account)
+                if response:
+                    # inlog gelukt of eruit geknikkerd met foutmelding
+                    return response
 
             # gebruiker mag het nog een keer proberen
             if len(form.errors) == 0:
@@ -394,8 +424,8 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
         context['nieuwe_accounts'] = AccountEmail.objects.all().order_by('-account__date_joined')[:50]
-        context['recente_activiteit'] = AccountEmail.objects.all().filter(account__last_login__isnull=False).order_by('-account__last_login')[:50]
-        context['inlog_pogingen'] = AccountEmail.objects.all().filter(account__laatste_inlog_poging__isnull=False).filter(account__last_login__lt=F('account__laatste_inlog_poging')).order_by('-account__laatste_inlog_poging')
+        context['recente_activiteit'] = AccountEmail.objects.filter(account__last_login__isnull=False).order_by('-account__last_login')[:50]
+        context['inlog_pogingen'] = AccountEmail.objects.filter(account__laatste_inlog_poging__isnull=False).filter(account__last_login__lt=F('account__laatste_inlog_poging')).order_by('-account__laatste_inlog_poging')[:50]
         menu_dynamics(self.request, context, actief="hetplein")
         return context
 
@@ -429,14 +459,15 @@ class LoginAsZoekView(UserPassesTestMixin, ListView):
         zoekterm = self.form.cleaned_data['zoekterm']
         if len(zoekterm) >= 2:  # minimaal twee tekens van de naam/nummer
             self.zoekterm = zoekterm
-            qset = Account.objects.\
-                       exclude(is_staff=True).\
-                       annotate(hele_naam=Concat('first_name', Value(' '), 'last_name')).\
-                       filter(
-                            Q(username__icontains=zoekterm) |  # dekt nhb_nr
+            qset = (Account
+                    .objects
+                    .exclude(is_staff=True)
+                    .annotate(hele_naam=Concat('first_name', Value(' '), 'last_name'))
+                    .filter(Q(username__icontains=zoekterm) |  # dekt nhb_nr
                             Q(first_name__icontains=zoekterm) |
                             Q(last_name__icontains=zoekterm) |
-                            Q(hele_naam__icontains=zoekterm)).order_by('username')
+                            Q(hele_naam__icontains=zoekterm))
+                    .order_by('username'))
             return qset[:50]
 
         self.zoekterm = ""
@@ -493,13 +524,13 @@ def account_vraag_email_bevestiging(accountmail, **kwargs):
     # maak de url aan om het e-mailadres te bevestigen
     url = maak_tijdelijke_url_account_email(accountmail, **kwargs)
 
-    text_body = "Hallo!\n\n" + \
-                "Je hebt een account aangemaakt op de website van de NHB.\n" + \
-                "Klik op onderstaande link om dit te bevestigen.\n\n" + \
-                url + "\n\n" + \
-                "Als jij dit niet was, neem dan contact met ons op via info@handboogsport.nl\n\n" + \
-                "Veel plezier met de site!\n" + \
-                "Het bondsburo\n"
+    text_body = ("Hallo!\n\n"
+                 + "Je hebt een account aangemaakt op de website van de NHB.\n"
+                 + "Klik op onderstaande link om dit te bevestigen.\n\n"
+                 + url + "\n\n"
+                 + "Als jij dit niet was, neem dan contact met ons op via info@handboogsport.nl\n\n"
+                 + "Veel plezier met de site!\n"
+                 + "Het bondsburo\n")
 
     mailer_queue_email(accountmail.nieuwe_email, 'Aanmaken account voltooien', text_body)
 

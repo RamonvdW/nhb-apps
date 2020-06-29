@@ -1,0 +1,160 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2020 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Verenigingen en Accommodaties{% endblock %}
+
+{% block pagina %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="lijst-verenigingen" %}
+
+<h4>Verenigingen en Accommodaties</h4>
+
+{% if landelijk %}
+    <p>Hieronder volgt de landelijke lijst van {{ object_list.count }} verenigingen.</p>
+{% else %}
+    <p>Hieronder volgt de lijst van {{ object_list.count }} verenigingen in jouw gebied.</p>
+{% endif %}
+
+<p>Je rol is <b>{{ huidige_rol }}</b>.</p>
+
+<table class="white" id="table1">
+    <thead>
+        <tr>        <!-- filter veld -->
+            {% if toon_rayon %}
+                <td></td>
+            {% endif %}
+
+            {% if toon_regio %}
+                <td></td>
+            {% endif %}
+
+            {% if toon_cluster %}
+                <td></td>
+            {% endif %}
+
+            <td colspan="2" class="table-filter"><input class="table-filter" oninput="myTableFilter(this, 'table1')" placeholder="Zoeken"/></td>
+
+            <td><!-- accommodatie details/icoontjes --></td>
+
+            {% if toon_details %}
+                <td></td>
+            {% endif %}
+
+            {% if toon_ledental %}
+                <td></td>
+            {% endif %}
+        </tr>
+        <tr>
+            {% if toon_rayon %}
+                <th class="center-align">Rayon</th>
+            {% endif %}
+
+            {% if toon_regio %}
+                <th class="center-align">Regio</th>
+            {% endif %}
+
+            {% if toon_cluster %}
+                <th class="center-align">Clusters</th>
+            {% endif %}
+
+            <th filter="on">Vereniging</th>
+
+            <th filter="on">Accommodatie<br>adres</th>
+            <th>Accommodatie<br>info</th>
+
+            {% if toon_details %}
+            <th></th>
+            {% endif %}
+
+            {% if toon_ledental %}
+                <th>Aantal leden</th>
+            {% endif %}
+        </tr>
+    </thead>
+
+    {% for obj in object_list %}
+        <tr>
+            {% if toon_rayon %}
+                <td class="center-align">{{ obj.regio.rayon.rayon_nr }}</td>
+            {% endif %}
+
+            {% if toon_regio %}
+                <td class="center-align">{{ obj.regio.regio_nr }}</td>
+            {% endif %}
+
+            {% if toon_cluster %}
+                <td class="center-align">{{ obj.cluster_letters }}</td>
+            {% endif %}
+
+            <!-- vereniging -->
+            <td>[{{ obj.nhb_nr }}] {{ obj.naam }}</td>
+
+            <!-- accommodatie -->
+            {% if obj.plaats %}
+                <td>
+                    {% for loc in obj.wedstrijdlocatie_set.all %}
+                        {% if not forloop.first %}
+                        <br>------<br>
+                        {% endif %}
+
+                        <span>{{ loc.adres|linebreaksbr }}</span>
+                    {% endfor %}
+                </td>
+                <td>
+                    {% for loc in obj.wedstrijdlocatie_set.all %}
+                        {% if not forloop.first %}
+                        <br>------<br>
+                        {% endif %}
+
+                        {% if loc.baan_type == 'X' %}
+                            <!-- ga er vanuit dat nog niets ingevuld is -->
+                            <i class="material-icons-round red-text" style="vertical-align: bottom; font-size: 20px">error_outline</i>
+                        {% else %}
+                            <!-- toon binnen-buiten icoon -->
+                            {% if loc.baan_type == 'H' %}
+                                <i class="material-icons-round" style="vertical-align: bottom; font-size: 20px">flip</i>
+                            {% endif %}
+                            <!-- toon volledig-overdekt icoon -->
+                            {% if loc.baan_type == 'O' %}
+                                <i class="material-icons-round" style="vertical-align: bottom; font-size: 20px">crop_din</i>
+                            {% endif %}
+
+                            <!-- toon aantal banen -->
+                            <span>&nbsp;{{ loc.banen_18m }}|{{ loc.banen_25m }}</span>
+
+                            <!-- toon het belletje icoon als er notities zijn -->
+                            {% if loc.notities != '' %}
+                                <i class="material-icons-round" style="vertical-align: bottom; font-size: 20px">notifications_none</i>
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                </td>
+            {% else %}
+                <td><i>Geen</i></td>
+                <td><!-- accommodatie details/icoontjes --></td>
+            {% endif %}
+
+            {% if toon_details %}
+                <td>
+                    {% for loc in obj.wedstrijdlocatie_set.all %}
+                        {% if not forloop.first %}
+                            <br>------<br>
+                        {% endif %}
+                        <a class="btn-nhb-blauw" href="{{ loc.details_url }}">Details</a>
+                    {% endfor %}
+                </td>
+            {% endif %}
+
+            {% if toon_ledental %}
+                <td{% if obj.aantal_leden >= 100 %} class="blue-text"{% endif %}>{{ obj.aantal_leden }}</td>
+            {% endif %}
+        </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}
+

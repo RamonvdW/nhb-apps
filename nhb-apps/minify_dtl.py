@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019 Ramon van der Winkel.
+#  Copyright (c) 2019-2020 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -12,6 +12,9 @@
 
 from django.template.loaders.app_directories import Loader as AppDirectoriesLoader
 import re
+
+# change to False to disable this utility
+ENABLE_MINIFY = True
 
 
 class Loader(AppDirectoriesLoader):
@@ -95,14 +98,22 @@ class Loader(AppDirectoriesLoader):
     def get_contents(self, origin):
         """ Deze Loader methode lijkt aangeroepen """
         contents = super().get_contents(origin)
+
         # in our project we use .dtl for "django template language" files
-        if origin.template_name.endswith('.dtl'):
+        if ENABLE_MINIFY and origin.template_name.endswith('.dtl'):
             # print("minifying %s" % repr(origin.template_name))
 
             contents = self.remove_html_comments(contents)
 
             # TODO: zoek uit of het minder cpu kost als de reg-exps gecompileerd worden
             # TODO: zoek uit of het minder cpu kost als de reg-exps gecombineerd worden
+
+            # TODO: voeg minify rule toe %}\s+{{
+            # voorbeeld (login.dtl in Account)
+            #   {% csrf_token %}
+            #   {{ form.next }}
+
+            # TODO: zorg voor minify van debug toolbar
 
             # remove /* css block comments */
             contents = re.sub(r'/\*(.*?)\*/', '', contents, flags=re.MULTILINE)

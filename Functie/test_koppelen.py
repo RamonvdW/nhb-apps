@@ -7,6 +7,7 @@
 from django.test import TestCase
 from .models import maak_functie, Functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
+from Logboek.models import LogboekRegel
 from Overig.e2ehelpers import E2EHelpers
 import datetime
 
@@ -14,7 +15,7 @@ import datetime
 class TestFunctieKoppelen(E2EHelpers, TestCase):
     """ unit tests voor de Functie applicatie, functionaliteit Koppel bestuurders """
 
-    test_after = ('Account', 'Functie.test_2fa')
+    test_after = ('Account', 'Functie.test_2fa', 'Functie.test_overzicht')
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -56,21 +57,31 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         lid.save()
         self.nhblid1 = lid
 
-        self.functie_cwz = maak_functie("CWZ test", "CWZ")
-        self.functie_cwz.nhb_ver = ver
-        self.functie_cwz.save()
+        self.functie_sec = maak_functie("SEC test", "SEC")
+        self.functie_sec.nhb_ver = ver
+        self.functie_sec.save()
+
+        self.functie_hwl = maak_functie("HWL test", "HWL")
+        self.functie_hwl.nhb_ver = ver
+        self.functie_hwl.save()
+
+        self.functie_wl = maak_functie("WL test", "WL")
+        self.functie_wl.nhb_ver = ver
+        self.functie_wl.save()
+
+        self.regio_112 = NhbRegio.objects.get(regio_nr=112)
 
         # maak nog een test vereniging
         ver2 = NhbVereniging()
         ver2.naam = "Extra Club"
         ver2.nhb_nr = "1900"
-        ver2.regio = NhbRegio.objects.get(regio_nr=112)
+        ver2.regio = self.regio_112
         # secretaris kan nog niet ingevuld worden
         ver2.save()
 
-        self.functie_cwz2 = maak_functie("CWZ test 2", "CWZ")
-        self.functie_cwz2.nhb_ver = ver2
-        self.functie_cwz2.save()
+        self.functie_hwl2 = maak_functie("HWL test 2", "HWL")
+        self.functie_hwl2.nhb_ver = ver2
+        self.functie_hwl2.save()
 
         lid = NhbLid()
         lid.nhb_nr = 100024
@@ -89,116 +100,6 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.url_wijzig = '/functie/wijzig/'
         self.url_activeer_functie = '/functie/activeer-functie/%s/'
         self.url_activeer_rol = '/functie/activeer-rol/%s/'
-
-    def test_anon(self):
-        self.e2e_logout()
-
-        # geen rechten om dit overzicht in te zien
-        resp = self.client.get(self.url_overzicht)
-        self.assert_is_redirect(resp, '/plein/')
-
-        # geen rechten om beheerders te kiezen
-        resp = self.client.get(self.url_wijzig + '123/')
-        self.assert_is_redirect(resp, '/plein/')
-
-    def test_overzicht_view_normaal(self):
-        # geen rechten om dit overzicht in te zien
-        # zelf niet na acceptatie VHPG en OTP controle
-        self.e2e_login_and_pass_otp(self.account_normaal)
-
-        resp = self.client.get(self.url_overzicht)
-        self.assert_is_redirect(resp, '/plein/')
-
-        resp = self.client.get(self.url_overzicht + 'vereniging/')
-        self.assert_is_redirect(resp, '/plein/')
-
-    def test_overzicht_view_admin(self):
-        self.e2e_login_and_pass_otp(self.account_admin)
-
-        # neem de BB rol aan
-        self.e2e_wisselnaarrol_bb()
-        self.e2e_check_rol('BB')
-        resp = self.client.get('/plein/')
-        self.assert_html_ok(resp)
-        self.assertContains(resp, "Manager competitiezaken")
-
-        # controleer de Wijzig knoppen op de functie-overzicht pagina
-        resp = self.client.get(self.url_overzicht)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('functie/overzicht.dtl', 'plein/site_layout.dtl'))
-        urls = [url for url in self.extract_all_urls(resp) if url.startswith('/functie/wijzig/')]
-        self.assertEqual(len(urls), 2)      # BKO 18m en 25m
-
-        # controleer de Wijzig knoppen op de functie-overzicht pagina voor verschillende rollen
-
-        # neem de BKO 18m rol aan
-        self.e2e_wissel_naar_functie(self.functie_bko)
-        self.e2e_check_rol('BKO')
-        resp = self.client.get(self.url_overzicht)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('functie/overzicht.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, "BKO Indoor")
-        urls = [url for url in self.extract_all_urls(resp) if url.startswith(self.url_wijzig)]
-        self.assertEqual(len(urls), 4)      # 4x RKO
-
-        # neem de RKO Rayon 3 Indoor rol aan
-        self.e2e_wissel_naar_functie(self.functie_rko3)
-        self.e2e_check_rol('RKO')
-        resp = self.client.get(self.url_overzicht)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('functie/overzicht.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, "RKO Rayon 3 Indoor")
-        urls = [url for url in self.extract_all_urls(resp) if url.startswith(self.url_wijzig)]
-        self.assertEqual(len(urls), 4)      # 4x RCL
-
-        # neem de RCL Rayon 111 Indoor aan
-        self.e2e_wissel_naar_functie(self.functie_rcl111)
-        self.e2e_check_rol('RCL')
-
-        # controleer de Wijzig knoppen op de functie-overzicht pagina
-        resp = self.client.get(self.url_overzicht)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('functie/overzicht.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, "RCL Regio 111 Indoor")
-        urls = [url for url in self.extract_all_urls(resp) if url.startswith(self.url_wijzig)]
-        self.assertEqual(len(urls), 0)      # geen wijzig knoppen voor de RCL
-
-        self.e2e_assert_other_http_commands_not_supported(self.url_overzicht)
-
-    def test_overzicht_view_cwz(self):
-        # de CWZ krijgt niet het hele overzicht te zien
-        # alleen de RCL, RKO, BKO worden getoond die aan de regio gerelateerd zijn
-        self.functie_cwz.accounts.add(self.account_beh1)
-        self.e2e_login_and_pass_otp(self.account_beh1)
-
-        self.e2e_wissel_naar_functie(self.functie_cwz)
-        self.e2e_check_rol('CWZ')
-
-        # vraag het overzicht van competitie-bestuurders op
-        resp = self.client.get(self.url_overzicht)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('functie/overzicht.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, "CWZ")
-        urls = [url for url in self.extract_all_urls(resp) if url.startswith(self.url_wijzig)]
-        self.assertEqual(len(urls), 0)      # geen wijzig knoppen voor de CWZ
-
-        # controleer inhoudelijk op 2xRCL, 2xRKO en 2xBKO (18m en 25m)
-        self.assertContains(resp, "BKO", count=2)
-        self.assertContains(resp, "RKO", count=2)
-        self.assertContains(resp, "RCL", count=2)
-
-        # haal het overzicht van verenigingsbestuurders op
-        resp = self.client.get(self.url_overzicht + 'vereniging/')
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('functie/overzicht-vereniging.dtl', 'plein/site_layout.dtl'))
-
-        self.e2e_assert_other_http_commands_not_supported(self.url_overzicht + 'vereniging/')
 
     def test_wijzig_view(self):
         self.e2e_login_and_pass_otp(self.account_admin)
@@ -222,7 +123,8 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
 
         # haal het wijzig scherm op voor de BKO
         url = '/functie/wijzig/%s/' % self.functie_bko.pk
-        resp = self.client.get(url)
+        with self.assertNumQueries(4):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/wijzig.dtl', 'plein/site_layout.dtl'))
@@ -254,17 +156,17 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
 
         self.e2e_assert_other_http_commands_not_supported(url)
 
-    def test_wijzig_view_cwz(self):
-        # de CWZ vindt alleen leden van eigen vereniging
-        self.functie_cwz.accounts.add(self.account_beh1)
+    def test_wijzig_view_hwl(self):
+        # de HWL vindt alleen leden van eigen vereniging
+        self.functie_hwl.accounts.add(self.account_beh1)
         self.e2e_login_and_pass_otp(self.account_beh1)
 
-        resp = self.client.post(self.url_activeer_functie % self.functie_cwz.pk, follow=True)
+        resp = self.client.post(self.url_activeer_functie % self.functie_hwl.pk, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, "CWZ")
+        self.assertContains(resp, "HWL")
 
-        # probeer de zoek functie: er vindt 'beheerder' en 'ander'
-        url = '/functie/wijzig/%s/' % self.functie_cwz.pk
+        # probeer de zoek functie: zoek 'er' --> vind 'beheerder' en 'ander'
+        url = '/functie/wijzig/%s/' % self.functie_hwl.pk
         resp = self.client.get(url + '?zoekterm=er', follow=False)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -336,12 +238,19 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, "BKO ")
 
+        LogboekRegel.objects.all().delete()
+
         # koppel de RKO
         url = '/functie/wijzig/%s/ontvang/' % self.functie_rko3.pk
         self.assertEqual(self.functie_rko3.accounts.count(), 0)
         resp = self.client.post(url, {'add': self.account_beh2.pk}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertEqual(self.functie_rko3.accounts.count(), 1)
+
+        # controleer correctheid toevoeging in het logboek
+        regel = LogboekRegel.objects.all()[0]
+        self.assertEqual(regel.gebruikte_functie, 'Rollen')
+        self.assertEqual(regel.activiteit, 'NHB lid 100042 (Beh eerder) is beheerder gemaakt voor functie RKO Rayon 3 Indoor')
 
         # check dat de BKO geen RCL kan koppelen
         # juiste URL om RCL te koppelen
@@ -367,12 +276,20 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, "RKO ")
 
+        LogboekRegel.objects.all().delete()
+
         # koppel een RCL van het juiste rayon
         url = '/functie/wijzig/%s/ontvang/' % self.functie_rcl111.pk
         self.assertEqual(self.functie_rcl111.accounts.count(), 0)
         resp = self.client.post(url, {'add': self.account_beh1.pk}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertEqual(self.functie_rcl111.accounts.count(), 1)
+
+        # controleer correctheid toevoeging in het logboek
+        regel = LogboekRegel.objects.all()[0]
+        self.assertEqual(regel.gebruikte_functie, 'Rollen')
+        # beh1 is geen nhb lid
+        self.assertEqual(regel.activiteit, 'Account Beheerder1 (testbeheerder1) is beheerder gemaakt voor functie RCL Regio 111 Indoor')
 
         # koppel een RCL van het verkeerde rayon
         url = '/functie/wijzig/%s/ontvang/' % self.functie_rcl101.pk
@@ -397,6 +314,11 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, "RCL ")
 
+        # controleer dat de RCL niemand mag koppelen
+        url = '/functie/wijzig/%s/' % self.functie_wl.pk
+        resp = self.client.get(url)
+        self.assert_is_redirect(resp, '/plein/')
+
         # poog een andere rol te koppelen
         url = '/functie/wijzig/%s/ontvang/' % self.functie_rcl101.pk
         self.assertEqual(self.functie_rcl101.accounts.count(), 0)
@@ -404,22 +326,22 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
         self.assertEqual(self.functie_rcl101.accounts.count(), 0)
 
-    def test_koppel_cwz(self):
-        # CWZ mag zijn eigen leden koppelen: beh2
-        self.functie_cwz.accounts.add(self.account_beh1)
+    def test_koppel_hwl(self):
+        # HWL mag zijn eigen leden koppelen: beh2
+        self.functie_hwl.accounts.add(self.account_beh1)
         self.e2e_login_and_pass_otp(self.account_beh1)
 
-        self.e2e_wissel_naar_functie(self.functie_cwz)
-        self.e2e_check_rol('CWZ')
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+        self.e2e_check_rol('HWL')
         resp = self.client.get('/plein/')
-        self.assertContains(resp, "CWZ test")
+        self.assertContains(resp, "HWL test")
 
         # haal het overzicht voor bestuurders op
         resp = self.client.get(self.url_overzicht)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/overzicht.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, 'relevante functies en de beheerders')    # reduced list for CWZ
+        self.assertContains(resp, 'relevante functies en de beheerders')    # reduced list for HWL
 
         # haal het overzicht van verenigingsbestuurders op
         resp = self.client.get('/functie/overzicht/vereniging/')
@@ -427,12 +349,12 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/overzicht-vereniging.dtl', 'plein/site_layout.dtl'))
 
-        # koppel een CWZ uit de eigen gelederen
-        url = '/functie/wijzig/%s/ontvang/' % self.functie_cwz.pk
-        self.assertEqual(self.functie_cwz.accounts.count(), 1)
+        # HWL koppelt een lid uit de eigen gelederen
+        url = '/functie/wijzig/%s/ontvang/' % self.functie_hwl.pk
+        self.assertEqual(self.functie_hwl.accounts.count(), 1)
         resp = self.client.post(url, {'add': self.account_beh2.pk}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertEqual(self.functie_cwz.accounts.count(), 2)
+        self.assertEqual(self.functie_hwl.accounts.count(), 2)
 
         # controleer dat de naam getoond wordt
         resp = self.client.get('/functie/overzicht/vereniging/')
@@ -442,18 +364,63 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.assertContains(resp, self.account_beh2.volledige_naam())
 
         # poog een NHB lid te koppelen dat niet lid is van de vereniging
-        resp = self.client.post(url, {'add': self.account_ander.pk}, follow=True)
+        resp = self.client.post(url, {'add': self.account_ander.pk})
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
-        self.assertEqual(self.functie_cwz.accounts.count(), 2)
+        self.assertEqual(self.functie_hwl.accounts.count(), 2)
 
         # poog een niet-NHB lid account te koppelen
-        resp = self.client.post(url, {'add': self.account_admin.pk}, follow=True)
+        resp = self.client.post(url, {'add': self.account_admin.pk})
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
-        self.assertEqual(self.functie_cwz.accounts.count(), 2)
+        self.assertEqual(self.functie_hwl.accounts.count(), 2)
 
         # probeer een verkeerde vereniging te wijzigen
-        url = '/functie/wijzig/%s/ontvang/' % self.functie_cwz2.pk
-        resp = self.client.post(url, {'add': self.account_beh2.pk}, follow=True)
+        url = '/functie/wijzig/%s/ontvang/' % self.functie_hwl2.pk
+        resp = self.client.post(url, {'add': self.account_beh2.pk})
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
+
+        url = '/functie/wijzig/%s/' % self.functie_sec.pk
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 404)
+
+        # poog sec SEC rol te koppelen (mag niet)
+        url = '/functie/wijzig/%s/ontvang/' % self.functie_sec.pk
+        self.assertEqual(self.functie_sec.accounts.count(), 0)
+        resp = self.client.post(url, {'add': self.account_beh2.pk})
+        self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
+        self.assertEqual(self.functie_sec.accounts.count(), 0)
+
+        url = '/functie/wijzig/%s/' % self.functie_wl.pk
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+
+        url = '/functie/wijzig/%s/' % self.functie_hwl.pk
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+
+    def test_administratieve_regio(self):
+        # neem de BB rol aan
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_wisselnaarrol_bb()
+        self.e2e_check_rol('BB')
+
+        # maak regio 112 administratief
+        self.regio_112.is_administratief = True
+        self.regio_112.save()
+
+        url = '/functie/wijzig/%s/' % self.functie_bko.pk
+
+        # haal de pagina op - het gevonden lid heeft geen regio vermelding
+        resp = self.client.get(url + '?zoekterm=100')       # matcht alle nhb nummers
+        self.assertEqual(resp.status_code, 200)
+        self.assertNotContains(resp, 'regio 112')
+
+        # voeg het lid van de vereniging in regio 112 toe als beheerder
+        self.functie_bko.accounts.add(self.account_ander)
+
+        # haal de pagina opnieuw op - de gekoppelde beheerder heeft geen regio
+        url = '/functie/wijzig/%s/' % self.functie_bko.pk
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assertNotContains(resp, 'regio 112')
 
 # end of file

@@ -7,6 +7,7 @@
 from django.test import TestCase
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
+from Functie.models import Functie
 from Overig.e2ehelpers import E2EHelpers
 import datetime
 
@@ -37,9 +38,17 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         # secretaris kan nog niet ingevuld worden
         ver.save()
 
-        self.functie_cwz = maak_functie("CWZ test", "CWZ")
-        self.functie_cwz.nhb_ver = ver
-        self.functie_cwz.save()
+        self.functie_sec = maak_functie("SEC test", "SEC")
+        self.functie_sec.nhb_ver = ver
+        self.functie_sec.save()
+
+        self.functie_hwl = maak_functie("HWL test", "HWL")
+        self.functie_hwl.nhb_ver = ver
+        self.functie_hwl.save()
+
+        self.functie_wl = maak_functie("WL test", "WL")
+        self.functie_wl.nhb_ver = ver
+        self.functie_wl.save()
 
         # maak een test lid aan
         lid = NhbLid()
@@ -54,7 +63,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         lid.email = lid.account.email
         lid.save()
 
-        # maak een test vereniging zonder CWZ rol
+        # maak een test vereniging zonder HWL rol
         ver2 = NhbVereniging()
         ver2.naam = "Grote Club"
         ver2.nhb_nr = "1001"
@@ -74,7 +83,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.url_accountwissel = '/account/account-wissel/'
 
     def _get_wissel_urls(self, resp):
-        return [url for url in self.extract_all_urls(resp) if url.startswith('/functie/') or url == self.url_accountwissel]
+        return [url for url in self.extract_all_urls(resp) if url.startswith('/functie/activeer') or url == self.url_accountwissel]
 
     def test_admin(self):
         # controleer dat de link naar het wisselen van rol op de pagina staat
@@ -101,7 +110,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.assertNotContains(resp, 'Manager competitiezaken')
         self.assertContains(resp, 'Gebruiker')
         self.assertContains(resp, 'Voordat je aan de slag kan moeten we eerst een paar afspraken maken over het omgaan met persoonsgegevens.')
-        #print(str(resp.content).replace('>', '>\n'))
+        # print(str(resp.content).replace('>', '>\n'))
         self.assertContains(resp, 'Een aantal rollen komt beschikbaar nadat de controle van de tweede factor uitgevoerd is.')
 
         # accepteer VHPG en login met OTP controle
@@ -109,7 +118,8 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.e2e_account_accepteert_vhpg(self.account_admin)
 
         # controleer dat de complete keuzemogelijkheden op de pagina staan
-        resp = self.client.get(self.url_wisselvanrol)
+        with self.assertNumQueries(11):
+            resp = self.client.get(self.url_wisselvanrol)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assertContains(resp, 'IT beheerder')
@@ -125,13 +135,13 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         resp = self.client.get(self.url_wisselvanrol)
         self.assertEqual(resp.status_code, 302)     # 302 = Redirect (to plein)
 
-        self.assertTrue(str(self.functie_cwz) == "CWZ test")
+        self.assertTrue(str(self.functie_hwl) == "HWL test")
 
     def test_normaal_met_rol(self):
         # voeg de gebruiker toe aan twee functies waardoor wissel-van-rol actief wordt
         self.e2e_account_accepteert_vhpg(self.account_normaal)
         self.functie_rcl.accounts.add(self.account_normaal)
-        self.functie_cwz.accounts.add(self.account_normaal)
+        self.functie_hwl.accounts.add(self.account_normaal)
 
         self.e2e_login_and_pass_otp(self.account_normaal)
 
@@ -141,30 +151,22 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.assertNotContains(resp, "BKO test")
         self.assertNotContains(resp, "RKO test")
         self.assertContains(resp, "RCL test")
-        self.assertContains(resp, "CWZ test")
+        self.assertContains(resp, "HWL test")
         self.assertContains(resp, "Grote Club")
 
-        # activeer nu de rol van RCL
-        # dan komen de CWZ rollen te voorschijn
-        resp = self.client.post(self.url_activeer_rol % self.functie_rcl.pk)
+        # niet een niet- bestaande functie vanuit de RCL functie
+        resp = self.client.post(self.url_activeer_functie % self.functie_rcl.pk)
         self.assert_is_redirect(resp, self.url_wisselvanrol)
+        self.e2e_check_rol('RCL')
 
-        resp = self.client.get(self.url_wisselvanrol)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assertNotContains(resp, "BKO test")
-        self.assertNotContains(resp, "RKO test")
-        self.assertContains(resp, "RCL test")
-        self.assertContains(resp, "CWZ test")
-
-        # niet bestaande functie
         resp = self.client.post(self.url_activeer_functie % 999999)
         self.assert_is_redirect(resp, self.url_wisselvanrol)
-        # TODO: check functie ongewijzigd
+
+        self.e2e_check_rol('RCL')
 
         resp = self.client.post(self.url_activeer_functie % 'getal')
         self.assert_is_redirect(resp, self.url_wisselvanrol)
-        # TODO: check functie ongewijzigd
+        self.e2e_check_rol('RCL')
 
         self.e2e_assert_other_http_commands_not_supported(self.url_wisselvanrol)
 
@@ -176,7 +178,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, "Gebruiker")
         urls = self._get_wissel_urls(resp)
-        self.assertIn(self.url_activeer_rol % 'beheerder', urls)   # IT beheerder
+        self.assertIn(self.url_activeer_rol % 'IT', urls)          # IT beheerder
         self.assertIn(self.url_activeer_rol % 'BB', urls)          # Manager competitiezaken
         self.assertIn(self.url_activeer_rol % 'geen', urls)        # Gebruiker
         self.assertNotIn(self.url_accountwissel, urls)
@@ -187,7 +189,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         urls = self._get_wissel_urls(resp)
         self.assertNotIn(self.url_accountwissel, urls)
 
-        resp = self.client.post(self.url_activeer_rol % 'beheerder', follow=True)
+        resp = self.client.post(self.url_activeer_rol % 'IT', follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, "IT beheerder")
         urls = self._get_wissel_urls(resp)
@@ -221,7 +223,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, "Gebruiker")
         urls = self._get_wissel_urls(resp)
-        self.assertNotIn(self.url_accountwissel, urls)           # Account wissel
+        self.assertNotIn(self.url_accountwissel, urls)              # Account wissel
         self.assertIn(self.url_activeer_rol % 'BB', urls)           # Manager competitiezaken
         self.assertIn(self.url_activeer_rol % 'geen', urls)         # Gebruiker
 
@@ -255,16 +257,49 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.assertIn(self.url_activeer_functie % self.functie_rko.pk, urls)
         self.assertIn(self.url_activeer_rol % 'schutter', urls)
 
-    def test_cwz(self):
-        self.functie_cwz.accounts.add(self.account_normaal)
+    def test_rcl(self):
+        self.functie_rcl.accounts.add(self.account_normaal)
         self.e2e_account_accepteert_vhpg(self.account_normaal)
         self.e2e_login_and_pass_otp(self.account_normaal)
+        self.e2e_wissel_naar_functie(self.functie_rcl)
 
         resp = self.client.get(self.url_wisselvanrol)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, "Schutter")
         urls = self._get_wissel_urls(resp)
-        self.assertIn(self.url_activeer_functie % self.functie_cwz.pk, urls)
+        self.assertNotIn(self.url_activeer_functie % self.functie_sec.pk, urls)
+        self.assertIn(self.url_activeer_functie % self.functie_rcl.pk, urls)
+        self.assertIn(self.url_activeer_functie % self.functie_hwl.pk, urls)
+        self.assertIn(self.url_activeer_rol % 'schutter', urls)
+
+    def test_hwl(self):
+        self.functie_hwl.accounts.add(self.account_normaal)
+        self.e2e_account_accepteert_vhpg(self.account_normaal)
+        self.e2e_login_and_pass_otp(self.account_normaal)
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+
+        resp = self.client.get(self.url_wisselvanrol)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assertContains(resp, "Schutter")
+        urls = self._get_wissel_urls(resp)
+        self.assertNotIn(self.url_activeer_functie % self.functie_sec.pk, urls)
+        self.assertIn(self.url_activeer_functie % self.functie_hwl.pk, urls)
+        self.assertIn(self.url_activeer_functie % self.functie_wl.pk, urls)
+        self.assertIn(self.url_activeer_rol % 'schutter', urls)
+
+    def test_wl(self):
+        self.functie_wl.accounts.add(self.account_normaal)
+        self.e2e_account_accepteert_vhpg(self.account_normaal)
+        self.e2e_login_and_pass_otp(self.account_normaal)
+        self.e2e_wissel_naar_functie(self.functie_wl)
+
+        resp = self.client.get(self.url_wisselvanrol)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assertContains(resp, "Schutter")
+        urls = self._get_wissel_urls(resp)
+        self.assertNotIn(self.url_activeer_functie % self.functie_sec.pk, urls)
+        self.assertNotIn(self.url_activeer_functie % self.functie_hwl.pk, urls)
+        self.assertIn(self.url_activeer_functie % self.functie_wl.pk, urls)
         self.assertIn(self.url_activeer_rol % 'schutter', urls)
 
     def test_functie_geen_rol(self):
@@ -285,20 +320,20 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 302)     # 302 = Redirect (to login)
 
         # probeer van rol te wisselen
-        resp = self.client.post(self.url_activeer_rol % 'beheerder')
+        resp = self.client.post(self.url_activeer_rol % 'IT')
         self.assertEqual(resp.status_code, 302)     # 302 = Redirect (to login)
 
     def test_delete_functie(self):
         # corner case: activeer functie, verwijder functie, get_huidige_functie
-        self.functie_cwz.accounts.add(self.account_normaal)
+        self.functie_hwl.accounts.add(self.account_normaal)
         self.e2e_account_accepteert_vhpg(self.account_normaal)
         self.e2e_login_and_pass_otp(self.account_normaal)
 
-        # wordt cwz
-        self.e2e_wissel_naar_functie(self.functie_cwz)
+        # wordt hwl
+        self.e2e_wissel_naar_functie(self.functie_hwl)
 
-        # verwijder cwz
-        self.functie_cwz.delete()
+        # verwijder hwl
+        self.functie_hwl.delete()
 
         # wat is de huidige functie?
         resp = self.client.get(self.url_wisselvanrol)
@@ -339,7 +374,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         # voorkom dat dit probleem terug komt:
         # je hebt een rol en je erft deze
         # voorbeeld: RKO Rayon3 Indoor --> RCL Regio 111 (welke je ook expliciet hebt)
-        # hierdoor krijg je dubbele rollen: 2x alle CWZ in je regio
+        # hierdoor krijg je dubbele rollen: 2x alle HWL in je regio
 
         rko18r3 = maak_functie("RKO Rayon 3 Indoor", "RKO")
         rcl18r111 = maak_functie("RCL Regio 111 Indoor", "RCL")     # omdat 2x NhbVereniging in regio 111
@@ -352,7 +387,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
 
         self.e2e_wissel_naar_functie(rcl18r111)
 
-        # nu krijg je 2x alle CWZ in regio 111
+        # nu krijg je 2x alle HWL in regio 111
         resp = self.client.get(self.url_wisselvanrol)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         urls = self._get_wissel_urls(resp)
@@ -365,6 +400,35 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
             msg = "Dubbele mogelijkheden gevonden in WisselVanRol:\n  "
             msg += "\n  ".join(urls)
             self.fail(msg)
+
+    def test_help_anderen(self):
+        # probeer het helpen van andere rollen
+        # hiervoor moeten we de ingebouwde rollen gebruiken, met herkende hierarchy
+        bko18 = Functie.objects.get(beschrijving="BKO Indoor")
+        rko18r2 = Functie.objects.get(beschrijving="RKO Rayon 2 Indoor")
+        rcl18r105 = Functie.objects.get(beschrijving="RCL Regio 105 Indoor")
+
+        bko18.accounts.add(self.account_normaal)
+
+        # log in en wordt BKO
+        self.e2e_account_accepteert_vhpg(self.account_normaal)
+        self.e2e_login_and_pass_otp(self.account_normaal)
+        self.e2e_wissel_naar_functie(bko18)
+        self.e2e_check_rol('BKO')
+
+        # wissel naar RKO rol
+        self.e2e_wissel_naar_functie(rko18r2)
+        self.e2e_check_rol('RKO')
+        resp = self.client.get(self.url_wisselvanrol)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)       # checkt ook href's
+
+        # wissel door naar de RCL rol
+        self.e2e_wissel_naar_functie(rcl18r105)
+        self.e2e_check_rol('RCL')
+        resp = self.client.get(self.url_wisselvanrol)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)       # checkt ook href's
 
 
 # TODO: gebruik assert_other_http_commands_not_supported

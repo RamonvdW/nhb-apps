@@ -19,7 +19,7 @@ class TestAccountCLI(E2EHelpers, TestCase):
         """ initialisatie van de test case """
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
 
-        self.functie_cwz = maak_functie("CWZ test", "CWZ")
+        self.functie_hwl = maak_functie("HWL test", "HWL")
         self.functie_tst = maak_functie("Test test", "x")
 
         # maak een test vereniging
@@ -31,31 +31,31 @@ class TestAccountCLI(E2EHelpers, TestCase):
         ver.save()
         self.nhbver1 = ver
 
-        self.functie_cwz.nhb_ver = ver
-        self.functie_cwz.save()
+        self.functie_hwl.nhb_ver = ver
+        self.functie_hwl.save()
 
-    def test_maak_cwz(self):
+    def test_maak_hwl(self):
         self.assertFalse(self.account_normaal.is_staff)
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('maak_cwz', 'normaal', '1001', stderr=f1, stdout=f2)
+        management.call_command('maak_hwl', 'normaal', '1001', stderr=f1, stdout=f2)
         self.assertTrue(f1.getvalue() == '')
-        self.assertTrue("Account 'normaal' is CWZ gemaakt van vereniging [1001] Grote Club" in f2.getvalue())
+        self.assertTrue("Account 'normaal' is HWL gemaakt van vereniging [1001] Grote Club" in f2.getvalue())
 
-        # probeer nog een keer CWZ te maken
+        # probeer nog een keer HWL te maken
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('maak_cwz', 'normaal', '1001', stderr=f1, stdout=f2)
+        management.call_command('maak_hwl', 'normaal', '1001', stderr=f1, stdout=f2)
         # print('f1:', f1.getvalue())
         # print('f2:', f2.getvalue())
-        self.assertTrue("[WARNING] Account 'normaal' is al CWZ van vereniging [1001] Grote Club" in f1.getvalue())
+        self.assertTrue("[WARNING] Account 'normaal' is al HWL van vereniging [1001] Grote Club" in f1.getvalue())
         self.assertTrue(f2.getvalue() == '')
 
     def test_bad_account(self):
         # niet bestaand account
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('maak_cwz', 'abnormaal', '1001', stderr=f1, stdout=f2)
+        management.call_command('maak_hwl', 'abnormaal', '1001', stderr=f1, stdout=f2)
         self.assertTrue("Account matching query does not exist" in f1.getvalue())
         self.assertTrue(f2.getvalue() == '')
 
@@ -63,16 +63,16 @@ class TestAccountCLI(E2EHelpers, TestCase):
         # niet bestaande vereniging
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('maak_cwz', 'normaal', '9999', stderr=f1, stdout=f2)
+        management.call_command('maak_hwl', 'normaal', '9999', stderr=f1, stdout=f2)
         self.assertTrue("NhbVereniging matching query does not exist" in f1.getvalue())
         self.assertTrue(f2.getvalue() == '')
 
     def test_bad_functie(self):
         # niet bestaande functie
-        self.functie_cwz.delete()
+        self.functie_hwl.delete()
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('maak_cwz', 'normaal', '1001', stderr=f1, stdout=f2)
+        management.call_command('maak_hwl', 'normaal', '1001', stderr=f1, stdout=f2)
         self.assertTrue("Functie matching query does not exist" in f1.getvalue())
         self.assertTrue(f2.getvalue() == '')
 

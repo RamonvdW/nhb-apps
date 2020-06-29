@@ -5,19 +5,30 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import Resolver404, reverse
-from django.views.generic import ListView
+from django.http import HttpResponseRedirect, HttpResponse
+from django.views.generic import ListView, TemplateView
 from django.db.models import Q
+from django.contrib.auth.mixins import UserPassesTestMixin
+from Functie.rol import Rollen, rol_get_huidige
+from NhbStructuur.models import NhbLid
 from .models import HistCompetitie, HistCompetitieIndividueel, HistCompetitieTeam
 from .forms import FilterForm
 from Plein.menu import menu_dynamics
+from decimal import Decimal
+import csv
 
-TEMPLATE_HISTCOMP_ALLEJAREN = 'hist/histcomp_allejaren.dtl'
+TEMPLATE_HISTCOMP_ALLEJAREN = 'hist/histcomp_top.dtl'
 TEMPLATE_HISTCOMP_INDIV = 'hist/histcomp_indiv.dtl'
 TEMPLATE_HISTCOMP_TEAM = 'hist/histcomp_team.dtl'
+TEMPLATE_HISTCOMP_INTERLAND = 'hist/interland.dtl'
 
 RESULTS_PER_PAGE = 100
 
 KLASSEN_VOLGORDE = ("Recurve", "Compound", "Barebow", "Longbow", "Instinctive")
+
+
+MINIMALE_LEEFTIJD_JEUGD_INTERLAND = 13      # alles jonger wordt niet getoond
+MAXIMALE_LEEFTIJD_JEUGD_INTERLAND = 20      # boven deze leeftijd Senior
 
 
 class HistCompAlleJarenView(ListView):
@@ -254,5 +265,139 @@ class HistCompTeamView(HistCompBaseView):
     query_class = HistCompetitieTeam
     is_team = True
 
+
+class InterlandView(UserPassesTestMixin, TemplateView):
+
+    """ Deze view geeft de resultaten van de 25m1pijl die nodig zijn voor de Interland """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_HISTCOMP_INTERLAND
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        rol_nu = rol_get_huidige(self.request)
+        return rol_nu == Rollen.ROL_BB
+
+    def handle_no_permission(self):
+        """ gebruiker heeft geen toegang --> redirect naar het plein """
+        return HttpResponseRedirect(reverse('Plein:plein'))
+
+    def maak_data(self, context):
+
+        # maak een cache aan van nhb leden
+        # we filteren hier niet op inactieve leden
+        nhblid_dict = dict()  # [nhb_nr] = NhbLid
+        for schutter in (NhbLid
+                    .objects
+                    .filter(is_actief_lid=True)
+                    .select_related('bij_vereniging')
+                    .all()):
+            nhblid_dict[schutter.nhb_nr] = schutter
+        # for
+
+        context['jeugd_min'] = MINIMALE_LEEFTIJD_JEUGD_INTERLAND
+        context['jeugd_max'] = MAXIMALE_LEEFTIJD_JEUGD_INTERLAND
+
+        context['klassen'] = list()
+
+        # zoek het nieuwste seizoen beschikbaar
+        qset = HistCompetitie.objects.order_by('-seizoen').distinct('seizoen')
+        if len(qset) > 0:
+            # neem de data van het nieuwste seizoen
+            context['seizoen'] = seizoen = qset[0].seizoen
+
+            # bepaal het jaar waarin de wedstrijdleeftijd bepaald moet worden
+            # dit is het tweede jaar van het seizoen
+            context['wedstrijd_jaar'] = wedstrijd_jaar = int(seizoen.split('/')[1])
+
+            for klasse in (HistCompetitie
+                           .objects
+                           .filter(comp_type='25', seizoen=seizoen, is_team=False)):
+                context['klassen'].append(klasse)
+
+                klasse.url_download = reverse('HistComp:interland-als-bestand', kwargs={'klasse_pk': klasse.pk})
+
+                # zoek alle schutters erbij met minimaal 5 scores
+                klasse.schutters = list()
+
+                for schutter in (HistCompetitieIndividueel
+                            .objects
+                            .filter(histcompetitie=klasse, gemiddelde__gt=Decimal('0.000'))
+                            .order_by('-gemiddelde')):
+
+                    if schutter.tel_aantal_scores() >= 5:
+
+                        # zoek het nhb lid erbij
+                        try:
+                            nhblid = nhblid_dict[schutter.schutter_nr]
+                        except KeyError:
+                            nhblid = None
+
+                        if nhblid:
+                            schutter.nhblid = nhblid
+                            schutter.wedstrijd_leeftijd = nhblid.bereken_wedstrijdleeftijd(wedstrijd_jaar)
+                            if schutter.wedstrijd_leeftijd >= MINIMALE_LEEFTIJD_JEUGD_INTERLAND:
+                                if schutter.wedstrijd_leeftijd <= MAXIMALE_LEEFTIJD_JEUGD_INTERLAND:
+                                    schutter.leeftijd_str = "%s (jeugd)" % schutter.wedstrijd_leeftijd
+                                else:
+                                    schutter.leeftijd_str = "Senior"
+
+                                klasse.schutters.append(schutter)
+            # for
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        self.maak_data(context)
+
+        menu_dynamics(self.request, context, actief='histcomp')
+        return context
+
+
+class InterlandAlsBestandView(InterlandView):
+
+    """ Deze klasse wordt gebruikt om de interland deelnemers lijst
+        te downloaden als csv bestand
+    """
+
+    def get(self, request, *args, **kwargs):
+
+        klasse_pk = kwargs['klasse_pk'][:6]     # afkappen geeft beveiliging
+        del kwargs['klasse_pk']
+        try:
+            klasse = HistCompetitie.objects.get(pk=klasse_pk)
+        except HistCompetitie.DoesNotExist:
+            raise Resolver404()
+
+        context = dict()
+        self.maak_data(context)
+
+        schutters = None
+        for context_klasse in context['klassen']:
+            if context_klasse.pk == klasse.pk:
+                schutters = context_klasse.schutters
+                break   # from the for
+        # for
+
+        if schutters is None:
+            raise Resolver404()
+
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="interland.csv"'
+
+        writer = csv.writer(response)
+        writer.writerow(['Gemiddelde', 'Wedstrijdleeftijd', 'Geslacht', 'NHB nummer', 'Naam', 'Vereniging'])
+
+        for schutter in schutters:
+            writer.writerow([schutter.gemiddelde,
+                             schutter.leeftijd_str,
+                             schutter.nhblid.geslacht,
+                             schutter.nhblid.nhb_nr,
+                             schutter.nhblid.volledige_naam(),
+                             schutter.nhblid.bij_vereniging])
+        # for
+
+        return response
 
 # end of file

@@ -14,7 +14,8 @@ from NhbStructuur.models import NhbRayon, NhbRegio, NhbLid, NhbVereniging
 from Account.models import Account
 from Mailer.models import mailer_email_is_valide
 from Logboek.models import schrijf_in_logboek
-from Functie.models import maak_functie, maak_cwz
+from Functie.models import maak_functie, maak_account_verenigings_secretaris
+from Wedstrijden.models import WedstrijdLocatie
 import argparse
 import datetime
 import json
@@ -69,7 +70,14 @@ EXPECTED_MEMBER_KEYS = ('club_number', 'member_number', 'name', 'prefix', 'first
 # administratieve entries (met fouten) die overslagen moeten worden
 SKIP_MEMBERS = (101711,)        # CRM developer
 
-GEEN_SECRETARIS_NODIG = (1377,)
+GEEN_SECRETARIS_NODIG = (1377,)     # persoonlijk lid
+
+GEEN_WEDSTRIJDEN = (1377,)          # persoonlijk lid, geen wedstrijden
+
+GEEN_WEDSTRIJDLOCATIE = (1368,      # bondsbureau NHB
+                         1377,      # persoonlijk lid, geen wedstrijden
+                         )
+
 
 class Command(BaseCommand):
 
@@ -88,7 +96,7 @@ class Command(BaseCommand):
         self._count_verwijderingen = 0
         self._count_toevoegingen = 0
         self._count_lid_no_email = 0
-        self._count_cwz_no_account = 0
+        self._count_sec_no_account = 0
 
         self._nieuwe_clubs = list()
 
@@ -226,8 +234,9 @@ class Command(BaseCommand):
                 self._count_warnings += 1
                 ver_email = ""      # voorkom None
 
-            # TODO: verdere velden: website
-            # TODO: wedstrijdlocatie velden verwerken: address, postal_code, has_disabled_facilities
+            ver_geen_wedstrijden = (ver_nhb_nr in GEEN_WEDSTRIJDEN)
+
+            # FUTURE: verdere velden: website, has_disabled_facilities, lat/lon
 
             # zoek de vereniging op
             is_nieuw = False
@@ -267,10 +276,10 @@ class Command(BaseCommand):
                     if not self.dryrun:
                         obj.save()
 
-                if obj.contact_email != ver_email:
-                    self.stdout.write('[INFO] Wijziging van contact email voor vereniging %s: "%s" --> "%s"' % (ver_nhb_nr, obj.contact_email, ver_email))
+                if obj.geen_wedstrijden != ver_geen_wedstrijden:
+                    self.stdout.write("[INFO] Wijziging van 'geen wedstrijden' voor vereniging %s: %s --> %s" % (ver_nhb_nr, obj.geen_wedstrijden, ver_geen_wedstrijden))
                     self._count_wijzigingen += 1
-                    obj.contact_email = ver_email
+                    obj.geen_wedstrijden = ver_geen_wedstrijden
                     if not self.dryrun:
                         obj.save()
 
@@ -280,7 +289,7 @@ class Command(BaseCommand):
                 ver.nhb_nr = ver_nhb_nr
                 ver.naam = ver_naam
                 ver.plaats = ver_plaats
-                ver.contact_email = ver_email
+                ver.geen_wedstrijden = ver_geen_wedstrijden
                 regio_obj = vind_regio(ver_regio)
                 if not regio_obj:
                     self._count_errors += 1
@@ -294,12 +303,27 @@ class Command(BaseCommand):
                     self._nieuwe_clubs.append(ver_nhb_nr)   # voor onderdrukken 'wijziging' secretaris
                     obj = ver
 
-            # maak de cwz functie aan
+            # maak de functies aan voor deze vereniging
             if obj:
-                functie = maak_functie("CWZ vereniging %s" % obj.nhb_nr, "CWZ")
-                functie.nhb_ver = obj
-                if not self.dryrun:
-                    functie.save()
+                # let op: in sync houden met migratie m0012_migrate_cwz_hwl
+                for rol, beschr in (('WL', 'Wedstrijdleider %s'),
+                                    ('HWL', 'Hoofdwedstrijdleider %s'),
+                                    ('SEC', 'Secretaris vereniging %s')):
+                    functie = maak_functie(beschr % obj.nhb_nr, rol)
+                    functie.nhb_ver = obj
+
+                    if rol == 'SEC':
+                        # secretaris functie krijgt email uit CRM
+                        if functie.bevestigde_email != ver_email:
+                            self.stdout.write('[INFO] Wijziging van secretaris email voor vereniging %s: "%s" --> "%s"' % (
+                                                    ver_nhb_nr, functie.bevestigde_email, ver_email))
+                            self._count_wijzigingen += 1
+                            functie.bevestigde_email = ver_email
+                            functie.nieuwe_email = ''       # voor de zekerheid opruimen
+
+                    if not self.dryrun:
+                        functie.save()
+                # for
         # for
 
         # kijk of er verenigingen verwijderd moeten worden
@@ -361,17 +385,17 @@ class Command(BaseCommand):
                             '[WARNING] Vereniging %s (%s) heeft geen secretaris!' % (ver_nhb_nr, ver_naam))
                         self._count_warnings += 1
 
-                # forceer de secretaris in de CWZ groep
+                # forceer de secretaris in de SEC groep
                 if ver_secretaris_nhblid:
                     try:
                         account = Account.objects.get(nhblid=ver_secretaris_nhblid)
                     except Account.DoesNotExist:
-                        # CWZ heeft nog geen account
+                        # SEC heeft nog geen account
                         self.stdout.write("[WARNING] Secretaris %s van vereniging %s heeft nog geen account" % (ver_secretaris_nhblid.nhb_nr, obj.nhb_nr))
-                        self._count_cwz_no_account += 1
+                        self._count_sec_no_account += 1
                     else:
-                        if maak_cwz(obj, account):
-                            self.stdout.write("[INFO] Secretaris %s van vereniging %s is gekoppeld aan CWZ functie" % (ver_secretaris_nhblid.nhb_nr, obj.nhb_nr))
+                        if maak_account_verenigings_secretaris(obj, account):
+                            self.stdout.write("[INFO] Secretaris %s van vereniging %s is gekoppeld aan SEC functie" % (ver_secretaris_nhblid.nhb_nr, obj.nhb_nr))
         # for
 
     def _import_members(self, data):
@@ -650,6 +674,82 @@ class Command(BaseCommand):
             #             self.stderr.write('[ERROR] Onverwachte fout bij het verwijderen van een lid: %s' % str(exc))
         # while
 
+    def _import_wedstrijdlocaties(self, data):
+        """ Importeert data van verenigingen als basis voor wedstrijdlocaties """
+
+        if self._check_keys(data[0].keys(), EXPECTED_CLUB_KEYS, "club"):
+            return
+
+        # houd bij welke vereniging nhb_nrs in de database zitten
+        # als deze niet meer voorkomen, dan zijn ze verwijderd
+        nhb_nrs = [tup[0] for tup in NhbVereniging.objects.values_list('nhb_nr')]
+
+        # voor overige velden, zie _import_clubs
+        """ JSON velden (string, except):
+         'club_number':             int
+         'phone_business',
+         'phone_private',
+         'phone_mobile': None,      ???
+         'email', 'website',
+         'has_disabled_facilities': boolean
+         'address':                 string with newlines
+         'postal_code',
+         'location_name',
+         'latitude', 'longitude',
+        }
+        """
+
+        for club in data:
+            nhb_nr = club['club_number']
+
+            if nhb_nr in GEEN_WEDSTRIJDLOCATIE:
+                continue
+
+            nhb_ver = vind_vereniging(nhb_nr)
+            if not nhb_ver:
+                continue
+
+            # een vereniging zonder doel heeft een lege location_name
+            adres = ""
+            if club['location_name']:
+                adres = club['address']
+                if adres:
+                    adres = adres.strip()     # remove terminating \n
+
+            if not adres:
+                # verwijder de koppeling met wedstrijdlocatie uit crm
+                for obj in nhb_ver.wedstrijdlocatie_set.filter(adres_uit_crm=True):
+                    nhb_ver.wedstrijdlocatie_set.remove(obj)
+                    self.stdout.write('[INFO] Wedstrijdlocatie %s ontkoppeld voor vereniging %s' % (repr(obj.adres), nhb_nr))
+                    self._count_wijzigingen += 1
+                continue
+
+            # zoek de wedstrijdlocatie bij dit adres
+            try:
+                wedstrijdlocatie = WedstrijdLocatie.objects.get(adres=adres)
+            except WedstrijdLocatie.DoesNotExist:
+                # nieuw aanmaken
+                wedstrijdlocatie = WedstrijdLocatie()
+                wedstrijdlocatie.adres = adres
+                wedstrijdlocatie.adres_uit_crm = True
+                wedstrijdlocatie.save()
+                self.stdout.write('[INFO] Nieuwe wedstrijdlocatie voor adres %s' % repr(adres))
+                self._count_toevoegingen += 1
+
+            # bij adreswijzigingen moet de oude locatie ontkoppeld worden
+            for obj in nhb_ver.wedstrijdlocatie_set.exclude(adres_uit_crm=False).exclude(pk=wedstrijdlocatie.pk):
+                nhb_ver.wedstrijdlocatie_set.remove(obj)
+                self.stdout.write('[INFO] Vereniging %s ontkoppeld van wedstrijdlocatie met adres %s' % (nhb_ver, repr(obj.adres)))
+                self._count_wijzigingen += 1
+            # for
+
+            if wedstrijdlocatie.verenigingen.filter(nhb_nr=nhb_nr).count() == 0:
+                # maak koppeling tussen vereniging en wedstrijdlocatie
+                wedstrijdlocatie.verenigingen.add(nhb_ver)
+                self.stdout.write('[INFO] Vereniging %s gekoppeld aan wedstrijdlocatie %s' % (nhb_ver, repr(adres)))
+                self._count_toevoegingen += 1
+        # for
+
     def handle(self, *args, **options):
         self.dryrun = options['dryrun']
 
@@ -684,6 +784,7 @@ class Command(BaseCommand):
             self._import_clubs(data['clubs'])
             self._import_members(data['members'])
             self._import_clubs_secretaris(data['clubs'])
+            self._import_wedstrijdlocaties(data['clubs'])
         except django.db.utils.DataError as exc:        # pragma: no coverage
             self.stderr.write('[ERROR] Overwachte database fout: %s' % str(exc))
 
@@ -692,7 +793,7 @@ class Command(BaseCommand):
 
         # rapporteer de samenvatting en schrijf deze ook in het logboek
         samenvatting = "Samenvatting: %s fouten; %s waarschuwingen; %s nieuw; %s wijzigingen; %s verwijderingen; "\
-                        "%s leden, %s inactief; %s verenigingen; %s cwz's zonder account; %s regios; %s rayons; %s actieve leden zonder e-mail" %\
+                        "%s leden, %s inactief; %s verenigingen; %s secretarissen zonder account; %s regios; %s rayons; %s actieve leden zonder e-mail" %\
                           (self._count_errors,
                            self._count_warnings,
                            self._count_toevoegingen,
@@ -701,7 +802,7 @@ class Command(BaseCommand):
                            self._count_members - self._count_blocked,
                            self._count_blocked,
                            self._count_clubs,
-                           self._count_cwz_no_account,
+                           self._count_sec_no_account,
                            self._count_regios,
                            self._count_rayons,
                            self._count_lid_no_email)

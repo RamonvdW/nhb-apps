@@ -5,27 +5,47 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from . import views
+from . import view_accommodatie, view_overzicht, view_ledenlijst, view_inschrijven
 
 app_name = 'Vereniging'
 
 urlpatterns = [
 
     path('',
-         views.OverzichtView.as_view(),
+         view_overzicht.OverzichtView.as_view(),
          name='overzicht'),
 
     path('leden-lijst/',
-         views.LedenLijstView.as_view(),
+         view_ledenlijst.LedenLijstView.as_view(),
          name='ledenlijst'),
 
     path('leden-voorkeuren/',
-         views.LedenVoorkeurenView.as_view(),
+         view_ledenlijst.LedenVoorkeurenView.as_view(),
          name='leden-voorkeuren'),
 
-    path('leden-aanmelden/competitie/<comp_pk>/',
-         views.LedenAanmeldenView.as_view(),
-         name='leden-aanmelden')
+    path('leden-inschrijven/competitie/<comp_pk>/',
+         view_inschrijven.LedenInschrijvenView.as_view(),
+         name='leden-inschrijven'),
+
+    path('leden-ingeschreven/competitie/<deelcomp_pk>/',
+         view_inschrijven.LedenIngeschrevenView.as_view(),
+         name='leden-ingeschreven'),
+
+    path('accommodaties/lijst/',
+         view_accommodatie.LijstVerenigingenView.as_view(),
+         name='lijst-verenigingen'),
+
+    path('accommodaties/details/<locatie_pk>/<vereniging_pk>/',
+         view_accommodatie.AccommodatieDetailsView.as_view(),
+         name='accommodatie-details'),
+
+    path('accommodatie-details/<locatie_pk>/<vereniging_pk>/',
+         view_accommodatie.VerenigingAccommodatieDetailsView.as_view(),
+         name='vereniging-accommodatie-details'),
+
+    path('regio-clusters/',
+         view_accommodatie.WijzigClustersView.as_view(),
+         name='clusters'),
 ]
 
 # end of file

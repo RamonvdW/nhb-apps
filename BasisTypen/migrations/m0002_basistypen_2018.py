@@ -7,7 +7,7 @@
 from django.db import migrations
 
 
-def init_boogtype_2018(apps, schema_editor):
+def init_boogtype_2018(apps, _):
     """ Boog typen jaar 2018, volgens spec v1.2, tabel 2.2 """
 
     # haal de klassen op die van toepassing zijn tijdens deze migratie
@@ -48,25 +48,26 @@ def create_teamtype_boog(apps, beschrijving, boogtypen):
     # for
 
 
-def init_teamtype_2018(apps, schema_editor):
-    """ Maak de teamtype records aan """
+# team typen in jaar 2018, volgens spec v1.2, tabel 2.3
+TEAMTYPEN = (
+    # beschrijving           boogtypen
+    ('Recurve team', ('R', 'BB', 'IB', 'LB')),
+    ('Compound team', ('C',)),
+    ('Barebow team', ('BB', 'IB', 'LB')),
+    ('Instinctive Bow team', ('IB', 'LB')),
+    ('Longbow team', ('LB',))
+)
 
-    # team typen in jaar 2018, volgens spec v1.2, tabel 2.3
-    TEAMTYPEN = (
-        # beschrijving           boogtypen
-        ('Recurve team',         ('R', 'BB', 'IB', 'LB')),
-        ('Compound team',        ('C',)),
-        ('Barebow team',         ('BB', 'IB', 'LB')),
-        ('Instinctive Bow team', ('IB', 'LB')),
-        ('Longbow team',         ('LB',))
-    )
+
+def init_teamtype_2018(apps, _):
+    """ Maak de teamtype records aan """
 
     for tup in TEAMTYPEN:
         create_teamtype_boog(apps, *tup)
     # for
 
 
-def init_leeftijdsklasse_2018(apps, schema_editor):
+def init_leeftijdsklasse_2018(apps, _):
     """ Maak de leeftijdsklassen aan """
 
     # leeftijdsklassen jaar 2018, volgens spec v1.2, tabel 2.1
@@ -196,55 +197,56 @@ def create_wedstrijdklasse_team(apps, beschrijving, boogtypen, min_ag):
     # for
 
 
-def init_wedstrijdklassen_2018(apps, schema_editor):
-    # wedstrijdklassen jaar 2018 volgens spec v1.2, tabel 2.4 en 2.5
+# spec v1.2, tabel 2.4: wedstrijdklassen voor individuele competities
+WKL_INDIV = (
+    ('Recurve klasse 1', ('R', 'BB', 'IB', 'LB'), ('SH', 'SV'), '9.000'),
+    ('Recurve klasse 2', ('R', 'BB', 'IB', 'LB'), ('SH', 'SV'), '8.000'),
+    ('Recurve klasse 3', ('R', 'BB', 'IB', 'LB'), ('SH', 'SV'), '7.000'),
+    ('Recurve klasse 4', ('R', 'BB', 'IB', 'LB'), ('SH', 'SV'), '6.000'),
+    ('Recurve klasse 5', ('R', 'BB', 'IB', 'LB'), ('SH', 'SV'), '5.000'),
+    ('Recurve klasse 6', ('R', 'BB', 'IB', 'LB'), ('SH', 'SV'), '0.000'),
+    ('Recurve Junioren klasse 1', ('R', 'BB', 'IB', 'LB'), ('JH', 'JV'), '8.000'),
+    ('Recurve Junioren klasse 2', ('R', 'BB', 'IB', 'LB'), ('JH', 'JV'), '0.000'),
+    ('Recurve Cadetten klasse 1', ('R', 'BB', 'IB', 'LB'), ('CH', 'CV'), '9.000'),
+    ('Recurve Cadetten klasse 2', ('R', 'BB', 'IB', 'LB'), ('CH', 'CV'), '0.000'),
+    ('Recurve Aspiranten < 11 jaar', ('R', 'BB', 'IB', 'LB'), ('AH1', 'AV1'), '0.000', True),
+    ('Recurve Aspiranten 11-12 jaar', ('R', 'BB', 'IB', 'LB'), ('AH2', 'AV2'), '0.000', True),
+    ('Compound klasse 1', ('C',), ('SH', 'SV'), '9.000'),
+    ('Compound klasse 2', ('C',), ('SH', 'SV'), '0.000'),
+    ('Compound Junioren klasse 1', ('C',), ('JH', 'JV'), '9.000'),
+    ('Compound Junioren klasse 2', ('C',), ('JH', 'JV'), '0.000'),
+    ('Compound Cadetten klasse 1', ('C',), ('CH', 'CV'), '9.000'),
+    ('Compound Cadetten klasse 2', ('C',), ('CH', 'CV'), '0.000'),
+    ('Compound Aspiranten < 11 jaar', ('C',), ('AH1', 'AV1'), '0.000', True),
+    ('Compound Aspiranten 11-12 jaar', ('C',), ('AH2', 'AV2'), '0.000', True),
+    ('Barebow klasse 1', ('BB',), ('SH', 'SV', 'JH', 'JV', 'CH', 'CV'), '5.000'),
+    ('Barebow klasse 2', ('BB',), ('SH', 'SV', 'JH', 'JV', 'CH', 'CV'), '0.000'),
+    ('Instinctive Bow klasse 1', ('IB',), ('SH', 'SV', 'JH', 'JV', 'CH', 'CV'), '5.000'),
+    ('Instinctive Bow klasse 2', ('IB',), ('SH', 'SV', 'JH', 'JV', 'CH', 'CV'), '0.000'),
+    ('Longbow klasse 1', ('LB',), ('SH', 'SV', 'JH', 'JV', 'CH', 'CV'), '5.000'),
+    ('Longbow klasse 2', ('LB',), ('SH', 'SV', 'JH', 'JV', 'CH', 'CV'), '0.000'),
+)
 
-    # spec v1.2, tabel 2.4: wedstrijdklassen voor individuele competities
-    WKL_INDIV = (
-        ('Recurve klasse 1',               ('R', 'BB', 'IB', 'LB'), ('SH', 'SV'),         '9.000'),
-        ('Recurve klasse 2',               ('R', 'BB', 'IB', 'LB'), ('SH', 'SV'),         '8.000'),
-        ('Recurve klasse 3',               ('R', 'BB', 'IB', 'LB'), ('SH', 'SV'),         '7.000'),
-        ('Recurve klasse 4',               ('R', 'BB', 'IB', 'LB'), ('SH', 'SV'),         '6.000'),
-        ('Recurve klasse 5',               ('R', 'BB', 'IB', 'LB'), ('SH', 'SV'),         '5.000'),
-        ('Recurve klasse 6',               ('R', 'BB', 'IB', 'LB'), ('SH', 'SV'),         '0.000'),
-        ('Recurve Junioren klasse 1',      ('R', 'BB', 'IB', 'LB'), ('JH', 'JV'),         '8.000'),
-        ('Recurve Junioren klasse 2',      ('R', 'BB', 'IB', 'LB'), ('JH', 'JV'),         '0.000'),
-        ('Recurve Cadetten klasse 1',      ('R', 'BB', 'IB', 'LB'), ('CH', 'CV'),         '9.000'),
-        ('Recurve Cadetten klasse 2',      ('R', 'BB', 'IB', 'LB'), ('CH', 'CV'),         '0.000'),
-        ('Recurve Aspiranten < 11 jaar',   ('R', 'BB', 'IB', 'LB'), ('AH1', 'AV1'),       '0.000', True),
-        ('Recurve Aspiranten 11-12 jaar',  ('R', 'BB', 'IB', 'LB'), ('AH2', 'AV2'),       '0.000', True),
-        ('Compound klasse 1',              ('C',),  ('SH', 'SV'),                         '9.000'),
-        ('Compound klasse 2',              ('C',),  ('SH', 'SV'),                         '0.000'),
-        ('Compound Junioren klasse 1',     ('C',),  ('JH', 'JV'),                         '9.000'),
-        ('Compound Junioren klasse 2',     ('C',),  ('JH', 'JV'),                         '0.000'),
-        ('Compound Cadetten klasse 1',     ('C',),  ('CH', 'CV'),                         '9.000'),
-        ('Compound Cadetten klasse 2',     ('C',),  ('CH', 'CV'),                         '0.000'),
-        ('Compound Aspiranten < 11 jaar',  ('C',),  ('AH1', 'AV1'),                       '0.000', True),
-        ('Compound Aspiranten 11-12 jaar', ('C',),  ('AH2', 'AV2'),                       '0.000', True),
-        ('Barebow klasse 1',               ('BB',), ('SH', 'SV', 'JH', 'JV', 'CH', 'CV'), '5.000'),
-        ('Barebow klasse 2',               ('BB',), ('SH', 'SV', 'JH', 'JV', 'CH', 'CV'), '0.000'),
-        ('Instinctive Bow klasse 1',       ('IB',), ('SH', 'SV', 'JH', 'JV', 'CH', 'CV'), '5.000'),
-        ('Instinctive Bow klasse 2',       ('IB',), ('SH', 'SV', 'JH', 'JV', 'CH', 'CV'), '0.000'),
-        ('Longbow klasse 1',               ('LB',), ('SH', 'SV', 'JH', 'JV', 'CH', 'CV'), '5.000'),
-        ('Longbow klasse 2',               ('LB',), ('SH', 'SV', 'JH', 'JV', 'CH', 'CV'), '0.000'),
-    )
+WKL_TEAM = (
+    ('Recurve klasse ERE', ('R', 'BB', 'IB', 'LB'), '9.000'),
+    ('Recurve klasse A', ('R', 'BB', 'IB', 'LB'), '8.000'),
+    ('Recurve klasse B', ('R', 'BB', 'IB', 'LB'), '7.000'),
+    ('Recurve klasse C', ('R', 'BB', 'IB', 'LB'), '6.000'),
+    ('Recurve klasse D', ('R', 'BB', 'IB', 'LB'), '0.000'),
+    ('Compound klasse ERE', ('C',), '9.000'),
+    ('Compound klasse A', ('C',), '0.000'),
+    ('Barebow klasse ERE', ('BB', 'IB', 'LB'), '0.000'),
+    ('Instinctive Bow klasse ERE', ('IB', 'LB'), '0.000'),
+    ('Longbow klasse ERE', ('LB',), '0.000'),
+)
+
+
+def init_wedstrijdklassen_2018(apps, _):
+    # wedstrijdklassen jaar 2018 volgens spec v1.2, tabel 2.4 en 2.5
 
     for tup in WKL_INDIV:
         create_wedstrijdklasse_individueel(apps, *tup)
     # for
-
-    WKL_TEAM = (
-        ('Recurve klasse ERE',         ('R', 'BB', 'IB', 'LB'), '9.000'),
-        ('Recurve klasse A',           ('R', 'BB', 'IB', 'LB'), '8.000'),
-        ('Recurve klasse B',           ('R', 'BB', 'IB', 'LB'), '7.000'),
-        ('Recurve klasse C',           ('R', 'BB', 'IB', 'LB'), '6.000'),
-        ('Recurve klasse D',           ('R', 'BB', 'IB', 'LB'), '0.000'),
-        ('Compound klasse ERE',        ('C',),                  '9.000'),
-        ('Compound klasse A',          ('C',),                  '0.000'),
-        ('Barebow klasse ERE',         ('BB', 'IB', 'LB'),      '0.000'),
-        ('Instinctive Bow klasse ERE', ('IB', 'LB'),            '0.000'),
-        ('Longbow klasse ERE',         ('LB',),                 '0.000'),
-    )
 
     for tup in WKL_TEAM:
         create_wedstrijdklasse_team(apps, *tup)
@@ -269,4 +271,3 @@ class Migration(migrations.Migration):
     ]
 
 # end of file
-

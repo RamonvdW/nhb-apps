@@ -127,6 +127,11 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         f1 = io.StringIO()
         f2 = io.StringIO()
         management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_03.json', stderr=f1, stdout=f2)
+        # print("f1: %s" % f1.getvalue())
+        # print("f2: %s" % f2.getvalue())
+        self.assertTrue("[INFO] Nieuwe wedstrijdlocatie voor adres 'Oude pijlweg 1, 1234 AB Doelstad'" in f2.getvalue())
+        self.assertTrue("[INFO] Vereniging [1000] Grote Club gekoppeld aan wedstrijdlocatie 'Oude pijlweg 1, 1234 AB Doelstad'" in f2.getvalue())
+
         f1 = io.StringIO()
         f2 = io.StringIO()
         management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_08.json', stderr=f1, stdout=f2)
@@ -138,7 +143,10 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         self.assertTrue("[ERROR] Vereniging 1002 hoort bij onbekende regio 199" in f1.getvalue())
         self.assertTrue("[INFO] Wijziging van secretaris voor vereniging 1001: geen --> 100001" in f2.getvalue())
         self.assertTrue('[INFO] Wijziging van plaats voor vereniging 1000: "Stad" --> "Stadia"' in f2.getvalue())
-        self.assertTrue('[INFO] Wijziging van contact email voor vereniging 1000: "test@groteclub.archery" --> "andere@groteclub.archery"' in f2.getvalue())
+        self.assertTrue('[INFO] Wijziging van secretaris email voor vereniging 1000: "test@groteclub.archery" --> "andere@groteclub.archery"' in f2.getvalue())
+        self.assertTrue("[INFO] Nieuwe wedstrijdlocatie voor adres 'Nieuwe pijlweg 1, 1234 AB Doelstad'" in f2.getvalue())
+        self.assertTrue("[INFO] Vereniging [1000] Nieuwe Grote Club ontkoppeld van wedstrijdlocatie met adres 'Oude pijlweg 1, 1234 AB Doelstad'" in f2.getvalue())
+        self.assertTrue("[INFO] Vereniging [1000] Nieuwe Grote Club gekoppeld aan wedstrijdlocatie 'Nieuwe pijlweg 1, 1234 AB Doelstad'" in f2.getvalue())
 
     def test_lid_mutaties(self):
         # lid mutaties
@@ -191,7 +199,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         self.assertTrue("[ERROR] Lid 100997 heeft geen valide datum lidmaatschap: 1815-06-06" in f1.getvalue())
 
     def test_skip_member(self):
-        # sommige leden worden niet geimporteerd
+        # sommige leden worden niet geïmporteerd
         f1 = io.StringIO()
         f2 = io.StringIO()
         management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_12.json', stderr=f1, stdout=f2)
@@ -233,8 +241,8 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_13.json', stderr=f1, stdout=f2)
         self.assertTrue("[INFO] Lid 110000: vereniging geen --> 1000 Grote Club" in f2.getvalue())
 
-    def test_maak_cwz(self):
-        # secretaris-lid cwz maken
+    def test_maak_secretaris(self):
+        # een lid secretaris maken
         f1 = io.StringIO()
         f2 = io.StringIO()
         management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_14.json', stderr=f1, stdout=f2)
@@ -244,14 +252,14 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
 
         lid = NhbLid.objects.get(nhb_nr="100001")
         ver = NhbVereniging.objects.get(nhb_nr="1000")
-        functie = Functie.objects.get(rol="CWZ", nhb_ver=ver)
+        functie = Functie.objects.get(rol="SEC", nhb_ver=ver)
         self.assertEqual(functie.accounts.count(), 1)
 
         lid = NhbLid.objects.get(nhb_nr="100024")
         ver = NhbVereniging.objects.get(nhb_nr="2000")
-        functie = Functie.objects.get(rol="CWZ", nhb_ver=ver)
+        functie = Functie.objects.get(rol="SEC", nhb_ver=ver)
         self.assertEqual(functie.accounts.count(), 0)
-        # 100024 is nog geen CWZ omdat ze geen account heeft
+        # 100024 is nog geen SEC omdat ze geen account heeft
 
         # maak het account van 100024 aan en probeer het nog een keer
         lid.account = self.e2e_create_account(lid.nhb_nr, 'maakt.niet.uit@gratis.net', lid.voornaam)
@@ -261,10 +269,10 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         f2 = io.StringIO()
         management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_14.json', stderr=f1, stdout=f2)
         self.assertEqual(f1.getvalue(), '')
-        self.assertTrue("[INFO] Secretaris 100024 van vereniging 2000 is gekoppeld aan CWZ functie" in f2.getvalue())
+        self.assertTrue("[INFO] Secretaris 100024 van vereniging 2000 is gekoppeld aan SEC functie" in f2.getvalue())
 
         ver = NhbVereniging.objects.get(nhb_nr="2000")
-        functie = Functie.objects.get(rol="CWZ", nhb_ver=ver)
+        functie = Functie.objects.get(rol="SEC", nhb_ver=ver)
         self.assertEqual(functie.accounts.count(), 1)
 
     def test_club_1377(self):
@@ -273,12 +281,33 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         f1 = io.StringIO()
         f2 = io.StringIO()
         management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_15.json', stderr=f1, stdout=f2)
-        # print("f1: %s" % f1.getvalue())
-        # print("f2: %s" % f2.getvalue())
+
+        # controleer de geen_wedstrijden vlag voor 1377 en normale clubs
+        ver = NhbVereniging.objects.get(nhb_nr=1000)
+        self.assertFalse(ver.geen_wedstrijden)
+
+        ver = NhbVereniging.objects.get(nhb_nr=1377)
+        self.assertTrue(ver.geen_wedstrijden)
 
         # verifieer verwijderen van "(geen deelname wedstrijden)" uit de naam
-        ver = NhbVereniging.objects.get(nhb_nr=1377)
         self.assertEqual(ver.naam, "Persoonlijk")
+
+        # controleer dat de mutatie achteraf werkt
+        ver = NhbVereniging.objects.get(nhb_nr=1000)
+        ver.geen_wedstrijden = True
+        ver.save()
+
+        ver = NhbVereniging.objects.get(nhb_nr=1377)
+        ver.geen_wedstrijden = False
+        ver.save()
+
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_15.json', stderr=f1, stdout=f2)
+        self.assertTrue("[INFO] Wijziging van 'geen wedstrijden' voor vereniging 1377: False --> True" in f2.getvalue())
+        self.assertTrue("[INFO] Wijziging van 'geen wedstrijden' voor vereniging 1000: True --> False" in f2.getvalue())
+        # print("f1: %s" % f1.getvalue())
+        # print("f2: %s" % f2.getvalue())
 
     def test_verwijder_secretaris_fail(self):
         # verwijderen van de secretaris geeft een fout
@@ -299,7 +328,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         f2 = io.StringIO()
         management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_14.json', stderr=f1, stdout=f2)
         self.assertEqual(f1.getvalue(), '')
-        self.assertTrue("[INFO] Secretaris 100024 van vereniging 2000 is gekoppeld aan CWZ functie" in f2.getvalue())
+        self.assertTrue("[INFO] Secretaris 100024 van vereniging 2000 is gekoppeld aan SEC functie" in f2.getvalue())
 
         # probeer 100024 te verwijderen
         f1 = io.StringIO()
@@ -319,6 +348,11 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         self.assertTrue("DRY RUN" in f2.getvalue())
 
         management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_03.json', stderr=f1, stdout=f2)
+
+        ver = NhbVereniging.objects.get(nhb_nr=1000)
+        ver.geen_wedstrijden = True
+        ver.save()
+
         management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_08.json', '--dryrun', stderr=f1, stdout=f2)
         management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_09.json', '--dryrun', stderr=f1, stdout=f2)
         management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_14.json', '--dryrun', stderr=f1, stdout=f2)
@@ -330,5 +364,6 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         ver.regio = NhbRegio.objects.get(pk=116)
         ver.save()
         management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_12.json', '--dryrun', stderr=f1, stdout=f2)
+
 
 # end of file

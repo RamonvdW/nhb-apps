@@ -111,6 +111,16 @@ class TestAccountLogin(E2EHelpers, TestCase):
         self.assertTrue(self.account_normaal.is_geblokkeerd_tot > should_block_until)
         self.assertEqual(self.account_normaal.verkeerd_wachtwoord_teller, 0)
 
+    def test_inlog_email_nog_niet_bevestigd(self):
+        # verander de status van de bevestiging van het e-mailadres
+        self.email_normaal.email_is_bevestigd = False
+        self.email_normaal.save()
+
+        resp = self.client.post(self.url_login, {'login_naam': 'normaal', 'wachtwoord':  E2EHelpers.WACHTWOORD}, follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('account/bevestig-email.dtl', 'plein/site_layout.dtl'))
+
     def test_inlog_partialfields(self):
         # test inlog via het inlog formulier, met verkeerd wachtwoord
         resp = self.client.post(self.url_login, {'login_naam': 'normaal', 'wachtwoord': ''})

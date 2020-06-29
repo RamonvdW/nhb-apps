@@ -30,6 +30,14 @@ class E2EHelpers(object):
     def e2e_account_accepteert_vhpg(account):
         account_vhpg_is_geaccepteerd(account)
 
+    @staticmethod
+    def _remove_debugtoolbar(html):
+        """ removes the debug toolbar code """
+        pos = html.find('<link rel="stylesheet" href="/static/debug_toolbar/css/print.css"')
+        if pos > 0:     # pragma: no cover
+            html = html[:pos] + '<!-- removed debug toolbar --></body></html>'
+        return html
+
     def e2e_create_account(self, username, email, voornaam, accepteer_vhpg=False):
         """ Maak een Account met AccountEmail aan in de database van de website """
         account_create(username, voornaam, '', self.WACHTWOORD, email, True)
@@ -78,8 +86,8 @@ class E2EHelpers(object):
         resp = self.client.post('/functie/activeer-rol/%s/' % rol)
         self.assert_is_redirect(resp, expected_redirect)
 
-    def e2e_wisselnaarrol_beheerder(self):
-        self._wissel_naar_rol('beheerder', '/functie/wissel-van-rol/')
+    def e2e_wisselnaarrol_it(self):
+        self._wissel_naar_rol('IT', '/functie/wissel-van-rol/')
 
     def e2e_wisselnaarrol_bb(self):
         self._wissel_naar_rol('BB', '/competitie/')
@@ -93,7 +101,7 @@ class E2EHelpers(object):
     def e2e_wissel_naar_functie(self, functie):
         assert isinstance(self, TestCase)
         resp = self.client.post('/functie/activeer-functie/%s/' % functie.pk)
-        if functie.rol == 'CWZ':
+        if functie.rol in ('SEC', 'HWL', 'WL'):
             expected_redirect = '/vereniging/'
         else:
             expected_redirect = '/functie/wissel-van-rol/'
@@ -103,7 +111,7 @@ class E2EHelpers(object):
         resp = self.client.get('/functie/wissel-van-rol/')
         self.assertEqual(resp.status_code, 200)
 
-        # <meta rol_nu="CWZ" functie_nu="CWZ vereniging 4444">
+        # <meta rol_nu="SEC" functie_nu="Secretaris vereniging 4444">
         page = str(resp.content)
         pos = page.find('<meta rol_nu=')
         if pos < 0:
@@ -117,26 +125,27 @@ class E2EHelpers(object):
             # print("e2e_check_rol: rol_nu=%s, functie_nu=%s" % (rol_nu, functie_nu))
             raise ValueError('Rol mismatch: rol_nu=%s, rol_verwacht=%s' % (rol_nu, rol_verwacht))
 
-    @staticmethod
-    def e2e_dump_resp(resp):                        # pragma: no cover
+    def e2e_dump_resp(self, resp):                        # pragma: no cover
         print("status code:", resp.status_code)
         print(repr(resp))
         if resp.status_code == 302:
             print("redirect to url:", resp.url)
         content = str(resp.content)
+        content = self._remove_debugtoolbar(content)
         if len(content) < 50:
             print("very short content:", content)
         else:
             soup = BeautifulSoup(content, features="html.parser")
             print(soup.prettify())
 
-    @staticmethod
-    def extract_all_urls(resp):
-        # TODO: consider using Beautifulsoup to extract all href urls
-        #   for link in soup.find_all('a'):
-        #       print(link.get('href'))
+    def extract_all_urls(self, resp, skip_menu=False, skip_smileys=True):
         content = str(resp.content)
-        pos = content.find('<body')
+        content = self._remove_debugtoolbar(content)
+        if skip_menu:
+            # menu is the first part of the body
+            pos = content.find('<div id="content">')
+        else:
+            pos = content.find('<body')
         if pos > 0:                             # pragma: no branch
             content = content[pos:]             # strip head
         urls = list()
@@ -154,14 +163,17 @@ class E2EHelpers(object):
             # find the end of the new url
             pos = content.find('"')
             if pos > 0:
-                urls.append(content[:pos])
+                url = content[:pos]
                 content = content[pos:]
+                if url != "#":
+                    if not (skip_smileys and url.startswith('/overig/feedback/')):
+                        urls.append(url)
         # while
         return urls
 
-    @staticmethod
-    def extract_checkboxes(resp):
+    def extract_checkboxes(self, resp):
         content = str(resp.content)
+        content = self._remove_debugtoolbar(content)
         checked = list()
         unchecked = list()
         pos = content.find('<input ')
@@ -173,15 +185,14 @@ class E2EHelpers(object):
             is_checked = False
             name = ""
             for part in content[:pos].split(' '):
-                spl = part.split('=')
+                spl = part.split('=')       # geeft altijd lijst, minimaal 1 entry
                 if len(spl) == 2:
                     if spl[0] == "type" and "checkbox" in spl[1]:
                         is_checkbox = True
                     elif spl[0] == "name":
                         name = spl[1].replace('"', '')  # strip doublequotes
-                elif len(spl) == 1:
-                    if spl[0] == "checked":
-                        is_checked = True
+                elif spl[0] == "checked":
+                    is_checked = True
             # for
 
             if is_checkbox:
@@ -194,10 +205,43 @@ class E2EHelpers(object):
         # while
         return checked, unchecked
 
+    def assert_link_quality(self, content, template_name):
+        """ assert the quality of links
+            - links to external sites must have target="_blank" and rel="noopener noreferrer"
+            - links should not be empty
+        """
+        # strip head
+        pos = content.find('<body')
+        content = content[pos:]
+
+        while len(content):
+            # find the start of a new url
+            pos = content.find('<a ')
+            if pos >= 0:
+                content = content[pos:]
+                pos = content.find('</a>')
+                link = content[:pos+4]
+                content = content[pos+4:]
+                # filter out website-internal links
+                if link.find('href="/') < 0 and link.find('href="#') < 0 and link.find('href="mailto:') < 0:
+                    if link.find('href=""') >= 0:   # pragma: no cover
+                        self.fail(msg='Unexpected empty link %s on page %s' % (link, template_name))
+                    else:
+                        # remainder must be links that leave the website
+                        # these must target a blank window
+                        if 'target="_blank"' not in link:            # pragma: no cover
+                            self.fail(msg='Missing target="_blank" in link %s on page %s' % (link, template_name))
+                        if 'rel="noopener noreferrer"' not in link:  # pragma: no cover
+                            self.fail(msg='Missing rel="noopener noreferrer" in link %s on page %s' % (link, template_name))
+            else:
+                content = ''
+        # while
+
     def assert_html_ok(self, response):
         """ Doe een aantal basic checks op een html response """
         assert isinstance(self, TestCase)
         html = str(response.content)
+        html = self._remove_debugtoolbar(html)
         self.assertContains(response, "<html")
         self.assertIn("lang=", html)
         self.assertIn("</html>", html)
@@ -206,6 +250,20 @@ class E2EHelpers(object):
         self.assertIn("<body ", html)
         self.assertIn("</body>", html)
         self.assertIn("<!DOCTYPE html>", html)
+        self.assert_link_quality(html, response.templates[0].name)
+
+    def assert_is_bestand(self, response):
+        assert isinstance(self, TestCase)
+
+        # check the headers that make this a download
+        # print("response: ", repr([(a,b) for a,b in response.items()]))
+        content_type_header = response['Content-Type']
+        self.assertEqual(content_type_header, 'text/csv')
+        content_disposition_header = response['Content-Disposition']
+        self.assertTrue(content_disposition_header.startswith('attachment; filename='))
+
+        # ensure the file is not empty
+        self.assertTrue(len(str(response.content)) > 30)
 
     def assert_template_used(self, response, template_names):
         """ Controleer dat de gevraagde templates gebruikt zijn """

@@ -457,7 +457,7 @@ class Command(BaseCommand):
                     self._import_indiv(sheet, blad)
                     self.check_consistency(blad)
                 else:
-                    # TODO: support voor team records toevoegen
+                    # FUTURE: support voor team records toevoegen
                     self.stdout.write("[TODO] Team records worden nog niet ondersteund")
         # for
 

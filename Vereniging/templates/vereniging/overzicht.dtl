@@ -45,6 +45,17 @@
                 <div class="col s4">Plaats:</div>
                 <div class="col s6">{{ nhb_ver.plaats }}</div>
             </div>
+            <div class="row small-row">
+                <div class="col s4">Regio:</div>
+                <div class="col s6">{{ nhb_ver.regio }}</div>
+            </div>
+
+            {% if nhb_ver.cluster %}
+                <div class="row small-row">
+                    <div class="col s4">Cluster:</div>
+                    <div class="col s6">{{ nhb_ver.cluster }}</div>
+                </div>
+            {% endif %}
         </div>
     </div>
 </div>
@@ -55,15 +66,14 @@
 <p>Als beheerder van de vereniging heb je toegang tot onderstaande functies.</p>
 
 <div class="row">
+    <div class="col s12 cards-container">
 
-    <!-- ledenlijst -->
-    <div class="col s12 m6 xl4">
+        <!-- ledenlijst -->
         <div class="card">
             <div class="card-content">
-                <table class="simple"><tr style="border:0px">
-                    <td><i class="material-icons-round large">list</i></td>
-                    <td>Toon de ledenlijst van jouw vereniging.</td>
-                </tr></table>
+                <div class="card-title center-align">Ledenlijst</div>
+                <div class="center-align"><i class="material-icons-round medium">list</i></div>
+                <p>Bekijk de ledenlijst van de vereniging, inclusief wedstrijdklasse jeugdleden en laatste inlog op deze website.</p>
             </div>
             <a href="{% url 'Vereniging:ledenlijst' %}" class="nhb-klikbare-balk">
                 <div class="card-action center-align">
@@ -71,16 +81,13 @@
                 </div>
             </a>
         </div>
-    </div>
 
-    <!-- instellingen leden -->
-    <div class="col s12 m6 xl4">
+        <!-- instellingen leden -->
         <div class="card">
             <div class="card-content">
-                <table class="simple"><tr style="border:0px">
-                    <td><i class="material-icons-round large">tune</i></td>
-                    <td>Voorkeuren van de leden inzien en aanpassen.</td>
-                </tr></table>
+                <div class="card-title center-align">Voorkeuren</div>
+                <div class="center-align"><i class="material-icons-round medium">tune</i></div>
+                <p>Voorkeuren van de leden inzien en boog type instellen.</p>
             </div>
             <a href="{% url 'Vereniging:leden-voorkeuren' %}" class="nhb-klikbare-balk">
                 <div class="card-action center-align">
@@ -88,44 +95,81 @@
                 </div>
             </a>
         </div>
-    </div>
 
-    <!-- leden aanmelden voor de competitie -->
-    {% for comp in competities %}
-        <div class="col s12 m6 xl4">
+        <!-- leden inschrijven voor de competitie -->
+        {% for comp in competities %}
+            <div class="card">
+                {% if comp.fase <= 'B' %}
+                    <div class="card-content">
+                        <div class="card-title center-align grey-text">Inschrijven {{ comp.afstand }}m</div>
+                        <div class="center-align"><img src="{{ comp.icon }}" height="90" alt="logo" style="opacity: 0.5"></div>
+                        <p>Inschrijving voor de <b>{{ comp.beschrijving }}</b> opent op {{ comp.begin_aanmeldingen }}.</p>
+                    </div>
+                    <div class="card-action center-align">
+                        <span class="grey-text">(nog niet open)</span>
+                    </div>
+                {% else %}
+                    <div class="card-content">
+                        <div class="card-title center-align">Inschrijven {{ comp.afstand }}m</div>
+                        <div class="center-align"><img src="{{ comp.icon }}" height="90" alt="logo"></div>
+                        <p>Leden inschrijven voor de <b>{{ comp.beschrijving }}</b>.</p>
+                    </div>
+                    <a href="{% url 'Vereniging:leden-inschrijven' comp_pk=comp.pk %}" class="nhb-klikbare-balk">
+                        <div class="card-action center-align">
+                            <span class="nhb-klikbare-link">Tonen</span>
+                        </div>
+                    </a>
+                {% endif %}
+            </div>
+        {% endfor %}
+
+        <!-- leden uitschrijven uit de competitie -->
+        {% for deelcomp in deelcomps %}
             <div class="card">
                 <div class="card-content">
-                    <table class="simple"><tr style="border:0px">
-                        <td><img src="{{ comp.icon }}" height="90" alt="logo"></td>
-                        <td>Leden aanmelden voor de {{ comp.beschrijving }}.</td>
-                    </tr></table>
+                    <div class="card-title center-align">Ingeschreven {{ deelcomp.competitie.afstand }}m</div>
+                    <div class="center-align"><img src="{{ deelcomp.icon }}" height="90" alt="logo"></div>
+                    <p>Overzicht leden ingeschreven zijn voor de <b>{{ deelcomp.competitie.beschrijving }}</b>.</p>
                 </div>
-                <a href="{% url 'Vereniging:leden-aanmelden' comp_pk=comp.pk %}" class="nhb-klikbare-balk">
+                <a href="{% url 'Vereniging:leden-ingeschreven' deelcomp_pk=deelcomp.pk %}" class="nhb-klikbare-balk">
                     <div class="card-action center-align">
-                        <span class="nhb-klikbare-link">Aanmelden</span>
+                        <span class="nhb-klikbare-link">Tonen</span>
                     </div>
                 </a>
             </div>
-        </div>
-    {% endfor %}
+        {% endfor %}
 
-    <!-- beheerders vereniging -->
-    <div class="col s12 m6 xl4">
+        <!-- beheerders vereniging -->
         <div class="card">
             <div class="card-content">
-                <table class="simple"><tr style="border:0px">
-                    <td><i class="material-icons-round large">supervisor_account</i></td>
-                    <td>Koppel leden van de vereniging aan functies.</td>
-                </tr></table>
+                <div class="card-title center-align">Beheerders</div>
+                <div class="center-align"><i class="material-icons-round medium">supervisor_account</i></div>
+                <p>E-mailadressen van de (hoofd-)wedstrijdleider functies en eraan gekoppelde leden.</p>
             </div>
             <a href="{% url 'Functie:overzicht-vereniging' %}" class="nhb-klikbare-balk">
                 <div class="card-action center-align">
-                    <span class="nhb-klikbare-link">Beheerders</span>
+                    <span class="nhb-klikbare-link">Beheren</span>
                 </div>
             </a>
         </div>
-    </div>
 
+        <!-- accommodatie details -->
+        {% if accommodatie_details_url %}
+            <div class="card">
+                <div class="card-content">
+                    <div class="card-title center-align">Accommodatie</div>
+                    <div class="center-align"><i class="material-icons-round medium">home</i></div>
+                    <p>Gegevens over de accommodatie die van belang zijn voor wedstrijden.</p>
+                </div>
+                <a href="{{ accommodatie_details_url }}" class="nhb-klikbare-balk">
+                    <div class="card-action center-align">
+                        <span class="nhb-klikbare-link">Instellen</span>
+                    </div>
+                </a>
+            </div>
+        {% endif %}
+
+    </div>
 </div>
 
 {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vereniging-overzicht" %}

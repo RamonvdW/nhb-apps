@@ -17,7 +17,8 @@
 
     <p>Hoe we omgaan met jouw privacy staat beschreven in een apart document.</p>
 
-    <a class="btn-nhb-blauw" href="{{ url_privacyverklaring }}" target="_blank"><i class="material-icons-round left">open_in_new</i>document openen</a>
+    <a class="btn-nhb-blauw" href="{{ url_privacyverklaring }}" target="_blank" rel="noopener noreferrer">
+        <i class="material-icons-round left">open_in_new</i>document openen</a>
 
     <!--
     <h5>Cookies</h5>
@@ -32,7 +33,7 @@
     <p>We gebruiken geen tracking cookies waarvoor we je toestemming nodig hebben.
     Daarom krijg je bij deze website geen vraag of je cookies wilt accepteren.</p>
 
-    <p>Hier kan je <a href="https://www.rijksoverheid.nl/onderwerpen/telecommunicatie/vraag-en-antwoord/mag-een-website-ongevraagd-cookies-plaatsen" target="_blank">meer informatie over cookies</a> vinden.</p>
+    <p>Hier kan je <a href="https://www.rijksoverheid.nl/onderwerpen/telecommunicatie/vraag-en-antwoord/mag-een-website-ongevraagd-cookies-plaatsen" target="_blank" rel="noopener noreferrer">meer informatie over cookies</a> vinden.</p>
     -->
 
     <h5>Contact</h5>

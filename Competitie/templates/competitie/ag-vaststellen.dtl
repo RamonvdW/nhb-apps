@@ -23,9 +23,16 @@
 
 {% else %}
 
-<p>De historische data waar de aanvangsgemiddelden op gebaseerd zullen worden is van <b>seizoen {{ seizoen }}</b>.<br><span class="red-text">Controleer dat dit juist is.</span></p>
+    <p>Alle huidige aanvangsgemiddelden zullen eerst verwijderd worden. De schutters-boog die in het vorige seizoen genoeg scores neergezet hebben krijgen een nieuw aanvangsgemiddelde (AG) toegekend. Schutters-boog met te weinig scores krijgen geen aanvangsgemiddelde en beginnen daarom in klasse Onbekend.</p>
 
-    <p>Alle huidige aanvangsgemiddelden zullen eerst verwijderd worden. Schutters-boog met minimaal 6 scores in de voorgaande competitie krijgen als aanvangsgemiddelde het gemiddelde van de 6 hoogste scores. Schutters-boog met minder dan 6 scores krijgen geen aanvangsgemiddelde.</p>
+    <h5 class="red-text">Controleer dat onderstaande gegevens juist zijn.</h5>
+
+    <p>De historische uitslag waar de aanvangsgemiddelden op gebaseerd zullen worden is van <b>seizoen {{ seizoen }}</b>.</p>
+
+    <p>Voor de <b>Indoor competitie</b> moeten de schutters <b>minimaal {{ aantal_scores_18 }} scores</b> neergezet hebben om een AG te krijgen.</p>
+    <p>Voor de <b>25m 1pijl competitie</b> moeten de schutters <b>minimaal {{ aantal_scores_25 }} scores</b> neergezet hebben om een AG te krijgen.</p>
+
+    <p>Als bovenstaande gegevens correct zijn, druk dan op de volgende knop:</p>
 
     <form method="post" action="{% url 'Competitie:ag-vaststellen' %}">
         {% csrf_token %}

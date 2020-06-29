@@ -6,12 +6,42 @@
 
 from django.contrib import admin
 
-from .models import Competitie, DeelCompetitie, CompetitieKlasse, RegioCompetitieSchutterBoog
+from .models import (Competitie, DeelCompetitie, DeelcompetitieRonde,
+                     CompetitieKlasse, RegioCompetitieSchutterBoog)
+
+
+class DeelCompetitieAdmin(admin.ModelAdmin):
+    list_select_related = ('competitie', 'nhb_regio', 'nhb_rayon')
+
+
+class DeelcompetitieRondeAdmin(admin.ModelAdmin):
+    list_filter = ('deelcompetitie__is_afgesloten', 'deelcompetitie__nhb_regio')
+
+    list_select_related = ('deelcompetitie', 'deelcompetitie__nhb_regio', 'cluster', 'cluster__regio')
+
+
+class CompetitieKlasseAdmin(admin.ModelAdmin):
+    list_select_related = ('competitie', 'indiv', 'team')
+
+
+class RegioCompetitieSchutterBoogAdmin(admin.ModelAdmin):
+
+    readonly_fields = ('deelcompetitie', 'schutterboog', 'bij_vereniging')
+
+    search_fields = ('schutterboog__nhblid__voornaam', 'schutterboog__nhblid__achternaam')
+
+    list_filter = ('deelcompetitie',)
+
+    list_select_related = ('deelcompetitie', 'deelcompetitie__nhb_regio', 'deelcompetitie__nhb_rayon',
+                           'deelcompetitie__competitie',
+                           'klasse', 'klasse__indiv', 'klasse__team',
+                           'schutterboog', 'schutterboog__nhblid')
 
 
 admin.site.register(Competitie)
-admin.site.register(DeelCompetitie)
-admin.site.register(CompetitieKlasse)
-admin.site.register(RegioCompetitieSchutterBoog)
+admin.site.register(DeelCompetitie, DeelCompetitieAdmin)
+admin.site.register(DeelcompetitieRonde, DeelcompetitieRondeAdmin)
+admin.site.register(CompetitieKlasse, CompetitieKlasseAdmin)
+admin.site.register(RegioCompetitieSchutterBoog, RegioCompetitieSchutterBoogAdmin)
 
 # end of file

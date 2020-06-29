@@ -59,6 +59,19 @@ $nhb-collection-hover-background: $nhb-card-hover-background;
 
 
 //-----------------------------------
+// download button
+//
+.btn-nhb-download {
+  @extend .btn-nhb-blauw;
+
+  width: 30px;
+  height: 30px;
+  padding: 0px;
+  font-size: 10px;
+}
+
+
+//-----------------------------------
 // card
 //
 .card-action {
@@ -73,13 +86,22 @@ $nhb-collection-hover-background: $nhb-card-hover-background;
 }
 
 
+// als er geschakeld wordt naar een witte achtergrondkleur,
+// dan het hard zwart (ivm contrast grijze achtergrond)
+// omzetten naar het wat zachtere off-black
+.white {
+    @extend .white;
+    color: $off-black;
+}
+
+
 //-----------------------------------
 // cards-container
 //
 // based on https://codepen.io/aglio/pen/eGdVdQ
 //
 .cards-container {
-    column-break-inside: avoid;
+    -webkit-column-break-inside: avoid;
     .card {
         display: inline-block;
         overflow: visible;
@@ -100,12 +122,12 @@ $nhb-collection-hover-background: $nhb-card-hover-background;
 }
 @media #{$medium-and-up} {
   .cards-container {
-    @include column-count(2);
+    @include column-count(3);
   }
 }
 @media #{$extra-large-and-up} {
   .cards-container {
-    @include column-count(3);
+    @include column-count(4);
   }
 }
 

@@ -16,6 +16,8 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
 
     """ unit tests voor de Competitie applicatie, Koppel Beheerders functie """
 
+    test_after = ('Competitie.test_planning',)
+
     def _prep_beheerder_lid(self, voornaam):
         nhb_nr = self._next_nhbnr
         self._next_nhbnr += 1
@@ -53,10 +55,10 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         ver.save()
         self._ver = ver
 
-        # maak CWZ functie aan voor deze vereniging
-        self.functie_cwz = maak_functie("CWZ Vereniging %s" % ver.nhb_nr, "CWZ")
-        self.functie_cwz.nhb_ver = ver
-        self.functie_cwz.save()
+        # maak HWL functie aan voor deze vereniging
+        self.functie_hwl = maak_functie("HWL Vereniging %s" % ver.nhb_nr, "HWL")
+        self.functie_hwl.nhb_ver = ver
+        self.functie_hwl.save()
 
         # maak een BB aan (geen NHB lid)
         self.account_bb = self.e2e_create_account('bb', 'bko@nhb.test', 'BB', accepteer_vhpg=True)
@@ -80,7 +82,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.functie_rko.accounts.add(self.account_rko)
         self.functie_rcl.accounts.add(self.account_rcl)
 
-        # maak nog een test vereniging, zonder CWZ functie
+        # maak nog een test vereniging, zonder HWL functie
         ver = NhbVereniging()
         ver.naam = "Kleine Club"
         ver.nhb_nr = "1100"
@@ -90,6 +92,9 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
 
         self.url_overzicht = '/competitie/'
         self.url_wijzigdatums = '/competitie/wijzig-datums/%s/'
+        self.url_aangemeld_alles = '/competitie/lijst-regiocompetitie/%s/alles/'  # % comp_pk
+        self.url_aangemeld_rayon = '/competitie/lijst-regiocompetitie/%s/rayon-%s/'  # % comp_pk, rayon_pk
+        self.url_aangemeld_regio = '/competitie/lijst-regiocompetitie/%s/regio-%s/'  # % comp_pk, regio_pk
 
     def test_overzicht_anon(self):
         resp = self.client.get(self.url_overzicht)
@@ -101,7 +106,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
 
     def test_overzicht_it(self):
         self.e2e_login_and_pass_otp(self.account_admin)
-        self.e2e_wisselnaarrol_beheerder()
+        self.e2e_wisselnaarrol_it()
 
         resp = self.client.get(self.url_overzicht)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -119,6 +124,26 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('competitie/overzicht-beheerder.dtl', 'plein/site_layout.dtl'))
         self.assertNotContains(resp, '/competitie/beheer-favorieten/')
 
+    def test_overzicht_bko(self):
+        self.e2e_login_and_pass_otp(self.account_bko)
+        self.e2e_wissel_naar_functie(self.functie_bko)
+
+        resp = self.client.get(self.url_overzicht)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/overzicht-beheerder.dtl', 'plein/site_layout.dtl'))
+        self.assertNotContains(resp, '/competitie/beheer-favorieten/')
+
+    def test_overzicht_rko(self):
+        self.e2e_login_and_pass_otp(self.account_rko)
+        self.e2e_wissel_naar_functie(self.functie_rko)
+
+        resp = self.client.get(self.url_overzicht)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/overzicht-beheerder.dtl', 'plein/site_layout.dtl'))
+        self.assertNotContains(resp, '/competitie/beheer-favorieten/')
+
     def test_overzicht_rcl(self):
         self.e2e_login_and_pass_otp(self.account_rcl)
         self.e2e_wissel_naar_functie(self.functie_rcl)
@@ -129,14 +154,14 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('competitie/overzicht-beheerder.dtl', 'plein/site_layout.dtl'))
         self.assertNotContains(resp, '/competitie/beheer-favorieten/')
 
-    def test_overzicht_cwz(self):
-        self.e2e_login_and_pass_otp(self.account_bb)
-        self.e2e_wissel_naar_functie(self.functie_cwz)
+    def test_overzicht_hwl(self):
+        self.e2e_login_and_pass_otp(self.account_bb)        # geen account_hwl
+        self.e2e_wissel_naar_functie(self.functie_hwl)
 
         resp = self.client.get(self.url_overzicht)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/overzicht-cwz.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/overzicht-hwl.dtl', 'plein/site_layout.dtl'))
         self.assertNotContains(resp, '/competitie/beheer-favorieten/')
 
     def test_wijzig_datums_not_bb(self):
@@ -199,6 +224,54 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         resp = self.client.post(url)
         self.assertEqual(resp.status_code, 404)     # 404 = Not found
 
+    def test_aangemeld(self):
+        # schutters aangemeld voor de regiocompetitie
+
+        # creëer een competitie met deelcompetities
+        competitie_aanmaken(jaar=2019)
+        comp_pk = Competitie.objects.all()[0].pk
+
+        # landelijk
+        url = self.url_aangemeld_alles % comp_pk
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/lijst-aangemeld-regio.dtl', 'plein/site_layout.dtl'))
+
+        # rayon 2
+        url = self.url_aangemeld_rayon % (comp_pk, self.rayon_2.pk)
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/lijst-aangemeld-regio.dtl', 'plein/site_layout.dtl'))
+
+        # regio 101
+        url = self.url_aangemeld_regio % (comp_pk, self.regio_101.pk)
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/lijst-aangemeld-regio.dtl', 'plein/site_layout.dtl'))
+
+        # bad keys
+        url = self.url_aangemeld_alles % 999999
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+
+        url = self.url_aangemeld_rayon % (999999, 999999)
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+
+        url = self.url_aangemeld_rayon % (comp_pk, 999999)
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+
+        url = self.url_aangemeld_regio % (999999, 999999)
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+
+        url = self.url_aangemeld_regio % (comp_pk, 999999)
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 404)     # 404 = Not found
 
 
 # end of file

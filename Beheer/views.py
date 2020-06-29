@@ -21,7 +21,7 @@ class BeheerAdminSite(AdminSite):
 
     # replace all the functions that handle the urls for login/logout/password-change
 
-    # TODO: wachtwoord wijzigen implementeren
+    # FUTURE: wachtwoord wijzigen implementeren
     #def password_change(self, request, extra_context=None):
     #    return HttpResponseRedirect(reverse('Plein:plein'))
 

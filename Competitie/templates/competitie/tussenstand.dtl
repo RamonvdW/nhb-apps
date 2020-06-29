@@ -1,0 +1,41 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2020 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Tussenstand{% endblock %}
+
+{% block pagina %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-tussenstand" %}
+
+<h4>Competitie tussenstand</h4>
+
+{% if toon_details %}
+
+    <p>Nog even geduld, dit stukje van de site is nog niet af.</p>
+
+    {% if toon_histcomp %}
+
+        <p>De uitslag van vorig seizoen is ook nog in te zien.</p>
+
+        <a class="btn-nhb-blauw" href="{% url 'HistComp:top' %}">Uitslag vorig seizoen</a>
+
+    {% endif %}
+
+{% else %}
+
+    <p>Hier tonen we straks de tussenstand van de huidige competitie</p>
+
+    <p>Op dit moment is de competitie nog niet begonnen.</p>
+
+    <p>De uitslag van vorig seizoen is in te zien.</p>
+
+    <a class="btn-nhb-blauw" href="{% url 'HistComp:top' %}">Uitslag vorig seizoen</a>
+
+{% endif %}
+
+{% endblock %}
+

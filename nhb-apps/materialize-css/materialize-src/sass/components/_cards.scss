@@ -13,13 +13,14 @@
   position: relative;
   margin: $element-top-margin 0 $element-bottom-margin 0;
   background-color: $card-bg-color;
+  color: $off-black;
   transition: box-shadow .25s;
   border-radius: 2px;
   @extend .z-depth-1;
 
 
   .card-title {
-    font-size: 24px;
+    font-size: 20px;
     font-weight: 300;
     &.activator {
       cursor: pointer;
@@ -141,6 +142,7 @@
   .card-content {
     padding: $card-padding;
     border-radius: 0 0 2px 2px;
+    font-size: 90%;
 
     p {
       margin: 0;

@@ -1,0 +1,72 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2020 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Interland{% endblock %}
+
+{% block pagina %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="histcomp-interland" %}
+
+<h4>Interland</h4>
+
+<p>Uitslag competitie van 25m1pijl seizoen: <b>{{ seizoen }}</b>.</p>
+
+<p>Onderstaande schutters hebben minimaal <b>5</b> scores neergezet in het seizoen.</p>
+
+<p>De wedstrijdleeftijd is berekend voor het jaar: <b>{{ wedstrijd_jaar }}</b>.</p>
+
+<p>Schutters met een wedstrijdleeftijd:<br>
+.. lager dan <b>{{ jeugd_min}}</b> zijn niet in de lijst opgenomen.<br>
+.. vanaf <b>{{ jeugd_min }}</b> tot en met <b>{{ jeugd_max }}</b> worden als <b>Jeugd</b> gemarkeerd.<br>
+.. boven de <b>{{ jeugd_max }}</b> krijgen simpelweg de opmerking <b>Senior</b>.</p>
+
+<p>&nbsp;</p>
+<p>Spring naar klasse:</p>
+{% for klasse in klassen %}
+    <a class="btn-nhb-blauw margin-5" href="#{{ klasse.klasse }}">{{ klasse.klasse }}</a>
+{% endfor %}
+
+{% for klasse in klassen %}
+    <p>&nbsp;</p>
+    <h5 id="{{ klasse.klasse }}">Klasse: {{ klasse.klasse }}</h5>
+
+    <table class="white" id="table_{{ klasse.klasse }}">
+        <thead>
+            <tr>        <!-- filter rij -->
+                <td></td>
+                <td colspan="2" class="table-filter"><input class="table-filter" oninput="myTableFilter(this, 'table_{{ klasse.klasse }}')" placeholder="Zoeken"/></td>
+                <td></td>
+                <td></td>
+                <td>
+                    <a class="btn-nhb-download float right tooltipped" href="{{ klasse.url_download }}" data-position="left" data-tooltip="Lijst ophalen als bestand">
+                        <i class="material-icons-round">get_app</i></a>
+                </td>
+            </tr>
+            <tr>
+                <th>Gemiddelde</th>
+                <th filter="on">Wedstrijdleeftijd</th>
+                <th filter="on">Geslacht</th>
+                <th>NHB nummer</th>
+                <th>Naam</th>
+                <th>Vereniging</th>
+            </tr>
+        </thead>
+
+        {% for schutter in klasse.schutters %}
+            <tr>
+                <td>{{ schutter.gemiddelde }}</td>
+                <td>{{ schutter.leeftijd_str }}</td>
+                <td>{{ schutter.nhblid.geslacht }}</td>
+                <td>{{ schutter.nhblid.nhb_nr }}</td>
+                <td>{{ schutter.nhblid.volledige_naam }}</td>
+                <td>{{ schutter.nhblid.bij_vereniging }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endfor %}
+
+{% endblock %}

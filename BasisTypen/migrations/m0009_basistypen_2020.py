@@ -147,7 +147,7 @@ def create_wedstrijdklasse_team(apps, volgorde, beschrijving, boogtypen):
     # for
 
 
-def init_wedstrijdklassen_2020(apps, schema_editor):
+def init_wedstrijdklassen_2020(apps, _):
     """ Maak de wedstrijdklassen aan"""
 
     for tup in WKL_INDIV:
@@ -159,7 +159,7 @@ def init_wedstrijdklassen_2020(apps, schema_editor):
     # for
 
 
-def corrigeer_leeftijdsklassen(apps, schema_editor):
+def corrigeer_leeftijdsklassen(apps, _):
     # correctie op leeftijdsklasse uit basistypen_2018
     # Cadet meisjes heeft geslacht=M, moet zijn geslacht=V
 
@@ -186,4 +186,3 @@ class Migration(migrations.Migration):
     ]
 
 # end of file
-

@@ -1,0 +1,284 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2020 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Accommodatie details{% endblock %}
+
+{% block pagina %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vereniging-locatie-details" %}
+
+<h4>Vereniging en Accommodatie</h4>
+
+<p>Op deze pagina staan de details van de accommodatie van een vereniging.</p>
+
+<form action="{{ opslaan_url }}" method="post">
+    {% csrf_token %}
+
+    <table class="white">
+        <tr>
+            <td>Vereniging:</td>
+            <td>{{ nhbver }}</td>
+            {% if not readonly %}
+                <td><!-- kolom voor de wijzig knoppen --></td>
+            {% endif %}
+        </tr>
+
+        <tr>
+            <td>Regio:</td>
+            <td>{{ nhbver.regio }}</td>
+            {% if not readonly %}
+                <td><!-- kolom voor de wijzig knoppen --></td>
+            {% endif %}
+        </tr>
+
+        {% if nhbver.clusters.count %}
+            <td>Cluster(s):</td>
+            <td>
+                {% for cluster in nhbver.clusters.all %}
+                    <span>{{ cluster }}</span><br>
+                {% endfor %}
+            </td>
+            {% if not readonly %}
+                <td><!-- kolom voor de wijzig knoppen --></td>
+            {% endif %}
+        {% endif %}
+
+        <tr>
+            <td style="vertical-align: top">Adres van de accommodatie:</td>
+            <td style="vertical-align: top">{{ locatie.adres|linebreaksbr }}</td>
+            {% if not readonly %}
+                <td><!-- kolom voor de wijzig knoppen --></td>
+            {% endif %}
+        </tr>
+
+        <tr>
+            <td style="vertical-align: top">Secretaris</td>
+            <td style="vertical-align: top">
+                {% for name in sec_names %}
+                    <span>{{ name }}</span><br>
+                {% empty %}
+                    <i>Nog geen account</i>
+                {% endfor %}
+            </td>
+            {% if not readonly %}
+                <td>
+                    {% if url_koppel_sec %}
+                        <a class="btn-nhb-blauw" href="{{ url_koppel_sec }}"><i class="material-icons-round left">group_add</i>Koppel beheerders</a>
+                    {% endif %}
+                </td>
+            {% endif %}
+        </tr>
+
+        <tr>
+            <td style="vertical-align: top">Hoofdwedstrijdleider</td>
+            <td style="vertical-align: top">
+                {% for name in hwl_names %}
+                    <span>{{ name }}</span><br>
+                {% empty %}
+                    <i>Nog niet gekoppeld</i>
+                {% endfor %}
+            </td>
+            {% if not readonly %}
+                <td>
+                    {% if url_koppel_hwl %}
+                        <a class="btn-nhb-blauw" href="{{ url_koppel_hwl }}"><i class="material-icons-round left">group_add</i>Koppel beheerders</a>
+                    {% endif %}
+                </td>
+            {% endif %}
+        </tr>
+
+        <tr>
+            <td style="vertical-align: top">Wedstrijdleider</td>
+            <td style="vertical-align: top">
+                {% for name in wl_names %}
+                    <span>{{ name }}</span><br>
+                {% empty %}
+                    <i>Geen</i>
+                {% endfor %}
+            </td>
+            {% if not readonly %}
+                <td>
+                    {% if url_koppel_wl %}
+                        <a class="btn-nhb-blauw" href="{{ url_koppel_wl }}"><i class="material-icons-round left">group_add</i>Koppel beheerders</a>
+                    {% endif %}
+                </td>
+            {% endif %}
+        </tr>
+
+        <tr>
+            <td>E-mailadres secretaris</td>
+            <td>
+                {% if sec_email %}
+                    <code>{{ sec_email }}</code>
+                {% else %}
+                    <i>Onbekend</i>
+                {% endif %}
+            </td>
+            {% if not readonly %}
+                <!-- email van SEC moet gewijzigd worden in Onze Relaties -->
+                <td><!-- kolom voor de wijzig knoppen --></td>
+            {% endif %}
+        </tr>
+
+        <tr>
+            <td>E-mailadres hoofdwedstrijdleider</td>
+            <td>
+                {% if hwl_email %}
+                    <code>{{ hwl_email }}</code>
+                {% else %}
+                    <i>Onbekend</i>
+                {% endif %}
+            </td>
+            {% if not readonly %}
+                <td>
+                    {% if url_email_hwl %}
+                        <a class="btn-nhb-blauw" href="{{ url_email_hwl }}"><i class="material-icons-round left">alternate_email</i>Wijzig e-mail</a>
+                    {% endif %}
+                </td>
+            {% endif %}
+        </tr>
+
+        <tr>
+            <td>E-mailadres wedstrijdleider</td>
+            <td>
+                {% if wl_email %}
+                    <code>{{ wl_email }}</code>
+                {% else %}
+                    <i>Onbekend</i>
+                {% endif %}
+            </td>
+            {% if not readonly %}
+                <td>
+                    {% if url_email_wl %}
+                        <a class="btn-nhb-blauw" href="{{ url_email_wl }}"><i class="material-icons-round left">alternate_email</i>Wijzig e-mail</a>
+                    {% endif %}
+                </td>
+            {% endif %}
+        </tr>
+
+        <tr>
+            <td>Typering:</td>
+            <td>
+                {% if readonly %}
+                    <span>{{ locatie.baan_type_str }}<br></span>
+                {% else %}
+                    <select name="baan_type">
+                        <option value="X"{%if locatie.baan_type == "X" %} selected{% endif %}>Onbekend</option>
+                        <option value="O"{%if locatie.baan_type == "O" %} selected{% endif %}>Volledig overdekte binnenbaan</option>
+                        <option value="H"{%if locatie.baan_type == "H" %} selected{% endif %}>Half overdekt (binnen-buiten schieten)</option>
+                    </select>
+                {% endif %}
+            </td>
+            {% if not readonly %}
+                <td><!-- kolom voor de wijzig knoppen --></td>
+            {% endif %}
+        </tr>
+
+        <tr>
+            <td>Aantal banen 18 meter:</td>
+            <td>
+                {% if readonly %}
+                    <span>{{ locatie.banen_18m }} banen<br></span>
+                {% else %}
+                    <select name="banen_18m">
+                        <option value="0"{%if locatie.banen_18m == 0 %} selected{% endif %}>Geen banen</option>
+                        <option value="1"{%if locatie.banen_18m == 1 %} selected{% endif %}>1 baan</option>
+                        {% for baan in banen %}
+                            <option value="{{ baan }}"{%if locatie.banen_18m == baan %} selected{% endif %}>{{ baan }} banen</option>
+                        {% endfor %}
+                    </select>
+                {% endif %}
+            </td>
+            {% if not readonly %}
+                <td><!-- kolom voor de wijzig knoppen --></td>
+            {% endif %}
+        </tr>
+
+        <tr>
+            <td>Aantal banen 25 meter:</td>
+            <td>
+                {% if readonly %}
+                    <span>{{ locatie.banen_25m }} banen<br></span>
+                {% else %}
+                    <select name="banen_25m">
+                        <option value="0"{%if locatie.banen_25m == 0 %} selected{% endif %}>Geen banen</option>
+                        <option value="1"{%if locatie.banen_25m == 1 %} selected{% endif %}>1 baan</option>
+                        {% for baan in banen %}
+                            <option value="{{ baan }}"{%if locatie.banen_25m == baan %} selected{% endif %}>{{ baan }} banen</option>
+                        {% endfor %}
+                    </select>
+                {% endif %}
+            </td>
+            {% if not readonly %}
+                <td><!-- kolom voor de wijzig knoppen --></td>
+            {% endif %}
+        </tr>
+
+        <tr>
+            <td>Maximum aantal Dutch Targets op 1 baan:</td>
+            <td>
+                {% if readonly %}
+                    <span>{{ locatie.max_dt_per_baan }} blazoenen<br></span>
+                {% else %}
+                    <select name="max_dt">
+                        <option value="3"{%if locatie.max_dt_per_baan == 3 %} selected{% endif %}>3 blazoenen</option>
+                        <option value="4"{%if locatie.max_dt_per_baan == 4 %} selected{% endif %}>4 blazoenen</option>
+                    </select>
+                {% endif %}
+            </td>
+            {% if not readonly %}
+                <td><!-- kolom voor de wijzig knoppen --></td>
+            {% endif %}
+        </tr>
+
+        <tr>
+            <td style="vertical-align: top">Notities:</td>
+            <td style="vertical-align: top">
+                {% if readonly %}
+                    <span>{{ locatie.notities }}</span>
+                {% else %}
+                    <textarea name="notities" class="materialize-textarea">{{ locatie.notities }}</textarea>
+                {% endif %}
+            </td>
+            {% if not readonly %}
+                <td><!-- kolom voor de wijzig knoppen --></td>
+            {% endif %}
+        </tr>
+
+        {% if locatie.other_ver.count %}
+        <tr>
+            <td style="vertical-align: top">Accommodatie wordt ook gebruikt door vereniging:</td>
+            <td style="vertical-align: top">
+                {% for nhbver in locatie.other_ver.all %}
+                    <span>{{ nhbver }}</span><br>
+                {% endfor %}
+            </td>
+            {% if not readonly %}
+                <td><!-- kolom voor de wijzig knoppen --></td>
+            {% endif %}
+        </tr>
+        {% endif %}
+    </table>
+
+    <p>Deze gegevens kunnen aangepast worden door de vereniging zelf (secretaris of hoofdwedstrijdleider) en door de regiocompetitieleider.</p>
+    <p>
+        {% if readonly %}
+            <a class="btn-nhb-blauw margin-5" href="{{ terug_url }}">
+                <i class="material-icons-round left">arrow_back</i>Terug</a>
+        {% else %}
+            <a class="btn-nhb-blauw margin-5" href="{{ terug_url }}">
+                <i class="material-icons-round left">arrow_back</i>Terug (niet opslaan)</a>
+
+            <button class="btn-nhb-rood margin-5" type="submit">
+                <i class="material-icons-round left">save</i>Wijzigingen opslaan</button>
+        {% endif %}
+    </p>
+
+</form>
+
+{% endblock %}
+

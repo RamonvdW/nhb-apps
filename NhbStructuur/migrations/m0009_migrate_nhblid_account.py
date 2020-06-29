@@ -9,7 +9,7 @@ from django.db import migrations, models
 import django.db.models.deletion
 
 
-def zet_nhblid_account(apps, schema_editor):
+def zet_nhblid_account(apps, _):
 
     # haal de klassen op die van toepassing zijn tijdens deze migratie
     account_klas = apps.get_model('Account', 'Account')
@@ -33,7 +33,7 @@ class Migration(migrations.Migration):
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ('NhbStructuur', 'm0008_vereniging_plaats_email'),
-        ('Account', 'm0010_migrate_functie_nhblid_part2'),      # verwijdert Account.nhblid
+        ('Account', 'm0010_migrate_functie_nhblid_part2'),      # verwijderd Account.nhblid
     ]
 
     # migratie functies
@@ -44,7 +44,6 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(blank=True, null=True,
                                     on_delete=django.db.models.deletion.SET_NULL,
                                     to='Account.Account'),
-                                    #to=settings.AUTH_USER_MODEL),
         ),
         migrations.RunPython(zet_nhblid_account),
     ]

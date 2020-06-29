@@ -53,7 +53,8 @@ function do_wijzig(actie, id) {
                     {% endif %}
                 </div>
                 <div class="collapsible-body white">
-                    <button class="btn-nhb-rood" onclick="do_wijzig('drop', this)" data-pk="{{ account.pk }}"><i class="material-icons-round left">delete</i>Verwijder beheerder</button>
+                    <button class="btn-nhb-rood" onclick="do_wijzig('drop', this)" data-pk="{{ account.pk }}">
+                        <i class="material-icons-round left">delete</i>Verwijder beheerder</button>
                 </div>
             </li>
         {% endfor %}
@@ -84,7 +85,8 @@ function do_wijzig(actie, id) {
 
             <div class="row"><div class="col s12"></div>
                 <div class="center-align">
-                    <button class="btn-nhb-blauw" type="submit"><i class="material-icons-round left">search</i>Zoek</button>
+                    <button class="btn-nhb-blauw" type="submit">
+                        <i class="material-icons-round left">search</i>Zoek</button>
                 </div>
             </div>
         </form>
@@ -105,13 +107,14 @@ function do_wijzig(actie, id) {
                         {% endif %}
                     </div>
                     <div class="collapsible-body white">
-                        {% if is_rol_cwz %}
+                        {% if is_rol_hwl %}
                             <span>Lid van {{ vereniging_naam }}</span>
                             <p>NHB nummer: {{ account.nhb_nr_str|highlight:zoekterm }}</p>
                         {% else %}
                             <p style="margin-top:0px">NHB nummer: {{ account.nhb_nr_str|highlight:zoekterm }}</p>
                         {% endif %}
-                        <button class="btn-nhb-blauw" onclick="do_wijzig('add', this)" data-pk="{{ account.pk }}"><i class="material-icons-round left">add</i>Maak beheerder</button>
+                        <button class="btn-nhb-blauw" onclick="do_wijzig('add', this)" data-pk="{{ account.pk }}">
+                            <i class="material-icons-round left">add</i>Maak beheerder</button>
                     </div>
                 </li>
             {% endfor %}
@@ -124,7 +127,8 @@ function do_wijzig(actie, id) {
     <p>Staat de gezochte persoon er niet bij? Alleen personen met een account op deze website worden getoond.</p>
 {% endif %}
 
-<p><a class="btn-nhb-blauw margin-5" href="{{ terug_url }}"><i class="material-icons-round left">arrow_back</i>Terug</a></p>
+<p><a class="btn-nhb-blauw margin-5" href="{{ terug_url }}">
+    <i class="material-icons-round left">arrow_back</i>Terug</a></p>
 
 {% endblock %}
 

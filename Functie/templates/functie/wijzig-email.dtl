@@ -10,7 +10,7 @@
 {% block title %}Wijzig e-mailadres{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="functie-wijzig" %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="functie-wijzig-email" %}
 
 <h4>Wijzig e-mailadres</h4>
 

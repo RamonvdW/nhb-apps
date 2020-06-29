@@ -5,6 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import models
+from decimal import Decimal
 
 
 class HistCompetitie(models.Model):
@@ -14,7 +15,7 @@ class HistCompetitie(models.Model):
         De tabel bevat velden die anders heel vaak herhaald zouden worden in een andere tabel
         en het voorkomt zoeken naar deze informatie uit de grote tabel.
     """
-    COMP_TYPE = [('18', '18m Indoor'),      # note: 18, 25 must be in sync with Competitie.AFSTAND
+    COMP_TYPE = [('18', '18m Indoor'),      # note: 18, 25 must be in sync with Competitie.models.AFSTAND
                  ('25', '25m1pijl')]
 
     comptype2str = {'18': '18m Indoor',
@@ -70,6 +71,21 @@ class HistCompetitieIndividueel(models.Model):
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
         return "rank %s: %s %s" % (self.rank, self.schutter_naam, self.gemiddelde)
+
+    def tel_aantal_scores(self):
+        count = 0
+        nul = Decimal('0.000')
+        for score in (self.score1,
+                      self.score2,
+                      self.score3,
+                      self.score4,
+                      self.score5,
+                      self.score6,
+                      self.score7):
+            if score > nul:
+                count += 1
+        # for
+        return count
 
     class Meta:
         """ meta data voor de admin interface """

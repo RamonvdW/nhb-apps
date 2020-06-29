@@ -8,7 +8,7 @@ from django.conf import settings
 from django.db import migrations, models
 
 
-def zet_accounts(apps, schema_editor):
+def zet_accounts(apps, _):
 
     # haal de klassen op die van toepassing zijn tijdens deze migratie
     account_klas = apps.get_model('Account', 'Account')

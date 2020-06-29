@@ -10,7 +10,7 @@ from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
 from Overig.e2ehelpers import E2EHelpers
 from Functie.models import maak_functie
 from Score.models import aanvangsgemiddelde_opslaan
-from .models import SchutterBoog
+from .models import SchutterBoog, SchutterVoorkeuren
 import datetime
 
 
@@ -21,8 +21,8 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
         """ initialisatie van de test case """
         self.account_admin = self.e2e_create_account_admin()
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
-        self.account_cwz = self.e2e_create_account('cwz', 'cwz@test.com', 'Secretaris')
-        self.e2e_account_accepteert_vhpg(self.account_cwz)
+        self.account_hwl = self.e2e_create_account('hwl', 'hwl@test.com', 'Secretaris')
+        self.e2e_account_accepteert_vhpg(self.account_hwl)
 
         # maak een test vereniging
         ver = NhbVereniging()
@@ -31,10 +31,10 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
         ver.regio = NhbRegio.objects.get(pk=111)
         ver.save()
 
-        self.functie_cwz = maak_functie('CWZ 1000', 'CWZ')
-        self.functie_cwz.nhb_ver = ver
-        self.functie_cwz.save()
-        self.functie_cwz.accounts.add(self.account_cwz)
+        self.functie_hwl = maak_functie('HWL 1000', 'HWL')
+        self.functie_hwl.nhb_ver = ver
+        self.functie_hwl.save()
+        self.functie_hwl.accounts.add(self.account_hwl)
 
         # maak een test lid aan
         lid = NhbLid()
@@ -84,6 +84,7 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
 
         # initieel zijn er geen voorkeuren opgeslagen
         self.assertEqual(SchutterBoog.objects.count(), 0)
+        self.assertEqual(SchutterVoorkeuren.objects.count(), 0)
         resp = self.client.get(self.url_voorkeuren)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -100,68 +101,77 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
         obj = SchutterBoog.objects.get(nhblid=self.nhblid1, boogtype=self.boog_R)
         self.assertTrue(obj.heeft_interesse)
         self.assertFalse(obj.voor_wedstrijd)
-        self.assertFalse(obj.voorkeur_dutchtarget_18m)
 
         # maak wat wijzigingen
-        resp = self.client.post(self.url_voorkeuren, {'schiet_R': 'on', 'info_BB': 'on', 'voorkeur_DT_18m': 'on'})
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('schutter/voorkeuren-opgeslagen.dtl', 'plein/site_layout.dtl'))
+        resp = self.client.post(self.url_voorkeuren, {'schiet_R': 'on',
+                                                      'info_BB': 'on',
+                                                      'voorkeur_dt': 'on'})
+        self.assert_is_redirect(resp, '/schutter/')     # naar profiel
         self.assertEqual(SchutterBoog.objects.count(), 5)
+        self.assertEqual(SchutterVoorkeuren.objects.count(), 1)
 
         obj = SchutterBoog.objects.get(nhblid=self.nhblid1, boogtype=self.boog_R)
         self.assertFalse(obj.heeft_interesse)
         self.assertTrue(obj.voor_wedstrijd)
-        self.assertTrue(obj.voorkeur_dutchtarget_18m)
+
+        voorkeuren = SchutterVoorkeuren.objects.all()[0]
+        self.assertTrue(voorkeuren.voorkeur_dutchtarget_18m)
+        self.assertFalse(voorkeuren.voorkeur_meedoen_competitie)
+        self.assertEqual(voorkeuren.nhblid, self.nhblid1)
 
         # coverage
         self.assertTrue(str(obj) != "")
+        self.assertTrue(str(voorkeuren) != "")
 
         # GET met DT=aan
         resp = self.client.get(self.url_voorkeuren)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         # check DT=aan
         checked, unchecked = self.extract_checkboxes(resp)
-        self.assertTrue("voorkeur_DT_18m" in checked)
+        self.assertTrue("voorkeur_dt" in checked)
+        self.assertTrue("voorkeur_meedoen_competitie" in unchecked)
 
         # DT voorkeur uitzetten
         resp = self.client.post(self.url_voorkeuren, {'schiet_R': 'on', 'info_BB': 'on'})
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('schutter/voorkeuren-opgeslagen.dtl', 'plein/site_layout.dtl'))
+        self.assert_is_redirect(resp, '/schutter/')     # naar profiel
 
         obj = SchutterBoog.objects.get(nhblid=self.nhblid1, boogtype=self.boog_R)
         self.assertFalse(obj.heeft_interesse)
         self.assertTrue(obj.voor_wedstrijd)
-        self.assertFalse(obj.voorkeur_dutchtarget_18m)
 
-        # zet aanvangsgemiddelden voor 18m en 25m
-        datum = datetime.date(year=2020, month=5, day=2)
-        datum_str = "2 mei 2020"
-        aanvangsgemiddelde_opslaan(obj, 18, 9.018, datum, None, 'Test opmerking A')
-        aanvangsgemiddelde_opslaan(obj, 25, 2.5, datum, None, 'Test opmerking B')
+        voorkeuren = SchutterVoorkeuren.objects.all()[0]
+        self.assertFalse(voorkeuren.voorkeur_dutchtarget_18m)
+
+        # voorkeur competitie weer aan zetten
+        resp = self.client.post(self.url_voorkeuren, {'voorkeur_meedoen_competitie': 'on'})
+        self.assert_is_redirect(resp, '/schutter/')     # naar profiel
+
+        voorkeuren = SchutterVoorkeuren.objects.all()[0]
+        self.assertTrue(voorkeuren.voorkeur_meedoen_competitie)
 
         resp = self.client.get(self.url_voorkeuren)
-        self.assertContains(resp, "2,500")
-        self.assertContains(resp, "9,018")
-        self.assertContains(resp, "Test opmerking A")
-        self.assertContains(resp, "Test opmerking B")
-        self.assertContains(resp, datum_str)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        checked, unchecked = self.extract_checkboxes(resp)
+        self.assertTrue("voorkeur_meedoen_competitie" in checked)
+
+        # does een post zonder wijzigingen (voor de coverage)
+        resp = self.client.post(self.url_voorkeuren, {'voorkeur_meedoen_competitie': 'on'})
+        self.assert_is_redirect(resp, '/schutter/')     # naar profiel
 
         self.e2e_assert_other_http_commands_not_supported(self.url_voorkeuren, post=False)
 
-    def test_cwz(self):
-        # login as CWZ
-        self.e2e_login_and_pass_otp(self.account_cwz)
-        self.e2e_wissel_naar_functie(self.functie_cwz)
-        self.e2e_check_rol('CWZ')
+    def test_hwl(self):
+        # login as HWL
+        self.e2e_login_and_pass_otp(self.account_hwl)
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+        self.e2e_check_rol('HWL')
 
-        # haal als CWZ de voorkeuren pagina op van een lid van de vereniging
+        # haal als HWL de voorkeuren pagina op van een lid van de vereniging
         # dit maakt ook de SchutterBoog records aan
         resp = self.client.get(self.url_voorkeuren + '100001/')
         self.assertEqual(resp.status_code, 200)
 
-        # controleer de stand van zaken voordat de CWZ iets wijzigt
+        # controleer de stand van zaken voordat de HWL iets wijzigt
         obj_r = SchutterBoog.objects.get(nhblid__pk=100001, boogtype__afkorting='R')
         obj_c = SchutterBoog.objects.get(nhblid__pk=100001, boogtype__afkorting='C')
         self.assertFalse(obj_r.voor_wedstrijd)
@@ -181,25 +191,25 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
         self.assertFalse(obj_r.heeft_interesse)
         self.assertTrue(obj_c.heeft_interesse)
 
-    def test_cwz_bad(self):
-        # login as CWZ
-        self.e2e_login_and_pass_otp(self.account_cwz)
-        self.e2e_wissel_naar_functie(self.functie_cwz)
-        self.e2e_check_rol('CWZ')
+    def test_hwl_bad(self):
+        # login as HWL
+        self.e2e_login_and_pass_otp(self.account_hwl)
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+        self.e2e_check_rol('HWL')
 
-        # haal als CWZ 'de' voorkeuren pagina op, zonder specifiek nhblid_pk
+        # haal als HWL 'de' voorkeuren pagina op, zonder specifiek nhblid_pk
         resp = self.client.get(self.url_voorkeuren)
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
 
-        # haal als CWZ de voorkeuren pagina op met een niet-numeriek nhblid_pk
+        # haal als HWL de voorkeuren pagina op met een niet-numeriek nhblid_pk
         resp = self.client.get(self.url_voorkeuren + 'snuiter/')
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
 
-        # haal als CWZ de voorkeuren pagina op met een niet bestaand nhblid_pk
+        # haal als HWL de voorkeuren pagina op met een niet bestaand nhblid_pk
         resp = self.client.get(self.url_voorkeuren + '999999/')
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
 
-        # haal als CWZ de voorkeuren pagina op van een lid van een andere vereniging
+        # haal als HWL de voorkeuren pagina op van een lid van een andere vereniging
         resp = self.client.get(self.url_voorkeuren + '100002/')
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
 

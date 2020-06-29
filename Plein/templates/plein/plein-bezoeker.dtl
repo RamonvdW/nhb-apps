@@ -13,16 +13,57 @@
 
 <h4>Welkom</h4>
 
+<p>Op deze website kan je informatie vinden over de Handboogsport, zoals uitslagen van de competities en de Nederlandse Records.</p>
+
+<!-- TODO: deze opmerking verwijderen -->
 <p>Deze site is van de Nederlandse Handboog Bond (NHB) en is nog in ontwikkeling.</p>
 
-<h5>Menu</h5>
+<h5>Inloggen</h5>
 
-<!-- hide-on-large-only werkt als hide-on-large-and-up -->
-<div class="hide-on-large-only">Klik of druk op het plaatje met drie-streepjes (linksboven op deze pagina) om het menu <b>op te roepen</b>.</div>
-
-<p>Via het menu kan je informatie vinden over de Handboogsport zoals uitslagen van de competities en de Nederlandse Records.</p>
+<p>Heb je al een account?</p>
+<a class="btn-nhb-blauw" href="{% url 'Account:login' %}">
+        <i class="material-icons-round left">login</i>Inloggen</a></p>
 
 <h5>Account aanmaken</h5>
-<p>Ben je lid van de NHB (heb je een NHB nummer?), maak dan een account aan en log in, dan tonen we informatie die voor jou relevant is.</p>
+<p>Ben je lid van de NHB (heb je een NHB nummer?) maak dan een account aan en log in, dan tonen we informatie die voor jou relevant is.</p>
+<p><a class="btn-nhb-blauw" href="{% url 'Schutter:registreer' %}">
+    <i class="material-icons-round left">add</i>Account aanmaken</a></p>
+
+<h5>Verder</h5>
+
+<p>De volgende sites zijn misschien ook van interesse.</p>
+
+<div class="row">
+    <div class="col s12 cards-container">
+
+        <!-- andere sites van de NHB -->
+        <div class="card">
+            <div class="card-content">
+                <div class="card-title center-align">Handboogsport Nederland</div>
+                <div class="center-align"><img src="{% static 'plein/logo_nhb_192x192.png' %}" width="128" alt="Logo NHB"></div>
+                <p>Website van de NHB: <code>www.handboogsport.nl</code></p>
+            </div>
+            <a class="nhb-klikbare-balk" href="https://www.handboogsport.nl" target="_blank" rel="noopener noreferrer">
+                <div class="card-action center-align">
+                    <span class="nhb-klikbare-link">Bezoek de website</span>
+                </div>
+            </a>
+        </div>
+
+        <div class="card">
+            <div class="card-content">
+                <div class="card-title center-align">Free your mind</div>
+                <div class="center-align"><img src="{% static 'plein/logo_hero_512x512.png' %}" width="128" alt="Logo NHB"></div>
+                <p>Kaart met de locaties in Nederland waar je kan schieten.</p>
+            </div>
+            <a class="nhb-klikbare-balk" href="https://www.handboogsport.nl/freeyourmind/zelf-schieten/" target="_blank" rel="noopener noreferrer">
+                <div class="card-action center-align">
+                    <span class="nhb-klikbare-link">Bezoek de website</span>
+                </div>
+            </a>
+        </div>
+
+    </div>
+</div>
 
 {% endblock %}

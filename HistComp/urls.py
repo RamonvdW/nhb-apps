@@ -12,7 +12,7 @@ app_name = 'HistComp'
 urlpatterns = [
     path('',
          views.HistCompAlleJarenView.as_view(),
-         name='allejaren'),
+         name='top'),
 
     path('indiv/<histcomp_pk>/',
          views.HistCompIndivView.as_view(),
@@ -20,7 +20,15 @@ urlpatterns = [
 
     path('team/<histcomp_pk>/',
          views.HistCompTeamView.as_view(),
-         name='team')
+         name='team'),
+
+    path('interland/',
+         views.InterlandView.as_view(),
+         name='interland'),
+
+    path('interland/als-bestand/<klasse_pk>/',
+         views.InterlandAlsBestandView.as_view(),
+         name='interland-als-bestand')
 ]
 
 # end of file

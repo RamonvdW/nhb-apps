@@ -7,7 +7,7 @@
 from django.db import migrations, models
 
 
-def zet_temp_fields(apps, schema_editor):
+def zet_temp_fields(apps, _):
 
     # haal de klassen op die van toepassing zijn tijdens deze migratie
     account_klas = apps.get_model('Account', 'Account')

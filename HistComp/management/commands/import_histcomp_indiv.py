@@ -16,7 +16,7 @@ TOEGESTANE_KLASSEN = ('Recurve', 'Compound', 'Barebow', 'Longbow', 'Instinctive 
 
 
 class Command(BaseCommand):
-    help = "Importeer competitie historie"
+    help = "Importeer historische competitie uitslag, individueel"
     verbose = False
 
     def __init__(self, stdout=None, stderr=None, no_color=False, force_color=False):
@@ -141,10 +141,6 @@ class Command(BaseCommand):
 
             # overslaan als er niet ten minste 6 scores zijn
             scores, count, totaal = self._convert_scores(spl[3:3+7])
-            if count < 6:
-                # silently skip
-                self._count_not6scores += 1
-                continue
 
             # naam van het lid erbij zoeken (spelling in CRM is leidend)
             try:
@@ -298,11 +294,11 @@ class Command(BaseCommand):
         self._import(lines, seizoen, comptype)
         self._delete_dupes()
 
-        self.stdout.write("Read %s lines; skipped %s dupes; %s skipped; %s too few scores;"\
+        self.stdout.write("Read %s lines; skipped %s dupes; %s skipped;"\
                           " %s skip with errors; %s skip dupe bow score; added %s records;"
                           " %s without name" % (linecount, self._count_dupe, self._count_skip,
-                                                self._count_not6scores, self._count_error,
-                                                self._count_dupebow, self._count_added - self._count_dupebow,
+                                                self._count_error, self._count_dupebow,
+                                                self._count_added - self._count_dupebow,
                                                 self._count_noname))
 
 # end of file

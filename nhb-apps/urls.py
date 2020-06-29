@@ -17,24 +17,28 @@ from Beheer.views import BeheerAdminSite
 admin.site.__class__ = BeheerAdminSite
 
 urlpatterns = [
-    path('',            site_root_view),
-    path('account/',    include('Account.urls')),
-    path('beheer/',     admin.site.urls),
-    path('competitie/', include('Competitie.urls')),
-    path('functie/',    include('Functie.urls')),
-    path('hist/',       include('HistComp.urls')),
-    path('overig/',     include('Overig.urls')),
-    path('plein/',      include('Plein.urls')),
-    path('logboek/',    include('Logboek.urls')),
-    path('records/',    include('Records.urls')),
-    path('schutter/',   include('Schutter.urls')),
-    path('vereniging/', include('Vereniging.urls')),
-    path('idp/',        include('djangosaml2idp.urls')),        # single sign-on
+    path('',             site_root_view),
+    path('account/',     include('Account.urls')),
+    path('beheer/',      admin.site.urls),
+    path('competitie/',  include('Competitie.urls')),
+    path('functie/',     include('Functie.urls')),
+    path('handleiding/', include('Handleiding.urls')),
+    path('hist/',        include('HistComp.urls')),
+    path('logboek/',     include('Logboek.urls')),
+    path('overig/',      include('Overig.urls')),
+    path('plein/',       include('Plein.urls')),
+    path('records/',     include('Records.urls')),
+    path('schutter/',    include('Schutter.urls')),
+    path('vereniging/',  include('Vereniging.urls'))
 ]
+
+if settings.ENABLE_WIKI:    # pragma: no cover
+    # activeer single sign-on functionaliteit
+    urlpatterns.append(path('idp/',    include('djangosaml2idp.urls')))
 
 if settings.DEBUG:          # pragma: no cover
     import debug_toolbar
-    urlpatterns = [path('__debug__', include(debug_toolbar.urls)), ] + urlpatterns
+    urlpatterns.insert(0, path('__debug__', include(debug_toolbar.urls)))
 
 
 # end of file

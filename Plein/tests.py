@@ -16,6 +16,8 @@ import datetime
 class TestPlein(E2EHelpers, TestCase):
     """ unit tests voor de Plein applicatie """
 
+    test_after = ('Functie',)
+
     def setUp(self):
         """ initialisatie van de test case """
         self.account_admin = self.e2e_create_account_admin()
@@ -42,9 +44,17 @@ class TestPlein(E2EHelpers, TestCase):
         # secretaris kan nog niet ingevuld worden
         ver.save()
 
-        self.functie_cwz = maak_functie('CWZ vereniging 1000', 'CWZ')
-        self.functie_cwz.nhb_ver = ver
-        self.functie_cwz.save()
+        self.functie_sec = maak_functie('Secretaris vereniging 1000', 'SEC')
+        self.functie_sec.nhb_ver = ver
+        self.functie_sec.save()
+
+        self.functie_hwl = maak_functie('Hoofdwedstrijdleider 1000', 'HWL')
+        self.functie_hwl.nhb_ver = ver
+        self.functie_hwl.save()
+
+        self.functie_wl = maak_functie('Wedstrijdleider 1000', 'WL')
+        self.functie_wl.nhb_ver = ver
+        self.functie_wl.save()
 
         # maak een test lid aan
         lid = NhbLid()
@@ -93,27 +103,29 @@ class TestPlein(E2EHelpers, TestCase):
         self.e2e_login(self.account_admin)
         resp = self.client.get('/plein/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertNotContains(resp, '/beheer/')
-        self.assertNotContains(resp, '/admin/')
         self.assertContains(resp, 'Wissel van rol')
+        urls = [url for url in self.extract_all_urls(resp) if "admin" in url or "beheer" in url]
+        self.assertEqual(0, len(urls))
 
         # simuleer 2FA
         self.e2e_login_and_pass_otp(self.account_admin)
         resp = self.client.get('/plein/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertNotContains(resp, '/beheer/')    # komt pas in beeld na kiezen rol IT
         self.assertContains(resp, 'Wissel van rol')
         self.assert_template_used(resp, ('plein/plein-gebruiker.dtl', 'plein/site_layout.dtl'))
+        urls = [url for url in self.extract_all_urls(resp) if "beheer" in url]
+        self.assertEqual(0, len(urls))  # komt pas in beeld na kiezen rol IT
 
         # wissel naar IT beheerder
-        self.e2e_wisselnaarrol_beheerder()
-        self.e2e_check_rol('beheerder')
+        self.e2e_wisselnaarrol_it()
+        self.e2e_check_rol('IT')
 
         resp = self.client.get('/plein/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, '/beheer/')
         self.assertContains(resp, 'Wissel van rol')
         self.assert_template_used(resp, ('plein/plein-beheerder.dtl', 'plein/site_layout.dtl'))
+        urls = [url for url in self.extract_all_urls(resp) if "beheer" in url]
+        self.assertEqual(1, len(urls))
 
         # wissel naar elk van de functies
 
@@ -145,12 +157,19 @@ class TestPlein(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, 'RCL')
 
-        # cwz
-        self.e2e_wissel_naar_functie(self.functie_cwz)
-        self.e2e_check_rol('CWZ')
+        # sec
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+        self.e2e_check_rol('HWL')
         resp = self.client.get('/plein/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, 'CWZ ')
+        self.assertContains(resp, 'Hoofdwedstrijdleider 1000')
+
+        # wl
+        self.e2e_wissel_naar_functie(self.functie_wl)
+        self.e2e_check_rol('WL')
+        resp = self.client.get('/plein/')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assertContains(resp, 'Wedstrijdleider 1000')
 
         # geen
         self.e2e_wisselnaarrol_gebruiker()
@@ -158,6 +177,20 @@ class TestPlein(E2EHelpers, TestCase):
         resp = self.client.get('/plein/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, 'Gebruiker')
+
+    def test_sec(self):
+        # login als secretaris
+        account_sec = self.account_100001
+        self.functie_sec.accounts.add(account_sec)
+        self.e2e_account_accepteert_vhpg(account_sec)
+        self.e2e_login_and_pass_otp(account_sec)
+
+        # sec
+        self.e2e_wissel_naar_functie(self.functie_sec)
+        self.e2e_check_rol('SEC')
+        resp = self.client.get('/plein/')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assertContains(resp, 'Secretaris vereniging 1000')
 
     def test_privacy(self):
         resp = self.client.get('/plein/privacy/')
@@ -174,5 +207,12 @@ class TestPlein(E2EHelpers, TestCase):
         request.user.is_authenticated = False
         with self.assertRaises(AssertionError):
             menu_dynamics(request, context, actief='test-bestaat-niet')
+
+    def test_quick(self):
+        # voor test.sh om met een snelle run in debug mode
+        self.e2e_login(self.account_admin)
+        resp = self.client.get('/plein/')
+        self.assertEqual(resp.status_code, 200)
+        urls = self.extract_all_urls(resp)      # for coverage
 
 # end of file

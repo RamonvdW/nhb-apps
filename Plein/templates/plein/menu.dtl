@@ -42,7 +42,7 @@
 {% if menu_show_login %}
 <li{% if menu_actief == "inloggen" %} class="actief"{% endif %}>
     <a href="{% url 'Account:login' %}" class="white-text">
-    <i class="material-icons-round white-text">person</i>Inloggen</a>
+    <i class="material-icons-round white-text">login</i>Inloggen</a>
 </li>
 {% endif %}
 
@@ -66,7 +66,7 @@
 </li>
 
 <li{% if menu_actief == "histcomp" %} class="actief"{% endif %}>
-    <a href="{% url 'HistComp:allejaren' %}" class="white-text">
+    <a href="{% url 'Competitie:tussenstand' %}" class="white-text">
     <i class="material-icons-round white-text">account_balance</i>Competitie uitslagen</a>
 </li>
 
@@ -109,9 +109,10 @@
 {% endif %}
 
 <!-- handleiding, alleen voor gebruikers die toegang hebben -->
-{% if wiki_url %}
-<li>
-    <a href="{{ wiki_url }}" class="white-text" target="_blank"><i class="material-icons-round white-text">help_outline</i>{{ wiki_titel }}</a>
+{% if handleiding_url %}
+<li {% if menu_actief == "handleiding" %} class="actief"{% endif %}>
+    <a href="{{ handleiding_url }}" class="white-text" target="_blank" rel="noopener noreferrer">
+        <i class="material-icons-round white-text">help_outline</i>Handleiding</a>
 </li>
 {% endif %}
 

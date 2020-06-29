@@ -19,7 +19,7 @@
 
 <p>Kijk eens in het menu onder Competities en Wissel van rol.</p>
 
-{% if rol_is_cwz %}
+{% if rol_is_sec or rol_is_hwl or rol_is_wl %}
     <p>..en Vereniging</p>
 {% endif %}
 
@@ -31,9 +31,8 @@
         {% if toon_nieuwe_accounts %}
             <div class="card">
                 <div class="card-content">
-                    <div class="card-title center-align">Account activiteit<br>
-                        <br><i class="material-icons-round large">recent_actors</i>
-                    </div>
+                    <div class="card-title center-align">Account activiteit</div>
+                    <div class="center-align"><i class="material-icons-round medium">recent_actors</i></div>
                     <p>Toon overzicht van de recent gebruikte en aangemaakte accounts.</p>
                 </div>
                 <a href="{% url 'Account:activiteit' %}" class="nhb-klikbare-balk">
@@ -48,9 +47,8 @@
         {% if toon_functies %}
             <div class="card">
                 <div class="card-content">
-                    <div class="card-title center-align">Beheerders<br>
-                        <br><i class="material-icons-round large">face</i>
-                    </div>
+                    <div class="card-title center-align">Beheerders</div>
+                    <div class="center-align"><i class="material-icons-round medium">face</i></div>
                     <p>Toon of wijzig de functies, gekoppelde beheerders en contactgegevens.</p>
                 </div>
                 <a href="{% url 'Functie:overzicht' %}" class="nhb-klikbare-balk">
@@ -65,9 +63,8 @@
         {% if rol_is_bb %}
             <div class="card">
                 <div class="card-content">
-                    <div class="card-title center-align">VHPG status<br>
-                        <br><i class="material-icons-round large">verified_user</i>
-                    </div>
+                    <div class="card-title center-align">VHPG status</div>
+                    <div class="center-align"><i class="material-icons-round medium">verified_user</i></div>
                     <p>Toon overzicht van beheerders die de Verklaring Hanteren Persoonsgegevens (VHPG) geaccepteerd hebben.</p>
                 </div>
                 <a href="{% url 'Functie:vhpg-overzicht' %}" class="nhb-klikbare-balk">
@@ -78,16 +75,31 @@
             </div>
         {% endif %}
 
-        <!-- verenigingen overzicht IT/BB/BKO -->
+        <!-- Interland lijst -->
+        {% if rol_is_bb %}
+            <div class="card">
+                <div class="card-content">
+                    <div class="card-title center-align">Interland lijst</div>
+                    <div class="center-align"><i class="material-icons-round medium">outlined_flag</i></div>
+                    <p>Toon de lijst met kandidaat deelnemers voor de Interland.</p>
+                </div>
+                <a href="{% url 'HistComp:interland' %}" class="nhb-klikbare-balk">
+                    <div class="card-action center-align">
+                        <span class="nhb-klikbare-link">Tonen</span>
+                    </div>
+                </a>
+            </div>
+        {% endif %}
+
+        <!-- verenigingen/accommodaties overzicht IT/BB/BKO -->
         {% if rol_is_bko or rol_is_bb or rol_is_it %}
             <div class="card">
                 <div class="card-content">
-                    <div class="card-title center-align">Verenigingen<br>
-                        <br><i class="material-icons-round large">view_list</i>
-                    </div>
-                    <p>Toon overzicht van de verenigingen (landelijk).</p>
+                    <div class="card-title center-align">Verenigingen</div>
+                    <div class="center-align"><i class="material-icons-round medium">view_list</i></div>
+                    <p>Toon landelijk overzicht van de verenigingen en accommodaties.</p>
                 </div>
-                <a href="{% url 'Competitie:lijst-verenigingen' %}" class="nhb-klikbare-balk">
+                <a href="{% url 'Vereniging:lijst-verenigingen' %}" class="nhb-klikbare-balk">
                     <div class="card-action center-align">
                         <span class="nhb-klikbare-link">Overzicht tonen</span>
                     </div>
@@ -95,16 +107,15 @@
             </div>
         {% endif %}
 
-        <!-- verenigingen overzicht RKO -->
+        <!-- verenigingen/accommodaties overzicht RKO -->
         {% if rol_is_rko %}
             <div class="card">
                 <div class="card-content">
-                    <div class="card-title center-align">Verenigingen<br>
-                        <br><i class="material-icons-round large">view_list</i>
-                    </div>
-                    <p>Toon overzicht van de verenigingen (in jouw rayon).</p>
+                    <div class="card-title center-align">Verenigingen</div>
+                    <div class="center-align"><i class="material-icons-round medium">view_list</i></div>
+                    <p>Toon overzicht van de verenigingen en accommodaties in jouw rayon.</p>
                 </div>
-                <a href="{% url 'Competitie:lijst-verenigingen' %}" class="nhb-klikbare-balk">
+                <a href="{% url 'Vereniging:lijst-verenigingen' %}" class="nhb-klikbare-balk">
                     <div class="card-action center-align">
                         <span class="nhb-klikbare-link">Overzicht tonen</span>
                     </div>
@@ -112,18 +123,33 @@
             </div>
         {% endif %}
 
-        <!-- verenigingen overzicht RCL -->
+        <!-- verenigingen/accommodaties overzicht RCL en HWL -->
+        {% if rol_is_sec or rol_is_hwl or rol_is_rcl %}
+            <div class="card">
+                <div class="card-content">
+                    <div class="card-title center-align">Verenigingen</div>
+                    <div class="center-align"><i class="material-icons-round medium">view_list</i></div>
+                    <p>Toon overzicht van de verenigingen en accommodaties in jouw regio.</p>
+                </div>
+                <a href="{% url 'Vereniging:lijst-verenigingen' %}" class="nhb-klikbare-balk">
+                    <div class="card-action center-align">
+                        <span class="nhb-klikbare-link">Overzicht tonen</span>
+                    </div>
+                </a>
+            </div>
+        {% endif %}
+
+        <!-- clusters RCL -->
         {% if rol_is_rcl %}
             <div class="card">
                 <div class="card-content">
-                    <div class="card-title center-align">Verenigingen<br>
-                        <br><i class="material-icons-round large">view_list</i>
-                    </div>
-                    <p>Toon overzicht van de verenigingen (in jouw regio).</p>
+                    <div class="card-title center-align">Clusters</div>
+                    <div class="center-align"><i class="material-icons-round medium">group_work</i></div>
+                    <p>Mogelijkheden om in jouw regio de verenigingen in geografische clusters te groeperen.</p>
                 </div>
-                <a href="{% url 'Competitie:lijst-verenigingen' %}" class="nhb-klikbare-balk">
+                <a href="{% url 'Vereniging:clusters' %}" class="nhb-klikbare-balk">
                     <div class="card-action center-align">
-                        <span class="nhb-klikbare-link">Overzicht tonen</span>
+                        <span class="nhb-klikbare-link">Clusters instellingen</span>
                     </div>
                 </a>
             </div>

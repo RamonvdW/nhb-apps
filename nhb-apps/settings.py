@@ -15,9 +15,16 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
+import sys
 
-# NOTE: some setting have been moved to settings_local.py
-#       see end of this file
+# import install-specific settings from a separate file
+# that is easy to replace as part of the deployment process
+from .settings_local import *
+
+# for testing
+if "--enable-wiki" in sys.argv:
+    ENABLE_WIKI = True
+    sys.argv.remove("--enable-wiki")
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 PROJ_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -25,7 +32,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2020-05-13'
+SITE_VERSIE = '2020-06-28'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -44,6 +51,8 @@ INSTALLED_APPS = [
     'Vereniging.apps.VerenigingConfig',
     'Schutter.apps.SchutterConfig',
     'Score.apps.ScoreConfig',
+    'Wedstrijden.apps.WedstrijdenConfig',
+    'Handleiding.apps.HandleidingConfig',
     'djangosaml2idp',               # single sign-on Identity Provider (IP)
                                     #   using SAML2 (Security Assertion Markup Language)
     'django.contrib.staticfiles',   # gather static files from modules helper
@@ -52,13 +61,10 @@ INSTALLED_APPS = [
     'django.contrib.auth',          # authenticatie framework
     'django.contrib.contenttypes',  # permission association to models
     'django.contrib.messages',
-    # 'debug_toolbar',                # DEV ONLY
-    # 'django_extensions'             # DEV ONLY (provides show_urls)
 ]
 
 
 MIDDLEWARE = [
-    # 'debug_toolbar.middleware.DebugToolbarMiddleware',          # DEV ONLY
     'django.middleware.security.SecurityMiddleware',                # security (https improvements)
     'django.contrib.sessions.middleware.SessionMiddleware',         # manage sessions across requests
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -68,6 +74,9 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',       # security
 ]
 
+if ENABLE_DEBUG_TOOLBAR and "test" not in sys.argv:    # pragma: no cover
+    INSTALLED_APPS.append('debug_toolbar')
+    MIDDLEWARE.insert(0, 'debug_toolbar.middleware.DebugToolbarMiddleware')
 
 # gebruik ingebouwde authenticatie / login laag
 # inclusief permissions en groepen
@@ -190,6 +199,10 @@ TEST_RUNNER = 'nhb-apps.app-hierarchy-testrunner.HierarchyRunner'
 # applicatie specifieke settings
 MINIMUM_LEEFTIJD_LID = 5
 
+# minimum aantal scores in uitslag vorige seizoen nodig om te gebruiken als AG voor nieuwe seizoen
+COMPETITIE_18M_MINIMUM_SCORES_VOOR_AG = 6
+COMPETITIE_25M_MINIMUM_SCORES_VOOR_AG = 5   # uitzondering voor 2020/2021 in verband met corona
+
 # maximum aantal resultaten dat een doorzoeking van de records terug geeft
 # dit voorkomt honderden resultaten bij het zoeken naar de letter e
 # 150 omdat bepaalde plaatsen veel records hebben, zoals Schijndel (93 in Okt 2019)
@@ -246,10 +259,6 @@ RECORDS_TOEGESTANE_PARA_KLASSEN = (
     "Ja"        # aka Onbekend
 )
 
-# import install-specific settings from a separate file
-# that is easy to replace as part of the deployment process
-from .settings_local import *
-
 # definitions taken from saml2.saml to avoid importing saml2
 # because it replaces ElementTree with cElementTree, which gives problems with QR code generation
 NAMEID_FORMAT_UNSPECIFIED = 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified'
@@ -305,14 +314,34 @@ SAML_IDP_CONFIG = {
 }
 """
 
-# pagina's van de wiki
-WIKI_URL_TOP = WIKI_URL + '/Hoofdpagina'
-WIKI_URL_CWZ = WIKI_URL + '/Handleiding_CWZ'
-WIKI_URL_RCL = WIKI_URL + '/Handleiding_RCL'
-WIKI_URL_RKO = WIKI_URL + '/Handleiding_RKO'
-WIKI_URL_BKO = WIKI_URL + '/Handleiding_BKO'
-WIKI_URL_2FA = WIKI_URL + '/Twee-factor_authenticatie'
-WIKI_URL_ROLLEN = WIKI_URL + '/Rollen'
+# pagina's van de handleiding
+HANDLEIDING_TOP = 'Hoofdpagina'
+#HANDLEIDING_SEC = 'Handleiding_SEC'
+HANDLEIDING_WL = 'Handleiding_Wedstrijdleider'
+HANDLEIDING_HWL = 'Handleiding_Hoofdwedstrijdleider'
+HANDLEIDING_RCL = 'Handleiding_RCL'
+HANDLEIDING_RKO = 'Handleiding_RKO'
+HANDLEIDING_BKO = 'Handleiding_BKO'
+HANDLEIDING_BB = 'Handleiding_BB'
+HANDLEIDING_2FA = 'Twee-factor_authenticatie'
+HANDLEIDING_ROLLEN = 'Rollen'
+
+HANDLEIDING_PAGINAS = [
+    HANDLEIDING_TOP,
+    #HANDLEIDING_SEC,
+    HANDLEIDING_WL,
+    HANDLEIDING_HWL,
+    HANDLEIDING_RCL,
+    HANDLEIDING_RKO,
+    HANDLEIDING_BKO,
+    HANDLEIDING_BB,
+    HANDLEIDING_2FA,
+    HANDLEIDING_ROLLEN,
+    # pagina's van de handleiding die intern gerefereerd worden
+    'Tips_voor_wiki_gebruik',
+    'Handleiding_CWZ',
+    'Koppelen_beheerders'
+]
 
 
 # logging to syslog
