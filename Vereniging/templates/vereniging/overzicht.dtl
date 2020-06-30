@@ -99,7 +99,7 @@
         <!-- leden inschrijven voor de competitie -->
         {% for comp in competities %}
             <div class="card">
-                {% if comp.fase <= 'B' %}
+                {% if comp.fase < 'B' %}
                     <div class="card-content">
                         <div class="card-title center-align grey-text">Inschrijven {{ comp.afstand }}m</div>
                         <div class="center-align"><img src="{{ comp.icon }}" height="90" alt="logo" style="opacity: 0.5"></div>
