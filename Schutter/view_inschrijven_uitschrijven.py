@@ -253,9 +253,16 @@ class RegiocompetitieInschrijvenView(View):
 
         # kijk of er velden van een formulier bij zitten
         if methode == INSCHRIJF_METHODE_3:
+            aanmelding.inschrijf_voorkeur_dagdeel = ''
+
             dagdeel = request.POST.get('dagdeel', '')
             if dagdeel in DAGDEEL_AFKORTINGEN:
-                aanmelding.inschrijf_voorkeur_dagdeel = dagdeel
+                if dagdeel in deelcomp.toegestane_dagdelen or deelcomp.toegestane_dagdelen == '':
+                    aanmelding.inschrijf_voorkeur_dagdeel = dagdeel
+
+            if aanmelding.inschrijf_voorkeur_dagdeel == '':
+                # dagdeel is verplicht
+                raise Resolver404()
 
         opmerking = request.POST.get('opmerking', '')
         if len(opmerking) > 500:

@@ -181,6 +181,7 @@ class LedenInschrijvenView(UserPassesTestMixin, ListView):
 
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
         context['nhb_ver'] = functie_nu.nhb_ver
+        # rol is HWL (zie test_func)
 
         # splits the ledenlijst op in jeugd, senior en inactief
         jeugd = list()
@@ -196,31 +197,30 @@ class LedenInschrijvenView(UserPassesTestMixin, ListView):
         context['leden_senior'] = senior
         context['comp'] = self.comp
         context['seizoen'] = '%s/%s' % (self.comp.begin_jaar, self.comp.begin_jaar + 1)
-        if rol_nu == Rollen.ROL_HWL:
-            context['inschrijven_url'] = reverse('Vereniging:leden-inschrijven', kwargs={'comp_pk': self.comp.pk})
-            context['mag_inschrijven'] = True
+        context['inschrijven_url'] = reverse('Vereniging:leden-inschrijven', kwargs={'comp_pk': self.comp.pk})
+        context['mag_inschrijven'] = True
 
-            # bepaal de inschrijfmethode voor deze regio
-            mijn_regio = functie_nu.nhb_ver.regio.regio_nr
+        # bepaal de inschrijfmethode voor deze regio
+        mijn_regio = functie_nu.nhb_ver.regio.regio_nr
 
-            deelcomp = (DeelCompetitie
-                        .objects
-                        .select_related('competitie', 'nhb_regio')
-                        .get(competitie=self.comp, nhb_regio=functie_nu.nhb_ver.regio.regio_nr))
+        deelcomp = (DeelCompetitie
+                    .objects
+                    .select_related('competitie', 'nhb_regio')
+                    .get(competitie=self.comp, nhb_regio=functie_nu.nhb_ver.regio.regio_nr))
 
-            methode = deelcomp.inschrijf_methode
+        methode = deelcomp.inschrijf_methode
 
-            if methode == INSCHRIJF_METHODE_3:
-                context['dagdelen'] = DAGDEEL
+        if methode == INSCHRIJF_METHODE_3:
+            context['dagdelen'] = DAGDEEL
 
-                if deelcomp.toegestane_dagdelen != '':
-                    context['dagdelen'] = list()
-                    for dagdeel in DAGDEEL:
-                        # dagdeel = tuple(code, beschrijving)
-                        # code = GN / AV / ZA / ZO / WE
-                        if dagdeel[0] in deelcomp.toegestane_dagdelen:
-                            context['dagdelen'].append(dagdeel)
-                    # for
+            if deelcomp.toegestane_dagdelen != '':
+                context['dagdelen'] = list()
+                for dagdeel in DAGDEEL:
+                    # dagdeel = tuple(code, beschrijving)
+                    # code = GN / AV / ZA / ZO / WE
+                    if dagdeel[0] in deelcomp.toegestane_dagdelen:
+                        context['dagdelen'].append(dagdeel)
+                # for
 
         menu_dynamics(self.request, context, actief='vereniging')
         return context
@@ -236,8 +236,7 @@ class LedenInschrijvenView(UserPassesTestMixin, ListView):
             raise Resolver404()
 
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
-        if rol_nu != Rollen.ROL_HWL:
-            raise Resolver404()
+        # rol is HWL (zie test_func)
 
         # bepaal de inschrijfmethode voor deze regio
         hwl_regio_nr = functie_nu.nhb_ver.regio.regio_nr
@@ -245,7 +244,6 @@ class LedenInschrijvenView(UserPassesTestMixin, ListView):
         # zoek de juiste DeelCompetitie erbij
         deelcomp = DeelCompetitie.objects.get(competitie=comp,
                                               nhb_regio=hwl_regio_nr)
-
         methode = deelcomp.inschrijf_methode
 
         # zoek eerst de voorkeuren op
@@ -257,8 +255,10 @@ class LedenInschrijvenView(UserPassesTestMixin, ListView):
         if methode == INSCHRIJF_METHODE_3:
             dagdeel = request.POST.get('dagdeel', '')
             if dagdeel in DAGDEEL_AFKORTINGEN:
-                if dagdeel in deelcomp.toegestane_dagdelen:
+                if dagdeel in deelcomp.toegestane_dagdelen or deelcomp.toegestane_dagdelen == '':
                     bulk_dagdeel = dagdeel
+            if not bulk_dagdeel:
+                raise Resolver404()
 
         bulk_opmerking = request.POST.get('opmerking', '')
         if len(bulk_opmerking) > 500:

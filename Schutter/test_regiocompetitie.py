@@ -363,7 +363,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         self.assertEqual(inschrijving.inschrijf_notitie, 'ben ik oud genoeg?')
         self.assertFalse(inschrijving.inschrijf_voorkeur_team)
 
-    def test_inschrijven_methode3(self):
+    def test_inschrijven_methode3_twee_dagdelen(self):
         regio_105 = NhbRegio.objects.get(pk=105)
         self.nhbver.regio = regio_105
         self.nhbver.save()
@@ -399,11 +399,17 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         self.assertNotContains(resp, 's Avonds')
         self.assertNotContains(resp, 'Weekend')
 
-        # geef dagdeel, teamschieten en opmerking door
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
         res = aanvangsgemiddelde_opslaan(schutterboog, 18, 8.18, '2020-01-01', None, 'Test')
         self.assertTrue(res)
 
+        # schrijf in met een niet toegestaan dagdeel
+        url = self.url_inschrijven % (deelcomp.pk, schutterboog.pk)
+        resp = self.client.post(url, {'dagdeel': 'AV'})
+        self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
+        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
+
+        # schrijf in met dagdeel, team schieten en opmerking door
         url = self.url_inschrijven % (deelcomp.pk, schutterboog.pk)
         resp = self.client.post(url, {'wil_in_team': 'on',
                                       'dagdeel': 'ZA',
@@ -421,25 +427,59 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         deelcomp = DeelCompetitie.objects.get(competitie__afstand='18', nhb_regio=self.nhbver.regio)
         url = self.url_inschrijven % (deelcomp.pk, schutterboog.pk)
         resp = self.client.post(url, {'dagdeel': 'XX'})
-        self.assert_is_redirect(resp, self.url_profiel)
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 2)
+        self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
+        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 1)
 
-        inschrijving = RegioCompetitieSchutterBoog.objects.filter(schutterboog=schutterboog).all()[0]
-        self.assertFalse(inschrijving.inschrijf_voorkeur_team)
-        self.assertEqual(inschrijving.inschrijf_voorkeur_dagdeel, 'GN')
+    def test_inschrijven_methode3_alle_dagdelen(self):
+        regio_105 = NhbRegio.objects.get(pk=105)
+        self.nhbver.regio = regio_105
+        self.nhbver.save()
 
-        # alle dagdelen toegestaan
-        deelcomp.toegestane_dagdelen = ''
+        # log in as BB en maak de competitie aan
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_wisselnaarrol_bb()
+        self._competitie_aanmaken()
+
+        deelcomp = DeelCompetitie.objects.get(competitie__afstand='18', nhb_regio=regio_105)
+        deelcomp.inschrijf_methode = INSCHRIJF_METHODE_3
+        deelcomp.toegestane_dagdelen = ''   # alles toegestaan
         deelcomp.save()
-        schutterboog = SchutterBoog.objects.get(boogtype__afkorting='IB')
+
+        # log in as schutter
+        self.client.logout()
+        self.e2e_login(self.account_normaal)
+        self._prep_voorkeuren()
+
+        # schrijf in voor de 18m Recurve, met AG
+        schutterboog = SchutterBoog.objects.get(boogtype__afkorting='R')
+        deelcomp = DeelCompetitie.objects.get(competitie__afstand='18', nhb_regio=self.nhbver.regio)
+
+        # haal de bevestig pagina op met het formulier
         url = self.url_bevestig_inschrijven % (deelcomp.pk, schutterboog.pk)
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('schutter/bevestig-inschrijven.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, 'Dutch Target')
         self.assertContains(resp, 'Zaterdag')
         self.assertContains(resp, 'Zondag')
         self.assertContains(resp, 's Avonds')
         self.assertContains(resp, 'Weekend')
+
+        # geef dagdeel door
+        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
+        res = aanvangsgemiddelde_opslaan(schutterboog, 18, 8.18, '2020-01-01', None, 'Test')
+        self.assertTrue(res)
+
+        url = self.url_inschrijven % (deelcomp.pk, schutterboog.pk)
+        resp = self.client.post(url, {'dagdeel': 'AV'})
+        self.assert_is_redirect(resp, self.url_profiel)
+        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 1)
+
+        inschrijving = RegioCompetitieSchutterBoog.objects.all()[0]
+        self.assertFalse(inschrijving.inschrijf_voorkeur_team)
+        self.assertEqual(inschrijving.inschrijf_notitie, '')
+        self.assertEqual(inschrijving.inschrijf_voorkeur_dagdeel, 'AV')
 
 
 # end of file
