@@ -81,7 +81,7 @@ class RegiocompetitieInschrijvenBevestigView(UserPassesTestMixin, TemplateView):
         # urlconf parameters geaccepteerd
 
         # bepaal in welke wedstrijdklasse de schutter komt
-        age = schutterboog.nhblid.bereken_wedstrijdleeftijd(deelcomp.competitie.begin_jaar)
+        age = schutterboog.nhblid.bereken_wedstrijdleeftijd(deelcomp.competitie.begin_jaar + 1)
 
         # haal AG op, indien aanwezig
         scores = Score.objects.filter(schutterboog=schutterboog,
@@ -207,7 +207,7 @@ class RegiocompetitieInschrijvenView(View):
         methode = deelcomp.inschrijf_methode
 
         # bepaal in welke wedstrijdklasse de schutter komt
-        age = schutterboog.nhblid.bereken_wedstrijdleeftijd(deelcomp.competitie.begin_jaar)
+        age = schutterboog.nhblid.bereken_wedstrijdleeftijd(deelcomp.competitie.begin_jaar + 1)
 
         aanmelding = RegioCompetitieSchutterBoog()
         aanmelding.deelcompetitie = deelcomp
@@ -253,9 +253,16 @@ class RegiocompetitieInschrijvenView(View):
 
         # kijk of er velden van een formulier bij zitten
         if methode == INSCHRIJF_METHODE_3:
+            aanmelding.inschrijf_voorkeur_dagdeel = ''
+
             dagdeel = request.POST.get('dagdeel', '')
             if dagdeel in DAGDEEL_AFKORTINGEN:
-                aanmelding.inschrijf_voorkeur_dagdeel = dagdeel
+                if dagdeel in deelcomp.toegestane_dagdelen or deelcomp.toegestane_dagdelen == '':
+                    aanmelding.inschrijf_voorkeur_dagdeel = dagdeel
+
+            if aanmelding.inschrijf_voorkeur_dagdeel == '':
+                # dagdeel is verplicht
+                raise Resolver404()
 
         opmerking = request.POST.get('opmerking', '')
         if len(opmerking) > 500:

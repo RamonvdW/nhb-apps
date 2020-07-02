@@ -31,7 +31,7 @@
                 <th filter="on">Voornaam</th>
                 <th filter="on">Achternaam</th>
                 <th>Leeftijd</th>
-                <th>Wedstrijdklasse {{ wedstrijdklasse_jaar }}</th>
+                <th>Leeftijdsklasse {{ wedstrijdklasse_jaar }}</th>
                 <th>Laatste inlog</th>
             </tr>
         </thead>
