@@ -90,7 +90,7 @@
                     <th>Wedstrijd<wbr/>boog</th>
                     <th>Aanvangsgemiddelde</th>
                     <th filter="on">Naam</th>
-                    <th>Leeftijd</th>
+                    <th>Leeftijd {{ tweede_jaar }}</th>
                     <th>Leeftijdsklasse {{ seizoen }}</th>
                 </tr>
             </thead>

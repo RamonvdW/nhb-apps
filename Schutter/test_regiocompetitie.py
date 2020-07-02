@@ -481,5 +481,52 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         self.assertEqual(inschrijving.inschrijf_notitie, '')
         self.assertEqual(inschrijving.inschrijf_voorkeur_dagdeel, 'AV')
 
+    def test_inschrijven_aspirant(self):
+        # log in as BB en maak de competitie aan
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_wisselnaarrol_bb()
+        self._competitie_aanmaken()
+
+        # log in as schutter met een leeftijd waarbij het mis kan gaan
+        # huidige: 2020
+        # geboren: 2007
+        # bereikt leeftijd: 2020-2007 = 13
+        # wedstrijdleeftijd 2020: 13 --> Aspirant 11-12
+        # wedstrijdleeftijd 2021: 14 --> Cadet
+        # als het programma het goed doet, komt de schutter dus in de cadetten klasse
+        self.nhblid1.geboorte_datum = datetime.date(year=timezone.now().year - 13, month=1, day=1)
+        self.nhblid1.save()
+        self.client.logout()
+        self.e2e_login(self.account_normaal)
+        self._prep_voorkeuren()
+
+        schutterboog = SchutterBoog.objects.get(boogtype__afkorting='R')
+        deelcomp = DeelCompetitie.objects.get(competitie__afstand='18', nhb_regio=self.nhbver.regio)
+
+        # haal de bevestig pagina op met het formulier
+        url = self.url_bevestig_inschrijven % (deelcomp.pk, schutterboog.pk)
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('schutter/bevestig-inschrijven.dtl', 'plein/site_layout.dtl'))
+        self.assertNotContains(resp, 'Aspirant')
+        self.assertContains(resp, 'Cadet')
+
+        # probeer in te schrijven en controleer daarna de wedstrijdklasse waarin de schutter geplaatst is
+        url = self.url_inschrijven % (deelcomp.pk, schutterboog.pk)
+        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
+        resp = self.client.post(url)
+        self.assert_is_redirect(resp, self.url_profiel)
+        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 1)
+
+        inschrijving = RegioCompetitieSchutterBoog.objects.all()[0]
+        self.assertEqual(inschrijving.deelcompetitie, deelcomp)
+        self.assertEqual(inschrijving.schutterboog, schutterboog)
+
+        klasse = inschrijving.klasse.indiv
+        self.assertFalse('Aspirant' in klasse.beschrijving)
+        self.assertTrue('Cadet' in klasse.beschrijving)
+        self.assertFalse(klasse.buiten_gebruik)
+        self.assertEqual(klasse.boogtype, schutterboog.boogtype)
 
 # end of file

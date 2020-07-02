@@ -70,7 +70,7 @@ class LedenInschrijvenView(UserPassesTestMixin, ListView):
                     .order_by('-geboorte_datum__year', 'achternaam', 'voornaam')):
 
             # de wedstrijdleeftijd voor dit hele seizoen
-            wedstrijdleeftijd = comp.begin_jaar - obj.geboorte_datum.year
+            wedstrijdleeftijd = obj.bereken_wedstrijdleeftijd(comp.begin_jaar + 1)
             obj.leeftijd = wedstrijdleeftijd
 
             # de wedstrijdklasse voor dit hele seizoen
@@ -197,6 +197,7 @@ class LedenInschrijvenView(UserPassesTestMixin, ListView):
         context['leden_senior'] = senior
         context['comp'] = self.comp
         context['seizoen'] = '%s/%s' % (self.comp.begin_jaar, self.comp.begin_jaar + 1)
+        context['tweede_jaar'] = self.comp.begin_jaar + 1
         context['inschrijven_url'] = reverse('Vereniging:leden-inschrijven', kwargs={'comp_pk': self.comp.pk})
         context['mag_inschrijven'] = True
 
@@ -308,7 +309,7 @@ class LedenInschrijvenView(UserPassesTestMixin, ListView):
                     raise Resolver404()
 
                 # bepaal in welke wedstrijdklasse de schutter komt
-                age = schutterboog.nhblid.bereken_wedstrijdleeftijd(deelcomp.competitie.begin_jaar)
+                age = schutterboog.nhblid.bereken_wedstrijdleeftijd(deelcomp.competitie.begin_jaar + 1)
 
                 # zoek de aanvangsgemiddelden er bij, indien beschikbaar
                 ag = AG_NUL

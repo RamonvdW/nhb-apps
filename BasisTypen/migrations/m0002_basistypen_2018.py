@@ -116,7 +116,7 @@ def init_leeftijdsklasse_2018(apps, _):
     leeftijdsklasse_klas(
         afkorting='AH2', geslacht='M',
         klasse_kort='Aspirant',
-        beschrijving='Aspiranten 11-12, jongens',
+        beschrijving='Aspiranten 11-12, jongens',   # heet 11-12 ivm leeftijd in 1e jaar competitie..
         max_wedstrijdleeftijd=13).save()
     leeftijdsklasse_klas(
         afkorting='AV2', geslacht='V',

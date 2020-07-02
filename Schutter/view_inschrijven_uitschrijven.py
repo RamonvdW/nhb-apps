@@ -81,7 +81,7 @@ class RegiocompetitieInschrijvenBevestigView(UserPassesTestMixin, TemplateView):
         # urlconf parameters geaccepteerd
 
         # bepaal in welke wedstrijdklasse de schutter komt
-        age = schutterboog.nhblid.bereken_wedstrijdleeftijd(deelcomp.competitie.begin_jaar)
+        age = schutterboog.nhblid.bereken_wedstrijdleeftijd(deelcomp.competitie.begin_jaar + 1)
 
         # haal AG op, indien aanwezig
         scores = Score.objects.filter(schutterboog=schutterboog,
@@ -207,7 +207,7 @@ class RegiocompetitieInschrijvenView(View):
         methode = deelcomp.inschrijf_methode
 
         # bepaal in welke wedstrijdklasse de schutter komt
-        age = schutterboog.nhblid.bereken_wedstrijdleeftijd(deelcomp.competitie.begin_jaar)
+        age = schutterboog.nhblid.bereken_wedstrijdleeftijd(deelcomp.competitie.begin_jaar + 1)
 
         aanmelding = RegioCompetitieSchutterBoog()
         aanmelding.deelcompetitie = deelcomp

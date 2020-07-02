@@ -108,7 +108,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         lid.voornaam = "Cadet"
         lid.achternaam = "de Jeugd"
         lid.email = ""
-        lid.geboorte_datum = datetime.date(year=jaar-15, month=3, day=4)
+        lid.geboorte_datum = datetime.date(year=jaar-13, month=3, day=4)    # 13=asp, maar 14 in 2e jaar competitie!
         lid.sinds_datum = datetime.date(year=jaar-3, month=11, day=12)
         lid.bij_vereniging = ver
         lid.save()
@@ -241,9 +241,15 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
         # post een wijziging
         if nhb_nr == 100003:
-            resp = self.client.post(url_schutter_voorkeuren, {'nhblid_pk': nhb_nr, 'schiet_BB': 'on', 'info_R': 'on'})
+            resp = self.client.post(url_schutter_voorkeuren, {'nhblid_pk': nhb_nr,
+                                                              'schiet_BB': 'on',
+                                                              'info_R': 'on',
+                                                              'voorkeur_meedoen_competitie': 'on'})
         else:
-            resp = self.client.post(url_schutter_voorkeuren, {'nhblid_pk': nhb_nr, 'schiet_R': 'on', 'info_C': 'on'})
+            resp = self.client.post(url_schutter_voorkeuren, {'nhblid_pk': nhb_nr,
+                                                              'schiet_R': 'on',
+                                                              'info_C': 'on',
+                                                              'voorkeur_meedoen_competitie': 'on'})
 
         self.assert_is_redirect(resp, '/vereniging/leden-voorkeuren/')
 
@@ -365,6 +371,28 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_hwl)
         self.e2e_check_rol('HWL')
 
+        # stel 1 schutter in die op randje aspirant/cadet zit
+        self._zet_schutter_voorkeuren(100004)
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('vereniging/competitie-inschrijven.dtl', 'plein/site_layout.dtl'))
+
+        self.assertContains(resp, '<td>Cadet de Jeugd</td>')
+        self.assertContains(resp, '<td>14</td>')            # leeftijd 2021
+        self.assertContains(resp, '<td>Cadet</td>')         # leeftijdsklasse competitie
+
+        # schrijf het jong lid in en controleer de wedstrijdklasse
+        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
+        resp = self.client.post(url, {'lid_100004_boogtype_1': 'on'})       # 1=R
+        self.assertEqual(resp.status_code, 302)     # 302 = Redirect
+        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 1)
+
+        inschrijving = RegioCompetitieSchutterBoog.objects.all()[0]
+        self.assertEqual(inschrijving.schutterboog.nhblid.nhb_nr, 100004)
+        self.assertTrue('Cadet' in inschrijving.klasse.indiv.beschrijving)
+        inschrijving.delete()
+
         # stel een paar bogen in
         self._zet_schutter_voorkeuren(100002)
         self._zet_schutter_voorkeuren(100003)
@@ -471,7 +499,6 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('vereniging/competitie-inschrijven.dtl', 'plein/site_layout.dtl'))
-
 
         # probeer aan te melden met een niet-wedstrijd boog
         schutterboog = SchutterBoog.objects.get(nhblid__nhb_nr=self.nhblid_100002.nhb_nr,

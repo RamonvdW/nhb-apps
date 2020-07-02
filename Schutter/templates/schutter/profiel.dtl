@@ -88,7 +88,7 @@
 
             {% if deelcomp.separator_before %}
                 <tr class="nhb-grijs">
-                    <td colspan="4">Ter info: overige regiocompetities die gehouden worden:</td>
+                    <td colspan="4"><br>Ter info: overige regiocompetities die gehouden worden (pas je voorkeuren aan om deze niet te zien)</td>
                 </tr>
                 <tr>
                     <th>Regiocompetitie</th>
@@ -128,8 +128,14 @@
                         {% endif %}
                     {% endif %}
                 {% else %}
-                    <td>Inschrijven tot {{ deelcomp.competitie.einde_aanmeldingen }}</td>
-                    <td></td>
+                    {% if deelcomp.competitie.fase < 'B' %}
+                        <td>De inschrijving opent op {{ deelcomp.competitie.begin_aanmeldingen }}</td>
+                    {% elif deelcomp.competitie.fase > 'B' %}
+                        <td>De inschrijving is gesloten</td>
+                    {% else %}
+                        <td>Inschrijven kan tot {{ deelcomp.competitie.einde_aanmeldingen }}</td>
+                    {% endif %}
+                    <td><!-- ruimte voor de knop/status --></td>
                 {% endif %}
             </tr>
 
