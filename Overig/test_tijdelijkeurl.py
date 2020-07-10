@@ -37,20 +37,20 @@ class TestOverigTijdelijkeUrl(E2EHelpers, TestCase):
 
     def test_nonexist(self):
         resp = self.client.get('/overig/url/test/')
-        self.assertEqual(resp.status_code, 404)
+        self.assert_is_redirect(resp, '/plein/')
 
     def test_verlopen(self):
         resp = self.client.get('/overig/url/code1/')
-        self.assertEqual(resp.status_code, 404)
+        self.assert_is_redirect(resp, '/plein/')
 
     def test_geen_accountemail(self):
         resp = self.client.get('/overig/url/code2/')
-        self.assertEqual(resp.status_code, 404)
+        self.assert_is_redirect(resp, '/plein/')
 
     def test_onbekend(self):
         save_tijdelijke_url('code3', 'onbekende code', geldig_dagen=1)
         resp = self.client.get('/overig/url/code3/')
-        self.assertEqual(resp.status_code, 404)
+        self.assert_is_redirect(resp, '/plein/')
 
     def test_setup_dispatcher(self):
         set_tijdelijke_url_receiver("mytopic", "123")

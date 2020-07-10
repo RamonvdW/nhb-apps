@@ -166,6 +166,9 @@ class SiteTijdelijkeUrlView(View):
                 http_response = HttpResponseRedirect(url_or_response)
             return http_response
 
-        raise Resolver404()
+        # hier kom je ook als mensen de link nog een keer gebruiken
+        # stuur ze gewoon door naar het plein in plaats van een harde foutmelding
+        return HttpResponseRedirect(reverse('Plein:plein'))
+        # raise Resolver404()
 
 # end of file

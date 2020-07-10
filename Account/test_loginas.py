@@ -90,8 +90,8 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
 
         # controleer dat tijdelijke URL maar 1x gebruikt kan worden
         self.e2e_logout()
-        resp = self.client.get(tijdelijke_url, follow=True)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
+        resp = self.client.get(tijdelijke_url, follow=False)
+        self.assert_is_redirect(resp, '/plein/')
 
     def test_wissel_met_otp(self):
         # login als admin
@@ -215,8 +215,8 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
         obj.save()
 
         # volg de tijdelijke url om ingelogd te raken
-        resp = self.client.get(tijdelijke_url, follow=True)
-        self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
+        resp = self.client.get(tijdelijke_url, follow=False)
+        self.assert_is_redirect(resp, '/plein/')
 
 # TODO: gebruik assert_other_http_commands_not_supported
 
