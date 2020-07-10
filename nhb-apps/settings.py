@@ -22,6 +22,8 @@ import sys
 from .settings_local import *
 
 # for testing
+# TODO: dit werkt niet: ./manage.py --enable-wiki runserver
+# TODO: dit werkt niet: ./manage.py runserver -- --enable-wiki  --> deze file wordt 2x ingeladen
 if "--enable-wiki" in sys.argv:
     ENABLE_WIKI = True
     sys.argv.remove("--enable-wiki")
@@ -325,6 +327,7 @@ HANDLEIDING_BKO = 'Handleiding_BKO'
 HANDLEIDING_BB = 'Handleiding_BB'
 HANDLEIDING_2FA = 'Twee-factor_authenticatie'
 HANDLEIDING_ROLLEN = 'Rollen'
+HANDLEIDING_INTRO_NIEUWE_BEHEERDERS = 'Intro_nieuwe_beheerders'
 
 HANDLEIDING_PAGINAS = [
     HANDLEIDING_TOP,
@@ -337,6 +340,7 @@ HANDLEIDING_PAGINAS = [
     HANDLEIDING_BB,
     HANDLEIDING_2FA,
     HANDLEIDING_ROLLEN,
+    HANDLEIDING_INTRO_NIEUWE_BEHEERDERS,
     # pagina's van de handleiding die intern gerefereerd worden
     'Tips_voor_wiki_gebruik',
     'Handleiding_CWZ',

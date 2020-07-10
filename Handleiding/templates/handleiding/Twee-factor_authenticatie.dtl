@@ -10,7 +10,7 @@
 {% block pagina %}
 <div class="white" style="padding:10px 30px 10px 30px">
 <h4>Twee-factor authenticatie</h4>
-<p><h5>Doelstelling </h5></p>
+<p><h5>Doelstelling</h5></p>
 <p></p>
 <p>Tweestapsverificatie (2FA: 2e Factor Authenticatie / Two-factor Authentication) voorkomt misbruik van een account.</p>
 <p></p>
@@ -19,7 +19,7 @@
 <p>Zo kunnen de codes er uit zien in Google Authenticator op je mobiel:<br></p>
 <p><img src="{% static 'handleiding/Google-authenticator-mainscreen.jpg' %}" width="400" alt="Google Authenticator"></p>
 <p></p>
-<p><h5>Hulpprogramma's </h5></p>
+<p><h5>Hulpprogramma's</h5></p>
 <p></p>
 <p>Om de geheime code te onthouden en de codes te genereren heb je een programmatje nodig.</p>
 <p></p>
@@ -27,7 +27,7 @@
 <p></p>
 <a class="btn-nhb-blauw" href="https://chrome.google.com/webstore/detail/authenticator/bhghoamapcdpbohphigoooaddinpkbai" target="_blank" rel="noopener noreferrer"><i class="material-icons-round left">open_in_new</i>Authenticator voor Chrome</a><p>Er bestaan ook browser plug-ins zoals .</p>
 <p></p>
-<p><h5>Activeren </h5></p>
+<p><h5>Activeren</h5></p>
 <p></p>
 <p>Na het inloggen kan je onder 'Wissel van rol' op de knop 'NU CONTROLEREN' drukken en de code opgeven. Daarna komen meer opties beschikbaar in het menu - en extra rollen onder 'Wissel van rol'.</p>
 <p></p>
@@ -40,6 +40,8 @@
 <p></p>
 <p>Als je de QR code niet kunt scannen, dan kan je de code handmatig invoeren. Kies in de app de optie om een koppeling te maken en kies dan "Voer een code in" / "Enter a provided key". Je moet nu twee velden invullen: een beschrijving die je zelf mag kiezen en de code. Tik de letters en cijfers over - kleine letter/hoofdletters en spaties maken niet uit. Kies 'Time-based' want de website gebruikt Time-based OTP, want betekent dat elke 30 seconden een nieuwe 6-cijferige code gegenereerd wordt.</p>
 <p></p>
+<p></p>
+<hr><p><h5>Verder</h5></p>
 <p>Terug naar de <a href="/handleiding/Hoofdpagina">Hoofdpagina</a>.</p>
 
 </div>

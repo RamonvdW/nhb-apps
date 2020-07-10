@@ -18,6 +18,11 @@ rm -rf "$WIKI"/*
 
 # zoek de nieuwste export
 LATEST=$(ls -1rt ../../testserver/*wiki_export.tgz | tail -1)
+if [ -z "$LATEST" ]
+then
+    echo "[ERROR] Wiki export niet gevonden"
+    exit 1
+fi
 echo "[INFO] Using wiki export $LATEST"
 
 # pak de export uit
@@ -38,6 +43,7 @@ touch "$TEMPL/tmp.dtl"
 rm "$TEMPL"/*dtl
 echo "SITE_URL='hoi'" > ./copy_of_settings.py
 echo "DEBUG=True" >> ./copy_of_settings.py
+echo "ENABLE_DEBUG_TOOLBAR=False" >> ./copy_of_settings.py
 cat ../nhb-apps/settings.py | grep -v "settings_local" >> ./copy_of_settings.py
 
 python3 ./maak_handleiding.py "$WIKI_EXPORT" "$TEMPL" $*

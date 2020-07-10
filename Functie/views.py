@@ -921,12 +921,17 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
                 context['show_otp_koppelen'] = True
                 context['show_otp_controle'] = False
 
+        if context['show_otp_koppelen'] or context['show_vhpg']:
+            context['show_beheerder_intro'] = True
+
         if settings.ENABLE_WIKI:        # pragma: no cover
             context['wiki_2fa_url'] = settings.WIKI_URL + '/' + settings.HANDLEIDING_2FA
             context['wiki_rollen'] = settings.WIKI_URL + '/' + settings.HANDLEIDING_ROLLEN
+            context['wiki_intro_nieuwe_beheerders'] = settings.WIKI_URL + '/' + settings.HANDLEIDING_INTRO_NIEUWE_BEHEERDERS
         else:
             context['wiki_2fa_url'] = reverse('Handleiding:' + settings.HANDLEIDING_2FA)
             context['wiki_rollen'] = reverse('Handleiding:' + settings.HANDLEIDING_ROLLEN)
+            context['wiki_intro_nieuwe_beheerders'] = reverse('Handleiding:' + settings.HANDLEIDING_INTRO_NIEUWE_BEHEERDERS)
 
         # login-as functie voor IT beheerder
         if rol_get_huidige(self.request) == Rollen.ROL_IT:

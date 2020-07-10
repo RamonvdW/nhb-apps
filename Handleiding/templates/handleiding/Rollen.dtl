@@ -13,15 +13,32 @@
 <p>De volgende rollen en bijbehorende afkortingen worden gebruikt:</p>
 <p></p>
 <ul style="padding-left: 20px">
-<li  style="list-style-type: disc; padding-left: 0px">BB = Bondsburo / Manager Competitiezaken</li>
-<li  style="list-style-type: disc; padding-left: 0px">BKO = Bondskampioenschappen Organisator</li>
-<li  style="list-style-type: disc; padding-left: 0px">RKO = Rayonkampioenschappen Organisator</li>
-<li  style="list-style-type: disc; padding-left: 0px">RCL = Regiocompetitieleider</li>
-<li  style="list-style-type: disc; padding-left: 0px">HWL = Hoofd wedstrijdleider bij een vereniging</li>
-<li  style="list-style-type: disc; padding-left: 0px">WL = Wedstrijdleider bij een vereniging</li>
+<li style="list-style-type: disc; padding-left: 0px">BB = Bondsburo / Manager Competitiezaken (aantal: 1)</li>
+<li style="list-style-type: disc; padding-left: 0px">BKO = Bondskampioenschappen Organisator (aantal: 2x1=2)</li>
+<li style="list-style-type: disc; padding-left: 0px">RKO = Rayonkampioenschappen Organisator (aantal: 2x4=8)</li>
+<li style="list-style-type: disc; padding-left: 0px">RCL = Regiocompetitieleider (aantal: 2x16=32)</li>
+<li style="list-style-type: disc; padding-left: 0px">SEC = Secretaris van een vereniging (aantal: 1 per verenging)</li>
+<li style="list-style-type: disc; padding-left: 0px">HWL = Hoofd wedstrijdleider bij een vereniging (aantal: 1 per vereniging)</li>
+<li style="list-style-type: disc; padding-left: 0px">WL = Wedstrijdleider bij een vereniging (aantal: 1 per vereniging)</li>
 </ul>
 <p></p>
-<p>Terug naar de <a href="/handleiding/Hoofdpagina">Hoofdpagina</a>.</p>
+<p>Er kunnen meerdere personen gekoppeld worden aan elke rol.</p>
+<p></p>
+<p>Een persoon kan aan meerdere rollen gekoppeld worden (bijvoorbeeld RCL voor Indoor en 25m 1pijl)</p>
+<p></p>
+<p>Daarnaast is er de rol 'Schutter' die je altijd krijgt. Door deze rol te kiezen kan je de website persoonlijk gebruiken, bijvoorbeeld om jezelf in te schrijven voor een competitie.</p>
+<p></p>
+<p></p>
+<hr><p><h5>Verder</h5></p>
+<ul style="padding-left: 20px">
+<li style="list-style-type: disc; padding-left: 0px">Terug naar de <a href="/handleiding/Hoofdpagina">Hoofdpagina</a></li>
+<li style="list-style-type: disc; padding-left: 0px"><a href="/handleiding/Handleiding_BB">Handleiding_BB</a></li>
+<li style="list-style-type: disc; padding-left: 0px"><a href="/handleiding/Handleiding_BKO">Handleiding_BKO</a></li>
+<li style="list-style-type: disc; padding-left: 0px"><a href="/handleiding/Handleiding_RKO">Handleiding_RKO</a></li>
+<li style="list-style-type: disc; padding-left: 0px"><a href="/handleiding/Handleiding_RCL">Handleiding_RCL</a></li>
+<li style="list-style-type: disc; padding-left: 0px"><a href="/handleiding/Handleiding_Secretaris">Handleiding Secretaris</a></li>
+<li style="list-style-type: disc; padding-left: 0px"><a href="/handleiding/Handleiding_Hoofdwedstrijdleider">Handleiding Hoofdwedstrijdleider</a></li>
+<li style="list-style-type: disc; padding-left: 0px"><a href="/handleiding/Handleiding_Wedstrijdleider">Handleiding Wedstrijdleider</a></li>
 
 </div>
 
