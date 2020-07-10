@@ -45,7 +45,9 @@
                 <td>{{ obj.leeftijd }}</td>
                 <td>{{ obj.leeftijdsklasse.klasse_kort }}</td>
                 <td>
-                    {% if obj.geen_inlog %}
+                    {% if obj.geen_inlog == 2 %}
+                        <i>Onvoltooid account</i>
+                    {% elif obj.geen_inlog %}
                         <i>Nooit</i>
                     {% else %}
                         <span>{{ obj.laatste_inlog }}</span>
@@ -82,7 +84,9 @@
             <td>{{ obj.voornaam }}</td>
             <td>{{ obj.achternaam }}</td>
             <td>
-                {% if obj.geen_inlog %}
+                {% if obj.geen_inlog == 2 %}
+                    <i>Onvoltooid account</i>
+                {% elif obj.geen_inlog %}
                     <i>Nooit</i>
                 {% else %}
                     <span>{{ obj.laatste_inlog }}</span>

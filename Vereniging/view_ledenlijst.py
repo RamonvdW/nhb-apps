@@ -97,7 +97,10 @@ class LedenLijstView(UserPassesTestMixin, ListView):
                 nhblid.wijzig_url = reverse('Schutter:voorkeuren-nhblid', kwargs={'nhblid_pk': nhblid.pk})
 
             if nhblid.account:
-                nhblid.laatste_inlog = nhblid.account.last_login
+                if nhblid.account.last_login:
+                    nhblid.laatste_inlog = nhblid.account.last_login
+                else:
+                    nhblid.geen_inlog = 2
             else:
                 nhblid.geen_inlog = 1
         # for
