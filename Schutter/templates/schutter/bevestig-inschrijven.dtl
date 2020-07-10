@@ -104,7 +104,7 @@
     </table>
 
     <p>&nbsp;</p>
-    <input class="btn-nhb-rood" type="submit" value="Inschrijf mij in">
+    <input class="btn-nhb-rood" type="submit" value="Schrijf mij in">
 </form>
 
 {% endblock %}
