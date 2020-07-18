@@ -137,7 +137,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         histcomp = HistCompetitie()
         histcomp.seizoen = '2018/2019'
         histcomp.comp_type = '18'
-        histcomp.klasse = 'Testcurve1'       # TODO: kan de klasse een spatie bevatten?
+        histcomp.klasse = 'Testcurve1'
         histcomp.is_team = False
         histcomp.save()
 
