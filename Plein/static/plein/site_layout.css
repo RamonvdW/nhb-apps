@@ -42,17 +42,6 @@ h1, h2, h3, h4, h5, h6 {
     background-color: #f94137;     /* NHB medium rood */
 }
 
-/* TODO: uitleg */
-.collection-button {
-    background: none;
-    border: none;
-    text-decoration: none;
-    cursor: pointer;
-    font-size: 1em;
-    font-family: serif;
-    color: blue;
-}
-
 /* lagere regel in een grid */
 .small-row {
     padding: 5px 10px 5px 10px;
