@@ -318,7 +318,7 @@ SAML_IDP_CONFIG = {
 
 # pagina's van de handleiding
 HANDLEIDING_TOP = 'Hoofdpagina'
-#HANDLEIDING_SEC = 'Handleiding_SEC'
+HANDLEIDING_SEC = 'Handleiding_Secretaris'
 HANDLEIDING_WL = 'Handleiding_Wedstrijdleider'
 HANDLEIDING_HWL = 'Handleiding_Hoofdwedstrijdleider'
 HANDLEIDING_RCL = 'Handleiding_RCL'
@@ -331,7 +331,7 @@ HANDLEIDING_INTRO_NIEUWE_BEHEERDERS = 'Intro_nieuwe_beheerders'
 
 HANDLEIDING_PAGINAS = [
     HANDLEIDING_TOP,
-    #HANDLEIDING_SEC,
+    HANDLEIDING_SEC,
     HANDLEIDING_WL,
     HANDLEIDING_HWL,
     HANDLEIDING_RCL,

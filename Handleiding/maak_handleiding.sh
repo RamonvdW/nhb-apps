@@ -46,7 +46,7 @@ echo "DEBUG=True" >> ./copy_of_settings.py
 echo "ENABLE_DEBUG_TOOLBAR=False" >> ./copy_of_settings.py
 cat ../nhb-apps/settings.py | grep -v "settings_local" >> ./copy_of_settings.py
 
-python3 ./maak_handleiding.py "$WIKI_EXPORT" "$TEMPL" $*
+python3 -B ./maak_handleiding.py "$WIKI_EXPORT" "$TEMPL" $*
 
 rm ./copy_of_settings.py
 COUNT=$(ls -1 "$TEMPL" | wc -l)

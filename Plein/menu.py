@@ -33,7 +33,7 @@ ROL2HANDLEIDING_PAGINA = {
     Rollen.ROL_RCL: settings.HANDLEIDING_RCL,
     Rollen.ROL_HWL: settings.HANDLEIDING_HWL,
     Rollen.ROL_WL:  settings.HANDLEIDING_WL,
-    #Rollen.ROL_SEC: settings.HANDLEIDING_SEC,
+    Rollen.ROL_SEC: settings.HANDLEIDING_SEC,
 }
 
 
