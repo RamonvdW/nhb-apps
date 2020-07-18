@@ -43,15 +43,18 @@
 
             <!-- main contents -->
             <div id="content">      <!-- css manipulates this -->
+
                 <!-- button to call-up the sidenav; hidden when not needed -->
                 <a id="discover-menu" href="#" data-target="slide-out" class="sidenav-trigger hide-on-large-only">
                     <i class="material-icons-round black-text">menu</i>
                 </a>
 
-                <div class="tap-target" data-target="discover-menu">
+                <!-- aandachtstrekker: uitleg hoe in het menu te komen -->
+                <div class="tap-target" data-target="discover-menu" id="tap-target-voor-menu">
                     <div class="tap-target-content white-text">
                         <h5>Toegang tot het menu</h5>
                         <p>Gebruik de drie streepjes om het menu op te roepen</p>
+                        <button class="btn-nhb-blauw" onclick="closeTapTarget('tap-target-voor-menu')">Ik snap het</button>
                     </div>
                 </div>
 
@@ -88,7 +91,7 @@
             function discover_popup_show(mq_event) {
                 // scherm is kleiner geworden (of initieel klein), dus toon de tap target
                 if (mq_event == null || mq_event.matches) {
-                    // cookie zorgt ervoor dat de pop-up maar 5x tonen
+                    // cookie zorgt ervoor dat de pop-up maar 3x tonen
                     var count = getCookieNumber('menu_discover');
                     if (count < 3) {
                         document.cookie = 'menu_discover=' + (count + 1) + '; path=/';
@@ -104,6 +107,17 @@
                     var elem = document.querySelector('.tap-target');
                     M.TapTarget.getInstance(elem).close();
                 }
+            }
+
+            function closeTapTarget(id) {
+                // haal het tap-target element uit beeld
+                var elem = document.getElementById(id);
+                var inst = M.TapTarget.getInstance(elem);
+                inst.close();       // administratief
+                inst.destroy();     // verwijderd visuele elementen
+
+                // zet het cookie dat voorkomt dat de tap target weer getoond wordt
+                document.cookie = 'menu_discover=9; path=/';
             }
 
             document.addEventListener('DOMContentLoaded', function() {

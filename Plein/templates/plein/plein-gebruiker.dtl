@@ -15,6 +15,10 @@
 
 <p>Je ziet deze pagina omdat je de rol 'Gebruiker' gekozen hebt. Maar een paar gebruikers kunnen dat.</p>
 
+{% if is_test_server %}
+    {% include 'plein/ga-naar-live-server.dtl' %}
+{% endif %}
+
 <p>Naast de inhoud van deze website (te bereiken via het menu) zijn de volgende sites misschien ook van interesse.</p>
 
 <div class="row">

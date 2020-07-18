@@ -18,6 +18,10 @@
 <!-- TODO: deze opmerking verwijderen -->
 <p>Deze site is van de Nederlandse Handboog Bond (NHB) en is nog in ontwikkeling.</p>
 
+{% if is_test_server %}
+    {% include 'plein/ga-naar-live-server.dtl' %}
+{% endif %}
+
 <h5>Inloggen</h5>
 
 <p>Heb je al een account?</p>

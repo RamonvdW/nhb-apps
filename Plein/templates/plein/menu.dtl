@@ -22,6 +22,12 @@
             <img src="{% static 'plein/logo_with_text_nhb.png' %}" width="277" alt="NHB logo">
         </a>
 
+        <!-- test server banner -->
+        {% if is_test_server %}
+            <div class="divider"></div>
+            <h6 class="red-text center-align">NHB Test Server</h6>
+        {% endif %}
+
         <!-- informatie over ingelogde gebruiker -->
         {% if menu_show_logout %}
             <div class="divider"></div>
