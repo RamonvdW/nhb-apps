@@ -1,0 +1,33 @@
+{% comment %}
+                Copyright (c) 2020 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+<!-- andere sites van de NHB -->
+<div class="card">
+    <div class="card-content">
+        <div class="card-title center-align">Handboogsport Nederland</div>
+        <div class="center-align"><img src="{% static 'plein/logo_nhb_192x192.png' %}" height="90" alt="Logo NHB"></div>
+        <p>Hoofdwebsite van de NHB met informatie, nieuws en publicaties.</p>
+    </div>
+    <a class="nhb-klikbare-balk" href="https://www.handboogsport.nl" target="_blank" rel="noopener noreferrer">
+        <div class="card-action center-align">
+            <span class="nhb-klikbare-link">Bezoek de website</span>
+        </div>
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-content">
+        <div class="card-title center-align">Free your mind</div>
+        <div class="center-align"><img src="{% static 'plein/logo_hero_512x512.png' %}" height="90" alt="Logo Hero"></div>
+        <p>Kaart met de locaties in Nederland waar je kan schieten.</p>
+    </div>
+    <a class="nhb-klikbare-balk" href="https://www.handboogsport.nl/freeyourmind/zelf-schieten/" target="_blank" rel="noopener noreferrer">
+        <div class="card-action center-align">
+            <span class="nhb-klikbare-link">Bezoek de website</span>
+        </div>
+    </a>
+</div>

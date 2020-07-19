@@ -125,146 +125,144 @@
 <h5>Volgende stappen</h5>
 
 <div class="row">
-    <div class="col s12 cards-container">
 
-        <!-- toon inschrijvingen regiocompetitie -->
-        {% for comp in competities %}
-            {% if comp.fase != 'A1' and comp.fase != 'A1' %}    <!-- TODO: change to !=A1 and !=A2 -->
-                <div class="card">
-                    <div class="card-content">
-                        <div class="card-title center-align">Inschrijvingen {{ comp.afstand }}m</div>
-                        <div class="center-align"><i class="material-icons-round medium">receipt</i></div>
-                        <p>Toon lijst met schutters ingeschreven voor de {{ comp.beschrijving }}.</p>
-                    </div>
-                    <a href="{{ comp.url_inschrijvingen }}" class="nhb-klikbare-balk">
-                        <div class="card-action center-align">
-                            <span class="nhb-klikbare-link">Toon inschrijvingen</span>
-                        </div>
-                    </a>
-                </div>
-            {% endif %}
-        {% endfor %}
-
-        <!-- competities aanmaken -->
-        {% if bb_kan_competitie_aanmaken %}
+    <!-- toon inschrijvingen regiocompetitie -->
+    {% for comp in competities %}
+        {% if comp.fase != 'A1' and comp.fase != 'A1' %}    <!-- TODO: change to !=A1 and !=A2 -->
             <div class="card">
                 <div class="card-content">
-                    <div class="card-title center-align">Competitie opstarten</div>
-                    <div class="center-align"><i class="material-icons-round medium">playlist_add</i></div>
-                    <p>Instellingen voor de seizoen {{ nieuwe_seizoen }} controleren en competities aanmaken.</p>
+                    <div class="card-title center-align">Inschrijvingen {{ comp.afstand }}m</div>
+                    <div class="center-align"><i class="material-icons-round medium">receipt</i></div>
+                    <p>Toon lijst met schutters ingeschreven voor de {{ comp.beschrijving }}.</p>
                 </div>
-                <a href="{% url 'Competitie:instellingen-volgende-competitie' %}" class="nhb-klikbare-balk">
+                <a href="{{ comp.url_inschrijvingen }}" class="nhb-klikbare-balk">
                     <div class="card-action center-align">
-                        <span class="nhb-klikbare-link">Competitie opstarten</span>
+                        <span class="nhb-klikbare-link">Toon inschrijvingen</span>
+                    </div>
+                </a>
+            </div>
+        {% endif %}
+    {% endfor %}
+
+    <!-- competities aanmaken -->
+    {% if bb_kan_competitie_aanmaken %}
+        <div class="card">
+            <div class="card-content">
+                <div class="card-title center-align">Competitie opstarten</div>
+                <div class="center-align"><i class="material-icons-round medium">playlist_add</i></div>
+                <p>Instellingen voor de seizoen {{ nieuwe_seizoen }} controleren en competities aanmaken.</p>
+            </div>
+            <a href="{% url 'Competitie:instellingen-volgende-competitie' %}" class="nhb-klikbare-balk">
+                <div class="card-action center-align">
+                    <span class="nhb-klikbare-link">Competitie opstarten</span>
+                </div>
+            </a>
+        </div>
+    {% endif %}
+
+    {% if rol_is_bb %}
+
+        <!-- aanvangsgemiddelden vaststellen -->
+        {% if bb_kan_ag_vaststellen %}
+            <div class="card">
+                <div class="card-content">
+                    <div class="card-title center-align">Aanvangs<wbr/>gemiddelden</div>
+                    <div class="center-align"><i class="material-icons-round medium">how_to_reg</i></div>
+                    {% if bb_ag_nieuwste_datum %}
+                        <p class="center-align">(op {{ bb_ag_nieuwste_datum }} voor het laatst gedaan)</p>
+                        <br>
+                    {% endif %}
+                    <p>Aanvangsgemiddelden vaststellen voor elke schutter-boog, aan de hand van de uitslagen van vorig seizoen.</p>
+                </div>
+                <a href="{% url 'Competitie:ag-vaststellen' %}" class="nhb-klikbare-balk">
+                    <div class="card-action center-align">
+                        <span class="nhb-klikbare-link">Vaststellen</span>
                     </div>
                 </a>
             </div>
         {% endif %}
 
-        {% if rol_is_bb %}
-
-            <!-- aanvangsgemiddelden vaststellen -->
-            {% if bb_kan_ag_vaststellen %}
+        <!-- klassegrenzen vaststellen -->
+        {% for comp in object_list %}
+            {% if comp.fase == 'A1' %}
                 <div class="card">
                     <div class="card-content">
-                        <div class="card-title center-align">Aanvangs<wbr/>gemiddelden</div>
-                        <div class="center-align"><i class="material-icons-round medium">how_to_reg</i></div>
-                        {% if bb_ag_nieuwste_datum %}
-                            <p class="center-align">(op {{ bb_ag_nieuwste_datum }} voor het laatst gedaan)</p>
-                            <br>
-                        {% endif %}
-                        <p>Aanvangsgemiddelden vaststellen voor elke schutter-boog, aan de hand van de uitslagen van vorig seizoen.</p>
+                        <div class="card-title center-align">Klasse<wbr/>grenzen {{ comp.afstand }}m</div>
+                        <div class="center-align"><i class="material-icons-round medium">equalizer</i></div>
+                        <p>Klasse<wbr/>grenzen vaststellen voor de <b>{{ comp.beschrijving }}</b> aan de hand van de vastgestelde aanvangs<wbr/>gemiddelden.</p>
                     </div>
-                    <a href="{% url 'Competitie:ag-vaststellen' %}" class="nhb-klikbare-balk">
+                    <a href="{% url 'Competitie:klassegrenzen-vaststellen' afstand=comp.afstand %}" class="nhb-klikbare-balk">
                         <div class="card-action center-align">
                             <span class="nhb-klikbare-link">Vaststellen</span>
                         </div>
                     </a>
                 </div>
             {% endif %}
-
-            <!-- klassegrenzen vaststellen -->
-            {% for comp in object_list %}
-                {% if comp.fase == 'A1' %}
-                    <div class="card">
-                        <div class="card-content">
-                            <div class="card-title center-align">Klasse<wbr/>grenzen {{ comp.afstand }}m</div>
-                            <div class="center-align"><i class="material-icons-round medium">equalizer</i></div>
-                            <p>Klasse<wbr/>grenzen vaststellen voor de <b>{{ comp.beschrijving }}</b> aan de hand van de vastgestelde aanvangs<wbr/>gemiddelden.</p>
-                        </div>
-                        <a href="{% url 'Competitie:klassegrenzen-vaststellen' afstand=comp.afstand %}" class="nhb-klikbare-balk">
-                            <div class="card-action center-align">
-                                <span class="nhb-klikbare-link">Vaststellen</span>
-                            </div>
-                        </a>
-                    </div>
-                {% endif %}
-            {% endfor %}
-
-            <!-- datums wijzigen -->
-            {% if show_wijzig_datums %}
-                {% for comp in object_list %}
-                    <div class="card">
-                        <div class="card-content">
-                            <div class="card-title center-align">Datums {{ comp.afstand }}m</div>
-                            <div class="center-align"><i class="material-icons-round medium">date_range</i></div>
-                            <p>Datums aanpassen voor de {{ comp.beschrijving }}.</p>
-                        </div>
-                        <a href="{{ comp.url_wijzig_datums }}" class="nhb-klikbare-balk">
-                            <div class="card-action center-align">
-                                <span class="nhb-klikbare-link">Aanpassen</span>
-                            </div>
-                        </a>
-                    </div>
-                {% endfor %}
-            {% endif %}
-
-        {% endif %}     <!-- rol_is_bb -->
-
-        {% for deelcomp in planning_deelcomp %}
-            <div class="card">
-                <div class="card-content">
-                    <div class="card-title center-align">{{ deelcomp.titel }}</div>
-                    <div class="center-align"><i class="material-icons-round medium">date_range</i></div>
-                    <p>{{ deelcomp.tekst }}</p>
-                </div>
-                <a href="{{ deelcomp.url }}" class="nhb-klikbare-balk">
-                    <div class="card-action center-align">
-                        <span class="nhb-klikbare-link">Bekijken</span>
-                    </div>
-                </a>
-            </div>
         {% endfor %}
 
-        <!-- toon klassegrenzen regiocompetitie -->
+        <!-- datums wijzigen -->
+        {% if show_wijzig_datums %}
+            {% for comp in object_list %}
+                <div class="card">
+                    <div class="card-content">
+                        <div class="card-title center-align">Datums {{ comp.afstand }}m</div>
+                        <div class="center-align"><i class="material-icons-round medium">date_range</i></div>
+                        <p>Datums aanpassen voor de {{ comp.beschrijving }}.</p>
+                    </div>
+                    <a href="{{ comp.url_wijzig_datums }}" class="nhb-klikbare-balk">
+                        <div class="card-action center-align">
+                            <span class="nhb-klikbare-link">Aanpassen</span>
+                        </div>
+                    </a>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+    {% endif %}     <!-- rol_is_bb -->
+
+    {% for deelcomp in planning_deelcomp %}
         <div class="card">
             <div class="card-content">
-                <div class="card-title center-align">Klassegrenzen</div>
-                <div class="center-align"><i class="material-icons-round medium">equalizer</i></div>
-                <p>Toon de vastgestelde klassegrenzen voor de individuele wedstrijdklassen voor de competities.</p>
+                <div class="card-title center-align">{{ deelcomp.titel }}</div>
+                <div class="center-align"><i class="material-icons-round medium">date_range</i></div>
+                <p>{{ deelcomp.tekst }}</p>
             </div>
-            <a href="{% url 'Competitie:klassegrenzen-tonen' %}" class="nhb-klikbare-balk">
+            <a href="{{ deelcomp.url }}" class="nhb-klikbare-balk">
                 <div class="card-action center-align">
-                    <span class="nhb-klikbare-link">Toon klassegrenzen</span>
+                    <span class="nhb-klikbare-link">Bekijken</span>
                 </div>
             </a>
         </div>
+    {% endfor %}
 
-        <!-- algemene informatie over de competities -->
-        <div class="card">
-            <div class="card-content">
-                <div class="card-title center-align">Informatie</div>
-                <div class="center-align"><i class="material-icons-round medium">info</i></div>
-                <p>Algemene informatie over de competities.</p>
-            </div>
-            <a href="{% url 'Competitie:info-competitie' %}" class="nhb-klikbare-balk">
-                <div class="card-action center-align">
-                    <span class="nhb-klikbare-link">Tonen</span>
-                </div>
-            </a>
+    <!-- toon klassegrenzen regiocompetitie -->
+    <div class="card">
+        <div class="card-content">
+            <div class="card-title center-align">Klassegrenzen</div>
+            <div class="center-align"><i class="material-icons-round medium">equalizer</i></div>
+            <p>Toon de vastgestelde klassegrenzen voor de individuele wedstrijdklassen voor de competities.</p>
         </div>
-
+        <a href="{% url 'Competitie:klassegrenzen-tonen' %}" class="nhb-klikbare-balk">
+            <div class="card-action center-align">
+                <span class="nhb-klikbare-link">Toon klassegrenzen</span>
+            </div>
+        </a>
     </div>
+
+    <!-- algemene informatie over de competities -->
+    <div class="card">
+        <div class="card-content">
+            <div class="card-title center-align">Informatie</div>
+            <div class="center-align"><i class="material-icons-round medium">info</i></div>
+            <p>Algemene informatie over de competities.</p>
+        </div>
+        <a href="{% url 'Competitie:info-competitie' %}" class="nhb-klikbare-balk">
+            <div class="card-action center-align">
+                <span class="nhb-klikbare-link">Tonen</span>
+            </div>
+        </a>
+    </div>
+
 </div>
 
 <p>Kan je niet vinden wat je zoekt? Misschien moet je eerst van rol wisselen.</p>

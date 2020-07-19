@@ -21,9 +21,8 @@
 
 <div class="row">
     {% for obj in object_list %}
-    <div class="col s12 m6 l6 xl4">
         <div class="card">
-            <div class="card-content" style="height:250px">
+            <div class="card-content">
                 <img class="right" src="{{ obj.icon }}" height="50" alt="klein logo">
                 {% if obj.is_world_record %}
                     <span class="card-title">Wereld Record</span>
@@ -46,9 +45,7 @@
                 </div>
             </a>
         </div>
-    </div>
     {% endfor %}
 </div>
 
 {% endblock %}
-

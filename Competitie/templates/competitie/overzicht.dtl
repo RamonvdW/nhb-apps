@@ -16,39 +16,37 @@
 <p>Nog even geduld, dit stukje van de site is nog niet af.</p>
 
 <div class="row">
-    <div class="col s12 cards-container">
 
-        <!-- algemene informatie over de competities -->
+    <!-- algemene informatie over de competities -->
+    <div class="card">
+        <div class="card-content">
+            <div class="card-title center-align">Informatie</div>
+            <div class="center-align"><i class="material-icons-round medium">info</i></div>
+            <p>Algemene informatie over de competities.</p>
+        </div>
+        <a href="{% url 'Competitie:info-competitie' %}" class="nhb-klikbare-balk">
+            <div class="card-action center-align">
+                <span class="nhb-klikbare-link">Tonen</span>
+            </div>
+        </a>
+    </div>
+
+    <!-- toon klassegrenzen regiocompetitie -->
+    {% if toon_klassegrenzen %}
         <div class="card">
             <div class="card-content">
-                <div class="card-title center-align">Informatie</div>
-                <div class="center-align"><i class="material-icons-round medium">info</i></div>
-                <p>Algemene informatie over de competities.</p>
+                <div class="card-title center-align">Klassegrenzen</div>
+                <div class="center-align"><i class="material-icons-round medium">equalizer</i></div>
+                <p>Toon de klassegrenzen voor de competities.</p>
             </div>
-            <a href="{% url 'Competitie:info-competitie' %}" class="nhb-klikbare-balk">
+            <a href="{% url 'Competitie:klassegrenzen-tonen' %}" class="nhb-klikbare-balk">
                 <div class="card-action center-align">
                     <span class="nhb-klikbare-link">Tonen</span>
                 </div>
             </a>
         </div>
+    {% endif %}
 
-        <!-- toon klassegrenzen regiocompetitie -->
-        {% if toon_klassegrenzen %}
-            <div class="card">
-                <div class="card-content">
-                    <div class="card-title center-align">Klassegrenzen</div>
-                    <div class="center-align"><i class="material-icons-round medium">equalizer</i></div>
-                    <p>Toon de klassegrenzen voor de competities.</p>
-                </div>
-                <a href="{% url 'Competitie:klassegrenzen-tonen' %}" class="nhb-klikbare-balk">
-                    <div class="card-action center-align">
-                        <span class="nhb-klikbare-link">Tonen</span>
-                    </div>
-                </a>
-            </div>
-        {% endif %}
-
-    </div>
 </div>
 
 {% endblock %}
