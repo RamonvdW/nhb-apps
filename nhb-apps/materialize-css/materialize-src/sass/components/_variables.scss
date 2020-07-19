@@ -217,13 +217,21 @@ $switch-radius: 15px !default;
 // 11. Global
 // ==========================================================================
 
+// -------------
+// KEEP IN SYNC
+// - site_layout.css: media query to show/hide labels
+// - site_layout.dtl: javascript checks for menu visible/hidden with media query
+// - materialize.js: cut-off point to show/hide sidebar (menu)
+// - variables.css: media query ranges
+// -------------
+
 // Media Query Ranges
-$small-screen-up: 650px !default;
-$medium-screen-up: 993px !default;
-$large-screen-up: 1201px !default;
-$small-screen: 649px !default;
-$medium-screen: 992px !default;
-$large-screen: 1200px !default;
+$small-screen: 720px !default;      // up to this size = small
+$small-screen-up: 721px !default;   // more than small
+$medium-screen: 1020px !default;
+$medium-screen-up: 1021px !default;
+$large-screen: 1350px !default;     // up to this size
+$large-screen-up: 1351px !default;  // more than large
 
 $medium-and-up: "only screen and (min-width : #{$small-screen-up})" !default;
 $large-and-up: "only screen and (min-width : #{$medium-screen-up})" !default;

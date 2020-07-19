@@ -20,6 +20,15 @@ $nhb-card-hover-background: #f5f5f5;
 $nhb-collection-hover-background: $nhb-card-hover-background;
 
 
+// als er geschakeld wordt naar een witte achtergrondkleur,
+// dan het hard zwart (ivm contrast grijze achtergrond)
+// omzetten naar het wat zachtere off-black
+.white {
+    @extend .white;
+    color: $off-black;
+}
+
+
 //-----------------------------------
 // blauwe button
 //
@@ -85,49 +94,40 @@ $nhb-collection-hover-background: $nhb-card-hover-background;
   }
 }
 
+.card {
+  @extend .card;
 
-// als er geschakeld wordt naar een witte achtergrondkleur,
-// dan het hard zwart (ivm contrast grijze achtergrond)
-// omzetten naar het wat zachtere off-black
-.white {
-    @extend .white;
-    color: $off-black;
+  // forceer een vaste breedte van de kaartjes
+  // dit voorkomt vervormen van de kaartjes door re-layout
+  width: 300px;
+
+  // laat de kaartjes naast elkaar komen (in het display=block van de row)
+  display: inline-block;
+  margin-right: 30px;
 }
 
+.card-content {
+  @extend .card-content;
 
-//-----------------------------------
-// cards-container
-//
-// based on https://codepen.io/aglio/pen/eGdVdQ
-//
-.cards-container {
-    -webkit-column-break-inside: avoid;
-    .card {
-        display: inline-block;
-        overflow: visible;
-    }
+  // zet een vaste hoogte van de kaartjes
+  // dit voorkomt layout-hell
+  height: 200px;
+
+  // verlaag de padding net boven de balk
+  padding-bottom: 0;
 }
 
-@mixin column-count($ct) {
-    -webkit-column-count: $ct;
-    -moz-column-count: $ct;
-    column-count: $ct;
-}
-
-// select 1, 2 or 3 columns depending on screen size
-@media #{$small-and-down} {
-  .cards-container {
-    @include column-count(1);
+// pas de standaard hoogte van de kaartjes aan
+// voor de verschillende font sizes (zie _typography.scss)
+@media only screen and (min-width: $medium-screen) {
+  .card-content {
+      height: 208px;
   }
 }
-@media #{$medium-and-up} {
-  .cards-container {
-    @include column-count(3);
-  }
-}
-@media #{$extra-large-and-up} {
-  .cards-container {
-    @include column-count(4);
+
+@media only screen and (min-width: $large-screen) {
+  .card-content {
+      height: 216px;
   }
 }
 

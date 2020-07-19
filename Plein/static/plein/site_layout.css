@@ -74,7 +74,7 @@ input.table-filter {
     font-size: 12px;
 }
 
-/* sidenav zichtbaar / verstopt */
+/* sidenav zichtbaar en content dus een stuk opgeschoven */
 #container {
     padding-left: 300px;
 }
@@ -83,48 +83,60 @@ input.table-filter {
     padding: 20px;
 }
 
-@media only screen and (max-width : 992px) {
+/*
+// -------------
+// KEEP IN SYNC
+// - site_layout.css: media query to show/hide labels
+// - site_layout.dtl: javascript checks for menu visible/hidden with media query
+// - materialize.js: cut-off point to show/hide sidebar (menu)
+// - variables.css: media query ranges
+// -------------
+*/
+
+/* toon content tegen de linker kan als het menu niet in beeld is */
+@media only screen and (max-width: 1020px) {
     #container {
         padding-left: 0px;
     }
 }
 
-
-/* small: <650 */
-@media only screen and (min-width: 650px) {
+/* small: <=720 */
+@media only screen and (min-width: 721px) {
     .hide-unless-small {
         display: none;
     }
 }
 
-/* medium: 650-991 */
-@media only screen and (max-width : 649px) {
+/* medium: 720-1020 */
+@media only screen and (max-width : 720px) {
     .hide-unless-medium {
         display: none;
     }
 }
-@media only screen and (min-width: 992px) {
+@media only screen and (min-width: 1021px) {
     .hide-unless-medium {
         display: none;
     }
 }
 
-/* large: 992-1200 */
-@media only screen and (max-width : 991px) {
+/* large: 1021-1350 */
+@media only screen and (max-width : 1020px) {
+    .hide-unless-large {
+        display: none;
+    }
+}
+@media only screen and (min-width: 1351px) {
     .hide-unless-large {
         display: none;
     }
 }
 
-@media only screen and (min-width: 1201px) {
-    .hide-unless-large {
-        display: none;
-    }
-}
-
-/* xlarge: >1200 */
-@media only screen and (max-width : 1200px) {
+/* xlarge: >1330 */
+@media only screen and (max-width : 1350px) {
     .hide-unless-xlarge {
         display: none;
     }
 }
+
+/* end of file */
+
