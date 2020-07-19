@@ -14,9 +14,9 @@
 <p></p>
 <ul style="padding-left: 20px">
 <li style="list-style-type: disc; padding-left: 0px">BB = Bondsburo / Manager Competitiezaken (aantal: 1)</li>
-<li style="list-style-type: disc; padding-left: 0px">BKO = Bondskampioenschappen Organisator (aantal: 2x1=2)</li>
-<li style="list-style-type: disc; padding-left: 0px">RKO = Rayonkampioenschappen Organisator (aantal: 2x4=8)</li>
-<li style="list-style-type: disc; padding-left: 0px">RCL = Regiocompetitieleider (aantal: 2x16=32)</li>
+<li style="list-style-type: disc; padding-left: 0px">BKO = Bondskampioenschappen Organisator (aantal: 1 per competitie = 2)</li>
+<li style="list-style-type: disc; padding-left: 0px">RKO = Rayonkampioenschappen Organisator (aantal: 4 per rayon per competitie = 4x2=8)</li>
+<li style="list-style-type: disc; padding-left: 0px">RCL = Regiocompetitieleider (aantal: 1 per regio per competitie = 16x2=32)</li>
 <li style="list-style-type: disc; padding-left: 0px">SEC = Secretaris van een vereniging (aantal: 1 per verenging)</li>
 <li style="list-style-type: disc; padding-left: 0px">HWL = Hoofd wedstrijdleider bij een vereniging (aantal: 1 per vereniging)</li>
 <li style="list-style-type: disc; padding-left: 0px">WL = Wedstrijdleider bij een vereniging (aantal: 1 per vereniging)</li>
@@ -24,7 +24,7 @@
 <p></p>
 <p>Er kunnen meerdere personen gekoppeld worden aan elke rol.</p>
 <p></p>
-<p>Een persoon kan aan meerdere rollen gekoppeld worden (bijvoorbeeld RCL voor Indoor en 25m 1pijl)</p>
+<p>Een persoon kan aan meerdere rollen gekoppeld worden (bijvoorbeeld RCL voor Indoor <i>en</i> RCL voor 25m 1pijl)</p>
 <p></p>
 <p>Daarnaast is er de rol 'Schutter' die je altijd krijgt. Door deze rol te kiezen kan je de website persoonlijk gebruiken, bijvoorbeeld om jezelf in te schrijven voor een competitie.</p>
 <p></p>

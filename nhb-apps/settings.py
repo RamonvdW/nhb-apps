@@ -328,6 +328,7 @@ HANDLEIDING_BB = 'Handleiding_BB'
 HANDLEIDING_2FA = 'Twee-factor_authenticatie'
 HANDLEIDING_ROLLEN = 'Rollen'
 HANDLEIDING_INTRO_NIEUWE_BEHEERDERS = 'Intro_nieuwe_beheerders'
+HANDLEIDING_SCHUTTERBOOG = 'Schutter-boog'
 
 HANDLEIDING_PAGINAS = [
     HANDLEIDING_TOP,
@@ -341,6 +342,7 @@ HANDLEIDING_PAGINAS = [
     HANDLEIDING_2FA,
     HANDLEIDING_ROLLEN,
     HANDLEIDING_INTRO_NIEUWE_BEHEERDERS,
+    HANDLEIDING_SCHUTTERBOOG,
     # pagina's van de handleiding die intern gerefereerd worden
     'Tips_voor_wiki_gebruik',
     'Handleiding_CWZ',
