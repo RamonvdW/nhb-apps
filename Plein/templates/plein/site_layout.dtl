@@ -26,7 +26,7 @@
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans&amp;display=swap">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu&amp;display=swap">
         <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Round">
-        <link rel="stylesheet" href="{% static 'materialize/materialize-new-9.css' %}">
+        <link rel="stylesheet" href="{% static 'materialize/materialize-new-28.css' %}">
         <link rel="stylesheet" href="{% static 'plein/site_layout.css' %}"> <!-- moet ná materialize css -->
         {% block extraheader %}{% endblock %}
     </head>
@@ -73,15 +73,14 @@
             </div>
         </div>
 
-        <!-- TODO: minimized javascript -->
-        <script src="{% static 'materialize/materialize.js' %}"></script>
-        <!--<script src="{% static 'materialize/materialize.min.js' %}"></script>-->
+        <!-- TODO: minimized javascript using uglify -->
+        <script src="{% static 'materialize/materialize-new-1.js' %}"></script>
 
         <!-- framework init, after everything has been loaded and instantiated -->
         <script>
             function discover_popup_delayed_open() {
                 // in de tussentijd kan het scherm al weer groter zijn geworden
-                var menu_is_hidden = window.matchMedia("(max-width: 992px)");
+                var menu_is_hidden = window.matchMedia("(max-width: 985px)");
                 if (menu_is_hidden.matches) {
                     var elem = document.querySelector('.tap-target');
                     M.TapTarget.getInstance(elem).open();
@@ -143,10 +142,19 @@
 
                 var count = getCookieNumber('menu_discover');
                 if (count < 3) {
-                    var menu_is_shown = window.matchMedia("(min-width: 992px)");
+
+                    // -------------
+                    // KEEP IN SYNC
+                    // - site_layout.css: media query to show/hide labels
+                    // - site_layout.dtl: javascript checks for menu visible/hidden with media query
+                    // - materialize.js: cut-off point to show/hide sidebar (menu)
+                    // - variables.css: media query ranges
+                    // -------------
+
+                    var menu_is_shown = window.matchMedia("(min-width: 1021px)");
                     menu_is_shown.addListener(discover_popup_hide);
 
-                    var menu_is_hidden = window.matchMedia("(max-width: 992px)");
+                    var menu_is_hidden = window.matchMedia("(max-width: 1020px)");
                     menu_is_hidden.addListener(discover_popup_show);
                     if (menu_is_hidden.matches) {
                         // show immediately
