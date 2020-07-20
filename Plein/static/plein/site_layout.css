@@ -79,9 +79,19 @@ input.table-filter {
     padding-left: 300px;
 }
 
+
+/* padding rond de main content */
 #content {
     padding: 20px;
 }
+
+/* reduceer de padding rond de content op echt kleine schermen */
+@media only screen and (max-width: 400px) {
+    #content {
+        padding: 5px;
+    }
+}
+
 
 /*
 // -------------
