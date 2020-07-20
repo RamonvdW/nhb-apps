@@ -99,7 +99,7 @@ class RegistreerNhbNummerView(TemplateView):
                 schrijf_in_logboek(account=None,
                                    gebruikte_functie="Registreer met NHB nummer",
                                    activiteit="Mislukt voor nhb nummer %s vanaf IP %s: %s" % (repr(nhb_nummer), from_ip, str(exc)))
-                my_logger.info('%s REGISTREER Mislukt voor NHB nummer %s (reden: %s)' % (from_ip, repr(nhb_nummer), str(exc)))
+                my_logger.info('%s REGISTREER Mislukt voor NHB nummer %s met email %s (reden: %s)' % (from_ip, repr(nhb_nummer), repr(email), str(exc)))
             except SchutterNhbLidInactief:
                 # NHB lid is mag niet gebruik maken van de diensten van de NHB, inclusief deze website
                 schrijf_in_logboek(account=None,
