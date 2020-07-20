@@ -45,6 +45,8 @@ def menu_dynamics(request, context, actief=None):
         assert (actief in ACTIEF_OPTIES), 'menu_dynamics: Onbekende actief waarde %s' % repr(actief)
         context['menu_actief'] = actief
 
+    context['is_test_server'] = settings.ENABLE_WIKI
+
     rol = rol_get_huidige(request)
 
     # zet context variabelen om aan te geven welke optionele delen van het menu getoond moeten worden

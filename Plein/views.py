@@ -35,8 +35,6 @@ class PleinView(View):
         template = TEMPLATE_PLEIN_BEZOEKER
         context = dict()
 
-        context['is_test_server'] = settings.ENABLE_WIKI
-
         if request.user.is_authenticated:
             account = self.request.user
             rol_nu = rol_get_huidige(request)
