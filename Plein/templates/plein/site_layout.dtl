@@ -34,13 +34,6 @@
     <body class="nhb-grijs">
         <div id="container">        <!-- css manipulates this to make space for the menu -->
 
-            <!-- sidenav -->
-            <div id="menu">
-                <ul id="slide-out" class="sidenav sidenav-fixed">
-                    {% include 'plein/menu.dtl' %}
-                </ul>
-            </div>
-
             <!-- main contents -->
             <div id="content">      <!-- css manipulates this -->
 
@@ -71,6 +64,14 @@
                 <!-- echt pagina komt hier, vanuit de template -->
                 {% block pagina %}{% endblock %}
             </div>
+
+            <!-- sidenav (als laatste zodat dit niet de eerste tabstop is) -->
+            <div id="menu">
+                <ul id="slide-out" class="sidenav sidenav-fixed">
+                    {% include 'plein/menu.dtl' %}
+                </ul>
+            </div>
+
         </div>
 
         <!-- TODO: minimized javascript using uglify -->
