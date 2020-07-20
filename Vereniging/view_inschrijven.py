@@ -58,6 +58,11 @@ class LedenInschrijvenView(UserPassesTestMixin, ListView):
         _, functie_nu = rol_get_huidige_functie(self.request)
         objs = list()
 
+        # bepaal de inschrijfmethode voor deze regio
+        if functie_nu.nhb_ver.regio.is_administratief:
+            # niemand van deze vereniging mag zich inschrijven
+            return objs
+
         prev_lkl = None
         prev_wedstrijdleeftijd = 0
         jeugdgrens = comp.begin_jaar - MAXIMALE_LEEFTIJD_JEUGD
@@ -244,8 +249,8 @@ class LedenInschrijvenView(UserPassesTestMixin, ListView):
         hwl_regio = functie_nu.nhb_ver.regio
 
         if hwl_regio.is_administratief:
-            # mag niet meedoen aan wedstrijden
-            return
+            # niemand van deze vereniging mag meedoen aan wedstrijden
+            raise Resolver404()
 
         # zoek de juiste DeelCompetitie erbij
         deelcomp = DeelCompetitie.objects.get(competitie=comp,
