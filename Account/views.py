@@ -153,7 +153,7 @@ class LoginView(TemplateView):
             # account met deze username bestaat niet
             # sta ook toe dat met het email adres ingelogd wordt
             try:
-                email = AccountEmail.objects.get(bevestigde_email=login_naam)
+                email = AccountEmail.objects.get(bevestigde_email__iexact=login_naam)   # iexact = case insensitive volledige match
             except AccountEmail.DoesNotExist:
                 # email is ook niet bekend
                 # LET OP! dit kan heel snel heel veel data worden! - voorkom storage overflow!!

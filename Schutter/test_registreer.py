@@ -129,7 +129,7 @@ class TestSchutterRegistreer(E2EHelpers, TestCase):
     def test_registreer(self):
         resp = self.client.post('/schutter/registreer/',
                                 {'nhb_nummer': '100001',
-                                 'email': 'rdetester@gmail.not',
+                                 'email': 'rDeTester@gmail.not',    # dekt case-insensitive emailadres
                                  'nieuw_wachtwoord': E2EHelpers.WACHTWOORD},
                                 follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK

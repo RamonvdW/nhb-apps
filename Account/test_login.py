@@ -184,6 +184,15 @@ class TestAccountLogin(E2EHelpers, TestCase):
         # check of het niet aanzetten van het 'aangemeld blijven' vinkje werkt
         self.assertTrue(self.client.session.get_expire_at_browser_close())
 
+    def test_login_met_email_case_insensitive(self):
+        # test inlog via het inlog formulier, met een email adres
+        resp = self.client.post(self.url_login, {'login_naam': 'MetMail@test.com', 'wachtwoord': E2EHelpers.WACHTWOORD})
+        self.assert_is_redirect(resp, '/plein/')
+
+        # check aanwezigheid van Uitloggen optie in menu als teken van inlog succes
+        resp = self.client.get('/plein/')
+        self.assertContains(resp, 'Uitloggen')
+
     def test_login_aangemeld_blijven(self):
         # test inlog via het inlog formulier, met het 'aangemeld blijven' vinkje gezet
         resp = self.client.post(self.url_login, {'login_naam': 'metmail@test.com', 'wachtwoord': E2EHelpers.WACHTWOORD, 'aangemeld_blijven': True})

@@ -50,14 +50,15 @@ def schutter_create_account_nhb(nhb_nummer, email, nieuw_wachtwoord):
     if not mailer_email_is_valide(nhblid.email):
         raise SchutterNhbLidGeenEmail()
 
-    if email != nhblid.email:
+    # vergelijk e-mailadres hoofdletter ongevoelig
+    if email.lower() != nhblid.email.lower():
         raise AccountCreateError('De combinatie van NHB nummer en email worden niet herkend. Probeer het nog eens.')
 
     if not nhblid.is_actief_lid:
         raise SchutterNhbLidInactief()
 
     # maak het account aan
-    account, accountmail = account_create(nhb_nummer, nhblid.voornaam, nhblid.achternaam, nieuw_wachtwoord, email, False)
+    account, accountmail = account_create(nhb_nummer, nhblid.voornaam, nhblid.achternaam, nieuw_wachtwoord, nhblid.email, False)
 
     # koppelen nhblid en account
     nhblid.account = account
