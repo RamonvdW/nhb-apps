@@ -5,33 +5,36 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from . import views
+from . import (view_login, view_login_as, view_logout,
+               view_aangemaakt,
+               view_wachtwoord,
+               view_activiteit)
 
 app_name = 'Account'
 
 urlpatterns = [
     path('login/',
-         views.LoginView.as_view(),
+         view_login.LoginView.as_view(),
          name='login'),
 
     path('logout/',
-         views.LogoutView.as_view(),
+         view_logout.LogoutView.as_view(),
          name='logout'),
 
     path('aangemaakt/',
-         views.AangemaaktView.as_view(),
+         view_aangemaakt.AangemaaktView.as_view(),
          name='aangemaakt'),
 
     path('wachtwoord-vergeten/',
-         views.WachtwoordVergetenView.as_view(),
+         view_wachtwoord.WachtwoordVergetenView.as_view(),
          name='wachtwoord-vergeten'),
 
     path('activiteit/',
-         views.ActiviteitView.as_view(),
+         view_activiteit.ActiviteitView.as_view(),
          name='activiteit'),
 
     path('account-wissel/',
-         views.LoginAsZoekView.as_view(),
+         view_login_as.LoginAsZoekView.as_view(),
          name='account-wissel'),
 ]
 
