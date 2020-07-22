@@ -14,13 +14,13 @@ from django.db.models.functions import Concat
 from .forms import ZoekAccountForm, KiesAccountForm
 from .models import Account, AccountEmail
 from .rechten import account_rechten_otp_controle_gelukt, account_rechten_login_gelukt
+from .view_login import account_plugins_login
 from Overig.tijdelijke_url import (set_tijdelijke_url_receiver,
                                    RECEIVER_ACCOUNT_WISSEL,
                                    maak_tijdelijke_url_accountwissel)
 from Plein.menu import menu_dynamics
 from Logboek.models import schrijf_in_logboek
 from Overig.helpers import get_safe_from_ip
-from .view_login import account_plugins_login
 import logging
 
 
@@ -31,7 +31,7 @@ my_logger = logging.getLogger('NHBApps.Account')
 
 
 def receiver_account_wissel(request, obj):
-    """ Met deze functie kan een geauthoriseerd persoon tijdelijk inlogen op de site
+    """ Met deze functie kan een geautoriseerd persoon tijdelijk inloggen op de site
         als een andere gebruiker.
             obj is een AccountEmail object.
         We moeten een url teruggeven waar een http-redirect naar gedaan kan worden.
@@ -44,7 +44,7 @@ def receiver_account_wissel(request, obj):
     login(request, account)
 
     from_ip = get_safe_from_ip(request)
-    my_logger.info('%s LOGIN automatische inlog als schutter %s' % (from_ip, repr(account.username)))
+    my_logger.info('%s LOGIN automatische inlog met account %s' % (from_ip, repr(account.username)))
 
     for _, func in account_plugins_login:
         httpresp = func(request, from_ip, account)

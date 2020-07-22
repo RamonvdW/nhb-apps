@@ -29,6 +29,10 @@ urlpatterns = [
          view_wachtwoord.WachtwoordVergetenView.as_view(),
          name='wachtwoord-vergeten'),
 
+    path('nieuw-wachtwoord/',
+         view_wachtwoord.NieuwWachtwoordView.as_view(),
+         name='nieuw-wachtwoord'),
+
     path('activiteit/',
          view_activiteit.ActiviteitView.as_view(),
          name='activiteit'),

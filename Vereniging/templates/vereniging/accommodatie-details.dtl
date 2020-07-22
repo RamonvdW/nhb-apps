@@ -85,7 +85,8 @@
             {% if not readonly %}
                 <td>
                     {% if url_koppel_hwl %}
-                        <a class="btn-nhb-blauw" href="{{ url_koppel_hwl }}"><i class="material-icons-round left">group_add</i>Koppel beheerders</a>
+                        <a class="btn-nhb-blauw" href="{{ url_koppel_hwl }}">
+                            <i class="material-icons-round left">group_add</i>Koppel beheerders</a>
                     {% endif %}
                 </td>
             {% endif %}
@@ -103,7 +104,8 @@
             {% if not readonly %}
                 <td>
                     {% if url_koppel_wl %}
-                        <a class="btn-nhb-blauw" href="{{ url_koppel_wl }}"><i class="material-icons-round left">group_add</i>Koppel beheerders</a>
+                        <a class="btn-nhb-blauw" href="{{ url_koppel_wl }}">
+                            <i class="material-icons-round left">group_add</i>Koppel beheerders</a>
                     {% endif %}
                 </td>
             {% endif %}
@@ -136,7 +138,8 @@
             {% if not readonly %}
                 <td>
                     {% if url_email_hwl %}
-                        <a class="btn-nhb-blauw" href="{{ url_email_hwl }}"><i class="material-icons-round left">alternate_email</i>Wijzig e-mail</a>
+                        <a class="btn-nhb-blauw" href="{{ url_email_hwl }}">
+                            <i class="material-icons-round left">alternate_email</i>Wijzig e-mail</a>
                     {% endif %}
                 </td>
             {% endif %}
@@ -154,7 +157,8 @@
             {% if not readonly %}
                 <td>
                     {% if url_email_wl %}
-                        <a class="btn-nhb-blauw" href="{{ url_email_wl }}"><i class="material-icons-round left">alternate_email</i>Wijzig e-mail</a>
+                        <a class="btn-nhb-blauw" href="{{ url_email_wl }}">
+                            <i class="material-icons-round left">alternate_email</i>Wijzig e-mail</a>
                     {% endif %}
                 </td>
             {% endif %}
@@ -274,7 +278,7 @@
                 <i class="material-icons-round left">arrow_back</i>Terug (niet opslaan)</a>
 
             <button class="btn-nhb-rood margin-5" type="submit">
-                <i class="material-icons-round left">save</i>Wijzigingen opslaan</button>
+                <i class="material-icons-round left">check</i>Wijzigingen opslaan</button>
         {% endif %}
     </p>
 

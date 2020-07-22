@@ -14,6 +14,7 @@ uuid_namespace = uuid5(NAMESPACE_URL, 'Overig.Models.SiteUrls')
 RECEIVER_BEVESTIG_ACCOUNT_EMAIL = 'account_email'
 RECEIVER_BEVESTIG_FUNCTIE_EMAIL = 'functie_email'
 RECEIVER_ACCOUNT_WISSEL = 'account_wissel'
+RECEIVER_WACHTWOORD_VERGETEN = 'wachtwoord_vergeten'     # 19 lang
 
 
 class TijdelijkeUrlDispatcher(object):
@@ -86,9 +87,6 @@ def maak_tijdelijke_url_account_email(accountemail, **kwargs):
 def maak_tijdelijke_url_functie_email(functie):
     """ Maak een tijdelijke URL aan die gebruikt kan worden om een
         functie e-mail te bevestigen.
-        Een SiteTijdelijkeUrl record wordt in de database gezet met de
-        url_code en waar deze voor bedoeld is.
-        De volledige url wordt terug gegeven.
     """
     url_code = _maak_url_code(pk=functie.pk, email=functie.nieuwe_email)
     func = tijdelijkeurl_dispatcher.get_saver()
@@ -106,6 +104,16 @@ def maak_tijdelijke_url_accountwissel(accountemail, **kwargs):
     return settings.SITE_URL + reverse('Overig:tijdelijke-url', args=[url_code])
 
 
+def maak_tijdelijke_url_wachtwoord_vergeten(accountemail, **kwargs):
+    """ Maak een tijdelijke URL aan die gebruikt kan worden als het
+        account wachtwoord vergeten is.
+    """
+    url_code = _maak_url_code(**kwargs, pk=accountemail.pk)
+    func = tijdelijkeurl_dispatcher.get_saver()
+    func(url_code, dispatch_to=RECEIVER_WACHTWOORD_VERGETEN, geldig_dagen=7, accountemail=accountemail)
+    return settings.SITE_URL + reverse('Overig:tijdelijke-url', args=[url_code])
+
+
 def do_dispatch(request, obj):
     """ Deze functie wordt aangeroepen vanuit de view die de ontvangen url_code
         opgezocht heeft in de database.
@@ -114,11 +122,15 @@ def do_dispatch(request, obj):
     """
     redirect = None
 
-    if obj.dispatch_to in (RECEIVER_ACCOUNT_WISSEL, RECEIVER_BEVESTIG_ACCOUNT_EMAIL):
+    if obj.dispatch_to in (RECEIVER_ACCOUNT_WISSEL,
+                           RECEIVER_BEVESTIG_ACCOUNT_EMAIL,
+                           RECEIVER_WACHTWOORD_VERGETEN):
+        # referentie = AccountEmail
         func = tijdelijkeurl_dispatcher.get_receiver(obj.dispatch_to)
         redirect = func(request, obj.hoortbij_accountemail)
 
     elif obj.dispatch_to == RECEIVER_BEVESTIG_FUNCTIE_EMAIL:
+        # referentie = Functie
         func = tijdelijkeurl_dispatcher.get_receiver(obj.dispatch_to)
         redirect = func(request, obj.hoortbij_functie)
 

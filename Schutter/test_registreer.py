@@ -134,7 +134,7 @@ class TestSchutterRegistreer(E2EHelpers, TestCase):
                                 follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('account/aangemaakt.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('account/email_aangemaakt.dtl', 'plein/site_layout.dtl'))
 
         # controleer dat het email adres obfuscated is
         self.assertNotContains(resp, 'rdetester@gmail.not')
@@ -184,7 +184,7 @@ class TestSchutterRegistreer(E2EHelpers, TestCase):
                                 follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('account/aangemaakt.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('account/email_aangemaakt.dtl', 'plein/site_layout.dtl'))
 
         # tweede poging
         resp = self.client.post('/schutter/registreer/',

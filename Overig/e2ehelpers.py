@@ -60,22 +60,24 @@ class E2EHelpers(object):
         account.save()
         return account
 
-    def e2e_login_no_check(self, account):
+    def e2e_login_no_check(self, account, wachtwoord=None):
         """ log in op de website via de voordeur, zodat alle rechten geëvalueerd worden """
-        ww = self.WACHTWOORD
+        if not wachtwoord:
+            wachtwoord = self.WACHTWOORD
         assert isinstance(self, TestCase)
-        resp = self.client.post('/account/login/', {'login_naam': account.username, 'wachtwoord': ww})
+        resp = self.client.post('/account/login/', {'login_naam': account.username,
+                                                    'wachtwoord': wachtwoord})
         return resp
 
-    def e2e_login(self, account):
+    def e2e_login(self, account, wachtwoord=None):
         """ log in op de website via de voordeur, zodat alle rechten geëvalueerd worden """
-        resp = self.e2e_login_no_check(account)
+        resp = self.e2e_login_no_check(account, wachtwoord)
         self.assertEqual(resp.status_code, 302)  # 302 = Redirect
         user = auth.get_user(self.client)
         self.assertTrue(user.is_authenticated)
 
-    def e2e_login_and_pass_otp(self, account):
-        self.e2e_login(account)
+    def e2e_login_and_pass_otp(self, account, wachtwoord=None):
+        self.e2e_login(account, wachtwoord)
         # door de login is een cookie opgeslagen met het csrf token
         assert isinstance(self, TestCase)
         resp = self.client.post('/functie/otp-controle/', {'otp_code': pyotp.TOTP(account.otp_code).now()})

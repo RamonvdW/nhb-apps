@@ -40,16 +40,18 @@
 </div>
 
 
-{% if show_voorkeuren %}
-    <span>&nbsp;</span>
-    <h5>Voorkeuren</h5>
+<span>&nbsp;</span>
+<h5>Voorkeuren</h5>
 
+{% if show_voorkeuren %}    <!-- niet bij persoonlijk lidmaatschap -->
     <p>Je persoonlijke voorkeuren instellen, zoals welke boog je hebt.</p>
 
     <p><a class="btn-nhb-blauw" href="{% url 'Schutter:voorkeuren' %}"><i class="material-icons-round left">tune</i>Mijn voorkeuren</a></p>
+    <!-- <p>Gebruik de knop om naar de voorkeuren pagina te gaan.</p> -->
 
-    <p>Gebruik de knop om naar de voorkeuren pagina te gaan.</p>
 {% endif %}
+
+<p><a class="btn-nhb-blauw" href="{% url 'Account:nieuw-wachtwoord' %}">Wachtwoord wijzigen</a></p>
 
 
 {% if toon_leeftijdsklassen %}

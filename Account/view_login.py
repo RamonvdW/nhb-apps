@@ -27,7 +27,7 @@ import logging
 
 TEMPLATE_LOGIN = 'account/login.dtl'
 TEMPLATE_BEVESTIGD = 'account/bevestigd.dtl'
-TEMPLATE_AANGEMAAKT = 'account/aangemaakt.dtl'
+TEMPLATE_AANGEMAAKT = 'account/email_aangemaakt.dtl'
 TEMPLATE_GEBLOKKEERD = 'account/geblokkeerd.dtl'
 TEMPLATE_NIEUWEEMAIL = 'account/nieuwe-email.dtl'
 TEMPLATE_BEVESTIG_EMAIL = 'account/bevestig-email.dtl'

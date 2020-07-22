@@ -216,10 +216,12 @@ def account_email_bevestiging_ontvangen(mail):
     """ Deze functie wordt vanuit de tijdelijke url receiver functie (zie view)
         aanroepen met mail = AccountEmail object waar dit op van toepassing is
     """
-    mail.bevestigde_email = mail.nieuwe_email
-    mail.nieuwe_email = ''
-    mail.email_is_bevestigd = True
-    mail.save()
+    # voorkom verlies van een bevestigde email bij interne fouten
+    if mail.nieuwe_email != '':
+        mail.bevestigde_email = mail.nieuwe_email
+        mail.nieuwe_email = ''
+        mail.email_is_bevestigd = True
+        mail.save()
 
 
 def account_check_gewijzigde_email(account):

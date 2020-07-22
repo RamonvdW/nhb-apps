@@ -15,6 +15,8 @@
 
 <p>Je ziet deze pagina omdat je de rol 'Gebruiker' gekozen hebt. Maar een paar gebruikers kunnen dat.</p>
 
+<p><a class="btn-nhb-blauw" href="{% url 'Account:nieuw-wachtwoord' %}">Wachtwoord wijzigen</a></p>
+
 {% if is_test_server %}
     {% include 'plein/ga-naar-live-server.dtl' %}
 {% endif %}

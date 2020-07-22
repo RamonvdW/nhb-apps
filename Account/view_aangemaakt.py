@@ -11,7 +11,7 @@ from django.views.generic import TemplateView
 from Plein.menu import menu_dynamics
 
 
-TEMPLATE_AANGEMAAKT = 'account/aangemaakt.dtl'
+TEMPLATE_AANGEMAAKT = 'account/email_aangemaakt.dtl'
 
 
 class AangemaaktView(TemplateView):

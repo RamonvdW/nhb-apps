@@ -6,35 +6,31 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}Wachtwoord vergeten{% endblock %}
+{% block title %}Nieuw wachtwoord{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="account-wachtwoord-vergeten" %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="account-nieuw-wachtwoord" %}
 
-<h4>Wachtwoord vergeten</h4>
+<h4>Nieuw wachtwoord</h4>
 
-<p>Heb je eerder een account aangemaakt en weet je nu je wachtwoord niet meer?</p>
+<p>Via deze pagina kan je een nieuw wachtwoord kiezen.</p>
 
 <div class="container z-depth-2 white">
 
     <div class="row nhb-blauw white-text">
         <div class="col s12 center-align">
-            <h5>Wachtwoord vergeten</h5>
+            <h5>Wachtwoord wijzigen</h5>
             <p>Voor een bestaand account</p>
         </div>
     </div>
 
-    <div class="row"><div class="col s12">
-        <p>Vul je e-mailadres in, dan sturen we een e-mail waarmee je een nieuw wachtwoord in kan stellen.</p>
-    </div></div>
-
     <div class="row">
-        <form class="col s12" action="{% url 'Account:wachtwoord-vergeten' %}" method="post">
+        <form class="col s12" action="{% url 'Account:nieuw-wachtwoord' %}" method="post">
 {% csrf_token %}<!-- dit compacte formaat zorgt voor juiste minify -->
 
             <div class="row"><div class="input-field col s12">
-                <label class="black-text" for="id_email">E-mailadres:</label>
-                <input class="with-gap" type="email" name="email" value="" required id="id_email">
+                <label class="black-text" for="id_ww">Nieuwe wachtwoord:</label>
+                <input class="with-gap" type="password" name="wachtwoord" value="" required id="id_ww">
             </div></div>
 
             {% if foutmelding %}
@@ -46,12 +42,11 @@
             <div class="row"><div class="col s12">
                 <div class="center-align">
                     <button class="btn-nhb-blauw" type="submit">
-                        <i class="material-icons-round left">email</i>Verstuur e-mail</button>
+                        <i class="material-icons-round left">check</i>Opslaan</button>
                 </div>
             </div></div>
 
         </form>
-
     </div>
 </div>
 

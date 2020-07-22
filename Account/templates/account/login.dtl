@@ -25,7 +25,7 @@
 
     <div class="row">
         <form class="col s12" action="{% url 'Account:login' %}" method="post">
-{{ form.next }}{% csrf_token %}<!-- dit compact formaat zorgt voor juiste minify -->
+{{ form.next }}{% csrf_token %}<!-- dit compacte formaat zorgt voor juiste minify -->
 
             {% if form.errors %}
                 {% for error in form.non_field_errors %}
@@ -34,6 +34,14 @@
                         <div class="col s9 red-text">{{ error|escape }}</div>
                     </div>
                 {% endfor %}
+            {% endif %}
+
+            {% if show_wachtwoord_vergeten %}
+                <div class="row"><div class="col s12"></div>
+                    <div class="center-align">
+                        <a class="btn-nhb-blauw" href="{% url 'Account:wachtwoord-vergeten' %}">Wachtwoord vergeten?</a>
+                    </div>
+                </div>
             {% endif %}
 
             <div class="row"><div class="input-field col s12">
@@ -53,24 +61,16 @@
                     <input type="checkbox" class="filled-in" name="aangemeld_blijven">
                     <span class="black-text">Aangemeld blijven</span>
                 </label>
+                <p>&nbsp;</p>
             </div></div>
 
-            <div class="row"><div class="col s12"></div>
+            <div class="row"><div class="col s12">
                 <div class="center-align">
-                    <input class="btn-nhb-blauw" type="submit" value="Log in">
+                    <input class="btn-nhb-blauw center-align" type="submit" value="Log in">
                 </div>
-            </div>
-        </form>
+            </div></div>
 
-        <div class="row">
-            <!--
-            <div class="col s6 center-align">
-                <a href="{% url 'Schutter:registreer' %}">Nog geen account?</a>
-            </div> -->
-            <div class="col s6 offset-s6 center-align">
-                <a href="{% url 'Account:wachtwoord-vergeten' %}">Wachtwoord vergeten?</a>
-            </div>
-        </div>
+        </form>
     </div>
 </div>
 
@@ -81,5 +81,6 @@
 <p>De vereniging moet aangesloten zijn bij de Nederlandse Handboog Bond (NHB).</p>
 <p><a class="btn-nhb-blauw" href="{% url 'Schutter:registreer' %}">
     <i class="material-icons-round left">add</i>Account aanmaken</a></p>
+
 
 {% endblock %}
