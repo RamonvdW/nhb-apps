@@ -80,30 +80,31 @@ class Competitie(models.Model):
         now = timezone.now()
         now = datetime.date(year=now.year, month=now.month, day=now.day)
 
-        if now < self.begin_aanmeldingen:
-            # zijn de wedstrijdklassen vastgesteld?
-            if CompetitieKlasse.objects.filter(competitie=self).count() == 0:
-                # A1 = aanvangsgemiddelden en klassegrenzen zijn vastgesteld
-                self.fase = 'A1'
-                return
-
-            # A2 = klassegrenzen zijn bepaald
-            self.fase = 'A2'
+        # A1 totdat aanvangsgemiddelden en klassegrenzen zijn vastgesteld
+        self.fase = 'A1'
+        if self.competitieklasse_set.count() == 0:
+            # wedstrijdklassen zijn nog niet vastgesteld
             return
 
-        # B = open voor inschrijvingen
+        # A2 = instellingen regio, tot aanmeldingen beginnen
+        self.fase = 'A2'
+        if now < self.begin_aanmeldingen:
+            # nog niet open voor aanmelden
+            return
+
+        # B = open voor inschrijvingen, tot sluiten inschrijvingen
+        self.fase = 'B'
         if now < self.einde_aanmeldingen:
-            self.fase = 'B'
             return
 
         # C = aanmaken teams; gesloten voor individuele inschrijvingen
+        self.fase = 'C'
         if now < self.einde_teamvorming:
-            self.fase = 'C'
             return
 
         # D = aanmaken poules en afronden wedstrijdschema's
+        self.fase = 'D'
         if now < self.eerste_wedstrijd:
-            self.fase = 'D'
             return
 
         # E = Begin wedstrijden

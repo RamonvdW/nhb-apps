@@ -576,9 +576,14 @@ class TestCompetitie(E2EHelpers, TestCase):
         comp.zet_fase()
         self.assertEqual(comp.fase, 'A1')
 
+        comp.begin_aanmeldingen = gisteren
+        comp.zet_fase()
+        self.assertEqual(comp.fase, 'A1')
+
         # maak de klassen aan en controleer de fase weer
         indiv = IndivWedstrijdklasse.objects.all()[0]
         maak_competitieklasse_indiv(comp, indiv, 0.0)
+        comp.begin_aanmeldingen = comp.einde_aanmeldingen
         comp.zet_fase()
         self.assertEqual(comp.fase, 'A2')
 
