@@ -122,7 +122,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         lid.achternaam = "de Testerin"
         lid.email = ""
         lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        lid.sinds_datum = datetime.date(year=jaar-3, month=11, day=12)
+        lid.sinds_datum = datetime.date(year=jaar-4, month=11, day=12)
         lid.bij_vereniging = ver
         lid.save()
         self.nhblid_100003 = lid
@@ -574,6 +574,50 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         for obj in RegioCompetitieSchutterBoog.objects.all():
             self.assertEqual(obj.inschrijf_notitie, 'door de hwl')
             self.assertTrue(obj.inschrijf_voorkeur_team)
+        # for
+
+    def test_inschrijven_team_udvl(self):
+        url = self.url_inschrijven % self.comp_18.pk
+
+        # zet de udvl tussen de dvl van de twee schutters in
+        # nhblid_100003.sinds_datum = datetime.date(year=jaar-4, month=11, day=12)
+        # nhblid_100004.sinds_datum = datetime.date(year=jaar-3, month=11, day=12)
+        comp = Competitie.objects.get(afstand='18')
+        comp.uiterste_datum_lid = datetime.date(year=self.nhblid_100004.sinds_datum.year, month=1, day=1)
+        comp.save()
+
+        # login als HWL
+        self.e2e_login_and_pass_otp(self.account_hwl)
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+        self.e2e_check_rol('HWL')
+
+        # stel een paar bogen in
+        self._zet_schutter_voorkeuren(100004)
+        self._zet_schutter_voorkeuren(100003)
+
+        self._zet_ag(100004, 18)
+        self._zet_ag(100003, 25)
+
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_template_used(resp, ('vereniging/competitie-inschrijven.dtl', 'plein/site_layout.dtl'))
+
+        # nu de POST om een paar leden aan te melden
+        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
+        resp = self.client.post(url, {'lid_100004_boogtype_1': 'on',        # 1=R
+                                      'lid_100003_boogtype_3': 'on',        # 3=BB
+                                      'wil_in_team': 'ja',
+                                      'opmerking': 'door de hwl'})
+        self.assertEqual(resp.status_code, 302)     # 302 = Redirect
+        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 2)    # 2 schutters, 1 competitie
+
+        for obj in RegioCompetitieSchutterBoog.objects.all():
+            self.assertEqual(obj.inschrijf_notitie, 'door de hwl')
+            if obj.schutterboog.nhblid.nhb_nr == 100003:
+                self.assertTrue(obj.inschrijf_voorkeur_team)
+            else:
+                # 100004 heeft dvl > udvl, dus mag niet mee doen
+                self.assertFalse(obj.inschrijf_voorkeur_team)
         # for
 
     def test_uitschrijven(self):

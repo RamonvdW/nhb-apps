@@ -7,7 +7,7 @@
 from django.test import TestCase
 from django.utils import timezone
 from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
-from Competitie.models import DeelCompetitie, RegioCompetitieSchutterBoog, INSCHRIJF_METHODE_3
+from Competitie.models import Competitie, DeelCompetitie, RegioCompetitieSchutterBoog, INSCHRIJF_METHODE_3
 from Overig.e2ehelpers import E2EHelpers
 from Score.models import aanvangsgemiddelde_opslaan
 from .models import SchutterBoog
@@ -326,7 +326,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         self._prep_voorkeuren()
 
         # schrijf in voor de 18m Recurve, met AG
-        # geef ook teamschieten en opmerking door
+        # geef ook team schieten en opmerking door
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
         schutterboog = SchutterBoog.objects.get(boogtype__afkorting='R')
         deelcomp = DeelCompetitie.objects.get(competitie__afstand='18', nhb_regio=self.nhbver.regio)
@@ -362,6 +362,43 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         inschrijving = RegioCompetitieSchutterBoog.objects.filter(schutterboog=schutterboog).all()[0]
         self.assertEqual(inschrijving.inschrijf_notitie, 'ben ik oud genoeg?')
         self.assertFalse(inschrijving.inschrijf_voorkeur_team)
+
+    def test_team_udvl(self):
+        # controleer dat het filter voor uiterste datum van lidmaatschap werkt
+
+        # log in as BB en maak de competitie aan
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_wisselnaarrol_bb()
+        self._competitie_aanmaken()
+
+        comp = Competitie.objects.get(afstand='18')
+        #   nhblid1.sinds_datum = datetime.date(year=2010, month=11, day=12)
+        comp.uiterste_datum_lid = datetime.date(year=2010, month=11, day=11)
+        comp.save()
+
+        # log in as schutter
+        self.client.logout()
+        self.e2e_login(self.account_normaal)
+        self._prep_voorkeuren()
+
+        # schrijf in voor de 18m Recurve, met AG
+        # geef ook team schieten en opmerking door
+        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
+        schutterboog = SchutterBoog.objects.get(boogtype__afkorting='R')
+        deelcomp = DeelCompetitie.objects.get(competitie__afstand='18', nhb_regio=self.nhbver.regio)
+        res = aanvangsgemiddelde_opslaan(schutterboog, 18, 8.18, '2020-01-01', None, 'Test')
+        self.assertTrue(res)
+
+        url = self.url_inschrijven % (deelcomp.pk, schutterboog.pk)
+        resp = self.client.post(url, {'wil_in_team': 'yes'})
+        self.assert_is_redirect(resp, self.url_profiel)
+        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 1)
+
+        inschrijving = RegioCompetitieSchutterBoog.objects.all()[0]
+        self.assertEqual(inschrijving.deelcompetitie, deelcomp)
+        self.assertEqual(inschrijving.schutterboog, schutterboog)
+        self.assertEqual(inschrijving.bij_vereniging, schutterboog.nhblid.bij_vereniging)
+        self.assertFalse(inschrijving.inschrijf_voorkeur_team)      # belangrijkste testresultaat
 
     def test_inschrijven_methode3_twee_dagdelen(self):
         regio_105 = NhbRegio.objects.get(pk=105)

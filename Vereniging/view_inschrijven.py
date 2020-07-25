@@ -275,6 +275,8 @@ class LedenInschrijvenView(UserPassesTestMixin, ListView):
         if len(bulk_opmerking) > 500:
             bulk_opmerking = bulk_opmerking[:500]     # moet afkappen, anders database foutmelding
 
+        udvl = comp.uiterste_datum_lid
+
         # all checked boxes are in the post request as keys, typically with value 'on'
         for key, _ in request.POST.items():
             # key = 'lid_NNNNNN_boogtype_MM' (of iets anders)
@@ -320,6 +322,7 @@ class LedenInschrijvenView(UserPassesTestMixin, ListView):
 
                 # bepaal in welke wedstrijdklasse de schutter komt
                 age = schutterboog.nhblid.bereken_wedstrijdleeftijd(deelcomp.competitie.begin_jaar + 1)
+                dvl = schutterboog.nhblid.sinds_datum
 
                 # zoek de aanvangsgemiddelden er bij, indien beschikbaar
                 ag = AG_NUL
@@ -357,9 +360,9 @@ class LedenInschrijvenView(UserPassesTestMixin, ListView):
                         break
                 # for
 
-                # kijk of de schutter met een team mee wil schieten voor deze competitie
-                if age > MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT:
-                    # is geen aspirant
+                # kijk of de schutter met een team mee wil en mag schieten voor deze competitie
+                if (age > MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT and dvl < udvl):
+                    # is geen aspirant en was op tijd lid
                     if bulk_team:
                         aanmelding.inschrijf_voorkeur_team = True
 
