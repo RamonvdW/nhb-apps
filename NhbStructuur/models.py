@@ -184,20 +184,38 @@ def validate_sinds_datum(datum):
 
 class NhbLid(models.Model):
     """ Tabel om gegevens van een lid van de NHB bij te houden """
+
+    # het unieke NHB nummer
     nhb_nr = models.PositiveIntegerField(primary_key=True)
+
+    # volledige naam
+    # let op: voornaam kan ook een afkorting zijn
     voornaam = models.CharField(max_length=100)
     achternaam = models.CharField(max_length=100)
+
+    # het e-mailadres van dit lid
     email = models.CharField(max_length=150)
+
     geboorte_datum = models.DateField(validators=[validate_geboorte_datum,])
     geslacht = models.CharField(max_length=1, choices=GESLACHT)
+
+    # officieel geregistreerde para classificatie
     para_classificatie = models.CharField(max_length=30, blank=True)
+
+    # mag gebruik maken van NHB faciliteiten?
     is_actief_lid = models.BooleanField(default=True)   # False = niet meer in import dataset
+
+    # datum van lidmaatschap NHB
     sinds_datum = models.DateField(validators=[validate_sinds_datum,])
+
+    # lid bij vereniging
     bij_vereniging = models.ForeignKey(
                                 NhbVereniging,
                                 on_delete=models.PROTECT,
                                 blank=True,  # allow access input in form
                                 null=True)   # allow NULL relation in database
+
+    # koppeling met een account (indien aangemaakt)
     account = models.ForeignKey(Account, on_delete=models.SET_NULL, blank=True, null=True)
 
     def __str__(self):

@@ -46,16 +46,19 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
 
         context['nieuwe_accounts'] = (AccountEmail
                                       .objects
+                                      .select_related('account')
                                       .all()
                                       .order_by('-account__date_joined')[:50])
 
         context['recente_activiteit'] = (AccountEmail
                                          .objects
                                          .filter(account__last_login__isnull=False)
+                                         .select_related('account')
                                          .order_by('-account__last_login')[:50])
 
         context['inlog_pogingen'] = (AccountEmail
                                      .objects
+                                     .select_related('account')
                                      .filter(account__laatste_inlog_poging__isnull=False)
                                      .filter(account__last_login__lt=F('account__laatste_inlog_poging'))
                                      .order_by('-account__laatste_inlog_poging')[:50])

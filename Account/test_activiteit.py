@@ -35,8 +35,10 @@ class TestAccountActiviteit(E2EHelpers, TestCase):
         self.account_normaal.is_BB = True
         self.account_normaal.save()
         self.e2e_login(self.account_normaal)
+
         # wissel-van-rol is niet nodig (Account weet daar niets van)
-        resp = self.client.get('/account/activiteit/')
+        with self.assertNumQueries(5):
+            resp = self.client.get('/account/activiteit/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/activiteit.dtl', 'plein/site_layout.dtl'))
@@ -45,7 +47,8 @@ class TestAccountActiviteit(E2EHelpers, TestCase):
         # admin rechten
         self.e2e_login(self.account_admin)
         # wissel-van-rol is niet nodig (Account weet daar niets van)
-        resp = self.client.get('/account/activiteit/')
+        with self.assertNumQueries(5):
+            resp = self.client.get('/account/activiteit/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/activiteit.dtl', 'plein/site_layout.dtl'))
