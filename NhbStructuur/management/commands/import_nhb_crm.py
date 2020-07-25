@@ -314,7 +314,7 @@ class Command(BaseCommand):
 
                     if rol == 'SEC':
                         # secretaris functie krijgt email uit CRM
-                        if functie.bevestigde_email != ver_email:
+                        if functie.bevestigde_email != ver_email and functie.bevestigde_email != "":
                             self.stdout.write('[INFO] Wijziging van secretaris email voor vereniging %s: "%s" --> "%s"' % (
                                                     ver_nhb_nr, functie.bevestigde_email, ver_email))
                             self._count_wijzigingen += 1
