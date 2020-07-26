@@ -191,7 +191,7 @@ class TestSchutterProfiel(E2EHelpers, TestCase):
         url_uitschrijven_25bb = self.url_uitschrijven % inschrijving.pk
 
         # haal de profiel pagina op
-        with self.assertNumQueries(24):
+        with self.assertNumQueries(26):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
