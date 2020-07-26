@@ -1,5 +1,6 @@
-#!/usr/bin/env python3.6
+#!/bin/bash
 # -*- coding: utf-8 -*-
+"exec" "python" "$0" "$@"
 
 #  Copyright (c) 2019-2020 Ramon van der Winkel.
 #  All rights reserved.

@@ -9,7 +9,7 @@ RED="\e[31m"
 RESET="\e[0m"
 REPORT_DIR="/tmp/covhtml"
 
-OMIT="--omit=data3/wsgi.py,manage.py,/usr/*/python3*/site-packages/*"
+OMIT="--omit=*/lib/python3*/site-packages/*"    # use , to separate
 # show all saml2 and djangosaml2idp source files
 #OMIT="--omit=data3/wsgi.py,manage.py,/usr/local/lib64/*,/usr/lib/*,/usr/local/lib/python3.6/site-packages/c*,/usr/local/lib/python3.6/site-packages/da*,/usr/local/lib/python3.6/site-packages/de*,/usr/local/lib/python3.6/site-packages/i*,/usr/local/lib/python3.6/site-packages/p*,/usr/local/lib/python3.6/site-packages/q*,/usr/local/lib/python3.6/site-packages/r*,/usr/local/lib/python3.6/site-packages/si*,/usr/local/lib/python3.6/site-packages/u*,/usr/local/lib/python3.6/site-packages/django/*"
 
@@ -26,7 +26,7 @@ echo "****************************** START OF TEST RUN *************************
 echo
 
 echo "[INFO] Checking application is free of fatal errors"
-python3.6 ./manage.py check || exit $?
+python3 ./manage.py check || exit $?
 
 FOCUS=""
 if [ ! -z "$ARGS" ]
@@ -40,16 +40,16 @@ then
 fi
 
 # start the simulator (for the mailer)
-python3.6 ./websim.py &
+python3 ./Mailer/test_tools/websim.py &
 
-python3.6 -m coverage erase
+python3 -m coverage erase
 
-python3.6 -m coverage run --append --branch ./manage.py test --noinput $*  # note: double quotes not supported around $*
+python3 -m coverage run --append --branch ./manage.py test --noinput $*  # note: double quotes not supported around $*
 if [ $? -eq 0 -a $# -eq 0 ]
 then
     # add coverage with debug and wiki enabled
     echo "[INFO] Performing run with debug + wiki run"
-    python3.6 -m coverage run --append --branch ./manage.py test --noinput --debug-mode --enable-wiki Plein.tests.TestPlein.test_quick Functie.test_saml2idp &>/dev/null
+    python3 -m coverage run --append --branch ./manage.py test --noinput --debug-mode --enable-wiki Plein.tests.TestPlein.test_quick Functie.test_saml2idp &>/dev/null
 fi
 
 # stop the http simulator
@@ -66,16 +66,16 @@ rm -rf "$REPORT_DIR"
 echo
 if [ -z "$FOCUS" ]
 then
-    python3.6 -m coverage report --skip-covered --fail-under=98 $OMIT
+    python3 -m coverage report --skip-covered --fail-under=98 $OMIT
     res=$?
 else
-    python3.6 -m coverage report $OMIT | grep -E "$FOCUS|----|Cover"
+    python3 -m coverage report $OMIT | grep -E "$FOCUS|----|Cover"
     res=0
 fi
 #echo "res=$res"
 echo
 
-python3.6 -m coverage html -d "$REPORT_DIR" --skip-covered $OMIT
+python3 -m coverage html -d "$REPORT_DIR" --skip-covered $OMIT
 
 if [ "$res" -gt 0 ] && [ -z "$ARGS" ]
 then
