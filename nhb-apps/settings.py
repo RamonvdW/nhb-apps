@@ -34,7 +34,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2020-07-25'
+SITE_VERSIE = '2020-07-26'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -55,8 +55,6 @@ INSTALLED_APPS = [
     'Score.apps.ScoreConfig',
     'Wedstrijden.apps.WedstrijdenConfig',
     'Handleiding.apps.HandleidingConfig',
-    'djangosaml2idp',               # single sign-on Identity Provider (IP)
-                                    #   using SAML2 (Security Assertion Markup Language)
     'django.contrib.staticfiles',   # gather static files from modules helper
     'django.contrib.sessions',      # support for database-backed sessions; needed for logged-in user
     'django.contrib.admin',         # see-all/fix-all admin pages
@@ -75,6 +73,11 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',       # security
 ]
+
+if ENABLE_WIKI:
+    # single sign-on Identity Provider (IP)
+    #   using SAML2 (Security Assertion Markup Language)
+    INSTALLED_APPS.append('djangosaml2idp')
 
 if ENABLE_DEBUG_TOOLBAR and "test" not in sys.argv:    # pragma: no cover
     INSTALLED_APPS.append('debug_toolbar')
