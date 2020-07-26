@@ -318,8 +318,8 @@ class Command(BaseCommand):
                             self.stdout.write('[INFO] Wijziging van secretaris email voor vereniging %s: "%s" --> "%s"' % (
                                                     ver_nhb_nr, functie.bevestigde_email, ver_email))
                             self._count_wijzigingen += 1
-                            functie.bevestigde_email = ver_email
-                            functie.nieuwe_email = ''       # voor de zekerheid opruimen
+                        functie.bevestigde_email = ver_email
+                        functie.nieuwe_email = ''       # voor de zekerheid opruimen
 
                     if not self.dryrun:
                         functie.save()
