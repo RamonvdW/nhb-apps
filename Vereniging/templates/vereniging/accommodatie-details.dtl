@@ -35,10 +35,10 @@
             {% endif %}
         </tr>
 
-        {% if nhbver.clusters.count %}
+        {% if nhbver.sorted_cluster_names %}
             <td>Cluster(s):</td>
             <td>
-                {% for cluster in nhbver.clusters.all %}
+                {% for cluster in nhbver.sorted_cluster_names %}
                     <span>{{ cluster }}</span><br>
                 {% endfor %}
             </td>

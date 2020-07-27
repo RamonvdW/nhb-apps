@@ -201,6 +201,13 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
             # vereniging hoort niet bij deze locatie
             raise Resolver404()
 
+        clusters = list()
+        for cluster in nhbver.clusters.order_by('letter').all():
+            clusters.append(str(cluster))
+        # for
+        if len(clusters) > 0:
+            nhbver.sorted_cluster_names = clusters
+
         return locatie, nhbver
 
     def _mag_wijzigen(self, nhbver):
