@@ -20,5 +20,8 @@ beautifulsoup4
 # django database access analysis for performance / efficient queries
 Django-debug-toolbar
 
+# django extensions
+django_extensions
+
 # end of file
 
