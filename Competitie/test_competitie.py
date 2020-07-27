@@ -249,9 +249,6 @@ class TestCompetitie(E2EHelpers, TestCase):
         self.url_klassegrenzen_vaststellen_18 = '/competitie/klassegrenzen/vaststellen/18/'
         self.url_klassegrenzen_vaststellen_25 = '/competitie/klassegrenzen/vaststellen/25/'
         self.url_klassegrenzen_tonen = '/competitie/klassegrenzen/tonen/'
-        self.url_aangemeld_alles = '/competitie/lijst-regiocompetitie/%s/alles/'  # % comp_pk
-        self.url_aangemeld_rayon = '/competitie/lijst-regiocompetitie/%s/rayon-%s/'  # % comp_pk, rayon_pk
-        self.url_aangemeld_regio = '/competitie/lijst-regiocompetitie/%s/regio-%s/'  # % comp_pk, regio_pk
 
     def _maak_many_histcomp(self):
         # maak veel histcomp records aan
@@ -294,6 +291,11 @@ class TestCompetitie(E2EHelpers, TestCase):
     def test_anon(self):
         self.e2e_logout()
 
+        resp = self.client.get(self.url_overzicht)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/overzicht.dtl', 'plein/site_layout.dtl'))
+
         resp = self.client.get(self.url_instellingen)
         self.assert_is_redirect(resp, '/plein/')
 
@@ -303,11 +305,19 @@ class TestCompetitie(E2EHelpers, TestCase):
         resp = self.client.post(self.url_aanmaken)
         self.assert_is_redirect(resp, '/plein/')
 
+        resp = self.client.get(self.url_ag_vaststellen)
+        self.assert_is_redirect(resp, '/plein/')
+
         resp = self.client.get(self.url_klassegrenzen_vaststellen_18)
         self.assert_is_redirect(resp, '/plein/')
 
         resp = self.client.get(self.url_klassegrenzen_vaststellen_25)
         self.assert_is_redirect(resp, '/plein/')
+
+        resp = self.client.get(self.url_klassegrenzen_tonen)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/klassegrenzen-tonen.dtl', 'plein/site_layout.dtl'))
 
     def test_instellingen(self):
         self.e2e_login_and_pass_otp(self.account_bb)
