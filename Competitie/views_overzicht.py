@@ -191,6 +191,7 @@ class CompetitieOverzichtView(View):
     @staticmethod
     def _get_competitie_overzicht_schutter():
         # let op! Niet alleen voor schutter, maar ook voor gebruiker/anon
+        # TODO: iets nuttigs tonen
         context = dict()
         return context, TEMPLATE_COMPETITIE_OVERZICHT
 
@@ -289,6 +290,8 @@ class LijstAangemeldRegiocompAllesView(TemplateView):
 
     template_name = TEMPLATE_COMPETITIE_AANGEMELD_REGIO
 
+    # TODO: toegang begrenzen tot <tbd> (mbv UserPassesTestMixin)
+
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
@@ -328,6 +331,8 @@ class LijstAangemeldRegiocompRayonView(TemplateView):
     """ Toon een lijst van SchutterBoog die aangemeld zijn voor de regiocompetitie """
 
     template_name = TEMPLATE_COMPETITIE_AANGEMELD_REGIO
+
+    # TODO: toegang begrenzen tot <tbd> (mbv UserPassesTestMixin)
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -374,6 +379,8 @@ class LijstAangemeldRegiocompRegioView(TemplateView):
     """ Toon een lijst van SchutterBoog die aangemeld zijn voor de regiocompetitie """
 
     template_name = TEMPLATE_COMPETITIE_AANGEMELD_REGIO
+
+    # TODO: toegang begrenzen tot <tbd> (mbv UserPassesTestMixin)
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """

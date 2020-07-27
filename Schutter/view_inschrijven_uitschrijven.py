@@ -327,6 +327,8 @@ class RegiocompetitieUitschrijvenView(View):
         if inschrijving.schutterboog.nhblid != nhblid:
             raise Resolver404()
 
+        # TODO: controleer de fase van de competitie. Na bepaalde datum niet meer uit kunnen schrijven??
+
         # schrijf de schutter uit
         inschrijving.delete()
 

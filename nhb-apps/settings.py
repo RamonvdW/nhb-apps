@@ -34,7 +34,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2020-07-26'
+SITE_VERSIE = '2020-07-27'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     'django.contrib.auth',          # authenticatie framework
     'django.contrib.contenttypes',  # permission association to models
     'django.contrib.messages',
+    #'django_extensions'
 ]
 
 
