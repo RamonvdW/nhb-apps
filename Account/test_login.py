@@ -149,6 +149,11 @@ class TestAccountLogin(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('plein/plein-gebruiker.dtl', 'plein/site_layout.dtl'))
 
     def test_logout(self):
+        # controleer wat er gebeurd indien niet ingelogd
+        resp = self.client.get('/account/logout/')
+        self.assert_is_redirect(resp, '/plein/')
+
+        # log in
         resp = self.client.post(self.url_login, {'login_naam': 'normaal', 'wachtwoord': E2EHelpers.WACHTWOORD}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, 'Uitloggen')

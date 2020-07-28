@@ -8,6 +8,7 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.contrib.auth import logout
 from django.views.generic import TemplateView
+from django.contrib.auth.mixins import UserPassesTestMixin
 from Plein.menu import menu_dynamics
 from Overig.helpers import get_safe_from_ip
 import logging
@@ -18,7 +19,9 @@ TEMPLATE_UITLOGGEN = 'account/uitloggen.dtl'
 my_logger = logging.getLogger('NHBApps.Account')
 
 
-class LogoutView(TemplateView):
+# TODO: redirect to plein if not logged in (request.user.is_authenticated)
+
+class LogoutView(UserPassesTestMixin, TemplateView):
     """
         Deze view zorgt voor het uitloggen met een POST
         Knoppen / links om uit te loggen moeten hier naartoe wijzen
@@ -28,6 +31,15 @@ class LogoutView(TemplateView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_UITLOGGEN
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user is allowed to use this view """
+        # kijk of de gebruiker ingelogd is
+        return self.request.user.is_authenticated
+
+    def handle_no_permission(self):
+        """ gebruik van deze view is niet nodig --> redirect naar het plein """
+        return HttpResponseRedirect(reverse('Plein:plein'))
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
