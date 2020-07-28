@@ -20,6 +20,8 @@
 
 <h5 id="nieuwe">Nieuwste accounts</h5>
 
+<p>Sinds {{ deze_maand|date }} zijn er {{ deze_maand_count }} nieuwe accounts aangemaakt.</p>
+
 <p>Hieronder volgende nieuwe accounts (maximaal 50)</p>
 
 <table class="white" id="table1">

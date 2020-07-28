@@ -9,8 +9,10 @@ from django.urls import reverse
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.views.generic import TemplateView
 from django.db.models import F
-from .models import AccountEmail
+from django.utils.timezone import make_aware
+from .models import Account, AccountEmail
 from Plein.menu import menu_dynamics
+import datetime
 import logging
 
 
@@ -49,6 +51,18 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
                                       .select_related('account')
                                       .all()
                                       .order_by('-account__date_joined')[:50])
+
+        nieuwste = context['nieuwe_accounts'][0].account    # kost losse database access
+        jaar = nieuwste.date_joined.year
+        maand = nieuwste.date_joined.month
+        deze_maand = make_aware(datetime.datetime(year=jaar, month=maand, day=1))
+
+        context['deze_maand_count'] = (Account
+                                       .objects
+                                       .order_by('-date_joined')
+                                       .filter(date_joined__gte=deze_maand)
+                                       .count())
+        context['deze_maand'] = deze_maand
 
         context['recente_activiteit'] = (AccountEmail
                                          .objects
