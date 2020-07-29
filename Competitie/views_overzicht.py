@@ -136,6 +136,16 @@ class CompetitieOverzichtView(View):
                 obj.url_wijzig_datums = reverse('Competitie:wijzig-datums', kwargs={'comp_pk': obj.pk})
             # for
 
+            context['planning_deelcomp'] = (DeelCompetitie
+                                            .objects
+                                            .filter(laag=LAAG_BK)
+                                            .select_related('competitie'))
+            for obj in context['planning_deelcomp']:
+                obj.titel = 'Planning %sm' % obj.competitie.afstand
+                obj.tekst = 'Landelijke planning voor de %s.' % obj.competitie.beschrijving
+                obj.url = reverse('Competitie:bond-planning', kwargs={'deelcomp_pk': obj.pk})
+            # for
+
         if rol_nu == Rollen.ROL_RCL:
             context['planning_deelcomp'] = (DeelCompetitie
                                             .objects
