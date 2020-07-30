@@ -107,13 +107,13 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         comp = Competitie.objects.all()[0]
 
         resp = self.client.get(self.url_aangemeld_alles % comp.pk)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found/allowed
+        self.assert_is_redirect(resp, '/plein/')
 
         resp = self.client.get(self.url_aangemeld_rayon % (comp.pk, self.rayon_2.pk))
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found/allowed
+        self.assert_is_redirect(resp, '/plein/')
 
         resp = self.client.get(self.url_aangemeld_regio % (comp.pk, self.regio_101.pk))
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found/allowed
+        self.assert_is_redirect(resp, '/plein/')
 
     def test_overzicht_it(self):
         self.e2e_login_and_pass_otp(self.account_admin)
@@ -135,6 +135,28 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('competitie/overzicht-beheerder.dtl', 'plein/site_layout.dtl'))
         self.assertNotContains(resp, '/competitie/beheer-favorieten/')
 
+        # landelijk
+        comp_pk = Competitie.objects.all()[0].pk
+        url = self.url_aangemeld_alles % comp_pk
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/lijst-aangemeld-regio.dtl', 'plein/site_layout.dtl'))
+
+        # rayon 2
+        url = self.url_aangemeld_rayon % (comp_pk, self.rayon_2.pk)
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/lijst-aangemeld-regio.dtl', 'plein/site_layout.dtl'))
+
+        # regio 101
+        url = self.url_aangemeld_regio % (comp_pk, self.regio_101.pk)
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/lijst-aangemeld-regio.dtl', 'plein/site_layout.dtl'))
+
     def test_overzicht_bko(self):
         self.e2e_login_and_pass_otp(self.account_bko)
         self.e2e_wissel_naar_functie(self.functie_bko)
@@ -144,6 +166,28 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/overzicht-beheerder.dtl', 'plein/site_layout.dtl'))
         self.assertNotContains(resp, '/competitie/beheer-favorieten/')
+
+        # landelijk
+        comp_pk = Competitie.objects.all()[0].pk
+        url = self.url_aangemeld_alles % comp_pk
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/lijst-aangemeld-regio.dtl', 'plein/site_layout.dtl'))
+
+        # rayon 2
+        url = self.url_aangemeld_rayon % (comp_pk, self.rayon_2.pk)
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/lijst-aangemeld-regio.dtl', 'plein/site_layout.dtl'))
+
+        # regio 101
+        url = self.url_aangemeld_regio % (comp_pk, self.regio_101.pk)
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/lijst-aangemeld-regio.dtl', 'plein/site_layout.dtl'))
 
     def test_overzicht_rko(self):
         self.e2e_login_and_pass_otp(self.account_rko)
@@ -155,6 +199,28 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('competitie/overzicht-beheerder.dtl', 'plein/site_layout.dtl'))
         self.assertNotContains(resp, '/competitie/beheer-favorieten/')
 
+        # landelijk
+        comp_pk = Competitie.objects.all()[0].pk
+        url = self.url_aangemeld_alles % comp_pk
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/lijst-aangemeld-regio.dtl', 'plein/site_layout.dtl'))
+
+        # rayon 2
+        url = self.url_aangemeld_rayon % (comp_pk, self.rayon_2.pk)
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/lijst-aangemeld-regio.dtl', 'plein/site_layout.dtl'))
+
+        # regio 101
+        url = self.url_aangemeld_regio % (comp_pk, self.regio_101.pk)
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/lijst-aangemeld-regio.dtl', 'plein/site_layout.dtl'))
+
     def test_overzicht_rcl(self):
         self.e2e_login_and_pass_otp(self.account_rcl)
         self.e2e_wissel_naar_functie(self.functie_rcl)
@@ -165,6 +231,28 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('competitie/overzicht-beheerder.dtl', 'plein/site_layout.dtl'))
         self.assertNotContains(resp, '/competitie/beheer-favorieten/')
 
+        # landelijk
+        comp_pk = Competitie.objects.all()[0].pk
+        url = self.url_aangemeld_alles % comp_pk
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/lijst-aangemeld-regio.dtl', 'plein/site_layout.dtl'))
+
+        # rayon 2
+        url = self.url_aangemeld_rayon % (comp_pk, self.rayon_2.pk)
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/lijst-aangemeld-regio.dtl', 'plein/site_layout.dtl'))
+
+        # regio 101
+        url = self.url_aangemeld_regio % (comp_pk, self.regio_101.pk)
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/lijst-aangemeld-regio.dtl', 'plein/site_layout.dtl'))
+
     def test_overzicht_hwl(self):
         self.e2e_login_and_pass_otp(self.account_bb)        # geen account_hwl
         self.e2e_wissel_naar_functie(self.functie_hwl)
@@ -174,6 +262,30 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/overzicht-hwl.dtl', 'plein/site_layout.dtl'))
         self.assertNotContains(resp, '/competitie/beheer-favorieten/')
+
+        # landelijk
+        comp_pk = Competitie.objects.all()[0].pk
+        url = self.url_aangemeld_alles % comp_pk
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/lijst-aangemeld-regio.dtl', 'plein/site_layout.dtl'))
+
+        # rayon 2
+        url = self.url_aangemeld_rayon % (comp_pk, self.rayon_2.pk)
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/lijst-aangemeld-regio.dtl', 'plein/site_layout.dtl'))
+
+        # regio 101
+        url = self.url_aangemeld_regio % (comp_pk, self.regio_101.pk)
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/lijst-aangemeld-regio.dtl', 'plein/site_layout.dtl'))
+
+    # TODO: add WL
 
     def test_wijzig_datums_not_bb(self):
         comp = Competitie.objects.all()[0]
@@ -235,33 +347,12 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         resp = self.client.post(url)
         self.assertEqual(resp.status_code, 404)     # 404 = Not found
 
-    def test_aangemeld(self):
-        # schutters aangemeld voor de regiocompetitie
-
-        # creëer een competitie met deelcompetities
-        competitie_aanmaken(jaar=2019)
-        comp_pk = Competitie.objects.all()[0].pk
+    def test_bad(self):
+        self.e2e_login_and_pass_otp(self.account_bb)        # geen account_hwl
+        self.e2e_wissel_naar_functie(self.functie_hwl)
 
         # landelijk
-        url = self.url_aangemeld_alles % comp_pk
-        resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/lijst-aangemeld-regio.dtl', 'plein/site_layout.dtl'))
-
-        # rayon 2
-        url = self.url_aangemeld_rayon % (comp_pk, self.rayon_2.pk)
-        resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/lijst-aangemeld-regio.dtl', 'plein/site_layout.dtl'))
-
-        # regio 101
-        url = self.url_aangemeld_regio % (comp_pk, self.regio_101.pk)
-        resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/lijst-aangemeld-regio.dtl', 'plein/site_layout.dtl'))
+        comp_pk = Competitie.objects.all()[0].pk
 
         # bad keys
         url = self.url_aangemeld_alles % 999999
