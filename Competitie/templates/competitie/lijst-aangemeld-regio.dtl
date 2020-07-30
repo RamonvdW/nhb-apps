@@ -17,7 +17,7 @@
 
 <p>Filter mogelijkheden:</p>
 
-<div class="white">
+<div class="white shrink-wrap-5">
 
     {% if zoom_alles_url %}
         <a class="margin-5 btn-nhb-blauw btn-small" href="{{ zoom_alles_url }}">Alles</a>
