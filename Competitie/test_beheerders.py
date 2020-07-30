@@ -104,6 +104,17 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.assertNotContains(resp, '/competitie/beheer-favorieten/')
         self.e2e_assert_other_http_commands_not_supported(self.url_overzicht)
 
+        comp = Competitie.objects.all()[0]
+
+        resp = self.client.get(self.url_aangemeld_alles % comp.pk)
+        self.assertEqual(resp.status_code, 404)     # 404 = Not found/allowed
+
+        resp = self.client.get(self.url_aangemeld_rayon % (comp.pk, self.rayon_2.pk))
+        self.assertEqual(resp.status_code, 404)     # 404 = Not found/allowed
+
+        resp = self.client.get(self.url_aangemeld_regio % (comp.pk, self.regio_101.pk))
+        self.assertEqual(resp.status_code, 404)     # 404 = Not found/allowed
+
     def test_overzicht_it(self):
         self.e2e_login_and_pass_otp(self.account_admin)
         self.e2e_wisselnaarrol_it()

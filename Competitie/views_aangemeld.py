@@ -6,9 +6,11 @@
 
 from django.urls import Resolver404, reverse
 from django.views.generic import TemplateView
-from django.utils import timezone
+from django.contrib.auth.mixins import UserPassesTestMixin
+from django.http import HttpResponseRedirect
 from Plein.menu import menu_dynamics
 from NhbStructuur.models import NhbRayon, NhbRegio
+from Functie.rol import Rollen, rol_get_huidige
 from .models import LAAG_REGIO, Competitie, RegioCompetitieSchutterBoog
 
 
@@ -51,13 +53,20 @@ def maak_regiocomp_zoom_knoppen(context, comp_pk, rayon=None, regio=None):
     # for
 
 
-class LijstAangemeldRegiocompAllesView(TemplateView):
+class LijstAangemeldRegiocompAllesView(UserPassesTestMixin, TemplateView):
 
     """ Toon een lijst van SchutterBoog die aangemeld zijn voor de regiocompetitie """
 
     template_name = TEMPLATE_COMPETITIE_AANGEMELD_REGIO
 
-    # TODO: toegang begrenzen tot <tbd> (mbv UserPassesTestMixin)
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        rol_nu = rol_get_huidige(self.request)
+        return rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_WL)
+
+    def handle_no_permission(self):
+        """ gebruiker heeft geen toegang --> redirect naar het plein """
+        return HttpResponseRedirect(reverse('Plein:plein'))
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -93,13 +102,20 @@ class LijstAangemeldRegiocompAllesView(TemplateView):
         return context
 
 
-class LijstAangemeldRegiocompRayonView(TemplateView):
+class LijstAangemeldRegiocompRayonView(UserPassesTestMixin, TemplateView):
 
     """ Toon een lijst van SchutterBoog die aangemeld zijn voor de regiocompetitie """
 
     template_name = TEMPLATE_COMPETITIE_AANGEMELD_REGIO
 
-    # TODO: toegang begrenzen tot <tbd> (mbv UserPassesTestMixin)
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        rol_nu = rol_get_huidige(self.request)
+        return rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_WL)
+
+    def handle_no_permission(self):
+        """ gebruiker heeft geen toegang --> redirect naar het plein """
+        return HttpResponseRedirect(reverse('Plein:plein'))
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -141,13 +157,20 @@ class LijstAangemeldRegiocompRayonView(TemplateView):
         return context
 
 
-class LijstAangemeldRegiocompRegioView(TemplateView):
+class LijstAangemeldRegiocompRegioView(UserPassesTestMixin, TemplateView):
 
     """ Toon een lijst van SchutterBoog die aangemeld zijn voor de regiocompetitie """
 
     template_name = TEMPLATE_COMPETITIE_AANGEMELD_REGIO
 
-    # TODO: toegang begrenzen tot <tbd> (mbv UserPassesTestMixin)
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        rol_nu = rol_get_huidige(self.request)
+        return rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_WL)
+
+    def handle_no_permission(self):
+        """ gebruiker heeft geen toegang --> redirect naar het plein """
+        return HttpResponseRedirect(reverse('Plein:plein'))
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
