@@ -5,7 +5,13 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from . import views_bb, views_planning, views_overzicht
+from . import (views_aangemeld,
+               views_bb,
+               views_info,
+               views_klassegrenzen,
+               views_overzicht,
+               views_planning,
+               views_tussenstand)
 
 app_name = 'Competitie'
 
@@ -15,29 +21,28 @@ urlpatterns = [
          views_overzicht.CompetitieOverzichtView.as_view(),
          name='overzicht'),
 
+
     path('klassegrenzen/tonen/',
-         views_overzicht.KlassegrenzenTonenView.as_view(),
+         views_klassegrenzen.KlassegrenzenTonenView.as_view(),
          name='klassegrenzen-tonen'),
 
+
     path('lijst-regiocompetitie/<comp_pk>/alles/',
-         views_overzicht.LijstAangemeldRegiocompAllesView.as_view(),
+         views_aangemeld.LijstAangemeldRegiocompAllesView.as_view(),
          name='lijst-regiocomp-alles'),
 
     path('lijst-regiocompetitie/<comp_pk>/rayon-<rayon_pk>/',
-         views_overzicht.LijstAangemeldRegiocompRayonView.as_view(),
+         views_aangemeld.LijstAangemeldRegiocompRayonView.as_view(),
          name='lijst-regiocomp-rayon'),
 
     path('lijst-regiocompetitie/<comp_pk>/regio-<regio_pk>/',
-         views_overzicht.LijstAangemeldRegiocompRegioView.as_view(),
+         views_aangemeld.LijstAangemeldRegiocompRegioView.as_view(),
          name='lijst-regiocomp-regio'),
 
-    path('info/',
-         views_overzicht.InfoCompetitieView.as_view(),
-         name='info-competitie'),
 
-    path('tussenstand/',
-         views_overzicht.TussenstandView.as_view(),
-         name='tussenstand'),
+    path('info/',
+         views_info.InfoCompetitieView.as_view(),
+         name='info-competitie'),
 
 
     path('instellingen-volgende-competitie/',
@@ -87,7 +92,32 @@ urlpatterns = [
 
     path('planning/wedstrijd/verwijder/<wedstrijd_pk>/',
          views_planning.VerwijderWedstrijdView.as_view(),
-         name='verwijder-wedstrijd')
+         name='verwijder-wedstrijd'),
+
+
+    path('tussenstand/',
+         views_tussenstand.TussenstandView.as_view(),
+         name='tussenstand'),
+
+    path('tussenstand/<afstand>-<comp_boog>/regio/',
+         views_tussenstand.TussenstandRegioView.as_view(),
+         name='tussenstand-regio'),
+
+    path('tussenstand/<afstand>-<comp_boog>/regio/<regio_nr>/',
+         views_tussenstand.TussenstandRegioView.as_view(),
+         name='tussenstand-regio-n'),
+
+    path('tussenstand/<afstand>-<comp_boog>/rayon/',
+         views_tussenstand.TussenstandRayonView.as_view(),
+         name='tussenstand-rayon'),
+
+    path('tussenstand/<afstand>-<comp_boog>/rayon/<rayon_nr>/',
+         views_tussenstand.TussenstandRayonView.as_view(),
+         name='tussenstand-rayon-n'),
+
+    path('tussenstand/<afstand>-<comp_boog>/bond/',
+         views_tussenstand.TussenstandBondView.as_view(),
+         name='tussenstand-bond'),
 ]
 
 # end of file

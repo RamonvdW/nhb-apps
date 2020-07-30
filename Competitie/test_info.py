@@ -5,9 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from django.utils import timezone
 from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
-from Competitie.models import Competitie, competitie_aanmaken
 from Overig.e2ehelpers import E2EHelpers
 import datetime
 
@@ -83,38 +81,5 @@ class TestCompetitieInfo(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/info-competitie.dtl', 'plein/site_layout.dtl'))
-
-    def test_tussenstand(self):
-        # tussenstand zonder competitie actief
-        resp = self.client.get(self.url_tussenstand)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-
-        # creëer een competitie met deelcompetities
-        now = timezone.now()
-        competitie_aanmaken(jaar=now.year)
-        way_before = datetime.date(year=2018, month=1, day=1)   # must be before timezone.now()
-
-        # tussenstand met competitie in prep fase (<B)
-        resp = self.client.get(self.url_tussenstand)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-
-        # tussenstand met competitie in prep fase (B+)
-        comp = Competitie.objects.all()[0]
-        comp.begin_aanmeldingen = way_before   # fase B
-        comp.einde_aanmeldingen = way_before   # fase C
-        comp.save()
-        resp = self.client.get(self.url_tussenstand)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-
-        # tussenstand met competitie in scorende fase (E+)
-        comp.einde_teamvorming = way_before    # fase D
-        comp.eerste_wedstrijd = way_before     # fase E
-        comp.save()
-        resp = self.client.get(self.url_tussenstand)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
 
 # end of file

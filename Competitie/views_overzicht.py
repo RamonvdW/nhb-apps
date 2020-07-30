@@ -9,22 +9,17 @@ from django.urls import Resolver404, reverse
 from django.views.generic import TemplateView, ListView, View
 from django.utils import timezone
 from Plein.menu import menu_dynamics
-from Functie.rol import Rollen, rol_get_huidige_functie, rol_get_beschrijving, rol_get_huidige
-from BasisTypen.models import IndivWedstrijdklasse
+from Functie.rol import Rollen, rol_get_huidige_functie, rol_get_beschrijving
 from NhbStructuur.models import NhbRayon, NhbRegio
 from Score.models import zoek_meest_recente_automatisch_vastgestelde_ag
-from .models import (AG_NUL, LAAG_REGIO, LAAG_RK, LAAG_BK,
-                     Competitie, DeelCompetitie, CompetitieKlasse, RegioCompetitieSchutterBoog)
-import datetime
+from .models import (LAAG_REGIO, LAAG_RK, LAAG_BK,
+                     Competitie, DeelCompetitie, RegioCompetitieSchutterBoog)
 
 
 TEMPLATE_COMPETITIE_OVERZICHT = 'competitie/overzicht.dtl'
 TEMPLATE_COMPETITIE_OVERZICHT_HWL = 'competitie/overzicht-hwl.dtl'
 TEMPLATE_COMPETITIE_OVERZICHT_BEHEERDER = 'competitie/overzicht-beheerder.dtl'
-TEMPLATE_COMPETITIE_KLASSEGRENZEN_TONEN = 'competitie/klassegrenzen-tonen.dtl'
 TEMPLATE_COMPETITIE_AANGEMELD_REGIO = 'competitie/lijst-aangemeld-regio.dtl'
-TEMPLATE_COMPETITIE_INFO_COMPETITIE = 'competitie/info-competitie.dtl'
-TEMPLATE_COMPETITIE_TUSSENSTAND = 'competitie/tussenstand.dtl'
 
 JA_NEE = {False: 'Nee', True: 'Ja'}
 
@@ -221,45 +216,6 @@ class CompetitieOverzichtView(View):
         return render(request, template, context)
 
 
-class KlassegrenzenTonenView(ListView):
-
-    """ deze view laat de vastgestelde aanvangsgemiddelden voor de volgende competitie zien """
-
-    # class variables shared by all instances
-    template_name = TEMPLATE_COMPETITIE_KLASSEGRENZEN_TONEN
-
-    def get_queryset(self):
-        """ called by the template system to get the queryset or list of objects for the template """
-
-        objs = list()
-        if CompetitieKlasse.objects.filter(team=None).count() == 0:
-            return objs
-
-        indiv_dict = dict()     # [indiv.pk] = IndivWedstrijdklasse
-        for obj in IndivWedstrijdklasse.objects.order_by('volgorde'):
-            indiv_dict[obj.pk] = obj
-            objs.append(obj)
-        # for
-
-        for obj in CompetitieKlasse.objects.filter(team=None).select_related('competitie', 'indiv'):
-            indiv = indiv_dict[obj.indiv.pk]
-            min_ag = obj.min_ag
-            if min_ag != AG_NUL:
-                if obj.competitie.afstand == '18':
-                    indiv.min_ag18 = obj.min_ag
-                else:
-                    indiv.min_ag25 = obj.min_ag
-        # for
-
-        return objs
-
-    def get_context_data(self, **kwargs):
-        """ called by the template system to get the context data for the template """
-        context = super().get_context_data(**kwargs)
-        menu_dynamics(self.request, context, actief='competitie')
-        return context
-
-
 def maak_regiocomp_zoom_knoppen(context, comp_pk, rayon=None, regio=None):
 
     """ Maak de zoom knoppen structuur voor de regiocompetitie deelnemers lijst """
@@ -431,70 +387,6 @@ class LijstAangemeldRegiocompRegioView(TemplateView):
         maak_regiocomp_zoom_knoppen(context, comp_pk, regio=regio)
 
         menu_dynamics(self.request, context, actief='competitie')
-        return context
-
-
-class InfoCompetitieView(TemplateView):
-
-    """ Django class-based view voor de Competitie Info """
-
-    # class variables shared by all instances
-    template_name = TEMPLATE_COMPETITIE_INFO_COMPETITIE
-
-    def get_context_data(self, **kwargs):
-        """ called by the template system to get the context data for the template """
-        context = super().get_context_data(**kwargs)
-
-        context['regios'] = (NhbRegio
-                             .objects
-                             .filter(is_administratief=False)
-                             .select_related('rayon')
-                             .order_by('regio_nr'))
-
-        account = self.request.user
-        if account and account.is_authenticated:
-            if account.nhblid_set.count() > 0:
-                nhblid = account.nhblid_set.all()[0]
-                nhb_ver = nhblid.bij_vereniging
-                if nhb_ver:
-                    context['mijn_vereniging'] = nhb_ver
-                    for obj in context['regios']:
-                        if obj == nhb_ver.regio:
-                            obj.mijn_regio = True
-                    # for
-
-        context['klassen_count'] = IndivWedstrijdklasse.objects.exclude(is_onbekend=True).count()
-
-        menu_dynamics(self.request, context, actief='competitie')
-        return context
-
-
-class TussenstandView(TemplateView):
-
-    """ Django class-based view voor de de tussenstand van de competitie """
-
-    # class variables shared by all instances
-    template_name = TEMPLATE_COMPETITIE_TUSSENSTAND
-
-    def get_context_data(self, **kwargs):
-        """ called by the template system to get the context data for the template """
-        context = super().get_context_data(**kwargs)
-
-        context['toon_details'] = False
-        context['toon_histcomp'] = False
-
-        comps = Competitie.objects.filter(is_afgesloten=False).order_by('begin_jaar', 'afstand')
-        context['competities'] = comps
-        for comp in comps:
-            comp.zet_fase()
-            if comp.fase >= 'B':        # inschrijving is open
-                context['toon_details'] = True
-
-            if comp.fase < 'E':         # competitie is begonnen
-                context['toon_histcomp'] = True
-        # for
-
-        menu_dynamics(self.request, context, actief='histcomp')
         return context
 
 
