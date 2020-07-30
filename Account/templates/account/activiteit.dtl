@@ -13,6 +13,8 @@
 
 <h4>Account activiteit</h4>
 
+<p>Er {{ totaal }} accounts aangemaakt op deze server.</p>
+
 <p>Focus:</p>
 <p><a class="btn-nhb-blauw" href="#nieuwe">Nieuwe accounts</a></p>
 <p><a class="btn-nhb-blauw" href="#recent">Recente activiteit</a></p>

@@ -64,6 +64,8 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
                                        .count())
         context['deze_maand'] = deze_maand
 
+        context['totaal'] = Account.objects.count()
+
         context['recente_activiteit'] = (AccountEmail
                                          .objects
                                          .filter(account__last_login__isnull=False)
