@@ -6,7 +6,8 @@
 
 from django.views.generic import ListView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from django.db.models import Q
+from django.db.models import Q, Value
+from django.db.models.functions import Concat
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from Functie.rol import Rollen, rol_get_huidige
@@ -88,6 +89,24 @@ class LogboekBasisView(UserPassesTestMixin, ListView):
 
         return links
 
+    def get_queryset(self):
+        # haal de queryset met focus op en filter deze op een eventuele zoekterm
+        qset = self.get_focused_queryset()
+
+        zoekterm = self.request.GET.get('zoekterm', '')
+        if zoekterm:
+            qset = (qset
+                    .annotate(hele_naam=Concat('actie_door_account__first_name',
+                                               Value(' '),
+                                               'actie_door_account__last_name'))
+                    .filter(Q(gebruikte_functie__icontains=zoekterm) |
+                            Q(actie_door_account__hele_naam__icontains=zoekterm) |
+                            Q(activiteit__icontains=zoekterm)))
+        return qset
+
+    def get_focused_queryset(self):
+        raise NotImplementedError()     # must be implemented by sub-class
+
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
@@ -103,6 +122,33 @@ class LogboekBasisView(UserPassesTestMixin, ListView):
             obj.door = obj.bepaal_door()
         # for
 
+        context['url_rest'] = reverse('Logboek:rest')
+        context['url_rollen'] = reverse('Logboek:rollen')
+        context['url_uitrol'] = reverse('Logboek:uitrol')
+        context['url_records'] = reverse('Logboek:records')
+        context['url_accounts'] = reverse('Logboek:accounts')
+        context['url_clusters'] = reverse('Logboek:clusters')
+        context['url_competitie'] = reverse('Logboek:competitie')
+        context['url_nhbstructuur'] = reverse('Logboek:nhbstructuur')
+        context['url_accommodaties'] = reverse('Logboek:accommodaties')
+
+        # extra knop tonen om zoekterm te wissen
+        zoekterm = self.request.GET.get('zoekterm', '')
+        if zoekterm:
+            context['zoekterm'] = zoekterm
+            context['unfiltered_url'] = reverse('Logboek:%s' % self.filter)
+
+            zoekterm = "?zoekterm=%s" % zoekterm
+            context['url_rest'] += zoekterm
+            context['url_rollen'] += zoekterm
+            context['url_uitrol'] += zoekterm
+            context['url_records'] += zoekterm
+            context['url_accounts'] += zoekterm
+            context['url_clusters'] += zoekterm
+            context['url_competitie'] += zoekterm
+            context['url_nhbstructuur'] += zoekterm
+            context['url_accommodaties'] += zoekterm
+
         menu_dynamics(self.request, context, actief='logboek')
         return context
 
@@ -117,13 +163,15 @@ class LogboekRestView(LogboekBasisView):
         super().__init__(**kwargs)
         self.base_url = reverse('Logboek:alles')
 
-    def get_queryset(self):
+    def get_focused_queryset(self):
         """ retourneer de data voor de template view """
         return (LogboekRegel
                 .objects
+                .select_related('actie_door_account')
                 .exclude(Q(gebruikte_functie='Records') |           # Records
                          Q(gebruikte_functie='maak_beheerder') |    # Accounts
                          Q(gebruikte_functie='Inloggen') |
+                         Q(gebruikte_functie='Inlog geblokkeerd') |
                          Q(gebruikte_functie='OTP controle') |
                          Q(gebruikte_functie='Bevestig e-mail') |
                          Q(gebruikte_functie='Registreer met NHB nummer') |
@@ -146,7 +194,7 @@ class LogboekRecordsView(LogboekBasisView):
         super().__init__(**kwargs)
         self._base_url = reverse('Logboek:records')
 
-    def get_queryset(self):
+    def get_focused_queryset(self):
         """ retourneer de data voor de template view """
         return (LogboekRegel
                 .objects
@@ -164,16 +212,17 @@ class LogboekAccountsView(LogboekBasisView):
         super().__init__(**kwargs)
         self.base_url = reverse('Logboek:accounts')
 
-    def get_queryset(self):
+    def get_focused_queryset(self):
         """ retourneer de data voor de template view """
         return (LogboekRegel
                 .objects
+                .select_related('actie_door_account')
                 .filter(Q(gebruikte_functie='maak_beheerder') |
                         Q(gebruikte_functie='Inloggen') |
+                        Q(gebruikte_functie='Inlog geblokkeerd') |
                         Q(gebruikte_functie='OTP controle') |
                         Q(gebruikte_functie='Bevestig e-mail') |
                         Q(gebruikte_functie='Registreer met NHB nummer'))
-                .select_related('actie_door_account')
                 .order_by('-toegevoegd_op'))
 
 
@@ -187,12 +236,12 @@ class LogboekRollenView(LogboekBasisView):
         super().__init__(**kwargs)
         self.base_url = reverse('Logboek:rollen')
 
-    def get_queryset(self):
+    def get_focused_queryset(self):
         """ retourneer de data voor de template view """
         return (LogboekRegel
                 .objects
-                .filter(gebruikte_functie='Rollen')
                 .select_related('actie_door_account')
+                .filter(gebruikte_functie='Rollen')
                 .order_by('-toegevoegd_op'))
 
 
@@ -206,12 +255,12 @@ class LogboekNhbStructuurView(LogboekBasisView):
         super().__init__(**kwargs)
         self.base_url = reverse('Logboek:nhbstructuur')
 
-    def get_queryset(self):
+    def get_focused_queryset(self):
         """ retourneer de data voor de template view """
         return (LogboekRegel
                 .objects
-                .filter(gebruikte_functie='NhbStructuur')
                 .select_related('actie_door_account')
+                .filter(gebruikte_functie='NhbStructuur')
                 .order_by('-toegevoegd_op'))
 
 
@@ -225,12 +274,12 @@ class LogboekCompetitieView(LogboekBasisView):
         super().__init__(**kwargs)
         self.base_url = reverse('Logboek:competitie')
 
-    def get_queryset(self):
+    def get_focused_queryset(self):
         """ retourneer de data voor de template view """
         return (LogboekRegel
                 .objects
-                .filter(gebruikte_functie='Competitie')
                 .select_related('actie_door_account')
+                .filter(gebruikte_functie='Competitie')
                 .order_by('-toegevoegd_op'))
 
 
@@ -244,12 +293,12 @@ class LogboekAccommodatiesView(LogboekBasisView):
         super().__init__(**kwargs)
         self.base_url = reverse('Logboek:accommodaties')
 
-    def get_queryset(self):
+    def get_focused_queryset(self):
         """ retourneer de data voor de template view """
         return (LogboekRegel
                 .objects
-                .filter(gebruikte_functie='Accommodaties')
                 .select_related('actie_door_account')
+                .filter(gebruikte_functie='Accommodaties')
                 .order_by('-toegevoegd_op'))
 
 
@@ -263,12 +312,12 @@ class LogboekClustersView(LogboekBasisView):
         super().__init__(**kwargs)
         self.base_url = reverse('Logboek:clusters')
 
-    def get_queryset(self):
+    def get_focused_queryset(self):
         """ retourneer de data voor de template view """
         return (LogboekRegel
                 .objects
-                .filter(gebruikte_functie='Clusters')
                 .select_related('actie_door_account')
+                .filter(gebruikte_functie='Clusters')
                 .order_by('-toegevoegd_op'))
 
 
@@ -282,10 +331,11 @@ class LogboekUitrolView(LogboekBasisView):
         super().__init__(**kwargs)
         self.base_url = reverse('Logboek:clusters')
 
-    def get_queryset(self):
+    def get_focused_queryset(self):
         """ retourneer de data voor de template view """
         return (LogboekRegel
                 .objects
+                .select_related('actie_door_account')
                 .filter(gebruikte_functie='Uitrol')
                 .order_by('-toegevoegd_op'))
 
