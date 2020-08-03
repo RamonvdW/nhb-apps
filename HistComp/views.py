@@ -315,15 +315,16 @@ class InterlandView(UserPassesTestMixin, TemplateView):
                            .filter(comp_type='25', seizoen=seizoen, is_team=False)):
                 context['klassen'].append(klasse)
 
-                klasse.url_download = reverse('HistComp:interland-als-bestand', kwargs={'klasse_pk': klasse.pk})
+                klasse.url_download = reverse('HistComp:interland-als-bestand',
+                                              kwargs={'klasse_pk': klasse.pk})
 
                 # zoek alle schutters erbij met minimaal 5 scores
                 klasse.schutters = list()
 
                 for schutter in (HistCompetitieIndividueel
-                            .objects
-                            .filter(histcompetitie=klasse, gemiddelde__gt=Decimal('0.000'))
-                            .order_by('-gemiddelde')):
+                                 .objects
+                                 .filter(histcompetitie=klasse, gemiddelde__gt=Decimal('0.000'))
+                                 .order_by('-gemiddelde')):
 
                     if schutter.tel_aantal_scores() >= 5:
 
