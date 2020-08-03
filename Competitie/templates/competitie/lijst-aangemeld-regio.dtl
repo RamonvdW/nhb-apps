@@ -9,7 +9,7 @@
 {% block title %}Aanmeldingen{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="lijst-aangemeld-regio" %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-lijst-aangemeld-regio" %}
 
 <h4>Aanmeldingen regiocompetitie</h4>
 
@@ -66,6 +66,14 @@
 <p>Schutters die <b>{{ inhoud }}</b> ingeschreven zijn.</p>
 
 <p>Aantal: {{ object_list.count }}</p>
+
+{% if show_dagdeel_telling %}
+    <p>&nbsp;</p>
+    <p>
+        <a class="btn-nhb-blauw" href="{{ url_behoefte }}">
+            <i class="material-icons-round left">shopping_cart</i>Benodigde dagdelen</a>
+    </p>
+{% endif %}
 
 
 {% if object_list.count %}

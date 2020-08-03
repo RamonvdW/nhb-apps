@@ -40,6 +40,15 @@ urlpatterns = [
          name='lijst-regiocomp-regio'),
 
 
+    path('lijst-regiocompetitie/<comp_pk>/regio-<regio_pk>/dagdeel-behoefte/',
+         views_aangemeld.Inschrijfmethode3BehoefteView.as_view(),
+         name='inschrijfmethode3-behoefte'),
+
+    path('lijst-regiocompetitie/<comp_pk>/regio-<regio_pk>/dagdeel-behoefte-als-bestand/',
+         views_aangemeld.Inschrijfmethode3BehoefteAlsBestandView.as_view(),
+         name='inschrijfmethode3-behoefte-als-bestand'),
+
+
     path('info/',
          views_info.InfoCompetitieView.as_view(),
          name='info-competitie'),
