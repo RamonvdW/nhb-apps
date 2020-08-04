@@ -360,8 +360,12 @@ class LedenInschrijvenView(UserPassesTestMixin, ListView):
                         break
                 # for
 
+                if not done:
+                    # geen klasse kunnen vinden
+                    raise Resolver404()
+
                 # kijk of de schutter met een team mee wil en mag schieten voor deze competitie
-                if (age > MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT and dvl < udvl):
+                if age > MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT and dvl < udvl:
                     # is geen aspirant en was op tijd lid
                     if bulk_team:
                         aanmelding.inschrijf_voorkeur_team = True

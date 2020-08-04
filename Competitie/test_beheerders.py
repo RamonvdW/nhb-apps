@@ -5,10 +5,13 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from Functie.models import maak_functie
+from BasisTypen.models import BoogType
+from Functie.models import maak_functie, Functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
 from Overig.e2ehelpers import E2EHelpers
-from .models import Competitie, DeelCompetitie, competitie_aanmaken
+from Competitie.models import RegioCompetitieSchutterBoog
+from .models import (Competitie, DeelCompetitie, competitie_aanmaken,
+                     INSCHRIJF_METHODE_3, DAGDEEL_AFKORTINGEN)
 import datetime
 
 
@@ -43,6 +46,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
 
         self._next_nhbnr = 100001
 
+        self.rayon_1 = NhbRayon.objects.get(rayon_nr=1)
         self.rayon_2 = NhbRayon.objects.get(rayon_nr=2)
         self.regio_101 = NhbRegio.objects.get(regio_nr=101)
 
@@ -89,12 +93,89 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         ver.regio = self.regio_101
         # secretaris kan nog niet ingevuld worden
         ver.save()
+        self._ver2 = ver
+
+        # maak HWL functie aan voor deze vereniging
+        hwl = maak_functie("HWL Vereniging %s" % ver.nhb_nr, "HWL")
+        hwl.nhb_ver = ver
+        hwl.save()
 
         self.url_overzicht = '/competitie/'
         self.url_wijzigdatums = '/competitie/wijzig-datums/%s/'
         self.url_aangemeld_alles = '/competitie/lijst-regiocompetitie/%s/alles/'  # % comp_pk
         self.url_aangemeld_rayon = '/competitie/lijst-regiocompetitie/%s/rayon-%s/'  # % comp_pk, rayon_pk
         self.url_aangemeld_regio = '/competitie/lijst-regiocompetitie/%s/regio-%s/'  # % comp_pk, regio_pk
+        self.url_behoefte = '/competitie/lijst-regiocompetitie/%s/regio-%s/dagdeel-behoefte/'  # comp_pk, regio_pk
+        self.url_behoefte_bestand = '/competitie/lijst-regiocompetitie/%s/regio-%s/dagdeel-behoefte-als-bestand/'  # comp_pk, regio_pk
+
+    def _doe_inschrijven(self, comp):
+        # meld een bak leden aan voor de competitie
+
+        url_inschrijven = '/vereniging/leden-inschrijven/competitie/%s/' % comp.pk
+
+        self.e2e_wisselnaarrol_bb()
+
+        # klassegrenzen vaststellen
+        url_klassegrenzen_18 = '/competitie/klassegrenzen/vaststellen/18/'
+        url_klassegrenzen_25 = '/competitie/klassegrenzen/vaststellen/25/'
+        resp = self.client.post(url_klassegrenzen_18)
+        self.assertEqual(resp.status_code, 302)     # 302 = Redirect = succes
+        resp = self.client.post(url_klassegrenzen_25)
+        self.assertEqual(resp.status_code, 302)     # 302 = Redirect = succes
+
+        # zet de inschrijfmethode van regio 101 op 'methode 3', oftewel met dagdeel voorkeur
+        deelcomp = DeelCompetitie.objects.filter(laag='Regio', nhb_regio=self.regio_101, competitie=comp)[0]
+        deelcomp.inschrijf_methode = INSCHRIJF_METHODE_3
+        deelcomp.save()
+
+        dagdelen = list(DAGDEEL_AFKORTINGEN)
+        nhb_nr = 110000
+
+        recurve_boog_pk = BoogType.objects.get(afkorting='R').pk
+
+        # doorloop alle verenigingen in deze regio (er zijn er maar 2)
+        for nhb_ver in NhbVereniging.objects.filter(regio=self.regio_101).all()[:5]:
+
+            # wordt HWL om voorkeuren aan te kunnen passen en in te kunnen schrijven
+            functie_hwl = nhb_ver.functie_set.filter(rol='HWL').all()[0]
+            self.e2e_wissel_naar_functie(functie_hwl)
+
+            post_params = dict()
+
+            # maak net zoveel leden aan als er dagdeel afkortingen zijn (5 dus)
+            for lp in range(5):
+                nhb_nr += 1
+                lid = NhbLid()
+                lid.nhb_nr = nhb_nr
+                lid.voornaam = "Lid %s" % nhb_nr
+                lid.achternaam = "de Tester"
+                lid.bij_vereniging = nhb_ver
+                lid.is_actief_lid = True
+                lid.geboorte_datum = datetime.date(2000, 1, 1)
+                lid.sinds_datum = datetime.date(2010, 1, 1)
+                lid.geslacht = 'M'
+                lid.save()
+
+                # haal de schutter voorkeuren op, zodat de schutterboog records aangemaakt worden
+                url_voorkeuren = '/schutter/voorkeuren/%s/' % nhb_nr
+                resp = self.client.get(url_voorkeuren)
+                self.assertEqual(resp.status_code, 200)     # 200 = OK
+
+                # zet de recurve boog aan
+                resp = self.client.post(url_voorkeuren, {'nhblid_pk': nhb_nr,
+                                                         'schiet_R': 'on'})
+                self.assertEqual(resp.status_code, 302)     # 302 = redirect = succes
+
+                # onthoud deze schutterboog om straks in bulk aan te melden
+                # 'lid_NNNNNN_boogtype_MM'
+                post_params['lid_%s_boogtype_%s' % (nhb_nr, recurve_boog_pk)] = 'on'
+            # for
+
+            # schrijf in voor de competitie
+            post_params['dagdeel'] = dagdelen.pop(-1)
+            resp = self.client.post(url_inschrijven, post_params)
+            self.assertEqual(resp.status_code, 302)     # 302 = Redirect = succes
+        # for
 
     def test_overzicht_anon(self):
         resp = self.client.get(self.url_overzicht)
@@ -127,6 +208,9 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
 
     def test_overzicht_bb(self):
         self.e2e_login_and_pass_otp(self.account_bb)
+
+        comp = Competitie.objects.all()[0]
+        self._doe_inschrijven(comp)         # wisselt naar HWL rol
         self.e2e_wisselnaarrol_bb()
 
         resp = self.client.get(self.url_overzicht)
@@ -136,26 +220,30 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.assertNotContains(resp, '/competitie/beheer-favorieten/')
 
         # landelijk
-        comp_pk = Competitie.objects.all()[0].pk
-        url = self.url_aangemeld_alles % comp_pk
+        url = self.url_aangemeld_alles % comp.pk
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/lijst-aangemeld-regio.dtl', 'plein/site_layout.dtl'))
 
         # rayon 2
-        url = self.url_aangemeld_rayon % (comp_pk, self.rayon_2.pk)
+        url = self.url_aangemeld_rayon % (comp.pk, self.rayon_1.pk)
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/lijst-aangemeld-regio.dtl', 'plein/site_layout.dtl'))
 
         # regio 101
-        url = self.url_aangemeld_regio % (comp_pk, self.regio_101.pk)
+        url = self.url_aangemeld_regio % (comp.pk, self.regio_101.pk)
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/lijst-aangemeld-regio.dtl', 'plein/site_layout.dtl'))
+
+        # regio 100: niet bestaand als deelcompetitie
+        url = self.url_aangemeld_regio % (comp.pk, 100)
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 404)  # 404 = Not found
 
     def test_overzicht_bko(self):
         self.e2e_login_and_pass_otp(self.account_bko)
@@ -347,7 +435,38 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         resp = self.client.post(url)
         self.assertEqual(resp.status_code, 404)     # 404 = Not found
 
-    def test_bad(self):
+    def test_behoefte(self):
+        self.e2e_login_and_pass_otp(self.account_bb)        # geen account_hwl
+        self.e2e_wisselnaarrol_bb()
+
+        comp = Competitie.objects.all()[0]
+        self._doe_inschrijven(comp)     # wisselt naar HWL functies
+        self.e2e_wissel_naar_functie(self.functie_rcl)
+
+        resp = self.client.get(self.url_behoefte % (comp.pk, self.regio_101.pk))
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/inschrijfmethode3-behoefte.dtl', 'plein/site_layout.dtl'))
+
+        resp = self.client.get(self.url_behoefte_bestand % (comp.pk, self.regio_101.pk))
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        csv_file = "ver_nr,Naam,Geen voorkeur,'s Avonds,Zaterdag,Zondag,Weekend\r\n1000,Grote Club,0,0,0,0,5\r\n1100,Kleine Club,0,0,0,5,0\r\n"
+        self.assertContains(resp, csv_file)
+
+        # creëer een beetje puinhoop
+        self._ver2.regio = NhbRegio.objects.get(pk=102)
+        self._ver2.save()
+
+        obj = RegioCompetitieSchutterBoog.objects.filter(bij_vereniging=self._ver).all()[0]
+        obj.inschrijf_voorkeur_dagdeel = 'XX'
+        obj.save()
+
+        resp = self.client.get(self.url_behoefte % (comp.pk, self.regio_101.pk))
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/inschrijfmethode3-behoefte.dtl', 'plein/site_layout.dtl'))
+
+    def test_bad_hwl(self):
         self.e2e_login_and_pass_otp(self.account_bb)        # geen account_hwl
         self.e2e_wissel_naar_functie(self.functie_hwl)
 
@@ -372,6 +491,53 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 404)     # 404 = Not found
 
         url = self.url_aangemeld_regio % (comp_pk, 999999)
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+
+        # als HWL is deze pagina niet beschikbaar
+        url = self.url_behoefte % (999999, 101)
+        resp = self.client.get(url)
+        self.assert_is_redirect(resp, '/plein/')
+
+    def test_bad_rcl(self):
+        self.e2e_login_and_pass_otp(self.account_rcl)
+        self.e2e_wissel_naar_functie(self.functie_rcl)
+
+        comp_pk = Competitie.objects.all()[0].pk
+
+        # competitie bestaat niet
+        url = self.url_behoefte % (999999, 101)
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+
+        url = self.url_behoefte_bestand % (999999, 101)
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+
+        # regio bestaat niet
+        url = self.url_behoefte % (comp_pk, 999999)
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+
+        url = self.url_behoefte_bestand % (comp_pk, 999999)
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+
+        # deelcomp bestaat niet
+        url = self.url_behoefte % (comp_pk, 100)
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+
+        url = self.url_behoefte_bestand % (comp_pk, 100)
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+
+        # correct, maar niet inschrijfmethode 3
+        url = self.url_behoefte % (comp_pk, 101)
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+
+        url = self.url_behoefte_bestand % (comp_pk, 101)
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 404)     # 404 = Not found
 

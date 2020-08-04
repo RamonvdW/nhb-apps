@@ -432,14 +432,16 @@ class Inschrijfmethode3BehoefteAlsBestandView(Inschrijfmethode3BehoefteView):
 
         context['object_list'] = objs
 
-        if deelcomp.inschrijf_methode == INSCHRIJF_METHODE_3:
-            # voeg de tabel met dagdeel-behoefte toe
-            # dict(nhb_ver) = dict("dagdeel_afkorting") = count
-            # list[nhb_ver, ..] =
-            self._maak_data_dagdeel_behoefte(context, regio, objs)
+        if deelcomp.inschrijf_methode != INSCHRIJF_METHODE_3:
+            raise Resolver404()
+
+        # voeg de tabel met dagdeel-behoefte toe
+        # dict(nhb_ver) = dict("dagdeel_afkorting") = count
+        # list[nhb_ver, ..] =
+        self._maak_data_dagdeel_behoefte(context, regio, objs)
 
         response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename="interland.csv"'
+        response['Content-Disposition'] = 'attachment; filename="behoefte-%s.csv"' % regio.regio_nr
 
         writer = csv.writer(response)
         writer.writerow(['ver_nr', 'Naam'] + context['dagdelen'])
