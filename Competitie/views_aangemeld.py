@@ -269,6 +269,7 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
                 regio_verenigingen: lijst van NhbVereniging met counts_list met telling van dagdelen
                 dagdelen: beschrijving van dagdelen voor de kolom headers
         """
+
         context['dagdelen'] = dagdelen = list()
         for _, beschrijving in DAGDEEL:
             dagdelen.append(beschrijving)
@@ -306,12 +307,25 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
                     pass
         # for
 
+        # tel totalen
+        totals = dict()
+        for afkorting in DAGDEEL_AFKORTINGEN:
+            totals[afkorting] = 0
+        # for
+
         # convert dict to list
         for nhb_ver in vers:
             nhb_ver.counts_list = list()
             for afkorting in DAGDEEL_AFKORTINGEN:
-                nhb_ver.counts_list.append(nhb_ver.counts[afkorting])
+                count = nhb_ver.counts[afkorting]
+                nhb_ver.counts_list.append(count)
+                totals[afkorting] += count
             # for
+        # for
+
+        context['totalen'] = totalen = list()
+        for afkorting in DAGDEEL_AFKORTINGEN:
+            totalen.append(totals[afkorting])
         # for
 
     def get_context_data(self, **kwargs):
@@ -449,6 +463,8 @@ class Inschrijfmethode3BehoefteAlsBestandView(Inschrijfmethode3BehoefteView):
         for nhb_ver in context['regio_verenigingen']:
             writer.writerow([nhb_ver.nhb_nr, nhb_ver.naam] + nhb_ver.counts_list)
         # for
+
+        writer.writerow(['-', 'Totalen'] + context['totalen'])
 
         return response
 

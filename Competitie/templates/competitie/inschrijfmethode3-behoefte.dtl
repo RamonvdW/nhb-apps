@@ -37,38 +37,14 @@
             {% endfor %}
         </tr>
     {% endfor %}
+
+    <tr>
+        <td class="right-align"><b>Totalen:</b></td>
+        {% for count in totalen %}
+            <td class="center-align"><b>{{ count }}</b></td>
+        {% endfor %}
+    </tr>
+
 </table>
-
-
-{% if object_list.count %}
-
-    <table class="white">
-
-    {% for obj in object_list %}
-
-        {% if obj.nieuwe_klasse %}
-            <tr class="nhb-grijs">
-                <td colspan="3" style="padding-bottom: 0px"><h5>{{ obj.klasse.indiv.beschrijving }}</h5></td>
-            </tr>
-
-            <tr>
-                <th>Vereniging</th>
-                <th>Aanvangsgemiddelde</th>
-                <th>Naam schutter</th>
-            </tr>
-
-        {% endif %}
-
-        <tr>
-            <td>[{{ obj.schutterboog.nhblid.bij_vereniging.nhb_nr }}] {{ obj.schutterboog.nhblid.bij_vereniging.naam }}</td>
-            <td>{{ obj.aanvangsgemiddelde }}{% if obj.is_handmatig_ag %}<i> (handmatig)</i>{% endif %}</td>
-            <td>{{ obj.schutterboog.nhblid.volledige_naam }}</td>
-        </tr>
-
-    {% endfor %}
-
-    </table>
-
-{% endif %}
 
 {% endblock %}
