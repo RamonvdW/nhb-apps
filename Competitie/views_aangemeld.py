@@ -287,9 +287,9 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
             vers.append(nhb_ver)
             vers_dict[nhb_ver.nhb_nr] = nhb_ver
 
-            nhb_ver.counts = dict()
+            nhb_ver.counts_dict = dict()
             for afkorting in DAGDEEL_AFKORTINGEN:
-                nhb_ver.counts[afkorting] = 0
+                nhb_ver.counts_dict[afkorting] = 0
             # for
         # for
 
@@ -302,7 +302,7 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
             else:
                 afkorting = obj.inschrijf_voorkeur_dagdeel
                 try:
-                    nhb_ver.counts[afkorting] += 1
+                    nhb_ver.counts_dict[afkorting] += 1
                 except KeyError:
                     pass
         # for
@@ -316,17 +316,24 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
         # convert dict to list
         for nhb_ver in vers:
             nhb_ver.counts_list = list()
+            sum = 0
             for afkorting in DAGDEEL_AFKORTINGEN:
-                count = nhb_ver.counts[afkorting]
+                count = nhb_ver.counts_dict[afkorting]
                 nhb_ver.counts_list.append(count)
                 totals[afkorting] += count
+                sum += count
             # for
+            nhb_ver.counts_list.append(sum)
         # for
 
         context['totalen'] = totalen = list()
+        sum = 0
         for afkorting in DAGDEEL_AFKORTINGEN:
-            totalen.append(totals[afkorting])
+            count = totals[afkorting]
+            totalen.append(count)
+            sum += count
         # for
+        totalen.append(sum)
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -458,7 +465,7 @@ class Inschrijfmethode3BehoefteAlsBestandView(Inschrijfmethode3BehoefteView):
         response['Content-Disposition'] = 'attachment; filename="behoefte-%s.csv"' % regio.regio_nr
 
         writer = csv.writer(response)
-        writer.writerow(['ver_nr', 'Naam'] + context['dagdelen'])
+        writer.writerow(['ver_nr', 'Naam'] + context['dagdelen'] + ['Totaal'])
 
         for nhb_ver in context['regio_verenigingen']:
             writer.writerow([nhb_ver.nhb_nr, nhb_ver.naam] + nhb_ver.counts_list)

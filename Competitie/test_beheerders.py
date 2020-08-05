@@ -206,15 +206,6 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('competitie/overzicht-beheerder.dtl', 'plein/site_layout.dtl'))
         self.assertNotContains(resp, '/competitie/beheer-favorieten/')
 
-        obj = RegioCompetitieSchutterBoog.objects.get(laag=LAAG_BK).all()[0]
-        self.assertTrue(str(obj) != '')
-
-        obj = RegioCompetitieSchutterBoog.objects.get(laag=LAAG_RK).all()[0]
-        self.assertTrue(str(obj) != '')
-
-        obj = RegioCompetitieSchutterBoog.objects.get(laag=LAAG_RE).all()[0]
-        self.assertTrue(str(obj) != '')
-
     def test_overzicht_bb(self):
         self.e2e_login_and_pass_otp(self.account_bb)
 
@@ -253,6 +244,25 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         url = self.url_aangemeld_regio % (comp.pk, 100)
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 404)  # 404 = Not found
+
+        # coverage voor models __str__
+        obj = RegioCompetitieSchutterBoog.objects.filter(deelcompetitie__laag=LAAG_REGIO).all()[0]
+        self.assertTrue(str(obj) != '')
+
+        deelcomp = obj.deelcompetitie
+        deelcomp.laag = LAAG_RK
+        deelcomp.nhb_regio = None
+        deelcomp.nhb_rayon = self.rayon_1
+        deelcomp.save()
+        obj = RegioCompetitieSchutterBoog.objects.filter(deelcompetitie__laag=LAAG_RK).all()[0]
+        self.assertTrue(str(obj) != '')
+
+        deelcomp = obj.deelcompetitie
+        deelcomp.laag = LAAG_BK
+        deelcomp.nhb_rayon = None
+        deelcomp.save()
+        obj = RegioCompetitieSchutterBoog.objects.filter(deelcompetitie__laag=LAAG_BK).all()[0]
+        self.assertTrue(str(obj) != '')
 
     def test_overzicht_bko(self):
         self.e2e_login_and_pass_otp(self.account_bko)

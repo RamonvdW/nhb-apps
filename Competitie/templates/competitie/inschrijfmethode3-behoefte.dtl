@@ -27,6 +27,8 @@
         {% for beschrijving in dagdelen %}
             <th class="center-align">{{ beschrijving }}</th>
         {% endfor %}
+
+        <th class="center-align">Totaal</th>
     </thead>
 
     {% for nhb_ver in regio_verenigingen %}
