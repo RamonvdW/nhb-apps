@@ -47,7 +47,7 @@ class TestAccountActiviteit(E2EHelpers, TestCase):
         # admin rechten
         self.e2e_login(self.account_admin)
         # wissel-van-rol is niet nodig (Account weet daar niets van)
-        with self.assertNumQueries(7):
+        with self.assertNumQueries(8):
             resp = self.client.get('/account/activiteit/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
