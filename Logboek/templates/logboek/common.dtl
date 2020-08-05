@@ -18,7 +18,7 @@
             <span>&nbsp;</span>
             <a class="btn-nhb-blauw margin-5 btn-small {% if filter == 'accounts' %}disabled{% endif %}" href="{{ url_accounts }}">Accounts</a>
             <span>&nbsp;</span>
-            <a class="btn-nhb-blauw margin-5 btn-small {% if filter == 'rollen' %}disabled{% endif %}" href="{{ rollen }}">Rollen</a>
+            <a class="btn-nhb-blauw margin-5 btn-small {% if filter == 'rollen' %}disabled{% endif %}" href="{{ url_rollen }}">Rollen</a>
             <span>&nbsp;</span>
             <a class="btn-nhb-blauw margin-5 btn-small {% if filter == 'accommodatie' %}disabled{% endif %}" href="{{ url_accommodaties }}">Accommodaties</a>
             <span>&nbsp;</span>
