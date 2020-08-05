@@ -87,7 +87,7 @@ class TestLogboek(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
 
         # rest
-        with self.assertNumQueries(6):
+        with self.assertNumQueries(4):
             resp = self.client.get(self.logboek_url + 'rest/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_template_used(resp, ('logboek/rest.dtl', 'plein/site_layout.dtl'))
