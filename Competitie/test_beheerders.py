@@ -11,7 +11,7 @@ from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
 from Overig.e2ehelpers import E2EHelpers
 from Competitie.models import RegioCompetitieSchutterBoog
 from .models import (Competitie, DeelCompetitie, competitie_aanmaken,
-                     INSCHRIJF_METHODE_3, DAGDEEL_AFKORTINGEN)
+                     INSCHRIJF_METHODE_3, DAGDEEL_AFKORTINGEN, LAAG_REGIO, LAAG_RK, LAAG_BK)
 import datetime
 
 
@@ -78,9 +78,9 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         # creëer een competitie met deelcompetities
         competitie_aanmaken(jaar=2019)
 
-        self.functie_bko = DeelCompetitie.objects.filter(laag='BK')[0].functie
-        self.functie_rko = DeelCompetitie.objects.filter(laag='RK', nhb_rayon=self.rayon_2)[0].functie
-        self.functie_rcl = DeelCompetitie.objects.filter(laag='Regio', nhb_regio=self.regio_101)[0].functie
+        self.functie_bko = DeelCompetitie.objects.filter(laag=LAAG_BK)[0].functie
+        self.functie_rko = DeelCompetitie.objects.filter(laag=LAAG_RK, nhb_rayon=self.rayon_2)[0].functie
+        self.functie_rcl = DeelCompetitie.objects.filter(laag=LAAG_REGIO, nhb_regio=self.regio_101)[0].functie
 
         self.functie_bko.accounts.add(self.account_bko)
         self.functie_rko.accounts.add(self.account_rko)
@@ -205,6 +205,15 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/overzicht-beheerder.dtl', 'plein/site_layout.dtl'))
         self.assertNotContains(resp, '/competitie/beheer-favorieten/')
+
+        obj = RegioCompetitieSchutterBoog.objects.get(laag=LAAG_BK).all()[0]
+        self.assertTrue(str(obj) != '')
+
+        obj = RegioCompetitieSchutterBoog.objects.get(laag=LAAG_RK).all()[0]
+        self.assertTrue(str(obj) != '')
+
+        obj = RegioCompetitieSchutterBoog.objects.get(laag=LAAG_RE).all()[0]
+        self.assertTrue(str(obj) != '')
 
     def test_overzicht_bb(self):
         self.e2e_login_and_pass_otp(self.account_bb)
