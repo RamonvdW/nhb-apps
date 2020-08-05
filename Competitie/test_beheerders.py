@@ -469,7 +469,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
 
         resp = self.client.get(self.url_behoefte_bestand % (comp.pk, self.regio_101.pk))
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        csv_file = "ver_nr,Naam,Geen voorkeur,'s Avonds,Zaterdag,Zondag,Weekend\r\n1000,Grote Club,0,0,0,0,5\r\n1100,Kleine Club,0,0,0,5,0\r\n"
+        csv_file = "ver_nr,Naam,Geen voorkeur,'s Avonds,Zaterdag,Zondag,Weekend,Totaal\r\n1000,Grote Club,0,0,0,0,5,5\r\n1100,Kleine Club,0,0,0,5,0,5\r\n-,Totalen,0,0,0,5,5,10\r\n"
         self.assertContains(resp, csv_file)
 
         # creëer een beetje puinhoop
