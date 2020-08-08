@@ -449,10 +449,13 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
         context['regio'] = regio
 
         try:
-            deelcomp = DeelCompetitie.objects.get(is_afgesloten=False,
-                                                  laag=LAAG_REGIO,
-                                                  competitie=comp,
-                                                  nhb_regio=regio)
+            deelcomp = (DeelCompetitie
+                        .objects
+                        .select_related('competitie')
+                        .get(is_afgesloten=False,
+                             laag=LAAG_REGIO,
+                             competitie=comp,
+                             nhb_regio=regio))
         except DeelCompetitie.DoesNotExist:
             raise Resolver404()
 
@@ -524,10 +527,13 @@ class Inschrijfmethode3BehoefteAlsBestandView(Inschrijfmethode3BehoefteView):
             raise Resolver404()
 
         try:
-            deelcomp = DeelCompetitie.objects.get(is_afgesloten=False,
-                                                  laag=LAAG_REGIO,
-                                                  competitie=comp,
-                                                  nhb_regio=regio)
+            deelcomp = (DeelCompetitie
+                        .objects
+                        .select_related('competitie')
+                        .get(is_afgesloten=False,
+                             laag=LAAG_REGIO,
+                             competitie=comp,
+                             nhb_regio=regio))
         except DeelCompetitie.DoesNotExist:
             raise Resolver404()
 
