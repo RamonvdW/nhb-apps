@@ -49,7 +49,7 @@ if [ $? -eq 0 -a $# -eq 0 ]
 then
     # add coverage with debug and wiki enabled
     echo "[INFO] Performing run with debug + wiki run"
-    python3 -m coverage run --append --branch ./manage.py test --noinput --debug-mode --enable-wiki Plein.tests.TestPlein.test_quick Functie.test_saml2idp &>/dev/null
+    python3 -m coverage run --append --branch ./manage.py test --debug-mode --enable-wiki Plein.tests.TestPlein.test_quick Functie.test_saml2idp &>/dev/null
 fi
 
 # stop the http simulator

@@ -1,5 +1,8 @@
 #!/bin/bash
 # -*- coding: utf-8 -*-
+
+# this line + shebang ensures python is taken from the user's PATH
+# python sees this as a string and ignores it
 "exec" "python" "$0" "$@"
 
 #  Copyright (c) 2019-2020 Ramon van der Winkel.
@@ -20,7 +23,7 @@ def main():
     stars = None
     if "runserver" in sys.argv or ("test" in sys.argv and "--noinput" not in sys.argv):
         # avoid double line when runserver starts a child process
-        if "DJANGO_SETTINGS_MODULE" not in os.environ:
+        if "DJANGO_SETTINGS_MODULE" not in os.environ:      # pragma: no branch
             stars = "*" * 30
             print("\n%s START OF RUN %s\n" % (stars, stars))
 
@@ -31,7 +34,7 @@ def main():
         print("\nDone!")
 
 
-if __name__ == '__main__':
+if __name__ == '__main__':      # pragma: no branch
     main()
 
 # end of file
