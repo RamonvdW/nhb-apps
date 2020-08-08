@@ -6,7 +6,7 @@
 
 from django.contrib import auth
 from Account.models import Account, account_create
-from Functie.views import account_vhpg_is_geaccepteerd
+from Functie.view_vhpg import account_vhpg_is_geaccepteerd
 from bs4 import BeautifulSoup
 from django.test import TestCase
 import pyotp

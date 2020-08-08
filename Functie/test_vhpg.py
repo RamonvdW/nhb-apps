@@ -7,7 +7,7 @@
 from django.test import TestCase
 from Account.models import HanterenPersoonsgegevens
 from Functie.models import  account_needs_vhpg
-from Functie.views import account_vhpg_is_geaccepteerd
+from Functie.view_vhpg import account_vhpg_is_geaccepteerd
 from Overig.e2ehelpers import E2EHelpers
 
 

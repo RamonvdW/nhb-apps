@@ -53,6 +53,24 @@
     <a class="btn-nhb-rood" href="{% url 'Functie:otp-controle' %}">Nu controleren</a>
 {% endif %}
 
+{% if heeft_alle_rollen %}
+    <p>&nbsp;</p>
+    <h6>Indoor:</h6>
+    <div class="white shrink-wrap-5">
+    {% for obj in heeft_alle_rollen %}
+        {% if obj.comp_type_break %}
+            </div>
+            <h6>25m1pijl:</h6>
+            <div class="white shrink-wrap-5">
+        {% endif %}
+        {% if obj.insert_break %}<br>{% endif %}
+        <form style="display: inline-block" method="post" action="{{ obj.url }}">{% csrf_token %}
+            <input class="btn-nhb-blauw" type="submit" value="{{ obj.knop_tekst }}">
+        </form>
+    {% endfor %}
+    </div>
+{% endif %}
+
 {% if object_list %}
     <p>&nbsp;</p>
     <h5>Eigen rollen</h5>
