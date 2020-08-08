@@ -31,8 +31,7 @@ def send_mail_postmark(obj, stdout=None, stderr=None):
         'From': settings.EMAIL_FROM_ADDRESS,
         'To': obj.mail_to,
         'Subject': obj.mail_subj,
-        'TextBody': obj.mail_text,
-        'Headers': {'Date': obj.mail_date}      # TODO: not needed??
+        'TextBody': obj.mail_text
     }
 
     headers = {
@@ -49,7 +48,7 @@ def send_mail_postmark(obj, stdout=None, stderr=None):
     except (requests.exceptions.SSLError, requests.exceptions.ConnectionError) as exc:
         obj.log += "[WARNING] Exceptie bij versturen: %s\n" % str(exc)
         if stderr:
-            stderr.write("[ERROR] Exceptie bij versturen e-mail: %s\n" % str(exc))
+            stderr.write("[ERROR] Exceptie bij versturen e-mail: %s" % str(exc))
     else:
         if resp.status_code == 200:
             # success!
@@ -63,7 +62,7 @@ def send_mail_postmark(obj, stdout=None, stderr=None):
             obj.log += "  full response: %s\n" % repr(resp.text)
             if stdout:
                 stdout.write("[WARNING] Mail niet kunnen versturen! response encoding:%s, status_code:%s" % (repr(resp.encoding), repr(resp.status_code)))
-                stdout.write("  full response: %s\n" % repr(resp.text))
+                stdout.write("  full response: %s" % repr(resp.text))
 
     obj.save()
 

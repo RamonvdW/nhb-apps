@@ -17,13 +17,14 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import time
 
+
 class MyServer(BaseHTTPRequestHandler):
 
     def log_message(self, format, *args):
         # no logging please
         pass
 
-    #def do_GET(self):
+    # def do_GET(self):
     #    print("GET request,\nPath: %s\nHeaders:\n%s" % (str(self.path), str(self.headers)))
     #    self.send_response(200)
     #    self.send_header('Content-type', 'text/html')
@@ -33,7 +34,7 @@ class MyServer(BaseHTTPRequestHandler):
     def do_POST(self):
         datalen = int(self.headers['Content-Length'])
         data = self.rfile.read(datalen).decode('utf-8')
-        #print("POST request\nPath: %s\nHeaders:\n%s\n\nBody:\n%s" % (str(self.path), str(self.headers), data))
+        # print("POST request\nPath: %s\nHeaders:\n%s\n\nBody:\n%s" % (str(self.path), str(self.headers), data))
 
         if "faal" in data:
             self.send_error(401,     # mailgun: 'unauthorized'
@@ -45,7 +46,7 @@ class MyServer(BaseHTTPRequestHandler):
 
         self.send_header('Content-type', 'text/html')
         self.end_headers()
-        #self.wfile.write("POST request for {}".format(self.path).encode('utf-8'))
+        # self.wfile.write("POST request for {}".format(self.path).encode('utf-8'))
 
 
 def main():
