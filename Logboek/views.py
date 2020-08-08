@@ -105,7 +105,8 @@ class LogboekBasisView(UserPassesTestMixin, ListView):
         return qset
 
     def get_focused_queryset(self):
-        raise NotImplementedError()     # must be implemented by sub-class
+        # must be implemented by sub-class
+        raise NotImplementedError()     # pragma: no cover
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """

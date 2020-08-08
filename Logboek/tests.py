@@ -234,5 +234,14 @@ class TestLogboek(E2EHelpers, TestCase):
         obj = LogboekRegel.objects.filter(actie_door_account=self.account_normaal)[0]
         self.assertEqual(obj.bepaal_door(), 'normaal (Normaal)')
 
+    def test_zoek(self):
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_wisselnaarrol_bb()
+
+        # alles
+        resp = self.client.get(self.logboek_url + '?zoekterm=Ramon')
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+
 
 # end of file
