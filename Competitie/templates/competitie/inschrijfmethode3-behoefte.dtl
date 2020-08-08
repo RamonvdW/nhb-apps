@@ -47,6 +47,32 @@
         {% endfor %}
     </tr>
 
+    <tr class="nhb-grijs">
+        <td>
+            <p>&nbsp;</p>
+            <h5>Aantal schutters per blazoen type:</h5>
+        </td>
+        {% for beschrijving in dagdelen %}<td/>{% endfor %}
+        <td/>   <!-- totalen -->
+    </tr>
+
+    <thead>
+        <th>Type blazoen</th>
+
+        {% for beschrijving in dagdelen %}
+            <th class="center-align">{{ beschrijving }}</th>
+        {% endfor %}
+
+        <th class="center-align">Totaal</th>
+    </thead>
+
+    {% for kolommen in blazoen_count %}
+        <tr>
+            {% for kolom in kolommen %}
+                <td {% if not forloop.first %}class="center-align"{% endif %}>{{ kolom }}</td>
+            {% endfor %}
+        </tr>
+    {% endfor %}
 </table>
 
 {% endblock %}

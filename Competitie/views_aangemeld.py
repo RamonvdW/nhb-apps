@@ -11,6 +11,7 @@ from django.http import HttpResponseRedirect, HttpResponse
 from Plein.menu import menu_dynamics
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
 from Functie.rol import Rollen, rol_get_huidige
+from Schutter.models import SchutterVoorkeuren
 from .models import (LAAG_REGIO, INSCHRIJF_METHODE_3, DAGDEEL, DAGDEEL_AFKORTINGEN,
                      Competitie, DeelCompetitie, RegioCompetitieSchutterBoog)
 import csv
@@ -20,6 +21,15 @@ TEMPLATE_COMPETITIE_AANGEMELD_REGIO = 'competitie/lijst-aangemeld-regio.dtl'
 TEMPLATE_COMPETITIE_INSCHRIJFMETHODE3_BEHOEFTE = 'competitie/inschrijfmethode3-behoefte.dtl'
 
 JA_NEE = {False: 'Nee', True: 'Ja'}
+
+BLAZOEN_DT_C = 'DT Compound'
+BLAZOEN_DT_R = 'DT Recurve (wens)'
+BLAZOEN_40CM = '40cm'
+BLAZOEN_60CM = '60cm'
+BLAZOEN_60CM_C = '60cm Compound'
+
+COMP_BLAZOENEN = {'18': (BLAZOEN_40CM, BLAZOEN_DT_C, BLAZOEN_DT_R, BLAZOEN_60CM),
+                  '25': (BLAZOEN_60CM, BLAZOEN_60CM_C)}
 
 
 def maak_regiocomp_zoom_knoppen(context, comp_pk, rayon=None, regio=None):
@@ -264,15 +274,16 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
         return HttpResponseRedirect(reverse('Plein:plein'))
 
-    def _maak_data_dagdeel_behoefte(self, context, regio, objs):
+    def _maak_data_dagdeel_behoefte(self, context, deelcomp, objs, regio):
         """ voegt de volgende elementen toe aan de context:
                 regio_verenigingen: lijst van NhbVereniging met counts_list met telling van dagdelen
                 dagdelen: beschrijving van dagdelen voor de kolom headers
         """
 
         context['dagdelen'] = dagdelen = list()
-        for _, beschrijving in DAGDEEL:
-            dagdelen.append(beschrijving)
+        for afkorting, beschrijving in DAGDEEL:
+            if afkorting in deelcomp.toegestane_dagdelen:
+                dagdelen.append(beschrijving)
         # for
 
         # maak een lijst van alle verenigingen in deze regio
@@ -294,6 +305,7 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
         # for
 
         # doe de telling voor alle ingeschreven schutters
+        # objs = RegioCompetitieSchutterBoog
         for obj in objs:
             try:
                 nhb_ver = vers_dict[obj.bij_vereniging.nhb_nr]
@@ -316,24 +328,102 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
         # convert dict to list
         for nhb_ver in vers:
             nhb_ver.counts_list = list()
-            sum = 0
+            som = 0
             for afkorting in DAGDEEL_AFKORTINGEN:
-                count = nhb_ver.counts_dict[afkorting]
-                nhb_ver.counts_list.append(count)
-                totals[afkorting] += count
-                sum += count
+                if afkorting in deelcomp.toegestane_dagdelen:
+                    count = nhb_ver.counts_dict[afkorting]
+                    nhb_ver.counts_list.append(count)
+                    totals[afkorting] += count
+                    som += count
             # for
-            nhb_ver.counts_list.append(sum)
+            nhb_ver.counts_list.append(som)
         # for
 
         context['totalen'] = totalen = list()
-        sum = 0
+        som = 0
         for afkorting in DAGDEEL_AFKORTINGEN:
-            count = totals[afkorting]
-            totalen.append(count)
-            sum += count
+            if afkorting in deelcomp.toegestane_dagdelen:
+                count = totals[afkorting]
+                totalen.append(count)
+                som += count
         # for
-        totalen.append(sum)
+        totalen.append(som)
+
+    def _maak_data_blazoen_behoefte(self, context, deelcomp, objs):
+        """ maak het overzicht hoeveel blazoenen er nodig zijn
+            voor elk dagdeel
+        """
+
+        afstand = deelcomp.competitie.afstand
+
+        blazoenen = dict()
+        for blazoen in COMP_BLAZOENEN[afstand]:
+            blazoenen[blazoen] = afk_count = dict()
+            for afkorting in DAGDEEL_AFKORTINGEN:
+                afk_count[afkorting] = 0
+            # for
+        # for
+
+        # schutters met recurve boog willen mogelijk DT
+        voorkeur_dt = (SchutterVoorkeuren
+                       .objects
+                       .select_related('nhblid')
+                       .filter(voorkeur_dutchtarget_18m=True)
+                       .values_list('nhblid__nhb_nr', flat=True))
+
+        # objs = RegioCompetitieSchutterBoog
+        for obj in objs:
+            boog_afkorting = obj.schutterboog.boogtype.afkorting
+            if afstand == '18':
+                # 18m wordt geschoten op 40cm blazoen
+                #       uitzondering: alle Compound + Recurve klasse 1+2
+                #       uitzondering: aspiranten schieten op 60cm blazoen
+                # recurve schutters mogen voorkeur voor DT opgeven
+
+                blazoen = BLAZOEN_40CM
+                if boog_afkorting == 'C':
+                    blazoen = 'DT Compound'
+                elif boog_afkorting == 'R':
+                    # deze schutter heeft misschien voorkeur voor DT
+                    if obj.schutterboog.nhblid.nhb_nr in voorkeur_dt:
+                        blazoen = BLAZOEN_DT_R
+
+                # controleer of schutter een aspirant is
+                if obj.klasse.indiv.niet_voor_rk_bk:
+                    # schutterboog is ingeschreven in een aspirant klasse
+                    blazoen = BLAZOEN_60CM
+            else:
+                # 25m wordt geschoten op 60cm blazoen
+                #       aspiranten schieten op 18m
+                #       compound kan een eigen klein blazoen krijgen??
+                blazoen = BLAZOEN_60CM
+                if boog_afkorting == 'C':
+                    blazoen = BLAZOEN_60CM_C
+
+            try:
+                blazoenen[blazoen][obj.inschrijf_voorkeur_dagdeel] += 1
+            except KeyError:
+                pass
+        # for
+
+        # converteer naar lijstjes met vaste volgorde van de dagdelen
+        context['blazoen_count'] = blazoen_behoefte = list()
+        for blazoen in COMP_BLAZOENEN[afstand]:     # bepaalt volgorde
+            kolommen = list()
+            blazoen_behoefte.append(kolommen)
+
+            kolommen.append(blazoen)        # 1e kolom: beschrijving blazoen
+
+            som = 0
+            tellingen = blazoenen[blazoen]
+            for afkorting in DAGDEEL_AFKORTINGEN:
+                if afkorting in deelcomp.toegestane_dagdelen:
+                    count = tellingen[afkorting]
+                    kolommen.append(count)
+                    som += count
+            # for
+            kolommen.append(som)
+        # for
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -376,6 +466,7 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
                                 'deelcompetitie',
                                 'bij_vereniging',
                                 'schutterboog',
+                                'schutterboog__boogtype',
                                 'schutterboog__nhblid',
                                 'schutterboog__nhblid__bij_vereniging')
                 .filter(deelcompetitie=deelcomp)
@@ -390,7 +481,8 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
         # for
 
         # voeg de tabel met dagdeel-behoefte toe
-        self._maak_data_dagdeel_behoefte(context, regio, objs)
+        self._maak_data_dagdeel_behoefte(context, deelcomp, objs, regio)
+        self._maak_data_blazoen_behoefte(context, deelcomp, objs)
 
         # context['url_terug'] = reverse('Competitie:lijst-regiocomp-regio',
         #                                kwargs={'comp_pk': comp.pk,
@@ -459,12 +551,15 @@ class Inschrijfmethode3BehoefteAlsBestandView(Inschrijfmethode3BehoefteView):
         # voeg de tabel met dagdeel-behoefte toe
         # dict(nhb_ver) = dict("dagdeel_afkorting") = count
         # list[nhb_ver, ..] =
-        self._maak_data_dagdeel_behoefte(context, regio, objs)
+        self._maak_data_dagdeel_behoefte(context, deelcomp, objs, regio)
+        self._maak_data_blazoen_behoefte(context, deelcomp, objs)
 
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="behoefte-%s.csv"' % regio.regio_nr
 
         writer = csv.writer(response)
+
+        # voorkeur dagdelen per vereniging
         writer.writerow(['ver_nr', 'Naam'] + context['dagdelen'] + ['Totaal'])
 
         for nhb_ver in context['regio_verenigingen']:
@@ -472,6 +567,14 @@ class Inschrijfmethode3BehoefteAlsBestandView(Inschrijfmethode3BehoefteView):
         # for
 
         writer.writerow(['-', 'Totalen'] + context['totalen'])
+
+        # blazoen behoefte
+        writer.writerow(['-', '-'] + ['-' for _ in context['totalen']])
+        writer.writerow(['-', 'Blazoen type'] + context['dagdelen'] + ['Totaal'])
+
+        for behoefte in context['blazoen_count']:
+            writer.writerow(behoefte)
+        # for
 
         return response
 
