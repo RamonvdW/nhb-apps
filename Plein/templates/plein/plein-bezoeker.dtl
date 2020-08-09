@@ -15,7 +15,7 @@
 
 <p>Op deze website kan je informatie vinden over de Handboogsport, zoals uitslagen van de competities en de Nederlandse Records.</p>
 
-<!-- TODO: deze opmerking verwijderen -->
+<!-- FUTURE: deze opmerking verwijderen -->
 <p>Deze site is van de Nederlandse Handboog Bond (NHB) en is nog in ontwikkeling.</p>
 
 {% if is_test_server %}

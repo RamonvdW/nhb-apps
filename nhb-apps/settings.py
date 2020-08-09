@@ -34,7 +34,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2020-08-08'
+SITE_VERSIE = '2020-08-09'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -116,10 +116,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
             ],
             'loaders': [
-                ('django.template.loaders.cached.Loader', [
-                    'nhb-apps.minify_dtl.Loader',
-                    ]
-                ),
+                ('django.template.loaders.cached.Loader', ['nhb-apps.minify_dtl.Loader']),
             ],
         },
     },

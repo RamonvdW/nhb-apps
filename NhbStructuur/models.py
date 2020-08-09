@@ -122,7 +122,7 @@ class NhbVereniging(models.Model):
     # locatie van het doel van de vereniging
     plaats = models.CharField(max_length=100, blank=True)
 
-    contact_email = models.CharField(max_length=150, blank=True)    # TODO: consider removing
+    contact_email = models.CharField(max_length=150, blank=True)    # FUTURE: not used, can be removed
 
     # de regio waarin de vereniging zit
     regio = models.ForeignKey(NhbRegio, on_delete=models.PROTECT)

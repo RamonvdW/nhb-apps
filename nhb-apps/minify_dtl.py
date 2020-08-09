@@ -17,6 +17,9 @@ import re
 ENABLE_MINIFY = True
 
 
+# TODO: zoek uit of het minder cpu kost als de reg-exps gecompileerd worden
+# TODO: zoek uit of het minder cpu kost als de reg-exps gecombineerd worden
+
 class Loader(AppDirectoriesLoader):
     """ template loader die template files opschoont vlak na inladen.
         hierdoor kunnen de .dtl sources leesbaar blijven
@@ -105,9 +108,6 @@ class Loader(AppDirectoriesLoader):
 
             contents = self.remove_html_comments(contents)
 
-            # TODO: zoek uit of het minder cpu kost als de reg-exps gecompileerd worden
-            # TODO: zoek uit of het minder cpu kost als de reg-exps gecombineerd worden
-
             # TODO: voeg minify rule toe %}\s+{{
             # voorbeeld (login.dtl in Account)
             #   {% csrf_token %}
@@ -144,6 +144,5 @@ class Loader(AppDirectoriesLoader):
 
         return contents
 
-# TODO: minify style blocks - niet in deze template loader maar tijdens collectstatic ofzo
 
 # end of file
