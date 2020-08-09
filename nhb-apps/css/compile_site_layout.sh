@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2020 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,9 +8,11 @@
 # because all paths in this script are relative to that location
 cd $(dirname $0)
 
-OUT="$PWD/../global_static/materialize/"
-INFILE="$PWD/materialize-src/sass/materialize.scss"
-MINIFY="--style compressed"
+OUT="$PWD/../compiled_static"
+INFILE="$PWD/site_layout.css"
+MINIFY_CSS="../minify_css.py"
+
+# source file to modify when the version number changes
 DTLFILE="$PWD/../../Plein/templates/plein/site_layout.dtl"
 
 if [ ! -e "$INFILE" ]
@@ -46,27 +48,22 @@ then
 fi
 
 # get the sequence number
-LINE=$(grep -m1 'materialize/materialize' "$DTLFILE")
-# <link rel="stylesheet" href="{% static 'materialize/materialize-new-1.css' %}">
-NR=$(echo "$LINE" | cut -d. -f1 | cut -d/ -f2 | cut -d- -f3)
+# <link rel="stylesheet" href="{% static 'site_layout_min-1.css' %}">
+LINE=$(grep -m1 'site_layout_min' "$DTLFILE")
+NR=$(echo "$LINE" | cut -d. -f1 | cut -d- -f2)
 echo "[INFO] Found current sequence number: $NR"
 NEWNR=$(( NR + 1 ))
 echo "[INFO] Decided sequence number: $NEWNR"
 
 # delete the old outfile
-rm "$OUT"/materialize-new*.css
-OUTFILE="$OUT/materialize-new-$NEWNR.css"
+rm "$OUT"/site_layout_min*.css
+OUTFILE="$OUT/site_layout_min-$NEWNR.css"
 
-# run the compiler
-sass --no-cache --sourcemap=none $MINIFY $INFILE $OUTFILE
+# run the compiler (minify)
+python "$MINIFY_CSS" "$INFILE" "$OUTFILE"
 
-if [ $? -ne 0 ]
-then
-    echo "[ERROR] Detected compilation error - keeping current file"
-    exit 1
-fi
-
-cat "$DTLFILE" | sed "s/materialize-new-.*\.css/materialize-new-$NEWNR.css/" > "$DTLFILE.new"
+# replace the sequence number in the referencing django template
+cat "$DTLFILE" | sed "s/site_layout_min-.*\.css/site_layout_min-$NEWNR.css/" > "$DTLFILE.new"
 mv "$DTLFILE.new" "$DTLFILE"
 
 # end of file

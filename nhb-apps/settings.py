@@ -174,7 +174,7 @@ ROOT_URLCONF = 'nhb-apps.urls'
 STATIC_URL = '/static/'     # url
 STATIC_ROOT = 'nhb-apps/.static'     # relative to project top-dir
 STATICFILES_DIRS = [
-    os.path.join(PROJ_DIR, "global_static"),
+    os.path.join(PROJ_DIR, "compiled_static"),
 ]
 STATICFILES_FINDER = [
     'django.contrib.staticfiles.finders.FileSystemFinder',

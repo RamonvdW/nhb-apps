@@ -26,8 +26,8 @@
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans&amp;display=swap">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu&amp;display=swap">
         <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Round">
-        <link rel="stylesheet" href="{% static 'materialize/materialize-new-28.css' %}">
-        <link rel="stylesheet" href="{% static 'plein/site_layout.css' %}"> <!-- moet ná materialize css -->
+        <link rel="stylesheet" href="{% static 'materialize-new-28.css' %}">
+        <link rel="stylesheet" href="{% static 'site_layout_min-3.css' %}"> <!-- moet ná materialize css -->
         {% block extraheader %}{% endblock %}
     </head>
 
@@ -74,7 +74,7 @@
 
         </div>
 
-        <!-- TODO: minimized javascript using uglify -->
+        <!-- TODO: minimize javascript using uglify -->
         <script src="{% static 'materialize/materialize-new-1.js' %}"></script>
 
         <!-- framework init, after everything has been loaded and instantiated -->
