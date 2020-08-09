@@ -5,15 +5,12 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 """ Zorg voor compacte webpagina's door onnodige spaties en newlines
-    te verwijderen uit de een css file
+    te verwijderen uit de een css file.
+    Dit is een compile in dev omgeving, dus performance heeft geen prio
 """
 
 import sys
 import re
-
-# TODO: zoek uit of het minder cpu kost als de reg-exps gecompileerd worden
-# TODO: zoek uit of het minder cpu kost als de reg-exps gecombineerd worden
-# (re.compile)
 
 
 def minify_css_contents(contents):
@@ -45,8 +42,7 @@ def minify_css_contents(contents):
     clean = re.sub(r'\s*{\s*', '{', clean)
 
     # remove semicolon before curly brace
-    #TODO: TEST if still functional
-    # clean = re.sub(r';}', '}', clean)
+    clean = re.sub(r';}', '}', clean)
 
     return clean
 

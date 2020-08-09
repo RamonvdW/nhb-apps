@@ -6,6 +6,9 @@
 
 """ Zorg voor compacte webpagina's door onnodige spaties en newlines
     te verwijderen uit de templates bij het inladen.
+
+    Inladen gebeurt eenmalig na het starten van de applicatie.
+    Let op: dit is vOOr expansie van tags en die kunnen whitespace toevoegen
 """
 
 # credits to martinsvoboda for a good example
@@ -17,9 +20,6 @@ import re
 ENABLE_MINIFY = True
 
 
-# TODO: zoek uit of het minder cpu kost als de reg-exps gecompileerd worden
-# TODO: zoek uit of het minder cpu kost als de reg-exps gecombineerd worden
-
 class Loader(AppDirectoriesLoader):
     """ template loader die template files opschoont vlak na inladen.
         hierdoor kunnen de .dtl sources leesbaar blijven
@@ -28,7 +28,7 @@ class Loader(AppDirectoriesLoader):
     @staticmethod
     def minify_scripts(contents):
         """ Verwijder commentaar en onnodige spaties uit
-            scripts embedded in templates
+            javascript embedded in templates
         """
         clean = ""
         pos = contents.find('<script')
@@ -98,49 +98,46 @@ class Loader(AppDirectoriesLoader):
         clean += contents
         return clean
 
+    @staticmethod
+    def minify_template(contents):
+        # remove /* css block comments */
+        contents = re.sub(r'/\*(.*?)\*/', '', contents)
+
+        # remove whitespace between template tags
+        contents = re.sub(r'}\s+{', '}{', contents)
+
+        # remove whitespace between template tags and html tags
+        contents = re.sub(r'%}\s+<', '%}<', contents)
+        contents = re.sub(r'>\s+{%', '>{%', contents)
+
+        # remove whitespace between template context variables and html tags
+        contents = re.sub(r'>\s+{{', '>{{', contents)
+        contents = re.sub(r'}}\s+<', '}}<', contents)
+
+        # remove whitespace between html tags
+        contents = re.sub(r'>\s+<', '><', contents)
+
+        return contents
+
     def get_contents(self, origin):
         """ Deze Loader methode lijkt aangeroepen """
         contents = super().get_contents(origin)
 
         # in our project we use .dtl for "django template language" files
-        if ENABLE_MINIFY and origin.template_name.endswith('.dtl'):
-            # print("minifying %s" % repr(origin.template_name))
+        if ENABLE_MINIFY:
+            # own templates are .dtl
+            # .html is for 3rd party templates
+            if origin.template_name.endswith('.dtl') or origin.template_name.endswith('.html'):
+                # print("minifying %s" % repr(origin.template_name))
 
-            contents = self.remove_html_comments(contents)
+                contents = self.remove_html_comments(contents)
+                contents = self.minify_template(contents)
+                contents = self.minify_scripts(contents)
 
-            # TODO: voeg minify rule toe %}\s+{{
-            # voorbeeld (login.dtl in Account)
-            #   {% csrf_token %}
-            #   {{ form.next }}
-
-            # TODO: zorg voor minify van debug toolbar
-
-            # remove /* css block comments */
-            contents = re.sub(r'/\*(.*?)\*/', '', contents, flags=re.MULTILINE)
-
-            # remove whitespace between template tags
-            contents = re.sub(r'%}\s+{%', '%}{%', contents, flags=re.MULTILINE)
-
-            # remove whitespace between template tags and html tags
-            contents = re.sub(r'%}\s+<', '%}<', contents, flags=re.MULTILINE)
-            contents = re.sub(r'>\s+{%', '>{%', contents, flags=re.MULTILINE)
-
-            # remove whitespace between template context variables and html tags
-            contents = re.sub(r'>\s+{{', '>{{', contents, flags=re.MULTILINE)
-            contents = re.sub(r'}}\s+<', '}}<', contents, flags=re.MULTILINE)
-
-            # remove whitespace between html tags
-            contents = re.sub(r'>\s+<', '><', contents, flags=re.MULTILINE)
-
-            # remove empty lines
-            contents = re.sub(r'\n\n', '\n', contents)
-
-            # handling inline javascript
-            contents = self.minify_scripts(contents)
-
-            # remove terminating newline
-            while len(contents) > 0 and contents[-1] == '\n':
-                contents = contents[:-1]
+                # remove terminating newline
+                while len(contents) > 0 and contents[-1] == '\n':
+                    contents = contents[:-1]
+            # if
 
         return contents
 
