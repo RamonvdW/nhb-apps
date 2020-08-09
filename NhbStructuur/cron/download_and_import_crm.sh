@@ -6,12 +6,9 @@
 
 # script for daily (or faster) execution by a crob job
 
-NHBAPPS="/var/www/nhb-apps"
 LOGDIR="/var/log/www"
 SPOOLDIR="/var/spool/crm"
 CONFIGFILE="download_crm_config.txt"
-
-# FUTURE: cleanup of spool directory
 
 ID=$(id -u)
 ID_ROOT=$(id -u root)
@@ -73,7 +70,7 @@ then
 
     echo "[INFO] Importing new data set" >> "$LOG"
 
-    (cd $NHBAPPS; python3.6 manage.py import_nhb_crm "$SPOOLFILE") &>> "$LOG"
+    ./manage.py import_nhb_crm "$SPOOLFILE" &>> "$LOG"
 
     echo "[INFO] Import finished" >> "$LOG"
 fi

@@ -6,7 +6,6 @@
 
 # script for daily (or faster) execution by a crob job
 
-NHBAPPS="/var/www/nhb-apps"
 LOGDIR="/var/log/www"
 SPOOLDIR="/var/spool/records"
 TMPDIR="/tmp/downloader"
@@ -45,7 +44,7 @@ fi
 
 # download the records
 echo "[INFO] Starting download" >> "$LOG"
-python3.6 ./download_gsheet.py &>> "$LOG"
+python ./download_gsheet.py &>> "$LOG"
 
 # import or barf
 if [ -e "$RECORDS" ]
@@ -66,7 +65,7 @@ then
 
         # import the records
         echo "[INFO] Importing records" >> "$LOG"
-        (cd $NHBAPPS; python3.6 manage.py import_records "$SPOOLFILE") &>> "$LOG"
+        ./manage.py import_records "$SPOOLFILE" &>> "$LOG"
     else
         echo "[INFO] Records have not changed" >> "$LOG"
     fi
