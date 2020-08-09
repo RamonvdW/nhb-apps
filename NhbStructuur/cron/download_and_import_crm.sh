@@ -70,6 +70,10 @@ then
 
     echo "[INFO] Importing new data set" >> "$LOG"
 
+    # move from NhbStructuur/cron/ to top-dir
+    echo "[DEBUG] pwd=$PWD"
+    cd ../..
+    echo "[DEBUG] pwd=$PWD"
     ./manage.py import_nhb_crm "$SPOOLFILE" &>> "$LOG"
 
     echo "[INFO] Import finished" >> "$LOG"

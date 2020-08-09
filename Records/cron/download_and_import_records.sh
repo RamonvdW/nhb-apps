@@ -63,6 +63,11 @@ then
         echo "[INFO] Storing records file in $SPOOLFILE" >> "$LOG"
         cp "$RECORDS" "$SPOOLFILE"
 
+        # move from Records/cron/ to top-dir
+        echo "[DEBUG] pwd=$PWD"
+        cd ../..
+        echo "[DEBUG] pwd=$PWD"
+
         # import the records
         echo "[INFO] Importing records" >> "$LOG"
         ./manage.py import_records "$SPOOLFILE" &>> "$LOG"
