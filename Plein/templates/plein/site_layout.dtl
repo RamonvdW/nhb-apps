@@ -75,7 +75,7 @@
         </div>
 
         <!-- TODO: minimize javascript using uglify -->
-        <script src="{% static 'materialize/materialize-new-1.js' %}"></script>
+        <script src="{% static 'materialize-new-1.js' %}"></script>
 
         <!-- framework init, after everything has been loaded and instantiated -->
         <script>
