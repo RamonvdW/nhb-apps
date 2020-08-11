@@ -118,17 +118,34 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
         context['deelcomp_rk'] = deelcomp_rk
         context['rayon'] = deelcomp_rk.nhb_rayon
 
-        if rol_nu == Rollen.ROL_BKO:
+        if rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO):
             deelcomp_bk = DeelCompetitie.objects.get(laag=LAAG_BK,
                                                      competitie=deelcomp_rk.competitie)
             context['url_bond'] = reverse('Competitie:bond-planning', kwargs={'deelcomp_pk': deelcomp_bk.pk})
 
-        context['regio_deelcomps'] = (DeelCompetitie
-                                      .objects
-                                      .filter(laag=LAAG_REGIO,
-                                              competitie=deelcomp_rk.competitie,
-                                              nhb_regio__rayon=deelcomp_rk.nhb_rayon)
-                                      .order_by('nhb_regio__regio_nr'))
+        deelcomps = (DeelCompetitie
+                     .objects
+                     .filter(laag=LAAG_REGIO,
+                             competitie=deelcomp_rk.competitie,
+                             nhb_regio__rayon=deelcomp_rk.nhb_rayon)
+                     .order_by('nhb_regio__regio_nr'))
+        context['regio_deelcomps'] = deelcomps
+
+        # zoek het aantal wedstrijden erbij
+        for deelcomp in deelcomps:
+            plan_pks = (DeelcompetitieRonde
+                        .objects
+                        .filter(deelcompetitie=deelcomp)
+                        .values_list('plan__pk', flat=True))
+            deelcomp.rondes_count = len(plan_pks)
+            deelcomp.wedstrijden_count = 0
+            for plan in (WedstrijdenPlan
+                         .objects
+                         .filter(pk__in=plan_pks)
+                         .prefetch_related('wedstrijden')):
+                deelcomp.wedstrijden_count += plan.wedstrijden.count()
+            # for
+        # for
 
         menu_dynamics(self.request, context, actief='competitie')
         return context

@@ -42,7 +42,7 @@
 {% if url_rayon %}
     <p>&nbsp;</p>
     <p><a class="btn-nhb-blauw" href="{{ url_rayon }}">
-    <i class="material-icons-round left">arrow_upward</i>Naar de rayon planning</a></p>
+    <i class="material-icons-round left">arrow_upward</i>Planning rayon</a></p>
 {% endif %}
 
 

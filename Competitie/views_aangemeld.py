@@ -280,9 +280,11 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
                 dagdelen: beschrijving van dagdelen voor de kolom headers
         """
 
+        alles_mag = (deelcomp.toegestane_dagdelen == '')
+
         context['dagdelen'] = dagdelen = list()
         for afkorting, beschrijving in DAGDEEL:
-            if afkorting in deelcomp.toegestane_dagdelen:
+            if alles_mag or (afkorting in deelcomp.toegestane_dagdelen):
                 dagdelen.append(beschrijving)
         # for
 
@@ -330,7 +332,7 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
             nhb_ver.counts_list = list()
             som = 0
             for afkorting in DAGDEEL_AFKORTINGEN:
-                if afkorting in deelcomp.toegestane_dagdelen:
+                if alles_mag or (afkorting in deelcomp.toegestane_dagdelen):
                     count = nhb_ver.counts_dict[afkorting]
                     nhb_ver.counts_list.append(count)
                     totals[afkorting] += count
@@ -342,7 +344,7 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
         context['totalen'] = totalen = list()
         som = 0
         for afkorting in DAGDEEL_AFKORTINGEN:
-            if afkorting in deelcomp.toegestane_dagdelen:
+            if alles_mag or (afkorting in deelcomp.toegestane_dagdelen):
                 count = totals[afkorting]
                 totalen.append(count)
                 som += count
@@ -355,6 +357,7 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
         """
 
         afstand = deelcomp.competitie.afstand
+        alles_mag = (deelcomp.toegestane_dagdelen == '')
 
         blazoenen = dict()
         for blazoen in COMP_BLAZOENEN[afstand]:
@@ -417,7 +420,7 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
             som = 0
             tellingen = blazoenen[blazoen]
             for afkorting in DAGDEEL_AFKORTINGEN:
-                if afkorting in deelcomp.toegestane_dagdelen:
+                if alles_mag or (afkorting in deelcomp.toegestane_dagdelen):
                     count = tellingen[afkorting]
                     kolommen.append(count)
                     som += count

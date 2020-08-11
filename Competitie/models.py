@@ -195,6 +195,7 @@ class DeelCompetitie(models.Model):
 
     # methode 3: toegestane dagdelen
     # komma-gescheiden lijstje met DAGDEEL: GE,AV
+    # LET OP: leeg = alles toegestaan!
     toegestane_dagdelen = models.CharField(max_length=20, default='', blank=True)
 
     # TODO: VSG/Vast, etc.
