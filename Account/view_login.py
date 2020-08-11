@@ -267,6 +267,9 @@ class LoginView(TemplateView):
                 # is valide url
                 return HttpResponseRedirect(next)
 
+        if account.otp_is_actief:
+            return HttpResponseRedirect(reverse('Functie:otp-controle'))
+
         return HttpResponseRedirect(reverse('Plein:plein'))
 
     def post(self, request, *args, **kwargs):
