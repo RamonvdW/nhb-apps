@@ -16,9 +16,12 @@
 <p>De clusters kunnen optioneel gebruikt worden om een regio op te delen in kleinere geografische gebieden.</p>
 <p>Dit kan om praktische redenen nodig zijn in jouw regio, bijvoorbeeld in verband met onredelijke reistijden.</p>
 
-<p>Je rol is <b>{{ huidige_rol }}</b>.</p>
-
 <p>Bij gebruik van clusters wordt voor de regiocompetitie voor elk cluster een aparte wedstrijdplanning gemaakt.<br>De Indoor en 25m 1pijl competities hebben onafhankelijke clusters.</p>
+
+<p>Handleiding: <a class="btn-nhb-blauw" href="{{ handleiding_clusters_url }}" target="_blank" rel="noopener noreferrer">
+    <i class="material-icons-round white-text left">help_outline</i>Clusters</a>
+</p>
+
 
 {% if regio_heeft_clusters %}
     <form action="{{ opslaan_url }}" method="post">

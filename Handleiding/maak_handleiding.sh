@@ -9,6 +9,7 @@ cd $(dirname $0)
 
 STATIC="./static/handleiding"
 TEMPL="./templates/handleiding"
+WIKI_EXPORT_DIR="../../../testserver/"
 WIKI="/tmp/wiki"
 WIKI_EXPORT="$WIKI/tmp/wiki_export.xml"
 
@@ -17,7 +18,7 @@ mkdir -p "$WIKI"
 rm -rf "$WIKI"/*
 
 # zoek de nieuwste export
-LATEST=$(ls -1rt ../../testserver/*wiki_export.tgz | tail -1)
+LATEST=$(ls -1rt $WIKI_EXPORT_DIR/*wiki_export.tgz | tail -1)
 if [ -z "$LATEST" ]
 then
     echo "[ERROR] Wiki export niet gevonden"
@@ -44,6 +45,7 @@ rm "$TEMPL"/*dtl
 echo "SITE_URL='hoi'" > ./copy_of_settings.py
 echo "DEBUG=True" >> ./copy_of_settings.py
 echo "ENABLE_DEBUG_TOOLBAR=False" >> ./copy_of_settings.py
+echo "ENABLE_WIKI=False" >> ./copy_of_settings.py
 cat ../nhb-apps/settings.py | grep -v "settings_local" >> ./copy_of_settings.py
 
 python3 -B ./maak_handleiding.py "$WIKI_EXPORT" "$TEMPL" $*

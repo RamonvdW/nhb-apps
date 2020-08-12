@@ -250,6 +250,8 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
             context['url_rayon'] = reverse('Competitie:rayon-planning',
                                            kwargs={'deelcomp_pk': rayon.pk})
 
+        context['handleiding_planning_regio_url'] = reverse('Handleiding:Planning_Regio')
+
         menu_dynamics(self.request, context, actief='competitie')
         return context
 
@@ -348,6 +350,8 @@ class RegioClusterPlanningView(UserPassesTestMixin, TemplateView):
 
         context['terug_url'] = reverse('Competitie:regio-planning',
                                        kwargs={'deelcomp_pk': deelcomp.pk})
+
+        context['handleiding_planning_regio_url'] = reverse('Handleiding:Planning_Regio')
 
         menu_dynamics(self.request, context, actief='competitie')
         return context

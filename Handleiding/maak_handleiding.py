@@ -105,6 +105,7 @@ class MaakHandleiding(object):
         in_nummerlijstje = False
         in_italic = False
         in_bold = False
+        in_code = False
 
         if self.debug_pagina:
             print('[DEBUG] wiki text:')
@@ -115,6 +116,16 @@ class MaakHandleiding(object):
         # newline = nieuwe paragraaf
         out = ""
         for line in text.split('\n'):
+
+            # doorgaan met een pre-formatted block
+            if in_code:
+                if len(line) >= 1 and line[0] == ' ':
+                    out += "\n" + line
+                    continue
+                else:
+                    out += '\n</pre>'
+                    in_code = False
+
             if out:
                 if self.debug_pagina:
                     print('[DEBUG] tdl out: %s' % out)
@@ -261,7 +272,7 @@ class MaakHandleiding(object):
                 out += '<li>' + line[2:] + '</li>\n'
                 continue
 
-            # normale regel
+            # beëindig lijstjes
             if in_lijstje:
                 out += '</ul>\n'
                 in_lijstje = False
@@ -270,6 +281,12 @@ class MaakHandleiding(object):
                 out += '</ol>\n'
                 in_nummerlijstje = False
 
+            if len(line) >= 1 and line[0] == ' ':
+                in_code = True
+                out = '<pre class="handleiding_code">' + line
+                continue
+
+            # normale regel
             out += '<p>' + line + '</p>\n'
         # for
 

@@ -64,6 +64,13 @@ input.table-filter {
     padding: 5px;
 }
 
+/* pre-formatted / code block in de handleiding */
+.handleiding_code {
+    padding: 10px;
+    color: #000;             /* donker zwart */
+    background-color: #eee;  /* nhb-grijs */
+}
+
 /* site feedback floater */
 .site-sidebar-box {
     width: 180px;

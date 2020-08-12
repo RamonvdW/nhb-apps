@@ -34,7 +34,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2020-08-11'
+SITE_VERSIE = '2020-08-12'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -323,6 +323,7 @@ HANDLEIDING_SEC = 'Handleiding_Secretaris'
 HANDLEIDING_WL = 'Handleiding_Wedstrijdleider'
 HANDLEIDING_HWL = 'Handleiding_Hoofdwedstrijdleider'
 HANDLEIDING_RCL = 'Handleiding_RCL'
+HANDLEIDING_PLANNING_REGIO = 'Planning_Regio'
 HANDLEIDING_RKO = 'Handleiding_RKO'
 HANDLEIDING_BKO = 'Handleiding_BKO'
 HANDLEIDING_BB = 'Handleiding_BB'
@@ -330,6 +331,8 @@ HANDLEIDING_2FA = 'Twee-factor_authenticatie'
 HANDLEIDING_ROLLEN = 'Rollen'
 HANDLEIDING_INTRO_NIEUWE_BEHEERDERS = 'Intro_nieuwe_beheerders'
 HANDLEIDING_SCHUTTERBOOG = 'Schutter-boog'
+HANDLEIDING_INSCHRIJFMETHODES = 'Inschrijfmethodes_Regiocompetitie'
+HANDLEIDING_CLUSTERS = 'Clusters'
 
 HANDLEIDING_PAGINAS = [
     HANDLEIDING_TOP,
@@ -344,6 +347,9 @@ HANDLEIDING_PAGINAS = [
     HANDLEIDING_ROLLEN,
     HANDLEIDING_INTRO_NIEUWE_BEHEERDERS,
     HANDLEIDING_SCHUTTERBOOG,
+    HANDLEIDING_PLANNING_REGIO,
+    HANDLEIDING_INSCHRIJFMETHODES,
+    HANDLEIDING_CLUSTERS,
     # pagina's van de handleiding die intern gerefereerd worden
     'Tips_voor_wiki_gebruik',
     'Handleiding_CWZ',

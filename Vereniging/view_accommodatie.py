@@ -452,6 +452,8 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
 
         context['terug_url'] = reverse('Plein:plein')
 
+        context['handleiding_clusters_url'] = reverse('Handleiding:Clusters')
+
         menu_dynamics(self.request, context, actief='hetplein')
         return context
 
