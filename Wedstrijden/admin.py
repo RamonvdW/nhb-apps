@@ -8,7 +8,25 @@ from django.contrib import admin
 from .models import WedstrijdLocatie, Wedstrijd, WedstrijdenPlan
 
 
+class WedstrijdAdmin(admin.ModelAdmin):             # pragma: no cover
+    """ Admin configuratie voor Wedstrijd """
+
+    filter_horizontal = ('indiv_klassen', 'team_klassen')
+
+    def get_queryset(self, request):
+        """ deze functie is voor prestatieverbetering
+            want helaas bestaat list_prefetch_related niet
+        """
+        # qs = super().get_queryset(request)
+        return (Wedstrijd
+                .objects
+                .select_related('locatie', 'vereniging')
+                .prefetch_related('indiv_klassen', 'team_klassen')
+                .all())
+
+
 class WedstrijdLocatieAdmin(admin.ModelAdmin):      # pragma: no cover
+    """ Admin configuratie voor WedstrijdLocatie """
 
     list_filter = ('zichtbaar',)
 
@@ -16,7 +34,7 @@ class WedstrijdLocatieAdmin(admin.ModelAdmin):      # pragma: no cover
 
     def get_queryset(self, request):
         """ deze functie is voor prestatieverbetering
-            helaas bestaat list_prefetch_related niet
+            want helaas bestaat list_prefetch_related niet
         """
         # qs = super().get_queryset(request)
         return (WedstrijdLocatie
@@ -26,7 +44,7 @@ class WedstrijdLocatieAdmin(admin.ModelAdmin):      # pragma: no cover
 
 
 admin.site.register(WedstrijdLocatie, WedstrijdLocatieAdmin)
-admin.site.register(Wedstrijd)
+admin.site.register(Wedstrijd, WedstrijdAdmin)
 admin.site.register(WedstrijdenPlan)
 
 # TODO: Wedstrijd admin scherm is langzaam omdat str(WedstrijdLocatie) een self.verenigingen.count() doet

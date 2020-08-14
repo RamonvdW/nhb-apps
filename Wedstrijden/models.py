@@ -55,7 +55,8 @@ class WedstrijdLocatie(models.Model):
         else:
             msg = ""
         msg += self.adres.replace('\n', ', ')
-        msg += " (%s verenigingen)" % self.verenigingen.count()
+        # kost te veel database toegangen in admin interface
+        # msg += " (%s verenigingen)" % self.verenigingen.count()
         return msg
 
     class Meta:
@@ -93,6 +94,9 @@ class Wedstrijd(models.Model):
 
     team_klassen = models.ManyToManyField(TeamWedstrijdklasse,
                                           blank=True)  # mag leeg zijn / gemaakt worden
+
+    def __str__(self):
+        return "(%s) %s %s bij %s" % (self.pk, self.datum_wanneer, self.tijd_begin_wedstrijd, self.vereniging)
 
     class Meta:
         """ meta data voor de admin interface """
