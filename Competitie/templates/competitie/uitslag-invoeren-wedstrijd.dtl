@@ -42,6 +42,11 @@
     </div>
 </div>
 
+<p>
+    <a class="btn-nhb-blauw" href="{{ url_terug }}">
+        <i class="material-icons-round left">arrow_back</i>Terug</a>
+</p>
+
 <p>Op deze pagina kan je de uitslag van een wedstrijd invoeren.</p>
 
 
@@ -157,6 +162,9 @@
             } // for
 
             opzoeken_toon_status(btn.dataset, "bezig..", "gray");
+
+            // toevoegen knop disabled maken
+            document.getElementById('id_btn_toevoegen').disabled = true;
 
             btn.dataset.xhr = xhr;      // ter voorkoming parallelle verzoeken
 
@@ -330,7 +338,7 @@
         let deelnemers = rsp['deelnemers']
         // sorteer deelnemers op invoeg-volgorde: nhb_nr
         deelnemers.sort(function(a,b) { return a.nhb_nr - b.nhb_nr });
-        console.log('sorted deelnemers:', deelnemers);
+        //console.log('sorted deelnemers:', deelnemers);
 
         let first_added_row;
         let row_nr = 0;
@@ -383,7 +391,7 @@
                 new_row.cells[1].innerHTML = deelnemer['naam'];
 
                 let span = new_row.cells[2].firstChild;
-                span.innerHTML = deelnemer['ver_nr'];
+                span.innerHTML = "[" + deelnemer['ver_nr'] + "]";
                 span.nextSibling.innerHTML = "&nbsp;" + deelnemer['ver_naam'];
 
                 new_row.cells[3].innerHTML = deelnemer['boog'];

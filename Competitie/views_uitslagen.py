@@ -111,6 +111,10 @@ class UitslagInvoerenWedstrijdView(UserPassesTestMixin, TemplateView):
         context['url_opslaan'] = reverse('Competitie:dynamic-scores-opslaan')
         context['url_deelnemers_ophalen'] = reverse('Competitie:dynamic-deelnemers-ophalen')
 
+        plan = wedstrijd.wedstrijdenplan_set.all()[0]
+        ronde = DeelcompetitieRonde.objects.get(plan=plan)
+        context['url_terug'] = reverse('Competitie:regio-ronde-planning', kwargs={'ronde_pk': ronde.pk})
+
         menu_dynamics(self.request, context, actief='competitie')
         return context
 
