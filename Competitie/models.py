@@ -221,7 +221,7 @@ class DeelcompetitieRonde(models.Model):
 
     # het cluster waar deze planning specifiek bij hoort (optioneel)
     cluster = models.ForeignKey(NhbCluster, on_delete=models.PROTECT,
-                                            null=True, blank=True)      # cluster is optioneel
+                                null=True, blank=True)      # cluster is optioneel
 
     # het week nummer van deze ronde
     # moet liggen in een toegestane reeks (afhankelijk van 18m/25m)
