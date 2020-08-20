@@ -9,6 +9,13 @@ from Account.models import Account
 from Schutter.models import SchutterBoog
 
 
+# als een schutter per ongeluk opgenomen is in de uitslag
+# dan kan de score aangepast wordt tot SCORE_WAARDE_VERWIJDERD
+# om aan te geven dat de schutter eigenlijk toch niet mee deed.
+# via scorehist zijn de wijzigingen dan nog in te zien
+SCORE_WAARDE_VERWIJDERD = 32767
+
+
 class Score(models.Model):
     """ Bijhouden van een specifieke score """
 
@@ -27,7 +34,7 @@ class Score(models.Model):
     afstand_meter = models.PositiveSmallIntegerField()
 
     def __str__(self):
-        return "%s %sm - %s" % (self.waarde, self.afstand_meter, self.schutterboog)
+        return "%s - %sm: %s" % (self.schutterboog, self.afstand_meter, self.waarde)
 
     objects = models.Manager()      # for the editor only
 
@@ -41,7 +48,10 @@ class ScoreHist(models.Model):
     nieuwe_waarde = models.PositiveSmallIntegerField()
 
     # datum van wijziging
-    datum = models.DateField()
+    datum = models.DateField()      # TODO: obsolete
+
+    # datum/tijdstip
+    when = models.DateTimeField(auto_now_add=True)      # automatisch invullen
 
     # wie heeft de wijziging gedaan (null = systeem)
     door_account = models.ForeignKey(Account, on_delete=models.SET_NULL, null=True)
@@ -68,7 +78,10 @@ def aanvangsgemiddelde_opslaan(schutterboog, afstand, gemiddelde, datum, door_ac
         score = Score.objects.get(schutterboog=schutterboog, is_ag=True, afstand_meter=afstand)
     except Score.DoesNotExist:
         # eerste aanvangsgemiddelde voor deze afstand
-        score = Score(schutterboog=schutterboog, is_ag=True, waarde=waarde, afstand_meter=afstand)
+        score = Score(schutterboog=schutterboog,
+                      is_ag=True,
+                      waarde=waarde,
+                      afstand_meter=afstand)
         score.save()
 
         hist = ScoreHist(score=score,
