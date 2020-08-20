@@ -7,6 +7,8 @@
 from django.db import models
 from BasisTypen.models import IndivWedstrijdklasse, TeamWedstrijdklasse
 from NhbStructuur.models import NhbVereniging
+from Score.models import Score
+
 
 # FUTURE: uitbreiden met meer mogelijkheden zoals buitenbaan, veld, 3D, etc.
 BAAN_TYPE = (('X', 'Onbekend'),
@@ -65,6 +67,26 @@ class WedstrijdLocatie(models.Model):
         verbose_name_plural = "Wedstrijdlocaties"
 
 
+class WedstrijdUitslag(models.Model):
+
+    # de maximale score die gehaald (en ingevoerd) mag worden
+    # dit afhankelijk van het type wedstrijd
+    max_score = models.PositiveSmallIntegerField()      # max = 32767
+
+    # 18, 25, 70, etc.
+    afstand_meter = models.PositiveSmallIntegerField()
+
+    # scores bevat SchutterBoog en komt met ScoreHist
+    scores = models.ManyToManyField(Score,
+                                    blank=True)  # mag leeg zijn / gemaakt worden
+
+    # hier houden we geen klassen bij - het is geen inschrijflijst
+    class Meta:
+        """ meta data voor de admin interface """
+        verbose_name = "Wedstrijduitslag"
+        verbose_name_plural = "Wedstrijduitslagen"
+
+
 class Wedstrijd(models.Model):
     """ Wedstrijd is de kleinste planbare eenheid """
 
@@ -94,6 +116,10 @@ class Wedstrijd(models.Model):
 
     team_klassen = models.ManyToManyField(TeamWedstrijdklasse,
                                           blank=True)  # mag leeg zijn / gemaakt worden
+
+    # uitslag van deze wedstrijd
+    uitslag = models.ForeignKey(WedstrijdUitslag, on_delete=models.PROTECT,
+                                blank=True, null=True)
 
     def __str__(self):
         return "(%s) %s %s bij %s" % (self.pk, self.datum_wanneer, self.tijd_begin_wedstrijd, self.vereniging)
