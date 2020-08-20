@@ -11,7 +11,8 @@ from . import (views_aangemeld,
                views_klassegrenzen,
                views_overzicht,
                views_planning,
-               views_tussenstand)
+               views_tussenstand,
+               views_uitslagen)
 
 app_name = 'Competitie'
 
@@ -102,6 +103,23 @@ urlpatterns = [
     path('planning/wedstrijd/verwijder/<wedstrijd_pk>/',
          views_planning.VerwijderWedstrijdView.as_view(),
          name='verwijder-wedstrijd'),
+
+
+    path('uitslagen-invoeren/wedstrijd/<wedstrijd_pk>/',
+         views_uitslagen.UitslagInvoerenWedstrijdView.as_view(),
+         name='uitslag-invoeren-wedstrijd'),
+
+    path('dynamic/deelnemers-ophalen/',
+         views_uitslagen.DynamicDeelnemersOphalenView.as_view(),
+         name='dynamic-deelnemers-ophalen'),
+
+    path('dynamic/check-nhbnr/',
+         views_uitslagen.DynamicZoekOpNhbnrView.as_view(),
+         name='dynamic-check-nhbnr'),
+
+    path('dynamic/scores-opslaan/',
+         views_uitslagen.DynamicScoresOpslaanView.as_view(),
+         name='dynamic-scores-opslaan'),
 
 
     path('tussenstand/',

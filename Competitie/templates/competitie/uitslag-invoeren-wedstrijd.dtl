@@ -1,0 +1,584 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2020 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Uitslag invoeren{% endblock %}
+
+{% block pagina %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-uitslag-invoeren-wedstrijd" %}
+
+<h4>Uitslag invoeren</h4>
+
+<div class="row">
+
+    <!-- toon gegevens van de competitie, regio, wedstrijd en accommodatie in blauwe box -->
+    <div class="col s12 m10 l8 xl6 offset-m1 offset-l2 offset-xl3">
+        <div class="white-text nhb-blauw z-depth-2">
+
+            <div class="row small-row">
+                <div class="col s3">Competitie:</div>
+                <div class="col s8">{{ deelcomp.competitie.beschrijving }}</div>
+            </div>
+
+            <div class="row small-row">
+                <div class="col s3">Regio:</div>
+                <div class="col s8">{{ deelcomp.nhb_regio }}</div>
+            </div>
+
+            <div class="row small-row">
+                <div class="col s3">Wedstrijd:</div>
+                <div class="col s8">{{ wedstrijd.datum_wanneer }} om {{ wedstrijd.tijd_begin_wedstrijd }}</div>
+            </div>
+
+            <div class="row small-row">
+                <div class="col s3">Bij vereniging:</div>
+                <div class="col s8">{{ wedstrijd.vereniging }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<p>Op deze pagina kan je de uitslag van een wedstrijd invoeren.</p>
+
+
+<script type="text/javascript">
+    function opzoeken_toon_status(dataset, tekst, color)
+    {
+        for (let d in dataset)
+        {
+            if (d != 'xhr' && d != 'opzoeken')
+            {
+                const id = dataset[d];
+                const el = document.getElementById(id);
+
+                // underscore aan het einde wordt gebruikt voor twee regels
+                // die onder elkaar staan, zodat de melding maar 1x getoond wordt
+                if (id.slice(-1) == '_')
+                {
+                    el.innerHTML = "";
+                    el.style.color = color;
+                }
+                else
+                {
+                    el.innerHTML = tekst;
+                    el.style.color = color;
+                }
+            }
+        } // for
+    }
+
+    function opzoeken_klaar(xhr, btn)
+    {
+        //console.log('opzoeken_klaar: ready=',xhr.readyState, 'status=', xhr.status);
+        let is_fail = true;
+        if (xhr.readyState == XMLHttpRequest.DONE && xhr.status == 200)
+        {
+            // verzoek is klaar en we hebben een antwoord
+            // responseText is leeg bij connection failure
+            if (xhr.responseText != "")
+            {
+                const rsp = JSON.parse(xhr.responseText);
+                //console.log('response:', rsp);
+
+                // sla het resultaat op voor gebruik in toevoegen()
+                const el = document.getElementById('id_zoekresultaat');
+                el.value = rsp;
+
+                // antwoord bevat fail=1 in verschillende situaties:
+                // nhb nummer niet gevonden, geen actief lid
+                if (rsp['fail'] === undefined)
+                {
+                    is_fail = false;
+                    for (let d in btn.dataset)
+                    {
+                        if (d != 'xhr' && d != 'opzoeken')
+                        {
+                            const antwoord = rsp[d];
+                            if (antwoord !== undefined)
+                            {
+                                let el = document.getElementById(btn.dataset[d]);
+                                el.innerHTML = antwoord;
+                                el.style.color = "";
+                            }
+                        }
+                    } // for
+                }
+            }
+        }
+
+        const el = document.getElementById('id_btn_toevoegen');
+        if (is_fail)
+        {
+            el.disabled = true;
+            opzoeken_toon_status(btn.dataset, "niet gevonden", "red");
+        }
+        else
+        {
+            el.disabled = false;
+        }
+    }
+
+    function opzoeken_timeout(xhr)
+    {
+        // voorkom reactie bij ontvangst laat antwoord
+        xhr.abort();
+
+        // note: opzoeken_klaar wordt zo aangeroepen met readyState=0
+        // deze zet de foutmelding-status op het scherm
+    }
+
+    function opzoeken(btn)
+    {
+        // deze functie wordt aangeroepen bij druk op de knop
+
+        // voorkom parallelle verzoeken
+        if (btn.dataset['xhr'] === undefined)
+        {
+            const xhr = new XMLHttpRequest();
+
+            // doorloop de data- attributen van de knop
+            let obj = { wedstrijd_pk: '{{ wedstrijd.pk }}' };
+
+            // haal de data op die we moeten sturen
+            for (let d in btn.dataset)
+            {
+                if (d === 'opzoeken')
+                {
+                    // zoek het DOM element met deze id
+                    let el = document.getElementById(btn.dataset[d]);
+                    let nhb_nr = el.value.slice(0,6);
+                    if (nhb_nr === '') return;   // hanteer lege input
+                    obj['nhb_nr'] = nhb_nr;
+                }
+            } // for
+
+            opzoeken_toon_status(btn.dataset, "bezig..", "gray");
+
+            btn.dataset.xhr = xhr;      // ter voorkoming parallelle verzoeken
+
+            const data = JSON.stringify(obj);
+
+            // POST voorkomt caching
+            xhr.open("POST", "{{ url_check_nhbnr }}", true);    // true = async
+            xhr.timeout = 3000;                                 // 3 sec
+            xhr.onloadend = function(){
+                                opzoeken_klaar(xhr, btn);
+                                delete btn.dataset.xhr;         // nieuw verzoek toegestaan
+                            }
+            xhr.ontimeout = function(){ opzoeken_timeout(xhr); }
+            xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+            xhr.send(data);
+        }
+        // else: verzoek loopt nog, dus laat gebruiker wachten
+    }
+
+    function toevoegen()
+    {
+        // voeg de gevonden schutter toe aan de tabel
+        // en geef dit door aan de website via een POST
+
+        // als nhb_nr al in de tabel staat, dan niet toevoegen
+        // zet focus op score invoer veld
+        // en maak zoekveld weer leeg
+
+        const el_rsp = document.getElementById('id_zoekresultaat');
+        const rsp = el_rsp.value;
+        //console.log('zoekresultaat:', rsp);
+        el_rsp.value = ""
+
+        const nhb_nr = rsp['nhb_nr'];
+        const naam = rsp['naam'];
+        const ver = rsp['vereniging'];                  // "[1234] De Naam"
+        const ver_nr = ver.slice(0, 6);                 // "[1234]"
+        const ver_naam = "&nbsp;" + ver.slice(7);       // "De Naam"
+        //console.log(nhb_nr, naam, ver_nr, ver_naam);
+
+        // zoek het plekje in de tabel waar deze toegevoegd moet worden
+        const table = document.getElementById('table1');
+        const body = table.tBodies[0];
+        let row_smaller = 0;
+        for (let i=0, row; row = body.rows[i]; i++)     // stops when row=null
+        {
+            const filter_cmd = row.dataset["tablefilter"];
+            if (filter_cmd === "stop") break;           // from the for
+
+            const row_nhb_nr = row.cells[0].innerText;   // nhbnr
+            if (row_nhb_nr < nhb_nr) row_smaller = i;
+
+            // voorkom dubbele
+            if (row_nhb_nr == nhb_nr)
+            {
+                body.deleteRow(i);          // TODO: dit verwijderd uitslag!!
+                i--;        // manipulate for-loop
+            }
+        } // for
+
+        // table filter uitzetten zodat de nieuwe regel getoond kan worden
+        // maak zoekveld leeg; dit triggert myTableFilter()
+        document.getElementById("table1_zoeken_input").value = "";
+
+        // voeg een regel(s) toe aan de tabel, op de juiste positie
+        // doe dit door een kopie te maken
+        const base_row = body.rows[0];      // regel om te clonen
+        let row = body.rows[row_smaller];
+        const bogen = rsp['bogen'];
+        for (let i=0, tup; tup = bogen[i]; i++)
+        {
+            const new_row = base_row.cloneNode(true);
+
+            const pk = tup['pk'];
+            const boog = tup['boog'];
+
+            // volgende statement is gelijk aan insertAfter, welke niet bestaat
+            // werkt ook aan het einde van de tabel
+            // zie https://stackoverflow.com/questions/4793604/how-to-insert-an-element-after-another-element-in-javascript-without-using-a-lib
+            row.parentNode.insertBefore(new_row, row.nextSibling);
+
+            // pas de nieuwe regel aan met de gevonden data
+            new_row.cells[0].innerHTML = nhb_nr;
+            new_row.cells[0].dataset.pk = pk;
+
+            new_row.cells[1].innerHTML = naam;
+
+            let span = new_row.cells[2].firstChild;
+            span.innerHTML = ver_nr;
+            span.nextSibling.innerHTML = ver_naam;
+
+            new_row.cells[3].innerHTML = boog;
+
+            // maak de nieuwe row zichtbaar
+            new_row.classList.remove('hide');
+
+            row = new_row;
+        } // for
+
+        // scroll nieuwe regel into view + zet focus op invoer score
+        body.rows[row_smaller + 1].cells[4].firstChild.focus();
+
+        // zoekveld weer leeg maken
+        document.getElementById('id_nhbnr').value = "";
+
+        const el_naam = document.getElementById('id_naam');
+        el_naam.innerHTML = "Naam van de schutter";
+        el_naam.style.color = "grey";
+
+        const el_ver = document.getElementById('id_ver');
+        el_ver.innerHTML = "Naam van de vereniging";
+        el_ver.style.color = "grey";
+
+        document.getElementById('id_regio_').innerHTML = "";
+
+        // toevoegen knop weer disabled maken
+        document.getElementById('id_btn_toevoegen').disabled = true;
+    }
+
+    // sla de ingevoerde scores op door een POST naar de website
+    function opslaan(btn)
+    {
+        const table = document.getElementById('table1');
+        const body = table.tBodies[0];
+
+        let obj = { wedstrijd_pk: {{ wedstrijd.pk }} };
+        // begin bij 1 om de clone-template over te slaan
+        for (let i=1, row; row = body.rows[i]; i++)     // stops when row=null
+        {
+            const filter_cmd = row.dataset["tablefilter"];
+            if (filter_cmd === "stop") break;           // from the for
+
+            const pk = row.cells[0].dataset.pk;
+            const score = row.cells[4].firstChild.value;
+            //console.log('pk:', pk, 'score:', score);
+
+            // lege scores juist wel meesturen, dan kan een verkeerd nhbnr
+            // nog uit de uitslag gehaald worden door de score leeg te maken!
+            //if (score !== "")
+            obj[pk] = score;
+        } // for
+
+        const data = JSON.stringify(obj);
+
+        btn.disabled = true;
+
+        const xhr = new XMLHttpRequest();
+
+        // POST voorkomt caching
+        xhr.open("POST", "{{ url_opslaan }}", true);        // true = async
+        xhr.timeout = 3000;                                 // 3 sec
+        xhr.onloadend = function() { btn.disabled = false; }
+        xhr.ontimeout = function() { btn.disabled = false; }
+        xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+        xhr.send(data);
+    }
+
+    function deelnemers_ophalen_toevoegen(rsp)
+    {
+        // voeg de schuttersboog toe aan de tabel, tenzij al aanwezig
+        //  (voorkomt verwijderen van al ingevoerde scores)
+
+        const table = document.getElementById('table1');
+        const body = table.tBodies[0];
+        const base_row = body.rows[0];      // regel om te clonen
+
+        // table filter uitzetten zodat de nieuwe regels getoond kunnen worden
+        // maak zoekveld leeg; dit triggert myTableFilter()
+        document.getElementById("table1_zoeken_input").value = "";
+
+        let deelnemers = rsp['deelnemers']
+        // sorteer deelnemers op invoeg-volgorde: nhb_nr
+        deelnemers.sort(function(a,b) { return a.nhb_nr - b.nhb_nr });
+        console.log('sorted deelnemers:', deelnemers);
+
+        let first_added_row;
+        let row_nr = 0;
+        for (let i=0, deelnemer; deelnemer = deelnemers[i]; i++)
+        {
+            const nhb_nr = deelnemer['nhb_nr'];
+            let skip = false;
+            while (row_nr <= body.rows.length)      // stop eerder: op tablefilter=stop
+            {
+                const row = body.rows[row_nr];
+
+                const filter_cmd = row.dataset["tablefilter"];
+                if (filter_cmd === "stop")
+                {
+                    row_nr -= 1;    // terug naar een echte regel
+                    break;          // from the while
+                }
+
+                const row_nhb_nr = row.cells[0].innerText;
+
+                if (nhb_nr == row_nhb_nr)
+                {
+                    // TODO: ook boogtype meenemen in de controle!!
+                    // dit is een dubbele
+                    skip = true;
+                    break;
+                }
+                else if (nhb_nr < row_nhb_nr)
+                {
+                    // nhb_nr is minder dan nhb_nr in deze regel
+                    row_nr -= 1;    // toevoegen voor deze regel
+                    break;          // from the while
+                }
+                else
+                {
+                    // blijf zoeken
+                    row_nr += 1;
+                }
+            }
+
+            if (!skip)
+            {
+                const row = body.rows[row_nr];
+                const new_row = base_row.cloneNode(true);
+
+                // pas de nieuwe regel aan met de ontvangen data
+                new_row.cells[0].innerHTML = nhb_nr;
+                new_row.cells[0].dataset.pk = deelnemer['pk'];
+
+                new_row.cells[1].innerHTML = deelnemer['naam'];
+
+                let span = new_row.cells[2].firstChild;
+                span.innerHTML = deelnemer['ver_nr'];
+                span.nextSibling.innerHTML = "&nbsp;" + deelnemer['ver_naam'];
+
+                new_row.cells[3].innerHTML = deelnemer['boog'];
+
+                // volgende statement is gelijk aan insertAfter, welke niet bestaat
+                // werkt ook aan het einde van de tabel
+                // zie https://stackoverflow.com/questions/4793604/how-to-insert-an-element-after-another-element-in-javascript-without-using-a-lib
+                row.parentNode.insertBefore(new_row, row.nextSibling);
+
+                row_nr += 1;        // ga verder op de zojuist toegevoegd regel
+
+                if (first_added_row === undefined) first_added_row = row_nr;
+            }
+        } // for
+
+        // maak alle nieuwe regels in een blok operatie zichtbaar
+        if (first_added_row !== undefined)
+        {
+            // er zijn regels toegevoegd
+            // begin bij 1, want 0 is de clone template
+            for (let i=1, row; row = body.rows[i]; i++)
+            {
+                const filter_cmd = row.dataset["tablefilter"];
+                if (filter_cmd === "stop") break;  // from the for
+
+                // maak de nieuwe row zichtbaar
+                row.classList.remove('hide');
+
+                if (i == first_added_row)
+                    row.cells[4].firstChild.focus();
+            }
+        }
+    }
+
+    function deelnemers_ophalen_klaar(xhr, btn)
+    {
+        let is_fail = true;
+        //console.log('deelnemers_ophalen_klaar: ready=',xhr.readyState, 'status=', xhr.status);
+        if (xhr.readyState == XMLHttpRequest.DONE)
+        {
+            if (xhr.status == 200)
+            {
+                // verzoek is klaar en we hebben een antwoord
+                // responseText is leeg bij connection failure
+                if (xhr.responseText != "")
+                {
+                    const rsp = JSON.parse(xhr.responseText);
+                    deelnemers_ophalen_toevoegen(rsp);
+                }
+            }
+            else
+            {
+                // er is een fout opgetreden
+                // maak de knop weer actief voor een nieuwe poging
+                btn.disabled = false;
+            }
+        }
+    }
+
+    function deelnemers_ophalen(btn)
+    {
+        btn.disabled = true;        // knop is voor eenmalig gebruik
+
+        const obj = { deelcomp_pk: {{ deelcomp.pk }},
+                      wedstrijd_pk: {{ wedstrijd.pk }} };
+        const data = JSON.stringify(obj);
+        const xhr = new XMLHttpRequest();
+
+        // POST voorkomt caching
+        xhr.open("POST", "{{ url_deelnemers_ophalen }}", true);  // true = async
+        xhr.timeout = 5000;                                      // 5 sec
+        xhr.onloadend = function() { deelnemers_ophalen_klaar(xhr, btn); }
+        xhr.ontimeout = function() { btn.disabled = false; }     // sta nieuw gebruik knop toe
+        xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+        xhr.send(data);
+    }
+
+    function controleer_score(el)
+    {
+        let color = "";
+
+        // /\D/.test() matches digits and returns true if there are non-digits
+        const value = el.value;
+        if (/\D/.test(value) || value < 0 || value > {{ wedstrijd.uitslag.max_score }})
+            color = "red";
+
+        el.style.color = color;
+    }
+</script>
+
+
+<table class="white" id="table1">
+
+    <thead>
+        <tr>        <!-- filter veld -->
+            <td class="table-filter" colspan="3">
+                <input id="table1_zoeken_input" class="table-filter" autofocus oninput="myTableFilter(this, 'table1')" placeholder="Zoeken"/>
+            </td>
+            <td colspan="2"/>
+        </tr>
+        <tr>
+            <th filter="on">NHB nummer</th>
+            <th filter="on">Naam</th>
+            <th filter="on">Vereniging</th>
+            <th>Boog type</th>
+            <th>Score</th>
+        </tr>
+    </thead>
+
+    <!-- eerste regel van de body is een template om een 'clone' mee uit te voeren
+         dit maakt ook de JS eenvoudiger omdat we nooit in hoeven te voegen voor row[0] -->
+    <tr class="hide">
+        <td data-pk="0">000000</td>
+        <td>dit is een niet zo korte naam</td>
+        <td>
+            <span>[0000]</span>
+            <span class="hide-on-small-only">&nbsp;naam van de vereniging</span>
+        </td>
+        <td>boogtype</td>
+        <td><input type="text" oninput="controleer_score(this)" placeholder="0" value="" size="3" maxlength="3" style="width:3em; height:2rem; margin:0"></td>
+    </tr>
+
+    {% for score in scores %}
+        <tr>
+            <td data-pk="{{ score.schutterboog.pk }}">{{ score.schutterboog.nhblid.nhb_nr }}</td>
+            <td>{{ score.schutterboog.nhblid.volledige_naam }}</td>
+            <td>
+                <span>[{{ score.schutterboog.nhblid.bij_vereniging.nhb_nr }}]</span>
+                <span class="hide-on-small-only">&nbsp;{{ score.schutterboog.nhblid.bij_vereniging.naam }}</span>
+            </td>
+            <td>{{ score.schutterboog.boogtype.beschrijving }}</td>
+            <td><input type="text" oninput="controleer_score(this)" placeholder="0" value="{{ score.waarde }}" size="3" maxlength="3" style="width:3em; height:2rem; margin:0"></td>
+        </tr>
+    {% endfor %}
+
+
+    <tr class="nhb-grijs" data-tablefilter="stop" style="border: 0px">
+        <td colspan="5" class="center-align">
+            <button class="btn-nhb-blauw" onclick="deelnemers_ophalen(this)">Waarschijnlijke deelnemers toevoegen</button>
+        </td>
+    </tr>
+
+    <!-- Hieronder: zoekveld voor ander lid (nhb-nr >> naam + vereniging) -->
+
+    <tr class="nhb-grijs" data-tablefilter="stop">
+        <td colspan="5">
+            <span>Gebruik onderstaand formulier om een ander NHB nummer toe te voegen</span>
+        </td>
+    </tr>
+
+    <tr>
+        <th>NHB nummer</th>
+        <th>Naam</th>
+        <th>Vereniging</th>
+        <th colspan="2"/>   <!-- kolom voor knop 'toevoegen' -->
+    </tr>
+
+    <tr style="border: 0px">
+        <td>
+            <input id="id_nhbnr" type="text" placeholder="NHB nummer" size="6" maxlength="6" style="width:auto; margin:0">
+            <div id="id_zoekresultaat" style="display: none"></div>
+        </td>
+
+        <td id="id_naam" style="color:gray">
+            <span>Naam van de schutter</span>
+        </td>
+
+        <td>
+            <span id="id_ver" style="color:gray">Naam van de vereniging</span>
+            <br>
+            <span id="id_regio_"></span>
+              <!-- underscore ^  onderdrukt status melding -->
+        </td>
+
+        <td colspan="2">
+            <button id="id_btn_toevoegen" class="btn-nhb-blauw" onclick="toevoegen()" disabled>
+                <i class="material-icons-round left">add</i>Toevoegen</button>
+        </td>
+    </tr>
+
+    <tr>
+        <td colspan="2">
+            <button class="btn-nhb-blauw" onclick="opzoeken(this)" data-opzoeken="id_nhbnr" data-naam="id_naam" data-vereniging="id_ver", data-regio="id_regio_">
+                <i class="material-icons-round left">search</i>Zoek</button>
+        </td>
+        <td colspan="2"></td>
+    </tr>
+
+</table>
+
+<div class="fixed-action-btn">
+    <button class="btn-nhb-rood" onclick="opslaan(this)">
+        <i class="material-icons-round left">check</i>Opslaan</button>
+</div>
+
+
+{% endblock %}
+

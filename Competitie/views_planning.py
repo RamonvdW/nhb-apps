@@ -11,7 +11,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Plein.menu import menu_dynamics
 from Functie.rol import Rollen, rol_get_huidige
 from NhbStructuur.models import NhbCluster, NhbVereniging
-from Wedstrijden.models import Wedstrijd
+from Wedstrijden.models import Wedstrijd, WedstrijdenPlan
 from .models import (LAAG_REGIO, LAAG_RK, LAAG_BK,
                      DeelCompetitie, DeelcompetitieRonde, maak_deelcompetitie_ronde)
 from types import SimpleNamespace
@@ -494,6 +494,13 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
 
         context['ronde_opslaan_url'] = reverse('Competitie:regio-ronde-planning',
                                                kwargs={'ronde_pk': ronde.pk})
+
+        # uitslagen invoeren
+        for wedstrijd in context['wedstrijden']:
+            # TODO: knop pas beschikbaar maken als de wedstrijd begin
+            wedstrijd.url_uitslag_invoeren = reverse('Competitie:uitslag-invoeren-wedstrijd',
+                                                     kwargs={'wedstrijd_pk': wedstrijd.pk})
+        # for
 
         rol_nu = rol_get_huidige(self.request)
         if rol_nu != Rollen.ROL_RCL:

@@ -116,6 +116,7 @@
             <th>Wanneer</th>
             <th>Waar</th>
             <th><!-- kolom voor wijzig knoppen --></th>
+            <th><!-- kolom voor uitslag invoeren knoppen --></th>
         </tr>
     </thead>
 
@@ -136,6 +137,14 @@
                 {% if wedstrijd.url_wijzig %}
                     <a class="btn-nhb-blauw" href="{{ wedstrijd.url_wijzig }}">
                         <i class="material-icons-round left">arrow_forward</i>Aanpassen</a>
+                {% endif %}
+            </td>
+
+            <!-- knop om uitslagen in te voeren -->
+            <td>
+                {% if wedstrijd.url_uitslag_invoeren %}
+                    <a class="btn-nhb-blauw" href="{{ wedstrijd.url_uitslag_invoeren }}">
+                        <i class="material-icons-round left">arrow_forward</i>Uitslag invoeren</a>
                 {% endif %}
             </td>
         </tr>
