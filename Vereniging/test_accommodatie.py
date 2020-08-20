@@ -52,6 +52,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
 
         # maak een locatie aan
         loc = WedstrijdLocatie()
+        loc.adres = 'Grote baan'
         loc.save()
         loc.verenigingen.add(ver)
         self.loc1 = loc
@@ -99,6 +100,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
 
         # maak een locatie aan
         loc = WedstrijdLocatie()
+        loc.adres = 'Kleine baan'
         loc.save()
         loc.verenigingen.add(ver)
         self.loc2 = loc
