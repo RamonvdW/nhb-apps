@@ -14,23 +14,23 @@
 <script>
 function post_datums() {
     // voer een POST uit om toe te voegen
-    var form = document.createElement('form');
+    const form = document.createElement('form');
     form.setAttribute('method', 'post');
     form.setAttribute('action', '{{ wijzig_url }}');
 
     for (let nr = 1; nr <= 4; nr++) {
-        var el = document.querySelector('#datum' + nr);
-        var inp = document.createElement('input');
+        const el = document.querySelector('#datum' + nr);
+        const inp = document.createElement('input');
         inp.type = "hidden";
         inp.name = "datum" + nr;
         inp.value = el.M_Datepicker.toString('yyyy-mm-dd');
         form.appendChild(inp);
     }
 
-    var inp = document.createElement('input');
+    const inp = document.createElement('input');
     inp.type = "hidden";
     inp.name = "csrfmiddlewaretoken";
-    inp.value = getCookie('csrftoken');
+    inp.value = getCookie('csrftoken'); // TODO: "{{ csrf_token }}" mag ook (zie uitslag-invoeren-wedstrijd.dtl)
     form.appendChild(inp);
 
     form.style.display = 'hidden';

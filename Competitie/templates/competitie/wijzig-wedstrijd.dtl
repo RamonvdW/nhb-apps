@@ -138,10 +138,12 @@
 <!-- initialisatie van de time pickers -->
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        var el = document.querySelector('#tijd1');
-        var inst = M.Timepicker.init(el, { twelveHour: false,
-                                           defaultTime: "{{ wedstrijd.tijd_begin_wedstrijd_str }}",
-                                         });
+        const el = document.querySelector('#tijd1');
+        const options = {
+                        twelveHour: false,
+                        defaultTime: "{{ wedstrijd.tijd_begin_wedstrijd_str }}",
+                    };
+        const inst = M.Timepicker.init(el, options);
         inst._updateTimeFromInput();
         inst.done();
     })

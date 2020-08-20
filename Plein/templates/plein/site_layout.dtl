@@ -81,9 +81,9 @@
         <script>
             function discover_popup_delayed_open() {
                 // in de tussentijd kan het scherm al weer groter zijn geworden
-                var menu_is_hidden = window.matchMedia("(max-width: 985px)");
+                let menu_is_hidden = window.matchMedia("(max-width: 985px)");
                 if (menu_is_hidden.matches) {
-                    var elem = document.querySelector(".tap-target");
+                    let elem = document.querySelector(".tap-target");
                     M.TapTarget.getInstance(elem).open();
                 }
             }
@@ -92,7 +92,7 @@
                 // scherm is kleiner geworden (of initieel klein), dus toon de tap target
                 if (mq_event == null || mq_event.matches) {
                     // cookie zorgt ervoor dat de pop-up maar 3x tonen
-                    var count = getCookieNumber("menu_discover");
+                    let count = getCookieNumber("menu_discover");
                     if (count < 3) {
                         document.cookie = "menu_discover=" + (count + 1) + "; path=/";
                         // toon met een kleine vertraging
@@ -104,15 +104,15 @@
             function discover_popup_hide(mq_event) {
                 // scherm is kleiner geworden, dus haal de tap-target uit beeld
                 if (mq_event.matches) {
-                    var elem = document.querySelector(".tap-target");
+                    let elem = document.querySelector(".tap-target");
                     M.TapTarget.getInstance(elem).close();
                 }
             }
 
             function closeTapTarget(id) {
                 // haal het tap-target element uit beeld
-                var elem = document.getElementById(id);
-                var inst = M.TapTarget.getInstance(elem);
+                let elem = document.getElementById(id);
+                let inst = M.TapTarget.getInstance(elem);
                 inst.close();       // administratief
                 inst.destroy();     // verwijderd visuele elementen
 
@@ -122,26 +122,26 @@
 
             document.addEventListener("DOMContentLoaded", function() {
                 // sidenav
-                var elems = document.querySelectorAll(".sidenav");
-                var insts = M.Sidenav.init(elems, {});
+                let elems = document.querySelectorAll(".sidenav");
+                M.Sidenav.init(elems, {});
 
                 // accordeons
                 // TODO: defaults statisch aanpassen
-                options = { inDuration: 100,    // default is 300
-                            outDuration: 100    // default is 300
-                          };
-                var elems = document.querySelectorAll(".collapsible");
-                var insts = M.Collapsible.init(elems, options);
+                const options = { inDuration: 100,    // default is 300
+                                  outDuration: 100    // default is 300
+                                };
+                elems = document.querySelectorAll(".collapsible");
+                M.Collapsible.init(elems, options);
 
                 // tooltips
-                var elems = document.querySelectorAll(".tooltipped");
-                var insts = M.Tooltip.init(elems, { enterDelay: 1000 });
+                elems = document.querySelectorAll(".tooltipped");
+                M.Tooltip.init(elems, { enterDelay: 1000 });
 
                 // feature discovery
-                var elems = document.querySelectorAll(".tap-target");
-                var insts = M.TapTarget.init(elems, {});
+                elems = document.querySelectorAll(".tap-target");
+                M.TapTarget.init(elems, {});
 
-                var count = getCookieNumber("menu_discover");
+                let count = getCookieNumber("menu_discover");
                 if (count < 3) {
 
                     // -------------
@@ -152,10 +152,10 @@
                     // - variables.css: media query ranges
                     // -------------
 
-                    var menu_is_shown = window.matchMedia("(min-width: 1021px)");
+                    let menu_is_shown = window.matchMedia("(min-width: 1021px)");
                     menu_is_shown.addListener(discover_popup_hide);
 
-                    var menu_is_hidden = window.matchMedia("(max-width: 1020px)");
+                    let menu_is_hidden = window.matchMedia("(max-width: 1020px)");
                     menu_is_hidden.addListener(discover_popup_show);
                     if (menu_is_hidden.matches) {
                         // show immediately
@@ -164,19 +164,19 @@
                 }
 
                 // rolgordijnen
-                var elems = document.querySelectorAll("select");
-                var insts = M.FormSelect.init(elems, {});
+                elems = document.querySelectorAll("select");
+                M.FormSelect.init(elems, {});
             })
         </script>
 
         <!-- helper functie om een opgeslagen cookie in te lezen -->
         <script>
             function getCookie(name) {
-                var cookieValue = null;
+                let cookieValue = null;
                 if (document.cookie && document.cookie !== "") {
-                    var cookies = document.cookie.split(";");
-                    for (var i = 0; i < cookies.length; i++) {
-                        var cookie = cookies[i].trim();
+                    let cookies = document.cookie.split(";");
+                    for (let i = 0; i < cookies.length; i++) {
+                        let cookie = cookies[i].trim();
                         // Does this cookie string begin with the name we want?
                         if (cookie.substring(0, name.length + 1) === (name + "=")) {
                             cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
@@ -188,8 +188,8 @@
             }
 
             function getCookieNumber(name) {
-                var value = getCookie(name);
-                var number = 0;
+                let value = getCookie(name);
+                let number = 0;
                 if (value != null) {
                     number = parseInt(value, 10);
                     if (isNaN(number)) number = 0;
@@ -231,39 +231,48 @@
             function myTableFilter(zoekveld, tableId)
             {
                 //console.log("myTableFilter: ", zoekveld);
-                var table = document.getElementById(tableId);
-                if (table == undefined) return;
+                const table = document.getElementById(tableId);
+                if (table === undefined) return;
                 //console.log("  table: ", table);
 
-                var filter = /[\u0300-\u036f]/g;        // precompiled regexp, for performance gain
+                const filter = /[\u0300-\u036f]/g;        // precompiled regexp, for performance gain
 
-                filter_tekst = zoekveld.value.normalize("NFD").replace(filter, "").toLowerCase();
+                const filter_tekst = zoekveld.value.normalize("NFD").replace(filter, "").toLowerCase();
                 //console.log("  filter_tekst: ", filter_tekst);
 
                 // doorzoek de header kolommen op filter=on
-                var filter_kolommen = new Array();
-                for (var i=0, row; row = table.tHead.rows[i]; i++) {        // stops when row=null
-                    for (var j=0, col_nr=0, cell; cell = row.cells[j]; j++) {         // stops when cell=null
+                const filter_kolommen = new Array();
+                for (let i=0, row; row = table.tHead.rows[i]; i++)          // stops when row=null
+                {
+                    for (let j=0, col_nr=0, cell; cell = row.cells[j]; j++) // stops when cell=null
+                    {
                         if (cell.hasAttribute("filter")) filter_kolommen.push(col_nr);
-                        if (cell.hasAttribute("colSpan")) {
+
+                        if (cell.hasAttribute("colSpan"))
+                        {
                             //console.log("cell with colSpan: ", cell.colSpan);
                             col_nr += cell.colSpan;
-                        } else {
+                        }
+                        else
+                        {
                             col_nr += 1;
                         }
                     }
                 }
                 //console.log("kolom nummers met filter: ", filter_kolommen);
 
-                var row_deferred_hide = new Array();    // deferred updates, for performance gain
-                var row_deferred_show = new Array();
+                const row_deferred_hide = new Array();    // deferred updates, for performance gain
+                const row_deferred_show = new Array();
 
-                var body = table.tBodies[0];
-                //console.log("body: ", body);        // for debug
-                for (var i=0, row; row = body.rows[i]; i++) {               // stops when row=null
+                const body = table.tBodies[0];
+                //console.log("body: ", body);
+                for (let i=0, row; row = body.rows[i]; i++)     // stops when row=null
+                {
+                    const filter_cmd = row.dataset["tablefilter"];
+                    if (filter_cmd === "stop") break;      // from the for
 
                     // besluit om deze regel te tonen, of niet
-                    var show = false;
+                    let show = false;
 
                     if (filter_tekst == "") {
                         // performance optimization: converteren van elke tabel string
@@ -272,8 +281,9 @@
                     } else {
                         // kijk of de zoekterm in een van de gekozen kolommen voorkomt
                         filter_kolommen.forEach(kolom_nr => {
-                                var cell = row.cells[kolom_nr];
-                                var clean_text = cell.dataset.clean_text;       // cached resultaat ophalen
+                                const cell = row.cells[kolom_nr];
+                                //if (cell === undefined) { console.log('missing cell in kolom_nr=', kolom_nr, "in row", i); }
+                                let clean_text = cell.dataset["clean_text"];    // cached resultaat ophalen
                                 //console.log("clean_text:", clean_text);
                                 if (typeof clean_text === "undefined") {
                                     // eerste keer: voer de vervorming uit en cache het resultaat op
@@ -313,11 +323,11 @@
             // anders zijn de tabellen niet meer gefiltreerd
             window.addEventListener("load", function(){
                 //console.log("load!");
-                var tables = document.getElementsByTagName("table");
+                const tables = document.getElementsByTagName("table");
                 //console.log("tables: ", tables);
-                for (var i=0, table; table = tables[i]; i++) {
+                for (let i=0, table; table = tables[i]; i++) {
                     //console.log("  table: ", table);
-                    inputs = table.getElementsByTagName("input");
+                    const inputs = table.getElementsByTagName("input");
                     if (inputs.length >= 1) {
                         myTableFilter(inputs[0], table.id);
                     }
