@@ -18,24 +18,39 @@
     <!-- toon gegevens van de competitie, regio, wedstrijd en accommodatie in blauwe box -->
     <div class="col s12 m10 l8 xl6 offset-m1 offset-l2 offset-xl3">
         <div class="white-text nhb-blauw z-depth-2">
+            <!--
+            <div class="row small-row">
+                <div class="col s1">1</div>
+                <div class="col s1">2</div>
+                <div class="col s1">3</div>
+                <div class="col s1">4</div>
+                <div class="col s1">5</div>
+                <div class="col s1">6</div>
+                <div class="col s1">7</div>
+                <div class="col s1">8</div>
+                <div class="col s1">9</div>
+                <div class="col s1">0</div>
+                <div class="col s1">1</div>
+                <div class="col s1">2</div>
+            </div> -->
 
             <div class="row small-row">
-                <div class="col s3">Competitie:</div>
+                <div class="col s3 l4">Competitie:</div>
                 <div class="col s8">{{ deelcomp.competitie.beschrijving }}</div>
             </div>
 
             <div class="row small-row">
-                <div class="col s3">Regio:</div>
+                <div class="col s3 l4">Regio:</div>
                 <div class="col s8">{{ deelcomp.nhb_regio }}</div>
             </div>
 
             <div class="row small-row">
-                <div class="col s3">Wedstrijd:</div>
+                <div class="col s3 l4">Wedstrijd:</div>
                 <div class="col s8">{{ wedstrijd.datum_wanneer }} om {{ wedstrijd.tijd_begin_wedstrijd }}</div>
             </div>
 
             <div class="row small-row">
-                <div class="col s3">Bij vereniging:</div>
+                <div class="col s3 l4">Bij vereniging:</div>
                 <div class="col s8">{{ wedstrijd.vereniging }}</div>
             </div>
         </div>
@@ -551,7 +566,7 @@
 
     <tr style="border: 0px">
         <td>
-            <input id="id_nhbnr" type="text" placeholder="NHB nummer" size="6" maxlength="6" style="width:auto; margin:0">
+            <input id="id_nhbnr" type="text" placeholder="123456" size="6" maxlength="6" style="width:auto; margin:0">
             <div id="id_zoekresultaat" style="display: none"></div>
         </td>
 

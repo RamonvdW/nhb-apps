@@ -4,6 +4,7 @@
   border: $button-border;
   border-radius: $button-radius;
   display: inline-block;
+  white-space: nowrap;      // added to prevent text after icon from wrapping
   height: $button-height;
   line-height: $button-height;
   padding: $button-padding;
