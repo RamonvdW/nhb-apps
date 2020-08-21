@@ -13,7 +13,7 @@ INFILE="$PWD/materialize-src/sass/materialize.scss"
 MINIFY="--style compressed"
 
 # source file to modify when the version number changes
-DTLFILE="$PWD/../../Plein/templates/plein/site_layout.dtl"
+DTL_FILE="$PWD/../../Plein/templates/plein/site_layout.dtl"
 
 if [ ! -e "$INFILE" ]
 then
@@ -41,26 +41,26 @@ then
     exit 1
 fi
 
-if [ ! -e "$DTLFILE" ]
+if [ ! -e "$DTL_FILE" ]
 then
-    echo "[ERROR] Failed to locate dtl file $DTLFILE"
+    echo "[ERROR] Failed to locate dtl file $DTL_FILE"
     exit 1
 fi
 
 # get the sequence number
-LINE=$(grep -m1 'materialize-new' "$DTLFILE")
+LINE=$(grep 'materialize-new-' "$DTL_FILE" | grep '\.css')
 # <link rel="stylesheet" href="{% static 'materialize/materialize-new-1.css' %}">
 NR=$(echo "$LINE" | cut -d. -f1 | cut -d- -f3)
 echo "[INFO] Found current sequence number: $NR"
-NEWNR=$(( NR + 1 ))
-echo "[INFO] Decided sequence number: $NEWNR"
+NEW_NR=$(( NR + 1 ))
+echo "[INFO] Decided sequence number: $NEW_NR"
 
 # delete the old outfile
 rm "$OUT"/materialize-new*.css
-OUTFILE="$OUT/materialize-new-$NEWNR.css"
+OUTFILE="$OUT/materialize-new-$NEW_NR.css"
 
 # run the compiler
-sass --no-cache --sourcemap=none $MINIFY $INFILE $OUTFILE
+sass --no-cache --sourcemap=none $MINIFY "$INFILE" "$OUTFILE"
 
 if [ $? -ne 0 ]
 then
@@ -68,8 +68,8 @@ then
     exit 1
 fi
 
-cat "$DTLFILE" | sed "s/materialize-new-.*\.css/materialize-new-$NEWNR.css/" > "$DTLFILE.new"
-mv "$DTLFILE.new" "$DTLFILE"
+cat "$DTL_FILE" | sed "s/materialize-new-.*\.css/materialize-new-$NEW_NR.css/" > "$DTL_FILE.new"
+mv "$DTL_FILE.new" "$DTL_FILE"
 
 # end of file
 

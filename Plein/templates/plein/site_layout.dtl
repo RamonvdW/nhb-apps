@@ -75,25 +75,29 @@
         </div>
 
         <!-- TODO: minimize javascript using uglify -->
-        <script src="{% static 'materialize-new-1.js' %}"></script>
+        <script src="{% static 'materialize-new-2_min.js' %}"></script>
 
         <!-- framework init, after everything has been loaded and instantiated -->
         <script>
-            function discover_popup_delayed_open() {
+            function discover_popup_delayed_open()
+            {
                 // in de tussentijd kan het scherm al weer groter zijn geworden
                 let menu_is_hidden = window.matchMedia("(max-width: 985px)");
-                if (menu_is_hidden.matches) {
+                if (menu_is_hidden.matches)
+                {
                     let elem = document.querySelector(".tap-target");
                     M.TapTarget.getInstance(elem).open();
                 }
             }
 
-            function discover_popup_show(mq_event) {
+            function discover_popup_show(mq_event)
+            {
                 // scherm is kleiner geworden (of initieel klein), dus toon de tap target
                 if (mq_event == null || mq_event.matches) {
                     // cookie zorgt ervoor dat de pop-up maar 3x tonen
                     let count = getCookieNumber("menu_discover");
-                    if (count < 3) {
+                    if (count < 3)
+                    {
                         document.cookie = "menu_discover=" + (count + 1) + "; path=/";
                         // toon met een kleine vertraging
                         setTimeout(discover_popup_delayed_open, 2000);
@@ -103,13 +107,15 @@
 
             function discover_popup_hide(mq_event) {
                 // scherm is kleiner geworden, dus haal de tap-target uit beeld
-                if (mq_event.matches) {
+                if (mq_event.matches)
+                {
                     let elem = document.querySelector(".tap-target");
                     M.TapTarget.getInstance(elem).close();
                 }
             }
 
-            function closeTapTarget(id) {
+            function closeTapTarget(id)
+            {
                 // haal het tap-target element uit beeld
                 let elem = document.getElementById(id);
                 let inst = M.TapTarget.getInstance(elem);
@@ -142,8 +148,8 @@
                 M.TapTarget.init(elems, {});
 
                 let count = getCookieNumber("menu_discover");
-                if (count < 3) {
-
+                if (count < 3)
+                {
                     // -------------
                     // KEEP IN SYNC
                     // - site_layout.css: media query to show/hide labels
@@ -153,10 +159,10 @@
                     // -------------
 
                     let menu_is_shown = window.matchMedia("(min-width: 1021px)");
-                    menu_is_shown.addListener(discover_popup_hide);
+                    menu_is_shown.addEventListener("change", discover_popup_hide);
 
                     let menu_is_hidden = window.matchMedia("(max-width: 1020px)");
-                    menu_is_hidden.addListener(discover_popup_show);
+                    menu_is_hidden.addEventListener("change", discover_popup_show);
                     if (menu_is_hidden.matches) {
                         // show immediately
                         discover_popup_show(null);
