@@ -88,7 +88,7 @@
 
         <tr>
             <td>Beschrijving</td>
-            {% if readonly %}
+            {% if readonly or vaste_beschrijving %}
                 <td>{{ ronde.beschrijving }}</td>
             {% else %}
                 <td class="input-field">

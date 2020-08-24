@@ -5,11 +5,13 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import admin
-from .models import WedstrijdLocatie, Wedstrijd, WedstrijdenPlan
+from .models import WedstrijdLocatie, Wedstrijd, WedstrijdenPlan, WedstrijdUitslag
 
 
 class WedstrijdAdmin(admin.ModelAdmin):             # pragma: no cover
     """ Admin configuratie voor Wedstrijd """
+
+    search_fields = ('beschrijving', 'vereniging')
 
     filter_horizontal = ('indiv_klassen', 'team_klassen')
 
@@ -43,9 +45,25 @@ class WedstrijdLocatieAdmin(admin.ModelAdmin):      # pragma: no cover
                 .all())
 
 
+class WedstrijdenPlanAdmin(admin.ModelAdmin):      # pragma: no cover
+    """ Admin configuratie voor WedstrijdenPlan"""
+
+    autocomplete_fields = ('wedstrijden',)
+
+
+class WedstrijdUitslagAdmin(admin.ModelAdmin):      # pragma: no cover
+    """ Admin configuratie voor WedstrijdenUitslag"""
+
+    readonly_fields = ('scores',)
+
+    #autocomplete_fields = ('wedstrijden',)
+    pass
+
+
 admin.site.register(WedstrijdLocatie, WedstrijdLocatieAdmin)
 admin.site.register(Wedstrijd, WedstrijdAdmin)
-admin.site.register(WedstrijdenPlan)
+admin.site.register(WedstrijdenPlan, WedstrijdenPlanAdmin)
+admin.site.register(WedstrijdUitslag, WedstrijdUitslagAdmin)
 
 # TODO: Wedstrijd admin scherm is langzaam omdat str(WedstrijdLocatie) een self.verenigingen.count() doet
 #       nog niet op kunnen lossen met een get_queryset()

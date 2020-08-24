@@ -238,6 +238,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                   .order_by('afstand_meter'))
 
         # TODO: alle ScoreHist met 1 query ophalen (score__in=alle Score pk's)
+        #       het is ook mogelijk om score.scorehist_set.all() te gebruiken
         for score in scores:
             score.ag = score.waarde / 1000
             hist = ScoreHist.objects.filter(score=score).order_by('-datum')

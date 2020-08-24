@@ -246,6 +246,12 @@ class DeelcompetitieRonde(models.Model):
         msg += " (%s)" % self.beschrijving
         return msg
 
+    def is_voor_import_oude_prg(self):
+        # beetje zwak, maar correcte functioneren van de import uit het oude programma
+        # is afhankelijk van de beschrijving, dus mag niet aangepast worden
+        # "Ronde 1 oude prg" .. "Ronde 7 oude prg"
+        return self.beschrijving[:6] == 'Ronde ' and self.beschrijving[-9:] == ' oude prg'
+
 
 def maak_deelcompetitie_ronde(deelcomp, cluster=None):
     """ Maak een nieuwe deelcompetitie ronde object aan
@@ -344,6 +350,7 @@ class RegioCompetitieSchutterBoog(models.Model):
     aanvangsgemiddelde = models.DecimalField(max_digits=5, decimal_places=3, default=0.0)    # 10,000
     klasse = models.ForeignKey(CompetitieKlasse, on_delete=models.CASCADE)
 
+    # TODO: scores = models.ManyToManyField(Score, blank=True)  # mag leeg zijn
     score1 = models.PositiveIntegerField(default=0)
     score2 = models.PositiveIntegerField(default=0)
     score3 = models.PositiveIntegerField(default=0)

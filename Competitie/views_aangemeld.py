@@ -101,7 +101,7 @@ class LijstAangemeldRegiocompAllesView(UserPassesTestMixin, TemplateView):
                                 'schutterboog__nhblid__bij_vereniging')
                 .filter(deelcompetitie__competitie=comp,
                         deelcompetitie__laag=LAAG_REGIO)
-                .order_by('klasse__indiv__volgorde', 'aanvangsgemiddelde'))
+                .order_by('klasse__indiv__volgorde', '-aanvangsgemiddelde'))
 
         volgorde = -1
         for obj in objs:

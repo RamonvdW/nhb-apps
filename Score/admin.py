@@ -10,9 +10,23 @@ from .models import Score, ScoreHist
 
 class ScoreAdmin(admin.ModelAdmin):
     """ Admin configuratie voor Score klasse """
-    list_filter = ('afstand_meter', 'is_ag', 'schutterboog__boogtype', 'schutterboog__nhblid__bij_vereniging')
+    list_filter = ('afstand_meter',
+                   'is_ag',
+                   'schutterboog__boogtype',
+                   'schutterboog__nhblid__bij_vereniging')
 
-    list_select_related = ('schutterboog', 'schutterboog__nhblid', 'schutterboog__boogtype')
+    list_select_related = ('schutterboog',
+                           'schutterboog__nhblid',
+                           'schutterboog__boogtype')
+
+    autocomplete_fields = ('schutterboog',)
+
+    # velden die niet gewijzigd mogen worden via de admin interface
+    readonly_fields = ('geschiedenis', )
+
+    @staticmethod
+    def geschiedenis(obj):     # pragma: no cover
+        return "\n".join([str(scorehist) for scorehist in obj.scorehist_set.all()])
 
 
 class ScoreHistAdmin(admin.ModelAdmin):

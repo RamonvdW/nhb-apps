@@ -154,7 +154,7 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
 def planning_sorteer_weeknummers(rondes):
     # sorteer op week nummer
     # en ondersteun dat meerdere rondes hetzelfde nummer hebben
-    nr2rondes = dict()      # [nr] = [ronde, ronde, ..]
+    nr2rondes = dict()      # [week nr] = [ronde, ronde, ..]
     nrs = list()
     for ronde in rondes:
         nr = ronde.week_nr
@@ -213,7 +213,9 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
         context['rondes'] = planning_sorteer_weeknummers(
                                 DeelcompetitieRonde
                                 .objects
-                                .filter(deelcompetitie=deelcomp, cluster=None))
+                                .filter(deelcompetitie=deelcomp,
+                                        cluster=None)
+                                .order_by('beschrijving'))
 
         for ronde in context['rondes']:
             ronde.wedstrijd_count = ronde.plan.wedstrijden.count()
@@ -409,7 +411,7 @@ def competitie_week_nr_to_date(jaar, week_nr):
 
 class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
 
-    """ Deze view geeft de planning van een ronde in een regio """
+    """ Deze view geeft de planning van een ronde in een regio of cluster in de regio """
 
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_PLANNING_REGIO_RONDE
@@ -492,6 +494,8 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
                                 kwargs={'deelcomp_pk': ronde.deelcompetitie.pk})
         context['terug_url'] = terug_url
 
+        context['vaste_beschrijving'] = ronde.is_voor_import_oude_prg()
+
         context['ronde_opslaan_url'] = reverse('Competitie:regio-ronde-planning',
                                                kwargs={'ronde_pk': ronde.pk})
 
@@ -511,7 +515,7 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
 
     def post(self, request, *args, **kwargs):
         """ Deze functie wordt aangeroepen als de knop 'Regel toevoegen' gebruikt wordt
-            en als op de knop Opslaan wordt gedrukt voor de ronde parameters
+            en als op de knop Instellingen Opslaan wordt gedrukt voor de ronde parameters
         """
 
         ronde_pk = kwargs['ronde_pk'][:6]     # afkappen geeft beveiliging
@@ -536,12 +540,20 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
                 raise Resolver404()
 
             # sanity-check op ronde nummer
-            if week_nr < 1 or week_nr > 53 or (week_nr > 11 and week_nr < 37):
+            if week_nr < 1 or week_nr > 53 or (11 < week_nr < 37):
                 # geen valide week nummer
                 raise Resolver404()
 
             beschrijving = request.POST.get('ronde_naam', '')
-            ronde.beschrijving = beschrijving[:20]  # afkappen, anders werkt save niet
+
+            if not ronde.is_voor_import_oude_prg():
+                # is niet voor import, dus beschrijving mag aangepast worden
+                oude_beschrijving = ronde.beschrijving
+                ronde.beschrijving = beschrijving[:20]  # afkappen, anders werkt save niet
+                if ronde.is_voor_import_oude_prg():
+                    # poging tot beschrijving die niet mag / problemen gaat geven
+                    # herstel de oude beschrijving
+                    ronde.beschrijving = oude_beschrijving
 
             if ronde.week_nr != week_nr:
                 # nieuw week nummer
