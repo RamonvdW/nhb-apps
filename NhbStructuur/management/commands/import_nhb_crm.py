@@ -441,10 +441,16 @@ class Command(BaseCommand):
             if not lid_voornaam:
                 lid_voornaam = member['initials']
                 if not lid_voornaam:
-                    self.stderr.write('[WARNING] Lid %s heeft geen voornaam of initials' % lid_nhb_nr)
-                    self._count_warnings += 1
+                    self.stderr.write('[ERROR] Lid %s heeft geen voornaam of initials' % lid_nhb_nr)
+                    self._count_errors += 1
+                    continue
 
             lid_achternaam = member['name']
+            if not lid_achternaam:
+                self.stderr.write("[ERROR] Lid %s heeft geen achternaam" % lid_nhb_nr)
+                self._count_errors += 1
+                continue        # data niet compleet voor dit lid
+
             pos = lid_achternaam.find('(')
             if pos > 0:
                 new_achternaam = lid_achternaam[:pos].strip()
