@@ -36,6 +36,8 @@ WEEK_DAGEN = ( (0, 'Maandag'),
                (5, 'Zaterdag'),
                (6, 'Zondag'))
 
+JA_NEE = {False: 'Nee', True: 'Ja'}
+
 
 class BondPlanningView(UserPassesTestMixin, TemplateView):
 
@@ -500,10 +502,18 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
                                                kwargs={'ronde_pk': ronde.pk})
 
         # uitslagen invoeren
+        if rol_nu == Rollen.ROL_RCL:
+            context['mag_uitslag_invoeren'] = True
+
         for wedstrijd in context['wedstrijden']:
-            # TODO: knop pas beschikbaar maken als de wedstrijd begin
-            wedstrijd.url_uitslag_invoeren = reverse('Competitie:uitslag-invoeren-wedstrijd',
-                                                     kwargs={'wedstrijd_pk': wedstrijd.pk})
+            wedstrijd.uitslag_aanwezig = JA_NEE[False]
+            if wedstrijd.uitslag and wedstrijd.uitslag.scores.count() > 0:
+                wedstrijd.uitslag_aanwezig = JA_NEE[True]
+
+            if rol_nu == Rollen.ROL_RCL:
+                # TODO: knop pas beschikbaar maken op wedstrijddatum tot datum+N
+                wedstrijd.url_uitslag_invoeren = reverse('Competitie:uitslag-invoeren-wedstrijd',
+                                                         kwargs={'wedstrijd_pk': wedstrijd.pk})
         # for
 
         rol_nu = rol_get_huidige(self.request)

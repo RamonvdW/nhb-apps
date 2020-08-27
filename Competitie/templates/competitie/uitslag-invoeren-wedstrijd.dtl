@@ -220,6 +220,7 @@
         const ver = rsp['vereniging'];                  // "[1234] De Naam"
         const ver_nr = ver.slice(0, 6);                 // "[1234]"
         const ver_naam = "&nbsp;" + ver.slice(7);       // "De Naam"
+        let bogen = rsp['bogen'];
         //console.log(nhb_nr, naam, ver_nr, ver_naam);
 
         // zoek het plekje in de tabel waar deze toegevoegd moet worden
@@ -234,11 +235,16 @@
             const row_nhb_nr = row.cells[0].innerText;
             if (row_nhb_nr < nhb_nr) row_smaller = i;
 
-            // voorkom dubbele
             if (row_nhb_nr == nhb_nr)
             {
-                body.deleteRow(i);          // TODO: dit verwijderd uitslag!!
-                i--;        // manipulate for-loop
+                // al bestaande regel van deze schutter gevonden
+                // verwijder deze boog uit het zoekresultaat
+                const row_pk = row.cells[0].dataset.pk;
+                for (let i=0, tup; tup = bogen[i]; i++)
+                {
+                    if (tup['pk'] == row_pk)
+                        tup['pk'] = -1;     // markeer om niet toe te voegen
+                } // for
             }
         } // for
 
@@ -252,35 +258,36 @@
         // doe dit door een kopie te maken
         const base_row = body.rows[0];      // regel om te clonen
         let row = body.rows[row_smaller];
-        const bogen = rsp['bogen'];
         for (let i=0, tup; tup = bogen[i]; i++)
         {
             const new_row = base_row.cloneNode(true);
 
-            const pk = tup['pk'];
-            const boog = tup['boog'];
+            const pk = tup['pk']
+            if (pk == -1)
+                continue        // with the for
+            const boog = tup['boog']
 
             // volgende statement is gelijk aan insertAfter, welke niet bestaat
             // werkt ook aan het einde van de tabel
             // zie https://stackoverflow.com/questions/4793604/how-to-insert-an-element-after-another-element-in-javascript-without-using-a-lib
-            row.parentNode.insertBefore(new_row, row.nextSibling);
+            row.parentNode.insertBefore(new_row, row.nextSibling)
 
             // pas de nieuwe regel aan met de gevonden data
-            new_row.cells[0].innerHTML = nhb_nr;
-            new_row.cells[0].dataset.pk = pk;
+            new_row.cells[0].innerHTML = nhb_nr
+            new_row.cells[0].dataset.pk = pk
 
-            new_row.cells[1].innerHTML = naam;
+            new_row.cells[1].innerHTML = naam
 
-            let span = new_row.cells[2].firstChild;
-            span.innerHTML = ver_nr;
-            span.nextSibling.innerHTML = ver_naam;
+            let span = new_row.cells[2].firstChild
+            span.innerHTML = ver_nr
+            span.nextSibling.innerHTML = ver_naam
 
-            new_row.cells[3].innerHTML = boog;
+            new_row.cells[3].innerHTML = boog
 
             // maak de nieuwe row zichtbaar
-            new_row.classList.remove('hide');
+            new_row.classList.remove('hide')
 
-            row = new_row;
+            row = new_row
         } // for
 
         // scroll nieuwe regel into view + zet focus op invoer score
@@ -365,6 +372,7 @@
         let row_nr = 0;
         for (let i=0, deelnemer; deelnemer = deelnemers[i]; i++)
         {
+            const pk = deelnemer['pk'];
             const nhb_nr = deelnemer['nhb_nr'];
             let skip = false;
             while (row_nr <= body.rows.length)      // stop eerder: op tablefilter=stop
@@ -378,11 +386,11 @@
                     break;          // from the while
                 }
 
+                const row_pk = row.cells[0].dataset.pk;
                 const row_nhb_nr = row.cells[0].innerText;
 
-                if (nhb_nr == row_nhb_nr)
+                if (pk == row_pk)
                 {
-                    // TODO: ook boogtype meenemen in de controle!!
                     // dit is een dubbele
                     skip = true;
                     break;

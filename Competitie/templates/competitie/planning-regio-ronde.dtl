@@ -116,7 +116,12 @@
             <th>Wanneer</th>
             <th>Waar</th>
             <th><!-- kolom voor wijzig knoppen --></th>
-            <th><!-- kolom voor uitslag invoeren knoppen --></th>
+            <th>
+                {% if not mag_uitslag_invoeren %}
+                    <span>Uitslag aanwezig?</span>
+                {% endif %}
+                <!-- else: kolom voor uitslag invoeren knoppen -->
+            </th>
         </tr>
     </thead>
 
@@ -145,6 +150,8 @@
                 {% if wedstrijd.url_uitslag_invoeren %}
                     <a class="btn-nhb-blauw" href="{{ wedstrijd.url_uitslag_invoeren }}">
                         <i class="material-icons-round left">arrow_forward</i>Uitslag invoeren</a>
+                {% else %}
+                    <span>{{ wedstrijd.uitslag_aanwezig }}</span>
                 {% endif %}
             </td>
         </tr>
