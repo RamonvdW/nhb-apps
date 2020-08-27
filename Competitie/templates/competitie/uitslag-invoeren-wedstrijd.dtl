@@ -112,14 +112,16 @@
                 // nhb nummer niet gevonden, geen actief lid
                 if (rsp['fail'] === undefined)
                 {
+                    // toon het zoekresultaat
                     is_fail = false;
                     for (let d in btn.dataset)
                     {
-                        if (d != 'xhr' && d != 'opzoeken')
+                        if (d != 'xhr' && d != 'opzoeken')      // deze overslaan
                         {
                             const antwoord = rsp[d];
                             if (antwoord !== undefined)
                             {
+                                // zet het resultaat in het veld: naam, vereniging, regio
                                 let el = document.getElementById(btn.dataset[d]);
                                 el.innerHTML = antwoord;
                                 el.style.color = "";
@@ -229,7 +231,7 @@
             const filter_cmd = row.dataset["tablefilter"];
             if (filter_cmd === "stop") break;           // from the for
 
-            const row_nhb_nr = row.cells[0].innerText;   // nhbnr
+            const row_nhb_nr = row.cells[0].innerText;
             if (row_nhb_nr < nhb_nr) row_smaller = i;
 
             // voorkom dubbele
@@ -242,7 +244,9 @@
 
         // table filter uitzetten zodat de nieuwe regel getoond kan worden
         // maak zoekveld leeg; dit triggert myTableFilter()
-        document.getElementById("table1_zoeken_input").value = "";
+        const el_filter = document.getElementById("table1_zoeken_input")
+        el_filter.value = "";
+        myTableFilter(el_filter, 'table1')
 
         // voeg een regel(s) toe aan de tabel, op de juiste positie
         // doe dit door een kopie te maken
@@ -348,7 +352,9 @@
 
         // table filter uitzetten zodat de nieuwe regels getoond kunnen worden
         // maak zoekveld leeg; dit triggert myTableFilter()
-        document.getElementById("table1_zoeken_input").value = "";
+        const el_filter = document.getElementById("table1_zoeken_input")
+        el_filter.value = "";
+        myTableFilter(el_filter, 'table1')
 
         let deelnemers = rsp['deelnemers']
         // sorteer deelnemers op invoeg-volgorde: nhb_nr

@@ -6,13 +6,12 @@
 
 from django.test import TestCase
 from BasisTypen.models import BoogType
-from Functie.models import maak_functie, Functie
+from Functie.models import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
 from Overig.e2ehelpers import E2EHelpers
 from Competitie.models import RegioCompetitieSchutterBoog
-from Schutter.models import SchutterVoorkeuren
 from .models import (Competitie, DeelCompetitie, competitie_aanmaken,
-                     INSCHRIJF_METHODE_3, DAGDEEL_AFKORTINGEN, LAAG_REGIO, LAAG_RK, LAAG_BK)
+                     INSCHRIJF_METHODE_3, LAAG_REGIO, LAAG_RK, LAAG_BK)
 import datetime
 
 
@@ -20,7 +19,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
 
     """ unit tests voor de Competitie applicatie, Koppel Beheerders functie """
 
-    test_after = ('Competitie.test_planning',)
+    test_after = ('Functie',)
 
     def _prep_beheerder_lid(self, voornaam):
         nhb_nr = self._next_nhbnr
