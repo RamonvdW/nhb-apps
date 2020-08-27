@@ -298,7 +298,7 @@ class DynamicScoresOpslaanView(UserPassesTestMixin, View):
 
     @staticmethod
     def nieuwe_score(uitslag, schutterboog_pk, waarde, datum, door_account):
-        print('nieuwe score: %s = %s' % (schutterboog_pk, waarde))
+        # print('nieuwe score: %s = %s' % (schutterboog_pk, waarde))
 
         schutterboog = SchutterBoog.objects.get(pk=schutterboog_pk)
 
@@ -319,7 +319,7 @@ class DynamicScoresOpslaanView(UserPassesTestMixin, View):
     @staticmethod
     def bijgewerkte_score(score_obj, waarde, datum, door_account):
         if score_obj.waarde != waarde:
-            print('bijgewerkte score: %s --> %s' % (score_obj, waarde))
+            # print('bijgewerkte score: %s --> %s' % (score_obj, waarde))
 
             ScoreHist(score=score_obj,
                       oude_waarde=score_obj.waarde,
@@ -345,7 +345,7 @@ class DynamicScoresOpslaanView(UserPassesTestMixin, View):
         for score_obj in uitslag.scores.all():
             pk2score_obj[score_obj.schutterboog.pk] = score_obj
         # for
-        print('pk2score_obj: %s' % repr(pk2score_obj))
+        # print('pk2score_obj: %s' % repr(pk2score_obj))
 
         for key, value in data.items():
             if key == 'wedstrijd_pk':
@@ -384,7 +384,7 @@ class DynamicScoresOpslaanView(UserPassesTestMixin, View):
                 continue
 
             if 0 <= waarde <= uitslag.max_score:
-                print('score geaccepteerd: %s %s' % (pk, waarde))
+                # print('score geaccepteerd: %s %s' % (pk, waarde))
                 # score opslaan
                 if not score_obj:
                     # het is een nieuwe score

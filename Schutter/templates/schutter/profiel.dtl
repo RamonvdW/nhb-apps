@@ -206,7 +206,7 @@
 {% endif %}
 
 
-{% if gemiddelden %}
+{% if heeft_ags %}
 
     <p>&nbsp;</p>
     <h5>Jouw gemiddelden</h5>

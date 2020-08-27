@@ -54,6 +54,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         for obj in (HistCompetitieIndividueel
                     .objects
                     .filter(schutter_nr=nhblid.nhb_nr)
+                    .exclude(totaal=0)
                     .select_related('histcompetitie')
                     .order_by('-histcompetitie__seizoen')):
             obj.competitie_str = HistCompetitie.comptype2str[obj.histcompetitie.comp_type]
@@ -247,14 +248,18 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         # for
 
         # koppel de boog typen aan de schutterboog
+        heeft_ags = False
         for obj in objs:
             obj.ags = list()
             for score in scores:
                 if score.schutterboog == obj:
                     obj.ags.append(score)
             # for
+            if len(obj.ags) > 0:
+                heeft_ags = True
         # for
-        return objs
+
+        return objs, heeft_ags
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -277,7 +282,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
 
             context['show_voorkeuren'] = True
             context['regiocompetities'] = self._find_regiocompetities(nhblid, voorkeuren)
-            context['gemiddelden'] = self._find_gemiddelden(nhblid)
+            context['gemiddelden'], context['heeft_ags'] = self._find_gemiddelden(nhblid)
 
         menu_dynamics(self.request, context, actief='schutter')
         return context
