@@ -5,11 +5,15 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
+from BasisTypen.models import BoogType, TeamWedstrijdklasse
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging, NhbLid
 from Wedstrijden.models import Wedstrijd
+from Schutter.models import SchutterBoog
 from Overig.e2ehelpers import E2EHelpers
-from .models import Competitie, DeelCompetitie, DeelcompetitieRonde, competitie_aanmaken
+from .models import (Competitie, DeelCompetitie, CompetitieKlasse,
+                     DeelcompetitieRonde, competitie_aanmaken,
+                     RegioCompetitieSchutterBoog)
 from .views_planning import competitie_week_nr_to_date
 import datetime
 
@@ -72,6 +76,7 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
         self.account_rko = self._prep_beheerder_lid('RKO')
         self.account_rcl = self._prep_beheerder_lid('RCL')
         self.account_schutter = self._prep_beheerder_lid('Schutter')
+        self.lid_schutter = NhbLid.objects.get(nhb_nr=self.account_schutter.username)
 
         # creëer een competitie met deelcompetities
         competitie_aanmaken(jaar=2019)
@@ -863,5 +868,30 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
         # while
 
         self.assertEqual(parts, ['40', '50', '50', '2', '8'])
+
+    def test_inschrijving_team(self):
+        # ivm coverage
+
+        wkl = TeamWedstrijdklasse.objects.all()[0]
+
+        klasse = CompetitieKlasse(competitie=self.deelcomp_regio_18.competitie,
+                                  team=wkl,
+                                  min_ag=0.42)
+        klasse.save()
+
+        boog_bb = BoogType.objects.get(afkorting='BB')
+        schutterboog = SchutterBoog(nhblid=self.lid_schutter,
+                                    boogtype=boog_bb,
+                                    voor_wedstrijd=True)
+        schutterboog.save()
+
+        inschrijving = RegioCompetitieSchutterBoog()
+        inschrijving.schutterboog = schutterboog
+        inschrijving.bij_vereniging = schutterboog.nhblid.bij_vereniging
+        inschrijving.deelcompetitie = self.deelcomp_regio_18
+        inschrijving.klasse = klasse
+        inschrijving.save()
+
+        self.assertTrue(str(inschrijving) != "")
 
 # end of file

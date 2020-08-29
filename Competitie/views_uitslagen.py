@@ -230,35 +230,32 @@ class DynamicZoekOpNhbnrView(UserPassesTestMixin, View):
 
         out = dict()
 
-        try:
-            deelnemers = (RegioCompetitieSchutterBoog
-                          .objects
-                          .select_related('schutterboog',
-                                          'schutterboog__boogtype',
-                                          'schutterboog__nhblid',
-                                          'schutterboog__nhblid__bij_vereniging')
-                          .filter(deelcompetitie__competitie=competitie,
-                                  schutterboog__nhblid__nhb_nr=nhb_nr))
-        except RegioCompetitieSchutterBoog.DoesNotExist:
-            out['fail'] = 1
+        deelnemers = (RegioCompetitieSchutterBoog
+                      .objects
+                      .select_related('schutterboog',
+                                      'schutterboog__boogtype',
+                                      'schutterboog__nhblid',
+                                      'schutterboog__nhblid__bij_vereniging')
+                      .filter(deelcompetitie__competitie=competitie,
+                              schutterboog__nhblid__nhb_nr=nhb_nr))
+
+        if len(deelnemers) == 0:
+            out['fail'] = 1         # is niet ingeschreven voor deze competitie
         else:
-            if len(deelnemers) == 0:
-                out['fail'] = 1         # is niet ingeschreven voor deze competitie
-            else:
-                # bouw het antwoord op
-                nhblid = deelnemers[0].schutterboog.nhblid
-                out['nhb_nr'] = nhblid.nhb_nr
-                out['naam'] = nhblid.volledige_naam()
-                out['vereniging'] = str(nhblid.bij_vereniging)
-                out['regio'] = str(nhblid.bij_vereniging.regio)
-                out['bogen'] = bogen = list()
-                for deelnemer in deelnemers:
+            # bouw het antwoord op
+            nhblid = deelnemers[0].schutterboog.nhblid
+            out['nhb_nr'] = nhblid.nhb_nr
+            out['naam'] = nhblid.volledige_naam()
+            out['vereniging'] = str(nhblid.bij_vereniging)
+            out['regio'] = str(nhblid.bij_vereniging.regio)
+            out['bogen'] = bogen = list()
+            for deelnemer in deelnemers:
 
-                    #MISSCHIEN BETER OM DEELNEMER.PK terug te geven
+                # TODO: MISSCHIEN BETER OM DEELNEMER.PK terug te geven
 
-                    bogen.append({'pk': deelnemer.schutterboog.pk,
-                                  'boog': deelnemer.schutterboog.boogtype.beschrijving})
-                # for
+                bogen.append({'pk': deelnemer.schutterboog.pk,
+                              'boog': deelnemer.schutterboog.boogtype.beschrijving})
+            # for
 
         return JsonResponse(out)
 

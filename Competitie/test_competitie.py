@@ -12,7 +12,8 @@ from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
 from Overig.e2ehelpers import E2EHelpers
 from Schutter.models import SchutterBoog
 from Functie.models import maak_functie
-from .models import Competitie, DeelCompetitie, CompetitieKlasse, maak_competitieklasse_indiv
+from .models import (Competitie, DeelCompetitie,
+                     CompetitieKlasse, maak_competitieklasse_indiv)
 import datetime
 
 
