@@ -222,7 +222,8 @@ class RecordsIndivZoom5View(RecordsIndivZoomBaseView):
         # vind de verschillende afstanden waarop records bestaan
         soorten = (IndivRecord
                    .objects
-                   .filter(geslacht=self.sel_gesl,
+                   .filter(para_klasse='',
+                           geslacht=self.sel_gesl,
                            discipline=self.sel_disc,
                            leeftijdscategorie=self.sel_lcat,
                            materiaalklasse=self.sel_makl)
@@ -239,6 +240,7 @@ class RecordsIndivZoom5View(RecordsIndivZoomBaseView):
                             discipline=self.sel_disc,
                             leeftijdscategorie=self.sel_lcat,
                             materiaalklasse=self.sel_makl,
+                            para_klasse='',
                             soort_record=soort)
                     .order_by('-datum'))[0:0+1]
             objs.extend(best)
