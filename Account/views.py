@@ -424,6 +424,19 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
         context['nieuwe_accounts'] = AccountEmail.objects.all().order_by('-account__date_joined')[:50]
+
+        jaar = nieuwste.date_joined.year
+        maand = nieuwste.date_joined.month
+        deze_maand = make_aware(datetime.datetime(year=jaar, month=maand, day=1))
+        context['deze_maand_count'] = (Account
+                                       .objects
+                                       .order_by('-date_joined')
+                                       .filter(date_joined__gte=deze_maand)
+                                       .count())
+        context['deze_maand'] = deze_maand
+
+        context['totaal'] = Account.objects.count()
+
         context['recente_activiteit'] = AccountEmail.objects.filter(account__last_login__isnull=False).order_by('-account__last_login')[:50]
         context['inlog_pogingen'] = AccountEmail.objects.filter(account__laatste_inlog_poging__isnull=False).filter(account__last_login__lt=F('account__laatste_inlog_poging')).order_by('-account__laatste_inlog_poging')[:50]
         menu_dynamics(self.request, context, actief="hetplein")
