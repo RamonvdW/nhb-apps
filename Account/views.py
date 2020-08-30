@@ -425,6 +425,7 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         context['nieuwe_accounts'] = AccountEmail.objects.all().order_by('-account__date_joined')[:50]
 
+        nieuwste = context['nieuwe_accounts'][0].account    # kost losse database access
         jaar = nieuwste.date_joined.year
         maand = nieuwste.date_joined.month
         deze_maand = make_aware(datetime.datetime(year=jaar, month=maand, day=1))
