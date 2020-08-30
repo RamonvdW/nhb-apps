@@ -14,6 +14,7 @@ from django.views.generic import TemplateView, ListView
 from django.db.models import F, Q, Value
 from django.db.models.functions import Concat
 from django.utils import timezone
+from django.utils.timezone import make_aware
 from .forms import LoginForm, ZoekAccountForm, KiesAccountForm
 from .models import (Account, AccountEmail,
                      account_email_bevestiging_ontvangen, account_check_gewijzigde_email)
