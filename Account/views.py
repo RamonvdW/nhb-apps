@@ -27,6 +27,7 @@ from Logboek.models import schrijf_in_logboek
 from Overig.helpers import get_safe_from_ip
 from Mailer.models import mailer_queue_email, mailer_obfuscate_email
 from datetime import timedelta
+import datetime
 import logging
 
 
