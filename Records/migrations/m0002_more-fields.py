@@ -10,10 +10,12 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     """ Migratie class voor dit deel van de applicatie """
 
+    # volgorde afdwingen
     dependencies = [
         ('Records', 'm0001_initial'),
     ]
 
+    # migratie functies
     operations = [
         migrations.AddField(
             model_name='indivrecord',

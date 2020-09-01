@@ -165,14 +165,10 @@ class Command(BaseCommand):
                         curr_record.para_klasse = record.para_klasse
 
                 # 7 = Verbeterbaar
-                #val = row[7]
-                #if blad == '18':
-                #    if val not in ('18', '25', '25+18'):
-                #        errors.append("Foute afstand: %s is geen indoor afstand" % repr(val))
-                #if blad == '25' and val != '25':
-                #    errors.append("Foute afstand: %s moet 25 zijn" % repr(val))
-                #if blad == 'OD' and val not in ('30', '40', '50', '60', '70', '90'):
-                #    errors.append("Foute afstand: %s is geen outdoor afstand" % repr(val))
+                val = row[7]
+                if val.lower() == 'nee' and record.verbeterbaar:
+                    wijzigingen.append('verbeterbaar: %s --> %s' % (curr_record.verbeterbaar, record.verbeterbaar))
+                    curr_record.verbeterbaar = False
 
                 # 8 = Pijlen
                 val = row[8]

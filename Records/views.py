@@ -6,13 +6,14 @@
 
 from django.conf import settings
 from django.urls import Resolver404, reverse
+from django.http import HttpResponseRedirect
 from django.views.generic import ListView
 from django.db.models import Q
 from django.core.exceptions import ObjectDoesNotExist
 from django.templatetags.static import static
 from Plein.menu import menu_dynamics
 from NhbStructuur.models import NhbLid
-from .models import IndivRecord
+from .models import IndivRecord, BesteIndivRecords
 from .forms import ZoekForm
 
 TEMPLATE_RECORDS_OVERZICHT = 'records/records_overzicht.dtl'
@@ -20,6 +21,8 @@ TEMPLATE_RECORDS_SPECIFIEK = 'records/records_specifiek.dtl'
 TEMPLATE_RECORDS_INDIV_ZOOM1234 = 'records/records_indiv_zoom1234.dtl'
 TEMPLATE_RECORDS_INDIV_ZOOM5 = 'records/records_indiv_zoom5.dtl'
 TEMPLATE_RECORDS_ZOEK = 'records/records_zoek.dtl'
+TEMPLATE_RECORDS_VERBETERBAAR_KIES_DISC = 'records/verbeterbaar_kies_disc.dtl'
+TEMPLATE_RECORDS_VERBETERBAAR_DISCIPLINE = 'records/verbeterbaar_discipline.dtl'
 
 
 DISCIPLINE_TO_ICON = {
@@ -27,6 +30,67 @@ DISCIPLINE_TO_ICON = {
     '18': static('plein/badge_nhb_indoor.png'),
     '25': static('plein/badge_nhb_25m1p.png')
 }
+
+# vertaling van velden naar urlconf elementen en terug
+disc2str = {'OD': 'Outdoor',
+            '18': 'Indoor',
+            '25': '25m 1pijl'}
+
+gesl2str = {'M': 'Mannen',
+            'V': 'Vrouwen'}
+
+makl2str = {'R': 'Recurve',
+            'C': 'Compound',
+            'BB': 'Barebow',
+            'IB': 'Instinctive bow',
+            'LB': 'Longbow',
+            'O': 'Para klassen'}
+
+lcat2str = {'M': 'Masters (50+)',
+            'S': 'Senioren',
+            'J': 'Junioren (t/m 20 jaar)',
+            'C': 'Cadetten (t/m 17 jaar)',
+            'U': 'Gecombineerd (bij para)'}
+
+sel2str4arg = {'disc': disc2str,
+               'gesl': gesl2str,
+               'makl': makl2str,
+               'lcat': lcat2str}
+
+disc2url = {'OD': 'outdoor',
+            '18': 'indoor',
+            '25': '25m1pijl'}
+
+gesl2url = {'M': 'mannen',
+            'V': 'vrouwen'}
+
+makl2url = {'R': 'recurve',
+            'C': 'compound',
+            'BB': 'barebow',
+            'IB': 'instinctive-bow',
+            'LB': 'longbow',
+            'O': 'para-klassen'}
+
+lcat2url = {'M': 'masters',
+            'S': 'senioren',
+            'J': 'junioren',
+            'C': 'cadetten',
+            'U': 'gecombineerd'}
+
+sel2url4arg = {'disc': disc2url,
+               'gesl': gesl2url,
+               'makl': makl2url,
+               'lcat': lcat2url}
+
+url2disc = {v: k for k, v in disc2url.items()}
+url2gesl = {v: k for k, v in gesl2url.items()}
+url2makl = {v: k for k, v in makl2url.items()}
+url2lcat = {v: k for k, v in lcat2url.items()}
+
+url2sel4arg = {'disc': url2disc,
+               'gesl': url2gesl,
+               'makl': url2makl,
+               'lcat': url2lcat}
 
 
 class RecordsOverzichtView(ListView):
@@ -43,15 +107,15 @@ class RecordsOverzichtView(ListView):
         obj.icon = DISCIPLINE_TO_ICON[obj.discipline]
 
         # heren/dames
-        obj.descr1_str = IndivRecord.gesl2str[obj.geslacht] + " "
+        obj.descr1_str = gesl2str[obj.geslacht] + " "
 
         # junioren, etc.
-        obj.descr1_str += IndivRecord.lcat2str[obj.leeftijdscategorie]
+        obj.descr1_str += lcat2str[obj.leeftijdscategorie]
 
         # type wedstrijd
-        obj.descr2_str = (IndivRecord.disc2str[obj.discipline] +             # indoor/outdoor
-                          " " + IndivRecord.makl2str[obj.materiaalklasse] +  # longbow/recurve
-                          " " + obj.soort_record)                            # 70m (72p)
+        obj.descr2_str = (disc2str[obj.discipline] +             # indoor/outdoor
+                          " " + makl2str[obj.materiaalklasse] +  # longbow/recurve
+                          " " + obj.soort_record)                # 70m (72p)
 
         # recurve etc.
         if obj.para_klasse:
@@ -110,15 +174,15 @@ class RecordsIndivZoomBaseView(ListView):
             Voorbeeld: arg_name='makl'; parameter 'makl'='recurve'
                        --> retourneert 'R', 'Recurve'
         """
-        url2sel = IndivRecord.url2sel4arg[arg_name]     # specifieke url vertaaltabel voor deze parameter
+        url2sel = url2sel4arg[arg_name]     # specifieke url vertaaltabel voor deze parameter
         try:
             url_part = self.kwargs[arg_name]
         except KeyError:
             pass        # parameter was niet aanwezig
         else:
             try:
-                sel = url2sel[url_part]                         # kijk of het een ondersteunde url tekst is
-                sel2str = IndivRecord.sel2str4arg[arg_name]     # zoek de beschrijvende tekst erbij
+                sel = url2sel[url_part]             # kijk of het een ondersteunde url tekst is
+                sel2str = sel2str4arg[arg_name]     # zoek de beschrijvende tekst erbij
                 return sel, sel2str[sel]
             except KeyError:
                 # niet ondersteunde url tekst --> geef een foutmelding
@@ -139,13 +203,13 @@ class RecordsIndivZoomBaseView(ListView):
         """Vertaal de opgegeven filter delen naar hun url representatie en sla deze op in self.params
         """
         if self.sel_gesl:
-            self.params['gesl'] = IndivRecord.gesl2url[self.sel_gesl]
+            self.params['gesl'] = gesl2url[self.sel_gesl]
         if self.sel_disc:
-            self.params['disc'] = IndivRecord.disc2url[self.sel_disc]
+            self.params['disc'] = disc2url[self.sel_disc]
         if self.sel_lcat:
-            self.params['lcat'] = IndivRecord.lcat2url[self.sel_lcat]
+            self.params['lcat'] = lcat2url[self.sel_lcat]
         if self.sel_makl:
-            self.params['makl'] = IndivRecord.makl2url[self.sel_makl]
+            self.params['makl'] = makl2url[self.sel_makl]
 
     def make_items(self, objs, arg, url_name, keys):
         """ Deze functie voegt een aantal filter opties toe aan de objects list die aan de template gegeven wordt.
@@ -156,8 +220,8 @@ class RecordsIndivZoomBaseView(ListView):
                 url_name: moet een 'name' matchen in de urlconf, voor de reverse-lookup
                 keys: de parameters om door te geven aan de reverse-lookup. De waarden worden uit self.params gehaald.
         """
-        sel2str = IndivRecord.sel2str4arg[arg]
-        sel2url = IndivRecord.sel2url4arg[arg]
+        sel2str = sel2str4arg[arg]
+        sel2url = sel2url4arg[arg]
         for sel, sel_str in sel2str.items():
             self.params[arg] = sel2url[sel]
             sub_params = {k: self.params[k] for k in keys}
@@ -294,20 +358,20 @@ class RecordsIndivSpecifiekView(ListView):
             raise Resolver404()
 
         # voeg informatie toe voor de template
-        spec.gesl_str = IndivRecord.gesl2str[spec.geslacht]
-        spec.disc_str = IndivRecord.disc2str[spec.discipline]
-        spec.lcat_str = IndivRecord.lcat2str[spec.leeftijdscategorie]
-        spec.makl_str = IndivRecord.makl2str[spec.materiaalklasse]
+        spec.gesl_str = gesl2str[spec.geslacht]
+        spec.disc_str = disc2str[spec.discipline]
+        spec.lcat_str = lcat2str[spec.leeftijdscategorie]
+        spec.makl_str = makl2str[spec.materiaalklasse]
 
         spec.op_pagina = "specifiek record: %s-%s" % (discipline, volg_nr)
 
         self.spec = spec
 
         # stel de url parameters vast voor de broodkruimel urls
-        self.params['gesl'] = IndivRecord.gesl2url[spec.geslacht]
-        self.params['disc'] = IndivRecord.disc2url[spec.discipline]
-        self.params['lcat'] = IndivRecord.lcat2url[spec.leeftijdscategorie]
-        self.params['makl'] = IndivRecord.makl2url[spec.materiaalklasse]
+        self.params['gesl'] = gesl2url[spec.geslacht]
+        self.params['disc'] = disc2url[spec.discipline]
+        self.params['lcat'] = lcat2url[spec.leeftijdscategorie]
+        self.params['makl'] = makl2url[spec.materiaalklasse]
 
         # zoek de andere records die hier bij horen, aflopend gesorteerd op datum
         # hier zit ook het record zelf bij
@@ -392,6 +456,88 @@ class RecordsZoekView(ListView):
         context['have_searched'] = self.get_zoekterm != ""
         context['zoekterm'] = self.get_zoekterm
         context['records_zoek_url'] = reverse('Records:zoek')
+        menu_dynamics(self.request, context, actief='records')
+        return context
+
+
+class RecordsVerbeterbaarKiesDisc(ListView):
+
+    """ Deze view laat de gebruiker een discipline kiezen """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_RECORDS_VERBETERBAAR_KIES_DISC
+
+    def get_queryset(self):
+        """ called by the template system to get the queryset or list of objects for the template """
+
+        objs = (IndivRecord
+                .objects
+                .distinct('discipline')
+                .order_by('discipline'))
+
+        for obj in objs:
+            obj.beschrijving = disc2str[obj.discipline]
+            url_disc = disc2url[obj.discipline]
+            obj.url = reverse('Records:indiv-verbeterbaar-disc', kwargs={'disc': url_disc})
+        # for
+
+        return objs
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+        menu_dynamics(self.request, context, actief='records')
+        return context
+
+
+class RecordsVerbeterbaarInDiscipline(ListView):
+
+    """ Deze view laat de gebruiker de lijst van verbeterbare NL records zien binnen een discipline """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_RECORDS_VERBETERBAAR_DISCIPLINE
+
+    def dispatch(self, request, *args, **kwargs):
+        url_disc = self.kwargs['disc']
+        try:
+            discipline = url2disc[url_disc]
+        except KeyError:
+            return HttpResponseRedirect(reverse('Records:indiv-verbeterbaar'))
+
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_queryset(self):
+        """ called by the template system to get the queryset or list of objects for the template """
+
+        url_disc = self.kwargs['disc']
+        discipline = url2disc[url_disc]
+
+        objs = (BesteIndivRecords
+                .objects
+                .filter(discipline=discipline)
+                .select_related('beste')
+                .order_by('volgorde'))
+
+        for obj in objs:
+
+            obj.geslacht_str = gesl2str[obj.geslacht]
+            obj.materiaalklasse_str = makl2str[obj.materiaalklasse]
+            obj.leeftijdscategorie_str = lcat2str[obj.leeftijdscategorie]
+
+            obj.url_details = reverse('Records:specifiek', kwargs={'discipline': obj.discipline,
+                                                                   'nummer': obj.beste.volg_nr})
+        # for
+
+        return objs
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        url_disc = self.kwargs['disc']
+        discipline = url2disc[url_disc]
+        context['beschrijving'] = disc2str[discipline]
+
         menu_dynamics(self.request, context, actief='records')
         return context
 

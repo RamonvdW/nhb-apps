@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019 Ramon van der Winkel.
+#  Copyright (c) 2020 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.db import migrations
+from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
@@ -12,14 +12,15 @@ class Migration(migrations.Migration):
 
     # volgorde afdwingen
     dependencies = [
-        ('Records', 'm0003_para-klasse'),
+        ('Records', 'm0004_remove-nat-record'),
     ]
 
     # migratie functies
     operations = [
-        migrations.RemoveField(
+        migrations.AddField(
             model_name='indivrecord',
-            name='is_national_record',
+            name='verbeterbaar',
+            field=models.BooleanField(default=True),
         ),
     ]
 

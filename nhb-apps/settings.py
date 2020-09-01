@@ -34,7 +34,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2020-08-30'
+SITE_VERSIE = '2020-09-01'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -215,21 +215,23 @@ RECORDS_MAX_ZOEKRESULTATEN = 150
 # wordt gebruikt om invoerfouten te ontdekken en rapporteren
 RECORDS_TOEGESTANE_SOORTEN = (
 
-    # outdoor
-    '30m',
-    '40m',
-    '50m',
-    '50m (15p)',
-    '50m (122cm)',
-    '50m (72p)',
-    '60m',
-    '60m (12p)',
-    '60m (72p)',
-    '70m',
-    '70m (12p)',
-    '70m (72p)',
-    '90m',
+    # LET OP: dit is ook meteen de presentatie-volgorde van de records
+
+    # Outdoor
     'WA1440',
+    '90m',
+    '70m',
+    '60m',
+    '50m',
+    '50m (122cm)',
+    '40m',
+    '30m',
+    '50m (72p)',
+    '60m (72p)',
+    '70m (72p)',
+    '50m (15p)',
+    '60m (12p)',
+    '70m (12p)',
     '288p',
 
     # Outdoor, still to be cleaned up
@@ -237,14 +239,14 @@ RECORDS_TOEGESTANE_SOORTEN = (
     'ShortMetric',
 
     # indoor
-    '18m (15p)',
     '18m (60p)',
     '18m',
+    '18m (15p)',
     '18m (12p)',
-    '25m',
     '25m (60p)',
-    '25m+18m (60p)',
+    '25m',
     '25m+18m (120p)',
+    '25m+18m (60p)',
 
     # Indoor, to be cleaned up
     'match (15p)',
@@ -254,12 +256,14 @@ RECORDS_TOEGESTANE_SOORTEN = (
     '30p',
 )
 
+
 RECORDS_TOEGESTANE_PARA_KLASSEN = (
     "Open",
     "Staand",
     "W1",
     "W2",
     "Ja"        # aka Onbekend
+    # TODO: hier ontbreken VI1 en VI2/3
 )
 
 # definitions taken from saml2.saml to avoid importing saml2

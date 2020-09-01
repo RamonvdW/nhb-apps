@@ -1,0 +1,23 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2019-2020 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Handboogsport Records{% endblock %}
+
+{% block pagina %}
+
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="records-verbeterbaar-kies-discipline" %}
+
+    <h4>Nederlandse Handboog<wbr/>sport Records</h4>
+
+    <p>Kies de discipline waarbinnen de verbeterbare records getoond moeten worden:</p>
+
+    {% for disc in object_list %}
+        <p><a class="btn-nhb-blauw" href="{{ disc.url }}">{{ disc.beschrijving }}</a></p>
+    {% endfor %}
+
+{% endblock %}
