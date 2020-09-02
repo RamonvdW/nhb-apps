@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from django.utils.dateparse import parse_date
-from .models import IndivRecord
+from .models import IndivRecord, LEEFTIJDSCATEGORIE, GESLACHT, MATERIAALKLASSE, DISCIPLINE
 from NhbStructuur.models import NhbLid
 from Overig.e2ehelpers import E2EHelpers
 import datetime
@@ -46,11 +46,11 @@ class TestRecordsView(E2EHelpers, TestCase):
         # Record 42
         rec = IndivRecord()
         rec.volg_nr = 42
-        rec.discipline = IndivRecord.DISCIPLINE[0][0]   # OD
+        rec.discipline = DISCIPLINE[0][0]   # OD
         rec.soort_record = 'Test record'
-        rec.geslacht = IndivRecord.GESLACHT[0][0]   # M
-        rec.leeftijdscategorie = IndivRecord.LEEFTIJDSCATEGORIE[0][0]   # M
-        rec.materiaalklasse = IndivRecord.MATERIAALKLASSE[0][0]     # R
+        rec.geslacht = GESLACHT[0][0]   # M
+        rec.leeftijdscategorie = LEEFTIJDSCATEGORIE[0][0]   # M
+        rec.materiaalklasse = MATERIAALKLASSE[0][0]     # R
         # rec.materiaalklasse_overig =
         rec.nhb_lid = lid
         rec.naam = 'Top Schutter'
@@ -68,10 +68,10 @@ class TestRecordsView(E2EHelpers, TestCase):
         # Record 43
         rec = IndivRecord()
         rec.volg_nr = 43
-        rec.discipline = IndivRecord.DISCIPLINE[1][0]   # 18
+        rec.discipline = DISCIPLINE[1][0]   # 18
         rec.soort_record = 'Test record para'
-        rec.geslacht = IndivRecord.GESLACHT[1][0]   # V
-        rec.leeftijdscategorie = IndivRecord.LEEFTIJDSCATEGORIE[1][0]   # S
+        rec.geslacht = GESLACHT[1][0]   # V
+        rec.leeftijdscategorie = LEEFTIJDSCATEGORIE[1][0]   # S
         rec.materiaalklasse = 'R'       # Recurve
         rec.para_klasse = 'Open'
         # rec.nhb_lid =
@@ -88,10 +88,10 @@ class TestRecordsView(E2EHelpers, TestCase):
         # Record 44
         rec = IndivRecord()
         rec.volg_nr = 44
-        rec.discipline = IndivRecord.DISCIPLINE[2][0]   # 25
+        rec.discipline = DISCIPLINE[2][0]   # 25
         rec.soort_record = '25m'
-        rec.geslacht = IndivRecord.GESLACHT[1][0]   # V
-        rec.leeftijdscategorie = IndivRecord.LEEFTIJDSCATEGORIE[3][0]   # C
+        rec.geslacht = GESLACHT[1][0]   # V
+        rec.leeftijdscategorie = LEEFTIJDSCATEGORIE[3][0]   # C
         rec.materiaalklasse = 'R'       # Recurve
         #rec.para_klasse =
         rec.nhb_lid = lid

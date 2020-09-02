@@ -7,7 +7,7 @@
 from django.test import TestCase
 from django.core import management
 from django.utils.dateparse import parse_date
-from .models import IndivRecord
+from .models import IndivRecord, LEEFTIJDSCATEGORIE, GESLACHT, MATERIAALKLASSE, DISCIPLINE
 from NhbStructuur.models import NhbLid
 import datetime
 import io
@@ -45,11 +45,11 @@ class TestRecordsImport(TestCase):
         # Record 42
         rec = IndivRecord()
         rec.volg_nr = 42
-        rec.discipline = IndivRecord.DISCIPLINE[0][0]   # OD
+        rec.discipline = DISCIPLINE[0][0]   # OD
         rec.soort_record = 'Test record'
-        rec.geslacht = IndivRecord.GESLACHT[0][0]   # M
-        rec.leeftijdscategorie = IndivRecord.LEEFTIJDSCATEGORIE[0][0]   # M
-        rec.materiaalklasse = IndivRecord.MATERIAALKLASSE[0][0]     # R
+        rec.geslacht = GESLACHT[0][0]   # M
+        rec.leeftijdscategorie = LEEFTIJDSCATEGORIE[0][0]   # M
+        rec.materiaalklasse = MATERIAALKLASSE[0][0]     # R
         # rec.materiaalklasse_overig =
         rec.nhb_lid = lid
         rec.naam = 'Top Schutter'
@@ -67,10 +67,10 @@ class TestRecordsImport(TestCase):
         # Record 43
         rec = IndivRecord()
         rec.volg_nr = 43
-        rec.discipline = IndivRecord.DISCIPLINE[1][0]   # 18
+        rec.discipline = DISCIPLINE[1][0]   # 18
         rec.soort_record = 'Test record para'
-        rec.geslacht = IndivRecord.GESLACHT[1][0]   # V
-        rec.leeftijdscategorie = IndivRecord.LEEFTIJDSCATEGORIE[1][0]   # S
+        rec.geslacht = GESLACHT[1][0]   # V
+        rec.leeftijdscategorie = LEEFTIJDSCATEGORIE[1][0]   # S
         rec.materiaalklasse = 'R'       # Recurve
         rec.para_klasse = 'Open'
         # rec.nhb_lid =
@@ -87,10 +87,10 @@ class TestRecordsImport(TestCase):
         # Record 44
         rec = IndivRecord()
         rec.volg_nr = 44
-        rec.discipline = IndivRecord.DISCIPLINE[2][0]   # 25
+        rec.discipline = DISCIPLINE[2][0]   # 25
         rec.soort_record = '25m'
-        rec.geslacht = IndivRecord.GESLACHT[1][0]   # V
-        rec.leeftijdscategorie = IndivRecord.LEEFTIJDSCATEGORIE[3][0]   # C
+        rec.geslacht = GESLACHT[1][0]   # V
+        rec.leeftijdscategorie = LEEFTIJDSCATEGORIE[3][0]   # C
         rec.materiaalklasse = 'R'       # Recurve
         rec.nhb_lid = lid
         rec.naam = 'Petra Schutter'
@@ -144,6 +144,7 @@ class TestRecordsImport(TestCase):
         f1 = io.StringIO()
         f2 = io.StringIO()
         management.call_command('import_records', './Records/management/testfiles/testfile_04.json', stderr=f1, stdout=f2)
+        # print("f2: %s" % f2.getvalue())
         self.assertFalse('[ERROR]' in f1.getvalue())
         self.assertTrue('[INFO] Record OD-1 toegevoegd' in f2.getvalue())
         self.assertTrue('[INFO] Record OD-2 toegevoegd' in f2.getvalue())
@@ -168,8 +169,8 @@ class TestRecordsImport(TestCase):
         f1 = io.StringIO()
         f2 = io.StringIO()
         management.call_command('import_records', './Records/management/testfiles/testfile_06.json', stderr=f1, stdout=f2)
-        #print("f1: %s" % f1.getvalue())
-        #print("f2: %s" % f2.getvalue())
+        # print("f1: %s" % f1.getvalue())
+        # print("f2: %s" % f2.getvalue())
         self.assertTrue("Wijzigingen voor record OD-42:" in f2.getvalue())
         self.assertTrue("geslacht: 'M' --> 'V'" in f2.getvalue())
         self.assertTrue("leeftijdscategorie: 'M' --> 'C'" in f2.getvalue())
@@ -187,6 +188,7 @@ class TestRecordsImport(TestCase):
         self.assertTrue("is_european_record: False --> True" in f2.getvalue())
         self.assertTrue("is_world_record: False --> True" in f2.getvalue())
         self.assertTrue("score_notitie: '' --> 'Geen notitie'" in f2.getvalue())
+        self.assertTrue("verbeterbaar: True --> False" in f2.getvalue())
 
         self.assertTrue("Wijzigingen voor record 25-44:" in f2.getvalue())
         self.assertTrue("score_notitie: '' --> 'gedeeld'" in f2.getvalue())
@@ -195,8 +197,6 @@ class TestRecordsImport(TestCase):
         f1 = io.StringIO()
         f2 = io.StringIO()
         management.call_command('import_records', './Records/management/testfiles/testfile_06.json', '--dryrun', stderr=f1, stdout=f2)
-        #print("f1: %s" % f1.getvalue())
-        #print("f2: %s" % f2.getvalue())
         self.assertTrue("DRY RUN\nSamenvatting: 5 records;" in f2.getvalue())
 
     def test_onbekend_nhbnr(self):
@@ -204,8 +204,6 @@ class TestRecordsImport(TestCase):
         f1 = io.StringIO()
         f2 = io.StringIO()
         management.call_command('import_records', './Records/management/testfiles/testfile_07.json', stderr=f1, stdout=f2)
-        #print("f1: %s" % f1.getvalue())
-        #print("f2: %s" % f2.getvalue())
         self.assertTrue("NHB nummer niet bekend: '999999' " in f1.getvalue())
 
     def test_foute_datums(self):
@@ -213,8 +211,6 @@ class TestRecordsImport(TestCase):
         f1 = io.StringIO()
         f2 = io.StringIO()
         management.call_command('import_records', './Records/management/testfiles/testfile_08.json', stderr=f1, stdout=f2)
-        #print("f1: %s" % f1.getvalue())
-        #print("f2: %s" % f2.getvalue())
         self.assertTrue("[ERROR] Fout in datum: '6-30-2017' in ['2'," in f1.getvalue())
         self.assertTrue("[ERROR] Fout in datum: '30-6-17' in ['3'," in f1.getvalue())
         self.assertTrue("[ERROR] Fout in datum: '30-617' in ['4'," in f1.getvalue())
@@ -227,8 +223,6 @@ class TestRecordsImport(TestCase):
         f1 = io.StringIO()
         f2 = io.StringIO()
         management.call_command('import_records', './Records/management/testfiles/testfile_09.json', stderr=f1, stdout=f2)
-        #print("f1: %s" % f1.getvalue())
-        #print("f2: %s" % f2.getvalue())
         self.assertTrue("[ERROR] Volgnummer 22 komt meerdere keren voor in" in f1.getvalue())
 
     def test_niet_consecutief(self):
@@ -236,8 +230,6 @@ class TestRecordsImport(TestCase):
         f1 = io.StringIO()
         f2 = io.StringIO()
         management.call_command('import_records', './Records/management/testfiles/testfile_10.json', stderr=f1, stdout=f2)
-        #print("f1: %s" % f1.getvalue())
-        #print("f2: %s" % f2.getvalue())
         self.assertTrue("[WARNING] Score niet consecutief voor records OD-101 en OD-100 (1200(57X) >= 1200(56X))" in f1.getvalue())
         self.assertTrue("[WARNING] Identieke datum en score voor records OD-202 en OD-102" in f1.getvalue())
         self.assertTrue("[WARNING] Score niet consecutief voor records OD-401 en OD-400 (400 >= 300)" in f1.getvalue())

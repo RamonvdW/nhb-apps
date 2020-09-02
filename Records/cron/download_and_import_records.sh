@@ -71,6 +71,9 @@ then
         # import the records
         echo "[INFO] Importing records" >> "$LOG"
         ./manage.py import_records "$SPOOLFILE" &>> "$LOG"
+
+        echo "[INFO] Decide best records" >> "$LOG"
+        ./manage.py bepaal_beste_records &>> "$LOG"
     else
         echo "[INFO] Records have not changed" >> "$LOG"
     fi

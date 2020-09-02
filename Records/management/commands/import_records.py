@@ -165,10 +165,12 @@ class Command(BaseCommand):
                         curr_record.para_klasse = record.para_klasse
 
                 # 7 = Verbeterbaar
+                # default = True tenzij er "nee" of "Nee" in het veld staat
                 val = row[7]
-                if val.lower() == 'nee' and record.verbeterbaar:
+                record.verbeterbaar = not (val.lower() == 'nee')
+                if curr_record and curr_record.verbeterbaar != record.verbeterbaar:
                     wijzigingen.append('verbeterbaar: %s --> %s' % (curr_record.verbeterbaar, record.verbeterbaar))
-                    curr_record.verbeterbaar = False
+                    curr_record.verbeterbaar = record.verbeterbaar
 
                 # 8 = Pijlen
                 val = row[8]
