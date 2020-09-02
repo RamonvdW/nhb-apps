@@ -12,40 +12,49 @@
 
 {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="records-overzicht" %}
 
-<h4>Nederlandse Handboog<wbr/>sport Records</h4>
+    <h4>Nederlandse Handboog<wbr/>sport Records</h4>
 
-<p><a class="btn white blue-text" href="{% url 'Records:indiv' %}">Individuele records</a></p>
-<p><a class="btn-nhb-blauw" href="{% url 'Records:zoek' %}">Zoek in de records</a></p>
+    <p>Op deze pagina tonen we de toegekende Nederlandse Records van de handboogsport.</p>
 
-<h5>De nieuwste records</h5>
+    <p>Bekijk een lijst met alle records die verbeterd kunnen worden:<br>
+        <a class="btn-nhb-blauw" href="{% url 'Records:indiv-verbeterbaar' %}">Verbeterbare records</a></p>
 
-<div class="row">
-    {% for obj in object_list %}
-        <div class="card">
-            <div class="card-content">
-                <img class="right" src="{{ obj.icon }}" height="50" alt="klein logo">
-                {% if obj.is_world_record %}
-                    <span class="card-title">Wereld Record</span>
-                {% elif obj.is_european_record %}
-                    <span class="card-title">Europees Record</span>
-                {% else %}
-                    <span class="card-title">Nederlands Record</span>
-                {% endif %}
-                <p>{{ obj.descr1_str }}</p>
-                <p>{{ obj.descr2_str }}</p>
-                <p>&nbsp;</p>
-                <p>{{ obj.datum }}</p>
-                <p><b>{{ obj.naam }}</b></p>
-                <p>Score: {{ obj.score_str }} / {{ obj.max_score_str }}</p>
-                <p>Plaats: {{ obj.plaats }}</p>
-            </div>
-            <a href="{{ obj.url }}" class="nhb-klikbare-balk">
-                <div class="card-action center-align">
-                    <span class="nhb-klikbare-link">Details</span>
+    <p>Vind een record door te filteren:<br>
+        <a class="btn-nhb-blauw" href="{% url 'Records:indiv' %}">Individuele records</a></p>
+
+    <p>Zoek in de records op naam van de schutter of een vereniging:<br>
+        <a class="btn-nhb-blauw" href="{% url 'Records:zoek' %}">Zoek in de records</a></p>
+
+    <p>&nbsp;</p>
+    <h5>De nieuwste toegekende records</h5>
+
+    <div class="row">
+        {% for obj in object_list %}
+            <div class="card">
+                <div class="card-content">
+                    <img class="right" src="{{ obj.icon }}" height="50" alt="klein logo">
+                    {% if obj.is_world_record %}
+                        <span class="card-title">Wereld Record</span>
+                    {% elif obj.is_european_record %}
+                        <span class="card-title">Europees Record</span>
+                    {% else %}
+                        <span class="card-title">Nederlands Record</span>
+                    {% endif %}
+                    <p>{{ obj.descr1_str }}</p>
+                    <p>{{ obj.descr2_str }}</p>
+                    <p>&nbsp;</p>
+                    <p>{{ obj.datum }}</p>
+                    <p><b>{{ obj.naam }}</b></p>
+                    <p>Score: {{ obj.score_str }} / {{ obj.max_score_str }}</p>
+                    <p>Plaats: {{ obj.plaats }}</p>
                 </div>
-            </a>
-        </div>
-    {% endfor %}
-</div>
+                <a href="{{ obj.url }}" class="nhb-klikbare-balk">
+                    <div class="card-action center-align">
+                        <span class="nhb-klikbare-link">Details</span>
+                    </div>
+                </a>
+            </div>
+        {% endfor %}
+    </div>
 
 {% endblock %}
