@@ -144,12 +144,16 @@ class E2EHelpers(object):
         content = str(resp.content)
         content = self._remove_debugtoolbar(content)
         if skip_menu:
-            # menu is the first part of the body
-            pos = content.find('<div id="content">')
-        else:
-            pos = content.find('<body')
+            # menu is the last part of the body
+            pos = content.find('<div id="menu">')
+            if pos > 0:
+                content = content[:pos]
+
+        # skip the headers
+        pos = content.find('<body')
         if pos > 0:                             # pragma: no branch
-            content = content[pos:]             # strip head
+            content = content[pos:]             # strip header
+
         urls = list()
         while len(content):
             # find the start of a new url
