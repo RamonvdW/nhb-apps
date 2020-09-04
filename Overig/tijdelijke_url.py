@@ -136,4 +136,19 @@ def do_dispatch(request, obj):
 
     return redirect
 
+
+def beschrijving_activiteit(obj):
+    if obj.dispatch_to == RECEIVER_ACCOUNT_WISSEL:
+        return "in te loggen als een andere gebruiker"
+
+    if obj.dispatch_to in (RECEIVER_BEVESTIG_ACCOUNT_EMAIL,
+                           RECEIVER_BEVESTIG_FUNCTIE_EMAIL):
+        return "bevestig toegang tot e-mail"
+
+    if obj.dispatch_to == RECEIVER_WACHTWOORD_VERGETEN:
+        return "een nieuw wachtwoord in te stellen"
+
+    return "????"
+
+
 # end of file
