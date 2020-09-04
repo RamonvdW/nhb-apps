@@ -89,6 +89,9 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
         self.assertEqual(obj.hoortbij_accountemail.bevestigde_email, 'normaal@test.com')
         url = '/overig/url/' + obj.url_code + '/'
         resp = self.client.get(url)
+        urls = self.extract_all_urls(resp, skip_menu=True, skip_smileys=True)
+        post_url = urls[0]
+        resp = self.client.post(post_url)
         self.assert_is_redirect(resp, '/account/nieuw-wachtwoord/')
 
         # controleer dat we nu ingelogd zijn!

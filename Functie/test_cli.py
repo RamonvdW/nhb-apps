@@ -97,7 +97,7 @@ class TestAccountCLI(E2EHelpers, TestCase):
         f2 = io.StringIO()
         management.call_command('maak_rcl', 'bestaatniet', '18', '000', stderr=f1, stdout=f2)
         # print('f1:', f1.getvalue())
-        print('f2:', f2.getvalue())
+        # print('f2:', f2.getvalue())
         self.assertTrue("Account matching query does not exist" in f1.getvalue())
         self.assertTrue("Functie matching query does not exist" in f1.getvalue())
         self.assertTrue(f2.getvalue() == '')

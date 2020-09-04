@@ -112,6 +112,11 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
 
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
+        urls = self.extract_all_urls(resp, skip_menu=True, skip_smileys=True)
+        post_url = urls[0]
+        resp = self.client.post(post_url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/bevestigd.dtl', 'plein/site_layout.dtl'))
 
     def test_bko1(self):
@@ -281,6 +286,11 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
         # volg de 1e url
         resp = self.client.get(url1)
         self.assertEqual(resp.status_code, 200)
+        urls = self.extract_all_urls(resp, skip_menu=True, skip_smileys=True)
+        post_url = urls[0]
+        resp = self.client.post(post_url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/bevestigd.dtl', 'plein/site_layout.dtl'))
 
         self.assertEqual(SiteTijdelijkeUrl.objects.count(), 1)
@@ -293,6 +303,11 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
         # volg de 2e url
         resp = self.client.get(url2)
         self.assertEqual(resp.status_code, 200)
+        urls = self.extract_all_urls(resp, skip_menu=True, skip_smileys=True)
+        post_url = urls[0]
+        resp = self.client.post(post_url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/bevestigd.dtl', 'plein/site_layout.dtl'))
 
         self.assertEqual(SiteTijdelijkeUrl.objects.count(), 0)
