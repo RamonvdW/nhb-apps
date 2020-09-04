@@ -30,7 +30,7 @@
 
             <div class="row"><div class="input-field col s12">
                 <label class="black-text" for="id_ww">Nieuwe wachtwoord:</label>
-                <input class="with-gap" type="password" name="wachtwoord" value="" required id="id_ww">
+                <input class="with-gap" type="password" autofocus name="wachtwoord" value="" required id="id_ww">
             </div></div>
 
             {% if foutmelding %}
