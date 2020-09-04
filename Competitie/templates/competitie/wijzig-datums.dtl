@@ -11,32 +11,34 @@
 {% block pagina %}
 {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-wijzig-datums" %}
 
-<script>
-function post_datums() {
-    // voer een POST uit om toe te voegen
-    const form = document.createElement('form');
-    form.setAttribute('method', 'post');
-    form.setAttribute('action', '{{ wijzig_url }}');
+<script type="application/javascript">
+    function post_datums()
+    {
+        // voer een POST uit om toe te voegen
+        const form = document.createElement('form');
+        form.setAttribute('method', 'post');
+        form.setAttribute('action', '{{ wijzig_url }}');
 
-    for (let nr = 1; nr <= 4; nr++) {
-        const el = document.querySelector('#datum' + nr);
+        for (let nr = 1; nr <= 4; nr++)
+        {
+            const el = document.querySelector('#datum' + nr);
+            const inp = document.createElement('input');
+            inp.type = "hidden";
+            inp.name = "datum" + nr;
+            inp.value = el.M_Datepicker.toString('yyyy-mm-dd');
+            form.appendChild(inp);
+        }
+
         const inp = document.createElement('input');
         inp.type = "hidden";
-        inp.name = "datum" + nr;
-        inp.value = el.M_Datepicker.toString('yyyy-mm-dd');
+        inp.name = "csrfmiddlewaretoken";
+        inp.value = getCookie('csrftoken'); // TODO: "{{ csrf_token }}" mag ook (zie uitslag-invoeren-wedstrijd.dtl)
         form.appendChild(inp);
+
+        form.style.display = 'hidden';
+        document.body.appendChild(form);
+        form.submit();
     }
-
-    const inp = document.createElement('input');
-    inp.type = "hidden";
-    inp.name = "csrfmiddlewaretoken";
-    inp.value = getCookie('csrftoken'); // TODO: "{{ csrf_token }}" mag ook (zie uitslag-invoeren-wedstrijd.dtl)
-    form.appendChild(inp);
-
-    form.style.display = 'hidden';
-    document.body.appendChild(form);
-    form.submit();
-}
 </script>
 
 <h4>Competitie datums</h4>
@@ -75,21 +77,22 @@ function post_datums() {
 </p>
 
 <!-- initialisatie van de datum pickers -->
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        var el = document.querySelector('#datum1');
+<script type="application/javascript">
+    document.addEventListener('DOMContentLoaded', function()
+    {
+        let el = document.querySelector('#datum1');
         M.Datepicker.init(el, { defaultDate: new Date("{{ competitie.datum1|date:'Y-m-d' }}"),
                                 setDefaultDate: true });
 
-        var el = document.querySelector('#datum2');
+        el = document.querySelector('#datum2');
         M.Datepicker.init(el, { defaultDate: new Date("{{ competitie.datum2|date:'Y-m-d' }}"),
                                 setDefaultDate: true });
 
-        var el = document.querySelector('#datum3');
+        el = document.querySelector('#datum3');
         M.Datepicker.init(el, { defaultDate: new Date("{{ competitie.datum3|date:'Y-m-d' }}"),
                                 setDefaultDate: true });
 
-        var el = document.querySelector('#datum4');
+        el = document.querySelector('#datum4');
         M.Datepicker.init(el, { defaultDate: new Date("{{ competitie.datum4|date:'Y-m-d' }}"),
                                 setDefaultDate: true });
     })

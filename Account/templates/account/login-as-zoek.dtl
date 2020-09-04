@@ -14,29 +14,31 @@
 
 <h4>Zoek account</h4>
 
-<script>
-function do_selecteer(id) {
-    // voer een POST uit om toe te voegen
-    var form = document.createElement('form');
-    form.setAttribute('method', 'post');
-    form.setAttribute('action', '{{ url }}');
+<script type="application/javascript">
 
-    var inp = document.createElement('input');
-    inp.type = "hidden";
-    inp.name = "selecteer";
-    inp.value = id.getAttribute("data-pk");
-    form.appendChild(inp);
+    function do_selecteer(id) {
+        // voer een POST uit om toe te voegen
+        const form = document.createElement('form');
+        form.setAttribute('method', 'post');
+        form.setAttribute('action', '{{ url }}');
 
-    var inp = document.createElement('input');
-    inp.type = "hidden";
-    inp.name = "csrfmiddlewaretoken";
-    inp.value = getCookie('csrftoken');
-    form.appendChild(inp);
+        const inp = document.createElement('input');
+        inp.type = "hidden";
+        inp.name = "selecteer";
+        inp.value = id.getAttribute("data-pk");
+        form.appendChild(inp);
 
-    form.style.display = 'hidden';
-    document.body.appendChild(form);
-    form.submit();
-}
+        const inp = document.createElement('input');
+        inp.type = "hidden";
+        inp.name = "csrfmiddlewaretoken";
+        inp.value = getCookie('csrftoken');
+        form.appendChild(inp);
+
+        form.style.display = 'hidden';
+        document.body.appendChild(form);
+        form.submit();
+    }
+
 </script>
 
 <p>Beleef de website als elke andere gebruiker.</p>

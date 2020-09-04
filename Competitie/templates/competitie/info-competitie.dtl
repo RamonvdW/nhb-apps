@@ -127,7 +127,7 @@
 
 {% endif %}
 
-<p></p>
+<p>&nbsp;</p>
 <table class="striped">
     <tr>
         <td class="center-align">
@@ -363,10 +363,10 @@ In de shoot-off wordt 1 pijl gesloten en beslist de scheidsrechter welke pijl he
 <p>Om mee te doen in een team of het RK/BK moet je uiterlijk 15 juli lid zijn bij een vereniging.</p>
 
 
-<script>
+<script type="application/javascript">
     document.addEventListener('DOMContentLoaded', function() {
-        var elems = document.querySelectorAll('.carousel');
-        var instances = M.Carousel.init(elems, { fullWidth: true,
+        let elems = document.querySelectorAll('.carousel');
+        let instances = M.Carousel.init(elems, { fullWidth: true,
                                                  indicators: true,
                                                  noWrap: true });
     });

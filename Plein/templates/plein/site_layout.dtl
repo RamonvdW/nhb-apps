@@ -74,11 +74,10 @@
 
         </div>
 
-        <!-- TODO: minimize javascript using uglify -->
         <script src="{% static 'materialize-new-2_min.js' %}"></script>
 
         <!-- framework init, after everything has been loaded and instantiated -->
-        <script>
+        <script type="application/javascript">
             function discover_popup_delayed_open()
             {
                 // in de tussentijd kan het scherm al weer groter zijn geworden
@@ -173,10 +172,8 @@
                 elems = document.querySelectorAll("select");
                 M.FormSelect.init(elems, {});
             })
-        </script>
 
-        <!-- helper functie om een opgeslagen cookie in te lezen -->
-        <script>
+            // helper functie om een opgeslagen cookie in te lezen
             function getCookie(name) {
                 let cookieValue = null;
                 if (document.cookie && document.cookie !== "") {
@@ -202,10 +199,10 @@
                 }
                 return number;
             }
-        </script>
 
-        <!-- tabel filter -->
-        <script>
+
+            // ### tabel filter ###
+
             // wordt gebruikt om te reageren op de input van een gebruiker in een zoekveld
             // en regels van de tabel wel/niet zichtbaar te maken
             // kolommen waarin gezocht mag worden moeten het 'filter' attribuut hebben

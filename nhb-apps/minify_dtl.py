@@ -26,7 +26,46 @@ class Loader(AppDirectoriesLoader):
     """
 
     @staticmethod
-    def minify_scripts(contents):
+    def minify_js(script):
+        """ Remove unnecessary comments, spaces and newlines from javascript """
+        # remove single-line comments
+        script = re.sub(r'//.*\n', '\n', script)
+
+        # remove whitespace at start and end of the line
+        script = re.sub(r'\n\s+', '\n', script)
+        script = re.sub(r'\s+\n', '\n', script)
+
+        # remove whitespace around operators
+        script = re.sub(r' = ', '=', script)
+        script = re.sub(r' == ', '==', script)
+        script = re.sub(r' != ', '!=', script)
+        script = re.sub(r' === ', '===', script)
+        script = re.sub(r' !== ', '!==', script)
+        script = re.sub(r' \+ ', '+', script)
+        script = re.sub(r' - ', '-', script)
+        script = re.sub(r' < ', '<', script)
+        script = re.sub(r' && ', '&&', script)
+        script = re.sub(r' => ', '=>', script)
+        script = re.sub(r', ', ',', script)
+        script = re.sub(r': ', ':', script)
+        script = re.sub(r'; ', ';', script)
+        script = re.sub(r' \(', '(', script)
+        script = re.sub(r'\) ', ')', script)
+        script = re.sub(r'{ ', '{', script)
+        script = re.sub(r' }', '}', script)
+
+        # remove unnecessary newlines
+        script = re.sub(r'\n{', '{', script)
+        script = re.sub(r'{\n', '{', script)
+        script = re.sub(r'\n}', '}', script)
+        script = re.sub(r';\n', ';', script)
+        script = re.sub(r',\n', ',', script)
+        script = re.sub(r'}\nelse', '}else', script)
+        script = re.sub(r'\)\ncontinue', ')continue', script)
+
+        return script
+
+    def minify_scripts(self, contents):
         """ Verwijder commentaar en onnodige spaties uit
             javascript embedded in templates
         """
@@ -35,36 +74,16 @@ class Loader(AppDirectoriesLoader):
         while len(contents) and pos >= 0:
             pos2 = contents.find('</script>')
             if pos2 > pos:
-                script = contents[pos+8:pos2]
-                if contents[pos+7] == '>':
-                    # remove single-line comments
-                    script = re.sub(r'//.*\n', '\n', script)
-                    # remove whitespace at start of the line
-                    script = re.sub(r'\n\s+', '\n', script)
-                    # remove whitespace at end of the line
-                    script = re.sub(r'\s+\n', '\n', script)
-                    # remove whitespace around certain operators
-                    script = re.sub(r' = ', '=', script)
-                    script = re.sub(r' == ', '==', script)
-                    script = re.sub(r' != ', '!=', script)
-                    script = re.sub(r' === ', '===', script)
-                    script = re.sub(r' !== ', '!==', script)
-                    script = re.sub(r' \+ ', '+', script)
-                    script = re.sub(r' - ', '-', script)
-                    script = re.sub(r' < ', '<', script)
-                    script = re.sub(r' && ', '&&', script)
-                    script = re.sub(r', ', ',', script)
-                    script = re.sub(r': ', ':', script)
-                    script = re.sub(r'; ', ';', script)
-                    script = re.sub(r'\) {', '){', script)
-                    script = re.sub(r'{ ', '{', script)
-                    script = re.sub(r' \(', '(', script)
-                    # remove newlines
-                    script = re.sub(r'\n', '', script)
-                # else: pass-through variant: <script src=".." variant
-                clean += contents[:pos+8]   # includes script start tag
-                clean += script
-                clean += '</script>'
+                # section of <script[...]>..</script>
+                pos3 = contents.find('<script type="application/javascript">')
+                if pos3 == pos:
+                    # javascript to minify
+                    clean += contents[:pos+38]   # eat complete start tag
+                    clean += self.minify_js(contents[pos+38:pos2])
+                    clean += contents[pos2:pos2+9]  # </script>
+                else:
+                    # typically  <script src="..."></script>
+                    clean += contents[:pos2+9]
                 contents = contents[pos2+9:]
             else:   # pragma: no cover
                 # unexpected: start-tag but no end-tag
@@ -124,10 +143,10 @@ class Loader(AppDirectoriesLoader):
         contents = super().get_contents(origin)
 
         # in our project we use .dtl for "django template language" files
-        if ENABLE_MINIFY:
+        if ENABLE_MINIFY:               # pragma: no branch
             # own templates are .dtl
             # .html is for 3rd party templates
-            if origin.template_name.endswith('.dtl') or origin.template_name.endswith('.html'):
+            if origin.template_name.endswith('.dtl') or origin.template_name.endswith('.html'):  # pragma: no branch
                 # print("minifying %s" % repr(origin.template_name))
 
                 contents = self.remove_html_comments(contents)

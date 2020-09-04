@@ -65,7 +65,7 @@
 <p>Op deze pagina kan je de uitslag van een wedstrijd invoeren.</p>
 
 
-<script type="text/javascript">
+<script type="application/javascript">
     function opzoeken_toon_status(dataset, tekst, color)
     {
         for (let d in dataset)

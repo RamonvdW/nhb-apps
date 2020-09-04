@@ -136,7 +136,7 @@
 {% endif %}
 
 <!-- initialisatie van de time pickers -->
-<script>
+<script type="application/javascript">
     document.addEventListener('DOMContentLoaded', function() {
         const el = document.querySelector('#tijd1');
         const options = {
