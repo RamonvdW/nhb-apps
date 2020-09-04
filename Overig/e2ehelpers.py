@@ -146,8 +146,7 @@ class E2EHelpers(object):
         if skip_menu:
             # menu is the last part of the body
             pos = content.find('<div id="menu">')
-            if pos > 0:
-                content = content[:pos]
+            content = content[:pos]     # if not found, takes [:-1], which is OK
 
         # skip the headers
         pos = content.find('<body')
