@@ -15,20 +15,20 @@
 <h4>Zoek account</h4>
 
 <script type="application/javascript">
-
-    function do_selecteer(id) {
+    function do_selecteer(id)
+    {
         // voer een POST uit om toe te voegen
         const form = document.createElement('form');
         form.setAttribute('method', 'post');
         form.setAttribute('action', '{{ url }}');
 
-        const inp = document.createElement('input');
+        let inp = document.createElement('input');
         inp.type = "hidden";
         inp.name = "selecteer";
         inp.value = id.getAttribute("data-pk");
         form.appendChild(inp);
 
-        const inp = document.createElement('input');
+        inp = document.createElement('input');
         inp.type = "hidden";
         inp.name = "csrfmiddlewaretoken";
         inp.value = getCookie('csrftoken');
@@ -38,7 +38,6 @@
         document.body.appendChild(form);
         form.submit();
     }
-
 </script>
 
 <p>Beleef de website als elke andere gebruiker.</p>
