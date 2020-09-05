@@ -125,54 +125,6 @@
                 document.cookie = "menu_discover=9; path=/";
             }
 
-            document.addEventListener("DOMContentLoaded", function() {
-                // sidenav
-                let elems = document.querySelectorAll(".sidenav");
-                M.Sidenav.init(elems, {});
-
-                // accordeons
-                // TODO: defaults statisch aanpassen
-                const options = { inDuration: 100,    // default is 300
-                                  outDuration: 100    // default is 300
-                                };
-                elems = document.querySelectorAll(".collapsible");
-                M.Collapsible.init(elems, options);
-
-                // tooltips
-                elems = document.querySelectorAll(".tooltipped");
-                M.Tooltip.init(elems, { enterDelay: 1000 });
-
-                // feature discovery
-                elems = document.querySelectorAll(".tap-target");
-                M.TapTarget.init(elems, {});
-
-                let count = getCookieNumber("menu_discover");
-                if (count < 3)
-                {
-                    // -------------
-                    // KEEP IN SYNC
-                    // - site_layout.css: media query to show/hide labels
-                    // - site_layout.dtl: javascript checks for menu visible/hidden with media query
-                    // - materialize.js: cut-off point to show/hide sidebar (menu)
-                    // - variables.css: media query ranges
-                    // -------------
-
-                    let menu_is_shown = window.matchMedia("(min-width: 1021px)");
-                    menu_is_shown.addEventListener("change", discover_popup_hide);
-
-                    let menu_is_hidden = window.matchMedia("(max-width: 1020px)");
-                    menu_is_hidden.addEventListener("change", discover_popup_show);
-                    if (menu_is_hidden.matches) {
-                        // show immediately
-                        discover_popup_show(null);
-                    }
-                }
-
-                // rolgordijnen
-                elems = document.querySelectorAll("select");
-                M.FormSelect.init(elems, {});
-            })
-
             // helper functie om een opgeslagen cookie in te lezen
             function getCookie(name) {
                 let cookieValue = null;
@@ -200,6 +152,53 @@
                 return number;
             }
 
+            document.addEventListener("DOMContentLoaded", function() {
+                // sidenav
+                let elems = document.querySelectorAll(".sidenav");
+                M.Sidenav.init(elems, {});
+
+                // accordeons
+                // TODO: defaults statisch aanpassen
+                const options = { inDuration: 100,    // default is 300
+                                  outDuration: 100    // default is 300
+                                };
+                elems = document.querySelectorAll(".collapsible");
+                M.Collapsible.init(elems, options);
+
+                // tooltips
+                elems = document.querySelectorAll(".tooltipped");
+                M.Tooltip.init(elems, { enterDelay: 1000 });
+
+                // feature discovery
+                elems = document.querySelectorAll(".tap-target");
+                M.TapTarget.init(elems, {});
+
+                // rolgordijnen
+                elems = document.querySelectorAll("select");
+                M.FormSelect.init(elems, {});
+
+                let count = getCookieNumber("menu_discover");
+                if (count < 3)
+                {
+                    // -------------
+                    // KEEP IN SYNC
+                    // - site_layout.css: media query to show/hide labels
+                    // - site_layout.dtl: javascript checks for menu visible/hidden with media query
+                    // - materialize.js: cut-off point to show/hide sidebar (menu)
+                    // - variables.css: media query ranges
+                    // -------------
+
+                    let menu_is_shown = window.matchMedia("(min-width: 1021px)");
+                    menu_is_shown.addEventListener("change", discover_popup_hide);
+
+                    let menu_is_hidden = window.matchMedia("(max-width: 1020px)");
+                    menu_is_hidden.addEventListener("change", discover_popup_show);
+                    if (menu_is_hidden.matches) {
+                        // show immediately
+                        discover_popup_show(null);
+                    }
+                }
+            })
 
             // ### tabel filter ###
 
