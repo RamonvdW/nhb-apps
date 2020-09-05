@@ -34,7 +34,7 @@
 
             <div class="row"><div class="input-field col s12">
                 <label class="black-text" for="id_email">E-mailadres:</label>
-                <input class="with-gap" type="email" name="email" value="" required id="id_email">
+                <input class="with-gap" autofocus type="email" name="email" value="" required id="id_email">
             </div></div>
 
             {% if foutmelding %}
