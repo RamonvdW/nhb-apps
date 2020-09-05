@@ -23,6 +23,7 @@ GEBRUIK = [('18', 'Indoor'),
 GEBRUIK2STR = {'18': 'Indoor',
                '25': '25m 1pijl'}
 
+
 class NhbRayon(models.Model):
     """ Tabel waarin de Rayon definities van de NHB staan """
 
@@ -37,7 +38,9 @@ class NhbRayon(models.Model):
 
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
-        return self.naam + ' ' + self.geografisch_gebied
+        # geografisch gebied klopt niet helemaal en wordt nu niet meer getoond
+        # return self.naam + ' ' + self.geografisch_gebied
+        return self.naam
 
     class Meta:
         """ meta data voor de admin interface """

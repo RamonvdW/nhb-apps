@@ -125,7 +125,7 @@ class Command(BaseCommand):
             return
 
         # rayons zijn statisch gedefinieerd, met een extra beschrijving
-        # controleer alleen of er overwacht een wijziging is die we over moeten nemen
+        # controleer alleen of er onverwacht een wijziging is die we over moeten nemen
         for rayon in data:
             self._count_rayons += 1
             rayon_nr = rayon['rayon_number']
