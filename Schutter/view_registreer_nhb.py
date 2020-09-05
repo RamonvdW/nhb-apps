@@ -15,6 +15,7 @@ from Overig.helpers import get_safe_from_ip
 from Mailer.models import mailer_email_is_valide
 from Account.models import AccountCreateError, account_create
 from Account.views import account_vraag_email_bevestiging
+from Functie.models import Functie
 from NhbStructuur.models import NhbLid
 from .models import SchutterNhbLidGeenEmail, SchutterNhbLidInactief
 from .forms import RegistreerForm
@@ -63,6 +64,11 @@ def schutter_create_account_nhb(nhb_nummer, email, nieuw_wachtwoord):
     # koppelen nhblid en account
     nhblid.account = account
     nhblid.save()
+
+    # indien dit een secretaris is, ook meteen koppelen aan SEC functie van zijn vereniging
+    if nhblid.bij_vereniging.secretaris_lid == nhblid:
+        functie = Functie.objects.get(rol='SEC', nhb_ver=nhblid.bij_vereniging)
+        functie.accounts.add(account)
 
     account_vraag_email_bevestiging(accountmail, nhb_nummer=nhb_nummer, email=email)
 
