@@ -13,7 +13,7 @@ import datetime
 import io
 
 
-class TestRecordsImport(TestCase):
+class TestRecordsCliImport(TestCase):
     """ unittests voor de Records applicatie, Import module """
 
     def setUp(self):

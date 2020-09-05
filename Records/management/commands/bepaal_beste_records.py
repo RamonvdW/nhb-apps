@@ -92,10 +92,7 @@ class Command(BaseCommand):
                             para_klasse=obj.para_klasse)
                     .order_by('-score', '-x_count'))
 
-            if len(alle):
-                hoogste = alle[0]
-            else:
-                hoogste = None
+            hoogste = alle[0]
 
             if beste.beste != hoogste:
                 beste.beste = hoogste

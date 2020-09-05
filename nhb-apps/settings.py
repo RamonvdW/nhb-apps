@@ -234,7 +234,7 @@ RECORDS_TOEGESTANE_SOORTEN = (
     '70m (12p)',
     '288p',
 
-    # Outdoor, still to be cleaned up
+    # Outdoor, TODO: still to be cleaned up
     'Fita RK Rayon 4',
     'ShortMetric',
 
@@ -248,7 +248,7 @@ RECORDS_TOEGESTANE_SOORTEN = (
     '25m+18m (120p)',
     '25m+18m (60p)',
 
-    # Indoor, to be cleaned up
+    # Indoor, TODO: to be cleaned up
     'match (15p)',
 
     # 25m1pijl
