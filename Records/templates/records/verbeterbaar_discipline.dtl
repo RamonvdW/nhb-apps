@@ -14,7 +14,49 @@
 
     <h4>Nederlandse Handboog<wbr/>sport Records</h4>
 
-    <p>Deze pagina toont de <b>{{ object_list.count }}</b> nederlandse handboogsport records voor de discipline <b>{{ beschrijving }}</b> die verbeterbaar zijn.</p>
+    <p>Deze pagina toont de nederlandse handboogsport records voor de discipline <b>{{ beschrijving }}</b> die verbeterbaar zijn.</p>
+
+    <p>Filter op geslacht, wedstrijdboog of leeftijdsklasse:</p>
+
+    <p>
+        <div class="white shrink-wrap-5">
+            {% for obj in geslacht %}
+                {% if obj.url %}
+                    <a class="margin-5 btn-nhb-blauw btn-small" href="{{ obj.url }}">{{ obj.button_str }}</a>
+                {% else %}
+                    <a class="margin-5 btn-nhb-blauw btn-small disabled" href="#">{{ obj.button_str }}</a>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </p>
+    <p>
+        <div class="white shrink-wrap-5">
+            {% for obj in bogen %}
+                {% if obj.url %}
+                    <a class="margin-5 btn-nhb-blauw btn-small" href="{{ obj.url }}">{{ obj.button_str }}</a>
+                {% else %}
+                    <a class="margin-5 btn-nhb-blauw btn-small disabled" href="#">{{ obj.button_str }}</a>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </p>
+    <p>
+        <div class="white shrink-wrap-5">
+            {% for obj in leeftijd %}
+                {% if obj.url %}
+                    <a class="margin-5 btn-nhb-blauw btn-small" href="{{ obj.url }}">{{ obj.button_str }}</a>
+                {% else %}
+                    <a class="margin-5 btn-nhb-blauw btn-small disabled" href="#">{{ obj.button_str }}</a>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </p>
+
+    {% if is_alles %}
+        <p>Hieronder volgen alle <b>{{ object_list.count }}</b> records die verbeterbaar zijn.</p>
+    {% else %}
+        <p>Hieronder volgen <b>{{ object_list.count }}</b> van de records die verbeterbaar zijn.</p>
+    {% endif %}
 
     <table class="white">
         <thead>

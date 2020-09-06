@@ -181,7 +181,7 @@ class TestRecordsVerbeterbaar(E2EHelpers, TestCase):
         self.e2e_assert_other_http_commands_not_supported(url)
 
         urls = self.extract_all_urls(resp, skip_menu=True, skip_smileys=True)
-        self.assertEqual(1, len(urls))
+        self.assertEqual(12, len(urls))
         self.assertTrue('/records/record-18-43/' in urls)
 
         self.e2e_assert_other_http_commands_not_supported(url)
@@ -195,12 +195,36 @@ class TestRecordsVerbeterbaar(E2EHelpers, TestCase):
         self.e2e_assert_other_http_commands_not_supported(url)
 
         urls = self.extract_all_urls(resp, skip_menu=True, skip_smileys=True)
-        self.assertEqual(1, len(urls))
+        self.assertEqual(12, len(urls))
         self.assertTrue('/records/record-25-45/' in urls)
+
+    def test_combies(self):
+        url = self.url_verbeterbaar % 'outdoor'
+        resp = self.client.get(url + '?boog=recurve')
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+
+        resp = self.client.get(url + '?boog=alles&geslacht=man&leeftijdsklassse=senior')
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+
+        resp = self.client.get(url + '?boog=recurve&geslacht=vrouw&leeftijdsklasse=junior')
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
 
     def test_verbeterbaar_bad(self):
         url = self.url_verbeterbaar % "bad"
         resp = self.client.get(url)
+        self.assert_is_redirect(resp, self.url_kies_disc)
+
+        url = self.url_verbeterbaar % "outdoor"
+        resp = self.client.get(url + '?boog=bad')
+        self.assert_is_redirect(resp, self.url_kies_disc)
+
+        resp = self.client.get(url + '?geslacht=bad')
+        self.assert_is_redirect(resp, self.url_kies_disc)
+
+        resp = self.client.get(url + '?leeftijdsklasse=bad')
         self.assert_is_redirect(resp, self.url_kies_disc)
 
 # end of file

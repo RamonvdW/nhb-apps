@@ -15,6 +15,8 @@ from Plein.menu import menu_dynamics
 from NhbStructuur.models import NhbLid
 from .models import IndivRecord, BesteIndivRecords
 from .forms import ZoekForm
+from types import SimpleNamespace
+
 
 TEMPLATE_RECORDS_OVERZICHT = 'records/records_overzicht.dtl'
 TEMPLATE_RECORDS_SPECIFIEK = 'records/records_specifiek.dtl'
@@ -497,10 +499,20 @@ class RecordsVerbeterbaarInDiscipline(ListView):
     # class variables shared by all instances
     template_name = TEMPLATE_RECORDS_VERBETERBAAR_DISCIPLINE
 
+    boogtype2filter = {'alles': '', 'recurve': 'R', 'compound': 'C', 'barebow': 'BB', 'longbow': 'LB', 'instinctive': 'IB'}
+    geslacht2filter = {'alles': '', 'man': 'M', 'vrouw': 'V'}
+    leeftijd2filter = {'alles': '', 'cadet': 'C', 'junior': 'J', 'senior': 'S', 'master': 'M'}
+
     def dispatch(self, request, *args, **kwargs):
+        """ deze functie wordt aangeroepen voor get_queryset
+            hier is het mogelijk om een redirect te doen.
+        """
         url_disc = self.kwargs['disc']
         try:
-            discipline = url2disc[url_disc]
+            _ = url2disc[url_disc]      # check dat deze aanwezig is
+            _ = self.boogtype2filter[request.GET.get('boog', 'alles')]
+            _ = self.geslacht2filter[request.GET.get('geslacht', 'alles')]
+            _ = self.leeftijd2filter[request.GET.get('leeftijdsklasse', 'alles')]
         except KeyError:
             return HttpResponseRedirect(reverse('Records:indiv-verbeterbaar'))
 
@@ -512,11 +524,24 @@ class RecordsVerbeterbaarInDiscipline(ListView):
         url_disc = self.kwargs['disc']
         discipline = url2disc[url_disc]
 
+        filter_boogtype = self.boogtype2filter[self.request.GET.get('boog', 'alles')]
+        filter_geslacht = self.geslacht2filter[self.request.GET.get('geslacht', 'alles')]
+        filter_leeftijd = self.leeftijd2filter[self.request.GET.get('leeftijdsklasse', 'alles')]
+
         objs = (BesteIndivRecords
                 .objects
                 .filter(discipline=discipline)
                 .select_related('beste')
                 .order_by('volgorde'))
+
+        if filter_geslacht:
+            objs = objs.filter(geslacht=filter_geslacht)
+
+        if filter_boogtype:
+            objs = objs.filter(materiaalklasse=filter_boogtype)
+
+        if filter_leeftijd:
+            objs = objs.filter(leeftijdscategorie=filter_leeftijd)
 
         for obj in objs:
 
@@ -530,6 +555,16 @@ class RecordsVerbeterbaarInDiscipline(ListView):
 
         return objs
 
+    @staticmethod
+    def maak_url(base_url, extra, param_type, param):
+        extra = extra[:]
+        if param != 'alles':
+            extra.append('%s=%s' % (param_type, param))
+        if len(extra):
+            extra.sort()
+            return base_url + '?' + '&'.join(extra)
+        return base_url
+
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
@@ -537,6 +572,62 @@ class RecordsVerbeterbaarInDiscipline(ListView):
         url_disc = self.kwargs['disc']
         discipline = url2disc[url_disc]
         context['beschrijving'] = disc2str[discipline]
+
+        boogtype = self.request.GET.get('boog', 'alles')
+        geslacht = self.request.GET.get('geslacht', 'alles')
+        leeftijd = self.request.GET.get('leeftijdsklasse', 'alles')
+
+        base_url = reverse('Records:indiv-verbeterbaar-disc', kwargs={'disc': url_disc})
+
+        extra = list()
+        if boogtype != 'alles':
+            extra.append('boog=' + boogtype)
+        if leeftijd != 'alles':
+            extra.append('leeftijdsklasse=' + leeftijd)
+        context['geslacht'] = list()
+        for geslacht_key in self.geslacht2filter.keys():
+            obj = SimpleNamespace()
+            obj.button_str = geslacht_key
+            if geslacht != geslacht_key:
+                obj.url = self.maak_url(base_url, extra, 'geslacht', geslacht_key)
+            else:
+                obj.url = None
+            context['geslacht'].append(obj)
+        # for
+
+        extra = list()
+        if geslacht != 'alles':
+            extra.append('geslacht=' + geslacht)
+        if leeftijd != 'alles':
+            extra.append('leeftijdsklasse=' + leeftijd)
+        context['bogen'] = list()
+        for boogtype_key in self.boogtype2filter.keys():
+            obj = SimpleNamespace()
+            obj.button_str = boogtype_key
+            if boogtype != boogtype_key:
+                obj.url = self.maak_url(base_url, extra, 'boog', boogtype_key)
+            else:
+                obj.url = None
+            context['bogen'].append(obj)
+        # for
+
+        extra = list()
+        if boogtype != 'alles':
+            extra.append('boog=' + boogtype)
+        if geslacht != 'alles':
+            extra.append('geslacht=' + geslacht)
+        context['leeftijd'] = list()
+        for leeftijd_key in self.leeftijd2filter.keys():
+            obj = SimpleNamespace()
+            obj.button_str = leeftijd_key
+            if leeftijd != leeftijd_key:
+                obj.url = self.maak_url(base_url, extra, 'leeftijdsklasse', leeftijd_key)
+            else:
+                obj.url = None
+            context['leeftijd'].append(obj)
+        # for
+
+        context['is_alles'] = (boogtype == geslacht == leeftijd)
 
         menu_dynamics(self.request, context, actief='records')
         return context
