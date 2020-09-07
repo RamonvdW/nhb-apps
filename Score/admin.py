@@ -31,7 +31,7 @@ class ScoreAdmin(admin.ModelAdmin):
 
 class ScoreHistAdmin(admin.ModelAdmin):
     """ Admin configuratie voor ScoreHist klasse """
-    list_filter = ('datum', 'score__afstand_meter')
+    list_filter = ('when', 'score__afstand_meter')
 
 
 admin.site.register(Score, ScoreAdmin)

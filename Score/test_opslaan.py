@@ -43,12 +43,11 @@ class TestScoreOpslaan(E2EHelpers, TestCase):
         afstand = 18
         gemiddelde = 9.876
         waarde = int(gemiddelde * 1000)
-        datum = datetime.date(year=2019, month=3, day=3)
         account = self.account_normaal
         notitie = "Dit is een notities"
 
         # de eerste keer wordt het Score object aangemaakt
-        res = aanvangsgemiddelde_opslaan(self.schutterboog, afstand, gemiddelde, datum, account, notitie)
+        res = aanvangsgemiddelde_opslaan(self.schutterboog, afstand, gemiddelde, account, notitie)
         self.assertEqual(res, True)
 
         self.assertEqual(Score.objects.count(), 1)
@@ -62,22 +61,20 @@ class TestScoreOpslaan(E2EHelpers, TestCase):
         scorehist = ScoreHist.objects.all()[0]
         self.assertEqual(scorehist.oude_waarde, 0)
         self.assertEqual(scorehist.nieuwe_waarde, waarde)
-        self.assertEqual(scorehist.datum, datum)
         self.assertEqual(scorehist.door_account, account)
         self.assertEqual(scorehist.notitie, notitie)
         self.assertTrue(str(scorehist) != "")
 
         # dezelfde score nog een keer opslaan resulteert in een reject
-        res = aanvangsgemiddelde_opslaan(self.schutterboog, afstand, gemiddelde, datum, account, notitie)
+        res = aanvangsgemiddelde_opslaan(self.schutterboog, afstand, gemiddelde, account, notitie)
         self.assertEqual(res, False)
 
         # tweede keer wordt er alleen een ScoreHist object aangemaakt
         gemiddelde2 = 8.765
         waarde2 = int(gemiddelde2 * 1000)
-        datum2 = datetime.date(year=2020, month=2, day=27)
         notitie2 = "Dit is de tweede notitie"
 
-        res = aanvangsgemiddelde_opslaan(self.schutterboog, afstand, gemiddelde2, datum2, account, notitie2)
+        res = aanvangsgemiddelde_opslaan(self.schutterboog, afstand, gemiddelde2, account, notitie2)
         self.assertEqual(res, True)
 
         self.assertEqual(Score.objects.count(), 1)
@@ -90,7 +87,6 @@ class TestScoreOpslaan(E2EHelpers, TestCase):
         scorehist = ScoreHist.objects.all()[1]          # TODO: onzeker of altijd nieuwste record
         self.assertEqual(scorehist.oude_waarde, waarde)
         self.assertEqual(scorehist.nieuwe_waarde, waarde2)
-        self.assertEqual(scorehist.datum, datum2)
         self.assertEqual(scorehist.door_account, account)
         self.assertEqual(scorehist.notitie, notitie2)
 

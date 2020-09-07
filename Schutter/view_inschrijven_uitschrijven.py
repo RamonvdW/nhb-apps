@@ -93,7 +93,7 @@ class RegiocompetitieInschrijvenBevestigView(UserPassesTestMixin, TemplateView):
         if len(scores):
             score = scores[0]
             aanvangsgemiddelde = score.waarde / 1000
-            hist = ScoreHist.objects.filter(score=score).order_by('-datum')
+            hist = ScoreHist.objects.filter(score=score).order_by('-when')
             if len(hist):
                 context['ag_hist'] = hist[0]
         context['ag'] = aanvangsgemiddelde

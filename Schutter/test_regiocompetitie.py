@@ -132,7 +132,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
         schutterboog = SchutterBoog.objects.get(boogtype__afkorting='R')
         deelcomp = DeelCompetitie.objects.get(competitie__afstand='18', nhb_regio=self.nhbver.regio)
-        res = aanvangsgemiddelde_opslaan(schutterboog, 18, 8.18, '2020-01-01', None, 'Test')
+        res = aanvangsgemiddelde_opslaan(schutterboog, 18, 8.18, None, 'Test')
         self.assertTrue(res)
 
         # haal de bevestig pagina op met het formulier
@@ -281,7 +281,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
         schutterboog_18 = SchutterBoog.objects.get(boogtype__afkorting='R')
         deelcomp = DeelCompetitie.objects.get(competitie__afstand='18', nhb_regio=self.nhbver.regio)
-        res = aanvangsgemiddelde_opslaan(schutterboog_18, 18, 8.18, '2020-01-01', None, 'Test')
+        res = aanvangsgemiddelde_opslaan(schutterboog_18, 18, 8.18, None, 'Test')
         self.assertTrue(res)
         resp = self.client.post(self.url_inschrijven % (deelcomp.pk, schutterboog_18.pk))
         self.assert_is_redirect(resp, self.url_profiel)
@@ -330,7 +330,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
         schutterboog = SchutterBoog.objects.get(boogtype__afkorting='R')
         deelcomp = DeelCompetitie.objects.get(competitie__afstand='18', nhb_regio=self.nhbver.regio)
-        res = aanvangsgemiddelde_opslaan(schutterboog, 18, 8.18, '2020-01-01', None, 'Test')
+        res = aanvangsgemiddelde_opslaan(schutterboog, 18, 8.18, None, 'Test')
         self.assertTrue(res)
 
         url = self.url_inschrijven % (deelcomp.pk, schutterboog.pk)
@@ -386,7 +386,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
         schutterboog = SchutterBoog.objects.get(boogtype__afkorting='R')
         deelcomp = DeelCompetitie.objects.get(competitie__afstand='18', nhb_regio=self.nhbver.regio)
-        res = aanvangsgemiddelde_opslaan(schutterboog, 18, 8.18, '2020-01-01', None, 'Test')
+        res = aanvangsgemiddelde_opslaan(schutterboog, 18, 8.18, None, 'Test')
         self.assertTrue(res)
 
         url = self.url_inschrijven % (deelcomp.pk, schutterboog.pk)
@@ -437,7 +437,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         self.assertNotContains(resp, 'Weekend')
 
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
-        res = aanvangsgemiddelde_opslaan(schutterboog, 18, 8.18, '2020-01-01', None, 'Test')
+        res = aanvangsgemiddelde_opslaan(schutterboog, 18, 8.18, None, 'Test')
         self.assertTrue(res)
 
         # schrijf in met een niet toegestaan dagdeel
@@ -505,7 +505,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
 
         # geef dagdeel door
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
-        res = aanvangsgemiddelde_opslaan(schutterboog, 18, 8.18, '2020-01-01', None, 'Test')
+        res = aanvangsgemiddelde_opslaan(schutterboog, 18, 8.18, None, 'Test')
         self.assertTrue(res)
 
         url = self.url_inschrijven % (deelcomp.pk, schutterboog.pk)

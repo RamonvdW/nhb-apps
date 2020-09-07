@@ -236,8 +236,7 @@ class TestVerenigingWL(E2EHelpers, TestCase):
         else:
             afkorting = 'R'
         schutterboog = SchutterBoog.objects.get(nhblid__nhb_nr=nhb_nr, boogtype__afkorting=afkorting)
-        datum = datetime.date(year=2020, month=4, day=1)
-        aanvangsgemiddelde_opslaan(schutterboog, afstand, 7.42, datum, self.account_bb, 'Test AG %s' % afstand)
+        aanvangsgemiddelde_opslaan(schutterboog, afstand, 7.42, self.account_bb, 'Test AG %s' % afstand)
 
     def test_overzicht(self):
         # login als WL

@@ -56,9 +56,6 @@ class Command(BaseCommand):
             nhblid_dict[obj.nhb_nr] = obj
         # for
 
-        now = timezone.now()
-        datum = datetime.date(year=now.year, month=now.month, day=now.day)
-
         records = 0
         nieuw = 0
         al_aan = 0
@@ -104,7 +101,6 @@ class Command(BaseCommand):
                                 schutterboog,
                                 int(obj.histcompetitie.comp_type),
                                 obj.gemiddelde,
-                                datum,
                                 None,
                                 "Uitslag competitie seizoen %s" % obj.histcompetitie.seizoen):
                             nieuw_ag += 1

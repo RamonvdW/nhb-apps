@@ -166,7 +166,7 @@ class TestSchutterProfiel(E2EHelpers, TestCase):
         # schrijf de schutter in voor de 18m Recurve
         schutterboog = SchutterBoog.objects.get(boogtype__afkorting='R')
         deelcomp = DeelCompetitie.objects.get(competitie__afstand='18', nhb_regio=self.nhbver.regio)
-        res = aanvangsgemiddelde_opslaan(schutterboog, 18, 8.18, '2020-01-01', None, 'Test')
+        res = aanvangsgemiddelde_opslaan(schutterboog, 18, 8.18, None, 'Test')
         self.assertTrue(res)
         url = self.url_inschrijven % (deelcomp.pk, schutterboog.pk)
         resp = self.client.post(url, {'opmerking': 'test van de 18m'})
@@ -206,10 +206,8 @@ class TestSchutterProfiel(E2EHelpers, TestCase):
         # zet aanvangsgemiddelden voor 18m en 25m
         Score.objects.all().delete()        # nieuw vastgestelde AG is van vandaag
         obj = SchutterBoog.objects.get(boogtype__afkorting='R')
-        datum = datetime.date(year=2020, month=5, day=2)
-        datum_str = "2 mei 2020"
-        aanvangsgemiddelde_opslaan(obj, 18, 9.018, datum, None, 'Test opmerking A')
-        aanvangsgemiddelde_opslaan(obj, 25, 2.5, datum, None, 'Test opmerking B')
+        aanvangsgemiddelde_opslaan(obj, 18, 9.018, None, 'Test opmerking A')
+        aanvangsgemiddelde_opslaan(obj, 25, 2.5, None, 'Test opmerking B')
 
         resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -218,7 +216,6 @@ class TestSchutterProfiel(E2EHelpers, TestCase):
         self.assertContains(resp, "9,018")
         self.assertContains(resp, "Test opmerking A")
         self.assertContains(resp, "Test opmerking B")
-        self.assertContains(resp, datum_str)
 
         # variant met Score zonder ScoreHist
         ScoreHist.objects.all().delete()
@@ -289,7 +286,7 @@ class TestSchutterProfiel(E2EHelpers, TestCase):
         # schrijf de schutter in voor de 18m Recurve
         schutterboog = SchutterBoog.objects.get(boogtype__afkorting='R')
         deelcomp = DeelCompetitie.objects.get(competitie__afstand='18', nhb_regio=self.nhbver.regio)
-        res = aanvangsgemiddelde_opslaan(schutterboog, 18, 8.18, '2020-01-01', None, 'Test')
+        res = aanvangsgemiddelde_opslaan(schutterboog, 18, 8.18, None, 'Test')
         self.assertTrue(res)
         url = self.url_inschrijven % (deelcomp.pk, schutterboog.pk)
         resp = self.client.post(url, {'opmerking': 'test van de 18m'})

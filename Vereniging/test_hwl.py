@@ -259,8 +259,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         else:
             afkorting = 'R'
         schutterboog = SchutterBoog.objects.get(nhblid__nhb_nr=nhb_nr, boogtype__afkorting=afkorting)
-        datum = datetime.date(year=2020, month=4, day=1)
-        aanvangsgemiddelde_opslaan(schutterboog, afstand, 7.42, datum, self.account_hwl, 'Test AG %s' % afstand)
+        aanvangsgemiddelde_opslaan(schutterboog, afstand, 7.42, self.account_hwl, 'Test AG %s' % afstand)
 
     def test_overzicht(self):
         # anon
@@ -380,7 +379,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
         self.assertContains(resp, '<td>Cadet de Jeugd</td>')
         self.assertContains(resp, '<td>14</td>')            # leeftijd 2021
-        self.assertContains(resp, '<td>Cadet</td>')         # leeftijdsklasse competitie
+        self.assertContains(resp, '<td class="hide-on-small-only">Cadet</td>')  # leeftijdsklasse competitie
 
         # schrijf het jong lid in en controleer de wedstrijdklasse
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)

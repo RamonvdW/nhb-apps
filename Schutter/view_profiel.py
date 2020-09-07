@@ -242,7 +242,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         #       het is ook mogelijk om score.scorehist_set.all() te gebruiken
         for score in scores:
             score.ag = score.waarde / 1000
-            hist = ScoreHist.objects.filter(score=score).order_by('-datum')
+            hist = ScoreHist.objects.filter(score=score).order_by('-when')
             if len(hist):
                 score.scorehist = hist[0]       # nieuwste
         # for
