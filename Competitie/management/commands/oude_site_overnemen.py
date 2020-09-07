@@ -200,7 +200,9 @@ class Command(BaseCommand):
                 score.save()
         else:
             if waarde != score.waarde:
-                self.stdout.write('[WARNING] Verschil in score.waarde=%s, ag=%s voor nhbnr=%s' % (score.waarde, ag, schutterboog.nhblid.nhb_nr))
+                self.stdout.write(
+                    '[WARNING] Verschil in AG voor nhbnr %s: bekend=%.3f, in uitslag=%.3f' % (
+                        schutterboog.nhblid.nhb_nr, score.waarde / 1000, gemiddelde))
 
         return score
 
@@ -230,13 +232,14 @@ class Command(BaseCommand):
     def uitslag_opslaan(self, deelcomp, inschrijving, scores):
         regio_nr = deelcomp.nhb_regio.regio_nr
 
+        # zoek naar alle scores van deze schutter
         score_pks = (Score
                      .objects
                      .filter(schutterboog=inschrijving.schutterboog,
                              is_ag=False,
                              afstand_meter=self._afstand)
                      .values_list('pk', flat=True))
-        #print('score_pks: %s' % score_pks)
+        # print('score_pks: %s' % score_pks)
 
         for ronde in range(1, 7+1):
             notitie = "Importeer scores van uitslagen.handboogsport.nl voor ronde %s" % ronde
@@ -245,14 +248,19 @@ class Command(BaseCommand):
             if waarde:                  # filter leeg
                 waarde = int(waarde)
                 if waarde:              # filter 0
+                    # zoek de uitslag van de virtuele wedstrijd erbij
                     uitslag = self._regio2ronde2uitslag[regio_nr][ronde]
 
-                    try:
-                        hist = (ScoreHist
-                                .objects
-                                .filter(notitie=notitie,
-                                        score__pk__in=score_pks))
-                    except ScoreHist.DoesNotExist:
+                    # zoek het score-geschiedenis record erbij
+                    #  voor de scores van deze schutter
+                    #   in deze ronde
+                    hists = (ScoreHist
+                             .objects
+                             .filter(notitie=notitie,
+                                     score__pk__in=score_pks))
+
+                    if len(hists) == 0:
+                        # eerste keer: maak het record + score aan
                         score = Score()
                         score.is_ag = False
                         score.afstand_meter = self._afstand
@@ -270,10 +278,11 @@ class Command(BaseCommand):
 
                         uitslag.scores.add(score)
                     else:
-                        score = hist.score
+                        # structuur bestond al
+                        # kijk of de score gewijzigd is
+                        score = hists[0].score
                         if score.waarde != waarde:
-                            # aangepaste score
-
+                            # sla de aangepaste score op
                             hist = ScoreHist()
                             hist.score = score
                             hist.oude_waarde = score.waarde
@@ -287,9 +296,8 @@ class Command(BaseCommand):
         # for
 
     def parse_tabel_cells(self, cells):
-        #print('cells: %s' % repr(cells))
-
         # cellen: rank, schutter, vereniging, AG, scores 1..7, VSG, totaal
+        # print('cells: %s' % repr(cells))
 
         # schutter: [123456] Volledige Naam
         nhb_nr = cells[1][1:1+6]
@@ -301,27 +309,35 @@ class Command(BaseCommand):
             try:
                 nhb_nr = VERTAAL_NHB_NR[nhb_nr]
             except KeyError:
-                self.stderr.write('[ERROR] Onbekend NHB lid: %s' % repr(cells[1]))
+                self.stderr.write('[ERROR] Kan NHB nummer niet vertalen: %s' % repr(cells[1]))
                 return
             else:
                 check = True
 
-        lid = (NhbLid
-               .objects
-               .select_related('bij_vereniging',
-                               'bij_vereniging__regio')
-               .get(nhb_nr=nhb_nr))
+        try:
+            lid = (NhbLid
+                   .objects
+                   .select_related('bij_vereniging',
+                                   'bij_vereniging__regio')
+                   .get(nhb_nr=nhb_nr))
+        except NhbLid.DoesNotExist:
+            self.stdout.write('[WARNING] Kan lid %s niet vinden' % nhb_nr)
+            return
 
         if check:
             if naam.lower() not in lid.volledige_naam().lower():
-                self.stdout.write('[WARNING] Verschil: naam=%s, lid=%s (%s)' % (naam, lid.volledige_naam(), lid.nhb_nr))
+                self.stdout.write(
+                    '[WARNING] Verschil: naam=%s, lid=%s (%s)' % (
+                        naam, lid.volledige_naam(), lid.nhb_nr))
 
         if not lid.bij_vereniging:
-            self.stderr.write('[ERROR] Inschreven lid %s heeft geen vereniging' % nhb_nr)
+            self.stderr.write('[ERROR] Ingeschreven lid %s heeft geen vereniging' % nhb_nr)
             return
 
         if str(lid.bij_vereniging) != cells[2]:
-            self.stdout.write('[WARNING] Verschil: vereniging=%s, lid=%s, bij_vereniging=%s' % (repr(cells[2]), str(lid), str(lid.bij_vereniging)))
+            self.stdout.write(
+                '[WARNING] Verschil: vereniging=%s, lid=%s, bij_vereniging=%s' % (
+                    repr(cells[2]), str(lid), str(lid.bij_vereniging)))
 
         deelcomp = self._regio2deelcomp[lid.bij_vereniging.regio.regio_nr]
 
@@ -332,8 +348,8 @@ class Command(BaseCommand):
         klasse_min_ag = int(self._klasse.min_ag * 1000)
         if score_ag.waarde < klasse_min_ag:
             self.stdout.write(
-                '[WARNING] schutter %s heeft te laag AG voor klasse %s (%s < %s)' % (
-                      nhb_nr, self._klasse, score_ag.waarde, klasse_min_ag))
+                '[WARNING] schutter %s heeft te laag AG (%.3f) voor klasse %s' % (
+                      nhb_nr, score_ag.waarde / 1000, self._klasse))
 
         inschrijving = self.vind_of_maak_inschrijving(deelcomp, schutterboog, cells[3])
 
@@ -400,7 +416,7 @@ class Command(BaseCommand):
                 html = html[pos:]
                 pos = html.find('</tr>')
                 if pos < 0:
-                    self.stderr.write('[ERROR] kan einde regel onverwacht niet vinden')
+                    self.stderr.write('[ERROR] Kan einde regel onverwacht niet vinden')
                     html = ''
                 else:
                     self.parse_tabel_regel(html[:pos])
@@ -418,7 +434,7 @@ class Command(BaseCommand):
                 html = html[pos:]
                 pos = html.find('</table>')
                 if pos < 0:
-                    self.stderr.write('[ERROR] kan einde tabel onverwacht niet vinden')
+                    self.stderr.write('[ERROR] Kan einde tabel onverwacht niet vinden')
                     html = ''
                 else:
                     self.parse_html_table(html[:pos])
@@ -427,8 +443,12 @@ class Command(BaseCommand):
 
     def read_html(self, fname):
         self.stdout.write("[INFO] Inlezen: " + repr(fname))
-        html = open(fname, "r").read()
-        self.parse_html(html)
+        try:
+            html = open(fname, "r").read()
+        except FileNotFoundError:
+            self.stderr.write('[ERROR] Failed to open %s' % fname)
+        else:
+            self.parse_html(html)
 
     def handle(self, *args, **options):
         pad = options['pad'][0]
@@ -448,8 +468,6 @@ class Command(BaseCommand):
                     self.read_html(os.path.join(pad, fname3))
             # for
         # for
-
-        #self.stderr.write('[WARNING] Account %s is al HWL van vereniging %s' % (repr(username), nhb_ver))
 
         activiteit = "Competitie inschrijvingen en scores aangevuld vanuit het oude programma"
 
