@@ -18,7 +18,7 @@ def zet_when(apps, _):
     # haal de klassen op die van toepassing zijn tijdens deze migratie
     scorehist_klas = apps.get_model('Score', 'ScoreHist')
 
-    for obj in scorehist_klas.objects.all():
+    for obj in scorehist_klas.objects.all():        # pragma: no cover
         # converteer 'datum' naar 'when'
         # defaults voor hour, minute, second, millisecond is 0
         obj.when = datetime.datetime(year=obj.datum.year,
