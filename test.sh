@@ -42,6 +42,8 @@ fi
 # start the simulator (for the mailer)
 python3 ./Mailer/test_tools/websim.py &
 
+export COVERAGE_FILE="/tmp/.coverage.$$"
+
 python3 -m coverage erase
 
 python3 -m coverage run --append --branch ./manage.py test --noinput $*  # note: double quotes not supported around $*
@@ -88,7 +90,7 @@ else
     echo "HTML report is in $REPORT_DIR  (try firefox $REPORT_DIR/index.html)"
 fi
 
-rm .coverage
+rm "$COVERAGE_FILE"
 
 echo
 echo -n "Press ENTER to start firefox now, or Ctrl+C to abort"
