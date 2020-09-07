@@ -57,6 +57,9 @@ class TestScoreOpslaan(E2EHelpers, TestCase):
         self.assertEqual(score.schutterboog, self.schutterboog)
         self.assertTrue(str(score) != "")
 
+        score.is_ag = False
+        self.assertTrue(str(score) != "")
+
         self.assertEqual(ScoreHist.objects.count(), 1)
         scorehist = ScoreHist.objects.all()[0]
         self.assertEqual(scorehist.oude_waarde, 0)
