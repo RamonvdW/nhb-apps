@@ -229,7 +229,7 @@ class DeelcompetitieRonde(models.Model):
 
     # een eigen beschrijving van deze ronde
     # om gewone rondes en inhaalrondes uit elkaar te houden
-    beschrijving = models.CharField(max_length=20)
+    beschrijving = models.CharField(max_length=40)
 
     # wedstrijdenplan voor deze competitie ronde
     plan = models.ForeignKey(WedstrijdenPlan, on_delete=models.PROTECT)

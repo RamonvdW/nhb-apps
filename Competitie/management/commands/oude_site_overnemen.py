@@ -72,7 +72,7 @@ class Command(BaseCommand):
             for ronde in range(1, 7+1):
                 self._regio2ronde2uitslag[regio_nr][ronde] = dict()
 
-                beschrijving = "Ronde %s oude prg" % ronde    # max 20 chars!
+                beschrijving = "Ronde %s oude programma" % ronde
 
                 try:
                     deelcomp_ronde = (DeelcompetitieRonde
