@@ -34,7 +34,10 @@ class Score(models.Model):
     afstand_meter = models.PositiveSmallIntegerField()
 
     def __str__(self):
-        return "%s - %sm: %s" % (self.schutterboog, self.afstand_meter, self.waarde)
+        msg = "%s - %sm: %s" % (self.schutterboog, self.afstand_meter, self.waarde)
+        if self.is_ag:
+            msg += ' (is AG)'
+        return msg
 
     objects = models.Manager()      # for the editor only
 
