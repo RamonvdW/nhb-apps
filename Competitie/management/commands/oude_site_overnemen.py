@@ -9,7 +9,7 @@
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 from BasisTypen.models import BoogType
-from NhbStructuur.models import NhbLid
+from NhbStructuur.models import NhbLid, NhbVereniging
 from Logboek.models import schrijf_in_logboek
 from Competitie.models import (Competitie, CompetitieKlasse,
                                LAAG_REGIO, DeelCompetitie, DeelcompetitieRonde,
@@ -20,34 +20,6 @@ from Score.models import Score, ScoreHist
 from decimal import Decimal
 import datetime
 import os
-
-
-VERTAAL_NHB_NR = {
-    '995661': 175808,
-    '996609': 175752,
-    '993424': 175821,
-    '990885': 175753,
-    '996945': 118591,
-    '994939': 175814,
-    '993055': 175816,
-    '998440': 175812,
-    #'997980': 173698,
-    '994090': 168710,
-    '992817': 175779,
-    '990025': 175788,
-    '997700': 175736,
-    '998440': 175812,
-    '999983': 137888,
-    '999688': 112975,
-    '995674': 161733,
-    '991289': 175815,
-    '997323': 139067,
-    '991731': 175800,
-    #'998287': 103931,
-    #'996150': 171029,
-    #'995528 Femke Schuitema',
-    #'998730 Mike van Ham',
-}
 
 
 class Command(BaseCommand):
@@ -206,7 +178,7 @@ class Command(BaseCommand):
 
         return score
 
-    def vind_of_maak_inschrijving(self, deelcomp, schutterboog, ag):
+    def vind_of_maak_inschrijving(self, deelcomp, schutterboog, lid_vereniging, ag):
         # zoek de RegioCompetitieSchutterBoog erbij
         try:
             inschrijving = (RegioCompetitieSchutterBoog
@@ -218,7 +190,7 @@ class Command(BaseCommand):
             inschrijving = RegioCompetitieSchutterBoog()
             inschrijving.deelcompetitie = deelcomp
             inschrijving.schutterboog = schutterboog
-            inschrijving.bij_vereniging = schutterboog.nhblid.bij_vereniging
+            inschrijving.bij_vereniging = lid_vereniging
             inschrijving.klasse = self._klasse
 
             if ag:
@@ -300,19 +272,8 @@ class Command(BaseCommand):
         # print('cells: %s' % repr(cells))
 
         # schutter: [123456] Volledige Naam
-        nhb_nr = cells[1][1:1+6]
+        nhb_nr = cells[1][1:1+6]       # afkappen voor veiligheid
         naam = cells[1][9:]
-
-        check = False
-        if nhb_nr[0] == '9':
-            # nhb nummer begint met een 9 --> tijdelijk nummer
-            try:
-                nhb_nr = VERTAAL_NHB_NR[nhb_nr]
-            except KeyError:
-                self.stderr.write('[ERROR] Kan NHB nummer niet vertalen: %s' % repr(cells[1]))
-                return
-            else:
-                check = True
 
         try:
             lid = (NhbLid
@@ -324,20 +285,21 @@ class Command(BaseCommand):
             self.stdout.write('[WARNING] Kan lid %s niet vinden' % nhb_nr)
             return
 
-        if check:
-            if naam.lower() not in lid.volledige_naam().lower():
-                self.stdout.write(
-                    '[WARNING] Verschil: naam=%s, lid=%s (%s)' % (
-                        naam, lid.volledige_naam(), lid.nhb_nr))
+        if naam != lid.volledige_naam():
+            self.stdout.write('[WARNING] Verschil in lid %s naam: bekend=%s, oude programma=%s' % (lid.nhb_nr, lid.volledige_naam(), naam))
 
         if not lid.bij_vereniging:
-            self.stderr.write('[ERROR] Ingeschreven lid %s heeft geen vereniging' % nhb_nr)
+            self.stderr.write('[ERROR] Lid %s heeft geen vereniging en wordt dus niet ingeschreven' % nhb_nr)
             return
 
         if str(lid.bij_vereniging) != cells[2]:
-            self.stdout.write(
-                '[WARNING] Verschil: vereniging=%s, lid=%s, bij_vereniging=%s' % (
-                    repr(cells[2]), str(lid), str(lid.bij_vereniging)))
+            # vind de oude vereniging, want die moeten we opslaan bij de inschrijving
+            ver_nr = cells[2][1:1+4]       # afkappen voor veiligheid
+            lid_ver = NhbVereniging.objects.get(nhb_nr=ver_nr)
+            if str(lid_ver) != cells[2]:
+                self.stdout.write('[WARNING] Verschil in vereniging naam: bekend=%s, oude programma=%s' % (str(lid_ver), cells[2]))
+        else:
+            lid_ver = lid.bij_vereniging
 
         deelcomp = self._regio2deelcomp[lid.bij_vereniging.regio.regio_nr]
 
@@ -351,7 +313,7 @@ class Command(BaseCommand):
                 '[WARNING] schutter %s heeft te laag AG (%.3f) voor klasse %s' % (
                       nhb_nr, score_ag.waarde / 1000, self._klasse))
 
-        inschrijving = self.vind_of_maak_inschrijving(deelcomp, schutterboog, cells[3])
+        inschrijving = self.vind_of_maak_inschrijving(deelcomp, schutterboog, lid_ver, cells[3])
 
         self.uitslag_opslaan(deelcomp, inschrijving, cells[4:4+7])
 

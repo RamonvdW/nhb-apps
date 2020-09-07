@@ -26,22 +26,31 @@ class CompetitieKlasseAdmin(admin.ModelAdmin):
 
 class RegioCompetitieSchutterBoogAdmin(admin.ModelAdmin):
 
-    readonly_fields = ('deelcompetitie', 'schutterboog', 'bij_vereniging')
+    readonly_fields = ('deelcompetitie',
+                       'schutterboog',
+                       'bij_vereniging')
 
-    search_fields = ('schutterboog__nhblid__voornaam', 'schutterboog__nhblid__achternaam')
+    search_fields = ('schutterboog__nhblid__voornaam',
+                     'schutterboog__nhblid__achternaam',
+                     'schutterboog__nhblid__nhb_nr')
 
-    list_filter = ('deelcompetitie',)
+    #list_filter = ('deelcompetitie',)      # kost veel database accesses (komt door __str__)
 
-    list_select_related = ('deelcompetitie', 'deelcompetitie__nhb_regio', 'deelcompetitie__nhb_rayon',
+    list_select_related = ('deelcompetitie',
+                           'deelcompetitie__nhb_regio',
+                           'deelcompetitie__nhb_rayon',
                            'deelcompetitie__competitie',
-                           'klasse', 'klasse__indiv', 'klasse__team',
-                           'schutterboog', 'schutterboog__nhblid')
+                           'klasse',
+                           'klasse__indiv',
+                           'klasse__team',
+                           'schutterboog',
+                           'schutterboog__nhblid')
 
 
 admin.site.register(Competitie)
 admin.site.register(DeelCompetitie, DeelCompetitieAdmin)
-admin.site.register(DeelcompetitieRonde, DeelcompetitieRondeAdmin)
 admin.site.register(CompetitieKlasse, CompetitieKlasseAdmin)
+admin.site.register(DeelcompetitieRonde, DeelcompetitieRondeAdmin)
 admin.site.register(RegioCompetitieSchutterBoog, RegioCompetitieSchutterBoogAdmin)
 
 # end of file

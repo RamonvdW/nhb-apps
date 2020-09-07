@@ -98,7 +98,8 @@ class LijstAangemeldRegiocompAllesView(UserPassesTestMixin, TemplateView):
                 .select_related('klasse', 'klasse__indiv',
                                 'deelcompetitie', 'deelcompetitie__nhb_regio',
                                 'schutterboog', 'schutterboog__nhblid',
-                                'schutterboog__nhblid__bij_vereniging')
+                                'schutterboog__nhblid',
+                                'bij_vereniging')
                 .filter(deelcompetitie__competitie=comp,
                         deelcompetitie__laag=LAAG_REGIO)
                 .order_by('klasse__indiv__volgorde', '-aanvangsgemiddelde'))

@@ -92,7 +92,7 @@ class TestRecordsCliOudeSiteOvernemen(E2EHelpers, TestCase):
         lid.save()
 
         lid = NhbLid()
-        lid.nhb_nr = 175752
+        lid.nhb_nr = 100004
         lid.geslacht = "V"
         lid.voornaam = "Juf"
         lid.achternaam = "de Schutter"
@@ -131,21 +131,18 @@ class TestRecordsCliOudeSiteOvernemen(E2EHelpers, TestCase):
         self.assertTrue("[ERROR] Kan einde tabel onverwacht niet vinden" in f1.getvalue())
         self.assertTrue("[ERROR] Kan einde regel onverwacht niet vinden" in f1.getvalue())
         self.assertTrue("[ERROR] Kan einde wedstrijdklasse niet vinden: " in f1.getvalue())
-        self.assertTrue("[ERROR] Ingeschreven lid 100003 heeft geen vereniging" in f1.getvalue())
-        self.assertTrue("[ERROR] Kan NHB nummer niet vertalen: '[990000] Geen Bekende" in f1.getvalue())
+        self.assertTrue("[ERROR] Lid 100003 heeft geen vereniging en wordt dus niet ingeschreven" in f1.getvalue())
 
-        self.assertTrue("[WARNING] Verschil: vereniging='[1000] Grootste Club', lid=100001 Ramon de Tester [M, 1972], bij_vereniging=[1000] Grote Club" in f2.getvalue())
+        self.assertTrue("[WARNING] Verschil in vereniging naam: bekend=[1000] Grote Club, oude programma=[1000] Grootste Club" in f2.getvalue())
         self.assertTrue("[WARNING] schutter 100001 heeft te laag AG (9.022) voor klasse Recurve klasse 2 (9.500)" in f2.getvalue())
         self.assertTrue("[WARNING] Verschil in AG voor nhbnr 100001: bekend=9.022, in uitslag=8.022" in f2.getvalue())
         self.assertTrue("[WARNING] Kan lid 100042 niet vinden" in f2.getvalue())
-        self.assertTrue("[WARNING] Verschil: naam=Juf de Schytter, lid=Juf de Schutter (175752)" in f2.getvalue())
+        self.assertTrue("[WARNING] Kan lid 990000 niet vinden" in f2.getvalue())
+        self.assertTrue("[WARNING] Verschil in lid 100004 naam: bekend=Juf de Schutter, oude programma=Juf de Schytter" in f2.getvalue())
 
-        # TODO: check database records
-        for score in Score.objects.all():
-            print('score: %s' % score)
-        for hist in ScoreHist.objects.all():
-            print('hist: %s' % hist)
-        #self.assertEqual(BesteIndivRecords.objects.count(), 3)
+        self.assertEqual(Score.objects.filter(is_ag=True).count(), 3)
+        self.assertEqual(Score.objects.filter(is_ag=False).count(), 2)
+        self.assertEqual(ScoreHist.objects.count(), 3)
 
         # nog een keer, want dan zijn de uitslagen er al (extra coverage)
         f1 = io.StringIO()
