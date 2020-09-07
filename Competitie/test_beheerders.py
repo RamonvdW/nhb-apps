@@ -630,5 +630,55 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 404)     # 404 = Not found
 
+    def _vind_tabel_regel_met(self, resp, zoekterm):
+        content = str(resp.content)
+
+        pos = content.find(zoekterm)
+        if pos < 0:
+            return None
+        content = content[pos-200:pos+200]
+
+        pos = content.find('<tr>')
+        while pos >= 0:
+            content = content[pos:]
+            pos = content.find('</tr>')
+            regel = content[:pos]
+            if zoekterm in regel:
+                return regel
+            content = content[pos:]
+            pos = content.find('<tr>')
+        # while
+        return None
+
+    def test_verander_vereniging(self):
+        # verander 1 schutterboog naar een andere verenigingen
+        # en laat zien dat de oude vereniging blijft staan in de inschrijven
+        self.e2e_login_and_pass_otp(self.account_bb)
+
+        comp = Competitie.objects.all()[0]
+        self._doe_inschrijven(comp)         # wisselt naar HWL rol
+
+        inschrijving = RegioCompetitieSchutterBoog.objects.filter(bij_vereniging=self._ver).all()[0]
+        naam_str = "[" + str(inschrijving.schutterboog.nhblid.nhb_nr) + "] " + inschrijving.schutterboog.nhblid.volledige_naam()
+        ver_str = str(self._ver)        # [nrnr] Vereniging
+
+        # controleer dat de schutter bij de juiste vereniging staat
+        url = self.url_aangemeld_alles % inschrijving.deelcompetitie.competitie.pk
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        regel = self._vind_tabel_regel_met(resp, naam_str)
+        self.assertTrue(ver_str in regel)
+
+        # schrijf de schutter over naar een andere vereniging
+        lid = inschrijving.schutterboog.nhblid
+        lid.bij_vereniging = self._ver2
+        lid.save()
+
+        # controleer dat de schutter nog steeds bij dezelfde vereniging staat
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        regel = self._vind_tabel_regel_met(resp, naam_str)
+        self.assertTrue(ver_str in regel)
+
 
 # end of file
