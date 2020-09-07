@@ -295,9 +295,14 @@ class Command(BaseCommand):
         if str(lid.bij_vereniging) != cells[2]:
             # vind de oude vereniging, want die moeten we opslaan bij de inschrijving
             ver_nr = cells[2][1:1+4]       # afkappen voor veiligheid
-            lid_ver = NhbVereniging.objects.get(nhb_nr=ver_nr)
-            if str(lid_ver) != cells[2]:
-                self.stdout.write('[WARNING] Verschil in vereniging naam: bekend=%s, oude programma=%s' % (str(lid_ver), cells[2]))
+            try:
+                lid_ver = NhbVereniging.objects.get(nhb_nr=ver_nr)
+            except NhbVereniging.DoesNotExist:
+                self.stderr.write('[ERROR] Vereniging %s is niet bekend' % ver_nr)
+                return
+            else:
+                if str(lid_ver) != cells[2]:
+                    self.stdout.write('[WARNING] Verschil in vereniging naam: bekend=%s, oude programma=%s' % (str(lid_ver), cells[2]))
         else:
             lid_ver = lid.bij_vereniging
 

@@ -44,6 +44,15 @@ class TestRecordsCliOudeSiteOvernemen(E2EHelpers, TestCase):
 
         # maak een test vereniging
         ver = NhbVereniging()
+        ver.naam = "Oude Club"
+        ver.plaats = "Boogdrop"
+        ver.nhb_nr = 1002
+        ver.regio = regio
+        # secretaris kan nog niet ingevuld worden
+        ver.save()
+
+        # maak een test vereniging
+        ver = NhbVereniging()
         ver.naam = "Grote Club"
         ver.plaats = "Boogstad"
         ver.nhb_nr = 1000
@@ -140,7 +149,7 @@ class TestRecordsCliOudeSiteOvernemen(E2EHelpers, TestCase):
         self.assertTrue("[WARNING] Kan lid 990000 niet vinden" in f2.getvalue())
         self.assertTrue("[WARNING] Verschil in lid 100004 naam: bekend=Juf de Schutter, oude programma=Juf de Schytter" in f2.getvalue())
 
-        self.assertEqual(Score.objects.filter(is_ag=True).count(), 3)
+        self.assertEqual(Score.objects.filter(is_ag=True).count(), 2)
         self.assertEqual(Score.objects.filter(is_ag=False).count(), 2)
         self.assertEqual(ScoreHist.objects.count(), 3)
 
