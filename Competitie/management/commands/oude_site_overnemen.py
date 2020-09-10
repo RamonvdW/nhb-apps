@@ -19,6 +19,7 @@ from Wedstrijden.models import Wedstrijd, WedstrijdUitslag, WedstrijdenPlan
 from Score.models import Score, ScoreHist
 from decimal import Decimal
 import datetime
+import sys
 import os
 
 
@@ -32,6 +33,9 @@ class Command(BaseCommand):
         self._comp = None
         self._klasse = None
         self._boogtype = None
+        self._dryrun = False
+        self._count_errors = 0
+        self._count_warnings = 0
 
         # datum/tijd stempel voor alle nieuwe ScoreHist
         self._import_when = timezone.now()
@@ -125,9 +129,6 @@ class Command(BaseCommand):
             # for
         # for
 
-    def add_arguments(self, parser):
-        parser.add_argument('pad', nargs=1, help="Pad naar directory met opgehaalde rayonuitslagen (.html)")
-
     def selecteer_klasse(self, klasse):
         self._klasse = (CompetitieKlasse
                         .objects
@@ -168,13 +169,15 @@ class Command(BaseCommand):
             score.waarde = waarde
             if waarde > 0:
                 # alleen opslaan als dit een zinnige AG is
-                # anders geven we wel het record terug zodat de cod gelijk kan blijven
-                score.save()
+                # anders geven we wel het record terug zodat de code gelijk kan blijven
+                if not self._dryrun:
+                    score.save()
         else:
             if waarde != score.waarde:
                 self.stdout.write(
                     '[WARNING] Verschil in AG voor nhbnr %s: bekend=%.3f, in uitslag=%.3f' % (
                         schutterboog.nhblid.nhb_nr, score.waarde / 1000, gemiddelde))
+                self._count_warnings += 1
 
         return score
 
@@ -197,7 +200,8 @@ class Command(BaseCommand):
                 inschrijving.aanvangsgemiddelde = ag
             else:
                 inschrijving.aanvangsgemiddelde = AG_NUL
-            inschrijving.save()
+            if not self._dryrun:
+                inschrijving.save()
 
         return inschrijving
 
@@ -231,40 +235,41 @@ class Command(BaseCommand):
                              .filter(notitie=notitie,
                                      score__pk__in=score_pks))
 
-                    if len(hists) == 0:
-                        # eerste keer: maak het record + score aan
-                        score = Score()
-                        score.is_ag = False
-                        score.afstand_meter = self._afstand
-                        score.schutterboog = inschrijving.schutterboog
-                        score.waarde = waarde
-                        score.save()
+                    if not self._dryrun:
+                        if len(hists) == 0:
+                            # eerste keer: maak het record + score aan
+                            score = Score()
+                            score.is_ag = False
+                            score.afstand_meter = self._afstand
+                            score.schutterboog = inschrijving.schutterboog
+                            score.waarde = waarde
+                            score.save()
 
-                        hist = ScoreHist()
-                        hist.score = score
-                        hist.oude_waarde = 0
-                        hist.nieuwe_waarde = waarde
-                        hist.when = self._import_when
-                        hist.notitie = notitie
-                        hist.save()
-
-                        uitslag.scores.add(score)
-                    else:
-                        # structuur bestond al
-                        # kijk of de score gewijzigd is
-                        score = hists[0].score
-                        if score.waarde != waarde:
-                            # sla de aangepaste score op
                             hist = ScoreHist()
                             hist.score = score
-                            hist.oude_waarde = score.waarde
+                            hist.oude_waarde = 0
                             hist.nieuwe_waarde = waarde
                             hist.when = self._import_when
                             hist.notitie = notitie
                             hist.save()
 
-                            score.waarde = waarde
-                            score.save()
+                            uitslag.scores.add(score)
+                        else:
+                            # structuur bestond al
+                            # kijk of de score gewijzigd is
+                            score = hists[0].score
+                            if score.waarde != waarde:
+                                # sla de aangepaste score op
+                                hist = ScoreHist()
+                                hist.score = score
+                                hist.oude_waarde = score.waarde
+                                hist.nieuwe_waarde = waarde
+                                hist.when = self._import_when
+                                hist.notitie = notitie
+                                hist.save()
+
+                                score.waarde = waarde
+                                score.save()
         # for
 
     def parse_tabel_cells(self, cells):
@@ -283,13 +288,16 @@ class Command(BaseCommand):
                    .get(nhb_nr=nhb_nr))
         except NhbLid.DoesNotExist:
             self.stdout.write('[WARNING] Kan lid %s niet vinden' % nhb_nr)
+            self._count_warnings += 1
             return
 
         if naam != lid.volledige_naam():
             self.stdout.write('[WARNING] Verschil in lid %s naam: bekend=%s, oude programma=%s' % (lid.nhb_nr, lid.volledige_naam(), naam))
+            self._count_warnings += 1
 
         if not lid.bij_vereniging:
-            self.stderr.write('[ERROR] Lid %s heeft geen vereniging en wordt dus niet ingeschreven' % nhb_nr)
+            self.stdout.write('[WARNING] Lid %s heeft geen vereniging en wordt dus niet ingeschreven' % nhb_nr)
+            self._count_warnings += 1
             return
 
         if str(lid.bij_vereniging) != cells[2]:
@@ -299,10 +307,12 @@ class Command(BaseCommand):
                 lid_ver = NhbVereniging.objects.get(nhb_nr=ver_nr)
             except NhbVereniging.DoesNotExist:
                 self.stderr.write('[ERROR] Vereniging %s is niet bekend' % ver_nr)
+                self._count_errors += 1
                 return
             else:
                 if str(lid_ver) != cells[2]:
                     self.stdout.write('[WARNING] Verschil in vereniging naam: bekend=%s, oude programma=%s' % (str(lid_ver), cells[2]))
+                    self._count_warnings += 1
         else:
             lid_ver = lid.bij_vereniging
 
@@ -317,6 +327,7 @@ class Command(BaseCommand):
             self.stdout.write(
                 '[WARNING] schutter %s heeft te laag AG (%.3f) voor klasse %s' % (
                       nhb_nr, score_ag.waarde / 1000, self._klasse))
+            self._count_warnings += 1
 
         inschrijving = self.vind_of_maak_inschrijving(deelcomp, schutterboog, lid_ver, cells[3])
 
@@ -338,6 +349,7 @@ class Command(BaseCommand):
             pos = html.find('</b>')
             if pos < 0:
                 self.stderr.write('[ERROR] Kan einde wedstrijdklasse niet vinden: %s' % repr(html))
+                self._count_errors += 1
             else:
                 self.selecteer_klasse(html[:pos])
             return
@@ -384,6 +396,7 @@ class Command(BaseCommand):
                 pos = html.find('</tr>')
                 if pos < 0:
                     self.stderr.write('[ERROR] Kan einde regel onverwacht niet vinden')
+                    self._count_errors += 1
                     html = ''
                 else:
                     self.parse_tabel_regel(html[:pos])
@@ -402,6 +415,7 @@ class Command(BaseCommand):
                 pos = html.find('</table>')
                 if pos < 0:
                     self.stderr.write('[ERROR] Kan einde tabel onverwacht niet vinden')
+                    self._count_errors += 1
                     html = ''
                 else:
                     self.parse_html_table(html[:pos])
@@ -414,11 +428,19 @@ class Command(BaseCommand):
             html = open(fname, "r").read()
         except FileNotFoundError:
             self.stderr.write('[ERROR] Failed to open %s' % fname)
+            self._count_errors += 1
         else:
             self.parse_html(html)
 
+    def add_arguments(self, parser):
+        parser.add_argument('dir', nargs=1, help="Pad naar directory met opgehaalde rayonuitslagen (.html)")
+        parser.add_argument('max_fouten', nargs=1, type=int, help="Zet exit code bij meer dan dit aantal fouten")
+        parser.add_argument('--dryrun', action='store_true')
+
     def handle(self, *args, **options):
-        pad = options['pad'][0]
+        pad = options['dir'][0]
+        max_fouten = options['max_fouten'][0]
+        self._dryrun = options['dryrun']
 
         for afstand in (18, 25):
             self._afstand = afstand
@@ -438,10 +460,17 @@ class Command(BaseCommand):
 
         activiteit = "Competitie inschrijvingen en scores aangevuld vanuit het oude programma"
 
+        if self._dryrun:
+            activiteit = "(DRY RUN) " + activiteit
+        activiteit += " (waarschuwingen: %s, fouten: %s)" % (self._count_warnings, self._count_errors)
+
         # schrijf in het logboek
         schrijf_in_logboek(account=None,
                            gebruikte_functie='oude_site_overnemen (command line)',
                            activiteit=activiteit)
         self.stdout.write(activiteit)
+
+        if self._count_errors > max_fouten:
+            sys.exit(1)
 
 # end of file

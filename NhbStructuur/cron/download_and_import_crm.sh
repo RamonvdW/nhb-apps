@@ -19,6 +19,8 @@ then
     exit 1
 fi
 
+cd $(dirname $0)    # ga naar de directory van het script
+
 # everything sent to stdout/stderr will be picked up by crontab and sent in an email
 # avoid this by writing to a logfile
 
@@ -71,9 +73,7 @@ then
     echo "[INFO] Importing new data set" >> "$LOG"
 
     # move from NhbStructuur/cron/ to top-dir
-    echo "[DEBUG] pwd=$PWD"
     cd ../..
-    echo "[DEBUG] pwd=$PWD"
     ./manage.py import_nhb_crm "$SPOOLFILE" &>> "$LOG"
 
     echo "[INFO] Import finished" >> "$LOG"
