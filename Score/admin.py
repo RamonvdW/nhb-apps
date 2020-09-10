@@ -33,6 +33,9 @@ class ScoreHistAdmin(admin.ModelAdmin):
     """ Admin configuratie voor ScoreHist klasse """
     list_filter = ('when', 'score__afstand_meter')
 
+    # voorkom trage admin interface (lange lijstjes die veel queries kosten)
+    readonly_fields = ('score', 'door_account')
+
 
 admin.site.register(Score, ScoreAdmin)
 admin.site.register(ScoreHist, ScoreHistAdmin)
