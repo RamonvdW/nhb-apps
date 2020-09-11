@@ -180,7 +180,7 @@ class NieuwWachtwoordView(UserPassesTestMixin, TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
         account = self.request.user
-        if account.nhblid_set.count() > 0:      # TODO: ongewenste check
+        if account.nhblid_set.count() > 0:      # TODO: ongewenste kennis over op NhbLid.account
             menu_dynamics(self.request, context, actief="schutter")
         else:
             menu_dynamics(self.request, context, actief="hetplein")
@@ -198,7 +198,7 @@ class NieuwWachtwoordView(UserPassesTestMixin, TemplateView):
         valid, errmsg = account_test_wachtwoord_sterkte(nieuw_wachtwoord, account.username)
         if not valid:
             context['foutmelding'] = errmsg
-            if account.nhblid_set.count() > 0:  # TODO: ongewenste check
+            if account.nhblid_set.count() > 0:  # TODO: ongewenste kennis over NhbLid.account
                 menu_dynamics(self.request, context, actief="schutter")
             else:
                 menu_dynamics(self.request, context, actief="hetplein")

@@ -19,8 +19,6 @@ TEMPLATE_UITLOGGEN = 'account/uitloggen.dtl'
 my_logger = logging.getLogger('NHBApps.Account')
 
 
-# TODO: redirect to plein if not logged in (request.user.is_authenticated)
-
 class LogoutView(UserPassesTestMixin, TemplateView):
     """
         Deze view zorgt voor het uitloggen met een POST
