@@ -66,6 +66,8 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
         self.assertContains(resp, 'Wachtwoord bevat te veel gelijke tekens')
 
     def test_vergeten(self):
+        self.client.logout()
+
         # test ophalen van het wachtwoord-vergeten formulier
         resp = self.client.get(self.url_vergeten)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -88,6 +90,7 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
 
         self.assertEqual(obj.hoortbij_accountemail.bevestigde_email, 'normaal@test.com')
         url = '/overig/url/' + obj.url_code + '/'
+        self.client.logout()
         resp = self.client.get(url)
         urls = self.extract_all_urls(resp, skip_menu=True, skip_smileys=True)
         post_url = urls[0]
@@ -98,6 +101,50 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
         resp = self.client.get('/plein/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, 'Uitloggen')
+
+    def test_vergeten_inlog(self):
+        # log in als admin
+        self.account_admin = self.e2e_create_account_admin()
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_wisselnaarrol_bb()
+        self.e2e_check_rol('BB')
+
+        # test ophalen van het wachtwoord-vergeten formulier
+        resp = self.client.get(self.url_vergeten)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('account/wachtwoord-vergeten.dtl', 'plein/site_layout.dtl'))
+
+        self.assertEqual(MailQueue.objects.count(), 0)
+        self.assertEqual(SiteTijdelijkeUrl.objects.count(), 0)
+
+        # gebruiker moet valide e-mailadres invoeren via POST
+        resp = self.client.post(self.url_vergeten, {'email': 'normaal@test.com'})
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('account/email_wachtwoord-vergeten.dtl', 'plein/site_layout.dtl'))
+
+        # er moet nu een mail in de MailQueue staan met een single-use url
+        self.assertEqual(MailQueue.objects.count(), 1)
+        self.assertEqual(SiteTijdelijkeUrl.objects.count(), 1)
+        obj = SiteTijdelijkeUrl.objects.all()[0]
+
+        self.assertEqual(obj.hoortbij_accountemail.bevestigde_email, 'normaal@test.com')
+        url = '/overig/url/' + obj.url_code + '/'
+        self.client.logout()
+        resp = self.client.get(url)
+        urls = self.extract_all_urls(resp, skip_menu=True, skip_smileys=True)
+        post_url = urls[0]
+        resp = self.client.post(post_url)
+        self.assert_is_redirect(resp, '/account/nieuw-wachtwoord/')
+
+        # controleer dat we nu ingelogd zijn!
+        resp = self.client.get('/plein/')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assertContains(resp, 'Uitloggen')
+
+        # check dat we geen BB meer zijn
+        self.assertContains(resp, 'Gebruiker')
 
     def test_vergeten_bad(self):
         resp = self.client.get(self.url_vergeten)

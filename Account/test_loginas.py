@@ -106,6 +106,8 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
         self.account_normaal.save()
         self.e2e_account_accepteert_vhpg(self.account_normaal)
 
+        self.e2e_assert_other_http_commands_not_supported(self.wissel_url, post=False)
+
         # selecteer de andere schutter
         resp = self.client.post(self.wissel_url, {'selecteer': self.account_normaal.pk})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -192,7 +194,6 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
     def test_bad_post(self):
         # niet ingelogd
         self.e2e_logout()
-        url = '/account/account-wissel/'
         resp = self.client.post(self.wissel_url)
         self.assertEqual(resp.status_code, 404)     # 404 = not allowed
 
@@ -229,7 +230,5 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
         resp = self.client.get(tijdelijke_url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('overig/tijdelijke-url-fout.dtl', 'plein/site_layout.dtl'))
-
-# TODO: gebruik assert_other_http_commands_not_supported
 
 # end of file
