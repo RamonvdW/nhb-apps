@@ -11,7 +11,7 @@ from Account.rechten import account_rechten_is_otp_verified
 
 # aanpassingen van de ingebouwde Admin site
 # hiermee kunnen we 2FA checks doen
-# hiermee verwijderen we de login/logout/password change views
+# hiermee verwijderen we de default login/logout/password change views
 
 # django.contrib.admin.sites levert de urls en views
 # maak een aangepaste versie
@@ -19,17 +19,15 @@ from Account.rechten import account_rechten_is_otp_verified
 
 class BeheerAdminSite(AdminSite):
 
-    # replace all the functions that handle the urls for login/logout/password-change
+    """ Replace all the functions that handle the urls for login/logout/password-change """
 
-    # FUTURE: wachtwoord wijzigen implementeren
-    #def password_change(self, request, extra_context=None):
-    #    return HttpResponseRedirect(reverse('Plein:plein'))
+    def password_change(self, request, extra_context=None):
+        return HttpResponseRedirect(reverse('Account:nieuw-wachtwoord'))
 
     def logout(self, request, extra_context=None):
         return HttpResponseRedirect(reverse('Account:logout'))
 
     def login(self, request, extra_context=None):
-
         next = request.GET.get('next', '')
 
         # send the user to the login page only when required

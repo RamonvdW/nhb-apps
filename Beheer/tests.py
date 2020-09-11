@@ -28,6 +28,8 @@ class TestBeheer(E2EHelpers, TestCase):
         resp = self.client.get('/beheer/login/?next=/records/', follow=True)
         self.assertEqual(resp.redirect_chain[-1], ('/account/login/?next=/records/', 302))
 
+        self.e2e_assert_other_http_commands_not_supported('/beheer/login/')
+
     def test_index(self):
         # voordat 2FA verificatie gedaan is
         self.e2e_login(self.account_admin)
@@ -35,6 +37,8 @@ class TestBeheer(E2EHelpers, TestCase):
         # redirect naar wissel-van-rol pagina
         resp = self.client.get('/beheer/', follow=True)
         self.assertEqual(resp.redirect_chain[-1], ('/functie/otp-controle/?next=/beheer/', 302))
+
+        self.e2e_assert_other_http_commands_not_supported('/beheer/')
 
         # na 2FA verificatie
         self.e2e_login_and_pass_otp(self.account_admin)
@@ -50,7 +54,6 @@ class TestBeheer(E2EHelpers, TestCase):
         # onnodig via beheer-login zonder post-authenticatie pagina
         resp = self.client.get('/beheer/login/', follow=True)
         self.assertEqual(resp.redirect_chain[-1], ('/plein/', 302))
-        #print("redirect_chain: %s" % repr(resp.redirect_chain))
 
     def test_logout(self):
         # controleer dat de admin login vervangen is door een redirect naar onze eigen login
@@ -61,6 +64,15 @@ class TestBeheer(E2EHelpers, TestCase):
         resp = self.client.get('/beheer/logout/', follow=True)
         self.assertEqual(resp.redirect_chain[-1], ('/account/logout/', 302))
 
-# TODO: gebruik assert_other_http_commands_not_supported
+    def test_pw_change(self):
+        url = reverse('admin:password_change')
+        self.assertEqual(url, '/beheer/password_change/')
+
+        self.e2e_login_and_pass_otp(self.account_admin)
+
+        resp = self.client.get(url, follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assertContains(resp, 'Nieuw wachtwoord')
+        self.assertEqual(resp.redirect_chain[-1], ('/account/nieuw-wachtwoord/', 302))
 
 # end of file
