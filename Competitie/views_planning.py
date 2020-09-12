@@ -455,7 +455,8 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
                                                       kwargs={'ronde_pk': ronde.pk})
 
             for wedstrijd in context['wedstrijden']:
-                wedstrijd.url_wijzig = reverse('Competitie:wijzig-wedstrijd', kwargs={'wedstrijd_pk': wedstrijd.pk})
+                wedstrijd.url_wijzig = reverse('Competitie:wijzig-wedstrijd',
+                                               kwargs={'wedstrijd_pk': wedstrijd.pk})
             # for
 
         start_week = 37
@@ -507,9 +508,9 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
             context['mag_uitslag_invoeren'] = True
 
         for wedstrijd in context['wedstrijden']:
-            wedstrijd.uitslag_aanwezig = JA_NEE[False]
             if wedstrijd.uitslag and wedstrijd.uitslag.scores.count() > 0:
-                wedstrijd.uitslag_aanwezig = JA_NEE[True]
+                wedstrijd.url_uitslag_bekijken = reverse('Competitie:wedstrijd-bekijk-uitslag',
+                                                         kwargs={'wedstrijd_pk': wedstrijd.pk})
 
             if rol_nu == Rollen.ROL_RCL:
                 # TODO: knop pas beschikbaar maken op wedstrijddatum tot datum+N

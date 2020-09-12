@@ -11,7 +11,7 @@ from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Plein.menu import menu_dynamics
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
-from Wedstrijden.models import Wedstrijd, WedstrijdUitslag
+from Wedstrijden.models import Wedstrijd, WedstrijdUitslag, WedstrijdenPlan
 from Schutter.models import SchutterBoog
 from Score.models import Score, ScoreHist, SCORE_WAARDE_VERWIJDERD
 from .models import (LAAG_REGIO, DeelCompetitie,
@@ -21,6 +21,7 @@ import sys
 
 
 TEMPLATE_COMPETITIE_UITSLAG_INVOEREN_WEDSTRIJD = 'competitie/uitslag-invoeren-wedstrijd.dtl'
+TEMPLATE_COMPETITIE_UITSLAG_BEKIJKEN_WEDSTRIJD = 'competitie/bekijk-wedstrijd-uitslag.dtl'
 
 
 def mag_deelcomp_wedstrijd_wijzigen(wedstrijd, functie_nu, deelcomp):
@@ -34,6 +35,45 @@ def mag_deelcomp_wedstrijd_wijzigen(wedstrijd, functie_nu, deelcomp):
         return True
 
     return False
+
+
+def bepaal_wedstrijd_en_deelcomp_of_404(wedstrijd_pk):
+    try:
+        wedstrijd = (Wedstrijd
+                     .objects
+                     .select_related('uitslag')
+                     .prefetch_related('uitslag__scores')
+                     .get(pk=wedstrijd_pk))
+    except Wedstrijd.DoesNotExist:
+        raise Resolver404()
+
+    plan = wedstrijd.wedstrijdenplan_set.all()[0]
+
+    # zoek de ronde erbij
+    # deze hoort al bij een competitie type (indoor / 25m1pijl)
+    ronde = (DeelcompetitieRonde
+             .objects
+             .select_related('deelcompetitie',
+                             'deelcompetitie__nhb_regio',
+                             'deelcompetitie__competitie')
+             .get(plan=plan))
+
+    deelcomp = ronde.deelcompetitie
+
+    # maak de WedstrijdUitslag aan indien nog niet gedaan
+    if not wedstrijd.uitslag:
+        uitslag = WedstrijdUitslag()
+        if deelcomp.competitie.afstand == '18':
+            uitslag.max_score = 300
+            uitslag.afstand_meter = 18
+        else:
+            uitslag.max_score = 250
+            uitslag.afstand_meter = 25
+        uitslag.save()
+        wedstrijd.uitslag = uitslag
+        wedstrijd.save()
+
+    return wedstrijd, deelcomp, ronde
 
 
 class UitslagInvoerenWedstrijdView(UserPassesTestMixin, TemplateView):
@@ -54,45 +94,6 @@ class UitslagInvoerenWedstrijdView(UserPassesTestMixin, TemplateView):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
         return HttpResponseRedirect(reverse('Plein:plein'))
 
-    @staticmethod
-    def bepaal_wedstrijd_en_deelcomp_of_404(wedstrijd_pk):
-        try:
-            wedstrijd = (Wedstrijd
-                         .objects
-                         .select_related('uitslag')
-                         .prefetch_related('uitslag__scores')
-                         .get(pk=wedstrijd_pk))
-        except Wedstrijd.DoesNotExist:
-            raise Resolver404()
-
-        plan = wedstrijd.wedstrijdenplan_set.all()[0]
-
-        # zoek de ronde erbij
-        # deze hoort al bij een competitie type (indoor / 25m1pijl)
-        ronde = (DeelcompetitieRonde
-                 .objects
-                 .select_related('deelcompetitie',
-                                 'deelcompetitie__nhb_regio',
-                                 'deelcompetitie__competitie')
-                 .get(plan=plan))
-
-        deelcomp = ronde.deelcompetitie
-
-        # maak de WedstrijdUitslag aan indien nog niet gedaan
-        if not wedstrijd.uitslag:
-            uitslag = WedstrijdUitslag()
-            if deelcomp.competitie.afstand == '18':
-                uitslag.max_score = 300
-                uitslag.afstand_meter = 18
-            else:
-                uitslag.max_score = 250
-                uitslag.afstand_meter = 25
-            uitslag.save()
-            wedstrijd.uitslag = uitslag
-            wedstrijd.save()
-
-        return wedstrijd, deelcomp
-
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
@@ -100,7 +101,7 @@ class UitslagInvoerenWedstrijdView(UserPassesTestMixin, TemplateView):
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
 
         wedstrijd_pk = kwargs['wedstrijd_pk'][:6]     # afkappen geeft beveiliging
-        wedstrijd, deelcomp = self.bepaal_wedstrijd_en_deelcomp_of_404(wedstrijd_pk)
+        wedstrijd, deelcomp, ronde = bepaal_wedstrijd_en_deelcomp_of_404(wedstrijd_pk)
 
         context['wedstrijd'] = wedstrijd
         context['deelcomp'] = deelcomp
@@ -137,12 +138,10 @@ class UitslagInvoerenWedstrijdView(UserPassesTestMixin, TemplateView):
 
 class DynamicDeelnemersOphalenView(UserPassesTestMixin, View):
 
-    # TODO: UserPassesTestMixing is niet echt nodig - kan direct in post()
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
-        #TODO: HWL/WL toevoegen
-        return rol_nu == Rollen.ROL_RCL
+        return rol_nu in (Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_WL)
 
     def handle_no_permission(self):
         """ gebruiker heeft geen toegang """
@@ -198,12 +197,10 @@ class DynamicDeelnemersOphalenView(UserPassesTestMixin, View):
 
 class DynamicZoekOpNhbnrView(UserPassesTestMixin, View):
 
-    # TODO: UserPassesTestMixing is niet echt nodig - kan direct in post()
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
-        #TODO: HWL/WL toevoegen
-        return rol_nu == Rollen.ROL_RCL
+        return rol_nu in (Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_WL)
 
     def handle_no_permission(self):
         """ gebruiker heeft geen toegang """
@@ -278,12 +275,10 @@ class DynamicZoekOpNhbnrView(UserPassesTestMixin, View):
 
 class DynamicScoresOpslaanView(UserPassesTestMixin, View):
 
-    # TODO: UserPassesTestMixing is niet echt nodig - kan direct in post()
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
-        #TODO: HWL/WL toevoegen
-        return rol_nu == Rollen.ROL_RCL
+        return rol_nu in (Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_WL)
 
     def handle_no_permission(self):
         """ gebruiker heeft geen toegang """
@@ -310,7 +305,7 @@ class DynamicScoresOpslaanView(UserPassesTestMixin, View):
         return wedstrijd
 
     @staticmethod
-    def nieuwe_score(uitslag, schutterboog_pk, waarde, datum, door_account):
+    def nieuwe_score(uitslag, schutterboog_pk, waarde, when, door_account):
         # print('nieuwe score: %s = %s' % (schutterboog_pk, waarde))
 
         schutterboog = SchutterBoog.objects.get(pk=schutterboog_pk)
@@ -325,19 +320,19 @@ class DynamicScoresOpslaanView(UserPassesTestMixin, View):
         ScoreHist(score=score_obj,
                   oude_waarde=0,
                   nieuwe_waarde=waarde,
-                  datum=datum,
+                  when=when,
                   door_account=door_account,
                   notitie="Invoer uitslag wedstrijd").save()
 
     @staticmethod
-    def bijgewerkte_score(score_obj, waarde, datum, door_account):
+    def bijgewerkte_score(score_obj, waarde, when, door_account):
         if score_obj.waarde != waarde:
             # print('bijgewerkte score: %s --> %s' % (score_obj, waarde))
 
             ScoreHist(score=score_obj,
                       oude_waarde=score_obj.waarde,
                       nieuwe_waarde=waarde,
-                      datum=datum,
+                      when=when,
                       door_account=door_account,
                       notitie="Invoer uitslag wedstrijd").save()
 
@@ -345,7 +340,7 @@ class DynamicScoresOpslaanView(UserPassesTestMixin, View):
             score_obj.save()
         # else: zelfde score
 
-    def scores_opslaan(self, uitslag, data, datum, door_account):
+    def scores_opslaan(self, uitslag, data, when, door_account):
         """ sla de scores op
             data bevat schutterboog_pk + score
             als score leeg is moet pk uit de uitslag gehaald worden
@@ -384,10 +379,11 @@ class DynamicScoresOpslaanView(UserPassesTestMixin, View):
                 if score_obj:
                     # verwijder deze score uit de uit, maar behoud de geschiedenis
                     waarde = SCORE_WAARDE_VERWIJDERD
-                    self.bijgewerkte_score(score_obj, waarde, datum, door_account)
+                    self.bijgewerkte_score(score_obj, waarde, when, door_account)
                 else:
                     # geen score en al afwezig in de uitslag --> doe niets
-                    continue
+                    pass
+                continue
 
             # sla de score op
             try:
@@ -401,9 +397,9 @@ class DynamicScoresOpslaanView(UserPassesTestMixin, View):
                 # score opslaan
                 if not score_obj:
                     # het is een nieuwe score
-                    self.nieuwe_score(uitslag, pk, waarde, datum, door_account)
+                    self.nieuwe_score(uitslag, pk, waarde, when, door_account)
                 else:
-                    self.bijgewerkte_score(score_obj, waarde, datum, door_account)
+                    self.bijgewerkte_score(score_obj, waarde, when, door_account)
             # else: illegale score --> ignore
         # for
 
@@ -428,16 +424,66 @@ class DynamicScoresOpslaanView(UserPassesTestMixin, View):
         # plan = wedstrijd.wedstrijdenplan_set.all()[0]
 
         door_account = request.user
-        datum = timezone.now()
+        when = timezone.now()
 
         try:
-            self.scores_opslaan(uitslag, data, datum, door_account)
+            self.scores_opslaan(uitslag, data, when, door_account)
         except:
             exc = sys.exc_info()[1]
             print('OHOH: %s' % exc)
 
         out = {'done': 1}
         return JsonResponse(out)
+
+
+class BekijkWedstrijdUitslagView(TemplateView):
+
+    """ Deze view toont de uitslag van een wedstrijd """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_COMPETITIE_UITSLAG_BEKIJKEN_WEDSTRIJD
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        wedstrijd_pk = kwargs['wedstrijd_pk'][:6]     # afkappen geeft beveiliging
+        wedstrijd, deelcomp, ronde = bepaal_wedstrijd_en_deelcomp_of_404(wedstrijd_pk)
+
+        scores = (wedstrijd
+                  .uitslag
+                  .scores
+                  .exclude(is_ag=True)
+                  .exclude(waarde=SCORE_WAARDE_VERWIJDERD)
+                  .select_related('schutterboog',
+                                  'schutterboog__boogtype',
+                                  'schutterboog__nhblid')
+                  .order_by('schutterboog__nhblid__nhb_nr'))
+
+        # maak een opzoek tabel voor de huidige vereniging van elke schutterboog
+        schutterboog_pks = [score.schutterboog.pk for score in scores]
+        regioschutters = (RegioCompetitieSchutterBoog
+                          .objects
+                          .select_related('schutterboog',
+                                          'bij_vereniging')
+                          .filter(schutterboog__pk__in=schutterboog_pks))
+        schutterboog2vereniging = dict()
+        for regioschutter in regioschutters:
+            schutterboog2vereniging[regioschutter.schutterboog.pk] = regioschutter.bij_vereniging
+        # for
+
+        for score in scores:
+            score.schutter_str = score.schutterboog.nhblid.volledige_naam()
+            score.vereniging_str = str(schutterboog2vereniging[score.schutterboog.pk])
+        # for
+
+        context['wedstrijd'] = wedstrijd
+        context['deelcomp'] = deelcomp
+        context['ronde'] = ronde
+        context['scores'] = scores
+
+        menu_dynamics(self.request, context, actief='competitie')
+        return context
 
 
 # end of file

@@ -95,9 +95,11 @@ class LijstAangemeldRegiocompAllesView(UserPassesTestMixin, TemplateView):
 
         objs = (RegioCompetitieSchutterBoog
                 .objects
-                .select_related('klasse', 'klasse__indiv',
-                                'deelcompetitie', 'deelcompetitie__nhb_regio',
-                                'schutterboog', 'schutterboog__nhblid',
+                .select_related('klasse',
+                                'klasse__indiv',
+                                'deelcompetitie',
+                                'deelcompetitie__nhb_regio',
+                                'schutterboog',
                                 'schutterboog__nhblid',
                                 'bij_vereniging')
                 .filter(deelcompetitie__competitie=comp,
@@ -157,10 +159,13 @@ class LijstAangemeldRegiocompRayonView(UserPassesTestMixin, TemplateView):
 
         objs = (RegioCompetitieSchutterBoog
                 .objects
-                .select_related('klasse', 'klasse__indiv',
-                                'deelcompetitie', 'deelcompetitie__nhb_regio__rayon',
-                                'schutterboog', 'schutterboog__nhblid',
-                                'schutterboog__nhblid__bij_vereniging')
+                .select_related('klasse',
+                                'klasse__indiv',
+                                'deelcompetitie',
+                                'deelcompetitie__nhb_regio__rayon',
+                                'schutterboog',
+                                'schutterboog__nhblid',
+                                'bij_vereniging')
                 .filter(deelcompetitie__competitie=comp,
                         deelcompetitie__laag=LAAG_REGIO,
                         deelcompetitie__nhb_regio__rayon=rayon)
@@ -234,7 +239,7 @@ class LijstAangemeldRegiocompRegioView(UserPassesTestMixin, TemplateView):
                                 'deelcompetitie',
                                 'schutterboog',
                                 'schutterboog__nhblid',
-                                'schutterboog__nhblid__bij_vereniging')
+                                'bij_vereniging')
                 .filter(deelcompetitie=deelcomp)
                 .order_by('klasse__indiv__volgorde', 'aanvangsgemiddelde'))
 

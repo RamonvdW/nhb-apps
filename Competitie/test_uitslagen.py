@@ -162,6 +162,8 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         self.url_uitslag_zoeken = '/competitie/dynamic/check-nhbnr/'
         self.url_uitslag_opslaan = '/competitie/dynamic/scores-opslaan/'
 
+        self.url_bekijk_uitslag = '/competitie/wedstrijd/bekijk-uitslag/%s/'    # wedstrijd_pk
+
         self.e2e_login_and_pass_otp(self.account_rcl101)
         self.e2e_wissel_naar_functie(self.functie_rcl101)
 
@@ -384,5 +386,10 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         # post zonder data
         resp = self.client.post(self.url_uitslag_opslaan)
         self.assertEqual(resp.status_code, 404)       # 404 = not found / not allowed
+
+    def test_bekijk_uitslag(self):
+        url = self.url_bekijk_uitslag % self.wedstrijd18_pk
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)       # 200 = OK
 
 # end of file
