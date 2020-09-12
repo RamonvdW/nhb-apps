@@ -23,6 +23,19 @@ import sys
 TEMPLATE_COMPETITIE_UITSLAG_INVOEREN_WEDSTRIJD = 'competitie/uitslag-invoeren-wedstrijd.dtl'
 
 
+def mag_deelcomp_wedstrijd_wijzigen(wedstrijd, functie_nu, deelcomp):
+    """ controleer toestemming om scoreverwerking te doen voor deze wedstrijd """
+    if functie_nu.rol == 'RCL' and functie_nu.nhb_regio == deelcomp.nhb_regio:
+        # RCL van de deelcompetitie
+        return True
+
+    if functie_nu.rol in ('HWL', 'WL') and functie_nu.nhb_ver == wedstrijd.vereniging:
+        # (H)WL van de organiserende vereniging
+        return True
+
+    return False
+
+
 class UitslagInvoerenWedstrijdView(UserPassesTestMixin, TemplateView):
 
     """ Deze view laat de RCL de uitslag van een wedstrijd invoeren """
@@ -35,7 +48,7 @@ class UitslagInvoerenWedstrijdView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
-        return rol_nu == Rollen.ROL_RCL
+        return rol_nu in (Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_WL)
 
     def handle_no_permission(self):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
@@ -84,17 +97,16 @@ class UitslagInvoerenWedstrijdView(UserPassesTestMixin, TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
+        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
+
         wedstrijd_pk = kwargs['wedstrijd_pk'][:6]     # afkappen geeft beveiliging
         wedstrijd, deelcomp = self.bepaal_wedstrijd_en_deelcomp_of_404(wedstrijd_pk)
 
         context['wedstrijd'] = wedstrijd
         context['deelcomp'] = deelcomp
 
-        # TODO: controleer toestemming om scoreverwerking te doen voor deze wedstrijd
-
-        #rol_nu, functie_nu = rol_get_huidige_functie(self.request)
-        #if rol_nu == 'RCL':
-        #    # regio = functie_nu.nhb_regio
+        if not mag_deelcomp_wedstrijd_wijzigen(wedstrijd, functie_nu, deelcomp):
+            raise Resolver404()
 
         context['scores'] = (wedstrijd
                              .uitslag
@@ -113,7 +125,11 @@ class UitslagInvoerenWedstrijdView(UserPassesTestMixin, TemplateView):
 
         plan = wedstrijd.wedstrijdenplan_set.all()[0]
         ronde = DeelcompetitieRonde.objects.get(plan=plan)
-        context['url_terug'] = reverse('Competitie:regio-ronde-planning', kwargs={'ronde_pk': ronde.pk})
+
+        if rol_nu == Rollen.ROL_RCL:
+            context['url_terug'] = reverse('Competitie:regio-ronde-planning', kwargs={'ronde_pk': ronde.pk})
+        else:
+            context['url_terug'] = reverse('Vereniging:wedstrijden')
 
         menu_dynamics(self.request, context, actief='competitie')
         return context

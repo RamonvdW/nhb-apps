@@ -65,7 +65,7 @@ admin.site.register(Wedstrijd, WedstrijdAdmin)
 admin.site.register(WedstrijdenPlan, WedstrijdenPlanAdmin)
 admin.site.register(WedstrijdUitslag, WedstrijdUitslagAdmin)
 
-# TODO: Wedstrijd admin scherm is langzaam omdat str(WedstrijdLocatie) een self.verenigingen.count() doet
-#       nog niet op kunnen lossen met een get_queryset()
+# FUTURE: Wedstrijd admin scherm word langzaam als str(WedstrijdLocatie) een self.verenigingen.count() doet
+#         nog niet op kunnen lossen met een get_queryset(). Even uitgezet.
 
 # end of file

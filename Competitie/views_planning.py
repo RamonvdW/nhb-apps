@@ -531,7 +531,10 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
 
         ronde_pk = kwargs['ronde_pk'][:6]     # afkappen geeft beveiliging
         try:
-            ronde = DeelcompetitieRonde.objects.get(pk=ronde_pk)
+            ronde = (DeelcompetitieRonde
+                     .objects
+                     .select_related('deelcompetitie__competitie')
+                     .get(pk=ronde_pk))
         except DeelcompetitieRonde.DoesNotExist:
             raise Resolver404()
 
@@ -585,12 +588,21 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
 
             ronde.save()
 
+            # werk de beschrijvingen van alle wedstrijden bij
+            comp_str = ronde.deelcompetitie.competitie.beschrijving
+            for obj in ronde.plan.wedstrijden.all():
+                new_str = "%s - %s" % (comp_str, ronde.beschrijving)
+                if obj.beschrijving != new_str:
+                    obj.beschrijving = new_str
+                    obj.save()
+            # for
+
             if ronde.cluster:
                 next_url = reverse('Competitie:regio-cluster-planning',
-                                    kwargs={'cluster_pk': ronde.cluster.pk})
+                                   kwargs={'cluster_pk': ronde.cluster.pk})
             else:
                 next_url = reverse('Competitie:regio-planning',
-                                    kwargs={'deelcomp_pk': ronde.deelcompetitie.pk})
+                                   kwargs={'deelcomp_pk': ronde.deelcompetitie.pk})
         else:
             # voeg een wedstrijd toe
             jaar = ronde.deelcompetitie.competitie.begin_jaar

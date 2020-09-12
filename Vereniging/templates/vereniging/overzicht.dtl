@@ -96,6 +96,20 @@
         </div>
     {% endfor %}
 
+    <!-- wedstrijden -->
+    <div class="card">
+        <div class="card-content">
+            <div class="card-title center-align">Wedstrijden</div>
+            <div class="center-align"><i class="material-icons-round medium">event</i></div>
+            <p>Wedstrijden die bij deze vereniging geschoten worden.</p>
+        </div>
+        <a href="{% url 'Vereniging:wedstrijden' %}" class="nhb-klikbare-balk">
+            <div class="card-action center-align">
+                <span class="nhb-klikbare-link">Wedstrijden</span>
+            </div>
+        </a>
+    </div>
+
     <!-- ledenlijst -->
     <div class="card">
         <div class="card-content">

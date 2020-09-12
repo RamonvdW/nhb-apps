@@ -145,11 +145,11 @@
                 {% endif %}
             </td>
 
-            <!-- knop om uitslagen in te voeren -->
+            <!-- knop om uitslagen te zien / in te voeren -->
             <td>
                 {% if wedstrijd.url_uitslag_invoeren %}
                     <a class="btn-nhb-blauw" href="{{ wedstrijd.url_uitslag_invoeren }}">
-                        <i class="material-icons-round left">arrow_forward</i>Uitslag invoeren</a>
+                        <i class="material-icons-round left">arrow_forward</i>Uitslag</a>
                 {% else %}
                     <span>{{ wedstrijd.uitslag_aanwezig }}</span>
                 {% endif %}
