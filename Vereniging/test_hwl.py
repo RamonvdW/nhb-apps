@@ -81,10 +81,11 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         lid.geslacht = "V"
         lid.voornaam = "Ramona"
         lid.achternaam = "de Jeugdschutter"
-        lid.email = ""
+        lid.email = "nietleeg@nhb.not"
         lid.geboorte_datum = datetime.date(year=jaar-10, month=3, day=4)
         lid.sinds_datum = datetime.date(year=jaar-3, month=11, day=12)
         lid.bij_vereniging = ver
+        lid.account = self.e2e_create_account(lid.nhb_nr, lid.email, lid.voornaam)  # heeft last_login=None
         lid.save()
         self.nhblid_100002 = lid
 
