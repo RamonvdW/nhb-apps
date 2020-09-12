@@ -5,12 +5,15 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
+from BasisTypen.models import BoogType
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
 from Competitie.models import (Competitie, CompetitieKlasse,
                                LAAG_REGIO, DeelCompetitie,
                                maak_deelcompetitie_ronde)
-from Wedstrijden.models import Wedstrijd
+from Schutter.models import SchutterBoog
+from Wedstrijden.models import Wedstrijd, WedstrijdUitslag
+from Score.models import Score
 from Overig.e2ehelpers import E2EHelpers
 import datetime
 
@@ -74,6 +77,14 @@ class TestVerenigingWedstrijden(E2EHelpers, TestCase):
         lid.account = self.account_wl
         lid.save()
         self.nhblid_100001 = lid
+
+        boog_ib = BoogType.objects.get(afkorting='IB')
+
+        schutterboog = SchutterBoog(nhblid=lid,
+                                    boogtype=boog_ib,
+                                    voor_wedstrijd=True)
+        schutterboog.save()
+        self.schutterboog_100001 = schutterboog
 
         # maak een jeugdlid aan
         lid = NhbLid()
@@ -207,7 +218,18 @@ class TestVerenigingWedstrijden(E2EHelpers, TestCase):
                             tijd_begin_wedstrijd=de_tijd,
                             tijd_einde_wedstrijd=de_tijd)
             if volgnr == 1:
+                score = Score(schutterboog=self.schutterboog_100001,
+                              waarde=123,
+                              afstand_meter=12)
+                score.save()
+
+                uitslag = WedstrijdUitslag(max_score=300, afstand_meter=12)
+                uitslag.save()
+                uitslag.scores.add(score)
+
+                wedstrijd.uitslag = uitslag
                 wedstrijd.beschrijving = "Dit is een testje"
+
             wedstrijd.save()
             ronde.plan.wedstrijden.add(wedstrijd)
         # for
@@ -220,6 +242,7 @@ class TestVerenigingWedstrijden(E2EHelpers, TestCase):
                         tijd_begin_wedstrijd=de_tijd,
                         tijd_einde_wedstrijd=de_tijd)
         wedstrijd.save()
+        self.wedstrijd = wedstrijd
 
     def test_wedstrijden_hwl(self):
         # login als HWL

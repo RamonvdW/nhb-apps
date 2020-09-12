@@ -40,9 +40,14 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
 
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
 
+        pks = (DeelcompetitieRonde
+               .objects
+               .filter(plan__wedstrijden__vereniging=functie_nu.nhb_ver)
+               .values_list('plan__wedstrijden', flat=True))
+
         wedstrijden = (Wedstrijd
                        .objects
-                       .filter(vereniging=functie_nu.nhb_ver)
+                       .filter(pk__in=pks)
                        .order_by('datum_wanneer', 'tijd_begin_wedstrijd'))
 
         for obj in wedstrijden:
@@ -55,22 +60,22 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
                 # maak er dan een passende beschrijving voor
 
                 # Wedstrijd --> WedstrijdenPlan --> DeelcompetitieRonde
-                try:
-                    plan = obj.wedstrijdenplan_set.all()[0]
-                    ronde = plan.deelcompetitieronde_set.all()[0]
-                except (WedstrijdenPlan.DoesNotExist, DeelcompetitieRonde.DoesNotExist, IndexError):
-                    obj.beschrijving = "?"
-                else:
-                    obj.beschrijving = "%s - %s" % (ronde.deelcompetitie.competitie.beschrijving, ronde.beschrijving)
+                plan = obj.wedstrijdenplan_set.all()[0]
+                ronde = plan.deelcompetitieronde_set.all()[0]
+                obj.beschrijving = "%s - %s" % (ronde.deelcompetitie.competitie.beschrijving,
+                                                ronde.beschrijving)
 
+            obj.toon_geen_uitslag = True
             if rol_nu in (Rollen.ROL_HWL, Rollen.ROL_WL):
                 # mag uitslag wijzigen
                 obj.url_uitslag_invoeren = reverse('Competitie:uitslag-invoeren-wedstrijd',
                                                    kwargs={'wedstrijd_pk': obj.pk})
-            #else:
-            #    obj.url_uitslag_bekijken = reverse('Competitie:uitslag-bekijken-wedstrijd',
-            #                                       kwargs={'wedstrijd_pk': obj.pk})
-
+                obj.toon_geen_uitslag = False
+            else:
+                if obj.uitslag and obj.uitslag.scores.count() > 0:
+                    obj.url_uitslag_bekijken = reverse('Competitie:wedstrijd-bekijk-uitslag',
+                                                       kwargs={'wedstrijd_pk': obj.pk})
+                    obj.toon_geen_uitslag = False
         # for
 
         context['vereniging'] = functie_nu.nhb_ver

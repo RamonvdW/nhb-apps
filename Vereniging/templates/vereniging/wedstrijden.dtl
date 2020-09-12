@@ -9,42 +9,47 @@
 {% block title %}Wedstrijden{% endblock %}
 
 {% block pagina %}
+
+    <h4>Wedstrijden</h4>
+
+    <p>Hieronder volgt de lijst van wedstrijden die geschoten worden bij vereniging <b>{{ vereniging }}</b>.</p>
+
+    <!-- <p>Je rol is <b>{{ huidige_rol }}</b>.</p> -->
+
+    <table class="white">
+        <thead>
+            <tr>
+                <th>Wanneer</th>
+                <th>Beschrijving</th>
+                <th>Uitslag</th>
+            </tr>
+        </thead>
+
+        {% for obj in wedstrijden %}
+            <tr>
+                <td>{{ obj.datum_wanneer }} om {{ obj.tijd_begin_wedstrijd }}</td>
+                <td>{{ obj.beschrijving }}</td>
+                <!-- knop om uitslagen te zien / in te voeren -->
+                <td>
+                    {% if obj.url_uitslag_invoeren %}
+                        <a class="btn-nhb-blauw" href="{{ obj.url_uitslag_invoeren }}">
+                            <i class="material-icons-round left">arrow_forward</i>Uitslag invoeren</a>
+                    {% endif %}
+
+                    {% if obj.url_uitslag_bekijken %}
+                        <a class="btn-nhb-blauw" href="{{ obj.url_uitslag_bekijken }}">
+                            <i class="material-icons-round left">arrow_forward</i>Uitslag</a>
+                    {% endif %}
+
+                    {% if obj.toon_geen_uitslag %}
+                        <span><i>Nog geen</i></span>
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+
 {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vereniging-wedstrijden" %}
-
-<h4>Wedstrijden</h4>
-
-<p>Hieronder volgt de lijst van wedstrijden die geschoten worden bij vereniging <b>{{ vereniging }}</b>.</p>
-
-<p>Je rol is <b>{{ huidige_rol }}</b>.</p>
-
-<table class="white">
-    <thead>
-        <tr>
-            <th>Wanneer</th>
-            <th>Beschrijving</th>
-            <th>Uitslag</th>
-        </tr>
-    </thead>
-
-    {% for obj in wedstrijden %}
-        <tr>
-            <td>{{ obj.datum_wanneer }} om {{ obj.tijd_begin_wedstrijd }}</td>
-            <td>{{ obj.beschrijving }}</td>
-            <!-- knop om uitslagen te zien / in te voeren -->
-            <td>
-                {% if obj.url_uitslag_invoeren %}
-                    <a class="btn-nhb-blauw" href="{{ obj.url_uitslag_invoeren }}">
-                        <i class="material-icons-round left">arrow_forward</i>Uitslag invoeren</a>
-                {% endif %}
-
-                {% if obj.url_uitslag_bekijken %}
-                    <a class="btn-nhb-blauw" href="{{ obj.url_uitslag_bekijken }}">
-                        <i class="material-icons-round left">arrow_forward</i>Uitslag</a>
-                {% endif %}
-            </td>
-        </tr>
-    {% endfor %}
-</table>
 
 {% endblock %}
 
