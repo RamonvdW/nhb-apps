@@ -226,7 +226,7 @@
                     <td>{{ schutterboog.boogtype.beschrijving }}</td>
                     <td>{{ ag.afstand_meter }} meter</td>
                     <td>{{ ag.ag|floatformat:3 }}</td>
-                    <td>{{ ag.scorehist.datum }}</td>
+                    <td>{{ ag.scorehist.when|date:"j F Y" }}</td>
                     <td>{{ ag.scorehist.notitie }}</td>
                 </tr>
             {% endfor %}
