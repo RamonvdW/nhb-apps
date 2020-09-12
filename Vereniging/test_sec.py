@@ -53,7 +53,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.functie_sec.nhb_ver = ver
         self.functie_sec.save()
 
-        # maak het lid aan dat HWL wordt
+        # maak het lid aan dat SEC wordt
         lid = NhbLid()
         lid.nhb_nr = 100001
         lid.geslacht = "M"

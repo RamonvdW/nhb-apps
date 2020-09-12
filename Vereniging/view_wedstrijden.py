@@ -58,7 +58,7 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
                 try:
                     plan = obj.wedstrijdenplan_set.all()[0]
                     ronde = plan.deelcompetitieronde_set.all()[0]
-                except (WedstrijdenPlan.DoesNotExist, DeelcompetitieRonde.DoesNotExist):
+                except (WedstrijdenPlan.DoesNotExist, DeelcompetitieRonde.DoesNotExist, IndexError):
                     obj.beschrijving = "?"
                 else:
                     obj.beschrijving = "%s - %s" % (ronde.deelcompetitie.competitie.beschrijving, ronde.beschrijving)
