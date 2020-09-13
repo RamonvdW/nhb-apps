@@ -631,24 +631,26 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 404)     # 404 = Not found
 
     def _vind_tabel_regel_met(self, resp, zoekterm):
+        regel = None
         content = str(resp.content)
 
         pos = content.find(zoekterm)
-        if pos < 0:
-            return None
-        content = content[pos-200:pos+200]
+        if pos >= 0:
+            content = content[pos-200:pos+200]
 
-        pos = content.find('<tr>')
-        while pos >= 0:
-            content = content[pos:]
-            pos = content.find('</tr>')
-            regel = content[:pos]
-            if zoekterm in regel:
-                return regel
-            content = content[pos:]
             pos = content.find('<tr>')
-        # while
-        return None
+            while pos >= 0:
+                content = content[pos:]
+                pos = content.find('</tr>')
+                regel = content[:pos]
+                if zoekterm in regel:
+                    pos = -1        # exits while loop
+                else:
+                    content = content[pos:]
+                    pos = content.find('<tr>')
+            # while
+
+        return regel
 
     def test_verander_vereniging(self):
         # verander 1 schutterboog naar een andere verenigingen
@@ -668,6 +670,8 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
         regel = self._vind_tabel_regel_met(resp, naam_str)
         self.assertTrue(ver_str in regel)
+
+        self.assertEqual(None, self._vind_tabel_regel_met(resp, 'dit staat er for sure niet in'))
 
         # schrijf de schutter over naar een andere vereniging
         lid = inschrijving.schutterboog.nhblid

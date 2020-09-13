@@ -26,8 +26,10 @@ TEMPLATE_COMPETITIE_UITSLAG_BEKIJKEN_WEDSTRIJD = 'competitie/bekijk-wedstrijd-ui
 
 def mag_deelcomp_wedstrijd_wijzigen(wedstrijd, functie_nu, deelcomp):
     """ controleer toestemming om scoreverwerking te doen voor deze wedstrijd """
-    if functie_nu.rol == 'RCL' and functie_nu.nhb_regio == deelcomp.nhb_regio:
-        # RCL van de deelcompetitie
+    if (functie_nu.rol == 'RCL'
+            and functie_nu.nhb_regio == deelcomp.nhb_regio
+            and functie_nu.comp_type == deelcomp.competitie.afstand):
+        # RCL van deze deelcompetitie
         return True
 
     if functie_nu.rol in ('HWL', 'WL') and functie_nu.nhb_ver == wedstrijd.vereniging:
@@ -82,8 +84,6 @@ class UitslagInvoerenWedstrijdView(UserPassesTestMixin, TemplateView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_UITSLAG_INVOEREN_WEDSTRIJD
-
-    # TODO: ondersteuning voor HWL en WL toevoegen
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -308,7 +308,11 @@ class DynamicScoresOpslaanView(UserPassesTestMixin, View):
     def nieuwe_score(uitslag, schutterboog_pk, waarde, when, door_account):
         # print('nieuwe score: %s = %s' % (schutterboog_pk, waarde))
 
-        schutterboog = SchutterBoog.objects.get(pk=schutterboog_pk)
+        try:
+            schutterboog = SchutterBoog.objects.get(pk=schutterboog_pk)
+        except SchutterBoog.DoesNotExist:
+            # garbage --> ignore
+            return
 
         score_obj = Score(schutterboog=schutterboog,
                           is_ag=False,
@@ -374,16 +378,10 @@ class DynamicScoresOpslaanView(UserPassesTestMixin, View):
 
             if isinstance(value, str) and value == '':
                 # lege invoer betekent: schutter deed niet mee
-                #print('schutter deed niet mee: %s' % pk)
-
                 if score_obj:
                     # verwijder deze score uit de uit, maar behoud de geschiedenis
-                    waarde = SCORE_WAARDE_VERWIJDERD
-                    self.bijgewerkte_score(score_obj, waarde, when, door_account)
-                else:
-                    # geen score en al afwezig in de uitslag --> doe niets
-                    pass
-                continue
+                    self.bijgewerkte_score(score_obj, SCORE_WAARDE_VERWIJDERD, when, door_account)
+                # laat tegen exceptie hieronder aanlopen
 
             # sla de score op
             try:
@@ -407,9 +405,6 @@ class DynamicScoresOpslaanView(UserPassesTestMixin, View):
         """ Deze functie wordt aangeroepen als de knop 'Opslaan' gebruikt wordt
         """
 
-        if not request.user.is_authenticated:
-            raise Resolver404()
-
         try:
             data = json.loads(request.body)
         except json.JSONDecodeError:
@@ -419,16 +414,28 @@ class DynamicScoresOpslaanView(UserPassesTestMixin, View):
 
         wedstrijd = self.laad_wedstrijd_of_404(data)
         uitslag = wedstrijd.uitslag
+        if not uitslag:
+            raise Resolver404()
 
-        # TODO: controleer toestemming om scores op te slaan voor deze wedstrijd
-        # plan = wedstrijd.wedstrijdenplan_set.all()[0]
+        # controleer toestemming om scores op te slaan voor deze wedstrijd
+
+        plannen = wedstrijd.wedstrijdenplan_set.all()
+        if plannen.count() < 1:
+            # wedstrijd met andere bedoeling
+            raise Resolver404()
+
+        ronde = DeelcompetitieRonde.objects.get(plan=plannen[0])
+
+        rol_nu, functie_nu = rol_get_huidige_functie(request)
+        if not mag_deelcomp_wedstrijd_wijzigen(wedstrijd, functie_nu, ronde.deelcompetitie):
+            raise Resolver404()
 
         door_account = request.user
         when = timezone.now()
 
         try:
             self.scores_opslaan(uitslag, data, when, door_account)
-        except:
+        except:                         # pragma: no cover
             exc = sys.exc_info()[1]
             print('OHOH: %s' % exc)
 

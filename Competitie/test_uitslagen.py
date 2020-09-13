@@ -10,10 +10,10 @@ from Functie.models import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging, NhbLid
 from Schutter.models import SchutterBoog
 from Wedstrijden.models import Wedstrijd
-from Overig.e2ehelpers import E2EHelpers
 from .models import (Competitie, DeelCompetitie, CompetitieKlasse,
                      DeelcompetitieRonde, competitie_aanmaken,
                      RegioCompetitieSchutterBoog, AG_NUL)
+from Overig.e2ehelpers import E2EHelpers
 import datetime
 import json
 
@@ -121,7 +121,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         self.account_bb.save()
 
         # maak test leden aan die we kunnen koppelen aan beheerders functies
-        self.account_rcl101 = self._prep_beheerder_lid('RCL 101')
+        self.account_rcl101_18 = self._prep_beheerder_lid('RCL 101')
         self.account_schutter = self._prep_beheerder_lid('Schutter')
 
         # creëer een competitie met deelcompetities
@@ -142,8 +142,8 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
 
         self.cluster_101a = NhbCluster.objects.get(regio=self.regio_101, letter='a', gebruik='18')
 
-        self.functie_rcl101 = self.deelcomp_regio101_18.functie
-        self.functie_rcl101.accounts.add(self.account_rcl101)
+        self.functie_rcl101_18 = self.deelcomp_regio101_18.functie
+        self.functie_rcl101_18.accounts.add(self.account_rcl101_18)
 
         # maak nog een test vereniging, zonder HWL functie
         ver = NhbVereniging()
@@ -164,8 +164,8 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
 
         self.url_bekijk_uitslag = '/competitie/wedstrijd/bekijk-uitslag/%s/'    # wedstrijd_pk
 
-        self.e2e_login_and_pass_otp(self.account_rcl101)
-        self.e2e_wissel_naar_functie(self.functie_rcl101)
+        self.e2e_login_and_pass_otp(self.account_rcl101_18)
+        self.e2e_wissel_naar_functie(self.functie_rcl101_18)
 
         # maak een regioplanning aan
         self.client.post(self.url_planning_regio % self.deelcomp_regio101_18.pk)
@@ -178,6 +178,9 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         self.client.post(self.url_planning_regio_ronde % ronde25.pk, {})
         self.wedstrijd18_pk = Wedstrijd.objects.all()[0].pk
         self.wedstrijd25_pk = Wedstrijd.objects.all()[1].pk
+        wedstrijd = Wedstrijd.objects.get(pk=self.wedstrijd18_pk)
+        wedstrijd.vereniging = self.functie_hwl.nhb_ver
+        wedstrijd.save()
 
         # schrijf een paar schutters in
         boog_r = BoogType.objects.get(afkorting='R')
@@ -217,8 +220,8 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 404)       # 404 = not found / not allowed
 
     def test_rcl_get(self):
-        self.e2e_login_and_pass_otp(self.account_rcl101)
-        self.e2e_wissel_naar_functie(self.functie_rcl101)
+        self.e2e_login_and_pass_otp(self.account_rcl101_18)
+        self.e2e_wissel_naar_functie(self.functie_rcl101_18)
 
         resp = self.client.get(self.url_uitslag_invoeren % self.wedstrijd18_pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -226,10 +229,10 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('competitie/uitslag-invoeren-wedstrijd.dtl', 'plein/site_layout.dtl'))
 
         # andere tak: max_score/afstand
-        resp = self.client.get(self.url_uitslag_invoeren % self.wedstrijd25_pk)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/uitslag-invoeren-wedstrijd.dtl', 'plein/site_layout.dtl'))
+        #resp = self.client.get(self.url_uitslag_invoeren % self.wedstrijd25_pk)
+        #self.assertEqual(resp.status_code, 200)     # 200 = OK
+        #self.assert_html_ok(resp)
+        #self.assert_template_used(resp, ('competitie/uitslag-invoeren-wedstrijd.dtl', 'plein/site_layout.dtl'))
 
         # nog een keer, dan bestaat de WedstrijdUitslag al
         resp = self.client.get(self.url_uitslag_invoeren % self.wedstrijd18_pk)
@@ -242,8 +245,8 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 404)     # 404 = not found
 
     def test_rcl_deelnemers_ophalen(self):
-        self.e2e_login_and_pass_otp(self.account_rcl101)
-        self.e2e_wissel_naar_functie(self.functie_rcl101)
+        self.e2e_login_and_pass_otp(self.account_rcl101_18)
+        self.e2e_wissel_naar_functie(self.functie_rcl101_18)
 
         # haal waarschijnlijke deelnemers op
         json_data = {'deelcomp_pk': self.deelcomp_regio101_18.pk}
@@ -275,8 +278,8 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         self.assertEqual(len(json_data['deelnemers']), 20)
 
     def test_rcl_bad_deelnemers_ophalen(self):
-        self.e2e_login_and_pass_otp(self.account_rcl101)
-        self.e2e_wissel_naar_functie(self.functie_rcl101)
+        self.e2e_login_and_pass_otp(self.account_rcl101_18)
+        self.e2e_wissel_naar_functie(self.functie_rcl101_18)
 
         # get (bestaat niet)
         resp = self.client.get(self.url_uitslag_deelnemers)
@@ -301,8 +304,8 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 404)       # 404 = not found / not allowed
 
     def test_rcl_zoeken(self):
-        self.e2e_login_and_pass_otp(self.account_rcl101)
-        self.e2e_wissel_naar_functie(self.functie_rcl101)
+        self.e2e_login_and_pass_otp(self.account_rcl101_18)
+        self.e2e_wissel_naar_functie(self.functie_rcl101_18)
 
         nhb_nr = self._next_nhbnr - 1
         json_data = {'wedstrijd_pk': self.wedstrijd18_pk,
@@ -342,8 +345,8 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         self.assertTrue('boog' in json_data_boog)
 
     def test_rcl_bad_zoeken(self):
-        self.e2e_login_and_pass_otp(self.account_rcl101)
-        self.e2e_wissel_naar_functie(self.functie_rcl101)
+        self.e2e_login_and_pass_otp(self.account_rcl101_18)
+        self.e2e_wissel_naar_functie(self.functie_rcl101_18)
 
         # get (bestaat niet)
         resp = self.client.get(self.url_uitslag_zoeken)
@@ -376,8 +379,60 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 404)       # 404 = not found / not allowed
 
     def test_rcl_opslaan(self):
-        self.e2e_login_and_pass_otp(self.account_rcl101)
-        self.e2e_wissel_naar_functie(self.functie_rcl101)
+        self.e2e_login_and_pass_otp(self.account_rcl101_18)
+        self.e2e_wissel_naar_functie(self.functie_rcl101_18)
+
+        # doe eerst een get zodat de wedstrijd.uitslag gegarandeerd is
+        resp = self.client.get(self.url_uitslag_invoeren % self.wedstrijd18_pk)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+
+        # zonder scores
+        json_data = {'wedstrijd_pk': self.wedstrijd18_pk}
+        resp = self.client.post(self.url_uitslag_opslaan,
+                                json.dumps(json_data),
+                                content_type='application/json')
+        self.assertEqual(resp.status_code, 200)
+        self.e2e_dump_resp(resp)
+
+        # met schutterboog_pk's en scores
+        json_data = {'wedstrijd_pk': self.wedstrijd18_pk,
+                     self._schuttersboog[0].pk: 123,
+                     self._schuttersboog[1].pk: -1,
+                     self._schuttersboog[2].pk: 999999,
+                     self._schuttersboog[3].pk: 'hoi',
+                     self._schuttersboog[4].pk: 100,
+                     self._schuttersboog[5].pk: 101,
+                     self._schuttersboog[6].pk: '',         # verwijderd maar was niet aanwezig
+                     'hoi': 1,
+                     999999: 111}                           # niet bestaande schutterboog_pk
+        # print('json_data for post: %s' % json.dumps(json_data))
+        resp = self.client.post(self.url_uitslag_opslaan,
+                                json.dumps(json_data),
+                                content_type='application/json')
+        self.assertEqual(resp.status_code, 200)
+        json_data = json.loads(resp.content)
+        self.assertEqual(json_data['done'], 1)
+
+        # nog een keer opslaan - met mutaties
+        json_data = {'wedstrijd_pk': self.wedstrijd18_pk,
+                     self._schuttersboog[0].pk: 132,        # aangepaste score
+                     self._schuttersboog[4].pk: 100,        # ongewijzigde score
+                     self._schuttersboog[5].pk: ''}         # verwijderde score
+        resp = self.client.post(self.url_uitslag_opslaan,
+                                json.dumps(json_data),
+                                content_type='application/json')
+        self.assertEqual(resp.status_code, 200)
+        json_data = json.loads(resp.content)
+        self.assertEqual(json_data['done'], 1)
+
+    def test_rcl_bad_opslaan(self):
+        # post zonder inlog
+        self.client.logout()
+        resp = self.client.post(self.url_uitslag_opslaan)
+        self.assertEqual(resp.status_code, 404)       # 404 = not found / not allowed
+
+        self.e2e_login_and_pass_otp(self.account_rcl101_18)
+        self.e2e_wissel_naar_functie(self.functie_rcl101_18)
 
         # get (bestaat niet)
         resp = self.client.get(self.url_uitslag_opslaan)
@@ -387,7 +442,94 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         resp = self.client.post(self.url_uitslag_opslaan)
         self.assertEqual(resp.status_code, 404)       # 404 = not found / not allowed
 
+        # post zonder wedstrijd_pk
+        json_data = {'hallo': 'daar'}
+        resp = self.client.post(self.url_uitslag_opslaan,
+                                json.dumps(json_data),
+                                content_type='application/json')
+        self.assertEqual(resp.status_code, 404)
+        self.assertEqual(resp.status_code, 404)       # 404 = not found / not allowed
+
+        # post met niet bestaande wedstrijd_pk
+        json_data = {'wedstrijd_pk': 999999}
+        resp = self.client.post(self.url_uitslag_opslaan,
+                                json.dumps(json_data),
+                                content_type='application/json')
+        self.assertEqual(resp.status_code, 404)       # 404 = not found / not allowed
+
+        # post met wedstrijd_pk die nog geen uitslag heeft
+        json_data = {'wedstrijd_pk': self.wedstrijd18_pk}
+        resp = self.client.post(self.url_uitslag_opslaan,
+                                json.dumps(json_data),
+                                content_type='application/json')
+        self.assertEqual(resp.status_code, 404)       # 404 = not found / not allowed
+
+        # post met wedstrijd_pk waar deze RCL geen toegang toe heeft
+        resp = self.client.get(self.url_uitslag_invoeren % self.wedstrijd25_pk)
+        json_data = {'wedstrijd_pk': self.wedstrijd25_pk}
+        resp = self.client.post(self.url_uitslag_opslaan,
+                                json.dumps(json_data),
+                                content_type='application/json')
+        self.assertEqual(resp.status_code, 404)       # 404 = not found / not allowed
+
+        # wedstrijd die niet bij de competitie hoort
+        resp = self.client.get(self.url_uitslag_invoeren % self.wedstrijd18_pk)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        wedstrijd = Wedstrijd.objects.get(pk=self.wedstrijd18_pk)
+        wedstrijd2 = Wedstrijd(beschrijving="niet in een plan",
+                               datum_wanneer=wedstrijd.datum_wanneer,
+                               tijd_begin_aanmelden=wedstrijd.tijd_begin_aanmelden,
+                               tijd_begin_wedstrijd=wedstrijd.tijd_begin_wedstrijd,
+                               tijd_einde_wedstrijd=wedstrijd.tijd_einde_wedstrijd,
+                               uitslag=wedstrijd.uitslag)
+        wedstrijd2.save()
+        json_data = {'wedstrijd_pk': wedstrijd2.pk}
+        resp = self.client.post(self.url_uitslag_opslaan,
+                                json.dumps(json_data),
+                                content_type='application/json')
+        self.assertEqual(resp.status_code, 404)       # 404 = not found / not allowed
+
+    def test_hwl(self):
+        # log in als RCL en help de HWL
+        self.e2e_login_and_pass_otp(self.account_rcl101_18)
+        self.e2e_wissel_naar_functie(self.functie_rcl101_18)
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+        self.e2e_check_rol('HWL')
+
+        # doe eerst een get zodat de wedstrijd.uitslag gegarandeerd is
+        resp = self.client.get(self.url_uitslag_invoeren % self.wedstrijd18_pk)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+
+    def _maak_uitslag(self, wedstrijd_pk):
+        # log in als RCL om de wedstrijduitslag in te voeren
+        self.e2e_login_and_pass_otp(self.account_rcl101_18)
+        self.e2e_wissel_naar_functie(self.functie_rcl101_18)
+
+        self._schrijf_in_voor_competitie(self.deelcomp_regio101_18,
+                                         self._schuttersboog,
+                                         1)
+        # voer een wedstrijd.uitslag in
+        json_data = {'wedstrijd_pk': wedstrijd_pk}
+        waarde = 100
+        for schutterboog in self._schuttersboog:
+            json_data[schutterboog.pk] = waarde
+            waarde += 1
+        # for
+
+        resp = self.client.get(self.url_uitslag_invoeren % self.wedstrijd18_pk)     # garandeert wedstrijd.uitslag
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+
+        resp = self.client.post(self.url_uitslag_opslaan,
+                                json.dumps(json_data),
+                                content_type='application/json')
+        self.assertEqual(resp.status_code, 200)
+        json_data = json.loads(resp.content)
+        self.assertEqual(json_data['done'], 1)
+
+        self.client.logout()
+
     def test_bekijk_uitslag(self):
+        self._maak_uitslag(self.wedstrijd18_pk)
         url = self.url_bekijk_uitslag % self.wedstrijd18_pk
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)       # 200 = OK
