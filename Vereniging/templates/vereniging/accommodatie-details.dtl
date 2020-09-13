@@ -56,7 +56,7 @@
         </tr>
 
         <tr>
-            <td style="vertical-align: top">Secretaris</td>
+            <td style="vertical-align: top">Secretaris:</td>
             <td style="vertical-align: top">
                 {% for name in sec_names %}
                     <span>{{ name }}</span><br>
@@ -74,7 +74,7 @@
         </tr>
 
         <tr>
-            <td style="vertical-align: top">Hoofdwedstrijdleider</td>
+            <td style="vertical-align: top">Hoofdwedstrijdleider:</td>
             <td style="vertical-align: top">
                 {% for name in hwl_names %}
                     <span>{{ name }}</span><br>
@@ -93,7 +93,7 @@
         </tr>
 
         <tr>
-            <td style="vertical-align: top">Wedstrijdleider</td>
+            <td style="vertical-align: top">Wedstrijdleider:</td>
             <td style="vertical-align: top">
                 {% for name in wl_names %}
                     <span>{{ name }}</span><br>
@@ -112,7 +112,7 @@
         </tr>
 
         <tr>
-            <td>E-mailadres secretaris</td>
+            <td>E-mailadres secretaris:</td>
             <td>
                 {% if sec_email %}
                     <code>{{ sec_email }}</code>
@@ -127,7 +127,7 @@
         </tr>
 
         <tr>
-            <td>E-mailadres hoofdwedstrijdleider</td>
+            <td>E-mailadres hoofdwedstrijdleider:</td>
             <td>
                 {% if hwl_email %}
                     <code>{{ hwl_email }}</code>
@@ -146,7 +146,7 @@
         </tr>
 
         <tr>
-            <td>E-mailadres wedstrijdleider</td>
+            <td>E-mailadres wedstrijdleider:</td>
             <td>
                 {% if wl_email %}
                     <code>{{ wl_email }}</code>
@@ -165,7 +165,7 @@
         </tr>
 
         <tr>
-            <td>Typering:</td>
+            <td>Type baan voor 18m/25m wedstrijden:</td>
             <td>
                 {% if readonly %}
                     <span>{{ locatie.baan_type_str }}<br></span>
@@ -268,7 +268,7 @@
         {% endif %}
     </table>
 
-    <p>Deze gegevens kunnen aangepast worden door de vereniging zelf (secretaris of hoofdwedstrijdleider) en door de regiocompetitieleider.</p>
+    <p>Deze gegevens kunnen worden aangepast door de vereniging zelf (secretaris of hoofdwedstrijdleider) en door de regiocompetitieleider.</p>
     <p>
         {% if readonly %}
             <a class="btn-nhb-blauw margin-5" href="{{ terug_url }}">

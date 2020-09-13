@@ -53,6 +53,11 @@
                 <div class="col s3 l4">Bij vereniging:</div>
                 <div class="col s8">{{ wedstrijd.vereniging }}</div>
             </div>
+
+            <div class="row small-row">
+                <div class="col s3 l4">Plaats:</div>
+                <div class="col s8">{{ wedstrijd.vereniging.plaats }}</div>
+            </div>
         </div>
     </div>
 </div>

@@ -9,7 +9,6 @@
 {% block title %}Weekplanning regiocompetitie{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-planning-regio-ronde" %}
 
 <h4>Weekplanning regiocompetitie</h4>
 
@@ -49,10 +48,6 @@
 <p><a class="btn-nhb-blauw" href="{{ terug_url }}">
         <i class="material-icons-round left">arrow_upward</i>Planning {% if ronde.cluster %}cluster{% else %}regio{% endif %}</a>
 </p>
-
-
-<p>&nbsp;</p>
-<p>De RCL kan deze instellingen wijzigen</p>
 
 
 <p>&nbsp;</p>
@@ -98,10 +93,13 @@
         </tr>
     </table>
 
-    {% if not readonly %}
-    <p>
-        <button class="btn-nhb-rood" type="submit"><i class="material-icons-round left">check</i>Instellingen opslaan</button>
-    </p>
+    {% if readonly %}
+        <p>De RCL kan deze instellingen wijzigen</p>
+    {% else %}
+        <p>
+            <button class="btn-nhb-rood" type="submit">
+                <i class="material-icons-round left">check</i>Instellingen opslaan</button>
+        </p>
     {% endif %}
 </form>
 
@@ -170,8 +168,7 @@
 
 </table>
 
-
-<!-- TODO: knop 'terug' -->
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-planning-regio-ronde" %}
 
 {% endblock %}
 

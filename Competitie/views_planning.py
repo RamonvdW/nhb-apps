@@ -11,7 +11,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Plein.menu import menu_dynamics
 from Functie.rol import Rollen, rol_get_huidige
 from NhbStructuur.models import NhbCluster, NhbVereniging
-from Wedstrijden.models import Wedstrijd, WedstrijdenPlan
+from Wedstrijden.models import Wedstrijd, WedstrijdenPlan, WedstrijdLocatie
 from .models import (LAAG_REGIO, LAAG_RK, LAAG_BK,
                      DeelCompetitie, DeelcompetitieRonde, maak_deelcompetitie_ronde)
 from types import SimpleNamespace
@@ -715,6 +715,24 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
             verenigingen = ronde.deelcompetitie.nhb_regio.nhbvereniging_set.all()
         context['verenigingen'] = verenigingen
 
+        if not wedstrijd.vereniging and verenigingen.count() > 0:
+            wedstrijd.vereniging = verenigingen[0]
+            wedstrijd.save()
+
+        if not wedstrijd.locatie and wedstrijd.vereniging:
+            locaties = wedstrijd.vereniging.wedstrijdlocatie_set.all()
+            if locaties.count() > 0:
+                wedstrijd.locatie = locaties[0]
+                wedstrijd.save()
+
+        context['locaties'] = locaties = dict()
+        pks = [ver.pk for ver in verenigingen]
+        for obj in WedstrijdLocatie.objects.filter(verenigingen__pk__in=pks):
+            for ver in obj.verenigingen.all():
+                locaties[str(ver.pk)] = obj.adres   # nhb_nr --> adres
+            # for
+        # for
+
         context['url_terug'] = reverse('Competitie:regio-ronde-planning', kwargs={'ronde_pk': ronde.pk})
         context['url_opslaan'] = reverse('Competitie:wijzig-wedstrijd', kwargs={'wedstrijd_pk': wedstrijd.pk})
 
@@ -728,6 +746,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         """ Deze functie wordt aangeroepen als de knop 'Opslaan' gebruikt wordt
         """
         wedstrijd_pk = kwargs['wedstrijd_pk'][:6]     # afkappen geeft beveiliging
+
         try:
             wedstrijd = Wedstrijd.objects.get(pk=wedstrijd_pk)
         except Wedstrijd.DoesNotExist:
@@ -755,7 +774,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         except (TypeError, ValueError):
             raise Resolver404()
 
-        if weekdag < 0 or weekdag > 6 or aanvang < 800 or aanvang > 2200:
+        if weekdag < 0 or weekdag > 6 or aanvang < 000 or aanvang > 2359:
             raise Resolver404()
 
         # bepaal de begin datum van de ronde-week
@@ -766,7 +785,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         # vertaal aanvang naar een tijd
         hour = aanvang // 100
         min = aanvang - (hour * 100)
-        if hour < 8 or hour > 22 or min < 0 or min > 59:
+        if hour < 0 or hour > 23 or min < 0 or min > 59:
             raise Resolver404()
 
         try:
@@ -777,6 +796,12 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         wedstrijd.datum_wanneer = when
         wedstrijd.tijd_begin_wedstrijd = datetime.time(hour=hour, minute=min)
         wedstrijd.vereniging = nhbver
+
+        locaties = nhbver.wedstrijdlocatie_set.all()
+        if locaties.count() > 0:
+            wedstrijd.locatie = locaties[0]
+        else:
+            wedstrijd.locatie = None
         wedstrijd.save()
 
         url = reverse('Competitie:regio-ronde-planning', kwargs={'ronde_pk': ronde.pk})
