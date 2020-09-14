@@ -392,7 +392,6 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
                                 json.dumps(json_data),
                                 content_type='application/json')
         self.assertEqual(resp.status_code, 200)
-        self.e2e_dump_resp(resp)
 
         # met schutterboog_pk's en scores
         json_data = {'wedstrijd_pk': self.wedstrijd18_pk,

@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from .models import account_test_wachtwoord_sterkte
+from .models import account_test_wachtwoord_sterkte, account_email_bevestiging_ontvangen
 from Overig.e2ehelpers import E2EHelpers
 
 
@@ -108,6 +108,34 @@ class TestAccountAanmaken(E2EHelpers, TestCase):
 
         res, msg = account_test_wachtwoord_sterkte('passWORD!', '123456')
         self.assertEqual((res, msg), (False, "Wachtwoord is niet sterk genoeg"))
+
+    def test_bevestiging(self):
+        # corner-cases van e-mail bevestiging ontvangen
+        email = self.email_metmail
+
+        email.nieuwe_email = 'nieuwe@nhb.not'
+        email.bevestigde_email = 'oude@nhb.not'
+        email.email_is_bevestigd = True
+        account_email_bevestiging_ontvangen(email)
+        self.assertEqual(email.nieuwe_email, '')
+        self.assertEqual(email.bevestigde_email, 'nieuwe@nhb.not')
+        self.assertTrue(email.email_is_bevestigd)
+
+        email.nieuwe_email = ''
+        email.bevestigde_email = 'oude@nhb.not'
+        email.email_is_bevestigd = True
+        account_email_bevestiging_ontvangen(email)
+        self.assertEqual(email.nieuwe_email, '')
+        self.assertEqual(email.bevestigde_email, 'oude@nhb.not')
+        self.assertTrue(email.email_is_bevestigd)
+
+        email.nieuwe_email = 'nieuwe@nhb.not'
+        email.bevestigde_email = ''
+        email.email_is_bevestigd = False
+        account_email_bevestiging_ontvangen(email)
+        self.assertEqual(email.nieuwe_email, '')
+        self.assertEqual(email.bevestigde_email, 'nieuwe@nhb.not')
+        self.assertTrue(email.email_is_bevestigd)
 
     # er is geen view om een account direct aan te maken
     # dit wordt via Schutter gedaan
