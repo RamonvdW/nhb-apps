@@ -300,7 +300,8 @@ $tabs-bg-color: #fff !default;
 // 18. Tables
 // ==========================================================================
 
-$table-border-color: rgba(0,0,0,.12) !default;
+//$table-border-color: rgba(0,0,0,.12) !default;        // inconsistent border thickness in Chrome
+$table-border-color: #dddddd !default;
 $table-striped-color: rgba(242, 242, 242, 0.5) !default;
 
 
