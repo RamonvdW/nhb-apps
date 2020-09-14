@@ -39,16 +39,11 @@ class TussenstandView(TemplateView):
         # kijk of de tussenstand klaar is om te tonen
         context['toon_comps'] = False
 
-        try:
-            comps = Competitie.objects.filter(is_afgesloten=False).all()
-        except Competitie.DoesNotExist:
-            pass
-        else:
-            for comp in comps:
-                comp.zet_fase()
-                if comp.fase >= 'B':        # inschrijving is open
-                    context['toon_comps'] = True
-            # for
+        for comp in Competitie.objects.filter(is_afgesloten=False).all():
+            comp.zet_fase()
+            if comp.fase >= 'B':        # inschrijving is open
+                context['toon_comps'] = True
+        # for
 
         context['url_18_regio'] = reverse('Competitie:tussenstand-regio',
                                           kwargs={'afstand': 18, 'comp_boog': 'r'})

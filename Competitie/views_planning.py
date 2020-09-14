@@ -498,7 +498,7 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
                                 kwargs={'deelcomp_pk': ronde.deelcompetitie.pk})
         context['terug_url'] = terug_url
 
-        context['vaste_beschrijving'] = ronde.is_voor_import_oude_prg()
+        context['vaste_beschrijving'] = is_import = ronde.is_voor_import_oude_programma()
 
         context['ronde_opslaan_url'] = reverse('Competitie:regio-ronde-planning',
                                                kwargs={'ronde_pk': ronde.pk})
@@ -512,7 +512,7 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
                 wedstrijd.url_uitslag_bekijken = reverse('Competitie:wedstrijd-bekijk-uitslag',
                                                          kwargs={'wedstrijd_pk': wedstrijd.pk})
 
-            if rol_nu == Rollen.ROL_RCL:
+            if rol_nu == Rollen.ROL_RCL and not is_import:
                 # TODO: knop pas beschikbaar maken op wedstrijddatum tot datum+N
                 wedstrijd.url_uitslag_invoeren = reverse('Competitie:uitslag-invoeren-wedstrijd',
                                                          kwargs={'wedstrijd_pk': wedstrijd.pk})
@@ -561,11 +561,11 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
 
             beschrijving = request.POST.get('ronde_naam', '')
 
-            if not ronde.is_voor_import_oude_prg():
+            if not ronde.is_voor_import_oude_programma():
                 # is niet voor import, dus beschrijving mag aangepast worden
                 oude_beschrijving = ronde.beschrijving
-                ronde.beschrijving = beschrijving[:20]  # afkappen, anders werkt save niet
-                if ronde.is_voor_import_oude_prg():
+                ronde.beschrijving = beschrijving[:40]  # afkappen, anders werkt save niet
+                if ronde.is_voor_import_oude_programma():
                     # poging tot beschrijving die niet mag / problemen gaat geven
                     # herstel de oude beschrijving
                     ronde.beschrijving = oude_beschrijving
