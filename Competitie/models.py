@@ -250,7 +250,6 @@ class DeelcompetitieRonde(models.Model):
         # beetje zwak, maar correcte functioneren van de import uit het oude programma
         # is afhankelijk van de beschrijving, dus mag niet aangepast worden
         # "Ronde 1 oude programma" .. "Ronde 7 oude programma"
-        print(self.beschrijving)
         return self.beschrijving[:6] == 'Ronde ' and self.beschrijving[-15:] == ' oude programma'
 
 

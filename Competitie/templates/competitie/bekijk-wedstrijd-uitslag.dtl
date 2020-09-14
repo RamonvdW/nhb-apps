@@ -35,15 +35,17 @@
                     <div class="col s7">{{ ronde.beschrijving }}</div>
                 </div>
 
-                <div class="row small-row">
-                    <div class="col s4">Vereniging:</div>
-                    <div class="col s7">{{ wedstrijd.vereniging }}</div>
-                </div>
+                {% if wedstrijd.vereniging %}
+                    <div class="row small-row">
+                        <div class="col s4">Vereniging:</div>
+                        <div class="col s7">{{ wedstrijd.vereniging }}</div>
+                    </div>
 
-                <div class="row small-row">
-                    <div class="col s4">Plaats:</div>
-                    <div class="col s7">{{ wedstrijd.vereniging.plaats }}</div>
-                </div>
+                    <div class="row small-row">
+                        <div class="col s4">Plaats:</div>
+                        <div class="col s7">{{ wedstrijd.vereniging.plaats }}</div>
+                    </div>
+                {% endif %}
 
                 <div class="row small-row">
                     <div class="col s4">Datum:</div>
