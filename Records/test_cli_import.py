@@ -183,7 +183,7 @@ class TestRecordsCliImport(TestCase):
         self.assertTrue("datum: 2017-08-27 --> 1901-01-01" in f2.getvalue())
         self.assertTrue("plaats: 'Papendal' --> 'Elbonia'" in f2.getvalue())
         self.assertTrue("land: 'Nederland' --> 'Mudland'" in f2.getvalue())
-        self.assertTrue("score: 1234 --> 1432" in f2.getvalue())
+        self.assertTrue("score: 1234 --> 1032" in f2.getvalue())
         self.assertTrue("x_count: 56 --> 21" in f2.getvalue())
         self.assertTrue("is_european_record: False --> True" in f2.getvalue())
         self.assertTrue("is_world_record: False --> True" in f2.getvalue())
@@ -211,6 +211,8 @@ class TestRecordsCliImport(TestCase):
         f1 = io.StringIO()
         f2 = io.StringIO()
         management.call_command('import_records', './Records/management/testfiles/testfile_08.json', stderr=f1, stdout=f2)
+        # print("f1: %s" % f1.getvalue())
+        # print("f2: %s" % f2.getvalue())
         self.assertTrue("[ERROR] Fout in datum: '6-30-2017' in ['2'," in f1.getvalue())
         self.assertTrue("[ERROR] Fout in datum: '30-6-17' in ['3'," in f1.getvalue())
         self.assertTrue("[ERROR] Fout in datum: '30-617' in ['4'," in f1.getvalue())
@@ -230,9 +232,19 @@ class TestRecordsCliImport(TestCase):
         f1 = io.StringIO()
         f2 = io.StringIO()
         management.call_command('import_records', './Records/management/testfiles/testfile_10.json', stderr=f1, stdout=f2)
+        # print("f1: %s" % f1.getvalue())
+        # print("f2: %s" % f2.getvalue())
         self.assertTrue("[WARNING] Score niet consecutief voor records OD-101 en OD-100 (1200(57X) >= 1200(56X))" in f1.getvalue())
         self.assertTrue("[WARNING] Identieke datum en score voor records OD-202 en OD-102" in f1.getvalue())
         self.assertTrue("[WARNING] Score niet consecutief voor records OD-401 en OD-400 (400 >= 300)" in f1.getvalue())
+
+    def test_verkeerde_soort_record(self):
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('import_records', './Records/management/testfiles/testfile_11.json', stderr=f1, stdout=f2)
+        # print("f1: %s" % f1.getvalue())
+        # print("f2: %s" % f2.getvalue())
+        self.assertTrue("[ERROR] Max score (afgeleide van aantal pijlen) is niet consistent in soort" in f1.getvalue())
 
 
 # end of file

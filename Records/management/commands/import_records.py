@@ -22,7 +22,8 @@ class Command(BaseCommand):
         super().__init__()
         self.count_read = 0
         self.count_ongewijzigd = 0
-        self.count_errors = 0
+        self.count_errors_skipped = 0
+        self.count_andere_errors = 0
         self.count_wijzigingen = 0
         self.count_toegevoegd = 0
         self.count_verwijderd = 0
@@ -276,8 +277,10 @@ class Command(BaseCommand):
                 except ValueError:
                     errors.append('Fout in score %s' % repr(val))
                     val = None
-                if val and curr_record:
-                    if curr_record.score != record.score:
+                if val:
+                    if record.score > record.max_score:
+                        errors.append('Te hoge score voor: %s > %s' % (record.score, record.max_score))
+                    if curr_record and curr_record.score != record.score:
                         wijzigingen.append('score: %s --> %s' % (repr(curr_record.score), repr(record.score)))
                         curr_record.score = record.score
 
@@ -351,7 +354,7 @@ class Command(BaseCommand):
 
             if len(errors):
                 self.stderr.write("[ERROR] %s in %s" % (" + ".join(errors), repr(row)))
-                self.count_errors += len(errors)
+                self.count_errors_skipped += len(errors)
             else:
                 if curr_record:
                     if len(wijzigingen):
@@ -382,32 +385,58 @@ class Command(BaseCommand):
         """ Controleer de consistentie van de records door voor elke soort_record
             te controleren dat de score en de datum aflopen.
         """
-        soorten = IndivRecord.objects.filter(discipline=disc).distinct('soort_record', 'geslacht', 'leeftijdscategorie', 'materiaalklasse').values_list('geslacht', 'leeftijdscategorie', 'materiaalklasse', 'soort_record', 'para_klasse')
+        soorten = (IndivRecord
+                   .objects
+                   .filter(discipline=disc)
+                   .distinct('soort_record',
+                             'geslacht',
+                             'leeftijdscategorie',
+                             'materiaalklasse')
+                   .values_list('geslacht',
+                                'leeftijdscategorie',
+                                'materiaalklasse',
+                                'soort_record',
+                                'para_klasse'))
         for tup in soorten:
             gesl, lcat, makl, srec, para = tup
 
             # maak de gesorteerde lijst van de records
             # net als RecordsIndivSpecifiekView:get_queryset
-            objs = IndivRecord.objects.filter(
-                            geslacht=gesl,
+            objs = (IndivRecord
+                    .objects
+                    .filter(geslacht=gesl,
                             discipline=disc,
                             para_klasse=para,
                             soort_record=srec,
                             materiaalklasse=makl,
-                            leeftijdscategorie=lcat).order_by('-datum', '-score')
+                            leeftijdscategorie=lcat)
+                    .order_by('-datum',
+                              '-score'))
             prev_obj = objs[0]
             for obj in objs[1:]:
                 if obj.datum == prev_obj.datum and obj.score == prev_obj.score and obj.x_count == prev_obj.x_count:
                     if obj.score_notitie != "gedeeld" or prev_obj.score_notitie != "gedeeld":
-                        self.stderr.write("[WARNING] Identieke datum en score voor records %s-%s en %s-%s" % (disc, prev_obj.volg_nr, disc, obj.volg_nr))
+                        self.stderr.write("[WARNING] Identieke datum en score voor records %s-%s en %s-%s" % (disc, prev_obj.volg_nr,
+                                                                                                              disc, obj.volg_nr))
                         self.count_waarschuwing += 1
                 elif obj.score > prev_obj.score or (obj.score == prev_obj.score and obj.x_count >= prev_obj.x_count):
                     if obj.x_count + prev_obj.x_count > 0:
-                        self.stderr.write("[WARNING] Score niet consecutief voor records %s-%s en %s-%s (%s(%sX) >= %s(%sX))" % (disc, prev_obj.volg_nr, disc, obj.volg_nr, obj.score, obj.x_count, prev_obj.score, prev_obj.x_count))
+                        self.stderr.write("[WARNING] Score niet consecutief voor records %s-%s en %s-%s (%s(%sX) >= %s(%sX))" % (disc, prev_obj.volg_nr,
+                                                                                                                                 disc, obj.volg_nr,
+                                                                                                                                 obj.score, obj.x_count, prev_obj.score, prev_obj.x_count))
                         self.count_waarschuwing += 1
                     else:
-                        self.stderr.write("[WARNING] Score niet consecutief voor records %s-%s en %s-%s (%s >= %s)" % (disc, prev_obj.volg_nr, disc, obj.volg_nr, obj.score, prev_obj.score))
+                        self.stderr.write("[WARNING] Score niet consecutief voor records %s-%s en %s-%s (%s >= %s)" % (disc, prev_obj.volg_nr,
+                                                                                                                       disc, obj.volg_nr,
+                                                                                                                       obj.score, prev_obj.score))
                         self.count_waarschuwing += 1
+
+                if prev_obj.max_score != obj.max_score:
+                    self.stderr.write('[ERROR] Max score (afgeleide van aantal pijlen) is niet consistent in soort %s tussen records %s-%s en %s-%s (%s != %s)' % (repr(srec),
+                                                                                                                                                                   disc, prev_obj.volg_nr,
+                                                                                                                                                                   disc, obj.volg_nr,
+                                                                                                                                                                   prev_obj.max_score, obj.max_score))
+                    self.count_andere_errors += 1
 
                 prev_obj = obj
             # for
@@ -460,14 +489,15 @@ class Command(BaseCommand):
         # for
 
         # rapporteer de samenvatting en schrijf deze ook in het logboek
-        samenvatting = "Samenvatting: %s records; %s ongewijzigd; %s overgeslagen i.v.m. fouten; %s verwijderd; %s wijzigingen; %s toegevoegd; %s waarschuwingen" %\
+        samenvatting = "Samenvatting: %s records; %s ongewijzigd; %s overgeslagen i.v.m. fouten; %s verwijderd; %s wijzigingen; %s toegevoegd; %s waarschuwingen, %s fouten" %\
                           (self.count_read,
                            self.count_ongewijzigd,
-                           self.count_errors,
+                           self.count_errors_skipped,
                            self.count_verwijderd,
                            self.count_wijzigingen,
                            self.count_toegevoegd,
-                           self.count_waarschuwing)
+                           self.count_waarschuwing,
+                           self.count_andere_errors)
 
         if self.dryrun:
             self.stdout.write("\nDRY RUN")
