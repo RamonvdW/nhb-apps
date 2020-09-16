@@ -100,6 +100,13 @@ class Command(BaseCommand):
 
         # for
 
+        # verwijder oude records die niet meer verbeterbaar zijn
+        objs = (BesteIndivRecords
+                .objects
+                .filter(beste__verbeterbaar=False))
+        print("[INFO] Niet meer verbeterbaar: %s" % objs.count())
+        objs.delete()
+
         self.stdout.write('Done')
         return
 

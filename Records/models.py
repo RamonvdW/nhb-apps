@@ -129,6 +129,16 @@ class BesteIndivRecords(models.Model):
     beste = models.ForeignKey(IndivRecord, on_delete=models.SET_NULL,
                               null=True, blank=True)
 
+    def __str__(self):
+        return "(%s) %s - %s - %s - %s - %s - %s - %s" % (self.pk,
+                                                          self.volgorde,
+                                                          self.discipline,
+                                                          self.soort_record,
+                                                          self.geslacht,
+                                                          self.leeftijdscategorie,
+                                                          self.materiaalklasse,
+                                                          self.para_klasse)
+
     class Meta:
         """ meta data voor de admin interface """
         verbose_name = verbose_name_plural = "Beste individuele records"

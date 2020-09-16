@@ -149,9 +149,13 @@ class TestRecordsVerbeterbaar(E2EHelpers, TestCase):
         beste.para_klasse = rec.para_klasse
         beste.beste = rec
         beste.save()
+        self.beste = beste
 
         self.url_kies_disc = '/records/indiv/verbeterbaar/'
         self.url_verbeterbaar = '/records/indiv/verbeterbaar/%s/'     # disc
+
+    def test_xtra(self):
+        self.assertTrue(str(self.beste) != "")
 
     def test_kies_disc(self):
         resp = self.client.get(self.url_kies_disc)
