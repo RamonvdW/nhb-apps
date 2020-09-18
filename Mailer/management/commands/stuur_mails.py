@@ -22,7 +22,7 @@ class Command(BaseCommand):
     help = "Probeer een aantal mails te sturen die in de queue staan"
 
     def __init__(self, stdout=None, stderr=None, no_color=False, force_color=False):
-        super().__init__(stdout=None, stderr=None, no_color=False, force_color=False)
+        super().__init__(stdout, stderr, no_color, force_color)
         self.stop_at = 0
 
     def add_arguments(self, parser):
