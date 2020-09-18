@@ -104,7 +104,7 @@ class Command(BaseCommand):
         objs = (BesteIndivRecords
                 .objects
                 .filter(beste__verbeterbaar=False))
-        print("[INFO] Niet meer verbeterbaar: %s" % objs.count())
+        self.stdout.write("[INFO] Niet meer verbeterbaar: %s" % objs.count())
         objs.delete()
 
         self.stdout.write('Done')
