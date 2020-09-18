@@ -7,11 +7,12 @@
 from django.views.generic import TemplateView
 from django.urls import reverse, Resolver404
 from django.http import HttpResponseRedirect
+from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import BoogType
 from NhbStructuur.models import NhbRayon, NhbRegio
 from Competitie.models import (AG_NUL, LAAG_REGIO, LAAG_RK, LAAG_BK,
                                DeelCompetitie, RegioCompetitieSchutterBoog)
-from Functie.rol import Rollen, rol_get_huidige_functie
+from Functie.rol import Rollen, rol_get_huidige_functie, rol_get_huidige
 from Plein.menu import menu_dynamics
 from .models import Competitie
 
@@ -20,6 +21,8 @@ TEMPLATE_COMPETITIE_TUSSENSTAND = 'competitie/tussenstand.dtl'
 TEMPLATE_COMPETITIE_TUSSENSTAND_REGIO = 'competitie/tussenstand-regio.dtl'
 TEMPLATE_COMPETITIE_TUSSENSTAND_RAYON = 'competitie/tussenstand-rayon.dtl'
 TEMPLATE_COMPETITIE_TUSSENSTAND_BOND = 'competitie/tussenstand-bond.dtl'
+
+TEMPLATE_COMPETITIE_TUSSENSTAND_REGIO_ALT = 'competitie/tussenstand-regio-alt.dtl'
 
 
 class TussenstandView(TemplateView):
@@ -69,6 +72,9 @@ class TussenstandRegioView(TemplateView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_TUSSENSTAND_REGIO
+    url_name = 'Competitie:tussenstand-regio-n'
+    url_switch = 'Competitie:tussenstand-regio-n-alt'
+    order_gemiddelde = '-gemiddelde'
 
     def _get_schutter_regio_nr(self):
         """ Geeft het regio nummer van de ingelogde schutter terug,
@@ -104,8 +110,7 @@ class TussenstandRegioView(TemplateView):
 
         return regio_nr
 
-    @staticmethod
-    def _maak_filter_knoppen(context, afstand, gekozen_regio_nr, comp_boog):
+    def _maak_filter_knoppen(self, context, afstand, gekozen_regio_nr, comp_boog):
         """ filter knoppen per regio, gegroepeerd per rayon en per competitie boog type """
 
         # boogtype files
@@ -120,7 +125,7 @@ class TussenstandRegioView(TemplateView):
                 comp_boog = boogtype.afkorting.lower()
                 # geen url --> knop disabled
             else:
-                boogtype.zoom_url = reverse('Competitie:tussenstand-regio-n',
+                boogtype.zoom_url = reverse(self.url_name,
                                             kwargs={'afstand': afstand,
                                                     'comp_boog': boogtype.afkorting.lower(),
                                                     'regio_nr': gekozen_regio_nr})
@@ -143,7 +148,7 @@ class TussenstandRegioView(TemplateView):
 
                 regio.title_str = 'Regio %s' % regio.regio_nr
                 if regio.regio_nr != gekozen_regio_nr:
-                    regio.zoom_url = reverse('Competitie:tussenstand-regio-n',
+                    regio.zoom_url = reverse(self.url_name,
                                              kwargs={'afstand': afstand,
                                                      'comp_boog': comp_boog,
                                                      'regio_nr': regio.regio_nr})
@@ -151,6 +156,11 @@ class TussenstandRegioView(TemplateView):
                     # geen zoom_url --> knop disabled
                     context['regio'] = regio
             # for
+
+        context['url_switch'] = reverse(self.url_switch,
+                                        kwargs={'afstand': afstand,
+                                                'comp_boog': comp_boog,
+                                                'regio_nr': gekozen_regio_nr})
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -195,7 +205,7 @@ class TussenstandRegioView(TemplateView):
                       .select_related('schutterboog', 'schutterboog__nhblid',
                                       'bij_vereniging', 'klasse', 'klasse__indiv', 'klasse__indiv__boogtype')
                       .filter(klasse__indiv__boogtype=boogtype)
-                      .order_by('klasse__indiv__volgorde', 'gemiddelde'))
+                      .order_by('klasse__indiv__volgorde', self.order_gemiddelde))
 
         klasse = -1
         for deelnemer in deelnemers:
@@ -206,16 +216,39 @@ class TussenstandRegioView(TemplateView):
 
             deelnemer.naam_str = deelnemer.schutterboog.nhblid.volledige_naam()
             deelnemer.ver_str = str(deelnemer.bij_vereniging)
-            #if deelnemer.aanvangsgemiddelde == AG_NUL:
-            #    deelnemer.ag_str = ""
-            #else:
-            #    deelnemer.ag_str = "%.3f" % deelnemer.aanvangsgemiddelde
         # for
 
         context['deelnemers'] = deelnemers
 
+        rol_nu = rol_get_huidige(self.request)
+        is_beheerder = rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_WL)
+        context['is_beheerder'] = is_beheerder
+
         menu_dynamics(self.request, context, actief='histcomp')
         return context
+
+
+class TussenstandRegioAltView(UserPassesTestMixin, TussenstandRegioView):
+
+    """ Django class-based view voor de de alternative tussenstand van de competitie """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_COMPETITIE_TUSSENSTAND_REGIO_ALT
+    url_name = 'Competitie:tussenstand-regio-n-alt'
+    url_switch = 'Competitie:tussenstand-regio-n'
+    order_gemiddelde = '-alt_gemiddelde'
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        # alle beheerders mogen deze lijst zien
+        rol_nu = rol_get_huidige(self.request)
+        is_beheerder = rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_WL)
+        return is_beheerder
+
+    def handle_no_permission(self):
+        """ gebruiker heeft geen toegang --> redirect naar het plein """
+        path = self.request.path.replace('/regio-alt/', '/regio/')
+        return HttpResponseRedirect(path)
 
 
 class TussenstandRayonView(TemplateView):

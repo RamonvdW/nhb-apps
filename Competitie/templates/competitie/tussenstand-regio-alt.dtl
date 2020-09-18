@@ -6,10 +6,10 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}Tussenstand{% endblock %}
+{% block title %}Alternatieve Tussenstand{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-tussenstand-regio" %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-tussenstand-regio-alt" %}
 
     <h4>Tussenstand regiocompetitie</h4>
 
@@ -18,12 +18,12 @@
             <i class="material-icons-round left">arrow_upward</i>Terug</a>
     </p>
 
-    <p>Deze pagina toont de tussenstand van de regiocompetities.</p>
+    <p>Deze pagina toont de tussenstand van de regiocompetities zoals ingevoerd door de WL, HWL en RCL.</p>
 
     {% if is_beheerder %}
         <div class="white shrink-wrap-5">
-            <a class="margin-5 btn-nhb-rood btn-small disabled" href="#">Ge&iuml;mporteerde uitslag</a>
-            <a class="margin-5 btn-nhb-rood btn-small" href="{{ url_switch }}">Handmatige uitslag</a>
+            <a class="margin-5 btn-nhb-rood btn-small" href="{{ url_switch }}">Ge&iuml;mporteerde uitslag</a>
+            <a class="margin-5 btn-nhb-rood btn-small disabled" href="#">Handmatige uitslag</a>
         </div>
     {% endif %}
 
@@ -103,15 +103,15 @@
             <!-- td class="center-align">?</td -->
             <td>{{ obj.naam_str }}</td>
             <td class="hide-on-small-only">{{ obj.ver_str }}</td>
-            <td class="center-align">{{ obj.gemiddelde }}</td>
-            <td class="right-align">{% if obj.laagste_score_nr == 1 %}({{ obj.score1 }}){% else %}{{ obj.score1 }}{% endif %}</td>
-            <td class="right-align">{% if obj.laagste_score_nr == 2 %}({{ obj.score2 }}){% else %}{{ obj.score2 }}{% endif %}</td>
-            <td class="right-align">{% if obj.laagste_score_nr == 3 %}({{ obj.score3 }}){% else %}{{ obj.score3 }}{% endif %}</td>
-            <td class="right-align">{% if obj.laagste_score_nr == 4 %}({{ obj.score4 }}){% else %}{{ obj.score4 }}{% endif %}</td>
-            <td class="right-align">{% if obj.laagste_score_nr == 5 %}({{ obj.score5 }}){% else %}{{ obj.score5 }}{% endif %}</td>
-            <td class="right-align">{% if obj.laagste_score_nr == 6 %}({{ obj.score6 }}){% else %}{{ obj.score6 }}{% endif %}</td>
-            <td class="right-align">{% if obj.laagste_score_nr == 7 %}({{ obj.score7 }}){% else %}{{ obj.score7 }}{% endif %}</td>
-            <td class="center-align hide-on-small-only">{{ obj.totaal }}</td>
+            <td class="center-align">{{ obj.alt_gemiddelde }}</td>
+            <td class="right-align">{% if obj.alt_laagste_score_nr == 1 %}({{ obj.alt_score1 }}){% else %}{{ obj.alt_score1 }}{% endif %}</td>
+            <td class="right-align">{% if obj.alt_laagste_score_nr == 2 %}({{ obj.alt_score2 }}){% else %}{{ obj.alt_score2 }}{% endif %}</td>
+            <td class="right-align">{% if obj.alt_laagste_score_nr == 3 %}({{ obj.alt_score3 }}){% else %}{{ obj.alt_score3 }}{% endif %}</td>
+            <td class="right-align">{% if obj.alt_laagste_score_nr == 4 %}({{ obj.alt_score4 }}){% else %}{{ obj.alt_score4 }}{% endif %}</td>
+            <td class="right-align">{% if obj.alt_laagste_score_nr == 5 %}({{ obj.alt_score5 }}){% else %}{{ obj.alt_score5 }}{% endif %}</td>
+            <td class="right-align">{% if obj.alt_laagste_score_nr == 6 %}({{ obj.alt_score6 }}){% else %}{{ obj.alt_score6 }}{% endif %}</td>
+            <td class="right-align">{% if obj.alt_laagste_score_nr == 7 %}({{ obj.alt_score7 }}){% else %}{{ obj.alt_score7 }}{% endif %}</td>
+            <td class="center-align hide-on-small-only">{{ obj.alt_totaal }}</td>
         </tr>
 
     {% endfor %}

@@ -10,6 +10,7 @@ from BasisTypen.models import IndivWedstrijdklasse, TeamWedstrijdklasse
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
 from Functie.models import Functie
 from Schutter.models import SchutterBoog
+from Score.models import Score, ScoreHist
 from Wedstrijden.models import WedstrijdenPlan
 from decimal import Decimal
 from datetime import date
@@ -350,7 +351,10 @@ class RegioCompetitieSchutterBoog(models.Model):
     aanvangsgemiddelde = models.DecimalField(max_digits=5, decimal_places=3, default=0.0)    # 10,000
     klasse = models.ForeignKey(CompetitieKlasse, on_delete=models.CASCADE)
 
-    # TODO: scores = models.ManyToManyField(Score, blank=True)  # mag leeg zijn
+    # alle scores van deze schutterboog in deze competitie
+    scores = models.ManyToManyField(Score,
+                                    blank=True)  # mag leeg zijn / gemaakt worden
+
     score1 = models.PositiveIntegerField(default=0)
     score2 = models.PositiveIntegerField(default=0)
     score3 = models.PositiveIntegerField(default=0)
@@ -359,7 +363,7 @@ class RegioCompetitieSchutterBoog(models.Model):
     score6 = models.PositiveIntegerField(default=0)
     score7 = models.PositiveIntegerField(default=0)
 
-    # som van score1..score7
+    # som van de beste 6 van score1..score7
     totaal = models.PositiveIntegerField(default=0)
 
     # welke van score1..score7 is de laagste?
@@ -376,6 +380,18 @@ class RegioCompetitieSchutterBoog(models.Model):
 
     # voorkeur dagdelen
     inschrijf_voorkeur_dagdeel = models.CharField(max_length=2, choices=DAGDEEL, default="GN")
+
+    # alternatieve uitslag - dit is tijdelijk
+    alt_score1 = models.PositiveIntegerField(default=0)
+    alt_score2 = models.PositiveIntegerField(default=0)
+    alt_score3 = models.PositiveIntegerField(default=0)
+    alt_score4 = models.PositiveIntegerField(default=0)
+    alt_score5 = models.PositiveIntegerField(default=0)
+    alt_score6 = models.PositiveIntegerField(default=0)
+    alt_score7 = models.PositiveIntegerField(default=0)
+    alt_totaal = models.PositiveIntegerField(default=0)
+    alt_laagste_score_nr = models.PositiveIntegerField(default=0)  # 1..7
+    alt_gemiddelde = models.DecimalField(max_digits=5, decimal_places=3, default=0.0)  # 10,000
 
     def __str__(self):
         # deelcompetitie (komt achteraan)
@@ -406,6 +422,15 @@ class RegioCompetitieSchutterBoog(models.Model):
         verbose_name_plural = "Regiocompetitie Schuttersboog"
 
     objects = models.Manager()      # for the editor only
+
+
+class CompetitieTaken(models.Model):
+
+    # simpele tabel om bij te houden hoe het met de achtergrond taken gaat
+
+    hoogste_scorehist = models.ForeignKey(ScoreHist,
+                                          null=True, blank=True,        # mag leeg in admin interface
+                                          on_delete=models.SET_NULL)
 
 
 # end of file
