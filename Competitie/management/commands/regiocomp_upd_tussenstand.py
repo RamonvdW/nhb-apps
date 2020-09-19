@@ -10,7 +10,7 @@
 from django.core.management.base import BaseCommand
 import django.db.utils
 from Competitie.models import (CompetitieTaken,
-                               DeelCompetitie, DeelcompetitieRonde,
+                               LAAG_REGIO, DeelCompetitie, DeelcompetitieRonde,
                                RegioCompetitieSchutterBoog)
 from Score.models import ScoreHist, SCORE_WAARDE_VERWIJDERD
 import datetime
@@ -40,22 +40,22 @@ class Command(BaseCommand):
 
         scorehist_latest = ScoreHist.objects.latest('pk')
 
-        # bepaal de score_pk's die we willen verwerken
+        # bepaal de scorehist objecten die we willen bekijken
+        qset = (ScoreHist
+                .objects
+                .select_related('score', 'score__schutterboog')
+                .all())
+
         if self.taken.hoogste_scorehist:
-            self.stdout.write('[INFO] hoogste ScoreHist pk is %s' % self.taken.hoogste_scorehist.pk)
-            allowed_score_pks = (ScoreHist
-                                 .objects
-                                 .filter(pk__gt=self.taken.hoogste_scorehist.pk)
-                                 .select_related('score')
-                                 .values_list('score__pk', flat=True))
-        else:
-            allowed_score_pks = (ScoreHist
-                                 .objects
-                                 .select_related('score')
-                                 .values_list('score__pk', flat=True))
+            self.stdout.write('[INFO] vorige hoogste ScoreHist pk is %s' % self.taken.hoogste_scorehist.pk)
+            qset = qset.filter(pk__gt=self.taken.hoogste_scorehist.pk)
+
+        # bepaal de schutterboog pk's die we bij moeten werken
+        allowed_schutterboog_pks = qset.values_list('score__schutterboog__pk', flat=True)
 
         self.taken.hoogste_scorehist = scorehist_latest
         self.taken.save(update_fields=['hoogste_scorehist'])
+        self.stdout.write('[INFO] nieuwe hoogste ScoreHist pk is %s' % self.taken.hoogste_scorehist.pk)
 
         # een deelcompetitie heeft ingeschreven schuttersboog (RegioCompetitieSchutterBoog)
         # een deelcompetitie bestaat uit rondes (RegioCompetitieRonde)
@@ -68,14 +68,15 @@ class Command(BaseCommand):
         for ronde in (DeelcompetitieRonde
                       .objects
                       .select_related('deelcompetitie', 'plan')
-                      .exclude(deelcompetitie__is_afgesloten=True)
+                      .filter(deelcompetitie__is_afgesloten=False,
+                              deelcompetitie__laag=LAAG_REGIO)
                       .all()):
             self.stdout.write('[INFO] ronde: %s' % ronde)
             is_alt = ronde.beschrijving.startswith('Ronde ') and ronde.beschrijving.endswith(' oude programma')
 
             # tijdelijk: de geïmporteerde uitslagen zijn de normale
             #            de handmatig ingevoerde scores zijn het alternatief
-            is_alt = not is_alt
+            is_alt = not is_alt     # FUTURE: schakelaar omzetten als we geen import meer doen
 
             self.stdout.write('[INFO]  plan: %s' % ronde.plan)
             for wedstrijd in (ronde
@@ -90,11 +91,10 @@ class Command(BaseCommand):
                 if uitslag:
                     for score in (uitslag
                                   .scores
-                                  .exclude(waarde=SCORE_WAARDE_VERWIJDERD)
                                   .select_related('schutterboog')
                                   .all()):
-                        if score.pk in allowed_score_pks:      # presumed better than huge __in
-                            pk = score.schutterboog.pk
+                        pk = score.schutterboog.pk
+                        if pk in allowed_schutterboog_pks:   # presumed better than huge __in
                             pk2scores = self.pk2scores_alt if is_alt else self.pk2scores
                             try:
                                 pk2scores[pk].append(score)
@@ -121,7 +121,9 @@ class Command(BaseCommand):
             totaal = sum(waardes) - laagste
             if laagste > 0:     # ga er vanuit dat er meer dan 1 score is
                 aantal_niet_nul -= 1
-            return totaal / (aantal_niet_nul * pijlen_per_ronde), totaal
+            # afronden op 3 decimalen (anders gebeurt dat tijdens opslaan in database)
+            gem = round(totaal / (aantal_niet_nul * pijlen_per_ronde), 3)
+            return gem, totaal
         return 0.0, 0
 
     def _update_regiocompetitieschuttersboog(self):
@@ -134,8 +136,10 @@ class Command(BaseCommand):
 
             if deelcomp.competitie.afstand == '18':
                 pijlen_per_ronde = 30
+                max_score = 300
             else:
                 pijlen_per_ronde = 25
+                max_score = 250
 
             for deelnemer in (RegioCompetitieSchutterBoog
                               .objects
@@ -152,6 +156,7 @@ class Command(BaseCommand):
                     found = True
                 except KeyError:
                     pass
+
                 try:
                     scores.extend(self.pk2scores_alt[pk])
                     found = True
@@ -159,17 +164,22 @@ class Command(BaseCommand):
                     pass
 
                 if found:
+                    # tot nu toe hebben we de verwijderde scores meegenomen
+                    # zodat we deze change-trigger krijgen.
+                    # Nu moeten de verwijderde scores eruit
+                    scores = [score for score in scores if score.waarde != SCORE_WAARDE_VERWIJDERD]
+
+                    # nieuwe scores toevoegen
                     curr_scores = deelnemer.scores.all()
                     for score in scores:
                         if score not in curr_scores:
                             deelnemer.scores.add(score)
-                            do_save = True
                     # for
 
+                    # verwijderde scores doorvoeren
                     for score in curr_scores:
                         if score not in scores:
                             deelnemer.scores.remove(score)
-                            do_save = True
                     # for
 
                     try:
@@ -177,7 +187,9 @@ class Command(BaseCommand):
                     except KeyError:
                         waardes = list()
                     else:
-                        waardes = [score.waarde for score in scores]
+                        # door waarde te filteren op max_score voorkomen we problemen met het gemiddelde
+                        # die pas naar boven komen tijdens de save()
+                        waardes = [score.waarde for score in scores if score.waarde <= max_score]
 
                     waardes.extend([0, 0, 0, 0, 0, 0, 0])
                     waardes = waardes[:7]
@@ -196,7 +208,9 @@ class Command(BaseCommand):
                     except KeyError:
                         waardes = list()
                     else:
-                        waardes = [score.waarde for score in scores]
+                        # door waarde te filteren op max_score voorkomen we problemen met het gemiddelde
+                        # die pas naar boven komen tijdens de save()
+                        waardes = [score.waarde for score in scores if score.waarde != SCORE_WAARDE_VERWIJDERD]
 
                     waardes.extend([0, 0, 0, 0, 0, 0, 0])
                     waardes = waardes[:7]
