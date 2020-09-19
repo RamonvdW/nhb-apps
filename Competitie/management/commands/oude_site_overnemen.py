@@ -44,6 +44,10 @@ class Command(BaseCommand):
         self._regio2deelcomp = None        # [regio_nr] = DeelCompetitie
         self._regio2ronde2uitslag = None   # [regio_nr] = [1..7] = WedstrijdUitslag
 
+        self._ingelezen = list()           # tuple(afstand, nhbnr, boogtype, score1, ..., score 7)
+        self._verwijder_r_18 = list()
+        self._verwijder_r_25 = list()
+
     def _prep_regio2deelcomp_regio2ronde2uitslag(self):
         # maak vertaling van vereniging naar deelcompetitie
         # wordt aangeroepen voor elke competitie (18/25)
@@ -280,6 +284,22 @@ class Command(BaseCommand):
         nhb_nr = cells[1][1:1+6]       # afkappen voor veiligheid
         naam = cells[1][9:]
 
+        if self._boogtype.afkorting in ('BB', 'IB', 'LB'):
+            tup = tuple([self._afstand, nhb_nr, self._boogtype.afkorting] + cells[4:4+7])
+            self._ingelezen.append(tup)
+        elif self._boogtype.afkorting == 'R':
+            # kijk of dit een dupe is met een houtboog uitslag
+            # dit ivm het dupliceren van uitslagen onder Recurve voor de teamcompetitie
+            for afkorting in ('BB', 'IB', 'LB'):
+                tup = tuple([self._afstand, nhb_nr, afkorting] + cells[4:4+7])
+                if tup in self._ingelezen:
+                    print('[WARNING] Sla dubbele invoer onder recurve (%sm) over: %s (scores: %s)' % (self._afstand, nhb_nr, ",".join(cells[4:4+7])))
+                    if self._afstand == 18:
+                        self._verwijder_r_18.append(nhb_nr)
+                    else:
+                        self._verwijder_r_25.append(nhb_nr)
+                    return
+
         try:
             lid = (NhbLid
                    .objects
@@ -432,6 +452,24 @@ class Command(BaseCommand):
         else:
             self.parse_html(html)
 
+    def _verwijder_dubbele_deelnemers(self):
+        # ruim op: eerder aangemaakte dubbele inschrijvingen (BB + R)
+        #          dit kan gebeuren als een uitslag wel in de BB/IB/LB staat maar nog niet in R
+        for afstand, nhb_nrs in (('18', self._verwijder_r_18),
+                                 ('25', self._verwijder_r_25)):
+            # zoek alle inschrijvingen die hier bij passen
+            objs = (RegioCompetitieSchutterBoog
+                    .objects
+                    .filter(deelcompetitie__competitie__afstand=afstand,
+                            schutterboog__nhblid__nhb_nr__in=nhb_nrs,
+                            schutterboog__boogtype__afkorting='R')
+                    .all())
+
+            if objs.count() > 0:
+                self.stdout.write('[WARNING] Verwijder %s dubbele inschrijvingen (%sm)' % (objs.count(), afstand))
+                objs.delete()
+        # for
+
     def add_arguments(self, parser):
         parser.add_argument('dir', nargs=1, help="Pad naar directory met opgehaalde rayonuitslagen (.html)")
         parser.add_argument('max_fouten', nargs=1, type=int, help="Zet exit code bij meer dan dit aantal fouten")
@@ -448,7 +486,9 @@ class Command(BaseCommand):
             self._comp = Competitie.objects.get(afstand=afstand)
             self._prep_regio2deelcomp_regio2ronde2uitslag()
 
-            for afkorting in ('R', 'C', 'BB', 'IB', 'LB'):
+            # doe R als laatste ivm verwijderen dubbelen door administratie teamcompetitie
+            # (BB/IB/LB wordt met zelfde score onder Recurve gezet)
+            for afkorting in ('C', 'BB', 'IB', 'LB', 'R'):
                 self._boogtype = BoogType.objects.get(afkorting=afkorting)
                 fname2 = fname1 + '_' + afkorting + '_rayon'
 
@@ -457,6 +497,8 @@ class Command(BaseCommand):
                     self.read_html(os.path.join(pad, fname3))
             # for
         # for
+
+        self._verwijder_dubbele_deelnemers()
 
         activiteit = "Competitie inschrijvingen en scores aangevuld vanuit het oude programma"
 
