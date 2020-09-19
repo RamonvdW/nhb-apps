@@ -260,8 +260,9 @@ class Command(BaseCommand):
 
             # sleep at least 5 seconds, then check again
             secs = (self.stop_at - now).total_seconds()
-            secs = min(secs, 5.0)
-            time.sleep(secs)
+            if secs > 0:
+                secs = min(secs, 5.0)
+                time.sleep(secs)
 
             now = datetime.datetime.now()
         # while
