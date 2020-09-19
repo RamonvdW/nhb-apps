@@ -25,7 +25,7 @@
 
 <h5>Inloggen</h5>
 <p>Heb je al een account?</p>
-<a class="btn-nhb-blauw" href="{% url 'Account:login' %}">
+<p><a class="btn-nhb-blauw" href="{% url 'Account:login' %}">
         <i class="material-icons-round left">login</i>Inloggen</a></p>
 
 
