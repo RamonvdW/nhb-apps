@@ -71,14 +71,15 @@ class Command(BaseCommand):
                       .filter(deelcompetitie__is_afgesloten=False,
                               deelcompetitie__laag=LAAG_REGIO)
                       .all()):
-            self.stdout.write('[INFO] ronde: %s' % ronde)
+
+            # self.stdout.write('[INFO] ronde: %s' % ronde)
             is_alt = ronde.beschrijving.startswith('Ronde ') and ronde.beschrijving.endswith(' oude programma')
 
             # tijdelijk: de geïmporteerde uitslagen zijn de normale
             #            de handmatig ingevoerde scores zijn het alternatief
             is_alt = not is_alt     # FUTURE: schakelaar omzetten als we geen import meer doen
 
-            self.stdout.write('[INFO]  plan: %s' % ronde.plan)
+            # self.stdout.write('[INFO]  plan: %s' % ronde.plan)
             for wedstrijd in (ronde
                               .plan
                               .wedstrijden
@@ -86,7 +87,7 @@ class Command(BaseCommand):
                               .order_by('datum_wanneer',
                                         'tijd_begin_wedstrijd')
                               .all()):
-                self.stdout.write('[INFO]   wedstrijd: %s' % wedstrijd)
+                # self.stdout.write('[INFO]   wedstrijd: %s' % wedstrijd)
                 uitslag = wedstrijd.uitslag
                 if uitslag:
                     for score in (uitslag
@@ -109,10 +110,13 @@ class Command(BaseCommand):
 
     @staticmethod
     def _bepaal_laagste_nr(waardes):
-        waardes.reverse()
-        laagste = min(waardes)
-        nr = waardes.index(laagste)     # 0..6
-        return 7 - nr, laagste          # 1..7
+        if sum(waardes) == 0:
+            return 0, 0
+        else:
+            waardes.reverse()
+            laagste = min(waardes)
+            nr = waardes.index(laagste)     # 0..6
+            return 7 - nr, laagste          # 1..7
 
     @staticmethod
     def _bepaal_gemiddelde_en_totaal(waardes, laagste, pijlen_per_ronde):
