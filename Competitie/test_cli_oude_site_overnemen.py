@@ -6,7 +6,10 @@
 
 from django.test import TestCase
 from django.core import management
+from BasisTypen.models import BoogType
+from Competitie.models import RegioCompetitieSchutterBoog, DeelCompetitie, LAAG_REGIO
 from NhbStructuur.models import NhbRegio, NhbLid, NhbVereniging
+from Schutter.models import SchutterBoog
 from Score.models import Score, ScoreHist
 from Overig.e2ehelpers import E2EHelpers
 from .models import CompetitieKlasse
@@ -37,6 +40,7 @@ class TestRecordsCliOudeSiteOvernemen(E2EHelpers, TestCase):
                                               indiv__beschrijving='Recurve klasse 2')
         klasse.min_ag = 9.5
         klasse.save()
+        self.klasse = klasse
 
     def _maak_leden_aan(self):
         # deze test is afhankelijk van de standaard regio's
@@ -128,6 +132,19 @@ class TestRecordsCliOudeSiteOvernemen(E2EHelpers, TestCase):
 
         self._maak_leden_aan()
 
+        # een schutterboog inschrijven in verkeerde klasse zodat deze verwijderd gaat worden
+        boog_r = BoogType.objects.get(afkorting='R')
+        schutterboog = SchutterBoog(nhblid=self.lid_100002, boogtype=boog_r, voor_wedstrijd=True)
+        schutterboog.save()
+        self.schutterboog_100002 = schutterboog
+
+        deelcomp = DeelCompetitie.objects.filter(competitie__afstand='18', laag=LAAG_REGIO).all()[0]
+        obj = RegioCompetitieSchutterBoog(deelcompetitie=deelcomp,
+                                          schutterboog=schutterboog,
+                                          bij_vereniging=self.lid_100002.bij_vereniging,
+                                          klasse=self.klasse)
+        obj.save()
+
     def test_bepaal(self):
         self.assertEqual(Score.objects.count(), 0)
         self.assertEqual(ScoreHist.objects.count(), 0)
@@ -148,10 +165,12 @@ class TestRecordsCliOudeSiteOvernemen(E2EHelpers, TestCase):
         self.assertTrue("[WARNING] Kan lid 100042 niet vinden" in f2.getvalue())
         self.assertTrue("[WARNING] Kan lid 990000 niet vinden" in f2.getvalue())
         self.assertTrue("[WARNING] Verschil in lid 100004 naam: bekend=Juf de Schutter, oude programma=Juf de Schytter" in f2.getvalue())
+        self.assertTrue("[WARNING] Sla dubbele invoer onder recurve (18m) over: 100002 (scores:" in f2.getvalue())
+        self.assertTrue("[WARNING] Verwijder 1 dubbele inschrijvingen" in f2.getvalue())
 
-        self.assertEqual(Score.objects.filter(is_ag=True).count(), 2)
-        self.assertEqual(Score.objects.filter(is_ag=False).count(), 2)
-        self.assertEqual(ScoreHist.objects.count(), 3)
+        self.assertEqual(Score.objects.filter(is_ag=True).count(), 1)
+        self.assertEqual(Score.objects.filter(is_ag=False).count(), 4)
+        self.assertEqual(ScoreHist.objects.count(), 5)
 
         # nog een keer, want dan zijn de uitslagen er al (extra coverage)
         f1 = io.StringIO()

@@ -47,6 +47,7 @@ class Command(BaseCommand):
         self._ingelezen = list()           # tuple(afstand, nhbnr, boogtype, score1, ..., score 7)
         self._verwijder_r_18 = list()
         self._verwijder_r_25 = list()
+        self._verwijder = None      # wijst naar _verwijder_r_18 of _verwijder_r_25, afhankelijk van afstand
 
     def _prep_regio2deelcomp_regio2ronde2uitslag(self):
         # maak vertaling van vereniging naar deelcompetitie
@@ -278,7 +279,7 @@ class Command(BaseCommand):
 
     def parse_tabel_cells(self, cells):
         # cellen: rank, schutter, vereniging, AG, scores 1..7, VSG, totaal
-        # print('cells: %s' % repr(cells))
+        # self.stdout.write('[DEBUG] cells: %s' % repr(cells))
 
         # schutter: [123456] Volledige Naam
         nhb_nr = cells[1][1:1+6]       # afkappen voor veiligheid
@@ -293,11 +294,8 @@ class Command(BaseCommand):
             for afkorting in ('BB', 'IB', 'LB'):
                 tup = tuple([self._afstand, nhb_nr, afkorting] + cells[4:4+7])
                 if tup in self._ingelezen:
-                    print('[WARNING] Sla dubbele invoer onder recurve (%sm) over: %s (scores: %s)' % (self._afstand, nhb_nr, ",".join(cells[4:4+7])))
-                    if self._afstand == 18:
-                        self._verwijder_r_18.append(nhb_nr)
-                    else:
-                        self._verwijder_r_25.append(nhb_nr)
+                    self.stdout.write('[WARNING] Sla dubbele invoer onder recurve (%sm) over: %s (scores: %s)' % (self._afstand, nhb_nr, ",".join(cells[4:4+7])))
+                    self._verwijder.append(nhb_nr)
                     return
 
         try:
@@ -485,6 +483,11 @@ class Command(BaseCommand):
             fname1 = str(afstand)
             self._comp = Competitie.objects.get(afstand=afstand)
             self._prep_regio2deelcomp_regio2ronde2uitslag()
+
+            if afstand == 18:
+                self._verwijder = self._verwijder_r_18
+            else:
+                self._verwijder = self._verwijder_r_25
 
             # doe R als laatste ivm verwijderen dubbelen door administratie teamcompetitie
             # (BB/IB/LB wordt met zelfde score onder Recurve gezet)
