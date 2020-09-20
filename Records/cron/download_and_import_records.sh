@@ -24,7 +24,8 @@ fi
 # avoid this by writing to a logfile
 
 STAMP=$(date +"%Y%m%d_%H%M%S")
-LOG="$LOGDIR/${STAMP}_download_and_import_records.log"
+SHORTSTAMP=$(date +"%Y%m%d")       # elke dag een nieuwe logfile
+LOG="$LOGDIR/${SHORTSTAMP}_download_and_import_records.log"
 #echo "Logging to: $LOG"
 echo "[INFO] Started" > "$LOG"
 
