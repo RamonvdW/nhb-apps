@@ -362,6 +362,11 @@
         const body = table.tBodies[0];
         const base_row = body.rows[0];      // regel om te clonen
 
+        // verwijder attributen van de template die toegevoegd zijn door de tabel filter
+        base_row.cells[0].removeAttribute("data-clean_text")
+        base_row.cells[1].removeAttribute("data-clean_text")
+        base_row.cells[2].removeAttribute("data-clean_text")
+
         // table filter uitzetten zodat de nieuwe regels getoond kunnen worden
         // maak zoekveld leeg; dit triggert myTableFilter()
         const el_filter = document.getElementById("table1_zoeken_input")
@@ -537,6 +542,7 @@
 
     <!-- eerste regel van de body is een template om een 'clone' mee uit te voeren
          dit maakt ook de JS eenvoudiger omdat we nooit in hoeven te voegen voor row[0] -->
+    <!-- let op dat de tabel filter hier attributen aan toe zal voegen die we moeten verwijderen bij kopieren -->
     <tr class="hide">
         <td data-pk="0">000000</td>
         <td>dit is een niet zo korte naam</td>

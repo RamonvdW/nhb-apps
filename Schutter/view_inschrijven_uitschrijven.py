@@ -107,7 +107,7 @@ class RegiocompetitieInschrijvenBevestigView(UserPassesTestMixin, TemplateView):
 
         # zoek een toepasselijke klasse aan de hand van de leeftijd
         done = False
-        for obj in qset:
+        for obj in qset:            # pragma: no branch
             if aanvangsgemiddelde >= obj.min_ag or obj.indiv.is_onbekend:
                 for lkl in obj.indiv.leeftijdsklassen.all():
                     if lkl.geslacht == schutterboog.nhblid.geslacht:
@@ -247,7 +247,7 @@ class RegiocompetitieInschrijvenView(View):
 
         # zoek een toepasselijke klasse aan de hand van de leeftijd
         done = False
-        for obj in qset:
+        for obj in qset:        # pragma: no branch
             if aanmelding.aanvangsgemiddelde >= obj.min_ag or obj.indiv.is_onbekend:
                 for lkl in obj.indiv.leeftijdsklassen.all():
                     if lkl.geslacht == schutterboog.nhblid.geslacht:

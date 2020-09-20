@@ -264,7 +264,7 @@ class Command(BaseCommand):
 
             # sleep at least 5 seconds, then check again
             secs = (self.stop_at - now).total_seconds()
-            if secs > 0:
+            if secs > 0:                    # pragma: no branch
                 secs = min(secs, 5.0)
                 time.sleep(secs)
 
