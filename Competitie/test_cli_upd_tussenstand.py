@@ -92,16 +92,20 @@ class TestRecordsCliUpdTussenstand(E2EHelpers, TestCase):
         top_pk = DeelcompetitieRonde.objects.latest('pk').pk - 2
 
         for nr in (1, 2, 3):
+            # maak een wedstrijd aan (doen voordat de beschrijving aangepast wordt)
+            resp = self.client.post(self.url_planning_regio_ronde % top_pk, {})
+            self.assertTrue(resp.status_code < 400)
+
             ronde = DeelcompetitieRonde.objects.get(pk=top_pk)
+
+            # wedstrijduitslag aanmaken
+            wedstrijd = ronde.plan.wedstrijden.all()[0]
+            resp = self.client.get(self.url_uitslag_invoeren % wedstrijd.pk)
+            self.assertTrue(resp.status_code < 400)
+
             ronde.beschrijving = 'Ronde %s oude programma' % nr
             ronde.save()
 
-            # maak een wedstrijd aan
-            self.client.post(self.url_planning_regio_ronde % ronde.pk, {})
-
-            ronde = DeelcompetitieRonde.objects.get(pk=ronde.pk)
-            wedstrijd = ronde.plan.wedstrijden.all()[0]
-            resp = self.client.get(self.url_uitslag_invoeren % wedstrijd.pk)
             wedstrijd = Wedstrijd.objects.get(pk=wedstrijd.pk)
             self.uitslagen.append(wedstrijd.uitslag)
 
