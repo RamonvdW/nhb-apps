@@ -48,6 +48,8 @@ class WedstrijdLocatieAdmin(admin.ModelAdmin):      # pragma: no cover
 class WedstrijdenPlanAdmin(admin.ModelAdmin):      # pragma: no cover
     """ Admin configuratie voor WedstrijdenPlan"""
 
+    search_fields = ('pk',)
+
     autocomplete_fields = ('wedstrijden',)
 
 
