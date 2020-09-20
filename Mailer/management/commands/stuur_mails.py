@@ -70,12 +70,12 @@ class Command(BaseCommand):
 
     def _set_stop_time(self, **options):
         # bepaal wanneer we moeten stoppen (zoals gevraagd)
-        # trek er nog eens 30 seconden vanaf, om overlap van twee cron jobs te voorkomen
+        # trek er nog eens 15 seconden vanaf, om overlap van twee cron jobs te voorkomen
         duration = options['duration']
 
         self.stop_at = (datetime.datetime.now()
                         + datetime.timedelta(minutes=duration)
-                        - datetime.timedelta(seconds=30))
+                        - datetime.timedelta(seconds=15))
 
         # test moet snel stoppen dus interpreteer duration in seconden
         if options['quick']:        # pragma: no branch
