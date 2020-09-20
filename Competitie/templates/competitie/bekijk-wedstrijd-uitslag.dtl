@@ -60,15 +60,17 @@
 
     <table class="white">
         <thead>
-            <th>Schutter</th>
             <th>Vereniging</th>
+            <th>Schutter</th>
+            <th>Boog</th>
             <th>Score</th>
         </thead>
 
         {% for score in scores %}
             <tr>
-                <td>{{ score.schutter_str }}</td>
                 <td>{{ score.vereniging_str }}</td>
+                <td>{{ score.schutter_str }}</td>
+                <td>{{ score.boog_str }}</td>
                 <td>{{ score.waarde }}</td>
             </tr>
         {% endfor %}

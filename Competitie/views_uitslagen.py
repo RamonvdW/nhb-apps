@@ -464,8 +464,7 @@ class BekijkWedstrijdUitslagView(TemplateView):
                   .exclude(waarde=SCORE_WAARDE_VERWIJDERD)
                   .select_related('schutterboog',
                                   'schutterboog__boogtype',
-                                  'schutterboog__nhblid')
-                  .order_by('schutterboog__nhblid__nhb_nr'))
+                                  'schutterboog__nhblid'))
 
         # maak een opzoek tabel voor de huidige vereniging van elke schutterboog
         schutterboog_pks = [score.schutterboog.pk for score in scores]
@@ -481,13 +480,18 @@ class BekijkWedstrijdUitslagView(TemplateView):
 
         for score in scores:
             score.schutter_str = score.schutterboog.nhblid.volledige_naam()
+            score.boog_str = score.schutterboog.boogtype.beschrijving
             score.vereniging_str = str(schutterboog2vereniging[score.schutterboog.pk])
         # for
 
+        te_sorteren = [(score.vereniging_str, score.schutter_str, score.boog_str, score) for score in scores]
+        te_sorteren.sort()
+        scores = [score for _,_,_,score in te_sorteren]
+
+        context['scores'] = scores
         context['wedstrijd'] = wedstrijd
         context['deelcomp'] = deelcomp
         context['ronde'] = ronde
-        context['scores'] = scores
 
         menu_dynamics(self.request, context, actief='competitie')
         return context
