@@ -444,13 +444,14 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
             raise Resolver404()
 
         context['ronde'] = ronde
+        context['vaste_beschrijving'] = is_import = ronde.is_voor_import_oude_programma()
 
         context['wedstrijden'] = (ronde.plan.wedstrijden
                                   .order_by('datum_wanneer', 'tijd_begin_wedstrijd')
                                   .select_related('vereniging'))
 
         rol_nu = rol_get_huidige(self.request)
-        if rol_nu == Rollen.ROL_RCL:
+        if rol_nu == Rollen.ROL_RCL and not is_import:
             context['url_nieuwe_wedstrijd'] = reverse('Competitie:regio-ronde-planning',
                                                       kwargs={'ronde_pk': ronde.pk})
 
@@ -497,8 +498,6 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
             terug_url = reverse('Competitie:regio-planning',
                                 kwargs={'deelcomp_pk': ronde.deelcompetitie.pk})
         context['terug_url'] = terug_url
-
-        context['vaste_beschrijving'] = is_import = ronde.is_voor_import_oude_programma()
 
         context['ronde_opslaan_url'] = reverse('Competitie:regio-ronde-planning',
                                                kwargs={'ronde_pk': ronde.pk})
@@ -606,6 +605,11 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
                                    kwargs={'deelcomp_pk': ronde.deelcompetitie.pk})
         else:
             # voeg een wedstrijd toe
+
+            # niet toestaan op import rondes
+            if ronde.is_voor_import_oude_programma():
+                raise Resolver404()
+
             jaar = ronde.deelcompetitie.competitie.begin_jaar
             wedstrijd = Wedstrijd()
             wedstrijd.datum_wanneer = competitie_week_nr_to_date(jaar, ronde.week_nr)
@@ -681,6 +685,10 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
 
         context['wedstrijd'] = wedstrijd
         context['ronde'] = ronde
+
+        if ronde.is_voor_import_oude_programma():
+            raise Resolver404()
+
         context['regio'] = ronde.deelcompetitie.nhb_regio
         context['competitie'] = competitie = ronde.deelcompetitie.competitie
 

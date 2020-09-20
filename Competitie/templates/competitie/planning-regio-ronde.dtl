@@ -113,8 +113,10 @@
     <thead>
         <tr>
             <th>Wanneer</th>
-            <th>Waar</th>
-            <th><!-- kolom voor wijzig knoppen --></th>
+            {% if not vaste_beschrijving %}
+                <th>Waar</th>
+                <th><!-- kolom voor wijzig knoppen --></th>
+            {% endif %}
             <th>Uitslag</th>
         </tr>
     </thead>
@@ -123,21 +125,23 @@
         <tr>
             <td>{{ wedstrijd.datum_wanneer|date:"l j F Y" }} om {{ wedstrijd.tijd_begin_wedstrijd }}</td>
 
-            <td>
-                {% if wedstrijd.vereniging %}
-                    <span>{{ wedstrijd.vereniging }}</span>
-                {% else %}
-                    <i class="red-text">Onbekend</i>
-                {% endif %}
-            </td>
+            {% if not vaste_beschrijving %}
+                <td>
+                    {% if wedstrijd.vereniging %}
+                        <span>{{ wedstrijd.vereniging }}</span>
+                    {% else %}
+                        <i class="red-text">Onbekend</i>
+                    {% endif %}
+                </td>
 
-            <!-- knop om wedstrijd te wijzigen -->
-            <td>
-                {% if wedstrijd.url_wijzig %}
-                    <a class="btn-nhb-blauw" href="{{ wedstrijd.url_wijzig }}">
-                        <i class="material-icons-round left">arrow_forward</i>Aanpassen</a>
-                {% endif %}
-            </td>
+                <!-- knop om wedstrijd te wijzigen -->
+                <td>
+                    {% if wedstrijd.url_wijzig %}
+                        <a class="btn-nhb-blauw" href="{{ wedstrijd.url_wijzig }}">
+                            <i class="material-icons-round left">arrow_forward</i>Aanpassen</a>
+                    {% endif %}
+                </td>
+            {% endif %}
 
             <!-- knop om uitslagen te zien / in te voeren -->
             <td>
