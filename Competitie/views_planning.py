@@ -213,15 +213,21 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
         context['deelcomp'] = deelcomp
         context['regio'] = deelcomp.nhb_regio
 
-        context['rondes'] = planning_sorteer_weeknummers(
+        rondes = planning_sorteer_weeknummers(
                                 DeelcompetitieRonde
                                 .objects
                                 .filter(deelcompetitie=deelcomp,
                                         cluster=None)
                                 .order_by('beschrijving'))
 
-        for ronde in context['rondes']:
+        context['rondes'] = list()
+        context['rondes_import'] = list()
+        for ronde in rondes:
             ronde.wedstrijd_count = ronde.plan.wedstrijden.count()
+            if ronde.is_voor_import_oude_programma():
+                context['rondes_import'].append(ronde)
+            else:
+                context['rondes'].append(ronde)
         # for
 
         # alleen de RCL mag de planning uitbreiden
