@@ -267,6 +267,11 @@
         {
             const new_row = base_row.cloneNode(true);
 
+            // verwijder attributen van de template die toegevoegd zijn door de tabel filter
+            new_row.cells[0].removeAttribute("data-clean_text")
+            new_row.cells[1].removeAttribute("data-clean_text")
+            new_row.cells[2].removeAttribute("data-clean_text")
+
             const pk = tup['pk']
             if (pk == -1)
                 continue        // with the for
