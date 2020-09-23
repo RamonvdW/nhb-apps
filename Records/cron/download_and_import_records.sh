@@ -23,11 +23,11 @@ fi
 # everything sent to stdout/stderr will be picked up by crontab and sent in an email
 # avoid this by writing to a logfile
 
-STAMP=$(date +"%Y%m%d_%H%M%S")
 SHORTSTAMP=$(date +"%Y%m%d")       # elke dag een nieuwe logfile
 LOG="$LOGDIR/${SHORTSTAMP}_download_and_import_records.log"
 #echo "Logging to: $LOG"
-echo "[INFO] Started" >> "$LOG"
+STAMP=$(date +"%Y%m%d_%H%M%S")
+echo "[INFO] Started at $STAMP" >> "$LOG"
 
 # prepare to download
 rm -rf "$TMPDIR"
@@ -65,9 +65,9 @@ then
         cp "$RECORDS" "$SPOOLFILE"
 
         # move from Records/cron/ to top-dir
-        echo "[DEBUG] pwd=$PWD"
+        #echo "[DEBUG] pwd=$PWD"
         cd ../..
-        echo "[DEBUG] pwd=$PWD"
+        #echo "[DEBUG] pwd=$PWD"
 
         # import the records
         echo "[INFO] Importing records" >> "$LOG"
@@ -86,6 +86,7 @@ else
     echo "[ERROR] Download failed: cannot locate $RECORDS" >> "$LOG"
 fi
 
-echo "[INFO] Finished" >> "$LOG"
+STAMP=$(date +"%Y%m%d_%H%M%S")
+echo "[INFO] Finished at $STAMP" >> "$LOG"
 
 # end of file
