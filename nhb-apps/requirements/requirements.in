@@ -3,7 +3,7 @@
 -c constraints.txt
 
 # web framework
-django
+Django
 
 # PostgreSQL database access
 # building has a ton of preconditions, so use binary version

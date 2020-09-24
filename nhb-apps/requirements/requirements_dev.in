@@ -6,10 +6,10 @@
 # add-ons for dev environment:
 
 # license check
-pip_licenses
+pip-licenses
 
 # update check
-pip_review
+pip-review
 
 # python code coverage measurement and reporting
 coverage
@@ -18,10 +18,9 @@ coverage
 beautifulsoup4
 
 # django database access analysis for performance / efficient queries
-Django-debug-toolbar
+django-debug-toolbar
 
 # django extensions
-django_extensions
+django-extensions
 
 # end of file
-

@@ -4,30 +4,30 @@
 #
 #    pip-compile requirements_test.in
 #
-arrow==0.15.8             # via djangosaml2idp
+arrow==0.16.0             # via djangosaml2idp
 asgiref==3.2.10           # via -r requirements.txt, django
 cachetools==4.1.1         # via -r requirements.txt, google-auth
 certifi==2020.6.20        # via -r requirements.txt, requests
-cffi==1.14.0              # via cryptography
+cffi==1.14.3              # via cryptography
 chardet==3.0.4            # via -r requirements.txt, requests
-cryptography==3.0         # via pyopenssl, pysaml2
+cryptography==3.1.1       # via pyopenssl, pysaml2
 defusedxml==0.6.0         # via pysaml2
-django==3.0.8             # via -r requirements.txt, djangosaml2idp
+django==3.0.10            # via -r requirements.txt, djangosaml2idp
 djangosaml2idp==0.7.2     # via -r requirements_test.in
-google-api-core==1.22.0   # via -r requirements.txt, google-api-python-client
-google-api-python-client==1.10.0  # via -r requirements.txt
+google-api-core==1.22.2   # via -r requirements.txt, google-api-python-client
+google-api-python-client==1.12.2  # via -r requirements.txt
 google-auth-httplib2==0.0.4  # via -r requirements.txt, google-api-python-client
-google-auth==1.19.2       # via -r requirements.txt, google-api-core, google-api-python-client, google-auth-httplib2
+google-auth==1.21.3       # via -r requirements.txt, google-api-core, google-api-python-client, google-auth-httplib2
 googleapis-common-protos==1.52.0  # via -r requirements.txt, google-api-core
 httplib2==0.18.1          # via -r requirements.txt, google-api-python-client, google-auth-httplib2
 idna==2.10                # via -r requirements.txt, requests
-protobuf==3.12.2          # via -r requirements.txt, google-api-core, googleapis-common-protos
-psycopg2-binary==2.8.5    # via -r requirements.txt
+protobuf==3.13.0          # via -r requirements.txt, google-api-core, googleapis-common-protos
+psycopg2-binary==2.8.6    # via -r requirements.txt
 pyasn1-modules==0.2.8     # via -r requirements.txt, google-auth
 pyasn1==0.4.8             # via -r requirements.txt, pyasn1-modules, rsa
 pycparser==2.20           # via cffi
 pyopenssl==19.1.0         # via pysaml2
-pyotp==2.3.0              # via -r requirements.txt
+pyotp==2.4.0              # via -r requirements.txt
 pysaml2==6.1.0            # via djangosaml2idp
 python-dateutil==2.8.1    # via arrow, pysaml2
 pytz==2020.1              # via -r requirements.txt, django, djangosaml2idp, google-api-core, pysaml2
