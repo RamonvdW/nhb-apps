@@ -110,13 +110,16 @@ class Command(BaseCommand):
 
     @staticmethod
     def _bepaal_laagste_nr(waardes):
-        if sum(waardes) == 0:
+        # bepaalde het schrap-resultaat pas bij 7 scores
+        # dus als er 7 niet-nul scores zijn, dan vervalt er 1
+        if len(waardes) <= 6 or waardes.count(0) > 0:
+            # minder dan 7 scores
             return 0, 0
-        else:
-            waardes.reverse()
-            laagste = min(waardes)
-            nr = waardes.index(laagste)     # 0..6
-            return 7 - nr, laagste          # 1..7
+
+        waardes.reverse()
+        laagste = min(waardes)
+        nr = waardes.index(laagste)     # 0..6
+        return 7 - nr, laagste          # 1..7
 
     @staticmethod
     def _bepaal_gemiddelde_en_totaal(waardes, laagste, pijlen_per_ronde):

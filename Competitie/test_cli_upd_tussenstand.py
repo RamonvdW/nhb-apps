@@ -280,7 +280,7 @@ class TestRecordsCliUpdTussenstand(E2EHelpers, TestCase):
         self.assertEqual(deelnemer.alt_score2, 124)
         self.assertEqual(deelnemer.alt_score3, 0)
         self.assertEqual(deelnemer.alt_totaal, 247)
-        self.assertEqual(deelnemer.alt_laagste_score_nr, 7)
+        self.assertEqual(deelnemer.alt_laagste_score_nr, 0)
         self.assertEqual(str(deelnemer.alt_gemiddelde), '4.117')
         # print('scores: %s %s %s %s %s %s %s, laagste_nr=%s, totaal=%s, gem=%s' % (deelnemer.score1, deelnemer.score2, deelnemer.score3, deelnemer.score4, deelnemer.score5, deelnemer.score6, deelnemer.score7, deelnemer.laagste_score_nr, deelnemer.totaal, deelnemer.gemiddelde))
         # print('alt_scores: %s %s %s %s %s %s %s, alt_laagste_nr=%s, alt_totaal=%s, alt_gem=%s' % (deelnemer.alt_score1, deelnemer.alt_score2, deelnemer.alt_score3, deelnemer.alt_score4, deelnemer.alt_score5, deelnemer.alt_score6, deelnemer.alt_score7, deelnemer.alt_laagste_score_nr, deelnemer.alt_totaal, deelnemer.alt_gemiddelde))
@@ -336,7 +336,7 @@ class TestRecordsCliUpdTussenstand(E2EHelpers, TestCase):
         self.assertEqual(deelnemer.alt_laagste_score_nr, 1)   # eerste score is de laagste
         self.assertEqual(str(deelnemer.alt_gemiddelde), '4.217')
 
-        # verwijder een schutter uit een uitslag
+        # verwijder een schutter uit een uitslag door de score op VERWIJDERD te zetten
         score = ScoreHist.objects.latest('pk').score
         hist = ScoreHist(score=score,
                          oude_waarde=score.waarde,
@@ -365,7 +365,7 @@ class TestRecordsCliUpdTussenstand(E2EHelpers, TestCase):
         self.assertEqual(deelnemer.alt_score6, 128)
         self.assertEqual(deelnemer.alt_score7, 0)
         self.assertEqual(deelnemer.alt_totaal, 753)           # som van 123..128 (6 scores)
-        self.assertEqual(deelnemer.alt_laagste_score_nr, 7)   # eerste score is de laagste
+        self.assertEqual(deelnemer.alt_laagste_score_nr, 0)   # geen schrap-score
         self.assertEqual(str(deelnemer.alt_gemiddelde), '4.183')
 
     def test_mix(self):
@@ -400,12 +400,12 @@ class TestRecordsCliUpdTussenstand(E2EHelpers, TestCase):
         self.assertEqual(deelnemer.score3, 137)
         self.assertEqual(deelnemer.score7, 0)
         self.assertEqual(deelnemer.totaal, 388)
-        self.assertEqual(deelnemer.laagste_score_nr, 7)
+        self.assertEqual(deelnemer.laagste_score_nr, 0)
         self.assertEqual(str(deelnemer.gemiddelde), '4.311')
         self.assertEqual(deelnemer.alt_score1, 123)
         self.assertEqual(deelnemer.alt_score4, 129)
         self.assertEqual(deelnemer.alt_totaal, 504)
-        self.assertEqual(deelnemer.alt_laagste_score_nr, 7)
+        self.assertEqual(deelnemer.alt_laagste_score_nr, 0)
         self.assertEqual(str(deelnemer.alt_gemiddelde), '4.200')
 
     def test_import(self):
@@ -440,7 +440,7 @@ class TestRecordsCliUpdTussenstand(E2EHelpers, TestCase):
         self.assertEqual(deelnemer.score3, 137)
         self.assertEqual(deelnemer.score7, 0)
         self.assertEqual(deelnemer.totaal, 388)
-        self.assertEqual(deelnemer.laagste_score_nr, 7)
+        self.assertEqual(deelnemer.laagste_score_nr, 0)
         self.assertEqual(str(deelnemer.gemiddelde), '4.311')
         self.assertEqual(deelnemer.alt_score1, 0)
         self.assertEqual(deelnemer.alt_totaal, 0)
