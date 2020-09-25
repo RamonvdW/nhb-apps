@@ -153,16 +153,16 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         # secretaris kan nog niet ingevuld worden
         ver.save()
 
-        self.url_planning_regio = '/competitie/planning/regiocompetitie/%s/'    # deelcomp_pk
+        self.url_planning_regio = '/competitie/planning/regiocompetitie/%s/'     # deelcomp_pk
         self.url_planning_regio_cluster = '/competitie/planning/regiocompetitie/cluster/%s/'    # cluster_pk
         self.url_planning_regio_ronde = '/competitie/planning/regiocompetitie/ronde/%s/'        # ronde_pk
 
-        self.url_uitslag_invoeren = '/competitie/uitslagen-invoeren/wedstrijd/%s/'  # wedstrijd_pk
+        self.url_uitslag_invoeren = '/competitie/wedstrijd/uitslag-invoeren/%s/'  # wedstrijd_pk
         self.url_uitslag_deelnemers = '/competitie/dynamic/deelnemers-ophalen/'
         self.url_uitslag_zoeken = '/competitie/dynamic/check-nhbnr/'
         self.url_uitslag_opslaan = '/competitie/dynamic/scores-opslaan/'
 
-        self.url_bekijk_uitslag = '/competitie/wedstrijd/bekijk-uitslag/%s/'    # wedstrijd_pk
+        self.url_bekijk_uitslag = '/competitie/wedstrijd/bekijk-uitslag/%s/'      # wedstrijd_pk
 
         self.e2e_login_and_pass_otp(self.account_rcl101_18)
         self.e2e_wissel_naar_functie(self.functie_rcl101_18)

@@ -66,13 +66,19 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
                                                 ronde.beschrijving)
 
             obj.toon_geen_uitslag = True
-            if rol_nu in (Rollen.ROL_HWL, Rollen.ROL_WL):
+            heeft_uitslag = (obj.uitslag and obj.uitslag.scores.count() > 0)
+            mag_wijzigen = (obj.uitslag and not obj.uitslag.is_bevroren)
+            if rol_nu in (Rollen.ROL_HWL, Rollen.ROL_WL) and mag_wijzigen:
                 # mag uitslag wijzigen
-                obj.url_uitslag_invoeren = reverse('Competitie:uitslag-invoeren-wedstrijd',
-                                                   kwargs={'wedstrijd_pk': obj.pk})
+                url = reverse('Competitie:wedstrijd-uitslag-invoeren',
+                              kwargs={'wedstrijd_pk': obj.pk})
+                if heeft_uitslag:
+                    obj.url_uitslag_aanpassen = url
+                else:
+                    obj.url_uitslag_invoeren = url
                 obj.toon_geen_uitslag = False
             else:
-                if obj.uitslag and obj.uitslag.scores.count() > 0:
+                if heeft_uitslag:
                     obj.url_uitslag_bekijken = reverse('Competitie:wedstrijd-bekijk-uitslag',
                                                        kwargs={'wedstrijd_pk': obj.pk})
                     obj.toon_geen_uitslag = False

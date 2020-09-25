@@ -145,7 +145,10 @@
 
             <!-- knop om uitslagen te zien / in te voeren -->
             <td>
-                {% if wedstrijd.url_uitslag_invoeren %}
+                {% if wedstrijd.url_uitslag_controleren %}
+                    <a {% if wedstrijd.uitslag.is_bevroren %}class="btn-nhb-blauw"{% else %}class="btn-nhb-rood"{% endif %} href="{{ wedstrijd.url_uitslag_controleren }}">
+                        <i class="material-icons-round left">arrow_forward</i>Controleer</a>
+                {% elif wedstrijd.url_uitslag_invoeren %}
                     <a class="btn-nhb-blauw" href="{{ wedstrijd.url_uitslag_invoeren }}">
                         <i class="material-icons-round left">arrow_forward</i>Invoeren</a>
                 {% elif wedstrijd.url_uitslag_bekijken %}

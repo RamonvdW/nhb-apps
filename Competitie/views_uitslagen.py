@@ -78,12 +78,13 @@ def bepaal_wedstrijd_en_deelcomp_of_404(wedstrijd_pk):
     return wedstrijd, deelcomp, ronde
 
 
-class UitslagInvoerenWedstrijdView(UserPassesTestMixin, TemplateView):
+class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
 
-    """ Deze view laat de RCL de uitslag van een wedstrijd invoeren """
+    """ Deze view laat de RCL, HWL en WL de uitslag van een wedstrijd invoeren """
 
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_UITSLAG_INVOEREN_WEDSTRIJD
+    is_controle = False
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -109,6 +110,13 @@ class UitslagInvoerenWedstrijdView(UserPassesTestMixin, TemplateView):
         if not mag_deelcomp_wedstrijd_wijzigen(wedstrijd, functie_nu, deelcomp):
             raise Resolver404()
 
+        context['is_controle'] = self.is_controle
+        context['is_akkoord'] = wedstrijd.uitslag.is_bevroren
+
+        if self.is_controle:
+            context['url_geef_akkoord'] = reverse('Competitie:wedstrijd-geef-akkoord',
+                                                  kwargs={'wedstrijd_pk': wedstrijd.pk})
+
         context['scores'] = (wedstrijd
                              .uitslag
                              .scores
@@ -128,12 +136,43 @@ class UitslagInvoerenWedstrijdView(UserPassesTestMixin, TemplateView):
         ronde = DeelcompetitieRonde.objects.get(plan=plan)
 
         if rol_nu == Rollen.ROL_RCL:
-            context['url_terug'] = reverse('Competitie:regio-ronde-planning', kwargs={'ronde_pk': ronde.pk})
+            context['url_terug'] = reverse('Competitie:regio-ronde-planning',
+                                           kwargs={'ronde_pk': ronde.pk})
         else:
             context['url_terug'] = reverse('Vereniging:wedstrijden')
 
         menu_dynamics(self.request, context, actief='competitie')
         return context
+
+
+class WedstrijdUitslagControlerenView(WedstrijdUitslagInvoerenView):
+
+    """ Deze view laat de RCL de uitslag van een wedstrijd aanpassen en accorderen """
+
+    is_controle = True
+
+    def post(self, request, *args, **kwargs):
+        """ Deze functie wordt aangeroepen als de knop 'ik geef akkoord voor deze uitslag'
+            gebruikt wordt door de RCL.
+        """
+
+        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
+
+        wedstrijd_pk = kwargs['wedstrijd_pk'][:6]     # afkappen geeft beveiliging
+        wedstrijd, deelcomp, _ = bepaal_wedstrijd_en_deelcomp_of_404(wedstrijd_pk)
+
+        if not mag_deelcomp_wedstrijd_wijzigen(wedstrijd, functie_nu, deelcomp):
+            raise Resolver404()
+
+        uitslag = wedstrijd.uitslag
+        if not uitslag.is_bevroren:
+            uitslag.is_bevroren = True
+            uitslag.save()
+
+        url = reverse('Competitie:wedstrijd-uitslag-controleren',
+                      kwargs={'wedstrijd_pk': wedstrijd.pk})
+
+        return HttpResponseRedirect(url)
 
 
 class DynamicDeelnemersOphalenView(UserPassesTestMixin, View):
@@ -430,6 +469,10 @@ class DynamicScoresOpslaanView(UserPassesTestMixin, View):
         if not mag_deelcomp_wedstrijd_wijzigen(wedstrijd, functie_nu, ronde.deelcompetitie):
             raise Resolver404()
 
+        # voorkom wijzigingen bevroren wedstrijduitslag
+        if rol_nu in (Rollen.ROL_HWL, Rollen.ROL_WL) and uitslag.is_bevroren:
+            raise Resolver404()
+
         door_account = request.user
         when = timezone.now()
 
@@ -443,7 +486,7 @@ class DynamicScoresOpslaanView(UserPassesTestMixin, View):
         return JsonResponse(out)
 
 
-class BekijkWedstrijdUitslagView(TemplateView):
+class WedstrijdUitslagBekijkenView(TemplateView):
 
     """ Deze view toont de uitslag van een wedstrijd """
 

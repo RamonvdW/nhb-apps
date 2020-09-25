@@ -80,6 +80,10 @@ class WedstrijdUitslag(models.Model):
     scores = models.ManyToManyField(Score,
                                     blank=True)  # mag leeg zijn / gemaakt worden
 
+    # False = uitslag mag door WL ingevoerd worden
+    # True  = uitslag is gecontroleerd en mag niet meer aangepast worden
+    is_bevroren = models.BooleanField(default=False)
+
     # hier houden we geen klassen bij - het is geen inschrijflijst
     class Meta:
         """ meta data voor de admin interface """

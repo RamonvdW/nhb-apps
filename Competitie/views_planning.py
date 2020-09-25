@@ -462,6 +462,7 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
                                                       kwargs={'ronde_pk': ronde.pk})
 
             for wedstrijd in context['wedstrijden']:
+                # TODO: vanaf welke datum dit niet meer aan laten passen?
                 wedstrijd.url_wijzig = reverse('Competitie:wijzig-wedstrijd',
                                                kwargs={'wedstrijd_pk': wedstrijd.pk})
             # for
@@ -513,14 +514,21 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
             context['mag_uitslag_invoeren'] = True
 
         for wedstrijd in context['wedstrijden']:
-            if wedstrijd.uitslag and wedstrijd.uitslag.scores.count() > 0:
+            heeft_uitslag = (wedstrijd.uitslag and wedstrijd.uitslag.scores.count() > 0)
+            if heeft_uitslag:
                 wedstrijd.url_uitslag_bekijken = reverse('Competitie:wedstrijd-bekijk-uitslag',
                                                          kwargs={'wedstrijd_pk': wedstrijd.pk})
 
+            # geef RCL de mogelijkheid om te scores aan te passen
+            # de HWL/WL krijgen deze link vanuit Vereniging::Wedstrijden
             if rol_nu == Rollen.ROL_RCL and not is_import:
-                # TODO: knop pas beschikbaar maken op wedstrijddatum tot datum+N
-                wedstrijd.url_uitslag_invoeren = reverse('Competitie:uitslag-invoeren-wedstrijd',
-                                                         kwargs={'wedstrijd_pk': wedstrijd.pk})
+                if heeft_uitslag:
+                    wedstrijd.url_uitslag_controleren = reverse('Competitie:wedstrijd-uitslag-controleren',
+                                                                kwargs={'wedstrijd_pk': wedstrijd.pk})
+                else:
+                    # TODO: knop pas beschikbaar maken op wedstrijddatum tot datum+N
+                    wedstrijd.url_uitslag_invoeren = reverse('Competitie:wedstrijd-uitslag-invoeren',
+                                                             kwargs={'wedstrijd_pk': wedstrijd.pk})
         # for
 
         rol_nu = rol_get_huidige(self.request)

@@ -9,7 +9,7 @@ cd $(dirname $0)
 
 STATIC="./static/handleiding"
 TEMPL="./templates/handleiding"
-WIKI_EXPORT_DIR="../../../testserver/"
+WIKI_EXPORT_DIR="../../../testserver"
 WIKI="/tmp/wiki"
 WIKI_EXPORT="$WIKI/tmp/wiki_export.xml"
 

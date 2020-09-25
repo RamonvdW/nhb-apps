@@ -105,9 +105,21 @@ urlpatterns = [
          name='verwijder-wedstrijd'),
 
 
-    path('uitslagen-invoeren/wedstrijd/<wedstrijd_pk>/',       # TODO: rename to /wedstrijd/uitslag-invoeren/
-         views_uitslagen.UitslagInvoerenWedstrijdView.as_view(),
-         name='uitslag-invoeren-wedstrijd'),
+    path('wedstrijd/uitslag-invoeren/<wedstrijd_pk>/',
+         views_uitslagen.WedstrijdUitslagInvoerenView.as_view(),
+         name='wedstrijd-uitslag-invoeren'),
+
+    path('wedstrijd/uitslag-controleren/<wedstrijd_pk>/',
+         views_uitslagen.WedstrijdUitslagControlerenView.as_view(),
+         name='wedstrijd-uitslag-controleren'),
+
+    path('wedstrijd/uitslag-accorderen/<wedstrijd_pk>/',
+         views_uitslagen.WedstrijdUitslagControlerenView.as_view(),
+         name='wedstrijd-geef-akkoord'),
+
+    path('wedstrijd/bekijk-uitslag/<wedstrijd_pk>/',
+         views_uitslagen.WedstrijdUitslagBekijkenView.as_view(),
+         name='wedstrijd-bekijk-uitslag'),
 
     path('dynamic/deelnemers-ophalen/',
          views_uitslagen.DynamicDeelnemersOphalenView.as_view(),
@@ -120,10 +132,6 @@ urlpatterns = [
     path('dynamic/scores-opslaan/',
          views_uitslagen.DynamicScoresOpslaanView.as_view(),
          name='dynamic-scores-opslaan'),
-
-    path('wedstrijd/bekijk-uitslag/<wedstrijd_pk>/',
-         views_uitslagen.BekijkWedstrijdUitslagView.as_view(),
-         name='wedstrijd-bekijk-uitslag'),
 
 
     path('tussenstand/',

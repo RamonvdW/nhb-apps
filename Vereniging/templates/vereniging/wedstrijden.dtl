@@ -31,14 +31,15 @@
                 <td>{{ obj.beschrijving }}</td>
                 <!-- knop om uitslagen te zien / in te voeren -->
                 <td>
-                    {% if obj.url_uitslag_invoeren %}
+                    {% if obj.url_uitslag_aanpassen %}
+                        <a class="btn-nhb-blauw" href="{{ obj.url_uitslag_aanpassen }}">
+                            <i class="material-icons-round left">arrow_forward</i>Aanpassen</a>
+                    {% elif obj.url_uitslag_invoeren %}
                         <a class="btn-nhb-blauw" href="{{ obj.url_uitslag_invoeren }}">
-                            <i class="material-icons-round left">arrow_forward</i>Uitslag invoeren</a>
-                    {% endif %}
-
-                    {% if obj.url_uitslag_bekijken %}
+                            <i class="material-icons-round left">arrow_forward</i>Invoeren</a>
+                    {% elif obj.url_uitslag_bekijken %}
                         <a class="btn-nhb-blauw" href="{{ obj.url_uitslag_bekijken }}">
-                            <i class="material-icons-round left">arrow_forward</i>Uitslag</a>
+                            <i class="material-icons-round left">arrow_forward</i>Bekijken</a>
                     {% endif %}
 
                     {% if obj.toon_geen_uitslag %}

@@ -6,12 +6,16 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}Uitslag invoeren{% endblock %}
+{% block title %}Uitslag {% if is_controle %}controleren{% else %}invoeren{% endif %}{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-uitslag-invoeren-wedstrijd" %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-wedstrijd-uitslag-controleren" %}
 
-<h4>Uitslag invoeren</h4>
+    {% if is_controle %}
+        <h4>Uitslag controleren</h4>
+    {% else %}
+        <h4>Uitslag invoeren</h4>
+    {% endif %}
 
 <div class="row">
 
@@ -67,8 +71,23 @@
         <i class="material-icons-round left">arrow_back</i>Terug</a>
 </p>
 
-<p>Op deze pagina kan je de uitslag van een wedstrijd invoeren.</p>
-
+    {% if is_controle %}
+        <!-- is controle van scores door RCL -->
+        {% if is_akkoord %}
+            <p>Op deze pagina kan je als RCL de uitslag van een wedstrijd nog aanpassen.</p>
+            <p>Je hebt eerder akkoord gegeven, dus de HWL/WL kan de uitslag niet meer aanpassen.</p>
+        {% else %}
+            <p>Op deze pagina kan je als RCL de uitslag van een wedstrijd controleren en accorderen, waarna de HWL/WL de uitslag niet meer aan kan passen. De RCL kan de uitslag altijd nog corrigeren.</p>
+            <p>
+                <form method="post" action="{{ url_geef_akkoord }}">
+                    {% csrf_token %}
+                    <button class="btn-nhb-rood" type="submit">Ik geeft akkoord voor deze uitslag</button>
+                </form>
+            </p>
+        {% endif %}
+    {% else %}
+        <p>Op deze pagina kan je de uitslag van een wedstrijd invoeren.</p>
+    {% endif %}
 
 <script type="application/javascript">
     function opzoeken_toon_status(dataset, tekst, color)
