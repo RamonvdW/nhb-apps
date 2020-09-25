@@ -26,7 +26,9 @@ fi
 SHORTSTAMP=$(date +"%Y%m%d")       # elke dag een nieuwe logfile
 LOG="$LOGDIR/${SHORTSTAMP}_download_and_import_records.log"
 #echo "Logging to: $LOG"
+
 STAMP=$(date +"%Y%m%d_%H%M%S")
+echo "" >> "$LOG"
 echo "[INFO] Started at $STAMP" >> "$LOG"
 
 # prepare to download
