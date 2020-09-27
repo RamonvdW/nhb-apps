@@ -212,7 +212,7 @@ class TestBeheer(E2EHelpers, TestCase):
         self.assertTrue(resp.status_code, 200)  # 200 = OK
 
         # TODO: hoeveel data zit er eigenlijk in de test database?
-        if len(connection.queries) > 15:
+        if len(connection.queries) > 15:        # pragma: no cover
             msg = 'Veel (%s) queries voor url %s' % (len(connection.queries), url)
             for query in connection.queries:
                 msg += '\n%s' % query

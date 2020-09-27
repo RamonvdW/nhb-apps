@@ -217,18 +217,19 @@ class TestVerenigingWedstrijden(E2EHelpers, TestCase):
                             tijd_begin_aanmelden=de_tijd,
                             tijd_begin_wedstrijd=de_tijd,
                             tijd_einde_wedstrijd=de_tijd)
+
+            if volgnr <= 1:
+                uitslag = WedstrijdUitslag(max_score=300, afstand_meter=12)
+                uitslag.save()
+                wedstrijd.uitslag = uitslag
+                wedstrijd.beschrijving = "Dit is een testje %s" % volgnr
+
             if volgnr == 1:
                 score = Score(schutterboog=self.schutterboog_100001,
                               waarde=123,
                               afstand_meter=12)
                 score.save()
-
-                uitslag = WedstrijdUitslag(max_score=300, afstand_meter=12)
-                uitslag.save()
                 uitslag.scores.add(score)
-
-                wedstrijd.uitslag = uitslag
-                wedstrijd.beschrijving = "Dit is een testje"
 
             wedstrijd.save()
             ronde.plan.wedstrijden.add(wedstrijd)

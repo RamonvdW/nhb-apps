@@ -74,14 +74,12 @@ class RegioCompetitieSchutterBoogAdmin(admin.ModelAdmin):
                            'schutterboog',
                            'schutterboog__nhblid')
 
-    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):    # pragma: no cover
         if db_field.name == 'klasse':
             kwargs['queryset'] = (CompetitieKlasse
                                   .objects
                                   .select_related('indiv', 'team')
                                   .all())
-        else:
-            print('db_field.name: %s' % repr(db_field.name))
 
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 

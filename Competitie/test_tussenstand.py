@@ -68,6 +68,8 @@ class TestCompetitieTussenstand(E2EHelpers, TestCase):
         self.url_tussenstand = '/competitie/tussenstand/'
         self.url_tussenstand_regio = '/competitie/tussenstand/%s-%s/regio/'
         self.url_tussenstand_regio_n = '/competitie/tussenstand/%s-%s/regio/%s/'
+        self.url_tussenstand_regio_alt = '/competitie/tussenstand/%s-%s/regio-alt/'
+        self.url_tussenstand_regio_alt_n = '/competitie/tussenstand/%s-%s/regio-alt/%s/'
         self.url_tussenstand_rayon = '/competitie/tussenstand/%s-%s/rayon/'
         self.url_tussenstand_rayon_n = '/competitie/tussenstand/%s-%s/rayon/%s/'
         self.url_tussenstand_bond = '/competitie/tussenstand/%s-%s/bond/'
@@ -226,6 +228,27 @@ class TestCompetitieTussenstand(E2EHelpers, TestCase):
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
+
+    def test_regio_alt(self):
+        url = self.url_tussenstand_regio_alt % (25, 'BB')
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+
+        url = self.url_tussenstand_regio_alt_n % (18, 'R', 101)
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+
+        self.client.logout()
+
+        url = self.url_tussenstand_regio_alt % (25, 'BB')
+        resp = self.client.get(url)
+        self.assert_is_redirect(resp, self.url_tussenstand_regio % (25, 'BB'))
+
+        url = self.url_tussenstand_regio_alt_n % (18, 'R', 101)
+        resp = self.client.get(url)
+        self.assert_is_redirect(resp, self.url_tussenstand_regio_n % (18, 'R', 101))
 
     def test_regio_bad(self):
         # slecht boog type
