@@ -9,7 +9,7 @@ from BasisTypen.models import BoogType
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging, NhbLid
 from Schutter.models import SchutterBoog
-from Wedstrijden.models import Wedstrijd
+from Wedstrijden.models import Wedstrijd, WedstrijdUitslag
 from .models import (Competitie, DeelCompetitie, CompetitieKlasse,
                      DeelcompetitieRonde, competitie_aanmaken,
                      RegioCompetitieSchutterBoog, AG_NUL)
@@ -73,7 +73,8 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
 
         # while
 
-    def _schrijf_in_voor_competitie(self, deelcomp, schuttersboog, skip):
+    @staticmethod
+    def _schrijf_in_voor_competitie(deelcomp, schuttersboog, skip):
         while len(schuttersboog):
             aanmelding = RegioCompetitieSchutterBoog()
             aanmelding.deelcompetitie = deelcomp
@@ -121,7 +122,8 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         self.account_bb.save()
 
         # maak test leden aan die we kunnen koppelen aan beheerders functies
-        self.account_rcl101_18 = self._prep_beheerder_lid('RCL 101')
+        self.account_rcl101_18 = self._prep_beheerder_lid('RCL 101 18m')
+        self.account_rcl101_25 = self._prep_beheerder_lid('RCL 101 25m')
         self.account_schutter = self._prep_beheerder_lid('Schutter')
 
         # creëer een competitie met deelcompetities
@@ -145,6 +147,9 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         self.functie_rcl101_18 = self.deelcomp_regio101_18.functie
         self.functie_rcl101_18.accounts.add(self.account_rcl101_18)
 
+        self.functie_rcl101_25 = self.deelcomp_regio101_25.functie
+        self.functie_rcl101_25.accounts.add(self.account_rcl101_25)
+
         # maak nog een test vereniging, zonder HWL functie
         ver = NhbVereniging()
         ver.naam = "Kleine Club"
@@ -153,16 +158,19 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         # secretaris kan nog niet ingevuld worden
         ver.save()
 
-        self.url_planning_regio = '/competitie/planning/regiocompetitie/%s/'     # deelcomp_pk
+        self.url_planning_regio = '/competitie/planning/regiocompetitie/%s/'            # deelcomp_pk
         self.url_planning_regio_cluster = '/competitie/planning/regiocompetitie/cluster/%s/'    # cluster_pk
         self.url_planning_regio_ronde = '/competitie/planning/regiocompetitie/ronde/%s/'        # ronde_pk
 
-        self.url_uitslag_invoeren = '/competitie/wedstrijd/uitslag-invoeren/%s/'  # wedstrijd_pk
+        self.url_uitslag_invoeren = '/competitie/wedstrijd/uitslag-invoeren/%s/'        # wedstrijd_pk
         self.url_uitslag_deelnemers = '/competitie/dynamic/deelnemers-ophalen/'
         self.url_uitslag_zoeken = '/competitie/dynamic/check-nhbnr/'
         self.url_uitslag_opslaan = '/competitie/dynamic/scores-opslaan/'
 
-        self.url_bekijk_uitslag = '/competitie/wedstrijd/bekijk-uitslag/%s/'      # wedstrijd_pk
+        self.url_uitslag_controleren = '/competitie/wedstrijd/uitslag-controleren/%s/'  # wedstrijd_pk
+        self.url_uitslag_accorderen = '/competitie/wedstrijd/uitslag-accorderen/%s/'    # wedstrijd_pk
+
+        self.url_bekijk_uitslag = '/competitie/wedstrijd/bekijk-uitslag/%s/'            # wedstrijd_pk
 
         self.e2e_login_and_pass_otp(self.account_rcl101_18)
         self.e2e_wissel_naar_functie(self.functie_rcl101_18)
@@ -229,10 +237,10 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('competitie/uitslag-invoeren-wedstrijd.dtl', 'plein/site_layout.dtl'))
 
         # andere tak: max_score/afstand
-        #resp = self.client.get(self.url_uitslag_invoeren % self.wedstrijd25_pk)
-        #self.assertEqual(resp.status_code, 200)     # 200 = OK
-        #self.assert_html_ok(resp)
-        #self.assert_template_used(resp, ('competitie/uitslag-invoeren-wedstrijd.dtl', 'plein/site_layout.dtl'))
+        # resp = self.client.get(self.url_uitslag_invoeren % self.wedstrijd25_pk)
+        # self.assertEqual(resp.status_code, 200)     # 200 = OK
+        # self.assert_html_ok(resp)
+        # self.assert_template_used(resp, ('competitie/uitslag-invoeren-wedstrijd.dtl', 'plein/site_layout.dtl'))
 
         # nog een keer, dan bestaat de WedstrijdUitslag al
         resp = self.client.get(self.url_uitslag_invoeren % self.wedstrijd18_pk)
@@ -424,6 +432,67 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         json_data = json.loads(resp.content)
         self.assertEqual(json_data['done'], 1)
 
+    def test_rcl_accorderen(self):
+        self.e2e_login_and_pass_otp(self.account_rcl101_18)
+        self.e2e_wissel_naar_functie(self.functie_rcl101_18)
+
+        url = self.url_uitslag_controleren % self.wedstrijd18_pk
+        ackurl = self.url_uitslag_accorderen % self.wedstrijd18_pk
+
+        # doe eerst een get zodat de wedstrijd.uitslag gegarandeerd is
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+
+        # scores aanmaken
+        json_data = {'wedstrijd_pk': self.wedstrijd18_pk,
+                     self._schuttersboog[0].pk: 123,
+                     self._schuttersboog[1].pk: 124,
+                     self._schuttersboog[2].pk: 125,
+                     self._schuttersboog[3].pk: 126,
+                     self._schuttersboog[4].pk: 127,
+                     self._schuttersboog[5].pk: 128,
+                     self._schuttersboog[6].pk: 129}
+        resp = self.client.post(self.url_uitslag_opslaan,
+                                json.dumps(json_data),
+                                content_type='application/json')
+        self.assertEqual(resp.status_code, 200)
+        json_data = json.loads(resp.content)
+        self.assertEqual(json_data['done'], 1)
+
+        # controleer dat de uitslag nog niet geaccordeerd is
+        wed = Wedstrijd.objects.select_related('uitslag').get(pk=self.wedstrijd18_pk)
+        self.assertFalse(wed.uitslag.is_bevroren)
+
+        # haal de uitslag op en controleer aanwezigheid 'accorderen' knop
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        urls = self.extract_all_urls(resp, skip_menu=True)
+        self.assertIn(ackurl, urls)
+
+        # accordeer de wedstrijd
+        resp = self.client.post(ackurl)
+        self.assert_is_redirect(resp, url)
+
+        wed = Wedstrijd.objects.select_related('uitslag').get(pk=self.wedstrijd18_pk)
+        self.assertTrue(wed.uitslag.is_bevroren)
+
+        # haal de uitslag op en controleer AFwezigheid 'accorderen' knop
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        urls = self.extract_all_urls(resp, skip_menu=True)
+        self.assertNotIn(ackurl, urls)
+
+        # probeer toch nog een keer te accorderen
+        resp = self.client.post(ackurl)
+        self.assert_is_redirect(resp, url)
+
+        # probeer ook een keer als 'de verkeerde rcl'
+        self.e2e_login_and_pass_otp(self.account_rcl101_25)
+        self.e2e_wissel_naar_functie(self.functie_rcl101_25)
+
+        resp = self.client.post(ackurl)
+        self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
+
     def test_rcl_bad_opslaan(self):
         # post zonder inlog
         self.client.logout()
@@ -464,7 +533,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 404)       # 404 = not found / not allowed
 
         # post met wedstrijd_pk waar deze RCL geen toegang toe heeft
-        resp = self.client.get(self.url_uitslag_invoeren % self.wedstrijd25_pk)
+        self.client.get(self.url_uitslag_invoeren % self.wedstrijd25_pk)
         json_data = {'wedstrijd_pk': self.wedstrijd25_pk}
         resp = self.client.post(self.url_uitslag_opslaan,
                                 json.dumps(json_data),
@@ -495,9 +564,63 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_hwl)
         self.e2e_check_rol('HWL')
 
+        url = self.url_uitslag_invoeren % self.wedstrijd18_pk
+        ackurl = self.url_uitslag_accorderen % self.wedstrijd18_pk
+
         # doe eerst een get zodat de wedstrijd.uitslag gegarandeerd is
-        resp = self.client.get(self.url_uitslag_invoeren % self.wedstrijd18_pk)
+        resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
+
+        # scores aanmaken
+        json_data = {'wedstrijd_pk': self.wedstrijd18_pk,
+                     self._schuttersboog[0].pk: 123,
+                     self._schuttersboog[1].pk: 124,
+                     self._schuttersboog[2].pk: 125,
+                     self._schuttersboog[3].pk: 126,
+                     self._schuttersboog[4].pk: 127,
+                     self._schuttersboog[5].pk: 128,
+                     self._schuttersboog[6].pk: 129}
+        resp = self.client.post(self.url_uitslag_opslaan,
+                                json.dumps(json_data),
+                                content_type='application/json')
+        self.assertEqual(resp.status_code, 200)
+        json_data = json.loads(resp.content)
+        self.assertEqual(json_data['done'], 1)
+
+        # controleer dat de uitslag nog niet geaccordeerd is
+        wed = Wedstrijd.objects.select_related('uitslag').get(pk=self.wedstrijd18_pk)
+        self.assertFalse(wed.uitslag.is_bevroren)
+
+        # haal de uitslag op en controleer AFwezigheid 'accorderen' knop
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        urls = self.extract_all_urls(resp, skip_menu=True)
+        self.assertNotIn(ackurl, urls)
+
+        # laat de RCL de uitslag accorderen
+        self.e2e_wissel_naar_functie(self.functie_rcl101_18)
+        self.e2e_check_rol('RCL')
+
+        resp = self.client.post(ackurl)
+        self.assert_is_redirect(resp, self.url_uitslag_controleren % self.wedstrijd18_pk)
+        wed = Wedstrijd.objects.select_related('uitslag').get(pk=self.wedstrijd18_pk)
+        self.assertTrue(wed.uitslag.is_bevroren)
+
+        # terug naar HWL rol
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+        self.e2e_check_rol('HWL')
+
+        # check dat de uitslag niet meer aan te passen is
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+
+        json_data = {'wedstrijd_pk': self.wedstrijd18_pk,
+                     self._schuttersboog[0].pk: 123,
+                     self._schuttersboog[6].pk: 129}
+        resp = self.client.post(self.url_uitslag_opslaan,
+                                json.dumps(json_data),
+                                content_type='application/json')
+        self.assertEqual(resp.status_code, 404)
 
     def _maak_uitslag(self, wedstrijd_pk):
         # log in als RCL om de wedstrijduitslag in te voeren
