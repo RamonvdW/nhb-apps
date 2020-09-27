@@ -193,11 +193,16 @@ class CompetitieOverzichtView(View):
 
         return context, TEMPLATE_COMPETITIE_OVERZICHT_HWL
 
-    @staticmethod
-    def _get_competitie_overzicht_schutter():
+    def _get_competitie_overzicht_schutter_bezoeker(self, rol_nu):
         # let op! Niet alleen voor schutter, maar ook voor gebruiker/anon
-        # TODO: iets nuttigs tonen
         context = dict()
+
+        self._get_competities(context, Rollen.ROL_SCHUTTER, None)
+
+        if rol_nu == Rollen.ROL_SCHUTTER:
+            # TODO: wedstrijdkalender toevoegen
+            pass
+
         return context, TEMPLATE_COMPETITIE_OVERZICHT
 
     def get(self, request, *args, **kwargs):
@@ -210,7 +215,7 @@ class CompetitieOverzichtView(View):
         elif rol_nu == Rollen.ROL_HWL:
             context, template = self._get_competitie_overzicht_hwl(request, rol_nu, functie_nu)
         else:
-            context, template = self._get_competitie_overzicht_schutter()
+            context, template = self._get_competitie_overzicht_schutter_bezoeker(rol_nu)
 
         menu_dynamics(self.request, context, actief='competitie')
         return render(request, template, context)

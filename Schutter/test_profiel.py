@@ -8,6 +8,7 @@ from django.utils.dateparse import parse_date
 from django.utils import timezone
 from django.test import TestCase
 from BasisTypen.models import BoogType
+from Functie.models import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Records.models import IndivRecord
@@ -21,7 +22,7 @@ import datetime
 class TestSchutterProfiel(E2EHelpers, TestCase):
     """ unit tests voor de Schutter applicatie, module Profiel """
 
-    test_after = ('NhbStructuur', 'HistComp', 'Competitie', 'Schutter.regiocompetitie')
+    test_after = ('NhbStructuur', 'HistComp', 'Competitie', 'Schutter.regiocompetitie', 'Functie')
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -51,6 +52,23 @@ class TestSchutterProfiel(E2EHelpers, TestCase):
         lid.email = lid.account.email
         lid.save()
         self.nhblid1 = lid
+
+        functie_hwl = maak_functie('HWL ver 1000', 'HWL')
+        functie_hwl.accounts.add(self.account_normaal)
+        functie_hwl.nhb_ver = ver
+        functie_hwl.bevestigde_email = 'hwl@groteclub.nl'
+        functie_hwl.save()
+        self.functie_hwl = functie_hwl
+
+        functie_sec = maak_functie('SEC ver 1000', 'SEC')
+        functie_sec.accounts.add(self.account_normaal)
+        functie_sec.bevestigde_email = 'sec@groteclub.nl'
+        functie_sec.nhb_ver = ver
+        functie_sec.save()
+        self.functie_sec = functie_sec
+
+        ver.secretaris_lid = lid
+        ver.save()
 
         # geef dit account een record
         rec = IndivRecord()
@@ -191,7 +209,7 @@ class TestSchutterProfiel(E2EHelpers, TestCase):
         url_uitschrijven_25bb = self.url_uitschrijven % inschrijving.pk
 
         # haal de profiel pagina op
-        with self.assertNumQueries(26):
+        with self.assertNumQueries(21):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -224,6 +242,18 @@ class TestSchutterProfiel(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
 
         self.e2e_assert_other_http_commands_not_supported(self.url_profiel)
+
+    def test_geen_sec(self):
+        # log in as schutter
+        self.e2e_login(self.account_normaal)
+        self._prep_voorkeuren()
+
+        # als er geen SEC gekoppeld is, dan wordt de nhb_ver.secretaris_lid gebruikt
+        self.functie_sec.accounts.remove(self.account_normaal)
+
+        resp = self.client.get(self.url_profiel)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
 
     def test_geen_wedstrijdbogen(self):
         # geen regiocompetities op profiel indien geen wedstrijdbogen
