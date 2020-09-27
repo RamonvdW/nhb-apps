@@ -242,6 +242,21 @@ class E2EHelpers(object):
                 content = ''
         # while
 
+    def assert_scripts_clean(self, html, template_name):
+        pos = html.find('<script ')
+        while pos >= 0:
+            html = html[pos:]
+            pos = html.find('</script>')
+            script = html[:pos+9]
+
+            pos = script.find('console.log')
+            if pos >= 0:        # pragma: no branch
+                self.fail(msg='Detected console.log usage in script from template %s' % template_name)
+
+            html = html[pos+9:]
+            pos = html.find('<script ')
+        # while
+
     def assert_html_ok(self, response):
         """ Doe een aantal basic checks op een html response """
         assert isinstance(self, TestCase)
@@ -256,6 +271,7 @@ class E2EHelpers(object):
         self.assertIn("</body>", html)
         self.assertIn("<!DOCTYPE html>", html)
         self.assert_link_quality(html, response.templates[0].name)
+        self.assert_scripts_clean(html, response.templates[0].name)
 
     def assert_is_bestand(self, response):
         assert isinstance(self, TestCase)
