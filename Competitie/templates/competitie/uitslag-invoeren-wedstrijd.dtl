@@ -81,7 +81,7 @@
             <p>
                 <form method="post" action="{{ url_geef_akkoord }}">
                     {% csrf_token %}
-                    <button class="btn-nhb-rood" type="submit">Ik geeft akkoord voor deze uitslag</button>
+                    <button class="btn-nhb-rood" type="submit">Ik geef akkoord voor deze uitslag</button>
                 </form>
             </p>
         {% endif %}
