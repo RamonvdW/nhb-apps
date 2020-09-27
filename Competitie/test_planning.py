@@ -754,7 +754,7 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
 
         # maak een regioplanning aan
         self.assertEqual(DeelcompetitieRonde.objects.count(), 0)
-        resp = self.client.post(self.url_planning_regio % self.deelcomp_regio_25.pk)
+        resp = self.client.post(self.url_planning_regio % self.deelcomp_regio_18.pk)
         self.assertEqual(resp.status_code, 302)  # 302 = Redirect = success
         self.assertEqual(DeelcompetitieRonde.objects.count(), 1)
         ronde_pk = DeelcompetitieRonde.objects.all()[0].pk
@@ -762,7 +762,7 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
         # pas de instellingen van de ronde aan
         resp = self.client.post(self.url_planning_regio_ronde % ronde_pk,
                                 {'ronde_week_nr': 5, 'ronde_naam': 'laatste inhaalronde'})
-        url_regio_planning = self.url_planning_regio % self.deelcomp_regio_25.pk
+        url_regio_planning = self.url_planning_regio % self.deelcomp_regio_18.pk
         self.assert_is_redirect(resp, url_regio_planning)
 
         # maak een wedstrijd aan
@@ -776,11 +776,46 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
         url = self.url_wijzig_wedstrijd % wedstrijd_pk
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
+        urls = self.extract_all_urls(resp, skip_menu=True)
+        verwijder_url = self.url_verwijder_wedstrijd % wedstrijd_pk
+        self.assertIn(verwijder_url, urls)
 
         # verwijder de wedstrijd
         url = self.url_verwijder_wedstrijd % wedstrijd_pk
         resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 405)     # bestaat niet
+        self.assertEqual(resp.status_code, 405)     # GET bestaat niet
+        resp = self.client.post(url)
+        self.assertEqual(resp.status_code, 302)     # 302 = Redirect = succes
+
+        # maak een wedstrijd aan
+        resp = self.client.post(self.url_planning_regio_ronde % ronde_pk, {})
+        self.assertEqual(resp.status_code, 302)     # 302 = Redirect = success
+        wedstrijd_pk = Wedstrijd.objects.latest('pk').pk
+
+        url = self.url_uitslag_invoeren % wedstrijd_pk
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+
+        # hang er een score aan
+        wed = Wedstrijd.objects.get(pk=wedstrijd_pk)
+        wed.uitslag.is_bevroren = True
+        wed.uitslag.save()
+
+        # haal de wijzig-wedstrijd pagina op
+        url = self.url_wijzig_wedstrijd % wedstrijd_pk
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        urls = self.extract_all_urls(resp, skip_menu=True)
+        verwijder_url = self.url_verwijder_wedstrijd % wedstrijd_pk
+        self.assertNotIn(verwijder_url, urls)
+
+        # probeer de wedstrijd met uitslag te verwijderen (mag niet)
+        url = self.url_verwijder_wedstrijd % wedstrijd_pk
+        resp = self.client.post(url)
+        self.assertEqual(resp.status_code, 404)     # 404 = Niet toegestaan
+
+        wed.uitslag.is_bevroren = False
+        wed.uitslag.save()
 
         # probeer te verwijderen als RKO
         self.e2e_login_and_pass_otp(self.account_rko)
@@ -964,7 +999,7 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
             ronde.save()
 
             wedstrijd = Wedstrijd.objects.get(pk=wedstrijd.pk)
-            #self.uitslagen.append(wedstrijd.uitslag)
+            # self.uitslagen.append(wedstrijd.uitslag)
 
             score = Score(is_ag=False,
                           afstand_meter=18,

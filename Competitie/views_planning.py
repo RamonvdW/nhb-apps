@@ -685,7 +685,11 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
 
         wedstrijd_pk = kwargs['wedstrijd_pk'][:6]     # afkappen geeft beveiliging
         try:
-            wedstrijd = Wedstrijd.objects.get(pk=wedstrijd_pk)
+            wedstrijd = (Wedstrijd
+                         .objects
+                         .select_related('uitslag')
+                         .prefetch_related('uitslag__scores')
+                         .get(pk=wedstrijd_pk))
         except Wedstrijd.DoesNotExist:
             raise Resolver404()
 
@@ -759,7 +763,12 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         context['url_opslaan'] = reverse('Competitie:wijzig-wedstrijd', kwargs={'wedstrijd_pk': wedstrijd.pk})
 
         if mag_verwijderen:     # pragma: no branch
-            context['url_verwijderen'] = reverse('Competitie:verwijder-wedstrijd', kwargs={'wedstrijd_pk': wedstrijd.pk})
+            uitslag = wedstrijd.uitslag
+            if uitslag and (uitslag.is_bevroren or uitslag.scores.count()):
+                context['kan_niet_verwijderen'] = True
+            else:
+                context['url_verwijderen'] = reverse('Competitie:verwijder-wedstrijd',
+                                                     kwargs={'wedstrijd_pk': wedstrijd.pk})
 
         menu_dynamics(self.request, context, actief='competitie')
         return context
@@ -848,11 +857,21 @@ class VerwijderWedstrijdView(UserPassesTestMixin, View):
         """
         wedstrijd_pk = kwargs['wedstrijd_pk'][:6]     # afkappen geeft beveiliging
         try:
-            wedstrijd = Wedstrijd.objects.get(pk=wedstrijd_pk)
+            wedstrijd = (Wedstrijd
+                         .objects
+                         .select_related('uitslag')
+                         .prefetch_related('uitslag__scores')
+                         .get(pk=wedstrijd_pk))
         except Wedstrijd.DoesNotExist:
             raise Resolver404()
 
         _, mag_verwijderen = plan_wedstrijd_rechten(request, wedstrijd)
+
+        if mag_verwijderen:
+            uitslag = wedstrijd.uitslag
+            if uitslag and (uitslag.is_bevroren or uitslag.scores.count()):
+                mag_verwijderen = False
+
         if not mag_verwijderen:
             raise Resolver404()
 
