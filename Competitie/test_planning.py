@@ -553,6 +553,26 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
 
+    def test_maak_10_rondes(self):
+        # er moeten 10 rondes aangemaakt worden
+        # de geïmporteerde rondes niet meegerekend
+        # maak de rondes aan voor de import van het oude programma
+        self.assertEqual(DeelcompetitieRonde.objects.count(), 0)
+        self._maak_import(7)        # logt in als BB en wisselt naar RCL 18m
+        self.assertEqual(DeelcompetitieRonde.objects.count(), 7)
+
+        # maak nu 10 'handmatige' rondes aan
+        for _ in range(10):
+            resp = self.client.post(self.url_planning_regio % self.deelcomp_regio_18.pk)
+            self.assertEqual(resp.status_code, 302)  # 302 = Redirect = success
+        # for
+        self.assertEqual(DeelcompetitieRonde.objects.count(), 7 + 10)
+
+        # controleer dat de 11e ronde niet aangemaakt mag worden
+        resp = self.client.post(self.url_planning_regio % self.deelcomp_regio_18.pk)
+        self.assertEqual(resp.status_code, 302)  # 302 = Redirect = success
+        self.assertEqual(DeelcompetitieRonde.objects.count(), 7 + 10)
+
     def test_rcl_maakt_cluster_planning(self):
         self.e2e_login_and_pass_otp(self.account_rcl)
         self.e2e_wissel_naar_functie(self.functie_rcl)
@@ -970,20 +990,21 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
 
         self.assertTrue(str(inschrijving) != "")
 
-    def _maak_import(self):
+    def _maak_import(self, aantal):
         # wissel naar RCL functie
         self.e2e_login_and_pass_otp(self.account_bb)
         self.e2e_wissel_naar_functie(self.deelcomp_regio_18.functie)
         self.e2e_check_rol('RCL')
 
         # maak er een paar rondes bij voor geïmporteerde uitslagen, elk met 1 wedstrijd
-        self.client.post(self.url_planning_regio % self.deelcomp_regio_18.pk)
-        self.client.post(self.url_planning_regio % self.deelcomp_regio_18.pk)
-        self.client.post(self.url_planning_regio % self.deelcomp_regio_18.pk)
+        for ronde in range(aantal):
+            self.client.post(self.url_planning_regio % self.deelcomp_regio_18.pk)
 
-        top_pk = DeelcompetitieRonde.objects.latest('pk').pk - 2
+        top_pk = DeelcompetitieRonde.objects.latest('pk').pk - aantal
 
-        for nr in (1, 2, 3):
+        for nr in range(aantal):
+            top_pk += 1
+
             # maak een wedstrijd aan (doen voordat de beschrijving aangepast wordt)
             resp = self.client.post(self.url_planning_regio_ronde % top_pk, {})
             self.assertTrue(resp.status_code < 400)
@@ -995,7 +1016,7 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
             resp = self.client.get(self.url_uitslag_invoeren % wedstrijd.pk)
             self.assertTrue(resp.status_code < 400)
 
-            ronde.beschrijving = 'Ronde %s oude programma' % nr
+            ronde.beschrijving = 'Ronde %s oude programma' % (nr + 1)
             ronde.save()
 
             wedstrijd = Wedstrijd.objects.get(pk=wedstrijd.pk)
@@ -1008,13 +1029,11 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
             score.save()
 
             wedstrijd.uitslag.scores.add(score)
-
-            top_pk += 1
         # for
 
     def test_met_import(self):
-        # maak een paar rondes + wedstrijd aan voor de geimporteerde uitslag
-        self._maak_import()
+        # maak een paar rondes + wedstrijd aan voor de geïmporteerde uitslag
+        self._maak_import(3)
 
         self.e2e_login_and_pass_otp(self.account_bb)
         self.e2e_wisselnaarrol_bb()

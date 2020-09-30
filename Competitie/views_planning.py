@@ -268,8 +268,8 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
 
     def post(self, request, *args, **kwargs):
         """ Deze functie wordt aangeroepen als de knop 'Regel toevoegen' gebruikt wordt
+            in de regioplanning, om een nieuwe ronde toe te voegen.
         """
-
         # alleen de RCL mag de planning uitbreiden
         rol_nu = rol_get_huidige(self.request)
         if rol_nu != Rollen.ROL_RCL:
