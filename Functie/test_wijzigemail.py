@@ -100,6 +100,7 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
         self._check_niet_wijzigbaar(self.functie_rcl101)
         self._check_niet_wijzigbaar(self.functie_rcl105)
         self._check_niet_wijzigbaar(self.functie_hwl)
+        self._check_niet_wijzigbaar(self.functie_wl)
 
         count_post = len(MailQueue.objects.all())
         self.assertEqual(count_pre + 2, count_post)
@@ -132,6 +133,7 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
         self._check_niet_wijzigbaar(self.functie_rcl101)
         self._check_niet_wijzigbaar(self.functie_rcl105)
         self._check_niet_wijzigbaar(self.functie_hwl)
+        self._check_niet_wijzigbaar(self.functie_wl)
 
     def test_bko2(self):
         # log in en wissel naar BKO 2
@@ -146,6 +148,7 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
         self._check_niet_wijzigbaar(self.functie_rcl101)
         self._check_niet_wijzigbaar(self.functie_rcl105)
         self._check_niet_wijzigbaar(self.functie_hwl)
+        self._check_niet_wijzigbaar(self.functie_wl)
 
     def test_rko1(self):
         # log in en wissel naar RKO Rayon 1 rol
@@ -160,6 +163,7 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
         self._check_wijzigbaar(self.functie_rcl101)
         self._check_niet_wijzigbaar(self.functie_rcl105)
         self._check_niet_wijzigbaar(self.functie_hwl)
+        self._check_niet_wijzigbaar(self.functie_wl)
 
     def test_rcl101(self):
         # log in en wissel naar RCL regio 101
@@ -173,7 +177,8 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
         self._check_niet_wijzigbaar(self.functie_rko1)
         self._check_wijzigbaar(self.functie_rcl101)
         self._check_niet_wijzigbaar(self.functie_rcl105)
-        self._check_niet_wijzigbaar(self.functie_hwl)
+        self._check_niet_wijzigbaar(self.functie_hwl)       # verkeerde regio
+        self._check_niet_wijzigbaar(self.functie_wl)        # verkeerde regio
 
     def test_rcl105(self):
         # log in en wissel naar RCL regio 105
@@ -187,7 +192,8 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
         self._check_niet_wijzigbaar(self.functie_rko1)
         self._check_niet_wijzigbaar(self.functie_rcl101)
         self._check_wijzigbaar(self.functie_rcl105)
-        self._check_niet_wijzigbaar(self.functie_hwl)
+        self._check_wijzigbaar(self.functie_hwl)            # juiste regio
+        self._check_wijzigbaar(self.functie_wl)             # juiste regio
 
     def test_hwl(self):
         # log in en wissel naar HWL

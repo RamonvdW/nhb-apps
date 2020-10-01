@@ -134,6 +134,12 @@ def mag_email_wijzigen_of_404(request, functie):
     if functie_nu == functie:
         return
 
+    # RCL mag email van HWL en WL aanpassen van vereniging binnen regio RCL
+    if rol_nu == Rollen.ROL_RCL and functie.rol in ('HWL', 'WL'):
+        if functie_nu.nhb_regio != functie.nhb_ver.regio:
+            raise Resolver404()
+        return
+
     # BKO, RKO, RCL
 
     # controleer dat deze wijziging voor de juiste competitie is
