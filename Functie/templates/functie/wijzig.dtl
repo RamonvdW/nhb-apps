@@ -108,8 +108,8 @@
                         {% endif %}
                     </div>
                     <div class="collapsible-body white">
-                        {% if is_rol_hwl %}
-                            <span>Lid van {{ vereniging_naam }}</span>
+                        {% if is_vereniging_rol %}
+                            <span>Lid van {{ account.vereniging_naam }}</span>
                             <p>NHB nummer: {{ account.nhb_nr_str|highlight:zoekterm }}</p>
                         {% else %}
                             <p style="margin-top:0px">NHB nummer: {{ account.nhb_nr_str|highlight:zoekterm }}</p>

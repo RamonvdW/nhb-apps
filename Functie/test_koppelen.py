@@ -305,8 +305,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.assertEqual(self.functie_rko3.accounts.count(), 0)
 
     def test_koppel_rcl(self):
-        # RCL mag niets
-
+        # RCL mag HWL en WL koppelen
         self.e2e_login_and_pass_otp(self.account_admin)
 
         # neem de RCL rol aan
@@ -314,10 +313,29 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, "RCL ")
 
-        # controleer dat de RCL niemand mag koppelen
+        # controleer dat de RCL de WL mag koppelen
         url = '/functie/wijzig/%s/' % self.functie_wl.pk
         resp = self.client.get(url)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+
+        # RCL koppelt WL, lid van de juiste vereniging
+        url = '/functie/wijzig/%s/ontvang/' % self.functie_wl.pk
+        self.assertEqual(self.functie_wl.accounts.count(), 0)
+        resp = self.client.post(url, {'add': self.account_beh2.pk}, follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assertEqual(self.functie_wl.accounts.count(), 1)
+
+        # controleer dat de RCL de HWL mag koppelen
+        url = '/functie/wijzig/%s/' % self.functie_hwl.pk
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+
+        # RCL koppelt HWL, lid van de juiste vereniging
+        url = '/functie/wijzig/%s/ontvang/' % self.functie_hwl.pk
+        self.assertEqual(self.functie_hwl.accounts.count(), 0)
+        resp = self.client.post(url, {'add': self.account_beh2.pk}, follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assertEqual(self.functie_hwl.accounts.count(), 1)
 
         # poog een andere rol te koppelen
         url = '/functie/wijzig/%s/ontvang/' % self.functie_rcl101.pk

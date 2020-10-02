@@ -98,7 +98,7 @@
                 {% for name in wl_names %}
                     <span>{{ name }}</span><br>
                 {% empty %}
-                    <i>Geen</i>
+                    <i>Nog niet gekoppeld</i>
                 {% endfor %}
             </td>
             {% if not readonly %}

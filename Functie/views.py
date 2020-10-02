@@ -64,6 +64,12 @@ def mag_beheerder_wijzigen_of_404(request, functie):
         # HWL
         return
 
+    # RCL mag HWL en WL koppelen van vereniging binnen regio RCL
+    if rol_nu == Rollen.ROL_RCL and functie.rol in ('HWL', 'WL'):
+        if functie_nu.nhb_regio != functie.nhb_ver.regio:
+            raise Resolver404()
+        return
+
     # BKO, RKO, RCL
 
     # controleer dat deze wijziging voor de juiste competitie is
@@ -387,7 +393,7 @@ class WijzigBeheerdersView(UserPassesTestMixin, ListView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol = rol_get_huidige(self.request)
-        return rol in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_SEC, Rollen.ROL_HWL)
+        return rol in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_SEC, Rollen.ROL_HWL)
 
     def handle_no_permission(self):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
@@ -439,10 +445,10 @@ class WijzigBeheerdersView(UserPassesTestMixin, ListView):
                             Q(hele_reeks__icontains=zoekterm))
                     .order_by('nhb_nr'))
 
-            rol_nu, functie_nu = rol_get_huidige_functie(self.request)
-            if rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL):
-                # alleen uit de eigen gelederen laten kiezen
-                qset = qset.filter(bij_vereniging=functie_nu.nhb_ver)
+            is_vereniging_rol = (self._functie.rol in ('SEC', 'HWL', 'WL'))
+            if is_vereniging_rol:
+                # alleen leden van de vereniging laten kiezen
+                qset = qset.filter(bij_vereniging=self._functie.nhb_ver)
 
             objs = list()
             for nhblid in qset[:50]:
@@ -450,8 +456,8 @@ class WijzigBeheerdersView(UserPassesTestMixin, ListView):
                 account.geo_beschrijving = ''
                 account.nhb_nr_str = str(nhblid.nhb_nr)
 
-                if rol_nu == Rollen.ROL_HWL:
-                    account.vereniging_naam = nhblid.bij_vereniging.naam
+                if is_vereniging_rol:
+                    account.vereniging_naam = str(nhblid.bij_vereniging)    # [1234] Naam
                 else:
                     regio = nhblid.bij_vereniging.regio
                     if not regio.is_administratief:
@@ -477,8 +483,12 @@ class WijzigBeheerdersView(UserPassesTestMixin, ListView):
         context['form'] = self._form
 
         if self._functie.rol in ('SEC', 'HWL', 'WL'):
-            context['is_rol_hwl'] = True
+            context['is_vereniging_rol'] = True
+            # TODO: fix terug-url. Je kan hier op twee manieren komen:
+            # via Plein, Verenigingen, Details (=Vereniging:accommodaties/details/pk/pk/), Koppel beheerders
+            # via Verenging, Beheerders (=Functie:overzicht-vereniging), Koppel beheerders
             context['terug_url'] = reverse('Functie:overzicht-vereniging')
+            #context['terug_url'] = reverse('Vereniging:lijst-verenigingen')
             menu_dynamics(self.request, context, actief='vereniging')
         else:
             context['terug_url'] = reverse('Functie:overzicht')
