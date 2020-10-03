@@ -65,7 +65,8 @@ class ZoekAccountForm(forms.Form):
     zoekterm = forms.CharField(
                     label='Zoek op:',
                     max_length=50,
-                    required=False)
+                    required=False,
+                    widget=forms.TextInput(attrs={'autofocus': ''}))
 
 
 class KiesAccountForm(forms.Form):
