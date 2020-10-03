@@ -67,7 +67,7 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
 
             obj.toon_geen_uitslag = True
             heeft_uitslag = (obj.uitslag and obj.uitslag.scores.count() > 0)
-            mag_wijzigen = (obj.uitslag and not obj.uitslag.is_bevroren)
+            mag_wijzigen = not (obj.uitslag and obj.uitslag.is_bevroren)
             if rol_nu in (Rollen.ROL_HWL, Rollen.ROL_WL) and mag_wijzigen:
                 # mag uitslag wijzigen
                 url = reverse('Competitie:wedstrijd-uitslag-invoeren',
