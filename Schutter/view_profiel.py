@@ -273,12 +273,16 @@ class ProfielView(UserPassesTestMixin, TemplateView):
 
     @staticmethod
     def _get_contact_gegevens(nhblid, context):
-        regio = nhblid.bij_vereniging.regio
 
         context['sec_namen'] = list()
         context['hwl_namen'] = list()
         context['rcl18_namen'] = list()
         context['rcl25_namen'] = list()
+
+        if not nhblid.bij_vereniging:
+            return
+
+        regio = nhblid.bij_vereniging.regio
 
         functies = (Functie
                     .objects
@@ -294,11 +298,10 @@ class ProfielView(UserPassesTestMixin, TemplateView):
             namen.sort()
 
             if functie.rol == 'SEC':
+                if len(namen) == 0 and nhblid.bij_vereniging.secretaris_lid:
+                    namen = [nhblid.bij_vereniging.secretaris_lid.volledige_naam()]
+                context['sec_namen'] = namen
                 context['sec_email'] = functie.bevestigde_email
-                if len(namen) == 0:
-                    context['sec_namen'] = [nhblid.bij_vereniging.secretaris_lid.volledige_naam()]
-                else:
-                    context['sec_namen'] = namen
             elif functie.rol == 'HWL':
                 context['hwl_namen'] = namen
                 context['hwl_email'] = functie.bevestigde_email
@@ -330,7 +333,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         context['records'] = self._find_records(nhblid)
         context['histcomp'] = self._find_histcomp_scores(nhblid, alle_bogen)
 
-        if not nhblid.bij_vereniging.geen_wedstrijden:
+        if nhblid.bij_vereniging and not nhblid.bij_vereniging.geen_wedstrijden:
             _, _, is_jong, _, _ = get_sessionvars_leeftijdsklassen(self.request)
             context['toon_leeftijdsklassen'] = is_jong
 

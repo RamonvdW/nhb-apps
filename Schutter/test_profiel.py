@@ -255,6 +255,14 @@ class TestSchutterProfiel(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
 
+        # maak dit een vereniging zonder secretaris
+        self.nhbver.secretaris_lid = None
+        self.nhbver.save()
+
+        resp = self.client.get(self.url_profiel)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+
     def test_geen_wedstrijdbogen(self):
         # geen regiocompetities op profiel indien geen wedstrijdbogen
 
