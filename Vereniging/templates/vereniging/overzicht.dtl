@@ -54,31 +54,33 @@
 <div class="row">
 
     <!-- leden inschrijven voor de competitie -->
-    {% for comp in competities %}
-        <div class="card">
-            {% if comp.fase < 'B' %}
-                <div class="card-content">
-                    <div class="card-title center-align grey-text">Inschrijven {{ comp.afstand }}m</div>
-                    <div class="center-align"><img src="{{ comp.icon }}" height="60" alt="logo" style="opacity: 0.5"></div>
-                    <p>Inschrijving voor de <b>{{ comp.beschrijving }}</b> opent op {{ comp.begin_aanmeldingen }}.</p>
-                </div>
-                <div class="card-action center-align">
-                    <span class="grey-text">(nog niet open)</span>
-                </div>
-            {% else %}
-                <div class="card-content">
-                    <div class="card-title center-align">Inschrijven {{ comp.afstand }}m</div>
-                    <div class="center-align"><img src="{{ comp.icon }}" height="60" alt="logo"></div>
-                    <p>Leden inschrijven voor de <b>{{ comp.beschrijving }}</b>.</p>
-                </div>
-                <a href="{% url 'Vereniging:leden-inschrijven' comp_pk=comp.pk %}" class="nhb-klikbare-balk">
-                    <div class="card-action center-align">
-                        <span class="nhb-klikbare-link">Tonen</span>
+    {% if toon_inschrijven %}
+        {% for comp in competities %}
+            <div class="card">
+                {% if comp.fase < 'B' %}
+                    <div class="card-content">
+                        <div class="card-title center-align grey-text">Inschrijven {{ comp.afstand }}m</div>
+                        <div class="center-align"><img src="{{ comp.icon }}" height="60" alt="logo" style="opacity: 0.5"></div>
+                        <p>Inschrijving voor de <b>{{ comp.beschrijving }}</b> opent op {{ comp.begin_aanmeldingen }}.</p>
                     </div>
-                </a>
-            {% endif %}
-        </div>
-    {% endfor %}
+                    <div class="card-action center-align">
+                        <span class="grey-text">(nog niet open)</span>
+                    </div>
+                {% else %}
+                    <div class="card-content">
+                        <div class="card-title center-align">Inschrijven {{ comp.afstand }}m</div>
+                        <div class="center-align"><img src="{{ comp.icon }}" height="60" alt="logo"></div>
+                        <p>Leden inschrijven voor de <b>{{ comp.beschrijving }}</b>.</p>
+                    </div>
+                    <a href="{% url 'Vereniging:leden-inschrijven' comp_pk=comp.pk %}" class="nhb-klikbare-balk">
+                        <div class="card-action center-align">
+                            <span class="nhb-klikbare-link">Tonen</span>
+                        </div>
+                    </a>
+                {% endif %}
+            </div>
+        {% endfor %}
+    {% endif %}
 
     <!-- leden uitschrijven uit de competitie -->
     {% for deelcomp in deelcomps %}

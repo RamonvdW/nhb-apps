@@ -5,8 +5,8 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.http import HttpResponseRedirect
-from django.urls import reverse, Resolver404
-from django.views.generic import TemplateView, ListView
+from django.urls import reverse
+from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.templatetags.static import static
 from Plein.menu import menu_dynamics
@@ -39,6 +39,8 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
 
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
         context['nhb_ver'] = functie_nu.nhb_ver
+
+        context['toon_inschrijven'] = (rol_nu != Rollen.ROL_WL)
 
         if functie_nu.nhb_ver.wedstrijdlocatie_set.count() > 0:
             locatie = functie_nu.nhb_ver.wedstrijdlocatie_set.all()[0]
