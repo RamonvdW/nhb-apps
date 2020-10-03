@@ -52,6 +52,7 @@ class TestLogboek(E2EHelpers, TestCase):
         schrijf_in_logboek(self.account_same, 'Accommodaties', 'Weer een clubhuis')
         schrijf_in_logboek(self.account_same, 'Clusters', 'Groepeer ze maar')
         schrijf_in_logboek(None, 'Iets anders', 'Valt onder Rest')
+        schrijf_in_logboek(None, 'oude_site_overnemen (command line)', 'Valt onder Import')
 
         self.logboek_url = '/logboek/'
 
@@ -158,6 +159,14 @@ class TestLogboek(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('logboek/uitrol.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
         self.assertContains(resp, 'Rollen met die hap')
+
+        # import
+        with self.assertNumQueries(4):
+            resp = self.client.get(self.logboek_url + 'import-oude-site/')
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_template_used(resp, ('logboek/import_oude_site.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
+        self.assertContains(resp, 'Valt onder Import')
 
     def test_pagination(self):
         self.e2e_login_and_pass_otp(self.account_admin)

@@ -49,6 +49,10 @@ urlpatterns = [
     path('uitrol/',
          views.LogboekUitrolView.as_view(),
          name='uitrol'),
+
+    path('import-oude-site/',
+         views.LogboekImportView.as_view(),
+         name='import'),
 ]
 
 # end of file

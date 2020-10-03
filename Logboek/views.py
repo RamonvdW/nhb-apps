@@ -24,6 +24,7 @@ TEMPLATE_LOGBOEK_CLUSTERS = 'logboek/clusters.dtl'
 TEMPLATE_LOGBOEK_COMPETITIE = 'logboek/competitie.dtl'
 TEMPLATE_LOGBOEK_NHBSTRUCTUUR = 'logboek/nhbstructuur.dtl'
 TEMPLATE_LOGBOEK_ACCOMMODATIES = 'logboek/accommodaties.dtl'
+TEMPLATE_LOGBOEK_IMPORT_OUDE_SITE = 'logboek/import_oude_site.dtl'
 
 RESULTS_PER_PAGE = 50
 
@@ -126,6 +127,7 @@ class LogboekBasisView(UserPassesTestMixin, ListView):
         context['url_rest'] = reverse('Logboek:rest')
         context['url_rollen'] = reverse('Logboek:rollen')
         context['url_uitrol'] = reverse('Logboek:uitrol')
+        context['url_import'] = reverse('Logboek:import')
         context['url_records'] = reverse('Logboek:records')
         context['url_accounts'] = reverse('Logboek:accounts')
         context['url_clusters'] = reverse('Logboek:clusters')
@@ -143,6 +145,7 @@ class LogboekBasisView(UserPassesTestMixin, ListView):
             context['url_rest'] += zoekterm
             context['url_rollen'] += zoekterm
             context['url_uitrol'] += zoekterm
+            context['url_import'] += zoekterm
             context['url_records'] += zoekterm
             context['url_accounts'] += zoekterm
             context['url_clusters'] += zoekterm
@@ -171,6 +174,7 @@ class LogboekRestView(LogboekBasisView):
                 .select_related('actie_door_account')
                 .exclude(Q(gebruikte_functie='Records') |           # Records
                          Q(gebruikte_functie='maak_beheerder') |    # Accounts
+                         Q(gebruikte_functie='Wachtwoord') |        # Accounts
                          Q(gebruikte_functie='Inloggen') |
                          Q(gebruikte_functie='Inlog geblokkeerd') |
                          Q(gebruikte_functie='OTP controle') |
@@ -181,7 +185,8 @@ class LogboekRestView(LogboekBasisView):
                          Q(gebruikte_functie='Competitie') |        # Competitie
                          Q(gebruikte_functie='Accommodaties') |     # Accommodatie
                          Q(gebruikte_functie='Clusters') |          # Clusters
-                         Q(gebruikte_functie='Uitrol'))             # Uitrol
+                         Q(gebruikte_functie='Uitrol') |            # Uitrol
+                         Q(gebruikte_functie='oude_site_overnemen (command line)'))     # Import
                 .order_by('-toegevoegd_op'))
 
 
@@ -223,7 +228,8 @@ class LogboekAccountsView(LogboekBasisView):
                         Q(gebruikte_functie='Inlog geblokkeerd') |
                         Q(gebruikte_functie='OTP controle') |
                         Q(gebruikte_functie='Bevestig e-mail') |
-                        Q(gebruikte_functie='Registreer met NHB nummer'))
+                        Q(gebruikte_functie='Registreer met NHB nummer') |
+                        Q(gebruikte_functie='Wachtwoord'))
                 .order_by('-toegevoegd_op'))
 
 
@@ -338,6 +344,25 @@ class LogboekUitrolView(LogboekBasisView):
                 .objects
                 .select_related('actie_door_account')
                 .filter(gebruikte_functie='Uitrol')
+                .order_by('-toegevoegd_op'))
+
+
+class LogboekImportView(LogboekBasisView):
+    """ Deze view toont de logboek regels die met de uitrol van software te maken hebben """
+
+    template_name = TEMPLATE_LOGBOEK_IMPORT_OUDE_SITE
+    filter = 'import'
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.base_url = reverse('Logboek:import')
+
+    def get_focused_queryset(self):
+        """ retourneer de data voor de template view """
+        return (LogboekRegel
+                .objects
+                .select_related('actie_door_account')
+                .filter(gebruikte_functie='oude_site_overnemen (command line)')
                 .order_by('-toegevoegd_op'))
 
 
