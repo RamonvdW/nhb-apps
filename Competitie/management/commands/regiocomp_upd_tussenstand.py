@@ -26,7 +26,7 @@ class Command(BaseCommand):
 
         self.taken = CompetitieTaken.objects.all()[0]
 
-        self.pk2scores = dict()      # [RegioCompetitieSchutterBoog.pk] = [score, ..]
+        self.pk2scores = dict()      # [RegioCompetitieSchutterBoog.pk] = [tup, ..] with tup = (afstand, score)
         self.pk2scores_alt = dict()
 
     def add_arguments(self, parser):
@@ -94,13 +94,14 @@ class Command(BaseCommand):
                                   .scores
                                   .select_related('schutterboog')
                                   .all()):
+                        tup = (uitslag.afstand_meter, score)
                         pk = score.schutterboog.pk
                         if pk in allowed_schutterboog_pks:   # presumed better than huge __in
                             pk2scores = self.pk2scores_alt if is_alt else self.pk2scores
                             try:
-                                pk2scores[pk].append(score)
+                                pk2scores[pk].append(tup)
                             except KeyError:
-                                pk2scores[pk] = [score]
+                                pk2scores[pk] = [tup]
                     # for
             # for
         # for
@@ -144,9 +145,11 @@ class Command(BaseCommand):
             if deelcomp.competitie.afstand == '18':
                 pijlen_per_ronde = 30
                 max_score = 300
+                comp_afstand = 18
             else:
                 pijlen_per_ronde = 25
                 max_score = 250
+                comp_afstand = 25
 
             for deelnemer in (RegioCompetitieSchutterBoog
                               .objects
@@ -156,16 +159,16 @@ class Command(BaseCommand):
                               .all()):
 
                 pk = deelnemer.schutterboog.pk
-                scores = list()
+                tups = list()
                 found = False
                 try:
-                    scores.extend(self.pk2scores[pk])
+                    tups.extend(self.pk2scores[pk])
                     found = True
                 except KeyError:
                     pass
 
                 try:
-                    scores.extend(self.pk2scores_alt[pk])
+                    tups.extend(self.pk2scores_alt[pk])
                     found = True
                 except KeyError:
                     pass
@@ -174,7 +177,7 @@ class Command(BaseCommand):
                     # tot nu toe hebben we de verwijderde scores meegenomen
                     # zodat we deze change-trigger krijgen.
                     # Nu moeten de verwijderde scores eruit
-                    scores = [score for score in scores if score.waarde != SCORE_WAARDE_VERWIJDERD]
+                    scores = [score for afstand, score in tups if score.waarde != SCORE_WAARDE_VERWIJDERD and afstand == comp_afstand]
 
                     # nieuwe scores toevoegen
                     curr_scores = deelnemer.scores.all()
@@ -190,13 +193,13 @@ class Command(BaseCommand):
                     # for
 
                     try:
-                        scores = self.pk2scores[pk]
+                        tups = self.pk2scores[pk]
                     except KeyError:
                         waardes = list()
                     else:
                         # door waarde te filteren op max_score voorkomen we problemen met het gemiddelde
                         # die pas naar boven komen tijdens de save()
-                        waardes = [score.waarde for score in scores if score.waarde <= max_score]
+                        waardes = [score.waarde for afstand, score in tups if score.waarde <= max_score and afstand == comp_afstand]
 
                     waardes.extend([0, 0, 0, 0, 0, 0, 0])
                     waardes = waardes[:7]
@@ -211,13 +214,13 @@ class Command(BaseCommand):
                     deelnemer.gemiddelde, deelnemer.totaal = self._bepaal_gemiddelde_en_totaal(waardes, laagste, pijlen_per_ronde)
 
                     try:
-                        scores = self.pk2scores_alt[pk]
+                        tups = self.pk2scores_alt[pk]
                     except KeyError:
                         waardes = list()
                     else:
                         # door waarde te filteren op max_score voorkomen we problemen met het gemiddelde
                         # die pas naar boven komen tijdens de save()
-                        waardes = [score.waarde for score in scores if score.waarde != SCORE_WAARDE_VERWIJDERD]
+                        waardes = [score.waarde for afstand, score in tups if score.waarde != SCORE_WAARDE_VERWIJDERD and afstand == comp_afstand]
 
                     waardes.extend([0, 0, 0, 0, 0, 0, 0])
                     waardes = waardes[:7]
