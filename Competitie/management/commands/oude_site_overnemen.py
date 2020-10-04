@@ -54,8 +54,6 @@ class Command(BaseCommand):
         self._cache_inschrijving = dict()  # [(deelcomp.pk, schutterboog.pk)] = RegioCompetitieSchutterBoog
         self._cache_ag_score = dict()      # [(afstand, schutterboog.pk)] = Score
 
-        self._dbcount_scorehist = 0
-
     def _prep_caches(self):
         for obj in (NhbLid
                     .objects
@@ -285,7 +283,6 @@ class Command(BaseCommand):
                     # zoek het score-geschiedenis record erbij
                     #  voor de scores van deze schutter
                     #   in deze ronde
-                    self._dbcount_scorehist += 1
                     hists = (ScoreHist
                              .objects
                              .filter(notitie=notitie,
@@ -559,13 +556,11 @@ class Command(BaseCommand):
         activiteit += " (waarschuwingen: %s, fouten: %s)" % (self._count_warnings, self._count_errors)
 
         # schrijf in het logboek
-        schrijf_in_logboek(account=None,
-                           gebruikte_functie='oude_site_overnemen (command line)',
-                           activiteit=activiteit)
+        if not self._dryrun:
+            schrijf_in_logboek(account=None,
+                               gebruikte_functie='oude_site_overnemen (command line)',
+                               activiteit=activiteit)
         self.stdout.write(activiteit)
-
-        self.stdout.write('Performance:')
-        self.stdout.write(' %5d queries ScoreHist' % self._dbcount_scorehist)
 
         if self._count_errors > max_fouten:
             sys.exit(1)
