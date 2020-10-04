@@ -5,7 +5,9 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from . import view_registreer_nhb, view_profiel, view_voorkeuren, view_inschrijven_uitschrijven, view_leeftijdsklassen
+from . import (view_registreer_nhb, view_profiel, view_voorkeuren,
+               view_inschrijven_uitschrijven, view_leeftijdsklassen,
+               view_scoregeschiedenis)
 
 
 app_name = 'Schutter'
@@ -42,6 +44,10 @@ urlpatterns = [
     path('regiocompetitie/uitschrijven/<regiocomp_pk>/',
          view_inschrijven_uitschrijven.RegiocompetitieUitschrijvenView.as_view(),
          name='uitschrijven'),
+
+    path('score-geschiedenis/',
+         view_scoregeschiedenis.ScoreGeschiedenisView.as_view(),
+         name='score-geschiedenis')
 ]
 
 # end of file

@@ -1,0 +1,97 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2020 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Score Geschiedenis{% endblock %}
+
+{% block pagina %}
+
+    <h4>Score Geschiedenis</h4>
+
+    <p>Via deze pagina kan je de geschiedenis van een de scores van een schutter inzien.</p>
+
+    <!-- zoekformulier -->
+
+    <div class="container z-depth-2 white">
+        <div class="row nhb-blauw white-text">
+            <div class="col s12 center-align">
+                <h5>Zoek schutter</h5>
+                <p>Zoek op NHB nummer</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <form class="col s12" action="{{ url_ophalen }}" method="get">
+                <div class="row"><div class="input-field col s12">
+                    {{ form.zoekterm.label_tag }}{{ form.zoekterm }}
+                </div></div>
+
+                <div class="row"><div class="col s12"></div>
+                    <div class="center-align">
+                        <button class="btn-nhb-blauw" type="submit"><i class="material-icons-round left">search</i>Zoek</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- resultaten -->
+    <p>&nbsp;</p>
+    {% if niet_gevonden %}
+        <p><i>Niets gevonden</i></p>
+    {% else %}
+        <p>Gevonden scores voor schutter <b>{{ nhblid }}</b> van {{ nhblid.bij_vereniging }} te {{ nhblid.bij_vereniging.plaats }} in {{ nhblid.bij_vereniging.regio }}</p>
+
+        <table class="white">
+            <thead>
+                <th>Boog</th>
+                <th>Wedstrijd</th>
+                <th>Waarde</th>
+                <th>Geschiedenis</th>
+            </thead>
+
+            {% for schutterboog in schuttersboog %}
+                {% if schutterboog.scores %}
+                    <tr>
+                        <td>{{ schutterboog.boogtype.beschrijving }}</td>
+                        <td colspan="3"/>
+                    </tr>
+
+                    {% for score in schutterboog.scores %}
+                        <tr>
+                            <td/>
+
+                            {% if score.is_ag %}
+                                <!-- de view heeft score.waarde al omgezet naar N.MMM -->
+                                <td>{{ score.afstand_meter }}m</td>
+                                <td>{{ score.waarde }} (AG)</td>
+                            {% else %}
+                                <td>{{ score.afstand_meter }}m<br>{{ score.wedstrijd_str }}<br>{{ score.wedstrijd_waar }}</td>
+                                <td>{{ score.waarde }}</td>
+                            {% endif %}
+
+                            <td/>
+                        </tr>
+
+                        {% for hist in score.hists %}
+                            <tr>
+                                <td colspan="2"/>
+                                <td>{{ hist.oude_waarde }}<span style="position: relative; bottom: .15em;"> &rarr; </span>{{ hist.nieuwe_waarde }}</td>
+                                <td>{{ hist.when }}<br>{{ hist.notitie }}<br>Door: {{ hist.door_account_str }}</td>
+                            </tr>
+                        {% endfor %}
+
+                    {% endfor %}
+                {% endif %}
+            {% endfor %}
+        </table>
+    {% endif %}
+
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="score-geschiedenis" %}
+
+{% endblock %}
+

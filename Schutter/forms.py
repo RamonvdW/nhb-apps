@@ -51,4 +51,16 @@ class RegistreerForm(forms.Form):
         return valid
 
 
+class ScoreGeschiedenisForm(forms.Form):
+    """ definitie van het formulier waarmee de een zoekterm in kan voeren
+        om te zoeken naar een account. Wordt gebruikt voor de Login-As functionaliteit.
+    """
+
+    # een simpel tekstveld waarin de gebruiker de zoek/filter tekst in kan voeren
+    zoekterm = forms.CharField(
+                    label='NHB nummer:',
+                    max_length=50,
+                    required=False,
+                    widget=forms.TextInput(attrs={'autofocus': ''}))
+
 # end of file
