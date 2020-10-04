@@ -250,8 +250,8 @@ class E2EHelpers(object):
             script = html[:pos+9]
 
             pos = script.find('console.log')
-            if pos >= 0:        # pragma: no branch
-                self.fail(msg='Detected console.log usage in script from template %s' % template_name)
+            if pos >= 0:
+                self.fail(msg='Detected console.log usage in script from template %s' % template_name)   # pragma: no cover
 
             html = html[pos+9:]
             pos = html.find('<script ')

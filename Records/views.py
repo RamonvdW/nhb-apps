@@ -365,7 +365,7 @@ class RecordsIndivSpecifiekView(ListView):
         spec.lcat_str = lcat2str[spec.leeftijdscategorie]
         spec.makl_str = makl2str[spec.materiaalklasse]
 
-        spec.op_pagina = "specifiek record: %s-%s" % (discipline, volg_nr)
+        spec.op_pagina = "specifiek_record_%s-%s" % (discipline, volg_nr)
 
         self.spec = spec
 
