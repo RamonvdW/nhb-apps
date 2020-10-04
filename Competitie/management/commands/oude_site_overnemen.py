@@ -47,7 +47,51 @@ class Command(BaseCommand):
         self._ingelezen = list()           # tuple(afstand, nhbnr, boogtype, score1, ..., score 7)
         self._verwijder_r_18 = list()
         self._verwijder_r_25 = list()
-        self._verwijder = None      # wijst naar _verwijder_r_18 of _verwijder_r_25, afhankelijk van afstand
+        self._verwijder = None             # wijst naar _verwijder_r_18 of _verwijder_r_25, afhankelijk van afstand
+
+        self._cache_nhblid = dict()        # [nhbnr] = NhbLid
+        self._cache_schutterboog = dict()  # [(nhblid, afkorting)] = SchutterBoog
+        self._cache_inschrijving = dict()  # [(deelcomp.pk, schutterboog.pk)] = RegioCompetitieSchutterBoog
+        self._cache_ag_score = dict()      # [(afstand, schutterboog.pk)] = Score
+
+        self._dbcount_scorehist = 0
+
+    def _prep_caches(self):
+        for obj in (NhbLid
+                    .objects
+                    .select_related('bij_vereniging',
+                                    'bij_vereniging__regio')
+                    .all()):
+            self._cache_nhblid[str(obj.nhb_nr)] = obj
+        # for
+
+        for obj in (SchutterBoog
+                    .objects
+                    .select_related('nhblid', 'boogtype')
+                    .all()):
+            tup = (obj.nhblid.nhb_nr, obj.boogtype.afkorting)
+            self._cache_schutterboog[tup] = obj
+        # for
+
+        for obj in (RegioCompetitieSchutterBoog
+                    .objects
+                    .select_related('deelcompetitie',
+                                    'schutterboog',
+                                    'bij_vereniging')
+                    .all()):
+            tup = (obj.deelcompetitie.pk, obj.schutterboog.pk)
+            self._cache_inschrijving[tup] = obj
+        # for
+
+        for obj in (Score
+                    .objects
+                    .select_related('schutterboog')
+                    .filter(is_ag=True,
+                            afstand_meter__in=(18, 25))
+                    .all()):
+            tup = (obj.afstand_meter, obj.schutterboog.pk)
+            self._cache_ag_score[tup] = obj
+        # for
 
     def _prep_regio2deelcomp_regio2ronde2uitslag(self):
         # maak vertaling van vereniging naar deelcompetitie
@@ -145,8 +189,16 @@ class Command(BaseCommand):
         # schutterboog record vinden / aanmaken
         # boogtype aanzetten voor wedstrijden
         # aanvangsgemiddelde record aanmaken
-        schutterboog, _ = SchutterBoog.objects.get_or_create(nhblid=lid,
-                                                             boogtype=self._boogtype)
+
+        tup = (lid.nhb_nr, self._boogtype.afkorting)
+
+        try:
+            schutterboog = self._cache_schutterboog[tup]
+        except KeyError:
+            schutterboog, _ = SchutterBoog.objects.get_or_create(nhblid=lid,
+                                                                 boogtype=self._boogtype)
+            self._cache_schutterboog[tup] = schutterboog
+
         if not schutterboog.voor_wedstrijd:
             schutterboog.voor_wedstrijd = True
             schutterboog.save()
@@ -160,13 +212,10 @@ class Command(BaseCommand):
             gemiddelde = AG_NUL
         waarde = int(gemiddelde * 1000)
 
+        tup = (self._afstand, schutterboog.pk)
         try:
-            score = (Score
-                     .objects
-                     .get(is_ag=True,
-                          schutterboog=schutterboog,
-                          afstand_meter=self._afstand))
-        except Score.DoesNotExist:
+            score = self._cache_ag_score[tup]
+        except KeyError:
             score = Score()
             score.is_ag = True
             score.schutterboog = schutterboog
@@ -177,6 +226,7 @@ class Command(BaseCommand):
                 # anders geven we wel het record terug zodat de code gelijk kan blijven
                 if not self._dryrun:
                     score.save()
+            self._cache_ag_score[tup] = score
         else:
             if waarde != score.waarde:
                 self.stdout.write(
@@ -188,12 +238,10 @@ class Command(BaseCommand):
 
     def vind_of_maak_inschrijving(self, deelcomp, schutterboog, lid_vereniging, ag):
         # zoek de RegioCompetitieSchutterBoog erbij
+        tup = (deelcomp.pk, schutterboog.pk)
         try:
-            inschrijving = (RegioCompetitieSchutterBoog
-                            .objects
-                            .get(deelcompetitie=deelcomp,
-                                 schutterboog=schutterboog))
-        except RegioCompetitieSchutterBoog.DoesNotExist:
+            inschrijving = self._cache_inschrijving[tup]
+        except KeyError:
             # schrijf de schutter in
             inschrijving = RegioCompetitieSchutterBoog()
             inschrijving.deelcompetitie = deelcomp
@@ -207,6 +255,8 @@ class Command(BaseCommand):
                 inschrijving.aanvangsgemiddelde = AG_NUL
             if not self._dryrun:
                 inschrijving.save()
+
+            self._cache_inschrijving[tup] = inschrijving
 
         return inschrijving
 
@@ -235,6 +285,7 @@ class Command(BaseCommand):
                     # zoek het score-geschiedenis record erbij
                     #  voor de scores van deze schutter
                     #   in deze ronde
+                    self._dbcount_scorehist += 1
                     hists = (ScoreHist
                              .objects
                              .filter(notitie=notitie,
@@ -299,12 +350,8 @@ class Command(BaseCommand):
                     return
 
         try:
-            lid = (NhbLid
-                   .objects
-                   .select_related('bij_vereniging',
-                                   'bij_vereniging__regio')
-                   .get(nhb_nr=nhb_nr))
-        except NhbLid.DoesNotExist:
+            lid = self._cache_nhblid[nhb_nr]
+        except KeyError:
             self.stdout.write('[WARNING] Kan lid %s niet vinden' % nhb_nr)
             self._count_warnings += 1
             return
@@ -478,6 +525,8 @@ class Command(BaseCommand):
         max_fouten = options['max_fouten'][0]
         self._dryrun = options['dryrun']
 
+        self._prep_caches()
+
         for afstand in (18, 25):
             self._afstand = afstand
             fname1 = str(afstand)
@@ -514,6 +563,9 @@ class Command(BaseCommand):
                            gebruikte_functie='oude_site_overnemen (command line)',
                            activiteit=activiteit)
         self.stdout.write(activiteit)
+
+        self.stdout.write('Performance:')
+        self.stdout.write(' %5d queries ScoreHist' % self._dbcount_scorehist)
 
         if self._count_errors > max_fouten:
             sys.exit(1)
