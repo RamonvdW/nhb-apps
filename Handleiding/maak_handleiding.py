@@ -102,8 +102,10 @@ class MaakHandleiding(object):
         # alles wat gebruikt kan worden: https://www.mediawiki.org/wiki/Help:Formatting
         total_out = ""
         in_lijstje = False
+        in_nummerlijstje = False
         in_italic = False
         in_bold = False
+        in_code = False
 
         if self.debug_pagina:
             print('[DEBUG] wiki text:')
@@ -114,6 +116,16 @@ class MaakHandleiding(object):
         # newline = nieuwe paragraaf
         out = ""
         for line in text.split('\n'):
+
+            # doorgaan met een pre-formatted block
+            if in_code:
+                if len(line) >= 1 and line[0] == ' ':
+                    out += "\n" + line
+                    continue
+                else:
+                    out += '\n</pre>'
+                    in_code = False
+
             if out:
                 if self.debug_pagina:
                     print('[DEBUG] tdl out: %s' % out)
@@ -211,7 +223,7 @@ class MaakHandleiding(object):
                         self.aangemaakte_interne_links[fname].append(voor_pagina)
                     except KeyError:
                         self.aangemaakte_interne_links[fname] = [voor_pagina]
-                    temp2 = '<a href="/handleiding/' + fname + '">' + link + '</a>'
+                    temp2 = '<a href="/handleiding/' + fname + '/">' + link + '</a>'
 
                 line = temp1 + temp2 + temp3
                 # continue processing
@@ -232,12 +244,17 @@ class MaakHandleiding(object):
                         + '<i class="material-icons-round left">open_in_new</i>'
                         + label + '</a>')
 
+            # horizontal divider
+            if line == "----":
+                out += '<hr>'
+                continue
+
             # headings
             if line[:2] == '==':
                 for marker, heading in (('==', 'h4'), ('===', 'h5'), ('====', 'h6')):
                     mlen = len(marker)
                     if line[:mlen+1] == marker + ' ' and line[-mlen-1:] == ' ' + marker:
-                        line = '<' + heading + '>' + line[mlen+1:0-mlen] + '</' + heading + '>'
+                        line = '<' + heading + '>' + line[mlen+1:0-mlen-1] + '</' + heading + '>'
                 # for
 
             # lijstjes
@@ -245,14 +262,31 @@ class MaakHandleiding(object):
                 if not in_lijstje:
                     out += '<ul style="padding-left: 20px">\n'
                     in_lijstje = True
-                out += '<li  style="list-style-type: disc; padding-left: 0px">' + line[2:] + '</li>\n'
+                out += '<li style="list-style-type: disc; padding-left: 0px">' + line[2:] + '</li>\n'
                 continue
 
-            # normale regel
+            if line[:2] == '# ':
+                if not in_nummerlijstje:
+                    out += '<ol style="padding-left: 20px">\n'
+                    in_nummerlijstje = True
+                out += '<li>' + line[2:] + '</li>\n'
+                continue
+
+            # beëindig lijstjes
             if in_lijstje:
                 out += '</ul>\n'
                 in_lijstje = False
 
+            if in_nummerlijstje:
+                out += '</ol>\n'
+                in_nummerlijstje = False
+
+            if len(line) >= 1 and line[0] == ' ':
+                in_code = True
+                out = '<pre class="handleiding_code">' + line
+                continue
+
+            # normale regel
             out += '<p>' + line + '</p>\n'
         # for
 

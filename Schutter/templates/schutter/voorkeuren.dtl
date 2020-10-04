@@ -95,7 +95,7 @@
         <tr>
             <td colspan="6" class="center-align">
                 <button class="btn-nhb-blauw" type="submit">
-                    <i class="material-icons-round left">save</i>Wijzigingen opslaan</button>
+                    <i class="material-icons-round left">check</i>Wijzigingen opslaan</button>
             </td>
         </tr>
 

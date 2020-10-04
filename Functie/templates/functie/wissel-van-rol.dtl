@@ -23,26 +23,52 @@
 <p>Op deze pagina kan je de rol kiezen die je aan wilt nemen.</p>
 <p>Je huidige rol is: <b>{{ huidige_rol }}</b>.</p>
 
+{% if show_beheerder_intro %}
+    <p>&nbsp;</p>
+    <h5>Introductie Beheerder</h5>
+    <p>Lees hier de introductie voor nieuwe beheerders:
+<a class="btn-small btn-nhb-blauw" href="{{ wiki_intro_nieuwe_beheerders }}" target="_blank" rel="noopener noreferrer"><i class="material-icons-round white-text">help_outline</i></a></p>
+{% endif %}
+
 {% if show_otp_koppelen %}
-<p>&nbsp;</p>
-<h5>Veiligheid</h5>
-<p>Controle met een tweede factor is verplicht voor gebruikers met toegang tot persoonsgegevens.</p>
-<p>Meer informatie: <a href="{{ wiki_2fa_url }}" target="_blank" rel="noopener noreferrer">Tweede-factor authenticatie</a>.</p>
-<p><a class="btn-nhb-rood" href="{% url 'Functie:otp-koppelen' %}">Nu Koppelen</a></p>
+    <p>&nbsp;</p>
+    <h5>Veiligheid</h5>
+    <p>Controle met een tweede factor is verplicht voor gebruikers met toegang tot persoonsgegevens.</p>
+    <p><a class="btn-nhb-rood" href="{% url 'Functie:otp-koppelen' %}">Nu Koppelen</a></p>
+    <p>Handleiding over het koppelen: <a class="btn-nhb-blauw" href="{{ wiki_2fa_url }}" target="_blank" rel="noopener noreferrer">
+<i class="material-icons-round white-text left">help_outline</i>Tweede-factor authenticatie</a></p>
 {% endif %}
 
 {% if show_vhpg %}
-<p>&nbsp;</p>
-<h5>Hanteren persoons<wbr/>gegevens</h5>
-<p>Voordat je aan de slag kan moeten we eerst een paar afspraken maken over het omgaan met persoonsgegevens.</p>
-<p><a class="btn-nhb-rood" href="{% url 'Functie:vhpg-acceptatie' %}">Bekijken</a></p>
+    <p>&nbsp;</p>
+    <h5>Hanteren persoons<wbr/>gegevens</h5>
+    <p>Voordat je aan de slag kan moeten we eerst een paar afspraken maken over het omgaan met persoonsgegevens.</p>
+    <p><a class="btn-nhb-rood" href="{% url 'Functie:vhpg-acceptatie' %}">Bekijken</a></p>
 {% endif %}
 
 {% if show_otp_controle %}
-<p>&nbsp;</p>
-<h5>Veiligheid</h5>
-<p>Een aantal rollen komt beschikbaar nadat de controle van de tweede factor uitgevoerd is.</p>
-<a class="btn-nhb-rood" href="{% url 'Functie:otp-controle' %}">Nu controleren</a>
+    <p>&nbsp;</p>
+    <h5>Veiligheid</h5>
+    <p>Een aantal rollen komt beschikbaar nadat de controle van de tweede factor uitgevoerd is.</p>
+    <a class="btn-nhb-rood" href="{% url 'Functie:otp-controle' %}">Nu controleren</a>
+{% endif %}
+
+{% if heeft_alle_rollen %}
+    <p>&nbsp;</p>
+    <h6>Indoor:</h6>
+    <div class="white shrink-wrap-5">
+    {% for obj in heeft_alle_rollen %}
+        {% if obj.comp_type_break %}
+            </div>
+            <h6>25m1pijl:</h6>
+            <div class="white shrink-wrap-5">
+        {% endif %}
+        {% if obj.insert_break %}<br>{% endif %}
+        <form style="display: inline-block" method="post" action="{{ obj.url }}">{% csrf_token %}
+            <input class="btn-nhb-blauw" type="submit" value="{{ obj.knop_tekst }}">
+        </form>
+    {% endfor %}
+    </div>
 {% endif %}
 
 {% if object_list %}

@@ -136,7 +136,7 @@ class TestVerenigingWL(E2EHelpers, TestCase):
         histcomp = HistCompetitie()
         histcomp.seizoen = '2018/2019'
         histcomp.comp_type = '18'
-        histcomp.klasse = 'Testcurve1'       # TODO: kan de klasse een spatie bevatten?
+        histcomp.klasse = 'Testcurve1'
         histcomp.is_team = False
         histcomp.save()
 
@@ -212,32 +212,6 @@ class TestVerenigingWL(E2EHelpers, TestCase):
         self.deelcomp_regio = DeelCompetitie.objects.get(laag=LAAG_REGIO,
                                                          nhb_regio=self.regio_111,
                                                          competitie__afstand=18)
-
-    def _zet_schutter_voorkeuren(self, nhb_nr):
-        # deze functie kan alleen gebruikt worden als HWL
-        url_schutter_voorkeuren = '/schutter/voorkeuren/'
-
-        # haal als HWL de voorkeuren pagina op van een lid van de vereniging
-        # dit maakt ook de SchutterBoog records aan
-        resp = self.client.get(url_schutter_voorkeuren + '%s/' % nhb_nr)
-        self.assertEqual(resp.status_code, 200)
-
-        # post een wijziging
-        if nhb_nr == 100003:
-            resp = self.client.post(url_schutter_voorkeuren, {'nhblid_pk': nhb_nr, 'schiet_BB': 'on', 'info_R': 'on'})
-        else:
-            resp = self.client.post(url_schutter_voorkeuren, {'nhblid_pk': nhb_nr, 'schiet_R': 'on', 'info_C': 'on'})
-
-        self.assert_is_redirect(resp, '/vereniging/leden-voorkeuren/')
-
-    def _zet_ag(self, nhb_nr, afstand):
-        if nhb_nr == 100003:
-            afkorting = 'BB'
-        else:
-            afkorting = 'R'
-        schutterboog = SchutterBoog.objects.get(nhblid__nhb_nr=nhb_nr, boogtype__afkorting=afkorting)
-        datum = datetime.date(year=2020, month=4, day=1)
-        aanvangsgemiddelde_opslaan(schutterboog, afstand, 7.42, datum, self.account_bb, 'Test AG %s' % afstand)
 
     def test_overzicht(self):
         # login als WL

@@ -6,7 +6,6 @@
 
 # script for daily (or faster) execution by a crob job
 
-NHBAPPS="/var/www/nhb-apps"
 LOGDIR="/var/log/www"
 SPOOLDIR="/var/spool/records"
 TMPDIR="/tmp/downloader"
@@ -24,10 +23,13 @@ fi
 # everything sent to stdout/stderr will be picked up by crontab and sent in an email
 # avoid this by writing to a logfile
 
-STAMP=$(date +"%Y%m%d_%H%M%S")
-LOG="$LOGDIR/${STAMP}_download_and_import_records.log"
+SHORTSTAMP=$(date +"%Y%m%d")       # elke dag een nieuwe logfile
+LOG="$LOGDIR/${SHORTSTAMP}_download_and_import_records.log"
 #echo "Logging to: $LOG"
-echo "[INFO] Started" > "$LOG"
+
+STAMP=$(date +"%Y%m%d_%H%M%S")
+echo "" >> "$LOG"
+echo "[INFO] Started at $STAMP" >> "$LOG"
 
 # prepare to download
 rm -rf "$TMPDIR"
@@ -45,7 +47,7 @@ fi
 
 # download the records
 echo "[INFO] Starting download" >> "$LOG"
-python3.6 ./download_gsheet.py &>> "$LOG"
+python ./download_gsheet.py &>> "$LOG"
 
 # import or barf
 if [ -e "$RECORDS" ]
@@ -64,9 +66,17 @@ then
         echo "[INFO] Storing records file in $SPOOLFILE" >> "$LOG"
         cp "$RECORDS" "$SPOOLFILE"
 
+        # move from Records/cron/ to top-dir
+        #echo "[DEBUG] pwd=$PWD"
+        cd ../..
+        #echo "[DEBUG] pwd=$PWD"
+
         # import the records
         echo "[INFO] Importing records" >> "$LOG"
-        (cd $NHBAPPS; python3.6 manage.py import_records "$SPOOLFILE") &>> "$LOG"
+        ./manage.py import_records "$SPOOLFILE" &>> "$LOG"
+
+        echo "[INFO] Decide best records" >> "$LOG"
+        ./manage.py bepaal_beste_records &>> "$LOG"
     else
         echo "[INFO] Records have not changed" >> "$LOG"
     fi
@@ -78,6 +88,7 @@ else
     echo "[ERROR] Download failed: cannot locate $RECORDS" >> "$LOG"
 fi
 
-echo "[INFO] Finished" >> "$LOG"
+STAMP=$(date +"%Y%m%d_%H%M%S")
+echo "[INFO] Finished at $STAMP" >> "$LOG"
 
 # end of file

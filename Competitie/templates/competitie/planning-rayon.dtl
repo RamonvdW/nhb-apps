@@ -37,7 +37,7 @@
 {% if url_bond %}
     <p>&nbsp;</p>
     <p><a class="btn-nhb-blauw" href="{{ url_bond }}">
-    <i class="material-icons-round left">arrow_upward</i>Naar de landelijke planning</a></p>
+    <i class="material-icons-round left">arrow_upward</i>Planning landelijk</a></p>
 {% endif %}
 
 
@@ -54,6 +54,8 @@
         <tr>
             <th>Status</th>
             <th>Gebied</th>
+            <th>Rondes</th>
+            <th>Wedstrijden</th>
             <th><!-- kolom voor button --></th>
         </tr>
     </thead>
@@ -71,6 +73,10 @@
             </td>
 
             <td>{{ deelcomp.nhb_regio }}</td>
+
+            <td>{{ deelcomp.rondes_count }}</td>
+
+            <td>{{ deelcomp.wedstrijden_count }}</td>
 
             <!-- knop naar de details van de regioplanning -->
             <td>

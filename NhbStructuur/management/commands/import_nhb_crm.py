@@ -125,7 +125,7 @@ class Command(BaseCommand):
             return
 
         # rayons zijn statisch gedefinieerd, met een extra beschrijving
-        # controleer alleen of er overwacht een wijziging is die we over moeten nemen
+        # controleer alleen of er onverwacht een wijziging is die we over moeten nemen
         for rayon in data:
             self._count_rayons += 1
             rayon_nr = rayon['rayon_number']
@@ -314,12 +314,12 @@ class Command(BaseCommand):
 
                     if rol == 'SEC':
                         # secretaris functie krijgt email uit CRM
-                        if functie.bevestigde_email != ver_email:
+                        if functie.bevestigde_email != ver_email and functie.bevestigde_email != "":
                             self.stdout.write('[INFO] Wijziging van secretaris email voor vereniging %s: "%s" --> "%s"' % (
                                                     ver_nhb_nr, functie.bevestigde_email, ver_email))
                             self._count_wijzigingen += 1
-                            functie.bevestigde_email = ver_email
-                            functie.nieuwe_email = ''       # voor de zekerheid opruimen
+                        functie.bevestigde_email = ver_email
+                        functie.nieuwe_email = ''       # voor de zekerheid opruimen
 
                     if not self.dryrun:
                         functie.save()
@@ -441,10 +441,16 @@ class Command(BaseCommand):
             if not lid_voornaam:
                 lid_voornaam = member['initials']
                 if not lid_voornaam:
-                    self.stderr.write('[WARNING] Lid %s heeft geen voornaam of initials' % lid_nhb_nr)
-                    self._count_warnings += 1
+                    self.stderr.write('[ERROR] Lid %s heeft geen voornaam of initials' % lid_nhb_nr)
+                    self._count_errors += 1
+                    continue
 
             lid_achternaam = member['name']
+            if not lid_achternaam:
+                self.stderr.write("[ERROR] Lid %s heeft geen achternaam" % lid_nhb_nr)
+                self._count_errors += 1
+                continue        # data niet compleet voor dit lid
+
             pos = lid_achternaam.find('(')
             if pos > 0:
                 new_achternaam = lid_achternaam[:pos].strip()

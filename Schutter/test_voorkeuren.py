@@ -28,8 +28,9 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
         ver = NhbVereniging()
         ver.naam = "Grote Club"
         ver.nhb_nr = "1000"
-        ver.regio = NhbRegio.objects.get(pk=111)
+        ver.regio = NhbRegio.objects.get(regio_nr=111)
         ver.save()
+        self.nhbver1 = ver
 
         self.functie_hwl = maak_functie('HWL 1000', 'HWL')
         self.functie_hwl.nhb_ver = ver
@@ -212,5 +213,18 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
         # haal als HWL de voorkeuren pagina op van een lid van een andere vereniging
         resp = self.client.get(self.url_voorkeuren + '100002/')
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
+
+    def test_geen_wedstrijden(self):
+        # self.account_normaal is lid bij self.nhbver1
+        # zet deze in de administratieve regio
+        self.nhbver1.geen_wedstrijden = True
+        self.nhbver1.save()
+
+        self.e2e_login(self.account_normaal)
+
+        # mag geen bogen instellen
+        # helemaal geen voorkeuren, om precies te zijn
+        resp = self.client.get(self.url_voorkeuren)
+        self.assertEqual(resp.status_code, 404)     # 404 = Not found
 
 # end of file

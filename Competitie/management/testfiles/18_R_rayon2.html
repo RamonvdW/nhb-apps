@@ -1,0 +1,87 @@
+
+<html>
+<head>
+<title>Scoreprogramma NHB</title>
+<link href="scoreprogramma.css" rel="STYLESHEET" type="text/css">
+<script src="scripts.js" language="JavaScript"></script>
+</head>
+
+<body>
+
+<form name="keuzeform" action="index.php" method="POST">
+<input type="hidden" name="go" value="go">
+<input type="hidden" name="nologin" value="">
+<table width="100%" align="center" cellSpacing=0 cellPadding=0>
+<tr valign="top"><td class="logo" width="280"><img src="logonhb.gif"></td><td class="logo">
+<img src="banner.jpg"><br>Ga naar <a href="http://www.handboogsport.nl">handboogsport.nl</a> | Vragen? Kijk in de <a href="javascript:popup('faq.php')">FAQ</a> 
+</td></tr>
+</table>
+<table width="100%" align="center" cellSpacing=0 cellPadding=0>
+<tr><td class="blauw" align="left">NHB Scoreprogramma | versie: Juli 2020 | <a href="mijngegevens.php" class="linkwit">bekijk mijn gegevens</a><td class="blauw" align="right">Ik ben beheerder en wil <a href="login.php" class="linkwit">inloggen</a>...</td></td></tr>
+</table>
+<table width="100%" align="center" cellSpacing=0 cellPadding=0>
+<tr><td colspan="2"><br><b>Score overzichten</b><br>Toon mij de scores van:</td></tr>
+<tr><td width="280"><input type="radio" name="keuze" value="2" class="radio" >Vereniging:</td>
+<td><select name="vereniging" onchange="setCheckedValue(document.forms['keuzeform'].elements['keuze'], '2');">
+<option value="">Selecteer de vereniging waarvan u de scores wilt zien...
+<option value="1000"> 1000 - Grote Club (Boogstad)
+</select></td></tr>
+<tr><td><input type="radio" name="keuze" value="3" class="radio" >Regio:</td>
+<td><select name="regio" onchange="setCheckedValue(document.forms['keuzeform'].elements['keuze'], '3');">
+<option value="">Selecteer de regio waarvan u de scores wilt zien...
+<option value="101"> 101 - Noord Holland
+<option value="102"> 102 - Utrecht/Flevoland
+<option value="103"> 103 - Noord-Nederland
+<option value="104"> 104 - Gelderland en Overijssel
+<option value="105"> 105 - Zuid Holland
+<option value="106"> 106 - Zeeland e.o.
+<option value="107"> 107 - Breda e.o.
+<option value="108"> 108 - Tilburg e.o.
+<option value="109"> 109 - Den Bosch e.o.
+<option value="110"> 110 - Nijmegen e.o.
+<option value="111"> 111 - Boxtel e.o.
+<option value="112"> 112 - Eindhoven e.o.
+<option value="113"> 113 - Helmond e.o.
+<option value="114"> 114 - Noord-Limburg
+<option value="115"> 115 - Midden-Limburg
+<option value="116"> 116 - Zuid-Limburg
+</select></td></tr>
+<tr><td><input type="radio" name="keuze" value="4" class="radio" CHECKED>Rayon:</td>
+<td><select name="rayon" onchange="setCheckedValue(document.forms['keuzeform'].elements['keuze'], '4');">
+<option value="">Selecteer het rayon waarvan u de scores wilt zien...
+<option value="1"> 1 -  Noord Nederland
+<option value="2" selected> 2 -  Zuid-West Nederland
+<option value="3"> 3 -  Oost Brabant en Noord Limburg
+<option value="4"> 4 -  Zuid- en Midden-Limburg
+</select></td></tr><tr><td><input type="radio" name="keuze" value="6" class="radio" >Landelijke lijst</td><td>Geheel Nederland</td></tr><tr><td colspan=2>&nbsp;</td></tr><tr><td>Competitie:</td><td><select name="competitie"><option value="1" selected> Indoorcompetitie Recurve 2020/2021
+<option value="2"> Indoorcompetitie Compound 2020/2021
+<option value="3"> 25 meter 1 pijl competitie recurve 2020/2021
+<option value="4"> 25 meter 1 pijl competitie compound 2020/2021
+<option value="5"> Indoorcompetitie Barebow 2020/2021
+<option value="6"> Indoorcompetitie Longbow 2020/2021
+<option value="7"> Indoorcompetitie Instinctive Bow 2020/2021
+<option value="8"> 25 meter 1 pijl Barebow 2020/2021
+<option value="9"> 25 meter 1 pijl Longbow 2020/2021
+<option value="10"> 25 meter 1 pijl Instinctive Bow 2020/2021
+</select>&nbsp;&nbsp;&nbsp;&nbsp;<input type="checkbox" name=sixplus >&nbsp;Alleen schutters met 6 of meer geschoten wedstrijden.</td></tr>
+
+<tr><td>Individueel of Teams:</td><td>
+	<input type="radio" name="teamcomp" value=1  CHECKED>Individueel
+	<input type="radio" name="teamcomp" value=2  >Teams
+</td></tr>
+<tr><td>&nbsp;</td><td><input type="image" src="button_verder.jpg" onClick="grayOut(true)"></td></tr>
+</table>
+</form>
+<table width="100%" align="center" cellSpacing=0 cellPadding=0><tr>
+<td class="blauw"></td><td class="blauw" >Schutter</td><td class="blauw" >Vereniging</td><td class="blauw">Aanvangs<br>Gemiddelde</td><td class="blauw">Ronde<br>1</td><td class="blauw">Ronde<br>2</td><td class="blauw">Ronde<br>3</td><td class="blauw">Ronde<br>4</td><td class="blauw">Ronde<br>5</td><td class="blauw">Ronde<br>6</td><td class="blauw">Ronde<br>7</td><td class="blauw">Voortschrijdend<br>Gemiddelde</td><td class="blauw">Tot.</td></tr>
+<tr class="grijs"><td align=right>&nbsp;&nbsp;</td><td colspan=15><b>Recurve Cadetten klasse 1</b></td></tr>
+<tr class="grijs"><td align=right>&nbsp;&nbsp;</td><td colspan=15>&nbsp;</td></tr>
+<tr class="grijs"><td align=right>&nbsp;&nbsp;</td><td colspan=15><b>Recurve klasse 1</b></td></tr>
+<tr class="grijs"><td align=right>&nbsp;&nbsp;</td><td colspan=15>&nbsp;</td></tr>
+<tr class="grijs"><td align=right>&nbsp;&nbsp;</td><td colspan=15><b>Vage klasse<!-- geen /b --></td></tr>
+<tr><!-- geen /tr  -->
+</table><br><br>
+
+</body>
+</html>
+

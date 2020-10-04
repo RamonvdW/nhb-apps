@@ -5,7 +5,14 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from . import views_bb, views_planning, views_overzicht
+from . import (views_aangemeld,
+               views_bb,
+               views_info,
+               views_klassegrenzen,
+               views_overzicht,
+               views_planning,
+               views_tussenstand,
+               views_uitslagen)
 
 app_name = 'Competitie'
 
@@ -15,29 +22,37 @@ urlpatterns = [
          views_overzicht.CompetitieOverzichtView.as_view(),
          name='overzicht'),
 
+
     path('klassegrenzen/tonen/',
-         views_overzicht.KlassegrenzenTonenView.as_view(),
+         views_klassegrenzen.KlassegrenzenTonenView.as_view(),
          name='klassegrenzen-tonen'),
 
+
     path('lijst-regiocompetitie/<comp_pk>/alles/',
-         views_overzicht.LijstAangemeldRegiocompAllesView.as_view(),
+         views_aangemeld.LijstAangemeldRegiocompAllesView.as_view(),
          name='lijst-regiocomp-alles'),
 
     path('lijst-regiocompetitie/<comp_pk>/rayon-<rayon_pk>/',
-         views_overzicht.LijstAangemeldRegiocompRayonView.as_view(),
+         views_aangemeld.LijstAangemeldRegiocompRayonView.as_view(),
          name='lijst-regiocomp-rayon'),
 
     path('lijst-regiocompetitie/<comp_pk>/regio-<regio_pk>/',
-         views_overzicht.LijstAangemeldRegiocompRegioView.as_view(),
+         views_aangemeld.LijstAangemeldRegiocompRegioView.as_view(),
          name='lijst-regiocomp-regio'),
 
-    path('info/',
-         views_overzicht.InfoCompetitieView.as_view(),
-         name='info-competitie'),
 
-    path('tussenstand/',
-         views_overzicht.TussenstandView.as_view(),
-         name='tussenstand'),
+    path('lijst-regiocompetitie/<comp_pk>/regio-<regio_pk>/dagdeel-behoefte/',
+         views_aangemeld.Inschrijfmethode3BehoefteView.as_view(),
+         name='inschrijfmethode3-behoefte'),
+
+    path('lijst-regiocompetitie/<comp_pk>/regio-<regio_pk>/dagdeel-behoefte-als-bestand/',
+         views_aangemeld.Inschrijfmethode3BehoefteAlsBestandView.as_view(),
+         name='inschrijfmethode3-behoefte-als-bestand'),
+
+
+    path('info/',
+         views_info.InfoCompetitieView.as_view(),
+         name='info-competitie'),
 
 
     path('instellingen-volgende-competitie/',
@@ -87,7 +102,69 @@ urlpatterns = [
 
     path('planning/wedstrijd/verwijder/<wedstrijd_pk>/',
          views_planning.VerwijderWedstrijdView.as_view(),
-         name='verwijder-wedstrijd')
+         name='verwijder-wedstrijd'),
+
+
+    path('wedstrijd/uitslag-invoeren/<wedstrijd_pk>/',
+         views_uitslagen.WedstrijdUitslagInvoerenView.as_view(),
+         name='wedstrijd-uitslag-invoeren'),
+
+    path('wedstrijd/uitslag-controleren/<wedstrijd_pk>/',
+         views_uitslagen.WedstrijdUitslagControlerenView.as_view(),
+         name='wedstrijd-uitslag-controleren'),
+
+    path('wedstrijd/uitslag-accorderen/<wedstrijd_pk>/',
+         views_uitslagen.WedstrijdUitslagControlerenView.as_view(),
+         name='wedstrijd-geef-akkoord'),
+
+    path('wedstrijd/bekijk-uitslag/<wedstrijd_pk>/',
+         views_uitslagen.WedstrijdUitslagBekijkenView.as_view(),
+         name='wedstrijd-bekijk-uitslag'),
+
+    path('dynamic/deelnemers-ophalen/',
+         views_uitslagen.DynamicDeelnemersOphalenView.as_view(),
+         name='dynamic-deelnemers-ophalen'),
+
+    path('dynamic/check-nhbnr/',
+         views_uitslagen.DynamicZoekOpNhbnrView.as_view(),
+         name='dynamic-check-nhbnr'),
+
+    path('dynamic/scores-opslaan/',
+         views_uitslagen.DynamicScoresOpslaanView.as_view(),
+         name='dynamic-scores-opslaan'),
+
+
+    path('tussenstand/',
+         views_tussenstand.TussenstandView.as_view(),
+         name='tussenstand'),
+
+    path('tussenstand/<afstand>-<comp_boog>/regio/',
+         views_tussenstand.TussenstandRegioView.as_view(),
+         name='tussenstand-regio'),
+
+    path('tussenstand/<afstand>-<comp_boog>/regio/<regio_nr>/',
+         views_tussenstand.TussenstandRegioView.as_view(),
+         name='tussenstand-regio-n'),
+
+    path('tussenstand/<afstand>-<comp_boog>/regio-alt/',
+         views_tussenstand.TussenstandRegioAltView.as_view(),
+         name='tussenstand-regio-alt'),
+
+    path('tussenstand/<afstand>-<comp_boog>/regio-alt/<regio_nr>/',
+         views_tussenstand.TussenstandRegioAltView.as_view(),
+         name='tussenstand-regio-n-alt'),
+
+    path('tussenstand/<afstand>-<comp_boog>/rayon/',
+         views_tussenstand.TussenstandRayonView.as_view(),
+         name='tussenstand-rayon'),
+
+    path('tussenstand/<afstand>-<comp_boog>/rayon/<rayon_nr>/',
+         views_tussenstand.TussenstandRayonView.as_view(),
+         name='tussenstand-rayon-n'),
+
+    path('tussenstand/<afstand>-<comp_boog>/bond/',
+         views_tussenstand.TussenstandBondView.as_view(),
+         name='tussenstand-bond'),
 ]
 
 # end of file

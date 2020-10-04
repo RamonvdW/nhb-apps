@@ -10,6 +10,7 @@ from BasisTypen.models import IndivWedstrijdklasse, TeamWedstrijdklasse
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
 from Functie.models import Functie
 from Schutter.models import SchutterBoog
+from Score.models import Score, ScoreHist
 from Wedstrijden.models import WedstrijdenPlan
 from decimal import Decimal
 from datetime import date
@@ -80,30 +81,31 @@ class Competitie(models.Model):
         now = timezone.now()
         now = datetime.date(year=now.year, month=now.month, day=now.day)
 
-        if now < self.begin_aanmeldingen:
-            # zijn de wedstrijdklassen vastgesteld?
-            if CompetitieKlasse.objects.filter(competitie=self).count() == 0:
-                # A1 = aanvangsgemiddelden en klassegrenzen zijn vastgesteld
-                self.fase = 'A1'
-                return
-
-            # A2 = klassegrenzen zijn bepaald
-            self.fase = 'A2'
+        # A1 totdat aanvangsgemiddelden en klassegrenzen zijn vastgesteld
+        self.fase = 'A1'
+        if self.competitieklasse_set.count() == 0:
+            # wedstrijdklassen zijn nog niet vastgesteld
             return
 
-        # B = open voor inschrijvingen
+        # A2 = instellingen regio, tot aanmeldingen beginnen
+        self.fase = 'A2'
+        if now < self.begin_aanmeldingen:
+            # nog niet open voor aanmelden
+            return
+
+        # B = open voor inschrijvingen, tot sluiten inschrijvingen
+        self.fase = 'B'
         if now < self.einde_aanmeldingen:
-            self.fase = 'B'
             return
 
         # C = aanmaken teams; gesloten voor individuele inschrijvingen
+        self.fase = 'C'
         if now < self.einde_teamvorming:
-            self.fase = 'C'
             return
 
         # D = aanmaken poules en afronden wedstrijdschema's
+        self.fase = 'D'
         if now < self.eerste_wedstrijd:
-            self.fase = 'D'
             return
 
         # E = Begin wedstrijden
@@ -194,6 +196,7 @@ class DeelCompetitie(models.Model):
 
     # methode 3: toegestane dagdelen
     # komma-gescheiden lijstje met DAGDEEL: GE,AV
+    # LET OP: leeg = alles toegestaan!
     toegestane_dagdelen = models.CharField(max_length=20, default='', blank=True)
 
     # TODO: VSG/Vast, etc.
@@ -219,7 +222,7 @@ class DeelcompetitieRonde(models.Model):
 
     # het cluster waar deze planning specifiek bij hoort (optioneel)
     cluster = models.ForeignKey(NhbCluster, on_delete=models.PROTECT,
-                                            null=True, blank=True)      # cluster is optioneel
+                                null=True, blank=True)      # cluster is optioneel
 
     # het week nummer van deze ronde
     # moet liggen in een toegestane reeks (afhankelijk van 18m/25m)
@@ -227,7 +230,7 @@ class DeelcompetitieRonde(models.Model):
 
     # een eigen beschrijving van deze ronde
     # om gewone rondes en inhaalrondes uit elkaar te houden
-    beschrijving = models.CharField(max_length=20)
+    beschrijving = models.CharField(max_length=40)
 
     # wedstrijdenplan voor deze competitie ronde
     plan = models.ForeignKey(WedstrijdenPlan, on_delete=models.PROTECT)
@@ -244,6 +247,12 @@ class DeelcompetitieRonde(models.Model):
         msg += " (%s)" % self.beschrijving
         return msg
 
+    def is_voor_import_oude_programma(self):
+        # beetje zwak, maar correcte functioneren van de import uit het oude programma
+        # is afhankelijk van de beschrijving, dus mag niet aangepast worden
+        # "Ronde 1 oude programma" .. "Ronde 7 oude programma"
+        return self.beschrijving[:6] == 'Ronde ' and self.beschrijving[-15:] == ' oude programma'
+
 
 def maak_deelcompetitie_ronde(deelcomp, cluster=None):
     """ Maak een nieuwe deelcompetitie ronde object aan
@@ -255,6 +264,9 @@ def maak_deelcompetitie_ronde(deelcomp, cluster=None):
             .objects
             .filter(deelcompetitie=deelcomp, cluster=cluster)
             .order_by('-week_nr'))
+
+    # filter de import rondes eruit
+    objs = [obj for obj in objs if not obj.is_voor_import_oude_programma()]
 
     if len(objs) > 0:
         nieuwe_week_nr = objs[0].week_nr + 1
@@ -342,6 +354,10 @@ class RegioCompetitieSchutterBoog(models.Model):
     aanvangsgemiddelde = models.DecimalField(max_digits=5, decimal_places=3, default=0.0)    # 10,000
     klasse = models.ForeignKey(CompetitieKlasse, on_delete=models.CASCADE)
 
+    # alle scores van deze schutterboog in deze competitie
+    scores = models.ManyToManyField(Score,
+                                    blank=True)  # mag leeg zijn / gemaakt worden
+
     score1 = models.PositiveIntegerField(default=0)
     score2 = models.PositiveIntegerField(default=0)
     score3 = models.PositiveIntegerField(default=0)
@@ -350,7 +366,7 @@ class RegioCompetitieSchutterBoog(models.Model):
     score6 = models.PositiveIntegerField(default=0)
     score7 = models.PositiveIntegerField(default=0)
 
-    # som van score1..score7
+    # som van de beste 6 van score1..score7
     totaal = models.PositiveIntegerField(default=0)
 
     # welke van score1..score7 is de laagste?
@@ -367,6 +383,18 @@ class RegioCompetitieSchutterBoog(models.Model):
 
     # voorkeur dagdelen
     inschrijf_voorkeur_dagdeel = models.CharField(max_length=2, choices=DAGDEEL, default="GN")
+
+    # alternatieve uitslag - dit is tijdelijk
+    alt_score1 = models.PositiveIntegerField(default=0)
+    alt_score2 = models.PositiveIntegerField(default=0)
+    alt_score3 = models.PositiveIntegerField(default=0)
+    alt_score4 = models.PositiveIntegerField(default=0)
+    alt_score5 = models.PositiveIntegerField(default=0)
+    alt_score6 = models.PositiveIntegerField(default=0)
+    alt_score7 = models.PositiveIntegerField(default=0)
+    alt_totaal = models.PositiveIntegerField(default=0)
+    alt_laagste_score_nr = models.PositiveIntegerField(default=0)  # 1..7
+    alt_gemiddelde = models.DecimalField(max_digits=5, decimal_places=3, default=0.0)  # 10,000
 
     def __str__(self):
         # deelcompetitie (komt achteraan)
@@ -397,6 +425,15 @@ class RegioCompetitieSchutterBoog(models.Model):
         verbose_name_plural = "Regiocompetitie Schuttersboog"
 
     objects = models.Manager()      # for the editor only
+
+
+class CompetitieTaken(models.Model):
+
+    # simpele tabel om bij te houden hoe het met de achtergrond taken gaat
+
+    hoogste_scorehist = models.ForeignKey(ScoreHist,
+                                          null=True, blank=True,        # mag leeg in admin interface
+                                          on_delete=models.SET_NULL)
 
 
 # end of file

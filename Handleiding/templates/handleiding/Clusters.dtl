@@ -1,0 +1,42 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2020 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+{% block title %}Clusters{% endblock %}
+
+{% block pagina %}
+<div class="white" style="padding:10px 30px 10px 30px">
+<h4>Clusters</h4>
+<p>Een cluster is een geografisch gebied binnen een regio en kan vrij ingedeeld worden door de RCL.</p>
+<p></p>
+<p>De clusters worden typisch toegepast:</p>
+<ul style="padding-left: 20px">
+<li style="list-style-type: disc; padding-left: 0px">om de reistijd en/of kosten acceptabel te houden. Voorbeeld: schutters op de eilanden, of grote geografische spreiding.</li>
+<li style="list-style-type: disc; padding-left: 0px">omdat er beperkingen zijn wie de accommodatie mogen betreden. Voorbeeld: bedrijfsverenigingen met accommodatie op het bedrijfsterrein.</li>
+</ul>
+<p></p>
+<p>De website biedt standaard 8 clusters per regio:</p>
+<ul style="padding-left: 20px">
+<li style="list-style-type: disc; padding-left: 0px">4 voor de Indoor competitie</li>
+<li style="list-style-type: disc; padding-left: 0px">4 voor de 25m 1pijl competitie.</li>
+</ul>
+<p></p>
+<p>Verenigingen kunnen worden toegevoegd aan twee clusters (apart voor Indoor een 25m 1pijl).</p>
+<p></p>
+<p>De clusters bestaan uit het nummer van de regio plus een unieke letter, bijvoorbeeld 101d.</p>
+<p>De RCL kan elk clusters een beschrijving geven.</p>
+<p></p>
+<p>Bij behoefte kunnen extra clusters aangevraagd worden via het bondsbureau. De letters zijn ook aan te passen.</p>
+<p></p>
+<p></p>
+<hr><p><h5>Verder</h5></p>
+<p>Terug naar de <a href="/handleiding/Hoofdpagina/">Hoofdpagina</a></p>
+<p></p>
+<p><a href="/handleiding/Planning_Regio/">Planning Regio</a></p>
+
+</div>
+
+{% endblock %}

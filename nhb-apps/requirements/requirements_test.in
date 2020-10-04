@@ -1,0 +1,11 @@
+# required pip packages
+
+# base packages
+-r requirements.txt
+
+# add-ons for test environment:
+
+# SSO integration with Wiki
+djangosaml2idp
+
+# end of file

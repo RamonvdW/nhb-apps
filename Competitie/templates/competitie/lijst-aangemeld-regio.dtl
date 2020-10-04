@@ -6,18 +6,18 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}Aanmeldingen{% endblock %}
+{% block title %}Inschrijvingen{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="lijst-aangemeld-regio" %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-lijst-aangemeld-regio" %}
 
-<h4>Aanmeldingen regiocompetitie</h4>
+<h4>Inschrijvingen voor de regiocompetitie</h4>
 
-<p>Op deze pagina tonen we inschrijving voor de regiocompetitie <b>{{ competitie.beschrijving }}</b>.</p>
+<p>Op deze pagina tonen we inschrijvingen voor de regiocompetitie <b>{{ competitie.beschrijving }}</b>.</p>
 
 <p>Filter mogelijkheden:</p>
 
-<div class="white">
+<div class="white shrink-wrap-5">
 
     {% if zoom_alles_url %}
         <a class="margin-5 btn-nhb-blauw btn-small" href="{{ zoom_alles_url }}">Alles</a>
@@ -67,6 +67,14 @@
 
 <p>Aantal: {{ object_list.count }}</p>
 
+{% if show_dagdeel_telling %}
+    <p>&nbsp;</p>
+    <p>
+        <a class="btn-nhb-blauw" href="{{ url_behoefte }}">
+            <i class="material-icons-round left">shopping_cart</i>Benodigde dagdelen</a>
+    </p>
+{% endif %}
+
 
 {% if object_list.count %}
 
@@ -88,9 +96,9 @@
         {% endif %}
 
         <tr>
-            <td>[{{ obj.schutterboog.nhblid.bij_vereniging.nhb_nr }}] {{ obj.schutterboog.nhblid.bij_vereniging.naam }}</td>
+            <td>[{{ obj.bij_vereniging.nhb_nr }}] {{ obj.bij_vereniging.naam }}</td>
             <td>{{ obj.aanvangsgemiddelde }}{% if obj.is_handmatig_ag %}<i> (handmatig)</i>{% endif %}</td>
-            <td>{{ obj.schutterboog.nhblid.volledige_naam }}</td>
+            <td>[{{ obj.schutterboog.nhblid.nhb_nr }}] {{ obj.schutterboog.nhblid.volledige_naam }}</td>
         </tr>
 
     {% endfor %}

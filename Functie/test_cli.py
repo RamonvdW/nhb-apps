@@ -76,4 +76,30 @@ class TestAccountCLI(E2EHelpers, TestCase):
         self.assertTrue("Functie matching query does not exist" in f1.getvalue())
         self.assertTrue(f2.getvalue() == '')
 
+    def test_maak_rcl(self):
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('maak_rcl', 'normaal', '18', '101', stderr=f1, stdout=f2)
+        self.assertTrue(f1.getvalue() == '')
+        self.assertTrue("Account 'normaal' is nu RCL Regio 101 Indoor" in f2.getvalue())
+
+        # probeer nog een keer RCL te maken
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('maak_rcl', 'normaal', '18', '101', stderr=f1, stdout=f2)
+        # print('f1:', f1.getvalue())
+        # print('f2:', f2.getvalue())
+        self.assertTrue("[WARNING] Account 'normaal' is al RCL Regio 101 Indoor" in f1.getvalue())
+        self.assertTrue(f2.getvalue() == '')
+
+    def test_maak_rcl_bad(self):
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('maak_rcl', 'bestaatniet', '18', '000', stderr=f1, stdout=f2)
+        # print('f1:', f1.getvalue())
+        # print('f2:', f2.getvalue())
+        self.assertTrue("Account matching query does not exist" in f1.getvalue())
+        self.assertTrue("Functie matching query does not exist" in f1.getvalue())
+        self.assertTrue(f2.getvalue() == '')
+
 # end of file

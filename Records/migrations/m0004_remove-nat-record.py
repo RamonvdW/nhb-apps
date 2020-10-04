@@ -10,10 +10,12 @@ from django.db import migrations
 class Migration(migrations.Migration):
     """ Migratie class voor dit deel van de applicatie """
 
+    # volgorde afdwingen
     dependencies = [
         ('Records', 'm0003_para-klasse'),
     ]
 
+    # migratie functies
     operations = [
         migrations.RemoveField(
             model_name='indivrecord',

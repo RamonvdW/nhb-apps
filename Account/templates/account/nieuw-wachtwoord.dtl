@@ -1,0 +1,53 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2019-2020 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Nieuw wachtwoord{% endblock %}
+
+{% block pagina %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="account-nieuw-wachtwoord" %}
+
+<h4>Nieuw wachtwoord</h4>
+
+<p>Via deze pagina kan je een nieuw wachtwoord kiezen.</p>
+
+<div class="container z-depth-2 white">
+
+    <div class="row nhb-blauw white-text">
+        <div class="col s12 center-align">
+            <h5>Wachtwoord wijzigen</h5>
+            <p>Voor een bestaand account</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <form class="col s12" action="{% url 'Account:nieuw-wachtwoord' %}" method="post">
+{% csrf_token %}<!-- dit compacte formaat zorgt voor juiste minify -->
+
+            <div class="row"><div class="input-field col s12">
+                <label class="black-text" for="id_ww">Nieuwe wachtwoord:</label>
+                <input class="with-gap" type="password" autofocus name="wachtwoord" value="" required id="id_ww">
+            </div></div>
+
+            {% if foutmelding %}
+                <div class="row"><div class="col s12">
+                    <span class="red-text">Fout: {{ foutmelding }}</span>
+                </div></div>
+            {% endif %}
+
+            <div class="row"><div class="col s12">
+                <div class="center-align">
+                    <button class="btn-nhb-blauw" type="submit">
+                        <i class="material-icons-round left">check</i>Opslaan</button>
+                </div>
+            </div></div>
+
+        </form>
+    </div>
+</div>
+
+{% endblock %}

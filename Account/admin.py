@@ -42,7 +42,7 @@ class AccountAdmin(UserAdmin):
 class AccountEmailAdmin(admin.ModelAdmin):
 
     # velden om in te zoeken (in de lijst)
-    search_fields = ('account__username',)
+    search_fields = ('account__username', 'bevestigde_email', 'nieuwe_email')
 
     list_filter = ('email_is_bevestigd',)
 

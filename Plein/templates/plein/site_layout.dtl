@@ -26,32 +26,28 @@
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans&amp;display=swap">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu&amp;display=swap">
         <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Round">
-        <link rel="stylesheet" href="{% static 'materialize/materialize-new-9.css' %}">
-        <link rel="stylesheet" href="{% static 'plein/site_layout.css' %}"> <!-- moet ná materialize css -->
+        <link rel="stylesheet" href="{% static 'materialize-new-31.css' %}">
+        <link rel="stylesheet" href="{% static 'site_layout_min-6.css' %}"> <!-- moet ná materialize css -->
         {% block extraheader %}{% endblock %}
     </head>
 
     <body class="nhb-grijs">
         <div id="container">        <!-- css manipulates this to make space for the menu -->
 
-            <!-- sidenav -->
-            <div id="menu">
-                <ul id="slide-out" class="sidenav sidenav-fixed">
-                    {% include 'plein/menu.dtl' %}
-                </ul>
-            </div>
-
             <!-- main contents -->
             <div id="content">      <!-- css manipulates this -->
+
                 <!-- button to call-up the sidenav; hidden when not needed -->
                 <a id="discover-menu" href="#" data-target="slide-out" class="sidenav-trigger hide-on-large-only">
                     <i class="material-icons-round black-text">menu</i>
                 </a>
 
-                <div class="tap-target" data-target="discover-menu">
+                <!-- aandachtstrekker: uitleg hoe in het menu te komen -->
+                <div class="tap-target" data-target="discover-menu" id="tap-target-voor-menu">
                     <div class="tap-target-content white-text">
                         <h5>Toegang tot het menu</h5>
                         <p>Gebruik de drie streepjes om het menu op te roepen</p>
+                        <button class="btn-nhb-blauw" onclick="closeTapTarget('tap-target-voor-menu')">Ik snap het</button>
                     </div>
                 </div>
 
@@ -68,30 +64,40 @@
                 <!-- echt pagina komt hier, vanuit de template -->
                 {% block pagina %}{% endblock %}
             </div>
+
+            <!-- sidenav (als laatste zodat dit niet de eerste tabstop is) -->
+            <div id="menu">
+                <ul id="slide-out" class="sidenav sidenav-fixed">
+                    {% include 'plein/menu.dtl' %}
+                </ul>
+            </div>
+
         </div>
 
-        <!-- TODO: minimized javascript -->
-        <script src="{% static 'materialize/materialize.js' %}"></script>
-        <!--<script src="{% static 'materialize/materialize.min.js' %}"></script>-->
+        <script src="{% static 'materialize-new-2_min.js' %}"></script>
 
         <!-- framework init, after everything has been loaded and instantiated -->
-        <script>
-            function discover_popup_delayed_open() {
+        <script type="application/javascript">
+            function discover_popup_delayed_open()
+            {
                 // in de tussentijd kan het scherm al weer groter zijn geworden
-                var menu_is_hidden = window.matchMedia("(max-width: 992px)");
-                if (menu_is_hidden.matches) {
-                    var elem = document.querySelector('.tap-target');
+                let menu_is_hidden = window.matchMedia("(max-width: 985px)");
+                if (menu_is_hidden.matches)
+                {
+                    let elem = document.querySelector(".tap-target");
                     M.TapTarget.getInstance(elem).open();
                 }
             }
 
-            function discover_popup_show(mq_event) {
+            function discover_popup_show(mq_event)
+            {
                 // scherm is kleiner geworden (of initieel klein), dus toon de tap target
                 if (mq_event == null || mq_event.matches) {
-                    // cookie zorgt ervoor dat de pop-up maar 5x tonen
-                    var count = getCookieNumber('menu_discover');
-                    if (count < 3) {
-                        document.cookie = 'menu_discover=' + (count + 1) + '; path=/';
+                    // cookie zorgt ervoor dat de pop-up maar 3x tonen
+                    let count = getCookieNumber("menu_discover");
+                    if (count < 3)
+                    {
+                        document.cookie = "menu_discover=" + (count + 1) + "; path=/";
                         // toon met een kleine vertraging
                         setTimeout(discover_popup_delayed_open, 2000);
                     }
@@ -100,62 +106,34 @@
 
             function discover_popup_hide(mq_event) {
                 // scherm is kleiner geworden, dus haal de tap-target uit beeld
-                if (mq_event.matches) {
-                    var elem = document.querySelector('.tap-target');
+                if (mq_event.matches)
+                {
+                    let elem = document.querySelector(".tap-target");
                     M.TapTarget.getInstance(elem).close();
                 }
             }
 
-            document.addEventListener('DOMContentLoaded', function() {
-                // sidenav
-                var elems = document.querySelectorAll('.sidenav');
-                var insts = M.Sidenav.init(elems, {});
+            function closeTapTarget(id)
+            {
+                // haal het tap-target element uit beeld
+                let elem = document.getElementById(id);
+                let inst = M.TapTarget.getInstance(elem);
+                inst.close();       // administratief
+                inst.destroy();     // verwijderd visuele elementen
 
-                // accordeons
-                // TODO: defaults statisch aanpassen
-                options = { inDuration: 100,    // default is 300
-                            outDuration: 100    // default is 300
-                          };
-                var elems = document.querySelectorAll('.collapsible');
-                var insts = M.Collapsible.init(elems, options);
+                // zet het cookie dat voorkomt dat de tap target weer getoond wordt
+                document.cookie = "menu_discover=9; path=/";
+            }
 
-                // tooltips
-                var elems = document.querySelectorAll('.tooltipped');
-                var insts = M.Tooltip.init(elems, { enterDelay: 1000 });
-
-                // feature discovery
-                var elems = document.querySelectorAll('.tap-target');
-                var insts = M.TapTarget.init(elems, {});
-
-                var count = getCookieNumber('menu_discover');
-                if (count < 3) {
-                    var menu_is_shown = window.matchMedia("(min-width: 992px)");
-                    menu_is_shown.addListener(discover_popup_hide);
-
-                    var menu_is_hidden = window.matchMedia("(max-width: 992px)");
-                    menu_is_hidden.addListener(discover_popup_show);
-                    if (menu_is_hidden.matches) {
-                        // show immediately
-                        discover_popup_show(null);
-                    }
-                }
-
-                // rolgordijnen
-                var elems = document.querySelectorAll('select');
-                var insts = M.FormSelect.init(elems, {});
-            })
-        </script>
-
-        <!-- helper functie om een opgeslagen cookie in te lezen -->
-        <script>
+            // helper functie om een opgeslagen cookie in te lezen
             function getCookie(name) {
-                var cookieValue = null;
-                if (document.cookie && document.cookie !== '') {
-                    var cookies = document.cookie.split(';');
-                    for (var i = 0; i < cookies.length; i++) {
-                        var cookie = cookies[i].trim();
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== "") {
+                    let cookies = document.cookie.split(";");
+                    for (let i = 0; i < cookies.length; i++) {
+                        let cookie = cookies[i].trim();
                         // Does this cookie string begin with the name we want?
-                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        if (cookie.substring(0, name.length + 1) === (name + "=")) {
                             cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
                             break;
                         }
@@ -165,18 +143,65 @@
             }
 
             function getCookieNumber(name) {
-                var value = getCookie(name);
-                var number = 0;
+                let value = getCookie(name);
+                let number = 0;
                 if (value != null) {
                     number = parseInt(value, 10);
                     if (isNaN(number)) number = 0;
                 }
                 return number;
             }
-        </script>
 
-        <!-- tabel filter -->
-        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                // sidenav
+                let elems = document.querySelectorAll(".sidenav");
+                M.Sidenav.init(elems, {});
+
+                // accordeons
+                // TODO: defaults statisch aanpassen
+                const options = { inDuration: 100,    // default is 300
+                                  outDuration: 100    // default is 300
+                                };
+                elems = document.querySelectorAll(".collapsible");
+                M.Collapsible.init(elems, options);
+
+                // tooltips
+                elems = document.querySelectorAll(".tooltipped");
+                M.Tooltip.init(elems, { enterDelay: 1000 });
+
+                // feature discovery
+                elems = document.querySelectorAll(".tap-target");
+                M.TapTarget.init(elems, {});
+
+                // rolgordijnen
+                elems = document.querySelectorAll("select");
+                M.FormSelect.init(elems, {});
+
+                let count = getCookieNumber("menu_discover");
+                if (count < 3)
+                {
+                    // -------------
+                    // KEEP IN SYNC
+                    // - site_layout.css: media query to show/hide labels
+                    // - site_layout.dtl: javascript checks for menu visible/hidden with media query
+                    // - materialize.js: cut-off point to show/hide sidebar (menu)
+                    // - variables.css: media query ranges
+                    // -------------
+
+                    let menu_is_shown = window.matchMedia("(min-width: 1021px)");
+                    menu_is_shown.addEventListener("change", discover_popup_hide);
+
+                    let menu_is_hidden = window.matchMedia("(max-width: 1020px)");
+                    menu_is_hidden.addEventListener("change", discover_popup_show);
+                    if (menu_is_hidden.matches) {
+                        // show immediately
+                        discover_popup_show(null);
+                    }
+                }
+            })
+
+            // ### tabel filter ###
+
             // wordt gebruikt om te reageren op de input van een gebruiker in een zoekveld
             // en regels van de tabel wel/niet zichtbaar te maken
             // kolommen waarin gezocht mag worden moeten het 'filter' attribuut hebben
@@ -208,40 +233,91 @@
             function myTableFilter(zoekveld, tableId)
             {
                 //console.log("myTableFilter: ", zoekveld);
-                var table = document.getElementById(tableId);
-                if (table == undefined) return;
-                //console.log('  table: ', table);
+                const table = document.getElementById(tableId);
+                if (table === undefined) return;
+                //console.log("  table: ", table);
 
-                filter_tekst = zoekveld.value;
-                //console.log('  filter_tekst: ', filter_tekst);
+                const filter = /[\u0300-\u036f]/g;        // precompiled regexp, for performance gain
+
+                const filter_tekst = zoekveld.value.normalize("NFD").replace(filter, "").toLowerCase();
+                //console.log("  filter_tekst: ", filter_tekst);
 
                 // doorzoek de header kolommen op filter=on
-                var filter_kolommen = new Array();
-                for (var i=0, row; row = table.tHead.rows[i]; i++) {        // stops when row=null
-                    for (var j=0, col_nr=0, cell; cell = row.cells[j]; j++) {         // stops when cell=null
-                        if (cell.hasAttribute('filter')) filter_kolommen.push(col_nr);
-                        if (cell.hasAttribute('colSpan')) {
-                            //console.log('cell with colSpan: ', cell.colSpan);
+                const filter_kolommen = new Array();
+                for (let i=0, row; row = table.tHead.rows[i]; i++)          // stops when row=null
+                {
+                    for (let j=0, col_nr=0, cell; cell = row.cells[j]; j++) // stops when cell=null
+                    {
+                        if (cell.hasAttribute("filter")) filter_kolommen.push(col_nr);
+
+                        if (cell.hasAttribute("colSpan"))
+                        {
+                            //console.log("cell with colSpan: ", cell.colSpan);
                             col_nr += cell.colSpan;
-                        } else {
+                        }
+                        else
+                        {
                             col_nr += 1;
                         }
                     }
                 }
-                //console.log('kolom nummers met filter: ', filter_kolommen);
+                //console.log("kolom nummers met filter: ", filter_kolommen);
 
-                var body = table.tBodies[0];
-                //console.log("body: ", body);        // for debug
-                for (var i=0, row; row = body.rows[i]; i++) {               // stops when row=null
+                const row_deferred_hide = new Array();    // deferred updates, for performance gain
+                const row_deferred_show = new Array();
+
+                const body = table.tBodies[0];
+                //console.log("body: ", body);
+                for (let i=0, row; row = body.rows[i]; i++)     // stops when row=null
+                {
+                    const filter_cmd = row.dataset["tablefilter"];
+                    if (filter_cmd === "stop") break;      // from the for
+
                     // besluit om deze regel te tonen, of niet
-                    var show = false;
-                    // kijk of de zoekterm in een van de kozen kolommen voorkomt
-                    filter_kolommen.forEach(kolom_nr => {
-                            // TODO: dit is nog niet case-insensitive of accent-insensitive
-                            if (row.cells[kolom_nr].innerText.indexOf(filter_tekst) != -1) show = true;
-                        });
-                    row.style.display = show ? 'table-row' : 'none';
+                    let show = false;
+
+                    if (filter_tekst == "") {
+                        // performance optimization: converteren van elke tabel string
+                        // stellen we uit tot de gebruiker een eerste letter invoert
+                        show = true;
+                    } else {
+                        // kijk of de zoekterm in een van de gekozen kolommen voorkomt
+                        filter_kolommen.forEach(kolom_nr => {
+                                const cell = row.cells[kolom_nr];
+                                //if (cell === undefined) { console.log('missing cell in kolom_nr=', kolom_nr, "in row", i); }
+                                let clean_text = cell.dataset["clean_text"];    // cached resultaat ophalen
+                                //console.log("clean_text:", clean_text);
+                                if (typeof clean_text === "undefined") {
+                                    // eerste keer: voer de vervorming uit en cache het resultaat op
+                                    clean_text = cell.innerText.normalize("NFD").replace(filter, "").toLowerCase();
+                                    cell.dataset["clean_text"] = clean_text;
+                                }
+                                if (clean_text.indexOf(filter_tekst) != -1) show = true;
+                            });
+                    }
+
+                    // onderzoek of een table row getoond of verstopt moet worden
+                    // sla het resultaat op, zodat we niet in een read-write-read-write cyclus komen
+                    // waarbij de browser steeds het hele scherm update voordat de read doorgang vindt
+                    // OLD: row.style.display = show ? "table-row" : "none";
+                    if (show) {
+                        if (row.style.display == "none") row_deferred_show.push(i);
+                    }
+                    else {
+                        if (row.style.display != "none") row_deferred_hide.push(i);
+                    }
                 }
+
+                //console.log("row_deferred_hide:", row_deferred_hide);
+                //console.log("row_deferred_show:", row_deferred_show);
+
+                // voor de deferred updates uit
+                row_deferred_hide.forEach(row_nr => {
+                        body.rows[row_nr].style.display = "none";
+                    });
+                row_deferred_show.forEach(row_nr => {
+                        body.rows[row_nr].style.display = "table-row";
+                    });
             }
 
             // zoek alle tabellen met een zoekveld en trigger de oninput method
@@ -249,13 +325,19 @@
             // anders zijn de tabellen niet meer gefiltreerd
             window.addEventListener("load", function(){
                 //console.log("load!");
-                var tables = document.getElementsByTagName('table');
-                //console.log('tables: ', tables);
-                for (var i=0, table; table = tables[i]; i++) {
-                    //console.log('  table: ', table);
-                    inputs = table.getElementsByTagName('input');
-                    if (inputs.length >= 1) {
-                        myTableFilter(inputs[0], table.id);
+                const tables = document.getElementsByTagName("table");
+                //console.log("tables: ", tables);
+                for (let i=0, table; table = tables[i]; i++)
+                {
+                    //console.log("  table:", table, ", table.id=", table.id);
+                    if (table.id !== "")
+                    {
+                        const inputs = table.getElementsByTagName("input");
+                        //console.log("  inputs:", inputs);
+                        if (inputs.length >= 1)
+                        {
+                            myTableFilter(inputs[0], table.id);
+                        }
                     }
                 }
 

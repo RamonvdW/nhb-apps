@@ -10,15 +10,31 @@
 {% block pagina %}
 <div class="white" style="padding:10px 30px 10px 30px">
 <h4>Handleiding RCL</h4>
-<p>Als Regiocompetitieleider (RCL) ben je verantwoordelijk voor:</p>
+<p>De Regiocompetitieleider (RCL) is verantwoordelijk voor het organiseren van de competities.</p>
+<p></p>
+<p>De website kent 32 RCL rollen: voor elk van de 16 regios en per competitie type: Indoor / 25m 1pijl.</p>
+<p></p>
+<p>De RCL krijgt de volgende mogelijkheden:</p>
 <ul style="padding-left: 20px">
-<li  style="list-style-type: disc; padding-left: 0px">Het organiseren van een regiocompetitie voor de Indoor of de 25m 1pijl competitie</li>
-<li  style="list-style-type: disc; padding-left: 0px">Een van de 16 rego's waarin Nederland opgedeeld is door de NHB</li>
-<li  style="list-style-type: disc; padding-left: 0px">Afspraken maken voor het opstellen van de wedstrijdkalender: in welke weeknummers en op welke locaties kan er geschoten worden?</li>
-<li  style="list-style-type: disc; padding-left: 0px">Zorgen dat elke schutter 7 scores neer kan zetten</li>
+<li style="list-style-type: disc; padding-left: 0px">Instellingen voor zijn regio aanpassen</li>
+<li style="list-style-type: disc; padding-left: 0px">Wedstrijdkalender opstellen: in welke weeknummers en op welke locaties kan er geschoten worden?</li>
+<li style="list-style-type: disc; padding-left: 0px">Van elke vereniging binnen de regio de HWL koppelen (de secretaris kan dit ook).</li>
+<li style="list-style-type: disc; padding-left: 0px">Informatie inzien over de accommodaties van de verenigingen binnen de regio.</li>
 </ul>
 <p></p>
-<p>Terug naar de <a href="/handleiding/Hoofdpagina">Hoofdpagina</a>.</p>
+<p>Noteer: Deze handleiding beschrijft alleen wat een RCL kan doen binnen de website.</p>
+<p></p>
+<p></p>
+<hr><p><h5>Verder</h5></p>
+<p>Terug naar de <a href="/handleiding/Hoofdpagina/">Hoofdpagina</a>.</p>
+<p></p>
+<p>Meer informatie over <a href="/handleiding/Rollen/">Rollen</a>.</p>
+<p></p>
+<p><a href="/handleiding/Clusters/">Clusters</a></p>
+<p></p>
+<p><a href="/handleiding/Inschrijfmethodes_Regiocompetitie/">Inschrijfmethodes Regiocompetitie</a></p>
+<p></p>
+<p><a href="/handleiding/Planning_Regio/">Planning Regio</a></p>
 
 </div>
 

@@ -46,11 +46,15 @@
 
 <p>&nbsp;</p>
 <p><a class="btn-nhb-blauw" href="{{ terug_url }}">
-    <i class="material-icons-round left">arrow_upward</i>Naar de regio planning</a></p>
+    <i class="material-icons-round left">arrow_upward</i>Planning regio</a></p>
 
 
 <p>&nbsp;</p>
 <p>De RCL kan deze planning aanpassen.</p>
+
+<p>Handleiding voor de RCL: <a class="btn-nhb-blauw" href="{{ handleiding_planning_regio_url }}" target="_blank" rel="noopener noreferrer">
+    <i class="material-icons-round white-text left">help_outline</i>Planning Regio</a>
+</p>
 
 
 <p>&nbsp;</p>

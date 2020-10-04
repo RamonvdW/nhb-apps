@@ -1,0 +1,24 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2020 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+{% block title %}Schutter-boog{% endblock %}
+
+{% block pagina %}
+<div class="white" style="padding:10px 30px 10px 30px">
+<h4>Schutter-boog</h4>
+<p>De website gebruikt de term schutter-boog voor de combinatie van een lid en type boog. Er worden vijf soorten bogen ondersteund, dus elk lid kan vijf keer voorkomen als schutter-boog.</p>
+<p></p>
+<p>Een schutter-boog kan zich inschrijven voor de competitie en komt, aan de hand van zijn boogtype automatisch in de juiste wedstrijdklasse. Ook worden er vijf onafhankelijke aanvangsgemiddelden bijgehouden voor elk lid.</p>
+<p></p>
+<p>Onder <i>voorkeuren</i> kan een lid opgeven met welke bogen hij schiet. De meeste leden schieten met 1 boog, maar er zijn leden die met twee bogen schieten.</p>
+<p></p>
+<hr><p><h5>Verder</h5></p>
+<p>Terug naar de <a href="/handleiding/Hoofdpagina/">Hoofdpagina</a>.</p>
+
+</div>
+
+{% endblock %}

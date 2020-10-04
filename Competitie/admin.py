@@ -6,6 +6,7 @@
 
 from django.contrib import admin
 
+from NhbStructuur.models import NhbCluster
 from .models import (Competitie, DeelCompetitie, DeelcompetitieRonde,
                      CompetitieKlasse, RegioCompetitieSchutterBoog)
 
@@ -17,7 +18,9 @@ class DeelCompetitieAdmin(admin.ModelAdmin):
 class DeelcompetitieRondeAdmin(admin.ModelAdmin):
     list_filter = ('deelcompetitie__is_afgesloten', 'deelcompetitie__nhb_regio')
 
-    list_select_related = ('deelcompetitie', 'deelcompetitie__nhb_regio', 'cluster', 'cluster__regio')
+    list_select_related = ('deelcompetitie', 'deelcompetitie__nhb_regio')
+
+    readonly_fields = ('deelcompetitie', 'cluster', 'plan')
 
 
 class CompetitieKlasseAdmin(admin.ModelAdmin):
@@ -26,22 +29,65 @@ class CompetitieKlasseAdmin(admin.ModelAdmin):
 
 class RegioCompetitieSchutterBoogAdmin(admin.ModelAdmin):
 
-    readonly_fields = ('deelcompetitie', 'schutterboog', 'bij_vereniging')
+    fieldsets = (
+        ('Wie',
+            {'fields': ('deelcompetitie',
+                        'schutterboog',
+                        'bij_vereniging')
+             }),
+        ('Klasse',
+            {'fields': (('aanvangsgemiddelde', 'is_handmatig_ag'),
+                        'klasse'),
+             }),
+        ('Inschrijving',
+            {'fields': ('inschrijf_voorkeur_team',
+                        'inschrijf_notitie',
+                        'inschrijf_voorkeur_dagdeel'),
+             }),
+        ('Uitslag',
+            {'fields': ('score1', 'score2', 'score3', 'score4', 'score5', 'score6', 'score7',
+                        'laagste_score_nr', 'totaal', 'gemiddelde')
+             }),
+        ('Alternatieve Uitslag',
+            {'fields': ('alt_score1', 'alt_score2', 'alt_score3', 'alt_score4', 'alt_score5', 'alt_score6', 'alt_score7',
+                        'alt_laagste_score_nr', 'alt_totaal', 'alt_gemiddelde')
+             }),
+    )
 
-    search_fields = ('schutterboog__nhblid__voornaam', 'schutterboog__nhblid__achternaam')
+    readonly_fields = ('deelcompetitie',
+                       'schutterboog',
+                       'bij_vereniging', 'scores')
 
-    list_filter = ('deelcompetitie',)
+    search_fields = ('schutterboog__nhblid__voornaam',
+                     'schutterboog__nhblid__achternaam',
+                     'schutterboog__nhblid__nhb_nr')
 
-    list_select_related = ('deelcompetitie', 'deelcompetitie__nhb_regio', 'deelcompetitie__nhb_rayon',
+    #list_filter = ('deelcompetitie',)      # kost veel database accesses (komt door __str__)
+
+    list_select_related = ('deelcompetitie',
+                           'deelcompetitie__nhb_regio',
+                           'deelcompetitie__nhb_rayon',
                            'deelcompetitie__competitie',
-                           'klasse', 'klasse__indiv', 'klasse__team',
-                           'schutterboog', 'schutterboog__nhblid')
+                           'klasse',
+                           'klasse__indiv',
+                           'klasse__team',
+                           'schutterboog',
+                           'schutterboog__nhblid')
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):    # pragma: no cover
+        if db_field.name == 'klasse':
+            kwargs['queryset'] = (CompetitieKlasse
+                                  .objects
+                                  .select_related('indiv', 'team')
+                                  .all())
+
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
 admin.site.register(Competitie)
 admin.site.register(DeelCompetitie, DeelCompetitieAdmin)
-admin.site.register(DeelcompetitieRonde, DeelcompetitieRondeAdmin)
 admin.site.register(CompetitieKlasse, CompetitieKlasseAdmin)
+admin.site.register(DeelcompetitieRonde, DeelcompetitieRondeAdmin)
 admin.site.register(RegioCompetitieSchutterBoog, RegioCompetitieSchutterBoogAdmin)
 
 # end of file

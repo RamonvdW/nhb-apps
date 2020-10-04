@@ -11,7 +11,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Plein.menu import menu_dynamics
 from Functie.rol import Rollen, rol_get_huidige
 from NhbStructuur.models import NhbCluster, NhbVereniging
-from Wedstrijden.models import Wedstrijd
+from Wedstrijden.models import Wedstrijd, WedstrijdenPlan, WedstrijdLocatie
 from .models import (LAAG_REGIO, LAAG_RK, LAAG_BK,
                      DeelCompetitie, DeelcompetitieRonde, maak_deelcompetitie_ronde)
 from types import SimpleNamespace
@@ -35,6 +35,8 @@ WEEK_DAGEN = ( (0, 'Maandag'),
                (4, 'Vrijdag'),
                (5, 'Zaterdag'),
                (6, 'Zondag'))
+
+JA_NEE = {False: 'Nee', True: 'Ja'}
 
 
 class BondPlanningView(UserPassesTestMixin, TemplateView):
@@ -118,17 +120,35 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
         context['deelcomp_rk'] = deelcomp_rk
         context['rayon'] = deelcomp_rk.nhb_rayon
 
-        if rol_nu == Rollen.ROL_BKO:
+        if rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO):
             deelcomp_bk = DeelCompetitie.objects.get(laag=LAAG_BK,
                                                      competitie=deelcomp_rk.competitie)
-            context['url_bond'] = reverse('Competitie:bond-planning', kwargs={'deelcomp_pk': deelcomp_bk.pk})
+            context['url_bond'] = reverse('Competitie:bond-planning',
+                                          kwargs={'deelcomp_pk': deelcomp_bk.pk})
 
-        context['regio_deelcomps'] = (DeelCompetitie
-                                      .objects
-                                      .filter(laag=LAAG_REGIO,
-                                              competitie=deelcomp_rk.competitie,
-                                              nhb_regio__rayon=deelcomp_rk.nhb_rayon)
-                                      .order_by('nhb_regio__regio_nr'))
+        deelcomps = (DeelCompetitie
+                     .objects
+                     .filter(laag=LAAG_REGIO,
+                             competitie=deelcomp_rk.competitie,
+                             nhb_regio__rayon=deelcomp_rk.nhb_rayon)
+                     .order_by('nhb_regio__regio_nr'))
+        context['regio_deelcomps'] = deelcomps
+
+        # zoek het aantal wedstrijden erbij
+        for deelcomp in deelcomps:
+            plan_pks = (DeelcompetitieRonde
+                        .objects
+                        .filter(deelcompetitie=deelcomp)
+                        .values_list('plan__pk', flat=True))
+            deelcomp.rondes_count = len(plan_pks)
+            deelcomp.wedstrijden_count = 0
+            for plan in (WedstrijdenPlan
+                         .objects
+                         .filter(pk__in=plan_pks)
+                         .prefetch_related('wedstrijden')):
+                deelcomp.wedstrijden_count += plan.wedstrijden.count()
+            # for
+        # for
 
         menu_dynamics(self.request, context, actief='competitie')
         return context
@@ -137,7 +157,7 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
 def planning_sorteer_weeknummers(rondes):
     # sorteer op week nummer
     # en ondersteun dat meerdere rondes hetzelfde nummer hebben
-    nr2rondes = dict()      # [nr] = [ronde, ronde, ..]
+    nr2rondes = dict()      # [week nr] = [ronde, ronde, ..]
     nrs = list()
     for ronde in rondes:
         nr = ronde.week_nr
@@ -193,13 +213,21 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
         context['deelcomp'] = deelcomp
         context['regio'] = deelcomp.nhb_regio
 
-        context['rondes'] = planning_sorteer_weeknummers(
+        rondes = planning_sorteer_weeknummers(
                                 DeelcompetitieRonde
                                 .objects
-                                .filter(deelcompetitie=deelcomp, cluster=None))
+                                .filter(deelcompetitie=deelcomp,
+                                        cluster=None)
+                                .order_by('beschrijving'))
 
-        for ronde in context['rondes']:
+        context['rondes'] = list()
+        context['rondes_import'] = list()
+        for ronde in rondes:
             ronde.wedstrijd_count = ronde.plan.wedstrijden.count()
+            if ronde.is_voor_import_oude_programma():
+                context['rondes_import'].append(ronde)
+            else:
+                context['rondes'].append(ronde)
         # for
 
         # alleen de RCL mag de planning uitbreiden
@@ -233,13 +261,15 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
             context['url_rayon'] = reverse('Competitie:rayon-planning',
                                            kwargs={'deelcomp_pk': rayon.pk})
 
+        context['handleiding_planning_regio_url'] = reverse('Handleiding:Planning_Regio')
+
         menu_dynamics(self.request, context, actief='competitie')
         return context
 
     def post(self, request, *args, **kwargs):
         """ Deze functie wordt aangeroepen als de knop 'Regel toevoegen' gebruikt wordt
+            in de regioplanning, om een nieuwe ronde toe te voegen.
         """
-
         # alleen de RCL mag de planning uitbreiden
         rol_nu = rol_get_huidige(self.request)
         if rol_nu != Rollen.ROL_RCL:
@@ -332,6 +362,8 @@ class RegioClusterPlanningView(UserPassesTestMixin, TemplateView):
         context['terug_url'] = reverse('Competitie:regio-planning',
                                        kwargs={'deelcomp_pk': deelcomp.pk})
 
+        context['handleiding_planning_regio_url'] = reverse('Handleiding:Planning_Regio')
+
         menu_dynamics(self.request, context, actief='competitie')
         return context
 
@@ -388,7 +420,7 @@ def competitie_week_nr_to_date(jaar, week_nr):
 
 class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
 
-    """ Deze view geeft de planning van een ronde in een regio """
+    """ Deze view geeft de planning van een ronde in een regio of cluster in de regio """
 
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_PLANNING_REGIO_RONDE
@@ -418,18 +450,21 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
             raise Resolver404()
 
         context['ronde'] = ronde
+        context['vaste_beschrijving'] = is_import = ronde.is_voor_import_oude_programma()
 
         context['wedstrijden'] = (ronde.plan.wedstrijden
                                   .order_by('datum_wanneer', 'tijd_begin_wedstrijd')
                                   .select_related('vereniging'))
 
         rol_nu = rol_get_huidige(self.request)
-        if rol_nu == Rollen.ROL_RCL:
+        if rol_nu == Rollen.ROL_RCL and not is_import:
             context['url_nieuwe_wedstrijd'] = reverse('Competitie:regio-ronde-planning',
                                                       kwargs={'ronde_pk': ronde.pk})
 
             for wedstrijd in context['wedstrijden']:
-                wedstrijd.url_wijzig = reverse('Competitie:wijzig-wedstrijd', kwargs={'wedstrijd_pk': wedstrijd.pk})
+                # TODO: vanaf welke datum dit niet meer aan laten passen?
+                wedstrijd.url_wijzig = reverse('Competitie:wijzig-wedstrijd',
+                                               kwargs={'wedstrijd_pk': wedstrijd.pk})
             # for
 
         start_week = 37
@@ -474,6 +509,28 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
         context['ronde_opslaan_url'] = reverse('Competitie:regio-ronde-planning',
                                                kwargs={'ronde_pk': ronde.pk})
 
+        # uitslagen invoeren
+        if rol_nu == Rollen.ROL_RCL:
+            context['mag_uitslag_invoeren'] = True
+
+        for wedstrijd in context['wedstrijden']:
+            heeft_uitslag = (wedstrijd.uitslag and wedstrijd.uitslag.scores.count() > 0)
+            if heeft_uitslag:
+                wedstrijd.url_uitslag_bekijken = reverse('Competitie:wedstrijd-bekijk-uitslag',
+                                                         kwargs={'wedstrijd_pk': wedstrijd.pk})
+
+            # geef RCL de mogelijkheid om te scores aan te passen
+            # de HWL/WL krijgen deze link vanuit Vereniging::Wedstrijden
+            if rol_nu == Rollen.ROL_RCL and not is_import:
+                if heeft_uitslag:
+                    wedstrijd.url_uitslag_controleren = reverse('Competitie:wedstrijd-uitslag-controleren',
+                                                                kwargs={'wedstrijd_pk': wedstrijd.pk})
+                else:
+                    # TODO: knop pas beschikbaar maken op wedstrijddatum tot datum+N
+                    wedstrijd.url_uitslag_invoeren = reverse('Competitie:wedstrijd-uitslag-invoeren',
+                                                             kwargs={'wedstrijd_pk': wedstrijd.pk})
+        # for
+
         rol_nu = rol_get_huidige(self.request)
         if rol_nu != Rollen.ROL_RCL:
             context['readonly'] = True
@@ -483,12 +540,15 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
 
     def post(self, request, *args, **kwargs):
         """ Deze functie wordt aangeroepen als de knop 'Regel toevoegen' gebruikt wordt
-            en als op de knop Opslaan wordt gedrukt voor de ronde parameters
+            en als op de knop Instellingen Opslaan wordt gedrukt voor de ronde parameters
         """
 
         ronde_pk = kwargs['ronde_pk'][:6]     # afkappen geeft beveiliging
         try:
-            ronde = DeelcompetitieRonde.objects.get(pk=ronde_pk)
+            ronde = (DeelcompetitieRonde
+                     .objects
+                     .select_related('deelcompetitie__competitie')
+                     .get(pk=ronde_pk))
         except DeelcompetitieRonde.DoesNotExist:
             raise Resolver404()
 
@@ -508,12 +568,20 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
                 raise Resolver404()
 
             # sanity-check op ronde nummer
-            if week_nr < 1 or week_nr > 53 or (week_nr > 11 and week_nr < 37):
+            if week_nr < 1 or week_nr > 53 or (11 < week_nr < 37):
                 # geen valide week nummer
                 raise Resolver404()
 
             beschrijving = request.POST.get('ronde_naam', '')
-            ronde.beschrijving = beschrijving[:20]  # afkappen, anders werkt save niet
+
+            if not ronde.is_voor_import_oude_programma():
+                # is niet voor import, dus beschrijving mag aangepast worden
+                oude_beschrijving = ronde.beschrijving
+                ronde.beschrijving = beschrijving[:40]  # afkappen, anders werkt save niet
+                if ronde.is_voor_import_oude_programma():
+                    # poging tot beschrijving die niet mag / problemen gaat geven
+                    # herstel de oude beschrijving
+                    ronde.beschrijving = oude_beschrijving
 
             if ronde.week_nr != week_nr:
                 # nieuw week nummer
@@ -534,14 +602,28 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
 
             ronde.save()
 
+            # werk de beschrijvingen van alle wedstrijden bij
+            comp_str = ronde.deelcompetitie.competitie.beschrijving
+            for obj in ronde.plan.wedstrijden.all():
+                new_str = "%s - %s" % (comp_str, ronde.beschrijving)
+                if obj.beschrijving != new_str:
+                    obj.beschrijving = new_str
+                    obj.save()
+            # for
+
             if ronde.cluster:
                 next_url = reverse('Competitie:regio-cluster-planning',
-                                    kwargs={'cluster_pk': ronde.cluster.pk})
+                                   kwargs={'cluster_pk': ronde.cluster.pk})
             else:
                 next_url = reverse('Competitie:regio-planning',
-                                    kwargs={'deelcomp_pk': ronde.deelcompetitie.pk})
+                                   kwargs={'deelcomp_pk': ronde.deelcompetitie.pk})
         else:
             # voeg een wedstrijd toe
+
+            # niet toestaan op import rondes
+            if ronde.is_voor_import_oude_programma():
+                raise Resolver404()
+
             jaar = ronde.deelcompetitie.competitie.begin_jaar
             wedstrijd = Wedstrijd()
             wedstrijd.datum_wanneer = competitie_week_nr_to_date(jaar, ronde.week_nr)
@@ -603,7 +685,11 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
 
         wedstrijd_pk = kwargs['wedstrijd_pk'][:6]     # afkappen geeft beveiliging
         try:
-            wedstrijd = Wedstrijd.objects.get(pk=wedstrijd_pk)
+            wedstrijd = (Wedstrijd
+                         .objects
+                         .select_related('uitslag')
+                         .prefetch_related('uitslag__scores')
+                         .get(pk=wedstrijd_pk))
         except Wedstrijd.DoesNotExist:
             raise Resolver404()
 
@@ -617,6 +703,10 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
 
         context['wedstrijd'] = wedstrijd
         context['ronde'] = ronde
+
+        if ronde.is_voor_import_oude_programma():
+            raise Resolver404()
+
         context['regio'] = ronde.deelcompetitie.nhb_regio
         context['competitie'] = competitie = ronde.deelcompetitie.competitie
 
@@ -651,11 +741,34 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
             verenigingen = ronde.deelcompetitie.nhb_regio.nhbvereniging_set.all()
         context['verenigingen'] = verenigingen
 
+        if not wedstrijd.vereniging and verenigingen.count() > 0:
+            wedstrijd.vereniging = verenigingen[0]
+            wedstrijd.save()
+
+        if not wedstrijd.locatie and wedstrijd.vereniging:
+            locaties = wedstrijd.vereniging.wedstrijdlocatie_set.all()
+            if locaties.count() > 0:
+                wedstrijd.locatie = locaties[0]
+                wedstrijd.save()
+
+        context['locaties'] = locaties = dict()
+        pks = [ver.pk for ver in verenigingen]
+        for obj in WedstrijdLocatie.objects.filter(verenigingen__pk__in=pks):
+            for ver in obj.verenigingen.all():
+                locaties[str(ver.pk)] = obj.adres   # nhb_nr --> adres
+            # for
+        # for
+
         context['url_terug'] = reverse('Competitie:regio-ronde-planning', kwargs={'ronde_pk': ronde.pk})
         context['url_opslaan'] = reverse('Competitie:wijzig-wedstrijd', kwargs={'wedstrijd_pk': wedstrijd.pk})
 
         if mag_verwijderen:     # pragma: no branch
-            context['url_verwijderen'] = reverse('Competitie:verwijder-wedstrijd', kwargs={'wedstrijd_pk': wedstrijd.pk})
+            uitslag = wedstrijd.uitslag
+            if uitslag and (uitslag.is_bevroren or uitslag.scores.count()):
+                context['kan_niet_verwijderen'] = True
+            else:
+                context['url_verwijderen'] = reverse('Competitie:verwijder-wedstrijd',
+                                                     kwargs={'wedstrijd_pk': wedstrijd.pk})
 
         menu_dynamics(self.request, context, actief='competitie')
         return context
@@ -664,6 +777,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         """ Deze functie wordt aangeroepen als de knop 'Opslaan' gebruikt wordt
         """
         wedstrijd_pk = kwargs['wedstrijd_pk'][:6]     # afkappen geeft beveiliging
+
         try:
             wedstrijd = Wedstrijd.objects.get(pk=wedstrijd_pk)
         except Wedstrijd.DoesNotExist:
@@ -691,7 +805,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         except (TypeError, ValueError):
             raise Resolver404()
 
-        if weekdag < 0 or weekdag > 6 or aanvang < 800 or aanvang > 2200:
+        if weekdag < 0 or weekdag > 6 or aanvang < 000 or aanvang > 2359:
             raise Resolver404()
 
         # bepaal de begin datum van de ronde-week
@@ -702,7 +816,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         # vertaal aanvang naar een tijd
         hour = aanvang // 100
         min = aanvang - (hour * 100)
-        if hour < 8 or hour > 22 or min < 0 or min > 59:
+        if hour < 0 or hour > 23 or min < 0 or min > 59:
             raise Resolver404()
 
         try:
@@ -713,6 +827,12 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         wedstrijd.datum_wanneer = when
         wedstrijd.tijd_begin_wedstrijd = datetime.time(hour=hour, minute=min)
         wedstrijd.vereniging = nhbver
+
+        locaties = nhbver.wedstrijdlocatie_set.all()
+        if locaties.count() > 0:
+            wedstrijd.locatie = locaties[0]
+        else:
+            wedstrijd.locatie = None
         wedstrijd.save()
 
         url = reverse('Competitie:regio-ronde-planning', kwargs={'ronde_pk': ronde.pk})
@@ -737,11 +857,21 @@ class VerwijderWedstrijdView(UserPassesTestMixin, View):
         """
         wedstrijd_pk = kwargs['wedstrijd_pk'][:6]     # afkappen geeft beveiliging
         try:
-            wedstrijd = Wedstrijd.objects.get(pk=wedstrijd_pk)
+            wedstrijd = (Wedstrijd
+                         .objects
+                         .select_related('uitslag')
+                         .prefetch_related('uitslag__scores')
+                         .get(pk=wedstrijd_pk))
         except Wedstrijd.DoesNotExist:
             raise Resolver404()
 
         _, mag_verwijderen = plan_wedstrijd_rechten(request, wedstrijd)
+
+        if mag_verwijderen:
+            uitslag = wedstrijd.uitslag
+            if uitslag and (uitslag.is_bevroren or uitslag.scores.count()):
+                mag_verwijderen = False
+
         if not mag_verwijderen:
             raise Resolver404()
 

@@ -86,6 +86,9 @@ def rol_zet_plugins(expandeer_functie):
 
 
 def rol_bepaal_hulp_rechten(functie_cache, nhbver_cache, rol, functie_pk):
+    """ Deze functie roept alle geregistreerde expandeer functies aan
+        om de afgeleide rollen van een functie te krijgen.
+    """
     nwe_functies = list()
 
     # WL is eindstation, dus geen tijd aan spenderen

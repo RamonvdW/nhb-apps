@@ -1,0 +1,45 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2020 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+{% block title %}Inschrijfmethodes Regiocompetitie{% endblock %}
+
+{% block pagina %}
+<div class="white" style="padding:10px 30px 10px 30px">
+<h4>Inschrijfmethodes Regiocompetitie</h4>
+<p>De website kent 3 inschrijfmethodes:</p>
+<p></p>
+<p>1) Schutter geeft beschikbaarheid op</p>
+<p>2) Wedstrijdklasse op accommodatie</p>
+<p>3) Voorkeur weekdagen</p>
+<p></p>
+<p><h4>Inschrijf methode 1</h4></p>
+<p></p>
+<p>Bij methode 1 krijgt de schutter de volledige planning te zien en kan aankruisen op welke momenten het hem of haar past om te schieten.</p>
+<p></p>
+<p><h4>Inschrijf methode 2</h4></p>
+<p></p>
+<p>Binnen elke ronde worden de wedstrijden verdeeld over enkele verenigingen aan de hand van de wedstrijdklasse (bijvoorbeeld: Compound Klasse 1).</p>
+<p></p>
+<p>Door de koppeling met het boogtype waarmee de schutter zich aangemeld heeft kunnen dus een kalender laten zien wanneer de schutter waar moet schieten.</p>
+<p></p>
+<p><h4>Inschrijf methode 3</h4></p>
+<p></p>
+<p>De schutter geeft bij het aanmelden voor de regiocompetitie op welke dagdelen de voorkeur hebben:</p>
+<p>- Geen voorkeur</p>
+<p>- 's Avonds</p>
+<p>- Weekend</p>
+<p>- Zaterdag</p>
+<p>- Zondag</p>
+<p></p>
+<p>De RCL krijgt het overzicht hoeveel schutters van elke vereniging bijvoorbeeld 's Avonds willen schieten. Om overbelasting van een accommodatie te voorkomen deelt de RCL quota-plaatsen uit aan de verenigingen voor elke wedstrijd. De verenigingen vergeven plaatsen aan de schutters.</p>
+<p></p>
+<hr><p><h5>Verder</h5></p>
+<p>Terug naar de <a href="/handleiding/Hoofdpagina/">Hoofdpagina</a>.</p>
+
+</div>
+
+{% endblock %}

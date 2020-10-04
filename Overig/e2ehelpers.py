@@ -6,7 +6,7 @@
 
 from django.contrib import auth
 from Account.models import Account, account_create
-from Functie.views import account_vhpg_is_geaccepteerd
+from Functie.view_vhpg import account_vhpg_is_geaccepteerd
 from bs4 import BeautifulSoup
 from django.test import TestCase
 import pyotp
@@ -60,22 +60,24 @@ class E2EHelpers(object):
         account.save()
         return account
 
-    def e2e_login_no_check(self, account):
+    def e2e_login_no_check(self, account, wachtwoord=None):
         """ log in op de website via de voordeur, zodat alle rechten geëvalueerd worden """
-        ww = self.WACHTWOORD
+        if not wachtwoord:
+            wachtwoord = self.WACHTWOORD
         assert isinstance(self, TestCase)
-        resp = self.client.post('/account/login/', {'login_naam': account.username, 'wachtwoord': ww})
+        resp = self.client.post('/account/login/', {'login_naam': account.username,
+                                                    'wachtwoord': wachtwoord})
         return resp
 
-    def e2e_login(self, account):
+    def e2e_login(self, account, wachtwoord=None):
         """ log in op de website via de voordeur, zodat alle rechten geëvalueerd worden """
-        resp = self.e2e_login_no_check(account)
+        resp = self.e2e_login_no_check(account, wachtwoord)
         self.assertEqual(resp.status_code, 302)  # 302 = Redirect
         user = auth.get_user(self.client)
         self.assertTrue(user.is_authenticated)
 
-    def e2e_login_and_pass_otp(self, account):
-        self.e2e_login(account)
+    def e2e_login_and_pass_otp(self, account, wachtwoord=None):
+        self.e2e_login(account, wachtwoord)
         # door de login is een cookie opgeslagen met het csrf token
         assert isinstance(self, TestCase)
         resp = self.client.post('/functie/otp-controle/', {'otp_code': pyotp.TOTP(account.otp_code).now()})
@@ -142,12 +144,15 @@ class E2EHelpers(object):
         content = str(resp.content)
         content = self._remove_debugtoolbar(content)
         if skip_menu:
-            # menu is the first part of the body
-            pos = content.find('<div id="content">')
-        else:
-            pos = content.find('<body')
+            # menu is the last part of the body
+            pos = content.find('<div id="menu">')
+            content = content[:pos]     # if not found, takes [:-1], which is OK
+
+        # skip the headers
+        pos = content.find('<body')
         if pos > 0:                             # pragma: no branch
-            content = content[pos:]             # strip head
+            content = content[pos:]             # strip header
+
         urls = list()
         while len(content):
             # find the start of a new url
@@ -237,6 +242,21 @@ class E2EHelpers(object):
                 content = ''
         # while
 
+    def assert_scripts_clean(self, html, template_name):
+        pos = html.find('<script ')
+        while pos >= 0:
+            html = html[pos:]
+            pos = html.find('</script>')
+            script = html[:pos+9]
+
+            pos = script.find('console.log')
+            if pos >= 0:
+                self.fail(msg='Detected console.log usage in script from template %s' % template_name)   # pragma: no cover
+
+            html = html[pos+9:]
+            pos = html.find('<script ')
+        # while
+
     def assert_html_ok(self, response):
         """ Doe een aantal basic checks op een html response """
         assert isinstance(self, TestCase)
@@ -251,6 +271,7 @@ class E2EHelpers(object):
         self.assertIn("</body>", html)
         self.assertIn("<!DOCTYPE html>", html)
         self.assert_link_quality(html, response.templates[0].name)
+        self.assert_scripts_clean(html, response.templates[0].name)
 
     def assert_is_bestand(self, response):
         assert isinstance(self, TestCase)

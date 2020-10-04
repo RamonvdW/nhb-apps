@@ -4,19 +4,14 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.conf import settings
 from django.http import HttpResponseRedirect
 from django.urls import Resolver404, reverse
-from django.utils import timezone
-from django.shortcuts import redirect, render
+from django.shortcuts import render
 from django.db.models import Q, Value, CharField
 from django.db.models.functions import Concat, Cast
-from django.views.generic import ListView, View, TemplateView
+from django.views.generic import ListView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Account.models import Account, HanterenPersoonsgegevens
-from Account.otp import (account_otp_prepare_koppelen, account_otp_koppel,
-                         account_otp_is_gekoppeld, account_otp_controleer)
-from Account.rechten import account_rechten_eval_now, account_rechten_is_otp_verified
+from Account.models import Account
 from NhbStructuur.models import NhbLid
 from Plein.menu import menu_dynamics
 from Logboek.models import schrijf_in_logboek
@@ -24,13 +19,9 @@ from Overig.tijdelijke_url import maak_tijdelijke_url_functie_email
 from Mailer.models import mailer_queue_email
 from Overig.tijdelijke_url import set_tijdelijke_url_receiver, RECEIVER_BEVESTIG_FUNCTIE_EMAIL
 from Overig.helpers import get_safe_from_ip
-from .rol import (Rollen, rol_mag_wisselen, rol_enum_pallet, rol2url,
-                  rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving,
-                  rol_activeer_rol, rol_activeer_functie, rol_evalueer_opnieuw)
-from .models import Functie, account_needs_vhpg, account_needs_otp
-from .forms import (ZoekBeheerdersForm, WijzigBeheerdersForm, OTPControleForm,
-                    AccepteerVHPGForm, WijzigEmailForm)
-from .qrcode import qrcode_get
+from .rol import Rollen, rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving
+from .models import Functie
+from .forms import ZoekBeheerdersForm, WijzigBeheerdersForm, WijzigEmailForm
 import logging
 
 
@@ -40,15 +31,6 @@ TEMPLATE_WIJZIG = 'functie/wijzig.dtl'
 TEMPLATE_WIJZIG_EMAIL = 'functie/wijzig-email.dtl'
 TEMPLATE_BEVESTIG_EMAIL = 'functie/bevestig.dtl'
 TEMPLATE_EMAIL_BEVESTIGD = 'functie/bevestigd.dtl'
-TEMPLATE_WISSELVANROL = 'functie/wissel-van-rol.dtl'
-TEMPLATE_VHPG_ACCEPTATIE = 'functie/vhpg-acceptatie.dtl'
-TEMPLATE_VHPG_AFSPRAKEN = 'functie/vhpg-afspraken.dtl'
-TEMPLATE_VHPG_OVERZICHT = 'functie/vhpg-overzicht.dtl'
-TEMPLATE_OTP_CONTROLE = 'functie/otp-controle.dtl'
-TEMPLATE_OTP_KOPPELEN = 'functie/otp-koppelen.dtl'
-TEMPLATE_OTP_GEKOPPELD = 'functie/otp-koppelen-gelukt.dtl'
-
-my_logger = logging.getLogger('NHBApps.Functie')
 
 
 def mag_beheerder_wijzigen_of_404(request, functie):
@@ -80,6 +62,12 @@ def mag_beheerder_wijzigen_of_404(request, functie):
             raise Resolver404()
 
         # HWL
+        return
+
+    # RCL mag HWL en WL koppelen van vereniging binnen regio RCL
+    if rol_nu == Rollen.ROL_RCL and functie.rol in ('HWL', 'WL'):
+        if functie_nu.nhb_regio != functie.nhb_ver.regio:
+            raise Resolver404()
         return
 
     # BKO, RKO, RCL
@@ -150,6 +138,12 @@ def mag_email_wijzigen_of_404(request, functie):
 
     # alle rollen mogen hun eigen e-mailadres aanpassen
     if functie_nu == functie:
+        return
+
+    # RCL mag email van HWL en WL aanpassen van vereniging binnen regio RCL
+    if rol_nu == Rollen.ROL_RCL and functie.rol in ('HWL', 'WL'):
+        if functie_nu.nhb_regio != functie.nhb_ver.regio:
+            raise Resolver404()
         return
 
     # BKO, RKO, RCL
@@ -399,7 +393,7 @@ class WijzigBeheerdersView(UserPassesTestMixin, ListView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol = rol_get_huidige(self.request)
-        return rol in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_SEC, Rollen.ROL_HWL)
+        return rol in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_SEC, Rollen.ROL_HWL)
 
     def handle_no_permission(self):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
@@ -451,10 +445,10 @@ class WijzigBeheerdersView(UserPassesTestMixin, ListView):
                             Q(hele_reeks__icontains=zoekterm))
                     .order_by('nhb_nr'))
 
-            rol_nu, functie_nu = rol_get_huidige_functie(self.request)
-            if rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL):
-                # alleen uit de eigen gelederen laten kiezen
-                qset = qset.filter(bij_vereniging=functie_nu.nhb_ver)
+            is_vereniging_rol = (self._functie.rol in ('SEC', 'HWL', 'WL'))
+            if is_vereniging_rol:
+                # alleen leden van de vereniging laten kiezen
+                qset = qset.filter(bij_vereniging=self._functie.nhb_ver)
 
             objs = list()
             for nhblid in qset[:50]:
@@ -462,8 +456,8 @@ class WijzigBeheerdersView(UserPassesTestMixin, ListView):
                 account.geo_beschrijving = ''
                 account.nhb_nr_str = str(nhblid.nhb_nr)
 
-                if rol_nu == Rollen.ROL_HWL:
-                    account.vereniging_naam = nhblid.bij_vereniging.naam
+                if is_vereniging_rol:
+                    account.vereniging_naam = str(nhblid.bij_vereniging)    # [1234] Naam
                 else:
                     regio = nhblid.bij_vereniging.regio
                     if not regio.is_administratief:
@@ -489,8 +483,12 @@ class WijzigBeheerdersView(UserPassesTestMixin, ListView):
         context['form'] = self._form
 
         if self._functie.rol in ('SEC', 'HWL', 'WL'):
-            context['is_rol_hwl'] = True
+            context['is_vereniging_rol'] = True
+            # TODO: fix terug-url. Je kan hier op twee manieren komen:
+            # via Plein, Verenigingen, Details (=Vereniging:accommodaties/details/pk/pk/), Koppel beheerders
+            # via Verenging, Beheerders (=Functie:overzicht-vereniging), Koppel beheerders
             context['terug_url'] = reverse('Functie:overzicht-vereniging')
+            #context['terug_url'] = reverse('Vereniging:lijst-verenigingen')
             menu_dynamics(self.request, context, actief='vereniging')
         else:
             context['terug_url'] = reverse('Functie:overzicht')
@@ -742,493 +740,6 @@ class OverzichtView(UserPassesTestMixin, ListView):
 
         menu_dynamics(self.request, context, actief='hetplein')
         return context
-
-
-class WisselVanRolView(UserPassesTestMixin, ListView):
-
-    """ Django class-based view om van rol te wisselen """
-
-    # TODO: zou next parameter kunnen ondersteunen, net als login view
-
-    # class variables shared by all instances
-    template_name = TEMPLATE_WISSELVANROL
-
-    def test_func(self):
-        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-
-        # evalueer opnieuw welke rechten de gebruiker heeft
-        rol_evalueer_opnieuw(self.request)
-
-        return self.request.user.is_authenticated and rol_mag_wisselen(self.request)
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
-
-    @staticmethod
-    def _functie_volgorde(functie):
-        if functie.rol == "BKO":
-            volgorde = 10  # 10
-        elif functie.rol == "RKO":
-            volgorde = 20 + functie.nhb_rayon.rayon_nr  # 21-24
-        elif functie.rol == "RCL":
-            volgorde = functie.nhb_regio.regio_nr       # 101-116
-        elif functie.rol == "SEC":
-            volgorde = functie.nhb_ver.nhb_nr           # 1000-9999
-        elif functie.rol == "HWL":
-            volgorde = functie.nhb_ver.nhb_nr + 10000   # 11000-19999
-        elif functie.rol == "WL":
-            volgorde = functie.nhb_ver.nhb_nr + 20000   # 21000-29999
-        else:             # pragma: no cover
-            volgorde = 0  # valt meteen op dat 'ie bovenaan komt
-        return volgorde
-
-    def _get_functies_eigen(self):
-        objs = list()
-
-        pks = list()
-
-        hierarchy2 = dict()      # [parent_tup] = list of child_tup
-        for child_tup, parent_tup in rol_enum_pallet(self.request):
-            rol, functie_pk = child_tup
-
-            # rollen die je altijd aan moet kunnen nemen als je ze hebt
-            if rol == Rollen.ROL_IT:
-                url = reverse('Functie:activeer-rol', kwargs={'rol': rol2url[rol]})
-                objs.append({'titel': 'IT beheerder', 'url': url, 'volgorde': 1})
-
-            elif rol == Rollen.ROL_BB:
-                url = reverse('Functie:activeer-rol', kwargs={'rol': rol2url[rol]})
-                objs.append({'titel': 'Manager competitiezaken', 'url': url, 'volgorde': 2})
-
-            elif rol == Rollen.ROL_SCHUTTER:
-                url = reverse('Functie:activeer-rol', kwargs={'rol': rol2url[rol]})
-                objs.append({'titel': 'Schutter', 'url': url, 'volgorde': 90000})
-
-            elif rol == Rollen.ROL_NONE:
-                url = reverse('Functie:activeer-rol', kwargs={'rol': rol2url[rol]})
-                objs.append({'titel': 'Gebruiker', 'url': url, 'volgorde': 90001})
-
-            elif parent_tup == (None, None):
-                # top-level rol voor deze gebruiker - deze altijd tonen
-                pks.append(functie_pk)
-            else:
-                try:
-                    hierarchy2[parent_tup].append(child_tup)
-                except KeyError:
-                    hierarchy2[parent_tup] = [child_tup,]
-        # for
-
-        # haal alle functies met 1 database query op
-        pk2func = dict()
-        for obj in (Functie
-                    .objects
-                    .filter(pk__in=pks)
-                    .select_related('nhb_ver', 'nhb_regio', 'nhb_rayon')
-                    .only('beschrijving', 'rol',
-                          'nhb_ver__nhb_nr', 'nhb_ver__naam',
-                          'nhb_rayon__rayon_nr', 'nhb_regio__regio_nr')):
-            pk2func[obj.pk] = obj
-        # for
-
-        for functie_pk in pks:
-            url = reverse('Functie:activeer-functie', kwargs={'functie_pk': functie_pk})
-            functie = pk2func[functie_pk]
-            title = functie.beschrijving
-            ver_naam = ''
-            if functie.nhb_ver:
-                ver_naam = functie.nhb_ver.naam
-            volgorde = self._functie_volgorde(functie)
-            objs.append({'titel': title, 'ver_naam': ver_naam, 'url': url, 'volgorde': volgorde})
-        # for
-
-        objs.sort(key=lambda x: x['volgorde'])
-        return objs, hierarchy2
-
-    def _get_functies_help_anderen(self, hierarchy2):
-        objs = list()
-
-        # nu nog uitzoeken welke ge-erfde functies we willen tonen
-        # deze staan in hierarchy
-        # TODO: minder vaak rol_get_huidige_functie aanroepen
-        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
-
-        if functie_nu:
-            nu_tup = (rol_nu, functie_nu.pk)
-        else:
-            nu_tup = (rol_nu, None)
-
-        try:
-            child_tups = hierarchy2[nu_tup]
-        except KeyError:
-            # geen ge-erfde functies
-            pass
-        else:
-            # haal alle benodigde functies met 1 query op
-            pks = [pk for _, pk in child_tups]
-            pk2func = dict()
-            for obj in (Functie
-                        .objects
-                        .filter(pk__in=pks)
-                        .select_related('nhb_ver', 'nhb_regio', 'nhb_rayon')
-                        .only('beschrijving', 'rol',
-                              'nhb_ver__nhb_nr', 'nhb_ver__naam',
-                              'nhb_rayon__rayon_nr', 'nhb_regio__regio_nr')):
-                pk2func[obj.pk] = obj
-            # for
-
-            for rol, functie_pk in child_tups:
-                url = reverse('Functie:activeer-functie', kwargs={'functie_pk': functie_pk})
-                if rol in (Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_WL):
-                    functie = pk2func[functie_pk]
-                    volgorde = self._functie_volgorde(functie)
-                    objs.append({'titel': functie.beschrijving, 'ver_naam': functie.nhb_ver.naam, 'url': url, 'volgorde': volgorde})
-                else:
-                    functie = pk2func[functie_pk]
-                    volgorde = self._functie_volgorde(functie)
-                    objs.append({'titel': functie.beschrijving, 'ver_naam': "", 'url': url, 'volgorde': volgorde})
-            # for
-
-        objs.sort(key=lambda x: x['volgorde'])
-        return objs
-
-    def get_queryset(self):
-        """ called by the template system to get the queryset or list of objects for the template """
-
-        objs, hierarchy = self._get_functies_eigen()
-        objs2 = self._get_functies_help_anderen(hierarchy)
-
-        if len(objs2):
-            objs.append({'separator': True})
-            objs.extend(objs2)
-
-        return objs
-
-    def get_context_data(self, **kwargs):
-        """ called by the template system to get the context data for the template """
-        context = super().get_context_data(**kwargs)
-        context['show_vhpg'], context['vhpg'] = account_needs_vhpg(self.request.user)
-        context['huidige_rol'] = rol_get_beschrijving(self.request)
-
-        if account_rechten_is_otp_verified(self.request):
-            context['show_otp_controle'] = False
-            context['show_otp_koppelen'] = False
-        else:
-            if account_otp_is_gekoppeld(self.request.user):
-                context['show_otp_koppelen'] = False
-                context['show_otp_controle'] = True
-            else:
-                context['show_otp_koppelen'] = True
-                context['show_otp_controle'] = False
-
-        if settings.ENABLE_WIKI:        # pragma: no cover
-            context['wiki_2fa_url'] = settings.WIKI_URL + '/' + settings.HANDLEIDING_2FA
-            context['wiki_rollen'] = settings.WIKI_URL + '/' + settings.HANDLEIDING_ROLLEN
-        else:
-            context['wiki_2fa_url'] = reverse('Handleiding:' + settings.HANDLEIDING_2FA)
-            context['wiki_rollen'] = reverse('Handleiding:' + settings.HANDLEIDING_ROLLEN)
-
-        # login-as functie voor IT beheerder
-        if rol_get_huidige(self.request) == Rollen.ROL_IT:
-            context['url_login_as'] = reverse('Account:account-wissel')
-
-        # bedoeld voor de testsuite, maar kan geen kwaad
-        context['insert_meta'] = True
-        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
-        context['meta_rol'] = rol2url[rol_nu]
-        if functie_nu:
-            context['meta_functie'] = functie_nu.beschrijving       # template doet html escaping
-        else:
-            context['meta_functie'] = ""
-
-        menu_dynamics(self.request, context, actief='wissel-van-rol')
-        return context
-
-
-class ActiveerRolView(UserPassesTestMixin, View):
-    """ Django class-based view om een andere rol aan te nemen """
-
-    # class variables shared by all instances
-
-    def test_func(self):
-        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        return self.request.user.is_authenticated and rol_mag_wisselen(self.request)
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
-
-    def post(self, request, *args, **kwargs):
-        from_ip = get_safe_from_ip(self.request)
-
-        if 'rol' in kwargs:
-            # activeer rol
-            my_logger.info('%s ROL account %s wissel naar rol %s' % (from_ip, self.request.user.username, repr(kwargs['rol'])))
-            rol_activeer_rol(request, kwargs['rol'])
-        else:
-            # activeer functie
-            my_logger.info('%s ROL account %s wissel naar functie %s' % (from_ip, self.request.user.username, repr(kwargs['functie_pk'])))
-            rol_activeer_functie(request, kwargs['functie_pk'])
-
-        rol_beschrijving = rol_get_beschrijving(request)
-        my_logger.info('%s ROL account %s is nu %s' % (from_ip, self.request.user.username, rol_beschrijving))
-
-        # stuur een aantal rollen door naar een functionele pagina
-        # de rest blijft in Wissel van Rol
-        rol = rol_get_huidige(request)
-        if rol == Rollen.ROL_BB:
-            return redirect('Competitie:overzicht')
-
-        if rol in (Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_WL):
-            return redirect('Vereniging:overzicht')
-
-        return redirect('Functie:wissel-van-rol')
-
-
-class VhpgAfsprakenView(UserPassesTestMixin, TemplateView):
-
-    """ Django class-based view om van rol te wisselen """
-
-    # class variables shared by all instances
-    template_name = TEMPLATE_VHPG_AFSPRAKEN
-
-    def test_func(self):
-        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        if self.request.user.is_authenticated:
-            needs_vhpg, _ = account_needs_vhpg(self.request.user, show_only=True)
-            return needs_vhpg
-        return False
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
-
-    def get_context_data(self, **kwargs):
-        """ called by the template system to get the context data for the template """
-        context = super().get_context_data(**kwargs)
-        menu_dynamics(self.request, context, actief='wissel-van-rol')
-        return context
-
-
-def account_vhpg_is_geaccepteerd(account):
-    """ onthoud dat de vhpg net geaccepteerd is door de gebruiker
-    """
-    try:
-        vhpg = HanterenPersoonsgegevens.objects.get(account=account)
-    except HanterenPersoonsgegevens.DoesNotExist:
-        vhpg = HanterenPersoonsgegevens()
-        vhpg.account = account
-
-    vhpg.acceptatie_datum = timezone.now()
-    vhpg.save()
-
-
-class VhpgAcceptatieView(TemplateView):
-    """ Met deze view kan de gebruiker de verklaring hanteren persoonsgegevens accepteren
-    """
-
-    def get(self, request, *args, **kwargs):
-        """ deze functie wordt aangeroepen als een GET request ontvangen is
-        """
-        if not request.user.is_authenticated:
-            # gebruiker is niet ingelogd, dus zou hier niet moeten komen
-            return HttpResponseRedirect(reverse('Plein:plein'))
-
-        account = request.user
-        needs_vhpg, _ = account_needs_vhpg(account)
-        if not needs_vhpg:
-            # gebruiker heeft geen VHPG nodig
-            return HttpResponseRedirect(reverse('Plein:plein'))
-
-        form = AccepteerVHPGForm()
-        context = {'form': form}
-        menu_dynamics(request, context, actief="wissel-van-rol")
-        return render(request, TEMPLATE_VHPG_ACCEPTATIE, context)
-
-    def post(self, request, *args, **kwargs):
-        """ deze functie wordt aangeroepen als een POST request ontvangen is.
-            dit is gekoppeld aan het drukken op de knop van het formulier.
-        """
-        if not request.user.is_authenticated:
-            # gebruiker is niet ingelogd, dus stuur terug naar af
-            return HttpResponseRedirect(reverse('Plein:plein'))
-
-        form = AccepteerVHPGForm(request.POST)
-        if form.is_valid():
-            # hier komen we alleen als de checkbox gezet is
-            account = request.user
-            account_vhpg_is_geaccepteerd(account)
-            schrijf_in_logboek(account, 'Rollen', 'VHPG geaccepteerd')
-            account_rechten_eval_now(request, account)
-            return HttpResponseRedirect(reverse('Functie:wissel-van-rol'))
-
-        # checkbox is verplicht --> nog een keer
-        context = {'form': form}
-        menu_dynamics(request, context, actief="inloggen")
-        return render(request, TEMPLATE_VHPG_ACCEPTATIE, context)
-
-
-class VhpgOverzichtView(UserPassesTestMixin, ListView):
-
-    """ Met deze view kan de Manager Competitiezaken een overzicht krijgen van alle beheerders
-        die de VHPG geaccepteerd hebben en wanneer dit voor het laatste was.
-    """
-
-    # class variables shared by all instances
-    template_name = TEMPLATE_VHPG_OVERZICHT
-
-    def test_func(self):
-        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        if self.request.user.is_authenticated:
-            rol_nu = rol_get_huidige(self.request)
-            return rol_nu == Rollen.ROL_BB
-        return False
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
-
-    def get_queryset(self):
-        """ called by the template system to get the queryset or list of objects for the template """
-        # er zijn ongeveer 30 beheerders
-        # voorlopig geen probleem als een beheerder vaker voorkomt
-        return HanterenPersoonsgegevens.objects.order_by('-acceptatie_datum')[:100]
-
-    def get_context_data(self, **kwargs):
-        """ called by the template system to get the context data for the template """
-        context = super().get_context_data(**kwargs)
-        menu_dynamics(self.request, context, actief='competitie')
-        return context
-
-
-class OTPControleView(TemplateView):
-    """ Met deze view kan de OTP controle doorlopen worden
-        Na deze controle is de gebruiker authenticated + verified
-    """
-
-    def get(self, request, *args, **kwargs):
-        """ deze functie wordt aangeroepen als een GET request ontvangen is
-        """
-        if not request.user.is_authenticated:
-            # gebruiker is niet ingelogd, dus stuur terug naar af
-            return HttpResponseRedirect(reverse('Plein:plein'))
-
-        account = request.user
-        if not account.otp_is_actief:
-            # gebruiker heeft geen OTP koppeling
-            return HttpResponseRedirect(reverse('Plein:plein'))
-
-        form = OTPControleForm()
-        context = {'form': form}
-        menu_dynamics(request, context, actief="inloggen")
-        return render(request, TEMPLATE_OTP_CONTROLE, context)
-
-    def post(self, request, *args, **kwargs):
-        """ deze functie wordt aangeroepen als een POST request ontvangen is.
-            dit is gekoppeld aan het drukken op de Controleer knop.
-        """
-        if not request.user.is_authenticated:
-            # gebruiker is niet ingelogd, dus stuur terug naar af
-            return HttpResponseRedirect(reverse('Plein:plein'))
-
-        account = request.user
-        if not account.otp_is_actief:
-            # gebruiker heeft geen OTP koppeling
-            return HttpResponseRedirect(reverse('Plein:plein'))
-
-        form = OTPControleForm(request.POST)
-        if form.is_valid():
-            otp_code = form.cleaned_data.get('otp_code')
-            if account_otp_controleer(request, account, otp_code):
-                # controle is gelukt (is ook al gelogd)
-                # terug naar de Wissel-van-rol pagina
-                return HttpResponseRedirect(reverse('Functie:wissel-van-rol'))
-            else:
-                # controle is mislukt (is al gelogd en in het logboek geschreven)
-                form.add_error(None, 'Verkeerde code. Probeer het nog eens.')
-                # FUTURE: blokkeer na X pogingen
-
-        # still here --> re-render with error message
-        context = {'form': form}
-        menu_dynamics(request, context, actief="inloggen")
-        return render(request, TEMPLATE_OTP_CONTROLE, context)
-
-
-class OTPKoppelenView(TemplateView):
-    """ Met deze view kan de OTP koppeling tot stand gebracht worden
-    """
-
-    @staticmethod
-    def _account_needs_otp_or_redirect(request):
-        """ Controleer dat het account OTP nodig heeft, of wegsturen """
-
-        if not request.user.is_authenticated:
-            # gebruiker is niet ingelogd, dus zou hier niet moeten komen
-            return None, HttpResponseRedirect(reverse('Plein:plein'))
-
-        account = request.user
-
-        if not account_needs_otp(account):
-            # gebruiker heeft geen OTP nodig
-            return account, HttpResponseRedirect(reverse('Plein:plein'))
-
-        if account.otp_is_actief:
-            # gebruiker is al gekoppeld, dus niet zomaar toestaan om een ander apparaat ook te koppelen!!
-            return account, HttpResponseRedirect(reverse('Plein:plein'))
-
-        return account, None
-
-    def get(self, request, *args, **kwargs):
-        """ deze functie wordt aangeroepen als een GET request ontvangen is
-        """
-        account, response = self._account_needs_otp_or_redirect(request)
-        if response:
-            return response
-
-        # haal de QR code op (en alles wat daar voor nodig is)
-        account_otp_prepare_koppelen(account)
-        qrcode = qrcode_get(account)
-
-        tmp = account.otp_code.lower()
-        secret = " ".join([tmp[i:i+4] for i in range(0, 16, 4)])
-
-        form = OTPControleForm()
-        context = {'form': form,
-                   'qrcode': qrcode,
-                   'otp_secret': secret }
-        menu_dynamics(request, context, actief="inloggen")
-        return render(request, TEMPLATE_OTP_KOPPELEN, context)
-
-    def post(self, request, *args, **kwargs):
-        """ deze functie wordt aangeroepen als een POST request ontvangen is.
-            dit is gekoppeld aan het drukken op de Controleer knop.
-        """
-        account, response = self._account_needs_otp_or_redirect(request)
-        if response:
-            return response
-
-        form = OTPControleForm(request.POST)
-        if form.is_valid():
-            otp_code = form.cleaned_data.get('otp_code')
-            if account_otp_koppel(request, account, otp_code):
-                # geef de succes pagina
-                context = dict()
-                menu_dynamics(request, context, actief="inloggen")
-                return render(request, TEMPLATE_OTP_GEKOPPELD, context)
-
-            # controle is mislukt - is al gelogd
-            form.add_error(None, 'Verkeerde code. Probeer het nog eens.')
-            # FUTURE: blokkeer na X pogingen
-
-        # still here --> re-render with error message
-        qrcode = qrcode_get(account)
-        tmp = account.otp_code.lower()
-        secret = " ".join([tmp[i:i+4] for i in range(0, 16, 4)])
-        context = {'form': form,
-                   'qrcode': qrcode,
-                   'otp_secret': secret}
-        menu_dynamics(request, context, actief="inloggen")
-        return render(request, TEMPLATE_OTP_KOPPELEN, context)
 
 
 # end of file

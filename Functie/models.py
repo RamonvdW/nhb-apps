@@ -82,15 +82,7 @@ def maak_functie(beschrijving, rol):
     """ Deze helper geeft het Functie object terug met de gevraagde parameters
         De eerste keer wordt deze aangemaakt.
     """
-    try:
-        functie = Functie.objects.get(beschrijving=beschrijving, rol=rol)
-    except Functie.DoesNotExist:
-        # maak een nieuwe Functie aan
-        functie = Functie()
-        functie.beschrijving = beschrijving
-        functie.rol = rol
-        functie.save()
-
+    functie, _ = Functie.objects.get_or_create(beschrijving=beschrijving, rol=rol)
     return functie      # caller kan zelf andere velden invullen
 
 

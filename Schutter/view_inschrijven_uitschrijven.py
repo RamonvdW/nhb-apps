@@ -66,7 +66,9 @@ class RegiocompetitieInschrijvenBevestigView(UserPassesTestMixin, TemplateView):
         # controleer dat deelcompetitie bij de juist regio hoort
         account = self.request.user
         nhblid = account.nhblid_set.all()[0]      # ROL_SCHUTTER geeft bescherming tegen geen nhblid
-        if schutterboog.nhblid != nhblid or deelcomp.laag != LAAG_REGIO or deelcomp.nhb_regio != nhblid.bij_vereniging.regio:
+        if (schutterboog.nhblid != nhblid
+                or deelcomp.laag != LAAG_REGIO
+                or deelcomp.nhb_regio != nhblid.bij_vereniging.regio):
             raise Resolver404()
 
         # voorkom dubbele aanmelding
@@ -91,7 +93,7 @@ class RegiocompetitieInschrijvenBevestigView(UserPassesTestMixin, TemplateView):
         if len(scores):
             score = scores[0]
             aanvangsgemiddelde = score.waarde / 1000
-            hist = ScoreHist.objects.filter(score=score).order_by('-datum')
+            hist = ScoreHist.objects.filter(score=score).order_by('-when')
             if len(hist):
                 context['ag_hist'] = hist[0]
         context['ag'] = aanvangsgemiddelde
@@ -105,7 +107,7 @@ class RegiocompetitieInschrijvenBevestigView(UserPassesTestMixin, TemplateView):
 
         # zoek een toepasselijke klasse aan de hand van de leeftijd
         done = False
-        for obj in qset:
+        for obj in qset:            # pragma: no branch
             if aanvangsgemiddelde >= obj.min_ag or obj.indiv.is_onbekend:
                 for lkl in obj.indiv.leeftijdsklassen.all():
                     if lkl.geslacht == schutterboog.nhblid.geslacht:
@@ -118,7 +120,11 @@ class RegiocompetitieInschrijvenBevestigView(UserPassesTestMixin, TemplateView):
                 break
         # for
 
-        context['mag_team_schieten'] = (age > MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT)
+        udvl = deelcomp.competitie.uiterste_datum_lid       # uiterste datum van lidmaatschap
+        dvl = schutterboog.nhblid.sinds_datum               # datum van lidmaatschap
+
+        context['mag_team_schieten'] = (age > MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT and
+                                        dvl < udvl)
 
         # bepaal de inschrijfmethode voor deze regio
         methode = deelcomp.inschrijf_methode
@@ -178,8 +184,15 @@ class RegiocompetitieInschrijvenView(View):
             deelcomp_pk = int(kwargs['deelcomp_pk'][:10])
             schutterboog_pk = int(kwargs['schutterboog_pk'][:10])
 
-            schutterboog = SchutterBoog.objects.get(pk=schutterboog_pk)
-            deelcomp = DeelCompetitie.objects.get(pk=deelcomp_pk)
+            schutterboog = (SchutterBoog
+                            .objects
+                            .select_related('nhblid')
+                            .get(pk=schutterboog_pk))
+
+            deelcomp = (DeelCompetitie
+                        .objects
+                        .select_related('competitie', 'nhb_regio')
+                        .get(pk=deelcomp_pk))
         except (ValueError, KeyError):
             # vuilnis
             raise Resolver404()
@@ -189,7 +202,9 @@ class RegiocompetitieInschrijvenView(View):
 
         # controleer dat schutterboog bij de ingelogde gebruiker hoort
         # controleer dat deelcompetitie bij de juist regio hoort
-        if schutterboog.nhblid != nhblid or deelcomp.laag != LAAG_REGIO or deelcomp.nhb_regio != nhblid.bij_vereniging.regio:
+        if (schutterboog.nhblid != nhblid
+                or deelcomp.laag != LAAG_REGIO
+                or deelcomp.nhb_regio != nhblid.bij_vereniging.regio):
             raise Resolver404()
 
         # voorkom dubbele aanmelding
@@ -232,7 +247,7 @@ class RegiocompetitieInschrijvenView(View):
 
         # zoek een toepasselijke klasse aan de hand van de leeftijd
         done = False
-        for obj in qset:
+        for obj in qset:        # pragma: no branch
             if aanmelding.aanvangsgemiddelde >= obj.min_ag or obj.indiv.is_onbekend:
                 for lkl in obj.indiv.leeftijdsklassen.all():
                     if lkl.geslacht == schutterboog.nhblid.geslacht:
@@ -245,9 +260,15 @@ class RegiocompetitieInschrijvenView(View):
                 break
         # for
 
+        udvl = deelcomp.competitie.uiterste_datum_lid       # uiterste datum van lidmaatschap
+        dvl = schutterboog.nhblid.sinds_datum               # datum van lidmaatschap
+
+        mag_team_schieten = (age > MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT and
+                             dvl < udvl)
+
         # kijk of de schutter met een team mee wil schieten voor deze competitie
-        if age > MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT:
-            # is geen aspirant
+        if mag_team_schieten:
+            # is geen aspirant en was op tijd lid
             if request.POST.get('wil_in_team', '') != '':
                 aanmelding.inschrijf_voorkeur_team = True
 
@@ -305,6 +326,8 @@ class RegiocompetitieUitschrijvenView(View):
         # controleer dat deze inschrijving bij het nhblid hoort
         if inschrijving.schutterboog.nhblid != nhblid:
             raise Resolver404()
+
+        # TODO: controleer de fase van de competitie. Na bepaalde datum niet meer uit kunnen schrijven??
 
         # schrijf de schutter uit
         inschrijving.delete()

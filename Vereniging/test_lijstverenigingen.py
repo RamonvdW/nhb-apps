@@ -90,6 +90,11 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         ver.regio = self.regio_101
         # secretaris kan nog niet ingevuld worden
         ver.save()
+        # stop de vereniging in clusters
+        cluster = NhbCluster.objects.filter(regio=ver.regio, gebruik='18').all()[0]
+        ver.clusters.add(cluster)
+        cluster = NhbCluster.objects.filter(regio=ver.regio, gebruik='25').all()[2]
+        ver.clusters.add(cluster)
         self.nhb_ver2 = ver
 
         self.url_lijst = '/vereniging/accommodaties/lijst/'

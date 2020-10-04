@@ -33,7 +33,7 @@ ROL2HANDLEIDING_PAGINA = {
     Rollen.ROL_RCL: settings.HANDLEIDING_RCL,
     Rollen.ROL_HWL: settings.HANDLEIDING_HWL,
     Rollen.ROL_WL:  settings.HANDLEIDING_WL,
-    #Rollen.ROL_SEC: settings.HANDLEIDING_SEC,
+    Rollen.ROL_SEC: settings.HANDLEIDING_SEC,
 }
 
 
@@ -44,6 +44,8 @@ def menu_dynamics(request, context, actief=None):
     if actief:
         assert (actief in ACTIEF_OPTIES), 'menu_dynamics: Onbekende actief waarde %s' % repr(actief)
         context['menu_actief'] = actief
+
+    context['is_test_server'] = settings.ENABLE_WIKI
 
     rol = rol_get_huidige(request)
 

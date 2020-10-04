@@ -6,12 +6,12 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}Aanmeldingen{% endblock %}
+{% block title %}Inschrijven{% endblock %}
 
 {% block pagina %}
 {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vereniging-leden-inschrijven" %}
 
-<h4>Aanmeldingen</h4>
+<h4>Inschrijven</h4>
 
 <form method="post" action="{{ inschrijven_url }}">
     {% csrf_token %}
@@ -81,17 +81,20 @@
         <table class="white" id="table1">
             <thead>
                 <tr>        <!-- filter veld -->
-                    <td colspan="3"></td>
-                    <td class="table-filter"><input class="table-filter" oninput="myTableFilter(this, 'table1')" placeholder="Zoeken"/></td>
-                    <td colspan="2"></td>
+                    <td></td>
+                    <td colspan="2" class="table-filter">
+                        <input class="table-filter" oninput="myTableFilter(this, 'table1')" placeholder="Zoeken"/>
+                    </td>
+                    <td colspan="4"></td>
                 </tr>
                 <tr>
                     <th class="center-align">{% if mag_inschrijven %}<!-- kolom voor vinkje -->{% else %}Aangemeld{% endif %}</th>
-                    <th>Wedstrijd<wbr/>boog</th>
-                    <th>Aanvangsgemiddelde</th>
+                    <th filter="on">NHB nr</th>
                     <th filter="on">Naam</th>
                     <th>Leeftijd {{ tweede_jaar }}</th>
-                    <th>Leeftijdsklasse {{ seizoen }}</th>
+                    <th class="hide-on-small-only">Leeftijdsklasse {{ seizoen }}</th>
+                    <th>Wedstrijd<wbr/>boog</th>
+                    <th>Aanvangs<wbr/>gemiddelde</th>
                 </tr>
             </thead>
 
@@ -100,11 +103,12 @@
                     {% if not obj.wil_competitie %}
                         <!-- schutter wil niet meedoen -->
                         <td><!-- geen checkbox --></td>
-                        <td class="grey-text">{{ obj.boogtype }}</td>
-                        <td><!-- geen aanvangsgemiddelde --></td>
+                        <td class="grey-text">{{ obj.nhb_nr }}</td>
                         <td class="grey-text">{{ obj.volledige_naam }}</td>
                         <td class="grey-text">{{ obj.leeftijd }}</td>
-                        <td class="grey-text">{{ obj.leeftijdsklasse.klasse_kort }}</td>
+                        <td class="grey-text hide-on-small-only">{{ obj.leeftijdsklasse.klasse_kort }}</td>
+                        <td class="grey-text">{{ obj.boogtype }}</td>
+                        <td><!-- geen aanvangsgemiddelde --></td>
                     {% else %}
                         <td class="center-align">
                             {% if mag_inschrijven %}
@@ -118,11 +122,12 @@
                                 {% endif %}
                             {% endif %}
                         </td>
-                        <td>{{ obj.boogtype }}</td>
-                        <td>{{ obj.ag|floatformat:3 }}</td>
+                        <td>{{ obj.nhb_nr }}</td>
                         <td>{{ obj.volledige_naam }}</td>
                         <td>{{ obj.leeftijd }}</td>
-                        <td>{{ obj.leeftijdsklasse.klasse_kort }}</td>
+                        <td class="hide-on-small-only">{{ obj.leeftijdsklasse.klasse_kort }}</td>
+                        <td>{{ obj.boogtype }}</td>
+                        <td>{{ obj.ag|floatformat:3 }}</td>
                     {% endif %}
                 </tr>
             {% endfor %}
@@ -136,25 +141,30 @@
     <table class="white" id="table2">
         <thead>
             <tr>        <!-- filter veld -->
-                <td colspan="3"></td>
-                <td class="table-filter"><input class="table-filter" oninput="myTableFilter(this, 'table2')" placeholder="Zoeken"/></td>
+                <td></td>
+                <td colspan="2" class="table-filter">
+                    <input class="table-filter" oninput="myTableFilter(this, 'table2')" placeholder="Zoeken"/>
+                </td>
+                <td colspan="5"></td>
             </tr>
             <tr>
                 <th class="center-align">{% if mag_inschrijven %}<!-- kolom voor vinkje -->{% else %}Aangemeld{% endif %}</th>
-                <th>Wedstrijdboog</th>
-                <th>Aanvangsgemiddelde</th>
+                <th filter="on">NHB nr</th>
                 <th filter="on">Naam</th>
+                <th>Wedstrijdboog</th>
+                <th>Aanvangs<wbr/>gemiddelde</th>
             </tr>
         </thead>
 
         {% for obj in leden_senior %}
             <tr>
-                    {% if not obj.wil_competitie %}
-                    <!-- geen bogen gekozen, dus kan niet aanmelden -->
+                {% if not obj.wil_competitie %}
+                    <!-- wil niet meedoen, dus kan niet aanmelden -->
                     <td><!-- geen checkbox --></td>
+                    <td class="grey-text">{{ obj.nhb_nr }}</td>
+                    <td class="grey-text">{{ obj.volledige_naam }}</td>
                     <td class="grey-text">{{ obj.boogtype }}</td>
                     <td><!-- geen aanvangsgemiddelde --></td>
-                    <td class="grey-text">{{ obj.volledige_naam }}</td>
                 {% else %}
                     <td class="center-align">
                         {% if mag_inschrijven %}
@@ -168,9 +178,10 @@
                             {% endif %}
                         {% endif %}
                     </td>
+                    <td>{{ obj.nhb_nr }}</td>
+                    <td>{{ obj.volledige_naam }}</td>
                     <td>{{ obj.boogtype }}</td>
                     <td>{{ obj.ag|floatformat:3 }}</td>
-                    <td>{{ obj.volledige_naam }}</td>
                 {% endif %}
             </tr>
         {% endfor %}

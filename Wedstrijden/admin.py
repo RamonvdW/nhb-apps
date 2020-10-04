@@ -5,10 +5,30 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import admin
-from .models import WedstrijdLocatie, Wedstrijd, WedstrijdenPlan
+from .models import WedstrijdLocatie, Wedstrijd, WedstrijdenPlan, WedstrijdUitslag
+
+
+class WedstrijdAdmin(admin.ModelAdmin):             # pragma: no cover
+    """ Admin configuratie voor Wedstrijd """
+
+    search_fields = ('beschrijving', 'vereniging')
+
+    filter_horizontal = ('indiv_klassen', 'team_klassen')
+
+    def get_queryset(self, request):
+        """ deze functie is voor prestatieverbetering
+            want helaas bestaat list_prefetch_related niet
+        """
+        # qs = super().get_queryset(request)
+        return (Wedstrijd
+                .objects
+                .select_related('locatie', 'vereniging')
+                .prefetch_related('indiv_klassen', 'team_klassen')
+                .all())
 
 
 class WedstrijdLocatieAdmin(admin.ModelAdmin):      # pragma: no cover
+    """ Admin configuratie voor WedstrijdLocatie """
 
     list_filter = ('zichtbaar',)
 
@@ -16,7 +36,7 @@ class WedstrijdLocatieAdmin(admin.ModelAdmin):      # pragma: no cover
 
     def get_queryset(self, request):
         """ deze functie is voor prestatieverbetering
-            helaas bestaat list_prefetch_related niet
+            want helaas bestaat list_prefetch_related niet
         """
         # qs = super().get_queryset(request)
         return (WedstrijdLocatie
@@ -25,11 +45,29 @@ class WedstrijdLocatieAdmin(admin.ModelAdmin):      # pragma: no cover
                 .all())
 
 
-admin.site.register(WedstrijdLocatie, WedstrijdLocatieAdmin)
-admin.site.register(Wedstrijd)
-admin.site.register(WedstrijdenPlan)
+class WedstrijdenPlanAdmin(admin.ModelAdmin):      # pragma: no cover
+    """ Admin configuratie voor WedstrijdenPlan"""
 
-# TODO: Wedstrijd admin scherm is langzaam omdat str(WedstrijdLocatie) een self.verenigingen.count() doet
-#       nog niet op kunnen lossen met een get_queryset()
+    search_fields = ('pk',)
+
+    autocomplete_fields = ('wedstrijden',)
+
+
+class WedstrijdUitslagAdmin(admin.ModelAdmin):      # pragma: no cover
+    """ Admin configuratie voor WedstrijdenUitslag"""
+
+    readonly_fields = ('scores',)
+
+    #autocomplete_fields = ('wedstrijden',)
+    pass
+
+
+admin.site.register(WedstrijdLocatie, WedstrijdLocatieAdmin)
+admin.site.register(Wedstrijd, WedstrijdAdmin)
+admin.site.register(WedstrijdenPlan, WedstrijdenPlanAdmin)
+admin.site.register(WedstrijdUitslag, WedstrijdUitslagAdmin)
+
+# FUTURE: Wedstrijd admin scherm word langzaam als str(WedstrijdLocatie) een self.verenigingen.count() doet
+#         nog niet op kunnen lossen met een get_queryset(). Even uitgezet.
 
 # end of file

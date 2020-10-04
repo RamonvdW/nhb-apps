@@ -147,4 +147,22 @@ class TestAccountCLI(TestCase):
         management.call_command('deblok_account', 'nietbestaand', stderr=f1, stdout=f2)
         self.assertEqual(f1.getvalue(), 'Account matching query does not exist.\n')
 
+    def test_zet_geheim(self):
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('zet_2fa_geheim', 'normaal', '1234567890123456', stderr=f1, stdout=f2)
+        # print('f1:', f1.getvalue())
+        # print('f2:', f2.getvalue())
+        self.assertTrue("2FA is opgeslagen voor account 'normaal'" in f2.getvalue())
+
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('zet_2fa_geheim', 'nietbestaand', '1', stderr=f1, stdout=f2)
+        self.assertEqual(f1.getvalue(), 'Foutief 2FA geheim: moet 16 tekens zijn\n')
+
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('zet_2fa_geheim', 'nietbestaand', '1234567890123456', stderr=f1, stdout=f2)
+        self.assertEqual(f1.getvalue(), 'Account matching query does not exist.\n')
+
 # end of file

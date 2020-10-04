@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import admin
-from .models import IndivRecord
+from .models import IndivRecord, BesteIndivRecords
 
 
 class IndivRecordAdmin(admin.ModelAdmin):
@@ -16,8 +16,16 @@ class IndivRecordAdmin(admin.ModelAdmin):
     list_filter = ('discipline', 'soort_record', 'geslacht', 'leeftijdscategorie', 'materiaalklasse',
                    'is_european_record', 'is_world_record')
 
+    autocomplete_fields = ('nhb_lid',)
+
+
+class BesteIndivRecordsAdmin(admin.ModelAdmin):
+
+    # filter mogelijkheid
+    list_filter = ('discipline', 'soort_record', 'geslacht', 'leeftijdscategorie', 'materiaalklasse')
+
 
 admin.site.register(IndivRecord, IndivRecordAdmin)
-
+admin.site.register(BesteIndivRecords, BesteIndivRecordsAdmin)
 
 # end of file

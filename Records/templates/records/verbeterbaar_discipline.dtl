@@ -1,0 +1,87 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2019-2020 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Handboogsport Records{% endblock %}
+
+{% block pagina %}
+
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="records-alle-verbeterbaar" %}
+
+    <h4>Nederlandse Handboog<wbr/>sport Records</h4>
+
+    <p>Deze pagina toont de nederlandse handboogsport records voor de discipline <b>{{ beschrijving }}</b> die verbeterbaar zijn.</p>
+
+    <p>Filter op geslacht, wedstrijdboog of leeftijdsklasse:</p>
+
+    <p>
+        <div class="white shrink-wrap-5">
+            {% for obj in geslacht %}
+                {% if obj.url %}
+                    <a class="margin-5 btn-nhb-blauw btn-small" href="{{ obj.url }}">{{ obj.button_str }}</a>
+                {% else %}
+                    <a class="margin-5 btn-nhb-blauw btn-small disabled" href="#">{{ obj.button_str }}</a>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </p>
+    <p>
+        <div class="white shrink-wrap-5">
+            {% for obj in bogen %}
+                {% if obj.url %}
+                    <a class="margin-5 btn-nhb-blauw btn-small" href="{{ obj.url }}">{{ obj.button_str }}</a>
+                {% else %}
+                    <a class="margin-5 btn-nhb-blauw btn-small disabled" href="#">{{ obj.button_str }}</a>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </p>
+    <p>
+        <div class="white shrink-wrap-5">
+            {% for obj in leeftijd %}
+                {% if obj.url %}
+                    <a class="margin-5 btn-nhb-blauw btn-small" href="{{ obj.url }}">{{ obj.button_str }}</a>
+                {% else %}
+                    <a class="margin-5 btn-nhb-blauw btn-small disabled" href="#">{{ obj.button_str }}</a>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </p>
+
+    {% if is_alles %}
+        <p>Hieronder volgen alle <b>{{ object_list.count }}</b> records die verbeterbaar zijn.</p>
+    {% else %}
+        <p>Hieronder volgen <b>{{ object_list.count }}</b> van de records die verbeterbaar zijn.</p>
+    {% endif %}
+
+    <table class="white">
+        <thead>
+            <th>Soort record</th>
+            <th>Materiaal<wbr/>klasse</th>
+            <th>Leeftijds<wbr/>categorie</th>
+            <th>Para klasse</th>
+            <th>Geslacht</th>
+            <th>Score</th>
+            <th><!-- kolom voor de 'details' knop --></th>
+        </thead>
+
+        {% for obj in object_list %}
+            <tr>
+                <td>{{ obj.soort_record }}</td>
+                <td>{{ obj.materiaalklasse_str }}</td>
+                <td>{{ obj.leeftijdscategorie_str }}</td>
+                <td>{{ obj.para_klasse }}</td>
+                <td>{{ obj.geslacht_str }}</td>
+                <td>{{ obj.beste.score_str }}</td>
+                <td>
+                    <a class="btn-nhb-blauw btn-small" href="{{ obj.url_details }}">Details</a>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+
+{% endblock %}

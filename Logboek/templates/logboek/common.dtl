@@ -6,25 +6,50 @@
 
 <h4>Logboek</h4>
 
-<p>Focus:
-    <a class="btn-nhb-blauw margin-5 btn-small {% if filter == 'rest' %}disabled{% endif %}" href="{% url 'Logboek:rest' %}">Rest</a>
-    <span>&nbsp;</span>
-    <a class="btn-nhb-blauw margin-5 btn-small {% if filter == 'records' %}disabled{% endif %}" href="{% url 'Logboek:records' %}">Records</a>
-    <span>&nbsp;</span>
-    <a class="btn-nhb-blauw margin-5 btn-small {% if filter == 'accounts' %}disabled{% endif %}" href="{% url 'Logboek:accounts' %}">Accounts</a>
-    <span>&nbsp;</span>
-    <a class="btn-nhb-blauw margin-5 btn-small {% if filter == 'rollen' %}disabled{% endif %}" href="{% url 'Logboek:rollen' %}">Rollen</a>
-    <span>&nbsp;</span>
-    <a class="btn-nhb-blauw margin-5 btn-small {% if filter == 'accommodatie' %}disabled{% endif %}" href="{% url 'Logboek:accommodaties' %}">Accommodaties</a>
-    <span>&nbsp;</span>
-    <a class="btn-nhb-blauw margin-5 btn-small {% if filter == 'nhbstructuur' %}disabled{% endif %}" href="{% url 'Logboek:nhbstructuur' %}">CRM import</a>
-    <span>&nbsp;</span>
-    <a class="btn-nhb-blauw margin-5 btn-small {% if filter == 'clusters' %}disabled{% endif %}" href="{% url 'Logboek:clusters' %}">Clusters</a>
-    <span>&nbsp;</span>
-    <a class="btn-nhb-blauw margin-5 btn-small {% if filter == 'competitie' %}disabled{% endif %}" href="{% url 'Logboek:competitie' %}">Competitie</a>
-    <span>&nbsp;</span>
-    <a class="btn-nhb-blauw margin-5 btn-small {% if filter == 'uitrol' %}disabled{% endif %}" href="{% url 'Logboek:uitrol' %}">Uitrol</a>
-</p>
+<p>Focus:</p>
+
+<form method="get" action="{{ filter_url }}">
+
+    <div class="row">
+        <div class="col s12 m6">
+            <a class="btn-nhb-blauw margin-5 btn-small {% if filter == 'rest' %}disabled{% endif %}" href="{{ url_rest }}">Rest</a>
+            <span>&nbsp;</span>
+            <a class="btn-nhb-blauw margin-5 btn-small {% if filter == 'records' %}disabled{% endif %}" href="{{ url_records }}">Records</a>
+            <span>&nbsp;</span>
+            <a class="btn-nhb-blauw margin-5 btn-small {% if filter == 'accounts' %}disabled{% endif %}" href="{{ url_accounts }}">Accounts</a>
+            <span>&nbsp;</span>
+            <a class="btn-nhb-blauw margin-5 btn-small {% if filter == 'rollen' %}disabled{% endif %}" href="{{ url_rollen }}">Rollen</a>
+            <span>&nbsp;</span>
+            <a class="btn-nhb-blauw margin-5 btn-small {% if filter == 'accommodatie' %}disabled{% endif %}" href="{{ url_accommodaties }}">Accommodaties</a>
+            <span>&nbsp;</span>
+            <a class="btn-nhb-blauw margin-5 btn-small {% if filter == 'nhbstructuur' %}disabled{% endif %}" href="{{ url_nhbstructuur }}">CRM import</a>
+            <span>&nbsp;</span>
+            <a class="btn-nhb-blauw margin-5 btn-small {% if filter == 'clusters' %}disabled{% endif %}" href="{{ url_clusters }}">Clusters</a>
+            <span>&nbsp;</span>
+            <a class="btn-nhb-blauw margin-5 btn-small {% if filter == 'competitie' %}disabled{% endif %}" href="{{ url_competitie }}">Competitie</a>
+            <span>&nbsp;</span>
+            <a class="btn-nhb-blauw margin-5 btn-small {% if filter == 'import' %}disabled{% endif %}" href="{{ url_import }}">Import oude site</a>
+            <span>&nbsp;</span>
+            <a class="btn-nhb-blauw margin-5 btn-small {% if filter == 'uitrol' %}disabled{% endif %}" href="{{ url_uitrol }}">Uitrol</a>
+        </div>
+        <div class="col s12 hide-on-med-and-up">
+            <br> <!-- spacing to input form -->
+        </div>
+        <div class="col s12 m6 white">
+            <div class="input-text" style="margin-left: 20px">
+                <span>Filter/zoek op:</span>
+                <input type="text" name="zoekterm" value="{{ zoekterm }}"></input>
+            </div>
+
+            <p class="center-align">
+                <button class="btn-nhb-blauw" type="submit"><i class="material-icons-round left">search</i>Zoek</button>
+                {% if unfiltered_url %}
+                    <span>&nbsp;&nbsp;</span><a class="btn-nhb-blauw" href="{{ unfiltered_url }}"><i class="material-icons-round left">backspace</i>Leeg maken</a>
+                {% endif %}
+            </p>
+        </div>
+    </div>
+</form>
 
 {% if is_paginated %}
     <ul class="pagination">

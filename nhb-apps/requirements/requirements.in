@@ -1,0 +1,23 @@
+# required pip packages
+
+-c constraints.txt
+
+# web framework
+Django
+
+# PostgreSQL database access
+# building has a ton of preconditions, so use binary version
+psycopg2-binary
+
+# 2FA support
+pyotp
+
+# QR code generation for 2FA
+qrcode
+
+# NL records download from gsheet
+google-auth
+google-api-python-client
+
+# end of file
+

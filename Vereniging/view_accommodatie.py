@@ -183,7 +183,8 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
         return HttpResponseRedirect(reverse('Plein:plein'))
 
-    def _get_locatie_nhver_or_404(self, **kwargs):
+    @staticmethod
+    def _get_locatie_nhver_or_404(**kwargs):
         locatie_pk = kwargs['locatie_pk']
         try:
             locatie = WedstrijdLocatie.objects.get(pk=locatie_pk)
@@ -200,6 +201,13 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
         if locatie.verenigingen.filter(nhb_nr=nhbver.nhb_nr).count() == 0:
             # vereniging hoort niet bij deze locatie
             raise Resolver404()
+
+        clusters = list()
+        for cluster in nhbver.clusters.order_by('letter').all():
+            clusters.append(str(cluster))
+        # for
+        if len(clusters) > 0:
+            nhbver.sorted_cluster_names = clusters
 
         return locatie, nhbver
 
@@ -244,6 +252,9 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
 
         context['sec_names'] = self.get_all_names(functie_sec)
         context['sec_email'] = functie_sec.bevestigde_email
+
+        if len(context['sec_names']) == 0 and nhbver.secretaris_lid:
+            context['sec_names'] = [nhbver.secretaris_lid.volledige_naam(),]
 
         context['hwl_names'] = self.get_all_names(functie_hwl)
         context['hwl_email'] = functie_hwl.bevestigde_email
@@ -444,6 +455,8 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
         # for
 
         context['terug_url'] = reverse('Plein:plein')
+
+        context['handleiding_clusters_url'] = reverse('Handleiding:Clusters')
 
         menu_dynamics(self.request, context, actief='hetplein')
         return context

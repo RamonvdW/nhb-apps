@@ -22,6 +22,8 @@ import sys
 from .settings_local import *
 
 # for testing
+# TODO: dit werkt niet: ./manage.py --enable-wiki runserver
+# TODO: dit werkt niet: ./manage.py runserver -- --enable-wiki  --> deze file wordt 2x ingeladen
 if "--enable-wiki" in sys.argv:
     ENABLE_WIKI = True
     sys.argv.remove("--enable-wiki")
@@ -32,7 +34,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2020-08-30'
+SITE_VERSIE = '2020-10-04'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -53,14 +55,13 @@ INSTALLED_APPS = [
     'Score.apps.ScoreConfig',
     'Wedstrijden.apps.WedstrijdenConfig',
     'Handleiding.apps.HandleidingConfig',
-    'djangosaml2idp',               # single sign-on Identity Provider (IP)
-                                    #   using SAML2 (Security Assertion Markup Language)
     'django.contrib.staticfiles',   # gather static files from modules helper
     'django.contrib.sessions',      # support for database-backed sessions; needed for logged-in user
     'django.contrib.admin',         # see-all/fix-all admin pages
     'django.contrib.auth',          # authenticatie framework
     'django.contrib.contenttypes',  # permission association to models
     'django.contrib.messages',
+    #'django_extensions'
 ]
 
 
@@ -73,6 +74,11 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',       # security
 ]
+
+if ENABLE_WIKI:
+    # single sign-on Identity Provider (IP)
+    #   using SAML2 (Security Assertion Markup Language)
+    INSTALLED_APPS.append('djangosaml2idp')
 
 if ENABLE_DEBUG_TOOLBAR and "test" not in sys.argv:    # pragma: no cover
     INSTALLED_APPS.append('debug_toolbar')
@@ -110,10 +116,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
             ],
             'loaders': [
-                ('django.template.loaders.cached.Loader', [
-                    'nhb-apps.minify_dtl.Loader',
-                    ]
-                ),
+                ('django.template.loaders.cached.Loader', ['nhb-apps.minify_dtl.Loader']),
             ],
         },
     },
@@ -171,7 +174,7 @@ ROOT_URLCONF = 'nhb-apps.urls'
 STATIC_URL = '/static/'     # url
 STATIC_ROOT = 'nhb-apps/.static'     # relative to project top-dir
 STATICFILES_DIRS = [
-    os.path.join(PROJ_DIR, "global_static"),
+    os.path.join(PROJ_DIR, "compiled_static"),
 ]
 STATICFILES_FINDER = [
     'django.contrib.staticfiles.finders.FileSystemFinder',
@@ -212,38 +215,40 @@ RECORDS_MAX_ZOEKRESULTATEN = 150
 # wordt gebruikt om invoerfouten te ontdekken en rapporteren
 RECORDS_TOEGESTANE_SOORTEN = (
 
-    # outdoor
-    '30m',
-    '40m',
-    '50m',
-    '50m (15p)',
-    '50m (122cm)',
-    '50m (72p)',
-    '60m',
-    '60m (12p)',
-    '60m (72p)',
-    '70m',
-    '70m (12p)',
-    '70m (72p)',
-    '90m',
+    # LET OP: dit is ook meteen de presentatie-volgorde van de records
+
+    # Outdoor
     'WA1440',
+    '90m',
+    '70m',
+    '60m',
+    '50m',
+    '50m (122cm)',
+    '40m',
+    '30m',
+    '50m (72p)',
+    '60m (72p)',
+    '70m (72p)',
+    '50m (15p)',
+    '60m (12p)',
+    '70m (12p)',
     '288p',
 
-    # Outdoor, still to be cleaned up
+    # Outdoor, TODO: still to be cleaned up
     'Fita RK Rayon 4',
     'ShortMetric',
 
     # indoor
-    '18m (15p)',
     '18m (60p)',
     '18m',
+    '18m (15p)',
     '18m (12p)',
-    '25m',
     '25m (60p)',
-    '25m+18m (60p)',
+    '25m',
     '25m+18m (120p)',
+    '25m+18m (60p)',
 
-    # Indoor, to be cleaned up
+    # Indoor, TODO: to be cleaned up
     'match (15p)',
 
     # 25m1pijl
@@ -251,12 +256,14 @@ RECORDS_TOEGESTANE_SOORTEN = (
     '30p',
 )
 
+
 RECORDS_TOEGESTANE_PARA_KLASSEN = (
     "Open",
     "Staand",
     "W1",
     "W2",
     "Ja"        # aka Onbekend
+    # TODO: hier ontbreken VI1 en VI2/3
 )
 
 # definitions taken from saml2.saml to avoid importing saml2
@@ -316,19 +323,24 @@ SAML_IDP_CONFIG = {
 
 # pagina's van de handleiding
 HANDLEIDING_TOP = 'Hoofdpagina'
-#HANDLEIDING_SEC = 'Handleiding_SEC'
+HANDLEIDING_SEC = 'Handleiding_Secretaris'
 HANDLEIDING_WL = 'Handleiding_Wedstrijdleider'
 HANDLEIDING_HWL = 'Handleiding_Hoofdwedstrijdleider'
 HANDLEIDING_RCL = 'Handleiding_RCL'
+HANDLEIDING_PLANNING_REGIO = 'Planning_Regio'
 HANDLEIDING_RKO = 'Handleiding_RKO'
 HANDLEIDING_BKO = 'Handleiding_BKO'
 HANDLEIDING_BB = 'Handleiding_BB'
 HANDLEIDING_2FA = 'Twee-factor_authenticatie'
 HANDLEIDING_ROLLEN = 'Rollen'
+HANDLEIDING_INTRO_NIEUWE_BEHEERDERS = 'Intro_nieuwe_beheerders'
+HANDLEIDING_SCHUTTERBOOG = 'Schutter-boog'
+HANDLEIDING_INSCHRIJFMETHODES = 'Inschrijfmethodes_Regiocompetitie'
+HANDLEIDING_CLUSTERS = 'Clusters'
 
 HANDLEIDING_PAGINAS = [
     HANDLEIDING_TOP,
-    #HANDLEIDING_SEC,
+    HANDLEIDING_SEC,
     HANDLEIDING_WL,
     HANDLEIDING_HWL,
     HANDLEIDING_RCL,
@@ -337,6 +349,11 @@ HANDLEIDING_PAGINAS = [
     HANDLEIDING_BB,
     HANDLEIDING_2FA,
     HANDLEIDING_ROLLEN,
+    HANDLEIDING_INTRO_NIEUWE_BEHEERDERS,
+    HANDLEIDING_SCHUTTERBOOG,
+    HANDLEIDING_PLANNING_REGIO,
+    HANDLEIDING_INSCHRIJFMETHODES,
+    HANDLEIDING_CLUSTERS,
     # pagina's van de handleiding die intern gerefereerd worden
     'Tips_voor_wiki_gebruik',
     'Handleiding_CWZ',

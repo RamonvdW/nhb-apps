@@ -134,6 +134,7 @@ def save_tijdelijke_url(url_code, dispatch_to, geldig_dagen=0, geldig_seconden=0
     obj.hoortbij_accountemail = accountemail
     obj.hoortbij_functie = functie
     obj.save()
+    return obj
 
 
 set_tijdelijke_url_saver(save_tijdelijke_url)

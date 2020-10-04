@@ -35,7 +35,8 @@ class NhbVerenigingAdmin(admin.ModelAdmin):
 
     def get_object(self, request, object_id, from_field=None):          # pragma: no cover
         obj = super().get_object(request, object_id, from_field)
-        self._nhbver_regio = obj.regio
+        if obj:
+            self._nhbver_regio = obj.regio
         return obj
 
     def formfield_for_manytomany(self, db_field, request, **kwargs):    # pragma: no cover

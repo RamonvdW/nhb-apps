@@ -6,12 +6,9 @@
 
 # script for daily (or faster) execution by a crob job
 
-NHBAPPS="/var/www/nhb-apps"
 LOGDIR="/var/log/www"
 SPOOLDIR="/var/spool/crm"
 CONFIGFILE="download_crm_config.txt"
-
-# FUTURE: cleanup of spool directory
 
 ID=$(id -u)
 ID_ROOT=$(id -u root)
@@ -21,6 +18,8 @@ then
     echo "Please run with sudo"
     exit 1
 fi
+
+cd $(dirname $0)    # ga naar de directory van het script
 
 # everything sent to stdout/stderr will be picked up by crontab and sent in an email
 # avoid this by writing to a logfile
@@ -73,7 +72,9 @@ then
 
     echo "[INFO] Importing new data set" >> "$LOG"
 
-    (cd $NHBAPPS; python3.6 manage.py import_nhb_crm "$SPOOLFILE") &>> "$LOG"
+    # move from NhbStructuur/cron/ to top-dir
+    cd ../..
+    ./manage.py import_nhb_crm "$SPOOLFILE" &>> "$LOG"
 
     echo "[INFO] Import finished" >> "$LOG"
 fi

@@ -82,7 +82,11 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
 
         # volg de tijdelijke url om ingelogd te raken
         self.e2e_logout()
-        resp = self.client.get(tijdelijke_url, follow=True)
+        resp = self.client.get(tijdelijke_url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        urls = self.extract_all_urls(resp, skip_menu=True, skip_smileys=True)
+        post_url = urls[0]
+        resp = self.client.post(post_url, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('plein/plein-gebruiker.dtl', 'plein/site_layout.dtl'))
@@ -90,8 +94,8 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
 
         # controleer dat tijdelijke URL maar 1x gebruikt kan worden
         self.e2e_logout()
-        resp = self.client.get(tijdelijke_url, follow=True)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
+        resp = self.client.post(post_url)
+        self.assert_is_redirect(resp, '/plein/')
 
     def test_wissel_met_otp(self):
         # login als admin
@@ -101,6 +105,8 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
         self.account_normaal.is_BB = True
         self.account_normaal.save()
         self.e2e_account_accepteert_vhpg(self.account_normaal)
+
+        self.e2e_assert_other_http_commands_not_supported(self.wissel_url, post=False)
 
         # selecteer de andere schutter
         resp = self.client.post(self.wissel_url, {'selecteer': self.account_normaal.pk})
@@ -114,7 +120,11 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
         tijdelijke_url = urls[0][urls[0].find('/overig/url/'):]
 
         # volg de tijdelijke url om ingelogd te raken
-        resp = self.client.get(tijdelijke_url, follow=True)
+        resp = self.client.get(tijdelijke_url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        urls = self.extract_all_urls(resp, skip_menu=True, skip_smileys=True)
+        post_url = urls[0]
+        resp = self.client.post(post_url, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('plein/plein-gebruiker.dtl', 'plein/site_layout.dtl'))
@@ -149,6 +159,9 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
 
         # volg de tijdelijke url om ingelogd te raken
         resp = self.client.get(tijdelijke_url)
+        urls = self.extract_all_urls(resp, skip_menu=True, skip_smileys=True)
+        post_url = urls[0]
+        resp = self.client.post(post_url)
         self.assert_is_redirect(resp, '/account/activiteit/')
 
     def test_wissel_bad(self):
@@ -181,7 +194,6 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
     def test_bad_post(self):
         # niet ingelogd
         self.e2e_logout()
-        url = '/account/account-wissel/'
         resp = self.client.post(self.wissel_url)
         self.assertEqual(resp.status_code, 404)     # 404 = not allowed
 
@@ -215,9 +227,8 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
         obj.save()
 
         # volg de tijdelijke url om ingelogd te raken
-        resp = self.client.get(tijdelijke_url, follow=True)
-        self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
-
-# TODO: gebruik assert_other_http_commands_not_supported
+        resp = self.client.get(tijdelijke_url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_template_used(resp, ('overig/tijdelijke-url-fout.dtl', 'plein/site_layout.dtl'))
 
 # end of file

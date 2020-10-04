@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from . import views
+from . import views, view_otp, view_vhpg, view_wisselvanrol
 
 app_name = 'Functie'
 
@@ -32,36 +32,39 @@ urlpatterns = [
          views.OverzichtView.as_view(),
          name='overzicht'),
 
+
     path('otp-controle/',
-         views.OTPControleView.as_view(),
+         view_otp.OTPControleView.as_view(),
          name="otp-controle"),
 
     path('otp-koppelen/',
-         views.OTPKoppelenView.as_view(),
+         view_otp.OTPKoppelenView.as_view(),
          name="otp-koppelen"),
 
+
     path('activeer-functie/<str:functie_pk>/',
-         views.ActiveerRolView.as_view(),
+         view_wisselvanrol.ActiveerRolView.as_view(),
          name='activeer-functie'),
 
     path('activeer-rol/<str:rol>/',
-         views.ActiveerRolView.as_view(),
+         view_wisselvanrol.ActiveerRolView.as_view(),
          name='activeer-rol'),
 
     path('wissel-van-rol/',
-         views.WisselVanRolView.as_view(),
+         view_wisselvanrol.WisselVanRolView.as_view(),
          name='wissel-van-rol'),
 
+
     path('vhpg-acceptatie/',
-         views.VhpgAcceptatieView.as_view(),
+         view_vhpg.VhpgAcceptatieView.as_view(),
          name='vhpg-acceptatie'),
 
     path('vhpg-afspraken/',
-         views.VhpgAfsprakenView.as_view(),
+         view_vhpg.VhpgAfsprakenView.as_view(),
          name='vhpg-afspraken'),
 
     path('vhpg-overzicht/',
-         views.VhpgOverzichtView.as_view(),
+         view_vhpg.VhpgOverzichtView.as_view(),
          name='vhpg-overzicht'),
 ]
 

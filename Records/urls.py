@@ -10,6 +10,14 @@ from . import views
 app_name = 'Records'
 
 urlpatterns = [
+    path('indiv/verbeterbaar/',
+         views.RecordsVerbeterbaarKiesDisc.as_view(),
+         name='indiv-verbeterbaar'),
+
+    path('indiv/verbeterbaar/<str:disc>/',
+         views.RecordsVerbeterbaarInDiscipline.as_view(),
+         name='indiv-verbeterbaar-disc'),
+
     path('indiv/<str:gesl>/<str:disc>/<str:lcat>/<str:makl>/',
          views.RecordsIndivZoom5View.as_view(),
          name='indiv-gdlm'),

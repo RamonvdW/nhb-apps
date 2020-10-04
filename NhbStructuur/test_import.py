@@ -158,7 +158,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_09.json', stderr=f1, stdout=f2)
         self.assertTrue("[ERROR] Lid 100001 heeft geen valide geboortedatum", f1.getvalue())
         self.assertTrue("[ERROR] Lid 100001 heeft onbekend geslacht: X (moet zijn: M of F)", f1.getvalue())
-        self.assertTrue("[WARNING] Lid 100009 heeft geen voornaam of initials" in f1.getvalue())
+        self.assertTrue("[ERROR] Lid 100009 heeft geen voornaam of initials" in f1.getvalue())
         self.assertTrue("[ERROR] Lid 100009 heeft geen valide lidmaatschapsdatum", f1.getvalue())
         self.assertTrue("[ERROR] Lid 100009 heeft geen valide email (geen)", f1.getvalue())
         self.assertTrue("[INFO] Lid 100024: is_actief_lid nee --> ja", f2.getvalue())
@@ -365,5 +365,17 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         ver.save()
         management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_12.json', '--dryrun', stderr=f1, stdout=f2)
 
+    def test_incomplete_data(self):
+        # test import met een incomplete entry van een nieuw lid
+
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_17.json', stderr=f1, stdout=f2)
+        # print("f1: %s" % f1.getvalue())
+        # print("f2: %s" % f2.getvalue())
+        self.assertTrue("[ERROR] Lid 100002 heeft geen achternaam" in f1.getvalue())
+        self.assertTrue("[ERROR] Lid 100007 heeft geen valide geboortedatum" in f1.getvalue())
+        self.assertTrue("[ERROR] Lid 100008 heeft geen valide lidmaatschapsdatum" in f1.getvalue())
+        self.assertTrue("[ERROR] Lid 100009 heeft geen voornaam of initials" in f1.getvalue())
 
 # end of file

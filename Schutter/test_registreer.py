@@ -6,6 +6,7 @@
 
 from django.test import TestCase
 from Account.models import Account, AccountEmail
+from Functie.models import Functie
 from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
 from Overig.e2ehelpers import E2EHelpers
 from Overig.models import SiteTijdelijkeUrl
@@ -29,6 +30,11 @@ class TestSchutterRegistreer(E2EHelpers, TestCase):
         ver.regio = NhbRegio.objects.get(pk=111)
         # secretaris kan nog niet ingevuld worden
         ver.save()
+        self.nhbver = ver
+
+        # maak de SEC functie aan
+        functie = Functie(rol='SEC', nhb_ver=ver, beschrijving='SEC vereniging 1000')
+        functie.save()
 
         # maak een test lid aan
         lid = NhbLid()
@@ -129,12 +135,12 @@ class TestSchutterRegistreer(E2EHelpers, TestCase):
     def test_registreer(self):
         resp = self.client.post('/schutter/registreer/',
                                 {'nhb_nummer': '100001',
-                                 'email': 'rdetester@gmail.not',
+                                 'email': 'rDeTester@gmail.not',    # dekt case-insensitive emailadres
                                  'nieuw_wachtwoord': E2EHelpers.WACHTWOORD},
                                 follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('account/aangemaakt.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('account/email_aangemaakt.dtl', 'plein/site_layout.dtl'))
 
         # controleer dat het email adres obfuscated is
         self.assertNotContains(resp, 'rdetester@gmail.not')
@@ -164,6 +170,11 @@ class TestSchutterRegistreer(E2EHelpers, TestCase):
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
+        urls = self.extract_all_urls(resp, skip_menu=True, skip_smileys=True)
+        post_url = urls[0]
+        resp = self.client.post(post_url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/bevestigd.dtl', 'plein/site_layout.dtl'))
 
         account = Account.objects.get(username='100001')
@@ -184,7 +195,7 @@ class TestSchutterRegistreer(E2EHelpers, TestCase):
                                 follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('account/aangemaakt.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('account/email_aangemaakt.dtl', 'plein/site_layout.dtl'))
 
         # tweede poging
         resp = self.client.post('/schutter/registreer/',
@@ -332,5 +343,29 @@ class TestSchutterRegistreer(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('schutter/registreer-nhb-account.dtl', 'plein/site_layout.dtl'))
         self.assertFormError(resp, 'form', None, 'Gebruik van NHB diensten is geblokkeerd. Neem contact op met de secretaris van je vereniging.')
+
+    def test_sec(self):
+        # lid dat zich registreert is secretaris van een vereniging
+        # en wordt meteen gekoppeld aan de SEC rol
+
+        self.nhbver.secretaris_lid = self.nhblid_100001
+        self.nhbver.save()
+
+        functie = Functie.objects.get(rol='SEC', nhb_ver=self.nhbver)
+        self.assertEqual(functie.accounts.count(), 0)
+
+        resp = self.client.post('/schutter/registreer/',
+                                {'nhb_nummer': '100001',
+                                 'email': 'rdetester@gmail.not',
+                                 'nieuw_wachtwoord': E2EHelpers.WACHTWOORD},
+                                follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('account/email_aangemaakt.dtl', 'plein/site_layout.dtl'))
+
+        self.assertEqual(functie.accounts.count(), 1)
+        self.nhblid_100001 = NhbLid.objects.get(nhb_nr=self.nhblid_100001.nhb_nr)   # refresh
+        self.assertEqual(functie.accounts.all()[0], self.nhblid_100001.account)
+
 
 # end of file

@@ -58,6 +58,11 @@ class LedenInschrijvenView(UserPassesTestMixin, ListView):
         _, functie_nu = rol_get_huidige_functie(self.request)
         objs = list()
 
+        # bepaal de inschrijfmethode voor deze regio
+        if functie_nu.nhb_ver.regio.is_administratief:
+            # niemand van deze vereniging mag zich inschrijven
+            return objs
+
         prev_lkl = None
         prev_wedstrijdleeftijd = 0
         jeugdgrens = comp.begin_jaar - MAXIMALE_LEEFTIJD_JEUGD
@@ -202,7 +207,13 @@ class LedenInschrijvenView(UserPassesTestMixin, ListView):
         context['mag_inschrijven'] = True
 
         # bepaal de inschrijfmethode voor deze regio
-        mijn_regio = functie_nu.nhb_ver.regio.regio_nr
+        mijn_regio = functie_nu.nhb_ver.regio
+
+        if not mijn_regio.is_administratief:
+            deelcomp = (DeelCompetitie
+                        .objects
+                        .select_related('competitie', 'nhb_regio')
+                        .get(competitie=self.comp, nhb_regio=mijn_regio))
 
         deelcomp = (DeelCompetitie
                     .objects
@@ -240,11 +251,15 @@ class LedenInschrijvenView(UserPassesTestMixin, ListView):
         # rol is HWL (zie test_func)
 
         # bepaal de inschrijfmethode voor deze regio
-        hwl_regio_nr = functie_nu.nhb_ver.regio.regio_nr
+        hwl_regio = functie_nu.nhb_ver.regio
+
+        if hwl_regio.is_administratief:
+            # niemand van deze vereniging mag meedoen aan wedstrijden
+            raise Resolver404()
 
         # zoek de juiste DeelCompetitie erbij
         deelcomp = DeelCompetitie.objects.get(competitie=comp,
-                                              nhb_regio=hwl_regio_nr)
+                                              nhb_regio=hwl_regio)
         methode = deelcomp.inschrijf_methode
 
         # zoek eerst de voorkeuren op
@@ -264,6 +279,8 @@ class LedenInschrijvenView(UserPassesTestMixin, ListView):
         bulk_opmerking = request.POST.get('opmerking', '')
         if len(bulk_opmerking) > 500:
             bulk_opmerking = bulk_opmerking[:500]     # moet afkappen, anders database foutmelding
+
+        udvl = comp.uiterste_datum_lid
 
         # all checked boxes are in the post request as keys, typically with value 'on'
         for key, _ in request.POST.items():
@@ -310,6 +327,7 @@ class LedenInschrijvenView(UserPassesTestMixin, ListView):
 
                 # bepaal in welke wedstrijdklasse de schutter komt
                 age = schutterboog.nhblid.bereken_wedstrijdleeftijd(deelcomp.competitie.begin_jaar + 1)
+                dvl = schutterboog.nhblid.sinds_datum
 
                 # zoek de aanvangsgemiddelden er bij, indien beschikbaar
                 ag = AG_NUL
@@ -347,9 +365,13 @@ class LedenInschrijvenView(UserPassesTestMixin, ListView):
                         break
                 # for
 
-                # kijk of de schutter met een team mee wil schieten voor deze competitie
-                if age > MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT:
-                    # is geen aspirant
+                if not done:
+                    # geen klasse kunnen vinden
+                    raise Resolver404()
+
+                # kijk of de schutter met een team mee wil en mag schieten voor deze competitie
+                if age > MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT and dvl < udvl:
+                    # is geen aspirant en was op tijd lid
                     if bulk_team:
                         aanmelding.inschrijf_voorkeur_team = True
 

@@ -15,6 +15,7 @@ from Overig.helpers import get_safe_from_ip
 from Mailer.models import mailer_email_is_valide
 from Account.models import AccountCreateError, account_create
 from Account.views import account_vraag_email_bevestiging
+from Functie.models import Functie
 from NhbStructuur.models import NhbLid
 from .models import SchutterNhbLidGeenEmail, SchutterNhbLidInactief
 from .forms import RegistreerForm
@@ -50,18 +51,24 @@ def schutter_create_account_nhb(nhb_nummer, email, nieuw_wachtwoord):
     if not mailer_email_is_valide(nhblid.email):
         raise SchutterNhbLidGeenEmail()
 
-    if email != nhblid.email:
+    # vergelijk e-mailadres hoofdletter ongevoelig
+    if email.lower() != nhblid.email.lower():
         raise AccountCreateError('De combinatie van NHB nummer en email worden niet herkend. Probeer het nog eens.')
 
     if not nhblid.is_actief_lid:
         raise SchutterNhbLidInactief()
 
     # maak het account aan
-    account, accountmail = account_create(nhb_nummer, nhblid.voornaam, nhblid.achternaam, nieuw_wachtwoord, email, False)
+    account, accountmail = account_create(nhb_nummer, nhblid.voornaam, nhblid.achternaam, nieuw_wachtwoord, nhblid.email, False)
 
     # koppelen nhblid en account
     nhblid.account = account
     nhblid.save()
+
+    # indien dit een secretaris is, ook meteen koppelen aan SEC functie van zijn vereniging
+    if nhblid.bij_vereniging.secretaris_lid == nhblid:
+        functie = Functie.objects.get(rol='SEC', nhb_ver=nhblid.bij_vereniging)
+        functie.accounts.add(account)
 
     account_vraag_email_bevestiging(accountmail, nhb_nummer=nhb_nummer, email=email)
 
@@ -98,7 +105,7 @@ class RegistreerNhbNummerView(TemplateView):
                 schrijf_in_logboek(account=None,
                                    gebruikte_functie="Registreer met NHB nummer",
                                    activiteit="Mislukt voor nhb nummer %s vanaf IP %s: %s" % (repr(nhb_nummer), from_ip, str(exc)))
-                my_logger.info('%s REGISTREER Mislukt voor NHB nummer %s (reden: %s)' % (from_ip, repr(nhb_nummer), str(exc)))
+                my_logger.info('%s REGISTREER Mislukt voor NHB nummer %s met email %s (reden: %s)' % (from_ip, repr(nhb_nummer), repr(email), str(exc)))
             except SchutterNhbLidInactief:
                 # NHB lid is mag niet gebruik maken van de diensten van de NHB, inclusief deze website
                 schrijf_in_logboek(account=None,

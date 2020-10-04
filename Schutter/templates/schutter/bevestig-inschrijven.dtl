@@ -46,7 +46,7 @@
                 {% if ag %}
                 <span><b>{{ ag|floatformat:3 }}</b></span>
                     {% if ag_hist %}
-                        <br><span class="grey-text">(vastgesteld op {{ ag_hist.datum }} - {{ ag_hist.notitie }})</span>
+                        <br><span class="grey-text">(vastgesteld op {{ ag_hist.when|date:"j F Y" }} - {{ ag_hist.notitie }})</span>
                     {% endif %}
                     <br><br>
                     <span>Je wordt geplaatst in klasse: <b>{{ wedstrijdklasse }}</b></span>

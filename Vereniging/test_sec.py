@@ -53,7 +53,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.functie_sec.nhb_ver = ver
         self.functie_sec.save()
 
-        # maak het lid aan dat HWL wordt
+        # maak het lid aan dat SEC wordt
         lid = NhbLid()
         lid.nhb_nr = 100001
         lid.geslacht = "M"
@@ -137,7 +137,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         histcomp = HistCompetitie()
         histcomp.seizoen = '2018/2019'
         histcomp.comp_type = '18'
-        histcomp.klasse = 'Testcurve1'       # TODO: kan de klasse een spatie bevatten?
+        histcomp.klasse = 'Testcurve1'
         histcomp.is_team = False
         histcomp.save()
 
@@ -210,32 +210,6 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.comp_18 = Competitie.objects.get(afstand=18)
         self.comp_25 = Competitie.objects.get(afstand=25)
 
-    def _zet_schutter_voorkeuren(self, nhb_nr):
-        # deze functie kan alleen gebruikt worden als HWL
-        url_schutter_voorkeuren = '/schutter/voorkeuren/'
-
-        # haal als HWL de voorkeuren pagina op van een lid van de vereniging
-        # dit maakt ook de SchutterBoog records aan
-        resp = self.client.get(url_schutter_voorkeuren + '%s/' % nhb_nr)
-        self.assertEqual(resp.status_code, 200)
-
-        # post een wijziging
-        if nhb_nr == 100003:
-            resp = self.client.post(url_schutter_voorkeuren, {'nhblid_pk': nhb_nr, 'schiet_BB': 'on', 'info_R': 'on'})
-        else:
-            resp = self.client.post(url_schutter_voorkeuren, {'nhblid_pk': nhb_nr, 'schiet_R': 'on', 'info_C': 'on'})
-
-        self.assert_is_redirect(resp, '/vereniging/leden-voorkeuren/')
-
-    def _zet_ag(self, nhb_nr, afstand):
-        if nhb_nr == 100003:
-            afkorting = 'BB'
-        else:
-            afkorting = 'R'
-        schutterboog = SchutterBoog.objects.get(nhblid__nhb_nr=nhb_nr, boogtype__afkorting=afkorting)
-        datum = datetime.date(year=2020, month=4, day=1)
-        aanvangsgemiddelde_opslaan(schutterboog, afstand, 7.42, datum, self.account_bb, 'Test AG %s' % afstand)
-
     def test_overzicht(self):
         # login als SEC
         self.e2e_login_and_pass_otp(self.account_sec)
@@ -287,15 +261,55 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.assertEqual(SchutterBoog.objects.count(), 0)
 
     def test_inschrijven(self):
+        # login als SEC
+        self.e2e_login_and_pass_otp(self.account_sec)
+        self.e2e_wissel_naar_functie(self.functie_sec)
+        self.e2e_check_rol('SEC')
+
         url = self.url_inschrijven % self.comp_18.pk
+        resp = self.client.get(url)
+        self.assert_is_redirect(resp, '/plein/')          # SEC mag dit niet
+
+        # wissel door naar HWL
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+        self.e2e_check_rol('HWL')
+
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+
+    def test_administratieve_regio(self):
+        # corner case: SEC van vereniging in administratieve regio
+
+        # regio 100 is administratief
+        regio100 = NhbRegio.objects.get(regio_nr=100)
+        self.assertTrue(regio100.is_administratief)
+
+        # account_sec is SEC bij self.nhbver1
+        self.nhbver1.regio = regio100
+        self.nhbver1.save()
 
         # login als SEC
         self.e2e_login_and_pass_otp(self.account_sec)
         self.e2e_wissel_naar_functie(self.functie_sec)
         self.e2e_check_rol('SEC')
 
+        url = self.url_inschrijven % self.comp_18.pk
         resp = self.client.get(url)
         self.assert_is_redirect(resp, '/plein/')          # SEC mag dit niet
+
+        # wissel door naar HWL
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+        self.e2e_check_rol('HWL')
+
+        # pagina is wel op te halen, maar bevat geen leden die zich in kunnen schrijven
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+
+        # probeer iemand in te schrijven
+        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
+        resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',        # 1=R
+                                      'lid_100003_boogtype_3': 'on'})       # 3=BB
+        self.assertEqual(resp.status_code, 404)     # 404 = Not found
 
     def test_ingeschreven(self):
         url = self.url_ingeschreven % 1

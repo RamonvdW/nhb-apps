@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from django.utils.dateparse import parse_date
-from .models import IndivRecord
+from .models import IndivRecord, LEEFTIJDSCATEGORIE, GESLACHT, MATERIAALKLASSE, DISCIPLINE
 from NhbStructuur.models import NhbLid
 
 
@@ -31,11 +31,11 @@ class TestRecordsRest(TestCase):
         # Record 42
         rec = IndivRecord()
         rec.volg_nr = 42
-        rec.discipline = IndivRecord.DISCIPLINE[0][0]   # OD
+        rec.discipline = DISCIPLINE[0][0]   # OD
         rec.soort_record = 'Test record'
-        rec.geslacht = IndivRecord.GESLACHT[0][0]   # M
-        rec.leeftijdscategorie = IndivRecord.LEEFTIJDSCATEGORIE[0][0]   # M
-        rec.materiaalklasse = IndivRecord.MATERIAALKLASSE[0][0]     # R
+        rec.geslacht = GESLACHT[0][0]   # M
+        rec.leeftijdscategorie = LEEFTIJDSCATEGORIE[0][0]   # M
+        rec.materiaalklasse = MATERIAALKLASSE[0][0]     # R
         rec.nhb_lid = lid
         rec.naam = 'Top Schutter'
         rec.datum = parse_date('2017-08-27')

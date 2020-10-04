@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from . import view_accommodatie, view_overzicht, view_ledenlijst, view_inschrijven
+from . import view_accommodatie, view_overzicht, view_ledenlijst, view_inschrijven, view_wedstrijden
 
 app_name = 'Vereniging'
 
@@ -46,6 +46,10 @@ urlpatterns = [
     path('regio-clusters/',
          view_accommodatie.WijzigClustersView.as_view(),
          name='clusters'),
+
+    path('wedstrijden/',
+         view_wedstrijden.WedstrijdenView.as_view(),
+         name='wedstrijden'),
 ]
 
 # end of file

@@ -308,7 +308,6 @@ class AGVaststellenView(UserPassesTestMixin, TemplateView):
                 scorehist = ScoreHist(score=score,
                                       oude_waarde=0,
                                       nieuwe_waarde=score.waarde,
-                                      datum=datum,
                                       door_account=None,
                                       notitie=notitie)
                 bulk_scorehist.append(scorehist)

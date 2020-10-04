@@ -13,29 +13,153 @@
 
 <h4>Competitie tussenstand</h4>
 
-{% if toon_details %}
+<p>Op deze pagina's is de tussenstand van de competitie te volgen.</p>
 
-    <p>Nog even geduld, dit stukje van de site is nog niet af.</p>
+<p>De competities beginnen in de 16 regio's (regiocompetitie) en culmineren in de 4 rayonkampioenschappen en de bondskampioenschappen.</p>
 
-    {% if toon_histcomp %}
+{% if toon_comps %}
 
-        <p>De uitslag van vorig seizoen is ook nog in te zien.</p>
+    <p>&nbsp;</p>
+    <h5>Individuele competitie 18m Indoor</h5>
 
-        <a class="btn-nhb-blauw" href="{% url 'HistComp:top' %}">Uitslag vorig seizoen</a>
+    <div class="row">
 
-    {% endif %}
+        <!-- regio -->
+        <div class="card">
+            <div class="card-content">
+                <div class="card-title center-align">Regiocompetitie</div>
+                <div class="center-align"><i class="material-icons-round medium">view_comfy</i></div>
+                <p>Tussenstand voor de regiocompetitie 18m Indoor.</p>
+            </div>
+            <a href="{{ url_18_regio }}" class="nhb-klikbare-balk">
+                <div class="card-action center-align">
+                    <span class="nhb-klikbare-link">Tonen</span>
+                </div>
+            </a>
+        </div>
+
+        <!-- rayon -->
+        <div class="card">
+            <div class="card-content">
+                <div class="card-title center-align">Rayonkampioenschappen</div>
+                <div class="center-align"><i class="material-icons-round medium">view_compact</i></div>
+                <p>Tussenstand voor de rayonkampioenschappen 18m Indoor.</p>
+            </div>
+            <a href="{{ url_18_rayon }}" class="nhb-klikbare-balk">
+                <div class="card-action center-align">
+                    <span class="nhb-klikbare-link">Tonen</span>
+                </div>
+            </a>
+        </div>
+
+        <!-- bond -->
+        <div class="card">
+            <div class="card-content">
+                <div class="card-title center-align">Bondskampioenschappen</div>
+                <div class="center-align"><i class="material-icons-round medium">flag</i></div>
+                <p>Tussenstand voor de bondskampioenschappen 18m Indoor.</p>
+            </div>
+            <a href="{{ url_18_bond }}" class="nhb-klikbare-balk">
+                <div class="card-action center-align">
+                    <span class="nhb-klikbare-link">Tonen</span>
+                </div>
+            </a>
+        </div>
+
+    </div>
+
+
+    <h5>Individuele competitie 25m 1pijl</h5>
+
+    <div class="row">
+
+        <!-- regio -->
+        <div class="card">
+            <div class="card-content">
+                <div class="card-title center-align">Regiocompetitie</div>
+                <div class="center-align"><i class="material-icons-round medium">view_comfy</i></div>
+                <p>Tussenstand voor de regiocompetitie 25m 1pijl.</p>
+            </div>
+            <a href="{{ url_25_regio }}" class="nhb-klikbare-balk">
+                <div class="card-action center-align">
+                    <span class="nhb-klikbare-link">Tonen</span>
+                </div>
+            </a>
+        </div>
+
+        <!-- rayon -->
+        <div class="card">
+            <div class="card-content">
+                <div class="card-title center-align">Rayonkampioenschappen</div>
+                <div class="center-align"><i class="material-icons-round medium">view_compact</i></div>
+                <p>Tussenstand voor de rayonkampioenschappen 25m 1pijl.</p>
+            </div>
+            <a href="{{ url_25_rayon }}" class="nhb-klikbare-balk">
+                <div class="card-action center-align">
+                    <span class="nhb-klikbare-link">Tonen</span>
+                </div>
+            </a>
+        </div>
+
+        <!-- bond -->
+        <div class="card">
+            <div class="card-content">
+                <div class="card-title center-align">Bondskampioenschappen</div>
+                <div class="center-align"><i class="material-icons-round medium">flag</i></div>
+                <p>Tussenstand voor de bondskampioenschappen 25m 1pijl.</p>
+            </div>
+            <a href="{{ url_25_bond }}" class="nhb-klikbare-balk">
+                <div class="card-action center-align">
+                    <span class="nhb-klikbare-link">Tonen</span>
+                </div>
+            </a>
+        </div>
+
+    </div>
 
 {% else %}
 
-    <p>Hier tonen we straks de tussenstand van de huidige competitie</p>
-
-    <p>Op dit moment is de competitie nog niet begonnen.</p>
-
-    <p>De uitslag van vorig seizoen is in te zien.</p>
-
-    <a class="btn-nhb-blauw" href="{% url 'HistComp:top' %}">Uitslag vorig seizoen</a>
+    <p>De competitie is nog niet begonnen.</p>
 
 {% endif %}
+
+
+<h5>Overig</h5>
+
+<div class="row">
+
+    <!-- uitslag vorig seizoen -->
+    {% if toon_histcomp %}
+        <div class="card">
+            <div class="card-content">
+                <div class="card-title center-align">Uitslag vorig seizoen</div>
+                <div class="center-align"><i class="material-icons-round medium">skip_previous</i></div>
+                <p>De uitslag van vorig seizoen is hier in te zien.</p>
+            </div>
+            <a href="{% url 'HistComp:top' %}" class="nhb-klikbare-balk">
+                <div class="card-action center-align">
+                    <span class="nhb-klikbare-link">Tonen</span>
+                </div>
+            </a>
+        </div>
+    {% endif %}
+
+    <!-- algemene informatie over de competities -->
+    <div class="card">
+        <div class="card-content">
+            <div class="card-title center-align">Informatie</div>
+            <div class="center-align"><i class="material-icons-round medium">info</i></div>
+            <p>Algemene informatie over de competities.</p>
+        </div>
+        <a href="{% url 'Competitie:info-competitie' %}" class="nhb-klikbare-balk">
+            <div class="card-action center-align">
+                <span class="nhb-klikbare-link">Tonen</span>
+            </div>
+        </a>
+    </div>
+
+</div>
+
 
 {% endblock %}
 

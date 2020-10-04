@@ -9,6 +9,13 @@ from Account.models import Account
 from Schutter.models import SchutterBoog
 
 
+# als een schutter per ongeluk opgenomen is in de uitslag
+# dan kan de score aangepast wordt tot SCORE_WAARDE_VERWIJDERD
+# om aan te geven dat de schutter eigenlijk toch niet mee deed.
+# via scorehist zijn de wijzigingen dan nog in te zien
+SCORE_WAARDE_VERWIJDERD = 32767
+
+
 class Score(models.Model):
     """ Bijhouden van een specifieke score """
 
@@ -27,7 +34,10 @@ class Score(models.Model):
     afstand_meter = models.PositiveSmallIntegerField()
 
     def __str__(self):
-        return "%s %sm - %s" % (self.waarde, self.afstand_meter, self.schutterboog)
+        msg = "%s - %sm: %s" % (self.schutterboog, self.afstand_meter, self.waarde)
+        if self.is_ag:
+            msg += ' (is AG)'
+        return msg
 
     objects = models.Manager()      # for the editor only
 
@@ -40,8 +50,8 @@ class ScoreHist(models.Model):
     oude_waarde = models.PositiveSmallIntegerField()
     nieuwe_waarde = models.PositiveSmallIntegerField()
 
-    # datum van wijziging
-    datum = models.DateField()
+    # datum/tijdstip
+    when = models.DateTimeField(auto_now_add=True)      # automatisch invullen
 
     # wie heeft de wijziging gedaan (null = systeem)
     door_account = models.ForeignKey(Account, on_delete=models.SET_NULL, null=True)
@@ -50,12 +60,12 @@ class ScoreHist(models.Model):
     notitie = models.CharField(max_length=100)
 
     def __str__(self):
-        return "[%s] (%s) %s --> %s: %s" % (self.datum, self.door_account, self.oude_waarde, self.nieuwe_waarde, self.notitie)
+        return "[%s] (%s) %s --> %s: %s" % (self.when, self.door_account, self.oude_waarde, self.nieuwe_waarde, self.notitie)
 
     objects = models.Manager()      # for the editor only
 
 
-def aanvangsgemiddelde_opslaan(schutterboog, afstand, gemiddelde, datum, door_account, notitie):
+def aanvangsgemiddelde_opslaan(schutterboog, afstand, gemiddelde, door_account, notitie):
     """ slaan het aanvangsgemiddelde op voor schutterboog
 
         Return value:
@@ -65,16 +75,20 @@ def aanvangsgemiddelde_opslaan(schutterboog, afstand, gemiddelde, datum, door_ac
     waarde = int(gemiddelde * 1000)
 
     try:
-        score = Score.objects.get(schutterboog=schutterboog, is_ag=True, afstand_meter=afstand)
+        score = Score.objects.get(schutterboog=schutterboog,
+                                  is_ag=True,
+                                  afstand_meter=afstand)
     except Score.DoesNotExist:
         # eerste aanvangsgemiddelde voor deze afstand
-        score = Score(schutterboog=schutterboog, is_ag=True, waarde=waarde, afstand_meter=afstand)
+        score = Score(schutterboog=schutterboog,
+                      is_ag=True,
+                      waarde=waarde,
+                      afstand_meter=afstand)
         score.save()
 
         hist = ScoreHist(score=score,
                          oude_waarde=0,
                          nieuwe_waarde=waarde,
-                         datum=datum,
                          door_account=door_account,
                          notitie=notitie)
         hist.save()
@@ -85,7 +99,6 @@ def aanvangsgemiddelde_opslaan(schutterboog, afstand, gemiddelde, datum, door_ac
         hist = ScoreHist(score=score,
                          oude_waarde=score.waarde,
                          nieuwe_waarde=waarde,
-                         datum=datum,
                          door_account=door_account,
                          notitie=notitie)
         hist.save()
@@ -103,10 +116,11 @@ def zoek_meest_recente_automatisch_vastgestelde_ag():
     scorehist = (ScoreHist
                  .objects
                  .select_related('score')
-                 .filter(door_account=None, score__is_ag=True)
-                 .order_by('-datum'))[:1]
+                 .filter(door_account=None,
+                         score__is_ag=True)
+                 .order_by('-when'))[:1]
     if len(scorehist) > 0:
-        return scorehist[0].datum
+        return scorehist[0].when
     return None
 
 # end of file

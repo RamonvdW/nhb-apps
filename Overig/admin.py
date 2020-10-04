@@ -57,7 +57,19 @@ class SiteFeedbackAdmin(admin.ModelAdmin):
     list_filter = (IsAfgehandeldListFilter,)
 
 
+class SiteTijdelijkeUrlAdmin(admin.ModelAdmin):
+
+    # readonly voorkomt inladen van lange lijst met mogelijkheden
+    # dit is ook meteen de volgorde waarin ze getoond worden
+    readonly_fields = ('hoortbij_accountemail',
+                       'hoortbij_functie')
+
+    list_select_related = ('hoortbij_functie',
+                           'hoortbij_accountemail',
+                           'hoortbij_accountemail__account')
+
+
 admin.site.register(SiteFeedback, SiteFeedbackAdmin)
-admin.site.register(SiteTijdelijkeUrl)
+admin.site.register(SiteTijdelijkeUrl, SiteTijdelijkeUrlAdmin)
 
 # end of file

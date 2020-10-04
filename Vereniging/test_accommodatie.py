@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from Functie.models import Functie, maak_functie
-from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
+from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging, NhbLid
 from Wedstrijden.models import WedstrijdLocatie
 from Overig.e2ehelpers import E2EHelpers
 import datetime
@@ -52,6 +52,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
 
         # maak een locatie aan
         loc = WedstrijdLocatie()
+        loc.adres = 'Grote baan'
         loc.save()
         loc.verenigingen.add(ver)
         self.loc1 = loc
@@ -99,6 +100,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
 
         # maak een locatie aan
         loc = WedstrijdLocatie()
+        loc.adres = 'Kleine baan'
         loc.save()
         loc.verenigingen.add(ver)
         self.loc2 = loc
@@ -473,5 +475,35 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('vereniging/accommodatie-details.dtl', 'plein/site_layout.dtl'))
+
+    def test_cluster(self):
+        # stop de vereniging in een cluster
+        cluster = NhbCluster.objects.filter(regio=self.nhbver2.regio, gebruik='18').all()[0]
+        self.nhbver2.clusters.add(cluster)
+        cluster = NhbCluster.objects.filter(regio=self.nhbver2.regio, gebruik='25').all()[2]
+        self.nhbver2.clusters.add(cluster)
+
+        # login als HWL van ver2 op loc2
+        self.e2e_login_and_pass_otp(self.account_hwl)
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+        self.e2e_check_rol('HWL')
+
+        # accommodaties lijst
+        resp = self.client.get(self.url_lijst)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('vereniging/lijst-verenigingen.dtl', 'plein/site_layout.dtl'))
+
+        # accommodatie details
+        url = self.url_accommodatie_details % (self.loc2.pk, self.nhbver2.pk)
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('vereniging/accommodatie-details.dtl', 'plein/site_layout.dtl'))
+        # check dat de HWL de opslaan-knop aangeboden krijgt
+        urls = self.extract_all_urls(resp, skip_menu=True)
+        self.assertTrue(url in urls)                                    # opslaan url
+        self.assertTrue('/vereniging/accommodaties/lijst/' in urls)     # terug url
+
 
 # end of file
