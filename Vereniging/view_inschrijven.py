@@ -215,19 +215,24 @@ class LedenInschrijvenView(UserPassesTestMixin, ListView):
                         .select_related('competitie', 'nhb_regio')
                         .get(competitie=self.comp, nhb_regio=mijn_regio))
 
-            methode = deelcomp.inschrijf_methode
+        deelcomp = (DeelCompetitie
+                    .objects
+                    .select_related('competitie', 'nhb_regio')
+                    .get(competitie=self.comp, nhb_regio=functie_nu.nhb_ver.regio.regio_nr))
 
-            if methode == INSCHRIJF_METHODE_3:
-                context['dagdelen'] = DAGDEEL
+        methode = deelcomp.inschrijf_methode
 
-                if deelcomp.toegestane_dagdelen != '':
-                    context['dagdelen'] = list()
-                    for dagdeel in DAGDEEL:
-                        # dagdeel = tuple(code, beschrijving)
-                        # code = GN / AV / ZA / ZO / WE
-                        if dagdeel[0] in deelcomp.toegestane_dagdelen:
-                            context['dagdelen'].append(dagdeel)
-                    # for
+        if methode == INSCHRIJF_METHODE_3:
+            context['dagdelen'] = DAGDEEL
+
+            if deelcomp.toegestane_dagdelen != '':
+                context['dagdelen'] = list()
+                for dagdeel in DAGDEEL:
+                    # dagdeel = tuple(code, beschrijving)
+                    # code = GN / AV / ZA / ZO / WE
+                    if dagdeel[0] in deelcomp.toegestane_dagdelen:
+                        context['dagdelen'].append(dagdeel)
+                # for
 
         menu_dynamics(self.request, context, actief='vereniging')
         return context
