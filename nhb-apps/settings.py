@@ -219,6 +219,7 @@ RECORDS_TOEGESTANE_SOORTEN = (
 
     # Outdoor
     'WA1440',
+    'WA1440 dubbel',
     '90m',
     '70m',
     '60m',
@@ -232,7 +233,6 @@ RECORDS_TOEGESTANE_SOORTEN = (
     '50m (15p)',
     '60m (12p)',
     '70m (12p)',
-    '288p',
 
     # Outdoor, TODO: still to be cleaned up
     'Fita RK Rayon 4',
