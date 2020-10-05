@@ -738,6 +738,17 @@ class OverzichtView(UserPassesTestMixin, ListView):
         if rol_nu == Rollen.ROL_HWL:
             context['rol_is_hwl'] = True
 
+        if rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB):
+            context['accounts_it'] = (Account
+                                      .objects
+                                      .filter(is_staff=True)
+                                      .order_by('username'))
+
+            context['accounts_bb'] = (Account
+                                      .objects
+                                      .filter(is_BB=True)
+                                      .order_by('username'))
+
         menu_dynamics(self.request, context, actief='hetplein')
         return context
 
