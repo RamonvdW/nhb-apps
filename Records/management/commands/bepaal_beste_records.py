@@ -7,6 +7,7 @@
 """ Tabel met de beste Nederlandse Records invullen """
 
 from django.conf import settings
+from django.db.models import F
 from django.core.management.base import BaseCommand
 from Records.models import IndivRecord, BesteIndivRecords
 
@@ -29,7 +30,7 @@ class Command(BaseCommand):
         index_g = GESLACHT2INDEX[obj.geslacht]
         index_m = MATERIAALKLASSE2INDEX[obj.materiaalklasse]
         if obj.para_klasse:
-            index_p = settings.RECORDS_TOEGESTANE_PARA_KLASSEN.index(obj.para_klasse)
+            index_p = 1 + settings.RECORDS_TOEGESTANE_PARA_KLASSEN.index(obj.para_klasse)
         else:
             index_p = 0
 
@@ -55,6 +56,14 @@ class Command(BaseCommand):
         return volgorde
 
     def handle(self, *args, **options):
+
+        # para records zijn een keer omgezet van specifieke leeftijdscategorie naar 'U'
+        # ruime de oude 'beste' records op
+        objs = (BesteIndivRecords
+                .objects
+                .exclude(beste__leeftijdscategorie=F('leeftijdscategorie')))
+        self.stdout.write("[INFO] Verwijder beste records met inconsistente leeftijdscategorie: %s" % objs.count())
+        objs.delete()
 
         # bepaal alle unieke combinaties
         objs = (IndivRecord
@@ -104,7 +113,7 @@ class Command(BaseCommand):
         objs = (BesteIndivRecords
                 .objects
                 .filter(beste__verbeterbaar=False))
-        self.stdout.write("[INFO] Niet meer verbeterbaar: %s" % objs.count())
+        self.stdout.write("[INFO] Verwijder niet meer verbeterbare beste records: %s" % objs.count())
         objs.delete()
 
         self.stdout.write('Done')
