@@ -87,7 +87,7 @@ class CompetitieOverzichtView(View):
 
         self._get_competities(context, rol_nu, functie_nu)
 
-        # kies de competities om het tijdschema van de tonen
+        # kies de competities om het tijdschema van te tonen
         objs = list()
         if functie_nu:
             # toon de competitie waar de functie een rol in heeft (BKO/RKO/RCL)

@@ -35,6 +35,37 @@
                 <th>E-mailadres</th>
             </tr>
         </thead>
+
+        {% if accounts_it %}
+            <tr>
+                <td style="vertical-align: top">IT beheerder</td>
+                <td>
+                    {% for obj in accounts_it %}
+                        {% if not forloop.first %}
+                            <br>
+                        {% endif %}
+                        <span>{{ obj.volledige_naam }}</span>
+                    {% endfor %}
+                </td>
+                <td/>   <!-- email -->
+            </tr>
+        {% endif %}
+
+        {% if accounts_bb %}
+            <tr>
+                <td style="vertical-align: top">Manager Competitiezaken</td>
+                <td>
+                    {% for obj in accounts_bb %}
+                        {% if not forloop.first %}
+                            <br>
+                        {% endif %}
+                        <span>{{ obj.volledige_naam }}</span>
+                    {% endfor %}
+                </td>
+                <td/>   <!-- email -->
+            </tr>
+        {% endif %}
+
         {% for obj in object_list %}
             <tr>
                 <td style="vertical-align: top">{{ obj.beschrijving }}</td>
