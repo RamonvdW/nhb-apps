@@ -45,8 +45,7 @@ makl2str = {'R': 'Recurve',
             'C': 'Compound',
             'BB': 'Barebow',
             'IB': 'Instinctive bow',
-            'LB': 'Longbow',
-            'O': 'Para klassen'}
+            'LB': 'Longbow'}
 
 lcat2str = {'M': 'Masters (50+)',
             'S': 'Senioren',
@@ -288,8 +287,7 @@ class RecordsIndivZoom5View(RecordsIndivZoomBaseView):
         # vind de verschillende afstanden waarop records bestaan
         soorten = (IndivRecord
                    .objects
-                   .filter(para_klasse='',
-                           geslacht=self.sel_gesl,
+                   .filter(geslacht=self.sel_gesl,
                            discipline=self.sel_disc,
                            leeftijdscategorie=self.sel_lcat,
                            materiaalklasse=self.sel_makl)
@@ -306,7 +304,6 @@ class RecordsIndivZoom5View(RecordsIndivZoomBaseView):
                             discipline=self.sel_disc,
                             leeftijdscategorie=self.sel_lcat,
                             materiaalklasse=self.sel_makl,
-                            para_klasse='',
                             soort_record=soort)
                     .order_by('-datum'))[0:0+1]
             objs.extend(best)
