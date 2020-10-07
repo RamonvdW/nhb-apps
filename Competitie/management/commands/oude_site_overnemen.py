@@ -50,6 +50,7 @@ class Command(BaseCommand):
         self._verwijder_r_25 = list()
         self._verwijder = None             # wijst naar _verwijder_r_18 of _verwijder_r_25, afhankelijk van afstand
 
+        self._cache_klasse = dict()        # [competitie.pk, klasse_beschrijving] = CompetitieKlasse
         self._cache_nhblid = dict()        # [nhbnr] = NhbLid
         self._cache_schutterboog = dict()  # [(nhblid, afkorting)] = SchutterBoog
         self._cache_inschrijving = dict()  # [(deelcomp.pk, schutterboog.pk)] = RegioCompetitieSchutterBoog
@@ -67,6 +68,15 @@ class Command(BaseCommand):
             self.stdout.write(msg)
 
     def _prep_caches(self):
+        # bouw caches om herhaaldelijke database toegang te voorkomen, voor performance
+        for obj in (CompetitieKlasse
+                    .objects
+                    .select_related('competitie', 'indiv')
+                    .exclude(indiv__buiten_gebruik=True)):
+            tup = (obj.competitie.pk, obj.indiv.beschrijving.lower())
+            self._cache_klasse[tup] = obj
+        # for
+
         for obj in (NhbLid
                     .objects
                     .select_related('bij_vereniging',
@@ -83,14 +93,19 @@ class Command(BaseCommand):
             self._cache_schutterboog[tup] = obj
         # for
 
+        afstand_schutterboog_pk2inschrijving = dict()
         for obj in (RegioCompetitieSchutterBoog
                     .objects
                     .select_related('deelcompetitie',
+                                    'deelcompetitie__competitie',
                                     'schutterboog',
                                     'bij_vereniging')
                     .all()):
             tup = (obj.deelcompetitie.pk, obj.schutterboog.pk)
             self._cache_inschrijving[tup] = obj
+
+            tup = (obj.deelcompetitie.competitie.afstand, obj.schutterboog.pk)
+            afstand_schutterboog_pk2inschrijving[tup] = obj
         # for
 
         for obj in (Score
@@ -101,6 +116,23 @@ class Command(BaseCommand):
                     .all()):
             tup = (obj.afstand_meter, obj.schutterboog.pk)
             self._cache_ag_score[tup] = obj
+        # for
+
+        for hist in(ScoreHist
+                    .objects
+                    .select_related('score', 'score__schutterboog')
+                    .filter(score__is_ag=False,
+                            notitie__startswith="Importeer scores van uitslagen.handboogsport.nl voor ronde ")):
+            ronde = int(hist.notitie[-1])
+            score = hist.score
+            tup = (str(score.afstand_meter), score.schutterboog.pk)
+            try:
+                inschrijving = afstand_schutterboog_pk2inschrijving[tup]
+            except KeyError:
+                pass
+            else:
+                tup = (inschrijving.pk, ronde)
+                self._cache_scores[tup] = score
         # for
 
     def _prep_regio2deelcomp_regio2ronde2uitslag(self):
@@ -191,12 +223,13 @@ class Command(BaseCommand):
     def _calc_hash(self, msg):
         return hashlib.md5(msg.encode('UTF-8')).hexdigest()
 
-    def _selecteer_klasse(self, klasse):
-        self._klasse = (CompetitieKlasse
-                        .objects
-                        .get(competitie=self._comp,
-                             indiv__buiten_gebruik=False,
-                             indiv__beschrijving__iexact=klasse))
+    def _selecteer_klasse(self, beschrijving):
+        tup = (self._comp.pk, beschrijving.lower())
+        try:
+            self._klasse = self._cache_klasse[tup]
+        except KeyError:
+            self.stderr.write('[ERROR] Kan wedstrijdklasse %s niet vinden (competitie %s)' % (repr(beschrijving), self._comp))
+            self._count_errors += 1
 
     def _vind_schutterboog(self, lid):
         # schutterboog record vinden / aanmaken
@@ -240,13 +273,8 @@ class Command(BaseCommand):
                 if not self._dryrun:
                     score.save()
             self._cache_ag_score[tup] = score
-        else:
-            if waarde != score.waarde:
-                self._roep_warning(
-                    '[WARNING] Verschil in AG voor nhbnr %s: bekend=%.3f, in uitslag=%.3f' % (
-                        schutterboog.nhblid.nhb_nr, score.waarde / 1000, gemiddelde))
 
-        return score
+        return score, waarde
 
     def _vind_of_maak_inschrijving(self, deelcomp, schutterboog, lid_vereniging, ag):
         # zoek de RegioCompetitieSchutterBoog erbij
@@ -273,6 +301,7 @@ class Command(BaseCommand):
         return inschrijving
 
     def _uitslag_opslaan(self, deelcomp, inschrijving, scores):
+        aantal_scores = 0
         regio_nr = deelcomp.nhb_regio.regio_nr
 
         for ronde in range(1, 7+1):
@@ -284,6 +313,7 @@ class Command(BaseCommand):
                 if waarde:              # filter 0
                     # zoek de uitslag van de virtuele wedstrijd erbij
                     uitslag = self._regio2ronde2uitslag[regio_nr][ronde]
+                    aantal_scores += 1
 
                     tup = (inschrijving.pk, ronde)
                     try:
@@ -324,6 +354,8 @@ class Command(BaseCommand):
                             score.save()
         # for
 
+        return aantal_scores
+
     def _parse_tabel_cells(self, cells):
         # cellen: rank, schutter, vereniging, AG, scores 1..7, VSG, totaal
         # self.stdout.write('[DEBUG] cells: %s' % repr(cells))
@@ -355,7 +387,10 @@ class Command(BaseCommand):
             self._roep_warning('[WARNING] Verschil in lid %s naam: bekend=%s, oude programma=%s' % (lid.nhb_nr, lid.volledige_naam(), naam))
 
         if not lid.bij_vereniging:
-            self._roep_warning('[WARNING] Lid %s heeft geen vereniging en wordt dus niet ingeschreven' % nhb_nr)
+            # onderdruk deze melding zolang er geen scores zijn
+            aantal_scores = len([1 for score in cells[4:4+7] if score and int(score) > 0])
+            if aantal_scores > 0:
+                self._roep_warning('[WARNING] Lid %s heeft %s scores maar geen vereniging en wordt dus niet ingeschreven' % (aantal_scores, nhb_nr))
             return
 
         if str(lid.bij_vereniging) != cells[2]:
@@ -377,29 +412,37 @@ class Command(BaseCommand):
 
         # zorg dat de schutter-boog records er zijn en de voorkeuren ingevuld zijn
         schutterboog = self._vind_schutterboog(lid)
-        score_ag = self._vind_of_maak_ag(schutterboog, cells[3])
-
-        klasse_min_ag = int(self._klasse.min_ag * 1000)
-        if score_ag.waarde < klasse_min_ag:
-            self._roep_warning(
-                '[WARNING] schutter %s heeft te laag AG (%.3f) voor klasse %s' % (
-                      nhb_nr, score_ag.waarde / 1000, self._klasse))
+        score_ag, waarde_ag = self._vind_of_maak_ag(schutterboog, cells[3])
 
         inschrijving = self._vind_of_maak_inschrijving(deelcomp, schutterboog, lid_ver, cells[3])
 
         if not self._dryrun:
-            self._uitslag_opslaan(deelcomp, inschrijving, cells[4:4 + 7])
+            aantal_scores = self._uitslag_opslaan(deelcomp, inschrijving, cells[4:4 + 7])
 
-    def _parse_tabel_regel(self, html):
-        if html.find('<td class="blauw">') >= 0:
+            if aantal_scores > 1:
+                if waarde_ag != score_ag.waarde:
+                    self._roep_warning(
+                        '[WARNING] Verschil in AG voor nhbnr %s: bekend=%.3f, in uitslag=%.3f' % (
+                            schutterboog.nhblid.nhb_nr, score_ag.waarde / 1000, waarde_ag / 1000))
+
+            # bij 3 scores wordt de schutter verplaatst van klasse onbekend naar andere klasse
+            if aantal_scores < 3:
+                klasse_min_ag = int(self._klasse.min_ag * 1000)
+                if score_ag.waarde < klasse_min_ag:
+                    self._roep_warning(
+                        '[WARNING] schutter %s heeft te laag AG (%.3f) voor klasse %s' % (
+                              nhb_nr, score_ag.waarde / 1000, self._klasse))
+
+    def _parse_tabel_regel(self, html, pos2, pos_end):
+        if html.find('<td class="blauw">', pos2, pos_end) >= 0:
             # overslaan: header regel boven aan de lijst
             return
 
-        if html.find('<td colspan=15>&nbsp;</td>') > 0:
+        if html.find('<td colspan=15>&nbsp;</td>', pos2, pos_end) > 0:
             # overslaan: lege regel voor de nieuwe wedstrijdklasse
             return
 
-        pos = html.find('<td colspan=15><b>')
+        pos = html.find('<td colspan=15><b>', pos2, pos_end)
         if pos > 0:
             # nieuwe klasse
             html = html[pos+18:]
@@ -413,70 +456,70 @@ class Command(BaseCommand):
 
         # 'gewone' regel met een deelnemer, AG, scores, VSG en totaal
         cells = list()
-        while len(html) > 0:
-            pos = html.find('<td')
-            if pos >= 0:
-                html = html[pos+3:]
-                pos = html.find('>')
-                html = html[pos+1:]
+        while pos2 < len(html):
+            pos1 = html.find('<td', pos2, pos_end)
+            if pos1 >= 0:
+                # found the start of the next data cell
+                # can be <td something=more>, or just <td>
+                pos2 = html.find('>', pos1+3, pos_end)
+                pos1 = pos2+1
 
-                pos = html.find('</td>')
-                cell = html[:pos]
+                pos2 = html.find('</td>', pos1, pos_end)
+                cell = html[pos1:pos2]
+                pos2 += 5
 
                 cell = cell.replace('&nbsp;&nbsp;&nbsp;', ' ')
-                cell = cell.replace('<font color="#FF0000">', '')
-                cell = cell.replace('</font>', '')
 
                 if cell == '&nbsp;':
                     cell = ''
 
                 cells.append(cell)
-
-                html = html[pos+5:]
             else:
-                html = ''
+                break   # from the while
         # while
         self._parse_tabel_cells(cells)
 
-    def _parse_html_table(self, html):
-        if html.find('class="blauw">') < 0:
+    def _parse_html_table(self, html, pos2, pos_end):
+        if html.find('class="blauw">', pos2, pos_end) < 0:
             # ignore want niet de tabel met de scores
             return
 
-        while len(html) > 0:
-            pos = html.find('<tr')
-            if pos < 0:
+        while pos2 < pos_end:
+            pos1 = html.find('<tr', pos2, pos_end)
+            if pos1 < 0:
                 # geen nieuwe regel meer kunnen vinden
-                html = ''
+                pos2 = pos_end
             else:
-                html = html[pos:]
-                pos = html.find('</tr>')
-                if pos < 0:
+                pos2 = html.find('</tr>', pos1, pos_end)
+                if pos2 < 0:
                     self.stderr.write('[ERROR] Kan einde regel onverwacht niet vinden')
                     self._count_errors += 1
                     html = ''
                 else:
-                    self._parse_tabel_regel(html[:pos])
-                    html = html[pos+5:]
+                    self._parse_tabel_regel(html, pos1, pos2)
+                    pos2 += 5
         # while
 
     def _parse_html(self, html):
+        # clean up unnecessary formatting
+        html = html.replace('<font color="#FF0000">', '')
+        html = html.replace('</font>', '')
+
         # html pagina bestaat uit tabellen met regels en cellen
-        while len(html) > 0:
-            pos = html.find('<table ')
-            if pos < 0:
+        pos2 = 0
+        while pos2 < len(html):
+            pos1 = html.find('<table ', pos2)
+            if pos1 < 0:
                 # geen table meer --> klaar
-                html = ''
+                pos2 = len(html)
             else:
-                html = html[pos:]
-                pos = html.find('</table>')
-                if pos < 0:
+                pos2 = html.find('</table>', pos1)
+                if pos2 < 0:
                     self.stderr.write('[ERROR] Kan einde tabel onverwacht niet vinden')
                     self._count_errors += 1
                     html = ''
                 else:
-                    self._parse_html_table(html[:pos])
-                    html = html[pos+8:]
+                    self._parse_html_table(html, pos1, pos2)
         # while
 
     def _read_html(self, fpath):
@@ -590,5 +633,22 @@ class Command(BaseCommand):
 
         if self._count_errors > max_fouten:
             sys.exit(1)
+
+
+"""
+    performance debug helper:
+         
+    from django.db import connection
+
+        q_begin = len(connection.queries)
+
+        # queries here
+
+        print('queries: %s' % (len(connection.queries) - q_begin))
+        for obj in connection.queries[q_begin:]:
+            print('%10s %s' % (obj['time'], obj['sql'][:200]))
+        # for
+        sys.exit(1)
+"""
 
 # end of file
