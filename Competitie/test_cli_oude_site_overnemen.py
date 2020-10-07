@@ -145,13 +145,15 @@ class TestRecordsCliOudeSiteOvernemen(E2EHelpers, TestCase):
                                           klasse=self.klasse)
         obj.save()
 
+        self.dir_testfiles = './Competitie/management/testfiles/20200929_235958'
+
     def test_bepaal(self):
         self.assertEqual(Score.objects.count(), 0)
         self.assertEqual(ScoreHist.objects.count(), 0)
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('oude_site_overnemen', './Competitie/management/testfiles/', '100', stderr=f1, stdout=f2)
+        management.call_command('oude_site_overnemen', self.dir_testfiles, '100', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
         self.assertTrue("[ERROR] Kan einde tabel onverwacht niet vinden" in f1.getvalue())
@@ -176,12 +178,12 @@ class TestRecordsCliOudeSiteOvernemen(E2EHelpers, TestCase):
         f1 = io.StringIO()
         f2 = io.StringIO()
         with self.assertRaises(SystemExit):
-            management.call_command('oude_site_overnemen', './Competitie/management/testfiles/', '1', stderr=f1, stdout=f2)
+            management.call_command('oude_site_overnemen', self.dir_testfiles, '1', stderr=f1, stdout=f2)
 
     def test_dryrun(self):
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('oude_site_overnemen', '--dryrun', './Competitie/management/testfiles/', '100', stderr=f1, stdout=f2)
+        management.call_command('oude_site_overnemen', '--dryrun', self.dir_testfiles, '100', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
         self.assertTrue("(DRY RUN)" in f2.getvalue())

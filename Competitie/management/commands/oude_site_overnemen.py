@@ -7,7 +7,6 @@
 # maak een account HWL van specifieke vereniging, vanaf de commandline
 
 from django.core.management.base import BaseCommand
-from django.utils import timezone
 from BasisTypen.models import BoogType
 from NhbStructuur.models import NhbLid, NhbVereniging
 from Logboek.models import schrijf_in_logboek
@@ -19,6 +18,7 @@ from Wedstrijden.models import Wedstrijd, WedstrijdUitslag, WedstrijdenPlan
 from Score.models import Score, ScoreHist
 from decimal import Decimal
 import datetime
+import hashlib
 import sys
 import os
 
@@ -36,9 +36,10 @@ class Command(BaseCommand):
         self._dryrun = False
         self._count_errors = 0
         self._count_warnings = 0
+        self._warnings = list()            # al geroepen warnings
 
         # datum/tijd stempel voor alle nieuwe ScoreHist
-        self._import_when = timezone.now()
+        self._import_when = None
 
         # wordt opgezet door _prep_regio2deelcomp_regio2ronde2uitslag
         self._regio2deelcomp = None        # [regio_nr] = DeelCompetitie
@@ -53,6 +54,17 @@ class Command(BaseCommand):
         self._cache_schutterboog = dict()  # [(nhblid, afkorting)] = SchutterBoog
         self._cache_inschrijving = dict()  # [(deelcomp.pk, schutterboog.pk)] = RegioCompetitieSchutterBoog
         self._cache_ag_score = dict()      # [(afstand, schutterboog.pk)] = Score
+        self._cache_scores = dict()        # [(inschrijving.pk, ronde.pk)] = score
+
+        self._prev_hash = dict()           # [fname] = hash
+
+    def _roep_warning(self, msg):
+        # print en tel waarschuwingen
+        # en onderdruk dubbele berichten
+        if msg not in self._warnings:
+            self._warnings.append(msg)
+            self._count_warnings += 1
+            self.stdout.write(msg)
 
     def _prep_caches(self):
         for obj in (NhbLid
@@ -176,14 +188,17 @@ class Command(BaseCommand):
             # for
         # for
 
-    def selecteer_klasse(self, klasse):
+    def _calc_hash(self, msg):
+        return hashlib.md5(msg.encode('UTF-8')).hexdigest()
+
+    def _selecteer_klasse(self, klasse):
         self._klasse = (CompetitieKlasse
                         .objects
                         .get(competitie=self._comp,
                              indiv__buiten_gebruik=False,
                              indiv__beschrijving__iexact=klasse))
 
-    def vind_schutterboog(self, lid):
+    def _vind_schutterboog(self, lid):
         # schutterboog record vinden / aanmaken
         # boogtype aanzetten voor wedstrijden
         # aanvangsgemiddelde record aanmaken
@@ -203,7 +218,7 @@ class Command(BaseCommand):
 
         return schutterboog
 
-    def vind_of_maak_ag(self, schutterboog, ag):
+    def _vind_of_maak_ag(self, schutterboog, ag):
         if ag:
             gemiddelde = Decimal(ag)
         else:
@@ -227,14 +242,13 @@ class Command(BaseCommand):
             self._cache_ag_score[tup] = score
         else:
             if waarde != score.waarde:
-                self.stdout.write(
+                self._roep_warning(
                     '[WARNING] Verschil in AG voor nhbnr %s: bekend=%.3f, in uitslag=%.3f' % (
                         schutterboog.nhblid.nhb_nr, score.waarde / 1000, gemiddelde))
-                self._count_warnings += 1
 
         return score
 
-    def vind_of_maak_inschrijving(self, deelcomp, schutterboog, lid_vereniging, ag):
+    def _vind_of_maak_inschrijving(self, deelcomp, schutterboog, lid_vereniging, ag):
         # zoek de RegioCompetitieSchutterBoog erbij
         tup = (deelcomp.pk, schutterboog.pk)
         try:
@@ -258,17 +272,8 @@ class Command(BaseCommand):
 
         return inschrijving
 
-    def uitslag_opslaan(self, deelcomp, inschrijving, scores):
+    def _uitslag_opslaan(self, deelcomp, inschrijving, scores):
         regio_nr = deelcomp.nhb_regio.regio_nr
-
-        # zoek naar alle scores van deze schutter
-        score_pks = (Score
-                     .objects
-                     .filter(schutterboog=inschrijving.schutterboog,
-                             is_ag=False,
-                             afstand_meter=self._afstand)
-                     .values_list('pk', flat=True))
-        # print('score_pks: %s' % score_pks)
 
         for ronde in range(1, 7+1):
             notitie = "Importeer scores van uitslagen.handboogsport.nl voor ronde %s" % ronde
@@ -280,52 +285,46 @@ class Command(BaseCommand):
                     # zoek de uitslag van de virtuele wedstrijd erbij
                     uitslag = self._regio2ronde2uitslag[regio_nr][ronde]
 
-                    # zoek het score-geschiedenis record erbij
-                    #  voor de scores van deze schutter
-                    #   in deze ronde
-                    hists = (ScoreHist
-                             .objects
-                             .filter(notitie=notitie,
-                                     score__pk__in=score_pks))
+                    tup = (inschrijving.pk, ronde)
+                    try:
+                        score = self._cache_scores[tup]
+                    except KeyError:
+                        # eerste keer: maak het record + score aan
+                        score = Score()
+                        score.is_ag = False
+                        score.afstand_meter = self._afstand
+                        score.schutterboog = inschrijving.schutterboog
+                        score.waarde = waarde
+                        score.save()
 
-                    if not self._dryrun:
-                        if len(hists) == 0:
-                            # eerste keer: maak het record + score aan
-                            score = Score()
-                            score.is_ag = False
-                            score.afstand_meter = self._afstand
-                            score.schutterboog = inschrijving.schutterboog
-                            score.waarde = waarde
-                            score.save()
+                        hist = ScoreHist()
+                        hist.score = score
+                        hist.oude_waarde = 0
+                        hist.nieuwe_waarde = waarde
+                        hist.when = self._import_when
+                        hist.notitie = notitie
+                        hist.save()
 
+                        uitslag.scores.add(score)
+
+                        self._cache_scores[tup] = score
+                    else:
+                        # kijk of de score gewijzigd is
+                        if score.waarde != waarde:
+                            # sla de aangepaste score op
                             hist = ScoreHist()
                             hist.score = score
-                            hist.oude_waarde = 0
+                            hist.oude_waarde = score.waarde
                             hist.nieuwe_waarde = waarde
                             hist.when = self._import_when
                             hist.notitie = notitie
                             hist.save()
 
-                            uitslag.scores.add(score)
-                        else:
-                            # structuur bestond al
-                            # kijk of de score gewijzigd is
-                            score = hists[0].score
-                            if score.waarde != waarde:
-                                # sla de aangepaste score op
-                                hist = ScoreHist()
-                                hist.score = score
-                                hist.oude_waarde = score.waarde
-                                hist.nieuwe_waarde = waarde
-                                hist.when = self._import_when
-                                hist.notitie = notitie
-                                hist.save()
-
-                                score.waarde = waarde
-                                score.save()
+                            score.waarde = waarde
+                            score.save()
         # for
 
-    def parse_tabel_cells(self, cells):
+    def _parse_tabel_cells(self, cells):
         # cellen: rank, schutter, vereniging, AG, scores 1..7, VSG, totaal
         # self.stdout.write('[DEBUG] cells: %s' % repr(cells))
 
@@ -342,24 +341,21 @@ class Command(BaseCommand):
             for afkorting in ('BB', 'IB', 'LB'):
                 tup = tuple([self._afstand, nhb_nr, afkorting] + cells[4:4+7])
                 if tup in self._ingelezen:
-                    self.stdout.write('[WARNING] Sla dubbele invoer onder recurve (%sm) over: %s (scores: %s)' % (self._afstand, nhb_nr, ",".join(cells[4:4+7])))
+                    self._roep_warning('[WARNING] Sla dubbele invoer onder recurve (%sm) over: %s (scores: %s)' % (self._afstand, nhb_nr, ",".join(cells[4:4+7])))
                     self._verwijder.append(nhb_nr)
                     return
 
         try:
             lid = self._cache_nhblid[nhb_nr]
         except KeyError:
-            self.stdout.write('[WARNING] Kan lid %s niet vinden' % nhb_nr)
-            self._count_warnings += 1
+            self._roep_warning('[WARNING] Kan lid %s niet vinden' % nhb_nr)
             return
 
         if naam != lid.volledige_naam():
-            self.stdout.write('[WARNING] Verschil in lid %s naam: bekend=%s, oude programma=%s' % (lid.nhb_nr, lid.volledige_naam(), naam))
-            self._count_warnings += 1
+            self._roep_warning('[WARNING] Verschil in lid %s naam: bekend=%s, oude programma=%s' % (lid.nhb_nr, lid.volledige_naam(), naam))
 
         if not lid.bij_vereniging:
-            self.stdout.write('[WARNING] Lid %s heeft geen vereniging en wordt dus niet ingeschreven' % nhb_nr)
-            self._count_warnings += 1
+            self._roep_warning('[WARNING] Lid %s heeft geen vereniging en wordt dus niet ingeschreven' % nhb_nr)
             return
 
         if str(lid.bij_vereniging) != cells[2]:
@@ -373,29 +369,28 @@ class Command(BaseCommand):
                 return
             else:
                 if str(lid_ver) != cells[2]:
-                    self.stdout.write('[WARNING] Verschil in vereniging naam: bekend=%s, oude programma=%s' % (str(lid_ver), cells[2]))
-                    self._count_warnings += 1
+                    self._roep_warning('[WARNING] Verschil in vereniging naam: bekend=%s, oude programma=%s' % (str(lid_ver), cells[2]))
         else:
             lid_ver = lid.bij_vereniging
 
         deelcomp = self._regio2deelcomp[lid.bij_vereniging.regio.regio_nr]
 
         # zorg dat de schutter-boog records er zijn en de voorkeuren ingevuld zijn
-        schutterboog = self.vind_schutterboog(lid)
-        score_ag = self.vind_of_maak_ag(schutterboog, cells[3])
+        schutterboog = self._vind_schutterboog(lid)
+        score_ag = self._vind_of_maak_ag(schutterboog, cells[3])
 
         klasse_min_ag = int(self._klasse.min_ag * 1000)
         if score_ag.waarde < klasse_min_ag:
-            self.stdout.write(
+            self._roep_warning(
                 '[WARNING] schutter %s heeft te laag AG (%.3f) voor klasse %s' % (
                       nhb_nr, score_ag.waarde / 1000, self._klasse))
-            self._count_warnings += 1
 
-        inschrijving = self.vind_of_maak_inschrijving(deelcomp, schutterboog, lid_ver, cells[3])
+        inschrijving = self._vind_of_maak_inschrijving(deelcomp, schutterboog, lid_ver, cells[3])
 
-        self.uitslag_opslaan(deelcomp, inschrijving, cells[4:4+7])
+        if not self._dryrun:
+            self._uitslag_opslaan(deelcomp, inschrijving, cells[4:4 + 7])
 
-    def parse_tabel_regel(self, html):
+    def _parse_tabel_regel(self, html):
         if html.find('<td class="blauw">') >= 0:
             # overslaan: header regel boven aan de lijst
             return
@@ -413,7 +408,7 @@ class Command(BaseCommand):
                 self.stderr.write('[ERROR] Kan einde wedstrijdklasse niet vinden: %s' % repr(html))
                 self._count_errors += 1
             else:
-                self.selecteer_klasse(html[:pos])
+                self._selecteer_klasse(html[:pos])
             return
 
         # 'gewone' regel met een deelnemer, AG, scores, VSG en totaal
@@ -441,9 +436,9 @@ class Command(BaseCommand):
             else:
                 html = ''
         # while
-        self.parse_tabel_cells(cells)
+        self._parse_tabel_cells(cells)
 
-    def parse_html_table(self, html):
+    def _parse_html_table(self, html):
         if html.find('class="blauw">') < 0:
             # ignore want niet de tabel met de scores
             return
@@ -461,11 +456,11 @@ class Command(BaseCommand):
                     self._count_errors += 1
                     html = ''
                 else:
-                    self.parse_tabel_regel(html[:pos])
+                    self._parse_tabel_regel(html[:pos])
                     html = html[pos+5:]
         # while
 
-    def parse_html(self, html):
+    def _parse_html(self, html):
         # html pagina bestaat uit tabellen met regels en cellen
         while len(html) > 0:
             pos = html.find('<table ')
@@ -480,49 +475,37 @@ class Command(BaseCommand):
                     self._count_errors += 1
                     html = ''
                 else:
-                    self.parse_html_table(html[:pos])
+                    self._parse_html_table(html[:pos])
                     html = html[pos+8:]
         # while
 
-    def read_html(self, fname):
-        self.stdout.write("[INFO] Inlezen: " + repr(fname))
+    def _read_html(self, fpath):
         try:
-            html = open(fname, "r").read()
+            html = open(fpath, "r").read()
         except FileNotFoundError:
-            self.stderr.write('[ERROR] Failed to open %s' % fname)
+            self.stderr.write('[ERROR] Failed to open %s' % fpath)
             self._count_errors += 1
         else:
-            self.parse_html(html)
+            new_hash = self._calc_hash(html)
+            fname = fpath.split('/')[-1]
+            try:
+                prev_hash = self._prev_hash[fname]
+            except KeyError:
+                pass
+            else:
+                if new_hash == prev_hash:
+                    # self.stdout.write('[DEBUG] dupe')
+                    return              # avoid duplicate processing
 
-    def _verwijder_dubbele_deelnemers(self):
-        # ruim op: eerder aangemaakte dubbele inschrijvingen (BB + R)
-        #          dit kan gebeuren als een uitslag wel in de BB/IB/LB staat maar nog niet in R
-        for afstand, nhb_nrs in (('18', self._verwijder_r_18),
-                                 ('25', self._verwijder_r_25)):
-            # zoek alle inschrijvingen die hier bij passen
-            objs = (RegioCompetitieSchutterBoog
-                    .objects
-                    .filter(deelcompetitie__competitie__afstand=afstand,
-                            schutterboog__nhblid__nhb_nr__in=nhb_nrs,
-                            schutterboog__boogtype__afkorting='R')
-                    .all())
+            self.stdout.write("[INFO] Verwerk " + repr(fpath))
+            self._prev_hash[fname] = new_hash
+            self._parse_html(html)
 
-            if objs.count() > 0:
-                self.stdout.write('[WARNING] Verwijder %s dubbele inschrijvingen (%sm)' % (objs.count(), afstand))
-                objs.delete()
-        # for
-
-    def add_arguments(self, parser):
-        parser.add_argument('dir', nargs=1, help="Pad naar directory met opgehaalde rayonuitslagen (.html)")
-        parser.add_argument('max_fouten', nargs=1, type=int, help="Zet exit code bij meer dan dit aantal fouten")
-        parser.add_argument('--dryrun', action='store_true')
-
-    def handle(self, *args, **options):
-        pad = options['dir'][0]
-        max_fouten = options['max_fouten'][0]
-        self._dryrun = options['dryrun']
-
-        self._prep_caches()
+    def _lees_html_in_pad(self, pad):
+        # filename: YYYYMMDD_HHMMSS_uitslagen
+        spl = pad.split('/')
+        grabbed_at = spl[-1][:15]
+        self._import_when = datetime.datetime.strptime(grabbed_at, '%Y%m%d_%H%M%S')
 
         for afstand in (18, 25):
             self._afstand = afstand
@@ -543,9 +526,52 @@ class Command(BaseCommand):
 
                 for rayon in ('1', '2', '3', '4'):
                     fname3 = fname2 + rayon + ".html"
-                    self.read_html(os.path.join(pad, fname3))
+                    self._read_html(os.path.join(pad, fname3))
             # for
         # for
+
+    def _verwijder_dubbele_deelnemers(self):
+        # ruim op: eerder aangemaakte dubbele inschrijvingen (BB + R)
+        #          dit kan gebeuren als een uitslag wel in de BB/IB/LB staat maar nog niet in R
+        for afstand, nhb_nrs in (('18', self._verwijder_r_18),
+                                 ('25', self._verwijder_r_25)):
+            # zoek alle inschrijvingen die hier bij passen
+            objs = (RegioCompetitieSchutterBoog
+                    .objects
+                    .filter(deelcompetitie__competitie__afstand=afstand,
+                            schutterboog__nhblid__nhb_nr__in=nhb_nrs,
+                            schutterboog__boogtype__afkorting='R')
+                    .all())
+
+            if objs.count() > 0:
+                self._roep_warning('[WARNING] Verwijder %s dubbele inschrijvingen (%sm)' % (objs.count(), afstand))
+                objs.delete()
+        # for
+
+    def add_arguments(self, parser):
+        parser.add_argument('dir', nargs=1, help="Pad naar directory met opgehaalde rayonuitslagen")
+        parser.add_argument('max_fouten', nargs=1, type=int, help="Zet exit code bij meer dan dit aantal fouten")
+        parser.add_argument('--dryrun', action='store_true')
+        parser.add_argument('--all', action='store_true')
+
+    def handle(self, *args, **options):
+        pad = os.path.normpath(options['dir'][0])
+        max_fouten = options['max_fouten'][0]
+        self._dryrun = options['dryrun']
+
+        self._prep_caches()
+
+        if options['all']:
+            # pad wijst naar een top-dir
+            # doorloop alle sub-directories
+            subdirs = os.listdir(pad)       # geen volgorde garantie
+            subdirs.sort()                  # wij willen oudste eerst
+            for nr, subdir in enumerate(subdirs):
+                print("Voortgang: %s van de %s" % (nr, len(subdirs)))
+                self._lees_html_in_pad(os.path.join(pad, subdir))
+            # for
+        else:
+            self._lees_html_in_pad(pad)
 
         self._verwijder_dubbele_deelnemers()
 

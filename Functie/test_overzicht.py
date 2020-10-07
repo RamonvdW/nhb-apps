@@ -132,7 +132,7 @@ class TestFunctieOverzicht(E2EHelpers, TestCase):
         self.assertContains(resp, "Manager competitiezaken")
 
         # controleer de Wijzig knoppen op de functie-overzicht pagina
-        with self.assertNumQueries(4):
+        with self.assertNumQueries(6):
             resp = self.client.get(self.url_overzicht)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
