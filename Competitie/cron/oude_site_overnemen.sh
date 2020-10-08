@@ -109,6 +109,7 @@ echo "[INFO] Convert downloaded html to json" >> "$LOG"
 NEW_JSON="$DIR/oude_site.json"
 
 # kijk of deze anders is dan de vorige json
+export LC_ALL=C
 PREV_JSON=$(ls -1dt $SPOOLDIR/2020*/oude_site.json | head -1)
 echo "[INFO] Previous JSON=$PREV_JSON"
 cmp "$PREV_JSON" "$NEW_JSON" &>> "$LOG"
