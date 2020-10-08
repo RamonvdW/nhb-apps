@@ -7,6 +7,7 @@
 # converteer de gedownloade .html files en maak er 1 .json file van
 
 from django.core.management.base import BaseCommand
+import hashlib
 import json
 import os
 
@@ -15,6 +16,7 @@ class Command(BaseCommand):
     help = "Data van download oude site converteren naar een JSON file"
 
     JSON_FNAME = 'oude_site.json'
+    JSON_FNAME_ZELFDE = 'zelfde_site.json'
 
     def __init__(self, stdout=None, stderr=None, no_color=False, force_color=False):
         super().__init__(stdout, stderr, no_color, force_color)
@@ -26,6 +28,8 @@ class Command(BaseCommand):
         self._count_warnings = 0
         self._warnings = list()            # al geroepen warnings
 
+        self._prev_hash = None
+
     def _roep_warning(self, msg):
         # print en tel waarschuwingen
         # en onderdruk dubbele berichten
@@ -35,17 +39,22 @@ class Command(BaseCommand):
             self.stdout.write(msg)
 
     @staticmethod
+    def _calc_hash(msg):
+        return hashlib.md5(msg.encode('UTF-8')).hexdigest()
+
+    @staticmethod
     def _parse_tabel_cells(data, cells):
         # cellen: rank, schutter, vereniging, AG, scores 1..7, VSG, totaal
 
         # schutter: [123456] Volledige Naam
-        nhb_nr = cells[1][1:1+6]       # afkappen voor veiligheid
-        naam = cells[1][9:]
+        nhb_nr = cells[1][1:1+6]                # nhb nummer
 
         data[nhb_nr] = schutter_data = dict()
-        schutter_data['n'] = naam
-        schutter_data['a'] = cells[3]
-        schutter_data['s'] = [int(score) for score in cells[4:4 + 7] if score and int(score) > 0]
+        schutter_data['n'] = cells[1][9:]       # naam (achter nhb_nr)
+        schutter_data['a'] = cells[3]           # aanvangsgemiddelde
+        schutter_data['v'] = cells[2][1:1+4]    # vereniging nummer
+        scores = [int("0"+score_str) for score_str in cells[4:4+7]]
+        schutter_data['s'] = scores
 
     def _parse_tabel_regel(self, data, html, pos2, pos_end):
         if html.find('<td class="blauw">', pos2, pos_end) >= 0:
@@ -172,9 +181,28 @@ class Command(BaseCommand):
         # for
 
     def _schrijf_json(self, fpath, data):
-        fout = os.path.join(fpath, self.JSON_FNAME)
-        with open(fout, 'w') as f:
-            json.dump(data, f, sort_keys=True)
+        # verwijder oude json files
+        try:
+            os.remove(os.path.join(fpath, self.JSON_FNAME))
+        except OSError:
+            pass
+
+        try:
+            os.remove(os.path.join(fpath, self.JSON_FNAME_ZELFDE))
+        except OSError:
+            pass
+
+        msg = json.dumps(data, sort_keys=True)
+        new_hash = self._calc_hash(msg)
+
+        if new_hash == self._prev_hash:
+            fout = os.path.join(fpath, self.JSON_FNAME_ZELFDE)
+        else:
+            fout = os.path.join(fpath, self.JSON_FNAME)
+            self._prev_hash = new_hash
+
+        self.stdout.write('[INFO] Schrijf %s' % repr(fout))
+        open(fout, 'w').write(msg)
 
     def _verwerk_pad(self, fpath):
         data = dict()
@@ -194,11 +222,16 @@ class Command(BaseCommand):
             self._verbose = False
             subdirs = os.listdir(pad)       # geen volgorde garantie
             subdirs.sort()                  # wij willen oudste eerst
-            for nr, subdir in enumerate(subdirs):
-                self.stdout.write("Voortgang: %s van de %s" % (nr + 1, len(subdirs)))
+            paden = list()
+            for subdir in subdirs:
                 fpath = os.path.join(pad, subdir)
                 if os.path.isdir(fpath):
-                    self._verwerk_pad(fpath)
+                    paden.append(fpath)
+            # for
+            del subdirs
+            for nr, pad in enumerate(paden):
+                self.stdout.write("Voortgang: %s van de %s" % (nr + 1, len(paden)))
+                self._verwerk_pad(pad)
             # for
         else:
             self._verwerk_pad(pad)
