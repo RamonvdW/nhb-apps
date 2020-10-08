@@ -117,7 +117,7 @@ CMP_RES=$?
 if [ $CMP_RES -eq 0 ]
 then
     # identical file - no need to import
-    echo "[INFO] Renaming identical oude_site.json to zelfde_site.json"
+    echo "[INFO] Renaming identical oude_site.json to zelfde_site.json" >> "$LOG"
     mv "$NEW_JSON" "$DIR/zelfde_site.json" &>> "$LOG"
 else
     # do import
