@@ -98,8 +98,6 @@ echo "[INFO] Downloading to $DIR" >> "$LOG"
 download_18
 download_25
 
-echo "[INFO] Starting dry run" >> "$LOG"
-
 # move from Competitie/cron/ to top-dir
 cd ../..
 
@@ -121,6 +119,7 @@ then
     mv "$NEW_JSON" "$DIR/zelfde_site.json" &>> "$LOG"
 else
     # do import
+    echo "[INFO] Starting dry run" >> "$LOG"
     ./manage.py oude_site_overnemen --dryrun "$DIR" $MAX_FOUTEN &>> "$LOG"
     RES=$?
     if [ $RES -eq 0 ]

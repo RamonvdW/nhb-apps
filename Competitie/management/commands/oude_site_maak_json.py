@@ -71,7 +71,7 @@ class Command(BaseCommand):
             html = html[pos+18:]
             pos = html.find('</b>')
             if pos < 0:
-                self.stderr.write('[ERROR] Kan einde wedstrijdklasse niet vinden: %s' % repr(html))
+                self.stdout.write('[ERROR] Kan einde wedstrijdklasse niet vinden: %s' % repr(html))
                 self._count_errors += 1
             else:
                 klasse = html[:pos]
@@ -120,7 +120,7 @@ class Command(BaseCommand):
             else:
                 pos2 = html.find('</tr>', pos1, pos_end)
                 if pos2 < 0:
-                    self.stderr.write('[ERROR] Kan einde regel onverwacht niet vinden')
+                    self.stdout.write('[ERROR] Kan einde regel onverwacht niet vinden')
                     self._count_errors += 1
                     html = ''
                 else:
@@ -144,7 +144,7 @@ class Command(BaseCommand):
                 pos2 = html.find('</table>', pos1)
                 if pos2 < 0:
                     if self._verbose:
-                        self.stderr.write('[ERROR] Kan einde tabel onverwacht niet vinden')
+                        self.stdout.write('[ERROR] Kan einde tabel onverwacht niet vinden')
                     self._count_errors += 1
                     html = ''
                 else:
@@ -155,7 +155,7 @@ class Command(BaseCommand):
         try:
             html = open(fpath, "r").read()
         except FileNotFoundError:
-            self.stderr.write('[ERROR] Failed to open %s' % fpath)
+            self.stdout.write('[ERROR] Failed to open %s' % fpath)
             self._count_errors += 1
         else:
             if self._verbose:

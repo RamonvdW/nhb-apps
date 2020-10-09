@@ -4,8 +4,9 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-# maak een account HWL van specifieke vereniging, vanaf de commandline
+# import the data van de oude site die opgeslagen staat in de .json file
 
+from django.utils import timezone
 from django.core.management.base import BaseCommand
 from BasisTypen.models import BoogType
 from NhbStructuur.models import NhbLid, NhbVereniging
@@ -18,13 +19,15 @@ from Wedstrijden.models import Wedstrijd, WedstrijdUitslag, WedstrijdenPlan
 from Score.models import Score, ScoreHist
 from decimal import Decimal
 import datetime
-import hashlib
+import json
 import sys
 import os
 
 
 class Command(BaseCommand):
     help = "Data van de oude site overnemen"
+
+    JSON_FILE = 'oude_site.json'
 
     def __init__(self, stdout=None, stderr=None, no_color=False, force_color=False):
         super().__init__(stdout, stderr, no_color, force_color)
@@ -50,6 +53,7 @@ class Command(BaseCommand):
         self._verwijder_r_25 = list()
         self._verwijder = None             # wijst naar _verwijder_r_18 of _verwijder_r_25, afhankelijk van afstand
 
+        self._cache_boogtype = dict()      # [afkorting] = BoogType
         self._cache_klasse = dict()        # [competitie.pk, klasse_beschrijving] = CompetitieKlasse
         self._cache_nhblid = dict()        # [nhbnr] = NhbLid
         self._cache_schutterboog = dict()  # [(nhblid, afkorting)] = SchutterBoog
@@ -58,6 +62,10 @@ class Command(BaseCommand):
         self._cache_scores = dict()        # [(inschrijving.pk, ronde.pk)] = score
 
         self._prev_hash = dict()           # [fname] = hash
+
+        self._bulk_score = list()
+        self._bulk_hist = list()
+        self._bulk_uitslag = list()
 
     def _roep_warning(self, msg):
         # print en tel waarschuwingen
@@ -69,6 +77,11 @@ class Command(BaseCommand):
 
     def _prep_caches(self):
         # bouw caches om herhaaldelijke database toegang te voorkomen, voor performance
+
+        for obj in BoogType.objects.all():
+            self._cache_boogtype[obj.afkorting] = obj
+        # for
+
         for obj in (CompetitieKlasse
                     .objects
                     .select_related('competitie', 'indiv')
@@ -82,7 +95,8 @@ class Command(BaseCommand):
                     .select_related('bij_vereniging',
                                     'bij_vereniging__regio')
                     .all()):
-            self._cache_nhblid[str(obj.nhb_nr)] = obj
+            obj.volledige_naam_str = obj.volledige_naam()
+            self._cache_nhblid[obj.nhb_nr] = obj
         # for
 
         for obj in (SchutterBoog
@@ -220,9 +234,6 @@ class Command(BaseCommand):
             # for
         # for
 
-    def _calc_hash(self, msg):
-        return hashlib.md5(msg.encode('UTF-8')).hexdigest()
-
     def _selecteer_klasse(self, beschrijving):
         tup = (self._comp.pk, beschrijving.lower())
         try:
@@ -251,9 +262,9 @@ class Command(BaseCommand):
 
         return schutterboog
 
-    def _vind_of_maak_ag(self, schutterboog, ag):
-        if ag:
-            gemiddelde = Decimal(ag)
+    def _vind_of_maak_ag(self, schutterboog, ag_str):
+        if ag_str:
+            gemiddelde = Decimal(ag_str)
         else:
             gemiddelde = AG_NUL
         waarde = int(gemiddelde * 1000)
@@ -276,7 +287,7 @@ class Command(BaseCommand):
 
         return score, waarde
 
-    def _vind_of_maak_inschrijving(self, deelcomp, schutterboog, lid_vereniging, ag):
+    def _vind_of_maak_inschrijving(self, deelcomp, schutterboog, lid_vereniging, ag_str):
         # zoek de RegioCompetitieSchutterBoog erbij
         tup = (deelcomp.pk, schutterboog.pk)
         try:
@@ -289,8 +300,8 @@ class Command(BaseCommand):
             inschrijving.bij_vereniging = lid_vereniging
             inschrijving.klasse = self._klasse
 
-            if ag:
-                inschrijving.aanvangsgemiddelde = ag
+            if ag_str:
+                inschrijving.aanvangsgemiddelde = ag_str
             else:
                 inschrijving.aanvangsgemiddelde = AG_NUL
             if not self._dryrun:
@@ -301,79 +312,71 @@ class Command(BaseCommand):
         return inschrijving
 
     def _uitslag_opslaan(self, deelcomp, inschrijving, scores):
-        aantal_scores = 0
         regio_nr = deelcomp.nhb_regio.regio_nr
+
+        uitslagen = self._regio2ronde2uitslag[regio_nr]
 
         for ronde in range(1, 7+1):
             notitie = "Importeer scores van uitslagen.handboogsport.nl voor ronde %s" % ronde
 
             waarde = scores[ronde - 1]
-            if waarde:                  # filter leeg
-                waarde = int(waarde)
-                if waarde:              # filter 0
-                    # zoek de uitslag van de virtuele wedstrijd erbij
-                    uitslag = self._regio2ronde2uitslag[regio_nr][ronde]
-                    aantal_scores += 1
+            if waarde:              # filter 0
+                # zoek de uitslag van de virtuele wedstrijd erbij
+                uitslag = uitslagen[ronde]
 
-                    tup = (inschrijving.pk, ronde)
-                    try:
-                        score = self._cache_scores[tup]
-                    except KeyError:
-                        # eerste keer: maak het record + score aan
-                        score = Score()
-                        score.is_ag = False
-                        score.afstand_meter = self._afstand
-                        score.schutterboog = inschrijving.schutterboog
-                        score.waarde = waarde
-                        score.save()
+                tup = (inschrijving.pk, ronde)
+                try:
+                    score = self._cache_scores[tup]
+                except KeyError:
+                    # eerste keer: maak het record + score aan
+                    score = Score()
+                    score.is_ag = False
+                    score.afstand_meter = self._afstand
+                    score.schutterboog = inschrijving.schutterboog
+                    score.waarde = waarde
+                    self._bulk_score.append(score)
 
+                    hist = ScoreHist()
+                    hist.score = score
+                    hist.oude_waarde = 0
+                    hist.nieuwe_waarde = waarde
+                    hist.notitie = notitie
+                    self._bulk_hist.append(hist)
+
+                    tup2 = (uitslag, score)
+                    self._bulk_uitslag.append(tup2)
+
+                    self._cache_scores[tup] = score
+                else:
+                    # kijk of de score gewijzigd is
+                    if score.waarde != waarde:
+                        # sla de aangepaste score op
                         hist = ScoreHist()
                         hist.score = score
-                        hist.oude_waarde = 0
+                        hist.oude_waarde = score.waarde
                         hist.nieuwe_waarde = waarde
-                        hist.when = self._import_when
                         hist.notitie = notitie
-                        hist.save()
+                        self._bulk_hist.append(hist)
 
-                        uitslag.scores.add(score)
-
-                        self._cache_scores[tup] = score
-                    else:
-                        # kijk of de score gewijzigd is
-                        if score.waarde != waarde:
-                            # sla de aangepaste score op
-                            hist = ScoreHist()
-                            hist.score = score
-                            hist.oude_waarde = score.waarde
-                            hist.nieuwe_waarde = waarde
-                            hist.when = self._import_when
-                            hist.notitie = notitie
-                            hist.save()
-
-                            score.waarde = waarde
-                            score.save()
+                        score.waarde = waarde
+                        score.save()
         # for
 
-        return aantal_scores
+    def _verwerk_schutter(self, nhb_nr, naam, ver_nr, ag_str, scores):
 
-    def _parse_tabel_cells(self, cells):
-        # cellen: rank, schutter, vereniging, AG, scores 1..7, VSG, totaal
-        # self.stdout.write('[DEBUG] cells: %s' % repr(cells))
-
-        # schutter: [123456] Volledige Naam
-        nhb_nr = cells[1][1:1+6]       # afkappen voor veiligheid
-        naam = cells[1][9:]
-
+        # zoek naar hout schutters die ook bij recurve staan
         if self._boogtype.afkorting in ('BB', 'IB', 'LB'):
-            tup = tuple([self._afstand, nhb_nr, self._boogtype.afkorting] + cells[4:4+7])
+            tup = tuple([self._afstand, nhb_nr, self._boogtype.afkorting] + scores)
             self._ingelezen.append(tup)
+
         elif self._boogtype.afkorting == 'R':
             # kijk of dit een dupe is met een houtboog uitslag
             # dit ivm het dupliceren van uitslagen onder Recurve voor de teamcompetitie
             for afkorting in ('BB', 'IB', 'LB'):
-                tup = tuple([self._afstand, nhb_nr, afkorting] + cells[4:4+7])
+                tup = tuple([self._afstand, nhb_nr, afkorting] + scores)
                 if tup in self._ingelezen:
-                    self._roep_warning('[WARNING] Sla dubbele invoer onder recurve (%sm) over: %s (scores: %s)' % (self._afstand, nhb_nr, ",".join(cells[4:4+7])))
+                    self._roep_warning('[WARNING] Sla dubbele invoer onder recurve (%sm) over: %s (scores: %s)' % (
+                                        self._afstand, nhb_nr, ",".join([str(score) for score in scores])))
                     self._verwijder.append(nhb_nr)
                     return
 
@@ -383,28 +386,28 @@ class Command(BaseCommand):
             self._roep_warning('[WARNING] Kan lid %s niet vinden' % nhb_nr)
             return
 
-        if naam != lid.volledige_naam():
-            self._roep_warning('[WARNING] Verschil in lid %s naam: bekend=%s, oude programma=%s' % (lid.nhb_nr, lid.volledige_naam(), naam))
+        if naam != lid.volledige_naam_str:
+            self._roep_warning('[WARNING] Verschil in lid %s naam: bekend=%s, oude programma=%s' % (lid.nhb_nr, lid.volledige_naam_str, naam))
+
+        aantal_scores = len(scores)
+        while aantal_scores > 0 and scores[aantal_scores - 1] == 0:
+            aantal_scores -= 1
+        # while
 
         if not lid.bij_vereniging:
             # onderdruk deze melding zolang er geen scores zijn
-            aantal_scores = len([1 for score in cells[4:4+7] if score and int(score) > 0])
             if aantal_scores > 0:
-                self._roep_warning('[WARNING] Lid %s heeft %s scores maar geen vereniging en wordt dus niet ingeschreven' % (aantal_scores, nhb_nr))
+                self._roep_warning('[WARNING] Lid %s heeft %s scores maar geen vereniging en wordt dus niet ingeschreven' % (nhb_nr, aantal_scores))
             return
 
-        if str(lid.bij_vereniging) != cells[2]:
+        if str(lid.bij_vereniging.nhb_nr) != ver_nr:
             # vind de oude vereniging, want die moeten we opslaan bij de inschrijving
-            ver_nr = cells[2][1:1+4]       # afkappen voor veiligheid
             try:
                 lid_ver = NhbVereniging.objects.get(nhb_nr=ver_nr)
             except NhbVereniging.DoesNotExist:
-                self.stderr.write('[ERROR] Vereniging %s is niet bekend' % ver_nr)
+                self.stderr.write('[ERROR] Vereniging %s is niet bekend; kan lid %s niet inschrijven' % (ver_nr, nhb_nr))
                 self._count_errors += 1
                 return
-            else:
-                if str(lid_ver) != cells[2]:
-                    self._roep_warning('[WARNING] Verschil in vereniging naam: bekend=%s, oude programma=%s' % (str(lid_ver), cells[2]))
         else:
             lid_ver = lid.bij_vereniging
 
@@ -412,18 +415,19 @@ class Command(BaseCommand):
 
         # zorg dat de schutter-boog records er zijn en de voorkeuren ingevuld zijn
         schutterboog = self._vind_schutterboog(lid)
-        score_ag, waarde_ag = self._vind_of_maak_ag(schutterboog, cells[3])
+        score_ag, waarde_ag = self._vind_of_maak_ag(schutterboog, ag_str)
 
-        inschrijving = self._vind_of_maak_inschrijving(deelcomp, schutterboog, lid_ver, cells[3])
+        inschrijving = self._vind_of_maak_inschrijving(deelcomp, schutterboog, lid_ver, ag_str)
 
         if not self._dryrun:
-            aantal_scores = self._uitslag_opslaan(deelcomp, inschrijving, cells[4:4 + 7])
-
             if aantal_scores > 1:
                 if waarde_ag != score_ag.waarde:
                     self._roep_warning(
-                        '[WARNING] Verschil in AG voor nhbnr %s: bekend=%.3f, in uitslag=%.3f' % (
-                            schutterboog.nhblid.nhb_nr, score_ag.waarde / 1000, waarde_ag / 1000))
+                        '[WARNING] Verschil in AG voor nhbnr %s (%sm): bekend=%.3f, in uitslag=%.3f' % (
+                                    schutterboog.nhblid.nhb_nr,
+                                    self._afstand,
+                                    score_ag.waarde / 1000,
+                                    waarde_ag / 1000))
 
             # bij 3 scores wordt de schutter verplaatst van klasse onbekend naar andere klasse
             if aantal_scores < 3:
@@ -433,144 +437,43 @@ class Command(BaseCommand):
                         '[WARNING] schutter %s heeft te laag AG (%.3f) voor klasse %s' % (
                               nhb_nr, score_ag.waarde / 1000, self._klasse))
 
-    def _parse_tabel_regel(self, html, pos2, pos_end):
-        if html.find('<td class="blauw">', pos2, pos_end) >= 0:
-            # overslaan: header regel boven aan de lijst
-            return
+            self._uitslag_opslaan(deelcomp, inschrijving, scores)
 
-        if html.find('<td colspan=15>&nbsp;</td>', pos2, pos_end) > 0:
-            # overslaan: lege regel voor de nieuwe wedstrijdklasse
-            return
+    def _verwerk_klassen(self, data):
+        self._bulk_score = list()
+        self._bulk_hist = list()
+        self._bulk_uitslag = list()
 
-        pos = html.find('<td colspan=15><b>', pos2, pos_end)
-        if pos > 0:
-            # nieuwe klasse
-            html = html[pos+18:]
-            pos = html.find('</b>')
-            if pos < 0:
-                self.stderr.write('[ERROR] Kan einde wedstrijdklasse niet vinden: %s' % repr(html))
-                self._count_errors += 1
-            else:
-                self._selecteer_klasse(html[:pos])
-            return
+        for klasse, data_schutters in data.items():
+            self._selecteer_klasse(klasse)
 
-        # 'gewone' regel met een deelnemer, AG, scores, VSG en totaal
-        cells = list()
-        while pos2 < len(html):
-            pos1 = html.find('<td', pos2, pos_end)
-            if pos1 >= 0:
-                # found the start of the next data cell
-                # can be <td something=more>, or just <td>
-                pos2 = html.find('>', pos1+3, pos_end)
-                pos1 = pos2+1
+            for nhb_nr, data_schutter in data_schutters.items():
+                naam = data_schutter['n']
+                ver_nr = data_schutter['v']
+                ag = data_schutter['a']         # "9.123"
+                scores = data_schutter['s']     # list
 
-                pos2 = html.find('</td>', pos1, pos_end)
-                cell = html[pos1:pos2]
-                pos2 += 5
+                self._verwerk_schutter(int(nhb_nr), naam, ver_nr, ag, scores)
+        # for
 
-                cell = cell.replace('&nbsp;&nbsp;&nbsp;', ' ')
+        # bulk-create the scores en scorehist records
+        if len(self._bulk_score):
+            Score.objects.bulk_create(self._bulk_score)
 
-                if cell == '&nbsp;':
-                    cell = ''
-
-                cells.append(cell)
-            else:
-                break   # from the while
-        # while
-        self._parse_tabel_cells(cells)
-
-    def _parse_html_table(self, html, pos2, pos_end):
-        if html.find('class="blauw">', pos2, pos_end) < 0:
-            # ignore want niet de tabel met de scores
-            return
-
-        while pos2 < pos_end:
-            pos1 = html.find('<tr', pos2, pos_end)
-            if pos1 < 0:
-                # geen nieuwe regel meer kunnen vinden
-                pos2 = pos_end
-            else:
-                pos2 = html.find('</tr>', pos1, pos_end)
-                if pos2 < 0:
-                    self.stderr.write('[ERROR] Kan einde regel onverwacht niet vinden')
-                    self._count_errors += 1
-                    html = ''
-                else:
-                    self._parse_tabel_regel(html, pos1, pos2)
-                    pos2 += 5
-        # while
-
-    def _parse_html(self, html):
-        # clean up unnecessary formatting
-        html = html.replace('<font color="#FF0000">', '')
-        html = html.replace('</font>', '')
-
-        # html pagina bestaat uit tabellen met regels en cellen
-        pos2 = 0
-        while pos2 < len(html):
-            pos1 = html.find('<table ', pos2)
-            if pos1 < 0:
-                # geen table meer --> klaar
-                pos2 = len(html)
-            else:
-                pos2 = html.find('</table>', pos1)
-                if pos2 < 0:
-                    self.stderr.write('[ERROR] Kan einde tabel onverwacht niet vinden')
-                    self._count_errors += 1
-                    html = ''
-                else:
-                    self._parse_html_table(html, pos1, pos2)
-        # while
-
-    def _read_html(self, fpath):
-        try:
-            html = open(fpath, "r").read()
-        except FileNotFoundError:
-            self.stderr.write('[ERROR] Failed to open %s' % fpath)
-            self._count_errors += 1
-        else:
-            new_hash = self._calc_hash(html)
-            fname = fpath.split('/')[-1]
-            try:
-                prev_hash = self._prev_hash[fname]
-            except KeyError:
-                pass
-            else:
-                if new_hash == prev_hash:
-                    # self.stdout.write('[DEBUG] dupe')
-                    return              # avoid duplicate processing
-
-            self.stdout.write("[INFO] Verwerk " + repr(fpath))
-            self._prev_hash[fname] = new_hash
-            self._parse_html(html)
-
-    def _lees_html_in_pad(self, pad):
-        # filename: YYYYMMDD_HHMMSS_uitslagen
-        spl = pad.split('/')
-        grabbed_at = spl[-1][:15]
-        self._import_when = datetime.datetime.strptime(grabbed_at, '%Y%m%d_%H%M%S')
-
-        for afstand in (18, 25):
-            self._afstand = afstand
-            fname1 = str(afstand)
-            self._comp = Competitie.objects.get(afstand=afstand)
-            self._prep_regio2deelcomp_regio2ronde2uitslag()
-
-            if afstand == 18:
-                self._verwijder = self._verwijder_r_18
-            else:
-                self._verwijder = self._verwijder_r_25
-
-            # doe R als laatste ivm verwijderen dubbelen door administratie teamcompetitie
-            # (BB/IB/LB wordt met zelfde score onder Recurve gezet)
-            for afkorting in ('C', 'BB', 'IB', 'LB', 'R'):
-                self._boogtype = BoogType.objects.get(afkorting=afkorting)
-                fname2 = fname1 + '_' + afkorting + '_rayon'
-
-                for rayon in ('1', '2', '3', '4'):
-                    fname3 = fname2 + rayon + ".html"
-                    self._read_html(os.path.join(pad, fname3))
+        if len(self._bulk_hist):
+            for hist in self._bulk_hist:
+                hist.score = hist.score     # doet iets voor net bulk-aangemaakte score records
             # for
+            ScoreHist.objects.bulk_create(self._bulk_hist)
+
+            # must manually back-date hist.when for each create object
+            for hist in self._bulk_hist:
+                hist.when = self._import_when
+                hist.save()
+            # for
+
+        for uitslag, score in self._bulk_uitslag:
+            uitslag.scores.add(score)
         # for
 
     def _verwijder_dubbele_deelnemers(self):
@@ -591,6 +494,48 @@ class Command(BaseCommand):
                 objs.delete()
         # for
 
+        # reset memory
+        self._verwijder_r_18 = list()
+        self._verwijder_r_25 = list()
+        self._verwijder = None
+        self._ingelezen = list()
+
+    def _lees_json(self, pad):
+        self.stdout.write('[INFO] Inladen: %s' % pad)
+
+        # filename: YYYYMMDD_HHMMSS_uitslagen
+        spl = pad.split('/')
+        grabbed_at = spl[-1][:15]
+        import_when = datetime.datetime.strptime(grabbed_at, '%Y%m%d_%H%M%S')
+        self._import_when = import_when.replace(tzinfo=timezone.now().tzinfo)
+
+        json_file = os.path.join(pad, self.JSON_FILE)
+        with open(json_file, 'r') as f:
+            json_data = json.load(f)
+
+        for afstand in (18, 25):
+            self._afstand = afstand
+            self._comp = Competitie.objects.get(afstand=afstand)
+            self._prep_regio2deelcomp_regio2ronde2uitslag()
+
+            if afstand == 18:
+                self._verwijder = self._verwijder_r_18
+            else:
+                self._verwijder = self._verwijder_r_25
+
+            afstand_data = json_data[str(afstand)]
+
+            # doe R als laatste ivm verwijderen dubbelen door administratie teamcompetitie
+            # (BB/IB/LB wordt met zelfde score onder Recurve gezet)
+            for afkorting in ('C', 'BB', 'IB', 'LB', 'R'):
+                self._boogtype = self._cache_boogtype[afkorting]
+                boog_data = afstand_data[afkorting]
+                self._verwerk_klassen(boog_data)
+            # for
+        # for
+
+        self._verwijder_dubbele_deelnemers()
+
     def add_arguments(self, parser):
         parser.add_argument('dir', nargs=1, help="Pad naar directory met opgehaalde rayonuitslagen")
         parser.add_argument('max_fouten', nargs=1, type=int, help="Zet exit code bij meer dan dit aantal fouten")
@@ -606,17 +551,25 @@ class Command(BaseCommand):
 
         if options['all']:
             # pad wijst naar een top-dir
-            # doorloop alle sub-directories
-            subdirs = os.listdir(pad)       # geen volgorde garantie
-            subdirs.sort()                  # wij willen oudste eerst
-            for nr, subdir in enumerate(subdirs):
-                print("Voortgang: %s van de %s" % (nr, len(subdirs)))
-                self._lees_html_in_pad(os.path.join(pad, subdir))
+            # doorloop alle sub-directories op zoek naar oude_site.json
+            json_dirs = list()
+            subdirs = os.listdir(pad)
+            subdirs.sort()  # oudste eerst
+            for subdir in subdirs:
+                fpath = os.path.join(pad, subdir)
+                if os.path.isdir(fpath):
+                    fname = os.path.join(fpath, self.JSON_FILE)
+                    if os.path.isfile(fname):
+                        json_dirs.append(fpath)
+            # for
+            del subdirs
+
+            for nr, json_dir in enumerate(json_dirs):
+                print("Voortgang: %s van de %s" % (nr, len(json_dirs)))
+                self._lees_json(json_dir)
             # for
         else:
-            self._lees_html_in_pad(pad)
-
-        self._verwijder_dubbele_deelnemers()
+            self._lees_json(pad)
 
         activiteit = "Competitie inschrijvingen en scores aangevuld vanuit het oude programma"
 
