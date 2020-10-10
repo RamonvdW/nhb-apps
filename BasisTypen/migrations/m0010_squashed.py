@@ -4,7 +4,102 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.db import migrations
+from django.db import migrations, models
+import django.db.models.deletion
+
+
+def init_boogtype_2018(apps, _):
+    """ Boog typen jaar 2018, volgens spec v1.2, tabel 2.2 """
+
+    # haal de klassen op die van toepassing zijn tijdens deze migratie
+    boogtype_klas = apps.get_model('BasisTypen', 'BoogType')
+
+    # maak de standaard boogtypen aan
+    boogtype_klas(afkorting='R',  volgorde='A', beschrijving='Recurve').save()
+    boogtype_klas(afkorting='C',  volgorde='D', beschrijving='Compound').save()
+    boogtype_klas(afkorting='BB', volgorde='I', beschrijving='Barebow').save()
+    boogtype_klas(afkorting='IB', volgorde='M', beschrijving='Instinctive bow').save()
+    boogtype_klas(afkorting='LB', volgorde='S', beschrijving='Longbow').save()
+
+
+def init_leeftijdsklasse_2018(apps, _):
+    """ Maak de leeftijdsklassen aan """
+
+    # leeftijdsklassen jaar 2018, volgens spec v1.2, tabel 2.1
+    # note: wedstrijdleeftijd = leeftijd die je bereikt in een jaar
+    #       competitieleeftijd = wedstrijdleeftijd + 1
+
+    # haal de klassen op die van toepassing zijn tijdens deze migratie
+    leeftijdsklasse_klas = apps.get_model('BasisTypen', 'LeeftijdsKlasse')
+
+    leeftijdsklasse_klas(
+        afkorting='SH', geslacht='M',
+        klasse_kort='Senior',
+        beschrijving='Senioren, mannen',
+        min_wedstrijdleeftijd=21,
+        max_wedstrijdleeftijd=150).save()
+    leeftijdsklasse_klas(
+        afkorting='SV', geslacht='V',
+        klasse_kort='Senior',
+        beschrijving='Senioren, vrouwen',
+        min_wedstrijdleeftijd=21,
+        max_wedstrijdleeftijd=150).save()
+
+    # 18, 19, 20
+    leeftijdsklasse_klas(
+        afkorting='JH', geslacht='M',
+        klasse_kort='Junior',
+        beschrijving='Junioren, mannen',
+        min_wedstrijdleeftijd=18,
+        max_wedstrijdleeftijd=20).save()
+    leeftijdsklasse_klas(
+        afkorting='JV', geslacht='V',
+        klasse_kort='Junior',
+        beschrijving='Junioren, vrouwen',
+        min_wedstrijdleeftijd=18,
+        max_wedstrijdleeftijd=20).save()
+
+    # 14, 15, 16, 17
+    leeftijdsklasse_klas(
+        afkorting='CH', geslacht='M',
+        klasse_kort='Cadet',
+        beschrijving='Cadetten, jongens',
+        min_wedstrijdleeftijd=14,
+        max_wedstrijdleeftijd=17).save()
+    leeftijdsklasse_klas(
+        afkorting='CV', geslacht='V',
+        klasse_kort='Cadet',
+        beschrijving='Cadetten, meisjes',
+        min_wedstrijdleeftijd=14,
+        max_wedstrijdleeftijd=17).save()
+
+    # 12 + 13
+    leeftijdsklasse_klas(
+        afkorting='AH2', geslacht='M',
+        klasse_kort='Aspirant',
+        beschrijving='Aspiranten 11-12, jongens',   # heet 11-12 ivm leeftijd in 1e jaar competitie..
+        min_wedstrijdleeftijd=12,
+        max_wedstrijdleeftijd=13).save()
+    leeftijdsklasse_klas(
+        afkorting='AV2', geslacht='V',
+        klasse_kort='Aspirant',
+        beschrijving='Aspiranten 11-12, meisjes',
+        min_wedstrijdleeftijd=12,
+        max_wedstrijdleeftijd=13).save()
+
+    # 10 + 11
+    leeftijdsklasse_klas(
+        afkorting='AH1', geslacht='M',
+        klasse_kort='Aspirant',
+        beschrijving='Aspiranten <11, jongens',
+        min_wedstrijdleeftijd=1,
+        max_wedstrijdleeftijd=11).save()
+    leeftijdsklasse_klas(
+        afkorting='AV1', geslacht='V',
+        klasse_kort='Aspirant',
+        beschrijving='Aspiranten <11, meisjes',
+        min_wedstrijdleeftijd=1,
+        max_wedstrijdleeftijd=11).save()
 
 
 # individuele wedstrijdklassen jaar 2020 volgens spec v1.3, tabel 2.4
@@ -159,30 +254,82 @@ def init_wedstrijdklassen_2020(apps, _):
     # for
 
 
-def corrigeer_leeftijdsklassen(apps, _):
-    # correctie op leeftijdsklasse uit basistypen_2018
-    # Cadet meisjes heeft geslacht=M, moet zijn geslacht=V
-
-    leeftijdsklasse_klas = apps.get_model('BasisTypen', 'LeeftijdsKlasse')
-
-    obj = leeftijdsklasse_klas.objects.get(afkorting='CV')
-    obj.geslacht = 'V'
-    obj.save()
-
-
 class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
 
+    # dit is de eerste
+    initial = True
+
     # volgorde afdwingen
     dependencies = [
-        ('BasisTypen', 'm0008_vereenvoudiging'),
     ]
 
     # migratie functies
     operations = [
+        migrations.CreateModel(
+            name='BoogType',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('beschrijving', models.CharField(max_length=50)),
+                ('afkorting', models.CharField(max_length=5)),
+                ('volgorde', models.CharField(default='?', max_length=1)),
+            ],
+            options={
+                'verbose_name': 'Boog type',
+                'verbose_name_plural': 'Boog types',
+            },
+        ),
+        migrations.CreateModel(
+            name='LeeftijdsKlasse',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('afkorting', models.CharField(max_length=5)),
+                ('beschrijving', models.CharField(max_length=80)),
+                ('klasse_kort', models.CharField(max_length=30)),
+                ('geslacht', models.CharField(choices=[('M', 'Man'), ('V', 'Vrouw')], max_length=1)),
+                ('min_wedstrijdleeftijd', models.IntegerField()),
+                ('max_wedstrijdleeftijd', models.IntegerField()),
+            ],
+            options={
+                'verbose_name': 'Leeftijdsklasse',
+                'verbose_name_plural': 'Leeftijdsklassen',
+            },
+        ),
+        migrations.CreateModel(
+            name='IndivWedstrijdklasse',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('buiten_gebruik', models.BooleanField(default=False)),
+                ('beschrijving', models.CharField(max_length=80)),
+                ('volgorde', models.PositiveIntegerField()),
+                ('niet_voor_rk_bk', models.BooleanField()),
+                ('is_onbekend', models.BooleanField(default=False)),
+                ('boogtype', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='BasisTypen.BoogType')),
+                ('leeftijdsklassen', models.ManyToManyField(to='BasisTypen.LeeftijdsKlasse')),
+            ],
+            options={
+                'verbose_name': 'Wedstrijdklasse',
+                'verbose_name_plural': 'Wedstrijdklassen',
+            },
+        ),
+        migrations.CreateModel(
+            name='TeamWedstrijdklasse',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('buiten_gebruik', models.BooleanField(default=False)),
+                ('beschrijving', models.CharField(max_length=80)),
+                ('volgorde', models.PositiveIntegerField()),
+                ('boogtypen', models.ManyToManyField(to='BasisTypen.BoogType')),
+            ],
+            options={
+                'verbose_name': 'Team Wedstrijdklasse',
+                'verbose_name_plural': 'Team Wedstrijdklassen',
+            },
+        ),
+        migrations.RunPython(init_boogtype_2018),
+        migrations.RunPython(init_leeftijdsklasse_2018),
         migrations.RunPython(init_wedstrijdklassen_2020),
-        migrations.RunPython(corrigeer_leeftijdsklassen),
     ]
 
 # end of file

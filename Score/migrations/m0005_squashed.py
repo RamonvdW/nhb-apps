@@ -4,20 +4,23 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.conf import settings
-from django.db import migrations, models
+import datetime
 import django.db.models.deletion
+from django.db import migrations, models
+from django.utils.timezone import utc
 
 
 class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
 
-    # volgorde afdwingen
+    # dit is de eerste
     initial = True
+
+    # volgorde afdwingen
     dependencies = [
-        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('Schutter', 'm0001_initial'),
+        ('Account', 'm0013_squashed'),
+        ('Schutter', 'm0006_squashed'),
     ]
 
     # migratie functies
@@ -29,6 +32,7 @@ class Migration(migrations.Migration):
                 ('waarde', models.PositiveSmallIntegerField()),
                 ('afstand_meter', models.PositiveSmallIntegerField()),
                 ('schutterboog', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='Schutter.SchutterBoog')),
+                ('is_ag', models.BooleanField(default=False)),
             ],
         ),
         migrations.CreateModel(
@@ -37,10 +41,10 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('oude_waarde', models.PositiveSmallIntegerField()),
                 ('nieuwe_waarde', models.PositiveSmallIntegerField()),
-                ('datum', models.DateField()),
                 ('notitie', models.CharField(max_length=100)),
-                ('door_account', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL)),
+                ('door_account', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='Account.Account')),
                 ('score', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='Score.Score')),
+                ('when', models.DateTimeField(auto_now_add=True)),
             ],
         ),
     ]

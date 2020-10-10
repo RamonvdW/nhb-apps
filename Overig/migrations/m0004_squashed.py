@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019 Ramon van der Winkel.
+#  Copyright (c) 2020 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,6 +9,7 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
+
     """ Migratie class voor dit deel van de applicatie """
 
     # dit is de eerste
@@ -16,7 +17,8 @@ class Migration(migrations.Migration):
 
     # volgorde afdwingen
     dependencies = [
-        ('Account', 'm0001_initial'),
+        ('Account', 'm0013_squashed'),
+        ('Functie', 'm0008_squashed'),
     ]
 
     # migratie functies
@@ -46,6 +48,10 @@ class Migration(migrations.Migration):
                 ('aangemaakt_op', models.DateTimeField()),
                 ('geldig_tot', models.DateTimeField()),
                 ('hoortbij_accountemail', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='Account.AccountEmail')),
+                ('dispatch_to', models.CharField(default='', max_length=20)),
+                ('hoortbij_functie', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='Functie.Functie')),
             ],
         ),
     ]
+
+# end of file

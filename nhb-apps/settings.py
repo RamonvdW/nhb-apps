@@ -93,7 +93,7 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 
-# vervanger van (aanpassing/uitbreiding op)  de ingebouwde User
+# vervanger van (aanpassing/uitbreiding op) de ingebouwde User
 AUTH_USER_MODEL = 'Account.Account'
 
 # maximum aantal keer dat een verkeerd wachtwoord opgegeven mag worden
