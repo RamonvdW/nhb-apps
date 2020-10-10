@@ -30,14 +30,6 @@ class Command(BaseCommand):
 
         self._prev_hash = None
 
-    def _roep_warning(self, msg):
-        # print en tel waarschuwingen
-        # en onderdruk dubbele berichten
-        if msg not in self._warnings:
-            self._warnings.append(msg)
-            self._count_warnings += 1
-            self.stdout.write(msg)
-
     @staticmethod
     def _calc_hash(msg):
         return hashlib.md5(msg.encode('UTF-8')).hexdigest()
@@ -102,7 +94,7 @@ class Command(BaseCommand):
 
                 cells.append(cell)
             else:
-                break   # from the while
+                pos2 = len(html)   # exit while
         # while
 
         self._parse_tabel_cells(self._klasse_data, cells)

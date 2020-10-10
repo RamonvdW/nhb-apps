@@ -7,18 +7,22 @@
 from django.test import TestCase
 from django.core import management
 from BasisTypen.models import BoogType
-from Competitie.models import RegioCompetitieSchutterBoog, DeelCompetitie, LAAG_REGIO
+from Competitie.models import (RegioCompetitieSchutterBoog, DeelCompetitie, LAAG_REGIO,
+                               DeelcompetitieRonde)
 from NhbStructuur.models import NhbRegio, NhbLid, NhbVereniging
 from Schutter.models import SchutterBoog
-from Score.models import Score, ScoreHist
+from Score.models import Score, ScoreHist, aanvangsgemiddelde_opslaan
+from Wedstrijden.models import WedstrijdenPlan
 from Overig.e2ehelpers import E2EHelpers
 from .models import CompetitieKlasse
 import datetime
 import io
 
 
-class TestRecordsCliOudeSiteOvernemen(E2EHelpers, TestCase):
+class TestCompetitieCliOudeSiteOvernemen(E2EHelpers, TestCase):
     """ unittests voor de Competitie applicatie, management command oude_site_overnemen """
+
+    test_after = ('Competitie.test_cli_oude_site_maak_json',)
 
     def _maak_competitie_aan(self):
         # login als BB
@@ -132,6 +136,8 @@ class TestRecordsCliOudeSiteOvernemen(E2EHelpers, TestCase):
 
         self._maak_leden_aan()
 
+        self.boog_bb = BoogType.objects.get(afkorting='BB')
+
         # een schutterboog inschrijven in verkeerde klasse zodat deze verwijderd gaat worden
         boog_r = BoogType.objects.get(afkorting='R')
         schutterboog = SchutterBoog(nhblid=self.lid_100002, boogtype=boog_r, voor_wedstrijd=True)
@@ -144,26 +150,49 @@ class TestRecordsCliOudeSiteOvernemen(E2EHelpers, TestCase):
                                           bij_vereniging=self.lid_100002.bij_vereniging,
                                           klasse=self.klasse)
         obj.save()
+        self.deelcomp = deelcomp
 
-        self.dir_testfiles = './Competitie/management/testfiles/20200929_235958'
+        self.dir_top = './Competitie/management/testfiles/'
+        self.dir_testfiles1 = './Competitie/management/testfiles/20200929_220000'
+        self.dir_testfiles2 = './Competitie/management/testfiles/20200930_091011'
 
-    def test_bepaal(self):
+    def test_verwijder_oude_data(self):
+        # eerst aanmaken, dan verwijderen
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('oude_site_overnemen', self.dir_testfiles1, '100', stderr=f1, stdout=f2)
+
+        # verwijder de uitslag van een wedstrijd
+        ronde = DeelcompetitieRonde.objects.all()[3]
+        wedstrijd = ronde.plan.wedstrijden.all()[0]
+        uitslag = wedstrijd.uitslag
+        wedstrijd.uitslag = None
+        wedstrijd.save()
+        uitslag.delete()
+
+        # voeg een ronde toe die niet voor het oude programma is
+        plan = WedstrijdenPlan()
+        plan.save()
+        ronde = DeelcompetitieRonde(deelcompetitie=self.deelcomp,
+                                    beschrijving="Hello World",
+                                    week_nr=42,
+                                    plan=plan)
+        ronde.save()
+
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('verwijder_data_oude_site', stderr=f1, stdout=f2)
+
+    def test_bepaal_1(self):
         self.assertEqual(Score.objects.count(), 0)
         self.assertEqual(ScoreHist.objects.count(), 0)
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('oude_site_overnemen', self.dir_testfiles, '100', stderr=f1, stdout=f2)
+        management.call_command('oude_site_overnemen', self.dir_testfiles1, '100', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
-        self.assertTrue("[ERROR] Kan einde tabel onverwacht niet vinden" in f1.getvalue())
-        self.assertTrue("[ERROR] Kan einde regel onverwacht niet vinden" in f1.getvalue())
-        self.assertTrue("[ERROR] Kan einde wedstrijdklasse niet vinden: " in f1.getvalue())
-
-        self.assertTrue("[WARNING] Lid 100003 heeft geen vereniging en wordt dus niet ingeschreven" in f2.getvalue())
-        self.assertTrue("[WARNING] Verschil in vereniging naam: bekend=[1000] Grote Club, oude programma=[1000] Grootste Club" in f2.getvalue())
         self.assertTrue("[WARNING] schutter 100001 heeft te laag AG (9.022) voor klasse Recurve klasse 2 (9.500)" in f2.getvalue())
-        self.assertTrue("[WARNING] Verschil in AG voor nhbnr 100001: bekend=9.022, in uitslag=8.022" in f2.getvalue())
         self.assertTrue("[WARNING] Kan lid 100042 niet vinden" in f2.getvalue())
         self.assertTrue("[WARNING] Kan lid 990000 niet vinden" in f2.getvalue())
         self.assertTrue("[WARNING] Verschil in lid 100004 naam: bekend=Juf de Schutter, oude programma=Juf de Schytter" in f2.getvalue())
@@ -172,20 +201,59 @@ class TestRecordsCliOudeSiteOvernemen(E2EHelpers, TestCase):
 
         self.assertEqual(Score.objects.filter(is_ag=True).count(), 1)
         self.assertEqual(Score.objects.filter(is_ag=False).count(), 4)
-        self.assertEqual(ScoreHist.objects.count(), 5)
+        self.assertEqual(ScoreHist.objects.count(), 4)
+
+        hist = ScoreHist.objects.all()[0]
+        self.assertEqual(str(hist.when), '2020-09-29 22:00:00+00:00')
 
         # nog een keer, want dan zijn de uitslagen er al (extra coverage)
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assertRaises(SystemExit):
-            management.call_command('oude_site_overnemen', self.dir_testfiles, '1', stderr=f1, stdout=f2)
+        management.call_command('oude_site_overnemen', self.dir_testfiles1, '1', stderr=f1, stdout=f2)
+
+        self.assertEqual(ScoreHist.objects.count(), 4)
+
+    def test_bepaal_2(self):
+        # maak een AG aan voor schutter 100002-BB zodat we een verschil kunnen detecteren
+
+        schutterboog = SchutterBoog(nhblid=self.lid_100002,
+                                    boogtype=self.boog_bb,
+                                    voor_wedstrijd=True)
+        schutterboog.save()
+        aanvangsgemiddelde_opslaan(schutterboog, 18, 4.444, None, 'test prep')
+
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('oude_site_overnemen', self.dir_testfiles2, '100', stderr=f1, stdout=f2)
+        # print("f1: %s" % f1.getvalue())
+        self.assertTrue("[ERROR] Kan wedstrijdklasse 'Barebow Cadetten klasse 1' niet vinden (competitie Indoor" in f1.getvalue())
+        self.assertTrue("[ERROR] Vereniging 1099 is niet bekend; kan lid 100004 niet inschrijven" in f1.getvalue())
+        # print("f2: %s" % f2.getvalue())
+        self.assertTrue("[WARNING] Lid 100003 heeft 1 scores maar geen vereniging en wordt dus niet ingeschreven" in f2.getvalue())
+        self.assertTrue("[WARNING] Verschil in AG voor nhbnr 100002 (18m): bekend=4.444, in uitslag=4.567" in f2.getvalue())
 
     def test_dryrun(self):
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('oude_site_overnemen', '--dryrun', self.dir_testfiles, '100', stderr=f1, stdout=f2)
+        management.call_command('oude_site_overnemen', '--dryrun', self.dir_testfiles1, '100', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
         self.assertTrue("(DRY RUN)" in f2.getvalue())
+
+    def test_all(self):
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('oude_site_overnemen', '--all', self.dir_top, '100', stderr=f1, stdout=f2)
+        # print("f1: %s" % f1.getvalue())
+        # print("f2: %s" % f2.getvalue())
+        # de 3 directories bevatten maar 2 oude_site.json
+        self.assertTrue('Voortgang: 1 van de 2' in f2.getvalue())
+        self.assertTrue('Voortgang: 2 van de 2' in f2.getvalue())
+
+    def test_te_veel_fouten(self):
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        with self.assertRaises(SystemExit):
+            management.call_command('oude_site_overnemen', self.dir_testfiles1, '-1', stderr=f1, stdout=f2)
 
 # end of file

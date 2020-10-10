@@ -142,7 +142,7 @@ class Command(BaseCommand):
             tup = (str(score.afstand_meter), score.schutterboog.pk)
             try:
                 inschrijving = afstand_schutterboog_pk2inschrijving[tup]
-            except KeyError:
+            except KeyError:        # pragma: no cover
                 pass
             else:
                 tup = (inschrijving.pk, ronde)
@@ -565,7 +565,7 @@ class Command(BaseCommand):
             del subdirs
 
             for nr, json_dir in enumerate(json_dirs):
-                print("Voortgang: %s van de %s" % (nr, len(json_dirs)))
+                self.stdout.write("Voortgang: %s van de %s" % (nr + 1, len(json_dirs)))
                 self._lees_json(json_dir)
             # for
         else:
