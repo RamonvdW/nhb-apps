@@ -34,7 +34,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2020-10-05'
+SITE_VERSIE = '2020-10-10'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -93,7 +93,7 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 
-# vervanger van (aanpassing/uitbreiding op)  de ingebouwde User
+# vervanger van (aanpassing/uitbreiding op) de ingebouwde User
 AUTH_USER_MODEL = 'Account.Account'
 
 # maximum aantal keer dat een verkeerd wachtwoord opgegeven mag worden

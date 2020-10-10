@@ -1,17 +1,18 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2020 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
-
 
 from django.db import migrations, models
 import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
+
     """ Migratie class voor dit deel van de applicatie """
 
+    # dit is de eerste
     initial = True
 
     # volgorde afdwingen
@@ -68,7 +69,7 @@ class Migration(migrations.Migration):
                 ('schutter_naam', models.CharField(max_length=50)),
                 ('vereniging_nr', models.PositiveIntegerField()),
                 ('vereniging_naam', models.CharField(max_length=50)),
-                ('boogtype', models.CharField(max_length=5)),
+                ('boogtype', models.CharField(blank=True, max_length=5, null=True)),
                 ('score1', models.PositiveIntegerField()),
                 ('score2', models.PositiveIntegerField()),
                 ('score3', models.PositiveIntegerField()),
@@ -79,6 +80,7 @@ class Migration(migrations.Migration):
                 ('totaal', models.PositiveIntegerField()),
                 ('gemiddelde', models.DecimalField(decimal_places=3, max_digits=5)),
                 ('histcompetitie', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='HistComp.HistCompetitie')),
+                ('laagste_score_nr', models.PositiveIntegerField(default=0)),
             ],
             options={
                 'verbose_name': 'Historie individuele competitie',
@@ -88,4 +90,3 @@ class Migration(migrations.Migration):
     ]
 
 # end of file
-

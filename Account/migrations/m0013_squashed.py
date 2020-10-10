@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019 Ramon van der Winkel.
+#  Copyright (c) 2020 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
-import django.contrib.auth.models
 from django.db import migrations, models
-import django.db.models.deletion
 import django.utils.timezone
+import django.contrib.auth.models
 
 
 class Migration(migrations.Migration):
+
     """ Migratie class voor dit deel van de applicatie """
 
     # dit is de eerste
@@ -19,8 +19,7 @@ class Migration(migrations.Migration):
 
     # volgorde afdwingen
     dependencies = [
-        ('auth', '0001_initial'),               # auth.Group
-        ('NhbStructuur', 'm0001_initial'),      # NhbLid
+        ('auth', '0001_initial'),
     ]
 
     # migratie functies
@@ -38,15 +37,17 @@ class Migration(migrations.Migration):
                 ('is_active', models.BooleanField(default=True, help_text='Designates whether this user should be treated as active. Unselect this instead of deleting accounts.', verbose_name='active')),
                 ('is_staff', models.BooleanField(default=False, help_text='Designates whether the user can log into this admin site.', verbose_name='staff status')),
                 ('is_superuser', models.BooleanField(default=False, help_text='Designates that this user has all permissions without explicitly assigning them.', verbose_name='superuser status')),
-                ('is_voltooid', models.BooleanField(default=False, help_text='Extra informatie correct opgegeven voor NHB account?')),
-                ('is_BKO', models.BooleanField(default=False, help_text='BK Organisator')),
-                ('extra_info_pogingen', models.IntegerField(default=3, help_text='Aantal pogingen over om extra informatie voor NHB account op te geven')),
                 ('vraag_nieuw_wachtwoord', models.BooleanField(default=False, help_text='Moet de gebruiker een nieuw wachtwoord opgeven bij volgende inlog?')),
                 ('groups', models.ManyToManyField(blank=True, help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.', related_name='user_set', related_query_name='user', to='auth.Group', verbose_name='groups')),
                 ('user_permissions', models.ManyToManyField(blank=True, help_text='Specific permissions for this user.', related_name='user_set', related_query_name='user', to='auth.Permission', verbose_name='user permissions')),
                 ('laatste_inlog_poging', models.DateTimeField(blank=True, null=True)),
                 ('last_login', models.DateTimeField(blank=True, null=True, verbose_name='last login')),
-                ('nhblid', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to='NhbStructuur.NhbLid')),
+                ('is_geblokkeerd_tot', models.DateTimeField(blank=True, help_text='Login niet mogelijk tot', null=True)),
+                ('verkeerd_wachtwoord_teller', models.IntegerField(default=0, help_text='Aantal mislukte inlog pogingen op rij')),
+                ('otp_code', models.CharField(blank=True, default='', help_text='OTP code', max_length=16)),
+                ('otp_is_actief', models.BooleanField(default=False, help_text='Is OTP verificatie gelukt')),
+                ('is_BB', models.BooleanField(default=False, help_text='Manager Competitiezaken')),
+                ('is_Observer', models.BooleanField(default=False, help_text='Alleen observeren')),
             ],
             options={
                 'verbose_name': 'Account',
@@ -55,18 +56,6 @@ class Migration(migrations.Migration):
             managers=[
                 ('objects', django.contrib.auth.models.UserManager()),
             ],
-        ),
-        migrations.CreateModel(
-            name='HanterenPersoonsgegevens',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('acceptatie_datum', models.DateTimeField()),
-                ('account', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
-            ],
-            options={
-                'verbose_name': 'Hanteren Persoonsgegevens',
-                'verbose_name_plural': 'Hanteren Persoonsgegevens',
-            },
         ),
         migrations.CreateModel(
             name='AccountEmail',
@@ -87,7 +76,19 @@ class Migration(migrations.Migration):
                 'verbose_name_plural': 'AccountEmails',
             },
         ),
+        migrations.CreateModel(
+            name='HanterenPersoonsgegevens',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('acceptatie_datum', models.DateTimeField()),
+                (
+                'account', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+            ],
+            options={
+                'verbose_name': 'Hanteren Persoonsgegevens',
+                'verbose_name_plural': 'Hanteren Persoonsgegevens',
+            },
+        ),
     ]
 
 # end of file
-
