@@ -65,6 +65,15 @@ class Command(BaseCommand):
                 self.verwijder_ronde(ronde)
         # for
 
+        # verwijder AG zonder hist
+        teller = 0
+        for obj in Score.objects.filter(is_ag=True):
+            if ScoreHist.objects.filter(score=obj).count() == 0:
+                obj.delete()
+                teller += 1
+        # for
+        self.stdout.write("AG's opgeruimd: %s" % teller)
+
         activiteit = 'Alle eerder ingelezen data van het oude programma zijn verwijderd'
 
         # schrijf in het logboek

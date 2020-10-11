@@ -287,7 +287,7 @@ class Command(BaseCommand):
 
         return schutterboog
 
-    def _vind_of_maak_ag(self, schutterboog, ag_str):
+    def _vind_of_maak_ag(self, schutterboog, ag_str, aantal_scores):
         if ag_str:
             gemiddelde = Decimal(ag_str)
         else:
@@ -298,19 +298,28 @@ class Command(BaseCommand):
         try:
             score = self._cache_ag_score[tup]
         except KeyError:
+            # maak een tijdelijk AG aan dat we niet opslaan
+            # want de oude site vult ontbrekende AG's aan vanaf 3 scores
             score = Score()
             score.is_ag = True
             score.schutterboog = schutterboog
             score.afstand_meter = self._afstand
             score.waarde = waarde
-            if waarde > 0:
-                # alleen opslaan als dit een zinnige AG is
-                # anders geven we wel het record terug zodat de code gelijk kan blijven
-                if not self._dryrun:
-                    score.save()
-            self._cache_ag_score[tup] = score
 
-        return score, waarde
+            self._cache_ag_score[tup] = score
+        else:
+            # controleer of het AG overeen komt
+            # stop hiermee vanaf 3 scores omdat de oude site het ontbrekende AG dan invult
+            # en deze altijd afwijkend is
+            if waarde != score.waarde and aantal_scores < 3:
+                self._roep_warning(
+                    '[WARNING] Verschil in AG voor nhbnr %s (%sm): bekend=%.3f, in uitslag=%.3f' % (
+                                schutterboog.nhblid.nhb_nr,
+                                self._afstand,
+                                score.waarde / 1000,
+                                waarde / 1000))
+
+        return score
 
     def _vind_of_maak_inschrijving(self, deelcomp, schutterboog, lid_vereniging, ag_str):
         # zoek de RegioCompetitieSchutterBoog erbij
@@ -443,20 +452,11 @@ class Command(BaseCommand):
 
         # zorg dat de schutter-boog records er zijn en de voorkeuren ingevuld zijn
         schutterboog = self._vind_schutterboog(lid)
-        score_ag, waarde_ag = self._vind_of_maak_ag(schutterboog, ag_str)
+        score_ag = self._vind_of_maak_ag(schutterboog, ag_str, aantal_scores)
 
         inschrijving = self._vind_of_maak_inschrijving(deelcomp, schutterboog, lid_ver, ag_str)
 
         if not self._dryrun:
-            if aantal_scores > 1:
-                if waarde_ag != score_ag.waarde:
-                    self._roep_warning(
-                        '[WARNING] Verschil in AG voor nhbnr %s (%sm): bekend=%.3f, in uitslag=%.3f' % (
-                                    schutterboog.nhblid.nhb_nr,
-                                    self._afstand,
-                                    score_ag.waarde / 1000,
-                                    waarde_ag / 1000))
-
             # bij 3 scores wordt de schutter verplaatst van klasse onbekend naar andere klasse
             if aantal_scores < 3:
                 klasse_min_ag = int(self._klasse.min_ag * 1000)
