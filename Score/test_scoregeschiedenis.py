@@ -59,9 +59,9 @@ class TestScoreGeschiedenis(E2EHelpers, TestCase):
         self.schutterboog_100001 = schutterboog
 
         # maak een AG aan
-        aanvangsgemiddelde_opslaan(schutterboog, 18, 9.123, None, 'Automatisch vastgesteld')
+        aanvangsgemiddelde_opslaan(schutterboog, 18, 9.123, None, 'test melding')
 
-        aanvangsgemiddelde_opslaan(schutterboog, 25, 9.251, self.account_hwl, 'Automatisch vastgesteld')
+        aanvangsgemiddelde_opslaan(schutterboog, 25, 9.251, self.account_hwl, 'test melding')
 
         self.url_geschiedenis = '/score/geschiedenis/'
 
@@ -94,8 +94,8 @@ class TestScoreGeschiedenis(E2EHelpers, TestCase):
 
         self.assertContains(resp, self.nhblid1.volledige_naam())
         self.assertContains(resp, 'Recurve')
-        self.assertContains(resp, ' (AG)')
-        self.assertContains(resp, 'Automatisch vastgesteld')
+        self.assertContains(resp, 'AG vastgesteld')
+        self.assertContains(resp, 'test melding')
 
     def test_zoek_bad(self):
         # login als BB
