@@ -156,10 +156,14 @@ def rol_zet_sessionvars(account, request):
         if account_rechten_is_otp_verified(request) and not show_vhpg:
             if account.is_staff:
                 rollen_vast.append(Rollen.ROL_IT)
+                rollen_vast.append(Rollen.ROL_NONE)      # Gebruiker, want geen NHB lid
+
+            # query is te duur
+            # if account.nhblid_set.count() == 0:
+            #    rollen_vast.append(Rollen.ROL_NONE)      # Gebruiker, want geen NHB lid
 
             if account.is_staff or account.is_BB:
                 rollen_vast.append(Rollen.ROL_BB)
-                rollen_vast.append(Rollen.ROL_NONE)      # Gebruiker (voor IT en BB)
 
                 for func in rol_expandeer_functies:
                     parent_tup = (Rollen.ROL_BB, None)
