@@ -47,6 +47,8 @@ class Command(BaseCommand):
         # wordt opgezet door _prep_regio2deelcomp_regio2ronde2uitslag
         self._regio2deelcomp = None        # [regio_nr] = DeelCompetitie
         self._regio2ronde2uitslag = None   # [regio_nr] = [1..7] = WedstrijdUitslag
+        self._uitslag2wedstrijd = dict()   # [uitslag.pk] = Wedstrijd
+        self._wedstrijd2ronde = dict()     # [wedstrijd.pk] = DeelcompetitieRonde
 
         self._ingelezen = list()           # tuple(afstand, nhbnr, boogtype, score1, ..., score 7)
         self._verwijder_r_18 = list()
@@ -65,7 +67,8 @@ class Command(BaseCommand):
 
         self._bulk_score = list()
         self._bulk_hist = list()
-        self._bulk_uitslag = list()
+        self._bulk_uitslag = dict()        # [uitslag] = [score, ...]
+        self._pk2uitslag = dict()          # [uitslag.pk] = WedstrijdUitslag
 
     def _roep_warning(self, msg):
         # print en tel waarschuwingen
@@ -155,6 +158,7 @@ class Command(BaseCommand):
 
         self._regio2deelcomp = dict()
         self._regio2ronde2uitslag = dict()
+        self._uitslag2wedstrijd = dict()
 
         nul_uur = datetime.time(hour=0, minute=0, second=0)
 
@@ -212,7 +216,7 @@ class Command(BaseCommand):
                     wedstrijd = Wedstrijd()
                     wedstrijd.beschrijving = beschrijving
                     wedstrijd.preliminair = False
-                    wedstrijd.datum_wanneer = datetime.date.today()
+                    wedstrijd.datum_wanneer = self._maandag_wk37
                     wedstrijd.tijd_begin_aanmelden = nul_uur
                     wedstrijd.tijd_begin_wedstrijd = nul_uur
                     wedstrijd.tijd_einde_wedstrijd = nul_uur
@@ -231,8 +235,29 @@ class Command(BaseCommand):
                     wedstrijd.save()
 
                 self._regio2ronde2uitslag[regio_nr][ronde] = wedstrijd.uitslag
+                self._uitslag2wedstrijd[wedstrijd.uitslag.pk] = wedstrijd
+                self._wedstrijd2ronde[wedstrijd.pk] = deelcomp_ronde
             # for
         # for
+
+    def _update_wedstrijd_datum(self, wedstrijd):
+        # deze wedstrijd heeft de default datum maandag_wk37
+        # aan de hand van de momenten waarop de scores in gevoerd zijn
+        # bepalen we een nieuwe datum: maandag in de week van deze import
+
+        d1 = wedstrijd.datum_wanneer
+        d2 = self._maandag_wk37
+
+        if d1.year == d2.year and d1.month == d2.month and d1.day == d2.day:
+            # weekday = 0..6, waarbij 0=maandag
+            wedstrijd.datum_wanneer = self._import_when - datetime.timedelta(days=self._import_when.weekday())
+            wedstrijd.save()
+
+            ronde = self._wedstrijd2ronde[wedstrijd.pk]
+            ronde.week_nr = self._import_when.isocalendar()[1]
+            ronde.save()
+
+            self.stdout.write('[INFO] Datum van wedstrijd %s aangepast naar %s in week %s' % (wedstrijd.beschrijving, str(wedstrijd.datum_wanneer).split(' ')[0], ronde.week_nr))
 
     def _selecteer_klasse(self, beschrijving):
         tup = (self._comp.pk, beschrijving.lower())
@@ -343,8 +368,11 @@ class Command(BaseCommand):
                     hist.notitie = notitie
                     self._bulk_hist.append(hist)
 
-                    tup2 = (uitslag, score)
-                    self._bulk_uitslag.append(tup2)
+                    try:
+                        self._bulk_uitslag[uitslag.pk].append(score)
+                    except KeyError:
+                        self._pk2uitslag[uitslag.pk] = uitslag
+                        self._bulk_uitslag[uitslag.pk] = [score]
 
                     self._cache_scores[tup] = score
                 else:
@@ -442,7 +470,8 @@ class Command(BaseCommand):
     def _verwerk_klassen(self, data):
         self._bulk_score = list()
         self._bulk_hist = list()
-        self._bulk_uitslag = list()
+        self._bulk_uitslag = dict()
+        self._pk2uitslag = dict()
 
         for klasse, data_schutters in data.items():
             self._selecteer_klasse(klasse)
@@ -472,8 +501,13 @@ class Command(BaseCommand):
                 hist.save()
             # for
 
-        for uitslag, score in self._bulk_uitslag:
-            uitslag.scores.add(score)
+        for uitslag_pk, scores in self._bulk_uitslag.items():
+            uitslag = self._pk2uitslag[uitslag_pk]
+            uitslag.scores.add(*scores)
+
+            # wedstrijd datum aanpassen
+            wedstrijd = self._uitslag2wedstrijd[uitslag_pk]
+            self._update_wedstrijd_datum(wedstrijd)
         # for
 
     def _verwijder_dubbele_deelnemers(self):
@@ -516,6 +550,8 @@ class Command(BaseCommand):
         for afstand in (18, 25):
             self._afstand = afstand
             self._comp = Competitie.objects.get(afstand=afstand)
+            self._maandag_wk37 = datetime.datetime.strptime("%s-W%d-1" % (self._comp.begin_jaar, 37), "%G-W%V-%u")
+
             self._prep_regio2deelcomp_regio2ronde2uitslag()
 
             if afstand == 18:
