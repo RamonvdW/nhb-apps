@@ -6,8 +6,7 @@
 
 from django.urls import path
 from . import (view_registreer_nhb, view_profiel, view_voorkeuren,
-               view_inschrijven_uitschrijven, view_leeftijdsklassen,
-               view_scoregeschiedenis)
+               view_inschrijven_uitschrijven, view_leeftijdsklassen)
 
 
 app_name = 'Schutter'
@@ -45,9 +44,6 @@ urlpatterns = [
          view_inschrijven_uitschrijven.RegiocompetitieUitschrijvenView.as_view(),
          name='uitschrijven'),
 
-    path('score-geschiedenis/',
-         view_scoregeschiedenis.ScoreGeschiedenisView.as_view(),
-         name='score-geschiedenis')
 ]
 
 # end of file

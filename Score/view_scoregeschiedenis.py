@@ -1,22 +1,22 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2020 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import reverse
-from django.shortcuts import redirect, render
-from django.views.generic import TemplateView, View
+from django.shortcuts import render
+from django.views.generic import View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.http import HttpResponseRedirect
-from Functie.rol import Rollen, rol_get_huidige, rol_get_beschrijving
+from Functie.rol import Rollen, rol_get_huidige
 from Schutter.models import SchutterBoog
 from Score.models import ScoreHist, SCORE_WAARDE_VERWIJDERD
 from .forms import ScoreGeschiedenisForm
 from Plein.menu import menu_dynamics
 
 
-TEMPLATE_SCORE_GESCHIEDENIS = 'schutter/score-geschiedenis.dtl'
+TEMPLATE_SCORE_GESCHIEDENIS = 'score/score-geschiedenis.dtl'
 
 
 class ScoreGeschiedenisView(UserPassesTestMixin, View):
@@ -38,7 +38,7 @@ class ScoreGeschiedenisView(UserPassesTestMixin, View):
         """ called by the template system to get the context data for the template """
 
         context = dict()
-        context['url_ophalen'] = reverse('Schutter:score-geschiedenis')
+        context['url_ophalen'] = reverse('Score:geschiedenis')
 
         context['form'] = form = ScoreGeschiedenisForm(self.request.GET)
         form.full_clean()  # vult cleaned_data
@@ -68,15 +68,14 @@ class ScoreGeschiedenisView(UserPassesTestMixin, View):
                          .objects
                          .select_related('score',
                                          'score__schutterboog')
+                         .prefetch_related('score__wedstrijduitslag_set')
                          .filter(score__schutterboog__in=pks)
                          .order_by('-when'))
 
                 # splitst de hists op per score
                 score2hists = dict()    # [score.pk] = [hist, ...]
                 for hist in hists:
-                    if not hist.door_account:
-                        hist.door_account_str = 'Systeem'
-                    else:
+                    if hist.door_account:
                         hist.door_account_str = str(hist.door_account)
 
                     if hist.score.is_ag:
@@ -94,6 +93,8 @@ class ScoreGeschiedenisView(UserPassesTestMixin, View):
                         score2hists[hist.score.pk] = [hist]
                 # for
 
+                context['afstanden'] = afstanden = list()
+
                 for obj in schuttersboog:
                     obj.scores = list()
                     for hist in hists:      # deze volgorde aanhouden
@@ -109,17 +110,25 @@ class ScoreGeschiedenisView(UserPassesTestMixin, View):
                                 if score.is_ag:
                                     score.waarde = "%.3f" % (hist.score.waarde / 1000)
 
+                                if score.afstand_meter not in afstanden:
+                                    afstanden.append(score.afstand_meter)
+
                                 try:
                                     uitslag = score.wedstrijduitslag_set.all()[0]
                                     wedstrijd = uitslag.wedstrijd_set.all()[0]
-                                    score.wedstrijd_str = "%s %s" % (wedstrijd.datum_wanneer, wedstrijd.tijd_begin_wedstrijd)
+                                    score.wedstrijd_str = str(wedstrijd.datum_wanneer)
+                                    tijd = str(wedstrijd.tijd_begin_wedstrijd)[:5]
+                                    if tijd != "00:00":
+                                        score.wedstrijd_str += " " + tijd
                                     if wedstrijd.vereniging:
-                                        score.wedstrijd_waar = 'Bij %s' % wedstrijd.vereniging
+                                        score.wedstrijd_waar = 'bij %s' % wedstrijd.vereniging
                                 except IndexError:
                                     pass
 
                                 obj.scores.append(score)
                     # for
+
+                    afstanden.sort()
                 # for
         else:
             context['niet_gevonden'] = True

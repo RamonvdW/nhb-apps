@@ -9,12 +9,12 @@ from BasisTypen.models import BoogType
 from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
 from Overig.e2ehelpers import E2EHelpers
 from Functie.models import maak_functie
-from Score.models import aanvangsgemiddelde_opslaan
-from .models import SchutterBoog, SchutterVoorkeuren
+from .models import aanvangsgemiddelde_opslaan
+from Schutter.models import SchutterBoog, SchutterVoorkeuren
 import datetime
 
 
-class TestSchutterVoorkeuren(E2EHelpers, TestCase):
+class TestScoreGeschiedenis(E2EHelpers, TestCase):
     """ unit tests voor de Schutter applicatie, module Voorkeuren """
 
     def setUp(self):
@@ -63,7 +63,7 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
 
         aanvangsgemiddelde_opslaan(schutterboog, 25, 9.251, self.account_hwl, 'Automatisch vastgesteld')
 
-        self.url_geschiedenis = '/schutter/score-geschiedenis/'
+        self.url_geschiedenis = '/score/geschiedenis/'
 
     def test_mag_niet(self):
         # moet BB zijn om de geschiedenis in te mogen zien
@@ -79,7 +79,7 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
         resp = self.client.get(self.url_geschiedenis)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('schutter/score-geschiedenis.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('score/score-geschiedenis.dtl', 'plein/site_layout.dtl'))
 
     def test_zoek(self):
         # login als BB
@@ -90,7 +90,7 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('schutter/score-geschiedenis.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('score/score-geschiedenis.dtl', 'plein/site_layout.dtl'))
 
         self.assertContains(resp, self.nhblid1.volledige_naam())
         self.assertContains(resp, 'Recurve')
@@ -106,7 +106,7 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('schutter/score-geschiedenis.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('score/score-geschiedenis.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'Niets gevonden')
 
         url = self.url_geschiedenis + '?zoekterm=xx'

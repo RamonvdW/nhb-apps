@@ -162,7 +162,7 @@
                 <div class="center-align"><i class="material-icons-round medium">history</i></div>
                 <p>Bekijk de wijzigingen / geschiedenis van de scores van een schutter.</p>
             </div>
-            <a href="{% url 'Schutter:score-geschiedenis' %}" class="nhb-klikbare-balk">
+            <a href="{% url 'Score:geschiedenis' %}" class="nhb-klikbare-balk">
                 <div class="card-action center-align">
                     <span class="nhb-klikbare-link">Ga er naartoe</span>
                 </div>
