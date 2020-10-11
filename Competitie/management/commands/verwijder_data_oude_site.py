@@ -7,18 +7,9 @@
 # maak een account HWL van specifieke vereniging, vanaf de commandline
 
 from django.core.management.base import BaseCommand
-from django.utils import timezone
-from BasisTypen.models import BoogType
-from NhbStructuur.models import NhbLid, NhbVereniging
 from Logboek.models import schrijf_in_logboek
 from Competitie.models import DeelcompetitieRonde
-from Schutter.models import SchutterBoog
-from Wedstrijden.models import Wedstrijd, WedstrijdUitslag, WedstrijdenPlan
 from Score.models import Score, ScoreHist
-from decimal import Decimal
-import datetime
-import sys
-import os
 
 
 class Command(BaseCommand):
@@ -72,7 +63,8 @@ class Command(BaseCommand):
                 obj.delete()
                 teller += 1
         # for
-        self.stdout.write("AG's opgeruimd: %s" % teller)
+        if teller > 0:
+            self.stdout.write("AG's opgeruimd: %s" % teller)
 
         activiteit = 'Alle eerder ingelezen data van het oude programma zijn verwijderd'
 

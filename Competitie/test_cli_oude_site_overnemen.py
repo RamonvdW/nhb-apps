@@ -199,7 +199,7 @@ class TestCompetitieCliOudeSiteOvernemen(E2EHelpers, TestCase):
         self.assertTrue("[WARNING] Sla dubbele invoer onder recurve (18m) over: 100002 (scores:" in f2.getvalue())
         self.assertTrue("[WARNING] Verwijder 1 dubbele inschrijvingen" in f2.getvalue())
 
-        self.assertEqual(Score.objects.filter(is_ag=True).count(), 1)
+        self.assertEqual(Score.objects.filter(is_ag=True).count(), 0)
         self.assertEqual(Score.objects.filter(is_ag=False).count(), 4)
         self.assertEqual(ScoreHist.objects.count(), 4)
 
