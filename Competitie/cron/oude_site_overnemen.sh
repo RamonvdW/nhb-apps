@@ -101,15 +101,17 @@ download_25
 # move from Competitie/cron/ to top-dir
 cd ../..
 
+# bepaal de vorige oude_site.json voordat de nieuwe aangemaakt wordt
+export LC_ALL=C
+PREV_JSON=$(ls -1dt $SPOOLDIR/202*/oude_site.json | head -1)
+echo "[INFO] Previous JSON=$PREV_JSON" >> "$LOG"
+
 # convert to json
 echo "[INFO] Convert downloaded html to json" >> "$LOG"
 ./manage.py oude_site_maak_json "$DIR" &>> "$LOG"
 NEW_JSON="$DIR/oude_site.json"
 
 # kijk of deze anders is dan de vorige json
-export LC_ALL=C
-PREV_JSON=$(ls -1dt $SPOOLDIR/2020*/oude_site.json | head -1)
-echo "[INFO] Previous JSON=$PREV_JSON" >> "$LOG"
 cmp "$PREV_JSON" "$NEW_JSON" &>> "$LOG"
 CMP_RES=$?
 if [ $CMP_RES -eq 0 ]
