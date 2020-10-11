@@ -313,11 +313,12 @@ class Command(BaseCommand):
             # en deze altijd afwijkend is
             if waarde != score.waarde and aantal_scores < 3:
                 self._roep_warning(
-                    '[WARNING] Verschil in AG voor nhbnr %s (%sm): bekend=%.3f, in uitslag=%.3f' % (
+                    '[WARNING] Verschil in AG voor nhbnr %s (%sm): bekend=%.3f, in uitslag=%.3f bij %s scores' % (
                                 schutterboog.nhblid.nhb_nr,
                                 self._afstand,
                                 score.waarde / 1000,
-                                waarde / 1000))
+                                waarde / 1000),
+                                aantal_scores)
 
         return score
 

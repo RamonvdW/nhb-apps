@@ -145,9 +145,12 @@ class Command(BaseCommand):
 
     def _read_html(self, fpath, data):
         try:
-            html = open(fpath, "r").read()
+            html = open(fpath, "r", encoding='utf-8').read()
         except FileNotFoundError:
-            self.stdout.write('[ERROR] Failed to open %s' % fpath)
+            self.stdout.write('[ERROR] Failed to open %s' % repr(fpath))
+            self._count_errors += 1
+        except UnicodeDecodeError as exc:
+            self.stdout.write('[ERROR] Leesfout %s: %s' % (repr(fpath), str(exc)))
             self._count_errors += 1
         else:
             if self._verbose:
