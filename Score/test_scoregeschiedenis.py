@@ -9,13 +9,77 @@ from BasisTypen.models import BoogType
 from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
 from Overig.e2ehelpers import E2EHelpers
 from Functie.models import maak_functie
+from Schutter.models import SchutterBoog
+from Score.models import Score, ScoreHist, SCORE_WAARDE_VERWIJDERD
+from Wedstrijden.models import Wedstrijd, WedstrijdUitslag
 from .models import aanvangsgemiddelde_opslaan
-from Schutter.models import SchutterBoog, SchutterVoorkeuren
 import datetime
 
 
 class TestScoreGeschiedenis(E2EHelpers, TestCase):
     """ unit tests voor de Schutter applicatie, module Voorkeuren """
+
+    def _maak_uitslag(self, schutterboog):
+        # maak 2x wedstrijd + uitslag + score voor deze schutterboog, met geschiedenis
+        uur_00 = datetime.time(hour=0)
+        uur_18 = datetime.time(hour=18)
+        uur_19 = datetime.time(hour=19)
+        uur_22 = datetime.time(hour=22)
+
+        uitslag18 = WedstrijdUitslag(max_score=300,
+                                     afstand_meter=18)
+        uitslag18.save()
+
+        uitslag25 = WedstrijdUitslag(max_score=250,
+                                     afstand_meter=25)
+        uitslag25.save()
+
+        Wedstrijd(beschrijving='Test wedstrijdje 18m',
+                  datum_wanneer=datetime.date(year=2020, month=10, day=10),
+                  tijd_begin_aanmelden=uur_18,
+                  tijd_begin_wedstrijd=uur_19,
+                  tijd_einde_wedstrijd=uur_22,
+                  uitslag=uitslag18,
+                  vereniging=self.nhbver1).save()
+
+        Wedstrijd(beschrijving='Test wedstrijdje 25m',
+                  datum_wanneer=datetime.date(year=2020, month=10, day=11),
+                  tijd_begin_aanmelden=uur_00,
+                  tijd_begin_wedstrijd=uur_00,
+                  tijd_einde_wedstrijd=uur_00,
+                  uitslag=uitslag25).save()
+
+        score = Score(schutterboog=schutterboog,
+                      afstand_meter=18,
+                      waarde=260)
+        score.save()
+        ScoreHist(score=score,
+                  oude_waarde=0,
+                  nieuwe_waarde=290,
+                  door_account=self.account_hwl).save()
+        ScoreHist(score=score,
+                  oude_waarde=290,
+                  nieuwe_waarde=260,
+                  door_account=self.account_hwl).save()
+        uitslag18.scores.add(score)
+
+        score = Score(schutterboog=schutterboog,
+                      afstand_meter=25,
+                      waarde=234)
+        score.save()
+        ScoreHist(score=score,
+                  oude_waarde=SCORE_WAARDE_VERWIJDERD,
+                  nieuwe_waarde=234,
+                  door_account=self.account_hwl).save()
+        ScoreHist(score=score,
+                  oude_waarde=0,
+                  nieuwe_waarde=SCORE_WAARDE_VERWIJDERD,
+                  door_account=self.account_hwl).save()
+        ScoreHist(score=score,
+                  oude_waarde=0,
+                  nieuwe_waarde=1,
+                  door_account=self.account_hwl).save()
+        uitslag25.scores.add(score)
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -52,16 +116,23 @@ class TestScoreGeschiedenis(E2EHelpers, TestCase):
         self.nhblid1 = lid
 
         self.boog_r = BoogType.objects.get(afkorting='R')
+        self.boog_c = BoogType.objects.get(afkorting='C')
 
-        # maak een schutterboog aan
+        # maak 2 schutterboog aan
+        schutterboog = SchutterBoog(nhblid=lid, boogtype=self.boog_c, voor_wedstrijd=True)
+        schutterboog.save()
+        self.schutterboog_100001c = schutterboog
+
         schutterboog = SchutterBoog(nhblid=lid, boogtype=self.boog_r, voor_wedstrijd=True)
         schutterboog.save()
-        self.schutterboog_100001 = schutterboog
+        self.schutterboog_100001r = schutterboog
 
         # maak een AG aan
         aanvangsgemiddelde_opslaan(schutterboog, 18, 9.123, None, 'test melding')
 
         aanvangsgemiddelde_opslaan(schutterboog, 25, 9.251, self.account_hwl, 'test melding')
+
+        self._maak_uitslag(schutterboog)
 
         self.url_geschiedenis = '/score/geschiedenis/'
 

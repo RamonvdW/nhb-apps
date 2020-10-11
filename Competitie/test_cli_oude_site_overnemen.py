@@ -179,9 +179,32 @@ class TestCompetitieCliOudeSiteOvernemen(E2EHelpers, TestCase):
                                     plan=plan)
         ronde.save()
 
+        # maak een AG die opgeruimd moet worden
+        Score(schutterboog=self.schutterboog_100002,
+              is_ag=True,
+              waarde=1000,
+              afstand_meter=18).save()
+
+        # maak er nog een met een ScoreHist, die moet dus niet opgeruimd worden
+        score = Score(schutterboog=self.schutterboog_100002,
+                      is_ag=True,
+                      waarde=1000,
+                      afstand_meter=25)
+        score.save()
+        ScoreHist(score=score,
+                  nieuwe_waarde=1000,
+                  oude_waarde=999,
+                  notitie="Gewoon een testje").save()
+
         f1 = io.StringIO()
         f2 = io.StringIO()
         management.call_command('verwijder_data_oude_site', stderr=f1, stdout=f2)
+        self.assertTrue("AG's opgeruimd: 1" in f2.getvalue())
+
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('verwijder_data_oude_site', stderr=f1, stdout=f2)
+        self.assertTrue("AG's opgeruimd" not in f2.getvalue())
 
     def test_bepaal_1(self):
         self.assertEqual(Score.objects.count(), 0)
