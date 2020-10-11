@@ -317,8 +317,8 @@ class Command(BaseCommand):
                                 schutterboog.nhblid.nhb_nr,
                                 self._afstand,
                                 score.waarde / 1000,
-                                waarde / 1000),
-                                aantal_scores)
+                                waarde / 1000,
+                                aantal_scores))
 
         return score
 
