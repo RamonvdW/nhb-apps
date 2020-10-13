@@ -6,7 +6,7 @@
 
 # import the data van de oude site die opgeslagen staat in de .json file
 
-from django.utils import timezone
+from django.utils.timezone import make_aware
 from django.core.management.base import BaseCommand
 from BasisTypen.models import BoogType
 from NhbStructuur.models import NhbLid, NhbVereniging
@@ -76,7 +76,10 @@ class Command(BaseCommand):
         if msg not in self._warnings:
             self._warnings.append(msg)
             self._count_warnings += 1
-            self.stdout.write(msg)
+            self.stdout.write('[WARNING] ' + msg)
+
+    def _roep_info(self, msg):
+        self.stdout.write('[INFO] ' + msg)
 
     def _prep_caches(self):
         # bouw caches om herhaaldelijke database toegang te voorkomen, voor performance
@@ -135,11 +138,11 @@ class Command(BaseCommand):
             self._cache_ag_score[tup] = obj
         # for
 
-        for hist in(ScoreHist
-                    .objects
-                    .select_related('score', 'score__schutterboog')
-                    .filter(score__is_ag=False,
-                            notitie__startswith="Importeer scores van uitslagen.handboogsport.nl voor ronde ")):
+        for hist in (ScoreHist
+                     .objects
+                     .select_related('score', 'score__schutterboog')
+                     .filter(score__is_ag=False,
+                             notitie__startswith="Importeer scores van uitslagen.handboogsport.nl voor ronde ")):
             ronde = int(hist.notitie[-1])
             score = hist.score
             tup = (str(score.afstand_meter), score.schutterboog.pk)
@@ -250,21 +253,24 @@ class Command(BaseCommand):
 
         if d1.year == d2.year and d1.month == d2.month and d1.day == d2.day:
             # weekday = 0..6, waarbij 0=maandag
-            wedstrijd.datum_wanneer = self._import_when - datetime.timedelta(days=self._import_when.weekday())
+            wanneer = self._import_when - datetime.timedelta(days=self._import_when.weekday())
+            wedstrijd.datum_wanneer = datetime.date(year=wanneer.year, month=wanneer.month, day=wanneer.day)
             wedstrijd.save()
 
             ronde = self._wedstrijd2ronde[wedstrijd.pk]
             ronde.week_nr = self._import_when.isocalendar()[1]
             ronde.save()
 
-            self.stdout.write('[INFO] Datum van wedstrijd %s aangepast naar %s in week %s' % (wedstrijd.beschrijving, str(wedstrijd.datum_wanneer).split(' ')[0], ronde.week_nr))
+            self._roep_info('Datum van wedstrijd %s aangepast naar %s in week %s' % (
+                                repr(wedstrijd.beschrijving), wedstrijd.datum_wanneer, ronde.week_nr))
 
     def _selecteer_klasse(self, beschrijving):
         tup = (self._comp.pk, beschrijving.lower())
         try:
             self._klasse = self._cache_klasse[tup]
         except KeyError:
-            self.stderr.write('[ERROR] Kan wedstrijdklasse %s niet vinden (competitie %s)' % (repr(beschrijving), self._comp))
+            self.stderr.write('[ERROR] Kan wedstrijdklasse %s niet vinden (competitie %s)' % (
+                                  repr(beschrijving), self._comp))
             self._count_errors += 1
 
     def _vind_schutterboog(self, lid):
@@ -313,7 +319,7 @@ class Command(BaseCommand):
             # en deze altijd afwijkend is
             if waarde != score.waarde and aantal_scores < 3:
                 self._roep_warning(
-                    '[WARNING] Verschil in AG voor nhbnr %s (%sm): bekend=%.3f, in uitslag=%.3f bij %s scores' % (
+                    'Verschil in AG voor nhbnr %s (%sm): bekend=%.3f, in uitslag=%.3f bij %s scores' % (
                                 schutterboog.nhblid.nhb_nr,
                                 self._afstand,
                                 score.waarde / 1000,
@@ -413,19 +419,20 @@ class Command(BaseCommand):
             for afkorting in ('BB', 'IB', 'LB'):
                 tup = tuple([self._afstand, nhb_nr, afkorting] + scores)
                 if tup in self._ingelezen:
-                    self._roep_warning('[WARNING] Sla dubbele invoer onder recurve (%sm) over: %s (scores: %s)' % (
-                                        self._afstand, nhb_nr, ",".join([str(score) for score in scores])))
+                    self._roep_info('Sla dubbele invoer onder recurve (%sm) over: %s (scores: %s)' % (
+                                    self._afstand, nhb_nr, ",".join([str(score) for score in scores])))
                     self._verwijder.append(nhb_nr)
                     return
 
         try:
             lid = self._cache_nhblid[nhb_nr]
         except KeyError:
-            self._roep_warning('[WARNING] Kan lid %s niet vinden' % nhb_nr)
+            self._roep_warning('Kan lid %s niet vinden' % nhb_nr)
             return
 
         if naam != lid.volledige_naam_str:
-            self._roep_warning('[WARNING] Verschil in lid %s naam: bekend=%s, oude programma=%s' % (lid.nhb_nr, lid.volledige_naam_str, naam))
+            self._roep_info('Verschil in lid %s naam: bekend=%s, oude programma=%s' % (
+                                lid.nhb_nr, lid.volledige_naam_str, naam))
 
         aantal_scores = len(scores)
         while aantal_scores > 0 and scores[aantal_scores - 1] == 0:
@@ -435,7 +442,8 @@ class Command(BaseCommand):
         if not lid.bij_vereniging:
             # onderdruk deze melding zolang er geen scores zijn
             if aantal_scores > 0:
-                self._roep_warning('[WARNING] Lid %s heeft %s scores maar geen vereniging en wordt dus niet ingeschreven' % (nhb_nr, aantal_scores))
+                self._roep_warning('Lid %s heeft %s scores maar geen vereniging en wordt dus niet ingeschreven' % (
+                                       nhb_nr, aantal_scores))
             return
 
         if str(lid.bij_vereniging.nhb_nr) != ver_nr:
@@ -443,7 +451,8 @@ class Command(BaseCommand):
             try:
                 lid_ver = NhbVereniging.objects.get(nhb_nr=ver_nr)
             except NhbVereniging.DoesNotExist:
-                self.stderr.write('[ERROR] Vereniging %s is niet bekend; kan lid %s niet inschrijven' % (ver_nr, nhb_nr))
+                self.stderr.write('[ERROR] Vereniging %s is niet bekend; kan lid %s niet inschrijven' % (
+                                      ver_nr, nhb_nr))
                 self._count_errors += 1
                 return
         else:
@@ -463,7 +472,7 @@ class Command(BaseCommand):
                 klasse_min_ag = int(self._klasse.min_ag * 1000)
                 if score_ag.waarde < klasse_min_ag:
                     self._roep_warning(
-                        '[WARNING] schutter %s heeft te laag AG (%.3f) voor klasse %s' % (
+                        'Schutter %s heeft te laag AG (%.3f) voor klasse %s' % (
                               nhb_nr, score_ag.waarde / 1000, self._klasse))
 
             self._uitslag_opslaan(deelcomp, inschrijving, scores)
@@ -525,7 +534,7 @@ class Command(BaseCommand):
                     .all())
 
             if objs.count() > 0:
-                self._roep_warning('[WARNING] Verwijder %s dubbele inschrijvingen (%sm)' % (objs.count(), afstand))
+                self._roep_info('Verwijder %s dubbele inschrijvingen (%sm)' % (objs.count(), afstand))
                 objs.delete()
         # for
 
@@ -536,13 +545,14 @@ class Command(BaseCommand):
         self._ingelezen = list()
 
     def _lees_json(self, pad):
-        self.stdout.write('[INFO] Inladen: %s' % pad)
+        self._roep_info('Inladen: %s' % pad)
 
         # filename: YYYYMMDD_HHMMSS_uitslagen
         spl = pad.split('/')
         grabbed_at = spl[-1][:15]
         import_when = datetime.datetime.strptime(grabbed_at, '%Y%m%d_%H%M%S')
-        self._import_when = import_when.replace(tzinfo=timezone.now().tzinfo)
+        self._import_when = make_aware(import_when)
+        # self.stdout.write('[DEBUG] import_when=%s' % self._import_when)
 
         json_file = os.path.join(pad, self.JSON_FILE)
         with open(json_file, 'r') as f:
@@ -552,6 +562,7 @@ class Command(BaseCommand):
             self._afstand = afstand
             self._comp = Competitie.objects.get(afstand=afstand)
             self._maandag_wk37 = datetime.datetime.strptime("%s-W%d-1" % (self._comp.begin_jaar, 37), "%G-W%V-%u")
+            self._maandag_wk37 = make_aware(self._maandag_wk37)
 
             self._prep_regio2deelcomp_regio2ronde2uitslag()
 

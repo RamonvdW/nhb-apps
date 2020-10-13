@@ -215,19 +215,19 @@ class TestCompetitieCliOudeSiteOvernemen(E2EHelpers, TestCase):
         management.call_command('oude_site_overnemen', self.dir_testfiles1, '100', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
-        self.assertTrue("[WARNING] schutter 100001 heeft te laag AG (9.022) voor klasse Recurve klasse 2 (9.500)" in f2.getvalue())
+        self.assertTrue("[WARNING] Schutter 100001 heeft te laag AG (9.022) voor klasse Recurve klasse 2 (9.500)" in f2.getvalue())
         self.assertTrue("[WARNING] Kan lid 100042 niet vinden" in f2.getvalue())
         self.assertTrue("[WARNING] Kan lid 990000 niet vinden" in f2.getvalue())
-        self.assertTrue("[WARNING] Verschil in lid 100004 naam: bekend=Juf de Schutter, oude programma=Juf de Schytter" in f2.getvalue())
-        self.assertTrue("[WARNING] Sla dubbele invoer onder recurve (18m) over: 100002 (scores:" in f2.getvalue())
-        self.assertTrue("[WARNING] Verwijder 1 dubbele inschrijvingen" in f2.getvalue())
+        self.assertTrue("[INFO] Verschil in lid 100004 naam: bekend=Juf de Schutter, oude programma=Juf de Schytter" in f2.getvalue())
+        self.assertTrue("[INFO] Sla dubbele invoer onder recurve (18m) over: 100002 (scores:" in f2.getvalue())
+        self.assertTrue("[INFO] Verwijder 1 dubbele inschrijvingen" in f2.getvalue())
 
         self.assertEqual(Score.objects.filter(is_ag=True).count(), 0)
         self.assertEqual(Score.objects.filter(is_ag=False).count(), 4)
         self.assertEqual(ScoreHist.objects.count(), 4)
 
         hist = ScoreHist.objects.all()[0]
-        self.assertEqual(str(hist.when), '2020-09-29 22:00:00+00:00')
+        self.assertEqual(str(hist.when), '2020-09-29 20:00:00+00:00')       # TODO: test gevoelig voor timezone?
 
         # nog een keer, want dan zijn de uitslagen er al (extra coverage)
         f1 = io.StringIO()
