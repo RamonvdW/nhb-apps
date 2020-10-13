@@ -12,9 +12,12 @@
 <h4>Inschrijfmethodes Regiocompetitie</h4>
 <p>De website kent 3 inschrijfmethodes:</p>
 <p></p>
-<p>1) Schutter geeft beschikbaarheid op</p>
-<p>2) Wedstrijdklasse op accommodatie</p>
-<p>3) Voorkeur weekdagen</p>
+<ol style="padding-left: 20px">
+<li>Schutter geeft beschikbaarheid op</li>
+<li>Wedstrijdklasse op accommodatie</li>
+<li>Voorkeur weekdagen</li>
+</ol>
+<p></p>
 <p></p>
 <p><h4>Inschrijf methode 1</h4></p>
 <p></p>
@@ -29,11 +32,13 @@
 <p><h4>Inschrijf methode 3</h4></p>
 <p></p>
 <p>De schutter geeft bij het aanmelden voor de regiocompetitie op welke dagdelen de voorkeur hebben:</p>
-<p>- Geen voorkeur</p>
-<p>- 's Avonds</p>
-<p>- Weekend</p>
-<p>- Zaterdag</p>
-<p>- Zondag</p>
+<ul style="padding-left: 20px">
+<li style="list-style-type: disc; padding-left: 0px">Geen voorkeur</li>
+<li style="list-style-type: disc; padding-left: 0px">'s Avonds</li>
+<li style="list-style-type: disc; padding-left: 0px">Weekend</li>
+<li style="list-style-type: disc; padding-left: 0px">Zaterdag</li>
+<li style="list-style-type: disc; padding-left: 0px">Zondag</li>
+</ul>
 <p></p>
 <p>De RCL krijgt het overzicht hoeveel schutters van elke vereniging bijvoorbeeld 's Avonds willen schieten. Om overbelasting van een accommodatie te voorkomen deelt de RCL quota-plaatsen uit aan de verenigingen voor elke wedstrijd. De verenigingen vergeven plaatsen aan de schutters.</p>
 <p></p>
