@@ -208,13 +208,17 @@ class TussenstandRegioView(TemplateView):
                       .order_by('klasse__indiv__volgorde', self.order_gemiddelde))
 
         klasse = -1
+        rank = 0
         for deelnemer in deelnemers:
             deelnemer.break_klasse = (klasse != deelnemer.klasse.indiv.volgorde)
             if deelnemer.break_klasse:
                 deelnemer.klasse_str = deelnemer.klasse.indiv.beschrijving
+                rank = 0
             klasse = deelnemer.klasse.indiv.volgorde
 
+            rank += 1
             lid = deelnemer.schutterboog.nhblid
+            deelnemer.rank = rank
             deelnemer.naam_str = "[%s] %s" % (lid.nhb_nr, lid.volledige_naam())
             deelnemer.ver_str = str(deelnemer.bij_vereniging)
         # for
