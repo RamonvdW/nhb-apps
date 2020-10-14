@@ -82,19 +82,23 @@
     {
         let el = document.querySelector('#datum1');
         M.Datepicker.init(el, { defaultDate: new Date("{{ competitie.datum1|date:'Y-m-d' }}"),
-                                setDefaultDate: true });
+                                setDefaultDate: true,
+                                yearRange: [{{  competitie.begin_jaar }}, {{ competitie.begin_jaar }} + 1]});
 
         el = document.querySelector('#datum2');
         M.Datepicker.init(el, { defaultDate: new Date("{{ competitie.datum2|date:'Y-m-d' }}"),
-                                setDefaultDate: true });
+                                setDefaultDate: true,
+                                yearRange: [{{  competitie.begin_jaar }}, {{ competitie.begin_jaar }} + 1]});
 
         el = document.querySelector('#datum3');
         M.Datepicker.init(el, { defaultDate: new Date("{{ competitie.datum3|date:'Y-m-d' }}"),
-                                setDefaultDate: true });
+                                setDefaultDate: true,
+                                yearRange: [{{  competitie.begin_jaar }}, {{ competitie.begin_jaar }} + 1]});
 
         el = document.querySelector('#datum4');
         M.Datepicker.init(el, { defaultDate: new Date("{{ competitie.datum4|date:'Y-m-d' }}"),
-                                setDefaultDate: true });
+                                setDefaultDate: true,
+                                yearRange: [{{  competitie.begin_jaar }}, {{ competitie.begin_jaar }} + 1]});
     })
 </script>
 
