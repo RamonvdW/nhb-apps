@@ -199,7 +199,7 @@ class DeelCompetitie(models.Model):
     # LET OP: leeg = alles toegestaan!
     toegestane_dagdelen = models.CharField(max_length=20, default='', blank=True)
 
-    # TODO: VSG/Vast, etc.
+    # FUTURE: VSG/Vast, etc.
 
     def __str__(self):
         """ geef een tekstuele afkorting van dit object, voor in de admin interface """

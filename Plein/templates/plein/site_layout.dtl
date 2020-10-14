@@ -158,7 +158,6 @@
                 M.Sidenav.init(elems, {});
 
                 // accordeons
-                // TODO: defaults statisch aanpassen
                 const options = { inDuration: 100,    // default is 300
                                   outDuration: 100    // default is 300
                                 };

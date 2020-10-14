@@ -473,7 +473,7 @@ def functie_expandeer_rol(functie_cache, nhbver_cache, rol_in, functie_in):
                     yield Rollen.ROL_HWL, obj.pk
             # for
 
-        # TODO: is SEC maar HWL gewenst?
+        # TODO: is SEC naar HWL gewenst?
         if functie_in.rol == 'SEC':
             # secretaris mag HWL worden, binnen de vereniging
             for pk, obj in functie_cache.items():
