@@ -18,14 +18,14 @@ from Plein.menu import menu_dynamics
 from .models import SchutterVoorkeuren, SchutterBoog
 
 
-TEMPLATE_INSCHRIJVEN = 'schutter/bevestig-aanmelden.dtl'
+TEMPLATE_AANMELDEN = 'schutter/bevestig-aanmelden.dtl'
 
 
-class RegiocompetitieInschrijvenBevestigView(UserPassesTestMixin, TemplateView):
+class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
 
-    """ Via deze view kan een schutter zich inschrijven voor een competitie """
+    """ Via deze view kan een schutter zich aanmelden voor een competitie """
 
-    template_name = TEMPLATE_INSCHRIJVEN
+    template_name = TEMPLATE_AANMELDEN
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -133,7 +133,7 @@ class RegiocompetitieInschrijvenBevestigView(UserPassesTestMixin, TemplateView):
         context['schutterboog'] = schutterboog
         context['voorkeuren'], _ = SchutterVoorkeuren.objects.get_or_create(nhblid=nhblid)
         # context['voorkeuren_url'] = reverse('Schutter:voorkeuren')
-        context['bevestig_url'] = reverse('Schutter:inschrijven',
+        context['bevestig_url'] = reverse('Schutter:aanmelden',
                                           kwargs={'schutterboog_pk': schutterboog.pk,
                                                   'deelcomp_pk': deelcomp.pk})
 
@@ -157,7 +157,7 @@ class RegiocompetitieInschrijvenBevestigView(UserPassesTestMixin, TemplateView):
         return context
 
 
-class RegiocompetitieInschrijvenView(View):
+class RegiocompetitieAanmeldenView(View):
 
     """ Deze class wordt gebruikt om een schutterboog in te schrijven voor een regiocompetitie
         methode 1 / 2 : direct geaccepteerd
@@ -166,7 +166,7 @@ class RegiocompetitieInschrijvenView(View):
     """
     def post(self, request, *args, **kwargs):
         """ Deze functie wordt aangeroepen als de schutter op zijn profiel pagina
-            de knop Inschrijven gebruikt voor een specifieke regiocompetitie en boogtype.
+            de knop Aanmelden gebruikt voor een specifieke regiocompetitie en boogtype.
         """
         # voorkom misbruik: ingelogd als niet geblokkeerd nhblid vereist
         nhblid = None
@@ -295,7 +295,7 @@ class RegiocompetitieInschrijvenView(View):
         return HttpResponseRedirect(reverse('Schutter:profiel'))
 
 
-class RegiocompetitieUitschrijvenView(View):
+class RegiocompetitieAfmeldenView(View):
 
     def post(self, request, *args, **kwargs):
         """ Deze functie wordt aangeroepen als de schutter op zijn profiel pagina

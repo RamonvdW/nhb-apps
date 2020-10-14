@@ -123,7 +123,7 @@
                             {% if deelcomp.is_ingeschreven %}
                                 <td {% if deelcomp.boog_niet_meer %}class="red-text"{% else %}class="green-text"{% endif %}>Je bent ingeschreven</td>
                                 <td>
-                                    <form method="post" action="{{ deelcomp.url_uitschrijven }}">
+                                    <form method="post" action="{{ deelcomp.url_afmelden }}">
                                         {% csrf_token %}
                                         <input class="btn-nhb-blauw" type="submit" value="Uitschrijven">
                                     </form>
@@ -131,7 +131,7 @@
                             {% else %}
                                 <td>Aanmelden kan tot {{ deelcomp.competitie.einde_aanmeldingen }}</td>
                                 <td>
-                                    <a class="btn-nhb-blauw" href="{{ deelcomp.url_inschrijven }}">Aanmelden</a>
+                                    <a class="btn-nhb-blauw" href="{{ deelcomp.url_aanmelden }}">Aanmelden</a>
                                 </td>
                             {% endif %}
                         {% endif %}

@@ -54,21 +54,21 @@
 <div class="row">
 
     <!-- leden aanmelden voor de competitie -->
-    {% if toon_inschrijven %}
+    {% if toon_aanmelden %}
         {% for comp in competities %}
             <div class="card">
                 {% if comp.fase < 'B' %}
                     <div class="card-content">
                         <div class="card-title center-align grey-text">Aanmelden {{ comp.afstand }}m</div>
                         <div class="center-align"><img src="{{ comp.icon }}" height="60" alt="logo" style="opacity: 0.5"></div>
-                        <p>Inschrijving voor de <b>{{ comp.beschrijving }}</b> opent op {{ comp.begin_aanmeldingen }}.</p>
+                        <p>Aanmelden voor de <b>{{ comp.beschrijving }}</b> opent op {{ comp.begin_aanmeldingen }}.</p>
                     </div>
                     <div class="card-action center-align">
                         <span class="grey-text">(nog niet open)</span>
                     </div>
                 {% else %}
                     <div class="card-content">
-                        <div class="card-title center-align">Inschrijven {{ comp.afstand }}m</div>
+                        <div class="card-title center-align">Aanmelden {{ comp.afstand }}m</div>
                         <div class="center-align"><img src="{{ comp.icon }}" height="60" alt="logo"></div>
                         <p>Leden aanmelden voor de <b>{{ comp.beschrijving }}</b>.</p>
                     </div>
@@ -82,7 +82,7 @@
         {% endfor %}
     {% endif %}
 
-    <!-- leden uitschrijven uit de competitie -->
+    <!-- leden ingeschreven voor de competitie -->
     {% for deelcomp in deelcomps %}
         <div class="card">
             <div class="card-content">

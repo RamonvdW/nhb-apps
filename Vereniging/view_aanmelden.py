@@ -443,8 +443,8 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
         context['deelcomp'] = deelcomp = self.deelcomp
 
         if rol_nu == Rollen.ROL_HWL:
-            context['uitschrijven_url'] = reverse('Vereniging:leden-ingeschreven', kwargs={'deelcomp_pk': deelcomp.pk})
-            context['mag_uitschrijven'] = True
+            context['afmelden_url'] = reverse('Vereniging:leden-ingeschreven', kwargs={'deelcomp_pk': deelcomp.pk})
+            context['mag_afmelden'] = True
 
         methode = deelcomp.inschrijf_methode
         if methode == INSCHRIJF_METHODE_3:

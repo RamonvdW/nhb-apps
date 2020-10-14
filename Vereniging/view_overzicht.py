@@ -40,7 +40,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
         context['nhb_ver'] = functie_nu.nhb_ver
 
-        context['toon_inschrijven'] = (rol_nu != Rollen.ROL_WL)
+        context['toon_aanmelden'] = (rol_nu != Rollen.ROL_WL)
 
         if functie_nu.nhb_ver.wedstrijdlocatie_set.count() > 0:
             locatie = functie_nu.nhb_ver.wedstrijdlocatie_set.all()[0]
@@ -74,7 +74,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                 comp.icon = static('plein/badge_nhb_25m1p.png')
         # for
 
-        # deelcomp is nodig voor uitschrijven
+        # deelcomp is nodig voor afmelden
         for deelcomp in context['deelcomps']:
             deelcomp.competitie.zet_fase()
             if deelcomp.competitie.afstand == '18':

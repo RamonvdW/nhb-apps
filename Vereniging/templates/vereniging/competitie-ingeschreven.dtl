@@ -13,21 +13,21 @@
 
 <h4>Ingeschreven</h4>
 
-<form method="post" action="{{ aanmelden_url }}">
+<form method="post" action="{{ afmelden_url }}">
     {% csrf_token %}
 
     <p>Deze pagina toont de leden van vereniging [{{ nhb_ver.nhb_nr }}] {{ nhb_ver.naam }} te {{ nhb_ver.plaats }} die ingeschreven zijn voor de <b>{{ deelcomp }}</b>.</p>
 
-    {% if mag_uitschrijven %}
-        <p>Als hoofdwedstrijdleider kan je leden uitschrijven: zet een vinkje bij de naam en druk dan rode knop in de rechter onderhoek.</p>
+    {% if mag_afmelden %}
+        <p>Als hoofdwedstrijdleider kan je leden afmelden: zet een vinkje bij de naam en druk dan rode knop in de rechter onderhoek.</p>
     {% else %}
-        <p>De hoofdwedstrijdleider kan leden uitschrijven.</p>
+        <p>De hoofdwedstrijdleider kan leden afmelden.</p>
     {% endif %}
 
     <table class="white" id="table1">
         <thead>
             <tr>        <!-- filter veld -->
-                {% if mag_uitschrijven %}
+                {% if mag_afmelden %}
                     <td><!-- kolom voor vinkje --></td>
                 {% endif %}
 
@@ -38,7 +38,7 @@
                 <td colspan="3"></td>
             </tr>
             <tr>
-                {% if mag_uitschrijven %}
+                {% if mag_afmelden %}
                     <th><!-- kolom voor vinkje --></th>
                 {% endif %}
 
@@ -58,13 +58,13 @@
 
         {% for obj in object_list %}
         <tr>
-            {% if mag_uitschrijven %}
-            <td class="center-align">
-                <label>
-                    <input type="checkbox" name="{{ obj.check }}" class="filled-in">
-                    <span><!-- noodzakelijk --></span>
-                </label>
-            </td>
+            {% if mag_afmelden %}
+                <td class="center-align">
+                    <label>
+                        <input type="checkbox" name="{{ obj.check }}" class="filled-in">
+                        <span><!-- noodzakelijk --></span>
+                    </label>
+                </td>
             {% endif %}
 
             <td>{{ obj.klasse.indiv.beschrijving }}</td>
@@ -82,9 +82,9 @@
         {% endfor %}
     </table>
 
-    {% if mag_uitschrijven %}
+    {% if mag_afmelden %}
         <div class="fixed-action-btn">
-            <input class="btn-nhb-rood" type="submit" value="Geselecteerde schutters uitschrijven">
+            <input class="btn-nhb-rood" type="submit" value="Geselecteerde leden afmelden">
         </div>
     {% endif %}
 </form>

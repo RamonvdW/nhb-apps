@@ -620,7 +620,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
                 self.assertFalse(obj.inschrijf_voorkeur_team)
         # for
 
-    def test_uitschrijven(self):
+    def test_afmelden(self):
         # login als HWL
         self.e2e_login_and_pass_otp(self.account_hwl)
         self.e2e_wissel_naar_functie(self.functie_hwl)
