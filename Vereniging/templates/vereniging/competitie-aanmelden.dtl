@@ -6,17 +6,17 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}Inschrijven{% endblock %}
+{% block title %}Aanmelden{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vereniging-leden-inschrijven" %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vereniging-leden-aanmelden" %}
 
-<h4>Inschrijven</h4>
+<h4>Aanmelden</h4>
 
-<form method="post" action="{{ inschrijven_url }}">
+<form method="post" action="{{ aanmelden_url }}">
     {% csrf_token %}
 
-    {% if mag_inschrijven %}
+    {% if mag_aanmelden %}
         <p>Als hoofdwedstrijdleider kan je via deze pagina leden van vereniging [{{ nhb_ver.nhb_nr }}] {{ nhb_ver.naam }} te {{ nhb_ver.plaats }} aanmelden voor de <b>{{ comp.beschrijving }}</b>.</p>
 
         <p>Onderstaande lijst toont alleen leden die ingesteld hebben met welke boog ze schieten. Je kan ze hier bij helpen via het kaartje "voorkeuren leden".</p>
@@ -88,7 +88,7 @@
                     <td colspan="4"></td>
                 </tr>
                 <tr>
-                    <th class="center-align">{% if mag_inschrijven %}<!-- kolom voor vinkje -->{% else %}Aangemeld{% endif %}</th>
+                    <th class="center-align">{% if mag_aanmelden %}<!-- kolom voor vinkje -->{% else %}Aangemeld{% endif %}</th>
                     <th filter="on">NHB nr</th>
                     <th filter="on">Naam</th>
                     <th>Leeftijd {{ tweede_jaar }}</th>
@@ -111,7 +111,7 @@
                         <td><!-- geen aanvangsgemiddelde --></td>
                     {% else %}
                         <td class="center-align">
-                            {% if mag_inschrijven %}
+                            {% if mag_aanmelden %}
                                 <label>
                                     <input type="checkbox" name="{{ obj.check }}" {% if obj.is_aangemeld %}disabled checked{% else %}class="filled-in"{%endif%}>
                                     <span><!-- noodzakelijk --></span>
@@ -148,7 +148,7 @@
                 <td colspan="5"></td>
             </tr>
             <tr>
-                <th class="center-align">{% if mag_inschrijven %}<!-- kolom voor vinkje -->{% else %}Aangemeld{% endif %}</th>
+                <th class="center-align">{% if mag_aanmelden %}<!-- kolom voor vinkje -->{% else %}Aangemeld{% endif %}</th>
                 <th filter="on">NHB nr</th>
                 <th filter="on">Naam</th>
                 <th>Wedstrijdboog</th>
@@ -167,7 +167,7 @@
                     <td><!-- geen aanvangsgemiddelde --></td>
                 {% else %}
                     <td class="center-align">
-                        {% if mag_inschrijven %}
+                        {% if mag_aanmelden %}
                             <label>
                                 <input type="checkbox" name="{{ obj.check }}" {% if obj.is_aangemeld %}disabled checked{% else %}class="filled-in"{%endif%}>
                                 <span><!-- noodzakelijk --></span>
@@ -187,7 +187,7 @@
         {% endfor %}
     </table>
 
-    {% if mag_inschrijven %}
+    {% if mag_aanmelden %}
         <div class="fixed-action-btn">
             <input class="btn-nhb-rood" type="submit" value="Geselecteerde schutters aanmelden">
         </div>

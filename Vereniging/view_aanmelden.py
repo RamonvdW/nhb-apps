@@ -21,18 +21,18 @@ from Score.models import Score
 import copy
 
 
-TEMPLATE_LEDEN_INSCHRIJVEN = 'vereniging/competitie-inschrijven.dtl'
+TEMPLATE_LEDEN_AANMELDEN = 'vereniging/competitie-aanmelden.dtl'
 TEMPLATE_LEDEN_INGESCHREVEN = 'vereniging/competitie-ingeschreven.dtl'
 
 JA_NEE = {False: 'Nee', True: 'Ja'}
 
 
-class LedenInschrijvenView(UserPassesTestMixin, ListView):
+class LedenAanmeldenView(UserPassesTestMixin, ListView):
 
     """ Deze view laat de HWL leden inschrijven voor een competitie """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_LEDEN_INSCHRIJVEN
+    template_name = TEMPLATE_LEDEN_AANMELDEN
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -203,8 +203,8 @@ class LedenInschrijvenView(UserPassesTestMixin, ListView):
         context['comp'] = self.comp
         context['seizoen'] = '%s/%s' % (self.comp.begin_jaar, self.comp.begin_jaar + 1)
         context['tweede_jaar'] = self.comp.begin_jaar + 1
-        context['inschrijven_url'] = reverse('Vereniging:leden-inschrijven', kwargs={'comp_pk': self.comp.pk})
-        context['mag_inschrijven'] = True
+        context['aanmelden_url'] = reverse('Vereniging:leden-aanmelden', kwargs={'comp_pk': self.comp.pk})
+        context['mag_aanmelden'] = True
 
         # bepaal de inschrijfmethode voor deze regio
         mijn_regio = functie_nu.nhb_ver.regio

@@ -129,9 +129,9 @@
                                     </form>
                                 </td>
                             {% else %}
-                                <td>Inschrijven kan tot {{ deelcomp.competitie.einde_aanmeldingen }}</td>
+                                <td>Aanmelden kan tot {{ deelcomp.competitie.einde_aanmeldingen }}</td>
                                 <td>
-                                    <a class="btn-nhb-blauw" href="{{ deelcomp.url_inschrijven }}">Inschrijven</a>
+                                    <a class="btn-nhb-blauw" href="{{ deelcomp.url_inschrijven }}">Aanmelden</a>
                                 </td>
                             {% endif %}
                         {% endif %}
@@ -141,7 +141,7 @@
                         {% elif deelcomp.competitie.fase > 'B' %}
                             <td>De inschrijving is gesloten</td>
                         {% else %}
-                            <td>Inschrijven kan tot {{ deelcomp.competitie.einde_aanmeldingen }}</td>
+                            <td>Aanmelden kan tot {{ deelcomp.competitie.einde_aanmeldingen }}</td>
                         {% endif %}
                         <td><!-- ruimte voor de knop/status --></td>
                     {% endif %}

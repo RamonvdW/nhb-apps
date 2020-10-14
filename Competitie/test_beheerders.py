@@ -113,10 +113,10 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.url_behoefte_bestand = '/competitie/lijst-regiocompetitie/%s/regio-%s/dagdeel-behoefte-als-bestand/'  # comp_pk, regio_pk
 
     def _doe_inschrijven(self, comp):
+
+        url_inschrijven = '/vereniging/leden-aanmelden/competitie/%s/' % comp.pk
+
         # meld een bak leden aan voor de competitie
-
-        url_inschrijven = '/vereniging/leden-inschrijven/competitie/%s/' % comp.pk
-
         self.e2e_wisselnaarrol_bb()
 
         # klassegrenzen vaststellen

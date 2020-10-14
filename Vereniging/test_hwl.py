@@ -145,7 +145,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.url_overzicht = '/vereniging/'
         self.url_ledenlijst = '/vereniging/leden-lijst/'
         self.url_voorkeuren = '/vereniging/leden-voorkeuren/'
-        self.url_inschrijven = '/vereniging/leden-inschrijven/competitie/%s/'    # <comp_pk>
+        self.url_inschrijven = '/vereniging/leden-aanmelden/competitie/%s/'      # <comp_pk>
         self.url_ingeschreven = '/vereniging/leden-ingeschreven/competitie/%s/'  # <deelcomp_pk>
         self.url_schutter_voorkeuren = '/schutter/voorkeuren/%s/'                # <nhblid_pk>
 
@@ -376,7 +376,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/competitie-inschrijven.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/competitie-aanmelden.dtl', 'plein/site_layout.dtl'))
 
         self.assertContains(resp, '<td>Cadet de Jeugd</td>')
         self.assertContains(resp, '<td>14</td>')            # leeftijd 2021
@@ -403,7 +403,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/competitie-inschrijven.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/competitie-aanmelden.dtl', 'plein/site_layout.dtl'))
 
         # nu de POST om een paar leden aan te melden
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
@@ -440,7 +440,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('vereniging/competitie-inschrijven.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/competitie-aanmelden.dtl', 'plein/site_layout.dtl'))
 
         # nu de POST om een paar leden aan te melden met een verkeer dagdeel
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
@@ -498,7 +498,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('vereniging/competitie-inschrijven.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/competitie-aanmelden.dtl', 'plein/site_layout.dtl'))
 
         # probeer aan te melden met een niet-wedstrijd boog
         schutterboog = SchutterBoog.objects.get(nhblid__nhb_nr=self.nhblid_100002.nhb_nr,
@@ -560,7 +560,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('vereniging/competitie-inschrijven.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/competitie-aanmelden.dtl', 'plein/site_layout.dtl'))
 
         # nu de POST om een paar leden aan te melden
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
@@ -600,7 +600,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('vereniging/competitie-inschrijven.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/competitie-aanmelden.dtl', 'plein/site_layout.dtl'))
 
         # nu de POST om een paar leden aan te melden
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
@@ -636,7 +636,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         url = self.url_inschrijven % self.comp_18.pk
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('vereniging/competitie-inschrijven.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/competitie-aanmelden.dtl', 'plein/site_layout.dtl'))
 
         # nu de POST om een paar leden aan te melden
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)

@@ -6,13 +6,13 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}Inschrijven competitie{% endblock %}
+{% block title %}Aanmelden voor de competitie{% endblock %}
 
 {% block pagina %}
 
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="schutter-inschrijven-competitie" %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="schutter-bevestig-aanmelden-competitie" %}
 
-<h4>Inschrijven competitie</h4>
+<h4>Aanmelden voor de competitie</h4>
 
 <p>Via dit formulier kan je je aanmelden voor de <b>{{ deelcomp.competitie.beschrijving }}</b> in jouw regio.</p>
 

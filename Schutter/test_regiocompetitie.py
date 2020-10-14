@@ -140,7 +140,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('schutter/bevestig-inschrijven.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('schutter/bevestig-aanmelden.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'Dutch Target')
 
         resp = self.client.post(self.url_inschrijven % (deelcomp.pk, schutterboog.pk))
@@ -170,7 +170,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('schutter/bevestig-inschrijven.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('schutter/bevestig-aanmelden.dtl', 'plein/site_layout.dtl'))
         self.assertNotContains(resp, 'Dutch Target')
 
         # schakel over naar de 25m1pijl, barebow
@@ -182,7 +182,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('schutter/bevestig-inschrijven.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('schutter/bevestig-aanmelden.dtl', 'plein/site_layout.dtl'))
         self.assertNotContains(resp, 'Dutch Target')
 
         # schrijf in voor de 25m BB, zonder AG
@@ -429,7 +429,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('schutter/bevestig-inschrijven.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('schutter/bevestig-aanmelden.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'Dutch Target')
         self.assertContains(resp, 'Zaterdag')
         self.assertContains(resp, 'Zondag')
@@ -496,7 +496,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('schutter/bevestig-inschrijven.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('schutter/bevestig-aanmelden.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'Dutch Target')
         self.assertContains(resp, 'Zaterdag')
         self.assertContains(resp, 'Zondag')
@@ -545,7 +545,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('schutter/bevestig-inschrijven.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('schutter/bevestig-aanmelden.dtl', 'plein/site_layout.dtl'))
         self.assertNotContains(resp, 'Aspirant')
         self.assertContains(resp, 'Cadet')
 

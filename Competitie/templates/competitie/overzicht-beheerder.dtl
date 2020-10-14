@@ -62,7 +62,7 @@
             <tr>
                 <td {% if obj.fase == 'B' %}class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>B</td>
                 <!-- {{ obj.uiterste_datum_lid }} is 1 augustus om praktische redenen, maar reglement zegt 15 juli -->
-                <td>Open voor inschrijvingen individueel en teams<br>(indien lid voor 15 juli {{ obj.uiterste_datum_lid|date:"Y" }})</td>
+                <td>Open voor aanmelden individueel en teams<br>(indien lid voor 15 juli {{ obj.uiterste_datum_lid|date:"Y" }})</td>
                 <td>
                     {% if obj.fase > 'B' %}
                         <span class="green-text">Afgerond</span>

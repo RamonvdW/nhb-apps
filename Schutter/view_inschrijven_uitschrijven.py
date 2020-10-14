@@ -18,7 +18,7 @@ from Plein.menu import menu_dynamics
 from .models import SchutterVoorkeuren, SchutterBoog
 
 
-TEMPLATE_INSCHRIJVEN = 'schutter/bevestig-inschrijven.dtl'
+TEMPLATE_INSCHRIJVEN = 'schutter/bevestig-aanmelden.dtl'
 
 
 class RegiocompetitieInschrijvenBevestigView(UserPassesTestMixin, TemplateView):
