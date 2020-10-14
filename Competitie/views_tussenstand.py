@@ -214,7 +214,8 @@ class TussenstandRegioView(TemplateView):
                 deelnemer.klasse_str = deelnemer.klasse.indiv.beschrijving
             klasse = deelnemer.klasse.indiv.volgorde
 
-            deelnemer.naam_str = deelnemer.schutterboog.nhblid.volledige_naam()
+            lid = deelnemer.schutterboog.nhblid
+            deelnemer.naam_str = "[%s] %s" % (lid.nhb_nr, lid.volledige_naam())
             deelnemer.ver_str = str(deelnemer.bij_vereniging)
         # for
 
