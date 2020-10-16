@@ -137,7 +137,7 @@ class TussenstandRegioView(TemplateView):
                       .objects
                       .select_related('rayon')
                       .filter(is_administratief=False)
-                      .order_by('rayon__rayon_nr'))
+                      .order_by('rayon__rayon_nr', 'regio_nr'))
 
             context['regio_filters'] = regios
 
