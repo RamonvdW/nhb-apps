@@ -382,8 +382,6 @@ class KlassegrenzenVaststellenView(UserPassesTestMixin, TemplateView):
         return targets2
 
     def _get_queryset(self, afstand):
-        """ called by the template system to get the queryset or list of objects for the template """
-
         # bepaal het jaar waarin de wedstrijdleeftijd bepaald moet worden
         # dit is het huidige jaar + 1
         self.wedstrijdjaar = jaar = 1 + models_bepaal_startjaar_nieuwe_competitie()
@@ -517,7 +515,7 @@ class KlassegrenzenVaststellenView(UserPassesTestMixin, TemplateView):
             comp = objs[0]
 
             if comp.competitieklasse_set.count() != 0:
-                # onverwachts here
+                # onverwachts hier
                 raise Resolver404()
 
             # haal dezelfde data op als voor de GET request
