@@ -62,12 +62,31 @@ class LeeftijdsKlasse(models.Model):
 
 class IndivWedstrijdklasse(models.Model):
     """ definitie van een wedstrijdklasse """
-    buiten_gebruik = models.BooleanField(default=False)     # niet meer gebruiken?
+
+    # klassen die verouderd zijn krijgen worden op deze manier eruit gehaald
+    # zonder dat referenties die nog in gebruik zijn kapot gaan
+    buiten_gebruik = models.BooleanField(default=False)
+
+    # beschrijving om te presenteren, bijvoorbeeld Recurve Junioren Klasse 2
     beschrijving = models.CharField(max_length=80)
+
+    # het boogtype, bijvoorbeeld Recurve
     boogtype = models.ForeignKey(BoogType, on_delete=models.PROTECT)
-    volgorde = models.PositiveIntegerField()                # lager nummer = betere schutters
+
+    # volgende voor gebruik bij het presenteren van een lijst van klassen
+    # lager nummer = betere schutters
+    volgorde = models.PositiveIntegerField()
+
+    # de leeftijdsklassen: aspirant, cadet, junior, senior en mannen/vrouwen
+    # typisch zijn twee klassen: mannen en vrouwen
     leeftijdsklassen = models.ManyToManyField(LeeftijdsKlasse)
-    niet_voor_rk_bk = models.BooleanField()                 # aspirant klassen
+
+    # wedstrijdklasse wel/niet meenemen naar de RK/BK
+    # staat op True voor aspiranten klassen
+    niet_voor_rk_bk = models.BooleanField()
+
+    # is dit bedoeld als klasse onbekend?
+    # bevat typische ook "Klasse Onbekend" in de titel
     is_onbekend = models.BooleanField(default=False)
 
     def __str__(self):
