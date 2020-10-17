@@ -6,12 +6,12 @@
 
 from django.test import TestCase
 from django.core import management
-from django.utils import timezone
 from BasisTypen.models import BoogType
-from Competitie.models import Competitie, DeelCompetitie, DeelcompetitieRonde, RegioCompetitieSchutterBoog, AG_NUL
+from Competitie.models import (Competitie, DeelCompetitie, DeelcompetitieRonde,
+                               RegioCompetitieSchutterBoog, AG_NUL)
 from NhbStructuur.models import NhbRegio, NhbLid, NhbVereniging
 from Schutter.models import SchutterBoog
-from Score.models import Score, ScoreHist, SCORE_WAARDE_VERWIJDERD
+from Score.models import Score, ScoreHist, SCORE_WAARDE_VERWIJDERD, aanvangsgemiddelde_opslaan
 from Wedstrijden.models import Wedstrijd
 from Overig.e2ehelpers import E2EHelpers
 from .models import CompetitieKlasse
@@ -31,6 +31,8 @@ class TestRecordsCliUpdTussenstand(E2EHelpers, TestCase):
         # maak de competitie aan
         self.client.post(self.url_aanmaken)
         self.comp = Competitie.objects.all()[0]
+
+        aanvangsgemiddelde_opslaan(self.schutterboog_100005, 18, 9.500, None, "Test")
 
         # klassegrenzen vaststellen
         resp = self.client.post(self.url_klassegrenzen_vaststellen_18)
@@ -88,10 +90,12 @@ class TestRecordsCliUpdTussenstand(E2EHelpers, TestCase):
         self.client.post(self.url_planning_regio % self.deelcomp_r101.pk)
         self.client.post(self.url_planning_regio % self.deelcomp_r101.pk)
         self.client.post(self.url_planning_regio % self.deelcomp_r101.pk)
+        self.client.post(self.url_planning_regio % self.deelcomp_r101.pk)
+        self.client.post(self.url_planning_regio % self.deelcomp_r101.pk)
 
-        top_pk = DeelcompetitieRonde.objects.latest('pk').pk - 2
+        top_pk = DeelcompetitieRonde.objects.latest('pk').pk - 4
 
-        for nr in (1, 2, 3):
+        for nr in (1, 2, 3, 4, 5):
             # maak een wedstrijd aan (doen voordat de beschrijving aangepast wordt)
             resp = self.client.post(self.url_planning_regio_ronde % top_pk, {})
             self.assertTrue(resp.status_code < 400)
@@ -126,13 +130,9 @@ class TestRecordsCliUpdTussenstand(E2EHelpers, TestCase):
         lid.account = self.account_lid
         lid.save()
         self.lid_100001 = lid
-
-        # maak een schutterboog aan voor het jeugdlid (nodig om aan te melden)
         schutterboog = SchutterBoog(nhblid=self.lid_100001, boogtype=self.boog_r, voor_wedstrijd=True)
         schutterboog.save()
         self.schutterboog_100001 = schutterboog
-
-        self._schrijf_in_voor_competitie(self.deelcomp_r101, [self.schutterboog_100001], 1)
 
         lid = NhbLid()
         lid.nhb_nr = 100002
@@ -147,6 +147,9 @@ class TestRecordsCliUpdTussenstand(E2EHelpers, TestCase):
         lid.account = self.account_jeugdlid
         lid.save()
         self.lid_100002 = lid
+        schutterboog = SchutterBoog(nhblid=self.lid_100002, boogtype=self.boog_r, voor_wedstrijd=True)
+        schutterboog.save()
+        self.schutterboog_100002 = schutterboog
 
         lid = NhbLid()
         lid.nhb_nr = 100003
@@ -171,9 +174,29 @@ class TestRecordsCliUpdTussenstand(E2EHelpers, TestCase):
         lid.bij_vereniging = self.ver
         lid.account = self.e2e_create_account(lid.nhb_nr, lid.email, lid.voornaam)
         lid.save()
+        self.lid_100004 = lid
+        schutterboog = SchutterBoog(nhblid=self.lid_100004, boogtype=self.boog_r, voor_wedstrijd=True)
+        schutterboog.save()
+        self.schutterboog_100004 = schutterboog
+
+        lid = NhbLid()
+        lid.nhb_nr = 100005
+        lid.geslacht = "V"
+        lid.voornaam = "Jans"
+        lid.achternaam = "de Schutter"
+        lid.email = "jufschut@nhb.not"
+        lid.geboorte_datum = datetime.date(year=1977, month=12, day=4)
+        lid.sinds_datum = datetime.date(year=2015, month=7, day=15)
+        lid.bij_vereniging = self.ver
+        lid.account = self.e2e_create_account(lid.nhb_nr, lid.email, lid.voornaam)
+        lid.save()
+        self.lid_100005 = lid
+        schutterboog = SchutterBoog(nhblid=self.lid_100005, boogtype=self.boog_r, voor_wedstrijd=True)
+        schutterboog.save()
+        self.schutterboog_100005 = schutterboog
 
     @staticmethod
-    def _schrijf_in_voor_competitie(deelcomp, schuttersboog, skip):
+    def _schrijf_in_voor_competitie(deelcomp, schuttersboog, skip=1):
         while len(schuttersboog):
             aanmelding = RegioCompetitieSchutterBoog()
             aanmelding.deelcompetitie = deelcomp
@@ -225,8 +248,13 @@ class TestRecordsCliUpdTussenstand(E2EHelpers, TestCase):
         self.e2e_wisselnaarrol_bb()
         self.e2e_check_rol('BB')
 
-        self._maak_competitie_aan()
         self._maak_leden_aan()
+        self._maak_competitie_aan()
+
+        # schrijf de leden in
+        schuttersboog = [self.schutterboog_100001, self.schutterboog_100002,
+                         self.schutterboog_100004, self.schutterboog_100005]
+        self._schrijf_in_voor_competitie(self.deelcomp_r101, schuttersboog)
 
         self.client.logout()
 
@@ -246,8 +274,8 @@ class TestRecordsCliUpdTussenstand(E2EHelpers, TestCase):
         uitslag.scores.add(score)
 
     def test_leeg(self):
-        self.assertEqual(Score.objects.count(), 0)
-        self.assertEqual(ScoreHist.objects.count(), 0)
+        ScoreHist.objects.all().delete()
+        Score.objects.all().delete()
 
         f1 = io.StringIO()
         f2 = io.StringIO()
@@ -369,7 +397,7 @@ class TestRecordsCliUpdTussenstand(E2EHelpers, TestCase):
         self.assertEqual(str(deelnemer.alt_gemiddelde), '4.183')
 
     def test_mix(self):
-        self._maak_import()     # 3 nieuwe rondes
+        self._maak_import()     # 5 nieuwe rondes: 7..11
 
         # schrijf iemand in
         post_params = dict()
@@ -413,7 +441,7 @@ class TestRecordsCliUpdTussenstand(E2EHelpers, TestCase):
         DeelcompetitieRonde.objects.all().delete()
         self.uitslagen = list()
 
-        self._maak_import()     # 3 nieuwe rondes
+        self._maak_import()     # 5 nieuwe rondes: 7..11
 
         # schrijf iemand in
         post_params = dict()
@@ -446,6 +474,75 @@ class TestRecordsCliUpdTussenstand(E2EHelpers, TestCase):
         self.assertEqual(deelnemer.alt_totaal, 0)
         self.assertEqual(deelnemer.alt_laagste_score_nr, 0)
         self.assertEqual(str(deelnemer.alt_gemiddelde), '0.000')
+
+    def test_verplaats(self):
+        # check het verplaatsen van een schutter uit klasse onbekend
+
+        self._maak_import()     # 5 nieuwe rondes: 7..11
+
+        # schrijf een paar mensen in
+        post_params = dict()
+        post_params['lid_100001_boogtype_%s' % self.boog_r.pk] = 'on'
+        post_params['lid_100002_boogtype_%s' % self.boog_r.pk] = 'on'
+        post_params['lid_100004_boogtype_%s' % self.boog_r.pk] = 'on'
+        post_params['lid_100005_boogtype_%s' % self.boog_r.pk] = 'on'
+        resp = self.client.post(self.url_inschrijven % self.comp.pk, post_params)
+        self.assertEqual(resp.status_code, 302)  # 302 = Redirect = succes
+
+        # 100001: 4 scores, gebruik laagste 3
+        # 100002: nog maar 2 scores
+        # 100004: Al in hogere klasse geplaatst
+        # 100005: AG > 0.001
+
+        # verplaats 100004 naar Recurve klasse 4, Senioren Vrouwen
+        # zodat deze straks niet verplaatst hoeft te worden
+        klasse = None
+        for obj in (CompetitieKlasse
+                    .objects
+                    .filter(competitie=self.comp,
+                            indiv__is_onbekend=False,
+                            indiv__boogtype__afkorting=self.boog_r.afkorting)):
+            for lkl in (obj.indiv.leeftijdsklassen
+                        .filter(geslacht='V',
+                                min_wedstrijdleeftijd__gt=20)):
+                klasse = obj
+                break
+            # for
+
+            if klasse:
+                break
+        # for
+
+        deelnemer = RegioCompetitieSchutterBoog.objects.get(schutterboog=self.schutterboog_100004)
+        deelnemer.klasse = klasse
+        deelnemer.save()
+
+        # pas het AG van 100005 aan
+        deelnemer = RegioCompetitieSchutterBoog.objects.get(schutterboog=self.schutterboog_100005)
+        deelnemer.aanvangsgemiddelde = 9.000
+        deelnemer.save()
+
+        # maak een paar score + scorehist
+        self._score_opslaan(self.uitslagen[7], self.schutterboog_100001, 123)
+        self._score_opslaan(self.uitslagen[8], self.schutterboog_100001, 124)
+        self._score_opslaan(self.uitslagen[10], self.schutterboog_100001, 128)
+        self._score_opslaan(self.uitslagen[11], self.schutterboog_100001, 255)
+
+        self._score_opslaan(self.uitslagen[7], self.schutterboog_100002, 123)
+        self._score_opslaan(self.uitslagen[9], self.schutterboog_100002, 124)
+
+        self._score_opslaan(self.uitslagen[7], self.schutterboog_100004, 123)
+        self._score_opslaan(self.uitslagen[9], self.schutterboog_100004, 124)
+        self._score_opslaan(self.uitslagen[10], self.schutterboog_100004, 128)
+
+        self._score_opslaan(self.uitslagen[11], self.schutterboog_100005, 128)
+
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
+        # print("f1: %s" % f1.getvalue())
+        # print("f2: %s" % f2.getvalue())
+        self.assertTrue('[INFO] Verplaats 100001 (18m) met nieuw AG 4.167 naar klasse Recurve klasse' in f2.getvalue())
 
 
 # end of file
