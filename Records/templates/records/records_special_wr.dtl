@@ -1,0 +1,47 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2020 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Handboogsport Wereld Records{% endblock %}
+
+{% block pagina %}
+
+    <h4>Wereld Records</h4>
+
+    <p>Hieronder staan de individuele records van nederlandse schutters die toegekend zijn als Wereld Record door World Archery.</p>
+
+    <table class="white">
+        <thead>
+            <th>Datum</th>
+            <th>Schutter</th>
+            <th>Soort record</th>
+            <th>Materiaal<wbr/>klasse</th>
+            <!-- <th>Leeftijds<wbr/>categorie</th> -->
+            <!-- <th>Para klasse</th> -->
+            <th>Score</th>
+            <th><!-- kolom voor de 'details' knop --></th>
+        </thead>
+
+        {% for obj in object_list %}
+            <tr>
+                <td>{{ obj.datum }}</td>
+                <td>{{ obj.naam }}</td>
+                <td>{{ obj.soort_record }}</td>
+                <td>{{ obj.materiaalklasse_str }}</td>
+                <!-- <td>{{ obj.leeftijdscategorie_str }}</td> -->
+                <!-- <td>{{ obj.para_klasse }}</td> -->
+                <td>{{ obj.score_str }}</td>
+                <td>
+                    <a class="btn-nhb-blauw btn-small" href="{{ obj.url_details }}">Details</a>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="records-lijst-wr" %}
+
+{% endblock %}
