@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from . import views
+from . import views, views_special
 
 app_name = 'Records'
 
@@ -45,6 +45,14 @@ urlpatterns = [
     path('record-<str:discipline>-<int:nummer>/',
          views.RecordsIndivSpecifiekView.as_view(),
          name='specifiek'),
+
+    path('lijst-er/',
+         views_special.RecordsSpecialERView.as_view(),
+         name='lijst-er'),
+
+    path('lijst-wr/',
+         views_special.RecordsSpecialWRView.as_view(),
+         name='lijst-wr'),
 
     path('',
          views.RecordsOverzichtView.as_view(),
