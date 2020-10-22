@@ -34,7 +34,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2020-10-18'
+SITE_VERSIE = '2020-10-22'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -235,7 +235,6 @@ RECORDS_TOEGESTANE_SOORTEN = (
     '70m (12p)',
 
     # Outdoor, TODO: still to be cleaned up
-    'Fita RK Rayon 4',
     'ShortMetric',
 
     # indoor
@@ -247,9 +246,6 @@ RECORDS_TOEGESTANE_SOORTEN = (
     '25m',
     '25m+18m (120p)',
     '25m+18m (60p)',
-
-    # Indoor, TODO: to be cleaned up
-    'match (15p)',
 
     # 25m1pijl
     '50p',
