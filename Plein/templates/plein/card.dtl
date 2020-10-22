@@ -1,0 +1,47 @@
+{% comment %}
+                Copyright (c) 2020 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+
+{% comment %}
+
+    Deze file formateert een kaartje aan de hand van de vier parameters:
+
+        title = "Account activiteit"
+        icon  = "recent_actors"
+        text  = "Toon overzicht van de recent gebruikte en aangemaakte accounts."
+        url   = de url waar je heen gaat na klikken op het kaartje
+
+    Hierdoor is mogelijk om centraal de code van een kaartje aan te passen.
+
+{% endcomment %}
+
+
+<!-- zet breedte, hoogte en side-by-side layout -->
+<!-- bij mouse-over licht de rand op -->
+<div class="nhb-card">
+
+    <!-- de hele kaart is klikbaar -->
+    <a href="{{ url }}">
+
+        <!-- padding om bij de rand weg te blijven -->
+        <div class="nhb-card-content">
+
+            <!-- titel -->
+            <div class="card-title center-align">{{ title }}</div>
+
+            <!-- icoon -->
+            <div class="center-align" style="margin-bottom:8px">
+                <i class="material-icons-round medium">{{ icon }}</i>
+            </div>
+
+            <div>{{ text }}</div>
+
+        </div>
+
+    </a>
+
+</div>
+
+<!-- end of file -->

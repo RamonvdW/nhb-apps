@@ -15,78 +15,27 @@
 <div class="row">
 
     <!-- beheerders van de competitie -->
-    <div class="card">
-        <div class="card-content">
-            <div class="card-title center-align">Beheerders</div>
-            <div class="center-align"><i class="material-icons-round medium">face</i></div>
-            <p>Relevante beheerders van de competities.</p>
-        </div>
-        <a href="{% url 'Functie:overzicht' %}" class="nhb-klikbare-balk">
-            <div class="card-action center-align">
-                <span class="nhb-klikbare-link">Tonen</span>
-            </div>
-        </a>
-    </div>
+    {% url 'Functie:overzicht' as card_url %}
+    {% include 'plein/card.dtl' with title="Beheerders" text="Relevante beheerders van de competities." icon="face" url=card_url %}
 
     <!-- toon klassegrenzen regiocompetitie -->
-    <div class="card">
-        <div class="card-content">
-            <div class="card-title center-align">Klassegrenzen</div>
-            <div class="center-align"><i class="material-icons-round medium">equalizer</i></div>
-            <p>Toon de klassegrenzen voor de competities.</p>
-        </div>
-        <a href="{% url 'Competitie:klassegrenzen-tonen' %}" class="nhb-klikbare-balk">
-            <div class="card-action center-align">
-                <span class="nhb-klikbare-link">Toon klassegrenzen</span>
-            </div>
-        </a>
-    </div>
+    {% url 'Competitie:klassegrenzen-tonen' as card_url %}
+    {% include 'plein/card.dtl' with title="Klassegrenzen" text="Toon de klassegrenzen voor de competities." icon="equalizer" url=card_url %}
 
     <!-- toon inschrijvingen regiocompetitie -->
     {% for comp in competities %}
-        <div class="card">
-            <div class="card-content">
-                <div class="card-title center-align">Inschrijvingen {{ comp.afstand }}m</div>
-                <div class="center-align"><i class="material-icons-round medium">receipt</i></div>
-                <p>Lijst met schutters ingeschreven voor de {{ comp.beschrijving }}.</p>
-            </div>
-            <a href="{{ comp.url_inschrijvingen }}" class="nhb-klikbare-balk">
-                <div class="card-action center-align">
-                    <span class="nhb-klikbare-link">Tonen</span>
-                </div>
-            </a>
-        </div>
+        {% include 'plein/card.dtl' with title="Inschrijvingen "|add:comp.afstand|add:"m" text="Lijst met schutters ingeschreven voor de "|add:comp.beschrijving|add:"." icon="receipt" url=comp.url_inschrijvingen %}
     {% endfor %}
 
     <!-- planning regiocompetities -->
     {% for deelcomp in planning_deelcomp %}
-        <div class="card">
-            <div class="card-content">
-                <div class="card-title center-align">Planning {{ deelcomp.competitie.afstand }}m</div>
-                <div class="center-align"><i class="material-icons-round medium">date_range</i></div>
-                <p>Planning voor de {{ deelcomp.competitie.beschrijving }} in {{ deelcomp.nhb_regio.naam }}.</p>
-            </div>
-            <a href="{% url 'Competitie:regio-planning' deelcomp.pk %}" class="nhb-klikbare-balk">
-                <div class="card-action center-align">
-                    <span class="nhb-klikbare-link">Bekijken</span>
-                </div>
-            </a>
-        </div>
+        {% url 'Competitie:regio-planning' deelcomp.pk as card_url %}
+        {% include 'plein/card.dtl' with title="Planning "|add:deelcomp.competitie.afstand|add:"m" text="Planning voor de "|add:deelcomp.competitie.beschrijving|add:" in "|add:deelcomp.nhb_regio.naam icon="date_range" url=card_url %}
     {% endfor %}
 
     <!-- algemene informatie over de competities -->
-    <div class="card">
-        <div class="card-content">
-            <div class="card-title center-align">Informatie</div>
-            <div class="center-align"><i class="material-icons-round medium">info</i></div>
-            <p>Algemene informatie over de competities.</p>
-        </div>
-        <a href="{% url 'Competitie:info-competitie' %}" class="nhb-klikbare-balk">
-            <div class="card-action center-align">
-                <span class="nhb-klikbare-link">Tonen</span>
-            </div>
-        </a>
-    </div>
+    {% url 'Competitie:info-competitie' as card_url %}
+    {% include 'plein/card.dtl' with title="Informatie" text="Algemene informatie over de competities." icon="info" url=card_url %}
 
 </div>
 

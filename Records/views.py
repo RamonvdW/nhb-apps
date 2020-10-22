@@ -107,6 +107,13 @@ class RecordsOverzichtView(ListView):
         obj.url = reverse('Records:specifiek', kwargs={'nummer': obj.volg_nr, 'discipline': obj.discipline})
         obj.icon = DISCIPLINE_TO_ICON[obj.discipline]
 
+        if obj.is_world_record:
+            obj.title_str = "Wereld Record"
+        elif obj.is_european_record:
+            obj.title_str = "Europees Record"
+        else:
+            obj.title_str = "Nederlands Record"
+
         # heren/dames
         obj.descr1_str = gesl2str[obj.geslacht] + " "
 

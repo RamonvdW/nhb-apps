@@ -28,146 +28,58 @@
 
     <!-- nieuwe accounts -->
     {% if toon_nieuwe_accounts %}
-        <div class="card">
-            <div class="card-content">
-                <div class="card-title center-align">Account activiteit</div>
-                <div class="center-align"><i class="material-icons-round medium">recent_actors</i></div>
-                <p>Toon overzicht van de recent gebruikte en aangemaakte accounts.</p>
-            </div>
-            <a href="{% url 'Account:activiteit' %}" class="nhb-klikbare-balk">
-                <div class="card-action center-align">
-                    <span class="nhb-klikbare-link">Overzicht tonen</span>
-                </div>
-            </a>
-        </div>
+        {% url 'Account:activiteit' as card_url %}
+        {% include 'plein/card.dtl' with title="Account activiteit" text="Toon overzicht van de recent gebruikte en aangemaakte accounts." icon="recent_actors" url=card_url %}
     {% endif %}
 
     <!-- toon en koppel beheerders -->
     {% if toon_functies %}
-        <div class="card">
-            <div class="card-content">
-                <div class="card-title center-align">Beheerders</div>
-                <div class="center-align"><i class="material-icons-round medium">face</i></div>
-                <p>Toon of wijzig de functies, gekoppelde beheerders en contactgegevens.</p>
-            </div>
-            <a href="{% url 'Functie:overzicht' %}" class="nhb-klikbare-balk">
-                <div class="card-action center-align">
-                    <span class="nhb-klikbare-link">Toon beheerders</span>
-                </div>
-            </a>
-        </div>
+        {% url 'Functie:overzicht' as card_url %}
+        {% include 'plein/card.dtl' with title="Beheerders" text="Toon of wijzig de functies, gekoppelde beheerders en contactgegevens." icon="face" url=card_url %}
+        {% include 'plein/card.dtl' with title="Beheerders" text="Toon of wijzig de functies" icon="face" url=card_url %}
+        {% include 'plein/card.dtl' with title="Beheerders" text="Toon of wijzig de functies, gekoppelde beheerders en contactgegevens. Probeer ook eens een langere tekst. Zo lang zelfs dat het er niet meer op past." icon="face" url=card_url %}
     {% endif %}
 
     <!-- Interland lijst -->
     {% if rol_is_bb %}
-        <div class="card">
-            <div class="card-content">
-                <div class="card-title center-align">Interland lijst</div>
-                <div class="center-align"><i class="material-icons-round medium">outlined_flag</i></div>
-                <p>Toon de lijst met kandidaat deelnemers voor de Interland.</p>
-            </div>
-            <a href="{% url 'HistComp:interland' %}" class="nhb-klikbare-balk">
-                <div class="card-action center-align">
-                    <span class="nhb-klikbare-link">Tonen</span>
-                </div>
-            </a>
-        </div>
+        {% url 'HistComp:interland' as card_url %}
+        {% include 'plein/card.dtl' with title="Interland lijst" text="Toon de lijst met kandidaat deelnemers voor de Interland." icon="outlined_flag" url=card_url %}
     {% endif %}
 
     <!-- verenigingen/accommodaties overzicht IT/BB/BKO -->
     {% if rol_is_bko or rol_is_bb or rol_is_it %}
-        <div class="card">
-            <div class="card-content">
-                <div class="card-title center-align">Verenigingen</div>
-                <div class="center-align"><i class="material-icons-round medium">view_list</i></div>
-                <p>Toon landelijk overzicht van de verenigingen en accommodaties.</p>
-            </div>
-            <a href="{% url 'Vereniging:lijst-verenigingen' %}" class="nhb-klikbare-balk">
-                <div class="card-action center-align">
-                    <span class="nhb-klikbare-link">Overzicht tonen</span>
-                </div>
-            </a>
-        </div>
+        {% url 'Vereniging:lijst-verenigingen' as card_url %}
+        {% include 'plein/card.dtl' with title="Verenigingen" text="Toon landelijk overzicht van de verenigingen en accommodaties." icon="view_list" url=card_url %}
     {% endif %}
 
     <!-- verenigingen/accommodaties overzicht RKO -->
     {% if rol_is_rko %}
-        <div class="card">
-            <div class="card-content">
-                <div class="card-title center-align">Verenigingen</div>
-                <div class="center-align"><i class="material-icons-round medium">view_list</i></div>
-                <p>Toon overzicht van de verenigingen en accommodaties in jouw rayon.</p>
-            </div>
-            <a href="{% url 'Vereniging:lijst-verenigingen' %}" class="nhb-klikbare-balk">
-                <div class="card-action center-align">
-                    <span class="nhb-klikbare-link">Overzicht tonen</span>
-                </div>
-            </a>
-        </div>
+        {% url 'Vereniging:lijst-verenigingen' as card_url %}
+        {% include 'plein/card.dtl' with title="Verenigingen" text="Toon overzicht van de verenigingen en accommodaties in jouw rayon." icon="view_list" url=card_url %}
     {% endif %}
 
     <!-- verenigingen/accommodaties overzicht RCL en HWL -->
     {% if rol_is_sec or rol_is_hwl or rol_is_rcl %}
-        <div class="card">
-            <div class="card-content">
-                <div class="card-title center-align">Verenigingen</div>
-                <div class="center-align"><i class="material-icons-round medium">view_list</i></div>
-                <p>Toon overzicht van de verenigingen en accommodaties in jouw regio.</p>
-            </div>
-            <a href="{% url 'Vereniging:lijst-verenigingen' %}" class="nhb-klikbare-balk">
-                <div class="card-action center-align">
-                    <span class="nhb-klikbare-link">Overzicht tonen</span>
-                </div>
-            </a>
-        </div>
+        {% url 'Vereniging:lijst-verenigingen' as card_url %}
+        {% include 'plein/card.dtl' with title="Verenigingen" text="Toon overzicht van de verenigingen en accommodaties in jouw regio." icon="view_list" url=card_url %}
     {% endif %}
 
     <!-- clusters RCL -->
     {% if rol_is_rcl %}
-        <div class="card">
-            <div class="card-content">
-                <div class="card-title center-align">Clusters</div>
-                <div class="center-align"><i class="material-icons-round medium">group_work</i></div>
-                <p>Mogelijkheden om in jouw regio de verenigingen in geografische clusters te groeperen.</p>
-            </div>
-            <a href="{% url 'Vereniging:clusters' %}" class="nhb-klikbare-balk">
-                <div class="card-action center-align">
-                    <span class="nhb-klikbare-link">Clusters instellingen</span>
-                </div>
-            </a>
-        </div>
+        {% url 'Vereniging:clusters' as card_url %}
+        {% include 'plein/card.dtl' with title="Clusters" text="Mogelijkheden om in jouw regio de verenigingen in geografische clusters te groeperen." icon="group_work" url=card_url %}
     {% endif %}
 
     <!-- overzicht VHPG acceptatie -->
     {% if rol_is_bb %}
-        <div class="card">
-            <div class="card-content">
-                <div class="card-title center-align">VHPG status</div>
-                <div class="center-align"><i class="material-icons-round medium">verified_user</i></div>
-                <p>Toon overzicht van beheerders die de Verklaring Hanteren Persoonsgegevens (VHPG) geaccepteerd hebben.</p>
-            </div>
-            <a href="{% url 'Functie:vhpg-overzicht' %}" class="nhb-klikbare-balk">
-                <div class="card-action center-align">
-                    <span class="nhb-klikbare-link">Overzicht tonen</span>
-                </div>
-            </a>
-        </div>
+        {% url 'Functie:vhpg-overzicht' as card_url %}
+        {% include 'plein/card.dtl' with title="VHPG status" text="Toon overzicht van beheerders die de Verklaring Hanteren Persoonsgegevens (VHPG) geaccepteerd hebben." icon="verified_user" url=card_url %}
     {% endif %}
 
     <!-- score geschiedenis -->
     {% if rol_is_bb or rol_is_it %}
-        <div class="card">
-            <div class="card-content">
-                <div class="card-title center-align">Score Geschiedenis</div>
-                <div class="center-align"><i class="material-icons-round medium">history</i></div>
-                <p>Bekijk de wijzigingen / geschiedenis van de scores van een schutter.</p>
-            </div>
-            <a href="{% url 'Score:geschiedenis' %}" class="nhb-klikbare-balk">
-                <div class="card-action center-align">
-                    <span class="nhb-klikbare-link">Ga er naartoe</span>
-                </div>
-            </a>
-        </div>
+        {% url 'Score:geschiedenis' as card_url %}
+        {% include 'plein/card.dtl' with title="Score Geschiedenis" text="Bekijk de wijzigingen / geschiedenis van de scores van een schutter." icon="history" url=card_url %}
     {% endif %}
 
 </div>

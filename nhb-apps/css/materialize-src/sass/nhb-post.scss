@@ -5,20 +5,6 @@
 
 // Specific classes for our website
 
-$nhb-blauw-color: #0aa0e1 !default;
-$nhb-rood-color:  #f94137 !default;
-
-$nhb-blauw-focus: lighten($nhb-blauw-color, 5%) !default;
-$nhb-blauw-default: $nhb-blauw-color !default;
-$nhb-blauw-hover: darken($nhb-blauw-color, 10%) !default;
-
-$nhb-rood-focus: lighten($nhb-rood-color, 5%) !default;
-$nhb-rood-default: $nhb-rood-color !default;
-$nhb-rood-hover: darken($nhb-rood-color, 25%) !default;
-
-$nhb-card-hover-background: #f5f5f5;
-$nhb-collection-hover-background: $nhb-card-hover-background;
-
 
 // als er geschakeld wordt naar een witte achtergrondkleur,
 // dan het hard zwart (ivm contrast grijze achtergrond)
@@ -81,82 +67,51 @@ $nhb-collection-hover-background: $nhb-card-hover-background;
 
 
 //-----------------------------------
-// card
+// nhb-card
 //
-.card-action {
-  @extend .card-action;
-
-  // belangrijk om kleur te geven, anders schijnt de kaart er doorheen (als deze te groot is)
-  background-color: #fff;       /* white */
-
-  &:hover {
-    background-color: $nhb-card-hover-background;
-  }
-}
-
-.card {
+.nhb-card {
   @extend .card;
+
+  // laat de kaartjes naast elkaar komen (in het display=block van de row)
+  display: inline-flex;
+  margin-right: 30px;
+  padding: 2px;
+  border-radius: 5px;
 
   // forceer een vaste breedte van de kaartjes
   // dit voorkomt vervormen van de kaartjes door re-layout
-  width: 300px;
+  position: relative;
+  width: 250px;
+  height: 250px;
 
-  // laat de kaartjes naast elkaar komen (in het display=block van de row)
-  display: inline-block;
-  margin-right: 30px;
+  &:hover {
+    padding: 0px;
+    border-width: 2px;
+    border-style: solid;
+    border-color: $nhb-blauw-focus;
+  }
 }
 
-.card-content {
+.nhb-card-content {
   @extend .card-content;
 
-  // zet een vaste hoogte van de kaartjes
-  // dit voorkomt layout-hell
-  height: 200px;
-
-  // verlaag de padding net boven de balk
-  padding-bottom: 0;
+  padding: 24px 24px 0 24px;
+  color: $off-black;
+  width: 246px;          // iets minder dan maximum ivm border
+  border-radius: 0 0 5px 5px;
 }
 
-// pas de standaard hoogte van de kaartjes aan
-// voor de verschillende font sizes (zie _typography.scss)
-@media only screen and (min-width: $medium-screen) {
-  .card-content {
-      height: 208px;
-  }
-}
-
-@media only screen and (min-width: $large-screen) {
-  .card-content {
-      height: 216px;
-  }
-}
 
 
 //-----------------------------------
 // grote klikbare oppervlakten
 //
-// zoals card-action en collection-item
+// zoals collection-item
 //
 
 // voor in oppervlakte met a
 .nhb-klikbare-balk {
     color: inherit;     // dit zorgt voor een zwarte tekst ipv <a> kleur
-}
-
-.card-action {
-    @extends .card-action;
-
-    .nhb-klikbare-link {
-        color: $card-link-color;
-        margin-right: $card-padding;
-        transition: color .3s ease;
-        text-transform: uppercase;
-        margin: 0;
-
-        &:hover {
-            color: $card-link-color-light;
-        }
-    }
 }
 
 

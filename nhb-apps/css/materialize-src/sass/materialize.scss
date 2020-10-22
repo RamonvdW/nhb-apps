@@ -4,6 +4,9 @@
 @import "components/color-variables";
 @import "components/color-classes";
 
+// our own extensions
+@import "nhb-pre";
+
 // Variables;
 @import "components/variables";
 
@@ -41,4 +44,4 @@
 @import "components/timepicker";
 
 // our own extensions
-@import "nhb";
+@import "nhb-post";
