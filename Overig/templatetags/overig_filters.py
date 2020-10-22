@@ -10,7 +10,7 @@ from django.utils.safestring import mark_safe
 
 
 def filter_highlight(text, search_for):
-    """  highlight filter looks for occurences of 'search_for' in 'text'
+    """  highlight filter looks for occurrences of 'search_for' in 'text'
          and puts a html tags around it to highlight that text.
          The search is case-insensitive.
     """
@@ -36,7 +36,7 @@ def filter_highlight(text, search_for):
 
             new_text += '</b>'          # highlighter postfix
 
-            # find the next occurence
+            # find the next occurrence
             pos = text.lower().find(search_for)
         # while
 
