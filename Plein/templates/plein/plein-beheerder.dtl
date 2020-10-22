@@ -36,8 +36,6 @@
     {% if toon_functies %}
         {% url 'Functie:overzicht' as card_url %}
         {% include 'plein/card.dtl' with title="Beheerders" text="Toon of wijzig de functies, gekoppelde beheerders en contactgegevens." icon="face" url=card_url %}
-        {% include 'plein/card.dtl' with title="Beheerders" text="Toon of wijzig de functies" icon="face" url=card_url %}
-        {% include 'plein/card.dtl' with title="Beheerders" text="Toon of wijzig de functies, gekoppelde beheerders en contactgegevens. Probeer ook eens een langere tekst. Zo lang zelfs dat het er niet meer op past." icon="face" url=card_url %}
     {% endif %}
 
     <!-- Interland lijst -->
