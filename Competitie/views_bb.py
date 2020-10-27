@@ -24,8 +24,7 @@ from Schutter.models import SchutterBoog
 from Score.models import Score, ScoreHist
 from .models import (AG_NUL, AG_LAAGSTE_NIET_NUL,
                      Competitie, competitie_aanmaken,
-                     CompetitieKlasse, maak_competitieklasse_indiv,
-                     RegioCompetitieSchutterBoog)
+                     maak_competitieklasse_indiv)
 import datetime
 
 
