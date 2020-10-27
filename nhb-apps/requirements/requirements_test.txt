@@ -10,7 +10,7 @@ cachetools==4.1.1         # via -r requirements.txt, google-auth
 certifi==2020.6.20        # via -r requirements.txt, requests
 cffi==1.14.3              # via cryptography
 chardet==3.0.4            # via -r requirements.txt, requests
-cryptography==3.1.1       # via pyopenssl, pysaml2
+cryptography==3.2         # via pyopenssl, pysaml2
 defusedxml==0.6.0         # via pysaml2
 django==3.0.10            # via -r requirements.txt, djangosaml2idp
 djangosaml2idp==0.7.2     # via -r requirements_test.in
