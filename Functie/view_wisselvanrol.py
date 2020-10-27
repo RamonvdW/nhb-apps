@@ -249,6 +249,9 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
         # login-as functie voor IT beheerder
         if rol_get_huidige(self.request) == Rollen.ROL_IT:
             context['url_login_as'] = reverse('Account:account-wissel')
+
+        # snel wissel kaartje voor IT en BB
+        if rol_get_huidige(self.request) in (Rollen.ROL_IT, Rollen.ROL_BB):
             context['heeft_alle_rollen'] = self._maak_alle_rollen()
 
         # bedoeld voor de testsuite, maar kan geen kwaad
