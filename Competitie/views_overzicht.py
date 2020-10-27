@@ -124,7 +124,7 @@ class CompetitieOverzichtView(View):
                 # zoek uit wanneer dit voor het laatste gedaan is
                 datum = zoek_meest_recente_automatisch_vastgestelde_ag()
                 if datum:
-                    context['bb_ag_nieuwste_datum'] = datum
+                    context['bb_ag_nieuwste_datum'] = datum.strftime("%Y-%m-%d %H:%M")
 
             context['show_wijzig_datums'] = True
             for obj in objs:

@@ -144,7 +144,12 @@
         <!-- aanvangsgemiddelden vaststellen -->
         {% if bb_kan_ag_vaststellen %}
             {% url 'Competitie:ag-vaststellen' as card_url %}
-            {% include 'plein/card.dtl' with title="Aanvangsgemiddelden" text="Aanvangsgemiddelden vaststellen voor elke schutter-boog, aan de hand van de uitslagen van vorig seizoen (op "|add:bb_ag_nieuwste_datum|add:" voor het laatst gedaan)" icon="how_to_reg" url=card_url %}
+            {% if bb_ag_nieuwste_datum %}
+                <!-- template tag 'add' cannot handle missing variables -->
+                {% include 'plein/card.dtl' with title="Aanvangsgemiddelden" text="AG vaststellen voor elke schutter-boog, aan de hand van de uitslagen van vorig seizoen (op "|add:bb_ag_nieuwste_datum|add:" voor het laatst gedaan)" icon="how_to_reg" url=card_url %}
+            {% else %}
+                {% include 'plein/card.dtl' with title="Aanvangsgemiddelden" text="AG vaststellen voor elke schutter-boog, aan de hand van de uitslagen van vorig seizoen (eerste keer)" icon="how_to_reg" url=card_url %}
+            {% endif %}
         {% endif %}
 
         <!-- klassegrenzen vaststellen -->
