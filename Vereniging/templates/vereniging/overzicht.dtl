@@ -57,15 +57,12 @@
     {% if toon_aanmelden %}
         {% for comp in competities %}
             {% if comp.fase < 'B' %}
-                <div class="card">
-                    <!-- TODO: convert to new card type -->
-                    <div class="card-content">
+                <div class="nhb-card-disabled">
+                    <div class="nhb-card-content">
                         <div class="card-title center-align grey-text">Aanmelden {{ comp.afstand }}m</div>
                         <div class="center-align"><img src="{{ comp.icon }}" height="60" alt="logo" style="opacity: 0.5"></div>
-                        <p>Aanmelden voor de <b>{{ comp.beschrijving }}</b> opent op {{ comp.begin_aanmeldingen }}.</p>
-                    </div>
-                    <div class="card-action center-align">
-                        <span class="grey-text">(nog niet open)</span>
+                        <div class="card-text grey-text">Aanmelden voor de <b>{{ comp.beschrijving }}</b> opent op {{ comp.begin_aanmeldingen }}.</div>
+                        <div class="card-text center-align"><br>(NOG NIET BESCHIKBAAR)</div>
                     </div>
                 </div>
             {% else %}

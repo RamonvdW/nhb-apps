@@ -92,6 +92,22 @@
   }
 }
 
+.nhb-card-disabled {
+  @extend .card;
+
+  // laat de kaartjes naast elkaar komen (in het display=block van de row)
+  display: inline-flex;
+  margin-right: 30px;
+  padding: 2px;
+  border-radius: 5px;
+
+  // forceer een vaste breedte van de kaartjes
+  // dit voorkomt vervormen van de kaartjes door re-layout
+  position: relative;
+  width: 250px;
+  height: 250px;
+}
+
 .nhb-card-content {
   @extend .card-content;
 
