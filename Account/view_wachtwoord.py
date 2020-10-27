@@ -7,7 +7,7 @@
 from django.shortcuts import render
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from django.contrib.auth import login, update_session_auth_hash
+from django.contrib.auth import authenticate, login, update_session_auth_hash
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from .models import AccountEmail, account_test_wachtwoord_sterkte
@@ -148,6 +148,8 @@ def receive_wachtwoord_vergeten(request, obj):
     # zorg dat de session-cookie snel verloopt
     request.session.set_expiry(0)
 
+    request.session['moet_oude_ww_weten'] = False
+
     # schrijf in het logboek
     schrijf_in_logboek(account=None,
                        gebruikte_functie="Wachtwoord",
@@ -179,6 +181,12 @@ class NieuwWachtwoordView(UserPassesTestMixin, TemplateView):
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
+
+        try:
+            context['moet_oude_ww_weten'] = self.request.session['moet_oude_ww_weten']
+        except KeyError:
+            context['moet_oude_ww_weten'] = True
+
         account = self.request.user
         if account.nhblid_set.count() > 0:      # TODO: ongewenste kennis over op NhbLid.account
             menu_dynamics(self.request, context, actief="schutter")
@@ -192,12 +200,33 @@ class NieuwWachtwoordView(UserPassesTestMixin, TemplateView):
         """
         context = super().get_context_data(**kwargs)
 
-        nieuw_wachtwoord = request.POST.get('wachtwoord', '')[:50]   # afkappen voor extra veiligheid
+        huidige_ww = request.POST.get('huidige', '')[:50]   # afkappen voor extra veiligheid
+        nieuw_ww = request.POST.get('nieuwe', '')[:50]      # afkappen voor extra veiligheid
+        from_ip = get_safe_from_ip(self.request)
 
         account = request.user
-        valid, errmsg = account_test_wachtwoord_sterkte(nieuw_wachtwoord, account.username)
+
+        # controleer het nieuwe wachtwoord
+        valid, errmsg = account_test_wachtwoord_sterkte(nieuw_ww, account.username)
+
+        # controleer het huidige wachtwoord
+        if valid and not authenticate(username=account.username, password=huidige_ww):
+            valid = False
+            errmsg = "Huidige wachtwoord komt niet overeen"
+
+            schrijf_in_logboek(account=account,
+                               gebruikte_functie="Wachtwoord",
+                               activiteit='Verkeerd huidige wachtwoord vanaf IP %s voor account %s' % (from_ip, repr(account.username)))
+            my_logger.info('%s LOGIN Verkeerd huidige wachtwoord voor account %s' % (from_ip, repr(account.username)))
+
         if not valid:
             context['foutmelding'] = errmsg
+
+            try:
+                context['moet_oude_ww_weten'] = self.request.session['moet_oude_ww_weten']
+            except KeyError:
+                context['moet_oude_ww_weten'] = True
+
             if account.nhblid_set.count() > 0:  # TODO: ongewenste kennis over NhbLid.account
                 menu_dynamics(self.request, context, actief="schutter")
             else:
@@ -206,11 +235,16 @@ class NieuwWachtwoordView(UserPassesTestMixin, TemplateView):
 
         # wijzigen van het wachtwoord zorgt er ook voor dat alle sessies van deze gebruiker vervallen
         # hierdoor blijft de gebruiker niet ingelogd op andere sessies
-        account.set_password(nieuw_wachtwoord)
+        account.set_password(nieuw_ww)
         account.save()
 
         # houd de gebruiker ingelogd in deze sessie
         update_session_auth_hash(request, account)
+
+        try:
+            del request.session['moet_oude_ww_weten']
+        except KeyError:
+            pass
 
         # schrijf in het logboek
         schrijf_in_logboek(account=account,

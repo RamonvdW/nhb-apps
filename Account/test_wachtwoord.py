@@ -40,7 +40,15 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
         self.assertContains(resp, 'Uitloggen')
 
         nieuw_ww = 'nieuwWwoord'
-        resp = self.client.post(self.url_wijzig, {'wachtwoord': nieuw_ww})
+
+        # foutief huidige wachtwoord
+        resp = self.client.post(self.url_wijzig, {'huidige': nieuw_ww, 'nieuwe': nieuw_ww})
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('account/nieuw-wachtwoord.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, 'Huidige wachtwoord komt niet overeen')
+
+        resp = self.client.post(self.url_wijzig, {'huidige': self.WACHTWOORD, 'nieuwe': nieuw_ww})
         self.assert_is_redirect(resp, '/plein/')
 
         # controleer dat we nog steeds ingelogd zijn
@@ -59,13 +67,13 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('account/nieuw-wachtwoord.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'Wachtwoord moet minimaal 9 tekens lang zijn')
 
-        resp = self.client.post(self.url_wijzig, {'wachtwoord': '123412341234'})
+        resp = self.client.post(self.url_wijzig, {'nieuwe': '123412341234'})
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/nieuw-wachtwoord.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'Wachtwoord bevat te veel gelijke tekens')
 
-    def test_vergeten(self):
+    def test_vergeten_uitgelogd(self):
         self.client.logout()
 
         # test ophalen van het wachtwoord-vergeten formulier
@@ -95,14 +103,21 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
         urls = self.extract_all_urls(resp, skip_menu=True, skip_smileys=True)
         post_url = urls[0]
         resp = self.client.post(post_url)
-        self.assert_is_redirect(resp, '/account/nieuw-wachtwoord/')
+        self.assert_is_redirect(resp, self.url_wijzig)
+
+        # haal de wachtwoord-vergeten pagina op
+        # en controleer dat we het oude wachtwoord niet in hoeven te voeren
+        resp = self.client.get(self.url_wijzig)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('account/nieuw-wachtwoord.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, 'Nieuwe wachtwoord:')
+        self.assertNotContains(resp, 'Huidige wachtwoord:')
 
         # controleer dat we nu ingelogd zijn!
-        resp = self.client.get('/plein/')
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, 'Uitloggen')
 
-    def test_vergeten_inlog(self):
+    def test_vergeten_ingelogd(self):
         # log in als admin
         self.account_admin = self.e2e_create_account_admin()
         self.e2e_login_and_pass_otp(self.account_admin)
@@ -136,15 +151,25 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
         urls = self.extract_all_urls(resp, skip_menu=True, skip_smileys=True)
         post_url = urls[0]
         resp = self.client.post(post_url)
-        self.assert_is_redirect(resp, '/account/nieuw-wachtwoord/')
+        self.assert_is_redirect(resp, self.url_wijzig)
+        session = self.client.session
+        self.assertTrue('moet_oude_ww_weten' in session)
+        self.assertFalse(session['moet_oude_ww_weten'])
+
+        # haal de wachtwoord-vergeten pagina op
+        # en controleer dat we het oude wachtwoord niet in hoeven te voeren
+        resp = self.client.get(self.url_wijzig)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('account/nieuw-wachtwoord.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, 'Nieuwe wachtwoord:')
+        self.assertNotContains(resp, 'Huidige wachtwoord:')
 
         # controleer dat we nu ingelogd zijn!
-        resp = self.client.get('/plein/')
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, 'Uitloggen')
 
         # check dat we geen BB meer zijn
-        self.assertContains(resp, 'Gebruiker')
+        self.assertContains(resp, 'Normaal')
 
     def test_vergeten_bad(self):
         resp = self.client.get(self.url_vergeten)
