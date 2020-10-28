@@ -114,8 +114,17 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
         self.assertContains(resp, 'Nieuwe wachtwoord:')
         self.assertNotContains(resp, 'Huidige wachtwoord:')
 
-        # controleer dat we nu ingelogd zijn!
+        # controleer dat we nu ingelogd zijn
         self.assertContains(resp, 'Uitloggen')
+
+        # wijzig door alleen het nieuwe wachtwoord op te geven
+        nieuw_ww = 'nieuwWwoord'
+        resp = self.client.post(self.url_wijzig, {'nieuwe': nieuw_ww})
+        self.assert_is_redirect(resp, '/plein/')
+
+        # controleer dat het nieuwe wachtwoord gebruikt kan worden
+        self.client.logout()
+        self.e2e_login(self.account_normaal, wachtwoord=nieuw_ww)
 
     def test_vergeten_ingelogd(self):
         # log in als admin

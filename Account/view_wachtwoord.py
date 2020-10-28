@@ -200,24 +200,29 @@ class NieuwWachtwoordView(UserPassesTestMixin, TemplateView):
         """
         context = super().get_context_data(**kwargs)
 
+        account = request.user
         huidige_ww = request.POST.get('huidige', '')[:50]   # afkappen voor extra veiligheid
         nieuw_ww = request.POST.get('nieuwe', '')[:50]      # afkappen voor extra veiligheid
         from_ip = get_safe_from_ip(self.request)
 
-        account = request.user
+        try:
+            moet_oude_ww_weten = self.request.session['moet_oude_ww_weten']
+        except KeyError:
+            moet_oude_ww_weten = True
 
         # controleer het nieuwe wachtwoord
         valid, errmsg = account_test_wachtwoord_sterkte(nieuw_ww, account.username)
 
         # controleer het huidige wachtwoord
-        if valid and not authenticate(username=account.username, password=huidige_ww):
-            valid = False
-            errmsg = "Huidige wachtwoord komt niet overeen"
+        if moet_oude_ww_weten and valid:
+            if not authenticate(username=account.username, password=huidige_ww):
+                valid = False
+                errmsg = "Huidige wachtwoord komt niet overeen"
 
-            schrijf_in_logboek(account=account,
-                               gebruikte_functie="Wachtwoord",
-                               activiteit='Verkeerd huidige wachtwoord vanaf IP %s voor account %s' % (from_ip, repr(account.username)))
-            my_logger.info('%s LOGIN Verkeerd huidige wachtwoord voor account %s' % (from_ip, repr(account.username)))
+                schrijf_in_logboek(account=account,
+                                   gebruikte_functie="Wachtwoord",
+                                   activiteit='Verkeerd huidige wachtwoord vanaf IP %s voor account %s' % (from_ip, repr(account.username)))
+                my_logger.info('%s LOGIN Verkeerd huidige wachtwoord voor account %s' % (from_ip, repr(account.username)))
 
         if not valid:
             context['foutmelding'] = errmsg
