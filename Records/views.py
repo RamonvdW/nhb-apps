@@ -118,22 +118,28 @@ class RecordsOverzichtView(ListView):
         obj.descr1_str = gesl2str[obj.geslacht] + " "
 
         # junioren, etc.
-        obj.descr1_str += lcat2str[obj.leeftijdscategorie]
+        lcat = lcat2str[obj.leeftijdscategorie]
+        pos = lcat.find(' (')
+        if pos > 0:
+            lcat = lcat[:pos]
+        obj.descr1_str += lcat
 
         # type wedstrijd
         obj.descr2_str = (disc2str[obj.discipline] +             # indoor/outdoor
                           " " + makl2str[obj.materiaalklasse] +  # longbow/recurve
                           " " + obj.soort_record)                # 70m (72p)
 
-        # recurve etc.
+        # para
         if obj.para_klasse:
-            obj.descr2_str += " para " + obj.para_klasse
+            obj.para_str = "Para " + obj.para_klasse
+        else:
+            obj.para_str = None
 
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
         # 10 nieuwste records (alle disciplines)
         # op datum (nieuwste boven) en volg_nr (hoogste boven)
-        objs = IndivRecord.objects.all().order_by('-datum', '-volg_nr')[:10]
+        objs = IndivRecord.objects.all().order_by('-datum', '-volg_nr')[:100]
         for obj in objs:
             self.set_url_specifiek(obj)
         # for

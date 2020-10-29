@@ -33,15 +33,18 @@
             <div class="nhb-card">
                 <a href="{{ obj.url }}">
                     <div class="nhb-card-content">
-                        <img class="right" src="{{ obj.icon }}" height="50" alt="klein logo">
                         <span class="card-title">{{ obj.title_str }}</span>
+                        {% if obj.para_str %}
+                            <p>{{ obj.para_str }}</p>
+                        {% endif %}
                         <p>{{ obj.descr1_str }}</p>
                         <p>{{ obj.descr2_str }}</p>
                         <p>&nbsp;</p>
+                        <img class="right" src="{{ obj.icon }}" height="50" alt="klein logo">
                         <p>{{ obj.datum }}</p>
-                        <p><b>{{ obj.naam }}</b></p>
-                        <p>Score: {{ obj.score_str }} / {{ obj.max_score_str }}</p>
                         <p>Plaats: {{ obj.plaats }}</p>
+                        <p class="truncate"><b>{{ obj.naam }}</b></p>
+                        <p>Score: {{ obj.score_str }} / {{ obj.max_score_str }}</p>
                     </div>
                 </a>
             </div>
