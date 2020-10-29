@@ -139,7 +139,7 @@ class RecordsOverzichtView(ListView):
         """ called by the template system to get the queryset or list of objects for the template """
         # 10 nieuwste records (alle disciplines)
         # op datum (nieuwste boven) en volg_nr (hoogste boven)
-        objs = IndivRecord.objects.all().order_by('-datum', '-volg_nr')[:100]
+        objs = IndivRecord.objects.all().order_by('-datum', '-volg_nr')[:10]
         for obj in objs:
             self.set_url_specifiek(obj)
         # for

@@ -59,7 +59,7 @@ class IndivRecord(models.Model):
 
     plaats = models.CharField(max_length=50)
 
-    land = models.CharField(max_length=50)
+    land = models.CharField(max_length=50)      # TODO: blank=True toevoegen
 
     score = models.PositiveIntegerField()
 
