@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
     # volgorde afdwingen
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('Competitie', 'm0014_datums_rk_bk'),
+        ('Competitie', 'm0013_squashed'),
     ]
 
     # migratie functies
