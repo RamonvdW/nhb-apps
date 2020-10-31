@@ -75,7 +75,7 @@
 
             <!-- knop naar de ronde van de regioplanning -->
             <td>
-                <a class="btn-nhb-blauw" href="{% url 'Competitie:regio-ronde-planning' ronde.pk %}">
+                <a class="btn-nhb-blauw btn-small" href="{% url 'Competitie:regio-ronde-planning' ronde.pk %}">
                     <i class="material-icons-round left">arrow_forward</i>Bekijk</a>
             </td>
         </tr>
@@ -91,7 +91,7 @@
             <td colspan="4">
                 <form action="{{ url_nieuwe_week }}" method="post">
                     {% csrf_token %}
-                    <button class="btn-nhb-blauw" type="submit">
+                    <button class="btn-nhb-blauw btn-small" type="submit">
                         <i class="material-icons-round left">add</i>Regel toevoegen</button>
                 </form>
             </td>
@@ -124,7 +124,7 @@
 
                 <!-- knop naar de ronde van de regioplanning -->
                 <td>
-                    <a class="btn-nhb-blauw" href="{% url 'Competitie:regio-cluster-planning' cluster.pk %}">
+                    <a class="btn-nhb-blauw btn-small" href="{% url 'Competitie:regio-cluster-planning' cluster.pk %}">
                         <i class="material-icons-round left">arrow_forward</i>Bekijk</a>
                 </td>
             </tr>

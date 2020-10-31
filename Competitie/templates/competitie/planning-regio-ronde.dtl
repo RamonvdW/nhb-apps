@@ -137,7 +137,7 @@
                 <!-- knop om wedstrijd te wijzigen -->
                 <td>
                     {% if wedstrijd.url_wijzig %}
-                        <a class="btn-nhb-blauw" href="{{ wedstrijd.url_wijzig }}">
+                        <a class="btn-nhb-blauw btn-small" href="{{ wedstrijd.url_wijzig }}">
                             <i class="material-icons-round left">arrow_forward</i>Aanpassen</a>
                     {% endif %}
                 </td>
@@ -146,13 +146,13 @@
             <!-- knop om uitslagen te zien / in te voeren -->
             <td>
                 {% if wedstrijd.url_uitslag_controleren %}
-                    <a {% if wedstrijd.uitslag.is_bevroren %}class="btn-nhb-blauw"{% else %}class="btn-nhb-rood"{% endif %} href="{{ wedstrijd.url_uitslag_controleren }}">
+                    <a {% if wedstrijd.uitslag.is_bevroren %}class="btn-nhb-blauw btn-small"{% else %}class="btn-nhb-rood"{% endif %} href="{{ wedstrijd.url_uitslag_controleren }}">
                         <i class="material-icons-round left">arrow_forward</i>Controleer</a>
                 {% elif wedstrijd.url_uitslag_invoeren %}
-                    <a class="btn-nhb-blauw" href="{{ wedstrijd.url_uitslag_invoeren }}">
+                    <a class="btn-nhb-blauw btn-small" href="{{ wedstrijd.url_uitslag_invoeren }}">
                         <i class="material-icons-round left">arrow_forward</i>Invoeren</a>
                 {% elif wedstrijd.url_uitslag_bekijken %}
-                    <a class="btn-nhb-blauw" href="{{ wedstrijd.url_uitslag_bekijken }}">
+                    <a class="btn-nhb-blauw btn-small" href="{{ wedstrijd.url_uitslag_bekijken }}">
                         <i class="material-icons-round left">arrow_forward</i>Bekijken</a>
                 {% else %}
                     <i>Nog geen</i>

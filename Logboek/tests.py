@@ -4,7 +4,6 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.test import TestCase
 from Logboek.apps import post_migration_callback

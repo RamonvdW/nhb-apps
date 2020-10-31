@@ -1,0 +1,80 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2020 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Taken overzicht{% endblock %}
+
+{% block pagina %}
+
+    <h4>Taken overzicht</h4>
+
+    <p>Op deze pagina kan je open en afgeronde taken zien.</p>
+
+    <p>&nbsp;</p>
+    <h5>Open taken</h5>
+
+    {% if heeft_open_taken %}
+        <table class="white">
+            <thead>
+                <th class="center-align">Nummer</th>
+                <th class="center-align">Deadline</th>
+                <th>Beschrijving</th>
+                <th><!-- kolom voor knop --></th>
+            </thead>
+
+            {% for taak in taken %}
+                {% if not taak.is_afgerond %}
+                    <tr>
+                        <td class="center-align">{{ taak.pk }}</td>
+                        <td class="center-align">{{ taak.deadline|date:"Y-m-d" }}</td>
+                        <td>{{ taak.beschrijving|linebreaks }}</td>
+                        <td>
+                            <a class="btn-nhb-blauw btn-small" href="{{ taak.url }}">Details</a>
+                        </td>
+                    </tr>
+                {% endif %}
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>Er zijn op dit moment geen open taken.</p>
+    {% endif %}
+
+
+    <p>&nbsp;</p>
+    <h5>Afgeronde taken</h5>
+
+    {% if heeft_afgeronde_taken %}
+        <table class="white">
+            <thead>
+                <th class="center-align">Nummer</th>
+                <th class="center-align">Deadline</th>
+                <th>Beschrijving</th>
+                <th><!-- kolom voor knop --></th>
+            </thead>
+
+            {% for taak in taken %}
+                {% if taak.is_afgerond %}
+                    <tr>
+                        <td class="center-align">{{ taak.pk }}</td>
+                        <td class="center-align">{{ taak.deadline|date:"Y-m-d" }}</td>
+                        <td>{{ taak.beschrijving|linebreaks }}</td>
+                        <td>
+                            <a class="btn-nhb-blauw btn-small" href="{{ taak.url }}">Details</a>
+                        </td>
+                    </tr>
+                {% endif %}
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>Er zijn nog geen afgeronde taken.</p>
+    {% endif %}
+
+
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="taken-overzicht" %}
+
+{% endblock %}
+

@@ -8,6 +8,7 @@ from django.conf import settings
 from django.shortcuts import redirect, render
 from django.views.generic import TemplateView, View
 from Functie.rol import Rollen, rol_get_huidige, rol_get_beschrijving
+from Taken.taken import eval_open_taken
 from .menu import menu_dynamics
 
 
@@ -78,6 +79,9 @@ class PleinView(View):
                     raise ValueError("PleinView: onbekende rol %s" % rol_nu)
 
                 context['huidige_rol'] = rol_get_beschrijving(request)
+
+                # kijk hoeveel taken er open staan
+                eval_open_taken(request)
 
         menu_dynamics(self.request, context, actief='hetplein')
         return render(request, template, context)

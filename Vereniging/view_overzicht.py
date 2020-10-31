@@ -12,6 +12,7 @@ from django.templatetags.static import static
 from Plein.menu import menu_dynamics
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Competitie.models import Competitie, DeelCompetitie, LAAG_REGIO
+from Taken.taken import eval_open_taken
 
 
 TEMPLATE_OVERZICHT = 'vereniging/overzicht.dtl'
@@ -82,6 +83,8 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
             else:
                 deelcomp.icon = static('plein/badge_nhb_25m1p.png')
         # for
+
+        eval_open_taken(self.request)
 
         menu_dynamics(self.request, context, actief='vereniging')
         return context

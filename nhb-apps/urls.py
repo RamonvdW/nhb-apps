@@ -30,6 +30,7 @@ urlpatterns = [
     path('records/',     include('Records.urls')),
     path('schutter/',    include('Schutter.urls')),
     path('score/',       include('Score.urls')),
+    path('taken/',       include('Taken.urls')),
     path('vereniging/',  include('Vereniging.urls'))
 ]
 

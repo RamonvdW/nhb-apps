@@ -5,16 +5,15 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.shortcuts import render
-from django.urls import Resolver404, reverse
-from django.views.generic import TemplateView, ListView, View
+from django.urls import reverse
+from django.views.generic import View
 from django.utils import timezone
 from Plein.menu import menu_dynamics
 from Functie.rol import Rollen, rol_get_huidige_functie, rol_get_beschrijving
-from NhbStructuur.models import NhbRayon, NhbRegio
 from Score.models import zoek_meest_recente_automatisch_vastgestelde_ag
+from Taken.taken import eval_open_taken
 from .models import (LAAG_REGIO, LAAG_RK, LAAG_BK,
-                     Competitie, DeelCompetitie, RegioCompetitieSchutterBoog)
-
+                     Competitie, DeelCompetitie)
 
 TEMPLATE_COMPETITIE_OVERZICHT = 'competitie/overzicht.dtl'
 TEMPLATE_COMPETITIE_OVERZICHT_HWL = 'competitie/overzicht-hwl.dtl'
@@ -212,8 +211,10 @@ class CompetitieOverzichtView(View):
 
         if rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL):
             context, template = self._get_competitie_overzicht_beheerder(request, rol_nu, functie_nu)
+            eval_open_taken(request)
         elif rol_nu == Rollen.ROL_HWL:
             context, template = self._get_competitie_overzicht_hwl(request, rol_nu, functie_nu)
+            eval_open_taken(request)
         else:
             context, template = self._get_competitie_overzicht_schutter_bezoeker(rol_nu)
 
