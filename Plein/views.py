@@ -38,7 +38,10 @@ def is_browser_supported(request):
         pass
     else:
         if " MSIE " in useragent:
-            # Internal Explorer (alle versies) wordt niet ondersteund
+            # Internal Explorer versie tm IE10: worden niet ondersteund
+            is_supported = False
+        elif "Trident/7.0; rv:11" in useragent:
+            # Internet Explorer versie 11
             is_supported = False
 
     # wel ondersteund

@@ -70,8 +70,9 @@ class TestPlein(E2EHelpers, TestCase):
         lid.email = lid.account.email
         lid.save()
 
+        self.useragent_msie_1 = 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.0; Trident/4.0)'
+        self.useragent_msie_2 = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; Trident/7.0; rv:11.0) like Gecko'
         self.useragent_firefox = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.11; rv:47.0) Gecko/20100101 Firefox/47.0'
-        self.useragent_msie = 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.0; Trident/4.0)'
 
         self.url_root = '/'
         self.url_plein = '/plein/'
@@ -232,7 +233,9 @@ class TestPlein(E2EHelpers, TestCase):
         self.assertTrue(is_browser_supported(request))
 
         # internet explorer
-        request.META['HTTP_USER_AGENT'] = self.useragent_msie
+        request.META['HTTP_USER_AGENT'] = self.useragent_msie_1
+        self.assertFalse(is_browser_supported(request))
+        request.META['HTTP_USER_AGENT'] = self.useragent_msie_2
         self.assertFalse(is_browser_supported(request))
 
         # andere
@@ -240,10 +243,10 @@ class TestPlein(E2EHelpers, TestCase):
         self.assertTrue(is_browser_supported(request))
 
     def test_browser_support(self):
-        resp = self.client.get(self.url_root, HTTP_USER_AGENT=self.useragent_msie)
+        resp = self.client.get(self.url_root, HTTP_USER_AGENT=self.useragent_msie_1)
         self.assert_is_redirect(resp, self.url_niet_ondersteund)
 
-        resp = self.client.get(self.url_plein, HTTP_USER_AGENT=self.useragent_msie)
+        resp = self.client.get(self.url_plein, HTTP_USER_AGENT=self.useragent_msie_2)
         self.assert_is_redirect(resp, self.url_niet_ondersteund)
 
         resp = self.client.get(self.url_root, HTTP_USER_AGENT=self.useragent_firefox)
