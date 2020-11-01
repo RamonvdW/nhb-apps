@@ -33,13 +33,13 @@ class TestCompetitieTussenstand(E2EHelpers, TestCase):
         self.account_bb.save()
 
         # deze test is afhankelijk van de standaard regio's
-        regio = NhbRegio.objects.get(regio_nr=101)
+        self.regio101 = NhbRegio.objects.get(regio_nr=101)
 
         # maak een test vereniging
         ver = NhbVereniging()
         ver.naam = "Grote Club"
         ver.nhb_nr = 1000
-        ver.regio = regio
+        ver.regio = self.regio101
         # secretaris kan nog niet ingevuld worden
         ver.save()
 
@@ -129,7 +129,11 @@ class TestCompetitieTussenstand(E2EHelpers, TestCase):
 
         # schrijf iemand in
         boog_ib = BoogType.objects.get(afkorting='IB')
-        deelcomp = DeelCompetitie.objects.filter(competitie=self.comp_18, laag=LAAG_REGIO).all()[0]
+        deelcomp = DeelCompetitie.objects.filter(competitie=self.comp_18,
+                                                 laag=LAAG_REGIO,
+                                                 nhb_regio=self.regio101).all()[0]
+
+        # Schutter 1 aanmelden
 
         schutterboog = SchutterBoog(nhblid=self.lid_100001,
                                     boogtype=boog_ib,
@@ -147,6 +151,28 @@ class TestCompetitieTussenstand(E2EHelpers, TestCase):
                                                  bij_vereniging=schutterboog.nhblid.bij_vereniging,
                                                  aanvangsgemiddelde=AG_NUL,
                                                  klasse=klasse)
+        aanmelding.aantal_scores = 6        # nodig om voor te komen in de rayon tussenstand
+        aanmelding.save()
+
+        # Schutter 2 aanmelden
+
+        klasse = (CompetitieKlasse
+                  .objects
+                  .filter(competitie=self.comp_18,
+                          indiv__boogtype=boog_ib,
+                          indiv__is_onbekend=False))[0]
+
+        schutterboog = SchutterBoog(nhblid=self.lid_100002,
+                                    boogtype=boog_ib,
+                                    voor_wedstrijd=True)
+        schutterboog.save()
+
+        aanmelding = RegioCompetitieSchutterBoog(deelcompetitie=deelcomp,
+                                                 schutterboog=schutterboog,
+                                                 bij_vereniging=schutterboog.nhblid.bij_vereniging,
+                                                 aanvangsgemiddelde=AG_NUL,
+                                                 klasse=klasse)
+        aanmelding.aantal_scores = 6        # nodig om voor te komen in de rayon tussenstand
         aanmelding.save()
 
         # nog een aanmelding in dezelfde klasse
@@ -160,6 +186,7 @@ class TestCompetitieTussenstand(E2EHelpers, TestCase):
                                                  bij_vereniging=schutterboog.nhblid.bij_vereniging,
                                                  aanvangsgemiddelde=AG_NUL,
                                                  klasse=klasse)
+        aanmelding.aantal_scores = 6        # nodig om voor te komen in de rayon tussenstand
         aanmelding.save()
 
     def test_top(self):

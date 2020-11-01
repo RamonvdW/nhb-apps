@@ -497,19 +497,19 @@ class TestRecordsCliUpdTussenstand(E2EHelpers, TestCase):
         # verplaats 100004 naar Recurve klasse 4, Senioren Vrouwen
         # zodat deze straks niet verplaatst hoeft te worden
         klasse = None
-        for obj in (CompetitieKlasse
+        for obj in (CompetitieKlasse                    # pragma: no branch
                     .objects
                     .filter(competitie=self.comp,
                             indiv__is_onbekend=False,
                             indiv__boogtype__afkorting=self.boog_r.afkorting)):
-            for lkl in (obj.indiv.leeftijdsklassen
+            for lkl in (obj.indiv.leeftijdsklassen      # pragma: no branch
                         .filter(geslacht='V',
                                 min_wedstrijdleeftijd__gt=20)):
                 klasse = obj
                 break
             # for
 
-            if klasse:
+            if klasse:                                  # pragma: no branch
                 break
         # for
 
