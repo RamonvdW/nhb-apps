@@ -46,11 +46,11 @@ class RegioCompetitieSchutterBoogAdmin(admin.ModelAdmin):
              }),
         ('Uitslag',
             {'fields': ('score1', 'score2', 'score3', 'score4', 'score5', 'score6', 'score7',
-                        'laagste_score_nr', 'totaal', 'gemiddelde')
+                        'aantal_scores', 'laagste_score_nr', 'totaal', 'gemiddelde')
              }),
         ('Alternatieve Uitslag',
             {'fields': ('alt_score1', 'alt_score2', 'alt_score3', 'alt_score4', 'alt_score5', 'alt_score6', 'alt_score7',
-                        'alt_laagste_score_nr', 'alt_totaal', 'alt_gemiddelde')
+                        'alt_aantal_scores', 'alt_laagste_score_nr', 'alt_totaal', 'alt_gemiddelde')
              }),
     )
 

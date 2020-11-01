@@ -369,6 +369,9 @@ class RegioCompetitieSchutterBoog(models.Model):
     # som van de beste 6 van score1..score7
     totaal = models.PositiveIntegerField(default=0)
 
+    # aantal scores dat tot nu toe neergezet is (om eenvoudig te kunnen filteren)
+    aantal_scores = models.PositiveSmallIntegerField(default=0)
+
     # welke van score1..score7 is de laagste?
     laagste_score_nr = models.PositiveIntegerField(default=0)  # 1..7
 
@@ -393,6 +396,7 @@ class RegioCompetitieSchutterBoog(models.Model):
     alt_score6 = models.PositiveIntegerField(default=0)
     alt_score7 = models.PositiveIntegerField(default=0)
     alt_totaal = models.PositiveIntegerField(default=0)
+    alt_aantal_scores = models.PositiveSmallIntegerField(default=0)
     alt_laagste_score_nr = models.PositiveIntegerField(default=0)  # 1..7
     alt_gemiddelde = models.DecimalField(max_digits=5, decimal_places=3, default=0.0)  # 10,000
 
