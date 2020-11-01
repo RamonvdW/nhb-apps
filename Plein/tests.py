@@ -10,6 +10,7 @@ from Functie.models import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
 from Overig.e2ehelpers import E2EHelpers
 from types import SimpleNamespace
+from .views import is_browser_supported
 import datetime
 
 
@@ -69,21 +70,29 @@ class TestPlein(E2EHelpers, TestCase):
         lid.email = lid.account.email
         lid.save()
 
+        self.useragent_firefox = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.11; rv:47.0) Gecko/20100101 Firefox/47.0'
+        self.useragent_msie = 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.0; Trident/4.0)'
+
+        self.url_root = '/'
+        self.url_plein = '/plein/'
+        self.url_privacy = '/plein/privacy/'
+        self.url_niet_ondersteund = '/plein/niet-ondersteund/'
+
     def test_root_redirect(self):
-        resp = self.client.get('/')
+        resp = self.client.get(self.url_root)
         self.assertEqual(resp.status_code, 302)     # 302 = redirect
         self.assertEqual(resp.url, '/plein/')
 
     def test_plein_anon(self):
         self.e2e_logout()
-        resp = self.client.get('/plein/')
+        resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('plein/plein-bezoeker.dtl', 'plein/site_layout.dtl'))
 
     def test_plein_normaal(self):
         self.e2e_login(self.account_normaal)
-        resp = self.client.get('/plein/')
+        resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertNotContains(resp, '/admin/')
         self.assertNotContains(resp, 'Wissel van rol')
@@ -92,7 +101,7 @@ class TestPlein(E2EHelpers, TestCase):
 
     def test_plein_nhblid(self):
         self.e2e_login(self.account_100001)
-        resp = self.client.get('/plein/')
+        resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertNotContains(resp, '/admin/')
         self.assertNotContains(resp, 'Wissel van rol')
@@ -101,7 +110,7 @@ class TestPlein(E2EHelpers, TestCase):
 
     def test_plein_admin(self):
         self.e2e_login(self.account_admin)
-        resp = self.client.get('/plein/')
+        resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, 'Wissel van rol')
         urls = [url for url in self.extract_all_urls(resp) if "admin" in url or "beheer" in url]
@@ -109,7 +118,7 @@ class TestPlein(E2EHelpers, TestCase):
 
         # simuleer 2FA
         self.e2e_login_and_pass_otp(self.account_admin)
-        resp = self.client.get('/plein/')
+        resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, 'Wissel van rol')
         self.assert_template_used(resp, ('plein/plein-gebruiker.dtl', 'plein/site_layout.dtl'))
@@ -120,7 +129,7 @@ class TestPlein(E2EHelpers, TestCase):
         self.e2e_wisselnaarrol_it()
         self.e2e_check_rol('IT')
 
-        resp = self.client.get('/plein/')
+        resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, 'Wissel van rol')
         self.assert_template_used(resp, ('plein/plein-beheerder.dtl', 'plein/site_layout.dtl'))
@@ -132,49 +141,49 @@ class TestPlein(E2EHelpers, TestCase):
         # bb
         self.e2e_wisselnaarrol_bb()
         self.e2e_check_rol('BB')
-        resp = self.client.get('/plein/')
+        resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, 'Manager competitiezaken')
 
         # bko
         self.e2e_wissel_naar_functie(self.functie_bko)
         self.e2e_check_rol('BKO')
-        resp = self.client.get('/plein/')
+        resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, 'BKO')
 
         # rko
         self.e2e_wissel_naar_functie(self.functie_rko)
         self.e2e_check_rol('RKO')
-        resp = self.client.get('/plein/')
+        resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, 'RKO')
 
         # rcl
         self.e2e_wissel_naar_functie(self.functie_rcl)
         self.e2e_check_rol('RCL')
-        resp = self.client.get('/plein/')
+        resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, 'RCL')
 
         # sec
         self.e2e_wissel_naar_functie(self.functie_hwl)
         self.e2e_check_rol('HWL')
-        resp = self.client.get('/plein/')
+        resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, 'Hoofdwedstrijdleider 1000')
 
         # wl
         self.e2e_wissel_naar_functie(self.functie_wl)
         self.e2e_check_rol('WL')
-        resp = self.client.get('/plein/')
+        resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, 'Wedstrijdleider 1000')
 
         # geen
         self.e2e_wisselnaarrol_gebruiker()
         self.e2e_check_rol('geen')
-        resp = self.client.get('/plein/')
+        resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, 'Gebruiker')
 
@@ -188,16 +197,16 @@ class TestPlein(E2EHelpers, TestCase):
         # sec
         self.e2e_wissel_naar_functie(self.functie_sec)
         self.e2e_check_rol('SEC')
-        resp = self.client.get('/plein/')
+        resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, 'Secretaris vereniging 1000')
 
     def test_privacy(self):
-        resp = self.client.get('/plein/privacy/')
+        resp = self.client.get(self.url_privacy)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('plein/privacy.dtl', 'plein/site_layout.dtl'))
-        self.e2e_assert_other_http_commands_not_supported('/plein/privacy/')
+        self.e2e_assert_other_http_commands_not_supported(self.url_privacy)
 
     def test_dynamic_menu_assert(self):
         # test the assert in menu_dynamics
@@ -211,8 +220,46 @@ class TestPlein(E2EHelpers, TestCase):
     def test_quick(self):
         # voor test.sh om met een snelle run in debug mode
         self.e2e_login(self.account_admin)
-        resp = self.client.get('/plein/')
+        resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)
         urls = self.extract_all_urls(resp)      # for coverage
+
+    def test_is_browser_supported(self):
+        request = SimpleNamespace()
+        request.META = dict()
+
+        # geen header
+        self.assertTrue(is_browser_supported(request))
+
+        # internet explorer
+        request.META['HTTP_USER_AGENT'] = self.useragent_msie
+        self.assertFalse(is_browser_supported(request))
+
+        # andere
+        request.META['HTTP_USER_AGENT'] = self.useragent_firefox
+        self.assertTrue(is_browser_supported(request))
+
+    def test_browser_support(self):
+        resp = self.client.get(self.url_root, HTTP_USER_AGENT=self.useragent_msie)
+        self.assert_is_redirect(resp, self.url_niet_ondersteund)
+
+        resp = self.client.get(self.url_plein, HTTP_USER_AGENT=self.useragent_msie)
+        self.assert_is_redirect(resp, self.url_niet_ondersteund)
+
+        resp = self.client.get(self.url_root, HTTP_USER_AGENT=self.useragent_firefox)
+        self.assert_is_redirect(resp, self.url_plein)
+
+    def test_niet_ondersteund(self):
+        resp = self.client.get(self.url_niet_ondersteund)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('plein/niet-ondersteund.dtl',))
+
+        # site_layout.dtl moet niet gebruikt worden ivm alle javascript
+        for templ in resp.templates:
+            self.assertFalse("site_layout.dtl" in templ.name)
+        # for
+
+        self.e2e_assert_other_http_commands_not_supported(self.url_niet_ondersteund)
 
 # end of file

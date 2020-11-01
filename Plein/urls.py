@@ -17,6 +17,10 @@ urlpatterns = [
     path('privacy/',
          views.PrivacyView.as_view(),
          name='privacy'),
+
+    path('niet-ondersteund/',
+         views.NietOndersteundView.as_view(),
+         name='niet-ondersteund'),
 ]
 
 # end of file
