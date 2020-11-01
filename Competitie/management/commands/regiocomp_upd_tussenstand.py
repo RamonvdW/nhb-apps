@@ -260,6 +260,7 @@ class Command(BaseCommand):
                     deelnemer.score5 = waardes[4]
                     deelnemer.score6 = waardes[5]
                     deelnemer.score7 = waardes[6]
+                    deelnemer.aantal_scores = len(waardes) - waardes.count(0)
                     deelnemer.laagste_score_nr, laagste = self._bepaal_laagste_nr(waardes)
                     deelnemer.gemiddelde, deelnemer.totaal = self._bepaal_gemiddelde_en_totaal(waardes, laagste, pijlen_per_ronde)
 
@@ -308,6 +309,7 @@ class Command(BaseCommand):
                     deelnemer.alt_score5 = waardes[4]
                     deelnemer.alt_score6 = waardes[5]
                     deelnemer.alt_score7 = waardes[6]
+                    deelnemer.alt_aantal_scores = len(waardes) - waardes.count(0)
                     deelnemer.alt_laagste_score_nr, laagste = self._bepaal_laagste_nr(waardes)
                     deelnemer.alt_gemiddelde, deelnemer.alt_totaal = self._bepaal_gemiddelde_en_totaal(waardes, laagste, pijlen_per_ronde)
 

@@ -343,6 +343,49 @@ class TussenstandRayonView(TemplateView):
             raise Resolver404()
 
         context['deelcomp'] = deelcomp
+        deelcomp.competitie.zet_fase()
+
+        if deelcomp.competitie.fase < 'K':
+            # competitie is nog in de regiocompetitie fase
+            context['regiocomp_nog_actief'] = True
+
+            # schutter moeten uit LAAG_REGIO gehaald worden, uit de 4 regio's van het rayon
+            deelcomp_pks = (DeelCompetitie
+                            .objects
+                            .filter(laag=LAAG_REGIO,
+                                    competitie__is_afgesloten=False,
+                                    competitie__afstand=afstand,
+                                    nhb_regio__rayon__rayon_nr=rayon_nr)
+                            .values_list('pk', flat=True))
+
+            deelnemers = (RegioCompetitieSchutterBoog
+                          .objects
+                          .filter(deelcompetitie__pk__in=deelcomp_pks,
+                                  klasse__indiv__boogtype=boogtype,
+                                  aantal_scores__gte=6)
+                          .order_by('klasse__indiv__volgorde', '-gemiddelde'))
+        else:
+            # FUTURE: deelnemers/reserveschutters van het RK tonen
+            context['nog_niet_af'] = True
+            deelnemers = list()
+
+        klasse = -1
+        rank = 0
+        for deelnemer in deelnemers:
+            deelnemer.break_klasse = (klasse != deelnemer.klasse.indiv.volgorde)
+            if deelnemer.break_klasse:
+                deelnemer.klasse_str = deelnemer.klasse.indiv.beschrijving
+                rank = 0
+            klasse = deelnemer.klasse.indiv.volgorde
+
+            rank += 1
+            lid = deelnemer.schutterboog.nhblid
+            deelnemer.rank = rank
+            deelnemer.naam_str = "[%s] %s" % (lid.nhb_nr, lid.volledige_naam())
+            deelnemer.ver_str = str(deelnemer.bij_vereniging)
+        # for
+
+        context['deelnemers'] = deelnemers
 
         menu_dynamics(self.request, context, actief='histcomp')
         return context
