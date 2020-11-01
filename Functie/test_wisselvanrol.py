@@ -118,6 +118,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.e2e_account_accepteert_vhpg(self.account_admin)
 
         # controleer dat de complete keuzemogelijkheden op de pagina staan
+        self.client.session.save()      # in session aanwezige cache data (over taken) opslaan
         with self.assertNumQueries(11):
             resp = self.client.get(self.url_wisselvanrol)
         self.assertEqual(resp.status_code, 200)     # 200 = OK

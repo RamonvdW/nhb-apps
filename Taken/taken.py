@@ -35,7 +35,7 @@ def eval_open_taken(request, forceer=False):
 
     if not forceer:
         now_str = str(timezone.now().toordinal())
-        if eval_after and now_str < eval_after:
+        if eval_after and now_str <= eval_after:
             return
 
     # update het aantal open taken in de sessie
