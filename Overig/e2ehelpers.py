@@ -270,6 +270,9 @@ class E2EHelpers(object):
         self.assertIn("<body ", html)
         self.assertIn("</body>", html)
         self.assertIn("<!DOCTYPE html>", html)
+        self.assertNotIn('<th/>', html)             # must be replaced with <th></th>
+        self.assertNotIn('<td/>', html)             # must be replaced with <td></td>
+        self.assertNotIn('<thead><th>', html)       # missing <tr>
         self.assert_link_quality(html, response.templates[0].name)
         self.assert_scripts_clean(html, response.templates[0].name)
 

@@ -86,10 +86,12 @@
 
         <table class="white">
             <thead>
-                <th>Regiocompetitie</th>
-                <th>Wedstrijdboog</th>
-                <th>Status</th>
-                <th><!-- kolom voor knopje --></th>
+                <tr>
+                    <th>Regiocompetitie</th>
+                    <th>Wedstrijdboog</th>
+                    <th>Status</th>
+                    <th><!-- kolom voor knopje --></th>
+                </tr>
             </thead>
 
             {% for deelcomp in regiocompetities %}
@@ -162,11 +164,13 @@
 
         <table class="white">
             <thead>
-                <th>Datum</th>
-                <th>Soort record</th>
-                <th>Score</th>
-                <th>Plaats</th>
-                <th><!-- kolom voor knop --></th>
+                <tr>
+                    <th>Datum</th>
+                    <th>Soort record</th>
+                    <th>Score</th>
+                    <th>Plaats</th>
+                    <th><!-- kolom voor knop --></th>
+                </tr>
             </thead>
 
             {% for obj in records %}
@@ -188,11 +192,13 @@
 
         <table class="white">
             <thead>
-                <th>Competitie</th>
-                <th>Seizoen</th>
-                <th>Boog</th>
-                <th>Scores</th>
-                <th>Gemiddelde pijl</th>
+                <tr>
+                    <th>Competitie</th>
+                    <th>Seizoen</th>
+                    <th>Boog</th>
+                    <th>Scores</th>
+                    <th>Gemiddelde pijl</th>
+                </tr>
             </thead>
 
             {% for obj in histcomp %}
@@ -215,11 +221,13 @@
 
         <table class="white">
             <thead>
-                <th>Boog</th>
-                <th>Afstand</th>
-                <th>Gemiddelde</th>
-                <th>Vastgesteld op</th>
-                <th>Bron</th>
+                <tr>
+                    <th>Boog</th>
+                    <th>Afstand</th>
+                    <th>Gemiddelde</th>
+                    <th>Vastgesteld op</th>
+                    <th>Bron</th>
+                </tr>
             </thead>
 
             {% for schutterboog in gemiddelden %}
@@ -246,9 +254,11 @@
 
     <table class="white">
         <thead>
-            <th>Naam / Namen</th>
-            <th>Functie</th>
-            <th>E-mail</th>
+            <tr>
+                <th>Naam / Namen</th>
+                <th>Functie</th>
+                <th>E-mail</th>
+            </tr>
         </thead>
 
         <!-- RCL Indoor -->

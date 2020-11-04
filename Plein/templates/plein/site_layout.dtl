@@ -203,8 +203,9 @@
             // en regels van de tabel wel/niet zichtbaar te maken
             // kolommen waarin gezocht mag worden moeten het 'filter' attribuut hebben
             //          <thead>
-            //              <th filter="on">Header1</th>
-            //              <th>Header2<th>
+            //              <tr>
+            //                  <th filter="on">Header1</th>
+            //                  <th>Header2<th>
 
             // Uitgebreider voorbeeld:
             //   <table class="white" id="table3">

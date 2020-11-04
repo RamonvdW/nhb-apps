@@ -52,8 +52,8 @@
             <p>&nbsp;</p>
             <h5>Aantal schutters per blazoen type:</h5>
         </td>
-        {% for beschrijving in dagdelen %}<td/>{% endfor %}
-        <td/>   <!-- totalen -->
+        {% for beschrijving in dagdelen %}<td></td>{% endfor %}
+        <td></td>   <!-- totalen -->
     </tr>
 
     <thead>

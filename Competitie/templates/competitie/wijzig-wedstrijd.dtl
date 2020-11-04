@@ -82,8 +82,10 @@
         <table class="white">
 
             <thead>
-                <th>Beschrijving</th>
-                <th>Datum</th>
+                <tr>
+                    <th>Beschrijving</th>
+                    <th>Datum</th>
+                </tr>
             </thead>
 
             <tr>

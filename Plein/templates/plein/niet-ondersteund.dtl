@@ -38,17 +38,19 @@
             <table class="white">
 
                 <thead>
-                    <th>Browser naam</th>
-                    <th>Minimum versie</th>
-                    <th>Beschikbaar sinds</th>
-                    <th>Marktaandeel 2020</th>
+                    <tr>
+                        <th>Browser naam</th>
+                        <th>Marktaandeel 2020</th>
+                        <th>Minimum versie</th>
+                        <th>Beschikbaar sinds</th>
+                    </tr>
                 </thead>
 
-                <tr><td>Chrome</td><td>51</td><td>Mei 2016</td><td>66%</td></tr>
-                <tr><td>Safari</td><td>10</td><td>September 2016</td><td>17%</td></tr>
-                <tr><td>Firefox</td><td>54</td><td>Juni 2017</td><td>4%</td></tr>
-                <tr><td>Opera</td><td>38</td><td>Juni 2016</td><td>2%</td></tr>
-                <tr><td>Edge</td><td>14</td><td>Augustus 2016</td><td>1%</td></tr>
+                <tr> <td>Chrome</td>  <td>66%</td> <td>51</td> <td>Mei 2016</td>       </tr>
+                <tr> <td>Safari</td>  <td>17%</td> <td>10</td> <td>September 2016</td> </tr>
+                <tr> <td>Firefox</td> <td>4%</td>  <td>54</td> <td>Juni 2017</td>      </tr>
+                <tr> <td>Opera</td>   <td>2%</td>  <td>38</td> <td>Juni 2016</td>      </tr>
+                <tr> <td>Edge</td>    <td>1%</td>  <td>14</td> <td>Augustus 2016</td>  </tr>
             </table>
 
             <p>Zoals je kan zien waren deze browsers in 2016 en 2017 al beschikbaar.</p>
@@ -62,7 +64,13 @@
 
             <p>Er bestaan browsers die een verpakking zijn van een van de ondersteunde browsers. Die zouden in principe moeten werken.</p>
 
-            <p>Als je problemen ondervindt met zo'n browser willen je vriendelijk verzoeken om uit te sluiten dat het aan deze browser ligt (dat kunnen we namelijk niet oplossen) door het eerst te proberen met een van browsers die wel ondersteund zijn.</p>
+            <p>Als je problemen ondervindt met zo'n browser, dan willen je vriendelijk verzoeken om uit te sluiten dat het aan deze browser ligt (dat kunnen we namelijk niet oplossen): probeer het eerst met een van de browsers die we wel ondersteunen.</p>
+
+            <p>&nbsp;</p>
+            <h5>Help!</h5>
+
+            <p>Komt je er niet uit? Stuur dan een e-mail naar het volgende adres:</p>
+            <a class="btn-nhb-blauw" href="mailto:nhb-apps-support@handboogsport.nl"><i class="material-icons-round left">email</i>nhb-apps-support@handboogsport.nl</a>
 
         </div>
     </body>

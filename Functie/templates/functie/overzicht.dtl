@@ -27,7 +27,7 @@
         <thead>
             <tr>        <!-- filter rij -->
                 <td colspan="2" class="table-filter"><input class="table-filter" oninput="myTableFilter(this, 'table1')" placeholder="Zoeken"/></td>
-                <td/>       <!-- email -->
+                <td></td>       <!-- email -->
             </tr>
             <tr>
                 <th filter="on">Functie / Rol</th>
@@ -47,7 +47,7 @@
                         <span>{{ obj.volledige_naam }}</span>
                     {% endfor %}
                 </td>
-                <td/>   <!-- email -->
+                <td></td>   <!-- email -->
             </tr>
         {% endif %}
 
@@ -62,7 +62,7 @@
                         <span>{{ obj.volledige_naam }}</span>
                     {% endfor %}
                 </td>
-                <td/>   <!-- email -->
+                <td></td>   <!-- email -->
             </tr>
         {% endif %}
 

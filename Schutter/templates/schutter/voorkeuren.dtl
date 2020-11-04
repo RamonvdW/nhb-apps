@@ -48,8 +48,10 @@
     <table class="white">
 
         <thead>
-            <th>Hier schiet ik mee</th>
-            <th>Alleen informatie</th>
+            <tr>
+                <th>Hier schiet ik mee</th>
+                <th>Alleen informatie</th>
+            </tr>
         </thead>
 
         {% for obj in bogen %}

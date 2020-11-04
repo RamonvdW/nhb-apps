@@ -17,7 +17,7 @@
 <table class="striped">
     <tr>
         <td class="center-align">
-            <img src="{% static 'plein/indoor_sfeer_1.jpg' %}" style="width:100%; height:auto" loading="lazy"><br>
+            <img src="{% static 'plein/indoor_sfeer_1.jpg' %}" style="width:100%; height:auto" loading="lazy" alt="sfeerfoto"><br>
             <code style="font-size:12px">Sfeerfoto van een wedstrijd binnenshuis</code>
         </td>
     </tr>
@@ -34,13 +34,15 @@
 
 <table class="white">
     <thead>
-        <th>Competitie</th>
-        <th>Schiet<wbr/>afstand</th>
-        <th><span class="hide-on-small-only">Pijlen per schietbeurt</span>
-            <span class="hide-on-med-and-up">Per beurt</span></th>
-        <th>Schiet<wbr/>beurten</th>
-        <th class="hide-on-small-only">Blazoen</th>
-        <th class="hide-on-small-only">Maximale score</th>
+        <tr>
+            <th>Competitie</th>
+            <th>Schiet<wbr/>afstand</th>
+            <th><span class="hide-on-small-only">Pijlen per schietbeurt</span>
+                <span class="hide-on-med-and-up">Per beurt</span></th>
+            <th>Schiet<wbr/>beurten</th>
+            <th class="hide-on-small-only">Blazoen</th>
+            <th class="hide-on-small-only">Maximale score</th>
+        </tr>
     </thead>
 
     <tr>
@@ -67,7 +69,7 @@
 <table class="striped">
     <tr>
         <td class="center-align">
-            <img src="{% static 'plein/indoor_sfeer_2.jpg' %}" style="width:100%; height:auto" loading="lazy"><br>
+            <img src="{% static 'plein/indoor_sfeer_2.jpg' %}" style="width:100%; height:auto" loading="lazy" alt="sfeerfoto"><br>
             <code style="font-size:12px">Sfeerfoto van een wedstrijd binnenshuis</code>
         </td>
     </tr>
@@ -80,8 +82,10 @@
 
 <table class="white">
     <thead>
-        <th class="hide-on-small-only">Rayon</th>
-        <th>Regio</th>
+        <tr>
+            <th class="hide-on-small-only">Rayon</th>
+            <th>Regio</th>
+        </tr>
     </thead>
     {% for regio in regios %}
     <tr {% if regio.mijn_regio %}class="nhb-blauw white-text"{% endif %}>
@@ -131,7 +135,7 @@
 <table class="striped">
     <tr>
         <td class="center-align">
-            <img src="{% static 'plein/indoor_sfeer_4.jpg' %}" style="width:100%; height:auto" loading="lazy"><br>
+            <img src="{% static 'plein/indoor_sfeer_4.jpg' %}" style="width:100%; height:auto" loading="lazy" alt="sfeerfoto"><br>
             <code style="font-size:12px">Sfeerfoto van een wedstrijd binnenshuis</code>
         </td>
     </tr>
@@ -156,7 +160,7 @@ Nieuwe schutters krijgen na 3 scores hun speelsterkte vastgesteld.</p>
 <table class="striped">
     <tr>
         <td class="center-align">
-            <img src="{% static 'plein/indoor_sfeer_3.jpg' %}" style="width:100%; height:auto" loading="lazy"><br>
+            <img src="{% static 'plein/indoor_sfeer_3.jpg' %}" style="width:100%; height:auto" loading="lazy" alt="sfeerfoto"><br>
             <code style="font-size:12px">Sfeerfoto van een wedstrijd binnenshuis</code>
         </td>
     </tr>
@@ -173,9 +177,11 @@ Nieuwe schutters krijgen na 3 scores hun speelsterkte vastgesteld.</p>
 
 <table class="white">
     <thead>
-        <th>Competitie</th>
-        <th>Pijlen</th>
-        <th>Knock-out finales</th>
+        <tr>
+            <th>Competitie</th>
+            <th>Pijlen</th>
+            <th>Knock-out finales</th>
+        </tr>
     </thead>
 
     <tr>
@@ -202,10 +208,10 @@ Nieuwe schutters krijgen na 3 scores hun speelsterkte vastgesteld.</p>
     </tr>
     <tr>
         <td class="center-align">
-            <img src="{% static 'plein/blazoen_dt.png' %}" style="max-height: 300px; height: auto" alt="Dutch Target blazoen" loading="lazy">
+            <img src="{% static 'plein/blazoen_dt.png' %}" style="max-height:300px; height:auto" loading="lazy" alt="Dutch Target blazoen">
         </td>
         <td class="center-align">
-            <img src="{% static 'plein/blazoen_40cm.png' %}" style="max-height: 220px; height: auto" alt="40cm / 60cm blazoen" style="border:1px solid gray" loading="lazy">
+            <img src="{% static 'plein/blazoen_40cm.png' %}" style="max-height:220px; height:auto; border:1px solid gray" loading="lazy" alt="40cm / 60cm blazoen" >
         </td>
     </tr>
     <tr>
@@ -306,7 +312,7 @@ In de shoot-off wordt 1 pijl gesloten en beslist de scheidsrechter welke pijl he
 <table class="striped">
     <tr>
         <td class="center-align">
-            <img src="{% static 'plein/indoor_sfeer_5.jpg' %}" style="width:100%; height:auto" loading="lazy"><br>
+            <img src="{% static 'plein/indoor_sfeer_5.jpg' %}" style="width:100%; height:auto" loading="lazy" alt="sfeerfoto"><br>
             <code style="font-size:12px">Sfeerfoto van een wedstrijd binnenshuis</code>
         </td>
     </tr>
@@ -318,9 +324,11 @@ In de shoot-off wordt 1 pijl gesloten en beslist de scheidsrechter welke pijl he
 
 <table class="white">
     <thead>
-        <th>Activiteit</th>
-        <th>Indoor</th>
-        <th>25m 1pijl</th>
+        <tr>
+            <th>Activiteit</th>
+            <th>Indoor</th>
+            <th>25m 1pijl</th>
+        </tr>
     </thead>
 
     <tr>
@@ -346,13 +354,13 @@ In de shoot-off wordt 1 pijl gesloten en beslist de scheidsrechter welke pijl he
         <td><span class="hide-on-small-only">Bondskampioenschappen Indoor</span>
             <span class="hide-on-med-and-up">BK Indoor</span></td>
         <td>februari / maart</td>
-        <td/>
+        <td></td>
     </tr>
 
     <tr>
         <td><span class="hide-on-small-only">Nederlandse Kampioenschappen 25m1 pijl</span>
             <span class="hide-on-med-and-up">NK 25m1 pijl</span></td>
-        <td/>
+        <td></td>
         <td>mei / juni</td>
     </tr>
 

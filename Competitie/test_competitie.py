@@ -501,6 +501,9 @@ class TestCompetitie(E2EHelpers, TestCase):
         # coverage
         obj = CompetitieKlasse.objects.all()[0]
         self.assertTrue(str(obj) != "")
+        obj.indiv = None
+        obj.team = TeamWedstrijdklasse.objects.all()[0]
+        self.assertTrue(str(obj) != "")
 
     def test_klassegrenzen_vaststellen_cornercases(self):
         self.e2e_login_and_pass_otp(self.account_bb)

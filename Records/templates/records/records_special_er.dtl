@@ -16,14 +16,16 @@
 
     <table class="white">
         <thead>
-            <th>Datum</th>
-            <th>Schutter</th>
-            <th>Soort record</th>
-            <th>Materiaal<wbr/>klasse</th>
-            <!-- <th>Leeftijds<wbr/>categorie</th> -->
-            <!-- <th>Para klasse</th> -->
-            <th>Score</th>
-            <th><!-- kolom voor de 'details' knop --></th>
+            <tr>
+                <th>Datum</th>
+                <th>Schutter</th>
+                <th>Soort record</th>
+                <th>Materiaal<wbr/>klasse</th>
+                <!-- <th>Leeftijds<wbr/>categorie</th> -->
+                <!-- <th>Para klasse</th> -->
+                <th>Score</th>
+                <th><!-- kolom voor de 'details' knop --></th>
+            </tr>
         </thead>
 
         {% for obj in object_list %}

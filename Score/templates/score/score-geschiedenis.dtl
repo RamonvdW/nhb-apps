@@ -52,10 +52,12 @@
 
             <table class="white">
                 <thead>
-                    <th>Boog</th>
-                    <th>Wedstrijd</th>
-                    <th>Waarde</th>
-                    <th>Geschiedenis</th>
+                    <tr>
+                        <th>Boog</th>
+                        <th>Wedstrijd</th>
+                        <th>Waarde</th>
+                        <th>Geschiedenis</th>
+                    </tr>
                 </thead>
 
                 {% for schutterboog in schuttersboog %}
@@ -68,7 +70,7 @@
                         {% for score in schutterboog.scores %}
                             {% if score.afstand_meter == afstand %}
                                 <tr>
-                                    <td/>   <!-- boog -->
+                                    <td></td>   <!-- boog -->
 
                                     {% if score.is_ag %}
                                         <!-- de view heeft score.waarde al omgezet naar N.MMM -->
@@ -79,7 +81,7 @@
                                         <td>{{ score.waarde }}</td>
                                     {% endif %}
 
-                                    <td/>
+                                    <td></td>
                                 </tr>
 
                                 {% for hist in score.hists %}

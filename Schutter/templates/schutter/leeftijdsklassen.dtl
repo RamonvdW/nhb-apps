@@ -29,9 +29,11 @@ Jij bereikt dit jaar de leeftijd {{ plein_leeftijd }}. Dit bepaalt je <i>leeftij
 
 <table class="white">
     <thead>
-        <th>Jaartal</th>
-        <th>Te bereiken leeftijd</th>
-        <th>Jouw leeftijdsklasse voor wedstrijden het gehele jaar</th>
+        <tr>
+            <th>Jaartal</th>
+            <th>Te bereiken leeftijd</th>
+            <th>Jouw leeftijdsklasse voor wedstrijden het gehele jaar</th>
+        </tr>
     </thead>
 
     <tr>
@@ -75,8 +77,10 @@ Jij bereikt dit jaar de leeftijd {{ plein_leeftijd }}. Dit bepaalt je <i>leeftij
 
 <table class="white">
     <thead>
-        <th>Seizoen bondscompetitie</th>
-        <th>Jouw wedstrijdklasse voor het gehele seizoen</th>
+        <tr>
+            <th>Seizoen bondscompetitie</th>
+            <th>Jouw wedstrijdklasse voor het gehele seizoen</th>
+        </tr>
     </thead>
 
     <tr>

@@ -59,8 +59,10 @@
 
     <table class="white">
         <thead>
-            <th>Aspect</th>
-            <th>Keuze</th>
+            <tr>
+                <th>Aspect</th>
+                <th>Keuze</th>
+            </tr>
         </thead>
 
         <tr>

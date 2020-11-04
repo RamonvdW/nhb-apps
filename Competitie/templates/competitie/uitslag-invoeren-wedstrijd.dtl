@@ -553,7 +553,7 @@
             <td class="table-filter" colspan="4">
                 <input id="table1_zoeken_input" class="table-filter" autofocus oninput="myTableFilter(this, 'table1')" placeholder="Zoeken"/>
             </td>
-            <td/>
+            <td></td>
         </tr>
         <tr>
             <th filter="on">NHB nummer</th>
@@ -610,7 +610,7 @@
         <th>NHB nummer</th>
         <th>Naam</th>
         <th>Vereniging</th>
-        <th colspan="2"/>   <!-- kolom voor knop 'toevoegen' -->
+        <th colspan="2"></th>   <!-- kolom voor knop 'toevoegen' -->
     </tr>
 
     <tr style="border: 0px">
