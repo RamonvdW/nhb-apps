@@ -455,7 +455,13 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         resp = self.client.post(url, {'datum1': '2019-08-09',
                                       'datum2': '2019-09-10',
                                       'datum3': '2019-10-11',
-                                      'datum4': '2019-11-12'})
+                                      'datum4': '2019-11-12',
+                                      'datum5': '2019-11-12',
+                                      'datum6': '2020-02-01',
+                                      'datum7': '2019-02-12',
+                                      'datum8': '2020-05-01',
+                                      'datum9': '2020-05-12',
+                                      })
         self.assert_is_redirect(resp, self.url_overzicht)
 
         # controleer dat de nieuwe datums opgeslagen zijn

@@ -61,12 +61,38 @@ class Competitie(models.Model):
     # seizoen
     begin_jaar = models.PositiveSmallIntegerField()     # 2019
 
-    # kalender data
+    # wanneer moet een schutter lid zijn bij de bond om mee te mogen doen aan de teamcompetitie?
     uiterste_datum_lid = models.DateField()
+
+    # fases en datums regiocompetitie
+    # fase A: aanmaken competitie, vaststellen klassen
     begin_aanmeldingen = models.DateField()
+    # fase B: aanmelden schutters
     einde_aanmeldingen = models.DateField()
+    # fase C: samenstellen vaste teams (HWL)
     einde_teamvorming = models.DateField()
+    # fase D: aanmaken poules (RCL)
     eerste_wedstrijd = models.DateField()
+    # fase E: wedstrijden
+    laatst_mogelijke_wedstrijd = models.DateField()
+    # fase F: vaststellen en publiceren uitslag
+    alle_regiocompetities_afgesloten = models.BooleanField(default=False)
+
+    # fases en datums rayonkampioenschappen
+    # fase K: bevestig deelnemers; oproepen reserves
+    rk_eerste_wedstrijd = models.DateField()
+    # fase L: wedstrijden
+    rk_laatste_wedstrijd = models.DateField()
+    # fase M: vaststellen en publiceren uitslag
+    alle_rks_afgesloten = models.BooleanField(default=False)
+
+    # fases en datums bondskampioenschappen
+    # fase P: bevestig deelnemers; oproepen reserves
+    bk_eerste_wedstrijd = models.DateField()
+    # fase Q: wedstrijden
+    bk_laatste_wedstrijd = models.DateField()
+    # fase R: vaststellen en publiceren uitslag
+    alle_bks_afgesloten = models.BooleanField(default=False)
 
     # nog te wijzigen?
     is_afgesloten = models.BooleanField(default=False)
@@ -78,38 +104,78 @@ class Competitie(models.Model):
     def zet_fase(self):
         # fase A was totdat dit object gemaakt werd
 
+        if self.alle_bks_afgesloten:
+            self.fase = 'Z'
+            return
+
         now = timezone.now()
         now = datetime.date(year=now.year, month=now.month, day=now.day)
 
-        # A1 totdat aanvangsgemiddelden en klassegrenzen zijn vastgesteld
-        self.fase = 'A1'
+        if self.alle_rks_afgesloten:
+            # in BK fases
+            if now < self.bk_eerste_wedstrijd:
+                # fase P: bevestig deelnemers; oproepen reserves
+                self.fase = 'P'
+                return
+
+            if now <= self.bk_laatste_wedstrijd:
+                # fase Q: wedstrijden
+                self.fase = 'Q'
+                return
+
+            # fase R: vaststellen en publiceren uitslag
+            self.fase = 'R'
+            return
+
+        if self.alle_regiocompetities_afgesloten:
+            # in RK fase
+            if now < self.rk_eerste_wedstrijd:
+                # fase K: bevestig deelnemers; oproepen reserves
+                self.fase = 'K'
+                return
+
+            if now <= self.rk_laatste_wedstrijd:
+                # fase L: wedstrijden
+                self.fase = 'L'
+                return
+
+            # fase M: vaststellen en publiceren uitslag
+            self.fase = 'M'
+            return
+
+        # regiocompetitie fases
         if self.competitieklasse_set.count() == 0:
-            # wedstrijdklassen zijn nog niet vastgesteld
+            # fase A1: wedstrijdklassen zijn nog niet vastgesteld
+            self.fase = 'A1'
             return
 
-        # A2 = instellingen regio, tot aanmeldingen beginnen
-        self.fase = 'A2'
         if now < self.begin_aanmeldingen:
-            # nog niet open voor aanmelden
+            # A2 = instellingen regio, tot aanmeldingen beginnen; nog niet open voor aanmelden
+            self.fase = 'A2'
             return
 
-        # B = open voor inschrijvingen, tot sluiten inschrijvingen
-        self.fase = 'B'
-        if now < self.einde_aanmeldingen:
+        if now <= self.einde_aanmeldingen:
+            # B = open voor inschrijvingen, tot sluiten inschrijvingen
+            self.fase = 'B'
             return
 
-        # C = aanmaken teams; gesloten voor individuele inschrijvingen
-        self.fase = 'C'
-        if now < self.einde_teamvorming:
+        if now <= self.einde_teamvorming:
+            # C = aanmaken teams; gesloten voor individuele inschrijvingen
+            self.fase = 'C'
             return
 
-        # D = aanmaken poules en afronden wedstrijdschema's
-        self.fase = 'D'
         if now < self.eerste_wedstrijd:
+            # D = aanmaken poules en afronden wedstrijdschema's
+            self.fase = 'D'
             return
 
-        # E = Begin wedstrijden
-        self.fase = 'E'
+        if now < self.laatst_mogelijke_wedstrijd:
+            # E = Begin wedstrijden
+            self.fase = 'E'
+            return
+
+        # fase F: vaststellen en publiceren uitslag
+        self.fase = 'F'
 
     objects = models.Manager()      # for the editor only
 
@@ -298,7 +364,9 @@ def competitie_aanmaken(jaar):
         Wedstrijdklassen volgen later, tijdens het bepalen van de klassegrenzen
     """
     yearend = date(year=jaar, month=12, day=31)     # 31 december
-    udvl = date(year=jaar, month=8, day=1)          # 1 augustus = uiterste datum van lidmaatschap voor deelname teamcompetitie
+    udvl = date(year=jaar, month=8, day=1)          # 1 augustus
+    begin_rk = date(year=jaar + 1, month=2, day=1)  # 1 februari
+    begin_bk = date(year=jaar + 1, month=5, day=1)  # 1 mei
 
     # maak de Competitie aan voor 18m en 25m
     for afstand, beschrijving in AFSTAND:
@@ -308,6 +376,16 @@ def competitie_aanmaken(jaar):
         comp.begin_jaar = jaar
         comp.uiterste_datum_lid = udvl
         comp.begin_aanmeldingen = comp.einde_aanmeldingen = comp.einde_teamvorming = comp.eerste_wedstrijd = yearend
+        if afstand == '18':
+            comp.laatst_mogelijke_wedstrijd = yearend
+        else:
+            comp.laatst_mogelijke_wedstrijd = begin_rk
+        comp.rk_selecteer_deelnemers = begin_rk
+        comp.rk_eerste_wedstrijd = begin_rk
+        comp.rk_laatste_wedstrijd = begin_rk
+        comp.bk_selecteer_deelnemers = begin_bk
+        comp.bk_eerste_wedstrijd = begin_bk
+        comp.bk_laatste_wedstrijd = begin_bk
         comp.save()
 
         # maak de Deelcompetities aan voor Regio, RK, BK

@@ -369,7 +369,7 @@ class TestCompetitieTussenstand(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
 
     def test_rayon_n(self):
-        url = self.url_tussenstand_rayon_n % (18, 'R', 1)
+        url = self.url_tussenstand_rayon_n % (18, 'IB', 1)      # bevat onze enige deelnemer met 6 scores
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)

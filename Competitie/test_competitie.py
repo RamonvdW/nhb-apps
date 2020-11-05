@@ -565,7 +565,12 @@ class TestCompetitie(E2EHelpers, TestCase):
                           begin_aanmeldingen=datum,
                           einde_aanmeldingen=datum,
                           einde_teamvorming=datum,
-                          eerste_wedstrijd=datum)
+                          eerste_wedstrijd=datum,
+                          laatst_mogelijke_wedstrijd=datum,
+                          rk_eerste_wedstrijd=datum,
+                          rk_laatste_wedstrijd=datum,
+                          bk_eerste_wedstrijd=datum,
+                          bk_laatste_wedstrijd=datum)
         comp.save()
 
         wkl = TeamWedstrijdklasse.objects.all()[0]
@@ -585,7 +590,10 @@ class TestCompetitie(E2EHelpers, TestCase):
         comp = Competitie()
         comp.begin_jaar = 2000
         comp.uiterste_datum_lid = datetime.date(year=2000, month=1, day=1)
-        comp.begin_aanmeldingen = comp.einde_aanmeldingen = comp.einde_teamvorming = comp.eerste_wedstrijd = einde_jaar
+        comp.begin_aanmeldingen = comp.einde_aanmeldingen = comp.einde_teamvorming = einde_jaar
+        comp.eerste_wedstrijd = comp.laatst_mogelijke_wedstrijd = einde_jaar
+        comp.rk_eerste_wedstrijd = comp.rk_laatste_wedstrijd = einde_jaar
+        comp.bk_eerste_wedstrijd = comp.bk_laatste_wedstrijd = einde_jaar
         comp.save()
         comp.zet_fase()
         self.assertEqual(comp.fase, 'A1')
@@ -620,6 +628,39 @@ class TestCompetitie(E2EHelpers, TestCase):
         comp.eerste_wedstrijd = gisteren
         comp.zet_fase()
         self.assertEqual(comp.fase, 'E')
+
+        # na laatste wedstrijd = F
+        comp.laatst_mogelijke_wedstrijd = gisteren
+        comp.zet_fase()
+        self.assertEqual(comp.fase, 'F')
+
+        comp.alle_regiocompetities_afgesloten = True
+        comp.zet_fase()
+        self.assertEqual(comp.fase, 'K')
+
+        comp.rk_eerste_wedstrijd = gisteren
+        comp.zet_fase()
+        self.assertEqual(comp.fase, 'L')
+
+        comp.rk_laatste_wedstrijd = gisteren
+        comp.zet_fase()
+        self.assertEqual(comp.fase, 'M')
+
+        comp.alle_rks_afgesloten = True
+        comp.zet_fase()
+        self.assertEqual(comp.fase, 'P')
+
+        comp.bk_eerste_wedstrijd = gisteren
+        comp.zet_fase()
+        self.assertEqual(comp.fase, 'Q')
+
+        comp.bk_laatste_wedstrijd = gisteren
+        comp.zet_fase()
+        self.assertEqual(comp.fase, 'R')
+
+        comp.alle_bks_afgesloten = True
+        comp.zet_fase()
+        self.assertEqual(comp.fase, 'Z')
 
 
 # TODO: gebruik assert_other_http_commands_not_supported
