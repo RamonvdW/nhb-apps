@@ -22,13 +22,15 @@
 
 <table class="white">
     <thead>
-        <th>Vereniging</th>
+        <tr>
+            <th>Vereniging</th>
 
-        {% for beschrijving in dagdelen %}
-            <th class="center-align">{{ beschrijving }}</th>
-        {% endfor %}
+            {% for beschrijving in dagdelen %}
+                <th class="center-align">{{ beschrijving }}</th>
+            {% endfor %}
 
-        <th class="center-align">Totaal</th>
+            <th class="center-align">Totaal</th>
+        </tr>
     </thead>
 
     {% for nhb_ver in regio_verenigingen %}
@@ -57,13 +59,15 @@
     </tr>
 
     <thead>
-        <th>Type blazoen</th>
+        <tr>
+            <th>Type blazoen</th>
 
-        {% for beschrijving in dagdelen %}
-            <th class="center-align">{{ beschrijving }}</th>
-        {% endfor %}
+            {% for beschrijving in dagdelen %}
+                <th class="center-align">{{ beschrijving }}</th>
+            {% endfor %}
 
-        <th class="center-align">Totaal</th>
+            <th class="center-align">Totaal</th>
+        </tr>
     </thead>
 
     {% for kolommen in blazoen_count %}
