@@ -41,12 +41,13 @@ def mag_deelcomp_wedstrijd_wijzigen(wedstrijd, functie_nu, deelcomp):
 
 def bepaal_wedstrijd_en_deelcomp_of_404(wedstrijd_pk):
     try:
+        wedstrijd_pk = int(wedstrijd_pk)
         wedstrijd = (Wedstrijd
                      .objects
                      .select_related('uitslag')
                      .prefetch_related('uitslag__scores')
                      .get(pk=wedstrijd_pk))
-    except Wedstrijd.DoesNotExist:
+    except (ValueError, Wedstrijd.DoesNotExist):
         raise Resolver404()
 
     plan = wedstrijd.wedstrijdenplan_set.all()[0]
@@ -198,12 +199,10 @@ class DynamicDeelnemersOphalenView(UserPassesTestMixin, View):
         # print('data: %s' % repr(data))
 
         try:
-            deelcomp_pk = str(data['deelcomp_pk'])[:6]   # afkappen voor extra veiligheid
+            deelcomp_pk = int(str(data['deelcomp_pk'])[:6])   # afkappen voor extra veiligheid
             deelcomp = DeelCompetitie.objects.get(laag=LAAG_REGIO,
                                                   pk=deelcomp_pk)
-        except KeyError:
-            raise Resolver404()         # garbage in
-        except DeelCompetitie.DoesNotExist:
+        except (KeyError, ValueError, DeelCompetitie.DoesNotExist):
             raise Resolver404()         # garbage in
 
         # TODO: filter deelnemers op cluster (wedstrijd.vereniging.clusters)
@@ -258,12 +257,10 @@ class DynamicZoekOpNhbnrView(UserPassesTestMixin, View):
         # print('data: %s' % repr(data))
 
         try:
-            nhb_nr = str(data['nhb_nr'])[:6]               # afkappen voor extra veiligheid
-            wedstrijd_pk = str(data['wedstrijd_pk'])[:6]   # afkappen voor extra veiligheid
+            nhb_nr = int(str(data['nhb_nr'])[:6])               # afkappen voor extra veiligheid
+            wedstrijd_pk = int(str(data['wedstrijd_pk'])[:6])   # afkappen voor extra veiligheid
             wedstrijd = Wedstrijd.objects.get(pk=wedstrijd_pk)
-        except KeyError:
-            raise Resolver404()         # garbage in
-        except Wedstrijd.DoesNotExist:
+        except (KeyError, ValueError, Wedstrijd.DoesNotExist):
             raise Resolver404()         # garbage in
 
         plan = wedstrijd.wedstrijdenplan_set.all()[0]
@@ -326,19 +323,13 @@ class DynamicScoresOpslaanView(UserPassesTestMixin, View):
     @staticmethod
     def laad_wedstrijd_of_404(data):
         try:
-            # invoer kan string of numeriek zijn
-            wedstrijd_pk = str(data['wedstrijd_pk'])[:6]     # afkappen geeft beveiliging
-        except KeyError:
-            # verplicht veld afwezig is suspicious
-            raise Resolver404()
-
-        try:
+            wedstrijd_pk = int(str(data['wedstrijd_pk'])[:6])   # afkappen geeft beveiliging
             wedstrijd = (Wedstrijd
                          .objects
                          .select_related('uitslag')
                          .prefetch_related('uitslag__scores')
                          .get(pk=wedstrijd_pk))
-        except Wedstrijd.DoesNotExist:
+        except (KeyError, ValueError, Wedstrijd.DoesNotExist):
             raise Resolver404()
 
         return wedstrijd

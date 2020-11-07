@@ -547,10 +547,10 @@ class WijzigDatumsView(UserPassesTestMixin, TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        comp_pk = kwargs['comp_pk'][:6]     # afkappen geeft beveiliging
         try:
+            comp_pk = int(kwargs['comp_pk'][:6])      # afkappen geeft beveiliging
             competitie = Competitie.objects.get(pk=comp_pk)
-        except Competitie.DoesNotExist:
+        except (ValueError, Competitie.DoesNotExist):
             raise Resolver404()
 
         context['competitie'] = competitie
@@ -573,10 +573,10 @@ class WijzigDatumsView(UserPassesTestMixin, TemplateView):
         """ deze functie wordt aangeroepen als een POST request ontvangen is.
             --> de beheerder wil deze klassegrenzen vaststellen
         """
-        comp_pk = kwargs['comp_pk'][:6]     # afkappen geeft beveiliging
         try:
+            comp_pk = int(kwargs['comp_pk'][:6])      # afkappen geeft beveiliging
             competitie = Competitie.objects.get(pk=comp_pk)
-        except Competitie.DoesNotExist:
+        except (ValueError, Competitie.DoesNotExist):
             raise Resolver404()
 
         datums = list()

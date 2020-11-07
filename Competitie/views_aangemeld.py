@@ -85,10 +85,10 @@ class LijstAangemeldRegiocompAllesView(UserPassesTestMixin, TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        comp_pk = kwargs['comp_pk']
         try:
+            comp_pk = int(kwargs['comp_pk'][:6])        # afkappen voor veiligheid
             comp = Competitie.objects.get(pk=comp_pk)
-        except Competitie.DoesNotExist:
+        except (ValueError, Competitie.DoesNotExist):
             raise Resolver404()
 
         context['competitie'] = comp
@@ -141,18 +141,18 @@ class LijstAangemeldRegiocompRayonView(UserPassesTestMixin, TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        comp_pk = kwargs['comp_pk']
         try:
+            comp_pk = int(kwargs['comp_pk'][:6])    # afkappen voor veiligheid
             comp = Competitie.objects.get(pk=comp_pk)
-        except Competitie.DoesNotExist:
+        except (ValueError, Competitie.DoesNotExist):
             raise Resolver404()
 
         context['competitie'] = comp
 
-        rayon_pk = kwargs['rayon_pk']
         try:
+            rayon_pk = int(kwargs['rayon_pk'][:6])  # afkappen voor veiligheid
             rayon = NhbRayon.objects.get(pk=rayon_pk)
-        except NhbRayon.DoesNotExist:
+        except (ValueError, NhbRayon.DoesNotExist):
             raise Resolver404()
 
         context['inhoud'] = 'in ' + str(rayon)
@@ -205,21 +205,21 @@ class LijstAangemeldRegiocompRegioView(UserPassesTestMixin, TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        comp_pk = kwargs['comp_pk']
         try:
+            comp_pk = int(kwargs['comp_pk'][:6])        # afkappen voor veiligheid
             comp = Competitie.objects.get(pk=comp_pk)
-        except Competitie.DoesNotExist:
+        except (ValueError, Competitie.DoesNotExist):
             raise Resolver404()
 
         context['competitie'] = comp
 
-        regio_pk = kwargs['regio_pk']
         try:
+            regio_pk = int(kwargs['regio_pk'][:6])      # afkappen voor veiligheid
             regio = (NhbRegio
                      .objects
                      .select_related('rayon')
                      .get(pk=regio_pk))
-        except NhbRegio.DoesNotExist:
+        except (ValueError, NhbRegio.DoesNotExist):
             raise Resolver404()
 
         context['inhoud'] = 'in ' + str(regio)
@@ -438,21 +438,21 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        comp_pk = kwargs['comp_pk']
         try:
+            comp_pk = int(kwargs['comp_pk'][:6])        # afkappen voor veiligheid
             comp = Competitie.objects.get(pk=comp_pk)
-        except Competitie.DoesNotExist:
+        except (ValueError, Competitie.DoesNotExist):
             raise Resolver404()
 
         context['competitie'] = comp
 
-        regio_pk = kwargs['regio_pk']
         try:
+            regio_pk = int(kwargs['regio_pk'][:6])      # afkappen voor veiligheid
             regio = (NhbRegio
                      .objects
                      .select_related('rayon')
                      .get(pk=regio_pk))
-        except NhbRegio.DoesNotExist:
+        except (ValueError, NhbRegio.DoesNotExist):
             raise Resolver404()
 
         context['regio'] = regio
@@ -518,21 +518,21 @@ class Inschrijfmethode3BehoefteAlsBestandView(Inschrijfmethode3BehoefteView):
 
         context = dict()
 
-        comp_pk = kwargs['comp_pk']
         try:
+            comp_pk = int(kwargs['comp_pk'][:6])        # afkappen voor veiligheid
             comp = Competitie.objects.get(pk=comp_pk)
-        except Competitie.DoesNotExist:
+        except (ValueError, Competitie.DoesNotExist):
             raise Resolver404()
 
         context['competitie'] = comp
 
-        regio_pk = kwargs['regio_pk']
         try:
+            regio_pk = int(kwargs['regio_pk'][:6])      # afkappen voor veiligheid
             regio = (NhbRegio
                      .objects
                      .select_related('rayon')
                      .get(pk=regio_pk))
-        except NhbRegio.DoesNotExist:
+        except (ValueError, NhbRegio.DoesNotExist):
             raise Resolver404()
 
         try:

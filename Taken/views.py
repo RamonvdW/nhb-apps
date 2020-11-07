@@ -91,10 +91,10 @@ class DetailsView(UserPassesTestMixin, TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        taak_pk = kwargs['taak_pk']
         try:
+            taak_pk = int(kwargs['taak_pk'][:6])        # afkappen geeft veiligheid
             taak = Taak.objects.get(pk=taak_pk)
-        except Taak.DoesNotExist:
+        except (ValueError, Taak.DoesNotExist):
             raise Resolver404()
 
         account = self.request.user
@@ -116,10 +116,10 @@ class DetailsView(UserPassesTestMixin, TemplateView):
 
     def post(self, request, *args, **kwargs):
 
-        taak_pk = kwargs['taak_pk']
         try:
+            taak_pk = int(kwargs['taak_pk'][:6])    # afkappen geeft veiligheid
             taak = Taak.objects.get(pk=taak_pk)
-        except Taak.DoesNotExist:
+        except (ValueError, Taak.DoesNotExist):
             raise Resolver404()
 
         account = self.request.user

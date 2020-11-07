@@ -28,13 +28,13 @@ TEMPLATE_COMPETITIE_WIJZIG_WEDSTRIJD = 'competitie/wijzig-wedstrijd.dtl'
 
 # python strftime: 0=sunday, 6=saturday
 # wij rekenen het verschil ten opzicht van maandag in de week
-WEEK_DAGEN = ( (0, 'Maandag'),
-               (1, 'Dinsdag'),
-               (2, 'Woensdag'),
-               (3, 'Donderdag'),
-               (4, 'Vrijdag'),
-               (5, 'Zaterdag'),
-               (6, 'Zondag'))
+WEEK_DAGEN = ((0, 'Maandag'),
+              (1, 'Dinsdag'),
+              (2, 'Woensdag'),
+              (3, 'Donderdag'),
+              (4, 'Vrijdag'),
+              (5, 'Zaterdag'),
+              (6, 'Zondag'))
 
 JA_NEE = {False: 'Nee', True: 'Ja'}
 
@@ -59,13 +59,13 @@ class BondPlanningView(UserPassesTestMixin, TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        deelcomp_pk = kwargs['deelcomp_pk'][:6]     # afkappen geeft beveiliging
         try:
+            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen geeft beveiliging
             deelcomp_bk = (DeelCompetitie
                            .objects
                            .select_related('competitie')
                            .get(pk=deelcomp_pk))
-        except DeelCompetitie.DoesNotExist:
+        except (KeyError, DeelCompetitie.DoesNotExist):
             raise Resolver404()
 
         if deelcomp_bk.laag != LAAG_BK:
@@ -198,16 +198,13 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        deelcomp_pk = kwargs['deelcomp_pk'][:6]     # afkappen geeft beveiliging
         try:
+            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen geeft beveiliging
             deelcomp = (DeelCompetitie
                         .objects
                         .select_related('competitie', 'nhb_regio', 'nhb_regio__rayon')
-                        .get(pk=deelcomp_pk))
-        except DeelCompetitie.DoesNotExist:
-            raise Resolver404()
-
-        if deelcomp.laag != LAAG_REGIO:
+                        .get(pk=deelcomp_pk, laag=LAAG_REGIO))
+        except (ValueError, DeelCompetitie.DoesNotExist):
             raise Resolver404()
 
         context['deelcomp'] = deelcomp
@@ -275,13 +272,13 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
         if rol_nu != Rollen.ROL_RCL:
             raise Resolver404()
 
-        deelcomp_pk = kwargs['deelcomp_pk'][:6]     # afkappen geeft beveiliging
         try:
+            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen geeft beveiliging
             deelcomp = (DeelCompetitie
                         .objects
                         .select_related('competitie', 'nhb_regio')
-                        .get(pk=deelcomp_pk))
-        except DeelCompetitie.DoesNotExist:
+                        .get(pk=deelcomp_pk, laag=LAAG_REGIO, nhb_regio=functie_nu.nhb_regio))
+        except (ValueError, DeelCompetitie.DoesNotExist):
             raise Resolver404()
 
         if deelcomp.laag != LAAG_REGIO:
@@ -319,13 +316,13 @@ class RegioClusterPlanningView(UserPassesTestMixin, TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        cluster_pk = kwargs['cluster_pk'][:6]     # afkappen geeft beveiliging
         try:
+            cluster_pk = int(kwargs['cluster_pk'][:6])  # afkappen geeft beveiliging
             cluster = (NhbCluster
                        .objects
                        .select_related('regio', 'regio__rayon')
                        .get(pk=cluster_pk))
-        except NhbCluster.DoesNotExist:
+        except (ValueError, NhbCluster.DoesNotExist):
             raise Resolver404()
 
         context['cluster'] = cluster
@@ -376,13 +373,13 @@ class RegioClusterPlanningView(UserPassesTestMixin, TemplateView):
         if rol_nu != Rollen.ROL_RCL:
             raise Resolver404()
 
-        cluster_pk = kwargs['cluster_pk'][:6]     # afkappen geeft beveiliging
         try:
+            cluster_pk = int(kwargs['cluster_pk'][:6])  # afkappen geeft beveiliging
             cluster = (NhbCluster
                        .objects
                        .select_related('regio', 'regio__rayon')
                        .get(pk=cluster_pk))
-        except NhbCluster.DoesNotExist:
+        except (ValueError, NhbCluster.DoesNotExist):
             raise Resolver404()
 
         try:
@@ -438,15 +435,15 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        ronde_pk = kwargs['ronde_pk'][:6]     # afkappen geeft beveiliging
         try:
+            ronde_pk = int(kwargs['ronde_pk'][:6])  # afkappen geeft beveiliging
             ronde = (DeelcompetitieRonde
                      .objects
                      .select_related('deelcompetitie__competitie',
                                      'deelcompetitie__nhb_regio__rayon',
                                      'cluster__regio')
                      .get(pk=ronde_pk))
-        except DeelcompetitieRonde.DoesNotExist:
+        except (ValueError, DeelcompetitieRonde.DoesNotExist):
             raise Resolver404()
 
         context['ronde'] = ronde
@@ -543,13 +540,13 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
             en als op de knop Instellingen Opslaan wordt gedrukt voor de ronde parameters
         """
 
-        ronde_pk = kwargs['ronde_pk'][:6]     # afkappen geeft beveiliging
         try:
+            ronde_pk = int(kwargs['ronde_pk'][:6])  # afkappen geeft beveiliging
             ronde = (DeelcompetitieRonde
                      .objects
                      .select_related('deelcompetitie__competitie')
                      .get(pk=ronde_pk))
-        except DeelcompetitieRonde.DoesNotExist:
+        except (ValueError, DeelcompetitieRonde.DoesNotExist):
             raise Resolver404()
 
         # alleen de RCL mag een wedstrijd toevoegen
@@ -683,14 +680,14 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        wedstrijd_pk = kwargs['wedstrijd_pk'][:6]     # afkappen geeft beveiliging
         try:
+            wedstrijd_pk = int(kwargs['wedstrijd_pk'][:6])  # afkappen geeft beveiliging
             wedstrijd = (Wedstrijd
                          .objects
                          .select_related('uitslag')
                          .prefetch_related('uitslag__scores')
                          .get(pk=wedstrijd_pk))
-        except Wedstrijd.DoesNotExist:
+        except (ValueError, Wedstrijd.DoesNotExist):
             raise Resolver404()
 
         mag_wijzigen, mag_verwijderen = plan_wedstrijd_rechten(self.request, wedstrijd)
@@ -776,11 +773,11 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
     def post(self, request, *args, **kwargs):
         """ Deze functie wordt aangeroepen als de knop 'Opslaan' gebruikt wordt
         """
-        wedstrijd_pk = kwargs['wedstrijd_pk'][:6]     # afkappen geeft beveiliging
 
         try:
+            wedstrijd_pk = int(kwargs['wedstrijd_pk'][:6])  # afkappen geeft beveiliging
             wedstrijd = Wedstrijd.objects.get(pk=wedstrijd_pk)
-        except Wedstrijd.DoesNotExist:
+        except (ValueError, Wedstrijd.DoesNotExist):
             raise Resolver404()
 
         plan = wedstrijd.wedstrijdenplan_set.all()[0]
@@ -805,7 +802,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         except (TypeError, ValueError):
             raise Resolver404()
 
-        if weekdag < 0 or weekdag > 6 or aanvang < 000 or aanvang > 2359:
+        if weekdag < 0 or weekdag > 6 or aanvang < 0 or aanvang > 2359:
             raise Resolver404()
 
         # bepaal de begin datum van de ronde-week
@@ -814,9 +811,9 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         when += datetime.timedelta(days=weekdag)
 
         # vertaal aanvang naar een tijd
-        hour = aanvang // 100
-        min = aanvang - (hour * 100)
-        if hour < 0 or hour > 23 or min < 0 or min > 59:
+        uur = aanvang // 100
+        minuut = aanvang - (uur * 100)
+        if uur < 0 or uur > 23 or minuut < 0 or minuut > 59:
             raise Resolver404()
 
         try:
@@ -825,7 +822,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
             raise Resolver404()
 
         wedstrijd.datum_wanneer = when
-        wedstrijd.tijd_begin_wedstrijd = datetime.time(hour=hour, minute=min)
+        wedstrijd.tijd_begin_wedstrijd = datetime.time(hour=uur, minute=minuut)
         wedstrijd.vereniging = nhbver
 
         locaties = nhbver.wedstrijdlocatie_set.all()
@@ -855,14 +852,14 @@ class VerwijderWedstrijdView(UserPassesTestMixin, View):
     def post(self, request, *args, **kwargs):
         """ Deze functie wordt aangeroepen als de knop 'Opslaan' gebruikt wordt
         """
-        wedstrijd_pk = kwargs['wedstrijd_pk'][:6]     # afkappen geeft beveiliging
         try:
+            wedstrijd_pk = int(kwargs['wedstrijd_pk'][:6])  # afkappen geeft beveiliging
             wedstrijd = (Wedstrijd
                          .objects
                          .select_related('uitslag')
                          .prefetch_related('uitslag__scores')
                          .get(pk=wedstrijd_pk))
-        except Wedstrijd.DoesNotExist:
+        except (ValueError, Wedstrijd.DoesNotExist):
             raise Resolver404()
 
         _, mag_verwijderen = plan_wedstrijd_rechten(request, wedstrijd)
