@@ -382,10 +382,10 @@ def competitie_aanmaken(jaar):
             comp.laatst_mogelijke_wedstrijd = begin_rk
         comp.rk_selecteer_deelnemers = begin_rk
         comp.rk_eerste_wedstrijd = begin_rk
-        comp.rk_laatste_wedstrijd = begin_rk
+        comp.rk_laatste_wedstrijd = begin_rk + datetime.timedelta(days=7)
         comp.bk_selecteer_deelnemers = begin_bk
         comp.bk_eerste_wedstrijd = begin_bk
-        comp.bk_laatste_wedstrijd = begin_bk
+        comp.bk_laatste_wedstrijd = begin_bk + datetime.timedelta(days=7)
         comp.save()
 
         # maak de Deelcompetities aan voor Regio, RK, BK

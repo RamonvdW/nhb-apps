@@ -9,9 +9,9 @@ from django.urls import Resolver404, reverse
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Plein.menu import menu_dynamics
-from Functie.rol import Rollen, rol_get_huidige
+from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
 from NhbStructuur.models import NhbCluster, NhbVereniging
-from Wedstrijden.models import Wedstrijd, WedstrijdenPlan, WedstrijdLocatie
+from Wedstrijden.models import Wedstrijd, WedstrijdLocatie
 from .models import (LAAG_REGIO, LAAG_RK, LAAG_BK,
                      DeelCompetitie, DeelcompetitieRonde, maak_deelcompetitie_ronde)
 from types import SimpleNamespace
@@ -21,7 +21,6 @@ import datetime
 TEMPLATE_COMPETITIE_PLANNING_REGIO_RONDE = 'competitie/planning-regio-ronde.dtl'
 TEMPLATE_COMPETITIE_PLANNING_REGIO_CLUSTER = 'competitie/planning-regio-cluster.dtl'
 TEMPLATE_COMPETITIE_PLANNING_REGIO = 'competitie/planning-regio.dtl'
-TEMPLATE_COMPETITIE_PLANNING_RAYON = 'competitie/planning-rayon.dtl'
 TEMPLATE_COMPETITIE_PLANNING_BOND = 'competitie/planning-landelijk.dtl'
 TEMPLATE_COMPETITIE_WIJZIG_WEDSTRIJD = 'competitie/wijzig-wedstrijd.dtl'
 
@@ -78,77 +77,6 @@ class BondPlanningView(UserPassesTestMixin, TemplateView):
                                       .filter(laag=LAAG_RK,
                                               competitie=deelcomp_bk.competitie)
                                       .order_by('nhb_rayon__rayon_nr'))
-
-        menu_dynamics(self.request, context, actief='competitie')
-        return context
-
-
-class RayonPlanningView(UserPassesTestMixin, TemplateView):
-
-    """ Deze view geeft de planning voor een competitie in een rayon """
-
-    # class variables shared by all instances
-    template_name = TEMPLATE_COMPETITIE_PLANNING_RAYON
-
-    def test_func(self):
-        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        rol_nu = rol_get_huidige(self.request)
-        return rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO)
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
-
-    def get_context_data(self, **kwargs):
-        """ called by the template system to get the context data for the template """
-        context = super().get_context_data(**kwargs)
-
-        deelcomp_pk = kwargs['deelcomp_pk'][:6]     # afkappen geeft beveiliging
-        try:
-            deelcomp_rk = (DeelCompetitie
-                           .objects
-                           .select_related('competitie', 'nhb_rayon')
-                           .get(pk=deelcomp_pk))
-        except DeelCompetitie.DoesNotExist:
-            raise Resolver404()
-
-        if deelcomp_rk.laag != LAAG_RK:
-            raise Resolver404()
-
-        rol_nu = rol_get_huidige(self.request)
-
-        context['deelcomp_rk'] = deelcomp_rk
-        context['rayon'] = deelcomp_rk.nhb_rayon
-
-        if rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO):
-            deelcomp_bk = DeelCompetitie.objects.get(laag=LAAG_BK,
-                                                     competitie=deelcomp_rk.competitie)
-            context['url_bond'] = reverse('Competitie:bond-planning',
-                                          kwargs={'deelcomp_pk': deelcomp_bk.pk})
-
-        deelcomps = (DeelCompetitie
-                     .objects
-                     .filter(laag=LAAG_REGIO,
-                             competitie=deelcomp_rk.competitie,
-                             nhb_regio__rayon=deelcomp_rk.nhb_rayon)
-                     .order_by('nhb_regio__regio_nr'))
-        context['regio_deelcomps'] = deelcomps
-
-        # zoek het aantal wedstrijden erbij
-        for deelcomp in deelcomps:
-            plan_pks = (DeelcompetitieRonde
-                        .objects
-                        .filter(deelcompetitie=deelcomp)
-                        .values_list('plan__pk', flat=True))
-            deelcomp.rondes_count = len(plan_pks)
-            deelcomp.wedstrijden_count = 0
-            for plan in (WedstrijdenPlan
-                         .objects
-                         .filter(pk__in=plan_pks)
-                         .prefetch_related('wedstrijden')):
-                deelcomp.wedstrijden_count += plan.wedstrijden.count()
-            # for
-        # for
 
         menu_dynamics(self.request, context, actief='competitie')
         return context
@@ -228,8 +156,10 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
         # for
 
         # alleen de RCL mag de planning uitbreiden
-        rol_nu = rol_get_huidige(self.request)
-        if rol_nu == Rollen.ROL_RCL and len(context['rondes']) < 10:
+        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
+        mag_wijzigen = (rol_nu == Rollen.ROL_RCL and functie_nu.nhb_regio == deelcomp.nhb_regio)
+
+        if mag_wijzigen and len(context['rondes']) < 10:
             context['url_nieuwe_week'] = reverse('Competitie:regio-planning',
                                                  kwargs={'deelcomp_pk': deelcomp.pk})
 
@@ -268,7 +198,7 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
             in de regioplanning, om een nieuwe ronde toe te voegen.
         """
         # alleen de RCL mag de planning uitbreiden
-        rol_nu = rol_get_huidige(self.request)
+        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
         if rol_nu != Rollen.ROL_RCL:
             raise Resolver404()
 
@@ -281,10 +211,7 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
         except (ValueError, DeelCompetitie.DoesNotExist):
             raise Resolver404()
 
-        if deelcomp.laag != LAAG_REGIO:
-            raise Resolver404()
-
-        ronde = maak_deelcompetitie_ronde(deelcomp=deelcomp)
+        ronde = maak_deelcompetitie_ronde(deelcomp=deelcomp)  # checkt ook maximum aantal toegestaan
         if ronde:
             # nieuwe ronde is aangemaakt
             next_url = reverse('Competitie:regio-ronde-planning', kwargs={'ronde_pk': ronde.pk})
@@ -641,20 +568,21 @@ def plan_wedstrijd_rechten(request, wedstrijd):
     """ Retourneert:
             mag_wijzigen, mag_verwijderen
     """
-    rol_nu = rol_get_huidige(request)
+    rol_nu, functie_nu = rol_get_huidige_functie(request)
+
     if rol_nu in (Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL):
         # TODO: error handling
         plan = wedstrijd.wedstrijdenplan_set.all()[0]
         ronde = DeelcompetitieRonde.objects.get(plan=plan)
         laag = ronde.deelcompetitie.laag
 
-        if rol_nu == Rollen.ROL_BKO and laag == LAAG_BK:
+        if rol_nu == Rollen.ROL_BKO and laag == LAAG_BK:        # TODO: check correcte competitie
             return True, True
 
-        if rol_nu == Rollen.ROL_RKO and laag == LAAG_RK:
+        if rol_nu == Rollen.ROL_RKO and laag == LAAG_RK:        # TODO: check correcte competitie en regio in rayon RKO
             return True, True
 
-        if rol_nu == Rollen.ROL_RCL and laag == LAAG_REGIO:
+        if rol_nu == Rollen.ROL_RCL and laag == LAAG_REGIO:     # TODO: check correcte competitie regio van RCL
             return True, True
 
     return False, False
@@ -670,7 +598,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
-        return rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL)
+        return rol_nu == Rollen.ROL_RCL
 
     def handle_no_permission(self):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
@@ -690,23 +618,28 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         except (ValueError, Wedstrijd.DoesNotExist):
             raise Resolver404()
 
-        mag_wijzigen, mag_verwijderen = plan_wedstrijd_rechten(self.request, wedstrijd)
-        if not mag_wijzigen:
-            raise Resolver404()
-
-        # zoek het weeknummer waarin deze wedstrijd gehouden moet worden
         plan = wedstrijd.wedstrijdenplan_set.all()[0]
-        ronde = DeelcompetitieRonde.objects.get(plan=plan)
-
-        context['wedstrijd'] = wedstrijd
-        context['ronde'] = ronde
+        ronde = (DeelcompetitieRonde
+                 .objects
+                 .select_related('deelcompetitie',
+                                 'deelcompetitie__competitie',
+                                 'deelcompetitie__nhb_regio')
+                 .get(plan=plan))
 
         if ronde.is_voor_import_oude_programma():
             raise Resolver404()
 
-        context['regio'] = ronde.deelcompetitie.nhb_regio
-        context['competitie'] = competitie = ronde.deelcompetitie.competitie
+        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
+        if ronde.deelcompetitie.functie != functie_nu:
+            # mag niet wijzigen
+            raise Resolver404()
 
+        context['competitie'] = ronde.deelcompetitie.competitie
+        context['regio'] = ronde.deelcompetitie.nhb_regio
+        context['ronde'] = ronde
+        context['wedstrijd'] = wedstrijd
+
+        # zoek het weeknummer waarin deze wedstrijd gehouden moet worden
         context['opt_weekdagen'] = opt_weekdagen = list()
 
         # bepaal de weekdag uit de huidige wedstrijd datum
@@ -759,13 +692,12 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         context['url_terug'] = reverse('Competitie:regio-ronde-planning', kwargs={'ronde_pk': ronde.pk})
         context['url_opslaan'] = reverse('Competitie:wijzig-wedstrijd', kwargs={'wedstrijd_pk': wedstrijd.pk})
 
-        if mag_verwijderen:     # pragma: no branch
-            uitslag = wedstrijd.uitslag
-            if uitslag and (uitslag.is_bevroren or uitslag.scores.count()):
-                context['kan_niet_verwijderen'] = True
-            else:
-                context['url_verwijderen'] = reverse('Competitie:verwijder-wedstrijd',
-                                                     kwargs={'wedstrijd_pk': wedstrijd.pk})
+        uitslag = wedstrijd.uitslag
+        if uitslag and (uitslag.is_bevroren or uitslag.scores.count()):
+            context['kan_niet_verwijderen'] = True
+        else:
+            context['url_verwijderen'] = reverse('Competitie:verwijder-wedstrijd',
+                                                 kwargs={'wedstrijd_pk': wedstrijd.pk})
 
         menu_dynamics(self.request, context, actief='competitie')
         return context
@@ -781,12 +713,22 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
             raise Resolver404()
 
         plan = wedstrijd.wedstrijdenplan_set.all()[0]
-        ronde = DeelcompetitieRonde.objects.get(plan=plan)
-        jaar = ronde.deelcompetitie.competitie.begin_jaar
+        ronde = (DeelcompetitieRonde
+                 .objects
+                 .select_related('deelcompetitie',
+                                 'deelcompetitie__competitie',
+                                 'deelcompetitie__nhb_regio')
+                 .get(plan=plan))
 
-        mag_wijzigen, _ = plan_wedstrijd_rechten(request, wedstrijd)
-        if not mag_wijzigen:
+        if ronde.is_voor_import_oude_programma():
             raise Resolver404()
+
+        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
+        if ronde.deelcompetitie.functie != functie_nu:
+            # mag niet wijzigen
+            raise Resolver404()
+
+        jaar = ronde.deelcompetitie.competitie.begin_jaar
 
         # weekdag is een cijfer van 0 tm 6
         # aanvang bestaat uit vier cijfers, zoals 0830
@@ -862,19 +804,48 @@ class VerwijderWedstrijdView(UserPassesTestMixin, View):
         except (ValueError, Wedstrijd.DoesNotExist):
             raise Resolver404()
 
-        _, mag_verwijderen = plan_wedstrijd_rechten(request, wedstrijd)
+        plan = wedstrijd.wedstrijdenplan_set.all()[0]
 
-        if mag_verwijderen:
-            uitslag = wedstrijd.uitslag
-            if uitslag and (uitslag.is_bevroren or uitslag.scores.count()):
-                mag_verwijderen = False
+        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
 
-        if not mag_verwijderen:
+        if rol_nu == Rollen.ROL_RCL:
+            # regiocompetitieronde
+            try:
+                ronde = DeelcompetitieRonde.objects.get(plan=plan,
+                                                        deelcompetitie__laag=LAAG_REGIO)
+            except DeelcompetitieRonde.DoesNotExist:
+                raise Resolver404()
+
+            deelcomp = ronde.deelcompetitie
+            url = reverse('Competitie:regio-ronde-planning', kwargs={'ronde_pk': ronde.pk})
+
+        elif rol_nu == Rollen.ROL_RKO:
+            # RK wedstrijd
+            try:
+                deelcomp = DeelCompetitie.objects.get(plan=plan, laag=LAAG_RK)
+            except DeelCompetitie.DoesNotExist:
+                raise Resolver404()
+
+            url = reverse('Competitie:rayon-planning', kwargs={'deelcomp_pk': deelcomp.pk})
+
+        else:
+            # BK wedstrijd
+            try:
+                deelcomp = DeelCompetitie.objects.get(plan=plan, laag=LAAG_BK)
+            except DeelCompetitie.DoesNotExist:
+                raise Resolver404()
+
+            url = reverse('Competitie:bond-planning', kwargs={'deelcomp_pk': deelcomp.pk})
+
+        # correcte beheerder?
+        if deelcomp.functie != functie_nu:
             raise Resolver404()
 
-        plan = wedstrijd.wedstrijdenplan_set.all()[0]
-        ronde = DeelcompetitieRonde.objects.get(plan=plan)
-        url = reverse('Competitie:regio-ronde-planning', kwargs={'ronde_pk': ronde.pk})
+        # voorkom verwijderen van wedstrijden waar een uitslag aan hangt
+        if wedstrijd.uitslag:
+            uitslag = wedstrijd.uitslag
+            if uitslag and (uitslag.is_bevroren or uitslag.scores.count() > 0):
+                raise Resolver404()
 
         wedstrijd.delete()
 

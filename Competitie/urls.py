@@ -11,6 +11,7 @@ from . import (views_aangemeld,
                views_klassegrenzen,
                views_overzicht,
                views_planning,
+               views_planning_rayon,
                views_tussenstand,
                views_uitslagen)
 
@@ -88,10 +89,6 @@ urlpatterns = [
          views_planning.RegioPlanningView.as_view(),
          name='regio-planning'),
 
-    path('planning/rayoncompetitie/<deelcomp_pk>/',
-         views_planning.RayonPlanningView.as_view(),
-         name='rayon-planning'),
-
     path('planning/bondscompetitie/<deelcomp_pk>/',
          views_planning.BondPlanningView.as_view(),
          name='bond-planning'),
@@ -103,6 +100,15 @@ urlpatterns = [
     path('planning/wedstrijd/verwijder/<wedstrijd_pk>/',
          views_planning.VerwijderWedstrijdView.as_view(),
          name='verwijder-wedstrijd'),
+
+
+    path('planning/rayoncompetitie/<deelcomp_pk>/',
+         views_planning_rayon.RayonPlanningView.as_view(),
+         name='rayon-planning'),
+
+    path('planning/wedstrijd-rayon/wijzig/<wedstrijd_pk>/',
+         views_planning_rayon.WijzigRayonWedstrijdView.as_view(),
+         name='wijzig-rayon-wedstrijd'),
 
 
     path('wedstrijd/uitslag-invoeren/<wedstrijd_pk>/',
