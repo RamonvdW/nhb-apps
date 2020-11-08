@@ -68,6 +68,10 @@ class CompetitieOverzichtView(View):
                 comp.url_inschrijvingen = reverse('Competitie:lijst-regiocomp-alles',
                                                   kwargs={'comp_pk': comp.pk})
 
+            comp.titel_inschrijvingen = "Inschrijvingen"
+            if len(comps) > 1:
+                comp.titel_inschrijvingen += " %sm" % comp.afstand
+
             comp.zet_fase()
             if comp.fase == 'A1' and rol_nu == Rollen.ROL_BB:
                 context['bb_kan_ag_vaststellen'] = True
@@ -86,18 +90,24 @@ class CompetitieOverzichtView(View):
 
         self._get_competities(context, rol_nu, functie_nu)
 
-        # kies de competities om het tijdschema van te tonen
         objs = list()
         if functie_nu:
-            # toon de competitie waar de functie een rol in heeft (BKO/RKO/RCL)
+            # kijk of deze rol nog iets te doen heeft
+            context['rol_is_klaar'] = True
+
+            # toon de competitie waar de functie een rol in heeft of had (BKO/RKO/RCL)
             for deelcomp in (DeelCompetitie
                              .objects
-                             .filter(is_afgesloten=False,
+                             .filter(competitie__is_afgesloten=False,
                                      functie=functie_nu)):
+                deelcomp.competitie.zet_fase()
                 objs.append(deelcomp.competitie)
+                if not deelcomp.is_afgesloten:
+                    context['rol_is_klaar'] = False
             # for
         else:
             # toon alle competities (IT/BB)
+            context['rol_is_klaar'] = False
             objs = (Competitie
                     .objects
                     .filter(is_afgesloten=False)
@@ -143,39 +153,59 @@ class CompetitieOverzichtView(View):
         if rol_nu == Rollen.ROL_RCL:
             context['planning_deelcomp'] = (DeelCompetitie
                                             .objects
-                                            .filter(laag=LAAG_REGIO,
-                                                    nhb_regio=functie_nu.nhb_regio,
-                                                    competitie__afstand=functie_nu.comp_type)
+                                            .filter(functie=functie_nu,
+                                                    is_afgesloten=False)
                                             .select_related('nhb_regio', 'competitie'))
             for obj in context['planning_deelcomp']:
                 obj.titel = 'Planning Regio'
                 obj.tekst = 'Planning voor %s voor de %s.' % (obj.nhb_regio.naam, obj.competitie.beschrijving)
-                obj.url = reverse('Competitie:regio-planning', kwargs={'deelcomp_pk': obj.pk})
+                obj.url = reverse('Competitie:regio-planning',
+                                  kwargs={'deelcomp_pk': obj.pk})
+            # for
+
+            context['afsluiten_deelcomp'] = (DeelCompetitie
+                                             .objects
+                                             .filter(functie=functie_nu,
+                                                     is_afgesloten=False)
+                                             .select_related('nhb_regio', 'competitie'))
+            for obj in context['afsluiten_deelcomp']:
+                obj.titel = 'Sluit Regiocompetitie'
+                obj.tekst = 'Bevestig eindstand %s voor de %s en zet schutters door naar RK.' % (obj.nhb_regio.naam, obj.competitie.beschrijving)
+                obj.url_afsluiten = reverse('Competitie:afsluiten-regiocomp',
+                                            kwargs={'deelcomp_pk': obj.pk})
             # for
 
         elif rol_nu == Rollen.ROL_RKO:
-            context['planning_deelcomp'] = (DeelCompetitie
-                                            .objects
-                                            .filter(laag=LAAG_RK,
-                                                    nhb_rayon=functie_nu.nhb_rayon,
-                                                    competitie__afstand=functie_nu.comp_type)
-                                            .select_related('nhb_rayon', 'competitie'))
-            for obj in context['planning_deelcomp']:
-                obj.titel = 'Planning %s' % obj.nhb_rayon.naam
-                obj.tekst = 'Planning voor %s voor de %s.' % (obj.nhb_rayon.naam, obj.competitie.beschrijving)
-                obj.url = reverse('Competitie:rayon-planning', kwargs={'deelcomp_pk': obj.pk})
-            # for
+            deelcomp_rks = (DeelCompetitie
+                            .objects
+                            .select_related('nhb_rayon', 'competitie')
+                            .filter(functie=functie_nu,
+                                    is_afgesloten=False))
+            if len(deelcomp_rks):
+                deelcomp_rk = deelcomp_rks[0]
+
+                deelcomp_rk.titel = 'Planning %s' % deelcomp_rk.nhb_rayon.naam
+                deelcomp_rk.tekst = 'Planning voor %s voor de %s.' % (deelcomp_rk.nhb_rayon.naam, deelcomp_rk.competitie.beschrijving)
+                deelcomp_rk.url = reverse('Competitie:rayon-planning',
+                                          kwargs={'deelcomp_pk': deelcomp_rk.pk})
+
+                context['planning_deelcomp'] = [deelcomp_rk, ]
+
+                # geeft de RKO de mogelijkheid om de deelnemerslijst voor het RK vast te stellen
+                context['url_lijst_rk'] = reverse('Competitie:lijst-rk',
+                                                  kwargs={'deelcomp_pk': deelcomp_rk.pk})
 
         elif rol_nu == Rollen.ROL_BKO:
             context['planning_deelcomp'] = (DeelCompetitie
                                             .objects
-                                            .filter(laag=LAAG_BK,
-                                                    competitie__afstand=functie_nu.comp_type)
+                                            .filter(functie=functie_nu,
+                                                    is_afgesloten=False)
                                             .select_related('competitie'))
             for obj in context['planning_deelcomp']:
                 obj.titel = 'Planning %sm' % obj.competitie.afstand
                 obj.tekst = 'Landelijke planning voor de %s.' % obj.competitie.beschrijving
-                obj.url = reverse('Competitie:bond-planning', kwargs={'deelcomp_pk': obj.pk})
+                obj.url = reverse('Competitie:bond-planning',
+                                  kwargs={'deelcomp_pk': obj.pk})
             # for
 
         return context, TEMPLATE_COMPETITIE_OVERZICHT_BEHEERDER

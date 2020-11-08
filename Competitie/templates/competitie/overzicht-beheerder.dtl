@@ -26,13 +26,6 @@
 
         <div class="row">
 
-            <!-- toon inschrijvingen regiocompetitie -->
-            {% for comp in competities %}
-                {% if comp.fase != 'A1' and comp.fase != 'A1' %}    <!-- TODO: change to !=A1 and !=A2 -->
-                    {% include 'plein/card.dtl' with title="Inschrijvingen "|add:comp.afstand|add:"m" text="Toon lijst met schutters ingeschreven voor de "|add:comp.beschrijving|add:"." icon="receipt" url=comp.url_inschrijvingen %}
-                {% endif %}
-            {% endfor %}
-
             <!-- competities aanmaken -->
             {% if bb_kan_competitie_aanmaken %}
                 {% url 'Competitie:instellingen-volgende-competitie' as card_url %}
@@ -69,8 +62,26 @@
 
             {% endif %}     <!-- rol_is_bb -->
 
+            <!-- planning deelcomp -->
             {% for deelcomp in planning_deelcomp %}
                 {% include 'plein/card.dtl' with title=deelcomp.titel text=deelcomp.tekst icon="date_range" url=deelcomp.url %}
+            {% endfor %}
+
+            <!-- RK schutters -->
+            {% if url_lijst_rk %}
+                {% include 'plein/card.dtl' with title="RK schutters" text="Toon lijst met schutters voor de Rayonkampioenschappen." icon="receipt" url=url_lijst_rk %}
+            {% endif %}
+
+            <!-- toon inschrijvingen regiocompetitie -->
+            {% for comp in competities %}
+                {% if comp.fase != 'A1' and comp.fase != 'A1' %}    <!-- TODO: change to !=A1 and !=A2 -->
+                    {% include 'plein/card.dtl' with title=comp.titel_inschrijvingen text="Toon lijst met schutters ingeschreven voor de regiocompetitie van de "|add:comp.beschrijving|add:"." icon="receipt" url=comp.url_inschrijvingen %}
+                {% endif %}
+            {% endfor %}
+
+            <!-- afsluiten deelcomp -->
+            {% for deelcomp in afsluiten_deelcomp %}
+                {% include 'plein/card.dtl' with title=deelcomp.titel text=deelcomp.tekst icon="done_outline" url=deelcomp.url_afsluiten %}
             {% endfor %}
 
             <!-- toon klassegrenzen regiocompetitie -->
@@ -83,10 +94,15 @@
 
         </div>
 
-        <p>Kan je niet vinden wat je zoekt? Misschien moet je eerst van rol wisselen.</p>
+        {% if rol_is_klaar %}
+            <p>Kan je niet vinden wat je zoekt? Door je rol kan je dit deel van de website bekijken, maar je hoeft niets meer te doen.</p>
+        {% else %}
+            <p>Kan je niet vinden wat je zoekt? Misschien moet je eerst van rol wisselen.</p>
+        {% endif %}
+
         <p>Je huidige rol is: <b>{{ huidige_rol }}</b>.</p>
 
-        {% for obj in object_list %}
+        {% for obj in competities %}
 
             <p>&nbsp;</p>
             <h5>Tijdlijn {{ obj.beschrijving }}</h5>

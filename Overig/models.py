@@ -9,6 +9,7 @@ from django.conf import settings
 from django.utils import timezone
 from datetime import timedelta
 from Account.models import AccountEmail
+from Competitie.models import KampioenschapSchutterBoog
 from Functie.models import Functie
 from .tijdelijke_url import set_tijdelijke_url_saver
 
@@ -111,6 +112,11 @@ class SiteTijdelijkeUrl(models.Model):
                                 Functie,
                                 on_delete=models.CASCADE,
                                 blank=True, null=True)        # optional
+
+    hoortbij_kampioenschap = models.ForeignKey(
+                                KampioenschapSchutterBoog,
+                                on_delete=models.CASCADE,
+                                blank=True, null=True)        # optioneel
 
     # in de toekomst meer mogelijkheden, zoals taken
 

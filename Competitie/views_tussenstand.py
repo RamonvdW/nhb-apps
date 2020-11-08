@@ -202,8 +202,12 @@ class TussenstandRegioView(TemplateView):
         deelnemers = (RegioCompetitieSchutterBoog
                       .objects
                       .filter(deelcompetitie=deelcomp)
-                      .select_related('schutterboog', 'schutterboog__nhblid',
-                                      'bij_vereniging', 'klasse', 'klasse__indiv', 'klasse__indiv__boogtype')
+                      .select_related('schutterboog',
+                                      'schutterboog__nhblid',
+                                      'bij_vereniging',
+                                      'klasse',
+                                      'klasse__indiv',
+                                      'klasse__indiv__boogtype')
                       .filter(klasse__indiv__boogtype=boogtype)
                       .order_by('klasse__indiv__volgorde', self.order_gemiddelde))
 
@@ -345,7 +349,11 @@ class TussenstandRayonView(TemplateView):
         context['deelcomp'] = deelcomp
         deelcomp.competitie.zet_fase()
 
-        if deelcomp.competitie.fase < 'K':
+        if deelcomp.heeft_deelnemerslijst:
+            # FUTURE: deelnemers/reserveschutters van het RK tonen
+            context['nog_niet_af'] = True
+            deelnemers = list()
+        else:
             # competitie is nog in de regiocompetitie fase
             context['regiocomp_nog_actief'] = True
 
@@ -363,11 +371,10 @@ class TussenstandRayonView(TemplateView):
                           .filter(deelcompetitie__pk__in=deelcomp_pks,
                                   klasse__indiv__boogtype=boogtype,
                                   aantal_scores__gte=6)
+                          .select_related('klasse__indiv',
+                                          'schutterboog__nhblid',
+                                          'bij_vereniging')
                           .order_by('klasse__indiv__volgorde', '-gemiddelde'))
-        else:
-            # FUTURE: deelnemers/reserveschutters van het RK tonen
-            context['nog_niet_af'] = True
-            deelnemers = list()
 
         klasse = -1
         rank = 0

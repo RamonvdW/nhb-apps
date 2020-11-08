@@ -41,7 +41,6 @@ urlpatterns = [
          views_aangemeld.LijstAangemeldRegiocompRegioView.as_view(),
          name='lijst-regiocomp-regio'),
 
-
     path('lijst-regiocompetitie/<comp_pk>/regio-<regio_pk>/dagdeel-behoefte/',
          views_aangemeld.Inschrijfmethode3BehoefteView.as_view(),
          name='inschrijfmethode3-behoefte'),
@@ -49,6 +48,19 @@ urlpatterns = [
     path('lijst-regiocompetitie/<comp_pk>/regio-<regio_pk>/dagdeel-behoefte-als-bestand/',
          views_aangemeld.Inschrijfmethode3BehoefteAlsBestandView.as_view(),
          name='inschrijfmethode3-behoefte-als-bestand'),
+
+
+    path('lijst-rayonkampioenschappen/<deelcomp_pk>/',
+         views_planning_rayon.LijstRkSchuttersView.as_view(),
+         name='lijst-rk'),
+
+    path('lijst-rayonkampioenschappen/contact-gegevens/<deelcomp_pk>/',
+         views_planning_rayon.LijstRkContactgegevensView.as_view(),
+         name='lijst-rk-contact'),
+
+    path('lijst-rayonkampioenschappen/wijzig-status-rk-deelnemer/<deelnemer_pk>/',
+         views_planning_rayon.WijzigStatusRkSchutterView.as_view(),
+         name='wijzig-status-rk-deelnemer'),
 
 
     path('info/',
@@ -84,6 +96,10 @@ urlpatterns = [
     path('planning/regiocompetitie/cluster/<cluster_pk>/',
          views_planning.RegioClusterPlanningView.as_view(),
          name='regio-cluster-planning'),
+
+    path('planning/regiocompetitie/afsluiten/<deelcomp_pk>/',
+         views_planning.AfsluitenRegiocompView.as_view(),
+         name='afsluiten-regiocomp'),
 
     path('planning/regiocompetitie/<deelcomp_pk>/',
          views_planning.RegioPlanningView.as_view(),

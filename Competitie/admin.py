@@ -8,7 +8,7 @@ from django.contrib import admin
 
 from NhbStructuur.models import NhbCluster
 from .models import (Competitie, DeelCompetitie, DeelcompetitieRonde,
-                     CompetitieKlasse, RegioCompetitieSchutterBoog)
+                     CompetitieKlasse, RegioCompetitieSchutterBoog, KampioenschapSchutterBoog)
 
 
 class DeelCompetitieAdmin(admin.ModelAdmin):
@@ -84,10 +84,63 @@ class RegioCompetitieSchutterBoogAdmin(admin.ModelAdmin):
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
+class KampioenschapSchutterBoogAdmin(admin.ModelAdmin):
+
+    fieldsets = (
+        ('Wie',
+            {'fields': ('deelcompetitie',
+                        'schutterboog')
+             }),
+        ('Klasse',
+            {'fields': ('klasse',),
+             }),
+        ('Details',
+            {'fields': ('gemiddelde',
+                        'kampioen_label')
+             }),
+        ('Status aanmelding',
+            {'fields': ('deelname_bevestigd',
+                        'is_afgemeld',
+                        'volgorde'),
+             }),
+    )
+
+    readonly_fields = ('deelcompetitie',
+                       'schutterboog')
+
+    search_fields = ('schutterboog__nhblid__voornaam',
+                     'schutterboog__nhblid__achternaam',
+                     'schutterboog__nhblid__nhb_nr')
+
+    list_select_related = ('deelcompetitie',
+                           'deelcompetitie__nhb_rayon',
+                           'deelcompetitie__competitie',
+                           'klasse',
+                           'klasse__indiv',
+                           'klasse__team',
+                           'schutterboog',
+                           'schutterboog__boogtype',
+                           'schutterboog__nhblid')
+
+    list_filter = ('deelcompetitie__competitie',
+                   'deelcompetitie__nhb_rayon',
+                   'schutterboog__boogtype')
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):    # pragma: no cover
+        if db_field.name == 'klasse':
+            kwargs['queryset'] = (CompetitieKlasse
+                                  .objects
+                                  .select_related('indiv', 'team')
+                                  .all())
+
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+
 admin.site.register(Competitie)
 admin.site.register(DeelCompetitie, DeelCompetitieAdmin)
 admin.site.register(CompetitieKlasse, CompetitieKlasseAdmin)
 admin.site.register(DeelcompetitieRonde, DeelcompetitieRondeAdmin)
 admin.site.register(RegioCompetitieSchutterBoog, RegioCompetitieSchutterBoogAdmin)
+admin.site.register(KampioenschapSchutterBoog, KampioenschapSchutterBoogAdmin)
 
 # end of file

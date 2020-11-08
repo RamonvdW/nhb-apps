@@ -6,21 +6,26 @@
 
 from django.http import HttpResponseRedirect
 from django.urls import Resolver404, reverse
+from django.utils import timezone
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Plein.menu import menu_dynamics
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
+from Logboek.models import schrijf_in_logboek
 from NhbStructuur.models import NhbCluster, NhbVereniging
+from Plein.menu import menu_dynamics
+from Taken.models import Taak
 from Wedstrijden.models import Wedstrijd, WedstrijdenPlan, WedstrijdLocatie
-from .models import (LAAG_REGIO, LAAG_RK, LAAG_BK,
-                     DeelCompetitie, DeelcompetitieRonde, maak_deelcompetitie_ronde)
+from .models import (LAAG_REGIO, LAAG_RK, LAAG_BK, DeelCompetitie, DeelcompetitieRonde,
+                     RegioCompetitieSchutterBoog, KampioenschapSchutterBoog)
 from types import SimpleNamespace
 import datetime
 
 
 TEMPLATE_COMPETITIE_PLANNING_RAYON = 'competitie/planning-rayon.dtl'
 TEMPLATE_COMPETITIE_WIJZIG_WEDSTRIJD_RAYON = 'competitie/wijzig-wedstrijd-rk.dtl'
-
+TEMPLATE_COMPETITIE_LIJST_RK = 'competitie/lijst-rk.dtl'
+TEMPLATE_COMPETITIE_LIJST_RK_CONTACT = 'competitie/lijst-rk-contact.dtl'
+TEMPLATE_COMPETITIE_WIJZIG_STATUS_RK_SCHUTTER = 'competitie/wijzig-status-rk-deelnemer.dtl'
 
 # python strftime: 0=sunday, 6=saturday
 # wij rekenen het verschil ten opzicht van maandag in de week
@@ -337,6 +342,505 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
 
         url = reverse('Competitie:rayon-planning', kwargs={'deelcomp_pk': deelcomp_rk.pk})
         return HttpResponseRedirect(url)
+
+
+class LijstRkSchuttersView(UserPassesTestMixin, TemplateView):
+
+    """ Deze view laat de (kandidaat) schutters van en RK zien,
+        met mogelijkheid voor de RKO om deze te bevestigen.
+    """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_COMPETITIE_LIJST_RK
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        rol_nu = rol_get_huidige(self.request)
+        return rol_nu == Rollen.ROL_RKO
+
+    def handle_no_permission(self):
+        """ gebruiker heeft geen toegang --> redirect naar het plein """
+        return HttpResponseRedirect(reverse('Plein:plein'))
+
+    def _get_schutters_regios(self, competitie, rayon_nr):
+        """ geeft een lijst met deelnemers terug
+            en een totaal-status van de onderliggende regiocompetities: alles afgesloten?
+        """
+        alles_afgesloten = True
+        pks = list()
+
+        # schutter moeten uit LAAG_REGIO gehaald worden, uit de 4 regio's van het rayon
+        for deelcomp in (DeelCompetitie
+                         .objects
+                         .filter(laag=LAAG_REGIO,
+                                 competitie=competitie,
+                                 nhb_regio__rayon__rayon_nr=rayon_nr)):
+            if not deelcomp.is_afgesloten:
+                alles_afgesloten = False
+
+            pks.append(deelcomp.pk)
+        # for
+
+        deelnemers = (RegioCompetitieSchutterBoog
+                      .objects
+                      .select_related('klasse__indiv',
+                                      'bij_vereniging__regio',
+                                      'schutterboog__nhblid')
+                      .filter(deelcompetitie__in=pks,
+                              aantal_scores__gte=3,         # TODO: gte=6
+                              schutterboog__nhblid__is_actief_lid=True)     # verwijdert uitgeschreven leden
+                      .order_by('klasse__indiv__volgorde',      # groepeer per klasse
+                                '-gemiddelde'))                 # aflopend gemiddelde
+
+        # markeer de regiokampioenen
+        klasse = -1
+        regios = list()     # bijhouden welke kampioenen we al gemarkeerd hebben
+        kampioenen = list()
+        deelnemers = list(deelnemers)
+        nr = 0
+        insert_at = 0
+        rank = 0
+        while nr < len(deelnemers):
+            deelnemer = deelnemers[nr]
+
+            if klasse != deelnemer.klasse.indiv.volgorde:
+                klasse = deelnemer.klasse.indiv.volgorde
+                if len(kampioenen):
+                    kampioenen.sort()
+                    for _, kampioen in kampioenen:
+                        deelnemers.insert(insert_at, kampioen)
+                        insert_at += 1
+                        nr += 1
+                    # for
+                kampioenen = list()
+                regios = list()
+                insert_at = nr
+                rank = 0
+
+            # fake een paar velden uit KampioenschapSchutterBoog
+            deelnemer.is_afgemeld = False
+            deelnemer.deelname_bevestigd = False
+
+            rank += 1
+            deelnemer.volgorde = rank
+
+            regio_nr = deelnemer.bij_vereniging.regio.regio_nr
+            if regio_nr not in regios:
+                regios.append(regio_nr)
+                deelnemer.kampioen_label = "Kampioen regio %s" % regio_nr
+                tup = (regio_nr, deelnemer)
+                kampioenen.append(tup)
+                deelnemers.pop(nr)
+            else:
+                if rank <= 48:
+                    deelnemer.kampioen_label = ""
+                    nr += 1
+                else:
+                    # verwijder deze schutter uit de lijst
+                    deelnemers.pop(nr)
+        # while
+
+        if len(kampioenen):
+            kampioenen.sort(reverse=True)       # hoogste regionummer bovenaan
+            for _, kampioen in kampioenen:
+                deelnemers.insert(insert_at, kampioen)
+                insert_at += 1
+            # for
+
+        return deelnemers, alles_afgesloten
+
+    def _get_schutters_rk(self, deelcomp_rk):
+        deelnemers = (KampioenschapSchutterBoog
+                      .objects
+                      .select_related('deelcompetitie',
+                                      'klasse__indiv',
+                                      'schutterboog__nhblid',
+                                      'bij_vereniging')
+                      .filter(deelcompetitie=deelcomp_rk)
+                      .order_by('klasse__indiv__volgorde',  # groepeer per klasse
+                                '-kampioen_label',          # hoogste regio nummer boven (anders leeg boven)
+                                '-gemiddelde'))             # aflopend gemiddelde
+        return deelnemers
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        # er zijn 3 situaties:
+        # 1) regiocompetities zijn nog niet afgesloten --> verwijst naar pagina tussenstand rayon
+        # 2) deelnemers voor RK zijn nog niet vastgesteld --> toon lijst + knop om akkoord te geven
+        # 3) deelnemers voor RK zijn vastgesteld --> toon lijst
+
+        try:
+            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen geeft beveiliging
+            deelcomp_rk = (DeelCompetitie
+                           .objects
+                           .select_related('competitie', 'nhb_rayon')
+                           .get(pk=deelcomp_pk, laag=LAAG_RK))
+        except (ValueError, DeelCompetitie.DoesNotExist):
+            raise Resolver404()
+
+        # controleer dat de juiste RKO aan de knoppen zit
+        _, functie_nu = rol_get_huidige_functie(self.request)
+        if functie_nu != deelcomp_rk.functie:
+            raise Resolver404()     # niet de juiste RKO
+
+        context['deelcomp_rk'] = deelcomp_rk
+
+        if not deelcomp_rk.heeft_deelnemerslijst:
+            deelnemers, alles_afgesloten = self._get_schutters_regios(deelcomp_rk.competitie,
+                                                                      deelcomp_rk.nhb_rayon.rayon_nr)
+            if not alles_afgesloten:
+                # situatie 1)
+                context['url_tussenstand'] = reverse('Competitie:tussenstand-rayon-n',
+                                                     kwargs={'afstand': deelcomp_rk.competitie.afstand,
+                                                             'comp_boog': 'r',
+                                                             'rayon_nr': deelcomp_rk.nhb_rayon.rayon_nr})
+                deelnemers = list()
+            else:
+                # situatie 2)
+                context['url_bevestig_rk_schutters'] = reverse('Competitie:lijst-rk',
+                                                               kwargs={'deelcomp_pk': deelcomp_rk.pk})
+        else:
+            # situatie 3)
+            deelnemers = self._get_schutters_rk(deelcomp_rk)
+
+            for deelnemer in deelnemers:
+                deelnemer.url_wijzig = reverse('Competitie:wijzig-status-rk-deelnemer',
+                                               kwargs={'deelnemer_pk': deelnemer.pk})
+            # for
+
+        klasse = -1
+        rank = 0
+        aantal_afgemeld = 0
+        aantal_bevestigd = 0
+        aantal_onbekend = 0
+        aantal_klassen = 0
+        for deelnemer in deelnemers:
+            deelnemer.break_klasse = (klasse != deelnemer.klasse.indiv.volgorde)
+            if deelnemer.break_klasse:
+                if klasse != -1:
+                    aantal_klassen += 1
+                deelnemer.klasse_str = deelnemer.klasse.indiv.beschrijving
+                klasse = deelnemer.klasse.indiv.volgorde
+                rank = 0
+
+            lid = deelnemer.schutterboog.nhblid
+            deelnemer.naam_str = "[%s] %s" % (lid.nhb_nr, lid.volledige_naam())
+            deelnemer.ver_str = str(deelnemer.bij_vereniging)
+
+            deelnemer.rank = 0
+            if not deelnemer.is_afgemeld:
+                rank += 1
+                deelnemer.rank = rank
+
+            if rank > 24:
+                deelnemer.is_reserve = True
+
+            # tel het aantal deelnemers
+            if deelnemer.volgorde <= 24+8:
+                if deelnemer.is_afgemeld:
+                    aantal_afgemeld += 1
+                elif deelnemer.deelname_bevestigd:
+                    aantal_bevestigd += 1
+                else:
+                    aantal_onbekend += 1
+        # for
+
+        context['deelnemers'] = deelnemers
+        context['aantal_klassen'] = aantal_klassen
+
+        if deelcomp_rk.heeft_deelnemerslijst:
+            context['aantal_afgemeld'] = aantal_afgemeld
+            context['aantal_onbekend'] = aantal_onbekend
+            context['aantal_bevestigd'] = aantal_bevestigd
+
+            context['url_contact'] = reverse('Competitie:lijst-rk-contact',
+                                             kwargs={'deelcomp_pk': deelcomp_rk.pk})
+
+        menu_dynamics(self.request, context, actief='competitie')
+        return context
+
+    def post(self, request, *args, **kwargs):
+
+        try:
+            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen geeft beveiliging
+            deelcomp_rk = (DeelCompetitie
+                           .objects
+                           .select_related('competitie', 'nhb_rayon')
+                           .get(pk=deelcomp_pk, laag=LAAG_RK))
+        except (ValueError, DeelCompetitie.DoesNotExist):
+            raise Resolver404()
+
+        # controleer dat de juiste RKO aan de knoppen zit
+        _, functie_nu = rol_get_huidige_functie(self.request)
+        if functie_nu != deelcomp_rk.functie:
+            raise Resolver404()     # niet de juiste RKO
+
+        if not deelcomp_rk.heeft_deelnemerslijst:
+            deelnemers, alles_afgesloten = self._get_schutters_regios(deelcomp_rk.competitie,
+                                                                      deelcomp_rk.nhb_rayon.rayon_nr)
+            if not alles_afgesloten:
+                raise Resolver404()
+
+            # schrijf all deze schutters in voor het RK
+            # kampioenen zitten als eerste in de lijst, daarna aflopend gesorteerd op gemiddelde
+            bulk_lijst = list()
+            klasse = -1
+            volgorde = 0
+            for obj in deelnemers:
+                if klasse != obj.klasse.indiv.volgorde:
+                    klasse = obj.klasse.indiv.volgorde
+                    volgorde = 0
+
+                volgorde += 1
+
+                deelnemer = KampioenschapSchutterBoog(
+                                deelcompetitie=deelcomp_rk,
+                                schutterboog=obj.schutterboog,
+                                klasse=obj.klasse,
+                                bij_vereniging=obj.bij_vereniging,
+                                volgorde=volgorde,
+                                gemiddelde=obj.gemiddelde,
+                                kampioen_label=obj.kampioen_label)
+
+                bulk_lijst.append(deelnemer)
+                if len(bulk_lijst) > 500:
+                    KampioenschapSchutterBoog.objects.bulk_create(bulk_lijst)
+                    bulk_lijst = list()
+            # for
+
+            if len(bulk_lijst) > 0:
+                KampioenschapSchutterBoog.objects.bulk_create(bulk_lijst)
+            del bulk_lijst
+
+            deelcomp_rk.heeft_deelnemerslijst = True
+            deelcomp_rk.save()
+
+            # zoek het bijbehorende BK op
+            deelcomp_bk = DeelCompetitie.objects.get(competitie=deelcomp_rk.competitie,
+                                                     laag=LAAG_BK)
+
+            # stuur elke RKO een taak ('ter info')
+            bko_namen = list()
+            functie_bko = deelcomp_bk.functie
+            now = timezone.now()
+            taak_deadline = now
+            taak_tekst = "Ter info: De deelnemerslijst voor de Rayonkampioenschappen in %s zijn zojuist vastgesteld door RKO %s" % (str(deelcomp_rk.nhb_rayon), request.user.volledige_naam())
+            taak_log = "[%s] Taak aangemaakt" % now
+
+            for account in functie_bko.accounts.all():
+                # maak een taak aan voor deze BKO
+                taak = Taak(toegekend_aan=account,
+                            deadline=taak_deadline,
+                            aangemaakt_door=request.user,
+                            beschrijving=taak_tekst,
+                            handleiding_pagina="",
+                            log=taak_log,
+                            deelcompetitie=deelcomp_bk)
+                taak.save()
+                bko_namen.append(account.volledige_naam())
+            # for
+
+            # schrijf in het logboek
+            msg = "De deelnemerslijst voor de Rayonkampioenschappen in %s is zojuist vastgesteld." % str(deelcomp_rk.nhb_rayon)
+            msg += '\nDe volgende beheerders zijn geïnformeerd via een taak: %s' % ", ".join(bko_namen)
+            schrijf_in_logboek(request.user, "Competitie", msg)
+
+        return HttpResponseRedirect(reverse('Competitie:overzicht'))
+
+
+class WijzigStatusRkSchutterView(TemplateView):
+
+    """ Deze view laat de RKO de status van een RK schutters aanpassen """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_COMPETITIE_WIJZIG_STATUS_RK_SCHUTTER
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        rol_nu = rol_get_huidige(self.request)
+        return rol_nu == Rollen.ROL_RKO
+
+    def handle_no_permission(self):
+        """ gebruiker heeft geen toegang --> redirect naar het plein """
+        return HttpResponseRedirect(reverse('Plein:plein'))
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        try:
+            deelnemer_pk = int(kwargs['deelnemer_pk'][:6])  # afkappen geeft beveiliging
+            deelnemer = (KampioenschapSchutterBoog
+                         .objects
+                         .select_related('deelcompetitie__competitie',
+                                         'deelcompetitie__nhb_rayon',
+                                         'schutterboog__nhblid',
+                                         'bij_vereniging')
+                         .get(pk=deelnemer_pk))
+        except (ValueError, KampioenschapSchutterBoog.DoesNotExist):
+            raise Resolver404()
+
+        # controleer dat de juiste RKO aan de knoppen zit
+        _, functie_nu = rol_get_huidige_functie(self.request)
+        if functie_nu != deelnemer.deelcompetitie.functie:
+            raise Resolver404()     # niet de juiste RKO
+
+        lid = deelnemer.schutterboog.nhblid
+        deelnemer.naam_str = "[%s] %s" % (lid.nhb_nr, lid.volledige_naam())
+        deelnemer.ver_str = str(deelnemer.bij_vereniging)
+
+        context['deelnemer'] = deelnemer
+
+        context['url_wijzig'] = reverse('Competitie:wijzig-status-rk-deelnemer',
+                                        kwargs={'deelnemer_pk': deelnemer.pk})
+
+        context['url_terug'] = reverse('Competitie:lijst-rk',
+                                       kwargs={'deelcomp_pk': deelnemer.deelcompetitie.pk})
+
+        menu_dynamics(self.request, context, actief='competitie')
+        return context
+
+    def post(self, request, *args, **kwargs):
+        """ wordt aangeroepen als de gebruik op de knop OPSLAAN druk """
+        try:
+            deelnemer_pk = int(kwargs['deelnemer_pk'][:6])  # afkappen geeft beveiliging
+            deelnemer = (KampioenschapSchutterBoog
+                         .objects
+                         .select_related('deelcompetitie__competitie')
+                         .get(pk=deelnemer_pk))
+        except (ValueError, KampioenschapSchutterBoog.DoesNotExist):
+            raise Resolver404()
+
+        bevestig = request.POST.get('bevestig', '')
+        afmelden = request.POST.get('afmelden', '')
+
+        _, functie_nu = rol_get_huidige_functie(self.request)
+        if functie_nu != deelnemer.deelcompetitie.functie:
+            raise Resolver404()     # niet de juiste RKO
+
+        if bevestig == "1":
+            if not deelnemer.deelname_bevestigd:
+                deelnemer.deelname_bevestigd = True
+                deelnemer.is_afgemeld = False
+                deelnemer.save()
+        elif afmelden == "1":
+            if not deelnemer.is_afgemeld:
+                deelnemer.deelname_bevestigd = False
+                deelnemer.is_afgemeld = True
+                deelnemer.save()
+
+        return HttpResponseRedirect(reverse('Competitie:lijst-rk',
+                                            kwargs={'deelcomp_pk': deelnemer.deelcompetitie.pk}))
+
+
+class LijstRkContactgegevensView(UserPassesTestMixin, TemplateView):
+    """ Deze view laat de contactgegevens zien van de RK schutters """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_COMPETITIE_LIJST_RK_CONTACT
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        rol_nu = rol_get_huidige(self.request)
+        return rol_nu == Rollen.ROL_RKO
+
+    def handle_no_permission(self):
+        """ gebruiker heeft geen toegang --> redirect naar het plein """
+        return HttpResponseRedirect(reverse('Plein:plein'))
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        try:
+            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen geeft beveiliging
+            deelcomp_rk = (DeelCompetitie
+                           .objects
+                           .select_related('competitie', 'nhb_rayon')
+                           .get(pk=deelcomp_pk, laag=LAAG_RK))
+        except (ValueError, DeelCompetitie.DoesNotExist):
+            raise Resolver404()
+
+        # controleer dat de juiste RKO aan de knoppen zit
+        _, functie_nu = rol_get_huidige_functie(self.request)
+        if functie_nu != deelcomp_rk.functie:
+            raise Resolver404()     # niet de juiste RKO
+
+        if not deelcomp_rk.heeft_deelnemerslijst:
+            raise Resolver404()     # zou hier niet moeten komen
+
+        context['deelcomp_rk'] = deelcomp_rk
+
+        deelnemers = (KampioenschapSchutterBoog
+                      .objects
+                      .filter(deelcompetitie=deelcomp_rk)
+                      .select_related('deelcompetitie',
+                                      'klasse__indiv',
+                                      'schutterboog__nhblid',
+                                      'bij_vereniging')
+                      .order_by('klasse__indiv__volgorde',  # groepeer per klasse
+                                '-kampioen_label',          # hoogste regio nummer boven (anders leeg boven)
+                                '-gemiddelde'))             # aflopend gemiddelde
+
+        klasse = -1
+        rank = 0
+        per_ver = list()
+        for deelnemer in deelnemers:
+            if klasse != deelnemer.klasse.indiv.volgorde:
+                klasse = deelnemer.klasse.indiv.volgorde
+                rank = 0
+
+            lid = deelnemer.schutterboog.nhblid
+            deelnemer.naam_str = "[%s] %s" % (lid.nhb_nr, lid.volledige_naam())
+            deelnemer.ver_str = str(deelnemer.bij_vereniging)
+
+            if lid.email == "":
+                deelnemer.geen_email = True
+
+            if not deelnemer.is_afgemeld:
+                rank += 1
+                if rank > 24:
+                    deelnemer.is_reserve = True
+
+                if not deelnemer.deelname_bevestigd:
+                    tup = (deelnemer.bij_vereniging.nhb_nr, lid.nhb_nr, deelnemer)
+                    per_ver.append(tup)
+        # for
+
+        # opnieuw sorteren, op vereniging
+        per_ver.sort(key=lambda tup: tup[0:0+2])
+
+        context['deelnemers'] = contacten = [obj for _,_,obj in per_ver]
+
+        ver = -1
+        for obj in contacten:
+            if ver != obj.bij_vereniging.nhb_nr:
+                ver = obj.bij_vereniging.nhb_nr
+                obj.break_ver = True
+
+                obj.ver_email = ""
+
+                functies = obj.bij_vereniging.functie_set.filter(rol='HWL')
+                if len(functies) > 0:
+                    functie = functies[0]
+                    if functie.bevestigde_email:
+                        obj.ver_email = functie.bevestigde_email
+                        obj.ver_rol = 'Hoofdwedstrijdleider'
+
+                if obj.ver_email == "":
+                    functies = obj.bij_vereniging.functie_set.filter(rol='SEC')
+                    if len(functies) > 0:
+                        functie = functies[0]
+                        if functie.bevestigde_email:
+                            obj.ver_email = functie.bevestigde_email
+                            obj.ver_rol = 'Secretaris'
+
+        # for
+
+        menu_dynamics(self.request, context, actief='competitie')
+        return context
 
 
 # end of file

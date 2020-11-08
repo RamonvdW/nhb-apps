@@ -225,8 +225,7 @@ class LijstAangemeldRegiocompRegioView(UserPassesTestMixin, TemplateView):
         context['inhoud'] = 'in ' + str(regio)
 
         try:
-            deelcomp = DeelCompetitie.objects.get(is_afgesloten=False,
-                                                  laag=LAAG_REGIO,
+            deelcomp = DeelCompetitie.objects.get(laag=LAAG_REGIO,
                                                   competitie=comp,
                                                   nhb_regio=regio)
         except DeelCompetitie.DoesNotExist:

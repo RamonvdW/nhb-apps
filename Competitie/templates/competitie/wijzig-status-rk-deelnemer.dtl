@@ -1,0 +1,158 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2020 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Wijzig status RK schutter{% endblock %}
+
+{% block pagina %}
+
+    <h4>Wijzig status RK schutter</h4>
+
+    <p>Op deze pagina kan je de status van een schutter voor deelname aan het RK aanpassen.</p>
+
+    <div class="row">
+
+        <!-- toon gegevens van de regio en competitie in een blauwe box -->
+        <div class="col s12 m10 l8 xl6 offset-m1 offset-l2 offset-xl3">
+            <div class="white-text nhb-blauw z-depth-2">
+
+                <div class="row small-row">
+                    <div class="col s3">Competitie:</div>
+                    <div class="col s8">{{ deelnemer.deelcompetitie.competitie.beschrijving }}</div>
+                </div>
+
+                <div class="row small-row">
+                    <div class="col s3">Rayon:</div>
+                    <div class="col s8">{{ deelnemer.deelcompetitie.nhb_rayon }}</div>
+                </div>
+
+                <div class="row small-row">
+                    <div class="col s3">Klasse:</div>
+                    <div class="col s8">{{ deelnemer.klasse.indiv.beschrijving }}</div>
+                </div>
+
+                <div class="row small-row">
+                    <div class="col s3">Schutter:</div>
+                    <div class="col s8">{{ deelnemer.naam_str }}</div>
+                </div>
+
+                <div class="row small-row">
+                    <div class="col s3">Vereniging:</div>
+                    <div class="col s8">{{ deelnemer.ver_str }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <p>&nbsp;</p>
+
+    <p>
+    <a class="btn-nhb-blauw" href="{{ url_terug }}">
+        <i class="material-icons-round left">keyboard_backspace</i>Terug naar de lijst</a>
+    </p>
+
+    <p>&nbsp;</p>
+
+    <table class="white">
+        <tr>
+            <td colspan="3" class="center">
+                <span>De status van deelname voor deze schutter is: </span>
+                {% if deelnemer.is_afgemeld %}
+                    <span class="red-text">AFGEMELD</span>
+                {% elif deelnemer.deelname_bevestigd %}
+                    <span class="green-text">DEELNAME BEVESTIGD</span>
+                {% else %}
+                    <span class="blue-text"><i>ONBEKEND</i></span>
+                {% endif %}
+            </td>
+        </tr>
+
+        {% if not deelnemer.deelname_bevestigd %}
+            <tr class="nhb-grijs"><td colspan="3"></td></tr>
+
+            <tr>
+                <td colspan="3" class="center">Klik op de blauwe knop om deelname aan het RK te bevestigen</td>
+            </tr>
+            <tr>
+                <td colspan="3" class="center">
+                    <form method="post" action="{{ url_opslaan }}">
+                        {% csrf_token %}
+                        <input name="bevestig" type="hidden" value="1">
+                        <button class="btn-nhb-blauw" type="submit">
+                            <i class="material-icons-round left">thumb_up</i>Bevestig deelname</button>
+                    </form>
+                </td>
+            </tr>
+        {% endif %}
+
+        {% if not deelnemer.is_afgemeld %}
+            <tr class="nhb-grijs"><td colspan="3"></td></tr>
+
+            <tr>
+                <td colspan="3" class="center">Klik op de rode knop om de schutter af te melden voor het RK</td>
+            </tr>
+            <tr>
+                <td colspan="3" class="center">
+                    <form method="post" action="{{ url_opslaan }}">
+                        {% csrf_token %}
+                        <input name="afmelden" type="hidden" value="1">
+                        <button class="btn-nhb-rood" type="submit">
+                            <i class="material-icons-round left">report_problem</i>Afmelden</button>
+                    </form>
+                </td>
+            </tr>
+        {% endif %}
+    </table>
+
+    <!--        TODO: alleen tonen als rol != RKO
+    {% if not deelnemer.is_afgemeld %}
+        <table class="white centered">
+            <tr>
+                <td style="padding:24px"><b class="red-text">LET&nbsp;OP!</b></td>
+                <td>Afmelden kan niet ongedaan gemaakt worden.<br>(na afmelden wordt een andere schutter opgeroepen)</td>
+                <td style="padding:24px"><b class="red-text">LET&nbsp;OP!</b></td>
+            </tr>
+        </table>
+    {% endif %}
+    -->
+
+
+    {% if kan_niet_verwijderen %}
+        <p>&nbsp;</p>
+        <ul class="collapsible">
+            <li>
+                <div class="collapsible-header white">
+                    <span>Klik eerst hier als je de wedstrijd wilt verwijderen</span>
+                </div>
+                <div class="collapsible-body white">
+                    <p>Deze wedstrijd kan niet meer verwijderd worden, want er hangt een uitslag aan</p>
+                </div>
+            </li>
+        </ul>
+    {% elif url_verwijderen %}
+        <p>&nbsp;</p>
+        <form method="post" action="{{ url_verwijderen }}">
+            {% csrf_token %}
+            <ul class="collapsible">
+                <li>
+                    <div class="collapsible-header white">
+                        <span>Klik eerst hier als je de wedstrijd wilt verwijderen</span>
+                    </div>
+                    <div class="collapsible-body white">
+                        <p>Heb je deze wedstrijd echt niet meer nodig?</p>
+                        <button class="btn-nhb-rood" type="submit">
+                            <i class="material-icons-round left">delete</i>Verwijder deze wedstrijd</button>
+                    </div>
+                </li>
+            </ul>
+        </form>
+    {% endif %}
+
+    <p>&nbsp;</p>
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-wijzig-status-rk-deelnemer" %}
+
+{% endblock %}

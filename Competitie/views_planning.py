@@ -6,11 +6,14 @@
 
 from django.http import HttpResponseRedirect
 from django.urls import Resolver404, reverse
+from django.utils import timezone
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Plein.menu import menu_dynamics
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
+from Logboek.models import schrijf_in_logboek
 from NhbStructuur.models import NhbCluster, NhbVereniging
+from Taken.models import Taak
 from Wedstrijden.models import Wedstrijd, WedstrijdLocatie
 from .models import (LAAG_REGIO, LAAG_RK, LAAG_BK,
                      DeelCompetitie, DeelcompetitieRonde, maak_deelcompetitie_ronde)
@@ -23,7 +26,7 @@ TEMPLATE_COMPETITIE_PLANNING_REGIO_CLUSTER = 'competitie/planning-regio-cluster.
 TEMPLATE_COMPETITIE_PLANNING_REGIO = 'competitie/planning-regio.dtl'
 TEMPLATE_COMPETITIE_PLANNING_BOND = 'competitie/planning-landelijk.dtl'
 TEMPLATE_COMPETITIE_WIJZIG_WEDSTRIJD = 'competitie/wijzig-wedstrijd.dtl'
-
+TEMPLATE_COMPETITIE_AFSLUITEN_REGIOCOMP = 'competitie/afsluiten-regiocomp.dtl'
 
 # python strftime: 0=sunday, 6=saturday
 # wij rekenen het verschil ten opzicht van maandag in de week
@@ -849,6 +852,95 @@ class VerwijderWedstrijdView(UserPassesTestMixin, View):
 
         wedstrijd.delete()
 
+        return HttpResponseRedirect(url)
+
+
+class AfsluitenRegiocompView(UserPassesTestMixin, TemplateView):
+
+    """ Deze view kan de RCL een regiocompetitie afsluiten """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_COMPETITIE_AFSLUITEN_REGIOCOMP
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        rol_nu = rol_get_huidige(self.request)
+        return rol_nu == Rollen.ROL_RCL
+
+    def handle_no_permission(self):
+        """ gebruiker heeft geen toegang --> redirect naar het plein """
+        return HttpResponseRedirect(reverse('Plein:plein'))
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        try:
+            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen geeft beveiliging
+            deelcomp = DeelCompetitie.objects.get(pk=deelcomp_pk)
+        except (ValueError, DeelCompetitie.DoesNotExist):
+            raise Resolver404()
+
+        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
+        if deelcomp.functie != functie_nu:
+            # niet de beheerder
+            raise Resolver404()
+
+        context['url_afsluiten'] = reverse('Competitie:afsluiten-regiocomp', kwargs={'deelcomp_pk': deelcomp.pk})
+
+        menu_dynamics(self.request, context, actief='competitie')
+        return context
+
+    def post(self, request, *args, **kwargs):
+        """ Deze functie wordt aangeroepen als de knop 'Afsluiten' gebruikt wordt door de RCL """
+
+        try:
+            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen geeft beveiliging
+            deelcomp = DeelCompetitie.objects.get(pk=deelcomp_pk)
+        except (ValueError, DeelCompetitie.DoesNotExist):
+            raise Resolver404()
+
+        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
+        if deelcomp.functie != functie_nu:
+            # niet de beheerder
+            raise Resolver404()
+
+        if not deelcomp.is_afgesloten:
+            deelcomp.is_afgesloten = True
+            deelcomp.save()
+
+            # zoek de bijbehorende RK op
+            deelcomp_rk = DeelCompetitie.objects.get(competitie=deelcomp.competitie,
+                                                     laag=LAAG_RK,
+                                                     nhb_rayon=deelcomp.nhb_regio.rayon)
+            # stuur elke RKO een taak ('ter info')
+            rko_namen = list()
+            functie_rko = deelcomp_rk.functie
+            now = timezone.now()
+            taak_deadline = now
+            taak_tekst = "Ter info: De regiocompetitie %s is zojuist afgesloten door RCL %s" % (str(deelcomp), request.user.volledige_naam())
+            taak_tekst += "\nAls RKO kan je onder Competitie, Planning Rayon de status van elke regio zien."
+            taak_log = "[%s] Taak aangemaakt" % now
+
+            for account in functie_rko.accounts.all():
+                # maak een taak aan voor deze RKO
+                taak = Taak(toegekend_aan=account,
+                            deadline=taak_deadline,
+                            aangemaakt_door=request.user,
+                            beschrijving=taak_tekst,
+                            handleiding_pagina="",
+                            log=taak_log,
+                            deelcompetitie=deelcomp_rk)
+                taak.save()
+                rko_namen.append(account.volledige_naam())
+            # for
+
+            # schrijf in het logboek
+            msg = "Deelcompetitie '%s' is afgesloten" % str(deelcomp)
+            msg += '\nDe volgende beheerders zijn geïnformeerd via een taak: %s' % ", ".join(rko_namen)
+            schrijf_in_logboek(request.user, "Competitie", msg)
+
+        url = reverse('Competitie:overzicht')
         return HttpResponseRedirect(url)
 
 # end of file

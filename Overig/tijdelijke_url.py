@@ -15,6 +15,8 @@ RECEIVER_BEVESTIG_ACCOUNT_EMAIL = 'account_email'
 RECEIVER_BEVESTIG_FUNCTIE_EMAIL = 'functie_email'
 RECEIVER_ACCOUNT_WISSEL = 'account_wissel'
 RECEIVER_WACHTWOORD_VERGETEN = 'wachtwoord_vergeten'     # 19 lang
+RECEIVER_KAMPIOENSCHAP_JA = 'kampioenschap_ja'
+RECEIVER_KAMPIOENSCHAP_NEE = 'kampioenschap_nee'
 
 
 class TijdelijkeUrlDispatcher(object):
@@ -134,10 +136,20 @@ def do_dispatch(request, obj):
         func = tijdelijkeurl_dispatcher.get_receiver(obj.dispatch_to)
         redirect = func(request, obj.hoortbij_functie)
 
+    elif obj.dispatch_to in (RECEIVER_KAMPIOENSCHAP_JA,
+                             RECEIVER_KAMPIOENSCHAP_NEE):
+        # referentie = KampioenschapSchutterBoog
+        wil_meedoen = (obj.dispatch_to == RECEIVER_KAMPIOENSCHAP_JA)
+        func = tijdelijkeurl_dispatcher.get_receiver(obj.dispatch_to)
+        redirect = func(request, obj.hoortbij_kampioenschap, wil_meedoen)
+
     return redirect
 
 
 def beschrijving_activiteit(obj):
+
+    # Je hebt verzocht om ...
+
     if obj.dispatch_to == RECEIVER_ACCOUNT_WISSEL:
         return "in te loggen als een andere gebruiker"
 
@@ -147,6 +159,12 @@ def beschrijving_activiteit(obj):
 
     if obj.dispatch_to == RECEIVER_WACHTWOORD_VERGETEN:
         return "een nieuw wachtwoord in te stellen"
+
+    if obj.dispatch_to == RECEIVER_KAMPIOENSCHAP_JA:
+        return "je beschikbaarheid voor een kampioenschap te bevestigen"
+
+    if obj.dispatch_to == RECEIVER_KAMPIOENSCHAP_NEE:
+        return "je af te melden voor een kampioenschap"
 
     return "????"
 
