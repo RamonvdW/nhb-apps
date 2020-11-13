@@ -14,9 +14,39 @@
 
     {% if url_tussenstand %}
         <p>Op deze pagina kan je de lijst met kandidaat-schutters voor jouw RK's vaststellen.</p>
-        <p>Dit is pas mogelijk als de onderliggende regiocompetities afgesloten zijn. De status hiervan kan je zien onder Planning Rayon</p>
-        <p>Tot dat moment kan je de kandidaten voor elk van de {{ aantal_klassen }} wedstrijdklassen zien op deze pagina:</p>
-        <a class="btn-nhb-blauw" href="{{ url_tussenstand }}">Tussenstand</a>
+        <p>Dit is pas mogelijk als alle onderliggende regiocompetities afgesloten zijn. De status hiervan kan je hier onder zien.</p>
+        <p>Tot dat moment kan je de kandidaten voor elke wedstrijdklassen zien op deze pagina:</p>
+        <p>
+            <a class="btn-nhb-blauw" href="{{ url_tussenstand }}">Tussenstand</a>
+        </p>
+
+        <p>&nbsp;</p>
+        <h5>Status regiocompetities</h5>
+        <p>Deze tabel toont de status van elke regiocompetitie. Als ze allemaal afgesloten zijn, dan kunnen de kandidaat-deelnemers lijsten voor de RK's vastgesteld worden.</p>
+        <div class="row">
+            <div class="col s12 m8 l6">
+                <table class="white">
+                    <thead>
+                        <tr>
+                            <th>Rayon</th>
+                            <th>Regio</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+
+                    {% for obj in regio_status %}
+                        <tr>
+                            <td>{{ obj.rayon_str }}</td>
+                            <td>{{ obj.regio_str }}</td>
+                            <td{% if obj.status_groen %} class="green-text"{% endif %}>{{ obj.status_str }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+
+            </div>
+        </div>
+
+
     {% else %}
 
         {% if deelcomp_rk.heeft_deelnemerslijst %}

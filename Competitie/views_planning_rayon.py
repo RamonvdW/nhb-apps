@@ -9,6 +9,7 @@ from django.urls import Resolver404, reverse
 from django.utils import timezone
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
+from BasisTypen.models import IndivWedstrijdklasse
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
 from Logboek.models import schrijf_in_logboek
 from NhbStructuur.models import NhbCluster, NhbVereniging
@@ -16,7 +17,7 @@ from Plein.menu import menu_dynamics
 from Taken.models import Taak
 from Wedstrijden.models import Wedstrijd, WedstrijdenPlan, WedstrijdLocatie
 from .models import (LAAG_REGIO, LAAG_RK, LAAG_BK, DeelCompetitie, DeelcompetitieRonde,
-                     RegioCompetitieSchutterBoog, KampioenschapSchutterBoog)
+                     CompetitieKlasse, RegioCompetitieSchutterBoog, KampioenschapSchutterBoog)
 from types import SimpleNamespace
 import datetime
 
@@ -80,11 +81,36 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
             deelcomp_rk.plan.save()
             deelcomp_rk.save()
 
+        klasse2schutters = dict()
+        for obj in (KampioenschapSchutterBoog
+                    .objects
+                    .filter(deelcompetitie=deelcomp_rk)
+                    .select_related('klasse')):
+            try:
+                klasse2schutters[obj.klasse.indiv.pk] += 1
+            except KeyError:
+                klasse2schutters[obj.klasse.indiv.pk] = 1
+        # for
+
         # haal de RK wedstrijden op
         context['wedstrijden_rk'] = (deelcomp_rk.plan.wedstrijden
                                      .select_related('vereniging')
+                                     .prefetch_related('indiv_klassen',
+                                                       'team_klassen')
                                      .order_by('datum_wanneer',
                                                'tijd_begin_wedstrijd'))
+        for obj in context['wedstrijden_rk']:
+            obj.klassen_count = obj.indiv_klassen.count() + obj.team_klassen.count()
+            obj.schutters_count = 0
+
+            for klasse in obj.indiv_klassen.all():
+                try:
+                    obj.schutters_count += klasse2schutters[klasse.pk]
+                except KeyError:
+                    # geen schutters in deze klasse
+                    pass
+            # for
+        # for
 
         if rol_nu == Rollen.ROL_RKO and functie_nu.nhb_rayon == deelcomp_rk.nhb_rayon:
             context['url_nieuwe_wedstrijd'] = reverse('Competitie:rayon-planning',
@@ -183,6 +209,82 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
         return HttpResponseRedirect(reverse('Plein:plein'))
 
+    @staticmethod
+    def _get_wedstrijdklassen(deelcomp_rk, wedstrijd):
+        klasse2schutters = dict()
+        for obj in (KampioenschapSchutterBoog
+                    .objects
+                    .filter(deelcompetitie=deelcomp_rk)
+                    .select_related('klasse')):
+            try:
+                klasse2schutters[obj.klasse.indiv.pk] += 1
+            except KeyError:
+                klasse2schutters[obj.klasse.indiv.pk] = 1
+        # for
+
+        # wedstrijdklassen
+        wedstrijd_indiv_pks = [obj.pk for obj in wedstrijd.indiv_klassen.all()]
+        wkl_indiv = (CompetitieKlasse
+                     .objects
+                     .filter(competitie=deelcomp_rk.competitie,
+                             indiv__is_onbekend=False,
+                             team=None)
+                     .select_related('indiv__boogtype')
+                     .order_by('indiv__volgorde')
+                     .all())
+        prev_boogtype = wkl_indiv[0].indiv.boogtype
+        for obj in wkl_indiv:
+            if prev_boogtype != obj.indiv.boogtype:
+                prev_boogtype = obj.indiv.boogtype
+                obj.break_before = True
+            try:
+                schutters = klasse2schutters[obj.indiv.pk]
+                if schutters > 24:
+                    schutters = 24
+            except KeyError:
+                schutters = 0
+            obj.short_str = obj.indiv.beschrijving
+            obj.schutters = schutters
+            obj.sel_str = "wkl_indiv_%s" % obj.indiv.pk
+            obj.geselecteerd = (obj.indiv.pk in wedstrijd_indiv_pks)
+        # for
+
+        wedstrijd_team_pks = [obj.pk for obj in wedstrijd.team_klassen.all()]
+        wkl_team = (CompetitieKlasse
+                    .objects
+                    .filter(competitie=deelcomp_rk.competitie,
+                            indiv=None)
+                    .order_by('indiv__volgorde')
+                    .all())
+        for obj in wkl_team:
+            obj.short_str = obj.team.beschrijving
+            obj.sel_str = "wkl_team_%s" % obj.team.pk
+            obj.geselecteerd = (obj.team.pk in wedstrijd_team_pks)
+        # for
+
+        return wkl_indiv, wkl_team
+
+    @staticmethod
+    def _get_dagen(deelcomp_rk, wedstrijd):
+        opt_dagen = list()
+        when = deelcomp_rk.competitie.rk_eerste_wedstrijd
+        stop = deelcomp_rk.competitie.rk_laatste_wedstrijd
+        weekdag_nr = 0
+        limit = 30
+        while limit > 0 and when <= stop:
+            obj = SimpleNamespace()
+            obj.weekdag_nr = weekdag_nr
+            obj.datum = when
+            obj.actief = (when == wedstrijd.datum_wanneer)
+            opt_dagen.append(obj)
+
+            limit -= 1
+            when += datetime.timedelta(days=1)
+            weekdag_nr += 1
+        # while
+
+        return opt_dagen
+
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
@@ -194,7 +296,9 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
             wedstrijd = (Wedstrijd
                          .objects
                          .select_related('uitslag')
-                         .prefetch_related('uitslag__scores')
+                         .prefetch_related('uitslag__scores',
+                                           'indiv_klassen',
+                                           'team_klassen')
                          .get(pk=wedstrijd_pk))
         except (ValueError, Wedstrijd.DoesNotExist):
             raise Resolver404()
@@ -211,22 +315,7 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
         context['wedstrijd'] = wedstrijd
 
         # maak de lijst waarop de wedstrijd gehouden kan worden
-        context['opt_weekdagen'] = opt_weekdagen = list()
-        when = deelcomp_rk.competitie.rk_eerste_wedstrijd
-        stop = deelcomp_rk.competitie.rk_laatste_wedstrijd
-        weekdag_nr = 0
-        limit = 30
-        while limit > 0 and when <= stop:
-            obj = SimpleNamespace()
-            obj.weekdag_nr = weekdag_nr
-            obj.datum = when
-            obj.actief = (when == wedstrijd.datum_wanneer)
-            opt_weekdagen.append(obj)
-
-            limit -= 1
-            when += datetime.timedelta(days=1)
-            weekdag_nr += 1
-        # while
+        context['opt_weekdagen'] = self._get_dagen(deelcomp_rk, wedstrijd)
 
         wedstrijd.tijd_begin_wedstrijd_str = wedstrijd.tijd_begin_wedstrijd.strftime("%H:%M")
         # wedstrijd.tijd_begin_aanmelden_str = wedstrijd.tijd_begin_aanmelden.strftime("%H%M")
@@ -255,6 +344,8 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
                 locaties[str(ver.pk)] = obj.adres   # nhb_nr --> adres
             # for
         # for
+
+        context['wkl_indiv'], context['wkl_team'] = self._get_wedstrijdklassen(deelcomp_rk, wedstrijd)
 
         context['url_terug'] = reverse('Competitie:rayon-planning', kwargs={'deelcomp_pk': deelcomp_rk.pk})
         context['url_opslaan'] = reverse('Competitie:wijzig-rayon-wedstrijd', kwargs={'wedstrijd_pk': wedstrijd.pk})
@@ -338,7 +429,33 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
             wedstrijd.locatie = locaties[0]
         else:
             wedstrijd.locatie = None
+
         wedstrijd.save()
+
+        gekozen_klassen = list()
+        for key, value in request.POST.items():
+            if key[:10] == "wkl_indiv_":
+                try:
+                    pk = int(key[10:10+6])
+                except (IndexError, TypeError, ValueError):
+                    pass
+                else:
+                    gekozen_klassen.append(pk)
+        # for
+
+        niet_meer_gekozen = list()
+        for obj in wedstrijd.indiv_klassen.all():
+            if obj.pk in gekozen_klassen:
+                # was al gekozen
+                gekozen_klassen.remove(obj.pk)
+            else:
+                # moet uitgezet worden
+                wedstrijd.indiv_klassen.remove(obj)
+        # for
+
+        # alle nieuwe klassen toevoegen
+        if len(gekozen_klassen):
+            wedstrijd.indiv_klassen.add(*gekozen_klassen)
 
         url = reverse('Competitie:rayon-planning', kwargs={'deelcomp_pk': deelcomp_rk.pk})
         return HttpResponseRedirect(url)
@@ -361,6 +478,32 @@ class LijstRkSchuttersView(UserPassesTestMixin, TemplateView):
     def handle_no_permission(self):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
         return HttpResponseRedirect(reverse('Plein:plein'))
+
+    @staticmethod
+    def _get_regio_status(competitie):
+        # schutter moeten uit LAAG_REGIO gehaald worden, uit de 4 regio's van het rayon
+        regio_deelcomps = (DeelCompetitie
+                           .objects
+                           .filter(laag=LAAG_REGIO,
+                                   competitie=competitie)
+                           .select_related('nhb_regio',
+                                           'nhb_regio__rayon')
+                           .order_by('nhb_regio__regio_nr'))
+
+        alles_afgesloten = True
+        for obj in regio_deelcomps:
+            obj.regio_str = str(obj.nhb_regio.regio_nr)
+            obj.rayon_str = str(obj.nhb_regio.rayon.rayon_nr)
+
+            if obj.is_afgesloten:
+                obj.status_str = "Afgesloten"
+                obj.status_groen = True
+            else:
+                alles_afgesloten = False
+                obj.status_str = "Actief"
+        # for
+
+        return alles_afgesloten, regio_deelcomps
 
     def _get_schutters_regios(self, competitie, rayon_nr):
         """ geeft een lijst met deelnemers terug
@@ -484,6 +627,9 @@ class LijstRkSchuttersView(UserPassesTestMixin, TemplateView):
         _, functie_nu = rol_get_huidige_functie(self.request)
         if functie_nu != deelcomp_rk.functie:
             raise Resolver404()     # niet de juiste RKO
+
+        alles_afgesloten, regio_status = self._get_regio_status(deelcomp_rk.competitie)
+        context['regio_status'] = regio_status
 
         context['deelcomp_rk'] = deelcomp_rk
 

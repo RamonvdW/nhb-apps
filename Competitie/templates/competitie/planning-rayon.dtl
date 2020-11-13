@@ -51,8 +51,8 @@
                 <th>Wanneer</th>
                 <th>Waar</th>
                 <th>Klassen</th>
+                <th>Schutters</th>
                 <th><!-- kolom voor wijzig knoppen --></th>
-                <th>Uitslag</th>
             </tr>
         </thead>
 
@@ -68,7 +68,9 @@
                     {% endif %}
                 </td>
 
-                <td>?</td>
+                <td>{{ wedstrijd.klassen_count }}</td>
+
+                <td>{{ wedstrijd.schutters_count }}</td>
 
                 <!-- knop om wedstrijd te wijzigen -->
                 <td>
@@ -78,21 +80,6 @@
                     {% endif %}
                 </td>
 
-                <!-- knop om uitslagen te zien / in te voeren -->
-                <td>
-                    {% if wedstrijd.url_uitslag_controleren %}
-                        <a {% if wedstrijd.uitslag.is_bevroren %}class="btn-nhb-blauw btn-small"{% else %}class="btn-nhb-rood"{% endif %} href="{{ wedstrijd.url_uitslag_controleren }}">
-                            <i class="material-icons-round left">arrow_forward</i>Controleer</a>
-                    {% elif wedstrijd.url_uitslag_invoeren %}
-                        <a class="btn-nhb-blauw btn-small" href="{{ wedstrijd.url_uitslag_invoeren }}">
-                            <i class="material-icons-round left">arrow_forward</i>Invoeren</a>
-                    {% elif wedstrijd.url_uitslag_bekijken %}
-                        <a class="btn-nhb-blauw btn-small" href="{{ wedstrijd.url_uitslag_bekijken }}">
-                            <i class="material-icons-round left">arrow_forward</i>Bekijken</a>
-                    {% else %}
-                        <i>Nog geen</i>
-                    {% endif %}
-                </td>
             </tr>
         {% empty %}
             {% if not url_nieuwe_wedstrijd %}

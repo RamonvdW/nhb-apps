@@ -94,7 +94,57 @@
                 <td>Accommodatie:</td>
                 <td id="id_loc"></td>
             </tr>
+
+            <tr>
+                <!-- inline-block gives vertical align top -->
+                <td style="display: inline-block">Wedstrijdklassen individueel:</td>
+
+                <td>
+                    <table class="striped">
+                        <thead>
+                            <tr>
+                                <th><!-- checkbox column --></th>
+                                <th>Klasse</th>
+                                <th>Aantal schutters</th>
+                            </tr>
+                        </thead>
+                        {% for obj in wkl_indiv %}
+                            <tr>
+                                <!-- {% if obj.break_before %}<br>{% endif %} -->
+                                <td><label>
+                                    <input type="checkbox" class="filled-in" name="{{ obj.sel_str }}" {% if obj.geselecteerd %}checked{% endif %}{% if obj.schutters == 0 %}disabled{% endif %}>
+                                    <span>&nbsp</span>
+                                    </label>
+                                </td>
+                                <td>{{ obj.short_str }}</td>
+                                <td>{{ obj.schutters }}</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </td>
+            </tr>
         </table>
+
+        <!--
+        <h6>Wedstrijdklassen teams</h6>
+
+        <table class="white">
+            <tr>
+                {% for obj in wkl_team %}
+                    {% if obj.break_before %}
+                        </tr><tr>
+                    {% endif %}
+
+                    <td>
+                        <label>
+                            <input type="checkbox" class="filled-in" name="{{ obj.sel_str }}" {% if obj.geselecteerd %}checked{% endif %}>
+                            <span class="black-text">{{ obj.short_str }}</span>
+                        </label>
+                    </td>
+                {% endfor %}
+            </tr>
+        </table>
+        -->
 
         <p>
             <a class="btn-nhb-blauw" href="{{ url_terug }}">
