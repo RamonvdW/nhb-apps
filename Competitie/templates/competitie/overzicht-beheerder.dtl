@@ -74,7 +74,7 @@
 
             <!-- toon inschrijvingen regiocompetitie -->
             {% for comp in competities %}
-                {% if comp.fase != 'A1' and comp.fase != 'A1' %}    <!-- TODO: change to !=A1 and !=A2 -->
+                {% if comp.url_inschrijvingen %}
                     {% include 'plein/card.dtl' with title=comp.titel_inschrijvingen text="Toon lijst met schutters ingeschreven voor de regiocompetitie van de "|add:comp.beschrijving|add:"." icon="receipt" url=comp.url_inschrijvingen %}
                 {% endif %}
             {% endfor %}
