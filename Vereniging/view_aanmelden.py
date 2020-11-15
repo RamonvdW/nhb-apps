@@ -429,6 +429,9 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
             obj.team_ja_nee = JA_NEE[obj.inschrijf_voorkeur_team]
             obj.dagdeel_str = dagdeel_str[obj.inschrijf_voorkeur_dagdeel]
             obj.check = "pk_%s" % obj.pk
+            lid = obj.schutterboog.nhblid
+            obj.nhb_nr = lid.nhb_nr
+            obj.naam_str = lid.volledige_naam()
         # for
 
         return objs
