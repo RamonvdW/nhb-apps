@@ -12,14 +12,24 @@
 
     <h4>Regiocompetitie afsluiten</h4>
 
-    <p>Als RCL wil je de regiocompetitie in jouw regio afsluiten.</p>
-    <p>Dit is een eenmalige maar belangrijke actie, waardoor de schutters doorgezet worden naar het RK.</p>
-    <p>Hiermee bevestig je dat alle scores ingevoerd zijn en er geen klachten meer in behandeling zijn die invloed kunnen hebben op de top-24 van elke wedstrijdklasse.</p>
+    {% if url_afsluiten %}
+        <p>Als RCL wil je de regiocompetitie in jouw regio afsluiten.</p>
+        <p>Dit is een eenmalige maar belangrijke actie, waardoor de schutters doorgezet worden naar het RK.</p>
+        <p>Hiermee bevestig je ook dat alle scores ingevoerd zijn en er geen klachten meer in behandeling zijn die invloed kunnen hebben op de top-24 van elke wedstrijdklasse.</p>
 
-    <form method="post" action="{{ url_afsluiten }}">
-        {% csrf_token %}
-        <input class="btn-nhb-rood" name="button_afsluiten" type="submit" value="Ja, ik ben er klaar mee">
-    </form>
+        <form method="post" action="{{ url_afsluiten }}">
+            {% csrf_token %}
+            <input class="btn-nhb-rood" name="button_afsluiten" type="submit" value="Ja, ik ben er klaar mee">
+        </form>
+    {% else %}
+        <p>Als RCL kan je straks de regiocompetitie in jouw regio afsluiten.</p>
+        <p>Dit is een eenmalige maar belangrijke actie, waardoor de schutters doorgezet worden naar het RK.</p>
+        <p>Daarmee bevestig je ook dat alle scores ingevoerd zijn en er geen klachten meer in behandeling zijn die invloed kunnen hebben op de top-24 van elke wedstrijdklasse.</p>
+
+        <p>&nbsp;</p>
+        <p>De competitie kan nu nog niet afgesloten worden.</p>
+        <a class="btn-nhb-blauw" href="{% url 'Competitie:overzicht' %}">Terug</a>
+    {% endif %}
 
     {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-afsluiten-regiocomp" %}
 
