@@ -886,7 +886,11 @@ class AfsluitenRegiocompView(UserPassesTestMixin, TemplateView):
             # niet de beheerder
             raise Resolver404()
 
-        context['url_afsluiten'] = reverse('Competitie:afsluiten-regiocomp', kwargs={'deelcomp_pk': deelcomp.pk})
+        if not deelcomp.is_afgesloten:
+            deelcomp.competitie.zet_fase()
+            if deelcomp.competitie.fase == 'F':
+                context['url_afsluiten'] = reverse('Competitie:afsluiten-regiocomp',
+                                                   kwargs={'deelcomp_pk': deelcomp.pk})
 
         menu_dynamics(self.request, context, actief='competitie')
         return context
@@ -906,6 +910,12 @@ class AfsluitenRegiocompView(UserPassesTestMixin, TemplateView):
             raise Resolver404()
 
         if not deelcomp.is_afgesloten:
+
+            deelcomp.competitie.zet_fase()
+            if deelcomp.competitie.fase != 'F':
+                # nog niet mogelijk om af te sluiten
+                raise Resolver404()
+
             deelcomp.is_afgesloten = True
             deelcomp.save()
 
