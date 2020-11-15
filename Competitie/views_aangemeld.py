@@ -91,6 +91,10 @@ class LijstAangemeldRegiocompAllesView(UserPassesTestMixin, TemplateView):
         except (ValueError, Competitie.DoesNotExist):
             raise Resolver404()
 
+        comp.zet_fase()
+        if comp.fase < 'B' or comp.fase > 'E':
+            raise Resolver404()
+
         context['competitie'] = comp
 
         objs = (RegioCompetitieSchutterBoog
@@ -145,6 +149,10 @@ class LijstAangemeldRegiocompRayonView(UserPassesTestMixin, TemplateView):
             comp_pk = int(kwargs['comp_pk'][:6])    # afkappen voor veiligheid
             comp = Competitie.objects.get(pk=comp_pk)
         except (ValueError, Competitie.DoesNotExist):
+            raise Resolver404()
+
+        comp.zet_fase()
+        if comp.fase < 'B' or comp.fase > 'E':
             raise Resolver404()
 
         context['competitie'] = comp
@@ -209,6 +217,10 @@ class LijstAangemeldRegiocompRegioView(UserPassesTestMixin, TemplateView):
             comp_pk = int(kwargs['comp_pk'][:6])        # afkappen voor veiligheid
             comp = Competitie.objects.get(pk=comp_pk)
         except (ValueError, Competitie.DoesNotExist):
+            raise Resolver404()
+
+        comp.zet_fase()
+        if comp.fase < 'B' or comp.fase > 'E':
             raise Resolver404()
 
         context['competitie'] = comp
@@ -443,6 +455,10 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
         except (ValueError, Competitie.DoesNotExist):
             raise Resolver404()
 
+        comp.zet_fase()
+        if comp.fase < 'B' or comp.fase > 'E':
+            raise Resolver404()
+
         context['competitie'] = comp
 
         try:
@@ -521,6 +537,10 @@ class Inschrijfmethode3BehoefteAlsBestandView(Inschrijfmethode3BehoefteView):
             comp_pk = int(kwargs['comp_pk'][:6])        # afkappen voor veiligheid
             comp = Competitie.objects.get(pk=comp_pk)
         except (ValueError, Competitie.DoesNotExist):
+            raise Resolver404()
+
+        comp.zet_fase()
+        if comp.fase < 'B' or comp.fase > 'E':
             raise Resolver404()
 
         context['competitie'] = comp
