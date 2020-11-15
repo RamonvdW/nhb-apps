@@ -24,7 +24,7 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
 
     """ unit tests voor de Competitie applicatie, Koppel Beheerders functie """
 
-    test_after = ('Competitie.test_beheerders', 'Competitie.test_competitie')
+    test_after = ('Competitie.test_fase', 'Competitie.test_beheerders', 'Competitie.test_competitie')
 
     def _prep_beheerder_lid(self, voornaam):
         nhb_nr = self._next_nhbnr

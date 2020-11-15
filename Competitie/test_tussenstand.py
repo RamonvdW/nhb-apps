@@ -20,7 +20,7 @@ class TestCompetitieTussenstand(E2EHelpers, TestCase):
 
     """ unit tests voor de Competitie applicatie, module Informatie over de Competitie """
 
-    test_after = ('Competitie.test_beheerders', 'Competitie.test_competitie')
+    test_after = ('Competitie.test_fase', 'Competitie.test_beheerders', 'Competitie.test_competitie')
 
     def setUp(self):
         """ eenmalige setup voor alle tests

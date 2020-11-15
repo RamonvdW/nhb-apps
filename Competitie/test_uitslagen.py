@@ -22,7 +22,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
 
     """ unit tests voor de Competitie applicatie, module Informatie over de Competitie """
 
-    test_after = ('Competitie.test_planning',)
+    test_after = ('Competitie.test_fase', 'Competitie.test_planning',)
 
     def _prep_beheerder_lid(self, voornaam):
         nhb_nr = self._next_nhbnr
