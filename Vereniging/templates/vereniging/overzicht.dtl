@@ -65,17 +65,19 @@
                         <div class="card-text center-align"><br>(NOG NIET BESCHIKBAAR)</div>
                     </div>
                 </div>
-            {% else %}
+            {% elif comp.fase < 'F' %}
                 {% url 'Vereniging:leden-aanmelden' comp_pk=comp.pk as card_url %}
                 {% include 'plein/card_logo.dtl' with title="Aanmelden "|add:comp.afstand|add:"m" text="Leden aanmelden voor de "|add:comp.beschrijving|add:"." img_src=comp.icon img_height="60" url=card_url %}
             {% endif %}
         {% endfor %}
     {% endif %}
 
-    <!-- leden ingeschreven voor de competitie -->
+    <!-- leden ingeschreven voor de competitie (niet meer tonen vanaf fase RK) -->
     {% for deelcomp in deelcomps %}
-        {% url 'Vereniging:leden-ingeschreven' deelcomp_pk=deelcomp.pk as card_url %}
-        {% include 'plein/card_logo.dtl' with title="Ingeschreven "|add:deelcomp.competitie.afstand|add:"m" text="Overzicht leden ingeschreven zijn voor de "|add:deelcomp.competitie.beschrijving|add:"." img_src=deelcomp.icon img_height="60" url=card_url %}
+        {% if deelcomp.competitie.fase <= 'F' %}
+            {% url 'Vereniging:leden-ingeschreven' deelcomp_pk=deelcomp.pk as card_url %}
+            {% include 'plein/card_logo.dtl' with title="Ingeschreven "|add:deelcomp.competitie.afstand|add:"m" text="Overzicht leden ingeschreven zijn voor de "|add:deelcomp.competitie.beschrijving|add:"." img_src=deelcomp.icon img_height="60" url=card_url %}
+        {% endif %}
     {% endfor %}
 
     <!-- wedstrijden -->
