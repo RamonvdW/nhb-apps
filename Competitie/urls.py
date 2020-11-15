@@ -29,6 +29,14 @@ urlpatterns = [
          name='klassegrenzen-tonen'),
 
 
+    path('lijst-regiocompetitie/<comp_pk>/regio-<regio_pk>/dagdeel-behoefte/',
+         views_aangemeld.Inschrijfmethode3BehoefteView.as_view(),
+         name='inschrijfmethode3-behoefte'),
+
+    path('lijst-regiocompetitie/<comp_pk>/regio-<regio_pk>/dagdeel-behoefte-als-bestand/',
+         views_aangemeld.Inschrijfmethode3BehoefteAlsBestandView.as_view(),
+         name='inschrijfmethode3-behoefte-als-bestand'),
+
     path('lijst-regiocompetitie/<comp_pk>/alles/',
          views_aangemeld.LijstAangemeldRegiocompAllesView.as_view(),
          name='lijst-regiocomp-alles'),
@@ -41,22 +49,10 @@ urlpatterns = [
          views_aangemeld.LijstAangemeldRegiocompRegioView.as_view(),
          name='lijst-regiocomp-regio'),
 
-    path('lijst-regiocompetitie/<comp_pk>/regio-<regio_pk>/dagdeel-behoefte/',
-         views_aangemeld.Inschrijfmethode3BehoefteView.as_view(),
-         name='inschrijfmethode3-behoefte'),
-
-    path('lijst-regiocompetitie/<comp_pk>/regio-<regio_pk>/dagdeel-behoefte-als-bestand/',
-         views_aangemeld.Inschrijfmethode3BehoefteAlsBestandView.as_view(),
-         name='inschrijfmethode3-behoefte-als-bestand'),
-
 
     path('lijst-rayonkampioenschappen/<deelcomp_pk>/',
          views_planning_rayon.LijstRkSchuttersView.as_view(),
          name='lijst-rk'),
-
-    path('lijst-rayonkampioenschappen/contact-gegevens/<deelcomp_pk>/',
-         views_planning_rayon.LijstRkContactgegevensView.as_view(),
-         name='lijst-rk-contact'),
 
     path('lijst-rayonkampioenschappen/wijzig-status-rk-deelnemer/<deelnemer_pk>/',
          views_planning_rayon.WijzigStatusRkSchutterView.as_view(),
