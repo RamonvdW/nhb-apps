@@ -8,10 +8,11 @@
 # zodra er nieuwe ScoreHist records zijn
 
 from django.core.management.base import BaseCommand
+from django.db.models import F
 import django.db.utils
 from Competitie.models import (CompetitieTaken, CompetitieKlasse,
-                               LAAG_REGIO, DeelCompetitie, DeelcompetitieRonde,
-                               RegioCompetitieSchutterBoog)
+                               LAAG_REGIO, Competitie, DeelCompetitie, DeelcompetitieRonde,
+                               RegioCompetitieSchutterBoog, KampioenschapSchutterBoog)
 from Score.models import ScoreHist, SCORE_WAARDE_VERWIJDERD
 import datetime
 import time
@@ -37,6 +38,41 @@ class Command(BaseCommand):
                             help="Aantal minuten actief blijven")
         parser.add_argument('--all', action='store_true')       # alles opnieuw vaststellen
         parser.add_argument('--quick', action='store_true')     # for testing
+
+    def _verwerk_overstappers_regio(self, comp):
+        objs = (RegioCompetitieSchutterBoog
+                .objects
+                .select_related('bij_vereniging',
+                                'bij_vereniging__regio',
+                                'schutterboog__nhblid',
+                                'schutterboog__nhblid__bij_vereniging',
+                                'schutterboog__nhblid__bij_vereniging__regio')
+                .filter(aantal_scores__lt=6)    # vanaf 6 scores niet meer overzetten
+                .exclude(bij_vereniging=F('schutterboog__nhblid__bij_vereniging')))
+        for obj in objs:
+            lid = obj.schutterboog.nhblid
+            if not lid.bij_vereniging:
+                self.stdout.write('[WARNING] Uitstapper: %s [%s] %s (actief=%s)' % (lid.nhb_nr, obj.bij_vereniging.regio.regio_nr, obj.bij_vereniging, lid.is_actief_lid))
+            else:
+                self.stdout.write('[INFO] Verwerk overstap %s: [%s] %s --> [%s] %s' % (lid.nhb_nr, obj.bij_vereniging.regio.regio_nr, obj.bij_vereniging, lid.bij_vereniging.regio.regio_nr, lid.bij_vereniging))
+                if obj.bij_vereniging.regio != lid.bij_vereniging.regio:
+                    obj.deelcompetitie = DeelCompetitie.objects.get(competitie=obj.deelcompetitie.competitie,
+                                                                    nhb_regio=lid.bij_vereniging.regio)
+                obj.bij_vereniging = lid.bij_vereniging
+                obj.save()
+        # for
+
+    def _verwerk_overstappers(self):
+        """ Deze functie verwerkt schutters die overgestapt zijn naar een andere vereniging
+            Deze worden overgeschreven naar een andere deelcompetitie (regio/RK/BK).
+        """
+        for comp in Competitie.objects.filter(is_afgesloten=False):
+            # 18m of 25m
+            comp.zet_fase()
+            if comp.fase <= 'E':
+                # TODO: voor de teamcompetitie moet dit pas gebeuren nadat de teamscores vastgesteld zijn
+                self._verwerk_overstappers_regio(comp)
+        # for
 
     def _prep_caches(self):
         # maak een structuur om gerelateerde IndivWedstrijdklassen te vinden
@@ -371,6 +407,8 @@ class Command(BaseCommand):
 
         if options['all']:
             self.taken.hoogste_scorehist = None
+
+        self._verwerk_overstappers()
 
         self._prep_caches()
 
