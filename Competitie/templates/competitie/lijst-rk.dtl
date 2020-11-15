@@ -59,32 +59,32 @@
                     <table class="white">
                         <thead>
                             <tr>
+                                <th><!--icon--></th>
                                 <th>Status</th>
                                 <th>Aantal</th>
                             </tr>
                         </thead>
 
                         <tr>
-                            <td><i class="red-text">Onbekend</i></td>
+                            <td class="center-align"><i class="red-text material-icons-round">help</i></td>
+                            <td class="red-text">Onbekend</td>
                             <td>{{ aantal_onbekend }}</td>
                         </tr>
 
                         <tr>
+                            <td class="center-align"><i class="green-text material-icons-round">check</i></td>
                             <td class="green-text">Deelname bevestigd</td>
                             <td>{{ aantal_bevestigd }}</td>
                         </tr>
 
                         <tr>
-                            <td>Afgemeld</td>
+                            <td class="center-align"><i class="grey-text material-icons-round">block</i></td>
+                            <td class="grey-text">Afgemeld</td>
                             <td>{{ aantal_afgemeld }}</td>
                         </tr>
                     </table>
                 </div>
             </div>
-
-            <p>
-                <a class="btn-nhb-blauw right" href="{{ url_contact }}">Contactgegevens schutters</a>
-            </p>
 
         {% else %}
             <p>Hieronder tonen we de lijst met kandidaat schutters voor elke wedstrijdklasse van de Rayonkampioenschappen.</p>
@@ -116,7 +116,7 @@
 
                 <tr{% if obj.is_afgemeld %} class="grey-text"{% endif %}>
                     {% if obj.rank %}
-                        <td>{{ obj.rank }}</td>
+                        <td class="right-align">{{ obj.rank }}</td>
                     {% else %}
                         <td></td>
                     {% endif %}
@@ -135,11 +135,12 @@
 
                     {% if not url_bevestig_rk_schutters %}
                         {% if obj.deelname_bevestigd %}
-                            <td class="green-text">Bevestigd</td>
+                            <td class="center-align"><i class="green-text material-icons-round">check</i></td>
                         {% elif obj.is_afgemeld %}
-                            <td>Afgemeld</td>
+                            <td class="center-align"><i class="grey-text material-icons-round">block</i></td>
                         {% else %}
-                            <td><i class="red-text">Onbekend</i></td>
+                            <!-- onbekend -->
+                            <td class="center-align"><i class="red-text material-icons-round">help</i></td>
                         {% endif %}
 
                         <td><a class="btn-nhb-blauw btn-small" href="{{ obj.url_wijzig }}">Wijzig</a></td>
