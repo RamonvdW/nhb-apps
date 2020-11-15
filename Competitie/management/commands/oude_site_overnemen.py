@@ -434,10 +434,7 @@ class Command(BaseCommand):
             self._roep_info('Verschil in lid %s naam: bekend=%s, oude programma=%s' % (
                                 lid.nhb_nr, lid.volledige_naam_str, naam))
 
-        aantal_scores = len(scores)
-        while aantal_scores > 0 and scores[aantal_scores - 1] == 0:
-            aantal_scores -= 1
-        # while
+        aantal_scores = len(scores) - scores.count(0)
 
         if not lid.bij_vereniging:
             # onderdruk deze melding zolang er geen scores zijn
