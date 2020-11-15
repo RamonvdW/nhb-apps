@@ -52,27 +52,29 @@ class CompetitieOverzichtView(View):
                      .order_by('begin_jaar', 'afstand'))
 
         for comp in comps:
-            if rol_nu == Rollen.ROL_HWL:
-                comp.url_inschrijvingen = reverse('Competitie:lijst-regiocomp-regio',
-                                                  kwargs={'comp_pk': comp.pk,
-                                                          'regio_pk': functie_nu.nhb_ver.regio.pk})
-            elif rol_nu == Rollen.ROL_RCL:
-                comp.url_inschrijvingen = reverse('Competitie:lijst-regiocomp-regio',
-                                                  kwargs={'comp_pk': comp.pk,
-                                                          'regio_pk': functie_nu.nhb_regio.pk})
-            elif rol_nu == Rollen.ROL_RKO:
-                comp.url_inschrijvingen = reverse('Competitie:lijst-regiocomp-rayon',
-                                                  kwargs={'comp_pk': comp.pk,
-                                                          'rayon_pk': functie_nu.nhb_rayon.pk})
-            else:
-                comp.url_inschrijvingen = reverse('Competitie:lijst-regiocomp-alles',
-                                                  kwargs={'comp_pk': comp.pk})
-
-            comp.titel_inschrijvingen = "Inschrijvingen"
-            if len(comps) > 1:
-                comp.titel_inschrijvingen += " %sm" % comp.afstand
-
             comp.zet_fase()
+
+            if 'B' <= comp.fase <= 'E':
+                comp.titel_inschrijvingen = "Inschrijvingen"
+                if len(comps) > 1:
+                    comp.titel_inschrijvingen += " %sm" % comp.afstand
+
+                if rol_nu == Rollen.ROL_HWL:
+                    comp.url_inschrijvingen = reverse('Competitie:lijst-regiocomp-regio',
+                                                      kwargs={'comp_pk': comp.pk,
+                                                              'regio_pk': functie_nu.nhb_ver.regio.pk})
+                elif rol_nu == Rollen.ROL_RCL:
+                    comp.url_inschrijvingen = reverse('Competitie:lijst-regiocomp-regio',
+                                                      kwargs={'comp_pk': comp.pk,
+                                                              'regio_pk': functie_nu.nhb_regio.pk})
+                elif rol_nu == Rollen.ROL_RKO:
+                    comp.url_inschrijvingen = reverse('Competitie:lijst-regiocomp-rayon',
+                                                      kwargs={'comp_pk': comp.pk,
+                                                              'rayon_pk': functie_nu.nhb_rayon.pk})
+                else:
+                    comp.url_inschrijvingen = reverse('Competitie:lijst-regiocomp-alles',
+                                                      kwargs={'comp_pk': comp.pk})
+
             if comp.fase == 'A1' and rol_nu == Rollen.ROL_BB:
                 context['bb_kan_ag_vaststellen'] = True
 
