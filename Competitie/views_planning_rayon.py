@@ -25,7 +25,6 @@ import datetime
 TEMPLATE_COMPETITIE_PLANNING_RAYON = 'competitie/planning-rayon.dtl'
 TEMPLATE_COMPETITIE_WIJZIG_WEDSTRIJD_RAYON = 'competitie/wijzig-wedstrijd-rk.dtl'
 TEMPLATE_COMPETITIE_LIJST_RK = 'competitie/lijst-rk.dtl'
-TEMPLATE_COMPETITIE_LIJST_RK_CONTACT = 'competitie/lijst-rk-contact.dtl'
 TEMPLATE_COMPETITIE_WIJZIG_STATUS_RK_SCHUTTER = 'competitie/wijzig-status-rk-deelnemer.dtl'
 
 # python strftime: 0=sunday, 6=saturday
@@ -232,7 +231,7 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
                      .select_related('indiv__boogtype')
                      .order_by('indiv__volgorde')
                      .all())
-        prev_boogtype = wkl_indiv[0].indiv.boogtype
+        prev_boogtype = -1
         for obj in wkl_indiv:
             if prev_boogtype != obj.indiv.boogtype:
                 prev_boogtype = obj.indiv.boogtype
@@ -701,9 +700,6 @@ class LijstRkSchuttersView(UserPassesTestMixin, TemplateView):
             context['aantal_onbekend'] = aantal_onbekend
             context['aantal_bevestigd'] = aantal_bevestigd
 
-            context['url_contact'] = reverse('Competitie:lijst-rk-contact',
-                                             kwargs={'deelcomp_pk': deelcomp_rk.pk})
-
         menu_dynamics(self.request, context, actief='competitie')
         return context
 
@@ -879,114 +875,6 @@ class WijzigStatusRkSchutterView(TemplateView):
 
         return HttpResponseRedirect(reverse('Competitie:lijst-rk',
                                             kwargs={'deelcomp_pk': deelnemer.deelcompetitie.pk}))
-
-
-class LijstRkContactgegevensView(UserPassesTestMixin, TemplateView):
-    """ Deze view laat de contactgegevens zien van de RK schutters """
-
-    # class variables shared by all instances
-    template_name = TEMPLATE_COMPETITIE_LIJST_RK_CONTACT
-
-    def test_func(self):
-        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        rol_nu = rol_get_huidige(self.request)
-        return rol_nu == Rollen.ROL_RKO
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
-
-    def get_context_data(self, **kwargs):
-        """ called by the template system to get the context data for the template """
-        context = super().get_context_data(**kwargs)
-
-        try:
-            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen geeft beveiliging
-            deelcomp_rk = (DeelCompetitie
-                           .objects
-                           .select_related('competitie', 'nhb_rayon')
-                           .get(pk=deelcomp_pk, laag=LAAG_RK))
-        except (ValueError, DeelCompetitie.DoesNotExist):
-            raise Resolver404()
-
-        # controleer dat de juiste RKO aan de knoppen zit
-        _, functie_nu = rol_get_huidige_functie(self.request)
-        if functie_nu != deelcomp_rk.functie:
-            raise Resolver404()     # niet de juiste RKO
-
-        if not deelcomp_rk.heeft_deelnemerslijst:
-            raise Resolver404()     # zou hier niet moeten komen
-
-        context['deelcomp_rk'] = deelcomp_rk
-
-        deelnemers = (KampioenschapSchutterBoog
-                      .objects
-                      .filter(deelcompetitie=deelcomp_rk)
-                      .select_related('deelcompetitie',
-                                      'klasse__indiv',
-                                      'schutterboog__nhblid',
-                                      'bij_vereniging')
-                      .order_by('klasse__indiv__volgorde',  # groepeer per klasse
-                                '-kampioen_label',          # hoogste regio nummer boven (anders leeg boven)
-                                '-gemiddelde'))             # aflopend gemiddelde
-
-        klasse = -1
-        rank = 0
-        per_ver = list()
-        for deelnemer in deelnemers:
-            if klasse != deelnemer.klasse.indiv.volgorde:
-                klasse = deelnemer.klasse.indiv.volgorde
-                rank = 0
-
-            lid = deelnemer.schutterboog.nhblid
-            deelnemer.naam_str = "[%s] %s" % (lid.nhb_nr, lid.volledige_naam())
-            deelnemer.ver_str = str(deelnemer.bij_vereniging)
-
-            if lid.email == "":
-                deelnemer.geen_email = True
-
-            if not deelnemer.is_afgemeld:
-                rank += 1
-                if rank > 24:
-                    deelnemer.is_reserve = True
-
-                if not deelnemer.deelname_bevestigd:
-                    tup = (deelnemer.bij_vereniging.nhb_nr, lid.nhb_nr, deelnemer)
-                    per_ver.append(tup)
-        # for
-
-        # opnieuw sorteren, op vereniging
-        per_ver.sort(key=lambda tup: tup[0:0+2])
-
-        context['deelnemers'] = contacten = [obj for _,_,obj in per_ver]
-
-        ver = -1
-        for obj in contacten:
-            if ver != obj.bij_vereniging.nhb_nr:
-                ver = obj.bij_vereniging.nhb_nr
-                obj.break_ver = True
-
-                obj.ver_email = ""
-
-                functies = obj.bij_vereniging.functie_set.filter(rol='HWL')
-                if len(functies) > 0:
-                    functie = functies[0]
-                    if functie.bevestigde_email:
-                        obj.ver_email = functie.bevestigde_email
-                        obj.ver_rol = 'Hoofdwedstrijdleider'
-
-                if obj.ver_email == "":
-                    functies = obj.bij_vereniging.functie_set.filter(rol='SEC')
-                    if len(functies) > 0:
-                        functie = functies[0]
-                        if functie.bevestigde_email:
-                            obj.ver_email = functie.bevestigde_email
-                            obj.ver_rol = 'Secretaris'
-
-        # for
-
-        menu_dynamics(self.request, context, actief='competitie')
-        return context
 
 
 # end of file
