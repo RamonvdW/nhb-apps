@@ -529,7 +529,6 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
         resp = self.client.post(self.url_planning_regio % self.deelcomp_regio101_18.pk)
         self.assertEqual(resp.status_code, 302)  # 302 = Redirect = success
         self.assertEqual(DeelcompetitieRonde.objects.count(), 1)
-        ronde_pk = DeelcompetitieRonde.objects.all()[0].pk
 
         # maak de planning voor de tweede week aan
         resp = self.client.post(self.url_planning_regio % self.deelcomp_regio101_18.pk)
@@ -933,10 +932,10 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
 
         # maak 4 rondes aan
         self.assertEqual(DeelcompetitieRonde.objects.count(), 0)
-        resp = self.client.post(url)
-        resp = self.client.post(url)
-        resp = self.client.post(url)
-        resp = self.client.post(url)
+        self.client.post(url)
+        self.client.post(url)
+        self.client.post(url)
+        self.client.post(url)
         resp = self.client.post(url)
         self.assertEqual(resp.status_code, 302)  # 302 = Redirect = success
         self.assertEqual(DeelcompetitieRonde.objects.count(), 5)
@@ -1161,214 +1160,5 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
         resp = self.client.post(url, {'weekdag': 0, 'nhbver_pk': self.nhbver_101.pk, 'aanvang': '12:34'})
         self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
 
-    def test_buiten_eigen_rayon(self):
-        # RKO probeert RK wedstrijd toe te voegen en wijzigen buiten eigen rayon
-        self.e2e_login_and_pass_otp(self.account_rko1_18)
-        self.e2e_wissel_naar_functie(self.functie_rko1_18)
-
-        # maak een RK wedstrijd aan in een ander rayon
-        url = self.url_planning_rayon % self.deelcomp_rayon2_18.pk
-        resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)  # 200 = OK
-        # controleer dat er geen 'ronde toevoegen' knop is
-        urls = self.extract_all_urls(resp, skip_menu=True)
-        self.assertNotIn(url, urls)     # url wordt gebruikt voor POST
-
-        # coverage: nog een keer ophalen, want dan is het plan er al
-        resp = self.client.get(url)
-
-        resp = self.client.post(url)
-        self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
-
-        # maak een RK wedstrijd aan in het eigen rayon
-        url = self.url_planning_rayon % self.deelcomp_rayon1_18.pk
-        resp = self.client.post(url)
-        self.assertEqual(resp.status_code, 302)  # 302 = Redirect = success
-
-        wedstrijd_r1_pk = DeelCompetitie.objects.get(pk=self.deelcomp_rayon1_18.pk).plan.wedstrijden.all()[0].pk
-        url = self.url_wijzig_rk_wedstrijd % wedstrijd_r1_pk
-
-        resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)  # 200 = OK
-
-        self.e2e_login_and_pass_otp(self.account_rko2_18)
-        self.e2e_wissel_naar_functie(self.functie_rko2_18)
-
-        resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
-
-    def test_planning_rayon(self):
-        self.e2e_login_and_pass_otp(self.account_rko1_18)
-        self.e2e_wissel_naar_functie(self.functie_rko1_18)
-
-        # maak een RK wedstrijd aan in het eigen rayon
-        url = self.url_planning_rayon % self.deelcomp_rayon1_18.pk
-        resp = self.client.post(url)
-        self.assertEqual(resp.status_code, 302)  # 302 = Redirect = success
-
-        # nog een wedstrijd
-        resp = self.client.post(url)
-        self.assertEqual(resp.status_code, 302)  # 302 = Redirect = success
-
-        # haal het overzicht op met deze nieuwe wedstrijden
-        resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/planning-rayon.dtl', 'plein/site_layout.dtl'))
-
-        # haal de wedstrijd op
-        wedstrijd_r1_pk = DeelCompetitie.objects.get(pk=self.deelcomp_rayon1_18.pk).plan.wedstrijden.all()[0].pk
-        url = self.url_wijzig_rk_wedstrijd % wedstrijd_r1_pk
-        resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/wijzig-wedstrijd-rk.dtl', 'plein/site_layout.dtl'))
-
-        # nog een keer ophalen, want dan zijn wedstrijd.vereniging en wedstrijd.locatie al gezet
-        resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)  # 200 = OK
-
-        # wijzig de wedstrijd
-        resp = self.client.post(url, {'weekdag': 1,
-                                      'aanvang': '12:34',
-                                      'nhbver_pk': self.nhbver_101.nhb_nr})
-        self.assertEqual(resp.status_code, 302)  # 302 = redirect == success
-
-    def test_planning_rayon_geen_ver(self):
-        self.e2e_login_and_pass_otp(self.account_rko2_18)
-        self.e2e_wissel_naar_functie(self.functie_rko2_18)
-
-        # maak een RK wedstrijd aan in het eigen rayon
-        url = self.url_planning_rayon % self.deelcomp_rayon2_18.pk
-        resp = self.client.post(url)
-        self.assertEqual(resp.status_code, 302)  # 302 = Redirect = success
-
-        # haal de wedstrijd op
-        # hierbij lukt het niet om de wedstrijd.vereniging in te vullen
-        wedstrijd_r2_pk = DeelCompetitie.objects.get(pk=self.deelcomp_rayon2_18.pk).plan.wedstrijden.all()[0].pk
-        url = self.url_wijzig_rk_wedstrijd % wedstrijd_r2_pk
-        resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/wijzig-wedstrijd-rk.dtl', 'plein/site_layout.dtl'))
-
-        # nu met een vereniging zonder accommodatie
-        ver = self.nhbver_112       # heeft geen locatie
-        ver.regio = self.regio_105  # verhuis naar rayon 2
-        ver.save()
-
-        resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)  # 200 = OK
-
-        # wijzig de wedstrijd - hierbij wordt de wedstrijd.locatie op None gezet
-        resp = self.client.post(url, {'weekdag': 1,
-                                      'aanvang': '12:34',
-                                      'nhbver_pk': ver.nhb_nr})
-        self.assertEqual(resp.status_code, 302)  # 302 = redirect == success
-
-    def test_planning_rayon_bad(self):
-        # probeer als BKO (RCL kom niet door de user-passes-test-mixin)
-        self.e2e_login_and_pass_otp(self.account_bko_18)
-        self.e2e_wissel_naar_functie(self.functie_bko_18)
-
-        url = self.url_planning_rayon % self.deelcomp_rayon2_18.pk
-        resp = self.client.post(url)
-        self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
-
-        # probeer een wedstrijd te wijzigen als BKO
-        url = self.url_wijzig_rk_wedstrijd % 999999
-        resp = self.client.get(url)
-        self.assert_is_redirect(resp, '/plein/')
-
-        # nogmaals, als RKO
-        self.e2e_login_and_pass_otp(self.account_rko1_18)
-        self.e2e_wissel_naar_functie(self.functie_rko1_18)
-
-        url = self.url_wijzig_rk_wedstrijd % 999999
-        resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
-
-        url = self.url_wijzig_rk_wedstrijd % "BAD"
-        resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
-
-        url = self.url_wijzig_rk_wedstrijd % "##"
-        resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
-
-        url = self.url_wijzig_rk_wedstrijd % "1(2)"
-        resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
-        resp = self.client.post(url)
-        self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
-
-        # maak een RK wedstrijd aan in het eigen rayon
-        url = self.url_planning_rayon % self.deelcomp_rayon1_18.pk
-        resp = self.client.post(url)
-        self.assertEqual(resp.status_code, 302)  # 302 = Redirect = success
-
-        wedstrijd_r1_pk = DeelCompetitie.objects.get(pk=self.deelcomp_rayon1_18.pk).plan.wedstrijden.all()[0].pk
-        url = self.url_wijzig_rk_wedstrijd % wedstrijd_r1_pk
-
-        # wijzig de wedstrijd
-        resp = self.client.post(url)
-        self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
-
-        # slechte weekdag
-        resp = self.client.post(url, {'weekdag': "XX",
-                                      'aanvang': '12:34',
-                                      'nhbver_pk': self.nhbver_112.nhb_nr})
-        self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
-
-        # slechte weekdag
-        resp = self.client.post(url, {'weekdag': 99,
-                                      'aanvang': '12:34',
-                                      'nhbver_pk': self.nhbver_112.nhb_nr})
-        self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
-
-        # slechte weekdag
-        resp = self.client.post(url, {'weekdag': "-1",
-                                      'aanvang': '12:34',
-                                      'nhbver_pk': self.nhbver_112.nhb_nr})
-        self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
-
-        # weekdag buiten RK range (is 1 week lang)
-        resp = self.client.post(url, {'weekdag': 30,
-                                      'aanvang': '12:34',
-                                      'nhbver_pk': self.nhbver_112.nhb_nr})
-        self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
-
-        # slecht tijdstip
-        resp = self.client.post(url, {'weekdag': 1,
-                                      'aanvang': '(*:#)',
-                                      'nhbver_pk': self.nhbver_112.nhb_nr})
-        self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
-
-        # slecht tijdstip
-        resp = self.client.post(url, {'weekdag': 1,
-                                      'aanvang': '12:60',
-                                      'nhbver_pk': self.nhbver_112.nhb_nr})
-        self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
-
-        # bad vereniging nummer
-        resp = self.client.post(url, {'weekdag': 1,
-                                      'aanvang': '12:34',
-                                      'nhbver_pk': 999999})
-        self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
-
-        # niet toegestane vereniging
-        resp = self.client.post(url, {'weekdag': 1,
-                                      'aanvang': '12:34',
-                                      'nhbver_pk': self.nhbver_112.nhb_nr})
-        self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
-
-        # probeer wedstrijd van ander rayon te wijzigen
-        self.e2e_login_and_pass_otp(self.account_rko2_18)
-        self.e2e_wissel_naar_functie(self.functie_rko2_18)
-
-        resp = self.client.post(url, {'weekdag': 1,
-                                      'aanvang': '12:34',
-                                      'nhbver_pk': self.nhbver_101.nhb_nr})
-        self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
 
 # end of file
