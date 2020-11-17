@@ -9,6 +9,7 @@ from django.core import management
 from BasisTypen.models import BoogType
 from Competitie.models import (Competitie, DeelCompetitie, DeelcompetitieRonde,
                                RegioCompetitieSchutterBoog, AG_NUL)
+from Competitie.test_fase import zet_competitie_fase
 from NhbStructuur.models import NhbRegio, NhbLid, NhbVereniging
 from Schutter.models import SchutterBoog
 from Score.models import Score, ScoreHist, SCORE_WAARDE_VERWIJDERD, aanvangsgemiddelde_opslaan
@@ -302,12 +303,14 @@ class TestRecordsCliUpdTussenstand(E2EHelpers, TestCase):
         self.assertEqual(deelnemer.score1, 0)
         self.assertEqual(deelnemer.score7, 0)
         self.assertEqual(deelnemer.totaal, 0)
+        self.assertEqual(deelnemer.aantal_scores, 0)
         self.assertEqual(deelnemer.laagste_score_nr, 0)
         self.assertEqual(deelnemer.gemiddelde, 0.0)
         self.assertEqual(deelnemer.alt_score1, 123)
         self.assertEqual(deelnemer.alt_score2, 124)
         self.assertEqual(deelnemer.alt_score3, 0)
         self.assertEqual(deelnemer.alt_totaal, 247)
+        self.assertEqual(deelnemer.alt_aantal_scores, 2)
         self.assertEqual(deelnemer.alt_laagste_score_nr, 0)
         self.assertEqual(str(deelnemer.alt_gemiddelde), '4.117')
         # print('scores: %s %s %s %s %s %s %s, laagste_nr=%s, totaal=%s, gem=%s' % (deelnemer.score1, deelnemer.score2, deelnemer.score3, deelnemer.score4, deelnemer.score5, deelnemer.score6, deelnemer.score7, deelnemer.laagste_score_nr, deelnemer.totaal, deelnemer.gemiddelde))
@@ -355,12 +358,14 @@ class TestRecordsCliUpdTussenstand(E2EHelpers, TestCase):
         self.assertEqual(deelnemer.score1, 0)
         self.assertEqual(deelnemer.score7, 0)
         self.assertEqual(deelnemer.totaal, 0)
+        self.assertEqual(deelnemer.aantal_scores, 0)
         self.assertEqual(deelnemer.laagste_score_nr, 0)
         self.assertEqual(deelnemer.gemiddelde, 0.0)
         self.assertEqual(deelnemer.alt_score1, 123)
         self.assertEqual(deelnemer.alt_score6, 128)
         self.assertEqual(deelnemer.alt_score7, 129)
         self.assertEqual(deelnemer.alt_totaal, 759)           # som van 124..129 (123 is de laagste)
+        self.assertEqual(deelnemer.alt_aantal_scores, 7)
         self.assertEqual(deelnemer.alt_laagste_score_nr, 1)   # eerste score is de laagste
         self.assertEqual(str(deelnemer.alt_gemiddelde), '4.217')
 
@@ -387,12 +392,14 @@ class TestRecordsCliUpdTussenstand(E2EHelpers, TestCase):
         self.assertEqual(deelnemer.score1, 0)
         self.assertEqual(deelnemer.score7, 0)
         self.assertEqual(deelnemer.totaal, 0)
+        self.assertEqual(deelnemer.aantal_scores, 0)
         self.assertEqual(deelnemer.laagste_score_nr, 0)
         self.assertEqual(deelnemer.gemiddelde, 0.0)
         self.assertEqual(deelnemer.alt_score1, 123)
         self.assertEqual(deelnemer.alt_score6, 128)
         self.assertEqual(deelnemer.alt_score7, 0)
         self.assertEqual(deelnemer.alt_totaal, 753)           # som van 123..128 (6 scores)
+        self.assertEqual(deelnemer.alt_aantal_scores, 6)
         self.assertEqual(deelnemer.alt_laagste_score_nr, 0)   # geen schrap-score
         self.assertEqual(str(deelnemer.alt_gemiddelde), '4.183')
 
@@ -428,11 +435,13 @@ class TestRecordsCliUpdTussenstand(E2EHelpers, TestCase):
         self.assertEqual(deelnemer.score3, 137)
         self.assertEqual(deelnemer.score7, 0)
         self.assertEqual(deelnemer.totaal, 388)
+        self.assertEqual(deelnemer.aantal_scores, 3)
         self.assertEqual(deelnemer.laagste_score_nr, 0)
         self.assertEqual(str(deelnemer.gemiddelde), '4.311')
         self.assertEqual(deelnemer.alt_score1, 123)
         self.assertEqual(deelnemer.alt_score4, 129)
         self.assertEqual(deelnemer.alt_totaal, 504)
+        self.assertEqual(deelnemer.alt_aantal_scores, 4)
         self.assertEqual(deelnemer.alt_laagste_score_nr, 0)
         self.assertEqual(str(deelnemer.alt_gemiddelde), '4.200')
 
@@ -540,9 +549,99 @@ class TestRecordsCliUpdTussenstand(E2EHelpers, TestCase):
         f1 = io.StringIO()
         f2 = io.StringIO()
         management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
-        # print("f1: %s" % f1.getvalue())
-        # print("f2: %s" % f2.getvalue())
         self.assertTrue('[INFO] Verplaats 100001 (18m) met nieuw AG 4.167 naar klasse Recurve klasse' in f2.getvalue())
 
+    def test_overstap(self):
+        # test schutters die overstappen naar een andere vereniging
+
+        # schrijf iemand in
+        post_params = dict()
+        post_params['lid_100001_boogtype_%s' % self.boog_r.pk] = 'on'
+        resp = self.client.post(self.url_inschrijven % self.comp.pk, post_params)
+        self.assertEqual(resp.status_code, 302)  # 302 = Redirect = succes
+
+        # maak een paar score + scorehist
+        self._score_opslaan(self.uitslagen[0], self.schutterboog_100001, 123)
+        self._score_opslaan(self.uitslagen[2], self.schutterboog_100001, 124)
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
+        self.assertTrue('Scores voor 1 schuttersboog bijgewerkt' in f2.getvalue())
+
+        deelnemer = RegioCompetitieSchutterBoog.objects.get(schutterboog=self.schutterboog_100001)
+        self.assertEqual(deelnemer.bij_vereniging.nhb_nr, self.ver.nhb_nr)
+
+        # maak een tweede vereniging aan
+        regio_116 = NhbRegio.objects.get(regio_nr=116)
+        ver = NhbVereniging()
+        ver.naam = "Zuidelijke Club"
+        ver.plaats = "Grensstad"
+        ver.nhb_nr = 1100
+        ver.regio = regio_116
+        # secretaris kan nog niet ingevuld worden
+        ver.save()
+
+        lid = deelnemer.schutterboog.nhblid
+        lid.bij_vereniging = ver
+        lid.save()
+
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
+        self.assertTrue("[INFO] Verwerk overstap 100001: [101] [1000] Grote Club --> [116] [1100] Zuidelijke Club" in f2.getvalue())
+
+        # overstap naar vereniging in zelfde regio
+        self.ver.regio = regio_116
+        self.ver.save()
+        lid.bij_vereniging = self.ver
+        lid.save()
+
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
+        self.assertTrue("[INFO] Verwerk overstap 100001: [116] [1100] Zuidelijke Club --> [116] [1000] Grote Club" in f2.getvalue())
+
+        # zet the competitie in een later fase zodat overschrijvingen niet meer gedaan worden
+        for comp in Competitie.objects.all():
+            zet_competitie_fase(comp, 'K')
+            comp.zet_fase()
+            self.assertEqual(comp.fase, 'K')
+        # for
+        lid.bij_vereniging = ver
+        lid.save()
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
+        # print("f1: %s" % f1.getvalue())
+        # print("f2: %s" % f2.getvalue())
+        self.assertFalse('Verwerk overstap' in f2.getvalue())
+
+    def test_uitstap(self):
+        # schutter schrijft zich uit
+
+        # schrijf iemand in
+        post_params = dict()
+        post_params['lid_100001_boogtype_%s' % self.boog_r.pk] = 'on'
+        resp = self.client.post(self.url_inschrijven % self.comp.pk, post_params)
+        self.assertEqual(resp.status_code, 302)  # 302 = Redirect = succes
+
+        # maak een paar score + scorehist
+        self._score_opslaan(self.uitslagen[0], self.schutterboog_100001, 123)
+        self._score_opslaan(self.uitslagen[2], self.schutterboog_100001, 124)
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
+        self.assertTrue('Scores voor 1 schuttersboog bijgewerkt' in f2.getvalue())
+
+        # schrijf een schutter uit
+        lid = self.schutterboog_100001.nhblid
+        lid.bij_vereniging = None
+        lid.save()
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
+        # print("f1: %s" % f1.getvalue())
+        # print("f2: %s" % f2.getvalue())
+        self.assertTrue("[WARNING] Uitstapper: 100001 [101] [1000] Grote Club (actief=True)" in f2.getvalue())
 
 # end of file
