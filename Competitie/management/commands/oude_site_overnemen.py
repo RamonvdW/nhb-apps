@@ -8,6 +8,7 @@
 
 from django.utils.timezone import make_aware
 from django.core.management.base import BaseCommand
+from django.conf import settings
 from BasisTypen.models import BoogType
 from NhbStructuur.models import NhbLid, NhbVereniging
 from Logboek.models import schrijf_in_logboek
@@ -69,6 +70,8 @@ class Command(BaseCommand):
         self._bulk_hist = list()
         self._bulk_uitslag = dict()        # [uitslag] = [score, ...]
         self._pk2uitslag = dict()          # [uitslag.pk] = WedstrijdUitslag
+
+        self._gezocht_99 = list()
 
     def _roep_warning(self, msg):
         # print en tel waarschuwingen
@@ -406,7 +409,111 @@ class Command(BaseCommand):
                         score.save()
         # for
 
+    def _zoek_echte_lid(self, nhb_nr, naam, ver_nr):
+
+        objs = NhbLid.objects.filter(bij_vereniging__nhb_nr=ver_nr)
+        objs_no_ver = NhbLid.objects.filter(bij_vereniging__isnull=True)
+
+        # doe een paar kleine aanpassingen aan de naam
+        pos = naam.find(' vd ')
+        if pos > 0:
+            naam = naam[:pos] + ' v.d. ' + naam[pos+4:]
+
+        pos = naam.find(' v ')
+        if pos > 0:
+            naam = naam[:pos] + ' van ' + naam[pos+3:]
+
+        low_naam = naam.lower()
+
+        # poging 1: volledige naam
+        for obj in objs:
+            if obj.volledige_naam().lower() == low_naam:
+                return obj
+        # for
+
+        # poging 1: volledige naam, geen vereniging
+        for obj in objs_no_ver:
+            if obj.volledige_naam().lower() == low_naam:
+                return obj
+        # for
+
+        # poging 2: alleen op achternaam
+        matches = list()
+        for obj in objs:
+            if len(obj.achternaam) >= 4 and obj.achternaam.lower() in low_naam:
+                matches.append(obj)
+        # for
+        if len(matches) == 1:
+            return matches[0]
+
+        if len(matches):
+            self.stdout.write('[DEBUG] MULTI match (achternaam): %s, %s, %s' % (nhb_nr, ver_nr, naam))
+            for obj in matches:
+                msg = str(obj)
+                if not obj.bij_vereniging:
+                    msg += ' (GEEN VERENIGING)'
+                self.stdout.write('  ' + msg)
+            return None
+
+        # poging 2: alleen op achternaam, geen vereniging
+        matches = list()
+        for obj in objs_no_ver:
+            if len(obj.achternaam) >= 4 and obj.achternaam.lower() in low_naam:
+                matches.append(obj)
+        # for
+        if len(matches) == 1:
+            return matches[0]
+
+        if len(matches):
+            self.stdout.write('[DEBUG] MULTI match (achternaam): %s, %s, %s' % (nhb_nr, ver_nr, naam))
+            for obj in matches:
+                msg = str(obj)
+                if not obj.bij_vereniging:
+                    msg += ' (GEEN VERENIGING)'
+                self.stdout.write('  ' + msg)
+            return None
+
+        # poging 3: op voornaam
+        matches = list()
+        for obj in objs:
+            if len(obj.voornaam) >= 3 and obj.voornaam.lower() in low_naam[:len(obj.voornaam)+3]:
+                matches.append(obj)
+        # for
+
+        if len(matches) == 1:
+            return matches[0]
+
+        if len(matches):
+            self.stdout.write('[DEBUG] MULTI match (voornaam): %s, %s, %s' % (nhb_nr, ver_nr, naam))
+            for obj in matches:
+                msg = str(obj)
+                if not obj.bij_vereniging:
+                    msg += ' (GEEN VERENIGING)'
+                self.stdout.write('  ' + msg)
+            return None
+
+        return None
+
     def _verwerk_schutter(self, nhb_nr, naam, ver_nr, ag_str, scores):
+
+        if nhb_nr >= 990000 and nhb_nr not in self._gezocht_99:
+            try:
+                nhb_nr = settings.MAP_99_NRS[nhb_nr]
+            except KeyError:
+                # niet een bekende mapping - doe een voorstel
+                self._gezocht_99.append(nhb_nr)
+                lid = self._zoek_echte_lid(nhb_nr, naam, ver_nr)
+                if lid:
+                    msg = '[VOORSTEL] %s --> %s (%s' % (nhb_nr, lid.nhb_nr, ver_nr)
+                    if not lid.bij_vereniging:
+                        msg += ' --> GEEN VERENIGING'
+                    msg += ' / %s' % naam
+                    if naam != lid.volledige_naam():
+                        msg += ' --> %s' % lid.volledige_naam()
+                    msg += ')'
+                    self.stdout.write(msg)
+                else:
+                    self.stdout.write('[WARNING] No match for %s %s %s' % (nhb_nr, ver_nr, naam))
 
         # zoek naar hout schutters die ook bij recurve staan
         if self._boogtype.afkorting in ('BB', 'IB', 'LB'):
@@ -484,7 +591,7 @@ class Command(BaseCommand):
             self._selecteer_klasse(klasse)
 
             for nhb_nr, data_schutter in data_schutters.items():
-                naam = data_schutter['n']
+                naam = data_schutter['n'].strip()
                 ver_nr = data_schutter['v']
                 ag = data_schutter['a']         # "9.123"
                 scores = data_schutter['s']     # list
