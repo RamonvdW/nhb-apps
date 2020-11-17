@@ -47,31 +47,61 @@ class Command(BaseCommand):
                                 'schutterboog__nhblid',
                                 'schutterboog__nhblid__bij_vereniging',
                                 'schutterboog__nhblid__bij_vereniging__regio')
-                .filter(aantal_scores__lt=6)    # vanaf 6 scores niet meer overzetten
-                .exclude(bij_vereniging=F('schutterboog__nhblid__bij_vereniging')))
+                .exclude(bij_vereniging=F('schutterboog__nhblid__bij_vereniging')))   # bevat geen uitstappers
         for obj in objs:
             lid = obj.schutterboog.nhblid
-            if not lid.bij_vereniging:
-                self.stdout.write('[WARNING] Uitstapper: %s [%s] %s (actief=%s)' % (lid.nhb_nr, obj.bij_vereniging.regio.regio_nr, obj.bij_vereniging, lid.is_actief_lid))
-            else:
-                self.stdout.write('[INFO] Verwerk overstap %s: [%s] %s --> [%s] %s' % (lid.nhb_nr, obj.bij_vereniging.regio.regio_nr, obj.bij_vereniging, lid.bij_vereniging.regio.regio_nr, lid.bij_vereniging))
-                if obj.bij_vereniging.regio != lid.bij_vereniging.regio:
-                    obj.deelcompetitie = DeelCompetitie.objects.get(competitie=obj.deelcompetitie.competitie,
-                                                                    nhb_regio=lid.bij_vereniging.regio)
-                obj.bij_vereniging = lid.bij_vereniging
-                obj.save()
+            # het lijkt erop dat lid.bij_vereniging == None niet voor kan komen
+            self.stdout.write('[INFO] Verwerk overstap %s: [%s] %s --> [%s] %s' % (
+                              lid.nhb_nr,
+                              obj.bij_vereniging.regio.regio_nr, obj.bij_vereniging,
+                              lid.bij_vereniging.regio.regio_nr, lid.bij_vereniging))
+            if obj.bij_vereniging.regio != lid.bij_vereniging.regio:
+                # overschrijven naar andere deelcompetitie
+                obj.deelcompetitie = DeelCompetitie.objects.get(competitie=obj.deelcompetitie.competitie,
+                                                                nhb_regio=lid.bij_vereniging.regio)
+            obj.bij_vereniging = lid.bij_vereniging
+            obj.save()
+        # for
+
+    def _verwerk_uitstappers_regio(self, comp):
+        objs = (RegioCompetitieSchutterBoog
+                .objects
+                .select_related('bij_vereniging',
+                                'bij_vereniging__regio',
+                                'schutterboog__nhblid',
+                                'schutterboog__nhblid__bij_vereniging',
+                                'schutterboog__nhblid__bij_vereniging__regio')
+                .filter(schutterboog__nhblid__bij_vereniging__isnull=True))
+        for obj in objs:
+            lid = obj.schutterboog.nhblid
+            self.stdout.write('[WARNING] Uitstapper: %s [%s] %s (actief=%s)' % (
+                              lid.nhb_nr,
+                              obj.bij_vereniging.regio.regio_nr, obj.bij_vereniging,
+                              lid.is_actief_lid))
+            # TODO: hoe hier mee omgaan?
+            # LET OP! obj.bij_vereniging = None mag niet van het model!
+            # obj.save()
         # for
 
     def _verwerk_overstappers(self):
         """ Deze functie verwerkt schutters die overgestapt zijn naar een andere vereniging
             Deze worden overgeschreven naar een andere deelcompetitie (regio/RK/BK).
         """
+
+        # 1. NhbLid.bij_vereniging komt overeen met informatie uit CRM
+
+        # 2. Schutters in regiocompetitie kunnen elk moment overstappen
+        #    RegioCompetitieSchutterBoog.bij_vereniging
+        # TODO: voor de teamcompetitie moet dit pas gebeuren nadat de teamscores vastgesteld zijn
+
+        # 3. Bij vaststellen RK/BK deelname/reserve wordt vereniging bevroren
+        #    KampioenschapSchutterBoog.bij_vereniging
+
         for comp in Competitie.objects.filter(is_afgesloten=False):
-            # 18m of 25m
             comp.zet_fase()
-            if comp.fase <= 'E':
-                # TODO: voor de teamcompetitie moet dit pas gebeuren nadat de teamscores vastgesteld zijn
+            if comp.fase <= 'F':        # Regiocompetitie
                 self._verwerk_overstappers_regio(comp)
+                self._verwerk_uitstappers_regio(comp)
         # for
 
     def _prep_caches(self):
