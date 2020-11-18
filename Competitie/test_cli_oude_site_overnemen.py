@@ -120,6 +120,78 @@ class TestCompetitieCliOudeSiteOvernemen(E2EHelpers, TestCase):
         lid.account = self.e2e_create_account(lid.nhb_nr, lid.email, lid.voornaam)
         lid.save()
 
+        lid = NhbLid()
+        lid.nhb_nr = 100005
+        lid.geslacht = "V"
+        lid.voornaam = "Jean"
+        lid.achternaam = "van de Schut"
+        lid.email = "jeanvdschut@nhb.not"
+        lid.geboorte_datum = datetime.date(year=1988, month=12, day=4)
+        lid.sinds_datum = datetime.date(year=2015, month=7, day=15)
+        lid.bij_vereniging = ver
+        lid.account = self.e2e_create_account(lid.nhb_nr, lid.email, lid.voornaam)
+        lid.save()
+
+        lid = NhbLid()
+        lid.nhb_nr = 100006
+        lid.geslacht = "V"
+        lid.voornaam = "Jans"
+        lid.achternaam = "van Schoot"
+        lid.email = "jansvschut@nhb.not"
+        lid.geboorte_datum = datetime.date(year=1988, month=12, day=4)
+        lid.sinds_datum = datetime.date(year=2015, month=7, day=15)
+        lid.bij_vereniging = ver
+        lid.account = self.e2e_create_account(lid.nhb_nr, lid.email, lid.voornaam)
+        lid.save()
+
+        lid = NhbLid()
+        lid.nhb_nr = 100007
+        lid.geslacht = "V"
+        lid.voornaam = "Petra"
+        lid.achternaam = "Jans"
+        lid.email = "pjans@nhb.not"
+        lid.geboorte_datum = datetime.date(year=1988, month=12, day=4)
+        lid.sinds_datum = datetime.date(year=2015, month=7, day=15)
+        lid.bij_vereniging = ver
+        lid.account = self.e2e_create_account(lid.nhb_nr, lid.email, lid.voornaam)
+        lid.save()
+
+        lid = NhbLid()
+        lid.nhb_nr = 100008
+        lid.geslacht = "M"
+        lid.voornaam = "Eerste"
+        lid.achternaam = "Exlid"
+        lid.email = "exlid1@nhb.not"
+        lid.geboorte_datum = datetime.date(year=1988, month=12, day=4)
+        lid.sinds_datum = datetime.date(year=2015, month=7, day=15)
+        lid.bij_vereniging = None
+        lid.account = self.e2e_create_account(lid.nhb_nr, lid.email, lid.voornaam)
+        lid.save()
+
+        lid = NhbLid()
+        lid.nhb_nr = 100009
+        lid.geslacht = "M"
+        lid.voornaam = "Tweede"
+        lid.achternaam = "Exlid"
+        lid.email = "exlid1@nhb.not"
+        lid.geboorte_datum = datetime.date(year=1988, month=12, day=4)
+        lid.sinds_datum = datetime.date(year=2015, month=7, day=15)
+        lid.bij_vereniging = None
+        lid.account = self.e2e_create_account(lid.nhb_nr, lid.email, lid.voornaam)
+        lid.save()
+
+        lid = NhbLid()
+        lid.nhb_nr = 100010
+        lid.geslacht = "M"
+        lid.voornaam = "Whatever"
+        lid.achternaam = "Overstapper"
+        lid.email = "overstapper@nhb.not"
+        lid.geboorte_datum = datetime.date(year=1988, month=12, day=4)
+        lid.sinds_datum = datetime.date(year=2015, month=7, day=15)
+        lid.bij_vereniging = None
+        lid.account = self.e2e_create_account(lid.nhb_nr, lid.email, lid.voornaam)
+        lid.save()
+
     def setUp(self):
         """ initialisatie van de test case """
 
