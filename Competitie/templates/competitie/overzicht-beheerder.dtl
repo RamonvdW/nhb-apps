@@ -92,6 +92,13 @@
             {% url 'Competitie:info-competitie' as card_url %}
             {% include 'plein/card.dtl' with title="Informatie" text="Algemene informatie over de competities." icon="info" url=card_url %}
 
+            <!-- BKO kaartjes -->
+            {% if bko_doorzetten %}
+                {% include 'plein/card.dtl' with title="Doorzetten" text=bko_doorzetten.titel_doorzetten icon="mediation" url=bko_doorzetten.url_doorzetten %}
+            {% endif %}
+            {% if bko_afsluiten %}
+                {% include 'plein/card.dtl' with title="Afsluiten" text=bko_afsluiten.titel_afsluiten icon="mediation" url=bko_afsluiten.url_afsluiten %}
+            {% endif %}
         </div>
 
         {% if rol_is_klaar %}

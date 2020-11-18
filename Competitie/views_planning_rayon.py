@@ -504,93 +504,6 @@ class LijstRkSchuttersView(UserPassesTestMixin, TemplateView):
 
         return alles_afgesloten, regio_deelcomps
 
-    def _get_schutters_regios(self, competitie, rayon_nr):
-        """ geeft een lijst met deelnemers terug
-            en een totaal-status van de onderliggende regiocompetities: alles afgesloten?
-        """
-        alles_afgesloten = True
-        pks = list()
-
-        # schutter moeten uit LAAG_REGIO gehaald worden, uit de 4 regio's van het rayon
-        for deelcomp in (DeelCompetitie
-                         .objects
-                         .filter(laag=LAAG_REGIO,
-                                 competitie=competitie,
-                                 nhb_regio__rayon__rayon_nr=rayon_nr)):
-            if not deelcomp.is_afgesloten:
-                alles_afgesloten = False
-
-            pks.append(deelcomp.pk)
-        # for
-
-        deelnemers = (RegioCompetitieSchutterBoog
-                      .objects
-                      .select_related('klasse__indiv',
-                                      'bij_vereniging__regio',
-                                      'schutterboog__nhblid')
-                      .filter(deelcompetitie__in=pks,
-                              aantal_scores__gte=3,         # TODO: gte=6
-                              schutterboog__nhblid__is_actief_lid=True)     # verwijdert uitgeschreven leden
-                      .order_by('klasse__indiv__volgorde',      # groepeer per klasse
-                                '-gemiddelde'))                 # aflopend gemiddelde
-
-        # markeer de regiokampioenen
-        klasse = -1
-        regios = list()     # bijhouden welke kampioenen we al gemarkeerd hebben
-        kampioenen = list()
-        deelnemers = list(deelnemers)
-        nr = 0
-        insert_at = 0
-        rank = 0
-        while nr < len(deelnemers):
-            deelnemer = deelnemers[nr]
-
-            if klasse != deelnemer.klasse.indiv.volgorde:
-                klasse = deelnemer.klasse.indiv.volgorde
-                if len(kampioenen):
-                    kampioenen.sort()
-                    for _, kampioen in kampioenen:
-                        deelnemers.insert(insert_at, kampioen)
-                        insert_at += 1
-                        nr += 1
-                    # for
-                kampioenen = list()
-                regios = list()
-                insert_at = nr
-                rank = 0
-
-            # fake een paar velden uit KampioenschapSchutterBoog
-            deelnemer.is_afgemeld = False
-            deelnemer.deelname_bevestigd = False
-
-            rank += 1
-            deelnemer.volgorde = rank
-
-            regio_nr = deelnemer.bij_vereniging.regio.regio_nr
-            if regio_nr not in regios:
-                regios.append(regio_nr)
-                deelnemer.kampioen_label = "Kampioen regio %s" % regio_nr
-                tup = (regio_nr, deelnemer)
-                kampioenen.append(tup)
-                deelnemers.pop(nr)
-            else:
-                if rank <= 48:
-                    deelnemer.kampioen_label = ""
-                    nr += 1
-                else:
-                    # verwijder deze schutter uit de lijst
-                    deelnemers.pop(nr)
-        # while
-
-        if len(kampioenen):
-            kampioenen.sort(reverse=True)       # hoogste regionummer bovenaan
-            for _, kampioen in kampioenen:
-                deelnemers.insert(insert_at, kampioen)
-                insert_at += 1
-            # for
-
-        return deelnemers, alles_afgesloten
-
     def _get_schutters_rk(self, deelcomp_rk):
         deelnemers = (KampioenschapSchutterBoog
                       .objects
@@ -608,10 +521,9 @@ class LijstRkSchuttersView(UserPassesTestMixin, TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        # er zijn 3 situaties:
+        # er zijn 2 situaties:
         # 1) regiocompetities zijn nog niet afgesloten --> verwijst naar pagina tussenstand rayon
-        # 2) deelnemers voor RK zijn nog niet vastgesteld --> toon lijst + knop om akkoord te geven
-        # 3) deelnemers voor RK zijn vastgesteld --> toon lijst
+        # 2) deelnemers voor RK zijn vastgesteld --> toon lijst
 
         try:
             deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen geeft beveiliging
@@ -633,19 +545,11 @@ class LijstRkSchuttersView(UserPassesTestMixin, TemplateView):
         context['deelcomp_rk'] = deelcomp_rk
 
         if not deelcomp_rk.heeft_deelnemerslijst:
-            deelnemers, alles_afgesloten = self._get_schutters_regios(deelcomp_rk.competitie,
-                                                                      deelcomp_rk.nhb_rayon.rayon_nr)
-            if not alles_afgesloten:
-                # situatie 1)
-                context['url_tussenstand'] = reverse('Competitie:tussenstand-rayon-n',
-                                                     kwargs={'afstand': deelcomp_rk.competitie.afstand,
-                                                             'comp_boog': 'r',
-                                                             'rayon_nr': deelcomp_rk.nhb_rayon.rayon_nr})
-                deelnemers = list()
-            else:
-                # situatie 2)
-                context['url_bevestig_rk_schutters'] = reverse('Competitie:lijst-rk',
-                                                               kwargs={'deelcomp_pk': deelcomp_rk.pk})
+            context['url_tussenstand'] = reverse('Competitie:tussenstand-rayon-n',
+                                                 kwargs={'afstand': deelcomp_rk.competitie.afstand,
+                                                         'comp_boog': 'r',
+                                                         'rayon_nr': deelcomp_rk.nhb_rayon.rayon_nr})
+            deelnemers = list()
         else:
             # situatie 3)
             deelnemers = self._get_schutters_rk(deelcomp_rk)
@@ -702,94 +606,6 @@ class LijstRkSchuttersView(UserPassesTestMixin, TemplateView):
 
         menu_dynamics(self.request, context, actief='competitie')
         return context
-
-    def post(self, request, *args, **kwargs):
-
-        try:
-            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen geeft beveiliging
-            deelcomp_rk = (DeelCompetitie
-                           .objects
-                           .select_related('competitie', 'nhb_rayon')
-                           .get(pk=deelcomp_pk, laag=LAAG_RK))
-        except (ValueError, DeelCompetitie.DoesNotExist):
-            raise Resolver404()
-
-        # controleer dat de juiste RKO aan de knoppen zit
-        _, functie_nu = rol_get_huidige_functie(self.request)
-        if functie_nu != deelcomp_rk.functie:
-            raise Resolver404()     # niet de juiste RKO
-
-        if not deelcomp_rk.heeft_deelnemerslijst:
-            deelnemers, alles_afgesloten = self._get_schutters_regios(deelcomp_rk.competitie,
-                                                                      deelcomp_rk.nhb_rayon.rayon_nr)
-            if not alles_afgesloten:
-                raise Resolver404()
-
-            # schrijf all deze schutters in voor het RK
-            # kampioenen zitten als eerste in de lijst, daarna aflopend gesorteerd op gemiddelde
-            bulk_lijst = list()
-            klasse = -1
-            volgorde = 0
-            for obj in deelnemers:
-                if klasse != obj.klasse.indiv.volgorde:
-                    klasse = obj.klasse.indiv.volgorde
-                    volgorde = 0
-
-                volgorde += 1
-
-                deelnemer = KampioenschapSchutterBoog(
-                                deelcompetitie=deelcomp_rk,
-                                schutterboog=obj.schutterboog,
-                                klasse=obj.klasse,
-                                bij_vereniging=obj.bij_vereniging,
-                                volgorde=volgorde,
-                                gemiddelde=obj.gemiddelde,
-                                kampioen_label=obj.kampioen_label)
-
-                bulk_lijst.append(deelnemer)
-                if len(bulk_lijst) > 500:
-                    KampioenschapSchutterBoog.objects.bulk_create(bulk_lijst)
-                    bulk_lijst = list()
-            # for
-
-            if len(bulk_lijst) > 0:
-                KampioenschapSchutterBoog.objects.bulk_create(bulk_lijst)
-            del bulk_lijst
-
-            deelcomp_rk.heeft_deelnemerslijst = True
-            deelcomp_rk.save()
-
-            # zoek het bijbehorende BK op
-            deelcomp_bk = DeelCompetitie.objects.get(competitie=deelcomp_rk.competitie,
-                                                     laag=LAAG_BK)
-
-            # stuur elke RKO een taak ('ter info')
-            bko_namen = list()
-            functie_bko = deelcomp_bk.functie
-            now = timezone.now()
-            taak_deadline = now
-            taak_tekst = "Ter info: De deelnemerslijst voor de Rayonkampioenschappen in %s zijn zojuist vastgesteld door RKO %s" % (str(deelcomp_rk.nhb_rayon), request.user.volledige_naam())
-            taak_log = "[%s] Taak aangemaakt" % now
-
-            for account in functie_bko.accounts.all():
-                # maak een taak aan voor deze BKO
-                taak = Taak(toegekend_aan=account,
-                            deadline=taak_deadline,
-                            aangemaakt_door=request.user,
-                            beschrijving=taak_tekst,
-                            handleiding_pagina="",
-                            log=taak_log,
-                            deelcompetitie=deelcomp_bk)
-                taak.save()
-                bko_namen.append(account.volledige_naam())
-            # for
-
-            # schrijf in het logboek
-            msg = "De deelnemerslijst voor de Rayonkampioenschappen in %s is zojuist vastgesteld." % str(deelcomp_rk.nhb_rayon)
-            msg += '\nDe volgende beheerders zijn geïnformeerd via een taak: %s' % ", ".join(bko_namen)
-            schrijf_in_logboek(request.user, "Competitie", msg)
-
-        return HttpResponseRedirect(reverse('Competitie:overzicht'))
 
 
 class WijzigStatusRkSchutterView(TemplateView):

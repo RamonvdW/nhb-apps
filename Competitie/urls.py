@@ -11,6 +11,7 @@ from . import (views_aangemeld,
                views_klassegrenzen,
                views_overzicht,
                views_planning,
+               views_planning_bond,
                views_planning_rayon,
                views_tussenstand,
                views_uitslagen)
@@ -183,6 +184,19 @@ urlpatterns = [
     path('tussenstand/<afstand>-<comp_boog>/bond/',
          views_tussenstand.TussenstandBondView.as_view(),
          name='tussenstand-bond'),
+
+
+    path('planning/doorzetten/<comp_pk>/rk/',
+         views_planning_bond.DoorzettenNaarRKView.as_view(),
+         name='bko-doorzetten-naar-rk'),
+
+    path('planning/doorzetten/<comp_pk>/bk/',
+         views_planning_bond.DoorzettenNaarBKView.as_view(),
+         name='bko-doorzetten-naar-bk'),
+
+    #path('planning/afsluiten/<comp_pk>/',
+    #     views_planning_bond.CompetitieAfsluitenView.as_view(),
+    #     name='bko-afsluiten-competitie'),
 ]
 
 # end of file

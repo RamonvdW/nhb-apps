@@ -14,6 +14,7 @@ from Score.models import zoek_meest_recente_automatisch_vastgestelde_ag
 from Taken.taken import eval_open_taken
 from .models import (LAAG_REGIO, LAAG_RK, LAAG_BK,
                      Competitie, DeelCompetitie)
+import datetime
 
 TEMPLATE_COMPETITIE_OVERZICHT = 'competitie/overzicht.dtl'
 TEMPLATE_COMPETITIE_OVERZICHT_HWL = 'competitie/overzicht-hwl.dtl'
@@ -53,6 +54,9 @@ class CompetitieOverzichtView(View):
 
         for comp in comps:
             comp.zet_fase()
+
+            comp.einde_fase_F = comp.laatst_mogelijke_wedstrijd + datetime.timedelta(days=14)
+            comp.einde_fase_M = comp.rk_laatste_wedstrijd + datetime.timedelta(days=7)
 
             if 'B' <= comp.fase <= 'E':
                 comp.titel_inschrijvingen = "Inschrijvingen"
@@ -208,6 +212,27 @@ class CompetitieOverzichtView(View):
                 obj.tekst = 'Landelijke planning voor de %s.' % obj.competitie.beschrijving
                 obj.url = reverse('Competitie:bond-planning',
                                   kwargs={'deelcomp_pk': obj.pk})
+
+                # geef de BKO de mogelijkheid om
+                # - de regiocompetitie door te zetten naar de rayonkampioenschappen
+                # - de RK door te zetten naar de BK
+                comp = obj.competitie
+                comp.zet_fase()
+                if 'E' <= comp.fase < 'K':
+                    comp.url_doorzetten = reverse('Competitie:bko-doorzetten-naar-rk',
+                                                  kwargs={'comp_pk': comp.pk})
+                    comp.titel_doorzetten = '%s doorzetten naar de volgende fase (Regio naar RK)' % comp.beschrijving
+                    context['bko_doorzetten'] = comp
+                elif 'M' <= comp.fase < 'P':
+                    comp.url_doorzetten = reverse('Competitie:bko-doorzetten-naar-bk',
+                                                  kwargs={'comp_pk': comp.pk})
+                    comp.titel_doorzetten = '%s doorzetten naar de volgende fase (RK naar BK)' % comp.beschrijving
+                    context['bko_doorzetten'] = comp
+                elif 'R' <= comp.fase < 'Z':
+                    comp.url_afsluiten = reverse('Competitie:bko-competitie-afsluiten',
+                                                 kwargs={'comp_pk': comp.pk})
+                    comp.titel_afsluiten = '%s helemaal afsluiten' % comp.beschrijving
+                    context['bko_afsluiten'] = comp
             # for
 
         return context, TEMPLATE_COMPETITIE_OVERZICHT_BEHEERDER

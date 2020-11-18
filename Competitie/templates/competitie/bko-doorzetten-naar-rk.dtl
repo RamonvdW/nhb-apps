@@ -1,0 +1,38 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2020 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Competitie doorzetten{% endblock %}
+
+{% block pagina %}
+
+    <h4>Competitie doorzetten</h4>
+
+    <p>Als BKO wil je de competitie doorzetten naar de volgende fase: van regiocompetitie naar rayonkampioenschappen.</p>
+    <p>Dit is een eenmalige maar belangrijke actie, waardoor de schutters die voldoen aan de vereisten doorgezet worden naar de RKs.</p>
+
+    {% if url_doorzetten %}
+
+        <form method="post" action="{{ url_doorzetten }}">
+            {% csrf_token %}
+            <a class="btn-nhb-blauw" href="{% url 'Competitie:overzicht' %}"><i class="material-icons-round left">arrow_back</i>Terug</a>
+            <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
+            <input class="btn-nhb-rood" name="button_afsluiten" type="submit" value="Doorzetten naar de volgende fase">
+        </form>
+
+    {% else %}
+
+        <p>&nbsp;</p>
+        <p>De regiocompetitie kan op dit moment nog niet doorgezet worden. Wacht tot de tijdlijn fase G bereikt heeft.</p>
+        <a class="btn-nhb-blauw" href="{% url 'Competitie:overzicht' %}"><i class="material-icons-round left">arrow_back</i>Terug</a>
+
+    {% endif %}
+
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-bko-doorzetten-naar-rk" %}
+
+{% endblock %}
+

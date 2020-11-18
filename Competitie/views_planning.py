@@ -26,7 +26,7 @@ TEMPLATE_COMPETITIE_PLANNING_REGIO_CLUSTER = 'competitie/planning-regio-cluster.
 TEMPLATE_COMPETITIE_PLANNING_REGIO = 'competitie/planning-regio.dtl'
 TEMPLATE_COMPETITIE_PLANNING_BOND = 'competitie/planning-landelijk.dtl'
 TEMPLATE_COMPETITIE_WIJZIG_WEDSTRIJD = 'competitie/wijzig-wedstrijd.dtl'
-TEMPLATE_COMPETITIE_AFSLUITEN_REGIOCOMP = 'competitie/afsluiten-regiocomp.dtl'
+TEMPLATE_COMPETITIE_AFSLUITEN_REGIOCOMP = 'competitie/rcl-afsluiten-regiocomp.dtl'
 
 # python strftime: 0=sunday, 6=saturday
 # wij rekenen het verschil ten opzicht van maandag in de week
@@ -919,19 +919,19 @@ class AfsluitenRegiocompView(UserPassesTestMixin, TemplateView):
             deelcomp.is_afgesloten = True
             deelcomp.save()
 
-            # zoek de bijbehorende RK op
-            deelcomp_rk = DeelCompetitie.objects.get(competitie=deelcomp.competitie,
-                                                     laag=LAAG_RK,
-                                                     nhb_rayon=deelcomp.nhb_regio.rayon)
-            # stuur elke RKO een taak ('ter info')
-            rko_namen = list()
-            functie_rko = deelcomp_rk.functie
+            # maak het bericht voor een taak aan de RKO's en BKO's
+            ter_info_namen = list()
             now = timezone.now()
             taak_deadline = now
             taak_tekst = "Ter info: De regiocompetitie %s is zojuist afgesloten door RCL %s" % (str(deelcomp), request.user.volledige_naam())
             taak_tekst += "\nAls RKO kan je onder Competitie, Planning Rayon de status van elke regio zien."
             taak_log = "[%s] Taak aangemaakt" % now
 
+            # stuur elke RKO een taak ('ter info')
+            deelcomp_rk = DeelCompetitie.objects.get(competitie=deelcomp.competitie,
+                                                     laag=LAAG_RK,
+                                                     nhb_rayon=deelcomp.nhb_regio.rayon)
+            functie_rko = deelcomp_rk.functie
             for account in functie_rko.accounts.all():
                 # maak een taak aan voor deze RKO
                 taak = Taak(toegekend_aan=account,
@@ -942,12 +942,30 @@ class AfsluitenRegiocompView(UserPassesTestMixin, TemplateView):
                             log=taak_log,
                             deelcompetitie=deelcomp_rk)
                 taak.save()
-                rko_namen.append(account.volledige_naam())
+                ter_info_namen.append(account.volledige_naam())
+            # for
+
+            # stuur elke BKO een taak ('ter info')
+            deelcomp_bk = DeelCompetitie.objects.get(is_afgesloten=False,
+                                                     competitie=deelcomp.competitie,
+                                                     laag=LAAG_BK)
+            functie_bko = deelcomp_bk.functie
+            for account in functie_bko.accounts.all():
+                # maak een taak aan voor deze BKO
+                taak = Taak(toegekend_aan=account,
+                            deadline=taak_deadline,
+                            aangemaakt_door=request.user,
+                            beschrijving=taak_tekst,
+                            handleiding_pagina="",
+                            log=taak_log,
+                            deelcompetitie=deelcomp_bk)
+                taak.save()
+                ter_info_namen.append(account.volledige_naam())
             # for
 
             # schrijf in het logboek
             msg = "Deelcompetitie '%s' is afgesloten" % str(deelcomp)
-            msg += '\nDe volgende beheerders zijn geïnformeerd via een taak: %s' % ", ".join(rko_namen)
+            msg += '\nDe volgende beheerders zijn geïnformeerd via een taak: %s' % ", ".join(ter_info_namen)
             schrijf_in_logboek(request.user, "Competitie", msg)
 
         url = reverse('Competitie:overzicht')

@@ -22,7 +22,7 @@
 
         <p>&nbsp;</p>
         <h5>Status regiocompetities</h5>
-        <p>Deze tabel toont de status van elke regiocompetitie. Als ze allemaal afgesloten zijn, dan kunnen de kandidaat-deelnemers lijsten voor de RK's vastgesteld worden.</p>
+        <p>Deze tabel toont de status van elke regiocompetitie. Als ze allemaal afgesloten zijn, dan kunnen de kandidaat-deelnemers lijsten voor de RK's vastgesteld worden door de BKO.</p>
         <div class="row">
             <div class="col s12 m8 l6">
                 <table class="white">
@@ -49,47 +49,41 @@
 
     {% else %}
 
-        {% if deelcomp_rk.heeft_deelnemerslijst %}
-            <p>Hieronder tonen we de vastgestelde schutters lijst voor elk van de {{ aantal_klassen }} wedstrijdklassen van de Rayonkampioenschappen.</p>
+        <p>Hieronder tonen we de vastgestelde schutters lijst voor elk van de {{ aantal_klassen }} wedstrijdklassen van de Rayonkampioenschappen.</p>
 
-            <p>&nbsp;</p>
-            <p>Deelname-status voor de geselecteerde schutters + eerste acht reserveschutters:</p>
-            <div class="row">
-                <div class="col offset-s1 s7 offset-m2 m6 offset-xl2 xl4">
-                    <table class="white">
-                        <thead>
-                            <tr>
-                                <th><!--icon--></th>
-                                <th>Status</th>
-                                <th>Aantal</th>
-                            </tr>
-                        </thead>
-
+        <p>&nbsp;</p>
+        <p>Deelname-status voor de geselecteerde schutters + eerste acht reserveschutters:</p>
+        <div class="row">
+            <div class="col offset-s1 s7 offset-m2 m6 offset-xl2 xl4">
+                <table class="white">
+                    <thead>
                         <tr>
-                            <td class="center-align"><i class="red-text material-icons-round">help</i></td>
-                            <td class="red-text">Onbekend</td>
-                            <td>{{ aantal_onbekend }}</td>
+                            <th><!--icon--></th>
+                            <th>Status</th>
+                            <th>Aantal</th>
                         </tr>
+                    </thead>
 
-                        <tr>
-                            <td class="center-align"><i class="green-text material-icons-round">check</i></td>
-                            <td class="green-text">Deelname bevestigd</td>
-                            <td>{{ aantal_bevestigd }}</td>
-                        </tr>
+                    <tr>
+                        <td class="center-align"><i class="red-text material-icons-round">help</i></td>
+                        <td class="red-text">Onbekend</td>
+                        <td>{{ aantal_onbekend }}</td>
+                    </tr>
 
-                        <tr>
-                            <td class="center-align"><i class="grey-text material-icons-round">block</i></td>
-                            <td class="grey-text">Afgemeld</td>
-                            <td>{{ aantal_afgemeld }}</td>
-                        </tr>
-                    </table>
-                </div>
+                    <tr>
+                        <td class="center-align"><i class="green-text material-icons-round">check</i></td>
+                        <td class="green-text">Deelname bevestigd</td>
+                        <td>{{ aantal_bevestigd }}</td>
+                    </tr>
+
+                    <tr>
+                        <td class="center-align"><i class="grey-text material-icons-round">block</i></td>
+                        <td class="grey-text">Afgemeld</td>
+                        <td>{{ aantal_afgemeld }}</td>
+                    </tr>
+                </table>
             </div>
-
-        {% else %}
-            <p>Hieronder tonen we de lijst met kandidaat schutters voor elke wedstrijdklasse van de Rayonkampioenschappen.</p>
-            <p>Controleer deze en druk daarna op de knop 'bevestigen' helemaal onderaan deze pagina.</p>
-        {% endif %}
+        </div>
 
         <table class="white">
 
@@ -133,37 +127,21 @@
                         <td></td>
                     {% endif %}
 
-                    {% if not url_bevestig_rk_schutters %}
-                        {% if obj.deelname_bevestigd %}
-                            <td class="center-align"><i class="green-text material-icons-round">check</i></td>
-                        {% elif obj.is_afgemeld %}
-                            <td class="center-align"><i class="grey-text material-icons-round">block</i></td>
-                        {% else %}
-                            <!-- onbekend -->
-                            <td class="center-align"><i class="red-text material-icons-round">help</i></td>
-                        {% endif %}
-
-                        <td><a class="btn-nhb-blauw btn-small" href="{{ obj.url_wijzig }}">Wijzig</a></td>
+                    {% if obj.deelname_bevestigd %}
+                        <td class="center-align"><i class="green-text material-icons-round">check</i></td>
+                    {% elif obj.is_afgemeld %}
+                        <td class="center-align"><i class="grey-text material-icons-round">block</i></td>
                     {% else %}
-                        <td></td>
-                        <td></td>
+                        <!-- onbekend -->
+                        <td class="center-align"><i class="red-text material-icons-round">help</i></td>
                     {% endif %}
+
+                    <td><a class="btn-nhb-blauw btn-small" href="{{ obj.url_wijzig }}">Wijzig</a></td>
                 </tr>
 
             {% endfor %}
 
         </table>
-
-        <!-- toon de knop om de deelnemerslijst te bevestigen -->
-        {% if url_bevestig_rk_schutters %}
-            <p>Druk op onderstaande knop om de lijst met RK schutters te bevestigen:</p>
-
-            <form method="post" action="{{ url_bevestig_rk_schutters }}">
-                {% csrf_token %}
-                <button class="btn-nhb-rood" type="submit">
-                    <i class="material-icons-round left">check</i>Bevestigen</button>
-            </form>
-        {% endif %}
 
     {% endif %}
 
