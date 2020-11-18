@@ -204,9 +204,21 @@
 
                 <tr>
                     <td {% if obj.fase == 'F' %} class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>F</td>
-                    <td>Vaststellen uitslagen in elke regio</td>
+                    <td>Vaststellen uitslagen in elke regio (RCL)</td>
                     <td>
                         {% if obj.fase > 'F' %}
+                            <span class="green-text">Afgerond</span>
+                        {% else %}
+                            <span>tot {{ obj.einde_fase_F }}</span>
+                        {% endif %}
+                    </td>
+                </tr>
+
+                <tr>
+                    <td {% if obj.fase == 'G' %} class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>G</td>
+                    <td>Afsluiten regiocompetitie (BKO)</td>
+                    <td>
+                        {% if obj.fase > 'G' %}
                             <span class="green-text">Afgerond</span>
                         {% endif %}
                     </td>
@@ -243,9 +255,21 @@
 
                 <tr>
                     <td {% if obj.fase == 'M' %} class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>M</td>
-                    <td>Vaststellen uitslagen in elk rayon</td>
+                    <td>Vaststellen uitslagen in elk rayon (RKO)</td>
                     <td>
                         {% if obj.fase > 'M' %}
+                            <span class="green-text">Afgerond</span>
+                        {% else %}
+                            <span>tot {{ obj.einde_fase_M }}</span>
+                        {% endif %}
+                    </td>
+                </tr>
+
+                <tr>
+                    <td {% if obj.fase == 'N' %} class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>N</td>
+                    <td>Afsluiten rayonkampioenschappen (BKO)</td>
+                    <td>
+                        {% if obj.fase > 'N' %}
                             <span class="green-text">Afgerond</span>
                         {% endif %}
                     </td>
@@ -291,13 +315,8 @@
                 </tr>
 
                 <tr>
-                    <td></td>
-                    <td colspan="2"><b>Afsluiten</b></td>
-                </tr>
-
-                <tr>
-                    <td {% if obj.fase == 'Z' %} class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>Z</td>
-                    <td>Archiveren uitslag en afsluiten competitie (Bondsburo)</td>
+                    <td {% if obj.fase == 'S' %} class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>S</td>
+                    <td>Afsluiten competitie (BKO)</td>
                     <td></td>
                 </tr>
             </table>

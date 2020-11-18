@@ -123,8 +123,14 @@ class Competitie(models.Model):
                 self.fase = 'Q'
                 return
 
-            # fase R: vaststellen en publiceren uitslag
-            self.fase = 'R'
+            # fase R: vaststellen uitslagen
+            if self.deelcompetitie_set.filter(is_afgesloten=False,
+                                              laag=LAAG_BK).count() > 0:
+                self.fase = 'R'
+                return
+
+            # fase S: afsluiten bondscompetitie
+            self.fase = 'S'
             return
 
         if self.alle_regiocompetities_afgesloten:
@@ -139,8 +145,14 @@ class Competitie(models.Model):
                 self.fase = 'L'
                 return
 
-            # fase M: vaststellen en publiceren uitslag
-            self.fase = 'M'
+            # fase M: vaststellen uitslag in elk rayon (RKO)
+            if self.deelcompetitie_set.filter(is_afgesloten=False,
+                                              laag=LAAG_RK).count() > 0:
+                self.fase = 'M'
+                return
+
+            # fase N: afsluiten rayonkampioenschappen (BKO)
+            self.fase = 'N'
             return
 
         # regiocompetitie fases
@@ -174,8 +186,14 @@ class Competitie(models.Model):
             self.fase = 'E'
             return
 
-        # fase F: vaststellen en publiceren uitslag
-        self.fase = 'F'
+        # fase F: vaststellen uitslag in elke regio (RCL)
+        if self.deelcompetitie_set.filter(is_afgesloten=False,
+                                          laag=LAAG_REGIO).count() > 0:
+            self.fase = 'F'
+            return
+
+        # fase G: afsluiten regiocompetitie (BKO)
+        self.fase = 'G'
 
     objects = models.Manager()      # for the editor only
 

@@ -7,7 +7,9 @@
 from django.utils import timezone
 from django.test import TestCase
 from BasisTypen.models import IndivWedstrijdklasse
-from Competitie.models import Competitie, maak_competitieklasse_indiv
+from Competitie.models import (Competitie, DeelCompetitie,
+                               LAAG_REGIO, LAAG_RK, LAAG_BK,
+                               maak_competitieklasse_indiv)
 import datetime
 
 
@@ -43,7 +45,7 @@ def zet_competitie_fase(comp, fase):
             comp.save()
             return
 
-        # fase R: vaststellen en publiceren uitslag
+        # fase R of S: vaststellen uitslagen + afsluiten BK
         comp.bk_laatste_wedstrijd = gister
         comp.save()
         return
@@ -65,7 +67,7 @@ def zet_competitie_fase(comp, fase):
             comp.save()
             return
 
-        # fase M: vaststellen en publiceren uitslag
+        # fase M of N: vaststellen uitslag in elk rayon + afsluiten RK
         comp.rk_laatste_wedstrijd = gister
         comp.save()
         return
@@ -109,7 +111,7 @@ def zet_competitie_fase(comp, fase):
 
     comp.laatst_mogelijke_wedstrijd = gister
 
-    # fase F: vaststellen en publiceren uitslag
+    # fase F of G: vaststellen uitslag in elke regio + afsluiten regiocompetitie
     comp.save()
     return
 
@@ -131,6 +133,22 @@ class TestCompetitieFase(TestCase):
         comp.rk_eerste_wedstrijd = comp.rk_laatste_wedstrijd = einde_jaar
         comp.bk_eerste_wedstrijd = comp.bk_laatste_wedstrijd = einde_jaar
         comp.save()
+
+        deelcomp_regio = DeelCompetitie(competitie=comp,
+                                        is_afgesloten=False,
+                                        laag=LAAG_REGIO)
+        deelcomp_regio.save()
+
+        deelcomp_rk = DeelCompetitie(competitie=comp,
+                                     is_afgesloten=False,
+                                     laag=LAAG_RK)
+        deelcomp_rk.save()
+
+        deelcomp_bk = DeelCompetitie(competitie=comp,
+                                     is_afgesloten=False,
+                                     laag=LAAG_BK)
+        deelcomp_bk.save()
+
         comp.zet_fase()
         self.assertEqual(comp.fase, 'A1')
 
@@ -170,6 +188,12 @@ class TestCompetitieFase(TestCase):
         comp.zet_fase()
         self.assertEqual(comp.fase, 'F')
 
+        # na afsluiten regio deelcomp = G
+        deelcomp_regio.is_afgesloten = True
+        deelcomp_regio.save()
+        comp.zet_fase()
+        self.assertEqual(comp.fase, 'G')
+
         comp.alle_regiocompetities_afgesloten = True
         comp.zet_fase()
         self.assertEqual(comp.fase, 'K')
@@ -182,6 +206,12 @@ class TestCompetitieFase(TestCase):
         comp.zet_fase()
         self.assertEqual(comp.fase, 'M')
 
+        # na afsluiten RK = N
+        deelcomp_rk.is_afgesloten = True
+        deelcomp_rk.save()
+        comp.zet_fase()
+        self.assertEqual(comp.fase, 'N')
+
         comp.alle_rks_afgesloten = True
         comp.zet_fase()
         self.assertEqual(comp.fase, 'P')
@@ -193,6 +223,12 @@ class TestCompetitieFase(TestCase):
         comp.bk_laatste_wedstrijd = gisteren
         comp.zet_fase()
         self.assertEqual(comp.fase, 'R')
+
+        # na afsluiten BK = S
+        deelcomp_bk.is_afgesloten = True
+        deelcomp_bk.save()
+        comp.zet_fase()
+        self.assertEqual(comp.fase, 'S')
 
         comp.alle_bks_afgesloten = True
         comp.zet_fase()
@@ -224,7 +260,7 @@ class TestCompetitieFase(TestCase):
         comp.zet_fase()
         self.assertEqual(comp.fase, 'A2')
 
-        sequence = 'BCDEFKLMPQRZRQPMLKFEDCBKREBRLQC'
+        sequence = 'BCDEGKLNPQSQPNLKGEDCBKSEBZLQC'  # let op! F en R kunnen niet
         for fase in sequence:
             zet_competitie_fase(comp, fase)
             comp.zet_fase()
