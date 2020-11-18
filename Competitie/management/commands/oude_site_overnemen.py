@@ -450,8 +450,6 @@ class Command(BaseCommand):
             self.stdout.write('[DEBUG] MULTI match (achternaam): %s, %s, %s' % (nhb_nr, ver_nr, naam))
             for obj in matches:
                 msg = str(obj)
-                if not obj.bij_vereniging:
-                    msg += ' (GEEN VERENIGING)'
                 self.stdout.write('  ' + msg)
             return None
 
@@ -467,9 +465,7 @@ class Command(BaseCommand):
         if len(matches):
             self.stdout.write('[DEBUG] MULTI match (achternaam): %s, %s, %s' % (nhb_nr, ver_nr, naam))
             for obj in matches:
-                msg = str(obj)
-                if not obj.bij_vereniging:
-                    msg += ' (GEEN VERENIGING)'
+                msg = str(obj) + ' (GEEN VERENIGING)'
                 self.stdout.write('  ' + msg)
             return None
 
@@ -487,8 +483,6 @@ class Command(BaseCommand):
             self.stdout.write('[DEBUG] MULTI match (voornaam): %s, %s, %s' % (nhb_nr, ver_nr, naam))
             for obj in matches:
                 msg = str(obj)
-                if not obj.bij_vereniging:
-                    msg += ' (GEEN VERENIGING)'
                 self.stdout.write('  ' + msg)
             return None
 
