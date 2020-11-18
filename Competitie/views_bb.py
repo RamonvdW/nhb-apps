@@ -475,7 +475,7 @@ class KlassegrenzenVaststellenView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         # stukje input beveiliging: begrens tot 2 tekens getal (18/25)
-        afstand_str = kwargs['afstand'][:2]
+        afstand_str = kwargs['afstand'][:2]     # afkappen geeft veiligheid
         try:
             afstand = int(afstand_str)
         except ValueError:
@@ -503,7 +503,7 @@ class KlassegrenzenVaststellenView(UserPassesTestMixin, TemplateView):
         """ deze functie wordt aangeroepen als een POST request ontvangen is.
             --> de beheerder wil deze klassegrenzen vaststellen
         """
-        afstand_str = kwargs['afstand']
+        afstand_str = kwargs['afstand'][:2]     # afkappen geeft veiligheid
         try:
             afstand = int(afstand_str)
         except ValueError:
