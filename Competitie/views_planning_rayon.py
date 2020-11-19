@@ -554,18 +554,15 @@ class LijstRkSchuttersView(UserPassesTestMixin, TemplateView):
             # situatie 3)
             deelnemers = self._get_schutters_rk(deelcomp_rk)
 
-            for deelnemer in deelnemers:
-                deelnemer.url_wijzig = reverse('Competitie:wijzig-status-rk-deelnemer',
-                                               kwargs={'deelnemer_pk': deelnemer.pk})
-            # for
-
         klasse = -1
         rank = 0
         aantal_afgemeld = 0
         aantal_bevestigd = 0
         aantal_onbekend = 0
         aantal_klassen = 0
+        aantal_attentie = 0
         for deelnemer in deelnemers:
+
             deelnemer.break_klasse = (klasse != deelnemer.klasse.indiv.volgorde)
             if deelnemer.break_klasse:
                 if klasse != -1:
@@ -576,7 +573,12 @@ class LijstRkSchuttersView(UserPassesTestMixin, TemplateView):
 
             lid = deelnemer.schutterboog.nhblid
             deelnemer.naam_str = "[%s] %s" % (lid.nhb_nr, lid.volledige_naam())
-            deelnemer.ver_str = str(deelnemer.bij_vereniging)
+
+            if not deelnemer.bij_vereniging:
+                aantal_attentie += 1
+
+            deelnemer.url_wijzig = reverse('Competitie:wijzig-status-rk-deelnemer',
+                                           kwargs={'deelnemer_pk': deelnemer.pk})
 
             deelnemer.rank = 0
             if not deelnemer.is_afgemeld:
@@ -603,6 +605,7 @@ class LijstRkSchuttersView(UserPassesTestMixin, TemplateView):
             context['aantal_afgemeld'] = aantal_afgemeld
             context['aantal_onbekend'] = aantal_onbekend
             context['aantal_bevestigd'] = aantal_bevestigd
+            context['aantal_attentie'] = aantal_attentie
 
         menu_dynamics(self.request, context, actief='competitie')
         return context
@@ -647,7 +650,11 @@ class WijzigStatusRkSchutterView(TemplateView):
 
         lid = deelnemer.schutterboog.nhblid
         deelnemer.naam_str = "[%s] %s" % (lid.nhb_nr, lid.volledige_naam())
-        deelnemer.ver_str = str(deelnemer.bij_vereniging)
+
+        if deelnemer.bij_vereniging:
+            deelnemer.ver_str = str(deelnemer.bij_vereniging)
+        else:
+            deelnemer.ver_str = "?"
 
         context['deelnemer'] = deelnemer
 

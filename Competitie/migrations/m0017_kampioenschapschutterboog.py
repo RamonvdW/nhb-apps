@@ -30,7 +30,7 @@ class Migration(migrations.Migration):
                 ('is_afgemeld', models.BooleanField(default=False)),
                 ('gemiddelde', models.DecimalField(decimal_places=3, default=0.0, max_digits=5)),
                 ('deelcompetitie', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='Competitie.DeelCompetitie')),
-                ('bij_vereniging', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='NhbStructuur.NhbVereniging')),
+                ('bij_vereniging', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='NhbStructuur.NhbVereniging', blank=True, null=True)),
                 ('klasse', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='Competitie.CompetitieKlasse')),
                 ('schutterboog', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='Schutter.SchutterBoog')),
                 ('bevestiging_gevraagd_op', models.DateTimeField(blank=True, null=True)),

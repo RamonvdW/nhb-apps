@@ -61,50 +61,60 @@
         <tr>
             <td colspan="3" class="center">
                 <span>De status van deelname voor deze schutter is: </span>
-                {% if deelnemer.is_afgemeld %}
-                    <span class="red-text">AFGEMELD</span>
+                {% if not deelnemer.bij_vereniging %}
+                    <span class="red-text">ATTENTIE</span>
+                {% elif deelnemer.is_afgemeld %}
+                    <span class="grey-text">AFGEMELD</span>
                 {% elif deelnemer.deelname_bevestigd %}
                     <span class="green-text">DEELNAME BEVESTIGD</span>
                 {% else %}
-                    <span class="blue-text"><i>ONBEKEND</i></span>
+                    <span class="nhb-blauw-text"><i>ONBEKEND</i></span>
                 {% endif %}
             </td>
         </tr>
 
-        {% if not deelnemer.deelname_bevestigd %}
+        {% if not deelnemer.bij_vereniging %}
             <tr class="nhb-grijs"><td colspan="3"></td></tr>
+            <tr>
+                <td colspan="3" class="center">Deze schutter is niet aangemeld bij een vereniging en mag zo niet deelnemen aan het RK.<br>Laat het bondsburo uitzoeken of dit een niet-afgeronde overschrijving is.</td>
+            </tr>
+        {% else %}
 
-            <tr>
-                <td colspan="3" class="center">Klik op de blauwe knop om deelname aan het RK te bevestigen</td>
-            </tr>
-            <tr>
-                <td colspan="3" class="center">
-                    <form method="post" action="{{ url_opslaan }}">
-                        {% csrf_token %}
-                        <input name="bevestig" type="hidden" value="1">
-                        <button class="btn-nhb-blauw" type="submit">
-                            <i class="material-icons-round left">thumb_up</i>Bevestig deelname</button>
-                    </form>
-                </td>
-            </tr>
-        {% endif %}
+            {% if not deelnemer.deelname_bevestigd %}
+                <tr class="nhb-grijs"><td colspan="3"></td></tr>
 
-        {% if not deelnemer.is_afgemeld %}
-            <tr class="nhb-grijs"><td colspan="3"></td></tr>
+                <tr>
+                    <td colspan="3" class="center">Klik op de blauwe knop om deelname aan het RK te bevestigen</td>
+                </tr>
+                <tr>
+                    <td colspan="3" class="center">
+                        <form method="post" action="{{ url_opslaan }}">
+                            {% csrf_token %}
+                            <input name="bevestig" type="hidden" value="1">
+                            <button class="btn-nhb-blauw" type="submit">
+                                <i class="material-icons-round left">thumb_up</i>Bevestig deelname</button>
+                        </form>
+                    </td>
+                </tr>
+            {% endif %}
 
-            <tr>
-                <td colspan="3" class="center">Klik op de rode knop om de schutter af te melden voor het RK</td>
-            </tr>
-            <tr>
-                <td colspan="3" class="center">
-                    <form method="post" action="{{ url_opslaan }}">
-                        {% csrf_token %}
-                        <input name="afmelden" type="hidden" value="1">
-                        <button class="btn-nhb-rood" type="submit">
-                            <i class="material-icons-round left">report_problem</i>Afmelden</button>
-                    </form>
-                </td>
-            </tr>
+            {% if not deelnemer.is_afgemeld %}
+                <tr class="nhb-grijs"><td colspan="3"></td></tr>
+
+                <tr>
+                    <td colspan="3" class="center">Klik op de rode knop om de schutter af te melden voor het RK</td>
+                </tr>
+                <tr>
+                    <td colspan="3" class="center">
+                        <form method="post" action="{{ url_opslaan }}">
+                            {% csrf_token %}
+                            <input name="afmelden" type="hidden" value="1">
+                            <button class="btn-nhb-rood" type="submit">
+                                <i class="material-icons-round left">report_problem</i>Afmelden</button>
+                        </form>
+                    </td>
+                </tr>
+            {% endif %}
         {% endif %}
     </table>
 

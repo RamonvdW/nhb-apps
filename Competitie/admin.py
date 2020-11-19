@@ -89,7 +89,8 @@ class KampioenschapSchutterBoogAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Wie',
             {'fields': ('deelcompetitie',
-                        'schutterboog')
+                        'schutterboog',
+                        'bij_vereniging')
              }),
         ('Klasse',
             {'fields': ('klasse',),

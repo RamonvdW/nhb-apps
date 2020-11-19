@@ -65,8 +65,8 @@
                     </thead>
 
                     <tr>
-                        <td class="center-align"><i class="red-text material-icons-round">help</i></td>
-                        <td class="red-text">Onbekend</td>
+                        <td class="center-align"><i class="nhb-blauw-text material-icons-round">help</i></td>
+                        <td class="nhb-blauw-text">Onbekend</td>
                         <td>{{ aantal_onbekend }}</td>
                     </tr>
 
@@ -81,6 +81,14 @@
                         <td class="grey-text">Afgemeld</td>
                         <td>{{ aantal_afgemeld }}</td>
                     </tr>
+
+                    {% if aantal_attentie %}
+                        <tr>
+                            <td class="center-align"><i class="red-text material-icons-round">warning</i></td>
+                            <td class="red-text">Attentie</td>
+                            <td>{{ aantal_attentie }}</td>
+                        </tr>
+                    {% endif %}
                 </table>
             </div>
         </div>
@@ -100,10 +108,8 @@
                         <th>Vereniging</th>
                         <th class="hide-on-small-only">Gemiddelde</th>
                         <th>Notitie</th>
-                        {% if not url_bevestig_rk_schutters %}
-                            <th>Status</th>
-                            <th><!-- knop --></th>
-                        {% endif %}
+                        <th class="center-align">Status</th>
+                        <th><!-- knop --></th>
                     </tr>
 
                 {% endif %}
@@ -115,8 +121,14 @@
                         <td></td>
                     {% endif %}
 
-                    <td>[{{ obj.schutterboog.nhblid.nhb_nr }}] {{ obj.schutterboog.nhblid.volledige_naam }}</td>
-                    <td>[{{ obj.bij_vereniging.nhb_nr }}]<span class="hide-on-small-only">&nbsp;{{ obj.bij_vereniging.naam }}</span></td>
+                    <td>{{ obj.naam_str }}</td>
+
+                    {% if obj.bij_vereniging %}
+                        <td>[{{ obj.bij_vereniging.nhb_nr }}]<span class="hide-on-small-only">&nbsp;{{ obj.bij_vereniging.naam }}</span></td>
+                    {% else %}
+                        <td><!-- geen vereniging --></td>
+                    {% endif %}
+
                     <td class="hide-on-small-only">{{ obj.gemiddelde }}</td>
 
                     {% if obj.kampioen_label != "" %}
@@ -127,13 +139,15 @@
                         <td></td>
                     {% endif %}
 
-                    {% if obj.deelname_bevestigd %}
+                    {% if not obj.bij_vereniging %}
+                        <td class="center-align"><i class="red-text material-icons-round">warning</i></td>
+                    {% elif obj.deelname_bevestigd %}
                         <td class="center-align"><i class="green-text material-icons-round">check</i></td>
                     {% elif obj.is_afgemeld %}
                         <td class="center-align"><i class="grey-text material-icons-round">block</i></td>
                     {% else %}
                         <!-- onbekend -->
-                        <td class="center-align"><i class="red-text material-icons-round">help</i></td>
+                        <td class="center-align"><i class="nhb-blauw-text material-icons-round">help</i></td>
                     {% endif %}
 
                     <td><a class="btn-nhb-blauw btn-small" href="{{ obj.url_wijzig }}">Wijzig</a></td>

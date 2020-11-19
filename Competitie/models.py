@@ -543,7 +543,8 @@ class KampioenschapSchutterBoog(models.Model):
 
     # vereniging wordt hier apart bijgehouden omdat de schutter over kan stappen
     # tijdens het seizoen
-    bij_vereniging = models.ForeignKey(NhbVereniging, on_delete=models.PROTECT)
+    bij_vereniging = models.ForeignKey(NhbVereniging, on_delete=models.PROTECT,
+                                       blank=True, null=True)
 
     # kampioenen hebben een label
     kampioen_label = models.CharField(max_length=50, default='', blank=True)
