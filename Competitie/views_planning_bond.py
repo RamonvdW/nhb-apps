@@ -39,6 +39,30 @@ class DoorzettenNaarRKView(UserPassesTestMixin, TemplateView):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
         return HttpResponseRedirect(reverse('Plein:plein'))
 
+    @staticmethod
+    def _get_regio_status(competitie):
+        # schutter moeten uit LAAG_REGIO gehaald worden, uit de 4 regio's van het rayon
+        regio_deelcomps = (DeelCompetitie
+                           .objects
+                           .filter(laag=LAAG_REGIO,
+                                   competitie=competitie)
+                           .select_related('nhb_regio',
+                                           'nhb_regio__rayon')
+                           .order_by('nhb_regio__regio_nr'))
+
+        for obj in regio_deelcomps:
+            obj.regio_str = str(obj.nhb_regio.regio_nr)
+            obj.rayon_str = str(obj.nhb_regio.rayon.rayon_nr)
+
+            if obj.is_afgesloten:
+                obj.status_str = "Afgesloten"
+                obj.status_groen = True
+            else:
+                obj.status_str = "Actief"
+        # for
+
+        return regio_deelcomps
+
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
@@ -56,6 +80,8 @@ class DoorzettenNaarRKView(UserPassesTestMixin, TemplateView):
         if comp.fase < 'E' or comp.fase >= 'K':
             # kaartjes werd niet getoond, dus je zou hier niet moeten zijn
             raise Resolver404()
+
+        context['regio_status'] = self._get_regio_status(comp)
 
         if comp.fase == 'G':
             # klaar om door te zetten
@@ -185,7 +211,7 @@ class DoorzettenNaarRKView(UserPassesTestMixin, TemplateView):
                                       'schutterboog__nhblid')
                       .filter(deelcompetitie__in=pks,
                               aantal_scores__gte=6,
-                              schutterboog__nhblid__is_actief_lid=True)     # verwijdert uitgeschreven leden
+                              klasse__indiv__niet_voor_rk_bk=False)         # skip aspiranten
                       .order_by('klasse__indiv__volgorde',      # groepeer per klasse
                                 '-gemiddelde'))                 # aflopend gemiddelde
 

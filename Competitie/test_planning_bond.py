@@ -170,7 +170,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
 
         # nu echt doorzetten
         resp = self.client.post(url)
-        self.assert_is_redirect(resp, '/competitie/overzicht/')       # redirect = Success
+        self.assert_is_redirect(resp, '/competitie/')       # redirect = Success
 
     def test_doorzetten_bk(self):
         self.e2e_login_and_pass_otp(self.account_bb)
@@ -206,7 +206,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
 
         # nu echt doorzetten
         resp = self.client.post(url)
-        self.assert_is_redirect(resp, '/competitie/overzicht/')       # redirect = Success
+        self.assert_is_redirect(resp, '/competitie/')       # redirect = Success
 
     def test_doorzetten_bad(self):
         # moet BKO zijn

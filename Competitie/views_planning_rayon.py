@@ -227,6 +227,7 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
                      .objects
                      .filter(competitie=deelcomp_rk.competitie,
                              indiv__is_onbekend=False,
+                             indiv__niet_voor_rk_bk=False,
                              team=None)
                      .select_related('indiv__boogtype')
                      .order_by('indiv__volgorde')

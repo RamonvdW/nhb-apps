@@ -30,6 +30,32 @@
         <p>De regiocompetitie kan op dit moment nog niet doorgezet worden. Wacht tot de tijdlijn fase G bereikt heeft.</p>
         <a class="btn-nhb-blauw" href="{% url 'Competitie:overzicht' %}"><i class="material-icons-round left">arrow_back</i>Terug</a>
 
+        <p>&nbsp;</p>
+        <h5>Status regiocompetities</h5>
+        <p>Deze tabel toont de status van elke regiocompetitie.</p>
+        <div class="row">
+            <div class="col s12 m8 l6">
+                <table class="white">
+                    <thead>
+                        <tr>
+                            <th>Rayon</th>
+                            <th>Regio</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+
+                    {% for obj in regio_status %}
+                        <tr>
+                            <td>{{ obj.rayon_str }}</td>
+                            <td>{{ obj.regio_str }}</td>
+                            <td{% if obj.status_groen %} class="green-text"{% endif %}>{{ obj.status_str }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+
+            </div>
+        </div>
+
     {% endif %}
 
     {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-bko-doorzetten-naar-rk" %}
