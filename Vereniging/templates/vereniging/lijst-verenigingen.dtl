@@ -150,7 +150,7 @@
             {% endif %}
 
             {% if toon_ledental %}
-                <td{% if obj.aantal_leden >= 100 %} class="blue-text"{% endif %}>{{ obj.aantal_leden }}</td>
+                <td{% if obj.aantal_leden >= 100 %} class="nhb-blauw-text"{% endif %}>{{ obj.aantal_leden }}</td>
             {% endif %}
         </tr>
     {% endfor %}

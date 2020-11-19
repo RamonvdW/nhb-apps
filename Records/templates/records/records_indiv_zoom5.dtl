@@ -42,7 +42,7 @@
     <p>Kies nu het soort record (dit is typisch de afstand en aantal pijlen):</p>
 
     {% for obj in object_list %}
-    <p><a class="btn white blue-text" href="{{ obj.url }}">{{ obj.soort_record }}</a></p>
+    <p><a class="btn white nhb-blauw-text" href="{{ obj.url }}">{{ obj.soort_record }}</a></p>
     {% endfor %}
 
 {% else %}
