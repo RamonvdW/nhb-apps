@@ -13,7 +13,7 @@ from Plein.menu import menu_dynamics
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
 from Logboek.models import schrijf_in_logboek
 from NhbStructuur.models import NhbCluster, NhbVereniging
-from Taken.models import Taak
+from Taken.taken import maak_taak
 from Wedstrijden.models import Wedstrijd, WedstrijdLocatie
 from .models import (LAAG_REGIO, LAAG_RK, LAAG_BK,
                      DeelCompetitie, DeelcompetitieRonde, maak_deelcompetitie_ronde)
@@ -934,14 +934,13 @@ class AfsluitenRegiocompView(UserPassesTestMixin, TemplateView):
             functie_rko = deelcomp_rk.functie
             for account in functie_rko.accounts.all():
                 # maak een taak aan voor deze RKO
-                taak = Taak(toegekend_aan=account,
-                            deadline=taak_deadline,
-                            aangemaakt_door=request.user,
-                            beschrijving=taak_tekst,
-                            handleiding_pagina="",
-                            log=taak_log,
-                            deelcompetitie=deelcomp_rk)
-                taak.save()
+                maak_taak(toegekend_aan=account,
+                          deadline=taak_deadline,
+                          aangemaakt_door=request.user,
+                          beschrijving=taak_tekst,
+                          handleiding_pagina="",
+                          log=taak_log,
+                          deelcompetitie=deelcomp_rk)
                 ter_info_namen.append(account.volledige_naam())
             # for
 
@@ -952,14 +951,13 @@ class AfsluitenRegiocompView(UserPassesTestMixin, TemplateView):
             functie_bko = deelcomp_bk.functie
             for account in functie_bko.accounts.all():
                 # maak een taak aan voor deze BKO
-                taak = Taak(toegekend_aan=account,
-                            deadline=taak_deadline,
-                            aangemaakt_door=request.user,
-                            beschrijving=taak_tekst,
-                            handleiding_pagina="",
-                            log=taak_log,
-                            deelcompetitie=deelcomp_bk)
-                taak.save()
+                maak_taak(toegekend_aan=account,
+                          deadline=taak_deadline,
+                          aangemaakt_door=request.user,
+                          beschrijving=taak_tekst,
+                          handleiding_pagina="",
+                          log=taak_log,
+                          deelcompetitie=deelcomp_bk)
                 ter_info_namen.append(account.volledige_naam())
             # for
 

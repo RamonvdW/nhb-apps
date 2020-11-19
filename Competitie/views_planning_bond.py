@@ -12,7 +12,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Functie.rol import Rollen, rol_get_huidige
 from Logboek.models import schrijf_in_logboek
 from Plein.menu import menu_dynamics
-from Taken.models import Taak
+from Taken.taken import maak_taak
 from .models import (Competitie,
                      LAAG_REGIO, LAAG_RK, LAAG_BK, DeelCompetitie,
                      RegioCompetitieSchutterBoog, KampioenschapSchutterBoog)
@@ -172,14 +172,13 @@ class DoorzettenNaarRKView(UserPassesTestMixin, TemplateView):
 
             for account in functie_rko.accounts.all():
                 # maak een taak aan voor deze BKO
-                taak = Taak(toegekend_aan=account,
-                            deadline=taak_deadline,
-                            aangemaakt_door=self.request.user,
-                            beschrijving=taak_tekst,
-                            handleiding_pagina="",
-                            log=taak_log,
-                            deelcompetitie=deelcomp_rk)
-                taak.save()
+                maak_taak(toegekend_aan=account,
+                          deadline=taak_deadline,
+                          aangemaakt_door=self.request.user,
+                          beschrijving=taak_tekst,
+                          handleiding_pagina="",
+                          log=taak_log,
+                          deelcompetitie=deelcomp_rk)
                 rko_namen.append(account.volledige_naam())
             # for
 

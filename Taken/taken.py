@@ -5,6 +5,8 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.utils import timezone
+from django.conf import settings
+from Mailer.models import mailer_queue_email
 from .models import Taak
 from datetime import timedelta
 
@@ -50,5 +52,97 @@ def eval_open_taken(request, forceer=False):
                    .filter(toegekend_aan=request.user)
                    .count())
     request.session[SESSIONVAR_TAAK_AANTAL_OPEN] = aantal_open
+
+
+def stuur_taak_email_herinnering(email, aantal_open):
+    """ Stuur een e-mail ter herinnering dat er een taak te wachten staat.
+    """
+
+    text_body = ("Hallo %s!\n\n" % email.account.get_first_name()
+                 + "Er zijn taken die jouw aandacht nodig hebben op %s\n" % settings.SITE_URL
+                 + "Op het moment van sturen stonden er %s taken open.\n\n" % aantal_open
+                 + "Bedankt voor je aandacht!\n"
+                 + "Het bondsburo\n")
+
+    mailer_queue_email(email.bevestigde_email,
+                       'Er zijn taken voor jou',
+                       text_body)
+
+
+def stuur_nieuwe_taak_email(email, aantal_open):
+    """ Stuur een e-mail ter herinnering dat er een taak te wachten staat.
+    """
+
+    text_body = ("Hallo %s!\n\n" % email.account.get_first_name()
+                 + "Er is zojuist een nieuwe taak voor jou aangemaakt op %s\n" % settings.SITE_URL
+                 + "Op het moment van sturen stonden er %s taken open.\n\n" % aantal_open
+                 + "Bedankt voor je aandacht!\n"
+                 + "Het bondsburo\n")
+
+    mailer_queue_email(email.bevestigde_email,
+                       'Er is een nieuwe taak voor jou',
+                       text_body)
+
+
+def maak_taak(**kwargs):
+    """ Maak een nieuwe taak aan en stuur een e-mail ter herinnering """
+    taak = Taak(**kwargs)
+    taak.save()
+
+    email = taak.toegekend_aan.accountemail_set.all()[0]
+
+    if not email.optout_nieuwe_taak:
+        now = timezone.now()
+
+        if email.laatste_email_over_taken:
+            if email.laatste_email_over_taken + timedelta(days=1) > now:
+                # te vroeg om weer een mail te sturen
+                return
+
+        email.laatste_email_over_taken = now
+        email.save()
+
+        aantal_open = (Taak
+                       .objects
+                       .exclude(is_afgerond=True)
+                       .filter(toegekend_aan=request.user)
+                       .count())
+
+        stuur_nieuwe_taak_email(email, aantal_open)
+
+
+def herinner_aan_taken():
+    """ Deze functie wordt aangeroepen vanuit de stuur_emails cli om herinneringsmails
+        te maken voor openstaande taken.
+    """
+
+    taken = dict()      # [toegekend_aan] = aantal
+
+    for taak in Taak.objects.exclude(is_afgerond=True):
+        try:
+            taken[taak.toegekend_aan] += 1
+        except KeyError:
+            taken[taak.toegekend_aan] = 1
+    # for
+
+    now = timezone.now()
+
+    for account, aantal_open in taken.items():
+        email = account.accountemail_set.all()[0]
+
+        if email.optout_herinnering_taken:
+            # wil geen herinneringen ontvangen
+            continue
+
+        if email.laatste_email_over_taken:
+            if email.laatste_email_over_taken + timedelta(days=1) > now:
+                # te vroeg om weer een mail te sturen
+                continue
+
+        email.laatste_email_over_taken = now
+        email.save()
+
+        stuur_taak_email_herinnering(email, aantal_open)
+    # for
 
 # end of file
