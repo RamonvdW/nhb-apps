@@ -282,6 +282,9 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         if not nhblid.bij_vereniging:
             return
 
+        if nhblid.bij_vereniging.geen_wedstrijden:
+            context['geen_wedstrijden'] = True
+
         regio = nhblid.bij_vereniging.regio
 
         functies = (Functie

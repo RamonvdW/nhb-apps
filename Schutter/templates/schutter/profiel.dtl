@@ -248,9 +248,11 @@
     <span>&nbsp;</span>
     <h5>Contactgegevens</h5>
 
-    <p>De regiocompetitieleiders (RCL) regelen alles rond de competities en kan je benaderen als er problemen zijn met de uitslagen.</p>
+    {% if not geen_wedstrijden %}
+        <p>De regiocompetitieleiders (RCL) regelen alles rond de competities en kan je benaderen als er problemen zijn met de uitslagen.</p>
 
-    <p>De wedstrijdleiding van jouw vereniging is er voor vragen over wedstrijden en de competitie, zoals waar je heen moet.</p>
+        <p>De wedstrijdleiding van jouw vereniging is er voor vragen over wedstrijden en de competitie, zoals waar je heen moet.</p>
+    {% endif %}
 
     <table class="white">
         <thead>
@@ -261,71 +263,73 @@
             </tr>
         </thead>
 
-        <!-- RCL Indoor -->
-        <tr>
-            <td>
-                {% for naam in rcl18_namen %}
-                    {% if not forloop.first %}<br>{% endif %}
-                    <span>{{ naam }}</span>
-                {% empty %}
-                    <i>Onbekend</i>
-                {% endfor %}
-            </td>
+        {% if not geen_wedstrijden %}
+            <!-- RCL Indoor -->
+            <tr>
+                <td>
+                    {% for naam in rcl18_namen %}
+                        {% if not forloop.first %}<br>{% endif %}
+                        <span>{{ naam }}</span>
+                    {% empty %}
+                        <i>Onbekend</i>
+                    {% endfor %}
+                </td>
 
-            <td>RCL Indoor competitie</td>
+                <td>RCL Indoor competitie</td>
 
-            <td>
-                {% if rcl18_email %}
-                    <a class="btn-nhb-blauw" href="mailto:{{ rcl18_email }}">{{ rcl18_email }}</a>
-                {% else %}
-                    <i>Onbekend</i>
-                {% endif %}
-            </td>
-        </tr>
+                <td>
+                    {% if rcl18_email %}
+                        <a class="btn-nhb-blauw" href="mailto:{{ rcl18_email }}">{{ rcl18_email }}</a>
+                    {% else %}
+                        <i>Onbekend</i>
+                    {% endif %}
+                </td>
+            </tr>
 
-        <!-- RCL 25m1pijl -->
-        <tr>
-            <td>
-                {% for naam in rcl25_namen %}
-                    {% if not forloop.first %}<br>{% endif %}
-                    <span>{{ naam }}</span>
-                {% empty %}
-                    <i>Onbekend</i>
-                {% endfor %}
-            </td>
+            <!-- RCL 25m1pijl -->
+            <tr>
+                <td>
+                    {% for naam in rcl25_namen %}
+                        {% if not forloop.first %}<br>{% endif %}
+                        <span>{{ naam }}</span>
+                    {% empty %}
+                        <i>Onbekend</i>
+                    {% endfor %}
+                </td>
 
-            <td>RCL 25m 1pijl competitie</td>
+                <td>RCL 25m 1pijl competitie</td>
 
-            <td>
-                {% if rcl25_email %}
-                    <a class="btn-nhb-blauw" href="mailto:{{ rcl25_email }}">{{ rcl25_email }}</a>
-                {% else %}
-                    <i>Onbekend</i>
-                {% endif %}
-            </td>
-        </tr>
+                <td>
+                    {% if rcl25_email %}
+                        <a class="btn-nhb-blauw" href="mailto:{{ rcl25_email }}">{{ rcl25_email }}</a>
+                    {% else %}
+                        <i>Onbekend</i>
+                    {% endif %}
+                </td>
+            </tr>
 
-        <!-- HWL -->
-        <tr>
-            <td>
-                {% for naam in hwl_namen %}
-                    {% if not forloop.first %}<br>{% endif %}
-                    <span>{{ naam }}</span>
-                {% empty %}
-                    <i>Onbekend</i>
-                {% endfor %}
-            </td>
+            <!-- HWL -->
+            <tr>
+                <td>
+                    {% for naam in hwl_namen %}
+                        {% if not forloop.first %}<br>{% endif %}
+                        <span>{{ naam }}</span>
+                    {% empty %}
+                        <i>Onbekend</i>
+                    {% endfor %}
+                </td>
 
-            <td>Wedstrijdleiding vereniging</td>
+                <td>Wedstrijdleiding vereniging</td>
 
-            <td>
-                {% if hwl_email %}
-                    <a class="btn-nhb-blauw" href="mailto:{{ hwl_email }}">{{ hwl_email }}</a>
-                {% else %}
-                    <i>Onbekend</i>
-                {% endif %}
-            </td>
-        </tr>
+                <td>
+                    {% if hwl_email %}
+                        <a class="btn-nhb-blauw" href="mailto:{{ hwl_email }}">{{ hwl_email }}</a>
+                    {% else %}
+                        <i>Onbekend</i>
+                    {% endif %}
+                </td>
+            </tr>
+        {% endif %}
 
         <!-- SEC -->
         <tr>

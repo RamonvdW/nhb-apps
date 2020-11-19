@@ -156,11 +156,6 @@ def rol_zet_sessionvars(account, request):
         if account_rechten_is_otp_verified(request) and not show_vhpg:
             if account.is_staff:
                 rollen_vast.append(Rollen.ROL_IT)
-                rollen_vast.append(Rollen.ROL_NONE)      # Gebruiker, want geen NHB lid
-
-            # query is te duur
-            # if account.nhblid_set.count() == 0:
-            #    rollen_vast.append(Rollen.ROL_NONE)      # Gebruiker, want geen NHB lid
 
             if account.is_staff or account.is_BB:
                 rollen_vast.append(Rollen.ROL_BB)
@@ -230,6 +225,10 @@ def rol_zet_sessionvars(account, request):
             # koppeling met NhbLid, dus dit is een (potentiële) Schutter
             rollen_vast.append(Rollen.ROL_SCHUTTER)
             rol = Rollen.ROL_SCHUTTER
+        else:
+            if account.is_staff:
+                # admin maar geen NHB lid koppeling
+                rollen_vast.append(Rollen.ROL_NONE)
 
     request.session[SESSIONVAR_ROL_HUIDIGE] = rol
     request.session[SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK] = None
