@@ -5,6 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import models
+from django.conf import settings
 from django.utils import timezone
 
 
@@ -41,6 +42,12 @@ def mailer_queue_email(to_address, onderwerp, text_body):
     """ Deze functie accepteert het verzoek om een mail te versturen en slaat deze op in de database
         Het feitelijk versturen van de email wordt door een achtergrondprocess gedaan
     """
+
+    # als er een whitelist is, dan moet het e-mailadres er in voorkomen
+    if len(settings.EMAIL_ADDRESS_WHITELIST) > 0:
+        if to_address not in settings.EMAIL_ADDRESS_WHITELIST:
+            return
+
     now = timezone.now()    # in utc
 
     # maak de date: header voor in de mail, in lokale tijdzone
@@ -56,7 +63,6 @@ def mailer_queue_email(to_address, onderwerp, text_body):
     obj.mail_subj = onderwerp
     obj.mail_date = mail_date
     obj.mail_text = text_body
-    obj.laaatste_poging = "-"
     obj.save()
 
 

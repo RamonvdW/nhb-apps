@@ -340,7 +340,6 @@ class ProfielView(UserPassesTestMixin, TemplateView):
             _, _, is_jong, _, _ = get_sessionvars_leeftijdsklassen(self.request)
             context['toon_leeftijdsklassen'] = is_jong
 
-            context['show_voorkeuren'] = True
             context['regiocompetities'] = self._find_regiocompetities(nhblid, voorkeuren, alle_bogen)
             context['gemiddelden'], context['heeft_ags'] = self._find_gemiddelden(nhblid, alle_bogen)
 

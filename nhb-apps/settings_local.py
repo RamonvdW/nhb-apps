@@ -49,6 +49,10 @@ OTP_ISSUER_NAME = "yourdomain.com"
 #POSTMARK_URL = 'https://api.postmarkapp.com/email'
 #POSTMARK_API_KEY = 'postmark private api key'
 
+# users allowed to send to in this test setup
+# if empty, allows sending to anybody
+EMAIL_ADDRESS_WHITELIST = ()
+
 
 # url van het document privacyverklaring
 PRIVACYVERKLARING_URL = 'url to privacy statement html, pdf or googledoc, etc'

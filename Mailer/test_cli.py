@@ -148,7 +148,8 @@ class TestMailerCliBadBase(object):
 @override_settings(MAILGUN_URL='', MAILGUN_API_KEY='',
                    POSTMARK_URL='http://localhost:8123/postmark',
                    POSTMARK_API_KEY='the-api-key',
-                   EMAIL_FROM_ADDRESS='noreply@nhb.test')
+                   EMAIL_FROM_ADDRESS='noreply@nhb.test',
+                   EMAIL_ADDRESS_WHITELIST=())
 class TestMailerCliPostmark(TestMailerCliBase, TestCase):
     pass
 
@@ -156,7 +157,8 @@ class TestMailerCliPostmark(TestMailerCliBase, TestCase):
 @override_settings(POSTMARK_URL='', POSTMARK_API_KEY='',
                    MAILGUN_URL='http://localhost:8123/v3/testdomain2.com/messages',
                    MAILGUN_API_KEY='the-api-key',
-                   EMAIL_FROM_ADDRESS='noreply@nhb.test')
+                   EMAIL_FROM_ADDRESS='noreply@nhb.test',
+                   EMAIL_ADDRESS_WHITELIST=())
 class TestMailerCliMailgun(TestMailerCliBase, TestCase):
     pass
 
@@ -165,7 +167,8 @@ class TestMailerCliMailgun(TestMailerCliBase, TestCase):
 @override_settings(MAILGUN_URL='', MAILGUN_API_KEY='',
                    POSTMARK_URL='http://localhost:9999',
                    POSTMARK_API_KEY='the-api-key',
-                   EMAIL_FROM_ADDRESS='noreply@nhb.test')
+                   EMAIL_FROM_ADDRESS='noreply@nhb.test',
+                   EMAIL_ADDRESS_WHITELIST=())
 class TestMailerCliBadPostmark(TestMailerCliBadBase, TestCase):
     pass
 
@@ -173,7 +176,8 @@ class TestMailerCliBadPostmark(TestMailerCliBadBase, TestCase):
 @override_settings(POSTMARK_URL='', POSTMARK_API_KEY='',
                    MAILGUN_URL='http://localhost:9999',
                    MAILGUN_API_KEY='the-api-key',
-                   EMAIL_FROM_ADDRESS='noreply@nhb.test')
+                   EMAIL_FROM_ADDRESS='noreply@nhb.test',
+                   EMAIL_ADDRESS_WHITELIST=())
 class TestMailerCliBadMailgun(TestMailerCliBadBase, TestCase):
     pass
 
