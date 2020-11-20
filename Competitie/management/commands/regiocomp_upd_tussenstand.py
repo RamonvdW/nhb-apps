@@ -63,6 +63,35 @@ class Command(BaseCommand):
             obj.save()
         # for
 
+    def _verwerk_overstappers_rk(self, comp):
+        # ondersteuning om een overschrijving af te ronden
+        # schutters die eerder geen vereniging hebben en wel een vereniging
+        objs = (KampioenschapSchutterBoog
+                .objects
+                .select_related('deelcompetitie__nhb_rayon',
+                                'schutterboog__nhblid',
+                                'schutterboog__nhblid__bij_vereniging',
+                                'schutterboog__nhblid__bij_vereniging__regio__rayon')
+                .filter(bij_vereniging__isnull=True))
+        for obj in objs:
+            # schutter had geen vereniging; nu wel
+            # alleen overnemen als de nieuwe vereniging in het juiste rayon zit
+            ver = obj.schutterboog.nhblid.bij_vereniging
+            if ver:
+                if ver.regio.rayon.rayon_nr != obj.deelcompetitie.nhb_rayon.rayon_nr:
+                    self.stdout.write('[WARNING] Verwerk overstap naar ander rayon niet mogelijk voor %s in RK voor rayon %s: GEEN VERENIGING --> [%s] %s' % (
+                                      obj.deelcompetitie.nhb_rayon.rayon_nr,
+                                      obj.nhb_nr,
+                                      ver.regio.regio_nr, ver))
+                else:
+                    # pas de 'bij_vereniging' aan
+                    self.stdout.write('[INFO] Verwerk overstap %s: GEEN VERENIGING --> [%s] %s' % (
+                                      obj.nhb_nr,
+                                      ver.regio.regio_nr, ver))
+                    obj.bij_vereniging = ver
+                    obj.save()
+        # for
+
     def _verwerk_uitstappers_regio(self, comp):
         objs = (RegioCompetitieSchutterBoog
                 .objects
@@ -102,6 +131,8 @@ class Command(BaseCommand):
             if comp.fase <= 'F':        # Regiocompetitie
                 self._verwerk_overstappers_regio(comp)
                 self._verwerk_uitstappers_regio(comp)
+            elif comp.fase == 'K':      # RK
+                self._verwerk_overstappers_rk(comp)
         # for
 
     def _prep_caches(self):
