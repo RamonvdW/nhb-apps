@@ -66,7 +66,8 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/wijzig-email.dtl', 'plein/site_layout.dtl'))
 
-        resp = self.client.post(url, {'email': 'nieuweemail@test.com'})
+        with self.settings(EMAIL_ADDRESS_WHITELIST=()):
+            resp = self.client.post(url, {'email': 'nieuweemail@test.com'})
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/bevestig.dtl', 'plein/site_layout.dtl'))
@@ -252,7 +253,8 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
         self.assertEqual(SiteTijdelijkeUrl.objects.count(), 0)
 
         # eerste invoer
-        resp = self.client.post(url, {'email': 'nieuweemail1@test.com'})
+        with self.settings(EMAIL_ADDRESS_WHITELIST=()):
+            resp = self.client.post(url, {'email': 'nieuweemail1@test.com'})
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/bevestig.dtl', 'plein/site_layout.dtl'))
@@ -271,7 +273,8 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
         url1 = text[pos:pos+12+32+1]         # 32 = code
 
         # tweede invoer
-        resp = self.client.post(url, {'email': 'nieuweemail2@test.com'})
+        with self.settings(EMAIL_ADDRESS_WHITELIST=()):
+            resp = self.client.post(url, {'email': 'nieuweemail2@test.com'})
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/bevestig.dtl', 'plein/site_layout.dtl'))

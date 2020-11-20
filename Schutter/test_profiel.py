@@ -352,7 +352,5 @@ class TestSchutterProfiel(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('schutter/profiel.dtl', 'plein/site_layout.dtl'))
         self.assertNotContains(resp, 'Regiocompetities')
-        urls = self.extract_all_urls(resp)
-        self.assertFalse(self.url_voorkeuren in urls)
 
 # end of file

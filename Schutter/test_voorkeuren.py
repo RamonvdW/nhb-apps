@@ -227,7 +227,8 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
         # mag geen bogen instellen
         # helemaal geen voorkeuren, om precies te zijn
         resp = self.client.get(self.url_voorkeuren)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assertEqual(0, SchutterBoog.objects.filter(nhblid=self.nhblid1).count())
 
     def test_wijzig_wachtwoord(self):
         # zelfde test als in Account.test_wachtwoord

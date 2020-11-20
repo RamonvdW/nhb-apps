@@ -86,7 +86,8 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
         self.assertEqual(SiteTijdelijkeUrl.objects.count(), 0)
 
         # gebruiker moet valide e-mailadres invoeren via POST
-        resp = self.client.post(self.url_vergeten, {'email': 'normaal@test.com'})
+        with self.settings(EMAIL_ADDRESS_WHITELIST=()):
+            resp = self.client.post(self.url_vergeten, {'email': 'normaal@test.com'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/email_wachtwoord-vergeten.dtl', 'plein/site_layout.dtl'))
@@ -143,7 +144,8 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
         self.assertEqual(SiteTijdelijkeUrl.objects.count(), 0)
 
         # gebruiker moet valide e-mailadres invoeren via POST
-        resp = self.client.post(self.url_vergeten, {'email': 'normaal@test.com'})
+        with self.settings(EMAIL_ADDRESS_WHITELIST=()):
+            resp = self.client.post(self.url_vergeten, {'email': 'normaal@test.com'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/email_wachtwoord-vergeten.dtl', 'plein/site_layout.dtl'))
