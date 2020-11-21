@@ -46,10 +46,14 @@
             </div>
         </div>
 
-
     {% else %}
 
         <p>Hieronder tonen we de vastgestelde schutters lijst voor elk van de {{ aantal_klassen }} wedstrijdklassen van de Rayonkampioenschappen.</p>
+
+        <p>
+            <a class="btn-small btn-nhb-blauw" href="{{ wiki_rk_schutters }}" target="_blank" rel="noopener noreferrer">
+                <i class="material-icons-round white-text">help_outline</i></a>
+        </p>
 
         <p>&nbsp;</p>
         <p>Deelname-status voor de geselecteerde schutters + eerste acht reserveschutters:</p>

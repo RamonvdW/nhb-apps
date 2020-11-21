@@ -334,6 +334,7 @@ HANDLEIDING_INTRO_NIEUWE_BEHEERDERS = 'Intro_nieuwe_beheerders'
 HANDLEIDING_SCHUTTERBOOG = 'Schutter-boog'
 HANDLEIDING_INSCHRIJFMETHODES = 'Inschrijfmethodes_Regiocompetitie'
 HANDLEIDING_CLUSTERS = 'Clusters'
+HANDLEIDING_RK_SCHUTTERS = 'RK_schutters'
 
 HANDLEIDING_PAGINAS = [
     HANDLEIDING_TOP,
@@ -351,6 +352,7 @@ HANDLEIDING_PAGINAS = [
     HANDLEIDING_PLANNING_REGIO,
     HANDLEIDING_INSCHRIJFMETHODES,
     HANDLEIDING_CLUSTERS,
+    HANDLEIDING_RK_SCHUTTERS,
     # pagina's van de handleiding die intern gerefereerd worden
     'Tips_voor_wiki_gebruik',
     'Handleiding_CWZ',

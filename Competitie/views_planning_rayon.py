@@ -5,6 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db.models import F
+from django.conf import settings
 from django.http import HttpResponseRedirect
 from django.urls import Resolver404, reverse
 from django.views.generic import TemplateView
@@ -611,6 +612,8 @@ class LijstRkSchuttersView(UserPassesTestMixin, TemplateView):
             context['aantal_bevestigd'] = aantal_bevestigd
             context['aantal_attentie'] = aantal_attentie
 
+        context['wiki_rk_schutters'] = settings.WIKI_URL + '/' + settings.HANDLEIDING_RK_SCHUTTERS
+
         menu_dynamics(self.request, context, actief='competitie')
         return context
 
@@ -840,6 +843,8 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
                                         kwargs={'deelcomp_pk': deelcomp_rk.pk})
 
         context['url_terug'] = reverse('Competitie:overzicht')
+
+        context['wiki_rk_schutters'] = settings.WIKI_URL + '/' + settings.HANDLEIDING_RK_SCHUTTERS
 
         menu_dynamics(self.request, context, actief='competitie')
         return context

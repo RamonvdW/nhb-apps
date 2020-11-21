@@ -14,6 +14,11 @@
 
     <p>Op deze pagina kan je 'de cut' instellen voor elke wedstrijdklasse van jouw RK. Hiermee begrens je het aantal deelnemers dat uitgenodigd wordt.</p>
 
+    <p>
+        <a class="btn-small btn-nhb-blauw" href="{{ wiki_rk_schutters }}" target="_blank" rel="noopener noreferrer">
+            <i class="material-icons-round white-text">help_outline</i></a>
+    </p>
+
     <form action="{{ url_opslaan }}" method="post">
         {% csrf_token %}
 
