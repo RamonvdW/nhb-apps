@@ -24,7 +24,9 @@
 
     <!-- toon inschrijvingen regiocompetitie -->
     {% for comp in competities %}
-        {% include 'plein/card.dtl' with title="Inschrijvingen "|add:comp.afstand|add:"m" text="Lijst met schutters ingeschreven voor de "|add:comp.beschrijving|add:"." icon="receipt" url=comp.url_inschrijvingen %}
+        {% if comp.url_inschrijvingen %}
+            {% include 'plein/card.dtl' with title="Inschrijvingen "|add:comp.afstand|add:"m" text="Lijst met schutters ingeschreven voor de "|add:comp.beschrijving|add:"." icon="receipt" url=comp.url_inschrijvingen %}
+        {% endif %}
     {% endfor %}
 
     <!-- planning regiocompetities -->

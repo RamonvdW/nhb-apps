@@ -248,6 +248,7 @@ class CompetitieOverzichtView(View):
         context['planning_deelcomp'] = (DeelCompetitie
                                         .objects
                                         .filter(laag=LAAG_REGIO,
+                                                is_afgesloten=False,
                                                 nhb_regio=functie_nu.nhb_ver.regio))
 
         return context, TEMPLATE_COMPETITIE_OVERZICHT_HWL
