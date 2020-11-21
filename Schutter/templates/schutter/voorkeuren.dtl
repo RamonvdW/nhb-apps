@@ -108,7 +108,7 @@
                     <td>
                         <label>
                             <input type="checkbox" class="filled-in" name="optout_nieuwe_taak"{% if email.optout_nieuwe_taak %} checked{% endif %}>
-                            <span class="black-text">Stuur e-mail voor nieuwe taak (maximaal &eacute;&eacute;n e-mail per dag)</span>
+                            <span class="black-text">Stuur e-mail zodra er een nieuwe taak voor mij is aangemaakt</span>
                         </label>
                     </td>
                 </tr>
@@ -117,7 +117,7 @@
                     <td>
                         <label>
                             <input type="checkbox" class="filled-in" name="optout_herinnering_taken"{% if email.optout_herinnering_taken %} checked{% endif %}>
-                            <span class="black-text">Stuur e-mail voor herinnering taken (maximaal &eacute;&eacute;n e-mail per dag)</span>
+                            <span class="black-text">Stuur e-mail om te herinneren aan taken (maximaal &eacute;&eacute;n e-mail per week)</span>
                         </label>
                     </td>
                 </tr>

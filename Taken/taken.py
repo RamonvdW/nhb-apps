@@ -92,14 +92,7 @@ def maak_taak(**kwargs):
     email = taak.toegekend_aan.accountemail_set.all()[0]
 
     if not email.optout_nieuwe_taak:
-        now = timezone.now()
-
-        if email.laatste_email_over_taken:
-            if email.laatste_email_over_taken + timedelta(days=1) > now:
-                # te vroeg om weer een mail te sturen
-                return
-
-        email.laatste_email_over_taken = now
+        email.laatste_email_over_taken = timezone.now()
         email.save()
 
         aantal_open = (Taak
@@ -113,7 +106,7 @@ def maak_taak(**kwargs):
 
 def herinner_aan_taken():
     """ Deze functie wordt aangeroepen vanuit de stuur_emails cli om herinneringsmails
-        te maken voor openstaande taken.
+        te maken voor openstaande taken (elke 15 min dus).
     """
 
     taken = dict()      # [toegekend_aan] = aantal
@@ -135,7 +128,7 @@ def herinner_aan_taken():
             continue
 
         if email.laatste_email_over_taken:
-            if email.laatste_email_over_taken + timedelta(days=1) > now:
+            if email.laatste_email_over_taken + timedelta(days=7) > now:
                 # te vroeg om weer een mail te sturen
                 continue
 

@@ -94,7 +94,7 @@ class TestTakenTaken(E2EHelpers, TestCase):
         taak.is_afgerond = True
         self.assertTrue(str(taak) != "")
 
-        # maak nog een taak en controleer dat er geen email uit gaat
+        # maak nog een taak en controleer dat er weer meteen een email uit gaat
         with self.settings(EMAIL_ADDRESS_WHITELIST=()):
             taken.maak_taak(toegekend_aan=self.account_normaal,
                             deadline=deadline,
@@ -104,36 +104,18 @@ class TestTakenTaken(E2EHelpers, TestCase):
                             log="Log 2")
 
         self.assertEqual(2, Taak.objects.count())
-        self.assertEqual(1, MailQueue.objects.count())
-
-        # nog een taak als het lang geleden is dat we een herinnering stuurden
-        email = self.account_normaal.accountemail_set.all()[0]
-        email.laatste_email_over_taken -= datetime.timedelta(days=30)
-        email.save()
-
-        # maak nog een taak en controleer dat er geen email uit gaat
-        with self.settings(EMAIL_ADDRESS_WHITELIST=()):
-            taken.maak_taak(toegekend_aan=self.account_normaal,
-                            deadline=deadline,
-                            aangemaakt_door=None,
-                            beschrijving="Tekst 3",
-                            handleiding_pagina="Pagina 3",
-                            log="Log 3")
-
-        self.assertEqual(3, Taak.objects.count())
         self.assertEqual(2, MailQueue.objects.count())
 
     def test_maak_taak_optout(self):
         self.assertEqual(0, Taak.objects.count())
         self.assertEqual(0, MailQueue.objects.count())
 
-        email = self.account_normaal.accountemail_set.all()[0]
-        email.optout_nieuwe_taak = True
-        email.optout_herinnering_taken = True
-        email.save()
-
         deadline = datetime.date(2020, 12, 13)
 
+        # maak een taak aan en controleer dat er geen mail uit gaat, want: opt-out
+        email = self.account_normaal.accountemail_set.all()[0]
+        email.optout_nieuwe_taak = True
+        email.save()
         with self.settings(EMAIL_ADDRESS_WHITELIST=()):
             taken.maak_taak(toegekend_aan=self.account_normaal,
                             deadline=deadline,
@@ -145,6 +127,7 @@ class TestTakenTaken(E2EHelpers, TestCase):
         self.assertEqual(1, Taak.objects.count())
         self.assertEqual(0, MailQueue.objects.count())
 
+        # controleer dat alle velden van de taak goed ingevuld zijn
         taak = Taak.objects.all()[0]
         self.assertFalse(taak.is_afgerond)
         self.assertEqual(taak.toegekend_aan, self.account_normaal)
@@ -155,6 +138,10 @@ class TestTakenTaken(E2EHelpers, TestCase):
         self.assertEqual(taak.log, "Log")
         self.assertEqual(taak.deelcompetitie, None)
 
+        # controleer dat de herinnering geen mail stuurt na opt-out
+        email.optout_nieuwe_taak = False
+        email.optout_herinnering_taken = True
+        email.save()
         taken.herinner_aan_taken()
         self.assertEqual(0, MailQueue.objects.count())
 
@@ -192,8 +179,16 @@ class TestTakenTaken(E2EHelpers, TestCase):
 
         self.assertEqual(1, MailQueue.objects.count())
 
-        email = self.account_normaal.accountemail_set.all()[0]
-        email.laatste_email_over_taken = timezone.now() - datetime.timedelta(days=30)
+        # controleer dat de herinnering pas gestuurd worden na 7 dagen
+        email.laatste_email_over_taken = timezone.now() - datetime.timedelta(days=7) + datetime.timedelta(hours=1)
+        email.save()
+
+        with self.settings(EMAIL_ADDRESS_WHITELIST=()):
+            taken.herinner_aan_taken()
+
+        self.assertEqual(1, MailQueue.objects.count())
+
+        email.laatste_email_over_taken = timezone.now() - datetime.timedelta(days=7) - datetime.timedelta(hours=1)
         email.save()
 
         with self.settings(EMAIL_ADDRESS_WHITELIST=()):
