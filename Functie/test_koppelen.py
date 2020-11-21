@@ -97,7 +97,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.nhblid2 = lid
 
         self.url_overzicht = '/functie/overzicht/'
-        self.url_wijzig = '/functie/wijzig/'
+        self.url_wijzig = '/functie/wijzig/%s/'     # functie_pk
         self.url_activeer_functie = '/functie/activeer-functie/%s/'
         self.url_activeer_rol = '/functie/activeer-rol/%s/'
 
@@ -118,7 +118,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.nhblid2.save()
 
         # probeer een niet-bestaande functie
-        resp = self.client.get(self.url_wijzig + '999999/')
+        resp = self.client.get(self.url_wijzig % '999999')
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
 
         # haal het wijzig scherm op voor de BKO
@@ -440,5 +440,14 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assertNotContains(resp, 'regio 112')
+
+    def test_rcl_bad_buiten_regio(self):
+        # probeer een HWL te koppelen van een vereniging buiten de regio
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_wissel_naar_functie(self.functie_rcl101)
+
+        url = self.url_wijzig % self.functie_hwl.pk
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 404)     # 404 = not allowed
 
 # end of file
