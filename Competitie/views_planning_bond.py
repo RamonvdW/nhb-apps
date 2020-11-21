@@ -14,13 +14,74 @@ from Logboek.models import schrijf_in_logboek
 from Plein.menu import menu_dynamics
 from Taken.taken import maak_taak
 from .models import (Competitie,
-                     LAAG_REGIO, LAAG_RK, LAAG_BK, DeelCompetitie,
+                     LAAG_REGIO, LAAG_RK, LAAG_BK, DeelCompetitie, DeelcompetitieKlasseLimiet,
                      RegioCompetitieSchutterBoog, KampioenschapSchutterBoog)
 
 
 TEMPLATE_COMPETITIE_DOORZETTEN_NAAR_RK = 'competitie/bko-doorzetten-naar-rk.dtl'
 TEMPLATE_COMPETITIE_DOORZETTEN_NAAR_BK = 'competitie/bko-doorzetten-naar-bk.dtl'
 TEMPLATE_COMPETITIE_AFSLUITEN = 'competitie/bko-afsluiten-competitie.dtl'
+
+
+def kampioenschap_bepaal_deelnemers(deelcomp, klasse):
+    """ Bepaal de top-X deelnemers voor een klasse van een kampioenschap:
+            De niet-afgemelde kampioenen
+            aangevuld met de niet-afgemelde schutters met hoogste gemiddelde
+            gesorteerde op gemiddelde
+
+        Deze functie wordt gebruikt na het vaststellen van de initiele deelnemers
+        en na het aanpassen van de cut.
+    """
+
+    try:
+        limiet = (DeelcompetitieKlasseLimiet
+                  .objects
+                  .select_related('klasse')
+                  .get(deelcompetitie=deelcomp,
+                       klasse=klasse)).limiet
+    except DeelcompetitieKlasseLimiet.DoesNotExist:
+        limiet = 24
+
+    # kampioenen mogen altijd meedoen, ook als de cut omlaag gaat
+    kampioenen = (KampioenschapSchutterBoog
+                  .objects
+                  .exclude(kampioen_label='')
+                  .filter(deelcompetitie=deelcomp,
+                          klasse=klasse))
+
+    afgemeld = kampioenen.filter(is_afgemeld=True).count()
+
+    # aanvullen met schutters tot aan de cut
+    objs = (KampioenschapSchutterBoog
+            .objects
+            .filter(deelcompetitie=deelcomp,
+                    klasse=klasse,
+                    kampioen_label='',      # kampioenen hebben we al
+                    is_afgemeld=False,
+                    volgorde__lte=limiet - len(kampioenen) + afgemeld))
+
+    # voeg deze twee lijsten samen
+    lijst = list()
+    for obj in objs:
+        tup = (obj.gemiddelde, obj)
+        lijst.append(tup)
+    # for
+
+    for obj in kampioenen:
+        tup = (obj.gemiddelde, obj)
+        lijst.append(tup)
+    # for
+
+    lijst.sort(reverse=True)
+
+    # opnieuw sorteren en volgorde uitdelen voor deze schutters
+    volgorde = 1
+    for _, obj in lijst:
+        obj.volgorde = volgorde
+        obj.save()
+        if not obj.is_afgemeld:
+            volgorde += 1
+    # for
 
 
 class DoorzettenNaarRKView(UserPassesTestMixin, TemplateView):
@@ -92,8 +153,8 @@ class DoorzettenNaarRKView(UserPassesTestMixin, TemplateView):
         return context
 
     def post(self, request, *args, **kwargs):
-        """ Deze functie wordt aangeroepen als de knop 'Regel toevoegen' gebruikt wordt
-            in de RK planning, om een nieuwe wedstrijd toe te voegen.
+        """ Deze functie wordt aangeroepen als de knop 'Doorzetten' gebruikt wordt
+            om de competitie door te zetten naar de RK fase
         """
         try:
             comp_pk = int(kwargs['comp_pk'][:6])  # afkappen geeft beveiliging
@@ -119,6 +180,7 @@ class DoorzettenNaarRKView(UserPassesTestMixin, TemplateView):
         return HttpResponseRedirect(reverse('Competitie:overzicht'))
 
     def _maak_deelnemerslijst_rks(self, comp):
+
         for deelcomp_rk in (DeelCompetitie
                             .objects
                             .select_related('nhb_rayon')

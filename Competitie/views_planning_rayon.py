@@ -4,20 +4,19 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+from django.db.models import F
 from django.http import HttpResponseRedirect
 from django.urls import Resolver404, reverse
-from django.utils import timezone
-from django.views.generic import TemplateView, View
+from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from BasisTypen.models import IndivWedstrijdklasse
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
-from Logboek.models import schrijf_in_logboek
-from NhbStructuur.models import NhbCluster, NhbVereniging
+from NhbStructuur.models import NhbVereniging
 from Plein.menu import menu_dynamics
-from Taken.models import Taak
 from Wedstrijden.models import Wedstrijd, WedstrijdenPlan, WedstrijdLocatie
+from Competitie.views_planning_bond import kampioenschap_bepaal_deelnemers
 from .models import (LAAG_REGIO, LAAG_RK, LAAG_BK, DeelCompetitie, DeelcompetitieRonde,
-                     CompetitieKlasse, RegioCompetitieSchutterBoog, KampioenschapSchutterBoog)
+                     CompetitieKlasse, DeelcompetitieKlasseLimiet,
+                     KampioenschapSchutterBoog)
 from types import SimpleNamespace
 import datetime
 
@@ -26,6 +25,8 @@ TEMPLATE_COMPETITIE_PLANNING_RAYON = 'competitie/planning-rayon.dtl'
 TEMPLATE_COMPETITIE_WIJZIG_WEDSTRIJD_RAYON = 'competitie/wijzig-wedstrijd-rk.dtl'
 TEMPLATE_COMPETITIE_LIJST_RK = 'competitie/lijst-rk.dtl'
 TEMPLATE_COMPETITIE_WIJZIG_STATUS_RK_SCHUTTER = 'competitie/wijzig-status-rk-deelnemer.dtl'
+TEMPLATE_COMPETITIE_WIJZIG_LIMIETEN_RK = 'competitie/limieten-rk.dtl'
+
 
 # python strftime: 0=sunday, 6=saturday
 # wij rekenen het verschil ten opzicht van maandag in de week
@@ -505,19 +506,6 @@ class LijstRkSchuttersView(UserPassesTestMixin, TemplateView):
 
         return alles_afgesloten, regio_deelcomps
 
-    def _get_schutters_rk(self, deelcomp_rk):
-        deelnemers = (KampioenschapSchutterBoog
-                      .objects
-                      .select_related('deelcompetitie',
-                                      'klasse__indiv',
-                                      'schutterboog__nhblid',
-                                      'bij_vereniging')
-                      .filter(deelcompetitie=deelcomp_rk)
-                      .order_by('klasse__indiv__volgorde',  # groepeer per klasse
-                                '-kampioen_label',          # hoogste regio nummer boven (anders leeg boven)
-                                '-gemiddelde'))             # aflopend gemiddelde
-        return deelnemers
-
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
@@ -553,24 +541,44 @@ class LijstRkSchuttersView(UserPassesTestMixin, TemplateView):
             deelnemers = list()
         else:
             # situatie 3)
-            deelnemers = self._get_schutters_rk(deelcomp_rk)
+            deelnemers = (KampioenschapSchutterBoog
+                          .objects
+                          .select_related('deelcompetitie',
+                                          'klasse__indiv',
+                                          'schutterboog__nhblid',
+                                          'bij_vereniging')
+                          .filter(deelcompetitie=deelcomp_rk,
+                                  volgorde__lte=48)             # max 48 schutters per klasse tonen
+                          .order_by('klasse__indiv__volgorde',  # groepeer per klasse
+                                    'volgorde',                 # oplopend op volgorde (dubbelen mogelijk)
+                                    '-gemiddelde'))             # aflopend op gemiddelde
 
-        klasse = -1
-        rank = 0
+        wkl2limiet = dict()    # [pk] = aantal
+        for limiet in (DeelcompetitieKlasseLimiet
+                       .objects
+                       .select_related('klasse')
+                       .filter(deelcompetitie=deelcomp_rk)):
+            wkl2limiet[limiet.klasse.pk] = limiet.limiet
+        # for
+
         aantal_afgemeld = 0
         aantal_bevestigd = 0
         aantal_onbekend = 0
         aantal_klassen = 0
         aantal_attentie = 0
-        for deelnemer in deelnemers:
 
+        klasse = -1
+        for deelnemer in deelnemers:
             deelnemer.break_klasse = (klasse != deelnemer.klasse.indiv.volgorde)
             if deelnemer.break_klasse:
                 if klasse != -1:
                     aantal_klassen += 1
                 deelnemer.klasse_str = deelnemer.klasse.indiv.beschrijving
                 klasse = deelnemer.klasse.indiv.volgorde
-                rank = 0
+                try:
+                    limiet = wkl2limiet[deelnemer.klasse.pk]
+                except KeyError:
+                    limiet = 24
 
             lid = deelnemer.schutterboog.nhblid
             deelnemer.naam_str = "[%s] %s" % (lid.nhb_nr, lid.volledige_naam())
@@ -581,12 +589,7 @@ class LijstRkSchuttersView(UserPassesTestMixin, TemplateView):
             deelnemer.url_wijzig = reverse('Competitie:wijzig-status-rk-deelnemer',
                                            kwargs={'deelnemer_pk': deelnemer.pk})
 
-            deelnemer.rank = 0
-            if not deelnemer.is_afgemeld:
-                rank += 1
-                deelnemer.rank = rank
-
-            if rank > 24:
+            if deelnemer.volgorde > limiet:
                 deelnemer.is_reserve = True
 
             # tel het aantal deelnemers
@@ -612,7 +615,7 @@ class LijstRkSchuttersView(UserPassesTestMixin, TemplateView):
         return context
 
 
-class WijzigStatusRkSchutterView(TemplateView):
+class WijzigStatusRkSchutterView(UserPassesTestMixin, TemplateView):
 
     """ Deze view laat de RKO de status van een RK schutters aanpassen """
 
@@ -674,7 +677,9 @@ class WijzigStatusRkSchutterView(TemplateView):
             deelnemer_pk = int(kwargs['deelnemer_pk'][:6])  # afkappen geeft beveiliging
             deelnemer = (KampioenschapSchutterBoog
                          .objects
-                         .select_related('deelcompetitie__competitie')
+                         .select_related('klasse',
+                                         'deelcompetitie',
+                                         'deelcompetitie__competitie')
                          .get(pk=deelnemer_pk))
         except (ValueError, KampioenschapSchutterBoog.DoesNotExist):
             raise Resolver404()
@@ -688,17 +693,242 @@ class WijzigStatusRkSchutterView(TemplateView):
 
         if bevestig == "1":
             if not deelnemer.deelname_bevestigd:
-                deelnemer.deelname_bevestigd = True
-                deelnemer.is_afgemeld = False
-                deelnemer.save()
+                if deelnemer.is_afgemeld:
+                    kampioenschap_deelnemer_opnieuw_aanmelden(deelnemer)
+                else:
+                    deelnemer.deelname_bevestigd = True
+                    deelnemer.is_afgemeld = False
+                    deelnemer.save()
         elif afmelden == "1":
             if not deelnemer.is_afgemeld:
-                deelnemer.deelname_bevestigd = False
-                deelnemer.is_afgemeld = True
-                deelnemer.save()
+                kampioenschap_deelnemer_afmelden(deelnemer)
 
         return HttpResponseRedirect(reverse('Competitie:lijst-rk',
                                             kwargs={'deelcomp_pk': deelnemer.deelcompetitie.pk}))
+
+
+def kampioenschap_deelnemer_opnieuw_aanmelden(deelnemer):
+    # meld de deelnemer opnieuw aan door hem bij de reserves te zetten
+
+    # bepaal de limiet
+    try:
+        limiet = DeelcompetitieKlasseLimiet.objects.get(deelcompetitie=deelnemer.deelcompetitie,
+                                                        klasse=deelnemer.klasse).limiet
+    except DeelcompetitieKlasseLimiet.DoesNotExist:
+        limiet = 24
+
+    # zoek uit op welke plek deze schutter binnen gaat komen
+    # pak alle schutters in dezelfde klasse, met een lager gemiddelde
+    objs = (KampioenschapSchutterBoog
+            .objects
+            .filter(deelcompetitie=deelnemer.deelcompetitie,
+                    klasse=deelnemer.klasse,
+                    volgorde__gt=limiet,
+                    is_afgemeld=False,
+                    gemiddelde__lt=deelnemer.gemiddelde)
+            .order_by('-gemiddelde'))
+
+    deelnemer.deelname_bevestigd = True
+    deelnemer.is_afgemeld = False
+
+    if len(objs) > 0:
+        deelnemer.volgorde = objs[0].volgorde
+
+        # schuif al deze schutters een plekje omlaag
+        objs.update(volgorde=F('volgorde') + 1)
+    else:
+        # bepaal het eerstvolgende nummer
+        count = (KampioenschapSchutterBoog
+                 .objects
+                 .filter(deelcompetitie=deelnemer.deelcompetitie,
+                         klasse=deelnemer.klasse)
+                 .count())
+        deelnemer.volgorde = count
+
+    deelnemer.save()
+
+
+def kampioenschap_deelnemer_afmelden(deelnemer):
+
+    # bepaal de echte limiet
+    try:
+        limiet = DeelcompetitieKlasseLimiet.objects.get(deelcompetitie=deelnemer.deelcompetitie,
+                                                        klasse=deelnemer.klasse).limiet
+    except DeelcompetitieKlasseLimiet.DoesNotExist:
+        limiet = 24
+
+    # schuif iedereen met een hoger volgnummer een plekje omhoog
+    (KampioenschapSchutterBoog
+     .objects
+     .filter(deelcompetitie=deelnemer.deelcompetitie,
+             klasse=deelnemer.klasse,
+             volgorde__gt=deelnemer.volgorde)
+     ).update(volgorde=F('volgorde') - 1)
+
+    deelnemer.deelname_bevestigd = False
+    deelnemer.is_afgemeld = True
+    # deelnemer.volgorde = 0     # volgorde behouden voor tonen afgemelde schutters
+    deelnemer.save()
+
+    # als de schutter die zich afmeld boven de cut zit
+    # dan komt de eerste reserve schutter in de lijst
+    # zet deze schutter gesorteerd op zijn aanvangsgemiddelde in de lijst
+    if deelnemer.volgorde <= limiet:
+        kampioenschap_bepaal_deelnemers(deelnemer.deelcompetitie, deelnemer.klasse)
+
+
+class RayonLimietenView(UserPassesTestMixin, TemplateView):
+
+    """ Deze view laat de RKO de status van een RK schutters aanpassen """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_COMPETITIE_WIJZIG_LIMIETEN_RK
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        rol_nu = rol_get_huidige(self.request)
+        return rol_nu == Rollen.ROL_RKO
+
+    def handle_no_permission(self):
+        """ gebruiker heeft geen toegang --> redirect naar het plein """
+        return HttpResponseRedirect(reverse('Plein:plein'))
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        try:
+            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen geeft beveiliging
+            deelcomp_rk = (DeelCompetitie
+                           .objects
+                           .select_related('competitie')
+                           .get(pk=deelcomp_pk,
+                                laag=LAAG_RK))
+        except (ValueError, DeelCompetitie.DoesNotExist):
+            raise Resolver404()
+
+        # controleer dat de juiste RKO aan de knoppen zit
+        _, functie_nu = rol_get_huidige_functie(self.request)
+        if functie_nu != deelcomp_rk.functie:
+            raise Resolver404()     # niet de juiste RKO
+
+        context['wkl'] = wkl = (CompetitieKlasse
+                                .objects
+                                .filter(competitie=deelcomp_rk.competitie,
+                                        indiv__is_onbekend=False,
+                                        indiv__niet_voor_rk_bk=False,
+                                        team=None)
+                                .select_related('indiv__boogtype')
+                                .order_by('indiv__volgorde'))
+
+        pk2wkl = dict()
+        for obj in wkl:
+            obj.limiet = 24     # default limiet
+            obj.sel = 'sel_%s' % obj.pk
+            pk2wkl[obj.pk] = obj
+        # for
+
+        for limiet in (DeelcompetitieKlasseLimiet
+                       .objects
+                       .filter(deelcompetitie=deelcomp_rk.pk,
+                               klasse__in=pk2wkl.keys())):
+            wkl = pk2wkl[limiet.klasse.pk]
+            wkl.limiet = limiet.limiet
+        # for
+
+        context['url_wijzig'] = reverse('Competitie:rayon-limieten',
+                                        kwargs={'deelcomp_pk': deelcomp_rk.pk})
+
+        context['url_terug'] = reverse('Competitie:overzicht')
+
+        menu_dynamics(self.request, context, actief='competitie')
+        return context
+
+    def post(self, request, *args, **kwargs):
+        """ wordt aangeroepen als de gebruik op de knop OPSLAAN druk """
+
+        try:
+            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen geeft beveiliging
+            deelcomp_rk = (DeelCompetitie
+                           .objects
+                           .select_related('competitie')
+                           .get(pk=deelcomp_pk,
+                                laag=LAAG_RK))
+        except (ValueError, DeelCompetitie.DoesNotExist):
+            raise Resolver404()
+
+        # controleer dat de juiste RKO aan de knoppen zit
+        _, functie_nu = rol_get_huidige_functie(self.request)
+        if functie_nu != deelcomp_rk.functie:
+            raise Resolver404()     # niet de juiste RKO
+
+        pk2wkl = dict()
+        pk2keuze = dict()
+
+        for wkl in (CompetitieKlasse
+                    .objects
+                    .filter(competitie=deelcomp_rk.competitie,
+                            indiv__is_onbekend=False,
+                            indiv__niet_voor_rk_bk=False,
+                            team=None)):
+
+            sel = 'sel_%s' % wkl.pk
+            keuze = request.POST.get(sel, None)
+            if keuze:
+                try:
+                    pk2keuze[wkl.pk] = int(keuze[:2])   # afkappen voor veiligheid
+                    pk2wkl[wkl.pk] = wkl
+                except ValueError:
+                    pass
+                else:
+                    if pk2keuze[wkl.pk] not in (24, 20, 16, 12, 8, 4):
+                        raise Resolver404()
+        # for
+
+        bepaal_opnieuw = list()     # list of tup(deelcomp, klasse)
+
+        for limiet in (DeelcompetitieKlasseLimiet
+                       .objects
+                       .select_related('klasse')
+                       .filter(deelcompetitie=deelcomp_rk.pk,
+                               klasse__in=pk2keuze.keys())):
+            pk = limiet.klasse.pk
+            keuze = pk2keuze[pk]
+            del pk2keuze[pk]
+
+            tup = (deelcomp_rk, limiet.klasse)
+
+            if keuze == 24:
+                bepaal_opnieuw.append(tup)
+                limiet.delete()
+            else:
+                if keuze != limiet.limiet:
+                    bepaal_opnieuw.append(tup)
+                    limiet.limiet = keuze
+                    limiet.save()
+
+        # for
+
+        # voor de overgebleven keuzes een nieuwe DeelcompetitieKlasseLimiet aanmaken
+        bulk = list()
+        for pk, keuze in pk2keuze.items():
+            if keuze != 24:
+                limiet = DeelcompetitieKlasseLimiet(deelcompetitie=deelcomp_rk,
+                                                    klasse=pk2wkl[pk],
+                                                    limiet=keuze)
+                bulk.append(limiet)
+
+                tup = (deelcomp_rk, limiet.klasse)
+                bepaal_opnieuw.append(tup)
+        # for
+        DeelcompetitieKlasseLimiet.objects.bulk_create(bulk)
+
+        # bepaal opnieuw de deelnemers boven de cut en sorteer op gemiddelde
+        for deelcomp, klasse in bepaal_opnieuw:
+            kampioenschap_bepaal_deelnemers(deelcomp, klasse)
+        # for
+
+        return HttpResponseRedirect(reverse('Competitie:overzicht'))
 
 
 # end of file

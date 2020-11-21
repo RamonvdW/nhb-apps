@@ -115,6 +115,10 @@ urlpatterns = [
          name='verwijder-wedstrijd'),
 
 
+    path('planning/rayoncompetitie/<deelcomp_pk>/limieten/',
+         views_planning_rayon.RayonLimietenView.as_view(),
+         name='rayon-limieten'),
+
     path('planning/rayoncompetitie/<deelcomp_pk>/',
          views_planning_rayon.RayonPlanningView.as_view(),
          name='rayon-planning'),

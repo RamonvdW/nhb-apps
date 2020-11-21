@@ -301,6 +301,30 @@ class DeelCompetitie(models.Model):
     objects = models.Manager()      # for the editor only
 
 
+class DeelcompetitieKlasseLimiet(models.Model):
+    """ Deze database tabel bevat de limieten voor het aantal deelnemers in een RK of BK
+        wedstrijdklasse. De RKO kan dit bijstellen specifiek voor zijn RK.
+    """
+
+    # voor welke deelcompetitie (ivm scheiding RKs)
+    deelcompetitie = models.ForeignKey(DeelCompetitie, on_delete=models.CASCADE)
+
+    # voor welke klasse is deze limiet
+    klasse = models.ForeignKey(CompetitieKlasse, on_delete=models.CASCADE)
+
+    # maximum aantal deelnemers in deze klasse
+    limiet = models.PositiveSmallIntegerField(default=24)
+
+    def __str__(self):
+        return "%s : %s - %s" % (self.limiet,
+                                 self.klasse.indiv.beschrijving,
+                                 self.deelcompetitie)
+
+    class Meta:
+        verbose_name = "Deelcompetitie Klasse Limiet"
+        verbose_name_plural = "Deelcompetitie Klasse Limieten"
+
+
 class DeelcompetitieRonde(models.Model):
     """ Definitie van een competitieronde """
 

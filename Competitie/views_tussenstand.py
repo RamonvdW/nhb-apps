@@ -10,8 +10,9 @@ from django.http import HttpResponseRedirect
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import BoogType
 from NhbStructuur.models import NhbRayon, NhbRegio
-from Competitie.models import (AG_NUL, LAAG_REGIO, LAAG_RK, LAAG_BK,
-                               DeelCompetitie, RegioCompetitieSchutterBoog)
+from Competitie.models import (LAAG_REGIO, LAAG_RK, LAAG_BK,
+                               DeelCompetitie, DeelcompetitieKlasseLimiet,
+                               RegioCompetitieSchutterBoog, KampioenschapSchutterBoog)
 from Functie.rol import Rollen, rol_get_huidige_functie, rol_get_huidige
 from Plein.menu import menu_dynamics
 from .models import Competitie
@@ -349,10 +350,26 @@ class TussenstandRayonView(TemplateView):
         context['deelcomp'] = deelcomp
         deelcomp.competitie.zet_fase()
 
+        wkl2limiet = dict()    # [pk] = aantal
+
         if deelcomp.heeft_deelnemerslijst:
-            # FUTURE: deelnemers/reserveschutters van het RK tonen
-            context['nog_niet_af'] = True
-            deelnemers = list()
+            # deelnemers/reserveschutters van het RK tonen
+            deelnemers = (KampioenschapSchutterBoog
+                          .objects
+                          .exclude(bij_vereniging__isnull=True)     # attentie gevallen
+                          .filter(deelcompetitie=deelcomp,
+                                  is_afgemeld=False,
+                                  volgorde__lte=48)                 # toon tot 48 schutters per klasse
+                          .order_by('klasse__indiv__volgorde', 'volgorde'))
+
+            for limiet in (DeelcompetitieKlasseLimiet
+                           .objects
+                           .select_related('klasse')
+                           .filter(deelcompetitie=deelcomp)):
+                wkl2limiet[limiet.klasse.pk] = limiet.limiet
+            # for
+
+            context['is_lijst_rk'] = True
         else:
             # competitie is nog in de regiocompetitie fase
             context['regiocomp_nog_actief'] = True
@@ -378,18 +395,28 @@ class TussenstandRayonView(TemplateView):
 
         klasse = -1
         rank = 0
+        limiet = 24
         for deelnemer in deelnemers:
             deelnemer.break_klasse = (klasse != deelnemer.klasse.indiv.volgorde)
             if deelnemer.break_klasse:
                 deelnemer.klasse_str = deelnemer.klasse.indiv.beschrijving
                 rank = 0
+                try:
+                    limiet = wkl2limiet[deelnemer.klasse.pk]
+                except KeyError:
+                    limiet = 24
             klasse = deelnemer.klasse.indiv.volgorde
 
             rank += 1
             lid = deelnemer.schutterboog.nhblid
-            deelnemer.rank = rank
             deelnemer.naam_str = "[%s] %s" % (lid.nhb_nr, lid.volledige_naam())
             deelnemer.ver_str = str(deelnemer.bij_vereniging)
+
+            if deelcomp.heeft_deelnemerslijst:
+                if deelnemer.volgorde > limiet:
+                    deelnemer.is_reserve = True
+            else:
+                deelnemer.volgorde = rank
         # for
 
         context['deelnemers'] = deelnemers

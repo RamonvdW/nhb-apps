@@ -72,6 +72,11 @@
                 {% include 'plein/card.dtl' with title="RK schutters" text="Toon lijst met schutters voor de Rayonkampioenschappen." icon="receipt" url=url_lijst_rk %}
             {% endif %}
 
+            <!-- limieten RK -->
+            {% if url_limieten_rk %}
+                {% include 'plein/card.dtl' with title="RK limieten" text="Maximum aantal deelnemers in elke wedstrijdklasse van jouw RK instellen." icon="accessibility_new" url=url_limieten_rk %}
+            {% endif %}
+
             <!-- toon inschrijvingen regiocompetitie -->
             {% for comp in competities %}
                 {% if comp.url_inschrijvingen %}

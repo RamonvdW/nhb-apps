@@ -8,7 +8,8 @@ from django.contrib import admin
 
 from NhbStructuur.models import NhbCluster
 from .models import (Competitie, DeelCompetitie, DeelcompetitieRonde,
-                     CompetitieKlasse, RegioCompetitieSchutterBoog, KampioenschapSchutterBoog)
+                     CompetitieKlasse, DeelcompetitieKlasseLimiet,
+                     RegioCompetitieSchutterBoog, KampioenschapSchutterBoog)
 
 
 class DeelCompetitieAdmin(admin.ModelAdmin):
@@ -143,5 +144,6 @@ admin.site.register(CompetitieKlasse, CompetitieKlasseAdmin)
 admin.site.register(DeelcompetitieRonde, DeelcompetitieRondeAdmin)
 admin.site.register(RegioCompetitieSchutterBoog, RegioCompetitieSchutterBoogAdmin)
 admin.site.register(KampioenschapSchutterBoog, KampioenschapSchutterBoogAdmin)
+admin.site.register(DeelcompetitieKlasseLimiet)
 
 # end of file

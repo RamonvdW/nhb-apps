@@ -201,6 +201,9 @@ class CompetitieOverzichtView(View):
                 context['url_lijst_rk'] = reverse('Competitie:lijst-rk',
                                                   kwargs={'deelcomp_pk': deelcomp_rk.pk})
 
+                context['url_limieten_rk'] = reverse('Competitie:rayon-limieten',
+                                                     kwargs={'deelcomp_pk': deelcomp_rk.pk})
+
         elif rol_nu == Rollen.ROL_BKO:
             context['planning_deelcomp'] = (DeelCompetitie
                                             .objects

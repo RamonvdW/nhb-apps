@@ -74,11 +74,6 @@
         <p>Schutters worden in de lijst opgenomen als ze 6 of meer scores hebben.</p>
     {% endif %}
 
-    {% if nog_niet_af %}
-        <p>Dit deel van de site is nog niet af.</p>
-    {% endif %}
-
-
     <table class="white">
         {% for obj in deelnemers %}
             {% if obj.break_klasse %}
@@ -91,14 +86,22 @@
                     <th>Schutter</th>
                     <th class="hide-on-small-only">Vereniging</th>
                     <th class="center-align">Gemiddelde</th>
+                    {% if is_lijst_rk %}
+                        <th><!-- label --></th>
+                    {% endif %}
                 </tr>
             {% endif %}
 
             <tr>
-                <td class="center-align">{{ obj.rank }}</td>
+                <td class="center-align">{% if not obj.is_reserve %}{{ obj.volgorde }}{% endif %}</td>
                 <td>{{ obj.naam_str }}</td>
                 <td class="hide-on-small-only">{{ obj.ver_str }}</td>
                 <td class="center-align">{{ obj.gemiddelde }}</td>
+                {% if obj.is_reserve %}
+                    <td><i>Reserve</i></td>
+                {% elif is_lijst_rk %}
+                    <td>{{ obj.kampioen_label }}</td>
+                {% endif %}
             </tr>
 
         {% endfor %}
