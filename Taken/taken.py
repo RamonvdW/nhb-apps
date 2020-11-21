@@ -105,7 +105,7 @@ def maak_taak(**kwargs):
         aantal_open = (Taak
                        .objects
                        .exclude(is_afgerond=True)
-                       .filter(toegekend_aan=request.user)
+                       .filter(toegekend_aan=taak.toegekend_aan)
                        .count())
 
         stuur_nieuwe_taak_email(email, aantal_open)
