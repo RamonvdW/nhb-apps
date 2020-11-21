@@ -69,26 +69,26 @@
                     </thead>
 
                     <tr>
-                        <td class="center-align"><i class="nhb-blauw-text material-icons-round">help</i></td>
+                        <td class="center-align"><i class="nhb-blauw-text in-table-icon material-icons-round">help</i></td>
                         <td class="nhb-blauw-text">Onbekend</td>
                         <td>{{ aantal_onbekend }}</td>
                     </tr>
 
                     <tr>
-                        <td class="center-align"><i class="green-text material-icons-round">check</i></td>
+                        <td class="center-align"><i class="green-text in-table-icon material-icons-round">check</i></td>
                         <td class="green-text">Deelname bevestigd</td>
                         <td>{{ aantal_bevestigd }}</td>
                     </tr>
 
                     <tr>
-                        <td class="center-align"><i class="grey-text material-icons-round">block</i></td>
+                        <td class="center-align"><i class="grey-text in-table-icon material-icons-round">block</i></td>
                         <td class="grey-text">Afgemeld</td>
                         <td>{{ aantal_afgemeld }}</td>
                     </tr>
 
                     {% if aantal_attentie %}
                         <tr>
-                            <td class="center-align"><i class="red-text material-icons-round">warning</i></td>
+                            <td class="center-align"><i class="red-text in-table-icon material-icons-round">warning</i></td>
                             <td class="red-text">Attentie</td>
                             <td>{{ aantal_attentie }}</td>
                         </tr>
@@ -138,14 +138,14 @@
                     {% endif %}
 
                     {% if not obj.bij_vereniging %}
-                        <td class="center-align"><i class="red-text material-icons-round">warning</i></td>
+                        <td class="center-align"><i class="red-text in-table-icon material-icons-round">warning</i></td>
                     {% elif obj.deelname_bevestigd %}
-                        <td class="center-align"><i class="green-text material-icons-round">check</i></td>
+                        <td class="center-align"><i class="green-text in-table-icon material-icons-round">check</i></td>
                     {% elif obj.is_afgemeld %}
-                        <td class="center-align"><i class="grey-text material-icons-round">block</i></td>
+                        <td class="center-align"><i class="grey-text in-table-icon material-icons-round">block</i></td>
                     {% else %}
                         <!-- onbekend -->
-                        <td class="center-align"><i class="nhb-blauw-text material-icons-round">help</i></td>
+                        <td class="center-align"><i class="nhb-blauw-text in-table-icon material-icons-round">help</i></td>
                     {% endif %}
 
                     <td><a class="btn-nhb-blauw btn-small" href="{{ obj.url_wijzig }}">Wijzig</a></td>
