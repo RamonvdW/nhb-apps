@@ -12,16 +12,15 @@ from Competitie.test_fase import zet_competitie_fase
 from Schutter.models import SchutterBoog
 from Overig.e2ehelpers import E2EHelpers
 from .models import (Competitie, DeelCompetitie, CompetitieKlasse, DeelcompetitieKlasseLimiet,
-                     RegioCompetitieSchutterBoog, KampioenschapSchutterBoog,
-                     LAAG_REGIO, LAAG_RK, LAAG_BK, AG_NUL,
-                     competitie_aanmaken)
+                     RegioCompetitieSchutterBoog, KampioenschapSchutterBoog, KampioenschapMutatie,
+                     LAAG_REGIO, LAAG_RK, LAAG_BK, AG_NUL, competitie_aanmaken)
 import datetime
 import io
 
 
-class TestCompetitieLijstRk(E2EHelpers, TestCase):
+class TestCompetitieMutaties(E2EHelpers, TestCase):
 
-    """ unit tests voor de Competitie applicatie, module Lijst RK """
+    """ unit tests voor de Competitie applicatie, mutaties van RK/BK deelnemers lijsten """
 
     def setUp(self):
         """ eenmalige setup voor alle tests
@@ -651,6 +650,19 @@ class TestCompetitieLijstRk(E2EHelpers, TestCase):
         self.assertEqual(rank, [1, 6, 11, 16])
         self.assertEqual(volg, [1, 6, 11, 16])
 
+        # meld ook 3 mensen af: 1 kampioen en 1 niet-kampioen boven de cut + 1 onder cut
+        url = self.url_wijzig_status % KampioenschapSchutterBoog.objects.get(rank=1).pk
+        resp = self.client.post(url, {'afmelden': 1})
+        self.assert_is_redirect(resp, self.url_lijst)  # 302 = redirect = success
+
+        url = self.url_wijzig_status % KampioenschapSchutterBoog.objects.get(rank=2).pk
+        resp = self.client.post(url, {'afmelden': 1})
+        self.assert_is_redirect(resp, self.url_lijst)  # 302 = redirect = success
+
+        url = self.url_wijzig_status % KampioenschapSchutterBoog.objects.get(rank=10).pk
+        resp = self.client.post(url, {'afmelden': 1})
+        self.assert_is_redirect(resp, self.url_lijst)  # 302 = redirect = success
+
         # verplaats de cut naar 8
         url = self.url_wijzig_cut_rk % self.deelcomp_rk.pk
         sel = 'sel_%s' % self.cut.klasse.pk
@@ -660,8 +672,8 @@ class TestCompetitieLijstRk(E2EHelpers, TestCase):
         # self._dump_deelnemers()
 
         rank, volg = self._get_rank_volg(alleen_kampioenen=True)
-        self.assertEqual(rank, [1, 6, 7, 8])
-        self.assertEqual(volg, [1, 6, 7, 8])
+        self.assertEqual(rank, [0, 4, 7, 8])
+        self.assertEqual(volg, [1, 6, 9, 10])
 
         self._check_volgorde_en_rank()
 
@@ -679,5 +691,43 @@ class TestCompetitieLijstRk(E2EHelpers, TestCase):
         self._verwerk_mutaties()
 
         self._check_volgorde_en_rank()
+
+    def test_dubbel(self):
+        self._begin_rk()        # BB met rol RKO1
+        self._verwerk_mutaties()
+
+        # dubbel afmelden
+        url = self.url_wijzig_status % KampioenschapSchutterBoog.objects.get(rank=2).pk
+        resp = self.client.post(url, {'afmelden': 1})
+        self.assert_is_redirect(resp, self.url_lijst)  # 302 = redirect = success
+
+        resp = self.client.post(url, {'afmelden': 1})
+        self.assert_is_redirect(resp, self.url_lijst)  # 302 = redirect = success
+
+        # dubbel aanmelden
+        resp = self.client.post(url, {'bevestig': 1})
+        self.assert_is_redirect(resp, self.url_lijst)        # 302 = redirect = success
+
+        resp = self.client.post(url, {'bevestig': 1})
+        self.assert_is_redirect(resp, self.url_lijst)        # 302 = redirect = success
+
+        self._verwerk_mutaties()
+
+    def test_bad(self):
+        self._begin_rk()        # BB met rol RKO1
+
+        # slechte mutatie code
+        KampioenschapMutatie(mutatie=0,
+                             deelnemer=KampioenschapSchutterBoog.objects.all()[0],
+                             door='Tester').save()
+
+        # mutatie die al verwerkt is
+        KampioenschapMutatie(mutatie=0,
+                             is_verwerkt=True,
+                             deelnemer=KampioenschapSchutterBoog.objects.all()[0],
+                             door='Tester').save()
+
+        self._verwerk_mutaties()
+
 
 # end of file
