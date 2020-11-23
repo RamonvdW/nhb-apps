@@ -11,13 +11,14 @@ from django.urls import Resolver404, reverse
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
+from Logboek.models import schrijf_in_logboek
 from NhbStructuur.models import NhbVereniging
 from Plein.menu import menu_dynamics
 from Wedstrijden.models import Wedstrijd, WedstrijdenPlan, WedstrijdLocatie
-from Competitie.views_planning_bond import kampioenschap_bepaal_deelnemers
 from .models import (LAAG_REGIO, LAAG_RK, LAAG_BK, DeelCompetitie, DeelcompetitieRonde,
                      CompetitieKlasse, DeelcompetitieKlasseLimiet,
-                     KampioenschapSchutterBoog)
+                     KampioenschapSchutterBoog, KampioenschapMutatie,
+                     MUTATIE_CUT, MUTATIE_AFMELDEN, MUTATIE_AANMELDEN)
 from types import SimpleNamespace
 import datetime
 
@@ -31,15 +32,20 @@ TEMPLATE_COMPETITIE_WIJZIG_LIMIETEN_RK = 'competitie/limieten-rk.dtl'
 
 # python strftime: 0=sunday, 6=saturday
 # wij rekenen het verschil ten opzicht van maandag in de week
-WEEK_DAGEN = ( (0, 'Maandag'),
-               (1, 'Dinsdag'),
-               (2, 'Woensdag'),
-               (3, 'Donderdag'),
-               (4, 'Vrijdag'),
-               (5, 'Zaterdag'),
-               (6, 'Zondag'))
+WEEK_DAGEN = (
+    (0, 'Maandag'),
+    (1, 'Dinsdag'),
+    (2, 'Woensdag'),
+    (3, 'Donderdag'),
+    (4, 'Vrijdag'),
+    (5, 'Zaterdag'),
+    (6, 'Zondag'),
+)
 
-JA_NEE = {False: 'Nee', True: 'Ja'}
+JA_NEE = {
+    False: 'Nee',
+    True: 'Ja'
+}
 
 
 class RayonPlanningView(UserPassesTestMixin, TemplateView):
@@ -572,8 +578,7 @@ class LijstRkSchuttersView(UserPassesTestMixin, TemplateView):
         for deelnemer in deelnemers:
             deelnemer.break_klasse = (klasse != deelnemer.klasse.indiv.volgorde)
             if deelnemer.break_klasse:
-                if klasse != -1:
-                    aantal_klassen += 1
+                aantal_klassen += 1
                 deelnemer.klasse_str = deelnemer.klasse.indiv.beschrijving
                 klasse = deelnemer.klasse.indiv.volgorde
                 try:
@@ -590,11 +595,11 @@ class LijstRkSchuttersView(UserPassesTestMixin, TemplateView):
             deelnemer.url_wijzig = reverse('Competitie:wijzig-status-rk-deelnemer',
                                            kwargs={'deelnemer_pk': deelnemer.pk})
 
-            if deelnemer.volgorde > limiet:
+            if deelnemer.rank > limiet:
                 deelnemer.is_reserve = True
 
-            # tel het aantal deelnemers
-            if deelnemer.volgorde <= 24+8:
+            # tel de status van de deelnemers en eerste 8 reserven
+            if deelnemer.rank <= limiet+8:
                 if deelnemer.is_afgemeld:
                     aantal_afgemeld += 1
                 elif deelnemer.deelname_bevestigd:
@@ -687,97 +692,27 @@ class WijzigStatusRkSchutterView(UserPassesTestMixin, TemplateView):
         except (ValueError, KampioenschapSchutterBoog.DoesNotExist):
             raise Resolver404()
 
-        bevestig = request.POST.get('bevestig', '')
-        afmelden = request.POST.get('afmelden', '')
+        bevestig = str(request.POST.get('bevestig', ''))[:2]
+        afmelden = str(request.POST.get('afmelden', ''))[:2]
 
         _, functie_nu = rol_get_huidige_functie(self.request)
         if functie_nu != deelnemer.deelcompetitie.functie:
             raise Resolver404()     # niet de juiste RKO
 
+        account = request.user
+        door_str = "RKO %s" % account.volledige_naam()
+
         if bevestig == "1":
-            if not deelnemer.deelname_bevestigd:
-                if deelnemer.is_afgemeld:
-                    kampioenschap_deelnemer_opnieuw_aanmelden(deelnemer)
-                else:
-                    deelnemer.deelname_bevestigd = True
-                    deelnemer.is_afgemeld = False
-                    deelnemer.save()
+            KampioenschapMutatie(mutatie=MUTATIE_AANMELDEN,
+                                 deelnemer=deelnemer,
+                                 door=door_str).save()
         elif afmelden == "1":
-            if not deelnemer.is_afgemeld:
-                kampioenschap_deelnemer_afmelden(deelnemer)
+            KampioenschapMutatie(mutatie=MUTATIE_AFMELDEN,
+                                 deelnemer=deelnemer,
+                                 door=door_str).save()
 
         return HttpResponseRedirect(reverse('Competitie:lijst-rk',
                                             kwargs={'deelcomp_pk': deelnemer.deelcompetitie.pk}))
-
-
-def kampioenschap_deelnemer_opnieuw_aanmelden(deelnemer):
-    # meld de deelnemer opnieuw aan door hem bij de reserves te zetten
-
-    # bepaal de limiet
-    try:
-        limiet = DeelcompetitieKlasseLimiet.objects.get(deelcompetitie=deelnemer.deelcompetitie,
-                                                        klasse=deelnemer.klasse).limiet
-    except DeelcompetitieKlasseLimiet.DoesNotExist:
-        limiet = 24
-
-    # zoek uit op welke plek deze schutter binnen gaat komen
-    # pak alle schutters in dezelfde klasse, met een lager gemiddelde
-    objs = (KampioenschapSchutterBoog
-            .objects
-            .filter(deelcompetitie=deelnemer.deelcompetitie,
-                    klasse=deelnemer.klasse,
-                    volgorde__gt=limiet,
-                    is_afgemeld=False,
-                    gemiddelde__lt=deelnemer.gemiddelde)
-            .order_by('-gemiddelde'))
-
-    deelnemer.deelname_bevestigd = True
-    deelnemer.is_afgemeld = False
-
-    if len(objs) > 0:
-        deelnemer.volgorde = objs[0].volgorde
-
-        # schuif al deze schutters een plekje omlaag
-        objs.update(volgorde=F('volgorde') + 1)
-    else:
-        # bepaal het eerstvolgende nummer
-        count = (KampioenschapSchutterBoog
-                 .objects
-                 .filter(deelcompetitie=deelnemer.deelcompetitie,
-                         klasse=deelnemer.klasse)
-                 .count())
-        deelnemer.volgorde = count
-
-    deelnemer.save()
-
-
-def kampioenschap_deelnemer_afmelden(deelnemer):
-
-    # bepaal de echte limiet
-    try:
-        limiet = DeelcompetitieKlasseLimiet.objects.get(deelcompetitie=deelnemer.deelcompetitie,
-                                                        klasse=deelnemer.klasse).limiet
-    except DeelcompetitieKlasseLimiet.DoesNotExist:
-        limiet = 24
-
-    # schuif iedereen met een hoger volgnummer een plekje omhoog
-    (KampioenschapSchutterBoog
-     .objects
-     .filter(deelcompetitie=deelnemer.deelcompetitie,
-             klasse=deelnemer.klasse,
-             volgorde__gt=deelnemer.volgorde)
-     ).update(volgorde=F('volgorde') - 1)
-
-    deelnemer.deelname_bevestigd = False
-    deelnemer.is_afgemeld = True
-    # deelnemer.volgorde = 0     # volgorde behouden voor tonen afgemelde schutters
-    deelnemer.save()
-
-    # als de schutter die zich afmeld boven de cut zit
-    # dan komt de eerste reserve schutter in de lijst
-    # zet deze schutter gesorteerd op zijn aanvangsgemiddelde in de lijst
-    if deelnemer.volgorde <= limiet:
-        kampioenschap_bepaal_deelnemers(deelnemer.deelcompetitie, deelnemer.klasse)
 
 
 class RayonLimietenView(UserPassesTestMixin, TemplateView):
@@ -901,7 +836,7 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
             keuze = pk2keuze[pk]
             del pk2keuze[pk]
 
-            tup = (deelcomp_rk, limiet.klasse)
+            tup = (deelcomp_rk, limiet.klasse, keuze, limiet.limiet)
 
             if keuze == 24:
                 bepaal_opnieuw.append(tup)
@@ -923,14 +858,34 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
                                                     limiet=keuze)
                 bulk.append(limiet)
 
-                tup = (deelcomp_rk, limiet.klasse)
+                tup = (deelcomp_rk, limiet.klasse, limiet.limiet, 24)
                 bepaal_opnieuw.append(tup)
         # for
         DeelcompetitieKlasseLimiet.objects.bulk_create(bulk)
 
-        # bepaal opnieuw de deelnemers boven de cut en sorteer op gemiddelde
-        for deelcomp, klasse in bepaal_opnieuw:
-            kampioenschap_bepaal_deelnemers(deelcomp, klasse)
+        # laat opnieuw de deelnemers boven de cut bepalen en sorteer op gemiddelde
+        account = request.user
+        door_str = "RKO %s" % account.volledige_naam()
+        for deelcomp, klasse, nieuwe_limiet, oude_limiet in bepaal_opnieuw:
+
+            # schrijf in het logboek
+            msg = "De limiet (cut) voor klasse %s van de %s is aangepast van %s naar %s." % (
+                    str(klasse), str(deelcomp), oude_limiet, nieuwe_limiet)
+            schrijf_in_logboek(self.request.user, "Competitie", msg)
+
+            # zoek de eerste deelnemer
+            deelnemers = (KampioenschapSchutterBoog
+                          .objects
+                          .filter(deelcompetitie=deelcomp,
+                                  klasse=klasse)
+                          .all())
+
+            # geen deelnemers, dan ook niet nodig om te sorteren
+            if len(deelnemers) > 0:
+                deelnemer = deelnemers[0]
+                KampioenschapMutatie(mutatie=MUTATIE_CUT,
+                                     door=door_str,
+                                     deelnemer=deelnemer).save()
         # for
 
         return HttpResponseRedirect(reverse('Competitie:overzicht'))

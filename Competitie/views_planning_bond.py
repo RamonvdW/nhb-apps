@@ -15,73 +15,13 @@ from Plein.menu import menu_dynamics
 from Taken.taken import maak_taak
 from .models import (Competitie,
                      LAAG_REGIO, LAAG_RK, LAAG_BK, DeelCompetitie, DeelcompetitieKlasseLimiet,
-                     RegioCompetitieSchutterBoog, KampioenschapSchutterBoog)
+                     RegioCompetitieSchutterBoog, KampioenschapSchutterBoog,
+                     KampioenschapMutatie, MUTATIE_INITIEEL)
 
 
 TEMPLATE_COMPETITIE_DOORZETTEN_NAAR_RK = 'competitie/bko-doorzetten-naar-rk.dtl'
 TEMPLATE_COMPETITIE_DOORZETTEN_NAAR_BK = 'competitie/bko-doorzetten-naar-bk.dtl'
 TEMPLATE_COMPETITIE_AFSLUITEN = 'competitie/bko-afsluiten-competitie.dtl'
-
-
-def kampioenschap_bepaal_deelnemers(deelcomp, klasse):
-    """ Bepaal de top-X deelnemers voor een klasse van een kampioenschap:
-            De niet-afgemelde kampioenen
-            aangevuld met de niet-afgemelde schutters met hoogste gemiddelde
-            gesorteerde op gemiddelde
-
-        Deze functie wordt gebruikt na het vaststellen van de initiele deelnemers
-        en na het aanpassen van de cut.
-    """
-
-    try:
-        limiet = (DeelcompetitieKlasseLimiet
-                  .objects
-                  .select_related('klasse')
-                  .get(deelcompetitie=deelcomp,
-                       klasse=klasse)).limiet
-    except DeelcompetitieKlasseLimiet.DoesNotExist:
-        limiet = 24
-
-    # kampioenen mogen altijd meedoen, ook als de cut omlaag gaat
-    kampioenen = (KampioenschapSchutterBoog
-                  .objects
-                  .exclude(kampioen_label='')
-                  .filter(deelcompetitie=deelcomp,
-                          klasse=klasse))
-
-    afgemeld = kampioenen.filter(is_afgemeld=True).count()
-
-    # aanvullen met schutters tot aan de cut
-    objs = (KampioenschapSchutterBoog
-            .objects
-            .filter(deelcompetitie=deelcomp,
-                    klasse=klasse,
-                    kampioen_label='',      # kampioenen hebben we al
-                    is_afgemeld=False,
-                    volgorde__lte=limiet - len(kampioenen) + afgemeld))
-
-    # voeg deze twee lijsten samen
-    lijst = list()
-    for obj in objs:
-        tup = (obj.gemiddelde, obj)
-        lijst.append(tup)
-    # for
-
-    for obj in kampioenen:
-        tup = (obj.gemiddelde, obj)
-        lijst.append(tup)
-    # for
-
-    lijst.sort(reverse=True)
-
-    # opnieuw sorteren en volgorde uitdelen voor deze schutters
-    volgorde = 1
-    for _, obj in lijst:
-        obj.volgorde = volgorde
-        obj.save()
-        if not obj.is_afgemeld:
-            volgorde += 1
-    # for
 
 
 class DoorzettenNaarRKView(UserPassesTestMixin, TemplateView):
@@ -181,6 +121,9 @@ class DoorzettenNaarRKView(UserPassesTestMixin, TemplateView):
 
     def _maak_deelnemerslijst_rks(self, comp):
 
+        account = self.request.user
+        door_str = "BKO %s" % account.volledige_naam()
+
         for deelcomp_rk in (DeelCompetitie
                             .objects
                             .select_related('nhb_rayon')
@@ -190,24 +133,23 @@ class DoorzettenNaarRKView(UserPassesTestMixin, TemplateView):
 
             deelnemers = self._get_schutters_regios(comp, deelcomp_rk.nhb_rayon.rayon_nr)
 
+            klassen = list()
+
             # schrijf all deze schutters in voor het RK
             # kampioenen als eerste in de lijst, daarna aflopend gesorteerd op gemiddelde
             bulk_lijst = list()
             klasse = -1
-            volgorde = 0
+            mutatie_deelnemer = None
             for obj in deelnemers:
                 if klasse != obj.klasse.indiv.volgorde:
                     klasse = obj.klasse.indiv.volgorde
-                    volgorde = 0
-
-                volgorde += 1
+                    klassen.append(obj.klasse)
 
                 deelnemer = KampioenschapSchutterBoog(
                                 deelcompetitie=deelcomp_rk,
                                 schutterboog=obj.schutterboog,
                                 klasse=obj.klasse,
                                 bij_vereniging=obj.bij_vereniging,
-                                volgorde=volgorde,
                                 gemiddelde=obj.gemiddelde,
                                 kampioen_label=obj.kampioen_label)
 
@@ -215,6 +157,9 @@ class DoorzettenNaarRKView(UserPassesTestMixin, TemplateView):
                 if len(bulk_lijst) > 500:
                     KampioenschapSchutterBoog.objects.bulk_create(bulk_lijst)
                     bulk_lijst = list()
+
+                # onthoud de laatste
+                mutatie_deelnemer = deelnemer
             # for
 
             if len(bulk_lijst) > 0:
@@ -223,6 +168,12 @@ class DoorzettenNaarRKView(UserPassesTestMixin, TemplateView):
 
             deelcomp_rk.heeft_deelnemerslijst = True
             deelcomp_rk.save()
+
+            # laat de lijsten sorteren en de volgorde bepalen
+            if mutatie_deelnemer:
+                KampioenschapMutatie(mutatie=MUTATIE_INITIEEL,
+                                     door=door_str,
+                                     deelnemer=mutatie_deelnemer).save()
 
             # stuur de RKO een taak ('ter info')
             rko_namen = list()

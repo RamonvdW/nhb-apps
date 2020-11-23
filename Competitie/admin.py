@@ -9,7 +9,8 @@ from django.contrib import admin
 from NhbStructuur.models import NhbCluster
 from .models import (Competitie, DeelCompetitie, DeelcompetitieRonde,
                      CompetitieKlasse, DeelcompetitieKlasseLimiet,
-                     RegioCompetitieSchutterBoog, KampioenschapSchutterBoog)
+                     RegioCompetitieSchutterBoog, KampioenschapSchutterBoog,
+                     KampioenschapMutatie)
 
 
 class DeelCompetitieAdmin(admin.ModelAdmin):
@@ -138,6 +139,15 @@ class KampioenschapSchutterBoogAdmin(admin.ModelAdmin):
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
+class KampioenschapMutatieAdmin(admin.ModelAdmin):
+
+    readonly_fields = ('when', 'deelnemer')
+
+    list_select_related = ('deelnemer__deelcompetitie',
+                           'deelnemer__klasse',
+                           'deelnemer__schutterboog__nhblid')
+
+
 admin.site.register(Competitie)
 admin.site.register(DeelCompetitie, DeelCompetitieAdmin)
 admin.site.register(CompetitieKlasse, CompetitieKlasseAdmin)
@@ -145,5 +155,6 @@ admin.site.register(DeelcompetitieRonde, DeelcompetitieRondeAdmin)
 admin.site.register(RegioCompetitieSchutterBoog, RegioCompetitieSchutterBoogAdmin)
 admin.site.register(KampioenschapSchutterBoog, KampioenschapSchutterBoogAdmin)
 admin.site.register(DeelcompetitieKlasseLimiet)
+admin.site.register(KampioenschapMutatie, KampioenschapMutatieAdmin)
 
 # end of file

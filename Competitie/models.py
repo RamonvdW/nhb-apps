@@ -6,6 +6,7 @@
 
 from django.db import models
 from django.utils import timezone
+from Account.models import Account
 from BasisTypen.models import IndivWedstrijdklasse, TeamWedstrijdklasse
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
 from Functie.models import Functie
@@ -573,9 +574,10 @@ class KampioenschapSchutterBoog(models.Model):
     # kampioenen hebben een label
     kampioen_label = models.CharField(max_length=50, default='', blank=True)
 
-    # positive van deze schutter in de lijst
+    # positie van deze schutter in de lijst
     # de eerste 24 zijn deelnemers; daarna reserveschutters
-    volgorde = models.PositiveSmallIntegerField(default=0)
+    volgorde = models.PositiveSmallIntegerField(default=0)  # inclusief afmeldingen
+    rank = models.PositiveSmallIntegerField(default=0)      # exclusief afmeldingen
 
     # wanneer hebben we een bevestiging gevraagd hebben via e-mail
     bevestiging_gevraagd_op = models.DateTimeField(null=True, blank=True)
@@ -619,13 +621,75 @@ class KampioenschapSchutterBoog(models.Model):
     objects = models.Manager()      # for the editor only
 
 
+MUTATIE_CUT = 10
+MUTATIE_INITIEEL = 20
+MUTATIE_AFMELDEN = 30
+MUTATIE_AANMELDEN = 40
+
+mutatie2descr = {
+    MUTATIE_INITIEEL: "initieel",
+    MUTATIE_CUT: "nieuwe limiet",
+    MUTATIE_AFMELDEN: "afmelden",
+    MUTATIE_AANMELDEN: "aanmelden",
+}
+
+
+class KampioenschapMutatie(models.Model):
+
+    """ Deze tabel houdt de mutaties bij de lijst van (reserve-)schutters van
+        de RK en BK wedstrijden.
+        Alle verzoeken tot mutaties worden hier aan toegevoegd en na afhandelen bewaard
+        zodat er een geschiedenis is.
+    """
+
+    # datum/tijdstip van mutatie
+    when = models.DateTimeField(auto_now_add=True)      # automatisch invullen
+
+    # wat is de wijziging (zie MUTATIE_*)
+    mutatie = models.PositiveSmallIntegerField(default=0)
+
+    # zijn de lijsten bijgewerkt?
+    is_verwerkt = models.BooleanField(default=False)
+
+    # door wie is de mutatie geïnitieerd
+    # als het een account is, dan volledige naam + rol
+    # als er geen account is (schutter zonder account) dan NHB lid details
+    door = models.CharField(max_length=50, default='')
+
+    # op wie heeft de mutatie betrekking (aanmelden/afmelden)
+    # voor sommige mutaties verwijst deze deelnemer naar de hele deelcompetitie (MUTATIE_INITIEEL)
+    # of naar een specifieke klasse (MUTATIE_CUT)
+    deelnemer = models.ForeignKey(KampioenschapSchutterBoog,
+                                  on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name = "Kampioenschap Mutatie"
+        verbose_name_plural = "Kampioenschap Mutaties"
+
+    def __str__(self):
+        msg = "[%s]" % self.when
+        if not self.is_verwerkt:
+            msg += " (nog niet verwerkt)"
+        msg += " %s (%s)" % (self.mutatie, mutatie2descr[self.mutatie])
+
+        if self.mutatie not in (MUTATIE_INITIEEL, MUTATIE_CUT):
+            msg += " - %s" % self.deelnemer
+
+        return msg
+
+
 class CompetitieTaken(models.Model):
 
-    # simpele tabel om bij te houden hoe het met de achtergrond taken gaat
+    """ simpele tabel om bij te houden hoe het met de achtergrond taken gaat """
 
+    # wat is de hoogste ScoreHist tot nu toe verwerkt in de tussenstand?
     hoogste_scorehist = models.ForeignKey(ScoreHist,
                                           null=True, blank=True,        # mag leeg in admin interface
                                           on_delete=models.SET_NULL)
 
+    # wat is de hoogste KampioenschapMutatie tot nu toe verwerkt in de deelnemerslijst?
+    hoogste_mutatie = models.ForeignKey(KampioenschapMutatie,
+                                        null=True, blank=True,
+                                        on_delete=models.SET_NULL)
 
 # end of file

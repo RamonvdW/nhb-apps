@@ -188,6 +188,8 @@ class Command(BaseCommand):
         self.pk2scores_alt = dict()
 
         scorehist_latest = ScoreHist.objects.latest('pk')
+        # als hierna een extra ScoreHist aangemaakt wordt dan verwerken we een record
+        # misschien dubbel, maar daar kunnen we tegen
 
         # bepaal de scorehist objecten die we willen bekijken
         qset = (ScoreHist
@@ -425,7 +427,7 @@ class Command(BaseCommand):
         self._update_regiocompetitieschuttersboog()
 
         klaar = datetime.datetime.now()
-        self.stdout.write('[INFO] Tussenstand bijgewerkte in %s seconden' % (klaar - begin))
+        self.stdout.write('[INFO] Tussenstand bijgewerkt in %s seconden' % (klaar - begin))
 
     def _monitor_nieuwe_scores(self):
         # monitor voor nieuwe ScoreHist
@@ -440,9 +442,11 @@ class Command(BaseCommand):
 
             # sleep at least 5 seconds, then check again
             secs = (self.stop_at - now).total_seconds()
-            if secs > 0:                    # pragma: no branch
+            if secs > 5:                    # pragma: no branch
                 secs = min(secs, 5.0)
                 time.sleep(secs)
+            else:
+                break       # from the while
 
             now = datetime.datetime.now()
         # while

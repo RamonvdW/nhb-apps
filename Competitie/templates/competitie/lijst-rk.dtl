@@ -119,7 +119,7 @@
                 {% endif %}
 
                 <tr{% if obj.is_afgemeld %} class="grey-text"{% endif %}>
-                    <td class="right-align">{% if not obj.is_afgemeld %}{{ obj.volgorde }}{% endif %}</td>
+                    <td class="right-align">{{ obj.rank }}</td>
 
                     <td>{{ obj.naam_str }}</td>
 
@@ -131,11 +131,7 @@
 
                     <td class="hide-on-small-only">{{ obj.gemiddelde }}</td>
 
-                    {% if obj.is_reserve %}
-                        <td><i>Reserve</i></td>
-                    {% else %}
-                        <td>{{ obj.kampioen_label }}</td>
-                    {% endif %}
+                    <td>{% if obj.is_reserve %}<i>Reserve</i>{% if obj.kampioen_label != '' %}<br>{% endif %}{% endif %}{{ obj.kampioen_label }}</td>
 
                     {% if not obj.bij_vereniging %}
                         <td class="center-align"><i class="red-text in-table-icon material-icons-round">warning</i></td>

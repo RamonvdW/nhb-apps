@@ -360,7 +360,8 @@ class TussenstandRayonView(TemplateView):
                           .filter(deelcompetitie=deelcomp,
                                   is_afgemeld=False,
                                   volgorde__lte=48)                 # toon tot 48 schutters per klasse
-                          .order_by('klasse__indiv__volgorde', 'volgorde'))
+                          .order_by('klasse__indiv__volgorde',
+                                    'volgorde'))
 
             for limiet in (DeelcompetitieKlasseLimiet
                            .objects
@@ -400,23 +401,23 @@ class TussenstandRayonView(TemplateView):
             deelnemer.break_klasse = (klasse != deelnemer.klasse.indiv.volgorde)
             if deelnemer.break_klasse:
                 deelnemer.klasse_str = deelnemer.klasse.indiv.beschrijving
-                rank = 0
+                rank = 1
                 try:
                     limiet = wkl2limiet[deelnemer.klasse.pk]
                 except KeyError:
                     limiet = 24
             klasse = deelnemer.klasse.indiv.volgorde
 
-            rank += 1
             lid = deelnemer.schutterboog.nhblid
             deelnemer.naam_str = "[%s] %s" % (lid.nhb_nr, lid.volledige_naam())
             deelnemer.ver_str = str(deelnemer.bij_vereniging)
 
             if deelcomp.heeft_deelnemerslijst:
-                if deelnemer.volgorde > limiet:
+                if deelnemer.rank > limiet:
                     deelnemer.is_reserve = True
             else:
-                deelnemer.volgorde = rank
+                deelnemer.rank = rank
+                rank += 1
         # for
 
         context['deelnemers'] = deelnemers
