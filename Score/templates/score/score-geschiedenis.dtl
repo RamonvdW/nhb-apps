@@ -64,7 +64,7 @@
                     {% if schutterboog.scores %}
                         <tr>
                             <td>{{ schutterboog.boogtype.beschrijving }}</td>
-                            <td colspan="3"/>
+                            <td colspan="3"></td>
                         </tr>
 
                         {% for score in schutterboog.scores %}
@@ -86,7 +86,7 @@
 
                                 {% for hist in score.hists %}
                                     <tr>
-                                        <td colspan="2"/>
+                                        <td colspan="2"></td>
                                         <td>{{ hist.oude_waarde }}<span style="position: relative; bottom: .15em;"> &rarr; </span>{{ hist.nieuwe_waarde }}</td>
                                         <td>{{ hist.when }}{% if hist.door_account_str %} door {{ hist.door_account_str }}{% endif %}<br>{{ hist.notitie }}</td>
                                     </tr>

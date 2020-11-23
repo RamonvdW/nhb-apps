@@ -93,7 +93,7 @@
             {% endif %}
 
             <tr>
-                <td class="center-align">{% if not obj.is_reserve %}{{ obj.volgorde }}{% endif %}</td>
+                <td class="center-align">{% if not obj.is_reserve %}{{ obj.rank }}{% endif %}</td>
                 <td>{{ obj.naam_str }}</td>
                 <td class="hide-on-small-only">{{ obj.ver_str }}</td>
                 <td class="center-align">{{ obj.gemiddelde }}</td>

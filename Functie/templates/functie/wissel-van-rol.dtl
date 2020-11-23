@@ -119,7 +119,7 @@
     <p>&nbsp;</p>
     <h5>Hanteren persoons<wbr/>gegevens</h5>
 
-    <p>Je hebt de verklaring hanteren persoonsgegevens afgegeven op {{ vhpg.acceptatie_datum|date:"j F Y" }}.<p/>
+    <p>Je hebt de verklaring hanteren persoonsgegevens afgegeven op {{ vhpg.acceptatie_datum|date:"j F Y" }}.</p>
     <p><a class="btn-nhb-blauw" href="{% url 'Functie:vhpg-afspraken' %}"><i class="material-icons-round left">remove_red_eye</i>Afspraken inzien</a></p>
 
 {% endif %}
