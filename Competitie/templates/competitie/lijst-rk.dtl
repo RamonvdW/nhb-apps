@@ -13,7 +13,7 @@
     <h4>RK schutters</h4>
 
     {% if url_tussenstand %}
-        <p>Op deze pagina kan je de lijst met kandidaat-schutters voor jouw RK's vaststellen.</p>
+        <p>Op deze pagina kan je de lijst met kandidaat-schutters voor jouw RK's inzien en bewerken.</p>
         <p>Dit is pas mogelijk als alle onderliggende regiocompetities afgesloten zijn. De status hiervan kan je hier onder zien.</p>
         <p>Tot dat moment kan je de kandidaten voor elke wedstrijdklassen zien op deze pagina:</p>
         <p>
@@ -119,7 +119,7 @@
                 {% endif %}
 
                 <tr{% if obj.is_afgemeld %} class="grey-text"{% endif %}>
-                    <td class="right-align">{{ obj.rank }}</td>
+                    <td class="right-align">{% if not obj.is_afgemeld %}{{ obj.rank }}{% endif %}</td>
 
                     <td>{{ obj.naam_str }}</td>
 

@@ -11,7 +11,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from django.templatetags.static import static
 from Plein.menu import menu_dynamics
 from Functie.rol import Rollen, rol_get_huidige_functie
-from Competitie.models import Competitie, DeelCompetitie, LAAG_REGIO
+from Competitie.models import Competitie, DeelCompetitie, LAAG_REGIO, LAAG_RK
 from Taken.taken import eval_open_taken
 
 
@@ -66,6 +66,14 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                                     .select_related('competitie')
                                     .order_by('competitie__afstand'))
 
+            context['deelcomps_rk'] = (DeelCompetitie
+                                       .objects
+                                       .filter(laag=LAAG_RK,
+                                               competitie__is_afgesloten=False,
+                                               nhb_rayon=functie_nu.nhb_ver.regio.rayon)
+                                       .select_related('competitie')
+                                       .order_by('competitie__afstand'))
+
         # comp is nodig voor inschrijven
         for comp in context['competities']:
             comp.zet_fase()
@@ -74,6 +82,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
             else:
                 comp.icon = static('plein/badge_nhb_25m1p.png')
         # for
+        del comp
 
         # deelcomp is nodig voor afmelden
         for deelcomp in context['deelcomps']:
@@ -82,6 +91,18 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                 deelcomp.icon = static('plein/badge_nhb_indoor.png')
             else:
                 deelcomp.icon = static('plein/badge_nhb_25m1p.png')
+        # for
+        del deelcomp
+
+        for deelcomp_rk in context['deelcomps_rk']:
+            if deelcomp_rk.heeft_deelnemerslijst:
+                comp = deelcomp_rk.competitie
+                comp.zet_fase()
+                if comp.fase == 'K':
+                    # RK voorbereidende fase
+                    deelcomp_rk.text_str = "Schutters van de vereniging aan-/afmeldenvoor het RK van de %s" % comp.beschrijving
+                    deelcomp_rk.url_lijst_rk = reverse('Vereniging:lijst-rk',
+                                                       kwargs={'deelcomp_pk': deelcomp_rk.pk})
         # for
 
         eval_open_taken(self.request)

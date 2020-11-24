@@ -531,8 +531,8 @@ class LijstRkSchuttersView(UserPassesTestMixin, TemplateView):
             raise Resolver404()
 
         # controleer dat de juiste RKO aan de knoppen zit
-        _, functie_nu = rol_get_huidige_functie(self.request)
-        if functie_nu != deelcomp_rk.functie:
+        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
+        if rol_nu == Rollen.ROL_RKO and functie_nu != deelcomp_rk.functie:
             raise Resolver404()     # niet de juiste RKO
 
         alles_afgesloten, regio_status = self._get_regio_status(deelcomp_rk.competitie)
@@ -541,13 +541,14 @@ class LijstRkSchuttersView(UserPassesTestMixin, TemplateView):
         context['deelcomp_rk'] = deelcomp_rk
 
         if not deelcomp_rk.heeft_deelnemerslijst:
+            # situatie 1)
             context['url_tussenstand'] = reverse('Competitie:tussenstand-rayon-n',
                                                  kwargs={'afstand': deelcomp_rk.competitie.afstand,
                                                          'comp_boog': 'r',
                                                          'rayon_nr': deelcomp_rk.nhb_rayon.rayon_nr})
             deelnemers = list()
         else:
-            # situatie 3)
+            # situatie 2)
             deelnemers = (KampioenschapSchutterBoog
                           .objects
                           .select_related('deelcompetitie',

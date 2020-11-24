@@ -197,7 +197,7 @@ class CompetitieOverzichtView(View):
 
                 context['planning_deelcomp'] = [deelcomp_rk, ]
 
-                # geeft de RKO de mogelijkheid om de deelnemerslijst voor het RK vast te stellen
+                # geeft de RKO de mogelijkheid om de deelnemerslijst voor het RK te bewerken
                 context['url_lijst_rk'] = reverse('Competitie:lijst-rk',
                                                   kwargs={'deelcomp_pk': deelcomp_rk.pk})
 

@@ -141,7 +141,7 @@ class KampioenschapSchutterBoogAdmin(admin.ModelAdmin):
 
 class KampioenschapMutatieAdmin(admin.ModelAdmin):
 
-    readonly_fields = ('when', 'deelnemer')
+    readonly_fields = ('mutatie', 'when', 'deelnemer', 'door')
 
     list_select_related = ('deelnemer__deelcompetitie',
                            'deelnemer__klasse',
