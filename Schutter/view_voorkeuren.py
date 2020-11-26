@@ -143,10 +143,10 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
         return HttpResponseRedirect(reverse('Schutter:profiel'))
 
     @staticmethod
-    def _get_bogen(nhblid):
+    def _get_bogen(nhblid, geen_wedstrijden):
         """ Retourneer een lijst met SchutterBoog objecten, aangevuld met hulpvelden """
 
-        if nhblid.bij_vereniging and nhblid.bij_vereniging.geen_wedstrijden:
+        if geen_wedstrijden:
             # schutter mag niet aan wedstrijden deelnemen
             # verwijder daarom alle SchutterBoog records
             SchutterBoog.objects.filter(nhblid=nhblid).delete()
@@ -192,7 +192,9 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
             nhblid_pk = None
         nhblid = self._get_nhblid_or_404(self.request, nhblid_pk)
 
-        context['bogen'] = self._get_bogen(nhblid)
+        context['geen_wedstrijden'] = geen_wedstrijden = nhblid.bij_vereniging and nhblid.bij_vereniging.geen_wedstrijden
+
+        context['bogen'] = self._get_bogen(nhblid, geen_wedstrijden)
         context['voorkeuren'], _ = SchutterVoorkeuren.objects.get_or_create(nhblid=nhblid)
 
         if rol_get_huidige(self.request) == Rollen.ROL_HWL:
