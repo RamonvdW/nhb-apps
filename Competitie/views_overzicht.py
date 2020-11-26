@@ -55,7 +55,7 @@ class CompetitieOverzichtView(View):
         for comp in comps:
             comp.zet_fase()
 
-            comp.einde_fase_F = comp.laatst_mogelijke_wedstrijd + datetime.timedelta(days=14)
+            comp.einde_fase_F = comp.laatst_mogelijke_wedstrijd + datetime.timedelta(days=7)
             comp.einde_fase_M = comp.rk_laatste_wedstrijd + datetime.timedelta(days=7)
 
             if 'B' <= comp.fase <= 'E':

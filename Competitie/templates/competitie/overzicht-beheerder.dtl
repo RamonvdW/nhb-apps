@@ -267,7 +267,7 @@
 
                 <tr>
                     <td {% if obj.fase == 'M' %} class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>M</td>
-                    <td>Vaststellen uitslagen in elk rayon (RKO)</td>
+                    <td>Uitslagen RK wedstrijden overgenomen</td>
                     <td>
                         {% if obj.fase > 'M' %}
                             <span class="green-text">Afgerond</span>
@@ -318,7 +318,7 @@
 
                 <tr>
                     <td {% if obj.fase == 'R' %} class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>R</td>
-                    <td>Vaststellen uitslagen</td>
+                    <td>Uitslagen BK wedstrijden overgenomen</td>
                     <td>
                         {% if obj.fase > 'R' %}
                             <span class="green-text">Afgerond</span>
