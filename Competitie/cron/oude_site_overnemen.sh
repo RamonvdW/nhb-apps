@@ -102,7 +102,7 @@ download_25
 cd ../..
 
 # bepaal de vorige oude_site.json voordat de nieuwe aangemaakt wordt
-export LC_ALL=C
+LC_ALL=C
 PREV_JSON=$(ls -1dt $SPOOLDIR/202*/oude_site.json | head -1)
 echo "[INFO] Previous JSON=$PREV_JSON" >> "$LOG"
 
