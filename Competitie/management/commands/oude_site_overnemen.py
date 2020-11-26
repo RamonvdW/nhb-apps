@@ -689,6 +689,10 @@ class Command(BaseCommand):
         parser.add_argument('--all', action='store_true')
 
     def handle(self, *args, **options):
+
+        self.stdout.write('[DEBUG] self.stdout.encoding = %s' % self.stdout.encoding)
+        self.stdout.write('[DEBUG]  sys.stdout.encoding = %s' % sys.stdout.encoding)
+
         pad = os.path.normpath(options['dir'][0])
         max_fouten = options['max_fouten'][0]
         self._dryrun = options['dryrun']
