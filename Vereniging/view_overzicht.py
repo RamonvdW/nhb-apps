@@ -52,6 +52,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
         if rol_nu == Rollen.ROL_SEC or functie_nu.nhb_ver.regio.is_administratief:
             context['competities'] = list()
             context['deelcomps'] = list()
+            context['deelcomps_rk'] = list()
         else:
             context['competities'] = (Competitie
                                       .objects
@@ -82,7 +83,6 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
             else:
                 comp.icon = static('plein/badge_nhb_25m1p.png')
         # for
-        del comp
 
         # deelcomp is nodig voor afmelden
         for deelcomp in context['deelcomps']:
@@ -92,7 +92,6 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
             else:
                 deelcomp.icon = static('plein/badge_nhb_25m1p.png')
         # for
-        del deelcomp
 
         for deelcomp_rk in context['deelcomps_rk']:
             if deelcomp_rk.heeft_deelnemerslijst:

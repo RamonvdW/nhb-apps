@@ -115,7 +115,7 @@ class ScoreGeschiedenisView(UserPassesTestMixin, View):
                                     afstanden.append(score.afstand_meter)
 
                                 try:
-                                    uitslag = score.wedstrijduitslag_set.prefetch_related('wedstrijd').all()[0]
+                                    uitslag = score.wedstrijduitslag_set.prefetch_related('wedstrijd_set').all()[0]
                                     wedstrijd = uitslag.wedstrijd_set.all()[0]
                                     score.wedstrijd_str = str(wedstrijd.datum_wanneer)
                                     tijd = str(wedstrijd.tijd_begin_wedstrijd)[:5]
