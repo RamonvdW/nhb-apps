@@ -360,6 +360,9 @@ class TussenstandRayonView(TemplateView):
                           .filter(deelcompetitie=deelcomp,
                                   is_afgemeld=False,
                                   volgorde__lte=48)                 # toon tot 48 schutters per klasse
+                          .select_related('klasse__indiv',
+                                          'schutterboog__nhblid',
+                                          'bij_vereniging')
                           .order_by('klasse__indiv__volgorde',
                                     'volgorde'))
 

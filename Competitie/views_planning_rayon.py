@@ -91,6 +91,7 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
         klasse2schutters = dict()
         for obj in (KampioenschapSchutterBoog
                     .objects
+                    .select_related('klasse__indiv')
                     .filter(deelcompetitie=deelcomp_rk)
                     .select_related('klasse')):
             try:
@@ -136,6 +137,7 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
 
         deelcomps = (DeelCompetitie
                      .objects
+                     .select_related('nhb_regio')
                      .filter(laag=LAAG_REGIO,
                              competitie=deelcomp_rk.competitie,
                              nhb_regio__rayon=deelcomp_rk.nhb_rayon)
@@ -152,8 +154,8 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
             deelcomp.wedstrijden_count = 0
             for plan in (WedstrijdenPlan
                          .objects
-                         .filter(pk__in=plan_pks)
-                         .prefetch_related('wedstrijden')):
+                         .prefetch_related('wedstrijden')
+                         .filter(pk__in=plan_pks)):
                 deelcomp.wedstrijden_count += plan.wedstrijden.count()
             # for
         # for
@@ -769,6 +771,7 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
 
         for limiet in (DeelcompetitieKlasseLimiet
                        .objects
+                       .select_related('klasse')
                        .filter(deelcompetitie=deelcomp_rk.pk,
                                klasse__in=pk2wkl.keys())):
             wkl = pk2wkl[limiet.klasse.pk]
