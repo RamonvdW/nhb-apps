@@ -39,7 +39,8 @@ class Taak(models.Model):
     log = models.TextField(max_length=50000, blank=True)
 
     # hoort deze bij een deel van de competitie? (Regio/RK/BK)
-    deelcompetitie = models.ForeignKey(DeelCompetitie, on_delete=models.CASCADE, null=True, blank=True)
+    deelcompetitie = models.ForeignKey(DeelCompetitie, on_delete=models.CASCADE,
+                                       null=True, blank=True)
 
     def __str__(self):
         msg = str(self.pk)

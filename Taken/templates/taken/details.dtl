@@ -35,6 +35,12 @@
             {% endif %}
         </tr>
 
+        {% if taak.deelcompetitie %}
+            <tr>
+                <td>Hoort bij:</td>
+                <td>{{ taak.deelcompetitie }}</td>
+            </tr>
+        {% endif %}
 
         <tr>
             <td>Beschrijving:</td>

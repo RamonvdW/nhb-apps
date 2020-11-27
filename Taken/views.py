@@ -93,7 +93,12 @@ class DetailsView(UserPassesTestMixin, TemplateView):
 
         try:
             taak_pk = int(kwargs['taak_pk'][:6])        # afkappen geeft veiligheid
-            taak = Taak.objects.get(pk=taak_pk)
+            taak = (Taak
+                    .objects
+                    .select_related('deelcompetitie',
+                                    'toegekend_aan',
+                                    'aangemaakt_door')
+                    .get(pk=taak_pk))
         except (ValueError, Taak.DoesNotExist):
             raise Resolver404()
 
