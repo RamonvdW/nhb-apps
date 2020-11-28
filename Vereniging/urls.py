@@ -52,6 +52,10 @@ urlpatterns = [
          view_wedstrijden.WedstrijdenView.as_view(),
          name='wedstrijden'),
 
+    path('lijst-rayonkampioenschappen/<deelcomp_pk>/alles/',
+         view_lijst_rk.VerenigingLijstRkSchuttersAllesView.as_view(),
+         name='lijst-rk-alles'),
+
     path('lijst-rayonkampioenschappen/<deelcomp_pk>/',
          view_lijst_rk.VerenigingLijstRkSchuttersView.as_view(),
          name='lijst-rk'),

@@ -19,12 +19,13 @@ TEMPLATE_VERENIGING_LIJST_RK = 'vereniging/lijst-rk.dtl'
 
 class VerenigingLijstRkSchuttersView(UserPassesTestMixin, TemplateView):
 
-    """ Deze view laat de (kandidaat) schutters van en RK zien,
+    """ Deze view laat de kandidaat-schutters van en RK zien van de vereniging van de HWL,
         met mogelijkheid voor de HWL om deze te bevestigen.
     """
 
     # class variables shared by all instances
     template_name = TEMPLATE_VERENIGING_LIJST_RK
+    toon_alles = False
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -70,6 +71,9 @@ class VerenigingLijstRkSchuttersView(UserPassesTestMixin, TemplateView):
                       .order_by('klasse__indiv__volgorde',  # groepeer per klasse
                                 'volgorde',                 # oplopend op volgorde (dubbelen mogelijk)
                                 '-gemiddelde'))             # aflopend op gemiddelde
+
+        if not self.toon_alles:
+            deelnemers = deelnemers.filter(bij_vereniging=functie_nu.nhb_ver)
 
         wkl2limiet = dict()    # [pk] = aantal
         for limiet in (DeelcompetitieKlasseLimiet
@@ -125,8 +129,24 @@ class VerenigingLijstRkSchuttersView(UserPassesTestMixin, TemplateView):
         context['deelnemers'] = keep
         context['aantal_klassen'] = aantal_klassen
 
+        if self.toon_alles:
+            context['url_filtered'] = reverse('Vereniging:lijst-rk',
+                                              kwargs={'deelcomp_pk': deelcomp_rk.pk})
+        else:
+            context['url_alles'] = reverse('Vereniging:lijst-rk-alles',
+                                           kwargs={'deelcomp_pk': deelcomp_rk.pk})
+
         menu_dynamics(self.request, context, actief='vereniging')
         return context
+
+
+class VerenigingLijstRkSchuttersAllesView(VerenigingLijstRkSchuttersView):
+
+    """ Deze view laat alle kandidaat-schutters van en RK zien,
+        met mogelijkheid voor de HWL om deze te bevestigen.
+    """
+
+    toon_alles = True
 
 
 # end of file

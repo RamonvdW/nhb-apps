@@ -23,10 +23,20 @@
 
         {% if kan_wijzigen %}
             <p>Jij kan schutters van je eigen verenigingen aanmelden of aanmelden voor de kampioenschappen. De RKO (zie Plein, Beheerders) kan dit voor alle verenigingen in het rayon.</p>
-            <p>LET OP! Een schutter afmelden en weer aanmelden plaatst deze op de lijst van reserve-schutters (totdat een deelnemer zich afmeldt).</p>
+            <p><span class="red-text">PAS OP!</span> Een schutter afmelden en weer aanmelden plaatst deze op de lijst van reserve-schutters (totdat een deelnemer zich afmeldt).</p>
         {% else %}
             <p>De HWL van jouw vereniging en de RKO kunnen schutters aanmelden en afmelden.</p>
         {% endif %}
+
+        <div class="white shrink-wrap-5">
+            {% if url_alles %}
+                <a class="margin-5 btn-nhb-blauw btn-small disabled" href="#">Toon alleen onze schutters</a>
+                <a class="margin-5 btn-nhb-blauw btn-small" href="{{ url_alles }}">Toon alle deelnemers</a>
+            {% else %}
+                <a class="margin-5 btn-nhb-blauw btn-small" href="{{ url_filtered }}">Toon alleen onze schutters</a>
+                <a class="margin-5 btn-nhb-blauw btn-small disabled" href="#">Toon alle deelnemers</a>
+            {% endif %}
+        </div>
 
         <table class="white">
 
