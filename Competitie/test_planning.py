@@ -8,10 +8,9 @@ from django.test import TestCase
 from BasisTypen.models import BoogType, TeamWedstrijdklasse
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging, NhbLid
-from Wedstrijden.models import Wedstrijd
 from Schutter.models import SchutterBoog
 from Score.models import Score
-from Wedstrijden.models import WedstrijdLocatie
+from Wedstrijden.models import WedstrijdLocatie, Wedstrijd
 from Overig.e2ehelpers import E2EHelpers
 from .models import (Competitie, DeelCompetitie, CompetitieKlasse,
                      DeelcompetitieRonde, competitie_aanmaken,

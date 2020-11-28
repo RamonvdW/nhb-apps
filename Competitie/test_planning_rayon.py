@@ -9,7 +9,7 @@ from BasisTypen.models import BoogType
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging, NhbLid
 from Schutter.models import SchutterBoog
-from Wedstrijden.models import WedstrijdLocatie
+from Wedstrijden.models import WedstrijdLocatie, WedstrijdenPlan, Wedstrijd
 from Overig.e2ehelpers import E2EHelpers
 from .models import (Competitie, DeelCompetitie, LAAG_REGIO, competitie_aanmaken,
                      KampioenschapSchutterBoog, CompetitieKlasse, DeelcompetitieKlasseLimiet,
@@ -150,6 +150,10 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
                                                         indiv__is_onbekend=False,
                                                         indiv__niet_voor_rk_bk=False,
                                                         indiv__boogtype__afkorting='C')[0]
+        self.klasse_ib = CompetitieKlasse.objects.filter(competitie=self.comp_18,
+                                                         indiv__is_onbekend=False,
+                                                         indiv__niet_voor_rk_bk=False,
+                                                         indiv__boogtype__afkorting='IB')[0]
 
         # maak nog een test vereniging, zonder HWL functie
         ver = NhbVereniging()
@@ -179,6 +183,32 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
 
         comp.zet_fase()
         self.assertEqual(comp.fase, 'G')
+
+    def _deelnemers_aanmaken(self):
+        KampioenschapSchutterBoog(deelcompetitie=self.deelcomp_rayon1_18,
+                                  schutterboog=self.schutterboog,
+                                  klasse=self.klasse_r,
+                                  bij_vereniging=self.schutterboog.nhblid.bij_vereniging).save()
+
+        KampioenschapSchutterBoog(deelcompetitie=self.deelcomp_rayon1_18,
+                                  schutterboog=self.schutterboog,
+                                  klasse=self.klasse_r,
+                                  bij_vereniging=self.schutterboog.nhblid.bij_vereniging).save()
+
+        KampioenschapSchutterBoog(deelcompetitie=self.deelcomp_rayon1_18,
+                                  schutterboog=self.schutterboog,
+                                  klasse=self.klasse_r,
+                                  bij_vereniging=self.schutterboog.nhblid.bij_vereniging).save()
+
+        KampioenschapSchutterBoog(deelcompetitie=self.deelcomp_rayon1_18,
+                                  schutterboog=self.schutterboog,
+                                  klasse=self.klasse_c,
+                                  bij_vereniging=self.schutterboog.nhblid.bij_vereniging).save()
+
+        KampioenschapSchutterBoog(deelcompetitie=self.deelcomp_rayon1_18,
+                                  schutterboog=self.schutterboog,
+                                  klasse=self.klasse_c,
+                                  bij_vereniging=self.schutterboog.nhblid.bij_vereniging).save()
 
     def test_buiten_eigen_rayon(self):
         # RKO probeert RK wedstrijd toe te voegen en wijzigen buiten eigen rayon
@@ -220,6 +250,14 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_rko1_18)
         self.e2e_wissel_naar_functie(self.functie_rko1_18)
 
+        self._deelnemers_aanmaken()
+
+        # maak een regiowedstrijd aan, zodat deze geteld kan worden
+        deelcomp = DeelCompetitie.objects.get(competitie=self.comp_18,
+                                              laag=LAAG_REGIO,
+                                              nhb_regio=self.regio_101)
+        deelcomp.plan = WedstrijdenPlan()
+
         # maak een RK wedstrijd aan in het eigen rayon
         url = self.url_planning_rayon % self.deelcomp_rayon1_18.pk
         resp = self.client.post(url)
@@ -236,22 +274,34 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('competitie/planning-rayon.dtl', 'plein/site_layout.dtl'))
 
         # haal de wedstrijd op
-        wedstrijd_r1_pk = DeelCompetitie.objects.get(pk=self.deelcomp_rayon1_18.pk).plan.wedstrijden.all()[0].pk
-        url = self.url_wijzig_rk_wedstrijd % wedstrijd_r1_pk
-        resp = self.client.get(url)
+        wedstrijd_r1 = DeelCompetitie.objects.get(pk=self.deelcomp_rayon1_18.pk).plan.wedstrijden.all()[0]
+        url_w = self.url_wijzig_rk_wedstrijd % wedstrijd_r1.pk
+        resp = self.client.get(url_w)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/wijzig-wedstrijd-rk.dtl', 'plein/site_layout.dtl'))
 
         # nog een keer ophalen, want dan zijn wedstrijd.vereniging en wedstrijd.locatie al gezet
-        resp = self.client.get(url)
+        resp = self.client.get(url_w)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
 
-        # wijzig de wedstrijd
-        resp = self.client.post(url, {'weekdag': 1,
-                                      'aanvang': '12:34',
-                                      'nhbver_pk': self.nhbver_101.nhb_nr})
+        # wijzig de wedstrijd en zet een aantal wedstrijdklassen
+        sel_indiv_1 = "wkl_indiv_%s" % self.klasse_r.indiv.pk
+        sel_indiv_2 = "wkl_indiv_%s" % self.klasse_c.indiv.pk
+        sel_indiv_3 = "wkl_indiv_%s" % self.klasse_ib.indiv.pk
+        resp = self.client.post(url_w, {'weekdag': 1,
+                                        'aanvang': '12:34',
+                                        'nhbver_pk': self.nhbver_101.nhb_nr,
+                                        sel_indiv_1: "on",
+                                        sel_indiv_2: "on",
+                                        sel_indiv_3: "on"})
         self.assertEqual(resp.status_code, 302)  # 302 = redirect == success
+
+        # wissel naar BKO en haal de planning op
+        self.e2e_login_and_pass_otp(self.account_bko_18)
+        self.e2e_wissel_naar_functie(self.functie_bko_18)
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
 
     def test_planning_rayon_geen_ver(self):
         self.e2e_login_and_pass_otp(self.account_rko2_18)
