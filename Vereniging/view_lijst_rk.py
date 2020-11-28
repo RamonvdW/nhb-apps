@@ -35,32 +35,6 @@ class VerenigingLijstRkSchuttersView(UserPassesTestMixin, TemplateView):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
         return HttpResponseRedirect(reverse('Plein:plein'))
 
-    @staticmethod
-    def _get_regio_status(competitie):
-        # schutter moeten uit LAAG_REGIO gehaald worden, uit de 4 regio's van het rayon
-        regio_deelcomps = (DeelCompetitie
-                           .objects
-                           .filter(laag=LAAG_REGIO,
-                                   competitie=competitie)
-                           .select_related('nhb_regio',
-                                           'nhb_regio__rayon')
-                           .order_by('nhb_regio__regio_nr'))
-
-        alles_afgesloten = True
-        for obj in regio_deelcomps:
-            obj.regio_str = str(obj.nhb_regio.regio_nr)
-            obj.rayon_str = str(obj.nhb_regio.rayon.rayon_nr)
-
-            if obj.is_afgesloten:
-                obj.status_str = "Afgesloten"
-                obj.status_groen = True
-            else:
-                alles_afgesloten = False
-                obj.status_str = "Actief"
-        # for
-
-        return alles_afgesloten, regio_deelcomps
-
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
