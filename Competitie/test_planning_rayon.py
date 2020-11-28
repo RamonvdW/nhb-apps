@@ -11,7 +11,9 @@ from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging, N
 from Schutter.models import SchutterBoog
 from Wedstrijden.models import WedstrijdLocatie
 from Overig.e2ehelpers import E2EHelpers
-from .models import (Competitie, DeelCompetitie, LAAG_REGIO, competitie_aanmaken)
+from .models import (Competitie, DeelCompetitie, LAAG_REGIO, competitie_aanmaken,
+                     KampioenschapSchutterBoog, CompetitieKlasse, DeelcompetitieKlasseLimiet,
+                     KampioenschapMutatie)
 import datetime
 
 
@@ -140,6 +142,15 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         self.functie_rcl101_25.accounts.add(self.account_rcl101_25)
         self.functie_rcl112_18.accounts.add(self.account_rcl112_18)
 
+        self.klasse_r = CompetitieKlasse.objects.filter(competitie=self.comp_18,
+                                                        indiv__is_onbekend=False,
+                                                        indiv__niet_voor_rk_bk=False,
+                                                        indiv__boogtype__afkorting='R')[0]
+        self.klasse_c = CompetitieKlasse.objects.filter(competitie=self.comp_18,
+                                                        indiv__is_onbekend=False,
+                                                        indiv__niet_voor_rk_bk=False,
+                                                        indiv__boogtype__afkorting='C')[0]
+
         # maak nog een test vereniging, zonder HWL functie
         ver = NhbVereniging()
         ver.naam = "Kleine Club"
@@ -153,6 +164,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         self.url_doorzetten_rk = '/competitie/planning/doorzetten/%s/rk/'                  # comp_pk
         self.url_lijst_rk = '/competitie/lijst-rayonkampioenschappen/%s/'                  # deelcomp_pk
         self.url_wijzig_status = '/competitie/lijst-rayonkampioenschappen/wijzig-status-rk-deelnemer/%s/'  # deelnemer_pk
+        self.url_wijzig_limiet = '/competitie/planning/rayoncompetitie/%s/limieten/'       # deelcomp_pk
 
     def competitie_sluit_alle_regiocompetities(self, comp):
         # deze functie sluit alle regiocompetities af zodat de competitie in fase G komt
@@ -160,7 +172,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         # print(comp.fase)
         self.assertTrue('B' < comp.fase < 'G')
         for deelcomp in DeelCompetitie.objects.filter(competitie=comp, laag=LAAG_REGIO):
-            if not deelcomp.is_afgesloten:
+            if not deelcomp.is_afgesloten:          # pragma: no branch
                 deelcomp.is_afgesloten = True
                 deelcomp.save()
         # for
@@ -406,11 +418,59 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         resp = self.client.post(self.url_doorzetten_rk % self.comp_18.pk)
         self.assertEqual(resp.status_code, 302)     # 302 = redirect = success
 
+        # zet een limiet
+        DeelcompetitieKlasseLimiet(deelcompetitie=self.deelcomp_rayon1_18,
+                                   klasse=self.klasse_r,
+                                   limiet=20).save()
+
         # nu nog een keer, met een RK deelnemerslijst
         self.e2e_login_and_pass_otp(self.account_rko1_18)
         self.e2e_wissel_naar_functie(self.functie_rko1_18)
+
+        deelnemer = KampioenschapSchutterBoog(deelcompetitie=self.deelcomp_rayon1_18,
+                                              schutterboog=self.schutterboog,
+                                              bij_vereniging=self.schutterboog.nhblid.bij_vereniging,
+                                              klasse=self.klasse_r)
+        deelnemer.save()
+
+        deelnemer = KampioenschapSchutterBoog(deelcompetitie=self.deelcomp_rayon1_18,
+                                              schutterboog=self.schutterboog,
+                                              bij_vereniging=self.schutterboog.nhblid.bij_vereniging,
+                                              klasse=self.klasse_c)
+        deelnemer.save()
+
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/lijst-rk.dtl', 'plein/site_layout.dtl'))
+
+        deelnemer.deelname_bevestigd = True
+        deelnemer.save()
+
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/lijst-rk.dtl', 'plein/site_layout.dtl'))
+
+        deelnemer.rank = 100
+        deelnemer.save()
+
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/lijst-rk.dtl', 'plein/site_layout.dtl'))
+
+        deelnemer.bij_vereniging = None
+        deelnemer.rank = 1
+        deelnemer.is_afgemeld = True
+        deelnemer.save()
+
+        # twee deelnemers in dezelfde klasse
+        deelnemer.pk = None
+        deelnemer.save()
+
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/lijst-rk.dtl', 'plein/site_layout.dtl'))
 
@@ -433,5 +493,172 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         url = self.url_lijst_rk % self.deelcomp_rayon2_18.pk
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
+
+    def test_bad_wijzig_status(self):
+        self.client.logout()
+        url = self.url_wijzig_status % 999999
+        resp = self.client.get(url)
+        self.assert_is_redirect(resp, '/plein/')
+
+        # RKO
+        self.e2e_login_and_pass_otp(self.account_rko1_18)
+        self.e2e_wissel_naar_functie(self.functie_rko1_18)
+
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
+
+        resp = self.client.post(url)
+        self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
+
+        # verkeerde RKO
+        self.e2e_login_and_pass_otp(self.account_rko2_18)
+        self.e2e_wissel_naar_functie(self.functie_rko2_18)
+
+        deelnemer = KampioenschapSchutterBoog(deelcompetitie=self.deelcomp_rayon1_18,
+                                              schutterboog=self.schutterboog,
+                                              bij_vereniging=self.schutterboog.nhblid.bij_vereniging,
+                                              klasse=self.klasse_r)
+        deelnemer.save()
+
+        url = self.url_wijzig_status % deelnemer.pk
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
+
+        resp = self.client.post(url)
+        self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
+
+    def test_wijzig_status(self):
+        # RKO
+        self.e2e_login_and_pass_otp(self.account_rko1_18)
+        self.e2e_wissel_naar_functie(self.functie_rko1_18)
+
+        deelnemer = KampioenschapSchutterBoog(deelcompetitie=self.deelcomp_rayon1_18,
+                                              schutterboog=self.schutterboog,
+                                              bij_vereniging=self.schutterboog.nhblid.bij_vereniging,
+                                              klasse=self.klasse_r)
+        deelnemer.save()
+
+        url = self.url_wijzig_status % deelnemer.pk
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/wijzig-status-rk-deelnemer.dtl', 'plein/site_layout.dtl'))
+
+        # geen vereniging
+        deelnemer.bij_vereniging = None
+        deelnemer.save()
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+
+        self.assertEqual(KampioenschapMutatie.objects.count(), 0)
+
+        resp = self.client.post(url, {'bevestig': '0', 'afmelden': '0'})
+        deelnemer = KampioenschapSchutterBoog.objects.get(pk=deelnemer.pk)
+        self.assertEqual(KampioenschapMutatie.objects.count(), 0)
+
+        resp = self.client.post(url, {'bevestig': '0', 'afmelden': '1'})
+        deelnemer = KampioenschapSchutterBoog.objects.get(pk=deelnemer.pk)
+        self.assertEqual(KampioenschapMutatie.objects.count(), 1)
+
+        resp = self.client.post(url, {'bevestig': '1', 'afmelden': '0'})
+        deelnemer = KampioenschapSchutterBoog.objects.get(pk=deelnemer.pk)
+        self.assertEqual(KampioenschapMutatie.objects.count(), 2)
+
+    def test_bad_wijzig_limiet(self):
+        self.client.logout()
+        url = self.url_wijzig_limiet % 999999
+        resp = self.client.get(url)
+        self.assert_is_redirect(resp, '/plein/')
+
+        # RKO
+        self.e2e_login_and_pass_otp(self.account_rko1_18)
+        self.e2e_wissel_naar_functie(self.functie_rko1_18)
+
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
+
+        resp = self.client.post(url)
+        self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
+
+        url = self.url_wijzig_limiet % self.deelcomp_rayon1_18.pk
+
+        sel = 'sel_%s' % self.klasse_c.pk
+        resp = self.client.post(url, {sel: 'xx'})
+        self.assertEqual(resp.status_code, 302)     # doorloopt alles
+
+        resp = self.client.post(url, {sel: '19'})
+        self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
+
+        # verkeerde RKO
+        self.e2e_login_and_pass_otp(self.account_rko2_18)
+        self.e2e_wissel_naar_functie(self.functie_rko2_18)
+
+        url = self.url_wijzig_limiet % self.deelcomp_rayon1_18.pk
+
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
+
+        resp = self.client.post(url)
+        self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
+
+    def test_wijzig_limiet(self):
+        # RKO
+        self.e2e_login_and_pass_otp(self.account_rko1_18)
+        self.e2e_wissel_naar_functie(self.functie_rko1_18)
+
+        # zonder limiet aanwezig
+        url = self.url_wijzig_limiet % self.deelcomp_rayon1_18.pk
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/limieten-rk.dtl', 'plein/site_layout.dtl'))
+
+        sel = 'sel_%s' % self.klasse_r.pk
+
+        # limiet op default zetten
+        self.assertEqual(DeelcompetitieKlasseLimiet.objects.count(), 0)
+        resp = self.client.post(url, {sel: 24})
+        self.assertEqual(resp.status_code, 302)     # 302 = redirect = success
+        self.assertEqual(DeelcompetitieKlasseLimiet.objects.count(), 0)
+
+        # limiet zetten
+        self.assertEqual(DeelcompetitieKlasseLimiet.objects.count(), 0)
+        resp = self.client.post(url, {sel: 20})
+        self.assertEqual(resp.status_code, 302)     # 302 = redirect = success
+        self.assertEqual(DeelcompetitieKlasseLimiet.objects.count(), 1)
+
+        # limiet opnieuw zetten, geen wijziging
+        resp = self.client.post(url, {sel: 20})
+        self.assertEqual(resp.status_code, 302)     # 302 = redirect = success
+        self.assertEqual(DeelcompetitieKlasseLimiet.objects.count(), 1)
+
+        # limiet aanpassen
+        resp = self.client.post(url, {sel: 16})
+        self.assertEqual(resp.status_code, 302)     # 302 = redirect = success
+        self.assertEqual(DeelcompetitieKlasseLimiet.objects.count(), 1)
+
+        # met limiet aanwezig
+        url = self.url_wijzig_limiet % self.deelcomp_rayon1_18.pk
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+
+        # limiet verwijderen
+        resp = self.client.post(url, {sel: 24})
+        self.assertEqual(resp.status_code, 302)     # 302 = redirect = success
+        self.assertEqual(DeelcompetitieKlasseLimiet.objects.count(), 0)
+
+        # nu met een deelnemer, zodat de mutatie opgestart wordt
+        deelnemer = KampioenschapSchutterBoog(deelcompetitie=self.deelcomp_rayon1_18,
+                                              schutterboog=self.schutterboog,
+                                              bij_vereniging=self.schutterboog.nhblid.bij_vereniging,
+                                              klasse=self.klasse_r)
+        deelnemer.save()
+
+        self.assertEqual(KampioenschapMutatie.objects.count(), 0)
+        resp = self.client.post(url, {sel: 4})
+        self.assertEqual(resp.status_code, 302)     # 302 = redirect = success
+        self.assertEqual(KampioenschapMutatie.objects.count(), 1)
 
 # end of file

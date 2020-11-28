@@ -169,7 +169,7 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         # print(comp.fase)
         self.assertTrue('B' < comp.fase < 'G')
         for deelcomp in DeelCompetitie.objects.filter(competitie=comp, laag=LAAG_REGIO):
-            if not deelcomp.is_afgesloten:
+            if not deelcomp.is_afgesloten:      # pragma: no branch
                 deelcomp.is_afgesloten = True
                 deelcomp.save()
         # for
@@ -189,7 +189,8 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         self.comp = Competitie.objects.get(pk=self.comp.pk)
         self.e2e_wissel_naar_functie(self.functie_rko1)
 
-    def _dump_deelnemers(self):
+    @staticmethod
+    def _dump_deelnemers():                 # pragma: no coverage
         print('')
         print('====================================================================')
         print('Deelnemers:')
@@ -203,12 +204,12 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         if alleen_kampioenen:
             # verwijder iedereen zonder kampioen label
             objs = KampioenschapSchutterBoog.objects.exclude(kampioen_label='')
-        elif alle:
+        elif alle:                          # pragma: no branch
             # all deelnemers
             objs = KampioenschapSchutterBoog.objects.all()
         else:
             # verwijder de kampioenen
-            objs = KampioenschapSchutterBoog.objects.filter(kampioen_label='')
+            objs = KampioenschapSchutterBoog.objects.filter(kampioen_label='')      # pragma: no coverage
 
         objs = objs.order_by('volgorde')
 
@@ -251,7 +252,7 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         f2 = io.StringIO()
         management.call_command('kampioenschap_mutaties', '1', '--quick', stderr=f1, stdout=f2)
 
-        if show:
+        if show:                    # pragma: no coverage
             print(f1.getvalue())
             print(f2.getvalue())
 
