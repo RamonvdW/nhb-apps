@@ -11,8 +11,9 @@ from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
 from Schutter.models import SchutterBoog
 from Wedstrijden.models import WedstrijdLocatie
 from Overig.e2ehelpers import E2EHelpers
-from .models import (Competitie, DeelCompetitie, competitie_aanmaken,
-                     LAAG_REGIO, LAAG_RK)
+from .models import (Competitie, CompetitieKlasse,  competitie_aanmaken,
+                     DeelCompetitie, LAAG_REGIO, LAAG_RK, LAAG_BK,
+                     RegioCompetitieSchutterBoog)
 from .test_fase import zet_competitie_fase
 import datetime
 
@@ -99,6 +100,9 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         self.account_schutter = self._prep_beheerder_lid('Schutter')
         self.lid_schutter = NhbLid.objects.get(nhb_nr=self.account_schutter.username)
 
+        self.account_schutter2 = self._prep_beheerder_lid('Schutter2')
+        self.lid_schutter2 = NhbLid.objects.get(nhb_nr=self.account_schutter2.username)
+
         self.boog_r = BoogType.objects.get(afkorting='R')
 
         self.schutterboog = SchutterBoog(nhblid=self.lid_schutter,
@@ -119,11 +123,20 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         self.comp_18 = Competitie.objects.get(afstand='18')
         self.comp_25 = Competitie.objects.get(afstand='25')
 
-        self.deelcomp_bond_18 = DeelCompetitie.objects.filter(laag='BK', competitie=self.comp_18)[0]
-        self.deelcomp_rayon1_18 = DeelCompetitie.objects.filter(laag='RK', competitie=self.comp_18, nhb_rayon=self.rayon_1)[0]
+        self.deelcomp_bond_18 = DeelCompetitie.objects.filter(competitie=self.comp_18,
+                                                              laag=LAAG_BK)[0]
+        self.deelcomp_rayon1_18 = DeelCompetitie.objects.filter(competitie=self.comp_18,
+                                                                laag=LAAG_RK,
+                                                                nhb_rayon=self.rayon_1)[0]
+        self.deelcomp_regio_101 = DeelCompetitie.objects.filter(competitie=self.comp_18,
+                                                                laag=LAAG_REGIO,
+                                                                nhb_regio=self.regio_101)[0]
 
         self.functie_bko_18 = self.deelcomp_bond_18.functie
         self.functie_bko_18.accounts.add(self.account_bko_18)
+
+        self.functie_rko1_18 = self.deelcomp_rayon1_18.functie
+        self.functie_rko1_18.accounts.add(self.account_rko1_18)
 
         # maak nog een test vereniging, zonder HWL functie
         ver = NhbVereniging()
@@ -135,6 +148,49 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
 
         self.url_doorzetten_rk = '/competitie/planning/doorzetten/%s/rk/'     # comp_pk
         self.url_doorzetten_bk = '/competitie/planning/doorzetten/%s/bk/'     # comp_pk
+
+    def _regioschutters_inschrijven(self):
+
+        boog_c = BoogType.objects.get(afkorting='C')
+
+        klasse_r = CompetitieKlasse.objects.filter(indiv__boogtype__afkorting='R',
+                                                   indiv__is_onbekend=False,
+                                                   indiv__niet_voor_rk_bk=False)[0]
+
+        klasse_c = CompetitieKlasse.objects.filter(indiv__boogtype__afkorting='C',
+                                                   indiv__is_onbekend=False,
+                                                   indiv__niet_voor_rk_bk=False)[0]
+
+        # recurve, lid 1
+        RegioCompetitieSchutterBoog(deelcompetitie=self.deelcomp_regio_101,
+                                    schutterboog=self.schutterboog,
+                                    bij_vereniging=self.schutterboog.nhblid.bij_vereniging,
+                                    klasse=klasse_r,
+                                    aantal_scores=7).save()
+
+        # compound, lid 1
+        schutterboog = SchutterBoog(nhblid=self.lid_schutter,
+                                    boogtype=boog_c,
+                                    voor_wedstrijd=True)
+        schutterboog.save()
+
+        RegioCompetitieSchutterBoog(deelcompetitie=self.deelcomp_regio_101,
+                                    schutterboog=schutterboog,
+                                    bij_vereniging=schutterboog.nhblid.bij_vereniging,
+                                    klasse=klasse_c,
+                                    aantal_scores=6).save()
+
+        # compound, lid2
+        schutterboog = SchutterBoog(nhblid=self.lid_schutter2,
+                                    boogtype=boog_c,
+                                    voor_wedstrijd=True)
+        schutterboog.save()
+
+        RegioCompetitieSchutterBoog(deelcompetitie=self.deelcomp_regio_101,
+                                    schutterboog=schutterboog,
+                                    bij_vereniging=schutterboog.nhblid.bij_vereniging,
+                                    klasse=klasse_c,
+                                    aantal_scores=6).save()
 
     def test_doorzetten_rk(self):
         self.e2e_login_and_pass_otp(self.account_bb)
@@ -169,6 +225,8 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('competitie/bko-doorzetten-naar-rk.dtl', 'plein/site_layout.dtl'))
 
         # nu echt doorzetten
+        self._regioschutters_inschrijven()
+
         resp = self.client.post(url)
         self.assert_is_redirect(resp, '/competitie/')       # redirect = Success
 

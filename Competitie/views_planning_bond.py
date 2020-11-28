@@ -154,7 +154,7 @@ class DoorzettenNaarRKView(UserPassesTestMixin, TemplateView):
                                 kampioen_label=obj.kampioen_label)
 
                 bulk_lijst.append(deelnemer)
-                if len(bulk_lijst) > 500:
+                if len(bulk_lijst) > 150:       # pragma: no cover
                     KampioenschapSchutterBoog.objects.bulk_create(bulk_lijst)
                     bulk_lijst = list()
 
@@ -201,7 +201,8 @@ class DoorzettenNaarRKView(UserPassesTestMixin, TemplateView):
             schrijf_in_logboek(self.request.user, "Competitie", msg)
         # for
 
-    def _get_schutters_regios(self, competitie, rayon_nr):
+    @staticmethod
+    def _get_schutters_regios(competitie, rayon_nr):
         """ geeft een lijst met deelnemers terug
             en een totaal-status van de onderliggende regiocompetities: alles afgesloten?
         """
@@ -267,12 +268,9 @@ class DoorzettenNaarRKView(UserPassesTestMixin, TemplateView):
                 kampioenen.append(tup)
                 deelnemers.pop(nr)
             else:
-                if rank <= 48:
-                    deelnemer.kampioen_label = ""
-                    nr += 1
-                else:
-                    # verwijder deze schutter uit de lijst
-                    deelnemers.pop(nr)
+                # alle schutters overnemen als potentiële reserveschutter
+                deelnemer.kampioen_label = ""
+                nr += 1
         # while
 
         if len(kampioenen):
