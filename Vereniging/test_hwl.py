@@ -10,7 +10,7 @@ from Functie.models import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
 from Competitie.models import (Competitie, DeelCompetitie, CompetitieKlasse,
                                RegioCompetitieSchutterBoog,
-                               INSCHRIJF_METHODE_3, LAAG_REGIO)
+                               INSCHRIJF_METHODE_3, LAAG_REGIO, LAAG_RK)
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Schutter.models import SchutterBoog
 from Score.models import aanvangsgemiddelde_opslaan
@@ -142,6 +142,13 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self._create_histcomp()
         self._create_competitie()
 
+        # fake een deelnemerslijst voor de RK
+        deelcomp_rk = DeelCompetitie.objects.get(competitie=self.comp_25,
+                                                 laag=LAAG_RK,
+                                                 nhb_rayon=self.regio_111.rayon)
+        deelcomp_rk.heeft_deelnemerslijst = True
+        deelcomp_rk.save()
+
         self.url_overzicht = '/vereniging/'
         self.url_ledenlijst = '/vereniging/leden-lijst/'
         self.url_voorkeuren = '/vereniging/leden-voorkeuren/'
@@ -211,8 +218,6 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         url_klassegrenzen_25 = '/competitie/klassegrenzen/vaststellen/25/'
 
         self.assertEqual(CompetitieKlasse.objects.count(), 0)
-
-        resp = self.client.get(url_aanmaken)
 
         # competitie aanmaken
         resp = self.client.post(url_aanmaken)
