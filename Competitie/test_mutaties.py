@@ -13,7 +13,7 @@ from Schutter.models import SchutterBoog
 from Overig.e2ehelpers import E2EHelpers
 from .models import (Competitie, DeelCompetitie, CompetitieKlasse, DeelcompetitieKlasseLimiet,
                      RegioCompetitieSchutterBoog, KampioenschapSchutterBoog, KampioenschapMutatie,
-                     LAAG_REGIO, LAAG_RK, LAAG_BK, AG_NUL, competitie_aanmaken)
+                     LAAG_REGIO, LAAG_RK, LAAG_BK, AG_NUL, competitie_aanmaken, MUTATIE_INITIEEL)
 import datetime
 import io
 
@@ -722,7 +722,10 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
                                        deelnemer=KampioenschapSchutterBoog.objects.all()[0],
                                        door='Tester')
         mutatie.save()
-        self.assertTrue(str(mutatie) != "")
+
+        self.assertTrue("???" in str(mutatie))  # geen beschrijving beschikbaar
+        mutatie.code = MUTATIE_INITIEEL
+        self.assertTrue(str(mutatie) != "")     # wel een beschrijving
 
         # mutatie die al verwerkt is
         KampioenschapMutatie(mutatie=0,
@@ -731,6 +734,5 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
                              door='Tester').save()
 
         self._verwerk_mutaties()
-
 
 # end of file

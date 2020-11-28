@@ -48,6 +48,17 @@ INSCHRIJF_METHODES = (
     (INSCHRIJF_METHODE_3, 'Voorkeur dagdelen')
 )
 
+MUTATIE_CUT = 10
+MUTATIE_INITIEEL = 20
+MUTATIE_AFMELDEN = 30
+MUTATIE_AANMELDEN = 40
+
+mutatie2descr = {
+    MUTATIE_INITIEEL: "initieel",
+    MUTATIE_CUT: "nieuwe limiet",
+    MUTATIE_AFMELDEN: "afmelden",
+    MUTATIE_AANMELDEN: "aanmelden",
+}
 
 class Competitie(models.Model):
     """ Deze database tabel bevat een van de jaarlijkse competities voor 18m of 25m
@@ -621,19 +632,6 @@ class KampioenschapSchutterBoog(models.Model):
     objects = models.Manager()      # for the editor only
 
 
-MUTATIE_CUT = 10
-MUTATIE_INITIEEL = 20
-MUTATIE_AFMELDEN = 30
-MUTATIE_AANMELDEN = 40
-
-mutatie2descr = {
-    MUTATIE_INITIEEL: "initieel",
-    MUTATIE_CUT: "nieuwe limiet",
-    MUTATIE_AFMELDEN: "afmelden",
-    MUTATIE_AANMELDEN: "aanmelden",
-}
-
-
 class KampioenschapMutatie(models.Model):
 
     """ Deze tabel houdt de mutaties bij de lijst van (reserve-)schutters van
@@ -670,7 +668,10 @@ class KampioenschapMutatie(models.Model):
         msg = "[%s]" % self.when
         if not self.is_verwerkt:
             msg += " (nog niet verwerkt)"
-        msg += " %s (%s)" % (self.mutatie, mutatie2descr[self.mutatie])
+        try:
+            msg += " %s (%s)" % (self.mutatie, mutatie2descr[self.mutatie])
+        except KeyError:
+            msg += " %s (???)" % self.mutatie
 
         if self.mutatie not in (MUTATIE_INITIEEL, MUTATIE_CUT):
             msg += " - %s" % self.deelnemer
