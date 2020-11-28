@@ -636,7 +636,7 @@ class WijzigStatusRkSchutterView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
-        return rol_nu == Rollen.ROL_RKO
+        return rol_nu in (Rollen.ROL_RKO, Rollen.ROL_HWL)
 
     def handle_no_permission(self):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
@@ -645,6 +645,8 @@ class WijzigStatusRkSchutterView(UserPassesTestMixin, TemplateView):
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
+
+        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
 
         try:
             deelnemer_pk = int(kwargs['deelnemer_pk'][:6])  # afkappen geeft beveiliging
@@ -658,9 +660,10 @@ class WijzigStatusRkSchutterView(UserPassesTestMixin, TemplateView):
         except (ValueError, KampioenschapSchutterBoog.DoesNotExist):
             raise Resolver404()
 
-        # controleer dat de juiste RKO aan de knoppen zit
-        _, functie_nu = rol_get_huidige_functie(self.request)
-        if functie_nu != deelnemer.deelcompetitie.functie:
+        if rol_nu == Rollen.ROL_HWL and deelnemer.bij_vereniging != functie_nu.nhb_ver:
+            raise Resolver404()     # geen schutter van de vereniging
+
+        if rol_nu == Rollen.ROL_RKO and functie_nu != deelnemer.deelcompetitie.functie:
             raise Resolver404()     # niet de juiste RKO
 
         lid = deelnemer.schutterboog.nhblid
@@ -676,10 +679,16 @@ class WijzigStatusRkSchutterView(UserPassesTestMixin, TemplateView):
         context['url_wijzig'] = reverse('Competitie:wijzig-status-rk-deelnemer',
                                         kwargs={'deelnemer_pk': deelnemer.pk})
 
-        context['url_terug'] = reverse('Competitie:lijst-rk',
-                                       kwargs={'deelcomp_pk': deelnemer.deelcompetitie.pk})
+        if rol_nu == Rollen.ROL_RKO:
+            context['url_terug'] = reverse('Competitie:lijst-rk',
+                                           kwargs={'deelcomp_pk': deelnemer.deelcompetitie.pk})
+            menu_dynamics(self.request, context, actief='competitie')
+        else:
+            # HWL
+            context['url_terug'] = reverse('Vereniging:lijst-rk',
+                                           kwargs={'deelcomp_pk': deelnemer.deelcompetitie.pk})
+            menu_dynamics(self.request, context, actief='vereniging')
 
-        menu_dynamics(self.request, context, actief='competitie')
         return context
 
     def post(self, request, *args, **kwargs):
@@ -698,8 +707,12 @@ class WijzigStatusRkSchutterView(UserPassesTestMixin, TemplateView):
         bevestig = str(request.POST.get('bevestig', ''))[:2]
         afmelden = str(request.POST.get('afmelden', ''))[:2]
 
-        _, functie_nu = rol_get_huidige_functie(self.request)
-        if functie_nu != deelnemer.deelcompetitie.functie:
+        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
+
+        if rol_nu == Rollen.ROL_HWL and deelnemer.bij_vereniging != functie_nu.nhb_ver:
+            raise Resolver404()     # geen schutter van de vereniging
+
+        if rol_nu == Rollen.ROL_RKO and functie_nu != deelnemer.deelcompetitie.functie:
             raise Resolver404()     # niet de juiste RKO
 
         account = request.user
@@ -714,8 +727,14 @@ class WijzigStatusRkSchutterView(UserPassesTestMixin, TemplateView):
                                  deelnemer=deelnemer,
                                  door=door_str).save()
 
-        return HttpResponseRedirect(reverse('Competitie:lijst-rk',
-                                            kwargs={'deelcomp_pk': deelnemer.deelcompetitie.pk}))
+        if rol_nu == Rollen.ROL_RKO:
+            url = reverse('Competitie:lijst-rk',
+                          kwargs={'deelcomp_pk': deelnemer.deelcompetitie.pk})
+        else:
+            url = reverse('Vereniging:lijst-rk',
+                          kwargs={'deelcomp_pk': deelnemer.deelcompetitie.pk})
+
+        return HttpResponseRedirect(url)
 
 
 class RayonLimietenView(UserPassesTestMixin, TemplateView):
