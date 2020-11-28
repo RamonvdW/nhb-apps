@@ -6,10 +6,12 @@
 
 from django.test import TestCase
 from BasisTypen.models import BoogType, TeamWedstrijdklasse
+from Competitie.test_fase import zet_competitie_fase
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging, NhbLid
 from Schutter.models import SchutterBoog
 from Score.models import Score
+from Taken.models import Taak
 from Wedstrijden.models import WedstrijdLocatie, Wedstrijd
 from Overig.e2ehelpers import E2EHelpers
 from .models import (Competitie, DeelCompetitie, CompetitieKlasse,
@@ -111,6 +113,14 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
         # creëer een competitie met deelcompetities
         competitie_aanmaken(jaar=2019)
 
+        # klassengrenzen vaststellen om de competitie voorbij fase A1 te krijgen
+        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_wisselnaarrol_bb()
+        self.url_klassegrenzen_vaststellen_18 = '/competitie/klassegrenzen/vaststellen/18/'
+        resp = self.client.post(self.url_klassegrenzen_vaststellen_18)
+        self.assertEqual(resp.status_code, 302)     # 302 = Redirect = success
+        self.client.logout()
+
         self.comp_18 = Competitie.objects.get(afstand='18')
         self.comp_25 = Competitie.objects.get(afstand='25')
         self.deelcomp_bond_18 = DeelCompetitie.objects.filter(laag='BK', competitie=self.comp_18)[0]
@@ -153,6 +163,7 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
         self.url_wijzig_rk_wedstrijd = '/competitie/planning/wedstrijd-rayon/wijzig/%s/'  # wedstrijd_pk
         self.url_verwijder_wedstrijd = '/competitie/planning/wedstrijd/verwijder/%s/'     # wedstrijd_pk
         self.url_uitslag_invoeren = '/competitie/wedstrijd/uitslag-invoeren/%s/'          # wedstrijd_pk
+        self.url_afsluiten_regio = '/competitie/planning/regiocompetitie/afsluiten/%s/'   # deelcomp_pk
 
     def test_overzicht_anon(self):
         resp = self.client.get(self.url_planning_bond % self.deelcomp_bond_18.pk)
@@ -1156,8 +1167,88 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
 
         # pas de instellingen van de wedstrijd aan
-        resp = self.client.post(url, {'weekdag': 0, 'nhbver_pk': self.nhbver_101.pk, 'aanvang': '12:34'})
+        resp = self.client.post(url, {'weekdag': 0,
+                                      'aanvang': '12:34',
+                                      'nhbver_pk': self.nhbver_101.pk})
         self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
 
+    def test_afsluiten_regio(self):
+        self.e2e_login_and_pass_otp(self.account_rcl101_18)
+        self.e2e_wissel_naar_functie(self.functie_rcl101_18)
+        url = self.url_afsluiten_regio % self.deelcomp_regio101_18.pk
+
+        # nog niet afsluitbaar
+        zet_competitie_fase(self.comp_18, 'E')
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/rcl-afsluiten-regiocomp.dtl', 'plein/site_layout.dtl'))
+        hrefs = self.extract_all_urls(resp, skip_menu=True)
+        self.assertEqual(hrefs, ['/competitie/'])  # alleen de terug knop
+
+        # probeer afsluiten
+        resp = self.client.post(url)
+        self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
+        self.assertEqual(Taak.objects.count(), 0)
+
+        # wel afsluitbaar
+        zet_competitie_fase(self.comp_18, 'F')
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/rcl-afsluiten-regiocomp.dtl', 'plein/site_layout.dtl'))
+        hrefs = self.extract_all_urls(resp, skip_menu=True)
+        self.assertEqual(hrefs[0], url)
+
+        # echt afsluiten
+        self.assertEqual(Taak.objects.count(), 0)
+        resp = self.client.post(url)
+        self.assertEqual(resp.status_code, 302)  # 302 = Redirect = succes
+        deelcomp = DeelCompetitie.objects.get(pk=self.deelcomp_regio101_18.pk)
+        self.assertTrue(deelcomp.is_afgesloten)
+        self.assertEqual(Taak.objects.count(), 2)       # RKO + BKO
+
+        # get terwijl al afgesloten
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/rcl-afsluiten-regiocomp.dtl', 'plein/site_layout.dtl'))
+        hrefs = self.extract_all_urls(resp, skip_menu=True)
+        self.assertEqual(hrefs, ['/competitie/'])  # alleen de terug knop
+
+        # nogmaals afsluiten doet niets
+        resp = self.client.post(url)
+        self.assertEqual(resp.status_code, 302)  # 302 = Redirect = succes
+        self.assertEqual(Taak.objects.count(), 2)
+
+    def test_bad_afsluiten_regio(self):
+        self.client.logout()
+        url = self.url_afsluiten_regio % 999999
+        resp = self.client.get(url)
+        self.assert_is_redirect(resp, '/plein/')
+
+        # verkeerde rol
+        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_wisselnaarrol_bb()
+        resp = self.client.get(url)
+        self.assert_is_redirect(resp, '/plein/')
+
+        self.e2e_wissel_naar_functie(self.functie_rcl101_18)
+
+        # verkeerde regio
+        url = self.url_afsluiten_regio % self.deelcomp_regio112_18.pk
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
+
+        resp = self.client.post(url)
+        self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
+
+        # niet bestaande pk
+        url = self.url_afsluiten_regio % 999999
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
+
+        resp = self.client.post(url)
+        self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
 
 # end of file

@@ -877,7 +877,8 @@ class AfsluitenRegiocompView(UserPassesTestMixin, TemplateView):
 
         try:
             deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen geeft beveiliging
-            deelcomp = DeelCompetitie.objects.get(pk=deelcomp_pk)
+            deelcomp = DeelCompetitie.objects.get(pk=deelcomp_pk,
+                                                  laag=LAAG_REGIO)
         except (ValueError, DeelCompetitie.DoesNotExist):
             raise Resolver404()
 
@@ -900,7 +901,8 @@ class AfsluitenRegiocompView(UserPassesTestMixin, TemplateView):
 
         try:
             deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen geeft beveiliging
-            deelcomp = DeelCompetitie.objects.get(pk=deelcomp_pk)
+            deelcomp = DeelCompetitie.objects.get(pk=deelcomp_pk,
+                                                  laag=LAAG_REGIO)
         except (ValueError, DeelCompetitie.DoesNotExist):
             raise Resolver404()
 

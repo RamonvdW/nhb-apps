@@ -469,9 +469,11 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 302)     # 302 = redirect = success
 
         # zet een limiet
-        DeelcompetitieKlasseLimiet(deelcompetitie=self.deelcomp_rayon1_18,
-                                   klasse=self.klasse_r,
-                                   limiet=20).save()
+        limiet = DeelcompetitieKlasseLimiet(deelcompetitie=self.deelcomp_rayon1_18,
+                                            klasse=self.klasse_r,
+                                            limiet=20)
+        limiet.save()
+        self.assertTrue(str(limiet) != "")      # coverage only
 
         # nu nog een keer, met een RK deelnemerslijst
         self.e2e_login_and_pass_otp(self.account_rko1_18)
@@ -482,6 +484,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
                                               bij_vereniging=self.schutterboog.nhblid.bij_vereniging,
                                               klasse=self.klasse_r)
         deelnemer.save()
+        self.assertTrue(str(deelnemer) != "")      # coverage only
 
         deelnemer = KampioenschapSchutterBoog(deelcompetitie=self.deelcomp_rayon1_18,
                                               schutterboog=self.schutterboog,

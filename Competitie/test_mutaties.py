@@ -718,9 +718,11 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         self._begin_rk()        # BB met rol RKO1
 
         # slechte mutatie code
-        KampioenschapMutatie(mutatie=0,
-                             deelnemer=KampioenschapSchutterBoog.objects.all()[0],
-                             door='Tester').save()
+        mutatie = KampioenschapMutatie(mutatie=0,
+                                       deelnemer=KampioenschapSchutterBoog.objects.all()[0],
+                                       door='Tester')
+        mutatie.save()
+        self.assertTrue(str(mutatie) != "")
 
         # mutatie die al verwerkt is
         KampioenschapMutatie(mutatie=0,
