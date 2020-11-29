@@ -8782,7 +8782,6 @@ $jscomp.polyfill = function (e, r, p, m) {
     showClearBtn: false,
 
     // internationalization
-    // internationalization
     i18n: {                 // NL
       cancel: 'Terug',
       clear: 'Clear',
@@ -9068,14 +9067,45 @@ $jscomp.polyfill = function (e, r, p, m) {
     }, {
       key: "adjustCalendar",
       value: function adjustCalendar(calendar) {
-        if (calendar.month < 0) {
-          calendar.year -= Math.ceil(Math.abs(calendar.month) / 12);
-          calendar.month += 12;
+        if (calendar.month < 0)
+        {
+          if (calendar.year > this.options.yearRange[0])
+          {
+            calendar.year--;
+            calendar.month += 12;
+          }
+          else
+          {
+            // do not exit allowed range
+            calendar.month++;
+          }
         }
-        if (calendar.month > 11) {
-          calendar.year += Math.floor(Math.abs(calendar.month) / 12);
-          calendar.month -= 12;
+        if (calendar.month > 11)
+        {
+          if (calendar.year < this.options.yearRange[1])
+          {
+              calendar.year++;
+              calendar.month -= 12;
+          }
+          else
+          {
+            // do not exit allowed range
+            calendar.month--
+          }
         }
+
+        if (calendar.year === this.options.minDate.getFullYear())
+        {
+          let limit = this.options.minDate.getMonth();
+          if (calendar.month < limit) { calendar.month = limit }
+        }
+
+        if (calendar.year === this.options.maxDate.getFullYear())
+        {
+          let limit = this.options.maxDate.getMonth();
+          if (calendar.month > limit) { calendar.month = limit }
+        }
+
         return calendar;
       }
     }, {

@@ -120,51 +120,62 @@
     <script type="application/javascript">
         document.addEventListener('DOMContentLoaded', function()
         {
+            const minDate = new Date({{ competitie.begin_jaar }}, 6-1, 22-1)         // month and day 0-based
+            const maxDate = new Date({{ competitie.begin_jaar }} + 1, 6-1, 22-1)     // month and day 0-based
             const competitieJaren = [{{  competitie.begin_jaar }}, {{ competitie.begin_jaar }} + 1]
 
             let el = document.querySelector('#datum1');
             M.Datepicker.init(el, { defaultDate: new Date("{{ competitie.datum1|date:'Y-m-d' }}"),
                                     setDefaultDate: true,
+                                    minDate: minDate, maxDate: maxDate,
                                     yearRange: competitieJaren})
 
             el = document.querySelector('#datum2');
             M.Datepicker.init(el, { defaultDate: new Date("{{ competitie.datum2|date:'Y-m-d' }}"),
                                     setDefaultDate: true,
+                                    minDate: minDate, maxDate: maxDate,
                                     yearRange: competitieJaren})
 
             el = document.querySelector('#datum3');
             M.Datepicker.init(el, { defaultDate: new Date("{{ competitie.datum3|date:'Y-m-d' }}"),
                                     setDefaultDate: true,
+                                    minDate: minDate, maxDate: maxDate,
                                     yearRange: competitieJaren})
 
             el = document.querySelector('#datum4');
             M.Datepicker.init(el, { defaultDate: new Date("{{ competitie.datum4|date:'Y-m-d' }}"),
                                     setDefaultDate: true,
+                                    minDate: minDate, maxDate: maxDate,
                                     yearRange: competitieJaren})
 
             el = document.querySelector('#datum5');
             M.Datepicker.init(el, { defaultDate: new Date("{{ competitie.datum5|date:'Y-m-d' }}"),
                                     setDefaultDate: true,
+                                    minDate: minDate, maxDate: maxDate,
                                     yearRange: competitieJaren})
 
             el = document.querySelector('#datum6');
             M.Datepicker.init(el, { defaultDate: new Date("{{ competitie.datum6|date:'Y-m-d' }}"),
                                     setDefaultDate: true,
+                                    minDate: minDate, maxDate: maxDate,
                                     yearRange: competitieJaren})
 
             el = document.querySelector('#datum7');
             M.Datepicker.init(el, { defaultDate: new Date("{{ competitie.datum7|date:'Y-m-d' }}"),
                                     setDefaultDate: true,
+                                    minDate: minDate, maxDate: maxDate,
                                     yearRange: competitieJaren})
 
             el = document.querySelector('#datum8');
             M.Datepicker.init(el, { defaultDate: new Date("{{ competitie.datum8|date:'Y-m-d' }}"),
                                     setDefaultDate: true,
+                                    minDate: minDate, maxDate: maxDate,
                                     yearRange: competitieJaren})
 
             el = document.querySelector('#datum9');
             M.Datepicker.init(el, { defaultDate: new Date("{{ competitie.datum9|date:'Y-m-d' }}"),
                                     setDefaultDate: true,
+                                    minDate: minDate, maxDate: maxDate,
                                     yearRange: competitieJaren})
         })
     </script>
