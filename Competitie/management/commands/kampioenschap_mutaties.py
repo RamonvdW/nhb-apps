@@ -315,7 +315,11 @@ class Command(BaseCommand):
                     # er zijn te weinig schutters
                     # zet de schutter aan het einde van de lijst
                     self.stdout.write('[DEBUG] TODO: te weinig schutters')
-                    pass
+                    nieuwe_volgorde = (KampioenschapSchutterBoog
+                                       .objects
+                                       .filter(deelcompetitie=deelcomp,
+                                               klasse=klasse)
+                                       .count()) + 1
                 else:
                     nieuwe_volgorde = obj.volgorde
 

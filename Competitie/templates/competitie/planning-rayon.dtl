@@ -42,7 +42,10 @@
 
     <p>&nbsp;</p>
     <h5>RK wedstrijden</h5>
-    <p>Hier volgt later de planning van de RK wedstrijden.</p>
+
+    {% if not url_nieuwe_wedstrijd %}
+        <p>De RKO kan deze planning aanpassen.</p>
+    {% endif %}
 
     <table class="white">
 
