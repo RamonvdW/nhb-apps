@@ -18,9 +18,10 @@ from Wedstrijden.models import Wedstrijd, WedstrijdenPlan, WedstrijdLocatie
 from .models import (LAAG_REGIO, LAAG_RK, LAAG_BK, DeelCompetitie, DeelcompetitieRonde,
                      CompetitieKlasse, DeelcompetitieKlasseLimiet,
                      KampioenschapSchutterBoog, KampioenschapMutatie,
-                     MUTATIE_CUT, MUTATIE_AFMELDEN, MUTATIE_AANMELDEN)
+                     MUTATIE_CUT, MUTATIE_AFMELDEN, MUTATIE_AANMELDEN, DEELNAME_JA, DEELNAME_NEE)
 from types import SimpleNamespace
 import datetime
+import time
 
 
 TEMPLATE_COMPETITIE_PLANNING_RAYON = 'competitie/planning-rayon.dtl'
@@ -603,9 +604,9 @@ class LijstRkSchuttersView(UserPassesTestMixin, TemplateView):
 
             # tel de status van de deelnemers en eerste 8 reserven
             if deelnemer.rank <= limiet+8:
-                if deelnemer.is_afgemeld:
+                if deelnemer.deelname == DEELNAME_NEE:
                     aantal_afgemeld += 1
-                elif deelnemer.deelname_bevestigd:
+                elif deelnemer.deelname == DEELNAME_JA:
                     aantal_bevestigd += 1
                 else:
                     aantal_onbekend += 1
@@ -706,6 +707,7 @@ class WijzigStatusRkSchutterView(UserPassesTestMixin, TemplateView):
 
         bevestig = str(request.POST.get('bevestig', ''))[:2]
         afmelden = str(request.POST.get('afmelden', ''))[:2]
+        snel = str(request.POST.get('snel', ''))[:1]
 
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
 
@@ -719,13 +721,29 @@ class WijzigStatusRkSchutterView(UserPassesTestMixin, TemplateView):
         door_str = "RKO %s" % account.volledige_naam()
 
         if bevestig == "1":
-            KampioenschapMutatie(mutatie=MUTATIE_AANMELDEN,
-                                 deelnemer=deelnemer,
-                                 door=door_str).save()
+            mutatie = KampioenschapMutatie(mutatie=MUTATIE_AANMELDEN,
+                                           deelnemer=deelnemer,
+                                           door=door_str)
         elif afmelden == "1":
-            KampioenschapMutatie(mutatie=MUTATIE_AFMELDEN,
-                                 deelnemer=deelnemer,
-                                 door=door_str).save()
+            mutatie = KampioenschapMutatie(mutatie=MUTATIE_AFMELDEN,
+                                           deelnemer=deelnemer,
+                                           door=door_str)
+        else:
+            mutatie = None
+
+        if mutatie:
+            mutatie.save()
+
+            if snel != '1':
+                # wacht maximaal 3 seconden tot de mutatie uitgevoerd is
+                interval = 0.2      # om steeds te verdubbelen
+                total = 0.0         # om een limiet te stellen
+                while not mutatie.is_verwerkt and total + interval <= 3.0:
+                    time.sleep(interval)
+                    total += interval   # 0.0 --> 0.2, 0.6, 1.4, 3.0
+                    interval *= 2       # 0.2 --> 0.4, 0.8, 1.6, 3.2
+                    mutatie = KampioenschapMutatie.objects.get(pk=mutatie.pk)
+                # while
 
         if rol_nu == Rollen.ROL_RKO:
             url = reverse('Competitie:lijst-rk',

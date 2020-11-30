@@ -118,8 +118,8 @@
 
                 {% endif %}
 
-                <tr{% if obj.is_afgemeld %} class="grey-text"{% endif %}>
-                    <td class="right-align">{% if not obj.is_afgemeld %}{{ obj.rank }}{% endif %}</td>
+                <tr{% if obj.deelname == 'N' %} class="grey-text"{% endif %}>
+                    <td class="right-align">{% if obj.deelname != 'N' %}{{ obj.rank }}{% endif %}</td>
 
                     <td>{{ obj.naam_str }}</td>
 
@@ -135,9 +135,9 @@
 
                     {% if not obj.bij_vereniging %}
                         <td class="center-align"><i class="red-text in-table-icon material-icons-round">warning</i></td>
-                    {% elif obj.deelname_bevestigd %}
+                    {% elif obj.deelname == 'J' %}
                         <td class="center-align"><i class="green-text in-table-icon material-icons-round">check</i></td>
-                    {% elif obj.is_afgemeld %}
+                    {% elif obj.deelname == 'N' %}
                         <td class="center-align"><i class="grey-text in-table-icon material-icons-round">block</i></td>
                     {% else %}
                         <!-- onbekend -->

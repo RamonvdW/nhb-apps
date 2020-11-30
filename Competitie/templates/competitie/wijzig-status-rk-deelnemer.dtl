@@ -63,9 +63,9 @@
                 <span>De status van deelname voor deze schutter is: </span>
                 {% if not deelnemer.bij_vereniging %}
                     <span class="red-text">ATTENTIE</span>
-                {% elif deelnemer.is_afgemeld %}
+                {% elif deelnemer.deelname == 'N' %}
                     <span class="grey-text">AFGEMELD</span>
-                {% elif deelnemer.deelname_bevestigd %}
+                {% elif deelnemer.deelname == 'J' %}
                     <span class="green-text">DEELNAME BEVESTIGD</span>
                 {% else %}
                     <span class="nhb-blauw-text"><i>ONBEKEND</i></span>
@@ -80,7 +80,7 @@
             </tr>
         {% else %}
 
-            {% if not deelnemer.deelname_bevestigd %}
+            {% if deelnemer.deelname != 'J' %}
                 <tr class="nhb-grijs"><td colspan="3"></td></tr>
 
                 <tr>
@@ -98,7 +98,7 @@
                 </tr>
             {% endif %}
 
-            {% if not deelnemer.is_afgemeld %}
+            {% if deelnemer.deelname != 'N' %}
                 <tr class="nhb-grijs"><td colspan="3"></td></tr>
 
                 <tr>
@@ -119,7 +119,7 @@
     </table>
 
     <!--        TODO: alleen tonen als rol != RKO
-    {% if not deelnemer.is_afgemeld %}
+    {% if not deelnemer.deelname == 'N' %}
         <table class="white centered">
             <tr>
                 <td style="padding:24px"><b class="red-text">LET&nbsp;OP!</b></td>

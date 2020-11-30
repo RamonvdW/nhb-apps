@@ -13,7 +13,7 @@ from Wedstrijden.models import WedstrijdLocatie, WedstrijdenPlan, Wedstrijd
 from Overig.e2ehelpers import E2EHelpers
 from .models import (Competitie, DeelCompetitie, LAAG_REGIO, competitie_aanmaken,
                      KampioenschapSchutterBoog, CompetitieKlasse, DeelcompetitieKlasseLimiet,
-                     KampioenschapMutatie)
+                     KampioenschapMutatie, DEELNAME_NEE, DEELNAME_JA)
 import datetime
 
 
@@ -497,7 +497,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/lijst-rk.dtl', 'plein/site_layout.dtl'))
 
-        deelnemer.deelname_bevestigd = True
+        deelnemer.deelname = DEELNAME_JA
         deelnemer.save()
 
         resp = self.client.get(url)
@@ -515,7 +515,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
 
         deelnemer.bij_vereniging = None
         deelnemer.rank = 1
-        deelnemer.is_afgemeld = True
+        deelnemer.deelname = DEELNAME_NEE
         deelnemer.save()
 
         # twee deelnemers in dezelfde klasse

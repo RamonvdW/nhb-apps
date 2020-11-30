@@ -16,7 +16,7 @@ from Taken.taken import maak_taak
 from .models import (Competitie,
                      LAAG_REGIO, LAAG_RK, LAAG_BK, DeelCompetitie, DeelcompetitieKlasseLimiet,
                      RegioCompetitieSchutterBoog, KampioenschapSchutterBoog,
-                     KampioenschapMutatie, MUTATIE_INITIEEL)
+                     KampioenschapMutatie, MUTATIE_INITIEEL, DEELNAME_ONBEKEND)
 
 
 TEMPLATE_COMPETITIE_DOORZETTEN_NAAR_RK = 'competitie/bko-doorzetten-naar-rk.dtl'
@@ -254,11 +254,9 @@ class DoorzettenNaarRKView(UserPassesTestMixin, TemplateView):
                 rank = 0
 
             # fake een paar velden uit KampioenschapSchutterBoog
-            deelnemer.is_afgemeld = False
-            deelnemer.deelname_bevestigd = False
-
             rank += 1
             deelnemer.volgorde = rank
+            deelnemer.deelname = DEELNAME_ONBEKEND
 
             regio_nr = deelnemer.bij_vereniging.regio.regio_nr
             if regio_nr not in regios:

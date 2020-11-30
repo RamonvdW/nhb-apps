@@ -19,8 +19,6 @@
 
     {% else %}
 
-        <p>Hieronder tonen we de lijst voor elk van de {{ aantal_klassen }} wedstrijdklassen van de Rayonkampioenschappen waarin schutters van jouw vereniging opgenomen zijn.</p>
-
         {% if kan_wijzigen %}
             <p>Jij kan schutters van je eigen verenigingen aanmelden of aanmelden voor de kampioenschappen. De RKO (zie Plein, Beheerders) kan dit voor alle verenigingen in het rayon.</p>
             <p><span class="red-text">PAS OP!</span> Een schutter afmelden en weer aanmelden plaatst deze op de lijst van reserve-schutters (totdat een deelnemer zich afmeldt).</p>
@@ -37,6 +35,8 @@
                 <a class="margin-5 btn-nhb-blauw btn-small disabled" href="#">Toon alle deelnemers</a>
             {% endif %}
         </div>
+
+        <p>Hieronder tonen we de lijst voor elk van de {{ aantal_klassen }} wedstrijdklassen van de Rayonkampioenschappen <b>waarin schutters van jouw vereniging</b> opgenomen zijn. Onder Competitie uitslag, Rayon kan je de volledige deelnemerslijst bekijken.</p>
 
         <table class="white">
 
@@ -59,8 +59,8 @@
 
                 {% endif %}
 
-                <tr{% if obj.is_afgemeld %} class="grey-text"{% endif %}>
-                    <td class="right-align">{% if not obj.is_afgemeld %}{{ obj.rank }}{% endif %}</td>
+                <tr{% if obj.deelname == 'N' %} class="grey-text"{% endif %}>
+                    <td class="right-align">{% if obj.deelname != 'N' %}{{ obj.rank }}{% endif %}</td>
 
                     <td{% if obj.mijn_vereniging %} class="nhb-blauw-text"{% endif %}>{{ obj.naam_str }}</td>
 
@@ -76,9 +76,9 @@
 
                     {% if not obj.bij_vereniging %}
                         <td class="center-align"><i class="red-text in-table-icon material-icons-round">warning</i></td>
-                    {% elif obj.deelname_bevestigd %}
+                    {% elif obj.deelname == 'J' %}
                         <td class="center-align"><i class="green-text in-table-icon material-icons-round">check</i></td>
-                    {% elif obj.is_afgemeld %}
+                    {% elif obj.deelname == 'N' %}
                         <td class="center-align"><i class="grey-text in-table-icon material-icons-round">block</i></td>
                     {% else %}
                         <!-- onbekend -->

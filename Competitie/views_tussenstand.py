@@ -10,7 +10,7 @@ from django.http import HttpResponseRedirect
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import BoogType
 from NhbStructuur.models import NhbRayon, NhbRegio
-from Competitie.models import (LAAG_REGIO, LAAG_RK, LAAG_BK,
+from Competitie.models import (LAAG_REGIO, LAAG_RK, LAAG_BK, DEELNAME_NEE,
                                DeelCompetitie, DeelcompetitieKlasseLimiet,
                                RegioCompetitieSchutterBoog, KampioenschapSchutterBoog)
 from Functie.rol import Rollen, rol_get_huidige_functie, rol_get_huidige
@@ -356,9 +356,9 @@ class TussenstandRayonView(TemplateView):
             # deelnemers/reserveschutters van het RK tonen
             deelnemers = (KampioenschapSchutterBoog
                           .objects
-                          .exclude(bij_vereniging__isnull=True)     # attentie gevallen
+                          .exclude(bij_vereniging__isnull=True,      # attentie gevallen
+                                   deelname=DEELNAME_NEE)            # geen schutters die zicht afgemeld hebben
                           .filter(deelcompetitie=deelcomp,
-                                  is_afgemeld=False,
                                   klasse__indiv__boogtype=boogtype,
                                   volgorde__lte=48)                 # toon tot 48 schutters per klasse
                           .select_related('klasse__indiv',

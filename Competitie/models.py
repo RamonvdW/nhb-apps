@@ -48,6 +48,14 @@ INSCHRIJF_METHODES = (
     (INSCHRIJF_METHODE_3, 'Voorkeur dagdelen')
 )
 
+DEELNAME_ONBEKEND = '?'
+DEELNAME_JA = 'J'
+DEELNAME_NEE = 'N'
+
+DEELNAME_CHOICES = [(DEELNAME_ONBEKEND, 'Onbekend'),
+                    (DEELNAME_JA, 'Bevestigd'),
+                    (DEELNAME_NEE, 'Afgemeld')]
+
 MUTATIE_CUT = 10
 MUTATIE_INITIEEL = 20
 MUTATIE_AFMELDEN = 30
@@ -59,6 +67,7 @@ mutatie2descr = {
     MUTATIE_AFMELDEN: "afmelden",
     MUTATIE_AANMELDEN: "aanmelden",
 }
+
 
 class Competitie(models.Model):
     """ Deze database tabel bevat een van de jaarlijkse competities voor 18m of 25m
@@ -593,15 +602,15 @@ class KampioenschapSchutterBoog(models.Model):
     # wanneer hebben we een bevestiging gevraagd hebben via e-mail
     bevestiging_gevraagd_op = models.DateTimeField(null=True, blank=True)
 
-    # heeft deze schutter bevestigd dat deelname gaat lukken?
-    # (voor deelnemers en reserves)
-    deelname_bevestigd = models.BooleanField(default=False)
-
-    # heeft deze schutter zich afgemeld?
-    is_afgemeld = models.BooleanField(default=False)
+    # kan deze schutter deelnemen, of niet?
+    deelname = models.CharField(max_length=1, choices=DEELNAME_CHOICES, default=DEELNAME_ONBEKEND)
 
     # gemiddelde uit de voorgaande competitie
     gemiddelde = models.DecimalField(max_digits=5, decimal_places=3, default=0.0)    # 10,000
+
+    # TODO: verwijder (worden niet meer gebruikt)
+    deelname_bevestigd = models.BooleanField(default=False)
+    is_afgemeld = models.BooleanField(default=False)
 
     def __str__(self):
         # deelcompetitie (komt achteraan)

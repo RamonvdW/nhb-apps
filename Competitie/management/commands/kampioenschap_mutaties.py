@@ -11,11 +11,14 @@ from django.core.management.base import BaseCommand
 from django.db.models import F
 import django.db.utils
 from Competitie.models import (CompetitieTaken, DeelCompetitie, LAAG_RK, LAAG_BK,
-                               DeelcompetitieKlasseLimiet, KampioenschapSchutterBoog,
-                               KampioenschapMutatie, MUTATIE_INITIEEL, MUTATIE_CUT,
-                               MUTATIE_AANMELDEN, MUTATIE_AFMELDEN)
+                               DeelcompetitieKlasseLimiet,
+                               KampioenschapSchutterBoog, DEELNAME_JA, DEELNAME_NEE,
+                               KampioenschapMutatie,
+                               MUTATIE_INITIEEL, MUTATIE_CUT, MUTATIE_AANMELDEN, MUTATIE_AFMELDEN)
 import datetime
 import time
+
+VOLGORDE_PARKEER = 22222        # hoog en past in PositiveSmallIntegerField
 
 
 class Command(BaseCommand):
@@ -53,22 +56,20 @@ class Command(BaseCommand):
 
         return limiet
 
-    def _update_rank_nummers(self, deelcomp, klasse):
-        #self.stdout.write('[DEBUG] Updated ranking:')
+    @staticmethod
+    def _update_rank_nummers(deelcomp, klasse):
         rank = 0
         for obj in (KampioenschapSchutterBoog
                     .objects
                     .filter(deelcompetitie=deelcomp,
                             klasse=klasse)
                     .order_by('volgorde')):
-            if obj.is_afgemeld:
+            if obj.deelname == DEELNAME_NEE:
                 obj.rank = 0
             else:
                 rank += 1
                 obj.rank = rank
             obj.save()
-            # self.stdout.write('  rank=%s, volgorde=%s, nhb_nr=%s, gem=%s, afgemeld=%s, label=%s' % (
-            #                     obj.rank, obj.volgorde, obj.schutterboog.nhblid.nhb_nr, obj.gemiddelde, obj.is_afgemeld, obj.kampioen_label))
         # for
 
     def _kampioenschap_bepaal_deelnemers(self, deelcomp, klasse):
@@ -96,7 +97,7 @@ class Command(BaseCommand):
         lijst = list()
         aantal = 0
         for obj in kampioenen:
-            if not obj.is_afgemeld:
+            if obj.deelname != DEELNAME_NEE:
                 aantal += 1
             tup = (obj.gemiddelde, len(lijst), obj)
             lijst.append(tup)
@@ -114,7 +115,7 @@ class Command(BaseCommand):
             if not obj.kampioen_label != "":
                 tup = (obj.gemiddelde, len(lijst), obj)
                 lijst.append(tup)
-                if not obj.is_afgemeld:
+                if obj.deelname != DEELNAME_NEE:
                     aantal += 1
                     if aantal >= limiet:
                         break       # uit de for
@@ -132,7 +133,7 @@ class Command(BaseCommand):
             volgorde += 1
             obj.volgorde = volgorde
 
-            if obj.is_afgemeld:
+            if obj.deelname == DEELNAME_NEE:
                 obj.rank = 0
             else:
                 rank += 1
@@ -148,7 +149,7 @@ class Command(BaseCommand):
                 volgorde += 1
                 obj.volgorde = volgorde
 
-                if obj.is_afgemeld:
+                if obj.deelname == DEELNAME_NEE:
                     obj.rank = 0
                 else:
                     rank += 1
@@ -194,7 +195,7 @@ class Command(BaseCommand):
         # bij een mutatie "boven de cut" wordt de schutter bovenaan de lijst van reserve schutters
         # tot deelnemer gepromoveerd. Zijn gemiddelde bepaalt de volgorde
 
-        deelnemer.is_afgemeld = True
+        deelnemer.deelname = DEELNAME_NEE
         deelnemer.save()
 
         deelcomp = deelnemer.deelcompetitie
@@ -243,30 +244,54 @@ class Command(BaseCommand):
         klasse = deelnemer.klasse
         oude_volgorde = deelnemer.volgorde
 
+        # verwijder de deelnemer uit de lijst op zijn oude plekje
+        # en schuif de rest omhoog
+        deelnemer.volgorde = VOLGORDE_PARKEER
+        deelnemer.save()
+
+        qset = (KampioenschapSchutterBoog
+                .objects
+                .filter(deelcompetitie=deelcomp,
+                        klasse=klasse,
+                        volgorde__gt=oude_volgorde,
+                        volgorde__lt=VOLGORDE_PARKEER))
+        qset.update(volgorde=F('volgorde') - 1)
+
         limiet = self._get_limiet(deelcomp, klasse)
 
-        # 1) zoek de plek waar de deelnemer ingestopt moet worden
+        # als er minder dan limiet deelnemers zijn, dan invoegen op gemiddelde
+        # als er een reserve lijst is, dan invoegen in de reserve-lijst op gemiddelde
+        # altijd invoegen NA schutters met gelijkwaarde gemiddelde
 
-        if deelnemer.kampioen_label != "":
-            # een kampioen die zich opnieuw aanmeldt mag bovenaan in de lijst van reserve-schutters
-            # daar kunnen nog meer kampioenen staan, dus daarna op gemiddelde
+        deelnemers_count = (KampioenschapSchutterBoog
+                            .objects
+                            .exclude(deelname=DEELNAME_NEE)
+                            .filter(deelcompetitie=deelcomp,
+                                    klasse=klasse,
+                                    rank__lte=limiet,
+                                    volgorde__lt=VOLGORDE_PARKEER).count())
+
+        if deelnemers_count >= limiet:
+            # er zijn genoeg schutters, dus deze her-aanmelding moet op de reserve-lijst
+
+            # zoek een plekje in de reserve-lijst
             objs = (KampioenschapSchutterBoog
                     .objects
-                    .exclude(kampioen_label='')
                     .filter(deelcompetitie=deelcomp,
                             klasse=klasse,
                             rank__gt=limiet,
-                            gemiddelde__gt=deelnemer.gemiddelde)
+                            gemiddelde__gte=deelnemer.gemiddelde)
                     .order_by('gemiddelde'))
 
             if len(objs):
-                # na deze kampioen op de reserve-lijst
+                # invoegen na de reserve-schutter met gelijk of hoger gemiddelde
                 nieuwe_rank = objs[0].rank + 1
             else:
-                # boven aan de reserve lijst
+                # er zijn geen reserve-schutters met gelijk of hoger gemiddelde
+                # dus deze schutter mag boven aan de reserve-lijst
                 nieuwe_rank = limiet + 1
 
-            # 2) maak een plekje door de andere deelnemers op te schuiven
+            # maak een plekje in de lijst door andere schutters op te schuiven
             objs = (KampioenschapSchutterBoog
                     .objects
                     .filter(deelcompetitie=deelcomp,
@@ -276,7 +301,6 @@ class Command(BaseCommand):
             if len(objs) > 0:
                 obj = objs.order_by('volgorde')[0]
                 nieuwe_volgorde = obj.volgorde
-                objs.update(volgorde=F('volgorde') + 1)
             else:
                 # niemand om op te schuiven - zet aan het einde
                 nieuwe_volgorde = (KampioenschapSchutterBoog
@@ -285,75 +309,44 @@ class Command(BaseCommand):
                                            klasse=klasse)
                                    .count()) + 1
         else:
-            # zoek alle reserve schutters met een beter gemiddelde
-            objs = (KampioenschapSchutterBoog
-                    .objects
-                    .filter(deelcompetitie=deelnemer.deelcompetitie,
-                            klasse=deelnemer.klasse,
-                            rank__gt=limiet,                      # na de cut
-                            gemiddelde__gt=deelnemer.gemiddelde)  # beter dan in te voegen schutter
-                    .order_by('gemiddelde'))
-
-            self.stdout.write('[DEBUG] reserve-schutters:')
-            for obj in objs:
-                self.stdout.write('    obj: rank=%s, volgorde=%s, nhbnr=%s, gemiddelde=%s' % (
-                    obj.rank, obj.volgorde, obj.schutterboog.nhblid.nhb_nr, obj.gemiddelde))
-
-            if len(objs) > 0:
-                # na deze kampioen op de reserve-lijst
-                nieuwe_volgorde = objs[0].volgorde + 1
-            else:
-                # bovenaan de reserve lijst
-                self.stdout.write('[DEBUG] bovenaan de reserve-lijst')
-                try:
-                    obj = (KampioenschapSchutterBoog
-                           .objects
-                           .get(deelcompetitie=deelcomp,
-                                klasse=klasse,
-                                rank=limiet + 1))
-                except KampioenschapSchutterBoog.DoesNotExist:
-                    # er zijn te weinig schutters
-                    # zet de schutter aan het einde van de lijst
-                    self.stdout.write('[DEBUG] TODO: te weinig schutters')
-                    nieuwe_volgorde = (KampioenschapSchutterBoog
-                                       .objects
-                                       .filter(deelcompetitie=deelcomp,
-                                               klasse=klasse)
-                                       .count()) + 1
-                else:
-                    nieuwe_volgorde = obj.volgorde
-
-            # 2) maak een plekje door de andere deelnemers op te schuiven
+            # er is geen reserve-lijst in deze klasse
+            # de schutter gaat dus meteen de deelnemers lijst in
             objs = (KampioenschapSchutterBoog
                     .objects
                     .filter(deelcompetitie=deelcomp,
                             klasse=klasse,
-                            volgorde__gte=nieuwe_volgorde))
+                            gemiddelde__gte=deelnemer.gemiddelde,
+                            volgorde__lt=VOLGORDE_PARKEER)
+                    .order_by('gemiddelde'))
 
-            objs.update(volgorde=F('volgorde') + 1)
+            if len(objs) > 0:
+                # voeg de schutter in na de laatste deelnemer
+                nieuwe_volgorde = objs[0].volgorde + 1
+            else:
+                # geen betere schutter gevonden
+                # zet deze deelnemer boven aan de lijst
+                nieuwe_volgorde = 1
 
-        deelnemer.volgorde = nieuwe_volgorde
-        deelnemer.is_afgemeld = False
-        deelnemer.deelname_bevestigd = True
-        deelnemer.save()
-
-        # 3) verwijder deelnemer uit de lijst, schuif de rest omhoog
-        qset = (KampioenschapSchutterBoog
+        objs = (KampioenschapSchutterBoog
                 .objects
                 .filter(deelcompetitie=deelcomp,
                         klasse=klasse,
-                        volgorde__gt=oude_volgorde))
-        qset.update(volgorde=F('volgorde') - 1)
+                        volgorde__gte=nieuwe_volgorde))
+        objs.update(volgorde=F('volgorde') + 1)
 
-        # 4) deel de rank nummers opnieuw uit
+        deelnemer.volgorde = nieuwe_volgorde
+        deelnemer.deelname = DEELNAME_JA
+        deelnemer.save()
+
+        # deel de rank nummers opnieuw uit
         self._update_rank_nummers(deelcomp, klasse)
 
     def _verwerk_mutatie_aanmelden(self, deelnemer):
-        if not deelnemer.deelname_bevestigd:
-            if deelnemer.is_afgemeld:
+        if deelnemer.deelname != DEELNAME_JA:
+            if deelnemer.deelname == DEELNAME_NEE:
                 self._opnieuw_aanmelden(deelnemer)
             else:
-                deelnemer.deelname_bevestigd = True
+                deelnemer.deelname = DEELNAME_JA
                 deelnemer.save()
                 # verder hoeven we niets te doen: volgorde en rank blijft hetzelfde
 
@@ -435,10 +428,11 @@ class Command(BaseCommand):
                 self._verwerk_nieuwe_mutaties()
                 now = datetime.datetime.now()
 
-            # sleep at least 1 second, then check again
+            # sleep 1/10 second, then check again
             secs = (self.stop_at - now).total_seconds()
             if secs > 1:                    # pragma: no branch
-                time.sleep(0.5)
+                # TODO: vervang door blokkerend wachten op een IPC
+                time.sleep(0.1)
             else:
                 # near the end
                 break       # from the while

@@ -102,9 +102,9 @@ class KampioenschapSchutterBoogAdmin(admin.ModelAdmin):
                         'kampioen_label')
              }),
         ('Status aanmelding',
-            {'fields': ('deelname_bevestigd',
-                        'is_afgemeld',
-                        'volgorde'),
+            {'fields': ('deelname',
+                        'volgorde',
+                        'rank'),
              }),
     )
 
