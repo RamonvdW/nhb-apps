@@ -79,6 +79,8 @@ class ScoreGeschiedenisView(UserPassesTestMixin, View):
                     if hist.door_account:
                         hist.door_account_str = str(hist.door_account)
 
+                    hist.is_edit = (hist.oude_waarde > 0)
+
                     if hist.score.is_ag:
                         hist.oude_waarde = "%.3f" % (hist.oude_waarde / 1000)
                         hist.nieuwe_waarde = "%.3f" % (hist.nieuwe_waarde / 1000)
