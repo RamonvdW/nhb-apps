@@ -112,7 +112,7 @@
                             <tr>
                                 <!-- {% if obj.break_before %}<br>{% endif %} -->
                                 <td><label>
-                                    <input type="checkbox" class="filled-in" name="{{ obj.sel_str }}" {% if obj.geselecteerd %}checked{% endif %}{% if obj.schutters == 0 %}disabled{% endif %}>
+                                    <input type="checkbox" class="filled-in" name="{{ obj.sel_str }}" {% if obj.geselecteerd %}checked{% endif %}>
                                     <span>&nbsp</span>
                                     </label>
                                 </td>
