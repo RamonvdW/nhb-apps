@@ -139,7 +139,6 @@ class DoorzettenNaarRKView(UserPassesTestMixin, TemplateView):
             # kampioenen als eerste in de lijst, daarna aflopend gesorteerd op gemiddelde
             bulk_lijst = list()
             klasse = -1
-            mutatie_deelnemer = None
             for obj in deelnemers:
                 if klasse != obj.klasse.indiv.volgorde:
                     klasse = obj.klasse.indiv.volgorde
@@ -157,9 +156,6 @@ class DoorzettenNaarRKView(UserPassesTestMixin, TemplateView):
                 if len(bulk_lijst) > 150:       # pragma: no cover
                     KampioenschapSchutterBoog.objects.bulk_create(bulk_lijst)
                     bulk_lijst = list()
-
-                # onthoud de laatste
-                mutatie_deelnemer = deelnemer
             # for
 
             if len(bulk_lijst) > 0:
@@ -170,10 +166,9 @@ class DoorzettenNaarRKView(UserPassesTestMixin, TemplateView):
             deelcomp_rk.save()
 
             # laat de lijsten sorteren en de volgorde bepalen
-            if mutatie_deelnemer:
-                KampioenschapMutatie(mutatie=MUTATIE_INITIEEL,
-                                     door=door_str,
-                                     deelnemer=mutatie_deelnemer).save()
+            KampioenschapMutatie(mutatie=MUTATIE_INITIEEL,
+                                 door=door_str,
+                                 deelcompetitie=deelcomp_rk).save()
 
             # stuur de RKO een taak ('ter info')
             rko_namen = list()

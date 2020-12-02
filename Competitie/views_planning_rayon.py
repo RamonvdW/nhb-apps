@@ -809,7 +809,7 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
         for limiet in (DeelcompetitieKlasseLimiet
                        .objects
                        .select_related('klasse')
-                       .filter(deelcompetitie=deelcomp_rk.pk,
+                       .filter(deelcompetitie=deelcomp_rk,
                                klasse__in=pk2wkl.keys())):
             wkl = pk2wkl[limiet.klasse.pk]
             wkl.limiet = limiet.limiet
@@ -843,93 +843,91 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
         if functie_nu != deelcomp_rk.functie:
             raise Resolver404()     # niet de juiste RKO
 
-        pk2wkl = dict()
+        pk2ckl = dict()
         pk2keuze = dict()
 
-        for wkl in (CompetitieKlasse
+        for ckl in (CompetitieKlasse
                     .objects
                     .filter(competitie=deelcomp_rk.competitie,
                             indiv__is_onbekend=False,
                             indiv__niet_voor_rk_bk=False,
                             team=None)):
 
-            sel = 'sel_%s' % wkl.pk
+            sel = 'sel_%s' % ckl.pk
             keuze = request.POST.get(sel, None)
             if keuze:
                 try:
-                    pk2keuze[wkl.pk] = int(keuze[:2])   # afkappen voor veiligheid
-                    pk2wkl[wkl.pk] = wkl
+                    pk2keuze[ckl.pk] = int(keuze[:2])   # afkappen voor veiligheid
+                    pk2ckl[ckl.pk] = ckl
                 except ValueError:
                     pass
                 else:
-                    if pk2keuze[wkl.pk] not in (24, 20, 16, 12, 8, 4):
+                    if pk2keuze[ckl.pk] not in (24, 20, 16, 12, 8, 4):
                         raise Resolver404()
         # for
 
-        bepaal_opnieuw = list()     # list of tup(deelcomp, klasse)
+        wijzig_limiet = list()     # list of tup(klasse, nieuwe_limiet, oude_limiet)
 
         for limiet in (DeelcompetitieKlasseLimiet
                        .objects
                        .select_related('klasse')
-                       .filter(deelcompetitie=deelcomp_rk.pk,
-                               klasse__in=pk2keuze.keys())):
+                       .filter(deelcompetitie=deelcomp_rk,
+                               klasse__in=list(pk2keuze.keys()))):
             pk = limiet.klasse.pk
             keuze = pk2keuze[pk]
             del pk2keuze[pk]
 
-            tup = (deelcomp_rk, limiet.klasse, keuze, limiet.limiet)
-
-            if keuze == 24:
-                bepaal_opnieuw.append(tup)
-                limiet.delete()
-            else:
-                if keuze != limiet.limiet:
-                    bepaal_opnieuw.append(tup)
-                    limiet.limiet = keuze
-                    limiet.save()
-
+            if keuze != limiet.limiet:
+                tup = (limiet.klasse, keuze, limiet.limiet)
+                wijzig_limiet.append(tup)
         # for
 
-        # voor de overgebleven keuzes een nieuwe DeelcompetitieKlasseLimiet aanmaken
-        bulk = list()
+        # verwerk de overgebleven keuzes waar nog geen limiet voor was
         for pk, keuze in pk2keuze.items():
             if keuze != 24:
-                limiet = DeelcompetitieKlasseLimiet(deelcompetitie=deelcomp_rk,
-                                                    klasse=pk2wkl[pk],
-                                                    limiet=keuze)
-                bulk.append(limiet)
-
-                tup = (deelcomp_rk, limiet.klasse, limiet.limiet, 24)
-                bepaal_opnieuw.append(tup)
+                # verandering van 24 naar een andere instelling
+                klasse = pk2ckl[pk]
+                tup = (klasse, keuze, 24)
+                wijzig_limiet.append(tup)
         # for
-        DeelcompetitieKlasseLimiet.objects.bulk_create(bulk)
 
         # laat opnieuw de deelnemers boven de cut bepalen en sorteer op gemiddelde
         account = request.user
         door_str = "RKO %s" % account.volledige_naam()
-        for deelcomp, klasse, nieuwe_limiet, oude_limiet in bepaal_opnieuw:
 
+        mutatie = None
+        for klasse, nieuwe_limiet, oude_limiet in wijzig_limiet:
             # schrijf in het logboek
             msg = "De limiet (cut) voor klasse %s van de %s is aangepast van %s naar %s." % (
-                    str(klasse), str(deelcomp), oude_limiet, nieuwe_limiet)
+                    str(klasse), str(deelcomp_rk), oude_limiet, nieuwe_limiet)
             schrijf_in_logboek(self.request.user, "Competitie", msg)
 
-            # zoek de eerste deelnemer
-            deelnemers = (KampioenschapSchutterBoog
-                          .objects
-                          .filter(deelcompetitie=deelcomp,
-                                  klasse=klasse)
-                          .all())
-
-            # geen deelnemers, dan ook niet nodig om te sorteren
-            if len(deelnemers) > 0:
-                deelnemer = deelnemers[0]
-                KampioenschapMutatie(mutatie=MUTATIE_CUT,
-                                     door=door_str,
-                                     deelnemer=deelnemer).save()
+            mutatie = KampioenschapMutatie(mutatie=MUTATIE_CUT,
+                                           door=door_str,
+                                           deelcompetitie=deelcomp_rk,
+                                           klasse=klasse,
+                                           cut_oud=oude_limiet,
+                                           cut_nieuw=nieuwe_limiet)
+            mutatie.save()
         # for
+
+        if mutatie:
+            # wacht op verwerking door achtergrond-taak voordat we verder gaan
+            snel = str(request.POST.get('snel', ''))[:1]        # voor autotest
+
+            if snel != '1':
+                # wacht 3 seconden tot de mutatie uitgevoerd is
+                interval = 0.2      # om steeds te verdubbelen
+                total = 0.0         # om een limiet te stellen
+                while not mutatie.is_verwerkt and total + interval <= 3.0:
+                    time.sleep(interval)
+                    total += interval   # 0.0 --> 0.2, 0.6, 1.4, 3.0, 6.2
+                    interval *= 2       # 0.2 --> 0.4, 0.8, 1.6, 3.2
+                    mutatie = KampioenschapMutatie.objects.get(pk=mutatie.pk)
+                # while
 
         return HttpResponseRedirect(reverse('Competitie:overzicht'))
 
 
 # end of file
+

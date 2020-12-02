@@ -619,7 +619,7 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         # verplaats de cut naar 20
         url = self.url_wijzig_cut_rk % self.deelcomp_rk.pk
         sel = 'sel_%s' % self.cut.klasse.pk
-        resp = self.client.post(url, {sel: 20})
+        resp = self.client.post(url, {sel: 20, 'snel': 1})
         self.assertEqual(resp.status_code, 302)     # 302 = redirect = success
         self._verwerk_mutaties()
 
@@ -644,7 +644,7 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         # verplaats de cut naar 8
         url = self.url_wijzig_cut_rk % self.deelcomp_rk.pk
         sel = 'sel_%s' % self.cut.klasse.pk
-        resp = self.client.post(url, {sel: 8})
+        resp = self.client.post(url, {sel: 8, 'snel': 1})
         self.assertEqual(resp.status_code, 302)     # 302 = redirect = success
         self._verwerk_mutaties()
         # self._dump_deelnemers()

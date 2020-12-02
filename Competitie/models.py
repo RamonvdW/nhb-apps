@@ -63,7 +63,7 @@ MUTATIE_AANMELDEN = 40
 
 mutatie2descr = {
     MUTATIE_INITIEEL: "initieel",
-    MUTATIE_CUT: "nieuwe limiet",
+    MUTATIE_CUT: "limiet aanpassen",
     MUTATIE_AFMELDEN: "afmelden",
     MUTATIE_AANMELDEN: "aanmelden",
 }
@@ -663,11 +663,24 @@ class KampioenschapMutatie(models.Model):
     # als er geen account is (schutter zonder account) dan NHB lid details
     door = models.CharField(max_length=50, default='')
 
-    # op wie heeft de mutatie betrekking (aanmelden/afmelden)
-    # voor sommige mutaties verwijst deze deelnemer naar de hele deelcompetitie (MUTATIE_INITIEEL)
-    # of naar een specifieke klasse (MUTATIE_CUT)
+    # op welke deelcompetitie heeft deze mutatie betrekking?
+    deelcompetitie = models.ForeignKey(DeelCompetitie,
+                                       on_delete=models.CASCADE,
+                                       null=True, blank=True)
+
+    # op welke klasse heeft deze mutatie betrekking?
+    klasse = models.ForeignKey(CompetitieKlasse,
+                               on_delete=models.CASCADE,
+                               null=True, blank=True)
+
+    # op welke schutter heeft de mutatie betrekking (aanmelden/afmelden)
     deelnemer = models.ForeignKey(KampioenschapSchutterBoog,
-                                  on_delete=models.CASCADE)
+                                  on_delete=models.CASCADE,
+                                  null=True, blank=True)
+
+    # alleen voor MUTATIE_CUT
+    cut_oud = models.PositiveSmallIntegerField(default=0)
+    cut_nieuw = models.PositiveSmallIntegerField(default=0)
 
     class Meta:
         verbose_name = "Kampioenschap Mutatie"
@@ -684,6 +697,9 @@ class KampioenschapMutatie(models.Model):
 
         if self.mutatie not in (MUTATIE_INITIEEL, MUTATIE_CUT):
             msg += " - %s" % self.deelnemer
+
+        if self.mutatie == MUTATIE_CUT:
+            msg += " (%s --> %s)" % (self.cut_oud, self.cut_nieuw)
 
         return msg
 

@@ -5,6 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
+from django.core import management
 from BasisTypen.models import BoogType
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging, NhbLid
@@ -15,6 +16,7 @@ from .models import (Competitie, DeelCompetitie, LAAG_REGIO, competitie_aanmaken
                      KampioenschapSchutterBoog, CompetitieKlasse, DeelcompetitieKlasseLimiet,
                      KampioenschapMutatie, DEELNAME_NEE, DEELNAME_JA)
 import datetime
+import io
 
 
 class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
@@ -22,6 +24,17 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
     """ unit tests voor de Competitie applicatie, Koppel Beheerders functie """
 
     test_after = ('Competitie.test_fase', 'Competitie.test_beheerders', 'Competitie.test_competitie')
+
+    @staticmethod
+    def _verwerk_mutaties(show=False):
+        # vraag de achtergrond taak om de mutaties te verwerken
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('kampioenschap_mutaties', '1', '--quick', stderr=f1, stdout=f2)
+
+        if show:                    # pragma: no coverage
+            print(f1.getvalue())
+            print(f2.getvalue())
 
     def _prep_beheerder_lid(self, voornaam):
         nhb_nr = self._next_nhbnr
@@ -606,15 +619,15 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
 
         self.assertEqual(KampioenschapMutatie.objects.count(), 0)
 
-        resp = self.client.post(url, {'bevestig': '0', 'afmelden': '0'})
+        resp = self.client.post(url, {'bevestig': '0', 'afmelden': '0', 'snel': 1})
         deelnemer = KampioenschapSchutterBoog.objects.get(pk=deelnemer.pk)
         self.assertEqual(KampioenschapMutatie.objects.count(), 0)
 
-        resp = self.client.post(url, {'bevestig': '0', 'afmelden': '1'})
+        resp = self.client.post(url, {'bevestig': '0', 'afmelden': '1', 'snel': 1})
         deelnemer = KampioenschapSchutterBoog.objects.get(pk=deelnemer.pk)
         self.assertEqual(KampioenschapMutatie.objects.count(), 1)
 
-        resp = self.client.post(url, {'bevestig': '1', 'afmelden': '0'})
+        resp = self.client.post(url, {'bevestig': '1', 'afmelden': '0', 'snel': 1})
         deelnemer = KampioenschapSchutterBoog.objects.get(pk=deelnemer.pk)
         self.assertEqual(KampioenschapMutatie.objects.count(), 2)
 
@@ -671,24 +684,27 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
 
         # limiet op default zetten
         self.assertEqual(DeelcompetitieKlasseLimiet.objects.count(), 0)
-        resp = self.client.post(url, {sel: 24})
+        resp = self.client.post(url, {sel: 24, 'snel': 1})
         self.assertEqual(resp.status_code, 302)     # 302 = redirect = success
         self.assertEqual(DeelcompetitieKlasseLimiet.objects.count(), 0)
 
         # limiet zetten
         self.assertEqual(DeelcompetitieKlasseLimiet.objects.count(), 0)
-        resp = self.client.post(url, {sel: 20})
+        resp = self.client.post(url, {sel: 20, 'snel': 1})
         self.assertEqual(resp.status_code, 302)     # 302 = redirect = success
+        self._verwerk_mutaties()
         self.assertEqual(DeelcompetitieKlasseLimiet.objects.count(), 1)
 
         # limiet opnieuw zetten, geen wijziging
-        resp = self.client.post(url, {sel: 20})
+        resp = self.client.post(url, {sel: 20, 'snel': 1})
         self.assertEqual(resp.status_code, 302)     # 302 = redirect = success
+        self._verwerk_mutaties()
         self.assertEqual(DeelcompetitieKlasseLimiet.objects.count(), 1)
 
         # limiet aanpassen
-        resp = self.client.post(url, {sel: 16})
+        resp = self.client.post(url, {sel: 16, 'snel': 1})
         self.assertEqual(resp.status_code, 302)     # 302 = redirect = success
+        self._verwerk_mutaties()
         self.assertEqual(DeelcompetitieKlasseLimiet.objects.count(), 1)
 
         # met limiet aanwezig
@@ -698,8 +714,9 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
 
         # limiet verwijderen
-        resp = self.client.post(url, {sel: 24})
+        resp = self.client.post(url, {sel: 24, 'snel': 1})
         self.assertEqual(resp.status_code, 302)     # 302 = redirect = success
+        self._verwerk_mutaties()
         self.assertEqual(DeelcompetitieKlasseLimiet.objects.count(), 0)
 
         # nu met een deelnemer, zodat de mutatie opgestart wordt
@@ -709,9 +726,10 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
                                               klasse=self.klasse_r)
         deelnemer.save()
 
-        self.assertEqual(KampioenschapMutatie.objects.count(), 0)
-        resp = self.client.post(url, {sel: 4})
+        aantal = KampioenschapMutatie.objects.count()
+        resp = self.client.post(url, {sel: 4, 'snel': 1})
         self.assertEqual(resp.status_code, 302)     # 302 = redirect = success
-        self.assertEqual(KampioenschapMutatie.objects.count(), 1)
+        self._verwerk_mutaties()
+        self.assertEqual(KampioenschapMutatie.objects.count(), aantal + 1)
 
 # end of file

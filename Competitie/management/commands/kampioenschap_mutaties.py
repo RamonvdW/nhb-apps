@@ -10,8 +10,7 @@
 from django.core.management.base import BaseCommand
 from django.db.models import F
 import django.db.utils
-from Competitie.models import (CompetitieTaken, DeelCompetitie, LAAG_RK, LAAG_BK,
-                               DeelcompetitieKlasseLimiet,
+from Competitie.models import (CompetitieTaken, DeelCompetitie, DeelcompetitieKlasseLimiet,
                                KampioenschapSchutterBoog, DEELNAME_JA, DEELNAME_NEE,
                                KampioenschapMutatie,
                                MUTATIE_INITIEEL, MUTATIE_CUT, MUTATIE_AANMELDEN, MUTATIE_AFMELDEN)
@@ -72,22 +71,16 @@ class Command(BaseCommand):
             obj.save()
         # for
 
-    def _kampioenschap_bepaal_deelnemers(self, deelcomp, klasse):
-        """
-            Bepaal de top-X deelnemers voor een klasse van een kampioenschap:
-                De niet-afgemelde kampioenen
-                aangevuld met de niet-afgemelde schutters met hoogste gemiddelde
-                gesorteerde op gemiddelde
-
-            Deze functie wordt gebruikt na het vaststellen van de initiële deelnemers
-            en na het aanpassen van de cut.
-        """
+    def _verwerk_mutatie_initieel_klasse(self, deelcomp, klasse):
+        # Bepaal de top-X deelnemers voor een klasse van een kampioenschap
+        # De kampioenen aangevuld met de schutters met hoogste gemiddelde
+        # gesorteerde op gemiddelde
 
         self.stdout.write('[INFO] Bepaal deelnemers in klasse %s van %s' % (klasse, deelcomp))
 
         limiet = self._get_limiet(deelcomp, klasse)
 
-        # kampioenen mogen altijd meedoen, ook als de cut omlaag gaat
+        # kampioenen hebben deelnamegarantie
         kampioenen = (KampioenschapSchutterBoog
                       .objects
                       .exclude(kampioen_label='')
@@ -107,18 +100,17 @@ class Command(BaseCommand):
         objs = (KampioenschapSchutterBoog
                 .objects
                 .filter(deelcompetitie=deelcomp,
-                        klasse=klasse)
-                .order_by('kampioen_label',     # kampioenen eerst
-                          '-gemiddelde'))
+                        klasse=klasse,
+                        kampioen_label='')      # kampioenen hebben we al gedaan
+                .order_by('-gemiddelde'))       # hoogste boven
 
         for obj in objs:
-            if not obj.kampioen_label != "":
-                tup = (obj.gemiddelde, len(lijst), obj)
-                lijst.append(tup)
-                if obj.deelname != DEELNAME_NEE:
-                    aantal += 1
-                    if aantal >= limiet:
-                        break       # uit de for
+            tup = (obj.gemiddelde, len(lijst), obj)
+            lijst.append(tup)
+            if obj.deelname != DEELNAME_NEE:
+                aantal += 1
+                if aantal >= limiet:
+                    break       # uit de for
         # for
 
         # sorteer op gemiddelde en daarna op het volgnummer in de lijst
@@ -165,27 +157,20 @@ class Command(BaseCommand):
                           .distinct('klasse')):
 
             # sorteer de lijst op gemiddelde en bepaalde volgorde
-            self._kampioenschap_bepaal_deelnemers(deelcomp, deelnemer.klasse)
+            self._verwerk_mutatie_initieel_klasse(deelcomp, deelnemer.klasse)
         # for
 
-    def _verwerk_mutatie_initieel(self, deelnemer):
+    def _verwerk_mutatie_initieel(self, competitie, laag):
         # bepaal de volgorde en rank van de deelnemers
-        # in alle klassen van de RK deelcompetities
+        # in alle klassen van de RK of BK deelcompetities
 
         # via deelnemer kunnen we bepalen over welke kampioenschappen dit gaat
-        if deelnemer.deelcompetitie.laag == LAAG_RK:
-            for deelcomp_rk in (DeelCompetitie
-                                .objects
-                                .filter(competitie=deelnemer.deelcompetitie.competitie,
-                                        laag=LAAG_RK)):
-                self._verwerk_mutatie_initieel_deelcomp(deelcomp_rk)
-            # for
-        else:
-            deelcomp_bk = (DeelCompetitie
-                           .objects
-                           .get(competitie=deelnemer.deelcompetitie.competitie,
-                                laag=LAAG_BK))
-            self._verwerk_mutatie_initieel_deelcomp(deelcomp_bk)
+        for deelcomp in (DeelCompetitie
+                         .objects
+                         .filter(competitie=competitie,
+                                 laag=laag)):
+            self._verwerk_mutatie_initieel_deelcomp(deelcomp)
+        # for
 
     def _verwerk_mutatie_afmelden(self, deelnemer):
         # pas alleen de ranking aan voor alle schutters in deze klasse
@@ -350,20 +335,163 @@ class Command(BaseCommand):
                 deelnemer.save()
                 # verder hoeven we niets te doen: volgorde en rank blijft hetzelfde
 
-    def _verwerk_mutatie_cut(self, deelnemer):
-        # de cut is aangepast, dus herhaal de methode die initieel gebruikt is
-        # zodat de regiokampioenen gegarandeerd deelnemer
-        self._kampioenschap_bepaal_deelnemers(deelnemer.deelcompetitie, deelnemer.klasse)
+    @staticmethod
+    def _verwerk_mutatie_verhoog_cut(deelcomp, klasse, cut_nieuw):
+        # de deelnemerslijst opnieuw sorteren op gemiddelde
+        # dit is nodig omdat kampioenen naar boven geplaatst kunnen zijn bij het verlagen van de cut
+        # nu plaatsen we ze weer terug op hun originele plek
+        lijst = list()
+        for obj in (KampioenschapSchutterBoog
+                    .objects
+                    .filter(deelcompetitie=deelcomp,
+                            klasse=klasse,
+                            rank__lte=cut_nieuw)):
+            tup = (obj.gemiddelde, len(lijst), obj)
+            lijst.append(tup)
+        # for
+
+        # sorteer de deelnemers op gemiddelde (hoogste eerst)
+        # bij gelijk gemiddelde: sorteer daarna op het volgnummer (hoogste eerst) in de lijst
+        #                        want sorteren op obj gaat niet
+        lijst.sort(reverse=True)
+
+        # volgorde uitdelen voor deze kandidaat-deelnemers
+        volgorde = 0
+        rank = 0
+        for _, _, obj in lijst:
+            volgorde += 1
+            obj.volgorde = volgorde
+
+            if obj.deelname == DEELNAME_NEE:
+                obj.rank = 0
+            else:
+                rank += 1
+                obj.rank = rank
+            obj.save()
+        # for
+
+    @staticmethod
+    def _verwerk_mutatie_verlaag_cut(deelcomp, klasse, cut_oud, cut_nieuw):
+        # zoek de kampioenen die al deel mochten nemen (dus niet op reserve lijst)
+        kampioenen = (KampioenschapSchutterBoog
+                      .objects
+                      .exclude(kampioen_label='')
+                      .filter(deelcompetitie=deelcomp,
+                              klasse=klasse,
+                              rank__lte=cut_oud))  # begrens tot deelnemerslijst
+
+        aantal = 0  # telt het aantal deelnemers
+        lijst = list()
+        lijst_pks = list()
+        for obj in kampioenen:
+            tup = (obj.gemiddelde, len(lijst), obj)
+            lijst.append(tup)
+            lijst_pks.append(obj.pk)
+            if obj.deelname != DEELNAME_NEE:
+                aantal += 1
+        # for
+
+        # aanvullen met schutters tot aan de cut
+        objs = (KampioenschapSchutterBoog
+                .objects
+                .filter(deelcompetitie=deelcomp,
+                        klasse=klasse,
+                        kampioen_label='',  # kampioenen hebben we al gedaan
+                        rank__lte=cut_oud)
+                .order_by('-gemiddelde'))  # hoogste boven
+
+        for obj in objs:
+            if obj.pk not in lijst_pks and aantal < cut_nieuw:
+                # voeg deze niet-kampioen toe aan de deelnemers lijst
+                tup = (obj.gemiddelde, len(lijst), obj)
+                lijst.append(tup)
+                lijst_pks.append(obj.pk)
+                if obj.deelname != DEELNAME_NEE:
+                    aantal += 1
+        # for
+
+        # sorteer de deelnemers op gemiddelde (hoogste eerst)
+        # bij gelijk gemiddelde: sorteer daarna op het volgnummer (hoogste eerst) in de lijst
+        #                        want sorteren op obj gaat niet
+        lijst.sort(reverse=True)
+
+        # volgorde uitdelen voor deze kandidaat-deelnemers
+        volgorde = 0
+        rank = 0
+        for _, _, obj in lijst:
+            volgorde += 1
+            obj.volgorde = volgorde
+
+            if obj.deelname == DEELNAME_NEE:
+                obj.rank = 0
+            else:
+                rank += 1
+                obj.rank = rank
+            obj.save()
+        # for
+
+        # geef nu alle andere schutters (tot de oude cut) opnieuw een volgnummer
+        # dit is nodig omdat de kampioenen er tussenuit gehaald (kunnen) zijn
+        # en we willen geen dubbele volgnummers
+        for obj in objs:
+            if obj.pk not in lijst_pks:
+                volgorde += 1
+                obj.volgorde = volgorde
+
+                if obj.deelname == DEELNAME_NEE:
+                    obj.rank = 0
+                else:
+                    rank += 1
+                    obj.rank = rank
+                obj.save()
+        # for
+
+    def _verwerk_mutatie_cut(self, deelcomp, klasse, cut_oud, cut_nieuw):
+        try:
+            is_nieuw = False
+            limiet = (DeelcompetitieKlasseLimiet
+                      .objects
+                      .get(deelcompetitie=deelcomp,
+                           klasse=klasse))
+        except DeelcompetitieKlasseLimiet.DoesNotExist:
+            # maak een nieuwe aan
+            is_nieuw = True
+            limiet = DeelcompetitieKlasseLimiet(deelcompetitie=deelcomp,
+                                                klasse=klasse)
+
+        if cut_nieuw > cut_oud:
+            # limiet verhogen is simpel, want deelnemers blijven deelnemers
+            if cut_nieuw == 24:
+                # verwijder het limiet record
+                if not is_nieuw:
+                    limiet.delete()
+            else:
+                limiet.limiet = cut_nieuw
+                limiet.save()
+
+            # toch even de deelnemerslijst opnieuw sorteren op gemiddelde
+            self._verwerk_mutatie_verhoog_cut(deelcomp, klasse, cut_nieuw)
+
+        elif cut_nieuw < cut_oud:
+            # limiet is omlaag gezet
+            # zorg dat de regiokampioenen er niet af vallen
+            limiet.limiet = cut_nieuw
+            limiet.save()
+
+            self._verwerk_mutatie_verlaag_cut(deelcomp, klasse, cut_oud, cut_nieuw)
+
+        # else: cut_oud == cut_nieuw --> doe niets
+        #   (dit kan voorkomen als 2 gebruikers tegelijkertijd de cut veranderen)
 
     def _verwerk_mutatie(self, mutatie):
         code = mutatie.mutatie
 
         if code == MUTATIE_INITIEEL:
             self.stdout.write('[INFO] Verwerk mutatie %s: initieel' % mutatie.pk)
-            self._verwerk_mutatie_initieel(mutatie.deelnemer)
+            self._verwerk_mutatie_initieel(mutatie.deelcompetitie.competitie, mutatie.deelcompetitie.laag)
         elif code == MUTATIE_CUT:
             self.stdout.write('[INFO] Verwerk mutatie %s: aangepaste limiet (cut)' % mutatie.pk)
-            self._verwerk_mutatie_cut(mutatie.deelnemer)
+            self._verwerk_mutatie_cut(mutatie.deelcompetitie, mutatie.klasse, mutatie.cut_oud, mutatie.cut_nieuw)
         elif code == MUTATIE_AANMELDEN:
             self.stdout.write('[INFO] Verwerk mutatie %s: aanmelden' % mutatie.pk)
             self._verwerk_mutatie_aanmelden(mutatie.deelnemer)
