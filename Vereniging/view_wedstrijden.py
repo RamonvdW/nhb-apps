@@ -42,7 +42,8 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
 
         pks = (DeelcompetitieRonde
                .objects
-               .filter(plan__wedstrijden__vereniging=functie_nu.nhb_ver)
+               .filter(deelcompetitie__is_afgesloten=False,
+                       plan__wedstrijden__vereniging=functie_nu.nhb_ver)
                .values_list('plan__wedstrijden', flat=True))
 
         wedstrijden = (Wedstrijd
