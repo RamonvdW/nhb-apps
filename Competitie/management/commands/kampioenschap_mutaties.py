@@ -9,11 +9,11 @@
 
 from django.core.management.base import BaseCommand
 from django.db.models import F
-import django.db.utils
 from Competitie.models import (CompetitieTaken, DeelCompetitie, DeelcompetitieKlasseLimiet,
                                KampioenschapSchutterBoog, DEELNAME_JA, DEELNAME_NEE,
                                KampioenschapMutatie,
                                MUTATIE_INITIEEL, MUTATIE_CUT, MUTATIE_AANMELDEN, MUTATIE_AFMELDEN)
+import django.db.utils
 import datetime
 import time
 
@@ -68,7 +68,7 @@ class Command(BaseCommand):
             else:
                 rank += 1
                 obj.rank = rank
-            obj.save()
+            obj.save(update_fields=['rank', 'volgorde'])
         # for
 
     def _verwerk_mutatie_initieel_klasse(self, deelcomp, klasse):
@@ -130,7 +130,7 @@ class Command(BaseCommand):
             else:
                 rank += 1
                 obj.rank = rank
-            obj.save()
+            obj.save(update_fields=['rank', 'volgorde'])
             pks.append(obj.pk)
         # for
 
@@ -146,7 +146,7 @@ class Command(BaseCommand):
                 else:
                     rank += 1
                     obj.rank = rank
-                obj.save()
+                obj.save(update_fields=['rank', 'volgorde'])
         # for
 
     def _verwerk_mutatie_initieel_deelcomp(self, deelcomp):
@@ -181,7 +181,7 @@ class Command(BaseCommand):
         # tot deelnemer gepromoveerd. Zijn gemiddelde bepaalt de volgorde
 
         deelnemer.deelname = DEELNAME_NEE
-        deelnemer.save()
+        deelnemer.save(update_fields=['deelname'])
 
         deelcomp = deelnemer.deelcompetitie
         klasse = deelnemer.klasse
@@ -214,7 +214,7 @@ class Command(BaseCommand):
                 if len(slechter) > 0:
                     # zet het nieuwe plekje
                     reserve.volgorde = slechter[0].volgorde
-                    reserve.save()
+                    reserve.save(update_fields=['volgorde'])
 
                     # schuif de andere schutters omlaag
                     slechter.update(volgorde=F('volgorde') + 1)
@@ -232,7 +232,7 @@ class Command(BaseCommand):
         # verwijder de deelnemer uit de lijst op zijn oude plekje
         # en schuif de rest omhoog
         deelnemer.volgorde = VOLGORDE_PARKEER
-        deelnemer.save()
+        deelnemer.save(update_fields=['volgorde'])
 
         qset = (KampioenschapSchutterBoog
                 .objects
@@ -290,6 +290,7 @@ class Command(BaseCommand):
                 # niemand om op te schuiven - zet aan het einde
                 nieuwe_volgorde = (KampioenschapSchutterBoog
                                    .objects
+                                   .exclude(volgorde=VOLGORDE_PARKEER)
                                    .filter(deelcompetitie=deelcomp,
                                            klasse=klasse)
                                    .count()) + 1
@@ -321,7 +322,7 @@ class Command(BaseCommand):
 
         deelnemer.volgorde = nieuwe_volgorde
         deelnemer.deelname = DEELNAME_JA
-        deelnemer.save()
+        deelnemer.save(update_fields=['volgorde', 'deelname'])
 
         # deel de rank nummers opnieuw uit
         self._update_rank_nummers(deelcomp, klasse)
@@ -332,7 +333,7 @@ class Command(BaseCommand):
                 self._opnieuw_aanmelden(deelnemer)
             else:
                 deelnemer.deelname = DEELNAME_JA
-                deelnemer.save()
+                deelnemer.save(update_fields=['deelname'])
                 # verder hoeven we niets te doen: volgorde en rank blijft hetzelfde
 
     @staticmethod
@@ -367,7 +368,7 @@ class Command(BaseCommand):
             else:
                 rank += 1
                 obj.rank = rank
-            obj.save()
+            obj.save(update_fields=['rank', 'volgorde'])
         # for
 
     @staticmethod
@@ -427,7 +428,7 @@ class Command(BaseCommand):
             else:
                 rank += 1
                 obj.rank = rank
-            obj.save()
+            obj.save(update_fields=['rank', 'volgorde'])
         # for
 
         # geef nu alle andere schutters (tot de oude cut) opnieuw een volgnummer
@@ -443,7 +444,7 @@ class Command(BaseCommand):
                 else:
                     rank += 1
                     obj.rank = rank
-                obj.save()
+                obj.save(update_fields=['rank', 'volgorde'])
         # for
 
     def _verwerk_mutatie_cut(self, deelcomp, klasse, cut_oud, cut_nieuw):
@@ -548,7 +549,7 @@ class Command(BaseCommand):
         # monitor voor nieuwe ScoreHist
         mutatie_count = 0      # moet 0 zijn: beschermd tegen query op lege mutatie tabel
         now = datetime.datetime.now()
-        while now < self.stop_at:
+        while now < self.stop_at:                   # pragma: no branch
             # self.stdout.write('tick')
             new_count = KampioenschapMutatie.objects.count()
             if new_count != mutatie_count:
@@ -599,5 +600,24 @@ class Command(BaseCommand):
             pass
 
         self.stdout.write('Klaar')
+
+
+"""
+    performance debug helper:
+
+    from django.db import connection
+
+        q_begin = len(connection.queries)
+
+        # queries here
+
+        print('queries: %s' % (len(connection.queries) - q_begin))
+        for obj in connection.queries[q_begin:]:
+            print('%10s %s' % (obj['time'], obj['sql'][:200]))
+        # for
+        sys.exit(1)
+
+    test uitvoeren met --debug-mode anders wordt er niets bijgehouden
+"""
 
 # end of file
