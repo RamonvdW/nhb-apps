@@ -603,7 +603,7 @@ class Command(BaseCommand):
             # for
             ScoreHist.objects.bulk_create(self._bulk_hist)
 
-            # must manually back-date hist.when for each create object
+            # must manually back-date hist.when for each created object
             for hist in self._bulk_hist:
                 hist.when = self._import_when
                 hist.save()
@@ -689,9 +689,8 @@ class Command(BaseCommand):
         parser.add_argument('--all', action='store_true')
 
     def handle(self, *args, **options):
-
-        self.stdout.write('[DEBUG] self.stdout.encoding = %s' % self.stdout.encoding)
-        self.stdout.write('[DEBUG]  sys.stdout.encoding = %s' % sys.stdout.encoding)
+        # self.stdout.write('[DEBUG] self.stdout.encoding = %s' % self.stdout.encoding)
+        # self.stdout.write('[DEBUG]  sys.stdout.encoding = %s' % sys.stdout.encoding)
 
         pad = os.path.normpath(options['dir'][0])
         max_fouten = options['max_fouten'][0]
