@@ -8,7 +8,8 @@ from django.test import TestCase
 from django.core import management
 from BasisTypen.models import BoogType
 from Competitie.models import (Competitie, DeelCompetitie, DeelcompetitieRonde,
-                               RegioCompetitieSchutterBoog, AG_NUL)
+                               RegioCompetitieSchutterBoog, KampioenschapSchutterBoog,
+                               AG_NUL, LAAG_REGIO, LAAG_BK)
 from Competitie.test_fase import zet_competitie_fase
 from NhbStructuur.models import NhbRegio, NhbLid, NhbVereniging
 from Schutter.models import SchutterBoog
@@ -20,7 +21,7 @@ import datetime
 import io
 
 
-class TestRecordsCliUpdTussenstand(E2EHelpers, TestCase):
+class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
     """ unittests voor de Competitie applicatie, management command regiocomp_upd_tussenstand """
 
     def _maak_competitie_aan(self):
@@ -214,6 +215,20 @@ class TestRecordsCliUpdTussenstand(E2EHelpers, TestCase):
             schuttersboog = schuttersboog[skip:]
         # while
 
+    def _sluit_alle_regiocompetities(self, comp):
+        # deze functie sluit alle regiocompetities af zodat de competitie in fase G komt
+        comp.zet_fase()
+        # print(comp.fase)
+        self.assertTrue('B' < comp.fase < 'G')
+        for deelcomp in DeelCompetitie.objects.filter(competitie=comp, laag=LAAG_REGIO):
+            if not deelcomp.is_afgesloten:      # pragma: no branch
+                deelcomp.is_afgesloten = True
+                deelcomp.save()
+        # for
+
+        comp.zet_fase()
+        self.assertEqual(comp.fase, 'G')
+
     def setUp(self):
         """ initialisatie van de test case """
 
@@ -256,6 +271,10 @@ class TestRecordsCliUpdTussenstand(E2EHelpers, TestCase):
         schuttersboog = [self.schutterboog_100001, self.schutterboog_100002,
                          self.schutterboog_100004, self.schutterboog_100005]
         self._schrijf_in_voor_competitie(self.deelcomp_r101, schuttersboog)
+
+        self.functie_bko = DeelCompetitie.objects.get(competitie=self.comp,
+                                                      laag=LAAG_BK,
+                                                      competitie__afstand=18).functie
 
         self.client.logout()
 
@@ -639,9 +658,81 @@ class TestRecordsCliUpdTussenstand(E2EHelpers, TestCase):
         lid.save()
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
+        management.call_command('regiocomp_upd_tussenstand', '7', '--quick', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
         self.assertTrue("[WARNING] Uitstapper: 100001 [101] [1000] Grote Club (actief=True)" in f2.getvalue())
+
+    def test_rk_fase_overstap(self):
+        # test schutters die overstappen naar een andere vereniging binnen het rayon, tijdens de RK fase
+
+        # schrijf iemand in
+        post_params = dict()
+        post_params['lid_100001_boogtype_%s' % self.boog_r.pk] = 'on'
+        resp = self.client.post(self.url_inschrijven % self.comp.pk, post_params)
+        self.assertEqual(resp.status_code, 302)  # 302 = Redirect = succes
+
+        # maak een paar score + scorehist
+        self._score_opslaan(self.uitslagen[0], self.schutterboog_100001, 123)
+        self._score_opslaan(self.uitslagen[2], self.schutterboog_100001, 124)
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
+        self.assertTrue('Scores voor 1 schuttersboog bijgewerkt' in f2.getvalue())
+
+        deelnemer = RegioCompetitieSchutterBoog.objects.get(schutterboog=self.schutterboog_100001)
+        self.assertEqual(deelnemer.bij_vereniging.nhb_nr, self.ver.nhb_nr)
+
+        deelnemer.aantal_scores = 6
+        deelnemer.save()
+
+        # BKO zet de competitie naar de RK fase
+        zet_competitie_fase(self.comp, 'F')
+        self._sluit_alle_regiocompetities(self.comp)
+        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_wissel_naar_functie(self.functie_bko)
+        url = '/competitie/planning/doorzetten/%s/rk/' % self.comp.pk
+        self.client.post(url)
+
+        # standaard vereniging is regio 101
+        # maak een tweede vereniging aan in regio 102
+        regio_102 = NhbRegio.objects.get(regio_nr=102)
+        ver = NhbVereniging()
+        ver.naam = "Polderclub"
+        ver.plaats = "Polderstad"
+        ver.nhb_nr = 1100
+        ver.regio = regio_102
+        # secretaris kan nog niet ingevuld worden
+        ver.save()
+
+        lid = deelnemer.schutterboog.nhblid
+        lid.bij_vereniging = ver
+        lid.save()
+
+        rk_deelnemer = KampioenschapSchutterBoog.objects.get(schutterboog=deelnemer.schutterboog)
+        rk_deelnemer.bij_vereniging = None
+        rk_deelnemer.save()
+
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
+        self.assertTrue("[INFO] Verwerk overstap 100001: GEEN VERENIGING --> [102] [1100] Polderclub" in f2.getvalue())
+
+        # overstap naar vereniging in buiten het rayon
+        self.ver.regio = NhbRegio.objects.get(regio_nr=105)
+        self.ver.save()
+        lid.bij_vereniging = self.ver
+        lid.save()
+
+        rk_deelnemer = KampioenschapSchutterBoog.objects.get(schutterboog=deelnemer.schutterboog)
+        rk_deelnemer.bij_vereniging = None
+        rk_deelnemer.save()
+
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
+        # print("f1: %s" % f1.getvalue())
+        # print("f2: %s" % f2.getvalue())
+        self.assertTrue("[WARNING] Verwerk overstap naar ander rayon niet mogelijk voor 100001 in RK voor rayon 1: GEEN VERENIGING --> [105] [1000] Grote Club" in f2.getvalue())
 
 # end of file

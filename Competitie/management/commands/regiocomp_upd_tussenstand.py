@@ -80,13 +80,13 @@ class Command(BaseCommand):
             if ver:
                 if ver.regio.rayon.rayon_nr != obj.deelcompetitie.nhb_rayon.rayon_nr:
                     self.stdout.write('[WARNING] Verwerk overstap naar ander rayon niet mogelijk voor %s in RK voor rayon %s: GEEN VERENIGING --> [%s] %s' % (
+                                      obj.schutterboog.nhblid.nhb_nr,
                                       obj.deelcompetitie.nhb_rayon.rayon_nr,
-                                      obj.nhb_nr,
                                       ver.regio.regio_nr, ver))
                 else:
                     # pas de 'bij_vereniging' aan
                     self.stdout.write('[INFO] Verwerk overstap %s: GEEN VERENIGING --> [%s] %s' % (
-                                      obj.nhb_nr,
+                                      obj.schutterboog.nhblid.nhb_nr,
                                       ver.regio.regio_nr, ver))
                     obj.bij_vereniging = ver
                     obj.save()
@@ -433,7 +433,7 @@ class Command(BaseCommand):
         # monitor voor nieuwe ScoreHist
         hist_count = 0      # moet 0 zijn: beschermd tegen query op lege scorehist tabel
         now = datetime.datetime.now()
-        while now < self.stop_at:
+        while now < self.stop_at:               # pragma: no branch
             new_count = ScoreHist.objects.count()
             if new_count != hist_count:
                 hist_count = new_count
