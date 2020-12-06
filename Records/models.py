@@ -59,7 +59,7 @@ class IndivRecord(models.Model):
 
     plaats = models.CharField(max_length=50)
 
-    land = models.CharField(max_length=50)
+    land = models.CharField(max_length=50)      # TODO: blank=True toevoegen
 
     score = models.PositiveIntegerField()
 
@@ -74,15 +74,18 @@ class IndivRecord(models.Model):
     is_world_record = models.BooleanField(default=False)
 
     def __str__(self):
-        return "%s: %s - %s - %s - %s - %s - %s - %s - %s" % (self.volg_nr,
-                                                              self.discipline,
-                                                              self.soort_record,
-                                                              self.geslacht,
-                                                              self.leeftijdscategorie,
-                                                              self.materiaalklasse,
-                                                              self.para_klasse,
-                                                              self.naam,
-                                                              self.score_str())
+        return "%s: %s - %s - %s%s%s - %s - %s - %s - %s - %s" % (
+                    self.volg_nr,
+                    self.discipline,
+                    self.soort_record,
+                    self.materiaalklasse,
+                    self.leeftijdscategorie,
+                    self.geslacht,
+                    self.para_klasse,
+                    self.naam,
+                    self.score_str(),
+                    self.datum,
+                    self.plaats)
 
     def score_str(self):
         """  make score beschrijving, inclusief X-count indien relevant """

@@ -185,14 +185,14 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
 
     @staticmethod
     def _get_locatie_nhver_or_404(**kwargs):
-        locatie_pk = kwargs['locatie_pk']
         try:
+            locatie_pk = int(kwargs['locatie_pk'][:6])      # afkappen voor veiligheid
             locatie = WedstrijdLocatie.objects.get(pk=locatie_pk)
-        except WedstrijdLocatie.DoesNotExist:
+        except (ValueError, WedstrijdLocatie.DoesNotExist):
             raise Resolver404()
 
-        nhbver_pk = kwargs['vereniging_pk']
         try:
+            nhbver_pk = int(kwargs['vereniging_pk'][:6])    # afkappen voor veiligheid
             nhbver = NhbVereniging.objects.get(pk=nhbver_pk)
         except NhbVereniging.DoesNotExist:
             raise Resolver404()

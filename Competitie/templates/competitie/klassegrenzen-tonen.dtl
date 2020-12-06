@@ -11,52 +11,52 @@
 {% block pagina %}
 {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="klassegrenzen-tonen" %}
 
-<h4>Klassegrenzen</h4>
+    <h4>Klassegrenzen</h4>
 
-{% if object_list %}
+    {% if object_list %}
 
-<p>Hieronder staan de vastgestelde klassegrenzen voor de individuele wedstrijdklassen voor de competities.</p>
+        <p>Hieronder staan de vastgestelde klassegrenzen voor de individuele wedstrijdklassen voor de competities.</p>
 
-<div class="row">
-    <table class="white">
-        <thead>
-            <tr>
-                <th></th>
-                <th colspan="2">Minimaal aanvangs<wbr/>gemiddelde</th>
-            </tr>
-            <tr>
-                <th>Materiaalklasse</th>
-                <th>Indoor</th>
-                <th>25m 1pijl</th>
-            </tr>
-        </thead>
+        <div class="row">
+            <table class="white">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th colspan="2">Minimaal aanvangs<wbr/>gemiddelde</th>
+                    </tr>
+                    <tr>
+                        <th>Materiaalklasse</th>
+                        <th>Indoor</th>
+                        <th>25m 1pijl</th>
+                    </tr>
+                </thead>
 
-        {% for obj in object_list %}
-            <tr>
-                <td>{{ obj.beschrijving }}</td>
-                <td>{% if obj.min_ag18 %}
-                        {{ obj.min_ag18|floatformat:3 }}
-                    {% else %}
-                        <i class="grey-text">geen</i>
-                    {% endif %}
-                </td>
-                <td>{% if obj.min_ag25 %}
-                        {{ obj.min_ag25|floatformat:3 }}
-                    {% else %}
-                        <i class="grey-text">geen</i>
-                    {% endif %}
-                </td>
-            </tr>
-        {% endfor %}
-    </table>
-</div>
+                {% for obj in object_list %}
+                    <tr>
+                        <td>{{ obj.beschrijving }}</td>
+                        <td>{% if obj.min_ag18 %}
+                                {{ obj.min_ag18|floatformat:3 }}
+                            {% else %}
+                                <i class="grey-text">geen</i>
+                            {% endif %}
+                        </td>
+                        <td>{% if obj.min_ag25 %}
+                                {{ obj.min_ag25|floatformat:3 }}
+                            {% else %}
+                                <i class="grey-text">geen</i>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
 
-{% else %}
+    {% else %}
 
-<p>De klassegrenzen zijn nog niet vastgesteld.</p>
+        <p>De klassegrenzen zijn nog niet vastgesteld.</p>
 
-{% endif %}
+    {% endif %}
 
-<a class="btn-nhb-blauw" href="{% url 'Competitie:overzicht' %}"><i class="material-icons-round left">close</i>Sluiten</a>
+    <a class="btn-nhb-blauw" href="{% url 'Competitie:overzicht' %}"><i class="material-icons-round left">close</i>Sluiten</a>
 
 {% endblock %}

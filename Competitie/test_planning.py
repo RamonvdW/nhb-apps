@@ -6,12 +6,13 @@
 
 from django.test import TestCase
 from BasisTypen.models import BoogType, TeamWedstrijdklasse
+from Competitie.test_fase import zet_competitie_fase
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging, NhbLid
-from Wedstrijden.models import Wedstrijd
 from Schutter.models import SchutterBoog
 from Score.models import Score
-from Wedstrijden.models import WedstrijdLocatie
+from Taken.models import Taak
+from Wedstrijden.models import WedstrijdLocatie, Wedstrijd
 from Overig.e2ehelpers import E2EHelpers
 from .models import (Competitie, DeelCompetitie, CompetitieKlasse,
                      DeelcompetitieRonde, competitie_aanmaken,
@@ -24,7 +25,7 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
 
     """ unit tests voor de Competitie applicatie, Koppel Beheerders functie """
 
-    test_after = ('Competitie.test_beheerders', 'Competitie.test_competitie')
+    test_after = ('Competitie.test_fase', 'Competitie.test_beheerders', 'Competitie.test_competitie')
 
     def _prep_beheerder_lid(self, voornaam):
         nhb_nr = self._next_nhbnr
@@ -38,7 +39,7 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
         lid.email = voornaam.lower() + "@nhb.test"
         lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
         lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        lid.bij_vereniging = self.nhbver
+        lid.bij_vereniging = self.nhbver_101
         lid.save()
 
         return self.e2e_create_account(nhb_nr, lid.email, lid.voornaam, accepteer_vhpg=True)
@@ -54,6 +55,17 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
         self.rayon_1 = NhbRayon.objects.get(rayon_nr=1)
         self.rayon_2 = NhbRayon.objects.get(rayon_nr=2)
         self.regio_101 = NhbRegio.objects.get(regio_nr=101)
+        self.regio_105 = NhbRegio.objects.get(regio_nr=105)
+        self.regio_112 = NhbRegio.objects.get(regio_nr=112)
+
+        # maak een test vereniging
+        ver = NhbVereniging()
+        ver.naam = "Zuidelijke Club"
+        ver.nhb_nr = "1111"
+        ver.regio = self.regio_112
+        # secretaris kan nog niet ingevuld worden
+        ver.save()
+        self.nhbver_112 = ver
 
         # maak een test vereniging
         ver = NhbVereniging()
@@ -62,7 +74,7 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
         ver.regio = self.regio_101
         # secretaris kan nog niet ingevuld worden
         ver.save()
-        self.nhbver = ver
+        self.nhbver_101 = ver
 
         loc = WedstrijdLocatie(banen_18m=1,
                                banen_25m=1,
@@ -82,9 +94,12 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
         self.account_bb.save()
 
         # maak test leden aan die we kunnen koppelen aan beheerders functies
-        self.account_bko = self._prep_beheerder_lid('BKO')
-        self.account_rko = self._prep_beheerder_lid('RKO')
-        self.account_rcl = self._prep_beheerder_lid('RCL')
+        self.account_bko_18 = self._prep_beheerder_lid('BKO')
+        self.account_rko1_18 = self._prep_beheerder_lid('RKO1')
+        self.account_rko2_18 = self._prep_beheerder_lid('RKO2')
+        self.account_rcl101_18 = self._prep_beheerder_lid('RCL101')
+        self.account_rcl101_25 = self._prep_beheerder_lid('RCL101-25')
+        self.account_rcl112_18 = self._prep_beheerder_lid('RCL112')
         self.account_schutter = self._prep_beheerder_lid('Schutter')
         self.lid_schutter = NhbLid.objects.get(nhb_nr=self.account_schutter.username)
 
@@ -98,23 +113,38 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
         # creëer een competitie met deelcompetities
         competitie_aanmaken(jaar=2019)
 
+        # klassengrenzen vaststellen om de competitie voorbij fase A1 te krijgen
+        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_wisselnaarrol_bb()
+        self.url_klassegrenzen_vaststellen_18 = '/competitie/klassegrenzen/vaststellen/18/'
+        resp = self.client.post(self.url_klassegrenzen_vaststellen_18)
+        self.assertEqual(resp.status_code, 302)     # 302 = Redirect = success
+        self.client.logout()
+
         self.comp_18 = Competitie.objects.get(afstand='18')
         self.comp_25 = Competitie.objects.get(afstand='25')
-        self.deelcomp_bond = DeelCompetitie.objects.filter(laag='BK', competitie=self.comp_18)[0]
-        self.deelcomp_rayon = DeelCompetitie.objects.filter(laag='RK', competitie=self.comp_18, nhb_rayon=self.rayon_2)[0]
-        self.deelcomp_rayon1 = DeelCompetitie.objects.filter(laag='RK', competitie=self.comp_18, nhb_rayon=self.rayon_1)[0]
-        self.deelcomp_regio_18 = DeelCompetitie.objects.filter(laag='Regio', competitie=self.comp_18, nhb_regio=self.regio_101)[0]
-        self.deelcomp_regio_25 = DeelCompetitie.objects.filter(laag='Regio', competitie=self.comp_25, nhb_regio=self.regio_101)[0]
+        self.deelcomp_bond_18 = DeelCompetitie.objects.filter(laag='BK', competitie=self.comp_18)[0]
+        self.deelcomp_rayon1_18 = DeelCompetitie.objects.filter(laag='RK', competitie=self.comp_18, nhb_rayon=self.rayon_1)[0]
+        self.deelcomp_rayon2_18 = DeelCompetitie.objects.filter(laag='RK', competitie=self.comp_18, nhb_rayon=self.rayon_2)[0]
+        self.deelcomp_regio101_18 = DeelCompetitie.objects.filter(laag='Regio', competitie=self.comp_18, nhb_regio=self.regio_101)[0]
+        self.deelcomp_regio101_25 = DeelCompetitie.objects.filter(laag='Regio', competitie=self.comp_25, nhb_regio=self.regio_101)[0]
+        self.deelcomp_regio112_18 = DeelCompetitie.objects.filter(laag='Regio', competitie=self.comp_18, nhb_regio=self.regio_112)[0]
 
         self.cluster_101a = NhbCluster.objects.get(regio=self.regio_101, letter='a', gebruik='18')
 
-        self.functie_bko = self.deelcomp_bond.functie
-        self.functie_rko = self.deelcomp_rayon.functie
-        self.functie_rcl = self.deelcomp_regio_18.functie
+        self.functie_bko_18 = self.deelcomp_bond_18.functie
+        self.functie_rko1_18 = self.deelcomp_rayon1_18.functie
+        self.functie_rko2_18 = self.deelcomp_rayon2_18.functie
+        self.functie_rcl101_18 = self.deelcomp_regio101_18.functie
+        self.functie_rcl101_25 = self.deelcomp_regio101_25.functie
+        self.functie_rcl112_18 = self.deelcomp_regio112_18.functie
 
-        self.functie_bko.accounts.add(self.account_bko)
-        self.functie_rko.accounts.add(self.account_rko)
-        self.functie_rcl.accounts.add(self.account_rcl)
+        self.functie_bko_18.accounts.add(self.account_bko_18)
+        self.functie_rko1_18.accounts.add(self.account_rko1_18)
+        self.functie_rko2_18.accounts.add(self.account_rko2_18)
+        self.functie_rcl101_18.accounts.add(self.account_rcl101_18)
+        self.functie_rcl101_25.accounts.add(self.account_rcl101_25)
+        self.functie_rcl112_18.accounts.add(self.account_rcl112_18)
 
         # maak nog een test vereniging, zonder HWL functie
         ver = NhbVereniging()
@@ -127,20 +157,22 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
         self.url_planning_bond = '/competitie/planning/bondscompetitie/%s/'     # deelcomp_pk
         self.url_planning_rayon = '/competitie/planning/rayoncompetitie/%s/'    # deelcomp_pk
         self.url_planning_regio = '/competitie/planning/regiocompetitie/%s/'    # deelcomp_pk
-        self.url_planning_regio_cluster = '/competitie/planning/regiocompetitie/cluster/%s/'    # cluster_pk
-        self.url_planning_regio_ronde = '/competitie/planning/regiocompetitie/ronde/%s/'        # ronde_pk
-        self.url_wijzig_wedstrijd = '/competitie/planning/wedstrijd/wijzig/%s/'        # wedstrijd_pk
-        self.url_verwijder_wedstrijd = '/competitie/planning/wedstrijd/verwijder/%s/'  # wedstrijd_pk
-        self.url_uitslag_invoeren = '/competitie/wedstrijd/uitslag-invoeren/%s/'       # wedstrijd_pk
+        self.url_planning_regio_cluster = '/competitie/planning/regiocompetitie/cluster/%s/'  # cluster_pk
+        self.url_planning_regio_ronde = '/competitie/planning/regiocompetitie/ronde/%s/'      # ronde_pk
+        self.url_wijzig_wedstrijd = '/competitie/planning/wedstrijd/wijzig/%s/'           # wedstrijd_pk
+        self.url_wijzig_rk_wedstrijd = '/competitie/planning/wedstrijd-rayon/wijzig/%s/'  # wedstrijd_pk
+        self.url_verwijder_wedstrijd = '/competitie/planning/wedstrijd/verwijder/%s/'     # wedstrijd_pk
+        self.url_uitslag_invoeren = '/competitie/wedstrijd/uitslag-invoeren/%s/'          # wedstrijd_pk
+        self.url_afsluiten_regio = '/competitie/planning/regiocompetitie/afsluiten/%s/'   # deelcomp_pk
 
     def test_overzicht_anon(self):
-        resp = self.client.get(self.url_planning_bond % self.deelcomp_bond.pk)
+        resp = self.client.get(self.url_planning_bond % self.deelcomp_bond_18.pk)
         self.assert_is_redirect(resp, '/plein/')      # not allowed
 
-        resp = self.client.get(self.url_planning_rayon % self.deelcomp_rayon.pk)
+        resp = self.client.get(self.url_planning_rayon % self.deelcomp_rayon2_18.pk)
         self.assert_is_redirect(resp, '/plein/')      # not allowed
 
-        resp = self.client.get(self.url_planning_regio % self.deelcomp_regio_18.pk)
+        resp = self.client.get(self.url_planning_regio % self.deelcomp_regio101_18.pk)
         self.assert_is_redirect(resp, '/plein/')      # not allowed
 
         resp = self.client.get(self.url_planning_regio_cluster % self.cluster_101a.pk)
@@ -159,13 +191,13 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_admin)
         self.e2e_wisselnaarrol_it()
 
-        resp = self.client.get(self.url_planning_bond % self.deelcomp_bond.pk)
+        resp = self.client.get(self.url_planning_bond % self.deelcomp_bond_18.pk)
         self.assert_is_redirect(resp, '/plein/')      # not allowed
 
-        resp = self.client.get(self.url_planning_rayon % self.deelcomp_rayon.pk)
+        resp = self.client.get(self.url_planning_rayon % self.deelcomp_rayon2_18.pk)
         self.assert_is_redirect(resp, '/plein/')      # not allowed
 
-        resp = self.client.get(self.url_planning_regio % self.deelcomp_regio_18.pk)
+        resp = self.client.get(self.url_planning_regio % self.deelcomp_regio101_18.pk)
         self.assert_is_redirect(resp, '/plein/')      # not allowed
 
         resp = self.client.get(self.url_planning_regio_cluster % self.cluster_101a.pk)
@@ -178,17 +210,18 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_bb)
         self.e2e_wisselnaarrol_bb()
 
-        resp = self.client.get(self.url_planning_bond % self.deelcomp_bond.pk)
+        resp = self.client.get(self.url_planning_bond % self.deelcomp_bond_18.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/planning-landelijk.dtl', 'plein/site_layout.dtl'))
 
-        resp = self.client.get(self.url_planning_rayon % self.deelcomp_rayon.pk)
+        resp = self.client.get(self.url_planning_rayon % self.deelcomp_rayon2_18.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/planning-rayon.dtl', 'plein/site_layout.dtl'))
+        # TODO: check geen knoppen 'wedstrijd toevoegen' of 'aanpassen wedstrijd'
 
-        resp = self.client.get(self.url_planning_regio % self.deelcomp_regio_18.pk)
+        resp = self.client.get(self.url_planning_regio % self.deelcomp_regio101_18.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/planning-regio.dtl', 'plein/site_layout.dtl'))
@@ -199,18 +232,19 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('competitie/planning-regio-cluster.dtl', 'plein/site_layout.dtl'))
 
     def test_overzicht_bko(self):
-        self.e2e_login_and_pass_otp(self.account_bko)
-        self.e2e_wissel_naar_functie(self.functie_bko)
+        self.e2e_login_and_pass_otp(self.account_bko_18)
+        self.e2e_wissel_naar_functie(self.functie_bko_18)
 
-        resp = self.client.get(self.url_planning_bond % self.deelcomp_bond.pk)
+        resp = self.client.get(self.url_planning_bond % self.deelcomp_bond_18.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/planning-landelijk.dtl', 'plein/site_layout.dtl'))
 
-        resp = self.client.get(self.url_planning_rayon % self.deelcomp_rayon.pk)
+        resp = self.client.get(self.url_planning_rayon % self.deelcomp_rayon2_18.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/planning-rayon.dtl', 'plein/site_layout.dtl'))
+        # TODO: check geen knoppen 'wedstrijd toevoegen' of 'aanpassen wedstrijd'
 
         # controleer dat de URL naar de bondscompetitie er in zit
         urls = self.extract_all_urls(resp, skip_menu=True)
@@ -218,7 +252,7 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
         if len(urls2) != 1:     # pragma: no cover
             self.fail(msg='Link naar bondscompetitie planning ontbreekt. Urls on page: %s' % repr(urls))
 
-        resp = self.client.get(self.url_planning_regio % self.deelcomp_regio_18.pk)
+        resp = self.client.get(self.url_planning_regio % self.deelcomp_regio101_18.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/planning-regio.dtl', 'plein/site_layout.dtl'))
@@ -235,25 +269,25 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('competitie/planning-regio-cluster.dtl', 'plein/site_layout.dtl'))
 
         # check dat de BKO geen wijzigingen mag maken
-        resp = self.client.post(self.url_planning_regio % self.deelcomp_regio_18.pk)
+        resp = self.client.post(self.url_planning_regio % self.deelcomp_regio101_18.pk)
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
 
         resp = self.client.post(self.url_planning_regio_cluster % self.cluster_101a.pk)
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
 
     def test_overzicht_rko(self):
-        self.e2e_login_and_pass_otp(self.account_rko)
-        self.e2e_wissel_naar_functie(self.functie_rko)
+        self.e2e_login_and_pass_otp(self.account_rko2_18)
+        self.e2e_wissel_naar_functie(self.functie_rko2_18)
 
-        resp = self.client.get(self.url_planning_bond % self.deelcomp_bond.pk)
+        resp = self.client.get(self.url_planning_bond % self.deelcomp_bond_18.pk)
         self.assert_is_redirect(resp, '/plein/')      # not allowed
 
-        resp = self.client.get(self.url_planning_rayon % self.deelcomp_rayon.pk)
+        resp = self.client.get(self.url_planning_rayon % self.deelcomp_rayon2_18.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/planning-rayon.dtl', 'plein/site_layout.dtl'))
 
-        resp = self.client.get(self.url_planning_regio % self.deelcomp_regio_18.pk)
+        resp = self.client.get(self.url_planning_regio % self.deelcomp_regio101_18.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/planning-regio.dtl', 'plein/site_layout.dtl'))
@@ -270,23 +304,23 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('competitie/planning-regio-cluster.dtl', 'plein/site_layout.dtl'))
 
         # check dat de RKO geen wijzigingen mag maken
-        resp = self.client.post(self.url_planning_regio % self.deelcomp_regio_18.pk)
+        resp = self.client.post(self.url_planning_regio % self.deelcomp_regio101_18.pk)
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
 
         resp = self.client.post(self.url_planning_regio_cluster % self.cluster_101a.pk)
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
 
     def test_overzicht_rcl(self):
-        self.e2e_login_and_pass_otp(self.account_rcl)
-        self.e2e_wissel_naar_functie(self.functie_rcl)
+        self.e2e_login_and_pass_otp(self.account_rcl101_18)
+        self.e2e_wissel_naar_functie(self.functie_rcl101_18)
 
-        resp = self.client.get(self.url_planning_bond % self.deelcomp_bond.pk)
+        resp = self.client.get(self.url_planning_bond % self.deelcomp_bond_18.pk)
         self.assert_is_redirect(resp, '/plein/')      # not allowed
 
-        resp = self.client.get(self.url_planning_rayon % self.deelcomp_rayon.pk)
+        resp = self.client.get(self.url_planning_rayon % self.deelcomp_rayon2_18.pk)
         self.assert_is_redirect(resp, '/plein/')      # not allowed
 
-        resp = self.client.get(self.url_planning_regio % self.deelcomp_regio_18.pk)
+        resp = self.client.get(self.url_planning_regio % self.deelcomp_regio101_18.pk)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/planning-regio.dtl', 'plein/site_layout.dtl'))
@@ -306,15 +340,15 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 404)     # 404 = Not found
 
     def test_wk53(self):
-        self.e2e_login_and_pass_otp(self.account_rcl)
-        self.e2e_wissel_naar_functie(self.functie_rcl)
+        self.e2e_login_and_pass_otp(self.account_rcl101_18)
+        self.e2e_wissel_naar_functie(self.functie_rcl101_18)
 
         # pas het jaartal van de competitie aan zodat wk53 bestaat
         self.comp_18.begin_jaar = 2020
         self.comp_18.save()
 
         # maak een ronde aan
-        resp = self.client.post(self.url_planning_regio % self.deelcomp_regio_18.pk)
+        resp = self.client.post(self.url_planning_regio % self.deelcomp_regio101_18.pk)
         self.assertEqual(resp.status_code, 302)     # 302 = Redirect = success
 
         ronde = DeelcompetitieRonde.objects.all()[0]
@@ -325,13 +359,13 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_bb)        # geen account_hwl
         self.e2e_wissel_naar_functie(self.functie_hwl)
 
-        resp = self.client.get(self.url_planning_bond % self.deelcomp_bond.pk)
+        resp = self.client.get(self.url_planning_bond % self.deelcomp_bond_18.pk)
         self.assert_is_redirect(resp, '/plein/')      # not allowed
 
-        resp = self.client.get(self.url_planning_rayon % self.deelcomp_rayon.pk)
+        resp = self.client.get(self.url_planning_rayon % self.deelcomp_rayon2_18.pk)
         self.assert_is_redirect(resp, '/plein/')      # not allowed
 
-        resp = self.client.get(self.url_planning_regio % self.deelcomp_regio_18.pk)
+        resp = self.client.get(self.url_planning_regio % self.deelcomp_regio101_18.pk)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/planning-regio.dtl', 'plein/site_layout.dtl'))
@@ -342,7 +376,7 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('competitie/planning-regio-cluster.dtl', 'plein/site_layout.dtl'))
 
         # check dat de HWL geen wijzigingen mag maken
-        resp = self.client.post(self.url_planning_regio % self.deelcomp_regio_18.pk)
+        resp = self.client.post(self.url_planning_regio % self.deelcomp_regio101_18.pk)
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
 
         resp = self.client.post(self.url_planning_regio_cluster % self.cluster_101a.pk)
@@ -372,20 +406,20 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
 
         # verkeerde laag
-        resp = self.client.get(self.url_planning_bond % self.deelcomp_rayon.pk)
+        resp = self.client.get(self.url_planning_bond % self.deelcomp_rayon2_18.pk)
         self.assertEqual(resp.status_code, 404)     # 404 = Not found
 
-        resp = self.client.get(self.url_planning_rayon % self.deelcomp_bond.pk)
+        resp = self.client.get(self.url_planning_rayon % self.deelcomp_bond_18.pk)
         self.assertEqual(resp.status_code, 404)     # 404 = Not found
 
-        resp = self.client.get(self.url_planning_regio % self.deelcomp_bond.pk)
+        resp = self.client.get(self.url_planning_regio % self.deelcomp_bond_18.pk)
         self.assertEqual(resp.status_code, 404)     # 404 = Not found
 
-        url = self.url_planning_bond % self.deelcomp_bond.pk
+        url = self.url_planning_bond % self.deelcomp_bond_18.pk
         self.e2e_assert_other_http_commands_not_supported(url, post=False)
 
         # wissel naar RCL voor meer rechten
-        self.e2e_wissel_naar_functie(self.functie_rcl)
+        self.e2e_wissel_naar_functie(self.functie_rcl101_18)
 
         resp = self.client.post(self.url_planning_regio % 99999)
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
@@ -393,7 +427,7 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
         resp = self.client.post(self.url_planning_regio_ronde % 99999)
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
 
-        resp = self.client.post(self.url_planning_regio % self.deelcomp_bond.pk)
+        resp = self.client.post(self.url_planning_regio % self.deelcomp_bond_18.pk)
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
 
         # illegaal cluster nummer
@@ -401,12 +435,12 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
 
     def test_rcl_maakt_planning_18(self):
-        self.e2e_login_and_pass_otp(self.account_rcl)
-        self.e2e_wissel_naar_functie(self.functie_rcl)
+        self.e2e_login_and_pass_otp(self.account_rcl101_18)
+        self.e2e_wissel_naar_functie(self.functie_rcl101_18)
 
         # maak een regioplanning aan
         self.assertEqual(DeelcompetitieRonde.objects.count(), 0)
-        resp = self.client.post(self.url_planning_regio % self.deelcomp_regio_18.pk)
+        resp = self.client.post(self.url_planning_regio % self.deelcomp_regio101_18.pk)
         self.assertEqual(resp.status_code, 302)     # 302 = Redirect = success
         self.assertEqual(DeelcompetitieRonde.objects.count(), 1)
 
@@ -424,7 +458,7 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
         resp = self.client.post(self.url_planning_regio_ronde % ronde_pk,
                                 {'ronde_week_nr': 51,
                                  'ronde_naam': 'eerste rondje is gratis'})
-        url_regio_planning = self.url_planning_regio % self.deelcomp_regio_18.pk
+        url_regio_planning = self.url_planning_regio % self.deelcomp_regio101_18.pk
         self.assert_is_redirect(resp, url_regio_planning)
 
         # TODO: check dat ronde settings in de database geland zijn
@@ -433,7 +467,7 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
         resp = self.client.post(self.url_planning_regio_ronde % ronde_pk,
                                 {'ronde_week_nr': 51,
                                  'ronde_naam': 'eerste rondje is gratis'})
-        url_regio_planning = self.url_planning_regio % self.deelcomp_regio_18.pk
+        url_regio_planning = self.url_planning_regio % self.deelcomp_regio101_18.pk
         self.assert_is_redirect(resp, url_regio_planning)
 
         # illegale week nummers
@@ -469,7 +503,7 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
         resp = self.client.post(self.url_planning_regio_ronde % ronde_pk,
                                 {'ronde_week_nr': 40,
                                  'ronde_naam': 'tweede rondje gaat snel'})
-        url_regio_planning = self.url_planning_regio % self.deelcomp_regio_18.pk
+        url_regio_planning = self.url_planning_regio % self.deelcomp_regio101_18.pk
         self.assert_is_redirect(resp, url_regio_planning)
         wedstrijd_datum = Wedstrijd.objects.get(pk=wedstrijd_pk).datum_wanneer
         self.assertEqual(str(wedstrijd_datum), "2019-09-30")
@@ -497,18 +531,17 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 404)  # 404 = Not found
 
     def test_rcl_maakt_planning_25(self):
-        self.e2e_login_and_pass_otp(self.account_rcl)
-        self.e2e_wissel_naar_functie(self.functie_rcl)
+        self.e2e_login_and_pass_otp(self.account_rcl101_18)
+        self.e2e_wissel_naar_functie(self.functie_rcl101_18)
 
         # maak een regioplanning aan
         self.assertEqual(DeelcompetitieRonde.objects.count(), 0)
-        resp = self.client.post(self.url_planning_regio % self.deelcomp_regio_25.pk)
+        resp = self.client.post(self.url_planning_regio % self.deelcomp_regio101_18.pk)
         self.assertEqual(resp.status_code, 302)  # 302 = Redirect = success
         self.assertEqual(DeelcompetitieRonde.objects.count(), 1)
-        ronde_pk = DeelcompetitieRonde.objects.all()[0].pk
 
         # maak de planning voor de tweede week aan
-        resp = self.client.post(self.url_planning_regio % self.deelcomp_regio_25.pk)
+        resp = self.client.post(self.url_planning_regio % self.deelcomp_regio101_18.pk)
         self.assertEqual(resp.status_code, 302)  # 302 = Redirect = success
         self.assertEqual(DeelcompetitieRonde.objects.count(), 2)
         ronde_pk = DeelcompetitieRonde.objects.all()[0].pk      # maakt uit welke
@@ -522,7 +555,7 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
         # pas de instellingen aan
         resp = self.client.post(self.url_planning_regio_ronde % ronde_pk,
                                 {'ronde_week_nr': 1, 'ronde_naam': 'tweede rondje gaat snel'})
-        url_regio_planning = self.url_planning_regio % self.deelcomp_regio_25.pk
+        url_regio_planning = self.url_planning_regio % self.deelcomp_regio101_18.pk
         self.assert_is_redirect(resp, url_regio_planning)
 
         # maak een wedstrijd aan
@@ -543,7 +576,7 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
         self.assertEqual(str(wedstrijd_datum), "2019-12-30")        # week 1 begon op maandag 2019-12-30
         resp = self.client.post(self.url_planning_regio_ronde % ronde_pk,
                                 {'ronde_week_nr': 5, 'ronde_naam': 'tweede rondje gaat snel'})
-        url_regio_planning = self.url_planning_regio % self.deelcomp_regio_25.pk
+        url_regio_planning = self.url_planning_regio % self.deelcomp_regio101_18.pk
         self.assert_is_redirect(resp, url_regio_planning)
         wedstrijd_datum = Wedstrijd.objects.get(pk=wedstrijd_pk).datum_wanneer
         self.assertEqual(str(wedstrijd_datum), "2020-01-27")
@@ -563,19 +596,19 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
 
         # maak nu 10 'handmatige' rondes aan
         for _ in range(10):
-            resp = self.client.post(self.url_planning_regio % self.deelcomp_regio_18.pk)
+            resp = self.client.post(self.url_planning_regio % self.deelcomp_regio101_18.pk)
             self.assertEqual(resp.status_code, 302)  # 302 = Redirect = success
         # for
         self.assertEqual(DeelcompetitieRonde.objects.count(), 7 + 10)
 
         # controleer dat de 11e ronde niet aangemaakt mag worden
-        resp = self.client.post(self.url_planning_regio % self.deelcomp_regio_18.pk)
+        resp = self.client.post(self.url_planning_regio % self.deelcomp_regio101_18.pk)
         self.assertEqual(resp.status_code, 302)  # 302 = Redirect = success
         self.assertEqual(DeelcompetitieRonde.objects.count(), 7 + 10)
 
     def test_rcl_maakt_cluster_planning(self):
-        self.e2e_login_and_pass_otp(self.account_rcl)
-        self.e2e_wissel_naar_functie(self.functie_rcl)
+        self.e2e_login_and_pass_otp(self.account_rcl101_18)
+        self.e2e_wissel_naar_functie(self.functie_rcl101_18)
 
         # maak een eerste ronde-planning aan voor een cluster
         self.assertEqual(DeelcompetitieRonde.objects.count(), 0)
@@ -614,10 +647,10 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('competitie/wijzig-wedstrijd.dtl', 'plein/site_layout.dtl'))
 
         # stop een vereniging in het cluster
-        self.nhbver.clusters.add(self.cluster_101a)
+        self.nhbver_101.clusters.add(self.cluster_101a)
 
         # haal de regioplanning op, inclusief de clusterplanning
-        resp = self.client.get(self.url_planning_regio % self.deelcomp_regio_18.pk)
+        resp = self.client.get(self.url_planning_regio % self.deelcomp_regio101_18.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
 
@@ -627,12 +660,12 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
 
     def test_wijzig_wedstrijd_18(self):
-        self.e2e_login_and_pass_otp(self.account_rcl)
-        self.e2e_wissel_naar_functie(self.functie_rcl)
+        self.e2e_login_and_pass_otp(self.account_rcl101_18)
+        self.e2e_wissel_naar_functie(self.functie_rcl101_18)
 
         # maak een regioplanning aan
         self.assertEqual(DeelcompetitieRonde.objects.count(), 0)
-        resp = self.client.post(self.url_planning_regio % self.deelcomp_regio_18.pk)
+        resp = self.client.post(self.url_planning_regio % self.deelcomp_regio101_18.pk)
         self.assertEqual(resp.status_code, 302)     # 302 = Redirect = success
         self.assertEqual(DeelcompetitieRonde.objects.count(), 1)
         ronde_pk = DeelcompetitieRonde.objects.all()[0].pk
@@ -646,7 +679,7 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
 
         # pas de instellingen van de wedstrijd aan
         resp = self.client.post(self.url_wijzig_wedstrijd % wedstrijd_pk,
-                                {'weekdag': 1, 'nhbver_pk': self.nhbver.pk, 'aanvang': '12:34'})
+                                {'weekdag': 1, 'nhbver_pk': self.nhbver_101.pk, 'aanvang': '12:34'})
         self.assertEqual(resp.status_code, 302)  # 302 = Redirect = Accepted
 
         wedstrijd = Wedstrijd.objects.get(pk=wedstrijd_pk)
@@ -704,32 +737,32 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
         # probeer een wijziging te doen als HWL
         self.e2e_wissel_naar_functie(self.functie_hwl)
         resp = self.client.post(self.url_wijzig_wedstrijd % wedstrijd_pk)
-        self.assertEqual(resp.status_code, 404)  # 404 = Not found
+        self.assert_is_redirect(resp, '/plein/')
 
         # probeer te wijzigen als RKO
-        self.e2e_login_and_pass_otp(self.account_rko)
-        self.e2e_wissel_naar_functie(self.functie_rko)
+        self.e2e_login_and_pass_otp(self.account_rko2_18)
+        self.e2e_wissel_naar_functie(self.functie_rko2_18)
 
         resp = self.client.get(self.url_wijzig_wedstrijd % wedstrijd_pk)
-        self.assertEqual(resp.status_code, 404)  # 404 = Not found
+        self.assert_is_redirect(resp, '/plein/')
 
         # probeer te wijzigen als BKO
         self.e2e_login_and_pass_otp(self.account_bb)
-        self.e2e_wissel_naar_functie(self.functie_bko)
+        self.e2e_wissel_naar_functie(self.functie_bko_18)
 
         resp = self.client.get(self.url_wijzig_wedstrijd % wedstrijd_pk)
-        self.assertEqual(resp.status_code, 404)  # 404 = Not found
+        self.assert_is_redirect(resp, '/plein/')
 
     def test_wijzig_wedstrijd_25(self):
-        self.e2e_login_and_pass_otp(self.account_rcl)
-        self.e2e_wissel_naar_functie(self.functie_rcl)
+        self.e2e_login_and_pass_otp(self.account_rcl101_25)
+        self.e2e_wissel_naar_functie(self.functie_rcl101_25)
 
         # haal de vereniging uit de locatie
-        self.loc.verenigingen.remove(self.nhbver)
+        self.loc.verenigingen.remove(self.nhbver_101)
 
         # maak een regioplanning aan
         self.assertEqual(DeelcompetitieRonde.objects.count(), 0)
-        resp = self.client.post(self.url_planning_regio % self.deelcomp_regio_25.pk)
+        resp = self.client.post(self.url_planning_regio % self.deelcomp_regio101_25.pk)
         self.assertEqual(resp.status_code, 302)  # 302 = Redirect = success
         self.assertEqual(DeelcompetitieRonde.objects.count(), 1)
         ronde_pk = DeelcompetitieRonde.objects.all()[0].pk
@@ -737,7 +770,7 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
         # pas de instellingen van de ronde aan
         resp = self.client.post(self.url_planning_regio_ronde % ronde_pk,
                                 {'ronde_week_nr': 5, 'ronde_naam': 'laatste inhaalronde'})
-        url_regio_planning = self.url_planning_regio % self.deelcomp_regio_25.pk
+        url_regio_planning = self.url_planning_regio % self.deelcomp_regio101_25.pk
         self.assert_is_redirect(resp, url_regio_planning)
 
         # maak een wedstrijd aan
@@ -752,7 +785,7 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
 
         # pas de instellingen van de wedstrijd aan
         resp = self.client.post(self.url_wijzig_wedstrijd % wedstrijd_pk,
-                                {'weekdag': 0, 'nhbver_pk': self.nhbver.pk, 'aanvang': '12:34'})
+                                {'weekdag': 0, 'nhbver_pk': self.nhbver_101.pk, 'aanvang': '12:34'})
         self.assertEqual(resp.status_code, 302)  # 302 = Redirect = Accepted
 
         wedstrijd = Wedstrijd.objects.get(pk=wedstrijd_pk)
@@ -761,7 +794,7 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
 
         # pas de weekdag aan
         resp = self.client.post(self.url_wijzig_wedstrijd % wedstrijd_pk,
-                                {'weekdag': 2, 'nhbver_pk': self.nhbver.pk, 'aanvang': '12:34'})
+                                {'weekdag': 2, 'nhbver_pk': self.nhbver_101.pk, 'aanvang': '12:34'})
         self.assertEqual(resp.status_code, 302)  # 302 = Redirect = Accepted
 
         wedstrijd = Wedstrijd.objects.get(pk=wedstrijd_pk)
@@ -769,12 +802,12 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
         self.assertEqual(str(wedstrijd.datum_wanneer), '2020-01-29')
 
     def test_verwijder_wedstrijd(self):
-        self.e2e_login_and_pass_otp(self.account_rcl)
-        self.e2e_wissel_naar_functie(self.functie_rcl)
+        self.e2e_login_and_pass_otp(self.account_rcl101_18)
+        self.e2e_wissel_naar_functie(self.functie_rcl101_18)
 
         # maak een regioplanning aan
         self.assertEqual(DeelcompetitieRonde.objects.count(), 0)
-        resp = self.client.post(self.url_planning_regio % self.deelcomp_regio_18.pk)
+        resp = self.client.post(self.url_planning_regio % self.deelcomp_regio101_18.pk)
         self.assertEqual(resp.status_code, 302)  # 302 = Redirect = success
         self.assertEqual(DeelcompetitieRonde.objects.count(), 1)
         ronde_pk = DeelcompetitieRonde.objects.all()[0].pk
@@ -782,7 +815,7 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
         # pas de instellingen van de ronde aan
         resp = self.client.post(self.url_planning_regio_ronde % ronde_pk,
                                 {'ronde_week_nr': 5, 'ronde_naam': 'laatste inhaalronde'})
-        url_regio_planning = self.url_planning_regio % self.deelcomp_regio_18.pk
+        url_regio_planning = self.url_planning_regio % self.deelcomp_regio101_18.pk
         self.assert_is_redirect(resp, url_regio_planning)
 
         # maak een wedstrijd aan
@@ -838,14 +871,14 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
         wed.uitslag.save()
 
         # probeer te verwijderen als RKO
-        self.e2e_login_and_pass_otp(self.account_rko)
-        self.e2e_wissel_naar_functie(self.functie_rko)
+        self.e2e_login_and_pass_otp(self.account_rko2_18)
+        self.e2e_wissel_naar_functie(self.functie_rko2_18)
 
         resp = self.client.post(url)
         self.assertEqual(resp.status_code, 404)     # 404 = Niet toegestaan
 
-        self.e2e_login_and_pass_otp(self.account_rcl)
-        self.e2e_wissel_naar_functie(self.functie_rcl)
+        self.e2e_login_and_pass_otp(self.account_rcl101_18)
+        self.e2e_wissel_naar_functie(self.functie_rcl101_18)
 
         # verwijder een niet bestaande wedstrijd
         resp = self.client.post(self.url_verwijder_wedstrijd % 999999)
@@ -855,18 +888,18 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 302)     # redirect naar regioplanning
 
     def test_max_rondes(self):
-        self.e2e_login_and_pass_otp(self.account_rcl)
-        self.e2e_wissel_naar_functie(self.functie_rcl)
+        self.e2e_login_and_pass_otp(self.account_rcl101_18)
+        self.e2e_wissel_naar_functie(self.functie_rcl101_18)
 
         # maak het maximum aantal rondes aan plus een beetje meer
         self.assertEqual(DeelcompetitieRonde.objects.count(), 0)
         for lp in range(13):
-            resp = self.client.post(self.url_planning_regio % self.deelcomp_regio_25.pk)
+            resp = self.client.post(self.url_planning_regio % self.deelcomp_regio101_25.pk)
             self.assertEqual(resp.status_code, 302)  # 302 = Redirect = success
         # for
         self.assertEqual(DeelcompetitieRonde.objects.count(), 10)
 
-        resp = self.client.get(self.url_planning_regio % self.deelcomp_regio_25.pk)
+        resp = self.client.get(self.url_planning_regio % self.deelcomp_regio101_25.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
 
@@ -902,17 +935,17 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
 
     def test_sortering_week_nummers(self):
         # log in als RCL
-        self.e2e_login_and_pass_otp(self.account_rcl)
-        self.e2e_wissel_naar_functie(self.functie_rcl)
+        self.e2e_login_and_pass_otp(self.account_rcl101_18)
+        self.e2e_wissel_naar_functie(self.functie_rcl101_18)
 
-        url = self.url_planning_regio % self.deelcomp_regio_25.pk
+        url = self.url_planning_regio % self.deelcomp_regio101_25.pk
 
         # maak 4 rondes aan
         self.assertEqual(DeelcompetitieRonde.objects.count(), 0)
-        resp = self.client.post(url)
-        resp = self.client.post(url)
-        resp = self.client.post(url)
-        resp = self.client.post(url)
+        self.client.post(url)
+        self.client.post(url)
+        self.client.post(url)
+        self.client.post(url)
         resp = self.client.post(url)
         self.assertEqual(resp.status_code, 302)  # 302 = Redirect = success
         self.assertEqual(DeelcompetitieRonde.objects.count(), 5)
@@ -970,7 +1003,7 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
 
         wkl = TeamWedstrijdklasse.objects.all()[0]
 
-        klasse = CompetitieKlasse(competitie=self.deelcomp_regio_18.competitie,
+        klasse = CompetitieKlasse(competitie=self.deelcomp_regio101_18.competitie,
                                   team=wkl,
                                   min_ag=0.42)
         klasse.save()
@@ -984,7 +1017,7 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
         inschrijving = RegioCompetitieSchutterBoog()
         inschrijving.schutterboog = schutterboog
         inschrijving.bij_vereniging = schutterboog.nhblid.bij_vereniging
-        inschrijving.deelcompetitie = self.deelcomp_regio_18
+        inschrijving.deelcompetitie = self.deelcomp_regio101_18
         inschrijving.klasse = klasse
         inschrijving.save()
 
@@ -993,12 +1026,12 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
     def _maak_import(self, aantal):
         # wissel naar RCL functie
         self.e2e_login_and_pass_otp(self.account_bb)
-        self.e2e_wissel_naar_functie(self.deelcomp_regio_18.functie)
+        self.e2e_wissel_naar_functie(self.deelcomp_regio101_18.functie)
         self.e2e_check_rol('RCL')
 
         # maak er een paar rondes bij voor geïmporteerde uitslagen, elk met 1 wedstrijd
         for ronde in range(aantal):
-            self.client.post(self.url_planning_regio % self.deelcomp_regio_18.pk)
+            self.client.post(self.url_planning_regio % self.deelcomp_regio101_18.pk)
 
         top_pk = DeelcompetitieRonde.objects.latest('pk').pk - aantal
 
@@ -1039,19 +1072,19 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
         self.e2e_wisselnaarrol_bb()
 
         # haal de rayon planning op
-        resp = self.client.get(self.url_planning_rayon % self.deelcomp_rayon1.pk)
+        resp = self.client.get(self.url_planning_rayon % self.deelcomp_rayon1_18.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/planning-rayon.dtl', 'plein/site_layout.dtl'))
 
         # haal de regio planning op
-        resp = self.client.get(self.url_planning_regio % self.deelcomp_regio_18.pk)
+        resp = self.client.get(self.url_planning_regio % self.deelcomp_regio101_18.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/planning-regio.dtl', 'plein/site_layout.dtl'))
 
         # haal de ronde planning op
-        ronde_import = DeelcompetitieRonde.objects.filter(deelcompetitie=self.deelcomp_regio_18).all()[0]
+        ronde_import = DeelcompetitieRonde.objects.filter(deelcompetitie=self.deelcomp_regio101_18).all()[0]
         ronde_pk = ronde_import.pk
         resp = self.client.get(self.url_planning_regio_ronde % ronde_pk)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
@@ -1059,7 +1092,7 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('competitie/planning-regio-ronde.dtl', 'plein/site_layout.dtl'))
 
         # wissel naar RCL rol
-        self.e2e_wissel_naar_functie(self.functie_rcl)
+        self.e2e_wissel_naar_functie(self.functie_rcl101_18)
 
         # haal de ronde planning op
         ronde_pk = ronde_import.pk
@@ -1074,7 +1107,7 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 302)
 
         # maak een ronde aan
-        resp = self.client.post(self.url_planning_regio % self.deelcomp_regio_18.pk)
+        resp = self.client.post(self.url_planning_regio % self.deelcomp_regio101_18.pk)
         self.assertEqual(resp.status_code, 302)     # 302 = Redirect = success
         ronde = DeelcompetitieRonde.objects.latest('pk')
 
@@ -1098,5 +1131,124 @@ class TestCompetitiePlanning(E2EHelpers, TestCase):
         wedstrijd = ronde_import.plan.wedstrijden.all()[0]
         resp = self.client.get(self.url_wijzig_wedstrijd % wedstrijd.pk)
         self.assertEqual(resp.status_code, 404)
+
+    def test_buiten_eigen_regio(self):
+        # RCL probeert wedstrijd toe te voegen en wijzigen buiten eigen regio
+        self.e2e_login_and_pass_otp(self.account_rcl112_18)
+        self.e2e_wissel_naar_functie(self.functie_rcl112_18)
+
+        # maak een regioplanning aan in een andere regio
+        url = self.url_planning_regio % self.deelcomp_regio101_18.pk
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        # controleer dat er geen 'ronde toevoegen' knop is
+        urls = self.extract_all_urls(resp, skip_menu=True)
+        self.assertNotIn(url, urls)     # url wordt gebruikt voor POST
+
+        resp = self.client.post(url)
+        self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
+
+        # maak de eigen regioplanning aan
+        resp = self.client.post(self.url_planning_regio % self.deelcomp_regio112_18.pk)
+        self.assertEqual(resp.status_code, 302)  # 302 = Redirect = success
+        ronde_pk = DeelcompetitieRonde.objects.get(deelcompetitie=self.deelcomp_regio112_18).pk
+
+        # maak een wedstrijd aan in de eigen regio
+        resp = self.client.post(self.url_planning_regio_ronde % ronde_pk, {})
+        self.assertEqual(resp.status_code, 302)  # 302 = Redirect = success
+        plan = DeelcompetitieRonde.objects.get(deelcompetitie=self.deelcomp_regio112_18).plan
+        wedstrijd112_pk = plan.wedstrijden.all()[0].pk
+        url = self.url_wijzig_wedstrijd % wedstrijd112_pk
+
+        self.e2e_login_and_pass_otp(self.account_rcl101_18)
+        self.e2e_wissel_naar_functie(self.functie_rcl101_18)
+
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
+
+        # pas de instellingen van de wedstrijd aan
+        resp = self.client.post(url, {'weekdag': 0,
+                                      'aanvang': '12:34',
+                                      'nhbver_pk': self.nhbver_101.pk})
+        self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
+
+    def test_afsluiten_regio(self):
+        self.e2e_login_and_pass_otp(self.account_rcl101_18)
+        self.e2e_wissel_naar_functie(self.functie_rcl101_18)
+        url = self.url_afsluiten_regio % self.deelcomp_regio101_18.pk
+
+        # nog niet afsluitbaar
+        zet_competitie_fase(self.comp_18, 'E')
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/rcl-afsluiten-regiocomp.dtl', 'plein/site_layout.dtl'))
+        hrefs = self.extract_all_urls(resp, skip_menu=True)
+        self.assertEqual(hrefs, ['/competitie/'])  # alleen de terug knop
+
+        # probeer afsluiten
+        resp = self.client.post(url)
+        self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
+        self.assertEqual(Taak.objects.count(), 0)
+
+        # wel afsluitbaar
+        zet_competitie_fase(self.comp_18, 'F')
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/rcl-afsluiten-regiocomp.dtl', 'plein/site_layout.dtl'))
+        hrefs = self.extract_all_urls(resp, skip_menu=True)
+        self.assertEqual(hrefs[0], url)
+
+        # echt afsluiten
+        self.assertEqual(Taak.objects.count(), 0)
+        resp = self.client.post(url)
+        self.assertEqual(resp.status_code, 302)  # 302 = Redirect = succes
+        deelcomp = DeelCompetitie.objects.get(pk=self.deelcomp_regio101_18.pk)
+        self.assertTrue(deelcomp.is_afgesloten)
+        self.assertEqual(Taak.objects.count(), 2)       # RKO + BKO
+
+        # get terwijl al afgesloten
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/rcl-afsluiten-regiocomp.dtl', 'plein/site_layout.dtl'))
+        hrefs = self.extract_all_urls(resp, skip_menu=True)
+        self.assertEqual(hrefs, ['/competitie/'])  # alleen de terug knop
+
+        # nogmaals afsluiten doet niets
+        resp = self.client.post(url)
+        self.assertEqual(resp.status_code, 302)  # 302 = Redirect = succes
+        self.assertEqual(Taak.objects.count(), 2)
+
+    def test_bad_afsluiten_regio(self):
+        self.client.logout()
+        url = self.url_afsluiten_regio % 999999
+        resp = self.client.get(url)
+        self.assert_is_redirect(resp, '/plein/')
+
+        # verkeerde rol
+        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_wisselnaarrol_bb()
+        resp = self.client.get(url)
+        self.assert_is_redirect(resp, '/plein/')
+
+        self.e2e_wissel_naar_functie(self.functie_rcl101_18)
+
+        # verkeerde regio
+        url = self.url_afsluiten_regio % self.deelcomp_regio112_18.pk
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
+
+        resp = self.client.post(url)
+        self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
+
+        # niet bestaande pk
+        url = self.url_afsluiten_regio % 999999
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
+
+        resp = self.client.post(url)
+        self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
 
 # end of file

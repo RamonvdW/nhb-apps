@@ -10,7 +10,7 @@ from Functie.models import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
 from Competitie.models import (Competitie, DeelCompetitie, CompetitieKlasse,
                                RegioCompetitieSchutterBoog,
-                               INSCHRIJF_METHODE_3, LAAG_REGIO)
+                               INSCHRIJF_METHODE_3, LAAG_REGIO, LAAG_RK)
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Schutter.models import SchutterBoog
 from Score.models import aanvangsgemiddelde_opslaan
@@ -142,10 +142,17 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self._create_histcomp()
         self._create_competitie()
 
+        # fake een deelnemerslijst voor de RK
+        deelcomp_rk = DeelCompetitie.objects.get(competitie=self.comp_25,
+                                                 laag=LAAG_RK,
+                                                 nhb_rayon=self.regio_111.rayon)
+        deelcomp_rk.heeft_deelnemerslijst = True
+        deelcomp_rk.save()
+
         self.url_overzicht = '/vereniging/'
         self.url_ledenlijst = '/vereniging/leden-lijst/'
         self.url_voorkeuren = '/vereniging/leden-voorkeuren/'
-        self.url_inschrijven = '/vereniging/leden-inschrijven/competitie/%s/'    # <comp_pk>
+        self.url_inschrijven = '/vereniging/leden-aanmelden/competitie/%s/'      # <comp_pk>
         self.url_ingeschreven = '/vereniging/leden-ingeschreven/competitie/%s/'  # <deelcomp_pk>
         self.url_schutter_voorkeuren = '/schutter/voorkeuren/%s/'                # <nhblid_pk>
 
@@ -211,8 +218,6 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         url_klassegrenzen_25 = '/competitie/klassegrenzen/vaststellen/25/'
 
         self.assertEqual(CompetitieKlasse.objects.count(), 0)
-
-        resp = self.client.get(url_aanmaken)
 
         # competitie aanmaken
         resp = self.client.post(url_aanmaken)
@@ -376,7 +381,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/competitie-inschrijven.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/competitie-aanmelden.dtl', 'plein/site_layout.dtl'))
 
         self.assertContains(resp, '<td>Cadet de Jeugd</td>')
         self.assertContains(resp, '<td>14</td>')            # leeftijd 2021
@@ -403,7 +408,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/competitie-inschrijven.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/competitie-aanmelden.dtl', 'plein/site_layout.dtl'))
 
         # nu de POST om een paar leden aan te melden
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
@@ -440,7 +445,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('vereniging/competitie-inschrijven.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/competitie-aanmelden.dtl', 'plein/site_layout.dtl'))
 
         # nu de POST om een paar leden aan te melden met een verkeer dagdeel
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
@@ -498,7 +503,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('vereniging/competitie-inschrijven.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/competitie-aanmelden.dtl', 'plein/site_layout.dtl'))
 
         # probeer aan te melden met een niet-wedstrijd boog
         schutterboog = SchutterBoog.objects.get(nhblid__nhb_nr=self.nhblid_100002.nhb_nr,
@@ -560,7 +565,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('vereniging/competitie-inschrijven.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/competitie-aanmelden.dtl', 'plein/site_layout.dtl'))
 
         # nu de POST om een paar leden aan te melden
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
@@ -600,7 +605,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('vereniging/competitie-inschrijven.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/competitie-aanmelden.dtl', 'plein/site_layout.dtl'))
 
         # nu de POST om een paar leden aan te melden
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
@@ -620,7 +625,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
                 self.assertFalse(obj.inschrijf_voorkeur_team)
         # for
 
-    def test_uitschrijven(self):
+    def test_afmelden(self):
         # login als HWL
         self.e2e_login_and_pass_otp(self.account_hwl)
         self.e2e_wissel_naar_functie(self.functie_hwl)
@@ -636,7 +641,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         url = self.url_inschrijven % self.comp_18.pk
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('vereniging/competitie-inschrijven.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/competitie-aanmelden.dtl', 'plein/site_layout.dtl'))
 
         # nu de POST om een paar leden aan te melden
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)

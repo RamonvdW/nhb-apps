@@ -68,11 +68,13 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
         lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
         lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
         lid.bij_vereniging = ver
+        lid.account = self.account_hwl
         lid.save()
 
         self.boog_R = BoogType.objects.get(afkorting='R')
 
         self.url_voorkeuren = '/schutter/voorkeuren/'
+        self.url_wijzig = '/account/nieuw-wachtwoord/'
 
     def test_view(self):
         # zonder login --> terug naar het plein
@@ -225,6 +227,44 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
         # mag geen bogen instellen
         # helemaal geen voorkeuren, om precies te zijn
         resp = self.client.get(self.url_voorkeuren)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assertEqual(0, SchutterBoog.objects.filter(nhblid=self.nhblid1).count())
+
+    def test_wijzig_wachtwoord(self):
+        # zelfde test als in Account.test_wachtwoord
+        # maar ivm nhblid koppeling wordt 'Schutter' menu gekozen
+
+        # login as HWL
+        self.e2e_login_and_pass_otp(self.account_hwl)
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+        self.e2e_check_rol('HWL')
+
+        resp = self.client.get(self.url_wijzig)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('account/nieuw-wachtwoord.dtl', 'plein/site_layout.dtl'))
+
+        nieuw_ww = 'GratisNieuwGheim'
+
+        # foutief huidige wachtwoord
+        resp = self.client.post(self.url_wijzig, {'huidige': nieuw_ww, 'nieuwe': nieuw_ww})
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('account/nieuw-wachtwoord.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, 'Huidige wachtwoord komt niet overeen')
+
+        resp = self.client.post(self.url_wijzig, {'nieuwe': '123412341234'})
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('account/nieuw-wachtwoord.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, 'Wachtwoord bevat te veel gelijke tekens')
+
+        # wijzig het wachtwoord
+        resp = self.client.post(self.url_wijzig, {'huidige': self.WACHTWOORD, 'nieuwe': nieuw_ww})
+        self.assert_is_redirect(resp, '/plein/')
+
+        # controleer dat het nieuwe wachtwoord gebruikt kan worden
+        self.client.logout()
+        self.e2e_login(self.account_hwl, wachtwoord=nieuw_ww)
 
 # end of file

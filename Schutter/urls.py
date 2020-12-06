@@ -5,7 +5,8 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from . import view_registreer_nhb, view_profiel, view_voorkeuren, view_inschrijven_uitschrijven, view_leeftijdsklassen
+from . import (view_registreer_nhb, view_profiel, view_voorkeuren,
+               view_aanmelden_afmelden, view_leeftijdsklassen)
 
 
 app_name = 'Schutter'
@@ -31,17 +32,18 @@ urlpatterns = [
          view_leeftijdsklassen.LeeftijdsklassenView.as_view(),
          name='leeftijdsklassen'),
 
-    path('regiocompetitie/inschrijven/<deelcomp_pk>/<schutterboog_pk>/bevestig/',
-         view_inschrijven_uitschrijven.RegiocompetitieInschrijvenBevestigView.as_view(),
-         name='bevestig-inschrijven'),
+    path('regiocompetitie/aanmelden/<deelcomp_pk>/<schutterboog_pk>/bevestig/',
+         view_aanmelden_afmelden.RegiocompetitieAanmeldenBevestigView.as_view(),
+         name='bevestig-aanmelden'),
 
-    path('regiocompetitie/inschrijven/<deelcomp_pk>/<schutterboog_pk>/',
-         view_inschrijven_uitschrijven.RegiocompetitieInschrijvenView.as_view(),
-         name='inschrijven'),
+    path('regiocompetitie/aanmelden/<deelcomp_pk>/<schutterboog_pk>/',
+         view_aanmelden_afmelden.RegiocompetitieAanmeldenView.as_view(),
+         name='aanmelden'),
 
-    path('regiocompetitie/uitschrijven/<regiocomp_pk>/',
-         view_inschrijven_uitschrijven.RegiocompetitieUitschrijvenView.as_view(),
-         name='uitschrijven'),
+    path('regiocompetitie/afmelden/<regiocomp_pk>/',
+         view_aanmelden_afmelden.RegiocompetitieAfmeldenView.as_view(),
+         name='afmelden'),
+
 ]
 
 # end of file

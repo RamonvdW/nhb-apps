@@ -6,6 +6,7 @@
 
 from django.db import models
 from django.utils import timezone
+from Account.models import Account
 from BasisTypen.models import IndivWedstrijdklasse, TeamWedstrijdklasse
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
 from Functie.models import Functie
@@ -47,6 +48,26 @@ INSCHRIJF_METHODES = (
     (INSCHRIJF_METHODE_3, 'Voorkeur dagdelen')
 )
 
+DEELNAME_ONBEKEND = '?'
+DEELNAME_JA = 'J'
+DEELNAME_NEE = 'N'
+
+DEELNAME_CHOICES = [(DEELNAME_ONBEKEND, 'Onbekend'),
+                    (DEELNAME_JA, 'Bevestigd'),
+                    (DEELNAME_NEE, 'Afgemeld')]
+
+MUTATIE_CUT = 10
+MUTATIE_INITIEEL = 20
+MUTATIE_AFMELDEN = 30
+MUTATIE_AANMELDEN = 40
+
+mutatie2descr = {
+    MUTATIE_INITIEEL: "initieel",
+    MUTATIE_CUT: "limiet aanpassen",
+    MUTATIE_AFMELDEN: "afmelden",
+    MUTATIE_AANMELDEN: "aanmelden",
+}
+
 
 class Competitie(models.Model):
     """ Deze database tabel bevat een van de jaarlijkse competities voor 18m of 25m
@@ -61,12 +82,38 @@ class Competitie(models.Model):
     # seizoen
     begin_jaar = models.PositiveSmallIntegerField()     # 2019
 
-    # kalender data
+    # wanneer moet een schutter lid zijn bij de bond om mee te mogen doen aan de teamcompetitie?
     uiterste_datum_lid = models.DateField()
+
+    # fases en datums regiocompetitie
+    # fase A: aanmaken competitie, vaststellen klassen
     begin_aanmeldingen = models.DateField()
+    # fase B: aanmelden schutters
     einde_aanmeldingen = models.DateField()
+    # fase C: samenstellen vaste teams (HWL)
     einde_teamvorming = models.DateField()
+    # fase D: aanmaken poules (RCL)
     eerste_wedstrijd = models.DateField()
+    # fase E: wedstrijden
+    laatst_mogelijke_wedstrijd = models.DateField()
+    # fase F: vaststellen en publiceren uitslag
+    alle_regiocompetities_afgesloten = models.BooleanField(default=False)
+
+    # fases en datums rayonkampioenschappen
+    # fase K: bevestig deelnemers; oproepen reserves
+    rk_eerste_wedstrijd = models.DateField()
+    # fase L: wedstrijden
+    rk_laatste_wedstrijd = models.DateField()
+    # fase M: vaststellen en publiceren uitslag
+    alle_rks_afgesloten = models.BooleanField(default=False)
+
+    # fases en datums bondskampioenschappen
+    # fase P: bevestig deelnemers; oproepen reserves
+    bk_eerste_wedstrijd = models.DateField()
+    # fase Q: wedstrijden
+    bk_laatste_wedstrijd = models.DateField()
+    # fase R: vaststellen en publiceren uitslag
+    alle_bks_afgesloten = models.BooleanField(default=False)
 
     # nog te wijzigen?
     is_afgesloten = models.BooleanField(default=False)
@@ -78,38 +125,96 @@ class Competitie(models.Model):
     def zet_fase(self):
         # fase A was totdat dit object gemaakt werd
 
+        if self.alle_bks_afgesloten:
+            self.fase = 'Z'
+            return
+
         now = timezone.now()
         now = datetime.date(year=now.year, month=now.month, day=now.day)
 
-        # A1 totdat aanvangsgemiddelden en klassegrenzen zijn vastgesteld
-        self.fase = 'A1'
+        if self.alle_rks_afgesloten:
+            # in BK fases
+            if now < self.bk_eerste_wedstrijd:
+                # fase P: bevestig deelnemers; oproepen reserves
+                self.fase = 'P'
+                return
+
+            if now <= self.bk_laatste_wedstrijd:
+                # fase Q: wedstrijden
+                self.fase = 'Q'
+                return
+
+            # fase R: vaststellen uitslagen
+            if self.deelcompetitie_set.filter(is_afgesloten=False,
+                                              laag=LAAG_BK).count() > 0:
+                self.fase = 'R'
+                return
+
+            # fase S: afsluiten bondscompetitie
+            self.fase = 'S'
+            return
+
+        if self.alle_regiocompetities_afgesloten:
+            # in RK fase
+            if now < self.rk_eerste_wedstrijd:
+                # fase K: bevestig deelnemers; oproepen reserves
+                self.fase = 'K'
+                return
+
+            if now <= self.rk_laatste_wedstrijd:
+                # fase L: wedstrijden
+                self.fase = 'L'
+                return
+
+            # fase M: vaststellen uitslag in elk rayon (RKO)
+            if self.deelcompetitie_set.filter(is_afgesloten=False,
+                                              laag=LAAG_RK).count() > 0:
+                self.fase = 'M'
+                return
+
+            # fase N: afsluiten rayonkampioenschappen (BKO)
+            self.fase = 'N'
+            return
+
+        # regiocompetitie fases
         if self.competitieklasse_set.count() == 0:
-            # wedstrijdklassen zijn nog niet vastgesteld
+            # fase A1: wedstrijdklassen zijn nog niet vastgesteld
+            self.fase = 'A1'
             return
 
-        # A2 = instellingen regio, tot aanmeldingen beginnen
-        self.fase = 'A2'
         if now < self.begin_aanmeldingen:
-            # nog niet open voor aanmelden
+            # A2 = instellingen regio, tot aanmeldingen beginnen; nog niet open voor aanmelden
+            self.fase = 'A2'
             return
 
-        # B = open voor inschrijvingen, tot sluiten inschrijvingen
-        self.fase = 'B'
-        if now < self.einde_aanmeldingen:
+        if now <= self.einde_aanmeldingen:
+            # B = open voor inschrijvingen, tot sluiten inschrijvingen
+            self.fase = 'B'
             return
 
-        # C = aanmaken teams; gesloten voor individuele inschrijvingen
-        self.fase = 'C'
-        if now < self.einde_teamvorming:
+        if now <= self.einde_teamvorming:
+            # C = aanmaken teams; gesloten voor individuele inschrijvingen
+            self.fase = 'C'
             return
 
-        # D = aanmaken poules en afronden wedstrijdschema's
-        self.fase = 'D'
         if now < self.eerste_wedstrijd:
+            # D = aanmaken poules en afronden wedstrijdschema's
+            self.fase = 'D'
             return
 
-        # E = Begin wedstrijden
-        self.fase = 'E'
+        if now < self.laatst_mogelijke_wedstrijd:
+            # E = Begin wedstrijden
+            self.fase = 'E'
+            return
+
+        # fase F: vaststellen uitslag in elke regio (RCL)
+        if self.deelcompetitie_set.filter(is_afgesloten=False,
+                                          laag=LAAG_REGIO).count() > 0:
+            self.fase = 'F'
+            return
+
+        # fase G: afsluiten regiocompetitie (BKO)
+        self.fase = 'G'
 
     objects = models.Manager()      # for the editor only
 
@@ -199,7 +304,10 @@ class DeelCompetitie(models.Model):
     # LET OP: leeg = alles toegestaan!
     toegestane_dagdelen = models.CharField(max_length=20, default='', blank=True)
 
-    # TODO: VSG/Vast, etc.
+    # FUTURE: VSG/Vast, etc.
+
+    # heeft deze RK/BK al een vastgestelde deelnemerslijst?
+    heeft_deelnemerslijst = models.BooleanField(default=False)
 
     def __str__(self):
         """ geef een tekstuele afkorting van dit object, voor in de admin interface """
@@ -212,6 +320,30 @@ class DeelCompetitie(models.Model):
         return "%s - %s" % (self.competitie, substr)
 
     objects = models.Manager()      # for the editor only
+
+
+class DeelcompetitieKlasseLimiet(models.Model):
+    """ Deze database tabel bevat de limieten voor het aantal deelnemers in een RK of BK
+        wedstrijdklasse. De RKO kan dit bijstellen specifiek voor zijn RK.
+    """
+
+    # voor welke deelcompetitie (ivm scheiding RKs)
+    deelcompetitie = models.ForeignKey(DeelCompetitie, on_delete=models.CASCADE)
+
+    # voor welke klasse is deze limiet
+    klasse = models.ForeignKey(CompetitieKlasse, on_delete=models.CASCADE)
+
+    # maximum aantal deelnemers in deze klasse
+    limiet = models.PositiveSmallIntegerField(default=24)
+
+    def __str__(self):
+        return "%s : %s - %s" % (self.limiet,
+                                 self.klasse.indiv.beschrijving,
+                                 self.deelcompetitie)
+
+    class Meta:
+        verbose_name = "Deelcompetitie Klasse Limiet"
+        verbose_name_plural = "Deelcompetitie Klasse Limieten"
 
 
 class DeelcompetitieRonde(models.Model):
@@ -298,7 +430,9 @@ def competitie_aanmaken(jaar):
         Wedstrijdklassen volgen later, tijdens het bepalen van de klassegrenzen
     """
     yearend = date(year=jaar, month=12, day=31)     # 31 december
-    udvl = date(year=jaar, month=8, day=1)          # 1 augustus = uiterste datum van lidmaatschap voor deelname teamcompetitie
+    udvl = date(year=jaar, month=8, day=1)          # 1 augustus
+    begin_rk = date(year=jaar + 1, month=2, day=1)  # 1 februari
+    begin_bk = date(year=jaar + 1, month=5, day=1)  # 1 mei
 
     # maak de Competitie aan voor 18m en 25m
     for afstand, beschrijving in AFSTAND:
@@ -308,6 +442,16 @@ def competitie_aanmaken(jaar):
         comp.begin_jaar = jaar
         comp.uiterste_datum_lid = udvl
         comp.begin_aanmeldingen = comp.einde_aanmeldingen = comp.einde_teamvorming = comp.eerste_wedstrijd = yearend
+        if afstand == '18':
+            comp.laatst_mogelijke_wedstrijd = yearend
+        else:
+            comp.laatst_mogelijke_wedstrijd = begin_rk
+        comp.rk_selecteer_deelnemers = begin_rk
+        comp.rk_eerste_wedstrijd = begin_rk
+        comp.rk_laatste_wedstrijd = begin_rk + datetime.timedelta(days=7)
+        comp.bk_selecteer_deelnemers = begin_bk
+        comp.bk_eerste_wedstrijd = begin_bk
+        comp.bk_laatste_wedstrijd = begin_bk + datetime.timedelta(days=7)
         comp.save()
 
         # maak de Deelcompetities aan voor Regio, RK, BK
@@ -340,7 +484,7 @@ def competitie_aanmaken(jaar):
 
 
 class RegioCompetitieSchutterBoog(models.Model):
-    """ Een schutterboog aangemeld bij een competitie """
+    """ Een schutterboog aangemeld bij een regiocompetitie """
 
     deelcompetitie = models.ForeignKey(DeelCompetitie, on_delete=models.CASCADE)
 
@@ -369,6 +513,9 @@ class RegioCompetitieSchutterBoog(models.Model):
     # som van de beste 6 van score1..score7
     totaal = models.PositiveIntegerField(default=0)
 
+    # aantal scores dat tot nu toe neergezet is (om eenvoudig te kunnen filteren)
+    aantal_scores = models.PositiveSmallIntegerField(default=0)
+
     # welke van score1..score7 is de laagste?
     laagste_score_nr = models.PositiveIntegerField(default=0)  # 1..7
 
@@ -393,6 +540,7 @@ class RegioCompetitieSchutterBoog(models.Model):
     alt_score6 = models.PositiveIntegerField(default=0)
     alt_score7 = models.PositiveIntegerField(default=0)
     alt_totaal = models.PositiveIntegerField(default=0)
+    alt_aantal_scores = models.PositiveSmallIntegerField(default=0)
     alt_laagste_score_nr = models.PositiveIntegerField(default=0)  # 1..7
     alt_gemiddelde = models.DecimalField(max_digits=5, decimal_places=3, default=0.0)  # 10,000
 
@@ -412,10 +560,11 @@ class RegioCompetitieSchutterBoog(models.Model):
         if self.klasse.team:
             msg = self.klasse.team.beschrijving
 
-        return "%s - %s (%s) - %s (%s) - %s" % (
+        return "%s - %s (%s) - %s (%s) %s - %s" % (
                     substr,
                     msg,
                     self.klasse.min_ag,
+                    self.schutterboog,
                     self.schutterboog.nhblid.volledige_naam(),
                     self.aanvangsgemiddelde,
                     self.deelcompetitie.competitie.beschrijving)
@@ -427,13 +576,146 @@ class RegioCompetitieSchutterBoog(models.Model):
     objects = models.Manager()      # for the editor only
 
 
+class KampioenschapSchutterBoog(models.Model):
+
+    """ Een schutterboog aangemeld bij een rayon- of bondskampioenschap """
+
+    deelcompetitie = models.ForeignKey(DeelCompetitie, on_delete=models.CASCADE)
+
+    schutterboog = models.ForeignKey(SchutterBoog, on_delete=models.CASCADE)
+
+    klasse = models.ForeignKey(CompetitieKlasse, on_delete=models.CASCADE)
+
+    # vereniging wordt hier apart bijgehouden omdat de schutter over kan stappen
+    # tijdens het seizoen
+    bij_vereniging = models.ForeignKey(NhbVereniging, on_delete=models.PROTECT,
+                                       blank=True, null=True)
+
+    # kampioenen hebben een label
+    kampioen_label = models.CharField(max_length=50, default='', blank=True)
+
+    # positie van deze schutter in de lijst
+    # de eerste 24 zijn deelnemers; daarna reserveschutters
+    volgorde = models.PositiveSmallIntegerField(default=0)  # inclusief afmeldingen
+    rank = models.PositiveSmallIntegerField(default=0)      # exclusief afmeldingen
+
+    # wanneer hebben we een bevestiging gevraagd hebben via e-mail
+    bevestiging_gevraagd_op = models.DateTimeField(null=True, blank=True)
+
+    # kan deze schutter deelnemen, of niet?
+    deelname = models.CharField(max_length=1, choices=DEELNAME_CHOICES, default=DEELNAME_ONBEKEND)
+
+    # gemiddelde uit de voorgaande competitie
+    gemiddelde = models.DecimalField(max_digits=5, decimal_places=3, default=0.0)    # 10,000
+
+    # TODO: verwijder (worden niet meer gebruikt)
+    deelname_bevestigd = models.BooleanField(default=False)
+    is_afgemeld = models.BooleanField(default=False)
+
+    def __str__(self):
+        # deelcompetitie (komt achteraan)
+        if self.deelcompetitie.nhb_rayon:
+            substr = str(self.deelcompetitie.nhb_rayon)
+        else:
+            substr = "BK"
+
+        # klasse
+        msg = "?"
+        if self.klasse.indiv:
+            msg = self.klasse.indiv.beschrijving
+        if self.klasse.team:
+            msg = self.klasse.team.beschrijving
+
+        return "%s - %s - %s (%s) %s - %s" % (
+                    substr,
+                    msg,
+                    self.schutterboog,
+                    self.schutterboog.nhblid.volledige_naam(),
+                    self.gemiddelde,
+                    self.deelcompetitie.competitie.beschrijving)
+
+    class Meta:
+        verbose_name = "Kampioenschap Schutterboog"
+        verbose_name_plural = "Kampioenschap Schuttersboog"
+
+    objects = models.Manager()      # for the editor only
+
+
+class KampioenschapMutatie(models.Model):
+
+    """ Deze tabel houdt de mutaties bij de lijst van (reserve-)schutters van
+        de RK en BK wedstrijden.
+        Alle verzoeken tot mutaties worden hier aan toegevoegd en na afhandelen bewaard
+        zodat er een geschiedenis is.
+    """
+
+    # datum/tijdstip van mutatie
+    when = models.DateTimeField(auto_now_add=True)      # automatisch invullen
+
+    # wat is de wijziging (zie MUTATIE_*)
+    mutatie = models.PositiveSmallIntegerField(default=0)
+
+    # zijn de lijsten bijgewerkt?
+    is_verwerkt = models.BooleanField(default=False)
+
+    # door wie is de mutatie geïnitieerd
+    # als het een account is, dan volledige naam + rol
+    # als er geen account is (schutter zonder account) dan NHB lid details
+    door = models.CharField(max_length=50, default='')
+
+    # op welke deelcompetitie heeft deze mutatie betrekking?
+    deelcompetitie = models.ForeignKey(DeelCompetitie,
+                                       on_delete=models.CASCADE,
+                                       null=True, blank=True)
+
+    # op welke klasse heeft deze mutatie betrekking?
+    klasse = models.ForeignKey(CompetitieKlasse,
+                               on_delete=models.CASCADE,
+                               null=True, blank=True)
+
+    # op welke schutter heeft de mutatie betrekking (aanmelden/afmelden)
+    deelnemer = models.ForeignKey(KampioenschapSchutterBoog,
+                                  on_delete=models.CASCADE,
+                                  null=True, blank=True)
+
+    # alleen voor MUTATIE_CUT
+    cut_oud = models.PositiveSmallIntegerField(default=0)
+    cut_nieuw = models.PositiveSmallIntegerField(default=0)
+
+    class Meta:
+        verbose_name = "Kampioenschap Mutatie"
+        verbose_name_plural = "Kampioenschap Mutaties"
+
+    def __str__(self):
+        msg = "[%s]" % self.when
+        if not self.is_verwerkt:
+            msg += " (nog niet verwerkt)"
+        try:
+            msg += " %s (%s)" % (self.mutatie, mutatie2descr[self.mutatie])
+        except KeyError:
+            msg += " %s (???)" % self.mutatie
+
+        if self.mutatie not in (MUTATIE_INITIEEL, MUTATIE_CUT):
+            msg += " - %s" % self.deelnemer
+
+        if self.mutatie == MUTATIE_CUT:
+            msg += " (%s --> %s)" % (self.cut_oud, self.cut_nieuw)
+
+        return msg
+
+
 class CompetitieTaken(models.Model):
 
-    # simpele tabel om bij te houden hoe het met de achtergrond taken gaat
+    """ simpele tabel om bij te houden hoe het met de achtergrond taken gaat """
 
+    # wat is de hoogste ScoreHist tot nu toe verwerkt in de tussenstand?
     hoogste_scorehist = models.ForeignKey(ScoreHist,
                                           null=True, blank=True,        # mag leeg in admin interface
                                           on_delete=models.SET_NULL)
 
+    # wat is de hoogste KampioenschapMutatie tot nu toe verwerkt in de deelnemerslijst?
+    hoogste_mutatie = models.ForeignKey(KampioenschapMutatie,
+                                        null=True, blank=True,
+                                        on_delete=models.SET_NULL)
 
 # end of file

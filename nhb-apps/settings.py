@@ -34,7 +34,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2020-10-10'
+SITE_VERSIE = '2020-12-04'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'Vereniging.apps.VerenigingConfig',
     'Schutter.apps.SchutterConfig',
     'Score.apps.ScoreConfig',
+    'Taken.apps.TakenConfig',
     'Wedstrijden.apps.WedstrijdenConfig',
     'Handleiding.apps.HandleidingConfig',
     'django.contrib.staticfiles',   # gather static files from modules helper
@@ -235,7 +236,6 @@ RECORDS_TOEGESTANE_SOORTEN = (
     '70m (12p)',
 
     # Outdoor, TODO: still to be cleaned up
-    'Fita RK Rayon 4',
     'ShortMetric',
 
     # indoor
@@ -247,9 +247,6 @@ RECORDS_TOEGESTANE_SOORTEN = (
     '25m',
     '25m+18m (120p)',
     '25m+18m (60p)',
-
-    # Indoor, TODO: to be cleaned up
-    'match (15p)',
 
     # 25m1pijl
     '50p',
@@ -337,6 +334,7 @@ HANDLEIDING_INTRO_NIEUWE_BEHEERDERS = 'Intro_nieuwe_beheerders'
 HANDLEIDING_SCHUTTERBOOG = 'Schutter-boog'
 HANDLEIDING_INSCHRIJFMETHODES = 'Inschrijfmethodes_Regiocompetitie'
 HANDLEIDING_CLUSTERS = 'Clusters'
+HANDLEIDING_RK_SCHUTTERS = 'RK_schutters'
 
 HANDLEIDING_PAGINAS = [
     HANDLEIDING_TOP,
@@ -354,6 +352,7 @@ HANDLEIDING_PAGINAS = [
     HANDLEIDING_PLANNING_REGIO,
     HANDLEIDING_INSCHRIJFMETHODES,
     HANDLEIDING_CLUSTERS,
+    HANDLEIDING_RK_SCHUTTERS,
     # pagina's van de handleiding die intern gerefereerd worden
     'Tips_voor_wiki_gebruik',
     'Handleiding_CWZ',

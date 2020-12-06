@@ -53,121 +53,59 @@
 
 <div class="row">
 
-    <!-- leden inschrijven voor de competitie -->
-    {% if toon_inschrijven %}
+    <!-- wedstrijden -->
+    {% for deelcomp_rk in deelcomps_rk %}
+        {% if deelcomp_rk.url_lijst_rk %}
+            {% include 'plein/card.dtl' with title="RK schutters" text=deelcomp_rk.text_str icon="receipt" url=deelcomp_rk.url_lijst_rk %}
+        {% endif %}
+    {% endfor %}
+
+    <!-- leden aanmelden voor de competitie -->
+    {% if toon_aanmelden %}
         {% for comp in competities %}
-            <div class="card">
-                {% if comp.fase < 'B' %}
-                    <div class="card-content">
-                        <div class="card-title center-align grey-text">Inschrijven {{ comp.afstand }}m</div>
+            {% if comp.fase < 'B' %}
+                <div class="nhb-card-disabled">
+                    <div class="nhb-card-content">
+                        <div class="card-title center-align grey-text">Aanmelden {{ comp.afstand }}m</div>
                         <div class="center-align"><img src="{{ comp.icon }}" height="60" alt="logo" style="opacity: 0.5"></div>
-                        <p>Inschrijving voor de <b>{{ comp.beschrijving }}</b> opent op {{ comp.begin_aanmeldingen }}.</p>
+                        <div class="card-text grey-text">Aanmelden voor de <b>{{ comp.beschrijving }}</b> opent op {{ comp.begin_aanmeldingen }}.</div>
+                        <div class="card-text center-align"><br>(NOG NIET BESCHIKBAAR)</div>
                     </div>
-                    <div class="card-action center-align">
-                        <span class="grey-text">(nog niet open)</span>
-                    </div>
-                {% else %}
-                    <div class="card-content">
-                        <div class="card-title center-align">Inschrijven {{ comp.afstand }}m</div>
-                        <div class="center-align"><img src="{{ comp.icon }}" height="60" alt="logo"></div>
-                        <p>Leden inschrijven voor de <b>{{ comp.beschrijving }}</b>.</p>
-                    </div>
-                    <a href="{% url 'Vereniging:leden-inschrijven' comp_pk=comp.pk %}" class="nhb-klikbare-balk">
-                        <div class="card-action center-align">
-                            <span class="nhb-klikbare-link">Tonen</span>
-                        </div>
-                    </a>
-                {% endif %}
-            </div>
+                </div>
+            {% elif comp.fase < 'F' %}
+                {% url 'Vereniging:leden-aanmelden' comp_pk=comp.pk as card_url %}
+                {% include 'plein/card_logo.dtl' with title="Aanmelden "|add:comp.afstand|add:"m" text="Leden aanmelden voor de "|add:comp.beschrijving|add:"." img_src=comp.icon img_height="60" url=card_url %}
+            {% endif %}
         {% endfor %}
     {% endif %}
 
-    <!-- leden uitschrijven uit de competitie -->
+    <!-- leden ingeschreven voor de competitie (niet meer tonen vanaf fase RK) -->
     {% for deelcomp in deelcomps %}
-        <div class="card">
-            <div class="card-content">
-                <div class="card-title center-align">Ingeschreven {{ deelcomp.competitie.afstand }}m</div>
-                <div class="center-align"><img src="{{ deelcomp.icon }}" height="60" alt="logo"></div>
-                <p>Overzicht leden ingeschreven zijn voor de <b>{{ deelcomp.competitie.beschrijving }}</b>.</p>
-            </div>
-            <a href="{% url 'Vereniging:leden-ingeschreven' deelcomp_pk=deelcomp.pk %}" class="nhb-klikbare-balk">
-                <div class="card-action center-align">
-                    <span class="nhb-klikbare-link">Tonen</span>
-                </div>
-            </a>
-        </div>
+        {% if deelcomp.competitie.fase <= 'F' %}
+            {% url 'Vereniging:leden-ingeschreven' deelcomp_pk=deelcomp.pk as card_url %}
+            {% include 'plein/card_logo.dtl' with title="Ingeschreven "|add:deelcomp.competitie.afstand|add:"m" text="Overzicht leden ingeschreven zijn voor de "|add:deelcomp.competitie.beschrijving|add:"." img_src=deelcomp.icon img_height="60" url=card_url %}
+        {% endif %}
     {% endfor %}
 
     <!-- wedstrijden -->
-    <div class="card">
-        <div class="card-content">
-            <div class="card-title center-align">Wedstrijden</div>
-            <div class="center-align"><i class="material-icons-round medium">event</i></div>
-            <p>Wedstrijden die bij deze vereniging geschoten worden.</p>
-        </div>
-        <a href="{% url 'Vereniging:wedstrijden' %}" class="nhb-klikbare-balk">
-            <div class="card-action center-align">
-                <span class="nhb-klikbare-link">Wedstrijden</span>
-            </div>
-        </a>
-    </div>
+    {% url 'Vereniging:wedstrijden' as card_url %}
+    {% include 'plein/card.dtl' with title="Wedstrijden" text="Wedstrijden die bij deze vereniging geschoten worden." icon="event" url=card_url %}
 
     <!-- ledenlijst -->
-    <div class="card">
-        <div class="card-content">
-            <div class="card-title center-align">Ledenlijst</div>
-            <div class="center-align"><i class="material-icons-round medium">list</i></div>
-            <p>Bekijk de ledenlijst van de vereniging, inclusief wedstrijdklasse jeugdleden en laatste inlog op deze website.</p>
-        </div>
-        <a href="{% url 'Vereniging:ledenlijst' %}" class="nhb-klikbare-balk">
-            <div class="card-action center-align">
-                <span class="nhb-klikbare-link">Ledenlijst</span>
-            </div>
-        </a>
-    </div>
+    {% url 'Vereniging:ledenlijst' as card_url %}
+    {% include 'plein/card.dtl' with title="Ledenlijst" text="Bekijk de ledenlijst van de vereniging, inclusief wedstrijdklasse jeugdleden en laatste inlog op deze website." icon="list" url=card_url %}
 
     <!-- beheerders vereniging -->
-    <div class="card">
-        <div class="card-content">
-            <div class="card-title center-align">Beheerders</div>
-            <div class="center-align"><i class="material-icons-round medium">supervisor_account</i></div>
-            <p>E-mailadressen van de (hoofd-)wedstrijdleider functies en eraan gekoppelde leden.</p>
-        </div>
-        <a href="{% url 'Functie:overzicht-vereniging' %}" class="nhb-klikbare-balk">
-            <div class="card-action center-align">
-                <span class="nhb-klikbare-link">Beheren</span>
-            </div>
-        </a>
-    </div>
+    {% url 'Functie:overzicht-vereniging' as card_url %}
+    {% include 'plein/card.dtl' with title="Beheerders" text="E-mailadressen van de (hoofd-)wedstrijdleider functies en eraan gekoppelde leden." icon="supervisor_account" url=card_url %}
 
     <!-- instellingen leden -->
-    <div class="card">
-        <div class="card-content">
-            <div class="card-title center-align">Voorkeuren</div>
-            <div class="center-align"><i class="material-icons-round medium">tune</i></div>
-            <p>Voorkeuren van de leden inzien en boog type instellen.</p>
-        </div>
-        <a href="{% url 'Vereniging:leden-voorkeuren' %}" class="nhb-klikbare-balk">
-            <div class="card-action center-align">
-                <span class="nhb-klikbare-link">Voorkeuren</span>
-            </div>
-        </a>
-    </div>
+    {% url 'Vereniging:leden-voorkeuren' as card_url %}
+    {% include 'plein/card.dtl' with title="Voorkeuren" text="Voorkeuren van de leden inzien en boog type instellen." icon="tune" url=card_url %}
 
     <!-- accommodatie details -->
     {% if accommodatie_details_url %}
-        <div class="card">
-            <div class="card-content">
-                <div class="card-title center-align">Accommodatie</div>
-                <div class="center-align"><i class="material-icons-round medium">home</i></div>
-                <p>Gegevens over de accommodatie die van belang zijn voor wedstrijden.</p>
-            </div>
-            <a href="{{ accommodatie_details_url }}" class="nhb-klikbare-balk">
-                <div class="card-action center-align">
-                    <span class="nhb-klikbare-link">Instellen</span>
-                </div>
-            </a>
-        </div>
+        {% include 'plein/card.dtl' with title="Accommodatie" text="Gegevens over de accommodatie die van belang zijn voor wedstrijden." icon="home" url=accommodatie_details_url %}
     {% endif %}
 
 </div>

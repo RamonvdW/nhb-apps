@@ -5,7 +5,8 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from . import view_accommodatie, view_overzicht, view_ledenlijst, view_inschrijven, view_wedstrijden
+from . import (view_accommodatie, view_overzicht, view_ledenlijst,
+               view_aanmelden, view_wedstrijden, view_lijst_rk)
 
 app_name = 'Vereniging'
 
@@ -23,12 +24,12 @@ urlpatterns = [
          view_ledenlijst.LedenVoorkeurenView.as_view(),
          name='leden-voorkeuren'),
 
-    path('leden-inschrijven/competitie/<comp_pk>/',
-         view_inschrijven.LedenInschrijvenView.as_view(),
-         name='leden-inschrijven'),
+    path('leden-aanmelden/competitie/<comp_pk>/',
+         view_aanmelden.LedenAanmeldenView.as_view(),
+         name='leden-aanmelden'),
 
     path('leden-ingeschreven/competitie/<deelcomp_pk>/',
-         view_inschrijven.LedenIngeschrevenView.as_view(),
+         view_aanmelden.LedenIngeschrevenView.as_view(),
          name='leden-ingeschreven'),
 
     path('accommodaties/lijst/',
@@ -50,6 +51,14 @@ urlpatterns = [
     path('wedstrijden/',
          view_wedstrijden.WedstrijdenView.as_view(),
          name='wedstrijden'),
+
+    path('lijst-rayonkampioenschappen/<deelcomp_pk>/alles/',
+         view_lijst_rk.VerenigingLijstRkSchuttersAllesView.as_view(),
+         name='lijst-rk-alles'),
+
+    path('lijst-rayonkampioenschappen/<deelcomp_pk>/',
+         view_lijst_rk.VerenigingLijstRkSchuttersView.as_view(),
+         name='lijst-rk'),
 ]
 
 # end of file

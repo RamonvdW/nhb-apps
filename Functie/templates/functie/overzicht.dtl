@@ -27,7 +27,7 @@
         <thead>
             <tr>        <!-- filter rij -->
                 <td colspan="2" class="table-filter"><input class="table-filter" oninput="myTableFilter(this, 'table1')" placeholder="Zoeken"/></td>
-                <td/>       <!-- email -->
+                <td></td>       <!-- email -->
             </tr>
             <tr>
                 <th filter="on">Functie / Rol</th>
@@ -47,7 +47,8 @@
                         <span>{{ obj.volledige_naam }}</span>
                     {% endfor %}
                 </td>
-                <td/>   <!-- email -->
+                <td></td>   <!-- email -->
+
             </tr>
         {% endif %}
 
@@ -62,7 +63,7 @@
                         <span>{{ obj.volledige_naam }}</span>
                     {% endfor %}
                 </td>
-                <td/>   <!-- email -->
+                <td></td>   <!-- email -->
             </tr>
         {% endif %}
 
@@ -86,7 +87,7 @@
 
                     {% if obj.wijzig_url %}
                         <br><br>
-                        <a class="btn-nhb-blauw" href="{{ obj.wijzig_url }}"><i class="material-icons-round left">group_add</i>Koppel beheerders</a>
+                        <a class="btn-nhb-blauw btn-small" href="{{ obj.wijzig_url }}"><i class="material-icons-round left">group_add</i>Koppelen</a>
                     {% endif %}
                 </td>
 
@@ -110,7 +111,7 @@
 
                     {% if obj.email_url %}
                         <br><br>
-                        <a class="btn-nhb-blauw" href="{{ obj.email_url }}"><i class="material-icons-round left">alternate_email</i>Wijzig e-mail</a>
+                        <a class="btn-nhb-blauw btn-small" href="{{ obj.email_url }}"><i class="material-icons-round left">alternate_email</i>Wijzig e-mail</a>
                     {% endif %}
                 </td>
             </tr>

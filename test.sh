@@ -17,8 +17,8 @@ OMIT="--omit=*/lib/python3*/site-packages/*"    # use , to separate
 pgrep -f websim
 if [ $? -eq 0 ]
 then
-    echo "[ERROR] websim is already running - please stop it (try pkill -f websim)"
-    exit 1
+    echo "[WARNING] websim was already running - killing it now with 'pkill -f websim'"
+    pkill -f websim
 fi
 
 echo

@@ -8,9 +8,10 @@ from django.db import migrations, models
 import django.db.models.deletion
 
 
-# TODO: kan deze migratiefunctie weg?
 def maak_taken(apps, _):
-
+    """ Maak de enige tabel regel aan die gebruikt wordt door het cron job
+        regiocomp_upd_tussenstand.
+    """
     # haal de klassen op die van toepassing zijn tijdens deze migratie
     taken_klas = apps.get_model('Competitie', 'CompetitieTaken')
 

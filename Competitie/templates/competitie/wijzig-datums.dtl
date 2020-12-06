@@ -9,94 +9,176 @@
 {% block title %}Competitie datums{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-wijzig-datums" %}
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-wijzig-datums" %}
 
-<script type="application/javascript">
-    function post_datums()
-    {
-        // voer een POST uit om toe te voegen
-        const form = document.createElement('form');
-        form.setAttribute('method', 'post');
-        form.setAttribute('action', '{{ wijzig_url }}');
-
-        for (let nr = 1; nr <= 4; nr++)
+    <script type="application/javascript">
+        function post_datums()
         {
-            const el = document.querySelector('#datum' + nr);
+            // voer een POST uit om toe te voegen
+            const form = document.createElement('form');
+            form.setAttribute('method', 'post');
+            form.setAttribute('action', '{{ wijzig_url }}');
+
+            for (let nr = 1; nr <= 9; nr++)
+            {
+                const el = document.querySelector('#datum' + nr);
+                const inp = document.createElement('input');
+                inp.type = "hidden";
+                inp.name = "datum" + nr;
+                inp.value = el.M_Datepicker.toString('yyyy-mm-dd');
+                form.appendChild(inp);
+            }
+
             const inp = document.createElement('input');
             inp.type = "hidden";
-            inp.name = "datum" + nr;
-            inp.value = el.M_Datepicker.toString('yyyy-mm-dd');
+            inp.name = "csrfmiddlewaretoken";
+            inp.value = "{{ csrf_token }}"
             form.appendChild(inp);
+
+            form.style.display = 'hidden';
+            document.body.appendChild(form);
+            form.submit();
         }
+    </script>
 
-        const inp = document.createElement('input');
-        inp.type = "hidden";
-        inp.name = "csrfmiddlewaretoken";
-        inp.value = getCookie('csrftoken'); // TODO: "{{ csrf_token }}" mag ook (zie uitslag-invoeren-wedstrijd.dtl)
-        form.appendChild(inp);
+    <h4>Competitie datums</h4>
 
-        form.style.display = 'hidden';
-        document.body.appendChild(form);
-        form.submit();
-    }
-</script>
+    <p>Op deze pagina kan je de belangrijke datums aanpassen voor de <b>{{ competitie }}</b>.</p>
 
-<h4>Competitie datums</h4>
+    <p>Klik op de datum om deze te wijzigen.</p>
 
-<p>Op deze pagina kan je de belangrijke datums aanpassen voor de <b>{{ competitie }}</b>.</p>
+    <table class="white">
+        <thead>
+            <tr>
+                <th>Beschrijving</th>
+                <th>Datum</th>
+            </tr>
+        </thead>
+        <tr>
+            <td>Inschrijving openen op</td>
+            <td><input type="text" class="nl_datepicker" id="datum1"></td>
+        </tr>
+        <tr>
+            <td>Inschrijving sluiten op</td>
+            <td><input type="text" class="nl_datepicker" id="datum2"></td>
+        </tr>
 
-<p>Klik op de datum om deze te wijzigen.</p>
+        <tr>
+            <td colspan="2"><b>Regiocompetitie</b></td>
+        </tr>
 
-<table class="white">
-    <thead>
-        <th>Beschrijving</th>
-        <th>Datum</th>
-    </thead>
-    <tr>
-        <td>Inschrijven openen op</td>
-        <td><input type="text" class="nl_datepicker" id="datum1"></td>
-    </tr>
-    <tr>
-        <td>Inschrijvingen sluiten op</td>
-        <td><input type="text" class="nl_datepicker" id="datum2"></td>
-    </tr>
-    <tr>
-        <td>Samenstellen vaste teams kan tot</td>
-        <td><input type="text" class="nl_datepicker" id="datum3"></td>
-    </tr>
-    <tr>
-        <td>Aanmaken poules tot</td>
-        <td><input type="text" class="nl_datepicker" id="datum4"></td>
-    </tr>
-</table>
+        <tr>
+            <td>Samenstellen vaste teams kan tot</td>
+            <td><input type="text" class="nl_datepicker" id="datum3"></td>
+        </tr>
+        <tr>
+            <td>Aanmaken poules tot</td>
+            <td><input type="text" class="nl_datepicker" id="datum4"></td>
+        </tr>
+        <tr>
+            <td>Wedstrijden tot</td>
+            <td><input type="text" class="nl_datepicker" id="datum5"></td>
+        </tr>
 
-<p>
-    <a class="btn-nhb-blauw" href="{% url 'Competitie:overzicht' %}"><i class="material-icons-round left">close</i>Terug</a>
-    <span>&nbsp;&nbsp;</span>
-    <button class="btn-nhb-rood" onclick="post_datums()"><i class="material-icons-round left">check</i>Opslaan</button>
-</p>
+        <tr>
+            <td colspan="2"><b>Rayonkampioenschappen</b></td>
+        </tr>
 
-<!-- initialisatie van de datum pickers -->
-<script type="application/javascript">
-    document.addEventListener('DOMContentLoaded', function()
-    {
-        let el = document.querySelector('#datum1');
-        M.Datepicker.init(el, { defaultDate: new Date("{{ competitie.datum1|date:'Y-m-d' }}"),
-                                setDefaultDate: true });
+        <tr>
+            <td>Wedstrijden vanaf</td>
+            <td><input type="text" class="nl_datepicker" id="datum6"></td>
+        </tr>
 
-        el = document.querySelector('#datum2');
-        M.Datepicker.init(el, { defaultDate: new Date("{{ competitie.datum2|date:'Y-m-d' }}"),
-                                setDefaultDate: true });
+        <tr>
+            <td>Wedstrijden tot</td>
+            <td><input type="text" class="nl_datepicker" id="datum7"></td>
+        </tr>
 
-        el = document.querySelector('#datum3');
-        M.Datepicker.init(el, { defaultDate: new Date("{{ competitie.datum3|date:'Y-m-d' }}"),
-                                setDefaultDate: true });
+        <tr>
+            <td colspan="2"><b>Bondskampioenschappen</b></td>
+        </tr>
 
-        el = document.querySelector('#datum4');
-        M.Datepicker.init(el, { defaultDate: new Date("{{ competitie.datum4|date:'Y-m-d' }}"),
-                                setDefaultDate: true });
-    })
-</script>
+        <tr>
+            <td>Wedstrijden vanaf</td>
+            <td><input type="text" class="nl_datepicker" id="datum8"></td>
+        </tr>
+
+        <tr>
+            <td>Wedstrijden tot</td>
+            <td><input type="text" class="nl_datepicker" id="datum9"></td>
+        </tr>
+
+    </table>
+
+    <p>
+        <a class="btn-nhb-blauw" href="{% url 'Competitie:overzicht' %}"><i class="material-icons-round left">close</i>Terug</a>
+        <span>&nbsp;&nbsp;</span>
+        <button class="btn-nhb-rood" onclick="post_datums()"><i class="material-icons-round left">check</i>Opslaan</button>
+    </p>
+
+    <!-- initialisatie van de datum pickers -->
+    <script type="application/javascript">
+        document.addEventListener('DOMContentLoaded', function()
+        {
+            const minDate = new Date({{ competitie.begin_jaar }}, 6-1, 22-1)         // month and day 0-based
+            const maxDate = new Date({{ competitie.begin_jaar }} + 1, 6-1, 22-1)     // month and day 0-based
+            const competitieJaren = [{{  competitie.begin_jaar }}, {{ competitie.begin_jaar }} + 1]
+
+            let el = document.querySelector('#datum1');
+            M.Datepicker.init(el, { defaultDate: new Date("{{ competitie.datum1|date:'Y-m-d' }}"),
+                                    setDefaultDate: true,
+                                    minDate: minDate, maxDate: maxDate,
+                                    yearRange: competitieJaren})
+
+            el = document.querySelector('#datum2');
+            M.Datepicker.init(el, { defaultDate: new Date("{{ competitie.datum2|date:'Y-m-d' }}"),
+                                    setDefaultDate: true,
+                                    minDate: minDate, maxDate: maxDate,
+                                    yearRange: competitieJaren})
+
+            el = document.querySelector('#datum3');
+            M.Datepicker.init(el, { defaultDate: new Date("{{ competitie.datum3|date:'Y-m-d' }}"),
+                                    setDefaultDate: true,
+                                    minDate: minDate, maxDate: maxDate,
+                                    yearRange: competitieJaren})
+
+            el = document.querySelector('#datum4');
+            M.Datepicker.init(el, { defaultDate: new Date("{{ competitie.datum4|date:'Y-m-d' }}"),
+                                    setDefaultDate: true,
+                                    minDate: minDate, maxDate: maxDate,
+                                    yearRange: competitieJaren})
+
+            el = document.querySelector('#datum5');
+            M.Datepicker.init(el, { defaultDate: new Date("{{ competitie.datum5|date:'Y-m-d' }}"),
+                                    setDefaultDate: true,
+                                    minDate: minDate, maxDate: maxDate,
+                                    yearRange: competitieJaren})
+
+            el = document.querySelector('#datum6');
+            M.Datepicker.init(el, { defaultDate: new Date("{{ competitie.datum6|date:'Y-m-d' }}"),
+                                    setDefaultDate: true,
+                                    minDate: minDate, maxDate: maxDate,
+                                    yearRange: competitieJaren})
+
+            el = document.querySelector('#datum7');
+            M.Datepicker.init(el, { defaultDate: new Date("{{ competitie.datum7|date:'Y-m-d' }}"),
+                                    setDefaultDate: true,
+                                    minDate: minDate, maxDate: maxDate,
+                                    yearRange: competitieJaren})
+
+            el = document.querySelector('#datum8');
+            M.Datepicker.init(el, { defaultDate: new Date("{{ competitie.datum8|date:'Y-m-d' }}"),
+                                    setDefaultDate: true,
+                                    minDate: minDate, maxDate: maxDate,
+                                    yearRange: competitieJaren})
+
+            el = document.querySelector('#datum9');
+            M.Datepicker.init(el, { defaultDate: new Date("{{ competitie.datum9|date:'Y-m-d' }}"),
+                                    setDefaultDate: true,
+                                    minDate: minDate, maxDate: maxDate,
+                                    yearRange: competitieJaren})
+        })
+    </script>
 
 {% endblock %}
 

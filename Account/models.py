@@ -119,6 +119,12 @@ class Account(AbstractUser):
             email = ""
         return email
 
+    def __str__(self):
+        """ geef een korte beschrijving van dit account
+            wordt gebruikt in de drop-down lijsten en autocomplete_fields van de admin interface
+        """
+        return self.get_account_full_name()
+
 
 class AccountEmail(models.Model):
     """ definitie van een e-mail adres (en de status daarvan) voor een account """

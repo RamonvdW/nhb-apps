@@ -11,7 +11,7 @@ from .models import Wedstrijd, WedstrijdLocatie
 import datetime
 
 
-class TestWedstrijd(E2EHelpers, TestCase):
+class TestWedstrijden(E2EHelpers, TestCase):
 
     """ Tests voor de Wedstrijden applicatie """
 

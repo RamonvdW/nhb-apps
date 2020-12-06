@@ -11,6 +11,8 @@ from . import (views_aangemeld,
                views_klassegrenzen,
                views_overzicht,
                views_planning,
+               views_planning_bond,
+               views_planning_rayon,
                views_tussenstand,
                views_uitslagen)
 
@@ -28,6 +30,14 @@ urlpatterns = [
          name='klassegrenzen-tonen'),
 
 
+    path('lijst-regiocompetitie/<comp_pk>/regio-<regio_pk>/dagdeel-behoefte/',
+         views_aangemeld.Inschrijfmethode3BehoefteView.as_view(),
+         name='inschrijfmethode3-behoefte'),
+
+    path('lijst-regiocompetitie/<comp_pk>/regio-<regio_pk>/dagdeel-behoefte-als-bestand/',
+         views_aangemeld.Inschrijfmethode3BehoefteAlsBestandView.as_view(),
+         name='inschrijfmethode3-behoefte-als-bestand'),
+
     path('lijst-regiocompetitie/<comp_pk>/alles/',
          views_aangemeld.LijstAangemeldRegiocompAllesView.as_view(),
          name='lijst-regiocomp-alles'),
@@ -41,13 +51,13 @@ urlpatterns = [
          name='lijst-regiocomp-regio'),
 
 
-    path('lijst-regiocompetitie/<comp_pk>/regio-<regio_pk>/dagdeel-behoefte/',
-         views_aangemeld.Inschrijfmethode3BehoefteView.as_view(),
-         name='inschrijfmethode3-behoefte'),
+    path('lijst-rayonkampioenschappen/<deelcomp_pk>/',
+         views_planning_rayon.LijstRkSchuttersView.as_view(),
+         name='lijst-rk'),
 
-    path('lijst-regiocompetitie/<comp_pk>/regio-<regio_pk>/dagdeel-behoefte-als-bestand/',
-         views_aangemeld.Inschrijfmethode3BehoefteAlsBestandView.as_view(),
-         name='inschrijfmethode3-behoefte-als-bestand'),
+    path('lijst-rayonkampioenschappen/wijzig-status-rk-deelnemer/<deelnemer_pk>/',
+         views_planning_rayon.WijzigStatusRkSchutterView.as_view(),
+         name='wijzig-status-rk-deelnemer'),
 
 
     path('info/',
@@ -84,13 +94,13 @@ urlpatterns = [
          views_planning.RegioClusterPlanningView.as_view(),
          name='regio-cluster-planning'),
 
+    path('planning/regiocompetitie/afsluiten/<deelcomp_pk>/',
+         views_planning.AfsluitenRegiocompView.as_view(),
+         name='afsluiten-regiocomp'),
+
     path('planning/regiocompetitie/<deelcomp_pk>/',
          views_planning.RegioPlanningView.as_view(),
          name='regio-planning'),
-
-    path('planning/rayoncompetitie/<deelcomp_pk>/',
-         views_planning.RayonPlanningView.as_view(),
-         name='rayon-planning'),
 
     path('planning/bondscompetitie/<deelcomp_pk>/',
          views_planning.BondPlanningView.as_view(),
@@ -103,6 +113,19 @@ urlpatterns = [
     path('planning/wedstrijd/verwijder/<wedstrijd_pk>/',
          views_planning.VerwijderWedstrijdView.as_view(),
          name='verwijder-wedstrijd'),
+
+
+    path('planning/rayoncompetitie/<deelcomp_pk>/limieten/',
+         views_planning_rayon.RayonLimietenView.as_view(),
+         name='rayon-limieten'),
+
+    path('planning/rayoncompetitie/<deelcomp_pk>/',
+         views_planning_rayon.RayonPlanningView.as_view(),
+         name='rayon-planning'),
+
+    path('planning/wedstrijd-rayon/wijzig/<wedstrijd_pk>/',
+         views_planning_rayon.WijzigRayonWedstrijdView.as_view(),
+         name='wijzig-rayon-wedstrijd'),
 
 
     path('wedstrijd/uitslag-invoeren/<wedstrijd_pk>/',
@@ -165,6 +188,19 @@ urlpatterns = [
     path('tussenstand/<afstand>-<comp_boog>/bond/',
          views_tussenstand.TussenstandBondView.as_view(),
          name='tussenstand-bond'),
+
+
+    path('planning/doorzetten/<comp_pk>/rk/',
+         views_planning_bond.DoorzettenNaarRKView.as_view(),
+         name='bko-doorzetten-naar-rk'),
+
+    path('planning/doorzetten/<comp_pk>/bk/',
+         views_planning_bond.DoorzettenNaarBKView.as_view(),
+         name='bko-doorzetten-naar-bk'),
+
+    #path('planning/afsluiten/<comp_pk>/',
+    #     views_planning_bond.CompetitieAfsluitenView.as_view(),
+    #     name='bko-afsluiten-competitie'),
 ]
 
 # end of file

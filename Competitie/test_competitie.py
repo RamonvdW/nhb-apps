@@ -20,7 +20,7 @@ import datetime
 class TestCompetitie(E2EHelpers, TestCase):
     """ unit tests voor de Competitie applicatie """
 
-    test_after = ('BasisTypen', 'Functie')
+    test_after = ('BasisTypen', 'Functie', 'Competitie.test_fase')
 
     def setUp(self):
         """ eenmalige setup voor alle tests
@@ -501,6 +501,9 @@ class TestCompetitie(E2EHelpers, TestCase):
         # coverage
         obj = CompetitieKlasse.objects.all()[0]
         self.assertTrue(str(obj) != "")
+        obj.indiv = None
+        obj.team = TeamWedstrijdklasse.objects.all()[0]
+        self.assertTrue(str(obj) != "")
 
     def test_klassegrenzen_vaststellen_cornercases(self):
         self.e2e_login_and_pass_otp(self.account_bb)
@@ -562,7 +565,12 @@ class TestCompetitie(E2EHelpers, TestCase):
                           begin_aanmeldingen=datum,
                           einde_aanmeldingen=datum,
                           einde_teamvorming=datum,
-                          eerste_wedstrijd=datum)
+                          eerste_wedstrijd=datum,
+                          laatst_mogelijke_wedstrijd=datum,
+                          rk_eerste_wedstrijd=datum,
+                          rk_laatste_wedstrijd=datum,
+                          bk_eerste_wedstrijd=datum,
+                          bk_laatste_wedstrijd=datum)
         comp.save()
 
         wkl = TeamWedstrijdklasse.objects.all()[0]
@@ -570,53 +578,6 @@ class TestCompetitie(E2EHelpers, TestCase):
         obj = CompetitieKlasse(competitie=comp, team=wkl, min_ag=0.42)
         obj.save()
         self.assertTrue(wkl.beschrijving in str(obj))
-
-    def test_zet_fase(self):
-
-        now = timezone.now()
-        now = datetime.date(year=now.year, month=now.month, day=now.day)
-        einde_jaar = datetime.date(year=now.year, month=12, day=31)
-        gisteren = now - datetime.timedelta(days=1)
-
-        # maak een competitie aan en controleer de fase
-        comp = Competitie()
-        comp.begin_jaar = 2000
-        comp.uiterste_datum_lid = datetime.date(year=2000, month=1, day=1)
-        comp.begin_aanmeldingen = comp.einde_aanmeldingen = comp.einde_teamvorming = comp.eerste_wedstrijd = einde_jaar
-        comp.save()
-        comp.zet_fase()
-        self.assertEqual(comp.fase, 'A1')
-
-        comp.begin_aanmeldingen = gisteren
-        comp.zet_fase()
-        self.assertEqual(comp.fase, 'A1')
-
-        # maak de klassen aan en controleer de fase weer
-        indiv = IndivWedstrijdklasse.objects.all()[0]
-        maak_competitieklasse_indiv(comp, indiv, 0.0)
-        comp.begin_aanmeldingen = comp.einde_aanmeldingen
-        comp.zet_fase()
-        self.assertEqual(comp.fase, 'A2')
-
-        # tussen begin en einde aanmeldingen = B
-        comp.begin_aanmeldingen = gisteren
-        comp.zet_fase()
-        self.assertEqual(comp.fase, 'B')
-
-        # na einde aanmeldingen tot einde_teamvorming = C
-        comp.einde_aanmeldingen = gisteren
-        comp.zet_fase()
-        self.assertEqual(comp.fase, 'C')
-
-        # na einde teamvorming tot eerste wedstrijd = D
-        comp.einde_teamvorming = gisteren
-        comp.zet_fase()
-        self.assertEqual(comp.fase, 'D')
-
-        # na eerste wedstrijd = E
-        comp.eerste_wedstrijd = gisteren
-        comp.zet_fase()
-        self.assertEqual(comp.fase, 'E')
 
 
 # TODO: gebruik assert_other_http_commands_not_supported

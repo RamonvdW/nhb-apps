@@ -8,10 +8,11 @@
 # zodra er nieuwe ScoreHist records zijn
 
 from django.core.management.base import BaseCommand
+from django.db.models import F
 import django.db.utils
-from Competitie.models import (CompetitieTaken,
-                               LAAG_REGIO, DeelCompetitie, DeelcompetitieRonde,
-                               RegioCompetitieSchutterBoog)
+from Competitie.models import (CompetitieTaken, CompetitieKlasse,
+                               LAAG_REGIO, Competitie, DeelCompetitie, DeelcompetitieRonde,
+                               RegioCompetitieSchutterBoog, KampioenschapSchutterBoog)
 from Score.models import ScoreHist, SCORE_WAARDE_VERWIJDERD
 import datetime
 import time
@@ -26,8 +27,10 @@ class Command(BaseCommand):
 
         self.taken = CompetitieTaken.objects.all()[0]
 
-        self.pk2scores = dict()      # [RegioCompetitieSchutterBoog.pk] = [tup, ..] with tup = (afstand, score)
+        self.pk2scores = dict()         # [RegioCompetitieSchutterBoog.pk] = [tup, ..] with tup = (afstand, score)
         self.pk2scores_alt = dict()
+
+        self._onbekend2beter = dict()   # [competitieklasse.pk] = [klasse, ..] met oplopend AG
 
     def add_arguments(self, parser):
         parser.add_argument('duration', type=int,
@@ -36,9 +39,157 @@ class Command(BaseCommand):
         parser.add_argument('--all', action='store_true')       # alles opnieuw vaststellen
         parser.add_argument('--quick', action='store_true')     # for testing
 
+    def _verwerk_overstappers_regio(self, comp):
+        objs = (RegioCompetitieSchutterBoog
+                .objects
+                .select_related('bij_vereniging',
+                                'bij_vereniging__regio',
+                                'schutterboog__nhblid',
+                                'schutterboog__nhblid__bij_vereniging',
+                                'schutterboog__nhblid__bij_vereniging__regio')
+                .exclude(bij_vereniging=F('schutterboog__nhblid__bij_vereniging')))   # bevat geen uitstappers
+        for obj in objs:
+            lid = obj.schutterboog.nhblid
+            # het lijkt erop dat lid.bij_vereniging == None niet voor kan komen
+            self.stdout.write('[INFO] Verwerk overstap %s: [%s] %s --> [%s] %s' % (
+                              lid.nhb_nr,
+                              obj.bij_vereniging.regio.regio_nr, obj.bij_vereniging,
+                              lid.bij_vereniging.regio.regio_nr, lid.bij_vereniging))
+            if obj.bij_vereniging.regio != lid.bij_vereniging.regio:
+                # overschrijven naar andere deelcompetitie
+                obj.deelcompetitie = DeelCompetitie.objects.get(competitie=obj.deelcompetitie.competitie,
+                                                                nhb_regio=lid.bij_vereniging.regio)
+            obj.bij_vereniging = lid.bij_vereniging
+            obj.save()
+        # for
+
+    def _verwerk_overstappers_rk(self, comp):
+        # ondersteuning om een overschrijving af te ronden
+        # schutters die eerder geen vereniging hebben en wel een vereniging
+        objs = (KampioenschapSchutterBoog
+                .objects
+                .select_related('deelcompetitie__nhb_rayon',
+                                'schutterboog__nhblid',
+                                'schutterboog__nhblid__bij_vereniging',
+                                'schutterboog__nhblid__bij_vereniging__regio__rayon')
+                .filter(bij_vereniging__isnull=True))
+        for obj in objs:
+            # schutter had geen vereniging; nu wel
+            # alleen overnemen als de nieuwe vereniging in het juiste rayon zit
+            ver = obj.schutterboog.nhblid.bij_vereniging
+            if ver:
+                if ver.regio.rayon.rayon_nr != obj.deelcompetitie.nhb_rayon.rayon_nr:
+                    self.stdout.write('[WARNING] Verwerk overstap naar ander rayon niet mogelijk voor %s in RK voor rayon %s: GEEN VERENIGING --> [%s] %s' % (
+                                      obj.schutterboog.nhblid.nhb_nr,
+                                      obj.deelcompetitie.nhb_rayon.rayon_nr,
+                                      ver.regio.regio_nr, ver))
+                else:
+                    # pas de 'bij_vereniging' aan
+                    self.stdout.write('[INFO] Verwerk overstap %s: GEEN VERENIGING --> [%s] %s' % (
+                                      obj.schutterboog.nhblid.nhb_nr,
+                                      ver.regio.regio_nr, ver))
+                    obj.bij_vereniging = ver
+                    obj.save()
+        # for
+
+    def _verwerk_uitstappers_regio(self, comp):
+        objs = (RegioCompetitieSchutterBoog
+                .objects
+                .select_related('bij_vereniging',
+                                'bij_vereniging__regio',
+                                'schutterboog__nhblid',
+                                'schutterboog__nhblid__bij_vereniging',
+                                'schutterboog__nhblid__bij_vereniging__regio')
+                .filter(schutterboog__nhblid__bij_vereniging__isnull=True))
+        for obj in objs:
+            lid = obj.schutterboog.nhblid
+            self.stdout.write('[WARNING] Uitstapper: %s [%s] %s (actief=%s)' % (
+                              lid.nhb_nr,
+                              obj.bij_vereniging.regio.regio_nr, obj.bij_vereniging,
+                              lid.is_actief_lid))
+            # TODO: hoe hier mee omgaan?
+            # LET OP! obj.bij_vereniging = None mag niet van het model!
+            # obj.save()
+        # for
+
+    def _verwerk_overstappers(self):
+        """ Deze functie verwerkt schutters die overgestapt zijn naar een andere vereniging
+            Deze worden overgeschreven naar een andere deelcompetitie (regio/RK/BK).
+        """
+
+        # 1. NhbLid.bij_vereniging komt overeen met informatie uit CRM
+
+        # 2. Schutters in regiocompetitie kunnen elk moment overstappen
+        #    RegioCompetitieSchutterBoog.bij_vereniging
+        # TODO: voor de teamcompetitie moet dit pas gebeuren nadat de teamscores vastgesteld zijn
+
+        # 3. Bij vaststellen RK/BK deelname/reserve wordt vereniging bevroren
+        #    KampioenschapSchutterBoog.bij_vereniging
+
+        for comp in Competitie.objects.filter(is_afgesloten=False):
+            comp.zet_fase()
+            if comp.fase <= 'F':        # Regiocompetitie
+                self._verwerk_overstappers_regio(comp)
+                self._verwerk_uitstappers_regio(comp)
+            elif comp.fase == 'K':      # RK
+                self._verwerk_overstappers_rk(comp)
+        # for
+
+    def _prep_caches(self):
+        # maak een structuur om gerelateerde IndivWedstrijdklassen te vinden
+        indiv_alike = dict()     # [(boogtype.pk, leeftijdsklasse.pk, ...)] = [indiv, ..]
+        klassen_qset = (CompetitieKlasse
+                        .objects
+                        .select_related('competitie', 'indiv', 'indiv__boogtype')
+                        .prefetch_related('indiv__leeftijdsklassen')
+                        .exclude(indiv__buiten_gebruik=True))
+
+        for obj in klassen_qset:
+            indiv = obj.indiv
+            if not indiv.is_onbekend:
+                tup = (indiv.boogtype.pk,)
+                tup += tuple(indiv.leeftijdsklassen.values_list('pk', flat=True))
+                try:
+                    if indiv not in indiv_alike[tup]:
+                        indiv_alike[tup].append(indiv)
+                except KeyError:
+                    indiv_alike[tup] = [indiv]
+        # for
+
+        # maak een datastructuur waarmee we snel kunnen bepalen naar welke nieuwe
+        # wedstrijdklasse een schutter verplaatst kan worden vanuit klasse onbekend
+        for klasse in klassen_qset:
+            if klasse.indiv.is_onbekend:
+                tup = (klasse.indiv.boogtype.pk,)
+                tup += tuple(klasse.indiv.leeftijdsklassen.values_list('pk', flat=True))
+
+                for indiv in indiv_alike[tup]:
+                    # zoek klasse met deze indiv
+                    for klasse2 in klassen_qset:
+                        if klasse2.indiv == indiv and klasse2.competitie == klasse.competitie:
+                            try:
+                                self._onbekend2beter[klasse.pk].append(klasse2)
+                            except KeyError:
+                                self._onbekend2beter[klasse.pk] = [klasse2]
+                # for
+        # for
+
+        # sorteer de 'alike' klassen op aflopend AG
+        for klasse_pk in self._onbekend2beter.keys():
+            self._onbekend2beter[klasse_pk].sort(key=lambda x: x.min_ag, reverse=True)
+        # for
+
     def _vind_scores(self):
+        """ zoek alle recent ingevoerde scores en bepaal van welke schuttersboog
+            de tussenstand bijgewerkt moet worden.
+            Vult pk2scores en pk2scores_alt.
+        """
+        self.pk2scores = dict()
+        self.pk2scores_alt = dict()
 
         scorehist_latest = ScoreHist.objects.latest('pk')
+        # als hierna een extra ScoreHist aangemaakt wordt dan verwerken we een record
+        # misschien dubbel, maar daar kunnen we tegen
 
         # bepaal de scorehist objecten die we willen bekijken
         qset = (ScoreHist
@@ -72,14 +223,13 @@ class Command(BaseCommand):
                               deelcompetitie__laag=LAAG_REGIO)
                       .all()):
 
-            # self.stdout.write('[INFO] ronde: %s' % ronde)
-            is_alt = ronde.beschrijving.startswith('Ronde ') and ronde.beschrijving.endswith(' oude programma')
+            is_alt = ronde.is_voor_import_oude_programma()
 
             # tijdelijk: de geïmporteerde uitslagen zijn de normale
             #            de handmatig ingevoerde scores zijn het alternatief
             is_alt = not is_alt     # FUTURE: schakelaar omzetten als we geen import meer doen
 
-            # self.stdout.write('[INFO]  plan: %s' % ronde.plan)
+            # sorteer de beschikbare scores op het moment van de wedstrijd
             for wedstrijd in (ronde
                               .plan
                               .wedstrijden
@@ -87,7 +237,7 @@ class Command(BaseCommand):
                               .order_by('datum_wanneer',
                                         'tijd_begin_wedstrijd')
                               .all()):
-                # self.stdout.write('[INFO]   wedstrijd: %s' % wedstrijd)
+
                 uitslag = wedstrijd.uitslag
                 if uitslag:
                     for score in (uitslag
@@ -106,8 +256,8 @@ class Command(BaseCommand):
             # for
         # for
 
-        self.stdout.write('[INFO] Aantallen: pk2scores=%s, pk2scores_alt=%s' % (len(self.pk2scores),
-                                                                                len(self.pk2scores_alt)))
+        self.stdout.write('[INFO] Aantallen: pk2scores=%s, pk2scores_alt=%s' % (
+                               len(self.pk2scores), len(self.pk2scores_alt)))
 
     @staticmethod
     def _bepaal_laagste_nr(waardes):
@@ -174,9 +324,8 @@ class Command(BaseCommand):
                     pass
 
                 if found:
-                    # tot nu toe hebben we de verwijderde scores meegenomen
-                    # zodat we deze change-trigger krijgen.
-                    # Nu moeten de verwijderde scores eruit
+                    # tot nu toe hebben we de verwijderde scores meegenomen zodat we deze
+                    # change-trigger krijgen. Nu moeten de verwijderde scores eruit
                     scores = [score for afstand, score in tups if score.waarde != SCORE_WAARDE_VERWIJDERD and afstand == comp_afstand]
 
                     # nieuwe scores toevoegen
@@ -197,8 +346,8 @@ class Command(BaseCommand):
                     except KeyError:
                         waardes = list()
                     else:
-                        # door waarde te filteren op max_score voorkomen we problemen met het gemiddelde
-                        # die pas naar boven komen tijdens de save()
+                        # door waarde te filteren op max_score voorkomen we problemen
+                        # die anders pas naar boven komen tijdens de save()
                         waardes = [score.waarde for afstand, score in tups if score.waarde <= max_score and afstand == comp_afstand]
 
                     waardes.extend([0, 0, 0, 0, 0, 0, 0])
@@ -210,16 +359,44 @@ class Command(BaseCommand):
                     deelnemer.score5 = waardes[4]
                     deelnemer.score6 = waardes[5]
                     deelnemer.score7 = waardes[6]
+                    deelnemer.aantal_scores = len(waardes) - waardes.count(0)
                     deelnemer.laagste_score_nr, laagste = self._bepaal_laagste_nr(waardes)
                     deelnemer.gemiddelde, deelnemer.totaal = self._bepaal_gemiddelde_en_totaal(waardes, laagste, pijlen_per_ronde)
+
+                    # kijk of verplaatsing uit klasse onbekend van toepassing is
+                    if deelnemer.aanvangsgemiddelde < 0.001:
+                        try:
+                            betere_klassen = self._onbekend2beter[deelnemer.klasse.pk]
+                        except KeyError:
+                            # overslaan, want niet meer in een klasse onbekend
+                            pass
+                        else:
+                            # kijk of 3 scores ingevuld zijn
+                            # dit hoeven niet de eerste drie scores te zijn!
+                            waardes_niet_nul = [waarde for waarde in waardes if waarde > 0]
+                            if len(waardes_niet_nul) >= 3:
+                                totaal = sum(waardes_niet_nul[:3])      # max 3 scores meenemen
+                                # afronden op 3 decimalen (anders gebeurt dat tijdens opslaan in database)
+                                new_ag = round(totaal / (3 * pijlen_per_ronde), 3)
+
+                                # de betere klassen zijn gesorteerd op AG, hoogste eerst
+                                for klasse in betere_klassen:       # pragma: no branch
+                                    if new_ag >= klasse.min_ag:
+                                        # dit is de nieuwe klasse
+                                        self.stdout.write(
+                                            '[INFO] Verplaats %s (%sm) met nieuw AG %.3f naar klasse %s' % (
+                                                deelnemer.schutterboog.nhblid.nhb_nr, klasse.competitie.afstand, new_ag, klasse))
+                                        deelnemer.klasse = klasse
+                                        break
+                                # for
 
                     try:
                         tups = self.pk2scores_alt[pk]
                     except KeyError:
                         waardes = list()
                     else:
-                        # door waarde te filteren op max_score voorkomen we problemen met het gemiddelde
-                        # die pas naar boven komen tijdens de save()
+                        # door waarde te filteren op max_score voorkomen we problemen
+                        # die anders pas naar boven komen tijdens de save()
                         waardes = [score.waarde for afstand, score in tups if score.waarde != SCORE_WAARDE_VERWIJDERD and afstand == comp_afstand]
 
                     waardes.extend([0, 0, 0, 0, 0, 0, 0])
@@ -231,6 +408,7 @@ class Command(BaseCommand):
                     deelnemer.alt_score5 = waardes[4]
                     deelnemer.alt_score6 = waardes[5]
                     deelnemer.alt_score7 = waardes[6]
+                    deelnemer.alt_aantal_scores = len(waardes) - waardes.count(0)
                     deelnemer.alt_laagste_score_nr, laagste = self._bepaal_laagste_nr(waardes)
                     deelnemer.alt_gemiddelde, deelnemer.alt_totaal = self._bepaal_gemiddelde_en_totaal(waardes, laagste, pijlen_per_ronde)
 
@@ -240,28 +418,22 @@ class Command(BaseCommand):
         self.stdout.write('[INFO] Scores voor %s schuttersboog bijgewerkt' % count)
 
     def _update_tussenstand(self):
-        # stap 1: alle RegioCompetitieSchutterBoog.scores vaststellen
-
         begin = datetime.datetime.now()
 
-        self.pk2scores = dict()      # [schutterboog.pk] = [score, score, ..]
-        self.pk2scores_alt = dict()
-
+        # stap 1: alle RegioCompetitieSchutterBoog.scores vaststellen
         self._vind_scores()
 
         # stap 2: overige velden bijwerken van aangepaste RegioCompetitieSchutterBoog
         self._update_regiocompetitieschuttersboog()
 
         klaar = datetime.datetime.now()
-
-        self.stdout.write('[INFO] Tussenstand bijgewerkte in %s seconden' % (klaar - begin))
+        self.stdout.write('[INFO] Tussenstand bijgewerkt in %s seconden' % (klaar - begin))
 
     def _monitor_nieuwe_scores(self):
-
         # monitor voor nieuwe ScoreHist
         hist_count = 0      # moet 0 zijn: beschermd tegen query op lege scorehist tabel
         now = datetime.datetime.now()
-        while now < self.stop_at:
+        while now < self.stop_at:               # pragma: no branch
             new_count = ScoreHist.objects.count()
             if new_count != hist_count:
                 hist_count = new_count
@@ -270,9 +442,11 @@ class Command(BaseCommand):
 
             # sleep at least 5 seconds, then check again
             secs = (self.stop_at - now).total_seconds()
-            if secs > 0:                    # pragma: no branch
+            if secs > 5:                    # pragma: no branch
                 secs = min(secs, 5.0)
                 time.sleep(secs)
+            else:
+                break       # from the while
 
             now = datetime.datetime.now()
         # while
@@ -298,6 +472,10 @@ class Command(BaseCommand):
 
         if options['all']:
             self.taken.hoogste_scorehist = None
+
+        self._verwerk_overstappers()
+
+        self._prep_caches()
 
         # vang generieke fouten af
         try:

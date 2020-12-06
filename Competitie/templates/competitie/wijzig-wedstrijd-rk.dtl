@@ -1,0 +1,210 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2020 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Wijzig RK wedstrijd{% endblock %}
+
+{% block pagina %}
+
+    <script type="application/javascript">
+        function locatie_aanpassen(sel)
+        {
+            const locaties = {{ locaties|safe }};   // nhb_ver.nhb_nr --> adres
+            const el_sel = document.getElementById('id_ver_sel')
+            let adres = locaties[el_sel.value];        // gekozen vereniging
+            if (adres === undefined)
+                adres = '<i class="red-text">Niet beschikbaar!</i>';
+            adres = adres.replace(/\n/g, '<br>')    // vervang newlines door breaks
+            const el_loc = document.getElementById('id_loc')
+            el_loc.innerHTML = adres
+        }
+    </script>
+
+    <h4>Wijzig RK wedstrijd</h4>
+
+    <div class="row">
+
+        <!-- toon gegevens van de regio en competitie in een blauwe box -->
+        <div class="col s12 m10 l8 xl6 offset-m1 offset-l2 offset-xl3">
+            <div class="white-text nhb-blauw z-depth-2">
+
+                <div class="row small-row">
+                    <div class="col s3">Competitie:</div>
+                    <div class="col s8">{{ deelcomp_rk.competitie.beschrijving }}</div>
+                </div>
+
+                <div class="row small-row">
+                    <div class="col s3">Rayon:</div>
+                    <div class="col s8">{{ deelcomp_rk.nhb_rayon }}</div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <p>&nbsp;</p>
+    <p>Op deze pagina kunnen de details voor een RK wedstrijd aangepast worden.</p>
+
+    <form method="post" action="{{ url_opslaan }}">
+        {% csrf_token %}
+
+        <table class="white">
+
+            <thead>
+                <tr>
+                    <th>Beschrijving</th>
+                    <th>Datum</th>
+                </tr>
+            </thead>
+
+            <tr>
+                <td>Datum wedstrijd:</td>
+                <td>
+                    <select name="weekdag">
+                        {% for opt in opt_weekdagen %}
+                            <option value="{{ opt.weekdag_nr }}"{% if opt.actief %} selected{% endif %}>{{ opt.datum|date:"l j F Y" }}</option>
+                        {% endfor %}
+                    </select>
+                </td>
+            </tr>
+
+            <tr>
+                <td>Aanvang wedstrijd:</td>
+                <td>
+                    <input id="tijd1" name="aanvang" type="text" class="timepicker">
+                </td>
+            </tr>
+
+            <tr>
+                <td>Bij vereniging:</td>
+                <td>
+                    <select name="nhbver_pk" onchange="locatie_aanpassen()" id="id_ver_sel">
+                        {% for opt in verenigingen %}
+                            <option value="{{ opt.pk }}"{% if opt.pk == wedstrijd.vereniging.pk %}selected{% endif %}>{{ opt }}</option>
+                        {% endfor %}
+                    </select>
+                </td>
+            </tr>
+
+            <tr>
+                <td>Accommodatie:</td>
+                <td id="id_loc"></td>
+            </tr>
+
+            <tr>
+                <!-- inline-block gives vertical align top -->
+                <td style="display: inline-block">Wedstrijdklassen individueel:</td>
+
+                <td>
+                    <table class="striped">
+                        <thead>
+                            <tr>
+                                <th><!-- checkbox column --></th>
+                                <th>Klasse</th>
+                                <th>Aantal schutters</th>
+                            </tr>
+                        </thead>
+                        {% for obj in wkl_indiv %}
+                            <tr>
+                                <!-- {% if obj.break_before %}<br>{% endif %} -->
+                                <td><label>
+                                    <input type="checkbox" class="filled-in" name="{{ obj.sel_str }}" {% if obj.geselecteerd %}checked{% endif %}>
+                                    <span>&nbsp</span>
+                                    </label>
+                                </td>
+                                <td>{{ obj.short_str }}</td>
+                                <td>{{ obj.schutters }}</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </td>
+            </tr>
+        </table>
+
+        <!--
+        <h6>Wedstrijdklassen teams</h6>
+
+        <table class="white">
+            <tr>
+                {% for obj in wkl_team %}
+                    {% if obj.break_before %}
+                        </tr><tr>
+                    {% endif %}
+
+                    <td>
+                        <label>
+                            <input type="checkbox" class="filled-in" name="{{ obj.sel_str }}" {% if obj.geselecteerd %}checked{% endif %}>
+                            <span class="black-text">{{ obj.short_str }}</span>
+                        </label>
+                    </td>
+                {% endfor %}
+            </tr>
+        </table>
+        -->
+
+        <p>
+            <a class="btn-nhb-blauw" href="{{ url_terug }}">
+                <i class="material-icons-round left">close</i>Terug</a>
+
+            <span>&nbsp;&nbsp;</span>
+
+            <button class="btn-nhb-rood" type="submit">
+                <i class="material-icons-round left">check</i>Opslaan</button>
+        </p>
+
+    </form>
+
+    {% if kan_niet_verwijderen %}
+        <p>&nbsp;</p>
+        <ul class="collapsible">
+            <li>
+                <div class="collapsible-header white">
+                    <span>Klik eerst hier als je de wedstrijd wilt verwijderen</span>
+                </div>
+                <div class="collapsible-body white">
+                    <p>Deze wedstrijd kan niet meer verwijderd worden, want er hangt een uitslag aan</p>
+                </div>
+            </li>
+        </ul>
+    {% elif url_verwijderen %}
+        <p>&nbsp;</p>
+        <form method="post" action="{{ url_verwijderen }}">
+            {% csrf_token %}
+            <ul class="collapsible">
+                <li>
+                    <div class="collapsible-header white">
+                        <span>Klik eerst hier als je de wedstrijd wilt verwijderen</span>
+                    </div>
+                    <div class="collapsible-body white">
+                        <p>Heb je deze wedstrijd echt niet meer nodig?</p>
+                        <button class="btn-nhb-rood" type="submit">
+                            <i class="material-icons-round left">delete</i>Verwijder deze wedstrijd</button>
+                    </div>
+                </li>
+            </ul>
+        </form>
+    {% endif %}
+
+    <!-- initialisatie van de time pickers -->
+    <script type="application/javascript">
+        document.addEventListener('DOMContentLoaded', function() {
+            let el = document.querySelector('#tijd1');
+            let options = {
+                    twelveHour: false,
+                    defaultTime: "{{ wedstrijd.tijd_begin_wedstrijd_str }}",
+                  };
+            let inst = M.Timepicker.init(el, options);
+            inst._updateTimeFromInput();
+            inst.done();
+
+            locatie_aanpassen()
+        })
+    </script>
+
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-wijzig-wedstrijd-rk" %}
+
+{% endblock %}

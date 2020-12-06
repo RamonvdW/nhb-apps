@@ -6,6 +6,7 @@
 # add-ons for test environment:
 
 # SSO integration with Wiki
+pysaml2
 djangosaml2idp
 
 # end of file

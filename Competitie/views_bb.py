@@ -24,8 +24,7 @@ from Schutter.models import SchutterBoog
 from Score.models import Score, ScoreHist
 from .models import (AG_NUL, AG_LAAGSTE_NIET_NUL,
                      Competitie, competitie_aanmaken,
-                     CompetitieKlasse, maak_competitieklasse_indiv,
-                     RegioCompetitieSchutterBoog)
+                     maak_competitieklasse_indiv)
 import datetime
 
 
@@ -382,8 +381,6 @@ class KlassegrenzenVaststellenView(UserPassesTestMixin, TemplateView):
         return targets2
 
     def _get_queryset(self, afstand):
-        """ called by the template system to get the queryset or list of objects for the template """
-
         # bepaal het jaar waarin de wedstrijdleeftijd bepaald moet worden
         # dit is het huidige jaar + 1
         self.wedstrijdjaar = jaar = 1 + models_bepaal_startjaar_nieuwe_competitie()
@@ -478,7 +475,7 @@ class KlassegrenzenVaststellenView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         # stukje input beveiliging: begrens tot 2 tekens getal (18/25)
-        afstand_str = kwargs['afstand'][:2]
+        afstand_str = kwargs['afstand'][:2]     # afkappen geeft veiligheid
         try:
             afstand = int(afstand_str)
         except ValueError:
@@ -506,7 +503,7 @@ class KlassegrenzenVaststellenView(UserPassesTestMixin, TemplateView):
         """ deze functie wordt aangeroepen als een POST request ontvangen is.
             --> de beheerder wil deze klassegrenzen vaststellen
         """
-        afstand_str = kwargs['afstand']
+        afstand_str = kwargs['afstand'][:2]     # afkappen geeft veiligheid
         try:
             afstand = int(afstand_str)
         except ValueError:
@@ -517,7 +514,7 @@ class KlassegrenzenVaststellenView(UserPassesTestMixin, TemplateView):
             comp = objs[0]
 
             if comp.competitieklasse_set.count() != 0:
-                # onverwachts here
+                # onverwachts hier
                 raise Resolver404()
 
             # haal dezelfde data op als voor de GET request
@@ -550,10 +547,10 @@ class WijzigDatumsView(UserPassesTestMixin, TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        comp_pk = kwargs['comp_pk'][:6]     # afkappen geeft beveiliging
         try:
+            comp_pk = int(kwargs['comp_pk'][:6])      # afkappen geeft beveiliging
             competitie = Competitie.objects.get(pk=comp_pk)
-        except Competitie.DoesNotExist:
+        except (ValueError, Competitie.DoesNotExist):
             raise Resolver404()
 
         context['competitie'] = competitie
@@ -561,6 +558,11 @@ class WijzigDatumsView(UserPassesTestMixin, TemplateView):
         competitie.datum2 = competitie.einde_aanmeldingen
         competitie.datum3 = competitie.einde_teamvorming
         competitie.datum4 = competitie.eerste_wedstrijd
+        competitie.datum5 = competitie.laatst_mogelijke_wedstrijd
+        competitie.datum6 = competitie.rk_eerste_wedstrijd
+        competitie.datum7 = competitie.rk_laatste_wedstrijd
+        competitie.datum8 = competitie.bk_eerste_wedstrijd
+        competitie.datum9 = competitie.bk_laatste_wedstrijd
 
         context['wijzig_url'] = reverse('Competitie:wijzig-datums', kwargs={'comp_pk': competitie.pk})
 
@@ -571,33 +573,37 @@ class WijzigDatumsView(UserPassesTestMixin, TemplateView):
         """ deze functie wordt aangeroepen als een POST request ontvangen is.
             --> de beheerder wil deze klassegrenzen vaststellen
         """
-        comp_pk = kwargs['comp_pk'][:6]     # afkappen geeft beveiliging
         try:
+            comp_pk = int(kwargs['comp_pk'][:6])      # afkappen geeft beveiliging
             competitie = Competitie.objects.get(pk=comp_pk)
-        except Competitie.DoesNotExist:
+        except (ValueError, Competitie.DoesNotExist):
             raise Resolver404()
 
-        datum1 = request.POST.get('datum1', None)
-        datum2 = request.POST.get('datum2', None)
-        datum3 = request.POST.get('datum3', None)
-        datum4 = request.POST.get('datum4', None)
+        datums = list()
+        for datum_nr in range(9):
+            datum_s = request.POST.get('datum%s' % (datum_nr + 1), None)
+            if not datum_s:
+                # alle datums zijn verplicht
+                raise Resolver404()
 
-        # alle vier datums zijn verplicht
-        if not (datum1 and datum2 and datum3 and datum4):
-            raise Resolver404()
+            try:
+                datum_p = datetime.datetime.strptime(datum_s, '%Y-%m-%d')
+            except ValueError:
+                raise Resolver404()
 
-        try:
-            datum1 = datetime.datetime.strptime(datum1, '%Y-%m-%d')
-            datum2 = datetime.datetime.strptime(datum2, '%Y-%m-%d')
-            datum3 = datetime.datetime.strptime(datum3, '%Y-%m-%d')
-            datum4 = datetime.datetime.strptime(datum4, '%Y-%m-%d')
-        except ValueError:
-            raise Resolver404()
+            datums.append(datum_p.date())
+        # for
 
-        competitie.begin_aanmeldingen = datum1.date()
-        competitie.einde_aanmeldingen = datum2.date()
-        competitie.einde_teamvorming = datum3.date()
-        competitie.eerste_wedstrijd = datum4.date()
+        datums.insert(0, None)      # dummy
+        competitie.begin_aanmeldingen = datums[1]
+        competitie.einde_aanmeldingen = datums[2]
+        competitie.einde_teamvorming = datums[3]
+        competitie.eerste_wedstrijd = datums[4]
+        competitie.laatst_mogelijke_wedstrijd = datums[5]
+        competitie.rk_eerste_wedstrijd = datums[6]
+        competitie.rk_laatste_wedstrijd = datums[7]
+        competitie.bk_eerste_wedstrijd = datums[8]
+        competitie.bk_laatste_wedstrijd = datums[9]
         competitie.save()
 
         return HttpResponseRedirect(reverse('Competitie:overzicht'))

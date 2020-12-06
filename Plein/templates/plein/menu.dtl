@@ -19,7 +19,7 @@
         <a href="{% url 'Plein:plein' %}">
             <!-- het menu is 300px breed minus 10px padding left/right geeft 280px
                  maar het logo /lijkt/ dan iets te ver naar rechts te staan, dus we nemen iets minder -->
-            <img src="{% static 'plein/logo_with_text_nhb.png' %}" width="277" alt="NHB logo">
+            <img src="{% static 'plein/logo_with_text_nhb.png' %}" width="277" height="65" alt="NHB logo">
         </a>
 
         <!-- test server banner -->
@@ -39,10 +39,12 @@
     </div>
 </li>
 
+
 <li{% if menu_actief == "hetplein" %} class="actief"{% endif %}>
     <a href="{% url 'Plein:plein' %}" class="white-text">
     <i class="material-icons-round white-text"><!--control_camera-->filter_vintage</i>Het Plein</a>
 </li>
+
 
 <!-- inlog knop als gebruiker niet ingelogd is -->
 {% if menu_show_login %}
@@ -52,12 +54,14 @@
 </li>
 {% endif %}
 
+
 {% if menu_show_schutter %}
 <li{% if menu_actief == "schutter" %} class="actief"{% endif %}>
     <a href="{% url 'Schutter:profiel' %}" class="white-text">
     <i class="material-icons-round white-text">portrait</i>Schutter</a>
 </li>
 {% endif %}
+
 
 {% if menu_show_vereniging %}
 <li{% if menu_actief == "vereniging" %} class="actief"{% endif %}>
@@ -66,25 +70,30 @@
 </li>
 {% endif %}
 
+
 <li{% if menu_actief == "competitie" %} class="actief"{% endif %}>
     <a href="{% url 'Competitie:overzicht' %}" class="white-text">
     <i class="material-icons-round white-text"><!--developer_board--><!--gamepad--><!--assistant-->my_location</i>Competities</a>
 </li>
+
 
 <li{% if menu_actief == "histcomp" %} class="actief"{% endif %}>
     <a href="{% url 'Competitie:tussenstand' %}" class="white-text">
     <i class="material-icons-round white-text">account_balance</i>Competitie uitslagen</a>
 </li>
 
+
 <li{% if menu_actief == "records" %} class="actief"{% endif %}>
     <a href="{% url 'Records:overzicht' %}" class="white-text">
     <i class="material-icons-round white-text"><!--star-->trending_up</i>Nederlandse records</a>
 </li>
 
+
 <li{% if menu_actief == "privacy" %} class="actief"{% endif %}>
     <a href="{% url 'Plein:privacy' %}" class="white-text">
     <i class="material-icons-round white-text">security</i>Privacyverklaring</a>
 </li>
+
 
 {% if menu_show_sitefeedback %}
 <li{% if menu_actief == "site-feedback-inzicht" %} class="actief"{% endif %}>
@@ -93,12 +102,14 @@
 </li>
 {% endif %}
 
+
 {% if menu_show_logboek %}
 <li{% if menu_actief == "logboek" %} class="actief"{% endif %}>
     <a href="{% url 'Logboek:alles' %}" class="white-text">
     <i class="material-icons-round white-text">book</i>Logboek</a>
 </li>
 {% endif %}
+
 
 {% if menu_show_admin %}
 <li>
@@ -107,6 +118,7 @@
 </li>
 {% endif %}
 
+
 {% if menu_show_logout %}
 <li{% if menu_actief == "uitloggen" %} class="actief"{% endif %}>
     <a href="{% url 'Account:logout' %}" class="white-text">
@@ -114,11 +126,24 @@
 </li>
 {% endif %}
 
+
 <!-- handleiding, alleen voor gebruikers die toegang hebben -->
 {% if handleiding_url %}
 <li {% if menu_actief == "handleiding" %} class="actief"{% endif %}>
     <a href="{{ handleiding_url }}" class="white-text" target="_blank" rel="noopener noreferrer">
         <i class="material-icons-round white-text">help_outline</i>Handleiding</a>
+</li>
+{% endif %}
+
+
+<!-- taken, voor beheerders -->
+{% if menu_show_taken %}
+<li{% if menu_actief == "taken" %} class="actief"{% endif %}>
+    <a href="{% url 'Taken:overzicht' %}" class="white-text">
+    <i class="material-icons-round white-text">inbox</i>Taken{% if menu_aantal_open_taken %}
+        <span class="new badge{% if menu_actief == "taken" %} red{% endif %}" data-badge-caption="open">{{ menu_aantal_open_taken }}</span>
+    {% endif %}
+</a>
 </li>
 {% endif %}
 

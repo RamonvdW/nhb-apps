@@ -10,6 +10,7 @@
 
 from Mailer import mailer
 from Mailer.models import MailQueue
+from Taken.taken import herinner_aan_taken
 from django.core.management.base import BaseCommand
 from django.db.models import ProtectedError
 import django.db.utils
@@ -89,6 +90,7 @@ class Command(BaseCommand):
 
         # vang generieke fouten af
         try:
+            herinner_aan_taken()
             if not options['skip_old']:
                 self._stuur_oude_mails()
             self._stuur_nieuwe_mails()

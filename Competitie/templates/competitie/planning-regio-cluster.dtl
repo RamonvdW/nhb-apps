@@ -78,7 +78,7 @@
 
             <!-- knop naar de ronde van de regioplanning -->
             <td>
-                <a class="btn-nhb-blauw" href="{% url 'Competitie:regio-ronde-planning' ronde.pk %}">
+                <a class="btn-nhb-blauw btn-small" href="{% url 'Competitie:regio-ronde-planning' ronde.pk %}">
                     <i class="material-icons-round left">arrow_forward</i>Bekijk</a>
             </td>
         </tr>

@@ -8,6 +8,7 @@ from django.conf import settings
 from django.shortcuts import redirect, render
 from django.views.generic import TemplateView, View
 from Functie.rol import Rollen, rol_get_huidige, rol_get_beschrijving
+from Taken.taken import eval_open_taken
 from .menu import menu_dynamics
 
 
@@ -16,10 +17,43 @@ TEMPLATE_PLEIN_GEBRUIKER = 'plein/plein-gebruiker.dtl'          # special (ROL_N
 TEMPLATE_PLEIN_SCHUTTER = 'plein/plein-schutter.dtl'            # schutter (ROL_SCHUTTER)
 TEMPLATE_PLEIN_BEHEERDER = 'plein/plein-beheerder.dtl'          # beheerder (ROL_BB/BKO/RKO/RCL/SEC/HWL/WL)
 TEMPLATE_PRIVACY = 'plein/privacy.dtl'
+TEMPLATE_NIET_ONDERSTEUND = 'plein/niet-ondersteund.dtl'
+
+
+def is_browser_supported(request):
+    """ analyseer de User Agent header
+        geef True terug als de browser ondersteund wordt
+    """
+
+    # minimal requirement is ECMAScript 2015 (ES6)
+    # since most browsers have supported this since 2016/2017, we don't need to check the version
+    # only filter out Internet Explorer
+
+    is_supported = True
+
+    try:
+        useragent = request.META['HTTP_USER_AGENT']
+    except KeyError:
+        # niet aanwezig, dus kan geen analyse doen
+        pass
+    else:
+        if " MSIE " in useragent:
+            # Internal Explorer versie tm IE10: worden niet ondersteund
+            is_supported = False
+        elif "Trident/7.0; rv:11" in useragent:
+            # Internet Explorer versie 11
+            is_supported = False
+
+    # wel ondersteund
+    return is_supported
 
 
 def site_root_view(request):
     """ simpele Django view functie om vanaf de top-level site naar het Plein te gaan """
+
+    if not is_browser_supported(request):
+        return redirect('Plein:niet-ondersteund')
+
     return redirect('Plein:plein')
 
 
@@ -30,6 +64,9 @@ class PleinView(View):
 
     def get(self, request, *args, **kwargs):
         """ called by the template system to get the context data for the template """
+
+        if not is_browser_supported(request):
+            return redirect('Plein:niet-ondersteund')
 
         # zet alles goed voor bezoekers / geen rol
         template = TEMPLATE_PLEIN_BEZOEKER
@@ -54,7 +91,7 @@ class PleinView(View):
                 if rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB):
                     context['toon_nieuwe_accounts'] = True
 
-                if rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL):
+                if rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL):
                     context['toon_functies'] = True
 
                 if rol_nu == Rollen.ROL_IT:
@@ -79,6 +116,9 @@ class PleinView(View):
 
                 context['huidige_rol'] = rol_get_beschrijving(request)
 
+                # kijk hoeveel taken er open staan
+                eval_open_taken(request)
+
         menu_dynamics(self.request, context, actief='hetplein')
         return render(request, template, context)
 
@@ -96,6 +136,18 @@ class PrivacyView(TemplateView):
         context['url_privacyverklaring'] = settings.PRIVACYVERKLARING_URL
         menu_dynamics(self.request, context, actief='privacy')
         return context
+
+
+class NietOndersteundView(View):
+
+    """ Django class-based om te rapporteren dat de browser niet ondersteund wordt """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_NIET_ONDERSTEUND
+
+    def get(self, request, *args, **kwargs):
+        context = dict()
+        return render(request, self.template_name, context)
 
 
 # end of file

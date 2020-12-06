@@ -50,5 +50,4 @@ class RegistreerForm(forms.Form):
 
         return valid
 
-
 # end of file

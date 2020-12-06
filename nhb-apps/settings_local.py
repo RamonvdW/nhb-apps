@@ -46,12 +46,12 @@ OTP_ISSUER_NAME = "yourdomain.com"
 
 # sending email
 #EMAIL_FROM_ADDRESS = 'noreply@yourdomain.com'         # zie ook https://nl.wikipedia.org/wiki/Noreply
-
-#MAILGUN_URL = 'https://api.eu.mailgun.net/v3/yourdomain.com/messages'
-#MAILGUN_API_KEY = 'mailgun private api key'
-
 #POSTMARK_URL = 'https://api.postmarkapp.com/email'
 #POSTMARK_API_KEY = 'postmark private api key'
+
+# users allowed to send to in this test setup
+# if empty, allows sending to anybody
+EMAIL_ADDRESS_WHITELIST = ()
 
 
 # url van het document privacyverklaring
@@ -72,5 +72,10 @@ RECORDS_GSHEET_SHEET_NAMES = [
 # ondersteuning van de Wiki met SSO via de IdP, of ingebouwde handleiding?
 ENABLE_WIKI = False
 WIKI_URL = 'http://wiki.yourdomain.com'
+
+# vertaling van tijdelijke (99xxxx nummers) naar correcte NHB nummer
+MAP_99_NRS = {
+    990001: 1234567,
+}
 
 # end of file

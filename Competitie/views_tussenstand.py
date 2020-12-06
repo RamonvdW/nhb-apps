@@ -10,8 +10,9 @@ from django.http import HttpResponseRedirect
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import BoogType
 from NhbStructuur.models import NhbRayon, NhbRegio
-from Competitie.models import (AG_NUL, LAAG_REGIO, LAAG_RK, LAAG_BK,
-                               DeelCompetitie, RegioCompetitieSchutterBoog)
+from Competitie.models import (LAAG_REGIO, LAAG_RK, LAAG_BK, DEELNAME_NEE,
+                               DeelCompetitie, DeelcompetitieKlasseLimiet,
+                               RegioCompetitieSchutterBoog, KampioenschapSchutterBoog)
 from Functie.rol import Rollen, rol_get_huidige_functie, rol_get_huidige
 from Plein.menu import menu_dynamics
 from .models import Competitie
@@ -137,7 +138,7 @@ class TussenstandRegioView(TemplateView):
                       .objects
                       .select_related('rayon')
                       .filter(is_administratief=False)
-                      .order_by('rayon__rayon_nr'))
+                      .order_by('rayon__rayon_nr', 'regio_nr'))
 
             context['regio_filters'] = regios
 
@@ -202,19 +203,28 @@ class TussenstandRegioView(TemplateView):
         deelnemers = (RegioCompetitieSchutterBoog
                       .objects
                       .filter(deelcompetitie=deelcomp)
-                      .select_related('schutterboog', 'schutterboog__nhblid',
-                                      'bij_vereniging', 'klasse', 'klasse__indiv', 'klasse__indiv__boogtype')
+                      .select_related('schutterboog',
+                                      'schutterboog__nhblid',
+                                      'bij_vereniging',
+                                      'klasse',
+                                      'klasse__indiv',
+                                      'klasse__indiv__boogtype')
                       .filter(klasse__indiv__boogtype=boogtype)
                       .order_by('klasse__indiv__volgorde', self.order_gemiddelde))
 
         klasse = -1
+        rank = 0
         for deelnemer in deelnemers:
             deelnemer.break_klasse = (klasse != deelnemer.klasse.indiv.volgorde)
             if deelnemer.break_klasse:
                 deelnemer.klasse_str = deelnemer.klasse.indiv.beschrijving
+                rank = 0
             klasse = deelnemer.klasse.indiv.volgorde
 
-            deelnemer.naam_str = deelnemer.schutterboog.nhblid.volledige_naam()
+            rank += 1
+            lid = deelnemer.schutterboog.nhblid
+            deelnemer.rank = rank
+            deelnemer.naam_str = "[%s] %s" % (lid.nhb_nr, lid.volledige_naam())
             deelnemer.ver_str = str(deelnemer.bij_vereniging)
         # for
 
@@ -338,6 +348,83 @@ class TussenstandRayonView(TemplateView):
             raise Resolver404()
 
         context['deelcomp'] = deelcomp
+        deelcomp.competitie.zet_fase()
+
+        wkl2limiet = dict()    # [pk] = aantal
+
+        if deelcomp.heeft_deelnemerslijst:
+            # deelnemers/reserveschutters van het RK tonen
+            deelnemers = (KampioenschapSchutterBoog
+                          .objects
+                          .exclude(bij_vereniging__isnull=True,      # attentie gevallen
+                                   deelname=DEELNAME_NEE)            # geen schutters die zicht afgemeld hebben
+                          .filter(deelcompetitie=deelcomp,
+                                  klasse__indiv__boogtype=boogtype,
+                                  volgorde__lte=48)                 # toon tot 48 schutters per klasse
+                          .select_related('klasse__indiv',
+                                          'schutterboog__nhblid',
+                                          'bij_vereniging')
+                          .order_by('klasse__indiv__volgorde',
+                                    'volgorde'))
+
+            for limiet in (DeelcompetitieKlasseLimiet
+                           .objects
+                           .select_related('klasse')
+                           .filter(deelcompetitie=deelcomp)):
+                wkl2limiet[limiet.klasse.pk] = limiet.limiet
+            # for
+
+            context['is_lijst_rk'] = True
+        else:
+            # competitie is nog in de regiocompetitie fase
+            context['regiocomp_nog_actief'] = True
+
+            # schutter moeten uit LAAG_REGIO gehaald worden, uit de 4 regio's van het rayon
+            deelcomp_pks = (DeelCompetitie
+                            .objects
+                            .filter(laag=LAAG_REGIO,
+                                    competitie__is_afgesloten=False,
+                                    competitie__afstand=afstand,
+                                    nhb_regio__rayon__rayon_nr=rayon_nr)
+                            .values_list('pk', flat=True))
+
+            deelnemers = (RegioCompetitieSchutterBoog
+                          .objects
+                          .filter(deelcompetitie__pk__in=deelcomp_pks,
+                                  klasse__indiv__boogtype=boogtype,
+                                  aantal_scores__gte=6)
+                          .select_related('klasse__indiv',
+                                          'schutterboog__nhblid',
+                                          'bij_vereniging')
+                          .order_by('klasse__indiv__volgorde', '-gemiddelde'))
+
+        klasse = -1
+        rank = 0
+        limiet = 24
+        for deelnemer in deelnemers:
+            deelnemer.break_klasse = (klasse != deelnemer.klasse.indiv.volgorde)
+            if deelnemer.break_klasse:
+                deelnemer.klasse_str = deelnemer.klasse.indiv.beschrijving
+                rank = 1
+                try:
+                    limiet = wkl2limiet[deelnemer.klasse.pk]
+                except KeyError:
+                    limiet = 24
+            klasse = deelnemer.klasse.indiv.volgorde
+
+            lid = deelnemer.schutterboog.nhblid
+            deelnemer.naam_str = "[%s] %s" % (lid.nhb_nr, lid.volledige_naam())
+            deelnemer.ver_str = str(deelnemer.bij_vereniging)
+
+            if deelcomp.heeft_deelnemerslijst:
+                if deelnemer.rank > limiet:
+                    deelnemer.is_reserve = True
+            else:
+                deelnemer.rank = rank
+                rank += 1
+        # for
+
+        context['deelnemers'] = deelnemers
 
         menu_dynamics(self.request, context, actief='histcomp')
         return context

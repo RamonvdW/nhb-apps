@@ -23,11 +23,9 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>{% block title %}{% endblock %}</title>
         <link rel="icon" href="{% static 'plein/logo_nhb_192x192.png' %}" sizes="192x192">
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans&amp;display=swap">
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu&amp;display=swap">
         <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Round">
-        <link rel="stylesheet" href="{% static 'materialize-new-31.css' %}">
-        <link rel="stylesheet" href="{% static 'site_layout_min-6.css' %}"> <!-- moet ná materialize css -->
+        <link rel="stylesheet" href="{% static 'materialize-new-35.css' %}">
+        <link rel="stylesheet" href="{% static 'site_layout_min-8.css' %}"> <!-- moet ná materialize css -->
         {% block extraheader %}{% endblock %}
     </head>
 
@@ -74,7 +72,7 @@
 
         </div>
 
-        <script src="{% static 'materialize-new-2_min.js' %}"></script>
+        <script src="{% static 'materialize-new-3_min.js' %}"></script>
 
         <!-- framework init, after everything has been loaded and instantiated -->
         <script type="application/javascript">
@@ -158,7 +156,6 @@
                 M.Sidenav.init(elems, {});
 
                 // accordeons
-                // TODO: defaults statisch aanpassen
                 const options = { inDuration: 100,    // default is 300
                                   outDuration: 100    // default is 300
                                 };
@@ -206,8 +203,9 @@
             // en regels van de tabel wel/niet zichtbaar te maken
             // kolommen waarin gezocht mag worden moeten het 'filter' attribuut hebben
             //          <thead>
-            //              <th filter="on">Header1</th>
-            //              <th>Header2<th>
+            //              <tr>
+            //                  <th filter="on">Header1</th>
+            //                  <th>Header2<th>
 
             // Uitgebreider voorbeeld:
             //   <table class="white" id="table3">
@@ -347,5 +345,7 @@
             });
         </script>
 
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans&amp;display=swap">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu&amp;display=swap">
     </body>
 </html>

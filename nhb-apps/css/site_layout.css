@@ -48,6 +48,11 @@ h1, h2, h3, h4, h5, h6 {
     margin-bottom: 0px;
 }
 
+.in-table-icon {
+    vertical-align: middle;     /* betere alignment met text in andere td */
+    font-size: 22px;            /* deze maat aligned beter met de tekst */
+}
+
 /* invoerveld voor een zoek / filter veld boven aan de tabel */
 .table-filter {
     padding: 0 5px;     /* deze padding komt voor en na het invoer veld */

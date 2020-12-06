@@ -34,7 +34,7 @@ class NhbRayon(models.Model):
     naam = models.CharField(max_length=20)      # Rayon 3
 
     # beschrijving van het gebied dat dit rayon dekt
-    geografisch_gebied = models.CharField(max_length=50)
+    geografisch_gebied = models.CharField(max_length=50)        # TODO: verwijderen
 
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
@@ -140,7 +140,7 @@ class NhbVereniging(models.Model):
                                        null=True)   # allow NULL relation in database
 
     # er is een vereniging voor persoonlijk lidmaatschap
-    # deze leden mogen geen wedstijden schieten
+    # deze leden mogen geen wedstrijden schieten
     geen_wedstrijden = models.BooleanField(default=False)
 
     def __str__(self):

@@ -7,6 +7,7 @@
 from django.conf import settings
 from django.urls import reverse
 from Functie.rol import Rollen, rol_get_huidige, rol_mag_wisselen, rol_get_beschrijving
+from Taken.taken import aantal_open_taken
 
 
 ACTIEF_OPTIES = (
@@ -22,9 +23,9 @@ ACTIEF_OPTIES = (
     'histcomp',
     'schutter',
     'vereniging',
-    'handleiding'
+    'handleiding',
+    'taken'
 )
-
 
 ROL2HANDLEIDING_PAGINA = {
     Rollen.ROL_BB: settings.HANDLEIDING_BB,
@@ -82,6 +83,12 @@ def menu_dynamics(request, context, actief=None):
 
         if rol in (Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_WL):
             context['menu_show_vereniging'] = True
+
+        if rol in (Rollen.ROL_IT, Rollen.ROL_BB,
+                   Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL,
+                   Rollen.ROL_HWL):
+            context['menu_show_taken'] = True
+            context['menu_aantal_open_taken'] = aantal_open_taken(request)
     else:
         # inloggen
         context['menu_show_login'] = True

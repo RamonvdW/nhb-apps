@@ -1,0 +1,161 @@
+
+// Copyright (c) 2020 Ramon van der Winkel.
+// All rights reserved.
+// Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+
+// Specific classes for our website
+
+
+// als er geschakeld wordt naar een witte achtergrondkleur,
+// dan het hard zwart (ivm contrast grijze achtergrond)
+// omzetten naar het wat zachtere off-black
+.white {
+    @extend .white;
+    color: $off-black;
+}
+
+.nhb-blauw-text {
+    color: $nhb-blauw-color;
+}
+
+
+//-----------------------------------
+// blauwe button
+//
+.btn-nhb-blauw {
+  @extend .btn;
+
+  //color: $button-raised-color;
+  background-color: $nhb-blauw-default;
+
+  &:focus {
+    background-color: $nhb-blauw-focus;
+  }
+
+  &:hover {
+    background-color: $nhb-blauw-hover;
+  }
+}
+
+
+//-----------------------------------
+// rode button
+//
+.btn-nhb-rood {
+  @extend .btn;
+
+  //color: $button-raised-color;
+  background-color: $nhb-rood-default;
+
+  &:focus {
+    background-color: $nhb-rood-focus;
+  }
+
+  &:hover {
+    background-color: $nhb-rood-hover;
+  }
+}
+
+
+//-----------------------------------
+// download button
+//
+.btn-nhb-download {
+  @extend .btn-nhb-blauw;
+
+  width: 30px;
+  height: 30px;
+  padding: 0px;
+  font-size: 10px;
+}
+
+
+//-----------------------------------
+// nhb-card
+//
+.nhb-card {
+  @extend .card;
+
+  // laat de kaartjes naast elkaar komen (in het display=block van de row)
+  display: inline-flex;
+  margin-right: 30px;
+  padding: 2px;
+  border-radius: 5px;
+
+  // forceer een vaste breedte van de kaartjes
+  // dit voorkomt vervormen van de kaartjes door re-layout
+  position: relative;
+  width: 250px;
+  height: 250px;
+
+  &:hover {
+    padding: 0px;
+    border-width: 2px;
+    border-style: solid;
+    border-color: $nhb-blauw-focus;
+  }
+}
+
+.nhb-card-disabled {
+  @extend .card;
+
+  // laat de kaartjes naast elkaar komen (in het display=block van de row)
+  display: inline-flex;
+  margin-right: 30px;
+  padding: 2px;
+  border-radius: 5px;
+
+  // forceer een vaste breedte van de kaartjes
+  // dit voorkomt vervormen van de kaartjes door re-layout
+  position: relative;
+  width: 250px;
+  height: 250px;
+}
+
+.nhb-card-content {
+  @extend .card-content;
+
+  padding: 24px 24px 0 24px;
+  color: $off-black;
+  width: 246px;          // iets minder dan maximum ivm border
+  border-radius: 0 0 5px 5px;
+}
+
+
+
+//-----------------------------------
+// grote klikbare oppervlakten
+//
+// zoals collection-item
+//
+
+// voor in oppervlakte met a
+.nhb-klikbare-balk {
+    color: inherit;     // dit zorgt voor een zwarte tekst ipv <a> kleur
+}
+
+
+//-----------------------------------
+// collection
+//
+.collection-item {
+    @extends .collection-item;
+
+    &:hover {
+        background-color: $nhb-collection-hover-background;
+    }
+}
+
+
+//-----------------------------------
+// sidenav
+//
+.sidenav {
+  @extend .sidenav;
+
+  li > a {
+    &:hover { background-color: rgba(0,0,0,.15); }
+  }
+}
+
+// end of file

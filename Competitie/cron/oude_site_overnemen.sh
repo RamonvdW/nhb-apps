@@ -98,19 +98,39 @@ echo "[INFO] Downloading to $DIR" >> "$LOG"
 download_18
 download_25
 
-echo "[INFO] Starting dry run" >> "$LOG"
-
 # move from Competitie/cron/ to top-dir
 cd ../..
-./manage.py oude_site_overnemen --dryrun "$DIR" $MAX_FOUTEN &>> "$LOG"
-RES=$?
 
-if [ $RES -eq 0 ]
+# bepaal de vorige oude_site.json voordat de nieuwe aangemaakt wordt
+LC_ALL=C
+PREV_JSON=$(ls -1dt $SPOOLDIR/202*/oude_site.json | head -1)
+echo "[INFO] Previous JSON=$PREV_JSON" >> "$LOG"
+
+# convert to json
+echo "[INFO] Convert downloaded html to json" >> "$LOG"
+./manage.py oude_site_maak_json "$DIR" &>> "$LOG"
+NEW_JSON="$DIR/oude_site.json"
+
+# kijk of deze anders is dan de vorige json
+cmp "$PREV_JSON" "$NEW_JSON" &>> "$LOG"
+CMP_RES=$?
+if [ $CMP_RES -eq 0 ]
 then
-    echo "[INFO] Positief resultaat van dry-run. Overnemen van de data begint nu." >> "$LOG"
-    ./manage.py oude_site_overnemen "$DIR" $MAX_FOUTEN &>> "$LOG"
+    # identical file - no need to import
+    echo "[INFO] Renaming identical oude_site.json to zelfde_site.json" >> "$LOG"
+    mv "$NEW_JSON" "$DIR/zelfde_site.json" &>> "$LOG"
 else
-    echo "[WARNING] Dry-run negatief resultaat - import wordt overgeslagen!" >> "$LOG"
+    # do import
+    echo "[INFO] Starting dry run" >> "$LOG"
+    ./manage.py oude_site_overnemen --dryrun "$DIR" $MAX_FOUTEN &>> "$LOG"
+    RES=$?
+    if [ $RES -eq 0 ]
+    then
+        echo "[INFO] Positief resultaat van dry-run. Overnemen van de data begint nu." >> "$LOG"
+        ./manage.py oude_site_overnemen "$DIR" $MAX_FOUTEN &>> "$LOG"
+    else
+        echo "[WARNING] Dry-run negatief resultaat - import wordt overgeslagen!" >> "$LOG"
+    fi
 fi
 
 echo "[INFO] Finished" >> "$LOG"

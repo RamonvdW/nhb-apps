@@ -14,6 +14,7 @@ from Account.otp import account_otp_is_gekoppeld
 from Account.rechten import account_rechten_is_otp_verified
 from Plein.menu import menu_dynamics
 from Overig.helpers import get_safe_from_ip
+from Taken.taken import eval_open_taken
 from .rol import (Rollen, rol_mag_wisselen, rol_enum_pallet, rol2url,
                   rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving,
                   rol_activeer_rol, rol_activeer_functie, rol_evalueer_opnieuw)
@@ -249,6 +250,9 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
         # login-as functie voor IT beheerder
         if rol_get_huidige(self.request) == Rollen.ROL_IT:
             context['url_login_as'] = reverse('Account:account-wissel')
+
+        # snel wissel kaartje voor IT en BB
+        if rol_get_huidige(self.request) in (Rollen.ROL_IT, Rollen.ROL_BB):
             context['heeft_alle_rollen'] = self._maak_alle_rollen()
 
         # bedoeld voor de testsuite, maar kan geen kwaad
@@ -259,6 +263,8 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
             context['meta_functie'] = functie_nu.beschrijving       # template doet html escaping
         else:
             context['meta_functie'] = ""
+
+        eval_open_taken(self.request)
 
         menu_dynamics(self.request, context, actief='wissel-van-rol')
         return context

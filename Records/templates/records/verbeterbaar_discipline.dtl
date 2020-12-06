@@ -60,13 +60,15 @@
 
     <table class="white">
         <thead>
-            <th>Soort record</th>
-            <th>Materiaal<wbr/>klasse</th>
-            <th>Leeftijds<wbr/>categorie</th>
-            <th>Para klasse</th>
-            <th>Geslacht</th>
-            <th>Score</th>
-            <th><!-- kolom voor de 'details' knop --></th>
+            <tr>
+                <th>Soort record</th>
+                <th>Materiaal<wbr/>klasse</th>
+                <th>Leeftijds<wbr/>categorie</th>
+                <th>Para klasse</th>
+                <th>Geslacht</th>
+                <th>Score</th>
+                <th><!-- kolom voor de 'details' knop --></th>
+            </tr>
         </thead>
 
         {% for obj in object_list %}

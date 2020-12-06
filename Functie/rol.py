@@ -159,7 +159,6 @@ def rol_zet_sessionvars(account, request):
 
             if account.is_staff or account.is_BB:
                 rollen_vast.append(Rollen.ROL_BB)
-                rollen_vast.append(Rollen.ROL_NONE)      # Gebruiker (voor IT en BB)
 
                 for func in rol_expandeer_functies:
                     parent_tup = (Rollen.ROL_BB, None)
@@ -226,6 +225,10 @@ def rol_zet_sessionvars(account, request):
             # koppeling met NhbLid, dus dit is een (potentiële) Schutter
             rollen_vast.append(Rollen.ROL_SCHUTTER)
             rol = Rollen.ROL_SCHUTTER
+        else:
+            if account.is_staff:
+                # admin maar geen NHB lid koppeling
+                rollen_vast.append(Rollen.ROL_NONE)
 
     request.session[SESSIONVAR_ROL_HUIDIGE] = rol
     request.session[SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK] = None
@@ -469,7 +472,7 @@ def functie_expandeer_rol(functie_cache, nhbver_cache, rol_in, functie_in):
                     yield Rollen.ROL_HWL, obj.pk
             # for
 
-        # TODO: is SEC maar HWL gewenst?
+        # TODO: is SEC naar HWL gewenst?
         if functie_in.rol == 'SEC':
             # secretaris mag HWL worden, binnen de vereniging
             for pk, obj in functie_cache.items():

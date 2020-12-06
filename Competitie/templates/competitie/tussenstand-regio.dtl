@@ -87,20 +87,21 @@
     {% for obj in deelnemers %}
         {% if obj.break_klasse %}
             <tr class="nhb-grijs">
-                <td colspan="12"><h5>{{ obj.klasse_str }}</h5></td>
+                <td></td>   <!-- rank -->
+                <td colspan="11"><h5>{{ obj.klasse_str }}</h5></td>
             </tr>
             <tr>
-                <!--th class="center-align">Rank</th-->
+                <th></th>   <!-- rank -->
                 <th>Schutter</th>
                 <th class="hide-on-small-only">Vereniging</th>
                 <th class="center-align">Gemiddelde</th>
-                <th class="center-align" colspan="7">Scores</th>
+                <th colspan="7" class="center-align">Scores</th>
                 <th class="center-align hide-on-small-only">Totaal</th>
             </tr>
         {% endif %}
 
         <tr>
-            <!-- td class="center-align">?</td -->
+            <td class="center-align">{{ obj.rank }}</td>
             <td>{{ obj.naam_str }}</td>
             <td class="hide-on-small-only">{{ obj.ver_str }}</td>
             <td class="center-align">{{ obj.gemiddelde }}</td>

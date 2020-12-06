@@ -121,9 +121,9 @@ class TestSchutterProfiel(E2EHelpers, TestCase):
 
         self.url_profiel = '/schutter/'
         self.url_voorkeuren = '/schutter/voorkeuren/'
-        self.url_inschrijven = '/schutter/regiocompetitie/inschrijven/%s/%s/'   # deelcomp_pk, schutterboog_pk
-        self.url_bevestig_inschrijven = self.url_inschrijven + 'bevestig/'
-        self.url_uitschrijven = '/schutter/regiocompetitie/uitschrijven/%s/'    # regiocomp_pk
+        self.url_aanmelden = '/schutter/regiocompetitie/aanmelden/%s/%s/'   # deelcomp_pk, schutterboog_pk
+        self.url_bevestig_inschrijven = self.url_aanmelden + 'bevestig/'
+        self.url_afmelden = '/schutter/regiocompetitie/afmelden/%s/'        # regiocomp_pk
 
     def _prep_voorkeuren(self):
         # haal de voorkeuren op - hiermee worden de SchutterBoog records aangemaakt
@@ -186,12 +186,12 @@ class TestSchutterProfiel(E2EHelpers, TestCase):
         deelcomp = DeelCompetitie.objects.get(competitie__afstand='18', nhb_regio=self.nhbver.regio)
         res = aanvangsgemiddelde_opslaan(schutterboog, 18, 8.18, None, 'Test')
         self.assertTrue(res)
-        url = self.url_inschrijven % (deelcomp.pk, schutterboog.pk)
+        url = self.url_aanmelden % (deelcomp.pk, schutterboog.pk)
         resp = self.client.post(url, {'opmerking': 'test van de 18m'})
         self.assert_is_redirect(resp, self.url_profiel)
 
         inschrijving = RegioCompetitieSchutterBoog.objects.get(schutterboog=schutterboog)
-        url_uitschrijven_18r = self.url_uitschrijven % inschrijving.pk
+        url_afmelden_18r = self.url_afmelden % inschrijving.pk
 
         deelcomp = DeelCompetitie.objects.get(competitie__afstand='25', nhb_regio=self.nhbver.regio)
         url_inschrijven_25r = self.url_bevestig_inschrijven % (deelcomp.pk, schutterboog.pk)
@@ -200,13 +200,13 @@ class TestSchutterProfiel(E2EHelpers, TestCase):
         schutterboog_bb = SchutterBoog.objects.get(boogtype__afkorting='BB')
         schutterboog_bb.voor_wedstrijd = True
         schutterboog_bb.save()
-        url = self.url_inschrijven % (deelcomp.pk, schutterboog_bb.pk)
+        url = self.url_aanmelden % (deelcomp.pk, schutterboog_bb.pk)
         resp = self.client.post(url, {'wil_in_team': 'on'})
         self.assert_is_redirect(resp, self.url_profiel)
         schutterboog_bb.voor_wedstrijd = False
         schutterboog_bb.save()
         inschrijving = RegioCompetitieSchutterBoog.objects.get(schutterboog=schutterboog)
-        url_uitschrijven_25bb = self.url_uitschrijven % inschrijving.pk
+        url_afmelden_25bb = self.url_afmelden % inschrijving.pk
 
         # haal de profiel pagina op
         with self.assertNumQueries(21):
@@ -218,8 +218,8 @@ class TestSchutterProfiel(E2EHelpers, TestCase):
         # check inschrijf en uitschrijf knoppen
         urls = self.extract_all_urls(resp, skip_menu=True)
         self.assertTrue(url_inschrijven_25r in urls)
-        self.assertTrue(url_uitschrijven_18r in urls)
-        self.assertTrue(url_uitschrijven_25bb in urls)
+        self.assertTrue(url_afmelden_18r in urls)
+        self.assertTrue(url_afmelden_25bb in urls)
 
         # zet aanvangsgemiddelden voor 18m en 25m
         Score.objects.all().delete()        # nieuw vastgestelde AG is van vandaag
@@ -326,7 +326,7 @@ class TestSchutterProfiel(E2EHelpers, TestCase):
         deelcomp = DeelCompetitie.objects.get(competitie__afstand='18', nhb_regio=self.nhbver.regio)
         res = aanvangsgemiddelde_opslaan(schutterboog, 18, 8.18, None, 'Test')
         self.assertTrue(res)
-        url = self.url_inschrijven % (deelcomp.pk, schutterboog.pk)
+        url = self.url_aanmelden % (deelcomp.pk, schutterboog.pk)
         resp = self.client.post(url, {'opmerking': 'test van de 18m'})
         self.assert_is_redirect(resp, self.url_profiel)
 
@@ -352,7 +352,5 @@ class TestSchutterProfiel(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('schutter/profiel.dtl', 'plein/site_layout.dtl'))
         self.assertNotContains(resp, 'Regiocompetities')
-        urls = self.extract_all_urls(resp)
-        self.assertFalse(self.url_voorkeuren in urls)
 
 # end of file

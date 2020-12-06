@@ -55,13 +55,15 @@
                 <div class="col s1">12</div>
             </div> -->
             <div class="row small-row">
-                <div class="col s5">Soort record:</div>
-                {% if obj_record.is_world_record %}
-                <div class="col s6">Wereld Record</div>
+                <div class="col s5">Toegekend:</div>
+                {%  if obj_record.is_european_record and obj_record.is_world_record %}
+                <div class="col s6">Europees en Wereld</div>
+                {% elif obj_record.is_world_record %}
+                <div class="col s6">Wereld</div>
                 {% elif obj_record.is_european_record %}
-                <div class="col s6">Europees Record</div>
+                <div class="col s6">Europees</div>
                 {% else %}
-                <div class="col s6">Nederlands Record</div>
+                <div class="col s6">Nederlands</div>
                 {% endif %}
             </div>
             <div class="divider">&nbsp;</div>

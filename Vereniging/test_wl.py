@@ -127,7 +127,7 @@ class TestVerenigingWL(E2EHelpers, TestCase):
         self.url_overzicht = '/vereniging/'
         self.url_ledenlijst = '/vereniging/leden-lijst/'
         self.url_voorkeuren = '/vereniging/leden-voorkeuren/'
-        self.url_inschrijven = '/vereniging/leden-inschrijven/competitie/%s/'    # <comp_pk>
+        self.url_inschrijven = '/vereniging/leden-aanmelden/competitie/%s/'      # <comp_pk>
         self.url_ingeschreven = '/vereniging/leden-ingeschreven/competitie/%s/'  # <deelcomp_pk>
         self.url_schutter_voorkeuren = '/schutter/voorkeuren/%s/'                # <nhblid_pk>
 

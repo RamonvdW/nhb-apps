@@ -35,8 +35,10 @@
 
         <table class="white">
             <thead>
-                <th>Cluster</th>
-                <th>Zelf gekozen beschrijving / naam</th>
+                <tr>
+                    <th>Cluster</th>
+                    <th>Zelf gekozen beschrijving / naam</th>
+                </tr>
             </thead>
 
             {% for obj in cluster_list %}

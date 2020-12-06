@@ -45,8 +45,7 @@ makl2str = {'R': 'Recurve',
             'C': 'Compound',
             'BB': 'Barebow',
             'IB': 'Instinctive bow',
-            'LB': 'Longbow',
-            'O': 'Para klassen'}
+            'LB': 'Longbow'}
 
 lcat2str = {'M': 'Masters (50+)',
             'S': 'Senioren',
@@ -108,20 +107,33 @@ class RecordsOverzichtView(ListView):
         obj.url = reverse('Records:specifiek', kwargs={'nummer': obj.volg_nr, 'discipline': obj.discipline})
         obj.icon = DISCIPLINE_TO_ICON[obj.discipline]
 
+        if obj.is_world_record:
+            obj.title_str = "Wereld Record"
+        elif obj.is_european_record:
+            obj.title_str = "Europees Record"
+        else:
+            obj.title_str = "Nederlands Record"
+
         # heren/dames
         obj.descr1_str = gesl2str[obj.geslacht] + " "
 
         # junioren, etc.
-        obj.descr1_str += lcat2str[obj.leeftijdscategorie]
+        lcat = lcat2str[obj.leeftijdscategorie]
+        pos = lcat.find(' (')
+        if pos > 0:
+            lcat = lcat[:pos]
+        obj.descr1_str += lcat
 
         # type wedstrijd
         obj.descr2_str = (disc2str[obj.discipline] +             # indoor/outdoor
                           " " + makl2str[obj.materiaalklasse] +  # longbow/recurve
                           " " + obj.soort_record)                # 70m (72p)
 
-        # recurve etc.
+        # para
         if obj.para_klasse:
-            obj.descr2_str += " para " + obj.para_klasse
+            obj.para_str = "Para " + obj.para_klasse
+        else:
+            obj.para_str = None
 
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
@@ -288,8 +300,7 @@ class RecordsIndivZoom5View(RecordsIndivZoomBaseView):
         # vind de verschillende afstanden waarop records bestaan
         soorten = (IndivRecord
                    .objects
-                   .filter(para_klasse='',
-                           geslacht=self.sel_gesl,
+                   .filter(geslacht=self.sel_gesl,
                            discipline=self.sel_disc,
                            leeftijdscategorie=self.sel_lcat,
                            materiaalklasse=self.sel_makl)
@@ -306,7 +317,6 @@ class RecordsIndivZoom5View(RecordsIndivZoomBaseView):
                             discipline=self.sel_disc,
                             leeftijdscategorie=self.sel_lcat,
                             materiaalklasse=self.sel_makl,
-                            para_klasse='',
                             soort_record=soort)
                     .order_by('-datum'))[0:0+1]
             objs.extend(best)

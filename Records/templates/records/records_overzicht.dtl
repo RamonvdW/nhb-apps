@@ -30,27 +30,21 @@
 
     <div class="row">
         {% for obj in object_list %}
-            <div class="card">
-                <div class="card-content">
-                    <img class="right" src="{{ obj.icon }}" height="50" alt="klein logo">
-                    {% if obj.is_world_record %}
-                        <span class="card-title">Wereld Record</span>
-                    {% elif obj.is_european_record %}
-                        <span class="card-title">Europees Record</span>
-                    {% else %}
-                        <span class="card-title">Nederlands Record</span>
-                    {% endif %}
-                    <p>{{ obj.descr1_str }}</p>
-                    <p>{{ obj.descr2_str }}</p>
-                    <p>&nbsp;</p>
-                    <p>{{ obj.datum }}</p>
-                    <p><b>{{ obj.naam }}</b></p>
-                    <p>Score: {{ obj.score_str }} / {{ obj.max_score_str }}</p>
-                    <p>Plaats: {{ obj.plaats }}</p>
-                </div>
-                <a href="{{ obj.url }}" class="nhb-klikbare-balk">
-                    <div class="card-action center-align">
-                        <span class="nhb-klikbare-link">Details</span>
+            <div class="nhb-card">
+                <a href="{{ obj.url }}">
+                    <div class="nhb-card-content">
+                        <span class="card-title">{{ obj.title_str }}</span>
+                        {% if obj.para_str %}
+                            <p>{{ obj.para_str }}</p>
+                        {% endif %}
+                        <p>{{ obj.descr1_str }}</p>
+                        <p>{{ obj.descr2_str }}</p>
+                        <p>&nbsp;</p>
+                        <img class="right" src="{{ obj.icon }}" height="50" alt="klein logo">
+                        <p>{{ obj.datum }}</p>
+                        <p>Plaats: {{ obj.plaats }}</p>
+                        <p class="truncate"><b>{{ obj.naam }}</b></p>
+                        <p>Score: {{ obj.score_str }} / {{ obj.max_score_str }}</p>
                     </div>
                 </a>
             </div>

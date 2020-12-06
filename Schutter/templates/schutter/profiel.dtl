@@ -49,13 +49,9 @@
     <span>&nbsp;</span>
     <h5>Voorkeuren</h5>
 
-    {% if show_voorkeuren %}    <!-- niet bij persoonlijk lidmaatschap -->
-        <p>Je persoonlijke voorkeuren instellen, zoals welke boog je hebt.</p>
+    <p>Je persoonlijke voorkeuren instellen.</p>
 
-        <p><a class="btn-nhb-blauw" href="{% url 'Schutter:voorkeuren' %}"><i class="material-icons-round left">tune</i>Mijn voorkeuren</a></p>
-        <!-- <p>Gebruik de knop om naar de voorkeuren pagina te gaan.</p> -->
-
-    {% endif %}
+    <p><a class="btn-nhb-blauw" href="{% url 'Schutter:voorkeuren' %}"><i class="material-icons-round left">tune</i>Mijn voorkeuren</a></p>
 
     <p><a class="btn-nhb-blauw" href="{% url 'Account:nieuw-wachtwoord' %}">Wachtwoord wijzigen</a></p>
 
@@ -86,10 +82,12 @@
 
         <table class="white">
             <thead>
-                <th>Regiocompetitie</th>
-                <th>Wedstrijdboog</th>
-                <th>Status</th>
-                <th><!-- kolom voor knopje --></th>
+                <tr>
+                    <th>Regiocompetitie</th>
+                    <th>Wedstrijdboog</th>
+                    <th>Status</th>
+                    <th><!-- kolom voor knopje --></th>
+                </tr>
             </thead>
 
             {% for deelcomp in regiocompetities %}
@@ -123,15 +121,15 @@
                             {% if deelcomp.is_ingeschreven %}
                                 <td {% if deelcomp.boog_niet_meer %}class="red-text"{% else %}class="green-text"{% endif %}>Je bent ingeschreven</td>
                                 <td>
-                                    <form method="post" action="{{ deelcomp.url_uitschrijven }}">
+                                    <form method="post" action="{{ deelcomp.url_afmelden }}">
                                         {% csrf_token %}
                                         <input class="btn-nhb-blauw" type="submit" value="Uitschrijven">
                                     </form>
                                 </td>
                             {% else %}
-                                <td>Inschrijven kan tot {{ deelcomp.competitie.einde_aanmeldingen }}</td>
+                                <td>Aanmelden kan tot {{ deelcomp.competitie.einde_aanmeldingen }}</td>
                                 <td>
-                                    <a class="btn-nhb-blauw" href="{{ deelcomp.url_inschrijven }}">Inschrijven</a>
+                                    <a class="btn-nhb-blauw" href="{{ deelcomp.url_aanmelden }}">Aanmelden</a>
                                 </td>
                             {% endif %}
                         {% endif %}
@@ -141,7 +139,7 @@
                         {% elif deelcomp.competitie.fase > 'B' %}
                             <td>De inschrijving is gesloten</td>
                         {% else %}
-                            <td>Inschrijven kan tot {{ deelcomp.competitie.einde_aanmeldingen }}</td>
+                            <td>Aanmelden kan tot {{ deelcomp.competitie.einde_aanmeldingen }}</td>
                         {% endif %}
                         <td><!-- ruimte voor de knop/status --></td>
                     {% endif %}
@@ -162,11 +160,13 @@
 
         <table class="white">
             <thead>
-                <th>Datum</th>
-                <th>Soort record</th>
-                <th>Score</th>
-                <th>Plaats</th>
-                <th><!-- kolom voor knop --></th>
+                <tr>
+                    <th>Datum</th>
+                    <th>Soort record</th>
+                    <th>Score</th>
+                    <th>Plaats</th>
+                    <th><!-- kolom voor knop --></th>
+                </tr>
             </thead>
 
             {% for obj in records %}
@@ -188,11 +188,13 @@
 
         <table class="white">
             <thead>
-                <th>Competitie</th>
-                <th>Seizoen</th>
-                <th>Boog</th>
-                <th>Scores</th>
-                <th>Gemiddelde pijl</th>
+                <tr>
+                    <th>Competitie</th>
+                    <th>Seizoen</th>
+                    <th>Boog</th>
+                    <th>Scores</th>
+                    <th>Gemiddelde pijl</th>
+                </tr>
             </thead>
 
             {% for obj in histcomp %}
@@ -215,11 +217,13 @@
 
         <table class="white">
             <thead>
-                <th>Boog</th>
-                <th>Afstand</th>
-                <th>Gemiddelde</th>
-                <th>Vastgesteld op</th>
-                <th>Bron</th>
+                <tr>
+                    <th>Boog</th>
+                    <th>Afstand</th>
+                    <th>Gemiddelde</th>
+                    <th>Vastgesteld op</th>
+                    <th>Bron</th>
+                </tr>
             </thead>
 
             {% for schutterboog in gemiddelden %}
@@ -240,82 +244,88 @@
     <span>&nbsp;</span>
     <h5>Contactgegevens</h5>
 
-    <p>De regiocompetitieleiders (RCL) regelen alles rond de competities en kan je benaderen als er problemen zijn met de uitslagen.</p>
+    {% if not geen_wedstrijden %}
+        <p>De regiocompetitieleiders (RCL) regelen alles rond de competities en kan je benaderen als er problemen zijn met de uitslagen.</p>
 
-    <p>De wedstrijdleiding van jouw vereniging is er voor vragen over wedstrijden en de competitie, zoals waar je heen moet.</p>
+        <p>De wedstrijdleiding van jouw vereniging is er voor vragen over wedstrijden en de competitie, zoals waar je heen moet.</p>
+    {% endif %}
 
     <table class="white">
         <thead>
-            <th>Naam / Namen</th>
-            <th>Functie</th>
-            <th>E-mail</th>
+            <tr>
+                <th>Naam / Namen</th>
+                <th>Functie</th>
+                <th>E-mail</th>
+            </tr>
         </thead>
 
-        <!-- RCL Indoor -->
-        <tr>
-            <td>
-                {% for naam in rcl18_namen %}
-                    {% if not forloop.first %}<br>{% endif %}
-                    <span>{{ naam }}</span>
-                {% empty %}
-                    <i>Onbekend</i>
-                {% endfor %}
-            </td>
+        {% if not geen_wedstrijden %}
+            <!-- RCL Indoor -->
+            <tr>
+                <td>
+                    {% for naam in rcl18_namen %}
+                        {% if not forloop.first %}<br>{% endif %}
+                        <span>{{ naam }}</span>
+                    {% empty %}
+                        <i>Onbekend</i>
+                    {% endfor %}
+                </td>
 
-            <td>RCL Indoor competitie</td>
+                <td>RCL Indoor competitie</td>
 
-            <td>
-                {% if rcl18_email %}
-                    <a class="btn-nhb-blauw" href="mailto:{{ rcl18_email }}">{{ rcl18_email }}</a>
-                {% else %}
-                    <i>Onbekend</i>
-                {% endif %}
-            </td>
-        </tr>
+                <td>
+                    {% if rcl18_email %}
+                        <a class="btn-nhb-blauw" href="mailto:{{ rcl18_email }}">{{ rcl18_email }}</a>
+                    {% else %}
+                        <i>Onbekend</i>
+                    {% endif %}
+                </td>
+            </tr>
 
-        <!-- RCL 25m1pijl -->
-        <tr>
-            <td>
-                {% for naam in rcl25_namen %}
-                    {% if not forloop.first %}<br>{% endif %}
-                    <span>{{ naam }}</span>
-                {% empty %}
-                    <i>Onbekend</i>
-                {% endfor %}
-            </td>
+            <!-- RCL 25m1pijl -->
+            <tr>
+                <td>
+                    {% for naam in rcl25_namen %}
+                        {% if not forloop.first %}<br>{% endif %}
+                        <span>{{ naam }}</span>
+                    {% empty %}
+                        <i>Onbekend</i>
+                    {% endfor %}
+                </td>
 
-            <td>RCL 25m 1pijl competitie</td>
+                <td>RCL 25m 1pijl competitie</td>
 
-            <td>
-                {% if rcl25_email %}
-                    <a class="btn-nhb-blauw" href="mailto:{{ rcl25_email }}">{{ rcl25_email }}</a>
-                {% else %}
-                    <i>Onbekend</i>
-                {% endif %}
-            </td>
-        </tr>
+                <td>
+                    {% if rcl25_email %}
+                        <a class="btn-nhb-blauw" href="mailto:{{ rcl25_email }}">{{ rcl25_email }}</a>
+                    {% else %}
+                        <i>Onbekend</i>
+                    {% endif %}
+                </td>
+            </tr>
 
-        <!-- HWL -->
-        <tr>
-            <td>
-                {% for naam in hwl_namen %}
-                    {% if not forloop.first %}<br>{% endif %}
-                    <span>{{ naam }}</span>
-                {% empty %}
-                    <i>Onbekend</i>
-                {% endfor %}
-            </td>
+            <!-- HWL -->
+            <tr>
+                <td>
+                    {% for naam in hwl_namen %}
+                        {% if not forloop.first %}<br>{% endif %}
+                        <span>{{ naam }}</span>
+                    {% empty %}
+                        <i>Onbekend</i>
+                    {% endfor %}
+                </td>
 
-            <td>Wedstrijdleiding vereniging</td>
+                <td>Wedstrijdleiding vereniging</td>
 
-            <td>
-                {% if hwl_email %}
-                    <a class="btn-nhb-blauw" href="mailto:{{ hwl_email }}">{{ hwl_email }}</a>
-                {% else %}
-                    <i>Onbekend</i>
-                {% endif %}
-            </td>
-        </tr>
+                <td>
+                    {% if hwl_email %}
+                        <a class="btn-nhb-blauw" href="mailto:{{ hwl_email }}">{{ hwl_email }}</a>
+                    {% else %}
+                        <i>Onbekend</i>
+                    {% endif %}
+                </td>
+            </tr>
+        {% endif %}
 
         <!-- SEC -->
         <tr>

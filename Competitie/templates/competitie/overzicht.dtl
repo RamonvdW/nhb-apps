@@ -18,33 +18,13 @@
 <div class="row">
 
     <!-- algemene informatie over de competities -->
-    <div class="card">
-        <div class="card-content">
-            <div class="card-title center-align">Informatie</div>
-            <div class="center-align"><i class="material-icons-round medium">info</i></div>
-            <p>Algemene informatie over de competities.</p>
-        </div>
-        <a href="{% url 'Competitie:info-competitie' %}" class="nhb-klikbare-balk">
-            <div class="card-action center-align">
-                <span class="nhb-klikbare-link">Tonen</span>
-            </div>
-        </a>
-    </div>
+    {% url 'Competitie:info-competitie' as card_url %}
+    {% include 'plein/card.dtl' with title="Informatie" text="Algemene informatie over de competities." icon="info" url=card_url %}
 
     <!-- toon klassegrenzen regiocompetitie -->
     {% if toon_klassegrenzen %}
-        <div class="card">
-            <div class="card-content">
-                <div class="card-title center-align">Klassegrenzen</div>
-                <div class="center-align"><i class="material-icons-round medium">equalizer</i></div>
-                <p>Toon de klassegrenzen voor de competities.</p>
-            </div>
-            <a href="{% url 'Competitie:klassegrenzen-tonen' %}" class="nhb-klikbare-balk">
-                <div class="card-action center-align">
-                    <span class="nhb-klikbare-link">Tonen</span>
-                </div>
-            </a>
-        </div>
+        {% url 'Competitie:klassegrenzen-tonen' as card_url %}
+        {% include 'plein/card.dtl' with title="Klassegrenzen" text="Toon de klassegrenzen voor de competities." icon="equalizer" url=card_url %}
     {% endif %}
 
 </div>

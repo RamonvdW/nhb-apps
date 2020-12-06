@@ -17,7 +17,7 @@
 <p>Maak een keuze:</p>
 
 {% for obj in object_list %}
-<p><a class="btn white blue-text" href="{{ obj.sel_url }}">{{ obj.sel_str}}</a></p>
+<p><a class="btn white nhb-blauw-text" href="{{ obj.sel_url }}">{{ obj.sel_str}}</a></p>
 {% endfor %}
 
 {% endblock %}

@@ -9,7 +9,7 @@ from django.urls import reverse, Resolver404
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Plein.menu import menu_dynamics
-from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
+from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie, rol_mag_wisselen
 from BasisTypen.models import BoogType
 from NhbStructuur.models import NhbLid
 from .models import SchutterVoorkeuren, SchutterBoog
@@ -65,10 +65,6 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
         account = request.user
         nhblid = account.nhblid_set.all()[0]  # ROL_SCHUTTER geeft bescherming tegen geen nhblid
 
-        # stuur persoonlijke leden weg van de instellingen
-        if nhblid.bij_vereniging.geen_wedstrijden:
-            raise Resolver404()
-
         return nhblid
 
     def post(self, request, *args, **kwargs):
@@ -101,7 +97,6 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
                 # wijzigingen opslaan
                 obj.save()
         # for
-        del obj
 
         voorkeuren, _ = SchutterVoorkeuren.objects.get_or_create(nhblid=nhblid)
 
@@ -121,6 +116,26 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
             voorkeuren.save()
         del voorkeuren
 
+        if rol_get_huidige(self.request) != Rollen.ROL_HWL:
+            if rol_mag_wisselen(self.request):
+                account = request.user
+                email = account.accountemail_set.all()[0]
+
+                optout_nieuwe_taak = False
+                if request.POST.get('optout_nieuwe_taak'):
+                    optout_nieuwe_taak = True
+
+                optout_herinnering_taken = False
+                if request.POST.get('optout_herinnering_taken'):
+                    optout_herinnering_taken = True
+
+                if (email.optout_nieuwe_taak != optout_nieuwe_taak or
+                        email.optout_herinnering_taken != optout_herinnering_taken):
+                    # wijziging opslaan
+                    email.optout_nieuwe_taak = optout_nieuwe_taak
+                    email.optout_herinnering_taken = optout_herinnering_taken
+                    email.save()
+
         if rol_get_huidige(request) == Rollen.ROL_HWL:
             # stuur de HWL terug naar zijn ledenlijst
             return HttpResponseRedirect(reverse('Vereniging:leden-voorkeuren'))
@@ -128,8 +143,14 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
         return HttpResponseRedirect(reverse('Schutter:profiel'))
 
     @staticmethod
-    def _get_bogen(nhblid):
+    def _get_bogen(nhblid, geen_wedstrijden):
         """ Retourneer een lijst met SchutterBoog objecten, aangevuld met hulpvelden """
+
+        if geen_wedstrijden:
+            # schutter mag niet aan wedstrijden deelnemen
+            # verwijder daarom alle SchutterBoog records
+            SchutterBoog.objects.filter(nhblid=nhblid).delete()
+            return None
 
         # haal de SchutterBoog records op van deze gebruiker
         objs = (SchutterBoog
@@ -171,13 +192,20 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
             nhblid_pk = None
         nhblid = self._get_nhblid_or_404(self.request, nhblid_pk)
 
-        context['bogen'] = self._get_bogen(nhblid)
+        context['geen_wedstrijden'] = geen_wedstrijden = nhblid.bij_vereniging and nhblid.bij_vereniging.geen_wedstrijden
+
+        context['bogen'] = self._get_bogen(nhblid, geen_wedstrijden)
         context['voorkeuren'], _ = SchutterVoorkeuren.objects.get_or_create(nhblid=nhblid)
 
         if rol_get_huidige(self.request) == Rollen.ROL_HWL:
             context['nhblid_pk'] = nhblid.pk
             context['nhblid'] = nhblid
             context['is_hwl'] = True
+        else:
+            # niet de HWL maar de schutter zelf
+            if rol_mag_wisselen(self.request):
+                # schutter is beheerder, dus toon opt-out opties
+                context['email'] = nhblid.account.accountemail_set.all()[0]
 
         context['opslaan_url'] = reverse('Schutter:voorkeuren')
 

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+{% comment %}
+                Copyright (c) 2020 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+
+<!-- variant van site_layout.dtl zonder alle javascript -->
+
+{% load static %}
+
+<html lang="nl">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Niet ondersteund</title>
+        <link rel="icon" href="{% static 'plein/logo_nhb_192x192.png' %}" sizes="192x192">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Round">
+        <link rel="stylesheet" href="{% static 'materialize-new-34.css' %}">
+        <link rel="stylesheet" href="{% static 'site_layout_min-6.css' %}"> <!-- moet ná materialize css -->
+    </head>
+
+    <body class="nhb-grijs">
+        <!-- geen menu -->
+        <div id="content">      <!-- geeft padding -->
+
+            <h4>Oeps!</h4>
+
+            <p>Aangezien je op deze pagina terecht komt, heb je waarschijnlijk een browser die niet ondersteund wordt. Lees verder.</p>
+            <p>Op deze pagina beschrijven we de minimale eisen om deze website te kunnen gebruiken.</p>
+
+
+            <p>&nbsp;</p>
+            <h5>Ondersteunde browsers</h5>
+
+            <p>We hebben redelijke moderne tools gekozen voor deze website. Dit vereist een redelijk moderne browser.</p>
+            <p>Hieronder kan je zien welke populaire browsers we ondersteunen en vanaf welke versie:</p>
+
+            <table class="white">
+
+                <thead>
+                    <tr>
+                        <th>Browser naam</th>
+                        <th>Marktaandeel 2020</th>
+                        <th>Minimum versie</th>
+                        <th>Beschikbaar sinds</th>
+                    </tr>
+                </thead>
+
+                <tr> <td>Chrome</td>  <td>66%</td> <td>51</td> <td>Mei 2016</td>       </tr>
+                <tr> <td>Safari</td>  <td>17%</td> <td>10</td> <td>September 2016</td> </tr>
+                <tr> <td>Firefox</td> <td>4%</td>  <td>54</td> <td>Juni 2017</td>      </tr>
+                <tr> <td>Opera</td>   <td>2%</td>  <td>38</td> <td>Juni 2016</td>      </tr>
+                <tr> <td>Edge</td>    <td>1%</td>  <td>14</td> <td>Augustus 2016</td>  </tr>
+            </table>
+
+            <p>Zoals je kan zien waren deze browsers in 2016 en 2017 al beschikbaar.</p>
+            <p>Technisch detail: De ondergrens wordt gezet door Javascript gebaseerd op de ECMAScript 2015 standaard (ES6).</p>
+
+
+            <p>&nbsp;</p>
+            <h5>Maar...</h5>
+
+            <p>Browsers die we niet ondersteunen zijn waarschijnlijk zo oud dat we je afraden deze te gebruiken om redenen van persoonlijke digitale veiligheid op het Internet.</p>
+
+            <p>Er bestaan browsers die een verpakking zijn van een van de ondersteunde browsers. Die zouden in principe moeten werken.</p>
+
+            <p>Als je problemen ondervindt met zo'n browser, dan willen je vriendelijk verzoeken om uit te sluiten dat het aan deze browser ligt (dat kunnen we namelijk niet oplossen): probeer het eerst met een van de browsers die we wel ondersteunen.</p>
+
+            <p>&nbsp;</p>
+            <h5>Help!</h5>
+
+            <p>Komt je er niet uit? Stuur dan een e-mail naar het volgende adres:</p>
+            <a class="btn-nhb-blauw" href="mailto:nhb-apps-support@handboogsport.nl"><i class="material-icons-round left">email</i>nhb-apps-support@handboogsport.nl</a>
+
+        </div>
+    </body>
+</html>

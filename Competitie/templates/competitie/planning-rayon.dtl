@@ -9,85 +9,145 @@
 {% block title %}Planning Rayon{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-planning-rayon" %}
 
-<h4>Planning Rayon</h4>
+    <h4>Planning Rayon</h4>
 
-<div class="row">
+    <div class="row">
 
-    <!-- toon gegevens van de regio en competitie in een blauwe box -->
-    <div class="col s12 m10 l8 xl6 offset-m1 offset-l2 offset-xl3">
-        <div class="white-text nhb-blauw z-depth-2">
+        <!-- toon gegevens van de regio en competitie in een blauwe box -->
+        <div class="col s12 m10 l8 xl6 offset-m1 offset-l2 offset-xl3">
+            <div class="white-text nhb-blauw z-depth-2">
 
-            <div class="row small-row">
-                <div class="col s3">Competitie:</div>
-                <div class="col s7">{{ deelcomp_rk.competitie.beschrijving }}</div>
+                <div class="row small-row">
+                    <div class="col s3">Competitie:</div>
+                    <div class="col s7">{{ deelcomp_rk.competitie.beschrijving }}</div>
+                </div>
+
+                <div class="row small-row">
+                    <div class="col s3">Rayon:</div>
+                    <div class="col s7">{{ rayon }}</div>
+                </div>
+
             </div>
-
-            <div class="row small-row">
-                <div class="col s3">Rayon:</div>
-                <div class="col s7">{{ rayon }}</div>
-            </div>
-
         </div>
     </div>
-</div>
 
 
-{% if url_bond %}
+    {% if url_bond %}
+        <p>&nbsp;</p>
+        <p><a class="btn-nhb-blauw" href="{{ url_bond }}">
+        <i class="material-icons-round left">arrow_upward</i>Planning landelijk</a></p>
+    {% endif %}
+
+
     <p>&nbsp;</p>
-    <p><a class="btn-nhb-blauw" href="{{ url_bond }}">
-    <i class="material-icons-round left">arrow_upward</i>Planning landelijk</a></p>
-{% endif %}
+    <h5>RK wedstrijden</h5>
 
+    {% if not url_nieuwe_wedstrijd %}
+        <p>De RKO kan deze planning aanpassen.</p>
+    {% endif %}
 
-<p>&nbsp;</p>
-<h5>RK wedstrijden</h5>
-<p>Hier volgt later de planning van de RK wedstrijden.</p>
+    <table class="white">
 
+        <thead>
+            <tr>
+                <th>Wanneer</th>
+                <th>Waar</th>
+                <th>Klassen</th>
+                <th>Schutters</th>
+                <th><!-- kolom voor wijzig knoppen --></th>
+            </tr>
+        </thead>
 
-<p>&nbsp;</p>
-<h5>Regiocompetitie</h5>
-<table class="white">
+        {% for wedstrijd in wedstrijden_rk %}
+            <tr>
+                <td>{{ wedstrijd.datum_wanneer|date:"l j F Y" }} om {{ wedstrijd.tijd_begin_wedstrijd }}</td>
 
-    <thead>
-        <tr>
-            <th>Status</th>
-            <th>Gebied</th>
-            <th>Rondes</th>
-            <th>Wedstrijden</th>
-            <th><!-- kolom voor button --></th>
-        </tr>
-    </thead>
+                <td>
+                    {% if wedstrijd.vereniging %}
+                        <span>{{ wedstrijd.vereniging }}</span>
+                    {% else %}
+                        <i class="red-text">Onbekend</i>
+                    {% endif %}
+                </td>
 
-    <!-- FUTURE: RK wedstrijden toevoegen -->
+                <td>{{ wedstrijd.klassen_count }}</td>
 
-    {% for deelcomp in regio_deelcomps %}
-        <tr>
-            <td>
-                {% if deelcomp.is_afgesloten %}
-                    <span>Afgesloten</span>
-                {% else %}
-                    <span>Actief</span>
-                {% endif %}
-            </td>
+                <td>{{ wedstrijd.schutters_count }}</td>
 
-            <td>{{ deelcomp.nhb_regio }}</td>
+                <!-- knop om wedstrijd te wijzigen -->
+                <td>
+                    {% if wedstrijd.url_wijzig %}
+                        <a class="btn-nhb-blauw btn-small" href="{{ wedstrijd.url_wijzig }}">
+                            <i class="material-icons-round left">arrow_forward</i>Aanpassen</a>
+                    {% endif %}
+                </td>
 
-            <td>{{ deelcomp.rondes_count }}</td>
+            </tr>
+        {% empty %}
+            {% if not url_nieuwe_wedstrijd %}
+                <tr>
+                    <td colspan="4"><i>Nog geen wedstrijden aangemaakt</i></td>
+                </tr>
+            {% endif %}
+        {% endfor %}
 
-            <td>{{ deelcomp.wedstrijden_count }}</td>
+        <!-- knop om een regel toe te voegen -->
+        {% if url_nieuwe_wedstrijd %}
+            <tr>
+                <td colspan="3">
+                    <form action="{{ url_nieuwe_wedstrijd }}" method="post">
+                        {% csrf_token %}
+                        <button class="btn-nhb-blauw" type="submit">
+                            <i class="material-icons-round left">add</i>Wedstrijd toevoegen</button>
+                    </form>
+                </td>
+            </tr>
+        {% endif %}
 
-            <!-- knop naar de details van de regioplanning -->
-            <td>
-                <a class="btn-nhb-blauw" href="{% url 'Competitie:regio-planning' deelcomp.pk %}">
-                    <i class="material-icons-round left">arrow_forward</i>Bekijk</a>
-            </td>
-        </tr>
-    {% endfor %}
+    </table>
 
+    <p>&nbsp;</p>
+    <h5>Regiocompetitie</h5>
+    <table class="white">
 
-</table>
+        <thead>
+            <tr>
+                <th>Status</th>
+                <th>Gebied</th>
+                <th>Rondes</th>
+                <th>Wedstrijden</th>
+                <th><!-- kolom voor button --></th>
+            </tr>
+        </thead>
+
+        {% for deelcomp in regio_deelcomps %}
+            <tr>
+                <td>
+                    {% if deelcomp.is_afgesloten %}
+                        <span class="green-text">Afgesloten</span>
+                    {% else %}
+                        <span>Actief</span>
+                    {% endif %}
+                </td>
+
+                <td>{{ deelcomp.nhb_regio }}</td>
+
+                <td>{{ deelcomp.rondes_count }}</td>
+
+                <td>{{ deelcomp.wedstrijden_count }}</td>
+
+                <!-- knop naar de details van de regioplanning -->
+                <td>
+                    <a class="btn-nhb-blauw btn-small" href="{% url 'Competitie:regio-planning' deelcomp.pk %}">
+                        <i class="material-icons-round left">arrow_forward</i>Bekijk</a>
+                </td>
+            </tr>
+        {% endfor %}
+
+    </table>
+
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-planning-rayon" %}
 
 {% endblock %}
 

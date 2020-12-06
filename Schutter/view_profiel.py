@@ -178,17 +178,17 @@ class ProfielView(UserPassesTestMixin, TemplateView):
             for inschrijving in inschrijvingen:
                 if inschrijving.schutterboog == schutterboog and inschrijving.deelcompetitie == obj:
                     obj.is_ingeschreven = True
-                    obj.url_uitschrijven = reverse('Schutter:uitschrijven', kwargs={'regiocomp_pk': inschrijving.pk})
+                    obj.url_afmelden = reverse('Schutter:afmelden', kwargs={'regiocomp_pk': inschrijving.pk})
                     inschrijvingen.remove(inschrijving)
                     break
 
             if not obj.is_ingeschreven:
                 # niet ingeschreven
-                obj.url_inschrijven = reverse('Schutter:bevestig-inschrijven', kwargs={'schutterboog_pk': schutterboog.pk, 'deelcomp_pk': obj.pk})
+                obj.url_aanmelden = reverse('Schutter:bevestig-aanmelden', kwargs={'schutterboog_pk': schutterboog.pk, 'deelcomp_pk': obj.pk})
         # for
 
         # voeg alle inschrijvingen toe waar geen boog meer voor gekozen is,
-        # zodat uitgeschreven kan worden
+        # zodat er afgemeld kan worden
         for obj in inschrijvingen:
             afk = obj.schutterboog.boogtype.afkorting
             deelcomp = obj.deelcompetitie
@@ -196,7 +196,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
             deelcomp.is_voor_wedstrijd = True
             deelcomp.boog_niet_meer = True
             deelcomp.boog_beschrijving = boog_dict[afk].beschrijving
-            deelcomp.url_uitschrijven = reverse('Schutter:uitschrijven', kwargs={'regiocomp_pk': obj.pk})
+            deelcomp.url_afmelden = reverse('Schutter:afmelden', kwargs={'regiocomp_pk': obj.pk})
             objs_wedstrijd.append(deelcomp)
         # for
 
@@ -282,6 +282,9 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         if not nhblid.bij_vereniging:
             return
 
+        if nhblid.bij_vereniging.geen_wedstrijden:
+            context['geen_wedstrijden'] = True
+
         regio = nhblid.bij_vereniging.regio
 
         functies = (Functie
@@ -337,7 +340,6 @@ class ProfielView(UserPassesTestMixin, TemplateView):
             _, _, is_jong, _, _ = get_sessionvars_leeftijdsklassen(self.request)
             context['toon_leeftijdsklassen'] = is_jong
 
-            context['show_voorkeuren'] = True
             context['regiocompetities'] = self._find_regiocompetities(nhblid, voorkeuren, alle_bogen)
             context['gemiddelden'], context['heeft_ags'] = self._find_gemiddelden(nhblid, alle_bogen)
 

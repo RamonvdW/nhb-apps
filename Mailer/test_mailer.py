@@ -5,6 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase, override_settings
+from django.conf import settings
 from .models import MailQueue, mailer_queue_email, mailer_obfuscate_email, mailer_email_is_valide
 from .mailer import send_mail
 
@@ -35,8 +36,7 @@ class TestMailerBase(object):
         # requires websim.py running in the background
 
         # stop een mail in de queue
-        objs = MailQueue.objects.all()
-        self.assertEqual(len(objs), 0)
+        self.assertEqual(0, MailQueue.objects.count())
         mailer_queue_email('schutter@nhb.test', 'onderwerp', 'body\ndoei!\n')
 
         # probeer te versturen
@@ -88,6 +88,19 @@ class TestMailerBase(object):
         self.assertFalse(mailer_email_is_valide('test er@nhb.nl'))
         self.assertFalse(mailer_email_is_valide('test\ter@nhb.nl'))
         self.assertFalse(mailer_email_is_valide('test\ner@nhb.nl'))
+
+    def test_whitelist(self):
+        # controleer dat de whitelist zijn werk doet
+
+        self.assertEqual(0, MailQueue.objects.count())
+
+        with self.settings(EMAIL_ADDRESS_WHITELIST=('een.test@nhb.not',)):
+            mailer_queue_email('schutter@nhb.test', 'onderwerp', 'body\ndoei!\n')
+            self.assertEqual(0, MailQueue.objects.count())
+
+            mailer_queue_email('een.test@nhb.not', 'onderwerp', 'body\ndoei!\n')
+            self.assertEqual(1, MailQueue.objects.count())
+        # with
 
 
 class TestMailerBadBase(object):
@@ -168,7 +181,8 @@ class TestMailerBadBase(object):
 @override_settings(MAILGUN_URL='', MAILGUN_API_KEY='',
                    POSTMARK_URL='http://localhost:8123/postmark',
                    POSTMARK_API_KEY='the-api-key',
-                   EMAIL_FROM_ADDRESS='noreply@nhb.test')
+                   EMAIL_FROM_ADDRESS='noreply@nhb.test',
+                   EMAIL_ADDRESS_WHITELIST=())
 class TestMailerPostmark(TestMailerBase, TestCase):
     pass
 
@@ -176,7 +190,8 @@ class TestMailerPostmark(TestMailerBase, TestCase):
 @override_settings(POSTMARK_URL='', POSTMARK_API_KEY='',
                    MAILGUN_URL='http://localhost:8123/v3/testdomain2.com/messages',
                    MAILGUN_API_KEY='the-api-key',
-                   EMAIL_FROM_ADDRESS='noreply@nhb.test')
+                   EMAIL_FROM_ADDRESS='noreply@nhb.test',
+                   EMAIL_ADDRESS_WHITELIST=())
 class TestMailerMailgun(TestMailerBase, TestCase):
     pass
 
@@ -185,7 +200,8 @@ class TestMailerMailgun(TestMailerBase, TestCase):
 @override_settings(MAILGUN_URL='', MAILGUN_API_KEY='',
                    POSTMARK_URL='http://localhost:9999',
                    POSTMARK_API_KEY='the-api-key',
-                   EMAIL_FROM_ADDRESS='noreply@nhb.test')
+                   EMAIL_FROM_ADDRESS='noreply@nhb.test',
+                   EMAIL_ADDRESS_WHITELIST=())
 class TestMailerBadPostmark(TestMailerBadBase, TestCase):
     pass
 
@@ -193,7 +209,8 @@ class TestMailerBadPostmark(TestMailerBadBase, TestCase):
 @override_settings(POSTMARK_URL='', POSTMARK_API_KEY='',
                    MAILGUN_URL='http://localhost:9999',
                    MAILGUN_API_KEY='the-api-key',
-                   EMAIL_FROM_ADDRESS='noreply@nhb.test')
+                   EMAIL_FROM_ADDRESS='noreply@nhb.test',
+                   EMAIL_ADDRESS_WHITELIST=())
 class TestMailerBadMailgun(TestMailerBadBase, TestCase):
     pass
 
