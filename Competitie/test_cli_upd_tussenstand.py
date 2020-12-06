@@ -82,22 +82,19 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
         # maak nog een wedstrijd aan - die blijft zonder uitslag
         self.client.post(self.url_planning_regio_ronde % ronde.pk, {})
 
-    def _maak_import(self):
+    def _maak_import(self, aantal=5):
         # wissel naar RCL functie
         self.e2e_login_and_pass_otp(self.account_bb)
         self.e2e_wissel_naar_functie(self.deelcomp_r101.functie)
         self.e2e_check_rol('RCL')
 
         # maak er een paar rondes bij voor geïmporteerde uitslagen, elk met 1 wedstrijd
-        self.client.post(self.url_planning_regio % self.deelcomp_r101.pk)
-        self.client.post(self.url_planning_regio % self.deelcomp_r101.pk)
-        self.client.post(self.url_planning_regio % self.deelcomp_r101.pk)
-        self.client.post(self.url_planning_regio % self.deelcomp_r101.pk)
-        self.client.post(self.url_planning_regio % self.deelcomp_r101.pk)
+        for _ in range(aantal):
+            self.client.post(self.url_planning_regio % self.deelcomp_r101.pk)
 
-        top_pk = DeelcompetitieRonde.objects.latest('pk').pk - 4
+        top_pk = DeelcompetitieRonde.objects.latest('pk').pk - aantal + 1
 
-        for nr in (1, 2, 3, 4, 5):
+        for nr in range(1, 1+aantal):
             # maak een wedstrijd aan (doen voordat de beschrijving aangepast wordt)
             resp = self.client.post(self.url_planning_regio_ronde % top_pk, {})
             self.assertTrue(resp.status_code < 400)
@@ -517,7 +514,7 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
         resp = self.client.post(self.url_inschrijven % self.comp.pk, post_params)
         self.assertEqual(resp.status_code, 302)  # 302 = Redirect = succes
 
-        # 100001: 4 scores, gebruik laagste 3
+        # 100001: 4 scores, gebruik eerste 3
         # 100002: nog maar 2 scores
         # 100004: Al in hogere klasse geplaatst
         # 100005: AG > 0.001
@@ -554,7 +551,7 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
         self._score_opslaan(self.uitslagen[7], self.schutterboog_100001, 123)
         self._score_opslaan(self.uitslagen[8], self.schutterboog_100001, 124)
         self._score_opslaan(self.uitslagen[10], self.schutterboog_100001, 128)
-        self._score_opslaan(self.uitslagen[11], self.schutterboog_100001, 255)
+        self._score_opslaan(self.uitslagen[11], self.schutterboog_100001, 120)
 
         self._score_opslaan(self.uitslagen[7], self.schutterboog_100002, 123)
         self._score_opslaan(self.uitslagen[9], self.schutterboog_100002, 124)
@@ -569,6 +566,33 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
         f2 = io.StringIO()
         management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
         self.assertTrue('[INFO] Verplaats 100001 (18m) met nieuw AG 4.167 naar klasse Recurve klasse' in f2.getvalue())
+
+    def test_verplaats_zeven(self):
+        # check het verplaatsen van een schutter uit klasse onbekend
+
+        self._maak_import(aantal=7)     # 7 nieuwe rondes: 7..13
+
+        # schrijf een paar mensen in
+        post_params = dict()
+        post_params['lid_100001_boogtype_%s' % self.boog_r.pk] = 'on'
+        resp = self.client.post(self.url_inschrijven % self.comp.pk, post_params)
+        self.assertEqual(resp.status_code, 302)  # 302 = Redirect = succes
+
+        # 100001: 7 scores, gebruik eerste 3 voor bepalen AG voor overstap
+
+        self._score_opslaan(self.uitslagen[7], self.schutterboog_100001, 123)
+        self._score_opslaan(self.uitslagen[8], self.schutterboog_100001, 124)
+        self._score_opslaan(self.uitslagen[9], self.schutterboog_100001, 125)
+        self._score_opslaan(self.uitslagen[10], self.schutterboog_100001, 122)
+        self._score_opslaan(self.uitslagen[11], self.schutterboog_100001, 121)
+        self._score_opslaan(self.uitslagen[12], self.schutterboog_100001, 129)
+        self._score_opslaan(self.uitslagen[13], self.schutterboog_100001, 128)
+
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
+        # print("f2: %s" % f2.getvalue())
+        self.assertTrue('[INFO] Verplaats 100001 (18m) met nieuw AG 4.133 naar klasse Recurve klasse' in f2.getvalue())
 
     def test_overstap(self):
         # test schutters die overstappen naar een andere vereniging
