@@ -48,7 +48,6 @@
                     {% endfor %}
                 </td>
                 <td></td>   <!-- email -->
-
             </tr>
         {% endif %}
 
