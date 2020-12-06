@@ -14,7 +14,7 @@ from Overig.e2ehelpers import E2EHelpers
 from .models import (Competitie, DeelCompetitie, CompetitieKlasse, competitie_aanmaken,
                      LAAG_REGIO, LAAG_RK, LAAG_BK, AG_NUL,
                      RegioCompetitieSchutterBoog,  DeelcompetitieKlasseLimiet,
-                     KampioenschapMutatie, MUTATIE_INITIEEL, MUTATIE_CUT,
+                     KampioenschapMutatie, MUTATIE_INITIEEL, MUTATIE_CUT, MUTATIE_AFMELDEN,
                      KampioenschapSchutterBoog, DEELNAME_ONBEKEND, DEELNAME_JA, DEELNAME_NEE)
 import datetime
 import io
@@ -790,6 +790,12 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
 
         self.assertTrue("???" in str(mutatie))  # geen beschrijving beschikbaar
         mutatie.code = MUTATIE_INITIEEL
+        self.assertTrue(str(mutatie) != "")     # wel een beschrijving
+
+        mutatie.code = MUTATIE_CUT
+        self.assertTrue(str(mutatie) != "")     # wel een beschrijving
+
+        mutatie.code = MUTATIE_AFMELDEN
         self.assertTrue(str(mutatie) != "")     # wel een beschrijving
 
         # mutatie die al verwerkt is

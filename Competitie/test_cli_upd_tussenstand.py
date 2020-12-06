@@ -735,4 +735,22 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
         # print("f2: %s" % f2.getvalue())
         self.assertTrue("[WARNING] Verwerk overstap naar ander rayon niet mogelijk voor 100001 in RK voor rayon 1: GEEN VERENIGING --> [105] [1000] Grote Club" in f2.getvalue())
 
+        # schutter die nog niet helemaal overgestapt is
+        lid.bij_vereniging = None
+        lid.save()
+
+        rk_deelnemer = KampioenschapSchutterBoog.objects.get(schutterboog=deelnemer.schutterboog)
+        rk_deelnemer.bij_vereniging = None
+        rk_deelnemer.save()
+
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
+
+        # corner case
+        zet_competitie_fase(self.comp, 'L')
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('regiocomp_upd_tussenstand', '1', '--quick', stderr=f1, stdout=f2)
+
 # end of file
