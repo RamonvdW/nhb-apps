@@ -235,7 +235,8 @@ class Command(BaseCommand):
                               .wedstrijden
                               .select_related('uitslag')
                               .order_by('datum_wanneer',
-                                        'tijd_begin_wedstrijd')
+                                        'tijd_begin_wedstrijd',
+                                        'pk')
                               .all()):
 
                 uitslag = wedstrijd.uitslag
