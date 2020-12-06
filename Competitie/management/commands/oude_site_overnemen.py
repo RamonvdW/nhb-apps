@@ -41,6 +41,7 @@ class Command(BaseCommand):
         self._count_errors = 0
         self._count_warnings = 0
         self._warnings = list()            # al geroepen warnings
+        self._meld_afwijking_lid = list()
 
         # datum/tijd stempel voor alle nieuwe ScoreHist
         self._import_when = None
@@ -532,8 +533,11 @@ class Command(BaseCommand):
             return
 
         if naam != lid.volledige_naam_str:
-            self._roep_info('Verschil in lid %s naam: bekend=%s, oude programma=%s' % (
-                                lid.nhb_nr, lid.volledige_naam_str, naam))
+            tup = (lid.nhb_nr, lid.volledige_naam_str, naam)
+            if tup not in self._meld_afwijking_lid:
+                self._meld_afwijking_lid.append(tup)
+                self._roep_info('Verschil in lid %s naam: bekend=%s, oude programma=%s' % (
+                                    lid.nhb_nr, lid.volledige_naam_str, naam))
 
         aantal_scores = len(scores) - scores.count(0)
 
