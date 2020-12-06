@@ -579,6 +579,14 @@ class Command(BaseCommand):
 
             self._uitslag_opslaan(deelcomp, inschrijving, scores)
 
+            if inschrijving.klasse != self._klasse:
+                self._roep_warning(
+                    'Verschil in klasse voor nhbnr %s (%sm): %s; oude programma: %s' % (
+                        schutterboog.nhblid.nhb_nr,
+                        deelcomp.competitie.afstand,
+                        inschrijving.klasse,
+                        self._klasse))
+
     def _verwerk_klassen(self, data):
         self._bulk_score = list()
         self._bulk_hist = list()
