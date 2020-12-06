@@ -267,6 +267,8 @@ class Command(BaseCommand):
             # minder dan 7 scores
             return 0, 0
 
+        # zoek de laagste score, van achteren
+        waardes = waardes[:]            # maak kopie
         waardes.reverse()
         laagste = min(waardes)
         nr = waardes.index(laagste)     # 0..6
