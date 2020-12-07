@@ -13,7 +13,7 @@ from Score.models import Score, ScoreHist
 
 
 class Command(BaseCommand):
-    help = "Data van de oude site verwijderen"
+    help = "Data van de oude site verwijderen uit de database"
 
     def __init__(self, stdout=None, stderr=None, no_color=False, force_color=False):
         super().__init__(stdout, stderr, no_color, force_color)
@@ -66,7 +66,7 @@ class Command(BaseCommand):
         if teller > 0:
             self.stdout.write("AG's opgeruimd: %s" % teller)
 
-        activiteit = 'Alle eerder ingelezen data van het oude programma zijn verwijderd'
+        activiteit = 'Alle eerder ingelezen data van het oude programma zijn verwijderd uit de database'
 
         # schrijf in het logboek
         schrijf_in_logboek(account=None,
