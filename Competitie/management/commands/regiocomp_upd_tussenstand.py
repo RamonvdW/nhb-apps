@@ -216,6 +216,7 @@ class Command(BaseCommand):
         # wedstrijden hebben een uitslag met scores
         # scores refereren aan een schutterboog
         # schutters kunnen in een wedstrijd buiten hun ingeschreven rayon geschoten hebben
+        rondes = list()
         for ronde in (DeelcompetitieRonde
                       .objects
                       .select_related('deelcompetitie', 'plan')
@@ -223,6 +224,19 @@ class Command(BaseCommand):
                               deelcompetitie__laag=LAAG_REGIO)
                       .all()):
 
+            week_nr = ronde.week_nr
+            if week_nr < 26:
+                week_nr += 100
+
+            tup = (week_nr, ronde.pk, ronde)
+            rondes.append(tup)
+        # for
+
+        # sorteer op weeknummer, anders raken de scores door de war en berekenen we
+        # een verkeerd gemiddelde en verplaatsen we de schutter naar de verkeerde klasse
+        rondes.sort()
+
+        for _, _, ronde in rondes:
             is_alt = ronde.is_voor_import_oude_programma()
 
             # tijdelijk: de geïmporteerde uitslagen zijn de normale

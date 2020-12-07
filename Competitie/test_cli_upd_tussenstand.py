@@ -92,27 +92,36 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
         for _ in range(aantal):
             self.client.post(self.url_planning_regio % self.deelcomp_r101.pk)
 
-        top_pk = DeelcompetitieRonde.objects.latest('pk').pk - aantal + 1
+        top_pk = DeelcompetitieRonde.objects.latest('pk').pk - aantal
 
-        for nr in range(1, 1+aantal):
+        for nr in range(aantal):
             # maak een wedstrijd aan (doen voordat de beschrijving aangepast wordt)
-            resp = self.client.post(self.url_planning_regio_ronde % top_pk, {})
+            resp = self.client.post(self.url_planning_regio_ronde % (top_pk + nr + 1), {})
             self.assertTrue(resp.status_code < 400)
+        # for
 
-            ronde = DeelcompetitieRonde.objects.get(pk=top_pk)
+        # programma moet sorteren op weeknummer van de ronde
+        hussel = (1, 3, 5, 2, 4, 7, 6)
+        for volgnr in range(aantal):
+            nr = hussel[volgnr]
+
+            ronde = DeelcompetitieRonde.objects.get(pk=top_pk + nr)
 
             # wedstrijduitslag aanmaken
             wedstrijd = ronde.plan.wedstrijden.all()[0]
             resp = self.client.get(self.url_uitslag_invoeren % wedstrijd.pk)
             self.assertTrue(resp.status_code < 400)
 
+            week_nr = 37 + nr*4
+            if week_nr > 52:
+                week_nr -= 52
+
             ronde.beschrijving = 'Ronde %s oude programma' % nr
+            ronde.week_nr = week_nr
             ronde.save()
 
             wedstrijd = Wedstrijd.objects.get(pk=wedstrijd.pk)
             self.uitslagen.append(wedstrijd.uitslag)
-
-            top_pk += 1
         # for
 
     def _maak_leden_aan(self):
@@ -592,7 +601,7 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
         f2 = io.StringIO()
         management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
         # print("f2: %s" % f2.getvalue())
-        self.assertTrue('[INFO] Verplaats 100001 (18m) met nieuw AG 4.133 naar klasse Recurve klasse' in f2.getvalue())
+        self.assertTrue('[INFO] Verplaats 100001 (18m) met nieuw AG 4.100 naar klasse Recurve klasse' in f2.getvalue())
 
     def test_overstap(self):
         # test schutters die overstappen naar een andere vereniging
