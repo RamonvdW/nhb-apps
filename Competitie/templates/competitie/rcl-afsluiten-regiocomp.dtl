@@ -14,7 +14,7 @@
 
     {% if url_afsluiten %}
         <p>Als RCL wil je de regiocompetitie in jouw regio afsluiten.</p>
-        <p>Dit is een eenmalige maar belangrijke actie, waardoor de schutters doorgezet worden naar het RK.</p>
+        <p>Dit is een eenmalige maar belangrijke actie, waardoor de sporters doorgezet worden naar het RK.</p>
         <p>Hiermee bevestig je ook dat alle scores ingevoerd zijn en er geen klachten meer in behandeling zijn die invloed kunnen hebben op de top-24 van elke wedstrijdklasse.</p>
 
         <form method="post" action="{{ url_afsluiten }}">
@@ -23,7 +23,7 @@
         </form>
     {% else %}
         <p>Als RCL kan je straks de regiocompetitie in jouw regio afsluiten.</p>
-        <p>Dit is een eenmalige maar belangrijke actie, waardoor de schutters doorgezet worden naar het RK.</p>
+        <p>Dit is een eenmalige maar belangrijke actie, waardoor de sporters doorgezet worden naar het RK.</p>
         <p>Daarmee bevestig je ook dat alle scores ingevoerd zijn en er geen klachten meer in behandeling zijn die invloed kunnen hebben op de top-24 van elke wedstrijdklasse.</p>
 
         <p>&nbsp;</p>

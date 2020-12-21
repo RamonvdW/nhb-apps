@@ -6,13 +6,13 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}Wijzig status RK schutter{% endblock %}
+{% block title %}Wijzig sporter status{% endblock %}
 
 {% block pagina %}
 
-    <h4>Wijzig status RK schutter</h4>
+    <h4>Wijzig sporter status</h4>
 
-    <p>Op deze pagina kan je de status van een schutter voor deelname aan het RK aanpassen.</p>
+    <p>Op deze pagina kan je de status van een sporter voor deelname aan het RK aanpassen.</p>
 
     <div class="row">
 
@@ -36,7 +36,7 @@
                 </div>
 
                 <div class="row small-row">
-                    <div class="col s3">Schutter:</div>
+                    <div class="col s3">Sporter:</div>
                     <div class="col s8">{{ deelnemer.naam_str }}</div>
                 </div>
 
@@ -60,7 +60,7 @@
     <table class="white">
         <tr>
             <td colspan="3" class="center">
-                <span>De status van deelname voor deze schutter is: </span>
+                <span>De status van deelname voor deze sporter is: </span>
                 {% if not deelnemer.bij_vereniging %}
                     <span class="red-text">ATTENTIE</span>
                 {% elif deelnemer.deelname == 'N' %}
@@ -76,7 +76,7 @@
         {% if not deelnemer.bij_vereniging %}
             <tr class="nhb-grijs"><td colspan="3"></td></tr>
             <tr>
-                <td colspan="3" class="center">Deze schutter is niet aangemeld bij een vereniging en mag zo niet deelnemen aan het RK.<br>Laat het bondsburo uitzoeken of dit een niet-afgeronde overschrijving is.</td>
+                <td colspan="3" class="center">Deze sporter is niet aangemeld bij een vereniging en mag zo niet deelnemen aan het RK.<br>Laat het bondsburo uitzoeken of dit een niet-afgeronde overschrijving is.</td>
             </tr>
         {% else %}
 
@@ -102,7 +102,7 @@
                 <tr class="nhb-grijs"><td colspan="3"></td></tr>
 
                 <tr>
-                    <td colspan="3" class="center">Klik op de rode knop om de schutter af te melden voor het RK</td>
+                    <td colspan="3" class="center">Klik op de rode knop om de sporter af te melden voor het RK</td>
                 </tr>
                 <tr>
                     <td colspan="3" class="center">
@@ -123,7 +123,7 @@
         <table class="white centered">
             <tr>
                 <td style="padding:24px"><b class="red-text">LET&nbsp;OP!</b></td>
-                <td>Afmelden kan niet ongedaan gemaakt worden.<br>(na afmelden wordt een andere schutter opgeroepen)</td>
+                <td>Afmelden kan niet ongedaan gemaakt worden.<br>(na afmelden wordt een andere sporter opgeroepen)</td>
                 <td style="padding:24px"><b class="red-text">LET&nbsp;OP!</b></td>
             </tr>
         </table>

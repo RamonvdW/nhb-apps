@@ -35,12 +35,12 @@
                     <td>{{ obj.indiv.beschrijving }}</td>
                     <td>
                         <select name="{{ obj.sel }}">
-                            <option value="24"{%if obj.limiet == 24 %} selected{% endif %}>24 schutters (standaard)</option>
-                            <option value="20"{%if obj.limiet == 20 %} selected{% endif %}>20 schutters</option>
-                            <option value="16"{%if obj.limiet == 16 %} selected{% endif %}>16 schutters</option>
-                            <option value="12"{%if obj.limiet == 12 %} selected{% endif %}>12 schutters</option>
-                            <option value="8"{%if obj.limiet == 8 %} selected{% endif %}>8 schutters</option>
-                            <option value="4"{%if obj.limiet == 4 %} selected{% endif %}>4 schutters</option>
+                            <option value="24"{%if obj.limiet == 24 %} selected{% endif %}>24 sporters (standaard)</option>
+                            <option value="20"{%if obj.limiet == 20 %} selected{% endif %}>20 sporters</option>
+                            <option value="16"{%if obj.limiet == 16 %} selected{% endif %}>16 sporters</option>
+                            <option value="12"{%if obj.limiet == 12 %} selected{% endif %}>12 sporters</option>
+                            <option value="8"{%if obj.limiet == 8 %} selected{% endif %}>8 sporters</option>
+                            <option value="4"{%if obj.limiet == 4 %} selected{% endif %}>4 sporters</option>
                         </select>
                     </td>
                 </tr>

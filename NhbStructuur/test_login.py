@@ -45,7 +45,7 @@ class TestNhbStructuurLogin(E2EHelpers, TestCase):
     def test_nhblid(self):
         self.e2e_login(self.account_normaal)
         resp = self.client.get('/plein/')
-        self.assertContains(resp, 'Schutter')
+        self.assertContains(resp, 'Sporter')
 
     def test_inactief(self):
         # probeer in te loggen als inactief lid
@@ -64,7 +64,7 @@ class TestNhbStructuurLogin(E2EHelpers, TestCase):
         self.e2e_login(self.account_normaal)
         resp = self.client.get('/plein/')
         self.assertContains(resp, 'Gebruiker')
-        self.assertNotContains(resp, 'Schutter')
+        self.assertNotContains(resp, 'Sporter')
 
     def test_overdracht_naam(self):
         # controleer dat de naam van het NHB lid door de login overgenomen wordt in het account

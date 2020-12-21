@@ -63,7 +63,7 @@
 </div>
 
 
-<p>Schutters die <b>{{ inhoud }}</b> ingeschreven zijn.</p>
+<p>Sporters die <b>{{ inhoud }}</b> ingeschreven zijn.</p>
 
 <p>Aantal: {{ object_list.count }}</p>
 

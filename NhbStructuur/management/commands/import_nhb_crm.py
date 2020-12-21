@@ -6,7 +6,6 @@
 
 """ importeer een JSON file met data uit het CRM systeem van de NHB """
 
-from django.utils.dateparse import parse_date
 from django.core.management.base import BaseCommand
 from django.db.models import ProtectedError
 import django.db.utils
@@ -16,7 +15,6 @@ from Mailer.models import mailer_email_is_valide
 from Logboek.models import schrijf_in_logboek
 from Functie.models import maak_functie, maak_account_verenigings_secretaris
 from Wedstrijden.models import WedstrijdLocatie
-import argparse
 import datetime
 import json
 

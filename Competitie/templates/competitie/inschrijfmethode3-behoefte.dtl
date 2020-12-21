@@ -52,7 +52,7 @@
     <tr class="nhb-grijs">
         <td>
             <p>&nbsp;</p>
-            <h5>Aantal schutters per blazoen type:</h5>
+            <h5>Aantal sporters per blazoen type:</h5>
         </td>
         {% for beschrijving in dagdelen %}<td></td>{% endfor %}
         <td></td>   <!-- totalen -->

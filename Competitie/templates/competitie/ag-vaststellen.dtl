@@ -29,8 +29,8 @@
 
     <p>De historische uitslag waar de aanvangsgemiddelden op gebaseerd zullen worden is van <b>seizoen {{ seizoen }}</b>.</p>
 
-    <p>Voor de <b>Indoor competitie</b> moeten de schutters <b>minimaal {{ aantal_scores_18 }} scores</b> neergezet hebben om een AG te krijgen.</p>
-    <p>Voor de <b>25m 1pijl competitie</b> moeten de schutters <b>minimaal {{ aantal_scores_25 }} scores</b> neergezet hebben om een AG te krijgen.</p>
+    <p>Voor de <b>Indoor competitie</b> moeten de sporters <b>minimaal {{ aantal_scores_18 }} scores</b> neergezet hebben om een AG te krijgen.</p>
+    <p>Voor de <b>25m 1pijl competitie</b> moeten de sporters <b>minimaal {{ aantal_scores_25 }} scores</b> neergezet hebben om een AG te krijgen.</p>
 
     <p>Als bovenstaande gegevens correct zijn, druk dan op de volgende knop:</p>
 

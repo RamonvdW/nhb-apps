@@ -73,7 +73,7 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
 
         self.boog_R = BoogType.objects.get(afkorting='R')
 
-        self.url_voorkeuren = '/schutter/voorkeuren/'
+        self.url_voorkeuren = '/sporter/voorkeuren/'
         self.url_wijzig = '/account/nieuw-wachtwoord/'
 
     def test_view(self):
@@ -109,7 +109,7 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
         resp = self.client.post(self.url_voorkeuren, {'schiet_R': 'on',
                                                       'info_BB': 'on',
                                                       'voorkeur_dt': 'on'})
-        self.assert_is_redirect(resp, '/schutter/')     # naar profiel
+        self.assert_is_redirect(resp, '/sporter/')     # naar profiel
         self.assertEqual(SchutterBoog.objects.count(), 5)
         self.assertEqual(SchutterVoorkeuren.objects.count(), 1)
 
@@ -136,7 +136,7 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
 
         # DT voorkeur uitzetten
         resp = self.client.post(self.url_voorkeuren, {'schiet_R': 'on', 'info_BB': 'on'})
-        self.assert_is_redirect(resp, '/schutter/')     # naar profiel
+        self.assert_is_redirect(resp, '/sporter/')     # naar profiel
 
         obj = SchutterBoog.objects.get(nhblid=self.nhblid1, boogtype=self.boog_R)
         self.assertFalse(obj.heeft_interesse)
@@ -147,7 +147,7 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
 
         # voorkeur competitie weer aan zetten
         resp = self.client.post(self.url_voorkeuren, {'voorkeur_meedoen_competitie': 'on'})
-        self.assert_is_redirect(resp, '/schutter/')     # naar profiel
+        self.assert_is_redirect(resp, '/sporter/')     # naar profiel
 
         voorkeuren = SchutterVoorkeuren.objects.all()[0]
         self.assertTrue(voorkeuren.voorkeur_meedoen_competitie)
@@ -159,7 +159,7 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
 
         # does een post zonder wijzigingen (voor de coverage)
         resp = self.client.post(self.url_voorkeuren, {'voorkeur_meedoen_competitie': 'on'})
-        self.assert_is_redirect(resp, '/schutter/')     # naar profiel
+        self.assert_is_redirect(resp, '/sporter/')     # naar profiel
 
         self.e2e_assert_other_http_commands_not_supported(self.url_voorkeuren, post=False)
 
@@ -232,7 +232,7 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
 
     def test_wijzig_wachtwoord(self):
         # zelfde test als in Account.test_wachtwoord
-        # maar ivm nhblid koppeling wordt 'Schutter' menu gekozen
+        # maar ivm nhblid koppeling wordt 'Sporter' menu gekozen
 
         # login as HWL
         self.e2e_login_and_pass_otp(self.account_hwl)

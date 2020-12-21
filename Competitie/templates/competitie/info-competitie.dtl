@@ -151,10 +151,10 @@ Vraag op je vereniging waar en wanneer de wedstrijden in jouw regio gehouden wor
 <p>De regiocompetitie is per boog type, leeftijdsgroep en speelsterkte opgedeeld in wedstrijdklassen.
 Je schiet <b>7 rondes</b>, waarvan de beste 6 tellend zijn.</p>
 
-<p>Schutters die vorige seizoen 6 scores neergezet hebben krijgen aan de hand van dat gemiddelde een <i>aanvangsgemiddelde</i> waarmee de indeling op speelsterkte gedaan wordt.
-Nieuwe schutters krijgen na 3 scores hun speelsterkte vastgesteld.</p>
+<p>Sporters die vorige seizoen 6 scores neergezet hebben krijgen aan de hand van dat gemiddelde een <i>aanvangsgemiddelde</i> waarmee de indeling op speelsterkte gedaan wordt.
+Nieuwe sporters krijgen na 3 scores hun speelsterkte vastgesteld.</p>
 
-<p>In elke van de {{ klassen_count }} wedstrijdklassen wordt de schutter met de hoogste score gekroond tot <b>regiokampioen</b>.</p>
+<p>In elke van de {{ klassen_count }} wedstrijdklassen wordt de sporter met de hoogste score gekroond tot <b>regiokampioen</b>.</p>
 
 
 <table class="striped">
@@ -170,8 +170,8 @@ Nieuwe schutters krijgen na 3 scores hun speelsterkte vastgesteld.</p>
 <p>&nbsp;</p>
 <h5>Rayonkampioenschappen (RK)</h5>
 
-<p>De Rayonkampioenschappen worden in elk van de 4 rayons georganiseerd voor de schutters uit de 4 regio's van het rayon.</p>
-<p>In elke wedstrijdklasse nemen 24 schutters het tegen elkaar op, bestaande uit de 4 regiokampioenen aangevuld met de 20 beste schutters uit de regiocompetities.</p>
+<p>De Rayonkampioenschappen worden in elk van de 4 rayons georganiseerd voor de sporters uit de 4 regio's van het rayon.</p>
+<p>In elke wedstrijdklasse nemen 24 sporters het tegen elkaar op, bestaande uit de 4 regiokampioenen aangevuld met de 20 beste sporters uit de regiocompetities.</p>
 
 <p>Voor aspiranten geldt een open inschrijving (iedereen die wil mag meedoen).</p>
 
@@ -233,27 +233,27 @@ Nieuwe schutters krijgen na 3 scores hun speelsterkte vastgesteld.</p>
 
 <p>&nbsp;</p>
 <h6>Indoor knock-out finales</h6>
-<p>De knock-out finales (alleen voor de Indoor competitie) begint met de beste 16 schutters, waarvan de 8 winnaars doorgaan naar de kwartfinale.
+<p>De knock-out finales (alleen voor de Indoor competitie) begint met de beste 16 sporters, waarvan de 8 winnaars doorgaan naar de kwartfinale.
 Uit de kwartfinale gaan de 4 winnaars door naar de halve finale. Zie het schema hier onder.</p>
 
 <p>De winnaars van de halve finales gaan naar de gouden finale voor plaats 1 en 2.
-De overige twee schutters uit de halve finales gaan naar de brozen finale voor plaats 3 en 4.</p>
+De overige twee sporters uit de halve finales gaan naar de brozen finale voor plaats 3 en 4.</p>
 
 <table class="white">
     <tr>
-        <td class="center-align"><b>Achtste finale</b><br>(16<span class="hide-on-small-only"> schutters</span>)</td>
-        <td class="center-align"><b>Kwart finale</b><br>(8<span class="hide-on-small-only"> schutters</span>)</td>
-        <td class="center-align"><b>Halve finale</b><br>(4<span class="hide-on-small-only"> schutters</span>)</td>
-        <td class="center-align"><b>Bronzen finale</b><br>(2<span class="hide-on-small-only"> schutters</span>)</td>
-        <td class="center-align"><b>Gouden finale</b><br>(2<span class="hide-on-small-only"> schutters</span>)</td>
+        <td class="center-align"><b>Achtste finale</b><br>(16<span class="hide-on-small-only"> sporters</span>)</td>
+        <td class="center-align"><b>Kwart finale</b><br>(8<span class="hide-on-small-only"> sporters</span>)</td>
+        <td class="center-align"><b>Halve finale</b><br>(4<span class="hide-on-small-only"> sporters</span>)</td>
+        <td class="center-align"><b>Bronzen finale</b><br>(2<span class="hide-on-small-only"> sporters</span>)</td>
+        <td class="center-align"><b>Gouden finale</b><br>(2<span class="hide-on-small-only"> sporters</span>)</td>
     </tr>
 
     <tr>
         <td class="center-align"><span class="nhb-blauw-text">#1</span><span class="hide-on-small-only"> tegen</span><br class="show-on-med-and-up"/>#16</td>
-        <td class="center-align" rowspan="2">2<span class="hide-on-small-only"> schutters</span></td>
-        <td class="center-align" rowspan="4">2<span class="hide-on-small-only"> schutters</span></td>
-        <td class="center-align" rowspan="8">2<span class="hide-on-small-only"> schutters</span></td>
-        <td class="center-align" rowspan="8">2<span class="hide-on-small-only"> schutters</span></td>
+        <td class="center-align" rowspan="2">2<span class="hide-on-small-only"> sporters</span></td>
+        <td class="center-align" rowspan="4">2<span class="hide-on-small-only"> sporters</span></td>
+        <td class="center-align" rowspan="8">2<span class="hide-on-small-only"> sporters</span></td>
+        <td class="center-align" rowspan="8">2<span class="hide-on-small-only"> sporters</span></td>
     </tr>
     <tr>
         <td class="center-align">#8<span class="hide-on-small-only"> tegen</span><br class="show-on-med-and-up"/>#9</td>
@@ -261,7 +261,7 @@ De overige twee schutters uit de halve finales gaan naar de brozen finale voor p
 
     <tr>
         <td class="center-align">#5<span class="hide-on-small-only"> tegen</span><br class="show-on-med-and-up"/>#12</td>
-        <td class="center-align" rowspan="2">2<span class="hide-on-small-only"> schutters</span></td>
+        <td class="center-align" rowspan="2">2<span class="hide-on-small-only"> sporters</span></td>
     </tr>
     <tr>
         <td class="center-align"><span class="nhb-blauw-text">#4</span><span class="hide-on-small-only"> tegen</span><br class="show-on-med-and-up"/>#13</td>
@@ -269,8 +269,8 @@ De overige twee schutters uit de halve finales gaan naar de brozen finale voor p
 
     <tr>
         <td class="center-align"><span class="nhb-blauw-text">#3</span><span class="hide-on-small-only"> tegen</span><br class="show-on-med-and-up"/>#14</td>
-        <td class="center-align" rowspan="2">2<span class="hide-on-small-only"> schutters</span></td>
-        <td class="center-align" rowspan="4">2<span class="hide-on-small-only"> schutters</span></td>
+        <td class="center-align" rowspan="2">2<span class="hide-on-small-only"> sporters</span></td>
+        <td class="center-align" rowspan="4">2<span class="hide-on-small-only"> sporters</span></td>
     </tr>
     <tr>
         <td class="center-align">#6<span class="hide-on-small-only"> tegen</span><br class="show-on-med-and-up"/>#11</td>
@@ -278,7 +278,7 @@ De overige twee schutters uit de halve finales gaan naar de brozen finale voor p
 
     <tr>
         <td class="center-align">#7<span class="hide-on-small-only"> tegen</span><br class="show-on-med-and-up"/>#10</td>
-        <td class="center-align" rowspan="2">2<span class="hide-on-small-only"> schutters</span></td>
+        <td class="center-align" rowspan="2">2<span class="hide-on-small-only"> sporters</span></td>
     </tr>
     <tr>
         <td class="center-align"><span class="nhb-blauw-text">#2</span><span class="hide-on-small-only"> tegen</span><br class="show-on-med-and-up"/>#15</td>
@@ -286,12 +286,12 @@ De overige twee schutters uit de halve finales gaan naar de brozen finale voor p
 
 </table>
 
-<p>Compound schutters schieten in de finale 5x3 pijlen en vergelijken hun totale score.
-Alle andere schutters schieten de finale volgens het set-systeem over 5 sets van 3 pijlen.
-Na elke set krijgen de schutters setpunten: 0 (laagste score), 1 (gelijke score) of 2 (hoogste score).</p>
+<p>Compound sporters schieten in de finale 5x3 pijlen en vergelijken hun totale score.
+Alle andere sporters schieten de finale volgens het set-systeem over 5 sets van 3 pijlen.
+Na elke set krijgen de sporters setpunten: 0 (laagste score), 1 (gelijke score) of 2 (hoogste score).</p>
 
-<p>Als de compound schutters met gelijke score eindigen, dan volgt een shoot-off.
-De set-systeem schutters schieten een shoot-off als na 5 sets the score gelijk is (5-5).
+<p>Als de compound sporters met gelijke score eindigen, dan volgt een shoot-off.
+De set-systeem sporters schieten een shoot-off als na 5 sets the score gelijk is (5-5).
 In de shoot-off wordt 1 pijl gesloten en beslist de scheidsrechter welke pijl het dichts bij het midden zit.</p>
 
 
@@ -299,7 +299,7 @@ In de shoot-off wordt 1 pijl gesloten en beslist de scheidsrechter welke pijl he
 <h5>Bondskampioenschappen (BK)</h5>
 
 <p>De Bondskampioenschappen worden landelijk georganiseerd.</p>
-<p>In elke wedstrijdklasse nemen 24 schutters het tegen elkaar op, bestaande uit de 4 rayonkampioenen aangevuld met de 20 beste schutters uit de rayonkampioenschappen.</p>
+<p>In elke wedstrijdklasse nemen 24 sporters het tegen elkaar op, bestaande uit de 4 rayonkampioenen aangevuld met de 20 beste sporters uit de rayonkampioenschappen.</p>
 
 <p>Voor aspiranten geldt een open inschrijving (iedereen die wil mag meedoen).</p>
 

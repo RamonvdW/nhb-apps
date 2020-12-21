@@ -227,7 +227,7 @@
 
     function toevoegen()
     {
-        // voeg de gevonden schutter toe aan de tabel
+        // voeg de gevonden sporter toe aan de tabel
         // en geef dit door aan de website via een POST
 
         // als nhb_nr al in de tabel staat, dan niet toevoegen
@@ -261,7 +261,7 @@
 
             if (row_nhb_nr == nhb_nr)
             {
-                // al bestaande regel van deze schutter gevonden
+                // al bestaande regel van deze sporter gevonden
                 // verwijder deze boog uit het zoekresultaat
                 const row_pk = row.cells[0].dataset.pk;
                 for (let i=0, tup; tup = bogen[i]; i++)
@@ -326,7 +326,7 @@
         document.getElementById('id_nhbnr').value = "";
 
         const el_naam = document.getElementById('id_naam');
-        el_naam.innerHTML = "Naam van de schutter";
+        el_naam.innerHTML = "Naam van de sporter";
         el_naam.style.color = "grey";
 
         const el_ver = document.getElementById('id_ver');
@@ -620,7 +620,7 @@
         </td>
 
         <td id="id_naam" style="color:gray">
-            <span>Naam van de schutter</span>
+            <span>Naam van de sporter</span>
         </td>
 
         <td>

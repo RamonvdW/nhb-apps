@@ -71,7 +71,7 @@
 
     {% if regiocomp_nog_actief %}
         <p class="red-text">De regiocompetitie is nog niet afgesloten, dus onderstaande lijst kan nog wijzigingen.</p>
-        <p>Schutters worden in de lijst opgenomen als ze 6 of meer scores hebben.</p>
+        <p>Sporters worden in de lijst opgenomen als ze 6 of meer scores hebben.</p>
     {% endif %}
 
     <table class="white">
@@ -83,7 +83,7 @@
                 </tr>
                 <tr>
                     <th></th>   <!-- rank -->
-                    <th>Schutter</th>
+                    <th>Sporter</th>
                     <th class="hide-on-small-only">Vereniging</th>
                     <th class="center-align">Gemiddelde</th>
                     {% if is_lijst_rk %}

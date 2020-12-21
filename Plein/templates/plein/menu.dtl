@@ -58,7 +58,7 @@
 {% if menu_show_schutter %}
 <li{% if menu_actief == "schutter" %} class="actief"{% endif %}>
     <a href="{% url 'Schutter:profiel' %}" class="white-text">
-    <i class="material-icons-round white-text">portrait</i>Schutter</a>
+    <i class="material-icons-round white-text">portrait</i>Sporter</a>
 </li>
 {% endif %}
 

@@ -622,7 +622,7 @@ class LijstRkSchuttersView(UserPassesTestMixin, TemplateView):
             context['aantal_bevestigd'] = aantal_bevestigd
             context['aantal_attentie'] = aantal_attentie
 
-        context['wiki_rk_schutters'] = settings.WIKI_URL + '/' + settings.HANDLEIDING_RK_SCHUTTERS
+        context['wiki_rk_schutters'] = settings.WIKI_URL + '/' + settings.HANDLEIDING_RK_SELECTIE
 
         menu_dynamics(self.request, context, actief='competitie')
         return context
@@ -630,7 +630,7 @@ class LijstRkSchuttersView(UserPassesTestMixin, TemplateView):
 
 class WijzigStatusRkSchutterView(UserPassesTestMixin, TemplateView):
 
-    """ Deze view laat de RKO de status van een RK schutters aanpassen """
+    """ Deze view laat de RKO de status van een RK selectie aanpassen """
 
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_WIJZIG_STATUS_RK_SCHUTTER
@@ -758,7 +758,7 @@ class WijzigStatusRkSchutterView(UserPassesTestMixin, TemplateView):
 
 class RayonLimietenView(UserPassesTestMixin, TemplateView):
 
-    """ Deze view laat de RKO de status van een RK schutters aanpassen """
+    """ Deze view laat de RKO de status van een RK selectie aanpassen """
 
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_WIJZIG_LIMIETEN_RK
@@ -821,7 +821,7 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
 
         context['url_terug'] = reverse('Competitie:overzicht')
 
-        context['wiki_rk_schutters'] = settings.WIKI_URL + '/' + settings.HANDLEIDING_RK_SCHUTTERS
+        context['wiki_rk_schutters'] = settings.WIKI_URL + '/' + settings.HANDLEIDING_RK_SELECTIE
 
         menu_dynamics(self.request, context, actief='competitie')
         return context

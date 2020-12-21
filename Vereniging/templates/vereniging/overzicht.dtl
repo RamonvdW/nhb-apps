@@ -56,7 +56,7 @@
     <!-- wedstrijden -->
     {% for deelcomp_rk in deelcomps_rk %}
         {% if deelcomp_rk.url_lijst_rk %}
-            {% include 'plein/card.dtl' with title="RK schutters" text=deelcomp_rk.text_str icon="receipt" url=deelcomp_rk.url_lijst_rk %}
+            {% include 'plein/card.dtl' with title="RK selectie" text=deelcomp_rk.text_str icon="receipt" url=deelcomp_rk.url_lijst_rk %}
         {% endif %}
     {% endfor %}
 

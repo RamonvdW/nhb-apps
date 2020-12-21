@@ -77,11 +77,11 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         lid.email = lid.account.email
         lid.save()
 
-        self.url_profiel = '/schutter/'
-        self.url_voorkeuren = '/schutter/voorkeuren/'
-        self.url_aanmelden = '/schutter/regiocompetitie/aanmelden/%s/%s/'   # deelcomp_pk, schutterboog_pk
+        self.url_profiel = '/sporter/'
+        self.url_voorkeuren = '/sporter/voorkeuren/'
+        self.url_aanmelden = '/sporter/regiocompetitie/aanmelden/%s/%s/'   # deelcomp_pk, schutterboog_pk
         self.url_bevestig_aanmelden = self.url_aanmelden + 'bevestig/'
-        self.url_afmelden = '/schutter/regiocompetitie/afmelden/%s/'        # regiocomp_pk
+        self.url_afmelden = '/sporter/regiocompetitie/afmelden/%s/'        # regiocomp_pk
 
     def _prep_voorkeuren(self):
         # haal de voorkeuren op - hiermee worden de SchutterBoog records aangemaakt

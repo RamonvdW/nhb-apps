@@ -63,13 +63,13 @@ class TestSchutterRegistreer(E2EHelpers, TestCase):
 
     def test_get(self):
         # test registratie via het formulier
-        resp = self.client.get('/schutter/registreer/')
+        resp = self.client.get('/sporter/registreer/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('schutter/registreer-nhb-account.dtl', 'plein/site_layout.dtl'))
 
     def test_partialfields(self):
-        resp = self.client.post('/schutter/registreer/',
+        resp = self.client.post('/sporter/registreer/',
                                 {'nhb_nummer': '100001',
                                  'email': 'rdetester@gmail.not',
                                  'nieuw_wachtwoord': ''})
@@ -79,7 +79,7 @@ class TestSchutterRegistreer(E2EHelpers, TestCase):
         self.assertFormError(resp, 'form', None, 'Niet alle velden zijn ingevuld')
 
     def test_invalidfields(self):
-        resp = self.client.post('/schutter/registreer/',
+        resp = self.client.post('/sporter/registreer/',
                                 {'nhb_nummer': '100678',
                                  'email': 'is geen email',
                                  'nieuw_wachtwoord': E2EHelpers.WACHTWOORD})
@@ -89,7 +89,7 @@ class TestSchutterRegistreer(E2EHelpers, TestCase):
         self.assertFormError(resp, 'form', None, 'De gegevens worden niet geaccepteerd')
 
     def test_bad_nhb_nr(self):
-        resp = self.client.post('/schutter/registreer/',
+        resp = self.client.post('/sporter/registreer/',
                                 {'nhb_nummer': 'hallo!',
                                  'email': 'test@test.not',
                                  'nieuw_wachtwoord': E2EHelpers.WACHTWOORD},
@@ -100,7 +100,7 @@ class TestSchutterRegistreer(E2EHelpers, TestCase):
         self.assertFormError(resp, 'form', None, 'Onbekend NHB nummer')
 
     def test_nonexisting_nr(self):
-        resp = self.client.post('/schutter/registreer/',
+        resp = self.client.post('/sporter/registreer/',
                                 {'nhb_nummer': '999999',
                                  'email': 'test@test.not',
                                  'nieuw_wachtwoord': E2EHelpers.WACHTWOORD},
@@ -111,7 +111,7 @@ class TestSchutterRegistreer(E2EHelpers, TestCase):
         self.assertFormError(resp, 'form', None, 'Onbekend NHB nummer')
 
     def test_geen_email(self):
-        resp = self.client.post('/schutter/registreer/',
+        resp = self.client.post('/sporter/registreer/',
                                 {'nhb_nummer': '100002',
                                  'email': 'rdetester@gmail.not',
                                  'nieuw_wachtwoord': E2EHelpers.WACHTWOORD},
@@ -122,7 +122,7 @@ class TestSchutterRegistreer(E2EHelpers, TestCase):
         self.assertFormError(resp, 'form', None, 'Geen email adres bekend. Neem contact op met de secretaris van je vereniging.')
 
     def test_verkeerde_email(self):
-        resp = self.client.post('/schutter/registreer/',
+        resp = self.client.post('/sporter/registreer/',
                                 {'nhb_nummer': '100001',
                                  'email': 'rdetester@gmail.yes',
                                  'nieuw_wachtwoord': E2EHelpers.WACHTWOORD},
@@ -133,7 +133,7 @@ class TestSchutterRegistreer(E2EHelpers, TestCase):
         self.assertFormError(resp, 'form', None, 'De combinatie van NHB nummer en email worden niet herkend. Probeer het nog eens.')
 
     def test_registreer(self):
-        resp = self.client.post('/schutter/registreer/',
+        resp = self.client.post('/sporter/registreer/',
                                 {'nhb_nummer': '100001',
                                  'email': 'rDeTester@gmail.not',    # dekt case-insensitive emailadres
                                  'nieuw_wachtwoord': E2EHelpers.WACHTWOORD},
@@ -188,7 +188,7 @@ class TestSchutterRegistreer(E2EHelpers, TestCase):
         self.assertEqual(account.volledige_naam(), 'Ramon de Tester')
 
     def test_bestaat_al(self):
-        resp = self.client.post('/schutter/registreer/',
+        resp = self.client.post('/sporter/registreer/',
                                 {'nhb_nummer': '100001',
                                  'email': 'rdetester@gmail.not',
                                  'nieuw_wachtwoord': E2EHelpers.WACHTWOORD},
@@ -198,7 +198,7 @@ class TestSchutterRegistreer(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('account/email_aangemaakt.dtl', 'plein/site_layout.dtl'))
 
         # tweede poging
-        resp = self.client.post('/schutter/registreer/',
+        resp = self.client.post('/sporter/registreer/',
                                 {'nhb_nummer': '100001',
                                  'email': 'rdetester@gmail.not',
                                  'nieuw_wachtwoord': E2EHelpers.WACHTWOORD},
@@ -210,7 +210,7 @@ class TestSchutterRegistreer(E2EHelpers, TestCase):
 
     def test_zwak_wachtwoord(self):
         # te kort
-        resp = self.client.post('/schutter/registreer/',
+        resp = self.client.post('/sporter/registreer/',
                                 {'nhb_nummer': '100001',
                                  'email': 'rdetester@gmail.not',
                                  'nieuw_wachtwoord': 'te kort'},
@@ -221,7 +221,7 @@ class TestSchutterRegistreer(E2EHelpers, TestCase):
         self.assertContains(resp, "Wachtwoord moet minimaal 9 tekens lang zijn")
 
         # verboden reeks
-        resp = self.client.post('/schutter/registreer/',
+        resp = self.client.post('/sporter/registreer/',
                                 {'nhb_nummer': '100001',
                                  'email': 'rdetester@gmail.not',
                                  'nieuw_wachtwoord': 'handboogsport'},
@@ -232,7 +232,7 @@ class TestSchutterRegistreer(E2EHelpers, TestCase):
         self.assertContains(resp, "Wachtwoord is niet sterk genoeg")
 
         # NHB nummer in wachtwoord
-        resp = self.client.post('/schutter/registreer/',
+        resp = self.client.post('/sporter/registreer/',
                                 {'nhb_nummer': '100001',
                                  'email': 'rdetester@gmail.not',
                                  'nieuw_wachtwoord': 'yoho100001jaha'},
@@ -243,7 +243,7 @@ class TestSchutterRegistreer(E2EHelpers, TestCase):
         self.assertContains(resp, "Wachtwoord bevat een verboden reeks")
 
         # keyboard walk 1
-        resp = self.client.post('/schutter/registreer/',
+        resp = self.client.post('/sporter/registreer/',
                                 {'nhb_nummer': '100001',
                                  'email': 'rdetester@gmail.not',
                                  'nieuw_wachtwoord': 'qwertyuiop'},
@@ -254,7 +254,7 @@ class TestSchutterRegistreer(E2EHelpers, TestCase):
         self.assertContains(resp, "Wachtwoord is niet sterk genoeg")
 
         # keyboard walk 2
-        resp = self.client.post('/schutter/registreer/',
+        resp = self.client.post('/sporter/registreer/',
                                 {'nhb_nummer': '100001',
                                  'email': 'rdetester@gmail.not',
                                  'nieuw_wachtwoord': 'asdfghjkl'},
@@ -265,7 +265,7 @@ class TestSchutterRegistreer(E2EHelpers, TestCase):
         self.assertContains(resp, "Wachtwoord is niet sterk genoeg")
 
         # keyboard walk 3
-        resp = self.client.post('/schutter/registreer/',
+        resp = self.client.post('/sporter/registreer/',
                                 {'nhb_nummer': '100001',
                                  'email': 'rdetester@gmail.not',
                                  'nieuw_wachtwoord': 'zxcvbnm,.'},
@@ -276,7 +276,7 @@ class TestSchutterRegistreer(E2EHelpers, TestCase):
         self.assertContains(resp, "Wachtwoord is niet sterk genoeg")
 
         # keyboard walk 4
-        resp = self.client.post('/schutter/registreer/',
+        resp = self.client.post('/sporter/registreer/',
                                 {'nhb_nummer': '100001',
                                  'email': 'rdetester@gmail.not',
                                  'nieuw_wachtwoord': '1234567890!'},
@@ -287,7 +287,7 @@ class TestSchutterRegistreer(E2EHelpers, TestCase):
         self.assertContains(resp, "Wachtwoord is niet sterk genoeg")
 
         # te weinig verschillende tekens 1
-        resp = self.client.post('/schutter/registreer/',
+        resp = self.client.post('/sporter/registreer/',
                                 {'nhb_nummer': '100001',
                                  'email': 'rdetester@gmail.not',
                                  'nieuw_wachtwoord': 'xxxxxxxxx'},
@@ -298,7 +298,7 @@ class TestSchutterRegistreer(E2EHelpers, TestCase):
         self.assertContains(resp, "Wachtwoord bevat te veel gelijke tekens")
 
         # te weinig verschillende tekens 2
-        resp = self.client.post('/schutter/registreer/',
+        resp = self.client.post('/sporter/registreer/',
                                 {'nhb_nummer': '100001',
                                  'email': 'rdetester@gmail.not',
                                  'nieuw_wachtwoord': 'jaJAjaJAjaJA'},
@@ -309,7 +309,7 @@ class TestSchutterRegistreer(E2EHelpers, TestCase):
         self.assertContains(resp, "Wachtwoord bevat te veel gelijke tekens")
 
         # te weinig verschillende tekens 3
-        resp = self.client.post('/schutter/registreer/',
+        resp = self.client.post('/sporter/registreer/',
                                 {'nhb_nummer': '100001',
                                  'email': 'rdetester@gmail.not',
                                  'nieuw_wachtwoord': 'Jo!Jo!Jo!Jo!Jo!'},
@@ -320,7 +320,7 @@ class TestSchutterRegistreer(E2EHelpers, TestCase):
         self.assertContains(resp, "Wachtwoord bevat te veel gelijke tekens")
 
         # te weinig verschillende tekens 4
-        resp = self.client.post('/schutter/registreer/',
+        resp = self.client.post('/sporter/registreer/',
                                 {'nhb_nummer': '100001',
                                  'email': 'rdetester@gmail.not',
                                  'nieuw_wachtwoord': 'helphelphelphelp'},
@@ -334,7 +334,7 @@ class TestSchutterRegistreer(E2EHelpers, TestCase):
         self.nhblid_100001.is_actief_lid = False
         self.nhblid_100001.save()
 
-        resp = self.client.post('/schutter/registreer/',
+        resp = self.client.post('/sporter/registreer/',
                                 {'nhb_nummer': '100001',
                                  'email': self.nhblid_100001.email,
                                  'nieuw_wachtwoord': E2EHelpers.WACHTWOORD},
@@ -354,7 +354,7 @@ class TestSchutterRegistreer(E2EHelpers, TestCase):
         functie = Functie.objects.get(rol='SEC', nhb_ver=self.nhbver)
         self.assertEqual(functie.accounts.count(), 0)
 
-        resp = self.client.post('/schutter/registreer/',
+        resp = self.client.post('/sporter/registreer/',
                                 {'nhb_nummer': '100001',
                                  'email': 'rdetester@gmail.not',
                                  'nieuw_wachtwoord': E2EHelpers.WACHTWOORD},

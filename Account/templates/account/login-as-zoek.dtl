@@ -46,7 +46,7 @@
 <div class="container z-depth-2 white">
     <div class="row nhb-blauw white-text">
         <div class="col s12 center-align">
-            <h5>Zoek schutter</h5>
+            <h5>Zoek gebruiker</h5>
             <p>Zoek op username of gebruiker naam</p>
         </div>
     </div>
@@ -69,7 +69,7 @@
 
 {% if zoekterm %}
     {% if object_list.count %}
-        <h5>Gevonden schutters ({{ object_list.count }})</h5>
+        <h5>Gevonden gebruikers ({{ object_list.count }})</h5>
         <ul class="collapsible">
             {% for obj in object_list %}
                 <!-- obj is Account -->

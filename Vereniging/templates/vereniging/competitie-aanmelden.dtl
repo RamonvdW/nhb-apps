@@ -21,7 +21,7 @@
 
         <p>Onderstaande lijst toont alleen leden die ingesteld hebben met welke boog ze schieten. Je kan ze hier bij helpen via het kaartje "voorkeuren leden".</p>
 
-        <p>Aanmelden gaat in bulk: kies de voorkeuren, zet daarna een vinkje bij de schutters die je aan wilt melden en druk dan rode knop in de rechter onderhoek. Leden die al aangemeld zijn hebben een grijs vinkje.</p>
+        <p>Aanmelden gaat in bulk: kies de voorkeuren, zet daarna een vinkje bij de sporters die je aan wilt melden en druk dan rode knop in de rechter onderhoek. Leden die al aangemeld zijn hebben een grijs vinkje.</p>
         <p>Leden die aangegeven hebben niet mee te willen doen met de (winter-)competities zijn helemaal grijs.</p>
 
         <table class="white">
@@ -101,7 +101,7 @@
             {% for obj in leden_jeugd %}
                 <tr>
                     {% if not obj.wil_competitie %}
-                        <!-- schutter wil niet meedoen -->
+                        <!-- sporter wil niet meedoen -->
                         <td><!-- geen checkbox --></td>
                         <td class="grey-text">{{ obj.nhb_nr }}</td>
                         <td class="grey-text">{{ obj.volledige_naam }}</td>
@@ -189,7 +189,7 @@
 
     {% if mag_aanmelden %}
         <div class="fixed-action-btn">
-            <input class="btn-nhb-rood" type="submit" value="Geselecteerde schutters aanmelden">
+            <input class="btn-nhb-rood" type="submit" value="Geselecteerde sporters aanmelden">
         </div>
     {% endif %}
 </form>

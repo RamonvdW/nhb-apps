@@ -154,7 +154,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.url_voorkeuren = '/vereniging/leden-voorkeuren/'
         self.url_inschrijven = '/vereniging/leden-aanmelden/competitie/%s/'      # <comp_pk>
         self.url_ingeschreven = '/vereniging/leden-ingeschreven/competitie/%s/'  # <deelcomp_pk>
-        self.url_schutter_voorkeuren = '/schutter/voorkeuren/%s/'                # <nhblid_pk>
+        self.url_schutter_voorkeuren = '/sporter/voorkeuren/%s/'                # <nhblid_pk>
 
     def _create_histcomp(self):
         # (strategisch gekozen) historische data om klassegrenzen uit te bepalen
@@ -238,7 +238,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
     def _zet_schutter_voorkeuren(self, nhb_nr):
         # deze functie kan alleen gebruikt worden als HWL
-        url_schutter_voorkeuren = '/schutter/voorkeuren/'
+        url_schutter_voorkeuren = '/sporter/voorkeuren/'
 
         # haal als HWL de voorkeuren pagina op van een lid van de vereniging
         # dit maakt ook de SchutterBoog records aan

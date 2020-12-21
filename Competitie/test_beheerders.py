@@ -176,7 +176,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
                 lid.save()
 
                 # haal de schutter voorkeuren op, zodat de schutterboog records aangemaakt worden
-                url_voorkeuren = '/schutter/voorkeuren/%s/' % nhb_nr
+                url_voorkeuren = '/sporter/voorkeuren/%s/' % nhb_nr
                 resp = self.client.get(url_voorkeuren)
                 self.assertEqual(resp.status_code, 200)     # 200 = OK
 

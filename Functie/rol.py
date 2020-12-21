@@ -59,7 +59,7 @@ url2rol = {
     'HWL': Rollen.ROL_HWL,
     'WL': Rollen.ROL_WL,
     'SEC': Rollen.ROL_SEC,
-    'schutter': Rollen.ROL_SCHUTTER,
+    'sporter': Rollen.ROL_SCHUTTER,
     'geen': Rollen.ROL_NONE
 }
 
@@ -72,7 +72,7 @@ rol2url = {
     Rollen.ROL_HWL: 'HWL',
     Rollen.ROL_WL: 'WL',
     Rollen.ROL_SEC: 'SEC',
-    Rollen.ROL_SCHUTTER: 'schutter',
+    Rollen.ROL_SCHUTTER: 'sporter',
     Rollen.ROL_NONE: 'geen',
 }
 
@@ -328,10 +328,10 @@ def rol_bepaal_beschrijving(rol, functie_pk=None):
     elif rol in (Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_WL, Rollen.ROL_SEC):
         beschr = functie.beschrijving
     elif rol == Rollen.ROL_SCHUTTER:
-        beschr = 'Schutter'
+        beschr = 'Sporter'
     else:   # ook rol == None
         # dit komt alleen voor als account geen nhblid is maar wel OTP mag koppelen (is_staff of is_BB)
-        beschr = "Gebruiker"
+        beschr = 'Gebruiker'
     return beschr
 
 

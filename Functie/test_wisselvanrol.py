@@ -238,13 +238,13 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
 
         resp = self.client.get(self.url_wisselvanrol)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, "Schutter")
+        self.assertContains(resp, "Sporter")
         urls = self._get_wissel_urls(resp)
         self.assertIn(self.url_activeer_functie % self.functie_bko.pk, urls)
-        self.assertIn(self.url_activeer_rol % 'schutter', urls)
+        self.assertIn(self.url_activeer_rol % 'sporter', urls)
 
         self.e2e_wisselnaarrol_schutter()
-        self.e2e_check_rol('schutter')
+        self.e2e_check_rol('sporter')
 
     def test_rko(self):
         self.functie_rko.accounts.add(self.account_normaal)
@@ -253,10 +253,10 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
 
         resp = self.client.get(self.url_wisselvanrol)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, "Schutter")
+        self.assertContains(resp, "Sporter")
         urls = self._get_wissel_urls(resp)
         self.assertIn(self.url_activeer_functie % self.functie_rko.pk, urls)
-        self.assertIn(self.url_activeer_rol % 'schutter', urls)
+        self.assertIn(self.url_activeer_rol % 'sporter', urls)
 
     def test_rcl(self):
         self.functie_rcl.accounts.add(self.account_normaal)
@@ -266,12 +266,12 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
 
         resp = self.client.get(self.url_wisselvanrol)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, "Schutter")
+        self.assertContains(resp, "Sporter")
         urls = self._get_wissel_urls(resp)
         self.assertNotIn(self.url_activeer_functie % self.functie_sec.pk, urls)
         self.assertIn(self.url_activeer_functie % self.functie_rcl.pk, urls)
         self.assertIn(self.url_activeer_functie % self.functie_hwl.pk, urls)
-        self.assertIn(self.url_activeer_rol % 'schutter', urls)
+        self.assertIn(self.url_activeer_rol % 'sporter', urls)
 
     def test_hwl(self):
         self.functie_hwl.accounts.add(self.account_normaal)
@@ -281,12 +281,12 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
 
         resp = self.client.get(self.url_wisselvanrol)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, "Schutter")
+        self.assertContains(resp, "Sporter")
         urls = self._get_wissel_urls(resp)
         self.assertNotIn(self.url_activeer_functie % self.functie_sec.pk, urls)
         self.assertIn(self.url_activeer_functie % self.functie_hwl.pk, urls)
         self.assertIn(self.url_activeer_functie % self.functie_wl.pk, urls)
-        self.assertIn(self.url_activeer_rol % 'schutter', urls)
+        self.assertIn(self.url_activeer_rol % 'sporter', urls)
 
     def test_wl(self):
         self.functie_wl.accounts.add(self.account_normaal)
@@ -296,12 +296,12 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
 
         resp = self.client.get(self.url_wisselvanrol)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, "Schutter")
+        self.assertContains(resp, "Sporter")
         urls = self._get_wissel_urls(resp)
         self.assertNotIn(self.url_activeer_functie % self.functie_sec.pk, urls)
         self.assertNotIn(self.url_activeer_functie % self.functie_hwl.pk, urls)
         self.assertIn(self.url_activeer_functie % self.functie_wl.pk, urls)
-        self.assertIn(self.url_activeer_rol % 'schutter', urls)
+        self.assertIn(self.url_activeer_rol % 'sporter', urls)
 
     def test_functie_geen_rol(self):
         # test van een functie die niet resulteert in een rol
@@ -312,7 +312,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
 
         resp = self.client.get(self.url_wisselvanrol)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, "Schutter")
+        self.assertContains(resp, "Sporter")
 
     def test_geen_rolwissel(self):
         # dit raakt de exceptie in Account.rol:rol_mag_wisselen

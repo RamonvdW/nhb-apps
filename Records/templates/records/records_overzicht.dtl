@@ -22,7 +22,7 @@
     <p>Vind een record door te filteren:<br>
         <a class="btn-nhb-blauw" href="{% url 'Records:indiv' %}">Individuele records</a></p>
 
-    <p>Zoek in de records op naam van de schutter of een vereniging:<br>
+    <p>Zoek in de records op naam van de sporter of een vereniging:<br>
         <a class="btn-nhb-blauw" href="{% url 'Records:zoek' %}">Zoek in de records</a></p>
 
     <p>&nbsp;</p>

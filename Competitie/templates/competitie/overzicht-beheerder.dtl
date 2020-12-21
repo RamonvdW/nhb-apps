@@ -67,9 +67,9 @@
                 {% include 'plein/card.dtl' with title=deelcomp.titel text=deelcomp.tekst icon="date_range" url=deelcomp.url %}
             {% endfor %}
 
-            <!-- RK schutters -->
+            <!-- RK selectie -->
             {% if url_lijst_rk %}
-                {% include 'plein/card.dtl' with title="RK schutters" text="Toon lijst met schutters voor de Rayonkampioenschappen." icon="receipt" url=url_lijst_rk %}
+                {% include 'plein/card.dtl' with title="RK selectie" text="Selectie van sporters voor de Rayonkampioenschappen." icon="receipt" url=url_lijst_rk %}
             {% endif %}
 
             <!-- limieten RK -->
@@ -80,7 +80,7 @@
             <!-- toon inschrijvingen regiocompetitie -->
             {% for comp in competities %}
                 {% if comp.url_inschrijvingen %}
-                    {% include 'plein/card.dtl' with title=comp.titel_inschrijvingen text="Toon lijst met schutters ingeschreven voor de regiocompetitie van de "|add:comp.beschrijving|add:"." icon="receipt" url=comp.url_inschrijvingen %}
+                    {% include 'plein/card.dtl' with title=comp.titel_inschrijvingen text="Toon lijst met sporters ingeschreven voor de regiocompetitie van de "|add:comp.beschrijving|add:"." icon="receipt" url=comp.url_inschrijvingen %}
                 {% endif %}
             {% endfor %}
 
@@ -91,7 +91,7 @@
 
             <!-- toon klassegrenzen regiocompetitie -->
             {% url 'Competitie:klassegrenzen-tonen' as card_url %}
-            {% include 'plein/card.dtl' with title="Klassegrenzen" text="Toon de vastgestelde klassegrenzen voor de individuele wedstrijdklassen voor de competities." icon="equalizer" url=card_url %}
+            {% include 'plein/card.dtl' with title="Klassegrenzen" text="Vastgestelde klassegrenzen voor de wedstrijdklassen van de competities." icon="equalizer" url=card_url %}
 
             <!-- algemene informatie over de competities -->
             {% url 'Competitie:info-competitie' as card_url %}

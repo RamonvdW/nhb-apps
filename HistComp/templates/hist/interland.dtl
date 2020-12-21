@@ -15,11 +15,11 @@
 
 <p>Uitslag competitie van 25m1pijl seizoen: <b>{{ seizoen }}</b>.</p>
 
-<p>Onderstaande schutters hebben minimaal <b>5</b> scores neergezet in het seizoen.</p>
+<p>Onderstaande sporters hebben minimaal <b>5</b> scores neergezet in het seizoen.</p>
 
 <p>De wedstrijdleeftijd is berekend voor het jaar: <b>{{ wedstrijd_jaar }}</b>.</p>
 
-<p>Schutters met een wedstrijdleeftijd:<br>
+<p>Sporters met een wedstrijdleeftijd:<br>
 .. lager dan <b>{{ jeugd_min}}</b> zijn niet in de lijst opgenomen.<br>
 .. vanaf <b>{{ jeugd_min }}</b> tot en met <b>{{ jeugd_max }}</b> worden als <b>Jeugd</b> gemarkeerd.<br>
 .. boven de <b>{{ jeugd_max }}</b> krijgen simpelweg de opmerking <b>Senior</b>.</p>

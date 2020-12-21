@@ -6,37 +6,37 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}RK schutters{% endblock %}
+{% block title %}RK selectie{% endblock %}
 
 {% block pagina %}
 
-    <h4>RK schutters</h4>
+    <h4>RK selectie</h4>
 
     {% if aantal_klassen == 0 %}
 
-        <p>Op deze pagina wordt gebruikt om schutters van jouw vereniging aan-/af te melden voor de Rayonkampioenschappen.</p>
-        <p>Het lijkt erop dat geen schutters van jouw vereniging zich geplaatst hebben.</p>
+        <p>Op deze pagina wordt gebruikt om sporters van jouw vereniging aan-/af te melden voor de Rayonkampioenschappen.</p>
+        <p>Het lijkt erop dat geen sporters van jouw vereniging zich geplaatst hebben.</p>
 
     {% else %}
 
         {% if kan_wijzigen %}
-            <p>Jij kan schutters van je eigen verenigingen aanmelden of aanmelden voor de kampioenschappen. De RKO (zie Plein, Beheerders) kan dit voor alle verenigingen in het rayon.</p>
-            <p><span class="red-text">PAS OP!</span> Een schutter afmelden en weer aanmelden plaatst deze op de lijst van reserve-schutters (totdat een deelnemer zich afmeldt).</p>
+            <p>Jij kan sporters van je eigen verenigingen aanmelden of aanmelden voor de kampioenschappen. De RKO (zie Plein, Beheerders) kan dit voor alle verenigingen in het rayon.</p>
+            <p><span class="red-text">PAS OP!</span> Een sporter afmelden en weer aanmelden plaatst deze op de lijst van reserve-sporters (totdat een deelnemer zich afmeldt).</p>
         {% else %}
-            <p>De HWL van jouw vereniging en de RKO kunnen schutters aanmelden en afmelden.</p>
+            <p>De HWL van jouw vereniging en de RKO kunnen sporters aanmelden en afmelden.</p>
         {% endif %}
 
         <div class="white shrink-wrap-5">
             {% if url_alles %}
-                <a class="margin-5 btn-nhb-blauw btn-small disabled" href="#">Toon alleen onze schutters</a>
+                <a class="margin-5 btn-nhb-blauw btn-small disabled" href="#">Toon alleen onze sporters</a>
                 <a class="margin-5 btn-nhb-blauw btn-small" href="{{ url_alles }}">Toon alle deelnemers</a>
             {% else %}
-                <a class="margin-5 btn-nhb-blauw btn-small" href="{{ url_filtered }}">Toon alleen onze schutters</a>
+                <a class="margin-5 btn-nhb-blauw btn-small" href="{{ url_filtered }}">Toon alleen onze sporters</a>
                 <a class="margin-5 btn-nhb-blauw btn-small disabled" href="#">Toon alle deelnemers</a>
             {% endif %}
         </div>
 
-        <p>Hieronder tonen we de lijst voor elk van de {{ aantal_klassen }} wedstrijdklassen van de Rayonkampioenschappen <b>waarin schutters van jouw vereniging</b> opgenomen zijn. Onder Competitie uitslag, Rayon kan je de volledige deelnemerslijst bekijken.</p>
+        <p>Hieronder tonen we de lijst voor elk van de {{ aantal_klassen }} wedstrijdklassen van de Rayonkampioenschappen <b>waarin sporters van jouw vereniging</b> opgenomen zijn. Onder Competitie uitslag, Rayon kan je de volledige deelnemerslijst bekijken.</p>
 
         <table class="white">
 
@@ -49,7 +49,7 @@
 
                     <tr>
                         <th><!-- volgorde --></th>
-                        <th>Schutter</th>
+                        <th>Sporter</th>
                         <th>Vereniging</th>
                         <th class="hide-on-small-only">Gemiddelde</th>
                         <th>Notitie</th>

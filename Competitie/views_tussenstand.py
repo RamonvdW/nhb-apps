@@ -180,6 +180,10 @@ class TussenstandRegioView(TemplateView):
         except ValueError:
             raise Resolver404()
 
+        # voorkom 404 voor leden in de administratieve regio
+        if regio_nr == 100:
+            regio_nr = 101
+
         try:
             deelcomp = (DeelCompetitie
                         .objects
@@ -189,7 +193,6 @@ class TussenstandRegioView(TemplateView):
                              competitie__is_afgesloten=False,
                              nhb_regio__regio_nr=regio_nr))
         except DeelCompetitie.DoesNotExist:
-            # niet mogelijk: return HttpResponseRedirect(reverse('Competitie:tussenstand'))
             raise Resolver404()
 
         context['deelcomp'] = deelcomp

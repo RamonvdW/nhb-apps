@@ -77,7 +77,7 @@
     <!-- score geschiedenis -->
     {% if rol_is_bb or rol_is_it %}
         {% url 'Score:geschiedenis' as card_url %}
-        {% include 'plein/card.dtl' with title="Score Geschiedenis" text="Bekijk de wijzigingen / geschiedenis van de scores van een schutter." icon="history" url=card_url %}
+        {% include 'plein/card.dtl' with title="Score Geschiedenis" text="Bekijk de wijzigingen / geschiedenis van de scores van een sporter." icon="history" url=card_url %}
     {% endif %}
 
 </div>

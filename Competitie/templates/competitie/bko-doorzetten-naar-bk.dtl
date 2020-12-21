@@ -13,7 +13,7 @@
     <h4>Competitie doorzetten</h4>
 
     <p>Als BKO wil je de competitie doorzetten naar de volgende fase: van rayonkampioenschappen naar bondskampioenschappen.</p>
-    <p>Dit is een eenmalige maar belangrijke actie, waardoor de schutters die voldoen aan de vereisten doorgezet worden naar de BKs.</p>
+    <p>Dit is een eenmalige maar belangrijke actie, waardoor de sporters die voldoen aan de vereisten doorgezet worden naar de BKs.</p>
 
     {% if url_doorzetten %}
 
@@ -27,7 +27,7 @@
     {% else %}
 
         <p>&nbsp;</p>
-        <p>De rayonkampioenschappen kunnen op dit moment nog niet doorgezet worden. Wacht tot de tijdlijn fase N bereikt heeft.</p>
+        <p class="red-text">De rayonkampioenschappen kunnen op dit moment nog niet doorgezet worden. Wacht tot de tijdlijn fase N bereikt heeft.</p>
         <a class="btn-nhb-blauw" href="{% url 'Competitie:overzicht' %}"><i class="material-icons-round left">arrow_back</i>Terug</a>
 
     {% endif %}
