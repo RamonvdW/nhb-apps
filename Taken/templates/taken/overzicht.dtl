@@ -22,10 +22,12 @@
     {% if heeft_open_taken %}
         <table class="white">
             <thead>
-                <th class="center-align">Nummer</th>
-                <th class="center-align">Deadline</th>
-                <th>Beschrijving</th>
-                <th><!-- kolom voor knop --></th>
+                <tr>
+                    <th class="center-align">Nummer</th>
+                    <th class="center-align">Deadline</th>
+                    <th>Beschrijving</th>
+                    <th><!-- kolom voor knop --></th>
+                </tr>
             </thead>
 
             {% for taak in taken %}
@@ -52,10 +54,12 @@
     {% if heeft_afgeronde_taken %}
         <table class="white">
             <thead>
-                <th class="center-align">Nummer</th>
-                <th class="center-align">Deadline</th>
-                <th>Beschrijving</th>
-                <th><!-- kolom voor knop --></th>
+                <tr>
+                    <th class="center-align">Nummer</th>
+                    <th class="center-align">Deadline</th>
+                    <th>Beschrijving</th>
+                    <th><!-- kolom voor knop --></th>
+                </tr>
             </thead>
 
             {% for taak in taken %}

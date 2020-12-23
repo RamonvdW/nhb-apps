@@ -62,18 +62,23 @@
         <p>Als de taak afgehandeld is, dan kan je deze sluiten:</p>
     {% endif %}
 
-    <form action="{{ taak.url_sluiten }}" method="post">
-        {% csrf_token %}
+    {% if taak.url_sluiten %}
+        <form action="{{ taak.url_sluiten }}" method="post">
+            {% csrf_token %}
+            <p>
+                <a class="btn-nhb-blauw" href="{% url 'Taken:overzicht' %}">
+                    <i class="material-icons-round left">close</i>Terug</a>
+
+                <span>&nbsp;&nbsp;&nbsp;</span>
+                <input class="btn-nhb-rood" name="button_sluit_taak" type="submit" value="Taak sluiten">
+            </p>
+        </form>
+    {% else %}
         <p>
             <a class="btn-nhb-blauw" href="{% url 'Taken:overzicht' %}">
                 <i class="material-icons-round left">close</i>Terug</a>
-
-            {% if taak.url_sluiten %}
-                <span>&nbsp;&nbsp;&nbsp;</span>
-                <input class="btn-nhb-rood" name="button_sluit_taak" type="submit" value="Taak sluiten">
-            {% endif %}
         </p>
-    </form>
+    {% endif %}
 
     {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="taken-details" %}
 

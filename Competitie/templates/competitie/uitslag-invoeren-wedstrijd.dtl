@@ -556,10 +556,10 @@
             <td></td>
         </tr>
         <tr>
-            <th filter="on">NHB nummer</th>
-            <th filter="on">Naam</th>
-            <th filter="on">Vereniging</th>
-            <th filter="on">Boog type</th>
+            <th data-filter="on">NHB nummer</th>
+            <th data-filter="on">Naam</th>
+            <th data-filter="on">Vereniging</th>
+            <th data-filter="on">Boog type</th>
             <th>Score</th>
         </tr>
     </thead>
@@ -638,7 +638,7 @@
 
     <tr>
         <td colspan="2">
-            <button class="btn-nhb-blauw" onclick="opzoeken(this)" data-opzoeken="id_nhbnr" data-naam="id_naam" data-vereniging="id_ver", data-regio="id_regio_">
+            <button class="btn-nhb-blauw" onclick="opzoeken(this)" data-opzoeken="id_nhbnr" data-naam="id_naam" data-vereniging="id_ver" data-regio="id_regio_">
                 <i class="material-icons-round left">search</i>Zoek</button>
         </td>
         <td colspan="2"></td>

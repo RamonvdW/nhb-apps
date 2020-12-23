@@ -15,15 +15,11 @@
     <p>Je hebt verzocht om {{ activiteit }}.</p>
     <p>Als dit klopt, druk dan op onderstaande knop.</p>
 
-    <p>
-        <form method="post" action="{{ url }}">
-            {% csrf_token %}
-            <button class="btn-nhb-blauw" type="submit" value="Ga door">
-                <i class="material-icons-round left">check</i>Ga door</button>
-        </form>
-
-
-    </p>
+    <form method="post" action="{{ url }}">
+        {% csrf_token %}
+        <button class="btn-nhb-blauw" type="submit" value="Ga door">
+            <i class="material-icons-round left">check</i>Ga door</button>
+    </form>
 
     <p>&nbsp;</p>
     <p>Klopt er helemaal niets van? Sluit dan gewoon dit venster.</p>

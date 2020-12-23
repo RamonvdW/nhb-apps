@@ -247,7 +247,7 @@ class TestLogboek(E2EHelpers, TestCase):
         self.e2e_wisselnaarrol_bb()
 
         # alles
-        resp = self.client.get(self.logboek_url + '?zoekterm=Ramon')
+        resp = self.client.get(self.logboek_url + '?zoekterm=Ramon%20de%20Tester')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
 

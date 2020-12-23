@@ -75,11 +75,11 @@
             {% for obj in object_list %}
                 {% if obj.comp_type == '18' %}
                     {% if obj.is_team is True %}
-                        <a href="{{ obj.url }}" class="nhb-klikbare-balk">
-                            <li class="collection-item">
-                                <span>{{ obj.klasse }}</span>
-                            </li>
-                        </a>
+                        <li class="collection-item">
+                            <a href="{{ obj.url }}" class="nhb-klikbare-balk">
+                                <div>{{ obj.klasse }}</div>
+                            </a>
+                        </li>
                     {% endif %}
                 {% endif %}
             {% endfor %}
@@ -92,11 +92,11 @@
             {% for obj in object_list %}
                 {% if obj.comp_type == '25' %}
                     {% if obj.is_team is True %}
-                        <a href="{{ obj.url }}" class="nhb-klikbare-balk">
-                            <li class="collection-item">
-                                <span>{{ obj.klasse }}</span>
-                            </li>
-                        </a>
+                        <li class="collection-item">
+                            <a href="{{ obj.url }}" class="nhb-klikbare-balk">
+                                <div>{{ obj.klasse }}</div>
+                            </a>
+                        </li>
                     {% endif %}
                 {% endif %}
             {% endfor %}

@@ -26,10 +26,10 @@
                 <td colspan="3"></td>
             </tr>
             <tr>
-                <th filter="on">NHB nummer</th>
+                <th data-filter="on">NHB nummer</th>
                 <th>M/V</th>
-                <th filter="on">Voornaam</th>
-                <th filter="on">Achternaam</th>
+                <th data-filter="on">Voornaam</th>
+                <th data-filter="on">Achternaam</th>
                 <th>Leeftijd</th>
                 <th>Leeftijdsklasse {{ wedstrijdklasse_jaar }}</th>
                 <th>Laatste inlog</th>
@@ -69,10 +69,10 @@
             <td></td>
         </tr>
         <tr>
-            <th filter="on">NHB nummer</th>
+            <th data-filter="on">NHB nummer</th>
             <th>M/V</th>
-            <th filter="on">Voornaam</th>
-            <th filter="on">Achternaam</th>
+            <th data-filter="on">Voornaam</th>
+            <th data-filter="on">Achternaam</th>
             <th>Laatste inlog</th>
         </tr>
     </thead>

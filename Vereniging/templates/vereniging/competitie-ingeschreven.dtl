@@ -35,7 +35,11 @@
 
                 <td colspan="2" class="table-filter"><input class="table-filter" oninput="myTableFilter(this, 'table1')" placeholder="Zoeken"/></td>
 
-                <td colspan="3"></td>
+                {% if toon_dagdeel %}
+                    <td colspan="3"></td>
+                {% else %}
+                    <td colspan="2"></td>
+                {% endif %}
             </tr>
             <tr>
                 {% if mag_afmelden %}
@@ -44,8 +48,8 @@
 
                 <th>Wedstrijdklasse</th>
 
-                <th filter="on">NHB nr</th>
-                <th filter="on">Naam</th>
+                <th data-filter="on">NHB nr</th>
+                <th data-filter="on">Naam</th>
 
                 <th>Voorkeur teamschieten</th>
 

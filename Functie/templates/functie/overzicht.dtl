@@ -30,8 +30,8 @@
                 <td></td>       <!-- email -->
             </tr>
             <tr>
-                <th filter="on">Functie / Rol</th>
-                <th filter="on">Beheerder(s)</th>
+                <th data-filter="on">Functie / Rol</th>
+                <th data-filter="on">Beheerder(s)</th>
                 <th>E-mailadres</th>
             </tr>
         </thead>

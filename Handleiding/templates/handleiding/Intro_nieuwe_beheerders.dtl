@@ -15,7 +15,7 @@
 <p>In vergelijking tot een sporter krijg je als beheerder toegang tot extra functies van de website.</p>
 <p>Aangezien de meeste rollen toegang hebben tot persoonsgegevens, moeten we zeker stellen dat je hier juist mee om gaat en extra veiligheidsmaatregelen activeren.</p>
 <p></p>
-<p><h4>Stap 1: tweede factor</h4></p>
+<h4>Stap 1: tweede factor</h4>
 <p></p>
 <p>De website maakt gebruik van verificatie met een tweede factor. Na de inlog met NHB nummer en wachtwoord moet je een 6-cijferige code invoeren die door een app op je telefoon berekend wordt. Deze code wijzigt elke 30 seconden.</p>
 <p></p>
@@ -23,11 +23,11 @@
 <p></p>
 <p>Installatie is heel simpel. Uitleg over het activeren van de tweede factor staat op deze pagina van de handleiding: <a href="/handleiding/Twee-factor_authenticatie/">Twee-factor_authenticatie</a>.</p>
 <p></p>
-<p><h4>Stap 2: Verklaring ondertekenen</h4></p>
+<h4>Stap 2: Verklaring ondertekenen</h4>
 <p></p>
 <p>We hebben een simpele verklaring geschreven over de omgang met persoonsgegevens. Deze moet je elk jaar lezen en accorderen.</p>
 <p></p>
-<p><h4>Stap 3: Kies een rol</h4></p>
+<h4>Stap 3: Kies een rol</h4>
 <p></p>
 <p>Via Wissel van Rol in het menu kom je op een pagina waar je kan wisselen tussen rollen. De verschillende rollen staan beschreven op deze pagina: <a href="/handleiding/Rollen/">Rollen</a>.</p>
 <p></p>
@@ -45,7 +45,7 @@
 <p>De rol 'sporter' is bedoeld om terug te gaan naar het persoonlijke gebruik van de website, bijvoorbeeld om jezelf in te schrijven voor een competitie.</p>
 <p></p>
 <p></p>
-<hr><p><h5>Verder</h5></p>
+<hr><h5>Verder</h5>
 <ul style="padding-left: 20px">
 <li style="list-style-type: disc; padding-left: 0px">Terug naar de <a href="/handleiding/Hoofdpagina/">Hoofdpagina</a></li>
 <li style="list-style-type: disc; padding-left: 0px">Beschrijving van de <a href="/handleiding/Rollen/">Rollen</a></li>

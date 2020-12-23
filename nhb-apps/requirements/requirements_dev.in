@@ -23,4 +23,7 @@ django-debug-toolbar
 # django extensions
 django-extensions
 
+# html validatie
+html5validator
+
 # end of file

@@ -278,10 +278,11 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
             opslaan_urlconf = 'Vereniging:accommodatie-details'
             menu_actief = 'hetplein'
 
+        context['opslaan_url'] = reverse(opslaan_urlconf, kwargs={'locatie_pk': locatie.pk,
+                                                                  'vereniging_pk': nhbver.pk})
+
         if self._mag_wijzigen(nhbver):
             context['readonly'] = False
-            context['opslaan_url'] = reverse(opslaan_urlconf, kwargs={'locatie_pk': locatie.pk,
-                                                                      'vereniging_pk': nhbver.pk})
 
             rol_nu = rol_get_huidige(self.request)
 

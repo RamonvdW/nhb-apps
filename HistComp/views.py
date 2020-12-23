@@ -15,6 +15,7 @@ from .models import HistCompetitie, HistCompetitieIndividueel, HistCompetitieTea
 from .forms import FilterForm
 from Plein.menu import menu_dynamics
 from decimal import Decimal
+from urllib.parse import quote_plus
 import csv
 
 TEMPLATE_HISTCOMP_ALLEJAREN = 'hist/histcomp_top.dtl'
@@ -36,7 +37,8 @@ class HistCompAlleJarenView(ListView):
     # class variables shared by all instances
     template_name = TEMPLATE_HISTCOMP_ALLEJAREN
 
-    def _zet_op_volgorde_klassen(self, objs_unsorted):
+    @staticmethod
+    def _zet_op_volgorde_klassen(objs_unsorted):
         # sorteer de klassen op de gewenste volgorde
         # deze routine lijkt een beetje omslachtig, maar dat komt omdat QuerySet geen remove heeft
         objs = list()
@@ -118,6 +120,8 @@ class HistCompBaseView(ListView):
         self.comp_type = None
         self.klasse = None
         self.jaar = None
+        self.histcomp = None
+        self.histcomp_pk = None
 
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
@@ -184,7 +188,7 @@ class HistCompBaseView(ListView):
 
         base_url = self.base_url + '?'
         if self.get_filter:
-            base_url += 'filter=%s' % self.get_filter
+            base_url += 'filter=%s' % quote_plus(self.get_filter)
 
         num_pages = context['paginator'].num_pages
         page_nr = context['page_obj'].number

@@ -111,7 +111,7 @@
                 <td>
                     <select name="nhbver_pk" onchange="locatie_aanpassen()" id="id_ver_sel">
                         {% for opt in verenigingen %}
-                            <option value="{{ opt.pk }}"{% if opt.pk == wedstrijd.vereniging.pk %}selected{% endif %}>{{ opt }}</option>
+                            <option value="{{ opt.pk }}"{% if opt.pk == wedstrijd.vereniging.pk %} selected{% endif %}>{{ opt }}</option>
                         {% endfor %}
                     </select>
                 </td>

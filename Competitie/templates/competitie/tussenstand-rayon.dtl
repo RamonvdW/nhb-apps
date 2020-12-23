@@ -79,16 +79,14 @@
             {% if obj.break_klasse %}
                 <tr class="nhb-grijs">
                     <td></td>   <!-- rank -->
-                    <td colspan="12"><h5>{{ obj.klasse_str }}</h5></td>
+                    <td colspan="4"><h5>{{ obj.klasse_str }}</h5></td>
                 </tr>
                 <tr>
                     <th></th>   <!-- rank -->
                     <th>Sporter</th>
                     <th class="hide-on-small-only">Vereniging</th>
                     <th class="center-align">Gemiddelde</th>
-                    {% if is_lijst_rk %}
-                        <th><!-- label --></th>
-                    {% endif %}
+                    <th></th>   <!-- label -->
                 </tr>
             {% endif %}
 
@@ -101,6 +99,8 @@
                     <td><i>Reserve</i></td>
                 {% elif is_lijst_rk %}
                     <td>{{ obj.kampioen_label }}</td>
+                {% else %}
+                    <td></td>
                 {% endif %}
             </tr>
 

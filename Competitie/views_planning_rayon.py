@@ -816,8 +816,8 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
             wkl.limiet = limiet.limiet
         # for
 
-        context['url_wijzig'] = reverse('Competitie:rayon-limieten',
-                                        kwargs={'deelcomp_pk': deelcomp_rk.pk})
+        context['url_opslaan'] = reverse('Competitie:rayon-limieten',
+                                         kwargs={'deelcomp_pk': deelcomp_rk.pk})
 
         context['url_terug'] = reverse('Competitie:overzicht')
 

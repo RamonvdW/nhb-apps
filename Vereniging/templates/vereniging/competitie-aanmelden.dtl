@@ -89,8 +89,8 @@
                 </tr>
                 <tr>
                     <th class="center-align">{% if mag_aanmelden %}<!-- kolom voor vinkje -->{% else %}Aangemeld{% endif %}</th>
-                    <th filter="on">NHB nr</th>
-                    <th filter="on">Naam</th>
+                    <th data-filter="on">NHB nr</th>
+                    <th data-filter="on">Naam</th>
                     <th>Leeftijd {{ tweede_jaar }}</th>
                     <th class="hide-on-small-only">Leeftijdsklasse {{ seizoen }}</th>
                     <th>Wedstrijd<wbr/>boog</th>
@@ -145,12 +145,12 @@
                 <td colspan="2" class="table-filter">
                     <input class="table-filter" oninput="myTableFilter(this, 'table2')" placeholder="Zoeken"/>
                 </td>
-                <td colspan="5"></td>
+                <td colspan="2"></td>
             </tr>
             <tr>
                 <th class="center-align">{% if mag_aanmelden %}<!-- kolom voor vinkje -->{% else %}Aangemeld{% endif %}</th>
-                <th filter="on">NHB nr</th>
-                <th filter="on">Naam</th>
+                <th data-filter="on">NHB nr</th>
+                <th data-filter="on">Naam</th>
                 <th>Wedstrijdboog</th>
                 <th>Aanvangs<wbr/>gemiddelde</th>
             </tr>

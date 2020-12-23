@@ -38,7 +38,7 @@
         <div class="col s12 m6 white">
             <div class="input-text" style="margin-left: 20px">
                 <span>Filter/zoek op:</span>
-                <input type="text" name="zoekterm" value="{{ zoekterm }}"></input>
+                <input type="text" name="zoekterm" value="{{ zoekterm }}">
             </div>
 
             <p class="center-align">

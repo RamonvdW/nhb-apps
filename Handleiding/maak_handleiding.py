@@ -286,8 +286,11 @@ class MaakHandleiding(object):
                 out = '<pre class="handleiding_code">' + line
                 continue
 
-            # normale regel
-            out += '<p>' + line + '</p>\n'
+            # normale regel in paragraaf stijl zetten, tenzij het een block-level element is
+            if line[:2] != '<h':
+                line = '<p>' + line + '</p>'
+
+            out = out + line + '\n'
         # for
 
         if out:

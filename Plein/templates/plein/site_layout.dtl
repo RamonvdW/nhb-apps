@@ -25,7 +25,7 @@
         <link rel="icon" href="{% static 'plein/logo_nhb_192x192.png' %}" sizes="192x192">
         <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Round">
         <link rel="stylesheet" href="{% static 'materialize-new-35.css' %}">
-        <link rel="stylesheet" href="{% static 'site_layout_min-8.css' %}"> <!-- moet ná materialize css -->
+        <link rel="stylesheet" href="{% static 'site_layout_min-10.css' %}"> <!-- moet ná materialize css -->
         {% block extraheader %}{% endblock %}
     </head>
 
@@ -204,7 +204,7 @@
             // kolommen waarin gezocht mag worden moeten het 'filter' attribuut hebben
             //          <thead>
             //              <tr>
-            //                  <th filter="on">Header1</th>
+            //                  <th data-filter="on">Header1</th>
             //                  <th>Header2<th>
 
             // Uitgebreider voorbeeld:
@@ -220,11 +220,11 @@
             //       <tr>
             //         <th>Laatste poging</th>
             //         <th>Laatste inlog</th>
-            //         <th filter="on">Inlog</th>
-            //         <th filter="on">Naam</th>
+            //         <th data-filter="on">Inlog</th>
+            //         <th data-filter="on">Naam</th>
             //         <th>Email is bevestigd</th>
             //         <th>Tweede factor</th>
-            //          <th>Aangemaakt</th>
+            //         <th>Aangemaakt</th>
             //       </tr>
             //     </thead>
 
@@ -240,13 +240,14 @@
                 const filter_tekst = zoekveld.value.normalize("NFD").replace(filter, "").toLowerCase();
                 //console.log("  filter_tekst: ", filter_tekst);
 
-                // doorzoek de header kolommen op filter=on
+                // doorzoek de header kolommen op data-filter=on
                 const filter_kolommen = new Array();
                 for (let i=0, row; row = table.tHead.rows[i]; i++)          // stops when row=null
                 {
                     for (let j=0, col_nr=0, cell; cell = row.cells[j]; j++) // stops when cell=null
                     {
-                        if (cell.hasAttribute("filter")) filter_kolommen.push(col_nr);
+                        if (cell.hasAttribute("filter")) filter_kolommen.push(col_nr);      // TODO: remove
+                        if (cell.hasAttribute("data-filter")) filter_kolommen.push(col_nr);
 
                         if (cell.hasAttribute("colSpan"))
                         {

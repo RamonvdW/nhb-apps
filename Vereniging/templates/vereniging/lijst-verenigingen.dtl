@@ -61,9 +61,9 @@
                 <th class="center-align">Clusters</th>
             {% endif %}
 
-            <th filter="on">Vereniging</th>
+            <th data-filter="on">Vereniging</th>
 
-            <th filter="on">Accommodatie<br>adres</th>
+            <th data-filter="on">Accommodatie<br>adres</th>
             <th>Accommodatie<br>info</th>
 
             {% if toon_details %}

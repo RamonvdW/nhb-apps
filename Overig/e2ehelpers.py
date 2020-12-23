@@ -5,10 +5,14 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import auth
+from django.conf import settings
 from Account.models import Account, account_create
 from Functie.view_vhpg import account_vhpg_is_geaccepteerd
 from bs4 import BeautifulSoup
 from django.test import TestCase
+import subprocess
+import tempfile
+import vnujar
 import pyotp
 
 
@@ -72,6 +76,7 @@ class E2EHelpers(object):
     def e2e_login(self, account, wachtwoord=None):
         """ log in op de website via de voordeur, zodat alle rechten geëvalueerd worden """
         resp = self.e2e_login_no_check(account, wachtwoord)
+        assert isinstance(self, TestCase)
         self.assertEqual(resp.status_code, 302)  # 302 = Redirect
         user = auth.get_user(self.client)
         self.assertTrue(user.is_authenticated)
@@ -81,11 +86,13 @@ class E2EHelpers(object):
         # door de login is een cookie opgeslagen met het csrf token
         assert isinstance(self, TestCase)
         resp = self.client.post('/functie/otp-controle/', {'otp_code': pyotp.TOTP(account.otp_code).now()})
+        assert isinstance(self, E2EHelpers)
         self.assert_is_redirect(resp, '/functie/wissel-van-rol/')
 
     def _wissel_naar_rol(self, rol, expected_redirect):
         assert isinstance(self, TestCase)
         resp = self.client.post('/functie/activeer-rol/%s/' % rol)
+        assert isinstance(self, E2EHelpers)
         self.assert_is_redirect(resp, expected_redirect)
 
     def e2e_wisselnaarrol_it(self):
@@ -107,24 +114,25 @@ class E2EHelpers(object):
             expected_redirect = '/vereniging/'
         else:
             expected_redirect = '/functie/wissel-van-rol/'
+        assert isinstance(self, E2EHelpers)
         self.assert_is_redirect(resp, expected_redirect)
 
     def e2e_check_rol(self, rol_verwacht):
+        assert isinstance(self, TestCase)
         resp = self.client.get('/functie/wissel-van-rol/')
         self.assertEqual(resp.status_code, 200)
 
-        # <meta rol_nu="SEC" functie_nu="Secretaris vereniging 4444">
+        # <meta property="nhb-apps:rol" content="SEC">
+        # <meta property="nhb-apps:functie" content="Secretaris vereniging 4444">
         page = str(resp.content)
-        pos = page.find('<meta rol_nu=')
+        pos = page.find('<meta property="nhb-apps:rol" content="')
         if pos < 0:
             # informatie is niet aanwezig
             rol_nu = "geen meta"            # pragma: no cover
         else:
-            spl = page[pos+14:pos+100].split('"')
+            spl = page[pos+39:pos+39+15].split('"')
             rol_nu = spl[0]
-            # functie_nu = spl[2]
         if rol_nu != rol_verwacht:
-            # print("e2e_check_rol: rol_nu=%s, functie_nu=%s" % (rol_nu, functie_nu))
             raise ValueError('Rol mismatch: rol_nu=%s, rol_verwacht=%s' % (rol_nu, rol_verwacht))
 
     def e2e_dump_resp(self, resp):                        # pragma: no cover
@@ -215,6 +223,8 @@ class E2EHelpers(object):
             - links to external sites must have target="_blank" and rel="noopener noreferrer"
             - links should not be empty
         """
+        assert isinstance(self, TestCase)
+
         # strip head
         pos = content.find('<body')
         content = content[pos:]
@@ -243,6 +253,7 @@ class E2EHelpers(object):
         # while
 
     def assert_scripts_clean(self, html, template_name):
+        assert isinstance(self, TestCase)
         pos = html.find('<script ')
         while pos >= 0:
             html = html[pos:]
@@ -257,11 +268,108 @@ class E2EHelpers(object):
             pos = html.find('<script ')
         # while
 
+    _VALIDATE_IGNORE = (
+        'info warning: The “type” attribute is unnecessary for JavaScript resources.',
+        'error: Attribute “loading” not allowed on element “img” at this point.'            # too new
+    )
+
+    def _validate_html(self, html):
+        """ Run the HTML5 validator """
+        issues = list()
+
+        with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8") as tmp:
+            tmp.write(html)
+            tmp.flush()
+
+            # credits to html5validator
+            vnu_jar_location = vnujar.__file__.replace('__init__.pyc', 'vnu.jar').replace('__init__.py', 'vnu.jar')
+            proc = subprocess.Popen(["java", "-jar", vnu_jar_location, tmp.name],
+                                    stderr=subprocess.PIPE)
+            proc.wait(timeout=5)
+            # returncode is 0 als er geen problemen gevonden zijn
+            if proc.returncode:
+                lines = html.splitlines()
+
+                # feedback staat in stderr
+                msg = proc.stderr.read().decode('utf-8')
+
+                # remove tmp filename from error message
+                msg = msg.replace('"file:%s":' % tmp.name, '')
+                for issue in msg.splitlines():
+                    # extract location information (line.pos)
+                    spl = issue.split(': ')     # 1.2091-1.2094
+                    locs = spl[0].split('-')
+                    l1, p1 = locs[0].split('.')
+                    l2, p2 = locs[1].split('.')
+                    if l1 == l2:
+                        l1 = int(l1)
+                        p1 = int(p1)
+                        p2 = int(p2)
+                        p1 -= 20
+                        if p1 < 1:
+                            p1 = 1
+                        p2 += 20
+                        line = lines[l1-1]
+                        context = line[p1-1:p2]
+                    else:
+                        # TODO
+                        context = ''
+                        pass
+                    clean = ": ".join(spl[1:])
+                    if clean not in issues:
+                        if clean not in self._VALIDATE_IGNORE:
+                            clean += " ==> %s" % context
+                            issues.append(clean)
+                # for
+
+        # tmp file is deleted here
+        return issues
+
+    _IGNORE_TEMPLATE_NAMES = (
+        'plein/site_layout.dtl',
+        'plein/menu.dtl',
+        'overig/site-feedback-sidebar.dtl'
+    )
+
+    def _get_useful_template_name(self, response):
+        lst = [tmpl.name for tmpl in response.templates if tmpl.name not in self._IGNORE_TEMPLATE_NAMES]
+        return ", ".join(lst)
+
+    _BLOCK_LEVEL_ELEMENTS = (
+        'address', 'article', 'aside', 'canvas', 'figcaption', 'figure', 'footer',
+        'blockquote', 'dd', 'div', 'dl', 'dt', 'fieldset',
+        'form', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'header', 'hr', 'li',
+        'main', 'nav', 'noscript', 'ol', 'p', 'pre', 'pre', 'section', 'table', 'tfoot', 'ul', 'video'
+    )
+
+    def _assert_no_div_in_p(self, response, html):
+        pos = html.find('<p')
+        while pos >= 0:
+            html = html[pos+2:]
+            pos = html.find('</p')
+            sub = html[:pos]
+            # see https://stackoverflow.com/questions/21084870/no-p-element-in-scope-but-a-p-end-tag-seen-w3c-validation
+            for elem in self._BLOCK_LEVEL_ELEMENTS:
+                elem_pos = sub.find('<' + elem)
+                if elem_pos >= 0:
+                    elem_pos -= 20
+                    if elem_pos < 0:
+                        elem_pos = 0
+                    msg = "Bad HTML (template: %s):" % self._get_useful_template_name(response)
+                    msg += "\n   Found block-level element '%s' inside 'p'" % elem
+                    msg = msg + "\n   ==> " + sub[elem_pos:elem_pos+40]
+                    self.fail(msg=msg)
+            # for
+            html = html[pos+3:]
+            pos = html.find('<p')
+        # while
+
     def assert_html_ok(self, response):
         """ Doe een aantal basic checks op een html response """
-        assert isinstance(self, TestCase)
-        html = str(response.content)
+        html = response.content.decode('utf-8')
         html = self._remove_debugtoolbar(html)
+
+        assert isinstance(self, TestCase)
         self.assertContains(response, "<html")
         self.assertIn("lang=", html)
         self.assertIn("</html>", html)
@@ -273,8 +381,26 @@ class E2EHelpers(object):
         self.assertNotIn('<th/>', html)             # must be replaced with <th></th>
         self.assertNotIn('<td/>', html)             # must be replaced with <td></td>
         self.assertNotIn('<thead><th>', html)       # missing <tr>
+
+        assert isinstance(self, E2EHelpers)
         self.assert_link_quality(html, response.templates[0].name)
         self.assert_scripts_clean(html, response.templates[0].name)
+        self._assert_no_div_in_p(response, html)
+
+        urls = self.extract_all_urls(response)
+        for url in urls:
+            if url.find(" ") >= 0:
+                self.fail(msg="Unexpected space in url %s on page %s" % (repr(url), self._get_useful_template_name(response)))
+        # for
+
+        if settings.TEST_VALIDATE_HTML:
+            issues = self._validate_html(html)
+            if len(issues):
+                msg = 'Invalid HTML (template: %s):\n' % self._get_useful_template_name(response)
+                for issue in issues:
+                    msg += "    %s\n" % issue
+                # for
+                self.fail(msg=msg)
 
     def assert_is_bestand(self, response):
         assert isinstance(self, TestCase)
@@ -331,6 +457,7 @@ class E2EHelpers(object):
             self.assertTrue(resp.status_code in accepted_status_codes)
 
     def assert_is_redirect(self, resp, expected_url):
+        assert isinstance(self, TestCase)
         self.assertEqual(resp.status_code, 302)
         self.assertEqual(resp.url, expected_url)
 

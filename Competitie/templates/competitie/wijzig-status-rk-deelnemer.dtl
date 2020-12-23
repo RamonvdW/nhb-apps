@@ -59,7 +59,7 @@
 
     <table class="white">
         <tr>
-            <td colspan="3" class="center">
+            <td class="center">
                 <span>De status van deelname voor deze sporter is: </span>
                 {% if not deelnemer.bij_vereniging %}
                     <span class="red-text">ATTENTIE</span>
@@ -74,21 +74,25 @@
         </tr>
 
         {% if not deelnemer.bij_vereniging %}
-            <tr class="nhb-grijs"><td colspan="3"></td></tr>
+            <tr class="nhb-grijs"><td></td></tr>
             <tr>
-                <td colspan="3" class="center">Deze sporter is niet aangemeld bij een vereniging en mag zo niet deelnemen aan het RK.<br>Laat het bondsburo uitzoeken of dit een niet-afgeronde overschrijving is.</td>
+                <td class="center">Deze sporter is niet aangemeld bij een vereniging en mag zo niet deelnemen aan het RK.<br>Laat het bondsburo uitzoeken of dit een niet-afgeronde overschrijving is.</td>
             </tr>
         {% else %}
 
+            <!-- als de keuze onbekend is, toon dan twee knoppen (blauw en rood)
+                 toon anders maar 1 knop (de andere keuze)
+            -->
+
             {% if deelnemer.deelname != 'J' %}
-                <tr class="nhb-grijs"><td colspan="3"></td></tr>
+                <tr class="nhb-grijs"><td></td></tr>
 
                 <tr>
-                    <td colspan="3" class="center">Klik op de blauwe knop om deelname aan het RK te bevestigen</td>
+                    <td class="center">Klik op de blauwe knop om deelname aan het RK te bevestigen</td>
                 </tr>
                 <tr>
-                    <td colspan="3" class="center">
-                        <form method="post" action="{{ url_opslaan }}">
+                    <td class="center">
+                        <form method="post" action="{{ url_wijzig }}">
                             {% csrf_token %}
                             <input name="bevestig" type="hidden" value="1">
                             <button class="btn-nhb-blauw" type="submit">
@@ -99,14 +103,14 @@
             {% endif %}
 
             {% if deelnemer.deelname != 'N' %}
-                <tr class="nhb-grijs"><td colspan="3"></td></tr>
+                <tr class="nhb-grijs"><td></td></tr>
 
                 <tr>
-                    <td colspan="3" class="center">Klik op de rode knop om de sporter af te melden voor het RK</td>
+                    <td class="center">Klik op de rode knop om de sporter af te melden voor het RK</td>
                 </tr>
                 <tr>
-                    <td colspan="3" class="center">
-                        <form method="post" action="{{ url_opslaan }}">
+                    <td class="center">
+                        <form method="post" action="{{ url_wijzig }}">
                             {% csrf_token %}
                             <input name="afmelden" type="hidden" value="1">
                             <button class="btn-nhb-rood" type="submit">

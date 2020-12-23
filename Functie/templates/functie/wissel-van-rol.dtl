@@ -11,7 +11,10 @@
 {% block extraheader %}
     {% if insert_meta %}
         <!-- deze header is bedoeld voor de testsuite -->
-        <meta rol_nu="{{ meta_rol }}" functie_nu="{{ meta_functie }}">
+        <meta property="nhb-apps:rol" content="{{ meta_rol }}">
+        {% if meta_functie %}
+            <meta property="nhb-apps:functie" content="{{ meta_functie }}">
+        {% endif %}
     {% endif %}
 {% endblock %}
 
@@ -76,7 +79,7 @@
     <h5>Eigen rollen</h5>
 
     {% for obj in object_list %}
-        <p>
+        <div class="selectie-knoppen">
             {% if obj.separator %}
                 <p>&nbsp;</p>
                 <h5>Help anderen</h5>
@@ -106,7 +109,7 @@
                     {% endif %}
                 </form>
             {% endif %}
-        </p>
+        </div>
     {% endfor %}
 {% endif %}
 

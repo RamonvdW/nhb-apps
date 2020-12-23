@@ -13,6 +13,7 @@ from django.urls import reverse
 from Functie.rol import Rollen, rol_get_huidige
 from Plein.menu import menu_dynamics
 from .models import LogboekRegel
+from urllib.parse import quote_plus
 
 
 TEMPLATE_LOGBOEK_REST = 'logboek/rest.dtl'
@@ -135,13 +136,15 @@ class LogboekBasisView(UserPassesTestMixin, ListView):
         context['url_nhbstructuur'] = reverse('Logboek:nhbstructuur')
         context['url_accommodaties'] = reverse('Logboek:accommodaties')
 
+        context['filter_url'] = self.base_url
+
         # extra knop tonen om zoekterm te wissen
         zoekterm = self.request.GET.get('zoekterm', '')
         if zoekterm:
             context['zoekterm'] = zoekterm
             context['unfiltered_url'] = reverse('Logboek:%s' % self.filter)
 
-            zoekterm = "?zoekterm=%s" % zoekterm
+            zoekterm = "?zoekterm=%s" % quote_plus(zoekterm)
             context['url_rest'] += zoekterm
             context['url_rollen'] += zoekterm
             context['url_uitrol'] += zoekterm
@@ -198,7 +201,7 @@ class LogboekRecordsView(LogboekBasisView):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self._base_url = reverse('Logboek:records')
+        self.base_url = reverse('Logboek:records')
 
     def get_focused_queryset(self):
         """ retourneer de data voor de template view """
@@ -336,7 +339,7 @@ class LogboekUitrolView(LogboekBasisView):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.base_url = reverse('Logboek:clusters')
+        self.base_url = reverse('Logboek:uitrol')
 
     def get_focused_queryset(self):
         """ retourneer de data voor de template view """

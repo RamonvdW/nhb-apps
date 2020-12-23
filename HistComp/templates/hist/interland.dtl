@@ -48,8 +48,8 @@
             </tr>
             <tr>
                 <th>Gemiddelde</th>
-                <th filter="on">Wedstrijdleeftijd</th>
-                <th filter="on">Geslacht</th>
+                <th data-filter="on">Wedstrijdleeftijd</th>
+                <th data-filter="on">Geslacht</th>
                 <th>NHB nummer</th>
                 <th>Naam</th>
                 <th>Vereniging</th>

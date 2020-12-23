@@ -58,7 +58,7 @@
         <td></td>   <!-- totalen -->
     </tr>
 
-    <thead>
+    <!-- thead -->
         <tr>
             <th>Type blazoen</th>
 
@@ -68,7 +68,7 @@
 
             <th class="center-align">Totaal</th>
         </tr>
-    </thead>
+    <!-- /thead -->
 
     {% for kolommen in blazoen_count %}
         <tr>

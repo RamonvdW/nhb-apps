@@ -28,13 +28,16 @@ if "--enable-wiki" in sys.argv:
     ENABLE_WIKI = True
     sys.argv.remove("--enable-wiki")
 
+# enable html validation using v.Nu (warning: triples test duration)
+TEST_VALIDATE_HTML = False
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 PROJ_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2020-12-21'
+SITE_VERSIE = '2020-12-23'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -294,7 +297,7 @@ SAML_IDP_CONFIG = {
              # signing assertion and responses is mandatory in SAML 2.0
              'sign_response': True,
              'sign_assertion': True
-        }
+         }
     },
 
     # signing keys
