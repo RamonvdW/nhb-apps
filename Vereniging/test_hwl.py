@@ -335,6 +335,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         resp = self.client.get(self.url_voorkeuren)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('vereniging/leden-voorkeuren.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
 
         # nog een keer, nu met schutterboog records aanwezig
         # zowel van de vereniging van de HWL als van andere verenigingen
@@ -362,6 +363,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         resp = self.client.get(self.url_voorkeuren)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('vereniging/leden-voorkeuren.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
 
     def test_inschrijven(self):
         url = self.url_inschrijven % self.comp_18.pk

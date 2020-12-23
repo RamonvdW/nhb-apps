@@ -412,6 +412,7 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
                 .order_by('letter'))
         context['cluster_list'] = objs
         context['regio_heeft_clusters'] = objs.count() > 0
+        context['opslaan_url'] = reverse('Vereniging:clusters')
 
         for obj in objs:
             obj.veld_naam = "naam_%s" % obj.pk

@@ -88,8 +88,8 @@ class TestPlein(E2EHelpers, TestCase):
         self.e2e_logout()
         resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
         self.assert_template_used(resp, ('plein/plein-bezoeker.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
 
     def test_plein_normaal(self):
         self.e2e_login(self.account_normaal)
@@ -98,6 +98,7 @@ class TestPlein(E2EHelpers, TestCase):
         self.assertNotContains(resp, '/admin/')
         self.assertNotContains(resp, 'Wissel van rol')
         self.assert_template_used(resp, ('plein/plein-gebruiker.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
         self.e2e_logout()
 
     def test_plein_nhblid(self):
@@ -107,6 +108,7 @@ class TestPlein(E2EHelpers, TestCase):
         self.assertNotContains(resp, '/admin/')
         self.assertNotContains(resp, 'Wissel van rol')
         self.assert_template_used(resp, ('plein/plein-schutter.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
         self.e2e_logout()
 
     def test_plein_admin(self):
@@ -205,8 +207,8 @@ class TestPlein(E2EHelpers, TestCase):
     def test_privacy(self):
         resp = self.client.get(self.url_privacy)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
         self.assert_template_used(resp, ('plein/privacy.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
         self.e2e_assert_other_http_commands_not_supported(self.url_privacy)
 
     def test_dynamic_menu_assert(self):
@@ -255,8 +257,8 @@ class TestPlein(E2EHelpers, TestCase):
     def test_niet_ondersteund(self):
         resp = self.client.get(self.url_niet_ondersteund)
         self.assertEqual(resp.status_code, 200)
-        self.assert_html_ok(resp)
         self.assert_template_used(resp, ('plein/niet-ondersteund.dtl',))
+        self.assert_html_ok(resp)
 
         # site_layout.dtl moet niet gebruikt worden ivm alle javascript
         for templ in resp.templates:

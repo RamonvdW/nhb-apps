@@ -5,6 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
+from django.conf import settings
 from Overig.e2ehelpers import E2EHelpers
 
 
@@ -31,10 +32,18 @@ class TestHandleiding(E2EHelpers, TestCase):
         self.account.is_BB = True
         self.account.save()
         self.e2e_login(self.account)
+
         resp = self.client.get(self.url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('handleiding/Hoofdpagina.dtl', 'plein/site_layout.dtl'))
 
+        # doorloop alle handleiding pagina
+        for page in settings.HANDLEIDING_PAGINAS:
+            url = '/handleiding/%s/' % page
+            resp = self.client.get(url)
+            self.assertEqual(resp.status_code, 200)     # 200 = OK
+            self.assert_html_ok(resp)
+        # for
 
 # end of file

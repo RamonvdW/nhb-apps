@@ -16,6 +16,21 @@ import vnujar
 import pyotp
 
 
+# template names found by assert_html_ok
+validated_templates = list()
+
+# these templates are included by other templates
+included_templates = (
+    'plein/site_layout.dtl',
+    'plein/menu.dtl',
+    'plein/card.dtl',
+    'plein/card_logo.dtl',
+    'plein/andere-sites-van-de-nhb.dtl',
+    'plein/ga-naar-live-server.dtl',
+    'overig/site-feedback-sidebar.dtl',
+    'logboek/common.dtl'
+)
+
 class E2EHelpers(object):
 
     """ Helpers voor het End-to-End testen, dus zoals de gebruiker de website gebruikt vanuit de browser
@@ -41,6 +56,10 @@ class E2EHelpers(object):
         if pos > 0:     # pragma: no cover
             html = html[:pos] + '<!-- removed debug toolbar --></body></html>'
         return html
+
+    def _get_useful_template_name(self, response):
+        lst = [tmpl.name for tmpl in response.templates if tmpl.name not in included_templates and not tmpl.name.startswith('django/forms')]
+        return ", ".join(lst)
 
     def e2e_create_account(self, username, email, voornaam, accepteer_vhpg=False):
         """ Maak een Account met AccountEmail aan in de database van de website """
@@ -325,16 +344,6 @@ class E2EHelpers(object):
         # tmp file is deleted here
         return issues
 
-    _IGNORE_TEMPLATE_NAMES = (
-        'plein/site_layout.dtl',
-        'plein/menu.dtl',
-        'overig/site-feedback-sidebar.dtl'
-    )
-
-    def _get_useful_template_name(self, response):
-        lst = [tmpl.name for tmpl in response.templates if tmpl.name not in self._IGNORE_TEMPLATE_NAMES]
-        return ", ".join(lst)
-
     _BLOCK_LEVEL_ELEMENTS = (
         'address', 'article', 'aside', 'canvas', 'figcaption', 'figure', 'footer',
         'blockquote', 'dd', 'div', 'dl', 'dt', 'fieldset',
@@ -358,6 +367,7 @@ class E2EHelpers(object):
                     msg = "Bad HTML (template: %s):" % self._get_useful_template_name(response)
                     msg += "\n   Found block-level element '%s' inside 'p'" % elem
                     msg = msg + "\n   ==> " + sub[elem_pos:elem_pos+40]
+                    assert isinstance(self, TestCase)
                     self.fail(msg=msg)
             # for
             html = html[pos+3:]
@@ -369,37 +379,43 @@ class E2EHelpers(object):
         html = response.content.decode('utf-8')
         html = self._remove_debugtoolbar(html)
 
+        dtl = self._get_useful_template_name(response)
+        if dtl not in validated_templates:
+            validated_templates.append(dtl)
+
         assert isinstance(self, TestCase)
-        self.assertContains(response, "<html")
-        self.assertIn("lang=", html)
-        self.assertIn("</html>", html)
-        self.assertIn("<head>", html)
-        self.assertIn("</head>", html)
-        self.assertIn("<body ", html)
-        self.assertIn("</body>", html)
-        self.assertIn("<!DOCTYPE html>", html)
-        self.assertNotIn('<th/>', html)             # must be replaced with <th></th>
-        self.assertNotIn('<td/>', html)             # must be replaced with <td></td>
-        self.assertNotIn('<thead><th>', html)       # missing <tr>
+        self.assertIn("<!DOCTYPE html>", html, msg='Missing DOCTYPE at start of %s' % dtl)
+        self.assertIn("<html", html, msg='Missing <html in %s' % dtl)
+        self.assertIn("<head", html, msg='Missing <head in %s' % dtl)
+        self.assertIn("<body", html, msg='Missing <body in %s' % dtl)
+        self.assertIn("</head>", html, msg='Missing </head> in %s' % dtl)
+        self.assertIn("</body>", html, msg='Missing </body> in %s' % dtl)
+        self.assertIn("</html>", html, msg='Missing </html> in %s' % dtl)
+        self.assertIn("lang=", html, msg='lang= missing in %s' % dtl)
+        self.assertNotIn('<th/>', html, msg='Illegal <th/> must be replaced with <th></th> in %s' % dtl)
+        self.assertNotIn('<td/>', html, msg='Illegal <td/> must be replaced with <td></td> in %s' % dtl)
+        self.assertNotIn('<thead><th>', html, msg='Missing <tr> between <thead> and <th> in %s' % dtl)
 
         assert isinstance(self, E2EHelpers)
-        self.assert_link_quality(html, response.templates[0].name)
-        self.assert_scripts_clean(html, response.templates[0].name)
+        self.assert_link_quality(html, dtl)
+        self.assert_scripts_clean(html, dtl)
         self._assert_no_div_in_p(response, html)
 
         urls = self.extract_all_urls(response)
         for url in urls:
             if url.find(" ") >= 0:
-                self.fail(msg="Unexpected space in url %s on page %s" % (repr(url), self._get_useful_template_name(response)))
+                assert isinstance(self, TestCase)
+                self.fail(msg="Unexpected space in url %s on page %s" % (repr(url), dtl))
         # for
 
         if settings.TEST_VALIDATE_HTML:
             issues = self._validate_html(html)
             if len(issues):
-                msg = 'Invalid HTML (template: %s):\n' % self._get_useful_template_name(response)
+                msg = 'Invalid HTML (template: %s):\n' % dtl
                 for issue in issues:
                     msg += "    %s\n" % issue
                 # for
+                assert isinstance(self, TestCase)
                 self.fail(msg=msg)
 
     def assert_is_bestand(self, response):

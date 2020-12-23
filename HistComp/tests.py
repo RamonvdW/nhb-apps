@@ -57,6 +57,7 @@ class TestHistComp(E2EHelpers, TestCase):
         obj.klasse = 'Teamcurve3'
         obj.is_team = True
         obj.save()
+        self.team_histcomp_pk = obj.pk
 
         rec = HistCompetitieTeam()
         rec.histcompetitie = obj
@@ -241,6 +242,13 @@ class TestHistComp(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('hist/histcomp_indiv.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
         self.assertNotContains(resp, "Test Club")
+
+    def test_team(self):
+        url = '/hist/team/%s/' % self.team_histcomp_pk
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_template_used(resp, ('hist/histcomp_team.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
 
     # def _UIT_test_view_invid_empty(self):
     #     rsp = self.client.get('/hist/2019/18/Missing/indiv/')

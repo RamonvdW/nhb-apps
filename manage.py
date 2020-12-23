@@ -9,13 +9,31 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+from django.core.management import execute_from_command_line
+import sys
+import os
+
 """
     Django's command-line utility for administrative tasks.
 """
 
-import os
-import sys
-from django.core.management import execute_from_command_line
+
+def report_validated_templates():
+    """ Report which templates are not covered by a test that invokes assert_html_ok """
+    from Overig.e2ehelpers import validated_templates, included_templates
+    from pathlib import Path
+
+    if len(validated_templates) > 100:      # only do this on a "test all" run
+        # for dtl in validated_templates:
+        #     print('Validated template: %s' % repr(dtl))
+        # # for
+
+        for dtl in Path().rglob('*.dtl'):
+            dtl_str = str(dtl)
+            dtl_str = dtl_str[dtl_str.find('/templates/')+11:]
+            if dtl_str not in validated_templates and dtl_str not in included_templates:
+                print('[WARNING] Missing assert_html_ok coverage for template %s' % repr(dtl_str))
+        # for
 
 
 def main():
@@ -23,19 +41,20 @@ def main():
     stars = None
     if "runserver" in sys.argv or ("test" in sys.argv and "--noinput" not in sys.argv):
         # avoid double line when runserver starts a child process
-        if "DJANGO_SETTINGS_MODULE" not in os.environ:      # pragma: no branch
+        if "DJANGO_SETTINGS_MODULE" not in os.environ:  # pragma: no branch
             stars = "*" * 30
             print("\n%s START OF RUN %s\n" % (stars, stars))
 
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'nhb-apps.settings')
     execute_from_command_line(sys.argv)
 
+    report_validated_templates()
+
     if stars:
         print("\nDone!")
 
 
-if __name__ == '__main__':      # pragma: no branch
+if __name__ == '__main__':  # pragma: no branch
     main()
 
 # end of file
-

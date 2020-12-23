@@ -66,6 +66,7 @@ class TestAccount2FA(E2EHelpers, TestCase):
         resp = self.client.get(self.url_koppel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('functie/otp-koppelen.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
 
         # check dat het OTP secret aangemaakt is
         self.account_admin = Account.objects.get(username='admin')
@@ -85,6 +86,7 @@ class TestAccount2FA(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('functie/otp-koppelen.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'Verkeerde code. Probeer het nog eens')
+        self.assert_html_ok(resp)
 
         self.account_admin = Account.objects.get(username='admin')
         self.assertFalse(self.account_admin.otp_is_actief)
@@ -94,6 +96,7 @@ class TestAccount2FA(E2EHelpers, TestCase):
         resp = self.client.post(self.url_koppel, {'otp_code': code}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('functie/otp-koppelen-gelukt.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
 
         self.account_admin = Account.objects.get(username='admin')
         self.assertTrue(self.account_admin.otp_is_actief)

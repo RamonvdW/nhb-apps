@@ -156,16 +156,14 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         f1 = io.StringIO()
         f2 = io.StringIO()
         management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_09.json', stderr=f1, stdout=f2)
-        self.assertTrue("[ERROR] Lid 100001 heeft geen valide geboortedatum", f1.getvalue())
-        self.assertTrue("[ERROR] Lid 100001 heeft onbekend geslacht: X (moet zijn: M of F)", f1.getvalue())
+        self.assertTrue("[ERROR] Lid 100001 heeft geen valide geboortedatum" in f1.getvalue())
+        self.assertTrue("[ERROR] Lid 100001 heeft onbekend geslacht: X (moet zijn: M of F)" in f1.getvalue())
         self.assertTrue("[ERROR] Lid 100009 heeft geen voornaam of initials" in f1.getvalue())
-        self.assertTrue("[ERROR] Lid 100009 heeft geen valide lidmaatschapsdatum", f1.getvalue())
-        self.assertTrue("[ERROR] Lid 100009 heeft geen valide email (geen)", f1.getvalue())
-        self.assertTrue("[INFO] Lid 100024: is_actief_lid nee --> ja", f2.getvalue())
-        self.assertTrue("[INFO] Lid 100001: is_actief_lid: ja --> nee", f2.getvalue())
-        self.assertTrue("[INFO] Lid 100024: para_classificatie: 'W1' --> ''", f2.getvalue())
-        self.assertTrue("[INFO] Lid 100025: is_actief_lid ja --> nee (want blocked)", f2.getvalue())
-        self.assertTrue("[INFO] Lid 100025: vereniging 1000 Grote Club --> 1001 HBS Dichtbij", f2.getvalue())
+        self.assertTrue("[INFO] Lid 100024: is_actief_lid nee --> ja" in f2.getvalue())
+        self.assertTrue("[INFO] Lid 100001: is_actief_lid: ja --> nee" in f2.getvalue())
+        self.assertTrue("[INFO] Lid 100024: para_classificatie: 'W1' --> ''" in f2.getvalue())
+        self.assertTrue("[INFO] Lid 100025: is_actief_lid ja --> nee (want blocked)" in f2.getvalue())
+        self.assertTrue("[INFO] Lid 100025: vereniging 1000 Grote Club --> 1001 HBS Dichtbij" in f2.getvalue())
 
     def test_haakjes(self):
         # sommige leden hebben de toevoeging " (Erelid NHB)" aan hun achternaam toegevoegd

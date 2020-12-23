@@ -132,8 +132,8 @@ class TussenstandRegioView(TemplateView):
                                                     'regio_nr': gekozen_regio_nr})
         # for
 
+        # regio filters
         if context['comp_boog']:
-            # regio filters
             regios = (NhbRegio
                       .objects
                       .select_related('rayon')

@@ -293,6 +293,13 @@ class MaakHandleiding(object):
             out = out + line + '\n'
         # for
 
+        # beëindig lijstjes
+        if in_lijstje:
+            out += '</ul>\n'
+
+        if in_nummerlijstje:
+            out += '</ol>\n'
+
         if out:
             total_out += out
 

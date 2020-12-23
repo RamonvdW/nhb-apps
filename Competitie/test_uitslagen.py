@@ -233,8 +233,8 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
 
         resp = self.client.get(self.url_uitslag_invoeren % self.wedstrijd18_pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/uitslag-invoeren-wedstrijd.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
 
         # andere tak: max_score/afstand
         # resp = self.client.get(self.url_uitslag_invoeren % self.wedstrijd25_pk)
@@ -245,8 +245,8 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         # nog een keer, dan bestaat de WedstrijdUitslag al
         resp = self.client.get(self.url_uitslag_invoeren % self.wedstrijd18_pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/uitslag-invoeren-wedstrijd.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
 
         # niet bestaande wedstrijd
         resp = self.client.get(self.url_uitslag_invoeren % 999999)
@@ -655,5 +655,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         url = self.url_bekijk_uitslag % self.wedstrijd18_pk
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)       # 200 = OK
+        self.assert_template_used(resp, ('competitie/bekijk-wedstrijd-uitslag.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
 
 # end of file

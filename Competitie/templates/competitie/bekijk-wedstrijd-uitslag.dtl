@@ -60,10 +60,12 @@
 
     <table class="white">
         <thead>
-            <th>Vereniging</th>
-            <th>Sporter</th>
-            <th>Boog</th>
-            <th>Score</th>
+            <tr>
+                <th>Vereniging</th>
+                <th>Sporter</th>
+                <th>Boog</th>
+                <th>Score</th>
+            </tr>
         </thead>
 
         {% for score in scores %}

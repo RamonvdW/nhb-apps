@@ -19,12 +19,16 @@ import datetime
 import json
 
 
+# TODO: dmv caching het aantal database hits verlagen
+
+
 def vind_regio(regio_nr):
     try:
         return NhbRegio.objects.get(regio_nr=regio_nr)
     except NhbRegio.DoesNotExist:
         pass
     return None
+
 
 def vind_lid(nhb_nr):
     try:
@@ -33,6 +37,7 @@ def vind_lid(nhb_nr):
         pass
     return None
 
+
 def vind_vereniging(nhb_nr):
     try:
         return NhbVereniging.objects.get(nhb_nr=nhb_nr)
@@ -40,10 +45,12 @@ def vind_vereniging(nhb_nr):
         pass
     return None
 
+
 def get_secretaris_str(lid):
     if lid:
         return "%s %s %s" % (lid.nhb_nr, lid.voornaam, lid.achternaam)
     return "geen"
+
 
 def get_vereniging_str(ver):
     if ver:
@@ -97,6 +104,8 @@ class Command(BaseCommand):
         self._count_sec_no_account = 0
 
         self._nieuwe_clubs = list()
+
+        self.dryrun = False
 
     def add_arguments(self, parser):
         parser.add_argument('filename', nargs=1, help="pad naar het JSON bestand")
@@ -156,7 +165,7 @@ class Command(BaseCommand):
         # naam alleen de naam over
         for regio in data:
             self._count_regios += 1
-            rayon_nr = regio['rayon_number']
+            # rayon_nr = regio['rayon_number']
             regio_nr = regio['region_number']
             regio_naam = regio['name']
 
@@ -222,8 +231,6 @@ class Command(BaseCommand):
             ver_plaats = club['location_name']
             if not ver_plaats:
                 # een vereniging zonder doel heeft een lege location_name - geen waarschuwing geven
-                #self.stderr.write('[WARNING] Vereninging %s (%s) heeft geen plaatsnaam' % (ver_nhb_nr, ver_naam))
-                #self._count_warnings += 1
                 ver_plaats = ""     # voorkom None
 
             ver_email = club['email']
@@ -238,6 +245,7 @@ class Command(BaseCommand):
 
             # zoek de vereniging op
             is_nieuw = False
+            obj = None
             try:
                 obj = NhbVereniging.objects.get(nhb_nr=ver_nhb_nr)
             except NhbVereniging.DoesNotExist:
@@ -464,8 +472,8 @@ class Command(BaseCommand):
                 self.stdout.write('[WARNING] Lid %s: onbalans in haakjes in %s' % (lid_nhb_nr, repr(naam)))
                 self._count_warnings += 1
 
-            for chr in "!@#$%^&*[]{}=_+\\|\":;,<>/?~`":
-                if chr in naam:
+            for letter in "!@#$%^&*[]{}=_+\\|\":;,<>/?~`":
+                if letter in naam:
                     self.stdout.write("[WARNING] Lid %s: rare tekens in naam %s" % (lid_nhb_nr, repr(naam)))
                     self._count_warnings += 1
             # for
@@ -500,7 +508,7 @@ class Command(BaseCommand):
                         self.stderr.write('[ERROR] Lid %s heeft geen valide geboortedatum: %s' % (lid_nhb_nr, member['birthday']))
                         self._count_errors += 1
             try:
-                lid_geboorte_datum = datetime.datetime.strptime(member['birthday'], "%Y-%m-%d").date() # YYYY-MM-DD
+                lid_geboorte_datum = datetime.datetime.strptime(member['birthday'], "%Y-%m-%d").date()  # YYYY-MM-DD
             except (ValueError, TypeError):
                 lid_geboorte_datum = None
                 is_valid = False
@@ -524,7 +532,7 @@ class Command(BaseCommand):
                 self.stderr.write('[ERROR] Lid %s heeft geen valide datum lidmaatschap: %s' % (lid_nhb_nr, member['member_from']))
                 self._count_errors += 1
             try:
-                lid_sinds = datetime.datetime.strptime(member['member_from'], "%Y-%m-%d").date() # YYYY-MM-DD
+                lid_sinds = datetime.datetime.strptime(member['member_from'], "%Y-%m-%d").date()  # YYYY-MM-DD
             except (ValueError, TypeError):
                 lid_sinds = None
                 is_valid = False
@@ -686,7 +694,7 @@ class Command(BaseCommand):
 
         # houd bij welke vereniging nhb_nrs in de database zitten
         # als deze niet meer voorkomen, dan zijn ze verwijderd
-        nhb_nrs = [tup[0] for tup in NhbVereniging.objects.values_list('nhb_nr')]
+        # ver_nrs = [tup[0] for tup in NhbVereniging.objects.values_list('nhb_nr')]   # TODO: flat=True toepassen?
 
         # voor overige velden, zie _import_clubs
         """ JSON velden (string, except):
@@ -709,6 +717,7 @@ class Command(BaseCommand):
             if nhb_nr in GEEN_WEDSTRIJDLOCATIE:
                 continue
 
+            # TODO: waarom niet gewoon in ver_nrs kijken?
             nhb_ver = vind_vereniging(nhb_nr)
             if not nhb_ver:
                 continue
@@ -754,13 +763,15 @@ class Command(BaseCommand):
                 self._count_toevoegingen += 1
         # for
 
+        # TODO: vereniging opruimen
+
     def handle(self, *args, **options):
         self.dryrun = options['dryrun']
+        fname = options['filename'][0]
 
         try:
-            fname = options['filename'][0]
-            with open(fname, encoding='raw_unicode_escape') as fhandle:
-                data = json.load(fhandle)
+            with open(fname, encoding='raw_unicode_escape') as f_handle:
+                data = json.load(f_handle)
         except IOError as exc:
             self.stderr.write("[ERROR] Bestand kan niet gelezen worden (%s)" % str(exc))
             return
@@ -793,23 +804,23 @@ class Command(BaseCommand):
             self.stderr.write('[ERROR] Overwachte database fout: %s' % str(exc))
 
         self.stdout.write('Import van CRM data is klaar')
-        #self.stdout.write("Read %s lines; skipped %s dupes; skipped %s errors; added %s records" % (line_nr, dupe_count, error_count, added_count))
+        # self.stdout.write("Read %s lines; skipped %s dupes; skipped %s errors; added %s records" % (line_nr, dupe_count, error_count, added_count))
 
         # rapporteer de samenvatting en schrijf deze ook in het logboek
         samenvatting = "Samenvatting: %s fouten; %s waarschuwingen; %s nieuw; %s wijzigingen; %s verwijderingen; "\
-                        "%s leden, %s inactief; %s verenigingen; %s secretarissen zonder account; %s regios; %s rayons; %s actieve leden zonder e-mail" %\
-                          (self._count_errors,
-                           self._count_warnings,
-                           self._count_toevoegingen,
-                           self._count_wijzigingen,
-                           self._count_verwijderingen,
-                           self._count_members - self._count_blocked,
-                           self._count_blocked,
-                           self._count_clubs,
-                           self._count_sec_no_account,
-                           self._count_regios,
-                           self._count_rayons,
-                           self._count_lid_no_email)
+                       "%s leden, %s inactief; %s verenigingen; %s secretarissen zonder account; %s regios; %s rayons; %s actieve leden zonder e-mail" %\
+                       (self._count_errors,
+                        self._count_warnings,
+                        self._count_toevoegingen,
+                        self._count_wijzigingen,
+                        self._count_verwijderingen,
+                        self._count_members - self._count_blocked,
+                        self._count_blocked,
+                        self._count_clubs,
+                        self._count_sec_no_account,
+                        self._count_regios,
+                        self._count_rayons,
+                        self._count_lid_no_email)
 
         if self.dryrun:
             self.stdout.write("\nDRY RUN")
@@ -826,4 +837,3 @@ class Command(BaseCommand):
         return
 
 # end of file
-

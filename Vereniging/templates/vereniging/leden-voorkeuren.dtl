@@ -9,27 +9,75 @@
 {% block title %}Voorkeuren leden{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vereniging-leden-voorkeuren" %}
 
-<h4>Voorkeuren leden</h4>
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vereniging-leden-voorkeuren" %}
 
-<p>Deze pagina toont een overzicht van de voorkeuren van de leden van vereniging <b>[{{ nhb_ver.nhb_nr }}] {{ nhb_ver.naam }}</b> te {{ nhb_ver.plaats }} en geeft de mogelijkheid deze aan te passen.</p>
+    <h4>Voorkeuren leden</h4>
 
-{% if leden_jeugd %}
+    <p>Deze pagina toont een overzicht van de voorkeuren van de leden van vereniging <b>[{{ nhb_ver.nhb_nr }}] {{ nhb_ver.naam }}</b> te {{ nhb_ver.plaats }} en geeft de mogelijkheid deze aan te passen.</p>
 
-    <h5>Jeugd</h5>
+    {% if leden_jeugd %}
 
-    <table class="white" id="table1">   <!-- id is voor filter -->
+        <h5>Jeugd</h5>
+
+        <table class="white" id="table1">   <!-- id is voor filter -->
+            <thead>
+                <tr>        <!-- filter veld -->
+                    <td class="table-filter"><input class="table-filter" oninput="myTableFilter(this, 'table1')" placeholder="Zoeken"/></td>
+                    <td colspan="5"></td>
+                </tr>
+                <tr>
+                    <th data-filter="on">Naam</th>
+                    <th>M/V</th>
+                    <th>Leeftijd</th>
+                    <th>Wedstrijdklasse {{ wedstrijdklasse_jaar }}</th>
+                    <th>Schiet met</th>
+                    {% if toon_wijzig_kolom %}
+                        <th><!-- kolom voor de Voorkeuren knop --></th>
+                    {% endif %}
+                </tr>
+            </thead>
+
+            {% for obj in leden_jeugd %}
+                <tr>
+                    <td>{{ obj.volledige_naam }}</td>
+                    <td>{{ obj.geslacht }}</td>
+                    <td>{{ obj.leeftijd }}</td>
+                    <td>{{ obj.leeftijdsklasse.klasse_kort }}</td>
+
+                    <td>
+                        {% for boogtype in obj.wedstrijdbogen %}
+                            <span>{% if not forloop.first %},<br>{% endif %}{{ boogtype }}</span>
+                        {% empty %}
+                            <i class="red-text">Geen</i>
+                        {% endfor %}
+                    </td>
+
+                    {% if toon_wijzig_kolom %}
+                        <td class="right-align">
+                            {% if obj.wijzig_url %}
+                                <a class="btn-nhb-blauw" href="{{ obj.wijzig_url }}"><i class="material-icons-round left">tune</i>Voorkeuren</a>
+                            {% endif %}
+                        </td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+        </table>
+
+    {% endif %}
+
+
+    <h5>Volwassenen</h5>
+
+    <table class="white" id="table2">   <!-- id is voor filter -->
         <thead>
             <tr>        <!-- filter veld -->
-                <td class="table-filter"><input class="table-filter" oninput="myTableFilter(this, 'table1')" placeholder="Zoeken"/></td>
-                <td colspan="5"></td>
+                <td class="table-filter"><input class="table-filter" oninput="myTableFilter(this, 'table2')" placeholder="Zoeken"/></td>
+                <td colspan="3"></td>
             </tr>
             <tr>
                 <th data-filter="on">Naam</th>
                 <th>M/V</th>
-                <th>Leeftijd</th>
-                <th>Wedstrijdklasse {{ wedstrijdklasse_jaar }}</th>
                 <th>Schiet met</th>
                 {% if toon_wijzig_kolom %}
                     <th><!-- kolom voor de Voorkeuren knop --></th>
@@ -37,12 +85,10 @@
             </tr>
         </thead>
 
-        {% for obj in leden_jeugd %}
+        {% for obj in leden_senior %}
             <tr>
                 <td>{{ obj.volledige_naam }}</td>
                 <td>{{ obj.geslacht }}</td>
-                <td>{{ obj.leeftijd }}</td>
-                <td>{{ obj.leeftijdsklasse.klasse_kort }}</td>
 
                 <td>
                     {% for boogtype in obj.wedstrijdbogen %}
@@ -53,7 +99,7 @@
                 </td>
 
                 {% if toon_wijzig_kolom %}
-                    <td align="right">
+                    <td class="right-align">
                         {% if obj.wijzig_url %}
                             <a class="btn-nhb-blauw" href="{{ obj.wijzig_url }}"><i class="material-icons-round left">tune</i>Voorkeuren</a>
                         {% endif %}
@@ -63,51 +109,4 @@
         {% endfor %}
     </table>
 
-{% endif %}
-
-
-<h5>Volwassenen</h5>
-
-<table class="white" id="table2">   <!-- id is voor filter -->
-    <thead>
-        <tr>        <!-- filter veld -->
-            <td class="table-filter"><input class="table-filter" oninput="myTableFilter(this, 'table2')" placeholder="Zoeken"/></td>
-            <td colspan="3"></td>
-        </tr>
-        <tr>
-            <th data-filter="on">Naam</th>
-            <th>M/V</th>
-            <th>Schiet met</th>
-            {% if toon_wijzig_kolom %}
-                <th><!-- kolom voor de Voorkeuren knop --></th>
-            {% endif %}
-        </tr>
-    </thead>
-
-    {% for obj in leden_senior %}
-        <tr>
-            <td>{{ obj.volledige_naam }}</td>
-            <td>{{ obj.geslacht }}</td>
-
-            <td>
-                {% for boogtype in obj.wedstrijdbogen %}
-                    <span>{% if not forloop.first %},<br>{% endif %}{{ boogtype }}</span>
-                {% empty %}
-                    <i class="red-text">Geen</i>
-                {% endfor %}
-            </td>
-
-            {% if toon_wijzig_kolom %}
-                <td align="right">
-                    {% if obj.wijzig_url %}
-                        <a class="btn-nhb-blauw" href="{{ obj.wijzig_url }}"><i class="material-icons-round left">tune</i>Voorkeuren</a>
-                    {% endif %}
-                </td>
-            {% endif %}
-        </tr>
-    {% endfor %}
-</table>
-
-
 {% endblock %}
-

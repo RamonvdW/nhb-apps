@@ -28,95 +28,94 @@
     {% endif %}
 
 
-<p>Kies een wedstrijdboog:</p>
+    <p>Kies een wedstrijdboog:</p>
 
-<div class="white shrink-wrap-5">
-    {% for boog in boog_filters %}
-        {% if boog.zoom_url %}
-            <a class="margin-5 btn-nhb-blauw btn-small" href="{{ boog.zoom_url }}">{{ boog.beschrijving }}</a>
-        {% else %}
-            <a class="margin-5 btn-nhb-blauw btn-small disabled" href="#">{{ boog.beschrijving }}</a>
-        {% endif %}
-    {% endfor %}
-</div>
+    <div class="white shrink-wrap-5">
+        {% for boog in boog_filters %}
+            {% if boog.zoom_url %}
+                <a class="margin-5 btn-nhb-blauw btn-small" href="{{ boog.zoom_url }}">{{ boog.beschrijving }}</a>
+            {% else %}
+                <a class="margin-5 btn-nhb-blauw btn-small disabled" href="#">{{ boog.beschrijving }}</a>
+            {% endif %}
+        {% endfor %}
+    </div>
 
 
-<p>Kies een regio:</p>
+    <p>Kies een regio:</p>
 
-<div class="white shrink-wrap-5">
-    {% for regio in regio_filters %}
-        {% if regio.break_before %}
-            <br>
-        {% endif %}
-        {% if regio.zoom_url %}
-            <a class="margin-5 btn-nhb-blauw btn-small" href="{{ regio.zoom_url }}">{{ regio.title_str }}</a>
-        {% else %}
-            <a class="margin-5 btn-nhb-blauw btn-small disabled" href="#">{{ regio.title_str }}</a>
-        {% endif %}
-    {% endfor %}
-</div>
+    <div class="white shrink-wrap-5">
+        {% for regio in regio_filters %}
+            {% if regio.break_before %}
+                <br>
+            {% endif %}
+            {% if regio.zoom_url %}
+                <a class="margin-5 btn-nhb-blauw btn-small" href="{{ regio.zoom_url }}">{{ regio.title_str }}</a>
+            {% else %}
+                <a class="margin-5 btn-nhb-blauw btn-small disabled" href="#">{{ regio.title_str }}</a>
+            {% endif %}
+        {% endfor %}
+    </div>
 
-<p>&nbsp;</p>
-<div class="row">
+    <p>&nbsp;</p>
+    <div class="row">
 
-    <!-- toon gegevens van de regio en competitie in een blauwe box -->
-    <div class="col s12 m10 l8 xl6 offset-m1 offset-l2 offset-xl3">
-        <div class="white-text nhb-blauw z-depth-2">
+        <!-- toon gegevens van de regio en competitie in een blauwe box -->
+        <div class="col s12 m10 l8 xl6 offset-m1 offset-l2 offset-xl3">
+            <div class="white-text nhb-blauw z-depth-2">
 
-            <div class="row small-row">
-                <div class="col s3">Competitie:</div>
-                <div class="col s7">{{ deelcomp.competitie.beschrijving }}</div>
-            </div>
+                <div class="row small-row">
+                    <div class="col s3">Competitie:</div>
+                    <div class="col s7">{{ deelcomp.competitie.beschrijving }}</div>
+                </div>
 
-            <div class="row small-row">
-                <div class="col s3">Wedstrijdboog:</div>
-                <div class="col s7">{{ comp_boog.beschrijving }}</div>
-            </div>
+                <div class="row small-row">
+                    <div class="col s3">Wedstrijdboog:</div>
+                    <div class="col s7">{{ comp_boog.beschrijving }}</div>
+                </div>
 
-            <div class="row small-row">
-                <div class="col s3">Regio:</div>
-                <div class="col s7">{{ regio }}</div>
+                <div class="row small-row">
+                    <div class="col s3">Regio:</div>
+                    <div class="col s7">{{ regio }}</div>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<p>&nbsp;</p>
+    <p>&nbsp;</p>
 
-<table class="white">
-    {% for obj in deelnemers %}
-        {% if obj.break_klasse %}
-            <tr class="nhb-grijs">
-                <td></td>   <!-- rank -->
-                <td colspan="11"><h5>{{ obj.klasse_str }}</h5></td>
-            </tr>
+    <table class="white">
+        {% for obj in deelnemers %}
+            {% if obj.break_klasse %}
+                <tr class="nhb-grijs">
+                    <td></td>   <!-- rank -->
+                    <td colspan="11"><h5>{{ obj.klasse_str }}</h5></td>
+                </tr>
+                <tr>
+                    <th></th>   <!-- rank -->
+                    <th>Sporter</th>
+                    <th class="hide-on-small-only">Vereniging</th>
+                    <th class="center-align">Gemiddelde</th>
+                    <th class="center-align" colspan="7">Scores</th>
+                    <th class="center-align hide-on-small-only">Totaal</th>
+                </tr>
+            {% endif %}
+
             <tr>
-                <th></th>   <!-- rank -->
-                <th>Sporter</th>
-                <th class="hide-on-small-only">Vereniging</th>
-                <th class="center-align">Gemiddelde</th>
-                <th colspan="7" class="center-align">Scores</th>
-                <th class="center-align hide-on-small-only">Totaal</th>
+                <td class="center-align">{{ obj.rank }}</td>
+                <td>{{ obj.naam_str }}</td>
+                <td class="hide-on-small-only">{{ obj.ver_str }}</td>
+                <td class="center-align">{{ obj.gemiddelde }}</td>
+                <td class="right-align">{% if obj.laagste_score_nr == 1 %}({{ obj.score1 }}){% else %}{{ obj.score1 }}{% endif %}</td>
+                <td class="right-align">{% if obj.laagste_score_nr == 2 %}({{ obj.score2 }}){% else %}{{ obj.score2 }}{% endif %}</td>
+                <td class="right-align">{% if obj.laagste_score_nr == 3 %}({{ obj.score3 }}){% else %}{{ obj.score3 }}{% endif %}</td>
+                <td class="right-align">{% if obj.laagste_score_nr == 4 %}({{ obj.score4 }}){% else %}{{ obj.score4 }}{% endif %}</td>
+                <td class="right-align">{% if obj.laagste_score_nr == 5 %}({{ obj.score5 }}){% else %}{{ obj.score5 }}{% endif %}</td>
+                <td class="right-align">{% if obj.laagste_score_nr == 6 %}({{ obj.score6 }}){% else %}{{ obj.score6 }}{% endif %}</td>
+                <td class="right-align">{% if obj.laagste_score_nr == 7 %}({{ obj.score7 }}){% else %}{{ obj.score7 }}{% endif %}</td>
+                <td class="center-align hide-on-small-only">{{ obj.totaal }}</td>
             </tr>
-        {% endif %}
 
-        <tr>
-            <td class="center-align">{{ obj.rank }}</td>
-            <td>{{ obj.naam_str }}</td>
-            <td class="hide-on-small-only">{{ obj.ver_str }}</td>
-            <td class="center-align">{{ obj.gemiddelde }}</td>
-            <td class="right-align">{% if obj.laagste_score_nr == 1 %}({{ obj.score1 }}){% else %}{{ obj.score1 }}{% endif %}</td>
-            <td class="right-align">{% if obj.laagste_score_nr == 2 %}({{ obj.score2 }}){% else %}{{ obj.score2 }}{% endif %}</td>
-            <td class="right-align">{% if obj.laagste_score_nr == 3 %}({{ obj.score3 }}){% else %}{{ obj.score3 }}{% endif %}</td>
-            <td class="right-align">{% if obj.laagste_score_nr == 4 %}({{ obj.score4 }}){% else %}{{ obj.score4 }}{% endif %}</td>
-            <td class="right-align">{% if obj.laagste_score_nr == 5 %}({{ obj.score5 }}){% else %}{{ obj.score5 }}{% endif %}</td>
-            <td class="right-align">{% if obj.laagste_score_nr == 6 %}({{ obj.score6 }}){% else %}{{ obj.score6 }}{% endif %}</td>
-            <td class="right-align">{% if obj.laagste_score_nr == 7 %}({{ obj.score7 }}){% else %}{{ obj.score7 }}{% endif %}</td>
-            <td class="center-align hide-on-small-only">{{ obj.totaal }}</td>
-        </tr>
-
-    {% endfor %}
-</table>
+        {% endfor %}
+    </table>
 
 {% endblock %}
-
