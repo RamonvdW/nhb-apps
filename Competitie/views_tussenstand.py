@@ -9,7 +9,7 @@ from django.urls import reverse, Resolver404
 from django.http import HttpResponseRedirect
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import BoogType
-from NhbStructuur.models import NhbRayon, NhbRegio
+from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
 from Competitie.models import (LAAG_REGIO, LAAG_RK, LAAG_BK, DEELNAME_NEE,
                                DeelCompetitie, DeelcompetitieKlasseLimiet,
                                RegioCompetitieSchutterBoog, KampioenschapSchutterBoog)
@@ -19,6 +19,7 @@ from .models import Competitie
 
 
 TEMPLATE_COMPETITIE_TUSSENSTAND = 'competitie/tussenstand.dtl'
+TEMPLATE_COMPETITIE_TUSSENSTAND_VERENIGING = 'competitie/tussenstand-vereniging.dtl'
 TEMPLATE_COMPETITIE_TUSSENSTAND_REGIO = 'competitie/tussenstand-regio.dtl'
 TEMPLATE_COMPETITIE_TUSSENSTAND_RAYON = 'competitie/tussenstand-rayon.dtl'
 TEMPLATE_COMPETITIE_TUSSENSTAND_BOND = 'competitie/tussenstand-bond.dtl'
@@ -67,9 +68,157 @@ class TussenstandView(TemplateView):
         return context
 
 
-class TussenstandRegioView(TemplateView):
+class TussenstandVerenigingView(TemplateView):
 
     """ Django class-based view voor de de tussenstand van de competitie """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_COMPETITIE_TUSSENSTAND_VERENIGING
+
+    def _get_schutter_ver_nr(self):
+
+        """ Geeft het vereniging nhb nummer van de ingelogde schutter terug,
+            of 101 als er geen regio vastgesteld kan worden
+        """
+        ver_nr = -1
+
+        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
+
+        if functie_nu and functie_nu.nhb_ver:
+            # HWL, WL, SEC
+            ver_nr = functie_nu.nhb_ver.nhb_nr
+
+        if ver_nr < 0:
+            # pak de vereniging van de ingelogde gebruiker
+            account = self.request.user
+            if account.nhblid_set.count() > 0:
+                nhblid = account.nhblid_set.all()[0]
+                if nhblid.is_actief_lid and nhblid.bij_vereniging:
+                    ver_nr = nhblid.bij_vereniging.nhb_nr
+
+        ver_nrs = list(NhbVereniging.objects.order_by('nhb_nr').values_list('nhb_nr', flat=True))
+        if ver_nr not in ver_nrs:
+            ver_nr = ver_nrs[0]
+
+        return ver_nr
+
+    @staticmethod
+    def _maak_filter_knoppen(context, afstand, ver_nr, comp_boog):
+        """ filter knoppen per regio, gegroepeerd per rayon en per competitie boog type """
+
+        # boogtype files
+        boogtypen = BoogType.objects.order_by('volgorde').all()
+
+        context['comp_boog'] = None
+        context['boog_filters'] = boogtypen
+
+        for boogtype in boogtypen:
+            if boogtype.afkorting.upper() == comp_boog.upper():
+                context['comp_boog'] = boogtype
+                comp_boog = boogtype.afkorting.lower()
+                # geen url --> knop disabled
+            else:
+                boogtype.zoom_url = reverse('Competitie:tussenstand-vereniging-n',
+                                            kwargs={'afstand': afstand,
+                                                    'comp_boog': boogtype.afkorting.lower(),
+                                                    'ver_nr': ver_nr})
+        # for
+
+    @staticmethod
+    def _get_deelcomp(afstand, regio_nr):
+        if regio_nr == 100:
+            regio_nr = 101
+
+        try:
+            deelcomp = (DeelCompetitie
+                        .objects
+                        .select_related('competitie', 'nhb_regio')
+                        .get(laag=LAAG_REGIO,
+                             competitie__afstand=afstand,
+                             competitie__is_afgesloten=False,
+                             nhb_regio__regio_nr=regio_nr))
+        except DeelCompetitie.DoesNotExist:
+            raise Resolver404()
+
+        return deelcomp
+
+    @staticmethod
+    def _get_deelnemers(deelcomp, boogtype, ver_nr):
+        deelnemers = (RegioCompetitieSchutterBoog
+                      .objects
+                      .select_related('schutterboog',
+                                      'schutterboog__nhblid',
+                                      'bij_vereniging',
+                                      'klasse',
+                                      'klasse__indiv',
+                                      'klasse__indiv__boogtype')
+                      .filter(deelcompetitie=deelcomp,
+                              bij_vereniging__nhb_nr=ver_nr,
+                              klasse__indiv__boogtype=boogtype)
+                      .order_by('klasse__indiv__volgorde', '-gemiddelde'))
+
+        klasse = -1
+        rank = 0
+        for deelnemer in deelnemers:
+            deelnemer.break_klasse = (klasse != deelnemer.klasse.indiv.volgorde)
+            if deelnemer.break_klasse:
+                deelnemer.klasse_str = deelnemer.klasse.indiv.beschrijving
+                rank = 0
+            klasse = deelnemer.klasse.indiv.volgorde
+
+            rank += 1
+            lid = deelnemer.schutterboog.nhblid
+            deelnemer.rank = rank
+            deelnemer.naam_str = "[%s] %s" % (lid.nhb_nr, lid.volledige_naam())
+            deelnemer.ver_str = str(deelnemer.bij_vereniging)
+        # for
+
+        return deelnemers
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        afstand = kwargs['afstand'][:2]         # afkappen voor veiligheid
+        comp_boog = kwargs['comp_boog'][:2]     # afkappen voor veiligheid
+
+        # ver_nr is optioneel en resulteert in het nummer van de schutter
+        try:
+            ver_nr = kwargs['ver_nr'][:4]     # afkappen voor veiligheid
+            ver_nr = int(ver_nr)
+        except KeyError:
+            # zoek de vereniging die bij de huidige gebruiker past
+            ver_nr = self._get_schutter_ver_nr()
+        except ValueError:
+            raise Resolver404()
+
+        ver = NhbVereniging.objects.select_related('regio').get(nhb_nr=ver_nr)
+        context['ver'] = ver
+
+        self._maak_filter_knoppen(context, afstand, ver_nr, comp_boog)
+
+        boogtype = context['comp_boog']
+        if not boogtype:
+            raise Resolver404()
+
+        regio_nr = ver.regio.regio_nr
+        context['url_terug'] = reverse('Competitie:tussenstand-regio-n',
+                                       kwargs={'afstand': afstand,
+                                               'comp_boog': comp_boog,
+                                               'regio_nr': regio_nr})
+
+        context['deelcomp'] = deelcomp = self._get_deelcomp(afstand, regio_nr)
+
+        context['deelnemers'] = deelnemers = self._get_deelnemers(deelcomp, boogtype, ver_nr)
+        context['aantal_deelnemers'] = len(deelnemers)
+
+        menu_dynamics(self.request, context, actief='histcomp')
+        return context
+
+
+class TussenstandRegioView(TemplateView):
+
+    """ Django class-based view voor de de tussenstand van de competitie in 1 regio """
 
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_TUSSENSTAND_REGIO
@@ -157,6 +306,23 @@ class TussenstandRegioView(TemplateView):
                     # geen zoom_url --> knop disabled
                     context['regio'] = regio
             # for
+
+        # vereniging filters
+        if context['comp_boog']:
+            vers = (NhbVereniging
+                    .objects
+                    .select_related('regio')
+                    .filter(regio__regio_nr=gekozen_regio_nr))
+
+            for ver in vers:
+                ver.title_str = str(ver.nhb_nr)
+                ver.zoom_url = reverse('Competitie:tussenstand-vereniging-n',
+                                       kwargs={'afstand': afstand,
+                                               'comp_boog': comp_boog,
+                                               'ver_nr': ver.nhb_nr})
+            # for
+
+            context['ver_filters'] = vers
 
         context['url_switch'] = reverse(self.url_switch,
                                         kwargs={'afstand': afstand,

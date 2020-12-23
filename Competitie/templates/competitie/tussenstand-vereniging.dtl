@@ -9,24 +9,16 @@
 {% block title %}Tussenstand{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-tussenstand-regio" %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-tussenstand-vereniging" %}
 
-    <h4>Tussenstand regiocompetitie</h4>
+    <h4>Tussenstand</h4>
 
     <p>
-        <a class="btn-nhb-blauw" href="{% url 'Competitie:tussenstand' %}">
+        <a class="btn-nhb-blauw" href="{{  url_terug }}">
             <i class="material-icons-round left">arrow_upward</i>Terug</a>
     </p>
 
-    <p>Deze pagina toont de tussenstand van de regiocompetities.</p>
-
-    {% if is_beheerder %}
-        <div class="white shrink-wrap-5">
-            <a class="margin-5 btn-nhb-rood btn-small disabled" href="#">Ge&iuml;mporteerde uitslag</a>
-            <a class="margin-5 btn-nhb-rood btn-small" href="{{ url_switch }}">Handmatige uitslag</a>
-        </div>
-    {% endif %}
-
+    <p>Deze pagina toont de tussenstand van de regiocompetities binnen de vereniging.</p>
 
     <p>Kies een wedstrijdboog:</p>
 
@@ -40,38 +32,9 @@
         {% endfor %}
     </div>
 
-
-    <p>Kies een regio:</p>
-
-    <div class="white shrink-wrap-5">
-        {% for regio in regio_filters %}
-            {% if regio.break_before %}
-                <br>
-            {% endif %}
-            {% if regio.zoom_url %}
-                <a class="margin-5 btn-nhb-blauw btn-small" href="{{ regio.zoom_url }}">{{ regio.title_str }}</a>
-            {% else %}
-                <a class="margin-5 btn-nhb-blauw btn-small disabled" href="#">{{ regio.title_str }}</a>
-            {% endif %}
-        {% endfor %}
-    </div>
-
-
-    <p>Kies een vereniging:</p>
-
-    <div class="white shrink-wrap-5">
-        <a class="margin-5 btn-nhb-blauw btn-small disabled" href="#">Alles</a>
-
-        {% for ver in ver_filters %}
-            <a class="margin-5 btn-nhb-blauw btn-small" href="{{ ver.zoom_url }}">{{ ver.title_str }}</a>
-        {% endfor %}
-    </div>
-
-
     <p>&nbsp;</p>
     <div class="row">
-
-        <!-- toon gegevens van de regio en competitie in een blauwe box -->
+        <!-- toon gegevens van de competitie, regio en vereniging in een blauwe box -->
         <div class="col s12 m10 l8 xl6 offset-m1 offset-l2 offset-xl3">
             <div class="white-text nhb-blauw z-depth-2">
 
@@ -87,13 +50,20 @@
 
                 <div class="row small-row">
                     <div class="col s3">Regio:</div>
-                    <div class="col s7">{{ regio }}</div>
+                    <div class="col s7">{{ ver.regio }}</div>
+                </div>
+
+                <div class="row small-row">
+                    <div class="col s3">Vereniging:</div>
+                    <div class="col s7">{{ ver }}</div>
                 </div>
             </div>
         </div>
     </div>
 
     <p>&nbsp;</p>
+
+    <p>{{ aantal_deelnemers }} sporters van jouw vereniging doen met dit type boog mee aan de competitie.</p>
 
     <table class="white">
         {% for obj in deelnemers %}
@@ -107,7 +77,7 @@
                     <th>Sporter</th>
                     <th class="hide-on-small-only">Vereniging</th>
                     <th class="center-align">Gemiddelde</th>
-                    <th class="center-align" colspan="7">Scores</th>
+                    <th colspan="7" class="center-align">Scores</th>
                     <th class="center-align hide-on-small-only">Totaal</th>
                 </tr>
             {% endif %}

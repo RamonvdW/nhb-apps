@@ -56,6 +56,18 @@
         {% endfor %}
     </div>
 
+
+    <p>Kies een vereniging:</p>
+
+    <div class="white shrink-wrap-5">
+        <a class="margin-5 btn-nhb-blauw btn-small disabled" href="#">Alles</a>
+
+        {% for ver in ver_filters %}
+            <a class="margin-5 btn-nhb-blauw btn-small" href="{{ ver.zoom_url }}">{{ ver.title_str }}</a>
+        {% endfor %}
+    </div>
+
+
     <p>&nbsp;</p>
     <div class="row">
 

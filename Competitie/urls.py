@@ -161,21 +161,29 @@ urlpatterns = [
          views_tussenstand.TussenstandView.as_view(),
          name='tussenstand'),
 
-    path('tussenstand/<afstand>-<comp_boog>/regio/',
-         views_tussenstand.TussenstandRegioView.as_view(),
-         name='tussenstand-regio'),
+    path('tussenstand/<afstand>-<comp_boog>/vereniging/<ver_nr>/',
+         views_tussenstand.TussenstandVerenigingView.as_view(),
+         name='tussenstand-vereniging-n'),
+
+    path('tussenstand/<afstand>-<comp_boog>/vereniging/',
+         views_tussenstand.TussenstandVerenigingView.as_view(),
+         name='tussenstand-vereniging'),
 
     path('tussenstand/<afstand>-<comp_boog>/regio/<regio_nr>/',
          views_tussenstand.TussenstandRegioView.as_view(),
          name='tussenstand-regio-n'),
 
-    path('tussenstand/<afstand>-<comp_boog>/regio-alt/',
-         views_tussenstand.TussenstandRegioAltView.as_view(),
-         name='tussenstand-regio-alt'),
+    path('tussenstand/<afstand>-<comp_boog>/regio/',
+         views_tussenstand.TussenstandRegioView.as_view(),
+         name='tussenstand-regio'),
 
     path('tussenstand/<afstand>-<comp_boog>/regio-alt/<regio_nr>/',
          views_tussenstand.TussenstandRegioAltView.as_view(),
          name='tussenstand-regio-n-alt'),
+
+    path('tussenstand/<afstand>-<comp_boog>/regio-alt/',
+         views_tussenstand.TussenstandRegioAltView.as_view(),
+         name='tussenstand-regio-alt'),
 
     path('tussenstand/<afstand>-<comp_boog>/rayon/',
          views_tussenstand.TussenstandRayonView.as_view(),
