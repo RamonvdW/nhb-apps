@@ -10,6 +10,8 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management import execute_from_command_line
+from Overig.e2estatus import validated_templates, included_templates
+from pathlib import Path
 import sys
 import os
 
@@ -20,8 +22,6 @@ import os
 
 def report_validated_templates():
     """ Report which templates are not covered by a test that invokes assert_html_ok """
-    from Overig.e2ehelpers import validated_templates, included_templates
-    from pathlib import Path
 
     if len(validated_templates) > 100:      # only do this on a "test all" run
         # for dtl in validated_templates:

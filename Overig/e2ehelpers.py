@@ -8,28 +8,14 @@ from django.contrib import auth
 from django.conf import settings
 from Account.models import Account, account_create
 from Functie.view_vhpg import account_vhpg_is_geaccepteerd
-from bs4 import BeautifulSoup
 from django.test import TestCase
+from Overig.e2estatus import validated_templates, included_templates
+from bs4 import BeautifulSoup
 import subprocess
 import tempfile
 import vnujar
 import pyotp
 
-
-# template names found by assert_html_ok
-validated_templates = list()
-
-# these templates are included by other templates
-included_templates = (
-    'plein/site_layout.dtl',
-    'plein/menu.dtl',
-    'plein/card.dtl',
-    'plein/card_logo.dtl',
-    'plein/andere-sites-van-de-nhb.dtl',
-    'plein/ga-naar-live-server.dtl',
-    'overig/site-feedback-sidebar.dtl',
-    'logboek/common.dtl'
-)
 
 class E2EHelpers(object):
 
