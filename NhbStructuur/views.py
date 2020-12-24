@@ -29,17 +29,18 @@ def nhblid_login_plugin(request, from_ip, account):
     if account.nhblid_set.all().count() == 1:
         nhblid = account.nhblid_set.all()[0]
 
-        if not nhblid.is_actief_lid:
-            # NHB lid mag geen gebruik maken van de NHB faciliteiten
+        if not (account.is_staff or account.is_BB):  # beschermt management rollen tegen CRM ongelukken
+            if not nhblid.is_actief_lid:
+                # NHB lid mag geen gebruik maken van de NHB faciliteiten
 
-            schrijf_in_logboek(account, 'Inloggen',
-                               'Mislukte inlog vanaf IP %s voor inactief account %s' % (from_ip, repr(account.username)))
+                schrijf_in_logboek(account, 'Inloggen',
+                                   'Mislukte inlog vanaf IP %s voor inactief account %s' % (from_ip, repr(account.username)))
 
-            my_logger.info('%s LOGIN Geblokkeerde inlog voor inactief account %s' % (from_ip, repr(account.username)))
+                my_logger.info('%s LOGIN Geblokkeerde inlog voor inactief account %s' % (from_ip, repr(account.username)))
 
-            context = {'account': account}
-            menu_dynamics(request, context, actief='inloggen')
-            return render(request, TEMPLATE_NHBSTRUCTUUR_IS_INACTIEF, context)
+                context = {'account': account}
+                menu_dynamics(request, context, actief='inloggen')
+                return render(request, TEMPLATE_NHBSTRUCTUUR_IS_INACTIEF, context)
 
         # neem de namen over in het account
         # zodat Account zelfstandig te gebruiken is

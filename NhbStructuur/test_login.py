@@ -47,7 +47,7 @@ class TestNhbStructuurLogin(E2EHelpers, TestCase):
         resp = self.client.get('/plein/')
         self.assertContains(resp, 'Sporter')
 
-    def test_inactief(self):
+    def test_inactief_normaal(self):
         # probeer in te loggen als inactief lid
         self.nhblid1.is_actief_lid = False
         self.nhblid1.save()
@@ -56,6 +56,22 @@ class TestNhbStructuurLogin(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('nhbstructuur/is_inactief.dtl', 'plein/site_layout.dtl'))
+
+    def test_inactief_bb(self):
+        # inlog als BB met inactief nhblid moet gewoon werken
+        self.account_normaal.is_BB = True
+        self.account_normaal.save()
+        self.nhblid1.is_actief_lid = False
+        self.nhblid1.save()
+        self.e2e_login(self.account_normaal)
+
+    def test_inactief_staff(self):
+        # inlog als staff met inactief nhblid moet gewoon werken
+        self.account_normaal.is_staff = True
+        self.account_normaal.save()
+        self.nhblid1.is_actief_lid = False
+        self.nhblid1.save()
+        self.e2e_login(self.account_normaal)
 
     def test_geen_nhblid(self):
         self.nhblid1.account = None
