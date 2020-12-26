@@ -63,7 +63,7 @@
                         {% for name in sec_names %}
                             <span>{{ name }}</span><br>
                         {% empty %}
-                            <i>Nog geen account</i>
+                            <i class="grey-text">Nog geen account</i>
                         {% endfor %}
                     </td>
                     {% if not readonly %}
@@ -81,7 +81,11 @@
                         {% for name in hwl_names %}
                             <span>{{ name }}</span><br>
                         {% empty %}
-                            <i>Nog niet gekoppeld</i>
+                            {% if readonly %}
+                                <i class="grey-text">Nog niet gekoppeld</i>
+                            {% else %}
+                                <i class="red-text">Nog niet gekoppeld</i>
+                            {% endif %}
                         {% endfor %}
                     </td>
                     {% if not readonly %}
@@ -100,7 +104,11 @@
                         {% for name in wl_names %}
                             <span>{{ name }}</span><br>
                         {% empty %}
-                            <i>Nog niet gekoppeld</i>
+                            {% if readonly %}
+                                <i class="grey-text">Nog niet gekoppeld</i>
+                            {% else %}
+                                <i class="red-text">Nog niet gekoppeld</i>
+                            {% endif %}
                         {% endfor %}
                     </td>
                     {% if not readonly %}
@@ -119,7 +127,7 @@
                         {% if sec_email %}
                             <code>{{ sec_email }}</code>
                         {% else %}
-                            <i>Onbekend</i>
+                            <i class="grey-text">Onbekend</i>
                         {% endif %}
                     </td>
                     {% if not readonly %}
@@ -134,7 +142,11 @@
                         {% if hwl_email %}
                             <code>{{ hwl_email }}</code>
                         {% else %}
-                            <i>Onbekend</i>
+                            {% if readonly %}
+                                <i class="grey-text">Onbekend</i>
+                            {% else %}
+                                <i class="red-text">Onbekend</i>
+                            {% endif %}
                         {% endif %}
                     </td>
                     {% if not readonly %}
@@ -153,7 +165,11 @@
                         {% if wl_email %}
                             <code>{{ wl_email }}</code>
                         {% else %}
-                            <i>Onbekend</i>
+                            {% if readonly %}
+                                <i class="grey-text">Onbekend</i>
+                            {% else %}
+                                <i class="red-text">Onbekend</i>
+                            {% endif %}
                         {% endif %}
                     </td>
                     {% if not readonly %}
