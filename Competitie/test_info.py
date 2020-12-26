@@ -47,7 +47,6 @@ class TestCompetitieInfo(E2EHelpers, TestCase):
         self.account_geenlid = self.e2e_create_account('geenlid', 'geenlid@gmail.com', 'Testertje')
 
         self.url_info = '/competitie/info/'
-        self.url_tussenstand = '/competitie/tussenstand/'
 
     def test_anon(self):
         resp = self.client.get(self.url_info)

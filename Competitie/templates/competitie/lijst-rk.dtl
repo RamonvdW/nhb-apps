@@ -12,12 +12,12 @@
 
     <h4>RK selectie</h4>
 
-    {% if url_tussenstand %}
+    {% if url_uitslagen %}
         <p>Op deze pagina kan je de lijst met kandidaat-deelnemers voor jouw RK's inzien en bewerken.</p>
         <p>Dit is pas mogelijk als alle onderliggende regiocompetities afgesloten zijn. De status hiervan kan je hier onder zien.</p>
         <p>Tot dat moment kan je de kandidaten voor elke wedstrijdklassen zien op deze pagina:</p>
         <p>
-            <a class="btn-nhb-blauw" href="{{ url_tussenstand }}">Tussenstand</a>
+            <a class="btn-nhb-blauw" href="{{ url_uitslagen }}">Uitslagen</a>
         </p>
 
         <p>&nbsp;</p>

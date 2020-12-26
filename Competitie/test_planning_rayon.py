@@ -678,7 +678,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/limieten-rk.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/wijzig-limieten-rk.dtl', 'plein/site_layout.dtl'))
 
         sel = 'sel_%s' % self.klasse_r.pk
 

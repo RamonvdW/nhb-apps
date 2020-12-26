@@ -13,7 +13,7 @@ from . import (views_aangemeld,
                views_planning_regio,
                views_planning_bond,
                views_planning_rayon,
-               views_tussenstand,
+               views_uitslagen,
                views_scores)
 
 app_name = 'Competitie'
@@ -169,45 +169,45 @@ urlpatterns = [
          name='dynamic-scores-opslaan'),
 
 
-    path('tussenstand/',
-         views_tussenstand.TussenstandView.as_view(),
-         name='tussenstand'),
+    path('uitslagen/',
+         views_uitslagen.UitslagenView.as_view(),
+         name='uitslagen'),
 
-    path('tussenstand/<afstand>-<comp_boog>/vereniging/<ver_nr>/',
-         views_tussenstand.TussenstandVerenigingView.as_view(),
-         name='tussenstand-vereniging-n'),
+    path('uitslagen/<afstand>-<comp_boog>/vereniging/<ver_nr>/',
+         views_uitslagen.UitslagenVerenigingView.as_view(),
+         name='uitslagen-vereniging-n'),
 
-    path('tussenstand/<afstand>-<comp_boog>/vereniging/',
-         views_tussenstand.TussenstandVerenigingView.as_view(),
-         name='tussenstand-vereniging'),
+    path('uitslagen/<afstand>-<comp_boog>/vereniging/',
+         views_uitslagen.UitslagenVerenigingView.as_view(),
+         name='uitslagen-vereniging'),
 
-    path('tussenstand/<afstand>-<comp_boog>/regio/<regio_nr>/',
-         views_tussenstand.TussenstandRegioView.as_view(),
-         name='tussenstand-regio-n'),
+    path('uitslagen/<afstand>-<comp_boog>/regio/<regio_nr>/',
+         views_uitslagen.UitslagenRegioView.as_view(),
+         name='uitslagen-regio-n'),
 
-    path('tussenstand/<afstand>-<comp_boog>/regio/',
-         views_tussenstand.TussenstandRegioView.as_view(),
-         name='tussenstand-regio'),
+    path('uitslagen/<afstand>-<comp_boog>/regio/',
+         views_uitslagen.UitslagenRegioView.as_view(),
+         name='uitslagen-regio'),
 
-    path('tussenstand/<afstand>-<comp_boog>/regio-alt/<regio_nr>/',
-         views_tussenstand.TussenstandRegioAltView.as_view(),
-         name='tussenstand-regio-n-alt'),
+    path('uitslagen/<afstand>-<comp_boog>/regio-alt/<regio_nr>/',
+         views_uitslagen.UitslagenRegioAltView.as_view(),
+         name='uitslagen-regio-n-alt'),
 
-    path('tussenstand/<afstand>-<comp_boog>/regio-alt/',
-         views_tussenstand.TussenstandRegioAltView.as_view(),
-         name='tussenstand-regio-alt'),
+    path('uitslagen/<afstand>-<comp_boog>/regio-alt/',
+         views_uitslagen.UitslagenRegioAltView.as_view(),
+         name='uitslagen-regio-alt'),
 
-    path('tussenstand/<afstand>-<comp_boog>/rayon/',
-         views_tussenstand.TussenstandRayonView.as_view(),
-         name='tussenstand-rayon'),
+    path('uitslagen/<afstand>-<comp_boog>/rayon/',
+         views_uitslagen.UitslagenRayonView.as_view(),
+         name='uitslagen-rayon'),
 
-    path('tussenstand/<afstand>-<comp_boog>/rayon/<rayon_nr>/',
-         views_tussenstand.TussenstandRayonView.as_view(),
-         name='tussenstand-rayon-n'),
+    path('uitslagen/<afstand>-<comp_boog>/rayon/<rayon_nr>/',
+         views_uitslagen.UitslagenRayonView.as_view(),
+         name='uitslagen-rayon-n'),
 
-    path('tussenstand/<afstand>-<comp_boog>/bond/',
-         views_tussenstand.TussenstandBondView.as_view(),
-         name='tussenstand-bond'),
+    path('uitslagen/<afstand>-<comp_boog>/bond/',
+         views_uitslagen.UitslagenBondView.as_view(),
+         name='uitslagen-bond'),
 
 
     path('planning/doorzetten/<comp_pk>/rk/',

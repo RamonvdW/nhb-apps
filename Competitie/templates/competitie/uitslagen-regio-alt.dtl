@@ -9,16 +9,17 @@
 {% block title %}Alternatieve Tussenstand{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-tussenstand-regio-alt" %}
 
-    <h4>Tussenstand regiocompetitie</h4>
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-uitslagen-regio-alt" %}
+
+    <h4>Uitslagen regiocompetitie</h4>
 
     <p>
-        <a class="btn-nhb-blauw" href="{% url 'Competitie:tussenstand' %}">
+        <a class="btn-nhb-blauw" href="{% url 'Competitie:uitslagen' %}">
             <i class="material-icons-round left">arrow_upward</i>Terug</a>
     </p>
 
-    <p>Deze pagina toont de tussenstand van de regiocompetities zoals ingevoerd door de WL, HWL en RCL.</p>
+    <p>Deze pagina toont de tussenstand/eindstand van de regiocompetities zoals ingevoerd door de WL, HWL en RCL.</p>
 
     {% if is_beheerder %}
         <div class="white shrink-wrap-5">

@@ -6,17 +6,18 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}Tussenstand{% endblock %}
+{% block title %}Uitslagen{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-tussenstand-rayon" %}
 
-    <h4>Tussenstand rayonkampioenschappen</h4>
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-uitslagen-rayon" %}
 
-    <p>Deze pagina toont de tussenstand van de rayonkampioenschappen.</p>
+    <h4>Uitslagen rayonkampioenschappen</h4>
+
+    <p>Deze pagina toont de tussenstand/eindstand van de rayonkampioenschappen.</p>
 
     <p>
-        <a class="btn-nhb-blauw" href="{% url 'Competitie:tussenstand' %}">
+        <a class="btn-nhb-blauw" href="{% url 'Competitie:uitslagen' %}">
             <i class="material-icons-round left">arrow_upward</i>Terug</a>
     </p>
 

@@ -328,7 +328,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         resp = self.client.get(self.url_instellingen)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/instellingen-nieuwe-competitie.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/bb-instellingen-nieuwe-competitie.dtl', 'plein/site_layout.dtl'))
 
     def test_aanmaken(self):
         self.e2e_login_and_pass_otp(self.account_bb)
@@ -338,7 +338,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         resp = self.client.get(self.url_aanmaken)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/competities-aanmaken.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/bb-competities-aanmaken.dtl', 'plein/site_layout.dtl'))
 
         # gebruik een post om de competitie aan te laten maken
         # geen parameters nodig
@@ -378,7 +378,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         resp = self.client.get(self.url_aanmaken)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/competities-aanmaken.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/bb-competities-aanmaken.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, "Wat doe je hier?")
 
         resp = self.client.post(self.url_aanmaken)
@@ -488,7 +488,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         resp = self.client.get(self.url_klassegrenzen_vaststellen_18)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/klassegrenzen-vaststellen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/bb-klassegrenzen-vaststellen.dtl', 'plein/site_layout.dtl'))
         # TODO: check de aangeboden data
 
         # nu kunnen we met een POST de klassegrenzen vaststellen

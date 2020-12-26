@@ -28,7 +28,7 @@ TEMPLATE_COMPETITIE_PLANNING_RAYON = 'competitie/planning-rayon.dtl'
 TEMPLATE_COMPETITIE_WIJZIG_WEDSTRIJD_RAYON = 'competitie/wijzig-wedstrijd-rk.dtl'
 TEMPLATE_COMPETITIE_LIJST_RK = 'competitie/lijst-rk.dtl'
 TEMPLATE_COMPETITIE_WIJZIG_STATUS_RK_SCHUTTER = 'competitie/wijzig-status-rk-deelnemer.dtl'
-TEMPLATE_COMPETITIE_WIJZIG_LIMIETEN_RK = 'competitie/limieten-rk.dtl'
+TEMPLATE_COMPETITIE_WIJZIG_LIMIETEN_RK = 'competitie/wijzig-limieten-rk.dtl'
 
 
 # python strftime: 0=sunday, 6=saturday
@@ -546,10 +546,10 @@ class LijstRkSchuttersView(UserPassesTestMixin, TemplateView):
 
         if not deelcomp_rk.heeft_deelnemerslijst:
             # situatie 1)
-            context['url_tussenstand'] = reverse('Competitie:tussenstand-rayon-n',
-                                                 kwargs={'afstand': deelcomp_rk.competitie.afstand,
-                                                         'comp_boog': 'r',
-                                                         'rayon_nr': deelcomp_rk.nhb_rayon.rayon_nr})
+            context['url_uitslagen'] = reverse('Competitie:uitslagen-rayon-n',
+                                               kwargs={'afstand': deelcomp_rk.competitie.afstand,
+                                                       'comp_boog': 'r',
+                                                       'rayon_nr': deelcomp_rk.nhb_rayon.rayon_nr})
             deelnemers = list()
         else:
             # situatie 2)

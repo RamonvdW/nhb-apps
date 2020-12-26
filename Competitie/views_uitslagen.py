@@ -18,21 +18,21 @@ from Plein.menu import menu_dynamics
 from .models import Competitie
 
 
-TEMPLATE_COMPETITIE_TUSSENSTAND = 'competitie/tussenstand.dtl'
-TEMPLATE_COMPETITIE_TUSSENSTAND_VERENIGING = 'competitie/tussenstand-vereniging.dtl'
-TEMPLATE_COMPETITIE_TUSSENSTAND_REGIO = 'competitie/tussenstand-regio.dtl'
-TEMPLATE_COMPETITIE_TUSSENSTAND_RAYON = 'competitie/tussenstand-rayon.dtl'
-TEMPLATE_COMPETITIE_TUSSENSTAND_BOND = 'competitie/tussenstand-bond.dtl'
+TEMPLATE_COMPETITIE_UITSLAGEN = 'competitie/uitslagen.dtl'
+TEMPLATE_COMPETITIE_UITSLAGEN_VERENIGING = 'competitie/uitslagen-vereniging.dtl'
+TEMPLATE_COMPETITIE_UITSLAGEN_REGIO = 'competitie/uitslagen-regio.dtl'
+TEMPLATE_COMPETITIE_UITSLAGEN_RAYON = 'competitie/uitslagen-rayon.dtl'
+TEMPLATE_COMPETITIE_UITSLAGEN_BOND = 'competitie/uitslagen-bond.dtl'
 
-TEMPLATE_COMPETITIE_TUSSENSTAND_REGIO_ALT = 'competitie/tussenstand-regio-alt.dtl'
+TEMPLATE_COMPETITIE_UITSLAGEN_REGIO_ALT = 'competitie/uitslagen-regio-alt.dtl'
 
 
-class TussenstandView(TemplateView):
+class UitslagenView(TemplateView):
 
-    """ Django class-based view voor de de tussenstand van de competitie """
+    """ Django class-based view voor de de uitslagen van de competitie """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_COMPETITIE_TUSSENSTAND
+    template_name = TEMPLATE_COMPETITIE_UITSLAGEN
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -41,7 +41,7 @@ class TussenstandView(TemplateView):
         # TODO: besluit wanneer uitslag vorig seizoen niet meer tonen
         context['toon_histcomp'] = True
 
-        # kijk of de tussenstand klaar is om te tonen
+        # kijk of de uitslagen klaar zijn om te tonen
         context['toon_comps'] = False
 
         for comp in Competitie.objects.filter(is_afgesloten=False).all():
@@ -50,30 +50,30 @@ class TussenstandView(TemplateView):
                 context['toon_comps'] = True
         # for
 
-        context['url_18_regio'] = reverse('Competitie:tussenstand-regio',
+        context['url_18_regio'] = reverse('Competitie:uitslagen-regio',
                                           kwargs={'afstand': 18, 'comp_boog': 'r'})
-        context['url_18_rayon'] = reverse('Competitie:tussenstand-rayon',
+        context['url_18_rayon'] = reverse('Competitie:uitslagen-rayon',
                                           kwargs={'afstand': 18, 'comp_boog': 'r'})
-        context['url_18_bond'] = reverse('Competitie:tussenstand-bond',
+        context['url_18_bond'] = reverse('Competitie:uitslagen-bond',
                                          kwargs={'afstand': 18, 'comp_boog': 'r'})
 
-        context['url_25_regio'] = reverse('Competitie:tussenstand-regio',
+        context['url_25_regio'] = reverse('Competitie:uitslagen-regio',
                                           kwargs={'afstand': 25, 'comp_boog': 'r'})
-        context['url_25_rayon'] = reverse('Competitie:tussenstand-rayon',
+        context['url_25_rayon'] = reverse('Competitie:uitslagen-rayon',
                                           kwargs={'afstand': 25, 'comp_boog': 'r'})
-        context['url_25_bond'] = reverse('Competitie:tussenstand-bond',
+        context['url_25_bond'] = reverse('Competitie:uitslagen-bond',
                                          kwargs={'afstand': 25, 'comp_boog': 'r'})
 
         menu_dynamics(self.request, context, actief='histcomp')
         return context
 
 
-class TussenstandVerenigingView(TemplateView):
+class UitslagenVerenigingView(TemplateView):
 
-    """ Django class-based view voor de de tussenstand van de competitie """
+    """ Django class-based view voor de de uitslagen van de competitie """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_COMPETITIE_TUSSENSTAND_VERENIGING
+    template_name = TEMPLATE_COMPETITIE_UITSLAGEN_VERENIGING
 
     def _get_schutter_ver_nr(self):
 
@@ -118,7 +118,7 @@ class TussenstandVerenigingView(TemplateView):
                 comp_boog = boogtype.afkorting.lower()
                 # geen url --> knop disabled
             else:
-                boogtype.zoom_url = reverse('Competitie:tussenstand-vereniging-n',
+                boogtype.zoom_url = reverse('Competitie:uitslagen-vereniging-n',
                                             kwargs={'afstand': afstand,
                                                     'comp_boog': boogtype.afkorting.lower(),
                                                     'ver_nr': ver_nr})
@@ -202,7 +202,7 @@ class TussenstandVerenigingView(TemplateView):
             raise Resolver404()
 
         regio_nr = ver.regio.regio_nr
-        context['url_terug'] = reverse('Competitie:tussenstand-regio-n',
+        context['url_terug'] = reverse('Competitie:uitslagen-regio-n',
                                        kwargs={'afstand': afstand,
                                                'comp_boog': comp_boog,
                                                'regio_nr': regio_nr})
@@ -216,14 +216,14 @@ class TussenstandVerenigingView(TemplateView):
         return context
 
 
-class TussenstandRegioView(TemplateView):
+class UitslagenRegioView(TemplateView):
 
-    """ Django class-based view voor de de tussenstand van de competitie in 1 regio """
+    """ Django class-based view voor de de uitslagen van de competitie in 1 regio """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_COMPETITIE_TUSSENSTAND_REGIO
-    url_name = 'Competitie:tussenstand-regio-n'
-    url_switch = 'Competitie:tussenstand-regio-n-alt'
+    template_name = TEMPLATE_COMPETITIE_UITSLAGEN_REGIO
+    url_name = 'Competitie:uitslagen-regio-n'
+    url_switch = 'Competitie:uitslagen-regio-n-alt'
     order_gemiddelde = '-gemiddelde'
 
     def _get_schutter_regio_nr(self):
@@ -316,7 +316,7 @@ class TussenstandRegioView(TemplateView):
 
             for ver in vers:
                 ver.title_str = str(ver.nhb_nr)
-                ver.zoom_url = reverse('Competitie:tussenstand-vereniging-n',
+                ver.zoom_url = reverse('Competitie:uitslagen-vereniging-n',
                                        kwargs={'afstand': afstand,
                                                'comp_boog': comp_boog,
                                                'ver_nr': ver.nhb_nr})
@@ -407,14 +407,14 @@ class TussenstandRegioView(TemplateView):
         return context
 
 
-class TussenstandRegioAltView(UserPassesTestMixin, TussenstandRegioView):
+class UitslagenRegioAltView(UserPassesTestMixin, UitslagenRegioView):
 
-    """ Django class-based view voor de de alternative tussenstand van de competitie """
+    """ Django class-based view voor de de alternative uitslagen van de competitie """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_COMPETITIE_TUSSENSTAND_REGIO_ALT
-    url_name = 'Competitie:tussenstand-regio-n-alt'
-    url_switch = 'Competitie:tussenstand-regio-n'
+    template_name = TEMPLATE_COMPETITIE_UITSLAGEN_REGIO_ALT
+    url_name = 'Competitie:uitslagen-regio-n-alt'
+    url_switch = 'Competitie:uitslagen-regio-n'
     order_gemiddelde = '-alt_gemiddelde'
 
     def test_func(self):
@@ -430,12 +430,12 @@ class TussenstandRegioAltView(UserPassesTestMixin, TussenstandRegioView):
         return HttpResponseRedirect(path)
 
 
-class TussenstandRayonView(TemplateView):
+class UitslagenRayonView(TemplateView):
 
-    """ Django class-based view voor de de tussenstand van de rayonkampioenschappen """
+    """ Django class-based view voor de de uitslagen van de rayonkampioenschappen """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_COMPETITIE_TUSSENSTAND_RAYON
+    template_name = TEMPLATE_COMPETITIE_UITSLAGEN_RAYON
 
     def _maak_filter_knoppen(self, context, afstand, gekozen_rayon_nr, comp_boog):
         """ filter knoppen per rayon en per competitie boog type """
@@ -452,7 +452,7 @@ class TussenstandRayonView(TemplateView):
                 comp_boog = boogtype.afkorting.lower()
                 # geen url --> knop disabled
             else:
-                boogtype.zoom_url = reverse('Competitie:tussenstand-rayon-n',
+                boogtype.zoom_url = reverse('Competitie:uitslagen-rayon-n',
                                             kwargs={'afstand': afstand,
                                                     'comp_boog': boogtype.afkorting.lower(),
                                                     'rayon_nr': gekozen_rayon_nr})
@@ -470,7 +470,7 @@ class TussenstandRayonView(TemplateView):
             for rayon in rayons:
                 rayon.title_str = 'Rayon %s' % rayon.rayon_nr
                 if rayon.rayon_nr != gekozen_rayon_nr:
-                    rayon.zoom_url = reverse('Competitie:tussenstand-rayon-n',
+                    rayon.zoom_url = reverse('Competitie:uitslagen-rayon-n',
                                              kwargs={'afstand': afstand,
                                                      'comp_boog': comp_boog,
                                                      'rayon_nr': rayon.rayon_nr})
@@ -599,12 +599,12 @@ class TussenstandRayonView(TemplateView):
         return context
 
 
-class TussenstandBondView(TemplateView):
+class UitslagenBondView(TemplateView):
 
-    """ Django class-based view voor de de tussenstand van de bondskampioenschappen """
+    """ Django class-based view voor de de uitslagen van de bondskampioenschappen """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_COMPETITIE_TUSSENSTAND_BOND
+    template_name = TEMPLATE_COMPETITIE_UITSLAGEN_BOND
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """

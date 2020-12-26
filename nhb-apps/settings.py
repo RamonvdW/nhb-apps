@@ -65,7 +65,7 @@ INSTALLED_APPS = [
     'django.contrib.auth',          # authenticatie framework
     'django.contrib.contenttypes',  # permission association to models
     'django.contrib.messages',
-    #'django_extensions'
+    # 'django_extensions'             # very useful for show_urls
 ]
 
 

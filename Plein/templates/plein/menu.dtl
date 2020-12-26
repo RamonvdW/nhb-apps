@@ -78,7 +78,7 @@
 
 
 <li{% if menu_actief == "histcomp" %} class="actief"{% endif %}>
-    <a href="{% url 'Competitie:tussenstand' %}" class="white-text">
+    <a href="{% url 'Competitie:uitslagen' %}" class="white-text">
     <i class="material-icons-round white-text">account_balance</i>Competitie uitslagen</a>
 </li>
 
