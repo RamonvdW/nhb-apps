@@ -54,7 +54,7 @@
                 <th>Wanneer</th>
                 <th>Waar</th>
                 <th>Klassen</th>
-                <th>Sporters</th>
+                <th>Capaciteit</th>
                 <th><!-- kolom voor wijzig knoppen --></th>
             </tr>
         </thead>
@@ -71,9 +71,13 @@
                     {% endif %}
                 </td>
 
-                <td>{{ wedstrijd.klassen_count }}</td>
+                <td>
+                    {% for naam in wedstrijd.wkl_namen %}
+                        <span>{{ naam }}</span><br>
+                    {% endfor %}
+                </td>
 
-                <td>{{ wedstrijd.schutters_count }}</td>
+                <td>Nodig: {{ wedstrijd.schutters_count }}<br>Maximum: ?</td>
 
                 <!-- knop om wedstrijd te wijzigen -->
                 <td>
@@ -105,6 +109,17 @@
             </tr>
         {% endif %}
 
+        {% if wkl_niet_gebruikt %}
+            <tr>
+                <td colspan="2"><i>De volgende klassen zijn nog niet gekoppeld aan een wedstrijd:</i></td>
+                <td>
+                    {% for wkl_beschrijving in wkl_niet_gebruikt %}
+                        <span>{{ wkl_beschrijving }}</span><br>
+                    {% endfor %}
+                </td>
+                <td colspan="2"><!-- kolommen voor capaciteit en knoppen --></td>
+            </tr>
+        {% endif %}
     </table>
 
     <p>&nbsp;</p>

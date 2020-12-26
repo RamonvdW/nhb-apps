@@ -25,8 +25,7 @@ class TestAccountAanmaken(E2EHelpers, TestCase):
         # test rechtstreeks de 'aangemaakt' pagina ophalen, zonder registratie stappen
         # hierbij ontbreekt er een sessie variabele --> exceptie en redirect naar het plein
         resp = self.client.get('/account/aangemaakt/')
-        self.assertEqual(resp.status_code, 302)     # 302 = Redirect
-        self.assertEqual(resp.url, '/plein/')
+        self.assert_is_redirect(resp, '/plein/')
 
     def test_account_helpers(self):
         account = self.account_normaal

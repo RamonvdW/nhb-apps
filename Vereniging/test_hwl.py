@@ -392,7 +392,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         # schrijf het jong lid in en controleer de wedstrijdklasse
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
         resp = self.client.post(url, {'lid_100004_boogtype_1': 'on'})       # 1=R
-        self.assertEqual(resp.status_code, 302)     # 302 = Redirect
+        self.assert_is_redirect_not_plein(resp)     # check success
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 1)
 
         inschrijving = RegioCompetitieSchutterBoog.objects.all()[0]
@@ -416,7 +416,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
         resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',        # 1=R
                                       'lid_100003_boogtype_3': 'on'})       # 3=BB
-        self.assertEqual(resp.status_code, 302)     # 302 = Redirect
+        self.assert_is_redirect_not_plein(resp)     # check success
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 2)    # 2 schutters, 1 competitie
 
         # haal de lijst met ingeschreven schutters op
@@ -469,7 +469,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
                                       'lid_100003_boogtype_3': 'on',        # 3=BB
                                       'dagdeel': 'AV',
                                       'opmerking': 'methode 3'})
-        self.assertEqual(resp.status_code, 302)     # 302 = Redirect
+        self.assert_is_redirect_not_plein(resp)     # check success
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 2)    # 2 schutters, 1 competitie
 
         for obj in RegioCompetitieSchutterBoog.objects.all():
@@ -536,7 +536,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
                                       'lid_100003_boogtype_3': 'on',        # 3=BB
                                       'dagdeel': 'AV',
                                       'opmerking': 'methode 3' * 60})
-        self.assertEqual(resp.status_code, 302)     # 302 = Redirect
+        self.assert_is_redirect_not_plein(resp)     # check success
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 2)
 
         for obj in RegioCompetitieSchutterBoog.objects.all():
@@ -575,7 +575,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
                                       'lid_100003_boogtype_3': 'on',        # 3=BB
                                       'wil_in_team': 'ja',
                                       'opmerking': 'door de hwl'})
-        self.assertEqual(resp.status_code, 302)     # 302 = Redirect
+        self.assert_is_redirect_not_plein(resp)     # check success
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 2)    # 2 schutters, 1 competitie
 
         for obj in RegioCompetitieSchutterBoog.objects.all():
@@ -615,7 +615,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
                                       'lid_100003_boogtype_3': 'on',        # 3=BB
                                       'wil_in_team': 'ja',
                                       'opmerking': 'door de hwl'})
-        self.assertEqual(resp.status_code, 302)     # 302 = Redirect
+        self.assert_is_redirect_not_plein(resp)     # check success
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 2)    # 2 schutters, 1 competitie
 
         for obj in RegioCompetitieSchutterBoog.objects.all():
@@ -651,7 +651,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
                                       'lid_100003_boogtype_3': 'on',        # 3=BB
                                       'wil_in_team': 'ja',
                                       'opmerking': 'door de hwl'})
-        self.assertEqual(resp.status_code, 302)     # 302 = Redirect
+        self.assert_is_redirect_not_plein(resp)     # check success
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 2)    # 2 schutters, 1 competitie
 
         # schrijf de schutters weer uit

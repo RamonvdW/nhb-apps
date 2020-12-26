@@ -60,7 +60,7 @@ class TestLogboek(E2EHelpers, TestCase):
         # resulteert in een redirect naar het plein
         self.e2e_logout()
         resp = self.client.get(self.logboek_url)
-        self.assertRedirects(resp, '/plein/')
+        self.assert_is_redirect(resp, '/plein/')
 
     def test_str(self):
         # gebruik de str functie op de Logboek class

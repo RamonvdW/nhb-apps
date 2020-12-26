@@ -127,7 +127,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         self.e2e_wisselnaarrol_bb()
         self.url_klassegrenzen_vaststellen_18 = '/competitie/klassegrenzen/vaststellen/18/'
         resp = self.client.post(self.url_klassegrenzen_vaststellen_18)
-        self.assertEqual(resp.status_code, 302)     # 302 = Redirect = success
+        self.assert_is_redirect_not_plein(resp)     # check success
         self.client.logout()
 
         self.comp_18 = Competitie.objects.get(afstand='18')
@@ -245,7 +245,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         # maak een RK wedstrijd aan in het eigen rayon
         url = self.url_planning_rayon % self.deelcomp_rayon1_18.pk
         resp = self.client.post(url)
-        self.assertEqual(resp.status_code, 302)  # 302 = Redirect = success
+        self.assert_is_redirect_not_plein(resp)     # check success
 
         wedstrijd_r1_pk = DeelCompetitie.objects.get(pk=self.deelcomp_rayon1_18.pk).plan.wedstrijden.all()[0].pk
         url = self.url_wijzig_rk_wedstrijd % wedstrijd_r1_pk
@@ -274,11 +274,11 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         # maak een RK wedstrijd aan in het eigen rayon
         url = self.url_planning_rayon % self.deelcomp_rayon1_18.pk
         resp = self.client.post(url)
-        self.assertEqual(resp.status_code, 302)  # 302 = Redirect = success
+        self.assert_is_redirect_not_plein(resp)     # check success
 
         # nog een wedstrijd
         resp = self.client.post(url)
-        self.assertEqual(resp.status_code, 302)  # 302 = Redirect = success
+        self.assert_is_redirect_not_plein(resp)     # check success
 
         # haal het overzicht op met deze nieuwe wedstrijden
         resp = self.client.get(url)
@@ -308,7 +308,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
                                         sel_indiv_1: "on",
                                         sel_indiv_2: "on",
                                         sel_indiv_3: "on"})
-        self.assertEqual(resp.status_code, 302)  # 302 = redirect == success
+        self.assert_is_redirect_not_plein(resp)  # check for success
 
         # wissel naar BKO en haal de planning op
         self.e2e_login_and_pass_otp(self.account_bko_18)
@@ -323,7 +323,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         # maak een RK wedstrijd aan in het eigen rayon
         url = self.url_planning_rayon % self.deelcomp_rayon2_18.pk
         resp = self.client.post(url)
-        self.assertEqual(resp.status_code, 302)  # 302 = Redirect = success
+        self.assert_is_redirect_not_plein(resp)  # check for success
 
         # haal de wedstrijd op
         # hierbij lukt het niet om de wedstrijd.vereniging in te vullen
@@ -346,7 +346,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         resp = self.client.post(url, {'weekdag': 1,
                                       'aanvang': '12:34',
                                       'nhbver_pk': ver.nhb_nr})
-        self.assertEqual(resp.status_code, 302)  # 302 = redirect == success
+        self.assert_is_redirect_not_plein(resp)  # check for success
 
     def test_planning_rayon_bad(self):
         # anon
@@ -397,7 +397,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         # maak een RK wedstrijd aan in het eigen rayon
         url = self.url_planning_rayon % self.deelcomp_rayon1_18.pk
         resp = self.client.post(url)
-        self.assertEqual(resp.status_code, 302)  # 302 = Redirect = success
+        self.assert_is_redirect_not_plein(resp)  # check for success
 
         wedstrijd_r1_pk = DeelCompetitie.objects.get(pk=self.deelcomp_rayon1_18.pk).plan.wedstrijden.all()[0].pk
         url = self.url_wijzig_rk_wedstrijd % wedstrijd_r1_pk
@@ -479,7 +479,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_bko_18)
         self.e2e_wissel_naar_functie(self.functie_bko_18)
         resp = self.client.post(self.url_doorzetten_rk % self.comp_18.pk)
-        self.assertEqual(resp.status_code, 302)     # 302 = redirect = success
+        self.assert_is_redirect_not_plein(resp)  # check for success
 
         # zet een limiet
         limiet = DeelcompetitieKlasseLimiet(deelcompetitie=self.deelcomp_rayon1_18,
@@ -685,25 +685,25 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         # limiet op default zetten
         self.assertEqual(DeelcompetitieKlasseLimiet.objects.count(), 0)
         resp = self.client.post(url, {sel: 24, 'snel': 1})
-        self.assertEqual(resp.status_code, 302)     # 302 = redirect = success
+        self.assert_is_redirect_not_plein(resp)  # check for success
         self.assertEqual(DeelcompetitieKlasseLimiet.objects.count(), 0)
 
         # limiet zetten
         self.assertEqual(DeelcompetitieKlasseLimiet.objects.count(), 0)
         resp = self.client.post(url, {sel: 20, 'snel': 1})
-        self.assertEqual(resp.status_code, 302)     # 302 = redirect = success
+        self.assert_is_redirect_not_plein(resp)  # check for success
         self._verwerk_mutaties()
         self.assertEqual(DeelcompetitieKlasseLimiet.objects.count(), 1)
 
         # limiet opnieuw zetten, geen wijziging
         resp = self.client.post(url, {sel: 20, 'snel': 1})
-        self.assertEqual(resp.status_code, 302)     # 302 = redirect = success
+        self.assert_is_redirect_not_plein(resp)  # check for success
         self._verwerk_mutaties()
         self.assertEqual(DeelcompetitieKlasseLimiet.objects.count(), 1)
 
         # limiet aanpassen
         resp = self.client.post(url, {sel: 16, 'snel': 1})
-        self.assertEqual(resp.status_code, 302)     # 302 = redirect = success
+        self.assert_is_redirect_not_plein(resp)  # check for success
         self._verwerk_mutaties()
         self.assertEqual(DeelcompetitieKlasseLimiet.objects.count(), 1)
 
@@ -715,7 +715,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
 
         # limiet verwijderen
         resp = self.client.post(url, {sel: 24, 'snel': 1})
-        self.assertEqual(resp.status_code, 302)     # 302 = redirect = success
+        self.assert_is_redirect_not_plein(resp)  # check for success
         self._verwerk_mutaties()
         self.assertEqual(DeelcompetitieKlasseLimiet.objects.count(), 0)
 
@@ -728,7 +728,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
 
         aantal = KampioenschapMutatie.objects.count()
         resp = self.client.post(url, {sel: 4, 'snel': 1})
-        self.assertEqual(resp.status_code, 302)     # 302 = redirect = success
+        self.assert_is_redirect_not_plein(resp)  # check for success
         self._verwerk_mutaties()
         self.assertEqual(KampioenschapMutatie.objects.count(), aantal + 1)
 

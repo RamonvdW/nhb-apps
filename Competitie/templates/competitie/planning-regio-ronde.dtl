@@ -149,7 +149,7 @@
                             {% endfor %}
                         </td>
 
-                        <td>Nodig: {{ wedstrijd.aantal_schutters }}<br>Beschikbaar: ?</td>
+                        <td>Nodig: {{ wedstrijd.aantal_schutters }}<br>Maximum: ?</td>
                     {% endif %}
 
                     <!-- knop om wedstrijd te wijzigen -->
@@ -166,7 +166,7 @@
         <!-- knop om een regel toe te voegen -->
         {% if url_nieuwe_wedstrijd %}
             <tr>
-                <td colspan="5">
+                <td colspan={% if heeft_wkl %}"5"{% else %}"3"{% endif %}>
                     <form action="{{ url_nieuwe_wedstrijd }}" method="post">
                         {% csrf_token %}
                         <button class="btn-nhb-blauw" type="submit">
@@ -179,7 +179,7 @@
         {% if heeft_wkl %}
             {% if wkl_niet_gebruikt %}
                 <tr>
-                    <td colspan="2"><i>De volgende klassen zijn nog niet gebruikt:</i></td>
+                    <td colspan="2"><i>De volgende klassen zijn nog niet gekoppeld aan een wedstrijd:</i></td>
                     <td>
                         {% for wkl_beschrijving in wkl_niet_gebruikt %}
                             <span>{{ wkl_beschrijving }}</span><br>

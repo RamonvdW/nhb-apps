@@ -37,21 +37,25 @@ def report_validated_templates():
 
 
 def main():
-    # print a clear separator on the terminal when using runserver or test
-    stars = None
-    if "runserver" in sys.argv or ("test" in sys.argv and "--noinput" not in sys.argv):
-        # avoid double line when runserver starts a child process
-        if "DJANGO_SETTINGS_MODULE" not in os.environ:  # pragma: no branch
-            stars = "*" * 30
-            print("\n%s START OF RUN %s\n" % (stars, stars))
+    try:
+        # print a clear separator on the terminal when using runserver or test
+        stars = None
+        if "runserver" in sys.argv or ("test" in sys.argv and "--noinput" not in sys.argv):
+            # avoid double line when runserver starts a child process
+            if "DJANGO_SETTINGS_MODULE" not in os.environ:  # pragma: no branch
+                stars = "*" * 30
+                print("\n%s START OF RUN %s\n" % (stars, stars))
 
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'nhb-apps.settings')
-    execute_from_command_line(sys.argv)
+        os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'nhb-apps.settings')
+        execute_from_command_line(sys.argv)
 
-    report_validated_templates()
+        report_validated_templates()
 
-    if stars:
-        print("\nDone!")
+        if stars:
+            print("\nDone!")
+    except KeyboardInterrupt:
+        print('\nInterrupted!')
+        sys.exit(1)                 # allows test suite to detect test abort
 
 
 if __name__ == '__main__':  # pragma: no branch

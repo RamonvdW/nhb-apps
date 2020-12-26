@@ -126,9 +126,9 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         url_klassegrenzen_18 = '/competitie/klassegrenzen/vaststellen/18/'
         url_klassegrenzen_25 = '/competitie/klassegrenzen/vaststellen/25/'
         resp = self.client.post(url_klassegrenzen_18)
-        self.assertEqual(resp.status_code, 302)     # 302 = Redirect = succes
+        self.assert_is_redirect_not_plein(resp)  # check for success
         resp = self.client.post(url_klassegrenzen_25)
-        self.assertEqual(resp.status_code, 302)     # 302 = Redirect = succes
+        self.assert_is_redirect_not_plein(resp)  # check for success
         # nu in fase A2
 
         # zet de inschrijfmethode van regio 101 op 'methode 3', oftewel met dagdeel voorkeur
@@ -203,13 +203,13 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
                                                              'schiet_R': 'on'})
                     post_params['lid_%s_boogtype_%s' % (nhb_nr, recurve_boog_pk)] = 'on'
 
-                self.assertEqual(resp.status_code, 302)     # 302 = redirect = succes
+                self.assert_is_redirect_not_plein(resp)         # check for success
             # for
 
             # schrijf in voor de competitie
             post_params['dagdeel'] = dagdelen.pop(-1)
             resp = self.client.post(url_inschrijven, post_params)
-            self.assertEqual(resp.status_code, 302)     # 302 = Redirect = succes
+            self.assert_is_redirect_not_plein(resp)         # check for success
         # for
 
     def test_overzicht_anon(self):
@@ -481,7 +481,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/wijzig-datums.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/bb-wijzig-datums.dtl', 'plein/site_layout.dtl'))
 
         # post
         resp = self.client.post(url, {'datum1': '2019-08-09',

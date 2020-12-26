@@ -256,7 +256,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         for nhblid in (self.nhblid_100001, self.nhblid_100002, self.nhblid_100003):
             url = self.url_schutter_voorkeuren % nhblid.pk
             resp = self.client.get(url)
-            self.assertEqual(resp.status_code, 302)     # 302 = Redirect == mag niet
+            self.assert_is_redirect(resp, '/plein/')
         # for
         self.assertEqual(SchutterBoog.objects.count(), 0)
 

@@ -133,9 +133,9 @@ class TestCompetitieScores(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_bb)
         self.e2e_wisselnaarrol_bb()
         resp = self.client.post('/competitie/klassegrenzen/vaststellen/18/')
-        self.assertEqual(resp.status_code, 302)
+        self.assert_is_redirect_not_plein(resp)     # check success
         resp = self.client.post('/competitie/klassegrenzen/vaststellen/25/')
-        self.assertEqual(resp.status_code, 302)
+        self.assert_is_redirect_not_plein(resp)     # check success
 
         self.comp_18 = Competitie.objects.get(afstand='18')
         self.comp_25 = Competitie.objects.get(afstand='25')

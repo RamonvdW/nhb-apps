@@ -59,10 +59,10 @@ class TestTakenViews(E2EHelpers, TestCase):
         # resulteert in een redirect naar het plein
         self.e2e_logout()
         resp = self.client.get(self.url_overzicht)
-        self.assertRedirects(resp, '/plein/')
+        self.assert_is_redirect(resp, '/plein/')
 
         resp = self.client.get(self.url_details % 0)
-        self.assertRedirects(resp, '/plein/')
+        self.assert_is_redirect(resp, '/plein/')
 
     def test_allowed(self):
         self.e2e_login_and_pass_otp(self.account_admin)

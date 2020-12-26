@@ -464,5 +464,10 @@ class E2EHelpers(object):
         self.assertEqual(resp.status_code, 302)
         self.assertEqual(resp.url, expected_url)
 
+    def assert_is_redirect_not_plein(self, resp):
+        assert isinstance(self, TestCase)
+        self.assertEqual(resp.status_code, 302)
+        self.assertNotEqual(resp.url, '/plein/')    # redirect naar plein is typisch een reject om rechten
+
 
 # end of file

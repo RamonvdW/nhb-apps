@@ -118,7 +118,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         self.e2e_wisselnaarrol_bb()
         self.url_klassegrenzen_vaststellen_18 = '/competitie/klassegrenzen/vaststellen/18/'
         resp = self.client.post(self.url_klassegrenzen_vaststellen_18)
-        self.assertEqual(resp.status_code, 302)     # 302 = Redirect = success
+        self.assert_is_redirect_not_plein(resp)  # check for success
         self.client.logout()
 
         self.klasse_recurve_onbekend = (CompetitieKlasse
@@ -361,7 +361,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
 
         # maak een ronde aan
         resp = self.client.post(self.url_planning_regio % self.deelcomp_regio101_18.pk)
-        self.assertEqual(resp.status_code, 302)     # 302 = Redirect = success
+        self.assert_is_redirect_not_plein(resp)  # check for success
 
         ronde = DeelcompetitieRonde.objects.filter(deelcompetitie=self.deelcomp_regio101_18)[0]
         resp = self.client.get(self.url_planning_regio_ronde % ronde.pk)
@@ -369,7 +369,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
 
         # herhaal voor de 25m1p
         resp = self.client.post(self.url_planning_regio % self.deelcomp_regio101_25.pk)
-        self.assertEqual(resp.status_code, 302)  # 302 = Redirect = success
+        self.assert_is_redirect_not_plein(resp)  # check for success
 
         ronde = DeelcompetitieRonde.objects.filter(deelcompetitie=self.deelcomp_regio101_25)[0]
         resp = self.client.get(self.url_planning_regio_ronde % ronde.pk)
@@ -464,7 +464,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         # maak een ronde aan
         self.assertEqual(DeelcompetitieRonde.objects.count(), 0)
         resp = self.client.post(self.url_planning_regio % self.deelcomp_regio101_18.pk)
-        self.assertEqual(resp.status_code, 302)     # 302 = Redirect = success
+        self.assert_is_redirect_not_plein(resp)  # check for success
         self.assertEqual(DeelcompetitieRonde.objects.count(), 1)
 
         ronde = DeelcompetitieRonde.objects.all()[0]
@@ -516,7 +516,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         # maak een wedstrijd aan
         self.assertEqual(Wedstrijd.objects.count(), 0)
         resp = self.client.post(self.url_planning_regio_ronde % ronde_pk, {})
-        self.assertEqual(resp.status_code, 302)  # 302 = Redirect = success
+        self.assert_is_redirect_not_plein(resp)  # check for success
         self.assertEqual(Wedstrijd.objects.count(), 1)
         wedstrijd_pk = Wedstrijd.objects.all()[0].pk
 
@@ -564,12 +564,12 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         # maak een ronde aan
         self.assertEqual(DeelcompetitieRonde.objects.count(), 0)
         resp = self.client.post(self.url_planning_regio % self.deelcomp_regio101_25.pk)
-        self.assertEqual(resp.status_code, 302)  # 302 = Redirect = success
+        self.assert_is_redirect_not_plein(resp)  # check for success
         self.assertEqual(DeelcompetitieRonde.objects.count(), 1)
 
         # maak de planning voor de tweede week aan
         resp = self.client.post(self.url_planning_regio % self.deelcomp_regio101_25.pk)
-        self.assertEqual(resp.status_code, 302)  # 302 = Redirect = success
+        self.assert_is_redirect_not_plein(resp)  # check for success
         self.assertEqual(DeelcompetitieRonde.objects.count(), 2)
         ronde_pk = DeelcompetitieRonde.objects.all()[0].pk      # maakt uit welke
 
@@ -588,7 +588,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         # maak een wedstrijd aan
         self.assertEqual(Wedstrijd.objects.count(), 0)
         resp = self.client.post(self.url_planning_regio_ronde % ronde_pk, {})
-        self.assertEqual(resp.status_code, 302)  # 302 = Redirect = success
+        self.assert_is_redirect_not_plein(resp)  # check for success
         self.assertEqual(Wedstrijd.objects.count(), 1)
         wedstrijd_pk = Wedstrijd.objects.all()[0].pk
 
@@ -624,13 +624,13 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         # maak nu 10 'handmatige' rondes aan
         for _ in range(10):
             resp = self.client.post(self.url_planning_regio % self.deelcomp_regio101_18.pk)
-            self.assertEqual(resp.status_code, 302)  # 302 = Redirect = success
+            self.assert_is_redirect_not_plein(resp)  # check for success
         # for
         self.assertEqual(DeelcompetitieRonde.objects.count(), 7 + 10)
 
         # controleer dat de 11e ronde niet aangemaakt mag worden
         resp = self.client.post(self.url_planning_regio % self.deelcomp_regio101_18.pk)
-        self.assertEqual(resp.status_code, 302)  # 302 = Redirect = success
+        self.assert_is_redirect_not_plein(resp)  # check for success
         self.assertEqual(DeelcompetitieRonde.objects.count(), 7 + 10)
 
     def test_rcl_maakt_cluster_planning(self):
@@ -640,7 +640,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         # maak een eerste ronde-planning aan voor een cluster
         self.assertEqual(DeelcompetitieRonde.objects.count(), 0)
         resp = self.client.post(self.url_planning_regio_cluster % self.cluster_101a.pk)
-        self.assertEqual(resp.status_code, 302)  # 302 = Redirect = success
+        self.assert_is_redirect_not_plein(resp)  # check for success
         self.assertEqual(DeelcompetitieRonde.objects.count(), 1)
 
         ronde = DeelcompetitieRonde.objects.all()[0]
@@ -662,7 +662,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         # maak een wedstrijd aan
         self.assertEqual(Wedstrijd.objects.count(), 0)
         resp = self.client.post(self.url_planning_regio_ronde % ronde_pk, {})
-        self.assertEqual(resp.status_code, 302)  # 302 = Redirect = success
+        self.assert_is_redirect_not_plein(resp)  # check for success
         self.assertEqual(Wedstrijd.objects.count(), 1)
         wedstrijd_pk = Wedstrijd.objects.all()[0].pk
 
@@ -695,14 +695,14 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         # maak een regioplanning aan
         self.assertEqual(DeelcompetitieRonde.objects.count(), 0)
         resp = self.client.post(self.url_planning_regio % self.deelcomp_regio101_18.pk)
-        self.assertEqual(resp.status_code, 302)     # 302 = Redirect = success
+        self.assert_is_redirect_not_plein(resp)  # check for success
         self.assertEqual(DeelcompetitieRonde.objects.count(), 1)
         ronde_pk = DeelcompetitieRonde.objects.all()[0].pk
 
         # maak een wedstrijd aan
         self.assertEqual(Wedstrijd.objects.count(), 0)
         resp = self.client.post(self.url_planning_regio_ronde % ronde_pk, {})
-        self.assertEqual(resp.status_code, 302)  # 302 = Redirect = success
+        self.assert_is_redirect_not_plein(resp)  # check for success
         self.assertEqual(Wedstrijd.objects.count(), 1)
         wedstrijd_pk = Wedstrijd.objects.all()[0].pk
 
@@ -710,18 +710,18 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         resp = self.client.post(self.url_wijzig_wedstrijd % wedstrijd_pk,
                                 {'weekdag': 1, 'nhbver_pk': self.nhbver_101.pk, 'aanvang': '12:34',
                                  'wkl_indiv_%s' % self.klasse_recurve_onbekend.indiv.pk: 'on'})
-        self.assertEqual(resp.status_code, 302)  # 302 = Redirect = Accepted
+        self.assert_is_redirect_not_plein(resp)  # check for success
 
         # nog een keer hetzelfde
         resp = self.client.post(self.url_wijzig_wedstrijd % wedstrijd_pk,
                                 {'weekdag': 1, 'nhbver_pk': self.nhbver_101.pk, 'aanvang': '12:34',
                                  'wkl_indiv_%s' % self.klasse_recurve_onbekend.indiv.pk: 'on'})
-        self.assertEqual(resp.status_code, 302)  # 302 = Redirect = Accepted
+        self.assert_is_redirect_not_plein(resp)  # check for success
 
         # verwijder de wedstrijd weer
         resp = self.client.post(self.url_wijzig_wedstrijd % wedstrijd_pk,
                                 {'weekdag': 1, 'nhbver_pk': self.nhbver_101.pk, 'aanvang': '12:34'})
-        self.assertEqual(resp.status_code, 302)  # 302 = Redirect = Accepted
+        self.assert_is_redirect_not_plein(resp)  # check for success
 
         wedstrijd = Wedstrijd.objects.get(pk=wedstrijd_pk)
         self.assertEqual(str(wedstrijd.tijd_begin_wedstrijd), "12:34:00")
@@ -818,7 +818,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         # maak een regioplanning aan
         self.assertEqual(DeelcompetitieRonde.objects.count(), 0)
         resp = self.client.post(self.url_planning_regio % self.deelcomp_regio101_25.pk)
-        self.assertEqual(resp.status_code, 302)  # 302 = Redirect = success
+        self.assert_is_redirect_not_plein(resp)  # check for success
         self.assertEqual(DeelcompetitieRonde.objects.count(), 1)
         ronde_pk = DeelcompetitieRonde.objects.all()[0].pk
 
@@ -831,7 +831,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         # maak een wedstrijd aan
         self.assertEqual(Wedstrijd.objects.count(), 0)
         resp = self.client.post(self.url_planning_regio_ronde % ronde_pk, {})
-        self.assertEqual(resp.status_code, 302)  # 302 = Redirect = success
+        self.assert_is_redirect_not_plein(resp)  # check for success
         self.assertEqual(Wedstrijd.objects.count(), 1)
         wedstrijd_pk = Wedstrijd.objects.all()[0].pk
 
@@ -841,7 +841,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         # pas de instellingen van de wedstrijd aan
         resp = self.client.post(self.url_wijzig_wedstrijd % wedstrijd_pk,
                                 {'weekdag': 0, 'nhbver_pk': self.nhbver_101.pk, 'aanvang': '12:34'})
-        self.assertEqual(resp.status_code, 302)  # 302 = Redirect = Accepted
+        self.assert_is_redirect_not_plein(resp)  # check for success
 
         wedstrijd = Wedstrijd.objects.get(pk=wedstrijd_pk)
         self.assertEqual(str(wedstrijd.tijd_begin_wedstrijd), "12:34:00")
@@ -850,7 +850,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         # pas de weekdag aan
         resp = self.client.post(self.url_wijzig_wedstrijd % wedstrijd_pk,
                                 {'weekdag': 2, 'nhbver_pk': self.nhbver_101.pk, 'aanvang': '12:34'})
-        self.assertEqual(resp.status_code, 302)  # 302 = Redirect = Accepted
+        self.assert_is_redirect_not_plein(resp)  # check for success
 
         wedstrijd = Wedstrijd.objects.get(pk=wedstrijd_pk)
         self.assertEqual(str(wedstrijd.tijd_begin_wedstrijd), "12:34:00")
@@ -863,7 +863,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         # maak een regioplanning aan
         self.assertEqual(DeelcompetitieRonde.objects.count(), 0)
         resp = self.client.post(self.url_planning_regio % self.deelcomp_regio101_18.pk)
-        self.assertEqual(resp.status_code, 302)  # 302 = Redirect = success
+        self.assert_is_redirect_not_plein(resp)  # check for success
         self.assertEqual(DeelcompetitieRonde.objects.count(), 1)
         ronde_pk = DeelcompetitieRonde.objects.all()[0].pk
 
@@ -876,7 +876,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         # maak een wedstrijd aan
         self.assertEqual(Wedstrijd.objects.count(), 0)
         resp = self.client.post(self.url_planning_regio_ronde % ronde_pk, {})
-        self.assertEqual(resp.status_code, 302)  # 302 = Redirect = success
+        self.assert_is_redirect_not_plein(resp)  # check for success
         self.assertEqual(Wedstrijd.objects.count(), 1)
         wedstrijd_pk = Wedstrijd.objects.all()[0].pk
 
@@ -893,11 +893,11 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 405)     # GET bestaat niet
         resp = self.client.post(url)
-        self.assertEqual(resp.status_code, 302)     # 302 = Redirect = succes
+        self.assert_is_redirect_not_plein(resp)  # check for success
 
         # maak een wedstrijd aan
         resp = self.client.post(self.url_planning_regio_ronde % ronde_pk, {})
-        self.assertEqual(resp.status_code, 302)     # 302 = Redirect = success
+        self.assert_is_redirect_not_plein(resp)  # check for success
         wedstrijd_pk = Wedstrijd.objects.latest('pk').pk
 
         url = self.url_score_invoeren % wedstrijd_pk
@@ -940,7 +940,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 404)     # 404 = Not found
 
         resp = self.client.post(url)
-        self.assertEqual(resp.status_code, 302)     # redirect naar regioplanning
+        self.assert_is_redirect_not_plein(resp)     # redirect naar regioplanning
 
     def test_max_rondes(self):
         self.e2e_login_and_pass_otp(self.account_rcl101_18)
@@ -950,7 +950,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         self.assertEqual(DeelcompetitieRonde.objects.count(), 0)
         for lp in range(13):
             resp = self.client.post(self.url_planning_regio % self.deelcomp_regio101_25.pk)
-            self.assertEqual(resp.status_code, 302)  # 302 = Redirect = success
+            self.assert_is_redirect_not_plein(resp)  # check for success
         # for
         self.assertEqual(DeelcompetitieRonde.objects.count(), 10)
 
@@ -1002,7 +1002,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         self.client.post(url)
         self.client.post(url)
         resp = self.client.post(url)
-        self.assertEqual(resp.status_code, 302)  # 302 = Redirect = success
+        self.assert_is_redirect_not_plein(resp)  # check for success
         self.assertEqual(DeelcompetitieRonde.objects.count(), 5)
 
         pks = [obj.pk for obj in DeelcompetitieRonde.objects.all()]
@@ -1159,11 +1159,11 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         # ronde naam veranderen (mag niet)
         resp = self.client.post(self.url_planning_regio_ronde % ronde_pk,
                                 {'ronde_week_nr': 51, 'ronde_naam': 'maak niet uit'})
-        self.assertEqual(resp.status_code, 302)
+        self.assert_is_redirect_not_plein(resp)  # check for success
 
         # maak een ronde aan
         resp = self.client.post(self.url_planning_regio % self.deelcomp_regio101_18.pk)
-        self.assertEqual(resp.status_code, 302)     # 302 = Redirect = success
+        self.assert_is_redirect_not_plein(resp)  # check for success
         ronde = DeelcompetitieRonde.objects.latest('pk')
 
         # haal de ronde planning op
@@ -1176,7 +1176,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         # ronde naam veranderen in import-ronde (mag niet)
         resp = self.client.post(self.url_planning_regio_ronde % ronde_pk,
                                 {'ronde_week_nr': 51, 'ronde_naam': 'Ronde 9 oude programma'})
-        self.assertEqual(resp.status_code, 302)
+        self.assert_is_redirect_not_plein(resp)  # check for success
 
         # wedstrijd toevoegen aan import-ronde (mag niet)
         resp = self.client.post(self.url_planning_regio_ronde % ronde_import.pk, {})
@@ -1205,12 +1205,12 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
 
         # maak de eigen regioplanning aan
         resp = self.client.post(self.url_planning_regio % self.deelcomp_regio112_18.pk)
-        self.assertEqual(resp.status_code, 302)  # 302 = Redirect = success
+        self.assert_is_redirect_not_plein(resp)  # check for success
         ronde_pk = DeelcompetitieRonde.objects.get(deelcompetitie=self.deelcomp_regio112_18).pk
 
         # maak een wedstrijd aan in de eigen regio
         resp = self.client.post(self.url_planning_regio_ronde % ronde_pk, {})
-        self.assertEqual(resp.status_code, 302)  # 302 = Redirect = success
+        self.assert_is_redirect_not_plein(resp)  # check for success
         plan = DeelcompetitieRonde.objects.get(deelcompetitie=self.deelcomp_regio112_18).plan
         wedstrijd112_pk = plan.wedstrijden.all()[0].pk
         url = self.url_wijzig_wedstrijd % wedstrijd112_pk
@@ -1258,7 +1258,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         # echt afsluiten
         self.assertEqual(Taak.objects.count(), 0)
         resp = self.client.post(url)
-        self.assertEqual(resp.status_code, 302)  # 302 = Redirect = succes
+        self.assert_is_redirect_not_plein(resp)  # check for success
         deelcomp = DeelCompetitie.objects.get(pk=self.deelcomp_regio101_18.pk)
         self.assertTrue(deelcomp.is_afgesloten)
         self.assertEqual(Taak.objects.count(), 2)       # RKO + BKO
@@ -1273,7 +1273,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
 
         # nogmaals afsluiten doet niets
         resp = self.client.post(url)
-        self.assertEqual(resp.status_code, 302)  # 302 = Redirect = succes
+        self.assert_is_redirect_not_plein(resp)  # check for success
         self.assertEqual(Taak.objects.count(), 2)
 
     def test_bad_afsluiten_regio(self):

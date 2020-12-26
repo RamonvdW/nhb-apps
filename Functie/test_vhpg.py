@@ -89,7 +89,7 @@ class TestFunctieVHPG(E2EHelpers, TestCase):
 
         # is niet BB
         resp = self.client.get(self.url_overzicht)
-        self.assertEqual(resp.status_code, 302)     # 302 = Redirect (to plein)
+        self.assert_is_redirect(resp, '/plein/')
 
         # wissel naar BB rol
         self.e2e_wisselnaarrol_bb()

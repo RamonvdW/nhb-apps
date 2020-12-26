@@ -8,7 +8,6 @@ from django.test import TestCase
 from Overig.e2ehelpers import E2EHelpers
 from NhbStructuur.models import NhbVereniging, NhbRegio, NhbLid
 from .models import HistCompetitie, HistCompetitieIndividueel
-from .views import RESULTS_PER_PAGE
 import datetime
 
 

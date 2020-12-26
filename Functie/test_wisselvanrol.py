@@ -134,7 +134,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.e2e_login(self.account_normaal)
         # controleer dat de wissel-van-rol pagina niet aanwezig is voor deze normale gebruiker
         resp = self.client.get(self.url_wisselvanrol)
-        self.assertEqual(resp.status_code, 302)     # 302 = Redirect (to plein)
+        self.assert_is_redirect(resp, '/plein/')
 
         self.assertTrue(str(self.functie_hwl) == "HWL test")
 
@@ -318,11 +318,11 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         # dit raakt de exceptie in Account.rol:rol_mag_wisselen
         self.e2e_logout()
         resp = self.client.get(self.url_wisselvanrol)
-        self.assertEqual(resp.status_code, 302)     # 302 = Redirect (to login)
+        self.assert_is_redirect(resp, '/plein/')
 
         # probeer van rol te wisselen
         resp = self.client.post(self.url_activeer_rol % 'IT')
-        self.assertEqual(resp.status_code, 302)     # 302 = Redirect (to login)
+        self.assert_is_redirect(resp, '/plein/')
 
     def test_delete_functie(self):
         # corner case: activeer functie, verwijder functie, get_huidige_functie

@@ -64,16 +64,14 @@ class TestOverigFeedback(E2EHelpers, TestCase):
         self.e2e_logout()
         resp = self.client.get('/overig/feedback/nul/plein/')    # zet sessie variabelen: op_pagina en gebruiker
         resp = self.client.post('/overig/feedback/formulier/', {'bevinding': '4', 'feedback': 'Just testing'})
-        self.assertEqual(resp.status_code, 302)
-        self.assertEqual(resp.url, '/overig/feedback/bedankt/')
+        self.assert_is_redirect(resp, '/overig/feedback/bedankt/')
         self.e2e_assert_other_http_commands_not_supported('/overig/feedback/nul/plein/', post=False)   # post mag wel
 
     def test_feedback_post_user(self):
         self.e2e_login(self.account_normaal)
         resp = self.client.get('/overig/feedback/nul/plein/')   # zet sessie variabelen: op_pagina en gebruiker
         resp = self.client.post('/overig/feedback/formulier/', {'bevinding': '4', 'feedback': 20*'Just testing '})   # 20x makes it >80 chars long
-        self.assertEqual(resp.status_code, 302)
-        self.assertEqual(resp.url, '/overig/feedback/bedankt/')
+        self.assert_is_redirect(resp, '/overig/feedback/bedankt/')
         obj = SiteFeedback.objects.all()[0]
         descr = str(obj)
         self.assertGreater(len(descr), 0)
@@ -106,7 +104,7 @@ class TestOverigFeedback(E2EHelpers, TestCase):
         self.e2e_logout()
         resp = self.client.get('/overig/feedback/nul/plein/')   # zet sessie variabelen: op_pagina en gebruiker
         resp = self.client.post('/overig/feedback/formulier/', {'bevinding': '4', 'feedback': 'Just testing'})
-        self.assertEqual(resp.status_code, 302)  # redirect to bedankt pagina
+        self.assert_is_redirect(resp, '/overig/feedback/bedankt/')
         obj = SiteFeedback.objects.all()[0]
         self.assertFalse(obj.is_afgehandeld)
         obj.is_afgehandeld = True
@@ -124,15 +122,14 @@ class TestOverigFeedback(E2EHelpers, TestCase):
         # zonder inlog is feedback niet te zien
         self.e2e_logout()
         resp = self.client.get('/overig/feedback/inzicht/')
-        self.assertEqual(resp.status_code, 302)  # redirect
-        self.assertRedirects(resp, '/plein/')
+        self.assert_is_redirect(resp, '/plein/')
 
     def test_feedback_inzicht_user_forbidden(self):
         # do een get van het logboek met een gebruiker die daar geen rechten toe heeft
         # resulteert rauwe Forbidden
         self.e2e_login(self.account_normaal)
         resp = self.client.get('/overig/feedback/inzicht/')
-        self.assertEqual(resp.status_code, 302)  # 302 = Redirect (naar het plein)
+        self.assert_is_redirect(resp, '/plein/')
 
     def test_feedback_inzicht_admin(self):
         # do een get van alle feedback als IT beheerder

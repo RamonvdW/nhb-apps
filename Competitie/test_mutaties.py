@@ -124,7 +124,7 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         # klassengrenzen vaststellen om de competitie voorbij fase A1 te krijgen
         self.url_klassegrenzen_vaststellen_18 = '/competitie/klassegrenzen/vaststellen/18/'
         resp = self.client.post(self.url_klassegrenzen_vaststellen_18)
-        self.assertEqual(resp.status_code, 302)     # 302 = Redirect = success
+        self.assert_is_redirect_not_plein(resp)     # check success
         self.client.logout()
 
         self.comp = Competitie.objects.get(afstand='18')
@@ -676,7 +676,7 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         url = self.url_wijzig_cut_rk % self.deelcomp_rk.pk
         sel = 'sel_%s' % self.cut.klasse.pk
         resp = self.client.post(url, {sel: 20, 'snel': 1})
-        self.assertEqual(resp.status_code, 302)     # 302 = redirect = success
+        self.assert_is_redirect_not_plein(resp)     # check success
         self._verwerk_mutaties()
 
         # self._dump_deelnemers()
@@ -701,7 +701,7 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         url = self.url_wijzig_cut_rk % self.deelcomp_rk.pk
         sel = 'sel_%s' % self.cut.klasse.pk
         resp = self.client.post(url, {sel: 8, 'snel': 1})
-        self.assertEqual(resp.status_code, 302)     # 302 = redirect = success
+        self.assert_is_redirect_not_plein(resp)     # check success
         self._verwerk_mutaties()
         # self._dump_deelnemers()
 
@@ -721,7 +721,7 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         url = self.url_wijzig_cut_rk % self.deelcomp_rk.pk
         sel = 'sel_%s' % self.cut.klasse.pk
         resp = self.client.post(url, {sel: 16, 'snel': 1})
-        self.assertEqual(resp.status_code, 302)     # 302 = redirect = success
+        self.assert_is_redirect_not_plein(resp)     # check success
         # self._verwerk_mutaties()
 
         # meld iemand af
@@ -733,7 +733,7 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         url = self.url_wijzig_cut_rk % self.deelcomp_rk.pk
         sel = 'sel_%s' % self.cut.klasse.pk
         resp = self.client.post(url, {sel: 20, 'snel': 1})
-        self.assertEqual(resp.status_code, 302)     # 302 = redirect = success
+        self.assert_is_redirect_not_plein(resp)     # check success
         self._verwerk_mutaties()
         # self._dump_deelnemers()
 

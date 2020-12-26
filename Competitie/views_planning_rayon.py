@@ -90,6 +90,7 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
             deelcomp_rk.save()
 
         klasse2schutters = dict()
+        niet_gebruikt = dict()
         for obj in (KampioenschapSchutterBoog
                     .objects
                     .select_related('klasse__indiv')
@@ -101,6 +102,16 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
                 klasse2schutters[obj.klasse.indiv.pk] = 1
         # for
 
+        for wkl in (CompetitieKlasse
+                    .objects
+                    .exclude(indiv__niet_voor_rk_bk=True)
+                    .filter(competitie=deelcomp_rk.competitie)):
+            if wkl.indiv:
+                niet_gebruikt[100000 + wkl.indiv.pk] = wkl.indiv.beschrijving
+            if wkl.team:
+                niet_gebruikt[200000 + wkl.team.pk] = wkl.team.beschrijving
+        # for
+
         # haal de RK wedstrijden op
         context['wedstrijden_rk'] = (deelcomp_rk.plan.wedstrijden
                                      .select_related('vereniging')
@@ -109,7 +120,12 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
                                      .order_by('datum_wanneer',
                                                'tijd_begin_wedstrijd'))
         for obj in context['wedstrijden_rk']:
-            obj.klassen_count = obj.indiv_klassen.count() + obj.team_klassen.count()
+            obj.wkl_namen = list()
+            for wkl in obj.indiv_klassen.order_by('volgorde'):
+                obj.wkl_namen.append(wkl.beschrijving)
+                niet_gebruikt[100000 + wkl.pk] = None
+            # for
+            # FUTURE: obj.team_klassen toevoegen
             obj.schutters_count = 0
 
             for klasse in obj.indiv_klassen.all():
@@ -120,6 +136,10 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
                     pass
             # for
         # for
+
+        context['wkl_niet_gebruikt'] = [beschrijving for beschrijving in niet_gebruikt.values() if beschrijving]
+        if len(context['wkl_niet_gebruikt']) == 0:
+            del context['wkl_niet_gebruikt']
 
         if rol_nu == Rollen.ROL_RKO and functie_nu.nhb_rayon == deelcomp_rk.nhb_rayon:
             context['url_nieuwe_wedstrijd'] = reverse('Competitie:rayon-planning',
@@ -237,8 +257,7 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
         wedstrijd_indiv_pks = [obj.pk for obj in wedstrijd.indiv_klassen.all()]
         wkl_indiv = (CompetitieKlasse
                      .objects
-                     .exclude(indiv__niet_voor_rk_bk=True,      # verwijder regio-only klassen
-                              indiv__is_onbekend=True)
+                     .exclude(indiv__niet_voor_rk_bk=True)      # verwijder regio-only klassen
                      .filter(competitie=deelcomp_rk.competitie,
                              team=None)
                      .select_related('indiv__boogtype')
@@ -793,9 +812,8 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
 
         context['wkl'] = wkl = (CompetitieKlasse
                                 .objects
+                                .exclude(indiv__niet_voor_rk_bk=True)
                                 .filter(competitie=deelcomp_rk.competitie,
-                                        indiv__is_onbekend=False,
-                                        indiv__niet_voor_rk_bk=False,
                                         team=None)
                                 .select_related('indiv__boogtype')
                                 .order_by('indiv__volgorde'))
@@ -849,9 +867,8 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
 
         for ckl in (CompetitieKlasse
                     .objects
+                    .exclude(indiv__niet_voor_rk_bk=True)
                     .filter(competitie=deelcomp_rk.competitie,
-                            indiv__is_onbekend=False,
-                            indiv__niet_voor_rk_bk=False,
                             team=None)):
 
             sel = 'sel_%s' % ckl.pk

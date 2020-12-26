@@ -425,7 +425,7 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
         for wedstrijd in context['wedstrijden']:
             wedstrijd.aantal_schutters = 0
             if heeft_wkl:
-                for wkl in wedstrijd.indiv_klassen.all():
+                for wkl in wedstrijd.indiv_klassen.order_by('volgorde'):
                     try:
                         wedstrijd.aantal_schutters += klasse2schutters[wkl.pk]
                     except KeyError:
@@ -435,8 +435,7 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
                     niet_gebruikt[100000 + wkl.pk] = None
                 # for
 
-                for wkl in wedstrijd.team_klassen.all():
-                    niet_gebruikt[200000 + wkl.pk] = None
+                # FUTURE: team klassen toevoegen
         # for
 
         context['wkl_niet_gebruikt'] = [beschrijving for beschrijving in niet_gebruikt.values() if beschrijving]

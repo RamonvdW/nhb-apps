@@ -409,7 +409,7 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
                         blazoen = BLAZOEN_DT_R
 
                 # controleer of schutter een aspirant is
-                if obj.klasse.indiv.niet_voor_rk_bk:
+                if obj.klasse.indiv.niet_voor_rk_bk and not obj.klasse.indiv.is_onbekend:
                     # schutterboog is ingeschreven in een aspirant klasse
                     blazoen = BLAZOEN_60CM
             else:
