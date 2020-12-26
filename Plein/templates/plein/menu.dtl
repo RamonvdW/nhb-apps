@@ -85,7 +85,7 @@
 
 <li{% if menu_actief == "records" %} class="actief"{% endif %}>
     <a href="{% url 'Records:overzicht' %}" class="white-text">
-    <i class="material-icons-round white-text"><!--star-->trending_up</i>Nederlandse records</a>
+    <i class="material-icons-round white-text"><!--star--><!--trending_up-->insights</i>Nederlandse records</a>
 </li>
 
 
