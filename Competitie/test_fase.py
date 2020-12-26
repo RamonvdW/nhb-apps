@@ -7,9 +7,8 @@
 from django.utils import timezone
 from django.test import TestCase
 from BasisTypen.models import IndivWedstrijdklasse
-from Competitie.models import (Competitie, DeelCompetitie,
-                               LAAG_REGIO, LAAG_RK, LAAG_BK,
-                               maak_competitieklasse_indiv)
+from Competitie.models import (Competitie, DeelCompetitie, CompetitieKlasse,
+                               LAAG_REGIO, LAAG_RK, LAAG_BK)
 import datetime
 
 
@@ -158,7 +157,7 @@ class TestCompetitieFase(TestCase):
 
         # maak de klassen aan en controleer de fase weer
         indiv = IndivWedstrijdklasse.objects.all()[0]
-        maak_competitieklasse_indiv(comp, indiv, 0.0)
+        CompetitieKlasse(competitie=comp, indiv=indiv, min_ag=0.0).save()
         comp.begin_aanmeldingen = comp.einde_aanmeldingen
         comp.zet_fase()
         self.assertEqual(comp.fase, 'A2')
@@ -255,7 +254,7 @@ class TestCompetitieFase(TestCase):
 
         # maak de klassen aan en controleer de fase weer
         indiv = IndivWedstrijdklasse.objects.all()[0]
-        maak_competitieklasse_indiv(comp, indiv, 0.0)
+        CompetitieKlasse(competitie=comp, indiv=indiv, min_ag=0.0).save()
         zet_competitie_fase(comp, 'A2')
         comp.zet_fase()
         self.assertEqual(comp.fase, 'A2')

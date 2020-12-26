@@ -220,13 +220,16 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.assertEqual(CompetitieKlasse.objects.count(), 0)
 
         # competitie aanmaken
-        resp = self.client.post(url_aanmaken)
+        with self.assert_max_queries(20):
+            resp = self.client.post(url_aanmaken)
         self.assert_is_redirect(resp, url_overzicht)
 
         # klassegrenzen vaststellen
-        resp = self.client.post(url_klassegrenzen_18)
+        with self.assert_max_queries(20):
+            resp = self.client.post(url_klassegrenzen_18)
         self.assert_is_redirect(resp, url_overzicht)
-        resp = self.client.post(url_klassegrenzen_25)
+        with self.assert_max_queries(20):
+            resp = self.client.post(url_klassegrenzen_25)
         self.assert_is_redirect(resp, url_overzicht)
 
         self.comp_18 = Competitie.objects.get(afstand=18)
@@ -242,20 +245,23 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
         # haal als HWL de voorkeuren pagina op van een lid van de vereniging
         # dit maakt ook de SchutterBoog records aan
-        resp = self.client.get(url_schutter_voorkeuren + '%s/' % nhb_nr)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url_schutter_voorkeuren + '%s/' % nhb_nr)
         self.assertEqual(resp.status_code, 200)
 
         # post een wijziging
         if nhb_nr == 100003:
-            resp = self.client.post(url_schutter_voorkeuren, {'nhblid_pk': nhb_nr,
-                                                              'schiet_BB': 'on',
-                                                              'info_R': 'on',
-                                                              'voorkeur_meedoen_competitie': 'on'})
+            with self.assert_max_queries(20):
+                resp = self.client.post(url_schutter_voorkeuren, {'nhblid_pk': nhb_nr,
+                                                                  'schiet_BB': 'on',
+                                                                  'info_R': 'on',
+                                                                  'voorkeur_meedoen_competitie': 'on'})
         else:
-            resp = self.client.post(url_schutter_voorkeuren, {'nhblid_pk': nhb_nr,
-                                                              'schiet_R': 'on',
-                                                              'info_C': 'on',
-                                                              'voorkeur_meedoen_competitie': 'on'})
+            with self.assert_max_queries(20):
+                resp = self.client.post(url_schutter_voorkeuren, {'nhblid_pk': nhb_nr,
+                                                                  'schiet_R': 'on',
+                                                                  'info_C': 'on',
+                                                                  'voorkeur_meedoen_competitie': 'on'})
 
         self.assert_is_redirect(resp, '/vereniging/leden-voorkeuren/')
 
@@ -270,7 +276,8 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
     def test_overzicht(self):
         # anon
         self.e2e_logout()
-        resp = self.client.get(self.url_overzicht)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_overzicht)
         self.assert_is_redirect(resp, '/plein/')
 
         # login als HWL
@@ -278,7 +285,8 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_hwl)
         self.e2e_check_rol('HWL')
 
-        resp = self.client.get(self.url_overzicht)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_overzicht)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('vereniging/overzicht.dtl', 'plein/site_layout.dtl'))
@@ -288,7 +296,8 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
     def test_ledenlijst(self):
         # anon
         self.e2e_logout()
-        resp = self.client.get(self.url_ledenlijst)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_ledenlijst)
         self.assert_is_redirect(resp, '/plein/')
 
         # login als HWL
@@ -296,7 +305,8 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_hwl)
         self.e2e_check_rol('HWL')
 
-        resp = self.client.get(self.url_ledenlijst)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_ledenlijst)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('vereniging/ledenlijst.dtl', 'plein/site_layout.dtl'))
@@ -312,7 +322,8 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         # stel ook een paar bogen in
         self._zet_schutter_voorkeuren(100002)
 
-        resp = self.client.get(self.url_ledenlijst)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_ledenlijst)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
 
         self.assertContains(resp, 'Jeugd')
@@ -332,7 +343,8 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
         # eerste keer, zonder schutterboog records
         self.assertEqual(SchutterBoog.objects.count(), 0)
-        resp = self.client.get(self.url_voorkeuren)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_voorkeuren)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('vereniging/leden-voorkeuren.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
@@ -342,7 +354,8 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         for nhblid in (self.nhblid_100001, self.nhblid_100002, self.nhblid_100003):
             # get operatie maakt de schutterboog records aan
             url = self.url_schutter_voorkeuren % nhblid.pk
-            resp = self.client.get(url)
+            with self.assert_max_queries(20):
+                resp = self.client.get(url)
             self.assertEqual(resp.status_code, 200)
         # for
         self.assertEqual(SchutterBoog.objects.count(), 15)
@@ -360,7 +373,8 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.nhblid_100003.bij_vereniging = self.nhbver2
         self.nhblid_100003.save()
 
-        resp = self.client.get(self.url_voorkeuren)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_voorkeuren)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('vereniging/leden-voorkeuren.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
@@ -370,7 +384,8 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
         # anon
         self.e2e_logout()
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assert_is_redirect(resp, '/plein/')
 
         # login als HWL
@@ -380,7 +395,8 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
         # stel 1 schutter in die op randje aspirant/cadet zit
         self._zet_schutter_voorkeuren(100004)
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('vereniging/competitie-aanmelden.dtl', 'plein/site_layout.dtl'))
@@ -391,7 +407,8 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
         # schrijf het jong lid in en controleer de wedstrijdklasse
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
-        resp = self.client.post(url, {'lid_100004_boogtype_1': 'on'})       # 1=R
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'lid_100004_boogtype_1': 'on'})       # 1=R
         self.assert_is_redirect_not_plein(resp)     # check success
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 1)
 
@@ -407,21 +424,24 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self._zet_ag(100002, 18)
         self._zet_ag(100003, 25)
 
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('vereniging/competitie-aanmelden.dtl', 'plein/site_layout.dtl'))
 
         # nu de POST om een paar leden aan te melden
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
-        resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',        # 1=R
-                                      'lid_100003_boogtype_3': 'on'})       # 3=BB
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',        # 1=R
+                                          'lid_100003_boogtype_3': 'on'})       # 3=BB
         self.assert_is_redirect_not_plein(resp)     # check success
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 2)    # 2 schutters, 1 competitie
 
         # haal de lijst met ingeschreven schutters op
         url = self.url_ingeschreven % self.deelcomp_regio.pk
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('vereniging/competitie-ingeschreven.dtl', 'plein/site_layout.dtl'))
@@ -445,30 +465,34 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
         url = self.url_inschrijven % self.comp_18.pk
 
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('vereniging/competitie-aanmelden.dtl', 'plein/site_layout.dtl'))
 
         # nu de POST om een paar leden aan te melden met een verkeer dagdeel
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
-        resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',        # 1=R
-                                      'dagdeel': 'ZA'})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',        # 1=R
+                                          'dagdeel': 'ZA'})
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
 
         # nu de POST om een paar leden aan te melden met een verkeer dagdeel
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
-        resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',        # 1=R
-                                      'dagdeel': 'xx'})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',        # 1=R
+                                          'dagdeel': 'xx'})
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
 
         # nu de POST om een paar leden aan te melden
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
-        resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',        # 1=R
-                                      'lid_100003_boogtype_3': 'on',        # 3=BB
-                                      'dagdeel': 'AV',
-                                      'opmerking': 'methode 3'})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',        # 1=R
+                                          'lid_100003_boogtype_3': 'on',        # 3=BB
+                                          'dagdeel': 'AV',
+                                          'opmerking': 'methode 3'})
         self.assert_is_redirect_not_plein(resp)     # check success
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 2)    # 2 schutters, 1 competitie
 
@@ -479,7 +503,8 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
         # haal de lijst met ingeschreven schutters op
         url = self.url_ingeschreven % self.deelcomp_regio.pk
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('vereniging/competitie-ingeschreven.dtl', 'plein/site_layout.dtl'))
@@ -503,7 +528,8 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
         url = self.url_inschrijven % self.comp_18.pk
 
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('vereniging/competitie-aanmelden.dtl', 'plein/site_layout.dtl'))
 
@@ -513,8 +539,9 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         schutterboog.voor_wedstrijd = False
         schutterboog.save()
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
-        resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',        # 1=R
-                                      'dagdeel': 'AV'})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',        # 1=R
+                                          'dagdeel': 'AV'})
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
         schutterboog.voor_wedstrijd = True
@@ -523,8 +550,9 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         # probeer aan te melden met een lid dat niet van de vereniging van de HWL is
         self.nhblid_100002.bij_vereniging = self.nhbver2
         self.nhblid_100002.save()
-        resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',        # 1=R
-                                      'dagdeel': 'AV'})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',        # 1=R
+                                          'dagdeel': 'AV'})
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
         self.nhblid_100002.bij_vereniging = self.nhbver1
@@ -532,10 +560,11 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
         # nu de POST om een paar leden aan te melden
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
-        resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',        # 1=R
-                                      'lid_100003_boogtype_3': 'on',        # 3=BB
-                                      'dagdeel': 'AV',
-                                      'opmerking': 'methode 3' * 60})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',        # 1=R
+                                          'lid_100003_boogtype_3': 'on',        # 3=BB
+                                          'dagdeel': 'AV',
+                                          'opmerking': 'methode 3' * 60})
         self.assert_is_redirect_not_plein(resp)     # check success
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 2)
 
@@ -550,7 +579,8 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
         # anon
         self.e2e_logout()
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assert_is_redirect(resp, '/plein/')
 
         # login als HWL
@@ -565,16 +595,18 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self._zet_ag(100004, 18)
         self._zet_ag(100003, 25)
 
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('vereniging/competitie-aanmelden.dtl', 'plein/site_layout.dtl'))
 
         # nu de POST om een paar leden aan te melden
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
-        resp = self.client.post(url, {'lid_100004_boogtype_1': 'on',        # 1=R
-                                      'lid_100003_boogtype_3': 'on',        # 3=BB
-                                      'wil_in_team': 'ja',
-                                      'opmerking': 'door de hwl'})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'lid_100004_boogtype_1': 'on',        # 1=R
+                                          'lid_100003_boogtype_3': 'on',        # 3=BB
+                                          'wil_in_team': 'ja',
+                                          'opmerking': 'door de hwl'})
         self.assert_is_redirect_not_plein(resp)     # check success
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 2)    # 2 schutters, 1 competitie
 
@@ -605,16 +637,18 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self._zet_ag(100004, 18)
         self._zet_ag(100003, 25)
 
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('vereniging/competitie-aanmelden.dtl', 'plein/site_layout.dtl'))
 
         # nu de POST om een paar leden aan te melden
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
-        resp = self.client.post(url, {'lid_100004_boogtype_1': 'on',        # 1=R
-                                      'lid_100003_boogtype_3': 'on',        # 3=BB
-                                      'wil_in_team': 'ja',
-                                      'opmerking': 'door de hwl'})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'lid_100004_boogtype_1': 'on',        # 1=R
+                                          'lid_100003_boogtype_3': 'on',        # 3=BB
+                                          'wil_in_team': 'ja',
+                                          'opmerking': 'door de hwl'})
         self.assert_is_redirect_not_plein(resp)     # check success
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 2)    # 2 schutters, 1 competitie
 
@@ -641,23 +675,26 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self._zet_ag(100003, 25)
 
         url = self.url_inschrijven % self.comp_18.pk
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('vereniging/competitie-aanmelden.dtl', 'plein/site_layout.dtl'))
 
         # nu de POST om een paar leden aan te melden
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
-        resp = self.client.post(url, {'lid_100004_boogtype_1': 'on',        # 1=R
-                                      'lid_100003_boogtype_3': 'on',        # 3=BB
-                                      'wil_in_team': 'ja',
-                                      'opmerking': 'door de hwl'})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'lid_100004_boogtype_1': 'on',        # 1=R
+                                          'lid_100003_boogtype_3': 'on',        # 3=BB
+                                          'wil_in_team': 'ja',
+                                          'opmerking': 'door de hwl'})
         self.assert_is_redirect_not_plein(resp)     # check success
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 2)    # 2 schutters, 1 competitie
 
         # schrijf de schutters weer uit
         pk = RegioCompetitieSchutterBoog.objects.all()[0].pk
         url = self.url_ingeschreven % 0
-        resp = self.client.post(url, {'pk_%s' % pk: 'on'})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'pk_%s' % pk: 'on'})
         self.assert_is_redirect(resp, self.url_overzicht)
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 1)    # 1 schutter
 
@@ -665,7 +702,8 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         inschrijving = RegioCompetitieSchutterBoog.objects.all()[0]
         inschrijving.schutterboog.nhblid.bij_vereniging = self.nhbver2
         inschrijving.schutterboog.nhblid.save()
-        resp = self.client.post(url, {'pk_%s' % inschrijving.pk: 'on'})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'pk_%s' % inschrijving.pk: 'on'})
         self.assertEqual(resp.status_code, 404)         # 404 = Not allowed
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 1)    # 1 schutter
 
@@ -675,38 +713,48 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_hwl)
         self.e2e_check_rol('HWL')
 
-        resp = self.client.get(self.url_inschrijven % 9999999)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_inschrijven % 9999999)
         self.assertEqual(resp.status_code, 404)         # 404 = Not allowed
 
-        resp = self.client.post(self.url_inschrijven % 9999999)
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_inschrijven % 9999999)
         self.assertEqual(resp.status_code, 404)         # 404 = Not allowed
 
         url = self.url_inschrijven % self.comp_18.pk
-        resp = self.client.post(url, {'garbage': 'oh',
-                                      'lid_GEENGETAL_boogtype_3': 'on'})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'garbage': 'oh',
+                                          'lid_GEENGETAL_boogtype_3': 'on'})
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
 
-        resp = self.client.post(url, {'garbage': 'oh',
-                                      'lid_999999_boogtype_GEENGETAL': 'on'})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'garbage': 'oh',
+                                          'lid_999999_boogtype_GEENGETAL': 'on'})
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
 
-        resp = self.client.post(url, {'lid_999999_boogtype_3': 'on'})       # 3=BB
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'lid_999999_boogtype_3': 'on'})       # 3=BB
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
 
-        resp = self.client.post(url, {'lid_100003_boogtype_1': 'on'})       # 1=R = geen wedstrijdboog
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'lid_100003_boogtype_1': 'on'})       # 1=R = geen wedstrijdboog
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
 
         url = self.url_ingeschreven % 999999
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
 
-        resp = self.client.post(url)
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
         self.assertEqual(resp.status_code, 302)     # redirect want POST kijkt niet naar deelcomp_pk
 
-        resp = self.client.post(url, {'pk_hallo': 'on'})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'pk_hallo': 'on'})
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
 
-        resp = self.client.post(url, {'ignore': 'jaja', 'pk_null': 'on'})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'ignore': 'jaja', 'pk_null': 'on'})
         self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
 
     def test_wedstrijdlocatie(self):
@@ -722,7 +770,8 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.e2e_check_rol('HWL')
 
         # check voor het kaartje om de doel details aan te passen
-        resp = self.client.get(self.url_overzicht)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_overzicht)
         urls = self.extract_all_urls(resp)
         urls2 = [url for url in urls if url.startswith('/vereniging/accommodatie-details/')]
         self.assertEqual(len(urls2), 1)

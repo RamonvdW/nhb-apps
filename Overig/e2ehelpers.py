@@ -6,15 +6,54 @@
 
 from django.contrib import auth
 from django.conf import settings
+from django.test import TestCase
+from django.core.signals import request_started
+from django.db import DEFAULT_DB_ALIAS, connections, reset_queries
 from Account.models import Account, account_create
 from Functie.view_vhpg import account_vhpg_is_geaccepteerd
-from django.test import TestCase
 from Overig.e2estatus import validated_templates, included_templates
 from bs4 import BeautifulSoup
 import subprocess
 import tempfile
 import vnujar
 import pyotp
+
+
+class AssertMaxQueriesContext(object):
+    def __init__(self, test_case, num, connection):
+        self.test_case = test_case
+        self.connection = connection
+        self.num = num
+
+    def __enter__(self):
+        # entering the 'with' block
+        self.force_debug_cursor = self.connection.force_debug_cursor
+        self.connection.force_debug_cursor = True
+        self.connection.ensure_connection()
+        self.initial_queries = len(self.connection.queries_log)
+        request_started.disconnect(reset_queries)       # apparently prevents queries_log from being emptied
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        # leaving the 'with' block
+        self.connection.force_debug_cursor = self.force_debug_cursor
+        request_started.connect(reset_queries)
+        if exc_type is not None:
+            return
+        final_queries = len(self.connection.queries_log)
+        executed = final_queries - self.initial_queries
+        if executed > self.num:
+            queries = 'Captured queries from index %s to %s:' % (self.initial_queries, final_queries)
+            for i, query in enumerate(self.connection.queries[self.initial_queries:final_queries], start=1):
+                queries += '\n [%d] %s' % (i, query['sql'])
+            # for
+            msg = "Too many queries: %s; maximum %d. " % (executed, self.num)
+            self.test_case.fail(msg=msg + queries)
+        else:
+            ongebruikt = self.num - executed
+            if self.num > 20:
+                if ongebruikt / self.num > 0.25:
+                    self.test_case.fail(msg="Maximum (%s) has a lot of margin. Can be set as low as %s" % (self.num, executed))
 
 
 class E2EHelpers(object):
@@ -468,6 +507,10 @@ class E2EHelpers(object):
         assert isinstance(self, TestCase)
         self.assertEqual(resp.status_code, 302)
         self.assertNotEqual(resp.url, '/plein/')    # redirect naar plein is typisch een reject om rechten
+
+    def assert_max_queries(self, num):
+        conn = connections[DEFAULT_DB_ALIAS]
+        return AssertMaxQueriesContext(self, num, conn)
 
 
 # end of file

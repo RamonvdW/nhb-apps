@@ -194,16 +194,20 @@ class TestVerenigingWL(E2EHelpers, TestCase):
 
         self.assertEqual(CompetitieKlasse.objects.count(), 0)
 
-        resp = self.client.get(url_aanmaken)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url_aanmaken)
 
         # competitie aanmaken
-        resp = self.client.post(url_aanmaken)
+        with self.assert_max_queries(20):
+            resp = self.client.post(url_aanmaken)
         self.assert_is_redirect(resp, url_overzicht)
 
         # klassegrenzen vaststellen
-        resp = self.client.post(url_klassegrenzen_18)
+        with self.assert_max_queries(20):
+            resp = self.client.post(url_klassegrenzen_18)
         self.assert_is_redirect(resp, url_overzicht)
-        resp = self.client.post(url_klassegrenzen_25)
+        with self.assert_max_queries(20):
+            resp = self.client.post(url_klassegrenzen_25)
         self.assert_is_redirect(resp, url_overzicht)
 
         self.comp_18 = Competitie.objects.get(afstand=18)
@@ -219,7 +223,8 @@ class TestVerenigingWL(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_wl)
         self.e2e_check_rol('WL')
 
-        resp = self.client.get(self.url_overzicht)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_overzicht)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('vereniging/overzicht.dtl', 'plein/site_layout.dtl'))
@@ -227,7 +232,8 @@ class TestVerenigingWL(E2EHelpers, TestCase):
     def test_ledenlijst(self):
         # anon
         self.e2e_logout()
-        resp = self.client.get(self.url_ledenlijst)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_ledenlijst)
         self.assert_is_redirect(resp, '/plein/')
 
         # login als WL
@@ -235,7 +241,8 @@ class TestVerenigingWL(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_wl)
         self.e2e_check_rol('WL')
 
-        resp = self.client.get(self.url_ledenlijst)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_ledenlijst)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('vereniging/ledenlijst.dtl', 'plein/site_layout.dtl'))
@@ -255,7 +262,8 @@ class TestVerenigingWL(E2EHelpers, TestCase):
 
         # het overzicht mag de WL ophalen
         self.assertEqual(SchutterBoog.objects.count(), 0)
-        resp = self.client.get(self.url_voorkeuren)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_voorkeuren)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('vereniging/leden-voorkeuren.dtl', 'plein/site_layout.dtl'))
 
@@ -263,7 +271,8 @@ class TestVerenigingWL(E2EHelpers, TestCase):
         # maar dat mag de WL niet, dus gebeurt er niets
         for nhblid in (self.nhblid_100001, self.nhblid_100002, self.nhblid_100003):
             url = self.url_schutter_voorkeuren % nhblid.pk
-            resp = self.client.get(url)
+            with self.assert_max_queries(20):
+                resp = self.client.get(url)
             self.assert_is_redirect(resp, '/plein/')   # naar Plein, want mag niet
         # for
         self.assertEqual(SchutterBoog.objects.count(), 0)
@@ -276,7 +285,8 @@ class TestVerenigingWL(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_wl)
         self.e2e_check_rol('WL')
 
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assert_is_redirect(resp, '/plein/')       # WL mag dit niet
 
     def test_ingeschreven(self):
@@ -286,12 +296,14 @@ class TestVerenigingWL(E2EHelpers, TestCase):
         self.e2e_check_rol('WL')
 
         url = self.url_ingeschreven % self.deelcomp_regio.pk
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_template_used(resp, ('vereniging/competitie-ingeschreven.dtl', 'plein/site_layout.dtl'))
 
         # probeer in te schrijven (mag niet)
-        resp = self.client.post(url)
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
         self.assertEqual(resp.status_code, 404)         # 404 = Not found
 
     def test_cornercase(self):
@@ -300,7 +312,8 @@ class TestVerenigingWL(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_wl)
         self.e2e_check_rol('WL')
 
-        resp = self.client.get(self.url_ingeschreven % 9999999)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_ingeschreven % 9999999)
         self.assertEqual(resp.status_code, 404)         # 404 = Not found
 
     def test_wedstrijdlocatie(self):
@@ -316,7 +329,8 @@ class TestVerenigingWL(E2EHelpers, TestCase):
         self.e2e_check_rol('WL')
 
         # check dat het kaartje er is om de accommodatie details op te vragen
-        resp = self.client.get(self.url_overzicht)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_overzicht)
         urls = self.extract_all_urls(resp)
         urls2 = [url for url in urls if url.startswith('/vereniging/accommodatie-details/')]
         self.assertEqual(len(urls2), 1)

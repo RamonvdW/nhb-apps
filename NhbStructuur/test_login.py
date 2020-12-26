@@ -44,7 +44,8 @@ class TestNhbStructuurLogin(E2EHelpers, TestCase):
 
     def test_nhblid(self):
         self.e2e_login(self.account_normaal)
-        resp = self.client.get('/plein/')
+        with self.assert_max_queries(20):
+            resp = self.client.get('/plein/')
         self.assertContains(resp, 'Sporter')
 
     def test_inactief_normaal(self):
@@ -78,7 +79,8 @@ class TestNhbStructuurLogin(E2EHelpers, TestCase):
         self.nhblid1.save()
 
         self.e2e_login(self.account_normaal)
-        resp = self.client.get('/plein/')
+        with self.assert_max_queries(20):
+            resp = self.client.get('/plein/')
         self.assertContains(resp, 'Gebruiker')
         self.assertNotContains(resp, 'Sporter')
 

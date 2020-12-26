@@ -126,7 +126,8 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_bb)
         self.e2e_wisselnaarrol_bb()
         self.url_klassegrenzen_vaststellen_18 = '/competitie/klassegrenzen/vaststellen/18/'
-        resp = self.client.post(self.url_klassegrenzen_vaststellen_18)
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_klassegrenzen_vaststellen_18)
         self.assert_is_redirect_not_plein(resp)     # check success
         self.client.logout()
 
@@ -230,33 +231,39 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
 
         # maak een RK wedstrijd aan in een ander rayon
         url = self.url_planning_rayon % self.deelcomp_rayon2_18.pk
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         # controleer dat er geen 'ronde toevoegen' knop is
         urls = self.extract_all_urls(resp, skip_menu=True)
         self.assertNotIn(url, urls)     # url wordt gebruikt voor POST
 
         # coverage: nog een keer ophalen, want dan is het plan er al
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
 
-        resp = self.client.post(url)
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
         self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
 
         # maak een RK wedstrijd aan in het eigen rayon
         url = self.url_planning_rayon % self.deelcomp_rayon1_18.pk
-        resp = self.client.post(url)
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
         self.assert_is_redirect_not_plein(resp)     # check success
 
         wedstrijd_r1_pk = DeelCompetitie.objects.get(pk=self.deelcomp_rayon1_18.pk).plan.wedstrijden.all()[0].pk
         url = self.url_wijzig_rk_wedstrijd % wedstrijd_r1_pk
 
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
 
         self.e2e_login_and_pass_otp(self.account_rko2_18)
         self.e2e_wissel_naar_functie(self.functie_rko2_18)
 
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
 
     def test_planning_rayon(self):
@@ -273,15 +280,18 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
 
         # maak een RK wedstrijd aan in het eigen rayon
         url = self.url_planning_rayon % self.deelcomp_rayon1_18.pk
-        resp = self.client.post(url)
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
         self.assert_is_redirect_not_plein(resp)     # check success
 
         # nog een wedstrijd
-        resp = self.client.post(url)
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
         self.assert_is_redirect_not_plein(resp)     # check success
 
         # haal het overzicht op met deze nieuwe wedstrijden
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/planning-rayon.dtl', 'plein/site_layout.dtl'))
@@ -289,31 +299,35 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         # haal de wedstrijd op
         wedstrijd_r1 = DeelCompetitie.objects.get(pk=self.deelcomp_rayon1_18.pk).plan.wedstrijden.all()[0]
         url_w = self.url_wijzig_rk_wedstrijd % wedstrijd_r1.pk
-        resp = self.client.get(url_w)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url_w)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/wijzig-wedstrijd-rk.dtl', 'plein/site_layout.dtl'))
 
         # nog een keer ophalen, want dan zijn wedstrijd.vereniging en wedstrijd.locatie al gezet
-        resp = self.client.get(url_w)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url_w)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
 
         # wijzig de wedstrijd en zet een aantal wedstrijdklassen
         sel_indiv_1 = "wkl_indiv_%s" % self.klasse_r.indiv.pk
         sel_indiv_2 = "wkl_indiv_%s" % self.klasse_c.indiv.pk
         sel_indiv_3 = "wkl_indiv_%s" % self.klasse_ib.indiv.pk
-        resp = self.client.post(url_w, {'weekdag': 1,
-                                        'aanvang': '12:34',
-                                        'nhbver_pk': self.nhbver_101.nhb_nr,
-                                        sel_indiv_1: "on",
-                                        sel_indiv_2: "on",
-                                        sel_indiv_3: "on"})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url_w, {'weekdag': 1,
+                                            'aanvang': '12:34',
+                                            'nhbver_pk': self.nhbver_101.nhb_nr,
+                                            sel_indiv_1: "on",
+                                            sel_indiv_2: "on",
+                                            sel_indiv_3: "on"})
         self.assert_is_redirect_not_plein(resp)  # check for success
 
         # wissel naar BKO en haal de planning op
         self.e2e_login_and_pass_otp(self.account_bko_18)
         self.e2e_wissel_naar_functie(self.functie_bko_18)
-        resp = self.client.get(url)
+        with self.assert_max_queries(25):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
 
     def test_planning_rayon_geen_ver(self):
@@ -322,14 +336,16 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
 
         # maak een RK wedstrijd aan in het eigen rayon
         url = self.url_planning_rayon % self.deelcomp_rayon2_18.pk
-        resp = self.client.post(url)
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
         self.assert_is_redirect_not_plein(resp)  # check for success
 
         # haal de wedstrijd op
         # hierbij lukt het niet om de wedstrijd.vereniging in te vullen
         wedstrijd_r2_pk = DeelCompetitie.objects.get(pk=self.deelcomp_rayon2_18.pk).plan.wedstrijden.all()[0].pk
         url = self.url_wijzig_rk_wedstrijd % wedstrijd_r2_pk
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/wijzig-wedstrijd-rk.dtl', 'plein/site_layout.dtl'))
@@ -339,19 +355,22 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         ver.regio = self.regio_105  # verhuis naar rayon 2
         ver.save()
 
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
 
         # wijzig de wedstrijd - hierbij wordt de wedstrijd.locatie op None gezet
-        resp = self.client.post(url, {'weekdag': 1,
-                                      'aanvang': '12:34',
-                                      'nhbver_pk': ver.nhb_nr})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'weekdag': 1,
+                                          'aanvang': '12:34',
+                                          'nhbver_pk': ver.nhb_nr})
         self.assert_is_redirect_not_plein(resp)  # check for success
 
     def test_planning_rayon_bad(self):
         # anon
         url = self.url_planning_rayon % self.deelcomp_rayon2_18.pk
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assert_is_redirect(resp, '/plein/')
 
         # probeer als BKO (RCL kom niet door de user-passes-test-mixin)
@@ -359,17 +378,20 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_bko_18)
 
         url = self.url_planning_rayon % self.deelcomp_rayon2_18.pk
-        resp = self.client.post(url)
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
         self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
 
         # slechte deelcompetitie
         url = self.url_planning_rayon % 999999
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
 
         # probeer een wedstrijd te wijzigen als BKO
         url = self.url_wijzig_rk_wedstrijd % 999999
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assert_is_redirect(resp, '/plein/')
 
         # nogmaals, als RKO
@@ -377,90 +399,106 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_rko1_18)
 
         url = self.url_wijzig_rk_wedstrijd % 999999
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
 
         url = self.url_wijzig_rk_wedstrijd % "BAD"
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
 
         url = self.url_wijzig_rk_wedstrijd % "##"
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
 
         url = self.url_wijzig_rk_wedstrijd % "1(2)"
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
-        resp = self.client.post(url)
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
         self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
 
         # maak een RK wedstrijd aan in het eigen rayon
         url = self.url_planning_rayon % self.deelcomp_rayon1_18.pk
-        resp = self.client.post(url)
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
         self.assert_is_redirect_not_plein(resp)  # check for success
 
         wedstrijd_r1_pk = DeelCompetitie.objects.get(pk=self.deelcomp_rayon1_18.pk).plan.wedstrijden.all()[0].pk
         url = self.url_wijzig_rk_wedstrijd % wedstrijd_r1_pk
 
         # wijzig de wedstrijd
-        resp = self.client.post(url)
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
         self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
 
         # slechte weekdag
-        resp = self.client.post(url, {'weekdag': "XX",
-                                      'aanvang': '12:34',
-                                      'nhbver_pk': self.nhbver_112.nhb_nr})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'weekdag': "XX",
+                                          'aanvang': '12:34',
+                                          'nhbver_pk': self.nhbver_112.nhb_nr})
         self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
 
         # slechte weekdag
-        resp = self.client.post(url, {'weekdag': 99,
-                                      'aanvang': '12:34',
-                                      'nhbver_pk': self.nhbver_112.nhb_nr})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'weekdag': 99,
+                                          'aanvang': '12:34',
+                                          'nhbver_pk': self.nhbver_112.nhb_nr})
         self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
 
         # slechte weekdag
-        resp = self.client.post(url, {'weekdag': "-1",
-                                      'aanvang': '12:34',
-                                      'nhbver_pk': self.nhbver_112.nhb_nr})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'weekdag': "-1",
+                                          'aanvang': '12:34',
+                                          'nhbver_pk': self.nhbver_112.nhb_nr})
         self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
 
         # weekdag buiten RK range (is 1 week lang)
-        resp = self.client.post(url, {'weekdag': 30,
-                                      'aanvang': '12:34',
-                                      'nhbver_pk': self.nhbver_112.nhb_nr})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'weekdag': 30,
+                                          'aanvang': '12:34',
+                                          'nhbver_pk': self.nhbver_112.nhb_nr})
         self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
 
         # slecht tijdstip
-        resp = self.client.post(url, {'weekdag': 1,
-                                      'aanvang': '(*:#)',
-                                      'nhbver_pk': self.nhbver_112.nhb_nr})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'weekdag': 1,
+                                          'aanvang': '(*:#)',
+                                          'nhbver_pk': self.nhbver_112.nhb_nr})
         self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
 
         # slecht tijdstip
-        resp = self.client.post(url, {'weekdag': 1,
-                                      'aanvang': '12:60',
-                                      'nhbver_pk': self.nhbver_112.nhb_nr})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'weekdag': 1,
+                                          'aanvang': '12:60',
+                                          'nhbver_pk': self.nhbver_112.nhb_nr})
         self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
 
         # bad vereniging nummer
-        resp = self.client.post(url, {'weekdag': 1,
-                                      'aanvang': '12:34',
-                                      'nhbver_pk': 999999})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'weekdag': 1,
+                                          'aanvang': '12:34',
+                                          'nhbver_pk': 999999})
         self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
 
         # niet toegestane vereniging
-        resp = self.client.post(url, {'weekdag': 1,
-                                      'aanvang': '12:34',
-                                      'nhbver_pk': self.nhbver_112.nhb_nr})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'weekdag': 1,
+                                          'aanvang': '12:34',
+                                          'nhbver_pk': self.nhbver_112.nhb_nr})
         self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
 
         # probeer wedstrijd van ander rayon te wijzigen
         self.e2e_login_and_pass_otp(self.account_rko2_18)
         self.e2e_wissel_naar_functie(self.functie_rko2_18)
 
-        resp = self.client.post(url, {'weekdag': 1,
-                                      'aanvang': '12:34',
-                                      'nhbver_pk': self.nhbver_101.nhb_nr})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'weekdag': 1,
+                                          'aanvang': '12:34',
+                                          'nhbver_pk': self.nhbver_101.nhb_nr})
         self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
 
     def test_lijst_rk(self):
@@ -469,7 +507,8 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_rko1_18)
 
         url = self.url_lijst_rk % self.deelcomp_rayon1_18.pk
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/lijst-rk.dtl', 'plein/site_layout.dtl'))
@@ -478,7 +517,8 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         self.competitie_sluit_alle_regiocompetities(self.comp_18)
         self.e2e_login_and_pass_otp(self.account_bko_18)
         self.e2e_wissel_naar_functie(self.functie_bko_18)
-        resp = self.client.post(self.url_doorzetten_rk % self.comp_18.pk)
+        with self.assert_max_queries(45):
+            resp = self.client.post(self.url_doorzetten_rk % self.comp_18.pk)
         self.assert_is_redirect_not_plein(resp)  # check for success
 
         # zet een limiet
@@ -505,7 +545,8 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
                                               klasse=self.klasse_c)
         deelnemer.save()
 
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/lijst-rk.dtl', 'plein/site_layout.dtl'))
@@ -513,7 +554,8 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         deelnemer.deelname = DEELNAME_JA
         deelnemer.save()
 
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/lijst-rk.dtl', 'plein/site_layout.dtl'))
@@ -521,7 +563,8 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         deelnemer.rank = 100
         deelnemer.save()
 
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/lijst-rk.dtl', 'plein/site_layout.dtl'))
@@ -535,7 +578,8 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         deelnemer.pk = None
         deelnemer.save()
 
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/lijst-rk.dtl', 'plein/site_layout.dtl'))
@@ -543,7 +587,8 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
     def test_bad_lijst_rk(self):
         # anon
         url = self.url_lijst_rk % self.deelcomp_rayon1_18.pk
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assert_is_redirect(resp, '/plein/')
 
         # RKO
@@ -552,28 +597,33 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
 
         # regio deelcomp
         url = self.url_lijst_rk % self.deelcomp_regio101_18.pk
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
 
         # verkeerde rayon deelcomp
         url = self.url_lijst_rk % self.deelcomp_rayon2_18.pk
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
 
     def test_bad_wijzig_status(self):
         self.client.logout()
         url = self.url_wijzig_status % 999999
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assert_is_redirect(resp, '/plein/')
 
         # RKO
         self.e2e_login_and_pass_otp(self.account_rko1_18)
         self.e2e_wissel_naar_functie(self.functie_rko1_18)
 
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
 
-        resp = self.client.post(url)
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
         self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
 
         # verkeerde RKO
@@ -587,10 +637,12 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         deelnemer.save()
 
         url = self.url_wijzig_status % deelnemer.pk
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
 
-        resp = self.client.post(url)
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
         self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
 
     def test_wijzig_status(self):
@@ -605,7 +657,8 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         deelnemer.save()
 
         url = self.url_wijzig_status % deelnemer.pk
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/wijzig-status-rk-deelnemer.dtl', 'plein/site_layout.dtl'))
@@ -613,47 +666,56 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         # geen vereniging
         deelnemer.bij_vereniging = None
         deelnemer.save()
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
 
         self.assertEqual(KampioenschapMutatie.objects.count(), 0)
 
-        resp = self.client.post(url, {'bevestig': '0', 'afmelden': '0', 'snel': 1})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'bevestig': '0', 'afmelden': '0', 'snel': 1})
         deelnemer = KampioenschapSchutterBoog.objects.get(pk=deelnemer.pk)
         self.assertEqual(KampioenschapMutatie.objects.count(), 0)
 
-        resp = self.client.post(url, {'bevestig': '0', 'afmelden': '1', 'snel': 1})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'bevestig': '0', 'afmelden': '1', 'snel': 1})
         deelnemer = KampioenschapSchutterBoog.objects.get(pk=deelnemer.pk)
         self.assertEqual(KampioenschapMutatie.objects.count(), 1)
 
-        resp = self.client.post(url, {'bevestig': '1', 'afmelden': '0', 'snel': 1})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'bevestig': '1', 'afmelden': '0', 'snel': 1})
         deelnemer = KampioenschapSchutterBoog.objects.get(pk=deelnemer.pk)
         self.assertEqual(KampioenschapMutatie.objects.count(), 2)
 
     def test_bad_wijzig_limiet(self):
         self.client.logout()
         url = self.url_wijzig_limiet % 999999
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assert_is_redirect(resp, '/plein/')
 
         # RKO
         self.e2e_login_and_pass_otp(self.account_rko1_18)
         self.e2e_wissel_naar_functie(self.functie_rko1_18)
 
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
 
-        resp = self.client.post(url)
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
         self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
 
         url = self.url_wijzig_limiet % self.deelcomp_rayon1_18.pk
 
         sel = 'sel_%s' % self.klasse_c.pk
-        resp = self.client.post(url, {sel: 'xx'})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {sel: 'xx'})
         self.assertEqual(resp.status_code, 302)     # doorloopt alles
 
-        resp = self.client.post(url, {sel: '19'})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {sel: '19'})
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
 
         # verkeerde RKO
@@ -662,10 +724,12 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
 
         url = self.url_wijzig_limiet % self.deelcomp_rayon1_18.pk
 
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
 
-        resp = self.client.post(url)
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
         self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
 
     def test_wijzig_limiet(self):
@@ -675,7 +739,8 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
 
         # zonder limiet aanwezig
         url = self.url_wijzig_limiet % self.deelcomp_rayon1_18.pk
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/wijzig-limieten-rk.dtl', 'plein/site_layout.dtl'))
@@ -684,37 +749,43 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
 
         # limiet op default zetten
         self.assertEqual(DeelcompetitieKlasseLimiet.objects.count(), 0)
-        resp = self.client.post(url, {sel: 24, 'snel': 1})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {sel: 24, 'snel': 1})
         self.assert_is_redirect_not_plein(resp)  # check for success
         self.assertEqual(DeelcompetitieKlasseLimiet.objects.count(), 0)
 
         # limiet zetten
         self.assertEqual(DeelcompetitieKlasseLimiet.objects.count(), 0)
-        resp = self.client.post(url, {sel: 20, 'snel': 1})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {sel: 20, 'snel': 1})
         self.assert_is_redirect_not_plein(resp)  # check for success
         self._verwerk_mutaties()
         self.assertEqual(DeelcompetitieKlasseLimiet.objects.count(), 1)
 
         # limiet opnieuw zetten, geen wijziging
-        resp = self.client.post(url, {sel: 20, 'snel': 1})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {sel: 20, 'snel': 1})
         self.assert_is_redirect_not_plein(resp)  # check for success
         self._verwerk_mutaties()
         self.assertEqual(DeelcompetitieKlasseLimiet.objects.count(), 1)
 
         # limiet aanpassen
-        resp = self.client.post(url, {sel: 16, 'snel': 1})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {sel: 16, 'snel': 1})
         self.assert_is_redirect_not_plein(resp)  # check for success
         self._verwerk_mutaties()
         self.assertEqual(DeelcompetitieKlasseLimiet.objects.count(), 1)
 
         # met limiet aanwezig
         url = self.url_wijzig_limiet % self.deelcomp_rayon1_18.pk
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
 
         # limiet verwijderen
-        resp = self.client.post(url, {sel: 24, 'snel': 1})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {sel: 24, 'snel': 1})
         self.assert_is_redirect_not_plein(resp)  # check for success
         self._verwerk_mutaties()
         self.assertEqual(DeelcompetitieKlasseLimiet.objects.count(), 0)
@@ -727,7 +798,8 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         deelnemer.save()
 
         aantal = KampioenschapMutatie.objects.count()
-        resp = self.client.post(url, {sel: 4, 'snel': 1})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {sel: 4, 'snel': 1})
         self.assert_is_redirect_not_plein(resp)  # check for success
         self._verwerk_mutaties()
         self.assertEqual(KampioenschapMutatie.objects.count(), aantal + 1)

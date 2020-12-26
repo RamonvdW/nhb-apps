@@ -117,7 +117,8 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_bb)
         self.e2e_wisselnaarrol_bb()
         self.url_klassegrenzen_vaststellen_18 = '/competitie/klassegrenzen/vaststellen/18/'
-        resp = self.client.post(self.url_klassegrenzen_vaststellen_18)
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_klassegrenzen_vaststellen_18)
         self.assert_is_redirect_not_plein(resp)  # check for success
 
         self.comp_18 = Competitie.objects.get(afstand='18')
@@ -202,7 +203,8 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         zet_competitie_fase(self.comp_18, 'F')
         self.comp_18.zet_fase()
         self.assertEqual(self.comp_18.fase, 'F')
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/bko-doorzetten-naar-rk.dtl', 'plein/site_layout.dtl'))
@@ -219,7 +221,8 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         zet_competitie_fase(self.comp_18, 'G')
         self.comp_18.zet_fase()
         self.assertEqual(self.comp_18.fase, 'G')
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/bko-doorzetten-naar-rk.dtl', 'plein/site_layout.dtl'))
@@ -227,7 +230,8 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         # nu echt doorzetten
         self._regioschutters_inschrijven()
 
-        resp = self.client.post(url)
+        with self.assert_max_queries(35):
+            resp = self.client.post(url)
         self.assert_is_redirect(resp, '/competitie/')       # redirect = Success
 
     def test_doorzetten_bk(self):
@@ -240,7 +244,8 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         zet_competitie_fase(self.comp_18, 'M')
         self.comp_18.zet_fase()
         self.assertEqual(self.comp_18.fase, 'M')
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/bko-doorzetten-naar-bk.dtl', 'plein/site_layout.dtl'))
@@ -257,13 +262,15 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         zet_competitie_fase(self.comp_18, 'N')
         self.comp_18.zet_fase()
         self.assertEqual(self.comp_18.fase, 'N')
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/bko-doorzetten-naar-bk.dtl', 'plein/site_layout.dtl'))
 
         # nu echt doorzetten
-        resp = self.client.post(url)
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
         self.assert_is_redirect(resp, '/competitie/')       # redirect = Success
 
     def test_doorzetten_bad(self):
@@ -271,39 +278,49 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_bb)
         self.e2e_wisselnaarrol_bb()
 
-        resp = self.client.get(self.url_doorzetten_rk % 999999)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_doorzetten_rk % 999999)
         self.assert_is_redirect(resp, '/plein/')
 
-        resp = self.client.get(self.url_doorzetten_bk % 999999)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_doorzetten_bk % 999999)
         self.assert_is_redirect(resp, '/plein/')
 
         # niet bestaande comp_pk
         self.e2e_wissel_naar_functie(self.functie_bko_18)
 
-        resp = self.client.get(self.url_doorzetten_rk % 999999)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_doorzetten_rk % 999999)
         self.assertEqual(resp.status_code, 404)     # 404 = Not found/allowed
 
-        resp = self.client.post(self.url_doorzetten_rk % 999999)
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_doorzetten_rk % 999999)
         self.assertEqual(resp.status_code, 404)     # 404 = Not found/allowed
 
-        resp = self.client.get(self.url_doorzetten_bk % 999999)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_doorzetten_bk % 999999)
         self.assertEqual(resp.status_code, 404)     # 404 = Not found/allowed
 
-        resp = self.client.post(self.url_doorzetten_bk % 999999)
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_doorzetten_bk % 999999)
         self.assertEqual(resp.status_code, 404)     # 404 = Not found/allowed
 
         # juiste comp_pk maar verkeerde fase
         zet_competitie_fase(self.comp_18, 'C')
-        resp = self.client.get(self.url_doorzetten_rk % self.comp_18.pk)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_doorzetten_rk % self.comp_18.pk)
         self.assertEqual(resp.status_code, 404)     # 404 = Not found/allowed
 
-        resp = self.client.post(self.url_doorzetten_rk % self.comp_18.pk)
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_doorzetten_rk % self.comp_18.pk)
         self.assertEqual(resp.status_code, 404)     # 404 = Not found/allowed
 
-        resp = self.client.get(self.url_doorzetten_bk % self.comp_18.pk)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_doorzetten_bk % self.comp_18.pk)
         self.assertEqual(resp.status_code, 404)     # 404 = Not found/allowed
 
-        resp = self.client.post(self.url_doorzetten_bk % self.comp_18.pk)
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_doorzetten_bk % self.comp_18.pk)
         self.assertEqual(resp.status_code, 404)     # 404 = Not found/allowed
 
 

@@ -22,16 +22,19 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
 
     def test_wijzig_anon(self):
         # niet ingelogd
-        resp = self.client.get(self.url_wijzig)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_wijzig)
         self.assert_is_redirect(resp, '/plein/')
 
-        resp = self.client.post(self.url_wijzig, {'param': 'yeah'})
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_wijzig, {'param': 'yeah'})
         self.assert_is_redirect(resp, '/plein/')
 
     def test_wijzig(self):
         # log in
         self.e2e_login(self.account_normaal)
-        resp = self.client.get(self.url_wijzig)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_wijzig)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/nieuw-wachtwoord.dtl', 'plein/site_layout.dtl'))
@@ -42,17 +45,20 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
         nieuw_ww = 'nieuwWwoord'
 
         # foutief huidige wachtwoord
-        resp = self.client.post(self.url_wijzig, {'huidige': nieuw_ww, 'nieuwe': nieuw_ww})
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_wijzig, {'huidige': nieuw_ww, 'nieuwe': nieuw_ww})
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/nieuw-wachtwoord.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'Huidige wachtwoord komt niet overeen')
 
-        resp = self.client.post(self.url_wijzig, {'huidige': self.WACHTWOORD, 'nieuwe': nieuw_ww})
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_wijzig, {'huidige': self.WACHTWOORD, 'nieuwe': nieuw_ww})
         self.assert_is_redirect(resp, '/plein/')
 
         # controleer dat we nog steeds ingelogd zijn
-        resp = self.client.get('/plein/')
+        with self.assert_max_queries(20):
+            resp = self.client.get('/plein/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, 'Uitloggen')
 
@@ -61,13 +67,15 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
         self.e2e_login(self.account_normaal, wachtwoord=nieuw_ww)
 
         # wijzig met een slecht wachtwoord
-        resp = self.client.post(self.url_wijzig)
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_wijzig)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/nieuw-wachtwoord.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'Wachtwoord moet minimaal 9 tekens lang zijn')
 
-        resp = self.client.post(self.url_wijzig, {'nieuwe': '123412341234'})
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_wijzig, {'nieuwe': '123412341234'})
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/nieuw-wachtwoord.dtl', 'plein/site_layout.dtl'))
@@ -77,7 +85,8 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
         self.client.logout()
 
         # test ophalen van het wachtwoord-vergeten formulier
-        resp = self.client.get(self.url_vergeten)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_vergeten)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/wachtwoord-vergeten.dtl', 'plein/site_layout.dtl'))
@@ -87,7 +96,8 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
 
         # gebruiker moet valide e-mailadres invoeren via POST
         with self.settings(EMAIL_ADDRESS_WHITELIST=()):
-            resp = self.client.post(self.url_vergeten, {'email': 'normaal@test.com'})
+            with self.assert_max_queries(20):
+                resp = self.client.post(self.url_vergeten, {'email': 'normaal@test.com'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/email_wachtwoord-vergeten.dtl', 'plein/site_layout.dtl'))
@@ -100,15 +110,18 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
         self.assertEqual(obj.hoortbij_accountemail.bevestigde_email, 'normaal@test.com')
         url = '/overig/url/' + obj.url_code + '/'
         self.client.logout()
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         urls = self.extract_all_urls(resp, skip_menu=True, skip_smileys=True)
         post_url = urls[0]
-        resp = self.client.post(post_url)
+        with self.assert_max_queries(22):
+            resp = self.client.post(post_url)
         self.assert_is_redirect(resp, self.url_wijzig)
 
         # haal de wachtwoord-vergeten pagina op
         # en controleer dat we het oude wachtwoord niet in hoeven te voeren
-        resp = self.client.get(self.url_wijzig)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_wijzig)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/nieuw-wachtwoord.dtl', 'plein/site_layout.dtl'))
@@ -120,7 +133,8 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
 
         # wijzig door alleen het nieuwe wachtwoord op te geven
         nieuw_ww = 'nieuwWwoord'
-        resp = self.client.post(self.url_wijzig, {'nieuwe': nieuw_ww})
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_wijzig, {'nieuwe': nieuw_ww})
         self.assert_is_redirect(resp, '/plein/')
 
         # controleer dat het nieuwe wachtwoord gebruikt kan worden
@@ -135,7 +149,8 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
         self.e2e_check_rol('BB')
 
         # test ophalen van het wachtwoord-vergeten formulier
-        resp = self.client.get(self.url_vergeten)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_vergeten)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/wachtwoord-vergeten.dtl', 'plein/site_layout.dtl'))
@@ -145,7 +160,8 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
 
         # gebruiker moet valide e-mailadres invoeren via POST
         with self.settings(EMAIL_ADDRESS_WHITELIST=()):
-            resp = self.client.post(self.url_vergeten, {'email': 'normaal@test.com'})
+            with self.assert_max_queries(20):
+                resp = self.client.post(self.url_vergeten, {'email': 'normaal@test.com'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/email_wachtwoord-vergeten.dtl', 'plein/site_layout.dtl'))
@@ -158,10 +174,12 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
         self.assertEqual(obj.hoortbij_accountemail.bevestigde_email, 'normaal@test.com')
         url = '/overig/url/' + obj.url_code + '/'
         self.client.logout()
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         urls = self.extract_all_urls(resp, skip_menu=True, skip_smileys=True)
         post_url = urls[0]
-        resp = self.client.post(post_url)
+        with self.assert_max_queries(22):
+            resp = self.client.post(post_url)
         self.assert_is_redirect(resp, self.url_wijzig)
         session = self.client.session
         self.assertTrue('moet_oude_ww_weten' in session)
@@ -169,7 +187,8 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
 
         # haal de wachtwoord-vergeten pagina op
         # en controleer dat we het oude wachtwoord niet in hoeven te voeren
-        resp = self.client.get(self.url_wijzig)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_wijzig)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/nieuw-wachtwoord.dtl', 'plein/site_layout.dtl'))
@@ -183,34 +202,39 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
         self.assertContains(resp, 'Normaal')
 
     def test_vergeten_bad(self):
-        resp = self.client.get(self.url_vergeten)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_vergeten)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/wachtwoord-vergeten.dtl', 'plein/site_layout.dtl'))
 
         # geen email parameter
-        resp = self.client.post(self.url_vergeten)
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_vergeten)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/wachtwoord-vergeten.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'Voer het e-mailadres in van een bestaand account')
 
         # niet valide e-mailadres
-        resp = self.client.post(self.url_vergeten, {'email': 'not a valid email adres'})
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_vergeten, {'email': 'not a valid email adres'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/wachtwoord-vergeten.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'Voer het e-mailadres in van een bestaand account')
 
         # niet bestaand valide e-mailadres
-        resp = self.client.post(self.url_vergeten, {'email': 'als.het.maar@test.org'})
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_vergeten, {'email': 'als.het.maar@test.org'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/wachtwoord-vergeten.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'Voer het e-mailadres in van een bestaand account')
 
         account_twee = self.e2e_create_account('twee', 'normaal@test.com', 'Twee')  # dupe email
-        resp = self.client.post(self.url_vergeten, {'email': 'normaal@test.com'})
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_vergeten, {'email': 'normaal@test.com'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/wachtwoord-vergeten.dtl', 'plein/site_layout.dtl'))

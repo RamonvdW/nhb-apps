@@ -114,14 +114,16 @@ class TestRecordsView(E2EHelpers, TestCase):
         self.assertIsNotNone(str(rec))      # use the __str__ method (only used by admin interface)
 
     def test_view_overzicht(self):
-        resp = self.client.get('/records/')
+        with self.assert_max_queries(20):
+            resp = self.client.get('/records/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_template_used(resp, ('records/records_overzicht.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
         self.e2e_assert_other_http_commands_not_supported('/records/')
 
     def test_view_specifiek(self):
-        resp = self.client.get('/records/record-OD-42/')    # OD=Outdoor, 42=volg_nr
+        with self.assert_max_queries(20):
+            resp = self.client.get('/records/record-OD-42/')    # OD=Outdoor, 42=volg_nr
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_template_used(resp, ('records/records_specifiek.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
@@ -132,7 +134,8 @@ class TestRecordsView(E2EHelpers, TestCase):
         self.assertContains(resp, 'Top Schutter')
 
     def test_view_specifiek_overig(self):
-        resp = self.client.get('/records/record-18-43/')    # 18=Indoor, 43=volg_nr
+        with self.assert_max_queries(20):
+            resp = self.client.get('/records/record-18-43/')    # 18=Indoor, 43=volg_nr
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_template_used(resp, ('records/records_specifiek.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
@@ -144,78 +147,91 @@ class TestRecordsView(E2EHelpers, TestCase):
         self.assertContains(resp, 'Open')
 
     def test_view_specifiek_missing(self):
-        resp = self.client.get('/records/record-OD-0/')    # niet bestaand record nummer
+        with self.assert_max_queries(20):
+            resp = self.client.get('/records/record-OD-0/')    # niet bestaand record nummer
         self.assertEqual(resp.status_code, 404)  # 404 = Not found
 
     def test_view_zoom_0args(self):
-        resp = self.client.get('/records/indiv/')
+        with self.assert_max_queries(20):
+            resp = self.client.get('/records/indiv/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_template_used(resp, ('records/records_indiv_zoom1234.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
         # TODO: inhoudelijk check
 
     def test_view_zoom_1args(self):
-        resp = self.client.get('/records/indiv/mannen/')
+        with self.assert_max_queries(20):
+            resp = self.client.get('/records/indiv/mannen/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_template_used(resp, ('records/records_indiv_zoom1234.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
         # TODO: inhoudelijk check
 
     def test_view_zoom_2args(self):
-        resp = self.client.get('/records/indiv/mannen/outdoor/')
+        with self.assert_max_queries(20):
+            resp = self.client.get('/records/indiv/mannen/outdoor/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_template_used(resp, ('records/records_indiv_zoom1234.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
         # TODO: inhoudelijk check
 
     def test_view_zoom_3args(self):
-        resp = self.client.get('/records/indiv/mannen/outdoor/masters/')
+        with self.assert_max_queries(20):
+            resp = self.client.get('/records/indiv/mannen/outdoor/masters/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_template_used(resp, ('records/records_indiv_zoom1234.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
         # TODO: inhoudelijk check
 
     def test_view_zoom_4args(self):
-        resp = self.client.get('/records/indiv/mannen/outdoor/masters/recurve/')
+        with self.assert_max_queries(20):
+            resp = self.client.get('/records/indiv/mannen/outdoor/masters/recurve/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_template_used(resp, ('records/records_indiv_zoom5.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
         # TODO: inhoudelijk check
 
     def test_view_zoom_1args_neg(self):
-        resp = self.client.get('/records/indiv/neg/')
+        with self.assert_max_queries(20):
+            resp = self.client.get('/records/indiv/neg/')
         self.assertEqual(resp.status_code, 404)  # 404 = Not found
 
     def test_view_zoek(self):
-        resp = self.client.get('/records/zoek/')
+        with self.assert_max_queries(20):
+            resp = self.client.get('/records/zoek/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_template_used(resp, ('records/records_zoek.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
         self.e2e_assert_other_http_commands_not_supported('/records/zoek/')
 
     def test_view_zoek_nhb_nr(self):
-        resp = self.client.get('/records/zoek/', {'zoekterm': '123456'})
+        with self.assert_max_queries(20):
+            resp = self.client.get('/records/zoek/', {'zoekterm': '123456'})
         self.assertEqual(resp.status_code, 200)  # 200 = OK
 
     def test_view_zoek_unknown_nhb_nr(self):
-        resp = self.client.get('/records/zoek/', {'zoekterm': '999999'})
+        with self.assert_max_queries(20):
+            resp = self.client.get('/records/zoek/', {'zoekterm': '999999'})
         self.assertEqual(resp.status_code, 200)  # 200 = OK
 
     def test_view_zoek_not_nhb_nr(self):
         # let op de zoekterm: mag niet matchen met soort_record, naam, plaats of land
-        resp = self.client.get('/records/zoek/', {'zoekterm': 'jaja'})
+        with self.assert_max_queries(20):
+            resp = self.client.get('/records/zoek/', {'zoekterm': 'jaja'})
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assertContains(resp, "Niets gevonden")
 
     def test_view_zoek_plaats(self):
-        resp = self.client.get('/records/zoek/', {'zoekterm': 'Papendal'})
+        with self.assert_max_queries(20):
+            resp = self.client.get('/records/zoek/', {'zoekterm': 'Papendal'})
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_template_used(resp, ('records/records_zoek.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, "Gevonden records (1)")
         self.assert_html_ok(resp)
 
     def test_view_zoek_plaats_case_insensitive(self):
-        resp = self.client.get('/records/zoek/', {'zoekterm': 'PENdal'})
+        with self.assert_max_queries(20):
+            resp = self.client.get('/records/zoek/', {'zoekterm': 'PENdal'})
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assertContains(resp, "Gevonden records (1)")
 
@@ -225,13 +241,15 @@ class TestRecordsView(E2EHelpers, TestCase):
         self.rec.save()
 
         url = '/records/lijst-er/'
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_template_used(resp, ('records/records_special_er.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         url = '/records/lijst-wr/'
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_template_used(resp, ('records/records_special_wr.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)

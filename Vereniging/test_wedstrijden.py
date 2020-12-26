@@ -184,16 +184,20 @@ class TestVerenigingWedstrijden(E2EHelpers, TestCase):
 
         self.assertEqual(CompetitieKlasse.objects.count(), 0)
 
-        resp = self.client.get(url_aanmaken)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url_aanmaken)
 
         # competitie aanmaken
-        resp = self.client.post(url_aanmaken)
+        with self.assert_max_queries(20):
+            resp = self.client.post(url_aanmaken)
         self.assert_is_redirect(resp, url_overzicht)
 
         # klassegrenzen vaststellen
-        resp = self.client.post(url_klassegrenzen_18)
+        with self.assert_max_queries(20):
+            resp = self.client.post(url_klassegrenzen_18)
         self.assert_is_redirect(resp, url_overzicht)
-        resp = self.client.post(url_klassegrenzen_25)
+        with self.assert_max_queries(20):
+            resp = self.client.post(url_klassegrenzen_25)
         self.assert_is_redirect(resp, url_overzicht)
 
         self.comp_18 = Competitie.objects.get(afstand=18)
@@ -252,7 +256,8 @@ class TestVerenigingWedstrijden(E2EHelpers, TestCase):
         self.e2e_check_rol('HWL')
 
         # haal de lijst van wedstrijden
-        resp = self.client.get(self.url_wedstrijden)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_wedstrijden)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('vereniging/wedstrijden.dtl', 'plein/site_layout.dtl'))
@@ -266,7 +271,8 @@ class TestVerenigingWedstrijden(E2EHelpers, TestCase):
         self.e2e_check_rol('WL')
 
         # haal de lijst van wedstrijden
-        resp = self.client.get(self.url_wedstrijden)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_wedstrijden)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('vereniging/wedstrijden.dtl', 'plein/site_layout.dtl'))
@@ -280,7 +286,8 @@ class TestVerenigingWedstrijden(E2EHelpers, TestCase):
         self.e2e_check_rol('SEC')
 
         # haal de lijst van wedstrijden
-        resp = self.client.get(self.url_wedstrijden)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_wedstrijden)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('vereniging/wedstrijden.dtl', 'plein/site_layout.dtl'))
@@ -290,7 +297,8 @@ class TestVerenigingWedstrijden(E2EHelpers, TestCase):
     def test_bad(self):
         # geen toegang tot de pagina
         self.client.logout()
-        resp = self.client.get(self.url_wedstrijden)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_wedstrijden)
         self.assert_is_redirect(resp, '/plein/')
 
 # end of file

@@ -151,10 +151,12 @@ class TestBeheer(E2EHelpers, TestCase):
         self.assertEqual(url, '/beheer/login/')
 
         self.e2e_logout()
-        resp = self.client.get('/beheer/login/', follow=True)
+        with self.assert_max_queries(20):
+            resp = self.client.get('/beheer/login/', follow=True)
         self.assertEqual(resp.redirect_chain[-1], ('/account/login/', 302))
 
-        resp = self.client.get('/beheer/login/?next=/records/', follow=True)
+        with self.assert_max_queries(20):
+            resp = self.client.get('/beheer/login/?next=/records/', follow=True)
         self.assertEqual(resp.redirect_chain[-1], ('/account/login/?next=/records/', 302))
 
         self.e2e_assert_other_http_commands_not_supported('/beheer/login/')
@@ -164,24 +166,28 @@ class TestBeheer(E2EHelpers, TestCase):
         self.e2e_login(self.account_admin)
 
         # redirect naar wissel-van-rol pagina
-        resp = self.client.get('/beheer/', follow=True)
+        with self.assert_max_queries(20):
+            resp = self.client.get('/beheer/', follow=True)
         self.assertEqual(resp.redirect_chain[-1], ('/functie/otp-controle/?next=/beheer/', 302))
 
         self.e2e_assert_other_http_commands_not_supported('/beheer/')
 
         # na 2FA verificatie
         self.e2e_login_and_pass_otp(self.account_admin)
-        resp = self.client.get('/beheer/', follow=True)
+        with self.assert_max_queries(20):
+            resp = self.client.get('/beheer/', follow=True)
         self.assertTrue(len(resp.redirect_chain) == 0)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, '<title>Websitebeheer | Django-websitebeheer</title>')
 
         # onnodig via beheer-login naar post-authenticatie pagina
-        resp = self.client.get('/beheer/login/?next=/records/', follow=True)
+        with self.assert_max_queries(20):
+            resp = self.client.get('/beheer/login/?next=/records/', follow=True)
         self.assertEqual(resp.redirect_chain[-1], ('/records/', 302))
 
         # onnodig via beheer-login zonder post-authenticatie pagina
-        resp = self.client.get('/beheer/login/', follow=True)
+        with self.assert_max_queries(20):
+            resp = self.client.get('/beheer/login/', follow=True)
         self.assertEqual(resp.redirect_chain[-1], ('/plein/', 302))
 
     def test_logout(self):
@@ -190,7 +196,8 @@ class TestBeheer(E2EHelpers, TestCase):
         self.assertEqual(url, '/beheer/logout/')
 
         self.e2e_login_and_pass_otp(self.account_admin)
-        resp = self.client.get('/beheer/logout/', follow=True)
+        with self.assert_max_queries(20):
+            resp = self.client.get('/beheer/logout/', follow=True)
         self.assertEqual(resp.redirect_chain[-1], ('/account/logout/', 302))
 
     def test_pw_change(self):
@@ -199,7 +206,8 @@ class TestBeheer(E2EHelpers, TestCase):
 
         self.e2e_login_and_pass_otp(self.account_admin)
 
-        resp = self.client.get(url, follow=True)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, 'Nieuw wachtwoord')
         self.assertEqual(resp.redirect_chain[-1], ('/account/nieuw-wachtwoord/', 302))
@@ -208,7 +216,8 @@ class TestBeheer(E2EHelpers, TestCase):
         reset_queries()
 
         # print('url: %s' % repr(url))
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertTrue(resp.status_code, 200)  # 200 = OK
 
         # TODO: hoeveel data zit er eigenlijk in de test database?

@@ -101,7 +101,8 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
 
     def test_anon(self):
         self.e2e_logout()
-        resp = self.client.get(self.url_lijst)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_lijst)
         self.assert_is_redirect(resp, '/plein/')
         self.e2e_assert_other_http_commands_not_supported(self.url_lijst)
 
@@ -110,7 +111,7 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_admin)
         self.e2e_wisselnaarrol_it()
         self.e2e_check_rol('IT')
-        with self.assertNumQueries(6):
+        with self.assert_max_queries(6):
             resp = self.client.get(self.url_lijst)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -121,7 +122,7 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_bb)
         self.e2e_wisselnaarrol_bb()
         self.e2e_check_rol('BB')
-        with self.assertNumQueries(5):
+        with self.assert_max_queries(5):
             resp = self.client.get(self.url_lijst)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -132,7 +133,7 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_bko)
         self.e2e_wissel_naar_functie(self.functie_bko)
         self.e2e_check_rol('BKO')
-        with self.assertNumQueries(7):
+        with self.assert_max_queries(7):
             resp = self.client.get(self.url_lijst)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -143,7 +144,7 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_rko)
         self.e2e_wissel_naar_functie(self.functie_rko)
         self.e2e_check_rol('RKO')
-        with self.assertNumQueries(5):
+        with self.assert_max_queries(5):
             resp = self.client.get(self.url_lijst)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -154,7 +155,7 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_rcl)
         self.e2e_wissel_naar_functie(self.functie_rcl)
         self.e2e_check_rol('RCL')
-        with self.assertNumQueries(9):
+        with self.assert_max_queries(9):
             resp = self.client.get(self.url_lijst)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -182,7 +183,7 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         self.nhb_ver1.cluster = cluster
         self.nhb_ver1.save()
 
-        with self.assertNumQueries(9):
+        with self.assert_max_queries(9):
             resp = self.client.get(self.url_lijst)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -191,7 +192,7 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         self.nhb_ver2.cluster = cluster
         self.nhb_ver2.save()
 
-        with self.assertNumQueries(9):
+        with self.assert_max_queries(9):
             resp = self.client.get(self.url_lijst)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -206,7 +207,7 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         self.nhb_ver2.cluster = cluster
         self.nhb_ver2.save()
 
-        with self.assertNumQueries(9):
+        with self.assert_max_queries(9):
             resp = self.client.get(self.url_lijst)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -216,14 +217,15 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_hwl)
         self.e2e_wissel_naar_functie(self.functie_hwl)
         self.e2e_check_rol('HWL')
-        with self.assertNumQueries(9):
+        with self.assert_max_queries(9):
             resp = self.client.get(self.url_lijst)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('vereniging/lijst-verenigingen.dtl', 'plein/site_layout.dtl'))
 
     def test_overzicht_anon(self):
-        resp = self.client.get('/competitie/')
+        with self.assert_max_queries(20):
+            resp = self.client.get('/competitie/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/overzicht.dtl', 'plein/site_layout.dtl'))

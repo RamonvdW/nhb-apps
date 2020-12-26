@@ -20,12 +20,14 @@ class TestHandleiding(E2EHelpers, TestCase):
         self.url = '/handleiding/'
 
     def test_anon(self):
-        resp = self.client.get(self.url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url)
         self.assert_is_redirect(resp, '/plein/')
 
     def test_gebruiker(self):
         self.e2e_login(self.account)
-        resp = self.client.get(self.url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url)
         self.assert_is_redirect(resp, '/plein/')
 
     def test_beheerder(self):
@@ -33,7 +35,8 @@ class TestHandleiding(E2EHelpers, TestCase):
         self.account.save()
         self.e2e_login(self.account)
 
-        resp = self.client.get(self.url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('handleiding/Hoofdpagina.dtl', 'plein/site_layout.dtl'))
@@ -41,7 +44,8 @@ class TestHandleiding(E2EHelpers, TestCase):
         # doorloop alle handleiding pagina
         for page in settings.HANDLEIDING_PAGINAS:
             url = '/handleiding/%s/' % page
-            resp = self.client.get(url)
+            with self.assert_max_queries(20):
+                resp = self.client.get(url)
             self.assertEqual(resp.status_code, 200)     # 200 = OK
             self.assert_html_ok(resp)
         # for

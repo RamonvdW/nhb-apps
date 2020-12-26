@@ -40,20 +40,24 @@ class TestAccount2FA(E2EHelpers, TestCase):
         self.e2e_logout()
 
         # controleer redirect naar het plein, omdat de gebruiker niet ingelogd is
-        resp = self.client.get(self.url_koppel)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_koppel)
         self.assert_is_redirect(resp, '/plein/')
 
-        resp = self.client.post(self.url_koppel, {'otp_code': '123456'})
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_koppel, {'otp_code': '123456'})
         self.assert_is_redirect(resp, '/plein/')
 
     def test_2fa_koppelen_niet_nodig(self):
         self.e2e_login(self.account_normaal)
 
         # controleer redirect naar het plein, omdat OTP koppeling niet nodig is
-        resp = self.client.get(self.url_koppel)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_koppel)
         self.assert_is_redirect(resp, '/plein/')
 
-        resp = self.client.post(self.url_koppel, {'otp_code': '123456'})
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_koppel, {'otp_code': '123456'})
         self.assert_is_redirect(resp, '/plein/')
 
     def test_2fa_koppelen(self):
@@ -63,7 +67,8 @@ class TestAccount2FA(E2EHelpers, TestCase):
         self.e2e_login(self.account_admin)
 
         # check mogelijkheid tot koppelen
-        resp = self.client.get(self.url_koppel)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_koppel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('functie/otp-koppelen.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
@@ -73,7 +78,8 @@ class TestAccount2FA(E2EHelpers, TestCase):
         self.assertNotEqual(self.account_admin.otp_code, '')
 
         # geef een illegale (te korte) otp code op
-        resp = self.client.post(self.url_koppel, {'otp_code': '123'})
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_koppel, {'otp_code': '123'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('functie/otp-koppelen.dtl', 'plein/site_layout.dtl'))
         self.assertNotContains(resp, 'Verkeerde code. Probeer het nog eens')
@@ -82,7 +88,8 @@ class TestAccount2FA(E2EHelpers, TestCase):
         self.assertFalse(self.account_admin.otp_is_actief)
 
         # geef verkeerde otp code op
-        resp = self.client.post(self.url_koppel, {'otp_code': '123456'})
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_koppel, {'otp_code': '123456'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('functie/otp-koppelen.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'Verkeerde code. Probeer het nog eens')
@@ -93,7 +100,8 @@ class TestAccount2FA(E2EHelpers, TestCase):
 
         # juiste otp code
         code = get_otp_code(self.account_admin)
-        resp = self.client.post(self.url_koppel, {'otp_code': code}, follow=True)
+        with self.assert_max_queries(45):
+            resp = self.client.post(self.url_koppel, {'otp_code': code}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('functie/otp-koppelen-gelukt.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
@@ -117,31 +125,37 @@ class TestAccount2FA(E2EHelpers, TestCase):
         # probeer OTP koppelen terwijl al gedaan
         # post
         code = get_otp_code(self.account_admin)
-        resp = self.client.post(self.url_koppel, {'otp_code': code})
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_koppel, {'otp_code': code})
         self.assert_is_redirect(resp, '/plein/')
         # get
-        resp = self.client.get(self.url_koppel)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_koppel)
         self.assert_is_redirect(resp, '/plein/')
 
     def test_2fa_controle_niet_ingelogd(self):
         self.e2e_logout()
         # controleer redirect naar het plein, omdat de gebruiker niet ingelogged is
-        resp = self.client.get(self.url_controle, follow=True)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_controle, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('plein/plein-bezoeker.dtl', 'plein/site_layout.dtl'))
 
-        resp = self.client.post(self.url_controle, {'otp_code': '123456'}, follow=True)
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_controle, {'otp_code': '123456'}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('plein/plein-bezoeker.dtl', 'plein/site_layout.dtl'))
 
     def test_2fa_controle_niet_nodig(self):
         self.e2e_login(self.account_normaal)
         # controleer redirect naar het plein, omdat OTP koppeling niet nodig is
-        resp = self.client.get(self.url_controle, follow=True)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_controle, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('plein/plein-gebruiker.dtl', 'plein/site_layout.dtl'))
 
-        resp = self.client.post(self.url_controle, {'otp_code': '123456'}, follow=True)
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_controle, {'otp_code': '123456'}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('plein/plein-gebruiker.dtl', 'plein/site_layout.dtl'))
 
@@ -153,37 +167,43 @@ class TestAccount2FA(E2EHelpers, TestCase):
         self.e2e_login(self.account_admin)
 
         # ophalen van de OTP controle pagina
-        resp = self.client.get(self.url_controle)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_controle)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('functie/otp-controle.dtl', 'plein/site_layout.dtl'))
 
         # geen code
-        resp = self.client.post(self.url_controle, {'jaja': 'nee'})
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_controle, {'jaja': 'nee'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('functie/otp-controle.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, "De gegevens worden niet geaccepteerd")
 
         # lege code
-        resp = self.client.post(self.url_controle, {'otp_code': ''})
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_controle, {'otp_code': ''})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('functie/otp-controle.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, "De gegevens worden niet geaccepteerd")
 
         # illegale code
-        resp = self.client.post(self.url_controle, {'otp_code': 'ABCDEF'})
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_controle, {'otp_code': 'ABCDEF'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('functie/otp-controle.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, "Voer de vereiste code in")
 
         # fout code
-        resp = self.client.post(self.url_controle, {'otp_code': '123456'})
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_controle, {'otp_code': '123456'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('functie/otp-controle.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, "Verkeerde code. Probeer het nog eens.")
 
         # juiste otp code
         code = get_otp_code(self.account_admin)
-        resp = self.client.post(self.url_controle, {'otp_code': code}, follow=True)
+        with self.assert_max_queries(84):       # iets hoger ivm follow=True
+            resp = self.client.post(self.url_controle, {'otp_code': code}, follow=True)     # TODO: remove follow=True ivm assert_max_queries
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
 

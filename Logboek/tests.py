@@ -59,7 +59,8 @@ class TestLogboek(E2EHelpers, TestCase):
         # do een get van het logboek zonder ingelogd te zijn
         # resulteert in een redirect naar het plein
         self.e2e_logout()
-        resp = self.client.get(self.logboek_url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.logboek_url)
         self.assert_is_redirect(resp, '/plein/')
 
     def test_str(self):
@@ -72,7 +73,8 @@ class TestLogboek(E2EHelpers, TestCase):
         # do een get van het logboek met een gebruiker die daar geen rechten toe heeft
         # resulteert rauwe Forbidden
         self.e2e_login_and_pass_otp(self.account_normaal)
-        resp = self.client.get(self.logboek_url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.logboek_url)
         self.assertEqual(resp.status_code, 302)  # 302 = Redirect (naar het plein)
 
     def test_user_allowed(self):
@@ -82,12 +84,13 @@ class TestLogboek(E2EHelpers, TestCase):
         self.e2e_check_rol('BB')
 
         # alles
-        resp = self.client.get(self.logboek_url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.logboek_url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
 
         # rest
-        with self.assertNumQueries(4):
+        with self.assert_max_queries(4):
             resp = self.client.get(self.logboek_url + 'rest/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_template_used(resp, ('logboek/rest.dtl', 'plein/site_layout.dtl'))
@@ -96,7 +99,7 @@ class TestLogboek(E2EHelpers, TestCase):
         self.assertContains(resp, 'IT beheerder')
 
         # records import
-        with self.assertNumQueries(4):
+        with self.assert_max_queries(4):
             resp = self.client.get(self.logboek_url + 'records/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_template_used(resp, ('logboek/records.dtl', 'plein/site_layout.dtl'))
@@ -104,7 +107,7 @@ class TestLogboek(E2EHelpers, TestCase):
         self.assertContains(resp, 'import gelukt')
 
         # accounts
-        with self.assertNumQueries(4):
+        with self.assert_max_queries(4):
             resp = self.client.get(self.logboek_url + 'accounts/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_template_used(resp, ('logboek/accounts.dtl', 'plein/site_layout.dtl'))
@@ -112,7 +115,7 @@ class TestLogboek(E2EHelpers, TestCase):
         self.assertContains(resp, 'alweer verkeerd')
 
         # rollen
-        with self.assertNumQueries(4):
+        with self.assert_max_queries(4):
             resp = self.client.get(self.logboek_url + 'rollen/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_template_used(resp, ('logboek/rollen.dtl', 'plein/site_layout.dtl'))
@@ -120,7 +123,7 @@ class TestLogboek(E2EHelpers, TestCase):
         self.assertContains(resp, 'Jantje is de baas')
 
         # nhbstructuur / crm import
-        with self.assertNumQueries(4):
+        with self.assert_max_queries(4):
             resp = self.client.get(self.logboek_url + 'crm-import/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_template_used(resp, ('logboek/nhbstructuur.dtl', 'plein/site_layout.dtl'))
@@ -128,7 +131,7 @@ class TestLogboek(E2EHelpers, TestCase):
         self.assertContains(resp, 'weer een nieuw lid')
 
         # competitie
-        with self.assertNumQueries(4):
+        with self.assert_max_queries(4):
             resp = self.client.get(self.logboek_url + 'competitie/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_template_used(resp, ('logboek/competitie.dtl', 'plein/site_layout.dtl'))
@@ -136,7 +139,7 @@ class TestLogboek(E2EHelpers, TestCase):
         self.assertContains(resp, 'Klassegrenzen vastgesteld')
 
         # accommodaties
-        with self.assertNumQueries(4):
+        with self.assert_max_queries(4):
             resp = self.client.get(self.logboek_url + 'accommodaties/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_template_used(resp, ('logboek/accommodaties.dtl', 'plein/site_layout.dtl'))
@@ -144,7 +147,7 @@ class TestLogboek(E2EHelpers, TestCase):
         self.assertContains(resp, 'Weer een clubhuis')
 
         # clusters
-        with self.assertNumQueries(4):
+        with self.assert_max_queries(4):
             resp = self.client.get(self.logboek_url + 'clusters/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_template_used(resp, ('logboek/clusters.dtl', 'plein/site_layout.dtl'))
@@ -152,7 +155,7 @@ class TestLogboek(E2EHelpers, TestCase):
         self.assertContains(resp, 'Groepeer ze maar')
 
         # uitrol
-        with self.assertNumQueries(4):
+        with self.assert_max_queries(4):
             resp = self.client.get(self.logboek_url + 'uitrol/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_template_used(resp, ('logboek/uitrol.dtl', 'plein/site_layout.dtl'))
@@ -160,7 +163,7 @@ class TestLogboek(E2EHelpers, TestCase):
         self.assertContains(resp, 'Rollen met die hap')
 
         # import
-        with self.assertNumQueries(4):
+        with self.assert_max_queries(4):
             resp = self.client.get(self.logboek_url + 'import-oude-site/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_template_used(resp, ('logboek/import_oude_site.dtl', 'plein/site_layout.dtl'))
@@ -175,7 +178,8 @@ class TestLogboek(E2EHelpers, TestCase):
 
         # pagina 1 is altijd op te vragen
         # check that pagination niet aan staat (niet nodig, te weinig regels)
-        resp = self.client.get(self.logboek_url + 'crm-import/?page=1')
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.logboek_url + 'crm-import/?page=1')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_template_used(resp, ('logboek/nhbstructuur.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
@@ -183,9 +187,11 @@ class TestLogboek(E2EHelpers, TestCase):
         self.assertNotContains(resp, 'chevron_')      # icoon van pagination pijltje
 
         # test illegale pagina nummers
-        resp = self.client.get(self.logboek_url + 'crm-import/?page=999999')
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.logboek_url + 'crm-import/?page=999999')
         self.assertEqual(resp.status_code, 404)  # 404 = Not found
-        resp = self.client.get(self.logboek_url + 'crm-import/?page=test')
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.logboek_url + 'crm-import/?page=test')
         self.assertEqual(resp.status_code, 404)  # 404 = Not found
 
         # voeg wat extra regels toe aan het logboek
@@ -195,24 +201,28 @@ class TestLogboek(E2EHelpers, TestCase):
         # for
 
         # haal pagina 1 op en check dat de pagination nu getoond wordt
-        resp = self.client.get(self.logboek_url + 'crm-import/?page=1')
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.logboek_url + 'crm-import/?page=1')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_template_used(resp, ('logboek/nhbstructuur.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
         self.assertContains(resp, 'chevron_')      # icoon van pagination pijltje
 
         # haal pagina 2 op voor alternatieve coverage ('previous' wordt actief)
-        resp = self.client.get(self.logboek_url + 'crm-import/?page=2')
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.logboek_url + 'crm-import/?page=2')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
 
         # haal pagina 10 op voor alternatieve coverage (de pagina nummers schuiven)
-        resp = self.client.get(self.logboek_url + 'crm-import/?page=10')
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.logboek_url + 'crm-import/?page=10')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
 
         # haal de hoogste pagina op voor alternatieve coverage (geen 'next')
-        resp = self.client.get(self.logboek_url + 'crm-import/?page=12')
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.logboek_url + 'crm-import/?page=12')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
 
@@ -247,7 +257,8 @@ class TestLogboek(E2EHelpers, TestCase):
         self.e2e_wisselnaarrol_bb()
 
         # alles
-        resp = self.client.get(self.logboek_url + '?zoekterm=Ramon%20de%20Tester')
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.logboek_url + '?zoekterm=Ramon%20de%20Tester')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
 

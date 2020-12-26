@@ -38,7 +38,8 @@ class TestOverigTijdelijkeUrl(E2EHelpers, TestCase):
         tijdelijkeurl_dispatcher.test_restore()
 
     def test_nonexist(self):
-        resp = self.client.get('/overig/url/test/')
+        with self.assert_max_queries(20):
+            resp = self.client.get('/overig/url/test/')
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('overig/tijdelijke-url-fout.dtl', 'plein/site_layout.dtl'))
@@ -51,7 +52,8 @@ class TestOverigTijdelijkeUrl(E2EHelpers, TestCase):
         obj = SiteTijdelijkeUrl.objects.all()[0]
         self.assertTrue(str(obj) != '')
 
-        resp = self.client.get('/overig/url/code1/')
+        with self.assert_max_queries(20):
+            resp = self.client.get('/overig/url/code1/')
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('overig/tijdelijke-url-goed.dtl', 'plein/site_layout.dtl'))
@@ -66,13 +68,15 @@ class TestOverigTijdelijkeUrl(E2EHelpers, TestCase):
         obj.save()
 
         # volg de 'ga door' knop
-        resp = self.client.post(url)
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
         self.assert_is_redirect(resp, '/plein/')
 
     def test_bad_dispatch_to(self):
         save_tijdelijke_url('code3', 'onbekend', geldig_dagen=1)
 
-        resp = self.client.get('/overig/url/code3/')
+        with self.assert_max_queries(20):
+            resp = self.client.get('/overig/url/code3/')
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('overig/tijdelijke-url-goed.dtl', 'plein/site_layout.dtl'))
@@ -84,7 +88,8 @@ class TestOverigTijdelijkeUrl(E2EHelpers, TestCase):
 
         # volg de 'ga door' knop
         url = urls[0]
-        resp = self.client.post(url)
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
         self.assert_is_redirect(resp, '/plein/')
 
     def test_setup_dispatcher(self):
@@ -110,7 +115,8 @@ class TestOverigTijdelijkeUrl(E2EHelpers, TestCase):
         self.assertTrue("/overig/url/" in url)
         self.callback_count = 1
 
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('overig/tijdelijke-url-goed.dtl', 'plein/site_layout.dtl'))
@@ -123,7 +129,8 @@ class TestOverigTijdelijkeUrl(E2EHelpers, TestCase):
 
         # volg de 'ga door' knop
         url = urls[0]
-        resp = self.client.post(url, follow=True)
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, follow=True)
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(self.callback_count, 2)
         # _my_receiver_func stuurt door naar de feedback-bedankt pagina
@@ -136,7 +143,8 @@ class TestOverigTijdelijkeUrl(E2EHelpers, TestCase):
         self.assertTrue("/overig/url/" in url)
         self.callback_count = 0
 
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('overig/tijdelijke-url-goed.dtl', 'plein/site_layout.dtl'))
@@ -149,7 +157,8 @@ class TestOverigTijdelijkeUrl(E2EHelpers, TestCase):
 
         # volg de 'ga door' knop
         url = urls[0]
-        resp = self.client.post(url, follow=True)
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, follow=True)
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(self.callback_count, 1)
         # _my_receiver_func stuurt door naar de feedback-bedankt pagina
@@ -161,7 +170,8 @@ class TestOverigTijdelijkeUrl(E2EHelpers, TestCase):
         self.assertTrue("/overig/url/" in url)
         self.callback_count = 0
 
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('overig/tijdelijke-url-goed.dtl', 'plein/site_layout.dtl'))
@@ -174,7 +184,8 @@ class TestOverigTijdelijkeUrl(E2EHelpers, TestCase):
 
         # volg de 'ga door' knop
         url = urls[0]
-        resp = self.client.post(url, follow=True)
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, follow=True)
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(self.callback_count, 1)
         # _my_receiver_func stuurt door naar de feedback-bedankt pagina
@@ -194,7 +205,8 @@ class TestOverigTijdelijkeUrl(E2EHelpers, TestCase):
         self.assertTrue("/overig/url/" in url)
         self.callback_count = 0
 
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('overig/tijdelijke-url-goed.dtl', 'plein/site_layout.dtl'))
@@ -207,7 +219,8 @@ class TestOverigTijdelijkeUrl(E2EHelpers, TestCase):
 
         # volg de 'ga door' knop
         url = urls[0]
-        resp = self.client.post(url, follow=True)
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, follow=True)
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(self.callback_count, 1)
         # _my_receiver_func stuurt door naar de feedback-bedankt pagina

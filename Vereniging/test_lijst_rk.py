@@ -156,16 +156,20 @@ class TestVerenigingLijstRK(E2EHelpers, TestCase):
 
         self.assertEqual(CompetitieKlasse.objects.count(), 0)
 
-        resp = self.client.get(url_aanmaken)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url_aanmaken)
 
         # competitie aanmaken
-        resp = self.client.post(url_aanmaken)
+        with self.assert_max_queries(20):
+            resp = self.client.post(url_aanmaken)
         self.assert_is_redirect(resp, url_overzicht)
 
         # klassegrenzen vaststellen
-        resp = self.client.post(url_klassegrenzen_18)
+        with self.assert_max_queries(20):
+            resp = self.client.post(url_klassegrenzen_18)
         self.assert_is_redirect(resp, url_overzicht)
-        resp = self.client.post(url_klassegrenzen_25)
+        with self.assert_max_queries(20):
+            resp = self.client.post(url_klassegrenzen_25)
         self.assert_is_redirect(resp, url_overzicht)
 
         self.comp_18 = Competitie.objects.get(afstand=18)
@@ -193,14 +197,16 @@ class TestVerenigingLijstRK(E2EHelpers, TestCase):
 
         # haal de RK lijst op voordat er een deelnemerslijst is
         url = self.url_lijst_rk % self.deelcomp_r1.pk
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 404)     # 404 = Not found/allowed
 
         # zet de deelnemerslijst (fake)
         self.deelcomp_r1.heeft_deelnemerslijst = True
         self.deelcomp_r1.save()
 
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('vereniging/lijst-rk.dtl', 'plein/site_layout.dtl'))
@@ -217,7 +223,8 @@ class TestVerenigingLijstRK(E2EHelpers, TestCase):
                                   klasse=self.klasse_ib,
                                   bij_vereniging=self.functie_hwl.nhb_ver).save()
 
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('vereniging/lijst-rk.dtl', 'plein/site_layout.dtl'))
@@ -232,7 +239,8 @@ class TestVerenigingLijstRK(E2EHelpers, TestCase):
         self.deelcomp_r1.save()
 
         url = self.url_lijst_rk % self.deelcomp_r1.pk
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('vereniging/lijst-rk.dtl', 'plein/site_layout.dtl'))
@@ -242,7 +250,8 @@ class TestVerenigingLijstRK(E2EHelpers, TestCase):
         self.client.logout()
 
         url = self.url_lijst_rk % 999999
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assert_is_redirect(resp, '/plein/')
 
         self.e2e_login_and_pass_otp(self.account_bb)
@@ -250,7 +259,8 @@ class TestVerenigingLijstRK(E2EHelpers, TestCase):
         self.e2e_check_rol('HWL')
 
         url = self.url_lijst_rk % 999999
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 404)     # 404 = Not found/allowed
 
 # end of file

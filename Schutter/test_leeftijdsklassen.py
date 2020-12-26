@@ -157,13 +157,15 @@ class TestSchutterLeeftijdsklassen(E2EHelpers, TestCase):
 
     def test_view(self):
         # zonder login --> terug naar het plein
-        resp = self.client.get('/sporter/leeftijdsklassen/', follow=True)
+        with self.assert_max_queries(20):
+            resp = self.client.get('/sporter/leeftijdsklassen/', follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('plein/plein-bezoeker.dtl', 'plein/site_layout.dtl'))
 
         # met schutter-login wel toegankelijk
         self.e2e_login(self.account_normaal)
-        resp = self.client.get('/sporter/leeftijdsklassen/')
+        with self.assert_max_queries(20):
+            resp = self.client.get('/sporter/leeftijdsklassen/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('schutter/leeftijdsklassen.dtl', 'plein/site_layout.dtl'))

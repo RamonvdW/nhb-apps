@@ -31,15 +31,18 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
         self.e2e_check_rol('BB')
 
         # maak de competitie aan
-        self.client.post(self.url_aanmaken)
+        with self.assert_max_queries(20):
+            self.client.post(self.url_aanmaken)
         self.comp = Competitie.objects.filter(afstand=18)[0]
 
         aanvangsgemiddelde_opslaan(self.schutterboog_100005, 18, 9.500, None, "Test")
 
         # klassegrenzen vaststellen
-        resp = self.client.post(self.url_klassegrenzen_vaststellen_18)
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_klassegrenzen_vaststellen_18)
         self.assert_is_redirect_not_plein(resp)     # check success
-        resp = self.client.post(self.url_klassegrenzen_vaststellen_25)
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_klassegrenzen_vaststellen_25)
         self.assert_is_redirect_not_plein(resp)     # check success
 
         self.deelcomp_r101 = DeelCompetitie.objects.filter(laag='Regio',
@@ -69,7 +72,8 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
         self.uitslagen = list()
         uur = 1
         for pk in wedstrijd_pks[:]:     # copy to ensure stable
-            resp = self.client.get(self.url_uitslag_invoeren % pk)
+            with self.assert_max_queries(20):
+                resp = self.client.get(self.url_uitslag_invoeren % pk)
             wedstrijd = Wedstrijd.objects.get(pk=pk)
             self.assertIsNotNone(wedstrijd.uitslag)
             wedstrijd.vereniging = self.ver
@@ -96,7 +100,8 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
 
         for nr in range(aantal):
             # maak een wedstrijd aan (doen voordat de beschrijving aangepast wordt)
-            resp = self.client.post(self.url_planning_regio_ronde % (top_pk + nr + 1), {})
+            with self.assert_max_queries(20):
+                resp = self.client.post(self.url_planning_regio_ronde % (top_pk + nr + 1), {})
             self.assertTrue(resp.status_code < 400)
         # for
 
@@ -109,7 +114,8 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
 
             # wedstrijduitslag aanmaken
             wedstrijd = ronde.plan.wedstrijden.all()[0]
-            resp = self.client.get(self.url_uitslag_invoeren % wedstrijd.pk)
+            with self.assert_max_queries(20):
+                resp = self.client.get(self.url_uitslag_invoeren % wedstrijd.pk)
             self.assertTrue(resp.status_code < 400)
 
             week_nr = 37 + nr*4
