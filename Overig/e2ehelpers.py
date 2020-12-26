@@ -104,7 +104,8 @@ class E2EHelpers(object):
         self._wissel_naar_rol('IT', '/functie/wissel-van-rol/')
 
     def e2e_wisselnaarrol_bb(self):
-        self._wissel_naar_rol('BB', '/competitie/')
+        # self._wissel_naar_rol('BB', '/competitie/')
+        self._wissel_naar_rol('BB', '/functie/wissel-van-rol/')
 
     def e2e_wisselnaarrol_schutter(self):
         self._wissel_naar_rol('schutter', '/functie/wissel-van-rol/')

@@ -301,8 +301,8 @@ class ActiveerRolView(UserPassesTestMixin, View):
         # stuur een aantal rollen door naar een functionele pagina
         # de rest blijft in Wissel van Rol
         rol = rol_get_huidige(request)
-        if rol == Rollen.ROL_BB:
-            return redirect('Competitie:overzicht')
+        # if rol == Rollen.ROL_BB:
+        #     return redirect('Competitie:overzicht')
 
         if rol in (Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_WL):
             return redirect('Vereniging:overzicht')
