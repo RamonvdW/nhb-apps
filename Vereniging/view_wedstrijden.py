@@ -76,7 +76,7 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
                 if heeft_uitslag:
                     obj.url_uitslag_aanpassen = url
                 else:
-                    obj.url_uitslag_invoeren = url
+                    obj.url_score_invoeren = url
                 obj.toon_geen_uitslag = False
             else:
                 if heeft_uitslag:

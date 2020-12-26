@@ -99,7 +99,6 @@
         {% for obj in deelnemers %}
             {% if obj.break_klasse %}
                 <tr class="nhb-grijs">
-                    <td></td>   <!-- rank -->
                     <td colspan="12"><h5>{{ obj.klasse_str }}</h5></td>
                 </tr>
                 <tr>

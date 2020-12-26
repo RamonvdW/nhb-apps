@@ -10,11 +10,11 @@ from . import (views_aangemeld,
                views_info,
                views_klassegrenzen,
                views_overzicht,
-               views_planning,
+               views_planning_regio,
                views_planning_bond,
                views_planning_rayon,
                views_tussenstand,
-               views_uitslagen)
+               views_scores)
 
 app_name = 'Competitie'
 
@@ -25,9 +25,33 @@ urlpatterns = [
          name='overzicht'),
 
 
+    path('info/',
+         views_info.InfoCompetitieView.as_view(),
+         name='info-competitie'),
+
+    path('instellingen-volgende-competitie/',
+         views_bb.InstellingenVolgendeCompetitieView.as_view(),
+         name='instellingen-volgende-competitie'),
+
+    path('aanmaken/',
+         views_bb.CompetitieAanmakenView.as_view(),
+         name='aanmaken'),
+
+    path('ag-vaststellen/',
+         views_bb.AGVaststellenView.as_view(),
+         name='ag-vaststellen'),
+
+    path('klassegrenzen/vaststellen/<afstand>/',
+         views_bb.KlassegrenzenVaststellenView.as_view(),
+         name='klassegrenzen-vaststellen'),
+
     path('klassegrenzen/tonen/',
          views_klassegrenzen.KlassegrenzenTonenView.as_view(),
          name='klassegrenzen-tonen'),
+
+    path('wijzig-datums/<comp_pk>/',
+         views_bb.WijzigDatumsView.as_view(),
+         name='wijzig-datums'),
 
 
     path('lijst-regiocompetitie/<comp_pk>/regio-<regio_pk>/dagdeel-behoefte/',
@@ -60,100 +84,88 @@ urlpatterns = [
          name='wijzig-status-rk-deelnemer'),
 
 
-    path('info/',
-         views_info.InfoCompetitieView.as_view(),
-         name='info-competitie'),
-
-
-    path('instellingen-volgende-competitie/',
-         views_bb.InstellingenVolgendeCompetitieView.as_view(),
-         name='instellingen-volgende-competitie'),
-
-    path('aanmaken/',
-         views_bb.CompetitieAanmakenView.as_view(),
-         name='aanmaken'),
-
-    path('ag-vaststellen/',
-         views_bb.AGVaststellenView.as_view(),
-         name='ag-vaststellen'),
-
-    path('klassegrenzen/vaststellen/<afstand>/',
-         views_bb.KlassegrenzenVaststellenView.as_view(),
-         name='klassegrenzen-vaststellen'),
-
-    path('wijzig-datums/<comp_pk>/',
-         views_bb.WijzigDatumsView.as_view(),
-         name='wijzig-datums'),
-
-
-    path('planning/regiocompetitie/ronde/<ronde_pk>/',
-         views_planning.RegioRondePlanningView.as_view(),
+    path('planning/regio/ronde/<ronde_pk>/',
+         views_planning_regio.RegioRondePlanningView.as_view(),
          name='regio-ronde-planning'),
 
-    path('planning/regiocompetitie/cluster/<cluster_pk>/',
-         views_planning.RegioClusterPlanningView.as_view(),
+    path('planning/regio/cluster/<cluster_pk>/',
+         views_planning_regio.RegioClusterPlanningView.as_view(),
          name='regio-cluster-planning'),
 
-    path('planning/regiocompetitie/afsluiten/<deelcomp_pk>/',
-         views_planning.AfsluitenRegiocompView.as_view(),
+    path('planning/regio/afsluiten/<deelcomp_pk>/',
+         views_planning_regio.AfsluitenRegiocompView.as_view(),
          name='afsluiten-regiocomp'),
 
-    path('planning/regiocompetitie/<deelcomp_pk>/',
-         views_planning.RegioPlanningView.as_view(),
+    path('planning/regio/<deelcomp_pk>/',
+         views_planning_regio.RegioPlanningView.as_view(),
          name='regio-planning'),
 
-    path('planning/bondscompetitie/<deelcomp_pk>/',
-         views_planning.BondPlanningView.as_view(),
-         name='bond-planning'),
+    path('planning/regio/wedstrijd/wijzig/<wedstrijd_pk>/',
+         views_planning_regio.WijzigWedstrijdView.as_view(),
+         name='regio-wijzig-wedstrijd'),
 
-    path('planning/wedstrijd/wijzig/<wedstrijd_pk>/',
-         views_planning.WijzigWedstrijdView.as_view(),
-         name='wijzig-wedstrijd'),
-
-    path('planning/wedstrijd/verwijder/<wedstrijd_pk>/',
-         views_planning.VerwijderWedstrijdView.as_view(),
-         name='verwijder-wedstrijd'),
+    path('planning/regio/wedstrijd/verwijder/<wedstrijd_pk>/',
+         views_planning_regio.VerwijderWedstrijdView.as_view(),
+         name='regio-verwijder-wedstrijd'),
 
 
-    path('planning/rayoncompetitie/<deelcomp_pk>/limieten/',
+    path('planning/rk/<deelcomp_pk>/limieten/',
          views_planning_rayon.RayonLimietenView.as_view(),
          name='rayon-limieten'),
 
-    path('planning/rayoncompetitie/<deelcomp_pk>/',
+    path('planning/rk/<deelcomp_pk>/',
          views_planning_rayon.RayonPlanningView.as_view(),
          name='rayon-planning'),
 
-    path('planning/wedstrijd-rayon/wijzig/<wedstrijd_pk>/',
+    path('planning/rk/wedstrijd/wijzig/<wedstrijd_pk>/',
          views_planning_rayon.WijzigRayonWedstrijdView.as_view(),
-         name='wijzig-rayon-wedstrijd'),
+         name='rayon-wijzig-wedstrijd'),
+
+    path('planning/rk/wedstrijd/verwijder/<wedstrijd_pk>/',
+         views_planning_rayon.VerwijderWedstrijdView.as_view(),
+         name='rayon-verwijder-wedstrijd'),
 
 
-    path('wedstrijd/uitslag-invoeren/<wedstrijd_pk>/',
-         views_uitslagen.WedstrijdUitslagInvoerenView.as_view(),
+    path('planning/bk/<deelcomp_pk>/',
+         views_planning_bond.BondPlanningView.as_view(),
+         name='bond-planning'),
+
+    path('planning/bk/wedstrijd/verwijder/<wedstrijd_pk>/',
+         views_planning_bond.VerwijderWedstrijdView.as_view(),
+         name='bond-verwijder-wedstrijd'),
+
+
+    path('scores/regio/<deelcomp_pk>/',
+         views_scores.ScoresRegioView.as_view(),
+         name='scores-regio'),
+
+
+    path('scores/uitslag-invoeren/<wedstrijd_pk>/',
+         views_scores.WedstrijdUitslagInvoerenView.as_view(),
          name='wedstrijd-uitslag-invoeren'),
 
-    path('wedstrijd/uitslag-controleren/<wedstrijd_pk>/',
-         views_uitslagen.WedstrijdUitslagControlerenView.as_view(),
+    path('scores/uitslag-controleren/<wedstrijd_pk>/',
+         views_scores.WedstrijdUitslagControlerenView.as_view(),
          name='wedstrijd-uitslag-controleren'),
 
-    path('wedstrijd/uitslag-accorderen/<wedstrijd_pk>/',
-         views_uitslagen.WedstrijdUitslagControlerenView.as_view(),
+    path('scores/uitslag-accorderen/<wedstrijd_pk>/',
+         views_scores.WedstrijdUitslagControlerenView.as_view(),
          name='wedstrijd-geef-akkoord'),
 
-    path('wedstrijd/bekijk-uitslag/<wedstrijd_pk>/',
-         views_uitslagen.WedstrijdUitslagBekijkenView.as_view(),
+    path('scores/bekijk-uitslag/<wedstrijd_pk>/',
+         views_scores.WedstrijdUitslagBekijkenView.as_view(),
          name='wedstrijd-bekijk-uitslag'),
 
-    path('dynamic/deelnemers-ophalen/',
-         views_uitslagen.DynamicDeelnemersOphalenView.as_view(),
+    path('scores/dynamic/deelnemers-ophalen/',
+         views_scores.DynamicDeelnemersOphalenView.as_view(),
          name='dynamic-deelnemers-ophalen'),
 
-    path('dynamic/check-nhbnr/',
-         views_uitslagen.DynamicZoekOpNhbnrView.as_view(),
+    path('scores/dynamic/check-nhbnr/',
+         views_scores.DynamicZoekOpNhbnrView.as_view(),
          name='dynamic-check-nhbnr'),
 
-    path('dynamic/scores-opslaan/',
-         views_uitslagen.DynamicScoresOpslaanView.as_view(),
+    path('scores/dynamic/scores-opslaan/',
+         views_scores.DynamicScoresOpslaanView.as_view(),
          name='dynamic-scores-opslaan'),
 
 

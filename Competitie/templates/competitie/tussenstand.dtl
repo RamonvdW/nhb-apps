@@ -6,16 +6,16 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}Tussenstand{% endblock %}
+{% block title %}Uitslagen{% endblock %}
 
 {% block pagina %}
 {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-tussenstand" %}
 
-<h4>Competitie tussenstand</h4>
+<h4>Competitie uitslagen</h4>
 
-<p>Op deze pagina's is de tussenstand van de competitie te volgen.</p>
+<p>Op deze pagina's is de tussenstand/eindstand van de competitie te volgen.</p>
 
-<p>De competities beginnen in de 16 regio's (regiocompetitie) en culmineren in de 4 rayonkampioenschappen en de bondskampioenschappen.</p>
+<p>De competities beginnen in de 16 regio's (regiocompetitie) en culmineren in de 4 rayons (rayonkampioenschappen) en de bondskampioenschappen.</p>
 
 {% if toon_comps %}
 
@@ -63,10 +63,6 @@
         {% url 'HistComp:top' as card_url %}
         {% include 'plein/card.dtl' with title="Uitslag vorig seizoen" text="De uitslag van vorig seizoen is hier in te zien." icon="skip_previous" url=card_url %}
     {% endif %}
-
-    <!-- algemene informatie over de competities -->
-    {% url 'Competitie:info-competitie' as card_url %}
-    {% include 'plein/card.dtl' with title="Informatie" text="Algemene informatie over de competities." icon="info" url=card_url %}
 
 </div>
 

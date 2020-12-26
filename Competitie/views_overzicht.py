@@ -71,6 +71,7 @@ class CompetitieOverzichtView(View):
                     comp.url_inschrijvingen = reverse('Competitie:lijst-regiocomp-regio',
                                                       kwargs={'comp_pk': comp.pk,
                                                               'regio_pk': functie_nu.nhb_regio.pk})
+
                 elif rol_nu == Rollen.ROL_RKO:
                     comp.url_inschrijvingen = reverse('Competitie:lijst-regiocomp-rayon',
                                                       kwargs={'comp_pk': comp.pk,
@@ -165,8 +166,11 @@ class CompetitieOverzichtView(View):
             for obj in context['planning_deelcomp']:
                 obj.titel = 'Planning Regio'
                 obj.tekst = 'Planning voor %s voor de %s.' % (obj.nhb_regio.naam, obj.competitie.beschrijving)
-                obj.url = reverse('Competitie:regio-planning',
-                                  kwargs={'deelcomp_pk': obj.pk})
+                obj.url = reverse('Competitie:regio-planning', kwargs={'deelcomp_pk': obj.pk})
+
+                obj.tekst_scores = "Scores invoeren en aanpassen voor %s voor de %s." % (obj.nhb_regio.naam,
+                                                                                         obj.competitie.beschrijving)
+                obj.url_scores = reverse('Competitie:scores-regio', kwargs={'deelcomp_pk': obj.pk})
             # for
 
             context['afsluiten_deelcomp'] = (DeelCompetitie
@@ -176,7 +180,7 @@ class CompetitieOverzichtView(View):
                                              .select_related('nhb_regio', 'competitie'))
             for obj in context['afsluiten_deelcomp']:
                 obj.titel = 'Sluit Regiocompetitie'
-                obj.tekst = 'Bevestig eindstand %s voor de %s en zet schutters door naar RK.' % (obj.nhb_regio.naam, obj.competitie.beschrijving)
+                obj.tekst = 'Bevestig eindstand %s voor de %s.' % (obj.nhb_regio.naam, obj.competitie.beschrijving)
                 obj.url_afsluiten = reverse('Competitie:afsluiten-regiocomp',
                                             kwargs={'deelcomp_pk': obj.pk})
             # for

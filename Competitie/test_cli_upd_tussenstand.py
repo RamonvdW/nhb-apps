@@ -241,9 +241,9 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
         self.url_aanmaken = '/competitie/aanmaken/'
         self.url_klassegrenzen_vaststellen_18 = '/competitie/klassegrenzen/vaststellen/18/'
         self.url_klassegrenzen_vaststellen_25 = '/competitie/klassegrenzen/vaststellen/25/'
-        self.url_planning_regio = '/competitie/planning/regiocompetitie/%s/'        # deelcomp_pk
-        self.url_planning_regio_ronde = '/competitie/planning/regiocompetitie/ronde/%s/'  # ronde_pk
-        self.url_uitslag_invoeren = '/competitie/wedstrijd/uitslag-invoeren/%s/'    # wedstrijd_pk
+        self.url_planning_regio = '/competitie/planning/regio/%s/'                  # deelcomp_pk
+        self.url_planning_regio_ronde = '/competitie/planning/regio/ronde/%s/'      # ronde_pk
+        self.url_uitslag_invoeren = '/competitie/scores/uitslag-invoeren/%s/'       # wedstrijd_pk
         self.url_inschrijven = '/vereniging/leden-aanmelden/competitie/%s/'         # comp_pk
 
         # deze test is afhankelijk van de standaard regio's

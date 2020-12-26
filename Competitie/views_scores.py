@@ -20,8 +20,91 @@ import json
 import sys
 
 
-TEMPLATE_COMPETITIE_UITSLAG_INVOEREN_WEDSTRIJD = 'competitie/uitslag-invoeren-wedstrijd.dtl'
-TEMPLATE_COMPETITIE_UITSLAG_BEKIJKEN_WEDSTRIJD = 'competitie/bekijk-wedstrijd-uitslag.dtl'
+TEMPLATE_COMPETITIE_SCORES_REGIO = 'competitie/scores-regio.dtl'
+TEMPLATE_COMPETITIE_SCORES_INVOEREN = 'competitie/scores-invoeren.dtl'
+TEMPLATE_COMPETITIE_SCORES_BEKIJKEN = 'competitie/scores-bekijken.dtl'
+
+
+class ScoresRegioView(UserPassesTestMixin, TemplateView):
+
+    """ Deze view geeft de planning voor een competitie in een regio """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_COMPETITIE_SCORES_REGIO
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        rol_nu = rol_get_huidige(self.request)
+        return rol_nu == Rollen.ROL_RCL
+
+    def handle_no_permission(self):
+        """ gebruiker heeft geen toegang --> redirect naar het plein """
+        return HttpResponseRedirect(reverse('Plein:plein'))
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        try:
+            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen geeft beveiliging
+            deelcomp = DeelCompetitie.objects.get(pk=deelcomp_pk,
+                                                  laag=LAAG_REGIO)
+        except (ValueError, DeelCompetitie.DoesNotExist):
+            raise Resolver404()
+
+        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
+        if deelcomp.functie != functie_nu:
+            # niet de beheerder
+            raise Resolver404()
+
+        context['deelcomp'] = deelcomp
+
+        # deelcompetitie bestaat uit rondes
+        # elke ronde heeft een plan met wedstrijden
+
+        wedstrijd_pks = list()
+        wedstrijd2beschrijving = dict()
+        comp_str = deelcomp.competitie.beschrijving
+
+        for ronde in (DeelcompetitieRonde
+                      .objects
+                      .select_related('plan')
+                      .prefetch_related('plan__wedstrijden')
+                      .filter(deelcompetitie=deelcomp)):
+            if not ronde.is_voor_import_oude_programma():
+                for wedstrijd in ronde.plan.wedstrijden.all():
+                    wedstrijd_pks.append(wedstrijd.pk)
+                    wedstrijd2beschrijving[wedstrijd.pk] = "%s - %s" % (comp_str, ronde.beschrijving)
+        # for
+
+        wedstrijden = (Wedstrijd
+                       .objects
+                       .select_related('uitslag')
+                       .filter(pk__in=wedstrijd_pks))
+
+        for wedstrijd in wedstrijden:
+            heeft_uitslag = (wedstrijd.uitslag and wedstrijd.uitslag.scores.count() > 0)
+
+            beschrijving = wedstrijd2beschrijving[wedstrijd.pk]
+            if wedstrijd.beschrijving != beschrijving:
+                wedstrijd.beschrijving = beschrijving
+                wedstrijd.save()
+
+            # geef RCL de mogelijkheid om te scores aan te passen
+            # de HWL/WL krijgen deze link vanuit Vereniging::Wedstrijden
+            if heeft_uitslag:
+                wedstrijd.url_uitslag_controleren = reverse('Competitie:wedstrijd-uitslag-controleren',
+                                                            kwargs={'wedstrijd_pk': wedstrijd.pk})
+            else:
+                # TODO: knop pas beschikbaar maken op wedstrijddatum tot datum+N
+                wedstrijd.url_score_invoeren = reverse('Competitie:wedstrijd-uitslag-invoeren',
+                                                       kwargs={'wedstrijd_pk': wedstrijd.pk})
+        # for
+
+        context['wedstrijden'] = wedstrijden
+
+        menu_dynamics(self.request, context, actief='competitie')
+        return context
 
 
 def mag_deelcomp_wedstrijd_wijzigen(wedstrijd, functie_nu, deelcomp):
@@ -84,7 +167,7 @@ class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
     """ Deze view laat de RCL, HWL en WL de uitslag van een wedstrijd invoeren """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_COMPETITIE_UITSLAG_INVOEREN_WEDSTRIJD
+    template_name = TEMPLATE_COMPETITIE_SCORES_INVOEREN
     is_controle = False
 
     def test_func(self):
@@ -137,8 +220,8 @@ class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
         ronde = DeelcompetitieRonde.objects.get(plan=plan)
 
         if rol_nu == Rollen.ROL_RCL:
-            context['url_terug'] = reverse('Competitie:regio-ronde-planning',
-                                           kwargs={'ronde_pk': ronde.pk})
+            context['url_terug'] = reverse('Competitie:scores-regio',
+                                           kwargs={'deelcomp_pk': deelcomp.pk})
         else:
             context['url_terug'] = reverse('Vereniging:wedstrijden')
 
@@ -482,7 +565,7 @@ class WedstrijdUitslagBekijkenView(TemplateView):
     """ Deze view toont de uitslag van een wedstrijd """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_COMPETITIE_UITSLAG_BEKIJKEN_WEDSTRIJD
+    template_name = TEMPLATE_COMPETITIE_SCORES_BEKIJKEN
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """

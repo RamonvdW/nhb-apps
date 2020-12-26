@@ -63,9 +63,14 @@
             {% endif %}     <!-- rol_is_bb -->
 
             <!-- planning deelcomp -->
+            <!-- scores -->
             {% for deelcomp in planning_deelcomp %}
                 {% include 'plein/card.dtl' with title=deelcomp.titel text=deelcomp.tekst icon="date_range" url=deelcomp.url %}
+                {% if deelcomp.url_scores %}
+                    {% include 'plein/card.dtl' with title="Scores" text=deelcomp.tekst_scores icon="edit" url=deelcomp.url_scores %}
+                {% endif %}
             {% endfor %}
+
 
             <!-- RK selectie -->
             {% if url_lijst_rk %}

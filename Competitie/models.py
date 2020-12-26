@@ -297,7 +297,9 @@ class DeelCompetitie(models.Model):
                              null=True, blank=True)         # optioneel (alleen RK en BK)
 
     # specifieke instellingen voor deze regio
-    inschrijf_methode = models.CharField(max_length=1, default='2', choices=INSCHRIJF_METHODES)
+    inschrijf_methode = models.CharField(max_length=1,
+                                         default=INSCHRIJF_METHODE_2,
+                                         choices=INSCHRIJF_METHODES)
 
     # methode 3: toegestane dagdelen
     # komma-gescheiden lijstje met DAGDEEL: GE,AV

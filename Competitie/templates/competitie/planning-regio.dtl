@@ -76,7 +76,7 @@
             <!-- knop naar de ronde van de regioplanning -->
             <td>
                 <a class="btn-nhb-blauw btn-small" href="{% url 'Competitie:regio-ronde-planning' ronde.pk %}">
-                    <i class="material-icons-round left">arrow_forward</i>Bekijk</a>
+                    <i class="material-icons-round left">arrow_forward</i>Wedstrijden</a>
             </td>
         </tr>
     {% empty %}
@@ -92,7 +92,7 @@
                 <form action="{{ url_nieuwe_week }}" method="post">
                     {% csrf_token %}
                     <button class="btn-nhb-blauw btn-small" type="submit">
-                        <i class="material-icons-round left">add</i>Regel toevoegen</button>
+                        <i class="material-icons-round left">add</i>Blok toevoegen</button>
                 </form>
             </td>
         </tr>

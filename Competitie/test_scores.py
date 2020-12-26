@@ -18,11 +18,11 @@ import datetime
 import json
 
 
-class TestCompetitieUitslagen(E2EHelpers, TestCase):
+class TestCompetitieScores(E2EHelpers, TestCase):
 
-    """ unit tests voor de Competitie applicatie, module Informatie over de Competitie """
+    """ unit tests voor de Competitie applicatie, module Scores """
 
-    test_after = ('Competitie.test_fase', 'Competitie.test_planning',)
+    test_after = ('Competitie.test_fase', 'Competitie.test_planning_regio',)
 
     def _prep_beheerder_lid(self, voornaam):
         nhb_nr = self._next_nhbnr
@@ -158,19 +158,19 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         # secretaris kan nog niet ingevuld worden
         ver.save()
 
-        self.url_planning_regio = '/competitie/planning/regiocompetitie/%s/'            # deelcomp_pk
-        self.url_planning_regio_cluster = '/competitie/planning/regiocompetitie/cluster/%s/'    # cluster_pk
-        self.url_planning_regio_ronde = '/competitie/planning/regiocompetitie/ronde/%s/'        # ronde_pk
+        self.url_planning_regio = '/competitie/planning/regio/%s/'                   # deelcomp_pk
+        self.url_planning_regio_cluster = '/competitie/planning/regio/cluster/%s/'   # cluster_pk
+        self.url_planning_regio_ronde = '/competitie/planning/regio/ronde/%s/'       # ronde_pk
 
-        self.url_uitslag_invoeren = '/competitie/wedstrijd/uitslag-invoeren/%s/'        # wedstrijd_pk
-        self.url_uitslag_deelnemers = '/competitie/dynamic/deelnemers-ophalen/'
-        self.url_uitslag_zoeken = '/competitie/dynamic/check-nhbnr/'
-        self.url_uitslag_opslaan = '/competitie/dynamic/scores-opslaan/'
+        self.url_uitslag_invoeren = '/competitie/scores/uitslag-invoeren/%s/'        # wedstrijd_pk
+        self.url_uitslag_deelnemers = '/competitie/scores/dynamic/deelnemers-ophalen/'
+        self.url_uitslag_zoeken = '/competitie/scores/dynamic/check-nhbnr/'
+        self.url_uitslag_opslaan = '/competitie/scores/dynamic/scores-opslaan/'
 
-        self.url_uitslag_controleren = '/competitie/wedstrijd/uitslag-controleren/%s/'  # wedstrijd_pk
-        self.url_uitslag_accorderen = '/competitie/wedstrijd/uitslag-accorderen/%s/'    # wedstrijd_pk
+        self.url_uitslag_controleren = '/competitie/scores/uitslag-controleren/%s/'  # wedstrijd_pk
+        self.url_uitslag_accorderen = '/competitie/scores/uitslag-accorderen/%s/'    # wedstrijd_pk
 
-        self.url_bekijk_uitslag = '/competitie/wedstrijd/bekijk-uitslag/%s/'            # wedstrijd_pk
+        self.url_bekijk_uitslag = '/competitie/scores/bekijk-uitslag/%s/'            # wedstrijd_pk
 
         self.e2e_login_and_pass_otp(self.account_rcl101_18)
         self.e2e_wissel_naar_functie(self.functie_rcl101_18)
@@ -233,19 +233,19 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
 
         resp = self.client.get(self.url_uitslag_invoeren % self.wedstrijd18_pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('competitie/uitslag-invoeren-wedstrijd.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/scores-invoeren.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         # andere tak: max_score/afstand
         # resp = self.client.get(self.url_uitslag_invoeren % self.wedstrijd25_pk)
         # self.assertEqual(resp.status_code, 200)     # 200 = OK
         # self.assert_html_ok(resp)
-        # self.assert_template_used(resp, ('competitie/uitslag-invoeren-wedstrijd.dtl', 'plein/site_layout.dtl'))
+        # self.assert_template_used(resp, ('competitie/scores-invoeren.dtl', 'plein/site_layout.dtl'))
 
         # nog een keer, dan bestaat de WedstrijdUitslag al
         resp = self.client.get(self.url_uitslag_invoeren % self.wedstrijd18_pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('competitie/uitslag-invoeren-wedstrijd.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/scores-invoeren.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         # niet bestaande wedstrijd
@@ -655,7 +655,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         url = self.url_bekijk_uitslag % self.wedstrijd18_pk
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)       # 200 = OK
-        self.assert_template_used(resp, ('competitie/bekijk-wedstrijd-uitslag.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/scores-bekijken.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
 
 # end of file

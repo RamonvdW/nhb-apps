@@ -15,7 +15,7 @@
         {
             const locaties = {{ locaties|safe }};   // nhb_ver.nhb_nr --> adres
             const el_sel = document.getElementById('id_ver_sel')
-            let adres = locaties[el_sel.value];        // gekozen vereniging
+            let adres = locaties[el_sel.value];     // gekozen vereniging
             if (adres === undefined)
                 adres = '<i class="red-text">Niet beschikbaar!</i>';
             adres = adres.replace(/\n/g, '<br>')    // vervang newlines door breaks

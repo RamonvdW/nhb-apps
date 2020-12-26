@@ -176,12 +176,12 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         # secretaris kan nog niet ingevuld worden
         ver.save()
 
-        self.url_planning_rayon = '/competitie/planning/rayoncompetitie/%s/'               # deelcomp_pk
-        self.url_wijzig_rk_wedstrijd = '/competitie/planning/wedstrijd-rayon/wijzig/%s/'   # wedstrijd_pk
+        self.url_planning_rayon = '/competitie/planning/rk/%s/'                            # deelcomp_pk
+        self.url_wijzig_rk_wedstrijd = '/competitie/planning/rk/wedstrijd/wijzig/%s/'      # wedstrijd_pk
         self.url_doorzetten_rk = '/competitie/planning/doorzetten/%s/rk/'                  # comp_pk
         self.url_lijst_rk = '/competitie/lijst-rayonkampioenschappen/%s/'                  # deelcomp_pk
         self.url_wijzig_status = '/competitie/lijst-rayonkampioenschappen/wijzig-status-rk-deelnemer/%s/'  # deelnemer_pk
-        self.url_wijzig_limiet = '/competitie/planning/rayoncompetitie/%s/limieten/'       # deelcomp_pk
+        self.url_wijzig_limiet = '/competitie/planning/rk/%s/limieten/'                    # deelcomp_pk
 
     def competitie_sluit_alle_regiocompetities(self, comp):
         # deze functie sluit alle regiocompetities af zodat de competitie in fase G komt

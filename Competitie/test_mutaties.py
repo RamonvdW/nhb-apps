@@ -51,9 +51,9 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         # zet de competitie in fase F
         zet_competitie_fase(self.comp, 'F')
 
-        self.url_lijst_rk = '/competitie/lijst-rayonkampioenschappen/%s/'              # deelcomp_rk.pk
+        self.url_lijst_rk = '/competitie/lijst-rayonkampioenschappen/%s/'    # deelcomp_rk.pk
         self.url_wijzig_status = '/competitie/lijst-rayonkampioenschappen/wijzig-status-rk-deelnemer/%s/'  # deelnemer_pk
-        self.url_wijzig_cut_rk = '/competitie/planning/rayoncompetitie/%s/limieten/'   # deelcomp_rk.pk
+        self.url_wijzig_cut_rk = '/competitie/planning/rk/%s/limieten/'      # deelcomp_rk.pk
 
         self.url_lijst = self.url_lijst_rk % self.deelcomp_rk.pk
 

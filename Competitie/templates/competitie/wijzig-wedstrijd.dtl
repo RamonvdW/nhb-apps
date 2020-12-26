@@ -121,6 +121,38 @@
                 <td>Accommodatie:</td>
                 <td id="id_loc"></td>
             </tr>
+
+            {% if heeft_wkl %}
+                <tr>
+                    <!-- inline-block gives vertical align top -->
+                    <td style="display: inline-block">Wedstrijdklassen individueel:</td>
+
+                    <td>
+                        <table class="striped">
+                            <thead>
+                                <tr>
+                                    <th><!-- checkbox column --></th>
+                                    <th>Klasse</th>
+                                    <th>Aantal sporters</th>
+                                </tr>
+                            </thead>
+                            {% for obj in wkl_indiv %}
+                                <tr>
+                                    <!-- {% if obj.break_before %}<br>{% endif %} -->
+                                    <td><label>
+                                        <input type="checkbox" class="filled-in" name="{{ obj.sel_str }}"{% if obj.geselecteerd %} checked{% endif %}>
+                                        <span>&nbsp;</span>
+                                        </label>
+                                    </td>
+                                    <td>{{ obj.short_str }}</td>
+                                    <td>{{ obj.schutters }}</td>
+                                </tr>
+                            {% endfor %}
+                        </table>
+                    </td>
+                </tr>
+            {% endif %}
+
         </table>
 
         <p>

@@ -7,9 +7,9 @@
 from django.http import HttpResponseRedirect
 from django.urls import Resolver404, reverse
 from django.utils import timezone
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Functie.rol import Rollen, rol_get_huidige
+from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
 from Logboek.models import schrijf_in_logboek
 from Plein.menu import menu_dynamics
 from Taken.taken import maak_taak
@@ -17,11 +17,57 @@ from .models import (Competitie,
                      LAAG_REGIO, LAAG_RK, LAAG_BK, DeelCompetitie, DeelcompetitieKlasseLimiet,
                      RegioCompetitieSchutterBoog, KampioenschapSchutterBoog,
                      KampioenschapMutatie, MUTATIE_INITIEEL, DEELNAME_ONBEKEND)
+from Wedstrijden.models import Wedstrijd
 
 
+TEMPLATE_COMPETITIE_PLANNING_BOND = 'competitie/planning-landelijk.dtl'
 TEMPLATE_COMPETITIE_DOORZETTEN_NAAR_RK = 'competitie/bko-doorzetten-naar-rk.dtl'
 TEMPLATE_COMPETITIE_DOORZETTEN_NAAR_BK = 'competitie/bko-doorzetten-naar-bk.dtl'
 TEMPLATE_COMPETITIE_AFSLUITEN = 'competitie/bko-afsluiten-competitie.dtl'
+
+
+class BondPlanningView(UserPassesTestMixin, TemplateView):
+
+    """ Deze view geeft de planning voor een competitie op het landelijke niveau """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_COMPETITIE_PLANNING_BOND
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        rol_nu = rol_get_huidige(self.request)
+        return rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO)
+
+    def handle_no_permission(self):
+        """ gebruiker heeft geen toegang --> redirect naar het plein """
+        return HttpResponseRedirect(reverse('Plein:plein'))
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        try:
+            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen geeft beveiliging
+            deelcomp_bk = (DeelCompetitie
+                           .objects
+                           .select_related('competitie')
+                           .get(pk=deelcomp_pk))
+        except (KeyError, DeelCompetitie.DoesNotExist):
+            raise Resolver404()
+
+        if deelcomp_bk.laag != LAAG_BK:
+            raise Resolver404()
+
+        context['deelcomp_bk'] = deelcomp_bk
+
+        context['rayon_deelcomps'] = (DeelCompetitie
+                                      .objects
+                                      .filter(laag=LAAG_RK,
+                                              competitie=deelcomp_bk.competitie)
+                                      .order_by('nhb_rayon__rayon_nr'))
+
+        menu_dynamics(self.request, context, actief='competitie')
+        return context
 
 
 class DoorzettenNaarRKView(UserPassesTestMixin, TemplateView):
@@ -338,6 +384,55 @@ class DoorzettenNaarBKView(UserPassesTestMixin, TemplateView):
         # FUTURE: implementeer doorzetten
 
         return HttpResponseRedirect(reverse('Competitie:overzicht'))
+
+
+class VerwijderWedstrijdView(UserPassesTestMixin, View):
+
+    """ Deze view laat een BK wedstrijd verwijderen """
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        rol_nu = rol_get_huidige(self.request)
+        return rol_nu == Rollen.ROL_BKO
+
+    def handle_no_permission(self):
+        """ gebruiker heeft geen toegang --> redirect naar het plein """
+        return HttpResponseRedirect(reverse('Plein:plein'))
+
+    def post(self, request, *args, **kwargs):
+        """ Deze functie wordt aangeroepen als de knop 'Verwijder' gebruikt wordt
+        """
+        try:
+            wedstrijd_pk = int(kwargs['wedstrijd_pk'][:6])  # afkappen geeft beveiliging
+            wedstrijd = (Wedstrijd
+                         .objects
+                         .select_related('uitslag')
+                         .prefetch_related('uitslag__scores')
+                         .get(pk=wedstrijd_pk))
+        except (ValueError, Wedstrijd.DoesNotExist):
+            raise Resolver404()
+
+        plan = wedstrijd.wedstrijdenplan_set.all()[0]
+        try:
+            deelcomp = DeelCompetitie.objects.get(plan=plan, laag=LAAG_BK)
+        except DeelCompetitie.DoesNotExist:
+            raise Resolver404()
+
+        # correcte beheerder?
+        _, functie_nu = rol_get_huidige_functie(self.request)
+        if deelcomp.functie != functie_nu:
+            raise Resolver404()
+
+        # voorkom verwijderen van wedstrijden waar een uitslag aan hangt
+        if wedstrijd.uitslag:
+            uitslag = wedstrijd.uitslag
+            if uitslag and (uitslag.is_bevroren or uitslag.scores.count() > 0):
+                raise Resolver404()
+
+        wedstrijd.delete()
+
+        url = reverse('Competitie:bond-planning', kwargs={'deelcomp_pk': deelcomp.pk})
+        return HttpResponseRedirect(url)
 
 
 # class CompetitieAfsluitenView(UserPassesTestMixin, TemplateView):
