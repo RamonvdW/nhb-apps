@@ -9,6 +9,7 @@ from BasisTypen.models import BoogType
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging, NhbLid
 from Schutter.models import SchutterBoog
+from Score.models import Score
 from Wedstrijden.models import Wedstrijd, WedstrijdUitslag
 from .models import (Competitie, DeelCompetitie, CompetitieKlasse,
                      DeelcompetitieRonde, competitie_aanmaken,
@@ -172,6 +173,7 @@ class TestCompetitieScores(E2EHelpers, TestCase):
         self.url_uitslag_controleren = '/competitie/scores/uitslag-controleren/%s/'  # wedstrijd_pk
         self.url_uitslag_accorderen = '/competitie/scores/uitslag-accorderen/%s/'    # wedstrijd_pk
 
+        self.url_scores_regio = '/competitie/scores/regio/%s/'                       # deelcomp_pk
         self.url_bekijk_uitslag = '/competitie/scores/bekijk-uitslag/%s/'            # wedstrijd_pk
 
         self.e2e_login_and_pass_otp(self.account_rcl101_18)
@@ -215,6 +217,11 @@ class TestCompetitieScores(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_uitslag_invoeren % self.wedstrijd18_pk)
         self.assert_is_redirect(resp, '/plein/')      # not allowed
+
+        # scores
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_scores_regio % self.deelcomp_regio101_18.pk)
+        self.assert_is_redirect(resp, '/plein/')
 
         # deelnemers
         with self.assert_max_queries(20):
@@ -708,6 +715,65 @@ class TestCompetitieScores(E2EHelpers, TestCase):
         self.assertEqual(json_data['done'], 1)
 
         self.client.logout()
+
+    def test_scores_regio(self):
+        # RCL kan scores invoeren / inzien / accorderen voor zijn regio
+        self.e2e_login_and_pass_otp(self.account_rcl101_18)
+        self.e2e_wissel_naar_functie(self.functie_rcl101_18)
+
+        url = self.url_scores_regio % self.deelcomp_regio101_18.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+
+        # zet de ronde uitslag
+        score = Score(schutterboog=self._schuttersboog[0],
+                      afstand_meter=18,
+                      waarde=123)
+        score.save()
+
+        uitslag = WedstrijdUitslag(max_score=300,
+                                   afstand_meter=18)
+        uitslag.save()
+        uitslag.scores.add(score)
+
+        ronde = DeelcompetitieRonde.objects.filter(deelcompetitie=self.deelcomp_regio101_18)[0]
+        wedstrijd = ronde.plan.wedstrijden.all()[0]
+        wedstrijd.uitslag = uitslag
+        wedstrijd.save()
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+
+        # zet 1 ronde om voor het oude programma
+        ronde.beschrijving = 'Ronde 99 oude programma'
+        ronde.save()
+        self.assertTrue(ronde.is_voor_import_oude_programma())
+
+        url = self.url_scores_regio % self.deelcomp_regio101_18.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+
+    def test_scores_regio_bad(self):
+        self.e2e_login_and_pass_otp(self.account_rcl101_18)
+        self.e2e_wissel_naar_functie(self.functie_rcl101_18)
+
+        # bad deelcomp_pk
+        url = self.url_scores_regio % 999999
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+
+        # verkeerde regio
+        url = self.url_scores_regio % self.deelcomp_regio101_25.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 404)     # 404 = Not found
 
     def test_bekijk_uitslag(self):
         self._maak_uitslag(self.wedstrijd18_pk)
