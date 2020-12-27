@@ -232,7 +232,8 @@ class TestCompetitieCliOudeSiteOvernemen(E2EHelpers, TestCase):
         # eerst aanmaken, dan verwijderen
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('oude_site_overnemen', self.dir_testfiles1, '100', stderr=f1, stdout=f2)
+        with self.assert_max_queries(1845):     # TODO: probeer te verlagen
+            management.call_command('oude_site_overnemen', self.dir_testfiles1, '100', stderr=f1, stdout=f2)
 
         # verwijder de uitslag van een wedstrijd
         ronde = DeelcompetitieRonde.objects.all()[3]
@@ -270,12 +271,14 @@ class TestCompetitieCliOudeSiteOvernemen(E2EHelpers, TestCase):
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('verwijder_data_oude_site', stderr=f1, stdout=f2)
+        with self.assert_max_queries(4046):     # TODO: verlagen!
+            management.call_command('verwijder_data_oude_site', stderr=f1, stdout=f2)
         self.assertTrue("AG's opgeruimd: 1" in f2.getvalue())
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('verwijder_data_oude_site', stderr=f1, stdout=f2)
+        with self.assert_max_queries(20):
+            management.call_command('verwijder_data_oude_site', stderr=f1, stdout=f2)
         self.assertTrue("AG's opgeruimd" not in f2.getvalue())
 
     def test_bepaal_1(self):
@@ -284,7 +287,8 @@ class TestCompetitieCliOudeSiteOvernemen(E2EHelpers, TestCase):
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('oude_site_overnemen', self.dir_testfiles1, '100', stderr=f1, stdout=f2)
+        with self.assert_max_queries(1850):     # TODO: probeer te verlagen
+            management.call_command('oude_site_overnemen', self.dir_testfiles1, '100', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
         self.assertTrue("[WARNING] Schutter 100001 heeft te laag AG (9.022) voor klasse Recurve klasse 2 (9.500)" in f2.getvalue())
@@ -304,7 +308,8 @@ class TestCompetitieCliOudeSiteOvernemen(E2EHelpers, TestCase):
         # nog een keer, want dan zijn de uitslagen er al (extra coverage)
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('oude_site_overnemen', self.dir_testfiles1, '1', stderr=f1, stdout=f2)
+        with self.assert_max_queries(915):      # TODO: probeer te verlagen
+            management.call_command('oude_site_overnemen', self.dir_testfiles1, '1', stderr=f1, stdout=f2)
 
         self.assertEqual(ScoreHist.objects.count(), 4)
 
@@ -319,7 +324,8 @@ class TestCompetitieCliOudeSiteOvernemen(E2EHelpers, TestCase):
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('oude_site_overnemen', self.dir_testfiles2, '100', stderr=f1, stdout=f2)
+        with self.assert_max_queries(1875):     # TODO: probeer te verlagen
+            management.call_command('oude_site_overnemen', self.dir_testfiles2, '100', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
         self.assertTrue("[ERROR] Kan wedstrijdklasse 'Barebow Cadetten klasse 1' niet vinden (competitie Indoor" in f1.getvalue())
         self.assertTrue("[ERROR] Vereniging 1099 is niet bekend; kan lid 100004 niet inschrijven" in f1.getvalue())
@@ -330,7 +336,8 @@ class TestCompetitieCliOudeSiteOvernemen(E2EHelpers, TestCase):
     def test_dryrun(self):
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('oude_site_overnemen', '--dryrun', self.dir_testfiles1, '100', stderr=f1, stdout=f2)
+        with self.assert_max_queries(1825):     # TODO: probeer te verlagen
+            management.call_command('oude_site_overnemen', '--dryrun', self.dir_testfiles1, '100', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
         self.assertTrue("(DRY RUN)" in f2.getvalue())
@@ -338,7 +345,8 @@ class TestCompetitieCliOudeSiteOvernemen(E2EHelpers, TestCase):
     def test_all(self):
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('oude_site_overnemen', '--all', self.dir_top, '100', stderr=f1, stdout=f2)
+        with self.assert_max_queries(2800):     # TODO: probeer te verlagen
+            management.call_command('oude_site_overnemen', '--all', self.dir_top, '100', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
         # de 3 directories bevatten maar 2 oude_site.json

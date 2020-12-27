@@ -320,7 +320,8 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
+        with self.assert_max_queries(100):
+            management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
         self.assertTrue(f1.getvalue() == '')
         self.assertTrue('Klaar' in f2.getvalue())
 
@@ -330,7 +331,8 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
         self._score_opslaan(self.uitslagen[2], self.schutterboog_100001, 124)
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
+        with self.assert_max_queries(160):
+            management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
         self.assertTrue('Scores voor 1 schuttersboog bijgewerkt' in f2.getvalue())
 
         deelnemer = RegioCompetitieSchutterBoog.objects.get(schutterboog=self.schutterboog_100001)
@@ -353,13 +355,15 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
         # nog een keer - nu wordt er niets bijgewerkt omdat er geen nieuwe scores zijn
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
+        with self.assert_max_queries(156):
+            management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
         self.assertTrue('Scores voor 0 schuttersboog bijgewerkt' in f2.getvalue())
 
         # nog een keer met 'all'
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('regiocomp_upd_tussenstand', '2', '--quick', '--all', stderr=f1, stdout=f2)
+        with self.assert_max_queries(157):
+            management.call_command('regiocomp_upd_tussenstand', '2', '--quick', '--all', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
         self.assertTrue('Scores voor 1 schuttersboog bijgewerkt' in f2.getvalue())
@@ -375,7 +379,8 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
         self._score_opslaan(self.uitslagen[6], self.schutterboog_100001, 129)
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
+        with self.assert_max_queries(165):
+            management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
         self.assertTrue('Scores voor 1 schuttersboog bijgewerkt' in f2.getvalue())
@@ -409,7 +414,8 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
+        with self.assert_max_queries(160):
+            management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
         self.assertTrue('Scores voor 1 schuttersboog bijgewerkt' in f2.getvalue())
@@ -444,7 +450,8 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
         self._score_opslaan(self.uitslagen[6], self.schutterboog_100001, 129)
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
+        with self.assert_max_queries(175):
+            management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
         self.assertTrue('Scores voor 1 schuttersboog bijgewerkt' in f2.getvalue())
@@ -480,7 +487,8 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
         self._score_opslaan(self.uitslagen[2], self.schutterboog_100001, 137)       # import
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
+        with self.assert_max_queries(165):
+            management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
         self.assertTrue('Scores voor 1 schuttersboog bijgewerkt' in f2.getvalue())
@@ -558,7 +566,8 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
+        with self.assert_max_queries(185):
+            management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
         self.assertTrue('[INFO] Verplaats 100001 (18m) met nieuw AG 4.167 naar klasse Recurve klasse' in f2.getvalue())
 
     def test_verplaats_zeven(self):
@@ -581,7 +590,8 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
+        with self.assert_max_queries(180):
+            management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
         # print("f2: %s" % f2.getvalue())
         self.assertTrue('[INFO] Verplaats 100001 (18m) met nieuw AG 4.100 naar klasse Recurve klasse' in f2.getvalue())
 
@@ -593,7 +603,8 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
         self._score_opslaan(self.uitslagen[2], self.schutterboog_100001, 124)
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
+        with self.assert_max_queries(160):
+            management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
         self.assertTrue('Scores voor 1 schuttersboog bijgewerkt' in f2.getvalue())
 
         deelnemer = RegioCompetitieSchutterBoog.objects.get(schutterboog=self.schutterboog_100001)
@@ -615,7 +626,8 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
+        with self.assert_max_queries(161):
+            management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
         self.assertTrue("[INFO] Verwerk overstap 100001: [101] [1000] Grote Club --> [116] [1100] Zuidelijke Club" in f2.getvalue())
 
         # overstap naar vereniging in zelfde regio
@@ -626,7 +638,8 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
+        with self.assert_max_queries(160):
+            management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
         self.assertTrue("[INFO] Verwerk overstap 100001: [116] [1100] Zuidelijke Club --> [116] [1000] Grote Club" in f2.getvalue())
 
         # zet the competitie in een later fase zodat overschrijvingen niet meer gedaan worden
@@ -639,7 +652,8 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
         lid.save()
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
+        with self.assert_max_queries(153):
+            management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
         self.assertFalse('Verwerk overstap' in f2.getvalue())
@@ -652,7 +666,8 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
         self._score_opslaan(self.uitslagen[2], self.schutterboog_100001, 124)
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
+        with self.assert_max_queries(160):
+            management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
         self.assertTrue('Scores voor 1 schuttersboog bijgewerkt' in f2.getvalue())
 
         # schrijf een schutter uit
@@ -661,7 +676,8 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
         lid.save()
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('regiocomp_upd_tussenstand', '7', '--quick', stderr=f1, stdout=f2)
+        with self.assert_max_queries(157):
+            management.call_command('regiocomp_upd_tussenstand', '7', '--quick', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
         self.assertTrue("[WARNING] Uitstapper: 100001 [101] [1000] Grote Club (actief=True)" in f2.getvalue())
@@ -674,7 +690,8 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
         self._score_opslaan(self.uitslagen[2], self.schutterboog_100002, 124)
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
+        with self.assert_max_queries(160):
+            management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
         self.assertTrue('Scores voor 1 schuttersboog bijgewerkt' in f2.getvalue())
 
         deelnemer = RegioCompetitieSchutterBoog.objects.get(schutterboog=self.schutterboog_100002)
@@ -712,7 +729,8 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
+        with self.assert_max_queries(133):
+            management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
         self.assertTrue("[INFO] Verwerk overstap 100002: GEEN VERENIGING --> [102] [1100] Polderclub" in f2.getvalue())
 
         # overstap naar vereniging in buiten het rayon
@@ -727,7 +745,8 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
+        with self.assert_max_queries(132):
+            management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
         self.assertTrue("[WARNING] Verwerk overstap naar ander rayon niet mogelijk voor 100002 in RK voor rayon 1: GEEN VERENIGING --> [105] [1000] Grote Club" in f2.getvalue())
@@ -742,12 +761,14 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
+        with self.assert_max_queries(128):
+            management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
 
         # corner case
         zet_competitie_fase(self.comp, 'L')
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('regiocomp_upd_tussenstand', '1', '--quick', stderr=f1, stdout=f2)
+        with self.assert_max_queries(128):
+            management.call_command('regiocomp_upd_tussenstand', '1', '--quick', stderr=f1, stdout=f2)
 
 # end of file

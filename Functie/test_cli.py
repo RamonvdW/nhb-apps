@@ -38,14 +38,16 @@ class TestAccountCLI(E2EHelpers, TestCase):
         self.assertFalse(self.account_normaal.is_staff)
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('maak_hwl', 'normaal', '1001', stderr=f1, stdout=f2)
+        with self.assert_max_queries(20):
+            management.call_command('maak_hwl', 'normaal', '1001', stderr=f1, stdout=f2)
         self.assertTrue(f1.getvalue() == '')
         self.assertTrue("Account 'normaal' is HWL gemaakt van vereniging [1001] Grote Club" in f2.getvalue())
 
         # probeer nog een keer HWL te maken
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('maak_hwl', 'normaal', '1001', stderr=f1, stdout=f2)
+        with self.assert_max_queries(20):
+            management.call_command('maak_hwl', 'normaal', '1001', stderr=f1, stdout=f2)
         # print('f1:', f1.getvalue())
         # print('f2:', f2.getvalue())
         self.assertTrue("[WARNING] Account 'normaal' is al HWL van vereniging [1001] Grote Club" in f1.getvalue())
@@ -55,7 +57,8 @@ class TestAccountCLI(E2EHelpers, TestCase):
         # niet bestaand account
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('maak_hwl', 'abnormaal', '1001', stderr=f1, stdout=f2)
+        with self.assert_max_queries(20):
+            management.call_command('maak_hwl', 'abnormaal', '1001', stderr=f1, stdout=f2)
         self.assertTrue("Account matching query does not exist" in f1.getvalue())
         self.assertTrue(f2.getvalue() == '')
 
@@ -63,7 +66,8 @@ class TestAccountCLI(E2EHelpers, TestCase):
         # niet bestaande vereniging
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('maak_hwl', 'normaal', '9999', stderr=f1, stdout=f2)
+        with self.assert_max_queries(20):
+            management.call_command('maak_hwl', 'normaal', '9999', stderr=f1, stdout=f2)
         self.assertTrue("NhbVereniging matching query does not exist" in f1.getvalue())
         self.assertTrue(f2.getvalue() == '')
 
@@ -72,21 +76,24 @@ class TestAccountCLI(E2EHelpers, TestCase):
         self.functie_hwl.delete()
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('maak_hwl', 'normaal', '1001', stderr=f1, stdout=f2)
+        with self.assert_max_queries(20):
+            management.call_command('maak_hwl', 'normaal', '1001', stderr=f1, stdout=f2)
         self.assertTrue("Functie matching query does not exist" in f1.getvalue())
         self.assertTrue(f2.getvalue() == '')
 
     def test_maak_rcl(self):
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('maak_rcl', 'normaal', '18', '101', stderr=f1, stdout=f2)
+        with self.assert_max_queries(20):
+            management.call_command('maak_rcl', 'normaal', '18', '101', stderr=f1, stdout=f2)
         self.assertTrue(f1.getvalue() == '')
         self.assertTrue("Account 'normaal' is nu RCL Regio 101 Indoor" in f2.getvalue())
 
         # probeer nog een keer RCL te maken
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('maak_rcl', 'normaal', '18', '101', stderr=f1, stdout=f2)
+        with self.assert_max_queries(20):
+            management.call_command('maak_rcl', 'normaal', '18', '101', stderr=f1, stdout=f2)
         # print('f1:', f1.getvalue())
         # print('f2:', f2.getvalue())
         self.assertTrue("[WARNING] Account 'normaal' is al RCL Regio 101 Indoor" in f1.getvalue())
@@ -95,7 +102,8 @@ class TestAccountCLI(E2EHelpers, TestCase):
     def test_maak_rcl_bad(self):
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('maak_rcl', 'bestaatniet', '18', '000', stderr=f1, stdout=f2)
+        with self.assert_max_queries(20):
+            management.call_command('maak_rcl', 'bestaatniet', '18', '000', stderr=f1, stdout=f2)
         # print('f1:', f1.getvalue())
         # print('f2:', f2.getvalue())
         self.assertTrue("Account matching query does not exist" in f1.getvalue())

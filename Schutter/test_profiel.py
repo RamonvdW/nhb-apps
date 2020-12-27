@@ -155,7 +155,7 @@ class TestSchutterProfiel(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, url_overzicht)
 
         # aanvangsgemiddelden vaststellen
-        with self.assert_max_queries(600):      # TODO: optimize
+        with self.assert_max_queries(20):
             resp = self.client.post(url_ag_vaststellen)
 
         # klassegrenzen vaststellen
@@ -193,7 +193,7 @@ class TestSchutterProfiel(E2EHelpers, TestCase):
         res = aanvangsgemiddelde_opslaan(schutterboog, 18, 8.18, None, 'Test')
         self.assertTrue(res)
         url = self.url_aanmelden % (deelcomp.pk, schutterboog.pk)
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(21):
             resp = self.client.post(url, {'opmerking': 'test van de 18m'})
         self.assert_is_redirect(resp, self.url_profiel)
 
@@ -235,7 +235,7 @@ class TestSchutterProfiel(E2EHelpers, TestCase):
         aanvangsgemiddelde_opslaan(obj, 18, 9.018, None, 'Test opmerking A')
         aanvangsgemiddelde_opslaan(obj, 25, 2.5, None, 'Test opmerking B')
 
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(21):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -246,7 +246,7 @@ class TestSchutterProfiel(E2EHelpers, TestCase):
 
         # variant met Score zonder ScoreHist
         ScoreHist.objects.all().delete()
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(21):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -342,7 +342,7 @@ class TestSchutterProfiel(E2EHelpers, TestCase):
         res = aanvangsgemiddelde_opslaan(schutterboog, 18, 8.18, None, 'Test')
         self.assertTrue(res)
         url = self.url_aanmelden % (deelcomp.pk, schutterboog.pk)
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(21):
             resp = self.client.post(url, {'opmerking': 'test van de 18m'})
         self.assert_is_redirect(resp, self.url_profiel)
 

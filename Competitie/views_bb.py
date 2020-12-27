@@ -23,8 +23,7 @@ from NhbStructuur.models import NhbLid
 from Schutter.models import SchutterBoog
 from Score.models import Score, ScoreHist
 from .models import (AG_NUL, AG_LAAGSTE_NIET_NUL,
-                     Competitie, competitie_aanmaken,
-                     maak_competitieklasse_indiv)
+                     Competitie, competitie_aanmaken, CompetitieKlasse)
 import datetime
 
 
@@ -64,13 +63,14 @@ class InstellingenVolgendeCompetitieView(UserPassesTestMixin, TemplateView):
         objs = (IndivWedstrijdklasse
                 .objects
                 .filter(buiten_gebruik=False)
-                .order_by('volgorde')
-                .select_related('boogtype'))
+                .select_related('boogtype')
+                .prefetch_related('leeftijdsklassen')
+                .order_by('volgorde'))
         prev = 0
         for klasse in objs:
             groep = klasse.volgorde // 10
             klasse.separate_before = groep != prev
-            klasse.lkl_list = [lkl.beschrijving for lkl in klasse.leeftijdsklassen.only('beschrijving').all()]
+            klasse.lkl_list = [lkl.beschrijving for lkl in klasse.leeftijdsklassen.all()]
             prev = groep
         # for
         return objs
@@ -80,12 +80,13 @@ class InstellingenVolgendeCompetitieView(UserPassesTestMixin, TemplateView):
         objs = (TeamWedstrijdklasse
                 .objects
                 .filter(buiten_gebruik=False)
+                .prefetch_related('boogtypen')
                 .order_by('volgorde'))
         prev = 0
         for klasse in objs:
             groep = klasse.volgorde // 10
             klasse.separate_before = groep != prev
-            klasse.boogtypen_list = [boogtype.beschrijving for boogtype in klasse.boogtypen.only('beschrijving', 'volgorde').order_by('volgorde')]
+            klasse.boogtypen_list = [boogtype.beschrijving for boogtype in klasse.boogtypen.order_by('volgorde')]
             prev = groep
         # for
         return objs
@@ -355,6 +356,7 @@ class KlassegrenzenVaststellenView(UserPassesTestMixin, TemplateView):
         for wedstrklasse in (IndivWedstrijdklasse
                              .objects
                              .select_related('boogtype')
+                             .prefetch_related('leeftijdsklassen')
                              .filter(buiten_gebruik=False)
                              .order_by('volgorde')):
             # zoek de minimale en maximaal toegestane leeftijden voor deze wedstrijdklasse
@@ -391,6 +393,19 @@ class KlassegrenzenVaststellenView(UserPassesTestMixin, TemplateView):
             schutternr2age[lid.nhb_nr] = lid.bereken_wedstrijdleeftijd(jaar)
         # for
 
+        # haal de scores 1x op per boogtype
+        boogtype2ags = dict()        # [boogtype.afkorting] = scores
+        for boogtype in BoogType.objects.all():
+            boogtype2ags[boogtype.afkorting] = (Score
+                                                .objects
+                                                .select_related('schutterboog',
+                                                                'schutterboog__boogtype',
+                                                                'schutterboog__nhblid')
+                                                .filter(is_ag=True,
+                                                        afstand_meter=afstand,
+                                                        schutterboog__boogtype=boogtype))
+        # for
+
         # wedstrijdklassen vs leeftijd + bogen
         targets = self._get_targets()
 
@@ -401,10 +416,7 @@ class KlassegrenzenVaststellenView(UserPassesTestMixin, TemplateView):
 
             # zoek alle schutters-boog die hier in passen (boog, leeftijd)
             gemiddelden = list()
-            for score in (Score
-                          .objects
-                          .select_related('schutterboog', 'schutterboog__boogtype', 'schutterboog__nhblid')
-                          .filter(is_ag=True, afstand_meter=afstand, schutterboog__boogtype=boogtype)):
+            for score in boogtype2ags[boogtype.afkorting]:
                 age = schutternr2age[score.schutterboog.nhblid.nhb_nr]
                 if min_age <= age <= max_age:
                     gemiddelden.append(score.waarde)        # is AG*1000
@@ -518,9 +530,14 @@ class KlassegrenzenVaststellenView(UserPassesTestMixin, TemplateView):
                 raise Resolver404()
 
             # haal dezelfde data op als voor de GET request
+            bulk = list()
             for obj in self._get_queryset(afstand):
-                maak_competitieklasse_indiv(comp, obj['wedstrkl_obj'], obj['ag'])
+                compkl = CompetitieKlasse(competitie=comp,
+                                          indiv=obj['wedstrkl_obj'],
+                                          min_ag=obj['ag'])
+                bulk.append(compkl)
             # for
+            CompetitieKlasse.objects.bulk_create(bulk)
 
             schrijf_in_logboek(request.user, 'Competitie', 'Klassegrenzen bevestigd voor %s' % comp.beschrijving)
 

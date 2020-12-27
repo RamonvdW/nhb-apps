@@ -157,7 +157,8 @@ class TestAccountCLI(E2EHelpers, TestCase):
         self.assertNotEqual(self.account_normaal.otp_code, "1234")
 
         # exception case
-        management.call_command('deblok_account', 'nietbestaand', stderr=f1, stdout=f2)
+        with self.assert_max_queries(20):
+            management.call_command('deblok_account', 'nietbestaand', stderr=f1, stdout=f2)
         self.assertEqual(f1.getvalue(), 'Account matching query does not exist.\n')
 
     def test_zet_geheim(self):

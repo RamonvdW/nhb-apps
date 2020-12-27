@@ -295,7 +295,8 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                 try:
                     schutterboog = (SchutterBoog
                                     .objects
-                                    .select_related('nhblid')
+                                    .select_related('nhblid',
+                                                    'boogtype')
                                     .get(nhblid=nhblid_pk,
                                          boogtype=boogtype_pk))
                 except SchutterBoog.DoesNotExist:
@@ -343,6 +344,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                         .objects
                         .filter(competitie=deelcomp.competitie,
                                 indiv__boogtype=schutterboog.boogtype)
+                        .prefetch_related('indiv__leeftijdsklassen')
                         .order_by('indiv__volgorde'))
 
                 # zoek een toepasselijke klasse aan de hand van de leeftijd

@@ -713,12 +713,12 @@ class OverzichtView(UserPassesTestMixin, ListView):
                     .filter(Q(rol='RCL', nhb_regio=functie_hwl.nhb_ver.regio) |
                             Q(rol='RKO', nhb_rayon=functie_hwl.nhb_ver.regio.rayon) |
                             Q(rol='BKO'))
-                    .select_related('nhb_rayon', 'nhb_regio')
+                    .select_related('nhb_rayon', 'nhb_regio', 'nhb_regio__rayon')
                     .prefetch_related('accounts'))
         else:
             objs = (Functie.objects
                     .filter(Q(rol='BKO') | Q(rol='RKO') | Q(rol='RCL'))
-                    .select_related('nhb_rayon', 'nhb_regio')
+                    .select_related('nhb_rayon', 'nhb_regio', 'nhb_regio__rayon')
                     .prefetch_related('accounts'))
 
         objs = self._sorteer_functies(objs)

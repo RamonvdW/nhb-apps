@@ -43,7 +43,8 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         # afhandelen niet bestaand bestand
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/notexisting.json', stderr=f1, stdout=f2)
+        with self.assert_max_queries(20):
+            management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/notexisting.json', stderr=f1, stdout=f2)
         self.assertTrue(f1.getvalue().startswith('[ERROR] Bestand kan niet gelezen worden'))
         self.assertEqual(f2.getvalue(), '')
 
@@ -51,7 +52,8 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         # afhandelen slechte/lege JSON file
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_01.json', stderr=f1, stdout=f2)
+        with self.assert_max_queries(20):
+            management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_01.json', stderr=f1, stdout=f2)
         self.assertTrue(f1.getvalue().startswith('[ERROR] Probleem met het JSON formaat in bestand'))
         self.assertEqual(f2.getvalue(), '')
 
@@ -59,7 +61,8 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         # top-level keys afwezig
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_02.json', stderr=f1, stdout=f2)
+        with self.assert_max_queries(20):
+            management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_02.json', stderr=f1, stdout=f2)
         self.assertTrue("[ERROR] Verplichte sleutel 'rayons' niet aanwezig in de 'top-level' data" in f1.getvalue())
         self.assertTrue("[ERROR] Verplichte sleutel 'regions' niet aanwezig in de 'top-level' data" in f1.getvalue())
         self.assertTrue("[ERROR] Verplichte sleutel 'clubs' niet aanwezig in de 'top-level' data" in f1.getvalue())
@@ -69,7 +72,8 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
     def test_import(self):
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_03.json', stderr=f1, stdout=f2)
+        with self.assert_max_queries(105):
+            management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_03.json', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
         self.assertTrue("[WARNING] Vereniging 1000 (Grote Club) heeft geen secretaris!" in f1.getvalue())
@@ -86,7 +90,8 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         # UnicodeDecodeError
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_04.json', stderr=f1, stdout=f2)
+        with self.assert_max_queries(20):
+            management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_04.json', stderr=f1, stdout=f2)
         self.assertTrue("[ERROR] Bestand heeft unicode problemen ('rawunicodeescape' codec can't decode bytes in position 180-181: truncated" in f1.getvalue())
         self.assertEqual(f2.getvalue(), '')
 
@@ -94,7 +99,8 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         # missing/extra keys
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_05.json', stderr=f1, stdout=f2)
+        with self.assert_max_queries(20):
+            management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_05.json', stderr=f1, stdout=f2)
         self.assertTrue("[ERROR] Verplichte sleutel 'name' niet aanwezig in de 'rayon' data" in f1.getvalue())
         self.assertTrue("[ERROR] Verplichte sleutel 'name' niet aanwezig in de 'regio' data" in f1.getvalue())
         self.assertTrue("[ERROR] Verplichte sleutel 'name' niet aanwezig in de 'club' data" in f1.getvalue())
@@ -109,7 +115,8 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         # extra rayon/regio
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_06.json', stderr=f1, stdout=f2)
+        with self.assert_max_queries(35):
+            management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_06.json', stderr=f1, stdout=f2)
         self.assertTrue("[ERROR] Onbekend rayon {'rayon_number': 0, 'name': 'Rayon 0'}" in f1.getvalue())
         self.assertTrue("[ERROR] Onbekende regio {'region_number': 0, 'name': 'Regio 0', 'rayon_number': 1}" in f1.getvalue())
         # self.assertEqual(f2.getvalue(), '')
@@ -118,7 +125,8 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         # lege dataset
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_07.json', stderr=f1, stdout=f2)
+        with self.assert_max_queries(20):
+            management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_07.json', stderr=f1, stdout=f2)
         self.assertTrue("[ERROR] Geen data voor top-level sleutel 'clubs'" in f1.getvalue())
         self.assertEqual(f2.getvalue(), '')
 
@@ -126,7 +134,8 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         # vereniging mutaties
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_03.json', stderr=f1, stdout=f2)
+        with self.assert_max_queries(105):
+            management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_03.json', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
         self.assertTrue("[INFO] Nieuwe wedstrijdlocatie voor adres 'Oude pijlweg 1, 1234 AB Doelstad'" in f2.getvalue())
@@ -134,7 +143,8 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_08.json', stderr=f1, stdout=f2)
+        with self.assert_max_queries(76):
+            management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_08.json', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
         self.assertTrue("[INFO] Wijziging van regio voor vereniging 1000: 111 --> 112" in f2.getvalue())
@@ -152,10 +162,12 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         # lid mutaties
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_03.json', stderr=f1, stdout=f2)
+        with self.assert_max_queries(105):
+            management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_03.json', stderr=f1, stdout=f2)
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_09.json', stderr=f1, stdout=f2)
+        with self.assert_max_queries(72):
+            management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_09.json', stderr=f1, stdout=f2)
         self.assertTrue("[ERROR] Lid 100001 heeft geen valide geboortedatum" in f1.getvalue())
         self.assertTrue("[ERROR] Lid 100001 heeft onbekend geslacht: X (moet zijn: M of F)" in f1.getvalue())
         self.assertTrue("[ERROR] Lid 100009 heeft geen voornaam of initials" in f1.getvalue())
@@ -172,7 +184,8 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         # import verwijderd dit
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_10.json', stderr=f1, stdout=f2)
+        with self.assert_max_queries(51):
+            management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_10.json', stderr=f1, stdout=f2)
         # print(f2.getvalue())
         self.assertTrue("[WARNING] Lid 100999: verwijder toevoeging achternaam: 'Dienbaar (Erelid NHB)' --> 'Dienbaar'" in f2.getvalue())
         self.assertTrue("Lid 100998" not in f2.getvalue())
@@ -183,7 +196,8 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         # sommige leden hebben een geboortedatum zonder eeuw
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_11.json', stderr=f1, stdout=f2)
+        with self.assert_max_queries(45):
+            management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_11.json', stderr=f1, stdout=f2)
 
         # print(f1.getvalue(), f2.getvalue())
         self.assertTrue("[WARNING] Lid 100999 geboortedatum gecorrigeerd van 0030-05-05 naar 1930-05-05" in f1.getvalue())
@@ -200,7 +214,8 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         # sommige leden worden niet geïmporteerd
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_12.json', stderr=f1, stdout=f2)
+        with self.assert_max_queries(33):
+            management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_12.json', stderr=f1, stdout=f2)
         with self.assertRaises(NhbLid.DoesNotExist):
             NhbLid.objects.get(nhb_nr=101711)
 
@@ -216,7 +231,8 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_12.json', stderr=f1, stdout=f2)
+        with self.assert_max_queries(42):
+            management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_12.json', stderr=f1, stdout=f2)
         self.assertTrue("[INFO] Vereniging [1999] Wegisweg Club wordt nu verwijderd" in f2.getvalue())
 
     def test_inactief(self):
@@ -236,14 +252,16 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_13.json', stderr=f1, stdout=f2)
+        with self.assert_max_queries(35):
+            management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_13.json', stderr=f1, stdout=f2)
         self.assertTrue("[INFO] Lid 110000: vereniging geen --> 1000 Grote Club" in f2.getvalue())
 
     def test_maak_secretaris(self):
         # een lid secretaris maken
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_14.json', stderr=f1, stdout=f2)
+        with self.assert_max_queries(71):
+            management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_14.json', stderr=f1, stdout=f2)
         self.assertEqual(f1.getvalue(), '')
         self.assertTrue("[INFO] Wijziging van secretaris voor vereniging 1000: geen --> 100001 Ramon de Tester" in f2.getvalue())
         self.assertTrue("[WARNING] Secretaris 100024 van vereniging 2000 heeft nog geen account" in f2.getvalue())
@@ -265,7 +283,8 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_14.json', stderr=f1, stdout=f2)
+        with self.assert_max_queries(50):
+            management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_14.json', stderr=f1, stdout=f2)
         self.assertEqual(f1.getvalue(), '')
         self.assertTrue("[INFO] Secretaris 100024 van vereniging 2000 is gekoppeld aan SEC functie" in f2.getvalue())
 
@@ -278,7 +297,8 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_15.json', stderr=f1, stdout=f2)
+        with self.assert_max_queries(65):
+            management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_15.json', stderr=f1, stdout=f2)
 
         # controleer de geen_wedstrijden vlag voor 1377 en normale clubs
         ver = NhbVereniging.objects.get(nhb_nr=1000)
@@ -301,7 +321,8 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_15.json', stderr=f1, stdout=f2)
+        with self.assert_max_queries(45):
+            management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_15.json', stderr=f1, stdout=f2)
         self.assertTrue("[INFO] Wijziging van 'geen wedstrijden' voor vereniging 1377: False --> True" in f2.getvalue())
         self.assertTrue("[INFO] Wijziging van 'geen wedstrijden' voor vereniging 1000: True --> False" in f2.getvalue())
         # print("f1: %s" % f1.getvalue())
@@ -313,7 +334,8 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         # maak 100024 aan
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_14.json', stderr=f1, stdout=f2)
+        with self.assert_max_queries(71):
+            management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_14.json', stderr=f1, stdout=f2)
 
         # maak het account van 100024 aan, zodat deze secretaris kan worden
         # maak het account van 100024 aan en probeer het nog een keer
@@ -324,14 +346,16 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         # maak 100024 secretaris
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_14.json', stderr=f1, stdout=f2)
+        with self.assert_max_queries(50):
+            management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_14.json', stderr=f1, stdout=f2)
         self.assertEqual(f1.getvalue(), '')
         self.assertTrue("[INFO] Secretaris 100024 van vereniging 2000 is gekoppeld aan SEC functie" in f2.getvalue())
 
         # probeer 100024 te verwijderen
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_16.json', stderr=f1, stdout=f2)
+        with self.assert_max_queries(50):
+            management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_16.json', stderr=f1, stdout=f2)
 
         # verwijderen van leden staat op dit moment uit - zie import commando
         # self.assertTrue("[INFO] Lid 100024 Voornaam van der Achternaam [V, 2000] wordt nu verwijderd" in f2.getvalue())
@@ -342,18 +366,23 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         # dryrun
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_08.json', '--dryrun', stderr=f1, stdout=f2)
+        with self.assert_max_queries(60):
+            management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_08.json', '--dryrun', stderr=f1, stdout=f2)
         self.assertTrue("DRY RUN" in f2.getvalue())
 
-        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_03.json', stderr=f1, stdout=f2)
+        with self.assert_max_queries(105):
+            management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_03.json', stderr=f1, stdout=f2)
 
         ver = NhbVereniging.objects.get(nhb_nr=1000)
         ver.geen_wedstrijden = True
         ver.save()
 
-        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_08.json', '--dryrun', stderr=f1, stdout=f2)
-        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_09.json', '--dryrun', stderr=f1, stdout=f2)
-        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_14.json', '--dryrun', stderr=f1, stdout=f2)
+        with self.assert_max_queries(58):
+            management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_08.json', '--dryrun', stderr=f1, stdout=f2)
+        with self.assert_max_queries(42):
+            management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_09.json', '--dryrun', stderr=f1, stdout=f2)
+        with self.assert_max_queries(50):
+            management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_14.json', '--dryrun', stderr=f1, stdout=f2)
 
         # maak een test vereniging die verwijderd kan worden
         ver = NhbVereniging()
@@ -361,14 +390,16 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         ver.nhb_nr = "1999"
         ver.regio = NhbRegio.objects.get(pk=116)
         ver.save()
-        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_12.json', '--dryrun', stderr=f1, stdout=f2)
+        with self.assert_max_queries(27):
+            management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_12.json', '--dryrun', stderr=f1, stdout=f2)
 
     def test_incomplete_data(self):
         # test import met een incomplete entry van een nieuw lid
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_17.json', stderr=f1, stdout=f2)
+        with self.assert_max_queries(60):
+            management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_17.json', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
         self.assertTrue("[ERROR] Lid 100002 heeft geen achternaam" in f1.getvalue())

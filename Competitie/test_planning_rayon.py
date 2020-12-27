@@ -25,12 +25,12 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
 
     test_after = ('Competitie.test_fase', 'Competitie.test_beheerders', 'Competitie.test_competitie')
 
-    @staticmethod
-    def _verwerk_mutaties(show=False):
+    def _verwerk_mutaties(self, show=False):
         # vraag de achtergrond taak om de mutaties te verwerken
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('kampioenschap_mutaties', '1', '--quick', stderr=f1, stdout=f2)
+        with self.assert_max_queries(20):
+            management.call_command('kampioenschap_mutaties', '1', '--quick', stderr=f1, stdout=f2)
 
         if show:                    # pragma: no coverage
             print(f1.getvalue())
@@ -255,7 +255,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         wedstrijd_r1_pk = DeelCompetitie.objects.get(pk=self.deelcomp_rayon1_18.pk).plan.wedstrijden.all()[0].pk
         url = self.url_wijzig_rk_wedstrijd % wedstrijd_r1_pk
 
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(25):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
 
@@ -290,7 +290,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         self.assert_is_redirect_not_plein(resp)     # check success
 
         # haal het overzicht op met deze nieuwe wedstrijden
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(21):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
@@ -299,14 +299,14 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         # haal de wedstrijd op
         wedstrijd_r1 = DeelCompetitie.objects.get(pk=self.deelcomp_rayon1_18.pk).plan.wedstrijden.all()[0]
         url_w = self.url_wijzig_rk_wedstrijd % wedstrijd_r1.pk
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(30):
             resp = self.client.get(url_w)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/wijzig-wedstrijd-rk.dtl', 'plein/site_layout.dtl'))
 
         # nog een keer ophalen, want dan zijn wedstrijd.vereniging en wedstrijd.locatie al gezet
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(24):
             resp = self.client.get(url_w)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
 

@@ -445,7 +445,7 @@ class TestCompetitieScores(E2EHelpers, TestCase):
                      'hoi': 1,
                      999999: 111}                           # niet bestaande schutterboog_pk
         # print('json_data for post: %s' % json.dumps(json_data))
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(25):
             resp = self.client.post(self.url_uitslag_opslaan,
                                     json.dumps(json_data),
                                     content_type='application/json')
@@ -487,7 +487,7 @@ class TestCompetitieScores(E2EHelpers, TestCase):
                      self._schuttersboog[4].pk: 127,
                      self._schuttersboog[5].pk: 128,
                      self._schuttersboog[6].pk: 129}
-        with self.assert_max_queries(30):
+        with self.assert_max_queries(40):
             resp = self.client.post(self.url_uitslag_opslaan,
                                     json.dumps(json_data),
                                     content_type='application/json')
@@ -632,7 +632,7 @@ class TestCompetitieScores(E2EHelpers, TestCase):
                      self._schuttersboog[4].pk: 127,
                      self._schuttersboog[5].pk: 128,
                      self._schuttersboog[6].pk: 129}
-        with self.assert_max_queries(30):
+        with self.assert_max_queries(40):
             resp = self.client.post(self.url_uitslag_opslaan,
                                     json.dumps(json_data),
                                     content_type='application/json')
@@ -699,7 +699,7 @@ class TestCompetitieScores(E2EHelpers, TestCase):
             resp = self.client.get(self.url_uitslag_invoeren % self.wedstrijd18_pk)     # garandeert wedstrijd.uitslag
         self.assertEqual(resp.status_code, 200)     # 200 = OK
 
-        with self.assert_max_queries(80):
+        with self.assert_max_queries(91):
             resp = self.client.post(self.url_uitslag_opslaan,
                                     json.dumps(json_data),
                                     content_type='application/json')

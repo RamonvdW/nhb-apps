@@ -34,6 +34,30 @@ class AssertMaxQueriesContext(object):
         request_started.disconnect(reset_queries)       # apparently prevents queries_log from being emptied
         return self
 
+    @staticmethod
+    def _find_statement(query, start):
+        best = -1
+        word_len = 0
+        for word in (#'SELECT', 'DELETE FROM', 'INSERT INTO',m
+                     ' WHERE ', ' LEFT OUTER JOIN ',' INNER JOIN ', ' LEFT JOIN ', ' JOIN ',
+                     ' ORDER BY ', ' GROUP BY ', ' ON ', ' FROM ', ' VALUES '):
+            pos = query.find(word, start)
+            if pos >= 0 and (best == -1 or pos < best):
+                best = pos
+                word_len = len(word)
+        # for
+        return best, word_len
+
+    def _reformat_sql(self, query):
+        start = 0
+        pos, word_len = self._find_statement(query, start)
+        while pos >= 0:
+            query = query[:pos] + '\n   ' + query[pos:]
+            start = pos + word_len + 4
+            pos, word_len = self._find_statement(query, start)
+        # while
+        return query
+
     def __exit__(self, exc_type, exc_value, traceback):
         # leaving the 'with' block
         self.connection.force_debug_cursor = self.force_debug_cursor
@@ -45,7 +69,7 @@ class AssertMaxQueriesContext(object):
         if executed > self.num:
             queries = 'Captured queries from index %s to %s:' % (self.initial_queries, final_queries)
             for i, query in enumerate(self.connection.queries[self.initial_queries:final_queries], start=1):
-                queries += '\n [%d] %s' % (i, query['sql'])
+                queries += '\n [%d] %s' % (i, self._reformat_sql(query['sql']))
             # for
             msg = "Too many queries: %s; maximum %d. " % (executed, self.num)
             self.test_case.fail(msg=msg + queries)
@@ -53,7 +77,11 @@ class AssertMaxQueriesContext(object):
             ongebruikt = self.num - executed
             if self.num > 20:
                 if ongebruikt / self.num > 0.25:
-                    self.test_case.fail(msg="Maximum (%s) has a lot of margin. Can be set as low as %s" % (self.num, executed))
+                    queries = 'Captured queries from index %s to %s:' % (self.initial_queries, final_queries)
+                    for i, query in enumerate(self.connection.queries[self.initial_queries:final_queries], start=1):
+                        queries += '\n [%d] %s' % (i, self._reformat_sql(query['sql']))
+                    # for
+                    self.test_case.fail(msg="Maximum (%s) has a lot of margin. Can be set as low as %s\n%s" % (self.num, executed, queries))
 
 
 class E2EHelpers(object):

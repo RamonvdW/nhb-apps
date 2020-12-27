@@ -112,7 +112,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, url_overzicht)
 
         # aanvangsgemiddelden vaststellen
-        with self.assert_max_queries(600):      # TODO: optimize
+        with self.assert_max_queries(5):
             resp = self.client.post(url_ag_vaststellen)
 
         # klassegrenzen vaststellen

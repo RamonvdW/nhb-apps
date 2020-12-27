@@ -105,6 +105,7 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
         for wkl in (CompetitieKlasse
                     .objects
                     .exclude(indiv__niet_voor_rk_bk=True)
+                    .select_related('indiv', 'team')
                     .filter(competitie=deelcomp_rk.competitie)):
             if wkl.indiv:
                 niet_gebruikt[100000 + wkl.indiv.pk] = wkl.indiv.beschrijving

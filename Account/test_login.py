@@ -39,7 +39,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
         # test inlog via het inlog formulier
         self.account_normaal.verkeerd_wachtwoord_teller = 3
         self.account_normaal.save()
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(23):
             resp = self.client.post(self.url_login, {'login_naam': 'normaal',
                                                      'wachtwoord':  E2EHelpers.WACHTWOORD}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -100,7 +100,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
     def test_inlog_was_geblokkeerd(self):
         self.account_normaal.is_geblokkeerd_tot = timezone.now() + datetime.timedelta(hours=-1)
         self.account_normaal.save()
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(22):
             resp = self.client.post(self.url_login, {'login_naam': 'normaal',
                                                      'wachtwoord':  E2EHelpers.WACHTWOORD}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -145,7 +145,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
 
     def test_inlog_form_post_next_good(self):
         # controleer dat de next parameter gebruikt wordt
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(22):
             resp = self.client.post(self.url_login, {'login_naam': 'normaal',
                                                      'wachtwoord':  E2EHelpers.WACHTWOORD,
                                                      'next': '/account/logout/'}, follow=True)
@@ -155,7 +155,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
 
     def test_inlog_form_post_next_bad(self):
         # controleer dat een slechte next parameter naar het Plein gaat
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(22):
             resp = self.client.post(self.url_login, {'login_naam': 'normaal',
                                                      'wachtwoord':  E2EHelpers.WACHTWOORD,
                                                      'next': '/bla/bla/'}, follow=True)
@@ -178,7 +178,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, '/plein/')
 
         # log in
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(22):
             resp = self.client.post(self.url_login, {'login_naam': 'normaal',
                                                      'wachtwoord': E2EHelpers.WACHTWOORD}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -286,7 +286,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
         self.email_metmail.save()
 
         # test inlog via het inlog formulier, met een email adres
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(24):
             resp = self.client.post(self.url_login, {'login_naam': 'metmail@test.com',
                                                      'wachtwoord': E2EHelpers.WACHTWOORD}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -296,7 +296,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
 
     def test_login_next(self):
         # test een login met een 'next' parameter die na de login gevolgd wordt
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(24):
             resp = self.client.post(self.url_login, {'login_naam': 'metmail@test.com', 'wachtwoord': E2EHelpers.WACHTWOORD, 'next': '/account/logout'}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)

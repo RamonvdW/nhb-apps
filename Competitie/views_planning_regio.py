@@ -406,7 +406,7 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
             for obj in (RegioCompetitieSchutterBoog
                         .objects
                         .filter(deelcompetitie=ronde.deelcompetitie)
-                        .select_related('klasse')):
+                        .select_related('klasse__indiv')):
                 try:
                     klasse2schutters[obj.klasse.indiv.pk] += 1
                 except KeyError:
@@ -415,6 +415,7 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
 
             for wkl in (CompetitieKlasse
                         .objects
+                        .select_related('indiv', 'team')
                         .filter(competitie=ronde.deelcompetitie.competitie)):
                 if wkl.indiv:
                     niet_gebruikt[100000 + wkl.indiv.pk] = wkl.indiv.beschrijving

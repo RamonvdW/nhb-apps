@@ -53,7 +53,7 @@ class NhbRayon(models.Model):
 class NhbRegio(models.Model):
     """ Tabel waarin de Regio definities van de NHB staan """
 
-    # 3-cijferig NHB nummer van deze regio
+    # 3-cijferige NHB nummer van deze regio
     regio_nr = models.PositiveIntegerField(primary_key=True)
 
     # beschrijving van de regio

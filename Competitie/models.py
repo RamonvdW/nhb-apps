@@ -249,17 +249,6 @@ class CompetitieKlasse(models.Model):
     objects = models.Manager()      # for the editor only
 
 
-def maak_competitieklasse_indiv(comp, indiv_wedstrijdklasse, min_ag):
-    """ Deze functie maakt een nieuwe CompetitieWedstrijdklasse aan met het gevraagde min_ag
-        en koppelt deze aan de gevraagde Competitie
-    """
-    compkl = CompetitieKlasse()
-    compkl.competitie = comp
-    compkl.indiv = indiv_wedstrijdklasse
-    compkl.min_ag = min_ag
-    compkl.save()
-
-
 class DeelCompetitie(models.Model):
     """ Deze database tabel bevat informatie over een deel van een competitie:
         regiocompetitie (16x), rayoncompetitie (4x) of bondscompetitie (1x)
@@ -436,6 +425,27 @@ def competitie_aanmaken(jaar):
     begin_rk = date(year=jaar + 1, month=2, day=1)  # 1 februari
     begin_bk = date(year=jaar + 1, month=5, day=1)  # 1 mei
 
+    rayons = NhbRayon.objects.all()
+    regios = NhbRegio.objects.filter(is_administratief=False)
+
+    functies = dict()   # [rol, afstand, 0/rayon_nr/regio_nr] = functie
+    for functie in (Functie
+                    .objects
+                    .select_related('nhb_regio', 'nhb_rayon')
+                    .filter(rol__in=('RCL', 'RKO', 'BKO'))):
+        afstand = functie.comp_type
+        if functie.rol == 'RCL':
+            nr = functie.nhb_regio.regio_nr
+        elif functie.rol == 'RKO':
+            nr = functie.nhb_rayon.rayon_nr
+        elif functie.rol == 'BKO':
+            nr = 0
+
+        functies[(functie.rol, afstand, nr)] = functie
+    # for
+
+    bulk = list()
+
     # maak de Competitie aan voor 18m en 25m
     for afstand, beschrijving in AFSTAND:
         comp = Competitie()
@@ -458,31 +468,37 @@ def competitie_aanmaken(jaar):
 
         # maak de Deelcompetities aan voor Regio, RK, BK
         for laag, _ in DeelCompetitie.LAAG:
-            deel = DeelCompetitie()
-            deel.laag = laag
-            deel.competitie = comp
             if laag == LAAG_REGIO:
                 # Regio
-                for obj in NhbRegio.objects.filter(is_administratief=False):
-                    deel.nhb_regio = obj
-                    deel.pk = None
-                    deel.functie = Functie.objects.get(rol="RCL", comp_type=afstand, nhb_regio=obj)
-                    deel.save()
+                for obj in regios:
+                    functie = functies[("RCL", afstand, obj.regio_nr)]
+                    deel = DeelCompetitie(competitie=comp,
+                                          laag=laag,
+                                          nhb_regio=obj,
+                                          functie=functie)
+                    bulk.append(deel)
                 # for
             elif laag == LAAG_RK:
                 # RK
-                for obj in NhbRayon.objects.all():
-                    deel.nhb_rayon = obj
-                    deel.pk = None
-                    deel.functie = Functie.objects.get(rol="RKO", comp_type=afstand, nhb_rayon=obj)
-                    deel.save()
+                for obj in rayons:
+                    functie = functies[("RKO", afstand, obj.rayon_nr)]
+                    deel = DeelCompetitie(competitie=comp,
+                                          laag=laag,
+                                          nhb_rayon=obj,
+                                          functie=functie)
+                    bulk.append(deel)
                 # for
             else:
                 # BK
-                deel.functie = Functie.objects.get(rol="BKO", comp_type=afstand)
-                deel.save()
+                functie = functies[("BKO", afstand, 0)]
+                deel = DeelCompetitie(competitie=comp,
+                                      laag=laag,
+                                      functie=functie)
+                bulk.append(deel)
         # for
     # for
+
+    DeelCompetitie.objects.bulk_create(bulk)
 
 
 class RegioCompetitieSchutterBoog(models.Model):

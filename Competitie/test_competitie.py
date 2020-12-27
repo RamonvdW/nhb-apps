@@ -480,7 +480,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
 
         # probeer de POST
-        with self.assert_max_queries(600):      # TODO: optimize
+        with self.assert_max_queries(15):
             resp = self.client.post(self.url_ag_vaststellen)
         self.assert_is_redirect(resp, self.url_overzicht)
 
@@ -494,7 +494,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
 
         # probeer de POST
-        with self.assert_max_queries(600):      # TODO: optimize
+        with self.assert_max_queries(5):
             resp = self.client.post(self.url_ag_vaststellen)
         self.assert_is_redirect(resp, self.url_overzicht)
 

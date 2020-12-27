@@ -420,7 +420,7 @@ class DynamicScoresOpslaanView(UserPassesTestMixin, View):
     @staticmethod
     def nieuwe_score(uitslag, schutterboog_pk, waarde, when, door_account):
         # print('nieuwe score: %s = %s' % (schutterboog_pk, waarde))
-
+        # TODO: leer om bulk create te gebruiken
         try:
             schutterboog = SchutterBoog.objects.get(pk=schutterboog_pk)
         except SchutterBoog.DoesNotExist:
@@ -446,6 +446,7 @@ class DynamicScoresOpslaanView(UserPassesTestMixin, View):
         if score_obj.waarde != waarde:
             # print('bijgewerkte score: %s --> %s' % (score_obj, waarde))
 
+            # TODO: leer om bulk create te gebruiken
             ScoreHist(score=score_obj,
                       oude_waarde=score_obj.waarde,
                       nieuwe_waarde=waarde,

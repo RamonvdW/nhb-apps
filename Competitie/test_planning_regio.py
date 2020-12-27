@@ -602,7 +602,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         self.assertEqual(str(wedstrijd_datum), "2019-09-30")
 
         # haal de wedstrijd op
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(23):
             resp = self.client.get(self.url_wijzig_wedstrijd % wedstrijd_pk)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
@@ -1004,7 +1004,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
 
         # haal de wijzig-wedstrijd pagina op
         url = self.url_wijzig_wedstrijd % wedstrijd_pk
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(22):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         urls = self.extract_all_urls(resp, skip_menu=True)
@@ -1038,7 +1038,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
 
         # haal de wijzig-wedstrijd pagina op
         url = self.url_wijzig_wedstrijd % wedstrijd_pk
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(25):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         urls = self.extract_all_urls(resp, skip_menu=True)
@@ -1087,7 +1087,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         # for
         self.assertEqual(DeelcompetitieRonde.objects.count(), 10)
 
-        with self.assert_max_queries(25):
+        with self.assert_max_queries(30):
             resp = self.client.get(self.url_planning_regio % self.deelcomp_regio101_25.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -1414,7 +1414,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
 
         # echt afsluiten
         self.assertEqual(Taak.objects.count(), 0)
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(26):
             resp = self.client.post(url)
         self.assert_is_redirect_not_plein(resp)  # check for success
         deelcomp = DeelCompetitie.objects.get(pk=self.deelcomp_regio101_18.pk)

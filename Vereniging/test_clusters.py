@@ -92,7 +92,7 @@ class TestVerenigingClusters(E2EHelpers, TestCase):
         # plaats nhbver1 in een ander cluster
         # haal nhbver2 uit zijn cluster
         # stop nhbver3 in een cluster
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(22):
             resp = self.client.post(self.url_clusters, {'naam_%s' % self.cluster1.pk: 'Hallo!',
                                                         'ver_1001': self.cluster2.pk,
                                                         'ver_1002': '0',

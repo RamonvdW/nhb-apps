@@ -141,7 +141,6 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         deelcomp.save()
 
         # zet de datum voor inschrijven op vandaag
-        now = timezone.now()
         for comp in Competitie.objects.filter(is_afgesloten=False):
             zet_competitie_fase(comp, 'B')
         # for
@@ -151,13 +150,13 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         compound_boog_pk = BoogType.objects.get(afkorting='C').pk
         barebow_boog_pk = BoogType.objects.get(afkorting='BB').pk
 
-        # doorloop alle verenigingen in deze regio (er zijn er maar 2)
-        for nhb_ver in NhbVereniging.objects.filter(regio=self.regio_101).all()[:5]:
-
+        # doorloop de 2 verenigingen in deze regio
+        for nhb_ver in NhbVereniging.objects.filter(regio=self.regio_101):
             # wordt HWL om voorkeuren aan te kunnen passen en in te kunnen schrijven
             functie_hwl = nhb_ver.functie_set.filter(rol='HWL').all()[0]
             self.e2e_wissel_naar_functie(functie_hwl)
 
+            max_queries = 22
             post_params = dict()
 
             # maak net zoveel leden aan als er dagdeel afkortingen zijn
@@ -204,6 +203,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
                                                                  'schiet_BB': 'on'})
                     post_params['lid_%s_boogtype_%s' % (nhb_nr, barebow_boog_pk)] = 'on'
                     barebow_boog_pk = None
+                    max_queries = 30
                 else:
                     with self.assert_max_queries(20):
                         resp = self.client.post(url_voorkeuren, {'nhblid_pk': nhb_nr,
@@ -215,7 +215,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
 
             # schrijf in voor de competitie
             post_params['dagdeel'] = dagdelen.pop(-1)
-            with self.assert_max_queries(20):
+            with self.assert_max_queries(max_queries):
                 resp = self.client.post(url_inschrijven, post_params)
             self.assert_is_redirect_not_plein(resp)         # check for success
         # for
@@ -458,7 +458,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         comp = Competitie.objects.get(afstand='18')
 
         self.e2e_login_and_pass_otp(self.account_bb)
-        self._doe_inschrijven(comp)                         # wisselt naar HWL rol
+        self._doe_inschrijven(comp)                       # wisselt naar HWL rol
         # self.e2e_login_and_pass_otp(self.account_bb)        # geen account_hwl
         # self.e2e_wissel_naar_functie(self.functie_hwl)
 

@@ -368,7 +368,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         # poog een andere rol te koppelen
         url = '/functie/wijzig/%s/ontvang/' % self.functie_rcl101.pk
         self.assertEqual(self.functie_rcl101.accounts.count(), 0)
-        with self.assert_max_queries(25):
+        with self.assert_max_queries(20):
             resp = self.client.post(url, {'add': self.account_beh1.pk}, follow=True)
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
         self.assertEqual(self.functie_rcl101.accounts.count(), 0)
