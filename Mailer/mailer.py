@@ -4,7 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-""" Deze module kan een email sturen via MailGun of Postmark
+""" Deze module kan een email sturen via Postmark
 
     Het management commando stuur_emails vind verzoeken in de database
     en roept send_mail aan om deze te versturen.
@@ -67,51 +67,6 @@ def send_mail_postmark(obj, stdout=None, stderr=None):
     obj.save()
 
 
-def send_mail_mailgun(obj, stdout=None, stderr=None):
-
-    """ Deze functie probeert een mail te versturen via MailGun.
-
-        obj: MailQueue object
-        stdout: Voor rapportage voortgang
-        stderr: Voor melden van problemen
-    """
-
-    # format specs: https://tools.ietf.org/html/rfc2822
-    data = {
-        'from': settings.EMAIL_FROM_ADDRESS,
-        'to': obj.mail_to,
-        'date': obj.mail_date,
-        'subject': obj.mail_subj,
-        'text': obj.mail_text
-    }
-
-    try:
-        resp = requests.post(
-                        settings.MAILGUN_URL,
-                        auth=('api', settings.MAILGUN_API_KEY),
-                        data=data)
-    except (requests.exceptions.SSLError, requests.exceptions.ConnectionError) as exc:
-        obj.log += "[WARNING] Exceptie bij versturen: %s\n" % str(exc)
-        if stderr:
-            stderr.write("[ERROR] Exceptie bij versturen e-mail: %s\n" % str(exc))
-    else:
-        if resp.status_code == 200:
-            # success!
-            obj.log += "[INFO] Success (code 200)\n"
-            obj.is_verstuurd = True
-            if stdout:
-                stdout.write("[INFO] Een mail verstuurd")
-        else:
-            obj.log += "[WARNING] Mail niet kunnen versturen\n"
-            obj.log += "  response encoding:%s, status_code:%s\n" % (repr(resp.encoding), repr(resp.status_code))
-            obj.log += "  full response: %s\n" % repr(resp.text)
-            if stdout:
-                stdout.write("[WARNING] Mail niet kunnen versturen! response encoding:%s, status_code:%s" % (repr(resp.encoding), repr(resp.status_code)))
-                stdout.write("  full response: %s\n" % repr(resp.text))
-
-    obj.save()
-
-
 def send_mail(obj, stdout=None, stderr=None):
     """
         Deze functie doet 1 poging om een mail te versturen die in de database staat
@@ -127,10 +82,9 @@ def send_mail(obj, stdout=None, stderr=None):
     """
 
     # check which service is active. Need none-empty API key
-    has_mailgun = hasattr(settings, 'MAILGUN_API_KEY') and settings.MAILGUN_API_KEY
     has_postmark = hasattr(settings, 'POSTMARK_API_KEY') and settings.POSTMARK_API_KEY
 
-    if has_mailgun or has_postmark:
+    if has_postmark:
 
         # voorkom problemen en dubbel zenden
         if obj.is_verstuurd or obj.aantal_pogingen >= 25:
@@ -145,8 +99,6 @@ def send_mail(obj, stdout=None, stderr=None):
 
         if has_postmark:
             send_mail_postmark(obj, stdout, stderr)
-        else:
-            send_mail_mailgun(obj, stdout, stderr)
 
     # not configured for sending emails
     return

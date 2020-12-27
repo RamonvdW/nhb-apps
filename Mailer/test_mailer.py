@@ -5,7 +5,6 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase, override_settings
-from django.conf import settings
 from .models import MailQueue, mailer_queue_email, mailer_obfuscate_email, mailer_email_is_valide
 from .mailer import send_mail
 
@@ -107,7 +106,7 @@ class TestMailerBadBase(object):
     """ unit tests voor de Mailer applicatie """
 
     def test_no_api_key(self):
-        with self.settings(MAILGUN_API_KEY='', POSTMARK_API_KEY=''):
+        with self.settings(POSTMARK_API_KEY=''):
             send_mail(None)
 
         # als we hier komen is het goed, want geen exception
@@ -178,8 +177,7 @@ class TestMailerBadBase(object):
         self.assertFalse(mailer_email_is_valide('test\ner@nhb.nl'))
 
 
-@override_settings(MAILGUN_URL='', MAILGUN_API_KEY='',
-                   POSTMARK_URL='http://localhost:8123/postmark',
+@override_settings(POSTMARK_URL='http://localhost:8123/postmark',
                    POSTMARK_API_KEY='the-api-key',
                    EMAIL_FROM_ADDRESS='noreply@nhb.test',
                    EMAIL_ADDRESS_WHITELIST=())
@@ -187,31 +185,13 @@ class TestMailerPostmark(TestMailerBase, TestCase):
     pass
 
 
-@override_settings(POSTMARK_URL='', POSTMARK_API_KEY='',
-                   MAILGUN_URL='http://localhost:8123/v3/testdomain2.com/messages',
-                   MAILGUN_API_KEY='the-api-key',
-                   EMAIL_FROM_ADDRESS='noreply@nhb.test',
-                   EMAIL_ADDRESS_WHITELIST=())
-class TestMailerMailgun(TestMailerBase, TestCase):
-    pass
-
-
 # use a port with no service responding to it
-@override_settings(MAILGUN_URL='', MAILGUN_API_KEY='',
-                   POSTMARK_URL='http://localhost:9999',
+@override_settings(POSTMARK_URL='http://localhost:9999',
                    POSTMARK_API_KEY='the-api-key',
                    EMAIL_FROM_ADDRESS='noreply@nhb.test',
                    EMAIL_ADDRESS_WHITELIST=())
 class TestMailerBadPostmark(TestMailerBadBase, TestCase):
     pass
 
-
-@override_settings(POSTMARK_URL='', POSTMARK_API_KEY='',
-                   MAILGUN_URL='http://localhost:9999',
-                   MAILGUN_API_KEY='the-api-key',
-                   EMAIL_FROM_ADDRESS='noreply@nhb.test',
-                   EMAIL_ADDRESS_WHITELIST=())
-class TestMailerBadMailgun(TestMailerBadBase, TestCase):
-    pass
 
 # end of file

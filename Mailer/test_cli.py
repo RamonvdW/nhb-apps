@@ -150,8 +150,7 @@ class TestMailerCliBadBase(E2EHelpers, object):
         self.assertTrue('[ERROR] ' in f1.getvalue())
 
 
-@override_settings(MAILGUN_URL='', MAILGUN_API_KEY='',
-                   POSTMARK_URL='http://localhost:8123/postmark',
+@override_settings(POSTMARK_URL='http://localhost:8123/postmark',
                    POSTMARK_API_KEY='the-api-key',
                    EMAIL_FROM_ADDRESS='noreply@nhb.test',
                    EMAIL_ADDRESS_WHITELIST=())
@@ -159,31 +158,12 @@ class TestMailerCliPostmark(TestMailerCliBase, TestCase):
     pass
 
 
-@override_settings(POSTMARK_URL='', POSTMARK_API_KEY='',
-                   MAILGUN_URL='http://localhost:8123/v3/testdomain2.com/messages',
-                   MAILGUN_API_KEY='the-api-key',
-                   EMAIL_FROM_ADDRESS='noreply@nhb.test',
-                   EMAIL_ADDRESS_WHITELIST=())
-class TestMailerCliMailgun(TestMailerCliBase, TestCase):
-    pass
-
-
 # use a port with no service responding to it
-@override_settings(MAILGUN_URL='', MAILGUN_API_KEY='',
-                   POSTMARK_URL='http://localhost:9999',
+@override_settings(POSTMARK_URL='http://localhost:9999',
                    POSTMARK_API_KEY='the-api-key',
                    EMAIL_FROM_ADDRESS='noreply@nhb.test',
                    EMAIL_ADDRESS_WHITELIST=())
 class TestMailerCliBadPostmark(TestMailerCliBadBase, TestCase):
-    pass
-
-
-@override_settings(POSTMARK_URL='', POSTMARK_API_KEY='',
-                   MAILGUN_URL='http://localhost:9999',
-                   MAILGUN_API_KEY='the-api-key',
-                   EMAIL_FROM_ADDRESS='noreply@nhb.test',
-                   EMAIL_ADDRESS_WHITELIST=())
-class TestMailerCliBadMailgun(TestMailerCliBadBase, TestCase):
     pass
 
 
