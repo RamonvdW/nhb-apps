@@ -9,7 +9,7 @@
 
     Luistert op localhost poort 8123
 
-    Simuleert de MailGun API, inclusief fout-situatie
+    Simuleert de e-mail dienst API, inclusief fout-situatie
 """
 
 # used example: https://gist.github.com/mdonkers/63e115cc0c79b4f6b8b3a6b797e485c7
