@@ -9,7 +9,7 @@ from BasisTypen.models import BoogType
 from Competitie.models import (Competitie, CompetitieKlasse, DeelCompetitie,
                                RegioCompetitieSchutterBoog,
                                LAAG_BK, LAAG_RK, LAAG_REGIO, AG_NUL)
-from Functie.models import maak_functie
+from Functie.models import maak_functie, Functie
 from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
 from Schutter.models import SchutterBoog
 from Overig.e2ehelpers import E2EHelpers
@@ -42,6 +42,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         ver.regio = self.regio101
         # secretaris kan nog niet ingevuld worden
         ver.save()
+        self.ver = ver
 
         self.functie_hwl = maak_functie("HWL 1000", "HWL")
         self.functie_hwl.nhb_ver = ver
@@ -91,6 +92,8 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         self.url_uitslagen_rayon = '/competitie/uitslagen/%s-%s/rayon/'
         self.url_uitslagen_rayon_n = '/competitie/uitslagen/%s-%s/rayon/%s/'
         self.url_uitslagen_bond = '/competitie/uitslagen/%s-%s/bond/'
+        self.url_uitslagen_ver = '/competitie/uitslagen/%s-%s/vereniging/'
+        self.url_uitslagen_ver_n = '/competitie/uitslagen/%s-%s/vereniging/%s/'
 
         # log in as BB en maak de competitie aan
         self.e2e_login_and_pass_otp(self.account_bb)
@@ -336,6 +339,13 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
 
+        # regio 100 is valide maar heeft geen deelcompetitie
+        url = self.url_uitslagen_regio_n % (18, 'R', 100)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+
     def test_regio_alt(self):
         url = self.url_uitslagen_regio_alt % (25, 'BB')
         with self.assert_max_queries(20):
@@ -446,5 +456,82 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 404)
+
+    def test_vereniging(self):
+        url = self.url_uitslagen_ver % (18, 'R')
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+
+        url = self.url_uitslagen_ver_n % (18, 'R', self.ver.nhb_nr)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+
+        # als je de pagina ophaalt als een ingelogd lid, dan krijg je je eigen vereniging
+        self.e2e_login(self.account_lid_100002)
+
+        url = self.url_uitslagen_ver % (18, 'R')
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, '[1000] Grote Club')
+        self.assert_html_ok(resp)
+
+        # tenzij je geen lid meer bent bij een vereniging
+        nhblid = self.account_lid_100002.nhblid_set.all()[0]
+        nhblid.is_actief_lid = False
+        nhblid.save()
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+
+    def test_vereniging_hwl(self):
+        functie = Functie.objects.get(rol='HWL', nhb_ver=self.ver)
+        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_wissel_naar_functie(functie)
+
+        # als je de pagina ophaalt als functie SEC/HWL/WL, dan krijg je die vereniging
+        url = self.url_uitslagen_ver % (18, 'R')
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, '[1000] Grote Club')
+        self.assert_html_ok(resp)
+
+    def test_vereniging_regio_100(self):
+        self.ver.regio = NhbRegio.objects.get(regio_nr=100)
+        self.ver.save()
+
+        url = self.url_uitslagen_ver_n % (18, 'R', self.ver.nhb_nr)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+
+    def test_vereniging_bad(self):
+        url = self.url_uitslagen_ver % ('x', 'R')
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 404)
+
+        url = self.url_uitslagen_ver % (18, 'x')
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 404)
+
+        url = self.url_uitslagen_ver_n % (18, 'R', 999999)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 404)
+
+        url = self.url_uitslagen_ver_n % (18, 'R', 'nan')
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 404)
+
 
 # end of file

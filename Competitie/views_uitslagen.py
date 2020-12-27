@@ -192,7 +192,11 @@ class UitslagenVerenigingView(TemplateView):
         except ValueError:
             raise Resolver404()
 
-        ver = NhbVereniging.objects.select_related('regio').get(nhb_nr=ver_nr)
+        try:
+            ver = NhbVereniging.objects.select_related('regio').get(nhb_nr=ver_nr)
+        except NhbVereniging.DoesNotExist:
+            raise Resolver404()
+
         context['ver'] = ver
 
         self._maak_filter_knoppen(context, afstand, ver_nr, comp_boog)
