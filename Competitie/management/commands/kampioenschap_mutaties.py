@@ -7,15 +7,16 @@
 # werk de tussenstand bij voor deelcompetities die niet afgesloten zijn
 # zodra er nieuwe ScoreHist records zijn
 
+from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.db.models import F
 from Competitie.models import (CompetitieTaken, DeelCompetitie, DeelcompetitieKlasseLimiet,
                                KampioenschapSchutterBoog, DEELNAME_JA, DEELNAME_NEE,
                                KampioenschapMutatie,
                                MUTATIE_INITIEEL, MUTATIE_CUT, MUTATIE_AANMELDEN, MUTATIE_AFMELDEN)
+from Overig.background_sync import BackgroundSync
 import django.db.utils
 import datetime
-import time
 
 VOLGORDE_PARKEER = 22222        # hoog en past in PositiveSmallIntegerField
 
@@ -33,6 +34,9 @@ class Command(BaseCommand):
         self.pk2scores_alt = dict()
 
         self._onbekend2beter = dict()   # [competitieklasse.pk] = [klasse, ..] met oplopend AG
+
+        self._sync = BackgroundSync(settings.BACKGROUND_SYNC__KAMPIOENSCHAP_MUTATIES)
+        self._count_ping = 0
 
     def add_arguments(self, parser):
         parser.add_argument('duration', type=int,
@@ -557,11 +561,13 @@ class Command(BaseCommand):
                 self._verwerk_nieuwe_mutaties()
                 now = datetime.datetime.now()
 
-            # sleep 1/10 second, then check again
+            # wacht 5 seconden voordat we opnieuw in de database kijken
+            # het wachten kan onderbroken worden door een ping, als er een nieuwe mutatie toegevoegd is
             secs = (self.stop_at - now).total_seconds()
             if secs > 1:                    # pragma: no branch
-                # TODO: vervang door blokkerend wachten op een IPC
-                time.sleep(0.1)
+                timeout = min(5.0, secs)
+                if self._sync.wait_for_ping(timeout):
+                    self._count_ping += 1
             else:
                 # near the end
                 break       # from the while
@@ -598,6 +604,8 @@ class Command(BaseCommand):
             self.stderr.write('[ERROR] Onverwachte database fout: %s' % str(exc))
         except KeyboardInterrupt:                       # pragma: no coverage
             pass
+
+        self.stdout.write('[DEBUG] Aantal pings ontvangen: %s' % self._count_ping)
 
         self.stdout.write('Klaar')
 

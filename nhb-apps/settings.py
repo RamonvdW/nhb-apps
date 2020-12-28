@@ -37,7 +37,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2020-12-27'
+SITE_VERSIE = '2020-12-28'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -198,6 +198,11 @@ LOGIN_URL = '/account/login/'
 INTERNAL_IPS = [
     '127.0.0.1',
 ]
+
+
+BACKGROUND_SYNC_POORT = 3000
+BACKGROUND_SYNC__KAMPIOENSCHAP_MUTATIES = BACKGROUND_SYNC_POORT + 1
+
 
 # our own test runner that executes the tests ordered by application hierarchy indicators to ensure that
 # low-level errors are reported before applications depending that (broken) functionality report failures

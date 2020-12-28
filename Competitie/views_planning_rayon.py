@@ -13,6 +13,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
 from Logboek.models import schrijf_in_logboek
 from NhbStructuur.models import NhbVereniging
+from Overig.background_sync import BackgroundSync
 from Plein.menu import menu_dynamics
 from Wedstrijden.models import Wedstrijd, WedstrijdenPlan, WedstrijdLocatie
 from .models import (LAAG_REGIO, LAAG_RK, LAAG_BK, DeelCompetitie, DeelcompetitieRonde,
@@ -47,6 +48,8 @@ JA_NEE = {
     False: 'Nee',
     True: 'Ja'
 }
+
+mutatie_ping = BackgroundSync(settings.BACKGROUND_SYNC__KAMPIOENSCHAP_MUTATIES)
 
 
 class RayonPlanningView(UserPassesTestMixin, TemplateView):
@@ -754,6 +757,7 @@ class WijzigStatusRkSchutterView(UserPassesTestMixin, TemplateView):
 
         if mutatie:
             mutatie.save()
+            mutatie_ping.ping()
 
             if snel != '1':
                 # wacht maximaal 3 seconden tot de mutatie uitgevoerd is
@@ -931,6 +935,8 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
         # for
 
         if mutatie:
+            mutatie_ping.ping()
+
             # wacht op verwerking door achtergrond-taak voordat we verder gaan
             snel = str(request.POST.get('snel', ''))[:1]        # voor autotest
 
