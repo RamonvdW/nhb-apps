@@ -828,13 +828,16 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         mutatie.save()
 
         self.assertTrue("???" in str(mutatie))  # geen beschrijving beschikbaar
-        mutatie.code = MUTATIE_INITIEEL
+        mutatie.mutatie = MUTATIE_INITIEEL
         self.assertTrue(str(mutatie) != "")     # wel een beschrijving
 
-        mutatie.code = MUTATIE_CUT
+        mutatie.mutatie = MUTATIE_CUT
         self.assertTrue(str(mutatie) != "")     # wel een beschrijving
 
-        mutatie.code = MUTATIE_AFMELDEN
+        mutatie.mutatie = MUTATIE_AFMELDEN
+        self.assertTrue(str(mutatie) != "")     # wel een beschrijving
+
+        mutatie.is_verwerkt = True
         self.assertTrue(str(mutatie) != "")     # wel een beschrijving
 
         # mutatie die al verwerkt is
