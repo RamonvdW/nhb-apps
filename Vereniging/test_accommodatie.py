@@ -143,6 +143,9 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         lid.save()
         self.nhblid_100002 = lid
 
+        ver.secretaris_lid = lid
+        ver.save()
+
         self.url_lijst = '/vereniging/accommodaties/lijst/'
         self.url_accommodatie_details = '/vereniging/accommodaties/details/%s/%s/'       # <locatie_pk>, <vereniging_pk>
         self.url_accommodatie_vereniging = '/vereniging/accommodatie-details/%s/%s/'     # <locatie_pk>, <vereniging_pk>
@@ -313,9 +316,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('vereniging/accommodatie-details.dtl', 'plein/site_layout.dtl'))
         # check dat de HWL de opslaan-knop aangeboden krijgt
-        urls = self.extract_all_urls(resp, skip_menu=True)
-        self.assertTrue(url in urls)                                    # opslaan url
-        self.assertTrue('/vereniging/accommodaties/lijst/' in urls)     # terug url
+        self.assertContains(resp, 'Wijzigingen opslaan')
 
         # check the specifieke accommodatie pagina voor de HWL, met andere terug url
         url = self.url_accommodatie_vereniging % (self.loc2.pk, self.nhbver2.pk)
@@ -426,6 +427,9 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
             resp = self.client.get(self.url_lijst)
         self.assert_is_redirect(resp, '/plein/')
 
+        # haal de SEC uit zijn functie zodat deze direct uit de vereniging gehaald wordt
+        self.functie_sec.accounts.clear()
+
         # check accommodatie detail pagina
         url = self.url_accommodatie_details % (self.loc2.pk, self.nhbver2.pk)
         with self.assert_max_queries(20):
@@ -433,7 +437,27 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('vereniging/accommodatie-details.dtl', 'plein/site_layout.dtl'))
-        # TODO: check dat de WL de opslaan-knop NIET aangeboden krijgt
+
+        # check dat de WL de opslaan-knop NIET aangeboden krijgt
+        self.assertNotContains(resp, 'Wijzigingen opslaan')
+
+        # nog een keer, voor een vereniging zonder secretaris
+        self.nhbver2.secretaris_lid = None
+        self.nhbver2.save()
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+
+        # probeer een wijziging te doen
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'baan_type': 'O',
+                                          'banen_18m': 5,
+                                          'banen_25m': 6,
+                                          'max_dt': 3,
+                                          'notities': 'dit is een test'})
+        self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
 
     def test_sec(self):
         # login als SEC van ver2 op loc2

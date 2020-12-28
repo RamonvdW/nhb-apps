@@ -31,7 +31,7 @@ def report_validated_templates():
         for dtl in Path().rglob('*.dtl'):
             dtl_str = str(dtl)
             dtl_str = dtl_str[dtl_str.find('/templates/')+11:]
-            if dtl_str not in validated_templates and dtl_str not in included_templates:
+            if dtl_str not in validated_templates and dtl_str not in included_templates:    # pragma: no branch
                 print('[WARNING] Missing assert_html_ok coverage for template %s' % repr(dtl_str))
         # for
 

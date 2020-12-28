@@ -22,7 +22,6 @@ from Overig.helpers import get_safe_from_ip
 from .rol import Rollen, rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving
 from .models import Functie
 from .forms import ZoekBeheerdersForm, WijzigBeheerdersForm, WijzigEmailForm
-import logging
 
 
 TEMPLATE_OVERZICHT = 'functie/overzicht.dtl'
