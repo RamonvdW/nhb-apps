@@ -51,7 +51,19 @@ def mag_beheerder_wijzigen_of_404(request, functie):
             raise Resolver404()
         return
 
-    if rol_nu == Rollen.ROL_HWL:
+    if rol_nu == Rollen.ROL_SEC:
+        if functie.nhb_ver != functie_nu.nhb_ver:
+            # verkeerde vereniging
+            raise Resolver404()
+
+        if functie.rol not in ('SEC', 'HWL'):
+            # niet een rol die de SEC mag wijzigen
+            raise Resolver404()
+
+        # SEC
+        return
+
+    if rol_nu in Rollen.ROL_HWL:
         if functie.nhb_ver != functie_nu.nhb_ver:
             # verkeerde vereniging
             raise Resolver404()
@@ -487,7 +499,6 @@ class WijzigBeheerdersView(UserPassesTestMixin, ListView):
             # via Plein, Verenigingen, Details (=Vereniging:accommodaties/details/pk/pk/), Koppel beheerders
             # via Verenging, Beheerders (=Functie:overzicht-vereniging), Koppel beheerders
             context['terug_url'] = reverse('Functie:overzicht-vereniging')
-            #context['terug_url'] = reverse('Vereniging:lijst-verenigingen')
             menu_dynamics(self.request, context, actief='vereniging')
         else:
             context['terug_url'] = reverse('Functie:overzicht')
@@ -690,7 +701,8 @@ class OverzichtView(UserPassesTestMixin, ListView):
                         obj.email_url = None
         # for
 
-    def _zet_accounts(self, objs):
+    @staticmethod
+    def _zet_accounts(objs):
         """ als we de template door functie.accounts.all() laten lopen dan resulteert
             elke lookup in een database query voor het volledige account record.
             Hier doen we het iets efficienter.
