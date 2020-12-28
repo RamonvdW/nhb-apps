@@ -57,6 +57,12 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         lid.save()
         self.nhblid1 = lid
 
+        lid.pk = None
+        lid.nhb_nr = 10043
+        lid.account = self.account_normaal
+        lid.save()
+        self.nhblid3 = lid
+
         self.functie_sec = maak_functie("SEC test", "SEC")
         self.functie_sec.nhb_ver = ver
         self.functie_sec.save()
@@ -97,6 +103,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.nhblid2 = lid
 
         self.url_overzicht = '/functie/overzicht/'
+        self.url_overzicht_vereniging = '/functie/overzicht/vereniging/'
         self.url_wijzig = '/functie/wijzig/%s/'     # functie_pk
         self.url_activeer_functie = '/functie/activeer-functie/%s/'
         self.url_activeer_rol = '/functie/activeer-rol/%s/'
@@ -158,6 +165,9 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
 
     def test_wijzig_view_hwl(self):
         # de HWL vindt alleen leden van eigen vereniging
+        self.account_beh1.functie_set.clear()
+        self.account_beh2.functie_set.clear()
+
         self.functie_hwl.accounts.add(self.account_beh1)
         self.e2e_login_and_pass_otp(self.account_beh1)
 
@@ -346,6 +356,9 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
 
     def test_koppel_hwl(self):
         # HWL mag zijn eigen leden koppelen: beh2
+        self.account_beh1.functie_set.clear()
+        self.account_beh2.functie_set.clear()
+
         self.functie_hwl.accounts.add(self.account_beh1)
         self.e2e_login_and_pass_otp(self.account_beh1)
 
@@ -414,6 +427,52 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         url = '/functie/wijzig/%s/' % self.functie_hwl.pk
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
+
+    def test_koppel_sec(self):
+        # HWL mag zijn eigen leden koppelen: account_normaal
+        self.account_beh1.functie_set.clear()
+
+        self.functie_sec.accounts.add(self.account_beh1)
+        self.e2e_login_and_pass_otp(self.account_beh1)
+
+        self.e2e_wissel_naar_functie(self.functie_sec)
+        self.e2e_check_rol('SEC')
+
+        # haal het overzicht van verenigingsbestuurders op
+        resp = self.client.get(self.url_overzicht_vereniging)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('functie/overzicht-vereniging.dtl', 'plein/site_layout.dtl'))
+        urls = self.extract_all_urls(resp, skip_menu=True)
+        # verwachting: 2x koppelen beheerders, 1x wijzig email, 1x 'terug'
+        # print('SEC urls: %s' % repr(urls))
+        self.assertEqual(len(urls), 4)
+
+        # poog een lid te koppelen aan de rol SEC
+        url = '/functie/wijzig/%s/' % self.functie_sec.pk
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+
+        # koppel een verenigingslid aan de rol SEC
+        self.assertEqual(self.functie_sec.accounts.count(), 1)
+        url = '/functie/wijzig/%s/ontvang/' % self.functie_sec.pk
+        resp = self.client.post(url, {'add': self.account_normaal.pk})
+        self.assert_is_redirect_not_plein(resp)
+        self.assertEqual(self.functie_sec.accounts.count(), 2)
+
+        # koppel een verenigingslid aan de rol HWL
+        self.assertEqual(self.functie_hwl.accounts.count(), 0)
+        url = '/functie/wijzig/%s/ontvang/' % self.functie_hwl.pk
+        resp = self.client.post(url, {'add': self.account_normaal.pk})
+        self.assert_is_redirect_not_plein(resp)
+        self.assertEqual(self.functie_hwl.accounts.count(), 1)
+
+        # koppel een verenigingslid aan de rol WL (dit mag de SEC niet)
+        self.assertEqual(self.functie_wl.accounts.count(), 0)
+        url = '/functie/wijzig/%s/ontvang/' % self.functie_wl.pk
+        resp = self.client.post(url, {'add': self.account_normaal.pk})
+        self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
+        self.assertEqual(self.functie_wl.accounts.count(), 0)
 
     def test_administratieve_regio(self):
         # neem de BB rol aan

@@ -34,7 +34,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2020-12-07'
+SITE_VERSIE = '2020-12-28'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -294,7 +294,7 @@ SAML_IDP_CONFIG = {
              # signing assertion and responses is mandatory in SAML 2.0
              'sign_response': True,
              'sign_assertion': True
-        }
+         }
     },
 
     # signing keys
