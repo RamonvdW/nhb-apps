@@ -6,6 +6,14 @@
 
 # helper to check the uniqueness of the "op_pagina" for the feedback form
 
-find . -name \*.dtl -exec grep "with op_pagina" {} \+ | cut -d':' -f2 | grep -E '^{' | cut -d' ' -f5 | sort | uniq -c | sort -n
+DTL_INCLUDES=$(echo "/menu.dtl /andere-sites-van-de-nhb.dtl /site_layout.dtl /card.dtl /card_logo.dtl /ga-naar-live-server.dtl" | tr ' ' '|')
+DTL_BEWUST_NIET=$(echo "/niet-ondersteund.dtl /site-feedback- /tijdelijke-url- /Logboek/ /Handleiding/" | tr ' ' '|')
+
+DTL_FILES=$(find . -name \*.dtl | grep -vE "$DTL_BEWUST_NIET" | grep -vE "$DTL_INCLUDES")
+
+grep "with op_pagina" $DTL_FILES | cut -d':' -f2 | grep -E '^{' | cut -d' ' -f5 | sort | uniq -c | sort -n
+
+echo "[DEBUG] Geen 'op_pagina':"
+grep -L "with op_pagina" $DTL_FILES
 
 # end of file
