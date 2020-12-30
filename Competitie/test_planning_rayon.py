@@ -12,7 +12,7 @@ from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging, N
 from Schutter.models import SchutterBoog
 from Wedstrijden.models import WedstrijdLocatie, WedstrijdenPlan, WedstrijdUitslag
 from Overig.e2ehelpers import E2EHelpers
-from .models import (Competitie, DeelCompetitie, LAAG_REGIO, competitie_aanmaken,
+from .models import (Competitie, DeelCompetitie, LAAG_REGIO, LAAG_RK, competitie_aanmaken,
                      KampioenschapSchutterBoog, CompetitieKlasse, DeelcompetitieKlasseLimiet,
                      KampioenschapMutatie, DEELNAME_NEE, DEELNAME_JA)
 import datetime
@@ -403,6 +403,18 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
             resp = self.client.post(url)
         self.assertEqual(resp.status_code, 404)     # 404 = Not found/allowed
 
+        # wedstrijd van niet-RK
+        self.deelcomp_rayon1_18.laag = LAAG_REGIO
+        self.deelcomp_rayon1_18.save()
+
+        url = self.url_verwijder_rk_wedstrijd % wedstrijd.pk
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
+        self.assertEqual(resp.status_code, 404)     # 404 = Not found/allowed
+
+        self.deelcomp_rayon1_18.laag = LAAG_RK
+        self.deelcomp_rayon1_18.save()
+
         # verkeerde rol
         self.e2e_login_and_pass_otp(self.account_rko2_18)
         self.e2e_wissel_naar_functie(self.functie_rko2_18)
@@ -410,6 +422,15 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(url)
         self.assertEqual(resp.status_code, 404)     # 404 = Not found/allowed
+
+        # verwijder zonder uitslag
+        self.e2e_login_and_pass_otp(self.account_rko1_18)
+        self.e2e_wissel_naar_functie(self.functie_rko1_18)
+
+        url = self.url_verwijder_rk_wedstrijd % wedstrijd.pk
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
+        self.assertEqual(resp.status_code, 302)
 
     def test_planning_rayon_geen_ver(self):
         self.e2e_login_and_pass_otp(self.account_rko2_18)
