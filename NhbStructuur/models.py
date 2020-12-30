@@ -92,8 +92,11 @@ class NhbCluster(models.Model):
     # aparte clusters voor 18m en 25m
     gebruik = models.CharField(max_length=2, choices=GEBRUIK)
 
+    def cluster_code(self):
+        return "%s%s" % (self.regio.regio_nr, self.letter)
+
     def cluster_code_str(self):
-        return "%s%s voor %s" % (self.regio.regio_nr, self.letter, GEBRUIK2STR[self.gebruik])
+        return "%s voor %s" % (self.cluster_code(), GEBRUIK2STR[self.gebruik])
 
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """

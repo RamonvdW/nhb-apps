@@ -15,16 +15,18 @@ from Logboek.models import schrijf_in_logboek
 from NhbStructuur.models import NhbCluster, NhbVereniging
 from Taken.taken import maak_taak
 from Wedstrijden.models import Wedstrijd, WedstrijdLocatie
-from .models import (LAAG_REGIO, LAAG_RK, LAAG_BK, INSCHRIJF_METHODE_2,
+from .models import (LAAG_REGIO, LAAG_RK, LAAG_BK, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2,
                      DeelCompetitie, DeelcompetitieRonde, maak_deelcompetitie_ronde,
                      CompetitieKlasse, RegioCompetitieSchutterBoog)
 from types import SimpleNamespace
 import datetime
 
 
-TEMPLATE_COMPETITIE_PLANNING_REGIO_RONDE = 'competitie/planning-regio-ronde.dtl'
-TEMPLATE_COMPETITIE_PLANNING_REGIO_CLUSTER = 'competitie/planning-regio-cluster.dtl'
 TEMPLATE_COMPETITIE_PLANNING_REGIO = 'competitie/planning-regio.dtl'
+TEMPLATE_COMPETITIE_PLANNING_REGIO_METHODE1 = 'competitie/planning-regio-methode1.dtl'
+TEMPLATE_COMPETITIE_PLANNING_REGIO_CLUSTER = 'competitie/planning-regio-cluster.dtl'
+TEMPLATE_COMPETITIE_PLANNING_REGIO_RONDE = 'competitie/planning-regio-ronde.dtl'
+TEMPLATE_COMPETITIE_PLANNING_REGIO_RONDE_METHODE1 = 'competitie/planning-regio-ronde-methode1.dtl'
 TEMPLATE_COMPETITIE_WIJZIG_WEDSTRIJD = 'competitie/wijzig-wedstrijd.dtl'
 TEMPLATE_COMPETITIE_AFSLUITEN_REGIOCOMP = 'competitie/rcl-afsluiten-regiocomp.dtl'
 
@@ -70,7 +72,8 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
     """ Deze view geeft de planning voor een competitie in een regio """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_COMPETITIE_PLANNING_REGIO
+    template1 = TEMPLATE_COMPETITIE_PLANNING_REGIO
+    template2 = TEMPLATE_COMPETITIE_PLANNING_REGIO_METHODE1
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -81,21 +84,74 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
         return HttpResponseRedirect(reverse('Plein:plein'))
 
-    def get_context_data(self, **kwargs):
-        """ called by the template system to get the context data for the template """
-        context = super().get_context_data(**kwargs)
+    def _get_methode_1(self, context, deelcomp, mag_wijzigen):
+        self.template_name = self.template2
 
-        try:
-            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen geeft beveiliging
-            deelcomp = (DeelCompetitie
+        context['handleiding_planning_regio_url'] = reverse('Handleiding:Planning_Regio')
+
+        # zoek de regio planning op
+        regio_ronde = None
+        for ronde in (DeelcompetitieRonde
+                      .objects
+                      .filter(deelcompetitie=deelcomp,
+                              cluster=None)
+                      .order_by('beschrijving')):
+            if not ronde.is_voor_import_oude_programma():
+                regio_ronde = ronde
+                break
+        # for
+
+        if not regio_ronde:
+            # maak de enige ronde automatisch aan
+            regio_ronde = maak_deelcompetitie_ronde(deelcomp, cluster=None)
+            regio_ronde.week_nr = 0
+            regio_ronde.beschrijving = "Alle regio wedstrijden"
+            regio_ronde.save()
+
+        regio_ronde.wedstrijden_count = regio_ronde.plan.wedstrijden.count()
+        regio_ronde.url = reverse('Competitie:regio-methode1-planning',
+                                  kwargs={'ronde_pk': ronde.pk})
+        context['regio_ronde'] = regio_ronde
+
+        # zorg dat de clusters een ronde hebben
+        for cluster in (NhbCluster
                         .objects
-                        .select_related('competitie', 'nhb_regio', 'nhb_regio__rayon')
-                        .get(pk=deelcomp_pk, laag=LAAG_REGIO))
-        except (ValueError, DeelCompetitie.DoesNotExist):
-            raise Resolver404()
+                        .filter(regio=deelcomp.nhb_regio,
+                                gebruik=deelcomp.competitie.afstand)
+                        .prefetch_related('nhbvereniging_set',
+                                          'deelcompetitieronde_set')
+                        .select_related('regio')
+                        .order_by('letter')):
 
-        context['deelcomp'] = deelcomp
-        context['regio'] = deelcomp.nhb_regio
+            if cluster.nhbvereniging_set.count() > 0:
+                # maak de enige ronde automatisch aan
+                if cluster.deelcompetitieronde_set.count() == 0:
+                    maak_deelcompetitie_ronde(deelcomp, cluster)
+        # for
+
+        # zoek de bruikbare clusters
+        context['clusters'] = clusters = list()
+        for cluster in (NhbCluster
+                        .objects
+                        .filter(regio=deelcomp.nhb_regio,
+                                gebruik=deelcomp.competitie.afstand)
+                        .prefetch_related('nhbvereniging_set',
+                                          'deelcompetitieronde_set')
+                        .select_related('regio')
+                        .order_by('letter')):
+
+            if cluster.nhbvereniging_set.count() > 0:
+                ronde = cluster.deelcompetitieronde_set.all()[0]
+                cluster.wedstrijden_count = ronde.plan.wedstrijden.count()
+                cluster.ronde_url = reverse('Competitie:regio-methode1-planning',
+                                            kwargs={'ronde_pk': ronde.pk})
+
+                clusters.append(cluster)
+        # for
+
+    def _get_methode_2_3(self, context, deelcomp, mag_wijzigen):
+        self.template_name = self.template1
+        context['handleiding_planning_regio_url'] = reverse('Handleiding:Planning_Regio')
 
         rondes = planning_sorteer_weeknummers(
                                 DeelcompetitieRonde
@@ -140,14 +196,39 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
         if len(context['clusters']) > 0:
             context['show_clusters'] = True
 
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        try:
+            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen geeft beveiliging
+            deelcomp = (DeelCompetitie
+                        .objects
+                        .select_related('competitie',
+                                        'nhb_regio',
+                                        'nhb_regio__rayon')
+                        .get(pk=deelcomp_pk,
+                             laag=LAAG_REGIO))
+        except (ValueError, DeelCompetitie.DoesNotExist):
+            raise Resolver404()
+
+        context['deelcomp'] = deelcomp
+        context['regio'] = deelcomp.nhb_regio
+
+        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
+        mag_wijzigen = (rol_nu == Rollen.ROL_RCL and functie_nu.nhb_regio == deelcomp.nhb_regio)
+
+        if deelcomp.inschrijf_methode == INSCHRIJF_METHODE_1:
+            self._get_methode_1(context, deelcomp, mag_wijzigen)
+        else:
+            self._get_methode_2_3(context, deelcomp, mag_wijzigen)
+
         if rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO):
             rayon = DeelCompetitie.objects.get(laag=LAAG_RK,
                                                competitie=deelcomp.competitie,
                                                nhb_rayon=deelcomp.nhb_regio.rayon)
             context['url_rayon'] = reverse('Competitie:rayon-planning',
                                            kwargs={'deelcomp_pk': rayon.pk})
-
-        context['handleiding_planning_regio_url'] = reverse('Handleiding:Planning_Regio')
 
         menu_dynamics(self.request, context, actief='competitie')
         return context
@@ -393,10 +474,6 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
         context['ronde_opslaan_url'] = reverse('Competitie:regio-ronde-planning',
                                                kwargs={'ronde_pk': ronde.pk})
 
-        # uitslagen invoeren
-        if rol_nu == Rollen.ROL_RCL:
-            context['mag_uitslag_invoeren'] = True
-
         context['heeft_wkl'] = heeft_wkl = (ronde.deelcompetitie.inschrijf_methode == INSCHRIJF_METHODE_2 and
                                             not ronde.is_voor_import_oude_programma())
 
@@ -451,7 +528,7 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
         return context
 
     def post(self, request, *args, **kwargs):
-        """ Deze functie wordt aangeroepen als de knop 'Regel toevoegen' gebruikt wordt
+        """ Deze functie wordt aangeroepen als de knop 'Wedstrijd toevoegen' gebruikt wordt
             en als op de knop Instellingen Opslaan wordt gedrukt voor de ronde parameters
         """
 
@@ -549,6 +626,114 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
             # laat de nieuwe wedstrijd meteen wijzigen
             next_url = reverse('Competitie:regio-wijzig-wedstrijd',
                                kwargs={'wedstrijd_pk': wedstrijd.pk})
+
+        return HttpResponseRedirect(next_url)
+
+
+class RegioRondePlanningMethode1View(UserPassesTestMixin, TemplateView):
+
+    """ Deze view geeft de Methode 1 planning weer van een regio of cluster in de regio """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_COMPETITIE_PLANNING_REGIO_RONDE_METHODE1
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        rol_nu = rol_get_huidige(self.request)
+        return rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL)
+
+    def handle_no_permission(self):
+        """ gebruiker heeft geen toegang --> redirect naar het plein """
+        return HttpResponseRedirect(reverse('Plein:plein'))
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        try:
+            ronde_pk = int(kwargs['ronde_pk'][:6])  # afkappen geeft beveiliging
+            ronde = (DeelcompetitieRonde
+                     .objects
+                     .select_related('deelcompetitie__competitie',
+                                     'deelcompetitie__nhb_regio__rayon',
+                                     'cluster__regio')
+                     .get(pk=ronde_pk))
+        except (ValueError, DeelcompetitieRonde.DoesNotExist):
+            raise Resolver404()
+
+        context['ronde'] = ronde
+
+        context['wedstrijden'] = (ronde.plan.wedstrijden
+                                  .select_related('vereniging')
+                                  .order_by('datum_wanneer', 'tijd_begin_wedstrijd'))
+
+        rol_nu = rol_get_huidige(self.request)
+        if rol_nu == Rollen.ROL_RCL:
+            context['url_nieuwe_wedstrijd'] = reverse('Competitie:regio-methode1-planning',
+                                                      kwargs={'ronde_pk': ronde.pk})
+
+            for wedstrijd in context['wedstrijden']:
+                # TODO: vanaf welke datum dit niet meer aan laten passen?
+                wedstrijd.url_wijzig = reverse('Competitie:regio-wijzig-wedstrijd',
+                                               kwargs={'wedstrijd_pk': wedstrijd.pk})
+            # for
+
+        # TODO: datum_eerte/laatste hier niet nodig??!
+        week = 37
+        jaar = ronde.deelcompetitie.competitie.begin_jaar
+        context['datum_eerste'] = competitie_week_nr_to_date(jaar, week)
+
+        if ronde.deelcompetitie.competitie.afstand == '18':
+            week = 50+1
+        else:
+            week = 11+1
+            jaar += 1
+        context['datum_laatste'] = competitie_week_nr_to_date(jaar, week)   # TODO: moet 1 dag eerder?
+
+        terug_url = reverse('Competitie:regio-planning',
+                            kwargs={'deelcomp_pk': ronde.deelcompetitie.pk})
+        context['terug_url'] = terug_url
+
+        rol_nu = rol_get_huidige(self.request)
+        if rol_nu != Rollen.ROL_RCL:
+            context['readonly'] = True
+
+        menu_dynamics(self.request, context, actief='competitie')
+        return context
+
+    def post(self, request, *args, **kwargs):
+        """ Deze functie wordt aangeroepen als de knop 'Wedstrijd toevoegen' gebruikt wordt
+            en als op de knop Instellingen Opslaan wordt gedrukt voor de ronde parameters
+        """
+
+        try:
+            ronde_pk = int(kwargs['ronde_pk'][:6])  # afkappen geeft beveiliging
+            ronde = (DeelcompetitieRonde
+                     .objects
+                     .select_related('deelcompetitie__competitie')
+                     .get(pk=ronde_pk))
+        except (ValueError, DeelcompetitieRonde.DoesNotExist):
+            raise Resolver404()
+
+        # alleen de RCL mag een wedstrijd toevoegen
+        rol_nu = rol_get_huidige(self.request)
+        if rol_nu != Rollen.ROL_RCL:
+            raise Resolver404()
+
+        # voeg een wedstrijd toe
+        jaar = ronde.deelcompetitie.competitie.begin_jaar
+        wedstrijd = Wedstrijd()
+        wedstrijd.datum_wanneer = competitie_week_nr_to_date(jaar, 37)
+        wedstrijd.tijd_begin_aanmelden = datetime.time(hour=0, minute=0, second=0)
+        wedstrijd.tijd_begin_wedstrijd = wedstrijd.tijd_begin_aanmelden
+        wedstrijd.tijd_einde_wedstrijd = wedstrijd.tijd_begin_aanmelden
+        wedstrijd.save()
+
+        ronde.plan.wedstrijden.add(wedstrijd)
+
+        # laat de nieuwe wedstrijd meteen wijzigen
+        next_url = reverse('Competitie:regio-wijzig-wedstrijd',
+                           kwargs={'wedstrijd_pk': wedstrijd.pk})
 
         return HttpResponseRedirect(next_url)
 
@@ -656,27 +841,41 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         context['ronde'] = ronde
         context['wedstrijd'] = wedstrijd
 
-        # zoek het weeknummer waarin deze wedstrijd gehouden moet worden
-        context['opt_weekdagen'] = opt_weekdagen = list()
+        if ronde.deelcompetitie.inschrijf_methode == INSCHRIJF_METHODE_1:
+            jaar = ronde.deelcompetitie.competitie.begin_jaar
+            week = 37
+            context['datum_eerste'] = competitie_week_nr_to_date(jaar, week)
 
-        # bepaal de weekdag uit de huidige wedstrijd datum
-        jaar = ronde.deelcompetitie.competitie.begin_jaar
-        when = competitie_week_nr_to_date(jaar, ronde.week_nr)
-        ronde.maandag = when
+            if ronde.deelcompetitie.competitie.afstand == '18':
+                week = 50 + 1
+            else:
+                week = 11 + 1
+                jaar += 1
+            context['datum_laatste'] = competitie_week_nr_to_date(jaar, week)  # TODO: moet 1 dag eerder?
+        else:
+            # laat een dag van de week kiezen
 
-        verschil = wedstrijd.datum_wanneer - when
-        dag_nr = verschil.days
+            # zoek het weeknummer waarin deze wedstrijd gehouden moet worden
+            context['opt_weekdagen'] = opt_weekdagen = list()
 
-        for weekdag_nr, weekdag_naam in WEEK_DAGEN:
-            obj = SimpleNamespace()
-            obj.weekdag_nr = weekdag_nr
-            obj.weekdag_naam = weekdag_naam
-            obj.datum = when
-            obj.actief = (dag_nr == weekdag_nr)
-            opt_weekdagen.append(obj)
+            # bepaal de weekdag uit de huidige wedstrijd datum
+            jaar = ronde.deelcompetitie.competitie.begin_jaar
+            when = competitie_week_nr_to_date(jaar, ronde.week_nr)
+            ronde.maandag = when
 
-            when += datetime.timedelta(days=1)
-        # for
+            verschil = wedstrijd.datum_wanneer - when
+            dag_nr = verschil.days
+
+            for weekdag_nr, weekdag_naam in WEEK_DAGEN:
+                obj = SimpleNamespace()
+                obj.weekdag_nr = weekdag_nr
+                obj.weekdag_naam = weekdag_naam
+                obj.datum = when
+                obj.actief = (dag_nr == weekdag_nr)
+                opt_weekdagen.append(obj)
+
+                when += datetime.timedelta(days=1)
+            # for
 
         wedstrijd.tijd_begin_wedstrijd_str = wedstrijd.tijd_begin_wedstrijd.strftime("%H:%M")
         # wedstrijd.tijd_begin_aanmelden_str = wedstrijd.tijd_begin_aanmelden.strftime("%H%M")
@@ -710,8 +909,14 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         if heeft_wkl:
             context['wkl_indiv'], context['wkl_team'] = self._get_wedstrijdklassen(ronde.deelcompetitie, wedstrijd)
 
-        context['url_terug'] = reverse('Competitie:regio-ronde-planning', kwargs={'ronde_pk': ronde.pk})
         context['url_opslaan'] = reverse('Competitie:regio-wijzig-wedstrijd', kwargs={'wedstrijd_pk': wedstrijd.pk})
+
+        if ronde.deelcompetitie.inschrijf_methode == INSCHRIJF_METHODE_1:
+            context['url_terug'] = reverse('Competitie:regio-methode1-planning',
+                                           kwargs={'ronde_pk': ronde.pk})
+        else:
+            context['url_terug'] = reverse('Competitie:regio-ronde-planning',
+                                           kwargs={'ronde_pk': ronde.pk})
 
         uitslag = wedstrijd.uitslag
         if uitslag and (uitslag.is_bevroren or uitslag.scores.count()):
@@ -744,34 +949,27 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         if ronde.is_voor_import_oude_programma():
             raise Resolver404()
 
+        deelcomp = ronde.deelcompetitie
+
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
-        if ronde.deelcompetitie.functie != functie_nu:
+        if deelcomp.functie != functie_nu:
             # mag niet wijzigen
             raise Resolver404()
 
-        jaar = ronde.deelcompetitie.competitie.begin_jaar
-
-        # weekdag is een cijfer van 0 tm 6
-        # aanvang bestaat uit vier cijfers, zoals 0830
-        weekdag = request.POST.get('weekdag', '')[:1]     # afkappen = veiligheid
         aanvang = request.POST.get('aanvang', '')[:5]
         nhbver_pk = request.POST.get('nhbver_pk', '')[:6]
-        if weekdag == "" or nhbver_pk == "" or len(aanvang) != 5 or aanvang[2] != ':':
+        if nhbver_pk == "" or len(aanvang) != 5 or aanvang[2] != ':':
             raise Resolver404()
 
         try:
-            weekdag = int(weekdag)
+            nhbver = NhbVereniging.objects.get(pk=nhbver_pk)
+        except (NhbVereniging.DoesNotExist, ValueError):
+            raise Resolver404()
+
+        try:
             aanvang = int(aanvang[0:0+2] + aanvang[3:3+2])
         except (TypeError, ValueError):
             raise Resolver404()
-
-        if weekdag < 0 or weekdag > 6 or aanvang < 0 or aanvang > 2359:
-            raise Resolver404()
-
-        # bepaal de begin datum van de ronde-week
-        when = competitie_week_nr_to_date(jaar, ronde.week_nr)
-        # voeg nu de offset toe uit de weekdag
-        when += datetime.timedelta(days=weekdag)
 
         # vertaal aanvang naar een tijd
         uur = aanvang // 100
@@ -779,10 +977,37 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         if uur < 0 or uur > 23 or minuut < 0 or minuut > 59:
             raise Resolver404()
 
-        try:
-            nhbver = NhbVereniging.objects.get(pk=nhbver_pk)
-        except NhbVereniging.DoesNotExist:
-            raise Resolver404()
+        if deelcomp.inschrijf_methode == INSCHRIJF_METHODE_1:
+            wanneer = request.POST.get('wanneer', None)
+            if not wanneer:
+                raise Resolver404()
+
+            try:
+                datum_p = datetime.datetime.strptime(wanneer, '%Y-%m-%d')
+            except ValueError:
+                raise Resolver404()
+
+            when = datum_p.date()
+        else:
+            # weekdag is een cijfer van 0 tm 6
+            # aanvang bestaat uit vier cijfers, zoals 0830
+            weekdag = request.POST.get('weekdag', '')[:1]     # afkappen = veiligheid
+            if weekdag == "":
+                raise Resolver404()
+
+            try:
+                weekdag = int(weekdag)
+            except (TypeError, ValueError):
+                raise Resolver404()
+
+            if weekdag < 0 or weekdag > 6 or aanvang < 0 or aanvang > 2359:
+                raise Resolver404()
+
+            # bepaal de begin datum van de ronde-week
+            jaar = ronde.deelcompetitie.competitie.begin_jaar
+            when = competitie_week_nr_to_date(jaar, ronde.week_nr)
+            # voeg nu de offset toe uit de weekdag
+            when += datetime.timedelta(days=weekdag)
 
         wedstrijd.datum_wanneer = when
         wedstrijd.tijd_begin_wedstrijd = datetime.time(hour=uur, minute=minuut)
@@ -825,7 +1050,13 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         if len(gekozen_klassen):
             wedstrijd.indiv_klassen.add(*gekozen_klassen)
 
-        url = reverse('Competitie:regio-ronde-planning', kwargs={'ronde_pk': ronde.pk})
+        if deelcomp.inschrijf_methode == INSCHRIJF_METHODE_1:
+            url = reverse('Competitie:regio-methode1-planning',
+                          kwargs={'ronde_pk': ronde.pk})
+        else:
+            url = reverse('Competitie:regio-ronde-planning',
+                          kwargs={'ronde_pk': ronde.pk})
+
         return HttpResponseRedirect(url)
 
 

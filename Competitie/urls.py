@@ -25,10 +25,17 @@ urlpatterns = [
          name='overzicht'),
 
 
+    # openbare info
     path('info/',
          views_info.InfoCompetitieView.as_view(),
          name='info-competitie'),
 
+    path('klassegrenzen/tonen/',
+         views_klassegrenzen.KlassegrenzenTonenView.as_view(),
+         name='klassegrenzen-tonen'),
+
+
+    # BB schermen
     path('instellingen-volgende-competitie/',
          views_bb.InstellingenVolgendeCompetitieView.as_view(),
          name='instellingen-volgende-competitie'),
@@ -45,15 +52,12 @@ urlpatterns = [
          views_bb.KlassegrenzenVaststellenView.as_view(),
          name='klassegrenzen-vaststellen'),
 
-    path('klassegrenzen/tonen/',
-         views_klassegrenzen.KlassegrenzenTonenView.as_view(),
-         name='klassegrenzen-tonen'),
-
     path('wijzig-datums/<comp_pk>/',
          views_bb.WijzigDatumsView.as_view(),
          name='wijzig-datums'),
 
 
+    # aanmelden / ingeschreven
     path('lijst-regiocompetitie/<comp_pk>/regio-<regio_pk>/dagdeel-behoefte/',
          views_aangemeld.Inschrijfmethode3BehoefteView.as_view(),
          name='inschrijfmethode3-behoefte'),
@@ -75,6 +79,7 @@ urlpatterns = [
          name='lijst-regiocomp-regio'),
 
 
+    # RK selectie
     path('lijst-rayonkampioenschappen/<deelcomp_pk>/',
          views_planning_rayon.LijstRkSchuttersView.as_view(),
          name='lijst-rk'),
@@ -84,21 +89,22 @@ urlpatterns = [
          name='wijzig-status-rk-deelnemer'),
 
 
-    path('planning/regio/ronde/<ronde_pk>/',
-         views_planning_regio.RegioRondePlanningView.as_view(),
-         name='regio-ronde-planning'),
+    # planning regio
+    path('planning/regio/<deelcomp_pk>/',
+         views_planning_regio.RegioPlanningView.as_view(),
+         name='regio-planning'),
 
     path('planning/regio/cluster/<cluster_pk>/',
          views_planning_regio.RegioClusterPlanningView.as_view(),
          name='regio-cluster-planning'),
 
-    path('planning/regio/afsluiten/<deelcomp_pk>/',
-         views_planning_regio.AfsluitenRegiocompView.as_view(),
-         name='afsluiten-regiocomp'),
+    path('planning/regio/ronde/<ronde_pk>/',
+         views_planning_regio.RegioRondePlanningView.as_view(),
+         name='regio-ronde-planning'),
 
-    path('planning/regio/<deelcomp_pk>/',
-         views_planning_regio.RegioPlanningView.as_view(),
-         name='regio-planning'),
+    path('planning/regio/regio-wedstrijden/<ronde_pk>/',
+         views_planning_regio.RegioRondePlanningMethode1View.as_view(),
+         name='regio-methode1-planning'),
 
     path('planning/regio/wedstrijd/wijzig/<wedstrijd_pk>/',
          views_planning_regio.WijzigWedstrijdView.as_view(),
@@ -108,7 +114,12 @@ urlpatterns = [
          views_planning_regio.VerwijderWedstrijdView.as_view(),
          name='regio-verwijder-wedstrijd'),
 
+    path('planning/regio/afsluiten/<deelcomp_pk>/',
+         views_planning_regio.AfsluitenRegiocompView.as_view(),
+         name='afsluiten-regiocomp'),
 
+
+    # planning rk
     path('planning/rk/<deelcomp_pk>/limieten/',
          views_planning_rayon.RayonLimietenView.as_view(),
          name='rayon-limieten'),
@@ -126,6 +137,7 @@ urlpatterns = [
          name='rayon-verwijder-wedstrijd'),
 
 
+    # planning bk
     path('planning/bk/<deelcomp_pk>/',
          views_planning_bond.BondPlanningView.as_view(),
          name='bond-planning'),
@@ -135,11 +147,13 @@ urlpatterns = [
          name='bond-verwijder-wedstrijd'),
 
 
+    # scores regio
     path('scores/regio/<deelcomp_pk>/',
          views_scores.ScoresRegioView.as_view(),
          name='scores-regio'),
 
 
+    # uitslag invoeren
     path('scores/uitslag-invoeren/<wedstrijd_pk>/',
          views_scores.WedstrijdUitslagInvoerenView.as_view(),
          name='wedstrijd-uitslag-invoeren'),
@@ -169,6 +183,7 @@ urlpatterns = [
          name='dynamic-scores-opslaan'),
 
 
+    # competitie uitslagen
     path('uitslagen/',
          views_uitslagen.UitslagenView.as_view(),
          name='uitslagen'),

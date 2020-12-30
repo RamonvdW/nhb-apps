@@ -173,6 +173,7 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
         for deelcomp in deelcomps:
             plan_pks = (DeelcompetitieRonde
                         .objects
+                        .exclude(beschrijving__contains=' oude programma')
                         .filter(deelcompetitie=deelcomp)
                         .values_list('plan__pk', flat=True))
             deelcomp.rondes_count = len(plan_pks)
