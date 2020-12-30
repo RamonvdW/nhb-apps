@@ -188,7 +188,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('functie/wijzig.dtl', 'plein/site_layout.dtl'))
 
         # controleer aanwezigheid van toevoeg knoppen
-        self.assertContains(resp, 'Maak beheerder', count=1)         # maar 1 lid van vereniging
+        self.assertContains(resp, 'Maak beheerder', count=2)         # 2 leden van de vereniging
         # controleer afwezigheid van verwijder knoppen
         self.assertContains(resp, 'Verwijder beheerder', count=1)    # kan zichzelf verwijderen
 

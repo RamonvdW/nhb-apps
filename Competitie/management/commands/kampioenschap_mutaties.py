@@ -564,10 +564,10 @@ class Command(BaseCommand):
             # wacht 5 seconden voordat we opnieuw in de database kijken
             # het wachten kan onderbroken worden door een ping, als er een nieuwe mutatie toegevoegd is
             secs = (self.stop_at - now).total_seconds()
-            if secs > 1:                    # pragma: no branch
+            if secs > 1:                                    # pragma: no branch
                 timeout = min(5.0, secs)
-                if self._sync.wait_for_ping(timeout):
-                    self._count_ping += 1
+                if self._sync.wait_for_ping(timeout):       # pragma: no branch
+                    self._count_ping += 1                   # pragma: no cover
             else:
                 # near the end
                 break       # from the while

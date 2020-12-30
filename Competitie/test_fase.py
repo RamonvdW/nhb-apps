@@ -80,6 +80,9 @@ def zet_competitie_fase(comp, fase):
         comp.save()
         return
 
+    if comp.competitieklasse_set.count() == 0:
+        raise NotImplementedError("Kan niet naar fase %s zonder competitie klassen!" % fase)
+
     comp.begin_aanmeldingen = gister
 
     if fase == 'B':

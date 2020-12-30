@@ -569,8 +569,10 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 404)     # 404 = Not found
 
     def test_behoefte_18(self):
-        comp = Competitie.objects.filter(afstand='18').all()[0]
-        functie_rcl = DeelCompetitie.objects.get(competitie=comp, laag=LAAG_REGIO, nhb_regio=self.regio_101).functie
+        comp = Competitie.objects.get(afstand='18')
+        functie_rcl = DeelCompetitie.objects.get(competitie=comp,
+                                                 laag=LAAG_REGIO,
+                                                 nhb_regio=self.regio_101).functie
 
         self.e2e_login_and_pass_otp(self.account_bb)        # geen account_hwl
         self.e2e_wisselnaarrol_bb()
@@ -643,12 +645,18 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('competitie/inschrijfmethode3-behoefte.dtl', 'plein/site_layout.dtl'))
 
     def test_bad_hwl(self):
+        comp = Competitie.objects.get(afstand=18)       # let op: 25 werkt niet
+
         self.e2e_login_and_pass_otp(self.account_bb)        # geen account_hwl
+        self.e2e_wisselnaarrol_bb()
+        self._doe_inschrijven(comp)     # wisselt naar HWL functie
+
         self.e2e_wissel_naar_functie(self.functie_hwl)
 
         # landelijk
-        comp = Competitie.objects.all()[0]
         zet_competitie_fase(comp, 'C')
+        comp.zet_fase()
+        self.assertEqual(comp.fase, 'C')
 
         # bad keys
         url = self.url_aangemeld_alles % 999999
@@ -684,7 +692,9 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
 
     def test_bad_rcl(self):
         comp_pk = Competitie.objects.get(afstand='25').pk
-        functie_rcl = DeelCompetitie.objects.get(competitie=comp_pk, laag=LAAG_REGIO, nhb_regio=self.regio_101).functie
+        functie_rcl = DeelCompetitie.objects.get(competitie=comp_pk,
+                                                 laag=LAAG_REGIO,
+                                                 nhb_regio=self.regio_101).functie
 
         self.e2e_login_and_pass_otp(self.account_rcl)
         self.e2e_wissel_naar_functie(functie_rcl)

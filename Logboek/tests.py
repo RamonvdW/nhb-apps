@@ -66,8 +66,7 @@ class TestLogboek(E2EHelpers, TestCase):
     def test_str(self):
         # gebruik de str functie op de Logboek class
         log = LogboekRegel.objects.all()[0]
-        msg = str(log)
-        self.assertTrue("Logboek unittest" in msg and "normaal" in msg)
+        self.assertTrue(str(log) != "")
 
     def test_users_forbidden(self):
         # do een get van het logboek met een gebruiker die daar geen rechten toe heeft
