@@ -50,7 +50,7 @@ python3 -m coverage erase
 
 python3 -m coverage run --append --branch ./manage.py test --noinput $*  # note: double quotes not supported around $*
 RES=$?
-[ $RES -eq 0 ] || ABORTED=1
+[ $RES -eq 3 ] && ABORTED=1
 #echo "[DEBUG] Coverage run result: $RES"
 if [ $RES -eq 0 -a $# -eq 0 ]
 then
@@ -58,7 +58,7 @@ then
     echo "[INFO] Performing run with debug + wiki run"
     python3 -m coverage run --append --branch ./manage.py test --debug-mode --enable-wiki Plein.tests.TestPlein.test_quick Functie.test_saml2idp &>/dev/null
     RES=$?
-    [ $RES -eq 0 ] || ABORTED=1
+    [ $RES -eq 3 ] && ABORTED=1
     #echo "[DEBUG] Debug coverage run result: $RES"
 fi
 

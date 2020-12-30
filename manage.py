@@ -55,7 +55,7 @@ def main():
             print("\nDone!")
     except KeyboardInterrupt:
         print('\nInterrupted!')
-        sys.exit(1)                 # allows test suite to detect test abort
+        sys.exit(3)                 # allows test suite to detect test abort
 
 
 if __name__ == '__main__':  # pragma: no branch
