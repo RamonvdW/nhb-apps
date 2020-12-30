@@ -10,7 +10,7 @@ from BasisTypen.models import BoogType
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging, NhbLid
 from Schutter.models import SchutterBoog
-from Wedstrijden.models import WedstrijdLocatie, WedstrijdenPlan, Wedstrijd
+from Wedstrijden.models import WedstrijdLocatie, WedstrijdenPlan, WedstrijdUitslag
 from Overig.e2ehelpers import E2EHelpers
 from .models import (Competitie, DeelCompetitie, LAAG_REGIO, competitie_aanmaken,
                      KampioenschapSchutterBoog, CompetitieKlasse, DeelcompetitieKlasseLimiet,
@@ -177,12 +177,13 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         # secretaris kan nog niet ingevuld worden
         ver.save()
 
-        self.url_planning_rayon = '/competitie/planning/rk/%s/'                            # deelcomp_pk
-        self.url_wijzig_rk_wedstrijd = '/competitie/planning/rk/wedstrijd/wijzig/%s/'      # wedstrijd_pk
-        self.url_doorzetten_rk = '/competitie/planning/doorzetten/%s/rk/'                  # comp_pk
-        self.url_lijst_rk = '/competitie/lijst-rayonkampioenschappen/%s/'                  # deelcomp_pk
+        self.url_planning_rayon = '/competitie/planning/rk/%s/'                              # deelcomp_pk
+        self.url_wijzig_rk_wedstrijd = '/competitie/planning/rk/wedstrijd/wijzig/%s/'        # wedstrijd_pk
+        self.url_verwijder_rk_wedstrijd = '/competitie/planning/rk/wedstrijd/verwijder/%s/'  # wedstrijd_pk
+        self.url_doorzetten_rk = '/competitie/planning/doorzetten/%s/rk/'                    # comp_pk
+        self.url_lijst_rk = '/competitie/lijst-rayonkampioenschappen/%s/'                    # deelcomp_pk
         self.url_wijzig_status = '/competitie/lijst-rayonkampioenschappen/wijzig-status-rk-deelnemer/%s/'  # deelnemer_pk
-        self.url_wijzig_limiet = '/competitie/planning/rk/%s/limieten/'                    # deelcomp_pk
+        self.url_wijzig_limiet = '/competitie/planning/rk/%s/limieten/'                      # deelcomp_pk
 
     def competitie_sluit_alle_regiocompetities(self, comp):
         # deze functie sluit alle regiocompetities af zodat de competitie in fase G komt
@@ -329,6 +330,86 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         with self.assert_max_queries(25):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
+
+    def test_planning_rayon_verwijder(self):
+        # maak een wedstrijd aan en verwijder deze weer
+        self.e2e_login_and_pass_otp(self.account_rko1_18)
+        self.e2e_wissel_naar_functie(self.functie_rko1_18)
+
+        # doet een 'get' op de planning zodat er een plan aangemaakt wordt
+        url = self.url_planning_rayon % self.deelcomp_rayon1_18.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.deelcomp_rayon1_18 = DeelCompetitie.objects.get(pk=self.deelcomp_rayon1_18.pk)
+
+        # maak een RK wedstrijd aan in het eigen rayon
+        self.assertEqual(self.deelcomp_rayon1_18.plan.wedstrijden.count(), 0)
+        url = self.url_planning_rayon % self.deelcomp_rayon1_18.pk
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
+        self.assert_is_redirect_not_plein(resp)     # check success
+        self.assertEqual(self.deelcomp_rayon1_18.plan.wedstrijden.count(), 1)
+
+        # bevries de uitslag
+        wedstrijd = self.deelcomp_rayon1_18.plan.wedstrijden.all()[0]
+        uitslag = WedstrijdUitslag(max_score=300,
+                                   afstand_meter=18,
+                                   is_bevroren=True)
+        uitslag.save()
+        wedstrijd.uitslag = uitslag
+        wedstrijd.save()
+
+        # wedstrijd met bevroren uitslag kan niet verwijderd worden
+        url = self.url_verwijder_rk_wedstrijd % wedstrijd.pk
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
+        self.assertEqual(resp.status_code, 404)     # 404 = Not found/allowed
+
+        # verwijder de bevriezing
+        uitslag.is_bevroren = False
+        uitslag.save()
+
+        # verwijder de wedstrijd weer
+        url = self.url_verwijder_rk_wedstrijd % wedstrijd.pk
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
+        self.assert_is_redirect_not_plein(resp)     # check success
+        self.assertEqual(self.deelcomp_rayon1_18.plan.wedstrijden.count(), 0)
+
+    def test_planning_rayon_verwijder_bad(self):
+        # verkeerde rol / niet ingelogd
+        url = self.url_verwijder_rk_wedstrijd % 999999
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
+        self.assert_is_redirect(resp, '/plein/')
+
+        # inloggen
+        self.e2e_login_and_pass_otp(self.account_rko1_18)
+        self.e2e_wissel_naar_functie(self.functie_rko1_18)
+
+        # maak een RK wedstrijd aan
+        url = self.url_planning_rayon % self.deelcomp_rayon1_18.pk
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
+        self.assert_is_redirect_not_plein(resp)     # check success
+
+        self.deelcomp_rayon1_18 = DeelCompetitie.objects.get(pk=self.deelcomp_rayon1_18.pk)
+        wedstrijd = self.deelcomp_rayon1_18.plan.wedstrijden.all()[0]
+
+        # verwijder bad pk
+        url = self.url_verwijder_rk_wedstrijd % 999999
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
+        self.assertEqual(resp.status_code, 404)     # 404 = Not found/allowed
+
+        # verkeerde rol
+        self.e2e_login_and_pass_otp(self.account_rko2_18)
+        self.e2e_wissel_naar_functie(self.functie_rko2_18)
+        url = self.url_verwijder_rk_wedstrijd % wedstrijd.pk
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
+        self.assertEqual(resp.status_code, 404)     # 404 = Not found/allowed
 
     def test_planning_rayon_geen_ver(self):
         self.e2e_login_and_pass_otp(self.account_rko2_18)

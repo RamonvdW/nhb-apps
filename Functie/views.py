@@ -63,7 +63,7 @@ def mag_beheerder_wijzigen_of_404(request, functie):
         # SEC
         return
 
-    if rol_nu in Rollen.ROL_HWL:
+    if rol_nu == Rollen.ROL_HWL:
         if functie.nhb_ver != functie_nu.nhb_ver:
             # verkeerde vereniging
             raise Resolver404()
