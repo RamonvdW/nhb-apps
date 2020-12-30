@@ -15,7 +15,7 @@ from Taken.models import Taak
 from Wedstrijden.models import WedstrijdLocatie, Wedstrijd
 from Overig.e2ehelpers import E2EHelpers
 from .models import (Competitie, DeelCompetitie, CompetitieKlasse,
-                     DeelcompetitieRonde, competitie_aanmaken,
+                     DeelcompetitieRonde, competitie_aanmaken, LAAG_REGIO, LAAG_RK,
                      RegioCompetitieSchutterBoog, INSCHRIJF_METHODE_1)
 from .views_planning_regio import competitie_week_nr_to_date
 import datetime
@@ -1070,6 +1070,29 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
             resp = self.client.post(self.url_verwijder_wedstrijd % 999999)
         self.assertEqual(resp.status_code, 404)     # 404 = Not found
 
+        # verander de deelcompetitie laag
+        self.deelcomp_regio101_18.laag = LAAG_RK
+        self.deelcomp_regio101_18.save()
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
+        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+
+        self.deelcomp_regio101_18.laag = LAAG_REGIO
+        self.deelcomp_regio101_18.save()
+
+        # verwijder als 'verkeerde' RCL
+        self.e2e_login_and_pass_otp(self.account_rcl101_25)
+        self.e2e_wissel_naar_functie(self.functie_rcl101_25)
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
+        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+
+        self.e2e_login_and_pass_otp(self.account_rcl101_18)
+        self.e2e_wissel_naar_functie(self.functie_rcl101_18)
+
+        # verwijder de wedstrijd die niet meer bevroren is
         with self.assert_max_queries(20):
             resp = self.client.post(url)
         self.assert_is_redirect_not_plein(resp)     # redirect naar regioplanning
