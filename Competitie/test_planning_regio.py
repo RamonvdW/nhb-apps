@@ -141,7 +141,8 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         self.deelcomp_regio101_25 = DeelCompetitie.objects.filter(laag='Regio', competitie=self.comp_25, nhb_regio=self.regio_101)[0]
         self.deelcomp_regio112_18 = DeelCompetitie.objects.filter(laag='Regio', competitie=self.comp_18, nhb_regio=self.regio_112)[0]
 
-        self.cluster_101a = NhbCluster.objects.get(regio=self.regio_101, letter='a', gebruik='18')
+        self.cluster_101a_18 = NhbCluster.objects.get(regio=self.regio_101, letter='a', gebruik='18')
+        self.cluster_101e_25 = NhbCluster.objects.get(regio=self.regio_101, letter='e', gebruik='25')
 
         self.functie_bko_18 = self.deelcomp_bond_18.functie
         self.functie_rko1_18 = self.deelcomp_rayon1_18.functie
@@ -158,12 +159,13 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         self.functie_rcl112_18.accounts.add(self.account_rcl112_18)
 
         # maak nog een test vereniging, zonder HWL functie
+        # stop deze in een cluster
         ver = NhbVereniging()
         ver.naam = "Kleine Club"
         ver.nhb_nr = "1100"
         ver.regio = self.regio_101
-        # secretaris kan nog niet ingevuld worden
         ver.save()
+        ver.clusters.add(self.cluster_101e_25)
 
         self.url_planning_bond = '/competitie/planning/bk/%s/'                               # deelcomp_pk
         self.url_planning_rayon = '/competitie/planning/rk/%s/'                              # deelcomp_pk
@@ -196,7 +198,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, '/plein/')      # not allowed
 
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_planning_regio_cluster % self.cluster_101a.pk)
+            resp = self.client.get(self.url_planning_regio_cluster % self.cluster_101a_18.pk)
         self.assert_is_redirect(resp, '/plein/')      # not allowed
 
         with self.assert_max_queries(20):
@@ -229,7 +231,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, '/plein/')      # not allowed
 
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_planning_regio_cluster % self.cluster_101a.pk)
+            resp = self.client.get(self.url_planning_regio_cluster % self.cluster_101a_18.pk)
         self.assert_is_redirect(resp, '/plein/')      # not allowed
 
         with self.assert_max_queries(20):
@@ -260,7 +262,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('competitie/planning-regio.dtl', 'plein/site_layout.dtl'))
 
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_planning_regio_cluster % self.cluster_101a.pk)
+            resp = self.client.get(self.url_planning_regio_cluster % self.cluster_101a_18.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/planning-regio-cluster.dtl', 'plein/site_layout.dtl'))
@@ -301,7 +303,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
             self.fail(msg='Link naar rayoncompetitie planning ontbreekt. Urls on page: %s' % repr(urls))
 
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_planning_regio_cluster % self.cluster_101a.pk)
+            resp = self.client.get(self.url_planning_regio_cluster % self.cluster_101a_18.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/planning-regio-cluster.dtl', 'plein/site_layout.dtl'))
@@ -312,7 +314,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
 
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_planning_regio_cluster % self.cluster_101a.pk)
+            resp = self.client.post(self.url_planning_regio_cluster % self.cluster_101a_18.pk)
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
 
     def test_overzicht_rko(self):
@@ -342,7 +344,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
             self.fail(msg='Link naar rayoncompetitie planning ontbreekt. Urls on page: %s' % repr(urls))
 
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_planning_regio_cluster % self.cluster_101a.pk)
+            resp = self.client.get(self.url_planning_regio_cluster % self.cluster_101a_18.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/planning-regio-cluster.dtl', 'plein/site_layout.dtl'))
@@ -353,7 +355,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
 
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_planning_regio_cluster % self.cluster_101a.pk)
+            resp = self.client.post(self.url_planning_regio_cluster % self.cluster_101a_18.pk)
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
 
     def test_overzicht_rcl(self):
@@ -375,20 +377,20 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('competitie/planning-regio.dtl', 'plein/site_layout.dtl'))
 
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_planning_regio_cluster % self.cluster_101a.pk)
+            resp = self.client.get(self.url_planning_regio_cluster % self.cluster_101a_18.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/planning-regio-cluster.dtl', 'plein/site_layout.dtl'))
 
         # mess up the cluster
-        self.cluster_101a.gebruik = 42
-        self.cluster_101a.save()
+        self.cluster_101a_18.gebruik = 42
+        self.cluster_101a_18.save()
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_planning_regio_cluster % self.cluster_101a.pk)
+            resp = self.client.get(self.url_planning_regio_cluster % self.cluster_101a_18.pk)
         self.assertEqual(resp.status_code, 404)     # 404 = Not found
 
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_planning_regio_cluster % self.cluster_101a.pk)
+            resp = self.client.post(self.url_planning_regio_cluster % self.cluster_101a_18.pk)
         self.assertEqual(resp.status_code, 404)     # 404 = Not found
 
     def test_wk53(self):
@@ -438,7 +440,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('competitie/planning-regio.dtl', 'plein/site_layout.dtl'))
 
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_planning_regio_cluster % self.cluster_101a.pk)
+            resp = self.client.get(self.url_planning_regio_cluster % self.cluster_101a_18.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/planning-regio-cluster.dtl', 'plein/site_layout.dtl'))
@@ -449,7 +451,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
 
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_planning_regio_cluster % self.cluster_101a.pk)
+            resp = self.client.post(self.url_planning_regio_cluster % self.cluster_101a_18.pk)
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
 
     def test_protection(self):
@@ -644,12 +646,12 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
 
         # haal de (lege) planning op. Dit maakt ook meteen de enige ronde aan
         self.assertEqual(DeelcompetitieRonde.objects.count(), 0)
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(25):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/planning-regio-methode1.dtl', 'plein/site_layout.dtl'))
-        self.assertEqual(DeelcompetitieRonde.objects.count(), 1)
+        self.assertEqual(DeelcompetitieRonde.objects.count(), 2)
 
         # probeer een ronde aan te maken
         with self.assert_max_queries(20):
@@ -670,6 +672,13 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
 
         ronde_oud.delete()
         ronde_pk = DeelcompetitieRonde.objects.filter(deelcompetitie=self.deelcomp_regio101_25)[0].pk
+
+        # haal de planning op (nu is de ronde er al)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/planning-regio-methode1.dtl', 'plein/site_layout.dtl'))
 
         # haal de ronde planning op
         url_ronde = self.url_planning_regio_ronde_methode1 % ronde_pk
@@ -714,6 +723,11 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
 
         with self.assert_max_queries(20):
             resp = self.client.post(url_wed, {'nhbver_pk': self.nhbver_101.pk,
+                                              'aanvang': '12:34'})
+        self.assertEqual(resp.status_code, 404)
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(url_wed, {'nhbver_pk': self.nhbver_101.pk,
                                               'wanneer': '2013-12-11', 'aanvang': '12:34'})
         self.assert_is_redirect(resp, url_ronde)
 
@@ -741,8 +755,8 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_rcl101_25)
         self.e2e_wissel_naar_functie(self.functie_rcl101_25)
 
-        # haal de (lege) planning op. Dit maakt ook meteen de enige ronde aan
-        with self.assert_max_queries(20):
+        # haal de (lege) planning op. Dit maakt ook meteen de enige ronde aan in de regio en 1 cluster
+        with self.assert_max_queries(25):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
@@ -794,7 +808,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         # maak een eerste ronde-planning aan voor een cluster
         self.assertEqual(DeelcompetitieRonde.objects.count(), 0)
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_planning_regio_cluster % self.cluster_101a.pk)
+            resp = self.client.post(self.url_planning_regio_cluster % self.cluster_101a_18.pk)
         self.assert_is_redirect_not_plein(resp)  # check for success
         self.assertEqual(DeelcompetitieRonde.objects.count(), 1)
 
@@ -813,7 +827,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_planning_regio_ronde % ronde_pk,
                                     {'ronde_week_nr': 51, 'ronde_naam': 'eerste rondje is gratis'})
-        url_cluster_planning = self.url_planning_regio_cluster % self.cluster_101a.pk
+        url_cluster_planning = self.url_planning_regio_cluster % self.cluster_101a_18.pk
         self.assert_is_redirect(resp, url_cluster_planning)
 
         # maak een wedstrijd aan
@@ -833,7 +847,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('competitie/wijzig-wedstrijd.dtl', 'plein/site_layout.dtl'))
 
         # stop een vereniging in het cluster
-        self.nhbver_101.clusters.add(self.cluster_101a)
+        self.nhbver_101.clusters.add(self.cluster_101a_18)
 
         # haal de regioplanning op, inclusief de clusterplanning
         with self.assert_max_queries(20):
@@ -843,7 +857,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
 
         # haal de cluster planning op, inclusief telling wedstrijden in een ronde
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_planning_regio_cluster % self.cluster_101a.pk)
+            resp = self.client.get(self.url_planning_regio_cluster % self.cluster_101a_18.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
 
@@ -1299,8 +1313,11 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/planning-regio.dtl', 'plein/site_layout.dtl'))
 
+        # zoek alle weeknummers op
         parts = list()
         html = str(resp.content)
+        html = html[html.find('<table'):]           # pak de eerste tabel (in de 2e staan clusters)
+        html = html[:html.find('</table>')]
         while len(html):
             pos = html.find('<tr><td>')
             if pos < 0:

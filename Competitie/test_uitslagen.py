@@ -5,6 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
+from django.utils import timezone
 from BasisTypen.models import BoogType
 from Competitie.models import (Competitie, CompetitieKlasse, DeelCompetitie,
                                RegioCompetitieSchutterBoog,
@@ -116,13 +117,13 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
 
         # aanvangsgemiddelden vaststellen
         with self.assert_max_queries(5):
-            resp = self.client.post(url_ag_vaststellen)
+            self.client.post(url_ag_vaststellen)
 
         # klassegrenzen vaststellen
         with self.assert_max_queries(20):
-            resp = self.client.post(url_klassegrenzen_vaststellen_18)
+            self.client.post(url_klassegrenzen_vaststellen_18)
         with self.assert_max_queries(20):
-            resp = self.client.post(url_klassegrenzen_vaststellen_25)
+            self.client.post(url_klassegrenzen_vaststellen_25)
 
         # zet de 18m open voor inschrijving
         self.comp_18 = Competitie.objects.get(afstand='18')
@@ -197,7 +198,13 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         aanmelding.save()
 
     def test_top(self):
-        comp = Competitie.objects.get(afstand=25)       # let op: 18 werkt niet
+        comp = Competitie.objects.get(afstand=25)               # let op: 18 werkt niet
+
+        now = timezone.now()
+        now = datetime.date(year=now.year, month=now.month, day=now.day)
+        if comp.begin_aanmeldingen == now:
+            comp.begin_aanmeldingen += datetime.timedelta(days=1)   # needed once a year
+
         way_before = datetime.date(year=2018, month=1, day=1)   # must be before timezone.now()
 
         # fase A1

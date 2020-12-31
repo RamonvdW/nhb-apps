@@ -124,6 +124,8 @@ class TestCompetitieFase(TestCase):
         now = timezone.now()
         now = datetime.date(year=now.year, month=now.month, day=now.day)
         einde_jaar = datetime.date(year=now.year, month=12, day=31)
+        if now == einde_jaar:
+            einde_jaar += datetime.timedelta(days=1)    # needed once a year..
         gisteren = now - datetime.timedelta(days=1)
 
         # maak een competitie aan en controleer de fase
@@ -158,7 +160,7 @@ class TestCompetitieFase(TestCase):
         comp.zet_fase()
         self.assertEqual(comp.fase, 'A1')
 
-        # maak de klassen aan en controleer de fase weer
+        # maak de klassen aan
         indiv = IndivWedstrijdklasse.objects.all()[0]
         CompetitieKlasse(competitie=comp, indiv=indiv, min_ag=0.0).save()
         comp.begin_aanmeldingen = comp.einde_aanmeldingen

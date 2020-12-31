@@ -682,18 +682,6 @@ class RegioRondePlanningMethode1View(UserPassesTestMixin, TemplateView):
                                                kwargs={'wedstrijd_pk': wedstrijd.pk})
             # for
 
-        # TODO: datum_eerte/laatste hier niet nodig??!
-        week = 37
-        jaar = ronde.deelcompetitie.competitie.begin_jaar
-        context['datum_eerste'] = competitie_week_nr_to_date(jaar, week)
-
-        if ronde.deelcompetitie.competitie.afstand == '18':
-            week = 50+1
-        else:
-            week = 11+1
-            jaar += 1
-        context['datum_laatste'] = competitie_week_nr_to_date(jaar, week)   # TODO: moet 1 dag eerder?
-
         terug_url = reverse('Competitie:regio-planning',
                             kwargs={'deelcomp_pk': ronde.deelcompetitie.pk})
         context['terug_url'] = terug_url
