@@ -16,8 +16,8 @@ from NhbStructuur.models import NhbVereniging
 from Overig.background_sync import BackgroundSync
 from Plein.menu import menu_dynamics
 from Wedstrijden.models import Wedstrijd, WedstrijdenPlan, WedstrijdLocatie
-from .models import (LAAG_REGIO, LAAG_RK, LAAG_BK, DeelCompetitie, DeelcompetitieRonde,
-                     CompetitieKlasse, DeelcompetitieKlasseLimiet,
+from .models import (LAAG_REGIO, LAAG_RK, LAAG_BK, INSCHRIJF_METHODE_1, DeelCompetitie,
+                     CompetitieKlasse, DeelcompetitieKlasseLimiet, DeelcompetitieRonde,
                      KampioenschapSchutterBoog, KampioenschapMutatie,
                      MUTATIE_CUT, MUTATIE_AFMELDEN, MUTATIE_AANMELDEN, DEELNAME_JA, DEELNAME_NEE)
 from types import SimpleNamespace
@@ -176,7 +176,10 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
                         .exclude(beschrijving__contains=' oude programma')
                         .filter(deelcompetitie=deelcomp)
                         .values_list('plan__pk', flat=True))
-            deelcomp.rondes_count = len(plan_pks)
+            if deelcomp.inschrijf_methode == INSCHRIJF_METHODE_1:
+                deelcomp.rondes_count = "-"
+            else:
+                deelcomp.rondes_count = len(plan_pks)
             deelcomp.wedstrijden_count = 0
             for plan in (WedstrijdenPlan
                          .objects
