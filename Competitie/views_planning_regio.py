@@ -110,7 +110,7 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
 
         regio_ronde.wedstrijden_count = regio_ronde.plan.wedstrijden.count()
         regio_ronde.url = reverse('Competitie:regio-methode1-planning',
-                                  kwargs={'ronde_pk': ronde.pk})
+                                  kwargs={'ronde_pk': regio_ronde.pk})
         context['regio_ronde'] = regio_ronde
 
         # zorg dat de clusters een ronde hebben
@@ -249,6 +249,10 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
                         .select_related('competitie', 'nhb_regio')
                         .get(pk=deelcomp_pk, laag=LAAG_REGIO, nhb_regio=functie_nu.nhb_regio))
         except (ValueError, DeelCompetitie.DoesNotExist):
+            raise Resolver404()
+
+        if deelcomp.inschrijf_methode == INSCHRIJF_METHODE_1:
+            # inschrijfmethode 1 heeft maar 1 ronde en die wordt automatisch aangemaakt
             raise Resolver404()
 
         ronde = maak_deelcompetitie_ronde(deelcomp=deelcomp)  # checkt ook maximum aantal toegestaan
@@ -1000,7 +1004,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
             except (TypeError, ValueError):
                 raise Resolver404()
 
-            if weekdag < 0 or weekdag > 6 or aanvang < 0 or aanvang > 2359:
+            if weekdag < 0 or weekdag > 6:
                 raise Resolver404()
 
             # bepaal de begin datum van de ronde-week
