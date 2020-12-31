@@ -35,7 +35,7 @@ class AssertMaxQueriesContext(object):
         return self
 
     @staticmethod
-    def _find_statement(query, start):
+    def _find_statement(query, start):                  # pragma: no cover
         best = -1
         word_len = 0
         for word in (#'SELECT', 'DELETE FROM', 'INSERT INTO',m
@@ -48,7 +48,7 @@ class AssertMaxQueriesContext(object):
         # for
         return best, word_len
 
-    def _reformat_sql(self, query):
+    def _reformat_sql(self, query):                     # pragma: no cover
         start = 0
         pos, word_len = self._find_statement(query, start)
         while pos >= 0:
@@ -62,11 +62,11 @@ class AssertMaxQueriesContext(object):
         # leaving the 'with' block
         self.connection.force_debug_cursor = self.force_debug_cursor
         request_started.connect(reset_queries)
-        if exc_type is not None:
+        if exc_type is not None:                        # pragma: no cover
             return
         final_queries = len(self.connection.queries_log)
         executed = final_queries - self.initial_queries
-        if executed > self.num:
+        if executed > self.num:                         # pragma: no cover
             queries = 'Captured queries from index %s to %s:' % (self.initial_queries, final_queries)
             for i, query in enumerate(self.connection.queries[self.initial_queries:final_queries], start=1):
                 queries += '\n [%d] %s' % (i, self._reformat_sql(query['sql']))
@@ -76,7 +76,7 @@ class AssertMaxQueriesContext(object):
         else:
             ongebruikt = self.num - executed
             if self.num > 20:
-                if ongebruikt / self.num > 0.25:
+                if ongebruikt / self.num > 0.25:        # pragma: no cover
                     queries = 'Captured queries from index %s to %s:' % (self.initial_queries, final_queries)
                     for i, query in enumerate(self.connection.queries[self.initial_queries:final_queries], start=1):
                         queries += '\n [%d] %s' % (i, self._reformat_sql(query['sql']))
@@ -346,7 +346,7 @@ class E2EHelpers(object):
         'error: Attribute “loading” not allowed on element “img” at this point.'            # too new
     )
 
-    def _validate_html(self, html):
+    def _validate_html(self, html):                 # pragma: no cover
         """ Run the HTML5 validator """
         issues = list()
 
@@ -414,7 +414,7 @@ class E2EHelpers(object):
             # see https://stackoverflow.com/questions/21084870/no-p-element-in-scope-but-a-p-end-tag-seen-w3c-validation
             for elem in self._BLOCK_LEVEL_ELEMENTS:
                 elem_pos = sub.find('<' + elem)
-                if elem_pos >= 0:
+                if elem_pos >= 0:                   # pragma: no cover
                     elem_pos -= 20
                     if elem_pos < 0:
                         elem_pos = 0
@@ -457,12 +457,12 @@ class E2EHelpers(object):
 
         urls = self.extract_all_urls(response)
         for url in urls:
-            if url.find(" ") >= 0:
+            if url.find(" ") >= 0:                  # pragma: no cover
                 assert isinstance(self, TestCase)
                 self.fail(msg="Unexpected space in url %s on page %s" % (repr(url), dtl))
         # for
 
-        if settings.TEST_VALIDATE_HTML:
+        if settings.TEST_VALIDATE_HTML:             # pragma: no cover
             issues = self._validate_html(html)
             if len(issues):
                 msg = 'Invalid HTML (template: %s):\n' % dtl

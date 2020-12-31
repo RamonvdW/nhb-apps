@@ -97,8 +97,7 @@ def send_mail(obj, stdout=None, stderr=None):
         obj.log += "[INFO] Nieuwe poging om %s\n" % str(now)
         obj.save()
 
-        if has_postmark:
-            send_mail_postmark(obj, stdout, stderr)
+        send_mail_postmark(obj, stdout, stderr)
 
     # not configured for sending emails
     return

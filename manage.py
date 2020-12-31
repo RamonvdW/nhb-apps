@@ -53,7 +53,7 @@ def main():
 
         if stars:
             print("\nDone!")
-    except KeyboardInterrupt:
+    except KeyboardInterrupt:       # pragma: no cover
         print('\nInterrupted!')
         sys.exit(3)                 # allows test suite to detect test abort
 
