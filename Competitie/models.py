@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -506,7 +506,7 @@ class RegioCompetitieSchutterBoog(models.Model):
 
     deelcompetitie = models.ForeignKey(DeelCompetitie, on_delete=models.CASCADE)
 
-    schutterboog = models.ForeignKey(SchutterBoog, on_delete=models.CASCADE)
+    schutterboog = models.ForeignKey(SchutterBoog, on_delete=models.PROTECT)
 
     # vereniging wordt hier apart bijgehouden omdat de schutter over kan stappen
     # midden in het seizoen
@@ -600,7 +600,7 @@ class KampioenschapSchutterBoog(models.Model):
 
     deelcompetitie = models.ForeignKey(DeelCompetitie, on_delete=models.CASCADE)
 
-    schutterboog = models.ForeignKey(SchutterBoog, on_delete=models.CASCADE)
+    schutterboog = models.ForeignKey(SchutterBoog, on_delete=models.PROTECT)
 
     klasse = models.ForeignKey(CompetitieKlasse, on_delete=models.CASCADE)
 

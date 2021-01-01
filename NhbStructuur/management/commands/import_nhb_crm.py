@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -15,6 +15,7 @@ from Mailer.models import mailer_email_is_valide
 from Logboek.models import schrijf_in_logboek
 from Functie.models import maak_functie, maak_account_verenigings_secretaris
 from Wedstrijden.models import WedstrijdLocatie
+from Records.models import IndivRecord
 import datetime
 import json
 
@@ -104,6 +105,7 @@ class Command(BaseCommand):
         self._count_sec_no_account = 0
 
         self._nieuwe_clubs = list()
+        self._recordhouder_nhb_nrs = list()
 
         self.dryrun = False
 
@@ -124,6 +126,16 @@ class Command(BaseCommand):
         if len(keys):
             self.stderr.write("[WARNING] Extra sleutel aanwezig in de %s data: %s" % (repr(level), repr(keys)))
         return has_error
+
+    def _vind_recordhouders(self):
+        """ Sporters met een NL record op hun naam worden niet verwijderd.
+            Zoek deze op zodat we niet eens een poging gaan doen om ze te verwijderen.
+        """
+        self._recordhouder_nhb_nrs = list(IndivRecord
+                                          .objects
+                                          .distinct('nhb_lid')
+                                          .values_list('nhb_lid__nhb_nr', flat=True))
+        # self.stdout.write('[DEBUG] Record houders: %s' % repr(self._recordhouder_nhb_nrs))
 
     def _import_rayons(self, data):
         """ Importeert data van alle rayons """
@@ -656,6 +668,7 @@ class Command(BaseCommand):
                 self._count_toevoegingen += 1
         # for
 
+        self.stdout.write('[DEBUG] Volgende %s NHB nummers moeten verwijderd worden: %s' % (len(nhb_nrs), repr(nhb_nrs)))
         while len(nhb_nrs) > 0:
             lid_nhb_nr = nhb_nrs.pop(0)
             obj = NhbLid.objects.get(nhb_nr=lid_nhb_nr)
@@ -669,21 +682,28 @@ class Command(BaseCommand):
                 if not self.dryrun:
                     obj.save()
                 # TODO: afhandelen van het inactiveren/verwijderen van een lid dat in een team zit in een competitie
+            elif obj.nhb_nr in self._recordhouder_nhb_nrs:
+                # lid heeft een record op zijn/haar naam --> behoud het hele record
+                # de CRM applicatie heeft hier nog geen veld voor
+                pass
+            else:
+                # lid echt verwijderen
+                #
+                # echt verwijderen van een lid is een groot risico gezien aangezien het verwijderen
+                # van gerelateerde records tot onrepareerbare schade kan lijden.
+                #
+                # de database structuur is beveiligd tegen het verwijderen van records die nog in gebruik zijn
+                # daarnaast hebben we ook altijd nog de backups.
+                # daarom is het en acceptabel risico om deze leden echt te verwijderen.
 
-            # echt verwijderen van een lid wordt op dit moment als een te groot risico gezien
-            # aangezien het verwijderen van gerelateerde records tot onrepareerbare schade kan lijden.
-            # TODO: minimaliseer de achtergebleven persoonsgegevens
-            # else:
-            #     self.stdout.write('[INFO] Lid %s wordt nu verwijderd' % str(obj))
-            #     if not self.dryrun:
-            #         # kan alleen als er geen leden maar aan hangen --> de modellen beschermen dit automatisch
-            #         # vang de gerelateerde exceptie af
-            #         try:
-            #             obj.delete()
-            #             self._count_verwijderingen += 1
-            #         except ProtectedError as exc:
-            #             self._count_errors += 1
-            #             self.stderr.write('[ERROR] Onverwachte fout bij het verwijderen van een lid: %s' % str(exc))
+                self.stdout.write('[INFO] Lid %s wordt nu verwijderd' % str(obj))
+                if not self.dryrun:
+                    try:
+                        obj.delete()
+                        self._count_verwijderingen += 1
+                    except ProtectedError as exc:
+                        self._count_errors += 1
+                        self.stderr.write('[ERROR] Onverwachte fout bij het verwijderen van een lid: %s' % str(exc))
         # while
 
     def _import_wedstrijdlocaties(self, data):
@@ -792,6 +812,7 @@ class Command(BaseCommand):
 
         # vang generieke fouten af
         try:
+            self._vind_recordhouders()
             self._import_rayons(data['rayons'])
             self._import_regions(data['regions'])
             # circular dependency: secretaris van vereniging is lid; lid hoort bij vereniging
@@ -801,7 +822,7 @@ class Command(BaseCommand):
             self._import_clubs_secretaris(data['clubs'])
             self._import_wedstrijdlocaties(data['clubs'])
         except django.db.utils.DataError as exc:        # pragma: no coverage
-            self.stderr.write('[ERROR] Overwachte database fout: %s' % str(exc))
+            self.stderr.write('[ERROR] Onverwachte database fout: %s' % str(exc))
 
         self.stdout.write('Import van CRM data is klaar')
         # self.stdout.write("Read %s lines; skipped %s dupes; skipped %s errors; added %s records" % (line_nr, dupe_count, error_count, added_count))
