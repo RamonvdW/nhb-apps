@@ -84,6 +84,10 @@ urlpatterns = [
          views_planning_rayon.LijstRkSelectieView.as_view(),
          name='lijst-rk'),
 
+    path('lijst-rayonkampioenschappen/<deelcomp_pk>/download/',
+         views_planning_rayon.LijstRkSelectieAlsBestandView.as_view(),
+         name='lijst-rk-als-bestand'),
+
     path('lijst-rayonkampioenschappen/wijzig-status-rk-deelnemer/<deelnemer_pk>/',
          views_planning_rayon.WijzigStatusRkSchutterView.as_view(),
          name='wijzig-status-rk-deelnemer'),

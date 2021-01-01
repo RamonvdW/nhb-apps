@@ -4,9 +4,8 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.db.models import F
 from django.conf import settings
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import Resolver404, reverse
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
@@ -23,6 +22,7 @@ from .models import (LAAG_REGIO, LAAG_RK, LAAG_BK, INSCHRIJF_METHODE_1, DeelComp
 from types import SimpleNamespace
 import datetime
 import time
+import csv
 
 
 TEMPLATE_COMPETITIE_PLANNING_RAYON = 'competitie/planning-rayon.dtl'
@@ -592,6 +592,9 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
                                     'volgorde',                 # oplopend op volgorde (dubbelen mogelijk)
                                     '-gemiddelde'))             # aflopend op gemiddelde
 
+            context['url_download'] = reverse('Competitie:lijst-rk-als-bestand',
+                                              kwargs={'deelcomp_pk': deelcomp_rk.pk})
+
         wkl2limiet = dict()    # [pk] = aantal
         for limiet in (DeelcompetitieKlasseLimiet
                        .objects
@@ -653,6 +656,84 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
 
         menu_dynamics(self.request, context, actief='competitie')
         return context
+
+
+class LijstRkSelectieAlsBestandView(LijstRkSelectieView):
+
+    """ Deze klasse wordt gebruikt om de RK selectie lijst
+        te downloaden als csv bestand
+    """
+
+    def get(self, request, *args, **kwargs):
+
+        try:
+            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen voor veiligheid
+            deelcomp_rk = (DeelCompetitie
+                           .objects
+                           .select_related('competitie', 'nhb_rayon')
+                           .get(pk=deelcomp_pk, laag=LAAG_RK))
+        except (ValueError, DeelCompetitie.DoesNotExist):
+            raise Resolver404()
+
+        if not deelcomp_rk.heeft_deelnemerslijst:
+            raise Resolver404()
+
+        # laat alleen de juiste RKO de lijst ophalen
+        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
+        if rol_nu == Rollen.ROL_RKO and functie_nu != deelcomp_rk.functie:
+            raise Resolver404()     # niet de juiste RKO
+
+        deelnemers = (KampioenschapSchutterBoog
+                      .objects
+                      .select_related('deelcompetitie',
+                                      'klasse__indiv',
+                                      'schutterboog__nhblid',
+                                      'bij_vereniging')
+                      .filter(deelcompetitie=deelcomp_rk,
+                              volgorde__lte=48)             # max 48 schutters per klasse tonen
+                      .order_by('klasse__indiv__volgorde',  # groepeer per klasse
+                                'volgorde',                 # oplopend op volgorde (dubbelen mogelijk)
+                                '-gemiddelde'))             # aflopend op gemiddelde
+
+        wkl2limiet = dict()    # [pk] = aantal
+        for limiet in (DeelcompetitieKlasseLimiet
+                       .objects
+                       .select_related('klasse')
+                       .filter(deelcompetitie=deelcomp_rk)):
+            wkl2limiet[limiet.klasse.pk] = limiet.limiet
+        # for
+
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="rayon%s_alle.csv"' % deelcomp_rk.nhb_rayon.rayon_nr
+
+        writer = csv.writer(response)
+        writer.writerow(['Rank', 'NHB nummer', 'Naam', 'Vereniging', 'Label', 'Klasse', 'Gemiddelde'])
+
+        for deelnemer in deelnemers:
+
+            try:
+                limiet = wkl2limiet[deelnemer.klasse.pk]
+            except KeyError:
+                limiet = 24
+
+            lid = deelnemer.schutterboog.nhblid
+            ver = deelnemer.bij_vereniging
+            ver_str = str(ver)
+
+            label = deelnemer.kampioen_label
+            if deelnemer.rank > limiet:
+                label = 'Reserve'
+
+            writer.writerow([deelnemer.rank,
+                             lid.nhb_nr,
+                             lid.volledige_naam(),
+                             str(ver),                  # [nnnn] Naam
+                             label,
+                             deelnemer.klasse.indiv.beschrijving,
+                             deelnemer.gemiddelde])
+        # for
+
+        return response
 
 
 class WijzigStatusRkSchutterView(UserPassesTestMixin, TemplateView):
