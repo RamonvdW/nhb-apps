@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -27,7 +27,7 @@ import time
 
 TEMPLATE_COMPETITIE_PLANNING_RAYON = 'competitie/planning-rayon.dtl'
 TEMPLATE_COMPETITIE_WIJZIG_WEDSTRIJD_RAYON = 'competitie/wijzig-wedstrijd-rk.dtl'
-TEMPLATE_COMPETITIE_LIJST_RK = 'competitie/lijst-rk.dtl'
+TEMPLATE_COMPETITIE_LIJST_RK = 'competitie/lijst-rk-selectie.dtl'
 TEMPLATE_COMPETITIE_WIJZIG_STATUS_RK_SCHUTTER = 'competitie/wijzig-status-rk-deelnemer.dtl'
 TEMPLATE_COMPETITIE_WIJZIG_LIMIETEN_RK = 'competitie/wijzig-limieten-rk.dtl'
 
@@ -500,7 +500,7 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
         return HttpResponseRedirect(url)
 
 
-class LijstRkSchuttersView(UserPassesTestMixin, TemplateView):
+class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
 
     """ Deze view laat de (kandidaat) schutters van en RK zien,
         met mogelijkheid voor de RKO om deze te bevestigen.

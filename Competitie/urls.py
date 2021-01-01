@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -81,7 +81,7 @@ urlpatterns = [
 
     # RK selectie
     path('lijst-rayonkampioenschappen/<deelcomp_pk>/',
-         views_planning_rayon.LijstRkSchuttersView.as_view(),
+         views_planning_rayon.LijstRkSelectieView.as_view(),
          name='lijst-rk'),
 
     path('lijst-rayonkampioenschappen/wijzig-status-rk-deelnemer/<deelnemer_pk>/',

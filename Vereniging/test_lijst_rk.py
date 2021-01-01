@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -209,7 +209,7 @@ class TestVerenigingLijstRK(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/lijst-rk.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/lijst-rk-selectie.dtl', 'plein/site_layout.dtl'))
 
         # voeg een extra deelnemer toe in een latere wedstrijdklasse
         # dit voor code coverage
@@ -227,7 +227,7 @@ class TestVerenigingLijstRK(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/lijst-rk.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/lijst-rk-selectie.dtl', 'plein/site_layout.dtl'))
 
     def test_wl_lijst_rk(self):
         self.e2e_login_and_pass_otp(self.account_beheerder)
@@ -243,7 +243,7 @@ class TestVerenigingLijstRK(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/lijst-rk.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/lijst-rk-selectie.dtl', 'plein/site_layout.dtl'))
 
     def test_bad_lijst_rk(self):
         # anon

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -249,6 +249,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         # coverage: nog een keer ophalen, want dan is het plan er al
         with self.assert_max_queries(20):
             resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
 
         with self.assert_max_queries(20):
             resp = self.client.post(url)
@@ -623,7 +624,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/lijst-rk.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/lijst-rk-selectie.dtl', 'plein/site_layout.dtl'))
 
         # nu doorzetten naar RK fase
         self.competitie_sluit_alle_regiocompetities(self.comp_18)
@@ -661,7 +662,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/lijst-rk.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/lijst-rk-selectie.dtl', 'plein/site_layout.dtl'))
 
         deelnemer.deelname = DEELNAME_JA
         deelnemer.save()
@@ -670,7 +671,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/lijst-rk.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/lijst-rk-selectie.dtl', 'plein/site_layout.dtl'))
 
         deelnemer.rank = 100
         deelnemer.save()
@@ -679,7 +680,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/lijst-rk.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/lijst-rk-selectie.dtl', 'plein/site_layout.dtl'))
 
         deelnemer.bij_vereniging = None
         deelnemer.rank = 1
@@ -694,7 +695,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/lijst-rk.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/lijst-rk-selectie.dtl', 'plein/site_layout.dtl'))
 
     def test_bad_lijst_rk(self):
         # anon
@@ -787,17 +788,14 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
 
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'bevestig': '0', 'afmelden': '0', 'snel': 1})
-        deelnemer = KampioenschapSchutterBoog.objects.get(pk=deelnemer.pk)
         self.assertEqual(KampioenschapMutatie.objects.count(), 0)
 
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'bevestig': '0', 'afmelden': '1', 'snel': 1})
-        deelnemer = KampioenschapSchutterBoog.objects.get(pk=deelnemer.pk)
         self.assertEqual(KampioenschapMutatie.objects.count(), 1)
 
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'bevestig': '1', 'afmelden': '0', 'snel': 1})
-        deelnemer = KampioenschapSchutterBoog.objects.get(pk=deelnemer.pk)
         self.assertEqual(KampioenschapMutatie.objects.count(), 2)
 
         # verbouw 'time' en voer een test uit zonder 'snel'
@@ -805,8 +803,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'bevestig': '1', 'afmelden': '0'})
         time.sleep = sleep_oud
-        deelnemer = KampioenschapSchutterBoog.objects.get(pk=deelnemer.pk)
-        self.assertEqual(KampioenschapMutatie.objects.count(), 2)
+        self.assertEqual(KampioenschapMutatie.objects.count(), 3)
 
     def test_wijzig_status_hwl(self):
         # HWL

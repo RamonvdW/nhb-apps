@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -53,11 +53,11 @@ urlpatterns = [
          name='wedstrijden'),
 
     path('lijst-rayonkampioenschappen/<deelcomp_pk>/alles/',
-         view_lijst_rk.VerenigingLijstRkSchuttersAllesView.as_view(),
+         view_lijst_rk.VerenigingLijstRkSelectieAllesView.as_view(),
          name='lijst-rk-alles'),
 
     path('lijst-rayonkampioenschappen/<deelcomp_pk>/',
-         view_lijst_rk.VerenigingLijstRkSchuttersView.as_view(),
+         view_lijst_rk.VerenigingLijstRkSelectieView.as_view(),
          name='lijst-rk'),
 ]
 

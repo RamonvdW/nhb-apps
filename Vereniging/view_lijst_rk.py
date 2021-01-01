@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -10,14 +10,14 @@ from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
-from Competitie.models import (LAAG_REGIO, LAAG_RK, DeelCompetitie,
+from Competitie.models import (LAAG_RK, DeelCompetitie,
                                DeelcompetitieKlasseLimiet, KampioenschapSchutterBoog)
 
 
-TEMPLATE_VERENIGING_LIJST_RK = 'vereniging/lijst-rk.dtl'
+TEMPLATE_VERENIGING_LIJST_RK = 'vereniging/lijst-rk-selectie.dtl'
 
 
-class VerenigingLijstRkSchuttersView(UserPassesTestMixin, TemplateView):
+class VerenigingLijstRkSelectieView(UserPassesTestMixin, TemplateView):
 
     """ Deze view laat de kandidaat-schutters van en RK zien van de vereniging van de HWL,
         met mogelijkheid voor de HWL om deze te bevestigen.
@@ -140,7 +140,7 @@ class VerenigingLijstRkSchuttersView(UserPassesTestMixin, TemplateView):
         return context
 
 
-class VerenigingLijstRkSchuttersAllesView(VerenigingLijstRkSchuttersView):
+class VerenigingLijstRkSelectieAllesView(VerenigingLijstRkSelectieView):
 
     """ Deze view laat alle kandidaat-schutters van en RK zien,
         met mogelijkheid voor de HWL om deze te bevestigen.
