@@ -73,7 +73,7 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen geeft beveiliging
+            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen voor veiligheid
             deelcomp_rk = (DeelCompetitie
                            .objects
                            .select_related('competitie', 'nhb_rayon')
@@ -202,7 +202,7 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
             raise Resolver404()
 
         try:
-            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen geeft beveiliging
+            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen voor veiligheid
             deelcomp_rk = (DeelCompetitie
                            .objects
                            .select_related('competitie', 'nhb_regio')
@@ -331,7 +331,7 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
         _, functie_nu = rol_get_huidige_functie(self.request)
 
         try:
-            wedstrijd_pk = int(kwargs['wedstrijd_pk'][:6])     # afkappen geeft beveiliging
+            wedstrijd_pk = int(kwargs['wedstrijd_pk'][:6])     # afkappen voor veiligheid
             wedstrijd = (Wedstrijd
                          .objects
                          .select_related('uitslag')
@@ -402,7 +402,7 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
         _, functie_nu = rol_get_huidige_functie(self.request)
 
         try:
-            wedstrijd_pk = int(kwargs['wedstrijd_pk'][:6])     # afkappen geeft beveiliging
+            wedstrijd_pk = int(kwargs['wedstrijd_pk'][:6])     # afkappen voor veiligheid
             wedstrijd = (Wedstrijd
                          .objects
                          .select_related('uitslag')
@@ -475,7 +475,7 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
         for key, value in request.POST.items():
             if key[:10] == "wkl_indiv_":
                 try:
-                    pk = int(key[10:10+6])
+                    pk = int(key[10:10+6])          # afkappen voor veiligheid
                 except (IndexError, TypeError, ValueError):
                     pass
                 else:
@@ -553,7 +553,7 @@ class LijstRkSchuttersView(UserPassesTestMixin, TemplateView):
         # 2) deelnemers voor RK zijn vastgesteld --> toon lijst
 
         try:
-            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen geeft beveiliging
+            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen voor veiligheid
             deelcomp_rk = (DeelCompetitie
                            .objects
                            .select_related('competitie', 'nhb_rayon')
@@ -678,7 +678,7 @@ class WijzigStatusRkSchutterView(UserPassesTestMixin, TemplateView):
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
 
         try:
-            deelnemer_pk = int(kwargs['deelnemer_pk'][:6])  # afkappen geeft beveiliging
+            deelnemer_pk = int(kwargs['deelnemer_pk'][:6])  # afkappen voor veiligheid
             deelnemer = (KampioenschapSchutterBoog
                          .objects
                          .select_related('deelcompetitie__competitie',
@@ -723,7 +723,7 @@ class WijzigStatusRkSchutterView(UserPassesTestMixin, TemplateView):
     def post(self, request, *args, **kwargs):
         """ wordt aangeroepen als de gebruik op de knop OPSLAAN druk """
         try:
-            deelnemer_pk = int(kwargs['deelnemer_pk'][:6])  # afkappen geeft beveiliging
+            deelnemer_pk = int(kwargs['deelnemer_pk'][:6])  # afkappen voor veiligheid
             deelnemer = (KampioenschapSchutterBoog
                          .objects
                          .select_related('klasse',
@@ -805,7 +805,7 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen geeft beveiliging
+            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen voor veiligheid
             deelcomp_rk = (DeelCompetitie
                            .objects
                            .select_related('competitie')
@@ -857,7 +857,7 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
         """ wordt aangeroepen als de gebruik op de knop OPSLAAN druk """
 
         try:
-            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen geeft beveiliging
+            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen voor veiligheid
             deelcomp_rk = (DeelCompetitie
                            .objects
                            .select_related('competitie')
@@ -975,7 +975,7 @@ class VerwijderWedstrijdView(UserPassesTestMixin, View):
         """ Deze functie wordt aangeroepen als de knop 'Verwijder' gebruikt wordt
         """
         try:
-            wedstrijd_pk = int(kwargs['wedstrijd_pk'][:6])  # afkappen geeft beveiliging
+            wedstrijd_pk = int(kwargs['wedstrijd_pk'][:6])  # afkappen voor veiligheid
             wedstrijd = (Wedstrijd
                          .objects
                          .select_related('uitslag')

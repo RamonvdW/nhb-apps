@@ -80,7 +80,7 @@ def zet_competitie_fase(comp, fase):
         comp.save()
         return
 
-    if comp.competitieklasse_set.count() == 0:
+    if comp.competitieklasse_set.count() == 0:      # pragma: no cover
         raise NotImplementedError("Kan niet naar fase %s zonder competitie klassen!" % fase)
 
     comp.begin_aanmeldingen = gister
@@ -124,7 +124,7 @@ class TestCompetitieFase(TestCase):
         now = timezone.now()
         now = datetime.date(year=now.year, month=now.month, day=now.day)
         einde_jaar = datetime.date(year=now.year, month=12, day=31)
-        if now == einde_jaar:
+        if now == einde_jaar:                           # pragma: no cover
             einde_jaar += datetime.timedelta(days=1)    # needed once a year..
         gisteren = now - datetime.timedelta(days=1)
 

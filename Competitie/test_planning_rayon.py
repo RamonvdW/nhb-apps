@@ -14,9 +14,12 @@ from Wedstrijden.models import WedstrijdLocatie, WedstrijdenPlan, WedstrijdUitsl
 from Overig.e2ehelpers import E2EHelpers
 from .models import (Competitie, DeelCompetitie, LAAG_REGIO, LAAG_RK, competitie_aanmaken,
                      KampioenschapSchutterBoog, CompetitieKlasse, DeelcompetitieKlasseLimiet,
-                     KampioenschapMutatie, DEELNAME_NEE, DEELNAME_JA)
+                     KampioenschapMutatie, DEELNAME_NEE, DEELNAME_JA, INSCHRIJF_METHODE_1)
 import datetime
+import time
 import io
+
+sleep_oud = time.sleep
 
 
 class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
@@ -24,6 +27,9 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
     """ unit tests voor de Competitie applicatie, Koppel Beheerders functie """
 
     test_after = ('Competitie.test_fase', 'Competitie.test_beheerders', 'Competitie.test_competitie')
+
+    def _dummy_sleep(self, duration):
+        pass
 
     def _verwerk_mutaties(self, show=False):
         # vraag de achtergrond taak om de mutaties te verwerken
@@ -176,6 +182,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         ver.regio = self.regio_101
         # secretaris kan nog niet ingevuld worden
         ver.save()
+        self.ver_1100 = ver
 
         self.url_planning_rayon = '/competitie/planning/rk/%s/'                              # deelcomp_pk
         self.url_wijzig_rk_wedstrijd = '/competitie/planning/rk/wedstrijd/wijzig/%s/'        # wedstrijd_pk
@@ -277,7 +284,8 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         deelcomp = DeelCompetitie.objects.get(competitie=self.comp_18,
                                               laag=LAAG_REGIO,
                                               nhb_regio=self.regio_101)
-        deelcomp.plan = WedstrijdenPlan()
+        deelcomp.inschrijf_methode = INSCHRIJF_METHODE_1
+        deelcomp.save()
 
         # maak een RK wedstrijd aan in het eigen rayon
         url = self.url_planning_rayon % self.deelcomp_rayon1_18.pk
@@ -321,7 +329,9 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
                                             'nhbver_pk': self.nhbver_101.nhb_nr,
                                             sel_indiv_1: "on",
                                             sel_indiv_2: "on",
-                                            sel_indiv_3: "on"})
+                                            sel_indiv_3: "on",
+                                            "wkl_indiv_": "on",         # bad
+                                            "wkl_indiv_bad": "on"})     # bad
         self.assert_is_redirect_not_plein(resp)  # check for success
 
         # wissel naar BKO en haal de planning op
@@ -790,6 +800,56 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         deelnemer = KampioenschapSchutterBoog.objects.get(pk=deelnemer.pk)
         self.assertEqual(KampioenschapMutatie.objects.count(), 2)
 
+        # verbouw 'time' en voer een test uit zonder 'snel'
+        time.sleep = self._dummy_sleep
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'bevestig': '1', 'afmelden': '0'})
+        time.sleep = sleep_oud
+        deelnemer = KampioenschapSchutterBoog.objects.get(pk=deelnemer.pk)
+        self.assertEqual(KampioenschapMutatie.objects.count(), 2)
+
+    def test_wijzig_status_hwl(self):
+        # HWL
+        self.e2e_login_and_pass_otp(self.account_bko_18)
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+
+        deelnemer = KampioenschapSchutterBoog(deelcompetitie=self.deelcomp_rayon1_18,
+                                              schutterboog=self.schutterboog,
+                                              bij_vereniging=self.schutterboog.nhblid.bij_vereniging,
+                                              klasse=self.klasse_r)
+        deelnemer.save()
+
+        # probeer als HWL van een andere vereniging de status van deze sporter aan te passen
+        url = self.url_wijzig_status % deelnemer.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {})
+        self.assertEqual(resp.status_code, 302)     # 302 = redirect
+
+        lid = self.schutterboog.nhblid
+        lid.bij_vereniging = self.ver_1100
+        lid.save()
+
+        deelnemer = KampioenschapSchutterBoog(deelcompetitie=self.deelcomp_rayon1_18,
+                                              schutterboog=self.schutterboog,
+                                              bij_vereniging=self.ver_1100,
+                                              klasse=self.klasse_r)
+        deelnemer.save()
+
+        # probeer als HWL van een andere vereniging de status van deze sporter aan te passen
+        url = self.url_wijzig_status % deelnemer.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 404)     # 404 = Not found/allowed
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {})
+        self.assertEqual(resp.status_code, 404)     # 404 = Not found/allowed
+
     def test_bad_wijzig_limiet(self):
         self.client.logout()
         url = self.url_wijzig_limiet % 999999
@@ -885,12 +945,14 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
 
-        # limiet verwijderen
+        # limiet verwijderen, zonder 'snel'
+        time.sleep = self._dummy_sleep
         with self.assert_max_queries(20):
-            resp = self.client.post(url, {sel: 24, 'snel': 1})
+            resp = self.client.post(url, {sel: 24})
         self.assert_is_redirect_not_plein(resp)  # check for success
         self._verwerk_mutaties()
         self.assertEqual(DeelcompetitieKlasseLimiet.objects.count(), 0)
+        time.sleep = sleep_oud
 
         # nu met een deelnemer, zodat de mutatie opgestart wordt
         deelnemer = KampioenschapSchutterBoog(deelcompetitie=self.deelcomp_rayon1_18,

@@ -202,7 +202,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
 
         now = timezone.now()
         now = datetime.date(year=now.year, month=now.month, day=now.day)
-        if comp.begin_aanmeldingen == now:
+        if comp.begin_aanmeldingen == now:                          # pragma: no cover
             comp.begin_aanmeldingen += datetime.timedelta(days=1)   # needed once a year
 
         way_before = datetime.date(year=2018, month=1, day=1)   # must be before timezone.now()
