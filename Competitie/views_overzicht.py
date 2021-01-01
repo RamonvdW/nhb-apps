@@ -133,7 +133,7 @@ class CompetitieOverzichtView(View):
             # als er nog geen competitie is voor het huidige jaar, geeft de BB dan de optie om deze op te starten
             beginjaar = models_bepaal_startjaar_nieuwe_competitie()
             context['nieuwe_seizoen'] = "%s/%s" % (beginjaar, beginjaar+1)
-            context['bb_kan_competitie_aanmaken'] = (0 == objs.filter(begin_jaar=beginjaar).count())
+            context['bb_kan_competitie_aanmaken'] = (objs.count() == 0)  # (0 == objs.filter(begin_jaar=beginjaar).count())
 
             if context['bb_kan_ag_vaststellen']:
                 # zoek uit wanneer dit voor het laatste gedaan is
