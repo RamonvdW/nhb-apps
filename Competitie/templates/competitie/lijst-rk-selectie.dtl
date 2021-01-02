@@ -99,8 +99,9 @@
 
         {% if url_download %}
             <p>
-                <a class="btn-nhb-download tooltipped" href="{{ url_download }}" data-position="left" data-tooltip="Lijst ophalen als bestand">
-                    <i class="material-icons-round">get_app</i></a>
+                <span>De selectie-lijst kan als bestand opgehaald worden, voor gebruik in de RK excel: </span>
+                <a class="btn-nhb-blauw" href="{{ url_download }}">
+                    <i class="material-icons-round left">get_app</i>RK selectie bestand</a>
             </p>
         {% endif %}
 

@@ -689,8 +689,9 @@ class LijstRkSelectieAlsBestandView(LijstRkSelectieView):
                                       'klasse__indiv',
                                       'schutterboog__nhblid',
                                       'bij_vereniging')
+                      .exclude(deelname=DEELNAME_NEE)
                       .filter(deelcompetitie=deelcomp_rk,
-                              volgorde__lte=48)             # max 48 schutters per klasse tonen
+                              rank__lte=48)                 # max 48 schutters
                       .order_by('klasse__indiv__volgorde',  # groepeer per klasse
                                 'volgorde',                 # oplopend op volgorde (dubbelen mogelijk)
                                 '-gemiddelde'))             # aflopend op gemiddelde
@@ -716,21 +717,29 @@ class LijstRkSelectieAlsBestandView(LijstRkSelectieView):
             except KeyError:
                 limiet = 24
 
-            lid = deelnemer.schutterboog.nhblid
-            ver = deelnemer.bij_vereniging
-            ver_str = str(ver)
+            # database query was voor 48 schutters
+            # voor kleinere klassen moeten we minder reservisten tonen
+            if deelnemer.rank <= 2*limiet:
+                lid = deelnemer.schutterboog.nhblid
+                ver = deelnemer.bij_vereniging
+                ver_str = str(ver)
 
-            label = deelnemer.kampioen_label
-            if deelnemer.rank > limiet:
-                label = 'Reserve'
+                label = deelnemer.kampioen_label
+                if deelnemer.rank > limiet:
+                    label = 'Reserve'
 
-            writer.writerow([deelnemer.rank,
-                             lid.nhb_nr,
-                             lid.volledige_naam(),
-                             str(ver),                  # [nnnn] Naam
-                             label,
-                             deelnemer.klasse.indiv.beschrijving,
-                             deelnemer.gemiddelde])
+                if deelnemer.deelname != DEELNAME_JA:
+                    if label != "":
+                        label += " "
+                    label += "(deelname onzeker)"
+
+                writer.writerow([deelnemer.rank,
+                                 lid.nhb_nr,
+                                 lid.volledige_naam(),
+                                 str(ver),                  # [nnnn] Naam
+                                 label,
+                                 deelnemer.klasse.indiv.beschrijving,
+                                 deelnemer.gemiddelde])
         # for
 
         return response

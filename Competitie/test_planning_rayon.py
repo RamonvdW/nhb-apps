@@ -189,6 +189,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         self.url_verwijder_rk_wedstrijd = '/competitie/planning/rk/wedstrijd/verwijder/%s/'  # wedstrijd_pk
         self.url_doorzetten_rk = '/competitie/planning/doorzetten/%s/rk/'                    # comp_pk
         self.url_lijst_rk = '/competitie/lijst-rayonkampioenschappen/%s/'                    # deelcomp_pk
+        self.url_lijst_bestand = '/competitie/lijst-rayonkampioenschappen/%s/bestand/'       # deelcomp_pk
         self.url_wijzig_status = '/competitie/lijst-rayonkampioenschappen/wijzig-status-rk-deelnemer/%s/'  # deelnemer_pk
         self.url_wijzig_limiet = '/competitie/planning/rk/%s/limieten/'                      # deelcomp_pk
 
@@ -697,6 +698,12 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/lijst-rk-selectie.dtl', 'plein/site_layout.dtl'))
 
+        url = self.url_lijst_bestand % self.deelcomp_rayon1_18.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.e2e_dump_resp(resp)
+
     def test_bad_lijst_rk(self):
         # anon
         url = self.url_lijst_rk % self.deelcomp_rayon1_18.pk
@@ -709,15 +716,30 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_rko1_18)
 
         # regio deelcomp
-        url = self.url_lijst_rk % self.deelcomp_regio101_18.pk
         with self.assert_max_queries(20):
-            resp = self.client.get(url)
+            resp = self.client.get(self.url_lijst_rk % self.deelcomp_regio101_18.pk)
         self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
 
         # verkeerde rayon deelcomp
-        url = self.url_lijst_rk % self.deelcomp_rayon2_18.pk
         with self.assert_max_queries(20):
-            resp = self.client.get(url)
+            resp = self.client.get(self.url_lijst_rk % self.deelcomp_rayon2_18.pk)
+        self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
+
+        # geen deelnemers lijst
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_lijst_bestand % self.deelcomp_rayon1_18.pk)
+        self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
+
+        # verkeerde rayon deelcomp - download
+        self.deelcomp_rayon2_18.heeft_deelnemerslijst = True
+        self.deelcomp_rayon2_18.save()
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_lijst_bestand % self.deelcomp_rayon2_18.pk)
+        self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
+
+        # bad deelcomp pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_lijst_bestand % 999999)
         self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
 
     def test_bad_wijzig_status(self):
