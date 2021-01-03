@@ -8,6 +8,7 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.views.generic import View
 from django.utils import timezone
+from django.utils.formats import localize
 from Plein.menu import menu_dynamics
 from Functie.rol import Rollen, rol_get_huidige_functie, rol_get_beschrijving
 from Score.models import zoek_meest_recente_automatisch_vastgestelde_ag
@@ -140,7 +141,7 @@ class CompetitieOverzichtView(View):
                 # zoek uit wanneer dit voor het laatste gedaan is
                 datum = zoek_meest_recente_automatisch_vastgestelde_ag()
                 if datum:
-                    context['bb_ag_nieuwste_datum'] = datum.strftime("%Y-%m-%d %H:%M")
+                    context['bb_ag_nieuwste_datum'] = localize(datum.date())
 
             context['show_wijzig_datums'] = True
             for obj in objs:
@@ -149,8 +150,10 @@ class CompetitieOverzichtView(View):
 
             context['planning_deelcomp'] = (DeelCompetitie
                                             .objects
+                                            .exclude(competitie__is_afgesloten=True)
                                             .filter(laag=LAAG_BK)
-                                            .select_related('competitie'))
+                                            .select_related('competitie')
+                                            .order_by('competitie__afstand'))
             for obj in context['planning_deelcomp']:
                 obj.titel = 'Planning %sm' % obj.competitie.afstand
                 obj.tekst = 'Landelijke planning voor de %s.' % obj.competitie.beschrijving
@@ -160,6 +163,7 @@ class CompetitieOverzichtView(View):
         if rol_nu == Rollen.ROL_RCL:
             context['planning_deelcomp'] = (DeelCompetitie
                                             .objects
+                                            .exclude(competitie__is_afgesloten=True)
                                             .filter(functie=functie_nu,
                                                     is_afgesloten=False)
                                             .select_related('nhb_regio', 'competitie'))
@@ -188,6 +192,7 @@ class CompetitieOverzichtView(View):
         elif rol_nu == Rollen.ROL_RKO:
             deelcomp_rks = (DeelCompetitie
                             .objects
+                            .exclude(competitie__is_afgesloten=True)
                             .select_related('nhb_rayon', 'competitie')
                             .filter(functie=functie_nu,
                                     is_afgesloten=False))

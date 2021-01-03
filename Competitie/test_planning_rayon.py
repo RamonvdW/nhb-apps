@@ -702,7 +702,11 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.e2e_dump_resp(resp)
+        self.assertContains(resp, "100007")
+        self.assertContains(resp, "Schutter Test")
+        self.assertContains(resp, "[1000] Grote Club")
+        self.assertContains(resp, "(deelname onzeker)")
+        self.assertContains(resp, "Recurve Klasse 1")
 
     def test_bad_lijst_rk(self):
         # anon
