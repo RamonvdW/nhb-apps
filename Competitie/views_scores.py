@@ -80,7 +80,8 @@ class ScoresRegioView(UserPassesTestMixin, TemplateView):
         wedstrijden = (Wedstrijd
                        .objects
                        .select_related('uitslag')
-                       .filter(pk__in=wedstrijd_pks))
+                       .filter(pk__in=wedstrijd_pks)
+                       .order_by('datum_wanneer', 'tijd_begin_wedstrijd'))
 
         for wedstrijd in wedstrijden:
             heeft_uitslag = (wedstrijd.uitslag and wedstrijd.uitslag.scores.count() > 0)
