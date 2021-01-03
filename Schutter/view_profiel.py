@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,13 +8,14 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
+from django.utils.formats import localize
 from django.db.models import Q
 from Plein.menu import menu_dynamics
 from Functie.rol import Rollen, rol_get_huidige
 from Functie.models import Functie
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from BasisTypen.models import BoogType
-from Competitie.models import (CompetitieKlasse, DeelCompetitie, RegioCompetitieSchutterBoog,
+from Competitie.models import (Competitie, DeelCompetitie, RegioCompetitieSchutterBoog,
                                LAAG_REGIO)
 from Records.models import IndivRecord
 from Score.models import Score, ScoreHist
@@ -88,52 +89,67 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         return objs
 
     @staticmethod
+    def _find_competities(voorkeuren):
+        if not voorkeuren.voorkeur_meedoen_competitie:
+            return None
+
+        comps = Competitie.objects.filter(is_afgesloten=False).order_by('afstand')
+        for comp in comps:
+            comp.zet_fase()
+
+            comp.inschrijven = 'De inschrijving is gesloten'
+
+            if comp.alle_rks_afgesloten:
+                comp.fase_str = 'Bondskampioenschappen'
+            elif comp.alle_regiocompetities_afgesloten:
+                comp.fase_str = 'Rayonkampioenschappen'
+            else:
+                comp.fase_str = 'Regiocompetitie'
+                if comp.fase < 'A2':
+                    comp.inschrijven = 'De competitie wordt voorbereid'
+                elif comp.fase < 'B':
+                    comp.inschrijven = 'De inschrijving opent op %s' % localize(comp.begin_aanmeldingen)
+                elif comp.fase < 'C':
+                    comp.inschrijven = 'Volwaardig inschrijven kan tot %s' % localize(comp.einde_aanmeldingen)
+                elif comp.fase < 'F':
+                    comp.inschrijven = 'Meedoen kan tot %s' % localize(comp.laatst_mogelijke_wedstrijd)
+        # for
+        return comps
+
+    @staticmethod
     def _find_regiocompetities(nhblid, voorkeuren, alle_bogen):
         """ Zoek regiocompetities waar de schutter zich op aan kan melden """
 
-        # toon alle deelcompetities waarop ingeschreven kan worden met de bogen van de schutter
-        # oftewel (deelcompetitie, schutterboog, is_ingeschreven)
-
         # stel vast welke boogtypen de schutter mee wil schieten (opt-in)
-        # en welke hij informatie over wil hebben (opt-out)
-        boog_afkorting_wedstrijd = list()
-        boog_afkorting_info = list()
-
         boog_dict = dict()      # [afkorting] = BoogType()
         for boogtype in alle_bogen:
             boog_dict[boogtype.afkorting] = boogtype
-            boog_afkorting_info.append(boogtype.afkorting)
         # for
 
-        schutterboog_dict = dict()  # [boog_afkorting] = SchutterBoog()
+        boog_afkorting_wedstrijd = list()
+        boogafk2schutterboog = dict()       # [boog_afkorting] = SchutterBoog()
         # typische 0 tot 5 records
         for schutterboog in (nhblid.schutterboog_set
                              .select_related('boogtype')
-                             .all()):
-            afkorting = schutterboog.boogtype.afkorting
-            schutterboog_dict[afkorting] = schutterboog
+                             .order_by('boogtype__volgorde')):
             if schutterboog.voor_wedstrijd:
+                afkorting = schutterboog.boogtype.afkorting
                 boog_afkorting_wedstrijd.append(afkorting)
-                boog_afkorting_info.remove(afkorting)
-            elif not schutterboog.heeft_interesse:
-                boog_afkorting_info.remove(afkorting)
+                boogafk2schutterboog[afkorting] = schutterboog
         # for
 
-        boog_afkorting_all = set(boog_afkorting_info + boog_afkorting_wedstrijd)
-
         # zoek alle inschrijvingen van deze schutter erbij
-        schutterbogen = [schutterboog for _, schutterboog in schutterboog_dict.items()]
+        schutterbogen = [schutterboog for _, schutterboog in boogafk2schutterboog.items()]
         inschrijvingen = list(RegioCompetitieSchutterBoog
                               .objects
                               .select_related('deelcompetitie', 'schutterboog')
-                              .filter(schutterboog__in=schutterbogen))
+                              .filter(schutterboog__nhblid=nhblid))
 
         if not voorkeuren.voorkeur_meedoen_competitie:
-            if len(inschrijvingen) == 0:
+            if len(inschrijvingen) == 0:        # niet nodig om "afmelden" knoppen te tonen
                 return None
 
-        objs_info = list()
-        objs_wedstrijd = list()
+        objs = list()
 
         # zoek deelcompetities in deze regio (typisch zijn er 2 in de regio: 18m en 25m)
         regio = nhblid.bij_vereniging.regio
@@ -141,69 +157,62 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                                .objects
                                .select_related('competitie')
                                .prefetch_related('competitie__competitieklasse_set')
+                               .exclude(competitie__is_afgesloten=True)
                                .filter(laag=LAAG_REGIO,
-                                       nhb_regio=regio,
-                                       is_afgesloten=False)):
-            deelcompetitie.competitie.zet_fase()
+                                       nhb_regio=regio)
+                               .order_by('competitie__afstand')):
+            comp = deelcompetitie.competitie
+            comp.zet_fase()
 
-            # zoek de klassen erbij die de schutter interessant vindt
-            afkortingen = list(boog_afkorting_all)
-            for klasse in (CompetitieKlasse
-                           .objects
-                           .select_related('indiv__boogtype')
-                           .filter(indiv__boogtype__afkorting__in=boog_afkorting_all,
-                                   competitie=deelcompetitie.competitie)):
-                afk = klasse.indiv.boogtype.afkorting
-                if afk in afkortingen:
-                    # dit boogtype nog niet gehad
-                    afkortingen.remove(afk)
-                    obj = copy.copy(deelcompetitie)
-                    obj.boog_afkorting = afk
-                    obj.boog_beschrijving = boog_dict[afk].beschrijving
-                    obj.is_ingeschreven = False
-                    if afk in boog_afkorting_wedstrijd:
-                        obj.is_voor_wedstrijd = True
-                        objs_wedstrijd.append(obj)
-                    else:
-                        obj.is_voor_wedstrijd = False
-                        objs_info.append(obj)
+            # doorloop elk boogtype waar de schutter informatie/wedstrijden voorkeur voor heeft
+            for afk in boog_afkorting_wedstrijd:
+                obj = copy.copy(deelcompetitie)
+                objs.append(obj)
+
+                obj.boog_afkorting = afk
+                obj.boog_beschrijving = boog_dict[afk].beschrijving
+                obj.boog_niet_meer = False
+                obj.is_ingeschreven = False
+
+                # zoek uit of de schutter al ingeschreven is
+                schutterboog = boogafk2schutterboog[afk]
+                for inschrijving in inschrijvingen:
+                    if inschrijving.schutterboog == schutterboog and inschrijving.deelcompetitie == obj:
+                        obj.is_ingeschreven = True
+                        inschrijvingen.remove(inschrijving)
+                        if comp.fase <= 'B':
+                            obj.url_afmelden = reverse('Schutter:afmelden',
+                                                       kwargs={'regiocomp_pk': inschrijving.pk})
+                        break
+                # for
+
+                if not obj.is_ingeschreven:
+                    # niet ingeschreven
+                    if comp.fase >= 'B' and comp.fase < 'F':
+                        obj.url_aanmelden = reverse('Schutter:bevestig-aanmelden',
+                                                    kwargs={'schutterboog_pk': schutterboog.pk,
+                                                            'deelcomp_pk': obj.pk})
             # for
-        # for
-
-        # zoek uit of de schutter al ingeschreven is
-        for obj in objs_wedstrijd:
-            schutterboog = schutterboog_dict[obj.boog_afkorting]
-
-            obj.is_ingeschreven = False
-            for inschrijving in inschrijvingen:
-                if inschrijving.schutterboog == schutterboog and inschrijving.deelcompetitie == obj:
-                    obj.is_ingeschreven = True
-                    obj.url_afmelden = reverse('Schutter:afmelden', kwargs={'regiocomp_pk': inschrijving.pk})
-                    inschrijvingen.remove(inschrijving)
-                    break
-
-            if not obj.is_ingeschreven:
-                # niet ingeschreven
-                obj.url_aanmelden = reverse('Schutter:bevestig-aanmelden', kwargs={'schutterboog_pk': schutterboog.pk, 'deelcomp_pk': obj.pk})
         # for
 
         # voeg alle inschrijvingen toe waar geen boog meer voor gekozen is,
         # zodat er afgemeld kan worden
-        for obj in inschrijvingen:
-            afk = obj.schutterboog.boogtype.afkorting
-            deelcomp = obj.deelcompetitie
-            deelcomp.is_ingeschreven = True
-            deelcomp.is_voor_wedstrijd = True
-            deelcomp.boog_niet_meer = True
-            deelcomp.boog_beschrijving = boog_dict[afk].beschrijving
-            deelcomp.url_afmelden = reverse('Schutter:afmelden', kwargs={'regiocomp_pk': obj.pk})
-            objs_wedstrijd.append(deelcomp)
+        for inschrijving in inschrijvingen:
+            afk = inschrijving.schutterboog.boogtype.afkorting
+            obj = inschrijving.deelcompetitie
+            objs.append(obj)
+
+            obj.is_ingeschreven = True
+            obj.boog_niet_meer = True
+            obj.boog_beschrijving = boog_dict[afk].beschrijving
+
+            comp = obj.competitie
+            comp.zet_fase()
+            if comp.fase <= 'B':
+                obj.url_afmelden = reverse('Schutter:afmelden',
+                                           kwargs={'regiocomp_pk': obj.pk})
         # for
 
-        objs = objs_wedstrijd
-        if len(objs_info):
-            objs_info[0].separator_before = True
-            objs.extend(objs_info)
         return objs
 
     @staticmethod
@@ -339,7 +348,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         if nhblid.bij_vereniging and not nhblid.bij_vereniging.geen_wedstrijden:
             _, _, is_jong, _, _ = get_sessionvars_leeftijdsklassen(self.request)
             context['toon_leeftijdsklassen'] = is_jong
-
+            context['competities'] = self._find_competities(voorkeuren)
             context['regiocompetities'] = self._find_regiocompetities(nhblid, voorkeuren, alle_bogen)
             context['gemiddelden'], context['heeft_ags'] = self._find_gemiddelden(nhblid, alle_bogen)
 
