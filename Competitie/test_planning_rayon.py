@@ -706,7 +706,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         self.assertContains(resp, "Schutter Test")
         self.assertContains(resp, "[1000] Grote Club")
         self.assertContains(resp, "(deelname onzeker)")
-        self.assertContains(resp, "Recurve Klasse 1")
+        self.assertContains(resp, "Recurve klasse 1")
 
     def test_bad_lijst_rk(self):
         # anon
