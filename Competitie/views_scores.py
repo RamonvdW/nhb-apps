@@ -97,8 +97,8 @@ class ScoresRegioView(UserPassesTestMixin, TemplateView):
                                                             kwargs={'wedstrijd_pk': wedstrijd.pk})
             else:
                 # TODO: knop pas beschikbaar maken op wedstrijddatum tot datum+N
-                wedstrijd.url_score_invoeren = reverse('Competitie:wedstrijd-uitslag-invoeren',
-                                                       kwargs={'wedstrijd_pk': wedstrijd.pk})
+                wedstrijd.url_uitslag_invoeren = reverse('Competitie:wedstrijd-uitslag-invoeren',
+                                                         kwargs={'wedstrijd_pk': wedstrijd.pk})
         # for
 
         context['wedstrijden'] = wedstrijden
