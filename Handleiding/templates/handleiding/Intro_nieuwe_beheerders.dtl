@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020 Ramon van der Winkel.
+                Copyright (c) 2020-2021 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -17,7 +17,7 @@
 <p></p>
 <h4>Stap 1: tweede factor</h4>
 <p></p>
-<p>De website maakt gebruik van verificatie met een tweede factor. Na de inlog met NHB nummer en wachtwoord moet je een 6-cijferige code invoeren die door een app op je telefoon berekend wordt. Deze code wijzigt elke 30 seconden.</p>
+<p>De website maakt gebruik van verificatie met een tweede factor. Na de inlog met bondsnummer en wachtwoord moet je een 6-cijferige code invoeren die door een app op je telefoon berekend wordt. Deze code wijzigt elke 30 seconden.</p>
 <p></p>
 <p>Kwaadwillenden moeten dus niet alleen je gebruikersnaam en wachtwoord weten, maar ook toegang hebben tot de app die de codes genereert.</p>
 <p></p>

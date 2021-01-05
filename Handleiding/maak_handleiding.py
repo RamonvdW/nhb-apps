@@ -28,7 +28,7 @@ class MaakHandleiding(object):
     def write_template(self, fname, title, text):
         out = '''{% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020 Ramon van der Winkel.
+                Copyright (c) 2020-2021 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}

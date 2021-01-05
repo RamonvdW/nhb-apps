@@ -134,7 +134,7 @@
                     el.value = rsp;
 
                     // antwoord bevat fail=1 in verschillende situaties:
-                    // nhb nummer niet gevonden, geen actief lid
+                    // bondsnummer niet gevonden, geen actief lid
                     if (rsp['fail'] === undefined)
                     {
                         // toon het zoekresultaat
@@ -357,7 +357,7 @@
                 const score = row.cells[4].firstChild.value;
                 //console.log('pk:', pk, 'score:', score);
 
-                // lege scores juist wel meesturen, dan kan een verkeerd nhbnr
+                // lege scores juist wel meesturen, dan kan een verkeerd bondsnummer
                 // nog uit de uitslag gehaald worden door de score leeg te maken!
                 //if (score !== "")
                 obj[pk] = score;
@@ -399,7 +399,7 @@
             myTableFilter(el_filter, 'table1')
 
             let deelnemers = rsp['deelnemers']
-            // sorteer deelnemers op invoeg-volgorde: nhb_nr
+            // sorteer deelnemers op invoeg-volgorde: bondsnummer
             deelnemers.sort(function(a,b) { return a.nhb_nr - b.nhb_nr });
             //console.log('sorted deelnemers:', deelnemers);
 
@@ -557,7 +557,7 @@
                 <td></td>
             </tr>
             <tr>
-                <th data-filter="on">NHB nummer</th>
+                <th data-filter="on">Bondsnummer</th>
                 <th data-filter="on">Naam</th>
                 <th data-filter="on">Vereniging</th>
                 <th data-filter="on">Boog type</th>
@@ -603,12 +603,12 @@
 
         <tr class="nhb-grijs" data-tablefilter="stop">
             <td colspan="5">
-                <span>Gebruik onderstaand formulier om een ander NHB nummer toe te voegen</span>
+                <span>Gebruik onderstaand formulier om een ander bondsnummer toe te voegen</span>
             </td>
         </tr>
 
         <tr>
-            <th>NHB nummer</th>
+            <th>Bondsnummer</th>
             <th>Naam</th>
             <th>Vereniging</th>
             <th colspan="2"></th>   <!-- kolom voor knop 'toevoegen' -->

@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020 Ramon van der Winkel.
+                Copyright (c) 2020-2021 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -26,7 +26,7 @@
                 <td colspan="3"></td>
             </tr>
             <tr>
-                <th data-filter="on">NHB nummer</th>
+                <th data-filter="on">Bondsnummer</th>
                 <th>M/V</th>
                 <th data-filter="on">Voornaam</th>
                 <th data-filter="on">Achternaam</th>
@@ -69,7 +69,7 @@
             <td></td>
         </tr>
         <tr>
-            <th data-filter="on">NHB nummer</th>
+            <th data-filter="on">Bondsnummer</th>
             <th>M/V</th>
             <th data-filter="on">Voornaam</th>
             <th data-filter="on">Achternaam</th>
@@ -104,7 +104,7 @@
     <table class="white">
         <thead>
             <tr>
-                <th>NHB nummer</th>
+                <th>Bondsnummer</th>
                 <th>M/V</th>
                 <th>Voornaam</th>
                 <th>Achternaam</th>

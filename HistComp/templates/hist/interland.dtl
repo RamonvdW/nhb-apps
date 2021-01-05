@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020 Ramon van der Winkel.
+                Copyright (c) 2020-2021 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -50,7 +50,7 @@
                 <th>Gemiddelde</th>
                 <th data-filter="on">Wedstrijdleeftijd</th>
                 <th data-filter="on">Geslacht</th>
-                <th>NHB nummer</th>
+                <th>Bondsnummer</th>
                 <th>Naam</th>
                 <th>Vereniging</th>
             </tr>
