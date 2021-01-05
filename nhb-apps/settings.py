@@ -41,24 +41,25 @@ SITE_VERSIE = '2021-01-05'
 
 # modules van de site
 INSTALLED_APPS = [
-    'Plein.apps.PleinConfig',
     'Beheer.apps.BeheerConfig',             # replaces admin
-    'NhbStructuur.apps.NhbStructuurConfig',
     'Account.apps.AccountConfig',
     'BasisTypen.apps.BasisTypenConfig',
-    'Functie.apps.FunctieConfig',
     'Competitie.apps.CompetitieConfig',
+    'Functie.apps.FunctieConfig',
+    'Handleiding.apps.HandleidingConfig',
     'HistComp.apps.HistCompConfig',
-    'Records.apps.RecordsConfig',
-    'Overig.apps.OverigConfig',
+    'Kalender.apps.KalenderConfig',
     'Logboek.apps.LogboekConfig',
     'Mailer.apps.MailerConfig',
-    'Vereniging.apps.VerenigingConfig',
+    'NhbStructuur.apps.NhbStructuurConfig',
+    'Overig.apps.OverigConfig',
+    'Plein.apps.PleinConfig',
+    'Records.apps.RecordsConfig',
     'Schutter.apps.SchutterConfig',
     'Score.apps.ScoreConfig',
     'Taken.apps.TakenConfig',
+    'Vereniging.apps.VerenigingConfig',
     'Wedstrijden.apps.WedstrijdenConfig',
-    'Handleiding.apps.HandleidingConfig',
     'django.contrib.staticfiles',   # gather static files from modules helper
     'django.contrib.sessions',      # support for database-backed sessions; needed for logged-in user
     'django.contrib.admin',         # see-all/fix-all admin pages

@@ -88,6 +88,13 @@
     <i class="material-icons-round white-text"><!--star--><!--trending_up-->insights</i>Nederlandse records</a>
 </li>
 
+{% if menu_show_kalender %}
+    <li{% if menu_actief == "kalender" %} class="actief"{% endif %}>
+        <a href="{% url 'Kalender:overzicht' %}" class="white-text">
+        <i class="material-icons-round white-text">location_on</i>Wedstrijdkalender</a>
+    </li>
+{% endif %}
+
 
 <li{% if menu_actief == "privacy" %} class="actief"{% endif %}>
     <a href="{% url 'Plein:privacy' %}" class="white-text">

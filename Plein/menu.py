@@ -23,8 +23,8 @@ ACTIEF_OPTIES = (
     'histcomp',
     'schutter',
     'vereniging',
-    'handleiding',
-    'taken'
+    'taken',
+    'kalender'
 )
 
 
@@ -57,6 +57,7 @@ def menu_dynamics(request, context, actief=None):
         if rol in (Rollen.ROL_IT, Rollen.ROL_BB):
             context['menu_show_logboek'] = True
             context['menu_show_sitefeedback'] = True
+            context['menu_show_kalender'] = True
 
         if rol == Rollen.ROL_SCHUTTER:
             context['menu_show_schutter'] = True
