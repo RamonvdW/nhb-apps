@@ -86,7 +86,6 @@
                             <i class="material-icons-round left">arrow_forward</i>Aanpassen</a>
                     {% endif %}
                 </td>
-
             </tr>
         {% empty %}
             {% if not url_nieuwe_wedstrijd %}
