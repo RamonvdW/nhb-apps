@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect, render, reverse
 from django.views.generic import TemplateView, View
-from Functie.rol import Rollen, rol_get_huidige, rol_get_beschrijving
+from Functie.rol import Rollen, rol_get_huidige, rol_get_beschrijving, rol_mag_wisselen
 from Taken.taken import eval_open_taken
 from .menu import menu_dynamics
 
@@ -18,6 +18,17 @@ TEMPLATE_PLEIN_SCHUTTER = 'plein/plein-schutter.dtl'            # schutter (ROL_
 TEMPLATE_PLEIN_BEHEERDER = 'plein/plein-beheerder.dtl'          # beheerder (ROL_BB/BKO/RKO/RCL/SEC/HWL/WL)
 TEMPLATE_PRIVACY = 'plein/privacy.dtl'
 TEMPLATE_NIET_ONDERSTEUND = 'plein/niet-ondersteund.dtl'
+
+
+ROL2HANDLEIDING_PAGINA = {
+    Rollen.ROL_BB: settings.HANDLEIDING_BB,
+    Rollen.ROL_BKO: settings.HANDLEIDING_BKO,
+    Rollen.ROL_RKO: settings.HANDLEIDING_RKO,
+    Rollen.ROL_RCL: settings.HANDLEIDING_RCL,
+    Rollen.ROL_HWL: settings.HANDLEIDING_HWL,
+    Rollen.ROL_WL:  settings.HANDLEIDING_WL,
+    Rollen.ROL_SEC: settings.HANDLEIDING_SEC,
+}
 
 
 def is_browser_supported(request):
@@ -93,6 +104,18 @@ class PleinView(View):
 
                 if rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL):
                     context['toon_functies'] = True
+
+                # wissel van rol
+                if rol_mag_wisselen(request):
+                    try:
+                        handleiding_pagina = ROL2HANDLEIDING_PAGINA[rol_nu]
+                    except KeyError:
+                        handleiding_pagina = settings.HANDLEIDING_TOP
+
+                    if settings.ENABLE_WIKI:
+                        context['handleiding_url'] = settings.WIKI_URL + '/' + handleiding_pagina
+                    else:
+                        context['handleiding_url'] = reverse('Handleiding:' + handleiding_pagina)
 
                 if rol_nu == Rollen.ROL_IT:
                     context['rol_is_it'] = True

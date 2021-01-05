@@ -1,5 +1,5 @@
 {% comment %}
-                Copyright (c) 2019-2020 Ramon van der Winkel.
+                Copyright (c) 2019-2021 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -48,32 +48,32 @@
 
 <!-- inlog knop als gebruiker niet ingelogd is -->
 {% if menu_show_login %}
-<li{% if menu_actief == "inloggen" %} class="actief"{% endif %}>
-    <a href="{% url 'Account:login' %}" class="white-text">
-    <i class="material-icons-round white-text">login</i>Inloggen</a>
-</li>
+    <li{% if menu_actief == "inloggen" %} class="actief"{% endif %}>
+        <a href="{% url 'Account:login' %}" class="white-text">
+        <i class="material-icons-round white-text">login</i>Inloggen</a>
+    </li>
 {% endif %}
 
 
 {% if menu_show_schutter %}
-<li{% if menu_actief == "schutter" %} class="actief"{% endif %}>
-    <a href="{% url 'Schutter:profiel' %}" class="white-text">
-    <i class="material-icons-round white-text">portrait</i>Sporter</a>
-</li>
+    <li{% if menu_actief == "schutter" %} class="actief"{% endif %}>
+        <a href="{% url 'Schutter:profiel' %}" class="white-text">
+        <i class="material-icons-round white-text">portrait</i>Sporter</a>
+    </li>
 {% endif %}
 
 
 {% if menu_show_vereniging %}
-<li{% if menu_actief == "vereniging" %} class="actief"{% endif %}>
-    <a href="{% url 'Vereniging:overzicht' %}" class="white-text">
-    <i class="material-icons-round white-text">home</i>Vereniging</a>
-</li>
+    <li{% if menu_actief == "vereniging" %} class="actief"{% endif %}>
+        <a href="{% url 'Vereniging:overzicht' %}" class="white-text">
+        <i class="material-icons-round white-text">home</i>Vereniging</a>
+    </li>
 {% endif %}
 
 
 <li{% if menu_actief == "competitie" %} class="actief"{% endif %}>
     <a href="{% url 'Competitie:overzicht' %}" class="white-text">
-    <i class="material-icons-round white-text"><!--developer_board--><!--gamepad--><!--assistant-->my_location</i>Competities</a>
+    <i class="material-icons-round white-text">my_location</i>Bondscompetities</a>
 </li>
 
 
@@ -96,63 +96,54 @@
 
 
 {% if menu_show_sitefeedback %}
-<li{% if menu_actief == "site-feedback-inzicht" %} class="actief"{% endif %}>
-    <a href="{% url 'Overig:feedback-inzicht' %}" class="white-text">
-    <i class="material-icons-round white-text">feedback</i>Site feedback</a>
-</li>
+    <li{% if menu_actief == "site-feedback-inzicht" %} class="actief"{% endif %}>
+        <a href="{% url 'Overig:feedback-inzicht' %}" class="white-text">
+        <i class="material-icons-round white-text">feedback</i>Site feedback</a>
+    </li>
 {% endif %}
 
 
 {% if menu_show_logboek %}
-<li{% if menu_actief == "logboek" %} class="actief"{% endif %}>
-    <a href="{% url 'Logboek:alles' %}" class="white-text">
-    <i class="material-icons-round white-text">book</i>Logboek</a>
-</li>
+    <li{% if menu_actief == "logboek" %} class="actief"{% endif %}>
+        <a href="{% url 'Logboek:alles' %}" class="white-text">
+        <i class="material-icons-round white-text">book</i>Logboek</a>
+    </li>
 {% endif %}
 
 
 {% if menu_show_admin %}
-<li>
-    <a href="{% url 'admin:index' %}" class="white-text">
-    <i class="material-icons-round red-text">build</i>Admin site</a>
-</li>
+    <li>
+        <a href="{% url 'admin:index' %}" class="white-text">
+        <i class="material-icons-round red-text">build</i>Admin site</a>
+    </li>
 {% endif %}
 
 
 {% if menu_show_logout %}
-<li{% if menu_actief == "uitloggen" %} class="actief"{% endif %}>
-    <a href="{% url 'Account:logout' %}" class="white-text">
-    <i class="material-icons-round white-text">exit_to_app</i>Uitloggen</a>
-</li>
-{% endif %}
-
-
-<!-- handleiding, alleen voor gebruikers die toegang hebben -->
-{% if handleiding_url %}
-<li {% if menu_actief == "handleiding" %} class="actief"{% endif %}>
-    <a href="{{ handleiding_url }}" class="white-text" target="_blank" rel="noopener noreferrer">
-        <i class="material-icons-round white-text">help_outline</i>Handleiding</a>
-</li>
+    <li{% if menu_actief == "uitloggen" %} class="actief"{% endif %}>
+        <a href="{% url 'Account:logout' %}" class="white-text">
+        <i class="material-icons-round white-text">exit_to_app</i>Uitloggen</a>
+    </li>
 {% endif %}
 
 
 <!-- taken, voor beheerders -->
 {% if menu_show_taken %}
-<li{% if menu_actief == "taken" %} class="actief"{% endif %}>
-    <a href="{% url 'Taken:overzicht' %}" class="white-text">
-    <i class="material-icons-round white-text">inbox</i>Taken{% if menu_aantal_open_taken %}
-        <span class="new badge{% if menu_actief == "taken" %} red{% endif %}" data-badge-caption="open">{{ menu_aantal_open_taken }}</span>
-    {% endif %}
-</a>
-</li>
+    <li{% if menu_actief == "taken" %} class="actief"{% endif %}>
+        <a href="{% url 'Taken:overzicht' %}" class="white-text">
+            <i class="material-icons-round white-text">inbox</i>Taken{% if menu_aantal_open_taken %}
+                <span class="new badge{% if menu_actief == "taken" %} red{% endif %}" data-badge-caption="open">{{ menu_aantal_open_taken }}</span>
+            {% endif %}
+        </a>
+    </li>
 {% endif %}
 
 <!-- wisselen van rol, voor beheerders -->
 {% if menu_show_wisselvanrol %}
-<li{% if menu_actief == "wissel-van-rol" %} class="actief"{% endif %}>
-    <a href="{% url 'Functie:wissel-van-rol' %}" class="white-text">
-    <i class="material-icons-round white-text">people_alt</i>Wissel van rol</a>
-</li>
+    <li{% if menu_actief == "wissel-van-rol" %} class="actief"{% endif %}>
+        <a href="{% url 'Functie:wissel-van-rol' %}" class="white-text">
+        <i class="material-icons-round white-text">people_alt</i>Wissel van rol</a>
+    </li>
 {% endif %}
 
 <!-- end of file -->

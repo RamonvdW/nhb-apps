@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -27,16 +27,6 @@ ACTIEF_OPTIES = (
     'taken'
 )
 
-ROL2HANDLEIDING_PAGINA = {
-    Rollen.ROL_BB: settings.HANDLEIDING_BB,
-    Rollen.ROL_BKO: settings.HANDLEIDING_BKO,
-    Rollen.ROL_RKO: settings.HANDLEIDING_RKO,
-    Rollen.ROL_RCL: settings.HANDLEIDING_RCL,
-    Rollen.ROL_HWL: settings.HANDLEIDING_HWL,
-    Rollen.ROL_WL:  settings.HANDLEIDING_WL,
-    Rollen.ROL_SEC: settings.HANDLEIDING_SEC,
-}
-
 
 def menu_dynamics(request, context, actief=None):
     """ Deze functie update the template context voor het dynamische gedrag van
@@ -58,16 +48,6 @@ def menu_dynamics(request, context, actief=None):
         # wissel van rol
         if rol_mag_wisselen(request):
             context['menu_show_wisselvanrol'] = True
-
-            try:
-                handleiding_pagina = ROL2HANDLEIDING_PAGINA[rol]
-            except KeyError:
-                handleiding_pagina = settings.HANDLEIDING_TOP
-
-            if settings.ENABLE_WIKI:
-                context['handleiding_url'] = settings.WIKI_URL + '/' + handleiding_pagina
-            else:
-                context['handleiding_url'] = reverse('Handleiding:' + handleiding_pagina)
 
         # admin menu
         if rol == Rollen.ROL_IT:

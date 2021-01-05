@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020 Ramon van der Winkel.
+                Copyright (c) 2020-2021 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -78,6 +78,11 @@
     {% if rol_is_bb or rol_is_it %}
         {% url 'Score:geschiedenis' as card_url %}
         {% include 'plein/card.dtl' with title="Score Geschiedenis" text="Bekijk de wijzigingen / geschiedenis van de scores van een sporter." icon="history" url=card_url %}
+    {% endif %}
+
+    <!-- handleiding -->
+    {% if handleiding_url %}
+        {% include 'plein/card.dtl' with title="Handleiding" text="Bekijk de handleiding" icon="help" url=handleiding_url %}
     {% endif %}
 
 </div>
