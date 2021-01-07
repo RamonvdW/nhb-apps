@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -11,7 +11,9 @@ from . import views
 app_name = 'Handleiding'
 
 urlpatterns = [
-    path('', views.HandleidingView.as_view(), name=settings.HANDLEIDING_TOP)
+    path('',
+         views.HandleidingView.as_view(),
+         name='begin')
 ]
 
 for pagina in settings.HANDLEIDING_PAGINAS:

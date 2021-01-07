@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -40,8 +40,8 @@ COUNT=$(ls -1 "$STATIC" | wc -l)
 echo "[INFO]   $COUNT bestanden klaargezet in static"
 
 echo "[INFO] template files worden opnieuw aangemaakt"
-touch "$TEMPL/tmp.dtl"
-rm "$TEMPL"/*dtl
+# verwijder alle .dtl files behalve menu.dtl
+find "$TEMPL" -type f -name \*.dtl ! -name menu.dtl -exec rm {} \+
 echo "SITE_URL='hoi'" > ./copy_of_settings.py
 echo "DEBUG=True" >> ./copy_of_settings.py
 echo "ENABLE_DEBUG_TOOLBAR=False" >> ./copy_of_settings.py
