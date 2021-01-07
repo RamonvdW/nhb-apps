@@ -14,6 +14,10 @@ h1, h2, h3, h4, h5, h6 {
     font-family: 'Ubuntu', sans-serif;
 }
 
+a {
+    color: inherit;
+}
+
 .selectie-knoppen {
     display: block;
     margin-bottom: 10px;
@@ -41,10 +45,26 @@ h1, h2, h3, h4, h5, h6 {
     margin: 5px;
 }
 
-/* actieve menu item in rood */
-.actief  {
-    background-color: #f94137;     /* NHB medium rood */
+
+/* layout van het menu in de sidenav */
+.menu-level1 {
+    color: #fff;
+    font-size: 16px;
 }
+
+.menu-level2 {
+    color: #fff;
+    font-size: 14px;
+}
+
+.menu-level2-spacer {
+    margin: 0 68px 0 0;             /* 68 = 24 + 32 + een beetje */
+}
+
+.menu-actief  {
+    background-color: #f94137;      /* NHB medium rood */
+}
+
 
 /* lagere regel in een grid */
 .small-row {
