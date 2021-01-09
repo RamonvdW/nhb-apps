@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -84,6 +84,10 @@ class TestHistComp(E2EHelpers, TestCase):
         obj.is_team = False
         obj.save()
 
+        self.url_hist_top = '/bondscompetities/hist/'
+        self.url_hist_team = '/bondscompetities/hist/team/%s/'      # team_pk
+        self.url_hist_indiv = '/bondscompetities/hist/indiv/%s/'    # indiv_pk
+
     def _add_many_records(self, pages):
         # paginator laat 100 entries per pagina zien, dus voeg er 100 toe
         rec = HistCompetitieIndividueel.objects.get(pk=self.indiv_rec_pk)
@@ -117,7 +121,7 @@ class TestHistComp(E2EHelpers, TestCase):
 
     def test_view_allejaren(self):
         with self.assert_max_queries(20):
-            resp = self.client.get('/hist/')
+            resp = self.client.get(self.url_hist_top)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('hist/histcomp_top.dtl', 'plein/site_layout.dtl'))
@@ -126,7 +130,7 @@ class TestHistComp(E2EHelpers, TestCase):
         self.assertContains(resp, 'Compound')
         self.assertContains(resp, 'Special Type')
         self.assertContains(resp, 'Recurve')
-        self.e2e_assert_other_http_commands_not_supported('/hist/')
+        self.e2e_assert_other_http_commands_not_supported(self.url_hist_top)
 
         # controleer de volgorde waarin de klassen getoond wordt
         resp_str = str(resp.content)
@@ -140,18 +144,19 @@ class TestHistComp(E2EHelpers, TestCase):
         # verwijder alle records en controleer dat het goed gaat
         HistCompetitie.objects.all().delete()
         with self.assert_max_queries(20):
-            resp = self.client.get('/hist/')
+            resp = self.client.get(self.url_hist_top)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assertContains(resp, "Er is op dit moment geen uitslag beschikbaar")
 
     def test_view_indiv_non_existing(self):
+        url = self.url_hist_indiv % 999999
         with self.assert_max_queries(20):
-            resp = self.client.get('/hist/indiv/999999/')
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 404)
 
     def test_view_indiv_few(self):
-        url = '/hist/indiv/%s/' % self.indiv_histcomp_pk
+        url = self.url_hist_indiv % self.indiv_histcomp_pk
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
@@ -165,7 +170,7 @@ class TestHistComp(E2EHelpers, TestCase):
 
     def test_view_indiv_many(self):
         self._add_many_records(10)  # 10*100 = +1000 records
-        url = '/hist/indiv/%s/' % self.indiv_histcomp_pk
+        url = self.url_hist_indiv % self.indiv_histcomp_pk
 
         with self.assert_max_queries(20):
             resp = self.client.get(url, {'page': 6})
@@ -186,7 +191,7 @@ class TestHistComp(E2EHelpers, TestCase):
     def test_view_indiv_all(self):
         # haal alle regels op, zonder paginering
         self._add_many_records(2)  # 20*100 = +200 records --> paginering actief
-        url = '/hist/indiv/%s/' % self.indiv_histcomp_pk
+        url = self.url_hist_indiv % self.indiv_histcomp_pk
 
         with self.assert_max_queries(20):
             resp = self.client.get(url)
@@ -209,7 +214,7 @@ class TestHistComp(E2EHelpers, TestCase):
         rec = HistCompetitieIndividueel.objects.get(pk=self.indiv_rec_pk)
         rec.schutter_naam = "Dhr Blazoengatenmaker"
         rec.save()
-        url = '/hist/indiv/%s/' % self.indiv_histcomp_pk
+        url = self.url_hist_indiv % self.indiv_histcomp_pk
 
         # filter on a string
         with self.assert_max_queries(20):
@@ -231,7 +236,7 @@ class TestHistComp(E2EHelpers, TestCase):
         self._add_many_records(2)  # 20*100 = +200 records --> paginering actief
 
         rec = HistCompetitieIndividueel.objects.get(pk=self.indiv_rec_pk)
-        url = '/hist/indiv/%s/' % self.indiv_histcomp_pk
+        url = self.url_hist_indiv % self.indiv_histcomp_pk
 
         # filter on a string
         with self.assert_max_queries(20):
@@ -259,7 +264,7 @@ class TestHistComp(E2EHelpers, TestCase):
         self.assertNotContains(resp, "Test Club")
 
     def test_team(self):
-        url = '/hist/team/%s/' % self.team_histcomp_pk
+        url = self.url_hist_team % self.team_histcomp_pk
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)

@@ -1,28 +1,72 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019-2020 Ramon van der Winkel.
+                Copyright (c) 2019-2021 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
 
-{% block title %}Welkom{% endblock %}
+{% block title %}Mijn Handboogsport{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="plein-schutter" %}
 
-<h4>Welkom op het Plein</h4>
+    <h4>Het Plein</h4>
 
-{% if is_test_server %}
-    {% include 'plein/ga-naar-live-server.dtl' %}
-{% endif %}
+    <p>Deze website is nog in ontwikkeling. We zullen regelmatig nieuwe informatie en functionaliteit beschikbaar te maken.</p>
+    <p>Gebruik de smileys om feedback te geven en voorstellen in te dienen.</p>
 
-<p>Naast de inhoud van deze website (te bereiken via het menu) zijn de volgende sites misschien ook van interesse.</p>
+    {% if is_test_server %}
+        {% include 'plein/ga-naar-live-server.dtl' %}
+    {% endif %}
 
-<div class="row">
-    <!-- andere sites van de NHB -->
-    {% include 'plein/andere-sites-van-de-nhb.dtl' %}
-</div>
+    <p>
+        <a class="btn-nhb-blauw" href="{% url 'Account:logout' %}" >
+            <i class="material-icons-round left">exit_to_app</i>Uitloggen</a>
+    </p>
 
+
+    <p>&nbsp;</p>
+    <h5>Op deze site</h5>
+
+    <p>Klik op een van de onderstaande kaartjes om naar een ander deel van deze site te gaan.</p>
+    <p>Tip: klik in het menu (aan de linker kant) op 'Het Plein' om terug te komen naar deze pagina.</p>
+
+    <div class="row">
+        {% url 'Schutter:profiel' as card_url %}
+        {% include 'plein/card.dtl' with title="Jouw pagina" text="Voorkeuren en informatie toegespitst op jou." icon="portrait" url=card_url %}
+
+        {% url 'Competitie:kies' as card_url %}
+        {% include 'plein/card.dtl' with title="Bondscompetities" text="Informatie over de bonds-competities, inclusief alle uitslagen." icon="my_location" url=card_url %}
+
+        {% url 'Records:overzicht' as card_url %}
+        {% include 'plein/card.dtl' with title="Records" text="Alle handboogsport records van nederlandse sporters." icon="insights" url=card_url %}
+    </div>
+
+    <p>
+        <span>Lees hier hoe we omgaan met jouw privacy: </span>
+        <a href="{% url 'Plein:privacy' %}" class="btn-nhb-blauw">
+            <i class="material-icons-round left">security</i>Privacyverklaring</a>
+    </p>
+
+
+    <p>&nbsp;</p>
+    <h5>Verder</h5>
+
+    <p>De volgende sites zijn misschien ook van interesse.</p>
+
+    <div class="row">
+        <!-- andere sites van de NHB -->
+        {% include 'plein/andere-sites-van-de-nhb.dtl' %}
+    </div>
+
+    <p>
+        <span>Voor vragen en problemen kan je contact met ons opnemen via e-mail: </span>
+        <a href="mailto:nhb-apps-support@handboogsport.nl" class="btn-nhb-blauw">
+            <i class="material-icons-round left">mail</i>nhb-apps-support@handboogsport.nl</a>
+    </p>
+
+    <p>Voorstellen en feedback over deze site graag via de drie gekleurde smileys die op elke pagina te vinden zijn.</p>
+
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="plein-schutter" %}
 
 {% endblock %}

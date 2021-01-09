@@ -1,47 +1,82 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020 Ramon van der Winkel.
+                Copyright (c) 20202-2021 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
 
-{% block title %}Competitie{% endblock %}
+{% block title %}{{ comp.beschrijving }}{% endblock %}
 
 {% block pagina %}
 
-<h4>Competitie overzicht voor de HWL</h4>
+    <h4>{{ comp.beschrijving }}</h4>
 
-<div class="row">
+    <p>Op deze pagina tonen we informatie en mogelijkheden voor beheerders voor een specifieke bondscompetitie.</p>
 
-    <!-- beheerders van de competitie -->
-    {% url 'Functie:overzicht' as card_url %}
-    {% include 'plein/card.dtl' with title="Beheerders" text="Relevante beheerders van de competities." icon="face" url=card_url %}
 
-    <!-- toon klassegrenzen regiocompetitie -->
-    {% url 'Competitie:klassegrenzen-tonen' as card_url %}
-    {% include 'plein/card.dtl' with title="Klassegrenzen" text="Toon de klassegrenzen voor de competities." icon="equalizer" url=card_url %}
+    {% if toon_uitslagen %}
+        <p>&nbsp;</p>
+        <h5>Uitslagen</h5>
 
-    <!-- toon inschrijvingen regiocompetitie -->
-    {% for comp in competities %}
+        <div class="row">
+            <!-- regio -->
+            {% include 'plein/card.dtl' with title="Regio" text=text_regio icon="view_comfy" url=url_regio %}
+
+            <!-- rayon -->
+            {% include 'plein/card.dtl' with title="Rayon" text=text_rayon icon="view_compact" url=url_rayon %}
+
+            <!-- bond -->
+            {% include 'plein/card.dtl' with title="Bond" text=text_bond icon="flag" url=url_bond %}
+        </div>
+    {% endif %}
+
+
+    <p>&nbsp;</p>
+    <h5>Competitie Beheer</h5>
+
+    <p>Je huidige rol is: <b>{{ huidige_rol }}</b>.</p>
+
+    <div class="row">
+
+        <!-- beheerders van de competitie -->
+        {% url 'Functie:overzicht' as card_url %}
+        {% include 'plein/card.dtl' with title="Beheerders" text="Relevante beheerders van de competities." icon="face" url=card_url %}
+
+        <!-- toon inschrijvingen regiocompetitie -->
         {% if comp.url_inschrijvingen %}
             {% include 'plein/card.dtl' with title="Inschrijvingen "|add:comp.afstand|add:"m" text="Lijst met sporters ingeschreven voor de "|add:comp.beschrijving|add:"." icon="receipt" url=comp.url_inschrijvingen %}
         {% endif %}
-    {% endfor %}
 
-    <!-- planning regiocompetities -->
-    {% for deelcomp in planning_deelcomp %}
-        {% url 'Competitie:regio-planning' deelcomp.pk as card_url %}
-        {% include 'plein/card.dtl' with title="Planning "|add:deelcomp.competitie.afstand|add:"m" text="Planning voor de "|add:deelcomp.competitie.beschrijving|add:" in "|add:deelcomp.nhb_regio.naam icon="date_range" url=card_url %}
-    {% endfor %}
+        <!-- planning regiocompetities -->
+        {% for deelcomp in planning_deelcomp %}
+            {% url 'Competitie:regio-planning' deelcomp.pk as card_url %}
+            {% include 'plein/card.dtl' with title="Planning "|add:deelcomp.competitie.afstand|add:"m" text="Planning voor de "|add:deelcomp.competitie.beschrijving|add:" in "|add:deelcomp.nhb_regio.naam icon="date_range" url=card_url %}
+        {% endfor %}
+    </div>
 
-    <!-- algemene informatie over de competities -->
-    {% url 'Competitie:info-competitie' as card_url %}
-    {% include 'plein/card.dtl' with title="Informatie" text="Algemene informatie over de competities." icon="info" url=card_url %}
 
-</div>
+    <p>&nbsp;</p>
+    <h5>Informatie</h5>
 
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-overzicht-hwl" %}
+    <div class="row">
+
+        <!-- toon klassegrenzen regiocompetitie -->
+        {% if comp.fase >= 'A2' %}
+            {% url 'Competitie:klassegrenzen-tonen' comp_pk=comp.pk as card_url %}
+            {% include 'plein/card.dtl' with title="Klassegrenzen" text="Toon de klassegrenzen voor de competities." icon="equalizer" url=card_url %}
+        {% endif %}
+
+        <!-- algemene informatie over de competities -->
+        {% url 'Competitie:info-competitie' as card_url %}
+        {% include 'plein/card.dtl' with title="Informatie" text="Algemene informatie over de competities." icon="info" url=card_url %}
+
+    </div>
+
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-overzicht-hwl" %}
 
 {% endblock %}
 
+{% block menu-competities %}
+    {% include 'competitie/menu.dtl' %}
+{% endblock %}

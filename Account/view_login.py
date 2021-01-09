@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -59,7 +59,7 @@ def account_check_nieuwe_email(request, from_ip, account):
         mailer_queue_email(mailadres, 'Email adres bevestigen', text_body)
 
         context = {'partial_email': mailer_obfuscate_email(mailadres)}
-        menu_dynamics(request, context, actief='inloggen')
+        menu_dynamics(request, context)
         return render(request, TEMPLATE_NIEUWEEMAIL, context)
 
     # geen wijziging van e-mailadres - gewoon doorgaan
@@ -88,7 +88,7 @@ def account_check_geblokkeerd(request, from_ip, account):
 
         # FUTURE: knop maken om na X uur een nieuwe mail te kunnen krijgen
         context = {'partial_email': mailer_obfuscate_email(email.nieuwe_email)}
-        menu_dynamics(request, context, actief='inloggen')
+        menu_dynamics(request, context)
         return render(request, TEMPLATE_BEVESTIG_EMAIL, context)
 
     # we wachten niet op bevestiging email - ga gewoon door
@@ -180,7 +180,7 @@ class LoginView(TemplateView):
                     my_logger.info(
                         '%s LOGIN Mislukte inlog voor geblokkeerd account %s' % (from_ip, repr(login_naam)))
                     context = {'account': account}
-                    menu_dynamics(self.request, context, actief='inloggen')
+                    menu_dynamics(self.request, context)
                     return render(self.request, TEMPLATE_GEBLOKKEERD, context), None
 
         return None, account
@@ -220,7 +220,7 @@ class LoginView(TemplateView):
                                        repr(login_naam),
                                        account.is_geblokkeerd_tot.strftime('%Y-%m-%d %H:%M:%S')))
                 context = {'account': account}
-                menu_dynamics(self.request, context, actief='inloggen')
+                menu_dynamics(self.request, context)
                 return render(self.request, TEMPLATE_GEBLOKKEERD, context)
 
             # wachtwoord klopt niet, doe opnieuw
@@ -304,7 +304,7 @@ class LoginView(TemplateView):
         if account and account.verkeerd_wachtwoord_teller > 0:
             context['show_wachtwoord_vergeten'] = True
 
-        menu_dynamics(request, context, actief='inloggen')
+        menu_dynamics(request, context)
         return render(request, TEMPLATE_LOGIN, context)
 
     def get(self, request, *args, **kwargs):
@@ -333,7 +333,7 @@ class LoginView(TemplateView):
 
         form = LoginForm(initial={'next': next})
         context = {'form': form}
-        menu_dynamics(request, context, actief='inloggen')
+        menu_dynamics(request, context)
         return render(request, TEMPLATE_LOGIN, context)
 
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -84,17 +84,17 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         lid.save()
         self.lid_100002 = lid
 
-        self.url_info = '/competitie/info/'
-        self.url_uitslagen = '/competitie/uitslagen/'
-        self.url_uitslagen_regio = '/competitie/uitslagen/%s-%s/regio/'
-        self.url_uitslagen_regio_n = '/competitie/uitslagen/%s-%s/regio/%s/'
-        self.url_uitslagen_regio_alt = '/competitie/uitslagen/%s-%s/regio-alt/'
-        self.url_uitslagen_regio_alt_n = '/competitie/uitslagen/%s-%s/regio-alt/%s/'
-        self.url_uitslagen_rayon = '/competitie/uitslagen/%s-%s/rayon/'
-        self.url_uitslagen_rayon_n = '/competitie/uitslagen/%s-%s/rayon/%s/'
-        self.url_uitslagen_bond = '/competitie/uitslagen/%s-%s/bond/'
-        self.url_uitslagen_ver = '/competitie/uitslagen/%s-%s/vereniging/'
-        self.url_uitslagen_ver_n = '/competitie/uitslagen/%s-%s/vereniging/%s/'
+        self.url_info = '/bondscompetities/info/'
+        self.url_overzicht = '/bondscompetities/%s/'
+        self.url_uitslagen_regio = '/bondscompetities/%s/uitslagen/%s/regio/'
+        self.url_uitslagen_regio_n = '/bondscompetities/%s/uitslagen/%s/regio/%s/'
+        self.url_uitslagen_regio_alt = '/bondscompetities/%s/uitslagen/%s/regio-alt/'
+        self.url_uitslagen_regio_alt_n = '/bondscompetities/%s/uitslagen/%s/regio-alt/%s/'
+        self.url_uitslagen_rayon = '/bondscompetities/%s/uitslagen/%s/rayon/'
+        self.url_uitslagen_rayon_n = '/bondscompetities/%s/uitslagen/%s/rayon/%s/'
+        self.url_uitslagen_bond = '/bondscompetities/%s/uitslagen/%s/bond/'
+        self.url_uitslagen_ver = '/bondscompetities/%s/uitslagen/%s/vereniging/'
+        self.url_uitslagen_ver_n = '/bondscompetities/%s/uitslagen/%s/vereniging/%s/'
 
         # log in as BB en maak de competitie aan
         self.e2e_login_and_pass_otp(self.account_bb)
@@ -104,29 +104,30 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         # TODO: schrijf schutters in (als RCL --> HWL)
 
     def _competitie_aanmaken(self):
-        url_overzicht = '/competitie/'
-        url_aanmaken = '/competitie/aanmaken/'
-        url_ag_vaststellen = '/competitie/ag-vaststellen/'
-        url_klassegrenzen_vaststellen_18 = '/competitie/klassegrenzen/vaststellen/18/'
-        url_klassegrenzen_vaststellen_25 = '/competitie/klassegrenzen/vaststellen/25/'
+        url_kies = '/bondscompetities/'
+        url_aanmaken = '/bondscompetities/aanmaken/'
+        url_ag_vaststellen = '/bondscompetities/ag-vaststellen/'
+        url_klassegrenzen_vaststellen = '/bondscompetities/%s/klassegrenzen/vaststellen/'
 
         # competitie aanmaken
         with self.assert_max_queries(20):
             resp = self.client.post(url_aanmaken)
-        self.assert_is_redirect(resp, url_overzicht)
+        self.assert_is_redirect(resp, url_kies)
 
         # aanvangsgemiddelden vaststellen
         with self.assert_max_queries(5):
             self.client.post(url_ag_vaststellen)
 
+        self.comp_18 = Competitie.objects.get(afstand='18')
+        self.comp_25 = Competitie.objects.get(afstand='25')
+
         # klassegrenzen vaststellen
         with self.assert_max_queries(20):
-            self.client.post(url_klassegrenzen_vaststellen_18)
+            self.client.post(url_klassegrenzen_vaststellen % self.comp_18.pk)
         with self.assert_max_queries(20):
-            self.client.post(url_klassegrenzen_vaststellen_25)
+            self.client.post(url_klassegrenzen_vaststellen % self.comp_25.pk)
 
         # zet de 18m open voor inschrijving
-        self.comp_18 = Competitie.objects.get(afstand='18')
         self.comp_18.begin_aanmeldingen = datetime.date(year=self.comp_18.begin_jaar, month=1, day=1)
         self.comp_18.save()
         self.comp_18.zet_fase()
@@ -211,7 +212,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         comp.zet_fase()
         self.assertTrue(comp.fase < 'B', msg="comp.fase=%s (expected: below B)" % comp.fase)
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_uitslagen)
+            resp = self.client.get(self.url_overzicht % comp.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
 
@@ -222,7 +223,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         comp.zet_fase()
         self.assertTrue(comp.fase >= 'B')
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_uitslagen)
+            resp = self.client.get(self.url_overzicht % comp.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
 
@@ -233,27 +234,20 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         comp.zet_fase()
         self.assertTrue(comp.fase >= 'E')
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_uitslagen)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-
-        # uitslagen zonder competitie actief
-        Competitie.objects.all().delete()
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_uitslagen)
+            resp = self.client.get(self.url_overzicht % comp.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
 
     def test_regio(self):
         # als BB
-        url = self.url_uitslagen_regio % (18, 'R')
+        url = self.url_uitslagen_regio % (self.comp_18.pk, 'R')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
 
         # lijst met onze deelnemers
-        url = self.url_uitslagen_regio_n % (18, 'IB', 101)
+        url = self.url_uitslagen_regio_n % (self.comp_18.pk, 'IB', 101)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
@@ -261,7 +255,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
 
         # als BKO
         self.e2e_wissel_naar_functie(self.functie_bko)
-        url = self.url_uitslagen_regio % (18, 'C')
+        url = self.url_uitslagen_regio % (self.comp_18.pk, 'C')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
@@ -269,7 +263,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
 
         # als RKO
         self.e2e_wissel_naar_functie(self.functie_rko)
-        url = self.url_uitslagen_regio % (25, 'IB')
+        url = self.url_uitslagen_regio % (self.comp_25.pk, 'IB')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
@@ -277,7 +271,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
 
         # als RCL
         self.e2e_wissel_naar_functie(self.functie_rcl)
-        url = self.url_uitslagen_regio % (25, 'LB')
+        url = self.url_uitslagen_regio % (self.comp_25.pk, 'LB')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
@@ -285,7 +279,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
 
         # als HWL
         self.e2e_wissel_naar_functie(self.functie_hwl)
-        url = self.url_uitslagen_regio % (25, 'R')
+        url = self.url_uitslagen_regio % (self.comp_25.pk, 'R')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
@@ -293,7 +287,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
 
         # als WL
         self.e2e_wissel_naar_functie(self.functie_wl)
-        url = self.url_uitslagen_regio % (25, 'C')
+        url = self.url_uitslagen_regio % (self.comp_25.pk, 'C')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
@@ -301,7 +295,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
 
         # als bezoeker
         self.client.logout()
-        url = self.url_uitslagen_regio % (25, 'LB')
+        url = self.url_uitslagen_regio % (self.comp_25.pk, 'LB')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
@@ -309,7 +303,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
 
         # als Schutter
         self.e2e_login(self.account_lid)
-        url = self.url_uitslagen_regio % (25, 'BB')
+        url = self.url_uitslagen_regio % (self.comp_25.pk, 'BB')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
@@ -318,7 +312,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         # als 'kapotte' Schutter
         self.lid_100001.is_actief_lid = False
         self.lid_100001.save()
-        url = self.url_uitslagen_regio % (25, 'BB')
+        url = self.url_uitslagen_regio % (self.comp_25.pk, 'BB')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
@@ -327,40 +321,40 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         # als 'kapotte' Schutter
         self.lid_100001.account = None
         self.lid_100001.save()
-        url = self.url_uitslagen_regio % (25, 'BB')
+        url = self.url_uitslagen_regio % (self.comp_25.pk, 'BB')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
 
     def test_regio_n(self):
-        url = self.url_uitslagen_regio_n % (18, 'R', 101)
+        url = self.url_uitslagen_regio_n % (self.comp_18.pk, 'R', 101)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
 
-        url = self.url_uitslagen_regio_n % (25, 'LB', 116)
+        url = self.url_uitslagen_regio_n % (self.comp_25.pk, 'LB', 116)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
 
         # regio 100 is valide maar heeft geen deelcompetitie
-        url = self.url_uitslagen_regio_n % (18, 'R', 100)
+        url = self.url_uitslagen_regio_n % (self.comp_18.pk, 'R', 100)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
 
     def test_regio_alt(self):
-        url = self.url_uitslagen_regio_alt % (25, 'BB')
+        url = self.url_uitslagen_regio_alt % (self.comp_25.pk, 'BB')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
 
-        url = self.url_uitslagen_regio_alt_n % (18, 'R', 101)
+        url = self.url_uitslagen_regio_alt_n % (self.comp_18.pk, 'R', 101)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
@@ -368,34 +362,34 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
 
         self.client.logout()
 
-        url = self.url_uitslagen_regio_alt % (25, 'BB')
+        url = self.url_uitslagen_regio_alt % (self.comp_25.pk, 'BB')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert_is_redirect(resp, self.url_uitslagen_regio % (25, 'BB'))
+        self.assert_is_redirect(resp, self.url_uitslagen_regio % (self.comp_25.pk, 'BB'))
 
-        url = self.url_uitslagen_regio_alt_n % (18, 'R', 101)
+        url = self.url_uitslagen_regio_alt_n % (self.comp_18.pk, 'R', 101)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert_is_redirect(resp, self.url_uitslagen_regio_n % (18, 'R', 101))
+        self.assert_is_redirect(resp, self.url_uitslagen_regio_n % (self.comp_18.pk, 'R', 101))
 
     def test_regio_bad(self):
         # slecht boog type
-        url = self.url_uitslagen_regio % (25, 'XXX')
+        url = self.url_uitslagen_regio % (self.comp_25.pk, 'XXX')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 404)
 
-        url = self.url_uitslagen_regio_n % (18, 'R', 999)
+        url = self.url_uitslagen_regio_n % (self.comp_18.pk, 'R', 999)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 404)
 
-        url = self.url_uitslagen_regio_n % (18, 'R', "NaN")
+        url = self.url_uitslagen_regio_n % (self.comp_18.pk, 'R', "NaN")
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 404)
 
-        url = self.url_uitslagen_regio_n % (18, 'BAD', 101)
+        url = self.url_uitslagen_regio_n % (self.comp_18.pk, 'BAD', 101)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 404)
@@ -411,14 +405,14 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 404)
 
     def test_rayon(self):
-        url = self.url_uitslagen_rayon % (18, 'R')
+        url = self.url_uitslagen_rayon % (self.comp_18.pk, 'R')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
 
     def test_rayon_n(self):
-        url = self.url_uitslagen_rayon_n % (18, 'IB', 1)      # bevat onze enige deelnemer met 6 scores
+        url = self.url_uitslagen_rayon_n % (self.comp_18.pk, 'IB', 1)      # bevat onze enige deelnemer met 6 scores
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
@@ -426,7 +420,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
 
     def test_rayon_bad(self):
         # slecht boogtype
-        url = self.url_uitslagen_rayon % (18, 'XXX')
+        url = self.url_uitslagen_rayon % (self.comp_18.pk, 'XXX')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 404)
@@ -441,13 +435,13 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 404)
 
-        url = self.url_uitslagen_rayon_n % (18, 'R', 'x')
+        url = self.url_uitslagen_rayon_n % (self.comp_18.pk, 'R', 'x')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 404)
 
     def test_bond(self):
-        url = self.url_uitslagen_bond % (18, 'R')
+        url = self.url_uitslagen_bond % (self.comp_18.pk, 'R')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
@@ -465,13 +459,13 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 404)
 
     def test_vereniging(self):
-        url = self.url_uitslagen_ver % (18, 'R')
+        url = self.url_uitslagen_ver % (self.comp_18.pk, 'R')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
 
-        url = self.url_uitslagen_ver_n % (18, 'R', self.ver.nhb_nr)
+        url = self.url_uitslagen_ver_n % (self.comp_18.pk, 'R', self.ver.nhb_nr)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
@@ -480,7 +474,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         # als je de pagina ophaalt als een ingelogd lid, dan krijg je je eigen vereniging
         self.e2e_login(self.account_lid_100002)
 
-        url = self.url_uitslagen_ver % (18, 'R')
+        url = self.url_uitslagen_ver % (self.comp_18.pk, 'R')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
@@ -502,7 +496,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(functie)
 
         # als je de pagina ophaalt als functie SEC/HWL/WL, dan krijg je die vereniging
-        url = self.url_uitslagen_ver % (18, 'R')
+        url = self.url_uitslagen_ver % (self.comp_18.pk, 'R')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
@@ -513,7 +507,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         self.ver.regio = NhbRegio.objects.get(regio_nr=100)
         self.ver.save()
 
-        url = self.url_uitslagen_ver_n % (18, 'R', self.ver.nhb_nr)
+        url = self.url_uitslagen_ver_n % (self.comp_18.pk, 'R', self.ver.nhb_nr)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
@@ -525,17 +519,17 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 404)
 
-        url = self.url_uitslagen_ver % (18, 'x')
+        url = self.url_uitslagen_ver % (self.comp_18.pk, 'x')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 404)
 
-        url = self.url_uitslagen_ver_n % (18, 'R', 999999)
+        url = self.url_uitslagen_ver_n % (self.comp_18.pk, 'R', 999999)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 404)
 
-        url = self.url_uitslagen_ver_n % (18, 'R', 'nan')
+        url = self.url_uitslagen_ver_n % (self.comp_18.pk, 'R', 'nan')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 404)

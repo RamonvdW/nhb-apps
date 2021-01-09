@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020 Ramon van der Winkel.
+                Copyright (c) 2020-2021 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -9,74 +9,79 @@
 {% block title %}Aanmeldingen{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-inschrijfmethode3-behoefte" %}
 
-<h4>Behoefte dagdelen</h4>
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-inschrijfmethode3-behoefte" %}
 
-<p>Op deze pagina tonen we de behoefte voor de regiocompetitie <b>{{ competitie.beschrijving }}</b> voor <b>{{ regio }}</b>.</p>
+    <h4>Behoefte dagdelen</h4>
 
-<a class="btn-nhb-blauw" href="{{ url_download }}">
-    <i class="material-icons-round left">get_app</i>Download lijst</a>
+    <p>Op deze pagina tonen we de behoefte voor de regiocompetitie <b>{{ competitie.beschrijving }}</b> voor <b>{{ regio }}</b>.</p>
 
-<h5>Dagdeel behoefte:</h5>
+    <a class="btn-nhb-blauw" href="{{ url_download }}">
+        <i class="material-icons-round left">get_app</i>Download lijst</a>
 
-<table class="white">
-    <thead>
-        <tr>
-            <th>Vereniging</th>
+    <h5>Dagdeel behoefte:</h5>
 
-            {% for beschrijving in dagdelen %}
-                <th class="center-align">{{ beschrijving }}</th>
-            {% endfor %}
+    <table class="white">
+        <thead>
+            <tr>
+                <th>Vereniging</th>
 
-            <th class="center-align">Totaal</th>
-        </tr>
-    </thead>
+                {% for beschrijving in dagdelen %}
+                    <th class="center-align">{{ beschrijving }}</th>
+                {% endfor %}
 
-    {% for nhb_ver in regio_verenigingen %}
-        <tr>
-            <td>{{ nhb_ver }}</td>  <!-- geeft [nhb_nr] naam -->
-            {% for count in nhb_ver.counts_list %}
-                <td class="center-align">{{ count }}</td>
-            {% endfor %}
-        </tr>
-    {% endfor %}
+                <th class="center-align">Totaal</th>
+            </tr>
+        </thead>
 
-    <tr>
-        <td class="right-align"><b>Totalen:</b></td>
-        {% for count in totalen %}
-            <td class="center-align"><b>{{ count }}</b></td>
+        {% for nhb_ver in regio_verenigingen %}
+            <tr>
+                <td>{{ nhb_ver }}</td>  <!-- geeft [nhb_nr] naam -->
+                {% for count in nhb_ver.counts_list %}
+                    <td class="center-align">{{ count }}</td>
+                {% endfor %}
+            </tr>
         {% endfor %}
-    </tr>
 
-    <tr class="nhb-grijs">
-        <td>
-            <p>&nbsp;</p>
-            <h5>Aantal sporters per blazoen type:</h5>
-        </td>
-        {% for beschrijving in dagdelen %}<td></td>{% endfor %}
-        <td></td>   <!-- totalen -->
-    </tr>
-
-    <!-- thead -->
         <tr>
-            <th>Type blazoen</th>
-
-            {% for beschrijving in dagdelen %}
-                <th class="center-align">{{ beschrijving }}</th>
-            {% endfor %}
-
-            <th class="center-align">Totaal</th>
-        </tr>
-    <!-- /thead -->
-
-    {% for kolommen in blazoen_count %}
-        <tr>
-            {% for kolom in kolommen %}
-                <td {% if not forloop.first %}class="center-align"{% endif %}>{{ kolom }}</td>
+            <td class="right-align"><b>Totalen:</b></td>
+            {% for count in totalen %}
+                <td class="center-align"><b>{{ count }}</b></td>
             {% endfor %}
         </tr>
-    {% endfor %}
-</table>
 
+        <tr class="nhb-grijs">
+            <td>
+                <p>&nbsp;</p>
+                <h5>Aantal sporters per blazoen type:</h5>
+            </td>
+            {% for beschrijving in dagdelen %}<td></td>{% endfor %}
+            <td></td>   <!-- totalen -->
+        </tr>
+
+        <!-- thead -->
+            <tr>
+                <th>Type blazoen</th>
+
+                {% for beschrijving in dagdelen %}
+                    <th class="center-align">{{ beschrijving }}</th>
+                {% endfor %}
+
+                <th class="center-align">Totaal</th>
+            </tr>
+        <!-- /thead -->
+
+        {% for kolommen in blazoen_count %}
+            <tr>
+                {% for kolom in kolommen %}
+                    <td {% if not forloop.first %}class="center-align"{% endif %}>{{ kolom }}</td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+    </table>
+
+{% endblock %}
+
+{% block menu-competities %}
+    {% include 'competitie/menu.dtl' %}
 {% endblock %}

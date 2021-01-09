@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -117,10 +117,13 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         # creëer een competitie met deelcompetities
         competitie_aanmaken(jaar=2019)
 
+        self.comp_18 = Competitie.objects.get(afstand='18')
+        self.comp_25 = Competitie.objects.get(afstand='25')
+
         # klassengrenzen vaststellen om de competitie voorbij fase A1 te krijgen
         self.e2e_login_and_pass_otp(self.account_bb)
         self.e2e_wisselnaarrol_bb()
-        self.url_klassegrenzen_vaststellen_18 = '/competitie/klassegrenzen/vaststellen/18/'
+        self.url_klassegrenzen_vaststellen_18 = '/bondscompetities/%s/klassegrenzen/vaststellen/' % self.comp_18.pk
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_klassegrenzen_vaststellen_18)
         self.assert_is_redirect_not_plein(resp)  # check for success
@@ -132,8 +135,6 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
                                                 indiv__is_onbekend=True)
                                         .all())[0]
 
-        self.comp_18 = Competitie.objects.get(afstand='18')
-        self.comp_25 = Competitie.objects.get(afstand='25')
         self.deelcomp_bond_18 = DeelCompetitie.objects.filter(laag='BK', competitie=self.comp_18)[0]
         self.deelcomp_rayon1_18 = DeelCompetitie.objects.filter(laag='RK', competitie=self.comp_18, nhb_rayon=self.rayon_1)[0]
         self.deelcomp_rayon2_18 = DeelCompetitie.objects.filter(laag='RK', competitie=self.comp_18, nhb_rayon=self.rayon_2)[0]
@@ -167,16 +168,16 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         ver.save()
         ver.clusters.add(self.cluster_101e_25)
 
-        self.url_planning_bond = '/competitie/planning/bk/%s/'                               # deelcomp_pk
-        self.url_planning_rayon = '/competitie/planning/rk/%s/'                              # deelcomp_pk
-        self.url_planning_regio = '/competitie/planning/regio/%s/'                           # deelcomp_pk
-        self.url_planning_regio_cluster = '/competitie/planning/regio/cluster/%s/'           # cluster_pk
-        self.url_planning_regio_ronde = '/competitie/planning/regio/ronde/%s/'               # ronde_pk
-        self.url_planning_regio_ronde_methode1 = '/competitie/planning/regio/regio-wedstrijden/%s/'  # ronde_pk
-        self.url_wijzig_wedstrijd = '/competitie/planning/regio/wedstrijd/wijzig/%s/'        # wedstrijd_pk
-        self.url_verwijder_wedstrijd = '/competitie/planning/regio/wedstrijd/verwijder/%s/'  # wedstrijd_pk
-        self.url_score_invoeren = '/competitie/scores/uitslag-invoeren/%s/'                  # wedstrijd_pk
-        self.url_afsluiten_regio = '/competitie/planning/regio/afsluiten/%s/'                # deelcomp_pk
+        self.url_planning_bond = '/bondscompetities/planning/bk/%s/'                               # deelcomp_pk
+        self.url_planning_rayon = '/bondscompetities/planning/rk/%s/'                              # deelcomp_pk
+        self.url_planning_regio = '/bondscompetities/planning/regio/%s/'                           # deelcomp_pk
+        self.url_planning_regio_cluster = '/bondscompetities/planning/regio/cluster/%s/'           # cluster_pk
+        self.url_planning_regio_ronde = '/bondscompetities/planning/regio/ronde/%s/'               # ronde_pk
+        self.url_planning_regio_ronde_methode1 = '/bondscompetities/planning/regio/regio-wedstrijden/%s/'  # ronde_pk
+        self.url_wijzig_wedstrijd = '/bondscompetities/planning/regio/wedstrijd/wijzig/%s/'        # wedstrijd_pk
+        self.url_verwijder_wedstrijd = '/bondscompetities/planning/regio/wedstrijd/verwijder/%s/'  # wedstrijd_pk
+        self.url_score_invoeren = '/bondscompetities/scores/uitslag-invoeren/%s/'                  # wedstrijd_pk
+        self.url_afsluiten_regio = '/bondscompetities/planning/regio/afsluiten/%s/'                # deelcomp_pk
 
     def _maak_inschrijving(self, deelcomp):
         RegioCompetitieSchutterBoog(schutterboog=self.schutterboog,
@@ -277,7 +278,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/planning-landelijk.dtl', 'plein/site_layout.dtl'))
 
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(21):
             resp = self.client.get(self.url_planning_rayon % self.deelcomp_rayon2_18.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -286,7 +287,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
 
         # controleer dat de URL naar de bondscompetitie er in zit
         urls = self.extract_all_urls(resp, skip_menu=True)
-        urls2 = [url for url in urls if url.startswith('/competitie/planning/bk/')]
+        urls2 = [url for url in urls if url.startswith('/bondscompetities/planning/bk/')]
         if len(urls2) != 1:     # pragma: no cover
             self.fail(msg='Link naar bondscompetitie planning ontbreekt. Urls on page: %s' % repr(urls))
 
@@ -298,7 +299,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
 
         # controleer dat de URL naar de rayoncompetitie er in zit
         urls = self.extract_all_urls(resp, skip_menu=True)
-        urls2 = [url for url in urls if url.startswith('/competitie/planning/rk/')]
+        urls2 = [url for url in urls if url.startswith('/bondscompetities/planning/rk/')]
         if len(urls2) != 1:     # pragma: no cover
             self.fail(msg='Link naar rayoncompetitie planning ontbreekt. Urls on page: %s' % repr(urls))
 
@@ -325,7 +326,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
             resp = self.client.get(self.url_planning_bond % self.deelcomp_bond_18.pk)
         self.assert_is_redirect(resp, '/plein/')      # not allowed
 
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(23):
             resp = self.client.get(self.url_planning_rayon % self.deelcomp_rayon2_18.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -339,7 +340,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
 
         # controleer dat de URL naar de rayoncompetitie er in zit
         urls = self.extract_all_urls(resp, skip_menu=True)
-        urls2 = [url for url in urls if url.startswith('/competitie/planning/rk/')]
+        urls2 = [url for url in urls if url.startswith('/bondscompetities/planning/rk/')]
         if len(urls2) != 1:     # pragma: no cover
             self.fail(msg='Link naar rayoncompetitie planning ontbreekt. Urls on page: %s' % repr(urls))
 
@@ -609,7 +610,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         self.assertEqual(str(wedstrijd_datum), "2019-09-30")
 
         # haal de wedstrijd op
-        with self.assert_max_queries(23):
+        with self.assert_max_queries(27):
             resp = self.client.get(self.url_wijzig_wedstrijd % wedstrijd_pk)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
@@ -664,7 +665,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         ronde_oud.save()
 
         # haal de planning op (maakt opnieuw een ronde aan)
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(22):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
@@ -907,7 +908,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         self.assertEqual(str(wedstrijd.tijd_begin_wedstrijd), "12:34:00")
         self.assertEqual(wedstrijd.vereniging.nhb_nr, self.nhbver_101.nhb_nr)
 
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(23):
             resp = self.client.get(self.url_wijzig_wedstrijd % wedstrijd_pk)
         self.assertEqual(resp.status_code, 200)
 
@@ -1120,7 +1121,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
 
         # haal de wijzig-wedstrijd pagina op
         url = self.url_wijzig_wedstrijd % wedstrijd_pk
-        with self.assert_max_queries(22):
+        with self.assert_max_queries(26):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         urls = self.extract_all_urls(resp, skip_menu=True)
@@ -1154,7 +1155,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
 
         # haal de wijzig-wedstrijd pagina op
         url = self.url_wijzig_wedstrijd % wedstrijd_pk
-        with self.assert_max_queries(25):
+        with self.assert_max_queries(27):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         urls = self.extract_all_urls(resp, skip_menu=True)
@@ -1226,7 +1227,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         # for
         self.assertEqual(DeelcompetitieRonde.objects.count(), 10)
 
-        with self.assert_max_queries(30):
+        with self.assert_max_queries(33):
             resp = self.client.get(self.url_planning_regio % self.deelcomp_regio101_25.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -1307,7 +1308,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         ronde.beschrijving = 'Derde'
         ronde.save()
 
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(23):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -1542,7 +1543,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/rcl-afsluiten-regiocomp.dtl', 'plein/site_layout.dtl'))
         hrefs = self.extract_all_urls(resp, skip_menu=True)
-        self.assertEqual(hrefs, ['/competitie/'])  # alleen de terug knop
+        self.assertEqual(hrefs, ['/bondscompetities/%s/' % self.comp_18.pk])  # alleen de terug knop
 
         # probeer afsluiten
         with self.assert_max_queries(20):
@@ -1576,7 +1577,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/rcl-afsluiten-regiocomp.dtl', 'plein/site_layout.dtl'))
         hrefs = self.extract_all_urls(resp, skip_menu=True)
-        self.assertEqual(hrefs, ['/competitie/'])  # alleen de terug knop
+        self.assertEqual(hrefs, ['/bondscompetities/%s/' % self.comp_18.pk])  # alleen de terug knop
 
         # nogmaals afsluiten doet niets
         with self.assert_max_queries(20):

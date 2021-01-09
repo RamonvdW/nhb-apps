@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -130,18 +130,20 @@ class TestCompetitieScores(E2EHelpers, TestCase):
         # creëer een competitie met deelcompetities
         competitie_aanmaken(jaar=2019)
 
+        self.comp_18 = Competitie.objects.get(afstand='18')
+        self.comp_25 = Competitie.objects.get(afstand='25')
+
         # klassegrenzen vaststellen
+        url_vaststellen = '/bondscompetities/%s/klassegrenzen/vaststellen/'  # comp_pk
         self.e2e_login_and_pass_otp(self.account_bb)
         self.e2e_wisselnaarrol_bb()
         with self.assert_max_queries(20):
-            resp = self.client.post('/competitie/klassegrenzen/vaststellen/18/')
+            resp = self.client.post(url_vaststellen % self.comp_18.pk)
         self.assert_is_redirect_not_plein(resp)     # check success
         with self.assert_max_queries(20):
-            resp = self.client.post('/competitie/klassegrenzen/vaststellen/25/')
+            resp = self.client.post(url_vaststellen % self.comp_25.pk)
         self.assert_is_redirect_not_plein(resp)     # check success
 
-        self.comp_18 = Competitie.objects.get(afstand='18')
-        self.comp_25 = Competitie.objects.get(afstand='25')
         self.deelcomp_regio101_18 = DeelCompetitie.objects.filter(laag='Regio', competitie=self.comp_18, nhb_regio=self.regio_101)[0]
         self.deelcomp_regio101_25 = DeelCompetitie.objects.filter(laag='Regio', competitie=self.comp_25, nhb_regio=self.regio_101)[0]
 
@@ -161,20 +163,20 @@ class TestCompetitieScores(E2EHelpers, TestCase):
         # secretaris kan nog niet ingevuld worden
         ver.save()
 
-        self.url_planning_regio = '/competitie/planning/regio/%s/'                   # deelcomp_pk
-        self.url_planning_regio_cluster = '/competitie/planning/regio/cluster/%s/'   # cluster_pk
-        self.url_planning_regio_ronde = '/competitie/planning/regio/ronde/%s/'       # ronde_pk
+        self.url_planning_regio = '/bondscompetities/planning/regio/%s/'                   # deelcomp_pk
+        self.url_planning_regio_cluster = '/bondscompetities/planning/regio/cluster/%s/'   # cluster_pk
+        self.url_planning_regio_ronde = '/bondscompetities/planning/regio/ronde/%s/'       # ronde_pk
 
-        self.url_uitslag_invoeren = '/competitie/scores/uitslag-invoeren/%s/'        # wedstrijd_pk
-        self.url_uitslag_deelnemers = '/competitie/scores/dynamic/deelnemers-ophalen/'
-        self.url_uitslag_zoeken = '/competitie/scores/dynamic/check-nhbnr/'
-        self.url_uitslag_opslaan = '/competitie/scores/dynamic/scores-opslaan/'
+        self.url_uitslag_invoeren = '/bondscompetities/scores/uitslag-invoeren/%s/'        # wedstrijd_pk
+        self.url_uitslag_deelnemers = '/bondscompetities/scores/dynamic/deelnemers-ophalen/'
+        self.url_uitslag_zoeken = '/bondscompetities/scores/dynamic/check-nhbnr/'
+        self.url_uitslag_opslaan = '/bondscompetities/scores/dynamic/scores-opslaan/'
 
-        self.url_uitslag_controleren = '/competitie/scores/uitslag-controleren/%s/'  # wedstrijd_pk
-        self.url_uitslag_accorderen = '/competitie/scores/uitslag-accorderen/%s/'    # wedstrijd_pk
+        self.url_uitslag_controleren = '/bondscompetities/scores/uitslag-controleren/%s/'  # wedstrijd_pk
+        self.url_uitslag_accorderen = '/bondscompetities/scores/uitslag-accorderen/%s/'    # wedstrijd_pk
 
-        self.url_scores_regio = '/competitie/scores/regio/%s/'                       # deelcomp_pk
-        self.url_bekijk_uitslag = '/competitie/scores/bekijk-uitslag/%s/'            # wedstrijd_pk
+        self.url_scores_regio = '/bondscompetities/scores/regio/%s/'                       # deelcomp_pk
+        self.url_bekijk_uitslag = '/bondscompetities/scores/bekijk-uitslag/%s/'            # wedstrijd_pk
 
         self.e2e_login_and_pass_otp(self.account_rcl101_18)
         self.e2e_wissel_naar_functie(self.functie_rcl101_18)

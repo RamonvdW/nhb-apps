@@ -6,17 +6,37 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}Competitie{% endblock %}
+{% block title %}{{ comp.beschrijving }}{% endblock %}
 
 {% block pagina %}
+
     {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-overzicht-beheerder" %}
 
-    <h4>Competitie</h4>
+    <h4>{{ comp.beschrijving }}</h4>
 
-    <p>Deze pagina toont de actieve competities.</p>
+    <p>Op deze pagina tonen we informatie en mogelijkheden voor beheerders voor een specifieke bondscompetitie.</p>
 
-    <p>&nbsp;</p>
-    <h5>Volgende stappen</h5>
+
+    {% if toon_uitslagen %}
+
+        <h5>Uitslagen</h5>
+
+        <div class="row">
+            <!-- regio -->
+            {% include 'plein/card.dtl' with title="Regio" text=text_regio icon="view_comfy" url=url_regio %}
+
+            <!-- rayon -->
+            {% include 'plein/card.dtl' with title="Rayon" text=text_rayon icon="view_compact" url=url_rayon %}
+
+            <!-- bond -->
+            {% include 'plein/card.dtl' with title="Bond" text=text_bond icon="flag" url=url_bond %}
+        </div>
+        <p>&nbsp;</p>
+
+    {% endif %}
+
+
+    <h5>Competitie Beheer</h5>
 
     <div class="row">
 
@@ -29,55 +49,38 @@
             {% endif %}
 
             <!-- datums wijzigen (hoge prio) -->
-            {% if show_wijzig_datums %}
-                {% for comp in object_list %}
-                    {% if comp.fase < 'B' %}
-                        {% include 'plein/card.dtl' with title="Datums "|add:comp.afstand|add:"m" text="Datums aanpassen voor de "|add:comp.beschrijving|add:"." icon="build" url=comp.url_wijzig_datums %}
-                    {% endif %}
-                {% endfor %}
-            {% endif %}
-
-            <!-- aanvangsgemiddelden vaststellen -->
-            {% if bb_kan_ag_vaststellen %}
-                {% url 'Competitie:ag-vaststellen' as card_url %}
-                {% if bb_ag_nieuwste_datum %}
-                    <!-- template tag 'add' cannot handle missing variables -->
-                    {% include 'plein/card.dtl' with title="Aanvangsgemiddelden" text="AG vaststellen voor elke schutter-boog, aan de hand van de uitslagen van vorig seizoen (op "|add:bb_ag_nieuwste_datum|add:" voor het laatst gedaan)" icon="how_to_reg" url=card_url %}
-                {% else %}
-                    {% include 'plein/card.dtl' with title="Aanvangsgemiddelden" text="AG vaststellen voor elke schutter-boog, aan de hand van de uitslagen van vorig seizoen (eerste keer)" icon="how_to_reg" url=card_url %}
-                {% endif %}
+            {% if comp.fase < 'B' %}
+                {% url 'Competitie:wijzig-datums' comp_pk=comp.pk as card_url %}
+                {% include 'plein/card.dtl' with title="Zet datums" text="Belangrijke datums aanpassen voor de fases van deze nieuwe competitie." icon="build" url=card_url %}
             {% endif %}
 
             <!-- klassegrenzen vaststellen -->
-            {% for comp in object_list %}
-                {% if comp.fase == 'A1' %}
-                    {% url 'Competitie:klassegrenzen-vaststellen' afstand=comp.afstand as card_url %}
-                    {% include 'plein/card.dtl' with title="Klassegrenzen "|add:comp.afstand|add:"m" text="Klassegrenzen vaststellen voor de "|add:comp.beschrijving icon="equalizer" url=card_url %}
-                {% endif %}
-            {% endfor %}
+            {% if comp.fase == 'A1' %}
+                {% url 'Competitie:klassegrenzen-vaststellen' comp_pk=comp.pk as card_url %}
+                {% include 'plein/card.dtl' with title="Zet klassegrenzen" text="Klassegrenzen vaststellen (eenmalige actie)." icon="equalizer" url=card_url %}
+            {% endif %}
 
             <!-- datums wijzigen (lage prio) -->
-            {% if show_wijzig_datums %}
-                {% for comp in object_list %}
-                    {% if comp.fase >= 'B' %}
-                        {% include 'plein/card.dtl' with title="Datums "|add:comp.afstand|add:"m" text="Datums aanpassen voor de "|add:comp.beschrijving|add:"." icon="build" url=comp.url_wijzig_datums %}
-                    {% endif %}
-                {% endfor %}
+            {% if comp.fase >= 'B' %}
+                {% url 'Competitie:wijzig-datums' comp_pk=comp.pk as card_url %}
+                {% include 'plein/card.dtl' with title="Fase datums" text="Datums aanpassen voor de fases van de competitie." icon="build" url=card_url %}
             {% endif %}
 
         {% endif %}     <!-- rol_is_bb -->
 
-        {% if have_active_comps %}
-            {% for deelcomp in planning_deelcomp %}
+        {% for deelcomp in planning_deelcomp %}
 
-                <!-- planning deelcomp -->
-                {% include 'plein/card.dtl' with title=deelcomp.titel text=deelcomp.tekst icon="pending_actions" url=deelcomp.url %}
+            <!-- planning deelcomp -->
+            {% include 'plein/card.dtl' with title=deelcomp.titel text=deelcomp.tekst icon="pending_actions" url=deelcomp.url %}
 
-                {% if deelcomp.url_scores %}
-                    <!-- scores -->
-                    {% include 'plein/card.dtl' with title="Scores" text=deelcomp.tekst_scores icon="edit" url=deelcomp.url_scores %}
-                {% endif %}
-            {% endfor %}
+            <!-- scores -->
+            {% if deelcomp.url_scores %}
+                {% include 'plein/card.dtl' with title="Scores" text=deelcomp.tekst_scores icon="edit" url=deelcomp.url_scores %}
+            {% endif %}
+
+        {% endfor %}
+
+        {% if comp.fase >= 'E' %}
 
             <!-- RK selectie -->
             {% if url_lijst_rk %}
@@ -89,35 +92,32 @@
                 {% include 'plein/card.dtl' with title="RK limieten" text="Maximum aantal deelnemers in elke wedstrijdklasse van jouw RK instellen." icon="accessibility_new" url=url_limieten_rk %}
             {% endif %}
 
-            <!-- toon inschrijvingen regiocompetitie -->
-            {% for comp in competities %}
-                {% if comp.url_inschrijvingen %}
-                    {% include 'plein/card.dtl' with title=comp.titel_inschrijvingen text="Toon lijst met sporters ingeschreven voor de regiocompetitie van de "|add:comp.beschrijving|add:"." icon="receipt" url=comp.url_inschrijvingen %}
-                {% endif %}
-            {% endfor %}
-
-            <!-- afsluiten deelcomp -->
-            {% for deelcomp in afsluiten_deelcomp %}
-                {% include 'plein/card.dtl' with title=deelcomp.titel text=deelcomp.tekst icon="done_outline" url=deelcomp.url_afsluiten %}
-            {% endfor %}
-
-            <!-- BKO kaartjes -->
-            {% if bko_doorzetten %}
-                {% include 'plein/card.dtl' with title="Doorzetten" text=bko_doorzetten.titel_doorzetten icon="mediation" url=bko_doorzetten.url_doorzetten %}
-            {% endif %}
-            {% if bko_afsluiten %}
-                {% include 'plein/card.dtl' with title="Afsluiten" text=bko_afsluiten.titel_afsluiten icon="mediation" url=bko_afsluiten.url_afsluiten %}
-            {% endif %}
-
-            <!-- toon klassegrenzen regiocompetitie -->
-            {% url 'Competitie:klassegrenzen-tonen' as card_url %}
-            {% include 'plein/card.dtl' with title="Klassegrenzen" text="Vastgestelde klassegrenzen voor de wedstrijdklassen van de competities." icon="equalizer" url=card_url %}
-
         {% endif %}
 
-        <!-- algemene informatie over de competities -->
-        {% url 'Competitie:info-competitie' as card_url %}
-        {% include 'plein/card.dtl' with title="Informatie" text="Algemene informatie over de competities." icon="info" url=card_url %}
+        <!-- toon inschrijvingen regiocompetitie -->
+        {% if comp.url_inschrijvingen %}
+            {% include 'plein/card.dtl' with title=comp.titel_inschrijvingen text="Toon lijst met sporters ingeschreven voor de regiocompetitie van de "|add:comp.beschrijving|add:"." icon="receipt" url=comp.url_inschrijvingen %}
+        {% endif %}
+
+        <!-- afsluiten deelcomp -->
+        {% for deelcomp in afsluiten_deelcomp %}
+            {% include 'plein/card.dtl' with title=deelcomp.titel text=deelcomp.tekst icon="done_outline" url=deelcomp.url_afsluiten %}
+        {% endfor %}
+
+        <!-- BKO kaartjes -->
+        {% if bko_doorzetten %}
+            {% include 'plein/card.dtl' with title="Doorzetten" text=bko_doorzetten.titel_doorzetten icon="mediation" url=bko_doorzetten.url_doorzetten %}
+        {% endif %}
+
+        {% if bko_afsluiten %}
+            {% include 'plein/card.dtl' with title="Afsluiten" text=bko_afsluiten.titel_afsluiten icon="mediation" url=bko_afsluiten.url_afsluiten %}
+        {% endif %}
+
+        <!-- toon klassegrenzen regiocompetitie -->
+        {% if comp.fase >= 'A2' %}
+            {% url 'Competitie:klassegrenzen-tonen' comp_pk=comp.pk as card_url %}
+            {% include 'plein/card.dtl' with title="Klassegrenzen" text="Vastgestelde klassegrenzen voor de wedstrijdklassen van de competities." icon="equalizer" url=card_url %}
+        {% endif %}
 
     </div>
 
@@ -128,226 +128,227 @@
     {% endif %}
 
     <p>Je huidige rol is: <b>{{ huidige_rol }}</b>.</p>
+    <p>&nbsp;</p>
 
-    {% for obj in competities %}
 
-        <p>&nbsp;</p>
-        <h5>Tijdlijn {{ obj.beschrijving }}</h5>
+    <h5>Tijdlijn {{ comp.beschrijving }}</h5>
 
-        <table class="white">
-            <thead>
-                <tr>
-                    <th class="center-align">Fase</th>
-                    <th>Activiteit</th>
-                    <th>Periode</th>
-                </tr>
-            </thead>
-
+    <table class="white">
+        <thead>
             <tr>
-                <td class="center-align">A</td>
-                <td>Competitie opstarten (Bondsburo)</td>
-                <td class="green-text">Afgerond</td>
+                <th class="center-align">Fase</th>
+                <th>Activiteit</th>
+                <th>Periode</th>
             </tr>
+        </thead>
 
-            <tr>
-                <td {% if obj.fase == 'A1' %}class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>A1</td>
-                <td>Vaststellen aanvangsgemiddelden<br>en klassegrenzen (Bondsburo)</td>
-                <td>
-                    {% if obj.fase > 'A1' %}
+        <tr>
+            <td class="center-align">A</td>
+            <td>Competitie opstarten (Bondsburo)</td>
+            <td class="green-text">Afgerond</td>
+        </tr>
+
+        <tr>
+            <td {% if comp.fase == 'A1' %}class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>A1</td>
+            <td>Vaststellen aanvangsgemiddelden<br>en klassegrenzen (Bondsburo)</td>
+            <td>
+                {% if comp.fase > 'A1' %}
                     <span class="green-text">Afgerond</span>
-                    {% else %}
+                {% else %}
                     <span>tot 15 juli</span>
-                    {% endif %}
-                </td>
-            </tr>
+                {% endif %}
+            </td>
+        </tr>
 
-            <tr>
-                <td></td>
-                <td colspan="2"><b>Regiocompetitie</b></td>
-            </tr>
+        <tr>
+            <td></td>
+            <td colspan="2"><b>Regiocompetitie</b></td>
+        </tr>
 
-            <tr>
-                <td {% if obj.fase == 'A2' %}class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>A2</td>
-                <td>Instellingen regio (RCL)</td>
-                <td>
-                    {% if obj.fase > 'A2' %}
+        <tr>
+            <td {% if comp.fase == 'A2' %}class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>A2</td>
+            <td>Instellingen regio (RCL)</td>
+            <td>
+                {% if comp.fase > 'A2' %}
                     <span class="green-text">Afgerond</span>
-                    {% else %}
+                {% else %}
                     <span>tot 15 juli</span>
-                    {% endif %}
-                </td>
-            </tr>
+                {% endif %}
+            </td>
+        </tr>
 
-            <tr>
-                <td {% if obj.fase == 'B' %}class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>B</td>
-                <!-- {{ obj.uiterste_datum_lid }} is 1 augustus om praktische redenen, maar reglement zegt 15 juli -->
-                <td>Open voor aanmelden individueel en teams<br>(indien lid voor 15 juli {{ obj.uiterste_datum_lid|date:"Y" }})</td>
-                <td>
-                    {% if obj.fase > 'B' %}
-                        <span class="green-text">Afgerond</span>
-                    {% else %}
-                        <span>{{ obj.begin_aanmeldingen }}{% if obj.einde_aanmeldingen > obj.begin_aanmeldingen %} tot<br>{{ obj.einde_aanmeldingen }}{% endif %}</span>
-                    {% endif %}
-                </td>
-            </tr>
+        <tr>
+            <td {% if comp.fase == 'B' %}class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>B</td>
+            <!-- {{ comp.uiterste_datum_lid }} is 1 augustus om praktische redenen, maar reglement zegt 15 juli -->
+            <td>Open voor aanmelden individueel en teams<br>(indien lid voor 15 juli {{ comp.uiterste_datum_lid|date:"Y" }})</td>
+            <td>
+                {% if comp.fase > 'B' %}
+                    <span class="green-text">Afgerond</span>
+                {% else %}
+                    <span>{{ comp.begin_aanmeldingen }}{% if comp.einde_aanmeldingen > comp.begin_aanmeldingen %} tot<br>{{ comp.einde_aanmeldingen }}{% endif %}</span>
+                {% endif %}
+            </td>
+        </tr>
 
-            <tr>
-                <td {% if obj.fase == 'C' %} class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>C</td>
-                <td>Samenstellen vaste teams (HWL)</td>
-                <td>
-                    {% if obj.fase > 'C' %}
-                        <span class="green-text">Afgerond</span>
-                    {% else %}
-                        <span>tot {{ obj.einde_teamvorming }}</span>
-                    {% endif %}
-                </td>
-            </tr>
+        <tr>
+            <td {% if comp.fase == 'C' %} class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>C</td>
+            <td>Samenstellen vaste teams (HWL)</td>
+            <td>
+                {% if comp.fase > 'C' %}
+                    <span class="green-text">Afgerond</span>
+                {% else %}
+                    <span>tot {{ comp.einde_teamvorming }}</span>
+                {% endif %}
+            </td>
+        </tr>
 
-            <tr>
-                <td {% if obj.fase == 'D' %} class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>D</td>
-                <td>Aanmaken poules (RCL)</td>
-                <td>
-                    {% if obj.fase > 'D' %}
-                        <span class="green-text">Afgerond</span>
-                    {% else %}
-                        <span>tot {{ obj.eerste_wedstrijd }}</span>
-                    {% endif %}
-                </td>
-            </tr>
+        <tr>
+            <td {% if comp.fase == 'D' %} class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>D</td>
+            <td>Aanmaken poules (RCL)</td>
+            <td>
+                {% if comp.fase > 'D' %}
+                    <span class="green-text">Afgerond</span>
+                {% else %}
+                    <span>tot {{ comp.eerste_wedstrijd }}</span>
+                {% endif %}
+            </td>
+        </tr>
 
-            <tr>
-                <td {% if obj.fase == 'E' %} class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>E</td>
-                <td>Wedstrijden</td>
-                <td>
-                    {% if obj.fase > 'E' %}
-                        <span class="green-text">Afgerond</span>
-                    {% elif obj.fase == 'E' %}
-                        <span>tot en met {{ obj.laatst_mogelijke_wedstrijd }}</span>
-                    {% else %}
-                        <span>vanaf {{ obj.eerste_wedstrijd }}{% if obj.laatst_mogelijke_wedstrijd > obj.eerste_wedstrijd %}<br>tot en met {{ obj.laatst_mogelijke_wedstrijd }}{% endif %}</span>
-                    {% endif %}
-                </td>
-            </tr>
+        <tr>
+            <td {% if comp.fase == 'E' %} class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>E</td>
+            <td>Wedstrijden</td>
+            <td>
+                {% if comp.fase > 'E' %}
+                    <span class="green-text">Afgerond</span>
+                {% elif comp.fase == 'E' %}
+                    <span>tot en met {{ comp.laatst_mogelijke_wedstrijd }}</span>
+                {% else %}
+                    <span>vanaf {{ comp.eerste_wedstrijd }}{% if comp.laatst_mogelijke_wedstrijd > comp.eerste_wedstrijd %}<br>tot en met {{ comp.laatst_mogelijke_wedstrijd }}{% endif %}</span>
+                {% endif %}
+            </td>
+        </tr>
 
-            <tr>
-                <td {% if obj.fase == 'F' %} class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>F</td>
-                <td>Vaststellen uitslagen in elke regio (RCL)</td>
-                <td>
-                    {% if obj.fase > 'F' %}
-                        <span class="green-text">Afgerond</span>
-                    {% else %}
-                        <span>tot {{ obj.einde_fase_F }}</span>
-                    {% endif %}
-                </td>
-            </tr>
+        <tr>
+            <td {% if comp.fase == 'F' %} class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>F</td>
+            <td>Vaststellen uitslagen in elke regio (RCL)</td>
+            <td>
+                {% if comp.fase > 'F' %}
+                    <span class="green-text">Afgerond</span>
+                {% else %}
+                    <span>tot {{ comp.einde_fase_F }}</span>
+                {% endif %}
+            </td>
+        </tr>
 
-            <tr>
-                <td {% if obj.fase == 'G' %} class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>G</td>
-                <td>Afsluiten regiocompetitie (BKO)</td>
-                <td>
-                    {% if obj.fase > 'G' %}
-                        <span class="green-text">Afgerond</span>
-                    {% endif %}
-                </td>
-            </tr>
+        <tr>
+            <td {% if comp.fase == 'G' %} class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>G</td>
+            <td>Afsluiten regiocompetitie (BKO)</td>
+            <td>
+                {% if comp.fase > 'G' %}
+                    <span class="green-text">Afgerond</span>
+                {% endif %}
+            </td>
+        </tr>
 
-            <tr>
-                <td></td>
-                <td colspan="2"><b>Rayonkampioenschappen</b></td>
-            </tr>
+        <tr>
+            <td></td>
+            <td colspan="2"><b>Rayonkampioenschappen</b></td>
+        </tr>
 
-            <tr>
-                <td {% if obj.fase == 'K' %} class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>K</td>
-                <td>Deelnemers en reserveschutters oproepen / bevestigen</td>
-                <td>
-                    {% if obj.fase > 'K' %}
-                        <span class="green-text">Afgerond</span>
-                    {% endif %}
-                </td>
-            </tr>
+        <tr>
+            <td {% if comp.fase == 'K' %} class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>K</td>
+            <td>Deelnemers en reserveschutters oproepen / bevestigen</td>
+            <td>
+                {% if comp.fase > 'K' %}
+                    <span class="green-text">Afgerond</span>
+                {% endif %}
+            </td>
+        </tr>
 
-            <tr>
-                <td {% if obj.fase == 'L' %} class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>L</td>
-                <td>Wedstrijden</td>
-                <td>
-                    {% if obj.fase > 'L' %}
-                        <span class="green-text">Afgerond</span>
-                    {% elif obj.fase == 'L' %}
-                        <span>tot en met {{ obj.rk_laatste_wedstrijd }}</span>
-                    {% else %}
-                        <span>{{ obj.rk_eerste_wedstrijd }}{% if obj.rk_laatste_wedstrijd > obj.rk_eerste_wedstrijd %} tot en met {{ obj.rk_laatste_wedstrijd }}{% endif %}</span>
-                    {% endif %}
-                </td>
-            </tr>
+        <tr>
+            <td {% if comp.fase == 'L' %} class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>L</td>
+            <td>Wedstrijden</td>
+            <td>
+                {% if comp.fase > 'L' %}
+                    <span class="green-text">Afgerond</span>
+                {% elif comp.fase == 'L' %}
+                    <span>tot en met {{ comp.rk_laatste_wedstrijd }}</span>
+                {% else %}
+                    <span>{{ comp.rk_eerste_wedstrijd }}{% if comp.rk_laatste_wedstrijd > comp.rk_eerste_wedstrijd %} tot en met {{ comp.rk_laatste_wedstrijd }}{% endif %}</span>
+                {% endif %}
+            </td>
+        </tr>
 
-            <tr>
-                <td {% if obj.fase == 'M' %} class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>M</td>
-                <td>Uitslagen RK wedstrijden overgenomen</td>
-                <td>
-                    {% if obj.fase > 'M' %}
-                        <span class="green-text">Afgerond</span>
-                    {% else %}
-                        <span>tot {{ obj.einde_fase_M }}</span>
-                    {% endif %}
-                </td>
-            </tr>
+        <tr>
+            <td {% if comp.fase == 'M' %} class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>M</td>
+            <td>Uitslagen RK wedstrijden overgenomen</td>
+            <td>
+                {% if comp.fase > 'M' %}
+                    <span class="green-text">Afgerond</span>
+                {% else %}
+                    <span>tot {{ comp.einde_fase_M }}</span>
+                {% endif %}
+            </td>
+        </tr>
 
-            <tr>
-                <td {% if obj.fase == 'N' %} class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>N</td>
-                <td>Afsluiten rayonkampioenschappen (BKO)</td>
-                <td>
-                    {% if obj.fase > 'N' %}
-                        <span class="green-text">Afgerond</span>
-                    {% endif %}
-                </td>
-            </tr>
+        <tr>
+            <td {% if comp.fase == 'N' %} class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>N</td>
+            <td>Afsluiten rayonkampioenschappen (BKO)</td>
+            <td>
+                {% if comp.fase > 'N' %}
+                    <span class="green-text">Afgerond</span>
+                {% endif %}
+            </td>
+        </tr>
 
-            <tr>
-                <td></td>
-                <td colspan="2"><b>Bondskampioenschappen</b></td>
-            </tr>
+        <tr>
+            <td></td>
+            <td colspan="2"><b>Bondskampioenschappen</b></td>
+        </tr>
 
-            <tr>
-                <td {% if obj.fase == 'P' %} class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>P</td>
-                <td>Deelnemers en reserveschutters oproepen / bevestigen</td>
-                <td>
-                    {% if obj.fase > 'P' %}
-                        <span class="green-text">Afgerond</span>
-                    {% endif %}
-                </td>
-            </tr>
+        <tr>
+            <td {% if comp.fase == 'P' %} class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>P</td>
+            <td>Deelnemers en reserveschutters oproepen / bevestigen</td>
+            <td>
+                {% if comp.fase > 'P' %}
+                    <span class="green-text">Afgerond</span>
+                {% endif %}
+            </td>
+        </tr>
 
-            <tr>
-                <td {% if obj.fase == 'Q' %} class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>Q</td>
-                <td>Wedstrijden</td>
-                <td>
-                    {% if obj.fase > 'Q' %}
-                        <span class="green-text">Afgerond</span>
-                    {% elif obj.fase == 'Q' %}
-                        <span>tot en met {{ obj.bk_laatste_wedstrijd }}</span>
-                    {% else %}
-                        <span>{{ obj.bk_eerste_wedstrijd }}{% if obj.bk_laatste_wedstrijd > obj.bk_eerste_wedstrijd %} tot en met {{ obj.bk_laatste_wedstrijd }}{% endif %}</span>
-                    {% endif %}
-                </td>
-            </tr>
+        <tr>
+            <td {% if comp.fase == 'Q' %} class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>Q</td>
+            <td>Wedstrijden</td>
+            <td>
+                {% if comp.fase > 'Q' %}
+                    <span class="green-text">Afgerond</span>
+                {% elif comp.fase == 'Q' %}
+                    <span>tot en met {{ comp.bk_laatste_wedstrijd }}</span>
+                {% else %}
+                    <span>{{ comp.bk_eerste_wedstrijd }}{% if comp.bk_laatste_wedstrijd > comp.bk_eerste_wedstrijd %} tot en met {{ comp.bk_laatste_wedstrijd }}{% endif %}</span>
+                {% endif %}
+            </td>
+        </tr>
 
-            <tr>
-                <td {% if obj.fase == 'R' %} class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>R</td>
-                <td>Uitslagen BK wedstrijden overgenomen</td>
-                <td>
-                    {% if obj.fase > 'R' %}
-                        <span class="green-text">Afgerond</span>
-                    {% endif %}
-                </td>
-            </tr>
+        <tr>
+            <td {% if comp.fase == 'R' %} class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>R</td>
+            <td>Uitslagen BK wedstrijden overgenomen</td>
+            <td>
+                {% if comp.fase > 'R' %}
+                    <span class="green-text">Afgerond</span>
+                {% endif %}
+            </td>
+        </tr>
 
-            <tr>
-                <td {% if obj.fase == 'S' %} class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>S</td>
-                <td>Afsluiten competitie (BKO)</td>
-                <td></td>
-            </tr>
-        </table>
-    {% endfor %}
+        <tr>
+            <td {% if comp.fase == 'S' %} class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>S</td>
+            <td>Afsluiten competitie (BKO)</td>
+            <td></td>
+        </tr>
+    </table>
 
 {% endblock %}
 
+{% block menu-competities %}
+    {% include 'competitie/menu.dtl' %}
+{% endblock %}

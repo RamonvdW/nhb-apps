@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -44,9 +44,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
                                                      'wachtwoord':  E2EHelpers.WACHTWOORD}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        # redirect is naar het plein
         self.assert_template_used(resp, ('functie/otp-controle.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, 'Uitloggen')
         self.account_normaal = Account.objects.get(username='normaal')
         self.assertEqual(self.account_normaal.verkeerd_wachtwoord_teller, 0)
 
@@ -106,7 +104,6 @@ class TestAccountLogin(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         # redirect is naar het plein
         self.assert_template_used(resp, ('functie/otp-controle.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, 'Uitloggen')
 
     def test_inlog_wordt_geblokkeerd(self):
         # te vaak een verkeerd wachtwoord
@@ -182,20 +179,18 @@ class TestAccountLogin(E2EHelpers, TestCase):
             resp = self.client.post(self.url_login, {'login_naam': 'normaal',
                                                      'wachtwoord': E2EHelpers.WACHTWOORD}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, 'Uitloggen')
+        self.assert_template_used(resp, ('functie/otp-controle.dtl', 'plein/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.get('/account/logout/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('account/uitloggen.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, 'Uitloggen')
 
         # do the actual logout
         with self.assert_max_queries(20):
             resp = self.client.post('/account/logout/', {}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('plein/plein-bezoeker.dtl', 'plein/site_layout.dtl'))
-        self.assertNotContains(resp, 'Uitloggen')
 
         self.e2e_assert_other_http_commands_not_supported('/account/logout/', post=False)
 
@@ -215,7 +210,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
         # check aanwezigheid van Uitloggen optie in menu als teken van inlog succes
         with self.assert_max_queries(20):
             resp = self.client.get('/plein/')
-        self.assertContains(resp, 'Uitloggen')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
 
         # check of het niet aanzetten van het 'aangemeld blijven' vinkje werkt
         self.assertTrue(self.client.session.get_expire_at_browser_close())
@@ -227,11 +222,6 @@ class TestAccountLogin(E2EHelpers, TestCase):
                                                      'wachtwoord': E2EHelpers.WACHTWOORD})
         self.assert_is_redirect(resp, '/functie/otp-controle/')
 
-        # check aanwezigheid van Uitloggen optie in menu als teken van inlog succes
-        with self.assert_max_queries(20):
-            resp = self.client.get('/plein/')
-        self.assertContains(resp, 'Uitloggen')
-
     def test_login_aangemeld_blijven(self):
         # test inlog via het inlog formulier, met het 'aangemeld blijven' vinkje gezet
         with self.assert_max_queries(22):
@@ -239,11 +229,6 @@ class TestAccountLogin(E2EHelpers, TestCase):
                                                      'wachtwoord': E2EHelpers.WACHTWOORD,
                                                      'aangemeld_blijven': True})
         self.assert_is_redirect(resp, '/functie/otp-controle/')
-
-        # check aanwezigheid van Uitloggen optie in menu als teken van inlog succes
-        with self.assert_max_queries(20):
-            resp = self.client.get('/plein/')
-        self.assertContains(resp, 'Uitloggen')
 
         # als het vinkje gezet is, dan verloopt deze sessie niet als de browser afgesloten wordt
         self.assertFalse(self.client.session.get_expire_at_browser_close())
@@ -320,8 +305,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         # redirect is naar het plein
-        self.assert_template_used(resp, ('plein/plein-gebruiker.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, 'Uitloggen')
+        self.assert_template_used(resp, ('plein/plein-bezoeker.dtl', 'plein/site_layout.dtl'))
 
     def test_login_next_al_ingelogd(self):
         self.e2e_login(self.account_admin)
@@ -333,7 +317,6 @@ class TestAccountLogin(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         # redirect is naar het plein
         self.assert_template_used(resp, ('account/uitloggen.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, 'Uitloggen')
 
 
 # end of file

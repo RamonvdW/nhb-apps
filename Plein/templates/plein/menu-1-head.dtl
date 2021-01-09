@@ -1,0 +1,67 @@
+{% comment %}
+                Copyright (c) 2019-2021 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+
+{% comment %}
+
+    Deze file bevat het navigatie menu aan de linker kant.
+    Dit stuk is het logo, de inlog naam en gekozen rol.
+    Deze template wordt apart verwerkt. Het resultaat komt in site_layout.dtl
+
+{% endcomment %}
+
+{% load static %}
+
+<li style="line-height: 0">    <!-- default is 48px == unwanted spacing between image and divider -->
+    <div class="grey lighten-4" style="padding: 10px">  <!-- padding rond het logo en de naam-box -->
+        <a href="{% url 'Plein:plein' %}">
+            <!-- het menu is 300px breed minus 10px padding left/right geeft 280px
+                 maar het logo /lijkt/ dan iets te ver naar rechts te staan, dus we nemen iets minder -->
+            <img src="{% static 'plein/logo_with_text_nhb.png' %}" width="277" height="65" alt="NHB logo">
+        </a>
+
+        <!-- test server banner -->
+        {% if is_test_server %}
+            <div class="divider"></div>
+            <h6 class="red-text center-align">NHB Test Server</h6>
+        {% endif %}
+
+        <!-- informatie over de ingelogde gebruiker -->
+        {% if menu_toon_naam %}
+            <div class="divider"></div>
+            <h5>{{ user.get_first_name|escape }}</h5>
+
+            {% if menu_rol_beschrijving %}
+                <h6>{{ menu_rol_beschrijving }}</h6>
+            {% endif %}
+
+        {% endif %}
+    </div>
+</li>
+
+
+<li class="menu-level1{% if menu_actief == "hetplein" %} menu-actief{% endif %}">
+    <a href="{% url 'Plein:plein' %}" class="white-text">
+      <i class="material-icons-round white-text"><!--control_camera-->filter_vintage</i>Het Plein</a>
+</li>
+
+
+{% if menu_toon_schutter_profiel %}
+    <li class="menu-level1{% if menu_actief == "schutter-profiel" %} menu-actief{% endif %}">
+        <a href="{% url 'Schutter:profiel' %}" class="white-text">
+           <i class="material-icons-round white-text">portrait</i>Jouw pagina</a>
+    </li>
+{% endif %}
+
+
+{% if menu_toon_vereniging %}
+    <li class="menu-level1{% if menu_actief == "vereniging" %} menu-actief{% endif %}">
+        <a href="{% url 'Vereniging:overzicht' %}" class="white-text">
+           <i class="material-icons-round white-text">store</i>Beheer Vereniging</a>
+    </li>
+{% endif %}
+
+
+<!-- end of file -->

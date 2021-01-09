@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -302,7 +302,7 @@ class ActiveerRolView(UserPassesTestMixin, View):
         # de rest blijft in Wissel van Rol
         rol = rol_get_huidige(request)
         # if rol == Rollen.ROL_BB:
-        #     return redirect('Competitie:overzicht')
+        #     return redirect('Competitie:kies')
 
         if rol in (Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_WL):
             return redirect('Vereniging:overzicht')

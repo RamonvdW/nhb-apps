@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -79,7 +79,7 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
                                      .filter(account__last_login__lt=F('account__laatste_inlog_poging'))
                                      .order_by('-account__laatste_inlog_poging')[:50])
 
-        menu_dynamics(self.request, context, actief="hetplein")
+        menu_dynamics(self.request, context)
         return context
 
 

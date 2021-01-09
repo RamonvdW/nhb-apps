@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -127,7 +127,7 @@ class RegistreerNhbNummerView(TemplateView):
 
         # still here --> re-render with error message
         context = {'form': form}
-        menu_dynamics(request, context, actief="inloggen")
+        menu_dynamics(request, context)
         return render(request, TEMPLATE_REGISTREER, context)
 
     def get(self, request, *args, **kwargs):
@@ -136,7 +136,7 @@ class RegistreerNhbNummerView(TemplateView):
         # GET operation --> create empty form
         form = RegistreerForm()
         context = {'form': form}
-        menu_dynamics(request, context, actief="inloggen")
+        menu_dynamics(request, context)
         return render(request, TEMPLATE_REGISTREER, context)
 
 

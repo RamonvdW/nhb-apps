@@ -21,16 +21,15 @@ app_name = 'Competitie'
 urlpatterns = [
 
     path('',
-         views_overzicht.CompetitieOverzichtView.as_view(),
-         name='overzicht'),
-
+         views_overzicht.CompetitieKiesView.as_view(),
+         name='kies'),
 
     # openbare info
     path('info/',
          views_info.InfoCompetitieView.as_view(),
          name='info-competitie'),
 
-    path('klassegrenzen/tonen/',
+    path('<comp_pk>/klassegrenzen/tonen/',
          views_klassegrenzen.KlassegrenzenTonenView.as_view(),
          name='klassegrenzen-tonen'),
 
@@ -48,33 +47,33 @@ urlpatterns = [
          views_bb.AGVaststellenView.as_view(),
          name='ag-vaststellen'),
 
-    path('klassegrenzen/vaststellen/<afstand>/',
+    path('<comp_pk>/klassegrenzen/vaststellen/',
          views_bb.KlassegrenzenVaststellenView.as_view(),
          name='klassegrenzen-vaststellen'),
 
-    path('wijzig-datums/<comp_pk>/',
+    path('<comp_pk>/wijzig-datums/',
          views_bb.WijzigDatumsView.as_view(),
          name='wijzig-datums'),
 
 
     # aanmelden / ingeschreven
-    path('lijst-regiocompetitie/<comp_pk>/regio-<regio_pk>/dagdeel-behoefte/',
+    path('<comp_pk>/lijst-regiocompetitie/regio-<regio_pk>/dagdeel-behoefte/',
          views_aangemeld.Inschrijfmethode3BehoefteView.as_view(),
          name='inschrijfmethode3-behoefte'),
 
-    path('lijst-regiocompetitie/<comp_pk>/regio-<regio_pk>/dagdeel-behoefte-als-bestand/',
+    path('<comp_pk>/lijst-regiocompetitie/regio-<regio_pk>/dagdeel-behoefte-als-bestand/',
          views_aangemeld.Inschrijfmethode3BehoefteAlsBestandView.as_view(),
          name='inschrijfmethode3-behoefte-als-bestand'),
 
-    path('lijst-regiocompetitie/<comp_pk>/alles/',
+    path('<comp_pk>/lijst-regiocompetitie/alles/',
          views_aangemeld.LijstAangemeldRegiocompAllesView.as_view(),
          name='lijst-regiocomp-alles'),
 
-    path('lijst-regiocompetitie/<comp_pk>/rayon-<rayon_pk>/',
+    path('<comp_pk>/lijst-regiocompetitie/rayon-<rayon_pk>/',
          views_aangemeld.LijstAangemeldRegiocompRayonView.as_view(),
          name='lijst-regiocomp-rayon'),
 
-    path('lijst-regiocompetitie/<comp_pk>/regio-<regio_pk>/',
+    path('<comp_pk>/lijst-regiocompetitie/regio-<regio_pk>/',
          views_aangemeld.LijstAangemeldRegiocompRegioView.as_view(),
          name='lijst-regiocomp-regio'),
 
@@ -188,58 +187,59 @@ urlpatterns = [
 
 
     # competitie uitslagen
-    path('uitslagen/',
-         views_uitslagen.UitslagenView.as_view(),
-         name='uitslagen'),
-
-    path('uitslagen/<afstand>-<comp_boog>/vereniging/<ver_nr>/',
+    path('<comp_pk>/uitslagen/<comp_boog>/vereniging/<ver_nr>/',
          views_uitslagen.UitslagenVerenigingView.as_view(),
          name='uitslagen-vereniging-n'),
 
-    path('uitslagen/<afstand>-<comp_boog>/vereniging/',
+    path('<comp_pk>/uitslagen/<comp_boog>/vereniging/',
          views_uitslagen.UitslagenVerenigingView.as_view(),
          name='uitslagen-vereniging'),
 
-    path('uitslagen/<afstand>-<comp_boog>/regio/<regio_nr>/',
+    path('<comp_pk>/uitslagen/<comp_boog>/regio/<regio_nr>/',
          views_uitslagen.UitslagenRegioView.as_view(),
          name='uitslagen-regio-n'),
 
-    path('uitslagen/<afstand>-<comp_boog>/regio/',
+    path('<comp_pk>/uitslagen/<comp_boog>/regio/',
          views_uitslagen.UitslagenRegioView.as_view(),
          name='uitslagen-regio'),
 
-    path('uitslagen/<afstand>-<comp_boog>/regio-alt/<regio_nr>/',
+    path('<comp_pk>/uitslagen/<comp_boog>/regio-alt/<regio_nr>/',
          views_uitslagen.UitslagenRegioAltView.as_view(),
          name='uitslagen-regio-n-alt'),
 
-    path('uitslagen/<afstand>-<comp_boog>/regio-alt/',
+    path('<comp_pk>/uitslagen/<comp_boog>/regio-alt/',
          views_uitslagen.UitslagenRegioAltView.as_view(),
          name='uitslagen-regio-alt'),
 
-    path('uitslagen/<afstand>-<comp_boog>/rayon/',
+    path('<comp_pk>/uitslagen/<comp_boog>/rayon/',
          views_uitslagen.UitslagenRayonView.as_view(),
          name='uitslagen-rayon'),
 
-    path('uitslagen/<afstand>-<comp_boog>/rayon/<rayon_nr>/',
+    path('<comp_pk>/uitslagen/<comp_boog>/rayon/<rayon_nr>/',
          views_uitslagen.UitslagenRayonView.as_view(),
          name='uitslagen-rayon-n'),
 
-    path('uitslagen/<afstand>-<comp_boog>/bond/',
+    path('<comp_pk>/uitslagen/<comp_boog>/bond/',
          views_uitslagen.UitslagenBondView.as_view(),
          name='uitslagen-bond'),
 
 
-    path('planning/doorzetten/<comp_pk>/rk/',
+    path('<comp_pk>/doorzetten/rk/',
          views_planning_bond.DoorzettenNaarRKView.as_view(),
          name='bko-doorzetten-naar-rk'),
 
-    path('planning/doorzetten/<comp_pk>/bk/',
+    path('<comp_pk>/doorzetten/bk/',
          views_planning_bond.DoorzettenNaarBKView.as_view(),
          name='bko-doorzetten-naar-bk'),
 
-    #path('planning/afsluiten/<comp_pk>/',
+    #path('<comp_pk>/afsluiten/',
     #     views_planning_bond.CompetitieAfsluitenView.as_view(),
     #     name='bko-afsluiten-competitie'),
+
+    path('<comp_pk>/',
+         views_overzicht.CompetitieOverzichtView.as_view(),
+         name='overzicht'),
+
 ]
 
 # end of file

@@ -39,3 +39,7 @@
 </div>
 
 {% endblock %}
+
+{% block menu %}
+    {% include 'handleiding/menu.dtl' %}
+{% endblock %}

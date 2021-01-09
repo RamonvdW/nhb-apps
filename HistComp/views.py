@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -13,7 +13,7 @@ from Functie.rol import Rollen, rol_get_huidige
 from NhbStructuur.models import NhbLid
 from .models import HistCompetitie, HistCompetitieIndividueel, HistCompetitieTeam
 from .forms import FilterForm
-from Plein.menu import menu_dynamics
+from Competitie.menu import menu_dynamics_competitie
 from decimal import Decimal
 from urllib.parse import quote_plus
 import csv
@@ -90,7 +90,7 @@ class HistCompAlleJarenView(ListView):
         if HistCompetitie.objects.filter(seizoen=self.seizoen, is_team=True).count() > 0:
             context['show_team'] = True
 
-        menu_dynamics(self.request, context, 'histcomp')
+        menu_dynamics_competitie(self.request, context, actief='histcomp')
         return context
 
 
@@ -248,7 +248,7 @@ class HistCompBaseView(ListView):
             context['all_count'] = self.all_count
         # else: we laten de 'all' lijst zien dus laat de 'all' knop weg
 
-        menu_dynamics(self.request, context, 'histcomp')
+        menu_dynamics_competitie(self.request, context, actief='histcomp')
         return context
 
 
@@ -356,7 +356,7 @@ class InterlandView(UserPassesTestMixin, TemplateView):
 
         self.maak_data(context)
 
-        menu_dynamics(self.request, context, actief='histcomp')
+        menu_dynamics_competitie(self.request, context, actief='histcomp')
         return context
 
 

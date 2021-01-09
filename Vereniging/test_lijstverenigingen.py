@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -225,10 +225,9 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
 
     def test_overzicht_anon(self):
         with self.assert_max_queries(20):
-            resp = self.client.get('/competitie/')
+            resp = self.client.get('/bondscompetities/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/overzicht.dtl', 'plein/site_layout.dtl'))
-        self.assertNotContains(resp, '/competitie/beheer-favorieten/')
+        self.assert_template_used(resp, ('competitie/kies.dtl', 'plein/site_layout.dtl'))
 
 # end of file

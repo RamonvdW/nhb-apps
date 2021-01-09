@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -128,6 +128,7 @@ class DoorzettenNaarRKView(UserPassesTestMixin, TemplateView):
             # kaartjes werd niet getoond, dus je zou hier niet moeten zijn
             raise Resolver404()
 
+        context['comp'] = comp
         context['regio_status'] = self._get_regio_status(comp)
 
         if comp.fase == 'G':
@@ -163,7 +164,7 @@ class DoorzettenNaarRKView(UserPassesTestMixin, TemplateView):
         comp.alle_regiocompetities_afgesloten = True
         comp.save()
 
-        return HttpResponseRedirect(reverse('Competitie:overzicht'))
+        return HttpResponseRedirect(reverse('Competitie:kies'))
 
     def _maak_deelnemerslijst_rks(self, comp):
 
@@ -360,6 +361,8 @@ class DoorzettenNaarBKView(UserPassesTestMixin, TemplateView):
             context['url_doorzetten'] = reverse('Competitie:bko-doorzetten-naar-bk',
                                                 kwargs={'comp_pk': comp.pk})
 
+        context['comp'] = comp
+
         menu_dynamics(self.request, context, actief='competitie')
         return context
 
@@ -383,7 +386,7 @@ class DoorzettenNaarBKView(UserPassesTestMixin, TemplateView):
 
         # FUTURE: implementeer doorzetten
 
-        return HttpResponseRedirect(reverse('Competitie:overzicht'))
+        return HttpResponseRedirect(reverse('Competitie:kies'))
 
 
 class VerwijderWedstrijdView(UserPassesTestMixin, View):
@@ -488,7 +491,7 @@ class VerwijderWedstrijdView(UserPassesTestMixin, View):
 #         if comp.fase < 'R' or comp.fase >= 'Z':
 #             raise Resolver404()
 #
-#         return HttpResponseRedirect(reverse('Competitie:overzicht'))
+#         return HttpResponseRedirect(reverse('Competitie:kies'))
 
 
 # end of file

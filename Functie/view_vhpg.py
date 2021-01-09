@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -17,7 +17,6 @@ from Logboek.models import schrijf_in_logboek
 from .rol import Rollen, rol_get_huidige
 from .models import account_needs_vhpg
 from .forms import AccepteerVHPGForm
-import logging
 
 
 TEMPLATE_VHPG_ACCEPTATIE = 'functie/vhpg-acceptatie.dtl'
@@ -104,7 +103,7 @@ class VhpgAcceptatieView(TemplateView):
 
         # checkbox is verplicht --> nog een keer
         context = {'form': form}
-        menu_dynamics(request, context, actief="inloggen")
+        menu_dynamics(request, context, actief="hetplein")
         return render(request, TEMPLATE_VHPG_ACCEPTATIE, context)
 
 
@@ -137,7 +136,7 @@ class VhpgOverzichtView(UserPassesTestMixin, ListView):
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
-        menu_dynamics(self.request, context, actief='competitie')
+        menu_dynamics(self.request, context, actief='hetplein')
         return context
 
 

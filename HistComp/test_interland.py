@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -196,8 +196,8 @@ class TestHistCompInterland(E2EHelpers, TestCase):
         self.account_bb.is_BB = True
         self.account_bb.save()
 
-        self.url_interland = '/hist/interland/'
-        self.url_interland_download = '/hist/interland/als-bestand/%s/'     # klasse_pk
+        self.url_interland = '/bondscompetities/hist/interland/'
+        self.url_interland_download = '/bondscompetities/hist/interland/als-bestand/%s/'     # klasse_pk
 
     def test_interland(self):
         # anon

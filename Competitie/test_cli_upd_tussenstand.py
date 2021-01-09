@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -35,14 +35,17 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
             self.client.post(self.url_aanmaken)
         self.comp = Competitie.objects.filter(afstand=18)[0]
 
+        comp_18 = Competitie.objects.get(afstand='18')
+        comp_25 = Competitie.objects.get(afstand='25')
+
         aanvangsgemiddelde_opslaan(self.schutterboog_100005, 18, 9.500, None, "Test")
 
         # klassegrenzen vaststellen
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_klassegrenzen_vaststellen_18)
+            resp = self.client.post(self.url_klassegrenzen_vaststellen % comp_18.pk)
         self.assert_is_redirect_not_plein(resp)     # check success
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_klassegrenzen_vaststellen_25)
+            resp = self.client.post(self.url_klassegrenzen_vaststellen % comp_25.pk)
         self.assert_is_redirect_not_plein(resp)     # check success
 
         self.deelcomp_r101 = DeelCompetitie.objects.filter(laag='Regio',
@@ -253,12 +256,11 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
     def setUp(self):
         """ initialisatie van de test case """
 
-        self.url_aanmaken = '/competitie/aanmaken/'
-        self.url_klassegrenzen_vaststellen_18 = '/competitie/klassegrenzen/vaststellen/18/'
-        self.url_klassegrenzen_vaststellen_25 = '/competitie/klassegrenzen/vaststellen/25/'
-        self.url_planning_regio = '/competitie/planning/regio/%s/'                  # deelcomp_pk
-        self.url_planning_regio_ronde = '/competitie/planning/regio/ronde/%s/'      # ronde_pk
-        self.url_uitslag_invoeren = '/competitie/scores/uitslag-invoeren/%s/'       # wedstrijd_pk
+        self.url_aanmaken = '/bondscompetities/aanmaken/'
+        self.url_klassegrenzen_vaststellen = '/bondscompetities/%s/klassegrenzen/vaststellen/'
+        self.url_planning_regio = '/bondscompetities/planning/regio/%s/'                  # deelcomp_pk
+        self.url_planning_regio_ronde = '/bondscompetities/planning/regio/ronde/%s/'      # ronde_pk
+        self.url_uitslag_invoeren = '/bondscompetities/scores/uitslag-invoeren/%s/'       # wedstrijd_pk
         self.url_inschrijven = '/vereniging/leden-aanmelden/competitie/%s/'         # comp_pk       # TODO: ongewenste dependency op Vereniging
 
         # deze test is afhankelijk van de standaard regio's
@@ -705,7 +707,7 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
         self._sluit_alle_regiocompetities(self.comp)
         self.e2e_login_and_pass_otp(self.account_bb)
         self.e2e_wissel_naar_functie(self.functie_bko)
-        url = '/competitie/planning/doorzetten/%s/rk/' % self.comp.pk
+        url = '/bondscompetities/%s/doorzetten/rk/' % self.comp.pk
         self.client.post(url)
 
         # standaard vereniging is regio 101

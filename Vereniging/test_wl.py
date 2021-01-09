@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -187,10 +187,9 @@ class TestVerenigingWL(E2EHelpers, TestCase):
         self.e2e_wisselnaarrol_bb()
         self.e2e_check_rol('BB')
 
-        url_overzicht = '/competitie/'
-        url_aanmaken = '/competitie/aanmaken/'
-        url_klassegrenzen_18 = '/competitie/klassegrenzen/vaststellen/18/'
-        url_klassegrenzen_25 = '/competitie/klassegrenzen/vaststellen/25/'
+        url_kies = '/bondscompetities/'
+        url_aanmaken = '/bondscompetities/aanmaken/'
+        url_klassegrenzen = '/bondscompetities/%s/klassegrenzen/vaststellen/'   # comp_pk
 
         self.assertEqual(CompetitieKlasse.objects.count(), 0)
 
@@ -200,18 +199,18 @@ class TestVerenigingWL(E2EHelpers, TestCase):
         # competitie aanmaken
         with self.assert_max_queries(20):
             resp = self.client.post(url_aanmaken)
-        self.assert_is_redirect(resp, url_overzicht)
-
-        # klassegrenzen vaststellen
-        with self.assert_max_queries(20):
-            resp = self.client.post(url_klassegrenzen_18)
-        self.assert_is_redirect(resp, url_overzicht)
-        with self.assert_max_queries(20):
-            resp = self.client.post(url_klassegrenzen_25)
-        self.assert_is_redirect(resp, url_overzicht)
+        self.assert_is_redirect(resp, url_kies)
 
         self.comp_18 = Competitie.objects.get(afstand=18)
         self.comp_25 = Competitie.objects.get(afstand=25)
+
+        # klassegrenzen vaststellen
+        with self.assert_max_queries(20):
+            resp = self.client.post(url_klassegrenzen % self.comp_18.pk)
+        self.assert_is_redirect(resp, url_kies)
+        with self.assert_max_queries(20):
+            resp = self.client.post(url_klassegrenzen % self.comp_25.pk)
+        self.assert_is_redirect(resp, url_kies)
 
         self.deelcomp_regio = DeelCompetitie.objects.get(laag=LAAG_REGIO,
                                                          nhb_regio=self.regio_111,

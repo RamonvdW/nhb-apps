@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -174,8 +174,8 @@ class E2EHelpers(object):
         # self._wissel_naar_rol('BB', '/competitie/')
         self._wissel_naar_rol('BB', '/functie/wissel-van-rol/')
 
-    def e2e_wisselnaarrol_schutter(self):
-        self._wissel_naar_rol('schutter', '/functie/wissel-van-rol/')
+    def e2e_wisselnaarrol_sporter(self):
+        self._wissel_naar_rol('sporter', '/functie/wissel-van-rol/')
 
     def e2e_wisselnaarrol_gebruiker(self):
         self._wissel_naar_rol('geen', '/functie/wissel-van-rol/')
@@ -213,6 +213,11 @@ class E2EHelpers(object):
         print(repr(resp))
         if resp.status_code == 302:
             print("redirect to url:", resp.url)
+        else:
+            print('templates used:')
+            for templ in resp.templates:
+                print('   %s' % repr(templ.name))
+            # for
         content = str(resp.content)
         content = self._remove_debugtoolbar(content)
         if len(content) < 50:
@@ -485,17 +490,34 @@ class E2EHelpers(object):
         # ensure the file is not empty
         self.assertTrue(len(str(response.content)) > 30)
 
-    def assert_template_used(self, response, template_names):
+    def assert_template_used(self, resp, template_names):
         """ Controleer dat de gevraagde templates gebruikt zijn """
         assert isinstance(self, TestCase)
         lst = list(template_names)
-        for templ in response.templates:
+        for templ in resp.templates:
             if templ.name in lst:
                 lst.remove(templ.name)
         # for
         if len(lst):    # pragma: no cover
-            msg = "Following templates should have been used: %s\n(actually used: %s)" % (repr(lst), repr([t.name for t in response.templates]))
+            msg = "Following templates should have been used: %s\n" % repr(lst)
+            msg += "Actually used: %s" % repr([t.name for t in resp.templates])
             self.assertTrue(False, msg=msg)
+
+    def e2e_assert_logged_in(self):
+        assert isinstance(self, TestCase)
+        resp = self.client.get('/account/logout/', follow=False)
+        # indien ingelogd krijgen we een pagina terug met status_code == 200
+        # indien niet ingelogd krijgen we een redirect met status_code == 302
+        if resp.status_code == 302:
+            self.fail(msg='Onverwacht NIET ingelogd')
+
+    def e2e_assert_not_logged_in(self):
+        assert isinstance(self, TestCase)
+        resp = self.client.get('/account/logout/', follow=False)
+        # indien ingelogd krijgen we een pagina terug met status_code == 200
+        # indien niet ingelogd krijgen we een redirect met status_code == 302
+        if resp.status_code == 200:
+            self.fail(msg='Onverwacht ingelogd')
 
     def e2e_assert_other_http_commands_not_supported(self, url, post=True, delete=True, put=True, patch=True):
         """ Test een aantal 'common' http methoden

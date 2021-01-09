@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -198,18 +198,20 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
         context['voorkeuren'], _ = SchutterVoorkeuren.objects.get_or_create(nhblid=nhblid)
 
         if rol_get_huidige(self.request) == Rollen.ROL_HWL:
+            actief = 'vereniging'
             context['nhblid_pk'] = nhblid.pk
             context['nhblid'] = nhblid
             context['is_hwl'] = True
         else:
             # niet de HWL maar de schutter zelf
+            actief = 'schutter-profiel'
             if rol_mag_wisselen(self.request):
                 # schutter is beheerder, dus toon opt-out opties
                 context['email'] = nhblid.account.accountemail_set.all()[0]
 
         context['opslaan_url'] = reverse('Schutter:voorkeuren')
 
-        menu_dynamics(self.request, context, actief='schutter')
+        menu_dynamics(self.request, context, actief=actief)
         return context
 
 

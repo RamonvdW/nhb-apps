@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -51,9 +51,9 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         # zet de competitie in fase F
         zet_competitie_fase(self.comp, 'F')
 
-        self.url_lijst_rk = '/competitie/lijst-rayonkampioenschappen/%s/'    # deelcomp_rk.pk
-        self.url_wijzig_status = '/competitie/lijst-rayonkampioenschappen/wijzig-status-rk-deelnemer/%s/'  # deelnemer_pk
-        self.url_wijzig_cut_rk = '/competitie/planning/rk/%s/limieten/'      # deelcomp_rk.pk
+        self.url_lijst_rk = '/bondscompetities/lijst-rayonkampioenschappen/%s/'    # deelcomp_rk.pk
+        self.url_wijzig_status = '/bondscompetities/lijst-rayonkampioenschappen/wijzig-status-rk-deelnemer/%s/'  # deelnemer_pk
+        self.url_wijzig_cut_rk = '/bondscompetities/planning/rk/%s/limieten/'      # deelcomp_rk.pk
 
         self.url_lijst = self.url_lijst_rk % self.deelcomp_rk.pk
 
@@ -121,14 +121,15 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         # creëer een competitie met deelcompetities
         competitie_aanmaken(jaar=2019)
 
+        self.comp = Competitie.objects.get(afstand='18')
+
         # klassengrenzen vaststellen om de competitie voorbij fase A1 te krijgen
-        self.url_klassegrenzen_vaststellen_18 = '/competitie/klassegrenzen/vaststellen/18/'
+        self.url_klassegrenzen_vaststellen = '/bondscompetities/%s/klassegrenzen/vaststellen/' % self.comp.pk
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_klassegrenzen_vaststellen_18)
+            resp = self.client.post(self.url_klassegrenzen_vaststellen)
         self.assert_is_redirect_not_plein(resp)     # check success
         self.client.logout()
 
-        self.comp = Competitie.objects.get(afstand='18')
         self.klasse = (CompetitieKlasse
                        .objects
                        .filter(competitie=self.comp,
@@ -186,7 +187,7 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         # doorzetten naar RK fase, door BKO
         self.e2e_login_and_pass_otp(self.account_bko)
         self.e2e_wissel_naar_functie(self.functie_bko)
-        url = '/competitie/planning/doorzetten/%s/rk/' % self.comp.pk
+        url = '/bondscompetities/%s/doorzetten/rk/' % self.comp.pk
         self.client.post(url)
 
         self.comp = Competitie.objects.get(pk=self.comp.pk)

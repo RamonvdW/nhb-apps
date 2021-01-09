@@ -164,3 +164,7 @@
     {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-lijst-rk-schutters" %}
 
 {% endblock %}
+
+{% block menu-competities %}
+    {% include 'competitie/menu.dtl' %}
+{% endblock %}

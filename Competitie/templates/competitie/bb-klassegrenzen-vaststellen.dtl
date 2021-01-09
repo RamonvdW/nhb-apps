@@ -1,56 +1,63 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020 Ramon van der Winkel.
+                Copyright (c) 2020-2021 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
 
-{% block title %}Klassegrenzen{% endblock %}
+{% block title %}Klassegrenzen vaststellen{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="klassegrenzen-vaststellen" %}
 
-<h4>Klassegrenzen</h4>
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="klassegrenzen-vaststellen" %}
 
-{% if al_vastgesteld %}
+    <h4>Klassegrenzen vaststellen</h4>
 
-    <p>De klassegrenzen voor de {{ comp_str }} zijn al vastgesteld. Wat doe je hier?</p>
-    <a class="btn-nhb-blauw" href="{% url 'Plein:plein' %}"><i class="material-icons-round left">close</i>Sluiten</a>
+    {% if al_vastgesteld %}
 
-{% else %}
+        <p>De klassegrenzen voor de <b>{{ comp.beschrijving }}</b> zijn al vastgesteld. Wat doe je hier?</p>
 
-    <p>Hieronder volgende de automatisch berekende klassegrenzen voor de individuele wedstrijdklassen voor de {{ comp_str }}.
-    Deze zijn gebaseerd op de vastgestelde aanvangsgemiddelden en de wedstrijdleeftijd van de sporters in het jaar {{ wedstrijdjaar }}.</p>
+        <a class="btn-nhb-blauw" href="{% url 'Plein:plein' %}">
+            <i class="material-icons-round left">close</i>Sluiten</a>
 
-    <p>Onder aan deze pagina vindt je een knop om de om de klassegrenzen vast te leggen. Dit is een eenmalige actie voor elke competitie.</p>
+    {% else %}
 
-    <div class="row">
-        <table class="white">
-            <thead>
-                <tr>
-                    <th>Materiaalklasse</th>
-                    <th>Aantal sporters</th>
-                    <th>Minimaal AG</th>
-                </tr>
-            </thead>
-            {% for obj in object_list %}
-                <tr>
-                    <td>{{ obj.beschrijving }}</td>
-                    <td>{{ obj.count }}</td>
-                    <td>{{ obj.ag|floatformat:3 }}</td>
-                </tr>
-            {% endfor %}
-        </table>
-    </div>
+        <p>Hieronder volgende de automatisch berekende klassegrenzen voor de individuele wedstrijdklassen voor de <b>{{ comp.beschrijving }}</b>.</p>
+        <p>Deze zijn gebaseerd op de vastgestelde aanvangsgemiddelden en de wedstrijdleeftijd van de sporters in het jaar {{ wedstrijdjaar }}.</p>
 
-    <div class="row">
-        <form method="post" action="{% url 'Competitie:klassegrenzen-vaststellen' afstand=afstand %}">
-        {% csrf_token %}
-        <input class="btn-nhb-rood" name="button_aanmaken" type="submit" value="Deze klassegrenzen vaststellen">
-        </form>
-    </div>
+        <p>Onder aan deze pagina vindt je een knop om de om de klassegrenzen vast te leggen. Dit is een eenmalige actie voor elke competitie.</p>
 
-{% endif %}
+        <div class="row">
+            <table class="white">
+                <thead>
+                    <tr>
+                        <th>Materiaalklasse</th>
+                        <th>Aantal sporters</th>
+                        <th>Minimaal AG</th>
+                    </tr>
+                </thead>
+                {% for obj in object_list %}
+                    <tr>
+                        <td>{{ obj.beschrijving }}</td>
+                        <td>{{ obj.count }}</td>
+                        <td>{{ obj.ag|floatformat:3 }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
 
+        <div class="row">
+            <form method="post" action="{% url 'Competitie:klassegrenzen-vaststellen' comp_pk=comp.pk %}">
+                {% csrf_token %}
+                <input class="btn-nhb-rood" name="button_aanmaken" type="submit" value="Deze klassegrenzen vaststellen">
+            </form>
+        </div>
+
+    {% endif %}
+
+{% endblock %}
+
+{% block menu-competities %}
+    {% include 'competitie/menu.dtl' %}
 {% endblock %}

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -81,6 +81,9 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         competitie_aanmaken(jaar=2019)
         # nu in fase A1
 
+        self.comp_18 = Competitie.objects.get(afstand='18')
+        self.comp_25 = Competitie.objects.get(afstand='25')
+
         for deelcomp in DeelCompetitie.objects.filter(laag=LAAG_BK).all():
             deelcomp.functie.accounts.add(self.account_bko)
         # for
@@ -107,13 +110,14 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         hwl.nhb_ver = ver
         hwl.save()
 
-        self.url_overzicht = '/competitie/'
-        self.url_wijzigdatums = '/competitie/wijzig-datums/%s/'
-        self.url_aangemeld_alles = '/competitie/lijst-regiocompetitie/%s/alles/'  # % comp_pk
-        self.url_aangemeld_rayon = '/competitie/lijst-regiocompetitie/%s/rayon-%s/'  # % comp_pk, rayon_pk
-        self.url_aangemeld_regio = '/competitie/lijst-regiocompetitie/%s/regio-%s/'  # % comp_pk, regio_pk
-        self.url_behoefte = '/competitie/lijst-regiocompetitie/%s/regio-%s/dagdeel-behoefte/'  # comp_pk, regio_pk
-        self.url_behoefte_bestand = '/competitie/lijst-regiocompetitie/%s/regio-%s/dagdeel-behoefte-als-bestand/'  # comp_pk, regio_pk
+        self.url_kies = '/bondscompetities/'
+        self.url_overzicht = '/bondscompetities/%s/'                                        # comp_pk
+        self.url_wijzigdatums = '/bondscompetities/%s/wijzig-datums/'                       # comp_pk
+        self.url_aangemeld_alles = '/bondscompetities/%s/lijst-regiocompetitie/alles/'      # comp_pk
+        self.url_aangemeld_rayon = '/bondscompetities/%s/lijst-regiocompetitie/rayon-%s/'   # comp_pk, rayon_pk
+        self.url_aangemeld_regio = '/bondscompetities/%s/lijst-regiocompetitie/regio-%s/'   # comp_pk, regio_pk
+        self.url_behoefte = '/bondscompetities/%s/lijst-regiocompetitie/regio-%s/dagdeel-behoefte/'  # comp_pk, regio_pk
+        self.url_behoefte_bestand = '/bondscompetities/%s/lijst-regiocompetitie/regio-%s/dagdeel-behoefte-als-bestand/'  # comp_pk, regio_pk
 
     def _doe_inschrijven(self, comp):
 
@@ -123,13 +127,12 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.e2e_wisselnaarrol_bb()
 
         # klassegrenzen vaststellen
-        url_klassegrenzen_18 = '/competitie/klassegrenzen/vaststellen/18/'
-        url_klassegrenzen_25 = '/competitie/klassegrenzen/vaststellen/25/'
+        url_klassegrenzen = '/bondscompetities/%s/klassegrenzen/vaststellen/'
         with self.assert_max_queries(20):
-            resp = self.client.post(url_klassegrenzen_18)
+            resp = self.client.post(url_klassegrenzen % self.comp_18.pk)
         self.assert_is_redirect_not_plein(resp)  # check for success
         with self.assert_max_queries(20):
-            resp = self.client.post(url_klassegrenzen_25)
+            resp = self.client.post(url_klassegrenzen % self.comp_25.pk)
         self.assert_is_redirect_not_plein(resp)  # check for success
         # nu in fase A2
 
@@ -221,13 +224,13 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         # for
 
     def test_overzicht_anon(self):
+        url = self.url_kies
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_overzicht)
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/overzicht.dtl', 'plein/site_layout.dtl'))
-        self.assertNotContains(resp, '/competitie/beheer-favorieten/')
-        self.e2e_assert_other_http_commands_not_supported(self.url_overzicht)
+        self.assert_template_used(resp, ('competitie/kies.dtl', 'plein/site_layout.dtl'))
+        self.e2e_assert_other_http_commands_not_supported(url)
 
         comp = Competitie.objects.all()[0]
 
@@ -248,11 +251,10 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.e2e_wisselnaarrol_it()
 
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_overzicht)
+            resp = self.client.get(self.url_overzicht % self.comp_18.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/overzicht-beheerder.dtl', 'plein/site_layout.dtl'))
-        self.assertNotContains(resp, '/competitie/beheer-favorieten/')
+        self.assert_template_used(resp, ('competitie/overzicht.dtl', 'plein/site_layout.dtl'))
 
     def test_overzicht_bb(self):
         self.e2e_login_and_pass_otp(self.account_bb)
@@ -262,11 +264,10 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.e2e_wisselnaarrol_bb()
 
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_overzicht)
+            resp = self.client.get(self.url_overzicht % comp.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/overzicht-beheerder.dtl', 'plein/site_layout.dtl'))
-        self.assertNotContains(resp, '/competitie/beheer-favorieten/')
 
         # landelijk
         url = self.url_aangemeld_alles % comp.pk
@@ -344,11 +345,10 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(functie_bko)
 
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_overzicht)
+            resp = self.client.get(self.url_overzicht % comp.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/overzicht-beheerder.dtl', 'plein/site_layout.dtl'))
-        self.assertNotContains(resp, '/competitie/beheer-favorieten/')
 
         # landelijk
         url = self.url_aangemeld_alles % comp.pk
@@ -384,11 +384,10 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(functie_rko)
 
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_overzicht)
+            resp = self.client.get(self.url_overzicht % comp.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/overzicht-beheerder.dtl', 'plein/site_layout.dtl'))
-        self.assertNotContains(resp, '/competitie/beheer-favorieten/')
 
         # landelijk
         url = self.url_aangemeld_alles % comp.pk
@@ -424,11 +423,10 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(functie_rcl)
 
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_overzicht)
+            resp = self.client.get(self.url_overzicht % comp.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/overzicht-beheerder.dtl', 'plein/site_layout.dtl'))
-        self.assertNotContains(resp, '/competitie/beheer-favorieten/')
 
         # landelijk
         url = self.url_aangemeld_alles % comp.pk
@@ -463,11 +461,10 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         # self.e2e_wissel_naar_functie(self.functie_hwl)
 
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_overzicht)
+            resp = self.client.get(self.url_overzicht % comp.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/overzicht-hwl.dtl', 'plein/site_layout.dtl'))
-        self.assertNotContains(resp, '/competitie/beheer-favorieten/')
 
     # TODO: add WL
 
@@ -510,7 +507,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
                                           'datum8': '2020-05-01',
                                           'datum9': '2020-05-12',
                                           })
-        self.assert_is_redirect(resp, self.url_overzicht)
+        self.assert_is_redirect(resp, self.url_overzicht % comp.pk)
 
         # controleer dat de nieuwe datums opgeslagen zijn
         comp = Competitie.objects.get(pk=comp.pk)

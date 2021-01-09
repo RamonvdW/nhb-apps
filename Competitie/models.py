@@ -8,6 +8,7 @@ from django.db import models
 from django.utils import timezone
 from Account.models import Account
 from BasisTypen.models import IndivWedstrijdklasse, TeamWedstrijdklasse
+from Functie.rol import Rollen
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
 from Functie.models import Functie
 from Schutter.models import SchutterBoog
@@ -122,7 +123,18 @@ class Competitie(models.Model):
         """ geef een tekstuele afkorting van dit object, voor in de admin interface """
         return self.beschrijving
 
-    def zet_fase(self):
+    def titel(self):
+        if self.afstand == '18':
+            msg = 'Indoor'
+        else:
+            msg = '25m 1pijl'
+        msg += ' %s/%s' % (self.begin_jaar, self.begin_jaar + 1)
+        return msg
+
+    def zet_fase(self):      # TODO: rename naar bepaal_fase
+        """ bepaalde huidige fase van de competitie en zet self.fase
+        """
+
         # fase A was totdat dit object gemaakt werd
 
         if self.alle_bks_afgesloten:
@@ -215,6 +227,28 @@ class Competitie(models.Model):
 
         # fase G: afsluiten regiocompetitie (BKO)
         self.fase = 'G'
+
+    def bepaal_openbaar(self, rol_nu):
+        """ deze functie bepaalt of de competitie openbaar is voor de gegeven rol
+            en zet de is_openbaar variabele op het object.
+
+            let op: self.fase moet gezet zijn
+        """
+        self.is_openbaar = False
+
+        if rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB, Rollen.ROL_BKO):
+            # IT, BB en BKO zien alles
+            self.is_openbaar = True
+        else:
+            if not hasattr(self, 'fase'):
+                self.zet_fase()
+
+            if self.fase >= 'B':
+                # modale gebruiker ziet alleen competities vanaf open-voor-inschrijving
+                self.is_openbaar = True
+            elif self.fase >= 'A2' and rol_nu in (Rollen.ROL_RKO, Rollen.ROL_RCL):
+                # beheerders die de competitie opzetten zien competities die opgestart zijn
+                self.is_openbaar = True
 
     objects = models.Manager()      # for the editor only
 

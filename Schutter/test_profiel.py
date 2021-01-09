@@ -144,26 +144,28 @@ class TestSchutterProfiel(E2EHelpers, TestCase):
         # for
 
     def _competitie_aanmaken(self):
-        url_overzicht = '/competitie/'
-        url_aanmaken = '/competitie/aanmaken/'
-        url_ag_vaststellen = '/competitie/ag-vaststellen/'
-        url_klassegrenzen_vaststellen_18 = '/competitie/klassegrenzen/vaststellen/18/'
-        url_klassegrenzen_vaststellen_25 = '/competitie/klassegrenzen/vaststellen/25/'
+        url_kies = '/bondscompetities/'
+        url_aanmaken = '/bondscompetities/aanmaken/'
+        url_ag_vaststellen = '/bondscompetities/ag-vaststellen/'
+        url_klassegrenzen_vaststellen = '/bondscompetities/%s/klassegrenzen/vaststellen/'
 
         # competitie aanmaken
         with self.assert_max_queries(20):
             resp = self.client.post(url_aanmaken)
-        self.assert_is_redirect(resp, url_overzicht)
+        self.assert_is_redirect(resp, url_kies)
 
         # aanvangsgemiddelden vaststellen
         with self.assert_max_queries(20):
             resp = self.client.post(url_ag_vaststellen)
 
+        comp_18 = Competitie.objects.get(afstand='18')
+        comp_25 = Competitie.objects.get(afstand='25')
+
         # klassegrenzen vaststellen
         with self.assert_max_queries(20):
-            resp = self.client.post(url_klassegrenzen_vaststellen_18)
+            resp = self.client.post(url_klassegrenzen_vaststellen % comp_18.pk)
         with self.assert_max_queries(20):
-            resp = self.client.post(url_klassegrenzen_vaststellen_25)
+            resp = self.client.post(url_klassegrenzen_vaststellen % comp_25.pk)
 
         # zet de inschrijving open
         now = timezone.now()
@@ -179,11 +181,10 @@ class TestSchutterProfiel(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, '/plein/')
 
     def test_compleet(self):
-        url_overzicht = '/competitie/'
-        url_aanmaken = '/competitie/aanmaken/'
-        url_ag_vaststellen = '/competitie/ag-vaststellen/'
-        url_klassegrenzen_vaststellen_18 = '/competitie/klassegrenzen/vaststellen/18/'
-        url_klassegrenzen_vaststellen_25 = '/competitie/klassegrenzen/vaststellen/25/'
+        url_kies = '/bondscompetities/'
+        url_aanmaken = '/bondscompetities/aanmaken/'
+        url_ag_vaststellen = '/bondscompetities/ag-vaststellen/'
+        url_klassegrenzen_vaststellen = '/bondscompetities/%s/klassegrenzen/vaststellen/'
 
         # log in as schutter
         self.e2e_login(self.account_normaal)
@@ -200,40 +201,16 @@ class TestSchutterProfiel(E2EHelpers, TestCase):
         # competitie aanmaken
         with self.assert_max_queries(20):
             resp = self.client.post(url_aanmaken)
-        self.assert_is_redirect(resp, url_overzicht)
-
-        # log in as schutter
-        self.e2e_login(self.account_normaal)
-        self._prep_voorkeuren()
-
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_profiel)
-        self.assertContains(resp, 'De competitie wordt voorbereid')
-        self.assertContains(resp, 'Je bent niet ingeschreven')
-        for url in self.extract_all_urls(resp, skip_menu=True):
-            self.assertTrue("/sporter/regiocompetitie/aanmelden/" not in url)
-        # for
-
-        # log in as BB en maak de competitie 'af'
-        self.e2e_login_and_pass_otp(self.account_admin)
-        self.e2e_wisselnaarrol_bb()
+        self.assert_is_redirect(resp, url_kies)
         self.client.post(url_ag_vaststellen)
-        self.client.post(url_klassegrenzen_vaststellen_18)
-        self.client.post(url_klassegrenzen_vaststellen_25)
 
-        # log in as schutter
-        self.e2e_login(self.account_normaal)
-        self._prep_voorkeuren()
-
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_profiel)
-        self.assertContains(resp, 'Inschrijven kan nog niet')
-        self.assertContains(resp, 'De inschrijving opent op 31 december 20')
-
-        # zet de competitie door naar fase B
         comp_18 = Competitie.objects.get(afstand=18)
         comp_25 = Competitie.objects.get(afstand=25)
 
+        self.client.post(url_klassegrenzen_vaststellen % comp_18.pk)
+        self.client.post(url_klassegrenzen_vaststellen % comp_25.pk)
+
+        # zet de competitie door naar fase B
         zet_competitie_fase(comp_18, 'B')
         zet_competitie_fase(comp_25, 'B')
 

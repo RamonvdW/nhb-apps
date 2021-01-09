@@ -1,0 +1,70 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2021 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Bondscompetities{% endblock %}
+
+{% block pagina %}
+
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-kies" %}
+
+    <h4>Bondscompetities</h4>
+
+    <p>Maak een keuze uit de beschikbare competities.</p>
+
+    <div class="row">
+
+        <!-- de beschikbare competities -->
+        {% for obj in competities %}
+            {% include 'plein/card_logo.dtl' with title=obj.titel text=obj.text img_src=obj.img_src img_height="63" url=obj.card_url %}
+        {% endfor %}
+
+        {% url 'HistComp:top' as card_url %}
+        {% include 'plein/card.dtl' with title="Uitslag vorig seizoen" text="De uitslag van vorig seizoen is hier in te zien." icon="skip_previous" url=card_url %}
+    </div>
+
+    {% if bb_kan_competitie_aanmaken or bb_kan_ag_vaststellen %}
+        <h5>Management bondscompetitie</h5>
+
+        <p>Deze mogelijkheid zijn alleen door de Manager Competitiezaken te gebruiken.</p>
+
+        <div class="row">
+
+            <!-- competities aanmaken -->
+            {% if bb_kan_competitie_aanmaken %}
+                {% url 'Competitie:instellingen-volgende-competitie' as card_url %}
+                {% include 'plein/card.dtl' with title="Start competitie" text="Instellingen voor seizoen "|add:nieuwe_seizoen|add:" controleren en nieuwe competities aanmaken." icon="playlist_add" url=card_url %}
+            {% endif %}
+
+            <!-- aanvangsgemiddelden vaststellen -->
+            {% if bb_kan_ag_vaststellen %}
+                {% url 'Competitie:ag-vaststellen' as card_url %}
+                {% if bb_ag_nieuwste_datum %}
+                    <!-- template tag 'add' cannot handle missing variables -->
+                    {% include 'plein/card.dtl' with title="Aanvangsgemiddelden" text="AG vaststellen aan de hand van de uitslagen van vorig seizoen (op "|add:bb_ag_nieuwste_datum|add:" voor het laatst gedaan)" icon="how_to_reg" url=card_url %}
+                {% else %}
+                    {% include 'plein/card.dtl' with title="Aanvangsgemiddelden" text="AG vaststellen aan de hand van de uitslagen van vorig seizoen (eerste keer)" icon="how_to_reg" url=card_url %}
+                {% endif %}
+            {% endif %}
+        </div>
+
+    {% endif %}
+
+    <h5>Algemeen</h5>
+
+    <div class="row">
+        <!-- algemene informatie over de competities -->
+        {% url 'Competitie:info-competitie' as card_url %}
+        {% include 'plein/card.dtl' with title="Informatie" text="Algemene informatie over de competities." icon="info" url=card_url %}
+    </div>
+
+
+{% endblock %}
+
+{% block menu-competities %}
+    {% include 'competitie/menu.dtl' %}
+{% endblock %}

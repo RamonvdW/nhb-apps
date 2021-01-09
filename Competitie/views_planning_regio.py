@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,7 +9,6 @@ from django.urls import Resolver404, reverse
 from django.utils import timezone
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Plein.menu import menu_dynamics
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
 from Logboek.models import schrijf_in_logboek
 from NhbStructuur.models import NhbCluster, NhbVereniging
@@ -18,6 +17,7 @@ from Wedstrijden.models import Wedstrijd, WedstrijdLocatie
 from .models import (LAAG_REGIO, LAAG_RK, LAAG_BK, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2,
                      DeelCompetitie, DeelcompetitieRonde, maak_deelcompetitie_ronde,
                      CompetitieKlasse, RegioCompetitieSchutterBoog)
+from .menu import menu_dynamics_competitie
 from types import SimpleNamespace
 import datetime
 
@@ -230,7 +230,7 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
             context['url_rayon'] = reverse('Competitie:rayon-planning',
                                            kwargs={'deelcomp_pk': rayon.pk})
 
-        menu_dynamics(self.request, context, actief='competitie')
+        menu_dynamics_competitie(self.request, context, comp_pk=deelcomp.competitie.pk)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -332,7 +332,7 @@ class RegioClusterPlanningView(UserPassesTestMixin, TemplateView):
 
         context['handleiding_planning_regio_url'] = reverse('Handleiding:Planning_Regio')
 
-        menu_dynamics(self.request, context, actief='competitie')
+        menu_dynamics_competitie(self.request, context, comp_pk=deelcomp.competitie.pk)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -528,7 +528,7 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
         if rol_nu != Rollen.ROL_RCL:
             context['readonly'] = True
 
-        menu_dynamics(self.request, context, actief='competitie')
+        menu_dynamics_competitie(self.request, context, comp_pk=ronde.deelcompetitie.competitie.pk)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -690,7 +690,7 @@ class RegioRondePlanningMethode1View(UserPassesTestMixin, TemplateView):
         if rol_nu != Rollen.ROL_RCL:
             context['readonly'] = True
 
-        menu_dynamics(self.request, context, actief='competitie')
+        menu_dynamics_competitie(self.request, context, comp_pk=ronde.deelcompetitie.competitie.pk)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -917,7 +917,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
             context['url_verwijderen'] = reverse('Competitie:regio-verwijder-wedstrijd',
                                                  kwargs={'wedstrijd_pk': wedstrijd.pk})
 
-        menu_dynamics(self.request, context, actief='competitie')
+        menu_dynamics_competitie(self.request, context, comp_pk=context['competitie'].pk)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -1126,8 +1126,11 @@ class AfsluitenRegiocompView(UserPassesTestMixin, TemplateView):
 
         try:
             deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen geeft beveiliging
-            deelcomp = DeelCompetitie.objects.get(pk=deelcomp_pk,
-                                                  laag=LAAG_REGIO)
+            deelcomp = (DeelCompetitie
+                        .objects
+                        .select_related('competitie')
+                        .get(pk=deelcomp_pk,
+                             laag=LAAG_REGIO))
         except (ValueError, DeelCompetitie.DoesNotExist):
             raise Resolver404()
 
@@ -1142,7 +1145,10 @@ class AfsluitenRegiocompView(UserPassesTestMixin, TemplateView):
                 context['url_afsluiten'] = reverse('Competitie:afsluiten-regiocomp',
                                                    kwargs={'deelcomp_pk': deelcomp.pk})
 
-        menu_dynamics(self.request, context, actief='competitie')
+        context['url_terug'] = reverse('Competitie:overzicht',
+                                       kwargs={'comp_pk': deelcomp.competitie.pk})
+
+        menu_dynamics_competitie(self.request, context, comp_pk=deelcomp.competitie.pk)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -1217,7 +1223,7 @@ class AfsluitenRegiocompView(UserPassesTestMixin, TemplateView):
             msg += '\nDe volgende beheerders zijn geïnformeerd via een taak: %s' % ", ".join(ter_info_namen)
             schrijf_in_logboek(request.user, "Competitie", msg)
 
-        url = reverse('Competitie:overzicht')
+        url = reverse('Competitie:kies')
         return HttpResponseRedirect(url)
 
 # end of file

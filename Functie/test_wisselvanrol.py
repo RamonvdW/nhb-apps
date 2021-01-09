@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -258,7 +258,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.assertIn(self.url_activeer_functie % self.functie_bko.pk, urls)
         self.assertIn(self.url_activeer_rol % 'sporter', urls)
 
-        self.e2e_wisselnaarrol_schutter()
+        self.e2e_wisselnaarrol_sporter()
         self.e2e_check_rol('sporter')
 
     def test_rko(self):

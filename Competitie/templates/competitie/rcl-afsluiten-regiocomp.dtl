@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020 Ramon van der Winkel.
+                Copyright (c) 2020-2021 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -28,10 +28,13 @@
 
         <p>&nbsp;</p>
         <p>De competitie kan nu nog niet afgesloten worden. Wacht tot de tijdlijn fase F bereikt heeft.</p>
-        <a class="btn-nhb-blauw" href="{% url 'Competitie:overzicht' %}">Terug</a>
+        <a class="btn-nhb-blauw" href="{{ url_terug }}">Terug</a>
     {% endif %}
 
     {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-rcl-afsluiten-regiocomp" %}
 
 {% endblock %}
 
+{% block menu-competities %}
+    {% include 'competitie/menu.dtl' %}
+{% endblock %}

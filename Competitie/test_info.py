@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -46,7 +46,7 @@ class TestCompetitieInfo(E2EHelpers, TestCase):
 
         self.account_geenlid = self.e2e_create_account('geenlid', 'geenlid@gmail.com', 'Testertje')
 
-        self.url_info = '/competitie/info/'
+        self.url_info = '/bondscompetities/info/'
 
     def test_anon(self):
         with self.assert_max_queries(20):

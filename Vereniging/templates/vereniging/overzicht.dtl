@@ -1,115 +1,113 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020 Ramon van der Winkel.
+                Copyright (c) 2020-2021 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
 
-{% block title %}Vereniging{% endblock %}
+{% block title %}Beheer Vereniging{% endblock %}
 
 {% block pagina %}
 
-<h4>Vereniging</h4>
+    <h4>Beheer Vereniging</h4>
 
-<!--<p>&nbsp;</p>-->
+    <div class="row">
 
-<div class="row">
-
-    <!-- toon gegevens van de vereniging in een blauwe box -->
-    <div class="col s12 m10 l8 xl6 offset-m1 offset-l2 offset-xl3">
-        <div class="white-text nhb-blauw z-depth-2">
-            <div class="row small-row">
-                <div class="col s4">NHB nummer:</div>
-                <div class="col s6">{{ nhb_ver.nhb_nr }}</div>
-            </div>
-            <div class="row small-row">
-                <div class="col s4">Naam:</div>
-                <div class="col s6">{{ nhb_ver.naam }}</div>
-            </div>
-            <div class="row small-row">
-                <div class="col s4">Plaats:</div>
-                <div class="col s6">{{ nhb_ver.plaats }}</div>
-            </div>
-            <div class="row small-row">
-                <div class="col s4">Regio:</div>
-                <div class="col s6">{{ nhb_ver.regio }}</div>
-            </div>
-
-            {% if nhb_ver.cluster %}
+        <!-- toon gegevens van de vereniging in een blauwe box -->
+        <div class="col s12 m10 l8 xl6 offset-m1 offset-l2 offset-xl3">
+            <div class="white-text nhb-blauw z-depth-2">
                 <div class="row small-row">
-                    <div class="col s4">Cluster:</div>
-                    <div class="col s6">{{ nhb_ver.cluster }}</div>
+                    <div class="col s4">NHB nummer:</div>
+                    <div class="col s6">{{ nhb_ver.nhb_nr }}</div>
                 </div>
-            {% endif %}
+                <div class="row small-row">
+                    <div class="col s4">Naam:</div>
+                    <div class="col s6">{{ nhb_ver.naam }}</div>
+                </div>
+                <div class="row small-row">
+                    <div class="col s4">Plaats:</div>
+                    <div class="col s6">{{ nhb_ver.plaats }}</div>
+                </div>
+                <div class="row small-row">
+                    <div class="col s4">Regio:</div>
+                    <div class="col s6">{{ nhb_ver.regio }}</div>
+                </div>
+
+                {% if nhb_ver.cluster %}
+                    <div class="row small-row">
+                        <div class="col s4">Cluster:</div>
+                        <div class="col s6">{{ nhb_ver.cluster }}</div>
+                    </div>
+                {% endif %}
+            </div>
         </div>
     </div>
-</div>
 
-<!--&nbsp;-->
-<h5>Beheerder</h5>
+    <!--&nbsp;-->
+    <h5>Beheerder</h5>
 
-<p>Als beheerder van de vereniging heb je toegang tot onderstaande functies.</p>
+    <p>Als beheerder van de vereniging heb je toegang tot onderstaande functies.</p>
 
-<div class="row">
+    <div class="row">
 
-    <!-- wedstrijden -->
-    {% for deelcomp_rk in deelcomps_rk %}
-        {% if deelcomp_rk.url_lijst_rk %}
-            {% include 'plein/card.dtl' with title="RK selectie" text=deelcomp_rk.text_str icon="receipt" url=deelcomp_rk.url_lijst_rk %}
-        {% endif %}
-    {% endfor %}
-
-    <!-- leden aanmelden voor de competitie -->
-    {% if toon_aanmelden %}
-        {% for comp in competities %}
-            {% if comp.fase < 'B' %}
-                <div class="nhb-card-disabled">
-                    <div class="nhb-card-content">
-                        <div class="card-title center-align grey-text">Aanmelden {{ comp.afstand }}m</div>
-                        <div class="center-align"><img src="{{ comp.icon }}" height="60" alt="logo" style="opacity: 0.5"></div>
-                        <div class="card-text grey-text">Aanmelden voor de <b>{{ comp.beschrijving }}</b> opent op {{ comp.begin_aanmeldingen }}.</div>
-                        <div class="card-text center-align"><br>(NOG NIET BESCHIKBAAR)</div>
-                    </div>
-                </div>
-            {% elif comp.fase < 'F' %}
-                {% url 'Vereniging:leden-aanmelden' comp_pk=comp.pk as card_url %}
-                {% include 'plein/card_logo.dtl' with title="Aanmelden "|add:comp.afstand|add:"m" text="Leden aanmelden voor de "|add:comp.beschrijving|add:"." img_src=comp.icon img_height="60" url=card_url %}
+        <!-- wedstrijden -->
+        {% for deelcomp_rk in deelcomps_rk %}
+            {% if deelcomp_rk.url_lijst_rk %}
+                {% include 'plein/card.dtl' with title="RK selectie" text=deelcomp_rk.text_str icon="receipt" url=deelcomp_rk.url_lijst_rk %}
             {% endif %}
         {% endfor %}
-    {% endif %}
 
-    <!-- leden ingeschreven voor de competitie (niet meer tonen vanaf fase RK) -->
-    {% for deelcomp in deelcomps %}
-        {% if deelcomp.competitie.fase <= 'F' %}
-            {% url 'Vereniging:leden-ingeschreven' deelcomp_pk=deelcomp.pk as card_url %}
-            {% include 'plein/card_logo.dtl' with title="Ingeschreven "|add:deelcomp.competitie.afstand|add:"m" text="Overzicht leden ingeschreven zijn voor de "|add:deelcomp.competitie.beschrijving|add:"." img_src=deelcomp.icon img_height="60" url=card_url %}
+        <!-- leden aanmelden voor de competitie -->
+        {% if toon_aanmelden %}
+            {% for comp in competities %}
+                {% if comp.fase < 'B' %}
+                    <div class="nhb-card-disabled">
+                        <div class="nhb-card-content">
+                            <div class="card-title center-align grey-text">Aanmelden {{ comp.afstand }}m</div>
+                            <div class="center-align"><img src="{{ comp.icon }}" height="60" alt="logo" style="opacity: 0.5"></div>
+                            <div class="card-text grey-text">Aanmelden voor de <b>{{ comp.beschrijving }}</b> opent op {{ comp.begin_aanmeldingen }}.</div>
+                            <div class="card-text center-align"><br>(NOG NIET BESCHIKBAAR)</div>
+                        </div>
+                    </div>
+                {% elif comp.fase < 'F' %}
+                    {% url 'Vereniging:leden-aanmelden' comp_pk=comp.pk as card_url %}
+                    {% include 'plein/card_logo.dtl' with title="Aanmelden "|add:comp.afstand|add:"m" text="Leden aanmelden voor de "|add:comp.beschrijving|add:"." img_src=comp.icon img_height="60" url=card_url %}
+                {% endif %}
+            {% endfor %}
         {% endif %}
-    {% endfor %}
 
-    <!-- wedstrijden -->
-    {% url 'Vereniging:wedstrijden' as card_url %}
-    {% include 'plein/card.dtl' with title="Wedstrijden" text="Wedstrijden die bij deze vereniging geschoten worden." icon="event" url=card_url %}
+        <!-- leden ingeschreven voor de competitie (niet meer tonen vanaf fase RK) -->
+        {% for deelcomp in deelcomps %}
+            {% if deelcomp.competitie.fase <= 'F' %}
+                {% url 'Vereniging:leden-ingeschreven' deelcomp_pk=deelcomp.pk as card_url %}
+                {% include 'plein/card_logo.dtl' with title="Ingeschreven "|add:deelcomp.competitie.afstand|add:"m" text="Overzicht leden ingeschreven zijn voor de "|add:deelcomp.competitie.beschrijving|add:"." img_src=deelcomp.icon img_height="60" url=card_url %}
+            {% endif %}
+        {% endfor %}
 
-    <!-- ledenlijst -->
-    {% url 'Vereniging:ledenlijst' as card_url %}
-    {% include 'plein/card.dtl' with title="Ledenlijst" text="Bekijk de ledenlijst van de vereniging, inclusief wedstrijdklasse jeugdleden en laatste inlog op deze website." icon="list" url=card_url %}
+        <!-- wedstrijden -->
+        {% url 'Vereniging:wedstrijden' as card_url %}
+        {% include 'plein/card.dtl' with title="Wedstrijden" text="Wedstrijden die bij deze vereniging geschoten worden." icon="event" url=card_url %}
 
-    <!-- beheerders vereniging -->
-    {% url 'Functie:overzicht-vereniging' as card_url %}
-    {% include 'plein/card.dtl' with title="Beheerders" text="E-mailadressen van de (hoofd-)wedstrijdleider functies en eraan gekoppelde leden." icon="supervisor_account" url=card_url %}
+        <!-- ledenlijst -->
+        {% url 'Vereniging:ledenlijst' as card_url %}
+        {% include 'plein/card.dtl' with title="Ledenlijst" text="Bekijk de ledenlijst van de vereniging, inclusief wedstrijdklasse jeugdleden en laatste inlog op deze website." icon="list" url=card_url %}
 
-    <!-- instellingen leden -->
-    {% url 'Vereniging:leden-voorkeuren' as card_url %}
-    {% include 'plein/card.dtl' with title="Voorkeuren" text="Voorkeuren van de leden inzien en boog type instellen." icon="tune" url=card_url %}
+        <!-- beheerders vereniging -->
+        {% url 'Functie:overzicht-vereniging' as card_url %}
+        {% include 'plein/card.dtl' with title="Beheerders" text="E-mailadressen van de (hoofd-)wedstrijdleider functies en eraan gekoppelde leden." icon="supervisor_account" url=card_url %}
 
-    <!-- accommodatie details -->
-    {% if accommodatie_details_url %}
-        {% include 'plein/card.dtl' with title="Accommodatie" text="Gegevens over de accommodatie die van belang zijn voor wedstrijden." icon="home" url=accommodatie_details_url %}
-    {% endif %}
+        <!-- instellingen leden -->
+        {% url 'Vereniging:leden-voorkeuren' as card_url %}
+        {% include 'plein/card.dtl' with title="Voorkeuren" text="Voorkeuren van de leden inzien en boog type instellen." icon="tune" url=card_url %}
 
-</div>
+        <!-- accommodatie details -->
+        {% if accommodatie_details_url %}
+            {% include 'plein/card.dtl' with title="Accommodatie" text="Gegevens over de accommodatie die van belang zijn voor wedstrijden." icon="home" url=accommodatie_details_url %}
+        {% endif %}
 
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vereniging-overzicht" %}
+    </div>
+
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vereniging-overzicht" %}
 
 {% endblock %}

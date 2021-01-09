@@ -90,34 +90,34 @@ class ProfielView(UserPassesTestMixin, TemplateView):
 
     @staticmethod
     def _find_competities(voorkeuren):
-        if not voorkeuren.voorkeur_meedoen_competitie:
-            return None
+        comps = list()
+        if voorkeuren.voorkeur_meedoen_competitie:
+            for comp in (Competitie
+                         .objects.filter(is_afgesloten=False)
+                         .order_by('afstand', 'begin_jaar')):
+                comp.zet_fase()
+                comp.bepaal_openbaar(Rollen.ROL_SCHUTTER)
+                if comp.is_openbaar:
+                    # fase B of later
+                    comp.inschrijven = 'De inschrijving is gesloten'
 
-        comps = Competitie.objects.filter(is_afgesloten=False).order_by('afstand')
-        for comp in comps:
-            comp.zet_fase()
+                    if comp.alle_rks_afgesloten:
+                        comp.fase_str = 'Bondskampioenschappen'
+                    elif comp.alle_regiocompetities_afgesloten:
+                        comp.fase_str = 'Rayonkampioenschappen'
+                    else:
+                        comp.fase_str = 'Regiocompetitie'
+                        if comp.fase < 'C':
+                            comp.inschrijven = 'Volwaardig inschrijven kan tot %s' % localize(comp.einde_aanmeldingen)
+                        elif comp.fase < 'F':
+                            comp.inschrijven = 'Meedoen kan tot %s' % localize(comp.laatst_mogelijke_wedstrijd)
 
-            comp.inschrijven = 'De inschrijving is gesloten'
-
-            if comp.alle_rks_afgesloten:
-                comp.fase_str = 'Bondskampioenschappen'
-            elif comp.alle_regiocompetities_afgesloten:
-                comp.fase_str = 'Rayonkampioenschappen'
-            else:
-                comp.fase_str = 'Regiocompetitie'
-                if comp.fase < 'A2':
-                    comp.inschrijven = 'De competitie wordt voorbereid'
-                elif comp.fase < 'B':
-                    comp.inschrijven = 'De inschrijving opent op %s' % localize(comp.begin_aanmeldingen)
-                elif comp.fase < 'C':
-                    comp.inschrijven = 'Volwaardig inschrijven kan tot %s' % localize(comp.einde_aanmeldingen)
-                elif comp.fase < 'F':
-                    comp.inschrijven = 'Meedoen kan tot %s' % localize(comp.laatst_mogelijke_wedstrijd)
-        # for
+                    comps.append(comp)
+            # for
         return comps
 
     @staticmethod
-    def _find_regiocompetities(nhblid, voorkeuren, alle_bogen):
+    def _find_regiocompetities(comps, nhblid, voorkeuren, alle_bogen):
         """ Zoek regiocompetities waar de schutter zich op aan kan melden """
 
         # stel vast welke boogtypen de schutter mee wil schieten (opt-in)
@@ -151,6 +151,8 @@ class ProfielView(UserPassesTestMixin, TemplateView):
 
         objs = list()
 
+        comp_pks = [comp.pk for comp in comps]
+
         # zoek deelcompetities in deze regio (typisch zijn er 2 in de regio: 18m en 25m)
         regio = nhblid.bij_vereniging.regio
         for deelcompetitie in (DeelCompetitie
@@ -158,7 +160,8 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                                .select_related('competitie')
                                .prefetch_related('competitie__competitieklasse_set')
                                .exclude(competitie__is_afgesloten=True)
-                               .filter(laag=LAAG_REGIO,
+                               .filter(competitie__pk__in=comp_pks,
+                                       laag=LAAG_REGIO,
                                        nhb_regio=regio)
                                .order_by('competitie__afstand')):
             comp = deelcompetitie.competitie
@@ -348,13 +351,13 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         if nhblid.bij_vereniging and not nhblid.bij_vereniging.geen_wedstrijden:
             _, _, is_jong, _, _ = get_sessionvars_leeftijdsklassen(self.request)
             context['toon_leeftijdsklassen'] = is_jong
-            context['competities'] = self._find_competities(voorkeuren)
-            context['regiocompetities'] = self._find_regiocompetities(nhblid, voorkeuren, alle_bogen)
+            context['competities'] = comps = self._find_competities(voorkeuren)
+            context['regiocompetities'] = self._find_regiocompetities(comps, nhblid, voorkeuren, alle_bogen)
             context['gemiddelden'], context['heeft_ags'] = self._find_gemiddelden(nhblid, alle_bogen)
 
         self._get_contact_gegevens(nhblid, context)
 
-        menu_dynamics(self.request, context, actief='schutter')
+        menu_dynamics(self.request, context, actief='schutter-profiel')
         return context
 
 

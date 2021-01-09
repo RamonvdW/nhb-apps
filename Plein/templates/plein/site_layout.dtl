@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 {% comment %}
-                Copyright (c) 2019-2020 Ramon van der Winkel.
+                Copyright (c) 2019-2021 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -24,8 +24,10 @@
         <title>{% block title %}{% endblock %}</title>
         <link rel="icon" href="{% static 'plein/logo_nhb_192x192.png' %}" sizes="192x192">
         <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Round">
-        <link rel="stylesheet" href="{% static 'materialize-new-35.css' %}">
-        <link rel="stylesheet" href="{% static 'site_layout_min-12.css' %}"> <!-- moet ná materialize css -->
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans&amp;display=swap">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu&amp;display=swap">
+        <link rel="stylesheet" href="{% static 'materialize-new-38.css' %}">
+        <link rel="stylesheet" href="{% static 'site_layout_min-13.css' %}"> <!-- moet ná materialize css -->
         {% block extraheader %}{% endblock %}
     </head>
 
@@ -50,7 +52,7 @@
                 </div>
 
                 <!-- screen-size indicator labels -->
-                {% if is_debug %}
+                {% if toon_schermgrootte %}
                     <div style="position: fixed; left: 320px; top: 2px; font-size:10px">
                         <span class="hide-unless-small">Small</span>
                         <span class="hide-unless-medium">Medium</span>
@@ -66,7 +68,16 @@
             <!-- sidenav (als laatste zodat dit niet de eerste tabstop is) -->
             <div id="menu">
                 <ul id="slide-out" class="sidenav sidenav-fixed">
-                    {% include 'plein/menu.dtl' %}
+                    {% include 'plein/menu-1-head.dtl' %}
+
+                    <!-- vervangbaar deel van het menu -->
+                    {% block menu-competities %}
+                        {% include 'plein/menu-2-competities.dtl' %}
+                    {% endblock %}
+
+                    {% include 'plein/menu-3.dtl' %}
+
+                    {% include 'plein/menu-9-tail.dtl' %}
                 </ul>
             </div>
 
@@ -345,7 +356,5 @@
             });
         </script>
 
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans&amp;display=swap">
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu&amp;display=swap">
     </body>
 </html>

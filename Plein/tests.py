@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -100,7 +100,7 @@ class TestPlein(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertNotContains(resp, '/admin/')
         self.assertNotContains(resp, 'Wissel van rol')
-        self.assert_template_used(resp, ('plein/plein-gebruiker.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('plein/plein-bezoeker.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
         self.e2e_logout()
 
@@ -130,7 +130,7 @@ class TestPlein(E2EHelpers, TestCase):
             resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, 'Wissel van rol')
-        self.assert_template_used(resp, ('plein/plein-gebruiker.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('plein/plein-bezoeker.dtl', 'plein/site_layout.dtl'))
         urls = [url for url in self.extract_all_urls(resp) if "beheer" in url]
         self.assertEqual(0, len(urls))  # komt pas in beeld na kiezen rol IT
 
@@ -218,6 +218,14 @@ class TestPlein(E2EHelpers, TestCase):
             resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, 'Secretaris vereniging 1000')
+
+        # sporter
+        self.e2e_wisselnaarrol_sporter()
+        self.e2e_check_rol('sporter')
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_plein)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assertContains(resp, 'Sporter')
 
     def test_privacy(self):
         with self.assert_max_queries(20):

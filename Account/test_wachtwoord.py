@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -39,8 +39,8 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/nieuw-wachtwoord.dtl', 'plein/site_layout.dtl'))
 
-        # controleer dat we ingelogd zijn: het menu bevat de optie Uitloggen
-        self.assertContains(resp, 'Uitloggen')
+        # controleer dat we nu ingelogd zijn!
+        self.e2e_assert_logged_in()
 
         nieuw_ww = 'nieuwWwoord'
 
@@ -57,10 +57,7 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, '/plein/')
 
         # controleer dat we nog steeds ingelogd zijn
-        with self.assert_max_queries(20):
-            resp = self.client.get('/plein/')
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, 'Uitloggen')
+        self.e2e_assert_logged_in()
 
         # controleer dat het nieuwe wachtwoord gebruikt kan worden
         self.client.logout()
@@ -129,7 +126,7 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
         self.assertNotContains(resp, 'Huidige wachtwoord:')
 
         # controleer dat we nu ingelogd zijn
-        self.assertContains(resp, 'Uitloggen')
+        self.e2e_assert_logged_in()
 
         # wijzig door alleen het nieuwe wachtwoord op te geven
         nieuw_ww = 'nieuwWwoord'
@@ -196,7 +193,7 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
         self.assertNotContains(resp, 'Huidige wachtwoord:')
 
         # controleer dat we nu ingelogd zijn!
-        self.assertContains(resp, 'Uitloggen')
+        self.e2e_assert_logged_in()
 
         # check dat we geen BB meer zijn
         self.assertContains(resp, 'Normaal')

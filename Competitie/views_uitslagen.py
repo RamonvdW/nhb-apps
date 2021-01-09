@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -13,59 +13,17 @@ from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
 from Competitie.models import (LAAG_REGIO, LAAG_RK, LAAG_BK, DEELNAME_NEE,
                                DeelCompetitie, DeelcompetitieKlasseLimiet,
                                RegioCompetitieSchutterBoog, KampioenschapSchutterBoog)
+from Competitie.menu import menu_dynamics_competitie
 from Functie.rol import Rollen, rol_get_huidige_functie, rol_get_huidige
-from Plein.menu import menu_dynamics
 from .models import Competitie
 
 
-TEMPLATE_COMPETITIE_UITSLAGEN = 'competitie/uitslagen.dtl'
 TEMPLATE_COMPETITIE_UITSLAGEN_VERENIGING = 'competitie/uitslagen-vereniging.dtl'
 TEMPLATE_COMPETITIE_UITSLAGEN_REGIO = 'competitie/uitslagen-regio.dtl'
 TEMPLATE_COMPETITIE_UITSLAGEN_RAYON = 'competitie/uitslagen-rayon.dtl'
 TEMPLATE_COMPETITIE_UITSLAGEN_BOND = 'competitie/uitslagen-bond.dtl'
 
 TEMPLATE_COMPETITIE_UITSLAGEN_REGIO_ALT = 'competitie/uitslagen-regio-alt.dtl'
-
-
-class UitslagenView(TemplateView):
-
-    """ Django class-based view voor de de uitslagen van de competitie """
-
-    # class variables shared by all instances
-    template_name = TEMPLATE_COMPETITIE_UITSLAGEN
-
-    def get_context_data(self, **kwargs):
-        """ called by the template system to get the context data for the template """
-        context = super().get_context_data(**kwargs)
-
-        # TODO: besluit wanneer uitslag vorig seizoen niet meer tonen
-        context['toon_histcomp'] = True
-
-        # kijk of de uitslagen klaar zijn om te tonen
-        context['toon_comps'] = False
-
-        for comp in Competitie.objects.filter(is_afgesloten=False).all():
-            comp.zet_fase()
-            if comp.fase >= 'B':        # inschrijving is open
-                context['toon_comps'] = True
-        # for
-
-        context['url_18_regio'] = reverse('Competitie:uitslagen-regio',
-                                          kwargs={'afstand': 18, 'comp_boog': 'r'})
-        context['url_18_rayon'] = reverse('Competitie:uitslagen-rayon',
-                                          kwargs={'afstand': 18, 'comp_boog': 'r'})
-        context['url_18_bond'] = reverse('Competitie:uitslagen-bond',
-                                         kwargs={'afstand': 18, 'comp_boog': 'r'})
-
-        context['url_25_regio'] = reverse('Competitie:uitslagen-regio',
-                                          kwargs={'afstand': 25, 'comp_boog': 'r'})
-        context['url_25_rayon'] = reverse('Competitie:uitslagen-rayon',
-                                          kwargs={'afstand': 25, 'comp_boog': 'r'})
-        context['url_25_bond'] = reverse('Competitie:uitslagen-bond',
-                                         kwargs={'afstand': 25, 'comp_boog': 'r'})
-
-        menu_dynamics(self.request, context, actief='histcomp')
-        return context
 
 
 class UitslagenVerenigingView(TemplateView):
@@ -103,7 +61,7 @@ class UitslagenVerenigingView(TemplateView):
         return ver_nr
 
     @staticmethod
-    def _maak_filter_knoppen(context, afstand, ver_nr, comp_boog):
+    def _maak_filter_knoppen(context, comp, ver_nr, comp_boog):
         """ filter knoppen per regio, gegroepeerd per rayon en per competitie boog type """
 
         # boogtype files
@@ -119,13 +77,13 @@ class UitslagenVerenigingView(TemplateView):
                 # geen url --> knop disabled
             else:
                 boogtype.zoom_url = reverse('Competitie:uitslagen-vereniging-n',
-                                            kwargs={'afstand': afstand,
+                                            kwargs={'comp_pk': comp.pk,
                                                     'comp_boog': boogtype.afkorting.lower(),
                                                     'ver_nr': ver_nr})
         # for
 
     @staticmethod
-    def _get_deelcomp(afstand, regio_nr):
+    def _get_deelcomp(comp, regio_nr):
         if regio_nr == 100:
             regio_nr = 101
 
@@ -134,7 +92,7 @@ class UitslagenVerenigingView(TemplateView):
                         .objects
                         .select_related('competitie', 'nhb_regio')
                         .get(laag=LAAG_REGIO,
-                             competitie__afstand=afstand,
+                             competitie=comp,
                              competitie__is_afgesloten=False,
                              nhb_regio__regio_nr=regio_nr))
         except DeelCompetitie.DoesNotExist:
@@ -179,7 +137,17 @@ class UitslagenVerenigingView(TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        afstand = kwargs['afstand'][:2]         # afkappen voor veiligheid
+        try:
+            comp_pk = int(kwargs['comp_pk'][:6])      # afkappen geeft beveiliging
+            comp = (Competitie
+                    .objects
+                    .get(pk=comp_pk))
+        except (ValueError, Competitie.DoesNotExist):
+            raise Resolver404()
+
+        comp.zet_fase()
+        context['comp'] = comp
+
         comp_boog = kwargs['comp_boog'][:2]     # afkappen voor veiligheid
 
         # ver_nr is optioneel en resulteert in het nummer van de schutter
@@ -199,7 +167,7 @@ class UitslagenVerenigingView(TemplateView):
 
         context['ver'] = ver
 
-        self._maak_filter_knoppen(context, afstand, ver_nr, comp_boog)
+        self._maak_filter_knoppen(context, comp, ver_nr, comp_boog)
 
         boogtype = context['comp_boog']
         if not boogtype:
@@ -207,16 +175,16 @@ class UitslagenVerenigingView(TemplateView):
 
         regio_nr = ver.regio.regio_nr
         context['url_terug'] = reverse('Competitie:uitslagen-regio-n',
-                                       kwargs={'afstand': afstand,
+                                       kwargs={'comp_pk': comp.pk,
                                                'comp_boog': comp_boog,
                                                'regio_nr': regio_nr})
 
-        context['deelcomp'] = deelcomp = self._get_deelcomp(afstand, regio_nr)
+        context['deelcomp'] = deelcomp = self._get_deelcomp(comp, regio_nr)
 
         context['deelnemers'] = deelnemers = self._get_deelnemers(deelcomp, boogtype, ver_nr)
         context['aantal_deelnemers'] = len(deelnemers)
 
-        menu_dynamics(self.request, context, actief='histcomp')
+        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
         return context
 
 
@@ -264,7 +232,7 @@ class UitslagenRegioView(TemplateView):
 
         return regio_nr
 
-    def _maak_filter_knoppen(self, context, afstand, gekozen_regio_nr, comp_boog):
+    def _maak_filter_knoppen(self, context, comp, gekozen_regio_nr, comp_boog):
         """ filter knoppen per regio, gegroepeerd per rayon en per competitie boog type """
 
         # boogtype files
@@ -280,7 +248,7 @@ class UitslagenRegioView(TemplateView):
                 # geen url --> knop disabled
             else:
                 boogtype.zoom_url = reverse(self.url_name,
-                                            kwargs={'afstand': afstand,
+                                            kwargs={'comp_pk': comp.pk,
                                                     'comp_boog': boogtype.afkorting.lower(),
                                                     'regio_nr': gekozen_regio_nr})
         # for
@@ -303,7 +271,7 @@ class UitslagenRegioView(TemplateView):
                 regio.title_str = 'Regio %s' % regio.regio_nr
                 if regio.regio_nr != gekozen_regio_nr:
                     regio.zoom_url = reverse(self.url_name,
-                                             kwargs={'afstand': afstand,
+                                             kwargs={'comp_pk': comp.pk,
                                                      'comp_boog': comp_boog,
                                                      'regio_nr': regio.regio_nr})
                 else:
@@ -321,7 +289,7 @@ class UitslagenRegioView(TemplateView):
             for ver in vers:
                 ver.title_str = str(ver.nhb_nr)
                 ver.zoom_url = reverse('Competitie:uitslagen-vereniging-n',
-                                       kwargs={'afstand': afstand,
+                                       kwargs={'comp_pk': comp.pk,
                                                'comp_boog': comp_boog,
                                                'ver_nr': ver.nhb_nr})
             # for
@@ -329,7 +297,7 @@ class UitslagenRegioView(TemplateView):
             context['ver_filters'] = vers
 
         context['url_switch'] = reverse(self.url_switch,
-                                        kwargs={'afstand': afstand,
+                                        kwargs={'comp_pk': comp.pk,
                                                 'comp_boog': comp_boog,
                                                 'regio_nr': gekozen_regio_nr})
 
@@ -337,7 +305,17 @@ class UitslagenRegioView(TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        afstand = kwargs['afstand'][:2]         # afkappen voor veiligheid
+        try:
+            comp_pk = int(kwargs['comp_pk'][:6])      # afkappen geeft beveiliging
+            comp = (Competitie
+                    .objects
+                    .get(pk=comp_pk))
+        except (ValueError, Competitie.DoesNotExist):
+            raise Resolver404()
+
+        comp.zet_fase()
+        context['comp'] = comp
+
         comp_boog = kwargs['comp_boog'][:2]     # afkappen voor veiligheid
 
         # regio_nr is optioneel (eerste binnenkomst zonder regio nummer)
@@ -359,7 +337,7 @@ class UitslagenRegioView(TemplateView):
                         .objects
                         .select_related('competitie', 'nhb_regio')
                         .get(laag=LAAG_REGIO,
-                             competitie__afstand=afstand,
+                             competitie=comp,
                              competitie__is_afgesloten=False,
                              nhb_regio__regio_nr=regio_nr))
         except DeelCompetitie.DoesNotExist:
@@ -367,7 +345,7 @@ class UitslagenRegioView(TemplateView):
 
         context['deelcomp'] = deelcomp
 
-        self._maak_filter_knoppen(context, afstand, regio_nr, comp_boog)
+        self._maak_filter_knoppen(context, comp, regio_nr, comp_boog)
 
         boogtype = context['comp_boog']
         if not boogtype:
@@ -407,7 +385,7 @@ class UitslagenRegioView(TemplateView):
         is_beheerder = rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_WL)
         context['is_beheerder'] = is_beheerder
 
-        menu_dynamics(self.request, context, actief='histcomp')
+        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
         return context
 
 
@@ -441,7 +419,8 @@ class UitslagenRayonView(TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_UITSLAGEN_RAYON
 
-    def _maak_filter_knoppen(self, context, afstand, gekozen_rayon_nr, comp_boog):
+    @staticmethod
+    def _maak_filter_knoppen(context, comp, gekozen_rayon_nr, comp_boog):
         """ filter knoppen per rayon en per competitie boog type """
 
         # boogtype files
@@ -457,7 +436,7 @@ class UitslagenRayonView(TemplateView):
                 # geen url --> knop disabled
             else:
                 boogtype.zoom_url = reverse('Competitie:uitslagen-rayon-n',
-                                            kwargs={'afstand': afstand,
+                                            kwargs={'comp_pk': comp.pk,
                                                     'comp_boog': boogtype.afkorting.lower(),
                                                     'rayon_nr': gekozen_rayon_nr})
         # for
@@ -475,7 +454,7 @@ class UitslagenRayonView(TemplateView):
                 rayon.title_str = 'Rayon %s' % rayon.rayon_nr
                 if rayon.rayon_nr != gekozen_rayon_nr:
                     rayon.zoom_url = reverse('Competitie:uitslagen-rayon-n',
-                                             kwargs={'afstand': afstand,
+                                             kwargs={'comp_pk': comp.pk,
                                                      'comp_boog': comp_boog,
                                                      'rayon_nr': rayon.rayon_nr})
                 else:
@@ -488,9 +467,15 @@ class UitslagenRayonView(TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            afstand = int(kwargs['afstand'][:2])     # afkappen voor veiligheid
-        except ValueError:
+            comp_pk = int(kwargs['comp_pk'][:6])      # afkappen geeft beveiliging
+            comp = (Competitie
+                    .objects
+                    .get(pk=comp_pk))
+        except (ValueError, Competitie.DoesNotExist):
             raise Resolver404()
+
+        comp.zet_fase()
+        context['comp'] = comp
 
         comp_boog = kwargs['comp_boog'][:2]          # afkappen voor veiligheid
 
@@ -503,7 +488,7 @@ class UitslagenRayonView(TemplateView):
         except ValueError:
             raise Resolver404()
 
-        self._maak_filter_knoppen(context, afstand, rayon_nr, comp_boog)
+        self._maak_filter_knoppen(context, comp, rayon_nr, comp_boog)
 
         boogtype = context['comp_boog']
         if not boogtype:
@@ -515,7 +500,7 @@ class UitslagenRayonView(TemplateView):
                         .select_related('competitie', 'nhb_rayon')
                         .get(laag=LAAG_RK,
                              competitie__is_afgesloten=False,
-                             competitie__afstand=afstand,
+                             competitie=comp,
                              nhb_rayon__rayon_nr=rayon_nr))
         except DeelCompetitie.DoesNotExist:
             raise Resolver404()
@@ -557,7 +542,7 @@ class UitslagenRayonView(TemplateView):
                             .objects
                             .filter(laag=LAAG_REGIO,
                                     competitie__is_afgesloten=False,
-                                    competitie__afstand=afstand,
+                                    competitie=comp,
                                     nhb_regio__rayon__rayon_nr=rayon_nr)
                             .values_list('pk', flat=True))
 
@@ -599,7 +584,7 @@ class UitslagenRayonView(TemplateView):
 
         context['deelnemers'] = deelnemers
 
-        menu_dynamics(self.request, context, actief='histcomp')
+        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
         return context
 
 
@@ -615,9 +600,15 @@ class UitslagenBondView(TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            afstand = int(kwargs['afstand'][:2])     # afkappen voor veiligheid
-        except ValueError:
+            comp_pk = int(kwargs['comp_pk'][:6])      # afkappen geeft beveiliging
+            comp = (Competitie
+                    .objects
+                    .get(pk=comp_pk))
+        except (ValueError, Competitie.DoesNotExist):
             raise Resolver404()
+
+        comp.zet_fase()
+        context['comp'] = comp
 
         comp_boog = kwargs['comp_boog'][:2]          # afkappen voor veiligheid
 
@@ -627,11 +618,11 @@ class UitslagenBondView(TemplateView):
                         .select_related('competitie')
                         .get(laag=LAAG_BK,
                              competitie__is_afgesloten=False,
-                             competitie__afstand=afstand))
+                             competitie__pk=comp_pk))
         except DeelCompetitie.DoesNotExist:
             raise Resolver404()
 
-        menu_dynamics(self.request, context, actief='histcomp')
+        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
         return context
 
 

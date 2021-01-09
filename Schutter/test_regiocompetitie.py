@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -101,16 +101,18 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         # for
 
     def _competitie_aanmaken(self):
-        url_overzicht = '/competitie/'
-        url_aanmaken = '/competitie/aanmaken/'
-        url_ag_vaststellen = '/competitie/ag-vaststellen/'
-        url_klassegrenzen_vaststellen_18 = '/competitie/klassegrenzen/vaststellen/18/'
-        url_klassegrenzen_vaststellen_25 = '/competitie/klassegrenzen/vaststellen/25/'
+        url_overzicht = '/bondscompetities/'
+        url_aanmaken = '/bondscompetities/aanmaken/'
+        url_ag_vaststellen = '/bondscompetities/ag-vaststellen/'
+        url_klassegrenzen_vaststellen = '/bondscompetities/%s/klassegrenzen/vaststellen/'   # comp_pk
 
         # competitie aanmaken
         with self.assert_max_queries(20):
             resp = self.client.post(url_aanmaken)
         self.assert_is_redirect(resp, url_overzicht)
+
+        comp_18 = Competitie.objects.get(afstand='18')
+        comp_25 = Competitie.objects.get(afstand='25')
 
         # aanvangsgemiddelden vaststellen
         with self.assert_max_queries(5):
@@ -118,9 +120,9 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
 
         # klassegrenzen vaststellen
         with self.assert_max_queries(20):
-            resp = self.client.post(url_klassegrenzen_vaststellen_18)
+            resp = self.client.post(url_klassegrenzen_vaststellen % comp_18.pk)
         with self.assert_max_queries(20):
-            resp = self.client.post(url_klassegrenzen_vaststellen_25)
+            resp = self.client.post(url_klassegrenzen_vaststellen % comp_25.pk)
 
     def test_inschrijven(self):
         # log in as BB en maak de competitie aan

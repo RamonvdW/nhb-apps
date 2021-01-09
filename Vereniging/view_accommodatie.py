@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -128,6 +128,7 @@ class LijstVerenigingenView(UserPassesTestMixin, ListView):
         context['toon_cluster'] = False
         context['toon_details'] = True
         context['toon_ledental'] = False
+
         menu_actief = 'hetplein'
 
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)

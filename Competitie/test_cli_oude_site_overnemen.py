@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -14,7 +14,7 @@ from Schutter.models import SchutterBoog
 from Score.models import Score, ScoreHist, aanvangsgemiddelde_opslaan
 from Wedstrijden.models import WedstrijdenPlan
 from Overig.e2ehelpers import E2EHelpers
-from .models import CompetitieKlasse
+from .models import Competitie, CompetitieKlasse
 import datetime
 import io
 
@@ -33,9 +33,12 @@ class TestCompetitieCliOudeSiteOvernemen(E2EHelpers, TestCase):
         # maak de competitie aan
         self.client.post(self.url_aanmaken)
 
+        comp_18 = Competitie.objects.get(afstand='18')
+        comp_25 = Competitie.objects.get(afstand='25')
+
         # klassegrenzen vaststellen
-        self.client.post(self.url_klassegrenzen_vaststellen_18)
-        self.client.post(self.url_klassegrenzen_vaststellen_25)
+        self.client.post(self.url_klassegrenzen_vaststellen % comp_18.pk)
+        self.client.post(self.url_klassegrenzen_vaststellen % comp_25.pk)
 
         # competitieklassen vaststellen
 
@@ -195,9 +198,8 @@ class TestCompetitieCliOudeSiteOvernemen(E2EHelpers, TestCase):
     def setUp(self):
         """ initialisatie van de test case """
 
-        self.url_aanmaken = '/competitie/aanmaken/'
-        self.url_klassegrenzen_vaststellen_18 = '/competitie/klassegrenzen/vaststellen/18/'
-        self.url_klassegrenzen_vaststellen_25 = '/competitie/klassegrenzen/vaststellen/25/'
+        self.url_aanmaken = '/bondscompetities/aanmaken/'
+        self.url_klassegrenzen_vaststellen = '/bondscompetities/%s/klassegrenzen/vaststellen/'
 
         # maak een BB aan, nodig om de competitie defaults in te zien
         self.account_bb = self.e2e_create_account('bb', 'bb@test.com', 'BB', accepteer_vhpg=True)

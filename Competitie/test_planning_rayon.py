@@ -128,17 +128,18 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         # creëer een competitie met deelcompetities
         competitie_aanmaken(jaar=2019)
 
+        self.comp_18 = Competitie.objects.get(afstand='18')
+        self.comp_25 = Competitie.objects.get(afstand='25')
+
         # klassengrenzen vaststellen om de competitie voorbij fase A1 te krijgen
         self.e2e_login_and_pass_otp(self.account_bb)
         self.e2e_wisselnaarrol_bb()
-        self.url_klassegrenzen_vaststellen_18 = '/competitie/klassegrenzen/vaststellen/18/'
+        self.url_klassegrenzen_vaststellen_18 = '/bondscompetities/%s/klassegrenzen/vaststellen/' % self.comp_18.pk
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_klassegrenzen_vaststellen_18)
         self.assert_is_redirect_not_plein(resp)     # check success
         self.client.logout()
 
-        self.comp_18 = Competitie.objects.get(afstand='18')
-        self.comp_25 = Competitie.objects.get(afstand='25')
         self.deelcomp_bond_18 = DeelCompetitie.objects.filter(laag='BK', competitie=self.comp_18)[0]
         self.deelcomp_rayon1_18 = DeelCompetitie.objects.filter(laag='RK', competitie=self.comp_18, nhb_rayon=self.rayon_1)[0]
         self.deelcomp_rayon2_18 = DeelCompetitie.objects.filter(laag='RK', competitie=self.comp_18, nhb_rayon=self.rayon_2)[0]
@@ -184,14 +185,14 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         ver.save()
         self.ver_1100 = ver
 
-        self.url_planning_rayon = '/competitie/planning/rk/%s/'                              # deelcomp_pk
-        self.url_wijzig_rk_wedstrijd = '/competitie/planning/rk/wedstrijd/wijzig/%s/'        # wedstrijd_pk
-        self.url_verwijder_rk_wedstrijd = '/competitie/planning/rk/wedstrijd/verwijder/%s/'  # wedstrijd_pk
-        self.url_doorzetten_rk = '/competitie/planning/doorzetten/%s/rk/'                    # comp_pk
-        self.url_lijst_rk = '/competitie/lijst-rayonkampioenschappen/%s/'                    # deelcomp_pk
-        self.url_lijst_bestand = '/competitie/lijst-rayonkampioenschappen/%s/bestand/'       # deelcomp_pk
-        self.url_wijzig_status = '/competitie/lijst-rayonkampioenschappen/wijzig-status-rk-deelnemer/%s/'  # deelnemer_pk
-        self.url_wijzig_limiet = '/competitie/planning/rk/%s/limieten/'                      # deelcomp_pk
+        self.url_planning_rayon = '/bondscompetities/planning/rk/%s/'                              # deelcomp_pk
+        self.url_wijzig_rk_wedstrijd = '/bondscompetities/planning/rk/wedstrijd/wijzig/%s/'        # wedstrijd_pk
+        self.url_verwijder_rk_wedstrijd = '/bondscompetities/planning/rk/wedstrijd/verwijder/%s/'  # wedstrijd_pk
+        self.url_doorzetten_rk = '/bondscompetities/%s/doorzetten/rk/'                             # comp_pk
+        self.url_lijst_rk = '/bondscompetities/lijst-rayonkampioenschappen/%s/'                    # deelcomp_pk
+        self.url_lijst_bestand = '/bondscompetities/lijst-rayonkampioenschappen/%s/bestand/'       # deelcomp_pk
+        self.url_wijzig_status = '/bondscompetities/lijst-rayonkampioenschappen/wijzig-status-rk-deelnemer/%s/'  # deelnemer_pk
+        self.url_wijzig_limiet = '/bondscompetities/planning/rk/%s/limieten/'                      # deelcomp_pk
 
     def competitie_sluit_alle_regiocompetities(self, comp):
         # deze functie sluit alle regiocompetities af zodat de competitie in fase G komt
@@ -240,7 +241,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
 
         # maak een RK wedstrijd aan in een ander rayon
         url = self.url_planning_rayon % self.deelcomp_rayon2_18.pk
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(23):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         # controleer dat er geen 'ronde toevoegen' knop is
@@ -248,7 +249,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         self.assertNotIn(url, urls)     # url wordt gebruikt voor POST
 
         # coverage: nog een keer ophalen, want dan is het plan er al
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(21):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
 
@@ -265,7 +266,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         wedstrijd_r1_pk = DeelCompetitie.objects.get(pk=self.deelcomp_rayon1_18.pk).plan.wedstrijden.all()[0].pk
         url = self.url_wijzig_rk_wedstrijd % wedstrijd_r1_pk
 
-        with self.assert_max_queries(25):
+        with self.assert_max_queries(27):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
 
@@ -301,7 +302,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         self.assert_is_redirect_not_plein(resp)     # check success
 
         # haal het overzicht op met deze nieuwe wedstrijden
-        with self.assert_max_queries(21):
+        with self.assert_max_queries(24):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
@@ -310,14 +311,14 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         # haal de wedstrijd op
         wedstrijd_r1 = DeelCompetitie.objects.get(pk=self.deelcomp_rayon1_18.pk).plan.wedstrijden.all()[0]
         url_w = self.url_wijzig_rk_wedstrijd % wedstrijd_r1.pk
-        with self.assert_max_queries(30):
+        with self.assert_max_queries(32):
             resp = self.client.get(url_w)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/wijzig-wedstrijd-rk.dtl', 'plein/site_layout.dtl'))
 
         # nog een keer ophalen, want dan zijn wedstrijd.vereniging en wedstrijd.locatie al gezet
-        with self.assert_max_queries(24):
+        with self.assert_max_queries(28):
             resp = self.client.get(url_w)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
 
@@ -350,7 +351,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
 
         # doet een 'get' op de planning zodat er een plan aangemaakt wordt
         url = self.url_planning_rayon % self.deelcomp_rayon1_18.pk
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(23):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.deelcomp_rayon1_18 = DeelCompetitie.objects.get(pk=self.deelcomp_rayon1_18.pk)
@@ -469,7 +470,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         ver.regio = self.regio_105  # verhuis naar rayon 2
         ver.save()
 
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(24):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
 

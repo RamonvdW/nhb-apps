@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -23,6 +23,8 @@ SESSIONVAR_ROL_HUIDIGE = 'gebruiker_rol_huidige'
 SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK = 'gebruiker_rol_functie_pk'
 SESSIONVAR_ROL_BESCHRIJVING = 'gebruiker_rol_beschrijving'
 
+
+# TODO: verwijder ROL_NONE (nodig voor accounts die geen nhblid zijn)
 
 class Rollen(enum.IntEnum):
     """ definitie van de rollen met codes
@@ -195,7 +197,7 @@ def rol_zet_sessionvars(account, request):
             while len(te_doorzoeken) > 0:
                 next_doorzoeken = list()
                 for child_tup, parent_tup in te_doorzoeken:
-                    # print("\nexpanding: child=%s, parent=%s" % (repr(child_tup), (parent_tup)))
+                    # print("\n" + "expanding: child=%s, parent=%s" % (repr(child_tup), (parent_tup)))
                     nwe_functies = rol_bepaal_hulp_rechten(functie_cache, nhbver_cache, *child_tup)
 
                     # voorkom dupes (zoals expliciete koppeling en erven van een rol)

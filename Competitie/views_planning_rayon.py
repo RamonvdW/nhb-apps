@@ -19,6 +19,7 @@ from .models import (LAAG_REGIO, LAAG_RK, LAAG_BK, INSCHRIJF_METHODE_1, DeelComp
                      CompetitieKlasse, DeelcompetitieKlasseLimiet, DeelcompetitieRonde,
                      KampioenschapSchutterBoog, KampioenschapMutatie,
                      MUTATIE_CUT, MUTATIE_AFMELDEN, MUTATIE_AANMELDEN, DEELNAME_JA, DEELNAME_NEE)
+from .menu import menu_dynamics_competitie
 from types import SimpleNamespace
 import datetime
 import time
@@ -189,7 +190,7 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
             # for
         # for
 
-        menu_dynamics(self.request, context, actief='competitie')
+        menu_dynamics_competitie(self.request, context, comp_pk=deelcomp_rk.competitie.pk)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -392,7 +393,7 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
         context['url_verwijderen'] = reverse('Competitie:rayon-verwijder-wedstrijd',
                                              kwargs={'wedstrijd_pk': wedstrijd.pk})
 
-        menu_dynamics(self.request, context, actief='competitie')
+        menu_dynamics_competitie(self.request, context, comp_pk=deelcomp_rk.competitie.pk)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -574,7 +575,7 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
         if not deelcomp_rk.heeft_deelnemerslijst:
             # situatie 1)
             context['url_uitslagen'] = reverse('Competitie:uitslagen-rayon-n',
-                                               kwargs={'afstand': deelcomp_rk.competitie.afstand,
+                                               kwargs={'comp_pk': deelcomp_rk.competitie.pk,
                                                        'comp_boog': 'r',
                                                        'rayon_nr': deelcomp_rk.nhb_rayon.rayon_nr})
             deelnemers = list()
@@ -654,7 +655,7 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
 
         context['wiki_rk_schutters'] = settings.WIKI_URL + '/' + settings.HANDLEIDING_RK_SELECTIE
 
-        menu_dynamics(self.request, context, actief='competitie')
+        menu_dynamics_competitie(self.request, context, comp_pk=deelcomp_rk.competitie.pk)
         return context
 
 
@@ -801,7 +802,7 @@ class WijzigStatusRkSchutterView(UserPassesTestMixin, TemplateView):
         if rol_nu == Rollen.ROL_RKO:
             context['url_terug'] = reverse('Competitie:lijst-rk',
                                            kwargs={'deelcomp_pk': deelnemer.deelcompetitie.pk})
-            menu_dynamics(self.request, context, actief='competitie')
+            menu_dynamics_competitie(self.request, context, comp_pk=deelnemer.deelcompetitie.competitie.pk)
         else:
             # HWL
             context['url_terug'] = reverse('Vereniging:lijst-rk',
@@ -936,11 +937,11 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
         context['url_opslaan'] = reverse('Competitie:rayon-limieten',
                                          kwargs={'deelcomp_pk': deelcomp_rk.pk})
 
-        context['url_terug'] = reverse('Competitie:overzicht')
+        context['url_terug'] = reverse('Competitie:kies')
 
         context['wiki_rk_schutters'] = settings.WIKI_URL + '/' + settings.HANDLEIDING_RK_SELECTIE
 
-        menu_dynamics(self.request, context, actief='competitie')
+        menu_dynamics_competitie(self.request, context, comp_pk=deelcomp_rk.competitie.pk)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -1045,7 +1046,7 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
                     mutatie = KampioenschapMutatie.objects.get(pk=mutatie.pk)
                 # while
 
-        return HttpResponseRedirect(reverse('Competitie:overzicht'))
+        return HttpResponseRedirect(reverse('Competitie:kies'))
 
 
 class VerwijderWedstrijdView(UserPassesTestMixin, View):
@@ -1098,4 +1099,3 @@ class VerwijderWedstrijdView(UserPassesTestMixin, View):
 
 
 # end of file
-

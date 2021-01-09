@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020 Ramon van der Winkel.
+                Copyright (c) 2020-2021 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -15,11 +15,6 @@
     <h4>Uitslagen rayonkampioenschappen</h4>
 
     <p>Deze pagina toont de tussenstand/eindstand van de rayonkampioenschappen.</p>
-
-    <p>
-        <a class="btn-nhb-blauw" href="{% url 'Competitie:uitslagen' %}">
-            <i class="material-icons-round left">arrow_upward</i>Terug</a>
-    </p>
 
     <p>Kies een wedstrijdboog:</p>
 
@@ -109,3 +104,6 @@
 
 {% endblock %}
 
+{% block menu-competities %}
+    {% include 'competitie/menu.dtl' %}
+{% endblock %}

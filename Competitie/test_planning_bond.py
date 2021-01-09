@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -113,16 +113,16 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         # creëer een competitie met deelcompetities
         competitie_aanmaken(jaar=2019)
 
+        self.comp_18 = Competitie.objects.get(afstand='18')
+        self.comp_25 = Competitie.objects.get(afstand='25')
+
         # klassengrenzen vaststellen om de competitie voorbij fase A1 te krijgen
         self.e2e_login_and_pass_otp(self.account_bb)
         self.e2e_wisselnaarrol_bb()
-        self.url_klassegrenzen_vaststellen_18 = '/competitie/klassegrenzen/vaststellen/18/'
+        self.url_klassegrenzen_vaststellen_18 = '/bondscompetities/%s/klassegrenzen/vaststellen/' % self.comp_18.pk
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_klassegrenzen_vaststellen_18)
         self.assert_is_redirect_not_plein(resp)  # check for success
-
-        self.comp_18 = Competitie.objects.get(afstand='18')
-        self.comp_25 = Competitie.objects.get(afstand='25')
 
         self.deelcomp_bond_18 = DeelCompetitie.objects.filter(competitie=self.comp_18,
                                                               laag=LAAG_BK)[0]
@@ -147,8 +147,8 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         # secretaris kan nog niet ingevuld worden
         ver.save()
 
-        self.url_doorzetten_rk = '/competitie/planning/doorzetten/%s/rk/'     # comp_pk
-        self.url_doorzetten_bk = '/competitie/planning/doorzetten/%s/bk/'     # comp_pk
+        self.url_doorzetten_rk = '/bondscompetities/%s/doorzetten/rk/'     # comp_pk
+        self.url_doorzetten_bk = '/bondscompetities/%s/doorzetten/bk/'     # comp_pk
 
     def _regioschutters_inschrijven(self):
 
@@ -232,7 +232,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
 
         with self.assert_max_queries(40):
             resp = self.client.post(url)
-        self.assert_is_redirect(resp, '/competitie/')       # redirect = Success
+        self.assert_is_redirect(resp, '/bondscompetities/')       # redirect = Success
 
     def test_doorzetten_bk(self):
         self.e2e_login_and_pass_otp(self.account_bb)
@@ -271,7 +271,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         # nu echt doorzetten
         with self.assert_max_queries(20):
             resp = self.client.post(url)
-        self.assert_is_redirect(resp, '/competitie/')       # redirect = Success
+        self.assert_is_redirect(resp, '/bondscompetities/')       # redirect = Success
 
     def test_doorzetten_bad(self):
         # moet BKO zijn

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -24,6 +24,7 @@ from Schutter.models import SchutterBoog
 from Score.models import Score, ScoreHist
 from .models import (AG_NUL, AG_LAAGSTE_NIET_NUL,
                      Competitie, competitie_aanmaken, CompetitieKlasse)
+from .menu import menu_dynamics_competitie
 import datetime
 
 
@@ -124,12 +125,12 @@ class CompetitieAanmakenView(UserPassesTestMixin, TemplateView):
         jaar = models_bepaal_startjaar_nieuwe_competitie()
 
         # beveiliging tegen dubbel aanmaken
-        if Competitie.objects.filter(is_afgesloten=False).order_by('begin_jaar', 'afstand').count() == 0:
+        if Competitie.objects.filter(begin_jaar=jaar).count() == 0:
             seizoen = "%s/%s" % (jaar, jaar+1)
             schrijf_in_logboek(request.user, 'Competitie', 'Aanmaken competities %s' % seizoen)
             competitie_aanmaken(jaar)
 
-        return redirect('Competitie:overzicht')
+        return redirect('Competitie:kies')
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -138,10 +139,10 @@ class CompetitieAanmakenView(UserPassesTestMixin, TemplateView):
         context['seizoen'] = "%s/%s" % (jaar, jaar+1)
 
         # beveiliging tegen dubbel aanmaken
-        if Competitie.objects.filter(is_afgesloten=False).order_by('begin_jaar', 'afstand').count() > 0:
+        if Competitie.objects.filter(begin_jaar=jaar).count() > 0:
             context['bestaat_al'] = True
 
-        menu_dynamics(self.request, context, actief='competitie')
+        menu_dynamics_competitie(self.request, context)
         return context
 
 
@@ -319,14 +320,14 @@ class AGVaststellenView(UserPassesTestMixin, TemplateView):
             if len(bulk_scorehist) > 0:
                 ScoreHist.objects.bulk_create(bulk_scorehist)
 
-        return redirect('Competitie:overzicht')
+        return redirect('Competitie:kies')
 
 
 class KlassegrenzenVaststellenView(UserPassesTestMixin, TemplateView):
 
     """ deze view laat de klassengrenzen voor de volgende competitie zien,
         aan de hand van de al vastgestelde aanvangsgemiddelden
-        De BKO kan deze bevestigen, waarna ze aan de competitie toegevoegd worden
+        De BB kan deze bevestigen, waarna ze aan de competitie toegevoegd worden
     """
 
     # class variables shared by all instances
@@ -382,10 +383,10 @@ class KlassegrenzenVaststellenView(UserPassesTestMixin, TemplateView):
         # for
         return targets2
 
-    def _get_queryset(self, afstand):
+    def _get_queryset(self, comp):
         # bepaal het jaar waarin de wedstrijdleeftijd bepaald moet worden
-        # dit is het huidige jaar + 1
-        self.wedstrijdjaar = jaar = 1 + models_bepaal_startjaar_nieuwe_competitie()
+        # dat is het tweede jaar van de competitie, waarin de BK gehouden wordt
+        jaar = comp.begin_jaar + 1
 
         # eenmalig de wedstrijdleeftijd van elke nhblid berekenen
         schutternr2age = dict()     # [ nhb_nr ] = age
@@ -402,7 +403,7 @@ class KlassegrenzenVaststellenView(UserPassesTestMixin, TemplateView):
                                                                 'schutterboog__boogtype',
                                                                 'schutterboog__nhblid')
                                                 .filter(is_ag=True,
-                                                        afstand_meter=afstand,
+                                                        afstand_meter=comp.afstand,
                                                         schutterboog__boogtype=boogtype))
         # for
 
@@ -486,62 +487,55 @@ class KlassegrenzenVaststellenView(UserPassesTestMixin, TemplateView):
         """
         context = super().get_context_data(**kwargs)
 
-        # stukje input beveiliging: begrens tot 2 tekens getal (18/25)
-        afstand_str = kwargs['afstand'][:2]     # afkappen geeft veiligheid
         try:
-            afstand = int(afstand_str)
-        except ValueError:
+            comp_pk = int(kwargs['comp_pk'][:6])      # afkappen geeft beveiliging
+            comp = Competitie.objects.get(pk=comp_pk)
+        except (ValueError, Competitie.DoesNotExist):
             raise Resolver404()
 
-        objs = Competitie.objects.filter(afstand=afstand_str, is_afgesloten=False)
-        if objs.count() == 0:
-            # onverwachts here
-            raise Resolver404()
-        obj = objs[0]
+        context['comp'] = comp
+        comp.zet_fase()
 
-        if obj.competitieklasse_set.count() != 0:
-            context['al_vastgesteld'] = True
+        if comp.fase != 'A1':
+            context['al_vastgesteld'] = True            # TODO: gebruik comp.fase
         else:
-            context['object_list'] = self._get_queryset(afstand)
-            context['wedstrijdjaar'] = self.wedstrijdjaar
+            context['object_list'] = self._get_queryset(comp)
+            context['wedstrijdjaar'] = comp.begin_jaar + 1
 
-        context['comp_str'] = obj.beschrijving
-        context['afstand'] = afstand_str
-
-        menu_dynamics(self.request, context, actief='competitie')
+        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
         return render(request, self.template_name, context)
 
     def post(self, request, *args, **kwargs):
         """ deze functie wordt aangeroepen als een POST request ontvangen is.
             --> de beheerder wil deze klassegrenzen vaststellen
         """
-        afstand_str = kwargs['afstand'][:2]     # afkappen geeft veiligheid
+
         try:
-            afstand = int(afstand_str)
-        except ValueError:
+            comp_pk = int(kwargs['comp_pk'][:6])      # afkappen geeft beveiliging
+            comp = Competitie.objects.get(pk=comp_pk)
+        except (ValueError, Competitie.DoesNotExist):
             raise Resolver404()
 
-        objs = Competitie.objects.filter(afstand=afstand_str, is_afgesloten=False)
-        if objs.count() > 0:
-            comp = objs[0]
+        comp.zet_fase()
+        if comp.fase == 'A1':
 
-            if comp.competitieklasse_set.count() != 0:
-                # onverwachts hier
-                raise Resolver404()
+            bulk = list()
 
             # haal dezelfde data op als voor de GET request
-            bulk = list()
-            for obj in self._get_queryset(afstand):
+            for obj in self._get_queryset(comp):
                 compkl = CompetitieKlasse(competitie=comp,
                                           indiv=obj['wedstrkl_obj'],
                                           min_ag=obj['ag'])
                 bulk.append(compkl)
             # for
+
             CompetitieKlasse.objects.bulk_create(bulk)
 
-            schrijf_in_logboek(request.user, 'Competitie', 'Klassegrenzen bevestigd voor %s' % comp.beschrijving)
+            schrijf_in_logboek(request.user,
+                               'Competitie',
+                               'Klassegrenzen vastgesteld voor %s' % comp.beschrijving)
 
-        return redirect('Competitie:overzicht')
+        return redirect('Competitie:kies')
 
 
 class WijzigDatumsView(UserPassesTestMixin, TemplateView):
@@ -566,24 +560,26 @@ class WijzigDatumsView(UserPassesTestMixin, TemplateView):
 
         try:
             comp_pk = int(kwargs['comp_pk'][:6])      # afkappen geeft beveiliging
-            competitie = Competitie.objects.get(pk=comp_pk)
+            comp = Competitie.objects.get(pk=comp_pk)
         except (ValueError, Competitie.DoesNotExist):
             raise Resolver404()
 
-        context['competitie'] = competitie
-        competitie.datum1 = competitie.begin_aanmeldingen
-        competitie.datum2 = competitie.einde_aanmeldingen
-        competitie.datum3 = competitie.einde_teamvorming
-        competitie.datum4 = competitie.eerste_wedstrijd
-        competitie.datum5 = competitie.laatst_mogelijke_wedstrijd
-        competitie.datum6 = competitie.rk_eerste_wedstrijd
-        competitie.datum7 = competitie.rk_laatste_wedstrijd
-        competitie.datum8 = competitie.bk_eerste_wedstrijd
-        competitie.datum9 = competitie.bk_laatste_wedstrijd
+        context['comp'] = comp
 
-        context['wijzig_url'] = reverse('Competitie:wijzig-datums', kwargs={'comp_pk': competitie.pk})
+        context['wijzig_url'] = reverse('Competitie:wijzig-datums',
+                                        kwargs={'comp_pk': comp.pk})
 
-        menu_dynamics(self.request, context, actief='competitie')
+        comp.datum1 = comp.begin_aanmeldingen
+        comp.datum2 = comp.einde_aanmeldingen
+        comp.datum3 = comp.einde_teamvorming
+        comp.datum4 = comp.eerste_wedstrijd
+        comp.datum5 = comp.laatst_mogelijke_wedstrijd
+        comp.datum6 = comp.rk_eerste_wedstrijd
+        comp.datum7 = comp.rk_laatste_wedstrijd
+        comp.datum8 = comp.bk_eerste_wedstrijd
+        comp.datum9 = comp.bk_laatste_wedstrijd
+
+        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -592,7 +588,7 @@ class WijzigDatumsView(UserPassesTestMixin, TemplateView):
         """
         try:
             comp_pk = int(kwargs['comp_pk'][:6])      # afkappen geeft beveiliging
-            competitie = Competitie.objects.get(pk=comp_pk)
+            comp = Competitie.objects.get(pk=comp_pk)
         except (ValueError, Competitie.DoesNotExist):
             raise Resolver404()
 
@@ -612,17 +608,18 @@ class WijzigDatumsView(UserPassesTestMixin, TemplateView):
         # for
 
         datums.insert(0, None)      # dummy
-        competitie.begin_aanmeldingen = datums[1]
-        competitie.einde_aanmeldingen = datums[2]
-        competitie.einde_teamvorming = datums[3]
-        competitie.eerste_wedstrijd = datums[4]
-        competitie.laatst_mogelijke_wedstrijd = datums[5]
-        competitie.rk_eerste_wedstrijd = datums[6]
-        competitie.rk_laatste_wedstrijd = datums[7]
-        competitie.bk_eerste_wedstrijd = datums[8]
-        competitie.bk_laatste_wedstrijd = datums[9]
-        competitie.save()
+        comp.begin_aanmeldingen = datums[1]
+        comp.einde_aanmeldingen = datums[2]
+        comp.einde_teamvorming = datums[3]
+        comp.eerste_wedstrijd = datums[4]
+        comp.laatst_mogelijke_wedstrijd = datums[5]
+        comp.rk_eerste_wedstrijd = datums[6]
+        comp.rk_laatste_wedstrijd = datums[7]
+        comp.bk_eerste_wedstrijd = datums[8]
+        comp.bk_laatste_wedstrijd = datums[9]
+        comp.save()
 
-        return HttpResponseRedirect(reverse('Competitie:overzicht'))
+        return HttpResponseRedirect(reverse('Competitie:overzicht',
+                                            kwargs={'comp_pk': comp.pk}))
 
 # end of file

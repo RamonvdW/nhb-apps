@@ -45,6 +45,12 @@
         </div>
     </div>
 
+    <p>&nbsp;</p>
+    <p>
+        <span>Lees hier hoe we omgaan met jouw privacy: </span>
+        <a href="{% url 'Plein:privacy' %}" class="btn-nhb-blauw">
+            <i class="material-icons-round left">security</i>Privacyverklaring</a>
+    </p>
 
     <span>&nbsp;</span>
     <h5>Voorkeuren</h5>
@@ -360,12 +366,5 @@
         </tr>
 
     </table>
-
-    <p>&nbsp;</p>
-    <h5>Binnenkort meer</h5>
-    <p>Deze website is nog in ontwikkeling. We proberen regelmatig nieuwe informatie beschikbaar te maken.</p>
-    <p>Gebruik de smileys om feedback te geven en voorstellen in te dienen.</p>
-
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="schutter-profiel" %}
 
 {% endblock %}

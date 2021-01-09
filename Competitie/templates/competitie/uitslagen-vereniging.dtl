@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020 Ramon van der Winkel.
+                Copyright (c) 2020-2021 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -19,21 +19,8 @@
             <i class="material-icons-round left">arrow_upward</i>Terug</a>
     </p>
 
-    <p>Deze pagina toont de tussenstand/eindstand van de regiocompetities binnen de vereniging.</p>
+    <p>Deze pagina toont de tussenstand/eindstand van de regiocompetities binnen een vereniging.</p>
 
-    <p>Kies een wedstrijdboog:</p>
-
-    <div class="white shrink-wrap-5">
-        {% for boog in boog_filters %}
-            {% if boog.zoom_url %}
-                <a class="margin-5 btn-nhb-blauw btn-small" href="{{ boog.zoom_url }}">{{ boog.beschrijving }}</a>
-            {% else %}
-                <a class="margin-5 btn-nhb-blauw btn-small disabled" href="#">{{ boog.beschrijving }}</a>
-            {% endif %}
-        {% endfor %}
-    </div>
-
-    <p>&nbsp;</p>
     <div class="row">
         <!-- toon gegevens van de competitie, regio en vereniging in een blauwe box -->
         <div class="col s12 m10 l8 xl6 offset-m1 offset-l2 offset-xl3">
@@ -62,9 +49,19 @@
         </div>
     </div>
 
-    <p>&nbsp;</p>
+    <p>Kies een wedstrijdboog:</p>
 
-    <p>{{ aantal_deelnemers }} sporters van jouw vereniging doen met dit type boog mee aan de competitie.</p>
+    <div class="white shrink-wrap-5">
+        {% for boog in boog_filters %}
+            {% if boog.zoom_url %}
+                <a class="margin-5 btn-nhb-blauw btn-small" href="{{ boog.zoom_url }}">{{ boog.beschrijving }}</a>
+            {% else %}
+                <a class="margin-5 btn-nhb-blauw btn-small disabled" href="#">{{ boog.beschrijving }}</a>
+            {% endif %}
+        {% endfor %}
+    </div>
+
+    <p>{{ aantal_deelnemers }} sporters van deze vereniging doen met dit type boog mee aan de competitie.</p>
 
     <table class="white">
         {% for obj in deelnemers %}
@@ -99,4 +96,8 @@
         {% endfor %}
     </table>
 
+{% endblock %}
+
+{% block menu-competities %}
+    {% include 'competitie/menu.dtl' %}
 {% endblock %}
