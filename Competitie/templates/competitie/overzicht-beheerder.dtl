@@ -96,7 +96,7 @@
 
         <!-- toon inschrijvingen regiocompetitie -->
         {% if comp.url_inschrijvingen %}
-            {% include 'plein/card.dtl' with title=comp.titel_inschrijvingen text="Toon lijst met sporters ingeschreven voor de regiocompetitie van de "|add:comp.beschrijving|add:"." icon="receipt" url=comp.url_inschrijvingen %}
+            {% include 'plein/card.dtl' with title="Inschrijvingen" text="Toon lijst met sporters ingeschreven voor de regiocompetitie van de "|add:comp.beschrijving|add:"." icon="receipt" url=comp.url_inschrijvingen %}
         {% endif %}
 
         <!-- afsluiten deelcomp -->

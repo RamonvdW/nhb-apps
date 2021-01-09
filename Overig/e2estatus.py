@@ -13,7 +13,7 @@ included_templates = (
     'plein/site_layout.dtl',
     'plein/menu-1-head.dtl',
     'plein/menu-2-competities.dtl',
-    'plein/menu-3-dtl.dtl',
+    'plein/menu-3.dtl',
     'plein/menu-9-tail.dtl',
     'plein/card.dtl',
     'plein/card_logo.dtl',

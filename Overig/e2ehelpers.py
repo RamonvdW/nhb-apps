@@ -439,6 +439,7 @@ class E2EHelpers(object):
         html = self._remove_debugtoolbar(html)
 
         dtl = self._get_useful_template_name(response)
+        # print('useful template names:', dtl)
         if dtl not in validated_templates:
             validated_templates.append(dtl)
 
