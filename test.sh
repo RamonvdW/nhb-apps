@@ -53,7 +53,7 @@ python3 -m coverage run --append --branch \
 RES=$?
 [ $RES -eq 3 ] && ABORTED=1
 #echo "[DEBUG] Coverage run result: $RES"
-if [ $RES -eq 0 ] #-a $# -eq 0 ]
+if [ $RES -eq 0 -a $# -eq 0 ]
 then
     # add coverage with debug and wiki enabled
     echo "[INFO] Performing run with debug + wiki run"

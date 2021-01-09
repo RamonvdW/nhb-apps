@@ -4,13 +4,13 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.views.generic import TemplateView
+from django.views.generic import ListView
 from Plein.menu import menu_dynamics
 
 TEMPLATE_KALENDER_OVERZICHT = 'kalender/overzicht.dtl'
 
 
-class KalenderOverzichtView(TemplateView):
+class KalenderOverzichtView(ListView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_KALENDER_OVERZICHT
