@@ -240,11 +240,15 @@ class CompetitieOverzichtView(View):
         context['toon_uitslagen'] = (comp.fase >= 'B')      # inschrijving is open
 
         context['url_regio'] = reverse('Competitie:uitslagen-regio',
-                                       kwargs={'comp_pk': comp.pk, 'comp_boog': 'r'})
+                                       kwargs={'comp_pk': comp.pk,
+                                               'zes_scores': 'alle',
+                                               'comp_boog': 'r'})
         context['url_rayon'] = reverse('Competitie:uitslagen-rayon',
-                                       kwargs={'comp_pk': comp.pk, 'comp_boog': 'r'})
+                                       kwargs={'comp_pk': comp.pk,
+                                               'comp_boog': 'r'})
         context['url_bond'] = reverse('Competitie:uitslagen-bond',
-                                      kwargs={'comp_pk': comp.pk, 'comp_boog': 'r'})
+                                      kwargs={'comp_pk': comp.pk,
+                                              'comp_boog': 'r'})
 
         # TODO: tussenstand --> eindstand
         context['text_regio'] = 'Tussenstand voor de regiocompetitie'

@@ -176,6 +176,7 @@ class UitslagenVerenigingView(TemplateView):
         regio_nr = ver.regio.regio_nr
         context['url_terug'] = reverse('Competitie:uitslagen-regio-n',
                                        kwargs={'comp_pk': comp.pk,
+                                               'zes_scores': 'alle',
                                                'comp_boog': comp_boog,
                                                'regio_nr': regio_nr})
 
@@ -232,7 +233,7 @@ class UitslagenRegioView(TemplateView):
 
         return regio_nr
 
-    def _maak_filter_knoppen(self, context, comp, gekozen_regio_nr, comp_boog):
+    def _maak_filter_knoppen(self, context, comp, gekozen_regio_nr, comp_boog, zes_scores):
         """ filter knoppen per regio, gegroepeerd per rayon en per competitie boog type """
 
         # boogtype files
@@ -249,6 +250,7 @@ class UitslagenRegioView(TemplateView):
             else:
                 boogtype.zoom_url = reverse(self.url_name,
                                             kwargs={'comp_pk': comp.pk,
+                                                    'zes_scores': zes_scores,
                                                     'comp_boog': boogtype.afkorting.lower(),
                                                     'regio_nr': gekozen_regio_nr})
         # for
@@ -272,6 +274,7 @@ class UitslagenRegioView(TemplateView):
                 if regio.regio_nr != gekozen_regio_nr:
                     regio.zoom_url = reverse(self.url_name,
                                              kwargs={'comp_pk': comp.pk,
+                                                     'zes_scores': zes_scores,
                                                      'comp_boog': comp_boog,
                                                      'regio_nr': regio.regio_nr})
                 else:
@@ -296,8 +299,21 @@ class UitslagenRegioView(TemplateView):
 
             context['ver_filters'] = vers
 
+        context['zes_scores_checked'] = (zes_scores == 'zes')
+        if zes_scores == 'alle':
+            zes_scores_next = 'zes'
+        else:
+            zes_scores_next = 'alle'
+        context['zes_scores_next'] = reverse(self.url_name,
+                                             kwargs={'comp_pk': comp.pk,
+                                                     'zes_scores': zes_scores_next,
+                                                     'comp_boog': comp_boog,
+                                                     'regio_nr': gekozen_regio_nr})
+
+        # switch naar alternatieve uitslag
         context['url_switch'] = reverse(self.url_switch,
                                         kwargs={'comp_pk': comp.pk,
+                                                'zes_scores': zes_scores,
                                                 'comp_boog': comp_boog,
                                                 'regio_nr': gekozen_regio_nr})
 
@@ -315,6 +331,10 @@ class UitslagenRegioView(TemplateView):
 
         comp.zet_fase()
         context['comp'] = comp
+
+        zes_scores = kwargs['zes_scores']
+        if zes_scores not in ('alle', 'zes'):
+            zes_scores = 'alle'
 
         comp_boog = kwargs['comp_boog'][:2]     # afkappen voor veiligheid
 
@@ -345,7 +365,7 @@ class UitslagenRegioView(TemplateView):
 
         context['deelcomp'] = deelcomp
 
-        self._maak_filter_knoppen(context, comp, regio_nr, comp_boog)
+        self._maak_filter_knoppen(context, comp, regio_nr, comp_boog, zes_scores)
 
         boogtype = context['comp_boog']
         if not boogtype:
@@ -363,12 +383,24 @@ class UitslagenRegioView(TemplateView):
                       .filter(klasse__indiv__boogtype=boogtype)
                       .order_by('klasse__indiv__volgorde', self.order_gemiddelde))
 
+        if zes_scores == 'zes':
+            deelnemers = deelnemers.filter(aantal_scores__gte=6)
+
+        toon_geslacht = False
         klasse = -1
         rank = 0
         for deelnemer in deelnemers:
             deelnemer.break_klasse = (klasse != deelnemer.klasse.indiv.volgorde)
             if deelnemer.break_klasse:
                 deelnemer.klasse_str = deelnemer.klasse.indiv.beschrijving
+                toon_geslacht = False
+                if deelnemer.klasse.indiv.niet_voor_rk_bk:
+                    # dit is een aspiranten klassen of een klasse onbekend
+                    for lkl in deelnemer.klasse.indiv.leeftijdsklassen.all():
+                        if lkl.is_aspirant_klasse():
+                            toon_geslacht = True
+                            break
+                    # for
                 rank = 0
             klasse = deelnemer.klasse.indiv.volgorde
 
@@ -376,6 +408,8 @@ class UitslagenRegioView(TemplateView):
             lid = deelnemer.schutterboog.nhblid
             deelnemer.rank = rank
             deelnemer.naam_str = "[%s] %s" % (lid.nhb_nr, lid.volledige_naam())
+            if toon_geslacht:
+                deelnemer.naam_str += " (" + lid.geslacht + ")"
             deelnemer.ver_str = str(deelnemer.bij_vereniging)
         # for
 

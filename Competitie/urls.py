@@ -195,19 +195,19 @@ urlpatterns = [
          views_uitslagen.UitslagenVerenigingView.as_view(),
          name='uitslagen-vereniging'),
 
-    path('<comp_pk>/uitslagen/<comp_boog>/regio/<regio_nr>/',
+    path('<comp_pk>/uitslagen/<comp_boog>/<zes_scores>/regio/<regio_nr>/',
          views_uitslagen.UitslagenRegioView.as_view(),
          name='uitslagen-regio-n'),
 
-    path('<comp_pk>/uitslagen/<comp_boog>/regio/',
+    path('<comp_pk>/uitslagen/<comp_boog>/<zes_scores>/regio/',
          views_uitslagen.UitslagenRegioView.as_view(),
          name='uitslagen-regio'),
 
-    path('<comp_pk>/uitslagen/<comp_boog>/regio-alt/<regio_nr>/',
+    path('<comp_pk>/uitslagen/<comp_boog>/<zes_scores>/regio-alt/<regio_nr>/',
          views_uitslagen.UitslagenRegioAltView.as_view(),
          name='uitslagen-regio-n-alt'),
 
-    path('<comp_pk>/uitslagen/<comp_boog>/regio-alt/',
+    path('<comp_pk>/uitslagen/<comp_boog>/<zes_scores>/regio-alt/',
          views_uitslagen.UitslagenRegioAltView.as_view(),
          name='uitslagen-regio-alt'),
 

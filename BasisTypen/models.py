@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -51,6 +51,9 @@ class LeeftijdsKlasse(models.Model):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
         return "%s %s" % (self.afkorting,
                           self.beschrijving)
+
+    def is_aspirant_klasse(self):
+        return self.max_wedstrijdleeftijd <= MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
 
     class Meta:
         """ meta data voor de admin interface """
