@@ -39,6 +39,7 @@ cp $(find "$WIKI" -type f -name \*png) "$STATIC"
 COUNT=$(ls -1 "$STATIC" | wc -l)
 echo "[INFO]   $COUNT bestanden klaargezet in static"
 
+# code moet bij settings.HANDLEIDING_PAGINAS zonder last te hebben van de rest
 echo "[INFO] template files worden opnieuw aangemaakt"
 # verwijder alle .dtl files behalve menu.dtl
 find "$TEMPL" -type f -name \*.dtl ! -name menu.dtl -exec rm {} \+
@@ -46,7 +47,7 @@ echo "SITE_URL='hoi'" > ./copy_of_settings.py
 echo "DEBUG=True" >> ./copy_of_settings.py
 echo "ENABLE_DEBUG_TOOLBAR=False" >> ./copy_of_settings.py
 echo "ENABLE_WIKI=False" >> ./copy_of_settings.py
-cat ../nhb-apps/settings.py | grep -v "settings_local" >> ./copy_of_settings.py
+cat ../nhbapps/settings.py | grep -v "settings_local" >> ./copy_of_settings.py
 
 python3 -B ./maak_handleiding.py "$WIKI_EXPORT" "$TEMPL" $*
 

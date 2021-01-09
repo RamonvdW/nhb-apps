@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -48,15 +48,17 @@ export COVERAGE_FILE="/tmp/.coverage.$$"
 
 python3 -m coverage erase
 
-python3 -m coverage run --append --branch ./manage.py test --noinput $*  # note: double quotes not supported around $*
+python3 -m coverage run --append --branch \
+    ./manage.py test --settings=nhbapps.settings_dev --noinput $*  # note: double quotes not supported around $*
 RES=$?
 [ $RES -eq 3 ] && ABORTED=1
 #echo "[DEBUG] Coverage run result: $RES"
-if [ $RES -eq 0 -a $# -eq 0 ]
+if [ $RES -eq 0 ] #-a $# -eq 0 ]
 then
     # add coverage with debug and wiki enabled
     echo "[INFO] Performing run with debug + wiki run"
-    python3 -m coverage run --append --branch ./manage.py test --debug-mode --enable-wiki Plein.tests.TestPlein.test_quick Functie.test_saml2idp &>/dev/null
+    python3 -m coverage run --append --branch \
+        ./manage.py test --settings=nhbapps.settings_dev_wiki_debug Plein.tests.TestPlein.test_quick Functie.test_saml2idp &>/dev/null
     RES=$?
     [ $RES -eq 3 ] && ABORTED=1
     #echo "[DEBUG] Debug coverage run result: $RES"

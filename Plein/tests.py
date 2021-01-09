@@ -70,6 +70,19 @@ class TestPlein(E2EHelpers, TestCase):
         lid.email = lid.account.email
         lid.save()
 
+        # maak een lid aan voor de admin
+        lid = NhbLid()
+        lid.nhb_nr = 100002
+        lid.geslacht = "M"
+        lid.voornaam = "Ad"
+        lid.achternaam = "Min"
+        lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
+        lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
+        lid.bij_vereniging = ver
+        lid.account = self.account_admin
+        lid.email = lid.account.email
+        lid.save()
+
         self.useragent_msie_1 = 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.0; Trident/4.0)'
         self.useragent_msie_2 = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; Trident/7.0; rv:11.0) like Gecko'
         self.useragent_firefox = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.11; rv:47.0) Gecko/20100101 Firefox/47.0'
@@ -130,7 +143,7 @@ class TestPlein(E2EHelpers, TestCase):
             resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, 'Wissel van rol')
-        self.assert_template_used(resp, ('plein/plein-bezoeker.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('plein/plein-schutter.dtl', 'plein/site_layout.dtl'))
         urls = [url for url in self.extract_all_urls(resp) if "beheer" in url]
         self.assertEqual(0, len(urls))  # komt pas in beeld na kiezen rol IT
 
@@ -246,10 +259,15 @@ class TestPlein(E2EHelpers, TestCase):
 
     def test_quick(self):
         # voor test.sh om met een snelle run in debug mode
-        self.e2e_login(self.account_admin)
+        # wissel naar IT zodat we het beheerders plein krijgen
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_wisselnaarrol_it()
+        self.e2e_check_rol('IT')
+
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)
+
         urls = self.extract_all_urls(resp)      # for coverage
 
     def test_is_browser_supported(self):

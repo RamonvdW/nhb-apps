@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 """
-Django settings for the nhb-apps project.
+Django settings for the NhbApps project.
 
 For more information on this file, see
 https://docs.djangoproject.com/en/2.2/topics/settings/
@@ -15,21 +15,10 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
-import sys
 
 # import install-specific settings from a separate file
 # that is easy to replace as part of the deployment process
-from .settings_local import *
-
-# for testing
-# TODO: dit werkt niet: ./manage.py --enable-wiki runserver
-# TODO: dit werkt niet: ./manage.py runserver -- --enable-wiki  --> deze file wordt 2x ingeladen
-if "--enable-wiki" in sys.argv:
-    ENABLE_WIKI = True
-    sys.argv.remove("--enable-wiki")
-
-# enable html validation using v.Nu (warning: triples test duration)
-TEST_VALIDATE_HTML = False
+from nhbapps.settings_local import *
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 PROJ_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -80,14 +69,6 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',       # security
 ]
 
-if ENABLE_WIKI:
-    # single sign-on Identity Provider (IP)
-    #   using SAML2 (Security Assertion Markup Language)
-    INSTALLED_APPS.append('djangosaml2idp')
-
-if ENABLE_DEBUG_TOOLBAR and "test" not in sys.argv:    # pragma: no cover
-    INSTALLED_APPS.append('debug_toolbar')
-    MIDDLEWARE.insert(0, 'debug_toolbar.middleware.DebugToolbarMiddleware')
 
 # gebruik ingebouwde authenticatie / login laag
 # inclusief permissions en groepen
@@ -121,7 +102,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
             ],
             'loaders': [
-                ('django.template.loaders.cached.Loader', ['nhb-apps.minify_dtl.Loader']),
+                ('django.template.loaders.cached.Loader', ['nhbapps.minify_dtl.Loader']),
             ],
         },
     },
@@ -129,7 +110,7 @@ TEMPLATES = [
 
 
 # point out location of WSGI application for django runserver command
-WSGI_APPLICATION = 'nhb-apps.wsgi.application'
+WSGI_APPLICATION = 'nhbapps.wsgi.application'
 
 # let browsers remember to connect with https
 # security analysis recommends at least 180 days
@@ -171,13 +152,13 @@ USE_TZ = True
 
 
 # top-level URL verdeling naar apps
-ROOT_URLCONF = 'nhb-apps.urls'
+ROOT_URLCONF = 'nhbapps.urls'
 
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 STATIC_URL = '/static/'     # url
-STATIC_ROOT = 'nhb-apps/.static'     # relative to project top-dir
+STATIC_ROOT = 'nhbapps/.static'     # relative to project top-dir
 STATICFILES_DIRS = [
     os.path.join(PROJ_DIR, "compiled_static"),
 ]
@@ -207,7 +188,7 @@ BACKGROUND_SYNC__KAMPIOENSCHAP_MUTATIES = BACKGROUND_SYNC_POORT + 1
 
 # our own test runner that executes the tests ordered by application hierarchy indicators to ensure that
 # low-level errors are reported before applications depending that (broken) functionality report failures
-TEST_RUNNER = 'nhb-apps.app-hierarchy-testrunner.HierarchyRunner'
+TEST_RUNNER = 'nhbapps.app-hierarchy-testrunner.HierarchyRunner'
 
 # applicatie specifieke settings
 MINIMUM_LEEFTIJD_LID = 5
@@ -282,7 +263,7 @@ BINDING_HTTP_POST = 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST'
 SAML_BASE_URL = SITE_URL + '/idp'
 
 SAML_IDP_CONFIG = {
-    'debug': DEBUG,
+    'debug': False,
     'xmlsec_binary': '/usr/bin/xmlsec1',
 
     # the SAML entity id of this side, the Identity Provider
@@ -409,5 +390,14 @@ LOGGING = {
         }
     }
 }
+
+# defaults for 'dev' and 'test' options
+
+# SECURITY WARNING: don't run with debug turned on in production!
+# let op: zonder DEBUG=True geen static files in dev omgeving!
+DEBUG = False
+
+# HTML validation using v.Nu (see Overig/e2ehelpers.py)
+TEST_VALIDATE_HTML = False
 
 # end of file
