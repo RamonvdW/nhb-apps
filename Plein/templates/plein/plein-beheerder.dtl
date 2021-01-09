@@ -10,8 +10,6 @@
 
 {% block pagina %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="plein-beheerder" %}
-
     <h4>Beheerders Plein</h4>
 
     <p>Als beheerder vind je op dit plein extra kaartjes die bij jouw rechten passen.</p>
@@ -120,6 +118,16 @@
             {% include 'plein/card.dtl' with title="Score Geschiedenis" text="Bekijk de wijzigingen / geschiedenis van de scores van een sporter." icon="history" url=card_url %}
         </div>
     {% endif %}
+
+    <p>
+        <span>Voor vragen en problemen kan je contact met ons opnemen via e-mail: </span>
+        <a href="mailto:nhb-apps-support@handboogsport.nl" class="btn-nhb-blauw">
+            <i class="material-icons-round left">mail</i>nhb-apps-support@handboogsport.nl</a>
+    </p>
+
+    <p>Voorstellen en feedback over deze site graag via de drie gekleurde smileys die op elke pagina te vinden zijn.</p>
+
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="plein-beheerder" %}
 
 {% endblock %}
 
