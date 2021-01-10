@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -84,6 +84,10 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         ver2.regio = self.regio_112
         # secretaris kan nog niet ingevuld worden
         ver2.save()
+
+        self.functie_sec2 = maak_functie("SEC test 2", "SEC")
+        self.functie_sec2.nhb_ver = ver2
+        self.functie_sec2.save()
 
         self.functie_hwl2 = maak_functie("HWL test 2", "HWL")
         self.functie_hwl2.nhb_ver = ver2
@@ -471,7 +475,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
 
     def test_koppel_sec(self):
-        # HWL mag zijn eigen leden koppelen: account_normaal
+        # SEC mag zijn eigen leden koppelen: account_normaal
         self.account_beh1.functie_set.clear()
 
         self.functie_sec.accounts.add(self.account_beh1)
@@ -503,6 +507,20 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'add': self.account_normaal.pk})
         self.assert_is_redirect_not_plein(resp)
+        self.assertEqual(self.functie_sec.accounts.count(), 2)
+
+        # koppel SEC voor een andere vereniging
+        url = '/functie/wijzig/%s/ontvang/' % self.functie_sec2.pk
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'add': self.account_ander.pk})    # silently ignored
+        self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
+        self.assertEqual(self.functie_sec.accounts.count(), 2)
+
+        # koppel een niet-verenigingslid aan de rol SEC
+        url = '/functie/wijzig/%s/ontvang/' % self.functie_sec.pk
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'add': self.account_ander.pk})
+        self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
         self.assertEqual(self.functie_sec.accounts.count(), 2)
 
         # koppel een verenigingslid aan de rol HWL

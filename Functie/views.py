@@ -371,7 +371,7 @@ class OntvangBeheerderWijzigingenView(View):
 
         if add:
             rol_nu, functie_nu = rol_get_huidige_functie(request)
-            if rol_nu == Rollen.ROL_HWL:
+            if rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL):
                 # stel zeker dat nhblid lid is bij de vereniging van functie
                 if not nhblid or nhblid.bij_vereniging != functie.nhb_ver:
                     raise Resolver404()

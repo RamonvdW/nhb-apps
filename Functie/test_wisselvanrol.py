@@ -102,7 +102,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.account_admin.save()
 
         # controleer dat de link naar de OTP controle en VHPG op de pagina staan
-        self.e2e_logout()        # TODO: onnodig?
+        self.e2e_logout()
         self.e2e_login(self.account_admin)          # zonder OTP control
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wisselvanrol)
@@ -289,6 +289,8 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.assertIn(self.url_activeer_functie % self.functie_rcl.pk, urls)
         self.assertIn(self.url_activeer_functie % self.functie_hwl.pk, urls)
         self.assertIn(self.url_activeer_rol % 'sporter', urls)
+
+    # TODO: SEC toevoegen
 
     def test_hwl(self):
         self.functie_hwl.accounts.add(self.account_normaal)
