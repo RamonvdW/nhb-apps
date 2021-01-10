@@ -66,7 +66,3 @@
     </div>
 
 {% endblock %}
-
-{% block menu %}
-    {% include 'plein/menu-3.dtl' %}
-{% endblock %}

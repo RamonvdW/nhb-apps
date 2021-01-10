@@ -130,7 +130,3 @@
     {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="plein-beheerder" %}
 
 {% endblock %}
-
-{% block menu %}
-    {% include 'plein/menu-3.dtl' %}
-{% endblock %}
