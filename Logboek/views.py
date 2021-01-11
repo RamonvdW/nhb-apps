@@ -47,11 +47,6 @@ class LogboekBasisView(UserPassesTestMixin, ListView):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
         return HttpResponseRedirect(reverse('Plein:plein'))
 
-    def get_queryset(self):
-        """ called by the template system to get the queryset or list of objects for the template """
-        # must override
-        return None         # pragma: no cover
-
     def _make_link_urls(self, context):
         # voorbereidingen voor een regel met volgende/vorige links
         # en rechtstreekse links naar een 10 pagina's
