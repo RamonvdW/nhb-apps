@@ -57,10 +57,15 @@
 
     <p>Je persoonlijke voorkeuren instellen.</p>
 
-    <p><a class="btn-nhb-blauw" href="{% url 'Schutter:voorkeuren' %}"><i class="material-icons-round left">tune</i>Mijn voorkeuren</a></p>
+    <p>
+        <a class="btn-nhb-blauw" href="{% url 'Schutter:voorkeuren' %}">
+            <i class="material-icons-round left">tune</i>Mijn voorkeuren</a>
+    </p>
 
-    <p><a class="btn-nhb-blauw" href="{% url 'Account:nieuw-wachtwoord' %}">Wachtwoord wijzigen</a></p>
-
+    <p>
+        <a class="btn-nhb-blauw" href="{% url 'Account:nieuw-wachtwoord' %}">
+            <i class="material-icons-round left">https</i>Wachtwoord wijzigen</a>
+    </p>
 
     {% if toon_leeftijdsklassen %}
 
