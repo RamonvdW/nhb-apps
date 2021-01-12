@@ -45,7 +45,7 @@
             {% endif %}
 
             {% if toon_ledental %}
-                <td></td>
+                <td colspan="2"></td>
             {% endif %}
         </tr>
         <tr>
@@ -71,7 +71,8 @@
             {% endif %}
 
             {% if toon_ledental %}
-                <th>Aantal leden</th>
+                <th class="center-align">Aantal leden</th>
+                <th class="center-align">Aantal beheerders</th>
             {% endif %}
         </tr>
     </thead>
@@ -134,23 +135,28 @@
                     {% endfor %}
                 </td>
             {% else %}
-                <td><i>Geen</i></td>
+                <td class="red-text"><i>Geen</i></td>
                 <td><!-- accommodatie details/icoontjes --></td>
             {% endif %}
 
             {% if toon_details %}
                 <td>
-                    {% for loc in obj.wedstrijdlocatie_set.all %}
-                        {% if not forloop.first %}
-                            <br>------<br>
-                        {% endif %}
-                        <a class="btn-nhb-blauw" href="{{ loc.details_url }}">Details</a>
-                    {% endfor %}
+                    {% if obj.plaats %}
+                        {% for loc in obj.wedstrijdlocatie_set.all %}
+                            {% if not forloop.first %}
+                                <br>------<br>
+                            {% endif %}
+                            <a class="btn-nhb-blauw" href="{{ loc.details_url }}">Details</a>
+                        {% endfor %}
+                    {% else %}
+                        <a class="btn-nhb-blauw" href="{{ obj.details_url }}">Details</a>
+                    {% endif %}
                 </td>
             {% endif %}
 
             {% if toon_ledental %}
-                <td{% if obj.aantal_leden >= 100 %} class="nhb-blauw-text"{% endif %}>{{ obj.aantal_leden }}</td>
+                <td class="center-align{% if obj.aantal_leden >= 100 %} nhb-blauw-text{% endif %}">{{ obj.aantal_leden }}</td>
+                <td class="center-align">{{ obj.aantal_beheerders }}</td>
             {% endif %}
         </tr>
     {% endfor %}
