@@ -45,6 +45,19 @@ class LijstVerenigingenView(UserPassesTestMixin, ListView):
 
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
 
+        # vul een kleine cache om vele database verzoeken te voorkomen
+        hwl_functies = dict()   # [nhb_ver] = Functie()
+        functie2count = dict()  # [functie.pk] = aantal
+        for functie in (Functie
+                        .objects
+                        .select_related('nhb_ver')
+                        .prefetch_related('accounts')):
+            if functie.rol == 'HWL':
+                hwl_functies[functie.nhb_ver.nhb_nr] = functie
+
+            functie2count[functie.pk] = functie.accounts.count()
+        # for
+
         if rol_nu == Rollen.ROL_RKO:
             # toon de lijst van verenigingen in het rayon van de RKO
             # het rayonnummer is verkrijgbaar via de deelcompetitie van de functie
@@ -53,7 +66,8 @@ class LijstVerenigingenView(UserPassesTestMixin, ListView):
                     .select_related('regio', 'regio__rayon')
                     .exclude(regio__regio_nr=100)
                     .filter(regio__rayon=functie_nu.nhb_rayon)
-                    .prefetch_related('wedstrijdlocatie_set', 'clusters')
+                    .prefetch_related('wedstrijdlocatie_set',
+                                      'clusters')
                     .order_by('regio__regio_nr', 'nhb_nr'))
 
         if rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO):
@@ -62,7 +76,8 @@ class LijstVerenigingenView(UserPassesTestMixin, ListView):
                     .objects
                     .select_related('regio', 'regio__rayon')
                     .exclude(regio__regio_nr=100)
-                    .prefetch_related('wedstrijdlocatie_set', 'clusters')
+                    .prefetch_related('wedstrijdlocatie_set',
+                                      'clusters')
                     .order_by('regio__regio_nr', 'nhb_nr'))
 
         if rol_nu == Rollen.ROL_IT:
@@ -71,23 +86,20 @@ class LijstVerenigingenView(UserPassesTestMixin, ListView):
                     .objects
                     .select_related('regio', 'regio__rayon')
                     .exclude(regio__regio_nr=100)
-                    .prefetch_related('nhblid_set', 'wedstrijdlocatie_set', 'clusters')
+                    .prefetch_related('nhblid_set',
+                                      'wedstrijdlocatie_set',
+                                      'functie_set',
+                                      'clusters')
                     .order_by('regio__regio_nr', 'nhb_nr'))
 
             for obj in objs:
                 obj.aantal_leden = obj.nhblid_set.count()
+                obj.aantal_beheerders = 0
+                for functie in obj.functie_set.all():
+                    obj.aantal_beheerders += functie2count[functie.pk]
+                # for
             # for
             return objs
-
-        # vul een kleine cache om vele database verzoeken te voorkomen
-        hwl_functies = dict()  # [nhb_ver] = Functie()
-        for functie in (Functie
-                        .objects
-                        .filter(rol='HWL')
-                        .select_related('nhb_ver')
-                        .prefetch_related('accounts')):
-            hwl_functies[functie.nhb_ver.nhb_nr] = functie
-        # for
 
         # toon de lijst van verenigingen in de regio
         if rol_nu == Rollen.ROL_RCL:
@@ -96,7 +108,8 @@ class LijstVerenigingenView(UserPassesTestMixin, ListView):
                     .objects
                     .filter(regio=functie_nu.nhb_regio)
                     .select_related('regio')
-                    .prefetch_related('wedstrijdlocatie_set', 'clusters')
+                    .prefetch_related('wedstrijdlocatie_set',
+                                      'clusters')
                     .order_by('nhb_nr'))
         else:
             # rol_nu == Rollen.ROL_HWL / ROL_SEC
@@ -105,7 +118,8 @@ class LijstVerenigingenView(UserPassesTestMixin, ListView):
                     .objects
                     .filter(regio=functie_nu.nhb_ver.regio)
                     .select_related('regio')
-                    .prefetch_related('wedstrijdlocatie_set', 'clusters')
+                    .prefetch_related('wedstrijdlocatie_set',
+                                      'clusters')
                     .order_by('nhb_nr'))
 
         for obj in objs:
@@ -150,8 +164,14 @@ class LijstVerenigingenView(UserPassesTestMixin, ListView):
 
         # voeg de url toe voor de "details" knoppen
         for nhbver in context['object_list']:
+            nhbver.details_url = reverse('Vereniging:accommodatie-details',
+                                         kwargs={'locatie_pk': 0,
+                                                 'vereniging_pk': nhbver.pk})
+
             for loc in nhbver.wedstrijdlocatie_set.all():
-                loc.details_url = reverse('Vereniging:accommodatie-details', kwargs={'locatie_pk': loc.pk, 'vereniging_pk': nhbver.pk})
+                loc.details_url = reverse('Vereniging:accommodatie-details',
+                                          kwargs={'locatie_pk': loc.pk,
+                                                  'vereniging_pk': nhbver.pk})
             # for
             if nhbver.clusters.count() > 0:
                 context['toon_cluster'] = True
@@ -188,7 +208,11 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
     def _get_locatie_nhver_or_404(**kwargs):
         try:
             locatie_pk = int(kwargs['locatie_pk'][:6])      # afkappen voor veiligheid
-            locatie = WedstrijdLocatie.objects.get(pk=locatie_pk)
+            if locatie_pk == 0:
+                # speciale waarde voor vereniging zonder locatie
+                locatie = None
+            else:
+                locatie = WedstrijdLocatie.objects.get(pk=locatie_pk)
         except (ValueError, WedstrijdLocatie.DoesNotExist):
             raise Resolver404()
 
@@ -199,9 +223,10 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
             raise Resolver404()
 
         # controleer dat de twee coherent zijn
-        if locatie.verenigingen.filter(nhb_nr=nhbver.nhb_nr).count() == 0:
-            # vereniging hoort niet bij deze locatie
-            raise Resolver404()
+        if locatie:
+            if locatie.verenigingen.filter(nhb_nr=nhbver.nhb_nr).count() == 0:
+                # vereniging hoort niet bij deze locatie
+                raise Resolver404()
 
         clusters = list()
         for cluster in nhbver.clusters.order_by('letter').all():
@@ -263,11 +288,15 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
         context['wl_names'] = self.get_all_names(functie_wl)
         context['wl_email'] = functie_wl.bevestigde_email
 
-        # beschrijving voor de template
-        locatie.baan_type_str = BAANTYPE2STR[locatie.baan_type]
+        if locatie:
+            # beschrijving voor de template
+            locatie.baan_type_str = BAANTYPE2STR[locatie.baan_type]
 
-        # lijst van verenigingen voor de template
-        locatie.other_ver = locatie.verenigingen.exclude(nhb_nr=nhbver.nhb_nr).order_by('nhb_nr')
+            # aantal banen waar uit gekozen kan worden, voor gebruik in de template
+            context['banen'] = [nr for nr in range(2, 25)]
+
+            # lijst van verenigingen voor de template
+            locatie.other_ver = locatie.verenigingen.exclude(nhb_nr=nhbver.nhb_nr).order_by('nhb_nr')
 
         # terug en opslaan knoppen voor in de template
         if 'is_ver' in kwargs:
@@ -279,9 +308,6 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
             opslaan_urlconf = 'Vereniging:accommodatie-details'
             menu_actief = 'hetplein'
 
-        context['opslaan_url'] = reverse(opslaan_urlconf, kwargs={'locatie_pk': locatie.pk,
-                                                                  'vereniging_pk': nhbver.pk})
-
         if self._mag_wijzigen(nhbver):
             context['readonly'] = False
 
@@ -289,18 +315,25 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
 
             # geef ook meteen de mogelijkheid om leden te koppelen aan rollen
             if rol_nu == Rollen.ROL_SEC:
-                context['url_koppel_sec'] = reverse('Functie:wijzig-beheerders', kwargs={'functie_pk': functie_sec.pk})
-            context['url_koppel_hwl'] = reverse('Functie:wijzig-beheerders', kwargs={'functie_pk': functie_hwl.pk})
-            context['url_koppel_wl'] = reverse('Functie:wijzig-beheerders', kwargs={'functie_pk': functie_wl.pk})
+                context['url_koppel_sec'] = reverse('Functie:wijzig-beheerders',
+                                                    kwargs={'functie_pk': functie_sec.pk})
+            context['url_koppel_hwl'] = reverse('Functie:wijzig-beheerders',
+                                                kwargs={'functie_pk': functie_hwl.pk})
+            context['url_koppel_wl'] = reverse('Functie:wijzig-beheerders',
+                                               kwargs={'functie_pk': functie_wl.pk})
 
             # geef ook meteen de mogelijkheid om de e-mailadressen van een functie aan te passen
-            context['url_email_hwl'] = reverse('Functie:wijzig-email', kwargs={'functie_pk': functie_hwl.pk})
-            context['url_email_wl'] = reverse('Functie:wijzig-email', kwargs={'functie_pk': functie_wl.pk})
+            context['url_email_hwl'] = reverse('Functie:wijzig-email',
+                                               kwargs={'functie_pk': functie_hwl.pk})
+            context['url_email_wl'] = reverse('Functie:wijzig-email',
+                                              kwargs={'functie_pk': functie_wl.pk})
         else:
             context['readonly'] = True
 
-        # aantal banen waar uit gekozen kan worden, voor gebruik in de template
-        context['banen'] = [nr for nr in range(2, 25)]
+        if locatie:
+            context['opslaan_url'] = reverse(opslaan_urlconf,
+                                             kwargs={'locatie_pk': locatie.pk,
+                                                     'vereniging_pk': nhbver.pk})
 
         menu_dynamics(self.request, context, actief=menu_actief)
         return context
@@ -310,6 +343,8 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
             op het accommodatie-details formulier.
         """
         locatie, nhbver = self._get_locatie_nhver_or_404(**kwargs)
+        if not locatie:
+            raise Resolver404()
 
         form = AccommodatieDetailsForm(request.POST)
         if not form.is_valid():

@@ -15,9 +15,10 @@
 
     <p>Op deze pagina staan de details van de accommodatie van een vereniging.</p>
 
-    <form action="{{ opslaan_url }}" method="post">
-        {% csrf_token %}
-
+    {% if opslaan_url %}
+        <form action="{{ opslaan_url }}" method="post">
+            {% csrf_token %}
+    {% endif %}
             <table class="white">
                 <tr>
                     <td>Vereniging:</td>
@@ -51,7 +52,7 @@
 
                 <tr>
                     <td style="vertical-align: top">Adres van de accommodatie:</td>
-                    <td style="vertical-align: top">{{ locatie.adres|linebreaksbr }}</td>
+                    <td style="vertical-align: top">{% if locatie %}{{ locatie.adres|linebreaksbr }}{% else %}<i>Geen</i>{% endif %}</td>
                     {% if not readonly %}
                         <td><!-- kolom voor de wijzig knoppen --></td>
                     {% endif %}
@@ -182,108 +183,110 @@
                     {% endif %}
                 </tr>
 
-                <tr>
-                    <td>Type baan voor 18m/25m wedstrijden:</td>
-                    <td>
-                        {% if readonly %}
-                            <span>{{ locatie.baan_type_str }}<br></span>
-                        {% else %}
-                            <select name="baan_type">
-                                <option value="X"{%if locatie.baan_type == "X" %} selected{% endif %}>Onbekend</option>
-                                <option value="O"{%if locatie.baan_type == "O" %} selected{% endif %}>Volledig overdekte binnenbaan</option>
-                                <option value="H"{%if locatie.baan_type == "H" %} selected{% endif %}>Half overdekt (binnen-buiten schieten)</option>
-                            </select>
+                {% if locatie %}
+                    <tr>
+                        <td>Type baan voor 18m/25m wedstrijden:</td>
+                        <td>
+                            {% if readonly %}
+                                <span>{{ locatie.baan_type_str }}<br></span>
+                            {% else %}
+                                <select name="baan_type">
+                                    <option value="X"{%if locatie.baan_type == "X" %} selected{% endif %}>Onbekend</option>
+                                    <option value="O"{%if locatie.baan_type == "O" %} selected{% endif %}>Volledig overdekte binnenbaan</option>
+                                    <option value="H"{%if locatie.baan_type == "H" %} selected{% endif %}>Half overdekt (binnen-buiten schieten)</option>
+                                </select>
+                            {% endif %}
+                        </td>
+                        {% if not readonly %}
+                            <td><!-- kolom voor de wijzig knoppen --></td>
                         {% endif %}
-                    </td>
-                    {% if not readonly %}
-                        <td><!-- kolom voor de wijzig knoppen --></td>
-                    {% endif %}
-                </tr>
+                    </tr>
 
-                <tr>
-                    <td>Aantal banen 18 meter:</td>
-                    <td>
-                        {% if readonly %}
-                            <span>{{ locatie.banen_18m }} banen<br></span>
-                        {% else %}
-                            <select name="banen_18m">
-                                <option value="0"{%if locatie.banen_18m == 0 %} selected{% endif %}>Geen banen</option>
-                                <option value="1"{%if locatie.banen_18m == 1 %} selected{% endif %}>1 baan</option>
-                                {% for baan in banen %}
-                                    <option value="{{ baan }}"{%if locatie.banen_18m == baan %} selected{% endif %}>{{ baan }} banen</option>
-                                {% endfor %}
-                            </select>
+                    <tr>
+                        <td>Aantal banen 18 meter:</td>
+                        <td>
+                            {% if readonly %}
+                                <span>{{ locatie.banen_18m }} banen<br></span>
+                            {% else %}
+                                <select name="banen_18m">
+                                    <option value="0"{%if locatie.banen_18m == 0 %} selected{% endif %}>Geen banen</option>
+                                    <option value="1"{%if locatie.banen_18m == 1 %} selected{% endif %}>1 baan</option>
+                                    {% for baan in banen %}
+                                        <option value="{{ baan }}"{%if locatie.banen_18m == baan %} selected{% endif %}>{{ baan }} banen</option>
+                                    {% endfor %}
+                                </select>
+                            {% endif %}
+                        </td>
+                        {% if not readonly %}
+                            <td><!-- kolom voor de wijzig knoppen --></td>
                         {% endif %}
-                    </td>
-                    {% if not readonly %}
-                        <td><!-- kolom voor de wijzig knoppen --></td>
-                    {% endif %}
-                </tr>
+                    </tr>
 
-                <tr>
-                    <td>Aantal banen 25 meter:</td>
-                    <td>
-                        {% if readonly %}
-                            <span>{{ locatie.banen_25m }} banen<br></span>
-                        {% else %}
-                            <select name="banen_25m">
-                                <option value="0"{%if locatie.banen_25m == 0 %} selected{% endif %}>Geen banen</option>
-                                <option value="1"{%if locatie.banen_25m == 1 %} selected{% endif %}>1 baan</option>
-                                {% for baan in banen %}
-                                    <option value="{{ baan }}"{%if locatie.banen_25m == baan %} selected{% endif %}>{{ baan }} banen</option>
-                                {% endfor %}
-                            </select>
+                    <tr>
+                        <td>Aantal banen 25 meter:</td>
+                        <td>
+                            {% if readonly %}
+                                <span>{{ locatie.banen_25m }} banen<br></span>
+                            {% else %}
+                                <select name="banen_25m">
+                                    <option value="0"{%if locatie.banen_25m == 0 %} selected{% endif %}>Geen banen</option>
+                                    <option value="1"{%if locatie.banen_25m == 1 %} selected{% endif %}>1 baan</option>
+                                    {% for baan in banen %}
+                                        <option value="{{ baan }}"{%if locatie.banen_25m == baan %} selected{% endif %}>{{ baan }} banen</option>
+                                    {% endfor %}
+                                </select>
+                            {% endif %}
+                        </td>
+                        {% if not readonly %}
+                            <td><!-- kolom voor de wijzig knoppen --></td>
                         {% endif %}
-                    </td>
-                    {% if not readonly %}
-                        <td><!-- kolom voor de wijzig knoppen --></td>
-                    {% endif %}
-                </tr>
+                    </tr>
 
-                <tr>
-                    <td>Maximum aantal Dutch Targets op 1 baan:</td>
-                    <td>
-                        {% if readonly %}
-                            <span>{{ locatie.max_dt_per_baan }} blazoenen<br></span>
-                        {% else %}
-                            <select name="max_dt">
-                                <option value="3"{%if locatie.max_dt_per_baan == 3 %} selected{% endif %}>3 blazoenen</option>
-                                <option value="4"{%if locatie.max_dt_per_baan == 4 %} selected{% endif %}>4 blazoenen</option>
-                            </select>
+                    <tr>
+                        <td>Maximum aantal Dutch Targets op 1 baan:</td>
+                        <td>
+                            {% if readonly %}
+                                <span>{{ locatie.max_dt_per_baan }} blazoenen<br></span>
+                            {% else %}
+                                <select name="max_dt">
+                                    <option value="3"{%if locatie.max_dt_per_baan == 3 %} selected{% endif %}>3 blazoenen</option>
+                                    <option value="4"{%if locatie.max_dt_per_baan == 4 %} selected{% endif %}>4 blazoenen</option>
+                                </select>
+                            {% endif %}
+                        </td>
+                        {% if not readonly %}
+                            <td><!-- kolom voor de wijzig knoppen --></td>
                         {% endif %}
-                    </td>
-                    {% if not readonly %}
-                        <td><!-- kolom voor de wijzig knoppen --></td>
-                    {% endif %}
-                </tr>
+                    </tr>
 
-                <tr>
-                    <td style="vertical-align: top">Notities:</td>
-                    <td style="vertical-align: top">
-                        {% if readonly %}
-                            <span>{{ locatie.notities }}</span>
-                        {% else %}
-                            <textarea name="notities" class="materialize-textarea">{{ locatie.notities }}</textarea>
+                    <tr>
+                        <td style="vertical-align: top">Notities:</td>
+                        <td style="vertical-align: top">
+                            {% if readonly %}
+                                <span>{{ locatie.notities }}</span>
+                            {% else %}
+                                <textarea name="notities" class="materialize-textarea">{{ locatie.notities }}</textarea>
+                            {% endif %}
+                        </td>
+                        {% if not readonly %}
+                            <td><!-- kolom voor de wijzig knoppen --></td>
                         {% endif %}
-                    </td>
-                    {% if not readonly %}
-                        <td><!-- kolom voor de wijzig knoppen --></td>
-                    {% endif %}
-                </tr>
+                    </tr>
 
-                {% if locatie.other_ver.count %}
-                <tr>
-                    <td style="vertical-align: top">Accommodatie wordt ook gebruikt door vereniging:</td>
-                    <td style="vertical-align: top">
-                        {% for nhbver in locatie.other_ver.all %}
-                            <span>{{ nhbver }}</span><br>
-                        {% endfor %}
-                    </td>
-                    {% if not readonly %}
-                        <td><!-- kolom voor de wijzig knoppen --></td>
+                    {% if locatie.other_ver.count %}
+                    <tr>
+                        <td style="vertical-align: top">Accommodatie wordt ook gebruikt door vereniging:</td>
+                        <td style="vertical-align: top">
+                            {% for nhbver in locatie.other_ver.all %}
+                                <span>{{ nhbver }}</span><br>
+                            {% endfor %}
+                        </td>
+                        {% if not readonly %}
+                            <td><!-- kolom voor de wijzig knoppen --></td>
+                        {% endif %}
+                    </tr>
                     {% endif %}
-                </tr>
-                {% endif %}
+                {% endif %}     <!-- if locatie -->
             </table>
 
             <p>Deze gegevens kunnen worden aangepast door de vereniging zelf (secretaris of hoofdwedstrijdleider) en door de regiocompetitieleider.</p>
@@ -300,6 +303,8 @@
                 {% endif %}
             </p>
 
+    {% if opslaan_url %}
         </form>
+    {% endif %}
 
 {% endblock %}
