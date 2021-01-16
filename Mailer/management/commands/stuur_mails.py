@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -12,8 +12,8 @@ from Mailer import mailer
 from Mailer.models import MailQueue
 from Taken.taken import herinner_aan_taken
 from django.core.management.base import BaseCommand
-from django.db.models import ProtectedError
-import django.db.utils
+from django.utils import timezone
+from django.db.utils import DataError
 import datetime
 import time
 
@@ -33,10 +33,23 @@ class Command(BaseCommand):
         parser.add_argument('--quick', action='store_true')     # for testing
         parser.add_argument('--skip_old', action='store_true')  # for testing
 
+    def _cleanout_old_blocked_mails(self):
+        one_month_ago = timezone.now() - datetime.timedelta(days=31)
+        objs = (MailQueue
+                .objects
+                .filter(toegevoegd_op__lt=one_month_ago,
+                        is_blocked=True))
+        self.stdout.write('[DEBUG] Could delete %s old blocked mails' % len(objs))
+        # TODO: actually delete old blocked mails
+
     def _stuur_oude_mails(self):
         # probeer eenmalig oude mails te sturen en keer daarna terug
         send_count = 0
-        for obj in MailQueue.objects.filter(is_verstuurd=False, aantal_pogingen__lt=25):
+        for obj in (MailQueue
+                    .objects
+                    .filter(is_verstuurd=False,
+                            is_blocked=False,
+                            aantal_pogingen__lt=25)):
             mailer.send_mail(obj, self.stdout, self.stderr)
             send_count += 1
 
@@ -53,7 +66,11 @@ class Command(BaseCommand):
         now = datetime.datetime.now()
         while now < self.stop_at:
 
-            objs = MailQueue.objects.filter(is_verstuurd=False, aantal_pogingen=0)
+            objs = (MailQueue
+                    .objects
+                    .filter(is_verstuurd=False,
+                            is_blocked=False,
+                            aantal_pogingen=0))
             if len(objs):
                 obj = objs[0]
                 mailer.send_mail(obj, self.stdout, self.stderr)
@@ -88,13 +105,16 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         self._set_stop_time(**options)
 
+        # verwijder oude geblokkeerde mails
+        self._cleanout_old_blocked_mails()
+
         # vang generieke fouten af
         try:
             herinner_aan_taken()
             if not options['skip_old']:
                 self._stuur_oude_mails()
             self._stuur_nieuwe_mails()
-        except django.db.utils.DataError as exc:        # pragma: no coverage
+        except DataError as exc:                        # pragma: no coverage
             self.stderr.write('[ERROR] Onverwachte database fout: %s' % str(exc))
         except KeyboardInterrupt:                       # pragma: no coverage
             pass

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -13,9 +13,10 @@ class MailQueue(models.Model):
     """ Database tabel waarin de te versturen emails staan """
 
     toegevoegd_op = models.DateTimeField()
-    is_verstuurd = models.BooleanField()
+    is_blocked = models.BooleanField(default=False)     # blocked door whitelist
+    is_verstuurd = models.BooleanField(default=False)
     laatste_poging = models.DateTimeField()
-    aantal_pogingen = models.PositiveSmallIntegerField()
+    aantal_pogingen = models.PositiveSmallIntegerField(default=0)
     mail_to = models.CharField(max_length=150)
     mail_subj = models.CharField(max_length=100)
     mail_date = models.CharField(max_length=60)
@@ -40,13 +41,8 @@ class MailQueue(models.Model):
 
 def mailer_queue_email(to_address, onderwerp, text_body):
     """ Deze functie accepteert het verzoek om een mail te versturen en slaat deze op in de database
-        Het feitelijk versturen van de email wordt door een achtergrondprocess gedaan
+        Het feitelijk versturen van de email wordt door een achtergrondtaak gedaan
     """
-
-    # als er een whitelist is, dan moet het e-mailadres er in voorkomen
-    if len(settings.EMAIL_ADDRESS_WHITELIST) > 0:
-        if to_address not in settings.EMAIL_ADDRESS_WHITELIST:
-            return
 
     now = timezone.now()    # in utc
 
@@ -54,21 +50,26 @@ def mailer_queue_email(to_address, onderwerp, text_body):
     # formaat: Tue, 01 Jan 2020 20:00:03 +0100
     mail_date = timezone.localtime(now).strftime("%a, %d %b %Y %H:%M:%S %z")
 
-    obj = MailQueue()
-    obj.toegevoegd_op = now
-    obj.is_verstuurd = False
-    obj.laatste_poging = now
-    obj.aantal_pogingen = 0
-    obj.mail_to = to_address
-    obj.mail_subj = onderwerp
-    obj.mail_date = mail_date
-    obj.mail_text = text_body
+    obj = MailQueue(toegevoegd_op=now,
+                    laatste_poging=now,
+                    mail_to=to_address,
+                    mail_subj=onderwerp,
+                    mail_date=mail_date,
+                    mail_text=text_body)
+
+    # als er een whitelist is, dan moet het e-mailadres er in voorkomen
+    if len(settings.EMAIL_ADDRESS_WHITELIST) > 0:
+        if to_address not in settings.EMAIL_ADDRESS_WHITELIST:
+            # blokkeer het versturen
+            # op deze manier kunnen we wel zien dat het bericht aangemaakt is
+            obj.is_blocked = True
+
     obj.save()
 
 
 def mailer_obfuscate_email(email):
     """ Helper functie om een email adres te maskeren
-        voorbeeld: nhb.ramonvdw@gmail.com --> nh####w@gmail.com
+        voorbeeld: nhb.whatever@gmail.com --> nh####w@gmail.com
     """
     try:
         user, domein = email.rsplit("@", 1)

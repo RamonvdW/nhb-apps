@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -67,9 +67,8 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/wijzig-email.dtl', 'plein/site_layout.dtl'))
 
-        with self.settings(EMAIL_ADDRESS_WHITELIST=()):
-            with self.assert_max_queries(20):
-                resp = self.client.post(url, {'email': 'nieuweemail@test.com'})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'email': 'nieuweemail@test.com'})
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/bevestig.dtl', 'plein/site_layout.dtl'))
@@ -261,9 +260,8 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
         self.assertEqual(SiteTijdelijkeUrl.objects.count(), 0)
 
         # eerste invoer
-        with self.settings(EMAIL_ADDRESS_WHITELIST=()):
-            with self.assert_max_queries(8):
-                resp = self.client.post(url, {'email': 'nieuweemail1@test.com'})
+        with self.assert_max_queries(8):
+            resp = self.client.post(url, {'email': 'nieuweemail1@test.com'})
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/bevestig.dtl', 'plein/site_layout.dtl'))
@@ -282,9 +280,8 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
         url1 = text[pos:pos+12+32+1]         # 32 = code
 
         # tweede invoer
-        with self.settings(EMAIL_ADDRESS_WHITELIST=()):
-            with self.assert_max_queries(20):
-                resp = self.client.post(url, {'email': 'nieuweemail2@test.com'})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'email': 'nieuweemail2@test.com'})
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/bevestig.dtl', 'plein/site_layout.dtl'))
