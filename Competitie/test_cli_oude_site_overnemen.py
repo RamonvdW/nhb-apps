@@ -7,14 +7,15 @@
 from django.test import TestCase
 from django.core import management
 from BasisTypen.models import BoogType
-from Competitie.models import (RegioCompetitieSchutterBoog, DeelCompetitie, LAAG_REGIO,
-                               DeelcompetitieRonde)
+from Competitie.models import (Competitie, CompetitieKlasse,
+                               DeelCompetitie, LAAG_REGIO, DeelcompetitieRonde,
+                               RegioCompetitieSchutterBoog,)
+from Competitie.test_fase import zet_competitie_fase
 from NhbStructuur.models import NhbRegio, NhbLid, NhbVereniging
 from Schutter.models import SchutterBoog
 from Score.models import Score, ScoreHist, aanvangsgemiddelde_opslaan
 from Wedstrijden.models import WedstrijdenPlan
 from Overig.e2ehelpers import E2EHelpers
-from .models import Competitie, CompetitieKlasse
 import datetime
 import io
 
@@ -49,6 +50,9 @@ class TestCompetitieCliOudeSiteOvernemen(E2EHelpers, TestCase):
         klasse.save()
         self.klasse = klasse
 
+        zet_competitie_fase(comp_18, 'B')
+        zet_competitie_fase(comp_25, 'B')
+
     def _maak_leden_aan(self):
         # deze test is afhankelijk van de standaard regio's
         self.regio_101 = regio = NhbRegio.objects.get(regio_nr=101)
@@ -70,6 +74,7 @@ class TestCompetitieCliOudeSiteOvernemen(E2EHelpers, TestCase):
         ver.regio = regio
         # secretaris kan nog niet ingevuld worden
         ver.save()
+        self.ver_1000 = ver
 
         lid = NhbLid()
         lid.nhb_nr = 100001
@@ -234,7 +239,7 @@ class TestCompetitieCliOudeSiteOvernemen(E2EHelpers, TestCase):
         # eerst aanmaken, dan verwijderen
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(1845):     # TODO: probeer te verlagen
+        with self.assert_max_queries(1855):     # TODO: probeer te verlagen
             management.call_command('oude_site_overnemen', self.dir_testfiles1, '100', stderr=f1, stdout=f2)
 
         # verwijder de uitslag van een wedstrijd
@@ -289,7 +294,7 @@ class TestCompetitieCliOudeSiteOvernemen(E2EHelpers, TestCase):
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(1850):     # TODO: probeer te verlagen
+        with self.assert_max_queries(1860):     # TODO: probeer te verlagen
             management.call_command('oude_site_overnemen', self.dir_testfiles1, '100', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
@@ -310,7 +315,7 @@ class TestCompetitieCliOudeSiteOvernemen(E2EHelpers, TestCase):
         # nog een keer, want dan zijn de uitslagen er al (extra coverage)
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(915):      # TODO: probeer te verlagen
+        with self.assert_max_queries(920):      # TODO: probeer te verlagen
             management.call_command('oude_site_overnemen', self.dir_testfiles1, '1', stderr=f1, stdout=f2)
 
         self.assertEqual(ScoreHist.objects.count(), 4)
@@ -326,19 +331,19 @@ class TestCompetitieCliOudeSiteOvernemen(E2EHelpers, TestCase):
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(1875):     # TODO: probeer te verlagen
+        with self.assert_max_queries(1890):     # TODO: probeer te verlagen
             management.call_command('oude_site_overnemen', self.dir_testfiles2, '100', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
         self.assertTrue("[ERROR] Kan wedstrijdklasse 'Barebow Cadetten klasse 1' niet vinden (competitie Indoor" in f1.getvalue())
         self.assertTrue("[ERROR] Vereniging 1099 is niet bekend; kan lid 100004 niet inschrijven" in f1.getvalue())
         # print("f2: %s" % f2.getvalue())
-        self.assertTrue("[WARNING] Lid 100003 heeft 1 scores maar geen vereniging en wordt dus niet ingeschreven" in f2.getvalue())
+        self.assertTrue("[WARNING] Lid 100003 heeft 1 scores maar geen vereniging en wordt ingeschreven onder de oude vereniging" in f2.getvalue())
         self.assertTrue("[WARNING] Verschil in AG voor nhbnr 100002 (18m): bekend=4.444, in uitslag=4.567" in f2.getvalue())
 
     def test_dryrun(self):
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(1825):     # TODO: probeer te verlagen
+        with self.assert_max_queries(1835):     # TODO: probeer te verlagen
             management.call_command('oude_site_overnemen', '--dryrun', self.dir_testfiles1, '100', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
@@ -347,7 +352,7 @@ class TestCompetitieCliOudeSiteOvernemen(E2EHelpers, TestCase):
     def test_all(self):
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(2800):     # TODO: probeer te verlagen
+        with self.assert_max_queries(2850):     # TODO: probeer te verlagen
             management.call_command('oude_site_overnemen', '--all', self.dir_top, '100', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
@@ -360,5 +365,41 @@ class TestCompetitieCliOudeSiteOvernemen(E2EHelpers, TestCase):
         f2 = io.StringIO()
         with self.assertRaises(SystemExit):
             management.call_command('oude_site_overnemen', self.dir_testfiles1, '-1', stderr=f1, stdout=f2)
+
+    def test_verkeerde_fase(self):
+        comp_18 = Competitie.objects.get(afstand='18')
+        zet_competitie_fase(comp_18, 'A2')
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        with self.assert_max_queries(910):     # TODO: probeer te verlagen
+            management.call_command('oude_site_overnemen', '--dryrun', self.dir_testfiles1, '100', stderr=f1, stdout=f2)
+        self.assertTrue("(DRY RUN)" in f2.getvalue())
+
+    def test_verwijderde_vereniging(self):
+        # uitslag oude programma verwijst nog naar een vereniging waar de schutter weg
+        # is en die bovendien opgeruimd is in het CRM
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        with self.assert_max_queries(1895):     # TODO: probeer te verlagen
+            management.call_command('oude_site_overnemen', self.dir_testfiles1, '100', stderr=f1, stdout=f2)
+
+        # ruim vereniging 1000 op
+        for deelnemer in RegioCompetitieSchutterBoog.objects.filter(bij_vereniging=self.ver_1000):
+            deelnemer.delete()
+        # for
+        for lid in NhbLid.objects.filter(bij_vereniging=self.ver_1000):
+            lid.bij_vereniging = None
+            lid.save()
+        # for
+        self.ver_1000.delete()
+
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        with self.assert_max_queries(950):     # TODO: probeer te verlagen
+            management.call_command('oude_site_overnemen', self.dir_testfiles1, '100', stderr=f1, stdout=f2)
+
+        # print("f1: %s" % f1.getvalue())
+        # print("f2: %s" % f2.getvalue())
+        self.assertTrue('[ERROR] Vereniging 1000 is niet bekend; kan lid 100002 niet inschrijven (bij de oude vereniging)' in f1.getvalue())
 
 # end of file

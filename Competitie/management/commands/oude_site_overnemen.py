@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -541,26 +541,38 @@ class Command(BaseCommand):
 
         aantal_scores = len(scores) - scores.count(0)
 
+        lid_ver = None
         if not lid.bij_vereniging:
-            # onderdruk deze melding zolang er geen scores zijn
-            if aantal_scores > 0:
-                self._roep_warning('Lid %s heeft %s scores maar geen vereniging en wordt dus niet ingeschreven' % (
-                                       nhb_nr, aantal_scores))
-            return
+            # sporter is op dit moment niet meer lid bij een vereniging
+            # dit kan een overschrijving zijn, dus toch importeren onder de oude vereniging
 
-        if str(lid.bij_vereniging.nhb_nr) != ver_nr:
-            # vind de oude vereniging, want die moeten we opslaan bij de inschrijving
+            # zoek de oude vereniging erbij
             try:
                 lid_ver = NhbVereniging.objects.get(nhb_nr=ver_nr)
             except NhbVereniging.DoesNotExist:
-                self.stderr.write('[ERROR] Vereniging %s is niet bekend; kan lid %s niet inschrijven' % (
+                self.stderr.write('[ERROR] Vereniging %s is niet bekend; kan lid %s niet inschrijven (bij de oude vereniging)' % (
                                       ver_nr, nhb_nr))
                 self._count_errors += 1
                 return
-        else:
-            lid_ver = lid.bij_vereniging
 
-        deelcomp = self._regio2deelcomp[lid.bij_vereniging.regio.regio_nr]
+            # onderdruk deze melding zolang er geen scores zijn
+            if aantal_scores > 0:
+                self._roep_warning('Lid %s heeft %s scores maar geen vereniging en wordt ingeschreven onder de oude vereniging' % (
+                                       nhb_nr, aantal_scores))
+        else:
+            if str(lid.bij_vereniging.nhb_nr) != ver_nr:
+                # vind de oude vereniging, want die moeten we opslaan bij de inschrijving
+                try:
+                    lid_ver = NhbVereniging.objects.get(nhb_nr=ver_nr)
+                except NhbVereniging.DoesNotExist:
+                    self.stderr.write('[ERROR] Vereniging %s is niet bekend; kan lid %s niet inschrijven' % (
+                                          ver_nr, nhb_nr))
+                    self._count_errors += 1
+                    return
+            else:
+                lid_ver = lid.bij_vereniging
+
+        deelcomp = self._regio2deelcomp[lid_ver.regio.regio_nr]
 
         # zorg dat de schutter-boog records er zijn en de voorkeuren ingevuld zijn
         schutterboog = self._vind_schutterboog(lid)
@@ -670,26 +682,36 @@ class Command(BaseCommand):
 
         for afstand in (18, 25):
             self._afstand = afstand
-            self._comp = Competitie.objects.get(afstand=afstand)
-            self._maandag_wk37 = datetime.datetime.strptime("%s-W%d-1" % (self._comp.begin_jaar, 37), "%G-W%V-%u")
-            self._maandag_wk37 = make_aware(self._maandag_wk37)
-
-            self._prep_regio2deelcomp_regio2ronde2uitslag()
-
-            if afstand == 18:
-                self._verwijder = self._verwijder_r_18
-            else:
-                self._verwijder = self._verwijder_r_25
-
-            afstand_data = json_data[str(afstand)]
-
-            # doe R als laatste ivm verwijderen dubbelen door administratie teamcompetitie
-            # (BB/IB/LB wordt met zelfde score onder Recurve gezet)
-            for afkorting in ('C', 'BB', 'IB', 'LB', 'R'):
-                self._boogtype = self._cache_boogtype[afkorting]
-                boog_data = afstand_data[afkorting]
-                self._verwerk_klassen(boog_data)
+            self._comp = None
+            for comp in Competitie.objects.filter(afstand=afstand):
+                comp.zet_fase()
+                if 'B' <= comp.fase <= 'F':
+                    # in de regiocompetitie wedstrijdfase, dus importeren
+                    self._comp = comp
             # for
+
+            if self._comp:
+                self._maandag_wk37 = datetime.datetime.strptime("%s-W%d-1" % (self._comp.begin_jaar, 37), "%G-W%V-%u")
+                self._maandag_wk37 = make_aware(self._maandag_wk37)
+
+                self._prep_regio2deelcomp_regio2ronde2uitslag()
+
+                if afstand == 18:
+                    self._verwijder = self._verwijder_r_18
+                else:
+                    self._verwijder = self._verwijder_r_25
+
+                afstand_data = json_data[str(afstand)]
+
+                # doe R als laatste ivm verwijderen dubbelen door administratie teamcompetitie
+                # (BB/IB/LB wordt met zelfde score onder Recurve gezet)
+                for afkorting in ('C', 'BB', 'IB', 'LB', 'R'):
+                    self._boogtype = self._cache_boogtype[afkorting]
+                    boog_data = afstand_data[afkorting]
+                    self._verwerk_klassen(boog_data)
+                # for
+            else:
+                self.stdout.write('[WARNING] Import %sm wordt overgeslagen want geen competitie gevonden in fase B..F' % afstand)
         # for
 
         self._verwijder_dubbele_deelnemers()
