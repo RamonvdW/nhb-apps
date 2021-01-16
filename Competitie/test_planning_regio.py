@@ -1563,7 +1563,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
 
         # echt afsluiten
         self.assertEqual(Taak.objects.count(), 0)
-        with self.assert_max_queries(26):
+        with self.assert_max_queries(28):
             resp = self.client.post(url)
         self.assert_is_redirect_not_plein(resp)  # check for success
         deelcomp = DeelCompetitie.objects.get(pk=self.deelcomp_regio101_18.pk)

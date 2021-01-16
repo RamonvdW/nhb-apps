@@ -230,7 +230,10 @@ def functie_vraag_email_bevestiging(functie):
                  + "Als je dit niet herkent, neem dan contact met ons op via info@handboogsport.nl\n\n"
                  + "Het bondsburo\n")
 
-    mailer_queue_email(functie.nieuwe_email, 'Bevestig gebruik e-mail voor rol', text_body)
+    mailer_queue_email(functie.nieuwe_email,
+                       'Bevestig gebruik e-mail voor rol',
+                       text_body,
+                       enforce_whitelist=False)
 
 
 class WijzigEmailView(UserPassesTestMixin, View):

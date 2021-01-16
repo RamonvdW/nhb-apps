@@ -46,7 +46,10 @@ def account_stuur_email_wachtwoord_vergeten(accountemail, **kwargs):
                  + "Veel plezier met de site!\n"
                  + "Het bondsburo\n")
 
-    mailer_queue_email(accountemail.bevestigde_email, 'Wachtwoord vergeten', text_body)
+    mailer_queue_email(accountemail.bevestigde_email,
+                       'Wachtwoord vergeten',
+                       text_body,
+                       enforce_whitelist=False)
 
 
 class WachtwoordVergetenView(TemplateView):

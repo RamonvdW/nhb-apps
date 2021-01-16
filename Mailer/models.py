@@ -39,7 +39,7 @@ class MailQueue(models.Model):
     objects = models.Manager()      # for the editor only
 
 
-def mailer_queue_email(to_address, onderwerp, text_body):
+def mailer_queue_email(to_address, onderwerp, text_body, enforce_whitelist=True):
     """ Deze functie accepteert het verzoek om een mail te versturen en slaat deze op in de database
         Het feitelijk versturen van de email wordt door een achtergrondtaak gedaan
     """
@@ -58,7 +58,7 @@ def mailer_queue_email(to_address, onderwerp, text_body):
                     mail_text=text_body)
 
     # als er een whitelist is, dan moet het e-mailadres er in voorkomen
-    if len(settings.EMAIL_ADDRESS_WHITELIST) > 0:
+    if enforce_whitelist and len(settings.EMAIL_ADDRESS_WHITELIST) > 0:
         if to_address not in settings.EMAIL_ADDRESS_WHITELIST:
             # blokkeer het versturen
             # op deze manier kunnen we wel zien dat het bericht aangemaakt is

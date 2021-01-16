@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -161,7 +161,7 @@ class TestTakenTaken(E2EHelpers, TestCase):
                         beschrijving="Tekst 3")
 
         self.assertEqual(3, Taak.objects.count())
-        self.assertEqual(0, MailQueue.objects.count())
+        self.assertEqual(3, MailQueue.objects.count())
 
         # vraag nu om herinneringen te sturen
         email = self.account_admin.accountemail_set.all()[0]
@@ -169,19 +169,19 @@ class TestTakenTaken(E2EHelpers, TestCase):
         email.save()
 
         taken.herinner_aan_taken()
-        self.assertEqual(1, MailQueue.objects.count())
+        self.assertEqual(4, MailQueue.objects.count())
 
         # controleer dat de herinnering pas gestuurd worden na 7 dagen
         email.laatste_email_over_taken = timezone.now() - datetime.timedelta(days=7) + datetime.timedelta(hours=1)
         email.save()
 
         taken.herinner_aan_taken()
-        self.assertEqual(1, MailQueue.objects.count())
+        self.assertEqual(4, MailQueue.objects.count())
 
         email.laatste_email_over_taken = timezone.now() - datetime.timedelta(days=7) - datetime.timedelta(hours=1)
         email.save()
 
         taken.herinner_aan_taken()
-        self.assertEqual(2, MailQueue.objects.count())
+        self.assertEqual(5, MailQueue.objects.count())
 
 # end of file

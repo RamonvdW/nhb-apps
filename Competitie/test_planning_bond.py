@@ -230,7 +230,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         # nu echt doorzetten
         self._regioschutters_inschrijven()
 
-        with self.assert_max_queries(40):
+        with self.assert_max_queries(41):
             resp = self.client.post(url)
         self.assert_is_redirect(resp, '/bondscompetities/')       # redirect = Success
 

@@ -56,7 +56,10 @@ def account_check_nieuwe_email(request, from_ip, account):
                      + "Veel plezier met de site!\n"
                      + "Het bondsburo\n")
 
-        mailer_queue_email(mailadres, 'Email adres bevestigen', text_body)
+        mailer_queue_email(mailadres,
+                           'Email adres bevestigen',
+                           text_body,
+                           enforce_whitelist=False)
 
         context = {'partial_email': mailer_obfuscate_email(mailadres)}
         menu_dynamics(request, context)
