@@ -89,13 +89,6 @@
 
         <table class="white">
 
-            <thead>
-                <tr>
-                    <th>Beschrijving</th>
-                    <th>Datum</th>
-                </tr>
-            </thead>
-
             <tr>
                 <td>Datum wedstrijd:</td>
                 <td>
