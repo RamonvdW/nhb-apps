@@ -668,7 +668,7 @@ class Command(BaseCommand):
                 self._count_toevoegingen += 1
         # for
 
-        self.stdout.write('[DEBUG] Volgende %s NHB nummers moeten verwijderd worden: %s' % (len(nhb_nrs), repr(nhb_nrs)))
+        # self.stdout.write('[DEBUG] Volgende %s NHB nummers moeten verwijderd worden: %s' % (len(nhb_nrs), repr(nhb_nrs)))
         while len(nhb_nrs) > 0:
             lid_nhb_nr = nhb_nrs.pop(0)
             obj = NhbLid.objects.get(nhb_nr=lid_nhb_nr)
@@ -685,6 +685,7 @@ class Command(BaseCommand):
             elif obj.nhb_nr in self._recordhouder_nhb_nrs:
                 # lid heeft een record op zijn/haar naam --> behoud het hele record
                 # de CRM applicatie heeft hier nog geen veld voor
+                self.stdout.write('[INFO] Lid %s is recordhouder en wordt daarom niet verwijderd' % obj.nhb_nr)
                 pass
             else:
                 # lid echt verwijderen
