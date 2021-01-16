@@ -14,9 +14,23 @@ from Plein.menu import menu_dynamics
 from Functie.rol import rol_mag_wisselen
 
 
+def reverse_handleiding(pagina):
+    """ geeft de URL terug voor een handleiding pagina,
+        voor de wiki of de statische pagina
+    """
+    if settings.ENABLE_WIKI:
+        url = settings.WIKI_URL
+        if url[-1] != '/':
+            url += '/'
+        url += pagina
+    else:
+        url = reverse('Handleiding:' + pagina)
+    return url
+
+
 class HandleidingView(UserPassesTestMixin, View):
 
-    """ Deze view bied alle handleiding pagina's aan """
+    """ Deze view biedt alle handleiding pagina's aan """
 
     # class variables shared by all instances
     # (none)

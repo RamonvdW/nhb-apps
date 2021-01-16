@@ -8,6 +8,7 @@ from django.conf import settings
 from django.shortcuts import redirect, render, reverse
 from django.views.generic import TemplateView, View
 from Functie.rol import Rollen, rol_get_huidige, rol_get_beschrijving, rol_mag_wisselen
+from Handleiding.views import reverse_handleiding
 from Taken.taken import eval_open_taken
 from .menu import menu_dynamics
 
@@ -104,10 +105,7 @@ class PleinView(View):
                 except KeyError:
                     handleiding_pagina = settings.HANDLEIDING_TOP
 
-                if settings.ENABLE_WIKI:
-                    context['handleiding_url'] = settings.WIKI_URL + '/' + handleiding_pagina
-                else:
-                    context['handleiding_url'] = reverse('Handleiding:' + handleiding_pagina)
+                context['handleiding_url'] = reverse_handleiding(handleiding_pagina)
 
                 if rol_nu == Rollen.ROL_IT:
                     context['rol_is_it'] = True

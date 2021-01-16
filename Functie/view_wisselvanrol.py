@@ -12,6 +12,7 @@ from django.views.generic import ListView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.otp import account_otp_is_gekoppeld
 from Account.rechten import account_rechten_is_otp_verified
+from Handleiding.views import reverse_handleiding
 from Plein.menu import menu_dynamics
 from Overig.helpers import get_safe_from_ip
 from Taken.taken import eval_open_taken
@@ -238,14 +239,9 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
         if context['show_otp_koppelen'] or context['show_vhpg']:
             context['show_beheerder_intro'] = True
 
-        if settings.ENABLE_WIKI:        # pragma: no cover
-            context['wiki_2fa_url'] = settings.WIKI_URL + '/' + settings.HANDLEIDING_2FA
-            context['wiki_rollen'] = settings.WIKI_URL + '/' + settings.HANDLEIDING_ROLLEN
-            context['wiki_intro_nieuwe_beheerders'] = settings.WIKI_URL + '/' + settings.HANDLEIDING_INTRO_NIEUWE_BEHEERDERS
-        else:
-            context['wiki_2fa_url'] = reverse('Handleiding:' + settings.HANDLEIDING_2FA)
-            context['wiki_rollen'] = reverse('Handleiding:' + settings.HANDLEIDING_ROLLEN)
-            context['wiki_intro_nieuwe_beheerders'] = reverse('Handleiding:' + settings.HANDLEIDING_INTRO_NIEUWE_BEHEERDERS)
+        context['wiki_2fa_url'] = reverse_handleiding(settings.HANDLEIDING_2FA)
+        context['wiki_rollen'] = reverse_handleiding(settings.HANDLEIDING_ROLLEN)
+        context['wiki_intro_nieuwe_beheerders'] = reverse_handleiding(settings.HANDLEIDING_INTRO_NIEUWE_BEHEERDERS)
 
         # login-as functie voor IT beheerder
         if rol_get_huidige(self.request) == Rollen.ROL_IT:

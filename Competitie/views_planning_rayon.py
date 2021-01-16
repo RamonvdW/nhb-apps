@@ -10,6 +10,7 @@ from django.urls import Resolver404, reverse
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
+from Handleiding.views import reverse_handleiding
 from Logboek.models import schrijf_in_logboek
 from NhbStructuur.models import NhbVereniging
 from Overig.background_sync import BackgroundSync
@@ -653,10 +654,7 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
             context['aantal_bevestigd'] = aantal_bevestigd
             context['aantal_attentie'] = aantal_attentie
 
-        if settings.ENABLE_WIKI:        # pragma: no cover
-            context['wiki_rk_schutters'] = settings.WIKI_URL + '/' + settings.HANDLEIDING_RK_SELECTIE
-        else:
-            context['wiki_rk_schutters'] = reverse('Handleiding:' + settings.HANDLEIDING_RK_SELECTIE)
+        context['wiki_rk_schutters'] = reverse_handleiding(settings.HANDLEIDING_RK_SELECTIE)
 
         menu_dynamics_competitie(self.request, context, comp_pk=deelcomp_rk.competitie.pk)
         return context
@@ -942,10 +940,7 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
 
         context['url_terug'] = reverse('Competitie:kies')
 
-        if settings.ENABLE_WIKI:        # pragma: no cover
-            context['wiki_rk_schutters'] = settings.WIKI_URL + '/' + settings.HANDLEIDING_RK_SELECTIE
-        else:
-            context['wiki_rk_schutters'] = reverse('Handleiding:' + settings.HANDLEIDING_RK_SELECTIE)
+        context['wiki_rk_schutters'] = reverse_handleiding(settings.HANDLEIDING_RK_SELECTIE)
 
         menu_dynamics_competitie(self.request, context, comp_pk=deelcomp_rk.competitie.pk)
         return context
