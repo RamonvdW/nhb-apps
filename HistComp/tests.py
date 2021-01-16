@@ -5,9 +5,11 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
+from django.core import management
 from Overig.e2ehelpers import E2EHelpers
 from .models import HistCompetitie, HistCompetitieIndividueel, HistCompetitieTeam
 from .views import RESULTS_PER_PAGE
+import io
 
 
 class TestHistComp(E2EHelpers, TestCase):
@@ -270,6 +272,16 @@ class TestHistComp(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assert_template_used(resp, ('hist/histcomp_team.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
+
+    def test_correct_histcomp(self):
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        with self.assert_max_queries(20):
+            management.call_command('correct_histcomp_indiv', stderr=f1, stdout=f2)
+        # print('f1: %s' % f1.getvalue())
+        # print('f2: %s' % f1.getvalue())
+        self.assertEqual("", f1.getvalue())
+        self.assertTrue("Corrigeer" in f2.getvalue())
 
     # def _UIT_test_view_invid_empty(self):
     #     rsp = self.client.get('/hist/2019/18/Missing/indiv/')

@@ -43,7 +43,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         for histcomp in HistCompetitie.objects.all():
-            print('Corrigeer %s - %sm - %s' % (histcomp.seizoen, histcomp.comp_type, histcomp.klasse))
+            self.stdout.write('Corrigeer %s - %sm - %s' % (histcomp.seizoen, histcomp.comp_type, histcomp.klasse))
             self._corrigeer(histcomp)
         # for
 
