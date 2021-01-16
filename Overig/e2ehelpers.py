@@ -509,16 +509,16 @@ class E2EHelpers(object):
         resp = self.client.get('/account/logout/', follow=False)
         # indien ingelogd krijgen we een pagina terug met status_code == 200
         # indien niet ingelogd krijgen we een redirect met status_code == 302
-        if resp.status_code == 302:
-            self.fail(msg='Onverwacht NIET ingelogd')
+        if resp.status_code == 302:                     # pragma: no branch
+            self.fail(msg='Onverwacht NIET ingelogd')   # pragma: no cover
 
     def e2e_assert_not_logged_in(self):
         assert isinstance(self, TestCase)
         resp = self.client.get('/account/logout/', follow=False)
         # indien ingelogd krijgen we een pagina terug met status_code == 200
         # indien niet ingelogd krijgen we een redirect met status_code == 302
-        if resp.status_code == 200:
-            self.fail(msg='Onverwacht ingelogd')
+        if resp.status_code == 200:                     # pragma: no branch
+            self.fail(msg='Onverwacht ingelogd')        # pragma: no cover
 
     def e2e_assert_other_http_commands_not_supported(self, url, post=True, delete=True, put=True, patch=True):
         """ Test een aantal 'common' http methoden

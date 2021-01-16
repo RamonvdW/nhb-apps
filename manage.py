@@ -23,7 +23,8 @@ import os
 def report_validated_templates():
     """ Report which templates are not covered by a test that invokes assert_html_ok """
 
-    if len(validated_templates) > 100:      # only do this on a "test all" run
+    # do something special for a "test all" run
+    if len(validated_templates) > 100:          # pragma: no branch
         # for dtl in validated_templates:
         #     print('Validated template: %s' % repr(dtl))
         # # for
@@ -51,7 +52,7 @@ def main():
 
         report_validated_templates()
 
-        if stars:
+        if stars:                   # pragma: no branch
             print("\nDone!")
     except KeyboardInterrupt:       # pragma: no cover
         print('\nInterrupted!')

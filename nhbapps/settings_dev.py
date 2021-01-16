@@ -22,10 +22,10 @@ ENABLE_DJANGO_EXTENSIONS = False
 #TEST_VALIDATE_HTML = True
 
 
-if ENABLE_DJANGO_EXTENSIONS:
+if ENABLE_DJANGO_EXTENSIONS:                        # pragma: no cover
     INSTALLED_APPS.append('django_extensions')
 
-if ENABLE_DEBUG_TOOLBAR:    # pragma: no cover
+if ENABLE_DEBUG_TOOLBAR:                            # pragma: no cover
     INSTALLED_APPS.append('debug_toolbar')
     MIDDLEWARE.insert(0, 'debug_toolbar.middleware.DebugToolbarMiddleware')
 

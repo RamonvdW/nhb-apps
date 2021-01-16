@@ -472,7 +472,7 @@ def competitie_aanmaken(jaar):
             nr = functie.nhb_regio.regio_nr
         elif functie.rol == 'RKO':
             nr = functie.nhb_rayon.rayon_nr
-        elif functie.rol == 'BKO':
+        else:  # elif functie.rol == 'BKO':
             nr = 0
 
         functies[(functie.rol, afstand, nr)] = functie

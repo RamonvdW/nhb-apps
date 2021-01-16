@@ -518,6 +518,15 @@ class TestCompetitie(E2EHelpers, TestCase):
         self.assertNotEqual(CompetitieKlasse.objects.count(), 0)    # TODO: filter op Competitie
         # TODO: check nog meer velden van de aangemaakte objecten
 
+        # coverage: nog een keer vaststellen
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
+        self.assert_is_redirect(resp, self.url_kies)
+
         # coverage
         obj = CompetitieKlasse.objects.all()[0]
         self.assertTrue(str(obj) != "")
@@ -539,6 +548,10 @@ class TestCompetitie(E2EHelpers, TestCase):
         # illegale competitie
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_klassegrenzen_vaststellen % 'xx')
+        self.assertEqual(resp.status_code, 404)
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_klassegrenzen_vaststellen % 'xx')
         self.assertEqual(resp.status_code, 404)
 
     def test_klassegrenzen_tonen(self):
