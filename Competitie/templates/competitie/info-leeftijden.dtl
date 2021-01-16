@@ -1,0 +1,108 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2021 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Leeftijdsgroepen{% endblock %}
+
+{% block pagina %}
+
+    <h4>Leeftijdsgroepen</h4>
+
+    <p>Sporters worden in een wedstrijd ingedeeld in een wedstrijdklasse aan de hand van hun leeftijd en/of type boog.</p>
+
+    <p>Volgens het reglement van World Archery wordt de klasse bepaald door de leeftijd die je <b>bereikt</b> in een jaar.</p>
+
+    <p>Vooral voor jonge sporters verandert de klasse waarin je uit mag komen regelmatig, daarom hebben we hieronder een overzicht gemaakt.</p>
+
+    {% if is_jong %}
+        <p>&nbsp;</p>
+        <p>Een persoonlijk overzicht kan je hier inzien: <a class="btn-nhb-blauw" href="{% url 'Schutter:leeftijdsklassen' %}"><i class="material-icons-round left">grade</i>Mijn leeftijdsklassen</a></p>
+    {% endif %}
+
+    <p>&nbsp;</p>
+    <h5>Leeftijdsklassen</h5>
+
+    <table class="white">
+        <thead>
+            <tr>
+                <th>Leeftijdsklasse</th>
+                <th>Tot en met het jaar waarin je deze leeftijd bereikt</th>
+            </tr>
+        </thead>
+
+        <tr>
+            <td>Aspirant</td>
+            <td>11</td>
+        </tr>
+
+        <tr>
+            <td>Cadet</td>
+            <td>17</td>
+        </tr>
+
+        <tr>
+            <td>Junior</td>
+            <td>20</td>
+        </tr>
+
+        <tr>
+            <td>Senior</td>
+            <td>49</td>
+        </tr>
+
+        <tr>
+            <td>Masters</td>
+            <td>-</td>
+        </tr>
+    </table>
+
+
+    <span>&nbsp;</span>
+    <h5>Bondscompetitie</h5>
+
+    <p>De bondscompetities (tijdens het winter-seizoen) lopen over 2 jaren. De finales worden in het tweede jaar gehouden. Daarom moet je de bondscompetitie beginnen in de klasse waarin je tijdens de finale hoort uit te komen.</p>
+
+    <table class="white">
+        <thead>
+            <tr>
+                <th>Leeftijdsklasse</th>
+                <th>Bondscompetitie {{ comp_1.seizoen }}</th>
+                <th>Bondscompetitie {{ comp_2.seizoen }}</th>
+            </tr>
+
+            <tr>
+                <td>Aspiranten</td>
+                <td>Geboren {{ comp_1.asp }} of later</td>
+                <td>Geboren {{ comp_2.asp }} of later</td>
+            </tr>
+
+            <tr>
+                <td>Cadet</td>
+                <td>Geboren {{ comp_1.cadet }}</td>
+                <td>Geboren {{ comp_2.cadet }}</td>
+            </tr>
+
+            <tr>
+                <td>Junior</td>
+                <td>Geboren {{ comp_1.junior }}</td>
+                <td>Geboren {{ comp_2.junior }}</td>
+            </tr>
+
+            <tr>
+                <td>Senior</td>
+                <td>Geboren {{ comp_1.senior }} of eerder</td>
+                <td>Geboren {{ comp_2.senior }} of eerder</td>
+            </tr>
+
+        </thead>
+    </table>
+
+    <p>Wanneer je je inschrijft via deze website gaat dit allemaal automatisch goed.</p>
+
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-info-leeftijden" %}
+
+{% endblock %}

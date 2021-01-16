@@ -49,6 +49,10 @@
         {% url 'Competitie:info-competitie' as card_url %}
         {% include 'plein/card.dtl' with title="Informatie" text="Algemene informatie over de competities." icon="info" url=card_url %}
 
+        <!-- informatie over leeftijden -->
+        {% url 'Competitie:info-leeftijden' as card_url %}
+        {% include 'plein/card.dtl' with title="Leeftijden" text="Informatie over de leeftijds-categori&euml;n voor wedstrijden en de competities." icon="star" url=card_url %}
+
     </div>
 
 {% endblock %}

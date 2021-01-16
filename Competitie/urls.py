@@ -29,6 +29,10 @@ urlpatterns = [
          views_info.InfoCompetitieView.as_view(),
          name='info-competitie'),
 
+    path('info/leeftijden/',
+         views_info.InfoLeeftijdenView.as_view(),
+         name='info-leeftijden'),
+
     path('<comp_pk>/klassegrenzen/tonen/',
          views_klassegrenzen.KlassegrenzenTonenView.as_view(),
          name='klassegrenzen-tonen'),

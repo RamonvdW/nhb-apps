@@ -151,6 +151,8 @@
     <p>De regiocompetitie is per boog type, leeftijdsgroep en speelsterkte opgedeeld in wedstrijdklassen.
     Je schiet <b>7 rondes</b>, waarvan de beste 6 tellend zijn.</p>
 
+    <p>We hebben een aparte pagina waarop de leeftijdsgroepen uitgelegd staan: <a class="btn-nhb-blauw" href="{% url 'Competitie:info-leeftijden' %}">Leeftijden</a></p>
+
     <p>Sporters die vorige seizoen 6 scores neergezet hebben krijgen aan de hand van dat gemiddelde een <i>aanvangsgemiddelde</i> waarmee de indeling op speelsterkte gedaan wordt.
     Nieuwe sporters krijgen na 3 scores hun speelsterkte vastgesteld.</p>
 
