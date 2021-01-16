@@ -14,10 +14,16 @@ DEBUG = True
 
 ENABLE_DEBUG_TOOLBAR = False
 
+# django-extensions: very useful for show_urls
+ENABLE_DJANGO_EXTENSIONS = False
+
 # enable html validation using v.Nu (warning: triples test duration)
 # warning: increases test run duration significantly
 #TEST_VALIDATE_HTML = True
 
+
+if ENABLE_DJANGO_EXTENSIONS:
+    INSTALLED_APPS.append('django_extensions')
 
 if ENABLE_DEBUG_TOOLBAR:    # pragma: no cover
     INSTALLED_APPS.append('debug_toolbar')
