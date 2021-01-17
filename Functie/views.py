@@ -266,7 +266,6 @@ class WijzigEmailView(UserPassesTestMixin, View):
 
         rol = rol_get_huidige(self.request)
         if rol == Rollen.ROL_HWL:
-            context['is_rol_hwl'] = True        # TODO: lijkt niet gebruik in wijzig-email.dtl
             context['terug_url'] = reverse('Functie:overzicht-vereniging')
             menu_dynamics(self.request, context, actief='vereniging')
         else:

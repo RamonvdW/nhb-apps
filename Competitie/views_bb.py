@@ -497,7 +497,7 @@ class KlassegrenzenVaststellenView(UserPassesTestMixin, TemplateView):
         comp.zet_fase()
 
         if comp.fase != 'A1':
-            context['al_vastgesteld'] = True            # TODO: gebruik comp.fase
+            context['al_vastgesteld'] = True
         else:
             context['object_list'] = self._get_queryset(comp)
             context['wedstrijdjaar'] = comp.begin_jaar + 1

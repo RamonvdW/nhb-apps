@@ -24,7 +24,7 @@ SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK = 'gebruiker_rol_functie_pk'
 SESSIONVAR_ROL_BESCHRIJVING = 'gebruiker_rol_beschrijving'
 
 
-# TODO: verwijder ROL_NONE (nodig voor accounts die geen nhblid zijn)
+# FUTURE: overweeg verwijderen ROL_NONE (nodig voor accounts die geen nhblid zijn?)
 
 class Rollen(enum.IntEnum):
     """ definitie van de rollen met codes
@@ -479,14 +479,12 @@ def functie_expandeer_rol(functie_cache, nhbver_cache, rol_in, functie_in):
                     yield Rollen.ROL_HWL, obj.pk
             # for
 
-        # TODO: is SEC naar HWL gewenst?
         if functie_in.rol == 'SEC':
             # secretaris mag HWL worden, binnen de vereniging
             for pk, obj in functie_cache.items():
                 if obj.rol == 'HWL' and obj.ver_nhb_nr == functie_in.nhb_ver.nhb_nr:
                     yield Rollen.ROL_HWL, obj.pk
 
-        # TODO: is HWL naar WL gewenst? HWL kan alles al..
         if functie_in.rol == 'HWL':
             # expandeer naar de WL rollen binnen dezelfde vereniging
             for pk, obj in functie_cache.items():

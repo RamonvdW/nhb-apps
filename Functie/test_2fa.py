@@ -109,6 +109,8 @@ class TestAccount2FA(E2EHelpers, TestCase):
         self.account_admin = Account.objects.get(username='admin')
         self.assertTrue(self.account_admin.otp_is_actief)
 
+        self.e2e_assert_other_http_commands_not_supported(self.url_koppel, post=False)
+
     def test_2fa_koppelen_al_gekoppeld(self):
         # maak OTP koppeling
         self.account_admin.otp_is_actief = True
@@ -202,11 +204,11 @@ class TestAccount2FA(E2EHelpers, TestCase):
 
         # juiste otp code
         code = get_otp_code(self.account_admin)
-        with self.assert_max_queries(84):       # iets hoger ivm follow=True
-            resp = self.client.post(self.url_controle, {'otp_code': code}, follow=True)     # TODO: remove follow=True ivm assert_max_queries
+        with self.assert_max_queries(25):       # iets hoger ivm follow=True
+            resp = self.client.post(self.url_controle, {'otp_code': code}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
 
-# TODO: gebruik assert_other_http_commands_not_supported
+        self.e2e_assert_other_http_commands_not_supported(self.url_controle, post=False)
 
 # end of file

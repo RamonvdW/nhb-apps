@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -34,7 +34,7 @@ class NhbRayon(models.Model):
     naam = models.CharField(max_length=20)      # Rayon 3
 
     # beschrijving van het gebied dat dit rayon dekt
-    geografisch_gebied = models.CharField(max_length=50)        # TODO: verwijderen
+    geografisch_gebied = models.CharField(max_length=50)        # FUTURE: verwijderen
 
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """

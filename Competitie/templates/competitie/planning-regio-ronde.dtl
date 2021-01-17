@@ -10,7 +10,6 @@
 
 {% block pagina %}
 
-    <!-- TODO: in methode1 is dit geen WEEK planning -->
     <h4>Weekplanning regiocompetitie</h4>
 
     <div class="row">

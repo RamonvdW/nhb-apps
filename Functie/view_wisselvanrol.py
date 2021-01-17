@@ -32,7 +32,7 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
 
     """ Django class-based view om van rol te wisselen """
 
-    # TODO: zou next parameter kunnen ondersteunen, net als login view
+    # FUTURE: zou next parameter kunnen ondersteunen, net als login view
 
     # class variables shared by all instances
     template_name = TEMPLATE_WISSELVANROL

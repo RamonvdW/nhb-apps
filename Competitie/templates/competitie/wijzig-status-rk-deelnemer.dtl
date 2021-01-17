@@ -122,19 +122,6 @@
         {% endif %}
     </table>
 
-    <!--        TODO: alleen tonen als rol != RKO
-    {% if not deelnemer.deelname == 'N' %}
-        <table class="white centered">
-            <tr>
-                <td style="padding:24px"><b class="red-text">LET&nbsp;OP!</b></td>
-                <td>Afmelden kan niet ongedaan gemaakt worden.<br>(na afmelden wordt een andere sporter opgeroepen)</td>
-                <td style="padding:24px"><b class="red-text">LET&nbsp;OP!</b></td>
-            </tr>
-        </table>
-    {% endif %}
-    -->
-
-
     {% if kan_niet_verwijderen %}
         <p>&nbsp;</p>
         <ul class="collapsible">
