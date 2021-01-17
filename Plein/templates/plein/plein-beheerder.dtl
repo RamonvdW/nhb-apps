@@ -41,20 +41,11 @@
             {% include 'plein/card.dtl' with title="Beheer Vereniging" text="Extra functies voor beheerders van jouw vereniging." icon="store" url=card_url %}
         {% endif %}
 
-        <!-- toon en koppel beheerders -->
-        <!-- TODO: verplaats naar Bondscompetities? -->
-        {% if toon_beheerders %}
-            {% url 'Functie:overzicht' as card_url %}
-            {% include 'plein/card.dtl' with title="Beheerders" text="Toon wie beheerders van de bondscompetitie zijn, koppel andere beheerders of wijzig contactgegevens." icon="face" url=card_url %}
-        {% endif %}
-
-
         <!-- clusters RCL -->
         {% if rol_is_rcl %}
             {% url 'Vereniging:clusters' as card_url %}
             {% include 'plein/card.dtl' with title="Clusters" text="Mogelijkheden om in jouw regio de verenigingen in geografische clusters te groeperen." icon="group_work" url=card_url %}
         {% endif %}
-
 
         <!-- verenigingen/accommodaties overzicht IT/BB/BKO -->
         {% if rol_is_bko or rol_is_bb or rol_is_it %}

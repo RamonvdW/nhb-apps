@@ -206,6 +206,8 @@ class CompetitieOverzichtView(View):
     @staticmethod
     def _get_competitie_overzicht_hwl(request, context, comp, rol_nu, functie_nu):
 
+        context['huidige_rol'] = rol_get_beschrijving(request)
+
         # haal zowel de 18m als 25m deelcompetities op in de regio van de HWL
         context['planning_deelcomp'] = (DeelCompetitie
                                         .objects
@@ -367,6 +369,9 @@ class CompetitieKiesView(TemplateView):
                 datum = zoek_meest_recente_automatisch_vastgestelde_ag()
                 if datum:
                     context['bb_ag_nieuwste_datum'] = localize(datum.date())
+
+        if rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL):
+            context['toon_beheerders'] = True
 
         menu_dynamics_competitie(self.request, context)
         return context

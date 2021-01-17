@@ -97,9 +97,6 @@ class PleinView(View):
                 # beheerder
                 template = TEMPLATE_PLEIN_BEHEERDER
 
-                if rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL):
-                    context['toon_beheerders'] = True
-
                 try:
                     handleiding_pagina = ROL2HANDLEIDING_PAGINA[rol_nu]
                 except KeyError:

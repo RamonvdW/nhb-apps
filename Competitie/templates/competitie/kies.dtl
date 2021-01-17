@@ -58,6 +58,12 @@
 
     <div class="row">
 
+        <!-- toon en koppel beheerders -->
+        {% if toon_beheerders %}
+            {% url 'Functie:overzicht' as card_url %}
+            {% include 'plein/card.dtl' with title="Beheerders" text="Toon wie beheerders van de bondscompetitie zijn, koppel andere beheerders of wijzig contactgegevens." icon="face" url=card_url %}
+        {% endif %}
+
         <!-- algemene informatie over de competities -->
         {% url 'Competitie:info-competitie' as card_url %}
         {% include 'plein/card.dtl' with title="Informatie" text="Algemene informatie over de competities." icon="info" url=card_url %}
