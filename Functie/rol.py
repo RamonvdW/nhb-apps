@@ -111,6 +111,7 @@ def rol_bepaal_hulp_rechten(functie_cache, nhbver_cache, rol, functie_pk):
         #         print("  out: %s" % repr(tup))
         # else:
         #     print("  out: []")
+
     return nwe_functies
 
 
@@ -461,10 +462,14 @@ def functie_expandeer_rol(functie_cache, nhbver_cache, rol_in, functie_in):
                     nhbver_cache[store.nhb_nr] = store
                 # for
 
+                # voorkom herhaaldelijke queries tijdens test zonder vereniging
+                if len(nhbver_cache) == 0:
+                    nhbver_cache[0] = 0
+
             # zoek alle verenigingen in de regio van deze RCL
             verenigingen = list()
             for nhb_nr, ver in nhbver_cache.items():
-                if ver.regio_nr == functie_in.nhb_regio.regio_nr:
+                if nhb_nr != 0 and ver.regio_nr == functie_in.nhb_regio.regio_nr:
                     verenigingen.append(nhb_nr)
             # for
 
