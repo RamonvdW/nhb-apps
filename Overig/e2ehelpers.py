@@ -7,81 +7,104 @@
 from django.contrib import auth
 from django.conf import settings
 from django.test import TestCase
-from django.core.signals import request_started
-from django.db import DEFAULT_DB_ALIAS, connections, reset_queries
+# from django.core.signals import request_started
+# from django.db import DEFAULT_DB_ALIAS, connections, reset_queries
+from django.db import connection
 from Account.models import Account, account_create
 from Functie.view_vhpg import account_vhpg_is_geaccepteerd
 from Overig.e2estatus import validated_templates, included_templates
+from contextlib import contextmanager
 from bs4 import BeautifulSoup
 import subprocess
+import traceback
 import tempfile
 import vnujar
 import pyotp
 
 
-class AssertMaxQueriesContext(object):
-    def __init__(self, test_case, num, connection):
-        self.test_case = test_case
-        self.connection = connection
-        self.num = num
+class MyQueryTracer(object):
+    def __init__(self):
+        self.trace = list()
 
-    def __enter__(self):
-        # entering the 'with' block
-        self.force_debug_cursor = self.connection.force_debug_cursor
-        self.connection.force_debug_cursor = True
-        self.connection.ensure_connection()
-        self.initial_queries = len(self.connection.queries_log)
-        request_started.disconnect(reset_queries)       # apparently prevents queries_log from being emptied
-        return self
+    def __call__(self, execute, sql, params, many, context):
+        call = {'sql': sql}
+        # print('sql:', sql)            # query with some %s in it
+        # print('params:', params)      # params for the %s ?
+        # print('many:', many)          # true/false
 
-    @staticmethod
-    def _find_statement(query, start):                  # pragma: no cover
-        best = -1
-        word_len = 0
-        for word in (#'SELECT', 'DELETE FROM', 'INSERT INTO',m
-                     ' WHERE ', ' LEFT OUTER JOIN ',' INNER JOIN ', ' LEFT JOIN ', ' JOIN ',
-                     ' ORDER BY ', ' GROUP BY ', ' ON ', ' FROM ', ' VALUES '):
-            pos = query.find(word, start)
-            if pos >= 0 and (best == -1 or pos < best):
-                best = pos
-                word_len = len(word)
+        call['stack'] = stack = list()
+        for fname, linenr, base, code in traceback.extract_stack():
+            if base != '__call__' and not fname.startswith('/usr/lib') and '/site-packages/' not in fname and not 'manage.py' in fname:
+                stack.append((fname, linenr, base))
         # for
-        return best, word_len
+        self.trace.append(call)
 
-    def _reformat_sql(self, query):                     # pragma: no cover
-        start = 0
-        pos, word_len = self._find_statement(query, start)
-        while pos >= 0:
-            query = query[:pos] + '\n   ' + query[pos:]
-            start = pos + word_len + 4
-            pos, word_len = self._find_statement(query, start)
-        # while
-        return query
+        execute(sql, params, many, context)
 
-    def __exit__(self, exc_type, exc_value, traceback):
-        # leaving the 'with' block
-        self.connection.force_debug_cursor = self.force_debug_cursor
-        request_started.connect(reset_queries)
-        if exc_type is not None:                        # pragma: no cover
-            return
-        final_queries = len(self.connection.queries_log)
-        executed = final_queries - self.initial_queries
-        if executed > self.num:                         # pragma: no cover
-            queries = 'Captured queries from index %s to %s:' % (self.initial_queries, final_queries)
-            for i, query in enumerate(self.connection.queries[self.initial_queries:final_queries], start=1):
-                queries += '\n [%d] %s' % (i, self._reformat_sql(query['sql']))
-            # for
-            msg = "Too many queries: %s; maximum %d. " % (executed, self.num)
-            self.test_case.fail(msg=msg + queries)
-        else:
-            ongebruikt = self.num - executed
-            if self.num > 20:
-                if ongebruikt / self.num > 0.25:        # pragma: no cover
-                    queries = 'Captured queries from index %s to %s:' % (self.initial_queries, final_queries)
-                    for i, query in enumerate(self.connection.queries[self.initial_queries:final_queries], start=1):
-                        queries += '\n [%d] %s' % (i, self._reformat_sql(query['sql']))
-                    # for
-                    self.test_case.fail(msg="Maximum (%s) has a lot of margin. Can be set as low as %s\n%s" % (self.num, executed, queries))
+
+# class AssertMaxQueriesContext(object):
+#     def __init__(self, test_case, num, connection):
+#         self.test_case = test_case
+#         self.connection = connection
+#         self.num = num
+#
+#     def __enter__(self):
+#         # entering the 'with' block
+#         self.force_debug_cursor = self.connection.force_debug_cursor
+#         self.connection.force_debug_cursor = True
+#         self.connection.ensure_connection()
+#         self.initial_queries = len(self.connection.queries_log)
+#         request_started.disconnect(reset_queries)       # apparently prevents queries_log from being emptied
+#         return self
+#
+#     @staticmethod
+#     def _find_statement(query, start):                  # pragma: no cover
+#         best = -1
+#         word_len = 0
+#         for word in (#'SELECT', 'DELETE FROM', 'INSERT INTO',m
+#                      ' WHERE ', ' LEFT OUTER JOIN ',' INNER JOIN ', ' LEFT JOIN ', ' JOIN ',
+#                      ' ORDER BY ', ' GROUP BY ', ' ON ', ' FROM ', ' VALUES '):
+#             pos = query.find(word, start)
+#             if pos >= 0 and (best == -1 or pos < best):
+#                 best = pos
+#                 word_len = len(word)
+#         # for
+#         return best, word_len
+#
+#     def _reformat_sql(self, query):                     # pragma: no cover
+#         start = 0
+#         pos, word_len = self._find_statement(query, start)
+#         while pos >= 0:
+#             query = query[:pos] + '\n   ' + query[pos:]
+#             start = pos + word_len + 4
+#             pos, word_len = self._find_statement(query, start)
+#         # while
+#         return query
+#
+#     def __exit__(self, exc_type, exc_value, traceback):
+#         # leaving the 'with' block
+#         self.connection.force_debug_cursor = self.force_debug_cursor
+#         request_started.connect(reset_queries)
+#         if exc_type is not None:                        # pragma: no cover
+#             return
+#         final_queries = len(self.connection.queries_log)
+#         executed = final_queries - self.initial_queries
+#         if executed > self.num:                         # pragma: no cover
+#             queries = 'Captured queries from index %s to %s:' % (self.initial_queries, final_queries)
+#             for i, query in enumerate(self.connection.queries[self.initial_queries:final_queries], start=1):
+#                 queries += '\n [%d] %s' % (i, self._reformat_sql(query['sql']))
+#             # for
+#             msg = "Too many queries: %s; maximum %d. " % (executed, self.num)
+#             self.test_case.fail(msg=msg + queries)
+#         else:
+#             ongebruikt = self.num - executed
+#             if self.num > 20:
+#                 if ongebruikt / self.num > 0.25:        # pragma: no cover
+#                     queries = 'Captured queries from index %s to %s:' % (self.initial_queries, final_queries)
+#                     for i, query in enumerate(self.connection.queries[self.initial_queries:final_queries], start=1):
+#                         queries += '\n [%d] %s' % (i, self._reformat_sql(query['sql']))
+#                     # for
+#                     self.test_case.fail(msg="Maximum (%s) has a lot of margin. Can be set as low as %s\n%s" % (self.num, executed, queries))
 
 
 class E2EHelpers(object):
@@ -559,9 +582,62 @@ class E2EHelpers(object):
         self.assertEqual(resp.status_code, 302)
         self.assertNotEqual(resp.url, '/plein/')    # redirect naar plein is typisch een reject om rechten
 
-    def assert_max_queries(self, num):
-        conn = connections[DEFAULT_DB_ALIAS]
-        return AssertMaxQueriesContext(self, num, conn)
+    # def OLD_assert_max_queries(self, num):
+    #     conn = connections[DEFAULT_DB_ALIAS]
+    #     return AssertMaxQueriesContext(self, num, conn)
 
+    @staticmethod
+    def _find_statement(query, start):                  # pragma: no cover
+        best = -1
+        word_len = 0
+        for word in (# 'SELECT', 'DELETE FROM', 'INSERT INTO',
+                     ' WHERE ', ' LEFT OUTER JOIN ',' INNER JOIN ', ' LEFT JOIN ', ' JOIN ',
+                     ' ORDER BY ', ' GROUP BY ', ' ON ', ' FROM ', ' VALUES '):
+            pos = query.find(word, start)
+            if pos >= 0 and (best == -1 or pos < best):
+                best = pos
+                word_len = len(word)
+        # for
+        return best, word_len
+
+    def _reformat_sql(self, prefix, query):       # pragma: no cover
+        start = 0
+        pos, word_len = self._find_statement(query, start)
+        prefix = prefix[:-1]        # because pos starts with a space
+        while pos >= 0:
+            query = query[:pos] + prefix + query[pos:]
+            start = pos + word_len + len(prefix)
+            pos, word_len = self._find_statement(query, start)
+        # while
+        return query
+
+    @contextmanager
+    def assert_max_queries(self, num):
+        tracer = MyQueryTracer()
+        try:
+            with connection.execute_wrapper(tracer):
+                yield
+        finally:
+            count = len(tracer.trace)
+            if count > num:
+                queries = 'Captured queries:'
+                prefix = '\n       '
+                for i, call in enumerate(tracer.trace, start=1):
+                    if i > 1:
+                        queries += '\n'
+                    queries += '\n [%d]  ' % i
+                    queries += self._reformat_sql(prefix, call['sql'])
+                    queries += '\n'
+                    for fname, linenr, base in call['stack']:
+                        queries += prefix + '%s:%s   %s' % (fname, linenr, base)
+                # for
+                msg = "Too many queries: %s; maximum %d. " % (count, num)
+                self.fail(msg=msg + queries)
+            else:
+                # kijk of het wat minder kan
+                if count > 20:
+                    ongebruikt = num - count
+                    if ongebruikt / num > 0.25:        # pragma: no cover
+                        self.fail(msg="Maximum (%s) has a lot of margin. Can be set as low as %s" % (num, count))
 
 # end of file
