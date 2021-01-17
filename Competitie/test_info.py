@@ -47,6 +47,7 @@ class TestCompetitieInfo(E2EHelpers, TestCase):
         self.account_geenlid = self.e2e_create_account('geenlid', 'geenlid@gmail.com', 'Testertje')
 
         self.url_info = '/bondscompetities/info/'
+        self.url_leeftijden = '/bondscompetities/info/leeftijden/'
 
     def test_anon(self):
         with self.assert_max_queries(20):
@@ -54,6 +55,12 @@ class TestCompetitieInfo(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/info-competitie.dtl', 'plein/site_layout.dtl'))
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_leeftijden)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/info-leeftijden.dtl', 'plein/site_layout.dtl'))
 
     def test_geen_lid(self):
         self.e2e_login(self.account_geenlid)
@@ -63,6 +70,12 @@ class TestCompetitieInfo(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/info-competitie.dtl', 'plein/site_layout.dtl'))
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_leeftijden)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/info-leeftijden.dtl', 'plein/site_layout.dtl'))
 
     def test_inactief(self):
         self.lid_100001.bij_vereniging = None
@@ -76,6 +89,12 @@ class TestCompetitieInfo(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/info-competitie.dtl', 'plein/site_layout.dtl'))
 
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_leeftijden)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/info-leeftijden.dtl', 'plein/site_layout.dtl'))
+
     def test_schutter(self):
         self.e2e_login(self.account_lid)
 
@@ -84,5 +103,11 @@ class TestCompetitieInfo(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/info-competitie.dtl', 'plein/site_layout.dtl'))
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_leeftijden)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/info-leeftijden.dtl', 'plein/site_layout.dtl'))
 
 # end of file

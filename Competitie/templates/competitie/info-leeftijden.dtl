@@ -75,7 +75,7 @@
             </tr>
 
             <tr>
-                <td>Aspiranten</td>
+                <td>Aspirant</td>
                 <td>Geboren {{ comp_1.asp }} of later</td>
                 <td>Geboren {{ comp_2.asp }} of later</td>
             </tr>

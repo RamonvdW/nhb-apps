@@ -6,7 +6,6 @@
 
 from django.views.generic import TemplateView, ListView, View
 from django.utils import timezone
-from BasisTypen.models import LeeftijdsKlasse, MAXIMALE_LEEFTIJD_JEUGD, GESLACHT
 from Plein.menu import menu_dynamics
 from BasisTypen.models import IndivWedstrijdklasse
 from NhbStructuur.models import NhbRegio
@@ -62,7 +61,6 @@ class InfoLeeftijdenView(TemplateView):
 
     @staticmethod
     def _maak_jaren(jaar, begin_leeftijd, aantal):
-        print('jaar=%s, begin_leeftijd=%s, aantal=%s' % (jaar, begin_leeftijd, aantal))
         jaar -= begin_leeftijd
         jaren = list()
         while aantal > 0:
@@ -93,9 +91,7 @@ class InfoLeeftijdenView(TemplateView):
         context['comp_1'] = self._comp_info(huidige_jaar - 1)
         context['comp_2'] = self._comp_info(huidige_jaar)
 
-        _, _, is_jong, _, _ = get_sessionvars_leeftijdsklassen(self.request)
-        if is_jong:
-            context['is_jong'] = True
+        _, _, context['is_jong'], _, _ = get_sessionvars_leeftijdsklassen(self.request)
 
         menu_dynamics(self.request, context, actief='competitie')
         return context
