@@ -5,7 +5,6 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
-from django.db import connection, reset_queries
 from django.test import TestCase
 from django.urls import reverse
 from Overig.e2ehelpers import E2EHelpers
@@ -136,33 +135,20 @@ class TestBeheer(E2EHelpers, TestCase):
         self.assertContains(resp, 'Nieuw wachtwoord')
         self.assertEqual(resp.redirect_chain[-1], ('/account/nieuw-wachtwoord/', 302))
 
-    def _check_url_queries(self, url):
-        reset_queries()
-
-        # print('url: %s' % repr(url))
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assertTrue(resp.status_code, 200)  # 200 = OK
-
-        # TODO: hoeveel data zit er eigenlijk in de test database?
-        if len(connection.queries) > 15:        # pragma: no cover
-            msg = 'Veel (%s) queries voor url %s' % (len(connection.queries), url)
-            for query in connection.queries:
-                msg += '\n%s' % query
-            # for
-            self.fail(msg=msg)
-
-        self.assertTrue(len(connection.queries) < 20)
-
     def test_queries(self):
         # controleer dat alle beheer pagina's het goed doen
         settings.DEBUG = True
         self.e2e_login_and_pass_otp(self.account_admin)
 
         for url in BEHEER_PAGINAS:
-            self._check_url_queries(url)
-            self._check_url_queries(url + 'add/')
-            self._check_url_queries(url + '1/change/')
+            with self.assert_max_queries(20):
+                self.client.get(url)
+
+            with self.assert_max_queries(20):
+                self.client.get(url + 'add/')
+
+            with self.assert_max_queries(20):
+                self.client.get(url + '1/change/')
         # for
 
         settings.DEBUG = False
