@@ -52,7 +52,7 @@ def main():
 
         report_validated_templates()
 
-        if stars:                   # pragma: no branch
+        if stars:                   # pragma: no cover
             print("\nDone!")
     except KeyboardInterrupt:       # pragma: no cover
         print('\nInterrupted!')

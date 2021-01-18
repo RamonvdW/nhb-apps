@@ -1100,7 +1100,13 @@ class VerwijderWedstrijdView(UserPassesTestMixin, View):
 
         wedstrijd.delete()
 
-        url = reverse('Competitie:regio-ronde-planning', kwargs={'ronde_pk': ronde.pk})
+        if deelcomp.inschrijf_methode == INSCHRIJF_METHODE_1:
+            url = reverse('Competitie:regio-methode1-planning',
+                          kwargs={'ronde_pk': ronde.pk})
+        else:
+            url = reverse('Competitie:regio-ronde-planning',
+                          kwargs={'ronde_pk': ronde.pk})
+
         return HttpResponseRedirect(url)
 
 

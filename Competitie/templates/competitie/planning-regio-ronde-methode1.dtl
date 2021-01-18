@@ -46,7 +46,7 @@
 
     <p>&nbsp;</p>
     <p><a class="btn-nhb-blauw" href="{{ terug_url }}">
-            <i class="material-icons-round left">arrow_upward</i>Planning {% if ronde.cluster %}cluster{% else %}regio{% endif %}</a>
+            <i class="material-icons-round left">arrow_upward</i>Planning regio</a>
     </p>
 
     <p>&nbsp;</p>
