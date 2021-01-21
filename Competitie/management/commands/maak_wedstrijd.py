@@ -79,6 +79,7 @@ class Command(BaseCommand):
                 self.stderr.write('Vereniging %s zit niet in cluster %s' % (repr(ver_nr), repr(geo)))
                 return
 
+        done = False
         for comp in Competitie.objects.filter(is_afgesloten=False,
                                               afstand=afstand):
             for ronde in (DeelcompetitieRonde

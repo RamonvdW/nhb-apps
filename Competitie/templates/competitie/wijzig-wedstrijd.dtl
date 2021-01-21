@@ -227,6 +227,7 @@
                 let el2 = document.querySelector('#datum')
                 let options2 = { defaultDate: new Date("{{ wedstrijd.datum_wanneer|date:'Y-m-d' }}"),
                                  setDefaultDate: true,
+                                 format: "dddd d mmmm yyyy",
                                  minDate: minDate, maxDate: maxDate,
                                  yearRange: competitieJaren }
                 M.Datepicker.init(el2, options2)

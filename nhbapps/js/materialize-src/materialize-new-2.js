@@ -8816,8 +8816,8 @@ $jscomp.polyfill = function (e, r, p, m) {
         'nov',
         'dec'
       ],
-      weekdays: ['Zondag', 'Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag', 'Zaterdag'],
-      weekdaysShort: ['Zon', 'Maa', 'Din', 'Woe', 'Don', 'Vrij', 'zat'],
+      weekdays: ['zondag', 'maandag', 'dinsdag', 'woensdag', 'donderdag', 'vrijdag', 'zaterdag'],
+      weekdaysShort: ['zon', 'maa', 'din', 'woe', 'don', 'vrij', 'zat'],
       weekdaysAbbrev: ['Z', 'M', 'D', 'W', 'D', 'V', 'Z']
     },
 
