@@ -279,10 +279,10 @@ class UitslagenRegioView(TemplateView):
             vers = (NhbVereniging
                     .objects
                     .select_related('regio')
-                    .filter(regio__regio_nr=gekozen_regio_nr))
+                    .filter(regio__regio_nr=gekozen_regio_nr)
+                    .order_by('nhb_nr'))
 
             for ver in vers:
-                ver.title_str = str(ver.nhb_nr)
                 ver.zoom_url = reverse('Competitie:uitslagen-vereniging-n',
                                        kwargs={'comp_pk': comp.pk,
                                                'comp_boog': comp_boog,

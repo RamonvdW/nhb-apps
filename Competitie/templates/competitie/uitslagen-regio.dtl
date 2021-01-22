@@ -59,25 +59,35 @@
         {% endfor %}
     </div>
 
-
-    <p>Kies een vereniging:</p>
-
+    <br><br>
     <div class="white shrink-wrap-5">
-        <a class="margin-5 btn-nhb-blauw btn-small disabled" href="#">Alles</a>
-
-        {% for ver in ver_filters %}
-            <a class="margin-5 btn-nhb-blauw btn-small" href="{{ ver.zoom_url }}">{{ ver.title_str }}</a>
-        {% endfor %}
+        <div style="margin-left: 10px">
+            <label>
+                <input type="checkbox" class="filled-in" id="zes_scores" onchange="zes_scores()"{% if zes_scores_checked %} checked{% endif %}>
+                <span class="black-text">Alleen sporters met 6 of meer geschoten wedstrijden</span>
+            </label>
+        </div>
     </div>
 
-
-    <div style="margin-left: 10px; margin-top: 30px">
-        <label>
-            <input type="checkbox" class="filled-in" id="zes_scores" onchange="zes_scores()"{% if zes_scores_checked %} checked{% endif %}>
-            <span class="black-text">Alleen sporters met 6 of meer geschoten wedstrijden</span>
-        </label>
+    <br><br>
+    <div class="row">
+        <div class="col s12 m6" style="padding:0">
+            <ul class="collapsible" style="box-shadow: none; border:0px">
+                <li>
+                    <div class="collapsible-header white">Klik voor verenigingen</div>
+                    <div class="collapsible-body white">
+                        <span>Kies een vereniging:</span><br>
+                        {% for ver in ver_filters %}
+                            <p>
+                            <a class="btn-nhb-blauw" href="{{ ver.zoom_url }}">{{ ver.nhb_nr }}</a>
+                            <span>&nbsp;&nbsp;{{ ver.naam }}</span>
+                            </p>
+                        {% endfor %}
+                    </div>
+                </li>
+            </ul>
+        </div>
     </div>
-
 
     <p>&nbsp;</p>
     <div class="row">
