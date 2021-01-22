@@ -33,24 +33,6 @@ TEMPLATE_COMPETITIE_LIJST_RK = 'competitie/lijst-rk-selectie.dtl'
 TEMPLATE_COMPETITIE_WIJZIG_STATUS_RK_SCHUTTER = 'competitie/wijzig-status-rk-deelnemer.dtl'
 TEMPLATE_COMPETITIE_WIJZIG_LIMIETEN_RK = 'competitie/wijzig-limieten-rk.dtl'
 
-
-# python strftime: 0=sunday, 6=saturday
-# wij rekenen het verschil ten opzicht van maandag in de week
-WEEK_DAGEN = (
-    (0, 'Maandag'),
-    (1, 'Dinsdag'),
-    (2, 'Woensdag'),
-    (3, 'Donderdag'),
-    (4, 'Vrijdag'),
-    (5, 'Zaterdag'),
-    (6, 'Zondag'),
-)
-
-JA_NEE = {
-    False: 'Nee',
-    True: 'Ja'
-}
-
 mutatie_ping = BackgroundSync(settings.BACKGROUND_SYNC__KAMPIOENSCHAP_MUTATIES)
 
 

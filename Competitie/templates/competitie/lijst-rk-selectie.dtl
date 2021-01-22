@@ -48,7 +48,7 @@
 
     {% else %}
 
-        <p>Hieronder tonen we de vastgestelde sporters lijst voor elk van de {{ aantal_klassen }} wedstrijdklassen van de Rayonkampioenschappen.</p>
+        <p>Hieronder tonen we de vastgestelde sporters lijst voor elk van de {{ aantal_klassen }} wedstrijdklassen van de Rayonkampioenschappen in <b>{{ deelcomp_rk.nhb_rayon }}</b>.</p>
 
         <p>
             <a class="btn-small btn-nhb-blauw" href="{{ wiki_rk_schutters }}" target="_blank" rel="noopener noreferrer">
