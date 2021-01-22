@@ -106,29 +106,21 @@ class UitslagenVerenigingView(TemplateView):
                       .objects
                       .select_related('schutterboog',
                                       'schutterboog__nhblid',
-                                      'bij_vereniging',
                                       'klasse',
                                       'klasse__indiv',
                                       'klasse__indiv__boogtype')
                       .filter(deelcompetitie=deelcomp,
                               bij_vereniging__nhb_nr=ver_nr,
                               klasse__indiv__boogtype=boogtype)
-                      .order_by('klasse__indiv__volgorde', '-gemiddelde'))
+                      .order_by('-gemiddelde'))
 
-        klasse = -1
-        rank = 0
+        rank = 1
         for deelnemer in deelnemers:
-            deelnemer.break_klasse = (klasse != deelnemer.klasse.indiv.volgorde)
-            if deelnemer.break_klasse:
-                deelnemer.klasse_str = deelnemer.klasse.indiv.beschrijving
-                rank = 0
-            klasse = deelnemer.klasse.indiv.volgorde
-
-            rank += 1
             lid = deelnemer.schutterboog.nhblid
             deelnemer.rank = rank
             deelnemer.naam_str = "[%s] %s" % (lid.nhb_nr, lid.volledige_naam())
-            deelnemer.ver_str = str(deelnemer.bij_vereniging)
+            deelnemer.klasse_str = deelnemer.klasse.indiv.beschrijving
+            rank += 1
         # for
 
         return deelnemers

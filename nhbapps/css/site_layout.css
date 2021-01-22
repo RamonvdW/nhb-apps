@@ -1,6 +1,6 @@
 
 /*
-                Copyright (c) 2019-2020 Ramon van der Winkel.
+                Copyright (c) 2019-2021 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 */
@@ -45,7 +45,6 @@ a {
     margin: 5px;
 }
 
-
 /* layout van het menu in de sidenav */
 .menu-level1 {
     color: #fff;
@@ -65,11 +64,22 @@ a {
     background-color: #f94137;      /* NHB medium rood */
 }
 
+del {
+    text-decoration: line-through;
+    text-decoration-style: double;
+    text-decoration-color: #0aa0e1;     /* NHB blauw default */
+}
 
 /* lagere regel in een grid */
 .small-row {
     padding: 5px 10px 5px 10px;
     margin-bottom: 0px;
+}
+
+/* smal in de breedte */
+.smal {
+    padding-left: 1px;
+    padding-right: 1px;
 }
 
 .in-table-icon {
