@@ -71,6 +71,21 @@
             </tr>
             {% endif %}
 
+            {% if wedstrijden %}    <!-- inschrijfmethode 1 -->
+            <tr>
+                <td>Kies wanneer je wilt schieten:<br>
+                    <br>
+                    {% for wedstrijd in wedstrijden %}
+                        <label style="margin-left: 20px">
+                            <input type="checkbox" class="filled-in" name="wedstrijd_{{ wedstrijd.pk }}">
+                            <span class="black-text">{{ wedstrijd.datum_wanneer }} om {{ wedstrijd.tijd_begin_wedstrijd }} bij <b>{{ wedstrijd.vereniging.naam }}</b> te {{ wedstrijd.vereniging.plaats }}</span>
+                        </label>
+                        <br>
+                    {% endfor %}
+                </td>
+            </tr>
+            {% endif %}
+
             {% if dagdelen %}       <!-- inschrijfmethode 3 -->
             <tr>
                 <td>Kies wanneer in de week je kan schieten:<br>

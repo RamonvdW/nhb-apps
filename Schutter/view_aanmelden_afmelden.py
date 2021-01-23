@@ -10,11 +10,14 @@ from django.views.generic import View, TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
 from Functie.rol import Rollen, rol_get_huidige
-from Competitie.models import (DeelCompetitie, CompetitieKlasse, RegioCompetitieSchutterBoog,
+from Competitie.models import (DeelCompetitie, DeelcompetitieRonde,
+                               CompetitieKlasse, RegioCompetitieSchutterBoog,
                                LAAG_REGIO, AG_NUL,
-                               INSCHRIJF_METHODE_3, DAGDEEL, DAGDEEL_AFKORTINGEN)
-from Score.models import Score, ScoreHist
+                               INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3,
+                               DAGDEEL, DAGDEEL_AFKORTINGEN)
 from Plein.menu import menu_dynamics
+from Score.models import Score, ScoreHist
+from Wedstrijden.models import Wedstrijd
 from .models import SchutterVoorkeuren, SchutterBoog
 
 
@@ -60,6 +63,11 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
             raise Resolver404()
         except (SchutterBoog.DoesNotExist, DeelCompetitie.DoesNotExist):
             # niet bestaand record
+            raise Resolver404()
+
+        # controleer dat de competitie aanmeldingen accepteert
+        deelcomp.competitie.zet_fase()
+        if deelcomp.competitie.fase < 'B' or deelcomp.competitie.fase >= 'F':
             raise Resolver404()
 
         # controleer dat schutterboog bij de ingelogde gebruiker hoort
@@ -137,6 +145,25 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
                                           kwargs={'schutterboog_pk': schutterboog.pk,
                                                   'deelcomp_pk': deelcomp.pk})
 
+        if methode == INSCHRIJF_METHODE_1:
+            pks = list()
+            for ronde in (DeelcompetitieRonde
+                          .objects
+                          .select_related('plan')
+                          .filter(deelcompetitie=deelcomp)):
+                if not ronde.is_voor_import_oude_programma():
+                    # toon de HWL alle wedstrijden in de regio, dus alle clusters
+                    pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
+            # for
+
+            wedstrijden = (Wedstrijd
+                           .objects
+                           .filter(pk__in=pks)
+                           .select_related('vereniging')
+                           .order_by('datum_wanneer',
+                                     'tijd_begin_wedstrijd'))
+            context['wedstrijden'] = wedstrijden
+
         if methode == INSCHRIJF_METHODE_3:
             context['dagdelen'] = DAGDEEL
             if deelcomp.toegestane_dagdelen != '':
@@ -191,13 +218,19 @@ class RegiocompetitieAanmeldenView(View):
 
             deelcomp = (DeelCompetitie
                         .objects
-                        .select_related('competitie', 'nhb_regio')
+                        .select_related('competitie',
+                                        'nhb_regio')
                         .get(pk=deelcomp_pk))
         except (ValueError, KeyError):
             # vuilnis
             raise Resolver404()
         except (SchutterBoog.DoesNotExist, DeelCompetitie.DoesNotExist):
             # niet bestaand record
+            raise Resolver404()
+
+        # controleer dat de competitie aanmeldingen accepteert
+        deelcomp.competitie.zet_fase()
+        if deelcomp.competitie.fase < 'B' or deelcomp.competitie.fase >= 'F':
             raise Resolver404()
 
         # controleer dat schutterboog bij de ingelogde gebruiker hoort
@@ -291,6 +324,24 @@ class RegiocompetitieAanmeldenView(View):
         aanmelding.inschrijf_notitie = opmerking
 
         aanmelding.save()
+
+        if methode == INSCHRIJF_METHODE_1:
+            pks = list()
+            for ronde in (DeelcompetitieRonde
+                    .objects
+                    .select_related('plan')
+                    .filter(deelcompetitie=deelcomp)):
+                if not ronde.is_voor_import_oude_programma():
+                    # sta alle wedstrijden in de regio toe, dus alle clusters
+                    pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
+            # for
+            wedstrijden = list()
+            for pk in pks:
+                key = 'wedstrijd_%s' % pk
+                if request.POST.get(key, '') != '':
+                    wedstrijden.append(pk)
+            # for
+            aanmelding.inschrijf_gekozen_wedstrijden.set(wedstrijden)
 
         return HttpResponseRedirect(reverse('Schutter:profiel'))
 

@@ -307,7 +307,6 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                 if request.POST.get(key, '') != '':
                     bulk_wedstrijden.append(pk)
             # for
-            print('bulk_wedstrijden: %s' % bulk_wedstrijden)
 
         bulk_dagdeel = ''
         if methode == INSCHRIJF_METHODE_3:
