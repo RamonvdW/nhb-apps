@@ -363,7 +363,7 @@ LOGGING = {
     },
     'handlers': {
         'syslog': {
-            'level': 'DEBUG',
+            'level': 'INFO',
             'class': 'logging.handlers.SysLogHandler',
             'formatter': 'verbose',
             'facility': 'user',
