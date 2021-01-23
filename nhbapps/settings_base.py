@@ -363,7 +363,7 @@ LOGGING = {
     },
     'handlers': {
         'syslog': {
-            'level': 'INFO',
+            'level': 'DEBUG',
             'class': 'logging.handlers.SysLogHandler',
             'formatter': 'verbose',
             'facility': 'user',
@@ -380,6 +380,10 @@ LOGGING = {
             'level': 'WARNING'
         },
         'djangosaml2idp': {
+            'handlers': ['syslog'],
+            'level': 'WARNING'
+        },
+        'xmlschema': {
             'handlers': ['syslog'],
             'level': 'WARNING'
         },
