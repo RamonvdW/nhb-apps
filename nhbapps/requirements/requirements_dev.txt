@@ -52,7 +52,7 @@ django==3.0.11
     #   djangosaml2idp
 djangosaml2idp==0.7.2
     # via -r requirements_test.txt
-elementpath==2.1.1
+elementpath==2.1.2
     # via
     #   -r requirements_test.txt
     #   xmlschema
