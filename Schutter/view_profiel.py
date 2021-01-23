@@ -338,7 +338,9 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         account = self.request.user
         nhblid = (account
                   .nhblid_set
-                  .select_related('bij_vereniging')
+                  .select_related('bij_vereniging',
+                                  'bij_vereniging__regio',
+                                  'bij_vereniging__regio__rayon')
                   .all())[0]
         voorkeuren, _ = SchutterVoorkeuren.objects.get_or_create(nhblid=nhblid)
 

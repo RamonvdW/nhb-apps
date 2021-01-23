@@ -158,14 +158,14 @@ class TestSchutterProfiel(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(url_ag_vaststellen)
 
-        comp_18 = Competitie.objects.get(afstand='18')
-        comp_25 = Competitie.objects.get(afstand='25')
+        self.comp_18 = Competitie.objects.get(afstand='18')
+        self.comp_25 = Competitie.objects.get(afstand='25')
 
         # klassegrenzen vaststellen
         with self.assert_max_queries(20):
-            resp = self.client.post(url_klassegrenzen_vaststellen % comp_18.pk)
+            resp = self.client.post(url_klassegrenzen_vaststellen % self.comp_18.pk)
         with self.assert_max_queries(20):
-            resp = self.client.post(url_klassegrenzen_vaststellen % comp_25.pk)
+            resp = self.client.post(url_klassegrenzen_vaststellen % self.comp_25.pk)
 
         # zet de inschrijving open
         now = timezone.now()
@@ -397,6 +397,14 @@ class TestSchutterProfiel(E2EHelpers, TestCase):
         # log in as schutter
         self.e2e_login(self.account_normaal)
         self._prep_voorkeuren()
+
+        # competitie wordt niet getoond in vroege fases
+        zet_competitie_fase(self.comp_18, 'A2')
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_profiel)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        zet_competitie_fase(self.comp_18, 'B')
 
         # met standaard voorkeuren worden de regiocompetities getoond
         voorkeuren, _ = SchutterVoorkeuren.objects.get_or_create(nhblid=self.nhblid1)
