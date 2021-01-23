@@ -6,14 +6,13 @@
 
 from django.db import models
 from django.utils import timezone
-from Account.models import Account
 from BasisTypen.models import IndivWedstrijdklasse, TeamWedstrijdklasse
 from Functie.rol import Rollen
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
 from Functie.models import Functie
 from Schutter.models import SchutterBoog
 from Score.models import Score, ScoreHist
-from Wedstrijden.models import WedstrijdenPlan
+from Wedstrijden.models import WedstrijdenPlan, Wedstrijd
 from decimal import Decimal
 from datetime import date
 import datetime
@@ -580,8 +579,11 @@ class RegioCompetitieSchutterBoog(models.Model):
     # opmerking vrije tekst
     inschrijf_notitie = models.TextField(default="", blank=True)
 
-    # voorkeur dagdelen
+    # voorkeur dagdelen (methode 3)
     inschrijf_voorkeur_dagdeel = models.CharField(max_length=2, choices=DAGDEEL, default="GN")
+
+    # voorkeur schietmomenten (methode 1)
+    inschrijf_gekozen_wedstrijden = models.ManyToManyField(Wedstrijd, blank=True)
 
     # alternatieve uitslag - dit is tijdelijk
     alt_score1 = models.PositiveIntegerField(default=0)

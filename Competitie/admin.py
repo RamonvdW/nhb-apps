@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import admin
-
+from Wedstrijden.models import Wedstrijd
 from .models import (Competitie, DeelCompetitie, DeelcompetitieRonde,
                      CompetitieKlasse, DeelcompetitieKlasseLimiet,
                      RegioCompetitieSchutterBoog, KampioenschapSchutterBoog,
@@ -42,8 +42,9 @@ class RegioCompetitieSchutterBoogAdmin(admin.ModelAdmin):
              }),
         ('Inschrijving',
             {'fields': ('inschrijf_voorkeur_team',
-                        'inschrijf_notitie',
-                        'inschrijf_voorkeur_dagdeel'),
+                        'inschrijf_gekozen_wedstrijden',
+                        'inschrijf_voorkeur_dagdeel',
+                        'inschrijf_notitie'),
              }),
         ('Uitslag',
             {'fields': ('score1', 'score2', 'score3', 'score4', 'score5', 'score6', 'score7',
@@ -75,6 +76,11 @@ class RegioCompetitieSchutterBoogAdmin(admin.ModelAdmin):
                            'schutterboog',
                            'schutterboog__nhblid')
 
+    def get_form(self, request, obj=None, **kwargs):
+        if obj:
+            self.obj = obj
+        return super().get_form(request, obj, **kwargs)
+
     def formfield_for_foreignkey(self, db_field, request, **kwargs):    # pragma: no cover
         if db_field.name == 'klasse':
             kwargs['queryset'] = (CompetitieKlasse
@@ -83,6 +89,24 @@ class RegioCompetitieSchutterBoogAdmin(admin.ModelAdmin):
                                   .all())
 
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+    def formfield_for_manytomany(self, db_field, request, **kwargs):    # pragma: no cover
+        if db_field.name == 'inschrijf_gekozen_wedstrijden':
+            pks = list()
+            for ronde in (DeelcompetitieRonde
+                          .objects
+                          .select_related('plan')
+                          .filter(deelcompetitie=self.obj.deelcompetitie)):
+                if not ronde.is_voor_import_oude_programma():
+                    # sta alle wedstrijden in de regio toe, dus alle clusters
+                    pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
+            # for
+            kwargs['queryset'] = (Wedstrijd
+                                  .objects
+                                  .filter(pk__in=pks)
+                                  .order_by('datum_wanneer',
+                                            'tijd_begin_wedstrijd'))
+        return super().formfield_for_manytomany(db_field, request, **kwargs)
 
 
 class KampioenschapSchutterBoogAdmin(admin.ModelAdmin):
