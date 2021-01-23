@@ -16,7 +16,7 @@ django==3.0.11
     # via
     #   -c constraints.txt
     #   -r requirements.in
-google-api-core==1.24.1
+google-api-core==1.25.0
     # via google-api-python-client
 google-api-python-client==1.12.8
     # via -r requirements.in
@@ -58,7 +58,7 @@ qrcode==6.1
     # via -r requirements.in
 requests==2.25.1
     # via google-api-core
-rsa==4.6
+rsa==4.7
     # via google-auth
 six==1.15.0
     # via

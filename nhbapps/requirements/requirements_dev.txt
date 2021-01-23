@@ -52,7 +52,11 @@ django==3.0.11
     #   djangosaml2idp
 djangosaml2idp==0.7.2
     # via -r requirements_test.txt
-google-api-core==1.24.1
+elementpath==2.1.1
+    # via
+    #   -r requirements_test.txt
+    #   xmlschema
+google-api-core==1.25.0
     # via
     #   -r requirements_test.txt
     #   google-api-python-client
@@ -83,9 +87,13 @@ idna==2.10
     # via
     #   -r requirements_test.txt
     #   requests
+importlib-resources==5.1.0
+    # via
+    #   -r requirements_test.txt
+    #   pysaml2
 packaging==20.8
     # via pip-review
-pip-licenses==3.2.0
+pip-licenses==3.3.0
     # via -r requirements_dev.in
 pip-review==1.1.0
     # via -r requirements_dev.in
@@ -119,7 +127,7 @@ pyotp==2.4.1
     # via -r requirements_test.txt
 pyparsing==2.4.7
     # via packaging
-pysaml2==6.4.1
+pysaml2==6.5.1
     # via
     #   -r requirements_test.txt
     #   djangosaml2idp
@@ -142,7 +150,7 @@ requests==2.25.1
     #   -r requirements_test.txt
     #   google-api-core
     #   pysaml2
-rsa==4.6
+rsa==4.7
     # via
     #   -r requirements_test.txt
     #   google-auth
@@ -174,6 +182,14 @@ urllib3==1.26.2
     # via
     #   -r requirements_test.txt
     #   requests
+xmlschema==1.4.1
+    # via
+    #   -r requirements_test.txt
+    #   pysaml2
+zipp==3.4.0
+    # via
+    #   -r requirements_test.txt
+    #   importlib-resources
 
 # The following packages are considered to be unsafe in a requirements file:
 # pip
