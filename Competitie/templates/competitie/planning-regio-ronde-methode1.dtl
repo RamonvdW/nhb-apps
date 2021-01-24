@@ -59,6 +59,7 @@
                 <th>Wanneer</th>
                 {% if not vaste_beschrijving %}     <!-- import -->
                     <th>Waar</th>
+                    <th>Aanmeldingen</th>
                     <th><!-- kolom voor wijzig knoppen --></th>
                 {% endif %}
             </tr>
@@ -76,6 +77,8 @@
                             <i class="red-text">Onbekend</i>
                         {% endif %}
                     </td>
+
+                    <td>{{ wedstrijd.aantal_aanmeldingen }}</td>
 
                     <!-- knop om wedstrijd te wijzigen -->
                     <td>

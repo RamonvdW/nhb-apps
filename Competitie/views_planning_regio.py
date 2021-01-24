@@ -667,16 +667,23 @@ class RegioRondePlanningMethode1View(UserPassesTestMixin, TemplateView):
 
         context['ronde'] = ronde
 
-        context['wedstrijden'] = (ronde.plan.wedstrijden
-                                  .select_related('vereniging')
-                                  .order_by('datum_wanneer', 'tijd_begin_wedstrijd'))
+        wedstrijden = (ronde.plan.wedstrijden
+                       .select_related('vereniging')
+                       .order_by('datum_wanneer',
+                                 'tijd_begin_wedstrijd'))
+        context['wedstrijden'] = wedstrijden
+
+        # er zijn minder wedstrijden dan deelnemers
+        for wedstrijd in wedstrijden:
+            wedstrijd.aantal_aanmeldingen = wedstrijd.regiocompetitieschutterboog_set.count()
+        # for
 
         rol_nu = rol_get_huidige(self.request)
         if rol_nu == Rollen.ROL_RCL:
             context['url_nieuwe_wedstrijd'] = reverse('Competitie:regio-methode1-planning',
                                                       kwargs={'ronde_pk': ronde.pk})
 
-            for wedstrijd in context['wedstrijden']:
+            for wedstrijd in wedstrijden:
                 # TODO: vanaf welke datum dit niet meer aan laten passen?
                 wedstrijd.url_wijzig = reverse('Competitie:regio-wijzig-wedstrijd',
                                                kwargs={'wedstrijd_pk': wedstrijd.pk})
