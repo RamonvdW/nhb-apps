@@ -15,8 +15,9 @@ from Functie.rol import Rollen, rol_get_huidige
 from Functie.models import Functie
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from BasisTypen.models import BoogType
-from Competitie.models import (Competitie, DeelCompetitie, RegioCompetitieSchutterBoog,
-                               LAAG_REGIO)
+from Competitie.models import (Competitie, DeelCompetitie,
+                               RegioCompetitieSchutterBoog,
+                               LAAG_REGIO, INSCHRIJF_METHODE_1)
 from Records.models import IndivRecord
 from Score.models import Score, ScoreHist
 from .leeftijdsklassen import get_sessionvars_leeftijdsklassen
@@ -139,7 +140,6 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         # for
 
         # zoek alle inschrijvingen van deze schutter erbij
-        schutterbogen = [schutterboog for _, schutterboog in boogafk2schutterboog.items()]
         inschrijvingen = list(RegioCompetitieSchutterBoog
                               .objects
                               .select_related('deelcompetitie', 'schutterboog')
@@ -186,12 +186,16 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                         if comp.fase <= 'B':
                             obj.url_afmelden = reverse('Schutter:afmelden',
                                                        kwargs={'regiocomp_pk': inschrijving.pk})
+
+                        if obj.inschrijf_methode == INSCHRIJF_METHODE_1 and comp.fase <= 'E':
+                            obj.url_schietmomenten = reverse('Schutter:schietmomenten',
+                                                             kwargs={'deelnemer_pk': inschrijving.pk})
                         break
                 # for
 
                 if not obj.is_ingeschreven:
                     # niet ingeschreven
-                    if comp.fase >= 'B' and comp.fase < 'F':
+                    if 'B' <= comp.fase < 'F':
                         obj.url_aanmelden = reverse('Schutter:bevestig-aanmelden',
                                                     kwargs={'schutterboog_pk': schutterboog.pk,
                                                             'deelcomp_pk': obj.pk})

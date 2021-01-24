@@ -167,6 +167,8 @@
                                     {% csrf_token %}
                                     <input class="btn-nhb-blauw" type="submit" value="Uitschrijven">
                                 </form>
+                            {% elif deelcomp.url_schietmomenten %}
+                                <a class="btn-nhb-blauw" href="{{ deelcomp.url_schietmomenten }}">Aanpassen</a>
                             {% elif deelcomp.competitie.fase < 'B' %}
                                 <span>Inschrijven kan nog niet</span>
                             {% endif %}

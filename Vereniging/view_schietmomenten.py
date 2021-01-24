@@ -124,7 +124,8 @@ class LedenSchietmomentView(UserPassesTestMixin, TemplateView):
             lid = obj.schutterboog.nhblid
             obj.nhb_nr = lid.nhb_nr
             obj.naam_str = "[%s] %s" % (lid.nhb_nr, lid.volledige_naam())
-            obj.url_wijzig = reverse('Plein:plein')
+            obj.url_wijzig = reverse('Schutter:schietmomenten',
+                                     kwargs={'deelnemer_pk': obj.pk})
             pks = obj.inschrijf_gekozen_wedstrijden.values_list('pk', flat=True)
             obj.kruisjes = list()
             for index in range(aantal):

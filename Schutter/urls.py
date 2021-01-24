@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -44,6 +44,9 @@ urlpatterns = [
          view_aanmelden_afmelden.RegiocompetitieAfmeldenView.as_view(),
          name='afmelden'),
 
+    path('regiocompetitie/<deelnemer_pk>/voorkeuren/',
+         view_aanmelden_afmelden.SchutterSchietmomentenView.as_view(),
+         name='schietmomenten'),
 ]
 
 # end of file
