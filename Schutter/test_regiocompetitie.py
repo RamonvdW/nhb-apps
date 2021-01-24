@@ -8,6 +8,7 @@ from django.test import TestCase
 from django.utils import timezone
 from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
 from Competitie.models import Competitie, DeelCompetitie, RegioCompetitieSchutterBoog, INSCHRIJF_METHODE_3
+from Competitie.test_fase import zet_competitie_fase
 from Overig.e2ehelpers import E2EHelpers
 from Score.models import aanvangsgemiddelde_opslaan
 from .models import SchutterBoog
@@ -123,6 +124,12 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
             resp = self.client.post(url_klassegrenzen_vaststellen % comp_18.pk)
         with self.assert_max_queries(20):
             resp = self.client.post(url_klassegrenzen_vaststellen % comp_25.pk)
+
+        comp_18 = Competitie.objects.get(pk=comp_18.pk)
+        zet_competitie_fase(comp_18, 'B')
+
+        comp_25 = Competitie.objects.get(pk=comp_25.pk)
+        zet_competitie_fase(comp_25, 'B')
 
     def test_inschrijven(self):
         # log in as BB en maak de competitie aan
@@ -388,7 +395,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 1)
         schutterboog = SchutterBoog.objects.get(boogtype__afkorting='BB')
         deelcomp = DeelCompetitie.objects.get(competitie__afstand='25', nhb_regio=self.nhbver.regio)
-        with self.assert_max_queries(22):
+        with self.assert_max_queries(23):
             resp = self.client.post(self.url_aanmelden % (deelcomp.pk, schutterboog.pk),
                                     {'wil_in_team': 'ja', 'opmerking': 'ben ik oud genoeg?'})
         self.assert_is_redirect(resp, self.url_profiel)
@@ -462,7 +469,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
 
         # haal de bevestig pagina op met het formulier
         url = self.url_bevestig_aanmelden % (deelcomp.pk, schutterboog.pk)
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(21):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
@@ -533,7 +540,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
 
         # haal de bevestig pagina op met het formulier
         url = self.url_bevestig_aanmelden % (deelcomp.pk, schutterboog.pk)
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(21):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
@@ -584,7 +591,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
 
         # haal de bevestig pagina op met het formulier
         url = self.url_bevestig_aanmelden % (deelcomp.pk, schutterboog.pk)
-        with self.assert_max_queries(30):
+        with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
@@ -595,7 +602,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         # probeer in te schrijven en controleer daarna de wedstrijdklasse waarin de schutter geplaatst is
         url = self.url_aanmelden % (deelcomp.pk, schutterboog.pk)
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
-        with self.assert_max_queries(30):
+        with self.assert_max_queries(20):
             resp = self.client.post(url)
         self.assert_is_redirect(resp, self.url_profiel)
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 1)

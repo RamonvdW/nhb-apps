@@ -239,7 +239,7 @@ class TestCompetitieCliOudeSiteOvernemen(E2EHelpers, TestCase):
         # eerst aanmaken, dan verwijderen
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(1855):
+        with self.assert_max_queries(1860):
             management.call_command('oude_site_overnemen', self.dir_testfiles1, '100', stderr=f1, stdout=f2)
 
         # verwijder de uitslag van een wedstrijd
@@ -278,7 +278,7 @@ class TestCompetitieCliOudeSiteOvernemen(E2EHelpers, TestCase):
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(4046):
+        with self.assert_max_queries(4270):
             management.call_command('verwijder_data_oude_site', stderr=f1, stdout=f2)
         self.assertTrue("AG's opgeruimd: 1" in f2.getvalue())
 

@@ -235,7 +235,7 @@ class TestSchutterProfiel(E2EHelpers, TestCase):
         res = aanvangsgemiddelde_opslaan(schutterboog, 18, 8.18, None, 'Test')
         self.assertTrue(res)
         url = self.url_aanmelden % (deelcomp.pk, schutterboog.pk)
-        with self.assert_max_queries(21):
+        with self.assert_max_queries(22):
             resp = self.client.post(url, {'opmerking': 'test van de 18m'})
         self.assert_is_redirect(resp, self.url_profiel)
 
@@ -432,7 +432,7 @@ class TestSchutterProfiel(E2EHelpers, TestCase):
         res = aanvangsgemiddelde_opslaan(schutterboog, 18, 8.18, None, 'Test')
         self.assertTrue(res)
         url = self.url_aanmelden % (deelcomp.pk, schutterboog.pk)
-        with self.assert_max_queries(21):
+        with self.assert_max_queries(22):
             resp = self.client.post(url, {'opmerking': 'test van de 18m'})
         self.assert_is_redirect(resp, self.url_profiel)
 
