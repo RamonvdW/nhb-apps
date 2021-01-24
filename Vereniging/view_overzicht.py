@@ -9,9 +9,10 @@ from django.urls import reverse
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.templatetags.static import static
-from Plein.menu import menu_dynamics
-from Functie.rol import Rollen, rol_get_huidige_functie
 from Competitie.models import Competitie, DeelCompetitie, LAAG_REGIO, LAAG_RK
+from Functie.rol import Rollen, rol_get_huidige_functie
+from NhbStructuur.models import NhbCluster
+from Plein.menu import menu_dynamics
 from Taken.taken import eval_open_taken
 
 
@@ -40,6 +41,8 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
 
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
         context['nhb_ver'] = functie_nu.nhb_ver
+
+        context['clusters'] = functie_nu.nhb_ver.clusters.all()
 
         context['toon_aanmelden'] = (rol_nu != Rollen.ROL_WL)
 

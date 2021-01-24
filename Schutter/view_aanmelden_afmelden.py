@@ -109,6 +109,7 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
         # zoek alle wedstrijdklassen van deze competitie met het juiste boogtype
         qset = (CompetitieKlasse
                 .objects
+                .select_related('indiv')
                 .filter(competitie=deelcomp.competitie,
                         indiv__boogtype=schutterboog.boogtype)
                 .order_by('indiv__volgorde'))
@@ -191,7 +192,8 @@ class RegiocompetitieAanmeldenView(View):
 
         methode 3: nhblid heeft voorkeuren opgegeven: dagdeel, team schieten, opmerking
     """
-    def post(self, request, *args, **kwargs):
+    @staticmethod
+    def post(request, *args, **kwargs):
         """ Deze functie wordt aangeroepen als de schutter op zijn profiel pagina
             de knop Aanmelden gebruikt voor een specifieke regiocompetitie en boogtype.
         """
@@ -274,6 +276,7 @@ class RegiocompetitieAanmeldenView(View):
         # zoek alle wedstrijdklassen van deze competitie met het juiste boogtype
         qset = (CompetitieKlasse
                 .objects
+                .select_related('indiv')
                 .filter(competitie=deelcomp.competitie,
                         indiv__boogtype=schutterboog.boogtype)
                 .order_by('indiv__volgorde'))
@@ -328,9 +331,9 @@ class RegiocompetitieAanmeldenView(View):
         if methode == INSCHRIJF_METHODE_1:
             pks = list()
             for ronde in (DeelcompetitieRonde
-                    .objects
-                    .select_related('plan')
-                    .filter(deelcompetitie=deelcomp)):
+                          .objects
+                          .select_related('plan')
+                          .filter(deelcompetitie=deelcomp)):
                 if not ronde.is_voor_import_oude_programma():
                     # sta alle wedstrijden in de regio toe, dus alle clusters
                     pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
@@ -348,7 +351,8 @@ class RegiocompetitieAanmeldenView(View):
 
 class RegiocompetitieAfmeldenView(View):
 
-    def post(self, request, *args, **kwargs):
+    @staticmethod
+    def post(request, *args, **kwargs):
         """ Deze functie wordt aangeroepen als de schutter op zijn profiel pagina
             de knop Uitschrijven gebruikt voor een specifieke regiocompetitie.
         """

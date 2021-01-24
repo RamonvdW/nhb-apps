@@ -44,7 +44,7 @@
                     {% for wedstrijd in wedstrijden %}
                         <label style="margin-left: 20px">
                             <input type="checkbox" class="filled-in" name="wedstrijd_{{ wedstrijd.pk }}">
-                            <span class="black-text">{{ wedstrijd.datum_wanneer }} om {{ wedstrijd.tijd_begin_wedstrijd }} bij <b>{{ wedstrijd.vereniging.naam }}</b> te {{ wedstrijd.vereniging.plaats }}</span>
+                            <span class="black-text">{{ wedstrijd.datum_wanneer }} om {{ wedstrijd.tijd_begin_wedstrijd }} bij <b>{{ wedstrijd.vereniging.naam }}</b><span class="hide-on-small-only"> te {{ wedstrijd.vereniging.plaats }}</span></span>
                         </label>
                         <br>
                     {% endfor %}
@@ -103,12 +103,12 @@
                 </tr>
                 <tr>
                     <th class="center-align">{% if mag_aanmelden %}<!-- kolom voor vinkje -->{% else %}Aangemeld{% endif %}</th>
-                    <th data-filter="on">NHB nr</th>
+                    <th data-filter="on">Bonds<wbr/>nummer</th>
                     <th data-filter="on">Naam</th>
                     <th>Leeftijd {{ tweede_jaar }}</th>
                     <th class="hide-on-small-only">Leeftijdsklasse {{ seizoen }}</th>
                     <th>Wedstrijd<wbr/>boog</th>
-                    <th>Aanvangs<wbr/>gemiddelde</th>
+                    <th><span class="hide-on-small-only">Aanvangs<wbr/>gemiddelde</span><span class="hide-on-med-and-up">AG</span></th>
                 </tr>
             </thead>
 
@@ -163,10 +163,10 @@
             </tr>
             <tr>
                 <th class="center-align">{% if mag_aanmelden %}<!-- kolom voor vinkje -->{% else %}Aangemeld{% endif %}</th>
-                <th data-filter="on">NHB nr</th>
+                <th data-filter="on">Bonds<wbr/>nummer</th>
                 <th data-filter="on">Naam</th>
                 <th>Wedstrijdboog</th>
-                <th>Aanvangs<wbr/>gemiddelde</th>
+                <th><span class="hide-on-small-only">Aanvangs<wbr/>gemiddelde</span><span class="hide-on-med-and-up">AG</span></th>
             </tr>
         </thead>
 
