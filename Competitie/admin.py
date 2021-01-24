@@ -76,6 +76,10 @@ class RegioCompetitieSchutterBoogAdmin(admin.ModelAdmin):
                            'schutterboog',
                            'schutterboog__nhblid')
 
+    def __init__(self, model, admin_site):
+        super().__init__(model, admin_site)
+        self.obj = None
+
     def get_form(self, request, obj=None, **kwargs):
         if obj:
             self.obj = obj
@@ -91,7 +95,7 @@ class RegioCompetitieSchutterBoogAdmin(admin.ModelAdmin):
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     def formfield_for_manytomany(self, db_field, request, **kwargs):    # pragma: no cover
-        if db_field.name == 'inschrijf_gekozen_wedstrijden':
+        if db_field.name == 'inschrijf_gekozen_wedstrijden' and self.obj:
             pks = list()
             for ronde in (DeelcompetitieRonde
                           .objects
