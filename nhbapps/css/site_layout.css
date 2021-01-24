@@ -70,6 +70,14 @@ del {
     text-decoration-color: #0aa0e1;     /* NHB blauw default */
 }
 
+.kruisje {
+    text-align: center;
+    border-left: 1px black dashed;
+    border-right: 1px black dashed;
+    padding-left: 1px;
+    padding-right: 1px;
+}
+
 /* lagere regel in een grid */
 .small-row {
     padding: 5px 10px 5px 10px;
@@ -119,6 +127,13 @@ input.table-filter {
     margin-bottom: 10px;
     border-radius: 5px;
     background-color: #fff;     /* wit */
+}
+
+/* verwijder de sidebar op hele kleine schermen */
+@media only screen and (max-width: 300px) {
+    .site-sidebar-box {
+        display: none;
+    }
 }
 
 /* de binnenkant van de feedback floater */
