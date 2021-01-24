@@ -7,8 +7,6 @@
 from django.contrib import auth
 from django.conf import settings
 from django.test import TestCase
-# from django.core.signals import request_started
-# from django.db import DEFAULT_DB_ALIAS, connections, reset_queries
 from django.db import connection
 from Account.models import Account, account_create
 from Functie.view_vhpg import account_vhpg_is_geaccepteerd
@@ -34,7 +32,7 @@ class MyQueryTracer(object):
 
         call['stack'] = stack = list()
         for fname, linenr, base, code in traceback.extract_stack():
-            if base != '__call__' and not fname.startswith('/usr/lib') and '/site-packages/' not in fname and not 'manage.py' in fname:
+            if base != '__call__' and not fname.startswith('/usr/lib') and '/site-packages/' not in fname and 'manage.py' not in fname:
                 stack.append((fname, linenr, base))
         # for
         self.trace.append(call)
@@ -622,6 +620,7 @@ class E2EHelpers(object):
             if count > num:
                 queries = 'Captured queries:'
                 prefix = '\n       '
+                limit = 200     # begrens aantal queries dat we printen
                 for i, call in enumerate(tracer.trace, start=1):
                     if i > 1:
                         queries += '\n'
@@ -630,6 +629,10 @@ class E2EHelpers(object):
                     queries += '\n'
                     for fname, linenr, base in call['stack']:
                         queries += prefix + '%s:%s   %s' % (fname, linenr, base)
+                    # for
+                    limit -= 1
+                    if limit <= 0:
+                        break
                 # for
                 msg = "Too many queries: %s; maximum %d. " % (count, num)
                 self.fail(msg=msg + queries)
