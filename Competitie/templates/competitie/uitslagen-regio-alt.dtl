@@ -10,6 +10,13 @@
 
 {% block pagina %}
 
+    <script>
+        function zes_scores() {
+            let el = document.getElementById('zes_scores')
+            window.location.href = "{{ zes_scores_next }}"
+        }
+    </script>
+
     {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-uitslagen-regio-alt" %}
 
     <h4>Uitslagen regiocompetitie</h4>
@@ -52,15 +59,34 @@
         {% endfor %}
     </div>
 
-
-    <p>Kies een vereniging:</p>
-
+    <br><br>
     <div class="white shrink-wrap-5">
-        <a class="margin-5 btn-nhb-blauw btn-small disabled" href="#">Alles</a>
+        <div style="margin-left: 10px">
+            <label>
+                <input type="checkbox" class="filled-in" id="zes_scores" onchange="zes_scores()"{% if zes_scores_checked %} checked{% endif %}>
+                <span class="black-text">Alleen sporters met 6 of meer geschoten wedstrijden</span>
+            </label>
+        </div>
+    </div>
 
-        {% for ver in ver_filters %}
-            <a class="margin-5 btn-nhb-blauw btn-small" href="{{ ver.zoom_url }}">{{ ver.title_str }}</a>
-        {% endfor %}
+    <br><br>
+    <div class="row">
+        <div class="col s12 m6" style="padding:0">
+            <ul class="collapsible" style="box-shadow: none; border:0px">
+                <li>
+                    <div class="collapsible-header white">Klik voor verenigingen</div>
+                    <div class="collapsible-body white">
+                        <span>Kies een vereniging:</span><br>
+                        {% for ver in ver_filters %}
+                            <p>
+                            <a class="btn-nhb-blauw" href="{{ ver.zoom_url }}">{{ ver.nhb_nr }}</a>
+                            <span>&nbsp;&nbsp;{{ ver.naam }}</span>
+                            </p>
+                        {% endfor %}
+                    </div>
+                </li>
+            </ul>
+        </div>
     </div>
 
 
@@ -112,13 +138,13 @@
                 <td>{{ obj.naam_str }}</td>
                 <td class="hide-on-small-only">{{ obj.ver_str }}</td>
                 <td class="center-align">{{ obj.alt_gemiddelde }}</td>
-                <td class="right-align">{% if obj.alt_laagste_score_nr == 1 %}({{ obj.alt_score1 }}){% else %}{{ obj.alt_score1 }}{% endif %}</td>
-                <td class="right-align">{% if obj.alt_laagste_score_nr == 2 %}({{ obj.alt_score2 }}){% else %}{{ obj.alt_score2 }}{% endif %}</td>
-                <td class="right-align">{% if obj.alt_laagste_score_nr == 3 %}({{ obj.alt_score3 }}){% else %}{{ obj.alt_score3 }}{% endif %}</td>
-                <td class="right-align">{% if obj.alt_laagste_score_nr == 4 %}({{ obj.alt_score4 }}){% else %}{{ obj.alt_score4 }}{% endif %}</td>
-                <td class="right-align">{% if obj.alt_laagste_score_nr == 5 %}({{ obj.alt_score5 }}){% else %}{{ obj.alt_score5 }}{% endif %}</td>
-                <td class="right-align">{% if obj.alt_laagste_score_nr == 6 %}({{ obj.alt_score6 }}){% else %}{{ obj.alt_score6 }}{% endif %}</td>
-                <td class="right-align">{% if obj.alt_laagste_score_nr == 7 %}({{ obj.alt_score7 }}){% else %}{{ obj.alt_score7 }}{% endif %}</td>
+                <td class="center-align smal">{% if obj.alt_laagste_score_nr == 1 %}<del>{{ obj.alt_score1 }}</del>{% else %}{{ obj.alt_score1 }}{% endif %}</td>
+                <td class="center-align smal">{% if obj.alt_laagste_score_nr == 2 %}<del>{{ obj.alt_score2 }}</del>{% else %}{{ obj.alt_score2 }}{% endif %}</td>
+                <td class="center-align smal">{% if obj.alt_laagste_score_nr == 3 %}<del>{{ obj.alt_score3 }}</del>{% else %}{{ obj.alt_score3 }}{% endif %}</td>
+                <td class="center-align smal">{% if obj.alt_laagste_score_nr == 4 %}<del>{{ obj.alt_score4 }}</del>{% else %}{{ obj.alt_score4 }}{% endif %}</td>
+                <td class="center-align smal">{% if obj.alt_laagste_score_nr == 5 %}<del>{{ obj.alt_score5 }}</del>{% else %}{{ obj.alt_score5 }}{% endif %}</td>
+                <td class="center-align smal">{% if obj.alt_laagste_score_nr == 6 %}<del>{{ obj.alt_score6 }}</del>{% else %}{{ obj.alt_score6 }}{% endif %}</td>
+                <td class="center-align smal">{% if obj.alt_laagste_score_nr == 7 %}<del>{{ obj.alt_score7 }}</del>{% else %}{{ obj.alt_score7 }}{% endif %}</td>
                 <td class="center-align hide-on-small-only">{{ obj.alt_totaal }}</td>
             </tr>
 
