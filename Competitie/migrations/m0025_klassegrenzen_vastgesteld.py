@@ -7,6 +7,20 @@
 from django.db import migrations, models
 
 
+def zet_klassegrenzen_vastgesteld(apps, _):
+    """ zet het nieuwe veld 'klassegrenzen_vastgesteld' voor elke Competitie """
+    competitie_klas = apps.get_model('Competitie', 'Competitie')
+    klasse_klas = apps.get_model('Competitie', 'CompetitieKlasse')
+
+    for comp in competitie_klas.objects.all():      # pragma: no cover
+
+        if klasse_klas.objects.filter(competitie=comp,
+                                      min_ag__gt=0.000).count() > 0:
+            comp.klassegrenzen_vastgesteld = True
+            comp.save()
+    # for
+
+
 class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
@@ -23,6 +37,7 @@ class Migration(migrations.Migration):
             name='klassegrenzen_vastgesteld',
             field=models.BooleanField(default=False),
         ),
+        migrations.RunPython(zet_klassegrenzen_vastgesteld),
     ]
 
 # end of file
