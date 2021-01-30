@@ -83,7 +83,6 @@
                 <td>{{ obj.naam_str }}</td>
                 <td>{{ obj.klasse_str }}</td>
                 <td class="center-align">{{ obj.gemiddelde }}</td>
-                <!-- TODO: als deze stijl bevalt, ook toepassen op andere plekken -->
                 <td class="center-align smal">{% if obj.laagste_score_nr == 1 %}<del>{{ obj.score1 }}</del>{% else %}{{ obj.score1 }}{% endif %}</td>
                 <td class="center-align smal">{% if obj.laagste_score_nr == 2 %}<del>{{ obj.score2 }}</del>{% else %}{{ obj.score2 }}{% endif %}</td>
                 <td class="center-align smal">{% if obj.laagste_score_nr == 3 %}<del>{{ obj.score3 }}</del>{% else %}{{ obj.score3 }}{% endif %}</td>
