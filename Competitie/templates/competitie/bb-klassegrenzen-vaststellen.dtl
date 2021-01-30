@@ -24,9 +24,14 @@
     {% else %}
 
         <p>Hieronder volgende de automatisch berekende klassegrenzen voor de individuele wedstrijdklassen voor de <b>{{ comp.beschrijving }}</b>.</p>
-        <p>Deze zijn gebaseerd op de vastgestelde aanvangsgemiddelden en de wedstrijdleeftijd van de sporters in het jaar {{ wedstrijdjaar }}.</p>
 
         <p>Onder aan deze pagina vindt je een knop om de om de klassegrenzen vast te leggen. Dit is een eenmalige actie voor elke competitie.</p>
+
+        <h5 class="red-text">Controleer dat onderstaande gegevens juist zijn.</h5>
+
+        <p>Weet je zeker dat de <b>aanvangsgemiddelden</b> recentelijk vastgesteld zijn aan de hand van de uitslagen van vorig seizoen?</p>
+        <p>Op <b>{{ bb_ag_nieuwste_datum }}</b> zijn de aanvangsgemiddelden voor het laatste vastgesteld.</p>
+        <p><a class="btn-nhb-blauw" href="{% url 'Competitie:ag-vaststellen' %}">Naar de aanvangsgemiddelden</a></p>
 
         <div class="row">
             <table class="white">

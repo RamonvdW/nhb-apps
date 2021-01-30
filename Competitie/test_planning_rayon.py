@@ -131,13 +131,15 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         self.comp_18 = Competitie.objects.get(afstand='18')
         self.comp_25 = Competitie.objects.get(afstand='25')
 
-        # klassengrenzen vaststellen om de competitie voorbij fase A1 te krijgen
+        # klassengrenzen vaststellen om de competitie voorbij fase A te krijgen
         self.e2e_login_and_pass_otp(self.account_bb)
         self.e2e_wisselnaarrol_bb()
         self.url_klassegrenzen_vaststellen_18 = '/bondscompetities/%s/klassegrenzen/vaststellen/' % self.comp_18.pk
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_klassegrenzen_vaststellen_18)
-        self.assert_is_redirect_not_plein(resp)     # check success
+        self.assert_is_redirect_not_plein(resp)                 # redirect = success
+        self.comp_18 = Competitie.objects.get(afstand='18')     # refresh met nieuwe status
+
         self.client.logout()
 
         self.deelcomp_bond_18 = DeelCompetitie.objects.filter(laag='BK', competitie=self.comp_18)[0]
@@ -197,7 +199,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
     def competitie_sluit_alle_regiocompetities(self, comp):
         # deze functie sluit alle regiocompetities af zodat de competitie in fase G komt
         comp.zet_fase()
-        # print(comp.fase)
+        # print('comp: %s --> fase=%s' % (comp, comp.fase))
         self.assertTrue('B' < comp.fase < 'G')
         for deelcomp in DeelCompetitie.objects.filter(competitie=comp, laag=LAAG_REGIO):
             if not deelcomp.is_afgesloten:          # pragma: no branch

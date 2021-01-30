@@ -55,7 +55,7 @@
             {% endif %}
 
             <!-- klassegrenzen vaststellen -->
-            {% if comp.fase == 'A1' %}
+            {% if not comp.klassegrenzen_vastgesteld %}
                 {% url 'Competitie:klassegrenzen-vaststellen' comp_pk=comp.pk as card_url %}
                 {% include 'plein/card.dtl' with title="Zet klassegrenzen" text="Klassegrenzen vaststellen (eenmalige actie)." icon="equalizer" url=card_url %}
             {% endif %}
@@ -143,16 +143,10 @@
         </thead>
 
         <tr>
-            <td class="center-align">A</td>
-            <td>Competitie opstarten (Bondsburo)</td>
-            <td class="green-text">Afgerond</td>
-        </tr>
-
-        <tr>
-            <td {% if comp.fase == 'A1' %}class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>A1</td>
-            <td>Vaststellen aanvangsgemiddelden<br>en klassegrenzen (Bondsburo)</td>
+            <td class="center-align{% if comp.fase == 'A' %} nhb-blauw white-text{% endif %}">A</td>
+            <td>Vaststellen klassegrenzen (Bondsburo)<br>Instellingen regio en planning regiocompetitie wedstrijden (RCL)</td>
             <td>
-                {% if comp.fase > 'A1' %}
+                {% if comp.fase > 'A' %}
                     <span class="green-text">Afgerond</span>
                 {% else %}
                     <span>tot 15 juli</span>
@@ -163,18 +157,6 @@
         <tr>
             <td></td>
             <td colspan="2"><b>Regiocompetitie</b></td>
-        </tr>
-
-        <tr>
-            <td {% if comp.fase == 'A2' %}class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>A2</td>
-            <td>Instellingen regio (RCL)</td>
-            <td>
-                {% if comp.fase > 'A2' %}
-                    <span class="green-text">Afgerond</span>
-                {% else %}
-                    <span>tot 15 juli</span>
-                {% endif %}
-            </td>
         </tr>
 
         <tr>

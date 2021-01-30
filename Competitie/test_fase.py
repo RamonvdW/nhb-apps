@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -73,15 +73,23 @@ def zet_competitie_fase(comp, fase):
 
     comp.alle_regiocompetities_afgesloten = False
 
-    # fase A was totdat de Competitie gemaakt werd
+    # fase A begon toen de competitie werd aangemaakt
 
-    if fase in ('A1', 'A2'):
+    if fase == 'A':
         comp.begin_aanmeldingen = morgen
+        comp.klassegrenzen_vastgesteld = False
         comp.save()
         return
 
     if comp.competitieklasse_set.count() == 0:      # pragma: no cover
         raise NotImplementedError("Kan niet naar fase %s zonder competitie klassen!" % fase)
+
+    comp.klassegrenzen_vastgesteld = True
+
+    if fase == 'A.3':
+        comp.begin_aanmeldingen = morgen
+        comp.save()
+        return
 
     comp.begin_aanmeldingen = gister
 
@@ -154,18 +162,22 @@ class TestCompetitieFase(TestCase):
         deelcomp_bk.save()
 
         comp.zet_fase()
-        self.assertEqual(comp.fase, 'A1')
+        self.assertEqual(comp.fase, 'A')
 
         comp.begin_aanmeldingen = gisteren
         comp.zet_fase()
-        self.assertEqual(comp.fase, 'A1')
+        self.assertEqual(comp.fase, 'A')
 
         # maak de klassen aan
         indiv = IndivWedstrijdklasse.objects.all()[0]
         CompetitieKlasse(competitie=comp, indiv=indiv, min_ag=0.0).save()
         comp.begin_aanmeldingen = comp.einde_aanmeldingen
         comp.zet_fase()
-        self.assertEqual(comp.fase, 'A2')
+        self.assertEqual(comp.fase, 'A')
+
+        comp.klassegrenzen_vastgesteld = True
+        comp.zet_fase()
+        self.assertEqual(comp.fase, 'A')
 
         # tussen begin en einde aanmeldingen = B
         comp.begin_aanmeldingen = gisteren
@@ -251,18 +263,23 @@ class TestCompetitieFase(TestCase):
         comp.save()
 
         comp.zet_fase()
-        self.assertEqual(comp.fase, 'A1')
+        self.assertEqual(comp.fase, 'A')
 
-        zet_competitie_fase(comp, 'A1')
+        zet_competitie_fase(comp, 'A')
         comp.zet_fase()
-        self.assertEqual(comp.fase, 'A1')
+        self.assertEqual(comp.fase, 'A')
 
         # maak de klassen aan en controleer de fase weer
         indiv = IndivWedstrijdklasse.objects.all()[0]
         CompetitieKlasse(competitie=comp, indiv=indiv, min_ag=0.0).save()
-        zet_competitie_fase(comp, 'A2')
+        zet_competitie_fase(comp, 'A')
         comp.zet_fase()
-        self.assertEqual(comp.fase, 'A2')
+        self.assertEqual(comp.fase, 'A')
+
+        comp.klassegrenzen_vastgesteld = True
+        zet_competitie_fase(comp, 'A')
+        comp.zet_fase()
+        self.assertEqual(comp.fase, 'A')
 
         sequence = 'BCDEGKLNPQSQPNLKGEDCBKSEBZLQC'  # let op! F en R kunnen niet
         for fase in sequence:

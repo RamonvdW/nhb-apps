@@ -246,7 +246,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
 
         way_before = datetime.date(year=2018, month=1, day=1)   # must be before timezone.now()
 
-        # fase A1
+        # fase A
         comp.zet_fase()
         self.assertTrue(comp.fase < 'B', msg="comp.fase=%s (expected: below B)" % comp.fase)
         with self.assert_max_queries(20):

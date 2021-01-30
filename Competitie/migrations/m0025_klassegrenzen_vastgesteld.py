@@ -13,16 +13,15 @@ class Migration(migrations.Migration):
 
     # volgorde afdwingen
     dependencies = [
-        ('Wedstrijden', 'm0006_squashed'),
-        ('Competitie', 'm0023_protect_schutterboog_delete'),
+        ('Competitie', 'm0024_gekozen_wedstrijden'),
     ]
 
     # migratie functies
     operations = [
         migrations.AddField(
-            model_name='regiocompetitieschutterboog',
-            name='inschrijf_gekozen_wedstrijden',
-            field=models.ManyToManyField(blank=True, to='Wedstrijden.Wedstrijd'),
+            model_name='competitie',
+            name='klassegrenzen_vastgesteld',
+            field=models.BooleanField(default=False),
         ),
     ]
 

@@ -85,8 +85,10 @@ class Competitie(models.Model):
     # wanneer moet een schutter lid zijn bij de bond om mee te mogen doen aan de teamcompetitie?
     uiterste_datum_lid = models.DateField()
 
-    # fases en datums regiocompetitie
     # fase A: aanmaken competitie, vaststellen klassen
+    klassegrenzen_vastgesteld = models.BooleanField(default=False)
+
+    # fases en datums regiocompetitie
     begin_aanmeldingen = models.DateField()
     # fase B: aanmelden schutters
     einde_aanmeldingen = models.DateField()
@@ -188,14 +190,10 @@ class Competitie(models.Model):
             return
 
         # regiocompetitie fases
-        if self.competitieklasse_set.count() == 0:
-            # fase A1: wedstrijdklassen zijn nog niet vastgesteld
-            self.fase = 'A1'
-            return
-
-        if now < self.begin_aanmeldingen:
-            # A2 = instellingen regio, tot aanmeldingen beginnen; nog niet open voor aanmelden
-            self.fase = 'A2'
+        if not self.klassegrenzen_vastgesteld or now < self.begin_aanmeldingen:
+            # A = vaststellen klassegrenzen, instellingen regio en planning regiocompetitie wedstrijden
+            #     tot aanmeldingen beginnen; nog niet open voor aanmelden
+            self.fase = 'A'
             return
 
         if now <= self.einde_aanmeldingen:
@@ -245,7 +243,7 @@ class Competitie(models.Model):
             if self.fase >= 'B':
                 # modale gebruiker ziet alleen competities vanaf open-voor-inschrijving
                 self.is_openbaar = True
-            elif self.fase >= 'A2' and rol_nu in (Rollen.ROL_RKO, Rollen.ROL_RCL):
+            elif rol_nu in (Rollen.ROL_RKO, Rollen.ROL_RCL):
                 # beheerders die de competitie opzetten zien competities die opgestart zijn
                 self.is_openbaar = True
 

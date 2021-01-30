@@ -79,7 +79,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
 
         # creëer een competitie met deelcompetities
         competitie_aanmaken(jaar=2019)
-        # nu in fase A1
+        # nu in fase A
 
         self.comp_18 = Competitie.objects.get(afstand='18')
         self.comp_25 = Competitie.objects.get(afstand='25')

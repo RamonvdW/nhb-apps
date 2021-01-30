@@ -123,7 +123,7 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
 
         self.comp = Competitie.objects.get(afstand='18')
 
-        # klassengrenzen vaststellen om de competitie voorbij fase A1 te krijgen
+        # klassengrenzen vaststellen om de competitie voorbij fase A te krijgen
         self.url_klassegrenzen_vaststellen = '/bondscompetities/%s/klassegrenzen/vaststellen/' % self.comp.pk
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_klassegrenzen_vaststellen)

@@ -368,7 +368,7 @@ class TestCompetitieCliOudeSiteOvernemen(E2EHelpers, TestCase):
 
     def test_verkeerde_fase(self):
         comp_18 = Competitie.objects.get(afstand='18')
-        zet_competitie_fase(comp_18, 'A2')
+        zet_competitie_fase(comp_18, 'A')
         f1 = io.StringIO()
         f2 = io.StringIO()
         with self.assert_max_queries(910):

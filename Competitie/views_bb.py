@@ -13,15 +13,16 @@ from django.shortcuts import redirect
 from django.utils import timezone
 from django.conf import settings
 from BasisTypen.models import BoogType
-from Plein.menu import menu_dynamics
-from Logboek.models import schrijf_in_logboek
-from Functie.rol import Rollen, rol_get_huidige
 from BasisTypen.models import (IndivWedstrijdklasse, TeamWedstrijdklasse,
                                MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT)
+from Functie.rol import Rollen, rol_get_huidige
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
+from Logboek.models import schrijf_in_logboek
 from NhbStructuur.models import NhbLid
+from Plein.menu import menu_dynamics
 from Schutter.models import SchutterBoog
-from Score.models import Score, ScoreHist
+from Score.models import Score, ScoreHist, zoek_meest_recente_automatisch_vastgestelde_ag
+from django.utils.formats import localize
 from .models import (AG_NUL, AG_LAAGSTE_NIET_NUL,
                      Competitie, competitie_aanmaken, CompetitieKlasse)
 from .menu import menu_dynamics_competitie
@@ -117,7 +118,8 @@ class CompetitieAanmakenView(UserPassesTestMixin, TemplateView):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
         return HttpResponseRedirect(reverse('Plein:plein'))
 
-    def post(self, request, *args, **kwargs):
+    @staticmethod
+    def post(request, *args, **kwargs):
         """ deze functie handelt het http-post verzoek af
             (wat volgt uit het drukken op de knop)
             om de nieuwe competitie op te starten.
@@ -160,11 +162,10 @@ class AGVaststellenView(UserPassesTestMixin, TemplateView):
         if rol_nu != Rollen.ROL_BB:
             return False
 
-        # alleen toestaan als een van de competities in fase A1 is
+        # alleen toestaan als een van de competities in fase A is
         kan_ag_vaststellen = False
         for comp in Competitie.objects.filter(is_afgesloten=False):
-            comp.zet_fase()
-            if comp.fase == 'A1':
+            if not comp.klassegrenzen_vastgesteld:
                 kan_ag_vaststellen = True
         # for
         return kan_ag_vaststellen
@@ -191,7 +192,8 @@ class AGVaststellenView(UserPassesTestMixin, TemplateView):
         menu_dynamics(self.request, context, actief='competitie')
         return render(request, self.template_name, context)
 
-    def post(self, request, *args, **kwargs):
+    @staticmethod
+    def post(request, *args, **kwargs):
         """ deze functie wordt aangeroepen als een POST request ontvangen is.
             --> de beheerder wil de AG's vaststellen
         """
@@ -494,13 +496,16 @@ class KlassegrenzenVaststellenView(UserPassesTestMixin, TemplateView):
             raise Resolver404()
 
         context['comp'] = comp
-        comp.zet_fase()
 
-        if comp.fase != 'A1':
+        if comp.klassegrenzen_vastgesteld:
             context['al_vastgesteld'] = True
         else:
             context['object_list'] = self._get_queryset(comp)
             context['wedstrijdjaar'] = comp.begin_jaar + 1
+
+        datum = zoek_meest_recente_automatisch_vastgestelde_ag()
+        if datum:
+            context['bb_ag_nieuwste_datum'] = localize(datum.date())
 
         menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
         return render(request, self.template_name, context)
@@ -516,9 +521,7 @@ class KlassegrenzenVaststellenView(UserPassesTestMixin, TemplateView):
         except (ValueError, Competitie.DoesNotExist):
             raise Resolver404()
 
-        comp.zet_fase()
-        if comp.fase == 'A1':
-
+        if not comp.klassegrenzen_vastgesteld:
             bulk = list()
 
             # haal dezelfde data op als voor de GET request
@@ -530,6 +533,9 @@ class KlassegrenzenVaststellenView(UserPassesTestMixin, TemplateView):
             # for
 
             CompetitieKlasse.objects.bulk_create(bulk)
+
+            comp.klassegrenzen_vastgesteld = True
+            comp.save()
 
             schrijf_in_logboek(request.user,
                                'Competitie',
@@ -582,7 +588,8 @@ class WijzigDatumsView(UserPassesTestMixin, TemplateView):
         menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
         return context
 
-    def post(self, request, *args, **kwargs):
+    @staticmethod
+    def post(request, *args, **kwargs):
         """ deze functie wordt aangeroepen als een POST request ontvangen is.
             --> de beheerder wil deze klassegrenzen vaststellen
         """

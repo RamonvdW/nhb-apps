@@ -70,131 +70,127 @@ class CompetitieOverzichtView(View):
             context['rol_is_bb'] = True
             kan_beheren = True
 
-            if comp.fase > 'A1':
-                context['planning_deelcomp'] = (DeelCompetitie
-                                                .objects
-                                                .filter(competitie=comp,
-                                                        laag=LAAG_BK)
-                                                .select_related('competitie')
-                                                .order_by('competitie__afstand'))
-                for obj in context['planning_deelcomp']:
-                    kan_beheren = True
+            context['planning_deelcomp'] = (DeelCompetitie
+                                            .objects
+                                            .filter(competitie=comp,
+                                                    laag=LAAG_BK)
+                                            .select_related('competitie')
+                                            .order_by('competitie__afstand'))
+            for obj in context['planning_deelcomp']:
+                kan_beheren = True
 
-                    obj.titel = 'Planning'
-                    obj.tekst = 'Landelijke planning voor deze competitie.'
-                    obj.url = reverse('Competitie:bond-planning',
-                                      kwargs={'deelcomp_pk': obj.pk})
-                # for
+                obj.titel = 'Planning'
+                obj.tekst = 'Landelijke planning voor deze competitie.'
+                obj.url = reverse('Competitie:bond-planning',
+                                  kwargs={'deelcomp_pk': obj.pk})
+            # for
 
         if rol_nu == Rollen.ROL_RCL:
-            if comp.fase > 'A1':
-                context['planning_deelcomp'] = (DeelCompetitie
-                                                .objects
-                                                .filter(competitie=comp,
-                                                        functie=functie_nu,
-                                                        is_afgesloten=False)
-                                                .select_related('nhb_regio', 'competitie'))
-                for obj in context['planning_deelcomp']:
+            context['planning_deelcomp'] = (DeelCompetitie
+                                            .objects
+                                            .filter(competitie=comp,
+                                                    functie=functie_nu,
+                                                    is_afgesloten=False)
+                                            .select_related('nhb_regio', 'competitie'))
+            for obj in context['planning_deelcomp']:
+                kan_beheren = True
+
+                obj.titel = 'Planning Regio %s' % obj.nhb_regio.regio_nr
+                obj.tekst = 'Planning voor %s voor deze competitie.' % obj.nhb_regio.naam
+                obj.url = reverse('Competitie:regio-planning',
+                                  kwargs={'deelcomp_pk': obj.pk})
+
+                obj.tekst_scores = "Scores invoeren en aanpassen voor %s voor deze competitie." % obj.nhb_regio.naam
+                obj.url_scores = reverse('Competitie:scores-regio',
+                                         kwargs={'deelcomp_pk': obj.pk})
+            # for
+
+            if 'B' <= comp.fase <= 'E':
+                comp.url_inschrijvingen = reverse('Competitie:lijst-regiocomp-regio',
+                                                  kwargs={'comp_pk': comp.pk,
+                                                          'regio_pk': functie_nu.nhb_regio.pk})
+
+            if comp.fase >= 'E':
+                context['afsluiten_deelcomp'] = (DeelCompetitie
+                                                 .objects
+                                                 .filter(competitie=comp,
+                                                         functie=functie_nu,
+                                                         is_afgesloten=False)
+                                                 .select_related('nhb_regio', 'competitie'))
+                for obj in context['afsluiten_deelcomp']:
                     kan_beheren = True
 
-                    obj.titel = 'Planning Regio %s' % obj.nhb_regio.regio_nr
-                    obj.tekst = 'Planning voor %s voor deze competitie.' % obj.nhb_regio.naam
-                    obj.url = reverse('Competitie:regio-planning',
-                                      kwargs={'deelcomp_pk': obj.pk})
-
-                    obj.tekst_scores = "Scores invoeren en aanpassen voor %s voor deze competitie." % obj.nhb_regio.naam
-                    obj.url_scores = reverse('Competitie:scores-regio',
-                                             kwargs={'deelcomp_pk': obj.pk})
+                    obj.titel = 'Sluit Regiocompetitie'
+                    obj.tekst = 'Bevestig eindstand %s voor de %s.' % (obj.nhb_regio.naam, obj.competitie.beschrijving)
+                    obj.url_afsluiten = reverse('Competitie:afsluiten-regiocomp',
+                                                kwargs={'deelcomp_pk': obj.pk})
                 # for
-
-                if 'B' <= comp.fase <= 'E':
-                    comp.url_inschrijvingen = reverse('Competitie:lijst-regiocomp-regio',
-                                                      kwargs={'comp_pk': comp.pk,
-                                                              'regio_pk': functie_nu.nhb_regio.pk})
-
-                if comp.fase >= 'E':
-                    context['afsluiten_deelcomp'] = (DeelCompetitie
-                                                     .objects
-                                                     .filter(competitie=comp,
-                                                             functie=functie_nu,
-                                                             is_afgesloten=False)
-                                                     .select_related('nhb_regio', 'competitie'))
-                    for obj in context['afsluiten_deelcomp']:
-                        kan_beheren = True
-
-                        obj.titel = 'Sluit Regiocompetitie'
-                        obj.tekst = 'Bevestig eindstand %s voor de %s.' % (obj.nhb_regio.naam, obj.competitie.beschrijving)
-                        obj.url_afsluiten = reverse('Competitie:afsluiten-regiocomp',
-                                                    kwargs={'deelcomp_pk': obj.pk})
-                    # for
 
         elif rol_nu == Rollen.ROL_RKO:
-            if comp.fase > 'A1':
-                deelcomp_rks = (DeelCompetitie
-                                .objects
-                                .select_related('nhb_rayon', 'competitie')
-                                .filter(competitie=comp,
-                                        functie=functie_nu,
-                                        is_afgesloten=False))
-                if len(deelcomp_rks):
-                    kan_beheren = True
+            deelcomp_rks = (DeelCompetitie
+                            .objects
+                            .select_related('nhb_rayon', 'competitie')
+                            .filter(competitie=comp,
+                                    functie=functie_nu,
+                                    is_afgesloten=False))
+            if len(deelcomp_rks):
+                kan_beheren = True
 
-                    deelcomp_rk = deelcomp_rks[0]
+                deelcomp_rk = deelcomp_rks[0]
 
-                    deelcomp_rk.titel = 'Planning %s' % deelcomp_rk.nhb_rayon.naam
-                    deelcomp_rk.tekst = 'Planning voor %s voor deze competitie.' % deelcomp_rk.nhb_rayon.naam
-                    deelcomp_rk.url = reverse('Competitie:rayon-planning',
-                                              kwargs={'deelcomp_pk': deelcomp_rk.pk})
+                deelcomp_rk.titel = 'Planning %s' % deelcomp_rk.nhb_rayon.naam
+                deelcomp_rk.tekst = 'Planning voor %s voor deze competitie.' % deelcomp_rk.nhb_rayon.naam
+                deelcomp_rk.url = reverse('Competitie:rayon-planning',
+                                          kwargs={'deelcomp_pk': deelcomp_rk.pk})
 
-                    context['planning_deelcomp'] = [deelcomp_rk, ]
+                context['planning_deelcomp'] = [deelcomp_rk, ]
 
-                    # geeft de RKO de mogelijkheid om de deelnemerslijst voor het RK te bewerken
-                    context['url_lijst_rk'] = reverse('Competitie:lijst-rk',
-                                                      kwargs={'deelcomp_pk': deelcomp_rk.pk})
+                # geeft de RKO de mogelijkheid om de deelnemerslijst voor het RK te bewerken
+                context['url_lijst_rk'] = reverse('Competitie:lijst-rk',
+                                                  kwargs={'deelcomp_pk': deelcomp_rk.pk})
 
-                    context['url_limieten_rk'] = reverse('Competitie:rayon-limieten',
-                                                         kwargs={'deelcomp_pk': deelcomp_rk.pk})
+                context['url_limieten_rk'] = reverse('Competitie:rayon-limieten',
+                                                     kwargs={'deelcomp_pk': deelcomp_rk.pk})
 
-                if 'B' <= comp.fase <= 'E':
-                    comp.url_inschrijvingen = reverse('Competitie:lijst-regiocomp-rayon',
-                                                      kwargs={'comp_pk': comp.pk,
-                                                              'rayon_pk': functie_nu.nhb_rayon.pk})
+            if 'B' <= comp.fase <= 'E':
+                comp.url_inschrijvingen = reverse('Competitie:lijst-regiocomp-rayon',
+                                                  kwargs={'comp_pk': comp.pk,
+                                                          'rayon_pk': functie_nu.nhb_rayon.pk})
 
         elif rol_nu == Rollen.ROL_BKO:
-            if comp.fase > 'A1':
-                context['planning_deelcomp'] = (DeelCompetitie
-                                                .objects
-                                                .filter(competitie=comp,
-                                                        functie=functie_nu,
-                                                        is_afgesloten=False)
-                                                .select_related('competitie'))
-                for obj in context['planning_deelcomp']:
-                    kan_beheren = True
+            context['planning_deelcomp'] = (DeelCompetitie
+                                            .objects
+                                            .filter(competitie=comp,
+                                                    functie=functie_nu,
+                                                    is_afgesloten=False)
+                                            .select_related('competitie'))
+            for obj in context['planning_deelcomp']:
+                kan_beheren = True
 
-                    obj.titel = 'Planning'
-                    obj.tekst = 'Landelijke planning voor deze competitie.'
-                    obj.url = reverse('Competitie:bond-planning',
-                                      kwargs={'deelcomp_pk': obj.pk})
+                obj.titel = 'Planning'
+                obj.tekst = 'Landelijke planning voor deze competitie.'
+                obj.url = reverse('Competitie:bond-planning',
+                                  kwargs={'deelcomp_pk': obj.pk})
 
-                    # geef de BKO de mogelijkheid om
-                    # - de regiocompetitie door te zetten naar de rayonkampioenschappen
-                    # - de RK door te zetten naar de BK
-                    if 'E' <= comp.fase < 'K':
-                        comp.url_doorzetten = reverse('Competitie:bko-doorzetten-naar-rk',
-                                                      kwargs={'comp_pk': comp.pk})
-                        comp.titel_doorzetten = '%s doorzetten naar de volgende fase (Regio naar RK)' % comp.beschrijving
-                        context['bko_doorzetten'] = comp
-                    elif 'M' <= comp.fase < 'P':
-                        comp.url_doorzetten = reverse('Competitie:bko-doorzetten-naar-bk',
-                                                      kwargs={'comp_pk': comp.pk})
-                        comp.titel_doorzetten = '%s doorzetten naar de volgende fase (RK naar BK)' % comp.beschrijving
-                        context['bko_doorzetten'] = comp
-                    elif 'R' <= comp.fase < 'Z':
-                        comp.url_afsluiten = reverse('Competitie:bko-competitie-afsluiten',
-                                                     kwargs={'comp_pk': comp.pk})
-                        comp.titel_afsluiten = '%s helemaal afsluiten' % comp.beschrijving
-                        context['bko_afsluiten'] = comp
-                # for
+                # geef de BKO de mogelijkheid om
+                # - de regiocompetitie door te zetten naar de rayonkampioenschappen
+                # - de RK door te zetten naar de BK
+                if 'E' <= comp.fase < 'K':
+                    comp.url_doorzetten = reverse('Competitie:bko-doorzetten-naar-rk',
+                                                  kwargs={'comp_pk': comp.pk})
+                    comp.titel_doorzetten = '%s doorzetten naar de volgende fase (Regio naar RK)' % comp.beschrijving
+                    context['bko_doorzetten'] = comp
+                elif 'M' <= comp.fase < 'P':
+                    comp.url_doorzetten = reverse('Competitie:bko-doorzetten-naar-bk',
+                                                  kwargs={'comp_pk': comp.pk})
+                    comp.titel_doorzetten = '%s doorzetten naar de volgende fase (RK naar BK)' % comp.beschrijving
+                    context['bko_doorzetten'] = comp
+                elif 'R' <= comp.fase < 'Z':
+                    comp.url_afsluiten = reverse('Competitie:bko-competitie-afsluiten',
+                                                 kwargs={'comp_pk': comp.pk})
+                    comp.titel_afsluiten = '%s helemaal afsluiten' % comp.beschrijving
+                    context['bko_afsluiten'] = comp
+            # for
 
         if kan_beheren:
             template_name = TEMPLATE_COMPETITIE_OVERZICHT_BEHEERDER
@@ -333,8 +329,7 @@ class CompetitieKiesView(TemplateView):
                      .order_by('afstand', 'begin_jaar')):
 
             if rol_nu == Rollen.ROL_BB:
-                comp.zet_fase()
-                if comp.fase < 'A2':
+                if not comp.klassegrenzen_vastgesteld:
                     # klassegrenzen zijn nog niet vastgesteld
                     # laat de BB de aanvangsgemiddelden vaststellen
                     context['bb_kan_ag_vaststellen'] = True

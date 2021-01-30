@@ -280,7 +280,7 @@ class TestCompetitie(E2EHelpers, TestCase):
                                             score6=6,
                                             score7=250,
                                             totaal=270,
-                                            gemiddelde= 5.5)
+                                            gemiddelde=5.5)
             records.append(rec)
         # for
 
@@ -420,9 +420,11 @@ class TestCompetitie(E2EHelpers, TestCase):
         self.assertTrue(self.url_ag_vaststellen in urls)
         self.assertNotContains(resp, "voor het laatst gedaan")
 
-        # verander de fase van de 25m competitie zodat we een A1 en een A2 hebben
+        # verander de fase van de 25m competitie zodat we verschillen hebben
         comp = Competitie.objects.get(afstand=25, is_afgesloten=False)
         CompetitieKlasse(competitie=comp, min_ag=25.0).save()
+        comp.klassegrenzen_vastgesteld = True
+        comp.save()
 
         # maak nog een hele bak AG's aan
         self._maak_many_histcomp()
