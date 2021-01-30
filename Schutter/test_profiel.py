@@ -286,7 +286,7 @@ class TestSchutterProfiel(E2EHelpers, TestCase):
         zet_competitie_fase(comp_18, 'F')
 
         # haal de profiel pagina op
-        with self.assert_max_queries(29):
+        with self.assert_max_queries(25):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -300,7 +300,7 @@ class TestSchutterProfiel(E2EHelpers, TestCase):
         aanvangsgemiddelde_opslaan(obj, 18, 9.018, None, 'Test opmerking A')
         aanvangsgemiddelde_opslaan(obj, 25, 2.5, None, 'Test opmerking B')
 
-        with self.assert_max_queries(29):
+        with self.assert_max_queries(25):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -311,7 +311,7 @@ class TestSchutterProfiel(E2EHelpers, TestCase):
 
         # variant met Score zonder ScoreHist
         ScoreHist.objects.all().delete()
-        with self.assert_max_queries(29):
+        with self.assert_max_queries(25):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
