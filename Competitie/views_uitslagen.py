@@ -309,6 +309,9 @@ class UitslagenRegioView(TemplateView):
                                                 'comp_boog': comp_boog,
                                                 'regio_nr': gekozen_regio_nr})
 
+    def filter_zes_scores(self, deelnemers):
+        return deelnemers.filter(aantal_scores__gte=6)
+
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
@@ -376,7 +379,7 @@ class UitslagenRegioView(TemplateView):
                       .order_by('klasse__indiv__volgorde', self.order_gemiddelde))
 
         if zes_scores == 'zes':
-            deelnemers = deelnemers.filter(aantal_scores__gte=6)
+            deelnemers = self.filter_zes_scores(deelnemers)
 
         toon_geslacht = False
         klasse = -1
@@ -436,6 +439,9 @@ class UitslagenRegioAltView(UserPassesTestMixin, UitslagenRegioView):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
         path = self.request.path.replace('/regio-alt/', '/regio/')
         return HttpResponseRedirect(path)
+
+    def filter_zes_scores(self, deelnemers):
+        return deelnemers.filter(alt_aantal_scores__gte=6)
 
 
 class UitslagenRayonView(TemplateView):
@@ -579,6 +585,7 @@ class UitslagenRayonView(TemplateView):
                                   aantal_scores__gte=6)
                           .select_related('klasse__indiv',
                                           'schutterboog__nhblid',
+                                          'schutterboog__nhblid__bij_vereniging',
                                           'bij_vereniging')
                           .order_by('klasse__indiv__volgorde', '-gemiddelde'))
 
@@ -599,6 +606,8 @@ class UitslagenRayonView(TemplateView):
             lid = deelnemer.schutterboog.nhblid
             deelnemer.naam_str = "[%s] %s" % (lid.nhb_nr, lid.volledige_naam())
             deelnemer.ver_str = str(deelnemer.bij_vereniging)
+
+            deelnemer.geen_deelname_risico = deelnemer.schutterboog.nhblid.bij_vereniging != deelnemer.bij_vereniging
 
             if deelcomp.heeft_deelnemerslijst:
                 if deelnemer.rank > limiet:
