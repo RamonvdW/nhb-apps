@@ -264,6 +264,7 @@ class DoorzettenNaarRKView(UserPassesTestMixin, TemplateView):
                       .select_related('klasse__indiv',
                                       'bij_vereniging__regio',
                                       'schutterboog__nhblid')
+                      .exclude(schutterboog__nhblid__bij_vereniging=None)   # moet nu lid zijn bij een vereniging
                       .filter(deelcompetitie__in=pks,
                               aantal_scores__gte=6,
                               klasse__indiv__niet_voor_rk_bk=False)         # skip aspiranten
