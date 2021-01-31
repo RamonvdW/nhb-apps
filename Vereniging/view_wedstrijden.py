@@ -5,13 +5,13 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.http import HttpResponseRedirect
-from django.urls import reverse, Resolver404
+from django.urls import reverse
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Plein.menu import menu_dynamics
 from Functie.rol import Rollen, rol_get_huidige_functie, rol_get_beschrijving
 from Competitie.models import DeelcompetitieRonde
-from Wedstrijden.models import Wedstrijd, WedstrijdenPlan
+from Wedstrijden.models import Wedstrijd
 
 TEMPLATE_WEDSTRIJDEN = 'vereniging/wedstrijden.dtl'
 
@@ -52,7 +52,6 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
                        .order_by('datum_wanneer', 'tijd_begin_wedstrijd'))
 
         for obj in wedstrijden:
-
             # voor competitiewedstrijden wordt de beschrijving ingevuld
             # als de instellingen van de ronde opgeslagen worden
             # dit is slechts fall-back

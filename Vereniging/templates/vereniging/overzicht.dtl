@@ -89,8 +89,10 @@
                 {% url 'Vereniging:leden-ingeschreven' deelcomp_pk=deelcomp.pk as card_url %}
                 {% include 'plein/card_logo.dtl' with title="Ingeschreven" text="Overzicht leden ingeschreven zijn voor de "|add:deelcomp.competitie.beschrijving|add:"." img_src=deelcomp.icon img_height="60" url=card_url %}
 
-                {% url 'Vereniging:schietmomenten' deelcomp_pk=deelcomp.pk as card_url %}
-                {% include 'plein/card_logo.dtl' with title="Wie schiet waar?" text="Overzicht leden ingeschreven zijn voor de "|add:deelcomp.competitie.beschrijving|add:"." img_src=deelcomp.icon img_height="60" url=card_url %}
+                {% if deelcomp.toon_wie_schiet_waar %}
+                    {% url 'Vereniging:schietmomenten' deelcomp_pk=deelcomp.pk as card_url %}
+                    {% include 'plein/card_logo.dtl' with title="Wie schiet waar?" text="Overzicht leden ingeschreven zijn voor de "|add:deelcomp.competitie.beschrijving|add:"." img_src=deelcomp.icon img_height="60" url=card_url %}
+                {% endif %}
             {% endif %}
         {% endfor %}
     </div>
@@ -133,8 +135,10 @@
                 {% url 'Vereniging:leden-ingeschreven' deelcomp_pk=deelcomp.pk as card_url %}
                 {% include 'plein/card_logo.dtl' with title="Ingeschreven" text="Overzicht leden ingeschreven zijn voor de "|add:deelcomp.competitie.beschrijving|add:"." img_src=deelcomp.icon img_height="60" url=card_url %}
 
-                {% url 'Vereniging:schietmomenten' deelcomp_pk=deelcomp.pk as card_url %}
-                {% include 'plein/card_logo.dtl' with title="Wie schiet waar?" text="Overzicht van de gekozen schietmomenten voor de "|add:deelcomp.competitie.beschrijving|add:"." img_src=deelcomp.icon img_height="60" url=card_url %}
+                {% if deelcomp.toon_wie_schiet_waar %}
+                    {% url 'Vereniging:schietmomenten' deelcomp_pk=deelcomp.pk as card_url %}
+                    {% include 'plein/card_logo.dtl' with title="Wie schiet waar?" text="Overzicht van de gekozen schietmomenten voor de "|add:deelcomp.competitie.beschrijving|add:"." img_src=deelcomp.icon img_height="60" url=card_url %}
+                {% endif %}
             {% endif %}
         {% endfor %}
     </div>

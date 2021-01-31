@@ -30,11 +30,13 @@
 
     <table class="white">
         <thead>
-            <th>Sporter</th>
-            {% for nr in kruisjes %}
-                <th class="kruisje">{{ nr }}</th>
-            {% endfor %}
-            <th><!-- kolom voor de wijzig knop --></th>
+            <tr>
+                <th>Sporter</th>
+                {% for nr in kruisjes %}
+                    <th class="kruisje">{{ nr }}</th>
+                {% endfor %}
+                <th><!-- kolom voor de wijzig knop --></th>
+            </tr>
         </thead>
 
         {% for deelnemer in object_list %}

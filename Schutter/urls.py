@@ -44,7 +44,8 @@ urlpatterns = [
          view_aanmelden_afmelden.RegiocompetitieAfmeldenView.as_view(),
          name='afmelden'),
 
-    path('regiocompetitie/<deelnemer_pk>/voorkeuren/',
+    # TODO: 'schietmomenten' vervangen door iets anders?
+    path('regiocompetitie/<deelnemer_pk>/schietmomenten/',
          view_aanmelden_afmelden.SchutterSchietmomentenView.as_view(),
          name='schietmomenten'),
 ]

@@ -34,8 +34,8 @@
                     {% if obj.url_uitslag_aanpassen %}
                         <a class="btn-nhb-blauw" href="{{ obj.url_uitslag_aanpassen }}">
                             <i class="material-icons-round left">arrow_forward</i>Aanpassen</a>
-                    {% elif obj.url_uitslag_invoeren %}
-                        <a class="btn-nhb-blauw" href="{{ obj.url_uitslag_invoeren }}">
+                    {% elif obj.url_score_invoeren %}
+                        <a class="btn-nhb-blauw" href="{{ obj.url_score_invoeren }}">
                             <i class="material-icons-round left">arrow_forward</i>Invoeren</a>
                     {% elif obj.url_uitslag_bekijken %}
                         <a class="btn-nhb-blauw" href="{{ obj.url_uitslag_bekijken }}">

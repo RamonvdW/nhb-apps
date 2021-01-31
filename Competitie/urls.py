@@ -60,7 +60,7 @@ urlpatterns = [
          name='wijzig-datums'),
 
 
-    # aanmelden / ingeschreven
+    # ingeschreven
     path('<comp_pk>/lijst-regiocompetitie/regio-<regio_pk>/dagdeel-behoefte/',
          views_aangemeld.Inschrijfmethode3BehoefteView.as_view(),
          name='inschrijfmethode3-behoefte'),

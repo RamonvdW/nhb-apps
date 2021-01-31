@@ -9,9 +9,8 @@ from django.urls import reverse
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.templatetags.static import static
-from Competitie.models import Competitie, DeelCompetitie, LAAG_REGIO, LAAG_RK
+from Competitie.models import Competitie, DeelCompetitie, LAAG_REGIO, LAAG_RK, INSCHRIJF_METHODE_1
 from Functie.rol import Rollen, rol_get_huidige_functie
-from NhbStructuur.models import NhbCluster
 from Plein.menu import menu_dynamics
 from Taken.taken import eval_open_taken
 
@@ -94,6 +93,8 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                 deelcomp.icon = static('plein/badge_nhb_indoor.png')
             else:
                 deelcomp.icon = static('plein/badge_nhb_25m1p.png')
+
+            deelcomp.toon_wie_schiet_waar = deelcomp.inschrijf_methode == INSCHRIJF_METHODE_1
         # for
 
         for deelcomp_rk in context['deelcomps_rk']:
@@ -102,7 +103,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                 comp.zet_fase()
                 if comp.fase == 'K':
                     # RK voorbereidende fase
-                    deelcomp_rk.text_str = "Schutters van de vereniging aan-/afmeldenvoor het RK van de %s" % comp.beschrijving
+                    deelcomp_rk.text_str = "Schutters van de vereniging aan-/afmelden voor het RK van de %s" % comp.beschrijving
                     deelcomp_rk.url_lijst_rk = reverse('Vereniging:lijst-rk',
                                                        kwargs={'deelcomp_pk': deelcomp_rk.pk})
         # for
