@@ -85,12 +85,6 @@ def zet_competitie_fase(comp, fase):
         raise NotImplementedError("Kan niet naar fase %s zonder competitie klassen!" % fase)
 
     comp.klassegrenzen_vastgesteld = True
-
-    if fase == 'A.3':
-        comp.begin_aanmeldingen = morgen
-        comp.save()
-        return
-
     comp.begin_aanmeldingen = gister
 
     if fase == 'B':

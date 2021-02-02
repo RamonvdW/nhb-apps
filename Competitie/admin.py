@@ -81,8 +81,8 @@ class RegioCompetitieSchutterBoogAdmin(admin.ModelAdmin):
         self.obj = None
 
     def get_form(self, request, obj=None, **kwargs):
-        if obj:
-            self.obj = obj
+        if obj:                 # pragma: no branch
+            self.obj = obj      # pragma: no cover
         return super().get_form(request, obj, **kwargs)
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):    # pragma: no cover

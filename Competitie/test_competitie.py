@@ -11,7 +11,8 @@ from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
 from Overig.e2ehelpers import E2EHelpers
 from Schutter.models import SchutterBoog
 from Functie.models import maak_functie
-from .models import (Competitie, DeelCompetitie, CompetitieKlasse)
+from Score.models import aanvangsgemiddelde_opslaan
+from .models import Competitie, DeelCompetitie, CompetitieKlasse
 import datetime
 
 
@@ -502,6 +503,10 @@ class TestCompetitie(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_kies)
 
         comp_pk = Competitie.objects.all()[0].pk
+
+        # gebruik een POST om de AG's vast te stellen
+        with self.assert_max_queries(600):      # TODO: optimize
+            resp = self.client.post(self.url_ag_vaststellen)
 
         # 18m competitie
         url = self.url_klassegrenzen_vaststellen % comp_pk
