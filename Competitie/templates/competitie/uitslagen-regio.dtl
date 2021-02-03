@@ -128,7 +128,7 @@
                     <th class="hide-on-small-only">Vereniging</th>
                     <th class="center-align">Gemiddelde</th>
                     <th class="center-align" colspan="7">Scores</th>
-                    <th class="center-align hide-on-small-only">Totaal</th>
+                    <!-- th class="center-align hide-on-small-only">Totaal</th -->
                 </tr>
             {% endif %}
 
@@ -144,7 +144,7 @@
                 <td class="center-align smal">{% if obj.laagste_score_nr == 5 %}<del>{{ obj.score5 }}</del>{% else %}{{ obj.score5 }}{% endif %}</td>
                 <td class="center-align smal">{% if obj.laagste_score_nr == 6 %}<del>{{ obj.score6 }}</del>{% else %}{{ obj.score6 }}{% endif %}</td>
                 <td class="center-align smal">{% if obj.laagste_score_nr == 7 %}<del>{{ obj.score7 }}</del>{% else %}{{ obj.score7 }}{% endif %}</td>
-                <td class="center-align hide-on-small-only">{{ obj.totaal }}</td>
+                <!-- td class="center-align hide-on-small-only">{{ obj.totaal }}</td -->
             </tr>
 
         {% endfor %}
