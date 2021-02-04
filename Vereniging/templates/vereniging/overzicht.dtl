@@ -52,7 +52,7 @@
     <p>Als beheerder van de vereniging heb je toegang tot onderstaande functies.</p>
 
 
-    <h5>Indoor competities</h5>
+    <h5>Indoor competitie</h5>
 
     <div class="row">
         <!-- wedstrijden -->
@@ -69,7 +69,7 @@
                     {% if comp.fase < 'B' %}
                         <div class="nhb-card-disabled">
                             <div class="nhb-card-content">
-                                <div class="card-title center-align grey-text">Aanmelden {{ comp.afstand }}m</div>
+                                <div class="card-title center-align grey-text">Aanmelden</div>
                                 <div class="center-align"><img src="{{ comp.icon }}" height="60" alt="logo" style="opacity: 0.5"></div>
                                 <div class="card-text grey-text">Aanmelden voor de <b>{{ comp.beschrijving }}</b> opent op {{ comp.begin_aanmeldingen }}.</div>
                                 <div class="card-text center-align"><br>(NOG NIET BESCHIKBAAR)</div>
@@ -98,7 +98,7 @@
     </div>
 
 
-    <h5>25m 1pijl competities</h5>
+    <h5>25m 1pijl competitie</h5>
 
     <div class="row">
         <!-- wedstrijden -->

@@ -43,15 +43,10 @@
         {% url 'Functie:overzicht' as card_url %}
         {% include 'plein/card.dtl' with title="Beheerders" text="Relevante beheerders van de competities." icon="face" url=card_url %}
 
-        <!-- toon inschrijvingen regiocompetitie -->
-        {% if comp.url_inschrijvingen %}
-            {% include 'plein/card.dtl' with title="Inschrijvingen "|add:comp.afstand|add:"m" text="Lijst met sporters ingeschreven voor de "|add:comp.beschrijving|add:"." icon="receipt" url=comp.url_inschrijvingen %}
-        {% endif %}
-
         <!-- planning regiocompetities -->
         {% for deelcomp in planning_deelcomp %}
             {% url 'Competitie:regio-planning' deelcomp.pk as card_url %}
-            {% include 'plein/card.dtl' with title="Planning "|add:deelcomp.competitie.afstand|add:"m" text="Planning voor de "|add:deelcomp.competitie.beschrijving|add:" in "|add:deelcomp.nhb_regio.naam icon="date_range" url=card_url %}
+            {% include 'plein/card.dtl' with title="Planning" text="Planning voor de "|add:deelcomp.competitie.beschrijving|add:" in "|add:deelcomp.nhb_regio.naam icon="date_range" url=card_url %}
         {% endfor %}
     </div>
 
