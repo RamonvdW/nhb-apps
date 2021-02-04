@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -74,14 +74,20 @@ class ScoresRegioView(UserPassesTestMixin, TemplateView):
             if not ronde.is_voor_import_oude_programma():
                 for wedstrijd in ronde.plan.wedstrijden.all():
                     wedstrijd_pks.append(wedstrijd.pk)
-                    wedstrijd2beschrijving[wedstrijd.pk] = "%s - %s" % (comp_str, ronde.beschrijving)
+                    beschrijving = ronde.beschrijving
+                    if not beschrijving and ronde.cluster:
+                        beschrijving = ronde.cluster.naam
+                    if not beschrijving:
+                        beschrijving = "?? (ronde)"
+                    wedstrijd2beschrijving[wedstrijd.pk] = "%s - %s" % (comp_str, beschrijving)
         # for
 
         wedstrijden = (Wedstrijd
                        .objects
                        .select_related('uitslag')
                        .filter(pk__in=wedstrijd_pks)
-                       .order_by('datum_wanneer', 'tijd_begin_wedstrijd'))
+                       .order_by('datum_wanneer', 'tijd_begin_wedstrijd',
+                                 'pk'))     # vaste sortering bij gelijke datum/tijd
 
         for wedstrijd in wedstrijden:
             heeft_uitslag = (wedstrijd.uitslag and wedstrijd.uitslag.scores.count() > 0)
