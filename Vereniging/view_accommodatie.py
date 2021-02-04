@@ -164,9 +164,11 @@ class LijstVerenigingenView(UserPassesTestMixin, ListView):
 
         # voeg de url toe voor de "details" knoppen
         for nhbver in context['object_list']:
-            nhbver.details_url = reverse('Vereniging:accommodatie-details',
-                                         kwargs={'locatie_pk': 0,
-                                                 'vereniging_pk': nhbver.pk})
+
+            if not nhbver.plaats:
+                nhbver.details_url = reverse('Vereniging:accommodatie-details',
+                                             kwargs={'locatie_pk': 0,
+                                                     'vereniging_pk': nhbver.pk})
 
             for loc in nhbver.wedstrijdlocatie_set.all():
                 loc.details_url = reverse('Vereniging:accommodatie-details',

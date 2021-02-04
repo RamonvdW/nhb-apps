@@ -13,6 +13,7 @@ from nhbapps.settings_base import *
 DEBUG = True
 
 ENABLE_DEBUG_TOOLBAR = False
+#ENABLE_DEBUG_TOOLBAR = True
 
 # django-extensions: very useful for show_urls
 ENABLE_DJANGO_EXTENSIONS = False

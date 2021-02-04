@@ -438,6 +438,10 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
     # class variables shared by all instances
     template_name = TEMPLATE_LEDEN_INGESCHREVEN
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.deelcomp = None
+
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         _, functie_nu = rol_get_huidige_functie(self.request)
@@ -474,7 +478,9 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
                                 'bij_vereniging', 'klasse', 'klasse__indiv')
                 .filter(deelcompetitie=deelcomp,
                         bij_vereniging=functie_nu.nhb_ver)
-                .order_by('klasse__indiv__volgorde'))
+                .order_by('klasse__indiv__volgorde',
+                          'schutterboog__nhblid__voornaam',
+                          'schutterboog__nhblid__achternaam'))
 
         for obj in objs:
             obj.team_ja_nee = JA_NEE[obj.inschrijf_voorkeur_team]
@@ -494,13 +500,14 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
         context['nhb_ver'] = functie_nu.nhb_ver
 
-        context['deelcomp'] = deelcomp = self.deelcomp
+        context['deelcomp'] = self.deelcomp
 
         if rol_nu == Rollen.ROL_HWL:
-            context['afmelden_url'] = reverse('Vereniging:leden-ingeschreven', kwargs={'deelcomp_pk': deelcomp.pk})
+            context['afmelden_url'] = reverse('Vereniging:leden-ingeschreven',
+                                              kwargs={'deelcomp_pk': self.deelcomp.pk})
             context['mag_afmelden'] = True
 
-        methode = deelcomp.inschrijf_methode
+        methode = self.deelcomp.inschrijf_methode
         if methode == INSCHRIJF_METHODE_3:
             context['toon_dagdeel'] = DAGDEEL
 
