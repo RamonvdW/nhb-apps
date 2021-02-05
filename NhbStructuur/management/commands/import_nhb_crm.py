@@ -8,7 +8,8 @@
 
 from django.core.management.base import BaseCommand
 from django.db.models import ProtectedError
-import django.db.utils
+from django.utils import timezone
+from django.db.utils import DataError
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbLid, NhbVereniging
 from Account.models import Account
 from Mailer.models import mailer_email_is_valide
@@ -107,11 +108,22 @@ class Command(BaseCommand):
         self._nieuwe_clubs = list()
         self._recordhouder_nhb_nrs = list()
 
+        self.lidmaatschap_jaar = 0
+        self.zet_lidmaatschap_jaar(timezone.now())
+
         self.dryrun = False
+
+    def zet_lidmaatschap_jaar(self, now):
+        self.lidmaatschap_jaar = now.year               # voorbeeld: 2021
+        if now.month == 1 and now.day <= 15:
+            # tot en met 15 januari hoort bij het voorgaande jaar
+            # leden kunnen dus nog uitgeschreven worden tot 15 jan
+            self.lidmaatschap_jaar -= 1                 # voorbeeld: 2020
 
     def add_arguments(self, parser):
         parser.add_argument('filename', nargs=1, help="pad naar het JSON bestand")
         parser.add_argument('--dryrun', action='store_true')
+        parser.add_argument('--sim_now', nargs=1, metavar='YYYY-MM-DD', help="gesimuleerde datum: YYYY-MM-DD")
 
     def _check_keys(self, keys, expected_keys, level):
         has_error = False
@@ -494,7 +506,6 @@ class Command(BaseCommand):
 
             if not member['club_number']:
                 # ex-leden hebben geen vereniging, dus niet te veel klagen
-                lid_blocked = True
                 lid_ver = None
             else:
                 lid_ver = vind_vereniging(member['club_number'])
@@ -524,7 +535,7 @@ class Command(BaseCommand):
             except (ValueError, TypeError):
                 lid_geboorte_datum = None
                 is_valid = False
-                if not lid_blocked:
+                if not lid_blocked:         # pragma: no branch
                     self.stderr.write('[ERROR] Lid %s heeft geen valide geboortedatum' % lid_nhb_nr)
                     self._count_errors += 1
 
@@ -583,6 +594,32 @@ class Command(BaseCommand):
                     self.stderr.write("[ERROR] Unexpected: nhb_nr %s onverwacht niet in lijst bestaande nhb nrs" % (repr(lid_nhb_nr)))
                     self._count_errors += 1
                 else:
+                    if obj.lid_tot_einde_jaar != self.lidmaatschap_jaar:
+                        if lid_ver:
+                            # lid bij een vereniging, dus het geldt weer een jaar
+                            obj.lid_tot_einde_jaar = self.lidmaatschap_jaar
+                        else:
+                            lid_blocked = True
+
+                    if obj.bij_vereniging != lid_ver:
+                        if lid_ver:
+                            self.stdout.write('[INFO] Lid %s: vereniging %s --> %s' % (lid_nhb_nr, get_vereniging_str(obj.bij_vereniging), get_vereniging_str(lid_ver)))
+                            obj.bij_vereniging = lid_ver
+                            self._count_wijzigingen += 1
+                            if not self.dryrun:
+                                obj.save()
+                        else:
+                            # als het lid uitgeschreven wordt in het CRM houden we de oude vereniging
+                            # vast, tot het einde van het lidmaatschap jaar.
+                            # dit voorkomt blokkeren en geen toegang tot de diensten tijdens een overschrijving
+                            if obj.lid_tot_einde_jaar < self.lidmaatschap_jaar:
+                                self.stdout.write('[INFO] Lid %s: vereniging %s --> geen (einde lidmaatschap jaar)' % (lid_nhb_nr, get_vereniging_str(obj.bij_vereniging)))
+                                obj.bij_vereniging = None
+                                obj.lid_blocked = True
+                                self._count_wijzigingen += 1
+                                if not self.dryrun:
+                                    obj.save()
+
                     if lid_blocked:
                         if obj.is_actief_lid:
                             self.stdout.write('[INFO] Lid %s: is_actief_lid ja --> nee (want blocked)' % lid_nhb_nr)
@@ -640,13 +677,6 @@ class Command(BaseCommand):
                         self._count_wijzigingen += 1
                         if not self.dryrun:
                             obj.save()
-
-                    if obj.bij_vereniging != lid_ver:
-                        self.stdout.write('[INFO] Lid %s: vereniging %s --> %s' % (lid_nhb_nr, get_vereniging_str(obj.bij_vereniging), get_vereniging_str(lid_ver)))
-                        obj.bij_vereniging = lid_ver
-                        self._count_wijzigingen += 1
-                        if not self.dryrun:
-                            obj.save()
                 # else
             # else
 
@@ -661,6 +691,7 @@ class Command(BaseCommand):
                 lid.para_classificatie = lid_para
                 lid.sinds_datum = lid_sinds
                 lid.bij_vereniging = lid_ver
+                lid.lid_tot_einde_jaar = self.lidmaatschap_jaar
                 if lid_blocked:
                     lid.is_actief_lid = False
                 if not self.dryrun:
@@ -790,6 +821,17 @@ class Command(BaseCommand):
         self.dryrun = options['dryrun']
         fname = options['filename'][0]
 
+        if options['sim_now']:
+            try:
+                sim_now = datetime.datetime.strptime(options['sim_now'][0], '%Y-%m-%d')
+            except ValueError as exc:
+                self.stderr.write('[ERROR] geen valide sim_now (%s)' % str(exc))
+                return
+            else:
+                self.zet_lidmaatschap_jaar(sim_now)
+
+        self.stdout.write('[INFO] lidmaatschap jaar = %s' % self.lidmaatschap_jaar)
+
         try:
             with open(fname, encoding='raw_unicode_escape') as f_handle:
                 data = json.load(f_handle)
@@ -822,7 +864,7 @@ class Command(BaseCommand):
             self._import_members(data['members'])
             self._import_clubs_secretaris(data['clubs'])
             self._import_wedstrijdlocaties(data['clubs'])
-        except django.db.utils.DataError as exc:        # pragma: no coverage
+        except DataError as exc:        # pragma: no coverage
             self.stderr.write('[ERROR] Onverwachte database fout: %s' % str(exc))
 
         self.stdout.write('Import van CRM data is klaar')

@@ -221,6 +221,11 @@ class NhbLid(models.Model):
                                 blank=True,  # allow access input in form
                                 null=True)   # allow NULL relation in database
 
+    # indien CRM aangeeft dat lid uitgeschreven is bij vereniging, toch op die vereniging
+    # houden tot het einde van het jaar zodat de diensten (waarvoor betaald is) nog gebruikt kunnen worden.
+    # dit voorkomt een gat bij overschrijvingen.
+    lid_tot_einde_jaar = models.PositiveSmallIntegerField(default=0)
+
     # koppeling met een account (indien aangemaakt)
     account = models.ForeignKey(Account, on_delete=models.SET_NULL, blank=True, null=True)
 
