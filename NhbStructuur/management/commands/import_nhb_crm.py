@@ -21,7 +21,7 @@ import datetime
 import json
 
 
-# TODO: dmv caching het aantal database hits verlagen
+# TODO: alle kleine save acties kost veel database access in de testen
 
 
 def vind_regio(regio_nr):
@@ -598,6 +598,9 @@ class Command(BaseCommand):
                         if lid_ver:
                             # lid bij een vereniging, dus het geldt weer een jaar
                             obj.lid_tot_einde_jaar = self.lidmaatschap_jaar
+                            # noteer: geen log regel
+                            if not self.dryrun:
+                                obj.save()
                         else:
                             lid_blocked = True
 
