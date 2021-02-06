@@ -273,7 +273,11 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
             resp = self.client.post(url)
         self.assert_is_redirect(resp, '/bondscompetities/')       # redirect = Success
 
-        self.assertEqual(2, KampioenschapSchutterBoog.objects.count())
+        # het lid zonder vereniging komt toch gewoon in de RK selectie
+        self.assertEqual(3, KampioenschapSchutterBoog.objects.count())
+
+        # TODO: controleer dat status lid niet op 'deelnemer' te zetten is
+        # TODO: lid weer aansluiten bij vereniging --> kan daarna wel deelnemer worden
 
     def test_doorzetten_bk(self):
         self.e2e_login_and_pass_otp(self.account_bb)
