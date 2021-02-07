@@ -178,7 +178,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.functie_hwl.accounts.add(self.account_beh1)
         self.e2e_login_and_pass_otp(self.account_beh1)
 
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(21):
             resp = self.client.post(self.url_activeer_functie % self.functie_hwl.pk, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, "HWL")

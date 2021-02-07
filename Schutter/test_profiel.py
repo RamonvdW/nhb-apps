@@ -124,7 +124,7 @@ class TestSchutterProfiel(E2EHelpers, TestCase):
         self.url_voorkeuren = '/sporter/voorkeuren/'
         self.url_aanmelden = '/sporter/regiocompetitie/aanmelden/%s/%s/'   # deelcomp_pk, schutterboog_pk
         self.url_bevestig_inschrijven = self.url_aanmelden + 'bevestig/'
-        self.url_afmelden = '/sporter/regiocompetitie/afmelden/%s/'        # regiocomp_pk
+        self.url_afmelden = '/sporter/regiocompetitie/afmelden/%s/'        # deelnemer_pk
 
     def _prep_voorkeuren(self):
         # haal de voorkeuren op - hiermee worden de SchutterBoog records aangemaakt
