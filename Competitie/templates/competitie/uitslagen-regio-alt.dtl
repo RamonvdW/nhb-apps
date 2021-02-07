@@ -119,6 +119,23 @@
 
     <table class="white">
         {% for obj in deelnemers %}
+            {% if forloop.first %}      <!-- alleen toevoegen als er deelnemers zijn, anders probleem met colspan=2 -->
+                <!-- forceer gelijkmatige layout in de Scores kolommen -->
+                <tr style="visibility: collapse">
+                    <td colspan="2"><!-- rank, naam --></td>
+                    <td class="hide-on-small-only"><!-- vereniging --></td>
+                    <td><!-- gemiddelde --></td>
+                    <td class="right-align smal">888</td>
+                    <td class="right-align smal">888</td>
+                    <td class="right-align smal">888</td>
+                    <td class="right-align smal">888</td>
+                    <td class="right-align smal">888</td>
+                    <td class="right-align smal">888</td>
+                    <td class="right-align smal">888</td>
+                    <td class="right-align hide-on-small-only"><!-- totaal --></td>
+                </tr>
+            {% endif %}
+
             {% if obj.break_klasse %}
                 <tr class="nhb-grijs">
                     <td colspan="12"><h5>{{ obj.klasse_str }}</h5></td>
@@ -129,7 +146,7 @@
                     <th class="hide-on-small-only">Vereniging</th>
                     <th class="center-align">Gemiddelde</th>
                     <th class="center-align" colspan="7">Scores</th>
-                    <th class="center-align hide-on-small-only">Totaal</th>
+                    <th class="right-align hide-on-small-only">Totaal</th>
                 </tr>
             {% endif %}
 
@@ -138,14 +155,14 @@
                 <td>{{ obj.naam_str }}</td>
                 <td class="hide-on-small-only">{{ obj.ver_str }}</td>
                 <td class="center-align">{{ obj.alt_gemiddelde }}</td>
-                <td class="center-align smal">{% if obj.alt_laagste_score_nr == 1 %}<del>{{ obj.alt_score1 }}</del>{% else %}{{ obj.alt_score1 }}{% endif %}</td>
-                <td class="center-align smal">{% if obj.alt_laagste_score_nr == 2 %}<del>{{ obj.alt_score2 }}</del>{% else %}{{ obj.alt_score2 }}{% endif %}</td>
-                <td class="center-align smal">{% if obj.alt_laagste_score_nr == 3 %}<del>{{ obj.alt_score3 }}</del>{% else %}{{ obj.alt_score3 }}{% endif %}</td>
-                <td class="center-align smal">{% if obj.alt_laagste_score_nr == 4 %}<del>{{ obj.alt_score4 }}</del>{% else %}{{ obj.alt_score4 }}{% endif %}</td>
-                <td class="center-align smal">{% if obj.alt_laagste_score_nr == 5 %}<del>{{ obj.alt_score5 }}</del>{% else %}{{ obj.alt_score5 }}{% endif %}</td>
-                <td class="center-align smal">{% if obj.alt_laagste_score_nr == 6 %}<del>{{ obj.alt_score6 }}</del>{% else %}{{ obj.alt_score6 }}{% endif %}</td>
-                <td class="center-align smal">{% if obj.alt_laagste_score_nr == 7 %}<del>{{ obj.alt_score7 }}</del>{% else %}{{ obj.alt_score7 }}{% endif %}</td>
-                <td class="center-align hide-on-small-only">{{ obj.alt_totaal }}</td>
+                <td class="right-align smal">{% if obj.alt_laagste_score_nr == 1 %}<del>{{ obj.alt_score1 }}</del>{% else %}{{ obj.alt_score1 }}{% endif %}</td>
+                <td class="right-align smal">{% if obj.alt_laagste_score_nr == 2 %}<del>{{ obj.alt_score2 }}</del>{% else %}{{ obj.alt_score2 }}{% endif %}</td>
+                <td class="right-align smal">{% if obj.alt_laagste_score_nr == 3 %}<del>{{ obj.alt_score3 }}</del>{% else %}{{ obj.alt_score3 }}{% endif %}</td>
+                <td class="right-align smal">{% if obj.alt_laagste_score_nr == 4 %}<del>{{ obj.alt_score4 }}</del>{% else %}{{ obj.alt_score4 }}{% endif %}</td>
+                <td class="right-align smal">{% if obj.alt_laagste_score_nr == 5 %}<del>{{ obj.alt_score5 }}</del>{% else %}{{ obj.alt_score5 }}{% endif %}</td>
+                <td class="right-align smal">{% if obj.alt_laagste_score_nr == 6 %}<del>{{ obj.alt_score6 }}</del>{% else %}{{ obj.alt_score6 }}{% endif %}</td>
+                <td class="right-align smal">{% if obj.alt_laagste_score_nr == 7 %}<del>{{ obj.alt_score7 }}</del>{% else %}{{ obj.alt_score7 }}{% endif %}</td>
+                <td class="right-align hide-on-small-only">{{ obj.alt_totaal }}</td>
             </tr>
 
         {% endfor %}

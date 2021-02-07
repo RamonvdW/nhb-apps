@@ -118,6 +118,23 @@
 
     <table class="white">
         {% for obj in deelnemers %}
+            {% if forloop.first %}      <!-- alleen toevoegen als er deelnemers zijn, anders probleem met colspan=2 -->
+                <!-- forceer gelijkmatige layout in de Scores kolommen -->
+                <tr style="visibility: collapse">
+                    <td colspan="2"><!-- rank, naam --></td>
+                    <td class="hide-on-small-only"><!-- vereniging --></td>
+                    <td><!-- gemiddelde --></td>
+                    <td class="right-align smal">888</td>
+                    <td class="right-align smal">888</td>
+                    <td class="right-align smal">888</td>
+                    <td class="right-align smal">888</td>
+                    <td class="right-align smal">888</td>
+                    <td class="right-align smal">888</td>
+                    <td class="right-align smal">888</td>
+                    <td class="right-align hide-on-small-only"><!-- totaal --></td>
+                </tr>
+            {% endif %}
+
             {% if obj.break_klasse %}
                 <tr class="nhb-grijs">
                     <td colspan="12"><h5>{{ obj.klasse_str }}</h5></td>
@@ -148,21 +165,6 @@
             </tr>
 
         {% endfor %}
-
-        <!-- forceer gelijkmatige layout in de Scores kolommen -->
-        <tr style="visibility: collapse">
-            <td colspan="2"><!-- rank, naam --></td>
-            <td class="hide-on-small-only"><!-- vereniging --></td>
-            <td><!-- gemiddelde --></td>
-            <td class="right-align smal">888</td>
-            <td class="right-align smal">888</td>
-            <td class="right-align smal">888</td>
-            <td class="right-align smal">888</td>
-            <td class="right-align smal">888</td>
-            <td class="right-align smal">888</td>
-            <td class="right-align smal">888</td>
-            <td class="right-align hide-on-small-only"><!-- totaal --></td>
-        </tr>
     </table>
 
 {% endblock %}
