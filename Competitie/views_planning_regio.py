@@ -192,6 +192,9 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
                 context['clusters'].append(cluster)
                 # tel het aantal rondes voor dit cluster
                 cluster.ronde_count = cluster.deelcompetitieronde_set.count()
+                cluster.url_bekijk = reverse('Competitie:regio-cluster-planning',
+                                             kwargs={'cluster_pk': cluster.pk,
+                                                     'deelcomp_pk': deelcomp.pk})
         # for
         if len(context['clusters']) > 0:
             context['show_clusters'] = True
@@ -300,13 +303,12 @@ class RegioClusterPlanningView(UserPassesTestMixin, TemplateView):
         context['regio'] = cluster.regio
 
         try:
+            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])     # afkappen geeft beveiliging
             deelcomp = (DeelCompetitie
                         .objects
                         .select_related('competitie')
-                        .get(laag=LAAG_REGIO,
-                             nhb_regio=cluster.regio,
-                             competitie__afstand=cluster.gebruik))
-        except DeelCompetitie.DoesNotExist:
+                        .get(pk=deelcomp_pk))
+        except (ValueError, DeelCompetitie.DoesNotExist):
             raise Resolver404()
 
         context['deelcomp'] = deelcomp
@@ -325,7 +327,8 @@ class RegioClusterPlanningView(UserPassesTestMixin, TemplateView):
         rol_nu = rol_get_huidige(self.request)
         if rol_nu == Rollen.ROL_RCL and len(context['rondes']) < 10:
             context['url_nieuwe_week'] = reverse('Competitie:regio-cluster-planning',
-                                                 kwargs={'cluster_pk': cluster.pk})
+                                                 kwargs={'deelcomp_pk': deelcomp.pk,
+                                                         'cluster_pk': cluster.pk})
 
         context['terug_url'] = reverse('Competitie:regio-planning',
                                        kwargs={'deelcomp_pk': deelcomp.pk})
@@ -469,7 +472,8 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
 
         if ronde.cluster:
             terug_url = reverse('Competitie:regio-cluster-planning',
-                                kwargs={'cluster_pk': ronde.cluster.pk})
+                                kwargs={'cluster_pk': ronde.cluster.pk,
+                                        'deelcomp_pk': ronde.deelcompetitie.pk})
         else:
             terug_url = reverse('Competitie:regio-planning',
                                 kwargs={'deelcomp_pk': ronde.deelcompetitie.pk})
@@ -606,7 +610,8 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
 
             if ronde.cluster:
                 next_url = reverse('Competitie:regio-cluster-planning',
-                                   kwargs={'cluster_pk': ronde.cluster.pk})
+                                   kwargs={'cluster_pk': ronde.cluster.pk,
+                                           'deelcomp_pk': ronde.deelcompetitie.pk})
             else:
                 next_url = reverse('Competitie:regio-planning',
                                    kwargs={'deelcomp_pk': ronde.deelcompetitie.pk})

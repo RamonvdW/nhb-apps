@@ -164,7 +164,6 @@ class TestCompetitieScores(E2EHelpers, TestCase):
         ver.save()
 
         self.url_planning_regio = '/bondscompetities/planning/regio/%s/'                   # deelcomp_pk
-        self.url_planning_regio_cluster = '/bondscompetities/planning/regio/cluster/%s/'   # cluster_pk
         self.url_planning_regio_ronde = '/bondscompetities/planning/regio/ronde/%s/'       # ronde_pk
 
         self.url_uitslag_invoeren = '/bondscompetities/scores/uitslag-invoeren/%s/'        # wedstrijd_pk

@@ -101,7 +101,11 @@ urlpatterns = [
          views_planning_regio.RegioPlanningView.as_view(),
          name='regio-planning'),
 
-    path('planning/regio/cluster/<cluster_pk>/',
+    path('planning/regio/<deelcomp_pk>/afsluiten/',
+         views_planning_regio.AfsluitenRegiocompView.as_view(),
+         name='afsluiten-regiocomp'),
+
+    path('planning/regio/<deelcomp_pk>/cluster/<cluster_pk>/',
          views_planning_regio.RegioClusterPlanningView.as_view(),
          name='regio-cluster-planning'),
 
@@ -120,10 +124,6 @@ urlpatterns = [
     path('planning/regio/wedstrijd/verwijder/<wedstrijd_pk>/',
          views_planning_regio.VerwijderWedstrijdView.as_view(),
          name='regio-verwijder-wedstrijd'),
-
-    path('planning/regio/afsluiten/<deelcomp_pk>/',
-         views_planning_regio.AfsluitenRegiocompView.as_view(),
-         name='afsluiten-regiocomp'),
 
 
     # planning rk

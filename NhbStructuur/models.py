@@ -96,7 +96,12 @@ class NhbCluster(models.Model):
         return "%s%s" % (self.regio.regio_nr, self.letter)
 
     def cluster_code_str(self):
-        return "%s voor %s" % (self.cluster_code(), GEBRUIK2STR[self.gebruik])
+        msg = "%s voor " % self.cluster_code()
+        try:
+            msg += GEBRUIK2STR[self.gebruik]
+        except KeyError:
+            msg = "?"
+        return msg
 
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
