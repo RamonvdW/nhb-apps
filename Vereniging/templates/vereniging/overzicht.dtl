@@ -152,6 +152,11 @@
         {% url 'Vereniging:wedstrijden' as card_url %}
         {% include 'plein/card.dtl' with title="Wedstrijden" text="Wedstrijden die bij deze vereniging geschoten worden." icon="event" url=card_url %}
 
+        {% if heeft_wedstrijden %}
+            {% url 'Vereniging:wedstrijden-uitslag-invoeren' as card_url %}
+            {% include 'plein/card.dtl' with title="Scores invoeren" text="Scores invoeren voor de wedstrijden die bij deze vereniging geschoten worden." icon="edit" url=card_url %}
+        {% endif %}
+
         <!-- ledenlijst -->
         {% url 'Vereniging:ledenlijst' as card_url %}
         {% include 'plein/card.dtl' with title="Ledenlijst" text="Bekijk de ledenlijst van de vereniging, inclusief wedstrijdklasse jeugdleden en laatste inlog op deze website." icon="list" url=card_url %}

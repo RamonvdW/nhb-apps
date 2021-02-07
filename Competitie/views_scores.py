@@ -230,7 +230,7 @@ class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
             context['url_terug'] = reverse('Competitie:scores-regio',
                                            kwargs={'deelcomp_pk': deelcomp.pk})
         else:
-            context['url_terug'] = reverse('Vereniging:wedstrijden')
+            context['url_terug'] = reverse('Vereniging:wedstrijden-uitslag-invoeren')
 
         menu_dynamics(self.request, context, actief='competitie')
         return context

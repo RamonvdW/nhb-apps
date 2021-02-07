@@ -58,6 +58,10 @@ urlpatterns = [
          view_wedstrijden.WedstrijdenView.as_view(),
          name='wedstrijden'),
 
+    path('uitslag-invoeren/',
+         view_wedstrijden.WedstrijdenUitslagInvoerenView.as_view(),
+         name='wedstrijden-uitslag-invoeren'),
+
     path('lijst-rayonkampioenschappen/<deelcomp_pk>/alles/',
          view_lijst_rk.VerenigingLijstRkSelectieAllesView.as_view(),
          name='lijst-rk-alles'),

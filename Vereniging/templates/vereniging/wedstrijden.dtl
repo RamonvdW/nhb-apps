@@ -16,39 +16,47 @@
 
     <!-- <p>Je rol is <b>{{ huidige_rol }}</b>.</p> -->
 
-    <table class="white">
-        <thead>
-            <tr>
-                <th>Wanneer</th>
-                <th>Beschrijving</th>
-                <th>Uitslag</th>
-            </tr>
-        </thead>
+    {% if geen_wedstrijden %}
 
-        {% for obj in wedstrijden %}
-            <tr>
-                <td>{{ obj.datum_wanneer }} om {{ obj.tijd_begin_wedstrijd }}</td>
-                <td>{{ obj.beschrijving }}</td>
-                <!-- knop om uitslagen te zien / in te voeren -->
-                <td>
-                    {% if obj.url_uitslag_aanpassen %}
-                        <a class="btn-nhb-blauw" href="{{ obj.url_uitslag_aanpassen }}">
-                            <i class="material-icons-round left">arrow_forward</i>Aanpassen</a>
-                    {% elif obj.url_score_invoeren %}
-                        <a class="btn-nhb-blauw" href="{{ obj.url_score_invoeren }}">
-                            <i class="material-icons-round left">arrow_forward</i>Invoeren</a>
-                    {% elif obj.url_uitslag_bekijken %}
-                        <a class="btn-nhb-blauw" href="{{ obj.url_uitslag_bekijken }}">
-                            <i class="material-icons-round left">arrow_forward</i>Bekijken</a>
-                    {% endif %}
+        <p>In de planning staan geen wedstrijden voor deze vereniging.</p>
 
-                    {% if obj.toon_geen_uitslag %}
-                        <span><i>Nog geen</i></span>
-                    {% endif %}
-                </td>
-            </tr>
-        {% endfor %}
-    </table>
+    {% else %}
+
+        <table class="white">
+            <thead>
+                <tr>
+                    <th>Wanneer</th>
+                    <th>Beschrijving</th>
+                    <th>Uitslag</th>
+                </tr>
+            </thead>
+
+            {% for obj in wedstrijden %}
+                <tr>
+                    <td>{{ obj.datum_wanneer }} om {{ obj.tijd_begin_wedstrijd }}</td>
+                    <td>{{ obj.beschrijving }}</td>
+                    <!-- knop om uitslagen te zien / in te voeren -->
+                    <td>
+                        {% if obj.url_uitslag_aanpassen %}
+                            <a class="btn-nhb-blauw" href="{{ obj.url_uitslag_aanpassen }}">
+                                <i class="material-icons-round left">arrow_forward</i>Aanpassen</a>
+                        {% elif obj.url_score_invoeren %}
+                            <a class="btn-nhb-blauw" href="{{ obj.url_score_invoeren }}">
+                                <i class="material-icons-round left">arrow_forward</i>Invoeren</a>
+                        {% elif obj.url_uitslag_bekijken %}
+                            <a class="btn-nhb-blauw" href="{{ obj.url_uitslag_bekijken }}">
+                                <i class="material-icons-round left">arrow_forward</i>Bekijken</a>
+                        {% endif %}
+
+                        {% if obj.toon_geen_uitslag %}
+                            <span><i>Nog geen</i></span>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+
+    {% endif %}
 
 {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vereniging-wedstrijden" %}
 

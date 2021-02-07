@@ -9,10 +9,12 @@ from django.urls import reverse
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.templatetags.static import static
-from Competitie.models import Competitie, DeelCompetitie, LAAG_REGIO, LAAG_RK, INSCHRIJF_METHODE_1
+from Competitie.models import (Competitie, DeelCompetitie, DeelcompetitieRonde,
+                               LAAG_REGIO, LAAG_RK, INSCHRIJF_METHODE_1)
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 from Taken.taken import eval_open_taken
+from Wedstrijden.models import Wedstrijd
 
 
 TEMPLATE_OVERZICHT = 'vereniging/overzicht.dtl'
@@ -76,6 +78,14 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                                                nhb_rayon=functie_nu.nhb_ver.regio.rayon)
                                        .select_related('competitie')
                                        .order_by('competitie__afstand'))
+
+            pks = (DeelcompetitieRonde
+                   .objects
+                   .filter(deelcompetitie__is_afgesloten=False,
+                           plan__wedstrijden__vereniging=functie_nu.nhb_ver)
+                   .values_list('plan__wedstrijden', flat=True))
+            if Wedstrijd.objects.filter(pk__in=pks).count() > 0:
+                context['heeft_wedstrijden'] = True
 
         # comp is nodig voor inschrijven
         for comp in context['competities']:
