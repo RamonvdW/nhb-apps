@@ -179,12 +179,11 @@
             {% if wkl_niet_gebruikt %}
                 <tr>
                     <td colspan="2"><i>De volgende klassen zijn nog niet gekoppeld aan een wedstrijd:</i></td>
-                    <td>
+                    <td colspan="3">
                         {% for wkl_beschrijving in wkl_niet_gebruikt %}
                             <span>{{ wkl_beschrijving }}</span><br>
                         {% endfor %}
                     </td>
-                    <td colspan="2"><!-- kolommen voor capaciteit en knoppen --></td>
                 </tr>
             {% endif %}
         {% endif %}
