@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -33,10 +33,6 @@ class SchutterVoorkeuren(models.Model):
     # (opt-out) wel/niet aanbieden om mee te doen met de competitie
     voorkeur_meedoen_competitie = models.BooleanField(default=True)
 
-    # het account waar dit record bij hoort
-    # (niet gebruiken!)
-    account = models.ForeignKey(Account, on_delete=models.CASCADE, null=True)
-
     class Meta:
         """ meta data voor de admin interface """
         verbose_name_plural = verbose_name = "Schutter voorkeuren"
@@ -59,10 +55,6 @@ class SchutterBoog(models.Model):
     # voorkeuren van de schutter: alleen interesse, of ook actief schieten?
     heeft_interesse = models.BooleanField(default=True)
     voor_wedstrijd = models.BooleanField(default=False)
-
-    # het account waar dit record bij hoort
-    # (niet gebruiken!)
-    account = models.ForeignKey(Account, on_delete=models.CASCADE, null=True)
 
     # aanvangsgemiddelde is opgeslagen in een Score en ScoreHist record
 
