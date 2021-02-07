@@ -197,12 +197,12 @@ class Competitie(models.Model):
             return
 
         if now <= self.einde_aanmeldingen:
-            # B = open voor inschrijvingen, tot sluiten inschrijvingen
+            # B = open voor inschrijvingen en aanmaken teams
             self.fase = 'B'
             return
 
         if now <= self.einde_teamvorming:
-            # C = aanmaken teams; gesloten voor individuele inschrijvingen
+            # C = afronde definitie teams
             self.fase = 'C'
             return
 
