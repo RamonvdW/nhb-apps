@@ -217,7 +217,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
             comp.zet_fase()
             if comp.fase <= 'B':
                 obj.url_afmelden = reverse('Schutter:afmelden',
-                                           kwargs={'regiocomp_pk': obj.pk})
+                                           kwargs={'deelnemer_pk': inschrijving.pk})
         # for
 
         return objs

@@ -40,7 +40,7 @@ urlpatterns = [
          view_aanmelden_afmelden.RegiocompetitieAanmeldenView.as_view(),
          name='aanmelden'),
 
-    path('regiocompetitie/afmelden/<regiocomp_pk>/',
+    path('regiocompetitie/afmelden/<deelnemer_pk>/',
          view_aanmelden_afmelden.RegiocompetitieAfmeldenView.as_view(),
          name='afmelden'),
 
