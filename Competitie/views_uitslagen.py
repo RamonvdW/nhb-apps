@@ -40,19 +40,20 @@ class UitslagenVerenigingView(TemplateView):
         """
         ver_nr = -1
 
-        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
+        if self.request.user.is_authenticated:
+            rol_nu, functie_nu = rol_get_huidige_functie(self.request)
 
-        if functie_nu and functie_nu.nhb_ver:
-            # HWL, WL, SEC
-            ver_nr = functie_nu.nhb_ver.nhb_nr
+            if functie_nu and functie_nu.nhb_ver:
+                # HWL, WL, SEC
+                ver_nr = functie_nu.nhb_ver.nhb_nr
 
-        if ver_nr < 0:
-            # pak de vereniging van de ingelogde gebruiker
-            account = self.request.user
-            if account.nhblid_set.count() > 0:
-                nhblid = account.nhblid_set.all()[0]
-                if nhblid.is_actief_lid and nhblid.bij_vereniging:
-                    ver_nr = nhblid.bij_vereniging.nhb_nr
+            if ver_nr < 0:
+                # pak de vereniging van de ingelogde gebruiker
+                account = self.request.user
+                if account.nhblid_set.count() > 0:
+                    nhblid = account.nhblid_set.all()[0]
+                    if nhblid.is_actief_lid and nhblid.bij_vereniging:
+                        ver_nr = nhblid.bij_vereniging.nhb_nr
 
         ver_nrs = list(NhbVereniging.objects.order_by('nhb_nr').values_list('nhb_nr', flat=True))
         if ver_nr not in ver_nrs:
@@ -93,9 +94,9 @@ class UitslagenVerenigingView(TemplateView):
                         .select_related('competitie', 'nhb_regio')
                         .get(laag=LAAG_REGIO,
                              competitie=comp,
-                             competitie__is_afgesloten=False,
+                             competitie__is_afgesloten=False,       # TODO: waarom hier opeens filteren?
                              nhb_regio__regio_nr=regio_nr))
-        except DeelCompetitie.DoesNotExist:
+        except DeelCompetitie.DoesNotExist:     # pragma: no cover
             raise Resolver404()
 
         return deelcomp

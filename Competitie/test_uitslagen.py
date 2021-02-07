@@ -99,7 +99,6 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         lid.save()
         self.lid_100003 = lid
 
-        self.url_info = '/bondscompetities/info/'
         self.url_overzicht = '/bondscompetities/%s/'
         self.url_uitslagen_regio = '/bondscompetities/%s/uitslagen/%s/%s/regio/'
         self.url_uitslagen_regio_n = '/bondscompetities/%s/uitslagen/%s/%s/regio/%s/'
@@ -392,7 +391,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
 
-        url = self.url_uitslagen_regio_alt_n % (self.comp_18.pk, 'R', 'alle', 101)
+        url = self.url_uitslagen_regio_alt_n % (self.comp_18.pk, 'R', 'zes', 101)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
@@ -474,6 +473,11 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 404)
 
         url = self.url_uitslagen_rayon_n % (self.comp_18.pk, 'R', 'x')
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 404)
+
+        url = self.url_uitslagen_rayon_n % (self.comp_18.pk, 'R', '0')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 404)
@@ -579,6 +583,57 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 404)
+
+    def test_anon(self):
+        self.client.logout()
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_overzicht % self.comp_18.pk)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_uitslagen_regio % (self.comp_18.pk, 'R', 'alle'))
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_uitslagen_regio_alt % (self.comp_18.pk, 'R', 'alle'))
+        self.assert_is_redirect(resp, self.url_uitslagen_regio % (self.comp_18.pk, 'R', 'alle'))
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_uitslagen_regio_n % (self.comp_18.pk, 'R', 'alle', 111))
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_uitslagen_regio_alt_n % (self.comp_18.pk, 'R', 'alle', 111))
+        self.assert_is_redirect(resp, self.url_uitslagen_regio_n % (self.comp_18.pk, 'R', 'alle', 111))
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_uitslagen_rayon % (self.comp_18.pk, 'R'))
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_uitslagen_rayon_n % (self.comp_18.pk, 'R', 2))
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_uitslagen_bond % (self.comp_18.pk, 'R'))
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_uitslagen_ver % (self.comp_18.pk, 'R'))
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_uitslagen_ver_n % (self.comp_18.pk, 'R', self.ver.nhb_nr))
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
 
 
 # end of file

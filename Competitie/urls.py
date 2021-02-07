@@ -195,6 +195,7 @@ urlpatterns = [
          views_uitslagen.UitslagenVerenigingView.as_view(),
          name='uitslagen-vereniging-n'),
 
+    # TODO: wordt deze gebruikt?
     path('<comp_pk>/uitslagen/<comp_boog>/vereniging/',
          views_uitslagen.UitslagenVerenigingView.as_view(),
          name='uitslagen-vereniging'),
