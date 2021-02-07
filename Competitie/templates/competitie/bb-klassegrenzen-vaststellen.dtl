@@ -25,7 +25,7 @@
 
         <p>Hieronder volgende de automatisch berekende klassegrenzen voor de individuele wedstrijdklassen voor de <b>{{ comp.beschrijving }}</b>.</p>
 
-        <p>Onder aan deze pagina vindt je een knop om de om de klassegrenzen vast te leggen. Dit is een eenmalige actie voor elke competitie.</p>
+        <p>Onder aan deze pagina vindt je een knop om de klassegrenzen vast te leggen. Dit is een eenmalige actie voor elke competitie.</p>
 
         <h5 class="red-text">Controleer dat onderstaande gegevens juist zijn.</h5>
 
