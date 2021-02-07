@@ -185,7 +185,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                         inschrijvingen.remove(inschrijving)
                         if comp.fase <= 'B':
                             obj.url_afmelden = reverse('Schutter:afmelden',
-                                                       kwargs={'regiocomp_pk': inschrijving.pk})
+                                                       kwargs={'deelnemer_pk': inschrijving.pk})
 
                         if obj.inschrijf_methode == INSCHRIJF_METHODE_1 and comp.fase <= 'E':
                             obj.url_schietmomenten = reverse('Schutter:schietmomenten',
