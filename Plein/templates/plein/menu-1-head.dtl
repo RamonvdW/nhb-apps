@@ -51,7 +51,7 @@
 {% if menu_toon_schutter_profiel %}
     <li class="menu-level1{% if menu_actief == "schutter-profiel" %} menu-actief{% endif %}">
         <a href="{% url 'Schutter:profiel' %}" class="white-text">
-           <i class="material-icons-round white-text">portrait</i>Jouw pagina</a>
+           <i class="material-icons-round white-text">portrait</i>Mijn pagina</a>
     </li>
 {% endif %}
 
