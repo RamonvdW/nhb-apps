@@ -4,40 +4,144 @@
 #
 #    pip-compile requirements_test.in
 #
-arrow==0.17.0             # via djangosaml2idp
-asgiref==3.3.1            # via -r requirements.txt, django
-cachetools==4.1.1         # via -r requirements.txt, google-auth
-certifi==2020.11.8        # via -r requirements.txt, requests
-cffi==1.14.4              # via cryptography
-chardet==3.0.4            # via -r requirements.txt, requests
-cryptography==3.2.1       # via pyopenssl, pysaml2
-defusedxml==0.6.0         # via pysaml2
-django==3.0.11            # via -r requirements.txt, djangosaml2idp
-djangosaml2idp==0.7.2     # via -r requirements_test.in
-google-api-core==1.23.0   # via -r requirements.txt, google-api-python-client
-google-api-python-client==1.12.8  # via -r requirements.txt
-google-auth-httplib2==0.0.4  # via -r requirements.txt, google-api-python-client
-google-auth==1.23.0       # via -r requirements.txt, google-api-core, google-api-python-client, google-auth-httplib2
-googleapis-common-protos==1.52.0  # via -r requirements.txt, google-api-core
-httplib2==0.18.1          # via -r requirements.txt, google-api-python-client, google-auth-httplib2
-idna==2.10                # via -r requirements.txt, requests
-protobuf==3.14.0          # via -r requirements.txt, google-api-core, googleapis-common-protos
-psycopg2-binary==2.8.6    # via -r requirements.txt
-pyasn1-modules==0.2.8     # via -r requirements.txt, google-auth
-pyasn1==0.4.8             # via -r requirements.txt, pyasn1-modules, rsa
-pycparser==2.20           # via cffi
-pyopenssl==20.0.0         # via pysaml2
-pyotp==2.4.1              # via -r requirements.txt
-pysaml2==6.3.1            # via -r requirements_test.in, djangosaml2idp
-python-dateutil==2.8.1    # via arrow, pysaml2
-pytz==2020.4              # via -r requirements.txt, django, djangosaml2idp, google-api-core, pysaml2
-qrcode==6.1               # via -r requirements.txt
-requests==2.25.0          # via -r requirements.txt, google-api-core, pysaml2
-rsa==4.6                  # via -r requirements.txt, google-auth
-six==1.15.0               # via -r requirements.txt, cryptography, google-api-core, google-api-python-client, google-auth, google-auth-httplib2, protobuf, pyopenssl, pysaml2, python-dateutil, qrcode
-sqlparse==0.4.1           # via -r requirements.txt, django
-uritemplate==3.0.1        # via -r requirements.txt, google-api-python-client
-urllib3==1.26.2           # via -r requirements.txt, requests
+arrow==0.17.0
+    # via djangosaml2idp
+asgiref==3.3.1
+    # via
+    #   -r requirements.txt
+    #   django
+cachetools==4.1.1
+    # via
+    #   -r requirements.txt
+    #   google-auth
+certifi==2020.11.8
+    # via
+    #   -r requirements.txt
+    #   requests
+cffi==1.14.4
+    # via cryptography
+chardet==3.0.4
+    # via
+    #   -r requirements.txt
+    #   requests
+cryptography==3.2.1
+    # via
+    #   pyopenssl
+    #   pysaml2
+defusedxml==0.6.0
+    # via pysaml2
+django==3.0.11
+    # via
+    #   -r requirements.txt
+    #   djangosaml2idp
+djangosaml2idp==0.7.2
+    # via -r requirements_test.in
+google-api-core==1.23.0
+    # via
+    #   -r requirements.txt
+    #   google-api-python-client
+google-api-python-client==1.12.8
+    # via -r requirements.txt
+google-auth-httplib2==0.0.4
+    # via
+    #   -r requirements.txt
+    #   google-api-python-client
+google-auth==1.23.0
+    # via
+    #   -r requirements.txt
+    #   google-api-core
+    #   google-api-python-client
+    #   google-auth-httplib2
+googleapis-common-protos==1.52.0
+    # via
+    #   -r requirements.txt
+    #   google-api-core
+httplib2==0.19.0
+    # via
+    #   -r requirements.txt
+    #   google-api-python-client
+    #   google-auth-httplib2
+idna==2.10
+    # via
+    #   -r requirements.txt
+    #   requests
+protobuf==3.14.0
+    # via
+    #   -r requirements.txt
+    #   google-api-core
+    #   googleapis-common-protos
+psycopg2-binary==2.8.6
+    # via -r requirements.txt
+pyasn1-modules==0.2.8
+    # via
+    #   -r requirements.txt
+    #   google-auth
+pyasn1==0.4.8
+    # via
+    #   -r requirements.txt
+    #   pyasn1-modules
+    #   rsa
+pycparser==2.20
+    # via cffi
+pyopenssl==20.0.0
+    # via pysaml2
+pyotp==2.4.1
+    # via -r requirements.txt
+pyparsing==2.4.7
+    # via
+    #   -r requirements.txt
+    #   httplib2
+pysaml2==6.3.1
+    # via
+    #   -r requirements_test.in
+    #   djangosaml2idp
+python-dateutil==2.8.1
+    # via
+    #   arrow
+    #   pysaml2
+pytz==2020.4
+    # via
+    #   -r requirements.txt
+    #   django
+    #   djangosaml2idp
+    #   google-api-core
+    #   pysaml2
+qrcode==6.1
+    # via -r requirements.txt
+requests==2.25.0
+    # via
+    #   -r requirements.txt
+    #   google-api-core
+    #   pysaml2
+rsa==4.6
+    # via
+    #   -r requirements.txt
+    #   google-auth
+six==1.15.0
+    # via
+    #   -r requirements.txt
+    #   cryptography
+    #   google-api-core
+    #   google-api-python-client
+    #   google-auth
+    #   google-auth-httplib2
+    #   protobuf
+    #   pyopenssl
+    #   pysaml2
+    #   python-dateutil
+    #   qrcode
+sqlparse==0.4.1
+    # via
+    #   -r requirements.txt
+    #   django
+uritemplate==3.0.1
+    # via
+    #   -r requirements.txt
+    #   google-api-python-client
+urllib3==1.26.2
+    # via
+    #   -r requirements.txt
+    #   requests
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
