@@ -33,7 +33,7 @@ class AccountAdmin(UserAdmin):
     list_filter = ('is_staff', 'is_BB', 'otp_is_actief')
 
     # velden om in te zoeken (in de lijst)
-    search_fields = ('username', 'sporter__voornaam', 'sporter__achternaam')
+    search_fields = ('username', 'first_name', 'last_name')
 
     def gekoppelde_functies(self, obj):     # pragma: no cover
         return "\n".join([functie.beschrijving for functie in obj.functie_set.all()])
