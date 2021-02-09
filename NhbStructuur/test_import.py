@@ -79,7 +79,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
     def test_import(self):
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(107):
+        with self.assert_max_queries(111):
             management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_03.json',
                                     '--sim_now=2020-07-01', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
@@ -156,7 +156,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(83):
+        with self.assert_max_queries(85):
             management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_08.json',
                                     '--sim_now=2020-07-01', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
@@ -176,15 +176,25 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         # lid mutaties
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(107):
+        with self.assert_max_queries(111):
             management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_03.json',
                                     '--sim_now=2020-07-01', stderr=f1, stdout=f2)
+
+        lid = NhbLid.objects.get(nhb_nr=100098)
+        self.assertEqual(lid.bij_vereniging.nhb_nr, 1000)
+        self.assertTrue(lid.is_actief_lid)
+        self.assertEqual(lid.lid_tot_einde_jaar, 2020)
+
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(74):
+        with self.assert_max_queries(75):
             management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_09.json',
                                     '--sim_now=2020-07-01', stderr=f1, stdout=f2)
+        # print(f1.getvalue())
+        # print(f2.getvalue())
         self.assertTrue("[ERROR] Lid 100001 heeft geen valide geboortedatum" in f1.getvalue())
+        self.assertTrue("[ERROR] Lid 100099 heeft geen valide geboortedatum" in f1.getvalue())
+        self.assertTrue("[ERROR] Lid 100099 heeft geen valide e-mail (bad_email)" in f1.getvalue())
         self.assertTrue("[ERROR] Lid 100001 heeft onbekend geslacht: X (moet zijn: M of F)" in f1.getvalue())
         self.assertTrue("[ERROR] Lid 100009 heeft geen voornaam of initials" in f1.getvalue())
         self.assertTrue("[INFO] Lid 100024: is_actief_lid nee --> ja" in f2.getvalue())
@@ -192,6 +202,12 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         self.assertTrue("[INFO] Lid 100024: para_classificatie: 'W1' --> ''" in f2.getvalue())
         self.assertTrue("[INFO] Lid 100025: is_actief_lid ja --> nee (want blocked)" in f2.getvalue())
         self.assertTrue("[INFO] Lid 100025: vereniging 1000 Grote Club --> 1001 HBS Dichtbij" in f2.getvalue())
+
+        # 100099 is geen lid meer, maar moet toch nog gebruik kunnen blijven maken van de diensten
+        lid = NhbLid.objects.get(nhb_nr=100098)
+        self.assertNotEqual(lid.bij_vereniging, None)
+        self.assertTrue(lid.is_actief_lid)
+        self.assertEqual(lid.lid_tot_einde_jaar, 2020)
 
     def test_haakjes(self):
         # sommige leden hebben de toevoeging " (Erelid NHB)" aan hun achternaam toegevoegd
@@ -460,13 +476,13 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         ver.geen_wedstrijden = True
         ver.save()
 
-        with self.assert_max_queries(59):
+        with self.assert_max_queries(61):
             management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_08.json',
                                     '--sim_now=2020-07-01', '--dryrun', stderr=f1, stdout=f2)
-        with self.assert_max_queries(43):
+        with self.assert_max_queries(45):
             management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_09.json',
                                     '--sim_now=2020-07-01', '--dryrun', stderr=f1, stdout=f2)
-        with self.assert_max_queries(51):
+        with self.assert_max_queries(53):
             management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_14.json',
                                     '--sim_now=2020-07-01', '--dryrun', stderr=f1, stdout=f2)
 
@@ -476,7 +492,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         ver.nhb_nr = "1999"
         ver.regio = NhbRegio.objects.get(pk=116)
         ver.save()
-        with self.assert_max_queries(28):
+        with self.assert_max_queries(30):
             management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_12.json',
                                     '--sim_now=2020-07-01', '--dryrun', stderr=f1, stdout=f2)
 
@@ -508,7 +524,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         # lid schrijft zich uit bij een vereniging en mag tot einde jaar diensten gebruiken
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(107):
+        with self.assert_max_queries(111):
             management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_03.json',
                                     '--sim_now=2020-07-01', stderr=f1, stdout=f2)
 
@@ -520,7 +536,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         # lid 100001 heeft zich uitgeschreven tijdens het jaar
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(60):
+        with self.assert_max_queries(62):
             management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_18.json',
                                     '--sim_now=2020-07-02', stderr=f1, stdout=f2)
 
@@ -532,7 +548,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         # lid 100001 is nog steeds uitgeschreven - geen verandering tot 15 januari
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(60):
+        with self.assert_max_queries(65):
             management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_18.json',
                                     '--sim_now=2021-01-15', stderr=f1, stdout=f2)
 
