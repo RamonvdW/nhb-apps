@@ -30,7 +30,7 @@ google-auth==1.24.0
     #   google-auth-httplib2
 googleapis-common-protos==1.52.0
     # via google-api-core
-httplib2==0.18.1
+httplib2==0.19.0
     # via
     #   google-api-python-client
     #   google-auth-httplib2
@@ -50,6 +50,8 @@ pyasn1==0.4.8
     #   rsa
 pyotp==2.4.1
     # via -r requirements.in
+pyparsing==2.4.7
+    # via httplib2
 pytz==2020.5
     # via
     #   django

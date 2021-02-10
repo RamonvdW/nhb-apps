@@ -58,7 +58,7 @@ googleapis-common-protos==1.52.0
     # via
     #   -r requirements.txt
     #   google-api-core
-httplib2==0.18.1
+httplib2==0.19.0
     # via
     #   -r requirements.txt
     #   google-api-python-client
@@ -91,6 +91,10 @@ pyopenssl==20.0.1
     # via pysaml2
 pyotp==2.4.1
     # via -r requirements.txt
+pyparsing==2.4.7
+    # via
+    #   -r requirements.txt
+    #   httplib2
 pysaml2==6.5.1
     # via
     #   -r requirements_test.in
@@ -144,8 +148,6 @@ urllib3==1.26.2
     #   requests
 xmlschema==1.4.1
     # via pysaml2
-zipp==3.4.0
-    # via importlib-resources
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
