@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020 Ramon van der Winkel.
+                Copyright (c) 2020-2021 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -26,10 +26,10 @@
 <p></p>
 <p>Een persoon kan aan meerdere rollen gekoppeld worden (bijvoorbeeld RCL voor Indoor <i>en</i> RCL voor 25m 1pijl)</p>
 <p></p>
-<p>Daarnaast is er de rol 'Schutter' die je altijd krijgt. Door deze rol te kiezen kan je de website persoonlijk gebruiken, bijvoorbeeld om jezelf in te schrijven voor een competitie.</p>
+<p>Daarnaast is er de rol 'Sporter' die je altijd krijgt. Door deze rol te kiezen kan je de website persoonlijk gebruiken, bijvoorbeeld om jezelf in te schrijven voor een competitie.</p>
 <p></p>
 <p></p>
-<hr><p><h5>Verder</h5></p>
+<hr><h5>Verder</h5>
 <ul style="padding-left: 20px">
 <li style="list-style-type: disc; padding-left: 0px">Terug naar de <a href="/handleiding/Hoofdpagina/">Hoofdpagina</a></li>
 <li style="list-style-type: disc; padding-left: 0px"><a href="/handleiding/Handleiding_BB/">Handleiding_BB</a></li>
@@ -39,7 +39,12 @@
 <li style="list-style-type: disc; padding-left: 0px"><a href="/handleiding/Handleiding_Secretaris/">Handleiding Secretaris</a></li>
 <li style="list-style-type: disc; padding-left: 0px"><a href="/handleiding/Handleiding_Hoofdwedstrijdleider/">Handleiding Hoofdwedstrijdleider</a></li>
 <li style="list-style-type: disc; padding-left: 0px"><a href="/handleiding/Handleiding_Wedstrijdleider/">Handleiding Wedstrijdleider</a></li>
+</ul>
 
 </div>
 
+{% endblock %}
+
+{% block menu %}
+    {% include 'handleiding/menu.dtl' %}
 {% endblock %}

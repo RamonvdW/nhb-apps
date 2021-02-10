@@ -9,10 +9,12 @@ from django.urls import reverse
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.templatetags.static import static
-from Plein.menu import menu_dynamics
+from Competitie.models import (Competitie, DeelCompetitie, DeelcompetitieRonde,
+                               LAAG_REGIO, LAAG_RK, INSCHRIJF_METHODE_1)
 from Functie.rol import Rollen, rol_get_huidige_functie
-from Competitie.models import Competitie, DeelCompetitie, LAAG_REGIO, LAAG_RK
+from Plein.menu import menu_dynamics
 from Taken.taken import eval_open_taken
+from Wedstrijden.models import Wedstrijd
 
 
 TEMPLATE_OVERZICHT = 'vereniging/overzicht.dtl'
@@ -40,6 +42,8 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
 
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
         context['nhb_ver'] = functie_nu.nhb_ver
+
+        context['clusters'] = functie_nu.nhb_ver.clusters.all()
 
         context['toon_aanmelden'] = (rol_nu != Rollen.ROL_WL)
 
@@ -75,6 +79,14 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                                        .select_related('competitie')
                                        .order_by('competitie__afstand'))
 
+            pks = (DeelcompetitieRonde
+                   .objects
+                   .filter(deelcompetitie__is_afgesloten=False,
+                           plan__wedstrijden__vereniging=functie_nu.nhb_ver)
+                   .values_list('plan__wedstrijden', flat=True))
+            if Wedstrijd.objects.filter(pk__in=pks).count() > 0:
+                context['heeft_wedstrijden'] = True
+
         # comp is nodig voor inschrijven
         for comp in context['competities']:
             comp.zet_fase()
@@ -91,6 +103,8 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                 deelcomp.icon = static('plein/badge_nhb_indoor.png')
             else:
                 deelcomp.icon = static('plein/badge_nhb_25m1p.png')
+
+            deelcomp.toon_wie_schiet_waar = deelcomp.inschrijf_methode == INSCHRIJF_METHODE_1
         # for
 
         for deelcomp_rk in context['deelcomps_rk']:
@@ -99,7 +113,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                 comp.zet_fase()
                 if comp.fase == 'K':
                     # RK voorbereidende fase
-                    deelcomp_rk.text_str = "Schutters van de vereniging aan-/afmeldenvoor het RK van de %s" % comp.beschrijving
+                    deelcomp_rk.text_str = "Schutters van de vereniging aan-/afmelden voor het RK van de %s" % comp.beschrijving
                     deelcomp_rk.url_lijst_rk = reverse('Vereniging:lijst-rk',
                                                        kwargs={'deelcomp_pk': deelcomp_rk.pk})
         # for

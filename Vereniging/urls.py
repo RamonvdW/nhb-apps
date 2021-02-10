@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
 from . import (view_accommodatie, view_overzicht, view_ledenlijst,
-               view_aanmelden, view_wedstrijden, view_lijst_rk)
+               view_aanmelden, view_wedstrijden, view_lijst_rk,
+               view_schietmomenten)
 
 app_name = 'Vereniging'
 
@@ -32,6 +33,11 @@ urlpatterns = [
          view_aanmelden.LedenIngeschrevenView.as_view(),
          name='leden-ingeschreven'),
 
+    # TODO: term 'schietmomenten' aanpassen?
+    path('leden-ingeschreven/competitie/<deelcomp_pk>/schietmomenten/',
+         view_schietmomenten.LedenSchietmomentView.as_view(),
+         name='schietmomenten'),
+
     path('accommodaties/lijst/',
          view_accommodatie.LijstVerenigingenView.as_view(),
          name='lijst-verenigingen'),
@@ -52,12 +58,16 @@ urlpatterns = [
          view_wedstrijden.WedstrijdenView.as_view(),
          name='wedstrijden'),
 
+    path('uitslag-invoeren/',
+         view_wedstrijden.WedstrijdenUitslagInvoerenView.as_view(),
+         name='wedstrijden-uitslag-invoeren'),
+
     path('lijst-rayonkampioenschappen/<deelcomp_pk>/alles/',
-         view_lijst_rk.VerenigingLijstRkSchuttersAllesView.as_view(),
+         view_lijst_rk.VerenigingLijstRkSelectieAllesView.as_view(),
          name='lijst-rk-alles'),
 
     path('lijst-rayonkampioenschappen/<deelcomp_pk>/',
-         view_lijst_rk.VerenigingLijstRkSchuttersView.as_view(),
+         view_lijst_rk.VerenigingLijstRkSelectieView.as_view(),
          name='lijst-rk'),
 ]
 

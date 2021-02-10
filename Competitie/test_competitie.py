@@ -1,19 +1,18 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from django.utils import timezone
-from BasisTypen.models import BoogType, TeamWedstrijdklasse, IndivWedstrijdklasse
+from BasisTypen.models import BoogType, TeamWedstrijdklasse
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
 from Overig.e2ehelpers import E2EHelpers
 from Schutter.models import SchutterBoog
 from Functie.models import maak_functie
-from .models import (Competitie, DeelCompetitie,
-                     CompetitieKlasse, maak_competitieklasse_indiv)
+from Score.models import aanvangsgemiddelde_opslaan
+from .models import Competitie, DeelCompetitie, CompetitieKlasse
 import datetime
 
 
@@ -243,13 +242,13 @@ class TestCompetitie(E2EHelpers, TestCase):
         rec.gemiddelde = 5.321
         rec.save()
 
-        self.url_overzicht = '/competitie/'
-        self.url_instellingen = '/competitie/instellingen-volgende-competitie/'
-        self.url_aanmaken = '/competitie/aanmaken/'
-        self.url_ag_vaststellen = '/competitie/ag-vaststellen/'
-        self.url_klassegrenzen_vaststellen_18 = '/competitie/klassegrenzen/vaststellen/18/'
-        self.url_klassegrenzen_vaststellen_25 = '/competitie/klassegrenzen/vaststellen/25/'
-        self.url_klassegrenzen_tonen = '/competitie/klassegrenzen/tonen/'
+        self.url_kies = '/bondscompetities/'
+        self.url_overzicht = '/bondscompetities/%s/'
+        self.url_instellingen = '/bondscompetities/instellingen-volgende-competitie/'
+        self.url_aanmaken = '/bondscompetities/aanmaken/'
+        self.url_ag_vaststellen = '/bondscompetities/ag-vaststellen/'
+        self.url_klassegrenzen_vaststellen = '/bondscompetities/%s/klassegrenzen/vaststellen/'  # comp_pk
+        self.url_klassegrenzen_tonen = '/bondscompetities/%s/klassegrenzen/tonen/'              # comp_pk
 
     def _maak_many_histcomp(self):
         # maak veel histcomp records aan
@@ -282,7 +281,7 @@ class TestCompetitie(E2EHelpers, TestCase):
                                             score6=6,
                                             score7=250,
                                             totaal=270,
-                                            gemiddelde= 5.5)
+                                            gemiddelde=5.5)
             records.append(rec)
         # for
 
@@ -292,60 +291,61 @@ class TestCompetitie(E2EHelpers, TestCase):
     def test_anon(self):
         self.e2e_logout()
 
-        resp = self.client.get(self.url_overzicht)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_kies)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/overzicht.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/kies.dtl', 'plein/site_layout.dtl'))
 
-        resp = self.client.get(self.url_instellingen)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_instellingen)
         self.assert_is_redirect(resp, '/plein/')
 
-        resp = self.client.get(self.url_aanmaken)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_aanmaken)
         self.assert_is_redirect(resp, '/plein/')
 
-        resp = self.client.post(self.url_aanmaken)
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_aanmaken)
         self.assert_is_redirect(resp, '/plein/')
 
-        resp = self.client.get(self.url_ag_vaststellen)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_ag_vaststellen)
         self.assert_is_redirect(resp, '/plein/')
 
-        resp = self.client.get(self.url_klassegrenzen_vaststellen_18)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_klassegrenzen_vaststellen % 999999)
         self.assert_is_redirect(resp, '/plein/')
-
-        resp = self.client.get(self.url_klassegrenzen_vaststellen_25)
-        self.assert_is_redirect(resp, '/plein/')
-
-        resp = self.client.get(self.url_klassegrenzen_tonen)
-        self.assertEqual(resp.status_code, 200)
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/klassegrenzen-tonen.dtl', 'plein/site_layout.dtl'))
 
     def test_instellingen(self):
         self.e2e_login_and_pass_otp(self.account_bb)
         self.e2e_wisselnaarrol_bb()
         self.e2e_check_rol('BB')
 
-        resp = self.client.get(self.url_instellingen)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_instellingen)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/instellingen-nieuwe-competitie.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/bb-instellingen-nieuwe-competitie.dtl', 'plein/site_layout.dtl'))
 
     def test_aanmaken(self):
         self.e2e_login_and_pass_otp(self.account_bb)
         self.e2e_wisselnaarrol_bb()
         self.e2e_check_rol('BB')
 
-        resp = self.client.get(self.url_aanmaken)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_aanmaken)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/competities-aanmaken.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/bb-competities-aanmaken.dtl', 'plein/site_layout.dtl'))
 
         # gebruik een post om de competitie aan te laten maken
         # geen parameters nodig
         self.assertEqual(Competitie.objects.count(), 0)
         self.assertEqual(DeelCompetitie.objects.count(), 0)
-        resp = self.client.post(self.url_aanmaken)
-        self.assert_is_redirect(resp, self.url_overzicht)
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_aanmaken)
+        self.assert_is_redirect(resp, self.url_kies)
         self.assertEqual(Competitie.objects.count(), 2)
         self.assertEqual(DeelCompetitie.objects.count(), 2*(1 + 4 + 16))
 
@@ -367,22 +367,25 @@ class TestCompetitie(E2EHelpers, TestCase):
         self.e2e_check_rol('BB')
 
         # gebruik een post om de competitie aan te laten maken
-        resp = self.client.post(self.url_aanmaken)
-        self.assert_is_redirect(resp, self.url_overzicht)
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_aanmaken)
+        self.assert_is_redirect(resp, self.url_kies)
 
         # probeer de competities nog een keer aan te maken
         # verifieer geen effect
         self.assertEqual(Competitie.objects.count(), 2)
         self.assertEqual(DeelCompetitie.objects.count(), 2*(1 + 4 + 16))
 
-        resp = self.client.get(self.url_aanmaken)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_aanmaken)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/competities-aanmaken.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/bb-competities-aanmaken.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, "Wat doe je hier?")
 
-        resp = self.client.post(self.url_aanmaken)
-        self.assert_is_redirect(resp, self.url_overzicht)
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_aanmaken)
+        self.assert_is_redirect(resp, self.url_kies)
 
         self.assertEqual(Competitie.objects.count(), 2)
         self.assertEqual(DeelCompetitie.objects.count(), 2*(1 + 4 + 16))
@@ -392,42 +395,50 @@ class TestCompetitie(E2EHelpers, TestCase):
 
         # trigger de permissie check (want: verkeerde rol)
         self.e2e_wisselnaarrol_gebruiker()
-        resp = self.client.get(self.url_ag_vaststellen)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_ag_vaststellen)
         self.assert_is_redirect(resp, '/plein/')
 
         self.e2e_wisselnaarrol_bb()
         self.e2e_check_rol('BB')
 
         # trigger de permissie check (want: geen competitie aangemaakt)
-        resp = self.client.get(self.url_ag_vaststellen)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_ag_vaststellen)
         self.assert_is_redirect(resp, '/plein/')
 
         # gebruik een POST om de competitie aan te maken
         # daarna is het mogelijk om AG's vast te stellen
-        resp = self.client.post(self.url_aanmaken)
-        self.assert_is_redirect(resp, self.url_overzicht)
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_aanmaken)
+        self.assert_is_redirect(resp, self.url_kies)
 
         # controleer dat het "ag vaststellen" kaartje er is
         # om te beginnen zonder "voor het laatst gedaan"
-        resp = self.client.get(self.url_overzicht)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_kies)
         urls = self.extract_all_urls(resp)
         self.assertTrue(self.url_ag_vaststellen in urls)
         self.assertNotContains(resp, "voor het laatst gedaan")
 
-        # verander de fase van de 25m competitie zodat we een A1 en een A2 hebben
+        # verander de fase van de 25m competitie zodat we verschillen hebben
         comp = Competitie.objects.get(afstand=25, is_afgesloten=False)
         CompetitieKlasse(competitie=comp, min_ag=25.0).save()
+        comp.klassegrenzen_vastgesteld = True
+        comp.save()
 
         # maak nog een hele bak AG's aan
         self._maak_many_histcomp()
 
         # haal het AG scherm op
-        resp = self.client.get(self.url_ag_vaststellen)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_ag_vaststellen)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
 
         # gebruik een POST om de AG's vast te stellen
-        resp = self.client.post(self.url_ag_vaststellen)
+        with self.assert_max_queries(600):      # TODO: optimize
+            resp = self.client.post(self.url_ag_vaststellen)
 
         # controleer dat er geen dubbele SchutterBoog records aangemaakt zijn
         self.assertEqual(1, SchutterBoog.objects.filter(nhblid=self.lid_100001, boogtype__afkorting='R').count())
@@ -436,7 +447,8 @@ class TestCompetitie(E2EHelpers, TestCase):
 
         # controleer dat het "ag vaststellen" kaartje er nog steeds is
         # dit keer met de "voor het laatst gedaan" notitie
-        resp = self.client.get(self.url_overzicht)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_kies)
         urls = self.extract_all_urls(resp)
         self.assertTrue(self.url_ag_vaststellen in urls)
         self.assertContains(resp, "voor het laatst gedaan")
@@ -447,32 +459,37 @@ class TestCompetitie(E2EHelpers, TestCase):
 
         # gebruik een POST om de competitie aan te maken
         # daarna is het mogelijk om AG's vast te stellen
-        resp = self.client.post(self.url_aanmaken)
-        self.assert_is_redirect(resp, self.url_overzicht)
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_aanmaken)
+        self.assert_is_redirect(resp, self.url_kies)
 
         # geen HistCompIndividueel
         HistCompetitieIndividueel.objects.all().delete()
 
         # haal het AG scherm op
-        resp = self.client.get(self.url_ag_vaststellen)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_ag_vaststellen)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
 
         # probeer de POST
-        resp = self.client.post(self.url_ag_vaststellen)
-        self.assert_is_redirect(resp, self.url_overzicht)
+        with self.assert_max_queries(15):
+            resp = self.client.post(self.url_ag_vaststellen)
+        self.assert_is_redirect(resp, self.url_kies)
 
         # geen HistComp
         HistCompetitie.objects.all().delete()
 
         # haal het AG scherm op
-        resp = self.client.get(self.url_ag_vaststellen)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_ag_vaststellen)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
 
         # probeer de POST
-        resp = self.client.post(self.url_ag_vaststellen)
-        self.assert_is_redirect(resp, self.url_overzicht)
+        with self.assert_max_queries(5):
+            resp = self.client.post(self.url_ag_vaststellen)
+        self.assert_is_redirect(resp, self.url_kies)
 
     def test_klassegrenzen_vaststellen(self):
         self.e2e_login_and_pass_otp(self.account_bb)
@@ -481,22 +498,41 @@ class TestCompetitie(E2EHelpers, TestCase):
 
         # gebruik een POST om de competitie aan te maken
         # daarna is het mogelijk om klassegrenzen in te stellen
-        resp = self.client.post(self.url_aanmaken)
-        self.assert_is_redirect(resp, self.url_overzicht)
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_aanmaken)
+        self.assert_is_redirect(resp, self.url_kies)
+
+        comp_pk = Competitie.objects.all()[0].pk
+
+        # gebruik een POST om de AG's vast te stellen
+        with self.assert_max_queries(600):      # TODO: optimize
+            resp = self.client.post(self.url_ag_vaststellen)
 
         # 18m competitie
-        resp = self.client.get(self.url_klassegrenzen_vaststellen_18)
+        url = self.url_klassegrenzen_vaststellen % comp_pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/klassegrenzen-vaststellen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/bb-klassegrenzen-vaststellen.dtl', 'plein/site_layout.dtl'))
         # TODO: check de aangeboden data
 
         # nu kunnen we met een POST de klassegrenzen vaststellen
         self.assertEqual(CompetitieKlasse.objects.count(), 0)       # TODO: filter op Competitie
-        resp = self.client.post(self.url_klassegrenzen_vaststellen_18)
-        self.assert_is_redirect(resp, self.url_overzicht)
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
+        self.assert_is_redirect(resp, self.url_kies)
         self.assertNotEqual(CompetitieKlasse.objects.count(), 0)    # TODO: filter op Competitie
         # TODO: check nog meer velden van de aangemaakte objecten
+
+        # coverage: nog een keer vaststellen
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
+        self.assert_is_redirect(resp, self.url_kies)
 
         # coverage
         obj = CompetitieKlasse.objects.all()[0]
@@ -512,50 +548,58 @@ class TestCompetitie(E2EHelpers, TestCase):
 
         # gebruik een POST om de competitie aan te maken
         # daarna is het mogelijk om klassegrenzen in te stellen
-        resp = self.client.post(self.url_aanmaken)
-        self.assert_is_redirect(resp, self.url_overzicht)
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_aanmaken)
+        self.assert_is_redirect(resp, self.url_kies)
 
         # illegale competitie
-        resp = self.client.get(self.url_klassegrenzen_vaststellen_18.replace('18', 'xx'))
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_klassegrenzen_vaststellen % 'xx')
+        self.assertEqual(resp.status_code, 404)
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_klassegrenzen_vaststellen % 'xx')
         self.assertEqual(resp.status_code, 404)
 
     def test_klassegrenzen_tonen(self):
-        resp = self.client.get(self.url_klassegrenzen_tonen)
-        self.assertEqual(resp.status_code, 200)
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/klassegrenzen-tonen.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, 'De klassegrenzen zijn nog niet vastgesteld')
-
         # competitie opstarten
         self.e2e_login_and_pass_otp(self.account_bb)
         self.e2e_wisselnaarrol_bb()
         self.e2e_check_rol('BB')
 
         # gebruik een POST om de competitie aan te maken
-        resp = self.client.post(self.url_aanmaken)
-        self.assert_is_redirect(resp, self.url_overzicht)
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_aanmaken)
+        self.assert_is_redirect(resp, self.url_kies)
 
-        resp = self.client.get(self.url_klassegrenzen_tonen)
+        comp_18 = Competitie.objects.filter(afstand=18).all()[0]
+        comp_25 = Competitie.objects.filter(afstand=25).all()[0]
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_klassegrenzen_tonen % comp_18.pk)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/klassegrenzen-tonen.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, 'De klassegrenzen zijn nog niet vastgesteld')
-
-        # daarna is het mogelijk om AG's vast te stellen?
+        self.assertContains(resp, ' zijn nog niet vastgesteld')
+        self.assertContains(resp, 'De klassegrenzen voor de ')
 
         # klassegrenzen vaststellen (18m en 25m)
-        resp = self.client.post(self.url_klassegrenzen_vaststellen_18)
-        self.assert_is_redirect(resp, self.url_overzicht)
-        resp = self.client.post(self.url_klassegrenzen_vaststellen_25)
-        self.assert_is_redirect(resp, self.url_overzicht)
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_klassegrenzen_vaststellen % comp_18.pk)
+        self.assert_is_redirect(resp, self.url_kies)
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_klassegrenzen_vaststellen % comp_25.pk)
+        self.assert_is_redirect(resp, self.url_kies)
         self.e2e_logout()
 
         # nog een keer
-        resp = self.client.get(self.url_klassegrenzen_tonen)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_klassegrenzen_tonen % comp_25.pk)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/klassegrenzen-tonen.dtl', 'plein/site_layout.dtl'))
-        self.assertNotContains(resp, 'De klassegrenzen zijn nog niet vastgesteld')
+        self.assertNotContains(resp, ' zijn nog niet vastgesteld')
+        self.assertNotContains(resp, 'De klassegrenzen voor de ')
 
     def test_team(self):
         # slechts een test van een CompetitieKlasse() gekoppeld aan een TeamWedstrijdKlasse

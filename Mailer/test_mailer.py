@@ -5,7 +5,6 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase, override_settings
-from django.conf import settings
 from .models import MailQueue, mailer_queue_email, mailer_obfuscate_email, mailer_email_is_valide
 from .mailer import send_mail
 
@@ -14,6 +13,8 @@ class TestMailerBase(object):
     """ unit tests voor de Mailer applicatie """
 
     def test_queue_mail(self):
+        assert isinstance(self, TestCase)
+
         objs = MailQueue.objects.all()
         self.assertEqual(len(objs), 0)
 
@@ -34,6 +35,7 @@ class TestMailerBase(object):
 
     def test_send_mail_deliver(self):
         # requires websim.py running in the background
+        assert isinstance(self, TestCase)
 
         # stop een mail in de queue
         self.assertEqual(0, MailQueue.objects.count())
@@ -52,6 +54,7 @@ class TestMailerBase(object):
 
     def test_send_mail_deliver_faal(self):
         # requires websim.py running in the background
+        assert isinstance(self, TestCase)
 
         # stop een mail in de queue
         objs = MailQueue.objects.all()
@@ -70,6 +73,7 @@ class TestMailerBase(object):
         self.assertFalse(obj.is_verstuurd)
 
     def test_obfuscate_email(self):
+        assert isinstance(self, TestCase)
         self.assertEqual(mailer_obfuscate_email(''), '')
         self.assertEqual(mailer_obfuscate_email('x'), 'x')
         self.assertEqual(mailer_obfuscate_email('x@test.nhb'), 'x@test.nhb')
@@ -80,6 +84,7 @@ class TestMailerBase(object):
         self.assertEqual(mailer_obfuscate_email('hele.lange@maaktnietuit.nl'), 'he#######e@maaktnietuit.nl')
 
     def test_email_is_valide(self):
+        assert isinstance(self, TestCase)
         self.assertTrue(mailer_email_is_valide('test@nhb.nl'))
         self.assertTrue(mailer_email_is_valide('jan.de.tester@nhb.nl'))
         self.assertTrue(mailer_email_is_valide('jan.de.tester@hb.nl'))
@@ -91,15 +96,21 @@ class TestMailerBase(object):
 
     def test_whitelist(self):
         # controleer dat de whitelist zijn werk doet
+        assert isinstance(self, TestCase)
 
         self.assertEqual(0, MailQueue.objects.count())
 
         with self.settings(EMAIL_ADDRESS_WHITELIST=('een.test@nhb.not',)):
             mailer_queue_email('schutter@nhb.test', 'onderwerp', 'body\ndoei!\n')
-            self.assertEqual(0, MailQueue.objects.count())
+            self.assertEqual(1, MailQueue.objects.count())
+            mail = MailQueue.objects.all()[0]
+            self.assertTrue(mail.is_blocked)
+            mail.delete()
 
             mailer_queue_email('een.test@nhb.not', 'onderwerp', 'body\ndoei!\n')
             self.assertEqual(1, MailQueue.objects.count())
+            mail = MailQueue.objects.all()[0]
+            self.assertFalse(mail.is_blocked)
         # with
 
 
@@ -107,7 +118,8 @@ class TestMailerBadBase(object):
     """ unit tests voor de Mailer applicatie """
 
     def test_no_api_key(self):
-        with self.settings(MAILGUN_API_KEY='', POSTMARK_API_KEY=''):
+        assert isinstance(self, TestCase)
+        with self.settings(POSTMARK_API_KEY=''):
             send_mail(None)
 
         # als we hier komen is het goed, want geen exception
@@ -116,6 +128,7 @@ class TestMailerBadBase(object):
     def test_send_mail_no_connect(self):
         # deze test eist dat de URL wijst naar een poort waar niet op gereageerd wordt
         # zoals http://localhost:9999
+        assert isinstance(self, TestCase)
 
         # stop een mail in de queue
         objs = MailQueue.objects.all()
@@ -133,6 +146,7 @@ class TestMailerBadBase(object):
     def test_send_mail_limit(self):
         # deze test eist dat de URL wijst naar een poort waar niet op gereageerd wordt
         # zoals http://localhost:9999
+        assert isinstance(self, TestCase)
 
         # stop een mail in de queue
         objs = MailQueue.objects.all()
@@ -158,6 +172,7 @@ class TestMailerBadBase(object):
         self.assertEqual(obj.log, old_log)
 
     def test_obfuscate_email(self):
+        assert isinstance(self, TestCase)
         self.assertEqual(mailer_obfuscate_email(''), '')
         self.assertEqual(mailer_obfuscate_email('x'), 'x')
         self.assertEqual(mailer_obfuscate_email('x@test.nhb'), 'x@test.nhb')
@@ -168,6 +183,7 @@ class TestMailerBadBase(object):
         self.assertEqual(mailer_obfuscate_email('hele.lange@maaktnietuit.nl'), 'he#######e@maaktnietuit.nl')
 
     def test_email_is_valide(self):
+        assert isinstance(self, TestCase)
         self.assertTrue(mailer_email_is_valide('test@nhb.nl'))
         self.assertTrue(mailer_email_is_valide('jan.de.tester@nhb.nl'))
         self.assertTrue(mailer_email_is_valide('jan.de.tester@hb.nl'))
@@ -178,8 +194,7 @@ class TestMailerBadBase(object):
         self.assertFalse(mailer_email_is_valide('test\ner@nhb.nl'))
 
 
-@override_settings(MAILGUN_URL='', MAILGUN_API_KEY='',
-                   POSTMARK_URL='http://localhost:8123/postmark',
+@override_settings(POSTMARK_URL='http://localhost:8123/postmark',
                    POSTMARK_API_KEY='the-api-key',
                    EMAIL_FROM_ADDRESS='noreply@nhb.test',
                    EMAIL_ADDRESS_WHITELIST=())
@@ -187,31 +202,13 @@ class TestMailerPostmark(TestMailerBase, TestCase):
     pass
 
 
-@override_settings(POSTMARK_URL='', POSTMARK_API_KEY='',
-                   MAILGUN_URL='http://localhost:8123/v3/testdomain2.com/messages',
-                   MAILGUN_API_KEY='the-api-key',
-                   EMAIL_FROM_ADDRESS='noreply@nhb.test',
-                   EMAIL_ADDRESS_WHITELIST=())
-class TestMailerMailgun(TestMailerBase, TestCase):
-    pass
-
-
 # use a port with no service responding to it
-@override_settings(MAILGUN_URL='', MAILGUN_API_KEY='',
-                   POSTMARK_URL='http://localhost:9999',
+@override_settings(POSTMARK_URL='http://localhost:9999',
                    POSTMARK_API_KEY='the-api-key',
                    EMAIL_FROM_ADDRESS='noreply@nhb.test',
                    EMAIL_ADDRESS_WHITELIST=())
 class TestMailerBadPostmark(TestMailerBadBase, TestCase):
     pass
 
-
-@override_settings(POSTMARK_URL='', POSTMARK_API_KEY='',
-                   MAILGUN_URL='http://localhost:9999',
-                   MAILGUN_API_KEY='the-api-key',
-                   EMAIL_FROM_ADDRESS='noreply@nhb.test',
-                   EMAIL_ADDRESS_WHITELIST=())
-class TestMailerBadMailgun(TestMailerBadBase, TestCase):
-    pass
 
 # end of file

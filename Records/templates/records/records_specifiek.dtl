@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019-2020 Ramon van der Winkel.
+                Copyright (c) 2019-2021 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -10,156 +10,155 @@
 
 {% block pagina %}
 
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina=obj_record.op_pagina %}
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina=obj_record.op_pagina %}
 
-<h4>Nederlandse Handboog<wbr/>sport Record</h4>
+    <h4>Nederlandse Handboog<wbr/>sport Record</h4>
 
-<div class="row">
+    <div class="row">
 
-    <!-- on extra-large displays, show the related records besides the actual record -->
-    <div class="col xl6 hide-on-large-and-down">
-        <p>&nbsp;</p>   <!-- align met box van record -->
+        <!-- on extra-large displays, show the related records besides the actual record -->
+        <div class="col xl6 hide-on-large-and-down">
+            <p>&nbsp;</p>   <!-- align met box van record -->
 
-        <ul class="collection with-header">
-            <li class="collection-header"><h5>Gerelateerde records</h5></li>
-            {% for obj in object_list %}
-                <li class="collection-item{% if obj.is_specifieke_record %} active{% endif %}">
-                    <a href="{{ obj.url }}" class="nhb-klikbare-balk">
-                        <div>
-                            <span>{{ obj.score_str }} door <b>{{ obj.naam }}</b></span>
-                            {% if obj.datum.year >= 1950 %}<span> op {{ obj.datum }}</span>{% endif %}
-                        </div>
-                    </a>
-                </li>
-            {% endfor %}
-        </ul>
-    </div>
+            <ul class="collection with-header">
+                <li class="collection-header"><h5>Gerelateerde records</h5></li>
+                {% for obj in object_list %}
+                    <li class="collection-item{% if obj.is_specifieke_record %} active{% endif %}">
+                        <a href="{{ obj.url }}" class="nhb-klikbare-balk">
+                            <div>
+                                <span>{{ obj.score_str }} door <b>{{ obj.naam }}</b></span>
+                                {% if obj.datum.year >= 1950 %}<span> op {{ obj.datum }}</span>{% endif %}
+                            </div>
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
 
-    <!-- show the actual record in een blauw box -->
-    <div class="col s12 m10 l8 xl6">
-        <p>Record {{ obj_record.discipline }}-{{ obj_record.volg_nr }}</p>
+        <!-- show the actual record in een blauw box -->
+        <div class="col s12 m10 l8 xl6">
+            <p>Record {{ obj_record.discipline }}-{{ obj_record.volg_nr }}</p>
 
-        <div class="white-text nhb-blauw z-depth-2">
-            <!-- <div class="row">
-                <div class="col s1">1</div>
-                <div class="col s1">2</div>
-                <div class="col s1">3</div>
-                <div class="col s1">4</div>
-                <div class="col s1">5</div>
-                <div class="col s1">6</div>
-                <div class="col s1">7</div>
-                <div class="col s1">8</div>
-                <div class="col s1">9</div>
-                <div class="col s1">10</div>
-                <div class="col s1">11</div>
-                <div class="col s1">12</div>
-            </div> -->
-            <div class="row small-row">
-                <div class="col s5">Toegekend:</div>
-                {%  if obj_record.is_european_record and obj_record.is_world_record %}
-                <div class="col s6">Europees en Wereld</div>
-                {% elif obj_record.is_world_record %}
-                <div class="col s6">Wereld</div>
-                {% elif obj_record.is_european_record %}
-                <div class="col s6">Europees</div>
-                {% else %}
-                <div class="col s6">Nederlands</div>
-                {% endif %}
-            </div>
-            <div class="divider">&nbsp;</div>
-            <div class="row small-row">
-                <div class="col s5">Discipline:</div>
-                <div class="col s6">{{ obj_record.disc_str }}</div>
-            </div>
-            <div class="row small-row">
-                <div class="col s5">Soort record:</div>
-                <div class="col s6">{{ obj_record.soort_record }}</div>
-            </div>
-            <div class="row small-row">
-                <div class="col s5">Geslacht:</div>
-                <div class="col s6">{{ obj_record.gesl_str }}</div>
-            </div>
-            <div class="row small-row">
-                <div class="col s5">Leeftijds<wbr/>categorie:</div>
-                <div class="col s6">{{ obj_record.lcat_str }}</div>
-            </div>
-            <div class="row small-row">
-                <div class="col s5">Materiaal<wbr/>klasse:</div>
-                <div class="col s6">{{ obj_record.makl_str }}</div>
-            </div>
-            {% if obj_record.para_klasse %}
-            <div class="row small-row">
-                <div class="col s5">Para klasse:</div>
-                <div class="col s6">{{ obj_record.para_klasse }}</div>
-            </div>
-            {% endif %}
-            <div class="divider">&nbsp;</div>
-            <div class="row small-row">
-                <div class="col s5">Score:</div>
-                <div class="col s6">{{ obj_record.score_str }}</div>
-            </div>
-            {% if obj_record.score_notitie %}
-            <div class="row small-row">
-                <div class="col s5">Score notitie:</div>
-                <div class="col s6">{{ obj_record.score_notitie }}</div>
-            </div>
-            {% endif %}
-            <div class="row small-row">
-                <div class="col s5">Maximale score:</div>
-                <div class="col s6">{{ obj_record.max_score_str }}</div>
-            </div>
-            <div class="row small-row">
-                <div class="col s5">Naam:</div>
-                <div class="col s6"><b>{{ obj_record.naam }}</b></div>
-            </div>
-            <div class="row small-row">
-                <div class="col s5">Plaats:</div>
-                <div class="col s6">
-                    {% if obj_record.plaats %}
-                    <span>{{ obj_record.plaats }}</span>
+            <div class="white-text nhb-blauw z-depth-2">
+                <!-- <div class="row">
+                    <div class="col s1">1</div>
+                    <div class="col s1">2</div>
+                    <div class="col s1">3</div>
+                    <div class="col s1">4</div>
+                    <div class="col s1">5</div>
+                    <div class="col s1">6</div>
+                    <div class="col s1">7</div>
+                    <div class="col s1">8</div>
+                    <div class="col s1">9</div>
+                    <div class="col s1">10</div>
+                    <div class="col s1">11</div>
+                    <div class="col s1">12</div>
+                </div> -->
+                <div class="row small-row">
+                    <div class="col s5">Toegekend:</div>
+                    {%  if obj_record.is_european_record and obj_record.is_world_record %}
+                    <div class="col s6">Europees en Wereld</div>
+                    {% elif obj_record.is_world_record %}
+                    <div class="col s6">Wereld</div>
+                    {% elif obj_record.is_european_record %}
+                    <div class="col s6">Europees</div>
                     {% else %}
-                    <span>Onbekend</span>
+                    <div class="col s6">Nederlands</div>
                     {% endif %}
                 </div>
-            </div>
-            {% if obj_record.land %}
-            <div class="row small-row">
-                <div class="col s5">Land:</div>
-                <div class="col s6">{{ obj_record.land }}</div>
-            </div>
-            {% endif %}
-            <div class="row small-row">
-                <div class="col s5">Datum:</div>
-                <div class="col s6">
-                    {% if obj_record.datum.year >= 1950 %}
-                    <span>{{ obj_record.datum }}</span>
-                    {% else %}
-                    <span>Onbekend</span>
-                    {% endif %}
+                <div class="divider">&nbsp;</div>
+                <div class="row small-row">
+                    <div class="col s5">Discipline:</div>
+                    <div class="col s6">{{ obj_record.disc_str }}</div>
+                </div>
+                <div class="row small-row">
+                    <div class="col s5">Soort record:</div>
+                    <div class="col s6">{{ obj_record.soort_record }}</div>
+                </div>
+                <div class="row small-row">
+                    <div class="col s5">Geslacht:</div>
+                    <div class="col s6">{{ obj_record.gesl_str }}</div>
+                </div>
+                <div class="row small-row">
+                    <div class="col s5">Leeftijds<wbr/>categorie:</div>
+                    <div class="col s6">{{ obj_record.lcat_str }}</div>
+                </div>
+                <div class="row small-row">
+                    <div class="col s5">Materiaal<wbr/>klasse:</div>
+                    <div class="col s6">{{ obj_record.makl_str }}</div>
+                </div>
+                {% if obj_record.para_klasse %}
+                <div class="row small-row">
+                    <div class="col s5">Para klasse:</div>
+                    <div class="col s6">{{ obj_record.para_klasse }}</div>
+                </div>
+                {% endif %}
+                <div class="divider">&nbsp;</div>
+                <div class="row small-row">
+                    <div class="col s5">Score:</div>
+                    <div class="col s6">{{ obj_record.score_str }}</div>
+                </div>
+                {% if obj_record.score_notitie %}
+                <div class="row small-row">
+                    <div class="col s5">Score notitie:</div>
+                    <div class="col s6">{{ obj_record.score_notitie }}</div>
+                </div>
+                {% endif %}
+                <div class="row small-row">
+                    <div class="col s5">Maximale score:</div>
+                    <div class="col s6">{{ obj_record.max_score_str }}</div>
+                </div>
+                <div class="row small-row">
+                    <div class="col s5">Naam:</div>
+                    <div class="col s6"><b>{{ obj_record.naam }}</b></div>
+                </div>
+                <div class="row small-row">
+                    <div class="col s5">Plaats:</div>
+                    <div class="col s6">
+                        {% if obj_record.plaats %}
+                        <span>{{ obj_record.plaats }}</span>
+                        {% else %}
+                        <span>Onbekend</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% if obj_record.land %}
+                <div class="row small-row">
+                    <div class="col s5">Land:</div>
+                    <div class="col s6">{{ obj_record.land }}</div>
+                </div>
+                {% endif %}
+                <div class="row small-row">
+                    <div class="col s5">Datum:</div>
+                    <div class="col s6">
+                        {% if obj_record.datum.year >= 1950 %}
+                        <span>{{ obj_record.datum }}</span>
+                        {% else %}
+                        <span>Onbekend</span>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
 
-<div class="row hide-on-extra-large-only">
-    <div class="col s12 m10 l8 xl6">
-        <ul class="collection with-header">
-            <li class="collection-header"><h5>Gerelateerde records</h5></li>
-            {% for obj in object_list %}
-                <li class="collection-item{% if obj.is_specifieke_record %} active{% endif %}">
-                    <a href="{{ obj.url }}" class="nhb-klikbare-balk">
-                        <div>
-                            <span>{{ obj.score_str }} door <b>{{ obj.naam }}</b></span>
-                            {% if obj.datum.year >= 1950 %}<span> op {{ obj.datum }}</span>{% endif %}
-                        </div>
-                    </a>
-                </li>
-            {% endfor %}
-        </ul>
+    <div class="row hide-on-extra-large-only">
+        <div class="col s12 m10 l8 xl6">
+            <ul class="collection with-header">
+                <li class="collection-header"><h5>Gerelateerde records</h5></li>
+                {% for obj in object_list %}
+                    <li class="collection-item{% if obj.is_specifieke_record %} active{% endif %}">
+                        <a href="{{ obj.url }}" class="nhb-klikbare-balk">
+                            <div>
+                                <span>{{ obj.score_str }} door <b>{{ obj.naam }}</b></span>
+                                {% if obj.datum.year >= 1950 %}<span> op {{ obj.datum }}</span>{% endif %}
+                            </div>
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
     </div>
-</div>
 
 {% endblock %}
-

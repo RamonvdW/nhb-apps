@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -33,7 +33,7 @@ class AccountAdmin(UserAdmin):
     list_filter = ('is_staff', 'is_BB', 'otp_is_actief')
 
     # velden om in te zoeken (in de lijst)
-    search_fields = ('username', 'nhblid__voornaam', 'nhblid__achternaam')
+    search_fields = ('username', 'first_name', 'last_name')
 
     def gekoppelde_functies(self, obj):     # pragma: no cover
         return "\n".join([functie.beschrijving for functie in obj.functie_set.all()])

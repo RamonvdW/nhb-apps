@@ -139,7 +139,8 @@ class TestScoreGeschiedenis(E2EHelpers, TestCase):
     def test_mag_niet(self):
         # moet BB zijn om de geschiedenis in te mogen zien
         self.client.logout()
-        resp = self.client.get(self.url_geschiedenis)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_geschiedenis)
         self.assert_is_redirect(resp, '/plein/')
 
     def test_bb(self):
@@ -147,7 +148,8 @@ class TestScoreGeschiedenis(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_admin)
         self.e2e_wisselnaarrol_bb()
 
-        resp = self.client.get(self.url_geschiedenis)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_geschiedenis)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('score/score-geschiedenis.dtl', 'plein/site_layout.dtl'))
@@ -158,7 +160,8 @@ class TestScoreGeschiedenis(E2EHelpers, TestCase):
         self.e2e_wisselnaarrol_bb()
 
         url = self.url_geschiedenis + '?zoekterm=%s' % self.nhblid1.nhb_nr
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('score/score-geschiedenis.dtl', 'plein/site_layout.dtl'))
@@ -174,14 +177,16 @@ class TestScoreGeschiedenis(E2EHelpers, TestCase):
         self.e2e_wisselnaarrol_bb()
 
         url = self.url_geschiedenis + '?zoekterm=999999'
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('score/score-geschiedenis.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'Niets gevonden')
 
         url = self.url_geschiedenis + '?zoekterm=xx'
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
 
 # end of file

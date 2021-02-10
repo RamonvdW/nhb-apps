@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020 Ramon van der Winkel.
+                Copyright (c) 2020-2021 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -15,7 +15,7 @@
         {
             const locaties = {{ locaties|safe }};   // nhb_ver.nhb_nr --> adres
             const el_sel = document.getElementById('id_ver_sel')
-            let adres = locaties[el_sel.value];        // gekozen vereniging
+            let adres = locaties[el_sel.value];     // gekozen vereniging
             if (adres === undefined)
                 adres = '<i class="red-text">Niet beschikbaar!</i>';
             adres = adres.replace(/\n/g, '<br>')    // vervang newlines door breaks
@@ -53,14 +53,6 @@
         {% csrf_token %}
 
         <table class="white">
-
-            <thead>
-                <tr>
-                    <th>Beschrijving</th>
-                    <th>Datum</th>
-                </tr>
-            </thead>
-
             <tr>
                 <td>Datum wedstrijd:</td>
                 <td>
@@ -84,7 +76,7 @@
                 <td>
                     <select name="nhbver_pk" onchange="locatie_aanpassen()" id="id_ver_sel">
                         {% for opt in verenigingen %}
-                            <option value="{{ opt.pk }}"{% if opt.pk == wedstrijd.vereniging.pk %}selected{% endif %}>{{ opt }}</option>
+                            <option value="{{ opt.pk }}"{% if opt.pk == wedstrijd.vereniging.pk %} selected{% endif %}>{{ opt }}</option>
                         {% endfor %}
                     </select>
                 </td>
@@ -105,15 +97,15 @@
                             <tr>
                                 <th><!-- checkbox column --></th>
                                 <th>Klasse</th>
-                                <th>Aantal schutters</th>
+                                <th>Aantal sporters</th>
                             </tr>
                         </thead>
                         {% for obj in wkl_indiv %}
                             <tr>
                                 <!-- {% if obj.break_before %}<br>{% endif %} -->
                                 <td><label>
-                                    <input type="checkbox" class="filled-in" name="{{ obj.sel_str }}" {% if obj.geselecteerd %}checked{% endif %}>
-                                    <span>&nbsp</span>
+                                    <input type="checkbox" class="filled-in" name="{{ obj.sel_str }}"{% if obj.geselecteerd %} checked{% endif %}>
+                                    <span>&nbsp;</span>
                                     </label>
                                 </td>
                                 <td>{{ obj.short_str }}</td>
@@ -207,4 +199,8 @@
 
     {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-wijzig-wedstrijd-rk" %}
 
+{% endblock %}
+
+{% block menu-competities %}
+    {% include 'competitie/menu.dtl' %}
 {% endblock %}

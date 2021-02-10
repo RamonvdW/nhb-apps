@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -44,13 +44,15 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_admin)
 
         # haal de account-wissel pagina op
-        resp = self.client.get(self.wissel_url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.wissel_url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/login-as-zoek.dtl', 'plein/site_layout.dtl'))
 
         # probeer de zoek functie
-        resp = self.client.get(self.wissel_url + '?zoekterm=normaal')
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.wissel_url + '?zoekterm=normaal')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/login-as-zoek.dtl', 'plein/site_layout.dtl'))
@@ -70,7 +72,8 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
         self.account_normaal.save()
 
         # selecteer de andere schutter
-        resp = self.client.post(self.wissel_url, {'selecteer': self.account_normaal.pk})
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.wissel_url, {'selecteer': self.account_normaal.pk})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/login-as-go.dtl', 'plein/site_layout.dtl'))
@@ -82,19 +85,22 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
 
         # volg de tijdelijke url om ingelogd te raken
         self.e2e_logout()
-        resp = self.client.get(tijdelijke_url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(tijdelijke_url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         urls = self.extract_all_urls(resp, skip_menu=True, skip_smileys=True)
         post_url = urls[0]
-        resp = self.client.post(post_url, follow=True)
+        with self.assert_max_queries(26):
+            resp = self.client.post(post_url, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('plein/plein-gebruiker.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('plein/plein-bezoeker.dtl', 'plein/site_layout.dtl'))
         self.assertNotContains(resp, 'Wissel van Rol')
 
         # controleer dat tijdelijke URL maar 1x gebruikt kan worden
         self.e2e_logout()
-        resp = self.client.post(post_url)
+        with self.assert_max_queries(20):
+            resp = self.client.post(post_url)
         self.assert_is_redirect(resp, '/plein/')
 
     def test_wissel_met_otp(self):
@@ -109,7 +115,8 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
         self.e2e_assert_other_http_commands_not_supported(self.wissel_url, post=False)
 
         # selecteer de andere schutter
-        resp = self.client.post(self.wissel_url, {'selecteer': self.account_normaal.pk})
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.wissel_url, {'selecteer': self.account_normaal.pk})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/login-as-go.dtl', 'plein/site_layout.dtl'))
@@ -120,19 +127,22 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
         tijdelijke_url = urls[0][urls[0].find('/overig/url/'):]
 
         # volg de tijdelijke url om ingelogd te raken
-        resp = self.client.get(tijdelijke_url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(tijdelijke_url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         urls = self.extract_all_urls(resp, skip_menu=True, skip_smileys=True)
         post_url = urls[0]
-        resp = self.client.post(post_url, follow=True)
+        with self.assert_max_queries(30):
+            resp = self.client.post(post_url, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('plein/plein-gebruiker.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('plein/plein-bezoeker.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'Wissel van rol')
 
         # controleer dat OTP controle niet nodig is
-        # TODO: ongewenste dependency op Functie --> verplaats deze test
-        resp = self.client.get('/functie/wissel-van-rol/')
+        # FUTURE: ongewenste dependency op Functie --> verplaats OTP ondersteuning naar Account
+        with self.assert_max_queries(45):
+            resp = self.client.get('/functie/wissel-van-rol/')
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
@@ -147,7 +157,8 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
         self._login_plugin_mode = 1
 
         # selecteer de andere schutter
-        resp = self.client.post(self.wissel_url, {'selecteer': self.account_normaal.pk})
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.wissel_url, {'selecteer': self.account_normaal.pk})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/login-as-go.dtl', 'plein/site_layout.dtl'))
@@ -158,10 +169,12 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
         tijdelijke_url = urls[0][urls[0].find('/overig/url/'):]
 
         # volg de tijdelijke url om ingelogd te raken
-        resp = self.client.get(tijdelijke_url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(tijdelijke_url)
         urls = self.extract_all_urls(resp, skip_menu=True, skip_smileys=True)
         post_url = urls[0]
-        resp = self.client.post(post_url)
+        with self.assert_max_queries(20):
+            resp = self.client.post(post_url)
         self.assert_is_redirect(resp, '/account/activiteit/')
 
     def test_wissel_bad(self):
@@ -173,33 +186,39 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
         self.account_normaal.save()
 
         # upgrade naar is_staff account mag niet
-        resp = self.client.post(self.wissel_url, {'selecteer': self.account_normaal.pk})
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.wissel_url, {'selecteer': self.account_normaal.pk})
         self.assertEqual(resp.status_code, 404)     # 404 = not allowed
 
         # niet bestaand account
-        resp = self.client.post(self.wissel_url, {'selecteer': 999999})
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.wissel_url, {'selecteer': 999999})
         self.assertEqual(resp.status_code, 404)     # 404 = not allowed
 
     def test_bad_get(self):
         # niet ingelogd
         self.e2e_logout()
-        resp = self.client.get(self.wissel_url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.wissel_url)
         self.assertEqual(resp.status_code, 404)     # 404 = not allowed
 
         # zonder is_staff rechten
         self.e2e_login_and_pass_otp(self.account_normaal)
-        resp = self.client.get(self.wissel_url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.wissel_url)
         self.assertEqual(resp.status_code, 404)     # 404 = not allowed
 
     def test_bad_post(self):
         # niet ingelogd
         self.e2e_logout()
-        resp = self.client.post(self.wissel_url)
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.wissel_url)
         self.assertEqual(resp.status_code, 404)     # 404 = not allowed
 
         # zonder is_staff rechten
         self.e2e_login_and_pass_otp(self.account_normaal)
-        resp = self.client.get(self.wissel_url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.wissel_url)
         self.assertEqual(resp.status_code, 404)     # 404 = not allowed
 
     def test_wissel_verlopen(self):
@@ -212,7 +231,8 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
         SiteTijdelijkeUrl.objects.all().delete()
 
         # selecteer de andere schutter
-        resp = self.client.post(self.wissel_url, {'selecteer': self.account_normaal.pk})
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.wissel_url, {'selecteer': self.account_normaal.pk})
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/login-as-go.dtl', 'plein/site_layout.dtl'))
@@ -227,7 +247,8 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
         obj.save()
 
         # volg de tijdelijke url om ingelogd te raken
-        resp = self.client.get(tijdelijke_url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(tijdelijke_url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('overig/tijdelijke-url-fout.dtl', 'plein/site_layout.dtl'))
 

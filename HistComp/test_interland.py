@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,7 +8,6 @@ from django.test import TestCase
 from Overig.e2ehelpers import E2EHelpers
 from NhbStructuur.models import NhbVereniging, NhbRegio, NhbLid
 from .models import HistCompetitie, HistCompetitieIndividueel
-from .views import RESULTS_PER_PAGE
 import datetime
 
 
@@ -197,19 +196,21 @@ class TestHistCompInterland(E2EHelpers, TestCase):
         self.account_bb.is_BB = True
         self.account_bb.save()
 
-        self.url_interland = '/hist/interland/'
-        self.url_interland_download = '/hist/interland/als-bestand/%s/'     # klasse_pk
+        self.url_interland = '/bondscompetities/hist/interland/'
+        self.url_interland_download = '/bondscompetities/hist/interland/als-bestand/%s/'     # klasse_pk
 
     def test_interland(self):
         # anon
-        resp = self.client.get(self.url_interland)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_interland)
         self.assert_is_redirect(resp, '/plein/')
 
         # log in als BB
         self.e2e_login_and_pass_otp(self.account_bb)
         self.e2e_wisselnaarrol_bb()
 
-        resp = self.client.get(self.url_interland)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_interland)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('hist/interland.dtl', 'plein/site_layout.dtl'))
@@ -218,20 +219,23 @@ class TestHistCompInterland(E2EHelpers, TestCase):
         url = self.url_interland_download % self.klasse_pk
 
         # anon
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assert_is_redirect(resp, '/plein/')
 
         # log in als BB
         self.e2e_login_and_pass_otp(self.account_bb)
         self.e2e_wisselnaarrol_bb()
 
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_is_bestand(resp)
 
         # download een lege lijst
         url = self.url_interland_download % self.klasse_pk_leeg
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_is_bestand(resp)
 
@@ -241,7 +245,8 @@ class TestHistCompInterland(E2EHelpers, TestCase):
         self.e2e_wisselnaarrol_bb()
 
         # illegale klasse_pk
-        resp = self.client.get(self.url_interland_download % 999999)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_interland_download % 999999)
         self.assertEqual(resp.status_code, 404)     # 404 = Not found
 
         # bestaande klasse_pk, maar verkeerd seizoen
@@ -251,14 +256,16 @@ class TestHistCompInterland(E2EHelpers, TestCase):
         obj.klasse = 'Compound'
         obj.is_team = False
         obj.save()
-        resp = self.client.get(self.url_interland_download % obj.pk)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_interland_download % obj.pk)
         self.assertEqual(resp.status_code, 404)     # 404 = Not found
 
         # verwijder de hele histcomp
         HistCompetitie.objects.all().delete()
 
         # haal het lege overzicht op
-        resp = self.client.get(self.url_interland)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_interland)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -48,8 +48,12 @@ class Command(BaseCommand):
             return
 
         try:
-            comp = Competitie.objects.get(afstand=afstand,
-                                          is_afgesloten=False)
+            # in geval van meerdere competities, pak de oudste (laagste begin_jaar)
+            comp = (Competitie
+                    .objects
+                    .filter(afstand=afstand,
+                            is_afgesloten=False)
+                    .order_by('begin_jaar'))[0]
         except Competitie.DoesNotExist:
             self.stderr.write('[ERROR] Kan competitie met afstand %s niet vinden' % afstand)
             return

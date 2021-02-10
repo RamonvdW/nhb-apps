@@ -1,47 +1,42 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020 Ramon van der Winkel.
+                Copyright (c) 2020-2021 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
 
-{% block title %}Klassegrenzen{% endblock %}
+{% block title %}Klassegrenzen bondscompetitie{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="klassegrenzen-tonen" %}
 
-    <h4>Klassegrenzen</h4>
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="klassegrenzen-tonen" %}
 
-    {% if object_list %}
+    <h4>Klassegrenzen bondscompetitie</h4>
 
-        <p>Hieronder staan de vastgestelde klassegrenzen voor de individuele wedstrijdklassen voor de competities.</p>
+    {% if geen_klassen %}
+
+        <p>De klassegrenzen voor de <b>{{ comp.beschrijving }}</b> zijn nog niet vastgesteld.</p>
+
+    {% else %}
+
+        <p>Hieronder staan de vastgestelde klassegrenzen voor de individuele wedstrijdklassen voor de <b>{{ comp.beschrijving }}</b>.</p>
 
         <div class="row">
             <table class="white">
                 <thead>
                     <tr>
-                        <th></th>
-                        <th colspan="2">Minimaal aanvangs<wbr/>gemiddelde</th>
-                    </tr>
-                    <tr>
                         <th>Materiaalklasse</th>
-                        <th>Indoor</th>
-                        <th>25m 1pijl</th>
+                        <th>Minimaal aanvangs<wbr/>gemiddelde</th>
                     </tr>
                 </thead>
 
-                {% for obj in object_list %}
+                {% for obj in indiv_klassen %}
                     <tr>
                         <td>{{ obj.beschrijving }}</td>
-                        <td>{% if obj.min_ag18 %}
-                                {{ obj.min_ag18|floatformat:3 }}
-                            {% else %}
-                                <i class="grey-text">geen</i>
-                            {% endif %}
-                        </td>
-                        <td>{% if obj.min_ag25 %}
-                                {{ obj.min_ag25|floatformat:3 }}
+
+                        <td>{% if obj.min_ag %}
+                                {{ obj.min_ag|floatformat:3 }}
                             {% else %}
                                 <i class="grey-text">geen</i>
                             {% endif %}
@@ -51,12 +46,10 @@
             </table>
         </div>
 
-    {% else %}
-
-        <p>De klassegrenzen zijn nog niet vastgesteld.</p>
-
     {% endif %}
 
-    <a class="btn-nhb-blauw" href="{% url 'Competitie:overzicht' %}"><i class="material-icons-round left">close</i>Sluiten</a>
+{% endblock %}
 
+{% block menu-competities %}
+    {% include 'competitie/menu.dtl' %}
 {% endblock %}

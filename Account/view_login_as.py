@@ -70,7 +70,7 @@ def receiver_account_wissel(request, obj):
     # schrijf in het logboek
     schrijf_in_logboek(account=None,
                        gebruikte_functie="Inloggen",
-                       activiteit="Automatische inlog als schutter %s vanaf IP %s" % (repr(account.username), from_ip))
+                       activiteit="Automatische inlog als gebruiker %s vanaf IP %s" % (repr(account.username), from_ip))
 
     return reverse('Plein:plein')
 
@@ -80,8 +80,8 @@ set_tijdelijke_url_receiver(RECEIVER_ACCOUNT_WISSEL, receiver_account_wissel)
 
 class LoginAsZoekView(UserPassesTestMixin, ListView):
 
-    """ Deze view laat Wissel van Rol toe naar een gekozen schutter
-        zodat de website 'door de ogen van' deze schutter bekeken kan worden
+    """ Deze view laat Wissel van Rol toe naar een gekozen gebruiker
+        zodat de website 'door de ogen van' deze gebruiker bekeken kan worden
     """
 
     template_name = TEMPLATE_LOGIN_AS_ZOEK

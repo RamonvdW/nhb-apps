@@ -1,0 +1,39 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2020-2021 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Competitie aanmaken{% endblock %}
+
+{% block pagina %}
+
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competities-aanmaken" %}
+
+    <h4>Competitie aanmaken</h4>
+
+    {% if bestaat_al %}
+
+        <p>Wat doe je hier? De bondscompetitie voor seizoen {{ seizoen }} is al aangemaakt!</p>
+        <a class="btn-nhb-blauw" href="{% url 'Plein:plein' %}"><i class="material-icons-round left">close</i>Sluiten</a>
+
+    {% else %}
+
+        <p>Als Manager Competitiezaken wil je de nieuwe bondscompetitie opstarten voor <b>seizoen {{ seizoen }}</b>.</p>
+        <p>Dit is een eenmalige actie waardoor zowel de Indoor als 25m1pijl competities aangemaakt worden.</p>
+        <p>In een later stadium kan je de klassegrenzen vaststellen.</p>
+
+        <form method="post" action="{% url 'Competitie:aanmaken' %}">
+        {% csrf_token %}
+        <input class="btn-nhb-rood" name="button_aanmaken" type="submit" value="Ja, maak de nieuwe competities aan!">
+        </form>
+
+    {% endif %}
+
+{% endblock %}
+
+{% block menu-competities %}
+    {% include 'competitie/menu.dtl' %}
+{% endblock %}

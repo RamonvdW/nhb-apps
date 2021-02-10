@@ -103,11 +103,13 @@ class TestFunctieOverzicht(E2EHelpers, TestCase):
         self.e2e_logout()
 
         # geen rechten om dit overzicht in te zien
-        resp = self.client.get(self.url_overzicht)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_overzicht)
         self.assert_is_redirect(resp, '/plein/')
 
         # geen rechten om beheerders te kiezen
-        resp = self.client.get(self.url_wijzig + '123/')
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_wijzig + '123/')
         self.assert_is_redirect(resp, '/plein/')
 
     def test_schutter(self):
@@ -115,10 +117,12 @@ class TestFunctieOverzicht(E2EHelpers, TestCase):
         # zelf niet na acceptatie VHPG en OTP controle
         self.e2e_login_and_pass_otp(self.account_normaal)
 
-        resp = self.client.get(self.url_overzicht)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_overzicht)
         self.assert_is_redirect(resp, '/plein/')
 
-        resp = self.client.get(self.url_overzicht + 'vereniging/')
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_overzicht + 'vereniging/')
         self.assert_is_redirect(resp, '/plein/')
 
     def test_bb(self):
@@ -127,12 +131,13 @@ class TestFunctieOverzicht(E2EHelpers, TestCase):
         # neem de BB rol aan
         self.e2e_wisselnaarrol_bb()
         self.e2e_check_rol('BB')
-        resp = self.client.get('/plein/')
+        with self.assert_max_queries(20):
+            resp = self.client.get('/plein/')
         self.assert_html_ok(resp)
         self.assertContains(resp, "Manager competitiezaken")
 
         # controleer de Wijzig knoppen op de functie-overzicht pagina
-        with self.assertNumQueries(6):
+        with self.assert_max_queries(6):
             resp = self.client.get(self.url_overzicht)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -145,7 +150,8 @@ class TestFunctieOverzicht(E2EHelpers, TestCase):
         # neem de BKO 18m rol aan
         self.e2e_wissel_naar_functie(self.functie_bko)
         self.e2e_check_rol('BKO')
-        resp = self.client.get(self.url_overzicht)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_overzicht)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/overzicht.dtl', 'plein/site_layout.dtl'))
@@ -156,7 +162,8 @@ class TestFunctieOverzicht(E2EHelpers, TestCase):
         # neem de RKO Rayon 3 Indoor rol aan
         self.e2e_wissel_naar_functie(self.functie_rko3)
         self.e2e_check_rol('RKO')
-        resp = self.client.get(self.url_overzicht)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_overzicht)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/overzicht.dtl', 'plein/site_layout.dtl'))
@@ -169,7 +176,8 @@ class TestFunctieOverzicht(E2EHelpers, TestCase):
         self.e2e_check_rol('RCL')
 
         # controleer de Wijzig knoppen op de functie-overzicht pagina
-        resp = self.client.get(self.url_overzicht)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_overzicht)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/overzicht.dtl', 'plein/site_layout.dtl'))
@@ -189,7 +197,8 @@ class TestFunctieOverzicht(E2EHelpers, TestCase):
         self.e2e_check_rol('HWL')
 
         # vraag het overzicht van competitie-bestuurders op
-        resp = self.client.get(self.url_overzicht)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_overzicht)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/overzicht.dtl', 'plein/site_layout.dtl'))
@@ -203,7 +212,8 @@ class TestFunctieOverzicht(E2EHelpers, TestCase):
         self.assertContains(resp, "RCL", count=2)
 
         # haal het overzicht van verenigingsbestuurders op
-        resp = self.client.get(self.url_overzicht + 'vereniging/')
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_overzicht + 'vereniging/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/overzicht-vereniging.dtl', 'plein/site_layout.dtl'))
@@ -221,11 +231,13 @@ class TestFunctieOverzicht(E2EHelpers, TestCase):
 
         # vraag het overzicht van competitie-bestuurders op
         # de WL heeft hier niets mee te maken en krijgt het overzicht dus niet
-        resp = self.client.get(self.url_overzicht)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_overzicht)
         self.assert_is_redirect(resp, '/plein/')
 
         # haal het overzicht van verenigingsbestuurders op
-        resp = self.client.get(self.url_overzicht + 'vereniging/')
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_overzicht + 'vereniging/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/overzicht-vereniging.dtl', 'plein/site_layout.dtl'))
@@ -241,11 +253,13 @@ class TestFunctieOverzicht(E2EHelpers, TestCase):
 
         # vraag het overzicht van competitie-bestuurders op
         # de SEC heeft hier niets mee te maken en krijgt het overzicht dus niet
-        resp = self.client.get(self.url_overzicht)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_overzicht)
         self.assert_is_redirect(resp, '/plein/')
 
         # haal het overzicht van verenigingsbestuurders op
-        resp = self.client.get(self.url_overzicht + 'vereniging/')
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_overzicht + 'vereniging/')
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/overzicht-vereniging.dtl', 'plein/site_layout.dtl'))

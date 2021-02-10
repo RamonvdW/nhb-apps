@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -46,7 +46,10 @@ def account_stuur_email_wachtwoord_vergeten(accountemail, **kwargs):
                  + "Veel plezier met de site!\n"
                  + "Het bondsburo\n")
 
-    mailer_queue_email(accountemail.bevestigde_email, 'Wachtwoord vergeten', text_body)
+    mailer_queue_email(accountemail.bevestigde_email,
+                       'Wachtwoord vergeten',
+                       text_body,
+                       enforce_whitelist=False)
 
 
 class WachtwoordVergetenView(TemplateView):
@@ -62,7 +65,7 @@ class WachtwoordVergetenView(TemplateView):
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
-        menu_dynamics(self.request, context, actief="inloggen")
+        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -98,7 +101,7 @@ class WachtwoordVergetenView(TemplateView):
 
         # we controleren hier niet of het account inactief is, dat doet login wel weer
 
-        menu_dynamics(self.request, context, actief="inloggen")
+        menu_dynamics(self.request, context)
 
         if not context['foutmelding']:
             # we hebben nu het account waar we een de e-mail voor moeten sturen
@@ -189,9 +192,9 @@ class NieuwWachtwoordView(UserPassesTestMixin, TemplateView):
 
         account = self.request.user
         if account.nhblid_set.count() > 0:      # TODO: ongewenste kennis over op NhbLid.account
-            menu_dynamics(self.request, context, actief="schutter")
+            menu_dynamics(self.request, context, actief="schutter-profiel")
         else:
-            menu_dynamics(self.request, context, actief="hetplein")
+            menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -233,9 +236,9 @@ class NieuwWachtwoordView(UserPassesTestMixin, TemplateView):
                 context['moet_oude_ww_weten'] = True
 
             if account.nhblid_set.count() > 0:  # TODO: ongewenste kennis over NhbLid.account
-                menu_dynamics(self.request, context, actief="schutter")
+                menu_dynamics(self.request, context, actief="schutter-profiel")
             else:
-                menu_dynamics(self.request, context, actief="hetplein")
+                menu_dynamics(self.request, context)
             return render(request, self.template_name, context)
 
         # wijzigen van het wachtwoord zorgt er ook voor dat alle sessies van deze gebruiker vervallen

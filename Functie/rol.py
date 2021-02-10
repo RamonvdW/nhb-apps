@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -23,6 +23,8 @@ SESSIONVAR_ROL_HUIDIGE = 'gebruiker_rol_huidige'
 SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK = 'gebruiker_rol_functie_pk'
 SESSIONVAR_ROL_BESCHRIJVING = 'gebruiker_rol_beschrijving'
 
+
+# FUTURE: overweeg verwijderen ROL_NONE (nodig voor accounts die geen nhblid zijn?)
 
 class Rollen(enum.IntEnum):
     """ definitie van de rollen met codes
@@ -59,7 +61,7 @@ url2rol = {
     'HWL': Rollen.ROL_HWL,
     'WL': Rollen.ROL_WL,
     'SEC': Rollen.ROL_SEC,
-    'schutter': Rollen.ROL_SCHUTTER,
+    'sporter': Rollen.ROL_SCHUTTER,
     'geen': Rollen.ROL_NONE
 }
 
@@ -72,7 +74,7 @@ rol2url = {
     Rollen.ROL_HWL: 'HWL',
     Rollen.ROL_WL: 'WL',
     Rollen.ROL_SEC: 'SEC',
-    Rollen.ROL_SCHUTTER: 'schutter',
+    Rollen.ROL_SCHUTTER: 'sporter',
     Rollen.ROL_NONE: 'geen',
 }
 
@@ -109,6 +111,7 @@ def rol_bepaal_hulp_rechten(functie_cache, nhbver_cache, rol, functie_pk):
         #         print("  out: %s" % repr(tup))
         # else:
         #     print("  out: []")
+
     return nwe_functies
 
 
@@ -195,7 +198,7 @@ def rol_zet_sessionvars(account, request):
             while len(te_doorzoeken) > 0:
                 next_doorzoeken = list()
                 for child_tup, parent_tup in te_doorzoeken:
-                    # print("\nexpanding: child=%s, parent=%s" % (repr(child_tup), (parent_tup)))
+                    # print("\n" + "expanding: child=%s, parent=%s" % (repr(child_tup), (parent_tup)))
                     nwe_functies = rol_bepaal_hulp_rechten(functie_cache, nhbver_cache, *child_tup)
 
                     # voorkom dupes (zoals expliciete koppeling en erven van een rol)
@@ -328,10 +331,10 @@ def rol_bepaal_beschrijving(rol, functie_pk=None):
     elif rol in (Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_WL, Rollen.ROL_SEC):
         beschr = functie.beschrijving
     elif rol == Rollen.ROL_SCHUTTER:
-        beschr = 'Schutter'
+        beschr = 'Sporter'
     else:   # ook rol == None
         # dit komt alleen voor als account geen nhblid is maar wel OTP mag koppelen (is_staff of is_BB)
-        beschr = "Gebruiker"
+        beschr = 'Gebruiker'
     return beschr
 
 
@@ -459,10 +462,14 @@ def functie_expandeer_rol(functie_cache, nhbver_cache, rol_in, functie_in):
                     nhbver_cache[store.nhb_nr] = store
                 # for
 
+                # voorkom herhaaldelijke queries tijdens test zonder vereniging
+                if len(nhbver_cache) == 0:
+                    nhbver_cache[0] = 0
+
             # zoek alle verenigingen in de regio van deze RCL
             verenigingen = list()
             for nhb_nr, ver in nhbver_cache.items():
-                if ver.regio_nr == functie_in.nhb_regio.regio_nr:
+                if nhb_nr != 0 and ver.regio_nr == functie_in.nhb_regio.regio_nr:
                     verenigingen.append(nhb_nr)
             # for
 
@@ -472,14 +479,12 @@ def functie_expandeer_rol(functie_cache, nhbver_cache, rol_in, functie_in):
                     yield Rollen.ROL_HWL, obj.pk
             # for
 
-        # TODO: is SEC naar HWL gewenst?
         if functie_in.rol == 'SEC':
             # secretaris mag HWL worden, binnen de vereniging
             for pk, obj in functie_cache.items():
                 if obj.rol == 'HWL' and obj.ver_nhb_nr == functie_in.nhb_ver.nhb_nr:
                     yield Rollen.ROL_HWL, obj.pk
 
-        # TODO: is HWL naar WL gewenst? HWL kan alles al..
         if functie_in.rol == 'HWL':
             # expandeer naar de WL rollen binnen dezelfde vereniging
             for pk, obj in functie_cache.items():

@@ -23,7 +23,8 @@ class TestTakenCLI(E2EHelpers, TestCase):
         self.assertEqual(0, Taak.objects.count())
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('maak_taak', 'eerste', 'tweede', '2020-02-03', '', 'Hallo', stderr=f1, stdout=f2)
+        with self.assert_max_queries(20):
+            management.call_command('maak_taak', 'eerste', 'tweede', '2020-02-03', '', 'Hallo', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
         self.assertEqual(1, Taak.objects.count())
@@ -35,7 +36,8 @@ class TestTakenCLI(E2EHelpers, TestCase):
         self.assertEqual(0, Taak.objects.count())
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('maak_taak', 'eerste', 'systeem', '2020-02-03', '', 'Hallo', stderr=f1, stdout=f2)
+        with self.assert_max_queries(20):
+            management.call_command('maak_taak', 'eerste', 'systeem', '2020-02-03', '', 'Hallo', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
         self.assertEqual(1, Taak.objects.count())
@@ -44,7 +46,8 @@ class TestTakenCLI(E2EHelpers, TestCase):
         self.assertEqual(0, Taak.objects.count())
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('maak_taak', 'derde', 'systeem', '2020-02-03', '', 'Hallo', stderr=f1, stdout=f2)
+        with self.assert_max_queries(20):
+            management.call_command('maak_taak', 'derde', 'systeem', '2020-02-03', '', 'Hallo', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
 
@@ -52,7 +55,8 @@ class TestTakenCLI(E2EHelpers, TestCase):
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('maak_taak', 'eerste', 'derde', '2020-02-03', '', 'Hallo', stderr=f1, stdout=f2)
+        with self.assert_max_queries(20):
+            management.call_command('maak_taak', 'eerste', 'derde', '2020-02-03', '', 'Hallo', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
         self.assertEqual(0, Taak.objects.count())

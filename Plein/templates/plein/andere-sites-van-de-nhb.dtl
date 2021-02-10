@@ -1,5 +1,5 @@
 {% comment %}
-                Copyright (c) 2020 Ramon van der Winkel.
+                Copyright (c) 2020-2021 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -12,7 +12,7 @@
         <div class="nhb-card-content">
             <div class="card-title center-align">Handboogsport NL</div>
             <div class="center-align">
-                <img src="{% static 'plein/logo_nhb_192x192.png' %}" height="90" alt="logo">
+                <img src="{% static 'plein/logo_nhb_192x192.png' %}" height="85" alt="logo">
             </div>
             <div class="card-text">Hoofdwebsite van de NHB met informatie, nieuws en publicaties.</div>
         </div>
@@ -25,9 +25,12 @@
         <div class="nhb-card-content">
             <div class="card-title center-align">Free your mind</div>
             <div class="center-align">
-                <img src="{% static 'plein/logo_hero_512x512.png' %}" height="90" alt="logo">
+                <img src="{% static 'plein/logo_hero_512x512.png' %}" height="85" alt="logo">
             </div>
             <div class="card-text">Kaart met de locaties waar je kan schieten in Nederland.</div>
         </div>
     </a>
 </div>
+
+
+<!-- end of file -->

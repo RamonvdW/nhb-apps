@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020 Ramon van der Winkel.
+                Copyright (c) 2020-2021 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -15,11 +15,11 @@
 
 <p>Uitslag competitie van 25m1pijl seizoen: <b>{{ seizoen }}</b>.</p>
 
-<p>Onderstaande schutters hebben minimaal <b>5</b> scores neergezet in het seizoen.</p>
+<p>Onderstaande sporters hebben minimaal <b>5</b> scores neergezet in het seizoen.</p>
 
 <p>De wedstrijdleeftijd is berekend voor het jaar: <b>{{ wedstrijd_jaar }}</b>.</p>
 
-<p>Schutters met een wedstrijdleeftijd:<br>
+<p>Sporters met een wedstrijdleeftijd:<br>
 .. lager dan <b>{{ jeugd_min}}</b> zijn niet in de lijst opgenomen.<br>
 .. vanaf <b>{{ jeugd_min }}</b> tot en met <b>{{ jeugd_max }}</b> worden als <b>Jeugd</b> gemarkeerd.<br>
 .. boven de <b>{{ jeugd_max }}</b> krijgen simpelweg de opmerking <b>Senior</b>.</p>
@@ -48,9 +48,9 @@
             </tr>
             <tr>
                 <th>Gemiddelde</th>
-                <th filter="on">Wedstrijdleeftijd</th>
-                <th filter="on">Geslacht</th>
-                <th>NHB nummer</th>
+                <th data-filter="on">Wedstrijdleeftijd</th>
+                <th data-filter="on">Geslacht</th>
+                <th>Bondsnummer</th>
                 <th>Naam</th>
                 <th>Vereniging</th>
             </tr>

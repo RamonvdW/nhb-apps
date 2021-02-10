@@ -63,81 +63,89 @@ class TestSchutterRegistreer(E2EHelpers, TestCase):
 
     def test_get(self):
         # test registratie via het formulier
-        resp = self.client.get('/schutter/registreer/')
+        with self.assert_max_queries(20):
+            resp = self.client.get('/sporter/registreer/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('schutter/registreer-nhb-account.dtl', 'plein/site_layout.dtl'))
 
     def test_partialfields(self):
-        resp = self.client.post('/schutter/registreer/',
-                                {'nhb_nummer': '100001',
-                                 'email': 'rdetester@gmail.not',
-                                 'nieuw_wachtwoord': ''})
+        with self.assert_max_queries(20):
+            resp = self.client.post('/sporter/registreer/',
+                                    {'nhb_nummer': '100001',
+                                     'email': 'rdetester@gmail.not',
+                                     'nieuw_wachtwoord': ''})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('schutter/registreer-nhb-account.dtl', 'plein/site_layout.dtl'))
         self.assertFormError(resp, 'form', None, 'Niet alle velden zijn ingevuld')
 
     def test_invalidfields(self):
-        resp = self.client.post('/schutter/registreer/',
-                                {'nhb_nummer': '100678',
-                                 'email': 'is geen email',
-                                 'nieuw_wachtwoord': E2EHelpers.WACHTWOORD})
+        with self.assert_max_queries(20):
+            resp = self.client.post('/sporter/registreer/',
+                                    {'nhb_nummer': '100678',
+                                     'email': 'is geen email',
+                                     'nieuw_wachtwoord': E2EHelpers.WACHTWOORD})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('schutter/registreer-nhb-account.dtl', 'plein/site_layout.dtl'))
         self.assertFormError(resp, 'form', None, 'De gegevens worden niet geaccepteerd')
 
     def test_bad_nhb_nr(self):
-        resp = self.client.post('/schutter/registreer/',
-                                {'nhb_nummer': 'hallo!',
-                                 'email': 'test@test.not',
-                                 'nieuw_wachtwoord': E2EHelpers.WACHTWOORD},
-                                follow=True)
+        with self.assert_max_queries(20):
+            resp = self.client.post('/sporter/registreer/',
+                                    {'nhb_nummer': 'hallo!',
+                                     'email': 'test@test.not',
+                                     'nieuw_wachtwoord': E2EHelpers.WACHTWOORD},
+                                    follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('schutter/registreer-nhb-account.dtl', 'plein/site_layout.dtl'))
         self.assertFormError(resp, 'form', None, 'Onbekend NHB nummer')
 
     def test_nonexisting_nr(self):
-        resp = self.client.post('/schutter/registreer/',
-                                {'nhb_nummer': '999999',
-                                 'email': 'test@test.not',
-                                 'nieuw_wachtwoord': E2EHelpers.WACHTWOORD},
-                                follow=True)
+        with self.assert_max_queries(20):
+            resp = self.client.post('/sporter/registreer/',
+                                    {'nhb_nummer': '999999',
+                                     'email': 'test@test.not',
+                                     'nieuw_wachtwoord': E2EHelpers.WACHTWOORD},
+                                    follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('schutter/registreer-nhb-account.dtl', 'plein/site_layout.dtl'))
         self.assertFormError(resp, 'form', None, 'Onbekend NHB nummer')
 
     def test_geen_email(self):
-        resp = self.client.post('/schutter/registreer/',
-                                {'nhb_nummer': '100002',
-                                 'email': 'rdetester@gmail.not',
-                                 'nieuw_wachtwoord': E2EHelpers.WACHTWOORD},
-                                follow=True)
+        with self.assert_max_queries(20):
+            resp = self.client.post('/sporter/registreer/',
+                                    {'nhb_nummer': '100002',
+                                     'email': 'rdetester@gmail.not',
+                                     'nieuw_wachtwoord': E2EHelpers.WACHTWOORD},
+                                    follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('schutter/registreer-nhb-account.dtl', 'plein/site_layout.dtl'))
         self.assertFormError(resp, 'form', None, 'Geen email adres bekend. Neem contact op met de secretaris van je vereniging.')
 
     def test_verkeerde_email(self):
-        resp = self.client.post('/schutter/registreer/',
-                                {'nhb_nummer': '100001',
-                                 'email': 'rdetester@gmail.yes',
-                                 'nieuw_wachtwoord': E2EHelpers.WACHTWOORD},
-                                follow=True)
+        with self.assert_max_queries(20):
+            resp = self.client.post('/sporter/registreer/',
+                                    {'nhb_nummer': '100001',
+                                     'email': 'rdetester@gmail.yes',
+                                     'nieuw_wachtwoord': E2EHelpers.WACHTWOORD},
+                                    follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('schutter/registreer-nhb-account.dtl', 'plein/site_layout.dtl'))
         self.assertFormError(resp, 'form', None, 'De combinatie van NHB nummer en email worden niet herkend. Probeer het nog eens.')
 
     def test_registreer(self):
-        resp = self.client.post('/schutter/registreer/',
-                                {'nhb_nummer': '100001',
-                                 'email': 'rDeTester@gmail.not',    # dekt case-insensitive emailadres
-                                 'nieuw_wachtwoord': E2EHelpers.WACHTWOORD},
-                                follow=True)
+        with self.assert_max_queries(20):
+            resp = self.client.post('/sporter/registreer/',
+                                    {'nhb_nummer': '100001',
+                                     'email': 'rDeTester@gmail.not',    # dekt case-insensitive emailadres
+                                     'nieuw_wachtwoord': E2EHelpers.WACHTWOORD},
+                                    follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/email_aangemaakt.dtl', 'plein/site_layout.dtl'))
@@ -167,12 +175,14 @@ class TestSchutterRegistreer(E2EHelpers, TestCase):
         self.assertEqual(obj.hoortbij_accountemail.nieuwe_email, 'rdetester@gmail.not')
         self.assertFalse(obj.hoortbij_accountemail.email_is_bevestigd)
         url = '/overig/url/' + obj.url_code + '/'
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         urls = self.extract_all_urls(resp, skip_menu=True, skip_smileys=True)
         post_url = urls[0]
-        resp = self.client.post(post_url)
+        with self.assert_max_queries(20):
+            resp = self.client.post(post_url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/bevestigd.dtl', 'plein/site_layout.dtl'))
@@ -188,21 +198,23 @@ class TestSchutterRegistreer(E2EHelpers, TestCase):
         self.assertEqual(account.volledige_naam(), 'Ramon de Tester')
 
     def test_bestaat_al(self):
-        resp = self.client.post('/schutter/registreer/',
-                                {'nhb_nummer': '100001',
-                                 'email': 'rdetester@gmail.not',
-                                 'nieuw_wachtwoord': E2EHelpers.WACHTWOORD},
-                                follow=True)
+        with self.assert_max_queries(20):
+            resp = self.client.post('/sporter/registreer/',
+                                    {'nhb_nummer': '100001',
+                                     'email': 'rdetester@gmail.not',
+                                     'nieuw_wachtwoord': E2EHelpers.WACHTWOORD},
+                                    follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/email_aangemaakt.dtl', 'plein/site_layout.dtl'))
 
         # tweede poging
-        resp = self.client.post('/schutter/registreer/',
-                                {'nhb_nummer': '100001',
-                                 'email': 'rdetester@gmail.not',
-                                 'nieuw_wachtwoord': E2EHelpers.WACHTWOORD},
-                                follow=True)
+        with self.assert_max_queries(20):
+            resp = self.client.post('/sporter/registreer/',
+                                    {'nhb_nummer': '100001',
+                                     'email': 'rdetester@gmail.not',
+                                     'nieuw_wachtwoord': E2EHelpers.WACHTWOORD},
+                                    follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('schutter/registreer-nhb-account.dtl', 'plein/site_layout.dtl'))
@@ -210,121 +222,132 @@ class TestSchutterRegistreer(E2EHelpers, TestCase):
 
     def test_zwak_wachtwoord(self):
         # te kort
-        resp = self.client.post('/schutter/registreer/',
-                                {'nhb_nummer': '100001',
-                                 'email': 'rdetester@gmail.not',
-                                 'nieuw_wachtwoord': 'te kort'},
-                                follow=False)
+        with self.assert_max_queries(20):
+            resp = self.client.post('/sporter/registreer/',
+                                    {'nhb_nummer': '100001',
+                                     'email': 'rdetester@gmail.not',
+                                     'nieuw_wachtwoord': 'te kort'},
+                                    follow=False)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('schutter/registreer-nhb-account.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, "Wachtwoord moet minimaal 9 tekens lang zijn")
 
         # verboden reeks
-        resp = self.client.post('/schutter/registreer/',
-                                {'nhb_nummer': '100001',
-                                 'email': 'rdetester@gmail.not',
-                                 'nieuw_wachtwoord': 'handboogsport'},
-                                follow=False)
+        with self.assert_max_queries(20):
+            resp = self.client.post('/sporter/registreer/',
+                                    {'nhb_nummer': '100001',
+                                     'email': 'rdetester@gmail.not',
+                                     'nieuw_wachtwoord': 'handboogsport'},
+                                    follow=False)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('schutter/registreer-nhb-account.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, "Wachtwoord is niet sterk genoeg")
 
         # NHB nummer in wachtwoord
-        resp = self.client.post('/schutter/registreer/',
-                                {'nhb_nummer': '100001',
-                                 'email': 'rdetester@gmail.not',
-                                 'nieuw_wachtwoord': 'yoho100001jaha'},
-                                follow=False)
+        with self.assert_max_queries(20):
+            resp = self.client.post('/sporter/registreer/',
+                                    {'nhb_nummer': '100001',
+                                     'email': 'rdetester@gmail.not',
+                                     'nieuw_wachtwoord': 'yoho100001jaha'},
+                                    follow=False)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('schutter/registreer-nhb-account.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, "Wachtwoord bevat een verboden reeks")
 
         # keyboard walk 1
-        resp = self.client.post('/schutter/registreer/',
-                                {'nhb_nummer': '100001',
-                                 'email': 'rdetester@gmail.not',
-                                 'nieuw_wachtwoord': 'qwertyuiop'},
-                                follow=False)
+        with self.assert_max_queries(20):
+            resp = self.client.post('/sporter/registreer/',
+                                    {'nhb_nummer': '100001',
+                                     'email': 'rdetester@gmail.not',
+                                     'nieuw_wachtwoord': 'qwertyuiop'},
+                                    follow=False)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('schutter/registreer-nhb-account.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, "Wachtwoord is niet sterk genoeg")
 
         # keyboard walk 2
-        resp = self.client.post('/schutter/registreer/',
-                                {'nhb_nummer': '100001',
-                                 'email': 'rdetester@gmail.not',
-                                 'nieuw_wachtwoord': 'asdfghjkl'},
-                                follow=False)
+        with self.assert_max_queries(20):
+            resp = self.client.post('/sporter/registreer/',
+                                    {'nhb_nummer': '100001',
+                                     'email': 'rdetester@gmail.not',
+                                     'nieuw_wachtwoord': 'asdfghjkl'},
+                                    follow=False)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('schutter/registreer-nhb-account.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, "Wachtwoord is niet sterk genoeg")
 
         # keyboard walk 3
-        resp = self.client.post('/schutter/registreer/',
-                                {'nhb_nummer': '100001',
-                                 'email': 'rdetester@gmail.not',
-                                 'nieuw_wachtwoord': 'zxcvbnm,.'},
-                                follow=False)
+        with self.assert_max_queries(20):
+            resp = self.client.post('/sporter/registreer/',
+                                    {'nhb_nummer': '100001',
+                                     'email': 'rdetester@gmail.not',
+                                     'nieuw_wachtwoord': 'zxcvbnm,.'},
+                                    follow=False)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('schutter/registreer-nhb-account.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, "Wachtwoord is niet sterk genoeg")
 
         # keyboard walk 4
-        resp = self.client.post('/schutter/registreer/',
-                                {'nhb_nummer': '100001',
-                                 'email': 'rdetester@gmail.not',
-                                 'nieuw_wachtwoord': '1234567890!'},
-                                follow=False)
+        with self.assert_max_queries(20):
+            resp = self.client.post('/sporter/registreer/',
+                                    {'nhb_nummer': '100001',
+                                     'email': 'rdetester@gmail.not',
+                                     'nieuw_wachtwoord': '1234567890!'},
+                                    follow=False)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('schutter/registreer-nhb-account.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, "Wachtwoord is niet sterk genoeg")
 
         # te weinig verschillende tekens 1
-        resp = self.client.post('/schutter/registreer/',
-                                {'nhb_nummer': '100001',
-                                 'email': 'rdetester@gmail.not',
-                                 'nieuw_wachtwoord': 'xxxxxxxxx'},
-                                follow=False)
+        with self.assert_max_queries(20):
+            resp = self.client.post('/sporter/registreer/',
+                                    {'nhb_nummer': '100001',
+                                     'email': 'rdetester@gmail.not',
+                                     'nieuw_wachtwoord': 'xxxxxxxxx'},
+                                    follow=False)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('schutter/registreer-nhb-account.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, "Wachtwoord bevat te veel gelijke tekens")
 
         # te weinig verschillende tekens 2
-        resp = self.client.post('/schutter/registreer/',
-                                {'nhb_nummer': '100001',
-                                 'email': 'rdetester@gmail.not',
-                                 'nieuw_wachtwoord': 'jaJAjaJAjaJA'},
-                                follow=False)
+        with self.assert_max_queries(20):
+            resp = self.client.post('/sporter/registreer/',
+                                    {'nhb_nummer': '100001',
+                                     'email': 'rdetester@gmail.not',
+                                     'nieuw_wachtwoord': 'jaJAjaJAjaJA'},
+                                    follow=False)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('schutter/registreer-nhb-account.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, "Wachtwoord bevat te veel gelijke tekens")
 
         # te weinig verschillende tekens 3
-        resp = self.client.post('/schutter/registreer/',
-                                {'nhb_nummer': '100001',
-                                 'email': 'rdetester@gmail.not',
-                                 'nieuw_wachtwoord': 'Jo!Jo!Jo!Jo!Jo!'},
-                                follow=False)
+        with self.assert_max_queries(20):
+            resp = self.client.post('/sporter/registreer/',
+                                    {'nhb_nummer': '100001',
+                                     'email': 'rdetester@gmail.not',
+                                     'nieuw_wachtwoord': 'Jo!Jo!Jo!Jo!Jo!'},
+                                    follow=False)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('schutter/registreer-nhb-account.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, "Wachtwoord bevat te veel gelijke tekens")
 
         # te weinig verschillende tekens 4
-        resp = self.client.post('/schutter/registreer/',
-                                {'nhb_nummer': '100001',
-                                 'email': 'rdetester@gmail.not',
-                                 'nieuw_wachtwoord': 'helphelphelphelp'},
-                                follow=False)
+        with self.assert_max_queries(20):
+            resp = self.client.post('/sporter/registreer/',
+                                    {'nhb_nummer': '100001',
+                                     'email': 'rdetester@gmail.not',
+                                     'nieuw_wachtwoord': 'helphelphelphelp'},
+                                    follow=False)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('schutter/registreer-nhb-account.dtl', 'plein/site_layout.dtl'))
@@ -334,11 +357,12 @@ class TestSchutterRegistreer(E2EHelpers, TestCase):
         self.nhblid_100001.is_actief_lid = False
         self.nhblid_100001.save()
 
-        resp = self.client.post('/schutter/registreer/',
-                                {'nhb_nummer': '100001',
-                                 'email': self.nhblid_100001.email,
-                                 'nieuw_wachtwoord': E2EHelpers.WACHTWOORD},
-                                follow=True)
+        with self.assert_max_queries(20):
+            resp = self.client.post('/sporter/registreer/',
+                                    {'nhb_nummer': '100001',
+                                     'email': self.nhblid_100001.email,
+                                     'nieuw_wachtwoord': E2EHelpers.WACHTWOORD},
+                                    follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('schutter/registreer-nhb-account.dtl', 'plein/site_layout.dtl'))
@@ -354,11 +378,12 @@ class TestSchutterRegistreer(E2EHelpers, TestCase):
         functie = Functie.objects.get(rol='SEC', nhb_ver=self.nhbver)
         self.assertEqual(functie.accounts.count(), 0)
 
-        resp = self.client.post('/schutter/registreer/',
-                                {'nhb_nummer': '100001',
-                                 'email': 'rdetester@gmail.not',
-                                 'nieuw_wachtwoord': E2EHelpers.WACHTWOORD},
-                                follow=True)
+        with self.assert_max_queries(20):
+            resp = self.client.post('/sporter/registreer/',
+                                    {'nhb_nummer': '100001',
+                                     'email': 'rdetester@gmail.not',
+                                     'nieuw_wachtwoord': E2EHelpers.WACHTWOORD},
+                                    follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/email_aangemaakt.dtl', 'plein/site_layout.dtl'))

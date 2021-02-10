@@ -6,18 +6,19 @@
 
 from django.test import TestCase, override_settings
 from django.core import management
-from django.conf import settings
 from .models import MailQueue, mailer_queue_email
+from Overig.e2ehelpers import E2EHelpers
 import io
 
 
-class TestMailerCliBase(object):
+class TestMailerCliBase(E2EHelpers, object):
     """ unit tests voor de Mailer applicatie """
 
     def test_leeg(self):
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('stuur_mails', '2', '--quick', stderr=f1, stdout=f2)
+        with self.assert_max_queries(20):
+            management.call_command('stuur_mails', '2', '--quick', stderr=f1, stdout=f2)
         self.assertTrue('[INFO] Aantal oude mails geprobeerd te versturen: 0' in f2.getvalue())
         self.assertTrue('[INFO] Aantal nieuwe mails geprobeerd te versturen: 0' in f2.getvalue())
         self.assertEqual(f1.getvalue(), '')
@@ -37,7 +38,8 @@ class TestMailerCliBase(object):
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('stuur_mails', '2', '--quick', stderr=f1, stdout=f2)
+        with self.assert_max_queries(20):
+            management.call_command('stuur_mails', '2', '--quick', stderr=f1, stdout=f2)
 
         obj = MailQueue.objects.all()[0]
         self.assertEqual(obj.aantal_pogingen, 1)
@@ -57,7 +59,8 @@ class TestMailerCliBase(object):
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('stuur_mails', '2', '--quick', stderr=f1, stdout=f2)
+        with self.assert_max_queries(20):
+            management.call_command('stuur_mails', '2', '--quick', stderr=f1, stdout=f2)
 
         self.assertTrue('[INFO] Aantal oude mails geprobeerd te versturen: 1' in f2.getvalue())
         self.assertTrue('[INFO] Aantal nieuwe mails geprobeerd te versturen: 0' in f2.getvalue())
@@ -79,7 +82,8 @@ class TestMailerCliBase(object):
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('stuur_mails', '--skip_old', '--quick', '2', stderr=f1, stdout=f2)
+        with self.assert_max_queries(20):
+            management.call_command('stuur_mails', '--skip_old', '--quick', '2', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
 
@@ -101,7 +105,8 @@ class TestMailerCliBase(object):
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('stuur_mails', '2', '--quick', stderr=f1, stdout=f2)
+        with self.assert_max_queries(20):
+            management.call_command('stuur_mails', '2', '--quick', stderr=f1, stdout=f2)
         self.assertTrue('[INFO] Aantal oude mails geprobeerd te versturen: 1' in f2.getvalue())
         self.assertTrue('[INFO] Aantal nieuwe mails geprobeerd te versturen: 0' in f2.getvalue())
         self.assertEqual(f1.getvalue(), '')
@@ -111,7 +116,7 @@ class TestMailerCliBase(object):
         self.assertTrue('(verstuurd)' in str(obj))
 
 
-class TestMailerCliBadBase(object):
+class TestMailerCliBadBase(E2EHelpers, object):
     """ unit tests voor de Mailer applicatie """
 
     def test_stuur_mails_bad_duration(self):
@@ -137,16 +142,15 @@ class TestMailerCliBadBase(object):
         # following port must not have any service responding to it
         f1 = io.StringIO()
         f2 = io.StringIO()
-
-        management.call_command('stuur_mails', '7', '--quick', stderr=f1, stdout=f2)
+        with self.assert_max_queries(20):
+            management.call_command('stuur_mails', '7', '--quick', stderr=f1, stdout=f2)
 
         obj = MailQueue.objects.all()[0]
         self.assertEqual(obj.aantal_pogingen, 1)
         self.assertTrue('[ERROR] ' in f1.getvalue())
 
 
-@override_settings(MAILGUN_URL='', MAILGUN_API_KEY='',
-                   POSTMARK_URL='http://localhost:8123/postmark',
+@override_settings(POSTMARK_URL='http://localhost:8123/postmark',
                    POSTMARK_API_KEY='the-api-key',
                    EMAIL_FROM_ADDRESS='noreply@nhb.test',
                    EMAIL_ADDRESS_WHITELIST=())
@@ -154,31 +158,12 @@ class TestMailerCliPostmark(TestMailerCliBase, TestCase):
     pass
 
 
-@override_settings(POSTMARK_URL='', POSTMARK_API_KEY='',
-                   MAILGUN_URL='http://localhost:8123/v3/testdomain2.com/messages',
-                   MAILGUN_API_KEY='the-api-key',
-                   EMAIL_FROM_ADDRESS='noreply@nhb.test',
-                   EMAIL_ADDRESS_WHITELIST=())
-class TestMailerCliMailgun(TestMailerCliBase, TestCase):
-    pass
-
-
 # use a port with no service responding to it
-@override_settings(MAILGUN_URL='', MAILGUN_API_KEY='',
-                   POSTMARK_URL='http://localhost:9999',
+@override_settings(POSTMARK_URL='http://localhost:9999',
                    POSTMARK_API_KEY='the-api-key',
                    EMAIL_FROM_ADDRESS='noreply@nhb.test',
                    EMAIL_ADDRESS_WHITELIST=())
 class TestMailerCliBadPostmark(TestMailerCliBadBase, TestCase):
-    pass
-
-
-@override_settings(POSTMARK_URL='', POSTMARK_API_KEY='',
-                   MAILGUN_URL='http://localhost:9999',
-                   MAILGUN_API_KEY='the-api-key',
-                   EMAIL_FROM_ADDRESS='noreply@nhb.test',
-                   EMAIL_ADDRESS_WHITELIST=())
-class TestMailerCliBadMailgun(TestMailerCliBadBase, TestCase):
     pass
 
 

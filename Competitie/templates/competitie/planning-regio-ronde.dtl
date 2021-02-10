@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020 Ramon van der Winkel.
+                Copyright (c) 2020-2021 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -10,175 +10,190 @@
 
 {% block pagina %}
 
-<!-- TODO: in methode1 is dit geen WEEK planning -->
-<h4>Weekplanning regiocompetitie</h4>
+    <h4>Weekplanning regiocompetitie</h4>
 
-<div class="row">
+    <div class="row">
 
-    <!-- toon gegevens van de regio en competitie in een blauwe box -->
-    <div class="col s12 m10 l8 xl6 offset-m1 offset-l2 offset-xl3">
-        <div class="white-text nhb-blauw z-depth-2">
+        <!-- toon gegevens van de regio en competitie in een blauwe box -->
+        <div class="col s12 m10 l8 xl6 offset-m1 offset-l2 offset-xl3">
+            <div class="white-text nhb-blauw z-depth-2">
 
-            <div class="row small-row">
-                <div class="col s3">Competitie:</div>
-                <div class="col s8">{{ ronde.deelcompetitie.competitie.beschrijving }}</div>
-            </div>
-
-            <div class="row small-row">
-                <div class="col s3">Rayon:</div>
-                <div class="col s8">{{ ronde.deelcompetitie.nhb_regio.rayon }}</div>
-            </div>
-
-            <div class="row small-row">
-                <div class="col s3">Regio:</div>
-                <div class="col s8">{{ ronde.deelcompetitie.nhb_regio }}</div>
-            </div>
-
-            {% if ronde.cluster %}
                 <div class="row small-row">
-                    <div class="col s3">Cluster:</div>
-                    <div class="col s8">{{ ronde.cluster }}</div>
+                    <div class="col s3">Competitie:</div>
+                    <div class="col s8">{{ ronde.deelcompetitie.competitie.beschrijving }}</div>
                 </div>
-            {% endif %}
 
+                <div class="row small-row">
+                    <div class="col s3">Rayon:</div>
+                    <div class="col s8">{{ ronde.deelcompetitie.nhb_regio.rayon }}</div>
+                </div>
+
+                <div class="row small-row">
+                    <div class="col s3">Regio:</div>
+                    <div class="col s8">{{ ronde.deelcompetitie.nhb_regio }}</div>
+                </div>
+
+                {% if ronde.cluster %}
+                    <div class="row small-row">
+                        <div class="col s3">Cluster:</div>
+                        <div class="col s8">{{ ronde.cluster }}</div>
+                    </div>
+                {% endif %}
+
+            </div>
         </div>
     </div>
-</div>
 
-<p>&nbsp;</p>
-<p><a class="btn-nhb-blauw" href="{{ terug_url }}">
-        <i class="material-icons-round left">arrow_upward</i>Planning {% if ronde.cluster %}cluster{% else %}regio{% endif %}</a>
-</p>
+    <p>&nbsp;</p>
+    <p><a class="btn-nhb-blauw" href="{{ terug_url }}">
+            <i class="material-icons-round left">arrow_upward</i>Planning {% if ronde.cluster %}cluster{% else %}regio{% endif %}</a>
+    </p>
 
 
-<p>&nbsp;</p>
-<h5>Instellingen competitieweek</h5>
+    <p>&nbsp;</p>
+    <h5>Instellingen competitieweek</h5>
 
-<form method="post" action="{{ ronde_opslaan_url }}">
-    {% csrf_token %}
+    <form method="post" action="{{ ronde_opslaan_url }}">
+        {% csrf_token %}
+
+        <table class="white">
+            <thead>
+                <tr>
+                    <th>Aspect</th>
+                    <th>Keuze</th>
+                </tr>
+            </thead>
+
+            <tr>
+                <td>Week nummer</td>
+                <td>
+                    {% if readonly %}
+                        {% for opt in opt_week_nrs %}
+                            {% if opt.actief %}
+                                <span>Week {{ opt.week_nr }} ({{ opt.maandag|date:"l j F Y" }})</span>
+                            {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        <select name="ronde_week_nr">
+                            {% for opt in opt_week_nrs %}
+                                <option value="{{ opt.choice_name }}"{% if opt.actief %} selected{% endif %}>Week {{ opt.week_nr }} ({{ opt.maandag|date:"l j F Y" }})</option>
+                            {% endfor %}
+                        </select>
+                    {% endif %}
+                </td>
+            </tr>
+
+            <tr>
+                <td>Beschrijving</td>
+                {% if readonly or vaste_beschrijving %}
+                    <td>{{ ronde.beschrijving }}</td>
+                {% else %}
+                    <td class="input-field">
+                        <input type="text" name="ronde_naam" placeholder="Hier invoeren" value="{{ ronde.beschrijving }}">
+                    </td>
+                {% endif %}
+            </tr>
+        </table>
+
+        {% if readonly %}
+            <p>De RCL kan deze instellingen wijzigen</p>
+        {% else %}
+            <p>
+                <button class="btn-nhb-rood" type="submit">
+                    <i class="material-icons-round left">check</i>Instellingen opslaan</button>
+            </p>
+        {% endif %}
+    </form>
+
+
+    <p>&nbsp;</p>
+    <h5>Wedstrijden</h5>
 
     <table class="white">
+
         <thead>
             <tr>
-                <th>Aspect</th>
-                <th>Keuze</th>
+                <th>Wanneer</th>
+                {% if not vaste_beschrijving %}     <!-- import -->
+                    <th>Waar</th>
+                    {% if heeft_wkl %}
+                        <th>Wedstrijdklassen</th>
+                        <th>Capaciteit</th>
+                    {% endif %}
+                    <th><!-- kolom voor wijzig knoppen --></th>
+                {% endif %}
             </tr>
         </thead>
 
-        <tr>
-            <td>Week nummer</td>
-            <td>
-                {% if readonly %}
-                    {% for opt in opt_week_nrs %}
-                        {% if opt.actief %}
-                            <span>Week {{ opt.week_nr }} ({{ opt.maandag|date:"l j F Y" }})</span>
-                        {% endif %}
-                    {% endfor %}
-                {% else %}
-                    <select name="ronde_week_nr">
-                        {% for opt in opt_week_nrs %}
-                            <option value="{{ opt.choice_name }}"{% if opt.actief %} selected{% endif %}>Week {{ opt.week_nr }} ({{ opt.maandag|date:"l j F Y" }})</option>
-                        {% endfor %}
-                    </select>
-                {% endif %}
-            </td>
-        </tr>
+        {% for wedstrijd in wedstrijden %}
+            <tr>
+                <td>{{ wedstrijd.datum_wanneer|date:"l j F Y" }} om {{ wedstrijd.tijd_begin_wedstrijd }}</td>
 
-        <tr>
-            <td>Beschrijving</td>
-            {% if readonly or vaste_beschrijving %}
-                <td>{{ ronde.beschrijving }}</td>
-            {% else %}
-                <td class="input-field">
-                    <input type="text" name="ronde_naam" placeholder="Hier invoeren" value="{{ ronde.beschrijving }}">
+                {% if not vaste_beschrijving %}
+                    <td>
+                        {% if wedstrijd.vereniging %}
+                            <span>{{ wedstrijd.vereniging }}</span>
+                        {% else %}
+                            <i class="red-text">Onbekend</i>
+                        {% endif %}
+                    </td>
+
+                    {% if heeft_wkl %}
+                        <td>
+                            {% for wkl in wedstrijd.indiv_klassen.all %}
+                                <span>{{ wkl.beschrijving }}</span><br>
+                            {% endfor %}
+                            {% for wkl in wedstrijd.team_klassen.all %}
+                                <span>{{ wkl.beschrijving }}</span><br>
+                            {% endfor %}
+                        </td>
+
+                        <td>Nodig: {{ wedstrijd.aantal_schutters }}<br>Maximum: ?</td>
+                    {% endif %}
+
+                    <!-- knop om wedstrijd te wijzigen -->
+                    <td>
+                        {% if wedstrijd.url_wijzig %}
+                            <a class="btn-nhb-blauw btn-small" href="{{ wedstrijd.url_wijzig }}">
+                                <i class="material-icons-round left">arrow_forward</i>Aanpassen</a>
+                        {% endif %}
+                    </td>
+                {% endif %}
+            </tr>
+        {% endfor %}
+
+        <!-- knop om een regel toe te voegen -->
+        {% if url_nieuwe_wedstrijd %}
+            <tr>
+                <td colspan={% if heeft_wkl %}"5"{% else %}"3"{% endif %}>
+                    <form action="{{ url_nieuwe_wedstrijd }}" method="post">
+                        {% csrf_token %}
+                        <button class="btn-nhb-blauw" type="submit">
+                            <i class="material-icons-round left">add</i>Wedstrijd toevoegen</button>
+                    </form>
                 </td>
+            </tr>
+        {% endif %}
+
+        {% if heeft_wkl %}
+            {% if wkl_niet_gebruikt %}
+                <tr>
+                    <td colspan="2"><i>De volgende klassen zijn nog niet gekoppeld aan een wedstrijd:</i></td>
+                    <td colspan="3">
+                        {% for wkl_beschrijving in wkl_niet_gebruikt %}
+                            <span>{{ wkl_beschrijving }}</span><br>
+                        {% endfor %}
+                    </td>
+                </tr>
             {% endif %}
-        </tr>
+        {% endif %}
+
     </table>
 
-    {% if readonly %}
-        <p>De RCL kan deze instellingen wijzigen</p>
-    {% else %}
-        <p>
-            <button class="btn-nhb-rood" type="submit">
-                <i class="material-icons-round left">check</i>Instellingen opslaan</button>
-        </p>
-    {% endif %}
-</form>
-
-
-<p>&nbsp;</p>
-<h5>Wedstrijden</h5>
-
-<table class="white">
-
-    <thead>
-        <tr>
-            <th>Wanneer</th>
-            {% if not vaste_beschrijving %}
-                <th>Waar</th>
-                <th><!-- kolom voor wijzig knoppen --></th>
-            {% endif %}
-            <th>Uitslag</th>
-        </tr>
-    </thead>
-
-    {% for wedstrijd in wedstrijden %}
-        <tr>
-            <td>{{ wedstrijd.datum_wanneer|date:"l j F Y" }} om {{ wedstrijd.tijd_begin_wedstrijd }}</td>
-
-            {% if not vaste_beschrijving %}
-                <td>
-                    {% if wedstrijd.vereniging %}
-                        <span>{{ wedstrijd.vereniging }}</span>
-                    {% else %}
-                        <i class="red-text">Onbekend</i>
-                    {% endif %}
-                </td>
-
-                <!-- knop om wedstrijd te wijzigen -->
-                <td>
-                    {% if wedstrijd.url_wijzig %}
-                        <a class="btn-nhb-blauw btn-small" href="{{ wedstrijd.url_wijzig }}">
-                            <i class="material-icons-round left">arrow_forward</i>Aanpassen</a>
-                    {% endif %}
-                </td>
-            {% endif %}
-
-            <!-- knop om uitslagen te zien / in te voeren -->
-            <td>
-                {% if wedstrijd.url_uitslag_controleren %}
-                    <a {% if wedstrijd.uitslag.is_bevroren %}class="btn-nhb-blauw btn-small"{% else %}class="btn-nhb-rood"{% endif %} href="{{ wedstrijd.url_uitslag_controleren }}">
-                        <i class="material-icons-round left">arrow_forward</i>Controleer</a>
-                {% elif wedstrijd.url_uitslag_invoeren %}
-                    <a class="btn-nhb-blauw btn-small" href="{{ wedstrijd.url_uitslag_invoeren }}">
-                        <i class="material-icons-round left">arrow_forward</i>Invoeren</a>
-                {% elif wedstrijd.url_uitslag_bekijken %}
-                    <a class="btn-nhb-blauw btn-small" href="{{ wedstrijd.url_uitslag_bekijken }}">
-                        <i class="material-icons-round left">arrow_forward</i>Bekijken</a>
-                {% else %}
-                    <i>Nog geen</i>
-                {% endif %}
-            </td>
-        </tr>
-    {% endfor %}
-
-    <!-- knop om een regel toe te voegen -->
-    {% if url_nieuwe_wedstrijd %}
-        <tr>
-            <td colspan="3">
-                <form action="{{ url_nieuwe_wedstrijd }}" method="post">
-                    {% csrf_token %}
-                    <button class="btn-nhb-blauw" type="submit">
-                        <i class="material-icons-round left">add</i>Regel toevoegen</button>
-                </form>
-            </td>
-        </tr>
-    {% endif %}
-
-</table>
-
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-planning-regio-ronde" %}
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-planning-regio-ronde" %}
 
 {% endblock %}
 
+{% block menu-competities %}
+    {% include 'competitie/menu.dtl' %}
+{% endblock %}

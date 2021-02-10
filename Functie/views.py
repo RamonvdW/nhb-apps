@@ -22,7 +22,6 @@ from Overig.helpers import get_safe_from_ip
 from .rol import Rollen, rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving
 from .models import Functie
 from .forms import ZoekBeheerdersForm, WijzigBeheerdersForm, WijzigEmailForm
-import logging
 
 
 TEMPLATE_OVERZICHT = 'functie/overzicht.dtl'
@@ -231,7 +230,10 @@ def functie_vraag_email_bevestiging(functie):
                  + "Als je dit niet herkent, neem dan contact met ons op via info@handboogsport.nl\n\n"
                  + "Het bondsburo\n")
 
-    mailer_queue_email(functie.nieuwe_email, 'Bevestig gebruik e-mail voor rol', text_body)
+    mailer_queue_email(functie.nieuwe_email,
+                       'Bevestig gebruik e-mail voor rol',
+                       text_body,
+                       enforce_whitelist=False)
 
 
 class WijzigEmailView(UserPassesTestMixin, View):
@@ -264,7 +266,6 @@ class WijzigEmailView(UserPassesTestMixin, View):
 
         rol = rol_get_huidige(self.request)
         if rol == Rollen.ROL_HWL:
-            context['is_rol_hwl'] = True        # TODO: lijkt niet gebruik in wijzig-email.dtl
             context['terug_url'] = reverse('Functie:overzicht-vereniging')
             menu_dynamics(self.request, context, actief='vereniging')
         else:
@@ -702,7 +703,8 @@ class OverzichtView(UserPassesTestMixin, ListView):
                         obj.email_url = None
         # for
 
-    def _zet_accounts(self, objs):
+    @staticmethod
+    def _zet_accounts(objs):
         """ als we de template door functie.accounts.all() laten lopen dan resulteert
             elke lookup in een database query voor het volledige account record.
             Hier doen we het iets efficienter.
@@ -724,12 +726,12 @@ class OverzichtView(UserPassesTestMixin, ListView):
                     .filter(Q(rol='RCL', nhb_regio=functie_hwl.nhb_ver.regio) |
                             Q(rol='RKO', nhb_rayon=functie_hwl.nhb_ver.regio.rayon) |
                             Q(rol='BKO'))
-                    .select_related('nhb_rayon', 'nhb_regio')
+                    .select_related('nhb_rayon', 'nhb_regio', 'nhb_regio__rayon')
                     .prefetch_related('accounts'))
         else:
             objs = (Functie.objects
                     .filter(Q(rol='BKO') | Q(rol='RKO') | Q(rol='RCL'))
-                    .select_related('nhb_rayon', 'nhb_regio')
+                    .select_related('nhb_rayon', 'nhb_regio', 'nhb_regio__rayon')
                     .prefetch_related('accounts'))
 
         objs = self._sorteer_functies(objs)

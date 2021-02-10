@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020 Ramon van der Winkel.
+                Copyright (c) 2020-2021 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -76,7 +76,7 @@
             <!-- knop naar de ronde van de regioplanning -->
             <td>
                 <a class="btn-nhb-blauw btn-small" href="{% url 'Competitie:regio-ronde-planning' ronde.pk %}">
-                    <i class="material-icons-round left">arrow_forward</i>Bekijk</a>
+                    <i class="material-icons-round left">arrow_forward</i>Wedstrijden</a>
             </td>
         </tr>
     {% empty %}
@@ -92,7 +92,7 @@
                 <form action="{{ url_nieuwe_week }}" method="post">
                     {% csrf_token %}
                     <button class="btn-nhb-blauw btn-small" type="submit">
-                        <i class="material-icons-round left">add</i>Regel toevoegen</button>
+                        <i class="material-icons-round left">add</i>Blok toevoegen</button>
                 </form>
             </td>
         </tr>
@@ -124,7 +124,7 @@
 
                 <!-- knop naar de ronde van de regioplanning -->
                 <td>
-                    <a class="btn-nhb-blauw btn-small" href="{% url 'Competitie:regio-cluster-planning' cluster.pk %}">
+                    <a class="btn-nhb-blauw btn-small" href="{{ cluster.url_bekijk }}">
                         <i class="material-icons-round left">arrow_forward</i>Bekijk</a>
                 </td>
             </tr>
@@ -174,3 +174,6 @@
 
 {% endblock %}
 
+{% block menu-competities %}
+    {% include 'competitie/menu.dtl' %}
+{% endblock %}

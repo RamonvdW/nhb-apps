@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -51,9 +51,9 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         # zet de competitie in fase F
         zet_competitie_fase(self.comp, 'F')
 
-        self.url_lijst_rk = '/competitie/lijst-rayonkampioenschappen/%s/'              # deelcomp_rk.pk
-        self.url_wijzig_status = '/competitie/lijst-rayonkampioenschappen/wijzig-status-rk-deelnemer/%s/'  # deelnemer_pk
-        self.url_wijzig_cut_rk = '/competitie/planning/rayoncompetitie/%s/limieten/'   # deelcomp_rk.pk
+        self.url_lijst_rk = '/bondscompetities/lijst-rayonkampioenschappen/%s/'    # deelcomp_rk.pk
+        self.url_wijzig_status = '/bondscompetities/lijst-rayonkampioenschappen/wijzig-status-rk-deelnemer/%s/'  # deelnemer_pk
+        self.url_wijzig_cut_rk = '/bondscompetities/planning/rk/%s/limieten/'      # deelcomp_rk.pk
 
         self.url_lijst = self.url_lijst_rk % self.deelcomp_rk.pk
 
@@ -121,13 +121,15 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         # creëer een competitie met deelcompetities
         competitie_aanmaken(jaar=2019)
 
-        # klassengrenzen vaststellen om de competitie voorbij fase A1 te krijgen
-        self.url_klassegrenzen_vaststellen_18 = '/competitie/klassegrenzen/vaststellen/18/'
-        resp = self.client.post(self.url_klassegrenzen_vaststellen_18)
-        self.assertEqual(resp.status_code, 302)     # 302 = Redirect = success
+        self.comp = Competitie.objects.get(afstand='18')
+
+        # klassengrenzen vaststellen om de competitie voorbij fase A te krijgen
+        self.url_klassegrenzen_vaststellen = '/bondscompetities/%s/klassegrenzen/vaststellen/' % self.comp.pk
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_klassegrenzen_vaststellen)
+        self.assert_is_redirect_not_plein(resp)     # check success
         self.client.logout()
 
-        self.comp = Competitie.objects.get(afstand='18')
         self.klasse = (CompetitieKlasse
                        .objects
                        .filter(competitie=self.comp,
@@ -185,7 +187,7 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         # doorzetten naar RK fase, door BKO
         self.e2e_login_and_pass_otp(self.account_bko)
         self.e2e_wissel_naar_functie(self.functie_bko)
-        url = '/competitie/planning/doorzetten/%s/rk/' % self.comp.pk
+        url = '/bondscompetities/%s/doorzetten/rk/' % self.comp.pk
         self.client.post(url)
 
         self.comp = Competitie.objects.get(pk=self.comp.pk)
@@ -248,12 +250,12 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         self.assertEqual(volg, volg_ok)
         self.assertEqual(rank, rank_ok)
 
-    @staticmethod
-    def _verwerk_mutaties(show=False):
+    def _verwerk_mutaties(self, max_mutaties=20, show=False):
         # vraag de achtergrond taak om de mutaties te verwerken
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('kampioenschap_mutaties', '1', '--quick', stderr=f1, stdout=f2)
+        with self.assert_max_queries(max_mutaties):
+            management.call_command('kampioenschap_mutaties', '1', '--quick', stderr=f1, stdout=f2)
 
         if show:                    # pragma: no coverage
             print(f1.getvalue())
@@ -267,7 +269,7 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         self._begin_rk()        # BB met rol RKO1
         self.assertEqual(4*5, KampioenschapSchutterBoog.objects.count())
 
-        self._verwerk_mutaties()
+        self._verwerk_mutaties(150)
         self._check_volgorde_en_rank()
 
         # controleer dat de regiokampioenen boven de cut staan
@@ -276,7 +278,8 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         self.assertEqual(rank, [1, 6, 7, 8])
         self.assertEqual(rank, volg)
 
-        resp = self.client.get(self.url_lijst)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_lijst)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
 
@@ -284,32 +287,35 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         # met de MUTATIE_INITIEEL kunnen we ook een 'reset' uitvoeren
         # daarbij wordt rekening gehouden met schutters die afgemeld zijn
         self._begin_rk()
-        self._verwerk_mutaties()
+        self._verwerk_mutaties(150)
 
         # self._dump_deelnemers()
 
         # meld een paar schutters af: 1 kampioen + 1 schutter boven de cut
         deelnemer = KampioenschapSchutterBoog.objects.get(volgorde=1)
         url = self.url_wijzig_status % deelnemer.pk
-        resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
         self.assert_is_redirect(resp, self.url_lijst)        # 302 = redirect = success
 
         deelnemer = KampioenschapSchutterBoog.objects.get(volgorde=3)
         url = self.url_wijzig_status % deelnemer.pk
-        resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
         self.assert_is_redirect(resp, self.url_lijst)        # 302 = redirect = success
 
         deelnemer = KampioenschapSchutterBoog.objects.get(volgorde=18)
         url = self.url_wijzig_status % deelnemer.pk
-        resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
         self.assert_is_redirect(resp, self.url_lijst)        # 302 = redirect = success
 
-        self._verwerk_mutaties()
+        self._verwerk_mutaties(90)
         # self._dump_deelnemers()
 
         KampioenschapMutatie(mutatie=MUTATIE_INITIEEL,
                              deelcompetitie=self.deelcomp_rk).save()
-        self._verwerk_mutaties()
+        self._verwerk_mutaties(42)
         # self._dump_deelnemers()
         self._check_volgorde_en_rank()
 
@@ -317,17 +323,18 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         DeelcompetitieKlasseLimiet.objects.all().delete()
         KampioenschapMutatie(mutatie=MUTATIE_INITIEEL,
                              deelcompetitie=self.deelcomp_rk).save()
-        self._verwerk_mutaties()
+        self._verwerk_mutaties(42)
 
     def test_rko_bevestigen(self):
         # bevestig deelname door een schutter en een reserve
         self._begin_rk()        # BB met rol RKO1
-        self._verwerk_mutaties()
+        self._verwerk_mutaties(150)
 
         deelnemer = KampioenschapSchutterBoog.objects.get(volgorde=4)
         self.assertEqual(deelnemer.rank, 4)
         url = self.url_wijzig_status % deelnemer.pk
-        resp = self.client.post(url, {'bevestig': 1, 'snel': 1})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'bevestig': 1, 'snel': 1})
         self.assert_is_redirect(resp, self.url_lijst)        # 302 = redirect = success
 
         self._verwerk_mutaties()
@@ -343,15 +350,16 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         # een reserve-schutter meldt zich af
         # dit heeft geen invloed op de deelnemers-lijst
         self._begin_rk()        # BB met rol RKO1
-        self._verwerk_mutaties()
+        self._verwerk_mutaties(150)
 
         # self._dump_deelnemers()
         deelnemer = KampioenschapSchutterBoog.objects.get(volgorde=10)
         url = self.url_wijzig_status % deelnemer.pk
-        resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
         self.assert_is_redirect(resp, self.url_lijst)        # 302 = redirect = success
 
-        self._verwerk_mutaties()
+        self._verwerk_mutaties(32)
 
         # self._dump_deelnemers()
         deelnemer = KampioenschapSchutterBoog.objects.get(pk=deelnemer.pk)
@@ -365,7 +373,7 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         # kandidaat-schutter (boven de cut) meldt zich af
         # reserve-schutter wordt opgeroepen
         self._begin_rk()        # BB met rol RKO1
-        self._verwerk_mutaties()
+        self._verwerk_mutaties(150)
 
         reserve = KampioenschapSchutterBoog.objects.get(volgorde=9)  # cut ligt op 8
         self.assertEqual(reserve.deelname, DEELNAME_ONBEKEND)
@@ -375,10 +383,11 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         # self._dump_deelnemers()
         deelnemer = KampioenschapSchutterBoog.objects.get(volgorde=4)
         url = self.url_wijzig_status % deelnemer.pk
-        resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
         self.assert_is_redirect(resp, self.url_lijst)        # 302 = redirect = success
 
-        self._verwerk_mutaties()
+        self._verwerk_mutaties(35)
 
         # self._dump_deelnemers()
         deelnemer = KampioenschapSchutterBoog.objects.get(pk=deelnemer.pk)
@@ -397,16 +406,17 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         # een reserve-schutter meldt zich af en weer aan
         # dit heeft geen invloed op de deelnemers-lijst
         self._begin_rk()        # BB met rol RKO1
-        self._verwerk_mutaties()
+        self._verwerk_mutaties(150)
 
         # self._dump_deelnemers()
         reserve = KampioenschapSchutterBoog.objects.get(rank=10)    # cut ligt op 8
         self.assertEqual(reserve.volgorde, 10)
         url = self.url_wijzig_status % reserve.pk
-        resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
         self.assert_is_redirect(resp, self.url_lijst)        # 302 = redirect = success
 
-        self._verwerk_mutaties()
+        self._verwerk_mutaties(32)
 
         # self._dump_deelnemers()
         reserve = KampioenschapSchutterBoog.objects.get(pk=reserve.pk)
@@ -415,10 +425,11 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         self.assertEqual(reserve.volgorde, 10)
 
         url = self.url_wijzig_status % reserve.pk
-        resp = self.client.post(url, {'bevestig': 1, 'snel': 1})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'bevestig': 1, 'snel': 1})
         self.assert_is_redirect(resp, self.url_lijst)        # 302 = redirect = success
 
-        self._verwerk_mutaties()
+        self._verwerk_mutaties(40)
 
         # self._dump_deelnemers()
         reserve = KampioenschapSchutterBoog.objects.get(pk=reserve.pk)
@@ -431,18 +442,20 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
     def test_rko_opnieuw_aanmelden_einde_lijst(self):
         # opnieuw aangemelde schutter komt helemaal aan het einde van de reserve-lijst
         self._begin_rk()        # BB met rol RKO1
-        self._verwerk_mutaties()
+        self._verwerk_mutaties(150)
 
         # self._dump_deelnemers()
         pk = KampioenschapSchutterBoog.objects.order_by('-rank')[0].pk
         url = self.url_wijzig_status % pk
 
-        resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
         self.assert_is_redirect(resp, self.url_lijst)        # 302 = redirect = success
-        resp = self.client.post(url, {'bevestig': 1, 'snel': 1})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'bevestig': 1, 'snel': 1})
         self.assert_is_redirect(resp, self.url_lijst)        # 302 = redirect = success
 
-        self._verwerk_mutaties()
+        self._verwerk_mutaties(65)
         self._check_volgorde_en_rank()
 
     def test_rko_opnieuw_aanmelden_boven_cut(self):
@@ -451,15 +464,16 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         # schutter meldt zichzelf daarna weer aan en komt in de lijst met reserve-schutters
         # gesorteerd op gemiddelde
         self._begin_rk()        # BB met rol RKO1
-        self._verwerk_mutaties()
+        self._verwerk_mutaties(150)
         # self._dump_deelnemers()
 
         deelnemer = KampioenschapSchutterBoog.objects.get(rank=3)    # cut ligt op 8
         self.assertEqual(deelnemer.volgorde, 3)
         url = self.url_wijzig_status % deelnemer.pk
-        resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
         self.assert_is_redirect(resp, self.url_lijst)        # 302 = redirect = success
-        self._verwerk_mutaties()
+        self._verwerk_mutaties(35)
         # self._dump_deelnemers()
 
         reserve = KampioenschapSchutterBoog.objects.get(pk=deelnemer.pk)
@@ -470,9 +484,10 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
 
         # opnieuw aanmelden --> wordt als reserve-schutter op de lijst gezet
         url = self.url_wijzig_status % reserve.pk
-        resp = self.client.post(url, {'bevestig': 1, 'snel': 1})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'bevestig': 1, 'snel': 1})
         self.assert_is_redirect(resp, self.url_lijst)        # 302 = redirect = success
-        self._verwerk_mutaties()
+        self._verwerk_mutaties(40)
         # self._dump_deelnemers()
 
         reserve = KampioenschapSchutterBoog.objects.get(pk=reserve.pk)
@@ -487,17 +502,19 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         # na afmelden van een deelnemer wordt de eerste reserve opgeroepen
         # de lijst met deelnemers wordt gesorteerd op gemiddelde
         self._begin_rk()        # BB met rol RKO1
-        self._verwerk_mutaties()
+        self._verwerk_mutaties(150)
 
         # bereik dit effect door nr 3 af te melden en daarna weer aan te melden
         deelnemer = KampioenschapSchutterBoog.objects.get(rank=3)    # cut ligt op 8
         url = self.url_wijzig_status % deelnemer.pk
-        resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
         self.assert_is_redirect(resp, self.url_lijst)        # 302 = redirect = success
-        resp = self.client.post(url, {'bevestig': 1, 'snel': 1})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'bevestig': 1, 'snel': 1})
         self.assert_is_redirect(resp, self.url_lijst)        # 302 = redirect = success
 
-        self._verwerk_mutaties()
+        self._verwerk_mutaties(67)
 
         reserve = KampioenschapSchutterBoog.objects.get(pk=deelnemer.pk)
         self.assertEqual(reserve.volgorde, 9)
@@ -510,7 +527,7 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         self.client.post(url, {'afmelden': 1, 'snel': 1})
         # self._dump_deelnemers()
 
-        self._verwerk_mutaties()
+        self._verwerk_mutaties(35)
 
         ex_reserve = KampioenschapSchutterBoog.objects.get(pk=reserve.pk)
         self.assertEqual(ex_reserve.volgorde, 3)
@@ -528,18 +545,20 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         # regiokampioen meldt zich af en daarna weer aan
         # komt in de lijst met reserve-schutters
         self._begin_rk()        # BB met rol RKO1
-        self._verwerk_mutaties()
+        self._verwerk_mutaties(150)
 
         # bereik dit effect door nr 8 af te melden en daarna weer aan te melden
         # dit is een regiokampioen met behoorlijk lage gemiddelde
         # self._dump_deelnemers()
         kampioen = KampioenschapSchutterBoog.objects.get(rank=8)    # cut ligt op 8
         url = self.url_wijzig_status % kampioen.pk
-        resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
         self.assert_is_redirect(resp, self.url_lijst)        # 302 = redirect = success
-        resp = self.client.post(url, {'bevestig': 1, 'snel': 1})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'bevestig': 1, 'snel': 1})
         self.assert_is_redirect(resp, self.url_lijst)        # 302 = redirect = success
-        self._verwerk_mutaties()
+        self._verwerk_mutaties(70)
 
         # kijk wat er met de kampioen gebeurd is
         # self._dump_deelnemers()
@@ -552,7 +571,7 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
 
     def test_rko_drie_kampioenen_opnieuw_aanmelden(self):
         self._begin_rk()        # BB met rol RKO1
-        self._verwerk_mutaties()
+        self._verwerk_mutaties(150)
 
         pks = (KampioenschapSchutterBoog
                .objects
@@ -562,11 +581,12 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         pks = list(pks)
         for pk in pks[:3]:
             url = self.url_wijzig_status % pk
-            resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
+            with self.assert_max_queries(20):
+                resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
             self.assert_is_redirect(resp, self.url_lijst)        # 302 = redirect = success
         # for
 
-        self._verwerk_mutaties()
+        self._verwerk_mutaties(95)
         # self._dump_deelnemers()
 
         # de laatste kampioen staat nog steeds onderaan in de lijst
@@ -576,18 +596,21 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
 
         # meld de drie kampioenen weer aan
         url = self.url_wijzig_status % pks[0]
-        resp = self.client.post(url, {'bevestig': 1, 'snel': 1})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'bevestig': 1, 'snel': 1})
         self.assert_is_redirect(resp, self.url_lijst)        # 302 = redirect = success
 
         url = self.url_wijzig_status % pks[1]
-        resp = self.client.post(url, {'bevestig': 1, 'snel': 1})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'bevestig': 1, 'snel': 1})
         self.assert_is_redirect(resp, self.url_lijst)        # 302 = redirect = success
 
         url = self.url_wijzig_status % pks[2]
-        resp = self.client.post(url, {'bevestig': 1, 'snel': 1})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'bevestig': 1, 'snel': 1})
         self.assert_is_redirect(resp, self.url_lijst)        # 302 = redirect = success
 
-        self._verwerk_mutaties()
+        self._verwerk_mutaties(102)
         # self._dump_deelnemers()
 
         # controleer dat ze in de reserve schutters lijst staan, gesorteerd op gemiddelde
@@ -608,7 +631,7 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
     def test_rko_cut24_drie_kampioenen_opnieuw_aanmelden(self):
         self.cut.delete()       # verwijder de cut van 8
         self._begin_rk()        # BB met rol RKO1
-        self._verwerk_mutaties()
+        self._verwerk_mutaties(150)
         # self._dump_deelnemers()
 
         pks = (KampioenschapSchutterBoog
@@ -619,11 +642,12 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         pks = list(pks)
         for pk in pks[:3]:
             url = self.url_wijzig_status % pk
-            resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
+            with self.assert_max_queries(20):
+                resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
             self.assert_is_redirect(resp, self.url_lijst)        # 302 = redirect = success
         # for
 
-        self._verwerk_mutaties()
+        self._verwerk_mutaties(85)
         # self._dump_deelnemers()
 
         # de laatste kampioen staat nog steeds onderaan in de lijst
@@ -633,18 +657,21 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
 
         # meld de drie kampioenen weer aan
         url = self.url_wijzig_status % pks[0]
-        resp = self.client.post(url, {'bevestig': 1, 'snel': 1})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'bevestig': 1, 'snel': 1})
         self.assert_is_redirect(resp, self.url_lijst)        # 302 = redirect = success
 
         url = self.url_wijzig_status % pks[1]
-        resp = self.client.post(url, {'bevestig': 1, 'snel': 1})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'bevestig': 1, 'snel': 1})
         self.assert_is_redirect(resp, self.url_lijst)        # 302 = redirect = success
 
         url = self.url_wijzig_status % pks[2]
-        resp = self.client.post(url, {'bevestig': 1, 'snel': 1})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'bevestig': 1, 'snel': 1})
         self.assert_is_redirect(resp, self.url_lijst)        # 302 = redirect = success
 
-        self._verwerk_mutaties()
+        self._verwerk_mutaties(100)
         # self._dump_deelnemers()
 
         # controleer dat ze op hun oude plek terug zijn gekomen
@@ -665,7 +692,7 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
     def test_verlaag_cut(self):
         # verplaats de cut en controleer de inhoud na de update
         self._begin_rk()        # BB met rol RKO1
-        self._verwerk_mutaties()
+        self._verwerk_mutaties(150)
 
         # self._dump_deelnemers()
         rank, volg = self._get_rank_volg(alleen_kampioenen=True)
@@ -675,9 +702,10 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         # verplaats de cut naar 20
         url = self.url_wijzig_cut_rk % self.deelcomp_rk.pk
         sel = 'sel_%s' % self.cut.klasse.pk
-        resp = self.client.post(url, {sel: 20, 'snel': 1})
-        self.assertEqual(resp.status_code, 302)     # 302 = redirect = success
-        self._verwerk_mutaties()
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {sel: 20, 'snel': 1})
+        self.assert_is_redirect_not_plein(resp)     # check success
+        self._verwerk_mutaties(33)
 
         # self._dump_deelnemers()
         rank, volg = self._get_rank_volg(alleen_kampioenen=True)
@@ -686,23 +714,27 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
 
         # meld ook 3 mensen af: 1 kampioen en 1 niet-kampioen boven de cut + 1 onder cut
         url = self.url_wijzig_status % KampioenschapSchutterBoog.objects.get(rank=1).pk
-        resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
         self.assert_is_redirect(resp, self.url_lijst)  # 302 = redirect = success
 
         url = self.url_wijzig_status % KampioenschapSchutterBoog.objects.get(rank=2).pk
-        resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
         self.assert_is_redirect(resp, self.url_lijst)  # 302 = redirect = success
 
         url = self.url_wijzig_status % KampioenschapSchutterBoog.objects.get(rank=10).pk
-        resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
         self.assert_is_redirect(resp, self.url_lijst)  # 302 = redirect = success
 
         # verplaats de cut naar 8
         url = self.url_wijzig_cut_rk % self.deelcomp_rk.pk
         sel = 'sel_%s' % self.cut.klasse.pk
-        resp = self.client.post(url, {sel: 8, 'snel': 1})
-        self.assertEqual(resp.status_code, 302)     # 302 = redirect = success
-        self._verwerk_mutaties()
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {sel: 8, 'snel': 1})
+        self.assert_is_redirect_not_plein(resp)     # check success
+        self._verwerk_mutaties(112)     # TODO: probeer te verlagen
         # self._dump_deelnemers()
 
         rank, volg = self._get_rank_volg(alleen_kampioenen=True)
@@ -714,27 +746,30 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
     def test_verhoog_cut(self):
         # verplaats de cut en controleer de inhoud na de update
         self._begin_rk()        # BB met rol RKO1
-        self._verwerk_mutaties()
+        self._verwerk_mutaties(150)
 
         # default cut is 8
         # verhoog de cut naar 16
         url = self.url_wijzig_cut_rk % self.deelcomp_rk.pk
         sel = 'sel_%s' % self.cut.klasse.pk
-        resp = self.client.post(url, {sel: 16, 'snel': 1})
-        self.assertEqual(resp.status_code, 302)     # 302 = redirect = success
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {sel: 16, 'snel': 1})
+        self.assert_is_redirect_not_plein(resp)     # check success
         # self._verwerk_mutaties()
 
         # meld iemand af
         url = self.url_wijzig_status % KampioenschapSchutterBoog.objects.get(rank=2).pk
-        resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
         self.assert_is_redirect(resp, self.url_lijst)  # 302 = redirect = success
 
         # verhoog de cut naar 20
         url = self.url_wijzig_cut_rk % self.deelcomp_rk.pk
         sel = 'sel_%s' % self.cut.klasse.pk
-        resp = self.client.post(url, {sel: 20, 'snel': 1})
-        self.assertEqual(resp.status_code, 302)     # 302 = redirect = success
-        self._verwerk_mutaties()
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {sel: 20, 'snel': 1})
+        self.assert_is_redirect_not_plein(resp)     # check success
+        self._verwerk_mutaties(85)
         # self._dump_deelnemers()
 
         rank, volg = self._get_rank_volg(alle=True)
@@ -745,39 +780,44 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
 
     def test_rko_allemaal_afmelden(self):
         self._begin_rk()        # BB met rol RKO1
-        self._verwerk_mutaties()
+        self._verwerk_mutaties(150)
 
         pks = list(KampioenschapSchutterBoog.objects.values_list('pk', flat=True))
         for pk in pks:
             url = self.url_wijzig_status % pk
-            resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
+            with self.assert_max_queries(20):
+                resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
             self.assert_is_redirect(resp, self.url_lijst)  # 302 = redirect = success
         # for
 
-        self._verwerk_mutaties()
+        self._verwerk_mutaties(554)     # TODO: reduce
 
         self._check_volgorde_en_rank()
 
     def test_dubbel(self):
         self._begin_rk()        # BB met rol RKO1
-        self._verwerk_mutaties()
+        self._verwerk_mutaties(150)
 
         # dubbel afmelden
         url = self.url_wijzig_status % KampioenschapSchutterBoog.objects.get(rank=2).pk
-        resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
         self.assert_is_redirect(resp, self.url_lijst)  # 302 = redirect = success
 
-        resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
         self.assert_is_redirect(resp, self.url_lijst)  # 302 = redirect = success
 
         # dubbel aanmelden
-        resp = self.client.post(url, {'bevestig': 1, 'snel': 1})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'bevestig': 1, 'snel': 1})
         self.assert_is_redirect(resp, self.url_lijst)        # 302 = redirect = success
 
-        resp = self.client.post(url, {'bevestig': 1, 'snel': 1})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'bevestig': 1, 'snel': 1})
         self.assert_is_redirect(resp, self.url_lijst)        # 302 = redirect = success
 
-        self._verwerk_mutaties()
+        self._verwerk_mutaties(100)
 
     def test_bad(self):
         self._begin_rk()        # BB met rol RKO1
@@ -789,13 +829,16 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         mutatie.save()
 
         self.assertTrue("???" in str(mutatie))  # geen beschrijving beschikbaar
-        mutatie.code = MUTATIE_INITIEEL
+        mutatie.mutatie = MUTATIE_INITIEEL
         self.assertTrue(str(mutatie) != "")     # wel een beschrijving
 
-        mutatie.code = MUTATIE_CUT
+        mutatie.mutatie = MUTATIE_CUT
         self.assertTrue(str(mutatie) != "")     # wel een beschrijving
 
-        mutatie.code = MUTATIE_AFMELDEN
+        mutatie.mutatie = MUTATIE_AFMELDEN
+        self.assertTrue(str(mutatie) != "")     # wel een beschrijving
+
+        mutatie.is_verwerkt = True
         self.assertTrue(str(mutatie) != "")     # wel een beschrijving
 
         # mutatie die al verwerkt is
@@ -827,7 +870,7 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
                              cut_nieuw=24,
                              door='Tester').save()
 
-        self._verwerk_mutaties()
+        self._verwerk_mutaties(210)
 
     def test_verwerk_all(self):
         # vraag de achtergrond taak om de mutaties te verwerken
@@ -835,6 +878,7 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         # en laat deze iets langer lopen
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('kampioenschap_mutaties', '2', '--quick', '--all', stderr=f1, stdout=f2)
+        with self.assert_max_queries(20):
+            management.call_command('kampioenschap_mutaties', '2', '--quick', '--all', stderr=f1, stdout=f2)
 
 # end of file

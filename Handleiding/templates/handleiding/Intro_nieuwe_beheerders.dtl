@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020 Ramon van der Winkel.
+                Copyright (c) 2020-2021 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -12,22 +12,22 @@
 <h4>Intro nieuwe beheerders</h4>
 <p>Deze pagina is geschreven voor leden die voor het eerst te maken krijgen met de Wissel van Rol pagina.</p>
 <p></p>
-<p>In vergelijking tot een schutter krijg je als beheerder toegang tot extra functies van de website.</p>
+<p>In vergelijking tot een sporter krijg je als beheerder toegang tot extra functies van de website.</p>
 <p>Aangezien de meeste rollen toegang hebben tot persoonsgegevens, moeten we zeker stellen dat je hier juist mee om gaat en extra veiligheidsmaatregelen activeren.</p>
 <p></p>
-<p><h4>Stap 1: tweede factor</h4></p>
+<h4>Stap 1: tweede factor</h4>
 <p></p>
-<p>De website maakt gebruik van verificatie met een tweede factor. Na de inlog met NHB nummer en wachtwoord moet je een 6-cijferige code invoeren die door een app op je telefoon berekend wordt. Deze code wijzigt elke 30 seconden.</p>
+<p>De website maakt gebruik van verificatie met een tweede factor. Na de inlog met bondsnummer en wachtwoord moet je een 6-cijferige code invoeren die door een app op je telefoon berekend wordt. Deze code wijzigt elke 30 seconden.</p>
 <p></p>
 <p>Kwaadwillenden moeten dus niet alleen je gebruikersnaam en wachtwoord weten, maar ook toegang hebben tot de app die de codes genereert.</p>
 <p></p>
 <p>Installatie is heel simpel. Uitleg over het activeren van de tweede factor staat op deze pagina van de handleiding: <a href="/handleiding/Twee-factor_authenticatie/">Twee-factor_authenticatie</a>.</p>
 <p></p>
-<p><h4>Stap 2: Verklaring ondertekenen</h4></p>
+<h4>Stap 2: Verklaring ondertekenen</h4>
 <p></p>
 <p>We hebben een simpele verklaring geschreven over de omgang met persoonsgegevens. Deze moet je elk jaar lezen en accorderen.</p>
 <p></p>
-<p><h4>Stap 3: Kies een rol</h4></p>
+<h4>Stap 3: Kies een rol</h4>
 <p></p>
 <p>Via Wissel van Rol in het menu kom je op een pagina waar je kan wisselen tussen rollen. De verschillende rollen staan beschreven op deze pagina: <a href="/handleiding/Rollen/">Rollen</a>.</p>
 <p></p>
@@ -42,15 +42,20 @@
 <p></p>
 <p>Na het kiezen van een rol kunnen er nieuwe rollen beschikbaar komen. Zo kan een RKO een RCL helpen en via die rol een HWL helpen.</p>
 <p></p>
-<p>De rol 'schutter' is bedoeld om terug te gaan naar het persoonlijke gebruik van de website, bijvoorbeeld om jezelf in te schrijven voor een competitie.</p>
+<p>De rol 'sporter' is bedoeld om terug te gaan naar het persoonlijke gebruik van de website, bijvoorbeeld om jezelf in te schrijven voor een competitie.</p>
 <p></p>
 <p></p>
-<hr><p><h5>Verder</h5></p>
+<hr><h5>Verder</h5>
 <ul style="padding-left: 20px">
 <li style="list-style-type: disc; padding-left: 0px">Terug naar de <a href="/handleiding/Hoofdpagina/">Hoofdpagina</a></li>
 <li style="list-style-type: disc; padding-left: 0px">Beschrijving van de <a href="/handleiding/Rollen/">Rollen</a></li>
 <li style="list-style-type: disc; padding-left: 0px"><a href="/handleiding/Twee-factor_authenticatie/">Twee-factor_authenticatie</a></li>
+</ul>
 
 </div>
 
+{% endblock %}
+
+{% block menu %}
+    {% include 'handleiding/menu.dtl' %}
 {% endblock %}

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -173,31 +173,34 @@ class TestVerenigingWedstrijden(E2EHelpers, TestCase):
         self.url_voorkeuren = '/vereniging/leden-voorkeuren/'
         self.url_inschrijven = '/vereniging/leden-aanmelden/competitie/%s/'      # <comp_pk>
         self.url_ingeschreven = '/vereniging/leden-ingeschreven/competitie/%s/'  # <deelcomp_pk>
-        self.url_schutter_voorkeuren = '/schutter/voorkeuren/%s/'                # <nhblid_pk>
+        self.url_schutter_voorkeuren = '/sporter/voorkeuren/%s/'                 # <nhblid_pk>
         self.url_wedstrijden = '/vereniging/wedstrijden/'
 
     def _create_competitie(self):
-        url_overzicht = '/competitie/'
-        url_aanmaken = '/competitie/aanmaken/'
-        url_klassegrenzen_18 = '/competitie/klassegrenzen/vaststellen/18/'
-        url_klassegrenzen_25 = '/competitie/klassegrenzen/vaststellen/25/'
+        url_kies = '/bondscompetities/'
+        url_aanmaken = '/bondscompetities/aanmaken/'
+        url_klassegrenzen = '/bondscompetities/%s/klassegrenzen/vaststellen/'    # comp_pk
 
         self.assertEqual(CompetitieKlasse.objects.count(), 0)
 
-        resp = self.client.get(url_aanmaken)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url_aanmaken)
 
         # competitie aanmaken
-        resp = self.client.post(url_aanmaken)
-        self.assert_is_redirect(resp, url_overzicht)
-
-        # klassegrenzen vaststellen
-        resp = self.client.post(url_klassegrenzen_18)
-        self.assert_is_redirect(resp, url_overzicht)
-        resp = self.client.post(url_klassegrenzen_25)
-        self.assert_is_redirect(resp, url_overzicht)
+        with self.assert_max_queries(20):
+            resp = self.client.post(url_aanmaken)
+        self.assert_is_redirect(resp, url_kies)
 
         self.comp_18 = Competitie.objects.get(afstand=18)
         self.comp_25 = Competitie.objects.get(afstand=25)
+
+        # klassegrenzen vaststellen
+        with self.assert_max_queries(20):
+            resp = self.client.post(url_klassegrenzen % self.comp_18.pk)
+        self.assert_is_redirect(resp, url_kies)
+        with self.assert_max_queries(20):
+            resp = self.client.post(url_klassegrenzen % self.comp_25.pk)
+        self.assert_is_redirect(resp, url_kies)
 
         self.deelcomp_regio = DeelCompetitie.objects.get(laag=LAAG_REGIO,
                                                          nhb_regio=self.regio_111,
@@ -252,7 +255,8 @@ class TestVerenigingWedstrijden(E2EHelpers, TestCase):
         self.e2e_check_rol('HWL')
 
         # haal de lijst van wedstrijden
-        resp = self.client.get(self.url_wedstrijden)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_wedstrijden)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('vereniging/wedstrijden.dtl', 'plein/site_layout.dtl'))
@@ -266,7 +270,8 @@ class TestVerenigingWedstrijden(E2EHelpers, TestCase):
         self.e2e_check_rol('WL')
 
         # haal de lijst van wedstrijden
-        resp = self.client.get(self.url_wedstrijden)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_wedstrijden)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('vereniging/wedstrijden.dtl', 'plein/site_layout.dtl'))
@@ -280,7 +285,8 @@ class TestVerenigingWedstrijden(E2EHelpers, TestCase):
         self.e2e_check_rol('SEC')
 
         # haal de lijst van wedstrijden
-        resp = self.client.get(self.url_wedstrijden)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_wedstrijden)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('vereniging/wedstrijden.dtl', 'plein/site_layout.dtl'))
@@ -290,7 +296,8 @@ class TestVerenigingWedstrijden(E2EHelpers, TestCase):
     def test_bad(self):
         # geen toegang tot de pagina
         self.client.logout()
-        resp = self.client.get(self.url_wedstrijden)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_wedstrijden)
         self.assert_is_redirect(resp, '/plein/')
 
 # end of file

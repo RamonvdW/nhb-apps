@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -31,16 +31,22 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
         self.e2e_check_rol('BB')
 
         # maak de competitie aan
-        self.client.post(self.url_aanmaken)
-        self.comp = Competitie.objects.all()[0]
+        with self.assert_max_queries(20):
+            self.client.post(self.url_aanmaken)
+        self.comp = Competitie.objects.filter(afstand=18)[0]
+
+        comp_18 = Competitie.objects.get(afstand='18')
+        comp_25 = Competitie.objects.get(afstand='25')
 
         aanvangsgemiddelde_opslaan(self.schutterboog_100005, 18, 9.500, None, "Test")
 
         # klassegrenzen vaststellen
-        resp = self.client.post(self.url_klassegrenzen_vaststellen_18)
-        self.assertEqual(resp.status_code, 302)     # 302 = Redirect = succes
-        resp = self.client.post(self.url_klassegrenzen_vaststellen_25)
-        self.assertEqual(resp.status_code, 302)     # 302 = Redirect = succes
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_klassegrenzen_vaststellen % comp_18.pk)
+        self.assert_is_redirect_not_plein(resp)     # check success
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_klassegrenzen_vaststellen % comp_25.pk)
+        self.assert_is_redirect_not_plein(resp)     # check success
 
         self.deelcomp_r101 = DeelCompetitie.objects.filter(laag='Regio',
                                                            competitie=self.comp,
@@ -69,7 +75,8 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
         self.uitslagen = list()
         uur = 1
         for pk in wedstrijd_pks[:]:     # copy to ensure stable
-            resp = self.client.get(self.url_uitslag_invoeren % pk)
+            with self.assert_max_queries(20):
+                resp = self.client.get(self.url_uitslag_invoeren % pk)
             wedstrijd = Wedstrijd.objects.get(pk=pk)
             self.assertIsNotNone(wedstrijd.uitslag)
             wedstrijd.vereniging = self.ver
@@ -96,7 +103,8 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
 
         for nr in range(aantal):
             # maak een wedstrijd aan (doen voordat de beschrijving aangepast wordt)
-            resp = self.client.post(self.url_planning_regio_ronde % (top_pk + nr + 1), {})
+            with self.assert_max_queries(20):
+                resp = self.client.post(self.url_planning_regio_ronde % (top_pk + nr + 1), {})
             self.assertTrue(resp.status_code < 400)
         # for
 
@@ -109,7 +117,8 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
 
             # wedstrijduitslag aanmaken
             wedstrijd = ronde.plan.wedstrijden.all()[0]
-            resp = self.client.get(self.url_uitslag_invoeren % wedstrijd.pk)
+            with self.assert_max_queries(20):
+                resp = self.client.get(self.url_uitslag_invoeren % wedstrijd.pk)
             self.assertTrue(resp.status_code < 400)
 
             week_nr = 37 + nr*4
@@ -206,17 +215,26 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
     @staticmethod
     def _schrijf_in_voor_competitie(deelcomp, schuttersboog, skip=1):
         while len(schuttersboog):
-            aanmelding = RegioCompetitieSchutterBoog()
-            aanmelding.deelcompetitie = deelcomp
-            aanmelding.schutterboog = schuttersboog[0]
+            schutterboog = schuttersboog[0]
+
+            # let op: de testen die een schutter doorschuiven vereisen dat schutter 100001 in klasse onbekend
+            klassen = (CompetitieKlasse
+                       .objects
+                       .filter(competitie=deelcomp.competitie,
+                               indiv__is_onbekend=(schutterboog.nhblid.nhb_nr == 100001),
+                               indiv__boogtype=schutterboog.boogtype))
+
+            aanmelding = RegioCompetitieSchutterBoog(deelcompetitie=deelcomp,
+                                                     schutterboog=schutterboog,
+                                                     aanvangsgemiddelde=AG_NUL)
             aanmelding.bij_vereniging = aanmelding.schutterboog.nhblid.bij_vereniging
-            aanmelding.aanvangsgemiddelde = AG_NUL
-            aanmelding.klasse = (CompetitieKlasse
-                                 .objects
-                                 .filter(competitie=deelcomp.competitie,
-                                         indiv__boogtype=aanmelding.schutterboog.boogtype,
-                                         indiv__is_onbekend=True)[0])
+
+            if len(schuttersboog) < len(klassen):
+                aanmelding.klasse = klassen[len(schuttersboog)]
+            else:
+                aanmelding.klasse = klassen[0]
             aanmelding.save()
+            # print('ingeschreven: %s in klasse %s' % (aanmelding.schutterboog, aanmelding.klasse))
 
             schuttersboog = schuttersboog[skip:]
         # while
@@ -238,13 +256,12 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
     def setUp(self):
         """ initialisatie van de test case """
 
-        self.url_aanmaken = '/competitie/aanmaken/'
-        self.url_klassegrenzen_vaststellen_18 = '/competitie/klassegrenzen/vaststellen/18/'
-        self.url_klassegrenzen_vaststellen_25 = '/competitie/klassegrenzen/vaststellen/25/'
-        self.url_planning_regio = '/competitie/planning/regiocompetitie/%s/'        # deelcomp_pk
-        self.url_planning_regio_ronde = '/competitie/planning/regiocompetitie/ronde/%s/'  # ronde_pk
-        self.url_uitslag_invoeren = '/competitie/wedstrijd/uitslag-invoeren/%s/'    # wedstrijd_pk
-        self.url_inschrijven = '/vereniging/leden-aanmelden/competitie/%s/'         # comp_pk
+        self.url_aanmaken = '/bondscompetities/aanmaken/'
+        self.url_klassegrenzen_vaststellen = '/bondscompetities/%s/klassegrenzen/vaststellen/'
+        self.url_planning_regio = '/bondscompetities/planning/regio/%s/'                  # deelcomp_pk
+        self.url_planning_regio_ronde = '/bondscompetities/planning/regio/ronde/%s/'      # ronde_pk
+        self.url_uitslag_invoeren = '/bondscompetities/scores/uitslag-invoeren/%s/'       # wedstrijd_pk
+        self.url_inschrijven = '/vereniging/leden-aanmelden/competitie/%s/'         # comp_pk       # TODO: ongewenste dependency op Vereniging
 
         # deze test is afhankelijk van de standaard regio's
         self.regio_101 = NhbRegio.objects.get(regio_nr=101)
@@ -305,23 +322,19 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
+        with self.assert_max_queries(100):
+            management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
         self.assertTrue(f1.getvalue() == '')
         self.assertTrue('Klaar' in f2.getvalue())
 
     def test_twee(self):
-        # schrijf iemand in
-        post_params = dict()
-        post_params['lid_100001_boogtype_%s' % self.boog_r.pk] = 'on'
-        resp = self.client.post(self.url_inschrijven % self.comp.pk, post_params)
-        self.assertEqual(resp.status_code, 302)  # 302 = Redirect = succes
-
         # maak een paar score + scorehist
         self._score_opslaan(self.uitslagen[0], self.schutterboog_100001, 123)
         self._score_opslaan(self.uitslagen[2], self.schutterboog_100001, 124)
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
+        with self.assert_max_queries(160):
+            management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
         self.assertTrue('Scores voor 1 schuttersboog bijgewerkt' in f2.getvalue())
 
         deelnemer = RegioCompetitieSchutterBoog.objects.get(schutterboog=self.schutterboog_100001)
@@ -344,24 +357,20 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
         # nog een keer - nu wordt er niets bijgewerkt omdat er geen nieuwe scores zijn
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
+        with self.assert_max_queries(156):
+            management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
         self.assertTrue('Scores voor 0 schuttersboog bijgewerkt' in f2.getvalue())
 
         # nog een keer met 'all'
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('regiocomp_upd_tussenstand', '2', '--quick', '--all', stderr=f1, stdout=f2)
+        with self.assert_max_queries(157):
+            management.call_command('regiocomp_upd_tussenstand', '2', '--quick', '--all', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
         self.assertTrue('Scores voor 1 schuttersboog bijgewerkt' in f2.getvalue())
 
     def test_zeven(self):
-        # schrijf iemand in
-        post_params = dict()
-        post_params['lid_100001_boogtype_%s' % self.boog_r.pk] = 'on'
-        resp = self.client.post(self.url_inschrijven % self.comp.pk, post_params)
-        self.assertEqual(resp.status_code, 302)  # 302 = Redirect = succes
-
         # maak een paar score + scorehist
         self._score_opslaan(self.uitslagen[0], self.schutterboog_100001, 123)
         self._score_opslaan(self.uitslagen[1], self.schutterboog_100001, 124)
@@ -372,7 +381,8 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
         self._score_opslaan(self.uitslagen[6], self.schutterboog_100001, 129)
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
+        with self.assert_max_queries(165):
+            management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
         self.assertTrue('Scores voor 1 schuttersboog bijgewerkt' in f2.getvalue())
@@ -406,7 +416,8 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
+        with self.assert_max_queries(160):
+            management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
         self.assertTrue('Scores voor 1 schuttersboog bijgewerkt' in f2.getvalue())
@@ -431,12 +442,6 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
     def test_mix(self):
         self._maak_import()     # 5 nieuwe rondes: 7..11
 
-        # schrijf iemand in
-        post_params = dict()
-        post_params['lid_100001_boogtype_%s' % self.boog_r.pk] = 'on'
-        resp = self.client.post(self.url_inschrijven % self.comp.pk, post_params)
-        self.assertEqual(resp.status_code, 302)  # 302 = Redirect = succes
-
         # maak een paar score + scorehist
         self._score_opslaan(self.uitslagen[0], self.schutterboog_100001, 123)
         self._score_opslaan(self.uitslagen[1], self.schutterboog_100001, 124)
@@ -447,7 +452,8 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
         self._score_opslaan(self.uitslagen[6], self.schutterboog_100001, 129)
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
+        with self.assert_max_queries(175):
+            management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
         self.assertTrue('Scores voor 1 schuttersboog bijgewerkt' in f2.getvalue())
@@ -477,19 +483,14 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
 
         self._maak_import()     # 5 nieuwe rondes: 7..11
 
-        # schrijf iemand in
-        post_params = dict()
-        post_params['lid_100001_boogtype_%s' % self.boog_r.pk] = 'on'
-        resp = self.client.post(self.url_inschrijven % self.comp.pk, post_params)
-        self.assertEqual(resp.status_code, 302)  # 302 = Redirect = succes
-
         # maak een paar score + scorehist
         self._score_opslaan(self.uitslagen[0], self.schutterboog_100001, 125)       # import
         self._score_opslaan(self.uitslagen[1], self.schutterboog_100001, 126)       # import
         self._score_opslaan(self.uitslagen[2], self.schutterboog_100001, 137)       # import
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
+        with self.assert_max_queries(165):
+            management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
         self.assertTrue('Scores voor 1 schuttersboog bijgewerkt' in f2.getvalue())
@@ -512,16 +513,10 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
     def test_verplaats(self):
         # check het verplaatsen van een schutter uit klasse onbekend
 
-        self._maak_import()     # 5 nieuwe rondes: 7..11
+        deelnemer = RegioCompetitieSchutterBoog.objects.filter(schutterboog=self.schutterboog_100001)[0]
+        self.assertTrue(deelnemer.klasse.indiv.is_onbekend)
 
-        # schrijf een paar mensen in
-        post_params = dict()
-        post_params['lid_100001_boogtype_%s' % self.boog_r.pk] = 'on'
-        post_params['lid_100002_boogtype_%s' % self.boog_r.pk] = 'on'
-        post_params['lid_100004_boogtype_%s' % self.boog_r.pk] = 'on'
-        post_params['lid_100005_boogtype_%s' % self.boog_r.pk] = 'on'
-        resp = self.client.post(self.url_inschrijven % self.comp.pk, post_params)
-        self.assertEqual(resp.status_code, 302)  # 302 = Redirect = succes
+        self._maak_import()     # 5 nieuwe rondes: 7..11
 
         # 100001: 4 scores, gebruik eerste 3
         # 100002: nog maar 2 scores
@@ -573,19 +568,17 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
+        with self.assert_max_queries(185):
+            management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
         self.assertTrue('[INFO] Verplaats 100001 (18m) met nieuw AG 4.167 naar klasse Recurve klasse' in f2.getvalue())
 
     def test_verplaats_zeven(self):
         # check het verplaatsen van een schutter uit klasse onbekend
 
-        self._maak_import(aantal=7)     # 7 nieuwe rondes: 7..13
+        deelnemer = RegioCompetitieSchutterBoog.objects.filter(schutterboog=self.schutterboog_100001)[0]
+        self.assertTrue(deelnemer.klasse.indiv.is_onbekend)
 
-        # schrijf een paar mensen in
-        post_params = dict()
-        post_params['lid_100001_boogtype_%s' % self.boog_r.pk] = 'on'
-        resp = self.client.post(self.url_inschrijven % self.comp.pk, post_params)
-        self.assertEqual(resp.status_code, 302)  # 302 = Redirect = succes
+        self._maak_import(aantal=7)     # 7 nieuwe rondes: 7..13
 
         # 100001: 7 scores, gebruik eerste 3 voor bepalen AG voor overstap
 
@@ -599,25 +592,21 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
+        with self.assert_max_queries(180):
+            management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
         # print("f2: %s" % f2.getvalue())
         self.assertTrue('[INFO] Verplaats 100001 (18m) met nieuw AG 4.100 naar klasse Recurve klasse' in f2.getvalue())
 
     def test_overstap(self):
         # test schutters die overstappen naar een andere vereniging
 
-        # schrijf iemand in
-        post_params = dict()
-        post_params['lid_100001_boogtype_%s' % self.boog_r.pk] = 'on'
-        resp = self.client.post(self.url_inschrijven % self.comp.pk, post_params)
-        self.assertEqual(resp.status_code, 302)  # 302 = Redirect = succes
-
         # maak een paar score + scorehist
         self._score_opslaan(self.uitslagen[0], self.schutterboog_100001, 123)
         self._score_opslaan(self.uitslagen[2], self.schutterboog_100001, 124)
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
+        with self.assert_max_queries(160):
+            management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
         self.assertTrue('Scores voor 1 schuttersboog bijgewerkt' in f2.getvalue())
 
         deelnemer = RegioCompetitieSchutterBoog.objects.get(schutterboog=self.schutterboog_100001)
@@ -639,7 +628,8 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
+        with self.assert_max_queries(161):
+            management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
         self.assertTrue("[INFO] Verwerk overstap 100001: [101] [1000] Grote Club --> [116] [1100] Zuidelijke Club" in f2.getvalue())
 
         # overstap naar vereniging in zelfde regio
@@ -650,7 +640,8 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
+        with self.assert_max_queries(160):
+            management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
         self.assertTrue("[INFO] Verwerk overstap 100001: [116] [1100] Zuidelijke Club --> [116] [1000] Grote Club" in f2.getvalue())
 
         # zet the competitie in een later fase zodat overschrijvingen niet meer gedaan worden
@@ -663,7 +654,8 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
         lid.save()
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
+        with self.assert_max_queries(153):
+            management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
         self.assertFalse('Verwerk overstap' in f2.getvalue())
@@ -671,18 +663,13 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
     def test_uitstap(self):
         # schutter schrijft zich uit
 
-        # schrijf iemand in
-        post_params = dict()
-        post_params['lid_100001_boogtype_%s' % self.boog_r.pk] = 'on'
-        resp = self.client.post(self.url_inschrijven % self.comp.pk, post_params)
-        self.assertEqual(resp.status_code, 302)  # 302 = Redirect = succes
-
         # maak een paar score + scorehist
         self._score_opslaan(self.uitslagen[0], self.schutterboog_100001, 123)
         self._score_opslaan(self.uitslagen[2], self.schutterboog_100001, 124)
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
+        with self.assert_max_queries(160):
+            management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
         self.assertTrue('Scores voor 1 schuttersboog bijgewerkt' in f2.getvalue())
 
         # schrijf een schutter uit
@@ -691,7 +678,8 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
         lid.save()
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('regiocomp_upd_tussenstand', '7', '--quick', stderr=f1, stdout=f2)
+        with self.assert_max_queries(157):
+            management.call_command('regiocomp_upd_tussenstand', '7', '--quick', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
         self.assertTrue("[WARNING] Uitstapper: 100001 [101] [1000] Grote Club (actief=True)" in f2.getvalue())
@@ -699,21 +687,16 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
     def test_rk_fase_overstap(self):
         # test schutters die overstappen naar een andere vereniging binnen het rayon, tijdens de RK fase
 
-        # schrijf iemand in
-        post_params = dict()
-        post_params['lid_100001_boogtype_%s' % self.boog_r.pk] = 'on'
-        resp = self.client.post(self.url_inschrijven % self.comp.pk, post_params)
-        self.assertEqual(resp.status_code, 302)  # 302 = Redirect = succes
-
         # maak een paar score + scorehist
-        self._score_opslaan(self.uitslagen[0], self.schutterboog_100001, 123)
-        self._score_opslaan(self.uitslagen[2], self.schutterboog_100001, 124)
+        self._score_opslaan(self.uitslagen[0], self.schutterboog_100002, 123)
+        self._score_opslaan(self.uitslagen[2], self.schutterboog_100002, 124)
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
+        with self.assert_max_queries(160):
+            management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
         self.assertTrue('Scores voor 1 schuttersboog bijgewerkt' in f2.getvalue())
 
-        deelnemer = RegioCompetitieSchutterBoog.objects.get(schutterboog=self.schutterboog_100001)
+        deelnemer = RegioCompetitieSchutterBoog.objects.get(schutterboog=self.schutterboog_100002)
         self.assertEqual(deelnemer.bij_vereniging.nhb_nr, self.ver.nhb_nr)
 
         deelnemer.aantal_scores = 6
@@ -724,7 +707,7 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
         self._sluit_alle_regiocompetities(self.comp)
         self.e2e_login_and_pass_otp(self.account_bb)
         self.e2e_wissel_naar_functie(self.functie_bko)
-        url = '/competitie/planning/doorzetten/%s/rk/' % self.comp.pk
+        url = '/bondscompetities/%s/doorzetten/rk/' % self.comp.pk
         self.client.post(url)
 
         # standaard vereniging is regio 101
@@ -748,8 +731,9 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
-        self.assertTrue("[INFO] Verwerk overstap 100001: GEEN VERENIGING --> [102] [1100] Polderclub" in f2.getvalue())
+        with self.assert_max_queries(133):
+            management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
+        self.assertTrue("[INFO] Verwerk overstap 100002: GEEN VERENIGING --> [102] [1100] Polderclub" in f2.getvalue())
 
         # overstap naar vereniging in buiten het rayon
         self.ver.regio = NhbRegio.objects.get(regio_nr=105)
@@ -763,10 +747,11 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
+        with self.assert_max_queries(132):
+            management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
-        self.assertTrue("[WARNING] Verwerk overstap naar ander rayon niet mogelijk voor 100001 in RK voor rayon 1: GEEN VERENIGING --> [105] [1000] Grote Club" in f2.getvalue())
+        self.assertTrue("[WARNING] Verwerk overstap naar ander rayon niet mogelijk voor 100002 in RK voor rayon 1: GEEN VERENIGING --> [105] [1000] Grote Club" in f2.getvalue())
 
         # schutter die nog niet helemaal overgestapt is
         lid.bij_vereniging = None
@@ -778,12 +763,14 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
+        with self.assert_max_queries(128):
+            management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
 
         # corner case
         zet_competitie_fase(self.comp, 'L')
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('regiocomp_upd_tussenstand', '1', '--quick', stderr=f1, stdout=f2)
+        with self.assert_max_queries(128):
+            management.call_command('regiocomp_upd_tussenstand', '1', '--quick', stderr=f1, stdout=f2)
 
 # end of file

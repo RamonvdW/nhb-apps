@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,16 +9,20 @@ from django.urls import reverse, Resolver404
 from django.views.generic import View, TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
-from Functie.rol import Rollen, rol_get_huidige
-from Competitie.models import (DeelCompetitie, CompetitieKlasse, RegioCompetitieSchutterBoog,
+from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
+from Competitie.models import (DeelCompetitie, DeelcompetitieRonde,
+                               CompetitieKlasse, RegioCompetitieSchutterBoog,
                                LAAG_REGIO, AG_NUL,
-                               INSCHRIJF_METHODE_3, DAGDEEL, DAGDEEL_AFKORTINGEN)
-from Score.models import Score, ScoreHist
+                               INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3,
+                               DAGDEEL, DAGDEEL_AFKORTINGEN)
 from Plein.menu import menu_dynamics
+from Score.models import Score, ScoreHist
+from Wedstrijden.models import Wedstrijd
 from .models import SchutterVoorkeuren, SchutterBoog
 
 
 TEMPLATE_AANMELDEN = 'schutter/bevestig-aanmelden.dtl'
+TEMPLATE_SCHIETMOMENTEN = 'schutter/schietmomenten.dtl'
 
 
 class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
@@ -62,6 +66,11 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
             # niet bestaand record
             raise Resolver404()
 
+        # controleer dat de competitie aanmeldingen accepteert
+        deelcomp.competitie.zet_fase()
+        if deelcomp.competitie.fase < 'B' or deelcomp.competitie.fase >= 'F':
+            raise Resolver404()
+
         # controleer dat schutterboog bij de ingelogde gebruiker hoort
         # controleer dat deelcompetitie bij de juist regio hoort
         account = self.request.user
@@ -101,6 +110,7 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
         # zoek alle wedstrijdklassen van deze competitie met het juiste boogtype
         qset = (CompetitieKlasse
                 .objects
+                .select_related('indiv')
                 .filter(competitie=deelcomp.competitie,
                         indiv__boogtype=schutterboog.boogtype)
                 .order_by('indiv__volgorde'))
@@ -137,6 +147,25 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
                                           kwargs={'schutterboog_pk': schutterboog.pk,
                                                   'deelcomp_pk': deelcomp.pk})
 
+        if methode == INSCHRIJF_METHODE_1:
+            pks = list()
+            for ronde in (DeelcompetitieRonde
+                          .objects
+                          .select_related('plan')
+                          .filter(deelcompetitie=deelcomp)):
+                if not ronde.is_voor_import_oude_programma():
+                    # toon de HWL alle wedstrijden in de regio, dus alle clusters
+                    pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
+            # for
+
+            wedstrijden = (Wedstrijd
+                           .objects
+                           .filter(pk__in=pks)
+                           .select_related('vereniging')
+                           .order_by('datum_wanneer',
+                                     'tijd_begin_wedstrijd'))
+            context['wedstrijden'] = wedstrijden
+
         if methode == INSCHRIJF_METHODE_3:
             context['dagdelen'] = DAGDEEL
             if deelcomp.toegestane_dagdelen != '':
@@ -153,7 +182,7 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
             if schutterboog.boogtype.afkorting in ('R', 'BB'):
                 context['show_dt'] = True
 
-        menu_dynamics(self.request, context, actief='schutter')
+        menu_dynamics(self.request, context, actief='schutter-profiel')
         return context
 
 
@@ -164,7 +193,8 @@ class RegiocompetitieAanmeldenView(View):
 
         methode 3: nhblid heeft voorkeuren opgegeven: dagdeel, team schieten, opmerking
     """
-    def post(self, request, *args, **kwargs):
+    @staticmethod
+    def post(request, *args, **kwargs):
         """ Deze functie wordt aangeroepen als de schutter op zijn profiel pagina
             de knop Aanmelden gebruikt voor een specifieke regiocompetitie en boogtype.
         """
@@ -191,13 +221,19 @@ class RegiocompetitieAanmeldenView(View):
 
             deelcomp = (DeelCompetitie
                         .objects
-                        .select_related('competitie', 'nhb_regio')
+                        .select_related('competitie',
+                                        'nhb_regio')
                         .get(pk=deelcomp_pk))
         except (ValueError, KeyError):
             # vuilnis
             raise Resolver404()
         except (SchutterBoog.DoesNotExist, DeelCompetitie.DoesNotExist):
             # niet bestaand record
+            raise Resolver404()
+
+        # controleer dat de competitie aanmeldingen accepteert
+        deelcomp.competitie.zet_fase()
+        if deelcomp.competitie.fase < 'B' or deelcomp.competitie.fase >= 'F':
             raise Resolver404()
 
         # controleer dat schutterboog bij de ingelogde gebruiker hoort
@@ -241,6 +277,7 @@ class RegiocompetitieAanmeldenView(View):
         # zoek alle wedstrijdklassen van deze competitie met het juiste boogtype
         qset = (CompetitieKlasse
                 .objects
+                .select_related('indiv')
                 .filter(competitie=deelcomp.competitie,
                         indiv__boogtype=schutterboog.boogtype)
                 .order_by('indiv__volgorde'))
@@ -292,12 +329,31 @@ class RegiocompetitieAanmeldenView(View):
 
         aanmelding.save()
 
+        if methode == INSCHRIJF_METHODE_1:
+            pks = list()
+            for ronde in (DeelcompetitieRonde
+                          .objects
+                          .select_related('plan')
+                          .filter(deelcompetitie=deelcomp)):
+                if not ronde.is_voor_import_oude_programma():
+                    # sta alle wedstrijden in de regio toe, dus alle clusters
+                    pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
+            # for
+            wedstrijden = list()
+            for pk in pks:
+                key = 'wedstrijd_%s' % pk
+                if request.POST.get(key, '') != '':
+                    wedstrijden.append(pk)
+            # for
+            aanmelding.inschrijf_gekozen_wedstrijden.set(wedstrijden)
+
         return HttpResponseRedirect(reverse('Schutter:profiel'))
 
 
 class RegiocompetitieAfmeldenView(View):
 
-    def post(self, request, *args, **kwargs):
+    @staticmethod
+    def post(request, *args, **kwargs):
         """ Deze functie wordt aangeroepen als de schutter op zijn profiel pagina
             de knop Uitschrijven gebruikt voor een specifieke regiocompetitie.
         """
@@ -314,8 +370,8 @@ class RegiocompetitieAfmeldenView(View):
 
         # converteer en doe eerste controle op de parameters
         try:
-            regiocomp_pk = int(kwargs['regiocomp_pk'][:6])     # afkappen geeft bescherming
-            inschrijving = RegioCompetitieSchutterBoog.objects.get(pk=regiocomp_pk)
+            deelnemer_pk = int(kwargs['deelnemer_pk'][:6])     # afkappen geeft bescherming
+            inschrijving = RegioCompetitieSchutterBoog.objects.get(pk=deelnemer_pk)
         except (ValueError, KeyError):
             # vuilnis
             raise Resolver404()
@@ -334,5 +390,156 @@ class RegiocompetitieAfmeldenView(View):
 
         return HttpResponseRedirect(reverse('Schutter:profiel'))
 
+
+class SchutterSchietmomentenView(UserPassesTestMixin, TemplateView):
+
+    template_name = TEMPLATE_SCHIETMOMENTEN
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        # gebruiker moet ingelogd zijn en schutter rol gekozen hebben
+        return rol_get_huidige(self.request) in (Rollen.ROL_SCHUTTER, Rollen.ROL_HWL)
+
+    def handle_no_permission(self):
+        """ gebruiker heeft geen toegang --> redirect naar het plein """
+        return HttpResponseRedirect(reverse('Plein:plein'))
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        try:
+            deelnemer_pk = int(self.kwargs['deelnemer_pk'][:6])       # afkappen geeft veiligheid
+            deelnemer = (RegioCompetitieSchutterBoog
+                         .objects
+                         .select_related('deelcompetitie',
+                                         'deelcompetitie__competitie')
+                         .get(pk=deelnemer_pk,
+                              deelcompetitie__inschrijf_methode=INSCHRIJF_METHODE_1))
+        except (ValueError, TypeError, RegioCompetitieSchutterBoog.DoesNotExist):
+            raise Resolver404()
+
+        context['deelnemer'] = deelnemer
+
+        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
+
+        if rol_nu == Rollen.ROL_SCHUTTER:
+            if self.request.user != deelnemer.schutterboog.nhblid.account:
+                raise Resolver404()
+        else:
+            # HWL: sporter moet lid zijn van zijn vereniging
+            if deelnemer.bij_vereniging != functie_nu.nhb_ver:
+                raise Resolver404()
+
+        # zoek alle dagdelen erbij
+        pks = list()
+        for ronde in (DeelcompetitieRonde
+                      .objects
+                      .select_related('deelcompetitie',
+                                      'plan')
+                      .prefetch_related('plan__wedstrijden')
+                      .filter(deelcompetitie=deelnemer.deelcompetitie)):
+            if not ronde.is_voor_import_oude_programma():
+                pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
+        # for
+
+        wedstrijden = (Wedstrijd
+                       .objects
+                       .filter(pk__in=pks)
+                       .select_related('vereniging')
+                       .order_by('datum_wanneer',
+                                 'tijd_begin_wedstrijd'))
+
+        context['wedstrijden'] = wedstrijden
+
+        keuze = list(deelnemer.inschrijf_gekozen_wedstrijden.values_list('pk', flat=True))
+        for wedstrijd in wedstrijden:
+            wedstrijd.is_gekozen = (wedstrijd.pk in keuze)
+        # for
+
+        if rol_nu == Rollen.ROL_SCHUTTER:
+            context['url_terug'] = reverse('Schutter:profiel')
+        else:
+            context['url_terug'] = reverse('Vereniging:schietmomenten',
+                                           kwargs={'deelcomp_pk': deelnemer.deelcompetitie.pk})
+
+        menu_dynamics(self.request, context, actief='schutter-profiel')
+        return context
+
+    @staticmethod
+    def post(request, *args, **kwargs):
+        """ Deze functie wordt aangeroepen als de schutter op zijn
+            schietmomenten-pagina de knop Opslaan gebruikt.
+        """
+
+        try:
+            deelnemer_pk = int(kwargs['deelnemer_pk'][:6])       # afkappen geeft veiligheid
+            deelnemer = (RegioCompetitieSchutterBoog
+                         .objects
+                         .select_related('deelcompetitie',
+                                         'deelcompetitie__competitie')
+                         .get(pk=deelnemer_pk,
+                              deelcompetitie__inschrijf_methode=INSCHRIJF_METHODE_1))
+        except (ValueError, TypeError, RegioCompetitieSchutterBoog.DoesNotExist):
+            raise Resolver404()
+
+        rol_nu, functie_nu = rol_get_huidige_functie(request)
+
+        # TODO: controleer dat ingelogde gebruiker deze wijziging mag maken
+
+        # zoek alle dagdelen erbij
+        pks = list()
+        for ronde in (DeelcompetitieRonde
+                      .objects
+                      .select_related('deelcompetitie',
+                                      'plan')
+                      .prefetch_related('plan__wedstrijden')
+                      .filter(deelcompetitie=deelnemer.deelcompetitie)):
+            if not ronde.is_voor_import_oude_programma():
+                pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
+        # for
+
+        # zoek alle wedstrijden erbij
+        wedstrijden = (Wedstrijd
+                       .objects
+                       .filter(pk__in=pks)
+                       .select_related('vereniging')
+                       .order_by('datum_wanneer',
+                                 'tijd_begin_wedstrijd'))
+
+        keuze = list(deelnemer.inschrijf_gekozen_wedstrijden.values_list('pk', flat=True))
+        keuze_add = list()
+        aanwezig = len(keuze)
+
+        for wedstrijd in wedstrijden:
+            param = 'wedstrijd_%s' % wedstrijd.pk
+            if request.POST.get(param, '') != '':
+                # deze wedstrijd is gekozen
+                if wedstrijd.pk in keuze:
+                    # al gekozen, dus behouden
+                    keuze.remove(wedstrijd.pk)
+                else:
+                    # toevoegen
+                    keuze_add.append(wedstrijd.pk)
+        # for
+
+        # alle overgebleven wedstrijden zijn ongewenst
+        aanwezig -= len(keuze)
+        deelnemer.inschrijf_gekozen_wedstrijden.remove(*keuze)
+
+        # controleer dat er maximaal 7 momenten gekozen worden
+        if aanwezig + len(keuze_add) > 7:
+            # begrens het aantal toe te voegen wedstrijden
+            keuze_add = keuze_add[:7 - aanwezig]
+
+        deelnemer.inschrijf_gekozen_wedstrijden.add(*keuze_add)
+
+        if rol_nu == Rollen.ROL_SCHUTTER:
+            url = reverse('Schutter:profiel')
+        else:
+            url = reverse('Vereniging:schietmomenten',
+                          kwargs={'deelcomp_pk': deelnemer.deelcompetitie.pk})
+
+        return HttpResponseRedirect(url)
 
 # end of file

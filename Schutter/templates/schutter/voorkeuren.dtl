@@ -20,7 +20,7 @@
 
     {% else %}
 
-        <p>Als schutter kan je op deze pagina je voorkeuren aanpassen.</p>
+        <p>Als sporter kan je op deze pagina je voorkeuren aanpassen.</p>
 
     {% endif %}
 

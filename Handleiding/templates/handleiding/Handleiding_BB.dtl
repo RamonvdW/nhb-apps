@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020 Ramon van der Winkel.
+                Copyright (c) 2020-2021 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -12,12 +12,12 @@
 <h4>Handleiding BB</h4>
 <p>Deze pagina beschrijft de mogelijkheden voor de Manager Competitiezaken.</p>
 <p></p>
-<p><h5>Opstarten nieuwe competitie</h5></p>
+<h5>Opstarten nieuwe competitie</h5>
 <p></p>
 <p>Opstarten van de nieuwe competitie bestaat uit de volgende stappen:</p>
 <ul style="padding-left: 20px">
 <li style="list-style-type: disc; padding-left: 0px">Afsluiten van de competitie van vorige seizoen; uitslagen definitief maken</li>
-<li style="list-style-type: disc; padding-left: 0px">Vaststellen van de aanvangsgemiddelden voor elke schutter-boog met voldoende scores</li>
+<li style="list-style-type: disc; padding-left: 0px">Vaststellen van de aanvangsgemiddelden voor elke sporter (schutter-boog) met voldoende scores</li>
 <li style="list-style-type: disc; padding-left: 0px">Aanmaken van de nieuwe competities (Indoor + 25m1pijl)</li>
 <li style="list-style-type: disc; padding-left: 0px">Vaststellen van de wedstrijdklassen</li>
 <li style="list-style-type: disc; padding-left: 0px">Vaststellen van de klassegrenzen per competitie, aan de hand van de aanvangsgemiddelden</li>
@@ -25,10 +25,15 @@
 </ul>
 <p></p>
 <p></p>
-<hr><p><h5>Verder</h5></p>
+<hr><h5>Verder</h5>
 <p></p>
 <p>Terug naar de <a href="/handleiding/Hoofdpagina/">Hoofdpagina</a>.</p>
+<p><br>Uitleg over <a href="/handleiding/Schutter-boog/">Schutter-boog</a>.</p>
 
 </div>
 
+{% endblock %}
+
+{% block menu %}
+    {% include 'handleiding/menu.dtl' %}
 {% endblock %}

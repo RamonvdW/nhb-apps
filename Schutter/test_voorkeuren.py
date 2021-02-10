@@ -73,12 +73,13 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
 
         self.boog_R = BoogType.objects.get(afkorting='R')
 
-        self.url_voorkeuren = '/schutter/voorkeuren/'
+        self.url_voorkeuren = '/sporter/voorkeuren/'
         self.url_wijzig = '/account/nieuw-wachtwoord/'
 
     def test_view(self):
         # zonder login --> terug naar het plein
-        resp = self.client.get(self.url_voorkeuren, follow=True)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_voorkeuren, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('plein/plein-bezoeker.dtl', 'plein/site_layout.dtl'))
 
@@ -88,7 +89,8 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
         # initieel zijn er geen voorkeuren opgeslagen
         self.assertEqual(SchutterBoog.objects.count(), 0)
         self.assertEqual(SchutterVoorkeuren.objects.count(), 0)
-        resp = self.client.get(self.url_voorkeuren)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_voorkeuren)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('schutter/voorkeuren.dtl', 'plein/site_layout.dtl'))
@@ -97,7 +99,8 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
         self.assertEqual(SchutterBoog.objects.count(), 5)
 
         # controleer dat ze niet nog een keer aangemaakt worden
-        resp = self.client.get(self.url_voorkeuren)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_voorkeuren)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertEqual(SchutterBoog.objects.count(), 5)
 
@@ -106,10 +109,11 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
         self.assertFalse(obj.voor_wedstrijd)
 
         # maak wat wijzigingen
-        resp = self.client.post(self.url_voorkeuren, {'schiet_R': 'on',
-                                                      'info_BB': 'on',
-                                                      'voorkeur_dt': 'on'})
-        self.assert_is_redirect(resp, '/schutter/')     # naar profiel
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_voorkeuren, {'schiet_R': 'on',
+                                                          'info_BB': 'on',
+                                                          'voorkeur_dt': 'on'})
+        self.assert_is_redirect(resp, '/sporter/')     # naar profiel
         self.assertEqual(SchutterBoog.objects.count(), 5)
         self.assertEqual(SchutterVoorkeuren.objects.count(), 1)
 
@@ -127,7 +131,8 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
         self.assertTrue(str(voorkeuren) != "")
 
         # GET met DT=aan
-        resp = self.client.get(self.url_voorkeuren)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_voorkeuren)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         # check DT=aan
         checked, unchecked = self.extract_checkboxes(resp)
@@ -135,8 +140,9 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
         self.assertTrue("voorkeur_meedoen_competitie" in unchecked)
 
         # DT voorkeur uitzetten
-        resp = self.client.post(self.url_voorkeuren, {'schiet_R': 'on', 'info_BB': 'on'})
-        self.assert_is_redirect(resp, '/schutter/')     # naar profiel
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_voorkeuren, {'schiet_R': 'on', 'info_BB': 'on'})
+        self.assert_is_redirect(resp, '/sporter/')     # naar profiel
 
         obj = SchutterBoog.objects.get(nhblid=self.nhblid1, boogtype=self.boog_R)
         self.assertFalse(obj.heeft_interesse)
@@ -146,20 +152,23 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
         self.assertFalse(voorkeuren.voorkeur_dutchtarget_18m)
 
         # voorkeur competitie weer aan zetten
-        resp = self.client.post(self.url_voorkeuren, {'voorkeur_meedoen_competitie': 'on'})
-        self.assert_is_redirect(resp, '/schutter/')     # naar profiel
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_voorkeuren, {'voorkeur_meedoen_competitie': 'on'})
+        self.assert_is_redirect(resp, '/sporter/')     # naar profiel
 
         voorkeuren = SchutterVoorkeuren.objects.all()[0]
         self.assertTrue(voorkeuren.voorkeur_meedoen_competitie)
 
-        resp = self.client.get(self.url_voorkeuren)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_voorkeuren)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         checked, unchecked = self.extract_checkboxes(resp)
         self.assertTrue("voorkeur_meedoen_competitie" in checked)
 
         # does een post zonder wijzigingen (voor de coverage)
-        resp = self.client.post(self.url_voorkeuren, {'voorkeur_meedoen_competitie': 'on'})
-        self.assert_is_redirect(resp, '/schutter/')     # naar profiel
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_voorkeuren, {'voorkeur_meedoen_competitie': 'on'})
+        self.assert_is_redirect(resp, '/sporter/')     # naar profiel
 
         self.e2e_assert_other_http_commands_not_supported(self.url_voorkeuren, post=False)
 
@@ -171,7 +180,8 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
 
         # haal als HWL de voorkeuren pagina op van een lid van de vereniging
         # dit maakt ook de SchutterBoog records aan
-        resp = self.client.get(self.url_voorkeuren + '100001/')
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_voorkeuren + '100001/')
         self.assertEqual(resp.status_code, 200)
 
         # controleer de stand van zaken voordat de HWL iets wijzigt
@@ -183,7 +193,8 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
         self.assertTrue(obj_c.heeft_interesse)
 
         # post een wijziging
-        resp = self.client.post(self.url_voorkeuren, {'nhblid_pk': '100001', 'schiet_R': 'on', 'info_C': 'on'})
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_voorkeuren, {'nhblid_pk': '100001', 'schiet_R': 'on', 'info_C': 'on'})
         self.assert_is_redirect(resp, '/vereniging/leden-voorkeuren/')
 
         # controleer dat de post werkte
@@ -201,19 +212,23 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
         self.e2e_check_rol('HWL')
 
         # haal als HWL 'de' voorkeuren pagina op, zonder specifiek nhblid_pk
-        resp = self.client.get(self.url_voorkeuren)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_voorkeuren)
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
 
         # haal als HWL de voorkeuren pagina op met een niet-numeriek nhblid_pk
-        resp = self.client.get(self.url_voorkeuren + 'snuiter/')
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_voorkeuren + 'snuiter/')
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
 
         # haal als HWL de voorkeuren pagina op met een niet bestaand nhblid_pk
-        resp = self.client.get(self.url_voorkeuren + '999999/')
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_voorkeuren + '999999/')
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
 
         # haal als HWL de voorkeuren pagina op van een lid van een andere vereniging
-        resp = self.client.get(self.url_voorkeuren + '100002/')
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_voorkeuren + '100002/')
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
 
     def test_geen_wedstrijden(self):
@@ -226,20 +241,22 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
 
         # mag geen bogen instellen
         # helemaal geen voorkeuren, om precies te zijn
-        resp = self.client.get(self.url_voorkeuren)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_voorkeuren)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertEqual(0, SchutterBoog.objects.filter(nhblid=self.nhblid1).count())
 
     def test_wijzig_wachtwoord(self):
         # zelfde test als in Account.test_wachtwoord
-        # maar ivm nhblid koppeling wordt 'Schutter' menu gekozen
+        # maar ivm nhblid koppeling wordt 'Sporter' menu gekozen
 
         # login as HWL
         self.e2e_login_and_pass_otp(self.account_hwl)
         self.e2e_wissel_naar_functie(self.functie_hwl)
         self.e2e_check_rol('HWL')
 
-        resp = self.client.get(self.url_wijzig)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_wijzig)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/nieuw-wachtwoord.dtl', 'plein/site_layout.dtl'))
@@ -247,20 +264,23 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
         nieuw_ww = 'GratisNieuwGheim'
 
         # foutief huidige wachtwoord
-        resp = self.client.post(self.url_wijzig, {'huidige': nieuw_ww, 'nieuwe': nieuw_ww})
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_wijzig, {'huidige': nieuw_ww, 'nieuwe': nieuw_ww})
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/nieuw-wachtwoord.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'Huidige wachtwoord komt niet overeen')
 
-        resp = self.client.post(self.url_wijzig, {'nieuwe': '123412341234'})
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_wijzig, {'nieuwe': '123412341234'})
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/nieuw-wachtwoord.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'Wachtwoord bevat te veel gelijke tekens')
 
         # wijzig het wachtwoord
-        resp = self.client.post(self.url_wijzig, {'huidige': self.WACHTWOORD, 'nieuwe': nieuw_ww})
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_wijzig, {'huidige': self.WACHTWOORD, 'nieuwe': nieuw_ww})
         self.assert_is_redirect(resp, '/plein/')
 
         # controleer dat het nieuwe wachtwoord gebruikt kan worden

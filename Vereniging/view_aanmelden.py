@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -11,13 +11,17 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Plein.menu import menu_dynamics
 from Functie.rol import Rollen, rol_get_huidige_functie
 from BasisTypen.models import (LeeftijdsKlasse,
-                               MAXIMALE_LEEFTIJD_JEUGD, MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT)
+                               MAXIMALE_LEEFTIJD_JEUGD,
+                               MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT)
 from NhbStructuur.models import NhbLid
 from Schutter.models import SchutterBoog, SchutterVoorkeuren
-from Competitie.models import (AG_NUL, DAGDEEL, DAGDEEL_AFKORTINGEN, INSCHRIJF_METHODE_3,
-                               Competitie, DeelCompetitie, CompetitieKlasse,
+from Competitie.models import (AG_NUL, DAGDEEL, DAGDEEL_AFKORTINGEN,
+                               INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3,
+                               Competitie, CompetitieKlasse,
+                               DeelCompetitie, DeelcompetitieRonde,
                                RegioCompetitieSchutterBoog)
 from Score.models import Score
+from Wedstrijden.models import Wedstrijd
 import copy
 
 
@@ -54,6 +58,8 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
 
         self.comp = comp
         comp.zet_fase()
+
+        # TODO: check dat competitie open is voor inschrijvingen
 
         _, functie_nu = rol_get_huidige_functie(self.request)
         objs = list()
@@ -212,10 +218,31 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
         if not mijn_regio.is_administratief:
             deelcomp = (DeelCompetitie
                         .objects
-                        .select_related('competitie', 'nhb_regio')
-                        .get(competitie=self.comp, nhb_regio=mijn_regio))
+                        .select_related('competitie',
+                                        'nhb_regio')
+                        .get(competitie=self.comp,
+                             nhb_regio=mijn_regio))
 
             methode = deelcomp.inschrijf_methode
+
+            if methode == INSCHRIJF_METHODE_1:
+                pks = list()
+                for ronde in (DeelcompetitieRonde
+                              .objects
+                              .select_related('plan')
+                              .filter(deelcompetitie=deelcomp)):
+                    if not ronde.is_voor_import_oude_programma():
+                        # toon de HWL alle wedstrijden in de regio, dus alle clusters
+                        pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
+                # for
+
+                wedstrijden = (Wedstrijd
+                               .objects
+                               .filter(pk__in=pks)
+                               .select_related('vereniging')
+                               .order_by('datum_wanneer',
+                                         'tijd_begin_wedstrijd'))
+                context['wedstrijden'] = wedstrijden
 
             if methode == INSCHRIJF_METHODE_3:
                 context['dagdelen'] = DAGDEEL
@@ -252,6 +279,8 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
             # niemand van deze vereniging mag meedoen aan wedstrijden
             raise Resolver404()
 
+        # TODO: check dat competitie open is voor inschrijvingen
+
         # zoek de juiste DeelCompetitie erbij
         deelcomp = DeelCompetitie.objects.get(competitie=comp,
                                               nhb_regio=hwl_regio)
@@ -261,6 +290,23 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
         bulk_team = False
         if request.POST.get('wil_in_team', '') != '':
             bulk_team = True
+
+        bulk_wedstrijden = list()
+        if methode == INSCHRIJF_METHODE_1:
+            pks = list()
+            for ronde in (DeelcompetitieRonde
+                          .objects
+                          .select_related('plan')
+                          .filter(deelcompetitie=deelcomp)):
+                if not ronde.is_voor_import_oude_programma():
+                    # sta alle wedstrijden in de regio toe, dus alle clusters
+                    pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
+            # for
+            for pk in pks:
+                key = 'wedstrijd_%s' % pk
+                if request.POST.get(key, '') != '':
+                    bulk_wedstrijden.append(pk)
+            # for
 
         bulk_dagdeel = ''
         if methode == INSCHRIJF_METHODE_3:
@@ -295,7 +341,8 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                 try:
                     schutterboog = (SchutterBoog
                                     .objects
-                                    .select_related('nhblid')
+                                    .select_related('nhblid',
+                                                    'boogtype')
                                     .get(nhblid=nhblid_pk,
                                          boogtype=boogtype_pk))
                 except SchutterBoog.DoesNotExist:
@@ -343,6 +390,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                         .objects
                         .filter(competitie=deelcomp.competitie,
                                 indiv__boogtype=schutterboog.boogtype)
+                        .prefetch_related('indiv__leeftijdsklassen')
                         .order_by('indiv__volgorde'))
 
                 # zoek een toepasselijke klasse aan de hand van de leeftijd
@@ -374,6 +422,9 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                 aanmelding.inschrijf_notitie = bulk_opmerking
                 aanmelding.save()
 
+                if methode == INSCHRIJF_METHODE_1:
+                    aanmelding.inschrijf_gekozen_wedstrijden.set(bulk_wedstrijden)
+
             # else: silently ignore
         # for
 
@@ -386,6 +437,10 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_LEDEN_INGESCHREVEN
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.deelcomp = None
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -423,7 +478,9 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
                                 'bij_vereniging', 'klasse', 'klasse__indiv')
                 .filter(deelcompetitie=deelcomp,
                         bij_vereniging=functie_nu.nhb_ver)
-                .order_by('klasse__indiv__volgorde'))
+                .order_by('klasse__indiv__volgorde',
+                          'schutterboog__nhblid__voornaam',
+                          'schutterboog__nhblid__achternaam'))
 
         for obj in objs:
             obj.team_ja_nee = JA_NEE[obj.inschrijf_voorkeur_team]
@@ -443,13 +500,14 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
         context['nhb_ver'] = functie_nu.nhb_ver
 
-        context['deelcomp'] = deelcomp = self.deelcomp
+        context['deelcomp'] = self.deelcomp
 
         if rol_nu == Rollen.ROL_HWL:
-            context['afmelden_url'] = reverse('Vereniging:leden-ingeschreven', kwargs={'deelcomp_pk': deelcomp.pk})
+            context['afmelden_url'] = reverse('Vereniging:leden-ingeschreven',
+                                              kwargs={'deelcomp_pk': self.deelcomp.pk})
             context['mag_afmelden'] = True
 
-        methode = deelcomp.inschrijf_methode
+        methode = self.deelcomp.inschrijf_methode
         if methode == INSCHRIJF_METHODE_3:
             context['toon_dagdeel'] = DAGDEEL
 

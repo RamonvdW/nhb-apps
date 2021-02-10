@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020 Ramon van der Winkel.
+                Copyright (c) 2020-2021 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -9,102 +9,107 @@
 {% block title %}Inschrijvingen{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-lijst-aangemeld-regio" %}
 
-<h4>Inschrijvingen voor de regiocompetitie</h4>
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-lijst-aangemeld-regio" %}
 
-<p>Op deze pagina tonen we inschrijvingen voor de regiocompetitie <b>{{ competitie.beschrijving }}</b>.</p>
+    <h4>Inschrijvingen voor de regiocompetitie</h4>
 
-<p>Filter mogelijkheden:</p>
+    <p>Op deze pagina tonen we inschrijvingen voor de regiocompetitie <b>{{ competitie.beschrijving }}</b>.</p>
 
-<div class="white shrink-wrap-5">
+    <p>Filter mogelijkheden:</p>
 
-    {% if zoom_alles_url %}
-        <a class="margin-5 btn-nhb-blauw btn-small" href="{{ zoom_alles_url }}">Alles</a>
-    {% else %}
-        <a class="margin-5 btn-nhb-blauw btn-small disabled" href="#">Alles</a>
+    <div class="white shrink-wrap-5">
+
+        {% if zoom_alles_url %}
+            <a class="margin-5 btn-nhb-blauw btn-small" href="{{ zoom_alles_url }}">Alles</a>
+        {% else %}
+            <a class="margin-5 btn-nhb-blauw btn-small disabled" href="#">Alles</a>
+        {% endif %}
+
+        <!-- begin rayon knoppen voor small -->
+        <br class="hide-on-med-and-up">
+
+        {% for rayon in zoom_rayons %}
+
+            {% if rayon.zoom_url %}
+                <a class="hide-on-med-and-up margin-5 btn-nhb-blauw btn-small" href="{{ rayon.zoom_url }}">{{ rayon.title_str }}</a>
+            {% else %}
+                <a class="hide-on-med-and-up margin-5 btn-nhb-blauw btn-small disabled" href="#">{{ rayon.title_str }}</a>
+            {% endif %}
+
+        {% endfor %}
+        <!-- einde rayon knoppen voor small -->
+
+        {% for rayon in zoom_rayons %}
+
+            <br>
+
+            {% if rayon.zoom_url %}
+                <a class="hide-on-small-only margin-5 btn-nhb-blauw btn-small" href="{{ rayon.zoom_url }}">{{ rayon.title_str }}</a>
+            {% else %}
+                <a class="hide-on-small-only margin-5 btn-nhb-blauw btn-small disabled" href="#">{{ rayon.title_str }}</a>
+            {% endif %}
+            <span class="hide-on-small-only">&nbsp;:&nbsp;</span>
+
+            {% for regio in rayon.regios %}
+
+                {% if regio.zoom_url %}
+                    <a class="margin-5 btn-nhb-blauw btn-small" href="{{ regio.zoom_url }}">{{ regio.title_str }}</a>
+                {% else %}
+                    <a class="margin-5 btn-nhb-blauw btn-small disabled" href="#">{{ regio.title_str }}</a>
+                {% endif %}
+            {% endfor %}
+
+        {% endfor %}
+    </div>
+
+
+    <p>Sporters die <b>{{ inhoud }}</b> ingeschreven zijn.</p>
+
+    <p>Aantal: {{ object_list.count }}</p>
+
+    {% if show_dagdeel_telling %}
+        <p>&nbsp;</p>
+        <p>
+            <a class="btn-nhb-blauw" href="{{ url_behoefte }}">
+                <i class="material-icons-round left">shopping_cart</i>Benodigde dagdelen</a>
+        </p>
     {% endif %}
 
-    <!-- begin rayon knoppen voor small -->
-    <br class="hide-on-med-and-up">
 
-    {% for rayon in zoom_rayons %}
+    {% if object_list.count %}
 
-        {% if rayon.zoom_url %}
-            <a class="hide-on-med-and-up margin-5 btn-nhb-blauw btn-small" href="{{ rayon.zoom_url }}">{{ rayon.title_str }}</a>
-        {% else %}
-            <a class="hide-on-med-and-up margin-5 btn-nhb-blauw btn-small disabled" href="#">{{ rayon.title_str }}</a>
-        {% endif %}
+        <table class="white">
 
-    {% endfor %}
-    <!-- einde rayon knoppen voor small -->
+        {% for obj in object_list %}
 
-    {% for rayon in zoom_rayons %}
+            {% if obj.nieuwe_klasse %}
+                <tr class="nhb-grijs">
+                    <td colspan="3" style="padding-bottom: 0px"><h5>{{ obj.klasse.indiv.beschrijving }}</h5></td>
+                </tr>
 
-        <br>
+                <tr>
+                    <th>Vereniging</th>
+                    <th>Aanvangsgemiddelde</th>
+                    <th>Naam schutter</th>
+                </tr>
 
-        {% if rayon.zoom_url %}
-            <a class="hide-on-small-only margin-5 btn-nhb-blauw btn-small" href="{{ rayon.zoom_url }}">{{ rayon.title_str }}</a>
-        {% else %}
-            <a class="hide-on-small-only margin-5 btn-nhb-blauw btn-small disabled" href="#">{{ rayon.title_str }}</a>
-        {% endif %}
-        <span class="hide-on-small-only">&nbsp;:&nbsp;</span>
-
-        {% for regio in rayon.regios %}
-
-            {% if regio.zoom_url %}
-                <a class="margin-5 btn-nhb-blauw btn-small" href="{{ regio.zoom_url }}">{{ regio.title_str }}</a>
-            {% else %}
-                <a class="margin-5 btn-nhb-blauw btn-small disabled" href="#">{{ regio.title_str }}</a>
             {% endif %}
-        {% endfor %}
-
-    {% endfor %}
-</div>
-
-
-<p>Schutters die <b>{{ inhoud }}</b> ingeschreven zijn.</p>
-
-<p>Aantal: {{ object_list.count }}</p>
-
-{% if show_dagdeel_telling %}
-    <p>&nbsp;</p>
-    <p>
-        <a class="btn-nhb-blauw" href="{{ url_behoefte }}">
-            <i class="material-icons-round left">shopping_cart</i>Benodigde dagdelen</a>
-    </p>
-{% endif %}
-
-
-{% if object_list.count %}
-
-    <table class="white">
-
-    {% for obj in object_list %}
-
-        {% if obj.nieuwe_klasse %}
-            <tr class="nhb-grijs">
-                <td colspan="3" style="padding-bottom: 0px"><h5>{{ obj.klasse.indiv.beschrijving }}</h5></td>
-            </tr>
 
             <tr>
-                <th>Vereniging</th>
-                <th>Aanvangsgemiddelde</th>
-                <th>Naam schutter</th>
+                <td>[{{ obj.bij_vereniging.nhb_nr }}] {{ obj.bij_vereniging.naam }}</td>
+                <td>{{ obj.aanvangsgemiddelde }}{% if obj.is_handmatig_ag %}<i> (handmatig)</i>{% endif %}</td>
+                <td>[{{ obj.schutterboog.nhblid.nhb_nr }}] {{ obj.schutterboog.nhblid.volledige_naam }}</td>
             </tr>
 
-        {% endif %}
+        {% endfor %}
 
-        <tr>
-            <td>[{{ obj.bij_vereniging.nhb_nr }}] {{ obj.bij_vereniging.naam }}</td>
-            <td>{{ obj.aanvangsgemiddelde }}{% if obj.is_handmatig_ag %}<i> (handmatig)</i>{% endif %}</td>
-            <td>[{{ obj.schutterboog.nhblid.nhb_nr }}] {{ obj.schutterboog.nhblid.volledige_naam }}</td>
-        </tr>
+        </table>
 
-    {% endfor %}
+    {% endif %}
 
-    </table>
+{% endblock %}
 
-{% endif %}
-
+{% block menu-competities %}
+    {% include 'competitie/menu.dtl' %}
 {% endblock %}

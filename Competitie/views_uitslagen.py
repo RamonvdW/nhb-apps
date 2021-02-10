@@ -1,533 +1,664 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.http import HttpResponseRedirect, JsonResponse
-from django.urls import Resolver404, reverse
-from django.utils import timezone
-from django.views.generic import TemplateView, View
+from django.views.generic import TemplateView
+from django.urls import reverse, Resolver404
+from django.http import HttpResponseRedirect
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Plein.menu import menu_dynamics
-from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
-from Wedstrijden.models import Wedstrijd, WedstrijdUitslag, WedstrijdenPlan
-from Schutter.models import SchutterBoog
-from Score.models import Score, ScoreHist, SCORE_WAARDE_VERWIJDERD
-from .models import (LAAG_REGIO, DeelCompetitie,
-                     DeelcompetitieRonde, RegioCompetitieSchutterBoog)
-import json
-import sys
+from BasisTypen.models import BoogType
+from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
+from Competitie.models import (LAAG_REGIO, LAAG_RK, LAAG_BK, DEELNAME_NEE,
+                               DeelCompetitie, DeelcompetitieKlasseLimiet,
+                               RegioCompetitieSchutterBoog, KampioenschapSchutterBoog)
+from Competitie.menu import menu_dynamics_competitie
+from Functie.rol import Rollen, rol_get_huidige_functie, rol_get_huidige
+from .models import Competitie
 
 
-TEMPLATE_COMPETITIE_UITSLAG_INVOEREN_WEDSTRIJD = 'competitie/uitslag-invoeren-wedstrijd.dtl'
-TEMPLATE_COMPETITIE_UITSLAG_BEKIJKEN_WEDSTRIJD = 'competitie/bekijk-wedstrijd-uitslag.dtl'
+TEMPLATE_COMPETITIE_UITSLAGEN_VERENIGING = 'competitie/uitslagen-vereniging.dtl'
+TEMPLATE_COMPETITIE_UITSLAGEN_REGIO = 'competitie/uitslagen-regio.dtl'
+TEMPLATE_COMPETITIE_UITSLAGEN_RAYON = 'competitie/uitslagen-rayon.dtl'
+TEMPLATE_COMPETITIE_UITSLAGEN_BOND = 'competitie/uitslagen-bond.dtl'
+
+TEMPLATE_COMPETITIE_UITSLAGEN_REGIO_ALT = 'competitie/uitslagen-regio-alt.dtl'
 
 
-def mag_deelcomp_wedstrijd_wijzigen(wedstrijd, functie_nu, deelcomp):
-    """ controleer toestemming om scoreverwerking te doen voor deze wedstrijd """
-    if (functie_nu.rol == 'RCL'
-            and functie_nu.nhb_regio == deelcomp.nhb_regio
-            and functie_nu.comp_type == deelcomp.competitie.afstand):
-        # RCL van deze deelcompetitie
-        return True
+class UitslagenVerenigingView(TemplateView):
 
-    if functie_nu.rol in ('HWL', 'WL') and functie_nu.nhb_ver == wedstrijd.vereniging:
-        # (H)WL van de organiserende vereniging
-        return True
-
-    return False
-
-
-def bepaal_wedstrijd_en_deelcomp_of_404(wedstrijd_pk):
-    try:
-        wedstrijd_pk = int(wedstrijd_pk)
-        wedstrijd = (Wedstrijd
-                     .objects
-                     .select_related('uitslag')
-                     .prefetch_related('uitslag__scores')
-                     .get(pk=wedstrijd_pk))
-    except (ValueError, Wedstrijd.DoesNotExist):
-        raise Resolver404()
-
-    plan = wedstrijd.wedstrijdenplan_set.all()[0]
-
-    # zoek de ronde erbij
-    # deze hoort al bij een competitie type (indoor / 25m1pijl)
-    ronde = (DeelcompetitieRonde
-             .objects
-             .select_related('deelcompetitie',
-                             'deelcompetitie__nhb_regio',
-                             'deelcompetitie__competitie')
-             .get(plan=plan))
-
-    deelcomp = ronde.deelcompetitie
-
-    # maak de WedstrijdUitslag aan indien nog niet gedaan
-    if not wedstrijd.uitslag:
-        uitslag = WedstrijdUitslag()
-        if deelcomp.competitie.afstand == '18':
-            uitslag.max_score = 300
-            uitslag.afstand_meter = 18
-        else:
-            uitslag.max_score = 250
-            uitslag.afstand_meter = 25
-        uitslag.save()
-        wedstrijd.uitslag = uitslag
-        wedstrijd.save()
-
-    return wedstrijd, deelcomp, ronde
-
-
-class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
-
-    """ Deze view laat de RCL, HWL en WL de uitslag van een wedstrijd invoeren """
+    """ Django class-based view voor de de uitslagen van de competitie """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_COMPETITIE_UITSLAG_INVOEREN_WEDSTRIJD
-    is_controle = False
+    template_name = TEMPLATE_COMPETITIE_UITSLAGEN_VERENIGING
 
-    def test_func(self):
-        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        rol_nu = rol_get_huidige(self.request)
-        return rol_nu in (Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_WL)
+    def _get_schutter_ver_nr(self):
 
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
-
-    def get_context_data(self, **kwargs):
-        """ called by the template system to get the context data for the template """
-        context = super().get_context_data(**kwargs)
-
-        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
-
-        wedstrijd_pk = kwargs['wedstrijd_pk'][:6]     # afkappen geeft beveiliging
-        wedstrijd, deelcomp, ronde = bepaal_wedstrijd_en_deelcomp_of_404(wedstrijd_pk)
-
-        context['wedstrijd'] = wedstrijd
-        context['deelcomp'] = deelcomp
-
-        if not mag_deelcomp_wedstrijd_wijzigen(wedstrijd, functie_nu, deelcomp):
-            raise Resolver404()
-
-        context['is_controle'] = self.is_controle
-        context['is_akkoord'] = wedstrijd.uitslag.is_bevroren
-
-        if self.is_controle:
-            context['url_geef_akkoord'] = reverse('Competitie:wedstrijd-geef-akkoord',
-                                                  kwargs={'wedstrijd_pk': wedstrijd.pk})
-
-        context['scores'] = (wedstrijd
-                             .uitslag
-                             .scores
-                             .exclude(is_ag=True)
-                             .exclude(waarde=SCORE_WAARDE_VERWIJDERD)
-                             .select_related('schutterboog',
-                                             'schutterboog__boogtype',
-                                             'schutterboog__nhblid',
-                                             'schutterboog__nhblid__bij_vereniging')
-                             .order_by('schutterboog__nhblid__nhb_nr'))
-
-        context['url_check_nhbnr'] = reverse('Competitie:dynamic-check-nhbnr')
-        context['url_opslaan'] = reverse('Competitie:dynamic-scores-opslaan')
-        context['url_deelnemers_ophalen'] = reverse('Competitie:dynamic-deelnemers-ophalen')
-
-        plan = wedstrijd.wedstrijdenplan_set.all()[0]
-        ronde = DeelcompetitieRonde.objects.get(plan=plan)
-
-        if rol_nu == Rollen.ROL_RCL:
-            context['url_terug'] = reverse('Competitie:regio-ronde-planning',
-                                           kwargs={'ronde_pk': ronde.pk})
-        else:
-            context['url_terug'] = reverse('Vereniging:wedstrijden')
-
-        menu_dynamics(self.request, context, actief='competitie')
-        return context
-
-
-class WedstrijdUitslagControlerenView(WedstrijdUitslagInvoerenView):
-
-    """ Deze view laat de RCL de uitslag van een wedstrijd aanpassen en accorderen """
-
-    is_controle = True
-
-    def post(self, request, *args, **kwargs):
-        """ Deze functie wordt aangeroepen als de knop 'ik geef akkoord voor deze uitslag'
-            gebruikt wordt door de RCL.
+        """ Geeft het vereniging nhb nummer van de ingelogde schutter terug,
+            of 101 als er geen regio vastgesteld kan worden
         """
+        ver_nr = -1
 
-        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
+        if self.request.user.is_authenticated:
+            rol_nu, functie_nu = rol_get_huidige_functie(self.request)
 
-        wedstrijd_pk = kwargs['wedstrijd_pk'][:6]     # afkappen geeft beveiliging
-        wedstrijd, deelcomp, _ = bepaal_wedstrijd_en_deelcomp_of_404(wedstrijd_pk)
+            if functie_nu and functie_nu.nhb_ver:
+                # HWL, WL, SEC
+                ver_nr = functie_nu.nhb_ver.nhb_nr
 
-        if not mag_deelcomp_wedstrijd_wijzigen(wedstrijd, functie_nu, deelcomp):
-            raise Resolver404()
+            if ver_nr < 0:
+                # pak de vereniging van de ingelogde gebruiker
+                account = self.request.user
+                if account.nhblid_set.count() > 0:
+                    nhblid = account.nhblid_set.all()[0]
+                    if nhblid.is_actief_lid and nhblid.bij_vereniging:
+                        ver_nr = nhblid.bij_vereniging.nhb_nr
 
-        uitslag = wedstrijd.uitslag
-        if not uitslag.is_bevroren:
-            uitslag.is_bevroren = True
-            uitslag.save()
+        ver_nrs = list(NhbVereniging.objects.order_by('nhb_nr').values_list('nhb_nr', flat=True))
+        if ver_nr not in ver_nrs:
+            ver_nr = ver_nrs[0]
 
-        url = reverse('Competitie:wedstrijd-uitslag-controleren',
-                      kwargs={'wedstrijd_pk': wedstrijd.pk})
+        return ver_nr
 
-        return HttpResponseRedirect(url)
+    @staticmethod
+    def _maak_filter_knoppen(context, comp, ver_nr, comp_boog):
+        """ filter knoppen per regio, gegroepeerd per rayon en per competitie boog type """
 
+        # boogtype files
+        boogtypen = BoogType.objects.order_by('volgorde').all()
 
-class DynamicDeelnemersOphalenView(UserPassesTestMixin, View):
+        context['comp_boog'] = None
+        context['boog_filters'] = boogtypen
 
-    def test_func(self):
-        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        rol_nu = rol_get_huidige(self.request)
-        return rol_nu in (Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_WL)
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang """
-        raise Resolver404()
-
-    def post(self, request, *args, **kwargs):
-        """ Deze functie wordt aangeroepen als de knop 'deelnemers ophalen' gebruikt wordt
-        """
-
-        try:
-            data = json.loads(request.body)
-        except json.JSONDecodeError:
-            raise Resolver404()         # garbage in
-
-        # print('data: %s' % repr(data))
-
-        try:
-            deelcomp_pk = int(str(data['deelcomp_pk'])[:6])   # afkappen voor extra veiligheid
-            deelcomp = DeelCompetitie.objects.get(laag=LAAG_REGIO,
-                                                  pk=deelcomp_pk)
-        except (KeyError, ValueError, DeelCompetitie.DoesNotExist):
-            raise Resolver404()         # garbage in
-
-        # TODO: filter deelnemers op cluster (wedstrijd.vereniging.clusters)
-
-        out = dict()
-        out['deelnemers'] = deelnemers = list()
-
-        for obj in (RegioCompetitieSchutterBoog
-                    .objects
-                    .select_related('schutterboog',
-                                    'schutterboog__nhblid',
-                                    'schutterboog__boogtype',
-                                    'bij_vereniging')
-                    .filter(deelcompetitie=deelcomp)):
-
-            deelnemer = {
-                'pk': obj.schutterboog.pk,
-                'nhb_nr': obj.schutterboog.nhblid.nhb_nr,
-                'naam': obj.schutterboog.nhblid.volledige_naam(),
-                'ver_nr': obj.bij_vereniging.nhb_nr,
-                'ver_naam': obj.bij_vereniging.naam,
-                'boog': obj.schutterboog.boogtype.beschrijving,
-            }
-
-            deelnemers.append(deelnemer)
+        for boogtype in boogtypen:
+            if boogtype.afkorting.upper() == comp_boog.upper():
+                context['comp_boog'] = boogtype
+                comp_boog = boogtype.afkorting.lower()
+                # geen url --> knop disabled
+            else:
+                boogtype.zoom_url = reverse('Competitie:uitslagen-vereniging-n',
+                                            kwargs={'comp_pk': comp.pk,
+                                                    'comp_boog': boogtype.afkorting.lower(),
+                                                    'ver_nr': ver_nr})
         # for
 
-        return JsonResponse(out)
-
-
-class DynamicZoekOpNhbnrView(UserPassesTestMixin, View):
-
-    def test_func(self):
-        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        rol_nu = rol_get_huidige(self.request)
-        return rol_nu in (Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_WL)
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang """
-        raise Resolver404()
-
-    def post(self, request, *args, **kwargs):
-        """ Deze functie wordt aangeroepen als de knop 'Zoek' gebruikt wordt
-        """
+    @staticmethod
+    def _get_deelcomp(comp, regio_nr):
+        if regio_nr == 100:
+            regio_nr = 101
 
         try:
-            data = json.loads(request.body)
-        except json.JSONDecodeError:
-            raise Resolver404()         # garbage in
+            deelcomp = (DeelCompetitie
+                        .objects
+                        .select_related('competitie', 'nhb_regio')
+                        .get(laag=LAAG_REGIO,
+                             competitie=comp,
+                             competitie__is_afgesloten=False,       # TODO: waarom hier opeens filteren?
+                             nhb_regio__regio_nr=regio_nr))
+        except DeelCompetitie.DoesNotExist:     # pragma: no cover
+            raise Resolver404()
 
-        # zoek een
-        # print('data: %s' % repr(data))
+        return deelcomp
 
-        try:
-            nhb_nr = int(str(data['nhb_nr'])[:6])               # afkappen voor extra veiligheid
-            wedstrijd_pk = int(str(data['wedstrijd_pk'])[:6])   # afkappen voor extra veiligheid
-            wedstrijd = Wedstrijd.objects.get(pk=wedstrijd_pk)
-        except (KeyError, ValueError, Wedstrijd.DoesNotExist):
-            raise Resolver404()         # garbage in
-
-        plan = wedstrijd.wedstrijdenplan_set.all()[0]
-
-        # zoek de ronde erbij
-        # deze hoort al bij een competitie type (indoor / 25m1pijl)
-        ronde = (DeelcompetitieRonde
-                 .objects
-                 .select_related('deelcompetitie',
-                                 'deelcompetitie__nhb_regio',
-                                 'deelcompetitie__competitie')
-                 .get(plan=plan))
-
-        # zoek schuttersboog die ingeschreven zijn voor deze competitie
-        competitie = ronde.deelcompetitie.competitie
-
-        out = dict()
-
+    @staticmethod
+    def _get_deelnemers(deelcomp, boogtype, ver_nr):
         deelnemers = (RegioCompetitieSchutterBoog
                       .objects
                       .select_related('schutterboog',
-                                      'schutterboog__boogtype',
                                       'schutterboog__nhblid',
-                                      'schutterboog__nhblid__bij_vereniging')
-                      .filter(deelcompetitie__competitie=competitie,
-                              schutterboog__nhblid__nhb_nr=nhb_nr))
+                                      'klasse',
+                                      'klasse__indiv',
+                                      'klasse__indiv__boogtype')
+                      .filter(deelcompetitie=deelcomp,
+                              bij_vereniging__nhb_nr=ver_nr,
+                              klasse__indiv__boogtype=boogtype)
+                      .order_by('-gemiddelde'))
 
-        if len(deelnemers) == 0:
-            out['fail'] = 1         # is niet ingeschreven voor deze competitie
-        else:
-            # bouw het antwoord op
-            nhblid = deelnemers[0].schutterboog.nhblid
-            out['nhb_nr'] = nhblid.nhb_nr
-            out['naam'] = nhblid.volledige_naam()
-            out['vereniging'] = str(nhblid.bij_vereniging)
-            out['regio'] = str(nhblid.bij_vereniging.regio)
-            out['bogen'] = bogen = list()
-            for deelnemer in deelnemers:
-
-                # TODO: MISSCHIEN BETER OM DEELNEMER.PK terug te geven
-
-                bogen.append({'pk': deelnemer.schutterboog.pk,
-                              'boog': deelnemer.schutterboog.boogtype.beschrijving})
-            # for
-
-        return JsonResponse(out)
-
-
-class DynamicScoresOpslaanView(UserPassesTestMixin, View):
-
-    def test_func(self):
-        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        rol_nu = rol_get_huidige(self.request)
-        return rol_nu in (Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_WL)
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang """
-        raise Resolver404()
-
-    @staticmethod
-    def laad_wedstrijd_of_404(data):
-        try:
-            wedstrijd_pk = int(str(data['wedstrijd_pk'])[:6])   # afkappen geeft beveiliging
-            wedstrijd = (Wedstrijd
-                         .objects
-                         .select_related('uitslag')
-                         .prefetch_related('uitslag__scores')
-                         .get(pk=wedstrijd_pk))
-        except (KeyError, ValueError, Wedstrijd.DoesNotExist):
-            raise Resolver404()
-
-        return wedstrijd
-
-    @staticmethod
-    def nieuwe_score(uitslag, schutterboog_pk, waarde, when, door_account):
-        # print('nieuwe score: %s = %s' % (schutterboog_pk, waarde))
-
-        try:
-            schutterboog = SchutterBoog.objects.get(pk=schutterboog_pk)
-        except SchutterBoog.DoesNotExist:
-            # garbage --> ignore
-            return
-
-        score_obj = Score(schutterboog=schutterboog,
-                          is_ag=False,
-                          waarde=waarde,
-                          afstand_meter=uitslag.afstand_meter)
-        score_obj.save()
-        uitslag.scores.add(score_obj)
-
-        ScoreHist(score=score_obj,
-                  oude_waarde=0,
-                  nieuwe_waarde=waarde,
-                  when=when,
-                  door_account=door_account,
-                  notitie="Invoer uitslag wedstrijd").save()
-
-    @staticmethod
-    def bijgewerkte_score(score_obj, waarde, when, door_account):
-        if score_obj.waarde != waarde:
-            # print('bijgewerkte score: %s --> %s' % (score_obj, waarde))
-
-            ScoreHist(score=score_obj,
-                      oude_waarde=score_obj.waarde,
-                      nieuwe_waarde=waarde,
-                      when=when,
-                      door_account=door_account,
-                      notitie="Invoer uitslag wedstrijd").save()
-
-            score_obj.waarde = waarde
-            score_obj.save()
-        # else: zelfde score
-
-    def scores_opslaan(self, uitslag, data, when, door_account):
-        """ sla de scores op
-            data bevat schutterboog_pk + score
-            als score leeg is moet pk uit de uitslag gehaald worden
-        """
-
-        # doorloop alle scores in de uitslag en haal de schutterboog erbij
-        # hiermee kunnen we snel controleren of iemand al in de uitslag
-        # voorkomt
-        pk2score_obj = dict()
-        for score_obj in uitslag.scores.all():
-            pk2score_obj[score_obj.schutterboog.pk] = score_obj
-        # for
-        # print('pk2score_obj: %s' % repr(pk2score_obj))
-
-        for key, value in data.items():
-            if key == 'wedstrijd_pk':
-                # geen schutterboog
-                continue
-
-            try:
-                pk = int(str(key)[:6])     # afkappen geeft beveiliging
-            except ValueError:
-                # fout pk: ignore
-                continue        # met de for-loop
-
-            try:
-                score_obj = pk2score_obj[pk]
-            except KeyError:
-                # schutterboog zit nog niet in de uitslag
-                score_obj = None
-
-            if isinstance(value, str) and value == '':
-                # lege invoer betekent: schutter deed niet mee
-                if score_obj:
-                    # verwijder deze score uit de uit, maar behoud de geschiedenis
-                    self.bijgewerkte_score(score_obj, SCORE_WAARDE_VERWIJDERD, when, door_account)
-                # laat tegen exceptie hieronder aanlopen
-
-            # sla de score op
-            try:
-                waarde = int(str(value)[:4])   # afkappen geeft beveiliging
-            except ValueError:
-                # foute score: ignore
-                continue
-
-            if 0 <= waarde <= uitslag.max_score:
-                # print('score geaccepteerd: %s %s' % (pk, waarde))
-                # score opslaan
-                if not score_obj:
-                    # het is een nieuwe score
-                    self.nieuwe_score(uitslag, pk, waarde, when, door_account)
-                else:
-                    self.bijgewerkte_score(score_obj, waarde, when, door_account)
-            # else: illegale score --> ignore
+        rank = 1
+        for deelnemer in deelnemers:
+            lid = deelnemer.schutterboog.nhblid
+            deelnemer.rank = rank
+            deelnemer.naam_str = "[%s] %s" % (lid.nhb_nr, lid.volledige_naam())
+            deelnemer.klasse_str = deelnemer.klasse.indiv.beschrijving
+            rank += 1
         # for
 
-    def post(self, request, *args, **kwargs):
-        """ Deze functie wordt aangeroepen als de knop 'Opslaan' gebruikt wordt
-        """
-
-        try:
-            data = json.loads(request.body)
-        except json.JSONDecodeError:
-            raise Resolver404()         # garbage in
-
-        # print('data:', repr(data))
-
-        wedstrijd = self.laad_wedstrijd_of_404(data)
-        uitslag = wedstrijd.uitslag
-        if not uitslag:
-            raise Resolver404()
-
-        # controleer toestemming om scores op te slaan voor deze wedstrijd
-
-        plannen = wedstrijd.wedstrijdenplan_set.all()
-        if plannen.count() < 1:
-            # wedstrijd met andere bedoeling
-            raise Resolver404()
-
-        ronde = DeelcompetitieRonde.objects.get(plan=plannen[0])
-
-        rol_nu, functie_nu = rol_get_huidige_functie(request)
-        if not mag_deelcomp_wedstrijd_wijzigen(wedstrijd, functie_nu, ronde.deelcompetitie):
-            raise Resolver404()
-
-        # voorkom wijzigingen bevroren wedstrijduitslag
-        if rol_nu in (Rollen.ROL_HWL, Rollen.ROL_WL) and uitslag.is_bevroren:
-            raise Resolver404()
-
-        door_account = request.user
-        when = timezone.now()
-
-        try:
-            self.scores_opslaan(uitslag, data, when, door_account)
-        except:                         # pragma: no cover
-            exc = sys.exc_info()[1]
-            print('OHOH: %s' % exc)
-
-        out = {'done': 1}
-        return JsonResponse(out)
-
-
-class WedstrijdUitslagBekijkenView(TemplateView):
-
-    """ Deze view toont de uitslag van een wedstrijd """
-
-    # class variables shared by all instances
-    template_name = TEMPLATE_COMPETITIE_UITSLAG_BEKIJKEN_WEDSTRIJD
+        return deelnemers
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        wedstrijd_pk = kwargs['wedstrijd_pk'][:6]     # afkappen geeft beveiliging
-        wedstrijd, deelcomp, ronde = bepaal_wedstrijd_en_deelcomp_of_404(wedstrijd_pk)
+        try:
+            comp_pk = int(kwargs['comp_pk'][:6])      # afkappen geeft beveiliging
+            comp = (Competitie
+                    .objects
+                    .get(pk=comp_pk))
+        except (ValueError, Competitie.DoesNotExist):
+            raise Resolver404()
 
-        scores = (wedstrijd
-                  .uitslag
-                  .scores
-                  .exclude(is_ag=True)
-                  .exclude(waarde=SCORE_WAARDE_VERWIJDERD)
-                  .select_related('schutterboog',
-                                  'schutterboog__boogtype',
-                                  'schutterboog__nhblid'))
+        comp.zet_fase()
+        context['comp'] = comp
 
-        # maak een opzoek tabel voor de huidige vereniging van elke schutterboog
-        schutterboog_pks = [score.schutterboog.pk for score in scores]
-        regioschutters = (RegioCompetitieSchutterBoog
-                          .objects
-                          .select_related('schutterboog',
-                                          'bij_vereniging')
-                          .filter(schutterboog__pk__in=schutterboog_pks))
-        schutterboog2vereniging = dict()
-        for regioschutter in regioschutters:
-            schutterboog2vereniging[regioschutter.schutterboog.pk] = regioschutter.bij_vereniging
+        comp_boog = kwargs['comp_boog'][:2]     # afkappen voor veiligheid
+
+        # ver_nr is optioneel en resulteert in het nummer van de schutter
+        try:
+            ver_nr = kwargs['ver_nr'][:4]     # afkappen voor veiligheid
+            ver_nr = int(ver_nr)
+        except KeyError:
+            # zoek de vereniging die bij de huidige gebruiker past
+            ver_nr = self._get_schutter_ver_nr()
+        except ValueError:
+            raise Resolver404()
+
+        try:
+            ver = NhbVereniging.objects.select_related('regio').get(nhb_nr=ver_nr)
+        except NhbVereniging.DoesNotExist:
+            raise Resolver404()
+
+        context['ver'] = ver
+
+        self._maak_filter_knoppen(context, comp, ver_nr, comp_boog)
+
+        boogtype = context['comp_boog']
+        if not boogtype:
+            raise Resolver404()
+
+        regio_nr = ver.regio.regio_nr
+        context['url_terug'] = reverse('Competitie:uitslagen-regio-n',
+                                       kwargs={'comp_pk': comp.pk,
+                                               'zes_scores': 'alle',
+                                               'comp_boog': comp_boog,
+                                               'regio_nr': regio_nr})
+
+        context['deelcomp'] = deelcomp = self._get_deelcomp(comp, regio_nr)
+
+        context['deelnemers'] = deelnemers = self._get_deelnemers(deelcomp, boogtype, ver_nr)
+        context['aantal_deelnemers'] = len(deelnemers)
+
+        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
+        return context
+
+
+class UitslagenRegioView(TemplateView):
+
+    """ Django class-based view voor de de uitslagen van de competitie in 1 regio """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_COMPETITIE_UITSLAGEN_REGIO
+    url_name = 'Competitie:uitslagen-regio-n'
+    url_switch = 'Competitie:uitslagen-regio-n-alt'
+    order_gemiddelde = '-gemiddelde'
+
+    def _get_schutter_regio_nr(self):
+        """ Geeft het regio nummer van de ingelogde schutter terug,
+            of 101 als er geen regio vastgesteld kan worden
+        """
+        regio_nr = 101
+
+        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
+
+        if functie_nu:
+            if functie_nu.nhb_ver:
+                # HWL, WL
+                regio_nr = functie_nu.nhb_ver.regio.regio_nr
+            elif functie_nu.nhb_regio:
+                # RCL
+                regio_nr = functie_nu.nhb_regio.regio_nr
+            elif functie_nu.nhb_rayon:
+                # RKO
+                regio = (NhbRegio
+                         .objects
+                         .filter(rayon=functie_nu.nhb_rayon,
+                                 is_administratief=False)
+                         .order_by('regio_nr'))[0]
+                regio_nr = regio.regio_nr
+        elif rol_nu == Rollen.ROL_SCHUTTER:
+            # schutter
+            account = self.request.user
+            if account.nhblid_set.count() > 0:
+                nhblid = account.nhblid_set.all()[0]
+                if nhblid.is_actief_lid and nhblid.bij_vereniging:
+                    nhb_ver = nhblid.bij_vereniging
+                    regio_nr = nhb_ver.regio.regio_nr
+
+        return regio_nr
+
+    def _maak_filter_knoppen(self, context, comp, gekozen_regio_nr, comp_boog, zes_scores):
+        """ filter knoppen per regio, gegroepeerd per rayon en per competitie boog type """
+
+        # boogtype files
+        boogtypen = BoogType.objects.order_by('volgorde').all()
+
+        context['comp_boog'] = None
+        context['boog_filters'] = boogtypen
+
+        for boogtype in boogtypen:
+            if boogtype.afkorting.upper() == comp_boog.upper():
+                context['comp_boog'] = boogtype
+                comp_boog = boogtype.afkorting.lower()
+                # geen url --> knop disabled
+            else:
+                boogtype.zoom_url = reverse(self.url_name,
+                                            kwargs={'comp_pk': comp.pk,
+                                                    'zes_scores': zes_scores,
+                                                    'comp_boog': boogtype.afkorting.lower(),
+                                                    'regio_nr': gekozen_regio_nr})
         # for
 
-        for score in scores:
-            score.schutter_str = score.schutterboog.nhblid.volledige_naam()
-            score.boog_str = score.schutterboog.boogtype.beschrijving
-            score.vereniging_str = str(schutterboog2vereniging[score.schutterboog.pk])
-        # for
+        # regio filters
+        if context['comp_boog']:
+            regios = (NhbRegio
+                      .objects
+                      .select_related('rayon')
+                      .filter(is_administratief=False)
+                      .order_by('rayon__rayon_nr', 'regio_nr'))
 
-        te_sorteren = [(score.vereniging_str, score.schutter_str, score.boog_str, score) for score in scores]
-        te_sorteren.sort()
-        scores = [score for _,_,_,score in te_sorteren]
+            context['regio_filters'] = regios
 
-        context['scores'] = scores
-        context['wedstrijd'] = wedstrijd
+            prev_rayon = 1
+            for regio in regios:
+                regio.break_before = (prev_rayon != regio.rayon.rayon_nr)
+                prev_rayon = regio.rayon.rayon_nr
+
+                regio.title_str = 'Regio %s' % regio.regio_nr
+                if regio.regio_nr != gekozen_regio_nr:
+                    regio.zoom_url = reverse(self.url_name,
+                                             kwargs={'comp_pk': comp.pk,
+                                                     'zes_scores': zes_scores,
+                                                     'comp_boog': comp_boog,
+                                                     'regio_nr': regio.regio_nr})
+                else:
+                    # geen zoom_url --> knop disabled
+                    context['regio'] = regio
+            # for
+
+        # vereniging filters
+        if context['comp_boog']:
+            vers = (NhbVereniging
+                    .objects
+                    .select_related('regio')
+                    .filter(regio__regio_nr=gekozen_regio_nr)
+                    .order_by('nhb_nr'))
+
+            for ver in vers:
+                ver.zoom_url = reverse('Competitie:uitslagen-vereniging-n',
+                                       kwargs={'comp_pk': comp.pk,
+                                               'comp_boog': comp_boog,
+                                               'ver_nr': ver.nhb_nr})
+            # for
+
+            context['ver_filters'] = vers
+
+        context['zes_scores_checked'] = (zes_scores == 'zes')
+        if zes_scores == 'alle':
+            zes_scores_next = 'zes'
+        else:
+            zes_scores_next = 'alle'
+        context['zes_scores_next'] = reverse(self.url_name,
+                                             kwargs={'comp_pk': comp.pk,
+                                                     'zes_scores': zes_scores_next,
+                                                     'comp_boog': comp_boog,
+                                                     'regio_nr': gekozen_regio_nr})
+
+        # switch naar alternatieve uitslag
+        context['url_switch'] = reverse(self.url_switch,
+                                        kwargs={'comp_pk': comp.pk,
+                                                'zes_scores': zes_scores,
+                                                'comp_boog': comp_boog,
+                                                'regio_nr': gekozen_regio_nr})
+
+    def filter_zes_scores(self, deelnemers):
+        return deelnemers.filter(aantal_scores__gte=6)
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        try:
+            comp_pk = int(kwargs['comp_pk'][:6])      # afkappen geeft beveiliging
+            comp = (Competitie
+                    .objects
+                    .get(pk=comp_pk))
+        except (ValueError, Competitie.DoesNotExist):
+            raise Resolver404()
+
+        comp.zet_fase()
+        context['comp'] = comp
+
+        zes_scores = kwargs['zes_scores']
+        if zes_scores not in ('alle', 'zes'):
+            zes_scores = 'alle'
+
+        comp_boog = kwargs['comp_boog'][:2]     # afkappen voor veiligheid
+
+        # regio_nr is optioneel (eerste binnenkomst zonder regio nummer)
+        try:
+            regio_nr = kwargs['regio_nr'][:3]   # afkappen voor veiligheid
+            regio_nr = int(regio_nr)
+        except KeyError:
+            # keep welke (initiële) regio bij de huidige gebruiker past
+            regio_nr = self._get_schutter_regio_nr()
+        except ValueError:
+            raise Resolver404()
+
+        # voorkom 404 voor leden in de administratieve regio
+        if regio_nr == 100:
+            regio_nr = 101
+
+        try:
+            deelcomp = (DeelCompetitie
+                        .objects
+                        .select_related('competitie', 'nhb_regio')
+                        .get(laag=LAAG_REGIO,
+                             competitie=comp,
+                             competitie__is_afgesloten=False,
+                             nhb_regio__regio_nr=regio_nr))
+        except DeelCompetitie.DoesNotExist:
+            raise Resolver404()
+
         context['deelcomp'] = deelcomp
-        context['ronde'] = ronde
 
-        menu_dynamics(self.request, context, actief='competitie')
+        self._maak_filter_knoppen(context, comp, regio_nr, comp_boog, zes_scores)
+
+        boogtype = context['comp_boog']
+        if not boogtype:
+            raise Resolver404()
+
+        deelnemers = (RegioCompetitieSchutterBoog
+                      .objects
+                      .filter(deelcompetitie=deelcomp)
+                      .select_related('schutterboog',
+                                      'schutterboog__nhblid',
+                                      'bij_vereniging',
+                                      'klasse',
+                                      'klasse__indiv',
+                                      'klasse__indiv__boogtype')
+                      .filter(klasse__indiv__boogtype=boogtype)
+                      .order_by('klasse__indiv__volgorde', self.order_gemiddelde))
+
+        if zes_scores == 'zes':
+            deelnemers = self.filter_zes_scores(deelnemers)
+
+        toon_geslacht = False
+        klasse = -1
+        rank = 0
+        for deelnemer in deelnemers:
+            deelnemer.break_klasse = (klasse != deelnemer.klasse.indiv.volgorde)
+            if deelnemer.break_klasse:
+                deelnemer.klasse_str = deelnemer.klasse.indiv.beschrijving
+                toon_geslacht = False
+                if deelnemer.klasse.indiv.niet_voor_rk_bk:
+                    # dit is een aspiranten klassen of een klasse onbekend
+                    for lkl in deelnemer.klasse.indiv.leeftijdsklassen.all():
+                        if lkl.is_aspirant_klasse():
+                            toon_geslacht = True
+                            break
+                    # for
+                rank = 0
+            klasse = deelnemer.klasse.indiv.volgorde
+
+            rank += 1
+            lid = deelnemer.schutterboog.nhblid
+            deelnemer.rank = rank
+            deelnemer.naam_str = "[%s] %s" % (lid.nhb_nr, lid.volledige_naam())
+            if toon_geslacht:
+                deelnemer.naam_str += " (" + lid.geslacht + ")"
+            deelnemer.ver_str = str(deelnemer.bij_vereniging)
+        # for
+
+        context['deelnemers'] = deelnemers
+
+        rol_nu = rol_get_huidige(self.request)
+        is_beheerder = rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_WL)
+        context['is_beheerder'] = is_beheerder
+
+        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
+        return context
+
+
+class UitslagenRegioAltView(UserPassesTestMixin, UitslagenRegioView):
+
+    """ Django class-based view voor de de alternative uitslagen van de competitie """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_COMPETITIE_UITSLAGEN_REGIO_ALT
+    url_name = 'Competitie:uitslagen-regio-n-alt'
+    url_switch = 'Competitie:uitslagen-regio-n'
+    order_gemiddelde = '-alt_gemiddelde'
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        # alle beheerders mogen deze lijst zien
+        rol_nu = rol_get_huidige(self.request)
+        is_beheerder = rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_WL)
+        return is_beheerder
+
+    def handle_no_permission(self):
+        """ gebruiker heeft geen toegang --> redirect naar het plein """
+        path = self.request.path.replace('/regio-alt/', '/regio/')
+        return HttpResponseRedirect(path)
+
+    def filter_zes_scores(self, deelnemers):
+        return deelnemers.filter(alt_aantal_scores__gte=6)
+
+
+class UitslagenRayonView(TemplateView):
+
+    """ Django class-based view voor de de uitslagen van de rayonkampioenschappen """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_COMPETITIE_UITSLAGEN_RAYON
+
+    @staticmethod
+    def _maak_filter_knoppen(context, comp, gekozen_rayon_nr, comp_boog):
+        """ filter knoppen per rayon en per competitie boog type """
+
+        # boogtype files
+        boogtypen = BoogType.objects.order_by('volgorde').all()
+
+        context['comp_boog'] = None
+        context['boog_filters'] = boogtypen
+
+        for boogtype in boogtypen:
+            if boogtype.afkorting.upper() == comp_boog.upper():
+                context['comp_boog'] = boogtype
+                comp_boog = boogtype.afkorting.lower()
+                # geen url --> knop disabled
+            else:
+                boogtype.zoom_url = reverse('Competitie:uitslagen-rayon-n',
+                                            kwargs={'comp_pk': comp.pk,
+                                                    'comp_boog': boogtype.afkorting.lower(),
+                                                    'rayon_nr': gekozen_rayon_nr})
+        # for
+
+        if context['comp_boog']:
+            # rayon filters
+            rayons = (NhbRayon
+                      .objects
+                      .order_by('rayon_nr')
+                      .all())
+
+            context['rayon_filters'] = rayons
+
+            for rayon in rayons:
+                rayon.title_str = 'Rayon %s' % rayon.rayon_nr
+                if rayon.rayon_nr != gekozen_rayon_nr:
+                    rayon.zoom_url = reverse('Competitie:uitslagen-rayon-n',
+                                             kwargs={'comp_pk': comp.pk,
+                                                     'comp_boog': comp_boog,
+                                                     'rayon_nr': rayon.rayon_nr})
+                else:
+                    # geen zoom_url --> knop disabled
+                    context['rayon'] = rayon
+            # for
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        try:
+            comp_pk = int(kwargs['comp_pk'][:6])      # afkappen geeft beveiliging
+            comp = (Competitie
+                    .objects
+                    .get(pk=comp_pk))
+        except (ValueError, Competitie.DoesNotExist):
+            raise Resolver404()
+
+        comp.zet_fase()
+        context['comp'] = comp
+
+        comp_boog = kwargs['comp_boog'][:2]          # afkappen voor veiligheid
+
+        # rayon_nr is optioneel (eerste binnenkomst zonder rayon nummer)
+        try:
+            rayon_nr = kwargs['rayon_nr'][:2]        # afkappen voor veiligheid
+            rayon_nr = int(rayon_nr)
+        except KeyError:
+            rayon_nr = 1
+        except ValueError:
+            raise Resolver404()
+
+        self._maak_filter_knoppen(context, comp, rayon_nr, comp_boog)
+
+        boogtype = context['comp_boog']
+        if not boogtype:
+            raise Resolver404()
+
+        try:
+            deelcomp = (DeelCompetitie
+                        .objects
+                        .select_related('competitie', 'nhb_rayon')
+                        .get(laag=LAAG_RK,
+                             competitie__is_afgesloten=False,
+                             competitie=comp,
+                             nhb_rayon__rayon_nr=rayon_nr))
+        except DeelCompetitie.DoesNotExist:
+            raise Resolver404()
+
+        context['deelcomp'] = deelcomp
+        deelcomp.competitie.zet_fase()
+
+        wkl2limiet = dict()    # [pk] = aantal
+
+        if deelcomp.heeft_deelnemerslijst:
+            # deelnemers/reserveschutters van het RK tonen
+            deelnemers = (KampioenschapSchutterBoog
+                          .objects
+                          .exclude(bij_vereniging__isnull=True,      # attentie gevallen
+                                   deelname=DEELNAME_NEE)            # geen schutters die zicht afgemeld hebben
+                          .filter(deelcompetitie=deelcomp,
+                                  klasse__indiv__boogtype=boogtype,
+                                  volgorde__lte=48)                 # toon tot 48 schutters per klasse
+                          .select_related('klasse__indiv',
+                                          'schutterboog__nhblid',
+                                          'bij_vereniging')
+                          .order_by('klasse__indiv__volgorde',
+                                    'volgorde'))
+
+            for limiet in (DeelcompetitieKlasseLimiet
+                           .objects
+                           .select_related('klasse')
+                           .filter(deelcompetitie=deelcomp)):
+                wkl2limiet[limiet.klasse.pk] = limiet.limiet
+            # for
+
+            context['is_lijst_rk'] = True
+        else:
+            # competitie is nog in de regiocompetitie fase
+            context['regiocomp_nog_actief'] = True
+
+            # schutter moeten uit LAAG_REGIO gehaald worden, uit de 4 regio's van het rayon
+            deelcomp_pks = (DeelCompetitie
+                            .objects
+                            .filter(laag=LAAG_REGIO,
+                                    competitie__is_afgesloten=False,
+                                    competitie=comp,
+                                    nhb_regio__rayon__rayon_nr=rayon_nr)
+                            .values_list('pk', flat=True))
+
+            deelnemers = (RegioCompetitieSchutterBoog
+                          .objects
+                          .filter(deelcompetitie__pk__in=deelcomp_pks,
+                                  klasse__indiv__boogtype=boogtype,
+                                  aantal_scores__gte=6)
+                          .select_related('klasse__indiv',
+                                          'schutterboog__nhblid',
+                                          'schutterboog__nhblid__bij_vereniging',
+                                          'bij_vereniging')
+                          .order_by('klasse__indiv__volgorde', '-gemiddelde'))
+
+        klasse = -1
+        rank = 0
+        limiet = 24
+        for deelnemer in deelnemers:
+            deelnemer.break_klasse = (klasse != deelnemer.klasse.indiv.volgorde)
+            if deelnemer.break_klasse:
+                deelnemer.klasse_str = deelnemer.klasse.indiv.beschrijving
+                rank = 1
+                try:
+                    limiet = wkl2limiet[deelnemer.klasse.pk]
+                except KeyError:
+                    limiet = 24
+            klasse = deelnemer.klasse.indiv.volgorde
+
+            lid = deelnemer.schutterboog.nhblid
+            deelnemer.naam_str = "[%s] %s" % (lid.nhb_nr, lid.volledige_naam())
+            deelnemer.ver_str = str(deelnemer.bij_vereniging)
+
+            deelnemer.geen_deelname_risico = deelnemer.schutterboog.nhblid.bij_vereniging != deelnemer.bij_vereniging
+
+            if deelcomp.heeft_deelnemerslijst:
+                if deelnemer.rank > limiet:
+                    deelnemer.is_reserve = True
+            else:
+                deelnemer.rank = rank
+                rank += 1
+        # for
+
+        context['deelnemers'] = deelnemers
+
+        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
+        return context
+
+
+class UitslagenBondView(TemplateView):
+
+    """ Django class-based view voor de de uitslagen van de bondskampioenschappen """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_COMPETITIE_UITSLAGEN_BOND
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        try:
+            comp_pk = int(kwargs['comp_pk'][:6])      # afkappen geeft beveiliging
+            comp = (Competitie
+                    .objects
+                    .get(pk=comp_pk))
+        except (ValueError, Competitie.DoesNotExist):
+            raise Resolver404()
+
+        comp.zet_fase()
+        context['comp'] = comp
+
+        comp_boog = kwargs['comp_boog'][:2]          # afkappen voor veiligheid
+
+        try:
+            deelcomp = (DeelCompetitie
+                        .objects
+                        .select_related('competitie')
+                        .get(laag=LAAG_BK,
+                             competitie__is_afgesloten=False,
+                             competitie__pk=comp_pk))
+        except DeelCompetitie.DoesNotExist:
+            raise Resolver404()
+
+        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
         return context
 
 

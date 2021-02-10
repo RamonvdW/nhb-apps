@@ -72,7 +72,8 @@ class TestVerenigingClusters(E2EHelpers, TestCase):
     def test_anon(self):
         # anon
         self.e2e_logout()
-        resp = self.client.get(self.url_clusters)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_clusters)
         self.assert_is_redirect(resp, '/plein/')
 
     def test_rcl(self):
@@ -82,18 +83,20 @@ class TestVerenigingClusters(E2EHelpers, TestCase):
         self.e2e_check_rol('RCL')
 
         # haal het overzicht op
-        with self.assertNumQueries(7):
+        with self.assert_max_queries(7):
             resp = self.client.get(self.url_clusters)
         self.assertTrue(resp.status_code, 200)
+        self.assert_html_ok(resp)
 
         # pas de naam van een cluster aan
         # plaats nhbver1 in een ander cluster
         # haal nhbver2 uit zijn cluster
         # stop nhbver3 in een cluster
-        resp = self.client.post(self.url_clusters, {'naam_%s' % self.cluster1.pk: 'Hallo!',
-                                                    'ver_1001': self.cluster2.pk,
-                                                    'ver_1002': '0',
-                                                    'ver_1003': self.cluster1.pk})
+        with self.assert_max_queries(22):
+            resp = self.client.post(self.url_clusters, {'naam_%s' % self.cluster1.pk: 'Hallo!',
+                                                        'ver_1001': self.cluster2.pk,
+                                                        'ver_1002': '0',
+                                                        'ver_1003': self.cluster1.pk})
         self.assert_is_redirect(resp, '/plein/')
 
         cluster = NhbCluster.objects.get(pk=self.cluster1.pk)
@@ -101,16 +104,18 @@ class TestVerenigingClusters(E2EHelpers, TestCase):
 
         # tweede set transacties, identiek aan de eerste
         # dit resulteert in alle "geen wijzigingen"
-        resp = self.client.post(self.url_clusters, {'naam_%s' % self.cluster1.pk: 'Hallo!',
-                                                    'ver_1001': self.cluster2.pk,
-                                                    'ver_1002': '0',
-                                                    'ver_1003': self.cluster1.pk})
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_clusters, {'naam_%s' % self.cluster1.pk: 'Hallo!',
+                                                        'ver_1001': self.cluster2.pk,
+                                                        'ver_1002': '0',
+                                                        'ver_1003': self.cluster1.pk})
         self.assert_is_redirect(resp, '/plein/')
 
         # stuur nog wat illegale parameters
         lange_tekst = 'Dit is een veel te lange tekst die ergens afgekapt gaat worden maar wel opgeslagen wordt.'
-        resp = self.client.post(self.url_clusters, {'ver_1001': 'x',
-                                                    'naam_%s' % self.cluster1.pk: lange_tekst})
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_clusters, {'ver_1001': 'x',
+                                                        'naam_%s' % self.cluster1.pk: lange_tekst})
         self.assert_is_redirect(resp, '/plein/')
 
         cluster = NhbCluster.objects.get(pk=self.cluster1.pk)

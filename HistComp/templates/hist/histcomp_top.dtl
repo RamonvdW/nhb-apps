@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019-2020 Ramon van der Winkel.
+                Copyright (c) 2019-2021 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -75,11 +75,11 @@
             {% for obj in object_list %}
                 {% if obj.comp_type == '18' %}
                     {% if obj.is_team is True %}
-                        <a href="{{ obj.url }}" class="nhb-klikbare-balk">
-                            <li class="collection-item">
-                                <span>{{ obj.klasse }}</span>
-                            </li>
-                        </a>
+                        <li class="collection-item">
+                            <a href="{{ obj.url }}" class="nhb-klikbare-balk">
+                                <div>{{ obj.klasse }}</div>
+                            </a>
+                        </li>
                     {% endif %}
                 {% endif %}
             {% endfor %}
@@ -92,11 +92,11 @@
             {% for obj in object_list %}
                 {% if obj.comp_type == '25' %}
                     {% if obj.is_team is True %}
-                        <a href="{{ obj.url }}" class="nhb-klikbare-balk">
-                            <li class="collection-item">
-                                <span>{{ obj.klasse }}</span>
-                            </li>
-                        </a>
+                        <li class="collection-item">
+                            <a href="{{ obj.url }}" class="nhb-klikbare-balk">
+                                <div>{{ obj.klasse }}</div>
+                            </a>
+                        </li>
                     {% endif %}
                 {% endif %}
             {% endfor %}
@@ -109,4 +109,8 @@
 
 {% endif %}
 
+{% endblock %}
+
+{% block menu-competities %}
+    {% include 'competitie/menu.dtl' %}
 {% endblock %}

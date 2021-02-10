@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020 Ramon van der Winkel.
+                Copyright (c) 2020-2021 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -21,7 +21,7 @@
 
         <p>Onderstaande lijst toont alleen leden die ingesteld hebben met welke boog ze schieten. Je kan ze hier bij helpen via het kaartje "voorkeuren leden".</p>
 
-        <p>Aanmelden gaat in bulk: kies de voorkeuren, zet daarna een vinkje bij de schutters die je aan wilt melden en druk dan rode knop in de rechter onderhoek. Leden die al aangemeld zijn hebben een grijs vinkje.</p>
+        <p>Aanmelden gaat in bulk: kies de voorkeuren, zet daarna een vinkje bij de sporters die je aan wilt melden en druk dan rode knop in de rechter onderhoek. Leden die al aangemeld zijn hebben een grijs vinkje.</p>
         <p>Leden die aangegeven hebben niet mee te willen doen met de (winter-)competities zijn helemaal grijs.</p>
 
         <table class="white">
@@ -38,7 +38,21 @@
                 </td>
             </tr>
 
-            {% if dagdelen %}
+            {% if wedstrijden %}    <!-- inschrijfmethode 1 -->
+            <tr>
+                <td>Kies wanneer ze willen schieten:<br>
+                    {% for wedstrijd in wedstrijden %}
+                        <label style="margin-left: 20px">
+                            <input type="checkbox" class="filled-in" name="wedstrijd_{{ wedstrijd.pk }}">
+                            <span class="black-text">{{ wedstrijd.datum_wanneer }} om {{ wedstrijd.tijd_begin_wedstrijd }} bij <b>{{ wedstrijd.vereniging.naam }}</b><span class="hide-on-small-only"> te {{ wedstrijd.vereniging.plaats }}</span></span>
+                        </label>
+                        <br>
+                    {% endfor %}
+                </td>
+            </tr>
+            {% endif %}
+
+            {% if dagdelen %}       <!-- inschrijfmethode 3 -->
             <tr>
                 <td>Kies wanneer in de week ze willen schieten:<br>
 
@@ -89,19 +103,19 @@
                 </tr>
                 <tr>
                     <th class="center-align">{% if mag_aanmelden %}<!-- kolom voor vinkje -->{% else %}Aangemeld{% endif %}</th>
-                    <th filter="on">NHB nr</th>
-                    <th filter="on">Naam</th>
+                    <th data-filter="on">Bonds<wbr/>nummer</th>
+                    <th data-filter="on">Naam</th>
                     <th>Leeftijd {{ tweede_jaar }}</th>
                     <th class="hide-on-small-only">Leeftijdsklasse {{ seizoen }}</th>
                     <th>Wedstrijd<wbr/>boog</th>
-                    <th>Aanvangs<wbr/>gemiddelde</th>
+                    <th><span class="hide-on-small-only">Aanvangs<wbr/>gemiddelde</span><span class="hide-on-med-and-up">AG</span></th>
                 </tr>
             </thead>
 
             {% for obj in leden_jeugd %}
                 <tr>
                     {% if not obj.wil_competitie %}
-                        <!-- schutter wil niet meedoen -->
+                        <!-- sporter wil niet meedoen -->
                         <td><!-- geen checkbox --></td>
                         <td class="grey-text">{{ obj.nhb_nr }}</td>
                         <td class="grey-text">{{ obj.volledige_naam }}</td>
@@ -145,14 +159,14 @@
                 <td colspan="2" class="table-filter">
                     <input class="table-filter" oninput="myTableFilter(this, 'table2')" placeholder="Zoeken"/>
                 </td>
-                <td colspan="5"></td>
+                <td colspan="2"></td>
             </tr>
             <tr>
                 <th class="center-align">{% if mag_aanmelden %}<!-- kolom voor vinkje -->{% else %}Aangemeld{% endif %}</th>
-                <th filter="on">NHB nr</th>
-                <th filter="on">Naam</th>
+                <th data-filter="on">Bonds<wbr/>nummer</th>
+                <th data-filter="on">Naam</th>
                 <th>Wedstrijdboog</th>
-                <th>Aanvangs<wbr/>gemiddelde</th>
+                <th><span class="hide-on-small-only">Aanvangs<wbr/>gemiddelde</span><span class="hide-on-med-and-up">AG</span></th>
             </tr>
         </thead>
 
@@ -189,7 +203,7 @@
 
     {% if mag_aanmelden %}
         <div class="fixed-action-btn">
-            <input class="btn-nhb-rood" type="submit" value="Geselecteerde schutters aanmelden">
+            <input class="btn-nhb-rood" type="submit" value="Geselecteerde sporters aanmelden">
         </div>
     {% endif %}
 </form>
@@ -198,4 +212,3 @@
 <p>&nbsp;</p>
 
 {% endblock %}
-

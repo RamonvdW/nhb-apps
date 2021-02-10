@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,6 +8,7 @@ from django.test import TestCase
 from django.utils import timezone
 from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
 from Competitie.models import Competitie, DeelCompetitie, RegioCompetitieSchutterBoog, INSCHRIJF_METHODE_3
+from Competitie.test_fase import zet_competitie_fase
 from Overig.e2ehelpers import E2EHelpers
 from Score.models import aanvangsgemiddelde_opslaan
 from .models import SchutterBoog
@@ -77,15 +78,16 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         lid.email = lid.account.email
         lid.save()
 
-        self.url_profiel = '/schutter/'
-        self.url_voorkeuren = '/schutter/voorkeuren/'
-        self.url_aanmelden = '/schutter/regiocompetitie/aanmelden/%s/%s/'   # deelcomp_pk, schutterboog_pk
+        self.url_profiel = '/sporter/'
+        self.url_voorkeuren = '/sporter/voorkeuren/'
+        self.url_aanmelden = '/sporter/regiocompetitie/aanmelden/%s/%s/'   # deelcomp_pk, schutterboog_pk
         self.url_bevestig_aanmelden = self.url_aanmelden + 'bevestig/'
-        self.url_afmelden = '/schutter/regiocompetitie/afmelden/%s/'        # regiocomp_pk
+        self.url_afmelden = '/sporter/regiocompetitie/afmelden/%s/'        # regiocomp_pk
 
     def _prep_voorkeuren(self):
         # haal de voorkeuren op - hiermee worden de SchutterBoog records aangemaakt
-        self.client.get(self.url_voorkeuren)
+        with self.assert_max_queries(20):
+            self.client.get(self.url_voorkeuren)
 
         # zet een wedstrijd voorkeur voor Recurve en informatie voorkeur voor Barebow
         schutterboog = SchutterBoog.objects.get(boogtype__afkorting='R')
@@ -100,22 +102,34 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         # for
 
     def _competitie_aanmaken(self):
-        url_overzicht = '/competitie/'
-        url_aanmaken = '/competitie/aanmaken/'
-        url_ag_vaststellen = '/competitie/ag-vaststellen/'
-        url_klassegrenzen_vaststellen_18 = '/competitie/klassegrenzen/vaststellen/18/'
-        url_klassegrenzen_vaststellen_25 = '/competitie/klassegrenzen/vaststellen/25/'
+        url_overzicht = '/bondscompetities/'
+        url_aanmaken = '/bondscompetities/aanmaken/'
+        url_ag_vaststellen = '/bondscompetities/ag-vaststellen/'
+        url_klassegrenzen_vaststellen = '/bondscompetities/%s/klassegrenzen/vaststellen/'   # comp_pk
 
         # competitie aanmaken
-        resp = self.client.post(url_aanmaken)
+        with self.assert_max_queries(20):
+            resp = self.client.post(url_aanmaken)
         self.assert_is_redirect(resp, url_overzicht)
 
+        comp_18 = Competitie.objects.get(afstand='18')
+        comp_25 = Competitie.objects.get(afstand='25')
+
         # aanvangsgemiddelden vaststellen
-        resp = self.client.post(url_ag_vaststellen)
+        with self.assert_max_queries(5):
+            resp = self.client.post(url_ag_vaststellen)
 
         # klassegrenzen vaststellen
-        resp = self.client.post(url_klassegrenzen_vaststellen_18)
-        resp = self.client.post(url_klassegrenzen_vaststellen_25)
+        with self.assert_max_queries(20):
+            resp = self.client.post(url_klassegrenzen_vaststellen % comp_18.pk)
+        with self.assert_max_queries(20):
+            resp = self.client.post(url_klassegrenzen_vaststellen % comp_25.pk)
+
+        comp_18 = Competitie.objects.get(pk=comp_18.pk)
+        zet_competitie_fase(comp_18, 'B')
+
+        comp_25 = Competitie.objects.get(pk=comp_25.pk)
+        zet_competitie_fase(comp_25, 'B')
 
     def test_inschrijven(self):
         # log in as BB en maak de competitie aan
@@ -137,13 +151,15 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
 
         # haal de bevestig pagina op met het formulier
         url = self.url_bevestig_aanmelden % (deelcomp.pk, schutterboog.pk)
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('schutter/bevestig-aanmelden.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'Dutch Target')
 
-        resp = self.client.post(self.url_aanmelden % (deelcomp.pk, schutterboog.pk))
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_aanmelden % (deelcomp.pk, schutterboog.pk))
         self.assert_is_redirect(resp, self.url_profiel)
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 1)
 
@@ -160,14 +176,16 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
 
         # geen bevestig formulier indien al ingeschreven
         url = self.url_bevestig_aanmelden % (deelcomp.pk, schutterboog.pk)
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 404)     # 404 = Not found
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 1)
 
         # 18m IB voor extra coverage
         schutterboog = SchutterBoog.objects.get(boogtype__afkorting='IB')
         url = self.url_bevestig_aanmelden % (deelcomp.pk, schutterboog.pk)
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('schutter/bevestig-aanmelden.dtl', 'plein/site_layout.dtl'))
@@ -179,7 +197,8 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
 
         # haal de bevestig pagina op met het formulier
         url = self.url_bevestig_aanmelden % (deelcomp.pk, schutterboog.pk)
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('schutter/bevestig-aanmelden.dtl', 'plein/site_layout.dtl'))
@@ -187,18 +206,21 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
 
         # schrijf in voor de 25m BB, zonder AG
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 1)
-        resp = self.client.post(self.url_aanmelden % (deelcomp.pk, schutterboog.pk))
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_aanmelden % (deelcomp.pk, schutterboog.pk))
         self.assert_is_redirect(resp, self.url_profiel)
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 2)
 
         # veroorzaak een dubbele inschrijving
-        resp = self.client.post(self.url_aanmelden % (deelcomp.pk, schutterboog.pk))
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_aanmelden % (deelcomp.pk, schutterboog.pk))
         self.assertEqual(resp.status_code, 404)     # 404 = Not found
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 2)
 
     def test_bad(self):
         # inschrijven als anon
-        resp = self.client.post(self.url_aanmelden % (0, 0))
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_aanmelden % (0, 0))
         self.assertEqual(resp.status_code, 404)     # 404 = Not found
 
         # log in as BB en maak de competitie aan
@@ -207,18 +229,21 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         self._competitie_aanmaken()
 
         # inschrijven als BB (niet NHB lid)
-        resp = self.client.post(self.url_aanmelden % (0, 0))
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_aanmelden % (0, 0))
         self.assertEqual(resp.status_code, 404)     # 404 = Not found
 
         # haal de bevestig pagina op als BB
         url = self.url_bevestig_aanmelden % (0, 0)
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assert_is_redirect(resp, '/plein/')
 
         # inschrijven als inactief lid
         self.client.logout()
         self.e2e_login(self.account_geenlid)
-        resp = self.client.post(self.url_aanmelden % (0, 0))
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_aanmelden % (0, 0))
         self.assertEqual(resp.status_code, 404)     # 404 = Not found
 
         # log in as schutter
@@ -230,31 +255,38 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         deelcomp = DeelCompetitie.objects.get(competitie__afstand='18', nhb_regio=self.nhbver.regio)
 
         # illegaal deelcomp nummer
-        resp = self.client.post(self.url_aanmelden % (99999, schutterboog.pk))
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_aanmelden % (99999, schutterboog.pk))
         self.assertEqual(resp.status_code, 404)     # 404 = Not found
-        resp = self.client.get(self.url_bevestig_aanmelden % (999999, schutterboog.pk))
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_bevestig_aanmelden % (999999, schutterboog.pk))
         self.assertEqual(resp.status_code, 404)     # 404 = Not found
 
         # illegaal schutterboog nummer
-        resp = self.client.post(self.url_aanmelden % (99999, 'hallo'))
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_aanmelden % (99999, 'hallo'))
         self.assertEqual(resp.status_code, 404)     # 404 = Not found
-        resp = self.client.get(self.url_bevestig_aanmelden % (999999, 'hallo'))
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_bevestig_aanmelden % (999999, 'hallo'))
         self.assertEqual(resp.status_code, 404)     # 404 = Not found
 
         # schutterboog hoort niet bij gebruiker
         self.client.logout()
         self.e2e_login(self.account_twee)
-        resp = self.client.post(self.url_aanmelden % (deelcomp.pk, schutterboog.pk))
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_aanmelden % (deelcomp.pk, schutterboog.pk))
         self.assertEqual(resp.status_code, 404)     # 404 = Not found
 
         # mismatch diverse zaken
         deelcomp = DeelCompetitie.objects.get(competitie__afstand='18', nhb_regio=NhbRegio.objects.get(regio_nr=116))
-        resp = self.client.get(self.url_bevestig_aanmelden % (deelcomp.pk, schutterboog.pk))
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_bevestig_aanmelden % (deelcomp.pk, schutterboog.pk))
         self.assertEqual(resp.status_code, 404)     # 404 = Not found
 
     def test_afmelden(self):
         # afmelden als anon
-        resp = self.client.post(self.url_afmelden % 0)
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_afmelden % 0)
         self.assertEqual(resp.status_code, 404)     # 404 = Not found
 
         # log in as BB en maak de competitie aan
@@ -263,13 +295,15 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         self._competitie_aanmaken()
 
         # afmelden als BB (niet NHB lid)
-        resp = self.client.post(self.url_afmelden % 0)
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_afmelden % 0)
         self.assertEqual(resp.status_code, 404)     # 404 = Not found
 
         # afmelden als inactief lid
         self.client.logout()
         self.e2e_login(self.account_geenlid)
-        resp = self.client.post(self.url_afmelden % 0)
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_afmelden % 0)
         self.assertEqual(resp.status_code, 404)     # 404 = Not found
 
         # log in as schutter
@@ -283,36 +317,75 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         deelcomp = DeelCompetitie.objects.get(competitie__afstand='18', nhb_regio=self.nhbver.regio)
         res = aanvangsgemiddelde_opslaan(schutterboog_18, 18, 8.18, None, 'Test')
         self.assertTrue(res)
-        resp = self.client.post(self.url_aanmelden % (deelcomp.pk, schutterboog_18.pk))
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_aanmelden % (deelcomp.pk, schutterboog_18.pk))
         self.assert_is_redirect(resp, self.url_profiel)
         inschrijving_18 = RegioCompetitieSchutterBoog.objects.all()[0]
 
         # aanmelden voor de 25m BB, zonder AG
         schutterboog_25 = SchutterBoog.objects.get(boogtype__afkorting='BB')
         deelcomp = DeelCompetitie.objects.get(competitie__afstand='25', nhb_regio=self.nhbver.regio)
-        resp = self.client.post(self.url_aanmelden % (deelcomp.pk, schutterboog_25.pk))
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_aanmelden % (deelcomp.pk, schutterboog_25.pk))
         self.assert_is_redirect(resp, self.url_profiel)
 
         # afmelden van de 18m
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 2)
-        resp = self.client.post(self.url_afmelden % inschrijving_18.pk)
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_afmelden % inschrijving_18.pk)
         self.assert_is_redirect(resp, self.url_profiel)
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 1)
 
         # illegaal inschrijving nummer
-        resp = self.client.post(self.url_afmelden % 999999)
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_afmelden % 999999)
         self.assertEqual(resp.status_code, 404)     # 404 = Not found
 
         # niet bestaand inschrijving nummer
-        resp = self.client.post(self.url_afmelden % 'hoi')
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_afmelden % 'hoi')
         self.assertEqual(resp.status_code, 404)     # 404 = Not found
 
         # schutterboog hoort niet bij gebruiker
         inschrijving_25 = RegioCompetitieSchutterBoog.objects.all()[0]
         self.client.logout()
         self.e2e_login(self.account_twee)
-        resp = self.client.post(self.url_afmelden % inschrijving_25.pk)
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_afmelden % inschrijving_25.pk)
         self.assertEqual(resp.status_code, 404)     # 404 = Not found
+
+    def test_afmelden_geen_voorkeur_meer(self):
+        # log in as BB en maak de competitie aan
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_wisselnaarrol_bb()
+        self._competitie_aanmaken()
+
+        # log in as schutter
+        self.client.logout()
+        self.e2e_login(self.account_normaal)
+        self._prep_voorkeuren()
+
+        # aanmelden voor de 18m Recurve, met AG
+        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
+        schutterboog_18 = SchutterBoog.objects.get(boogtype__afkorting='R')
+        deelcomp = DeelCompetitie.objects.get(competitie__afstand='18', nhb_regio=self.nhbver.regio)
+        res = aanvangsgemiddelde_opslaan(schutterboog_18, 18, 8.18, None, 'Test')
+        self.assertTrue(res)
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_aanmelden % (deelcomp.pk, schutterboog_18.pk))
+        self.assert_is_redirect(resp, self.url_profiel)
+        inschrijving_18 = RegioCompetitieSchutterBoog.objects.all()[0]
+
+        # voorkeur boogtype uitzetten
+        schutterboog_18.voor_wedstrijd = False
+        schutterboog_18.save()
+
+        # afmelden van de 18m
+        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 1)
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_afmelden % inschrijving_18.pk)
+        self.assert_is_redirect(resp, self.url_profiel)
+        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
 
     def test_inschrijven_team(self):
         # log in as BB en maak de competitie aan
@@ -334,7 +407,8 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         self.assertTrue(res)
 
         url = self.url_aanmelden % (deelcomp.pk, schutterboog.pk)
-        resp = self.client.post(url, {'wil_in_team': 'yes', 'opmerking': 'Hallo daar!'})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'wil_in_team': 'yes', 'opmerking': 'Hallo daar!'})
         self.assert_is_redirect(resp, self.url_profiel)
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 1)
 
@@ -354,8 +428,9 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 1)
         schutterboog = SchutterBoog.objects.get(boogtype__afkorting='BB')
         deelcomp = DeelCompetitie.objects.get(competitie__afstand='25', nhb_regio=self.nhbver.regio)
-        resp = self.client.post(self.url_aanmelden % (deelcomp.pk, schutterboog.pk),
-                                {'wil_in_team': 'ja', 'opmerking': 'ben ik oud genoeg?'})
+        with self.assert_max_queries(23):
+            resp = self.client.post(self.url_aanmelden % (deelcomp.pk, schutterboog.pk),
+                                    {'wil_in_team': 'ja', 'opmerking': 'ben ik oud genoeg?'})
         self.assert_is_redirect(resp, self.url_profiel)
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 2)
 
@@ -390,7 +465,8 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         self.assertTrue(res)
 
         url = self.url_aanmelden % (deelcomp.pk, schutterboog.pk)
-        resp = self.client.post(url, {'wil_in_team': 'yes'})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'wil_in_team': 'yes'})
         self.assert_is_redirect(resp, self.url_profiel)
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 1)
 
@@ -426,7 +502,8 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
 
         # haal de bevestig pagina op met het formulier
         url = self.url_bevestig_aanmelden % (deelcomp.pk, schutterboog.pk)
-        resp = self.client.get(url)
+        with self.assert_max_queries(21):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('schutter/bevestig-aanmelden.dtl', 'plein/site_layout.dtl'))
@@ -442,15 +519,17 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
 
         # schrijf in met een niet toegestaan dagdeel
         url = self.url_aanmelden % (deelcomp.pk, schutterboog.pk)
-        resp = self.client.post(url, {'dagdeel': 'AV'})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'dagdeel': 'AV'})
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
 
         # schrijf in met dagdeel, team schieten en opmerking door
         url = self.url_aanmelden % (deelcomp.pk, schutterboog.pk)
-        resp = self.client.post(url, {'wil_in_team': 'on',
-                                      'dagdeel': 'ZA',
-                                      'opmerking': 'Hallo nogmaals!\n' * 50})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'wil_in_team': 'on',
+                                          'dagdeel': 'ZA',
+                                          'opmerking': 'Hallo nogmaals!\n' * 50})
         self.assert_is_redirect(resp, self.url_profiel)
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 1)
 
@@ -463,7 +542,8 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         schutterboog = SchutterBoog.objects.get(boogtype__afkorting='BB')
         deelcomp = DeelCompetitie.objects.get(competitie__afstand='18', nhb_regio=self.nhbver.regio)
         url = self.url_aanmelden % (deelcomp.pk, schutterboog.pk)
-        resp = self.client.post(url, {'dagdeel': 'XX'})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'dagdeel': 'XX'})
         self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 1)
 
@@ -493,7 +573,8 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
 
         # haal de bevestig pagina op met het formulier
         url = self.url_bevestig_aanmelden % (deelcomp.pk, schutterboog.pk)
-        resp = self.client.get(url)
+        with self.assert_max_queries(21):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('schutter/bevestig-aanmelden.dtl', 'plein/site_layout.dtl'))
@@ -509,7 +590,8 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         self.assertTrue(res)
 
         url = self.url_aanmelden % (deelcomp.pk, schutterboog.pk)
-        resp = self.client.post(url, {'dagdeel': 'AV'})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'dagdeel': 'AV'})
         self.assert_is_redirect(resp, self.url_profiel)
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 1)
 
@@ -542,7 +624,8 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
 
         # haal de bevestig pagina op met het formulier
         url = self.url_bevestig_aanmelden % (deelcomp.pk, schutterboog.pk)
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('schutter/bevestig-aanmelden.dtl', 'plein/site_layout.dtl'))
@@ -552,7 +635,8 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         # probeer in te schrijven en controleer daarna de wedstrijdklasse waarin de schutter geplaatst is
         url = self.url_aanmelden % (deelcomp.pk, schutterboog.pk)
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
-        resp = self.client.post(url)
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
         self.assert_is_redirect(resp, self.url_profiel)
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 1)
 

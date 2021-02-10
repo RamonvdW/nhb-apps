@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019-2020 Ramon van der Winkel.
+                Copyright (c) 2019-2021 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -9,15 +9,16 @@
 {% block title %}Uitloggen{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="uitloggen" %}
 
-<h4>Uitloggen</h4>
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="uitloggen" %}
 
-<p>Druk op de knop om volledig uit te loggen.</p>
+    <h4>Uitloggen</h4>
 
-<form class="col s12" action="{% url 'Account:logout' %}" method="post">
-    {% csrf_token %}
-    <input class="btn-nhb-blauw" name="button_logout" type="submit" value="Uitloggen">
-</form>
+    <p>Druk op de knop om volledig uit te loggen, of maak een keuze in het menu om ingelogd te blijven.</p>
+
+    <form class="col s12" action="{% url 'Account:logout' %}" method="post">
+        {% csrf_token %}
+        <input class="btn-nhb-blauw" name="button_logout" type="submit" value="Uitloggen">
+    </form>
 
 {% endblock %}

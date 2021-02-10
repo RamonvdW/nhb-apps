@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019-2020 Ramon van der Winkel.
+                Copyright (c) 2019-2021 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -11,118 +11,121 @@
 {% block extraheader %}
     {% if insert_meta %}
         <!-- deze header is bedoeld voor de testsuite -->
-        <meta rol_nu="{{ meta_rol }}" functie_nu="{{ meta_functie }}">
+        <meta property="nhb-apps:rol" content="{{ meta_rol }}">
+        {% if meta_functie %}
+            <meta property="nhb-apps:functie" content="{{ meta_functie }}">
+        {% endif %}
     {% endif %}
 {% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="wissel-van-rol" %}
 
-<h4>Wissel van rol</h4>
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="wissel-van-rol" %}
 
-<p>Op deze pagina kan je de rol kiezen die je aan wilt nemen.</p>
-<p>Je huidige rol is: <b>{{ huidige_rol }}</b>.</p>
+    <h4>Wissel van rol</h4>
 
-{% if show_beheerder_intro %}
-    <p>&nbsp;</p>
-    <h5>Introductie Beheerder</h5>
-    <p>Lees hier de introductie voor nieuwe beheerders:
-<a class="btn-small btn-nhb-blauw" href="{{ wiki_intro_nieuwe_beheerders }}" target="_blank" rel="noopener noreferrer"><i class="material-icons-round white-text">help_outline</i></a></p>
-{% endif %}
+    <p>Op deze pagina kan je de rol kiezen die je aan wilt nemen.</p>
+    <p>Je huidige rol is: <b>{{ huidige_rol }}</b>.</p>
 
-{% if show_otp_koppelen %}
-    <p>&nbsp;</p>
-    <h5>Veiligheid</h5>
-    <p>Controle met een tweede factor is verplicht voor gebruikers met toegang tot persoonsgegevens.</p>
-    <p><a class="btn-nhb-rood" href="{% url 'Functie:otp-koppelen' %}">Nu Koppelen</a></p>
-    <p>Handleiding over het koppelen: <a class="btn-nhb-blauw" href="{{ wiki_2fa_url }}" target="_blank" rel="noopener noreferrer">
-<i class="material-icons-round white-text left">help_outline</i>Tweede-factor authenticatie</a></p>
-{% endif %}
+    {% if show_beheerder_intro %}
+        <p>&nbsp;</p>
+        <h5>Introductie Beheerder</h5>
+        <p>Lees hier de introductie voor nieuwe beheerders:
+    <a class="btn-small btn-nhb-blauw" href="{{ wiki_intro_nieuwe_beheerders }}" target="_blank" rel="noopener noreferrer"><i class="material-icons-round white-text">help_outline</i></a></p>
+    {% endif %}
 
-{% if show_vhpg %}
-    <p>&nbsp;</p>
-    <h5>Hanteren persoons<wbr/>gegevens</h5>
-    <p>Voordat je aan de slag kan moeten we eerst een paar afspraken maken over het omgaan met persoonsgegevens.</p>
-    <p><a class="btn-nhb-rood" href="{% url 'Functie:vhpg-acceptatie' %}">Bekijken</a></p>
-{% endif %}
+    {% if show_otp_koppelen %}
+        <p>&nbsp;</p>
+        <h5>Veiligheid</h5>
+        <p>Controle met een tweede factor is verplicht voor gebruikers met toegang tot persoonsgegevens.</p>
+        <p><a class="btn-nhb-rood" href="{% url 'Functie:otp-koppelen' %}">Nu Koppelen</a></p>
+        <p>Handleiding over het koppelen: <a class="btn-nhb-blauw" href="{{ wiki_2fa_url }}" target="_blank" rel="noopener noreferrer">
+    <i class="material-icons-round white-text left">help_outline</i>Tweede-factor authenticatie</a></p>
+    {% endif %}
 
-{% if show_otp_controle %}
-    <p>&nbsp;</p>
-    <h5>Veiligheid</h5>
-    <p>Een aantal rollen komt beschikbaar nadat de controle van de tweede factor uitgevoerd is.</p>
-    <a class="btn-nhb-rood" href="{% url 'Functie:otp-controle' %}">Nu controleren</a>
-{% endif %}
+    {% if show_vhpg %}
+        <p>&nbsp;</p>
+        <h5>Hanteren persoons<wbr/>gegevens</h5>
+        <p>Voordat je aan de slag kan moeten we eerst een paar afspraken maken over het omgaan met persoonsgegevens.</p>
+        <p><a class="btn-nhb-rood" href="{% url 'Functie:vhpg-acceptatie' %}">Bekijken</a></p>
+    {% endif %}
 
-{% if heeft_alle_rollen %}
-    <p>&nbsp;</p>
-    <h6>Indoor:</h6>
-    <div class="white shrink-wrap-5">
-    {% for obj in heeft_alle_rollen %}
-        {% if obj.comp_type_break %}
-            </div>
-            <h6>25m1pijl:</h6>
-            <div class="white shrink-wrap-5">
-        {% endif %}
-        {% if obj.insert_break %}<br>{% endif %}
-        <form style="display: inline-block" method="post" action="{{ obj.url }}">{% csrf_token %}
-            <input class="btn-nhb-blauw" type="submit" value="{{ obj.knop_tekst }}">
-        </form>
-    {% endfor %}
-    </div>
-{% endif %}
+    {% if show_otp_controle %}
+        <p>&nbsp;</p>
+        <h5>Veiligheid</h5>
+        <p>Een aantal rollen komt beschikbaar nadat de controle van de tweede factor uitgevoerd is.</p>
+        <a class="btn-nhb-rood" href="{% url 'Functie:otp-controle' %}">Nu controleren</a>
+    {% endif %}
 
-{% if object_list %}
-    <p>&nbsp;</p>
-    <h5>Eigen rollen</h5>
-
-    {% for obj in object_list %}
-        <p>
-            {% if obj.separator %}
-                <p>&nbsp;</p>
-                <h5>Help anderen</h5>
-
-                <p>Vanuit je <i>huidige</i> rol heb je de mogelijkheid om andere beheerders te helpen door naar <b>hun rol</b> te wisselen.<br>Na het wisselen zie je de website precies zoals zij hem zien. Je kan altijd weer terug.</p>
-                <p>De keuzes hieronder veranderen dus steeds, afhankelijk van je gekozen rol.<br>
-                        <!-- hierarchie -->
-                    <span>De hi&euml;rarchie is BB</span>
-                    <span style="position: relative; bottom: .15em;"> &rarr; </span>
-                    <span>BKO</span>
-                    <span style="position: relative; bottom: .15em;"> &rarr; </span>
-                    <span>RKO</span>
-                    <span style="position: relative; bottom: .15em;"> &rarr; </span>
-                    <span>RCL</span>
-                    <span style="position: relative; bottom: .15em;"> &rarr; </span>
-                    <span>HWL</span>
-                    <span style="position: relative; bottom: .15em;"> &rarr; </span>
-                    <span>WL.&nbsp;&nbsp;&nbsp;</span>
-                    <a class="btn-small btn-nhb-blauw" href="{{ wiki_rollen }}" target="_blank" rel="noopener noreferrer"><i class="material-icons-round white-text">help_outline</i></a>
-                </p>
-            {% else %}
-                <form method="post" action="{{ obj.url }}">
-                    {% csrf_token %}
-                    <input class="btn-nhb-blauw" type="submit" value="{{ obj.titel }}">
-                    {% if obj.ver_naam %}
-                        <span>&nbsp;&nbsp;{{ obj.ver_naam }}</span>
-                    {% endif %}
-                </form>
+    {% if heeft_alle_rollen %}
+        <p>&nbsp;</p>
+        <h6>Indoor:</h6>
+        <div class="white shrink-wrap-5">
+        {% for obj in heeft_alle_rollen %}
+            {% if obj.comp_type_break %}
+                </div>
+                <h6>25m1pijl:</h6>
+                <div class="white shrink-wrap-5">
             {% endif %}
-        </p>
-    {% endfor %}
-{% endif %}
+            {% if obj.insert_break %}<br>{% endif %}
+            <form style="display: inline-block" method="post" action="{{ obj.url }}">{% csrf_token %}
+                <input class="btn-nhb-blauw" type="submit" value="{{ obj.knop_tekst }}">
+            </form>
+        {% endfor %}
+        </div>
+    {% endif %}
 
-{% if url_login_as %}
-    <a class="btn-nhb-blauw" href="{{ url_login_as }}">Account wissel</a>
-{% endif %}
+    {% if object_list %}
+        <p>&nbsp;</p>
+        <h5>Eigen rollen</h5>
 
-{% if not show_vhpg %}
+        {% for obj in object_list %}
+            <div class="selectie-knoppen">
+                {% if obj.separator %}
+                    <p>&nbsp;</p>
+                    <h5>Help anderen</h5>
 
-    <p>&nbsp;</p>
-    <h5>Hanteren persoons<wbr/>gegevens</h5>
+                    <p>Vanuit je <i>huidige</i> rol heb je de mogelijkheid om andere beheerders te helpen door naar <b>hun rol</b> te wisselen.<br>Na het wisselen zie je de website precies zoals zij hem zien. Je kan altijd weer terug.</p>
+                    <p>De keuzes hieronder veranderen dus steeds, afhankelijk van je gekozen rol.<br>
+                            <!-- hierarchie -->
+                        <span>De hi&euml;rarchie is BB</span>
+                        <span style="position: relative; bottom: .15em;"> &rarr; </span>
+                        <span>BKO</span>
+                        <span style="position: relative; bottom: .15em;"> &rarr; </span>
+                        <span>RKO</span>
+                        <span style="position: relative; bottom: .15em;"> &rarr; </span>
+                        <span>RCL</span>
+                        <span style="position: relative; bottom: .15em;"> &rarr; </span>
+                        <span>HWL</span>
+                        <span style="position: relative; bottom: .15em;"> &rarr; </span>
+                        <span>WL.&nbsp;&nbsp;&nbsp;</span>
+                        <a class="btn-small btn-nhb-blauw" href="{{ wiki_rollen }}" target="_blank" rel="noopener noreferrer"><i class="material-icons-round white-text">help_outline</i></a>
+                    </p>
+                {% else %}
+                    <form method="post" action="{{ obj.url }}">
+                        {% csrf_token %}
+                        <input class="btn-nhb-blauw" type="submit" value="{{ obj.titel }}">
+                        {% if obj.ver_naam %}
+                            <span>&nbsp;&nbsp;{{ obj.ver_naam }}</span>
+                        {% endif %}
+                    </form>
+                {% endif %}
+            </div>
+        {% endfor %}
+    {% endif %}
 
-    <p>Je hebt de verklaring hanteren persoonsgegevens afgegeven op {{ vhpg.acceptatie_datum|date:"j F Y" }}.</p>
-    <p><a class="btn-nhb-blauw" href="{% url 'Functie:vhpg-afspraken' %}"><i class="material-icons-round left">remove_red_eye</i>Afspraken inzien</a></p>
+    {% if url_login_as %}
+        <a class="btn-nhb-blauw" href="{{ url_login_as }}">Account wissel</a>
+    {% endif %}
 
-{% endif %}
+    {% if not show_vhpg %}
 
+        <p>&nbsp;</p>
+        <h5>Hanteren persoons<wbr/>gegevens</h5>
+
+        <p>Je hebt de verklaring hanteren persoonsgegevens afgegeven op {{ vhpg.acceptatie_datum|date:"j F Y" }}.</p>
+        <p><a class="btn-nhb-blauw" href="{% url 'Functie:vhpg-afspraken' %}"><i class="material-icons-round left">remove_red_eye</i>Afspraken inzien</a></p>
+
+    {% endif %}
 
 {% endblock %}

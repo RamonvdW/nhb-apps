@@ -1,52 +1,39 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.db.models import F
 from django.conf import settings
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import Resolver404, reverse
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
+from Handleiding.views import reverse_handleiding
 from Logboek.models import schrijf_in_logboek
 from NhbStructuur.models import NhbVereniging
+from Overig.background_sync import BackgroundSync
 from Plein.menu import menu_dynamics
 from Wedstrijden.models import Wedstrijd, WedstrijdenPlan, WedstrijdLocatie
-from .models import (LAAG_REGIO, LAAG_RK, LAAG_BK, DeelCompetitie, DeelcompetitieRonde,
-                     CompetitieKlasse, DeelcompetitieKlasseLimiet,
+from .models import (LAAG_REGIO, LAAG_RK, LAAG_BK, INSCHRIJF_METHODE_1, DeelCompetitie,
+                     CompetitieKlasse, DeelcompetitieKlasseLimiet, DeelcompetitieRonde,
                      KampioenschapSchutterBoog, KampioenschapMutatie,
                      MUTATIE_CUT, MUTATIE_AFMELDEN, MUTATIE_AANMELDEN, DEELNAME_JA, DEELNAME_NEE)
+from .menu import menu_dynamics_competitie
 from types import SimpleNamespace
 import datetime
 import time
+import csv
 
 
 TEMPLATE_COMPETITIE_PLANNING_RAYON = 'competitie/planning-rayon.dtl'
 TEMPLATE_COMPETITIE_WIJZIG_WEDSTRIJD_RAYON = 'competitie/wijzig-wedstrijd-rk.dtl'
-TEMPLATE_COMPETITIE_LIJST_RK = 'competitie/lijst-rk.dtl'
+TEMPLATE_COMPETITIE_LIJST_RK = 'competitie/lijst-rk-selectie.dtl'
 TEMPLATE_COMPETITIE_WIJZIG_STATUS_RK_SCHUTTER = 'competitie/wijzig-status-rk-deelnemer.dtl'
-TEMPLATE_COMPETITIE_WIJZIG_LIMIETEN_RK = 'competitie/limieten-rk.dtl'
+TEMPLATE_COMPETITIE_WIJZIG_LIMIETEN_RK = 'competitie/wijzig-limieten-rk.dtl'
 
-
-# python strftime: 0=sunday, 6=saturday
-# wij rekenen het verschil ten opzicht van maandag in de week
-WEEK_DAGEN = (
-    (0, 'Maandag'),
-    (1, 'Dinsdag'),
-    (2, 'Woensdag'),
-    (3, 'Donderdag'),
-    (4, 'Vrijdag'),
-    (5, 'Zaterdag'),
-    (6, 'Zondag'),
-)
-
-JA_NEE = {
-    False: 'Nee',
-    True: 'Ja'
-}
+mutatie_ping = BackgroundSync(settings.BACKGROUND_SYNC__KAMPIOENSCHAP_MUTATIES)
 
 
 class RayonPlanningView(UserPassesTestMixin, TemplateView):
@@ -70,7 +57,7 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen geeft beveiliging
+            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen voor veiligheid
             deelcomp_rk = (DeelCompetitie
                            .objects
                            .select_related('competitie', 'nhb_rayon')
@@ -90,6 +77,7 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
             deelcomp_rk.save()
 
         klasse2schutters = dict()
+        niet_gebruikt = dict()
         for obj in (KampioenschapSchutterBoog
                     .objects
                     .select_related('klasse__indiv')
@@ -101,6 +89,17 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
                 klasse2schutters[obj.klasse.indiv.pk] = 1
         # for
 
+        for wkl in (CompetitieKlasse
+                    .objects
+                    .exclude(indiv__niet_voor_rk_bk=True)
+                    .select_related('indiv', 'team')
+                    .filter(competitie=deelcomp_rk.competitie)):
+            if wkl.indiv:
+                niet_gebruikt[100000 + wkl.indiv.pk] = wkl.indiv.beschrijving
+            if wkl.team:
+                niet_gebruikt[200000 + wkl.team.pk] = wkl.team.beschrijving
+        # for
+
         # haal de RK wedstrijden op
         context['wedstrijden_rk'] = (deelcomp_rk.plan.wedstrijden
                                      .select_related('vereniging')
@@ -109,7 +108,12 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
                                      .order_by('datum_wanneer',
                                                'tijd_begin_wedstrijd'))
         for obj in context['wedstrijden_rk']:
-            obj.klassen_count = obj.indiv_klassen.count() + obj.team_klassen.count()
+            obj.wkl_namen = list()
+            for wkl in obj.indiv_klassen.order_by('volgorde'):
+                obj.wkl_namen.append(wkl.beschrijving)
+                niet_gebruikt[100000 + wkl.pk] = None
+            # for
+            # FUTURE: obj.team_klassen toevoegen
             obj.schutters_count = 0
 
             for klasse in obj.indiv_klassen.all():
@@ -121,12 +125,16 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
             # for
         # for
 
+        context['wkl_niet_gebruikt'] = [beschrijving for beschrijving in niet_gebruikt.values() if beschrijving]
+        if len(context['wkl_niet_gebruikt']) == 0:
+            del context['wkl_niet_gebruikt']
+
         if rol_nu == Rollen.ROL_RKO and functie_nu.nhb_rayon == deelcomp_rk.nhb_rayon:
             context['url_nieuwe_wedstrijd'] = reverse('Competitie:rayon-planning',
                                                       kwargs={'deelcomp_pk': deelcomp_rk.pk})
 
             for wedstrijd in context['wedstrijden_rk']:
-                wedstrijd.url_wijzig = reverse('Competitie:wijzig-rayon-wedstrijd',
+                wedstrijd.url_wijzig = reverse('Competitie:rayon-wijzig-wedstrijd',
                                                kwargs={'wedstrijd_pk': wedstrijd.pk})
             # for
 
@@ -149,9 +157,13 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
         for deelcomp in deelcomps:
             plan_pks = (DeelcompetitieRonde
                         .objects
+                        .exclude(beschrijving__contains=' oude programma')
                         .filter(deelcompetitie=deelcomp)
                         .values_list('plan__pk', flat=True))
-            deelcomp.rondes_count = len(plan_pks)
+            if deelcomp.inschrijf_methode == INSCHRIJF_METHODE_1:
+                deelcomp.rondes_count = "-"
+            else:
+                deelcomp.rondes_count = len(plan_pks)
             deelcomp.wedstrijden_count = 0
             for plan in (WedstrijdenPlan
                          .objects
@@ -161,7 +173,7 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
             # for
         # for
 
-        menu_dynamics(self.request, context, actief='competitie')
+        menu_dynamics_competitie(self.request, context, comp_pk=deelcomp_rk.competitie.pk)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -174,7 +186,7 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
             raise Resolver404()
 
         try:
-            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen geeft beveiliging
+            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen voor veiligheid
             deelcomp_rk = (DeelCompetitie
                            .objects
                            .select_related('competitie', 'nhb_regio')
@@ -199,7 +211,7 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
 
         deelcomp_rk.plan.wedstrijden.add(wedstrijd)
 
-        return HttpResponseRedirect(reverse('Competitie:wijzig-rayon-wedstrijd',
+        return HttpResponseRedirect(reverse('Competitie:rayon-wijzig-wedstrijd',
                                             kwargs={'wedstrijd_pk': wedstrijd.pk}))
 
 
@@ -237,9 +249,8 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
         wedstrijd_indiv_pks = [obj.pk for obj in wedstrijd.indiv_klassen.all()]
         wkl_indiv = (CompetitieKlasse
                      .objects
+                     .exclude(indiv__niet_voor_rk_bk=True)      # verwijder regio-only klassen
                      .filter(competitie=deelcomp_rk.competitie,
-                             indiv__is_onbekend=False,
-                             indiv__niet_voor_rk_bk=False,
                              team=None)
                      .select_related('indiv__boogtype')
                      .order_by('indiv__volgorde')
@@ -304,7 +315,7 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
         _, functie_nu = rol_get_huidige_functie(self.request)
 
         try:
-            wedstrijd_pk = int(kwargs['wedstrijd_pk'][:6])     # afkappen geeft beveiliging
+            wedstrijd_pk = int(kwargs['wedstrijd_pk'][:6])     # afkappen voor veiligheid
             wedstrijd = (Wedstrijd
                          .objects
                          .select_related('uitslag')
@@ -360,12 +371,12 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
         context['wkl_indiv'], context['wkl_team'] = self._get_wedstrijdklassen(deelcomp_rk, wedstrijd)
 
         context['url_terug'] = reverse('Competitie:rayon-planning', kwargs={'deelcomp_pk': deelcomp_rk.pk})
-        context['url_opslaan'] = reverse('Competitie:wijzig-rayon-wedstrijd', kwargs={'wedstrijd_pk': wedstrijd.pk})
+        context['url_opslaan'] = reverse('Competitie:rayon-wijzig-wedstrijd', kwargs={'wedstrijd_pk': wedstrijd.pk})
 
-        context['url_verwijderen'] = reverse('Competitie:verwijder-wedstrijd',
+        context['url_verwijderen'] = reverse('Competitie:rayon-verwijder-wedstrijd',
                                              kwargs={'wedstrijd_pk': wedstrijd.pk})
 
-        menu_dynamics(self.request, context, actief='competitie')
+        menu_dynamics_competitie(self.request, context, comp_pk=deelcomp_rk.competitie.pk)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -375,7 +386,7 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
         _, functie_nu = rol_get_huidige_functie(self.request)
 
         try:
-            wedstrijd_pk = int(kwargs['wedstrijd_pk'][:6])     # afkappen geeft beveiliging
+            wedstrijd_pk = int(kwargs['wedstrijd_pk'][:6])     # afkappen voor veiligheid
             wedstrijd = (Wedstrijd
                          .objects
                          .select_related('uitslag')
@@ -448,7 +459,7 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
         for key, value in request.POST.items():
             if key[:10] == "wkl_indiv_":
                 try:
-                    pk = int(key[10:10+6])
+                    pk = int(key[10:10+6])          # afkappen voor veiligheid
                 except (IndexError, TypeError, ValueError):
                     pass
                 else:
@@ -473,7 +484,7 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
         return HttpResponseRedirect(url)
 
 
-class LijstRkSchuttersView(UserPassesTestMixin, TemplateView):
+class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
 
     """ Deze view laat de (kandidaat) schutters van en RK zien,
         met mogelijkheid voor de RKO om deze te bevestigen.
@@ -526,7 +537,7 @@ class LijstRkSchuttersView(UserPassesTestMixin, TemplateView):
         # 2) deelnemers voor RK zijn vastgesteld --> toon lijst
 
         try:
-            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen geeft beveiliging
+            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen voor veiligheid
             deelcomp_rk = (DeelCompetitie
                            .objects
                            .select_related('competitie', 'nhb_rayon')
@@ -546,10 +557,10 @@ class LijstRkSchuttersView(UserPassesTestMixin, TemplateView):
 
         if not deelcomp_rk.heeft_deelnemerslijst:
             # situatie 1)
-            context['url_tussenstand'] = reverse('Competitie:tussenstand-rayon-n',
-                                                 kwargs={'afstand': deelcomp_rk.competitie.afstand,
-                                                         'comp_boog': 'r',
-                                                         'rayon_nr': deelcomp_rk.nhb_rayon.rayon_nr})
+            context['url_uitslagen'] = reverse('Competitie:uitslagen-rayon-n',
+                                               kwargs={'comp_pk': deelcomp_rk.competitie.pk,
+                                                       'comp_boog': 'r',
+                                                       'rayon_nr': deelcomp_rk.nhb_rayon.rayon_nr})
             deelnemers = list()
         else:
             # situatie 2)
@@ -564,6 +575,9 @@ class LijstRkSchuttersView(UserPassesTestMixin, TemplateView):
                           .order_by('klasse__indiv__volgorde',  # groepeer per klasse
                                     'volgorde',                 # oplopend op volgorde (dubbelen mogelijk)
                                     '-gemiddelde'))             # aflopend op gemiddelde
+
+            context['url_download'] = reverse('Competitie:lijst-rk-als-bestand',
+                                              kwargs={'deelcomp_pk': deelcomp_rk.pk})
 
         wkl2limiet = dict()    # [pk] = aantal
         for limiet in (DeelcompetitieKlasseLimiet
@@ -622,15 +636,102 @@ class LijstRkSchuttersView(UserPassesTestMixin, TemplateView):
             context['aantal_bevestigd'] = aantal_bevestigd
             context['aantal_attentie'] = aantal_attentie
 
-        context['wiki_rk_schutters'] = settings.WIKI_URL + '/' + settings.HANDLEIDING_RK_SCHUTTERS
+        context['wiki_rk_schutters'] = reverse_handleiding(settings.HANDLEIDING_RK_SELECTIE)
 
-        menu_dynamics(self.request, context, actief='competitie')
+        menu_dynamics_competitie(self.request, context, comp_pk=deelcomp_rk.competitie.pk)
         return context
+
+
+class LijstRkSelectieAlsBestandView(LijstRkSelectieView):
+
+    """ Deze klasse wordt gebruikt om de RK selectie lijst
+        te downloaden als csv bestand
+    """
+
+    def get(self, request, *args, **kwargs):
+
+        try:
+            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen voor veiligheid
+            deelcomp_rk = (DeelCompetitie
+                           .objects
+                           .select_related('competitie', 'nhb_rayon')
+                           .get(pk=deelcomp_pk, laag=LAAG_RK))
+        except (ValueError, DeelCompetitie.DoesNotExist):
+            raise Resolver404()
+
+        if not deelcomp_rk.heeft_deelnemerslijst:
+            raise Resolver404()
+
+        # laat alleen de juiste RKO de lijst ophalen
+        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
+        if rol_nu == Rollen.ROL_RKO and functie_nu != deelcomp_rk.functie:
+            raise Resolver404()     # niet de juiste RKO
+
+        deelnemers = (KampioenschapSchutterBoog
+                      .objects
+                      .select_related('deelcompetitie',
+                                      'klasse__indiv',
+                                      'schutterboog__nhblid',
+                                      'bij_vereniging')
+                      .exclude(deelname=DEELNAME_NEE)
+                      .filter(deelcompetitie=deelcomp_rk,
+                              rank__lte=48)                 # max 48 schutters
+                      .order_by('klasse__indiv__volgorde',  # groepeer per klasse
+                                'volgorde',                 # oplopend op volgorde (dubbelen mogelijk)
+                                '-gemiddelde'))             # aflopend op gemiddelde
+
+        wkl2limiet = dict()    # [pk] = aantal
+        for limiet in (DeelcompetitieKlasseLimiet
+                       .objects
+                       .select_related('klasse')
+                       .filter(deelcompetitie=deelcomp_rk)):
+            wkl2limiet[limiet.klasse.pk] = limiet.limiet
+        # for
+
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="rayon%s_alle.csv"' % deelcomp_rk.nhb_rayon.rayon_nr
+
+        writer = csv.writer(response)
+        writer.writerow(['Rank', 'NHB nummer', 'Naam', 'Vereniging', 'Label', 'Klasse', 'Gemiddelde'])
+
+        for deelnemer in deelnemers:
+
+            try:
+                limiet = wkl2limiet[deelnemer.klasse.pk]
+            except KeyError:
+                limiet = 24
+
+            # database query was voor 48 schutters
+            # voor kleinere klassen moeten we minder reservisten tonen
+            if deelnemer.rank <= 2*limiet:
+                lid = deelnemer.schutterboog.nhblid
+                ver = deelnemer.bij_vereniging
+                ver_str = str(ver)
+
+                label = deelnemer.kampioen_label
+                if deelnemer.rank > limiet:
+                    label = 'Reserve'
+
+                if deelnemer.deelname != DEELNAME_JA:
+                    if label != "":
+                        label += " "
+                    label += "(deelname onzeker)"
+
+                writer.writerow([deelnemer.rank,
+                                 lid.nhb_nr,
+                                 lid.volledige_naam(),
+                                 str(ver),                  # [nnnn] Naam
+                                 label,
+                                 deelnemer.klasse.indiv.beschrijving,
+                                 deelnemer.gemiddelde])
+        # for
+
+        return response
 
 
 class WijzigStatusRkSchutterView(UserPassesTestMixin, TemplateView):
 
-    """ Deze view laat de RKO de status van een RK schutters aanpassen """
+    """ Deze view laat de RKO de status van een RK selectie aanpassen """
 
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_WIJZIG_STATUS_RK_SCHUTTER
@@ -651,7 +752,7 @@ class WijzigStatusRkSchutterView(UserPassesTestMixin, TemplateView):
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
 
         try:
-            deelnemer_pk = int(kwargs['deelnemer_pk'][:6])  # afkappen geeft beveiliging
+            deelnemer_pk = int(kwargs['deelnemer_pk'][:6])  # afkappen voor veiligheid
             deelnemer = (KampioenschapSchutterBoog
                          .objects
                          .select_related('deelcompetitie__competitie',
@@ -684,7 +785,7 @@ class WijzigStatusRkSchutterView(UserPassesTestMixin, TemplateView):
         if rol_nu == Rollen.ROL_RKO:
             context['url_terug'] = reverse('Competitie:lijst-rk',
                                            kwargs={'deelcomp_pk': deelnemer.deelcompetitie.pk})
-            menu_dynamics(self.request, context, actief='competitie')
+            menu_dynamics_competitie(self.request, context, comp_pk=deelnemer.deelcompetitie.competitie.pk)
         else:
             # HWL
             context['url_terug'] = reverse('Vereniging:lijst-rk',
@@ -696,7 +797,7 @@ class WijzigStatusRkSchutterView(UserPassesTestMixin, TemplateView):
     def post(self, request, *args, **kwargs):
         """ wordt aangeroepen als de gebruik op de knop OPSLAAN druk """
         try:
-            deelnemer_pk = int(kwargs['deelnemer_pk'][:6])  # afkappen geeft beveiliging
+            deelnemer_pk = int(kwargs['deelnemer_pk'][:6])  # afkappen voor veiligheid
             deelnemer = (KampioenschapSchutterBoog
                          .objects
                          .select_related('klasse',
@@ -734,6 +835,7 @@ class WijzigStatusRkSchutterView(UserPassesTestMixin, TemplateView):
 
         if mutatie:
             mutatie.save()
+            mutatie_ping.ping()
 
             if snel != '1':
                 # wacht maximaal 3 seconden tot de mutatie uitgevoerd is
@@ -758,7 +860,7 @@ class WijzigStatusRkSchutterView(UserPassesTestMixin, TemplateView):
 
 class RayonLimietenView(UserPassesTestMixin, TemplateView):
 
-    """ Deze view laat de RKO de status van een RK schutters aanpassen """
+    """ Deze view laat de RKO de status van een RK selectie aanpassen """
 
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_WIJZIG_LIMIETEN_RK
@@ -777,7 +879,7 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen geeft beveiliging
+            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen voor veiligheid
             deelcomp_rk = (DeelCompetitie
                            .objects
                            .select_related('competitie')
@@ -793,9 +895,8 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
 
         context['wkl'] = wkl = (CompetitieKlasse
                                 .objects
+                                .exclude(indiv__niet_voor_rk_bk=True)
                                 .filter(competitie=deelcomp_rk.competitie,
-                                        indiv__is_onbekend=False,
-                                        indiv__niet_voor_rk_bk=False,
                                         team=None)
                                 .select_related('indiv__boogtype')
                                 .order_by('indiv__volgorde'))
@@ -816,21 +917,21 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
             wkl.limiet = limiet.limiet
         # for
 
-        context['url_wijzig'] = reverse('Competitie:rayon-limieten',
-                                        kwargs={'deelcomp_pk': deelcomp_rk.pk})
+        context['url_opslaan'] = reverse('Competitie:rayon-limieten',
+                                         kwargs={'deelcomp_pk': deelcomp_rk.pk})
 
-        context['url_terug'] = reverse('Competitie:overzicht')
+        context['url_terug'] = reverse('Competitie:kies')
 
-        context['wiki_rk_schutters'] = settings.WIKI_URL + '/' + settings.HANDLEIDING_RK_SCHUTTERS
+        context['wiki_rk_schutters'] = reverse_handleiding(settings.HANDLEIDING_RK_SELECTIE)
 
-        menu_dynamics(self.request, context, actief='competitie')
+        menu_dynamics_competitie(self.request, context, comp_pk=deelcomp_rk.competitie.pk)
         return context
 
     def post(self, request, *args, **kwargs):
         """ wordt aangeroepen als de gebruik op de knop OPSLAAN druk """
 
         try:
-            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen geeft beveiliging
+            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen voor veiligheid
             deelcomp_rk = (DeelCompetitie
                            .objects
                            .select_related('competitie')
@@ -849,9 +950,8 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
 
         for ckl in (CompetitieKlasse
                     .objects
+                    .exclude(indiv__niet_voor_rk_bk=True)
                     .filter(competitie=deelcomp_rk.competitie,
-                            indiv__is_onbekend=False,
-                            indiv__niet_voor_rk_bk=False,
                             team=None)):
 
             sel = 'sel_%s' % ckl.pk
@@ -913,6 +1013,8 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
         # for
 
         if mutatie:
+            mutatie_ping.ping()
+
             # wacht op verwerking door achtergrond-taak voordat we verder gaan
             snel = str(request.POST.get('snel', ''))[:1]        # voor autotest
 
@@ -927,8 +1029,56 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
                     mutatie = KampioenschapMutatie.objects.get(pk=mutatie.pk)
                 # while
 
-        return HttpResponseRedirect(reverse('Competitie:overzicht'))
+        return HttpResponseRedirect(reverse('Competitie:kies'))
+
+
+class VerwijderWedstrijdView(UserPassesTestMixin, View):
+
+    """ Deze view laat een RK wedstrijd verwijderen """
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        rol_nu = rol_get_huidige(self.request)
+        return rol_nu == Rollen.ROL_RKO
+
+    def handle_no_permission(self):
+        """ gebruiker heeft geen toegang --> redirect naar het plein """
+        return HttpResponseRedirect(reverse('Plein:plein'))
+
+    def post(self, request, *args, **kwargs):
+        """ Deze functie wordt aangeroepen als de knop 'Verwijder' gebruikt wordt
+        """
+        try:
+            wedstrijd_pk = int(kwargs['wedstrijd_pk'][:6])  # afkappen voor veiligheid
+            wedstrijd = (Wedstrijd
+                         .objects
+                         .select_related('uitslag')
+                         .prefetch_related('uitslag__scores')
+                         .get(pk=wedstrijd_pk))
+        except (ValueError, Wedstrijd.DoesNotExist):
+            raise Resolver404()
+
+        plan = wedstrijd.wedstrijdenplan_set.all()[0]
+        try:
+            deelcomp = DeelCompetitie.objects.get(plan=plan, laag=LAAG_RK)
+        except DeelCompetitie.DoesNotExist:
+            raise Resolver404()
+
+        # correcte beheerder?
+        _, functie_nu = rol_get_huidige_functie(self.request)
+        if deelcomp.functie != functie_nu:
+            raise Resolver404()
+
+        # voorkom verwijderen van wedstrijden waar een uitslag aan hangt
+        if wedstrijd.uitslag:
+            uitslag = wedstrijd.uitslag
+            if uitslag and (uitslag.is_bevroren or uitslag.scores.count() > 0):
+                raise Resolver404()
+
+        wedstrijd.delete()
+
+        url = reverse('Competitie:rayon-planning', kwargs={'deelcomp_pk': deelcomp.pk})
+        return HttpResponseRedirect(url)
 
 
 # end of file
-

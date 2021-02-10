@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -34,7 +34,7 @@ class NhbRayon(models.Model):
     naam = models.CharField(max_length=20)      # Rayon 3
 
     # beschrijving van het gebied dat dit rayon dekt
-    geografisch_gebied = models.CharField(max_length=50)        # TODO: verwijderen
+    geografisch_gebied = models.CharField(max_length=50)        # FUTURE: verwijderen
 
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
@@ -53,7 +53,7 @@ class NhbRayon(models.Model):
 class NhbRegio(models.Model):
     """ Tabel waarin de Regio definities van de NHB staan """
 
-    # 3-cijferig NHB nummer van deze regio
+    # 3-cijferige NHB nummer van deze regio
     regio_nr = models.PositiveIntegerField(primary_key=True)
 
     # beschrijving van de regio
@@ -92,8 +92,16 @@ class NhbCluster(models.Model):
     # aparte clusters voor 18m en 25m
     gebruik = models.CharField(max_length=2, choices=GEBRUIK)
 
+    def cluster_code(self):
+        return "%s%s" % (self.regio.regio_nr, self.letter)
+
     def cluster_code_str(self):
-        return "%s%s voor %s" % (self.regio.regio_nr, self.letter, GEBRUIK2STR[self.gebruik])
+        msg = "%s voor " % self.cluster_code()
+        try:
+            msg += GEBRUIK2STR[self.gebruik]
+        except KeyError:
+            msg = "?"
+        return msg
 
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
@@ -217,6 +225,11 @@ class NhbLid(models.Model):
                                 on_delete=models.PROTECT,
                                 blank=True,  # allow access input in form
                                 null=True)   # allow NULL relation in database
+
+    # indien CRM aangeeft dat lid uitgeschreven is bij vereniging, toch op die vereniging
+    # houden tot het einde van het jaar zodat de diensten (waarvoor betaald is) nog gebruikt kunnen worden.
+    # dit voorkomt een gat bij overschrijvingen.
+    lid_tot_einde_jaar = models.PositiveSmallIntegerField(default=0)
 
     # koppeling met een account (indien aangemaakt)
     account = models.ForeignKey(Account, on_delete=models.SET_NULL, blank=True, null=True)

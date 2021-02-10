@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -13,29 +13,30 @@ from django.shortcuts import redirect
 from django.utils import timezone
 from django.conf import settings
 from BasisTypen.models import BoogType
-from Plein.menu import menu_dynamics
-from Logboek.models import schrijf_in_logboek
-from Functie.rol import Rollen, rol_get_huidige
 from BasisTypen.models import (IndivWedstrijdklasse, TeamWedstrijdklasse,
                                MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT)
+from Functie.rol import Rollen, rol_get_huidige
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
+from Logboek.models import schrijf_in_logboek
 from NhbStructuur.models import NhbLid
+from Plein.menu import menu_dynamics
 from Schutter.models import SchutterBoog
-from Score.models import Score, ScoreHist
+from Score.models import Score, ScoreHist, zoek_meest_recente_automatisch_vastgestelde_ag
+from django.utils.formats import localize
 from .models import (AG_NUL, AG_LAAGSTE_NIET_NUL,
-                     Competitie, competitie_aanmaken,
-                     maak_competitieklasse_indiv)
+                     Competitie, competitie_aanmaken, CompetitieKlasse)
+from .menu import menu_dynamics_competitie
 import datetime
 
 
-TEMPLATE_COMPETITIE_INSTELLINGEN = 'competitie/instellingen-nieuwe-competitie.dtl'
-TEMPLATE_COMPETITIE_AANMAKEN = 'competitie/competities-aanmaken.dtl'
-TEMPLATE_COMPETITIE_KLASSEGRENZEN_VASTSTELLEN = 'competitie/klassegrenzen-vaststellen.dtl'
+TEMPLATE_COMPETITIE_INSTELLINGEN = 'competitie/bb-instellingen-nieuwe-competitie.dtl'
+TEMPLATE_COMPETITIE_AANMAKEN = 'competitie/bb-competities-aanmaken.dtl'
+TEMPLATE_COMPETITIE_KLASSEGRENZEN_VASTSTELLEN = 'competitie/bb-klassegrenzen-vaststellen.dtl'
 TEMPLATE_COMPETITIE_KLASSEGRENZEN_TONEN = 'competitie/klassegrenzen-tonen.dtl'
 TEMPLATE_COMPETITIE_AANGEMELD_REGIO = 'competitie/lijst-aangemeld-regio.dtl'
-TEMPLATE_COMPETITIE_AG_VASTSTELLEN = 'competitie/ag-vaststellen.dtl'
+TEMPLATE_COMPETITIE_AG_VASTSTELLEN = 'competitie/bb-ag-vaststellen.dtl'
 TEMPLATE_COMPETITIE_INFO_COMPETITIE = 'competitie/info-competitie.dtl'
-TEMPLATE_COMPETITIE_WIJZIG_DATUMS = 'competitie/wijzig-datums.dtl'
+TEMPLATE_COMPETITIE_WIJZIG_DATUMS = 'competitie/bb-wijzig-datums.dtl'
 
 
 def models_bepaal_startjaar_nieuwe_competitie():
@@ -64,13 +65,14 @@ class InstellingenVolgendeCompetitieView(UserPassesTestMixin, TemplateView):
         objs = (IndivWedstrijdklasse
                 .objects
                 .filter(buiten_gebruik=False)
-                .order_by('volgorde')
-                .select_related('boogtype'))
+                .select_related('boogtype')
+                .prefetch_related('leeftijdsklassen')
+                .order_by('volgorde'))
         prev = 0
         for klasse in objs:
             groep = klasse.volgorde // 10
             klasse.separate_before = groep != prev
-            klasse.lkl_list = [lkl.beschrijving for lkl in klasse.leeftijdsklassen.only('beschrijving').all()]
+            klasse.lkl_list = [lkl.beschrijving for lkl in klasse.leeftijdsklassen.all()]
             prev = groep
         # for
         return objs
@@ -80,12 +82,13 @@ class InstellingenVolgendeCompetitieView(UserPassesTestMixin, TemplateView):
         objs = (TeamWedstrijdklasse
                 .objects
                 .filter(buiten_gebruik=False)
+                .prefetch_related('boogtypen')
                 .order_by('volgorde'))
         prev = 0
         for klasse in objs:
             groep = klasse.volgorde // 10
             klasse.separate_before = groep != prev
-            klasse.boogtypen_list = [boogtype.beschrijving for boogtype in klasse.boogtypen.only('beschrijving', 'volgorde').order_by('volgorde')]
+            klasse.boogtypen_list = [boogtype.beschrijving for boogtype in klasse.boogtypen.order_by('volgorde')]
             prev = groep
         # for
         return objs
@@ -115,7 +118,8 @@ class CompetitieAanmakenView(UserPassesTestMixin, TemplateView):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
         return HttpResponseRedirect(reverse('Plein:plein'))
 
-    def post(self, request, *args, **kwargs):
+    @staticmethod
+    def post(request, *args, **kwargs):
         """ deze functie handelt het http-post verzoek af
             (wat volgt uit het drukken op de knop)
             om de nieuwe competitie op te starten.
@@ -123,12 +127,12 @@ class CompetitieAanmakenView(UserPassesTestMixin, TemplateView):
         jaar = models_bepaal_startjaar_nieuwe_competitie()
 
         # beveiliging tegen dubbel aanmaken
-        if Competitie.objects.filter(is_afgesloten=False).order_by('begin_jaar', 'afstand').count() == 0:
+        if Competitie.objects.filter(begin_jaar=jaar).count() == 0:
             seizoen = "%s/%s" % (jaar, jaar+1)
             schrijf_in_logboek(request.user, 'Competitie', 'Aanmaken competities %s' % seizoen)
             competitie_aanmaken(jaar)
 
-        return redirect('Competitie:overzicht')
+        return redirect('Competitie:kies')
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -137,10 +141,10 @@ class CompetitieAanmakenView(UserPassesTestMixin, TemplateView):
         context['seizoen'] = "%s/%s" % (jaar, jaar+1)
 
         # beveiliging tegen dubbel aanmaken
-        if Competitie.objects.filter(is_afgesloten=False).order_by('begin_jaar', 'afstand').count() > 0:
+        if Competitie.objects.filter(begin_jaar=jaar).count() > 0:
             context['bestaat_al'] = True
 
-        menu_dynamics(self.request, context, actief='competitie')
+        menu_dynamics_competitie(self.request, context)
         return context
 
 
@@ -158,11 +162,10 @@ class AGVaststellenView(UserPassesTestMixin, TemplateView):
         if rol_nu != Rollen.ROL_BB:
             return False
 
-        # alleen toestaan als een van de competities in fase A1 is
+        # alleen toestaan als een van de competities in fase A is
         kan_ag_vaststellen = False
         for comp in Competitie.objects.filter(is_afgesloten=False):
-            comp.zet_fase()
-            if comp.fase == 'A1':
+            if not comp.klassegrenzen_vastgesteld:
                 kan_ag_vaststellen = True
         # for
         return kan_ag_vaststellen
@@ -189,7 +192,8 @@ class AGVaststellenView(UserPassesTestMixin, TemplateView):
         menu_dynamics(self.request, context, actief='competitie')
         return render(request, self.template_name, context)
 
-    def post(self, request, *args, **kwargs):
+    @staticmethod
+    def post(request, *args, **kwargs):
         """ deze functie wordt aangeroepen als een POST request ontvangen is.
             --> de beheerder wil de AG's vaststellen
         """
@@ -318,14 +322,14 @@ class AGVaststellenView(UserPassesTestMixin, TemplateView):
             if len(bulk_scorehist) > 0:
                 ScoreHist.objects.bulk_create(bulk_scorehist)
 
-        return redirect('Competitie:overzicht')
+        return redirect('Competitie:kies')
 
 
 class KlassegrenzenVaststellenView(UserPassesTestMixin, TemplateView):
 
     """ deze view laat de klassengrenzen voor de volgende competitie zien,
         aan de hand van de al vastgestelde aanvangsgemiddelden
-        De BKO kan deze bevestigen, waarna ze aan de competitie toegevoegd worden
+        De BB kan deze bevestigen, waarna ze aan de competitie toegevoegd worden
     """
 
     # class variables shared by all instances
@@ -355,6 +359,7 @@ class KlassegrenzenVaststellenView(UserPassesTestMixin, TemplateView):
         for wedstrklasse in (IndivWedstrijdklasse
                              .objects
                              .select_related('boogtype')
+                             .prefetch_related('leeftijdsklassen')
                              .filter(buiten_gebruik=False)
                              .order_by('volgorde')):
             # zoek de minimale en maximaal toegestane leeftijden voor deze wedstrijdklasse
@@ -380,15 +385,28 @@ class KlassegrenzenVaststellenView(UserPassesTestMixin, TemplateView):
         # for
         return targets2
 
-    def _get_queryset(self, afstand):
+    def _get_queryset(self, comp):
         # bepaal het jaar waarin de wedstrijdleeftijd bepaald moet worden
-        # dit is het huidige jaar + 1
-        self.wedstrijdjaar = jaar = 1 + models_bepaal_startjaar_nieuwe_competitie()
+        # dat is het tweede jaar van de competitie, waarin de BK gehouden wordt
+        jaar = comp.begin_jaar + 1
 
         # eenmalig de wedstrijdleeftijd van elke nhblid berekenen
         schutternr2age = dict()     # [ nhb_nr ] = age
         for lid in NhbLid.objects.all():
             schutternr2age[lid.nhb_nr] = lid.bereken_wedstrijdleeftijd(jaar)
+        # for
+
+        # haal de scores 1x op per boogtype
+        boogtype2ags = dict()        # [boogtype.afkorting] = scores
+        for boogtype in BoogType.objects.all():
+            boogtype2ags[boogtype.afkorting] = (Score
+                                                .objects
+                                                .select_related('schutterboog',
+                                                                'schutterboog__boogtype',
+                                                                'schutterboog__nhblid')
+                                                .filter(is_ag=True,
+                                                        afstand_meter=comp.afstand,
+                                                        schutterboog__boogtype=boogtype))
         # for
 
         # wedstrijdklassen vs leeftijd + bogen
@@ -401,10 +419,7 @@ class KlassegrenzenVaststellenView(UserPassesTestMixin, TemplateView):
 
             # zoek alle schutters-boog die hier in passen (boog, leeftijd)
             gemiddelden = list()
-            for score in (Score
-                          .objects
-                          .select_related('schutterboog', 'schutterboog__boogtype', 'schutterboog__nhblid')
-                          .filter(is_ag=True, afstand_meter=afstand, schutterboog__boogtype=boogtype)):
+            for score in boogtype2ags[boogtype.afkorting]:
                 age = schutternr2age[score.schutterboog.nhblid.nhb_nr]
                 if min_age <= age <= max_age:
                     gemiddelden.append(score.waarde)        # is AG*1000
@@ -474,57 +489,59 @@ class KlassegrenzenVaststellenView(UserPassesTestMixin, TemplateView):
         """
         context = super().get_context_data(**kwargs)
 
-        # stukje input beveiliging: begrens tot 2 tekens getal (18/25)
-        afstand_str = kwargs['afstand'][:2]     # afkappen geeft veiligheid
         try:
-            afstand = int(afstand_str)
-        except ValueError:
+            comp_pk = int(kwargs['comp_pk'][:6])      # afkappen geeft beveiliging
+            comp = Competitie.objects.get(pk=comp_pk)
+        except (ValueError, Competitie.DoesNotExist):
             raise Resolver404()
 
-        objs = Competitie.objects.filter(afstand=afstand_str, is_afgesloten=False)
-        if objs.count() == 0:
-            # onverwachts here
-            raise Resolver404()
-        obj = objs[0]
+        context['comp'] = comp
 
-        if obj.competitieklasse_set.count() != 0:
+        if comp.klassegrenzen_vastgesteld:
             context['al_vastgesteld'] = True
         else:
-            context['object_list'] = self._get_queryset(afstand)
-            context['wedstrijdjaar'] = self.wedstrijdjaar
+            context['object_list'] = self._get_queryset(comp)
+            context['wedstrijdjaar'] = comp.begin_jaar + 1
 
-        context['comp_str'] = obj.beschrijving
-        context['afstand'] = afstand_str
+        datum = zoek_meest_recente_automatisch_vastgestelde_ag()
+        if datum:
+            context['bb_ag_nieuwste_datum'] = localize(datum.date())
 
-        menu_dynamics(self.request, context, actief='competitie')
+        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
         return render(request, self.template_name, context)
 
     def post(self, request, *args, **kwargs):
         """ deze functie wordt aangeroepen als een POST request ontvangen is.
             --> de beheerder wil deze klassegrenzen vaststellen
         """
-        afstand_str = kwargs['afstand'][:2]     # afkappen geeft veiligheid
+
         try:
-            afstand = int(afstand_str)
-        except ValueError:
+            comp_pk = int(kwargs['comp_pk'][:6])      # afkappen geeft beveiliging
+            comp = Competitie.objects.get(pk=comp_pk)
+        except (ValueError, Competitie.DoesNotExist):
             raise Resolver404()
 
-        objs = Competitie.objects.filter(afstand=afstand_str, is_afgesloten=False)
-        if objs.count() > 0:
-            comp = objs[0]
-
-            if comp.competitieklasse_set.count() != 0:
-                # onverwachts hier
-                raise Resolver404()
+        if not comp.klassegrenzen_vastgesteld:
+            bulk = list()
 
             # haal dezelfde data op als voor de GET request
-            for obj in self._get_queryset(afstand):
-                maak_competitieklasse_indiv(comp, obj['wedstrkl_obj'], obj['ag'])
+            for obj in self._get_queryset(comp):
+                compkl = CompetitieKlasse(competitie=comp,
+                                          indiv=obj['wedstrkl_obj'],
+                                          min_ag=obj['ag'])
+                bulk.append(compkl)
             # for
 
-            schrijf_in_logboek(request.user, 'Competitie', 'Klassegrenzen bevestigd voor %s' % comp.beschrijving)
+            CompetitieKlasse.objects.bulk_create(bulk)
 
-        return redirect('Competitie:overzicht')
+            comp.klassegrenzen_vastgesteld = True
+            comp.save()
+
+            schrijf_in_logboek(request.user,
+                               'Competitie',
+                               'Klassegrenzen vastgesteld voor %s' % comp.beschrijving)
+
+        return redirect('Competitie:kies')
 
 
 class WijzigDatumsView(UserPassesTestMixin, TemplateView):
@@ -549,33 +566,36 @@ class WijzigDatumsView(UserPassesTestMixin, TemplateView):
 
         try:
             comp_pk = int(kwargs['comp_pk'][:6])      # afkappen geeft beveiliging
-            competitie = Competitie.objects.get(pk=comp_pk)
+            comp = Competitie.objects.get(pk=comp_pk)
         except (ValueError, Competitie.DoesNotExist):
             raise Resolver404()
 
-        context['competitie'] = competitie
-        competitie.datum1 = competitie.begin_aanmeldingen
-        competitie.datum2 = competitie.einde_aanmeldingen
-        competitie.datum3 = competitie.einde_teamvorming
-        competitie.datum4 = competitie.eerste_wedstrijd
-        competitie.datum5 = competitie.laatst_mogelijke_wedstrijd
-        competitie.datum6 = competitie.rk_eerste_wedstrijd
-        competitie.datum7 = competitie.rk_laatste_wedstrijd
-        competitie.datum8 = competitie.bk_eerste_wedstrijd
-        competitie.datum9 = competitie.bk_laatste_wedstrijd
+        context['comp'] = comp
 
-        context['wijzig_url'] = reverse('Competitie:wijzig-datums', kwargs={'comp_pk': competitie.pk})
+        context['wijzig_url'] = reverse('Competitie:wijzig-datums',
+                                        kwargs={'comp_pk': comp.pk})
 
-        menu_dynamics(self.request, context, actief='competitie')
+        comp.datum1 = comp.begin_aanmeldingen
+        comp.datum2 = comp.einde_aanmeldingen
+        comp.datum3 = comp.einde_teamvorming
+        comp.datum4 = comp.eerste_wedstrijd
+        comp.datum5 = comp.laatst_mogelijke_wedstrijd
+        comp.datum6 = comp.rk_eerste_wedstrijd
+        comp.datum7 = comp.rk_laatste_wedstrijd
+        comp.datum8 = comp.bk_eerste_wedstrijd
+        comp.datum9 = comp.bk_laatste_wedstrijd
+
+        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
         return context
 
-    def post(self, request, *args, **kwargs):
+    @staticmethod
+    def post(request, *args, **kwargs):
         """ deze functie wordt aangeroepen als een POST request ontvangen is.
             --> de beheerder wil deze klassegrenzen vaststellen
         """
         try:
             comp_pk = int(kwargs['comp_pk'][:6])      # afkappen geeft beveiliging
-            competitie = Competitie.objects.get(pk=comp_pk)
+            comp = Competitie.objects.get(pk=comp_pk)
         except (ValueError, Competitie.DoesNotExist):
             raise Resolver404()
 
@@ -595,17 +615,18 @@ class WijzigDatumsView(UserPassesTestMixin, TemplateView):
         # for
 
         datums.insert(0, None)      # dummy
-        competitie.begin_aanmeldingen = datums[1]
-        competitie.einde_aanmeldingen = datums[2]
-        competitie.einde_teamvorming = datums[3]
-        competitie.eerste_wedstrijd = datums[4]
-        competitie.laatst_mogelijke_wedstrijd = datums[5]
-        competitie.rk_eerste_wedstrijd = datums[6]
-        competitie.rk_laatste_wedstrijd = datums[7]
-        competitie.bk_eerste_wedstrijd = datums[8]
-        competitie.bk_laatste_wedstrijd = datums[9]
-        competitie.save()
+        comp.begin_aanmeldingen = datums[1]
+        comp.einde_aanmeldingen = datums[2]
+        comp.einde_teamvorming = datums[3]
+        comp.eerste_wedstrijd = datums[4]
+        comp.laatst_mogelijke_wedstrijd = datums[5]
+        comp.rk_eerste_wedstrijd = datums[6]
+        comp.rk_laatste_wedstrijd = datums[7]
+        comp.bk_eerste_wedstrijd = datums[8]
+        comp.bk_laatste_wedstrijd = datums[9]
+        comp.save()
 
-        return HttpResponseRedirect(reverse('Competitie:overzicht'))
+        return HttpResponseRedirect(reverse('Competitie:overzicht',
+                                            kwargs={'comp_pk': comp.pk}))
 
 # end of file

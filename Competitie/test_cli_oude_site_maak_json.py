@@ -26,7 +26,8 @@ class TestCompetitieCliOudeSiteMaakJson(E2EHelpers, TestCase):
     def test_een(self):
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('oude_site_maak_json', self.dir_testfiles1, stderr=f1, stdout=f2)
+        with self.assert_max_queries(20):
+            management.call_command('oude_site_maak_json', self.dir_testfiles1, stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
         self.assertTrue("[ERROR] Kan einde tabel onverwacht niet vinden" in f2.getvalue())
@@ -41,7 +42,8 @@ class TestCompetitieCliOudeSiteMaakJson(E2EHelpers, TestCase):
     def test_all(self):
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('oude_site_maak_json', self.dir_top, '--all', stderr=f1, stdout=f2)
+        with self.assert_max_queries(20):
+            management.call_command('oude_site_maak_json', self.dir_top, '--all', stderr=f1, stdout=f2)
         self.assertTrue("[INFO] Schrijf '%s/oude_site.json'" % self.dir_testfiles1[2:] in f2.getvalue())
         self.assertTrue("[INFO] Schrijf '%s/zelfde_site.json'" % self.dir_testfiles2[2:] in f2.getvalue())
 

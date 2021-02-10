@@ -1,23 +1,34 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect, render, reverse
 from django.views.generic import TemplateView, View
-from Functie.rol import Rollen, rol_get_huidige, rol_get_beschrijving
+from Functie.rol import Rollen, rol_get_huidige, rol_get_beschrijving, rol_mag_wisselen
+from Handleiding.views import reverse_handleiding
 from Taken.taken import eval_open_taken
 from .menu import menu_dynamics
 
 
-TEMPLATE_PLEIN_BEZOEKER = 'plein/plein-bezoeker.dtl'            # niet ingelogd
-TEMPLATE_PLEIN_GEBRUIKER = 'plein/plein-gebruiker.dtl'          # special (ROL_NONE)
-TEMPLATE_PLEIN_SCHUTTER = 'plein/plein-schutter.dtl'            # schutter (ROL_SCHUTTER)
-TEMPLATE_PLEIN_BEHEERDER = 'plein/plein-beheerder.dtl'          # beheerder (ROL_BB/BKO/RKO/RCL/SEC/HWL/WL)
+TEMPLATE_PLEIN_BEZOEKER = 'plein/plein-bezoeker.dtl'    # niet ingelogd
+TEMPLATE_PLEIN_SCHUTTER = 'plein/plein-schutter.dtl'    # schutter (ROL_SCHUTTER)
+TEMPLATE_PLEIN_BEHEERDER = 'plein/plein-beheerder.dtl'  # beheerder (ROL_BB/BKO/RKO/RCL/SEC/HWL/WL)
 TEMPLATE_PRIVACY = 'plein/privacy.dtl'
 TEMPLATE_NIET_ONDERSTEUND = 'plein/niet-ondersteund.dtl'
+
+
+ROL2HANDLEIDING_PAGINA = {
+    Rollen.ROL_BB: settings.HANDLEIDING_BB,
+    Rollen.ROL_BKO: settings.HANDLEIDING_BKO,
+    Rollen.ROL_RKO: settings.HANDLEIDING_RKO,
+    Rollen.ROL_RCL: settings.HANDLEIDING_RCL,
+    Rollen.ROL_HWL: settings.HANDLEIDING_HWL,
+    Rollen.ROL_WL:  settings.HANDLEIDING_WL,
+    Rollen.ROL_SEC: settings.HANDLEIDING_SEC,
+}
 
 
 def is_browser_supported(request):
@@ -73,26 +84,25 @@ class PleinView(View):
         context = dict()
 
         if request.user.is_authenticated:
-            account = self.request.user
             rol_nu = rol_get_huidige(request)
 
-            context['menu_show_plein'] = True
-
-            if rol_nu == Rollen.ROL_NONE or rol_nu is None:
-                template = TEMPLATE_PLEIN_GEBRUIKER
-
-            elif rol_nu == Rollen.ROL_SCHUTTER:
+            if rol_nu == Rollen.ROL_SCHUTTER:
                 template = TEMPLATE_PLEIN_SCHUTTER
+
+            elif rol_nu == Rollen.ROL_NONE or rol_nu is None:
+                # gebruik de bezoeker pagina
+                pass
 
             else:
                 # beheerder
                 template = TEMPLATE_PLEIN_BEHEERDER
 
-                if rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB):
-                    context['toon_nieuwe_accounts'] = True
+                try:
+                    handleiding_pagina = ROL2HANDLEIDING_PAGINA[rol_nu]
+                except KeyError:
+                    handleiding_pagina = settings.HANDLEIDING_TOP
 
-                if rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL):
-                    context['toon_functies'] = True
+                context['handleiding_url'] = reverse_handleiding(handleiding_pagina)
 
                 if rol_nu == Rollen.ROL_IT:
                     context['rol_is_it'] = True
@@ -119,7 +129,7 @@ class PleinView(View):
                 # kijk hoeveel taken er open staan
                 eval_open_taken(request)
 
-        menu_dynamics(self.request, context, actief='hetplein')
+        menu_dynamics(self.request, context)
         return render(request, template, context)
 
 
@@ -134,7 +144,7 @@ class PrivacyView(TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
         context['url_privacyverklaring'] = settings.PRIVACYVERKLARING_URL
-        menu_dynamics(self.request, context, actief='privacy')
+        menu_dynamics(self.request, context)
         return context
 
 

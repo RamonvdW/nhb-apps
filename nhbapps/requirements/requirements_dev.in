@@ -1,0 +1,29 @@
+# required pip packages
+
+# base packages
+-r requirements_test.txt
+
+# add-ons for dev environment:
+
+# license check
+pip-licenses
+
+# update check
+pip-review
+
+# python code coverage measurement and reporting
+coverage
+
+# for Overig.e2ehelper
+beautifulsoup4
+
+# django database access analysis for performance / efficient queries
+django-debug-toolbar
+
+# django extensions
+django-extensions
+
+# html validatie
+html5validator
+
+# end of file

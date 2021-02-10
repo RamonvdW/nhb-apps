@@ -10,11 +10,12 @@ from django.utils.dateparse import parse_date
 from .models import (IndivRecord, BesteIndivRecords,
                      LEEFTIJDSCATEGORIE, GESLACHT, MATERIAALKLASSE, DISCIPLINE)
 from NhbStructuur.models import NhbLid
+from Overig.e2ehelpers import E2EHelpers
 import datetime
 import io
 
 
-class TestRecordsCliBepaalBeste(TestCase):
+class TestRecordsCliBepaalBeste(E2EHelpers, TestCase):
     """ unittests voor de Records applicatie, Import module """
 
     def setUp(self):
@@ -108,7 +109,8 @@ class TestRecordsCliBepaalBeste(TestCase):
         self.assertEqual(BesteIndivRecords.objects.count(), 0)
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('bepaal_beste_records', stderr=f1, stdout=f2)
+        with self.assert_max_queries(26):
+            management.call_command('bepaal_beste_records', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
         self.assertEqual(f1.getvalue(), '')
@@ -118,7 +120,8 @@ class TestRecordsCliBepaalBeste(TestCase):
         # draai nog een keer om alle 'geen wijzig' takken te raken
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('bepaal_beste_records', stderr=f1, stdout=f2)
+        with self.assert_max_queries(20):
+            management.call_command('bepaal_beste_records', stderr=f1, stdout=f2)
         self.assertEqual(f1.getvalue(), '')
         self.assertTrue("Done" in f2.getvalue())
         self.assertEqual(BesteIndivRecords.objects.count(), 3)

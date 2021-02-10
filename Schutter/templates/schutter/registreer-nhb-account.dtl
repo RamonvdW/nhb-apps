@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019-2020 Ramon van der Winkel.
+                Copyright (c) 2019-2021 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -14,7 +14,7 @@
 <h4>Account aanmaken</h4>
 
 <p>Met deze pagina maak je een nieuw account aan. Dit hoef je maar één keer te doen.</p>
-<p>Je kan alleen een account aanmaken als je een NHB nummer hebt en je e-mail adres bekend is bij de bond.</p>
+<p>Je kan alleen een account aanmaken als je een bondsnummer hebt en je e-mail adres bekend is bij de bond.</p>
 <p>&nbsp;</p>
 
 <div class="container z-depth-2 white">

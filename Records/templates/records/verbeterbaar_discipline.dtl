@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019-2020 Ramon van der Winkel.
+                Copyright (c) 2019-2021 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -18,7 +18,7 @@
 
     <p>Filter op geslacht, wedstrijdboog of leeftijdsklasse:</p>
 
-    <p>
+    <div class="selectie-knoppen">
         <div class="white shrink-wrap-5">
             {% for obj in geslacht %}
                 {% if obj.url %}
@@ -28,8 +28,9 @@
                 {% endif %}
             {% endfor %}
         </div>
-    </p>
-    <p>
+    </div>
+
+    <div class="selectie-knoppen">
         <div class="white shrink-wrap-5">
             {% for obj in bogen %}
                 {% if obj.url %}
@@ -39,8 +40,9 @@
                 {% endif %}
             {% endfor %}
         </div>
-    </p>
-    <p>
+    </div>
+
+    <div class="selectie-knoppen">
         <div class="white shrink-wrap-5">
             {% for obj in leeftijd %}
                 {% if obj.url %}
@@ -50,7 +52,7 @@
                 {% endif %}
             {% endfor %}
         </div>
-    </p>
+    </div>
 
     {% if is_alles %}
         <p>Hieronder volgen alle <b>{{ object_list.count }}</b> records die verbeterbaar zijn.</p>

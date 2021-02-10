@@ -143,6 +143,9 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         lid.save()
         self.nhblid_100002 = lid
 
+        ver.secretaris_lid = lid
+        ver.save()
+
         self.url_lijst = '/vereniging/accommodaties/lijst/'
         self.url_accommodatie_details = '/vereniging/accommodaties/details/%s/%s/'       # <locatie_pk>, <vereniging_pk>
         self.url_accommodatie_vereniging = '/vereniging/accommodatie-details/%s/%s/'     # <locatie_pk>, <vereniging_pk>
@@ -150,11 +153,13 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
     def test_anon(self):
         # anon
         self.e2e_logout()
-        resp = self.client.get(self.url_lijst)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_lijst)
         self.assert_is_redirect(resp, '/plein/')
 
         url = self.url_accommodatie_details % (self.loc1.pk, self.nhbver1.pk)
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assert_is_redirect(resp, '/plein/')
 
     def test_bb(self):
@@ -164,7 +169,8 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.e2e_check_rol('BB')
 
         # grote lijst - alle locaties
-        resp = self.client.get(self.url_lijst)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_lijst)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('vereniging/lijst-verenigingen.dtl', 'plein/site_layout.dtl'))
@@ -173,19 +179,22 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
 
         # specifieke locatie
         url = self.url_accommodatie_details % (self.loc1.pk, self.nhbver1.pk)
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('vereniging/accommodatie-details.dtl', 'plein/site_layout.dtl'))
 
         # niet bestaande locatie
         url = self.url_accommodatie_details % (999999, self.nhbver1.pk)
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 404)     # 404 = Not found
 
         # vereniging die niet bij de locatie hoort
         url = self.url_accommodatie_details % (self.loc1.pk, 999999)
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 404)     # 404 = Not found
 
         # coverage
@@ -202,7 +211,8 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.e2e_check_rol('RKO')
 
         # grote lijst - alleen binnen het rayon
-        resp = self.client.get(self.url_lijst)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_lijst)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('vereniging/lijst-verenigingen.dtl', 'plein/site_layout.dtl'))
@@ -210,7 +220,8 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
 
         # details van een vereniging binnen de rayon
         url = self.url_accommodatie_details % (self.loc2.pk, self.nhbver2.pk)
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('vereniging/accommodatie-details.dtl', 'plein/site_layout.dtl'))
@@ -222,7 +233,8 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.e2e_check_rol('RCL')
 
         # grote lijst - alleen binnen de regio
-        resp = self.client.get(self.url_lijst)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_lijst)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('vereniging/lijst-verenigingen.dtl', 'plein/site_layout.dtl'))
@@ -230,31 +242,35 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
 
         # details van een vereniging binnen de regio
         url = self.url_accommodatie_details % (self.loc2.pk, self.nhbver2.pk)
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('vereniging/accommodatie-details.dtl', 'plein/site_layout.dtl'))
 
         # details van een vereniging buiten de regio
         url = self.url_accommodatie_details % (self.loc1.pk, self.nhbver1.pk)
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('vereniging/accommodatie-details.dtl', 'plein/site_layout.dtl'))
 
         # wijziging aanbrengen
         url = self.url_accommodatie_details % (self.loc2.pk, self.nhbver2.pk)
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('vereniging/accommodatie-details.dtl', 'plein/site_layout.dtl'))
 
         # probeer een wijziging te doen
-        resp = self.client.post(url, {'baan_type': 'X',
-                                      'banen_18m': 1,
-                                      'banen_25m': 0,
-                                      'max_dt': 3,
-                                      'notities': 'hoi'})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'baan_type': 'X',
+                                          'banen_18m': 1,
+                                          'banen_25m': 0,
+                                          'max_dt': 3,
+                                          'notities': 'hoi'})
         self.assert_is_redirect(resp, self.url_lijst)
         loc2 = WedstrijdLocatie.objects.get(pk=self.loc2.pk)
         self.assertEqual(loc2.baan_type, 'X')
@@ -264,11 +280,12 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.assertEqual(loc2.notities, 'hoi')
 
         # doe een niet-wijziging voor de coverage
-        resp = self.client.post(url, {'baan_type': 'X',
-                                      'banen_18m': 1,
-                                      'banen_25m': 0,
-                                      'max_dt': 3,
-                                      'notities': 'hoi'})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'baan_type': 'X',
+                                          'banen_18m': 1,
+                                          'banen_25m': 0,
+                                          'max_dt': 3,
+                                          'notities': 'hoi'})
         self.assert_is_redirect(resp, self.url_lijst)
         loc2 = WedstrijdLocatie.objects.get(pk=self.loc2.pk)
         self.assertEqual(loc2.baan_type, 'X')
@@ -284,7 +301,8 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.e2e_check_rol('HWL')
 
         # HWL krijgt dezelfde lijst als de RCL
-        resp = self.client.get(self.url_lijst)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_lijst)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('vereniging/lijst-verenigingen.dtl', 'plein/site_layout.dtl'))
@@ -292,18 +310,18 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
 
         # check accommodatie detail pagina
         url = self.url_accommodatie_details % (self.loc2.pk, self.nhbver2.pk)
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('vereniging/accommodatie-details.dtl', 'plein/site_layout.dtl'))
         # check dat de HWL de opslaan-knop aangeboden krijgt
-        urls = self.extract_all_urls(resp, skip_menu=True)
-        self.assertTrue(url in urls)                                    # opslaan url
-        self.assertTrue('/vereniging/accommodaties/lijst/' in urls)     # terug url
+        self.assertContains(resp, 'Wijzigingen opslaan')
 
         # check the specifieke accommodatie pagina voor de HWL, met andere terug url
         url = self.url_accommodatie_vereniging % (self.loc2.pk, self.nhbver2.pk)
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('vereniging/accommodatie-details.dtl', 'plein/site_layout.dtl'))
@@ -313,11 +331,12 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.assertTrue('/vereniging/' in urls)     # terug url
 
         # probeer een wijziging te doen
-        resp = self.client.post(url, {'baan_type': 'O',
-                                      'banen_18m': 5,
-                                      'banen_25m': 6,
-                                      'max_dt': 3,
-                                      'notities': 'dit is een test'})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'baan_type': 'O',
+                                          'banen_18m': 5,
+                                          'banen_25m': 6,
+                                          'max_dt': 3,
+                                          'notities': 'dit is een test'})
         self.assert_is_redirect(resp, '/vereniging/')       # stuur HWL terug naar vereniging pagina
         loc2 = WedstrijdLocatie.objects.get(pk=self.loc2.pk)
         self.assertEqual(loc2.baan_type, 'O')
@@ -325,65 +344,75 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.assertEqual(loc2.banen_25m, 6)
         self.assertEqual(loc2.max_dt_per_baan, 3)
         self.assertEqual(loc2.notities, 'dit is een test')
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertContains(resp, 'Volledig overdekt')
 
-        resp = self.client.post(url, {'baan_type': 'H',
-                                      'banen_18m': 5,
-                                      'banen_25m': 6,
-                                      'max_dt': 3,
-                                      'notities': 'dit is een test'})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'baan_type': 'H',
+                                          'banen_18m': 5,
+                                          'banen_25m': 6,
+                                          'max_dt': 3,
+                                          'notities': 'dit is een test'})
         self.assert_is_redirect(resp, '/vereniging/')       # stuur HWL terug naar vereniging pagina
         loc2 = WedstrijdLocatie.objects.get(pk=self.loc2.pk)
         self.assertEqual(loc2.baan_type, 'H')
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertContains(resp, 'Half overdekt')
 
-        resp = self.client.post(url, {'baan_type': 'X',
-                                      'banen_18m': 5,
-                                      'banen_25m': 6,
-                                      'max_dt': 3,
-                                      'notities': 'dit is een test'})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'baan_type': 'X',
+                                          'banen_18m': 5,
+                                          'banen_25m': 6,
+                                          'max_dt': 3,
+                                          'notities': 'dit is een test'})
         loc2 = WedstrijdLocatie.objects.get(pk=self.loc2.pk)
         self.assertEqual(loc2.baan_type, 'X')
 
         # probeer met illegale waarden
-        resp = self.client.post(url, {'baan_type': 'O',
-                                      'banen_18m': 40,
-                                      'banen_25m': 6,
-                                      'max_dt': 3})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'baan_type': 'O',
+                                          'banen_18m': 40,
+                                          'banen_25m': 6,
+                                          'max_dt': 3})
         self.assertEqual(resp.status_code, 404)     # 404 = Not found
 
-        resp = self.client.post(url, {'baan_type': 'O',
-                                      'banen_18m': 4,
-                                      'banen_25m': 40,
-                                      'max_dt': 3})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'baan_type': 'O',
+                                          'banen_18m': 4,
+                                          'banen_25m': 40,
+                                          'max_dt': 3})
         self.assertEqual(resp.status_code, 404)     # 404 = Not found
 
-        resp = self.client.post(url, {'baan_type': 'O',
-                                      'banen_18m': 4,
-                                      'banen_25m': 4,
-                                      'max_dt': 2})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'baan_type': 'O',
+                                          'banen_18m': 4,
+                                          'banen_25m': 4,
+                                          'max_dt': 2})
         self.assertEqual(resp.status_code, 404)     # 404 = Not found
 
-        resp = self.client.post(url, {'baan_type': 'O',
-                                      'banen_18m': 4,
-                                      'banen_25m': 4,
-                                      'max_dt': 5})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'baan_type': 'O',
+                                          'banen_18m': 4,
+                                          'banen_25m': 4,
+                                          'max_dt': 5})
         self.assertEqual(resp.status_code, 404)     # 404 = Not found
 
-        resp = self.client.post(url, {'baan_type': 'y',
-                                      'banen_18m': 4,
-                                      'banen_25m': 4,
-                                      'max_dt': 4})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'baan_type': 'y',
+                                          'banen_18m': 4,
+                                          'banen_25m': 4,
+                                          'max_dt': 4})
         self.assertEqual(resp.status_code, 404)     # 404 = Not found
 
         # illegale location_pk
         url = self.url_accommodatie_vereniging % (999999, 888888)
-        resp = self.client.post(url, {'baan_type': 'O',
-                                      'banen_18m': 4,
-                                      'banen_25m': 4,
-                                      'max_dt': 4})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'baan_type': 'O',
+                                          'banen_18m': 4,
+                                          'banen_25m': 4,
+                                          'max_dt': 4})
         self.assertEqual(resp.status_code, 404)     # 404 = Not found
 
     def test_wl(self):
@@ -394,18 +423,41 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.e2e_check_rol('WL')
 
         # WL mag de hele lijst met verenigingen niet ophalen
-        resp = self.client.get(self.url_lijst)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_lijst)
         self.assert_is_redirect(resp, '/plein/')
+
+        # haal de SEC uit zijn functie zodat deze direct uit de vereniging gehaald wordt
+        self.functie_sec.accounts.clear()
 
         # check accommodatie detail pagina
         url = self.url_accommodatie_details % (self.loc2.pk, self.nhbver2.pk)
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('vereniging/accommodatie-details.dtl', 'plein/site_layout.dtl'))
+
         # check dat de WL de opslaan-knop NIET aangeboden krijgt
-        urls = self.extract_all_urls(resp, skip_menu=True)
-        self.assertTrue(url not in urls)        # opslaan url moet ontbreken
+        self.assertNotContains(resp, 'Wijzigingen opslaan')
+
+        # nog een keer, voor een vereniging zonder secretaris
+        self.nhbver2.secretaris_lid = None
+        self.nhbver2.save()
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+
+        # probeer een wijziging te doen
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'baan_type': 'O',
+                                          'banen_18m': 5,
+                                          'banen_25m': 6,
+                                          'max_dt': 3,
+                                          'notities': 'dit is een test'})
+        self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
 
     def test_sec(self):
         # login als SEC van ver2 op loc2
@@ -414,14 +466,16 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.e2e_check_rol('SEC')
 
         # SEC krijgt dezelfde lijst als de RCL?
-        resp = self.client.get(self.url_lijst)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_lijst)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('vereniging/lijst-verenigingen.dtl', 'plein/site_layout.dtl'))
 
         # check accommodatie detail pagina
         url = self.url_accommodatie_details % (self.loc2.pk, self.nhbver2.pk)
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('vereniging/accommodatie-details.dtl', 'plein/site_layout.dtl'))
@@ -438,16 +492,18 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
 
         # probeer van andere vereniging te wijzigen
         url = self.url_accommodatie_details % (self.loc1.pk, self.nhbver1.pk)
-        resp = self.client.post(url, {'baan_type': 'H',
-                                      'banen_18m': 5,
-                                      'banen_25m': 6,
-                                      'max_dt': 3,
-                                      'notities': 'dit is een test'})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'baan_type': 'H',
+                                          'banen_18m': 5,
+                                          'banen_25m': 6,
+                                          'max_dt': 3,
+                                          'notities': 'dit is een test'})
         self.assertEqual(resp.status_code, 404)
 
         # geef een inconsistente locatie - vereniging
         url = self.url_accommodatie_details % (self.loc1.pk, self.nhbver2.pk)
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 404)
 
     def test_gedeelde_locatie(self):
@@ -464,14 +520,16 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
 
         # haal de details op
         url = self.url_accommodatie_details % (loc.pk, self.nhbver1.pk)
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('vereniging/accommodatie-details.dtl', 'plein/site_layout.dtl'))
 
         # haal de details op
         url = self.url_accommodatie_details % (loc.pk, self.nhbver2.pk)
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('vereniging/accommodatie-details.dtl', 'plein/site_layout.dtl'))
@@ -489,14 +547,16 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.e2e_check_rol('HWL')
 
         # accommodaties lijst
-        resp = self.client.get(self.url_lijst)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_lijst)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('vereniging/lijst-verenigingen.dtl', 'plein/site_layout.dtl'))
 
         # accommodatie details
         url = self.url_accommodatie_details % (self.loc2.pk, self.nhbver2.pk)
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('vereniging/accommodatie-details.dtl', 'plein/site_layout.dtl'))

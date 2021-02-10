@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020 Ramon van der Winkel.
+                Copyright (c) 2020-2021 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -13,7 +13,7 @@
 
 <h4>Account activiteit</h4>
 
-<p>Er {{ totaal }} accounts aangemaakt op deze server.</p>
+<p>Er zijn {{ totaal }} accounts aangemaakt op deze server.</p>
 
 <p>Focus:</p>
 <p><a class="btn-nhb-blauw" href="#nieuwe">Nieuwe accounts</a></p>
@@ -35,8 +35,8 @@
         </tr>
         <tr>
             <th>Aangemaakt</th>
-            <th filter="on">Inlog</th>
-            <th filter="on">Naam</th>
+            <th data-filter="on">Inlog</th>
+            <th data-filter="on">Naam</th>
             <th>Email is bevestigd</th>
             <th>Laatste inlog</th>
             <th>Laatste poging</th>
@@ -72,8 +72,8 @@
         </tr>
         <tr>
             <th>Laatste login</th>
-            <th filter="on">Inlog</th>
-            <th filter="on">Naam</th>
+            <th data-filter="on">Inlog</th>
+            <th data-filter="on">Naam</th>
             <th>Email is bevestigd</th>
             <th>Tweede factor</th>
             <th>Aangemaakt</th>
@@ -106,8 +106,8 @@
         <tr>
             <th>Laatste poging</th>
             <th>Laatste inlog</th>
-            <th filter="on">Inlog</th>
-            <th filter="on">Naam</th>
+            <th data-filter="on">Inlog</th>
+            <th data-filter="on">Naam</th>
             <th>Email is bevestigd</th>
             <th>Tweede factor</th>
             <th>Aangemaakt</th>

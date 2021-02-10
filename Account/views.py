@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -54,7 +54,10 @@ def account_vraag_email_bevestiging(accountmail, **kwargs):
                  + "Veel plezier met de site!\n"
                  + "Het bondsburo\n")
 
-    mailer_queue_email(accountmail.nieuwe_email, 'Aanmaken account voltooien', text_body)
+    mailer_queue_email(accountmail.nieuwe_email,
+                       'Aanmaken account voltooien',
+                       text_body,
+                       enforce_whitelist=False)     # deze mails altijd doorlaten
 
 
 # end of file

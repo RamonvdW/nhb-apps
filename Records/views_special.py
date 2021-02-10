@@ -4,18 +4,10 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.conf import settings
-from django.urls import Resolver404, reverse
-from django.http import HttpResponseRedirect
+from django.urls import reverse
 from django.views.generic import ListView
-from django.db.models import Q
-from django.core.exceptions import ObjectDoesNotExist
-from django.templatetags.static import static
 from Plein.menu import menu_dynamics
-from NhbStructuur.models import NhbLid
 from .models import IndivRecord
-from .forms import ZoekForm
-from types import SimpleNamespace
 
 
 TEMPLATE_RECORDS_SPECIAL_ER = 'records/records_special_er.dtl'
@@ -33,6 +25,7 @@ lcat2str = {'M': 'Masters (50+)',
             'C': 'Cadetten (t/m 17 jaar)',
             'U': 'Gecombineerd (bij para)'}
 
+
 class RecordsSpecialView(ListView):
     """ Toon lijst met 'speciale' records: ER of WR """
 
@@ -45,7 +38,7 @@ class RecordsSpecialView(ListView):
 
         for obj in context['object_list']:
             obj.materiaalklasse_str = makl2str[obj.materiaalklasse]
-            #obj.leeftijdscategorie_str = lcat2str[obj.leeftijdscategorie]
+            # obj.leeftijdscategorie_str = lcat2str[obj.leeftijdscategorie]
 
             obj.url_details = reverse('Records:specifiek', kwargs={'discipline': obj.discipline,
                                                                    'nummer': obj.volg_nr})

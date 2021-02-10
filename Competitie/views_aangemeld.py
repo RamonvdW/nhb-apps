@@ -75,7 +75,7 @@ class LijstAangemeldRegiocompAllesView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
-        return rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_WL)
+        return rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL)
 
     def handle_no_permission(self):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
@@ -135,7 +135,7 @@ class LijstAangemeldRegiocompRayonView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
-        return rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_WL)
+        return rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL)
 
     def handle_no_permission(self):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
@@ -177,7 +177,7 @@ class LijstAangemeldRegiocompRayonView(UserPassesTestMixin, TemplateView):
                 .filter(deelcompetitie__competitie=comp,
                         deelcompetitie__laag=LAAG_REGIO,
                         deelcompetitie__nhb_regio__rayon=rayon)
-                .order_by('klasse__indiv__volgorde', 'aanvangsgemiddelde'))
+                .order_by('klasse__indiv__volgorde', '-aanvangsgemiddelde'))
 
         volgorde = -1
         for obj in objs:
@@ -203,7 +203,7 @@ class LijstAangemeldRegiocompRegioView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
-        return rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_WL)
+        return rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL)
 
     def handle_no_permission(self):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
@@ -252,7 +252,7 @@ class LijstAangemeldRegiocompRegioView(UserPassesTestMixin, TemplateView):
                                 'schutterboog__nhblid',
                                 'bij_vereniging')
                 .filter(deelcompetitie=deelcomp)
-                .order_by('klasse__indiv__volgorde', 'aanvangsgemiddelde'))
+                .order_by('klasse__indiv__volgorde', '-aanvangsgemiddelde'))
 
         volgorde = -1
         for obj in objs:
@@ -409,7 +409,7 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
                         blazoen = BLAZOEN_DT_R
 
                 # controleer of schutter een aspirant is
-                if obj.klasse.indiv.niet_voor_rk_bk:
+                if obj.klasse.indiv.niet_voor_rk_bk and not obj.klasse.indiv.is_onbekend:
                     # schutterboog is ingeschreven in een aspirant klasse
                     blazoen = BLAZOEN_60CM
             else:

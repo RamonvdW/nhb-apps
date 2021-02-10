@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -40,10 +40,14 @@ urlpatterns = [
          view_aanmelden_afmelden.RegiocompetitieAanmeldenView.as_view(),
          name='aanmelden'),
 
-    path('regiocompetitie/afmelden/<regiocomp_pk>/',
+    path('regiocompetitie/afmelden/<deelnemer_pk>/',
          view_aanmelden_afmelden.RegiocompetitieAfmeldenView.as_view(),
          name='afmelden'),
 
+    # TODO: 'schietmomenten' vervangen door iets anders?
+    path('regiocompetitie/<deelnemer_pk>/schietmomenten/',
+         view_aanmelden_afmelden.SchutterSchietmomentenView.as_view(),
+         name='schietmomenten'),
 ]
 
 # end of file

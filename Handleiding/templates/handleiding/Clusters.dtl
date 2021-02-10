@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020 Ramon van der Winkel.
+                Copyright (c) 2020-2021 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -14,7 +14,7 @@
 <p></p>
 <p>De clusters worden typisch toegepast:</p>
 <ul style="padding-left: 20px">
-<li style="list-style-type: disc; padding-left: 0px">om de reistijd en/of kosten acceptabel te houden. Voorbeeld: schutters op de eilanden, of grote geografische spreiding.</li>
+<li style="list-style-type: disc; padding-left: 0px">om de reistijd en/of kosten acceptabel te houden. Voorbeeld: sporters op de eilanden, of grote geografische spreiding.</li>
 <li style="list-style-type: disc; padding-left: 0px">omdat er beperkingen zijn wie de accommodatie mogen betreden. Voorbeeld: bedrijfsverenigingen met accommodatie op het bedrijfsterrein.</li>
 </ul>
 <p></p>
@@ -32,11 +32,15 @@
 <p>Bij behoefte kunnen extra clusters aangevraagd worden via het bondsbureau. De letters zijn ook aan te passen.</p>
 <p></p>
 <p></p>
-<hr><p><h5>Verder</h5></p>
+<hr><h5>Verder</h5>
 <p>Terug naar de <a href="/handleiding/Hoofdpagina/">Hoofdpagina</a></p>
 <p></p>
 <p><a href="/handleiding/Planning_Regio/">Planning Regio</a></p>
 
 </div>
 
+{% endblock %}
+
+{% block menu %}
+    {% include 'handleiding/menu.dtl' %}
 {% endblock %}

@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020 Ramon van der Winkel.
+                Copyright (c) 2020-2021 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -14,19 +14,23 @@
 <p></p>
 <p>De BKO is verantwoordelijk voor het organiseren van het BK in elke wedstrijdklasse en deze door een vereniging uit te laten voeren.</p>
 <p></p>
-<p>De website bied ondersteuning voor:</p>
+<p>De website biedt ondersteuning voor:</p>
 <ul style="padding-left: 20px">
-<li style="list-style-type: disc; padding-left: 0px">Het vaststellen van de deelnemers</li>
-<li style="list-style-type: disc; padding-left: 0px">Het oproepen van reserve schutters</li>
-<li style="list-style-type: disc; padding-left: 0px">Vragen aan de schutters / reserves om deelname te bevestigen</li>
-<li style="list-style-type: disc; padding-left: 0px">Informeren van deelnemers en reserves over hun plaats op de deelnemerslijst</li>
+<li style="list-style-type: disc; padding-left: 0px">De competitie doorzetten van regiocompetitie naar rayonkampioenschappen fase</li>
+<li style="list-style-type: disc; padding-left: 0px">De competitie doorzetten van rayonkampioenschappen naar bondskampioenschappen fase</li>
+<li style="list-style-type: disc; padding-left: 0px">Het vaststellen van de BK selectie</li>
+<li style="list-style-type: disc; padding-left: 0px">Vragen aan de sporters om deelname aan het BK te bevestigen</li>
+<li style="list-style-type: disc; padding-left: 0px">Informeren van sporters over hun plaats op de deelnemerslijst</li>
 <li style="list-style-type: disc; padding-left: 0px">Het maken van een planning met verdeling van de wedstrijdklassen over de accommodaties</li>
 </ul>
 <p></p>
-<p></p>
-<hr><p><h5>Verder</h5></p>
+<hr><h5>Verder</h5>
 <p>Terug naar de <a href="/handleiding/Hoofdpagina/">Hoofdpagina</a>.</p>
 
 </div>
 
+{% endblock %}
+
+{% block menu %}
+    {% include 'handleiding/menu.dtl' %}
 {% endblock %}

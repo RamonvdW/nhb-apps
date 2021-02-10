@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -39,6 +39,8 @@ then
     echo "[INFO] Focus set to: $FOCUS"
 fi
 
+ABORTED=0
+
 # start the simulator (for the mailer)
 python3 ./Mailer/test_tools/websim.py &
 
@@ -46,12 +48,20 @@ export COVERAGE_FILE="/tmp/.coverage.$$"
 
 python3 -m coverage erase
 
-python3 -m coverage run --append --branch ./manage.py test --noinput $*  # note: double quotes not supported around $*
-if [ $? -eq 0 -a $# -eq 0 ]
+python3 -m coverage run --append --branch \
+    ./manage.py test --settings=nhbapps.settings_dev --noinput $*  # note: double quotes not supported around $*
+RES=$?
+[ $RES -eq 3 ] && ABORTED=1
+#echo "[DEBUG] Coverage run result: $RES"
+if [ $RES -eq 0 -a $# -eq 0 ]
 then
     # add coverage with debug and wiki enabled
     echo "[INFO] Performing run with debug + wiki run"
-    python3 -m coverage run --append --branch ./manage.py test --debug-mode --enable-wiki Plein.tests.TestPlein.test_quick Functie.test_saml2idp &>/dev/null
+    python3 -m coverage run --append --branch \
+        ./manage.py test --settings=nhbapps.settings_dev_wiki_debug Plein.tests.TestPlein.test_quick Functie.test_saml2idp &>/dev/null
+    RES=$?
+    [ $RES -eq 3 ] && ABORTED=1
+    #echo "[DEBUG] Debug coverage run result: $RES"
 fi
 
 # stop the http simulator
@@ -60,49 +70,52 @@ fi
 kill $!
 wait $! 2>/dev/null
 
-echo "[INFO] Generating reports"
-
-# delete old coverage report
-rm -rf "$REPORT_DIR"
-
-echo
-if [ -z "$FOCUS" ]
+if [ $ABORTED -eq 0 ]
 then
-    python3 -m coverage report --skip-covered --fail-under=98 $OMIT
-    res=$?
-else
-    python3 -m coverage report $OMIT | grep -E "$FOCUS|----|Cover"
-    res=0
+    echo "[INFO] Generating reports"
+
+    # delete old coverage report
+    rm -rf "$REPORT_DIR"
+
+    echo
+    if [ -z "$FOCUS" ]
+    then
+        python3 -m coverage report --skip-covered --fail-under=98 $OMIT
+        res=$?
+    else
+        python3 -m coverage report $OMIT | grep -E "$FOCUS|----|Cover"
+        res=0
+    fi
+    #echo "res=$res"
+    echo
+
+    python3 -m coverage html -d "$REPORT_DIR" --skip-covered $OMIT
+
+    if [ "$res" -gt 0 ] && [ -z "$ARGS" ]
+    then
+        echo -e "$RED"
+        echo "      ==========================="
+        echo "      FAILED: NOT ENOUGH COVERAGE"
+        echo "      ==========================="
+        echo -e "$RESET"
+    else
+        echo "HTML report is in $REPORT_DIR  (try firefox $REPORT_DIR/index.html)"
+    fi
+
+    rm "$COVERAGE_FILE"
+
+    echo
+    echo -n "Press ENTER to start firefox now, or Ctrl+C to abort"
+    timeout --foreground 5 read
+    if [ $? -ne 0 ]
+    then
+        # automatically abort
+        echo "^C"
+        exit 1
+    fi
+
+    firefox $REPORT_DIR/index.html &
 fi
-#echo "res=$res"
-echo
-
-python3 -m coverage html -d "$REPORT_DIR" --skip-covered $OMIT
-
-if [ "$res" -gt 0 ] && [ -z "$ARGS" ]
-then
-    echo -e "$RED"
-    echo "      ==========================="
-    echo "      FAILED: NOT ENOUGH COVERAGE"
-    echo "      ==========================="
-    echo -e "$RESET"
-else
-    echo "HTML report is in $REPORT_DIR  (try firefox $REPORT_DIR/index.html)"
-fi
-
-rm "$COVERAGE_FILE"
-
-echo
-echo -n "Press ENTER to start firefox now, or Ctrl+C to abort"
-timeout --foreground 5 read
-if [ $? -ne 0 ]
-then
-    # automatically abort
-    echo "^C"
-    exit 1
-fi
-
-firefox $REPORT_DIR/index.html &
 
 # end of file
 

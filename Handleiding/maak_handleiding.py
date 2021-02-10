@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -28,7 +28,7 @@ class MaakHandleiding(object):
     def write_template(self, fname, title, text):
         out = '''{% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020 Ramon van der Winkel.
+                Copyright (c) 2020-2021 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -47,6 +47,10 @@ class MaakHandleiding(object):
         out += '''
 </div>
 
+{% endblock %}
+
+{% block menu %}
+    {% include 'handleiding/menu.dtl' %}
 {% endblock %}
 '''
 
@@ -286,9 +290,19 @@ class MaakHandleiding(object):
                 out = '<pre class="handleiding_code">' + line
                 continue
 
-            # normale regel
-            out += '<p>' + line + '</p>\n'
+            # normale regel in paragraaf stijl zetten, tenzij het een block-level element is
+            if line[:2] != '<h':
+                line = '<p>' + line + '</p>'
+
+            out = out + line + '\n'
         # for
+
+        # beëindig lijstjes
+        if in_lijstje:
+            out += '</ul>\n'
+
+        if in_nummerlijstje:
+            out += '</ol>\n'
 
         if out:
             total_out += out

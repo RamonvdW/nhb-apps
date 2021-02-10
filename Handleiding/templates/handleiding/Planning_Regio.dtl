@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020 Ramon van der Winkel.
+                Copyright (c) 2020-2021 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -50,12 +50,16 @@
  zaterdag  13:00 Witmissers
  zondag    10:00 Witmissers
 </pre><p></p>
-<p>Indien de regio gebruikt maakt van clusters, dan heeft elk cluster een eigen planning. Daarnaast kan de regio ook nog een eigen planning hebben, bijvoorbeeld voor verenigingen die niet bij een cluster horen, of gewoon om schutters een extra schietmogelijkheid te geven.</p>
+<p>Indien de regio gebruikt maakt van clusters, dan heeft elk cluster een eigen planning. Daarnaast kan de regio ook nog een eigen planning hebben, bijvoorbeeld voor verenigingen die niet bij een cluster horen, of gewoon om sporters een extra schietmogelijkheid te geven.</p>
 <p></p>
-<hr><p><h5>Verder</h5></p>
+<hr><h5>Verder</h5>
 <p>Terug naar de <a href="/handleiding/Hoofdpagina/">Hoofdpagina</a>.</p>
 <p><a href="/handleiding/Inschrijfmethodes_Regiocompetitie/">Inschrijfmethodes Regiocompetitie</a></p>
 
 </div>
 
+{% endblock %}
+
+{% block menu %}
+    {% include 'handleiding/menu.dtl' %}
 {% endblock %}

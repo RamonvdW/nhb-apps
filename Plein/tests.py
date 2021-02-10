@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -70,6 +70,19 @@ class TestPlein(E2EHelpers, TestCase):
         lid.email = lid.account.email
         lid.save()
 
+        # maak een lid aan voor de admin
+        lid = NhbLid()
+        lid.nhb_nr = 100002
+        lid.geslacht = "M"
+        lid.voornaam = "Ad"
+        lid.achternaam = "Min"
+        lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
+        lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
+        lid.bij_vereniging = ver
+        lid.account = self.account_admin
+        lid.email = lid.account.email
+        lid.save()
+
         self.useragent_msie_1 = 'Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.0; Trident/4.0)'
         self.useragent_msie_2 = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; Trident/7.0; rv:11.0) like Gecko'
         self.useragent_firefox = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.11; rv:47.0) Gecko/20100101 Firefox/47.0'
@@ -80,38 +93,45 @@ class TestPlein(E2EHelpers, TestCase):
         self.url_niet_ondersteund = '/plein/niet-ondersteund/'
 
     def test_root_redirect(self):
-        resp = self.client.get(self.url_root)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_root)
         self.assertEqual(resp.status_code, 302)     # 302 = redirect
         self.assertEqual(resp.url, '/plein/')
 
     def test_plein_anon(self):
         self.e2e_logout()
-        resp = self.client.get(self.url_plein)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
         self.assert_template_used(resp, ('plein/plein-bezoeker.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
 
     def test_plein_normaal(self):
         self.e2e_login(self.account_normaal)
-        resp = self.client.get(self.url_plein)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertNotContains(resp, '/admin/')
         self.assertNotContains(resp, 'Wissel van rol')
-        self.assert_template_used(resp, ('plein/plein-gebruiker.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('plein/plein-bezoeker.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
         self.e2e_logout()
 
     def test_plein_nhblid(self):
         self.e2e_login(self.account_100001)
-        resp = self.client.get(self.url_plein)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertNotContains(resp, '/admin/')
         self.assertNotContains(resp, 'Wissel van rol')
         self.assert_template_used(resp, ('plein/plein-schutter.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
         self.e2e_logout()
 
     def test_plein_admin(self):
         self.e2e_login(self.account_admin)
-        resp = self.client.get(self.url_plein)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, 'Wissel van rol')
         urls = [url for url in self.extract_all_urls(resp) if "admin" in url or "beheer" in url]
@@ -119,10 +139,11 @@ class TestPlein(E2EHelpers, TestCase):
 
         # simuleer 2FA
         self.e2e_login_and_pass_otp(self.account_admin)
-        resp = self.client.get(self.url_plein)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, 'Wissel van rol')
-        self.assert_template_used(resp, ('plein/plein-gebruiker.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('plein/plein-schutter.dtl', 'plein/site_layout.dtl'))
         urls = [url for url in self.extract_all_urls(resp) if "beheer" in url]
         self.assertEqual(0, len(urls))  # komt pas in beeld na kiezen rol IT
 
@@ -130,7 +151,8 @@ class TestPlein(E2EHelpers, TestCase):
         self.e2e_wisselnaarrol_it()
         self.e2e_check_rol('IT')
 
-        resp = self.client.get(self.url_plein)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, 'Wissel van rol')
         self.assert_template_used(resp, ('plein/plein-beheerder.dtl', 'plein/site_layout.dtl'))
@@ -142,49 +164,56 @@ class TestPlein(E2EHelpers, TestCase):
         # bb
         self.e2e_wisselnaarrol_bb()
         self.e2e_check_rol('BB')
-        resp = self.client.get(self.url_plein)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, 'Manager competitiezaken')
 
         # bko
         self.e2e_wissel_naar_functie(self.functie_bko)
         self.e2e_check_rol('BKO')
-        resp = self.client.get(self.url_plein)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, 'BKO')
 
         # rko
         self.e2e_wissel_naar_functie(self.functie_rko)
         self.e2e_check_rol('RKO')
-        resp = self.client.get(self.url_plein)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, 'RKO')
 
         # rcl
         self.e2e_wissel_naar_functie(self.functie_rcl)
         self.e2e_check_rol('RCL')
-        resp = self.client.get(self.url_plein)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, 'RCL')
 
         # sec
         self.e2e_wissel_naar_functie(self.functie_hwl)
         self.e2e_check_rol('HWL')
-        resp = self.client.get(self.url_plein)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, 'Hoofdwedstrijdleider 1000')
 
         # wl
         self.e2e_wissel_naar_functie(self.functie_wl)
         self.e2e_check_rol('WL')
-        resp = self.client.get(self.url_plein)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, 'Wedstrijdleider 1000')
 
         # geen
         self.e2e_wisselnaarrol_gebruiker()
         self.e2e_check_rol('geen')
-        resp = self.client.get(self.url_plein)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, 'Gebruiker')
 
@@ -198,15 +227,25 @@ class TestPlein(E2EHelpers, TestCase):
         # sec
         self.e2e_wissel_naar_functie(self.functie_sec)
         self.e2e_check_rol('SEC')
-        resp = self.client.get(self.url_plein)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, 'Secretaris vereniging 1000')
 
-    def test_privacy(self):
-        resp = self.client.get(self.url_privacy)
+        # sporter
+        self.e2e_wisselnaarrol_sporter()
+        self.e2e_check_rol('sporter')
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
+        self.assertContains(resp, 'Sporter')
+
+    def test_privacy(self):
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_privacy)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('plein/privacy.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
         self.e2e_assert_other_http_commands_not_supported(self.url_privacy)
 
     def test_dynamic_menu_assert(self):
@@ -220,9 +259,15 @@ class TestPlein(E2EHelpers, TestCase):
 
     def test_quick(self):
         # voor test.sh om met een snelle run in debug mode
-        self.e2e_login(self.account_admin)
-        resp = self.client.get(self.url_plein)
+        # wissel naar IT zodat we het beheerders plein krijgen
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_wisselnaarrol_it()
+        self.e2e_check_rol('IT')
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)
+
         urls = self.extract_all_urls(resp)      # for coverage
 
     def test_is_browser_supported(self):
@@ -243,20 +288,24 @@ class TestPlein(E2EHelpers, TestCase):
         self.assertTrue(is_browser_supported(request))
 
     def test_browser_support(self):
-        resp = self.client.get(self.url_root, HTTP_USER_AGENT=self.useragent_msie_1)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_root, HTTP_USER_AGENT=self.useragent_msie_1)
         self.assert_is_redirect(resp, self.url_niet_ondersteund)
 
-        resp = self.client.get(self.url_plein, HTTP_USER_AGENT=self.useragent_msie_2)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_plein, HTTP_USER_AGENT=self.useragent_msie_2)
         self.assert_is_redirect(resp, self.url_niet_ondersteund)
 
-        resp = self.client.get(self.url_root, HTTP_USER_AGENT=self.useragent_firefox)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_root, HTTP_USER_AGENT=self.useragent_firefox)
         self.assert_is_redirect(resp, self.url_plein)
 
     def test_niet_ondersteund(self):
-        resp = self.client.get(self.url_niet_ondersteund)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_niet_ondersteund)
         self.assertEqual(resp.status_code, 200)
-        self.assert_html_ok(resp)
         self.assert_template_used(resp, ('plein/niet-ondersteund.dtl',))
+        self.assert_html_ok(resp)
 
         # site_layout.dtl moet niet gebruikt worden ivm alle javascript
         for templ in resp.templates:

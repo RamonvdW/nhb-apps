@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020 Ramon van der Winkel.
+                Copyright (c) 2020-2021 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -12,15 +12,15 @@
 
     <h4>Score Geschiedenis</h4>
 
-    <p>Via deze pagina kan je de geschiedenis van een de scores van een schutter inzien.</p>
+    <p>Via deze pagina kan je de geschiedenis van een de scores van een sporter inzien.</p>
 
     <!-- zoekformulier -->
 
     <div class="container z-depth-2 white">
         <div class="row nhb-blauw white-text">
             <div class="col s12 center-align">
-                <h5>Zoek schutter</h5>
-                <p>Zoek op NHB nummer</p>
+                <h5>Zoek sporter</h5>
+                <p>Zoek op bondsnummer</p>
             </div>
         </div>
 
@@ -44,7 +44,7 @@
     {% if niet_gevonden %}
         <p><i>Niets gevonden</i></p>
     {% else %}
-        <p>Gevonden scores voor schutter <b>{{ nhblid }}</b> van {{ nhblid.bij_vereniging }} te {{ nhblid.bij_vereniging.plaats }} in {{ nhblid.bij_vereniging.regio }}</p>
+        <p>Gevonden scores voor sporter <b>{{ nhblid }}</b> van {{ nhblid.bij_vereniging }} te {{ nhblid.bij_vereniging.plaats }} in {{ nhblid.bij_vereniging.regio }}</p>
 
         {% for afstand in afstanden %}
 

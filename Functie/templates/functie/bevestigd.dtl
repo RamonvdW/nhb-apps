@@ -13,7 +13,7 @@
 
 <h4>E-mail is bevestigd</h4>
 
-<p>Je hebt toegang tot de e-mail bevestigd.<p>
+<p>Je hebt toegang tot de e-mail bevestigd.</p>
 
 <p>Het e-mailadres is nu gekoppeld aan de functie <b>{{ functie.beschrijving }}</b>.</p>
 

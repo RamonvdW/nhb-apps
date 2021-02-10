@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -44,10 +44,11 @@ class TestNhbStructuurLogin(E2EHelpers, TestCase):
 
     def test_nhblid(self):
         self.e2e_login(self.account_normaal)
-        resp = self.client.get('/plein/')
-        self.assertContains(resp, 'Schutter')
+        with self.assert_max_queries(20):
+            resp = self.client.get('/plein/')
+        self.assert_template_used(resp, ('plein/plein-schutter.dtl',))
 
-    def test_inactief(self):
+    def test_inactief_normaal(self):
         # probeer in te loggen als inactief lid
         self.nhblid1.is_actief_lid = False
         self.nhblid1.save()
@@ -57,14 +58,30 @@ class TestNhbStructuurLogin(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('nhbstructuur/is_inactief.dtl', 'plein/site_layout.dtl'))
 
+    def test_inactief_bb(self):
+        # inlog als BB met inactief nhblid moet gewoon werken
+        self.account_normaal.is_BB = True
+        self.account_normaal.save()
+        self.nhblid1.is_actief_lid = False
+        self.nhblid1.save()
+        self.e2e_login(self.account_normaal)
+
+    def test_inactief_staff(self):
+        # inlog als staff met inactief nhblid moet gewoon werken
+        self.account_normaal.is_staff = True
+        self.account_normaal.save()
+        self.nhblid1.is_actief_lid = False
+        self.nhblid1.save()
+        self.e2e_login(self.account_normaal)
+
     def test_geen_nhblid(self):
         self.nhblid1.account = None
         self.nhblid1.save()
 
         self.e2e_login(self.account_normaal)
-        resp = self.client.get('/plein/')
-        self.assertContains(resp, 'Gebruiker')
-        self.assertNotContains(resp, 'Schutter')
+        with self.assert_max_queries(20):
+            resp = self.client.get('/plein/')
+        self.assert_template_used(resp, ('plein/plein-bezoeker.dtl',))
 
     def test_overdracht_naam(self):
         # controleer dat de naam van het NHB lid door de login overgenomen wordt in het account
@@ -98,11 +115,11 @@ class TestNhbStructuurLogin(E2EHelpers, TestCase):
 
         resp = self.e2e_login_no_check(self.account_normaal)
         self.assertEqual(resp.status_code, 200)
-        # check niet ingelogd
-        self.assertContains(resp, '/account/login/')
-        self.assertNotContains(resp, '/account/logout/')
         self.assertContains(resp, 'We hebben een nieuw e-mailadres doorgekregen uit de administratie van de NHB')
         self.assertContains(resp, 'ni###e@test.com')
+
+        # check niet ingelogd
+        self.e2e_assert_not_logged_in()
 
         # check propagatie is gedaan
         obj = self.account_normaal.accountemail_set.all()[0]

@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020 Ramon van der Winkel.
+                Copyright (c) 2020-2021 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -13,25 +13,25 @@
 <p>De website kent 3 inschrijfmethodes:</p>
 <p></p>
 <ol style="padding-left: 20px">
-<li>Schutter geeft beschikbaarheid op</li>
+<li>Sporter geeft beschikbaarheid op</li>
 <li>Wedstrijdklasse op accommodatie</li>
 <li>Voorkeur weekdagen</li>
 </ol>
 <p></p>
 <p></p>
-<p><h4>Inschrijf methode 1</h4></p>
+<h4>Inschrijf methode 1</h4>
 <p></p>
-<p>Bij methode 1 krijgt de schutter de volledige planning te zien en kan aankruisen op welke momenten het hem of haar past om te schieten.</p>
+<p>Bij methode 1 krijgt de sporter de volledige planning te zien en kan aankruisen op welke momenten het hem of haar past om te schieten.</p>
 <p></p>
-<p><h4>Inschrijf methode 2</h4></p>
+<h4>Inschrijf methode 2</h4>
 <p></p>
 <p>Binnen elke ronde worden de wedstrijden verdeeld over enkele verenigingen aan de hand van de wedstrijdklasse (bijvoorbeeld: Compound Klasse 1).</p>
 <p></p>
-<p>Door de koppeling met het boogtype waarmee de schutter zich aangemeld heeft kunnen dus een kalender laten zien wanneer de schutter waar moet schieten.</p>
+<p>Door de koppeling met het boogtype waarmee de sporter zich aangemeld heeft kunnen dus een kalender laten zien wanneer de sporter waar moet schieten.</p>
 <p></p>
-<p><h4>Inschrijf methode 3</h4></p>
+<h4>Inschrijf methode 3</h4>
 <p></p>
-<p>De schutter geeft bij het aanmelden voor de regiocompetitie op welke dagdelen de voorkeur hebben:</p>
+<p>De sporter geeft bij het aanmelden voor de regiocompetitie op welke dagdelen de voorkeur hebben:</p>
 <ul style="padding-left: 20px">
 <li style="list-style-type: disc; padding-left: 0px">Geen voorkeur</li>
 <li style="list-style-type: disc; padding-left: 0px">'s Avonds</li>
@@ -40,11 +40,15 @@
 <li style="list-style-type: disc; padding-left: 0px">Zondag</li>
 </ul>
 <p></p>
-<p>De RCL krijgt het overzicht hoeveel schutters van elke vereniging bijvoorbeeld 's Avonds willen schieten. Om overbelasting van een accommodatie te voorkomen deelt de RCL quota-plaatsen uit aan de verenigingen voor elke wedstrijd. De verenigingen vergeven plaatsen aan de schutters.</p>
+<p>De RCL krijgt het overzicht hoeveel sporters van elke vereniging bijvoorbeeld 's Avonds willen schieten. Om overbelasting van een accommodatie te voorkomen deelt de RCL quota-plaatsen uit aan de verenigingen voor elke wedstrijd. De verenigingen vergeven plaatsen aan de sporters.</p>
 <p></p>
-<hr><p><h5>Verder</h5></p>
+<hr><h5>Verder</h5>
 <p>Terug naar de <a href="/handleiding/Hoofdpagina/">Hoofdpagina</a>.</p>
 
 </div>
 
+{% endblock %}
+
+{% block menu %}
+    {% include 'handleiding/menu.dtl' %}
 {% endblock %}

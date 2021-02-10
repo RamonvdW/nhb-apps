@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -61,12 +61,13 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
 
     def _check_wijzigbaar(self, functie):
         url = self.url_wijzig_email % functie.pk
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/wijzig-email.dtl', 'plein/site_layout.dtl'))
 
-        with self.settings(EMAIL_ADDRESS_WHITELIST=()):
+        with self.assert_max_queries(20):
             resp = self.client.post(url, {'email': 'nieuweemail@test.com'})
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
@@ -74,15 +75,18 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
 
     def _check_niet_wijzigbaar(self, functie):
         url = self.url_wijzig_email % functie.pk
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 404)
 
-        resp = self.client.post(url, {'email': 'nieuweemail@test.com'})
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'email': 'nieuweemail@test.com'})
         self.assertEqual(resp.status_code, 404)
 
     def test_get_anon(self):
         url = self.url_wijzig_email % self.functie_rko1.pk
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assert_is_redirect(resp, '/plein/')
 
     def test_bb(self):
@@ -112,11 +116,13 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
         pos = text.find('/overig/url/')     # 12 lang
         url = text[pos:pos+12+32+1]        # 32 = code
 
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         urls = self.extract_all_urls(resp, skip_menu=True, skip_smileys=True)
         post_url = urls[0]
-        resp = self.client.post(post_url)
+        with self.assert_max_queries(20):
+            resp = self.client.post(post_url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/bevestigd.dtl', 'plein/site_layout.dtl'))
@@ -236,7 +242,8 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
 
         # controleer dat wijzig-email niet gebruikt mag worden
         url = '/functie/wijzig-email/%s/' % self.functie_wl.pk
-        resp = self.client.get(url)
+        with self.assert_max_queries(1):
+            resp = self.client.get(url)
         self.assert_is_redirect(resp, '/plein/')
 
     def test_multi_change(self):
@@ -253,7 +260,7 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
         self.assertEqual(SiteTijdelijkeUrl.objects.count(), 0)
 
         # eerste invoer
-        with self.settings(EMAIL_ADDRESS_WHITELIST=()):
+        with self.assert_max_queries(8):
             resp = self.client.post(url, {'email': 'nieuweemail1@test.com'})
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
@@ -273,7 +280,7 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
         url1 = text[pos:pos+12+32+1]         # 32 = code
 
         # tweede invoer
-        with self.settings(EMAIL_ADDRESS_WHITELIST=()):
+        with self.assert_max_queries(20):
             resp = self.client.post(url, {'email': 'nieuweemail2@test.com'})
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
@@ -293,11 +300,13 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
         url2 = text[pos:pos+12+32+1]         # 32 = code
 
         # volg de 1e url
-        resp = self.client.get(url1)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url1)
         self.assertEqual(resp.status_code, 200)
         urls = self.extract_all_urls(resp, skip_menu=True, skip_smileys=True)
         post_url = urls[0]
-        resp = self.client.post(post_url)
+        with self.assert_max_queries(20):
+            resp = self.client.post(post_url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/bevestigd.dtl', 'plein/site_layout.dtl'))
@@ -310,11 +319,13 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
         self.assertEqual(functie.bevestigde_email, 'nieuweemail2@test.com')
 
         # volg de 2e url
-        resp = self.client.get(url2)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url2)
         self.assertEqual(resp.status_code, 200)
         urls = self.extract_all_urls(resp, skip_menu=True, skip_smileys=True)
         post_url = urls[0]
-        resp = self.client.post(post_url)
+        with self.assert_max_queries(20):
+            resp = self.client.post(post_url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/bevestigd.dtl', 'plein/site_layout.dtl'))
@@ -334,16 +345,20 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
 
         # niet bestaande functie
         url = self.url_wijzig_email % 999999
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 404)
-        resp = self.client.post(url)
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
         self.assertEqual(resp.status_code, 404)
 
         # post met te weinig parameters
         url = self.url_wijzig_email % self.functie_rko1.pk
-        resp = self.client.get(url)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
-        resp = self.client.post(url)
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, 'E-mailadres niet geaccepteerd')
 

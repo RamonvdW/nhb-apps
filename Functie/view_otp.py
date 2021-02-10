@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -40,7 +40,7 @@ class OTPControleView(TemplateView):
 
         form = OTPControleForm()
         context = {'form': form}
-        menu_dynamics(request, context, actief="inloggen")
+        menu_dynamics(request, context, actief="wissel-van-rol")
         return render(request, TEMPLATE_OTP_CONTROLE, context)
 
     def post(self, request, *args, **kwargs):
@@ -70,7 +70,7 @@ class OTPControleView(TemplateView):
 
         # still here --> re-render with error message
         context = {'form': form}
-        menu_dynamics(request, context, actief="inloggen")
+        menu_dynamics(request, context, actief="wissel-van-rol")
         return render(request, TEMPLATE_OTP_CONTROLE, context)
 
 
@@ -116,7 +116,7 @@ class OTPKoppelenView(TemplateView):
         context = {'form': form,
                    'qrcode': qrcode,
                    'otp_secret': secret }
-        menu_dynamics(request, context, actief="inloggen")
+        menu_dynamics(request, context, actief="wissel-van-rol")
         return render(request, TEMPLATE_OTP_KOPPELEN, context)
 
     def post(self, request, *args, **kwargs):
@@ -133,7 +133,7 @@ class OTPKoppelenView(TemplateView):
             if account_otp_koppel(request, account, otp_code):
                 # geef de succes pagina
                 context = dict()
-                menu_dynamics(request, context, actief="inloggen")
+                menu_dynamics(request, context, actief="wissel-van-rol")
                 return render(request, TEMPLATE_OTP_GEKOPPELD, context)
 
             # controle is mislukt - is al gelogd
@@ -147,7 +147,7 @@ class OTPKoppelenView(TemplateView):
         context = {'form': form,
                    'qrcode': qrcode,
                    'otp_secret': secret}
-        menu_dynamics(request, context, actief="inloggen")
+        menu_dynamics(request, context, actief="wissel-van-rol")
         return render(request, TEMPLATE_OTP_KOPPELEN, context)
 
 

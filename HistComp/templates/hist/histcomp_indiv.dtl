@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019-2020 Ramon van der Winkel.
+                Copyright (c) 2019-2021 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -10,113 +10,61 @@
 {% block title %}Uitslag individuele competitie{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="histcomp_indiv" %}
 
-<h4>Uitslag individuele competitie</h4>
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="histcomp_indiv" %}
 
-<!-- toon gekozen competitie in een blauwe box -->
-<div class="row">
-    <div class="col s9 m8 l8 xl6 offset-s1 offset-m2 offset-l2 offset-xl3">
-        <div class="white-text nhb-blauw z-depth-2">
-            <div class="row small-row">
-                <div class="col s4">Competitie:</div>
-                <div class="col s5">{{ histcomp.comp_type_str }}</div>
-            </div>
-            <div class="row small-row">
-                <div class="col s4">Seizoen:</div>
-                <div class="col s5">{{ histcomp.seizoen }}</div>
-            </div>
-            <div class="row small-row">
-                <div class="col s4">Klasse:</div>
-                <div class="col s5">{{ histcomp.klasse }}</div>
+    <h4>Uitslag individuele competitie</h4>
+
+    <!-- toon gekozen competitie in een blauwe box -->
+    <div class="row">
+        <div class="col s9 m8 l8 xl6 offset-s1 offset-m2 offset-l2 offset-xl3">
+            <div class="white-text nhb-blauw z-depth-2">
+                <div class="row small-row">
+                    <div class="col s4">Competitie:</div>
+                    <div class="col s5">{{ histcomp.comp_type_str }}</div>
+                </div>
+                <div class="row small-row">
+                    <div class="col s4">Seizoen:</div>
+                    <div class="col s5">{{ histcomp.seizoen }}</div>
+                </div>
+                <div class="row small-row">
+                    <div class="col s4">Klasse:</div>
+                    <div class="col s5">{{ histcomp.klasse }}</div>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<p>&nbsp;</p>
+    <p>&nbsp;</p>
 
-<div class="container white z-depth-2">
-    <div class="row nhb-blauw white-text">
-        <div class="col s12 center-align">
-            <h5>Zoeken op naam</h5>
-            <p>of verenigingsnummer</p>
+    <div class="container white z-depth-2">
+        <div class="row nhb-blauw white-text">
+            <div class="col s12 center-align">
+                <h5>Zoeken op naam</h5>
+                <p>of verenigingsnummer</p>
+            </div>
         </div>
+
+        <form class="row" method="get" action="{{ filter_url }}">
+
+            <div class="row">
+                <div class="input-field col s12">
+                    {{ form.filter.label_tag }} {{ form.filter }}
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="center-align">
+                    <button class="btn-nhb-blauw" type="submit"><i class="material-icons-round left">search</i>Zoek</button>
+                    {% if unfiltered_url %}
+                        <span>&nbsp;&nbsp;</span><a class="btn-nhb-blauw" href="{{ unfiltered_url }}"><i class="material-icons-round left">backspace</i>Leeg maken</a>
+                    {% endif %}
+                </div>
+            </div>
+        </form>
     </div>
 
-    <form class="row" method="get" action="{{ filter_url }}">
-
-        <div class="row">
-            <div class="input-field col s12">
-                {{ form.filter.label_tag }} {{ form.filter }}
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="center-align">
-                <button class="btn-nhb-blauw" type="submit"><i class="material-icons-round left">search</i>Zoek</button>
-                {% if unfiltered_url %}
-                    <span>&nbsp;&nbsp;</span><a class="btn-nhb-blauw" href="{{ unfiltered_url }}"><i class="material-icons-round left">backspace</i>Leeg maken</a>
-                {% endif %}
-            </div>
-        </div>
-    </form>
-</div>
-
-<p>De gemiddelde pijl is berekend over de 6 hoogste scores. De laagste score staat tussen haakjes.</p>
-
-{% if is_paginated %}
-    <ul class="pagination">
-        {% for linkname, url in page_links %}
-            {% if linkname == active %}
-                <li class="active"><a href="{{ url }}">{{ linkname }}</a></li>
-            {% elif linkname == "vorige_disable" %}
-                <li class="disabled"><a href="#!"><i class="material-icons-round">chevron_left</i></a></li>
-            {% elif linkname == "vorige" %}
-                <li class="waves-effect"><a href="{{ url }}"><i class="material-icons-round">chevron_left</i></a></li>
-            {% elif linkname == "volgende" %}
-                <li class="waves-effect"><a href="{{ url }}"><i class="material-icons-round">chevron_right</i></a></li>
-            {% elif linkname == "volgende_disable" %}
-                <li class="disabled"><a href="#!"><i class="material-icons-round">chevron_right</i></a></li>
-            {% else %}
-                <li class="waves-effect"><a href="{{ url }}">{{ linkname }}</a></li>
-            {% endif %}
-        {% endfor %}
-    </ul>
-{% endif %}
-
-{% if object_list.count %}
-    <table class="white">
-        <thead>
-            <tr>
-                <th class="center-align">Rank</th>
-                <th>Schutter</th>
-                <th>Vereniging</th>
-                <th class="center-align">Gemiddelde pijl</th>
-                <th class="center-align" colspan="7">Scores</th>
-                <th class="center-align">Totale score</th>
-            </tr>
-        </thead>
-
-        {% for obj in object_list %}
-            <tr>
-                <td class="center-align">{{ obj.rank }}</td>
-                <td>{{ obj.schutter_naam|highlight:zoekterm }}</td>
-                <td>[{{ obj.vereniging_nr }}] {{ obj.vereniging_naam|highlight:zoekterm }}</td>
-                <td class="center-align">{{ obj.gemiddelde }}</td>
-
-                <td class="right-align">{% if obj.laagste_score_nr == 1 %}({{ obj.score1 }}){% else %}{{ obj.score1 }}{% endif %}</td>
-                <td class="right-align">{% if obj.laagste_score_nr == 2 %}({{ obj.score2 }}){% else %}{{ obj.score2 }}{% endif %}</td>
-                <td class="right-align">{% if obj.laagste_score_nr == 3 %}({{ obj.score3 }}){% else %}{{ obj.score3 }}{% endif %}</td>
-                <td class="right-align">{% if obj.laagste_score_nr == 4 %}({{ obj.score4 }}){% else %}{{ obj.score4 }}{% endif %}</td>
-                <td class="right-align">{% if obj.laagste_score_nr == 5 %}({{ obj.score5 }}){% else %}{{ obj.score5 }}{% endif %}</td>
-                <td class="right-align">{% if obj.laagste_score_nr == 6 %}({{ obj.score6 }}){% else %}{{ obj.score6 }}{% endif %}</td>
-                <td class="right-align">{% if obj.laagste_score_nr == 7 %}({{ obj.score7 }}){% else %}{{ obj.score7 }}{% endif %}</td>
-
-                <td class="center-align">{{ obj.totaal }}</td>
-            </tr>
-        {% endfor %}
-    </table>
+    <p>De gemiddelde pijl is berekend over de 6 hoogste scores. De laagste score staat tussen haakjes.</p>
 
     {% if is_paginated %}
         <ul class="pagination">
@@ -138,14 +86,71 @@
         </ul>
     {% endif %}
 
-    {% if all_url and not unfiltered_url %}
-        <p>Laad <a href="{{ all_url }}">alle {{ all_count }}</a> regels.</p>
+    {% if object_list.count %}
+        <table class="white">
+            <thead>
+                <tr>
+                    <th class="center-align">Rank</th>
+                    <th>Sporter</th>
+                    <th>Vereniging</th>
+                    <th class="center-align">Gemiddelde pijl</th>
+                    <th class="center-align" colspan="7">Scores</th>
+                    <th class="center-align">Totale score</th>
+                </tr>
+            </thead>
+
+            {% for obj in object_list %}
+                <tr>
+                    <td class="center-align">{{ obj.rank }}</td>
+                    <td>{{ obj.schutter_naam|highlight:zoekterm }}</td>
+                    <td>[{{ obj.vereniging_nr }}] {{ obj.vereniging_naam|highlight:zoekterm }}</td>
+                    <td class="center-align">{{ obj.gemiddelde }}</td>
+
+                    <td class="right-align">{% if obj.laagste_score_nr == 1 %}({{ obj.score1 }}){% else %}{{ obj.score1 }}{% endif %}</td>
+                    <td class="right-align">{% if obj.laagste_score_nr == 2 %}({{ obj.score2 }}){% else %}{{ obj.score2 }}{% endif %}</td>
+                    <td class="right-align">{% if obj.laagste_score_nr == 3 %}({{ obj.score3 }}){% else %}{{ obj.score3 }}{% endif %}</td>
+                    <td class="right-align">{% if obj.laagste_score_nr == 4 %}({{ obj.score4 }}){% else %}{{ obj.score4 }}{% endif %}</td>
+                    <td class="right-align">{% if obj.laagste_score_nr == 5 %}({{ obj.score5 }}){% else %}{{ obj.score5 }}{% endif %}</td>
+                    <td class="right-align">{% if obj.laagste_score_nr == 6 %}({{ obj.score6 }}){% else %}{{ obj.score6 }}{% endif %}</td>
+                    <td class="right-align">{% if obj.laagste_score_nr == 7 %}({{ obj.score7 }}){% else %}{{ obj.score7 }}{% endif %}</td>
+
+                    <td class="center-align">{{ obj.totaal }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+
+        {% if is_paginated %}
+            <ul class="pagination">
+                {% for linkname, url in page_links %}
+                    {% if linkname == active %}
+                        <li class="active"><a href="{{ url }}">{{ linkname }}</a></li>
+                    {% elif linkname == "vorige_disable" %}
+                        <li class="disabled"><a href="#!"><i class="material-icons-round">chevron_left</i></a></li>
+                    {% elif linkname == "vorige" %}
+                        <li class="waves-effect"><a href="{{ url }}"><i class="material-icons-round">chevron_left</i></a></li>
+                    {% elif linkname == "volgende" %}
+                        <li class="waves-effect"><a href="{{ url }}"><i class="material-icons-round">chevron_right</i></a></li>
+                    {% elif linkname == "volgende_disable" %}
+                        <li class="disabled"><a href="#!"><i class="material-icons-round">chevron_right</i></a></li>
+                    {% else %}
+                        <li class="waves-effect"><a href="{{ url }}">{{ linkname }}</a></li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        {% if all_url and not unfiltered_url %}
+            <p>Laad <a href="{{ all_url }}">alle {{ all_count }}</a> regels.</p>
+        {% endif %}
+
+    {% else %}
+
+        <p>Er zijn geen resultaten beschikbaar.</p>
+
     {% endif %}
 
-{% else %}
+{% endblock %}
 
-    <p>Er zijn geen resultaten beschikbaar.</p>
-
-{% endif %}
-
+{% block menu-competities %}
+    {% include 'competitie/menu.dtl' %}
 {% endblock %}

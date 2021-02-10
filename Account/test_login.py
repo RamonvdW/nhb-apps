@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -29,7 +29,8 @@ class TestAccountLogin(E2EHelpers, TestCase):
         
     def test_inlog_form_get(self):
         # test ophalen van het inlog formulier
-        resp = self.client.get(self.url_login)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_login)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/login.dtl', 'plein/site_layout.dtl'))
@@ -38,13 +39,12 @@ class TestAccountLogin(E2EHelpers, TestCase):
         # test inlog via het inlog formulier
         self.account_normaal.verkeerd_wachtwoord_teller = 3
         self.account_normaal.save()
-        resp = self.client.post(self.url_login, {'login_naam': 'normaal',
-                                                 'wachtwoord':  E2EHelpers.WACHTWOORD}, follow=True)
+        with self.assert_max_queries(23):
+            resp = self.client.post(self.url_login, {'login_naam': 'normaal',
+                                                     'wachtwoord':  E2EHelpers.WACHTWOORD}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        # redirect is naar het plein
         self.assert_template_used(resp, ('functie/otp-controle.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, 'Uitloggen')
         self.account_normaal = Account.objects.get(username='normaal')
         self.assertEqual(self.account_normaal.verkeerd_wachtwoord_teller, 0)
 
@@ -52,8 +52,9 @@ class TestAccountLogin(E2EHelpers, TestCase):
 
     def test_inlog_form_post_bad_login_naam(self):
         # test inlog via het inlog formulier, met onbekende login naam
-        resp = self.client.post(self.url_login, {'login_naam': 'onbekend',
-                                                 'wachtwoord':  E2EHelpers.WACHTWOORD})
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_login, {'login_naam': 'onbekend',
+                                                     'wachtwoord':  E2EHelpers.WACHTWOORD})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/login.dtl', 'plein/site_layout.dtl'))
@@ -61,7 +62,8 @@ class TestAccountLogin(E2EHelpers, TestCase):
 
     def test_inlog_form_niet_compleet(self):
         # test inlog via het inlog formulier, met niet complete parameters
-        resp = self.client.post(self.url_login, {'wachtwoord': 'ja'})
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_login, {'wachtwoord': 'ja'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/login.dtl', 'plein/site_layout.dtl'))
@@ -75,7 +77,8 @@ class TestAccountLogin(E2EHelpers, TestCase):
     def test_inlog_form_post_bad_wachtwoord(self):
         # test inlog via het inlog formulier, met verkeerd wachtwoord
         self.assertEqual(self.account_normaal.verkeerd_wachtwoord_teller, 0)
-        resp = self.client.post(self.url_login, {'login_naam': 'normaal', 'wachtwoord': 'huh'})
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_login, {'login_naam': 'normaal', 'wachtwoord': 'huh'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/login.dtl', 'plein/site_layout.dtl'))
@@ -86,7 +89,8 @@ class TestAccountLogin(E2EHelpers, TestCase):
     def test_inlog_is_geblokkeerd(self):
         self.account_normaal.is_geblokkeerd_tot = timezone.now() + datetime.timedelta(hours=1)
         self.account_normaal.save()
-        resp = self.client.post(self.url_login, {'login_naam': 'normaal', 'wachtwoord': 'huh'})
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_login, {'login_naam': 'normaal', 'wachtwoord': 'huh'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/geblokkeerd.dtl', 'plein/site_layout.dtl'))
@@ -94,18 +98,19 @@ class TestAccountLogin(E2EHelpers, TestCase):
     def test_inlog_was_geblokkeerd(self):
         self.account_normaal.is_geblokkeerd_tot = timezone.now() + datetime.timedelta(hours=-1)
         self.account_normaal.save()
-        resp = self.client.post(self.url_login, {'login_naam': 'normaal',
-                                                 'wachtwoord':  E2EHelpers.WACHTWOORD}, follow=True)
+        with self.assert_max_queries(22):
+            resp = self.client.post(self.url_login, {'login_naam': 'normaal',
+                                                     'wachtwoord':  E2EHelpers.WACHTWOORD}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         # redirect is naar het plein
         self.assert_template_used(resp, ('functie/otp-controle.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, 'Uitloggen')
 
     def test_inlog_wordt_geblokkeerd(self):
         # te vaak een verkeerd wachtwoord
         self.account_normaal.verkeerd_wachtwoord_teller = settings.AUTH_BAD_PASSWORD_LIMIT - 1
         self.account_normaal.save()
-        resp = self.client.post(self.url_login, {'login_naam': 'normaal', 'wachtwoord': 'huh'})
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_login, {'login_naam': 'normaal', 'wachtwoord': 'huh'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/geblokkeerd.dtl', 'plein/site_layout.dtl'))
@@ -119,15 +124,17 @@ class TestAccountLogin(E2EHelpers, TestCase):
         self.email_normaal.email_is_bevestigd = False
         self.email_normaal.save()
 
-        resp = self.client.post(self.url_login, {'login_naam': 'normaal',
-                                                 'wachtwoord':  E2EHelpers.WACHTWOORD}, follow=True)
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_login, {'login_naam': 'normaal',
+                                                     'wachtwoord':  E2EHelpers.WACHTWOORD}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/bevestig-email.dtl', 'plein/site_layout.dtl'))
 
     def test_inlog_partial_fields(self):
         # test inlog via het inlog formulier, met verkeerd wachtwoord
-        resp = self.client.post(self.url_login, {'login_naam': 'normaal', 'wachtwoord': ''})
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_login, {'login_naam': 'normaal', 'wachtwoord': ''})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/login.dtl', 'plein/site_layout.dtl'))
@@ -135,50 +142,55 @@ class TestAccountLogin(E2EHelpers, TestCase):
 
     def test_inlog_form_post_next_good(self):
         # controleer dat de next parameter gebruikt wordt
-        resp = self.client.post(self.url_login, {'login_naam': 'normaal',
-                                                 'wachtwoord':  E2EHelpers.WACHTWOORD,
-                                                 'next': '/account/logout/'}, follow=True)
+        with self.assert_max_queries(22):
+            resp = self.client.post(self.url_login, {'login_naam': 'normaal',
+                                                     'wachtwoord':  E2EHelpers.WACHTWOORD,
+                                                     'next': '/account/logout/'}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/uitloggen.dtl', 'plein/site_layout.dtl'))
 
     def test_inlog_form_post_next_bad(self):
         # controleer dat een slechte next parameter naar het Plein gaat
-        resp = self.client.post(self.url_login, {'login_naam': 'normaal',
-                                                 'wachtwoord':  E2EHelpers.WACHTWOORD,
-                                                 'next': '/bla/bla/'}, follow=True)
+        with self.assert_max_queries(22):
+            resp = self.client.post(self.url_login, {'login_naam': 'normaal',
+                                                     'wachtwoord':  E2EHelpers.WACHTWOORD,
+                                                     'next': '/bla/bla/'}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/otp-controle.dtl', 'plein/site_layout.dtl'))
 
-        resp = self.client.post(self.url_login, {'login_naam': 'normaal',
-                                                 'wachtwoord':  E2EHelpers.WACHTWOORD,
-                                                 'next': 'www.handboogsport.nl'}, follow=True)
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_login, {'login_naam': 'normaal',
+                                                     'wachtwoord':  E2EHelpers.WACHTWOORD,
+                                                     'next': 'www.handboogsport.nl'}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/otp-controle.dtl', 'plein/site_layout.dtl'))
 
     def test_logout(self):
         # controleer wat er gebeurd indien niet ingelogd
-        resp = self.client.get('/account/logout/')
+        with self.assert_max_queries(20):
+            resp = self.client.get('/account/logout/')
         self.assert_is_redirect(resp, '/plein/')
 
         # log in
-        resp = self.client.post(self.url_login, {'login_naam': 'normaal',
-                                                 'wachtwoord': E2EHelpers.WACHTWOORD}, follow=True)
+        with self.assert_max_queries(22):
+            resp = self.client.post(self.url_login, {'login_naam': 'normaal',
+                                                     'wachtwoord': E2EHelpers.WACHTWOORD}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, 'Uitloggen')
+        self.assert_template_used(resp, ('functie/otp-controle.dtl', 'plein/site_layout.dtl'))
 
-        resp = self.client.get('/account/logout/')
+        with self.assert_max_queries(20):
+            resp = self.client.get('/account/logout/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('account/uitloggen.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, 'Uitloggen')
 
         # do the actual logout
-        resp = self.client.post('/account/logout/', {}, follow=True)
+        with self.assert_max_queries(20):
+            resp = self.client.post('/account/logout/', {}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('plein/plein-bezoeker.dtl', 'plein/site_layout.dtl'))
-        self.assertNotContains(resp, 'Uitloggen')
 
         self.e2e_assert_other_http_commands_not_supported('/account/logout/', post=False)
 
@@ -190,37 +202,33 @@ class TestAccountLogin(E2EHelpers, TestCase):
 
     def test_login_met_email(self):
         # test inlog via het inlog formulier, met een email adres
-        resp = self.client.post(self.url_login, {'login_naam': 'metmail@test.com',
-                                                 'wachtwoord': E2EHelpers.WACHTWOORD})
+        with self.assert_max_queries(22):
+            resp = self.client.post(self.url_login, {'login_naam': 'metmail@test.com',
+                                                     'wachtwoord': E2EHelpers.WACHTWOORD})
         self.assert_is_redirect(resp, '/functie/otp-controle/')
 
         # check aanwezigheid van Uitloggen optie in menu als teken van inlog succes
-        resp = self.client.get('/plein/')
-        self.assertContains(resp, 'Uitloggen')
+        with self.assert_max_queries(20):
+            resp = self.client.get('/plein/')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
 
         # check of het niet aanzetten van het 'aangemeld blijven' vinkje werkt
         self.assertTrue(self.client.session.get_expire_at_browser_close())
 
     def test_login_met_email_case_insensitive(self):
         # test inlog via het inlog formulier, met een email adres
-        resp = self.client.post(self.url_login, {'login_naam': 'MetMail@test.com',
-                                                 'wachtwoord': E2EHelpers.WACHTWOORD})
+        with self.assert_max_queries(22):
+            resp = self.client.post(self.url_login, {'login_naam': 'MetMail@test.com',
+                                                     'wachtwoord': E2EHelpers.WACHTWOORD})
         self.assert_is_redirect(resp, '/functie/otp-controle/')
-
-        # check aanwezigheid van Uitloggen optie in menu als teken van inlog succes
-        resp = self.client.get('/plein/')
-        self.assertContains(resp, 'Uitloggen')
 
     def test_login_aangemeld_blijven(self):
         # test inlog via het inlog formulier, met het 'aangemeld blijven' vinkje gezet
-        resp = self.client.post(self.url_login, {'login_naam': 'metmail@test.com',
-                                                 'wachtwoord': E2EHelpers.WACHTWOORD,
-                                                 'aangemeld_blijven': True})
+        with self.assert_max_queries(22):
+            resp = self.client.post(self.url_login, {'login_naam': 'metmail@test.com',
+                                                     'wachtwoord': E2EHelpers.WACHTWOORD,
+                                                     'aangemeld_blijven': True})
         self.assert_is_redirect(resp, '/functie/otp-controle/')
-
-        # check aanwezigheid van Uitloggen optie in menu als teken van inlog succes
-        resp = self.client.get('/plein/')
-        self.assertContains(resp, 'Uitloggen')
 
         # als het vinkje gezet is, dan verloopt deze sessie niet als de browser afgesloten wordt
         self.assertFalse(self.client.session.get_expire_at_browser_close())
@@ -234,8 +242,9 @@ class TestAccountLogin(E2EHelpers, TestCase):
 
         # probeer in te loggen met email
         # check de foutmelding
-        resp = self.client.post(self.url_login, {'login_naam': 'metmail@test.com',
-                                                 'wachtwoord': E2EHelpers.WACHTWOORD})
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_login, {'login_naam': 'metmail@test.com',
+                                                     'wachtwoord': E2EHelpers.WACHTWOORD})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/login.dtl', 'plein/site_layout.dtl'))
@@ -247,8 +256,9 @@ class TestAccountLogin(E2EHelpers, TestCase):
         self.email_metmail.save()
 
         # test inlog via het inlog formulier, met een email adres
-        resp = self.client.post(self.url_login, {'login_naam': 'metmail@test.com',
-                                                 'wachtwoord': E2EHelpers.WACHTWOORD}, follow=True)
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_login, {'login_naam': 'metmail@test.com',
+                                                     'wachtwoord': E2EHelpers.WACHTWOORD}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         # redirect is naar de nieuwe-email pagina
@@ -261,8 +271,9 @@ class TestAccountLogin(E2EHelpers, TestCase):
         self.email_metmail.save()
 
         # test inlog via het inlog formulier, met een email adres
-        resp = self.client.post(self.url_login, {'login_naam': 'metmail@test.com',
-                                                 'wachtwoord': E2EHelpers.WACHTWOORD}, follow=True)
+        with self.assert_max_queries(24):
+            resp = self.client.post(self.url_login, {'login_naam': 'metmail@test.com',
+                                                     'wachtwoord': E2EHelpers.WACHTWOORD}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         # redirect is naar het plein, want er is geen nieuw email adres
@@ -270,7 +281,8 @@ class TestAccountLogin(E2EHelpers, TestCase):
 
     def test_login_next(self):
         # test een login met een 'next' parameter die na de login gevolgd wordt
-        resp = self.client.post(self.url_login, {'login_naam': 'metmail@test.com', 'wachtwoord': E2EHelpers.WACHTWOORD, 'next': '/account/logout'}, follow=True)
+        with self.assert_max_queries(24):
+            resp = self.client.post(self.url_login, {'login_naam': 'metmail@test.com', 'wachtwoord': E2EHelpers.WACHTWOORD, 'next': '/account/logout'}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         # redirect is naar de 'next' pagina
@@ -280,30 +292,31 @@ class TestAccountLogin(E2EHelpers, TestCase):
         self.e2e_login(self.account_admin)
 
         # test een login met een 'next' parameter die na de login gevolgd wordt
-        resp = self.client.get(self.url_login, {'next': '/account/bestaat-helemaal-zeker-weten-niet'}, follow=False)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_login, {'next': '/account/bestaat-helemaal-zeker-weten-niet'}, follow=False)
         self.assert_is_redirect(resp, '/plein/')
 
     def test_login_al_ingelogd(self):
         self.e2e_login(self.account_admin)
 
         # simuleer een redirect naar het login scherm met een 'next' parameter
-        resp = self.client.get(self.url_login, follow=True)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_login, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         # redirect is naar het plein
-        self.assert_template_used(resp, ('plein/plein-gebruiker.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, 'Uitloggen')
+        self.assert_template_used(resp, ('plein/plein-bezoeker.dtl', 'plein/site_layout.dtl'))
 
     def test_login_next_al_ingelogd(self):
         self.e2e_login(self.account_admin)
 
         # simuleer een redirect naar het login scherm met een 'next' parameter
-        resp = self.client.get(self.url_login, {'next': '/account/logout/'}, follow=True)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_login, {'next': '/account/logout/'}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         # redirect is naar het plein
         self.assert_template_used(resp, ('account/uitloggen.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, 'Uitloggen')
 
 
 # end of file

@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019-2020 Ramon van der Winkel.
+                Copyright (c) 2019-2021 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -10,107 +10,106 @@
 
 {% block pagina %}
 
-<h4>Je leeftijdsklasse</h4>
+    <h4>Je leeftijdsklasse</h4>
 
-<p>Schutters worden in een wedstrijd ingedeeld in een <i>wedstrijdklasse</i> aan de hand van hun leeftijd en/of type boog.</p>
+    <p>Sporters worden in een wedstrijd ingedeeld in een <i>wedstrijdklasse</i> aan de hand van hun leeftijd en/of type boog.</p>
 
-<p>Volgens het reglement van World Archery wordt de klasse bepaald door de leeftijd die je <i>bereikt</i> in een jaar.
-Jij bereikt dit jaar de leeftijd {{ plein_leeftijd }}. Dit bepaalt je <i>leeftijdsklasse</i>.</p>
+    <p>Volgens het reglement van World Archery wordt de klasse bepaald door de leeftijd die je <i>bereikt</i> in een jaar.
+    Jij bereikt dit jaar de leeftijd {{ plein_leeftijd }}. Dit bepaalt je <i>leeftijdsklasse</i>.</p>
 
-<p>Vooral voor jonge schutters verandert de klasse waarin je uit mag komen regelmatig, daarom hebben we hieronder een overzicht gemaakt.</p>
+    <p>Vooral voor jonge sporters verandert de klasse waarin je uit mag komen regelmatig, daarom hebben we hieronder een overzicht gemaakt.</p>
 
-<p>De jongste schutters beginnen als Aspirant, daarna wordt je Cadet, Junior en uiteindelijk Senior.</p>
+    <p>De jongste sporters beginnen als Aspirant, daarna wordt je Cadet, Junior en uiteindelijk Senior.</p>
 
 
-<span>&nbsp;</span>
-<h5>Wedstrijden</h5>
+    <span>&nbsp;</span>
+    <h5>Wedstrijden</h5>
 
-<p>Dit jaar bereik je de leeftijd {{ plein_leeftijd }} jaar. Daarom kom je het hele jaar uit in de klasse <b>{{ plein_wlst.1 }}.</b></p>
+    <p>Dit jaar bereik je de leeftijd {{ plein_leeftijd }} jaar. Daarom kom je het hele jaar uit in de klasse <b>{{ plein_wlst.1 }}.</b></p>
 
-<table class="white">
-    <thead>
+    <table class="white">
+        <thead>
+            <tr>
+                <th>Jaartal</th>
+                <th>Te bereiken leeftijd</th>
+                <th>Jouw leeftijdsklasse voor wedstrijden het gehele jaar</th>
+            </tr>
+        </thead>
+
         <tr>
-            <th>Jaartal</th>
-            <th>Te bereiken leeftijd</th>
-            <th>Jouw leeftijdsklasse voor wedstrijden het gehele jaar</th>
+            <td>{{ plein_huidige_jaar|add:"-1" }}</td>
+            <td>{{ plein_leeftijd|add:"-1" }}</td>
+            <td>{{ plein_wlst.0 }}</td>
         </tr>
-    </thead>
 
-    <tr>
-        <td>{{ plein_huidige_jaar|add:"-1" }}</td>
-        <td>{{ plein_leeftijd|add:"-1" }}</td>
-        <td>{{ plein_wlst.0 }}</td>
-    </tr>
+        <tr class="nhb-blauw white-text">
+            <td>{{ plein_huidige_jaar }}</td>
+            <td>{{ plein_leeftijd }}</td>
+            <td>{{ plein_wlst.1 }}</td>
+        </tr>
 
-    <tr class="nhb-blauw white-text">
-        <td>{{ plein_huidige_jaar }}</td>
-        <td>{{ plein_leeftijd }}</td>
-        <td>{{ plein_wlst.1 }}</td>
-    </tr>
-
-    <tr>
-        <td>{{ plein_huidige_jaar|add:"1" }}</td>
-        <td>{{ plein_leeftijd|add:"1" }}</td>
-        <td>{{ plein_wlst.2 }}</td>
-    </tr>
-
-    <tr>
-        <td>{{ plein_huidige_jaar|add:"2" }}</td>
-        <td>{{ plein_leeftijd|add:"2" }}</td>
-        <td>{{ plein_wlst.3 }}</td>
-    </tr>
-
-    <tr>
-        <td>{{ plein_huidige_jaar|add:"3" }}</td>
-        <td>{{ plein_leeftijd|add:"3" }}</td>
-        <td>{{ plein_wlst.4 }}</td>
-    </tr>
-</table>
-
-
-<span>&nbsp;</span>
-<h5>Bondscompetitie</h5>
-
-<p>Omdat de finales van de bondscompetitie in het nieuwe jaar plaatsvinden, moet je de bondscompetitie beginnen in de klasse waarin je volgend jaar uit moet komen.</p>
-
-<p>Voor seizoen {{ plein_huidige_jaar }}/{{ plein_huidige_jaar|add:"1" }} schiet je de bondscompetitie als <b>{{ plein_clst.1 }}</b>.</p>
-
-<table class="white">
-    <thead>
         <tr>
-            <th>Seizoen bondscompetitie</th>
-            <th>Jouw wedstrijdklasse voor het gehele seizoen</th>
+            <td>{{ plein_huidige_jaar|add:"1" }}</td>
+            <td>{{ plein_leeftijd|add:"1" }}</td>
+            <td>{{ plein_wlst.2 }}</td>
         </tr>
-    </thead>
 
-    <tr>
-        <td>{{ plein_huidige_jaar|add:"-1" }}/{{ plein_huidige_jaar }}</td>
-        <td>{{ plein_clst.0 }}</td>
-    </tr>
+        <tr>
+            <td>{{ plein_huidige_jaar|add:"2" }}</td>
+            <td>{{ plein_leeftijd|add:"2" }}</td>
+            <td>{{ plein_wlst.3 }}</td>
+        </tr>
 
-    <tr class="nhb-blauw white-text">
-        <td>{{ plein_huidige_jaar }}/{{ plein_huidige_jaar|add:"1" }}</td>
-        <td>{{ plein_clst.1 }}</td>
-    </tr>
+        <tr>
+            <td>{{ plein_huidige_jaar|add:"3" }}</td>
+            <td>{{ plein_leeftijd|add:"3" }}</td>
+            <td>{{ plein_wlst.4 }}</td>
+        </tr>
+    </table>
 
-    <tr>
-        <td>{{ plein_huidige_jaar|add:"1" }}/{{ plein_huidige_jaar|add:"2" }}</td>
-        <td>{{ plein_clst.2 }}</td>
-    </tr>
 
-    <tr>
-        <td>{{ plein_huidige_jaar|add:"2" }}/{{ plein_huidige_jaar|add:"3" }}</td>
-        <td>{{ plein_clst.3 }}</td>
-    </tr>
+    <span>&nbsp;</span>
+    <h5>Bondscompetitie</h5>
 
-    <tr>
-        <td>{{ plein_huidige_jaar|add:"3" }}/{{ plein_huidige_jaar|add:"4" }}</td>
-        <td>{{ plein_clst.4 }}</td>
-    </tr>
+    <p>Omdat de finales van de bondscompetitie in het nieuwe jaar plaatsvinden, moet je de bondscompetitie beginnen in de klasse waarin je volgend jaar uit moet komen.</p>
 
-</table>
+    <p>Voor seizoen {{ plein_huidige_jaar }}/{{ plein_huidige_jaar|add:"1" }} schiet je de bondscompetitie als <b>{{ plein_clst.1 }}</b>.</p>
 
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="schutter-leeftijdsklassen" %}
+    <table class="white">
+        <thead>
+            <tr>
+                <th>Seizoen bondscompetitie</th>
+                <th>Jouw wedstrijdklasse voor het gehele seizoen</th>
+            </tr>
+        </thead>
+
+        <tr>
+            <td>{{ plein_huidige_jaar|add:"-1" }}/{{ plein_huidige_jaar }}</td>
+            <td>{{ plein_clst.0 }}</td>
+        </tr>
+
+        <tr class="nhb-blauw white-text">
+            <td>{{ plein_huidige_jaar }}/{{ plein_huidige_jaar|add:"1" }}</td>
+            <td>{{ plein_clst.1 }}</td>
+        </tr>
+
+        <tr>
+            <td>{{ plein_huidige_jaar|add:"1" }}/{{ plein_huidige_jaar|add:"2" }}</td>
+            <td>{{ plein_clst.2 }}</td>
+        </tr>
+
+        <tr>
+            <td>{{ plein_huidige_jaar|add:"2" }}/{{ plein_huidige_jaar|add:"3" }}</td>
+            <td>{{ plein_clst.3 }}</td>
+        </tr>
+
+        <tr>
+            <td>{{ plein_huidige_jaar|add:"3" }}/{{ plein_huidige_jaar|add:"4" }}</td>
+            <td>{{ plein_clst.4 }}</td>
+        </tr>
+
+    </table>
+
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="schutter-leeftijdsklassen" %}
 
 {% endblock %}
-

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -13,8 +13,9 @@ from Functie.rol import Rollen, rol_get_huidige
 from NhbStructuur.models import NhbLid
 from .models import HistCompetitie, HistCompetitieIndividueel, HistCompetitieTeam
 from .forms import FilterForm
-from Plein.menu import menu_dynamics
+from Competitie.menu import menu_dynamics_competitie
 from decimal import Decimal
+from urllib.parse import quote_plus
 import csv
 
 TEMPLATE_HISTCOMP_ALLEJAREN = 'hist/histcomp_top.dtl'
@@ -36,7 +37,8 @@ class HistCompAlleJarenView(ListView):
     # class variables shared by all instances
     template_name = TEMPLATE_HISTCOMP_ALLEJAREN
 
-    def _zet_op_volgorde_klassen(self, objs_unsorted):
+    @staticmethod
+    def _zet_op_volgorde_klassen(objs_unsorted):
         # sorteer de klassen op de gewenste volgorde
         # deze routine lijkt een beetje omslachtig, maar dat komt omdat QuerySet geen remove heeft
         objs = list()
@@ -88,7 +90,7 @@ class HistCompAlleJarenView(ListView):
         if HistCompetitie.objects.filter(seizoen=self.seizoen, is_team=True).count() > 0:
             context['show_team'] = True
 
-        menu_dynamics(self.request, context, 'histcomp')
+        menu_dynamics_competitie(self.request, context, actief='histcomp')
         return context
 
 
@@ -118,6 +120,8 @@ class HistCompBaseView(ListView):
         self.comp_type = None
         self.klasse = None
         self.jaar = None
+        self.histcomp = None
+        self.histcomp_pk = None
 
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
@@ -184,7 +188,7 @@ class HistCompBaseView(ListView):
 
         base_url = self.base_url + '?'
         if self.get_filter:
-            base_url += 'filter=%s' % self.get_filter
+            base_url += 'filter=%s' % quote_plus(self.get_filter)
 
         num_pages = context['paginator'].num_pages
         page_nr = context['page_obj'].number
@@ -244,7 +248,7 @@ class HistCompBaseView(ListView):
             context['all_count'] = self.all_count
         # else: we laten de 'all' lijst zien dus laat de 'all' knop weg
 
-        menu_dynamics(self.request, context, 'histcomp')
+        menu_dynamics_competitie(self.request, context, actief='histcomp')
         return context
 
 
@@ -352,7 +356,7 @@ class InterlandView(UserPassesTestMixin, TemplateView):
 
         self.maak_data(context)
 
-        menu_dynamics(self.request, context, actief='histcomp')
+        menu_dynamics_competitie(self.request, context, actief='histcomp')
         return context
 
 

@@ -29,27 +29,33 @@ class TestFunctieVHPG(E2EHelpers, TestCase):
         self.e2e_logout()
 
         # probeer diverse functies zonder ingelogd te zijn
-        resp = self.client.get(self.url_overzicht)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_overzicht)
         self.assert_is_redirect(resp, '/plein/')
 
-        resp = self.client.get(self.url_afspraken)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_afspraken)
         self.assert_is_redirect(resp, '/plein/')
 
-        resp = self.client.get(self.url_acceptatie)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_acceptatie)
         self.assert_is_redirect(resp, '/plein/')
 
         # doe een post zonder ingelogd te zijn
-        resp = self.client.post(self.url_acceptatie, {})
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_acceptatie, {})
         self.assert_is_redirect(resp, '/plein/')
 
     def test_niet_nodig(self):
         self.e2e_login(self.account_normaal)
-        resp = self.client.get(self.url_acceptatie)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_acceptatie)
         self.assert_is_redirect(resp, '/plein/')
 
     def test_admin(self):
         self.e2e_login(self.account_admin)
-        resp = self.client.get(self.url_acceptatie, follow=True)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_acceptatie, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('functie/vhpg-acceptatie.dtl', 'plein/site_layout.dtl'))
         self.assertNotContains(resp, 'verplicht')
@@ -59,7 +65,8 @@ class TestFunctieVHPG(E2EHelpers, TestCase):
         self.assertTrue(needs_vhpg)
 
         # voer de post uit zonder checkbox (dit gebeurt ook als de checkbox niet gezet wordt)
-        resp = self.client.post(self.url_acceptatie, {}, follow=True)
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_acceptatie, {}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/vhpg-acceptatie.dtl', 'plein/site_layout.dtl'))
@@ -68,7 +75,8 @@ class TestFunctieVHPG(E2EHelpers, TestCase):
         self.assertEqual(HanterenPersoonsgegevens.objects.count(), 0)
 
         # voer de post uit met checkbox wel gezet (waarde maakt niet uit)
-        resp = self.client.post(self.url_acceptatie, {'accepteert': 'whatever'}, follow=True)
+        with self.assert_max_queries(25):
+            resp = self.client.post(self.url_acceptatie, {'accepteert': 'whatever'}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
@@ -88,14 +96,16 @@ class TestFunctieVHPG(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_admin)
 
         # is niet BB
-        resp = self.client.get(self.url_overzicht)
-        self.assertEqual(resp.status_code, 302)     # 302 = Redirect (to plein)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_overzicht)
+        self.assert_is_redirect(resp, '/plein/')
 
         # wissel naar BB rol
         self.e2e_wisselnaarrol_bb()
         self.e2e_check_rol('BB')
 
-        resp = self.client.get(self.url_overzicht)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_overzicht)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/vhpg-overzicht.dtl', 'plein/site_layout.dtl'))
@@ -105,7 +115,8 @@ class TestFunctieVHPG(E2EHelpers, TestCase):
     def test_afspraken(self):
         self.e2e_login(self.account_admin)
 
-        resp = self.client.get(self.url_afspraken)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_afspraken)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/vhpg-afspraken.dtl', 'plein/site_layout.dtl'))

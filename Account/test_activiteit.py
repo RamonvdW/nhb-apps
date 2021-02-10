@@ -22,13 +22,15 @@ class TestAccountActiviteit(E2EHelpers, TestCase):
     def test_activiteit_anon(self):
         # geen inlog = geen toegang
         self.e2e_logout()
-        resp = self.client.get(self.url_activiteit)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_activiteit)
         self.assert_is_redirect(resp, '/plein/')
 
     def test_activiteit_normaal(self):
         # inlog maar geen rechten
         self.e2e_login(self.account_normaal)
-        resp = self.client.get(self.url_activiteit)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_activiteit)
         self.assert_is_redirect(resp, '/plein/')
 
     def test_activiteit_bb(self):
@@ -38,7 +40,7 @@ class TestAccountActiviteit(E2EHelpers, TestCase):
         self.e2e_login(self.account_normaal)
 
         # wissel-van-rol is niet nodig (Account weet daar niets van)
-        with self.assertNumQueries(8):
+        with self.assert_max_queries(8):
             resp = self.client.get(self.url_activiteit)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
@@ -50,7 +52,7 @@ class TestAccountActiviteit(E2EHelpers, TestCase):
         # admin rechten
         self.e2e_login(self.account_admin)
         # wissel-van-rol is niet nodig (Account weet daar niets van)
-        with self.assertNumQueries(8):
+        with self.assert_max_queries(8):
             resp = self.client.get(self.url_activiteit)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
