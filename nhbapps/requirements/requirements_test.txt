@@ -24,7 +24,7 @@ chardet==4.0.0
     # via
     #   -r requirements.txt
     #   requests
-cryptography==3.3.1
+cryptography==3.3.2
     # via
     #   pyopenssl
     #   pysaml2
@@ -144,8 +144,6 @@ urllib3==1.26.2
     #   requests
 xmlschema==1.4.1
     # via pysaml2
-zipp==3.4.0
-    # via importlib-resources
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
