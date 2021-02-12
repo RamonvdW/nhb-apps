@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -298,26 +298,28 @@ class RecordsIndivZoom5View(RecordsIndivZoomBaseView):
         self.set_urls()
 
         # vind de verschillende afstanden waarop records bestaan
-        soorten = (IndivRecord
-                   .objects
-                   .filter(geslacht=self.sel_gesl,
-                           discipline=self.sel_disc,
-                           leeftijdscategorie=self.sel_lcat,
-                           materiaalklasse=self.sel_makl)
-                   .distinct('soort_record')
-                   .order_by('-soort_record')
-                   .values_list('soort_record', flat=True))
+        objs = (IndivRecord
+                .objects
+                .filter(geslacht=self.sel_gesl,
+                        discipline=self.sel_disc,
+                        leeftijdscategorie=self.sel_lcat,
+                        materiaalklasse=self.sel_makl)
+                .distinct('soort_record', 'para_klasse')
+                .order_by('-soort_record', 'para_klasse'))
+
+        soorten = [(obj.soort_record, obj.para_klasse) for obj in objs]
 
         # voor elk van de afstanden (soort records) zoek het meest recente (dus beste) record op
         objs = list()
-        for soort in soorten:
+        for soort, para in soorten:
             best = (IndivRecord
                     .objects
                     .filter(geslacht=self.sel_gesl,
                             discipline=self.sel_disc,
                             leeftijdscategorie=self.sel_lcat,
                             materiaalklasse=self.sel_makl,
-                            soort_record=soort)
+                            soort_record=soort,
+                            para_klasse=para)
                     .order_by('-datum'))[0:0+1]
             objs.extend(best)
         # for
