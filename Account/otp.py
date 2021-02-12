@@ -22,7 +22,7 @@ def account_otp_prepare_koppelen(account):
     """
     # maak eenmalig het OTP geheim aan voor deze gebruiker
     if len(account.otp_code) != 16:
-        account.otp_code = pyotp.random_base32()
+        account.otp_code = pyotp.random_base32()[:16]
         account.save()
 
 
