@@ -578,9 +578,6 @@ class Command(BaseCommand):
 
             self._count_members += 1
 
-            if lid_blocked:
-                self._count_blocked += 1
-
             is_nieuw = False
             try:
                 obj = NhbLid.objects.get(nhb_nr=lid_nhb_nr)
@@ -682,6 +679,9 @@ class Command(BaseCommand):
                             obj.save()
                 # else
             # else
+
+            if lid_blocked:
+                self._count_blocked += 1
 
             if is_nieuw:
                 lid = NhbLid()
