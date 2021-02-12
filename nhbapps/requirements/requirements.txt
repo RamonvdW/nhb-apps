@@ -6,23 +6,23 @@
 #
 asgiref==3.3.1
     # via django
-cachetools==4.2.0
+cachetools==4.2.1
     # via google-auth
 certifi==2020.12.5
     # via requests
 chardet==4.0.0
     # via requests
-django==3.0.11
+django==3.0.12
     # via
     #   -c constraints.txt
     #   -r requirements.in
-google-api-core==1.25.0
+google-api-core==1.26.0
     # via google-api-python-client
 google-api-python-client==1.12.8
     # via -r requirements.in
 google-auth-httplib2==0.0.4
     # via google-api-python-client
-google-auth==1.24.0
+google-auth==1.26.0
     # via
     #   -r requirements.in
     #   google-api-core
@@ -30,12 +30,14 @@ google-auth==1.24.0
     #   google-auth-httplib2
 googleapis-common-protos==1.52.0
     # via google-api-core
-httplib2==0.18.1
+httplib2==0.19.0
     # via
     #   google-api-python-client
     #   google-auth-httplib2
 idna==2.10
     # via requests
+packaging==20.9
+    # via google-api-core
 protobuf==3.14.0
     # via
     #   google-api-core
@@ -48,9 +50,13 @@ pyasn1==0.4.8
     # via
     #   pyasn1-modules
     #   rsa
-pyotp==2.4.1
+pyotp==2.6.0
     # via -r requirements.in
-pytz==2020.5
+pyparsing==2.4.7
+    # via
+    #   httplib2
+    #   packaging
+pytz==2021.1
     # via
     #   django
     #   google-api-core
@@ -72,7 +78,7 @@ sqlparse==0.4.1
     # via django
 uritemplate==3.0.1
     # via google-api-python-client
-urllib3==1.26.2
+urllib3==1.26.3
     # via requests
 
 # The following packages are considered to be unsafe in a requirements file:
