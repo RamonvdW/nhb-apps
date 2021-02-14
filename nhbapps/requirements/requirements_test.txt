@@ -48,7 +48,7 @@ google-auth-httplib2==0.0.4
     # via
     #   -r requirements.txt
     #   google-api-python-client
-google-auth==1.26.0
+google-auth==1.26.1
     # via
     #   -r requirements.txt
     #   google-api-core
@@ -152,8 +152,6 @@ urllib3==1.26.3
     #   requests
 xmlschema==1.5.1
     # via pysaml2
-zipp==3.4.0
-    # via importlib-resources
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
