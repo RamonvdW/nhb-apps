@@ -823,6 +823,8 @@ class WijzigStatusRkSchutterView(UserPassesTestMixin, TemplateView):
         door_str = "RKO %s" % account.volledige_naam()
 
         if bevestig == "1":
+            if not deelnemer.bij_vereniging:
+                raise Resolver404()     # kan niet bevestigen zonder verenigingslid te zijn
             mutatie = KampioenschapMutatie(mutatie=MUTATIE_AANMELDEN,
                                            deelnemer=deelnemer,
                                            door=door_str)

@@ -9,12 +9,14 @@ from django.core import management
 from BasisTypen.models import BoogType
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging, NhbLid
-from Schutter.models import SchutterBoog
-from Wedstrijden.models import WedstrijdLocatie, WedstrijdenPlan, WedstrijdUitslag
 from Overig.e2ehelpers import E2EHelpers
+from Schutter.models import SchutterBoog
+from Score.models import Score
+from Wedstrijden.models import WedstrijdLocatie, WedstrijdenPlan, WedstrijdUitslag
 from .models import (Competitie, DeelCompetitie, LAAG_REGIO, LAAG_RK, competitie_aanmaken,
                      KampioenschapSchutterBoog, CompetitieKlasse, DeelcompetitieKlasseLimiet,
-                     KampioenschapMutatie, DEELNAME_NEE, DEELNAME_JA, INSCHRIJF_METHODE_1)
+                     KampioenschapMutatie, DEELNAME_NEE, DEELNAME_JA, INSCHRIJF_METHODE_1,
+                     RegioCompetitieSchutterBoog)
 import datetime
 import time
 import io
@@ -993,5 +995,74 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         self.assert_is_redirect_not_plein(resp)  # check for success
         self._verwerk_mutaties()
         self.assertEqual(KampioenschapMutatie.objects.count(), aantal + 1)
+
+    def test_geen_vereniging(self):
+        # deelnemer regiocompetitie is nu zonder vereniging
+        # wordt wel opgenomen in de RK selectie
+        # kan geen deelnemer status krijgen
+        # wordt daarna weer lid en kan deelnemer worden
+
+        scores = (200, 200, 200, 200, 200, 200, 200)
+        deelnemer = RegioCompetitieSchutterBoog(
+                            deelcompetitie=self.deelcomp_regio101_18,
+                            schutterboog=self.schutterboog,     # bij self.nhbver_101
+                            bij_vereniging=self.nhbver_101,
+                            klasse=self.klasse_r,
+                            is_handmatig_ag=True,
+                            aanvangsgemiddelde=8.765,
+                            score1=scores[0],
+                            score2=scores[1],
+                            score3=scores[2],
+                            score4=scores[3],
+                            score5=scores[4],
+                            score6=scores[5],
+                            score7=scores[6],
+                            aantal_scores=7,
+                            totaal=sum(scores),
+                            laagste_score_nr=3)
+        deelnemer.save()
+
+        for waarde in scores:
+            score = Score(
+                        schutterboog=self.schutterboog,
+                        is_ag=False,
+                        waarde=waarde,
+                        afstand_meter=18)
+            score.save()
+            deelnemer.scores.add(score)
+        # for
+
+        # lid stapt over naar een andere vereniging
+        # noteer: deze situatie ontstaat pas na 15 januari (tot die tijd vast op oude vereniging)
+        lid = self.schutterboog.nhblid
+        lid.bij_vereniging = None           # was: self.ver_101
+        lid.save()
+
+        # nu doorzetten naar RK fase
+        self.competitie_sluit_alle_regiocompetities(self.comp_18)
+        self.e2e_login_and_pass_otp(self.account_bko_18)
+        self.e2e_wissel_naar_functie(self.functie_bko_18)
+        with self.assert_max_queries(45):
+            resp = self.client.post(self.url_doorzetten_rk % self.comp_18.pk)
+        self.assert_is_redirect_not_plein(resp)  # check for success
+
+        # controleer dat schutterboog opgenomen is in de RK selectie
+        deelnemer = KampioenschapSchutterBoog.objects.get(schutterboog=self.schutterboog)
+        self.assertEqual(deelnemer.bij_vereniging, None)
+
+        # wissel van rol naar RKO rayon1
+        self.e2e_login_and_pass_otp(self.account_rko1_18)
+        self.e2e_wissel_naar_functie(self.functie_rko1_18)
+
+        # status op "deelnemer" zetten terwijl bij_vereniging=None moet niet kunnen
+        url = self.url_wijzig_status % deelnemer.pk
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'bevestig': 1, 'snel': 1})
+        self.assertEqual(resp.status_code, 404)     # 404 = not allowed
+
+        # TODO: deze test is nog niet af!
+
+        # sluit het lid aan bij een andere vereniging
+        # wat als dit in een ander rayon is?
 
 # end of file
