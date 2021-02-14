@@ -195,7 +195,7 @@ class DoorzettenNaarRKView(UserPassesTestMixin, TemplateView):
                                 deelcompetitie=deelcomp_rk,
                                 schutterboog=obj.schutterboog,
                                 klasse=obj.klasse,
-                                bij_vereniging=obj.bij_vereniging,
+                                bij_vereniging=obj.schutterboog.nhblid.bij_vereniging,  # nieuwste
                                 gemiddelde=obj.gemiddelde,
                                 kampioen_label=obj.kampioen_label)
 
