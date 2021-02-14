@@ -13,6 +13,8 @@ from .models import (Competitie, DeelCompetitie, DeelcompetitieRonde,
 
 
 class DeelCompetitieAdmin(admin.ModelAdmin):
+    list_filter = ('nhb_regio',)
+
     list_select_related = ('competitie', 'nhb_regio', 'nhb_rayon')
 
 
