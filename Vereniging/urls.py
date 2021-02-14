@@ -42,11 +42,11 @@ urlpatterns = [
          view_accommodatie.LijstVerenigingenView.as_view(),
          name='lijst-verenigingen'),
 
-    path('accommodaties/details/<locatie_pk>/<vereniging_pk>/',
+    path('accommodaties/details/<vereniging_pk>/',
          view_accommodatie.AccommodatieDetailsView.as_view(),
          name='accommodatie-details'),
 
-    path('accommodatie-details/<locatie_pk>/<vereniging_pk>/',
+    path('accommodatie-details/<vereniging_pk>/',
          view_accommodatie.VerenigingAccommodatieDetailsView.as_view(),
          name='vereniging-accommodatie-details'),
 

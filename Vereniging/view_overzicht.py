@@ -48,10 +48,8 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
         context['toon_aanmelden'] = (rol_nu != Rollen.ROL_WL)
 
         if functie_nu.nhb_ver.wedstrijdlocatie_set.count() > 0:
-            locatie = functie_nu.nhb_ver.wedstrijdlocatie_set.all()[0]
             context['accommodatie_details_url'] = reverse('Vereniging:vereniging-accommodatie-details',
-                                                          kwargs={'locatie_pk': locatie.pk,
-                                                                  'vereniging_pk': functie_nu.nhb_ver.pk})
+                                                          kwargs={'vereniging_pk': functie_nu.nhb_ver.pk})
 
         if rol_nu == Rollen.ROL_SEC or functie_nu.nhb_ver.regio.is_administratief:
             context['competities'] = list()
