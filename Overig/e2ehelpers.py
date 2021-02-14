@@ -638,7 +638,7 @@ class E2EHelpers(object):
                 self.fail(msg=msg + queries)
             else:
                 # kijk of het wat minder kan
-                if count > 20:
+                if num > 20:
                     ongebruikt = num - count
                     if ongebruikt / num > 0.25:        # pragma: no cover
                         self.fail(msg="Maximum (%s) has a lot of margin. Can be set as low as %s" % (num, count))
