@@ -514,7 +514,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         # puur voor de coverage
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(60):
+        with self.assert_max_queries(0):
             management.call_command('import_nhb_crm', 'x', '--sim_now=y-m-d', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())

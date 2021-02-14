@@ -502,37 +502,42 @@ class TestCompetitie(E2EHelpers, TestCase):
             resp = self.client.post(self.url_aanmaken)
         self.assert_is_redirect(resp, self.url_kies)
 
-        comp_pk = Competitie.objects.all()[0].pk
-
         # gebruik een POST om de AG's vast te stellen
-        with self.assert_max_queries(600):      # TODO: optimize
+        with self.assert_max_queries(20):
             resp = self.client.post(self.url_ag_vaststellen)
 
         # 18m competitie
-        url = self.url_klassegrenzen_vaststellen % comp_pk
+        comp18 = Competitie.objects.filter(afstand='18')[0]
+        comp18_pk = comp18.pk
+        url = self.url_klassegrenzen_vaststellen % comp18_pk
+
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/bb-klassegrenzen-vaststellen.dtl', 'plein/site_layout.dtl'))
-        # TODO: check de aangeboden data
 
         # nu kunnen we met een POST de klassegrenzen vaststellen
-        self.assertEqual(CompetitieKlasse.objects.count(), 0)       # TODO: filter op Competitie
+        count = CompetitieKlasse.objects.filter(competitie=comp18).count()
+        self.assertEqual(count, 0)
         with self.assert_max_queries(20):
             resp = self.client.post(url)
-        self.assert_is_redirect(resp, self.url_kies)
-        self.assertNotEqual(CompetitieKlasse.objects.count(), 0)    # TODO: filter op Competitie
+        self.assert_is_redirect(resp, self.url_kies)        # redirect = success
+        count = CompetitieKlasse.objects.filter(competitie=comp18).count()
+        self.assertTrue(count > 20)
         # TODO: check nog meer velden van de aangemaakte objecten
 
         # coverage: nog een keer vaststellen
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assertEqual(resp.status_code, 200)             # 200 = OK
 
+        count1 = CompetitieKlasse.objects.filter(competitie=comp18).count()
         with self.assert_max_queries(20):
             resp = self.client.post(url)
-        self.assert_is_redirect(resp, self.url_kies)
+        self.assert_is_redirect(resp, self.url_kies)        # redirect = success
+        count2 = CompetitieKlasse.objects.filter(competitie=comp18).count()
+        self.assertEqual(count1, count2)
 
         # coverage
         obj = CompetitieKlasse.objects.all()[0]

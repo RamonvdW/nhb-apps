@@ -100,7 +100,7 @@ class TestAccount2FA(E2EHelpers, TestCase):
 
         # juiste otp code
         code = get_otp_code(self.account_admin)
-        with self.assert_max_queries(45):
+        with self.assert_max_queries(20):
             resp = self.client.post(self.url_koppel, {'otp_code': code}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('functie/otp-koppelen-gelukt.dtl', 'plein/site_layout.dtl'))

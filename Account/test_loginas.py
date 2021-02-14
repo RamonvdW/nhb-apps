@@ -140,8 +140,8 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
         self.assertContains(resp, 'Wissel van rol')
 
         # controleer dat OTP controle niet nodig is
-        # FUTURE: ongewenste dependency op Functie --> verplaats OTP ondersteuning naar Account
-        with self.assert_max_queries(45):
+        # FUTURE: ongewenste dependency op Functie --> verplaats deze check naar Functie
+        with self.assert_max_queries(20):
             resp = self.client.get('/functie/wissel-van-rol/')
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)

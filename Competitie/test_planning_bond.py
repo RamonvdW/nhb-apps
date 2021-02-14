@@ -233,7 +233,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         self.assertEqual(3, RegioCompetitieSchutterBoog.objects.count())
         self.assertEqual(0, KampioenschapSchutterBoog.objects.count())
 
-        with self.assert_max_queries(41):
+        with self.assert_max_queries(43):
             resp = self.client.post(url)
         self.assert_is_redirect(resp, '/bondscompetities/')       # redirect = Success
 
@@ -269,15 +269,14 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         self.lid_schutter2.bij_vereniging = None
         self.lid_schutter2.save()
 
-        with self.assert_max_queries(41):
+        with self.assert_max_queries(42):
             resp = self.client.post(url)
         self.assert_is_redirect(resp, '/bondscompetities/')       # redirect = Success
 
         # het lid zonder vereniging komt toch gewoon in de RK selectie
         self.assertEqual(3, KampioenschapSchutterBoog.objects.count())
 
-        # TODO: controleer dat status lid niet op 'deelnemer' te zetten is
-        # TODO: lid weer aansluiten bij vereniging --> kan daarna wel deelnemer worden
+        # verdere tests in test_planning_rayon.test_geen_vereniging check
 
     def test_doorzetten_bk(self):
         self.e2e_login_and_pass_otp(self.account_bb)

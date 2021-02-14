@@ -191,7 +191,7 @@ class NieuwWachtwoordView(UserPassesTestMixin, TemplateView):
             context['moet_oude_ww_weten'] = True
 
         account = self.request.user
-        if account.nhblid_set.count() > 0:      # TODO: ongewenste kennis over op NhbLid.account
+        if account.nhblid_set.count() > 0:      # FUTURE: ongewenste kennis over op NhbLid.account
             menu_dynamics(self.request, context, actief="schutter-profiel")
         else:
             menu_dynamics(self.request, context)

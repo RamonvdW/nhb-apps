@@ -428,7 +428,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 1)
         schutterboog = SchutterBoog.objects.get(boogtype__afkorting='BB')
         deelcomp = DeelCompetitie.objects.get(competitie__afstand='25', nhb_regio=self.nhbver.regio)
-        with self.assert_max_queries(23):
+        with self.assert_max_queries(20):
             resp = self.client.post(self.url_aanmelden % (deelcomp.pk, schutterboog.pk),
                                     {'wil_in_team': 'ja', 'opmerking': 'ben ik oud genoeg?'})
         self.assert_is_redirect(resp, self.url_profiel)
@@ -502,7 +502,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
 
         # haal de bevestig pagina op met het formulier
         url = self.url_bevestig_aanmelden % (deelcomp.pk, schutterboog.pk)
-        with self.assert_max_queries(21):
+        with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
@@ -573,7 +573,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
 
         # haal de bevestig pagina op met het formulier
         url = self.url_bevestig_aanmelden % (deelcomp.pk, schutterboog.pk)
-        with self.assert_max_queries(21):
+        with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
