@@ -1,7 +1,7 @@
 version: 2
 updates:
   - package-ecosystem: "pip"
-    directory: "/"
+    directory: "/nhbapps/requirements/requirements_test.txt"
     schedule:
       interval: "weekly"
     target-branch: "dev_v8"
