@@ -660,10 +660,6 @@ class KampioenschapSchutterBoog(models.Model):
     # gemiddelde uit de voorgaande competitie
     gemiddelde = models.DecimalField(max_digits=5, decimal_places=3, default=0.0)    # 10,000
 
-    # TODO: verwijder (worden niet meer gebruikt)
-    deelname_bevestigd = models.BooleanField(default=False)
-    is_afgemeld = models.BooleanField(default=False)
-
     def __str__(self):
         # deelcompetitie (komt achteraan)
         if self.deelcompetitie.nhb_rayon:
