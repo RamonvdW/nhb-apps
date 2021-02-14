@@ -241,7 +241,7 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
 
     def _sluit_alle_regiocompetities(self, comp):
         # deze functie sluit alle regiocompetities af zodat de competitie in fase G komt
-        comp.zet_fase()
+        comp.bepaal_fase()
         # print(comp.fase)
         self.assertTrue('B' < comp.fase < 'G')
         for deelcomp in DeelCompetitie.objects.filter(competitie=comp, laag=LAAG_REGIO):
@@ -250,7 +250,7 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
                 deelcomp.save()
         # for
 
-        comp.zet_fase()
+        comp.bepaal_fase()
         self.assertEqual(comp.fase, 'G')
 
     def setUp(self):
@@ -647,7 +647,7 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
         # zet the competitie in een later fase zodat overschrijvingen niet meer gedaan worden
         for comp in Competitie.objects.all():
             zet_competitie_fase(comp, 'K')
-            comp.zet_fase()
+            comp.bepaal_fase()
             self.assertEqual(comp.fase, 'K')
         # for
         lid.bij_vereniging = ver
@@ -682,7 +682,11 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
             management.call_command('regiocomp_upd_tussenstand', '7', '--quick', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
-        self.assertTrue("[WARNING] Uitstapper: 100001 [101] [1000] Grote Club (actief=True)" in f2.getvalue())
+
+        # controleer dat de schutter op zijn oude vereniging blijft staan
+        deelnemer = RegioCompetitieSchutterBoog.objects.get(schutterboog__nhblid__nhb_nr=100001)
+        self.assertIsNone(deelnemer.schutterboog.nhblid.bij_vereniging)
+        self.assertIsNotNone(deelnemer.bij_vereniging)
 
     def test_rk_fase_overstap(self):
         # test schutters die overstappen naar een andere vereniging binnen het rayon, tijdens de RK fase

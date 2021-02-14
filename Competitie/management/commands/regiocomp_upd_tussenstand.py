@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -107,7 +107,7 @@ class Command(BaseCommand):
         #    KampioenschapSchutterBoog.bij_vereniging
 
         for comp in Competitie.objects.filter(is_afgesloten=False):
-            comp.zet_fase()
+            comp.bepaal_fase()
             if comp.fase <= 'F':        # Regiocompetitie
                 self._verwerk_overstappers_regio(comp)
                 # uitstappers kijken we niet meer naar -> gewoon op oude vereniging houden

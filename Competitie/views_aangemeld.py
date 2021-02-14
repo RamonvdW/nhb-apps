@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -91,7 +91,7 @@ class LijstAangemeldRegiocompAllesView(UserPassesTestMixin, TemplateView):
         except (ValueError, Competitie.DoesNotExist):
             raise Resolver404()
 
-        comp.zet_fase()
+        comp.bepaal_fase()
         if comp.fase < 'B' or comp.fase > 'E':
             raise Resolver404()
 
@@ -151,7 +151,7 @@ class LijstAangemeldRegiocompRayonView(UserPassesTestMixin, TemplateView):
         except (ValueError, Competitie.DoesNotExist):
             raise Resolver404()
 
-        comp.zet_fase()
+        comp.bepaal_fase()
         if comp.fase < 'B' or comp.fase > 'E':
             raise Resolver404()
 
@@ -219,7 +219,7 @@ class LijstAangemeldRegiocompRegioView(UserPassesTestMixin, TemplateView):
         except (ValueError, Competitie.DoesNotExist):
             raise Resolver404()
 
-        comp.zet_fase()
+        comp.bepaal_fase()
         if comp.fase < 'B' or comp.fase > 'E':
             raise Resolver404()
 
@@ -455,7 +455,7 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
         except (ValueError, Competitie.DoesNotExist):
             raise Resolver404()
 
-        comp.zet_fase()
+        comp.bepaal_fase()
         if comp.fase < 'B' or comp.fase > 'E':
             raise Resolver404()
 
@@ -539,7 +539,7 @@ class Inschrijfmethode3BehoefteAlsBestandView(Inschrijfmethode3BehoefteView):
         except (ValueError, Competitie.DoesNotExist):
             raise Resolver404()
 
-        comp.zet_fase()
+        comp.bepaal_fase()
         if comp.fase < 'B' or comp.fase > 'E':
             raise Resolver404()
 

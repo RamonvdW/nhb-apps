@@ -201,7 +201,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
 
         # fase F: pagina zonder knop 'doorzetten'
         zet_competitie_fase(self.comp_18, 'F')
-        self.comp_18.zet_fase()
+        self.comp_18.bepaal_fase()
         self.assertEqual(self.comp_18.fase, 'F')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
@@ -219,7 +219,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
 
         # fase G: pagina met knop 'doorzetten'
         zet_competitie_fase(self.comp_18, 'G')
-        self.comp_18.zet_fase()
+        self.comp_18.bepaal_fase()
         self.assertEqual(self.comp_18.fase, 'G')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
@@ -286,7 +286,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
 
         # fase M: pagina zonder knop 'doorzetten'
         zet_competitie_fase(self.comp_18, 'M')
-        self.comp_18.zet_fase()
+        self.comp_18.bepaal_fase()
         self.assertEqual(self.comp_18.fase, 'M')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
@@ -304,7 +304,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
 
         # fase N: pagina met knop 'doorzetten'
         zet_competitie_fase(self.comp_18, 'N')
-        self.comp_18.zet_fase()
+        self.comp_18.bepaal_fase()
         self.assertEqual(self.comp_18.fase, 'N')
         with self.assert_max_queries(20):
             resp = self.client.get(url)

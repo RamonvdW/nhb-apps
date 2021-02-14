@@ -636,7 +636,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
 
         # landelijk
         zet_competitie_fase(comp, 'C')
-        comp.zet_fase()
+        comp.bepaal_fase()
         self.assertEqual(comp.fase, 'C')
 
         # als HWL is deze pagina niet beschikbaar

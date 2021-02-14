@@ -132,7 +132,7 @@ class Competitie(models.Model):
         msg += ' %s/%s' % (self.begin_jaar, self.begin_jaar + 1)
         return msg
 
-    def zet_fase(self):      # TODO: rename naar bepaal_fase
+    def bepaal_fase(self):
         """ bepaalde huidige fase van de competitie en zet self.fase
         """
 
@@ -238,7 +238,7 @@ class Competitie(models.Model):
             self.is_openbaar = True
         else:
             if not hasattr(self, 'fase'):
-                self.zet_fase()
+                self.bepaal_fase()
 
             if self.fase >= 'B':
                 # modale gebruiker ziet alleen competities vanaf open-voor-inschrijving

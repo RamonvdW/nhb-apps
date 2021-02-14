@@ -1158,7 +1158,7 @@ class AfsluitenRegiocompView(UserPassesTestMixin, TemplateView):
             raise Resolver404()
 
         if not deelcomp.is_afgesloten:
-            deelcomp.competitie.zet_fase()
+            deelcomp.competitie.bepaal_fase()
             if deelcomp.competitie.fase == 'F':
                 context['url_afsluiten'] = reverse('Competitie:afsluiten-regiocomp',
                                                    kwargs={'deelcomp_pk': deelcomp.pk})
@@ -1186,7 +1186,7 @@ class AfsluitenRegiocompView(UserPassesTestMixin, TemplateView):
 
         if not deelcomp.is_afgesloten:
 
-            deelcomp.competitie.zet_fase()
+            deelcomp.competitie.bepaal_fase()
             if deelcomp.competitie.fase != 'F':
                 # nog niet mogelijk om af te sluiten
                 raise Resolver404()

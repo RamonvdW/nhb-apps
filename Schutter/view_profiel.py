@@ -96,7 +96,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
             for comp in (Competitie
                          .objects.filter(is_afgesloten=False)
                          .order_by('afstand', 'begin_jaar')):
-                comp.zet_fase()
+                comp.bepaal_fase()
                 comp.bepaal_openbaar(Rollen.ROL_SCHUTTER)
                 if comp.is_openbaar:
                     # fase B of later
@@ -165,7 +165,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                                        nhb_regio=regio)
                                .order_by('competitie__afstand')):
             comp = deelcompetitie.competitie
-            comp.zet_fase()
+            comp.bepaal_fase()
 
             # doorloop elk boogtype waar de schutter informatie/wedstrijden voorkeur voor heeft
             for afk in boog_afkorting_wedstrijd:
@@ -214,7 +214,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
             obj.boog_beschrijving = boog_dict[afk].beschrijving
 
             comp = obj.competitie
-            comp.zet_fase()
+            comp.bepaal_fase()
             if comp.fase <= 'B':
                 obj.url_afmelden = reverse('Schutter:afmelden',
                                            kwargs={'deelnemer_pk': inschrijving.pk})

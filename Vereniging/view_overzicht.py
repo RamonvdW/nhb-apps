@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -89,7 +89,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
 
         # comp is nodig voor inschrijven
         for comp in context['competities']:
-            comp.zet_fase()
+            comp.bepaal_fase()
             if comp.afstand == '18':
                 comp.icon = static('plein/badge_nhb_indoor.png')
             else:
@@ -98,7 +98,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
 
         # deelcomp is nodig voor afmelden
         for deelcomp in context['deelcomps']:
-            deelcomp.competitie.zet_fase()
+            deelcomp.competitie.bepaal_fase()
             if deelcomp.competitie.afstand == '18':
                 deelcomp.icon = static('plein/badge_nhb_indoor.png')
             else:
@@ -110,7 +110,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
         for deelcomp_rk in context['deelcomps_rk']:
             if deelcomp_rk.heeft_deelnemerslijst:
                 comp = deelcomp_rk.competitie
-                comp.zet_fase()
+                comp.bepaal_fase()
                 if comp.fase == 'K':
                     # RK voorbereidende fase
                     deelcomp_rk.text_str = "Schutters van de vereniging aan-/afmelden voor het RK van de %s" % comp.beschrijving

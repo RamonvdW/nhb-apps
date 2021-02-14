@@ -56,7 +56,7 @@ class CompetitieOverzichtView(View):
                              .filter(competitie=comp,
                                      functie=functie_nu)):
                 kan_beheren = True
-                deelcomp.competitie.zet_fase()      # TODO: nodig?
+                deelcomp.competitie.bepaal_fase()
                 if not deelcomp.is_afgesloten:
                     context['rol_is_klaar'] = False
             # for
@@ -268,7 +268,7 @@ class CompetitieOverzichtView(View):
 
         rol_nu, functie_nu = rol_get_huidige_functie(request)
 
-        comp.zet_fase()                   # zet comp.fase
+        comp.bepaal_fase()                # zet comp.fase
         comp.bepaal_openbaar(rol_nu)      # zet comp.is_openbaar
 
         comp.einde_fase_F = comp.laatst_mogelijke_wedstrijd + datetime.timedelta(days=7)
@@ -346,7 +346,7 @@ class CompetitieKiesView(TemplateView):
 
                 comp.card_url = reverse('Competitie:overzicht',
                                         kwargs={'comp_pk': comp.pk})
-                comp.zet_fase()
+                comp.bepaal_fase()
                 if comp.fase < 'B':
                     comp.text = "Hier worden de voorbereidingen voor getroffen voor de volgende bondscompetitie."
                 else:

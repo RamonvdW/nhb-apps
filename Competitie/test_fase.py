@@ -155,93 +155,93 @@ class TestCompetitieFase(TestCase):
                                      laag=LAAG_BK)
         deelcomp_bk.save()
 
-        comp.zet_fase()
+        comp.bepaal_fase()
         self.assertEqual(comp.fase, 'A')
 
         comp.begin_aanmeldingen = gisteren
-        comp.zet_fase()
+        comp.bepaal_fase()
         self.assertEqual(comp.fase, 'A')
 
         # maak de klassen aan
         indiv = IndivWedstrijdklasse.objects.all()[0]
         CompetitieKlasse(competitie=comp, indiv=indiv, min_ag=0.0).save()
         comp.begin_aanmeldingen = comp.einde_aanmeldingen
-        comp.zet_fase()
+        comp.bepaal_fase()
         self.assertEqual(comp.fase, 'A')
 
         comp.klassegrenzen_vastgesteld = True
-        comp.zet_fase()
+        comp.bepaal_fase()
         self.assertEqual(comp.fase, 'A')
 
         # tussen begin en einde aanmeldingen = B
         comp.begin_aanmeldingen = gisteren
-        comp.zet_fase()
+        comp.bepaal_fase()
         self.assertEqual(comp.fase, 'B')
 
         # na einde aanmeldingen tot einde_teamvorming = C
         comp.einde_aanmeldingen = gisteren
-        comp.zet_fase()
+        comp.bepaal_fase()
         self.assertEqual(comp.fase, 'C')
 
         # na einde teamvorming tot eerste wedstrijd = D
         comp.einde_teamvorming = gisteren
-        comp.zet_fase()
+        comp.bepaal_fase()
         self.assertEqual(comp.fase, 'D')
 
         # na eerste wedstrijd = E
         comp.eerste_wedstrijd = gisteren
-        comp.zet_fase()
+        comp.bepaal_fase()
         self.assertEqual(comp.fase, 'E')
 
         # na laatste wedstrijd = F
         comp.laatst_mogelijke_wedstrijd = gisteren
-        comp.zet_fase()
+        comp.bepaal_fase()
         self.assertEqual(comp.fase, 'F')
 
         # na afsluiten regio deelcomp = G
         deelcomp_regio.is_afgesloten = True
         deelcomp_regio.save()
-        comp.zet_fase()
+        comp.bepaal_fase()
         self.assertEqual(comp.fase, 'G')
 
         comp.alle_regiocompetities_afgesloten = True
-        comp.zet_fase()
+        comp.bepaal_fase()
         self.assertEqual(comp.fase, 'K')
 
         comp.rk_eerste_wedstrijd = gisteren
-        comp.zet_fase()
+        comp.bepaal_fase()
         self.assertEqual(comp.fase, 'L')
 
         comp.rk_laatste_wedstrijd = gisteren
-        comp.zet_fase()
+        comp.bepaal_fase()
         self.assertEqual(comp.fase, 'M')
 
         # na afsluiten RK = N
         deelcomp_rk.is_afgesloten = True
         deelcomp_rk.save()
-        comp.zet_fase()
+        comp.bepaal_fase()
         self.assertEqual(comp.fase, 'N')
 
         comp.alle_rks_afgesloten = True
-        comp.zet_fase()
+        comp.bepaal_fase()
         self.assertEqual(comp.fase, 'P')
 
         comp.bk_eerste_wedstrijd = gisteren
-        comp.zet_fase()
+        comp.bepaal_fase()
         self.assertEqual(comp.fase, 'Q')
 
         comp.bk_laatste_wedstrijd = gisteren
-        comp.zet_fase()
+        comp.bepaal_fase()
         self.assertEqual(comp.fase, 'R')
 
         # na afsluiten BK = S
         deelcomp_bk.is_afgesloten = True
         deelcomp_bk.save()
-        comp.zet_fase()
+        comp.bepaal_fase()
         self.assertEqual(comp.fase, 'S')
 
         comp.alle_bks_afgesloten = True
-        comp.zet_fase()
+        comp.bepaal_fase()
         self.assertEqual(comp.fase, 'Z')
 
     def test_zet_competitie_fase(self):
@@ -256,29 +256,29 @@ class TestCompetitieFase(TestCase):
         comp.bk_eerste_wedstrijd = comp.bk_laatste_wedstrijd = einde_jaar
         comp.save()
 
-        comp.zet_fase()
+        comp.bepaal_fase()
         self.assertEqual(comp.fase, 'A')
 
         zet_competitie_fase(comp, 'A')
-        comp.zet_fase()
+        comp.bepaal_fase()
         self.assertEqual(comp.fase, 'A')
 
         # maak de klassen aan en controleer de fase weer
         indiv = IndivWedstrijdklasse.objects.all()[0]
         CompetitieKlasse(competitie=comp, indiv=indiv, min_ag=0.0).save()
         zet_competitie_fase(comp, 'A')
-        comp.zet_fase()
+        comp.bepaal_fase()
         self.assertEqual(comp.fase, 'A')
 
         comp.klassegrenzen_vastgesteld = True
         zet_competitie_fase(comp, 'A')
-        comp.zet_fase()
+        comp.bepaal_fase()
         self.assertEqual(comp.fase, 'A')
 
         sequence = 'BCDEGKLNPQSQPNLKGEDCBKSEBZLQC'  # let op! F en R kunnen niet
         for fase in sequence:
             zet_competitie_fase(comp, fase)
-            comp.zet_fase()
+            comp.bepaal_fase()
             self.assertEqual(comp.fase, fase)
         # for
 

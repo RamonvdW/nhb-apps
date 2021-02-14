@@ -144,7 +144,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         # zet de 18m open voor inschrijving
         self.comp_18.begin_aanmeldingen = datetime.date(year=self.comp_18.begin_jaar, month=1, day=1)
         self.comp_18.save()
-        self.comp_18.zet_fase()
+        self.comp_18.bepaal_fase()
 
         self.functie_bko = DeelCompetitie.objects.filter(competitie=self.comp_18, laag=LAAG_BK).all()[0].functie
         self.functie_rko = DeelCompetitie.objects.filter(competitie=self.comp_18, laag=LAAG_RK).all()[0].functie
@@ -246,7 +246,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         way_before = datetime.date(year=2018, month=1, day=1)   # must be before timezone.now()
 
         # fase A
-        comp.zet_fase()
+        comp.bepaal_fase()
         self.assertTrue(comp.fase < 'B', msg="comp.fase=%s (expected: below B)" % comp.fase)
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_overzicht % comp.pk)
@@ -257,7 +257,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         comp.begin_aanmeldingen = way_before   # fase B
         comp.einde_aanmeldingen = way_before   # fase C
         comp.save()
-        comp.zet_fase()
+        comp.bepaal_fase()
         self.assertTrue(comp.fase >= 'B')
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_overzicht % comp.pk)
@@ -268,7 +268,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         comp.einde_teamvorming = way_before    # fase D
         comp.eerste_wedstrijd = way_before     # fase E
         comp.save()
-        comp.zet_fase()
+        comp.bepaal_fase()
         self.assertTrue(comp.fase >= 'E')
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_overzicht % comp.pk)

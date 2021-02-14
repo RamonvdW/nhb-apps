@@ -200,7 +200,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
 
     def competitie_sluit_alle_regiocompetities(self, comp):
         # deze functie sluit alle regiocompetities af zodat de competitie in fase G komt
-        comp.zet_fase()
+        comp.bepaal_fase()
         # print('comp: %s --> fase=%s' % (comp, comp.fase))
         self.assertTrue('B' < comp.fase < 'G')
         for deelcomp in DeelCompetitie.objects.filter(competitie=comp, laag=LAAG_REGIO):
@@ -209,7 +209,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
                 deelcomp.save()
         # for
 
-        comp.zet_fase()
+        comp.bepaal_fase()
         self.assertEqual(comp.fase, 'G')
 
     def _deelnemers_aanmaken(self):
@@ -825,16 +825,17 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
             resp = self.client.post(url, {'bevestig': '0', 'afmelden': '1', 'snel': 1})
         self.assertEqual(KampioenschapMutatie.objects.count(), 1)
 
+        # bevestigen mag niet, want geen lid bij vereniging
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'bevestig': '1', 'afmelden': '0', 'snel': 1})
-        self.assertEqual(KampioenschapMutatie.objects.count(), 2)
+        self.assertEqual(KampioenschapMutatie.objects.count(), 1)
 
         # verbouw 'time' en voer een test uit zonder 'snel'
         time.sleep = self._dummy_sleep
         with self.assert_max_queries(20):
-            resp = self.client.post(url, {'bevestig': '1', 'afmelden': '0'})
+            resp = self.client.post(url, {'bevestig': '0', 'afmelden': '1'})
         time.sleep = sleep_oud
-        self.assertEqual(KampioenschapMutatie.objects.count(), 3)
+        self.assertEqual(KampioenschapMutatie.objects.count(), 2)
 
     def test_wijzig_status_hwl(self):
         # HWL

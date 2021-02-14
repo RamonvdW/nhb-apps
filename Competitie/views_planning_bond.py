@@ -123,7 +123,7 @@ class DoorzettenNaarRKView(UserPassesTestMixin, TemplateView):
         except (ValueError, Competitie.DoesNotExist):
             raise Resolver404()
 
-        comp.zet_fase()
+        comp.bepaal_fase()
         if comp.fase < 'E' or comp.fase >= 'K':
             # kaartjes werd niet getoond, dus je zou hier niet moeten zijn
             raise Resolver404()
@@ -152,7 +152,7 @@ class DoorzettenNaarRKView(UserPassesTestMixin, TemplateView):
         except (ValueError, Competitie.DoesNotExist):
             raise Resolver404()
 
-        comp.zet_fase()
+        comp.bepaal_fase()
         if comp.fase != 'G':
             raise Resolver404()
 
@@ -352,7 +352,7 @@ class DoorzettenNaarBKView(UserPassesTestMixin, TemplateView):
         except (ValueError, Competitie.DoesNotExist):
             raise Resolver404()
 
-        comp.zet_fase()
+        comp.bepaal_fase()
         if comp.fase < 'M' or comp.fase >= 'P':
             raise Resolver404()
 
@@ -380,7 +380,7 @@ class DoorzettenNaarBKView(UserPassesTestMixin, TemplateView):
         except (ValueError, Competitie.DoesNotExist):
             raise Resolver404()
 
-        comp.zet_fase()
+        comp.bepaal_fase()
         if comp.fase != 'N':
             raise Resolver404()
 

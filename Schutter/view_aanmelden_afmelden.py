@@ -67,7 +67,7 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
             raise Resolver404()
 
         # controleer dat de competitie aanmeldingen accepteert
-        deelcomp.competitie.zet_fase()
+        deelcomp.competitie.bepaal_fase()
         if deelcomp.competitie.fase < 'B' or deelcomp.competitie.fase >= 'F':
             raise Resolver404()
 
@@ -232,7 +232,7 @@ class RegiocompetitieAanmeldenView(View):
             raise Resolver404()
 
         # controleer dat de competitie aanmeldingen accepteert
-        deelcomp.competitie.zet_fase()
+        deelcomp.competitie.bepaal_fase()
         if deelcomp.competitie.fase < 'B' or deelcomp.competitie.fase >= 'F':
             raise Resolver404()
 

@@ -58,7 +58,7 @@ class Command(BaseCommand):
             self.stderr.write('[ERROR] Kan competitie met afstand %s niet vinden' % afstand)
             return
 
-        comp.zet_fase()
+        comp.bepaal_fase()
         if comp.fase < 'F' or comp.fase > 'G':
             self.stderr.write('[ERROR] Competitie in fase %s is niet ondersteund' % comp.fase)
             return

@@ -684,7 +684,7 @@ class Command(BaseCommand):
             self._afstand = afstand
             self._comp = None
             for comp in Competitie.objects.filter(afstand=afstand):
-                comp.zet_fase()
+                comp.bepaal_fase()
                 if 'B' <= comp.fase <= 'F':
                     # in de regiocompetitie wedstrijdfase, dus importeren
                     self._comp = comp

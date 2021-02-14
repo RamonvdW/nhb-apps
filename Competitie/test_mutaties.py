@@ -169,7 +169,7 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
 
     def _sluit_alle_regiocompetities(self, comp):
         # deze functie sluit alle regiocompetities af zodat de competitie in fase G komt
-        comp.zet_fase()
+        comp.bepaal_fase()
         # print(comp.fase)
         self.assertTrue('B' < comp.fase < 'G')
         for deelcomp in DeelCompetitie.objects.filter(competitie=comp, laag=LAAG_REGIO):
@@ -178,7 +178,7 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
                 deelcomp.save()
         # for
 
-        comp.zet_fase()
+        comp.bepaal_fase()
         self.assertEqual(comp.fase, 'G')
 
     def _begin_rk(self):

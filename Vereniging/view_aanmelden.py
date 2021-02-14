@@ -57,7 +57,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
             raise Resolver404()
 
         self.comp = comp
-        comp.zet_fase()
+        comp.bepaal_fase()
 
         # TODO: check dat competitie open is voor inschrijvingen
 

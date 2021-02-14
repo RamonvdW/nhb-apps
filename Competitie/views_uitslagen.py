@@ -138,7 +138,7 @@ class UitslagenVerenigingView(TemplateView):
         except (ValueError, Competitie.DoesNotExist):
             raise Resolver404()
 
-        comp.zet_fase()
+        comp.bepaal_fase()
         context['comp'] = comp
 
         comp_boog = kwargs['comp_boog'][:2]     # afkappen voor veiligheid
@@ -325,7 +325,7 @@ class UitslagenRegioView(TemplateView):
         except (ValueError, Competitie.DoesNotExist):
             raise Resolver404()
 
-        comp.zet_fase()
+        comp.bepaal_fase()
         context['comp'] = comp
 
         zes_scores = kwargs['zes_scores']
@@ -507,7 +507,7 @@ class UitslagenRayonView(TemplateView):
         except (ValueError, Competitie.DoesNotExist):
             raise Resolver404()
 
-        comp.zet_fase()
+        comp.bepaal_fase()
         context['comp'] = comp
 
         comp_boog = kwargs['comp_boog'][:2]          # afkappen voor veiligheid
@@ -539,7 +539,7 @@ class UitslagenRayonView(TemplateView):
             raise Resolver404()
 
         context['deelcomp'] = deelcomp
-        deelcomp.competitie.zet_fase()
+        deelcomp.competitie.bepaal_fase()
 
         wkl2limiet = dict()    # [pk] = aantal
 
@@ -643,7 +643,7 @@ class UitslagenBondView(TemplateView):
         except (ValueError, Competitie.DoesNotExist):
             raise Resolver404()
 
-        comp.zet_fase()
+        comp.bepaal_fase()
         context['comp'] = comp
 
         comp_boog = kwargs['comp_boog'][:2]          # afkappen voor veiligheid
