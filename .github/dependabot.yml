@@ -5,3 +5,5 @@ updates:
     schedule:
       interval: "weekly"
     target-branch: "dev_v8"
+    open-pull-requests-limit: 0
+
