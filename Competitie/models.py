@@ -497,6 +497,18 @@ def competitie_aanmaken(jaar):
         comp.bk_laatste_wedstrijd = begin_bk + datetime.timedelta(days=7)
         comp.save()
 
+        # zoek de voorgaande deelcompetities erbij om settings over te kunnen nemen
+        vorige_deelcomps = dict()   # [regio_nr] = DeelCompetitie()
+        for deelcomp in (DeelCompetitie
+                         .objects
+                         .select_related('competitie',
+                                         'nhb_regio')
+                         .filter(laag=LAAG_REGIO,
+                                 competitie__begin_jaar=jaar - 1,
+                                 competitie__afstand=afstand)):
+            vorige_deelcomps[deelcomp.nhb_regio.regio_nr] = deelcomp
+        # for
+
         # maak de Deelcompetities aan voor Regio, RK, BK
         for laag, _ in DeelCompetitie.LAAG:
             if laag == LAAG_REGIO:
@@ -507,6 +519,14 @@ def competitie_aanmaken(jaar):
                                           laag=laag,
                                           nhb_regio=obj,
                                           functie=functie)
+                    try:
+                        vorige = vorige_deelcomps[obj.regio_nr]
+                    except KeyError:
+                        pass
+                    else:
+                        deel.inschrijf_methode = vorige.inschrijf_methode
+                        deel.toegestane_dagdelen = vorige.toegestane_dagdelen
+
                     bulk.append(deel)
                 # for
             elif laag == LAAG_RK:

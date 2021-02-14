@@ -11,8 +11,9 @@ from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
 from Overig.e2ehelpers import E2EHelpers
 from Schutter.models import SchutterBoog
 from Functie.models import maak_functie
-from Score.models import aanvangsgemiddelde_opslaan
-from .models import Competitie, DeelCompetitie, CompetitieKlasse
+from .models import (Competitie, DeelCompetitie, CompetitieKlasse,
+                     INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2, INSCHRIJF_METHODE_3,
+                     DAGDEEL_AFKORTINGEN)
 import datetime
 
 
@@ -389,6 +390,74 @@ class TestCompetitie(E2EHelpers, TestCase):
 
         self.assertEqual(Competitie.objects.count(), 2)
         self.assertEqual(DeelCompetitie.objects.count(), 2*(1 + 4 + 16))
+
+    def test_regio_settings_overnemen(self):
+        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_wisselnaarrol_bb()
+        self.e2e_check_rol('BB')
+
+        # maak een competitie aan
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_aanmaken)
+        self.assert_is_redirect(resp, self.url_kies)
+
+        dagdelen_105_18 = "%s,%s,%s" % (DAGDEEL_AFKORTINGEN[0], DAGDEEL_AFKORTINGEN[1], DAGDEEL_AFKORTINGEN[2])
+        dagdelen_105_25 = "%s,%s,%s" % (DAGDEEL_AFKORTINGEN[3], DAGDEEL_AFKORTINGEN[4], DAGDEEL_AFKORTINGEN[0])
+
+        # pas regio-instellingen aan
+        deelcomp = DeelCompetitie.objects.get(
+                                competitie__afstand=18,
+                                nhb_regio__regio_nr=101)
+        deelcomp.inschrijf_methode = INSCHRIJF_METHODE_1
+        deelcomp.save()
+
+        deelcomp = DeelCompetitie.objects.get(
+                                competitie__afstand=18,
+                                nhb_regio__regio_nr=105)
+        deelcomp.inschrijf_methode = INSCHRIJF_METHODE_3
+        deelcomp.toegestane_dagdelen = dagdelen_105_18
+        deelcomp.save()
+
+        deelcomp = DeelCompetitie.objects.get(
+                                competitie__afstand=25,
+                                nhb_regio__regio_nr=105)
+        deelcomp.inschrijf_methode = INSCHRIJF_METHODE_3
+        deelcomp.toegestane_dagdelen = dagdelen_105_25
+        deelcomp.save()
+
+        # pas de competitie aan zodat deze van vorig jaar is
+        for comp in Competitie.objects.all():
+            comp.begin_jaar -= 1
+            comp.save()
+        # for
+
+        # maak opnieuw een competitie aan
+        # maak een competitie aan
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_aanmaken)
+        self.assert_is_redirect(resp, self.url_kies)
+
+        # controleer dat de settings overgenomen zijn
+        for deelcomp in (DeelCompetitie
+                         .objects
+                         .select_related('competitie', 'nhb_regio')
+                         .filter(nhb_regio__regio_nr=101)):
+            if deelcomp.competitie.afstand == '18':
+                self.assertEqual(deelcomp.inschrijf_methode, INSCHRIJF_METHODE_1)
+            else:
+                self.assertEqual(deelcomp.inschrijf_methode, INSCHRIJF_METHODE_2)
+        # for
+
+        for deelcomp in (DeelCompetitie
+                         .objects
+                         .select_related('competitie', 'nhb_regio')
+                         .filter(nhb_regio__regio_nr=105)):
+            self.assertEqual(deelcomp.inschrijf_methode, INSCHRIJF_METHODE_3)
+            if deelcomp.competitie.afstand == '18':
+                self.assertEqual(deelcomp.toegestane_dagdelen, dagdelen_105_18)
+            else:
+                self.assertEqual(deelcomp.toegestane_dagdelen, dagdelen_105_25)
+        # for
 
     def test_ag_vaststellen(self):
         self.e2e_login_and_pass_otp(self.account_bb)
