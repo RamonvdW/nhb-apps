@@ -22,7 +22,7 @@ certifi==2020.12.5
     # via
     #   -r requirements_test.txt
     #   requests
-cffi==1.14.4
+cffi==1.14.5
     # via
     #   -r requirements_test.txt
     #   cryptography
@@ -32,7 +32,7 @@ chardet==4.0.0
     #   requests
 coverage==5.4
     # via -r requirements_dev.in
-cryptography==3.4.4
+cryptography==3.4.5
     # via
     #   -r requirements_test.txt
     #   pyopenssl
@@ -66,7 +66,7 @@ google-auth-httplib2==0.0.4
     # via
     #   -r requirements_test.txt
     #   google-api-python-client
-google-auth==1.26.0
+google-auth==1.26.1
     # via
     #   -r requirements_test.txt
     #   google-api-core

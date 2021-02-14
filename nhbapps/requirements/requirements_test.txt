@@ -18,13 +18,13 @@ certifi==2020.12.5
     # via
     #   -r requirements.txt
     #   requests
-cffi==1.14.4
+cffi==1.14.5
     # via cryptography
 chardet==4.0.0
     # via
     #   -r requirements.txt
     #   requests
-cryptography==3.4.4
+cryptography==3.4.5
     # via
     #   pyopenssl
     #   pysaml2
@@ -48,7 +48,7 @@ google-auth-httplib2==0.0.4
     # via
     #   -r requirements.txt
     #   google-api-python-client
-google-auth==1.26.0
+google-auth==1.26.1
     # via
     #   -r requirements.txt
     #   google-api-core
