@@ -348,7 +348,11 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
         if not self._mag_wijzigen(nhbver, rol_nu, functie_nu):
             raise Resolver404()
 
-        if not buiten_locatie and request.POST.get('maak_buiten_locatie', None):
+        if request.POST.get('maak_buiten_locatie', None):
+            if buiten_locatie:
+                # er is al een buitenlocatie
+                raise Resolver404()
+
             buiten = WedstrijdLocatie(
                             baan_type='B',
                             adres_uit_crm=False,

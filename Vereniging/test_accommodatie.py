@@ -361,6 +361,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
                                           'banen_25m': 6,
                                           'max_dt': 3,
                                           'notities': 'dit is een test'})
+        self.assertEqual(resp.status_code, 302)     # 302 = redirect = success
         loc2 = WedstrijdLocatie.objects.get(pk=self.loc2.pk)
         self.assertEqual(loc2.baan_type, 'X')
 
@@ -553,7 +554,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.assertTrue(url in urls)                                    # opslaan url
         self.assertTrue('/vereniging/accommodaties/lijst/' in urls)     # terug url
 
-    def test_buiten_locatie(self):
+    def test_binnen_en_buiten_locatie(self):
         # login als HWL van ver2 op loc2
         self.e2e_login_and_pass_otp(self.account_hwl)
         self.e2e_wissel_naar_functie(self.functie_hwl)
@@ -569,9 +570,17 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.assertEqual(2, self.nhbver2.wedstrijdlocatie_set.count())
         buiten_locatie = self.nhbver2.wedstrijdlocatie_set.filter(baan_type='B').all()[0]
 
+        # maak de buiten locatie nog een keer aan
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'maak_buiten_locatie': 'on'})
+        self.assertEqual(resp.status_code, 404)
+        self.assertEqual(2, self.nhbver2.wedstrijdlocatie_set.count())
+
         # haal het scherm op met de buiten locatie erin
         with self.assert_max_queries(20):
             resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
 
         # pas wat parameters aan
         with self.assert_max_queries(20):
@@ -604,5 +613,52 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
                                           'buiten_max_afstand': 90,
                                           'buiten_notities': 'dit is een buiten test'})
         self.assert_is_redirect(resp, '/vereniging/')
+
+        # haal de lijst op, zodat we daar ook een buitenlocatie in hebben
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_lijst)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+
+    def test_buiten_locatie_only(self):
+        # login als HWL van ver2 op loc2
+        self.e2e_login_and_pass_otp(self.account_hwl)
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+        self.e2e_check_rol('HWL')
+
+        url = self.url_accommodatie_details % self.nhbver2.pk
+
+        # verwijder de binnen locatie
+        self.loc2.verenigingen.remove(self.nhbver2)
+
+        # haal het accommodatie scherm op zonder enige accommodatie
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+
+        # maak de buitenlocatie aan
+        self.assertEqual(0, self.nhbver2.wedstrijdlocatie_set.count())
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'maak_buiten_locatie': 'on'})
+        self.assert_is_redirect(resp, url)
+        self.assertEqual(1, self.nhbver2.wedstrijdlocatie_set.count())
+        # buiten_locatie = self.nhbver2.wedstrijdlocatie_set.filter(baan_type='B').all()[0]
+
+        # haal het accommodatie scherm met alleen de buiten locatie
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+
+        # pas wat parameters aan (zonder binnen locatie)
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'baan_type': 'X',     # verplichte parameter
+                                          'buiten_adres': 'Grote veld\nMiddenpijl',
+                                          'buiten_banen': 20,
+                                          'buiten_max_afstand': 90,
+                                          'buiten_notities': 'dit is een buiten test'})
+        self.assert_is_redirect(resp, '/vereniging/accommodaties/lijst/')
+
 
 # end of file
