@@ -314,7 +314,7 @@
                         {% if not readonly %}
                             <td><!-- kolom voor de wijzig knoppen -->
                                 {% if opslaan_url and not buiten_locatie %}
-                                    <button form="form1" class="btn-nhb-rood">Buitenlocatie toevoegen</button>
+                                    <button form="form1" class="btn-nhb-rood wijzig_knop">Buitenlocatie toevoegen</button>
                                 {% endif %}
                             </td>
                         {% endif %}
