@@ -32,7 +32,7 @@ chardet==4.0.0
     #   requests
 coverage==5.4
     # via -r requirements_dev.in
-cryptography==3.4.5
+cryptography==3.4.6
     # via
     #   -r requirements_test.txt
     #   pyopenssl
@@ -45,7 +45,7 @@ django-debug-toolbar==3.2
     # via -r requirements_dev.in
 django-extensions==3.1.1
     # via -r requirements_dev.in
-django==3.0.12
+django==3.1.6
     # via
     #   -r requirements_test.txt
     #   django-debug-toolbar
@@ -66,7 +66,7 @@ google-auth-httplib2==0.0.4
     # via
     #   -r requirements_test.txt
     #   google-api-python-client
-google-auth==1.26.1
+google-auth==1.27.0
     # via
     #   -r requirements_test.txt
     #   google-api-core
@@ -156,7 +156,7 @@ requests==2.25.1
     #   -r requirements_test.txt
     #   google-api-core
     #   pysaml2
-rsa==4.7
+rsa==4.7.1
     # via
     #   -r requirements_test.txt
     #   google-auth

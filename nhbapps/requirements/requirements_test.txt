@@ -24,13 +24,13 @@ chardet==4.0.0
     # via
     #   -r requirements.txt
     #   requests
-cryptography==3.4.5
+cryptography==3.4.6
     # via
     #   pyopenssl
     #   pysaml2
 defusedxml==0.6.0
     # via pysaml2
-django==3.0.12
+django==3.1.6
     # via
     #   -r requirements.txt
     #   djangosaml2idp
@@ -48,7 +48,7 @@ google-auth-httplib2==0.0.4
     # via
     #   -r requirements.txt
     #   google-api-python-client
-google-auth==1.26.1
+google-auth==1.27.0
     # via
     #   -r requirements.txt
     #   google-api-core
@@ -122,7 +122,7 @@ requests==2.25.1
     #   -r requirements.txt
     #   google-api-core
     #   pysaml2
-rsa==4.7
+rsa==4.7.1
     # via
     #   -r requirements.txt
     #   google-auth
