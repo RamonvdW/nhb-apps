@@ -15,7 +15,9 @@ DEBUG = True
 ENABLE_DEBUG_TOOLBAR = False
 #ENABLE_DEBUG_TOOLBAR = True
 
-# django-extensions: very useful for show_urls
+# django-extensions
+#   very useful for show_urls:
+#     ./manage.py show_urls --settings=nhbapps.settings_dev
 ENABLE_DJANGO_EXTENSIONS = False
 
 # enable html validation using v.Nu (warning: triples test duration)

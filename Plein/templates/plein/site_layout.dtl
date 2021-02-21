@@ -83,7 +83,7 @@
 
         </div>
 
-        <script src="{% static 'materialize-new-5_min.js' %}"></script>
+        <script src="{% static 'materialize-new-7_min.js' %}"></script>
 
         <!-- framework init, after everything has been loaded and instantiated -->
         <script type="application/javascript">
