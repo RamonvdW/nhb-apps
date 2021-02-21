@@ -8,7 +8,6 @@
 from django.db import models
 from BasisTypen.models import BoogType
 from NhbStructuur.models import NhbLid
-from Account.models import Account
 # mag niet afhankelijk zijn van Competitie
 
 

@@ -7,7 +7,7 @@
 from django.urls import path
 from . import (view_accommodatie, view_overzicht, view_ledenlijst,
                view_aanmelden, view_wedstrijden, view_lijst_rk,
-               view_schietmomenten)
+               view_schietmomenten, view_teams)
 
 app_name = 'Vereniging'
 
@@ -32,6 +32,14 @@ urlpatterns = [
     path('leden-ingeschreven/competitie/<deelcomp_pk>/',
          view_aanmelden.LedenIngeschrevenView.as_view(),
          name='leden-ingeschreven'),
+
+    path('teams/regio/',
+         view_teams.TeamsRegioView.as_view(),
+         name='teams-regio'),
+
+    path('teams/rk/',
+         view_teams.TeamsRkView.as_view(),
+         name='teams-rk'),
 
     # TODO: term 'schietmomenten' aanpassen?
     path('leden-ingeschreven/competitie/<deelcomp_pk>/schietmomenten/',

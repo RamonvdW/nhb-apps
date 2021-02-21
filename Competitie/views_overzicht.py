@@ -105,6 +105,11 @@ class CompetitieOverzichtView(View):
                                          kwargs={'deelcomp_pk': obj.pk})
             # for
 
+            if comp.fase < 'B':
+                comp.url_regio_instellingen = reverse('Competitie:regio-instellingen',
+                                                      kwargs={'comp_pk': comp.pk,
+                                                              'regio_nr': functie_nu.nhb_regio.regio_nr})
+
             if 'B' <= comp.fase <= 'E':
                 comp.url_inschrijvingen = reverse('Competitie:lijst-regiocomp-regio',
                                                   kwargs={'comp_pk': comp.pk,

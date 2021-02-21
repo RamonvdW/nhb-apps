@@ -394,7 +394,7 @@
                             {% if readonly %}
                                 <span>{{ buiten_locatie.notities|linebreaksbr }}</span>
                             {% else %}
-                                <textarea name="buiten_notities" class="materialize-textarea" onchange="gewijzigd()">{{ buiten_locatie.notities }}</textarea>
+                                <textarea name="buiten_notities" class="materialize-textarea" oninput="gewijzigd()">{{ buiten_locatie.notities }}</textarea>
                             {% endif %}
                         </td>
                         {% if not readonly %}

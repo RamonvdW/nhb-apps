@@ -68,6 +68,10 @@
 
         {% endif %}     <!-- rol_is_bb -->
 
+        {% if comp.url_regio_instellingen %}
+            {% include 'plein/card.dtl' with title="Instelling teams" text="Instellingen voor de teamcompetitie in de regio." icon="flaky" url=comp.url_regio_instellingen %}
+        {% endif %}
+
         {% for deelcomp in planning_deelcomp %}
 
             <!-- planning deelcomp -->

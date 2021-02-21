@@ -60,6 +60,12 @@ urlpatterns = [
          name='wijzig-datums'),
 
 
+    # RCL schermen
+    path('<comp_pk>/instellingen/regio-<regio_nr>/',
+         views_planning_regio.RegioInstellingenView.as_view(),
+         name='regio-instellingen'),
+
+
     # ingeschreven
     path('<comp_pk>/lijst-regiocompetitie/regio-<regio_pk>/dagdeel-behoefte/',
          views_aangemeld.Inschrijfmethode3BehoefteView.as_view(),

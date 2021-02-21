@@ -67,7 +67,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                                             competitie__is_afgesloten=False,
                                             nhb_regio=functie_nu.nhb_ver.regio)
                                     .select_related('competitie')
-                                    .order_by('competitie__afstand'))
+                                    .order_by('competitie__afstand', 'competitie__begin_jaar'))
 
             context['deelcomps_rk'] = (DeelCompetitie
                                        .objects

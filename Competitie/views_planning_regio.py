@@ -4,19 +4,23 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+from django.conf import settings
 from django.http import HttpResponseRedirect
 from django.urls import Resolver404, reverse
 from django.utils import timezone
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
+from Account.models import Account
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
+from Handleiding.views import reverse_handleiding
 from Logboek.models import schrijf_in_logboek
 from NhbStructuur.models import NhbCluster, NhbVereniging
 from Taken.taken import maak_taak
 from Wedstrijden.models import Wedstrijd, WedstrijdLocatie
 from .models import (LAAG_REGIO, LAAG_RK, LAAG_BK, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2,
+                     TEAM_PUNTEN_FORMULE1, TEAM_PUNTEN_TWEE, TEAM_PUNTEN_DRIE, TEAM_PUNTEN_SOM_SCORES,
                      DeelCompetitie, DeelcompetitieRonde, maak_deelcompetitie_ronde,
-                     CompetitieKlasse, RegioCompetitieSchutterBoog)
+                     CompetitieKlasse, RegioCompetitieSchutterBoog,)
 from .menu import menu_dynamics_competitie
 from types import SimpleNamespace
 import datetime
@@ -29,6 +33,8 @@ TEMPLATE_COMPETITIE_PLANNING_REGIO_RONDE = 'competitie/planning-regio-ronde.dtl'
 TEMPLATE_COMPETITIE_PLANNING_REGIO_RONDE_METHODE1 = 'competitie/planning-regio-ronde-methode1.dtl'
 TEMPLATE_COMPETITIE_WIJZIG_WEDSTRIJD = 'competitie/wijzig-wedstrijd.dtl'
 TEMPLATE_COMPETITIE_AFSLUITEN_REGIOCOMP = 'competitie/rcl-afsluiten-regiocomp.dtl'
+TEMPLATE_COMPETITIE_INSTELLINGEN_REGIO = 'competitie/rcl-instellingen.dtl'
+
 
 # python strftime: 0=sunday, 6=saturday
 # wij rekenen het verschil ten opzicht van maandag in de week
@@ -1195,10 +1201,12 @@ class AfsluitenRegiocompView(UserPassesTestMixin, TemplateView):
             deelcomp.save()
 
             # maak het bericht voor een taak aan de RKO's en BKO's
+            account = request.user
             ter_info_namen = list()
             now = timezone.now()
             taak_deadline = now
-            taak_tekst = "Ter info: De regiocompetitie %s is zojuist afgesloten door RCL %s" % (str(deelcomp), request.user.volledige_naam())
+            assert isinstance(account, Account)
+            taak_tekst = "Ter info: De regiocompetitie %s is zojuist afgesloten door RCL %s" % (str(deelcomp), account.volledige_naam())
             taak_tekst += "\nAls RKO kan je onder Competitie, Planning Rayon de status van elke regio zien."
             taak_log = "[%s] Taak aangemaakt" % now
 
@@ -1243,5 +1251,143 @@ class AfsluitenRegiocompView(UserPassesTestMixin, TemplateView):
 
         url = reverse('Competitie:kies')
         return HttpResponseRedirect(url)
+
+
+class RegioInstellingenView(UserPassesTestMixin, TemplateView):
+
+    """ Deze view kan de RCL instellingen voor de regiocompetitie aanpassen """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_COMPETITIE_INSTELLINGEN_REGIO
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        rol_nu = rol_get_huidige(self.request)
+        return rol_nu == Rollen.ROL_RCL
+
+    def handle_no_permission(self):
+        """ gebruiker heeft geen toegang --> redirect naar het plein """
+        return HttpResponseRedirect(reverse('Plein:plein'))
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        try:
+            regio_nr = int(kwargs['regio_nr'][:6])  # afkappen voor veiligheid
+            comp_pk = int(kwargs['comp_pk'][:6])    # afkappen voor veiligheid
+            deelcomp = (DeelCompetitie
+                        .objects
+                        .select_related('competitie', 'nhb_regio')
+                        .get(competitie=comp_pk,
+                             laag=LAAG_REGIO,
+                             nhb_regio__regio_nr=regio_nr))
+        except (ValueError, DeelCompetitie.DoesNotExist):
+            raise Resolver404()
+
+        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
+        if deelcomp.functie != functie_nu:
+            # niet de beheerder
+            raise Resolver404()
+
+        deelcomp.competitie.bepaal_fase()
+        if deelcomp.competitie.fase >= 'B':
+            raise Resolver404()
+
+        context['deelcomp'] = deelcomp
+
+        context['opt_team_alloc'] = opts = list()
+
+        obj = SimpleNamespace()
+        obj.choice_name = 'vast'
+        obj.beschrijving = 'Statisch (vaste teams)'
+        obj.actief = deelcomp.regio_heeft_vaste_teams
+        opts.append(obj)
+
+        obj = SimpleNamespace()
+        obj.choice_name = 'vsg'
+        obj.beschrijving = 'Dynamisch (voortschrijdend gemiddelde)'
+        obj.actief = not deelcomp.regio_heeft_vaste_teams
+        opts.append(obj)
+
+        context['opt_team_punten'] = opts = list()
+
+        obj = SimpleNamespace()
+        obj.choice_name = 'F1'
+        obj.beschrijving = 'Formule 1 systeem (10/8/6/5/4/3/2/1)'
+        obj.actief = deelcomp.regio_team_punten_model == TEAM_PUNTEN_FORMULE1
+        opts.append(obj)
+
+        obj = SimpleNamespace()
+        obj.choice_name = '2P'
+        obj.beschrijving = 'Twee punten systeem (2/1/0)'
+        obj.actief = deelcomp.regio_team_punten_model == TEAM_PUNTEN_TWEE
+        opts.append(obj)
+
+        obj = SimpleNamespace()
+        obj.choice_name = '3P'
+        obj.beschrijving = 'Drie punten systeem (3/1/0)'
+        obj.actief = deelcomp.regio_team_punten_model == TEAM_PUNTEN_DRIE
+        # opts.append(obj)      # TODO: pending discussion and agreement
+
+        obj = SimpleNamespace()
+        obj.choice_name = 'SS'
+        obj.beschrijving = 'Cumulatief: som van team totaal'
+        obj.actief = deelcomp.regio_team_punten_model == TEAM_PUNTEN_SOM_SCORES
+        opts.append(obj)
+
+        context['url_opslaan'] = reverse('Competitie:regio-instellingen',
+                                         kwargs={'comp_pk': deelcomp.competitie.pk,
+                                                 'regio_nr': deelcomp.nhb_regio.regio_nr})
+
+        context['wiki_rcl_regio_instellingen_url'] = reverse_handleiding(settings.HANDLEIDING_RCL_INSTELLINGEN_REGIO)
+
+        menu_dynamics_competitie(self.request, context, comp_pk=deelcomp.competitie.pk)
+        return context
+
+    def post(self, request, *args, **kwargs):
+        """ Deze functie wordt aangeroepen als de knop 'Opslaan' gebruikt wordt door de RCL """
+
+        try:
+            regio_nr = int(kwargs['regio_nr'][:6])  # afkappen voor veiligheid
+            comp_pk = int(kwargs['comp_pk'][:6])    # afkappen voor veiligheid
+            deelcomp = (DeelCompetitie
+                        .objects
+                        .select_related('competitie', 'nhb_regio')
+                        .get(competitie=comp_pk,
+                             laag=LAAG_REGIO,
+                             nhb_regio__regio_nr=regio_nr))
+        except (ValueError, DeelCompetitie.DoesNotExist):
+            raise Resolver404()
+
+        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
+        if deelcomp.functie != functie_nu:
+            # niet de beheerder
+            raise Resolver404()
+
+        deelcomp.competitie.bepaal_fase()
+        if deelcomp.competitie.fase >= 'B':
+            raise Resolver404()
+
+        teams = request.POST.get('teams', '?')[:3]      # ja/nee
+        alloc = request.POST.get('team_alloc', '?')[:4]      # vast/vsg
+        punten = request.POST.get('team_punten', '?')[:2]    # 2p/3p/ss/f1
+
+        if teams == 'nee':
+            deelcomp.regio_organiseert_teamcompetitie = False
+            deelcomp.save()
+        elif teams == 'ja':
+            deelcomp.regio_organiseert_teamcompetitie = True
+
+            deelcomp.regio_heeft_vaste_teams = (alloc == 'vast')
+
+            if punten in (TEAM_PUNTEN_TWEE, TEAM_PUNTEN_DRIE, TEAM_PUNTEN_FORMULE1, TEAM_PUNTEN_SOM_SCORES):
+                deelcomp.regio_team_punten_model = punten
+
+            deelcomp.save()
+
+        url = reverse('Competitie:overzicht', kwargs={'comp_pk': deelcomp.competitie.pk})
+        return HttpResponseRedirect(url)
+
 
 # end of file
