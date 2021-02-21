@@ -9,6 +9,8 @@ RED="\e[31m"
 RESET="\e[0m"
 REPORT_DIR="/tmp/covhtml"
 
+export PYTHONDONTWRITEBYTECODE=1
+
 OMIT="--omit=*/lib/python3*/site-packages/*"    # use , to separate
 # show all saml2 and djangosaml2idp source files
 #OMIT="--omit=data3/wsgi.py,manage.py,/usr/local/lib64/*,/usr/lib/*,/usr/local/lib/python3.6/site-packages/c*,/usr/local/lib/python3.6/site-packages/da*,/usr/local/lib/python3.6/site-packages/de*,/usr/local/lib/python3.6/site-packages/i*,/usr/local/lib/python3.6/site-packages/p*,/usr/local/lib/python3.6/site-packages/q*,/usr/local/lib/python3.6/site-packages/r*,/usr/local/lib/python3.6/site-packages/si*,/usr/local/lib/python3.6/site-packages/u*,/usr/local/lib/python3.6/site-packages/django/*"
@@ -106,7 +108,7 @@ then
 
     echo
     echo -n "Press ENTER to start firefox now, or Ctrl+C to abort"
-    timeout --foreground 5 read
+    read -t 5
     if [ $? -ne 0 ]
     then
         # automatically abort
@@ -114,7 +116,11 @@ then
         exit 1
     fi
 
+    echo
+    echo "Launching firefox"
     firefox $REPORT_DIR/index.html &
+
+    echo "Done"
 fi
 
 # end of file

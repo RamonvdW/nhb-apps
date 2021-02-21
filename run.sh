@@ -4,6 +4,8 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+export PYTHONDONTWRITEBYTECODE=1
+
 # start the background process
 echo "[INFO] Starting kampioenschap_mutaties (runtime: 60 minutes)"
 ./manage.py kampioenschap_mutaties 60 &
