@@ -6,7 +6,7 @@
 
 from django.db import models
 from django.utils import timezone
-from BasisTypen.models import IndivWedstrijdklasse, TeamWedstrijdklasse
+from BasisTypen.models import TeamType, IndivWedstrijdklasse, TeamWedstrijdklasse
 from Functie.rol import Rollen
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
 from Functie.models import Functie
@@ -539,6 +539,8 @@ class RegiocompetitieTeam(models.Model):
     # een volgnummer van het team binnen de vereniging
     volg_nr = models.PositiveSmallIntegerField(default=0)
 
+    team_type = models.ForeignKey(TeamType, on_delete=models.PROTECT)
+
     # de naam van dit team (wordt getoond in plaats van team volgnummer)
     team_naam = models.CharField(max_length=50, default='')
 
@@ -550,7 +552,8 @@ class RegiocompetitieTeam(models.Model):
     aanvangsgemiddelde = models.DecimalField(max_digits=5, decimal_places=3, default=0.0)    # 10,000
 
     # de klasse waarin dit team ingedeeld is
-    klasse = models.ForeignKey(CompetitieKlasse, on_delete=models.CASCADE)
+    klasse = models.ForeignKey(CompetitieKlasse, on_delete=models.CASCADE,
+                               blank=True, null=True)
 
 
 class RegiocompetitieTeamPoule(models.Model):

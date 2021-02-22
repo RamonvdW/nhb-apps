@@ -1301,8 +1301,11 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
             raise Resolver404()
 
         deelcomp.competitie.bepaal_fase()
-        if deelcomp.competitie.fase >= 'B':
+        if deelcomp.competitie.fase >= 'E':
             raise Resolver404()
+
+        if deelcomp.competitie.fase >= 'B':
+            context['readonly'] = True
 
         context['deelcomp'] = deelcomp
 

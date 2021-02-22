@@ -25,6 +25,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('volg_nr', models.PositiveSmallIntegerField(default=0)),
+                ('team_type', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='BasisTypen.teamtype')),
                 ('team_naam', models.CharField(default='', max_length=50)),
                 ('aanvangsgemiddelde', models.DecimalField(decimal_places=3, default=0.0, max_digits=5)),
             ],
@@ -61,7 +62,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='regiocompetitieteam',
             name='klasse',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='Competitie.competitieklasse'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='Competitie.competitieklasse'),
         ),
         migrations.AddField(
             model_name='regiocompetitieteam',

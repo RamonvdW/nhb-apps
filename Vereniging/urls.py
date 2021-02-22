@@ -33,11 +33,19 @@ urlpatterns = [
          view_aanmelden.LedenIngeschrevenView.as_view(),
          name='leden-ingeschreven'),
 
-    path('teams/regio/',
+    path('teams/regio/<deelcomp_pk>/wijzig/<team_pk>/',
+         view_teams.WijzigRegioTeamsView.as_view(),
+         name='teams-regio-wijzig'),
+
+    path('teams/regio/<deelcomp_pk>/nieuw/',
+         view_teams.WijzigRegioTeamsView.as_view(),
+         name='teams-regio-nieuw'),
+
+    path('teams/regio/<deelcomp_pk>/',
          view_teams.TeamsRegioView.as_view(),
          name='teams-regio'),
 
-    path('teams/rk/',
+    path('teams/rk/<deelcomp_pk>/',
          view_teams.TeamsRkView.as_view(),
          name='teams-rk'),
 

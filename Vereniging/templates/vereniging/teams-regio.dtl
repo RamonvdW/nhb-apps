@@ -1,0 +1,58 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2021 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Teams regiocompetitie{% endblock %}
+
+{% block pagina %}
+    <h4>Teams Regiocompetitie</h4>
+
+    {% if not deelcomp.regio_organiseert_teamcompetitie %}
+        <p>In jullie regio wordt geen team competitie gehouden.</p>
+        <p>Voor meer informatie: neem contact op met de RCL.</p>
+    {% else %}
+        <p>Op deze pagina kan je als HWL de teams opgeven voor de regiocompetitie van de {{ deelcomp }}.</p>
+
+        <table class="white">
+
+            <thead>
+                <tr>
+                    <th>Team type</th>
+                    <th>Team naam</th>
+                    <th><!-- kolom voor de knoppen --></th>
+                </tr>
+            </thead>
+
+            {% for team in teams %}
+                <tr>
+                    <td>{{ team.team_type.beschrijving }}</td>
+                    <td>{{ team.team_naam }}</td>
+                    <td><a class="btn-nhb-blauw" href="{{ team.url_wijzig }}">Wijzig</a></td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="3"><i>Er zijn nog geen teams</i></td>
+                </tr>
+            {% endfor %}
+
+            <!-- knop om een team toe te voegen -->
+            {% if url_nieuw_team %}
+                <tr>
+                    <td colspan="3">
+                        <a class="btn-nhb-blauw" href="{{ url_nieuw_team }}">
+                            <i class="material-icons-round left">add</i>Team toevoegen</a>
+                    </td>
+                </tr>
+            {% endif %}
+
+        </table>
+
+    {% endif %}
+
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="teams-regio" %}
+
+{% endblock %}

@@ -9,6 +9,7 @@ from Wedstrijden.models import Wedstrijd
 from .models import (Competitie, DeelCompetitie, DeelcompetitieRonde,
                      CompetitieKlasse, DeelcompetitieKlasseLimiet,
                      RegioCompetitieSchutterBoog, KampioenschapSchutterBoog,
+                     RegiocompetitieTeam, RegiocompetitieTeamPoule, RegiocompetitieRondeTeam,
                      KampioenschapMutatie)
 
 
@@ -115,6 +116,36 @@ class RegioCompetitieSchutterBoogAdmin(admin.ModelAdmin):
         return super().formfield_for_manytomany(db_field, request, **kwargs)
 
 
+class RegiocompetitieTeamAdmin(admin.ModelAdmin):
+    filter_horizontal = ('vaste_schutters', )
+
+    list_select_related = ('deelcompetitie',
+                           'deelcompetitie__nhb_regio',
+                           'deelcompetitie__nhb_rayon',
+                           'deelcompetitie__competitie',
+                           'vereniging',
+                           'klasse',
+                           'klasse__indiv',
+                           'klasse__team')
+
+    def __init__(self, model, admin_site):
+        super().__init__(model, admin_site)
+        self.obj = None
+
+    def get_form(self, request, obj=None, **kwargs):
+        if obj:                 # pragma: no branch
+            self.obj = obj      # pragma: no cover
+        return super().get_form(request, obj, **kwargs)
+
+    def formfield_for_manytomany(self, db_field, request, **kwargs):    # pragma: no cover
+        if db_field.name == 'vaste_schutters' and self.obj:
+            # alleen schutters van de juiste vereniging laten kiezen
+            kwargs['queryset'] = (RegioCompetitieSchutterBoog
+                                  .objects
+                                  .filter(bij_vereniging=self.obj.vereniging))
+        return super().formfield_for_manytomany(db_field, request, **kwargs)
+
+
 class KampioenschapSchutterBoogAdmin(admin.ModelAdmin):
 
     fieldsets = (
@@ -185,5 +216,8 @@ admin.site.register(RegioCompetitieSchutterBoog, RegioCompetitieSchutterBoogAdmi
 admin.site.register(KampioenschapSchutterBoog, KampioenschapSchutterBoogAdmin)
 admin.site.register(DeelcompetitieKlasseLimiet)
 admin.site.register(KampioenschapMutatie, KampioenschapMutatieAdmin)
+admin.site.register(RegiocompetitieTeam, RegiocompetitieTeamAdmin)
+admin.site.register(RegiocompetitieTeamPoule)
+admin.site.register(RegiocompetitieRondeTeam)
 
 # end of file
