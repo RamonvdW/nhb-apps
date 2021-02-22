@@ -8,6 +8,7 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
+from Competitie.models import DeelCompetitie
 from Plein.menu import menu_dynamics
 from Functie.rol import Rollen, rol_get_huidige_functie
 
@@ -24,10 +25,14 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_TEAMS_REGIO
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu, self.functie_nu = None, None
+
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
-        return functie_nu and rol_nu == Rollen.ROL_HWL
+        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        return self.functie_nu and self.rol_nu == Rollen.ROL_HWL
 
     def handle_no_permission(self):
         """ gebruiker heeft geen toegang --> redirect naar het plein """

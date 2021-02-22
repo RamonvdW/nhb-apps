@@ -9,7 +9,7 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import Resolver404, reverse
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
+from Functie.rol import Rollen, rol_get_huidige_functie
 from Handleiding.views import reverse_handleiding
 from Logboek.models import schrijf_in_logboek
 from NhbStructuur.models import NhbVereniging
@@ -43,10 +43,14 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_PLANNING_RAYON
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu, self.functie_nu = None, None
+
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        rol_nu = rol_get_huidige(self.request)
-        return rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO)
+        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO)
 
     def handle_no_permission(self):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
@@ -67,8 +71,6 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
 
         context['deelcomp_rk'] = deelcomp_rk
         context['rayon'] = deelcomp_rk.nhb_rayon
-
-        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
 
         # maak het plan aan, als deze nog niet aanwezig was
         if not deelcomp_rk.plan:
@@ -129,7 +131,7 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
         if len(context['wkl_niet_gebruikt']) == 0:
             del context['wkl_niet_gebruikt']
 
-        if rol_nu == Rollen.ROL_RKO and functie_nu.nhb_rayon == deelcomp_rk.nhb_rayon:
+        if self.rol_nu == Rollen.ROL_RKO and self.functie_nu.nhb_rayon == deelcomp_rk.nhb_rayon:
             context['url_nieuwe_wedstrijd'] = reverse('Competitie:rayon-planning',
                                                       kwargs={'deelcomp_pk': deelcomp_rk.pk})
 
@@ -138,7 +140,7 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
                                                kwargs={'wedstrijd_pk': wedstrijd.pk})
             # for
 
-        if rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO):
+        if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO):
             deelcomp_bk = DeelCompetitie.objects.get(laag=LAAG_BK,
                                                      competitie=deelcomp_rk.competitie)
             context['url_bond'] = reverse('Competitie:bond-planning',
@@ -181,8 +183,7 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
             in de RK planning, om een nieuwe wedstrijd toe te voegen.
         """
         # alleen de RKO mag de planning uitbreiden
-        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
-        if rol_nu != Rollen.ROL_RKO:
+        if self.rol_nu != Rollen.ROL_RKO:
             raise Resolver404()
 
         try:
@@ -192,7 +193,7 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
                            .select_related('competitie', 'nhb_regio')
                            .get(pk=deelcomp_pk,
                                 laag=LAAG_RK,                          # moet voor RK zijn
-                                nhb_rayon=functie_nu.nhb_rayon))       # moet juiste rayon zijn
+                                nhb_rayon=self.functie_nu.nhb_rayon))  # moet juiste rayon zijn
         except (ValueError, DeelCompetitie.DoesNotExist):
             raise Resolver404()
 
@@ -222,10 +223,14 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_WIJZIG_WEDSTRIJD_RAYON
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu, self.functie_nu = None, None
+
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        rol_nu = rol_get_huidige(self.request)
-        return rol_nu == Rollen.ROL_RKO
+        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        return self.rol_nu == Rollen.ROL_RKO
 
     def handle_no_permission(self):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
@@ -312,8 +317,6 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        _, functie_nu = rol_get_huidige_functie(self.request)
-
         try:
             wedstrijd_pk = int(kwargs['wedstrijd_pk'][:6])     # afkappen voor veiligheid
             wedstrijd = (Wedstrijd
@@ -331,7 +334,7 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
         deelcomp_rk = plan.deelcompetitie_set.all()[0]
 
         # is dit de beheerder?
-        if deelcomp_rk.functie != functie_nu:
+        if deelcomp_rk.functie != self.functie_nu:
             raise Resolver404()
 
         context['deelcomp_rk'] = deelcomp_rk
@@ -383,8 +386,6 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
         """ Deze functie wordt aangeroepen als de knop 'Opslaan' gebruikt wordt
         """
 
-        _, functie_nu = rol_get_huidige_functie(self.request)
-
         try:
             wedstrijd_pk = int(kwargs['wedstrijd_pk'][:6])     # afkappen voor veiligheid
             wedstrijd = (Wedstrijd
@@ -399,7 +400,7 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
         deelcomp_rk = plan.deelcompetitie_set.all()[0]
 
         # is dit de beheerder?
-        if deelcomp_rk.functie != functie_nu:
+        if deelcomp_rk.functie != self.functie_nu:
             raise Resolver404()
 
         competitie = deelcomp_rk.competitie
@@ -493,10 +494,14 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_LIJST_RK
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu, self.functie_nu = None, None
+
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        rol_nu = rol_get_huidige(self.request)
-        return rol_nu == Rollen.ROL_RKO
+        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        return self.rol_nu == Rollen.ROL_RKO
 
     def handle_no_permission(self):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
@@ -546,8 +551,7 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
             raise Resolver404()
 
         # controleer dat de juiste RKO aan de knoppen zit
-        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
-        if rol_nu == Rollen.ROL_RKO and functie_nu != deelcomp_rk.functie:
+        if self.rol_nu == Rollen.ROL_RKO and self.functie_nu != deelcomp_rk.functie:
             raise Resolver404()     # niet de juiste RKO
 
         alles_afgesloten, regio_status = self._get_regio_status(deelcomp_rk.competitie)
@@ -663,8 +667,7 @@ class LijstRkSelectieAlsBestandView(LijstRkSelectieView):
             raise Resolver404()
 
         # laat alleen de juiste RKO de lijst ophalen
-        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
-        if rol_nu == Rollen.ROL_RKO and functie_nu != deelcomp_rk.functie:
+        if self.rol_nu == Rollen.ROL_RKO and self.functie_nu != deelcomp_rk.functie:
             raise Resolver404()     # niet de juiste RKO
 
         deelnemers = (KampioenschapSchutterBoog
@@ -736,10 +739,14 @@ class WijzigStatusRkSchutterView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_WIJZIG_STATUS_RK_SCHUTTER
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu, self.functie_nu = None, None
+
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        rol_nu = rol_get_huidige(self.request)
-        return rol_nu in (Rollen.ROL_RKO, Rollen.ROL_HWL)
+        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        return self.rol_nu in (Rollen.ROL_RKO, Rollen.ROL_HWL)
 
     def handle_no_permission(self):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
@@ -748,8 +755,6 @@ class WijzigStatusRkSchutterView(UserPassesTestMixin, TemplateView):
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
-
-        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
 
         try:
             deelnemer_pk = int(kwargs['deelnemer_pk'][:6])  # afkappen voor veiligheid
@@ -763,10 +768,10 @@ class WijzigStatusRkSchutterView(UserPassesTestMixin, TemplateView):
         except (ValueError, KampioenschapSchutterBoog.DoesNotExist):
             raise Resolver404()
 
-        if rol_nu == Rollen.ROL_HWL and deelnemer.bij_vereniging != functie_nu.nhb_ver:
+        if self.rol_nu == Rollen.ROL_HWL and deelnemer.bij_vereniging != self.functie_nu.nhb_ver:
             raise Resolver404()     # geen schutter van de vereniging
 
-        if rol_nu == Rollen.ROL_RKO and functie_nu != deelnemer.deelcompetitie.functie:
+        if self.rol_nu == Rollen.ROL_RKO and self.functie_nu != deelnemer.deelcompetitie.functie:
             raise Resolver404()     # niet de juiste RKO
 
         lid = deelnemer.schutterboog.nhblid
@@ -782,7 +787,7 @@ class WijzigStatusRkSchutterView(UserPassesTestMixin, TemplateView):
         context['url_wijzig'] = reverse('Competitie:wijzig-status-rk-deelnemer',
                                         kwargs={'deelnemer_pk': deelnemer.pk})
 
-        if rol_nu == Rollen.ROL_RKO:
+        if self.rol_nu == Rollen.ROL_RKO:
             context['url_terug'] = reverse('Competitie:lijst-rk',
                                            kwargs={'deelcomp_pk': deelnemer.deelcompetitie.pk})
             menu_dynamics_competitie(self.request, context, comp_pk=deelnemer.deelcompetitie.competitie.pk)
@@ -811,12 +816,10 @@ class WijzigStatusRkSchutterView(UserPassesTestMixin, TemplateView):
         afmelden = str(request.POST.get('afmelden', ''))[:2]
         snel = str(request.POST.get('snel', ''))[:1]
 
-        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
-
-        if rol_nu == Rollen.ROL_HWL and deelnemer.bij_vereniging != functie_nu.nhb_ver:
+        if self.rol_nu == Rollen.ROL_HWL and deelnemer.bij_vereniging != self.functie_nu.nhb_ver:
             raise Resolver404()     # geen schutter van de vereniging
 
-        if rol_nu == Rollen.ROL_RKO and functie_nu != deelnemer.deelcompetitie.functie:
+        if self.rol_nu == Rollen.ROL_RKO and self.functie_nu != deelnemer.deelcompetitie.functie:
             raise Resolver404()     # niet de juiste RKO
 
         account = request.user
@@ -850,7 +853,7 @@ class WijzigStatusRkSchutterView(UserPassesTestMixin, TemplateView):
                     mutatie = KampioenschapMutatie.objects.get(pk=mutatie.pk)
                 # while
 
-        if rol_nu == Rollen.ROL_RKO:
+        if self.rol_nu == Rollen.ROL_RKO:
             url = reverse('Competitie:lijst-rk',
                           kwargs={'deelcomp_pk': deelnemer.deelcompetitie.pk})
         else:
@@ -867,10 +870,14 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_WIJZIG_LIMIETEN_RK
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu, self.functie_nu = None, None
+
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        rol_nu = rol_get_huidige(self.request)
-        return rol_nu == Rollen.ROL_RKO
+        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        return self.rol_nu == Rollen.ROL_RKO
 
     def handle_no_permission(self):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
@@ -891,8 +898,7 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
             raise Resolver404()
 
         # controleer dat de juiste RKO aan de knoppen zit
-        _, functie_nu = rol_get_huidige_functie(self.request)
-        if functie_nu != deelcomp_rk.functie:
+        if self.functie_nu != deelcomp_rk.functie:
             raise Resolver404()     # niet de juiste RKO
 
         context['wkl'] = wkl = (CompetitieKlasse
@@ -943,8 +949,7 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
             raise Resolver404()
 
         # controleer dat de juiste RKO aan de knoppen zit
-        _, functie_nu = rol_get_huidige_functie(self.request)
-        if functie_nu != deelcomp_rk.functie:
+        if self.functie_nu != deelcomp_rk.functie:
             raise Resolver404()     # niet de juiste RKO
 
         pk2ckl = dict()
@@ -1038,10 +1043,14 @@ class VerwijderWedstrijdView(UserPassesTestMixin, View):
 
     """ Deze view laat een RK wedstrijd verwijderen """
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu, self.functie_nu = None, None
+
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        rol_nu = rol_get_huidige(self.request)
-        return rol_nu == Rollen.ROL_RKO
+        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        return self.rol_nu == Rollen.ROL_RKO
 
     def handle_no_permission(self):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
@@ -1067,8 +1076,7 @@ class VerwijderWedstrijdView(UserPassesTestMixin, View):
             raise Resolver404()
 
         # correcte beheerder?
-        _, functie_nu = rol_get_huidige_functie(self.request)
-        if deelcomp.functie != functie_nu:
+        if deelcomp.functie != self.functie_nu:
             raise Resolver404()
 
         # voorkom verwijderen van wedstrijden waar een uitslag aan hangt

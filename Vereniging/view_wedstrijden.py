@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -26,10 +26,14 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
     template_name = TEMPLATE_WEDSTRIJDEN
     uitslag_invoeren = False
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu, self.functie_nu = None, None
+
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
-        return functie_nu and rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_WL)
+        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        return self.functie_nu and self.rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_WL)
 
     def handle_no_permission(self):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
@@ -39,12 +43,10 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
-
         pks = (DeelcompetitieRonde
                .objects
                .filter(deelcompetitie__is_afgesloten=False,
-                       plan__wedstrijden__vereniging=functie_nu.nhb_ver)
+                       plan__wedstrijden__vereniging=self.functie_nu.nhb_ver)
                .values_list('plan__wedstrijden', flat=True))
 
         wedstrijden = (Wedstrijd
@@ -70,7 +72,7 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
             obj.toon_geen_uitslag = True
             heeft_uitslag = (obj.uitslag and obj.uitslag.scores.count() > 0)
             mag_wijzigen = self.uitslag_invoeren and not (obj.uitslag and obj.uitslag.is_bevroren)
-            if rol_nu in (Rollen.ROL_HWL, Rollen.ROL_WL) and mag_wijzigen:
+            if self.rol_nu in (Rollen.ROL_HWL, Rollen.ROL_WL) and mag_wijzigen:
                 # mag uitslag wijzigen
                 url = reverse('Competitie:wedstrijd-uitslag-invoeren',
                               kwargs={'wedstrijd_pk': obj.pk})
@@ -88,7 +90,7 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
             context['geen_wedstrijden'] = False
         # for
 
-        context['vereniging'] = functie_nu.nhb_ver
+        context['vereniging'] = self.functie_nu.nhb_ver
         context['huidige_rol'] = rol_get_beschrijving(self.request)
         context['wedstrijden'] = wedstrijden
         context['uitslag_invoeren'] = self.uitslag_invoeren

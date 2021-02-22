@@ -5,9 +5,9 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
-from django.shortcuts import redirect, render, reverse
+from django.shortcuts import redirect, render
 from django.views.generic import TemplateView, View
-from Functie.rol import Rollen, rol_get_huidige, rol_get_beschrijving, rol_mag_wisselen
+from Functie.rol import Rollen, rol_get_huidige, rol_get_beschrijving
 from Handleiding.views import reverse_handleiding
 from Taken.taken import eval_open_taken
 from .menu import menu_dynamics

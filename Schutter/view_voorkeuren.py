@@ -28,10 +28,15 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
 
     template_name = TEMPLATE_VOORKEUREN
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu = None
+
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         # gebruiker moet ingelogd zijn en schutter rol gekozen hebben
-        return rol_get_huidige(self.request) in (Rollen.ROL_SCHUTTER, Rollen.ROL_HWL)
+        self.rol_nu = rol_get_huidige(self.request)
+        return self.rol_nu in (Rollen.ROL_SCHUTTER, Rollen.ROL_HWL)
 
     def handle_no_permission(self):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
@@ -116,7 +121,7 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
             voorkeuren.save()
         del voorkeuren
 
-        if rol_get_huidige(self.request) != Rollen.ROL_HWL:
+        if self.rol_nu != Rollen.ROL_HWL:
             if rol_mag_wisselen(self.request):
                 account = request.user
                 email = account.accountemail_set.all()[0]
@@ -136,7 +141,7 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
                     email.optout_herinnering_taken = optout_herinnering_taken
                     email.save()
 
-        if rol_get_huidige(request) == Rollen.ROL_HWL:
+        if self.rol_nu == Rollen.ROL_HWL:
             # stuur de HWL terug naar zijn ledenlijst
             return HttpResponseRedirect(reverse('Vereniging:leden-voorkeuren'))
 
@@ -197,7 +202,7 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
         context['bogen'] = self._get_bogen(nhblid, geen_wedstrijden)
         context['voorkeuren'], _ = SchutterVoorkeuren.objects.get_or_create(nhblid=nhblid)
 
-        if rol_get_huidige(self.request) == Rollen.ROL_HWL:
+        if self.rol_nu == Rollen.ROL_HWL:
             actief = 'vereniging'
             context['nhblid_pk'] = nhblid.pk
             context['nhblid'] = nhblid

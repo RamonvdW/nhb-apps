@@ -38,15 +38,19 @@ class CompetitieOverzichtView(View):
     # class variables shared by all instances
     # (none)
 
-    @staticmethod
-    def _get_competitie_overzicht_beheerder(request, context, comp, rol_nu, functie_nu):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu = None
+        self.functie_nu = None
+
+    def _get_competitie_overzicht_beheerder(self, request, context, comp):
 
         kan_beheren = False
 
         context['huidige_rol'] = rol_get_beschrijving(request)
-        context['toon_functies'] = rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO)
+        context['toon_functies'] = self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO)
 
-        if functie_nu:
+        if self.functie_nu:
             # kijk of deze rol nog iets te doen heeft
             context['rol_is_klaar'] = True
 
@@ -54,7 +58,7 @@ class CompetitieOverzichtView(View):
             for deelcomp in (DeelCompetitie
                              .objects
                              .filter(competitie=comp,
-                                     functie=functie_nu)):
+                                     functie=self.functie_nu)):
                 kan_beheren = True
                 deelcomp.competitie.bepaal_fase()
                 if not deelcomp.is_afgesloten:
@@ -66,7 +70,7 @@ class CompetitieOverzichtView(View):
 
         context['object_list'] = list()
 
-        if rol_nu == Rollen.ROL_BB:
+        if self.rol_nu == Rollen.ROL_BB:
             context['rol_is_bb'] = True
             kan_beheren = True
 
@@ -85,11 +89,11 @@ class CompetitieOverzichtView(View):
                                   kwargs={'deelcomp_pk': obj.pk})
             # for
 
-        if rol_nu == Rollen.ROL_RCL:
+        if self.rol_nu == Rollen.ROL_RCL:
             context['planning_deelcomp'] = (DeelCompetitie
                                             .objects
                                             .filter(competitie=comp,
-                                                    functie=functie_nu,
+                                                    functie=self.functie_nu,
                                                     is_afgesloten=False)
                                             .select_related('nhb_regio', 'competitie'))
             for obj in context['planning_deelcomp']:
@@ -108,18 +112,18 @@ class CompetitieOverzichtView(View):
             if comp.fase < 'B':
                 comp.url_regio_instellingen = reverse('Competitie:regio-instellingen',
                                                       kwargs={'comp_pk': comp.pk,
-                                                              'regio_nr': functie_nu.nhb_regio.regio_nr})
+                                                              'regio_nr': self.functie_nu.nhb_regio.regio_nr})
 
             if 'B' <= comp.fase <= 'E':
                 comp.url_inschrijvingen = reverse('Competitie:lijst-regiocomp-regio',
                                                   kwargs={'comp_pk': comp.pk,
-                                                          'regio_pk': functie_nu.nhb_regio.pk})
+                                                          'regio_pk': self.functie_nu.nhb_regio.pk})
 
             if comp.fase >= 'E':
                 context['afsluiten_deelcomp'] = (DeelCompetitie
                                                  .objects
                                                  .filter(competitie=comp,
-                                                         functie=functie_nu,
+                                                         functie=self.functie_nu,
                                                          is_afgesloten=False)
                                                  .select_related('nhb_regio', 'competitie'))
                 for obj in context['afsluiten_deelcomp']:
@@ -131,12 +135,12 @@ class CompetitieOverzichtView(View):
                                                 kwargs={'deelcomp_pk': obj.pk})
                 # for
 
-        elif rol_nu == Rollen.ROL_RKO:
+        elif self.rol_nu == Rollen.ROL_RKO:
             deelcomp_rks = (DeelCompetitie
                             .objects
                             .select_related('nhb_rayon', 'competitie')
                             .filter(competitie=comp,
-                                    functie=functie_nu,
+                                    functie=self.functie_nu,
                                     is_afgesloten=False))
             if len(deelcomp_rks):
                 kan_beheren = True
@@ -160,13 +164,13 @@ class CompetitieOverzichtView(View):
             if 'B' <= comp.fase <= 'E':
                 comp.url_inschrijvingen = reverse('Competitie:lijst-regiocomp-rayon',
                                                   kwargs={'comp_pk': comp.pk,
-                                                          'rayon_pk': functie_nu.nhb_rayon.pk})
+                                                          'rayon_pk': self.functie_nu.nhb_rayon.pk})
 
-        elif rol_nu == Rollen.ROL_BKO:
+        elif self.rol_nu == Rollen.ROL_BKO:
             context['planning_deelcomp'] = (DeelCompetitie
                                             .objects
                                             .filter(competitie=comp,
-                                                    functie=functie_nu,
+                                                    functie=self.functie_nu,
                                                     is_afgesloten=False)
                                             .select_related('competitie'))
             for obj in context['planning_deelcomp']:
@@ -204,8 +208,7 @@ class CompetitieOverzichtView(View):
 
         return template_name
 
-    @staticmethod
-    def _get_competitie_overzicht_hwl(request, context, comp, rol_nu, functie_nu):
+    def _get_competitie_overzicht_hwl(self, request, context, comp):
 
         context['huidige_rol'] = rol_get_beschrijving(request)
 
@@ -215,22 +218,21 @@ class CompetitieOverzichtView(View):
                                         .filter(competitie=comp,
                                                 laag=LAAG_REGIO,
                                                 is_afgesloten=False,
-                                                nhb_regio=functie_nu.nhb_ver.regio))
+                                                nhb_regio=self.functie_nu.nhb_ver.regio))
 
         comp.url_inschrijvingen = reverse('Competitie:lijst-regiocomp-regio',
                                           kwargs={'comp_pk': comp.pk,
-                                                  'regio_pk': functie_nu.nhb_ver.regio.pk})
+                                                  'regio_pk': self.functie_nu.nhb_ver.regio.pk})
 
         return TEMPLATE_COMPETITIE_OVERZICHT_HWL
 
-    @staticmethod
-    def _get_competitie_overzicht_schutter_bezoeker(context, comp, rol_nu):
+    def _get_competitie_overzicht_schutter_bezoeker(self, context, comp):
         # let op! Niet alleen voor schutter, maar ook voor gebruiker/anon
 
         if comp.fase >= 'B':
             context['toon_uitslagen'] = True
 
-        if rol_nu == Rollen.ROL_SCHUTTER:
+        if self.rol_nu == Rollen.ROL_SCHUTTER:
             # TODO: wedstrijdkalender toevoegen
             pass
 
@@ -261,6 +263,8 @@ class CompetitieOverzichtView(View):
     def get(self, request, *args, **kwargs):
         """ called by the template system to get the context data for the template """
 
+        self.rol_nu, self.functie_nu = rol_get_huidige_functie(request)
+
         context = dict()
 
         try:
@@ -271,10 +275,8 @@ class CompetitieOverzichtView(View):
         except (ValueError, Competitie.DoesNotExist):
             raise Resolver404()
 
-        rol_nu, functie_nu = rol_get_huidige_functie(request)
-
-        comp.bepaal_fase()                # zet comp.fase
-        comp.bepaal_openbaar(rol_nu)      # zet comp.is_openbaar
+        comp.bepaal_fase()                     # zet comp.fase
+        comp.bepaal_openbaar(self.rol_nu)      # zet comp.is_openbaar
 
         comp.einde_fase_F = comp.laatst_mogelijke_wedstrijd + datetime.timedelta(days=7)
         comp.einde_fase_M = comp.rk_laatste_wedstrijd + datetime.timedelta(days=7)
@@ -292,22 +294,22 @@ class CompetitieOverzichtView(View):
         #   - bezoeker
         template = None
 
-        if rol_nu in (Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL):
-            if functie_nu and functie_nu.comp_type == comp.afstand:
+        if self.rol_nu in (Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL):
+            if self.functie_nu and self.functie_nu.comp_type == comp.afstand:
                 # BKO/RKO/RCL van deze specifieke competitie
-                template = self._get_competitie_overzicht_beheerder(request, context, comp, rol_nu, functie_nu)
+                template = self._get_competitie_overzicht_beheerder(request, context, comp)
                 eval_open_taken(request)
 
-        elif rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB):
-            template = self._get_competitie_overzicht_beheerder(request, context, comp, rol_nu, functie_nu)
+        elif self.rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB):
+            template = self._get_competitie_overzicht_beheerder(request, context, comp)
             eval_open_taken(request)
 
-        elif rol_nu == Rollen.ROL_HWL:
-            template = self._get_competitie_overzicht_hwl(request, context, comp, rol_nu, functie_nu)
+        elif self.rol_nu == Rollen.ROL_HWL:
+            template = self._get_competitie_overzicht_hwl(request, context, comp)
             eval_open_taken(request)
 
         if not template:
-            template = self._get_competitie_overzicht_schutter_bezoeker(context, comp, rol_nu)
+            template = self._get_competitie_overzicht_schutter_bezoeker(context, comp)
 
         menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
         return render(request, template, context)

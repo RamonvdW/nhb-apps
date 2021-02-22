@@ -81,16 +81,20 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
     template1 = TEMPLATE_COMPETITIE_PLANNING_REGIO
     template2 = TEMPLATE_COMPETITIE_PLANNING_REGIO_METHODE1
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu, self.functie_nu = None, None
+
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        rol_nu = rol_get_huidige(self.request)
-        return rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL)
+        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL)
 
     def handle_no_permission(self):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
         return HttpResponseRedirect(reverse('Plein:plein'))
 
-    def _get_methode_1(self, context, deelcomp, mag_wijzigen):
+    def _get_methode_1(self, context, deelcomp):
         self.template_name = self.template2
 
         context['handleiding_planning_regio_url'] = reverse('Handleiding:Planning_Regio')
@@ -176,10 +180,6 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
                 context['rondes'].append(ronde)
         # for
 
-        # alleen de RCL mag de planning uitbreiden
-        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
-        mag_wijzigen = (rol_nu == Rollen.ROL_RCL and functie_nu.nhb_regio == deelcomp.nhb_regio)
-
         if mag_wijzigen and len(context['rondes']) < 10:
             context['url_nieuwe_week'] = reverse('Competitie:regio-planning',
                                                  kwargs={'deelcomp_pk': deelcomp.pk})
@@ -224,15 +224,14 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
         context['deelcomp'] = deelcomp
         context['regio'] = deelcomp.nhb_regio
 
-        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
-        mag_wijzigen = (rol_nu == Rollen.ROL_RCL and functie_nu.nhb_regio == deelcomp.nhb_regio)
+        mag_wijzigen = (self.rol_nu == Rollen.ROL_RCL and self.functie_nu.nhb_regio == deelcomp.nhb_regio)
 
         if deelcomp.inschrijf_methode == INSCHRIJF_METHODE_1:
-            self._get_methode_1(context, deelcomp, mag_wijzigen)
+            self._get_methode_1(context, deelcomp)
         else:
             self._get_methode_2_3(context, deelcomp, mag_wijzigen)
 
-        if rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO):
+        if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO):
             rayon = DeelCompetitie.objects.get(laag=LAAG_RK,
                                                competitie=deelcomp.competitie,
                                                nhb_rayon=deelcomp.nhb_regio.rayon)
@@ -247,8 +246,7 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
             in de regioplanning, om een nieuwe ronde toe te voegen.
         """
         # alleen de RCL mag de planning uitbreiden
-        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
-        if rol_nu != Rollen.ROL_RCL:
+        if self.rol_nu != Rollen.ROL_RCL:
             raise Resolver404()
 
         try:
@@ -256,7 +254,7 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
             deelcomp = (DeelCompetitie
                         .objects
                         .select_related('competitie', 'nhb_regio')
-                        .get(pk=deelcomp_pk, laag=LAAG_REGIO, nhb_regio=functie_nu.nhb_regio))
+                        .get(pk=deelcomp_pk, laag=LAAG_REGIO, nhb_regio=self.functie_nu.nhb_regio))
         except (ValueError, DeelCompetitie.DoesNotExist):
             raise Resolver404()
 
@@ -283,10 +281,14 @@ class RegioClusterPlanningView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_PLANNING_REGIO_CLUSTER
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu = None
+
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        rol_nu = rol_get_huidige(self.request)
-        return rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL)
+        self.rol_nu = rol_get_huidige(self.request)
+        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL)
 
     def handle_no_permission(self):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
@@ -330,8 +332,7 @@ class RegioClusterPlanningView(UserPassesTestMixin, TemplateView):
         # for
 
         # alleen de RCL mag de planning uitbreiden
-        rol_nu = rol_get_huidige(self.request)
-        if rol_nu == Rollen.ROL_RCL and len(context['rondes']) < 10:
+        if self.rol_nu == Rollen.ROL_RCL and len(context['rondes']) < 10:
             context['url_nieuwe_week'] = reverse('Competitie:regio-cluster-planning',
                                                  kwargs={'deelcomp_pk': deelcomp.pk,
                                                          'cluster_pk': cluster.pk})
@@ -349,8 +350,7 @@ class RegioClusterPlanningView(UserPassesTestMixin, TemplateView):
         """
 
         # alleen de RCL mag de planning uitbreiden
-        rol_nu = rol_get_huidige(self.request)
-        if rol_nu != Rollen.ROL_RCL:
+        if self.rol_nu != Rollen.ROL_RCL:
             raise Resolver404()
 
         try:
@@ -402,10 +402,14 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_PLANNING_REGIO_RONDE
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu = None
+
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        rol_nu = rol_get_huidige(self.request)
-        return rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL)
+        self.rol_nu = rol_get_huidige(self.request)
+        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL)
 
     def handle_no_permission(self):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
@@ -434,8 +438,7 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
                                   .prefetch_related('indiv_klassen')
                                   .order_by('datum_wanneer', 'tijd_begin_wedstrijd'))
 
-        rol_nu = rol_get_huidige(self.request)
-        if rol_nu == Rollen.ROL_RCL and not is_import:
+        if self.rol_nu == Rollen.ROL_RCL and not is_import:
             context['url_nieuwe_wedstrijd'] = reverse('Competitie:regio-ronde-planning',
                                                       kwargs={'ronde_pk': ronde.pk})
 
@@ -534,8 +537,7 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
         if len(context['wkl_niet_gebruikt']) == 0:
             del context['wkl_niet_gebruikt']
 
-        rol_nu = rol_get_huidige(self.request)
-        if rol_nu != Rollen.ROL_RCL:
+        if self.rol_nu != Rollen.ROL_RCL:
             context['readonly'] = True
 
         menu_dynamics_competitie(self.request, context, comp_pk=ronde.deelcompetitie.competitie.pk)
@@ -556,11 +558,8 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
             raise Resolver404()
 
         # alleen de RCL mag een wedstrijd toevoegen
-        rol_nu = rol_get_huidige(self.request)
-        if rol_nu != Rollen.ROL_RCL:
+        if self.rol_nu != Rollen.ROL_RCL:
             raise Resolver404()
-
-        # print("RegioRondePlanningView::post kwargs=%s, items=%s" % (repr(kwargs), repr([(key, value) for key,value in request.POST.items()])))
 
         week_nr = request.POST.get('ronde_week_nr', None)
         if week_nr:
@@ -652,10 +651,14 @@ class RegioRondePlanningMethode1View(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_PLANNING_REGIO_RONDE_METHODE1
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu = None
+
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        rol_nu = rol_get_huidige(self.request)
-        return rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL)
+        self.rol_nu = rol_get_huidige(self.request)
+        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL)
 
     def handle_no_permission(self):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
@@ -704,8 +707,7 @@ class RegioRondePlanningMethode1View(UserPassesTestMixin, TemplateView):
                             kwargs={'deelcomp_pk': ronde.deelcompetitie.pk})
         context['terug_url'] = terug_url
 
-        rol_nu = rol_get_huidige(self.request)
-        if rol_nu != Rollen.ROL_RCL:
+        if self.rol_nu != Rollen.ROL_RCL:
             context['readonly'] = True
 
         menu_dynamics_competitie(self.request, context, comp_pk=ronde.deelcompetitie.competitie.pk)
@@ -726,8 +728,7 @@ class RegioRondePlanningMethode1View(UserPassesTestMixin, TemplateView):
             raise Resolver404()
 
         # alleen de RCL mag een wedstrijd toevoegen
-        rol_nu = rol_get_huidige(self.request)
-        if rol_nu != Rollen.ROL_RCL:
+        if self.rol_nu != Rollen.ROL_RCL:
             raise Resolver404()
 
         # voeg een wedstrijd toe
@@ -1074,10 +1075,14 @@ class VerwijderWedstrijdView(UserPassesTestMixin, View):
 
     """ Deze view laat een Regio wedstrijd verwijderen """
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu, self.functie_nu = None, None
+
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        rol_nu = rol_get_huidige(self.request)
-        return rol_nu == Rollen.ROL_RCL
+        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        return self.rol_nu == Rollen.ROL_RCL
 
     def handle_no_permission(self):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
@@ -1106,8 +1111,7 @@ class VerwijderWedstrijdView(UserPassesTestMixin, View):
         deelcomp = ronde.deelcompetitie
 
         # correcte beheerder?
-        _, functie_nu = rol_get_huidige_functie(self.request)
-        if deelcomp.functie != functie_nu:
+        if deelcomp.functie != self.functie_nu:
             raise Resolver404()
 
         # voorkom verwijderen van wedstrijden waar een uitslag aan hangt
@@ -1135,10 +1139,14 @@ class AfsluitenRegiocompView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_AFSLUITEN_REGIOCOMP
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu, self.functie_nu = None, None
+
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        rol_nu = rol_get_huidige(self.request)
-        return rol_nu == Rollen.ROL_RCL
+        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        return self.rol_nu == Rollen.ROL_RCL
 
     def handle_no_permission(self):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
@@ -1158,8 +1166,7 @@ class AfsluitenRegiocompView(UserPassesTestMixin, TemplateView):
         except (ValueError, DeelCompetitie.DoesNotExist):
             raise Resolver404()
 
-        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
-        if deelcomp.functie != functie_nu:
+        if deelcomp.functie != self.functie_nu:
             # niet de beheerder
             raise Resolver404()
 
@@ -1185,8 +1192,7 @@ class AfsluitenRegiocompView(UserPassesTestMixin, TemplateView):
         except (ValueError, DeelCompetitie.DoesNotExist):
             raise Resolver404()
 
-        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
-        if deelcomp.functie != functie_nu:
+        if deelcomp.functie != self.functie_nu:
             # niet de beheerder
             raise Resolver404()
 
@@ -1206,7 +1212,8 @@ class AfsluitenRegiocompView(UserPassesTestMixin, TemplateView):
             now = timezone.now()
             taak_deadline = now
             assert isinstance(account, Account)
-            taak_tekst = "Ter info: De regiocompetitie %s is zojuist afgesloten door RCL %s" % (str(deelcomp), account.volledige_naam())
+            taak_tekst = "Ter info: De regiocompetitie %s is zojuist afgesloten door RCL %s" % (
+                            str(deelcomp), account.volledige_naam())
             taak_tekst += "\nAls RKO kan je onder Competitie, Planning Rayon de status van elke regio zien."
             taak_log = "[%s] Taak aangemaakt" % now
 
@@ -1260,10 +1267,14 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_INSTELLINGEN_REGIO
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu, self.functie_nu = None, None
+
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        rol_nu = rol_get_huidige(self.request)
-        return rol_nu == Rollen.ROL_RCL
+        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        return self.rol_nu == Rollen.ROL_RCL
 
     def handle_no_permission(self):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
@@ -1285,8 +1296,7 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
         except (ValueError, DeelCompetitie.DoesNotExist):
             raise Resolver404()
 
-        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
-        if deelcomp.functie != functie_nu:
+        if deelcomp.functie != self.functie_nu:
             # niet de beheerder
             raise Resolver404()
 
@@ -1360,8 +1370,7 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
         except (ValueError, DeelCompetitie.DoesNotExist):
             raise Resolver404()
 
-        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
-        if deelcomp.functie != functie_nu:
+        if deelcomp.functie != self.functie_nu:
             # niet de beheerder
             raise Resolver404()
 
@@ -1386,7 +1395,8 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
 
             deelcomp.save()
 
-        url = reverse('Competitie:overzicht', kwargs={'comp_pk': deelcomp.competitie.pk})
+        url = reverse('Competitie:overzicht',
+                      kwargs={'comp_pk': deelcomp.competitie.pk})
         return HttpResponseRedirect(url)
 
 

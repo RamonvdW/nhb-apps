@@ -243,17 +243,18 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
         context['wiki_rollen'] = reverse_handleiding(settings.HANDLEIDING_ROLLEN)
         context['wiki_intro_nieuwe_beheerders'] = reverse_handleiding(settings.HANDLEIDING_INTRO_NIEUWE_BEHEERDERS)
 
+        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
+
         # login-as functie voor IT beheerder
-        if rol_get_huidige(self.request) == Rollen.ROL_IT:
+        if rol_nu == Rollen.ROL_IT:
             context['url_login_as'] = reverse('Account:account-wissel')
 
         # snel wissel kaartje voor IT en BB
-        if rol_get_huidige(self.request) in (Rollen.ROL_IT, Rollen.ROL_BB):
+        if rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB):
             context['heeft_alle_rollen'] = self._maak_alle_rollen()
 
         # bedoeld voor de testsuite, maar kan geen kwaad
         context['insert_meta'] = True
-        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
         context['meta_rol'] = rol2url[rol_nu]
         if functie_nu:
             context['meta_functie'] = functie_nu.beschrijving       # template doet html escaping

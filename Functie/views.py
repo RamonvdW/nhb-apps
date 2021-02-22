@@ -242,10 +242,14 @@ class WijzigEmailView(UserPassesTestMixin, View):
 
     # class variables shared by all instances
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu = None
+
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        rol = rol_get_huidige(self.request)
-        return rol in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_SEC, Rollen.ROL_HWL)
+        self.rol_nu = rol_get_huidige(self.request)
+        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_SEC, Rollen.ROL_HWL)
 
     def handle_no_permission(self):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
@@ -264,8 +268,7 @@ class WijzigEmailView(UserPassesTestMixin, View):
         context = dict()
         context['functie'] = functie
 
-        rol = rol_get_huidige(self.request)
-        if rol == Rollen.ROL_HWL:
+        if self.rol_nu == Rollen.ROL_HWL:
             context['terug_url'] = reverse('Functie:overzicht-vereniging')
             menu_dynamics(self.request, context, actief='vereniging')
         else:
@@ -319,8 +322,7 @@ class WijzigEmailView(UserPassesTestMixin, View):
         context['functie'] = functie
 
         # stuur terug naar het overzicht
-        rol = rol_get_huidige(self.request)
-        if rol == Rollen.ROL_HWL:
+        if self.rol_nu == Rollen.ROL_HWL:
             context['terug_url'] = reverse('Functie:overzicht-vereniging')
         else:
             context['terug_url'] = reverse('Functie:overzicht')
@@ -608,11 +610,15 @@ class OverzichtView(UserPassesTestMixin, ListView):
     # class variables shared by all instances
     template_name = TEMPLATE_OVERZICHT
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu = None
+
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        rol = rol_get_huidige(self.request)
         # alle competitie beheerders + HWL
-        return rol in (Rollen.ROL_IT, Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL)
+        self.rol_nu = rol_get_huidige(self.request)
+        return self.rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL)
 
     def handle_no_permission(self):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
@@ -747,11 +753,10 @@ class OverzichtView(UserPassesTestMixin, ListView):
 
         context['huidige_rol'] = rol_get_beschrijving(self.request)
 
-        rol_nu = rol_get_huidige(self.request)
-        if rol_nu == Rollen.ROL_HWL:
+        if self.rol_nu == Rollen.ROL_HWL:
             context['rol_is_hwl'] = True
 
-        if rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB):
+        if self.rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB):
             context['accounts_it'] = (Account
                                       .objects
                                       .filter(is_staff=True)

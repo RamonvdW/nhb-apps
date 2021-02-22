@@ -11,7 +11,7 @@ from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Plein.menu import menu_dynamics
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
-from Wedstrijden.models import Wedstrijd, WedstrijdUitslag, WedstrijdenPlan
+from Wedstrijden.models import Wedstrijd, WedstrijdUitslag
 from Schutter.models import SchutterBoog
 from Score.models import Score, ScoreHist, SCORE_WAARDE_VERWIJDERD
 from .models import (LAAG_REGIO, DeelCompetitie,

@@ -11,6 +11,7 @@ from NhbStructuur.models import NhbVereniging
 from Overig.helpers import get_safe_from_ip
 from .models import Functie, account_needs_vhpg, account_needs_otp
 from types import SimpleNamespace
+from typing import Tuple
 import logging
 import enum
 
@@ -282,7 +283,7 @@ def rol_get_huidige(request):
     return Rollen.ROL_NONE
 
 
-def rol_get_huidige_functie(request):
+def rol_get_huidige_functie(request) -> Tuple[Rollen, Functie]:
     """ Deze functie wordt gebruikt door het menusysteem om te kijken welke optionele delen
         van het menu aangezet moeten worden. De gekozen vaste rol of functie resulteert in
         een rol uit de groep Rollen.ROL_xxx

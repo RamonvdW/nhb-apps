@@ -393,10 +393,14 @@ class VerwijderWedstrijdView(UserPassesTestMixin, View):
 
     """ Deze view laat een BK wedstrijd verwijderen """
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu, self.functie_nu = None, None
+
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        rol_nu = rol_get_huidige(self.request)
-        return rol_nu == Rollen.ROL_BKO
+        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        return self.rol_nu == Rollen.ROL_BKO
 
     def handle_no_permission(self):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
@@ -422,8 +426,7 @@ class VerwijderWedstrijdView(UserPassesTestMixin, View):
             raise Resolver404()
 
         # correcte beheerder?
-        _, functie_nu = rol_get_huidige_functie(self.request)
-        if deelcomp.functie != functie_nu:
+        if deelcomp.functie != self.functie_nu:
             raise Resolver404()
 
         # voorkom verwijderen van wedstrijden waar een uitslag aan hangt
