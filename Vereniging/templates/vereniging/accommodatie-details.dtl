@@ -219,11 +219,26 @@
                             {% if readonly %}
                                 <span>{{ locatie.baan_type_str }}</span>
                             {% else %}
-                                <select name="baan_type" onchange="gewijzigd()">
-                                    <option value="X"{%if locatie.baan_type == "X" %} selected{% endif %}>Onbekend</option>
-                                    <option value="O"{%if locatie.baan_type == "O" %} selected{% endif %}>Volledig overdekte binnenbaan</option>
-                                    <option value="H"{%if locatie.baan_type == "H" %} selected{% endif %}>Half overdekt (binnen-buiten schieten)</option>
-                                </select>
+                                <ul id="id_baantype">
+                                    <li>
+                                        <label class="black-text" for="id_baantype_X">
+                                            <input class="with-gap" type="radio" name="baan_type" value="X" required id="id_baantype_X"{%if locatie.baan_type == "X" %} checked{% endif %} onchange="gewijzigd()">
+                                            <span>Onbekend</span>
+                                        </label>
+                                    </li>
+                                    <li>
+                                        <label class="black-text" for="id_baantype_O">
+                                            <input class="with-gap" type="radio" name="baan_type" value="O" required id="id_baantype_O"{%if locatie.baan_type == "O" %} checked{% endif %} onchange="gewijzigd()">
+                                            <span>Volledig overdekte binnenbaan</span>
+                                        </label>
+                                    </li>
+                                    <li>
+                                        <label class="black-text" for="id_baantype_H">
+                                            <input class="with-gap" type="radio" name="baan_type" value="H" required id="id_baantype_H"{%if locatie.baan_type == "H" %} checked{% endif %} onchange="gewijzigd()">
+                                            <span>Half overdekt (binnen-buiten schieten)</span>
+                                        </label>
+                                    </li>
+                                </ul>
                             {% endif %}
                         </td>
                         {% if not readonly %}
@@ -277,10 +292,20 @@
                             {% if readonly %}
                                 <span>{{ locatie.max_dt_per_baan }} blazoenen</span>
                             {% else %}
-                                <select name="max_dt" onchange="gewijzigd()">
-                                    <option value="3"{%if locatie.max_dt_per_baan == 3 %} selected{% endif %}>3 blazoenen</option>
-                                    <option value="4"{%if locatie.max_dt_per_baan == 4 %} selected{% endif %}>4 blazoenen</option>
-                                </select>
+                                <ul id="id_max_dt">
+                                    <li>
+                                        <label class="black-text" for="id_max_dt_3">
+                                            <input class="with-gap" type="radio" name="max_dt" value="3" required id="id_max_dt_3"{%if locatie.max_dt_per_baan == 3 %} checked{% endif %} onchange="gewijzigd()">
+                                            <span>3 blazoenen</span>
+                                        </label>
+                                    </li>
+                                    <li>
+                                        <label class="black-text" for="id_max_dt_4">
+                                            <input class="with-gap" type="radio" name="max_dt" value="4" required id="id_max_dt_4"{%if locatie.max_dt_per_baan == 4 %} checked{% endif %} onchange="gewijzigd()">
+                                            <span>4 blazoenen</span>
+                                        </label>
+                                    </li>
+                                </ul>
                             {% endif %}
                         </td>
                         {% if not readonly %}
