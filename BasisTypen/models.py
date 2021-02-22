@@ -37,6 +37,30 @@ class BoogType(models.Model):
     objects = models.Manager()      # for the editor only
 
 
+class TeamType(models.Model):
+    """ team type: voor gebruik in de team competities """
+    beschrijving = models.CharField(max_length=50)
+    afkorting = models.CharField(max_length=2)
+
+    # sorteervolgorde zodat order_by('volgorde') de juiste sortering oplevert
+    volgorde = models.CharField(max_length=1, default='?')
+
+    # toegestane boogtypen
+    boog_typen = models.ManyToManyField(BoogType)
+
+    def __str__(self):
+        """ Lever een tekstuele beschrijving voor de admin interface """
+        return "(%s) %s" % (self.afkorting,
+                            self.beschrijving)
+
+    class Meta:
+        """ meta data voor de admin interface """
+        verbose_name = "Team type"
+        verbose_name_plural = "Team typen"
+
+    objects = models.Manager()      # for the editor only
+
+
 class LeeftijdsKlasse(models.Model):
     """ definitie van een leeftijdsklasse """
 
