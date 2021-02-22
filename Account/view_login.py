@@ -198,7 +198,8 @@ class LoginView(TemplateView):
         next = form.cleaned_data.get('next')
 
         # controleer het wachtwoord
-        if not authenticate(username=account.username, password=wachtwoord):
+        account2 = authenticate(username=account.username, password=wachtwoord)
+        if not account2:
             # authenticatie is niet gelukt
             # reden kan zijn: verkeerd wachtwoord of is_active=False
 
@@ -230,6 +231,7 @@ class LoginView(TemplateView):
             return None
 
         # wachtwoord is goed
+        account = account2
 
         # kijk of er een reden is om gebruik van het account te weren
         for _, func in account_plugins_login:
