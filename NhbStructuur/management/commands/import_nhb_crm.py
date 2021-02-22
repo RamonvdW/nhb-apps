@@ -14,7 +14,7 @@ from NhbStructuur.models import NhbRayon, NhbRegio, NhbLid, NhbVereniging
 from Account.models import Account
 from Mailer.models import mailer_email_is_valide
 from Logboek.models import schrijf_in_logboek
-from Functie.models import maak_functie, maak_account_verenigings_secretaris
+from Functie.models import maak_functie, maak_account_vereniging_secretaris
 from Wedstrijden.models import WedstrijdLocatie
 from Records.models import IndivRecord
 import datetime
@@ -424,7 +424,7 @@ class Command(BaseCommand):
                         self.stdout.write("[WARNING] Secretaris %s van vereniging %s heeft nog geen account" % (ver_secretaris_nhblid.nhb_nr, obj.nhb_nr))
                         self._count_sec_no_account += 1
                     else:
-                        if maak_account_verenigings_secretaris(obj, account):
+                        if maak_account_vereniging_secretaris(obj, account):
                             self.stdout.write("[INFO] Secretaris %s van vereniging %s is gekoppeld aan SEC functie" % (ver_secretaris_nhblid.nhb_nr, obj.nhb_nr))
         # for
 

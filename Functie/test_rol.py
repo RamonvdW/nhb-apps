@@ -9,7 +9,7 @@ from Functie.rol import (SESSIONVAR_ROL_HUIDIGE, SESSIONVAR_ROL_MAG_WISSELEN,
                          SESSIONVAR_ROL_PALLET_FUNCTIES, SESSIONVAR_ROL_PALLET_VAST,
                          rol_mag_wisselen, rol_enum_pallet,
                          rol_activeer_rol, rol_activeer_functie)
-from Functie.models import maak_functie, maak_account_verenigings_secretaris
+from Functie.models import maak_functie, maak_account_vereniging_secretaris
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Overig.e2ehelpers import E2EHelpers
 
@@ -40,12 +40,12 @@ class TestFunctieRol(E2EHelpers, TestCase):
 
     def test_maak_hwl(self):
         self.assertEqual(self.functie_sec.accounts.count(), 0)
-        added = maak_account_verenigings_secretaris(self.nhbver1, self.account_normaal)
+        added = maak_account_vereniging_secretaris(self.nhbver1, self.account_normaal)
         self.assertTrue(added)
         self.assertEqual(self.functie_sec.accounts.count(), 1)
 
         # opnieuw toevoegen heeft geen effect
-        added = maak_account_verenigings_secretaris(self.nhbver1, self.account_normaal)
+        added = maak_account_vereniging_secretaris(self.nhbver1, self.account_normaal)
         self.assertFalse(added)
         self.assertEqual(self.functie_sec.accounts.count(), 1)
 

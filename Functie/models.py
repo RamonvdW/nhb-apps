@@ -86,7 +86,7 @@ def maak_functie(beschrijving, rol):
     return functie      # caller kan zelf andere velden invullen
 
 
-def maak_account_verenigings_secretaris(nhb_ver, account):
+def maak_account_vereniging_secretaris(nhb_ver, account):
     """ Maak het NHB lid de secretaris van de NHB vereniging
         Retourneert True als het NHB lid aan de SEC functie toegevoegd is
     """
