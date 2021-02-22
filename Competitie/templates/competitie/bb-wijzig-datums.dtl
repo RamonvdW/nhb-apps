@@ -164,8 +164,8 @@
     <script type="application/javascript">
         document.addEventListener('DOMContentLoaded', function()
         {
-            const minDate = new Date({{ comp.begin_jaar }}, 6-1, 22-1)         // month and day 0-based
-            const maxDate = new Date({{ comp.begin_jaar }} + 1, 6-1, 22-1)     // month and day 0-based
+            const minDate = new Date({{ comp.begin_jaar }}, 2-1, 1)          // month is 0-based
+            const maxDate = new Date({{ comp.begin_jaar }} + 1, 6-1, 22)     // month is 0-based
             const competitieJaren = [{{  comp.begin_jaar }}, {{ comp.begin_jaar }} + 1]
 
             let el = document.querySelector('#datum1');
