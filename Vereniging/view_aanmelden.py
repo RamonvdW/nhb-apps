@@ -6,7 +6,7 @@
 
 from django.http import HttpResponseRedirect
 from django.urls import reverse, Resolver404
-from django.views.generic import ListView
+from django.views.generic import ListView, TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Plein.menu import menu_dynamics
 from Functie.rol import Rollen, rol_get_huidige_functie
@@ -20,13 +20,15 @@ from Competitie.models import (AG_NUL, DAGDEEL, DAGDEEL_AFKORTINGEN,
                                Competitie, CompetitieKlasse,
                                DeelCompetitie, DeelcompetitieRonde,
                                RegioCompetitieSchutterBoog)
-from Score.models import Score
+from Score.models import Score, ScoreHist, aanvangsgemiddelde_opslaan
 from Wedstrijden.models import Wedstrijd
 import copy
 
 
 TEMPLATE_LEDEN_AANMELDEN = 'vereniging/competitie-aanmelden.dtl'
 TEMPLATE_LEDEN_INGESCHREVEN = 'vereniging/competitie-ingeschreven.dtl'
+TEMPLATE_WIJZIG_AG = 'vereniging/wijzig-ag.dtl'
+
 
 JA_NEE = {False: 'Nee', True: 'Ja'}
 
@@ -441,11 +443,12 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.deelcomp = None
+        self.rol_nu, self.functie_nu = None, None
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        _, functie_nu = rol_get_huidige_functie(self.request)
-        return functie_nu and functie_nu.rol in ('HWL', 'WL')
+        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        return self.functie_nu and self.functie_nu.rol in ('HWL', 'WL')
 
     def handle_no_permission(self):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
@@ -497,12 +500,11 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
-        context['nhb_ver'] = functie_nu.nhb_ver
+        context['nhb_ver'] = self.functie_nu.nhb_ver
 
         context['deelcomp'] = self.deelcomp
 
-        if rol_nu == Rollen.ROL_HWL:
+        if self.rol_nu == Rollen.ROL_HWL:
             context['afmelden_url'] = reverse('Vereniging:leden-ingeschreven',
                                               kwargs={'deelcomp_pk': self.deelcomp.pk})
             context['mag_afmelden'] = True
@@ -515,9 +517,8 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
         return context
 
     def post(self, request, *args, **kwargs):
-        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
 
-        if rol_nu != Rollen.ROL_HWL:
+        if self.rol_nu != Rollen.ROL_HWL:
             raise Resolver404()
 
         # all checked boxes are in the post request as keys, typically with value 'on'
@@ -531,7 +532,7 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
                     raise Resolver404()
 
                 # controleer dat deze inschrijving bij de vereniging hoort
-                if inschrijving.schutterboog.nhblid.bij_vereniging != functie_nu.nhb_ver:
+                if inschrijving.schutterboog.nhblid.bij_vereniging != self.functie_nu.nhb_ver:
                     raise Resolver404()
 
                 # schrijf de schutter uit
@@ -539,5 +540,103 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
         # for
 
         return HttpResponseRedirect(reverse('Vereniging:overzicht'))
+
+
+class WijzigAanvangsgemiddeldeView(UserPassesTestMixin, TemplateView):
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_WIJZIG_AG
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.deelcomp = None
+        self.rol_nu, self.functie_nu = None, None
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        return self.rol_nu == Rollen.ROL_HWL
+
+    def handle_no_permission(self):
+        """ gebruiker heeft geen toegang --> redirect naar het plein """
+        return HttpResponseRedirect(reverse('Plein:plein'))
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        # haal de deelnemer op en controleer dat deze lid is bij de vereniging van de HWL
+        try:
+            deelnemer_pk = int(kwargs['deelnemer_pk'][:6])  # afkappen voor de veiligheid
+            deelnemer = (RegioCompetitieSchutterBoog
+                         .objects
+                         .select_related('schutterboog',
+                                         'schutterboog__nhblid',
+                                         'schutterboog__boogtype')
+                         .get(pk=deelnemer_pk,
+                              bij_vereniging=self.functie_nu.nhb_ver))
+        except (ValueError, RegioCompetitieSchutterBoog.DoesNotExist):
+            raise Resolver404()
+
+        context['deelnemer'] = deelnemer
+
+        if deelnemer.aanvangsgemiddelde == AG_NUL:
+            if not deelnemer.is_handmatig_ag:
+                deelnemer.is_handmatig_ag = True
+                deelnemer.save()
+
+        deelnemer.ag_str = '%.3f' % deelnemer.aanvangsgemiddelde
+
+        deelnemer.naam_str = deelnemer.schutterboog.nhblid.volledige_naam()
+        deelnemer.boog_str = deelnemer.schutterboog.boogtype.beschrijving
+
+        ag_hist = (ScoreHist
+                              .objects
+                              .filter(score__schutterboog=deelnemer.schutterboog,
+                                      score__is_ag=True)
+                              .order_by('-when'))
+        for obj in ag_hist:
+            obj.mutatie_str = "%.3f --> %.3f" % (obj.oude_waarde / 1000, obj.nieuwe_waarde / 1000)
+        # for
+        context['ag_hist'] = ag_hist
+
+        menu_dynamics(self.request, context, actief='vereniging')
+        return context
+
+    def post(self, request, *args, **kwargs):
+        """ Deze functie wordt aangeroepen als de knop 'Opslaan' wordt gebruikt """
+
+        # haal de deelnemer op en controleer dat deze lid is bij de vereniging van de HWL
+        try:
+            deelnemer_pk = int(kwargs['deelnemer_pk'][:6])  # afkappen voor de veiligheid
+            deelnemer = (RegioCompetitieSchutterBoog
+                         .objects
+                         .select_related('deelcompetitie',
+                                         'deelcompetitie__competitie',
+                                         'schutterboog')
+                         .get(pk=deelnemer_pk,
+                              bij_vereniging=self.functie_nu.nhb_ver))
+        except (ValueError, RegioCompetitieSchutterBoog.DoesNotExist):
+            raise Resolver404()
+
+        nieuw_ag = request.POST.get('nieuw_ag', '')
+        if nieuw_ag:
+            try:
+                nieuw_ag = float(nieuw_ag)
+            except ValueError:
+                raise Resolver404()
+
+            aanvangsgemiddelde_opslaan(
+                    deelnemer.schutterboog,
+                    deelnemer.deelcompetitie.competitie.afstand,
+                    nieuw_ag,
+                    request.user,
+                    "Nieuw handmatig AG ingevoerd door beheerder")
+
+            deelnemer.aanvangsgemiddelde = nieuw_ag
+            deelnemer.save()
+
+        url = reverse('Vereniging:teams-regio', kwargs={'deelcomp_pk': deelnemer.deelcompetitie.pk})
+        return HttpResponseRedirect(url)
 
 # end of file

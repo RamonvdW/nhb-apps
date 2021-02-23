@@ -215,7 +215,7 @@
 
                     <tr>
                         <td>Type baan voor 18m/25m wedstrijden:</td>
-                        <td>
+                        <td{% if not readonly %} colspan="2"{% endif %}>
                             {% if readonly %}
                                 <span>{{ locatie.baan_type_str }}</span>
                             {% else %}
@@ -241,9 +241,6 @@
                                 </ul>
                             {% endif %}
                         </td>
-                        {% if not readonly %}
-                            <td><!-- kolom voor de wijzig knoppen --></td>
-                        {% endif %}
                     </tr>
 
                     <tr>

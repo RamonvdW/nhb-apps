@@ -9,12 +9,13 @@ from django.urls import reverse, Resolver404
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import TeamType
-from Competitie.models import DeelCompetitie, LAAG_REGIO, RegiocompetitieTeam
+from Competitie.models import DeelCompetitie, LAAG_REGIO, RegioCompetitieSchutterBoog, RegiocompetitieTeam, AG_NUL
 from Plein.menu import menu_dynamics
 from Functie.rol import Rollen, rol_get_huidige_functie
 
 TEMPLATE_TEAMS_REGIO = 'vereniging/teams-regio.dtl'
 TEMPLATE_TEAMS_REGIO_WIJZIG = 'vereniging/teams-regio-wijzig.dtl'
+TEMPLATE_TEAMS_KOPPELEN = 'vereniging/teams-koppelen.dtl'
 TEMPLATE_TEAMS_RK = 'vereniging/teams-rk.dtl'
 
 
@@ -70,6 +71,8 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
         # zoek de deelcompetitie waar de regio teams voor in kunnen stellen
         context['deelcomp'] = deelcomp = self._get_deelcomp(kwargs['deelcomp_pk'])
 
+        context['vaste_teams'] = deelcomp.regio_heeft_vaste_teams
+
         teams = (RegiocompetitieTeam
                  .objects
                  .select_related('vereniging',
@@ -78,14 +81,50 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
                          vereniging=self.functie_nu.nhb_ver)
                  .order_by('volg_nr'))
         for obj in teams:
+            if deelcomp.regio_heeft_vaste_teams:
+                obj.aantal = obj.vaste_schutters.count()
+
             obj.url_wijzig = reverse('Vereniging:teams-regio-wijzig',
                                      kwargs={'deelcomp_pk': deelcomp.pk,
                                              'team_pk': obj.pk})
+
+            obj.url_koppelen = reverse('Vereniging:teams-regio-koppelen',
+                                       kwargs={'team_pk': obj.pk})
         # for
         context['teams'] = teams
 
         context['url_nieuw_team'] = reverse('Vereniging:teams-regio-nieuw',
                                             kwargs={'deelcomp_pk': deelcomp.pk})
+
+        deelnemers = (RegioCompetitieSchutterBoog
+                      .objects
+                      .select_related('schutterboog',
+                                      'schutterboog__nhblid',
+                                      'schutterboog__boogtype')
+                      .filter(deelcompetitie=deelcomp,
+                              bij_vereniging=self.functie_nu.nhb_ver,
+                              inschrijf_voorkeur_team=True)
+                      .order_by('schutterboog__boogtype__volgorde',
+                                '-aanvangsgemiddelde'))
+        for obj in deelnemers:
+            obj.boog_str = obj.schutterboog.boogtype.beschrijving
+            obj.naam_str = "[%s] %s" % (obj.schutterboog.nhblid.nhb_nr, obj.schutterboog.nhblid.volledige_naam())
+            obj.ag_str = "%.3f" % obj.aanvangsgemiddelde
+            try:
+                team = obj.regiocompetitieteam_set.all()[0]
+            except IndexError:
+                pass
+            else:
+                obj.in_team_str = team.maak_team_naam_kort()
+            if obj.aanvangsgemiddelde == AG_NUL:
+                obj.is_handmatig_ag = True
+                obj.rood_ag = True
+            if obj.is_handmatig_ag:
+                obj.ag_str += " (handmatig)"
+                obj.url_wijzig_ag = reverse('Vereniging:wijzig-ag',
+                                            kwargs={'deelnemer_pk': obj.pk})
+        # for
+        context['deelnemers'] = deelnemers
 
         menu_dynamics(self.request, context, actief='vereniging')
         return context
@@ -144,15 +183,14 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
         # zoek de deelcompetitie waar de regio teams voor in kunnen stellen
         context['deelcomp'] = deelcomp = self._get_deelcomp(kwargs['deelcomp_pk'])
 
-        teams = TeamType.objects.order_by('volgorde')
-        context['opt_team_type'] = teams
-
         teamtype_default = None
+        teams = TeamType.objects.order_by('volgorde')
         for obj in teams:
             obj.choice_name = obj.afkorting
             if obj.afkorting == 'R':
                 teamtype_default = obj
         # for
+        context['opt_team_type'] = teams
 
         try:
             team_pk = int(kwargs['team_pk'][:6])
@@ -254,7 +292,128 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
             team.team_naam = team_naam
             team.save()
 
-        url = reverse('Vereniging:teams-regio',  kwargs={'deelcomp_pk': deelcomp.pk})
+        url = reverse('Vereniging:teams-regio', kwargs={'deelcomp_pk': deelcomp.pk})
+        return HttpResponseRedirect(url)
+
+
+class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
+
+    """ Via deze view kan de HWL leden van zijn vereniging koppelen aan een team """
+
+    template_name = TEMPLATE_TEAMS_KOPPELEN
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu, self.functie_nu = None, None
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        return self.rol_nu == Rollen.ROL_HWL
+
+    def handle_no_permission(self):
+        """ gebruiker heeft geen toegang --> redirect naar het plein """
+        return HttpResponseRedirect(reverse('Plein:plein'))
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        # zoek het team erbij en controleer dat deze bij de vereniging van de beheerder hoort
+        try:
+            team_pk = int(kwargs['team_pk'][:6])
+            team = (RegiocompetitieTeam
+                    .objects
+                    .select_related('deelcompetitie',
+                                    'team_type')
+                    .prefetch_related('team_type__boog_typen')
+                    .get(pk=team_pk,
+                         vereniging=self.functie_nu.nhb_ver))
+        except (ValueError, RegiocompetitieTeam.DoesNotExist):
+            raise Resolver404()
+
+        context['team'] = team
+
+        boog_typen = team.team_type.boog_typen.all()
+        boog_pks = boog_typen.values_list('pk', flat=True)
+        context['boog_typen'] = boog_typen
+
+        pks = team.vaste_schutters.values_list('pk', flat=True)
+
+        deelnemers = (RegioCompetitieSchutterBoog
+                      .objects
+                      .filter(deelcompetitie=team.deelcompetitie,
+                              inschrijf_voorkeur_team=True,
+                              bij_vereniging=self.functie_nu.nhb_ver,
+                              schutterboog__boogtype__in=boog_pks)
+                      .order_by('-aanvangsgemiddelde'))
+        for obj in deelnemers:
+            obj.sel_str = "deelnemer_%s" % obj.pk
+            obj.naam_str = obj.schutterboog.nhblid.volledige_naam()
+            obj.boog_str = obj.schutterboog.boogtype.beschrijving
+            obj.blokkeer = (obj.aanvangsgemiddelde == AG_NUL)
+            obj.ag_str = "%.3f" % obj.aanvangsgemiddelde
+            obj.geselecteerd = (obj.pk in pks)
+            if not obj.geselecteerd:
+                if obj.regiocompetitieteam_set.count() > 0:
+                    obj.blokkeer = True
+        # for
+        context['deelnemers'] = deelnemers
+
+        context['url_opslaan'] = reverse('Vereniging:teams-regio-koppelen',
+                                         kwargs={'team_pk': team.pk})
+
+        menu_dynamics(self.request, context, actief='vereniging')
+        return context
+
+    def post(self, request, *args, **kwargs):
+        """ Deze functie wordt aangeroepen als de HWL op Opslaan drukt om team leden te koppelen """
+
+        # zoek het team erbij en controleer dat deze bij de vereniging van de beheerder hoort
+        try:
+            team_pk = int(kwargs['team_pk'][:6])
+            team = (RegiocompetitieTeam
+                    .objects
+                    .select_related('deelcompetitie',
+                                    'team_type')
+                    .prefetch_related('team_type__boog_typen')
+                    .get(pk=team_pk,
+                         vereniging=self.functie_nu.nhb_ver))
+        except (ValueError, RegiocompetitieTeam.DoesNotExist):
+            raise Resolver404()
+
+        if team.deelcompetitie.regio_heeft_vaste_teams:
+            pks = list()
+            for key in request.POST.keys():
+                if key.startswith('deelnemer_'):
+                    try:
+                        pk = int(key[10:])
+                    except ValueError:
+                        pass
+                    else:
+                        pks.append(pk)
+            # for
+
+            team.vaste_schutters.clear()
+            team.vaste_schutters.add(*pks)
+
+            ags = team.vaste_schutters.values_list('aanvangsgemiddelde', flat=True)
+            ags = list(ags)
+
+            if len(ags) >= 3:
+                # neem de beste 3 schutters
+                ags.sort(reverse=True)
+                ags = ags[:3]
+
+                # bereken het gemiddelde
+                ag = sum(ags) / len(ags)
+            else:
+                ag = AG_NUL
+
+            team.aanvangsgemiddelde = ag
+            team.save()
+
+        url = reverse('Vereniging:teams-regio', kwargs={'deelcomp_pk': team.deelcompetitie.pk})
         return HttpResponseRedirect(url)
 
 
@@ -267,10 +426,14 @@ class TeamsRkView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_TEAMS_RK
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu, self.functie_nu = None, None
+
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
-        return functie_nu and rol_nu == Rollen.ROL_HWL
+        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        return self.rol_nu == Rollen.ROL_HWL
 
     def handle_no_permission(self):
         """ gebruiker heeft geen toegang --> redirect naar het plein """

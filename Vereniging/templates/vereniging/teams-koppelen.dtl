@@ -1,0 +1,75 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2021 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Koppel teamleden{% endblock %}
+
+{% block pagina %}
+
+    <h4>Koppel teamleden</h4>
+
+    <form action="{{ url_opslaan }}" method="post">
+        {% csrf_token %}
+
+        <table class="white">
+
+            <tr>
+                <td>Vereniging</td>
+                <td>{{ team.vereniging }}</td>
+            </tr>
+
+            <tr>
+                <td>Team nummer</td>
+                <td>{{ team.volg_nr }}</td>
+            </tr>
+
+            <tr>
+                <td>Team naam</td>
+                <td>{{ team.team_naam }}</td>
+            </tr>
+
+            <tr>
+                <td>Team type</td>
+                <td>{{ team.team_type.beschrijving }}</td>
+            </tr>
+
+            <tr>
+                <td style="vertical-align: top">Toegestane bogen</td>
+                <td>
+                    {% for boog in boog_typen %}
+                        <span>{{ boog.beschrijving }}</span><br>
+                    {% endfor %}
+                </td>
+            </tr>
+
+
+            <tr>
+                <td style="vertical-align: top">Selecteer sporters</td>
+                <td>
+                    {% for obj in deelnemers %}
+                        <label>
+                            <input type="checkbox" class="filled-in" name="{{ obj.sel_str }}"{% if obj.geselecteerd %} checked{% endif %}{% if obj.blokkeer %} disabled{% endif %}>
+                            <span class="black-text">({{ obj.ag_str }}) {{ obj.naam_str }} - {{ obj.boog_str }}</span>
+                        </label>
+                        <br>
+                    {% endfor %}
+                </td>
+            </tr>
+
+            <tr>
+                <td colspan="2">
+                    <button class="btn-nhb-rood" type="submit">
+                        <i class="material-icons-round left">check</i>Opslaan</button>
+                </td>
+            </tr>
+
+        </table>
+    </form>
+
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="teams-koppelen" %}
+
+{% endblock %}

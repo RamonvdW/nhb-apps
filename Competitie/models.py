@@ -555,6 +555,20 @@ class RegiocompetitieTeam(models.Model):
     klasse = models.ForeignKey(CompetitieKlasse, on_delete=models.CASCADE,
                                blank=True, null=True)
 
+    def maak_team_naam(self):
+        msg = "%s-%s" % (self.vereniging.nhb_nr, self.volg_nr)
+        if self.team_naam:
+            msg += " (%s)" % self.team_naam
+        return msg
+
+    def maak_team_naam_kort(self):
+        if self.team_naam:
+            return self.team_naam
+        return self.maak_team_naam()
+
+    def __str__(self):
+        return self.maak_team_naam()
+
 
 class RegiocompetitieTeamPoule(models.Model):
     """ Een poule wordt gebruikt om teams direct tegen elkaar uit te laten komen.

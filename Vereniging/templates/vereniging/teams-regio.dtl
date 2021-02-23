@@ -23,6 +23,10 @@
                 <tr>
                     <th>Team type</th>
                     <th>Team naam</th>
+                    {% if vaste_teams %}
+                        <th>Vaste leden</th>
+                    {% endif %}
+                    <th>Aanvangsgemiddelde</th>
                     <th><!-- kolom voor de knoppen --></th>
                 </tr>
             </thead>
@@ -31,11 +35,22 @@
                 <tr>
                     <td>{{ team.team_type.beschrijving }}</td>
                     <td>{{ team.team_naam }}</td>
-                    <td><a class="btn-nhb-blauw" href="{{ team.url_wijzig }}">Wijzig</a></td>
+                    {% if vaste_teams %}
+                        <td>{{ team.aantal }}</td>
+                    {% endif %}
+                    <td>{{ team.aanvangsgemiddelde }}</td>  <!-- TODO: vervang door klasse -->
+                    <td>
+                        <a class="btn-nhb-blauw" href="{{ team.url_wijzig }}">Wijzig</a>
+                        <span>&nbsp;&nbsp;</span>
+                        <a class="btn-nhb-blauw" href="{{ team.url_koppelen }}">Koppel</a>
+                    </td>
                 </tr>
             {% empty %}
                 <tr>
                     <td colspan="3"><i>Er zijn nog geen teams</i></td>
+                    {% if vaste_teams %}
+                        <td></td>
+                    {% endif %}
                 </tr>
             {% endfor %}
 
@@ -46,9 +61,45 @@
                         <a class="btn-nhb-blauw" href="{{ url_nieuw_team }}">
                             <i class="material-icons-round left">add</i>Team toevoegen</a>
                     </td>
+                    {% if vaste_teams %}
+                        <td></td>
+                    {% endif %}
                 </tr>
             {% endif %}
 
+        </table>
+
+        <p>&nbsp;</p>
+        <p>Onderstaande leden van de vereniging zijn ingeschreven voor de regiocompetitie en hebben voorkeur opgegeven voor schieten in een team:</p>
+
+        <table class="white">
+            <thead>
+                <tr>
+                    <th>Boogtype</th>
+                    <th>Naam</th>
+                    <th>In team</th>
+                    <th>Aanvangsgemiddelde</th>
+                    <th><!-- kolom voor de knoppen --></th>
+                </tr>
+            </thead>
+
+            {% for deelnemer in deelnemers %}
+                <tr>
+                    <td>{{ deelnemer.boog_str }}</td>
+                    <td>{{ deelnemer.naam_str }}</td>
+                    <td>{{ deelnemer.in_team_str }}</td>
+                    <td{% if deelnemer.rood_ag %} class="red-text"{% endif %}>{{ deelnemer.ag_str }}</td>
+                    <td>
+                        {% if deelnemer.url_wijzig_ag %}
+                            <a class="btn-nhb-blauw" href="{{ deelnemer.url_wijzig_ag }}">Wijzig</a>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="3"><i>Geen leden gevonden</i></td>
+                </tr>
+            {% endfor %}
         </table>
 
     {% endif %}
