@@ -332,7 +332,7 @@ class Command(BaseCommand):
 
         return score
 
-    def _vind_of_maak_inschrijving(self, deelcomp, schutterboog, lid_vereniging, ag_str):
+    def _vind_of_maak_inschrijving(self, deelcomp, schutterboog, lid_vereniging, ag_str, in_team):
         # zoek de RegioCompetitieSchutterBoog erbij
         tup = (deelcomp.pk, schutterboog.pk)
         try:
@@ -344,6 +344,7 @@ class Command(BaseCommand):
             inschrijving.schutterboog = schutterboog
             inschrijving.bij_vereniging = lid_vereniging
             inschrijving.klasse = self._klasse
+            inschrijving.inschrijf_voorkeur_team = in_team
 
             if ag_str:
                 inschrijving.aanvangsgemiddelde = ag_str
@@ -353,6 +354,10 @@ class Command(BaseCommand):
                 inschrijving.save()
 
             self._cache_inschrijving[tup] = inschrijving
+        else:
+            if in_team and not inschrijving.inschrijf_voorkeur_team:
+                inschrijving.inschrijf_voorkeur_team = True
+                inschrijving.save()
 
         return inschrijving
 
@@ -489,7 +494,7 @@ class Command(BaseCommand):
 
         return None
 
-    def _verwerk_schutter(self, nhb_nr, naam, ver_nr, ag_str, scores):
+    def _verwerk_schutter(self, nhb_nr, naam, ver_nr, ag_str, scores, in_team):
 
         if nhb_nr >= 990000 and nhb_nr not in self._gezocht_99:
             try:
@@ -578,7 +583,7 @@ class Command(BaseCommand):
         schutterboog = self._vind_schutterboog(lid)
         score_ag = self._vind_of_maak_ag(schutterboog, ag_str, aantal_scores)
 
-        inschrijving = self._vind_of_maak_inschrijving(deelcomp, schutterboog, lid_ver, ag_str)
+        inschrijving = self._vind_of_maak_inschrijving(deelcomp, schutterboog, lid_ver, ag_str, in_team)
 
         if not self._dryrun:
             # bij 3 scores wordt de schutter verplaatst van klasse onbekend naar andere klasse
@@ -613,8 +618,9 @@ class Command(BaseCommand):
                 ver_nr = data_schutter['v']
                 ag = data_schutter['a']         # "9.123"
                 scores = data_schutter['s']     # list
+                in_team = ('t' in data_schutter)
 
-                self._verwerk_schutter(int(nhb_nr), naam, ver_nr, ag, scores)
+                self._verwerk_schutter(int(nhb_nr), naam, ver_nr, ag, scores, in_team)
         # for
 
         # bulk-create the scores en scorehist records
