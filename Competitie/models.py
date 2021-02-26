@@ -32,6 +32,11 @@ AFSTAND = [('18', 'Indoor'),
 
 DAGDEEL = [('GN', "Geen voorkeur"),
            ('AV', "'s Avonds"),
+           ('MA', "Maandag"),
+           ('DO', "Dinsdag"),
+           ('WO', "Woensdag"),
+           ('DO', "Donderdag"),
+           ('VR', "Vrijdag"),
            ('ZA', "Zaterdag"),
            ('ZO', "Zondag"),
            ('WE', "Weekend")]
@@ -893,6 +898,9 @@ def competitie_aanmaken(jaar):
                     else:
                         deel.inschrijf_methode = vorige.inschrijf_methode
                         deel.toegestane_dagdelen = vorige.toegestane_dagdelen
+                        deel.regio_organiseert_teamcompetitie = vorige.regio_organiseert_teamcompetitie
+                        deel.regio_heeft_vaste_teams = vorige.regio_heeft_vaste_teams
+                        deel.regio_team_punten_model = vorige.regio_team_punten_model
 
                     bulk.append(deel)
                 # for
