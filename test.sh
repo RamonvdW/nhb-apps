@@ -82,17 +82,17 @@ then
     echo
     if [ -z "$FOCUS" ]
     then
-        python3 -m coverage report --skip-covered --fail-under=98 $OMIT
+        python3 -m coverage report --precision=1 --skip-covered --fail-under=98 $OMIT
         res=$?
     else
-        python3 -m coverage report $OMIT | grep -E "$FOCUS|----|Cover"
+        python3 -m coverage report --precision=1 $OMIT | grep -E "$FOCUS|----|Cover"
         res=0
     fi
     #echo "res=$res"
     echo
 
 	# TODO: dark themed coverage report
-    python3 -m coverage html -d "$REPORT_DIR" --skip-covered $OMIT
+    python3 -m coverage html -d "$REPORT_DIR" --precision=1 --skip-covered $OMIT
 
     if [ "$res" -gt 0 ] && [ -z "$ARGS" ]
     then
