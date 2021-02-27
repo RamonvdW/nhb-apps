@@ -9,7 +9,7 @@
 {% block title %}Inloggen{% endblock %}
 
 {% block pagina %}
-    
+
     {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="login" %}
 
     <h4>Inloggen</h4>
@@ -76,6 +76,43 @@
         </div>
     </div>
 
+    <script>
+        /* respond to browser auto-fill of login dialog, especially password field
+           no events are fired (for security) and the value itself is not accessible,
+           but we need to move the label out of the way to avoid visual overlap */
+
+        function delayedUpdate() {
+            const els = document.querySelectorAll('input[type=text]:-webkit-autofill, input[type=password]:-webkit-autofill')
+            els.forEach(el => {
+                const el2 = el.previousSibling
+                el2.classList.add('active')
+            })
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            /* not all devices are equally fast, so repeat to ensure quick response when possible */
+            setTimeout(delayedUpdate, 50)
+            setTimeout(delayedUpdate, 100)
+            setTimeout(delayedUpdate, 200)
+            setTimeout(delayedUpdate, 500)
+            setTimeout(delayedUpdate, 1000)
+        })
+    </script>
+
+    <!--
+        var input_selector = 'input[type=text], input[type=password], input[type=email], input[type=url], input[type=tel], input[type=number], input[type=search], input[type=date], input[type=time], textarea';
+    $(input_selector).each(function (element, index) {
+      var $this = $(this);
+      if (element.value.length > 0 || $(element).is(':focus') || element.autofocus || $this.attr('placeholder') !== null) {
+        $this.siblings('label').addClass('active');
+      } else if (element.validity) {
+        $this.siblings('label').toggleClass('active', element.validity.badInput === true);
+      } else {
+        $this.siblings('label').removeClass('active');
+      }
+
+
+    -->
 
     <p>&nbsp;</p>
     <h5>Nog geen account?</h5>
