@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019-2020 Ramon van der Winkel.
+                Copyright (c) 2019-2021 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -9,79 +9,80 @@
 {% block title %}Inloggen{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="login" %}
+    
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="login" %}
 
-<h4>Inloggen</h4>
+    <h4>Inloggen</h4>
 
-<p>Heb je al een account, log dan in:</p>
+    <p>Heb je al een account, log dan in:</p>
 
-<div class="container z-depth-2 white">
-    <div class="row nhb-blauw white-text">
-        <div class="col s12 center-align">
-            <h5>Inloggen</h5>
-            <p>Met een bestaand account</p>
+    <div class="container z-depth-2 white">
+        <div class="row nhb-blauw white-text">
+            <div class="col s12 center-align">
+                <h5>Inloggen</h5>
+                <p>Met een bestaand account</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <form class="col s12" action="{% url 'Account:login' %}" method="post">
+                {{ form.next }}
+                {% csrf_token %}
+
+                {% if form.errors %}
+                    {% for error in form.non_field_errors %}
+                        <div class="row">
+                            <div class="col s2 m1 red-text">Fout:</div>
+                            <div class="col s9 red-text">{{ error|escape }}</div>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                {% if show_wachtwoord_vergeten %}
+                    <div class="row"><div class="col s12"></div>
+                        <div class="center-align">
+                            <a class="btn-nhb-blauw" href="{% url 'Account:wachtwoord-vergeten' %}">Wachtwoord vergeten?</a>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <div class="row"><div class="input-field col s12">
+                    {{ form.login_naam.label_tag }}{{ form.login_naam }}
+                </div></div>
+
+                <div class="row"><div class="input-field col s12">
+                    {{ form.wachtwoord.label_tag }}{{ form.wachtwoord }}
+                </div></div>
+
+                <!-- between Django and MaterializeCSS, checkboxes do not work
+                     because of the way Django generates the html (label before input tag)
+                     old: {{ form.aangemeld_blijven.label_tag }}{{ form.aangemeld_blijven }}
+                     workaround: manual deployment of the checkbox -->
+                <div class="row"><div class="input-field col s12">
+                    <label>
+                        <input type="checkbox" class="filled-in" name="aangemeld_blijven">
+                        <span class="black-text">Aangemeld blijven</span>
+                    </label>
+                    <p>&nbsp;</p>
+                </div></div>
+
+                <div class="row"><div class="col s12">
+                    <div class="center-align">
+                        <input class="btn-nhb-blauw center-align" type="submit" value="Log in">
+                    </div>
+                </div></div>
+
+            </form>
         </div>
     </div>
 
-    <div class="row">
-        <form class="col s12" action="{% url 'Account:login' %}" method="post">
-            {{ form.next }}
-            {% csrf_token %}
 
-            {% if form.errors %}
-                {% for error in form.non_field_errors %}
-                    <div class="row">
-                        <div class="col s2 m1 red-text">Fout:</div>
-                        <div class="col s9 red-text">{{ error|escape }}</div>
-                    </div>
-                {% endfor %}
-            {% endif %}
-
-            {% if show_wachtwoord_vergeten %}
-                <div class="row"><div class="col s12"></div>
-                    <div class="center-align">
-                        <a class="btn-nhb-blauw" href="{% url 'Account:wachtwoord-vergeten' %}">Wachtwoord vergeten?</a>
-                    </div>
-                </div>
-            {% endif %}
-
-            <div class="row"><div class="input-field col s12">
-                {{ form.login_naam.label_tag }}{{ form.login_naam }}
-            </div></div>
-
-            <div class="row"><div class="input-field col s12">
-                {{ form.wachtwoord.label_tag }}{{ form.wachtwoord }}
-            </div></div>
-
-            <!-- between Django and MaterializeCSS, checkboxes do not work
-                 because of the way Django generates the html (label before input tag)
-                 old: {{ form.aangemeld_blijven.label_tag }}{{ form.aangemeld_blijven }}
-                 workaround: manual deployment of the checkbox -->
-            <div class="row"><div class="input-field col s12">
-                <label>
-                    <input type="checkbox" class="filled-in" name="aangemeld_blijven">
-                    <span class="black-text">Aangemeld blijven</span>
-                </label>
-                <p>&nbsp;</p>
-            </div></div>
-
-            <div class="row"><div class="col s12">
-                <div class="center-align">
-                    <input class="btn-nhb-blauw center-align" type="submit" value="Log in">
-                </div>
-            </div></div>
-
-        </form>
-    </div>
-</div>
-
-
-<p>&nbsp;</p>
-<h5>Nog geen account?</h5>
-<p>Ben je lid bij een handboogvereniging, dan kan je een account aanmaken.</p>
-<p>De vereniging moet aangesloten zijn bij de Nederlandse Handboog Bond (NHB).</p>
-<p><a class="btn-nhb-blauw" href="{% url 'Schutter:registreer' %}">
-    <i class="material-icons-round left">add</i>Account aanmaken</a></p>
+    <p>&nbsp;</p>
+    <h5>Nog geen account?</h5>
+    <p>Ben je lid bij een handboogvereniging, dan kan je een account aanmaken.</p>
+    <p>De vereniging moet aangesloten zijn bij de Nederlandse Handboog Bond (NHB).</p>
+    <p><a class="btn-nhb-blauw" href="{% url 'Schutter:registreer' %}">
+        <i class="material-icons-round left">add</i>Account aanmaken</a></p>
 
 
 {% endblock %}
