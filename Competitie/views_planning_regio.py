@@ -448,10 +448,11 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
                                                kwargs={'wedstrijd_pk': wedstrijd.pk})
             # for
 
-        start_week = 37
-        eind_week = 11+1
+        start_week = settings.COMPETITIES_START_WEEK
+        eind_week = settings.COMPETITIE_25M_LAATSTE_WEEK
         if ronde.deelcompetitie.competitie.afstand == '18':
-            eind_week = 50+1
+            eind_week = settings.COMPETITIE_18M_LAATSTE_WEEK
+        eind_week += 1  # de hele week mag nog gebruikt worden
         begin_jaar = ronde.deelcompetitie.competitie.begin_jaar
 
         last_week_in_year = 52
