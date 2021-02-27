@@ -56,6 +56,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
             context['deelcomps'] = list()
             context['deelcomps_rk'] = list()
         else:
+            context['toon_competities'] = True
             context['competities'] = (Competitie
                                       .objects
                                       .filter(is_afgesloten=False)
