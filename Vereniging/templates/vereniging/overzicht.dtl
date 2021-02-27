@@ -145,13 +145,25 @@
 
             <!-- leden ingeschreven voor de competitie (niet meer tonen vanaf fase RK) -->
             {% for deelcomp in deelcomps %}
-                {% if deelcomp.competitie.afstand == '25' and deelcomp.competitie.fase >= 'B' and deelcomp.competitie.fase <= 'F' %}
-                    {% url 'Vereniging:leden-ingeschreven' deelcomp_pk=deelcomp.pk as card_url %}
-                    {% include 'plein/card_logo.dtl' with title="Ingeschreven" text="Overzicht leden ingeschreven zijn voor de "|add:deelcomp.competitie.beschrijving|add:"." img_src=deelcomp.icon img_height="60" url=card_url %}
+                {% if deelcomp.competitie.afstand == '25' %}
+                    {% if deelcomp.regio_organiseert_teamcompetitie and deelcomp.competitie.fase >= 'B' and deelcomp.competitie.fase <= 'C' %}
+                        {% url 'Vereniging:teams-regio' deelcomp_pk=deelcomp.pk as card_url %}
+                        {% include 'plein/card.dtl' with title="Teams Regio" text="Verenigingsteams voor de regiocompetitie van de "|add:deelcomp.competitie.beschrijving|add:" samenstellen." icon="gamepad" url=card_url %}
+                    {% endif %}
 
-                    {% if deelcomp.toon_wie_schiet_waar %}
-                        {% url 'Vereniging:schietmomenten' deelcomp_pk=deelcomp.pk as card_url %}
-                        {% include 'plein/card_logo.dtl' with title="Wie schiet waar?" text="Overzicht van de gekozen schietmomenten voor de "|add:deelcomp.competitie.beschrijving|add:"." img_src=deelcomp.icon img_height="60" url=card_url %}
+                    {% if deelcomp.competitie.fase >= 'E' and deelcomp.competitie.fase <= 'K' %}
+                        {% url 'Vereniging:teams-rk' deelcomp_pk=deelcomp.pk as card_url %}
+                        {% include 'plein/card.dtl' with title="Teams RK" text="Verenigingsteams voor de rayonkampioenschappen van de "|add:deelcomp.competitie.beschrijving|add:" samenstellen." icon="gamepad" url=card_url %} <!--widgets-->
+                    {% endif %}
+
+                    {% if deelcomp.competitie.fase >= 'B' and deelcomp.competitie.fase <= 'F' %}
+                        {% url 'Vereniging:leden-ingeschreven' deelcomp_pk=deelcomp.pk as card_url %}
+                        {% include 'plein/card_logo.dtl' with title="Ingeschreven" text="Overzicht leden ingeschreven zijn voor de "|add:deelcomp.competitie.beschrijving|add:"." img_src=deelcomp.icon img_height="60" url=card_url %}
+
+                        {% if deelcomp.toon_wie_schiet_waar %}
+                            {% url 'Vereniging:schietmomenten' deelcomp_pk=deelcomp.pk as card_url %}
+                            {% include 'plein/card_logo.dtl' with title="Wie schiet waar?" text="Overzicht leden ingeschreven zijn voor de "|add:deelcomp.competitie.beschrijving|add:"." img_src=deelcomp.icon img_height="60" url=card_url %}
+                        {% endif %}
                     {% endif %}
                 {% endif %}
             {% endfor %}
