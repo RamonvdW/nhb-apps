@@ -504,29 +504,9 @@ class RegioCompetitieSchutterBoog(models.Model):
     alt_gemiddelde = models.DecimalField(max_digits=5, decimal_places=3, default=0.0)  # 10,000
 
     def __str__(self):
-        # deelcompetitie (komt achteraan)
-        if self.deelcompetitie.nhb_regio:
-            substr = str(self.deelcompetitie.nhb_regio)
-        elif self.deelcompetitie.nhb_rayon:
-            substr = str(self.deelcompetitie.nhb_rayon)
-        else:
-            substr = "BK"
-
-        # klasse
-        msg = "?"
-        if self.klasse.indiv:
-            msg = self.klasse.indiv.beschrijving
-        if self.klasse.team:
-            msg = self.klasse.team.beschrijving
-
-        return "%s - %s (%s) - %s (%s) %s - %s" % (
-                    substr,
-                    msg,
-                    self.klasse.min_ag,
-                    self.schutterboog,
-                    self.schutterboog.nhblid.volledige_naam(),
-                    self.aanvangsgemiddelde,
-                    self.deelcompetitie.competitie.beschrijving)
+        # deze naam wordt gebruikt in de admin interface, dus kort houden
+        nhblid = self.schutterboog.nhblid
+        return "[%s] %s (%s)" % (nhblid.nhb_nr,  nhblid.volledige_naam(), self.schutterboog.boogtype.beschrijving)
 
     class Meta:
         verbose_name = "Regiocompetitie Schutterboog"
