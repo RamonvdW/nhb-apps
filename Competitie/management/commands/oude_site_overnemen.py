@@ -175,7 +175,7 @@ class Command(BaseCommand):
                     .select_related('vereniging',
                                     'deelcompetitie__competitie')
                     .all()):
-            tup = (obj.deelcompetitie.competitie.afstand, obj.vereniging.nhb_nr, obj.team_naam)
+            tup = (obj.deelcompetitie.competitie.afstand, str(obj.vereniging.nhb_nr), obj.team_naam)
             self._cache_teams[tup] = obj
         # for
 
@@ -635,7 +635,7 @@ class Command(BaseCommand):
             else:
                 for team_nr in team_data.keys():
                     naam = "%s-%s-%s" % (afkorting, ver_nr, team_nr)        # R-1000-1
-                    tup = (afstand, ver_nr, naam)
+                    tup = (afstand, str(ver_nr), naam)
                     if tup not in self._cache_teams:
                         # nieuw team
 
