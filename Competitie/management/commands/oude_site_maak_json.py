@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -223,7 +223,7 @@ class Command(BaseCommand):
             self._parse_html_rayon(data, html)
 
     @staticmethod
-    def _markeer_team_schutters(boog_data, team_nhb_nrs):
+    def _markeer_team_schutters(boog_data, team_nhb_nrs, teamtype):
         # de schutters staan in hun klasse onder boog_data
         for klasse_data in boog_data.values():
             nhb_nrs = klasse_data.keys()
@@ -231,7 +231,7 @@ class Command(BaseCommand):
                 if nhb_nr in team_nhb_nrs:
                     # markeer deze schutter als teamschutter
                     schutter_data = klasse_data[nhb_nr]
-                    schutter_data['t'] = 1
+                    schutter_data['t'] = teamtype
             # for
         # for
 
@@ -261,7 +261,7 @@ class Command(BaseCommand):
                     # for
                 # for
 
-                self._markeer_team_schutters(boog_data, team_nhb_nrs)
+                self._markeer_team_schutters(boog_data, team_nhb_nrs, teamtype=afkorting)
             # for
         # for
 

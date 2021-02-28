@@ -45,6 +45,7 @@ class RegioCompetitieSchutterBoogAdmin(admin.ModelAdmin):
              }),
         ('Inschrijving',
             {'fields': ('inschrijf_voorkeur_team',
+                        'inschrijf_team_type',
                         'inschrijf_gekozen_wedstrijden',
                         'inschrijf_voorkeur_dagdeel',
                         'inschrijf_notitie'),

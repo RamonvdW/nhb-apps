@@ -10,7 +10,7 @@ from django.views.generic import ListView, TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Plein.menu import menu_dynamics
 from Functie.rol import Rollen, rol_get_huidige_functie
-from BasisTypen.models import (LeeftijdsKlasse,
+from BasisTypen.models import (LeeftijdsKlasse, TeamType,
                                MAXIMALE_LEEFTIJD_JEUGD,
                                MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT)
 from NhbStructuur.models import NhbLid
@@ -40,10 +40,16 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
     # class variables shared by all instances
     template_name = TEMPLATE_LEDEN_AANMELDEN
 
+    def __init__(self, **kwargs):
+        super().__init__(*kwargs)
+        self.comp = None
+        self.teamtypen = list()
+        self.rol_nu, self.functie_nu = None, None
+
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        _, functie_nu = rol_get_huidige_functie(self.request)
-        return functie_nu and functie_nu.rol == 'HWL'
+        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        return self.functie_nu and self.functie_nu.rol == 'HWL'
 
     def handle_no_permission(self):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
@@ -61,7 +67,9 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
         self.comp = comp
         comp.bepaal_fase()
 
-        # TODO: check dat competitie open is voor inschrijvingen
+        # check dat competitie open is voor inschrijvingen
+        if not ('B' <= comp.fase <= 'E'):
+            raise Resolver404()
 
         _, functie_nu = rol_get_huidige_functie(self.request)
         objs = list()
@@ -109,6 +117,18 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                     .order_by('achternaam', 'voornaam')):
             obj.leeftijdsklasse = None
             objs.append(obj)
+        # for
+
+        # haal de teamtypen erbij
+        boog2teambogen = dict()     # ['IB'] = "IB, LB"
+        for obj in TeamType.objects.prefetch_related('boog_typen').order_by('volgorde'):
+            beschr = obj.beschrijving
+            afkortingen = list(obj.boog_typen.order_by('volgorde').values_list('afkorting', flat=True))
+            teambogen_str = ", ".join(afkortingen)
+            if len(afkortingen) > 1:
+                beschr += ' (bogen: %s)' % teambogen_str
+            tup = (obj.afkorting, beschr, teambogen_str)
+            self.teamtypen.append(tup)
         # for
 
         # maak een paar tabellen om database toegangen te verminderen
@@ -161,8 +181,12 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
             else:
                 # maak een kopie van het nhblid en maak het uniek voor dit boogtype
                 obj = copy.copy(nhblid)
+                obj.afkorting = schutterboog.boogtype.afkorting
                 obj.boogtype = schutterboog.boogtype.beschrijving
                 obj.check = "lid_%s_boogtype_%s" % (nhblid.nhb_nr, schutterboog.boogtype.pk)
+                obj.mag_teamschieten = True
+                if obj.leeftijdsklasse and  obj.leeftijdsklasse.is_aspirant_klasse():
+                    obj.mag_teamschieten = False
 
                 try:
                     obj.ag = ag_dict[schutterboog.pk]
@@ -192,8 +216,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
-        context['nhb_ver'] = functie_nu.nhb_ver
+        context['nhb_ver'] = self.functie_nu.nhb_ver
         # rol is HWL (zie test_func)
 
         # splits the ledenlijst op in jeugd, senior en inactief
@@ -215,7 +238,9 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
         context['mag_aanmelden'] = True
 
         # bepaal de inschrijfmethode voor deze regio
-        mijn_regio = functie_nu.nhb_ver.regio
+        mijn_regio = self.functie_nu.nhb_ver.regio
+
+        context['teamtypen'] = self.teamtypen
 
         if not mijn_regio.is_administratief:
             deelcomp = (DeelCompetitie
@@ -253,7 +278,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                     context['dagdelen'] = list()
                     for dagdeel in DAGDEEL:
                         # dagdeel = tuple(code, beschrijving)
-                        # code = GN / AV / ZA / ZO / WE
+                        # code = GN / AV / ZA / ZO / WE / etc.
                         if dagdeel[0] in deelcomp.toegestane_dagdelen:
                             context['dagdelen'].append(dagdeel)
                     # for
@@ -271,11 +296,15 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
         except (ValueError, TypeError, Competitie.DoesNotExist):
             raise Resolver404()
 
-        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
+        # check dat competitie open is voor inschrijvingen
+        comp.bepaal_fase()
+        if not ('B' <= comp.fase <= 'E'):
+            raise Resolver404()
+
         # rol is HWL (zie test_func)
 
         # bepaal de inschrijfmethode voor deze regio
-        hwl_regio = functie_nu.nhb_ver.regio
+        hwl_regio = self.functie_nu.nhb_ver.regio
 
         if hwl_regio.is_administratief:
             # niemand van deze vereniging mag meedoen aan wedstrijden
@@ -288,10 +317,26 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                                               nhb_regio=hwl_regio)
         methode = deelcomp.inschrijf_methode
 
+        # for k,v in request.POST.items():
+        #    print('%s=%s' % (k, v))
+
+        boog2teamtype = dict()
+        for obj in TeamType.objects.all():
+            boog2teamtype[obj.afkorting] = obj
+        # for
+
         # zoek eerst de voorkeuren op
         bulk_team = False
+        bulk_teamtype = None
         if request.POST.get('wil_in_team', '') != '':
             bulk_team = True
+
+            afkorting = request.POST.get('teamtype', '')[:6]
+            if afkorting != '':
+                try:
+                    bulk_teamtype = boog2teamtype[afkorting]
+                except KeyError:
+                    pass
 
         bulk_wedstrijden = list()
         if methode == INSCHRIJF_METHODE_1:
@@ -356,7 +401,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                     raise Resolver404()
 
                 # controleer lid bij vereniging HWL
-                if schutterboog.nhblid.bij_vereniging != functie_nu.nhb_ver:
+                if schutterboog.nhblid.bij_vereniging != self.functie_nu.nhb_ver:
                     # iemand loopt te klooien
                     raise Resolver404()
 
@@ -366,7 +411,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                         .filter(deelcompetitie=deelcomp,
                                 schutterboog=schutterboog)
                         .count() > 0):
-                    # al aangemeld - zie niet hier moeten zijn gekomen
+                    # al aangemeld - zou niet hier moeten zijn gekomen
                     raise Resolver404()
 
                 # bepaal in welke wedstrijdklasse de schutter komt
@@ -422,6 +467,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
 
                 aanmelding.inschrijf_voorkeur_dagdeel = bulk_dagdeel
                 aanmelding.inschrijf_notitie = bulk_opmerking
+                aanmelding.inschrijf_team_type = bulk_teamtype
                 aanmelding.save()
 
                 if methode == INSCHRIJF_METHODE_1:

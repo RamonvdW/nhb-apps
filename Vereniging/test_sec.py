@@ -8,9 +8,9 @@ from django.test import TestCase
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
 from Competitie.models import Competitie, CompetitieKlasse, RegioCompetitieSchutterBoog
+from Competitie.test_fase import zet_competitie_fase
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Schutter.models import SchutterBoog
-from Score.models import aanvangsgemiddelde_opslaan
 from Wedstrijden.models import WedstrijdLocatie
 from Overig.e2ehelpers import E2EHelpers
 import datetime
@@ -274,6 +274,8 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.e2e_check_rol('SEC')
 
         url = self.url_inschrijven % self.comp_18.pk
+        zet_competitie_fase(self.comp_18, 'B')
+
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assert_is_redirect(resp, '/plein/')          # SEC mag dit niet
@@ -303,6 +305,8 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.e2e_check_rol('SEC')
 
         url = self.url_inschrijven % self.comp_18.pk
+        zet_competitie_fase(self.comp_18, 'B')
+
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assert_is_redirect(resp, '/plein/')          # SEC mag dit niet

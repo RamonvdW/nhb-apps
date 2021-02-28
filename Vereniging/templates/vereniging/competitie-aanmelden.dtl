@@ -24,6 +24,56 @@
         <p>Aanmelden gaat in bulk: kies de voorkeuren, zet daarna een vinkje bij de sporters die je aan wilt melden en druk dan rode knop in de rechter onderhoek. Leden die al aangemeld zijn hebben een grijs vinkje.</p>
         <p>Leden die aangegeven hebben niet mee te willen doen met de (winter-)competities zijn helemaal grijs.</p>
 
+        <script>
+            function filter_op_boogtype(table_id, teambogen, alles) {
+                /* doorloop alle checkboxes */
+                const container = document.querySelector(table_id)
+                const els = container.getElementsByClassName('filled-in')   /* niet de al ingeschreven leden */
+                Array.prototype.forEach.call(els, function(el) {
+                    el.checked = false      /* vinkje weghalen */
+                    if (alles) {
+                        el.disabled = false
+                    } else {
+                        const boog = el.getAttribute('data-boog')
+                        if (boog) el.disabled = !teambogen.includes(boog)
+                    }
+                })
+            }
+
+            function filter_teamtype(el) {
+                /* deze functie wordt aangeroepen bij wijziging van de teamtype keuze */
+                const teambogen = el.getAttribute('data-teambogen')
+
+                /* filter the checkboxes die gekozen mogen worden */
+                filter_op_boogtype('#table1', teambogen, false)
+                filter_op_boogtype('#table2', teambogen, false)
+            }
+
+            function toggle_toon_teamtype(el_input) {
+                /* deze functie wordt aangeroepen bij wijziging vinkje 'Aanmelden voor team schieten' */
+                const el = document.getElementById('id_teamtype_regel')
+                if (el_input.checked) {
+                    /* team schieten: ja */
+                    el.classList.remove('hide')     /* toon radio buttons */
+
+                    /* kijk welke type geactiveerd is */
+                    const container = document.querySelector('#id_teamtype')
+                    const els = container.querySelectorAll('input[type=radio]')     /* TODO: checked=true ?? */
+                    els.forEach(el => {
+                        if (el.checked) filter_teamtype(el)
+                    })
+
+                } else {
+                    /* team schieten: nee */
+                    el.classList.add('hide')        /* verstop radio buttons */
+
+                    /* activeer alle checkboxes weer */
+                    filter_op_boogtype('#table1', '', true)
+                    filter_op_boogtype('#table2', '', true)
+                }
+            }
+        </script>
+
         <table class="white">
             <tr>
                 <td><b>Voorkeuren voor aanmelden in bulk</b></td>
@@ -32,9 +82,26 @@
             <tr>
                 <td>Aanmelden voor team schieten:<br><br>
                     <label style="margin-left: 20px">
-                        <input type="checkbox" class="filled-in" name="wil_in_team">
+                        <input type="checkbox" class="filled-in" name="wil_in_team" onchange="toggle_toon_teamtype(this)">
                         <span class="black-text">Ja</span>
                     </label>
+                </td>
+            </tr>
+
+            <tr id="id_teamtype_regel" class="hide">
+                <td>Wat voor soort team?<br>
+
+                    <ul id="id_teamtype">
+                        {% for code, beschr, teambogen in teamtypen %}
+                            <li>
+                                <label class="black-text" for="id_teamtype_{{ code }}" style="margin-left: 20px">
+                                    <input class="with-gap" type="radio" name="teamtype" value="{{ code }}" required id="id_teamtype_{{ code }}"{% if forloop.first %} checked{% endif %} data-teambogen="{{ teambogen }}" onchange="filter_teamtype(this)">
+                                    <span>{{ beschr }}</span>
+                                </label>
+                            </li>
+                        {% endfor %}
+                    </ul>
+
                 </td>
             </tr>
 
@@ -127,7 +194,7 @@
                         <td class="center-align">
                             {% if mag_aanmelden %}
                                 <label>
-                                    <input type="checkbox" name="{{ obj.check }}" {% if obj.is_aangemeld %}disabled checked{% else %}class="filled-in"{%endif%}>
+                                    <input type="checkbox" name="{{ obj.check }}" {% if obj.is_aangemeld %}disabled checked{% else %}class="filled-in"{%endif%} data-boog="{% if obj.mag_teamschieten %}{{ obj.afkorting }}{% else %}X{% endif %}">
                                     <span><!-- noodzakelijk --></span>
                                 </label>
                             {% else %}
@@ -183,7 +250,7 @@
                     <td class="center-align">
                         {% if mag_aanmelden %}
                             <label>
-                                <input type="checkbox" name="{{ obj.check }}" {% if obj.is_aangemeld %}disabled checked{% else %}class="filled-in"{%endif%}>
+                                <input type="checkbox" name="{{ obj.check }}" {% if obj.is_aangemeld %}disabled checked{% else %}class="filled-in"{%endif%} data-boog="{{ obj.afkorting }}">
                                 <span><!-- noodzakelijk --></span>
                             </label>
                         {% else %}

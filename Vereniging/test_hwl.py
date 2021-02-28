@@ -11,6 +11,7 @@ from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
 from Competitie.models import (Competitie, DeelCompetitie, CompetitieKlasse,
                                RegioCompetitieSchutterBoog,
                                INSCHRIJF_METHODE_3, LAAG_REGIO, LAAG_RK)
+from Competitie.test_fase import zet_competitie_fase
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Schutter.models import SchutterBoog
 from Score.models import aanvangsgemiddelde_opslaan
@@ -380,6 +381,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
     def test_inschrijven(self):
         url = self.url_inschrijven % self.comp_18.pk
+        zet_competitie_fase(self.comp_18, 'B')
 
         # anon
         self.e2e_logout()
@@ -394,7 +396,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
         # stel 1 schutter in die op randje aspirant/cadet zit
         self._zet_schutter_voorkeuren(100004)
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(22):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -423,7 +425,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self._zet_ag(100002, 18)
         self._zet_ag(100003, 25)
 
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(24):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -463,8 +465,9 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self._zet_ag(100003, 25)
 
         url = self.url_inschrijven % self.comp_18.pk
+        zet_competitie_fase(self.comp_18, 'B')
 
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(23):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('vereniging/competitie-aanmelden.dtl', 'plein/site_layout.dtl'))
@@ -526,8 +529,9 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self._zet_ag(100003, 25)
 
         url = self.url_inschrijven % self.comp_18.pk
+        zet_competitie_fase(self.comp_18, 'B')
 
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(23):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('vereniging/competitie-aanmelden.dtl', 'plein/site_layout.dtl'))
@@ -575,6 +579,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
     def test_inschrijven_team(self):
         url = self.url_inschrijven % self.comp_18.pk
+        zet_competitie_fase(self.comp_18, 'B')
 
         # anon
         self.e2e_logout()
@@ -594,7 +599,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self._zet_ag(100004, 18)
         self._zet_ag(100003, 25)
 
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(23):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('vereniging/competitie-aanmelden.dtl', 'plein/site_layout.dtl'))
@@ -616,13 +621,13 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
     def test_inschrijven_team_udvl(self):
         url = self.url_inschrijven % self.comp_18.pk
+        zet_competitie_fase(self.comp_18, 'B')
 
         # zet de udvl tussen de dvl van de twee schutters in
         # nhblid_100003.sinds_datum = datetime.date(year=jaar-4, month=11, day=12)
         # nhblid_100004.sinds_datum = datetime.date(year=jaar-3, month=11, day=12)
-        comp = Competitie.objects.get(afstand='18')
-        comp.uiterste_datum_lid = datetime.date(year=self.nhblid_100004.sinds_datum.year, month=1, day=1)
-        comp.save()
+        self.comp_18.uiterste_datum_lid = datetime.date(year=self.nhblid_100004.sinds_datum.year, month=1, day=1)
+        self.comp_18.save()
 
         # login als HWL
         self.e2e_login_and_pass_otp(self.account_hwl)
@@ -636,7 +641,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self._zet_ag(100004, 18)
         self._zet_ag(100003, 25)
 
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(23):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('vereniging/competitie-aanmelden.dtl', 'plein/site_layout.dtl'))
@@ -673,8 +678,10 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self._zet_ag(100004, 18)
         self._zet_ag(100003, 25)
 
+        zet_competitie_fase(self.comp_18, 'B')
+
         url = self.url_inschrijven % self.comp_18.pk
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(23):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('vereniging/competitie-aanmelden.dtl', 'plein/site_layout.dtl'))

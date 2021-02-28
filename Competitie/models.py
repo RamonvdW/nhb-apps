@@ -477,6 +477,10 @@ class RegioCompetitieSchutterBoog(models.Model):
     # voorkeuren opgegeven bij het inschrijven
     inschrijf_voorkeur_team = models.BooleanField(default=False)
 
+    # welk type team? (nodig voor de situatie Recurve team als Barebow schutter)
+    inschrijf_team_type = models.ForeignKey(TeamType, on_delete=models.PROTECT,
+                                            null=True, blank=True)
+
     # opmerking vrije tekst
     inschrijf_notitie = models.TextField(default="", blank=True)
 

@@ -9,7 +9,7 @@
 from django.utils.timezone import make_aware
 from django.core.management.base import BaseCommand
 from django.conf import settings
-from BasisTypen.models import BoogType
+from BasisTypen.models import BoogType, TeamType
 from NhbStructuur.models import NhbLid, NhbVereniging
 from Logboek.models import schrijf_in_logboek
 from Competitie.models import (Competitie, CompetitieKlasse,
@@ -58,6 +58,7 @@ class Command(BaseCommand):
         self._verwijder = None             # wijst naar _verwijder_r_18 of _verwijder_r_25, afhankelijk van afstand
 
         self._cache_boogtype = dict()      # [afkorting] = BoogType
+        self._cache_teamtype = dict()      # [afkorting] = TeamType
         self._cache_klasse = dict()        # [competitie.pk, klasse_beschrijving] = CompetitieKlasse
         self._cache_nhblid = dict()        # [nhbnr] = NhbLid
         self._cache_schutterboog = dict()  # [(nhblid, afkorting)] = SchutterBoog
@@ -90,6 +91,10 @@ class Command(BaseCommand):
 
         for obj in BoogType.objects.all():
             self._cache_boogtype[obj.afkorting] = obj
+        # for
+
+        for obj in TeamType.objects.all():
+            self._cache_teamtype[obj.afkorting] = obj
         # for
 
         for obj in (CompetitieKlasse
@@ -332,7 +337,7 @@ class Command(BaseCommand):
 
         return score
 
-    def _vind_of_maak_inschrijving(self, deelcomp, schutterboog, lid_vereniging, ag_str, in_team):
+    def _vind_of_maak_inschrijving(self, deelcomp, schutterboog, lid_vereniging, ag_str, teamtype):
         # zoek de RegioCompetitieSchutterBoog erbij
         tup = (deelcomp.pk, schutterboog.pk)
         try:
@@ -344,7 +349,8 @@ class Command(BaseCommand):
             inschrijving.schutterboog = schutterboog
             inschrijving.bij_vereniging = lid_vereniging
             inschrijving.klasse = self._klasse
-            inschrijving.inschrijf_voorkeur_team = in_team
+            inschrijving.inschrijf_voorkeur_team = (teamtype is not None)
+            inschrijving.inschrijf_team_type = teamtype
 
             if ag_str:
                 inschrijving.aanvangsgemiddelde = ag_str
@@ -355,8 +361,9 @@ class Command(BaseCommand):
 
             self._cache_inschrijving[tup] = inschrijving
         else:
-            if in_team and not inschrijving.inschrijf_voorkeur_team:
+            if teamtype and inschrijving.inschrijf_team_type != teamtype:
                 inschrijving.inschrijf_voorkeur_team = True
+                inschrijving.inschrijf_team_type = teamtype
                 inschrijving.save()
 
         return inschrijving
@@ -494,7 +501,7 @@ class Command(BaseCommand):
 
         return None
 
-    def _verwerk_schutter(self, nhb_nr, naam, ver_nr, ag_str, scores, in_team):
+    def _verwerk_schutter(self, nhb_nr, naam, ver_nr, ag_str, scores, teamtype):
 
         if nhb_nr >= 990000 and nhb_nr not in self._gezocht_99:
             try:
@@ -583,7 +590,7 @@ class Command(BaseCommand):
         schutterboog = self._vind_schutterboog(lid)
         score_ag = self._vind_of_maak_ag(schutterboog, ag_str, aantal_scores)
 
-        inschrijving = self._vind_of_maak_inschrijving(deelcomp, schutterboog, lid_ver, ag_str, in_team)
+        inschrijving = self._vind_of_maak_inschrijving(deelcomp, schutterboog, lid_ver, ag_str, teamtype)
 
         if not self._dryrun:
             # bij 3 scores wordt de schutter verplaatst van klasse onbekend naar andere klasse
@@ -618,9 +625,13 @@ class Command(BaseCommand):
                 ver_nr = data_schutter['v']
                 ag = data_schutter['a']         # "9.123"
                 scores = data_schutter['s']     # list
-                in_team = ('t' in data_schutter)
+                try:
+                    teamtype_str = data_schutter['t']
+                    teamtype = self._cache_teamtype[teamtype_str]
+                except KeyError:
+                    teamtype = None
 
-                self._verwerk_schutter(int(nhb_nr), naam, ver_nr, ag, scores, in_team)
+                self._verwerk_schutter(int(nhb_nr), naam, ver_nr, ag, scores, teamtype)
         # for
 
         # bulk-create the scores en scorehist records
