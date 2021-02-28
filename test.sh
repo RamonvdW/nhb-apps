@@ -47,6 +47,7 @@ ABORTED=0
 
 # start the simulator (for the mailer)
 python3 ./Mailer/test_tools/websim.py &
+PID_WEBSIM=$!
 
 export COVERAGE_FILE="/tmp/.coverage.$$"
 
@@ -58,6 +59,7 @@ python3 -m coverage run --append --branch ./manage.py test --settings=nhbapps.se
 RES=$?
 [ $RES -eq 3 ] && ABORTED=1
 #echo "[DEBUG] Coverage run result: $RES"
+
 if [ $RES -eq 0 -a $# -eq 0 ]
 then
     # add coverage with debug and wiki enabled
@@ -69,11 +71,10 @@ then
     #echo "[DEBUG] Debug coverage run result: $RES"
 fi
 
-# stop the http simulator
-# do this by killing the most recent background task
-# and use bash construct to prevent the Terminated message on the console
-kill $!
-wait $! 2>/dev/null
+# stop the websim tool
+# use bash construct to prevent the Terminated message on the console
+kill $PID_WEBSIM
+wait $PID_WEBSIM 2>/dev/null
 
 if [ $ABORTED -eq 0 ]
 then
