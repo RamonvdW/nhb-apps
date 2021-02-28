@@ -115,6 +115,10 @@ urlpatterns = [
          views_planning_regio.RegioClusterPlanningView.as_view(),
          name='regio-cluster-planning'),
 
+    path('planning/regio/<deelcomp_pk>/teams/',
+         views_planning_regio.RegioTeamsView.as_view(),
+         name='regio-teams'),
+
     path('planning/regio/ronde/<ronde_pk>/',
          views_planning_regio.RegioRondePlanningView.as_view(),
          name='regio-ronde-planning'),

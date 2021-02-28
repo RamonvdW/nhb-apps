@@ -170,7 +170,11 @@ class Command(BaseCommand):
                 self._cache_scores[tup] = score
         # for
 
-        for obj in RegiocompetitieTeam.objects.select_related('vereniging', 'deelcompetitie__competitie').all():
+        for obj in (RegiocompetitieTeam
+                    .objects
+                    .select_related('vereniging',
+                                    'deelcompetitie__competitie')
+                    .all()):
             tup = (obj.deelcompetitie.competitie.afstand, obj.vereniging.nhb_nr, obj.team_naam)
             self._cache_teams[tup] = obj
         # for
@@ -635,7 +639,7 @@ class Command(BaseCommand):
                     if tup not in self._cache_teams:
                         # nieuw team
 
-                        volg_nrs = [obj.volg_nr for obj in self._cache_teams.values() if obj.vereniging.nhb_nr == ver.nhb_nr]
+                        volg_nrs = [obj.volg_nr for obj in self._cache_teams.values() if obj.vereniging.nhb_nr == ver.nhb_nr and obj.deelcompetitie.competitie == self._comp]
                         volg_nrs.append(0)
                         next_nr = max(volg_nrs) + 1
 
@@ -647,7 +651,7 @@ class Command(BaseCommand):
                                     team_naam=naam)
                         team.save()
                         self._cache_teams[tup] = team
-                        self.stdout.write('[INFO] Regio team aangemaakt: %s in %sm competitie' % (naam, afstand))
+                        self.stdout.write('[INFO] Regio team aangemaakt: %s in competitie %s' % (naam, self._comp))
                 # for
         # for
 
@@ -746,7 +750,7 @@ class Command(BaseCommand):
             self._comp = None
             for comp in Competitie.objects.filter(afstand=afstand):
                 comp.bepaal_fase()
-                if 'B' <= comp.fase <= 'F':
+                if 'E' <= comp.fase <= 'F':
                     # in de regiocompetitie wedstrijdfase, dus importeren
                     self._comp = comp
             # for

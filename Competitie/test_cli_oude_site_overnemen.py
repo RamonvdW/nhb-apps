@@ -50,8 +50,8 @@ class TestCompetitieCliOudeSiteOvernemen(E2EHelpers, TestCase):
         klasse.save()
         self.klasse = klasse
 
-        zet_competitie_fase(comp_18, 'B')
-        zet_competitie_fase(comp_25, 'B')
+        zet_competitie_fase(comp_18, 'E')
+        zet_competitie_fase(comp_25, 'E')
 
     def _maak_leden_aan(self):
         # deze test is afhankelijk van de standaard regio's

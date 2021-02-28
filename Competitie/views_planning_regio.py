@@ -20,7 +20,7 @@ from Wedstrijden.models import Wedstrijd, WedstrijdLocatie
 from .models import (LAAG_REGIO, LAAG_RK, LAAG_BK, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2,
                      TEAM_PUNTEN_FORMULE1, TEAM_PUNTEN_TWEE, TEAM_PUNTEN_DRIE, TEAM_PUNTEN_SOM_SCORES,
                      DeelCompetitie, DeelcompetitieRonde, maak_deelcompetitie_ronde,
-                     CompetitieKlasse, RegioCompetitieSchutterBoog,)
+                     CompetitieKlasse, RegioCompetitieSchutterBoog, RegiocompetitieTeam)
 from .menu import menu_dynamics_competitie
 from types import SimpleNamespace
 import datetime
@@ -31,6 +31,7 @@ TEMPLATE_COMPETITIE_PLANNING_REGIO_METHODE1 = 'competitie/planning-regio-methode
 TEMPLATE_COMPETITIE_PLANNING_REGIO_CLUSTER = 'competitie/planning-regio-cluster.dtl'
 TEMPLATE_COMPETITIE_PLANNING_REGIO_RONDE = 'competitie/planning-regio-ronde.dtl'
 TEMPLATE_COMPETITIE_PLANNING_REGIO_RONDE_METHODE1 = 'competitie/planning-regio-ronde-methode1.dtl'
+TEMPLATE_COMPETITIE_PLANNING_REGIO_TEAMS = 'competitie/planning-regio-teams.dtl'
 TEMPLATE_COMPETITIE_WIJZIG_WEDSTRIJD = 'competitie/wijzig-wedstrijd.dtl'
 TEMPLATE_COMPETITIE_AFSLUITEN_REGIOCOMP = 'competitie/rcl-afsluiten-regiocomp.dtl'
 TEMPLATE_COMPETITIE_INSTELLINGEN_REGIO = 'competitie/rcl-instellingen.dtl'
@@ -1302,7 +1303,7 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
             raise Resolver404()
 
         deelcomp.competitie.bepaal_fase()
-        if deelcomp.competitie.fase >= 'E':
+        if deelcomp.competitie.fase > 'F':
             raise Resolver404()
 
         if deelcomp.competitie.fase >= 'B':
@@ -1403,5 +1404,65 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
                       kwargs={'comp_pk': deelcomp.competitie.pk})
         return HttpResponseRedirect(url)
 
+
+class RegioTeamsView(UserPassesTestMixin, TemplateView):
+
+    """ Met deze view kan de RCL de aangemaakte teams inzien """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_COMPETITIE_PLANNING_REGIO_TEAMS
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu, self.functie_nu = None, None
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        return self.rol_nu == Rollen.ROL_RCL
+
+    def handle_no_permission(self):
+        """ gebruiker heeft geen toegang --> redirect naar het plein """
+        return HttpResponseRedirect(reverse('Plein:plein'))
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        try:
+            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen geeft beveiliging
+            deelcomp = (DeelCompetitie
+                        .objects
+                        .select_related('competitie')
+                        .get(pk=deelcomp_pk,
+                             laag=LAAG_REGIO))
+        except (ValueError, DeelCompetitie.DoesNotExist):
+            raise Resolver404()
+
+        if deelcomp.functie != self.functie_nu:
+            # niet de beheerder
+            raise Resolver404()
+
+        context['deelcomp'] = deelcomp
+        context['regio'] = self.functie_nu.nhb_regio
+
+        regioteams = (RegiocompetitieTeam
+                      .objects
+                      .select_related('vereniging')
+                      .filter(deelcompetitie=deelcomp)
+                      .order_by('team_type', '-aanvangsgemiddelde', 'vereniging__nhb_nr'))
+
+        prev_team = None
+        for team in regioteams:
+            if team.team_type != prev_team:
+                team.break_before = True
+                prev_team = team.team_type
+            team.aanvangsgemiddelde_str = "%.3f" % team.aanvangsgemiddelde
+        # for
+
+        context['regioteams'] = regioteams
+
+        menu_dynamics_competitie(self.request, context, comp_pk=deelcomp.competitie.pk)
+        return context
 
 # end of file

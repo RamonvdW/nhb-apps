@@ -100,16 +100,21 @@ class CompetitieOverzichtView(View):
                 kan_beheren = True
 
                 obj.titel = 'Planning Regio %s' % obj.nhb_regio.regio_nr
-                obj.tekst = 'Planning voor %s voor deze competitie.' % obj.nhb_regio.naam
+                obj.tekst = 'Planning van de wedstrijden in %s voor deze competitie.' % obj.nhb_regio.naam
                 obj.url = reverse('Competitie:regio-planning',
                                   kwargs={'deelcomp_pk': obj.pk})
 
                 obj.tekst_scores = "Scores invoeren en aanpassen voor %s voor deze competitie." % obj.nhb_regio.naam
                 obj.url_scores = reverse('Competitie:scores-regio',
                                          kwargs={'deelcomp_pk': obj.pk})
+
+                obj.tekst_teams_regio = "Teams voor de regiocompetitie in %s inzien voor deze competitie." % obj.nhb_regio.naam
+                obj.url_teams_regio = reverse('Competitie:regio-teams',
+                                              kwargs={'deelcomp_pk': obj.pk})
+
             # for
 
-            if comp.fase < 'E':
+            if comp.fase <= 'F':
                 comp.url_regio_instellingen = reverse('Competitie:regio-instellingen',
                                                       kwargs={'comp_pk': comp.pk,
                                                               'regio_nr': self.functie_nu.nhb_regio.regio_nr})

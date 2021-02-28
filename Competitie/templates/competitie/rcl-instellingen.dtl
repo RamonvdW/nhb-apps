@@ -12,7 +12,11 @@
 
     <h4>Instellingen Teams</h4>
 
-    <p>Hieronder kan je als RCL keuzes maken voor jouw regiocompetitie.</p>
+    {% if not readonly %}
+        <p>Hieronder kan je als RCL keuzes maken voor jouw regiocompetitie. Dit kan totdat de competitie fase B bereikt.</p>
+    {% else %}
+        <p>Hieronder kan je de gemaakte keuzes maken voor jouw regiocompetitie inzien. Wijzigen is niet meer mogelijk.</p>
+    {% endif %}
 
     <script>
         function gewijzigd() {

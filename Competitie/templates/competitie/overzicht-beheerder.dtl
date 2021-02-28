@@ -68,7 +68,7 @@
 
         {% endif %}     <!-- rol_is_bb -->
 
-        {% if comp.url_regio_instellingen %}
+        {% if comp.url_regio_instellingen and comp.fase < 'B' %}
             {% include 'plein/card.dtl' with title="Instelling teams" text="Instellingen voor de teamcompetitie in de regio." icon="flaky" url=comp.url_regio_instellingen %}
         {% endif %}
 
@@ -77,12 +77,21 @@
             <!-- planning deelcomp -->
             {% include 'plein/card.dtl' with title=deelcomp.titel text=deelcomp.tekst icon="pending_actions" url=deelcomp.url %}
 
+            <!-- regio teams -->
+            {% if deelcomp.url_teams_regio %}
+                {% include 'plein/card.dtl' with title="Teams Regio" text=deelcomp.tekst_teams_regio icon="gamepad" url=deelcomp.url_teams_regio %}
+            {% endif %}
+
             <!-- scores -->
             {% if deelcomp.url_scores %}
                 {% include 'plein/card.dtl' with title="Scores" text=deelcomp.tekst_scores icon="edit" url=deelcomp.url_scores %}
             {% endif %}
 
         {% endfor %}
+
+        {% if comp.url_regio_instellingen and comp.fase >= 'B' %}
+            {% include 'plein/card.dtl' with title="Instelling teams" text="Instellingen voor de teamcompetitie in de regio." icon="flaky" url=comp.url_regio_instellingen %}
+        {% endif %}
 
         {% if comp.fase >= 'E' %}
 
