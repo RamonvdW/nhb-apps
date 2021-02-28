@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from .models import BoogType, LeeftijdsKlasse, IndivWedstrijdklasse, TeamWedstrijdklasse
+from .models import (BoogType, LeeftijdsKlasse, MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT,
+                     IndivWedstrijdklasse, TeamWedstrijdklasse)
 from .admin import BasisTypenIndivWedstrijdklasseAdmin, BasisTypenTeamWedstrijdklasseAdmin
 
 
@@ -25,6 +26,15 @@ class TestBasisTypen(TestCase):
     def test_leeftijdklasse(self):
         obj = LeeftijdsKlasse()
         self.assertIsNotNone(str(obj))      # use the __str__ method (only used by admin interface)
+
+        obj.max_wedstrijdleeftijd = MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT - 1
+        self.assertTrue(obj.is_aspirant_klasse())
+
+        obj.max_wedstrijdleeftijd = MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT + 1
+        self.assertFalse(obj.is_aspirant_klasse())
+
+        obj.max_wedstrijdleeftijd = MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
+        self.assertTrue(obj.is_aspirant_klasse())
 
     def test_indiv_wedstrijdklasse(self):
         obj = IndivWedstrijdklasse(beschrijving="Test")
