@@ -120,6 +120,9 @@ class RegioCompetitieSchutterBoogAdmin(admin.ModelAdmin):
 class RegiocompetitieTeamAdmin(admin.ModelAdmin):
     filter_horizontal = ('vaste_schutters', )
 
+    list_filter = ('deelcompetitie__competitie',
+                   'vereniging__regio',)
+
     list_select_related = ('deelcompetitie',
                            'deelcompetitie__nhb_regio',
                            'deelcompetitie__nhb_rayon',
