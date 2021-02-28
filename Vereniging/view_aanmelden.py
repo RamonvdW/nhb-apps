@@ -310,15 +310,10 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
             # niemand van deze vereniging mag meedoen aan wedstrijden
             raise Resolver404()
 
-        # TODO: check dat competitie open is voor inschrijvingen
-
         # zoek de juiste DeelCompetitie erbij
         deelcomp = DeelCompetitie.objects.get(competitie=comp,
                                               nhb_regio=hwl_regio)
         methode = deelcomp.inschrijf_methode
-
-        # for k,v in request.POST.items():
-        #    print('%s=%s' % (k, v))
 
         boog2teamtype = dict()
         for obj in TeamType.objects.all():
@@ -464,10 +459,10 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                     # is geen aspirant en was op tijd lid
                     if bulk_team:
                         aanmelding.inschrijf_voorkeur_team = True
+                        aanmelding.inschrijf_team_type = bulk_teamtype
 
                 aanmelding.inschrijf_voorkeur_dagdeel = bulk_dagdeel
                 aanmelding.inschrijf_notitie = bulk_opmerking
-                aanmelding.inschrijf_team_type = bulk_teamtype
                 aanmelding.save()
 
                 if methode == INSCHRIJF_METHODE_1:
