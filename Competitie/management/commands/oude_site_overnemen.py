@@ -635,7 +635,7 @@ class Command(BaseCommand):
             else:
                 for team_nr in team_data.keys():
                     naam = "%s-%s-%s" % (afkorting, ver_nr, team_nr)        # R-1000-1
-                    tup = (afstand, str(ver_nr), naam)
+                    tup = (str(afstand), ver_nr, naam)
                     if tup not in self._cache_teams:
                         # nieuw team
 
