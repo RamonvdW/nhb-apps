@@ -8,6 +8,8 @@ ARGS="$*"
 RED="\e[31m"
 RESET="\e[0m"
 REPORT_DIR="/tmp/covhtml"
+LOG="/tmp/test_out.txt"
+[ -e "$LOG" ] && rm "$LOG"
 
 export PYTHONDONTWRITEBYTECODE=1
 
@@ -50,8 +52,9 @@ export COVERAGE_FILE="/tmp/.coverage.$$"
 
 python3 -m coverage erase
 
-python3 -m coverage run --append --branch \
-    ./manage.py test --settings=nhbapps.settings_dev --noinput $*  # note: double quotes not supported around $*
+# note: double quotes not supported around $*
+echo "[INFO] Capturing output in $LOG"
+python3 -m coverage run --append --branch ./manage.py test --settings=nhbapps.settings_dev --noinput $* 2>&1 | tee "$LOG"
 RES=$?
 [ $RES -eq 3 ] && ABORTED=1
 #echo "[DEBUG] Coverage run result: $RES"
@@ -82,10 +85,10 @@ then
     echo
     if [ -z "$FOCUS" ]
     then
-        python3 -m coverage report --precision=1 --skip-covered --fail-under=98 $OMIT
+        python3 -m coverage report --precision=1 --skip-covered --fail-under=98 $OMIT | tee -a "$LOG"
         res=$?
     else
-        python3 -m coverage report --precision=1 $OMIT | grep -E "$FOCUS|----|Cover"
+        python3 -m coverage report --precision=1 $OMIT | grep -E "$FOCUS|----|Cover" | tee -a "$LOG"
         res=0
     fi
     #echo "res=$res"
