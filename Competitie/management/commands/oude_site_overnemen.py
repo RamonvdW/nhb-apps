@@ -14,7 +14,7 @@ from NhbStructuur.models import NhbLid, NhbVereniging
 from Logboek.models import schrijf_in_logboek
 from Competitie.models import (Competitie, CompetitieKlasse,
                                LAAG_REGIO, DeelCompetitie, DeelcompetitieRonde,
-                               AG_NUL, RegioCompetitieSchutterBoog)
+                               AG_NUL, RegioCompetitieSchutterBoog, RegiocompetitieTeam)
 from Schutter.models import SchutterBoog
 from Wedstrijden.models import Wedstrijd, WedstrijdUitslag, WedstrijdenPlan
 from Score.models import Score, ScoreHist
@@ -61,10 +61,12 @@ class Command(BaseCommand):
         self._cache_teamtype = dict()      # [afkorting] = TeamType
         self._cache_klasse = dict()        # [competitie.pk, klasse_beschrijving] = CompetitieKlasse
         self._cache_nhblid = dict()        # [nhbnr] = NhbLid
+        self._cache_nhbver = dict()        # [ver_nr] = NhbVereniging
         self._cache_schutterboog = dict()  # [(nhblid, afkorting)] = SchutterBoog
         self._cache_inschrijving = dict()  # [(deelcomp.pk, schutterboog.pk)] = RegioCompetitieSchutterBoog
         self._cache_ag_score = dict()      # [(afstand, schutterboog.pk)] = Score
         self._cache_scores = dict()        # [(inschrijving.pk, ronde.pk)] = score
+        self._cache_teams = dict()         # [(afstand, ver_nr, team_naam)] = RegiocompetitieTeam   (met team_naam = "R-1098-1")
 
         self._prev_hash = dict()           # [fname] = hash
 
@@ -112,6 +114,10 @@ class Command(BaseCommand):
                     .all()):
             obj.volledige_naam_str = obj.volledige_naam()
             self._cache_nhblid[obj.nhb_nr] = obj
+        # for
+
+        for obj in NhbVereniging.objects.all():
+            self._cache_nhbver[obj.nhb_nr] = obj
         # for
 
         for obj in (SchutterBoog
@@ -162,6 +168,11 @@ class Command(BaseCommand):
             else:
                 tup = (inschrijving.pk, ronde)
                 self._cache_scores[tup] = score
+        # for
+
+        for obj in RegiocompetitieTeam.objects.select_related('vereniging', 'deelcompetitie__competitie').all():
+            tup = (obj.deelcompetitie.competitie.afstand, obj.vereniging.nhb_nr, obj.team_naam)
+            self._cache_teams[tup] = obj
         # for
 
     def _prep_regio2deelcomp_regio2ronde2uitslag(self):
@@ -611,13 +622,46 @@ class Command(BaseCommand):
                         inschrijving.klasse,
                         self._klasse))
 
-    def _verwerk_klassen(self, data):
+    def _verwerk_ver_teams(self, data, afstand, afkorting):
+        for ver_nr, team_data in data.items():
+            try:
+                ver = self._cache_nhbver[int(ver_nr)]
+            except (ValueError, KeyError):
+                pass
+            else:
+                for team_nr in team_data.keys():
+                    naam = "%s-%s-%s" % (afkorting, ver_nr, team_nr)        # R-1000-1
+                    tup = (afstand, ver_nr, naam)
+                    if tup not in self._cache_teams:
+                        # nieuw team
+
+                        volg_nrs = [obj.volg_nr for obj in self._cache_teams.values() if obj.vereniging.nhb_nr == ver.nhb_nr]
+                        volg_nrs.append(0)
+                        next_nr = max(volg_nrs) + 1
+
+                        team = RegiocompetitieTeam(
+                                    deelcompetitie=self._regio2deelcomp[ver.regio.regio_nr],
+                                    vereniging=ver,
+                                    volg_nr=next_nr,
+                                    team_type=self._cache_teamtype[afkorting],
+                                    team_naam=naam)
+                        team.save()
+                        self._cache_teams[tup] = team
+                        self.stdout.write('[INFO] Regio team aangemaakt: %s in %sm competitie' % (naam, afstand))
+                # for
+        # for
+
+    def _verwerk_klassen(self, data, afstand, afkorting):
         self._bulk_score = list()
         self._bulk_hist = list()
         self._bulk_uitslag = dict()
         self._pk2uitslag = dict()
 
         for klasse, data_schutters in data.items():
+            if klasse == "ver_teams":
+                self._verwerk_ver_teams(data_schutters, afstand, afkorting)
+                continue
+
             self._selecteer_klasse(klasse)
 
             for nhb_nr, data_schutter in data_schutters.items():
@@ -725,7 +769,7 @@ class Command(BaseCommand):
                 for afkorting in ('C', 'BB', 'IB', 'LB', 'R'):
                     self._boogtype = self._cache_boogtype[afkorting]
                     boog_data = afstand_data[afkorting]
-                    self._verwerk_klassen(boog_data)
+                    self._verwerk_klassen(boog_data, afstand, afkorting)
                 # for
             else:
                 self.stdout.write('[WARNING] Import %sm wordt overgeslagen want geen competitie gevonden in fase B..F' % afstand)

@@ -35,7 +35,14 @@ class Command(BaseCommand):
         return hashlib.md5(msg.encode('UTF-8')).hexdigest()
 
     @staticmethod
-    def _parse_tabel_regel_vereniging(team_nhb_nrs, html, pos2, pos_end):
+    def _parse_tabel_regel_vereniging(team_nhb_nrs, team_nrs, html, pos2, pos_end):
+        # zoek het begin van een team
+        pos = html.find('<td><b>Team: ', pos2, pos_end)
+        if pos > 0:
+            team_nr = int(html[pos+13:pos+13+1])
+            team_nrs.append(team_nr)
+
+        # zoek het begin van een schutter bondsnummer
         pos = html.find('<td>[', pos2, pos_end)
         if pos < 0:
             # ignore want niet een regel met een bondsnummer / schutter naam
@@ -45,7 +52,7 @@ class Command(BaseCommand):
         if nhb_nr not in team_nhb_nrs:      # schutters kunnen voor meerdere teams uitkomen
             team_nhb_nrs.append(nhb_nr)
 
-    def _parse_html_table_vereniging(self, team_nhb_nrs, html, pos2, pos_end):
+    def _parse_html_table_vereniging(self, team_nhb_nrs, team_nrs, html, pos2, pos_end):
         if html.find('class="blauw">', pos2, pos_end) < 0:
             # ignore want niet de tabel met de scores
             return
@@ -62,11 +69,11 @@ class Command(BaseCommand):
                     self._count_errors += 1
                     html = ''
                 else:
-                    self._parse_tabel_regel_vereniging(team_nhb_nrs, html, pos1, pos2)
+                    self._parse_tabel_regel_vereniging(team_nhb_nrs, team_nrs, html, pos1, pos2)
                     pos2 += 5
         # while
 
-    def _parse_html_vereniging(self, team_nhb_nrs, html):
+    def _parse_html_vereniging(self, team_nhb_nrs, team_nrs, html):
         # html pagina bestaat uit tabellen met regels en cellen
         pos2 = 0
         while pos2 < len(html):
@@ -82,10 +89,10 @@ class Command(BaseCommand):
                     self._count_errors += 1
                     html = ''
                 else:
-                    self._parse_html_table_vereniging(team_nhb_nrs, html, pos1, pos2)
+                    self._parse_html_table_vereniging(team_nhb_nrs, team_nrs, html, pos1, pos2)
         # while
 
-    def _read_html_vereniging(self, fpath, team_nhb_nrs):
+    def _read_html_vereniging(self, fpath, team_nhb_nrs, team_nrs):
         try:
             html = open(fpath, "r", encoding='utf-8').read()
         except FileNotFoundError:               # pragma: no cover
@@ -97,7 +104,7 @@ class Command(BaseCommand):
         else:
             if self._verbose:
                 self.stdout.write("[INFO] Verwerk " + repr(fpath))
-            self._parse_html_vereniging(team_nhb_nrs, html)
+            self._parse_html_vereniging(team_nhb_nrs, team_nrs, html)
 
     @staticmethod
     def _parse_tabel_cells_rayon(data, cells):
@@ -252,12 +259,26 @@ class Command(BaseCommand):
                     self._read_html_rayon(os.path.join(pad, fname3), boog_data)
                 # for
 
+                ver_teams_data = None
                 # zoek alle _vereniging_<ver_nr>.txt
                 team_nhb_nrs = list()
                 for _, _, fnames in os.walk(pad):
                     for fname in fnames:
-                        if '_vereniging_' in fname and fname[:len(fname2)] == fname2:
-                            self._read_html_vereniging(os.path.join(pad, fname), team_nhb_nrs)
+                        if fname[:len(fname2)] == fname2:
+                            pos = fname.find('_vereniging_')
+                            if pos > 0:
+                                ver_nr = fname[pos+12:pos+12+4]
+                                team_nrs = list()
+                                self._read_html_vereniging(os.path.join(pad, fname), team_nhb_nrs, team_nrs)
+
+                                if len(team_nrs) > 0:
+                                    if not ver_teams_data:
+                                        boog_data['ver_teams'] = ver_teams_data = dict()
+
+                                    ver_teams_data[ver_nr] = team_data = dict()
+                                    for team_nr in team_nrs:
+                                        team_data[team_nr] = True
+                                    # for
                     # for
                 # for
 
