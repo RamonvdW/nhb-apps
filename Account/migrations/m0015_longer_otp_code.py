@@ -6,8 +6,6 @@
 
 from django.db import migrations, models
 
-# enforced migration as part of upgrade to Django 3.1
-
 
 class Migration(migrations.Migration):
 
@@ -15,15 +13,15 @@ class Migration(migrations.Migration):
 
     # volgorde afdwingen
     dependencies = [
-        ('Account', 'm0013_squashed'),
+        ('Account', 'm0014_account_first_name'),
     ]
 
     # migratie functies
     operations = [
         migrations.AlterField(
             model_name='account',
-            name='first_name',
-            field=models.CharField(blank=True, max_length=150, verbose_name='first name'),
+            name='otp_code',
+            field=models.CharField(blank=True, default='', help_text='OTP code', max_length=32),
         ),
     ]
 

@@ -110,7 +110,7 @@ class OTPKoppelenView(TemplateView):
         qrcode = qrcode_get(account)
 
         tmp = account.otp_code.lower()
-        secret = " ".join([tmp[i:i+4] for i in range(0, 16, 4)])
+        secret = " ".join([tmp[i:i+4] for i in range(0, len(tmp), 4)])
 
         form = OTPControleForm()
         context = {'form': form,
@@ -143,7 +143,7 @@ class OTPKoppelenView(TemplateView):
         # still here --> re-render with error message
         qrcode = qrcode_get(account)
         tmp = account.otp_code.lower()
-        secret = " ".join([tmp[i:i+4] for i in range(0, 16, 4)])
+        secret = " ".join([tmp[i:i+4] for i in range(0, len(tmp), 4)])
         context = {'form': form,
                    'qrcode': qrcode,
                    'otp_secret': secret}

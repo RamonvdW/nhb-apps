@@ -65,9 +65,9 @@ class Account(AbstractUser):
 
     # TOTP ondersteuning
     otp_code = models.CharField(
-                        max_length=16,          # 16-char base32 encoded secret
+                        max_length=32,          # 32-char base32 encoded secret
                         default="", blank=True,
-                        help_text ="OTP code")
+                        help_text="OTP code")
 
     otp_is_actief = models.BooleanField(
                         default=False,

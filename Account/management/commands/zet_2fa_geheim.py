@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -18,14 +18,14 @@ class Command(BaseCommand):
         parser.add_argument('username', nargs=1,
                             help="inlog naam")
         parser.add_argument('geheim', nargs=1,
-                            help="2FA geheim (16 tekens)")
+                            help="2FA geheim (16 of 32 tekens)")
 
     def handle(self, *args, **options):
         username = options['username'][0]
         geheim = options['geheim'][0]
 
-        if len(geheim) != 16:
-            self.stderr.write("Foutief 2FA geheim: moet 16 tekens zijn")
+        if len(geheim) not in (16, 32):
+            self.stderr.write("Foutief 2FA geheim: moet 16 of 32 tekens lang zijn")
             return
 
         try:
