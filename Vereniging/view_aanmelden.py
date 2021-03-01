@@ -667,6 +667,10 @@ class WijzigAanvangsgemiddeldeView(UserPassesTestMixin, TemplateView):
             except ValueError:
                 raise Resolver404()
 
+            # controleer dat het een redelijk AG is
+            if nieuw_ag < 1.0 or nieuw_ag >= 10.0:
+                raise Resolver404()
+
             aanvangsgemiddelde_opslaan(
                     deelnemer.schutterboog,
                     deelnemer.deelcompetitie.competitie.afstand,

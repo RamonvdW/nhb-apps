@@ -155,7 +155,8 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.url_voorkeuren = '/vereniging/leden-voorkeuren/'
         self.url_inschrijven = '/vereniging/leden-aanmelden/competitie/%s/'      # <comp_pk>
         self.url_ingeschreven = '/vereniging/leden-ingeschreven/competitie/%s/'  # <deelcomp_pk>
-        self.url_schutter_voorkeuren = '/sporter/voorkeuren/%s/'                # <nhblid_pk>
+        self.url_wijzig_ag = '/vereniging/leden-ingeschreven/wijzig-aanvangsgemiddelde/%s/'  # <deelnemer_pk>
+        self.url_schutter_voorkeuren = '/sporter/voorkeuren/%s/'                 # <nhblid_pk>
 
     def _create_histcomp(self):
         # (strategisch gekozen) historische data om klassegrenzen uit te bepalen
@@ -783,5 +784,88 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.assertEqual(len(urls2), 1)
 
         # ophalen en aanpassen: zie test_accommodatie
+
+    def test_wijzig_ag(self):
+        # de HWL wil het AG van een sporter aanpassen
+        zet_competitie_fase(self.comp_18, 'B')
+
+        # anon
+        self.e2e_logout()
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_wijzig_ag % 99999)
+        self.assert_is_redirect(resp, '/plein/')
+
+        # log in als HWL
+        self.e2e_login_and_pass_otp(self.account_hwl)
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+        self.e2e_check_rol('HWL')
+
+        # bad deelnemer_pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_wijzig_ag % 99999)
+        self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_wijzig_ag % 99999)
+        self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
+
+        # stel een paar bogen in
+        self._zet_schutter_voorkeuren(100002)
+        self._zet_schutter_voorkeuren(100003)
+
+        # beide sporters hebben geen AG
+
+        # meld twee leden aan voor de competitie
+        url = self.url_inschrijven % self.comp_18.pk
+        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
+        with self.assert_max_queries(22):
+            resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',        # 1=R
+                                          'lid_100003_boogtype_3': 'on'})       # 3=BB
+        self.assert_is_redirect_not_plein(resp)     # check success
+        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 2)    # 2 schutters, 1 competitie
+
+        deelnemer = RegioCompetitieSchutterBoog.objects.get(schutterboog__nhblid__nhb_nr=100003)
+
+        url = self.url_wijzig_ag % deelnemer.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_template_used(resp, ('vereniging/wijzig-ag.dtl', 'plein/site_layout.dtl'))
+
+        # post zonder wijziging
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
+        self.assert_is_redirect_not_plein(resp)
+
+        # post een wijziging
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'nieuw_ag': '7.654'})
+        self.assert_is_redirect_not_plein(resp)
+
+        # post nog een wijziging
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'nieuw_ag': '7.645'})
+        self.assert_is_redirect_not_plein(resp)
+
+        # post een te laag AG
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'nieuw_ag': '0.999'})
+        self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
+
+        # post een te hoog AG
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'nieuw_ag': '10.0'})
+        self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
+
+        # post een slechte wijziging
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'nieuw_ag': 'hallo!'})
+        self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
+
+        # opnieuw een get --> dit keer is er al een AG en er is geschiedenis
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+
 
 # end of file
