@@ -41,7 +41,7 @@ DAGDEEL = [('GN', "Geen voorkeur"),
            ('ZO', "Zondag"),
            ('WE', "Weekend")]
 
-DAGDEEL_AFKORTINGEN = ('GN', 'AV', 'ZA', 'ZO', 'WE')
+DAGDEEL_AFKORTINGEN = ('GN', 'AV', 'ZA', 'ZO', 'WE', 'MA', 'DI', 'WO', 'DO', 'VR')
 
 INSCHRIJF_METHODE_1 = '1'       # direct inschrijven op wedstrijd
 INSCHRIJF_METHODE_2 = '2'       # verdeel wedstrijdklassen over locaties
