@@ -101,6 +101,7 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
                       .select_related('schutterboog',
                                       'schutterboog__nhblid',
                                       'schutterboog__boogtype')
+                      .prefetch_related('regiocompetitieteam_set')
                       .filter(deelcompetitie=deelcomp,
                               bij_vereniging=self.functie_nu.nhb_ver,
                               inschrijf_voorkeur_team=True)

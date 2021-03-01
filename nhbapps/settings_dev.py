@@ -19,6 +19,7 @@ ENABLE_DEBUG_TOOLBAR = False
 #   very useful for show_urls:
 #     ./manage.py show_urls --settings=nhbapps.settings_dev
 ENABLE_DJANGO_EXTENSIONS = False
+#ENABLE_DJANGO_EXTENSIONS = True
 
 # enable html validation using v.Nu (warning: triples test duration)
 # warning: increases test run duration significantly

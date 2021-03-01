@@ -172,7 +172,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                              .filter(voor_wedstrijd=True)
                              .select_related('nhblid', 'boogtype')
                              .order_by('boogtype__volgorde')
-                             .only('nhblid__nhb_nr', 'boogtype__beschrijving')):
+                             .only('nhblid__nhb_nr', 'boogtype__afkorting', 'boogtype__beschrijving')):
             try:
                 nhblid = nhblid_dict[schutterboog.nhblid.nhb_nr]
             except KeyError:
