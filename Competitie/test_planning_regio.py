@@ -4,6 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+from django.conf import settings
 from django.test import TestCase
 from BasisTypen.models import BoogType, TeamWedstrijdklasse
 from Competitie.test_fase import zet_competitie_fase
@@ -552,7 +553,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         # pas de instellingen aan
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_planning_regio_ronde % ronde_pk,
-                                    {'ronde_week_nr': 51,
+                                    {'ronde_week_nr': 50,
                                      'ronde_naam': 'eerste rondje is gratis'})
         url_regio_planning = self.url_planning_regio % self.deelcomp_regio101_18.pk
         self.assert_is_redirect(resp, url_regio_planning)
@@ -562,9 +563,8 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         # nog een post met dezelfde resultaten
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_planning_regio_ronde % ronde_pk,
-                                    {'ronde_week_nr': 51,
+                                    {'ronde_week_nr': 50,
                                      'ronde_naam': 'eerste rondje is gratis'})
-        url_regio_planning = self.url_planning_regio % self.deelcomp_regio101_18.pk
         self.assert_is_redirect(resp, url_regio_planning)
 
         # illegale week nummers
@@ -582,16 +582,27 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
 
         # weken tussen de competitie blokken
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_planning_regio_ronde % ronde_pk, {'ronde_week_nr': 12})
+            resp = self.client.post(self.url_planning_regio_ronde % ronde_pk, {'ronde_week_nr': settings.COMPETITIE_18M_LAATSTE_WEEK })
+        self.assert_is_redirect_not_plein(resp)  # check for success
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_planning_regio_ronde % ronde_pk, {'ronde_week_nr': settings.COMPETITIE_18M_LAATSTE_WEEK + 1})
         self.assertEqual(resp.status_code, 404)  # 404 = Not found
 
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_planning_regio_ronde % ronde_pk, {'ronde_week_nr': 26})
+            resp = self.client.post(self.url_planning_regio_ronde % ronde_pk, {'ronde_week_nr': settings.COMPETITIES_START_WEEK - 1})
         self.assertEqual(resp.status_code, 404)  # 404 = Not found
 
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_planning_regio_ronde % ronde_pk, {'ronde_week_nr': 36})
-        self.assertEqual(resp.status_code, 404)  # 404 = Not found
+            resp = self.client.post(self.url_planning_regio_ronde % ronde_pk, {'ronde_week_nr': settings.COMPETITIES_START_WEEK})
+        self.assert_is_redirect_not_plein(resp)  # check for success
+
+        # terug naar de standaard week voor de rest van de tests
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_planning_regio_ronde % ronde_pk,
+                                    {'ronde_week_nr': 50,
+                                     'ronde_naam': 'eerste rondje is gratis'})
+        self.assert_is_redirect(resp, url_regio_planning)
 
         # maak een wedstrijd aan
         self.assertEqual(Wedstrijd.objects.count(), 0)
@@ -603,12 +614,11 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
 
         # wijziging van week --> wijzigt wedstrijd datums met hetzelfde aantal dagen
         wedstrijd_datum = Wedstrijd.objects.get(pk=wedstrijd_pk).datum_wanneer
-        self.assertEqual(str(wedstrijd_datum), "2019-12-16")
+        self.assertEqual(str(wedstrijd_datum), "2019-12-09")
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_planning_regio_ronde % ronde_pk,
                                 {'ronde_week_nr': 40,
                                  'ronde_naam': 'tweede rondje gaat snel'})
-        url_regio_planning = self.url_planning_regio % self.deelcomp_regio101_18.pk
         self.assert_is_redirect(resp, url_regio_planning)
         wedstrijd_datum = Wedstrijd.objects.get(pk=wedstrijd_pk).datum_wanneer
         self.assertEqual(str(wedstrijd_datum), "2019-09-30")
@@ -638,6 +648,98 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
             resp = self.client.post(self.url_planning_regio_ronde % ronde_pk,
                                     {'ronde_week_nr': 51, 'ronde_naam': 'eerste rondje is gratis'})
         self.assertEqual(resp.status_code, 404)  # 404 = Not found
+
+    def test_rcl_maakt_planning_25(self):
+        self.e2e_login_and_pass_otp(self.account_rcl101_25)
+        self.e2e_wissel_naar_functie(self.functie_rcl101_25)
+
+        # schrijf 1 schutter in
+        self._maak_inschrijving(self.deelcomp_regio101_25)
+
+        # maak een ronde aan
+        self.assertEqual(DeelcompetitieRonde.objects.count(), 0)
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_planning_regio % self.deelcomp_regio101_25.pk)
+        self.assert_is_redirect_not_plein(resp)  # check for success
+        self.assertEqual(DeelcompetitieRonde.objects.count(), 1)
+
+        ronde = DeelcompetitieRonde.objects.all()[0]
+        ronde_pk = ronde.pk
+        self.assertTrue(str(ronde) != '')
+
+        # haal de ronde planning op
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_planning_regio_ronde % ronde_pk)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/planning-regio-ronde.dtl', 'plein/site_layout.dtl'))
+
+        # pas de instellingen aan
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_planning_regio_ronde % ronde_pk,
+                                    {'ronde_week_nr': 50,
+                                     'ronde_naam': 'eerste rondje is gratis'})
+        url_regio_planning = self.url_planning_regio % self.deelcomp_regio101_25.pk
+        self.assert_is_redirect(resp, url_regio_planning)
+
+        # TODO: check dat ronde settings in de database geland zijn
+
+        # nog een post met dezelfde resultaten
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_planning_regio_ronde % ronde_pk,
+                                    {'ronde_week_nr': 50,
+                                     'ronde_naam': 'eerste rondje is gratis'})
+        self.assert_is_redirect(resp, url_regio_planning)
+
+        # weken tussen de competitie blokken
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_planning_regio_ronde % ronde_pk, {'ronde_week_nr': settings.COMPETITIE_25M_LAATSTE_WEEK})
+        self.assert_is_redirect_not_plein(resp)  # check for success
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_planning_regio_ronde % ronde_pk, {'ronde_week_nr': settings.COMPETITIE_25M_LAATSTE_WEEK + 1})
+        self.assertEqual(resp.status_code, 404)  # 404 = Not found
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_planning_regio_ronde % ronde_pk, {'ronde_week_nr': settings.COMPETITIES_START_WEEK - 1})
+        self.assertEqual(resp.status_code, 404)  # 404 = Not found
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_planning_regio_ronde % ronde_pk, {'ronde_week_nr': settings.COMPETITIES_START_WEEK})
+        self.assert_is_redirect_not_plein(resp)  # check for success
+
+        # terug naar de standaard week voor de rest van de tests
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_planning_regio_ronde % ronde_pk,
+                                    {'ronde_week_nr': 50,
+                                     'ronde_naam': 'eerste rondje is gratis'})
+        self.assert_is_redirect(resp, url_regio_planning)
+
+        # maak een wedstrijd aan
+        self.assertEqual(Wedstrijd.objects.count(), 0)
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_planning_regio_ronde % ronde_pk, {})
+        self.assert_is_redirect_not_plein(resp)  # check for success
+        self.assertEqual(Wedstrijd.objects.count(), 1)
+        wedstrijd_pk = Wedstrijd.objects.all()[0].pk
+
+        # wijziging van week --> wijzigt wedstrijd datums met hetzelfde aantal dagen
+        wedstrijd_datum = Wedstrijd.objects.get(pk=wedstrijd_pk).datum_wanneer
+        self.assertEqual(str(wedstrijd_datum), "2019-12-09")
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_planning_regio_ronde % ronde_pk,
+                                {'ronde_week_nr': 10,
+                                 'ronde_naam': 'tweede rondje gaat snel'})
+        self.assert_is_redirect(resp, url_regio_planning)
+        wedstrijd_datum = Wedstrijd.objects.get(pk=wedstrijd_pk).datum_wanneer
+        self.assertEqual(str(wedstrijd_datum), "2020-03-02")
+
+        # haal de wedstrijd op
+        with self.assert_max_queries(27):
+            resp = self.client.get(self.url_wijzig_wedstrijd % wedstrijd_pk)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/wijzig-wedstrijd.dtl', 'plein/site_layout.dtl'))
 
     def test_rcl_maakt_planning_methode1(self):
         self.e2e_login_and_pass_otp(self.account_rcl101_25)
@@ -831,7 +933,8 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         # pas de instellingen van de ronde (van een cluster) aan
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_planning_regio_ronde % ronde_pk,
-                                    {'ronde_week_nr': 51, 'ronde_naam': 'eerste rondje is gratis'})
+                                    {'ronde_week_nr': 50,
+                                     'ronde_naam': 'eerste rondje is gratis'})
         url_cluster_planning = self.url_planning_regio_cluster % (self.deelcomp_regio101_18.pk, self.cluster_101a_18.pk)
         self.assert_is_redirect(resp, url_cluster_planning)
 
@@ -1111,7 +1214,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         # pas de instellingen van de ronde aan
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_planning_regio_ronde % ronde_pk,
-                                    {'ronde_week_nr': 5, 'ronde_naam': 'laatste inhaalronde'})
+                                    {'ronde_week_nr': 45, 'ronde_naam': 'laatste inhaalronde'})
         url_regio_planning = self.url_planning_regio % self.deelcomp_regio101_18.pk
         self.assert_is_redirect(resp, url_regio_planning)
 
@@ -1448,7 +1551,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         # ronde naam veranderen (mag niet)
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_planning_regio_ronde % ronde_pk,
-                                    {'ronde_week_nr': 51, 'ronde_naam': 'maak niet uit'})
+                                    {'ronde_week_nr': 50, 'ronde_naam': 'maak niet uit'})
         self.assert_is_redirect_not_plein(resp)  # check for success
 
         # maak een ronde aan
@@ -1468,7 +1571,8 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         # ronde naam veranderen in import-ronde (mag niet)
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_planning_regio_ronde % ronde_pk,
-                                    {'ronde_week_nr': 51, 'ronde_naam': 'Ronde 9 oude programma'})
+                                    {'ronde_week_nr': 50,
+                                     'ronde_naam': 'Ronde 9 oude programma'})
         self.assert_is_redirect_not_plein(resp)  # check for success
 
         # wedstrijd toevoegen aan import-ronde (mag niet)

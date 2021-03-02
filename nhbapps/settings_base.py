@@ -26,7 +26,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2021-02-12'
+SITE_VERSIE = '2021-03-02'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -195,6 +195,12 @@ MINIMUM_LEEFTIJD_LID = 5
 # minimum aantal scores in uitslag vorige seizoen nodig om te gebruiken als AG voor nieuwe seizoen
 COMPETITIE_18M_MINIMUM_SCORES_VOOR_AG = 6
 COMPETITIE_25M_MINIMUM_SCORES_VOOR_AG = 5   # uitzondering voor 2020/2021 in verband met corona
+
+# week waarin de laatste wedstrijden geschoten mogen worden
+COMPETITIES_START_WEEK = 37
+COMPETITIE_18M_LAATSTE_WEEK = 50        # week 37 t/m week 50
+#COMPETITIE_25M_LAATSTE_WEEK = 11        # week 37 t/m week 11
+COMPETITIE_25M_LAATSTE_WEEK = 22		# uitzondering in 2021
 
 # maximum aantal resultaten dat een doorzoeking van de records terug geeft
 # dit voorkomt honderden resultaten bij het zoeken naar de letter e
