@@ -572,9 +572,22 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
                 raise Resolver404()
 
             # sanity-check op ronde nummer
-            if week_nr < 1 or week_nr > 53 or (11 < week_nr < 37):
+            if week_nr < 1 or week_nr > 53:
                 # geen valide week nummer
                 raise Resolver404()
+
+            eind_week = settings.COMPETITIE_25M_LAATSTE_WEEK
+            if ronde.deelcompetitie.competitie.afstand == '18':
+                eind_week = settings.COMPETITIE_18M_LAATSTE_WEEK
+
+            if eind_week < settings.COMPETITIES_START_WEEK:
+                # typisch voor 25m: week 11..37 mogen niet
+                if eind_week < week_nr < settings.COMPETITIES_START_WEEK:
+                    raise Resolver404()
+            else:
+                # typisch voor 18m: week 37..50 mogen, verder niet
+                if week_nr > eind_week or week_nr < settings.COMPETITIES_START_WEEK:
+                    raise Resolver404()
 
             beschrijving = request.POST.get('ronde_naam', '')
 
@@ -736,7 +749,7 @@ class RegioRondePlanningMethode1View(UserPassesTestMixin, TemplateView):
         # voeg een wedstrijd toe
         jaar = ronde.deelcompetitie.competitie.begin_jaar
         wedstrijd = Wedstrijd()
-        wedstrijd.datum_wanneer = competitie_week_nr_to_date(jaar, 37)
+        wedstrijd.datum_wanneer = competitie_week_nr_to_date(jaar, settings.COMPETITIES_START_WEEK)
         wedstrijd.tijd_begin_aanmelden = datetime.time(hour=0, minute=0, second=0)
         wedstrijd.tijd_begin_wedstrijd = wedstrijd.tijd_begin_aanmelden
         wedstrijd.tijd_einde_wedstrijd = wedstrijd.tijd_begin_aanmelden
@@ -856,13 +869,15 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
 
         if ronde.deelcompetitie.inschrijf_methode == INSCHRIJF_METHODE_1:
             jaar = ronde.deelcompetitie.competitie.begin_jaar
-            week = 37
+            week = settings.COMPETITIES_START_WEEK
             context['datum_eerste'] = competitie_week_nr_to_date(jaar, week)
 
             if ronde.deelcompetitie.competitie.afstand == '18':
-                week = 50 + 1
+                week = settings.COMPETITIE_18M_LAATSTE_WEEK + 1
             else:
-                week = 11 + 1
+                week = settings.COMPETITIE_25M_LAATSTE_WEEK + 1
+            week += 1
+            if week < settings.COMPETITIES_START_WEEK:
                 jaar += 1
             context['datum_laatste'] = competitie_week_nr_to_date(jaar, week)  # TODO: moet 1 dag eerder?
         else:
