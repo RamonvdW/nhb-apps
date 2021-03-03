@@ -175,6 +175,7 @@ class TestVerenigingWedstrijden(E2EHelpers, TestCase):
         self.url_ingeschreven = '/vereniging/leden-ingeschreven/competitie/%s/'  # <deelcomp_pk>
         self.url_schutter_voorkeuren = '/sporter/voorkeuren/%s/'                 # <nhblid_pk>
         self.url_wedstrijden = '/vereniging/wedstrijden/'
+        self.url_uitslag_invoeren = '/vereniging/uitslag-invoeren/'
 
     def _create_competitie(self):
         url_kies = '/bondscompetities/'
@@ -262,6 +263,17 @@ class TestVerenigingWedstrijden(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('vereniging/wedstrijden.dtl', 'plein/site_layout.dtl'))
 
         self.e2e_assert_other_http_commands_not_supported(self.url_wedstrijden)
+
+        # haal de lijst van wedstrijden waarvan de uitslag ingevoerd mag worden
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_uitslag_invoeren)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('vereniging/wedstrijden.dtl', 'plein/site_layout.dtl'))
+
+        urls2 = self.extract_all_urls(resp, skip_menu=True)
+        for url in urls2:
+            self.assertTrue(url.startswith('/bondscompetities/scores/uitslag-invoeren/'))
 
     def test_wedstrijden_wl(self):
         # login als WL
