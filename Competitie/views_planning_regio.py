@@ -18,7 +18,7 @@ from NhbStructuur.models import NhbCluster, NhbVereniging
 from Taken.taken import maak_taak
 from Wedstrijden.models import Wedstrijd, WedstrijdLocatie
 from .models import (LAAG_REGIO, LAAG_RK, LAAG_BK, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2,
-                     TEAM_PUNTEN_FORMULE1, TEAM_PUNTEN_TWEE, TEAM_PUNTEN_DRIE, TEAM_PUNTEN_SOM_SCORES,
+                     TEAM_PUNTEN_FORMULE1, TEAM_PUNTEN_TWEE, TEAM_PUNTEN_SOM_SCORES,
                      DeelCompetitie, DeelcompetitieRonde, maak_deelcompetitie_ronde,
                      CompetitieKlasse, RegioCompetitieSchutterBoog, RegiocompetitieTeam)
 from .menu import menu_dynamics_competitie
@@ -1355,12 +1355,6 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
         opts.append(obj)
 
         obj = SimpleNamespace()
-        obj.choice_name = '3P'
-        obj.beschrijving = 'Drie punten systeem (3/1/0)'
-        obj.actief = deelcomp.regio_team_punten_model == TEAM_PUNTEN_DRIE
-        # opts.append(obj)      # TODO: pending discussion and agreement
-
-        obj = SimpleNamespace()
         obj.choice_name = 'SS'
         obj.beschrijving = 'Cumulatief: som van team totaal'
         obj.actief = deelcomp.regio_team_punten_model == TEAM_PUNTEN_SOM_SCORES
@@ -1410,7 +1404,7 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
 
             deelcomp.regio_heeft_vaste_teams = (alloc == 'vast')
 
-            if punten in (TEAM_PUNTEN_TWEE, TEAM_PUNTEN_DRIE, TEAM_PUNTEN_FORMULE1, TEAM_PUNTEN_SOM_SCORES):
+            if punten in (TEAM_PUNTEN_TWEE, TEAM_PUNTEN_FORMULE1, TEAM_PUNTEN_SOM_SCORES):
                 deelcomp.regio_team_punten_model = punten
 
             deelcomp.save()

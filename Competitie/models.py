@@ -54,13 +54,11 @@ INSCHRIJF_METHODES = (
 )
 
 TEAM_PUNTEN_TWEE = '2P'
-TEAM_PUNTEN_DRIE = '3P'
 TEAM_PUNTEN_FORMULE1 = 'F1'
 TEAM_PUNTEN_SOM_SCORES = 'SS'
 
 TEAM_PUNTEN = (
     (TEAM_PUNTEN_TWEE, 'Twee punten systeem (2/1/0)'),                      # alleen bij head-to-head
-    (TEAM_PUNTEN_DRIE, 'Drie punten systeem (3/1/0)'),                      # alleen bij head-to-head
     (TEAM_PUNTEN_SOM_SCORES, 'Cumulatief: som van team totaal elke ronde'),
     (TEAM_PUNTEN_FORMULE1, 'Formule 1 systeem (10/8/6/5/4/3/2/1)'),         # afhankelijk van score
 )
