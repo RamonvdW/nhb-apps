@@ -338,7 +338,7 @@
                     {% endif %}
 
                     <tr>
-                        <td style="vertical-align: top">Notities:</td>
+                        <td style="vertical-align: top">Bijzonderheden:</td>
                         <td style="vertical-align: top">
                             {% if readonly %}
                                 <span>{{ locatie.notities|linebreaksbr }}</span>
@@ -424,7 +424,7 @@
                     </tr>
 
                     <tr>
-                        <td style="vertical-align: top">Notities:</td>
+                        <td style="vertical-align: top">Bijzonderheden:</td>
                         <td style="vertical-align: top">
                             {% if readonly %}
                                 <span>{{ buiten_locatie.notities|linebreaksbr }}</span>
