@@ -43,7 +43,6 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
     def __init__(self, **kwargs):
         super().__init__(*kwargs)
         self.comp = None
-        self.teamtypen = list()
         self.rol_nu, self.functie_nu = None, None
 
     def test_func(self):
@@ -117,18 +116,6 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                     .order_by('achternaam', 'voornaam')):
             obj.leeftijdsklasse = None
             objs.append(obj)
-        # for
-
-        # haal de teamtypen erbij
-        boog2teambogen = dict()     # ['IB'] = "IB, LB"
-        for obj in TeamType.objects.prefetch_related('boog_typen').order_by('volgorde'):
-            beschr = obj.beschrijving
-            afkortingen = list(obj.boog_typen.order_by('volgorde').values_list('afkorting', flat=True))
-            teambogen_str = ", ".join(afkortingen)
-            if len(afkortingen) > 1:
-                beschr += ' (bogen: %s)' % teambogen_str
-            tup = (obj.afkorting, beschr, teambogen_str)
-            self.teamtypen.append(tup)
         # for
 
         # maak een paar tabellen om database toegangen te verminderen
@@ -240,8 +227,6 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
         # bepaal de inschrijfmethode voor deze regio
         mijn_regio = self.functie_nu.nhb_ver.regio
 
-        context['teamtypen'] = self.teamtypen
-
         if not mijn_regio.is_administratief:
             deelcomp = (DeelCompetitie
                         .objects
@@ -322,16 +307,8 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
 
         # zoek eerst de voorkeuren op
         bulk_team = False
-        bulk_teamtype = None
         if request.POST.get('wil_in_team', '') != '':
             bulk_team = True
-
-            afkorting = request.POST.get('teamtype', '')[:6]
-            if afkorting != '':
-                try:
-                    bulk_teamtype = boog2teamtype[afkorting]
-                except KeyError:
-                    pass
 
         bulk_wedstrijden = list()
         if methode == INSCHRIJF_METHODE_1:
@@ -459,7 +436,6 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                     # is geen aspirant en was op tijd lid
                     if bulk_team:
                         aanmelding.inschrijf_voorkeur_team = True
-                        aanmelding.inschrijf_team_type = bulk_teamtype
 
                 aanmelding.inschrijf_voorkeur_dagdeel = bulk_dagdeel
                 aanmelding.inschrijf_notitie = bulk_opmerking
