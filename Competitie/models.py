@@ -277,6 +277,8 @@ class CompetitieKlasse(models.Model):
     team = models.ForeignKey(TeamWedstrijdklasse, on_delete=models.PROTECT, null=True, blank=True)
 
     # klassegrens voor deze competitie
+    # individueel: 0.000 - 10.000
+    # team som van de 3 beste = 0.003 - 30.000
     min_ag = models.DecimalField(max_digits=5, decimal_places=3)    # 10.000
 
     def __str__(self):

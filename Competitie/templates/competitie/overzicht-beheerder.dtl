@@ -127,7 +127,7 @@
         {% endif %}
 
         <!-- toon klassegrenzen regiocompetitie -->
-        {% if comp.fase >= 'A2' %}
+        {% if comp.klassegrenzen_vastgesteld %}
             {% url 'Competitie:klassegrenzen-tonen' comp_pk=comp.pk as card_url %}
             {% include 'plein/card.dtl' with title="Klassegrenzen" text="Vastgestelde klassegrenzen voor de wedstrijdklassen van de competities." icon="equalizer" url=card_url %}
         {% endif %}

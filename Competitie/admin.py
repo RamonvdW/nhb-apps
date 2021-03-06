@@ -28,7 +28,12 @@ class DeelcompetitieRondeAdmin(admin.ModelAdmin):
 
 
 class CompetitieKlasseAdmin(admin.ModelAdmin):
+
+    list_filter = ('competitie',)
+
     list_select_related = ('competitie', 'indiv', 'team')
+
+    ordering = ('team__volgorde', 'indiv__volgorde')
 
 
 class RegioCompetitieSchutterBoogAdmin(admin.ModelAdmin):
