@@ -55,8 +55,15 @@ python3 -m coverage erase
 
 # note: double quotes not supported around $*
 echo "[INFO] Capturing output in $LOG"
-python3 -m coverage run --append --branch ./manage.py test --settings=nhbapps.settings_dev --noinput $* 2>&1 | tee "$LOG"
+tail -f "$LOG" &
+PID_TAIL=$!
+
+python3 -m coverage run --append --branch ./manage.py test --settings=nhbapps.settings_dev --noinput $* >>"$LOG" 2>>"$LOG"
 RES=$?
+
+kill $PID_TAIL
+wait $PID_TAIL 2>/dev/null
+
 [ $RES -eq 3 ] && ABORTED=1
 #echo "[DEBUG] Coverage run result: $RES"
 
