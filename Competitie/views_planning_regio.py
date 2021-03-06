@@ -1322,7 +1322,10 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
             raise Resolver404()
 
         if deelcomp.competitie.fase >= 'B':
-            context['readonly'] = True
+            context['readonly_partly'] = True
+
+            if deelcomp.competitie.fase > 'C':
+                context['readonly'] = True
 
         context['deelcomp'] = deelcomp
 
@@ -1389,25 +1392,27 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
             raise Resolver404()
 
         deelcomp.competitie.bepaal_fase()
-        if deelcomp.competitie.fase >= 'B':
+        if deelcomp.competitie.fase > 'C':
+            # niet meer te wijzigen
             raise Resolver404()
 
-        teams = request.POST.get('teams', '?')[:3]      # ja/nee
-        alloc = request.POST.get('team_alloc', '?')[:4]      # vast/vsg
-        punten = request.POST.get('team_punten', '?')[:2]    # 2p/3p/ss/f1
+        readonly_partly = (deelcomp.competitie.fase >= 'B')
 
-        if teams == 'nee':
-            deelcomp.regio_organiseert_teamcompetitie = False
-            deelcomp.save()
-        elif teams == 'ja':
-            deelcomp.regio_organiseert_teamcompetitie = True
+        if not readonly_partly:
+            # deze velden worden alleen doorgegeven als ze te wijzigen zijn
+            teams = request.POST.get('teams', '?')[:3]  # ja/nee
+            alloc = request.POST.get('team_alloc', '?')[:4]  # vast/vsg
+            if teams == 'nee':
+                deelcomp.regio_organiseert_teamcompetitie = False
+            elif teams == 'ja':
+                deelcomp.regio_organiseert_teamcompetitie = True
+                deelcomp.regio_heeft_vaste_teams = (alloc == 'vast')
 
-            deelcomp.regio_heeft_vaste_teams = (alloc == 'vast')
+        punten = request.POST.get('team_punten', '?')[:2]    # 2p/ss/f1
+        if punten in (TEAM_PUNTEN_TWEE, TEAM_PUNTEN_FORMULE1, TEAM_PUNTEN_SOM_SCORES):
+            deelcomp.regio_team_punten_model = punten
 
-            if punten in (TEAM_PUNTEN_TWEE, TEAM_PUNTEN_FORMULE1, TEAM_PUNTEN_SOM_SCORES):
-                deelcomp.regio_team_punten_model = punten
-
-            deelcomp.save()
+        deelcomp.save()
 
         url = reverse('Competitie:overzicht',
                       kwargs={'comp_pk': deelcomp.competitie.pk})
