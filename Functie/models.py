@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import models
 from django.utils import timezone
+from django.utils.formats import localize
 from NhbStructuur.models import NhbRegio, NhbRayon, NhbVereniging
-from Account.models import Account, HanterenPersoonsgegevens
+from Account.models import Account
 import datetime
 
 """ Deze module houdt bij wie beheerders zijn
@@ -78,6 +79,29 @@ class Functie(models.Model):
     objects = models.Manager()      # for the editor only
 
 
+class VerklaringHanterenPersoonsgegevens(models.Model):
+    """ status van de vraag om juist om te gaan met persoonsgegevens,
+        voor de paar accounts waarvoor dit relevant is.
+    """
+
+    # het account waar dit record bij hoort
+    account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='vhpg')
+
+    # datum waarop de acceptatie voor het laatste gedaan is
+    acceptatie_datum = models.DateTimeField()
+
+    def __str__(self):
+        """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
+        return "[%s] %s" % (self.account.username, localize(self.acceptatie_datum))
+
+    class Meta:
+        """ meta data voor de admin interface """
+        verbose_name = "Verklaring Hanteren Persoonsgegevens"
+        verbose_name_plural = "Verklaring Hanteren Persoonsgegevens"
+
+    objects = models.Manager()      # for the editor only
+
+
 def maak_functie(beschrijving, rol):
     """ Deze helper geeft het Functie object terug met de gevraagde parameters
         De eerste keer wordt deze aangemaakt.
@@ -115,8 +139,8 @@ def account_needs_vhpg(account, show_only=False):
 
     # kijk of de acceptatie recent al afgelegd is
     try:
-        vhpg = HanterenPersoonsgegevens.objects.only('acceptatie_datum').get(account=account)
-    except HanterenPersoonsgegevens.DoesNotExist:
+        vhpg = VerklaringHanterenPersoonsgegevens.objects.only('acceptatie_datum').get(account=account)
+    except VerklaringHanterenPersoonsgegevens.DoesNotExist:
         # niet uitgevoerd, wel nodig
         return True, None
 

@@ -5,13 +5,9 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import models
-from django.conf import settings
-from django.utils import timezone
 from django.contrib.auth.models import AbstractUser
-from Overig.tijdelijke_url import set_tijdelijke_url_receiver, maak_tijdelijke_url_account_email
-from Account.rechten import account_rechten_otp_controle_gelukt
+from Overig.tijdelijke_url import maak_tijdelijke_url_account_email
 from Mailer.models import mailer_email_is_valide
-import datetime
 
 
 class AccountCreateError(Exception):
@@ -155,30 +151,6 @@ class AccountEmail(models.Model):
         """ meta data voor de admin interface """
         verbose_name = "AccountEmail"
         verbose_name_plural = "AccountEmails"
-
-    objects = models.Manager()      # for the editor only
-
-
-class HanterenPersoonsgegevens(models.Model):
-    """ status van de vraag om juist om te gaan met persoonsgegevens,
-        voor de paar accounts waarvoor dit relevant is.
-    """
-
-    # het account waar dit record bij hoort
-    account = models.ForeignKey(Account, on_delete=models.CASCADE)
-
-    # datum waarop de acceptatie voor het laatste gedaan is
-    acceptatie_datum = models.DateTimeField()
-
-    def __str__(self):
-        """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
-        return "%s [%s]" % (str(self.acceptatie_datum),
-                            self.account.username)
-
-    class Meta:
-        """ meta data voor de admin interface """
-        verbose_name = "Hanteren Persoonsgegevens"
-        verbose_name_plural = "Hanteren Persoonsgegevens"
 
     objects = models.Manager()      # for the editor only
 
