@@ -18,7 +18,7 @@
         {% csrf_token %}
 
         {% if mag_aanmelden %}
-            <p>Als hoofdwedstrijdleider kan je via deze pagina leden van vereniging [{{ nhb_ver.nhb_nr }}] {{ nhb_ver.naam }} te {{ nhb_ver.plaats }} aanmelden voor de <b>{{ comp.beschrijving }}</b>.</p>
+            <p>Als hoofdwedstrijdleider kan je via deze pagina leden van vereniging [{{ nhb_ver.ver_nr }}] {{ nhb_ver.naam }} te {{ nhb_ver.plaats }} aanmelden voor de <b>{{ comp.beschrijving }}</b>.</p>
 
             <p>Onderstaande lijst toont alleen leden die ingesteld hebben met welke boog ze schieten. Je kan ze hier bij helpen via het kaartje "voorkeuren leden".</p>
 
@@ -99,7 +99,7 @@
             </table>
 
         {% else %}
-            <p>Deze pagina toont voor leden van vereniging [{{ nhb_ver.nhb_nr }}] {{ nhb_ver.naam }} te {{ nhb_ver.plaats }} of ze aangemeld zijn voor de <b>{{ comp.beschrijving }}</b>.</p>
+            <p>Deze pagina toont voor leden van vereniging [{{ nhb_ver.ver_nr }}] {{ nhb_ver.naam }} te {{ nhb_ver.plaats }} of ze aangemeld zijn voor de <b>{{ comp.beschrijving }}</b>.</p>
 
             <p>Onderstaande lijst toont alleen leden die ingesteld hebben met welke boog ze schieten.</p>
 

@@ -132,7 +132,7 @@
                     <td>{{ obj.naam_str }}</td>
 
                     {% if obj.bij_vereniging %}
-                        <td>[{{ obj.bij_vereniging.nhb_nr }}]<span class="hide-on-small-only">&nbsp;{{ obj.bij_vereniging.naam }}</span></td>
+                        <td>[{{ obj.bij_vereniging.ver_nr }}]<span class="hide-on-small-only">&nbsp;{{ obj.bij_vereniging.naam }}</span></td>
                     {% else %}
                         <td><!-- geen vereniging --></td>
                     {% endif %}

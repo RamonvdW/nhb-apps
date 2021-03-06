@@ -19,7 +19,7 @@
             <div class="white-text nhb-blauw z-depth-2">
                 <div class="row small-row">
                     <div class="col s4">Verenigingsnummer:</div>
-                    <div class="col s6">{{ nhb_ver.nhb_nr }}</div>
+                    <div class="col s6">{{ nhb_ver.ver_nr }}</div>
                 </div>
                 <div class="row small-row">
                     <div class="col s4">Naam:</div>

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -32,7 +32,7 @@ class WedstrijdLocatieAdmin(admin.ModelAdmin):      # pragma: no cover
 
     list_filter = ('zichtbaar',)
 
-    search_fields = ('adres', 'verenigingen__nhb_nr')
+    search_fields = ('adres', 'verenigingen__ver_nr')
 
     def get_queryset(self, request):
         """ deze functie is voor prestatieverbetering

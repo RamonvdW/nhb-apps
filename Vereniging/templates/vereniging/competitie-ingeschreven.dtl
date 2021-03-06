@@ -17,7 +17,7 @@
     <form method="post" action="{{ afmelden_url }}">
         {% csrf_token %}
 
-        <p>Deze pagina toont de leden van vereniging [{{ nhb_ver.nhb_nr }}] {{ nhb_ver.naam }} te {{ nhb_ver.plaats }} die ingeschreven zijn voor de <b>{{ deelcomp }}</b>.</p>
+        <p>Deze pagina toont de leden van vereniging [{{ nhb_ver.ver_nr }}] {{ nhb_ver.naam }} te {{ nhb_ver.plaats }} die ingeschreven zijn voor de <b>{{ deelcomp }}</b>.</p>
 
         {% if mag_afmelden %}
             <p>Als hoofdwedstrijdleider kan je leden afmelden: zet een vinkje bij de naam en druk dan rode knop in de rechter onderhoek.</p>

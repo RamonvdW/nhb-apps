@@ -13,7 +13,7 @@
 
 <h4>Ledenlijst</h4>
 
-<p>Deze pagina toont een overzicht van de jeugdleden en volwassen leden van vereniging [{{ nhb_ver.nhb_nr }}] {{ nhb_ver.naam }} te {{ nhb_ver.plaats }}.</p>
+<p>Deze pagina toont een overzicht van de jeugdleden en volwassen leden van vereniging [{{ nhb_ver.ver_nr }}] {{ nhb_ver.naam }} te {{ nhb_ver.plaats }}.</p>
 
 {% if leden_jeugd %}
 

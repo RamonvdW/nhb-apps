@@ -79,7 +79,7 @@
                         <span>Kies een vereniging:</span><br>
                         {% for ver in ver_filters %}
                             <p>
-                            <a class="btn-nhb-blauw" href="{{ ver.zoom_url }}">{{ ver.nhb_nr }}</a>
+                            <a class="btn-nhb-blauw" href="{{ ver.zoom_url }}">{{ ver.ver_nr }}</a>
                             <span>&nbsp;&nbsp;{{ ver.naam }}</span>
                             </p>
                         {% endfor %}

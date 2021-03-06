@@ -36,7 +36,7 @@
                 </div>
                 <div class="row small-row">
                     <div class="col s5">Lid bij vereniging:</div>
-                    <div class="col s6">[{{ nhblid.bij_vereniging.nhb_nr }}] {{ nhblid.bij_vereniging.naam }}</div>
+                    <div class="col s6">[{{ nhblid.bij_vereniging.ver_nr }}] {{ nhblid.bij_vereniging.naam }}</div>
                 </div>
                 <div class="row small-row">
                     <div class="col s5">Plaats:</div>
