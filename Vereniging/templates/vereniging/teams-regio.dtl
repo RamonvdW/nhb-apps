@@ -23,9 +23,7 @@
                 <tr>
                     <th>Team type</th>
                     <th>Team naam</th>
-                    {% if vaste_teams %}
-                        <th>Vaste leden</th>
-                    {% endif %}
+                    <th>Gekoppeld</th>
                     <th>Aanvangsgemiddelde</th>
                     <th><!-- kolom voor de knoppen --></th>
                 </tr>
@@ -35,9 +33,7 @@
                 <tr>
                     <td>{{ team.team_type.beschrijving }}</td>
                     <td>{{ team.team_naam }}</td>
-                    {% if vaste_teams %}
-                        <td>{{ team.aantal }}</td>
-                    {% endif %}
+                    <td{% if team.aantal != 4 %} class="red-text"{% endif %}>{{ team.aantal }}</td>
                     <td>{{ team.aanvangsgemiddelde }}</td>  <!-- TODO: vervang door klasse -->
                     <td>
                         <a class="btn-nhb-blauw" href="{{ team.url_wijzig }}">Wijzig</a>
@@ -47,23 +43,17 @@
                 </tr>
             {% empty %}
                 <tr>
-                    <td colspan="3"><i>Er zijn nog geen teams</i></td>
-                    {% if vaste_teams %}
-                        <td></td>
-                    {% endif %}
+                    <td colspan="5"><i>Er zijn nog geen teams</i></td>
                 </tr>
             {% endfor %}
 
             <!-- knop om een team toe te voegen -->
             {% if url_nieuw_team %}
                 <tr>
-                    <td colspan="3">
+                    <td colspan="5">
                         <a class="btn-nhb-blauw" href="{{ url_nieuw_team }}">
                             <i class="material-icons-round left">add</i>Team toevoegen</a>
                     </td>
-                    {% if vaste_teams %}
-                        <td></td>
-                    {% endif %}
                 </tr>
             {% endif %}
 

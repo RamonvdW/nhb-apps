@@ -30,7 +30,7 @@
             {% endif %}
 
             <tr>
-                <td>Team type</td>
+                <td>Team type<br><br><i>(bij wijziging worden sporters ontkoppeld!)</i></td>
                 <td>
                     <ul id="id_team_type">
                         {% for opt in opt_team_type %}

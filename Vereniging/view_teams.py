@@ -71,8 +71,6 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
         # zoek de deelcompetitie waar de regio teams voor in kunnen stellen
         context['deelcomp'] = deelcomp = self._get_deelcomp(kwargs['deelcomp_pk'])
 
-        context['vaste_teams'] = deelcomp.regio_heeft_vaste_teams
-
         teams = (RegiocompetitieTeam
                  .objects
                  .select_related('vereniging',
@@ -81,8 +79,7 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
                          vereniging=self.functie_nu.nhb_ver)
                  .order_by('volg_nr'))
         for obj in teams:
-            if deelcomp.regio_heeft_vaste_teams:
-                obj.aantal = obj.vaste_schutters.count()
+            obj.aantal = obj.vaste_schutters.count()
 
             obj.url_wijzig = reverse('Vereniging:teams-regio-wijzig',
                                      kwargs={'deelcomp_pk': deelcomp.pk,
@@ -383,36 +380,35 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
         except (ValueError, RegiocompetitieTeam.DoesNotExist):
             raise Resolver404()
 
-        if team.deelcompetitie.regio_heeft_vaste_teams:
-            pks = list()
-            for key in request.POST.keys():
-                if key.startswith('deelnemer_'):
-                    try:
-                        pk = int(key[10:])
-                    except ValueError:
-                        pass
-                    else:
-                        pks.append(pk)
-            # for
+        pks = list()
+        for key in request.POST.keys():
+            if key.startswith('deelnemer_'):
+                try:
+                    pk = int(key[10:])
+                except ValueError:
+                    pass
+                else:
+                    pks.append(pk)
+        # for
 
-            team.vaste_schutters.clear()
-            team.vaste_schutters.add(*pks)
+        team.vaste_schutters.clear()
+        team.vaste_schutters.add(*pks)
 
-            ags = team.vaste_schutters.values_list('aanvangsgemiddelde', flat=True)
-            ags = list(ags)
+        ags = team.vaste_schutters.values_list('aanvangsgemiddelde', flat=True)
+        ags = list(ags)
 
-            if len(ags) >= 3:
-                # neem de beste 3 schutters
-                ags.sort(reverse=True)
-                ags = ags[:3]
+        if len(ags) >= 3:
+            # neem de beste 3 schutters
+            ags.sort(reverse=True)
+            ags = ags[:3]
 
-                # bereken het gemiddelde
-                ag = sum(ags) / len(ags)
-            else:
-                ag = AG_NUL
+            # bereken het gemiddelde
+            ag = sum(ags) / len(ags)
+        else:
+            ag = AG_NUL
 
-            team.aanvangsgemiddelde = ag
-            team.save()
+        team.aanvangsgemiddelde = ag
+        team.save()
 
         url = reverse('Vereniging:teams-regio', kwargs={'deelcomp_pk': team.deelcompetitie.pk})
         return HttpResponseRedirect(url)

@@ -12,6 +12,14 @@
 
     <h4>Koppel teamleden</h4>
 
+    <p>Op deze pagina kan je leden van de vereniging koppelen aan het team.</p>
+    {% if team.regio_heeft_vaste_teams %}
+        <p>In jullie regio is gekozen voor <b>vaste teams</b>, dus de leden die je koppelt blijven het hele seizoen in dit team en kunnen vervangen worden door een invallen.</p>
+    {% else %}
+        <p>In jullie regio is gekozen voor dynamische teams gebaseerd op het principe van <b>voortschrijdend gemiddelde</b> (VSG), dus elke ronde krijgt het team automatisch leden toegekend.</p>
+        <p>Tijdens de inschrijving moet je leden handmatig koppelen zodat sporters met een BB, IB or LB boog in het gewenste type team komen.</p>
+    {% endif %}
+
     <form action="{{ url_opslaan }}" method="post">
         {% csrf_token %}
 
@@ -46,17 +54,33 @@
                 </td>
             </tr>
 
-
             <tr>
                 <td style="vertical-align: top">Selecteer sporters</td>
+
                 <td>
-                    {% for obj in deelnemers %}
-                        <label>
-                            <input type="checkbox" class="filled-in" name="{{ obj.sel_str }}"{% if obj.geselecteerd %} checked{% endif %}{% if obj.blokkeer %} disabled{% endif %}>
-                            <span class="black-text">({{ obj.ag_str }}) {{ obj.naam_str }} - {{ obj.boog_str }}</span>
-                        </label>
-                        <br>
-                    {% endfor %}
+                    <table class="striped">
+                        <thead>
+                            <tr>
+                                <th><!-- checkbox column --></th>
+                                <th>Aanvangsgemiddelde</th>
+                                <th>Boog</th>
+                                <th>Naam</th>
+                            </tr>
+                        </thead>
+                        {% for obj in deelnemers %}
+                            <tr>
+                            <td>
+                                <label>
+                                    <input type="checkbox" class="filled-in" name="{{ obj.sel_str }}"{% if obj.geselecteerd %} checked{% endif %}{% if obj.blokkeer %} disabled{% endif %}>
+                                    <span>&nbsp;</span>
+                                </label>
+                            </td>
+                                <td>{{ obj.ag_str }}</td>
+                                <td>{{ obj.boog_str }}</td>
+                                <td>{{ obj.naam_str }}</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
                 </td>
             </tr>
 
