@@ -62,7 +62,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         # maak een test vereniging
         ver = NhbVereniging()
         ver.naam = "Zuidelijke Club"
-        ver.nhb_nr = 1111
+        ver.ver_nr = 1111
         ver.regio = self.regio_112
         # secretaris kan nog niet ingevuld worden
         ver.save()
@@ -71,7 +71,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         # maak een test vereniging
         ver = NhbVereniging()
         ver.naam = "Grote Club"
-        ver.nhb_nr = 1000
+        ver.ver_nr = 1000
         ver.regio = self.regio_101
         # secretaris kan nog niet ingevuld worden
         ver.save()
@@ -85,11 +85,11 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         self.loc = loc
 
         # maak HWL functie aan voor deze vereniging
-        self.functie_hwl = maak_functie("HWL Vereniging %s" % ver.nhb_nr, "HWL")
+        self.functie_hwl = maak_functie("HWL Vereniging %s" % ver.ver_nr, "HWL")
         self.functie_hwl.nhb_ver = ver
         self.functie_hwl.save()
 
-        self.functie_wl = maak_functie("WL Vereniging %s" % ver.nhb_nr, "WL")
+        self.functie_wl = maak_functie("WL Vereniging %s" % ver.ver_nr, "WL")
         self.functie_wl.nhb_ver = ver
         self.functie_wl.save()
 
@@ -164,7 +164,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         # stop deze in een cluster
         ver = NhbVereniging()
         ver.naam = "Kleine Club"
-        ver.nhb_nr = "1100"
+        ver.ver_nr = "1100"
         ver.regio = self.regio_101
         ver.save()
         ver.clusters.add(self.cluster_101e_25)
@@ -1013,7 +1013,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
 
         wedstrijd = Wedstrijd.objects.get(pk=wedstrijd_pk)
         self.assertEqual(str(wedstrijd.tijd_begin_wedstrijd), "12:34:00")
-        self.assertEqual(wedstrijd.vereniging.nhb_nr, self.nhbver_101.nhb_nr)
+        self.assertEqual(wedstrijd.vereniging.ver_nr, self.nhbver_101.ver_nr)
 
         with self.assert_max_queries(31):
             resp = self.client.get(self.url_wijzig_wedstrijd % wedstrijd_pk)

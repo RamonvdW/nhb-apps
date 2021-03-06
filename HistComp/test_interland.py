@@ -24,7 +24,7 @@ class TestHistCompInterland(E2EHelpers, TestCase):
         # maak een test vereniging
         ver = NhbVereniging()
         ver.naam = "Grote Club"
-        ver.nhb_nr = 1000
+        ver.ver_nr = 1000
         ver.regio = self.regio_101
         # secretaris kan nog niet ingevuld worden
         ver.save()
@@ -60,7 +60,7 @@ class TestHistCompInterland(E2EHelpers, TestCase):
         rec.rank = 1
         rec.schutter_nr = lid.nhb_nr
         rec.schutter_naam = "wordt niet gebruikt"
-        rec.vereniging_nr = ver.nhb_nr
+        rec.vereniging_nr = ver.ver_nr
         rec.vereniging_naam = "wordt niet gebruikt"
         rec.score1 = 10
         rec.score2 = 20
@@ -93,7 +93,7 @@ class TestHistCompInterland(E2EHelpers, TestCase):
         rec.rank = 1
         rec.schutter_nr = lid.nhb_nr
         rec.schutter_naam = "wordt niet gebruikt"
-        rec.vereniging_nr = ver.nhb_nr
+        rec.vereniging_nr = ver.ver_nr
         rec.vereniging_naam = "wordt niet gebruikt"
         rec.score1 = 10
         rec.score2 = 20
@@ -125,7 +125,7 @@ class TestHistCompInterland(E2EHelpers, TestCase):
         rec.rank = 1
         rec.schutter_nr = lid.nhb_nr
         rec.schutter_naam = "wordt niet gebruikt"
-        rec.vereniging_nr = ver.nhb_nr
+        rec.vereniging_nr = ver.ver_nr
         rec.vereniging_naam = "wordt niet gebruikt"
         rec.score1 = 10
         rec.score2 = 20
@@ -145,7 +145,7 @@ class TestHistCompInterland(E2EHelpers, TestCase):
         rec.rank = 1
         rec.schutter_nr = 999999
         rec.schutter_naam = "wordt niet gebruikt"
-        rec.vereniging_nr = ver.nhb_nr
+        rec.vereniging_nr = ver.ver_nr
         rec.vereniging_naam = "wordt niet gebruikt"
         rec.score1 = 10
         rec.score2 = 20
@@ -177,7 +177,7 @@ class TestHistCompInterland(E2EHelpers, TestCase):
         rec.rank = 1
         rec.schutter_nr = lid.nhb_nr
         rec.schutter_naam = "wordt niet gebruikt"
-        rec.vereniging_nr = ver.nhb_nr
+        rec.vereniging_nr = ver.ver_nr
         rec.vereniging_naam = "wordt niet gebruikt"
         rec.score1 = 10
         rec.score2 = 20

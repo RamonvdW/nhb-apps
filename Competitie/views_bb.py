@@ -557,7 +557,7 @@ class KlassegrenzenVaststellenView(UserPassesTestMixin, TemplateView):
             per_ver_gemiddelden = dict()    # [ver_nr] = list(gemiddelde, gemiddelde, ...)
             for score in boogtype2ags[boogtype_afkorting]:
                 if not was_aspirant[score.schutterboog.nhblid.nhb_nr]:
-                    ver_nr = score.schutterboog.nhblid.bij_vereniging.nhb_nr
+                    ver_nr = score.schutterboog.nhblid.bij_vereniging.ver_nr
                     try:
                         per_ver_gemiddelden[ver_nr].append(score.waarde)        # is AG*1000
                     except KeyError:

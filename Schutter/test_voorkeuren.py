@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -27,7 +27,7 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
         # maak een test vereniging
         ver = NhbVereniging()
         ver.naam = "Grote Club"
-        ver.nhb_nr = "1000"
+        ver.ver_nr = "1000"
         ver.regio = NhbRegio.objects.get(regio_nr=111)
         ver.save()
         self.nhbver1 = ver
@@ -54,7 +54,7 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
         # maak nog een test vereniging
         ver = NhbVereniging()
         ver.naam = "Nieuwe Club"
-        ver.nhb_nr = "1001"
+        ver.ver_nr = "1001"
         ver.regio = NhbRegio.objects.get(pk=112)
         ver.save()
 

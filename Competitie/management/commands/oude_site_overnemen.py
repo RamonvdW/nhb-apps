@@ -118,7 +118,7 @@ class Command(BaseCommand):
         # for
 
         for obj in NhbVereniging.objects.all():
-            self._cache_nhbver[obj.nhb_nr] = obj
+            self._cache_nhbver[obj.ver_nr] = obj
         # for
 
         for obj in (SchutterBoog
@@ -176,7 +176,7 @@ class Command(BaseCommand):
                     .select_related('vereniging',
                                     'deelcompetitie__competitie')
                     .all()):
-            tup = (obj.deelcompetitie.competitie.afstand, str(obj.vereniging.nhb_nr), obj.team_naam)
+            tup = (obj.deelcompetitie.competitie.afstand, str(obj.vereniging.ver_nr), obj.team_naam)
             self._cache_teams[tup] = obj
         # for
 
@@ -440,7 +440,7 @@ class Command(BaseCommand):
 
     def _zoek_echte_lid(self, nhb_nr, naam, ver_nr):
 
-        objs = NhbLid.objects.filter(bij_vereniging__nhb_nr=ver_nr)
+        objs = NhbLid.objects.filter(bij_vereniging__ver_nr=ver_nr)
         objs_no_ver = NhbLid.objects.filter(bij_vereniging__isnull=True)
 
         # doe een paar kleine aanpassingen aan de naam
@@ -576,7 +576,7 @@ class Command(BaseCommand):
 
             # zoek de oude vereniging erbij
             try:
-                lid_ver = NhbVereniging.objects.get(nhb_nr=ver_nr)
+                lid_ver = NhbVereniging.objects.get(ver_nr=ver_nr)
             except NhbVereniging.DoesNotExist:
                 self.stderr.write('[ERROR] Vereniging %s is niet bekend; kan lid %s niet inschrijven (bij de oude vereniging)' % (
                                       ver_nr, nhb_nr))
@@ -588,10 +588,10 @@ class Command(BaseCommand):
                 self._roep_warning('Lid %s heeft %s scores maar geen vereniging en wordt ingeschreven onder de oude vereniging' % (
                                        nhb_nr, aantal_scores))
         else:
-            if str(lid.bij_vereniging.nhb_nr) != ver_nr:
+            if str(lid.bij_vereniging.ver_nr) != ver_nr:
                 # vind de oude vereniging, want die moeten we opslaan bij de inschrijving
                 try:
-                    lid_ver = NhbVereniging.objects.get(nhb_nr=ver_nr)
+                    lid_ver = NhbVereniging.objects.get(ver_nr=ver_nr)
                 except NhbVereniging.DoesNotExist:
                     self.stderr.write('[ERROR] Vereniging %s is niet bekend; kan lid %s niet inschrijven' % (
                                           ver_nr, nhb_nr))
@@ -640,7 +640,7 @@ class Command(BaseCommand):
                     if tup not in self._cache_teams:
                         # nieuw team
 
-                        volg_nrs = [obj.volg_nr for obj in self._cache_teams.values() if obj.vereniging.nhb_nr == ver.nhb_nr and obj.deelcompetitie.competitie == self._comp]
+                        volg_nrs = [obj.volg_nr for obj in self._cache_teams.values() if obj.vereniging.ver_nr == ver.ver_nr and obj.deelcompetitie.competitie == self._comp]
                         volg_nrs.append(0)
                         next_nr = max(volg_nrs) + 1
 

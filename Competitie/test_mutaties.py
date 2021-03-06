@@ -92,7 +92,7 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         for regio in NhbRegio.objects.filter(regio_nr__in=(101, 102, 103, 104)):
             ver = NhbVereniging()
             ver.naam = "Grote Club %s" % regio.regio_nr
-            ver.nhb_nr = 1000 + regio.regio_nr
+            ver.ver_nr = 1000 + regio.regio_nr
             ver.regio = regio
             ver.save()
 

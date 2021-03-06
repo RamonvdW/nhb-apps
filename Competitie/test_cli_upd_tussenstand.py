@@ -276,7 +276,7 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
         ver = NhbVereniging()
         ver.naam = "Grote Club"
         ver.plaats = "Boogstad"
-        ver.nhb_nr = 1000
+        ver.ver_nr = 1000
         ver.regio = self.regio_101
         # secretaris kan nog niet ingevuld worden
         ver.save()
@@ -610,14 +610,14 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
         self.assertTrue('Scores voor 1 schuttersboog bijgewerkt' in f2.getvalue())
 
         deelnemer = RegioCompetitieSchutterBoog.objects.get(schutterboog=self.schutterboog_100001)
-        self.assertEqual(deelnemer.bij_vereniging.nhb_nr, self.ver.nhb_nr)
+        self.assertEqual(deelnemer.bij_vereniging.ver_nr, self.ver.ver_nr)
 
         # maak een tweede vereniging aan
         regio_116 = NhbRegio.objects.get(regio_nr=116)
         ver = NhbVereniging()
         ver.naam = "Zuidelijke Club"
         ver.plaats = "Grensstad"
-        ver.nhb_nr = 1100
+        ver.ver_nr = 1100
         ver.regio = regio_116
         # secretaris kan nog niet ingevuld worden
         ver.save()
@@ -701,7 +701,7 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
         self.assertTrue('Scores voor 1 schuttersboog bijgewerkt' in f2.getvalue())
 
         deelnemer = RegioCompetitieSchutterBoog.objects.get(schutterboog=self.schutterboog_100002)
-        self.assertEqual(deelnemer.bij_vereniging.nhb_nr, self.ver.nhb_nr)
+        self.assertEqual(deelnemer.bij_vereniging.ver_nr, self.ver.ver_nr)
 
         deelnemer.aantal_scores = 6
         deelnemer.save()
@@ -720,7 +720,7 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
         ver = NhbVereniging()
         ver.naam = "Polderclub"
         ver.plaats = "Polderstad"
-        ver.nhb_nr = 1100
+        ver.ver_nr = 1100
         ver.regio = regio_102
         # secretaris kan nog niet ingevuld worden
         ver.save()

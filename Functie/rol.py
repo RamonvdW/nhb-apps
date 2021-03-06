@@ -135,7 +135,7 @@ def rol_zet_sessionvars(account, request):
                 .only('rol', 'comp_type',
                       'nhb_rayon__rayon_nr',
                       'nhb_regio__rayon__rayon_nr',
-                      'nhb_ver__nhb_nr')):
+                      'nhb_ver__ver_nr')):
         func = SimpleNamespace()
         func.pk = obj.pk
         func.obj = obj
@@ -149,7 +149,7 @@ def rol_zet_sessionvars(account, request):
             func.regio_rayon_nr = obj.nhb_regio.rayon.rayon_nr
             func.comp_type = obj.comp_type
         elif func.rol in ("HWL", "WL", "SEC"):
-            func.ver_nhb_nr = obj.nhb_ver.nhb_nr
+            func.ver_nr = obj.nhb_ver.ver_nr
         functie_cache[obj.pk] = func
     # for
 
@@ -455,12 +455,12 @@ def functie_expandeer_rol(functie_cache, nhbver_cache, rol_in, functie_in):
                 for ver in (NhbVereniging
                             .objects
                             .select_related('regio')
-                            .only('nhb_nr', 'regio__regio_nr')):
+                            .only('ver_nr', 'regio__regio_nr')):
                     store = SimpleNamespace()
                     store.pk = ver.pk
-                    store.nhb_nr = ver.nhb_nr
+                    store.ver_nr = ver.ver_nr
                     store.regio_nr = ver.regio.regio_nr
-                    nhbver_cache[store.nhb_nr] = store
+                    nhbver_cache[store.ver_nr] = store
                 # for
 
                 # voorkom herhaaldelijke queries tijdens test zonder vereniging
@@ -469,27 +469,27 @@ def functie_expandeer_rol(functie_cache, nhbver_cache, rol_in, functie_in):
 
             # zoek alle verenigingen in de regio van deze RCL
             verenigingen = list()
-            for nhb_nr, ver in nhbver_cache.items():
-                if nhb_nr != 0 and ver.regio_nr == functie_in.nhb_regio.regio_nr:
-                    verenigingen.append(nhb_nr)
+            for ver_nr, ver in nhbver_cache.items():
+                if ver_nr != 0 and ver.regio_nr == functie_in.nhb_regio.regio_nr:
+                    verenigingen.append(ver_nr)
             # for
 
             # zoek de HWL functies op
             for pk, obj in functie_cache.items():
-                if obj.rol == 'HWL' and obj.ver_nhb_nr in verenigingen:
+                if obj.rol == 'HWL' and obj.ver_nr in verenigingen:
                     yield Rollen.ROL_HWL, obj.pk
             # for
 
         if functie_in.rol == 'SEC':
             # secretaris mag HWL worden, binnen de vereniging
             for pk, obj in functie_cache.items():
-                if obj.rol == 'HWL' and obj.ver_nhb_nr == functie_in.nhb_ver.nhb_nr:
+                if obj.rol == 'HWL' and obj.ver_nr == functie_in.nhb_ver.ver_nr:
                     yield Rollen.ROL_HWL, obj.pk
 
         if functie_in.rol == 'HWL':
             # expandeer naar de WL rollen binnen dezelfde vereniging
             for pk, obj in functie_cache.items():
-                if obj.rol == 'WL' and obj.ver_nhb_nr == functie_in.nhb_ver.nhb_nr:
+                if obj.rol == 'WL' and obj.ver_nr == functie_in.nhb_ver.ver_nr:
                     yield Rollen.ROL_WL, obj.pk
 
 

@@ -26,7 +26,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         # maak een test vereniging
         ver = NhbVereniging()
         ver.naam = "Grote Club"
-        ver.nhb_nr = "1000"
+        ver.ver_nr = "1000"
         ver.regio = NhbRegio.objects.get(pk=111)
         ver.save()
 
@@ -181,7 +181,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
                                     '--sim_now=2020-07-01', stderr=f1, stdout=f2)
 
         lid = NhbLid.objects.get(nhb_nr=100098)
-        self.assertEqual(lid.bij_vereniging.nhb_nr, 1000)
+        self.assertEqual(lid.bij_vereniging.ver_nr, 1000)
         self.assertTrue(lid.is_actief_lid)
         self.assertEqual(lid.lid_tot_einde_jaar, 2020)
 
@@ -260,7 +260,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         # maak een test vereniging die verwijderd kan worden
         ver = NhbVereniging()
         ver.naam = "Wegisweg Club"
-        ver.nhb_nr = "1999"
+        ver.ver_nr = "1999"
         ver.regio = NhbRegio.objects.get(pk=116)
         ver.save()
 
@@ -312,12 +312,12 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         self.assertTrue("[WARNING] Secretaris 100024 van vereniging 2000 heeft nog geen account" in f2.getvalue())
 
         # lid = NhbLid.objects.get(nhb_nr="100001")
-        ver = NhbVereniging.objects.get(nhb_nr="1000")
+        ver = NhbVereniging.objects.get(ver_nr="1000")
         functie = Functie.objects.get(rol="SEC", nhb_ver=ver)
         self.assertEqual(functie.accounts.count(), 1)
 
         lid = NhbLid.objects.get(nhb_nr="100024")
-        ver = NhbVereniging.objects.get(nhb_nr="2000")
+        ver = NhbVereniging.objects.get(ver_nr="2000")
         functie = Functie.objects.get(rol="SEC", nhb_ver=ver)
         self.assertEqual(functie.accounts.count(), 0)
         # 100024 is nog geen SEC omdat ze geen account heeft
@@ -334,7 +334,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         self.assertEqual(f1.getvalue(), '')
         self.assertTrue("[INFO] Secretaris 100024 van vereniging 2000 is gekoppeld aan SEC functie" in f2.getvalue())
 
-        ver = NhbVereniging.objects.get(nhb_nr="2000")
+        ver = NhbVereniging.objects.get(ver_nr="2000")
         functie = Functie.objects.get(rol="SEC", nhb_ver=ver)
         self.assertEqual(functie.accounts.count(), 1)
 
@@ -348,21 +348,21 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
                                     '--sim_now=2020-07-01', stderr=f1, stdout=f2)
 
         # controleer de geen_wedstrijden vlag voor 1377 en normale clubs
-        ver = NhbVereniging.objects.get(nhb_nr=1000)
+        ver = NhbVereniging.objects.get(ver_nr=1000)
         self.assertFalse(ver.geen_wedstrijden)
 
-        ver = NhbVereniging.objects.get(nhb_nr=1377)
+        ver = NhbVereniging.objects.get(ver_nr=1377)
         self.assertTrue(ver.geen_wedstrijden)
 
         # verifieer verwijderen van "(geen deelname wedstrijden)" uit de naam
         self.assertEqual(ver.naam, "Persoonlijk")
 
         # controleer dat de mutatie achteraf werkt
-        ver = NhbVereniging.objects.get(nhb_nr=1000)
+        ver = NhbVereniging.objects.get(ver_nr=1000)
         ver.geen_wedstrijden = True
         ver.save()
 
-        ver = NhbVereniging.objects.get(nhb_nr=1377)
+        ver = NhbVereniging.objects.get(ver_nr=1377)
         ver.geen_wedstrijden = False
         ver.save()
 
@@ -472,7 +472,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
             management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_03.json',
                                     '--sim_now=2020-07-01', stderr=f1, stdout=f2)
 
-        ver = NhbVereniging.objects.get(nhb_nr=1000)
+        ver = NhbVereniging.objects.get(ver_nr=1000)
         ver.geen_wedstrijden = True
         ver.save()
 
@@ -489,7 +489,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         # maak een test vereniging die verwijderd kan worden
         ver = NhbVereniging()
         ver.naam = "Wegisweg Club"
-        ver.nhb_nr = "1999"
+        ver.ver_nr = "1999"
         ver.regio = NhbRegio.objects.get(pk=116)
         ver.save()
         with self.assert_max_queries(30):

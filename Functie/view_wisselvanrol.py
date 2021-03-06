@@ -58,11 +58,11 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
         elif functie.rol == "RCL":
             volgorde = functie.nhb_regio.regio_nr       # 101-116
         elif functie.rol == "SEC":
-            volgorde = functie.nhb_ver.nhb_nr           # 1000-9999
+            volgorde = functie.nhb_ver.ver_nr           # 1000-9999
         elif functie.rol == "HWL":
-            volgorde = functie.nhb_ver.nhb_nr + 10000   # 11000-19999
+            volgorde = functie.nhb_ver.ver_nr + 10000   # 11000-19999
         elif functie.rol == "WL":
-            volgorde = functie.nhb_ver.nhb_nr + 20000   # 21000-29999
+            volgorde = functie.nhb_ver.ver_nr + 20000   # 21000-29999
         else:             # pragma: no cover
             volgorde = 0  # valt meteen op dat 'ie bovenaan komt
         return volgorde
@@ -110,7 +110,7 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
                     .filter(pk__in=pks)
                     .select_related('nhb_ver', 'nhb_regio', 'nhb_rayon')
                     .only('beschrijving', 'rol',
-                          'nhb_ver__nhb_nr', 'nhb_ver__naam',
+                          'nhb_ver__ver_nr', 'nhb_ver__naam',
                           'nhb_rayon__rayon_nr', 'nhb_regio__regio_nr')):
             pk2func[obj.pk] = obj
         # for
@@ -156,7 +156,7 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
                         .filter(pk__in=pks)
                         .select_related('nhb_ver', 'nhb_regio', 'nhb_rayon')
                         .only('beschrijving', 'rol',
-                              'nhb_ver__nhb_nr', 'nhb_ver__naam',
+                              'nhb_ver__ver_nr', 'nhb_ver__naam',
                               'nhb_rayon__rayon_nr', 'nhb_regio__regio_nr')):
                 pk2func[obj.pk] = obj
             # for

@@ -78,7 +78,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         # maak een test vereniging
         ver = NhbVereniging()
         ver.naam = "Zuidelijke Club"
-        ver.nhb_nr = "1111"
+        ver.ver_nr = "1111"
         ver.regio = self.regio_112
         # secretaris kan nog niet ingevuld worden
         ver.save()
@@ -87,7 +87,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         # maak een test vereniging
         ver = NhbVereniging()
         ver.naam = "Grote Club"
-        ver.nhb_nr = "1000"
+        ver.ver_nr = "1000"
         ver.regio = self.regio_101
         # secretaris kan nog niet ingevuld worden
         ver.save()
@@ -101,7 +101,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         self.loc = loc
 
         # maak HWL functie aan voor deze vereniging
-        self.functie_hwl = maak_functie("HWL Vereniging %s" % ver.nhb_nr, "HWL")
+        self.functie_hwl = maak_functie("HWL Vereniging %s" % ver.ver_nr, "HWL")
         self.functie_hwl.nhb_ver = ver
         self.functie_hwl.save()
 
@@ -183,7 +183,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         # maak nog een test vereniging, zonder HWL functie
         ver = NhbVereniging()
         ver.naam = "Kleine Club"
-        ver.nhb_nr = "1100"
+        ver.ver_nr = "1100"
         ver.regio = self.regio_101
         # secretaris kan nog niet ingevuld worden
         ver.save()
@@ -333,7 +333,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(url_w, {'weekdag': 1,
                                             'aanvang': '12:34',
-                                            'nhbver_pk': self.nhbver_101.nhb_nr,
+                                            'nhbver_pk': self.nhbver_101.ver_nr,
                                             sel_indiv_1: "on",
                                             sel_indiv_2: "on",
                                             sel_indiv_3: "on",
@@ -482,7 +482,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'weekdag': 1,
                                           'aanvang': '12:34',
-                                          'nhbver_pk': ver.nhb_nr})
+                                          'nhbver_pk': ver.ver_nr})
         self.assert_is_redirect_not_plein(resp)  # check for success
 
     def test_planning_rayon_bad(self):
@@ -558,42 +558,42 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'weekdag': "XX",
                                           'aanvang': '12:34',
-                                          'nhbver_pk': self.nhbver_112.nhb_nr})
+                                          'nhbver_pk': self.nhbver_112.ver_nr})
         self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
 
         # slechte weekdag
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'weekdag': 99,
                                           'aanvang': '12:34',
-                                          'nhbver_pk': self.nhbver_112.nhb_nr})
+                                          'nhbver_pk': self.nhbver_112.ver_nr})
         self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
 
         # slechte weekdag
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'weekdag': "-1",
                                           'aanvang': '12:34',
-                                          'nhbver_pk': self.nhbver_112.nhb_nr})
+                                          'nhbver_pk': self.nhbver_112.ver_nr})
         self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
 
         # weekdag buiten RK range (is 1 week lang)
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'weekdag': 30,
                                           'aanvang': '12:34',
-                                          'nhbver_pk': self.nhbver_112.nhb_nr})
+                                          'nhbver_pk': self.nhbver_112.ver_nr})
         self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
 
         # slecht tijdstip
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'weekdag': 1,
                                           'aanvang': '(*:#)',
-                                          'nhbver_pk': self.nhbver_112.nhb_nr})
+                                          'nhbver_pk': self.nhbver_112.ver_nr})
         self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
 
         # slecht tijdstip
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'weekdag': 1,
                                           'aanvang': '12:60',
-                                          'nhbver_pk': self.nhbver_112.nhb_nr})
+                                          'nhbver_pk': self.nhbver_112.ver_nr})
         self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
 
         # bad vereniging nummer
@@ -607,7 +607,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'weekdag': 1,
                                           'aanvang': '12:34',
-                                          'nhbver_pk': self.nhbver_112.nhb_nr})
+                                          'nhbver_pk': self.nhbver_112.ver_nr})
         self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
 
         # probeer wedstrijd van ander rayon te wijzigen
@@ -617,7 +617,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'weekdag': 1,
                                           'aanvang': '12:34',
-                                          'nhbver_pk': self.nhbver_101.nhb_nr})
+                                          'nhbver_pk': self.nhbver_101.ver_nr})
         self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
 
     def test_lijst_rk(self):

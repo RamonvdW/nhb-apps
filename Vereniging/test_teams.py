@@ -38,7 +38,7 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
         # maak een test vereniging
         ver = NhbVereniging()
         ver.naam = "Grote Club"
-        ver.nhb_nr = "1000"
+        ver.ver_nr = "1000"
         ver.regio = self.regio_111
         # secretaris kan nog niet ingevuld worden
         ver.save()
@@ -131,7 +131,7 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
         # maak een test vereniging
         ver2 = NhbVereniging()
         ver2.naam = "Andere Club"
-        ver2.nhb_nr = "1222"
+        ver2.ver_nr = "1222"
         ver2.regio = self.regio_111
         # secretaris kan nog niet ingevuld worden
         ver2.save()
@@ -162,7 +162,7 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
         rec.rank = 1
         rec.schutter_nr = self.nhblid_100001.nhb_nr
         rec.schutter_naam = self.nhblid_100001.volledige_naam()
-        rec.vereniging_nr = self.nhbver1.nhb_nr
+        rec.vereniging_nr = self.nhbver1.ver_nr
         rec.vereniging_naam = self.nhbver1.naam
         rec.boogtype = 'R'
         rec.score1 = 10
@@ -183,7 +183,7 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
         rec.rank = 1
         rec.schutter_nr = self.nhblid_100002.nhb_nr
         rec.schutter_naam = self.nhblid_100002.volledige_naam()
-        rec.vereniging_nr = self.nhbver1.nhb_nr
+        rec.vereniging_nr = self.nhbver1.ver_nr
         rec.vereniging_naam = self.nhbver1.naam
         rec.boogtype = 'BB'
         rec.score1 = 10

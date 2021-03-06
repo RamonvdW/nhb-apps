@@ -39,7 +39,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         # maak een test vereniging
         ver = NhbVereniging()
         ver.naam = "Grote Club"
-        ver.nhb_nr = 1000
+        ver.ver_nr = 1000
         ver.regio = self.regio101
         # secretaris kan nog niet ingevuld worden
         ver.save()
@@ -515,7 +515,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
 
-        url = self.url_uitslagen_ver_n % (self.comp_18.pk, 'R', self.ver.nhb_nr)
+        url = self.url_uitslagen_ver_n % (self.comp_18.pk, 'R', self.ver.ver_nr)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
@@ -557,7 +557,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         self.ver.regio = NhbRegio.objects.get(regio_nr=100)
         self.ver.save()
 
-        url = self.url_uitslagen_ver_n % (self.comp_18.pk, 'R', self.ver.nhb_nr)
+        url = self.url_uitslagen_ver_n % (self.comp_18.pk, 'R', self.ver.ver_nr)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
@@ -631,7 +631,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
 
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_uitslagen_ver_n % (self.comp_18.pk, 'R', self.ver.nhb_nr))
+            resp = self.client.get(self.url_uitslagen_ver_n % (self.comp_18.pk, 'R', self.ver.ver_nr))
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
 

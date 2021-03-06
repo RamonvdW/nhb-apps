@@ -45,7 +45,7 @@ class UitslagenVerenigingView(TemplateView):
 
             if functie_nu and functie_nu.nhb_ver:
                 # HWL, WL, SEC
-                ver_nr = functie_nu.nhb_ver.nhb_nr
+                ver_nr = functie_nu.nhb_ver.ver_nr
 
             if ver_nr < 0:
                 # pak de vereniging van de ingelogde gebruiker
@@ -53,9 +53,9 @@ class UitslagenVerenigingView(TemplateView):
                 if account.nhblid_set.count() > 0:
                     nhblid = account.nhblid_set.all()[0]
                     if nhblid.is_actief_lid and nhblid.bij_vereniging:
-                        ver_nr = nhblid.bij_vereniging.nhb_nr
+                        ver_nr = nhblid.bij_vereniging.ver_nr
 
-        ver_nrs = list(NhbVereniging.objects.order_by('nhb_nr').values_list('nhb_nr', flat=True))
+        ver_nrs = list(NhbVereniging.objects.order_by('ver_nr').values_list('ver_nr', flat=True))
         if ver_nr not in ver_nrs:
             ver_nr = ver_nrs[0]
 
@@ -111,7 +111,7 @@ class UitslagenVerenigingView(TemplateView):
                                       'klasse__indiv',
                                       'klasse__indiv__boogtype')
                       .filter(deelcompetitie=deelcomp,
-                              bij_vereniging__nhb_nr=ver_nr,
+                              bij_vereniging__ver_nr=ver_nr,
                               klasse__indiv__boogtype=boogtype)
                       .order_by('-gemiddelde'))
 
@@ -154,7 +154,7 @@ class UitslagenVerenigingView(TemplateView):
             raise Resolver404()
 
         try:
-            ver = NhbVereniging.objects.select_related('regio').get(nhb_nr=ver_nr)
+            ver = NhbVereniging.objects.select_related('regio').get(ver_nr=ver_nr)
         except NhbVereniging.DoesNotExist:
             raise Resolver404()
 
@@ -281,13 +281,13 @@ class UitslagenRegioView(TemplateView):
                     .objects
                     .select_related('regio')
                     .filter(regio__regio_nr=gekozen_regio_nr)
-                    .order_by('nhb_nr'))
+                    .order_by('ver_nr'))
 
             for ver in vers:
                 ver.zoom_url = reverse('Competitie:uitslagen-vereniging-n',
                                        kwargs={'comp_pk': comp.pk,
                                                'comp_boog': comp_boog,
-                                               'ver_nr': ver.nhb_nr})
+                                               'ver_nr': ver.ver_nr})
             # for
 
             context['ver_filters'] = vers

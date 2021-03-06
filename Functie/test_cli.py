@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -25,7 +25,7 @@ class TestAccountCLI(E2EHelpers, TestCase):
         # maak een test vereniging
         ver = NhbVereniging()
         ver.naam = "Grote Club"
-        ver.nhb_nr = 1001
+        ver.ver_nr = 1001
         ver.regio = NhbRegio.objects.get(pk=111)
         # secretaris kan nog niet ingevuld worden
         ver.save()
@@ -109,5 +109,7 @@ class TestAccountCLI(E2EHelpers, TestCase):
         self.assertTrue("Account matching query does not exist" in f1.getvalue())
         self.assertTrue("Functie matching query does not exist" in f1.getvalue())
         self.assertTrue(f2.getvalue() == '')
+
+# TODO: maak_sec toevoegen
 
 # end of file

@@ -37,7 +37,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         # maak een test vereniging
         ver = NhbVereniging()
         ver.naam = "Grote Club"
-        ver.nhb_nr = 1000
+        ver.ver_nr = 1000
         ver.regio = regio
         # secretaris kan nog niet ingevuld worden
         ver.save()
@@ -129,7 +129,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         rec.rank = 1
         rec.schutter_nr = self.lid_100001.nhb_nr
         rec.schutter_naam = self.lid_100001.volledige_naam()
-        rec.vereniging_nr = ver.nhb_nr
+        rec.vereniging_nr = ver.ver_nr
         rec.vereniging_naam = ver.naam
         rec.boogtype = 'R'
         rec.score1 = 10
@@ -149,7 +149,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         rec.rank = 1
         rec.schutter_nr = self.lid_100001.nhb_nr
         rec.schutter_naam = self.lid_100001.volledige_naam()
-        rec.vereniging_nr = ver.nhb_nr
+        rec.vereniging_nr = ver.ver_nr
         rec.vereniging_naam = ver.naam
         rec.boogtype = 'R'
         rec.score1 = 11
@@ -169,7 +169,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         rec.rank = 100
         rec.schutter_nr = self.lid_100001.nhb_nr
         rec.schutter_naam = self.lid_100001.volledige_naam()
-        rec.vereniging_nr = ver.nhb_nr
+        rec.vereniging_nr = ver.ver_nr
         rec.vereniging_naam = ver.naam
         rec.boogtype = 'IB'
         rec.score1 = 11
@@ -189,7 +189,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         rec.rank = 1
         rec.schutter_nr = self.lid_100002.nhb_nr
         rec.schutter_naam = self.lid_100002.volledige_naam()
-        rec.vereniging_nr = ver.nhb_nr
+        rec.vereniging_nr = ver.ver_nr
         rec.vereniging_naam = ver.naam
         rec.boogtype = 'C'
         rec.score1 = 0
@@ -209,7 +209,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         rec.rank = 1
         rec.schutter_nr = self.lid_100002.nhb_nr
         rec.schutter_naam = self.lid_100002.volledige_naam()
-        rec.vereniging_nr = ver.nhb_nr
+        rec.vereniging_nr = ver.ver_nr
         rec.vereniging_naam = ver.naam
         rec.boogtype = 'BB'
         rec.score1 = 10
@@ -229,7 +229,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         rec.rank = 1
         rec.schutter_nr = 991111
         rec.schutter_naam = "Die is weg"
-        rec.vereniging_nr = ver.nhb_nr
+        rec.vereniging_nr = ver.ver_nr
         rec.vereniging_naam = ver.naam
         rec.boogtype = 'BB'
         rec.score1 = 10

@@ -7,7 +7,6 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import Group
-from django.contrib.auth import get_user_model      # avoid circular dependency with Account.models
 from django.conf import settings
 from Account.models import Account
 from BasisTypen.models import GESLACHT
@@ -124,8 +123,8 @@ class NhbCluster(models.Model):
 class NhbVereniging(models.Model):
     """ Tabel waarin gegevens van de Verenigingen van de NHB staan """
 
-    # 4-cijferig NHB nummer van de verenigiging
-    nhb_nr = models.PositiveIntegerField(primary_key=True)
+    # 4-cijferige nummer van de vereniging
+    ver_nr = models.PositiveIntegerField(primary_key=True)
 
     # naam van de vereniging
     naam = models.CharField(max_length=200)
@@ -154,7 +153,7 @@ class NhbVereniging(models.Model):
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
         # selectie in de admin interface gaat op deze string, dus nhb_nr eerst
-        return "[%s] %s" % (self.nhb_nr, self.naam)
+        return "[%s] %s" % (self.ver_nr, self.naam)
 
     class Meta:
         """ meta data voor de admin interface """
@@ -207,7 +206,7 @@ class NhbLid(models.Model):
     # het e-mailadres van dit lid
     email = models.CharField(max_length=150)
 
-    geboorte_datum = models.DateField(validators=[validate_geboorte_datum,])
+    geboorte_datum = models.DateField(validators=[validate_geboorte_datum])
     geslacht = models.CharField(max_length=1, choices=GESLACHT)
 
     # officieel geregistreerde para classificatie
@@ -217,7 +216,7 @@ class NhbLid(models.Model):
     is_actief_lid = models.BooleanField(default=True)   # False = niet meer in import dataset
 
     # datum van lidmaatschap NHB
-    sinds_datum = models.DateField(validators=[validate_sinds_datum,])
+    sinds_datum = models.DateField(validators=[validate_sinds_datum])
 
     # lid bij vereniging
     bij_vereniging = models.ForeignKey(

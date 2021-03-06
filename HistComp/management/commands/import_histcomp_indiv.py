@@ -151,7 +151,7 @@ class Command(BaseCommand):
 
             # naam van de vereniging opzoeken en opslaan
             try:
-                ver = NhbVereniging.objects.get(nhb_nr=ver_nr)
+                ver = NhbVereniging.objects.get(ver_nr=ver_nr)
                 ver_naam = ver.naam
             except NhbVereniging.DoesNotExist:
                 # fall-back voor recent verwijderde verenigingen

@@ -106,14 +106,14 @@ class TestCompetitieScores(E2EHelpers, TestCase):
         # maak een test vereniging
         ver = NhbVereniging()
         ver.naam = "Grote Club"
-        ver.nhb_nr = "1000"
+        ver.ver_nr = "1000"
         ver.regio = self.regio_101
         # secretaris kan nog niet ingevuld worden
         ver.save()
         self.nhbver = ver
 
         # maak HWL functie aan voor deze vereniging
-        self.functie_hwl = maak_functie("HWL Vereniging %s" % ver.nhb_nr, "HWL")
+        self.functie_hwl = maak_functie("HWL Vereniging %s" % ver.ver_nr, "HWL")
         self.functie_hwl.nhb_ver = ver
         self.functie_hwl.save()
 
@@ -158,7 +158,7 @@ class TestCompetitieScores(E2EHelpers, TestCase):
         # maak nog een test vereniging, zonder HWL functie
         ver = NhbVereniging()
         ver.naam = "Kleine Club"
-        ver.nhb_nr = "1100"
+        ver.ver_nr = "1100"
         ver.regio = self.regio_101
         # secretaris kan nog niet ingevuld worden
         ver.save()

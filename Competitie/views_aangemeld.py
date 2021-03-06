@@ -311,11 +311,11 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
         for nhb_ver in (NhbVereniging
                         .objects
                         .filter(regio=regio)
-                        .order_by('nhb_nr')
+                        .order_by('ver_nr')
                         .all()):
 
             vers.append(nhb_ver)
-            vers_dict[nhb_ver.nhb_nr] = nhb_ver
+            vers_dict[nhb_ver.ver_nr] = nhb_ver
 
             nhb_ver.counts_dict = dict()
             for afkorting in DAGDEEL_AFKORTINGEN:
@@ -327,7 +327,7 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
         # objs = RegioCompetitieSchutterBoog
         for obj in objs:
             try:
-                nhb_ver = vers_dict[obj.bij_vereniging.nhb_nr]
+                nhb_ver = vers_dict[obj.bij_vereniging.ver_nr]
             except KeyError:
                 pass
             else:
@@ -597,7 +597,7 @@ class Inschrijfmethode3BehoefteAlsBestandView(Inschrijfmethode3BehoefteView):
         writer.writerow(['ver_nr', 'Naam'] + context['dagdelen'] + ['Totaal'])
 
         for nhb_ver in context['regio_verenigingen']:
-            writer.writerow([nhb_ver.nhb_nr, nhb_ver.naam] + nhb_ver.counts_list)
+            writer.writerow([nhb_ver.ver_nr, nhb_ver.naam] + nhb_ver.counts_list)
         # for
 
         writer.writerow(['-', 'Totalen'] + context['totalen'])

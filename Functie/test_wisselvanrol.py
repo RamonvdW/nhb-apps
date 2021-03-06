@@ -33,7 +33,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         # maak een test vereniging
         ver = NhbVereniging()
         ver.naam = "Grote Club"
-        ver.nhb_nr = "1000"
+        ver.ver_nr = "1000"
         ver.regio = regio_111
         # secretaris kan nog niet ingevuld worden
         ver.save()
@@ -66,7 +66,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         # maak een test vereniging zonder HWL rol
         ver2 = NhbVereniging()
         ver2.naam = "Grote Club"
-        ver2.nhb_nr = "1001"
+        ver2.ver_nr = "1001"
         ver2.regio = regio_111
         # secretaris kan nog niet ingevuld worden
         ver2.save()

@@ -61,7 +61,7 @@ class TestCompetitieCliOudeSiteOvernemen(E2EHelpers, TestCase):
         ver = NhbVereniging()
         ver.naam = "Oude Club"
         ver.plaats = "Boogdrop"
-        ver.nhb_nr = 1002
+        ver.ver_nr = 1002
         ver.regio = regio
         # secretaris kan nog niet ingevuld worden
         ver.save()
@@ -70,7 +70,7 @@ class TestCompetitieCliOudeSiteOvernemen(E2EHelpers, TestCase):
         ver = NhbVereniging()
         ver.naam = "Grote Club"
         ver.plaats = "Boogstad"
-        ver.nhb_nr = 1000
+        ver.ver_nr = 1000
         ver.regio = regio
         # secretaris kan nog niet ingevuld worden
         ver.save()

@@ -1464,7 +1464,7 @@ class RegioTeamsView(UserPassesTestMixin, TemplateView):
                       .objects
                       .select_related('vereniging')
                       .filter(deelcompetitie=deelcomp)
-                      .order_by('team_type', '-aanvangsgemiddelde', 'vereniging__nhb_nr'))
+                      .order_by('team_type', '-aanvangsgemiddelde', 'vereniging__ver_nr'))
 
         prev_team = None
         for team in regioteams:

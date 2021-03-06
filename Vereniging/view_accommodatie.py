@@ -50,7 +50,7 @@ class LijstVerenigingenView(UserPassesTestMixin, TemplateView):
                         .select_related('nhb_ver')
                         .prefetch_related('accounts')):
             if functie.rol == 'HWL':
-                hwl_functies[functie.nhb_ver.nhb_nr] = functie
+                hwl_functies[functie.nhb_ver.ver_nr] = functie
 
             functie2count[functie.pk] = functie.accounts.count()
         # for
@@ -65,7 +65,7 @@ class LijstVerenigingenView(UserPassesTestMixin, TemplateView):
                     .filter(regio__rayon=functie_nu.nhb_rayon)
                     .prefetch_related('wedstrijdlocatie_set',
                                       'clusters')
-                    .order_by('regio__regio_nr', 'nhb_nr'))
+                    .order_by('regio__regio_nr', 'ver_nr'))
 
         if rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO):
             # toon de landelijke lijst
@@ -75,7 +75,7 @@ class LijstVerenigingenView(UserPassesTestMixin, TemplateView):
                     .exclude(regio__regio_nr=100)
                     .prefetch_related('wedstrijdlocatie_set',
                                       'clusters')
-                    .order_by('regio__regio_nr', 'nhb_nr'))
+                    .order_by('regio__regio_nr', 'ver_nr'))
 
         if rol_nu == Rollen.ROL_IT:
             # landelijke lijst + telling aantal leden
@@ -87,7 +87,7 @@ class LijstVerenigingenView(UserPassesTestMixin, TemplateView):
                                       'wedstrijdlocatie_set',
                                       'functie_set',
                                       'clusters')
-                    .order_by('regio__regio_nr', 'nhb_nr'))
+                    .order_by('regio__regio_nr', 'ver_nr'))
 
             for obj in objs:
                 obj.aantal_leden = obj.nhblid_set.count()
@@ -107,7 +107,7 @@ class LijstVerenigingenView(UserPassesTestMixin, TemplateView):
                     .select_related('regio')
                     .prefetch_related('wedstrijdlocatie_set',
                                       'clusters')
-                    .order_by('nhb_nr'))
+                    .order_by('ver_nr'))
         else:
             # rol_nu == Rollen.ROL_HWL / ROL_SEC
             # het regionummer is verkrijgbaar via de vereniging
@@ -117,11 +117,11 @@ class LijstVerenigingenView(UserPassesTestMixin, TemplateView):
                     .select_related('regio')
                     .prefetch_related('wedstrijdlocatie_set',
                                       'clusters')
-                    .order_by('nhb_nr'))
+                    .order_by('ver_nr'))
 
         for obj in objs:
             try:
-                functie_hwl = hwl_functies[obj.nhb_nr]
+                functie_hwl = hwl_functies[obj.ver_nr]
             except KeyError:
                 # deze vereniging heeft geen HWL functie
                 obj.hwls = list()
@@ -291,7 +291,7 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
             context['banen'] = [nr for nr in range(2, 24+1)]          # 1 baan = handmatig in .dtl
 
             # lijst van verenigingen voor de template
-            binnen_locatie.other_ver = binnen_locatie.verenigingen.exclude(nhb_nr=nhbver.nhb_nr).order_by('nhb_nr')
+            binnen_locatie.other_ver = binnen_locatie.verenigingen.exclude(ver_nr=nhbver.ver_nr).order_by('ver_nr')
 
         if buiten_locatie:
             # aantal banen waar uit gekozen kan worden, voor gebruik in de template
@@ -524,12 +524,12 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
                 .objects
                 .filter(regio=functie_nu.nhb_regio)
                 .prefetch_related('clusters')
-                .order_by('nhb_nr'))
+                .order_by('ver_nr'))
         context['object_list'] = objs
 
         for obj in objs:
             # voeg form-fields toe die voor de post gebruikt kunnen worden
-            obj.veld_naam = 'ver_' + str(obj.nhb_nr)
+            obj.veld_naam = 'ver_' + str(obj.ver_nr)
 
             # maak een kopie om een vlag te kunnen zetten op de huidige optie
             obj.cluster_opties = copy.deepcopy(opts)
@@ -555,7 +555,7 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
         # vertaal de post value naar een NhbCluster object
         # checkt ook meteen dat het een valide cluster is voor deze regio
 
-        param_name = 'ver_' + str(nhbver.nhb_nr)
+        param_name = 'ver_' + str(nhbver.ver_nr)
         post_param = self.request.POST.get(param_name, None)
 
         cluster_pk = None

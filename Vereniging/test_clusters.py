@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -38,7 +38,7 @@ class TestVerenigingClusters(E2EHelpers, TestCase):
         # maak een test vereniging
         ver = NhbVereniging()
         ver.naam = "Eerste Club"
-        ver.nhb_nr = "1001"
+        ver.ver_nr = "1001"
         ver.regio = regio_111
         # secretaris kan nog niet ingevuld worden
         ver.save()
@@ -46,7 +46,7 @@ class TestVerenigingClusters(E2EHelpers, TestCase):
 
         ver = NhbVereniging()
         ver.naam = "Tweede Club"
-        ver.nhb_nr = "1002"
+        ver.ver_nr = "1002"
         ver.regio = regio_111
         # secretaris kan nog niet ingevuld worden
         ver.save()
@@ -54,7 +54,7 @@ class TestVerenigingClusters(E2EHelpers, TestCase):
 
         ver = NhbVereniging()
         ver.naam = "Derde Club"
-        ver.nhb_nr = "1003"
+        ver.ver_nr = "1003"
         ver.regio = regio_111
         # secretaris kan nog niet ingevuld worden
         ver.save()

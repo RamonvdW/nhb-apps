@@ -38,7 +38,7 @@ class TestFunctieOverzicht(E2EHelpers, TestCase):
         # maak een test vereniging
         ver = NhbVereniging()
         ver.naam = "Grote Club"
-        ver.nhb_nr = "1000"
+        ver.ver_nr = "1000"
         ver.regio = NhbRegio.objects.get(regio_nr=111)
         # secretaris kan nog niet ingevuld worden
         ver.save()
@@ -71,7 +71,7 @@ class TestFunctieOverzicht(E2EHelpers, TestCase):
         # maak nog een test vereniging
         ver2 = NhbVereniging()
         ver2.naam = "Extra Club"
-        ver2.nhb_nr = "1900"
+        ver2.ver_nr = "1900"
         ver2.regio = NhbRegio.objects.get(regio_nr=112)
         # secretaris kan nog niet ingevuld worden
         ver2.save()

@@ -312,7 +312,7 @@ class DynamicDeelnemersOphalenView(UserPassesTestMixin, View):
                 'pk': obj.schutterboog.pk,
                 'nhb_nr': obj.schutterboog.nhblid.nhb_nr,
                 'naam': obj.schutterboog.nhblid.volledige_naam(),
-                'ver_nr': obj.bij_vereniging.nhb_nr,
+                'ver_nr': obj.bij_vereniging.ver_nr,
                 'ver_naam': obj.bij_vereniging.naam,
                 'boog': obj.schutterboog.boogtype.beschrijving,
             }

@@ -285,7 +285,7 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
         team_naam = team_naam.strip()
         if team.team_naam != team_naam:
             if team_naam == '':
-                team_naam = "%s-%s" % (ver.nhb_nr, team.volg_nr)
+                team_naam = "%s-%s" % (ver.ver_nr, team.volg_nr)
 
             team.team_naam = team_naam
             team.save()

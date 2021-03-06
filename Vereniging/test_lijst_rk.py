@@ -34,7 +34,7 @@ class TestVerenigingLijstRK(E2EHelpers, TestCase):
 
         ver = NhbVereniging()
         ver.naam = "Grote Club"
-        ver.nhb_nr = "1000"
+        ver.ver_nr = "1000"
         ver.regio = NhbRegio.objects.get(regio_nr=111)
         # secretaris kan nog niet ingevuld worden
         ver.save()
@@ -85,7 +85,7 @@ class TestVerenigingLijstRK(E2EHelpers, TestCase):
         # maak een test vereniging
         ver = NhbVereniging()
         ver.naam = "Grote Club"
-        ver.nhb_nr = "1001"
+        ver.ver_nr = "1001"
         ver.regio = NhbRegio.objects.get(regio_nr=111)
         # secretaris kan nog niet ingevuld worden
         ver.save()
