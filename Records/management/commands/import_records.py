@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -160,7 +160,7 @@ class Command(BaseCommand):
                     val = None
                 else:
                     record.para_klasse = val
-                if val and curr_record:
+                if curr_record:
                     if curr_record.para_klasse != record.para_klasse:
                         wijzigingen.append('para_klasse: %s --> %s' % (repr(curr_record.para_klasse), repr(record.para_klasse)))
                         curr_record.para_klasse = record.para_klasse
