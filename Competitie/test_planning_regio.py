@@ -125,7 +125,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_bb)
         self.e2e_wisselnaarrol_bb()
         self.url_klassegrenzen_vaststellen_18 = '/bondscompetities/%s/klassegrenzen/vaststellen/' % self.comp_18.pk
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(35):
             resp = self.client.post(self.url_klassegrenzen_vaststellen_18)
         self.assert_is_redirect_not_plein(resp)  # check for success
         self.client.logout()
@@ -624,7 +624,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         self.assertEqual(str(wedstrijd_datum), "2019-09-30")
 
         # haal de wedstrijd op
-        with self.assert_max_queries(27):
+        with self.assert_max_queries(35):
             resp = self.client.get(self.url_wijzig_wedstrijd % wedstrijd_pk)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
@@ -948,7 +948,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
 
         # haal informatie over de wedstrijd (binnen het cluster) op
         # haal de wedstrijd op
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(28):
             resp = self.client.get(self.url_wijzig_wedstrijd % wedstrijd_pk)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
@@ -992,21 +992,21 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         wedstrijd_pk = Wedstrijd.objects.all()[0].pk
 
         # pas de instellingen van de wedstrijd aan
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(30):
             resp = self.client.post(self.url_wijzig_wedstrijd % wedstrijd_pk,
                                     {'weekdag': 1, 'nhbver_pk': self.nhbver_101.pk, 'aanvang': '12:34',
                                      'wkl_indiv_%s' % self.klasse_recurve_onbekend.indiv.pk: 'on'})
         self.assert_is_redirect_not_plein(resp)  # check for success
 
         # nog een keer hetzelfde
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(30):
             resp = self.client.post(self.url_wijzig_wedstrijd % wedstrijd_pk,
                                     {'weekdag': 1, 'nhbver_pk': self.nhbver_101.pk, 'aanvang': '12:34',
                                      'wkl_indiv_%s' % self.klasse_recurve_onbekend.indiv.pk: 'on'})
         self.assert_is_redirect_not_plein(resp)  # check for success
 
         # koppel de wedstrijdklasse weer los
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(30):
             resp = self.client.post(self.url_wijzig_wedstrijd % wedstrijd_pk,
                                     {'weekdag': 1, 'nhbver_pk': self.nhbver_101.pk, 'aanvang': '12:34'})
         self.assert_is_redirect_not_plein(resp)  # check for success
@@ -1015,7 +1015,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         self.assertEqual(str(wedstrijd.tijd_begin_wedstrijd), "12:34:00")
         self.assertEqual(wedstrijd.vereniging.nhb_nr, self.nhbver_101.nhb_nr)
 
-        with self.assert_max_queries(23):
+        with self.assert_max_queries(31):
             resp = self.client.get(self.url_wijzig_wedstrijd % wedstrijd_pk)
         self.assertEqual(resp.status_code, 200)
 
@@ -1080,13 +1080,13 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
                                     {'weekdag': 1, 'nhbver_pk': 9999999, 'aanvang': '12:34'})
         self.assertEqual(resp.status_code, 404)  # 404 = Not found
 
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(26):
             resp = self.client.post(self.url_wijzig_wedstrijd % wedstrijd_pk,
                                     {'weekdag': 1, 'nhbver_pk': self.nhbver_101.pk, 'aanvang': '12:34',
                                      'wkl_indiv_999999': 'on'})
         self.assertEqual(resp.status_code, 404)  # 404 = Not found
 
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(26):
             resp = self.client.post(self.url_wijzig_wedstrijd % wedstrijd_pk,
                                     {'weekdag': 1, 'nhbver_pk': self.nhbver_101.pk, 'aanvang': '12:34',
                                      'wkl_indiv_x': 'on'})
@@ -1228,7 +1228,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
 
         # haal de wijzig-wedstrijd pagina op
         url = self.url_wijzig_wedstrijd % wedstrijd_pk
-        with self.assert_max_queries(26):
+        with self.assert_max_queries(34):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         urls = self.extract_all_urls(resp, skip_menu=True)
@@ -1262,7 +1262,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
 
         # haal de wijzig-wedstrijd pagina op
         url = self.url_wijzig_wedstrijd % wedstrijd_pk
-        with self.assert_max_queries(27):
+        with self.assert_max_queries(35):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         urls = self.extract_all_urls(resp, skip_menu=True)

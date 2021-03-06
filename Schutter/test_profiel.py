@@ -162,9 +162,9 @@ class TestSchutterProfiel(E2EHelpers, TestCase):
         self.comp_25 = Competitie.objects.get(afstand='25')
 
         # klassegrenzen vaststellen
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(35):
             resp = self.client.post(url_klassegrenzen_vaststellen % self.comp_18.pk)
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(35):
             resp = self.client.post(url_klassegrenzen_vaststellen % self.comp_25.pk)
 
         # zet de inschrijving open

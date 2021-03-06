@@ -125,7 +125,7 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
 
         # klassengrenzen vaststellen om de competitie voorbij fase A te krijgen
         self.url_klassegrenzen_vaststellen = '/bondscompetities/%s/klassegrenzen/vaststellen/' % self.comp.pk
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(35):
             resp = self.client.post(self.url_klassegrenzen_vaststellen)
         self.assert_is_redirect_not_plein(resp)     # check success
         self.client.logout()

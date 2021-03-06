@@ -122,6 +122,7 @@ class Command(BaseCommand):
                         .objects
                         .select_related('competitie', 'indiv', 'indiv__boogtype')
                         .prefetch_related('indiv__leeftijdsklassen')
+                        .filter(team=None)
                         .exclude(indiv__buiten_gebruik=True))
 
         for obj in klassen_qset:

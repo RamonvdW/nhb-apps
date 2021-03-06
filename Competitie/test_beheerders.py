@@ -128,10 +128,10 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
 
         # klassegrenzen vaststellen
         url_klassegrenzen = '/bondscompetities/%s/klassegrenzen/vaststellen/'
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(35):
             resp = self.client.post(url_klassegrenzen % self.comp_18.pk)
         self.assert_is_redirect_not_plein(resp)  # check for success
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(35):
             resp = self.client.post(url_klassegrenzen % self.comp_25.pk)
         self.assert_is_redirect_not_plein(resp)  # check for success
         # nu in fase A2

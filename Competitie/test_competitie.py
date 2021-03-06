@@ -580,7 +580,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         comp18_pk = comp18.pk
         url = self.url_klassegrenzen_vaststellen % comp18_pk
 
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(35):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -589,7 +589,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         # nu kunnen we met een POST de klassegrenzen vaststellen
         count = CompetitieKlasse.objects.filter(competitie=comp18).count()
         self.assertEqual(count, 0)
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(35):
             resp = self.client.post(url)
         self.assert_is_redirect(resp, self.url_kies)        # redirect = success
         count = CompetitieKlasse.objects.filter(competitie=comp18).count()
@@ -658,10 +658,10 @@ class TestCompetitie(E2EHelpers, TestCase):
         self.assertContains(resp, 'De klassegrenzen voor de ')
 
         # klassegrenzen vaststellen (18m en 25m)
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(35):
             resp = self.client.post(self.url_klassegrenzen_vaststellen % comp_18.pk)
         self.assert_is_redirect(resp, self.url_kies)
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(35):
             resp = self.client.post(self.url_klassegrenzen_vaststellen % comp_25.pk)
         self.assert_is_redirect(resp, self.url_kies)
         self.e2e_logout()

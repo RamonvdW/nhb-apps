@@ -585,7 +585,12 @@ class KlassegrenzenVaststellenView(UserPassesTestMixin, TemplateView):
             count = len(team_scores)
             aantal = len(klassen)
             if aantal > 1:
-                step = int(count/ aantal)
+                if count < aantal:
+                    step = 0
+                else:
+                    step = int(count / aantal)
+                if len(team_scores) == 0:
+                    team_scores.append(AG_NUL)
                 pos = 0
                 for klasse in klassen[:-1]:
                     pos += step

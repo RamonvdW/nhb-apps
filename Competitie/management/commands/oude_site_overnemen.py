@@ -102,7 +102,8 @@ class Command(BaseCommand):
         for obj in (CompetitieKlasse
                     .objects
                     .select_related('competitie', 'indiv')
-                    .exclude(indiv__buiten_gebruik=True)):
+                    .filter(indiv__buiten_gebruik=False,
+                            team=None)):
             tup = (obj.competitie.pk, obj.indiv.beschrijving.lower())
             self._cache_klasse[tup] = obj
         # for
