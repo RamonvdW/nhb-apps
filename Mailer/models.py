@@ -44,6 +44,10 @@ def mailer_queue_email(to_address, onderwerp, text_body, enforce_whitelist=True)
         Het feitelijk versturen van de email wordt door een achtergrondtaak gedaan
     """
 
+    if not to_address:
+        # geen e-mailadres opgegeven --> jammer dan
+        return
+
     now = timezone.now()    # in utc
 
     # maak de date: header voor in de mail, in lokale tijdzone

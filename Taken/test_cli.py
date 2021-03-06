@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -60,5 +60,18 @@ class TestTakenCLI(E2EHelpers, TestCase):
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
         self.assertEqual(0, Taak.objects.count())
+
+    def test_no_email(self):
+        email = self.account1.accountemail_set.all()[0]
+        email.bevestigde_email = ''
+        email.save()
+
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        with self.assert_max_queries(20):
+            management.call_command('maak_taak', 'eerste', 'systeem', '2020-02-03', '', 'Hallo', stderr=f1, stdout=f2)
+        # print("f1: %s" % f1.getvalue())
+        # print("f2: %s" % f2.getvalue())
+        self.assertTrue('[ERROR] geen e-mailadres bekend voor account Eer' in f1.getvalue())
 
 # end of file
