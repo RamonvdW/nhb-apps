@@ -24,9 +24,9 @@ GEBRUIK2STR = {'18': 'Indoor',
 
 
 class NhbRayon(models.Model):
-    """ Tabel waarin de Rayon definities van de NHB staan """
+    """ Tabel waarin de Rayon definities """
 
-    # 1-cijferige NHB nummer van dit rayon
+    # 1-digit nummer van dit rayon
     rayon_nr = models.PositiveIntegerField(primary_key=True)
 
     # korte naam van het rayon (Rayon 1)
@@ -50,7 +50,7 @@ class NhbRayon(models.Model):
 
 
 class NhbRegio(models.Model):
-    """ Tabel waarin de Regio definities van de NHB staan """
+    """ Tabel waarin de Regio definities """
 
     # 3-cijferige NHB nummer van deze regio
     regio_nr = models.PositiveIntegerField(primary_key=True)
