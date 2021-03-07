@@ -11,15 +11,15 @@ from Overig.e2ehelpers import E2EHelpers
 
 
 # updaten met dit commando:
-#  for x in `./manage.py show_urls --settings=nhbapps.setting_dev | rev | cut -d'/' -f2- | rev | grep '/beheer/'`; do echo "'$x/',"; done | grep -vE ':object_id>/|/add/|/autocomplete/'
+#  for x in `./manage.py show_urls --settings=nhbapps.settings_dev | rev | cut -d'/' -f2- | rev | grep '/beheer/'`; do echo "'$x/',"; done | grep -vE ':object_id>/|/add/|/autocomplete/'
 BEHEER_PAGINAS = (
     '/beheer/Account/account/',
     '/beheer/Account/account/<id>/password/',
     '/beheer/Account/accountemail/',
-    '/beheer/Account/hanterenpersoonsgegevens/',
     '/beheer/BasisTypen/boogtype/',
     '/beheer/BasisTypen/indivwedstrijdklasse/',
     '/beheer/BasisTypen/leeftijdsklasse/',
+    '/beheer/BasisTypen/teamtype/',
     '/beheer/BasisTypen/teamwedstrijdklasse/',
     '/beheer/Competitie/competitie/',
     '/beheer/Competitie/competitieklasse/',
@@ -28,8 +28,12 @@ BEHEER_PAGINAS = (
     '/beheer/Competitie/deelcompetitieronde/',
     '/beheer/Competitie/kampioenschapmutatie/',
     '/beheer/Competitie/kampioenschapschutterboog/',
+    '/beheer/Competitie/regiocompetitierondeteam/',
     '/beheer/Competitie/regiocompetitieschutterboog/',
+    '/beheer/Competitie/regiocompetitieteam/',
+    '/beheer/Competitie/regiocompetitieteampoule/',
     '/beheer/Functie/functie/',
+    '/beheer/Functie/verklaringhanterenpersoonsgegevens/',
     '/beheer/HistComp/histcompetitie/',
     '/beheer/HistComp/histcompetitieindividueel/',
     '/beheer/HistComp/histcompetitieteam/',

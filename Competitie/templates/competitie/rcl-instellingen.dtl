@@ -34,6 +34,12 @@
             el.classList.remove('disabled')
         }
 
+        function datum_gewijzigd(el) {
+            const el_out = document.getElementById('datum1_out')
+            el_out.value = el.M_Datepicker.toString('yyyy-mm-dd')
+            gewijzigd()
+        }
+
         function teams_gewijzigd(keuze) {
             /* enable de andere radio buttons */
             const els = document.querySelectorAll("input[name=team_alloc], input[name=team_punten]")
@@ -99,6 +105,13 @@
             </tr>
 
             <tr>
+                <td>Teams aanmaken toestaan tot</td>
+                <td><input type="text" class="nl_datepicker" id="datum1" onchange="datum_gewijzigd(this)">
+                    <input type="hidden" name="einde_teams_aanmaken" id="datum1_out" value="{{ deelcomp.einde_teams_aanmaken|date:'Y-m-d' }}">
+                </td>
+            </tr>
+
+            <tr>
                 <td>Wedstrijdpunten</td>
                 <td>
                     {% if readonly %}
@@ -124,11 +137,28 @@
         </table>
 
     {% if not readonly %}
-            <p>
-                <button id="opslaan_knop" class="btn-nhb-rood disabled" type="submit">
-                    <i class="material-icons-round left">check</i>Opslaan</button>
-            </p>
+        <p>
+            <button id="opslaan_knop" class="btn-nhb-rood disabled" type="submit">
+                <i class="material-icons-round left">check</i>Opslaan</button>
+        </p>
     </form>
+
+    <!-- initialisatie van de datum pickers -->
+    <script type="application/javascript">
+        document.addEventListener('DOMContentLoaded', function() {
+            const el = document.querySelector('#datum1');
+            let maxDate = new Date("{{ deelcomp.competitie.eerste_wedstrijd|date:'Y-m-d' }}")
+            maxDate.setDate(maxDate.getDate() - 1)      // get/setDate = day of month!!
+
+            M.Datepicker.init(el, {
+                defaultDate: new Date("{{ deelcomp.einde_teams_aanmaken|date:'Y-m-d' }}"),
+                setDefaultDate: true,
+                minDate: new Date("{{ deelcomp.competitie.begin_aanmeldingen|date:'Y-m-d' }}"),
+                maxDate: maxDate
+            })
+        })
+    </script>
+
     {% endif %}
 
     <p>Handleiding over deze keuzes: <a class="btn-small btn-nhb-blauw" href="{{ wiki_rcl_regio_instellingen_url }}" target="_blank" rel="noopener noreferrer">

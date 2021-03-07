@@ -1412,6 +1412,19 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
         if punten in (TEAM_PUNTEN_TWEE, TEAM_PUNTEN_FORMULE1, TEAM_PUNTEN_SOM_SCORES):
             deelcomp.regio_team_punten_model = punten
 
+        einde_s = request.POST.get('einde_teams_aanmaken', '')[:10]       # yyyy-mm-dd
+        if einde_s:
+            try:
+                einde_p = datetime.datetime.strptime(einde_s, '%Y-%m-%d')
+            except ValueError:
+                raise Resolver404()
+            else:
+                einde_p = einde_p.date()
+                comp = deelcomp.competitie
+                if einde_p < comp.begin_aanmeldingen or einde_p >= comp.eerste_wedstrijd:
+                    raise Resolver404()
+                deelcomp.einde_teams_aanmaken = einde_p
+
         deelcomp.save()
 
         url = reverse('Competitie:overzicht',
@@ -1476,6 +1489,7 @@ class RegioTeamsView(UserPassesTestMixin, TemplateView):
             if team.team_type != prev_team:
                 team.break_before = True
                 prev_team = team.team_type
+
             # team AG is 0.0 - 30.0 --> toon als score: 000.0 .. 900.0
             team.aanvangsgemiddelde_str = "%05.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
         # for

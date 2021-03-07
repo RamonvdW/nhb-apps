@@ -50,7 +50,6 @@ class RegioCompetitieSchutterBoogAdmin(admin.ModelAdmin):
              }),
         ('Inschrijving',
             {'fields': ('inschrijf_voorkeur_team',
-                        'inschrijf_team_type',
                         'inschrijf_gekozen_wedstrijden',
                         'inschrijf_voorkeur_dagdeel',
                         'inschrijf_notitie'),
@@ -123,7 +122,7 @@ class RegioCompetitieSchutterBoogAdmin(admin.ModelAdmin):
 
 
 class RegiocompetitieTeamAdmin(admin.ModelAdmin):
-    filter_horizontal = ('vaste_schutters', )
+    filter_horizontal = ('gekoppelde_schutters', )
 
     list_filter = ('deelcompetitie__competitie',
                    'vereniging__regio',)
@@ -147,7 +146,7 @@ class RegiocompetitieTeamAdmin(admin.ModelAdmin):
         return super().get_form(request, obj, **kwargs)
 
     def formfield_for_manytomany(self, db_field, request, **kwargs):    # pragma: no cover
-        if db_field.name == 'vaste_schutters' and self.obj:
+        if db_field.name == 'gekoppelde_schutters' and self.obj:
             # alleen schutters van de juiste vereniging laten kiezen
             kwargs['queryset'] = (RegioCompetitieSchutterBoog
                                   .objects

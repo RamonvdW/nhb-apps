@@ -346,7 +346,7 @@ class DeelCompetitie(models.Model):
     # heeft deze RK/BK al een vastgestelde deelnemerslijst?
     heeft_deelnemerslijst = models.BooleanField(default=False)
 
-    # keuzes van de RCL voor de regiocompetitie
+    # keuzes van de RCL voor de regiocompetitie teams
 
     # doet deze deelcompetitie aan team competitie?
     regio_organiseert_teamcompetitie = models.BooleanField(default=True)
@@ -354,6 +354,10 @@ class DeelCompetitie(models.Model):
     # vaste teams? zo niet, dan voortschrijdend gemiddelde (VSG)
     regio_heeft_vaste_teams = models.BooleanField(default=True)
 
+    # tot welke datum mogen teams aangemeld aangemaakt worden (verschilt per regio)
+    einde_teams_aanmaken = models.DateField(default='2001-01-01')
+
+    # punten model
     regio_team_punten_model = models.CharField(max_length=2,
                                                default=TEAM_PUNTEN_TWEE,
                                                choices=TEAM_PUNTEN)
@@ -438,16 +442,21 @@ class DeelcompetitieRonde(models.Model):
 class RegioCompetitieSchutterBoog(models.Model):
     """ Een schutterboog aangemeld bij een regiocompetitie """
 
+    # bij welke deelcompetitie hoort deze inschrijving?
     deelcompetitie = models.ForeignKey(DeelCompetitie, on_delete=models.CASCADE)
 
+    # om wie gaat het?
     schutterboog = models.ForeignKey(SchutterBoog, on_delete=models.PROTECT)
 
     # vereniging wordt hier apart bijgehouden omdat de schutter over kan stappen
     # midden in het seizoen
     bij_vereniging = models.ForeignKey(NhbVereniging, on_delete=models.PROTECT)
 
+    # aanvangsgemiddelde: automatisch vastgesteld of handmatig ingevoerd
     is_handmatig_ag = models.BooleanField(default=False)
     aanvangsgemiddelde = models.DecimalField(max_digits=5, decimal_places=3, default=0.0)    # 10,000
+
+    # individuele klasse
     klasse = models.ForeignKey(CompetitieKlasse, on_delete=models.CASCADE)
 
     # alle scores van deze schutterboog in deze competitie
@@ -476,11 +485,6 @@ class RegioCompetitieSchutterBoog(models.Model):
 
     # voorkeuren opgegeven bij het inschrijven
     inschrijf_voorkeur_team = models.BooleanField(default=False)
-
-    # welk type team? (nodig voor de situatie Recurve team als Barebow schutter)
-    # TODO: niet meer in gebruik
-    inschrijf_team_type = models.ForeignKey(TeamType, on_delete=models.PROTECT,
-                                            null=True, blank=True)
 
     # opmerking vrije tekst
     inschrijf_notitie = models.TextField(default="", blank=True)
@@ -534,9 +538,9 @@ class RegiocompetitieTeam(models.Model):
     # de naam van dit team (wordt getoond in plaats van team volgnummer)
     team_naam = models.CharField(max_length=50, default='')
 
-    # schutters in het team (alleen bij vaste teams)
-    vaste_schutters = models.ManyToManyField(RegioCompetitieSchutterBoog,
-                                             blank=True)    # mag leeg zijn
+    # initiële schutters in het team
+    gekoppelde_schutters = models.ManyToManyField(RegioCompetitieSchutterBoog,
+                                                  blank=True)    # mag leeg zijn
 
     # het berekende team aanvangsgemiddelde
     aanvangsgemiddelde = models.DecimalField(max_digits=5, decimal_places=3, default=0.0)    # 10,000
