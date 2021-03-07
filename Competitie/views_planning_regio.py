@@ -18,7 +18,7 @@ from NhbStructuur.models import NhbCluster, NhbVereniging
 from Taken.taken import maak_taak
 from Wedstrijden.models import Wedstrijd, WedstrijdLocatie
 from .models import (LAAG_REGIO, LAAG_RK, LAAG_BK, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2,
-                     TEAM_PUNTEN_FORMULE1, TEAM_PUNTEN_TWEE, TEAM_PUNTEN_SOM_SCORES,
+                     TEAM_PUNTEN_FORMULE1, TEAM_PUNTEN_TWEE, TEAM_PUNTEN_SOM_SCORES, AG_NUL,
                      DeelCompetitie, DeelcompetitieRonde, maak_deelcompetitie_ronde,
                      CompetitieKlasse, RegioCompetitieSchutterBoog, RegiocompetitieTeam)
 from .menu import menu_dynamics_competitie
@@ -1473,28 +1473,83 @@ class RegioTeamsView(UserPassesTestMixin, TemplateView):
         context['deelcomp'] = deelcomp
         context['regio'] = self.functie_nu.nhb_regio
 
-        regioteams = (RegiocompetitieTeam
-                      .objects
-                      .select_related('vereniging')
-                      .filter(deelcompetitie=deelcomp)
-                      .order_by('team_type', '-aanvangsgemiddelde', 'vereniging__ver_nr'))
-
         if deelcomp.competitie.afstand == '18':
             aantal_pijlen = 30
         else:
             aantal_pijlen = 25
 
-        prev_team = None
-        for team in regioteams:
-            if team.team_type != prev_team:
-                team.break_before = True
-                prev_team = team.team_type
+        totaal_teams = 0
 
-            # team AG is 0.0 - 30.0 --> toon als score: 000.0 .. 900.0
-            team.aanvangsgemiddelde_str = "%05.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
+        klassen = (CompetitieKlasse
+                   .objects
+                   .filter(competitie=deelcomp.competitie,
+                           indiv=None)
+                   .order_by('team__volgorde'))
+
+        klasse2teams = dict()       # [klasse] = list(teams)
+        prev_sterkte = ''
+        prev_team = None
+        for klasse in klassen:
+            klasse2teams[klasse] = list()
+
+            if klasse.team.team_type != prev_team:
+                prev_sterkte = ''
+                prev_team = klasse.team.team_type
+
+            min_ag_str = "%5.1f" % (klasse.min_ag * aantal_pijlen)
+            if prev_sterkte:
+                if klasse.min_ag > AG_NUL:
+                    klasse.sterkte_str = "sterkte " + min_ag_str + " tot " + prev_sterkte
+                else:
+                    klasse.sterkte_str = "sterkte tot " + prev_sterkte
+            else:
+                klasse.sterkte_str = "sterkte " + min_ag_str + " en hoger"
+
+            prev_sterkte = min_ag_str
         # for
 
-        context['regioteams'] = regioteams
+        regioteams = (RegiocompetitieTeam
+                      .objects
+                      .select_related('vereniging',
+                                      'klasse')
+                      .exclude(klasse=None)
+                      .filter(deelcompetitie=deelcomp)
+                      .order_by('klasse__team__volgorde', '-aanvangsgemiddelde', 'vereniging__ver_nr'))
+
+        prev_klasse = None
+        for team in regioteams:
+            if team.klasse != prev_klasse:
+                team.break_before = True
+                prev_klasse = team.klasse
+
+            # team AG is 0.0 - 30.0 --> toon als score: 000.0 .. 900.0
+            team.ag_str = "%05.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
+            totaal_teams += 1
+
+            klasse2teams[team.klasse].append(team)
+        # for
+
+        context['regioteams'] = klasse2teams
+
+        regioteams = (RegiocompetitieTeam
+                      .objects
+                      .select_related('vereniging')
+                      .filter(deelcompetitie=deelcomp,
+                              klasse=None)
+                      .order_by('team_type__volgorde', '-aanvangsgemiddelde', 'vereniging__ver_nr'))
+
+        is_eerste = True
+        for team in regioteams:
+            # team AG is 0.0 - 30.0 --> toon als score: 000.0 .. 900.0
+            team.ag_str = "%05.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
+            totaal_teams += 1
+
+            team.break_before = is_eerste
+            is_eerste = False
+        # for
+
+        context['regioteams_niet_af'] = regioteams
+        context['totaal_teams'] = totaal_teams
 
         menu_dynamics_competitie(self.request, context, comp_pk=deelcomp.competitie.pk)
         return context

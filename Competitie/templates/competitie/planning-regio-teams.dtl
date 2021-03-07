@@ -44,30 +44,55 @@
     <p>Op deze pagina kan de RCL de verenigingsteams inzien voor de regiocompetitie.</p>
 
     <table class="white">
-        {% for team in regioteams %}
+        {% if totaal_teams == 0 %}
+            <tr>
+                <td colspan="4"><i>Er zijn nog geen teams aangemaakt</i></td>
+            </tr>
+        {% endif %}
 
+        {% for klasse, teams in regioteams.items %}
+            <tr class="nhb-grijs">
+                <td colspan="4"><h5>{{ klasse.team.beschrijving }}</h5>{{ klasse.sterkte_str }}</td>
+            </tr>
+            <tr>
+                <th>Vereniging</th>
+                <th>Naam</th>
+                <th colspan="2">Team sterkte</th>
+            </tr>
+
+            {% for team in teams %}
+                <tr>
+                    <td>{{ team.vereniging }}</td>
+                    <td>{{ team.team_naam }}</td>
+                    <td colspan="2">{{ team.ag_str }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="4"><i>Nog geen teams</i></td>
+                </tr>
+            {% endfor %}
+        {% endfor %}
+
+        {% for team in regioteams_niet_af %}
             {% if team.break_before %}
                 <tr class="nhb-grijs">
-                    <td colspan="3"><h5>{{ team.team_type.beschrijving }}</h5></td>
+                    <td colspan="4"><h5>Nog niet geplaatste teams</h5></td>
                 </tr>
                 <tr>
-                    <th>Vereniging</th>
+                    <th>Soort team</th>
                     <th>Naam</th>
-                    <th>Team aanvangsgemiddelde</th>
+                    <th>Team sterkte</th>
+                    <th>Vereniging</th>
                 </tr>
             {% endif %}
 
             <tr>
-                <td>{{ team.vereniging }}</td>
+                <td>{{ team.team_type.beschrijving }}</td>
                 <td>{{ team.team_naam }}</td>
-                <td>{{ team.aanvangsgemiddelde_str }}</td>
-            </tr>
-        {% empty %}
-            <tr>
-                <td colspan="3"><i>Er zijn nog geen teams aangemaakt</i></td>
+                <td>{{ team.ag_str }}</td>
+                <td>{{ team.vereniging }}</td>
             </tr>
         {% endfor %}
-
     </table>
 
 {% endblock %}
