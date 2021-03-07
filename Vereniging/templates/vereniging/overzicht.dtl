@@ -92,10 +92,12 @@
                         {% include 'plein/card.dtl' with title="Teams Regio" text="Verenigingsteams voor de regiocompetitie van de "|add:deelcomp.competitie.beschrijving|add:" samenstellen." icon="gamepad" url=card_url %}
                     {% endif %}
 
+                    <!--
                     {% if deelcomp.competitie.fase >= 'E' and deelcomp.competitie.fase <= 'K' %}
                         {% url 'Vereniging:teams-rk' deelcomp_pk=deelcomp.pk as card_url %}
-                        {% include 'plein/card.dtl' with title="Teams RK" text="Verenigingsteams voor de rayonkampioenschappen van de "|add:deelcomp.competitie.beschrijving|add:" samenstellen." icon="gamepad" url=card_url %} <!--widgets-->
+                        {% include 'plein/card.dtl' with title="Teams RK" text="Verenigingsteams voor de rayonkampioenschappen van de "|add:deelcomp.competitie.beschrijving|add:" samenstellen." icon="gamepad" url=card_url %}
                     {% endif %}
+                    -->
 
                     {% if deelcomp.competitie.fase >= 'B' and deelcomp.competitie.fase <= 'F' %}
                         {% url 'Vereniging:leden-ingeschreven' deelcomp_pk=deelcomp.pk as card_url %}
@@ -151,10 +153,12 @@
                         {% include 'plein/card.dtl' with title="Teams Regio" text="Verenigingsteams voor de regiocompetitie van de "|add:deelcomp.competitie.beschrijving|add:" samenstellen." icon="gamepad" url=card_url %}
                     {% endif %}
 
+                    <!--
                     {% if deelcomp.competitie.fase >= 'E' and deelcomp.competitie.fase <= 'K' %}
                         {% url 'Vereniging:teams-rk' deelcomp_pk=deelcomp.pk as card_url %}
-                        {% include 'plein/card.dtl' with title="Teams RK" text="Verenigingsteams voor de rayonkampioenschappen van de "|add:deelcomp.competitie.beschrijving|add:" samenstellen." icon="gamepad" url=card_url %} <!--widgets-->
+                        {% include 'plein/card.dtl' with title="Teams RK" text="Verenigingsteams voor de rayonkampioenschappen van de "|add:deelcomp.competitie.beschrijving|add:" samenstellen." icon="gamepad" url=card_url %}
                     {% endif %}
+                    -->
 
                     {% if deelcomp.competitie.fase >= 'B' and deelcomp.competitie.fase <= 'F' %}
                         {% url 'Vereniging:leden-ingeschreven' deelcomp_pk=deelcomp.pk as card_url %}
