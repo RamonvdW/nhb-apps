@@ -1466,12 +1466,18 @@ class RegioTeamsView(UserPassesTestMixin, TemplateView):
                       .filter(deelcompetitie=deelcomp)
                       .order_by('team_type', '-aanvangsgemiddelde', 'vereniging__ver_nr'))
 
+        if deelcomp.competitie.afstand == '18':
+            aantal_pijlen = 30
+        else:
+            aantal_pijlen = 25
+
         prev_team = None
         for team in regioteams:
             if team.team_type != prev_team:
                 team.break_before = True
                 prev_team = team.team_type
-            team.aanvangsgemiddelde_str = "%.3f" % team.aanvangsgemiddelde
+            # team AG is 0.0 - 30.0 --> toon als score: 000.0 .. 900.0
+            team.aanvangsgemiddelde_str = "%05.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
         # for
 
         context['regioteams'] = regioteams

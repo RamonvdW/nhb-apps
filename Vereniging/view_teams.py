@@ -71,6 +71,11 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
         # zoek de deelcompetitie waar de regio teams voor in kunnen stellen
         context['deelcomp'] = deelcomp = self._get_deelcomp(kwargs['deelcomp_pk'])
 
+        if deelcomp.competitie.afstand == '18':
+            aantal_pijlen = 30
+        else:
+            aantal_pijlen = 25
+
         teams = (RegiocompetitieTeam
                  .objects
                  .select_related('vereniging',
@@ -80,6 +85,7 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
                  .order_by('volg_nr'))
         for obj in teams:
             obj.aantal = obj.vaste_schutters.count()
+            obj.ag_str = "%05.1f" % (obj.aanvangsgemiddelde * aantal_pijlen)
 
             obj.url_wijzig = reverse('Vereniging:teams-regio-wijzig',
                                      kwargs={'deelcomp_pk': deelcomp.pk,
@@ -403,7 +409,7 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
             ags = ags[:3]
 
             # bereken het gemiddelde
-            ag = sum(ags) / len(ags)
+            ag = sum(ags)
         else:
             ag = AG_NUL
 
