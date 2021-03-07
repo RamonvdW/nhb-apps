@@ -559,6 +559,7 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
         return HttpResponseRedirect(reverse('Vereniging:overzicht'))
 
 
+# TODO: verplaatsen naar view_teams omdat dit AG alleen voor teams wordt gebruikt en het team AG + team klasse opnieuw vastgesteld moet worden bij wijziging AG
 class WijzigAanvangsgemiddeldeView(UserPassesTestMixin, TemplateView):
 
     # class variables shared by all instances

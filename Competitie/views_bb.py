@@ -82,13 +82,14 @@ class InstellingenVolgendeCompetitieView(UserPassesTestMixin, TemplateView):
         objs = (TeamWedstrijdklasse
                 .objects
                 .filter(buiten_gebruik=False)
-                .prefetch_related('boogtypen')
+                .select_related('team_type')
+                .prefetch_related('team_type__boog_typen')
                 .order_by('volgorde'))
         prev = 0
         for klasse in objs:
             groep = klasse.volgorde // 10
             klasse.separate_before = groep != prev
-            klasse.boogtypen_list = [boogtype.beschrijving for boogtype in klasse.boogtypen.order_by('volgorde')]
+            klasse.boogtypen_list = [boogtype.beschrijving for boogtype in klasse.team_type.boog_typen.order_by('volgorde')]
             prev = groep
         # for
         return objs
@@ -399,15 +400,14 @@ class KlassegrenzenVaststellenView(UserPassesTestMixin, TemplateView):
         for obj in (TeamWedstrijdklasse
                     .objects
                     .filter(buiten_gebruik=False)
-                    .prefetch_related('boogtypen')):
+                    .select_related('team_type')):
 
-            # als er meerdere boogtypen zijn (zoals bij R, BB, IB)
-            # neem dan de 'hoogste' boog
-            boogtype = obj.boogtypen.order_by('volgorde').all()[0].afkorting
+            afkorting = obj.team_type.afkorting
+
             try:
-                targets[boogtype].append(obj)
+                targets[afkorting].append(obj)
             except KeyError:
-                targets[boogtype] = [obj]
+                targets[afkorting] = [obj]
         # for
         return targets
 

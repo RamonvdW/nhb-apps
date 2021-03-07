@@ -137,7 +137,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_bb)
         self.e2e_wisselnaarrol_bb()
         self.url_klassegrenzen_vaststellen_18 = '/bondscompetities/%s/klassegrenzen/vaststellen/' % self.comp_18.pk
-        with self.assert_max_queries(35):
+        with self.assert_max_queries(24):
             resp = self.client.post(self.url_klassegrenzen_vaststellen_18)
         self.assert_is_redirect_not_plein(resp)                 # redirect = success
         self.comp_18 = Competitie.objects.get(afstand='18')     # refresh met nieuwe status

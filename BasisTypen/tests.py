@@ -50,10 +50,5 @@ class TestBasisTypen(TestCase):
         html = adm._leeftijdsklassen(obj)
         self.assertTrue(html.count('<p>') == obj.leeftijdsklassen.count())
 
-        adm = BasisTypenTeamWedstrijdklasseAdmin(TeamWedstrijdklasse, None)
-        obj = TeamWedstrijdklasse.objects.get(volgorde=10)
-        html = adm._boogtypen(obj)
-        self.assertTrue(html.count('<p>') == obj.boogtypen.count())
-
 # end of file
 

@@ -41,10 +41,10 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
         aanvangsgemiddelde_opslaan(self.schutterboog_100005, 18, 9.500, None, "Test")
 
         # klassegrenzen vaststellen
-        with self.assert_max_queries(35):
+        with self.assert_max_queries(24):
             resp = self.client.post(self.url_klassegrenzen_vaststellen % comp_18.pk)
         self.assert_is_redirect_not_plein(resp)     # check success
-        with self.assert_max_queries(35):
+        with self.assert_max_queries(24):
             resp = self.client.post(self.url_klassegrenzen_vaststellen % comp_25.pk)
         self.assert_is_redirect_not_plein(resp)     # check success
 
