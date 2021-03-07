@@ -59,18 +59,8 @@ class BasisTypenTeamWedstrijdklasseAdmin(BasisTypenReadonlyMetVolgordeAdmin):
 
     # record weergave
     fieldsets = (
-        (None, {'fields': ('beschrijving', '_boogtypen', 'volgorde', 'buiten_gebruik')}),
+        (None, {'fields': ('beschrijving', 'team_type', 'volgorde', 'buiten_gebruik')}),
     )
-
-    @staticmethod
-    def _boogtypen(instance):
-        """ formatteer de read-only lijst van boogtypen onder elkaar
-            wordt alleen gebruikt in de admin interface
-        """
-        html = ""
-        for boogtype in instance.boogtypen.all():
-            html += '<p>' + format_html(str(boogtype)) + '</p>'
-        return mark_safe(html)
 
 
 admin.site.register(BoogType, BasisTypenReadonlyMetVolgordeAdmin)

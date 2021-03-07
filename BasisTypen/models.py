@@ -39,7 +39,11 @@ class BoogType(models.Model):
 
 class TeamType(models.Model):
     """ team type: voor gebruik in de team competities """
+
+    # Recurve team, etc.
     beschrijving = models.CharField(max_length=50)
+
+    # R/C/BB/IB/LB
     afkorting = models.CharField(max_length=2)
 
     # sorteervolgorde zodat order_by('volgorde') de juiste sortering oplevert
@@ -130,10 +134,20 @@ class IndivWedstrijdklasse(models.Model):
 
 class TeamWedstrijdklasse(models.Model):
     """ definitie van een team wedstrijdklasse """
-    buiten_gebruik = models.BooleanField(default=False)     # niet meer gebruiken?
+
+    # niet meer gebruiken?
+    buiten_gebruik = models.BooleanField(default=False)
+
+    # voor welk team type is deze wedstrijdklasse?
+    team_type = models.ForeignKey(TeamType, on_delete=models.PROTECT,
+                                  null=True)                # nodig voor migratie
+
+    # sorteervolgorde
+    # lager nummer = betere schutters
+    volgorde = models.PositiveIntegerField()
+
+    # voorbeeld: Recurve klasse ERE
     beschrijving = models.CharField(max_length=80)
-    boogtypen = models.ManyToManyField(BoogType)
-    volgorde = models.PositiveIntegerField()                # lager nummer = betere schutters
 
     def __str__(self):
         """ Lever een tekstuele beschrijving voor de admin interface """
