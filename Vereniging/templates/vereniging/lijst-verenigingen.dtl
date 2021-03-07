@@ -92,7 +92,7 @@
             {% endif %}
 
             <!-- vereniging -->
-            <td>[{{ obj.nhb_nr }}] {{ obj.naam }}</td>
+            <td>[{{ obj.ver_nr }}] {{ obj.naam }}</td>
 
             <!-- accommodatie -->
             <td>

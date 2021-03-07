@@ -81,7 +81,7 @@
 
             {% for obj in object_list %}
                 <tr>
-                    <td>[{{ obj.nhb_nr }}] {{ obj.naam }}</td>
+                    <td>[{{ obj.ver_nr }}] {{ obj.naam }}</td>
 
                     <td>
                         <select name="{{ obj.veld_naam }}">
