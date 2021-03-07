@@ -84,7 +84,7 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
                          vereniging=self.functie_nu.nhb_ver)
                  .order_by('volg_nr'))
         for obj in teams:
-            obj.aantal = obj.vaste_schutters.count()
+            obj.aantal = obj.gekoppelde_schutters.count()
             obj.ag_str = "%05.1f" % (obj.aanvangsgemiddelde * aantal_pijlen)
 
             obj.url_wijzig = reverse('Vereniging:teams-regio-wijzig',
@@ -285,7 +285,7 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
 
                 # verwijder eventueel gekoppelde sporters bij wijziging team type,
                 # om verkeerde boog typen te voorkomen
-                team.vaste_schutters.clear()
+                team.gekoppelde_schutters.clear()
 
         team_naam = request.POST.get('team_naam', '')
         team_naam = team_naam.strip()
@@ -342,7 +342,7 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
         boog_pks = boog_typen.values_list('pk', flat=True)
         context['boog_typen'] = boog_typen
 
-        pks = team.vaste_schutters.values_list('pk', flat=True)
+        pks = team.gekoppelde_schutters.values_list('pk', flat=True)
 
         deelnemers = (RegioCompetitieSchutterBoog
                       .objects
@@ -397,10 +397,10 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
                     pks.append(pk)
         # for
 
-        team.vaste_schutters.clear()
-        team.vaste_schutters.add(*pks)
+        team.gekoppelde_schutters.clear()
+        team.gekoppelde_schutters.add(*pks)
 
-        ags = team.vaste_schutters.values_list('aanvangsgemiddelde', flat=True)
+        ags = team.gekoppelde_schutters.values_list('aanvangsgemiddelde', flat=True)
         ags = list(ags)
 
         if len(ags) >= 3:
