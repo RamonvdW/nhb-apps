@@ -267,6 +267,8 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
                             team_type=team_type,
                             team_naam=' ')
             team.save()
+
+            verwijderen = False
         else:
             try:
                 team = (RegiocompetitieTeam
