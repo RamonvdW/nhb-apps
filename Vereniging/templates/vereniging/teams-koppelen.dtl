@@ -20,6 +20,9 @@
         <p>Tijdens de inschrijving moet je leden handmatig koppelen zodat sporters met een BB, IB or LB boog in het gewenste type team komen.</p>
     {% endif %}
 
+    <p>De team sterkte wordt berekend uit het aanvangsgemiddelde van de drie sterkste teamleden.</p>
+    <p>De team wedstrijdklasse wordt bepaald door de team sterkte en de vastgestelde minimum sterkte voor een wedstrijdklasse.</p>
+
     <form action="{{ url_opslaan }}" method="post">
         {% csrf_token %}
 
@@ -41,7 +44,7 @@
             </tr>
 
             <tr>
-                <td>Team type</td>
+                <td>Soort team</td>
                 <td>{{ team.team_type.beschrijving }}</td>
             </tr>
 
@@ -55,33 +58,47 @@
             </tr>
 
             <tr>
+                <td>Team sterkte</td>
+                <td>{{ team.ag_str }}</td>
+            </tr>
+
+            <tr>
+                <td>Team wedstrijdklasse</td>
+                <td>{{ team.klasse.team.beschrijving }}</td>
+            </tr>
+
+            <tr>
                 <td style="vertical-align: top">Selecteer sporters</td>
 
-                <td>
-                    <table class="striped">
-                        <thead>
-                            <tr>
-                                <th><!-- checkbox column --></th>
-                                <th>Aanvangsgemiddelde</th>
-                                <th>Boog</th>
-                                <th>Naam</th>
-                            </tr>
-                        </thead>
-                        {% for obj in deelnemers %}
-                            <tr>
-                            <td>
-                                <label>
-                                    <input type="checkbox" class="filled-in" name="{{ obj.sel_str }}"{% if obj.geselecteerd %} checked{% endif %}{% if obj.blokkeer %} disabled{% endif %}>
-                                    <span>&nbsp;</span>
-                                </label>
-                            </td>
-                                <td>{{ obj.ag_str }}</td>
-                                <td>{{ obj.boog_str }}</td>
-                                <td>{{ obj.naam_str }}</td>
-                            </tr>
-                        {% endfor %}
-                    </table>
-                </td>
+                {% if not deelnemers.count %}
+                    <td colspan="3"><i class="red-text">Geen sporters gevonden met toegestaan boog type</i></td>
+                {% else %}
+                    <td>
+                        <table class="striped">
+                            <thead>
+                                <tr>
+                                    <th><!-- checkbox column --></th>
+                                    <th>Aanvangs<wbr/>gemiddelde</th>
+                                    <th>Boog</th>
+                                    <th>Naam</th>
+                                </tr>
+                            </thead>
+                            {% for obj in deelnemers %}
+                                <tr>
+                                <td>
+                                    <label>
+                                        <input type="checkbox" class="filled-in" name="{{ obj.sel_str }}"{% if obj.geselecteerd %} checked{% endif %}{% if obj.blokkeer %} disabled{% endif %}>
+                                        <span>&nbsp;</span>
+                                    </label>
+                                </td>
+                                    <td>{{ obj.ag_str }}</td>
+                                    <td>{{ obj.boog_str }}</td>
+                                    <td>{{ obj.naam_str }}</td>
+                                </tr>
+                            {% endfor %}
+                        </table>
+                    </td>
+                {% endif %}
             </tr>
 
             <tr>

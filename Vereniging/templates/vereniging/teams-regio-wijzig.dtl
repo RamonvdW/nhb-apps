@@ -30,7 +30,7 @@
             {% endif %}
 
             <tr>
-                <td>Team type<br><br><i>(bij wijziging worden sporters ontkoppeld!)</i></td>
+                <td>Soort team<br><br><i>(bij wijziging worden sporters ontkoppeld!)</i></td>
                 <td>
                     <ul id="id_team_type">
                         {% for opt in opt_team_type %}
@@ -59,6 +59,26 @@
 
         </table>
     </form>
+
+    {% if url_verwijderen %}
+        <p>&nbsp;</p>
+        <form method="post" action="{{ url_verwijderen }}">
+            {% csrf_token %}
+            <input type="hidden" name="verwijderen" value="1">
+            <ul class="collapsible">
+                <li>
+                    <div class="collapsible-header white">
+                        <span>Klik eerst hier als je dit team wilt verwijderen</span>
+                    </div>
+                    <div class="collapsible-body white">
+                        <p>Heb je dit team echt niet meer nodig?</p>
+                        <button class="btn-nhb-rood" type="submit">
+                            <i class="material-icons-round left">delete</i>Verwijder dit team</button>
+                    </div>
+                </li>
+            </ul>
+        </form>
+    {% endif %}
 
     {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="teams-regio-wijzig" %}
 

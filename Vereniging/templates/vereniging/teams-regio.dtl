@@ -15,26 +15,47 @@
         <p>In jullie regio wordt geen team competitie gehouden.</p>
         <p>Voor meer informatie: neem contact op met de RCL.</p>
     {% else %}
-        <p>Op deze pagina kan je als HWL de teams opgeven voor de regiocompetitie van de {{ deelcomp }}.</p>
+        <p>Op deze pagina kan je als HWL de teams opgeven voor de regiocompetitie van de <b>{{ deelcomp }}</b>.</p>
+
+        <p>&nbsp;</p>
+        <div class="container">
+            <table class="white">
+                <tr>
+                    <td class="center-align">Teams kunnen aangepast worden tot en met <b>{{ deelcomp.einde_teams_aanmaken }}</b>.</td>
+                </tr>
+            </table>
+        </div>
+        <p>&nbsp;</p>
 
         <table class="white">
 
             <thead>
                 <tr>
-                    <th>Team type</th>
-                    <th>Team naam</th>
-                    <th>Gekoppeld</th>
-                    <th>Aanvangsgemiddelde</th>
+                    <th class="hide-on-small-only">Soort team</th>
+                    <th class="hide-on-med-and-up">Soort</th>
+                    <th>Naam</th>
+                    <th class="hide-on-small-only center-align">Gekoppeld</th>
+                    <th class="hide-on-small-only">Sterkte</th>
+                    <th>Wedstrijd<wbr/>klasse</th>
                     <th><!-- kolom voor de knoppen --></th>
                 </tr>
             </thead>
 
             {% for team in teams %}
                 <tr>
-                    <td>{{ team.team_type.beschrijving }}</td>
+                    <td class="hide-on-small-only">{{ team.team_type.beschrijving }}</td>
+                    <td class="hide-on-med-and-up">{{ team.team_type.afkorting }}</td>
                     <td>{{ team.team_naam }}</td>
-                    <td{% if team.aantal != 4 %} class="red-text"{% endif %}>{{ team.aantal }}</td>
-                    <td>{{ team.ag_str }}</td>  <!-- TODO: vervang door klasse -->
+                    <td class="hide-on-small-only center-align"{% if team.aantal != 4 %} red-text{% endif %}">{{ team.aantal }}</td>
+
+                    {% if team.klasse %}
+                        <td class="hide-on-small-only">{{ team.ag_str }}</td>
+                        <td>{{ team.klasse.team.beschrijving }}</td>
+                    {% else %}
+                        <td class="hide-on-small-only"></td>
+                        <td><i class="red-text">team is niet compleet</i></td>
+                    {% endif %}
+
                     <td>
                         <a class="btn-nhb-blauw" href="{{ team.url_wijzig }}">Wijzig</a>
                         <span>&nbsp;&nbsp;</span>

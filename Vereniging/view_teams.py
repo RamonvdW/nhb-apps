@@ -9,7 +9,9 @@ from django.urls import reverse, Resolver404
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import TeamType
-from Competitie.models import DeelCompetitie, LAAG_REGIO, RegioCompetitieSchutterBoog, RegiocompetitieTeam, AG_NUL
+from Competitie.models import (CompetitieKlasse, AG_NUL,
+                               DeelCompetitie, LAAG_REGIO,
+                               RegioCompetitieSchutterBoog, RegiocompetitieTeam)
 from Plein.menu import menu_dynamics
 from Functie.rol import Rollen, rol_get_huidige_functie
 
@@ -218,6 +220,9 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
                                          kwargs={'deelcomp_pk': deelcomp.pk,
                                                  'team_pk': team.pk})
 
+        if team.pk > 0:
+            context['url_verwijderen'] = context['url_opslaan']
+
         menu_dynamics(self.request, context, actief='vereniging')
         return context
 
@@ -273,28 +278,34 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
             except RegiocompetitieTeam.DoesNotExist:
                 raise Resolver404()
 
-            afkorting = request.POST.get('team_type', '')
-            if team.team_type.afkorting != afkorting:
-                try:
-                    team_type = TeamType.objects.get(afkorting=afkorting)
-                except TeamType.DoesNotExist:
-                    raise Resolver404()
+            verwijderen = request.POST.get('verwijderen', None) is not None
 
-                team.team_type = team_type
+            if not verwijderen:
+                afkorting = request.POST.get('team_type', '')
+                if team.team_type.afkorting != afkorting:
+                    try:
+                        team_type = TeamType.objects.get(afkorting=afkorting)
+                    except TeamType.DoesNotExist:
+                        raise Resolver404()
+
+                    team.team_type = team_type
+                    team.save()
+
+                    # verwijder eventueel gekoppelde sporters bij wijziging team type,
+                    # om verkeerde boog typen te voorkomen
+                    team.gekoppelde_schutters.clear()
+
+        if not verwijderen:
+            team_naam = request.POST.get('team_naam', '')
+            team_naam = team_naam.strip()
+            if team.team_naam != team_naam:
+                if team_naam == '':
+                    team_naam = "%s-%s" % (ver.ver_nr, team.volg_nr)
+
+                team.team_naam = team_naam
                 team.save()
-
-                # verwijder eventueel gekoppelde sporters bij wijziging team type,
-                # om verkeerde boog typen te voorkomen
-                team.gekoppelde_schutters.clear()
-
-        team_naam = request.POST.get('team_naam', '')
-        team_naam = team_naam.strip()
-        if team.team_naam != team_naam:
-            if team_naam == '':
-                team_naam = "%s-%s" % (ver.ver_nr, team.volg_nr)
-
-            team.team_naam = team_naam
-            team.save()
+        else:
+            team.delete()
 
         url = reverse('Vereniging:teams-regio', kwargs={'deelcomp_pk': deelcomp.pk})
         return HttpResponseRedirect(url)
@@ -341,6 +352,12 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
         boog_typen = team.team_type.boog_typen.all()
         boog_pks = boog_typen.values_list('pk', flat=True)
         context['boog_typen'] = boog_typen
+
+        if team.deelcompetitie.competitie.afstand == '18':
+            aantal_pijlen = 30
+        else:
+            aantal_pijlen = 25
+        team.ag_str = "%5.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
 
         pks = team.gekoppelde_schutters.values_list('pk', flat=True)
 
@@ -410,8 +427,21 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
 
             # bereken het gemiddelde
             ag = sum(ags)
+
+            # bepaal de wedstrijdklasse
+            team.klasse = None
+            comp = team.deelcompetitie.competitie
+            for klasse in (CompetitieKlasse
+                           .objects
+                           .filter(competitie=comp,
+                                   team__team_type=team.team_type)
+                           .order_by('min_ag')):        # oplopend
+                if ag >= klasse.min_ag:
+                    team.klasse = klasse
+            # for
         else:
             ag = AG_NUL
+            team.klasse = None
 
         team.aanvangsgemiddelde = ag
         team.save()
