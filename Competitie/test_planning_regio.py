@@ -6,7 +6,7 @@
 
 from django.conf import settings
 from django.test import TestCase
-from BasisTypen.models import BoogType, TeamWedstrijdklasse
+from BasisTypen.models import BoogType, TeamWedstrijdklasse, TeamType
 from Competitie.test_fase import zet_competitie_fase
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging, NhbLid
@@ -17,7 +17,8 @@ from Wedstrijden.models import WedstrijdLocatie, Wedstrijd
 from Overig.e2ehelpers import E2EHelpers
 from .models import (Competitie, DeelCompetitie, CompetitieKlasse,
                      DeelcompetitieRonde, competitie_aanmaken, LAAG_REGIO, LAAG_RK,
-                     RegioCompetitieSchutterBoog, INSCHRIJF_METHODE_1)
+                     RegioCompetitieSchutterBoog, INSCHRIJF_METHODE_1,
+                     RegiocompetitieTeam)
 from .views_planning_regio import competitie_week_nr_to_date
 import datetime
 
@@ -125,9 +126,20 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_bb)
         self.e2e_wisselnaarrol_bb()
         self.url_klassegrenzen_vaststellen_18 = '/bondscompetities/%s/klassegrenzen/vaststellen/' % self.comp_18.pk
-        with self.assert_max_queries(24):
+        with self.assert_max_queries(29):
             resp = self.client.post(self.url_klassegrenzen_vaststellen_18)
         self.assert_is_redirect_not_plein(resp)  # check for success
+
+        klasse = CompetitieKlasse.objects.get(competitie=self.comp_18,
+                                              team__volgorde=10)
+        klasse.min_ag = 29.0
+        klasse.save()
+
+        klasse = CompetitieKlasse.objects.get(competitie=self.comp_18,
+                                              team__volgorde=11)
+        klasse.min_ag = 25.0
+        klasse.save()
+
         self.client.logout()
 
         self.klasse_recurve_onbekend = (CompetitieKlasse
@@ -179,6 +191,8 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         self.url_verwijder_wedstrijd = '/bondscompetities/planning/regio/wedstrijd/verwijder/%s/'  # wedstrijd_pk
         self.url_score_invoeren = '/bondscompetities/scores/uitslag-invoeren/%s/'                  # wedstrijd_pk
         self.url_afsluiten_regio = '/bondscompetities/planning/regio/%s/afsluiten/'                # deelcomp_pk
+        self.url_regio_instellingen = '/bondscompetities/%s/instellingen/regio-%s/'                # comp_pk, regio-nr
+        self.url_regio_teams = '/bondscompetities/planning/regio/%s/teams/'                        # deelcomp_pk
 
     def _maak_inschrijving(self, deelcomp):
         RegioCompetitieSchutterBoog(schutterboog=self.schutterboog,
@@ -1730,6 +1744,210 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(url)
         self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
+
+    def test_regio_instellingen(self):
+        self.e2e_login_and_pass_otp(self.account_rcl112_18)
+        self.e2e_wissel_naar_functie(self.functie_rcl112_18)
+
+        url = self.url_regio_instellingen = '/bondscompetities/%s/instellingen/regio-%s/' % (self.comp_18.pk, 112)
+
+        # fase A
+
+        # tijdens competitie fase A mogen alle instellingen aangepast worden
+        zet_competitie_fase(self.comp_18, 'A')
+
+        # when the phase is set artificially, some dates are left behind
+        # let's repair that here
+        self.comp_18 = Competitie.objects.get(pk=self.comp_18.pk)
+        self.comp_18.eerste_wedstrijd = self.comp_18.begin_aanmeldingen
+        self.comp_18.eerste_wedstrijd += datetime.timedelta(days=1)
+        self.comp_18.save()
+        post_datum_ok = self.comp_18.begin_aanmeldingen.strftime('%Y-%m-%d')
+        # print('begin_aanmeldingen: %s' % comp_datum1)
+        post_datum_bad = self.comp_18.eerste_wedstrijd.strftime('%Y-%m-%d')
+        # print('eerste_wedstrijd: %s' % comp_datum2)
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/rcl-instellingen.dtl', 'plein/site_layout.dtl'))
+
+        # all params missing
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
+        self.assert_is_redirect_not_plein(resp)
+
+        # all params present
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'teams': 'ja',
+                                          'team_alloc': 'vast',
+                                          'team_punten': 'F1',
+                                          'einde_teams_aanmaken': post_datum_ok})
+        self.assert_is_redirect_not_plein(resp)
+
+        # late date
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'teams': 'nee',
+                                          'einde_teams_aanmaken': post_datum_bad})
+        self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
+
+        # bad date
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'einde_teams_aanmaken': 'xxx'})
+        self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
+
+        # fase B en C
+
+        # tot en met fase C mogen de team punten en datum aanmaken teams aangepast worden
+        oude_punten = 'F1'
+
+        for fase in ('B', 'C'):
+            zet_competitie_fase(self.comp_18, fase)
+
+            with self.assert_max_queries(20):
+                resp = self.client.get(url)
+            self.assertEqual(resp.status_code, 200)  # 200 = OK
+            self.assert_html_ok(resp)
+            self.assert_template_used(resp, ('competitie/rcl-instellingen.dtl', 'plein/site_layout.dtl'))
+
+            deelcomp_pre = DeelCompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
+            self.assertTrue(deelcomp_pre.regio_organiseert_teamcompetitie)
+            self.assertTrue(deelcomp_pre.regio_heeft_vaste_teams)
+            self.assertEqual(deelcomp_pre.regio_team_punten_model, oude_punten)
+            if oude_punten == 'F1':
+                nieuwe_punten = '2P'
+            else:
+                nieuwe_punten = 'SS'
+
+            # all params present
+            with self.assert_max_queries(20):
+                resp = self.client.post(url, {'teams': 'nee',
+                                              'team_alloc': 'vsg',
+                                              'team_punten': nieuwe_punten,
+                                              'einde_teams_aanmaken': post_datum_ok})
+            self.assert_is_redirect_not_plein(resp)
+
+            deelcomp_post = DeelCompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
+            self.assertTrue(deelcomp_post.regio_organiseert_teamcompetitie)
+            self.assertTrue(deelcomp_post.regio_heeft_vaste_teams)
+            self.assertEqual(deelcomp_post.regio_team_punten_model, nieuwe_punten)
+            oude_punten = nieuwe_punten
+
+        # fase D
+
+        zet_competitie_fase(self.comp_18, 'D')
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/rcl-instellingen.dtl', 'plein/site_layout.dtl'))
+
+    def test_regio_instellingen_bad(self):
+        # bad cases
+        self.e2e_login_and_pass_otp(self.account_rcl112_18)
+        self.e2e_wissel_naar_functie(self.functie_rcl112_18)
+
+        url = self.url_regio_instellingen = '/bondscompetities/%s/instellingen/regio-%s/' % (self.comp_18.pk, 112)
+
+        # na fase F zijn de instellingen niet meer in te zien
+        zet_competitie_fase(self.comp_18, 'K')      # fase G is niet te zetten
+
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
+        resp = self.client.post(url)
+        self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
+
+        # niet bestaande regio
+        url = self.url_regio_instellingen = '/bondscompetities/%s/instellingen/regio-%s/' % (self.comp_18.pk, 100)
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
+        resp = self.client.post(url)
+        self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
+
+        # niet de regio van de RCL
+        url = self.url_regio_instellingen = '/bondscompetities/%s/instellingen/regio-%s/' % (self.comp_18.pk, 110)
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
+        resp = self.client.post(url)
+        self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
+
+        # logout
+
+        url = self.url_regio_instellingen = '/bondscompetities/%s/instellingen/regio-%s/' % (self.comp_18.pk, 112)
+        self.client.logout()
+        resp = self.client.get(url)
+        self.assert_is_redirect(resp, '/plein/')
+
+    def test_regio_teams(self):
+        # RCL ziet teams
+        self.e2e_login_and_pass_otp(self.account_rcl112_18)
+        self.e2e_wissel_naar_functie(self.functie_rcl112_18)
+
+        team_r = TeamType.objects.get(afkorting='R')
+        klasse_r_ere = CompetitieKlasse.objects.get(
+                                    competitie=self.comp_18,
+                                    team__volgorde=10)
+        # create two complete teams
+        RegiocompetitieTeam(
+                deelcompetitie=self.deelcomp_regio112_18,
+                vereniging=self.nhbver_112,
+                volg_nr=1,
+                team_type=team_r,
+                team_naam='Test team 1',
+                aanvangsgemiddelde=25.0,
+                klasse=klasse_r_ere).save()
+
+        RegiocompetitieTeam(
+                deelcompetitie=self.deelcomp_regio112_18,
+                vereniging=self.nhbver_112,
+                volg_nr=2,
+                team_type=team_r,
+                team_naam='Test team 2',
+                aanvangsgemiddelde=24.5,
+                klasse=klasse_r_ere).save()
+
+        # create a partial team
+        RegiocompetitieTeam(
+                deelcompetitie=self.deelcomp_regio112_18,
+                vereniging=self.nhbver_112,
+                volg_nr=3,
+                team_type=team_r,
+                team_naam='Test team 2',
+                aanvangsgemiddelde=0.0).save()
+
+        url = self.url_regio_teams % self.deelcomp_regio112_18.pk
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/planning-regio-teams.dtl', 'plein/site_layout.dtl'))
+
+        # verkeerde deelcomp
+        resp = self.client.get(self.url_regio_teams % self.deelcomp_regio101_18.pk)
+        self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
+
+        # niet bestaande deelcomp
+        resp = self.client.get(self.url_regio_teams % 999999)
+        self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
+
+        # logout
+
+        self.client.logout()
+        resp = self.client.get(url)
+        self.assert_is_redirect(resp, '/plein/')
+
+        # 25m
+
+        self.e2e_login_and_pass_otp(self.account_rcl101_25)
+        self.e2e_wissel_naar_functie(self.functie_rcl101_25)
+
+        url = self.url_regio_teams % self.deelcomp_regio101_25.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
 
 
 # end of file

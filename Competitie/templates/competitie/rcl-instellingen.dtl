@@ -15,7 +15,7 @@
     {% if readonly %}
         <p>Hieronder kan je de gemaakte keuzes maken voor jouw regiocompetitie inzien. Wijzigen is niet meer mogelijk.</p>
     {% else %}
-        <p>Hieronder kan je als RCL keuzes maken voor jouw regiocompetitie.<p>
+        <p>Hieronder kan je als RCL keuzes maken voor jouw regiocompetitie.</p>
         <p>LET OP: Wijzigen van het puntensysteem kan nog tot in fase C van de competitie. Overige instellingen kunnen alleen in fase A aanpast worden.</p>
     {% endif %}
 

@@ -1484,6 +1484,8 @@ class RegioTeamsView(UserPassesTestMixin, TemplateView):
                    .objects
                    .filter(competitie=deelcomp.competitie,
                            indiv=None)
+                   .select_related('team',
+                                   'team__team_type')
                    .order_by('team__volgorde'))
 
         klasse2teams = dict()       # [klasse] = list(teams)
@@ -1511,7 +1513,9 @@ class RegioTeamsView(UserPassesTestMixin, TemplateView):
         regioteams = (RegiocompetitieTeam
                       .objects
                       .select_related('vereniging',
-                                      'klasse')
+                                      'team_type',
+                                      'klasse',
+                                      'klasse__team')
                       .exclude(klasse=None)
                       .filter(deelcompetitie=deelcomp)
                       .order_by('klasse__team__volgorde', '-aanvangsgemiddelde', 'vereniging__ver_nr'))
@@ -1533,7 +1537,8 @@ class RegioTeamsView(UserPassesTestMixin, TemplateView):
 
         regioteams = (RegiocompetitieTeam
                       .objects
-                      .select_related('vereniging')
+                      .select_related('vereniging',
+                                      'team_type')
                       .filter(deelcompetitie=deelcomp,
                               klasse=None)
                       .order_by('team_type__volgorde', '-aanvangsgemiddelde', 'vereniging__ver_nr'))

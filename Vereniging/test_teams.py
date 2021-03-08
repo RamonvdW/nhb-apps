@@ -355,6 +355,7 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_maak_team % self.deelcomp18_regio111.pk)
         self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
 
         self.assertEqual(0, RegiocompetitieTeam.objects.count())
         with self.assert_max_queries(20):
@@ -382,6 +383,12 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
                                     {'team_type': 'C', 'team_naam': 'test test test'})
         self.assert_is_redirect(resp, self.url_regio_teams % self.deelcomp18_regio111.pk)
 
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_wijzig_team % (self.deelcomp18_regio111.pk, team.pk))
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('vereniging/teams-regio-wijzig.dtl', 'plein/site_layout.dtl'))
+
         # no team change + name change
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_wijzig_team % (self.deelcomp18_regio111.pk, team.pk),
@@ -402,6 +409,13 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_regio_teams % self.deelcomp18_regio111.pk)
         self.assertEqual(resp.status_code, 200)
+        self.assert_template_used(resp, ('vereniging/teams-regio.dtl', 'plein/site_layout.dtl'))
+
+        # verwijder een team
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_wijzig_team % (self.deelcomp18_regio111.pk, team.pk),
+                                    {'verwijderen': '1'})
+        self.assert_is_redirect(resp, self.url_regio_teams % self.deelcomp18_regio111.pk)
 
     def test_rk_teams(self):
         # login als HWL
@@ -414,5 +428,6 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('vereniging/teams-rk.dtl', 'plein/site_layout.dtl'))
+
 
 # end of file
