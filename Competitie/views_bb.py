@@ -400,7 +400,8 @@ class KlassegrenzenVaststellenView(UserPassesTestMixin, TemplateView):
         for obj in (TeamWedstrijdklasse
                     .objects
                     .filter(buiten_gebruik=False)
-                    .select_related('team_type')):
+                    .select_related('team_type')
+                    .order_by('volgorde')):        # hoogste klasse (=laagste volgnummer) eerst
 
             afkorting = obj.team_type.afkorting
 
