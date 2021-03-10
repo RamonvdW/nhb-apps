@@ -12,23 +12,23 @@ certifi==2020.12.5
     # via requests
 chardet==4.0.0
     # via requests
-django==3.1.6
+django==3.1.7
     # via
     #   -c constraints.txt
     #   -r requirements.in
-google-api-core==1.26.0
+google-api-core==1.26.1
     # via google-api-python-client
-google-api-python-client==1.12.8
+google-api-python-client==2.0.2
     # via -r requirements.in
-google-auth-httplib2==0.0.4
+google-auth-httplib2==0.1.0
     # via google-api-python-client
-google-auth==1.27.0
+google-auth==1.27.1
     # via
     #   -r requirements.in
     #   google-api-core
     #   google-api-python-client
     #   google-auth-httplib2
-googleapis-common-protos==1.52.0
+googleapis-common-protos==1.53.0
     # via google-api-core
 httplib2==0.19.0
     # via
@@ -38,7 +38,7 @@ idna==2.10
     # via requests
 packaging==20.9
     # via google-api-core
-protobuf==3.14.0
+protobuf==3.15.5
     # via
     #   google-api-core
     #   googleapis-common-protos
@@ -64,7 +64,7 @@ qrcode==6.1
     # via -r requirements.in
 requests==2.25.1
     # via google-api-core
-rsa==4.7.1
+rsa==4.7.2
     # via google-auth
 six==1.15.0
     # via
