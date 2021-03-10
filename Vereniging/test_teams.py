@@ -9,7 +9,7 @@ from django.utils import timezone
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
 from Competitie.models import (Competitie, DeelCompetitie, CompetitieKlasse,
-                               RegiocompetitieTeam, LAAG_REGIO)
+                               RegiocompetitieTeam, LAAG_REGIO, RegioCompetitieSchutterBoog)
 from Competitie.test_fase import zet_competitie_fase
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Schutter.models import SchutterBoog
@@ -265,6 +265,28 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
         schutterboog = SchutterBoog.objects.get(nhblid__nhb_nr=nhb_nr, boogtype__afkorting=afkorting)
         aanvangsgemiddelde_opslaan(schutterboog, afstand, 7.42, self.account_hwl, 'Test AG %s' % afstand)
 
+    def _create_deelnemers(self):
+        # moet ingelogd zijn als HWL
+        url_inschrijven = '/vereniging/leden-aanmelden/competitie/%s/'      # <comp_pk>
+        url = url_inschrijven % self.comp_18.pk
+
+        self._zet_schutter_voorkeuren(100002)       # R
+        self._zet_schutter_voorkeuren(100003)       # BB
+        self._zet_schutter_voorkeuren(100004)       # R
+        self._zet_schutter_voorkeuren(100012)       # R
+
+        self._zet_ag(100004, 18)
+
+        with self.assert_max_queries(38):
+            resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',    # 1=R
+                                          'lid_100003_boogtype_3': 'on',    # 3=BB
+                                          'lid_100004_boogtype_1': 'on',    # 1=R
+                                          'lid_100012_boogtype_1': 'on',    # 1=R
+                                          'wil_in_team': 'ja!'})
+        self.assert_is_redirect_not_plein(resp)     # check success
+
+        # print('aantal ingeschreven deelnemers:', RegioCompetitieSchutterBoog.objects.count())
+
     def test_anon(self):
         self.client.logout()
 
@@ -347,6 +369,9 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_hwl)
         self.e2e_check_rol('HWL')
 
+        zet_competitie_fase(self.comp_18, 'B')
+        self._create_deelnemers()
+
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_regio_teams % self.deelcomp18_regio111.pk)
         self.assertEqual(resp.status_code, 200)
@@ -411,11 +436,23 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assert_template_used(resp, ('vereniging/teams-regio.dtl', 'plein/site_layout.dtl'))
 
+        # haal het teams overzicht op voor de 25m
+        deelcomp25_regio111 = DeelCompetitie.objects.get(competitie=self.comp_25,
+                                                         laag=LAAG_REGIO,
+                                                         nhb_regio=self.regio_111)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_regio_teams % deelcomp25_regio111.pk)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_template_used(resp, ('vereniging/teams-regio.dtl', 'plein/site_layout.dtl'))
+
         # verwijder een team
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_wijzig_team % (self.deelcomp18_regio111.pk, team.pk),
                                     {'verwijderen': '1'})
         self.assert_is_redirect(resp, self.url_regio_teams % self.deelcomp18_regio111.pk)
+
+    def test_koppel(self):
+        pass
 
     def test_rk_teams(self):
         # login als HWL
