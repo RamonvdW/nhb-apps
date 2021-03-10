@@ -524,7 +524,7 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
         team_25 = RegiocompetitieTeam.objects.filter(deelcompetitie=self.deelcomp25_regio111)[0]
 
         # haal de koppel pagina op
-        with self.assert_max_queries(25):
+        with self.assert_max_queries(20):
             resp = self.client.get(self.url_koppelen % team_18.pk)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
@@ -577,7 +577,24 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
         self.assertEqual(str(team_18.aanvangsgemiddelde), '21.340')        # 7.42 + 7.42 + 6.5
         self.assertEqual(team_18.klasse, obj)
 
-        # bad cases
+        # maak nog een team aan
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_wijzig_team % (self.deelcomp18_regio111.pk, 0),
+                                    {'team_type': 'BB'})
+        self.assert_is_redirect(resp, self.url_regio_teams % self.deelcomp18_regio111.pk)
+
+        # haal het teams overzicht op, met gekoppelde leden
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_koppelen % team_18.pk)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_template_used(resp, ('vereniging/teams-koppelen.dtl', 'plein/site_layout.dtl'))
+
+        # haal het teams overzicht op, met geblokkeerde leden
+        team_bb = RegiocompetitieTeam.objects.get(team_type__afkorting='BB')
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_koppelen % team_bb.pk)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_template_used(resp, ('vereniging/teams-koppelen.dtl', 'plein/site_layout.dtl'))
 
     def test_rk_teams(self):
         # login als HWL

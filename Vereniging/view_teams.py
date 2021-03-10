@@ -6,6 +6,7 @@
 
 from django.http import HttpResponseRedirect
 from django.urls import reverse, Resolver404
+from django.db.models import Count
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import TeamType
@@ -497,6 +498,7 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
                               inschrijf_voorkeur_team=True,
                               bij_vereniging=self.functie_nu.nhb_ver,
                               schutterboog__boogtype__in=boog_pks)
+                      .annotate(in_team_count=Count('regiocompetitieteam'))
                       .order_by('-aanvangsgemiddelde'))
         for obj in deelnemers:
             obj.sel_str = "deelnemer_%s" % obj.pk
@@ -504,10 +506,10 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
             obj.boog_str = obj.schutterboog.boogtype.beschrijving
             obj.blokkeer = (obj.aanvangsgemiddelde == AG_NUL)
             obj.ag_str = "%.3f" % obj.aanvangsgemiddelde
-            obj.geselecteerd = (obj.pk in pks)
+            obj.geselecteerd = (obj.pk in pks)          # vinkje zetten: gekoppeld aan dit team
             if not obj.geselecteerd:
-                if obj.regiocompetitieteam_set.count() > 0:
-                    obj.blokkeer = True
+                if obj.in_team_count > 0:
+                    obj.blokkeer = True                 # niet te selecteren: gekoppeld aan een ander team
         # for
         context['deelnemers'] = deelnemers
 
