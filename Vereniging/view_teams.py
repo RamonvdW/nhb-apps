@@ -12,11 +12,13 @@ from BasisTypen.models import TeamType
 from Competitie.models import (CompetitieKlasse, AG_NUL,
                                DeelCompetitie, LAAG_REGIO,
                                RegioCompetitieSchutterBoog, RegiocompetitieTeam)
-from Plein.menu import menu_dynamics
 from Functie.rol import Rollen, rol_get_huidige_functie
+from Plein.menu import menu_dynamics
+from Score.models import ScoreHist, aanvangsgemiddelde_opslaan
 
 TEMPLATE_TEAMS_REGIO = 'vereniging/teams-regio.dtl'
 TEMPLATE_TEAMS_REGIO_WIJZIG = 'vereniging/teams-regio-wijzig.dtl'
+TEMPLATE_TEAMS_WIJZIG_AG = 'vereniging/wijzig-ag.dtl'
 TEMPLATE_TEAMS_KOPPELEN = 'vereniging/teams-koppelen.dtl'
 TEMPLATE_TEAMS_RK = 'vereniging/teams-rk.dtl'
 
@@ -313,6 +315,132 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
         return HttpResponseRedirect(url)
 
 
+class WijzigAanvangsgemiddeldeView(UserPassesTestMixin, TemplateView):
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_TEAMS_WIJZIG_AG
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.deelcomp = None
+        self.rol_nu, self.functie_nu = None, None
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        return self.rol_nu in (Rollen.ROL_RCL, Rollen.ROL_HWL)
+
+    def handle_no_permission(self):
+        """ gebruiker heeft geen toegang --> redirect naar het plein """
+        return HttpResponseRedirect(reverse('Plein:plein'))
+
+    def _mag_wijzigen_of_404(self, deelnemer):
+        ver = deelnemer.bij_vereniging
+        if self.rol_nu == Rollen.ROL_HWL:
+            # HWL
+            if ver != self.functie_nu.nhb_ver:
+                raise Resolver404()
+        else:
+            # RCL
+            if ver.regio != self.functie_nu.nhb_regio:
+                raise Resolver404()
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        # haal de deelnemer op
+        try:
+            deelnemer_pk = int(kwargs['deelnemer_pk'][:6])  # afkappen voor de veiligheid
+            deelnemer = (RegioCompetitieSchutterBoog
+                         .objects
+                         .select_related('schutterboog',
+                                         'schutterboog__nhblid',
+                                         'schutterboog__boogtype',
+                                         'bij_vereniging')
+                         .get(pk=deelnemer_pk))
+        except (ValueError, RegioCompetitieSchutterBoog.DoesNotExist):
+            raise Resolver404()
+
+        context['deelnemer'] = deelnemer
+
+        # controleer dat deze deelnemer bekeken en gewijzigd mag worden
+        self._mag_wijzigen_of_404(deelnemer)
+
+        if deelnemer.aanvangsgemiddelde == AG_NUL:
+            if not deelnemer.is_handmatig_ag:
+                deelnemer.is_handmatig_ag = True
+                deelnemer.save()
+
+        deelnemer.ag_str = '%.3f' % deelnemer.aanvangsgemiddelde
+
+        deelnemer.naam_str = deelnemer.schutterboog.nhblid.volledige_naam()
+        deelnemer.boog_str = deelnemer.schutterboog.boogtype.beschrijving
+
+        ag_hist = (ScoreHist
+                   .objects
+                   .filter(score__schutterboog=deelnemer.schutterboog,
+                           score__is_ag=True)
+                   .order_by('-when'))
+        for obj in ag_hist:
+            obj.mutatie_str = "%.3f --> %.3f" % (obj.oude_waarde / 1000, obj.nieuwe_waarde / 1000)
+        # for
+        context['ag_hist'] = ag_hist
+
+        menu_dynamics(self.request, context, actief='vereniging')
+        return context
+
+    def post(self, request, *args, **kwargs):
+        """ Deze functie wordt aangeroepen als de knop 'Opslaan' wordt gebruikt """
+
+        # haal de deelnemer op
+        try:
+            deelnemer_pk = int(kwargs['deelnemer_pk'][:6])  # afkappen voor de veiligheid
+            deelnemer = (RegioCompetitieSchutterBoog
+                         .objects
+                         .select_related('deelcompetitie',
+                                         'deelcompetitie__competitie',
+                                         'schutterboog',
+                                         'bij_vereniging')
+                         .get(pk=deelnemer_pk))
+        except (ValueError, RegioCompetitieSchutterBoog.DoesNotExist):
+            raise Resolver404()
+
+        # controleer dat deze deelnemer bekeken en gewijzigd mag worden
+        self._mag_wijzigen_of_404(deelnemer)
+
+        nieuw_ag = request.POST.get('nieuw_ag', '')
+        if nieuw_ag:
+            try:
+                nieuw_ag = float(nieuw_ag)
+            except ValueError:
+                raise Resolver404()
+
+            # controleer dat het een redelijk AG is
+            if nieuw_ag < 1.0 or nieuw_ag >= 10.0:
+                raise Resolver404()
+
+            aanvangsgemiddelde_opslaan(
+                    deelnemer.schutterboog,
+                    deelnemer.deelcompetitie.competitie.afstand,
+                    nieuw_ag,
+                    request.user,
+                    "Nieuw handmatig AG ingevoerd door beheerder")
+
+            deelnemer.aanvangsgemiddelde = nieuw_ag
+            deelnemer.save()
+
+        if self.rol_nu == Rollen.ROL_HWL:
+            url = reverse('Vereniging:teams-regio',
+                          kwargs={'deelcomp_pk': deelnemer.deelcompetitie.pk})
+        else:
+            url = reverse('Competitie:regio-ag-controle',
+                          kwargs={'comp_pk': deelnemer.deelcompetitie.competitie.pk,
+                                  'regio_nr': deelnemer.deelcompetitie.nhb_regio.regio_nr})
+
+        return HttpResponseRedirect(url)
+
+
 class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
 
     """ Via deze view kan de HWL leden van zijn vereniging koppelen aan een team """
@@ -478,8 +606,8 @@ class TeamsRkView(UserPassesTestMixin, TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
-        ver = functie_nu.nhb_ver
+        # rol_nu, functie_nu = rol_get_huidige_functie(self.request)
+        # ver = functie_nu.nhb_ver
 
         menu_dynamics(self.request, context, actief='vereniging')
         return context

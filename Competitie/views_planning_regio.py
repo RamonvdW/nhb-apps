@@ -35,6 +35,7 @@ TEMPLATE_COMPETITIE_PLANNING_REGIO_TEAMS = 'competitie/planning-regio-teams.dtl'
 TEMPLATE_COMPETITIE_WIJZIG_WEDSTRIJD = 'competitie/wijzig-wedstrijd.dtl'
 TEMPLATE_COMPETITIE_AFSLUITEN_REGIOCOMP = 'competitie/rcl-afsluiten-regiocomp.dtl'
 TEMPLATE_COMPETITIE_INSTELLINGEN_REGIO = 'competitie/rcl-instellingen.dtl'
+TEMPLATE_COMPETITIE_AG_CONTROLE_REGIO = 'competitie/rcl-ag-controle.dtl'
 
 
 # python strftime: 0=sunday, 6=saturday
@@ -1558,5 +1559,88 @@ class RegioTeamsView(UserPassesTestMixin, TemplateView):
 
         menu_dynamics_competitie(self.request, context, comp_pk=deelcomp.competitie.pk)
         return context
+
+
+class AGControleView(UserPassesTestMixin, TemplateView):
+
+    """ Met deze view kan de RCL de handmatig ingevoerde aanvangsgemiddelden zien """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_COMPETITIE_AG_CONTROLE_REGIO
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu, self.functie_nu = None, None
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        return self.rol_nu == Rollen.ROL_RCL
+
+    def handle_no_permission(self):
+        """ gebruiker heeft geen toegang --> redirect naar het plein """
+        return HttpResponseRedirect(reverse('Plein:plein'))
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        try:
+            regio_nr = int(kwargs['regio_nr'][:6])  # afkappen voor veiligheid
+            comp_pk = int(kwargs['comp_pk'][:6])    # afkappen voor veiligheid
+            deelcomp = (DeelCompetitie
+                        .objects
+                        .select_related('competitie', 'nhb_regio')
+                        .get(competitie=comp_pk,
+                             laag=LAAG_REGIO,
+                             nhb_regio__regio_nr=regio_nr))
+        except (ValueError, DeelCompetitie.DoesNotExist):
+            raise Resolver404()
+
+        if deelcomp.functie != self.functie_nu:
+            # niet de beheerder
+            raise Resolver404()
+
+        deelcomp.competitie.bepaal_fase()
+        if deelcomp.competitie.fase > 'F':
+            raise Resolver404()
+
+        context['deelcomp'] = deelcomp
+
+        context['handmatige_ag'] = ag_lijst = list()
+
+        # zoek de schuttersboog met handmatig_ag voor de teamcompetitie
+        for obj in (RegioCompetitieSchutterBoog
+                    .objects
+                    .filter(deelcompetitie=deelcomp,
+                            inschrijf_voorkeur_team=True,
+                            is_handmatig_ag=True)
+                    .select_related('schutterboog',
+                                    'schutterboog__nhblid',
+                                    'schutterboog__boogtype',
+                                    'bij_vereniging')
+                    .order_by('bij_vereniging__ver_nr',
+                              'schutterboog__nhblid__nhb_nr',
+                              'schutterboog__boogtype__volgorde')):
+
+            ver = obj.bij_vereniging
+            obj.ver_str = "[%s] %s" % (ver.ver_nr, ver.naam)
+
+            lid = obj.schutterboog.nhblid
+            obj.naam_str = "[%s] %s" % (lid.nhb_nr, lid.volledige_naam())
+
+            obj.boog_str = obj.schutterboog.boogtype.beschrijving
+
+            obj.ag_str = "%.3f" % obj.aanvangsgemiddelde
+
+            obj.url_details = reverse('Vereniging:wijzig-ag',
+                                      kwargs={'deelnemer_pk': obj.pk})
+
+            ag_lijst.append(obj)
+        # for
+
+        menu_dynamics_competitie(self.request, context, comp_pk=deelcomp.competitie.pk)
+        return context
+
 
 # end of file

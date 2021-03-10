@@ -20,14 +20,13 @@ from Competitie.models import (AG_NUL, DAGDEEL, DAGDEEL_AFKORTINGEN,
                                Competitie, CompetitieKlasse,
                                DeelCompetitie, DeelcompetitieRonde,
                                RegioCompetitieSchutterBoog)
-from Score.models import Score, ScoreHist, aanvangsgemiddelde_opslaan
+from Score.models import Score
 from Wedstrijden.models import Wedstrijd
 import copy
 
 
 TEMPLATE_LEDEN_AANMELDEN = 'vereniging/competitie-aanmelden.dtl'
 TEMPLATE_LEDEN_INGESCHREVEN = 'vereniging/competitie-ingeschreven.dtl'
-TEMPLATE_WIJZIG_AG = 'vereniging/wijzig-ag.dtl'
 
 
 JA_NEE = {False: 'Nee', True: 'Ja'}
@@ -558,107 +557,5 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
 
         return HttpResponseRedirect(reverse('Vereniging:overzicht'))
 
-
-# TODO: verplaatsen naar view_teams omdat dit AG alleen voor teams wordt gebruikt en het team AG + team klasse opnieuw vastgesteld moet worden bij wijziging AG
-class WijzigAanvangsgemiddeldeView(UserPassesTestMixin, TemplateView):
-
-    # class variables shared by all instances
-    template_name = TEMPLATE_WIJZIG_AG
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.deelcomp = None
-        self.rol_nu, self.functie_nu = None, None
-
-    def test_func(self):
-        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu == Rollen.ROL_HWL
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
-
-    def get_context_data(self, **kwargs):
-        """ called by the template system to get the context data for the template """
-        context = super().get_context_data(**kwargs)
-
-        # haal de deelnemer op en controleer dat deze lid is bij de vereniging van de HWL
-        try:
-            deelnemer_pk = int(kwargs['deelnemer_pk'][:6])  # afkappen voor de veiligheid
-            deelnemer = (RegioCompetitieSchutterBoog
-                         .objects
-                         .select_related('schutterboog',
-                                         'schutterboog__nhblid',
-                                         'schutterboog__boogtype')
-                         .get(pk=deelnemer_pk,
-                              bij_vereniging=self.functie_nu.nhb_ver))
-        except (ValueError, RegioCompetitieSchutterBoog.DoesNotExist):
-            raise Resolver404()
-
-        context['deelnemer'] = deelnemer
-
-        if deelnemer.aanvangsgemiddelde == AG_NUL:
-            if not deelnemer.is_handmatig_ag:
-                deelnemer.is_handmatig_ag = True
-                deelnemer.save()
-
-        deelnemer.ag_str = '%.3f' % deelnemer.aanvangsgemiddelde
-
-        deelnemer.naam_str = deelnemer.schutterboog.nhblid.volledige_naam()
-        deelnemer.boog_str = deelnemer.schutterboog.boogtype.beschrijving
-
-        ag_hist = (ScoreHist
-                              .objects
-                              .filter(score__schutterboog=deelnemer.schutterboog,
-                                      score__is_ag=True)
-                              .order_by('-when'))
-        for obj in ag_hist:
-            obj.mutatie_str = "%.3f --> %.3f" % (obj.oude_waarde / 1000, obj.nieuwe_waarde / 1000)
-        # for
-        context['ag_hist'] = ag_hist
-
-        menu_dynamics(self.request, context, actief='vereniging')
-        return context
-
-    def post(self, request, *args, **kwargs):
-        """ Deze functie wordt aangeroepen als de knop 'Opslaan' wordt gebruikt """
-
-        # haal de deelnemer op en controleer dat deze lid is bij de vereniging van de HWL
-        try:
-            deelnemer_pk = int(kwargs['deelnemer_pk'][:6])  # afkappen voor de veiligheid
-            deelnemer = (RegioCompetitieSchutterBoog
-                         .objects
-                         .select_related('deelcompetitie',
-                                         'deelcompetitie__competitie',
-                                         'schutterboog')
-                         .get(pk=deelnemer_pk,
-                              bij_vereniging=self.functie_nu.nhb_ver))
-        except (ValueError, RegioCompetitieSchutterBoog.DoesNotExist):
-            raise Resolver404()
-
-        nieuw_ag = request.POST.get('nieuw_ag', '')
-        if nieuw_ag:
-            try:
-                nieuw_ag = float(nieuw_ag)
-            except ValueError:
-                raise Resolver404()
-
-            # controleer dat het een redelijk AG is
-            if nieuw_ag < 1.0 or nieuw_ag >= 10.0:
-                raise Resolver404()
-
-            aanvangsgemiddelde_opslaan(
-                    deelnemer.schutterboog,
-                    deelnemer.deelcompetitie.competitie.afstand,
-                    nieuw_ag,
-                    request.user,
-                    "Nieuw handmatig AG ingevoerd door beheerder")
-
-            deelnemer.aanvangsgemiddelde = nieuw_ag
-            deelnemer.save()
-
-        url = reverse('Vereniging:teams-regio', kwargs={'deelcomp_pk': deelnemer.deelcompetitie.pk})
-        return HttpResponseRedirect(url)
 
 # end of file

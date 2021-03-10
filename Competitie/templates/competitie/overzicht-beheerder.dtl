@@ -93,6 +93,10 @@
             {% include 'plein/card.dtl' with title="Instelling teams" text="Instellingen voor de teamcompetitie in de regio." icon="flaky" url=comp.url_regio_instellingen %}
         {% endif %}
 
+        {% if comp.url_regio_handmatige_ag and comp.fase >= 'B' %}
+            {% include 'plein/card.dtl' with title="AG controle" text="Bekijk handmatig ingevoerde aanvangsgemiddelden voor de teamcompetitie in de regio." icon="how_to_reg" url=comp.url_regio_handmatige_ag %}
+        {% endif %}
+
         {% if comp.fase >= 'E' %}
 
             <!-- RK selectie -->

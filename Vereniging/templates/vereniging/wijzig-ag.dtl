@@ -12,6 +12,8 @@
 
     <h4>Wijzig aanvangsgemiddelde</h4>
 
+    <p>Via dit scherm kan de HWL en de RCL het aanvangsgemiddelde van een sporter wijzigen.</p>
+
     <script>
         function invoer() {
             const el = document.getElementById('id_ag')

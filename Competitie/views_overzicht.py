@@ -119,6 +119,10 @@ class CompetitieOverzichtView(View):
                                                       kwargs={'comp_pk': comp.pk,
                                                               'regio_nr': self.functie_nu.nhb_regio.regio_nr})
 
+                comp.url_regio_handmatige_ag = reverse('Competitie:regio-ag-controle',
+                                                       kwargs={'comp_pk': comp.pk,
+                                                               'regio_nr': self.functie_nu.nhb_regio.regio_nr})
+
             if 'B' <= comp.fase <= 'E':
                 comp.url_inschrijvingen = reverse('Competitie:lijst-regiocomp-regio',
                                                   kwargs={'comp_pk': comp.pk,
