@@ -1,0 +1,52 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2021 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}AG controle{% endblock %}
+
+{% block pagina %}
+
+    <h4>AG controle</h4>
+
+    <p>Op deze pagina kan je als RCL een controle uitvoeren van de aanvangsgemiddelden voor de teamcompetitie.</p>
+    <p>De aanvangsgemiddelden van de 3 beste sporters in een team bepalen de team sterkte en de klasse waarin het team uit mag komen.</p>
+    <p>&nbsp;</p>
+    <p>Sporters met voldoende geschoten competitiewedstrijden in het voorgaande seizoen hebben een automatisch aanvangsgemiddelde.</p>
+    <p>Voor alle andere sporters die mee willen doen in een team, moet de HWL een aanvangsgemiddelden invoeren.</p>
+
+    <table class="white">
+        <thead>
+            <tr>
+                <th>Vereniging</th>
+                <th>Sporter</th>
+                <th>Boog type</th>
+                <th colspan="2">Aanvangs<wbr/>gemiddelde</th>
+            </tr>
+        </thead>
+
+        {% for obj in handmatige_ag %}
+            <tr>
+                <td>{{ obj.ver_str }}</td>
+                <td>{{ obj.naam_str }}</td>
+                <td>{{ obj.boog_str }}</td>
+                <td>{{ obj.ag_str }}</td>
+                <td><a class="btn-nhb-blauw" href="{{ obj.url_details }}">Details</a></td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="4"><i>Er zijn nog geen handmatige aanvangsgemiddelden ingevoerd</i></td>
+            </tr>
+        {% endfor %}
+    </table>
+
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-rcl-ag-controle" %}
+
+{% endblock %}
+
+{% block menu-competities %}
+    {% include 'competitie/menu.dtl' %}
+{% endblock %}
