@@ -8,7 +8,7 @@ from django.test import TestCase
 from django.utils import timezone
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
-from Competitie.models import (Competitie, DeelCompetitie, CompetitieKlasse,
+from Competitie.models import (Competitie, DeelCompetitie, CompetitieKlasse, AG_NUL,
                                RegiocompetitieTeam, LAAG_REGIO, RegioCompetitieSchutterBoog)
 from Competitie.test_fase import zet_competitie_fase
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
@@ -16,6 +16,7 @@ from Schutter.models import SchutterBoog
 from Score.models import aanvangsgemiddelde_opslaan
 from Overig.e2ehelpers import E2EHelpers
 import datetime
+from decimal import Decimal
 
 
 class TestVerenigingTeams(E2EHelpers, TestCase):
@@ -74,28 +75,28 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
 
         jaar = timezone.now().year
 
-        # maak een jeugdlid aan
+        # maak een aspirant aan
         lid = NhbLid()
         lid.nhb_nr = 100002
         lid.geslacht = "V"
         lid.voornaam = "Ramona"
         lid.achternaam = "de Jeugdschutter"
         lid.email = "nietleeg@nhb.not"
-        lid.geboorte_datum = datetime.date(year=jaar-10, month=3, day=4)
+        lid.geboorte_datum = datetime.date(year=jaar-12, month=3, day=4)
         lid.sinds_datum = datetime.date(year=jaar-3, month=11, day=12)
         lid.bij_vereniging = ver
         lid.account = self.e2e_create_account(lid.nhb_nr, lid.email, lid.voornaam)  # heeft last_login=None
         lid.save()
         self.nhblid_100002 = lid
 
-        # maak nog een jeugdlid aan, in dezelfde leeftijdsklasse
+        # maak een cadet aan
         lid = NhbLid()
         lid.nhb_nr = 100012
         lid.geslacht = "V"
         lid.voornaam = "Andrea"
         lid.achternaam = "de Jeugdschutter"
         lid.email = ""
-        lid.geboorte_datum = datetime.date(year=jaar-10, month=3, day=4)
+        lid.geboorte_datum = datetime.date(year=jaar-15, month=3, day=4)
         lid.sinds_datum = datetime.date(year=jaar-3, month=10, day=10)
         lid.bij_vereniging = ver
         lid.save()
@@ -231,6 +232,10 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
 
         # default instellingen voor regio 111: organiseert competitie, vaste teams
 
+        self.deelcomp25_regio111 = DeelCompetitie.objects.get(competitie=self.comp_25,
+                                                              laag=LAAG_REGIO,
+                                                              nhb_regio=self.regio_111)
+
     def _zet_schutter_voorkeuren(self, nhb_nr):
         # deze functie kan alleen gebruikt worden als HWL
         url_schutter_voorkeuren = '/sporter/voorkeuren/'
@@ -265,27 +270,68 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
         schutterboog = SchutterBoog.objects.get(nhblid__nhb_nr=nhb_nr, boogtype__afkorting=afkorting)
         aanvangsgemiddelde_opslaan(schutterboog, afstand, 7.42, self.account_hwl, 'Test AG %s' % afstand)
 
-    def _create_deelnemers(self):
+    def _create_deelnemers(self, do_18=True, do_25=False):
         # moet ingelogd zijn als HWL
         url_inschrijven = '/vereniging/leden-aanmelden/competitie/%s/'      # <comp_pk>
-        url = url_inschrijven % self.comp_18.pk
 
         self._zet_schutter_voorkeuren(100002)       # R
         self._zet_schutter_voorkeuren(100003)       # BB
         self._zet_schutter_voorkeuren(100004)       # R
         self._zet_schutter_voorkeuren(100012)       # R
 
-        self._zet_ag(100004, 18)
+        if do_18:
+            self._zet_ag(100002, 18)
+            self._zet_ag(100003, 18)
+            self._zet_ag(100004, 18)
 
-        with self.assert_max_queries(38):
-            resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',    # 1=R
-                                          'lid_100003_boogtype_3': 'on',    # 3=BB
-                                          'lid_100004_boogtype_1': 'on',    # 1=R
-                                          'lid_100012_boogtype_1': 'on',    # 1=R
-                                          'wil_in_team': 'ja!'})
-        self.assert_is_redirect_not_plein(resp)     # check success
+            url = url_inschrijven % self.comp_18.pk
+            with self.assert_max_queries(38):
+                resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',    # 1=R
+                                              'lid_100003_boogtype_3': 'on',    # 3=BB
+                                              'lid_100004_boogtype_1': 'on',    # 1=R
+                                              'lid_100012_boogtype_1': 'on',    # 1=R
+                                              'wil_in_team': 'ja!'})
+            self.assert_is_redirect_not_plein(resp)     # check success
 
-        # print('aantal ingeschreven deelnemers:', RegioCompetitieSchutterBoog.objects.count())
+            # print('aantal ingeschreven deelnemers:', RegioCompetitieSchutterBoog.objects.count())
+
+            for obj in (RegioCompetitieSchutterBoog
+                        .objects
+                        .select_related('schutterboog__nhblid')
+                        .filter(deelcompetitie__competitie=self.comp_18)
+                        .all()):
+                nr = obj.schutterboog.nhblid.nhb_nr
+                if nr == 100002:
+                    self.deelnemer_100002_18 = obj
+                elif nr == 100003:
+                    self.deelnemer_100003_18 = obj
+                elif nr == 100004:
+                    self.deelnemer_100004_18 = obj
+                elif nr == 100012:
+                    self.deelnemer_100012_18 = obj
+            # for
+
+        if do_25:
+            url = url_inschrijven % self.comp_25.pk
+            with self.assert_max_queries(38):
+                resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',    # 1=R
+                                              'lid_100004_boogtype_1': 'on',    # 1=R
+                                              'lid_100012_boogtype_1': 'on',    # 1=R
+                                              'wil_in_team': 'ja!'})
+
+            for obj in (RegioCompetitieSchutterBoog
+                        .objects
+                        .select_related('schutterboog__nhblid')
+                        .filter(deelcompetitie__competitie=self.comp_25)
+                        .all()):
+                nr = obj.schutterboog.nhblid.nhb_nr
+                if nr == 100002:
+                    self.deelnemer_100002_25 = obj
+                elif nr == 100004:
+                    self.deelnemer_100004_25 = obj
+                elif nr == 100012:
+                    self.deelnemer_100012_25 = obj
+            # for
 
     def test_anon(self):
         self.client.logout()
@@ -422,12 +468,14 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
 
         # maak het maximum aantal teams aan
         for lp in range(9):
-            resp = self.client.post(self.url_wijzig_team % (self.deelcomp18_regio111.pk, 0), {'team_type': 'R'})
+            resp = self.client.post(self.url_wijzig_team % (self.deelcomp18_regio111.pk, 0),
+                                    {'team_type': 'R'})
             self.assert_is_redirect_not_plein(resp)
         # for
 
         # nu zijn er 10 teams. Maak #11 aan
-        resp = self.client.post(self.url_wijzig_team % (self.deelcomp18_regio111.pk, 0), {'team_type': 'R'})
+        resp = self.client.post(self.url_wijzig_team % (self.deelcomp18_regio111.pk, 0),
+                                {'team_type': 'R'})
         self.assertEqual(resp.status_code, 404)     # 404 = Not found
 
         # haal het teams overzicht op
@@ -437,11 +485,8 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('vereniging/teams-regio.dtl', 'plein/site_layout.dtl'))
 
         # haal het teams overzicht op voor de 25m
-        deelcomp25_regio111 = DeelCompetitie.objects.get(competitie=self.comp_25,
-                                                         laag=LAAG_REGIO,
-                                                         nhb_regio=self.regio_111)
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_regio_teams % deelcomp25_regio111.pk)
+            resp = self.client.get(self.url_regio_teams % self.deelcomp25_regio111.pk)
         self.assertEqual(resp.status_code, 200)
         self.assert_template_used(resp, ('vereniging/teams-regio.dtl', 'plein/site_layout.dtl'))
 
@@ -452,7 +497,87 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_regio_teams % self.deelcomp18_regio111.pk)
 
     def test_koppel(self):
-        pass
+        # login als HWL
+        self.e2e_login_and_pass_otp(self.account_hwl)
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+        self.e2e_check_rol('HWL')
+
+        zet_competitie_fase(self.comp_18, 'B')
+        zet_competitie_fase(self.comp_25, 'B')
+        self._create_deelnemers(do_25=True)
+
+        # maak een team aan
+        self.assertEqual(0, RegiocompetitieTeam.objects.count())
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_wijzig_team % (self.deelcomp18_regio111.pk, 0),
+                                    {'team_type': 'R'})
+        self.assert_is_redirect(resp, self.url_regio_teams % self.deelcomp18_regio111.pk)
+        self.assertEqual(1, RegiocompetitieTeam.objects.count())
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_wijzig_team % (self.deelcomp25_regio111.pk, 0),
+                                    {'team_type': 'R'})
+        self.assert_is_redirect(resp, self.url_regio_teams % self.deelcomp25_regio111.pk)
+        self.assertEqual(2, RegiocompetitieTeam.objects.count())
+
+        team_18 = RegiocompetitieTeam.objects.filter(deelcompetitie=self.deelcomp18_regio111)[0]
+        team_25 = RegiocompetitieTeam.objects.filter(deelcompetitie=self.deelcomp25_regio111)[0]
+
+        # haal de koppel pagina op
+        with self.assert_max_queries(25):
+            resp = self.client.get(self.url_koppelen % team_18.pk)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('vereniging/teams-koppelen.dtl', 'plein/site_layout.dtl'))
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_koppelen % team_25.pk)
+        self.assertEqual(resp.status_code, 200)
+
+        # koppel leden
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_koppelen % team_18.pk,
+                                    {'deelnemer_%s' % self.deelnemer_100002_18.pk: 1,       # aspirant
+                                     'deelnemer_%s' % self.deelnemer_100003_18.pk: 1,       # BB
+                                     'deelnemer_%s' % self.deelnemer_100004_18.pk: 1,
+                                     'deelnemer_%s' % self.deelnemer_100012_18.pk: 1,       # geen AG
+                                     'deelnemer_%s' % self.deelnemer_100004_25.pk: 1,       # verkeerde comp
+                                     'deelnemer_XYZ': 1,    # geen nummer
+                                     'iets_anders': 1})     # geen deelnemer parameter
+
+        team_18 = RegiocompetitieTeam.objects.get(pk=team_18.pk)
+        self.assertEqual(2, team_18.gekoppelde_schutters.count())
+        self.assertEqual(team_18.aanvangsgemiddelde, AG_NUL)
+        self.assertEqual(None, team_18.klasse)
+
+        # koppel nog meer leden
+        deelnemer = RegioCompetitieSchutterBoog.objects.get(pk=self.deelnemer_100012_18.pk)
+        deelnemer.is_handmatig_ag = True
+        deelnemer.aanvangsgemiddelde = 6.500
+        deelnemer.save()
+
+        obj = CompetitieKlasse.objects.get(competitie=self.comp_18,
+                                           team__volgorde=10)           # Recurve klasse ERE
+        obj.min_ag = 29.5
+        obj.save()
+
+        obj = CompetitieKlasse.objects.get(competitie=self.comp_18,
+                                           team__volgorde=11)           # Recurve klasse A
+        obj.min_ag = 21.340     # ondergrens = precies wat het team zal hebben
+        obj.save()
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_koppelen % team_18.pk,
+                                    {'deelnemer_%s' % self.deelnemer_100003_18.pk: 1,       # BB
+                                     'deelnemer_%s' % self.deelnemer_100004_18.pk: 1,
+                                     'deelnemer_%s' % self.deelnemer_100012_18.pk: 1})      # geen AG
+
+        team_18 = RegiocompetitieTeam.objects.get(pk=team_18.pk)
+        self.assertEqual(3, team_18.gekoppelde_schutters.count())
+        self.assertEqual(str(team_18.aanvangsgemiddelde), '21.340')        # 7.42 + 7.42 + 6.5
+        self.assertEqual(team_18.klasse, obj)
+
+        # bad cases
 
     def test_rk_teams(self):
         # login als HWL

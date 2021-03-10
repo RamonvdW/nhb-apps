@@ -533,6 +533,26 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
         except (ValueError, RegiocompetitieTeam.DoesNotExist):
             raise Resolver404()
 
+        # toegestane boogtypen en schutters
+        boog_pks = team.team_type.boog_typen.values_list('pk', flat=True)
+        bezet_pks = team.gekoppelde_schutters.values_list('pk', flat=True)
+
+        # leden die nog niet in een team zitten
+        ok1_pks = (RegioCompetitieSchutterBoog
+                   .objects
+                   .exclude(pk__in=bezet_pks)
+                   .filter(deelcompetitie=team.deelcompetitie,
+                           inschrijf_voorkeur_team=True,
+                           aanvangsgemiddelde__gte=1.0,
+                           bij_vereniging=self.functie_nu.nhb_ver,
+                           schutterboog__boogtype__in=boog_pks)
+                   .values_list('pk', flat=True))
+
+        # huidige leden mogen blijven ;-)
+        ok2_pks = team.gekoppelde_schutters.values_list('pk', flat=True)
+
+        ok_pks = list(ok1_pks) + list(ok2_pks)
+
         pks = list()
         for key in request.POST.keys():
             if key.startswith('deelnemer_'):
@@ -541,7 +561,9 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
                 except ValueError:
                     pass
                 else:
-                    pks.append(pk)
+                    if pk in ok_pks:
+                        pks.append(pk)
+                    # silently ignore bad pks
         # for
 
         team.gekoppelde_schutters.clear()
@@ -551,12 +573,9 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
         ags = list(ags)
 
         if len(ags) >= 3:
-            # neem de beste 3 schutters
+            # bereken het team aanvangsgemiddelde: de som van de 3 sterkste sporters
             ags.sort(reverse=True)
-            ags = ags[:3]
-
-            # bereken het gemiddelde
-            ag = sum(ags)
+            ag = sum(ags[:3])
 
             # bepaal de wedstrijdklasse
             team.klasse = None
@@ -565,7 +584,7 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
                            .objects
                            .filter(competitie=comp,
                                    team__team_type=team.team_type)
-                           .order_by('min_ag')):        # oplopend
+                           .order_by('min_ag', '-team__volgorde')):        # oplopend AG (=hogere klasse later)
                 if ag >= klasse.min_ag:
                     team.klasse = klasse
             # for
