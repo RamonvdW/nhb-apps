@@ -108,7 +108,8 @@ class LijstAangemeldRegiocompAllesView(UserPassesTestMixin, TemplateView):
                                 'bij_vereniging')
                 .filter(deelcompetitie__competitie=comp,
                         deelcompetitie__laag=LAAG_REGIO)
-                .order_by('klasse__indiv__volgorde', '-aanvangsgemiddelde'))
+                .order_by('klasse__indiv__volgorde',
+                          '-ag_voor_indiv'))
 
         volgorde = -1
         for obj in objs:
@@ -177,7 +178,8 @@ class LijstAangemeldRegiocompRayonView(UserPassesTestMixin, TemplateView):
                 .filter(deelcompetitie__competitie=comp,
                         deelcompetitie__laag=LAAG_REGIO,
                         deelcompetitie__nhb_regio__rayon=rayon)
-                .order_by('klasse__indiv__volgorde', '-aanvangsgemiddelde'))
+                .order_by('klasse__indiv__volgorde',
+                          '-ag_voor_indiv'))
 
         volgorde = -1
         for obj in objs:
@@ -252,7 +254,8 @@ class LijstAangemeldRegiocompRegioView(UserPassesTestMixin, TemplateView):
                                 'schutterboog__nhblid',
                                 'bij_vereniging')
                 .filter(deelcompetitie=deelcomp)
-                .order_by('klasse__indiv__volgorde', '-aanvangsgemiddelde'))
+                .order_by('klasse__indiv__volgorde',
+                          '-ag_voor_indiv'))
 
         volgorde = -1
         for obj in objs:
@@ -497,7 +500,8 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
                                 'schutterboog__nhblid',
                                 'schutterboog__nhblid__bij_vereniging')
                 .filter(deelcompetitie=deelcomp)
-                .order_by('klasse__indiv__volgorde', 'aanvangsgemiddelde'))
+                .order_by('klasse__indiv__volgorde',
+                          'ag_voor_indiv'))             # TODO: niet nodig??
 
         volgorde = -1
         for obj in objs:
@@ -575,7 +579,8 @@ class Inschrijfmethode3BehoefteAlsBestandView(Inschrijfmethode3BehoefteView):
                                 'schutterboog__nhblid',
                                 'schutterboog__nhblid__bij_vereniging')
                 .filter(deelcompetitie=deelcomp)
-                .order_by('klasse__indiv__volgorde', 'aanvangsgemiddelde'))
+                .order_by('klasse__indiv__volgorde',
+                          'ag_voor_indiv'))         # TODO: niet nodig?
 
         context['object_list'] = objs
 

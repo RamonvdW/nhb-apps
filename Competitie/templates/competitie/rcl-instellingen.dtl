@@ -90,7 +90,7 @@
                             {% endif %}
                         {% endfor %}
                     {% else %}
-                        <ul id="id_team_alloc">
+                        <ul>
                             {% for opt in opt_team_alloc %}
                                 <li>
                                     <label class="black-text" for="id_{{ opt.choice_name }}">
@@ -121,7 +121,7 @@
                             {% endif %}
                         {% endfor %}
                     {% else %}
-                        <ul id="id_team_alloc">
+                        <ul>
                             {% for opt in opt_team_punten %}
                                 <li>
                                     <label class="black-text" for="id_{{ opt.choice_name }}">

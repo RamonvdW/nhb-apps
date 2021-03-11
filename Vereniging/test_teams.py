@@ -16,7 +16,6 @@ from Schutter.models import SchutterBoog
 from Score.models import aanvangsgemiddelde_opslaan
 from Overig.e2ehelpers import E2EHelpers
 import datetime
-from decimal import Decimal
 
 
 class TestVerenigingTeams(E2EHelpers, TestCase):
@@ -552,8 +551,7 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
 
         # koppel nog meer leden
         deelnemer = RegioCompetitieSchutterBoog.objects.get(pk=self.deelnemer_100012_18.pk)
-        deelnemer.is_handmatig_ag = True
-        deelnemer.aanvangsgemiddelde = 6.500
+        deelnemer.ag_voor_team = 6.500
         deelnemer.save()
 
         obj = CompetitieKlasse.objects.get(competitie=self.comp_18,

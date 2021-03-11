@@ -1009,8 +1009,9 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
                             schutterboog=self.schutterboog,     # bij self.nhbver_101
                             bij_vereniging=self.nhbver_101,
                             klasse=self.klasse_r,
-                            is_handmatig_ag=True,
-                            aanvangsgemiddelde=8.765,
+                            ag_voor_indiv=8.765,
+                            ag_voor_team=8.765,
+                            ag_voor_team_mag_aangepast_worden=True,
                             score1=scores[0],
                             score2=scores[1],
                             score3=scores[2],

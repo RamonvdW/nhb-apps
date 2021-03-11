@@ -234,9 +234,6 @@ class AGVaststellenView(UserPassesTestMixin, TemplateView):
             Score.objects.filter(is_ag=True, afstand_meter=25).all().delete()
             bulk_score = list()
 
-            now = timezone.now()
-            datum = datetime.date(year=now.year, month=now.month, day=now.day)
-
             minimum_aantal_scores = {18: settings.COMPETITIE_18M_MINIMUM_SCORES_VOOR_AG,
                                      25: settings.COMPETITIE_25M_MINIMUM_SCORES_VOOR_AG}
 

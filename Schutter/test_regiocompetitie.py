@@ -164,8 +164,9 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 1)
 
         inschrijving = RegioCompetitieSchutterBoog.objects.all()[0]
-        self.assertFalse(inschrijving.is_handmatig_ag)
-        self.assertEqual(str(inschrijving.aanvangsgemiddelde), "8.180")
+        self.assertEqual(str(inschrijving.ag_voor_indiv), "8.180")
+        self.assertEqual(str(inschrijving.ag_voor_team), "8.180")
+        self.assertFalse(inschrijving.ag_voor_team_mag_aangepast_worden)
         self.assertEqual(inschrijving.deelcompetitie, deelcomp)
         self.assertEqual(inschrijving.schutterboog, schutterboog)
         self.assertEqual(inschrijving.bij_vereniging, schutterboog.nhblid.bij_vereniging)
@@ -413,8 +414,9 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 1)
 
         inschrijving = RegioCompetitieSchutterBoog.objects.all()[0]
-        self.assertFalse(inschrijving.is_handmatig_ag)
-        self.assertEqual(str(inschrijving.aanvangsgemiddelde), "8.180")
+        self.assertEqual(str(inschrijving.ag_voor_indiv), "8.180")
+        self.assertEqual(str(inschrijving.ag_voor_team), "8.180")
+        self.assertFalse(inschrijving.ag_voor_team_mag_aangepast_worden)
         self.assertEqual(inschrijving.deelcompetitie, deelcomp)
         self.assertEqual(inschrijving.schutterboog, schutterboog)
         self.assertEqual(inschrijving.bij_vereniging, schutterboog.nhblid.bij_vereniging)

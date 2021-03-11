@@ -562,7 +562,7 @@ class DynamicScoresOpslaanView(UserPassesTestMixin, View):
             self.scores_opslaan(uitslag, data, when, door_account)
         except:                         # pragma: no cover
             exc = sys.exc_info()[1]
-            print('OHOH: %s' % exc)
+            print('OHOH: %s' % exc)     # TODO: opruimen of loggen
 
         out = {'done': 1}
         return JsonResponse(out)

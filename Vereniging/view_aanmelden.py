@@ -6,7 +6,7 @@
 
 from django.http import HttpResponseRedirect
 from django.urls import reverse, Resolver404
-from django.views.generic import ListView, TemplateView
+from django.views.generic import ListView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Plein.menu import menu_dynamics
 from Functie.rol import Rollen, rol_get_huidige_functie
@@ -171,13 +171,13 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                 obj.boogtype = schutterboog.boogtype.beschrijving
                 obj.check = "lid_%s_boogtype_%s" % (nhblid.nhb_nr, schutterboog.boogtype.pk)
                 obj.mag_teamschieten = True
-                if obj.leeftijdsklasse and  obj.leeftijdsklasse.is_aspirant_klasse():
+                if obj.leeftijdsklasse and obj.leeftijdsklasse.is_aspirant_klasse():
                     obj.mag_teamschieten = False
 
                 try:
                     obj.ag = ag_dict[schutterboog.pk]
                 except KeyError:
-                    obj.ag_18 = AG_NUL
+                    obj.ag = AG_NUL
 
                 # kijk of de schutter al aangemeld is
                 try:
@@ -389,19 +389,24 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                 age = schutterboog.nhblid.bereken_wedstrijdleeftijd(deelcomp.competitie.begin_jaar + 1)
                 dvl = schutterboog.nhblid.sinds_datum
 
-                # zoek de aanvangsgemiddelden er bij, indien beschikbaar
-                ag = AG_NUL
-                for score in Score.objects.filter(schutterboog=schutterboog,
-                                                  afstand_meter=comp.afstand,
-                                                  is_ag=True):
-                    ag = score.waarde / 1000
-                # for
-
                 aanmelding = RegioCompetitieSchutterBoog()
                 aanmelding.deelcompetitie = deelcomp
                 aanmelding.schutterboog = schutterboog
                 aanmelding.bij_vereniging = schutterboog.nhblid.bij_vereniging
-                aanmelding.aanvangsgemiddelde = ag
+                aanmelding.ag_voor_indiv = AG_NUL
+                aanmelding.ag_voor_team = AG_NUL
+                aanmelding.ag_voor_team_mag_aangepast_worden = True
+
+                # zoek de aanvangsgemiddelden er bij, indien beschikbaar
+                for score in Score.objects.filter(schutterboog=schutterboog,
+                                                  afstand_meter=comp.afstand,
+                                                  is_ag=True):
+                    ag = score.waarde / 1000
+                    aanmelding.ag_voor_indiv = ag
+                    aanmelding.ag_voor_team = ag
+                    if ag > AG_NUL:
+                        aanmelding.ag_voor_team_mag_aangepast_worden = False
+                # for
 
                 # zoek alle wedstrijdklassen van deze competitie met het juiste boogtype
                 qset = (CompetitieKlasse
@@ -414,7 +419,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                 # zoek een toepasselijke klasse aan de hand van de leeftijd
                 done = False
                 for obj in qset:
-                    if aanmelding.aanvangsgemiddelde >= obj.min_ag or obj.indiv.is_onbekend:
+                    if aanmelding.ag_voor_indiv >= obj.min_ag or obj.indiv.is_onbekend:
                         for lkl in obj.indiv.leeftijdsklassen.all():
                             if lkl.geslacht == schutterboog.nhblid.geslacht:
                                 if lkl.min_wedstrijdleeftijd <= age <= lkl.max_wedstrijdleeftijd:

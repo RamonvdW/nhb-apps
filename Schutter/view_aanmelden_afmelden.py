@@ -98,14 +98,14 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
         scores = Score.objects.filter(schutterboog=schutterboog,
                                       is_ag=True,
                                       afstand_meter=deelcomp.competitie.afstand)
-        aanvangsgemiddelde = AG_NUL
+        ag = AG_NUL
         if len(scores):
             score = scores[0]
-            aanvangsgemiddelde = score.waarde / 1000
+            ag = score.waarde / 1000
             hist = ScoreHist.objects.filter(score=score).order_by('-when')
             if len(hist):
                 context['ag_hist'] = hist[0]
-        context['ag'] = aanvangsgemiddelde
+        context['ag'] = ag
 
         # zoek alle wedstrijdklassen van deze competitie met het juiste boogtype
         qset = (CompetitieKlasse
@@ -118,7 +118,7 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
         # zoek een toepasselijke klasse aan de hand van de leeftijd
         done = False
         for obj in qset:            # pragma: no branch
-            if aanvangsgemiddelde >= obj.min_ag or obj.indiv.is_onbekend:
+            if ag >= obj.min_ag or obj.indiv.is_onbekend:
                 for lkl in obj.indiv.leeftijdsklassen.all():
                     if lkl.geslacht == schutterboog.nhblid.geslacht:
                         if lkl.min_wedstrijdleeftijd <= age <= lkl.max_wedstrijdleeftijd:
@@ -264,7 +264,9 @@ class RegiocompetitieAanmeldenView(View):
         aanmelding.deelcompetitie = deelcomp
         aanmelding.schutterboog = schutterboog
         aanmelding.bij_vereniging = schutterboog.nhblid.bij_vereniging
-        aanmelding.aanvangsgemiddelde = AG_NUL
+        aanmelding.ag_voor_indiv = AG_NUL
+        aanmelding.ag_voor_team = AG_NUL
+        aanmelding.ag_voor_team_mag_aangepast_worden = True
 
         # haal AG op, indien aanwezig
         scores = Score.objects.filter(schutterboog=schutterboog,
@@ -272,7 +274,11 @@ class RegiocompetitieAanmeldenView(View):
                                       afstand_meter=deelcomp.competitie.afstand)
         if len(scores):
             score = scores[0]
-            aanmelding.aanvangsgemiddelde = score.waarde / 1000
+            ag = score.waarde / 1000
+            aanmelding.ag_voor_indiv = ag
+            aanmelding.ag_voor_team = ag
+            if ag > 0.000:
+                aanmelding.ag_voor_team_mag_aangepast_worden = False
 
         # zoek alle wedstrijdklassen van deze competitie met het juiste boogtype
         qset = (CompetitieKlasse
@@ -285,7 +291,7 @@ class RegiocompetitieAanmeldenView(View):
         # zoek een toepasselijke klasse aan de hand van de leeftijd
         done = False
         for obj in qset:        # pragma: no branch
-            if aanmelding.aanvangsgemiddelde >= obj.min_ag or obj.indiv.is_onbekend:
+            if aanmelding.ag_voor_indiv >= obj.min_ag or obj.indiv.is_onbekend:
                 for lkl in obj.indiv.leeftijdsklassen.all():
                     if lkl.geslacht == schutterboog.nhblid.geslacht:
                         if lkl.min_wedstrijdleeftijd <= age <= lkl.max_wedstrijdleeftijd:

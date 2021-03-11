@@ -1519,7 +1519,9 @@ class RegioTeamsView(UserPassesTestMixin, TemplateView):
                                       'klasse__team')
                       .exclude(klasse=None)
                       .filter(deelcompetitie=deelcomp)
-                      .order_by('klasse__team__volgorde', '-aanvangsgemiddelde', 'vereniging__ver_nr'))
+                      .order_by('klasse__team__volgorde',
+                                '-aanvangsgemiddelde',
+                                'vereniging__ver_nr'))
 
         prev_klasse = None
         for team in regioteams:
@@ -1542,7 +1544,9 @@ class RegioTeamsView(UserPassesTestMixin, TemplateView):
                                       'team_type')
                       .filter(deelcompetitie=deelcomp,
                               klasse=None)
-                      .order_by('team_type__volgorde', '-aanvangsgemiddelde', 'vereniging__ver_nr'))
+                      .order_by('team_type__volgorde',
+                                '-aanvangsgemiddelde',
+                                'vereniging__ver_nr'))
 
         is_eerste = True
         for team in regioteams:
@@ -1614,7 +1618,8 @@ class AGControleView(UserPassesTestMixin, TemplateView):
                     .objects
                     .filter(deelcompetitie=deelcomp,
                             inschrijf_voorkeur_team=True,
-                            is_handmatig_ag=True)
+                            ag_voor_team_mag_aangepast_worden=True,
+                            ag_voor_team__gt=0.0)
                     .select_related('schutterboog',
                                     'schutterboog__nhblid',
                                     'schutterboog__boogtype',
@@ -1631,7 +1636,7 @@ class AGControleView(UserPassesTestMixin, TemplateView):
 
             obj.boog_str = obj.schutterboog.boogtype.beschrijving
 
-            obj.ag_str = "%.3f" % obj.aanvangsgemiddelde
+            obj.ag_str = "%.3f" % obj.ag_voor_team
 
             obj.url_details = reverse('Vereniging:wijzig-ag',
                                       kwargs={'deelnemer_pk': obj.pk})

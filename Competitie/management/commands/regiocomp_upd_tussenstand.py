@@ -362,7 +362,7 @@ class Command(BaseCommand):
                     deelnemer.gemiddelde, deelnemer.totaal = self._bepaal_gemiddelde_en_totaal(waardes, laagste, pijlen_per_ronde)
 
                     # kijk of verplaatsing uit klasse onbekend van toepassing is
-                    if deelnemer.aanvangsgemiddelde < 0.001:
+                    if deelnemer.aanvangsgemiddelde < 0.001:        # TODO: verander is heeft_automatisch_ag
                         try:
                             betere_klassen = self._onbekend2beter[deelnemer.klasse.pk]
                         except KeyError:

@@ -87,9 +87,10 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
                                  'team_type')
                  .filter(deelcompetitie=deelcomp,
                          vereniging=self.functie_nu.nhb_ver)
+                 .annotate(gekoppelde_schutters_count=Count('gekoppelde_schutters'))
                  .order_by('volg_nr'))
         for obj in teams:
-            obj.aantal = obj.gekoppelde_schutters.count()
+            obj.aantal = obj.gekoppelde_schutters_count
             obj.ag_str = "%05.1f" % (obj.aanvangsgemiddelde * aantal_pijlen)
 
             obj.url_wijzig = reverse('Vereniging:teams-regio-wijzig',
@@ -118,17 +119,18 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
         for obj in deelnemers:
             obj.boog_str = obj.schutterboog.boogtype.beschrijving
             obj.naam_str = "[%s] %s" % (obj.schutterboog.nhblid.nhb_nr, obj.schutterboog.nhblid.volledige_naam())
-            obj.ag_str = "%.3f" % obj.aanvangsgemiddelde
+            obj.ag_str = "%.3f" % obj.ag_voor_team
             try:
                 team = obj.regiocompetitieteam_set.all()[0]
             except IndexError:
                 pass
             else:
                 obj.in_team_str = team.maak_team_naam_kort()
-            if obj.aanvangsgemiddelde == AG_NUL:
-                obj.is_handmatig_ag = True
+
+            if obj.ag_voor_team < 0.001:
                 obj.rood_ag = True
-            if obj.is_handmatig_ag:
+
+            if obj.ag_voor_team_mag_aangepast_worden:
                 obj.ag_str += " (handmatig)"
                 obj.url_wijzig_ag = reverse('Vereniging:wijzig-ag',
                                             kwargs={'deelnemer_pk': obj.pk})
@@ -368,12 +370,7 @@ class WijzigAanvangsgemiddeldeView(UserPassesTestMixin, TemplateView):
         # controleer dat deze deelnemer bekeken en gewijzigd mag worden
         self._mag_wijzigen_of_404(deelnemer)
 
-        if deelnemer.aanvangsgemiddelde == AG_NUL:
-            if not deelnemer.is_handmatig_ag:
-                deelnemer.is_handmatig_ag = True
-                deelnemer.save()
-
-        deelnemer.ag_str = '%.3f' % deelnemer.aanvangsgemiddelde
+        deelnemer.ag_str = '%.3f' % deelnemer.ag_voor_team
 
         deelnemer.naam_str = deelnemer.schutterboog.nhblid.volledige_naam()
         deelnemer.boog_str = deelnemer.schutterboog.boogtype.beschrijving
@@ -428,7 +425,7 @@ class WijzigAanvangsgemiddeldeView(UserPassesTestMixin, TemplateView):
                     request.user,
                     "Nieuw handmatig AG ingevoerd door beheerder")
 
-            deelnemer.aanvangsgemiddelde = nieuw_ag
+            deelnemer.ag_voor_team = nieuw_ag
             deelnemer.save()
 
         if self.rol_nu == Rollen.ROL_HWL:
@@ -504,8 +501,8 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
             obj.sel_str = "deelnemer_%s" % obj.pk
             obj.naam_str = obj.schutterboog.nhblid.volledige_naam()
             obj.boog_str = obj.schutterboog.boogtype.beschrijving
-            obj.blokkeer = (obj.aanvangsgemiddelde == AG_NUL)
-            obj.ag_str = "%.3f" % obj.aanvangsgemiddelde
+            obj.ag_str = "%.3f" % obj.ag_voor_team
+            obj.blokkeer = (obj.ag_voor_team < 0.001)
             obj.geselecteerd = (obj.pk in pks)          # vinkje zetten: gekoppeld aan dit team
             if not obj.geselecteerd:
                 if obj.in_team_count > 0:
@@ -545,7 +542,7 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
                    .exclude(pk__in=bezet_pks)
                    .filter(deelcompetitie=team.deelcompetitie,
                            inschrijf_voorkeur_team=True,
-                           aanvangsgemiddelde__gte=1.0,
+                           ag_voor_team__gte=1.0,
                            bij_vereniging=self.functie_nu.nhb_ver,
                            schutterboog__boogtype__in=boog_pks)
                    .values_list('pk', flat=True))
@@ -571,11 +568,11 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
         team.gekoppelde_schutters.clear()
         team.gekoppelde_schutters.add(*pks)
 
-        ags = team.gekoppelde_schutters.values_list('aanvangsgemiddelde', flat=True)
+        ags = team.gekoppelde_schutters.values_list('ag_voor_team', flat=True)
         ags = list(ags)
 
         if len(ags) >= 3:
-            # bereken het team aanvangsgemiddelde: de som van de 3 sterkste sporters
+            # bereken de team sterkte: de som van de 3 sterkste sporters
             ags.sort(reverse=True)
             ag = sum(ags[:3])
 
