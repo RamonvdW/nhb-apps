@@ -225,8 +225,7 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
                                indiv__boogtype=schutterboog.boogtype))
 
             aanmelding = RegioCompetitieSchutterBoog(deelcompetitie=deelcomp,
-                                                     schutterboog=schutterboog,
-                                                     aanvangsgemiddelde=AG_NUL)
+                                                     schutterboog=schutterboog)
             aanmelding.bij_vereniging = aanmelding.schutterboog.nhblid.bij_vereniging
 
             if len(schuttersboog) < len(klassen):

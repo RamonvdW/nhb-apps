@@ -452,9 +452,6 @@ class RegioCompetitieSchutterBoog(models.Model):
     # midden in het seizoen
     bij_vereniging = models.ForeignKey(NhbVereniging, on_delete=models.PROTECT)
 
-    is_handmatig_ag = models.BooleanField(default=False)    # TODO: obsolete
-    aanvangsgemiddelde = models.DecimalField(max_digits=5, decimal_places=3, default=0.0)    # TODO: obsolete
-
     # aanvangsgemiddelde voor de individuele competitie
     # typisch gebaseerd op de uitslag van vorig seizoen
     # is 0,000 voor nieuwe sporters en bij onvoldoende scores in vorig seizoen

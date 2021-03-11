@@ -82,7 +82,6 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         aanmelding = RegioCompetitieSchutterBoog(deelcompetitie=deelcomp,
                                                  schutterboog=schutterboog,
                                                  bij_vereniging=ver,
-                                                 aanvangsgemiddelde=AG_NUL,
                                                  gemiddelde=self.gemiddelde,
                                                  klasse=self.klasse)
         aanmelding.aantal_scores = aantal_scores

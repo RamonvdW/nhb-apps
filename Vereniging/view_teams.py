@@ -115,7 +115,7 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
                               bij_vereniging=self.functie_nu.nhb_ver,
                               inschrijf_voorkeur_team=True)
                       .order_by('schutterboog__boogtype__volgorde',
-                                '-aanvangsgemiddelde'))
+                                '-ag_voor_team'))
         for obj in deelnemers:
             obj.boog_str = obj.schutterboog.boogtype.beschrijving
             obj.naam_str = "[%s] %s" % (obj.schutterboog.nhblid.nhb_nr, obj.schutterboog.nhblid.volledige_naam())
@@ -496,7 +496,7 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
                               bij_vereniging=self.functie_nu.nhb_ver,
                               schutterboog__boogtype__in=boog_pks)
                       .annotate(in_team_count=Count('regiocompetitieteam'))
-                      .order_by('-aanvangsgemiddelde'))
+                      .order_by('-ag_voor_team'))
         for obj in deelnemers:
             obj.sel_str = "deelnemer_%s" % obj.pk
             obj.naam_str = obj.schutterboog.nhblid.volledige_naam()

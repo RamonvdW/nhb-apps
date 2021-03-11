@@ -173,7 +173,6 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         aanmelding = RegioCompetitieSchutterBoog(deelcompetitie=deelcomp,
                                                  schutterboog=schutterboog,
                                                  bij_vereniging=schutterboog.nhblid.bij_vereniging,
-                                                 aanvangsgemiddelde=AG_NUL,
                                                  klasse=klasse)
         aanmelding.aantal_scores = 6        # nodig om voor te komen in de rayon uitslagen
         aanmelding.save()
@@ -194,7 +193,6 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         aanmelding = RegioCompetitieSchutterBoog(deelcompetitie=deelcomp,
                                                  schutterboog=schutterboog,
                                                  bij_vereniging=schutterboog.nhblid.bij_vereniging,
-                                                 aanvangsgemiddelde=AG_NUL,
                                                  klasse=klasse)
         aanmelding.aantal_scores = 6        # nodig om voor te komen in de rayon uitslagen
         aanmelding.save()
@@ -208,7 +206,6 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         aanmelding = RegioCompetitieSchutterBoog(deelcompetitie=deelcomp,
                                                  schutterboog=schutterboog,
                                                  bij_vereniging=schutterboog.nhblid.bij_vereniging,
-                                                 aanvangsgemiddelde=AG_NUL,
                                                  klasse=klasse)
         aanmelding.aantal_scores = 6        # nodig om voor te komen in de rayon uitslagen
         aanmelding.save()
@@ -231,7 +228,6 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         aanmelding = RegioCompetitieSchutterBoog(deelcompetitie=deelcomp,
                                                  schutterboog=schutterboog,
                                                  bij_vereniging=schutterboog.nhblid.bij_vereniging,
-                                                 aanvangsgemiddelde=AG_NUL,
                                                  klasse=klasse)
         aanmelding.save()
 
