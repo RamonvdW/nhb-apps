@@ -296,7 +296,7 @@
                         {% endif %}
                     </tr>
 
-                    <tr id="id_dt_per_baan" class="hide">
+                    <tr id="id_dt_per_baan"{% if not readonly_show_max_dt %} class="hide"{% endif %}>
                         <td>Maximum aantal Dutch Targets op 1 baan:</td>
                         <td>
                             {% if readonly %}

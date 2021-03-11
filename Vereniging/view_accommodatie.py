@@ -6,6 +6,7 @@
 
 from django.http import HttpResponseRedirect
 from django.urls import reverse, Resolver404
+from django.db.models import Count
 from django.views.generic import TemplateView, ListView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Plein.menu import menu_dynamics
@@ -40,7 +41,8 @@ class LijstVerenigingenView(UserPassesTestMixin, TemplateView):
         """ gebruiker heeft geen toegang --> redirect naar het plein """
         return HttpResponseRedirect(reverse('Plein:plein'))
 
-    def _get_verenigingen(self, rol_nu, functie_nu):
+    @staticmethod
+    def _get_verenigingen(rol_nu, functie_nu):
 
         # vul een kleine cache om vele database verzoeken te voorkomen
         hwl_functies = dict()   # [nhb_ver] = Functie()
@@ -48,11 +50,12 @@ class LijstVerenigingenView(UserPassesTestMixin, TemplateView):
         for functie in (Functie
                         .objects
                         .select_related('nhb_ver')
-                        .prefetch_related('accounts')):
+                        .annotate(accounts_count=Count('accounts'))
+                        .all()):
             if functie.rol == 'HWL':
                 hwl_functies[functie.nhb_ver.ver_nr] = functie
 
-            functie2count[functie.pk] = functie.accounts.count()
+            functie2count[functie.pk] = functie.accounts_count
         # for
 
         if rol_nu == Rollen.ROL_RKO:
@@ -83,14 +86,14 @@ class LijstVerenigingenView(UserPassesTestMixin, TemplateView):
                     .objects
                     .select_related('regio', 'regio__rayon')
                     .exclude(regio__regio_nr=100)
-                    .prefetch_related('nhblid_set',
-                                      'wedstrijdlocatie_set',
+                    .prefetch_related('wedstrijdlocatie_set',
                                       'functie_set',
                                       'clusters')
+                    .annotate(nhblid_set_count=Count('nhblid'))
                     .order_by('regio__regio_nr', 'ver_nr'))
 
             for obj in objs:
-                obj.aantal_leden = obj.nhblid_set.count()
+                obj.aantal_leden = obj.nhblid_set_count
                 obj.aantal_beheerders = 0
                 for functie in obj.functie_set.all():
                     obj.aantal_beheerders += functie2count[functie.pk]
@@ -119,15 +122,6 @@ class LijstVerenigingenView(UserPassesTestMixin, TemplateView):
                                       'clusters')
                     .order_by('ver_nr'))
 
-        for obj in objs:
-            try:
-                functie_hwl = hwl_functies[obj.ver_nr]
-            except KeyError:
-                # deze vereniging heeft geen HWL functie
-                obj.hwls = list()
-            else:
-                obj.hwls = functie_hwl.accounts.all()
-        # for
         return objs
 
     def get_context_data(self, **kwargs):
@@ -333,6 +327,10 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
                                               kwargs={'functie_pk': functie_wl.pk})
         else:
             context['readonly'] = True
+
+            if binnen_locatie:
+                if binnen_locatie.banen_18m + binnen_locatie.banen_25m > 0:
+                    context['readonly_show_max_dt'] = True
 
         menu_dynamics(self.request, context, actief=menu_actief)
         return context
