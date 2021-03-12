@@ -65,17 +65,17 @@ kill $PID_TAIL
 wait $PID_TAIL 2>/dev/null
 
 [ $RES -eq 3 ] && ABORTED=1
-#echo "[DEBUG] Coverage run result: $RES"
+#echo "[DEBUG] Coverage run result: $RES --> ABORTED=$ABORTED"
 
 if [ $RES -eq 0 -a $# -eq 0 ]
 then
     # add coverage with debug and wiki enabled
     echo "[INFO] Performing run with debug + wiki run"
     python3 -m coverage run --append --branch \
-        ./manage.py test --settings=nhbapps.settings_dev_wiki_debug Plein.tests.TestPlein.test_quick Functie.test_saml2idp &>/dev/null
+        ./manage.py test --settings=nhbapps.settings_dev_wiki_debug Plein.tests.TestPlein.test_quick Functie.test_saml2idp >>"$LOG" 2>>"$LOG"
     RES=$?
     [ $RES -eq 3 ] && ABORTED=1
-    #echo "[DEBUG] Debug coverage run result: $RES"
+    #echo "[DEBUG] Debug coverage run result: $RES --> ABORTED=$ABORTED"
 fi
 
 # stop the websim tool

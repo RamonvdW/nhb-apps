@@ -26,7 +26,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2021-03-11'
+SITE_VERSIE = '2021-03-12'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -293,8 +293,8 @@ SAML_IDP_CONFIG = {
     },
 
     # signing keys
-    'key_file': os.path.join(BASE_DIR, 'data_private/saml2/private.key'),
-    'cert_file': os.path.join(BASE_DIR, 'data_private/saml2/cert.crt'),
+    'key_file': os.path.join(BASE_DIR, 'nhbapps/data_private/saml2/private.key'),
+    'cert_file': os.path.join(BASE_DIR, 'nhbapps/data_private/saml2/cert.crt'),
     'valid_for': 100*24
 }
 
