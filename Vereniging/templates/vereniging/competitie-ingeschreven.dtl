@@ -52,13 +52,13 @@
                     <th data-filter="on">Bonds<wbr/>nummer</th>
                     <th data-filter="on">Naam</th>
 
-                    <th>Voorkeur teamschieten</th>
+                    <th><span class="show-on-small hide-on-med-and-up">Team</span><span class="hide-on-small-only">Voorkeur teamschieten</span></th>
 
                     {% if toon_dagdeel %}
-                        <th>Voorkeur dagdelen</th>
+                        <th><span class="show-on-small hide-on-med-and-up">Dagdelen</span><span class="hide-on-small-only">Voorkeur dagdelen</span></th>
                     {% endif %}
 
-                    <th>Opmerking</th>
+                    <th class="hide-on-small-only">Opmerking</th>
                 </tr>
             </thead>
 
@@ -84,7 +84,7 @@
                     <td>{{ obj.dagdeel_str }}</td>
                 {% endif %}
 
-                <td>{{ obj.inschrijf_notitie|linebreaks }}</td>
+                <td class="hide-on-small-only">{{ obj.inschrijf_notitie|linebreaksbr }}</td>
             </tr>
             {% endfor %}
         </table>
