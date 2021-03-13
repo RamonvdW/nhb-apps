@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -31,11 +31,10 @@ class HistCompetitie(models.Model):
 
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
-        return "%s: %s (%s) %s (team=%s)" % (self.pk,
-                                             self.seizoen,
-                                             self.comp_type,
-                                             self.klasse,
-                                             self.is_team)
+        return "%s (%s) %s (team=%s)" % (self.seizoen,
+                                         self.comp_type,
+                                         self.klasse,
+                                         self.is_team)
 
     class Meta:
         """ meta data voor de admin interface """

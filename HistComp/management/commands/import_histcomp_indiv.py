@@ -34,7 +34,7 @@ class Command(BaseCommand):
         parser.add_argument('filename', nargs=1, type=argparse.FileType("r"),
                             help="in te lezen file")
         parser.add_argument('seizoen', nargs=1,
-                            help="competitie seizoen: 20xx-20yy")
+                            help="competitie seizoen: 20xx/20yy")
         parser.add_argument('comptype', nargs=1, choices=('18', '25'),
                             help="competitie type: 18 of 25")
         parser.add_argument('--verbose', action='store_true')
@@ -112,7 +112,7 @@ class Command(BaseCommand):
 
             ver_nr = spl[1]
 
-            klasse = spl[2]
+            klasse = spl[2]     # boogtype
             try:
                 histcompetitie = histcomps[klasse]
             except KeyError:
@@ -155,7 +155,9 @@ class Command(BaseCommand):
                 ver_naam = ver.naam
             except NhbVereniging.DoesNotExist:
                 # fall-back voor recent verwijderde verenigingen
-                if ver_nr == '1058':
+                if ver_nr == '1026':
+                    ver_naam = 'Victoria'
+                elif ver_nr == '1058':
                     ver_naam = 'Willem Tell'
                 elif ver_nr == '1093':
                     ver_naam = 'De Bosjagers'
@@ -167,6 +169,8 @@ class Command(BaseCommand):
                     ver_naam = 'Batavieren Treffers'
                 elif ver_nr == '1191':
                     ver_naam = 'Eendracht St Sebast'
+                elif ver_nr == '1226':
+                    ver_naam = 'Centaur Asten'
                 else:
                     ver_naam = '?'
                     self.stdout.write('[WARNING] Kan geen naam opzoeken voor verwijderde vereniging %s' % ver_nr)
@@ -261,7 +265,10 @@ class Command(BaseCommand):
         """
         self.stdout.write("[INFO] Removing duplicates from Recurve results (dupe with BB/IB/LB)")
 
-        histcomp_r = self._boogtype2histcomp['R']
+        try:
+            histcomp_r = self._boogtype2histcomp['R']
+        except KeyError:
+            return
 
         # doorloop de kleinste klassen
         for boogtype in ('BB', 'IB', 'LB'):

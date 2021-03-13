@@ -60,7 +60,8 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                     .filter(schutter_nr=nhblid.nhb_nr)
                     .exclude(totaal=0)
                     .select_related('histcompetitie')
-                    .order_by('-histcompetitie__seizoen')):
+                    .order_by('histcompetitie__comp_type',      # 18/25
+                              '-histcompetitie__seizoen')):     # jaartal, aflopend
             obj.competitie_str = HistCompetitie.comptype2str[obj.histcompetitie.comp_type]
             obj.seizoen_str = 'Seizoen ' + obj.histcompetitie.seizoen
             try:
