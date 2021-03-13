@@ -82,7 +82,7 @@
             <tr>
                 <td>{{ hist.when }}</td>
                 <td>{{ hist.door_account }}</td>
-                <td>{{ hist.mutatie_str }}</td>
+                <td>{{ hist.oude_waarde_str }}<span style="position: relative; bottom: .15em;"> &rarr; </span>{{ hist.nieuwe_waarde_str }}</td>
             </tr>
         {% empty %}
             <tr>

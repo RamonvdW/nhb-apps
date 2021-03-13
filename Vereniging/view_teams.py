@@ -413,7 +413,10 @@ class WijzigTeamAGView(UserPassesTestMixin, TemplateView):
                            score__type=SCORE_TYPE_TEAM_AG)
                    .order_by('-when'))
         for obj in ag_hist:
-            obj.mutatie_str = "%.3f --> %.3f" % (obj.oude_waarde / 1000, obj.nieuwe_waarde / 1000)
+            obj.oude_waarde /= 1000
+            obj.nieuwe_waarde /= 1000
+            obj.oude_waarde_str = "%.3f" % obj.oude_waarde
+            obj.nieuwe_waarde_str = "%.3f" % obj.nieuwe_waarde
         # for
         context['ag_hist'] = ag_hist
 
