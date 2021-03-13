@@ -72,12 +72,12 @@
                                 <tr>
                                     <td></td>   <!-- boog -->
 
-                                    {% if score.is_ag %}
-                                        <!-- de view heeft score.waarde al omgezet naar N.MMM -->
-                                        <td>AG vastgesteld</td>
+                                    {% if score.type == 'S' %}
+                                        <td>{{ score.wedstrijd_str }}<br>{{ score.wedstrijd_waar }}</td>
                                         <td>{{ score.waarde }}</td>
                                     {% else %}
-                                        <td>{{ score.wedstrijd_str }}<br>{{ score.wedstrijd_waar }}</td>
+                                        <!-- de view heeft score.waarde al omgezet naar N.MMM -->
+                                        <td>{% if score.type == 'T' %}AG voor teams (handmatig){% else %}Aanvangsgemiddelde{% endif %}</td>
                                         <td>{{ score.waarde }}</td>
                                     {% endif %}
 

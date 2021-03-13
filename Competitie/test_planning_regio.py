@@ -1512,8 +1512,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
             wedstrijd = Wedstrijd.objects.get(pk=wedstrijd.pk)
             # self.uitslagen.append(wedstrijd.uitslag)
 
-            score = Score(is_ag=False,
-                          afstand_meter=18,
+            score = Score(afstand_meter=18,
                           schutterboog=self.schutterboog,
                           waarde=123)
             score.save()

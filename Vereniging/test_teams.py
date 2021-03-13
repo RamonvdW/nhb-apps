@@ -13,7 +13,7 @@ from Competitie.models import (Competitie, DeelCompetitie, CompetitieKlasse, AG_
 from Competitie.test_fase import zet_competitie_fase
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Schutter.models import SchutterBoog
-from Score.models import aanvangsgemiddelde_opslaan
+from Score.models import score_indiv_ag_opslaan
 from Overig.e2ehelpers import E2EHelpers
 import datetime
 
@@ -267,7 +267,7 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
         else:
             afkorting = 'R'
         schutterboog = SchutterBoog.objects.get(nhblid__nhb_nr=nhb_nr, boogtype__afkorting=afkorting)
-        aanvangsgemiddelde_opslaan(schutterboog, afstand, 7.42, self.account_hwl, 'Test AG %s' % afstand)
+        score_indiv_ag_opslaan(schutterboog, afstand, 7.42, self.account_hwl, 'Test AG %s' % afstand)
 
     def _create_deelnemers(self, do_18=True, do_25=False):
         # moet ingelogd zijn als HWL

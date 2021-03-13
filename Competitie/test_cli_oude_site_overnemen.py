@@ -13,7 +13,7 @@ from Competitie.models import (Competitie, CompetitieKlasse,
 from Competitie.test_fase import zet_competitie_fase
 from NhbStructuur.models import NhbRegio, NhbLid, NhbVereniging
 from Schutter.models import SchutterBoog
-from Score.models import Score, ScoreHist, aanvangsgemiddelde_opslaan
+from Score.models import Score, ScoreHist, SCORE_TYPE_INDIV_AG, SCORE_TYPE_SCORE, score_indiv_ag_opslaan
 from Wedstrijden.models import WedstrijdenPlan
 from Overig.e2ehelpers import E2EHelpers
 import datetime
@@ -261,13 +261,13 @@ class TestCompetitieCliOudeSiteOvernemen(E2EHelpers, TestCase):
 
         # maak een AG die opgeruimd moet worden
         Score(schutterboog=self.schutterboog_100002,
-              is_ag=True,
+              type=SCORE_TYPE_INDIV_AG,
               waarde=1000,
               afstand_meter=18).save()
 
         # maak er nog een met een ScoreHist, die moet dus niet opgeruimd worden
         score = Score(schutterboog=self.schutterboog_100002,
-                      is_ag=True,
+                      type=SCORE_TYPE_INDIV_AG,
                       waarde=1000,
                       afstand_meter=25)
         score.save()
@@ -305,8 +305,8 @@ class TestCompetitieCliOudeSiteOvernemen(E2EHelpers, TestCase):
         self.assertTrue("[INFO] Sla dubbele invoer onder recurve (18m) over: 100002 (scores:" in f2.getvalue())
         self.assertTrue("[INFO] Verwijder 1 dubbele inschrijvingen" in f2.getvalue())
 
-        self.assertEqual(Score.objects.filter(is_ag=True).count(), 0)
-        self.assertEqual(Score.objects.filter(is_ag=False).count(), 4)
+        self.assertEqual(Score.objects.filter(type=SCORE_TYPE_INDIV_AG).count(), 0)
+        self.assertEqual(Score.objects.filter(type=SCORE_TYPE_SCORE).count(), 4)
         self.assertEqual(ScoreHist.objects.count(), 4)
 
         hist = ScoreHist.objects.all()[0]
@@ -327,7 +327,7 @@ class TestCompetitieCliOudeSiteOvernemen(E2EHelpers, TestCase):
                                     boogtype=self.boog_bb,
                                     voor_wedstrijd=True)
         schutterboog.save()
-        aanvangsgemiddelde_opslaan(schutterboog, 18, 4.444, None, 'test prep')
+        score_indiv_ag_opslaan(schutterboog, 18, 4.444, None, 'test prep')
 
         f1 = io.StringIO()
         f2 = io.StringIO()

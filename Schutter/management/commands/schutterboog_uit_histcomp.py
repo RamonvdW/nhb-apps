@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,14 +9,12 @@
 
 
 from django.core.management.base import BaseCommand
-from django.utils import timezone
 from BasisTypen.models import BoogType
 from HistComp.models import HistCompetitieIndividueel
 from Schutter.models import SchutterBoog
-from Score.models import aanvangsgemiddelde_opslaan
+from Score.models import score_indiv_ag_opslaan
 from NhbStructuur.models import NhbLid
 from Competitie.models import AG_NUL
-import datetime
 
 TOEGESTANE_KLASSEN = ('Recurve', 'Compound', 'Barebow', 'Longbow', 'Instinctive Bow')
 
@@ -50,7 +48,7 @@ class Command(BaseCommand):
             boogtype_dict[obj.afkorting] = obj
         # for
 
-        # maak een cache aan van nhbleden
+        # maak een cache aan van leden
         nhblid_dict = dict()        # [nhb_nr] = NhbLid
         for obj in NhbLid.objects.all():
             nhblid_dict[obj.nhb_nr] = obj
@@ -97,7 +95,7 @@ class Command(BaseCommand):
 
                     # zoek het score record erbij
                     if obj.gemiddelde > AG_NUL:
-                        if aanvangsgemiddelde_opslaan(
+                        if score_indiv_ag_opslaan(
                                 schutterboog,
                                 int(obj.histcompetitie.comp_type),
                                 obj.gemiddelde,

@@ -10,7 +10,7 @@ from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
 from Competitie.models import Competitie, DeelCompetitie, RegioCompetitieSchutterBoog, INSCHRIJF_METHODE_3
 from Competitie.test_fase import zet_competitie_fase
 from Overig.e2ehelpers import E2EHelpers
-from Score.models import aanvangsgemiddelde_opslaan
+from Score.models import score_indiv_ag_opslaan
 from .models import SchutterBoog
 import datetime
 
@@ -146,7 +146,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
         schutterboog = SchutterBoog.objects.get(boogtype__afkorting='R')
         deelcomp = DeelCompetitie.objects.get(competitie__afstand='18', nhb_regio=self.nhbver.regio)
-        res = aanvangsgemiddelde_opslaan(schutterboog, 18, 8.18, None, 'Test')
+        res = score_indiv_ag_opslaan(schutterboog, 18, 8.18, None, 'Test')
         self.assertTrue(res)
 
         # haal de bevestig pagina op met het formulier
@@ -316,7 +316,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
         schutterboog_18 = SchutterBoog.objects.get(boogtype__afkorting='R')
         deelcomp = DeelCompetitie.objects.get(competitie__afstand='18', nhb_regio=self.nhbver.regio)
-        res = aanvangsgemiddelde_opslaan(schutterboog_18, 18, 8.18, None, 'Test')
+        res = score_indiv_ag_opslaan(schutterboog_18, 18, 8.18, None, 'Test')
         self.assertTrue(res)
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_aanmelden % (deelcomp.pk, schutterboog_18.pk))
@@ -370,7 +370,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
         schutterboog_18 = SchutterBoog.objects.get(boogtype__afkorting='R')
         deelcomp = DeelCompetitie.objects.get(competitie__afstand='18', nhb_regio=self.nhbver.regio)
-        res = aanvangsgemiddelde_opslaan(schutterboog_18, 18, 8.18, None, 'Test')
+        res = score_indiv_ag_opslaan(schutterboog_18, 18, 8.18, None, 'Test')
         self.assertTrue(res)
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_aanmelden % (deelcomp.pk, schutterboog_18.pk))
@@ -404,7 +404,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
         schutterboog = SchutterBoog.objects.get(boogtype__afkorting='R')
         deelcomp = DeelCompetitie.objects.get(competitie__afstand='18', nhb_regio=self.nhbver.regio)
-        res = aanvangsgemiddelde_opslaan(schutterboog, 18, 8.18, None, 'Test')
+        res = score_indiv_ag_opslaan(schutterboog, 18, 8.18, None, 'Test')
         self.assertTrue(res)
 
         url = self.url_aanmelden % (deelcomp.pk, schutterboog.pk)
@@ -463,7 +463,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
         schutterboog = SchutterBoog.objects.get(boogtype__afkorting='R')
         deelcomp = DeelCompetitie.objects.get(competitie__afstand='18', nhb_regio=self.nhbver.regio)
-        res = aanvangsgemiddelde_opslaan(schutterboog, 18, 8.18, None, 'Test')
+        res = score_indiv_ag_opslaan(schutterboog, 18, 8.18, None, 'Test')
         self.assertTrue(res)
 
         url = self.url_aanmelden % (deelcomp.pk, schutterboog.pk)
@@ -516,7 +516,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         self.assertNotContains(resp, 'Weekend')
 
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
-        res = aanvangsgemiddelde_opslaan(schutterboog, 18, 8.18, None, 'Test')
+        res = score_indiv_ag_opslaan(schutterboog, 18, 8.18, None, 'Test')
         self.assertTrue(res)
 
         # schrijf in met een niet toegestaan dagdeel
@@ -588,7 +588,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
 
         # geef dagdeel door
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
-        res = aanvangsgemiddelde_opslaan(schutterboog, 18, 8.18, None, 'Test')
+        res = score_indiv_ag_opslaan(schutterboog, 18, 8.18, None, 'Test')
         self.assertTrue(res)
 
         url = self.url_aanmelden % (deelcomp.pk, schutterboog.pk)

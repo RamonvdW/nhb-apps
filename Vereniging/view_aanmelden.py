@@ -20,7 +20,7 @@ from Competitie.models import (AG_NUL, DAGDEEL, DAGDEEL_AFKORTINGEN,
                                Competitie, CompetitieKlasse,
                                DeelCompetitie, DeelcompetitieRonde,
                                RegioCompetitieSchutterBoog)
-from Score.models import Score
+from Score.models import Score, SCORE_TYPE_INDIV_AG
 from Wedstrijden.models import Wedstrijd
 import copy
 
@@ -128,7 +128,8 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
         for score in (Score
                       .objects
                       .select_related('schutterboog')
-                      .filter(is_ag=True, afstand_meter=comp.afstand)):
+                      .filter(type=SCORE_TYPE_INDIV_AG,
+                              afstand_meter=comp.afstand)):
             ag = score.waarde / 1000
             ag_dict[score.schutterboog.pk] = ag
         # for
@@ -400,7 +401,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                 # zoek de aanvangsgemiddelden er bij, indien beschikbaar
                 for score in Score.objects.filter(schutterboog=schutterboog,
                                                   afstand_meter=comp.afstand,
-                                                  is_ag=True):
+                                                  type=SCORE_TYPE_INDIV_AG):
                     ag = score.waarde / 1000
                     aanmelding.ag_voor_indiv = ag
                     aanmelding.ag_voor_team = ag

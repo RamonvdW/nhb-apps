@@ -6,13 +6,13 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}Wijzig AG{% endblock %}
+{% block title %}Wijzig AG teams{% endblock %}
 
 {% block pagina %}
 
-    <h4>Wijzig aanvangsgemiddelde</h4>
+    <h4>Wijzig aanvangsgemiddelde voor teamcompetitie</h4>
 
-    <p>Via dit scherm kan de HWL en de RCL het aanvangsgemiddelde van een sporter wijzigen.</p>
+    <p>Via dit scherm kan de HWL en de RCL voor een sporter het aanvangsgemiddelde wijzigen wat gebruikt wordt voor het berekenen van de team sterkte.</p>
 
     <script>
         function invoer() {
@@ -43,7 +43,7 @@
                 <td>{{ deelnemer.ag_str }}</td>
             </tr>
 
-            {% if not deelnemer.is_handmatig_ag %}
+            {% if not deelnemer.ag_voor_team_mag_aangepast_worden %}
                 <tr>
                     <td colspan="2"><i class="red-text">Het aanvangsgemiddelde is automatisch vastgesteld en kan niet gewijzigd worden</i></td>
                 </tr>
@@ -91,6 +91,6 @@
         {% endfor %}
     </table>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="wijzig-ag" %}
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="teams-wijzig-ag" %}
 
 {% endblock %}

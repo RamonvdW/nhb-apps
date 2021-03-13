@@ -17,7 +17,7 @@ from Competitie.models import (Competitie, CompetitieKlasse,
                                AG_NUL, RegioCompetitieSchutterBoog, RegiocompetitieTeam)
 from Schutter.models import SchutterBoog
 from Wedstrijden.models import Wedstrijd, WedstrijdUitslag, WedstrijdenPlan
-from Score.models import Score, ScoreHist
+from Score.models import Score, ScoreHist, SCORE_TYPE_SCORE, SCORE_TYPE_INDIV_AG
 from decimal import Decimal
 import datetime
 import json
@@ -147,7 +147,7 @@ class Command(BaseCommand):
         for obj in (Score
                     .objects
                     .select_related('schutterboog')
-                    .filter(is_ag=True,
+                    .filter(type=SCORE_TYPE_INDIV_AG,
                             afstand_meter__in=(18, 25))
                     .all()):
             tup = (obj.afstand_meter, obj.schutterboog.pk)
@@ -157,7 +157,7 @@ class Command(BaseCommand):
         for hist in (ScoreHist
                      .objects
                      .select_related('score', 'score__schutterboog')
-                     .filter(score__is_ag=False,
+                     .filter(score__type=SCORE_TYPE_SCORE,
                              notitie__startswith="Importeer scores van uitslagen.handboogsport.nl voor ronde ")):
             ronde = int(hist.notitie[-1])
             score = hist.score
@@ -332,7 +332,7 @@ class Command(BaseCommand):
             # maak een tijdelijk AG aan dat we niet opslaan
             # want de oude site vult ontbrekende AG's aan vanaf 3 scores
             score = Score()
-            score.is_ag = True
+            score.type = SCORE_TYPE_INDIV_AG
             score.schutterboog = schutterboog
             score.afstand_meter = self._afstand
             score.waarde = waarde
@@ -403,7 +403,7 @@ class Command(BaseCommand):
                 except KeyError:
                     # eerste keer: maak het record + score aan
                     score = Score()
-                    score.is_ag = False
+                    score.type = SCORE_TYPE_SCORE
                     score.afstand_meter = self._afstand
                     score.schutterboog = inschrijving.schutterboog
                     score.waarde = waarde

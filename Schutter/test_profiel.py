@@ -14,7 +14,7 @@ from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Records.models import IndivRecord
 from Competitie.models import Competitie, DeelCompetitie, RegioCompetitieSchutterBoog
-from Score.models import Score, ScoreHist, aanvangsgemiddelde_opslaan
+from Score.models import Score, ScoreHist, score_indiv_ag_opslaan
 from Overig.e2ehelpers import E2EHelpers
 from .models import SchutterVoorkeuren, SchutterBoog
 import datetime
@@ -232,7 +232,7 @@ class TestSchutterProfiel(E2EHelpers, TestCase):
         # schrijf de schutter in voor de 18m Recurve
         schutterboog = SchutterBoog.objects.get(boogtype__afkorting='R')
         deelcomp = DeelCompetitie.objects.get(competitie__afstand='18', nhb_regio=self.nhbver.regio)
-        res = aanvangsgemiddelde_opslaan(schutterboog, 18, 8.18, None, 'Test')
+        res = score_indiv_ag_opslaan(schutterboog, 18, 8.18, None, 'Test')
         self.assertTrue(res)
         url = self.url_aanmelden % (deelcomp.pk, schutterboog.pk)
         with self.assert_max_queries(20):
@@ -297,8 +297,8 @@ class TestSchutterProfiel(E2EHelpers, TestCase):
         # zet aanvangsgemiddelden voor 18m en 25m
         Score.objects.all().delete()        # nieuw vastgestelde AG is van vandaag
         obj = SchutterBoog.objects.get(boogtype__afkorting='R')
-        aanvangsgemiddelde_opslaan(obj, 18, 9.018, None, 'Test opmerking A')
-        aanvangsgemiddelde_opslaan(obj, 25, 2.5, None, 'Test opmerking B')
+        score_indiv_ag_opslaan(obj, 18, 9.018, None, 'Test opmerking A')
+        score_indiv_ag_opslaan(obj, 25, 2.5, None, 'Test opmerking B')
 
         with self.assert_max_queries(25):
             resp = self.client.get(self.url_profiel)
@@ -429,7 +429,7 @@ class TestSchutterProfiel(E2EHelpers, TestCase):
         # schrijf de schutter in voor de 18m Recurve
         schutterboog = SchutterBoog.objects.get(boogtype__afkorting='R')
         deelcomp = DeelCompetitie.objects.get(competitie__afstand='18', nhb_regio=self.nhbver.regio)
-        res = aanvangsgemiddelde_opslaan(schutterboog, 18, 8.18, None, 'Test')
+        res = score_indiv_ag_opslaan(schutterboog, 18, 8.18, None, 'Test')
         self.assertTrue(res)
         url = self.url_aanmelden % (deelcomp.pk, schutterboog.pk)
         with self.assert_max_queries(20):

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,7 +9,7 @@
 from django.core.management.base import BaseCommand
 from Logboek.models import schrijf_in_logboek
 from Competitie.models import DeelcompetitieRonde
-from Score.models import Score, ScoreHist
+from Score.models import Score, ScoreHist, SCORE_TYPE_SCORE
 
 
 class Command(BaseCommand):
@@ -57,8 +57,9 @@ class Command(BaseCommand):
         # for
 
         # verwijder AG zonder hist
+        # TODO: kan sneller met annotate: .annotate(hist_count=Count('scorehist'))
         teller = 0
-        for obj in Score.objects.filter(is_ag=True):
+        for obj in Score.objects.exclude(type=SCORE_TYPE_SCORE):
             if ScoreHist.objects.filter(score=obj).count() == 0:
                 obj.delete()
                 teller += 1

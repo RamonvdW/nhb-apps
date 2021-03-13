@@ -14,7 +14,7 @@ from Competitie.models import (Competitie, DeelCompetitie, CompetitieKlasse,
 from Competitie.test_fase import zet_competitie_fase
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Schutter.models import SchutterBoog
-from Score.models import aanvangsgemiddelde_opslaan
+from Score.models import score_indiv_ag_opslaan
 from Wedstrijden.models import WedstrijdLocatie
 from Overig.e2ehelpers import E2EHelpers
 import datetime
@@ -272,7 +272,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         else:
             afkorting = 'R'
         schutterboog = SchutterBoog.objects.get(nhblid__nhb_nr=nhb_nr, boogtype__afkorting=afkorting)
-        aanvangsgemiddelde_opslaan(schutterboog, afstand, 7.42, self.account_hwl, 'Test AG %s' % afstand)
+        score_indiv_ag_opslaan(schutterboog, afstand, 7.42, self.account_hwl, 'Test AG %s' % afstand)
 
     def test_overzicht(self):
         # anon
@@ -830,7 +830,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('vereniging/wijzig-ag.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/teams-wijzig-ag.dtl', 'plein/site_layout.dtl'))
 
         # post zonder wijziging
         with self.assert_max_queries(20):

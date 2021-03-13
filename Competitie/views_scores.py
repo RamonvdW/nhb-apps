@@ -13,7 +13,7 @@ from Plein.menu import menu_dynamics
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
 from Wedstrijden.models import Wedstrijd, WedstrijdUitslag
 from Schutter.models import SchutterBoog
-from Score.models import Score, ScoreHist, SCORE_WAARDE_VERWIJDERD
+from Score.models import Score, ScoreHist, SCORE_WAARDE_VERWIJDERD, SCORE_TYPE_SCORE
 from .models import (LAAG_REGIO, DeelCompetitie,
                      DeelcompetitieRonde, RegioCompetitieSchutterBoog)
 import json
@@ -211,7 +211,7 @@ class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
         context['scores'] = (wedstrijd
                              .uitslag
                              .scores
-                             .exclude(is_ag=True)
+                             .filter(type=SCORE_TYPE_SCORE)
                              .exclude(waarde=SCORE_WAARDE_VERWIJDERD)
                              .select_related('schutterboog',
                                              'schutterboog__boogtype',
@@ -435,7 +435,6 @@ class DynamicScoresOpslaanView(UserPassesTestMixin, View):
             return
 
         score_obj = Score(schutterboog=schutterboog,
-                          is_ag=False,
                           waarde=waarde,
                           afstand_meter=uitslag.afstand_meter)
         score_obj.save()
@@ -585,7 +584,7 @@ class WedstrijdUitslagBekijkenView(TemplateView):
         scores = (wedstrijd
                   .uitslag
                   .scores
-                  .exclude(is_ag=True)
+                  .filter(type=SCORE_TYPE_SCORE)
                   .exclude(waarde=SCORE_WAARDE_VERWIJDERD)
                   .select_related('schutterboog',
                                   'schutterboog__boogtype',

@@ -15,13 +15,44 @@ from Competitie.models import (CompetitieKlasse, AG_NUL,
                                RegioCompetitieSchutterBoog, RegiocompetitieTeam)
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
-from Score.models import ScoreHist, aanvangsgemiddelde_opslaan
+from Score.models import ScoreHist, SCORE_TYPE_TEAM_AG, score_teams_ag_opslaan
 
 TEMPLATE_TEAMS_REGIO = 'vereniging/teams-regio.dtl'
 TEMPLATE_TEAMS_REGIO_WIJZIG = 'vereniging/teams-regio-wijzig.dtl'
-TEMPLATE_TEAMS_WIJZIG_AG = 'vereniging/wijzig-ag.dtl'
+TEMPLATE_TEAMS_WIJZIG_AG = 'vereniging/teams-wijzig-ag.dtl'
 TEMPLATE_TEAMS_KOPPELEN = 'vereniging/teams-koppelen.dtl'
 TEMPLATE_TEAMS_RK = 'vereniging/teams-rk.dtl'
+
+
+def bepaal_team_sterkte_en_klasse(team):
+    """ gebruik AG van gekoppelde schutters om team aanvangsgemiddelde te berekenen
+        en bepaal aan de hand daarvan de team wedstrijdklasse
+    """
+    ags = team.gekoppelde_schutters.values_list('ag_voor_team', flat=True)
+    ags = list(ags)
+
+    team.klasse = None
+
+    if len(ags) >= 3:
+        # bereken de team sterkte: de som van de 3 sterkste sporters
+        ags.sort(reverse=True)
+        ag = sum(ags[:3])
+
+        # bepaal de wedstrijdklasse
+        comp = team.deelcompetitie.competitie
+        for klasse in (CompetitieKlasse
+                       .objects
+                       .filter(competitie=comp,
+                               team__team_type=team.team_type)
+                       .order_by('min_ag', '-team__volgorde')):  # oplopend AG (=hogere klasse later)
+            if ag >= klasse.min_ag:
+                team.klasse = klasse
+        # for
+    else:
+        ag = AG_NUL
+
+    team.aanvangsgemiddelde = ag
+    team.save()
 
 
 class TeamsRegioView(UserPassesTestMixin, TemplateView):
@@ -318,7 +349,7 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
         return HttpResponseRedirect(url)
 
 
-class WijzigAanvangsgemiddeldeView(UserPassesTestMixin, TemplateView):
+class WijzigTeamAGView(UserPassesTestMixin, TemplateView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_TEAMS_WIJZIG_AG
@@ -360,7 +391,8 @@ class WijzigAanvangsgemiddeldeView(UserPassesTestMixin, TemplateView):
                          .select_related('schutterboog',
                                          'schutterboog__nhblid',
                                          'schutterboog__boogtype',
-                                         'bij_vereniging')
+                                         'bij_vereniging',
+                                         'deelcompetitie__competitie')
                          .get(pk=deelnemer_pk))
         except (ValueError, RegioCompetitieSchutterBoog.DoesNotExist):
             raise Resolver404()
@@ -370,15 +402,15 @@ class WijzigAanvangsgemiddeldeView(UserPassesTestMixin, TemplateView):
         # controleer dat deze deelnemer bekeken en gewijzigd mag worden
         self._mag_wijzigen_of_404(deelnemer)
 
-        deelnemer.ag_str = '%.3f' % deelnemer.ag_voor_team
-
         deelnemer.naam_str = deelnemer.schutterboog.nhblid.volledige_naam()
         deelnemer.boog_str = deelnemer.schutterboog.boogtype.beschrijving
+        deelnemer.ag_str = '%.3f' % deelnemer.ag_voor_team
 
         ag_hist = (ScoreHist
                    .objects
                    .filter(score__schutterboog=deelnemer.schutterboog,
-                           score__is_ag=True)
+                           score__afstand_meter=deelnemer.deelcompetitie.competitie.afstand,
+                           score__type=SCORE_TYPE_TEAM_AG)
                    .order_by('-when'))
         for obj in ag_hist:
             obj.mutatie_str = "%.3f --> %.3f" % (obj.oude_waarde / 1000, obj.nieuwe_waarde / 1000)
@@ -418,15 +450,23 @@ class WijzigAanvangsgemiddeldeView(UserPassesTestMixin, TemplateView):
             if nieuw_ag < 1.0 or nieuw_ag >= 10.0:
                 raise Resolver404()
 
-            aanvangsgemiddelde_opslaan(
+            score_teams_ag_opslaan(
                     deelnemer.schutterboog,
                     deelnemer.deelcompetitie.competitie.afstand,
                     nieuw_ag,
                     request.user,
-                    "Nieuw handmatig AG ingevoerd door beheerder")
+                    "Nieuw handmatig AG voor teams")
 
             deelnemer.ag_voor_team = nieuw_ag
             deelnemer.save()
+
+            try:
+                team = deelnemer.regiocompetitieteam_set.all()[0]
+            except IndexError:
+                # niet in een team
+                pass
+            else:
+                bepaal_team_sterkte_en_klasse(team)
 
         if self.rol_nu == Rollen.ROL_HWL:
             url = reverse('Vereniging:teams-regio',
@@ -568,31 +608,7 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
         team.gekoppelde_schutters.clear()
         team.gekoppelde_schutters.add(*pks)
 
-        ags = team.gekoppelde_schutters.values_list('ag_voor_team', flat=True)
-        ags = list(ags)
-
-        if len(ags) >= 3:
-            # bereken de team sterkte: de som van de 3 sterkste sporters
-            ags.sort(reverse=True)
-            ag = sum(ags[:3])
-
-            # bepaal de wedstrijdklasse
-            team.klasse = None
-            comp = team.deelcompetitie.competitie
-            for klasse in (CompetitieKlasse
-                           .objects
-                           .filter(competitie=comp,
-                                   team__team_type=team.team_type)
-                           .order_by('min_ag', '-team__volgorde')):        # oplopend AG (=hogere klasse later)
-                if ag >= klasse.min_ag:
-                    team.klasse = klasse
-            # for
-        else:
-            ag = AG_NUL
-            team.klasse = None
-
-        team.aanvangsgemiddelde = ag
-        team.save()
+        bepaal_team_sterkte_en_klasse(team)
 
         url = reverse('Vereniging:teams-regio', kwargs={'deelcomp_pk': team.deelcompetitie.pk})
         return HttpResponseRedirect(url)

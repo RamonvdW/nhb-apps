@@ -19,7 +19,7 @@ from Competitie.models import (Competitie, DeelCompetitie,
                                RegioCompetitieSchutterBoog,
                                LAAG_REGIO, INSCHRIJF_METHODE_1)
 from Records.models import IndivRecord
-from Score.models import Score, ScoreHist
+from Score.models import Score, ScoreHist, SCORE_TYPE_INDIV_AG, SCORE_TYPE_TEAM_AG
 from .leeftijdsklassen import get_sessionvars_leeftijdsklassen
 from .models import SchutterVoorkeuren, SchutterBoog
 import logging
@@ -254,7 +254,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         scores = (Score
                   .objects
                   .filter(schutterboog__in=pks,
-                          is_ag=True)
+                          type__in=(SCORE_TYPE_INDIV_AG, SCORE_TYPE_TEAM_AG))
                   .select_related('schutterboog')
                   .order_by('afstand_meter'))
 

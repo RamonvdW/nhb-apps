@@ -11,7 +11,7 @@ from Functie.models import Functie
 from Overig.e2ehelpers import E2EHelpers
 from Records.models import IndivRecord
 from Schutter.models import SchutterBoog
-from Score.models import aanvangsgemiddelde_opslaan
+from Score.models import score_indiv_ag_opslaan
 from .models import NhbRegio, NhbVereniging, NhbLid
 import datetime
 import io
@@ -446,7 +446,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         schutterboog = SchutterBoog(nhblid=lid,
                                     boogtype=boog_r)
         schutterboog.save()
-        aanvangsgemiddelde_opslaan(schutterboog, 18, 5.678, None, "")
+        score_indiv_ag_opslaan(schutterboog, 18, 5.678, None, "")
 
         # probeer 100024 te verwijderen
         f1 = io.StringIO()

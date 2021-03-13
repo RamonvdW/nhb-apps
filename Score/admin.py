@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -11,7 +11,7 @@ from .models import Score, ScoreHist
 class ScoreAdmin(admin.ModelAdmin):
     """ Admin configuratie voor Score klasse """
     list_filter = ('afstand_meter',
-                   'is_ag',
+                   'type',
                    'schutterboog__boogtype',
                    'schutterboog__nhblid__bij_vereniging')
 

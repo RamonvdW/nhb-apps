@@ -34,7 +34,7 @@ urlpatterns = [
          name='leden-ingeschreven'),
 
     path('leden-ingeschreven/wijzig-aanvangsgemiddelde/<deelnemer_pk>/',
-         view_teams.WijzigAanvangsgemiddeldeView.as_view(),
+         view_teams.WijzigTeamAGView.as_view(),
          name='wijzig-ag'),
 
     path('teams/regio/koppelen/<team_pk>/',

@@ -16,7 +16,7 @@ from Competitie.models import (DeelCompetitie, DeelcompetitieRonde,
                                INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3,
                                DAGDEEL, DAGDEEL_AFKORTINGEN)
 from Plein.menu import menu_dynamics
-from Score.models import Score, ScoreHist
+from Score.models import Score, ScoreHist, SCORE_TYPE_INDIV_AG
 from Wedstrijden.models import Wedstrijd
 from .models import SchutterVoorkeuren, SchutterBoog
 
@@ -96,7 +96,7 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
 
         # haal AG op, indien aanwezig
         scores = Score.objects.filter(schutterboog=schutterboog,
-                                      is_ag=True,
+                                      type=SCORE_TYPE_INDIV_AG,
                                       afstand_meter=deelcomp.competitie.afstand)
         ag = AG_NUL
         if len(scores):
@@ -270,7 +270,7 @@ class RegiocompetitieAanmeldenView(View):
 
         # haal AG op, indien aanwezig
         scores = Score.objects.filter(schutterboog=schutterboog,
-                                      is_ag=True,
+                                      type=SCORE_TYPE_INDIV_AG,
                                       afstand_meter=deelcomp.competitie.afstand)
         if len(scores):
             score = scores[0]

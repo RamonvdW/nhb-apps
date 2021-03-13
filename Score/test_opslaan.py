@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,9 +8,10 @@ from django.test import TestCase
 from BasisTypen.models import BoogType
 from Schutter.models import SchutterBoog
 from NhbStructuur.models import NhbLid
-from .models import Score, ScoreHist, aanvangsgemiddelde_opslaan
+from .models import Score, ScoreHist, score_indiv_ag_opslaan, SCORE_TYPE_INDIV_AG, SCORE_TYPE_TEAM_AG
 from Overig.e2ehelpers import E2EHelpers
 import datetime
+
 
 class TestScoreOpslaan(E2EHelpers, TestCase):
     """ unit tests voor de Score applicatie, functie Opslaan """
@@ -47,7 +48,7 @@ class TestScoreOpslaan(E2EHelpers, TestCase):
         notitie = "Dit is een notities"
 
         # de eerste keer wordt het Score object aangemaakt
-        res = aanvangsgemiddelde_opslaan(self.schutterboog, afstand, gemiddelde, account, notitie)
+        res = score_indiv_ag_opslaan(self.schutterboog, afstand, gemiddelde, account, notitie)
         self.assertEqual(res, True)
 
         self.assertEqual(Score.objects.count(), 1)
@@ -57,7 +58,10 @@ class TestScoreOpslaan(E2EHelpers, TestCase):
         self.assertEqual(score.schutterboog, self.schutterboog)
         self.assertTrue(str(score) != "")
 
-        score.is_ag = False
+        score.type = SCORE_TYPE_INDIV_AG
+        self.assertTrue(str(score) != "")
+
+        score.type = SCORE_TYPE_TEAM_AG
         self.assertTrue(str(score) != "")
 
         self.assertEqual(ScoreHist.objects.count(), 1)
@@ -69,7 +73,7 @@ class TestScoreOpslaan(E2EHelpers, TestCase):
         self.assertTrue(str(scorehist) != "")
 
         # dezelfde score nog een keer opslaan resulteert in een reject
-        res = aanvangsgemiddelde_opslaan(self.schutterboog, afstand, gemiddelde, account, notitie)
+        res = score_indiv_ag_opslaan(self.schutterboog, afstand, gemiddelde, account, notitie)
         self.assertEqual(res, False)
 
         # tweede keer wordt er alleen een ScoreHist object aangemaakt
@@ -77,7 +81,7 @@ class TestScoreOpslaan(E2EHelpers, TestCase):
         waarde2 = int(gemiddelde2 * 1000)
         notitie2 = "Dit is de tweede notitie"
 
-        res = aanvangsgemiddelde_opslaan(self.schutterboog, afstand, gemiddelde2, account, notitie2)
+        res = score_indiv_ag_opslaan(self.schutterboog, afstand, gemiddelde2, account, notitie2)
         self.assertEqual(res, True)
 
         self.assertEqual(Score.objects.count(), 1)

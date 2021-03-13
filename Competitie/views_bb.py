@@ -21,7 +21,7 @@ from Logboek.models import schrijf_in_logboek
 from NhbStructuur.models import NhbLid
 from Plein.menu import menu_dynamics
 from Schutter.models import SchutterBoog
-from Score.models import Score, ScoreHist, zoek_meest_recente_automatisch_vastgestelde_ag
+from Score.models import Score, ScoreHist, SCORE_TYPE_INDIV_AG, wanneer_ag_vastgesteld
 from django.utils.formats import localize
 from .models import (AG_NUL, AG_LAAGSTE_NIET_NUL,
                      Competitie, competitie_aanmaken, CompetitieKlasse)
@@ -230,8 +230,8 @@ class AGVaststellenView(UserPassesTestMixin, TemplateView):
             # for
 
             # verwijder alle bestaande aanvangsgemiddelden
-            Score.objects.filter(is_ag=True, afstand_meter=18).all().delete()
-            Score.objects.filter(is_ag=True, afstand_meter=25).all().delete()
+            Score.objects.filter(type=SCORE_TYPE_INDIV_AG, afstand_meter=18).all().delete()
+            Score.objects.filter(type=SCORE_TYPE_INDIV_AG, afstand_meter=25).all().delete()
             bulk_score = list()
 
             minimum_aantal_scores = {18: settings.COMPETITIE_18M_MINIMUM_SCORES_VOOR_AG,
@@ -288,7 +288,7 @@ class AGVaststellenView(UserPassesTestMixin, TemplateView):
                             waarde = int(obj.gemiddelde * 1000)
 
                             score = Score(schutterboog=schutterboog,
-                                          is_ag=True,
+                                          type=SCORE_TYPE_INDIV_AG,
                                           waarde=waarde,
                                           afstand_meter=afstand_meter)
                             bulk_score.append(score)
@@ -428,7 +428,7 @@ class KlassegrenzenVaststellenView(UserPassesTestMixin, TemplateView):
                                                 .select_related('schutterboog',
                                                                 'schutterboog__boogtype',
                                                                 'schutterboog__nhblid')
-                                                .filter(is_ag=True,
+                                                .filter(type=SCORE_TYPE_INDIV_AG,
                                                         afstand_meter=comp.afstand,
                                                         schutterboog__boogtype=boogtype))
         # for
@@ -538,7 +538,7 @@ class KlassegrenzenVaststellenView(UserPassesTestMixin, TemplateView):
                                                                 'schutterboog__nhblid',
                                                                 'schutterboog__nhblid__bij_vereniging')
                                                 .exclude(schutterboog__nhblid__bij_vereniging=None)
-                                                .filter(is_ag=True,
+                                                .filter(type=SCORE_TYPE_INDIV_AG,
                                                         afstand_meter=comp.afstand,
                                                         schutterboog__boogtype=boogtype))
         # for
@@ -638,7 +638,7 @@ class KlassegrenzenVaststellenView(UserPassesTestMixin, TemplateView):
             context['klassegrenzen_teams'] = self._bepaal_klassegrenzen_teams(comp)
             context['wedstrijdjaar'] = comp.begin_jaar + 1
 
-        datum = zoek_meest_recente_automatisch_vastgestelde_ag()
+        datum = wanneer_ag_vastgesteld()
         if datum:
             context['bb_ag_nieuwste_datum'] = localize(datum.date())
 

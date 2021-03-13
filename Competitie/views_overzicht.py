@@ -11,7 +11,7 @@ from django.utils import timezone
 from django.utils.formats import localize
 from django.templatetags.static import static
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving
-from Score.models import zoek_meest_recente_automatisch_vastgestelde_ag
+from Score.models import wanneer_ag_vastgesteld
 from Taken.taken import eval_open_taken
 from .menu import menu_dynamics_competitie
 from .models import LAAG_REGIO, LAAG_BK, Competitie, DeelCompetitie
@@ -377,7 +377,7 @@ class CompetitieKiesView(TemplateView):
 
             if 'bb_kan_ag_vaststellen' in context:
                 # zoek uit wanneer dit voor het laatste gedaan is
-                datum = zoek_meest_recente_automatisch_vastgestelde_ag()
+                datum = wanneer_ag_vastgesteld()
                 if datum:
                     context['bb_ag_nieuwste_datum'] = localize(datum.date())
 

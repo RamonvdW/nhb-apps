@@ -12,7 +12,7 @@ from Functie.models import maak_functie
 from Schutter.models import SchutterBoog
 from Score.models import Score, ScoreHist, SCORE_WAARDE_VERWIJDERD
 from Wedstrijden.models import Wedstrijd, WedstrijdUitslag
-from .models import aanvangsgemiddelde_opslaan
+from .models import score_indiv_ag_opslaan
 import datetime
 
 
@@ -128,9 +128,9 @@ class TestScoreGeschiedenis(E2EHelpers, TestCase):
         self.schutterboog_100001r = schutterboog
 
         # maak een AG aan
-        aanvangsgemiddelde_opslaan(schutterboog, 18, 9.123, None, 'test melding')
+        score_indiv_ag_opslaan(schutterboog, 18, 9.123, None, 'test melding')
 
-        aanvangsgemiddelde_opslaan(schutterboog, 25, 9.251, self.account_hwl, 'test melding')
+        score_indiv_ag_opslaan(schutterboog, 25, 9.251, self.account_hwl, 'test melding')
 
         self._maak_uitslag(schutterboog)
 
@@ -168,7 +168,7 @@ class TestScoreGeschiedenis(E2EHelpers, TestCase):
 
         self.assertContains(resp, self.nhblid1.volledige_naam())
         self.assertContains(resp, 'Recurve')
-        self.assertContains(resp, 'AG vastgesteld')
+        self.assertContains(resp, 'Aanvangsgemiddelde')
         self.assertContains(resp, 'test melding')
 
     def test_zoek_bad(self):

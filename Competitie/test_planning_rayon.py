@@ -1027,7 +1027,6 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         for waarde in scores:
             score = Score(
                         schutterboog=self.schutterboog,
-                        is_ag=False,
                         waarde=waarde,
                         afstand_meter=18)
             score.save()

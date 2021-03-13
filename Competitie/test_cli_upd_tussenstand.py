@@ -13,7 +13,7 @@ from Competitie.models import (Competitie, DeelCompetitie, DeelcompetitieRonde,
 from Competitie.test_fase import zet_competitie_fase
 from NhbStructuur.models import NhbRegio, NhbLid, NhbVereniging
 from Schutter.models import SchutterBoog
-from Score.models import Score, ScoreHist, SCORE_WAARDE_VERWIJDERD, aanvangsgemiddelde_opslaan
+from Score.models import Score, ScoreHist, SCORE_WAARDE_VERWIJDERD, score_indiv_ag_opslaan
 from Wedstrijden.models import Wedstrijd
 from Overig.e2ehelpers import E2EHelpers
 from .models import CompetitieKlasse
@@ -38,7 +38,7 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
         comp_18 = Competitie.objects.get(afstand='18')
         comp_25 = Competitie.objects.get(afstand='25')
 
-        aanvangsgemiddelde_opslaan(self.schutterboog_100005, 18, 9.500, None, "Test")
+        score_indiv_ag_opslaan(self.schutterboog_100005, 18, 9.500, None, "Test")
 
         # klassegrenzen vaststellen
         with self.assert_max_queries(24):
@@ -302,8 +302,7 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
 
     @staticmethod
     def _score_opslaan(uitslag, schutterboog, waarde):
-        score = Score(is_ag=False,
-                      afstand_meter=18,
+        score = Score(afstand_meter=18,
                       schutterboog=schutterboog,
                       waarde=waarde)
         score.save()
