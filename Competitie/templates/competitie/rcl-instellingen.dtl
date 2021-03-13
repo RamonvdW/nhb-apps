@@ -41,8 +41,9 @@
         }
 
         function teams_gewijzigd(keuze) {
-            /* enable de andere radio buttons */
-            const els = document.querySelectorAll("input[name=team_alloc], input[name=team_punten]")
+            /* keuze teamcompetitie in de regio is aangepast */
+            /* enable/disable de andere opties */
+            const els = document.querySelectorAll("input[name=team_alloc], input[name=team_punten], input[id=datum1]")
             Array.prototype.forEach.call(els, function(el) {
                 el.disabled = keuze
             })
