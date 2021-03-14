@@ -32,15 +32,12 @@ class LijstVerenigingenView(UserPassesTestMixin, TemplateView):
     """
 
     template_name = TEMPLATE_LIJST_VERENIGINGEN
+    raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
         return rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_SEC)
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
 
     @staticmethod
     def _get_verenigingen(rol_nu, functie_nu):
@@ -190,15 +187,12 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_ACCOMMODATIE_DETAILS
+    raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
         return rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_WL, Rollen.ROL_SEC)
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
 
     @staticmethod
     def _get_locaties_nhbver_or_404(**kwargs):
@@ -270,7 +264,7 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
         context['sec_email'] = functie_sec.bevestigde_email
 
         if len(context['sec_names']) == 0 and nhbver.secretaris_lid:
-            context['sec_names'] = [nhbver.secretaris_lid.volledige_naam(),]
+            context['sec_names'] = [nhbver.secretaris_lid.volledige_naam()]
 
         context['hwl_names'] = self.get_all_names(functie_hwl)
         context['hwl_email'] = functie_hwl.bevestigde_email
@@ -466,6 +460,7 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_WIJZIG_CLUSTERS
+    raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -475,10 +470,6 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
         return rol_nu == Rollen.ROL_RCL
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """

@@ -141,7 +141,7 @@ class TestScoreGeschiedenis(E2EHelpers, TestCase):
         self.client.logout()
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_geschiedenis)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
     def test_bb(self):
         # login als BB

@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import reverse
-from django.http import HttpResponseRedirect, HttpResponse, Http404
+from django.http import HttpResponse, Http404
 from django.views.generic import ListView, TemplateView
 from django.db.models import Q
 from django.contrib.auth.mixins import UserPassesTestMixin
@@ -276,15 +276,12 @@ class InterlandView(UserPassesTestMixin, TemplateView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_HISTCOMP_INTERLAND
+    raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
         return rol_nu == Rollen.ROL_BB
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
 
     def maak_data(self, context):
 

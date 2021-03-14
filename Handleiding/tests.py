@@ -23,13 +23,13 @@ class TestHandleiding(E2EHelpers, TestCase):
     def test_anon(self):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
     def test_gebruiker(self):
         self.e2e_login(self.account)
         with self.assert_max_queries(20):
             resp = self.client.get(self.url)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
     def test_beheerder(self):
         self.account.is_BB = True

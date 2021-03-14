@@ -512,14 +512,29 @@ class E2EHelpers(object):
         # ensure the file is not empty
         self.assertTrue(len(str(response.content)) > 30)
 
-    def assert_template_used(self, resp, template_names):
-        """ Controleer dat de gevraagde templates gebruikt zijn """
+    def _get_templates_not_used(self, resp, template_names):
+        """ returns True when any of the templates have not been used """
         assert isinstance(self, TestCase)
         lst = list(template_names)
         for templ in resp.templates:
             if templ.name in lst:
                 lst.remove(templ.name)
         # for
+        return lst
+
+    def _is_fout_pagina(self, resp):
+        if resp.status_code == 200:
+            lst = self._get_templates_not_used(resp, ('plein/fout_403.dtl', 'plein/site_layout_minimaal.dtl'))
+            if len(lst) == 0:
+                return True
+            lst = self._get_templates_not_used(resp, ('plein/fout_404.dtl', 'plein/site_layout_minimaal.dtl'))
+            if len(lst) == 0:
+                return True
+        return False
+
+    def assert_template_used(self, resp, template_names):
+        """ Controleer dat de gevraagde templates gebruikt zijn """
+        lst = self._get_templates_not_used(resp, template_names)
         if len(lst):    # pragma: no cover
             msg = "Following templates should have been used: %s\n" % repr(lst)
             msg += "Actually used: %s" % repr([t.name for t in resp.templates])
@@ -550,25 +565,30 @@ class E2EHelpers(object):
 
         # toegestane status_codes:
         #   302 (redirect)
+        #   403 (not allowed)
         #   404 (not found)
         #   405 (not allowed)
-        accepted_status_codes = (302, 404, 405)
+        accepted_status_codes = (302, 403, 404, 405)
 
         if post:
             resp = self.client.post(url)
-            self.assertTrue(resp.status_code in accepted_status_codes)
+            if resp.status_code not in accepted_status_codes and not self._is_fout_pagina(resp):
+                self.fail(msg='Onverwachte status code %s bij POST command' % resp.status_code)
 
         if delete:                            # pragma: no cover
             resp = self.client.delete(url)
-            self.assertTrue(resp.status_code in accepted_status_codes)
+            if resp.status_code not in accepted_status_codes and not self._is_fout_pagina(resp):
+                self.fail(msg='Onverwachte status code %s bij DELETE command' % resp.status_code)
 
         if put:                               # pragma: no cover
             resp = self.client.put(url)
-            self.assertTrue(resp.status_code in accepted_status_codes)
+            if resp.status_code not in accepted_status_codes and not self._is_fout_pagina(resp):
+                self.fail(msg='Onverwachte status code %s bij PUT command' % resp.status_code)
 
         if patch:                             # pragma: no cover
             resp = self.client.patch(url)
-            self.assertTrue(resp.status_code in accepted_status_codes)
+            if resp.status_code not in accepted_status_codes and not self._is_fout_pagina(resp):
+                self.fail(msg='Onverwachte status code %s bij PATCH command' % resp.status_code)
 
     def assert_is_redirect(self, resp, expected_url):
         assert isinstance(self, TestCase)

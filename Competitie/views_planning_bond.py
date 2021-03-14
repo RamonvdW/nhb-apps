@@ -33,15 +33,12 @@ class BondPlanningView(UserPassesTestMixin, TemplateView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_PLANNING_BOND
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
         return rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO)
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -77,15 +74,12 @@ class DoorzettenNaarRKView(UserPassesTestMixin, TemplateView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_DOORZETTEN_NAAR_RK
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
         return rol_nu == Rollen.ROL_BKO
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
 
     @staticmethod
     def _get_regio_status(competitie):
@@ -330,15 +324,12 @@ class DoorzettenNaarBKView(UserPassesTestMixin, TemplateView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_DOORZETTEN_NAAR_BK
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
         return rol_nu == Rollen.ROL_BKO
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -394,6 +385,8 @@ class VerwijderWedstrijdView(UserPassesTestMixin, View):
 
     """ Deze view laat een BK wedstrijd verwijderen """
 
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.rol_nu, self.functie_nu = None, None
@@ -402,10 +395,6 @@ class VerwijderWedstrijdView(UserPassesTestMixin, View):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
         return self.rol_nu == Rollen.ROL_BKO
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
 
     def post(self, request, *args, **kwargs):
         """ Deze functie wordt aangeroepen als de knop 'Verwijder' gebruikt wordt
@@ -448,15 +437,12 @@ class VerwijderWedstrijdView(UserPassesTestMixin, View):
 #
 #     # class variables shared by all instances
 #     template_name = TEMPLATE_COMPETITIE_AFSLUITEN
+#     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 #
 #     def test_func(self):
 #         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
 #         rol_nu = rol_get_huidige(self.request)
 #         return rol_nu == Rollen.ROL_BKO
-#
-#     def handle_no_permission(self):
-#         """ gebruiker heeft geen toegang --> redirect naar het plein """
-#         return HttpResponseRedirect(reverse('Plein:plein'))
 #
 #     def get_context_data(self, **kwargs):
 #         """ called by the template system to get the context data for the template """

@@ -26,6 +26,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_OVERZICHT
+    raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -33,10 +34,6 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
         return rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB,
                           Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL,
                           Rollen.ROL_HWL)
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -76,6 +73,7 @@ class DetailsView(UserPassesTestMixin, TemplateView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_DETAILS
+    raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -83,10 +81,6 @@ class DetailsView(UserPassesTestMixin, TemplateView):
         return rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB,
                           Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL,
                           Rollen.ROL_HWL)
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """

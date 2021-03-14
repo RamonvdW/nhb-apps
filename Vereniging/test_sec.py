@@ -263,7 +263,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
             url = self.url_schutter_voorkeuren % nhblid.pk
             with self.assert_max_queries(20):
                 resp = self.client.get(url)
-            self.assert_is_redirect(resp, '/plein/')
+            self.assert403(resp)
         # for
         self.assertEqual(SchutterBoog.objects.count(), 0)
 
@@ -278,7 +278,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert_is_redirect(resp, '/plein/')          # SEC mag dit niet
+        self.assert403(resp)          # SEC mag dit niet
 
         # wissel door naar HWL
         self.e2e_wissel_naar_functie(self.functie_hwl)
@@ -309,7 +309,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert_is_redirect(resp, '/plein/')          # SEC mag dit niet
+        self.assert403(resp)          # SEC mag dit niet
 
         # wissel door naar HWL
         self.e2e_wissel_naar_functie(self.functie_hwl)
@@ -338,7 +338,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         # SEC mag de lijst met ingeschreven schutters niet ophalen
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert_is_redirect(resp, '/plein/')          # SEC mag dit niet
+        self.assert403(resp)          # SEC mag dit niet
 
     def test_wedstrijdlocatie(self):
         # maak een locatie en koppel aan de vereniging

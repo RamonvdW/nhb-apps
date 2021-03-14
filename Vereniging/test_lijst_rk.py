@@ -251,7 +251,7 @@ class TestVerenigingLijstRK(E2EHelpers, TestCase):
         url = self.url_lijst_rk % 999999
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
         self.e2e_login_and_pass_otp(self.account_bb)
         self.e2e_wissel_naar_functie(self.functie_hwl)

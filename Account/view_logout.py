@@ -29,15 +29,12 @@ class LogoutView(UserPassesTestMixin, TemplateView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_UITLOGGEN
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user is allowed to use this view """
         # kijk of de gebruiker ingelogd is
         return self.request.user.is_authenticated
-
-    def handle_no_permission(self):
-        """ gebruik van deze view is niet nodig --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """

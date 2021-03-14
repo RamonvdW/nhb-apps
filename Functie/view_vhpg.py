@@ -114,6 +114,7 @@ class VhpgOverzichtView(UserPassesTestMixin, ListView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_VHPG_OVERZICHT
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -121,10 +122,6 @@ class VhpgOverzichtView(UserPassesTestMixin, ListView):
             rol_nu = rol_get_huidige(self.request)
             return rol_nu == Rollen.ROL_BB
         return False
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
 
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """

@@ -203,31 +203,31 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
     def test_overzicht_anon(self):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_planning_bond % self.deelcomp_bond_18.pk)
-        self.assert_is_redirect(resp, '/plein/')      # not allowed
+        self.assert403(resp)      # not allowed
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_planning_rayon % self.deelcomp_rayon2_18.pk)
-        self.assert_is_redirect(resp, '/plein/')      # not allowed
+        self.assert403(resp)      # not allowed
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_planning_regio % self.deelcomp_regio101_18.pk)
-        self.assert_is_redirect(resp, '/plein/')      # not allowed
+        self.assert403(resp)      # not allowed
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_planning_regio_cluster % (self.deelcomp_regio101_18.pk, self.cluster_101a_18.pk))
-        self.assert_is_redirect(resp, '/plein/')      # not allowed
+        self.assert403(resp)      # not allowed
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_planning_regio_ronde % 0)
-        self.assert_is_redirect(resp, '/plein/')      # not allowed
+        self.assert403(resp)      # not allowed
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wijzig_wedstrijd % 0)
-        self.assert_is_redirect(resp, '/plein/')      # not allowed
+        self.assert403(resp)      # not allowed
 
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_verwijder_wedstrijd % 0)
-        self.assert_is_redirect(resp, '/plein/')      # not allowed
+        self.assert403(resp)      # not allowed
 
     def test_overzicht_it(self):
         self.e2e_login_and_pass_otp(self.account_admin)
@@ -235,24 +235,24 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_planning_bond % self.deelcomp_bond_18.pk)
-        self.assert_is_redirect(resp, '/plein/')      # not allowed
+        self.assert403(resp)      # not allowed
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_planning_rayon % self.deelcomp_rayon2_18.pk)
-        self.assert_is_redirect(resp, '/plein/')      # not allowed
+        self.assert403(resp)      # not allowed
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_planning_regio % self.deelcomp_regio101_18.pk)
-        self.assert_is_redirect(resp, '/plein/')      # not allowed
-        self.assert_is_redirect(resp, '/plein/')      # not allowed
+        self.assert403(resp)      # not allowed
+        self.assert403(resp)      # not allowed
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_planning_regio_cluster % (self.deelcomp_regio101_18.pk, self.cluster_101a_18.pk))
-        self.assert_is_redirect(resp, '/plein/')      # not allowed
+        self.assert403(resp)      # not allowed
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_planning_regio_ronde % 0)
-        self.assert_is_redirect(resp, '/plein/')      # not allowed
+        self.assert403(resp)      # not allowed
 
     def test_overzicht_bb(self):
         self.e2e_login_and_pass_otp(self.account_bb)
@@ -339,7 +339,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_planning_bond % self.deelcomp_bond_18.pk)
-        self.assert_is_redirect(resp, '/plein/')      # not allowed
+        self.assert403(resp)      # not allowed
 
         with self.assert_max_queries(23):
             resp = self.client.get(self.url_planning_rayon % self.deelcomp_rayon2_18.pk)
@@ -380,11 +380,11 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_planning_bond % self.deelcomp_bond_18.pk)
-        self.assert_is_redirect(resp, '/plein/')      # not allowed
+        self.assert403(resp)      # not allowed
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_planning_rayon % self.deelcomp_rayon2_18.pk)
-        self.assert_is_redirect(resp, '/plein/')      # not allowed
+        self.assert403(resp)      # not allowed
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_planning_regio % self.deelcomp_regio101_18.pk)
@@ -443,11 +443,11 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_planning_bond % self.deelcomp_bond_18.pk)
-        self.assert_is_redirect(resp, '/plein/')      # not allowed
+        self.assert403(resp)      # not allowed
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_planning_rayon % self.deelcomp_rayon2_18.pk)
-        self.assert_is_redirect(resp, '/plein/')      # not allowed
+        self.assert403(resp)      # not allowed
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_planning_regio % self.deelcomp_regio101_18.pk)
@@ -867,7 +867,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         self.client.logout()
         url = self.url_planning_regio % self.deelcomp_regio101_25.pk
         resp = self.client.get(url)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
         # zet deze deelcompetitie op inschrijfmethode 1
         self.deelcomp_regio101_25.inschrijf_methode = INSCHRIJF_METHODE_1
@@ -898,7 +898,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
 
         self.e2e_wissel_naar_functie(self.functie_wl)
         resp = self.client.get(url_ronde)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
     def test_maak_10_rondes(self):
         # er moeten 10 rondes aangemaakt worden
@@ -1110,7 +1110,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_hwl)
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_wijzig_wedstrijd % wedstrijd_pk)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
         # probeer te wijzigen als RKO
         self.e2e_login_and_pass_otp(self.account_rko2_18)
@@ -1118,7 +1118,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wijzig_wedstrijd % wedstrijd_pk)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
         # probeer te wijzigen als BKO
         self.e2e_login_and_pass_otp(self.account_bb)
@@ -1126,7 +1126,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wijzig_wedstrijd % wedstrijd_pk)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
     def test_wijzig_wedstrijd_25(self):
         self.e2e_login_and_pass_otp(self.account_rcl101_25)
@@ -1298,7 +1298,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
 
         with self.assert_max_queries(20):
             resp = self.client.post(url)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
         self.e2e_login_and_pass_otp(self.account_rcl101_18)
         self.e2e_wissel_naar_functie(self.functie_rcl101_18)
@@ -1713,14 +1713,14 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         url = self.url_afsluiten_regio % 999999
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
         # verkeerde rol
         self.e2e_login_and_pass_otp(self.account_bb)
         self.e2e_wisselnaarrol_bb()
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
         self.e2e_wissel_naar_functie(self.functie_rcl101_18)
 
@@ -1876,7 +1876,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         url = self.url_regio_instellingen = '/bondscompetities/%s/instellingen/regio-%s/' % (self.comp_18.pk, 112)
         self.client.logout()
         resp = self.client.get(url)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
     def test_regio_teams(self):
         # RCL ziet teams
@@ -1935,7 +1935,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
 
         self.client.logout()
         resp = self.client.get(url)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
         # 25m
 

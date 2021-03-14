@@ -232,7 +232,7 @@ class TestVerenigingWL(E2EHelpers, TestCase):
         self.e2e_logout()
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_ledenlijst)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
         # login als WL
         self.e2e_login_and_pass_otp(self.account_wl)
@@ -271,7 +271,7 @@ class TestVerenigingWL(E2EHelpers, TestCase):
             url = self.url_schutter_voorkeuren % nhblid.pk
             with self.assert_max_queries(20):
                 resp = self.client.get(url)
-            self.assert_is_redirect(resp, '/plein/')   # naar Plein, want mag niet
+            self.assert403(resp)   # naar Plein, want mag niet
         # for
         self.assertEqual(SchutterBoog.objects.count(), 0)
 
@@ -285,7 +285,7 @@ class TestVerenigingWL(E2EHelpers, TestCase):
 
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert_is_redirect(resp, '/plein/')       # WL mag dit niet
+        self.assert403(resp)       # WL mag dit niet
 
     def test_ingeschreven(self):
         # login als WL

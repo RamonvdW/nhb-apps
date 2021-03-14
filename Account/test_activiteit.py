@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -24,14 +24,14 @@ class TestAccountActiviteit(E2EHelpers, TestCase):
         self.e2e_logout()
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_activiteit)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
     def test_activiteit_normaal(self):
         # inlog maar geen rechten
         self.e2e_login(self.account_normaal)
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_activiteit)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
     def test_activiteit_bb(self):
         # inlog met rechten

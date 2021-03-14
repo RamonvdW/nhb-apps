@@ -153,7 +153,7 @@ class TestOverigFeedback(E2EHelpers, TestCase):
         self.e2e_logout()
         with self.assert_max_queries(20):
             resp = self.client.get('/overig/feedback/inzicht/')
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
     def test_feedback_inzicht_user_forbidden(self):
         # do een get van het logboek met een gebruiker die daar geen rechten toe heeft
@@ -161,7 +161,7 @@ class TestOverigFeedback(E2EHelpers, TestCase):
         self.e2e_login(self.account_normaal)
         with self.assert_max_queries(20):
             resp = self.client.get('/overig/feedback/inzicht/')
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
     def test_feedback_inzicht_admin(self):
         # do een get van alle feedback als IT beheerder

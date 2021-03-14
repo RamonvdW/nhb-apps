@@ -60,11 +60,11 @@ class TestTakenViews(E2EHelpers, TestCase):
         self.e2e_logout()
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_overzicht)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_details % 0)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
     def test_allowed(self):
         self.e2e_login_and_pass_otp(self.account_admin)

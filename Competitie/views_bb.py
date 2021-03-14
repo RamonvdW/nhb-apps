@@ -50,15 +50,12 @@ class InstellingenVolgendeCompetitieView(UserPassesTestMixin, TemplateView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_INSTELLINGEN
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
         return rol_nu == Rollen.ROL_BB
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
 
     @staticmethod
     def _get_queryset_indivklassen():
@@ -109,15 +106,12 @@ class CompetitieAanmakenView(UserPassesTestMixin, TemplateView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_AANMAKEN
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
         return rol_nu == Rollen.ROL_BB
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
 
     @staticmethod
     def post(request, *args, **kwargs):
@@ -156,6 +150,7 @@ class AGVaststellenView(UserPassesTestMixin, TemplateView):
     """
 
     template_name = TEMPLATE_COMPETITIE_AG_VASTSTELLEN
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -170,10 +165,6 @@ class AGVaststellenView(UserPassesTestMixin, TemplateView):
                 kan_ag_vaststellen = True
         # for
         return kan_ag_vaststellen
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
 
     def get(self, request, *args, **kwargs):
         """ deze functie wordt aangeroepen als een GET request ontvangen is
@@ -332,15 +323,12 @@ class KlassegrenzenVaststellenView(UserPassesTestMixin, TemplateView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_KLASSEGRENZEN_VASTSTELLEN
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
         return rol_nu == Rollen.ROL_BB
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
 
     @staticmethod
     def _get_targets_indiv():
@@ -697,15 +685,12 @@ class WijzigDatumsView(UserPassesTestMixin, TemplateView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_WIJZIG_DATUMS
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
         return rol_nu == Rollen.ROL_BB
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """

@@ -86,7 +86,9 @@ class LoginAsZoekView(UserPassesTestMixin, ListView):
         zodat de website 'door de ogen van' deze gebruiker bekeken kan worden
     """
 
+    # class variables shared by all instances
     template_name = TEMPLATE_LOGIN_AS_ZOEK
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -95,10 +97,6 @@ class LoginAsZoekView(UserPassesTestMixin, ListView):
         if account.is_authenticated:
             return account.is_staff
         return False
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang """
-        raise PermissionDenied()
 
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """

@@ -217,12 +217,12 @@ class TestCompetitieScores(E2EHelpers, TestCase):
         self.client.logout()
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_uitslag_invoeren % self.wedstrijd18_pk)
-        self.assert_is_redirect(resp, '/plein/')      # not allowed
+        self.assert403(resp)      # not allowed
 
         # scores
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_scores_regio % self.deelcomp_regio101_18.pk)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
         # deelnemers
         with self.assert_max_queries(20):

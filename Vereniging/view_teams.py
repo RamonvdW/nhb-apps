@@ -64,6 +64,7 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_TEAMS_REGIO
+    raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -73,10 +74,6 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
         return self.functie_nu and self.rol_nu == Rollen.ROL_HWL
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
 
     def _get_deelcomp(self, deelcomp_pk) -> DeelCompetitie:
 
@@ -181,6 +178,7 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_TEAMS_REGIO_WIJZIG
+    raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -190,10 +188,6 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
         return self.functie_nu and self.rol_nu == Rollen.ROL_HWL
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
 
     def _get_deelcomp(self, deelcomp_pk) -> DeelCompetitie:
 
@@ -359,6 +353,7 @@ class WijzigTeamAGView(UserPassesTestMixin, TemplateView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_TEAMS_WIJZIG_AG
+    raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -369,10 +364,6 @@ class WijzigTeamAGView(UserPassesTestMixin, TemplateView):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
         return self.rol_nu in (Rollen.ROL_RCL, Rollen.ROL_HWL)
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
 
     def _mag_wijzigen_of_404(self, deelnemer):
         ver = deelnemer.bij_vereniging
@@ -493,6 +484,7 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
     """ Via deze view kan de HWL leden van zijn vereniging koppelen aan een team """
 
     template_name = TEMPLATE_TEAMS_KOPPELEN
+    raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -502,10 +494,6 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
         return self.rol_nu == Rollen.ROL_HWL
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -631,6 +619,7 @@ class TeamsRkView(UserPassesTestMixin, TemplateView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_TEAMS_RK
+    raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -640,10 +629,6 @@ class TeamsRkView(UserPassesTestMixin, TemplateView):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
         return self.rol_nu == Rollen.ROL_HWL
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """

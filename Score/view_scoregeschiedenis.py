@@ -8,7 +8,6 @@ from django.urls import reverse
 from django.shortcuts import render
 from django.views.generic import View
 from django.contrib.auth.mixins import UserPassesTestMixin
-from django.http import HttpResponseRedirect
 from Functie.rol import Rollen, rol_get_huidige
 from Schutter.models import SchutterBoog
 from Score.models import ScoreHist, SCORE_WAARDE_VERWIJDERD, SCORE_TYPE_INDIV_AG, SCORE_TYPE_TEAM_AG
@@ -25,14 +24,11 @@ class ScoreGeschiedenisView(UserPassesTestMixin, View):
 
     # class variables shared by all instances
     template = TEMPLATE_SCORE_GESCHIEDENIS
+    raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         return rol_get_huidige(self.request) in (Rollen.ROL_IT, Rollen.ROL_BB)
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
 
     def get(self, request, *args, **kwargs):
         """ called by the template system to get the context data for the template """

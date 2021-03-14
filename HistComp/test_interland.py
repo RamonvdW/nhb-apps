@@ -203,7 +203,7 @@ class TestHistCompInterland(E2EHelpers, TestCase):
         # anon
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_interland)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
         # log in als BB
         self.e2e_login_and_pass_otp(self.account_bb)
@@ -221,7 +221,7 @@ class TestHistCompInterland(E2EHelpers, TestCase):
         # anon
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
         # log in als BB
         self.e2e_login_and_pass_otp(self.account_bb)

@@ -236,15 +236,15 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_aangemeld_alles % comp.pk)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_aangemeld_rayon % (comp.pk, self.rayon_2.pk))
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_aangemeld_regio % (comp.pk, self.regio_101.pk))
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
     def test_overzicht_it(self):
         self.e2e_login_and_pass_otp(self.account_admin)
@@ -473,7 +473,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         url = self.url_wijzigdatums % comp.pk
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
     def test_wijzig_datums_bb(self):
         comp = Competitie.objects.all()[0]
@@ -643,7 +643,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         url = self.url_behoefte % (999999, 101)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
     def test_bad_rcl(self):
         comp = Competitie.objects.get(afstand='25')

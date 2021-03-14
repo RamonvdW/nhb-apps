@@ -178,7 +178,7 @@ class TestSchutterProfiel(E2EHelpers, TestCase):
         # zonder login --> terug naar het plein
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_profiel)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
     def test_compleet(self):
         url_kies = '/bondscompetities/'
@@ -392,7 +392,7 @@ class TestSchutterProfiel(E2EHelpers, TestCase):
         # zonder login --> terug naar het plein
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_profiel)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
         # log in as schutter
         self.e2e_login(self.account_normaal)

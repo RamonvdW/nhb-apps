@@ -87,7 +87,7 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
         url = self.url_wijzig_email % self.functie_rko1.pk
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
     def test_bb(self):
         # log in en wissel naar BB rol
@@ -244,7 +244,7 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
         url = '/functie/wijzig-email/%s/' % self.functie_wl.pk
         with self.assert_max_queries(1):
             resp = self.client.get(url)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
     def test_multi_change(self):
         # voer meerdere malen een e-mailadres is

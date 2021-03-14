@@ -39,6 +39,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_LEDEN_AANMELDEN
+    raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
 
     def __init__(self, **kwargs):
         super().__init__(*kwargs)
@@ -49,10 +50,6 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
         return self.functie_nu and self.functie_nu.rol == 'HWL'
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
 
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
@@ -462,6 +459,7 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_LEDEN_INGESCHREVEN
+    raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -472,10 +470,6 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
         return self.functie_nu and self.functie_nu.rol in ('HWL', 'WL')
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
 
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """

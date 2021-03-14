@@ -32,15 +32,12 @@ class ScoresRegioView(UserPassesTestMixin, TemplateView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_SCORES_REGIO
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
         return rol_nu == Rollen.ROL_RCL
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -176,16 +173,13 @@ class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_SCORES_INVOEREN
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
     is_controle = False
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
         return rol_nu in (Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_WL)
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -269,14 +263,12 @@ class WedstrijdUitslagControlerenView(WedstrijdUitslagInvoerenView):
 
 class DynamicDeelnemersOphalenView(UserPassesTestMixin, View):
 
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
         return rol_nu in (Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_WL)
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang """
-        raise PermissionDenied()
 
     @staticmethod
     def post(request, *args, **kwargs):
@@ -328,14 +320,12 @@ class DynamicDeelnemersOphalenView(UserPassesTestMixin, View):
 
 class DynamicZoekOpNhbnrView(UserPassesTestMixin, View):
 
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
         return rol_nu in (Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_WL)
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang """
-        raise PermissionDenied()
 
     @staticmethod
     def post(request, *args, **kwargs):
@@ -407,14 +397,12 @@ class DynamicZoekOpNhbnrView(UserPassesTestMixin, View):
 
 class DynamicScoresOpslaanView(UserPassesTestMixin, View):
 
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
         return rol_nu in (Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_WL)
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang """
-        raise PermissionDenied()
 
     @staticmethod
     def laad_wedstrijd_of_404(data):

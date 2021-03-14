@@ -399,7 +399,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         url = self.url_verwijder_rk_wedstrijd % 999999
         with self.assert_max_queries(20):
             resp = self.client.post(url)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
         # inloggen
         self.e2e_login_and_pass_otp(self.account_rko1_18)
@@ -490,7 +490,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         url = self.url_planning_rayon % self.deelcomp_rayon2_18.pk
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
         # probeer als BKO (RCL kom niet door de user-passes-test-mixin)
         self.e2e_login_and_pass_otp(self.account_bko_18)
@@ -511,7 +511,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         url = self.url_wijzig_rk_wedstrijd % 999999
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
         # nogmaals, als RKO
         self.e2e_login_and_pass_otp(self.account_rko1_18)
@@ -719,7 +719,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         url = self.url_lijst_rk % self.deelcomp_rayon1_18.pk
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
         # RKO
         self.e2e_login_and_pass_otp(self.account_rko1_18)
@@ -757,7 +757,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         url = self.url_wijzig_status % 999999
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
         # RKO
         self.e2e_login_and_pass_otp(self.account_rko1_18)
@@ -885,7 +885,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         url = self.url_wijzig_limiet % 999999
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
         # RKO
         self.e2e_login_and_pass_otp(self.account_rko1_18)

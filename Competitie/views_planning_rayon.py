@@ -43,6 +43,7 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_PLANNING_RAYON
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -52,10 +53,6 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
         return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO)
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -223,6 +220,7 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_WIJZIG_WEDSTRIJD_RAYON
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -232,10 +230,6 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
         return self.rol_nu == Rollen.ROL_RKO
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
 
     @staticmethod
     def _get_wedstrijdklassen(deelcomp_rk, wedstrijd):
@@ -468,7 +462,6 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
                     gekozen_klassen.append(pk)
         # for
 
-        niet_meer_gekozen = list()
         for obj in wedstrijd.indiv_klassen.all():
             if obj.pk in gekozen_klassen:
                 # was al gekozen
@@ -494,6 +487,7 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_LIJST_RK
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -503,10 +497,6 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
         return self.rol_nu == Rollen.ROL_RKO
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
 
     @staticmethod
     def _get_regio_status(competitie):
@@ -599,6 +589,7 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
         aantal_attentie = 0
 
         klasse = -1
+        limiet = 24
         for deelnemer in deelnemers:
             deelnemer.break_klasse = (klasse != deelnemer.klasse.indiv.volgorde)
             if deelnemer.break_klasse:
@@ -622,7 +613,7 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
             if deelnemer.rank > limiet:
                 deelnemer.is_reserve = True
 
-            # tel de status van de deelnemers en eerste 8 reserven
+            # tel de status van de deelnemers en eerste 8 reserveschutters
             if deelnemer.rank <= limiet+8:
                 if deelnemer.deelname == DEELNAME_NEE:
                     aantal_afgemeld += 1
@@ -724,7 +715,7 @@ class LijstRkSelectieAlsBestandView(LijstRkSelectieView):
                 writer.writerow([deelnemer.rank,
                                  lid.nhb_nr,
                                  lid.volledige_naam(),
-                                 str(ver),                  # [nnnn] Naam
+                                 ver_str,                  # [nnnn] Naam
                                  label,
                                  deelnemer.klasse.indiv.beschrijving,
                                  deelnemer.gemiddelde])
@@ -739,6 +730,7 @@ class WijzigStatusRkSchutterView(UserPassesTestMixin, TemplateView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_WIJZIG_STATUS_RK_SCHUTTER
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -748,10 +740,6 @@ class WijzigStatusRkSchutterView(UserPassesTestMixin, TemplateView):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
         return self.rol_nu in (Rollen.ROL_RKO, Rollen.ROL_HWL)
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -871,6 +859,7 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_WIJZIG_LIMIETEN_RK
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -880,10 +869,6 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
         return self.rol_nu == Rollen.ROL_RKO
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -1045,6 +1030,8 @@ class VerwijderWedstrijdView(UserPassesTestMixin, View):
 
     """ Deze view laat een RK wedstrijd verwijderen """
 
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.rol_nu, self.functie_nu = None, None
@@ -1053,10 +1040,6 @@ class VerwijderWedstrijdView(UserPassesTestMixin, View):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
         return self.rol_nu == Rollen.ROL_RKO
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
 
     def post(self, request, *args, **kwargs):
         """ Deze functie wordt aangeroepen als de knop 'Verwijder' gebruikt wordt

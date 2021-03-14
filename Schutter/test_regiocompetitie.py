@@ -238,7 +238,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         url = self.url_bevestig_aanmelden % (0, 0)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
         # inschrijven als inactief lid
         self.client.logout()

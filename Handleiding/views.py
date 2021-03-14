@@ -5,7 +5,6 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
-from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from django.views.generic import View
@@ -33,15 +32,11 @@ class HandleidingView(UserPassesTestMixin, View):
     """ Deze view biedt alle handleiding pagina's aan """
 
     # class variables shared by all instances
-    # (none)
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         return rol_mag_wisselen(self.request)
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
 
     def get(self, request, *args, **kwargs):
         """ called by the template system to get the context data for the template """

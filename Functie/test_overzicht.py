@@ -104,12 +104,12 @@ class TestFunctieOverzicht(E2EHelpers, TestCase):
         # geen rechten om dit overzicht in te zien
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_overzicht)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
         # geen rechten om beheerders te kiezen
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wijzig + '123/')
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
     def test_schutter(self):
         # geen rechten om dit overzicht in te zien
@@ -118,11 +118,11 @@ class TestFunctieOverzicht(E2EHelpers, TestCase):
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_overzicht)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_overzicht + 'vereniging/')
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
     def test_bb(self):
         self.e2e_login_and_pass_otp(self.account_admin)
@@ -232,7 +232,7 @@ class TestFunctieOverzicht(E2EHelpers, TestCase):
         # de WL heeft hier niets mee te maken en krijgt het overzicht dus niet
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_overzicht)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
         # haal het overzicht van verenigingsbestuurders op
         with self.assert_max_queries(20):
@@ -254,7 +254,7 @@ class TestFunctieOverzicht(E2EHelpers, TestCase):
         # de SEC heeft hier niets mee te maken en krijgt het overzicht dus niet
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_overzicht)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
         # haal het overzicht van verenigingsbestuurders op
         with self.assert_max_queries(20):

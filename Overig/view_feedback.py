@@ -8,7 +8,6 @@ from django.views import View
 from django.views.generic import TemplateView, ListView
 from django.shortcuts import render, redirect
 from django.urls import Resolver404, reverse
-from django.http import HttpResponseRedirect
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Functie.rol import Rollen, rol_get_huidige
 from Plein.menu import menu_dynamics
@@ -106,14 +105,11 @@ class SiteFeedbackInzichtView(UserPassesTestMixin, ListView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_FEEDBACK_INZICHT
+    raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         return rol_get_huidige(self.request) in (Rollen.ROL_IT, Rollen.ROL_BB)
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
 
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """

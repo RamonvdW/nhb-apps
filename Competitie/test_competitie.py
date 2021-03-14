@@ -300,23 +300,23 @@ class TestCompetitie(E2EHelpers, TestCase):
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_instellingen)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_aanmaken)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_aanmaken)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_ag_vaststellen)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_klassegrenzen_vaststellen % 999999)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
     def test_instellingen(self):
         self.e2e_login_and_pass_otp(self.account_bb)
@@ -466,7 +466,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         self.e2e_wisselnaarrol_gebruiker()
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_ag_vaststellen)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
         self.e2e_wisselnaarrol_bb()
         self.e2e_check_rol('BB')
@@ -474,7 +474,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         # trigger de permissie check (want: geen competitie aangemaakt)
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_ag_vaststellen)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
         # gebruik een POST om de competitie aan te maken
         # daarna is het mogelijk om AG's vast te stellen

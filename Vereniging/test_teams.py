@@ -336,19 +336,19 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
         self.client.logout()
 
         resp = self.client.get(self.url_koppelen % 999999)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
         resp = self.client.get(self.url_maak_team % 999999)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
         resp = self.client.get(self.url_wijzig_team % (999999, 999999))
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
         resp = self.client.get(self.url_regio_teams % 999999)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
         resp = self.client.get(self.url_rk_teams % 999999)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
     def test_bad(self):
         # login als HWL

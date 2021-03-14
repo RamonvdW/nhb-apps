@@ -4,7 +4,6 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
@@ -25,6 +24,7 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_WEDSTRIJDEN
     uitslag_invoeren = False
+    raise_exception = True      # genereer PermissionDefined als test_func False terug geeft
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -34,10 +34,6 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
         return self.functie_nu and self.rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_WL)
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """

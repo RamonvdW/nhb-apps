@@ -31,15 +31,12 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
     """ Via deze view kan een schutter zich aanmelden voor een competitie """
 
     template_name = TEMPLATE_AANMELDEN
+    raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         # gebruiker moet ingelogd zijn en schutter rol gekozen hebben
         return rol_get_huidige(self.request) == Rollen.ROL_SCHUTTER
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -401,15 +398,12 @@ class RegiocompetitieAfmeldenView(View):
 class SchutterSchietmomentenView(UserPassesTestMixin, TemplateView):
 
     template_name = TEMPLATE_SCHIETMOMENTEN
+    raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         # gebruiker moet ingelogd zijn en schutter rol gekozen hebben
         return rol_get_huidige(self.request) in (Rollen.ROL_SCHUTTER, Rollen.ROL_HWL)
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """

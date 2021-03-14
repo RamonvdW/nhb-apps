@@ -74,7 +74,7 @@ class TestVerenigingClusters(E2EHelpers, TestCase):
         self.e2e_logout()
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_clusters)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
     def test_rcl(self):
         # log in als RCL
@@ -97,7 +97,7 @@ class TestVerenigingClusters(E2EHelpers, TestCase):
                                                         'ver_1001': self.cluster2.pk,
                                                         'ver_1002': '0',
                                                         'ver_1003': self.cluster1.pk})
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert_is_redirect(resp, '/plein/')    # redirect = success
 
         cluster = NhbCluster.objects.get(pk=self.cluster1.pk)
         self.assertEqual(cluster.naam, 'Hallo!')
@@ -109,14 +109,15 @@ class TestVerenigingClusters(E2EHelpers, TestCase):
                                                         'ver_1001': self.cluster2.pk,
                                                         'ver_1002': '0',
                                                         'ver_1003': self.cluster1.pk})
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert_is_redirect(resp, '/plein/')    # redirect = success
 
         # stuur nog wat illegale parameters
         lange_tekst = 'Dit is een veel te lange tekst die ergens afgekapt gaat worden maar wel opgeslagen wordt.'
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_clusters, {'ver_1001': 'x',
                                                         'naam_%s' % self.cluster1.pk: lange_tekst})
-        self.assert_is_redirect(resp, '/plein/')
+        # foute parameters are silently ignored
+        self.assert_is_redirect(resp, '/plein/')    # redirect = success
 
         cluster = NhbCluster.objects.get(pk=self.cluster1.pk)
         self.assertEqual(cluster.naam, lange_tekst[:50])

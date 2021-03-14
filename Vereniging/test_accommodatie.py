@@ -155,12 +155,12 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.e2e_logout()
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_lijst)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
         url = self.url_accommodatie_details % self.nhbver1.pk
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
     def test_bb(self):
         # login als BB
@@ -420,7 +420,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         # WL mag de hele lijst met verenigingen niet ophalen
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_lijst)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
         # haal de SEC uit zijn functie zodat deze direct uit de vereniging gehaald wordt
         self.functie_sec.accounts.clear()

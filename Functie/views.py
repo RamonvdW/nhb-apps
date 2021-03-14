@@ -242,6 +242,7 @@ class WijzigEmailView(UserPassesTestMixin, View):
     """ Via deze view kan het e-mailadres van een functie aangepast worden """
 
     # class variables shared by all instances
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -251,10 +252,6 @@ class WijzigEmailView(UserPassesTestMixin, View):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu = rol_get_huidige(self.request)
         return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_SEC, Rollen.ROL_HWL)
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
 
     def _get_functie_or_404(self):
         functie_pk = self.kwargs['functie_pk']
@@ -398,6 +395,7 @@ class WijzigBeheerdersView(UserPassesTestMixin, ListView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_WIJZIG
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -410,10 +408,6 @@ class WijzigBeheerdersView(UserPassesTestMixin, ListView):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol = rol_get_huidige(self.request)
         return rol in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_SEC, Rollen.ROL_HWL)
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
 
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
@@ -518,15 +512,12 @@ class OverzichtVerenigingView(UserPassesTestMixin, ListView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_OVERZICHT_VERENIGING
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
         return rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_WL)
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
 
     @staticmethod
     def _sorteer(objs):
@@ -610,6 +601,7 @@ class OverzichtView(UserPassesTestMixin, ListView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_OVERZICHT
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -620,10 +612,6 @@ class OverzichtView(UserPassesTestMixin, ListView):
         # alle competitie beheerders + HWL
         self.rol_nu = rol_get_huidige(self.request)
         return self.rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL)
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
 
     @staticmethod
     def _sorteer_functies(objs):

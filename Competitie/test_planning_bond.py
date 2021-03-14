@@ -324,11 +324,11 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_doorzetten_rk % 999999)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_doorzetten_bk % 999999)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
         # niet bestaande comp_pk
         self.e2e_wissel_naar_functie(self.functie_bko_18)

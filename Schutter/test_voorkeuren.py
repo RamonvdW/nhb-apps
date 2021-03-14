@@ -80,8 +80,7 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
         # zonder login --> terug naar het plein
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_voorkeuren, follow=True)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('plein/plein-bezoeker.dtl', 'plein/site_layout.dtl'))
+        self.assert403(resp)
 
         # met schutter-login wel toegankelijk
         self.e2e_login(self.account_normaal)

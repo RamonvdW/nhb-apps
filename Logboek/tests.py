@@ -61,7 +61,7 @@ class TestLogboek(E2EHelpers, TestCase):
         self.e2e_logout()
         with self.assert_max_queries(20):
             resp = self.client.get(self.logboek_url)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
     def test_str(self):
         # gebruik de str functie op de Logboek class
@@ -74,7 +74,7 @@ class TestLogboek(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_normaal)
         with self.assert_max_queries(20):
             resp = self.client.get(self.logboek_url)
-        self.assertEqual(resp.status_code, 302)  # 302 = Redirect (naar het plein)
+        self.assert403(resp)
 
     def test_user_allowed(self):
         self.e2e_login_and_pass_otp(self.account_admin)

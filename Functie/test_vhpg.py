@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -30,7 +30,7 @@ class TestFunctieVHPG(E2EHelpers, TestCase):
         # probeer diverse functies zonder ingelogd te zijn
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_overzicht)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_afspraken)
@@ -97,7 +97,7 @@ class TestFunctieVHPG(E2EHelpers, TestCase):
         # is niet BB
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_overzicht)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
         # wissel naar BB rol
         self.e2e_wisselnaarrol_bb()

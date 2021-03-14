@@ -36,6 +36,7 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_WISSELVANROL
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -44,10 +45,6 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
         rol_evalueer_opnieuw(self.request)
 
         return self.request.user.is_authenticated and rol_mag_wisselen(self.request)
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
 
     @staticmethod
     def _functie_volgorde(functie):
@@ -271,14 +268,11 @@ class ActiveerRolView(UserPassesTestMixin, View):
     """ Django class-based view om een andere rol aan te nemen """
 
     # class variables shared by all instances
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         return self.request.user.is_authenticated and rol_mag_wisselen(self.request)
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
 
     def post(self, request, *args, **kwargs):
         from_ip = get_safe_from_ip(self.request)

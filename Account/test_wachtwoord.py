@@ -24,11 +24,11 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
         # niet ingelogd
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wijzig)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_wijzig, {'param': 'yeah'})
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
     def test_wijzig(self):
         # log in

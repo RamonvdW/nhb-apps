@@ -28,6 +28,7 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
     """ Via deze view kunnen schutters hun voorkeuren inzien en aanpassen """
 
     template_name = TEMPLATE_VOORKEUREN
+    raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -38,10 +39,6 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
         # gebruiker moet ingelogd zijn en schutter rol gekozen hebben
         self.rol_nu = rol_get_huidige(self.request)
         return self.rol_nu in (Rollen.ROL_SCHUTTER, Rollen.ROL_HWL)
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
 
     @staticmethod
     def _get_nhblid_or_404(request, nhblid_pk):

@@ -277,7 +277,7 @@ class TestVerenigingSchietmomenten(E2EHelpers, TestCase):
     def test_anon(self):
         url = self.url_schietmomenten % self.deelcomp_regio.pk
         resp = self.client.get(url)
-        self.assert_is_redirect(resp, '/plein/')      # redirect = access denied
+        self.assert403(resp)      # redirect = access denied
 
     def test_kaartjes(self):
         # kaartje "Wie schiet waar?" moet getoond worden aan de HWL en WL
