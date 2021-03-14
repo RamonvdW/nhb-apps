@@ -4,10 +4,11 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, Http404
 from django.urls import reverse, Resolver404
 from django.db.models import Count
 from django.views.generic import TemplateView
+from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import TeamType
 from Competitie.models import (CompetitieKlasse, AG_NUL,
@@ -90,13 +91,13 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
                              laag=LAAG_REGIO,                           # moet regiocompetitie zijn
                              nhb_regio=self.functie_nu.nhb_ver.regio))
         except (ValueError, DeelCompetitie.DoesNotExist):
-            raise Resolver404()
+            raise Http404()
 
         comp = deelcomp.competitie
         comp.bepaal_fase()
         if comp.fase > 'C':
             # staat niet meer open voor instellen regiocompetitie teams
-            raise Resolver404()
+            raise Http404('Competitie is niet in de juiste fase')
 
         return deelcomp
 
@@ -208,13 +209,13 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
                              regio_organiseert_teamcompetitie=True,
                              nhb_regio=self.functie_nu.nhb_ver.regio))
         except (ValueError, DeelCompetitie.DoesNotExist):
-            raise Resolver404()
+            raise Http404()
 
         comp = deelcomp.competitie
         comp.bepaal_fase()
         if comp.fase > 'C':
             # staat niet meer open voor instellen regiocompetitie teams
-            raise Resolver404()
+            raise Http404('Competitie is niet in de juiste fase')
 
         return deelcomp
 
@@ -224,6 +225,7 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
 
         # zoek de deelcompetitie waar de regio teams voor in kunnen stellen
         context['deelcomp'] = deelcomp = self._get_deelcomp(kwargs['deelcomp_pk'])
+        ver = self.functie_nu.nhb_ver
 
         teamtype_default = None
         teams = TeamType.objects.order_by('volgorde')
@@ -236,9 +238,13 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
 
         try:
             team_pk = int(kwargs['team_pk'][:6])
-            team = RegiocompetitieTeam.objects.get(pk=team_pk, deelcompetitie=deelcomp)
+            team = (RegiocompetitieTeam
+                    .objects
+                    .get(pk=team_pk,
+                         deelcompetitie=deelcomp,
+                         vereniging=ver))
         except (ValueError, RegiocompetitieTeam.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Team niet gevonden of niet van jouw vereniging')
         except KeyError:
             # dit is een nieuw team
             team = RegiocompetitieTeam(
@@ -272,7 +278,7 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
         try:
             team_pk = int(kwargs['team_pk'][:6])    # afkappen voor de veiligheid
         except (ValueError, KeyError):
-            raise Resolver404()
+            raise Http404()
 
         if team_pk == 0:
             # nieuw team
@@ -288,13 +294,13 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
 
             if len(volg_nrs) > 10:
                 # te veel teams
-                raise Resolver404()
+                raise Http404('Maximum van 10 teams is bereikt')
 
             afkorting = request.POST.get('team_type', '')
             try:
                 team_type = TeamType.objects.get(afkorting=afkorting)
             except TeamType.DoesNotExist:
-                raise Resolver404()
+                raise Http404()
 
             team = RegiocompetitieTeam(
                             deelcompetitie=deelcomp,
@@ -314,7 +320,7 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
                              deelcompetitie=deelcomp,
                              vereniging=ver))
             except RegiocompetitieTeam.DoesNotExist:
-                raise Resolver404()
+                raise Http404()
 
             verwijderen = request.POST.get('verwijderen', None) is not None
 
@@ -324,7 +330,7 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
                     try:
                         team_type = TeamType.objects.get(afkorting=afkorting)
                     except TeamType.DoesNotExist:
-                        raise Resolver404()
+                        raise Http404()
 
                     team.team_type = team_type
                     team.save()
@@ -373,11 +379,11 @@ class WijzigTeamAGView(UserPassesTestMixin, TemplateView):
         if self.rol_nu == Rollen.ROL_HWL:
             # HWL
             if ver != self.functie_nu.nhb_ver:
-                raise Resolver404()
+                raise PermissionDenied('Niet lid van jouw vereniging')
         else:
             # RCL
             if ver.regio != self.functie_nu.nhb_regio:
-                raise Resolver404()
+                raise PermissionDenied('Niet lid van een vereniging in jouw regio')
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -395,7 +401,7 @@ class WijzigTeamAGView(UserPassesTestMixin, TemplateView):
                                          'deelcompetitie__competitie')
                          .get(pk=deelnemer_pk))
         except (ValueError, RegioCompetitieSchutterBoog.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Sporter niet gevonden')
 
         context['deelnemer'] = deelnemer
 
@@ -516,7 +522,7 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
                     .get(pk=team_pk,
                          vereniging=self.functie_nu.nhb_ver))
         except (ValueError, RegiocompetitieTeam.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Team niet gevonden of niet van jouw vereniging')
 
         context['team'] = team
 

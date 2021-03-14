@@ -643,4 +643,15 @@ class E2EHelpers(object):
                     if ongebruikt / num > 0.25:        # pragma: no cover
                         self.fail(msg="Maximum (%s) has a lot of margin. Can be set as low as %s" % (num, count))
 
+    def assert403(self, resp):
+        # controleer dat we op de speciale code-403 handler pagina gekomen zijn
+        self.assertEqual(resp.status_code, 200)
+        self.assert_template_used(resp, ('plein/fout_403.dtl', 'plein/site_layout_minimaal.dtl'))
+
+    def assert404(self, resp):
+        # self.assertEqual(resp.status_code, 404)
+        # controleer dat we op de speciale code-404 handler pagina gekomen zijn
+        self.assertEqual(resp.status_code, 200)
+        self.assert_template_used(resp, ('plein/fout_404.dtl', 'plein/site_layout_minimaal.dtl'))
+
 # end of file

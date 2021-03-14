@@ -358,55 +358,55 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_koppelen % 999999)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_koppelen % 999999)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_maak_team % 999999)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wijzig_team % (999999, 999999))
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_wijzig_team % (999999, 999999))
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_regio_teams % 999999)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_maak_team % self.deelcomp18_regio111.pk)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wijzig_team % (self.deelcomp18_regio111.pk, 999999))
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_wijzig_team % (self.deelcomp18_regio111.pk, 999999))
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
         # maak een team aan zonder team_type
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_wijzig_team % (self.deelcomp18_regio111.pk, 0))
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
         # zet de competitie naar fase > C
         zet_competitie_fase(self.comp_18, 'D')
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_regio_teams % self.deelcomp18_regio111.pk)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wijzig_team % (self.deelcomp18_regio111.pk, 999999))
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
     def test_regio_teams(self):
         # login als HWL
@@ -445,7 +445,7 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
         # wijzig het team type
         resp = self.client.post(self.url_wijzig_team % (self.deelcomp18_regio111.pk, team.pk),
                                 {'team_type': 'BAD'})
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
         # team change
         with self.assert_max_queries(20):
@@ -475,7 +475,7 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
         # nu zijn er 10 teams. Maak #11 aan
         resp = self.client.post(self.url_wijzig_team % (self.deelcomp18_regio111.pk, 0),
                                 {'team_type': 'R'})
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
         # haal het teams overzicht op
         with self.assert_max_queries(20):
