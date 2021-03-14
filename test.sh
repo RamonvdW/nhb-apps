@@ -58,7 +58,7 @@ echo "[INFO] Capturing output in $LOG"
 tail -f "$LOG" &
 PID_TAIL=$!
 
-python3 -m coverage run --append --branch ./manage.py test --settings=nhbapps.settings_dev --noinput $* >>"$LOG" 2>>"$LOG"
+python3 -m coverage run --append --branch ./manage.py test --settings=nhbapps.settings_autotest --noinput $* >>"$LOG" 2>>"$LOG"
 RES=$?
 
 kill $PID_TAIL
@@ -72,7 +72,7 @@ then
     # add coverage with debug and wiki enabled
     echo "[INFO] Performing run with debug + wiki run"
     python3 -m coverage run --append --branch \
-        ./manage.py test --settings=nhbapps.settings_dev_wiki_debug Plein.tests.TestPlein.test_quick Functie.test_saml2idp >>"$LOG" 2>>"$LOG"
+        ./manage.py test --settings=nhbapps.settings_autotest_wiki_nodebug Plein.tests.TestPlein.test_quick Functie.test_saml2idp >>"$LOG" 2>>"$LOG"
     RES=$?
     [ $RES -eq 3 ] && ABORTED=1
     #echo "[DEBUG] Debug coverage run result: $RES --> ABORTED=$ABORTED"

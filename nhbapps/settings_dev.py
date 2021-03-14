@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 """
-Django settings for the NhbApps project during development runs and testing.
+    Django settings for the NhbApps project during development runs.
 """
 
 from nhbapps.settings_base import *
