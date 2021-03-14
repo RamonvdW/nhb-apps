@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -188,10 +188,10 @@ class TestLogboek(E2EHelpers, TestCase):
         # test illegale pagina nummers
         with self.assert_max_queries(20):
             resp = self.client.get(self.logboek_url + 'crm-import/?page=999999')
-        self.assertEqual(resp.status_code, 404)  # 404 = Not found
+        self.assert404(resp)  # 404 = Not found
         with self.assert_max_queries(20):
             resp = self.client.get(self.logboek_url + 'crm-import/?page=test')
-        self.assertEqual(resp.status_code, 404)  # 404 = Not found
+        self.assert404(resp)  # 404 = Not found
 
         # voeg wat extra regels toe aan het logboek
         # zorg voor 10+ pagina's

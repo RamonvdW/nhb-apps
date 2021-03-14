@@ -5,7 +5,8 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.shortcuts import render
-from django.urls import reverse, Resolver404
+from django.urls import reverse
+from django.http import Http404
 from django.views.generic import View, TemplateView
 from django.utils import timezone
 from django.utils.formats import localize
@@ -282,7 +283,7 @@ class CompetitieOverzichtView(View):
                     .objects
                     .get(pk=comp_pk))
         except (ValueError, Competitie.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Competitie niet gevonden')
 
         comp.bepaal_fase()                     # zet comp.fase
         comp.bepaal_openbaar(self.rol_nu)      # zet comp.is_openbaar

@@ -179,7 +179,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         url = self.url_bevestig_aanmelden % (deelcomp.pk, schutterboog.pk)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 1)
 
         # 18m IB voor extra coverage
@@ -215,14 +215,14 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         # veroorzaak een dubbele inschrijving
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_aanmelden % (deelcomp.pk, schutterboog.pk))
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 2)
 
     def test_bad(self):
         # inschrijven als anon
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_aanmelden % (0, 0))
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
         # log in as BB en maak de competitie aan
         self.e2e_login_and_pass_otp(self.account_admin)
@@ -232,7 +232,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         # inschrijven als BB (niet NHB lid)
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_aanmelden % (0, 0))
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
         # haal de bevestig pagina op als BB
         url = self.url_bevestig_aanmelden % (0, 0)
@@ -245,7 +245,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         self.e2e_login(self.account_geenlid)
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_aanmelden % (0, 0))
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
         # log in as schutter
         self.client.logout()
@@ -258,37 +258,37 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         # illegaal deelcomp nummer
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_aanmelden % (99999, schutterboog.pk))
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_bevestig_aanmelden % (999999, schutterboog.pk))
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
         # illegaal schutterboog nummer
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_aanmelden % (99999, 'hallo'))
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_bevestig_aanmelden % (999999, 'hallo'))
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
         # schutterboog hoort niet bij gebruiker
         self.client.logout()
         self.e2e_login(self.account_twee)
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_aanmelden % (deelcomp.pk, schutterboog.pk))
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
         # mismatch diverse zaken
         deelcomp = DeelCompetitie.objects.get(competitie__afstand='18', nhb_regio=NhbRegio.objects.get(regio_nr=116))
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_bevestig_aanmelden % (deelcomp.pk, schutterboog.pk))
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
     def test_afmelden(self):
         # afmelden als anon
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_afmelden % 0)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
         # log in as BB en maak de competitie aan
         self.e2e_login_and_pass_otp(self.account_admin)
@@ -298,14 +298,14 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         # afmelden als BB (niet NHB lid)
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_afmelden % 0)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
         # afmelden als inactief lid
         self.client.logout()
         self.e2e_login(self.account_geenlid)
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_afmelden % 0)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
         # log in as schutter
         self.client.logout()
@@ -340,12 +340,12 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         # illegaal inschrijving nummer
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_afmelden % 999999)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
         # niet bestaand inschrijving nummer
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_afmelden % 'hoi')
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
         # schutterboog hoort niet bij gebruiker
         inschrijving_25 = RegioCompetitieSchutterBoog.objects.all()[0]
@@ -353,7 +353,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         self.e2e_login(self.account_twee)
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_afmelden % inschrijving_25.pk)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert403(resp)
 
     def test_afmelden_geen_voorkeur_meer(self):
         # log in as BB en maak de competitie aan
@@ -523,7 +523,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         url = self.url_aanmelden % (deelcomp.pk, schutterboog.pk)
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'dagdeel': 'AV'})
-        self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
+        self.assert404(resp)     # 404 = Not allowed
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
 
         # schrijf in met dagdeel, team schieten en opmerking door
@@ -546,7 +546,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         url = self.url_aanmelden % (deelcomp.pk, schutterboog.pk)
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'dagdeel': 'XX'})
-        self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
+        self.assert404(resp)     # 404 = Not allowed
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 1)
 
     def test_inschrijven_methode3_alle_dagdelen(self):

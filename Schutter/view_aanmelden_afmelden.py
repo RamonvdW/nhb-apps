@@ -4,9 +4,10 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.http import HttpResponseRedirect
-from django.urls import reverse, Resolver404
+from django.http import HttpResponseRedirect, Http404
+from django.urls import reverse
 from django.views.generic import View, TemplateView
+from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
@@ -61,15 +62,15 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
 
         except (ValueError, KeyError):
             # vuilnis
-            raise Resolver404()
+            raise Http404()
         except (SchutterBoog.DoesNotExist, DeelCompetitie.DoesNotExist):
             # niet bestaand record
-            raise Resolver404()
+            raise Http404('Sporter of competitie niet gevonden')
 
         # controleer dat de competitie aanmeldingen accepteert
         deelcomp.competitie.bepaal_fase()
         if deelcomp.competitie.fase < 'B' or deelcomp.competitie.fase >= 'F':
-            raise Resolver404()
+            raise Http404('Verkeerde competitie fase')
 
         # controleer dat schutterboog bij de ingelogde gebruiker hoort
         # controleer dat deelcompetitie bij de juist regio hoort
@@ -78,7 +79,7 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
         if (schutterboog.nhblid != nhblid
                 or deelcomp.laag != LAAG_REGIO
                 or deelcomp.nhb_regio != nhblid.bij_vereniging.regio):
-            raise Resolver404()
+            raise Http404('Geen valide combinatie')
 
         # voorkom dubbele aanmelding
         if (RegioCompetitieSchutterBoog
@@ -87,7 +88,7 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
                         schutterboog=schutterboog)
                 .count() > 0):
             # al aangemeld - zie niet hier moeten zijn gekomen
-            raise Resolver404()
+            raise Http404('Sporter is al aangemeld')
 
         # urlconf parameters geaccepteerd
 
@@ -207,7 +208,7 @@ class RegiocompetitieAanmeldenView(View):
                 if not (nhblid.is_actief_lid and nhblid.bij_vereniging):
                     nhblid = None
         if not nhblid:
-            raise Resolver404()
+            raise Http404('Sporter niet gevonden')
 
         # converteer en doe eerste controle op de parameters
         try:
@@ -226,22 +227,22 @@ class RegiocompetitieAanmeldenView(View):
                         .get(pk=deelcomp_pk))
         except (ValueError, KeyError):
             # vuilnis
-            raise Resolver404()
+            raise Http404()
         except (SchutterBoog.DoesNotExist, DeelCompetitie.DoesNotExist):
-            # niet bestaand record
-            raise Resolver404()
+            # niet bestaand record(s)
+            raise Http404('Sporter of competitie niet gevonden')
 
         # controleer dat de competitie aanmeldingen accepteert
         deelcomp.competitie.bepaal_fase()
         if deelcomp.competitie.fase < 'B' or deelcomp.competitie.fase >= 'F':
-            raise Resolver404()
+            raise Http404('Verkeerde competitie fase')
 
         # controleer dat schutterboog bij de ingelogde gebruiker hoort
         # controleer dat deelcompetitie bij de juist regio hoort
         if (schutterboog.nhblid != nhblid
                 or deelcomp.laag != LAAG_REGIO
                 or deelcomp.nhb_regio != nhblid.bij_vereniging.regio):
-            raise Resolver404()
+            raise Http404('Geen valide combinatie')
 
         # voorkom dubbele aanmelding
         if (RegioCompetitieSchutterBoog
@@ -250,7 +251,7 @@ class RegiocompetitieAanmeldenView(View):
                         schutterboog=schutterboog)
                 .count() > 0):
             # al aangemeld - zie niet hier moeten zijn gekomen
-            raise Resolver404()
+            raise Http404('Sporter is al aangemeld')
 
         # urlconf parameters geaccepteerd
 
@@ -326,7 +327,7 @@ class RegiocompetitieAanmeldenView(View):
 
             if aanmelding.inschrijf_voorkeur_dagdeel == '':
                 # dagdeel is verplicht
-                raise Resolver404()
+                raise Http404('Verzoek is niet compleet')
 
         opmerking = request.POST.get('opmerking', '')
         if len(opmerking) > 500:
@@ -372,7 +373,7 @@ class RegiocompetitieAfmeldenView(View):
                 if not (nhblid.is_actief_lid and nhblid.bij_vereniging):
                     nhblid = None
         if not nhblid:
-            raise Resolver404()
+            raise Http404('Sporter niet gevonden')
 
         # converteer en doe eerste controle op de parameters
         try:
@@ -380,14 +381,14 @@ class RegiocompetitieAfmeldenView(View):
             inschrijving = RegioCompetitieSchutterBoog.objects.get(pk=deelnemer_pk)
         except (ValueError, KeyError):
             # vuilnis
-            raise Resolver404()
+            raise Http404()
         except RegioCompetitieSchutterBoog.DoesNotExist:
             # niet bestaand record
-            raise Resolver404()
+            raise Http404('Inschrijving niet gevonden')
 
         # controleer dat deze inschrijving bij het nhblid hoort
         if inschrijving.schutterboog.nhblid != nhblid:
-            raise Resolver404()
+            raise PermissionDenied()
 
         # TODO: controleer de fase van de competitie. Na bepaalde datum niet meer uit kunnen schrijven??
 
@@ -423,7 +424,7 @@ class SchutterSchietmomentenView(UserPassesTestMixin, TemplateView):
                          .get(pk=deelnemer_pk,
                               deelcompetitie__inschrijf_methode=INSCHRIJF_METHODE_1))
         except (ValueError, TypeError, RegioCompetitieSchutterBoog.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Inschrijving niet gevonden')
 
         context['deelnemer'] = deelnemer
 
@@ -431,11 +432,11 @@ class SchutterSchietmomentenView(UserPassesTestMixin, TemplateView):
 
         if rol_nu == Rollen.ROL_SCHUTTER:
             if self.request.user != deelnemer.schutterboog.nhblid.account:
-                raise Resolver404()
+                raise PermissionDenied()
         else:
             # HWL: sporter moet lid zijn van zijn vereniging
             if deelnemer.bij_vereniging != functie_nu.nhb_ver:
-                raise Resolver404()
+                raise PermissionDenied('Sporter is niet van jouw vereniging')
 
         # zoek alle dagdelen erbij
         pks = list()
@@ -487,7 +488,7 @@ class SchutterSchietmomentenView(UserPassesTestMixin, TemplateView):
                          .get(pk=deelnemer_pk,
                               deelcompetitie__inschrijf_methode=INSCHRIJF_METHODE_1))
         except (ValueError, TypeError, RegioCompetitieSchutterBoog.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Inschrijving niet gevonden')
 
         rol_nu, functie_nu = rol_get_huidige_functie(request)
 

@@ -131,7 +131,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         # probeer een niet-bestaande functie
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wijzig % '999999')
-        self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
+        self.assert404(resp)     # 404 = Not allowed
 
         # haal het wijzig scherm op voor de BKO
         url = '/functie/wijzig/%s/' % self.functie_bko.pk
@@ -234,29 +234,29 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.assertEqual(self.functie_rko3.accounts.count(), 0)
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'add': self.account_beh1.pk}, follow=True)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
+        self.assert403(resp)
         self.assertEqual(self.functie_rko3.accounts.count(), 0)
 
         # probeer een GET
         with self.assert_max_queries(20):
             resp = self.client.get('/functie/wijzig/123/ontvang/')
-        self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
+        self.assert404(resp)  # 404 = Not allowed
 
         # probeer een niet-bestaande functie
         with self.assert_max_queries(20):
             resp = self.client.post('/functie/wijzig/123/ontvang/')
-        self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
+        self.assert404(resp)  # 404 = Not allowed
 
         # foute form parameter
         url = '/functie/wijzig/%s/ontvang/' % self.functie_bko.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'what': 1})
-        self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
+        self.assert404(resp)  # 404 = Not allowed
 
         # fout account nummer
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'add': '999999'})
-        self.assertEqual(resp.status_code, 404)  # 404 = Not allowed
+        self.assert404(resp)  # 404 = Not allowed
 
     def test_koppel_bko(self):
         self.e2e_login_and_pass_otp(self.account_admin)
@@ -288,7 +288,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.assertEqual(self.functie_rcl111.accounts.count(), 0)
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'add': self.account_beh2.pk}, follow=False)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
+        self.assert403(resp)
         self.assertEqual(self.functie_rcl111.accounts.count(), 0)
 
         # probeer als bezoeker (corner case coverage)
@@ -299,7 +299,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'add': self.account_beh2.pk}, follow=False)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
+        self.assert403(resp)
 
     def test_koppel_rko(self):
         self.e2e_login_and_pass_otp(self.account_admin)
@@ -330,7 +330,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         url = '/functie/wijzig/%s/ontvang/' % self.functie_rcl101.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'add': self.account_beh1.pk}, follow=True)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
+        self.assert403(resp)
         self.assertEqual(self.functie_rcl111.accounts.count(), 1)
 
         # poog een andere rol te koppelen
@@ -338,7 +338,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.assertEqual(self.functie_rko3.accounts.count(), 0)
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'add': self.account_beh1.pk}, follow=True)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
+        self.assert403(resp)
         self.assertEqual(self.functie_rko3.accounts.count(), 0)
 
     def test_koppel_rcl(self):
@@ -384,7 +384,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.assertEqual(self.functie_rcl101.accounts.count(), 0)
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'add': self.account_beh1.pk}, follow=True)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
+        self.assert403(resp)
         self.assertEqual(self.functie_rcl101.accounts.count(), 0)
 
     def test_koppel_hwl(self):
@@ -436,32 +436,32 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         # poog een NHB lid te koppelen dat niet lid is van de vereniging
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'add': self.account_ander.pk})
-        self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
+        self.assert403(resp)
         self.assertEqual(self.functie_hwl.accounts.count(), 2)
 
         # poog een niet-NHB lid account te koppelen
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'add': self.account_admin.pk})
-        self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
+        self.assert403(resp)
         self.assertEqual(self.functie_hwl.accounts.count(), 2)
 
         # probeer een verkeerde vereniging te wijzigen
         url = '/functie/wijzig/%s/ontvang/' % self.functie_hwl2.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'add': self.account_beh2.pk})
-        self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
+        self.assert403(resp)
 
         url = '/functie/wijzig/%s/' % self.functie_sec.pk
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)
+        self.assert403(resp)
 
         # poog sec SEC rol te koppelen (mag niet)
         url = '/functie/wijzig/%s/ontvang/' % self.functie_sec.pk
         self.assertEqual(self.functie_sec.accounts.count(), 0)
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'add': self.account_beh2.pk})
-        self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
+        self.assert403(resp)
         self.assertEqual(self.functie_sec.accounts.count(), 0)
 
         url = '/functie/wijzig/%s/' % self.functie_wl.pk
@@ -513,14 +513,14 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         url = '/functie/wijzig/%s/ontvang/' % self.functie_sec2.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'add': self.account_ander.pk})    # silently ignored
-        self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
+        self.assert403(resp)
         self.assertEqual(self.functie_sec.accounts.count(), 2)
 
         # koppel een niet-verenigingslid aan de rol SEC
         url = '/functie/wijzig/%s/ontvang/' % self.functie_sec.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'add': self.account_ander.pk})
-        self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
+        self.assert403(resp)
         self.assertEqual(self.functie_sec.accounts.count(), 2)
 
         # koppel een verenigingslid aan de rol HWL
@@ -536,7 +536,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         url = '/functie/wijzig/%s/ontvang/' % self.functie_wl.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'add': self.account_normaal.pk})
-        self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
+        self.assert403(resp)
         self.assertEqual(self.functie_wl.accounts.count(), 0)
 
     def test_administratieve_regio(self):
@@ -575,6 +575,6 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         url = self.url_wijzig % self.functie_hwl.pk
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)     # 404 = not allowed
+        self.assert403(resp)
 
 # end of file

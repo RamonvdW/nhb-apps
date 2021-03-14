@@ -4,9 +4,9 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import render
-from django.urls import Resolver404, reverse
+from django.urls import reverse
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.shortcuts import redirect
@@ -627,7 +627,7 @@ class KlassegrenzenVaststellenView(UserPassesTestMixin, TemplateView):
             comp_pk = int(kwargs['comp_pk'][:6])      # afkappen geeft beveiliging
             comp = Competitie.objects.get(pk=comp_pk)
         except (ValueError, Competitie.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Competitie niet gevonden')
 
         context['comp'] = comp
 
@@ -654,7 +654,7 @@ class KlassegrenzenVaststellenView(UserPassesTestMixin, TemplateView):
             comp_pk = int(kwargs['comp_pk'][:6])      # afkappen geeft beveiliging
             comp = Competitie.objects.get(pk=comp_pk)
         except (ValueError, Competitie.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Competitie niet gevonden')
 
         if not comp.klassegrenzen_vastgesteld:
 
@@ -715,7 +715,7 @@ class WijzigDatumsView(UserPassesTestMixin, TemplateView):
             comp_pk = int(kwargs['comp_pk'][:6])      # afkappen geeft beveiliging
             comp = Competitie.objects.get(pk=comp_pk)
         except (ValueError, Competitie.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Competitie niet gevonden')
 
         context['comp'] = comp
 
@@ -744,19 +744,19 @@ class WijzigDatumsView(UserPassesTestMixin, TemplateView):
             comp_pk = int(kwargs['comp_pk'][:6])      # afkappen geeft beveiliging
             comp = Competitie.objects.get(pk=comp_pk)
         except (ValueError, Competitie.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Competitie niet gevonden')
 
         datums = list()
         for datum_nr in range(9):
             datum_s = request.POST.get('datum%s' % (datum_nr + 1), None)
             if not datum_s:
                 # alle datums zijn verplicht
-                raise Resolver404()
+                raise Http404('Verplichte parameter ontbreekt')
 
             try:
                 datum_p = datetime.datetime.strptime(datum_s, '%Y-%m-%d')
             except ValueError:
-                raise Resolver404()
+                raise Http404('Geen valide datum')
 
             datums.append(datum_p.date())
         # for

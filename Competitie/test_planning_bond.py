@@ -335,37 +335,37 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_doorzetten_rk % 999999)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found/allowed
+        self.assert404(resp)     # 404 = Not found/allowed
 
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_doorzetten_rk % 999999)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found/allowed
+        self.assert404(resp)     # 404 = Not found/allowed
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_doorzetten_bk % 999999)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found/allowed
+        self.assert404(resp)     # 404 = Not found/allowed
 
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_doorzetten_bk % 999999)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found/allowed
+        self.assert404(resp)     # 404 = Not found/allowed
 
         # juiste comp_pk maar verkeerde fase
         zet_competitie_fase(self.comp_18, 'C')
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_doorzetten_rk % self.comp_18.pk)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found/allowed
+        self.assert404(resp)     # 404 = Not found/allowed
 
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_doorzetten_rk % self.comp_18.pk)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found/allowed
+        self.assert404(resp)     # 404 = Not found/allowed
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_doorzetten_bk % self.comp_18.pk)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found/allowed
+        self.assert404(resp)     # 404 = Not found/allowed
 
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_doorzetten_bk % self.comp_18.pk)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found/allowed
+        self.assert404(resp)     # 404 = Not found/allowed
 
 
 # end of file

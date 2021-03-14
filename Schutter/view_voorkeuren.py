@@ -4,9 +4,10 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.http import HttpResponseRedirect
-from django.urls import reverse, Resolver404
+from django.http import HttpResponseRedirect, Http404
+from django.urls import reverse
 from django.views.generic import TemplateView
+from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Plein.menu import menu_dynamics
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie, rol_mag_wisselen
@@ -54,16 +55,16 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
                 nhblid_pk = int(nhblid_pk)
             except (ValueError, TypeError):
                 # nhblid_pk was geen getal
-                raise Resolver404()
+                raise Http404('Sporter niet gevonden')
 
             try:
                 nhblid = NhbLid.objects.get(pk=nhblid_pk)
             except NhbLid.DoesNotExist:
-                raise Resolver404()
+                raise Http404('Sporter niet gevonden')
 
             # laatste control: het nhblid moet lid zijn bij de vereniging van de HWL
             if nhblid.bij_vereniging != functie_nu.nhb_ver:
-                raise Resolver404()
+                raise PermissionDenied('Geen sporter van jouw vereniging')
 
             return nhblid
 

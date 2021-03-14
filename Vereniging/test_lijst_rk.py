@@ -198,7 +198,7 @@ class TestVerenigingLijstRK(E2EHelpers, TestCase):
         url = self.url_lijst_rk % self.deelcomp_r1.pk
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found/allowed
+        self.assert404(resp)     # 404 = Not found/allowed
 
         # zet de deelnemerslijst (fake)
         self.deelcomp_r1.heeft_deelnemerslijst = True
@@ -260,6 +260,6 @@ class TestVerenigingLijstRK(E2EHelpers, TestCase):
         url = self.url_lijst_rk % 999999
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found/allowed
+        self.assert404(resp)     # 404 = Not found/allowed
 
 # end of file

@@ -5,10 +5,11 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
-from django.http import HttpResponseRedirect
-from django.urls import Resolver404, reverse
+from django.http import HttpResponseRedirect, Http404
+from django.urls import reverse
 from django.utils import timezone
 from django.views.generic import TemplateView, View
+from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import Account
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
@@ -221,7 +222,7 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
                         .get(pk=deelcomp_pk,
                              laag=LAAG_REGIO))
         except (ValueError, DeelCompetitie.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Competitie niet gevonden')
 
         context['deelcomp'] = deelcomp
         context['regio'] = deelcomp.nhb_regio
@@ -249,7 +250,7 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
         """
         # alleen de RCL mag de planning uitbreiden
         if self.rol_nu != Rollen.ROL_RCL:
-            raise Resolver404()
+            raise PermissionDenied()
 
         try:
             deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen geeft beveiliging
@@ -258,11 +259,11 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
                         .select_related('competitie', 'nhb_regio')
                         .get(pk=deelcomp_pk, laag=LAAG_REGIO, nhb_regio=self.functie_nu.nhb_regio))
         except (ValueError, DeelCompetitie.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Competitie niet gevonden')
 
         if deelcomp.inschrijf_methode == INSCHRIJF_METHODE_1:
             # inschrijfmethode 1 heeft maar 1 ronde en die wordt automatisch aangemaakt
-            raise Resolver404()
+            raise Http404('Verkeerde inschrijfmethode')
 
         ronde = maak_deelcompetitie_ronde(deelcomp=deelcomp)  # checkt ook maximum aantal toegestaan
         if ronde:
@@ -307,7 +308,7 @@ class RegioClusterPlanningView(UserPassesTestMixin, TemplateView):
                        .select_related('regio', 'regio__rayon')
                        .get(pk=cluster_pk))
         except (ValueError, NhbCluster.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Cluster niet gevonden')
 
         context['cluster'] = cluster
         context['regio'] = cluster.regio
@@ -319,7 +320,7 @@ class RegioClusterPlanningView(UserPassesTestMixin, TemplateView):
                         .select_related('competitie')
                         .get(pk=deelcomp_pk))
         except (ValueError, DeelCompetitie.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Competitie niet gevonden')
 
         context['deelcomp'] = deelcomp
 
@@ -353,7 +354,7 @@ class RegioClusterPlanningView(UserPassesTestMixin, TemplateView):
 
         # alleen de RCL mag de planning uitbreiden
         if self.rol_nu != Rollen.ROL_RCL:
-            raise Resolver404()
+            raise PermissionDenied()
 
         try:
             cluster_pk = int(kwargs['cluster_pk'][:6])  # afkappen geeft beveiliging
@@ -362,7 +363,7 @@ class RegioClusterPlanningView(UserPassesTestMixin, TemplateView):
                        .select_related('regio', 'regio__rayon')
                        .get(pk=cluster_pk))
         except (ValueError, NhbCluster.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Cluster niet gevonden')
 
         try:
             deelcomp = (DeelCompetitie
@@ -372,7 +373,7 @@ class RegioClusterPlanningView(UserPassesTestMixin, TemplateView):
                              nhb_regio=cluster.regio,
                              competitie__afstand=cluster.gebruik))
         except DeelCompetitie.DoesNotExist:
-            raise Resolver404()
+            raise Http404('Competitie niet gevonden')
 
         ronde = maak_deelcompetitie_ronde(deelcomp=deelcomp, cluster=cluster)
 
@@ -430,7 +431,7 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
                                      'cluster__regio')
                      .get(pk=ronde_pk))
         except (ValueError, DeelcompetitieRonde.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Ronde niet gevonden')
 
         context['ronde'] = ronde
         context['vaste_beschrijving'] = is_import = ronde.is_voor_import_oude_programma()
@@ -558,11 +559,11 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
                      .select_related('deelcompetitie__competitie')
                      .get(pk=ronde_pk))
         except (ValueError, DeelcompetitieRonde.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Ronde niet gevonden')
 
         # alleen de RCL mag een wedstrijd toevoegen
         if self.rol_nu != Rollen.ROL_RCL:
-            raise Resolver404()
+            raise PermissionDenied()
 
         week_nr = request.POST.get('ronde_week_nr', None)
         if week_nr:
@@ -570,12 +571,12 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
             try:
                 week_nr = int(week_nr)
             except (TypeError, ValueError):
-                raise Resolver404()
+                raise Http404('Geen valide week nummer')
 
             # sanity-check op ronde nummer
             if week_nr < 1 or week_nr > 53:
                 # geen valide week nummer
-                raise Resolver404()
+                raise Http404('Geen valide week nummer')
 
             eind_week = settings.COMPETITIE_25M_LAATSTE_WEEK
             if ronde.deelcompetitie.competitie.afstand == '18':
@@ -584,11 +585,11 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
             if eind_week < settings.COMPETITIES_START_WEEK:
                 # typisch voor 25m: week 11..37 mogen niet
                 if eind_week < week_nr < settings.COMPETITIES_START_WEEK:
-                    raise Resolver404()
+                    raise Http404('Geen valide week nummer')
             else:
                 # typisch voor 18m: week 37..50 mogen, verder niet
                 if week_nr > eind_week or week_nr < settings.COMPETITIES_START_WEEK:
-                    raise Resolver404()
+                    raise Http404('Geen valide week nummer')
 
             beschrijving = request.POST.get('ronde_naam', '')
 
@@ -641,7 +642,7 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
 
             # niet toestaan op import rondes
             if ronde.is_voor_import_oude_programma():
-                raise Resolver404()
+                raise PermissionDenied()
 
             jaar = ronde.deelcompetitie.competitie.begin_jaar
             wedstrijd = Wedstrijd()
@@ -693,7 +694,7 @@ class RegioRondePlanningMethode1View(UserPassesTestMixin, TemplateView):
                                      'cluster__regio')
                      .get(pk=ronde_pk))
         except (ValueError, DeelcompetitieRonde.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Ronde niet gevonden')
 
         context['ronde'] = ronde
 
@@ -741,11 +742,11 @@ class RegioRondePlanningMethode1View(UserPassesTestMixin, TemplateView):
                      .select_related('deelcompetitie__competitie')
                      .get(pk=ronde_pk))
         except (ValueError, DeelcompetitieRonde.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Ronde niet gevonden')
 
         # alleen de RCL mag een wedstrijd toevoegen
         if self.rol_nu != Rollen.ROL_RCL:
-            raise Resolver404()
+            raise PermissionDenied()
 
         # voeg een wedstrijd toe
         jaar = ronde.deelcompetitie.competitie.begin_jaar
@@ -845,7 +846,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
                          .prefetch_related('uitslag__scores')
                          .get(pk=wedstrijd_pk))
         except (ValueError, Wedstrijd.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Wedstrijd niet gevonden')
 
         plan = wedstrijd.wedstrijdenplan_set.all()[0]
         ronde = (DeelcompetitieRonde
@@ -856,12 +857,12 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
                  .get(plan=plan))
 
         if ronde.is_voor_import_oude_programma():
-            raise Resolver404()
+            raise PermissionDenied()
 
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
         if ronde.deelcompetitie.functie != functie_nu:
             # mag niet wijzigen
-            raise Resolver404()
+            raise PermissionDenied()
 
         context['competitie'] = ronde.deelcompetitie.competitie
         context['regio'] = ronde.deelcompetitie.nhb_regio
@@ -965,7 +966,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
             wedstrijd_pk = int(kwargs['wedstrijd_pk'][:6])  # afkappen geeft beveiliging
             wedstrijd = Wedstrijd.objects.get(pk=wedstrijd_pk)
         except (ValueError, Wedstrijd.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Wedstrijd niet gevonden')
 
         plan = wedstrijd.wedstrijdenplan_set.all()[0]
         ronde = (DeelcompetitieRonde
@@ -976,45 +977,45 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
                  .get(plan=plan))
 
         if ronde.is_voor_import_oude_programma():
-            raise Resolver404()
+            raise PermissionDenied()
 
         deelcomp = ronde.deelcompetitie
 
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
         if deelcomp.functie != functie_nu:
             # mag niet wijzigen
-            raise Resolver404()
+            raise PermissionDenied()
 
         aanvang = request.POST.get('aanvang', '')[:5]
         nhbver_pk = request.POST.get('nhbver_pk', '')[:6]
         if nhbver_pk == "" or len(aanvang) != 5 or aanvang[2] != ':':
-            raise Resolver404()
+            raise Http404('Geen valide verzoek')
 
         try:
             nhbver = NhbVereniging.objects.get(pk=nhbver_pk)
         except (NhbVereniging.DoesNotExist, ValueError):
-            raise Resolver404()
+            raise Http404('Vereniging niet gevonden')
 
         try:
             aanvang = int(aanvang[0:0+2] + aanvang[3:3+2])
         except (TypeError, ValueError):
-            raise Resolver404()
+            raise Http404('Geen valide verzoek')
 
         # vertaal aanvang naar een tijd
         uur = aanvang // 100
         minuut = aanvang - (uur * 100)
         if uur < 0 or uur > 23 or minuut < 0 or minuut > 59:
-            raise Resolver404()
+            raise Http404('Geen valide tijdstip')
 
         if deelcomp.inschrijf_methode == INSCHRIJF_METHODE_1:
             wanneer = request.POST.get('wanneer', None)
             if not wanneer:
-                raise Resolver404()
+                raise Http404('Verzoek is niet compleet')
 
             try:
                 datum_p = datetime.datetime.strptime(wanneer, '%Y-%m-%d')
             except ValueError:
-                raise Resolver404()
+                raise Http404('Geen valide datum')
 
             when = datum_p.date()
         else:
@@ -1022,15 +1023,15 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
             # aanvang bestaat uit vier cijfers, zoals 0830
             weekdag = request.POST.get('weekdag', '')[:1]     # afkappen = veiligheid
             if weekdag == "":
-                raise Resolver404()
+                raise Http404('Geen valide weekdag')
 
             try:
                 weekdag = int(weekdag)
             except (TypeError, ValueError):
-                raise Resolver404()
+                raise Http404('Geen valide weekdag')
 
             if weekdag < 0 or weekdag > 6:
-                raise Resolver404()
+                raise Http404('Geen valide weekdag')
 
             # bepaal de begin datum van de ronde-week
             jaar = ronde.deelcompetitie.competitie.begin_jaar
@@ -1058,11 +1059,11 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
                 try:
                     pk = int(key[10:10+6])
                 except (IndexError, TypeError, ValueError):
-                    raise Resolver404()
+                    raise Http404('Geen valide klasse')
                 else:
                     if pk not in indiv_pks:
                         # unsupported number
-                        raise Resolver404()
+                        raise Http404('Geen valide klasse')
                     gekozen_klassen.append(pk)
         # for
 
@@ -1117,26 +1118,26 @@ class VerwijderWedstrijdView(UserPassesTestMixin, View):
                          .prefetch_related('uitslag__scores')
                          .get(pk=wedstrijd_pk))
         except (ValueError, Wedstrijd.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Wedstrijd niet gevonden')
 
         plan = wedstrijd.wedstrijdenplan_set.all()[0]
         try:
             ronde = DeelcompetitieRonde.objects.get(plan=plan,
                                                     deelcompetitie__laag=LAAG_REGIO)
         except DeelcompetitieRonde.DoesNotExist:
-            raise Resolver404()
+            raise Http404('Ronde niet gevonden')
 
         deelcomp = ronde.deelcompetitie
 
         # correcte beheerder?
         if deelcomp.functie != self.functie_nu:
-            raise Resolver404()
+            raise PermissionDenied()
 
         # voorkom verwijderen van wedstrijden waar een uitslag aan hangt
         if wedstrijd.uitslag:
             uitslag = wedstrijd.uitslag
             if uitslag and (uitslag.is_bevroren or uitslag.scores.count() > 0):
-                raise Resolver404()
+                raise Http404('Uitslag mag niet meer gewijzigd worden')
 
         wedstrijd.delete()
 
@@ -1182,11 +1183,11 @@ class AfsluitenRegiocompView(UserPassesTestMixin, TemplateView):
                         .get(pk=deelcomp_pk,
                              laag=LAAG_REGIO))
         except (ValueError, DeelCompetitie.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Competitie niet gevonden')
 
         if deelcomp.functie != self.functie_nu:
             # niet de beheerder
-            raise Resolver404()
+            raise PermissionDenied()
 
         if not deelcomp.is_afgesloten:
             deelcomp.competitie.bepaal_fase()
@@ -1208,18 +1209,18 @@ class AfsluitenRegiocompView(UserPassesTestMixin, TemplateView):
             deelcomp = DeelCompetitie.objects.get(pk=deelcomp_pk,
                                                   laag=LAAG_REGIO)
         except (ValueError, DeelCompetitie.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Competitie niet gevonden')
 
         if deelcomp.functie != self.functie_nu:
             # niet de beheerder
-            raise Resolver404()
+            raise PermissionDenied()
 
         if not deelcomp.is_afgesloten:
 
             deelcomp.competitie.bepaal_fase()
             if deelcomp.competitie.fase != 'F':
                 # nog niet mogelijk om af te sluiten
-                raise Resolver404()
+                raise Http404('Verkeerde competitie fase')
 
             deelcomp.is_afgesloten = True
             deelcomp.save()
@@ -1312,15 +1313,15 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
                              laag=LAAG_REGIO,
                              nhb_regio__regio_nr=regio_nr))
         except (ValueError, DeelCompetitie.DoesNotExist):
-            raise Resolver404()
+            raise Http404()
 
         if deelcomp.functie != self.functie_nu:
             # niet de beheerder
-            raise Resolver404()
+            raise PermissionDenied()
 
         deelcomp.competitie.bepaal_fase()
         if deelcomp.competitie.fase > 'F':
-            raise Resolver404()
+            raise Http404('Verkeerde competitie fase')
 
         if deelcomp.competitie.fase >= 'B':
             context['readonly_partly'] = True
@@ -1386,16 +1387,16 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
                              laag=LAAG_REGIO,
                              nhb_regio__regio_nr=regio_nr))
         except (ValueError, DeelCompetitie.DoesNotExist):
-            raise Resolver404()
+            raise Http404()
 
         if deelcomp.functie != self.functie_nu:
             # niet de beheerder
-            raise Resolver404()
+            raise PermissionDenied()
 
         deelcomp.competitie.bepaal_fase()
         if deelcomp.competitie.fase > 'C':
             # niet meer te wijzigen
-            raise Resolver404()
+            raise Http404()
 
         readonly_partly = (deelcomp.competitie.fase >= 'B')
 
@@ -1418,12 +1419,12 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
             try:
                 einde_p = datetime.datetime.strptime(einde_s, '%Y-%m-%d')
             except ValueError:
-                raise Resolver404()
+                raise Http404('Datum fout formaat')
             else:
                 einde_p = einde_p.date()
                 comp = deelcomp.competitie
                 if einde_p < comp.begin_aanmeldingen or einde_p >= comp.eerste_wedstrijd:
-                    raise Resolver404()
+                    raise Http404('Datum buiten toegestane reeks')
                 deelcomp.einde_teams_aanmaken = einde_p
 
         deelcomp.save()
@@ -1465,11 +1466,11 @@ class RegioTeamsView(UserPassesTestMixin, TemplateView):
                         .get(pk=deelcomp_pk,
                              laag=LAAG_REGIO))
         except (ValueError, DeelCompetitie.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Competitie niet gevonden')
 
         if deelcomp.functie != self.functie_nu:
             # niet de beheerder
-            raise Resolver404()
+            raise PermissionDenied()
 
         context['deelcomp'] = deelcomp
         context['regio'] = self.functie_nu.nhb_regio
@@ -1599,15 +1600,15 @@ class AGControleView(UserPassesTestMixin, TemplateView):
                              laag=LAAG_REGIO,
                              nhb_regio__regio_nr=regio_nr))
         except (ValueError, DeelCompetitie.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Competitie niet gevonden')
 
         if deelcomp.functie != self.functie_nu:
             # niet de beheerder
-            raise Resolver404()
+            raise PermissionDenied()
 
         deelcomp.competitie.bepaal_fase()
         if deelcomp.competitie.fase > 'F':
-            raise Resolver404()
+            raise Http404('Verkeerde competitie fase')
 
         context['deelcomp'] = deelcomp
 

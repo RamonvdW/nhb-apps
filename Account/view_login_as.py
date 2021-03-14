@@ -1,16 +1,18 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.shortcuts import render
-from django.urls import reverse, Resolver404
+from django.urls import reverse
+from django.http import Http404
 from django.contrib.auth import login
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.views.generic import ListView
 from django.db.models import Q, Value
 from django.db.models.functions import Concat
+from django.core.exceptions import PermissionDenied
 from .forms import ZoekAccountForm, KiesAccountForm
 from .models import Account, AccountEmail
 from .rechten import account_rechten_otp_controle_gelukt, account_rechten_login_gelukt
@@ -95,8 +97,8 @@ class LoginAsZoekView(UserPassesTestMixin, ListView):
         return False
 
     def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> doe alsof dit niet bestaat """
-        raise Resolver404()
+        """ gebruiker heeft geen toegang """
+        raise PermissionDenied()
 
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
@@ -142,11 +144,11 @@ class LoginAsZoekView(UserPassesTestMixin, ListView):
         try:
             accountemail = AccountEmail.objects.get(account__pk=account_pk)
         except AccountEmail.DoesNotExist:
-            raise Resolver404()
+            raise Http404('Account heeft geen e-mail')
 
         # prevent upgrade
         if accountemail.account.is_staff:
-            raise Resolver404()
+            raise PermissionDenied()
 
         context = dict()
         context['account'] = accountemail.account

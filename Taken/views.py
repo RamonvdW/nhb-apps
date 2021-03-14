@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.http import HttpResponseRedirect
-from django.urls import reverse, Resolver404
+from django.http import HttpResponseRedirect, Http404
+from django.urls import reverse
 from django.utils import timezone
+from django.core.exceptions import PermissionDenied
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Plein.menu import menu_dynamics
@@ -100,13 +101,13 @@ class DetailsView(UserPassesTestMixin, TemplateView):
                                     'aangemaakt_door')
                     .get(pk=taak_pk))
         except (ValueError, Taak.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Geen valide taak')
 
         account = self.request.user
 
         # controleer dat deze taak bij de beheerder hoort
         if taak.toegekend_aan != account:
-            raise Resolver404()
+            raise PermissionDenied('Geen taak voor jouw account')
 
         if taak.handleiding_pagina:
             taak.url_handleiding = reverse('Handleiding:%s' % taak.handleiding_pagina)
@@ -125,13 +126,13 @@ class DetailsView(UserPassesTestMixin, TemplateView):
             taak_pk = int(kwargs['taak_pk'][:6])    # afkappen geeft veiligheid
             taak = Taak.objects.get(pk=taak_pk)
         except (ValueError, Taak.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Geen valide taak')
 
         account = self.request.user
 
         # controleer dat deze taak bij de beheerder hoort
         if taak.toegekend_aan != account:
-            raise Resolver404()
+            raise PermissionDenied('Geen taak voor jouw account')
 
         if not taak.is_afgerond:
             if taak.log != "":

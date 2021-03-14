@@ -325,7 +325,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',        # 1=R
                                           'lid_100003_boogtype_3': 'on'})       # 3=BB
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
     def test_ingeschreven(self):
         url = self.url_ingeschreven % 1

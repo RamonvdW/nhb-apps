@@ -4,10 +4,11 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.http import HttpResponseRedirect
-from django.urls import reverse, Resolver404
+from django.http import HttpResponseRedirect, Http404
+from django.urls import reverse
 from django.db.models import Count
-from django.views.generic import TemplateView, ListView
+from django.core.exceptions import PermissionDenied
+from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Plein.menu import menu_dynamics
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving
@@ -205,7 +206,7 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
             nhbver_pk = int(kwargs['vereniging_pk'][:6])    # afkappen voor veiligheid
             nhbver = NhbVereniging.objects.get(pk=nhbver_pk)
         except NhbVereniging.DoesNotExist:
-            raise Resolver404()
+            raise Http404('Geen valide vereniging')
 
         clusters = list()
         for cluster in nhbver.clusters.order_by('letter').all():
@@ -263,7 +264,7 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
         except IndexError:                  # pragma: no cover
             # only in autotest environment
             print("Vereniging.views.AccommodatieDetailsView: autotest ontbreekt rol SEC, HWL of WL")
-            raise Resolver404()
+            raise Http404()
 
         context['sec_names'] = self.get_all_names(functie_sec)
         context['sec_email'] = functie_sec.bevestigde_email
@@ -344,12 +345,12 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
 
         if not self._mag_wijzigen(nhbver, rol_nu, functie_nu):
-            raise Resolver404()
+            raise PermissionDenied('Wijzigen niet toegestaan')
 
         if request.POST.get('maak_buiten_locatie', None):
             if buiten_locatie:
                 # er is al een buitenlocatie
-                raise Resolver404()
+                raise Http404('Er is al een buitenlocatie')
 
             buiten = WedstrijdLocatie(
                             baan_type='B',
@@ -368,7 +369,7 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
 
         form = AccommodatieDetailsForm(request.POST)
         if not form.is_valid():
-            raise Resolver404()
+            raise Http404('Geen valide invoer')
 
         if binnen_locatie:
             msgs = list()

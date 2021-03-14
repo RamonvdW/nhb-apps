@@ -4,9 +4,10 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.http import HttpResponseRedirect
-from django.urls import reverse, Resolver404
+from django.http import HttpResponseRedirect, Http404
+from django.urls import reverse
 from django.views.generic import ListView
+from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Plein.menu import menu_dynamics
 from Functie.rol import Rollen, rol_get_huidige_functie
@@ -60,14 +61,14 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
             comp_pk = int(self.kwargs['comp_pk'][:10])
             comp = Competitie.objects.get(pk=comp_pk)
         except (ValueError, TypeError, Competitie.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Competitie niet gevonden')
 
         self.comp = comp
         comp.bepaal_fase()
 
         # check dat competitie open is voor inschrijvingen
         if not ('B' <= comp.fase <= 'E'):
-            raise Resolver404()
+            raise Http404('Verkeerde competitie fase')
 
         _, functie_nu = rol_get_huidige_functie(self.request)
         objs = list()
@@ -279,12 +280,12 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
             comp_pk = int(self.kwargs['comp_pk'][:10])
             comp = Competitie.objects.get(pk=comp_pk)
         except (ValueError, TypeError, Competitie.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Competitie niet gevonden')
 
         # check dat competitie open is voor inschrijvingen
         comp.bepaal_fase()
         if not ('B' <= comp.fase <= 'E'):
-            raise Resolver404()
+            raise Http404('Verkeerde competitie fase')
 
         # rol is HWL (zie test_func)
 
@@ -293,7 +294,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
 
         if hwl_regio.is_administratief:
             # niemand van deze vereniging mag meedoen aan wedstrijden
-            raise Resolver404()
+            raise Http404('Geen wedstrijden in deze regio')
 
         # zoek de juiste DeelCompetitie erbij
         deelcomp = DeelCompetitie.objects.get(competitie=comp,
@@ -334,7 +335,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                 if dagdeel in deelcomp.toegestane_dagdelen or deelcomp.toegestane_dagdelen == '':
                     bulk_dagdeel = dagdeel
             if not bulk_dagdeel:
-                raise Resolver404()
+                raise Http404('Incompleet verzoek')
 
         bulk_opmerking = request.POST.get('opmerking', '')
         if len(bulk_opmerking) > 500:
@@ -354,7 +355,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                     boogtype_pk = int(spl[3])
                 except (TypeError, ValueError):
                     # iemand loopt te klooien
-                    raise Resolver404()
+                    raise Http404('Verkeerde parameters')
 
                 # SchutterBoog record met voor_wedstrijd==True moet bestaan
                 try:
@@ -366,16 +367,16 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                                          boogtype=boogtype_pk))
                 except SchutterBoog.DoesNotExist:
                     # iemand loopt te klooien
-                    raise Resolver404()
+                    raise Http404('Sporter niet gevonden')
 
                 if not schutterboog.voor_wedstrijd:
                     # iemand loopt te klooien
-                    raise Resolver404()
+                    raise Http404('Sporter heeft geen voorkeur voor wedstrijden opgegeven')
 
                 # controleer lid bij vereniging HWL
                 if schutterboog.nhblid.bij_vereniging != self.functie_nu.nhb_ver:
                     # iemand loopt te klooien
-                    raise Resolver404()
+                    raise PermissionDenied('Geen lid bij jouw vereniging')
 
                 # voorkom dubbele aanmelding
                 if (RegioCompetitieSchutterBoog
@@ -384,7 +385,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                                 schutterboog=schutterboog)
                         .count() > 0):
                     # al aangemeld - zou niet hier moeten zijn gekomen
-                    raise Resolver404()
+                    raise Http404('Sporter is al ingeschreven')
 
                 # bepaal in welke wedstrijdklasse de schutter komt
                 age = schutterboog.nhblid.bereken_wedstrijdleeftijd(deelcomp.competitie.begin_jaar + 1)
@@ -434,7 +435,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
 
                 if not done:
                     # geen klasse kunnen vinden
-                    raise Resolver404()
+                    raise Http404('Geen passende wedstrijdklasse kunnen kiezen')
 
                 # kijk of de schutter met een team mee wil en mag schieten voor deze competitie
                 if age > MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT and dvl < udvl:
@@ -486,7 +487,7 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
                         .select_related('competitie')
                         .get(pk=deelcomp_pk))
         except (ValueError, TypeError, DeelCompetitie.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Verkeerde parameters')
 
         self.deelcomp = deelcomp
 
@@ -541,7 +542,7 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
     def post(self, request, *args, **kwargs):
 
         if self.rol_nu != Rollen.ROL_HWL:
-            raise Resolver404()
+            raise PermissionDenied('Verkeerde rol')
 
         # all checked boxes are in the post request as keys, typically with value 'on'
         for key, _ in request.POST.items():
@@ -551,11 +552,11 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
                     inschrijving = RegioCompetitieSchutterBoog.objects.get(pk=pk)
                 except (ValueError, TypeError, RegioCompetitieSchutterBoog.DoesNotExist):
                     # niet normaal
-                    raise Resolver404()
+                    raise Http404('Geen valide inschrijving')
 
                 # controleer dat deze inschrijving bij de vereniging hoort
                 if inschrijving.schutterboog.nhblid.bij_vereniging != self.functie_nu.nhb_ver:
-                    raise Resolver404()
+                    raise PermissionDenied('Sporter is niet lid bij jouw vereniging')
 
                 # schrijf de schutter uit
                 inschrijving.delete()

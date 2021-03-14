@@ -410,32 +410,32 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         url = self.url_uitslagen_regio % (self.comp_25.pk, 'XXX', 'alle')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)
+        self.assert404(resp)
 
         url = self.url_uitslagen_regio_n % (self.comp_18.pk, 'R', 'alle', 999)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)
+        self.assert404(resp)
 
         url = self.url_uitslagen_regio_n % (self.comp_18.pk, 'R', 'alle', "NaN")
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)
+        self.assert404(resp)
 
         url = self.url_uitslagen_regio_n % (self.comp_18.pk, 'BAD', 'alle', 101)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)
+        self.assert404(resp)
 
         url = self.url_uitslagen_regio_n % (99, 'r', 'alle', 101)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)
+        self.assert404(resp)
 
         url = self.url_uitslagen_regio_n % ('X', 'r', 'alle', 101)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)
+        self.assert404(resp)
 
     def test_rayon(self):
         url = self.url_uitslagen_rayon % (self.comp_18.pk, 'R')
@@ -456,27 +456,27 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         url = self.url_uitslagen_rayon % (self.comp_18.pk, 'XXX')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)
+        self.assert404(resp)
 
         url = self.url_uitslagen_rayon % ('x', 'R')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)
+        self.assert404(resp)
 
         url = self.url_uitslagen_rayon % (99, 'R')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)
+        self.assert404(resp)
 
         url = self.url_uitslagen_rayon_n % (self.comp_18.pk, 'R', 'x')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)
+        self.assert404(resp)
 
         url = self.url_uitslagen_rayon_n % (self.comp_18.pk, 'R', '0')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)
+        self.assert404(resp)
 
     def test_bond(self):
         url = self.url_uitslagen_bond % (self.comp_18.pk, 'R')
@@ -489,12 +489,12 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         url = self.url_uitslagen_bond % ('x', 'R')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)
+        self.assert404(resp)
 
         url = self.url_uitslagen_bond % (99, 'R')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)
+        self.assert404(resp)
 
         # BK voor al afgesloten competitie
         self.comp_18.is_afgesloten = True
@@ -502,7 +502,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         url = self.url_uitslagen_bond % (self.comp_18.pk, 'R')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)
+        self.assert404(resp)
 
     def test_vereniging(self):
         url = self.url_uitslagen_ver % (self.comp_18.pk, 'R')
@@ -563,22 +563,22 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         url = self.url_uitslagen_ver % ('x', 'R')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)
+        self.assert404(resp)
 
         url = self.url_uitslagen_ver % (self.comp_18.pk, 'x')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)
+        self.assert404(resp)
 
         url = self.url_uitslagen_ver_n % (self.comp_18.pk, 'R', 999999)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)
+        self.assert404(resp)
 
         url = self.url_uitslagen_ver_n % (self.comp_18.pk, 'R', 'nan')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)
+        self.assert404(resp)
 
     def test_anon(self):
         self.client.logout()

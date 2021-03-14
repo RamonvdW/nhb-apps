@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.http import HttpResponseRedirect, Http404
-from django.urls import reverse, Resolver404
+from django.urls import reverse
 from django.db.models import Count
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
@@ -443,7 +443,7 @@ class WijzigTeamAGView(UserPassesTestMixin, TemplateView):
                                          'bij_vereniging')
                          .get(pk=deelnemer_pk))
         except (ValueError, RegioCompetitieSchutterBoog.DoesNotExist):
-            raise Resolver404()
+            raise Http404()
 
         # controleer dat deze deelnemer bekeken en gewijzigd mag worden
         self._mag_wijzigen_of_404(deelnemer)
@@ -453,11 +453,11 @@ class WijzigTeamAGView(UserPassesTestMixin, TemplateView):
             try:
                 nieuw_ag = float(nieuw_ag)
             except ValueError:
-                raise Resolver404()
+                raise Http404('Geen goed AG')
 
             # controleer dat het een redelijk AG is
             if nieuw_ag < 1.0 or nieuw_ag >= 10.0:
-                raise Resolver404()
+                raise Http404('Geen goed AG')
 
             score_teams_ag_opslaan(
                     deelnemer.schutterboog,
@@ -579,7 +579,7 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
                     .get(pk=team_pk,
                          vereniging=self.functie_nu.nhb_ver))
         except (ValueError, RegiocompetitieTeam.DoesNotExist):
-            raise Resolver404()
+            raise Http404()
 
         # toegestane boogtypen en schutters
         boog_pks = team.team_type.boog_typen.values_list('pk', flat=True)

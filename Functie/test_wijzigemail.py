@@ -77,11 +77,11 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
         url = self.url_wijzig_email % functie.pk
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)
+        self.assert403(resp)
 
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'email': 'nieuweemail@test.com'})
-        self.assertEqual(resp.status_code, 404)
+        self.assert403(resp)
 
     def test_get_anon(self):
         url = self.url_wijzig_email % self.functie_rko1.pk
@@ -347,10 +347,10 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
         url = self.url_wijzig_email % 999999
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)
+        self.assert404(resp)
         with self.assert_max_queries(20):
             resp = self.client.post(url)
-        self.assertEqual(resp.status_code, 404)
+        self.assert404(resp)
 
         # post met te weinig parameters
         url = self.url_wijzig_email % self.functie_rko1.pk

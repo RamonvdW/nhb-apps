@@ -189,7 +189,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         url = self.url_accommodatie_details % 999999
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
         # coverage
         self.assertTrue(str(self.loc1) != "")
@@ -371,35 +371,35 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
                                           'banen_18m': 40,
                                           'banen_25m': 6,
                                           'max_dt': 3})
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'baan_type': 'O',
                                           'banen_18m': 4,
                                           'banen_25m': 40,
                                           'max_dt': 3})
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'baan_type': 'O',
                                           'banen_18m': 4,
                                           'banen_25m': 4,
                                           'max_dt': 2})
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'baan_type': 'O',
                                           'banen_18m': 4,
                                           'banen_25m': 4,
                                           'max_dt': 5})
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'baan_type': 'y',
                                           'banen_18m': 4,
                                           'banen_25m': 4,
                                           'max_dt': 4})
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
         # illegale location_pk
         url = self.url_accommodatie_vereniging % 888888
@@ -408,7 +408,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
                                           'banen_18m': 4,
                                           'banen_25m': 4,
                                           'max_dt': 4})
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
     def test_wl(self):
         # login als HWL van ver2 op loc2
@@ -452,7 +452,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
                                           'banen_25m': 6,
                                           'max_dt': 3,
                                           'notities': 'dit is een test'})
-        self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
+        self.assert403(resp)
 
     def test_sec(self):
         # login als SEC van ver2 op loc2
@@ -493,7 +493,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
                                           'banen_25m': 6,
                                           'max_dt': 3,
                                           'notities': 'dit is een test'})
-        self.assertEqual(resp.status_code, 404)
+        self.assert403(resp)
 
     def test_gedeelde_locatie(self):
         # login als BB
@@ -573,7 +573,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         # maak de buiten locatie nog een keer aan
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'maak_buiten_locatie': 'on'})
-        self.assertEqual(resp.status_code, 404)
+        self.assert404(resp)
         self.assertEqual(2, self.nhbver2.wedstrijdlocatie_set.count())
 
         # haal het scherm op met de buiten locatie erin

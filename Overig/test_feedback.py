@@ -146,7 +146,7 @@ class TestOverigFeedback(E2EHelpers, TestCase):
         self.e2e_logout()
         with self.assert_max_queries(20):
             resp = self.client.get('/overig/feedback/formulier/')
-        self.assertEqual(resp.status_code, 404)
+        self.assert404(resp)
 
     def test_feedback_inzicht_anon_redirect_login(self):
         # zonder inlog is feedback niet te zien

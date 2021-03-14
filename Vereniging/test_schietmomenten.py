@@ -358,7 +358,7 @@ class TestVerenigingSchietmomenten(E2EHelpers, TestCase):
         self.e2e_check_rol('HWL')
 
         resp = self.client.get(self.url_schietmomenten % 999999)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
         # maak een hoop extra schutters aan
         basis = self.deelnemer_100001

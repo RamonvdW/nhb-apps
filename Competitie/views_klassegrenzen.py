@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.views.generic import View
-from django.urls import Resolver404
+from django.http import Http404
 from django.shortcuts import render
 from BasisTypen.models import IndivWedstrijdklasse, TeamWedstrijdklasse
 from .models import (AG_NUL, Competitie, CompetitieKlasse)
@@ -94,7 +94,7 @@ class KlassegrenzenTonenView(View):
                     .objects
                     .get(pk=comp_pk))
         except (ValueError, Competitie.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Competitie niet gevonden')
 
         context['comp'] = comp
 

@@ -4,8 +4,8 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.http import HttpResponseRedirect
-from django.urls import Resolver404, reverse
+from django.http import HttpResponseRedirect, Http404
+from django.urls import reverse
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
@@ -51,10 +51,10 @@ class VerenigingLijstRkSelectieView(UserPassesTestMixin, TemplateView):
                            .select_related('competitie', 'nhb_rayon')
                            .get(pk=deelcomp_pk, laag=LAAG_RK))
         except (ValueError, DeelCompetitie.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Geen valide competitie')
 
         if not deelcomp_rk.heeft_deelnemerslijst:
-            raise Resolver404()
+            raise Http404('Geen deelnemerslijst beschikbaar')
 
         context['deelcomp_rk'] = deelcomp_rk
 

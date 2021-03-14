@@ -247,7 +247,7 @@ class TestHistCompInterland(E2EHelpers, TestCase):
         # illegale klasse_pk
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_interland_download % 999999)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
         # bestaande klasse_pk, maar verkeerd seizoen
         obj = HistCompetitie()
@@ -258,7 +258,7 @@ class TestHistCompInterland(E2EHelpers, TestCase):
         obj.save()
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_interland_download % obj.pk)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
         # verwijder de hele histcomp
         HistCompetitie.objects.all().delete()

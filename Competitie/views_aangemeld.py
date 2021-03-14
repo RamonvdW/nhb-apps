@@ -4,10 +4,10 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.urls import Resolver404, reverse
+from django.urls import reverse
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect, HttpResponse, Http404
 from Plein.menu import menu_dynamics
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
 from Functie.rol import Rollen, rol_get_huidige
@@ -89,11 +89,11 @@ class LijstAangemeldRegiocompAllesView(UserPassesTestMixin, TemplateView):
             comp_pk = int(kwargs['comp_pk'][:6])        # afkappen voor veiligheid
             comp = Competitie.objects.get(pk=comp_pk)
         except (ValueError, Competitie.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Competitie niet gevonden')
 
         comp.bepaal_fase()
         if comp.fase < 'B' or comp.fase > 'E':
-            raise Resolver404()
+            raise Http404('Verkeerde competitie fase')
 
         context['competitie'] = comp
 
@@ -150,11 +150,11 @@ class LijstAangemeldRegiocompRayonView(UserPassesTestMixin, TemplateView):
             comp_pk = int(kwargs['comp_pk'][:6])    # afkappen voor veiligheid
             comp = Competitie.objects.get(pk=comp_pk)
         except (ValueError, Competitie.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Competitie niet gevonden')
 
         comp.bepaal_fase()
         if comp.fase < 'B' or comp.fase > 'E':
-            raise Resolver404()
+            raise Http404('Verkeerde competitie fase')
 
         context['competitie'] = comp
 
@@ -162,7 +162,7 @@ class LijstAangemeldRegiocompRayonView(UserPassesTestMixin, TemplateView):
             rayon_pk = int(kwargs['rayon_pk'][:6])  # afkappen voor veiligheid
             rayon = NhbRayon.objects.get(pk=rayon_pk)
         except (ValueError, NhbRayon.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Rayon niet gevonden')
 
         context['inhoud'] = 'in ' + str(rayon)
 
@@ -219,11 +219,11 @@ class LijstAangemeldRegiocompRegioView(UserPassesTestMixin, TemplateView):
             comp_pk = int(kwargs['comp_pk'][:6])        # afkappen voor veiligheid
             comp = Competitie.objects.get(pk=comp_pk)
         except (ValueError, Competitie.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Competitie niet gevonden')
 
         comp.bepaal_fase()
         if comp.fase < 'B' or comp.fase > 'E':
-            raise Resolver404()
+            raise Http404('Verkeerde competitie fase')
 
         context['competitie'] = comp
 
@@ -234,7 +234,7 @@ class LijstAangemeldRegiocompRegioView(UserPassesTestMixin, TemplateView):
                      .select_related('rayon')
                      .get(pk=regio_pk))
         except (ValueError, NhbRegio.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Regio niet gevonden')
 
         context['inhoud'] = 'in ' + str(regio)
 
@@ -243,7 +243,7 @@ class LijstAangemeldRegiocompRegioView(UserPassesTestMixin, TemplateView):
                                                   competitie=comp,
                                                   nhb_regio=regio)
         except DeelCompetitie.DoesNotExist:
-            raise Resolver404()
+            raise Http404('Competitie niet gevonden')
 
         objs = (RegioCompetitieSchutterBoog
                 .objects
@@ -456,11 +456,11 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
             comp_pk = int(kwargs['comp_pk'][:6])        # afkappen voor veiligheid
             comp = Competitie.objects.get(pk=comp_pk)
         except (ValueError, Competitie.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Competitie niet gevonden')
 
         comp.bepaal_fase()
         if comp.fase < 'B' or comp.fase > 'E':
-            raise Resolver404()
+            raise Http404('Verkeerde competitie fase')
 
         context['competitie'] = comp
 
@@ -471,7 +471,7 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
                      .select_related('rayon')
                      .get(pk=regio_pk))
         except (ValueError, NhbRegio.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Regio niet gevonden')
 
         context['regio'] = regio
 
@@ -484,10 +484,10 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
                              competitie=comp,
                              nhb_regio=regio))
         except DeelCompetitie.DoesNotExist:
-            raise Resolver404()
+            raise Http404('Competitie niet gevonden')
 
         if deelcomp.inschrijf_methode != INSCHRIJF_METHODE_3:
-            raise Resolver404()
+            raise Http404('Verkeerde inschrijfmethode')
 
         objs = (RegioCompetitieSchutterBoog
                 .objects
@@ -541,11 +541,11 @@ class Inschrijfmethode3BehoefteAlsBestandView(Inschrijfmethode3BehoefteView):
             comp_pk = int(kwargs['comp_pk'][:6])        # afkappen voor veiligheid
             comp = Competitie.objects.get(pk=comp_pk)
         except (ValueError, Competitie.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Competitie niet gevonden')
 
         comp.bepaal_fase()
         if comp.fase < 'B' or comp.fase > 'E':
-            raise Resolver404()
+            raise Http404('Verkeerde competitie fase')
 
         context['competitie'] = comp
 
@@ -556,7 +556,7 @@ class Inschrijfmethode3BehoefteAlsBestandView(Inschrijfmethode3BehoefteView):
                      .select_related('rayon')
                      .get(pk=regio_pk))
         except (ValueError, NhbRegio.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Regio niet gevonden')
 
         try:
             deelcomp = (DeelCompetitie
@@ -567,7 +567,7 @@ class Inschrijfmethode3BehoefteAlsBestandView(Inschrijfmethode3BehoefteView):
                              competitie=comp,
                              nhb_regio=regio))
         except DeelCompetitie.DoesNotExist:
-            raise Resolver404()
+            raise Http404('Competitie niet gevonden')
 
         objs = (RegioCompetitieSchutterBoog
                 .objects
@@ -585,7 +585,7 @@ class Inschrijfmethode3BehoefteAlsBestandView(Inschrijfmethode3BehoefteView):
         context['object_list'] = objs
 
         if deelcomp.inschrijf_methode != INSCHRIJF_METHODE_3:
-            raise Resolver404()
+            raise Http404('Verkeerde inschrijfmethode')
 
         # voeg de tabel met dagdeel-behoefte toe
         # dict(nhb_ver) = dict("dagdeel_afkorting") = count

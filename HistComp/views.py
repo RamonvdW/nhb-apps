@@ -4,8 +4,8 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.urls import Resolver404, reverse
-from django.http import HttpResponseRedirect, HttpResponse
+from django.urls import reverse
+from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.views.generic import ListView, TemplateView
 from django.db.models import Q
 from django.contrib.auth.mixins import UserPassesTestMixin
@@ -137,7 +137,7 @@ class HistCompBaseView(ListView):
             histcomp = HistCompetitie.objects.get(pk=self.histcomp_pk)
         except HistCompetitie.DoesNotExist:
             # foute histcomp_pk
-            raise Resolver404()
+            raise Http404('Competitie niet gevonden')
 
         self.histcomp = histcomp
 
@@ -372,7 +372,7 @@ class InterlandAlsBestandView(InterlandView):
             klasse_pk = int(kwargs['klasse_pk'][:6])  # afkappen geeft beveiliging
             klasse = HistCompetitie.objects.get(pk=klasse_pk)
         except (ValueError, HistCompetitie.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Klasse niet gevonden')
 
         context = dict()
         self.maak_data(context)
@@ -385,7 +385,7 @@ class InterlandAlsBestandView(InterlandView):
         # for
 
         if schutters is None:
-            raise Resolver404()
+            raise Http404('Geen sporters gevonden')
 
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="interland.csv"'

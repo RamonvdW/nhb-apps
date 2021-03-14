@@ -298,23 +298,23 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         url = self.url_aangemeld_alles % comp.pk
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found/allowed
+        self.assert404(resp)     # 404 = Not found/allowed
 
         url = self.url_aangemeld_rayon % (comp.pk, self.rayon_1.pk)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found/allowed
+        self.assert404(resp)     # 404 = Not found/allowed
 
         url = self.url_aangemeld_regio % (comp.pk, self.regio_101.pk)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found/allowed
+        self.assert404(resp)     # 404 = Not found/allowed
 
         # regio 100: niet bestaand als deelcompetitie
         url = self.url_aangemeld_regio % (comp.pk, 100)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)  # 404 = Not found
+        self.assert404(resp)  # 404 = Not found
 
         # coverage voor models __str__
         obj = RegioCompetitieSchutterBoog.objects.filter(deelcompetitie__laag=LAAG_REGIO).all()[0]
@@ -521,25 +521,25 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         # alle datums verplicht
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'datum1': '2019-08-09'})
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'datum1': 'null',
                                           'datum2': 'hallo',
                                           'datum3': '0',
                                           'datum4': '2019-13-42'})
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
         # foute comp_pk bij get
         url = self.url_wijzigdatums % 999999
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
         # foute comp_pk bij post
         with self.assert_max_queries(20):
             resp = self.client.post(url)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
     def test_behoefte_18(self):
         comp = Competitie.objects.get(afstand='18')
@@ -658,71 +658,71 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         url = self.url_aangemeld_alles % 999999
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
         url = self.url_aangemeld_rayon % (999999, 999999)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
         url = self.url_aangemeld_rayon % (comp.pk, 999999)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
         url = self.url_aangemeld_regio % (999999, 999999)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
         url = self.url_aangemeld_regio % (comp.pk, 999999)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
         # competitie bestaat niet
         url = self.url_behoefte % (999999, 101)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
         url = self.url_behoefte_bestand % (999999, 101)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
         # regio bestaat niet
         url = self.url_behoefte % (comp.pk, 999999)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
         url = self.url_behoefte_bestand % (comp.pk, 999999)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
         # deelcomp bestaat niet
         url = self.url_behoefte % (comp.pk, 100)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
         url = self.url_behoefte_bestand % (comp.pk, 100)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
         # correct, maar niet inschrijfmethode 3
         url = self.url_behoefte % (comp.pk, 101)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
         url = self.url_behoefte_bestand % (comp.pk, 101)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
     @staticmethod
     def _vind_tabel_regel_met(resp, zoekterm):

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -149,7 +149,7 @@ class TestRecordsView(E2EHelpers, TestCase):
     def test_view_specifiek_missing(self):
         with self.assert_max_queries(20):
             resp = self.client.get('/records/record-OD-0/')    # niet bestaand record nummer
-        self.assertEqual(resp.status_code, 404)  # 404 = Not found
+        self.assert404(resp)  # 404 = Not found
 
     def test_view_zoom_0args(self):
         with self.assert_max_queries(20):
@@ -194,7 +194,7 @@ class TestRecordsView(E2EHelpers, TestCase):
     def test_view_zoom_1args_neg(self):
         with self.assert_max_queries(20):
             resp = self.client.get('/records/indiv/neg/')
-        self.assertEqual(resp.status_code, 404)  # 404 = Not found
+        self.assert404(resp)  # 404 = Not found
 
     def test_view_zoek(self):
         with self.assert_max_queries(20):

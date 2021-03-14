@@ -214,22 +214,22 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
         # haal als HWL 'de' voorkeuren pagina op, zonder specifiek nhblid_pk
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_voorkeuren)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
+        self.assert404(resp)     # 404 = Not allowed
 
         # haal als HWL de voorkeuren pagina op met een niet-numeriek nhblid_pk
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_voorkeuren + 'snuiter/')
-        self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
+        self.assert404(resp)     # 404 = Not allowed
 
         # haal als HWL de voorkeuren pagina op met een niet bestaand nhblid_pk
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_voorkeuren + '999999/')
-        self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
+        self.assert404(resp)     # 404 = Not allowed
 
         # haal als HWL de voorkeuren pagina op van een lid van een andere vereniging
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_voorkeuren + '100002/')
-        self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
+        self.assert403(resp)
 
     def test_geen_wedstrijden(self):
         # self.account_normaal is lid bij self.nhbver1

@@ -4,8 +4,8 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.http import HttpResponseRedirect
-from django.urls import reverse, Resolver404
+from django.http import HttpResponseRedirect, Http404
+from django.urls import reverse
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Plein.menu import menu_dynamics
@@ -49,7 +49,7 @@ class LedenSchietmomentView(UserPassesTestMixin, TemplateView):
                         .get(pk=deelcomp_pk,
                              inschrijf_methode=INSCHRIJF_METHODE_1))
         except (ValueError, TypeError, DeelCompetitie.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Geen valide competitie')
 
         context['deelcomp'] = deelcomp
 

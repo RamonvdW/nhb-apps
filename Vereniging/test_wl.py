@@ -302,7 +302,7 @@ class TestVerenigingWL(E2EHelpers, TestCase):
         # probeer in te schrijven (mag niet)
         with self.assert_max_queries(20):
             resp = self.client.post(url)
-        self.assertEqual(resp.status_code, 404)         # 404 = Not found
+        self.assert403(resp)
 
     def test_cornercase(self):
         # login als WL
@@ -312,7 +312,7 @@ class TestVerenigingWL(E2EHelpers, TestCase):
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_ingeschreven % 9999999)
-        self.assertEqual(resp.status_code, 404)         # 404 = Not found
+        self.assert404(resp)         # 404 = Not found
 
     def test_wedstrijdlocatie(self):
         # maak een locatie en koppel aan de vereniging

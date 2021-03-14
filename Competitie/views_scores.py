@@ -4,9 +4,10 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.http import HttpResponseRedirect, JsonResponse
-from django.urls import Resolver404, reverse
+from django.http import HttpResponseRedirect, JsonResponse, Http404
+from django.urls import reverse
 from django.utils import timezone
+from django.core.exceptions import PermissionDenied
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Plein.menu import menu_dynamics
@@ -50,12 +51,12 @@ class ScoresRegioView(UserPassesTestMixin, TemplateView):
             deelcomp = DeelCompetitie.objects.get(pk=deelcomp_pk,
                                                   laag=LAAG_REGIO)
         except (ValueError, DeelCompetitie.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Competitie niet gevonden')
 
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
         if deelcomp.functie != functie_nu:
             # niet de beheerder
-            raise Resolver404()
+            raise PermissionDenied()
 
         context['deelcomp'] = deelcomp
 
@@ -138,7 +139,7 @@ def bepaal_wedstrijd_en_deelcomp_of_404(wedstrijd_pk):
                      .prefetch_related('uitslag__scores')
                      .get(pk=wedstrijd_pk))
     except (ValueError, Wedstrijd.DoesNotExist):
-        raise Resolver404()
+        raise Http404('Wedstrijd niet gevonden')
 
     plan = wedstrijd.wedstrijdenplan_set.all()[0]
 
@@ -199,7 +200,7 @@ class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
         context['deelcomp'] = deelcomp
 
         if not mag_deelcomp_wedstrijd_wijzigen(wedstrijd, functie_nu, deelcomp):
-            raise Resolver404()
+            raise PermissionDenied()
 
         context['is_controle'] = self.is_controle
         context['is_akkoord'] = wedstrijd.uitslag.is_bevroren
@@ -223,8 +224,8 @@ class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
         context['url_opslaan'] = reverse('Competitie:dynamic-scores-opslaan')
         context['url_deelnemers_ophalen'] = reverse('Competitie:dynamic-deelnemers-ophalen')
 
-        plan = wedstrijd.wedstrijdenplan_set.all()[0]
-        ronde = DeelcompetitieRonde.objects.get(plan=plan)
+        # plan = wedstrijd.wedstrijdenplan_set.all()[0]
+        # ronde = DeelcompetitieRonde.objects.get(plan=plan)
 
         if rol_nu == Rollen.ROL_RCL:
             context['url_terug'] = reverse('Competitie:scores-regio',
@@ -253,7 +254,7 @@ class WedstrijdUitslagControlerenView(WedstrijdUitslagInvoerenView):
         wedstrijd, deelcomp, _ = bepaal_wedstrijd_en_deelcomp_of_404(wedstrijd_pk)
 
         if not mag_deelcomp_wedstrijd_wijzigen(wedstrijd, functie_nu, deelcomp):
-            raise Resolver404()
+            raise PermissionDenied()
 
         uitslag = wedstrijd.uitslag
         if not uitslag.is_bevroren:
@@ -275,16 +276,18 @@ class DynamicDeelnemersOphalenView(UserPassesTestMixin, View):
 
     def handle_no_permission(self):
         """ gebruiker heeft geen toegang """
-        raise Resolver404()
+        raise PermissionDenied()
 
-    def post(self, request, *args, **kwargs):
+    @staticmethod
+    def post(request, *args, **kwargs):
         """ Deze functie wordt aangeroepen als de knop 'deelnemers ophalen' gebruikt wordt
         """
 
         try:
             data = json.loads(request.body)
         except json.JSONDecodeError:
-            raise Resolver404()         # garbage in
+            # garbage in
+            raise Http404('Geen valide verzoek')
 
         # print('data: %s' % repr(data))
 
@@ -293,7 +296,7 @@ class DynamicDeelnemersOphalenView(UserPassesTestMixin, View):
             deelcomp = DeelCompetitie.objects.get(laag=LAAG_REGIO,
                                                   pk=deelcomp_pk)
         except (KeyError, ValueError, DeelCompetitie.DoesNotExist):
-            raise Resolver404()         # garbage in
+            raise Http404('Competitie niet gevonden')
 
         # TODO: filter deelnemers op cluster (wedstrijd.vereniging.clusters)
 
@@ -332,16 +335,18 @@ class DynamicZoekOpNhbnrView(UserPassesTestMixin, View):
 
     def handle_no_permission(self):
         """ gebruiker heeft geen toegang """
-        raise Resolver404()
+        raise PermissionDenied()
 
-    def post(self, request, *args, **kwargs):
+    @staticmethod
+    def post(request, *args, **kwargs):
         """ Deze functie wordt aangeroepen als de knop 'Zoek' gebruikt wordt
         """
 
         try:
             data = json.loads(request.body)
         except json.JSONDecodeError:
-            raise Resolver404()         # garbage in
+            # garbage in
+            raise Http404('Geen valide verzoek')
 
         # zoek een
         # print('data: %s' % repr(data))
@@ -351,7 +356,8 @@ class DynamicZoekOpNhbnrView(UserPassesTestMixin, View):
             wedstrijd_pk = int(str(data['wedstrijd_pk'])[:6])   # afkappen voor extra veiligheid
             wedstrijd = Wedstrijd.objects.get(pk=wedstrijd_pk)
         except (KeyError, ValueError, Wedstrijd.DoesNotExist):
-            raise Resolver404()         # garbage in
+            # garbage in
+            raise Http404('Geen valide verzoek')
 
         plan = wedstrijd.wedstrijdenplan_set.all()[0]
 
@@ -408,7 +414,7 @@ class DynamicScoresOpslaanView(UserPassesTestMixin, View):
 
     def handle_no_permission(self):
         """ gebruiker heeft geen toegang """
-        raise Resolver404()
+        raise PermissionDenied()
 
     @staticmethod
     def laad_wedstrijd_of_404(data):
@@ -420,7 +426,7 @@ class DynamicScoresOpslaanView(UserPassesTestMixin, View):
                          .prefetch_related('uitslag__scores')
                          .get(pk=wedstrijd_pk))
         except (KeyError, ValueError, Wedstrijd.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Wedstrijd niet gevonden')
 
         return wedstrijd
 
@@ -528,31 +534,32 @@ class DynamicScoresOpslaanView(UserPassesTestMixin, View):
         try:
             data = json.loads(request.body)
         except json.JSONDecodeError:
-            raise Resolver404()         # garbage in
+            # garbage in
+            raise Http404('Geen valide verzoek')
 
         # print('data:', repr(data))
 
         wedstrijd = self.laad_wedstrijd_of_404(data)
         uitslag = wedstrijd.uitslag
         if not uitslag:
-            raise Resolver404()
+            raise Http404()
 
         # controleer toestemming om scores op te slaan voor deze wedstrijd
 
         plannen = wedstrijd.wedstrijdenplan_set.all()
         if plannen.count() < 1:
             # wedstrijd met andere bedoeling
-            raise Resolver404()
+            raise Http404()
 
         ronde = DeelcompetitieRonde.objects.get(plan=plannen[0])
 
         rol_nu, functie_nu = rol_get_huidige_functie(request)
         if not mag_deelcomp_wedstrijd_wijzigen(wedstrijd, functie_nu, ronde.deelcompetitie):
-            raise Resolver404()
+            raise PermissionDenied()
 
         # voorkom wijzigingen bevroren wedstrijduitslag
         if rol_nu in (Rollen.ROL_HWL, Rollen.ROL_WL) and uitslag.is_bevroren:
-            raise Resolver404()
+            raise Http404('Uitslag mag niet meer gewijzigd worden')
 
         door_account = request.user
         when = timezone.now()
@@ -610,7 +617,7 @@ class WedstrijdUitslagBekijkenView(TemplateView):
 
         te_sorteren = [(score.vereniging_str, score.schutter_str, score.boog_str, score) for score in scores]
         te_sorteren.sort()
-        scores = [score for _,_,_,score in te_sorteren]
+        scores = [score for _, _, _, score in te_sorteren]
 
         context['scores'] = scores
         context['wedstrijd'] = wedstrijd

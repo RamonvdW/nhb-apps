@@ -629,11 +629,11 @@ class TestCompetitie(E2EHelpers, TestCase):
         # illegale competitie
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_klassegrenzen_vaststellen % 'xx')
-        self.assertEqual(resp.status_code, 404)
+        self.assert404(resp)
 
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_klassegrenzen_vaststellen % 'xx')
-        self.assertEqual(resp.status_code, 404)
+        self.assert404(resp)
 
     def test_klassegrenzen_tonen(self):
         # competitie opstarten
