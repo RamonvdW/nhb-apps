@@ -5,11 +5,13 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.utils import timezone
+from django.urls import reverse
 from django.test import TestCase
 from django.conf import settings
 from Overig.e2ehelpers import E2EHelpers
 from .models import Account
 from .forms import LoginForm
+from Overig.tijdelijke_url import maak_tijdelijke_url_account_email
 import datetime
 
 
@@ -124,12 +126,21 @@ class TestAccountLogin(E2EHelpers, TestCase):
         self.email_normaal.email_is_bevestigd = False
         self.email_normaal.save()
 
+        url = maak_tijdelijke_url_account_email(self.email_normaal, test="hallo")
+        code = url.split('/')[-2]
+
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_login, {'login_naam': 'normaal',
                                                      'wachtwoord':  E2EHelpers.WACHTWOORD}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/bevestig-email.dtl', 'plein/site_layout.dtl'))
+
+        self.e2e_login(self.account_admin)
+        url = reverse('Overig:tijdelijke-url', kwargs={'code': code})
+        resp = self.client.post(url)
+        self.assertTrue(resp.status_code, 200)
+        self.assert_template_used(resp, ('account/bevestigd.dtl', 'plein/site_layout.dtl'))
 
     def test_inlog_partial_fields(self):
         # test inlog via het inlog formulier, met verkeerd wachtwoord
