@@ -5,8 +5,11 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
+from django.http import Http404
+from django.urls import Resolver404
 from django.shortcuts import redirect, render
 from django.views.generic import TemplateView, View
+from django.core.exceptions import PermissionDenied, SuspiciousOperation
 from Functie.rol import Rollen, rol_get_huidige, rol_get_beschrijving
 from Handleiding.views import reverse_handleiding
 from Taken.taken import eval_open_taken
@@ -187,7 +190,11 @@ def site_handler404_page_not_found(request, exception=None):
     """
     # print('site_handler404: exception=%s; info=%s' % (repr(exception), str(exception)))
     context = dict()
-    info = str(exception)
+    if repr(exception).startswith('Resolver404('):
+        # voorkom dat we een hele urlconf dumpen naar de gebruiker
+        info = "Pagina bestaat niet"
+    else:
+        info = str(exception)
     if len(info):
         context['info'] = info
     return render(request, TEMPLATE_HANDLER_404, context)
@@ -203,5 +210,32 @@ def site_handler500_internal_server_error(request, exception=None):
     # print('site_handler500: exception=%s; info=%s' % (repr(exception), str(exception)))
     context = dict()
     return render(request, TEMPLATE_HANDLER_500, context)
+
+
+class TestSpecialePagina(View):
+
+    """ deze view wordt gebruikt om de site_handlers hier boven te raken tijdens autotest """
+    @staticmethod
+    def get(request, *args, **kwargs):
+        code = kwargs['code']
+        if code == '403a':
+            raise PermissionDenied('test')
+
+        if code == '403b':
+            raise PermissionDenied()
+
+        if code == '404a':
+            raise Http404('test')
+
+        if code == '404b':
+            raise Http404()
+
+        if code == '404c':
+            raise Resolver404()
+
+        if code == '500':       # pragma: no branch
+            # nog geen exceptie gevonden die hiervoor gebruikt kan worden
+            return site_handler500_internal_server_error(request, None)
+
 
 # end of file

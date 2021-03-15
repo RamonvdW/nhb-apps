@@ -314,4 +314,36 @@ class TestPlein(E2EHelpers, TestCase):
 
         self.e2e_assert_other_http_commands_not_supported(self.url_niet_ondersteund)
 
+    def test_403(self):
+        resp = self.client.get('/plein/test-speciale-pagina/403a/')
+        self.assertTrue(resp.status_code, 200)
+        self.assert_template_used(resp, ('plein/fout_403.dtl', 'plein/site_layout_minimaal.dtl'))
+        self.assert_html_ok(resp)
+
+        resp = self.client.get('/plein/test-speciale-pagina/403b/')
+        self.assertTrue(resp.status_code, 200)
+        self.assert_template_used(resp, ('plein/fout_403.dtl', 'plein/site_layout_minimaal.dtl'))
+        self.assert_html_ok(resp)
+
+    def test_404(self):
+        resp = self.client.get('/plein/test-speciale-pagina/404a/')
+        self.assertTrue(resp.status_code, 200)
+        self.assert_template_used(resp, ('plein/fout_404.dtl', 'plein/site_layout_minimaal.dtl'))
+        self.assert_html_ok(resp)
+
+        resp = self.client.get('/plein/test-speciale-pagina/404b/')
+        self.assertTrue(resp.status_code, 200)
+        self.assert_template_used(resp, ('plein/fout_404.dtl', 'plein/site_layout_minimaal.dtl'))
+        self.assert_html_ok(resp)
+
+        resp = self.client.get('/plein/test-speciale-pagina/404c/')
+        self.assertTrue(resp.status_code, 200)
+        self.assert_template_used(resp, ('plein/fout_404.dtl', 'plein/site_layout_minimaal.dtl'))
+
+    def test_500(self):
+        resp = self.client.get('/plein/test-speciale-pagina/500/')
+        self.assertTrue(resp.status_code, 200)
+        self.assert_template_used(resp, ('plein/fout_500.dtl', 'plein/site_layout_minimaal.dtl'))
+        self.assert_html_ok(resp)
+
 # end of file

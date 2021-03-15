@@ -11,6 +11,7 @@ validated_templates = list()
 # these templates are included by other templates
 included_templates = (
     'plein/site_layout.dtl',
+    'plein/site_layout_minimaal.dtl',
     'plein/menu-1-head.dtl',
     'plein/menu-2-competities.dtl',
     'plein/menu-3.dtl',
