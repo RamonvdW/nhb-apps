@@ -8,7 +8,9 @@ from django.test import TestCase
 from BasisTypen.models import BoogType
 from Schutter.models import SchutterBoog
 from NhbStructuur.models import NhbLid
-from .models import Score, ScoreHist, score_indiv_ag_opslaan, SCORE_TYPE_INDIV_AG, SCORE_TYPE_TEAM_AG
+from .models import (Score, ScoreHist, wanneer_ag_vastgesteld,
+                     score_indiv_ag_opslaan, score_teams_ag_opslaan,
+                     SCORE_TYPE_INDIV_AG, SCORE_TYPE_TEAM_AG, SCORE_TYPE_SCORE)
 from Overig.e2ehelpers import E2EHelpers
 import datetime
 
@@ -59,9 +61,12 @@ class TestScoreOpslaan(E2EHelpers, TestCase):
         self.assertTrue(str(score) != "")
 
         score.type = SCORE_TYPE_INDIV_AG
-        self.assertTrue(str(score) != "")
+        self.assertTrue("(indiv AG)" in str(score))
 
         score.type = SCORE_TYPE_TEAM_AG
+        self.assertTrue("(team AG)" in str(score))
+
+        score.type = SCORE_TYPE_SCORE
         self.assertTrue(str(score) != "")
 
         self.assertEqual(ScoreHist.objects.count(), 1)
@@ -97,5 +102,22 @@ class TestScoreOpslaan(E2EHelpers, TestCase):
         self.assertEqual(scorehist.door_account, account)
         self.assertEqual(scorehist.notitie, notitie2)
 
+        gemiddelde = 8.345
+        res = score_teams_ag_opslaan(self.schutterboog, afstand, gemiddelde, account, notitie)
+        self.assertEqual(res, True)
+
+        self.assertEqual(ScoreHist.objects.count(), 3)
+        scorehist = ScoreHist.objects.get(score__waarde=8345)
+        score = scorehist.score
+        self.assertTrue('(team AG)' in str(score))
+
+    def test_wanneer(self):
+        res = wanneer_ag_vastgesteld()
+        self.assertIsNone(res)
+
+        score_indiv_ag_opslaan(self.schutterboog, 18, 9.123, None, "test")
+
+        res = wanneer_ag_vastgesteld()
+        self.assertIsNotNone(res)
 
 # end of file

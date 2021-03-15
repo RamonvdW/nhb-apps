@@ -16,11 +16,11 @@ def zet_score_type(apps, _):
     scorehist_klas = apps.get_model('Score', 'ScoreHist')
 
     # zet alle handmatig ingevoerde AG's op type=Team-AG
-    for hist in (scorehist_klas                             # pragma: no cover
+    for hist in (scorehist_klas
                  .objects
                  .select_related('score')
                  .filter(score__is_ag=True)
-                 .exclude(door_account=None)):
+                 .exclude(door_account=None)):              # pragma: no cover
 
         score = hist.score
         score.type = 'T'
