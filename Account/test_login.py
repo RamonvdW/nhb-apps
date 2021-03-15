@@ -172,7 +172,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
         # controleer wat er gebeurd indien niet ingelogd
         with self.assert_max_queries(20):
             resp = self.client.get('/account/logout/')
-        self.assert403(resp)
+        self.assert_is_redirect(resp, '/plein/')
 
         # log in
         with self.assert_max_queries(22):

@@ -522,7 +522,7 @@ class E2EHelpers(object):
         # for
         return lst
 
-    def _is_fout_pagina(self, resp):
+    def _is_fout_pagina(self, resp):        # pragma: no cover
         if resp.status_code == 200:
             lst = self._get_templates_not_used(resp, ('plein/fout_403.dtl', 'plein/site_layout_minimaal.dtl'))
             if len(lst) == 0:
@@ -573,7 +573,7 @@ class E2EHelpers(object):
         if post:
             resp = self.client.post(url)
             if resp.status_code not in accepted_status_codes and not self._is_fout_pagina(resp):
-                self.fail(msg='Onverwachte status code %s bij POST command' % resp.status_code)
+                self.fail(msg='Onverwachte status code %s bij POST command' % resp.status_code)     # pragma: no cover
 
         if delete:                            # pragma: no cover
             resp = self.client.delete(url)
@@ -637,7 +637,7 @@ class E2EHelpers(object):
                 yield
         finally:
             count = len(tracer.trace)
-            if count > num:
+            if count > num:                     # pragma: no cover
                 queries = 'Captured queries:'
                 prefix = '\n       '
                 limit = 200     # begrens aantal queries dat we printen

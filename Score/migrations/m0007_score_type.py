@@ -16,7 +16,7 @@ def zet_score_type(apps, _):
     scorehist_klas = apps.get_model('Score', 'ScoreHist')
 
     # zet alle handmatig ingevoerde AG's op type=Team-AG
-    for hist in (scorehist_klas
+    for hist in (scorehist_klas                             # pragma: no cover
                  .objects
                  .select_related('score')
                  .filter(score__is_ag=True)
@@ -27,7 +27,7 @@ def zet_score_type(apps, _):
         score.save(update_fields=['type'])
     # for
 
-    for score in score_klas.objects.filter(is_ag=True):
+    for score in score_klas.objects.filter(is_ag=True):     # pragma: no cover
         if score.type != 'T':
             score.type = 'I'
             score.save(update_fields=['type'])

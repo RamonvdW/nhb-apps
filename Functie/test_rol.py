@@ -7,7 +7,8 @@
 from django.test import TestCase
 from Functie.rol import (SESSIONVAR_ROL_HUIDIGE, SESSIONVAR_ROL_MAG_WISSELEN,
                          SESSIONVAR_ROL_PALLET_FUNCTIES, SESSIONVAR_ROL_PALLET_VAST,
-                         rol_mag_wisselen, rol_enum_pallet,
+                         SESSIONVAR_ROL_BESCHRIJVING,
+                         rol_mag_wisselen, rol_enum_pallet, rol_get_beschrijving,
                          rol_activeer_rol, rol_activeer_functie)
 from Functie.models import maak_functie, maak_account_vereniging_secretaris
 from NhbStructuur.models import NhbRegio, NhbVereniging
@@ -70,6 +71,10 @@ class TestFunctieRol(E2EHelpers, TestCase):
         self.assertTrue(SESSIONVAR_ROL_PALLET_VAST not in request.session.keys())
         pallet = [tup for tup in rol_enum_pallet(request)]
         self.assertEqual(len(pallet), 0)
+        rol_activeer_rol(request, 'geen')
+
+        self.assertTrue(SESSIONVAR_ROL_BESCHRIJVING not in request.session.keys())
+        self.assertEqual(rol_get_beschrijving(request), "?")
 
     def test_plugin(self):
         # controleer het toekennen van rollen

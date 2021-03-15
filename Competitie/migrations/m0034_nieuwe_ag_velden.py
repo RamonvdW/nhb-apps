@@ -14,7 +14,7 @@ def migreer_ag_velden(apps, _):
 
     deelnemer_klas = apps.get_model('Competitie', 'RegioCompetitieSchutterBoog')
 
-    for obj in deelnemer_klas.objects.all():
+    for obj in deelnemer_klas.objects.all():        # pragma: no cover
         obj.ag_voor_team_mag_aangepast_worden = (obj.is_handmatig_ag or obj.aanvangsgemiddelde < 0.001)
         obj.ag_voor_indiv = obj.aanvangsgemiddelde
         obj.ag_voor_team = obj.aanvangsgemiddelde

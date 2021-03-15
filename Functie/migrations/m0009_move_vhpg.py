@@ -17,7 +17,7 @@ def take_over_vhpg(apps, _):
     vhpg_klas = apps.get_model('Functie', 'VerklaringHanterenPersoonsgegevens')
 
     bulk = list()
-    for obj in hpg_klas.objects.all():
+    for obj in hpg_klas.objects.all():      # pragma: no cover
         vhpg = vhpg_klas(account=obj.account,
                          acceptatie_datum=obj.acceptatie_datum)
         bulk.append(vhpg)

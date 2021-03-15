@@ -441,6 +441,9 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
         self.assertEqual(team.vereniging, self.nhbver1)
         self.assertEqual(team.volg_nr, 1)
         self.assertEqual(team.team_type.afkorting, 'R')
+        self.assertTrue(team.maak_team_naam() != '')
+        self.assertTrue(team.maak_team_naam_kort() != '')
+        self.assertTrue(str(team) != '')
 
         # wijzig het team type
         resp = self.client.post(self.url_wijzig_team % (self.deelcomp18_regio111.pk, team.pk),
