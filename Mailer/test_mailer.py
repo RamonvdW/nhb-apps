@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -32,6 +32,11 @@ class TestMailerBase(object):
         self.assertEqual(obj.mail_subj, 'onderwerp')
         self.assertEqual(obj.mail_text, 'body\ndoei!\n')
         self.assertTrue("onderwerp" in str(obj))
+
+        # controleer dat een leeg to-adres niet in de queue beland
+        self.assertEqual(1, MailQueue.objects.count())
+        mailer_queue_email('', 'onderwerp', 'body\ndoei!\n')
+        self.assertEqual(1, MailQueue.objects.count())
 
     def test_send_mail_deliver(self):
         # requires websim.py running in the background

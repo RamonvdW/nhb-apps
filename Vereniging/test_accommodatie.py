@@ -344,8 +344,8 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
 
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'baan_type': 'H',
-                                          'banen_18m': 5,
-                                          'banen_25m': 6,
+                                          'banen_18m': 0,
+                                          'banen_25m': 0,
                                           'max_dt': 3,
                                           'notities': 'dit is een test'})
         self.assert_is_redirect(resp, '/vereniging/')       # stuur HWL terug naar vereniging pagina
@@ -453,6 +453,21 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
                                           'max_dt': 3,
                                           'notities': 'dit is een test'})
         self.assert403(resp)
+
+        # zet het aantal banen op 0,0
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'baan_type': 'H',
+                                          'banen_18m': 1,
+                                          'banen_25m': 0,
+                                          'max_dt': 3,
+                                          'notities': 'dit is een test'})
+        # haal op als WL, dan krijg je read-only zonder DT
+        self.e2e_wissel_naar_functie(self.functie_wl)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
 
     def test_sec(self):
         # login als SEC van ver2 op loc2

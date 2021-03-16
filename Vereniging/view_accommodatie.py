@@ -323,7 +323,7 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
         else:
             context['readonly'] = True
 
-            if binnen_locatie:
+            if binnen_locatie:      # pragma: no branch
                 if binnen_locatie.banen_18m + binnen_locatie.banen_25m > 0:
                     context['readonly_show_max_dt'] = True
 
