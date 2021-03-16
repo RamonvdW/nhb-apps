@@ -258,7 +258,7 @@ class Competitie(models.Model):
             if self.fase >= 'B':
                 # modale gebruiker ziet alleen competities vanaf open-voor-inschrijving
                 self.is_openbaar = True
-            elif rol_nu in (Rollen.ROL_RKO, Rollen.ROL_RCL):
+            elif rol_nu in (Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL):
                 # beheerders die de competitie opzetten zien competities die opgestart zijn
                 self.is_openbaar = True
 

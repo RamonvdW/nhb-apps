@@ -23,6 +23,7 @@ included_templates = (
     'overig/site-feedback-sidebar.dtl',
     'logboek/common.dtl',
     'competitie/menu.dtl',
+    'competitie/tijdlijn.dtl',
     'handleiding/menu.dtl',
     'vereniging/menu.dtl',
 )
