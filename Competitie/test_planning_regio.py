@@ -192,6 +192,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         self.url_score_invoeren = '/bondscompetities/scores/uitslag-invoeren/%s/'                  # wedstrijd_pk
         self.url_afsluiten_regio = '/bondscompetities/planning/regio/%s/afsluiten/'                # deelcomp_pk
         self.url_regio_instellingen = '/bondscompetities/%s/instellingen/regio-%s/'                # comp_pk, regio-nr
+        self.url_ag_controle = '/bondscompetities/%s/ag-controle/regio-%s/'                        # comp_pk, regio-nr
         self.url_regio_teams = '/bondscompetities/planning/regio/%s/teams/'                        # deelcomp_pk
 
     def _maak_inschrijving(self, deelcomp):
@@ -1747,7 +1748,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_rcl112_18)
         self.e2e_wissel_naar_functie(self.functie_rcl112_18)
 
-        url = self.url_regio_instellingen = '/bondscompetities/%s/instellingen/regio-%s/' % (self.comp_18.pk, 112)
+        url = self.url_regio_instellingen % (self.comp_18.pk, 112)
 
         # fase A
 
@@ -1847,7 +1848,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_rcl112_18)
         self.e2e_wissel_naar_functie(self.functie_rcl112_18)
 
-        url = self.url_regio_instellingen = '/bondscompetities/%s/instellingen/regio-%s/' % (self.comp_18.pk, 112)
+        url = self.url_regio_instellingen % (self.comp_18.pk, 112)
 
         # na fase F zijn de instellingen niet meer in te zien
         zet_competitie_fase(self.comp_18, 'K')      # fase G is niet te zetten
@@ -1858,14 +1859,14 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         self.assert404(resp)  # 404 = Not found
 
         # niet bestaande regio
-        url = self.url_regio_instellingen = '/bondscompetities/%s/instellingen/regio-%s/' % (self.comp_18.pk, 100)
+        url = self.url_regio_instellingen % (self.comp_18.pk, 100)
         resp = self.client.get(url)
         self.assert404(resp)  # 404 = Not found
         resp = self.client.post(url)
         self.assert404(resp)  # 404 = Not found
 
         # niet de regio van de RCL
-        url = self.url_regio_instellingen = '/bondscompetities/%s/instellingen/regio-%s/' % (self.comp_18.pk, 110)
+        url = self.url_regio_instellingen % (self.comp_18.pk, 110)
         resp = self.client.get(url)
         self.assert403(resp)
         resp = self.client.post(url)
@@ -1873,7 +1874,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
 
         # logout
 
-        url = self.url_regio_instellingen = '/bondscompetities/%s/instellingen/regio-%s/' % (self.comp_18.pk, 112)
+        url = self.url_regio_instellingen % (self.comp_18.pk, 112)
         self.client.logout()
         resp = self.client.get(url)
         self.assert403(resp)
@@ -1946,6 +1947,49 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
+
+    def test_ag_controle(self):
+        self.e2e_login_and_pass_otp(self.account_rcl112_18)
+        self.e2e_wissel_naar_functie(self.functie_rcl112_18)
+
+        url = self.url_ag_controle % (self.comp_18.pk, 112)
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/rcl-ag-controle.dtl', 'plein/site_layout.dtl'))
+
+        # maak een inschrijving met handmatig AG
+        RegioCompetitieSchutterBoog(
+                schutterboog=self.schutterboog,
+                bij_vereniging=self.schutterboog.nhblid.bij_vereniging,
+                deelcompetitie=self.deelcomp_regio112_18,
+                klasse=self.klasse_recurve_onbekend,
+                inschrijf_voorkeur_team=True,
+                ag_voor_team_mag_aangepast_worden=True,
+                ag_voor_team=5.0).save()
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+
+        # verkeerde fase
+        zet_competitie_fase(self.comp_18, 'K')
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assert404(resp)
+
+        # bad pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_ag_controle % (999999, 999999))
+        self.assert404(resp)
+
+        # verkeerde regio
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_ag_controle % (self.comp_18.pk, 110))
+        self.assert403(resp)
 
 
 # end of file
