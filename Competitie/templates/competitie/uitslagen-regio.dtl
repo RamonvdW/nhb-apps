@@ -21,7 +21,7 @@
 
     <h4>Uitslagen regiocompetitie</h4>
 
-    <p>Deze pagina toont de tussenstand/eindstand van de regiocompetities.</p>
+    <p>Deze pagina toont de {% if comp.alle_regiocompetities_afgesloten %}eindstand{% else %}tussenstand{% endif %} van de regiocompetities.</p>
 
     {% if is_beheerder %}
         <div class="white shrink-wrap-5">
