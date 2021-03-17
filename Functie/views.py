@@ -4,6 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+from django.conf import settings
 from django.http import HttpResponseRedirect, Http404
 from django.urls import reverse
 from django.shortcuts import render
@@ -20,7 +21,7 @@ from Overig.tijdelijke_url import maak_tijdelijke_url_functie_email
 from Mailer.models import mailer_queue_email
 from Overig.tijdelijke_url import set_tijdelijke_url_receiver, RECEIVER_BEVESTIG_FUNCTIE_EMAIL
 from Overig.helpers import get_safe_from_ip
-from .rol import Rollen, rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving
+from .rol import Rollen, rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving, rol_activeer_wissel_van_rol_menu_voor_account
 from .models import Functie
 from .forms import ZoekBeheerdersForm, WijzigBeheerdersForm, WijzigEmailForm
 
@@ -381,6 +382,9 @@ class OntvangBeheerderWijzigingenView(View):
             functie.accounts.add(account)
             schrijf_in_logboek(request.user, 'Rollen',
                                "%s is beheerder gemaakt voor functie %s" % (wie, functie.beschrijving))
+
+            if account.functie_set.count() == 1:
+                rol_activeer_wissel_van_rol_menu_voor_account(account)
         else:
             functie.accounts.remove(account)
             schrijf_in_logboek(request.user, 'Rollen',

@@ -195,7 +195,7 @@ class LoginView(TemplateView):
         from_ip = get_safe_from_ip(self.request)
         login_naam = form.cleaned_data.get('login_naam')
         wachtwoord = form.cleaned_data.get('wachtwoord')
-        next = form.cleaned_data.get('next')
+        next_url = form.cleaned_data.get('next')
 
         # controleer het wachtwoord
         account2 = authenticate(username=account.username, password=wachtwoord)
@@ -259,18 +259,18 @@ class LoginView(TemplateView):
         account_rechten_login_gelukt(self.request)
 
         # voer de automatische redirect uit, indien gevraagd
-        if next:
+        if next_url:
             # reject niet bestaande urls
             # resolve zoekt de view die de url af kan handelen
-            if next[-1] != '/':
-                next += '/'
+            if next_url[-1] != '/':
+                next_url += '/'
             try:
-                resolve(next)
+                resolve(next_url)
             except Resolver404:
                 pass
             else:
                 # is valide url
-                return HttpResponseRedirect(next)
+                return HttpResponseRedirect(next_url)
 
         if account.otp_is_actief:
             return HttpResponseRedirect(reverse('Functie:otp-controle'))

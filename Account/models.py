@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.contrib.sessions.models import Session
 from Overig.tijdelijke_url import maak_tijdelijke_url_account_email
 from Mailer.models import mailer_email_is_valide
 
@@ -297,6 +298,18 @@ def account_test_wachtwoord_sterkte(wachtwoord, verboden_str):
             return False, "Wachtwoord is niet sterk genoeg"
 
     return True, None
+
+
+class AccountSessions(models.Model):
+    """ Speciale table om bij te houden welke sessies bij een account horen
+        zodat we deze eenvoudig kunnen benaderen.
+    """
+
+    # helaas gaat dit niet met een ManyToMany relatie, dus moet het zo
+    # (based on https://gavinballard.com/associating-django-users-sessions/)
+
+    account = models.ForeignKey(Account, on_delete=models.CASCADE)
+    session = models.ForeignKey(Session, on_delete=models.CASCADE)
 
 
 # end of file

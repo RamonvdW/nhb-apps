@@ -4,11 +4,13 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+from django.contrib.sessions.backends.db import SessionStore
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.views.generic import TemplateView
 from django.db.models import F
 from django.utils.timezone import make_aware
-from .models import Account, AccountEmail
+from Functie.rol import SESSIONVAR_ROL_HUIDIGE, SESSIONVAR_ROL_MAG_WISSELEN, rol2url
+from .models import Account, AccountEmail, AccountSessions
 from Plein.menu import menu_dynamics
 import datetime
 import logging
@@ -73,6 +75,18 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
                                      .filter(account__laatste_inlog_poging__isnull=False)
                                      .filter(account__last_login__lt=F('account__laatste_inlog_poging'))
                                      .order_by('-account__laatste_inlog_poging')[:50])
+
+        accses = (AccountSessions
+                  .objects
+                  .select_related('account', 'session')
+                  .order_by('account', 'session__expire_date'))
+        for obj in accses:
+            session = SessionStore(session_key=obj.session.session_key)
+            obj.mag_wisselen_str = session[SESSIONVAR_ROL_MAG_WISSELEN]
+            obj.laatste_rol_str = rol2url[session[SESSIONVAR_ROL_HUIDIGE]]
+        # for
+
+        context['accses'] = accses
 
         menu_dynamics(self.request, context)
         return context

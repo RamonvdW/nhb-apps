@@ -6,7 +6,9 @@
 
 """ ondersteuning voor de rollen binnen de NHB applicaties """
 
+from django.contrib.sessions.backends.db import SessionStore
 from Account.rechten import account_add_plugin_rechten, account_rechten_is_otp_verified
+from Account.models import AccountSessions
 from NhbStructuur.models import NhbVereniging
 from Overig.helpers import get_safe_from_ip
 from .models import Functie, account_needs_vhpg, account_needs_otp
@@ -342,10 +344,16 @@ def rol_bepaal_beschrijving(rol, functie_pk=None):
 def rol_mag_wisselen(request):
     """ Geeft True terug als deze gebruiker de wissel-van-rol getoond moet worden """
     try:
-        return request.session[SESSIONVAR_ROL_MAG_WISSELEN]
+        check = request.session[SESSIONVAR_ROL_MAG_WISSELEN]
     except KeyError:
-        pass
-    return False
+        return False
+
+    if check == "nieuw":
+        # dit wordt gebruikt om nieuwe beheerders het wissel-van-rol menu te laten krijgen
+        rol_zet_sessionvars(request.user, request)
+        check = request.session[SESSIONVAR_ROL_MAG_WISSELEN]
+
+    return check
 
 
 def rol_activeer_rol(request, rolurl):
@@ -498,5 +506,27 @@ rol_zet_plugins(functie_expandeer_rol)
 
 # registreer de rechten plugin
 account_add_plugin_rechten(rol_plugin_rechten)
+
+
+def rol_activeer_wissel_van_rol_menu_voor_account(account):
+    """ Deze functie zorgt ervoor dat nieuwe beheerders het Wissel van Rol menu in beeld krijgen
+
+        Aangezien dit om performance redenen opgeslagen ligt in de sessie van de gebruiker,
+        moeten we op zoek naar die sessie en daar een aanpassing in doen.
+    """
+
+    # de functie rol_mag_wisselen moet True terug geven en gebruikt informatie opgeslagen in de session vars
+    # overschrijf SESSIONVAR_ROL_MAG_WISSELEN voor alle sessies van deze gebruiker met de waarde "nieuw"
+
+    for obj in (AccountSessions
+                .objects
+                .filter(account=account)):
+        session = SessionStore(obj.session.session_key)
+        mag = session[SESSIONVAR_ROL_MAG_WISSELEN]
+        if mag == False:
+            session[SESSIONVAR_ROL_MAG_WISSELEN] = "nieuw"
+            session.save()
+    # for
+
 
 # end of file

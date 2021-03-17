@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+
+from .models import AccountSessions
 
 
 SESSIONVAR_ACCOUNT_IS_OTP_VERIFIED = "account_otp_verified"
@@ -40,6 +42,10 @@ def account_rechten_login_gelukt(request):
         te zetten die onthoudt of de gebruiker een OTP controle uitgevoerd heeft
     """
     _account_rechten_change_otp_status(request, False)
+
+    # koppel de (eventuele nieuwe) sessie aan het account
+    AccountSessions.objects.get_or_create(account=request.user,
+                                          session_id=request.session.session_key)   # session_id = primary key
 
 
 def account_rechten_otp_controle_gelukt(request):

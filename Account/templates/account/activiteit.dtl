@@ -16,10 +16,12 @@
 
     <p>Er zijn {{ totaal }} accounts aangemaakt op deze server.</p>
 
-    <p>Focus:</p>
-    <p><a class="btn-nhb-blauw" href="#nieuwe">Nieuwe accounts</a></p>
-    <p><a class="btn-nhb-blauw" href="#recent">Recente activiteit</a></p>
-    <p><a class="btn-nhb-blauw" href="#poging">Mislukte inlog pogingen</a></p>
+    <p>Focus:<br>
+        <a class="btn-nhb-blauw btn-small margin-5" href="#nieuwe">Nieuwe accounts</a>
+        <a class="btn-nhb-blauw btn-small margin-5" href="#recent">Recente activiteit</a>
+        <a class="btn-nhb-blauw btn-small margin-5" href="#poging">Mislukte inlog pogingen</a>
+        <a class="btn-nhb-blauw btn-small margin-5" href="#sessies">Sessies (experimenteel)</a>
+    </p>
 
     <h5 id="nieuwe">Nieuwste accounts</h5>
 
@@ -124,6 +126,32 @@
                 <td>{% if obj.email_is_bevestigd %}Ja{% else %}Nee{% endif %}</td>
                 <td>{% if obj.account.otp_is_actief %}Ja{% else %}Nee{% endif %}</td>
                 <td>{{ obj.account.date_joined|date:"j b H:i" }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+
+    <p>&nbsp;</p>
+    <h5 id="sessies">Sessies (experimenteel)</h5>
+    <p>Hieronder staan <i>alle</i> actieve sessies, oftewel mensen die ingelogd zijn.</p>
+
+    <table class="white">
+        <thead>
+            <tr>
+                <td>Gebruiker</td>
+                <td>Verloopt op</td>
+                <td>Cookie naam</td>
+                <td>Mag wisselen</td>
+                <td>Laatste rol</td>
+            </tr>
+        </thead>
+
+        {% for obj in accses %}
+            <tr>
+                <td>{{ obj.account.volledige_naam }}</td>
+                <td>{{ obj.session.expire_date }}</td>
+                <td>{{ obj.session.session_key }}</td>
+                <td>{{ obj.mag_wisselen_str }}</td>
+                <td>{{ obj.laatste_rol_str }}</td>
             </tr>
         {% endfor %}
     </table>
