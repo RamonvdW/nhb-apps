@@ -32,6 +32,9 @@ class SchutterVoorkeuren(models.Model):
     # (opt-out) wel/niet aanbieden om mee te doen met de competitie
     voorkeur_meedoen_competitie = models.BooleanField(default=True)
 
+    # sporters met para-classificatie mogen een opmerking toevoegen voor de wedstrijdleiding
+    opmerking_para_sporter = models.CharField(max_length=256, default='')
+
     class Meta:
         """ meta data voor de admin interface """
         verbose_name_plural = verbose_name = "Schutter voorkeuren"

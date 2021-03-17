@@ -97,7 +97,25 @@
                 </tr>
             </table>
 
-        {% endif %}
+            {% if nhblid.para_classificatie %}
+                <h5>Voorkeur para-sporter</h5>
+
+                <table class="white">
+                    <tr>
+                        <td>Als sporter met para classificatie kan je hieronder een kort bericht (1 regel) invoeren voor de wedstrijdleiding.</td>
+                    </tr>
+                    <tr>
+                        <td>Voorbeelden:<br>&nbsp;&nbsp;&nbsp;Blijft op schietlijn wachten<br>&nbsp;&nbsp;&nbsp;Gebruikt kruk<br>&nbsp;&nbsp;&nbsp;etc.</td>
+                    </tr>
+                    <tr>
+                        <td class="input-field">
+                            <input type="text" maxlength="256" name="para_notitie" placeholder="Hier invoeren" value="{{ voorkeuren.opmerking_para_sporter }}">
+                        </td>
+                    </tr>
+                </table>
+            {% endif %}
+
+        {% endif %}     <!-- bogen -->
 
 
         {% if email %}
