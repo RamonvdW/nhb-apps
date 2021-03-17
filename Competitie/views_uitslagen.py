@@ -313,6 +313,34 @@ class UitslagenRegioView(TemplateView):
     def filter_zes_scores(self, deelnemers):
         return deelnemers.filter(aantal_scores__gte=6)
 
+    @staticmethod
+    def _split_aspiranten(asps, objs):
+        klasse_str = asps[0].klasse_str
+        print('---[%s]---' % klasse_str)
+        for asp in asps:
+            print('asp: %s (%.3f)' % (asp, asp.gemiddelde))
+        rank_m = 0
+        rank_v = 0
+        asps_v = list()
+        for deelnemer in asps:
+            if deelnemer.schutterboog.nhblid.geslacht == 'V':
+                if rank_v == 0:
+                    deelnemer.klasse_str = klasse_str + ', meisjes'
+                    deelnemer.break_klasse = True
+                rank_v += 1
+                deelnemer.rank = rank_v
+                asps_v.append(deelnemer)
+            else:
+                if rank_m == 0:
+                    deelnemer.klasse_str = klasse_str + ', jongens'
+                    deelnemer.break_klasse = True
+                rank_m += 1
+                deelnemer.rank = rank_m
+                objs.append(deelnemer)
+        # for
+        if len(asps_v):
+            objs.extend(asps_v)
+
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
@@ -385,18 +413,27 @@ class UitslagenRegioView(TemplateView):
         toon_geslacht = False
         klasse = -1
         rank = 0
+        objs = list()
+        asps = list()
+        is_asp = False
         for deelnemer in deelnemers:
+
             deelnemer.break_klasse = (klasse != deelnemer.klasse.indiv.volgorde)
             if deelnemer.break_klasse:
+                if len(asps):
+                    self._split_aspiranten(asps, objs)
+                    asps = list()
+
                 deelnemer.klasse_str = deelnemer.klasse.indiv.beschrijving
-                toon_geslacht = False
+                is_asp = False
                 if deelnemer.klasse.indiv.niet_voor_rk_bk:
                     # dit is een aspiranten klassen of een klasse onbekend
                     for lkl in deelnemer.klasse.indiv.leeftijdsklassen.all():
                         if lkl.is_aspirant_klasse():
-                            toon_geslacht = True
+                            is_asp = True
                             break
                     # for
+
                 rank = 0
             klasse = deelnemer.klasse.indiv.volgorde
 
@@ -404,12 +441,19 @@ class UitslagenRegioView(TemplateView):
             lid = deelnemer.schutterboog.nhblid
             deelnemer.rank = rank
             deelnemer.naam_str = "[%s] %s" % (lid.nhb_nr, lid.volledige_naam())
-            if toon_geslacht:
-                deelnemer.naam_str += " (" + lid.geslacht + ")"
             deelnemer.ver_str = str(deelnemer.bij_vereniging)
+
+            if is_asp:
+                asps.append(deelnemer)
+            else:
+                objs.append(deelnemer)
         # for
 
-        context['deelnemers'] = deelnemers
+        if len(asps):
+            # aspiranten opsplitsen in jongens en meisjes klasse
+            self._split_aspiranten(asps, objs)
+
+        context['deelnemers'] = objs
 
         rol_nu = rol_get_huidige(self.request)
         is_beheerder = rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_WL)
