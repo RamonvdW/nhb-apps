@@ -134,6 +134,8 @@ class PleinView(View):
                 # kijk hoeveel taken er open staan
                 eval_open_taken(request)
 
+        context['naam_site'] = settings.NAAM_SITE
+
         menu_dynamics(self.request, context)
         return render(request, template, context)
 
@@ -149,6 +151,7 @@ class PrivacyView(TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
         context['url_privacyverklaring'] = settings.PRIVACYVERKLARING_URL
+        context['email_bondsburo'] = settings.EMAIL_BONDSBURO
         menu_dynamics(self.request, context)
         return context
 

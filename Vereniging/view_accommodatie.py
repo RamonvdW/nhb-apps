@@ -4,6 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+from django.conf import settings
 from django.http import HttpResponseRedirect, Http404
 from django.urls import reverse
 from django.db.models import Count
@@ -537,6 +538,7 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
         context['terug_url'] = reverse('Plein:plein')
 
         context['handleiding_clusters_url'] = reverse('Handleiding:Clusters')
+        context['email_bondsburo'] = settings.EMAIL_BONDSBURO
 
         menu_dynamics(self.request, context, actief='hetplein')
         return context

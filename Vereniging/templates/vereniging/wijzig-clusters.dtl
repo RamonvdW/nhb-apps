@@ -110,8 +110,8 @@
 
 <p>Heb je meer clusters nodig?</p>
 <p>Neem dan contact op met de Manager Competitiezaken van het bondsbureau om cluster(s) aan te laten maken:</p>
-    <a class="btn-nhb-blauw" href="mailto:info@handboogsport.nl">
-        <i class="material-icons-round left">email</i>info@handboogsport.nl</a>
+    <a class="btn-nhb-blauw" href="mailto:{{ email_bondsburo }}">
+        <i class="material-icons-round left">email</i>{{ email_bondsburo }}</a>
 
 
 {% endblock %}

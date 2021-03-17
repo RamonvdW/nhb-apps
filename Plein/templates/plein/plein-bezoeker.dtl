@@ -6,15 +6,15 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}Mijn Handboogsport{% endblock %}
+{% block title %}{{ naam_site }}{% endblock %}
 
 {% block pagina %}
 
     {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="plein-bezoeker" %}
 
-    <h4>Welkom op Mijn Handboogsport</h4>
+    <h4>Welkom op {{ naam_site }}</h4>
 
-    <p>Op deze website kan je informatie vinden over de Handboogsport, zoals uitslagen van de competities en de Nederlandse Records.</p>
+    <p>Op deze website kan je informatie vinden over de handboogsport, zoals uitslagen van de competities en de Nederlandse Records.</p>
 
     <!-- FUTURE: deze opmerking verwijderen -->
     <p>Deze site is van de Nederlandse Handboog Bond (NHB) en is nog in ontwikkeling.</p>

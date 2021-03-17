@@ -226,10 +226,10 @@ def functie_vraag_email_bevestiging(functie):
     url = maak_tijdelijke_url_functie_email(functie)
 
     text_body = ("Hallo!\n\n"
-                 + "Een beheerder heeft dit e-mailadres gekoppeld op de website van de NHB.\n"
+                 + "Een beheerder heeft dit e-mailadres gekoppeld op " + settings.NAAM_SITE + ".\n"
                  + "Klik op onderstaande link om dit te bevestigen.\n\n"
                  + url + "\n\n"
-                 + "Als je dit niet herkent, neem dan contact met ons op via info@handboogsport.nl\n\n"
+                 + "Als je dit niet herkent, neem dan contact met ons op via " + settings.EMAIL_BONDSBURO + "\n\n"
                  + "Het bondsburo\n")
 
     mailer_queue_email(functie.nieuwe_email,
@@ -383,6 +383,8 @@ class OntvangBeheerderWijzigingenView(View):
             schrijf_in_logboek(request.user, 'Rollen',
                                "%s is beheerder gemaakt voor functie %s" % (wie, functie.beschrijving))
 
+            self._stuur_notificatie_email(account, wie, functie.beschrijving, add=True)
+
             if account.functie_set.count() == 1:
                 rol_activeer_wissel_van_rol_menu_voor_account(account)
         else:
@@ -390,7 +392,29 @@ class OntvangBeheerderWijzigingenView(View):
             schrijf_in_logboek(request.user, 'Rollen',
                                "%s losgekoppeld van functie %s" % (wie, functie.beschrijving))
 
+            self._stuur_notificatie_email(account, wie, functie.beschrijving, remove=True)
+
         return HttpResponseRedirect(reverse('Functie:wijzig-beheerders', kwargs={'functie_pk': functie.pk}))
+
+    @staticmethod
+    def _stuur_notificatie_email(account, door_naam, functie_beschrijving, add=False, remove=False):
+        functie_beschrijving = '"' + functie_beschrijving + '"'
+
+        if add:
+            actie = "Toegevoegde"
+        else:
+            actie = 'Verwijderde'
+
+        text_body = ("Hallo!\n\n"
+                     + "Je rollen zijn aangepast op " + settings.NAAM_SITE + ".\n\n"
+                     + actie + " rol: " + functie_beschrijving + ".\n\n"
+                     + "Als je dit niet herkent, neem dan contact met ons op via " + settings.EMAIL_BONDSBURO + "\n\n"
+                     + "Het bondsburo\n")
+
+        email = account.accountemail_set.all()[0]
+        mailer_queue_email(email.bevestigde_email,
+                           'Wijziging rollen op ' + settings.NAAM_SITE,
+                           text_body)
 
 
 class WijzigBeheerdersView(UserPassesTestMixin, ListView):
