@@ -10,11 +10,13 @@ from django.utils import timezone
 from django.views.generic import TemplateView, View
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
+from BasisTypen.models import BoogType
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
 from Logboek.models import schrijf_in_logboek
+from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Plein.menu import menu_dynamics
 from Taken.taken import maak_taak
-from .models import (Competitie,
+from .models import (Competitie, CompetitieKlasse,
                      LAAG_REGIO, LAAG_RK, LAAG_BK, DeelCompetitie,
                      RegioCompetitieSchutterBoog, KampioenschapSchutterBoog,
                      KampioenschapMutatie, MUTATIE_INITIEEL, DEELNAME_ONBEKEND)
@@ -158,6 +160,8 @@ class DoorzettenNaarRKView(UserPassesTestMixin, TemplateView):
         # ga door naar de RK fase
         comp.alle_regiocompetities_afgesloten = True
         comp.save()
+
+        self.eindstand_regio_naar_histcomp(comp)
 
         return HttpResponseRedirect(reverse('Competitie:kies'))
 
@@ -316,6 +320,81 @@ class DoorzettenNaarRKView(UserPassesTestMixin, TemplateView):
             # for
 
         return deelnemers
+
+    def eindstand_regio_naar_histcomp(comp):
+        """ maak de HistComp aan vanuit een regiocompetitie eindstand """
+
+        seizoen = "%s/%s" % (comp.begin_jaar, comp.begin_jaar + 1)
+        try:
+            objs = HistCompetitie.objects.filter(seizoen=seizoen,
+                                                 comp_type=comp.afstand,
+                                                 is_team=False)
+        except HistCompetitieIndividueel.DoesNotExist:
+            pass
+        else:
+            # er bestaat al een uitslag - verwijder deze eerst
+            # dit verwijderd ook alle gekoppelde scores (individueel en team)
+            # elk 'klasse' heeft een eigen instantie - typisch Recurve, Compound, etc.
+            objs.delete()
+
+        bulk = list()
+        for boogtype in BoogType.objects.all():
+            histcomp = HistCompetitie(seizoen=seizoen,
+                                      comp_type=comp.afstand,
+                                      klasse=boogtype.beschrijving,     # 'Recurve'
+                                      is_team=False)
+            histcomp.save()
+
+            klassen_pks = (CompetitieKlasse
+                           .objects
+                           .filter(competitie=comp,
+                                   indiv__boogtype=boogtype)
+                           .values_list('pk', flat=True))
+
+            deelnemers = (RegioCompetitieSchutterBoog
+                          .objects
+                          .select_related('schutterboog__nhblid',
+                                          'bij_vereniging')
+                          .filter(deelcompetitie__competitie=comp,
+                                  klasse__in=klassen_pks)
+                          .order_by('-gemiddelde'))     # hoogste eerst
+
+            rank = 0
+            for deelnemer in deelnemers:
+                # skip sporters met helemaal geen scores
+                if deelnemer.totaal > 0:
+                    rank += 1
+                    lid = deelnemer.schutterboog.nhblid
+                    ver = deelnemer.bij_vereniging
+                    hist = HistCompetitieIndividueel(
+                                histcompetitie=histcomp,
+                                rank=rank,
+                                schutter_nr=lid.nhb_nr,
+                                schutter_naam=lid.volledige_naam(),
+                                boogtype=boogtype.afkorting,
+                                vereniging_nr=ver.ver_nr,
+                                vereniging_naam=ver.naam,
+                                score1=deelnemer.score1,
+                                score2=deelnemer.score2,
+                                score3=deelnemer.score3,
+                                score4=deelnemer.score4,
+                                score5=deelnemer.score5,
+                                score6=deelnemer.score6,
+                                score7=deelnemer.score7,
+                                laagste_score_nr=deelnemer.laagste_score_nr,
+                                totaal=deelnemer.totaal,
+                                gemiddelde=deelnemer.gemiddelde)
+
+                    bulk.append(hist)
+                    if len(bulk) >= 500:
+                        HistCompetitieIndividueel.objects.bulk_create(bulk)
+                        bulk = list()
+            # for
+
+        # for
+
+        if len(bulk):
+            HistCompetitieIndividueel.objects.bulk_create(bulk)
 
 
 class DoorzettenNaarBKView(UserPassesTestMixin, TemplateView):
