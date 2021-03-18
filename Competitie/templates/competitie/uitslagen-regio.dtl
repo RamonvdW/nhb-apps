@@ -140,7 +140,7 @@
                     <td colspan="12"><h5>{{ obj.klasse_str }}</h5></td>
                 </tr>
                 <tr>
-                    <th></th>   <!-- rank -->
+                    <th><!-- rank --></th>
                     <th>Sporter</th>
                     <th class="hide-on-small-only">Vereniging</th>
                     <th class="center-align">Gemiddelde</th>
