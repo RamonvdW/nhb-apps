@@ -50,11 +50,11 @@ class HistCompetitieIndividueel(models.Model):
     # primary key = los uniek nummer
     histcompetitie = models.ForeignKey(HistCompetitie, on_delete=models.CASCADE)
     rank = models.PositiveIntegerField()
-    schutter_nr = models.PositiveIntegerField()             # NHB nummer
+    schutter_nr = models.PositiveIntegerField()             # bondsnummer
     schutter_naam = models.CharField(max_length=50)         # voor + achternaam aaneen
     boogtype = models.CharField(max_length=5,               # R/C/BB/IB/LB
                                 null=True, blank=True)      # indien beschikbaar
-    vereniging_nr = models.PositiveIntegerField()           # NHB nummer
+    vereniging_nr = models.PositiveIntegerField()           # verenigingsnummer
     vereniging_naam = models.CharField(max_length=50)
     score1 = models.PositiveIntegerField()
     score2 = models.PositiveIntegerField()
@@ -64,7 +64,7 @@ class HistCompetitieIndividueel(models.Model):
     score6 = models.PositiveIntegerField()
     score7 = models.PositiveIntegerField()
     laagste_score_nr = models.PositiveIntegerField(default=0)  # 1..7
-    totaal = models.PositiveIntegerField()
+    totaal = models.PositiveIntegerField()                     # som van de best 6 scores
     gemiddelde = models.DecimalField(max_digits=5, decimal_places=3)    # 10.000
 
     def __str__(self):
