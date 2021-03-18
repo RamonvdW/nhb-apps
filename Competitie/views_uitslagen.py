@@ -316,9 +316,6 @@ class UitslagenRegioView(TemplateView):
     @staticmethod
     def _split_aspiranten(asps, objs):
         klasse_str = asps[0].klasse_str
-        print('---[%s]---' % klasse_str)
-        for asp in asps:
-            print('asp: %s (%.3f)' % (asp, asp.gemiddelde))
         rank_m = 0
         rank_v = 0
         asps_v = list()
