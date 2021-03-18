@@ -498,6 +498,8 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
                                     {'verwijderen': '1'})
         self.assert_is_redirect(resp, self.url_regio_teams % self.deelcomp18_regio111.pk)
 
+        self.e2e_assert_other_http_commands_not_supported(self.url_regio_teams % self.deelcomp25_regio111.pk)
+
     def test_koppel(self):
         # login als HWL
         self.e2e_login_and_pass_otp(self.account_hwl)
