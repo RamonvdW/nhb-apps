@@ -111,7 +111,7 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
             resp = self.client.get(url)
         urls = self.extract_all_urls(resp, skip_menu=True, skip_smileys=True)
         post_url = urls[0]
-        with self.assert_max_queries(23):
+        with self.assert_max_queries(27):
             resp = self.client.post(post_url)
         self.assert_is_redirect(resp, self.url_wijzig)
 
@@ -196,7 +196,7 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
             resp = self.client.get(url)
         urls = self.extract_all_urls(resp, skip_menu=True, skip_smileys=True)
         post_url = urls[0]
-        with self.assert_max_queries(23):
+        with self.assert_max_queries(27):
             resp = self.client.post(post_url)
         self.assert_is_redirect(resp, self.url_wijzig)
         session = self.client.session

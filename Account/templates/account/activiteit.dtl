@@ -20,7 +20,9 @@
         <a class="btn-nhb-blauw btn-small margin-5" href="#nieuwe">Nieuwe accounts</a>
         <a class="btn-nhb-blauw btn-small margin-5" href="#recent">Recente activiteit</a>
         <a class="btn-nhb-blauw btn-small margin-5" href="#poging">Mislukte inlog pogingen</a>
-        <a class="btn-nhb-blauw btn-small margin-5" href="#sessies">Sessies (experimenteel)</a>
+        {% if accses %}
+            <a class="btn-nhb-blauw btn-small margin-5" href="#sessies">Sessies (experimenteel)</a>
+        {% endif %}
     </p>
 
     <h5 id="nieuwe">Nieuwste accounts</h5>
@@ -130,31 +132,33 @@
         {% endfor %}
     </table>
 
-    <p>&nbsp;</p>
-    <h5 id="sessies">Sessies (experimenteel)</h5>
-    <p>Hieronder staan <i>alle</i> actieve sessies, oftewel mensen die ingelogd zijn.</p>
+    {% if accses %}
+        <p>&nbsp;</p>
+        <h5 id="sessies">Sessies (experimenteel)</h5>
+        <p>Hieronder staan <i>alle</i> actieve sessies, oftewel mensen die ingelogd zijn.</p>
 
-    <table class="white">
-        <thead>
-            <tr>
-                <td>Gebruiker</td>
-                <td>Verloopt op</td>
-                <td>Cookie naam</td>
-                <td>Mag wisselen</td>
-                <td>Laatste rol</td>
-            </tr>
-        </thead>
+        <table class="white">
+            <thead>
+                <tr>
+                    <th>Gebruiker</th>
+                    <th>Verloopt op</th>
+                    <th>Cookie naam</th>
+                    <th>Mag wisselen</th>
+                    <th>Laatste rol</th>
+                </tr>
+            </thead>
 
-        {% for obj in accses %}
-            <tr>
-                <td>{{ obj.account.volledige_naam }}</td>
-                <td>{{ obj.session.expire_date }}</td>
-                <td>{{ obj.session.session_key }}</td>
-                <td>{{ obj.mag_wisselen_str }}</td>
-                <td>{{ obj.laatste_rol_str }}</td>
-            </tr>
-        {% endfor %}
-    </table>
+            {% for obj in accses %}
+                <tr>
+                    <td>{{ obj.account.volledige_naam }}</td>
+                    <td>{{ obj.session.expire_date }}</td>
+                    <td>{{ obj.session.session_key }}</td>
+                    <td>{{ obj.mag_wisselen_str }}</td>
+                    <td>{{ obj.laatste_rol_str }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% endif %}
 
 {% endblock %}
 

@@ -43,6 +43,10 @@ def account_rechten_login_gelukt(request):
     """
     _account_rechten_change_otp_status(request, False)
 
+    # zorg dat nieuwe sessies al aangemaakt zijn
+    if not request.session.session_key:
+        request.session.save()
+
     # koppel de (eventuele nieuwe) sessie aan het account
     AccountSessions.objects.get_or_create(account=request.user,
                                           session_id=request.session.session_key)   # session_id = primary key

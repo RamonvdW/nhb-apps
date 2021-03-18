@@ -76,17 +76,17 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
                                      .filter(account__last_login__lt=F('account__laatste_inlog_poging'))
                                      .order_by('-account__laatste_inlog_poging')[:50])
 
-        accses = (AccountSessions
-                  .objects
-                  .select_related('account', 'session')
-                  .order_by('account', 'session__expire_date'))
-        for obj in accses:
-            session = SessionStore(session_key=obj.session.session_key)
-            obj.mag_wisselen_str = session[SESSIONVAR_ROL_MAG_WISSELEN]
-            obj.laatste_rol_str = rol2url[session[SESSIONVAR_ROL_HUIDIGE]]
-        # for
-
-        context['accses'] = accses
+        if self.request.user.is_staff:
+            accses = (AccountSessions
+                      .objects
+                      .select_related('account', 'session')
+                      .order_by('account', 'session__expire_date'))
+            for obj in accses:
+                session = SessionStore(session_key=obj.session.session_key)
+                obj.mag_wisselen_str = session[SESSIONVAR_ROL_MAG_WISSELEN]
+                obj.laatste_rol_str = rol2url[session[SESSIONVAR_ROL_HUIDIGE]]
+            # for
+            context['accses'] = accses
 
         menu_dynamics(self.request, context)
         return context

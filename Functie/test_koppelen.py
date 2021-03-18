@@ -218,7 +218,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.assertEqual(self.functie_bko.accounts.count(), 1)
 
         # koppel beheerder2
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(22):
             resp = self.client.post(url, {'add': self.account_beh2.pk}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertEqual(self.functie_bko.accounts.count(), 2)
@@ -272,7 +272,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         # koppel de RKO
         url = '/functie/wijzig/%s/ontvang/' % self.functie_rko3.pk
         self.assertEqual(self.functie_rko3.accounts.count(), 0)
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(24):
             resp = self.client.post(url, {'add': self.account_beh2.pk}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertEqual(self.functie_rko3.accounts.count(), 1)
@@ -315,7 +315,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         # koppel een RCL van het juiste rayon
         url = '/functie/wijzig/%s/ontvang/' % self.functie_rcl111.pk
         self.assertEqual(self.functie_rcl111.accounts.count(), 0)
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(23):
             resp = self.client.post(url, {'add': self.account_beh1.pk}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertEqual(self.functie_rcl111.accounts.count(), 1)
@@ -360,7 +360,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         # RCL koppelt WL, lid van de juiste vereniging
         url = '/functie/wijzig/%s/ontvang/' % self.functie_wl.pk
         self.assertEqual(self.functie_wl.accounts.count(), 0)
-        with self.assert_max_queries(25):
+        with self.assert_max_queries(28):
             resp = self.client.post(url, {'add': self.account_beh2.pk}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertEqual(self.functie_wl.accounts.count(), 1)
@@ -374,7 +374,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         # RCL koppelt HWL, lid van de juiste vereniging
         url = '/functie/wijzig/%s/ontvang/' % self.functie_hwl.pk
         self.assertEqual(self.functie_hwl.accounts.count(), 0)
-        with self.assert_max_queries(25):
+        with self.assert_max_queries(27):
             resp = self.client.post(url, {'add': self.account_beh2.pk}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertEqual(self.functie_hwl.accounts.count(), 1)
@@ -420,7 +420,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         # HWL koppelt een lid uit de eigen gelederen
         url = '/functie/wijzig/%s/ontvang/' % self.functie_hwl.pk
         self.assertEqual(self.functie_hwl.accounts.count(), 1)
-        with self.assert_max_queries(25):
+        with self.assert_max_queries(28):
             resp = self.client.post(url, {'add': self.account_beh2.pk}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertEqual(self.functie_hwl.accounts.count(), 2)

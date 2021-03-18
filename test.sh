@@ -60,12 +60,11 @@ PID_TAIL=$!
 
 python3 -m coverage run --append --branch ./manage.py test --settings=nhbapps.settings_autotest --noinput $* >>"$LOG" 2>>"$LOG"
 RES=$?
+[ $RES -eq 3 ] && ABORTED=1
+#echo "[DEBUG] Coverage run result: $RES --> ABORTED=$ABORTED"
 
 kill $PID_TAIL
 wait $PID_TAIL 2>/dev/null
-
-[ $RES -eq 3 ] && ABORTED=1
-#echo "[DEBUG] Coverage run result: $RES --> ABORTED=$ABORTED"
 
 if [ $RES -eq 0 -a $# -eq 0 ]
 then
