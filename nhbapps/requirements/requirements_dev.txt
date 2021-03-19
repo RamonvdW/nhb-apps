@@ -178,7 +178,7 @@ uritemplate==3.0.1
     # via
     #   -r requirements_test.txt
     #   google-api-python-client
-urllib3==1.26.2
+urllib3==1.26.3
     # via
     #   -r requirements_test.txt
     #   requests
@@ -186,10 +186,6 @@ xmlschema==1.4.1
     # via
     #   -r requirements_test.txt
     #   pysaml2
-zipp==3.4.0
-    # via
-    #   -r requirements_test.txt
-    #   importlib-resources
 
 # The following packages are considered to be unsafe in a requirements file:
 # pip
