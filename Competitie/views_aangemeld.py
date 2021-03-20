@@ -12,7 +12,7 @@ from Plein.menu import menu_dynamics
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
 from Functie.rol import Rollen, rol_get_huidige
 from Schutter.models import SchutterVoorkeuren
-from .models import (LAAG_REGIO, INSCHRIJF_METHODE_3, DAGDEEL, DAGDEEL_AFKORTINGEN,
+from .models import (LAAG_REGIO, INSCHRIJF_METHODE_3, DAGDELEN, DAGDEEL_AFKORTINGEN,
                      Competitie, DeelCompetitie, RegioCompetitieSchutterBoog)
 import csv
 
@@ -291,7 +291,7 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
         alles_mag = (deelcomp.toegestane_dagdelen == '')
 
         context['dagdelen'] = dagdelen = list()
-        for afkorting, beschrijving in DAGDEEL:
+        for afkorting, beschrijving in DAGDELEN:
             if alles_mag or (afkorting in deelcomp.toegestane_dagdelen):
                 dagdelen.append(beschrijving)
         # for

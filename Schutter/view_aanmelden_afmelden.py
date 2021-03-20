@@ -15,7 +15,7 @@ from Competitie.models import (DeelCompetitie, DeelcompetitieRonde,
                                CompetitieKlasse, RegioCompetitieSchutterBoog,
                                LAAG_REGIO, AG_NUL,
                                INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3,
-                               DAGDEEL, DAGDEEL_AFKORTINGEN)
+                               DAGDELEN, DAGDEEL_AFKORTINGEN)
 from Plein.menu import menu_dynamics
 from Score.models import Score, ScoreHist, SCORE_TYPE_INDIV_AG
 from Wedstrijden.models import Wedstrijd
@@ -165,10 +165,10 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
             context['wedstrijden'] = wedstrijden
 
         if methode == INSCHRIJF_METHODE_3:
-            context['dagdelen'] = DAGDEEL
+            context['dagdelen'] = DAGDELEN
             if deelcomp.toegestane_dagdelen != '':
                 context['dagdelen'] = list()
-                for dagdeel in DAGDEEL:
+                for dagdeel in DAGDELEN:
                     # dagdeel = tuple(code, beschrijving)
                     # code = GN / AV / ZA / ZO / WE
                     if dagdeel[0] in deelcomp.toegestane_dagdelen:

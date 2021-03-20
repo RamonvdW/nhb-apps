@@ -27,19 +27,19 @@ LAAG_REGIO = 'Regio'
 LAAG_RK = 'RK'
 LAAG_BK = 'BK'
 
-AFSTAND = [('18', 'Indoor'),
-           ('25', '25m 1pijl')]
+AFSTANDEN = [('18', 'Indoor'),
+             ('25', '25m 1pijl')]
 
-DAGDEEL = [('GN', "Geen voorkeur"),
-           ('AV', "'s Avonds"),
-           ('MA', "Maandag"),
-           ('DI', "Dinsdag"),
-           ('WO', "Woensdag"),
-           ('DO', "Donderdag"),
-           ('VR', "Vrijdag"),
-           ('ZA', "Zaterdag"),
-           ('ZO', "Zondag"),
-           ('WE', "Weekend")]
+DAGDELEN = [('GN', "Geen voorkeur"),
+            ('AV', "'s Avonds"),
+            ('MA', "Maandag"),
+            ('DI', "Dinsdag"),
+            ('WO', "Woensdag"),
+            ('DO', "Donderdag"),
+            ('VR', "Vrijdag"),
+            ('ZA', "Zaterdag"),
+            ('ZO', "Zondag"),
+            ('WE', "Weekend")]
 
 DAGDEEL_AFKORTINGEN = ('GN', 'AV', 'ZA', 'ZO', 'WE', 'MA', 'DI', 'WO', 'DO', 'VR')
 
@@ -92,7 +92,7 @@ class Competitie(models.Model):
     beschrijving = models.CharField(max_length=40)
 
     # 18m of 25m
-    afstand = models.CharField(max_length=2, choices=AFSTAND)
+    afstand = models.CharField(max_length=2, choices=AFSTANDEN)
 
     # seizoen
     begin_jaar = models.PositiveSmallIntegerField()     # 2019
@@ -500,7 +500,7 @@ class RegioCompetitieSchutterBoog(models.Model):
     inschrijf_notitie = models.TextField(default="", blank=True)
 
     # voorkeur dagdelen (methode 3)
-    inschrijf_voorkeur_dagdeel = models.CharField(max_length=2, choices=DAGDEEL, default="GN")
+    inschrijf_voorkeur_dagdeel = models.CharField(max_length=2, choices=DAGDELEN, default="GN")
 
     # voorkeur schietmomenten (methode 1)
     inschrijf_gekozen_wedstrijden = models.ManyToManyField(Wedstrijd, blank=True)

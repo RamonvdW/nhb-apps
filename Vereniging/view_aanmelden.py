@@ -16,7 +16,7 @@ from BasisTypen.models import (LeeftijdsKlasse, TeamType,
                                MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT)
 from NhbStructuur.models import NhbLid
 from Schutter.models import SchutterBoog, SchutterVoorkeuren
-from Competitie.models import (AG_NUL, DAGDEEL, DAGDEEL_AFKORTINGEN,
+from Competitie.models import (AG_NUL, DAGDELEN, DAGDEEL_AFKORTINGEN,
                                INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3,
                                Competitie, CompetitieKlasse,
                                DeelCompetitie, DeelcompetitieRonde,
@@ -255,11 +255,11 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                 context['wedstrijden'] = wedstrijden
 
             if methode == INSCHRIJF_METHODE_3:
-                context['dagdelen'] = DAGDEEL
+                context['dagdelen'] = DAGDELEN
 
                 if deelcomp.toegestane_dagdelen != '':
                     context['dagdelen'] = list()
-                    for dagdeel in DAGDEEL:
+                    for dagdeel in DAGDELEN:
                         # dagdeel = tuple(code, beschrijving)
                         # code = GN / AV / ZA / ZO / WE / etc.
                         if dagdeel[0] in deelcomp.toegestane_dagdelen:
@@ -486,7 +486,7 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
         self.deelcomp = deelcomp
 
         dagdeel_str = dict()
-        for afkorting, beschrijving in DAGDEEL:
+        for afkorting, beschrijving in DAGDELEN:
             dagdeel_str[afkorting] = beschrijving
         # for
         dagdeel_str[''] = ''
@@ -528,7 +528,7 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
 
         methode = self.deelcomp.inschrijf_methode
         if methode == INSCHRIJF_METHODE_3:
-            context['toon_dagdeel'] = DAGDEEL
+            context['toon_dagdeel'] = DAGDELEN
 
         menu_dynamics(self.request, context, actief='vereniging')
         return context
