@@ -66,7 +66,7 @@ google-auth-httplib2==0.1.0
     # via
     #   -r requirements_test.txt
     #   google-api-python-client
-google-auth==1.27.1
+google-auth==1.28.0
     # via
     #   -r requirements_test.txt
     #   google-api-core
@@ -100,7 +100,7 @@ pip-licenses==3.3.1
     # via -r requirements_dev.in
 pip-review==1.1.0
     # via -r requirements_dev.in
-protobuf==3.15.5
+protobuf==3.15.6
     # via
     #   -r requirements_test.txt
     #   google-api-core
@@ -172,7 +172,7 @@ six==1.15.0
     #   pysaml2
     #   python-dateutil
     #   qrcode
-soupsieve==2.2
+soupsieve==2.2.1
     # via beautifulsoup4
 sqlparse==0.4.1
     # via
@@ -187,11 +187,11 @@ uritemplate==3.0.1
     # via
     #   -r requirements_test.txt
     #   google-api-python-client
-urllib3==1.26.3
+urllib3==1.26.4
     # via
     #   -r requirements_test.txt
     #   requests
-xmlschema==1.5.2
+xmlschema==1.5.3
     # via
     #   -r requirements_test.txt
     #   pysaml2

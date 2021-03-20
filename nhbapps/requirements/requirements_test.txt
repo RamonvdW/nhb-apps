@@ -48,7 +48,7 @@ google-auth-httplib2==0.1.0
     # via
     #   -r requirements.txt
     #   google-api-python-client
-google-auth==1.27.1
+google-auth==1.28.0
     # via
     #   -r requirements.txt
     #   google-api-core
@@ -73,7 +73,7 @@ packaging==20.9
     # via
     #   -r requirements.txt
     #   google-api-core
-protobuf==3.15.5
+protobuf==3.15.6
     # via
     #   -r requirements.txt
     #   google-api-core
@@ -148,11 +148,11 @@ uritemplate==3.0.1
     # via
     #   -r requirements.txt
     #   google-api-python-client
-urllib3==1.26.3
+urllib3==1.26.4
     # via
     #   -r requirements.txt
     #   requests
-xmlschema==1.5.2
+xmlschema==1.5.3
     # via pysaml2
 zipp==3.4.1
     # via importlib-resources
