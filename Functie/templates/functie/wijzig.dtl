@@ -52,6 +52,9 @@
                     {% if account.geo_beschrijving %}
                         <span>&nbsp;({{ account.geo_beschrijving }})</span>
                     {% endif %}
+                    {% if account.let_op %}
+                        <span class="red-text">&nbsp;&nbsp;&nbsp;&nbsp;{{ account.let_op }}</span>
+                    {% endif %}
                 </div>
                 <div class="collapsible-body white">
                     <button class="btn-nhb-rood" onclick="do_wijzig('drop', this)" data-pk="{{ account.pk }}">
