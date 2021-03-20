@@ -321,6 +321,7 @@ class DoorzettenNaarRKView(UserPassesTestMixin, TemplateView):
 
         return deelnemers
 
+    @staticmethod
     def eindstand_regio_naar_histcomp(comp):
         """ maak de HistComp aan vanuit een regiocompetitie eindstand """
 

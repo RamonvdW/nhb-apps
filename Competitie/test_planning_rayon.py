@@ -637,8 +637,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         self.competitie_sluit_alle_regiocompetities(self.comp_18)
         self.e2e_login_and_pass_otp(self.account_bko_18)
         self.e2e_wissel_naar_functie(self.functie_bko_18)
-        with self.assert_max_queries(45):
-            resp = self.client.post(self.url_doorzetten_rk % self.comp_18.pk)
+        resp = self.client.post(self.url_doorzetten_rk % self.comp_18.pk)
         self.assert_is_redirect_not_plein(resp)  # check for success
 
         # zet een limiet
@@ -1044,7 +1043,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         self.competitie_sluit_alle_regiocompetities(self.comp_18)
         self.e2e_login_and_pass_otp(self.account_bko_18)
         self.e2e_wissel_naar_functie(self.functie_bko_18)
-        with self.assert_max_queries(45):
+        with self.assert_max_queries(58):
             resp = self.client.post(self.url_doorzetten_rk % self.comp_18.pk)
         self.assert_is_redirect_not_plein(resp)  # check for success
 

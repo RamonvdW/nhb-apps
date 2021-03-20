@@ -233,7 +233,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         self.assertEqual(3, RegioCompetitieSchutterBoog.objects.count())
         self.assertEqual(0, KampioenschapSchutterBoog.objects.count())
 
-        with self.assert_max_queries(43):
+        with self.assert_max_queries(55):
             resp = self.client.post(url)
         self.assert_is_redirect(resp, '/bondscompetities/')       # redirect = Success
 
@@ -269,7 +269,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         self.lid_schutter2.bij_vereniging = None
         self.lid_schutter2.save()
 
-        with self.assert_max_queries(42):
+        with self.assert_max_queries(54):
             resp = self.client.post(url)
         self.assert_is_redirect(resp, '/bondscompetities/')       # redirect = Success
 

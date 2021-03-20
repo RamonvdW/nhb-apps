@@ -73,16 +73,16 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         lid.achternaam = "Lid"
         lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
         lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        #lid.bij_vereniging =
         lid.account = self.account_geenlid
         lid.email = lid.account.email
         lid.save()
 
         self.url_profiel = '/sporter/'
         self.url_voorkeuren = '/sporter/voorkeuren/'
-        self.url_aanmelden = '/sporter/regiocompetitie/aanmelden/%s/%s/'   # deelcomp_pk, schutterboog_pk
+        self.url_aanmelden = '/sporter/regiocompetitie/aanmelden/%s/%s/'         # deelcomp_pk, schutterboog_pk
         self.url_bevestig_aanmelden = self.url_aanmelden + 'bevestig/'
-        self.url_afmelden = '/sporter/regiocompetitie/afmelden/%s/'        # regiocomp_pk
+        self.url_afmelden = '/sporter/regiocompetitie/afmelden/%s/'              # regiocomp_pk
+        self.url_schietmomenten = '/sporter/regiocompetitie/%s/schietmomenten/'  # deelnemer_pk
 
     def _prep_voorkeuren(self):
         # haal de voorkeuren op - hiermee worden de SchutterBoog records aangemaakt
