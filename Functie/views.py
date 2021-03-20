@@ -433,9 +433,10 @@ class WijzigBeheerdersView(UserPassesTestMixin, ListView):
             account.geo_beschrijving = ''
             if account.nhblid_set.count() > 0:
                 nhblid = account.nhblid_set.all()[0]
-                regio = nhblid.bij_vereniging.regio
-                if not regio.is_administratief:
-                    account.geo_beschrijving = "regio %s / rayon %s" % (regio.regio_nr, regio.rayon.rayon_nr)
+                if nhblid.bij_vereniging:
+                    regio = nhblid.bij_vereniging.regio
+                    if not regio.is_administratief:
+                        account.geo_beschrijving = "regio %s / rayon %s" % (regio.regio_nr, regio.rayon.rayon_nr)
         self._huidige_beheerders = beheerder_accounts
 
         zoekterm = self._form.cleaned_data['zoekterm']
