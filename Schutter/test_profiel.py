@@ -13,7 +13,7 @@ from Functie.models import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Records.models import IndivRecord
-from Competitie.models import Competitie, DeelCompetitie, RegioCompetitieSchutterBoog
+from Competitie.models import Competitie, DeelCompetitie, INSCHRIJF_METHODE_1
 from Score.models import Score, ScoreHist, score_indiv_ag_opslaan
 from Overig.e2ehelpers import E2EHelpers
 from .models import SchutterVoorkeuren, SchutterBoog
@@ -457,5 +457,59 @@ class TestSchutterProfiel(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('schutter/profiel.dtl', 'plein/site_layout.dtl'))
         self.assertNotContains(resp, 'De volgende competities worden georganiseerd')
+
+    def test_inschrijfmethode1(self):
+        # log in as BB en maak de competitie aan
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_wisselnaarrol_bb()
+        self._competitie_aanmaken()
+
+        # zet de deelcompetitie op inschrijfmethode 1
+        deelcomp = DeelCompetitie.objects.get(competitie__afstand='18', nhb_regio=self.nhbver.regio)
+        deelcomp.inschrijf_methode = INSCHRIJF_METHODE_1
+        deelcomp.save()
+
+        # log in as schutter en prep voor inschrijving
+        self.e2e_login(self.account_normaal)
+        self._prep_voorkeuren()
+        schutterboog = SchutterBoog.objects.get(boogtype__afkorting='R')
+        res = score_indiv_ag_opslaan(schutterboog, 18, 8.18, None, 'Test')
+        self.assertTrue(res)
+
+        # schrijf de schutter in voor de 18m Recurve
+        url = self.url_aanmelden % (deelcomp.pk, schutterboog.pk)
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
+        self.assert_is_redirect(resp, self.url_profiel)
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_profiel)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('schutter/profiel.dtl', 'plein/site_layout.dtl'))
+
+    def test_fase_a(self):
+        # test competitie in fase A wordt niet getoond op profiel
+        # log in as BB en maak de competitie aan
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_wisselnaarrol_bb()
+
+        # competitie aanmaken
+        url_kies = '/bondscompetities/'
+        url_aanmaken = '/bondscompetities/aanmaken/'
+        with self.assert_max_queries(20):
+            resp = self.client.post(url_aanmaken)
+        self.assert_is_redirect(resp, url_kies)
+
+        # log in as schutter
+        self.e2e_login(self.account_normaal)
+        self._prep_voorkeuren()
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_profiel)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('schutter/profiel.dtl', 'plein/site_layout.dtl'))
+
 
 # end of file
