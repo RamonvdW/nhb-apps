@@ -28,7 +28,7 @@ from .forms import ZoekBeheerdersForm, WijzigBeheerdersForm, WijzigEmailForm
 
 TEMPLATE_OVERZICHT = 'functie/overzicht.dtl'
 TEMPLATE_OVERZICHT_VERENIGING = 'functie/overzicht-vereniging.dtl'
-TEMPLATE_WIJZIG = 'functie/wijzig.dtl'
+TEMPLATE_WIJZIG = 'functie/koppel-beheerders.dtl'
 TEMPLATE_WIJZIG_EMAIL = 'functie/wijzig-email.dtl'
 TEMPLATE_BEVESTIG_EMAIL = 'functie/bevestig.dtl'
 TEMPLATE_EMAIL_BEVESTIGD = 'functie/bevestigd.dtl'
