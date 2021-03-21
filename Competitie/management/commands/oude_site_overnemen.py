@@ -377,9 +377,8 @@ class Command(BaseCommand):
 
             self._cache_inschrijving[tup] = inschrijving
         else:
-            if teamtype and inschrijving.inschrijf_team_type != teamtype:
+            if teamtype:
                 inschrijving.inschrijf_voorkeur_team = True
-                inschrijving.inschrijf_team_type = teamtype
                 inschrijving.save()
 
         return inschrijving

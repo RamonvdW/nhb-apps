@@ -67,7 +67,7 @@ echo "[INFO] Capturing output in $LOG"
 tail -f "$LOG" &
 PID_TAIL=$!
 
-python3 -m coverage run --append --branch ./manage.py test --settings=nhbapps.settings_autotest --noinput $* 2>&1 >>"$LOG"
+python3 -m coverage run --append --branch ./manage.py test --settings=nhbapps.settings_autotest --noinput $* 2>"$LOG" >>"$LOG"
 RES=$?
 [ $RES -eq 3 ] && ABORTED=1
 #echo "[DEBUG] Coverage run result: $RES --> ABORTED=$ABORTED"
