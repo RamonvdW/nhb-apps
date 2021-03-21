@@ -50,7 +50,7 @@
             <p>&nbsp;</p>
             <h5>Help!</h5>
 
-            <p>Komt je er niet uit? Stuur dan een e-mail naar het volgende adres (druk op de knop om je mail editor te starten):</p>
+            <p>Komt je er niet uit? Stuur dan een e-mail naar het volgende adres (druk op de knop om je mailprogramma te starten):</p>
             <a class="btn-nhb-blauw" href="mailto:nhb-apps-support@handboogsport.nl"><i class="material-icons-round left">email</i>nhb-apps-support@handboogsport.nl</a>
             <p>Schrijf de volgende informatie in de e-mail:<br>- Je bondsnummer<br>- Datum en tijdstip waarop het probleem ontstond<br>- Beschrijving van je probleem</p>
 
