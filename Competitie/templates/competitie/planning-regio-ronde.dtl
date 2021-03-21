@@ -50,7 +50,7 @@
             <i class="material-icons-round left">arrow_upward</i>Planning {% if ronde.cluster %}cluster{% else %}regio{% endif %}</a>
     </p>
 
-    <script>
+    <script type="application/javascript">
         function gewijzigd() {
             /* het formulier is aangepast en moet opgeslagen worden */
 

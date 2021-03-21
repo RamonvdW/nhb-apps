@@ -10,7 +10,7 @@
 
 {% block pagina %}
 
-    <script>
+    <script type="application/javascript">
         function zes_scores() {
             let el = document.getElementById('zes_scores')
             window.location.href = "{{ zes_scores_next }}"

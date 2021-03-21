@@ -14,7 +14,7 @@
 
     <p>Via dit scherm kan de HWL en de RCL voor een sporter het aanvangsgemiddelde wijzigen wat gebruikt wordt voor het berekenen van de team sterkte.</p>
 
-    <script>
+    <script type="application/javascript">
         function invoer() {
             const el = document.getElementById('id_ag')
 

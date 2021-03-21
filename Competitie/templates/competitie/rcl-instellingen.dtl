@@ -19,7 +19,7 @@
         <p>LET OP: Wijzigen van het puntensysteem kan nog tot in fase C van de competitie. Overige instellingen kunnen alleen in fase A aanpast worden.</p>
     {% endif %}
 
-    <script>
+    <script type="application/javascript">
         function gewijzigd() {
             /* het formulier is aangepast en moet opgeslagen worden */
 

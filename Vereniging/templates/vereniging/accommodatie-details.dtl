@@ -15,7 +15,7 @@
 
     <p>Op deze pagina staan de details van de accommodatie van een vereniging.</p>
 
-    <script>
+    <script type="application/javascript">
         function show_hide_dt() {
             const el18 = document.getElementById('banen_18')
             const el25 = document.getElementById('banen_25')
@@ -462,7 +462,7 @@
         </form>
     {% endif %}
 
-    <script>
+    <script type="application/javascript">
         document.addEventListener("DOMContentLoaded", function() {
             show_hide_dt()
         })

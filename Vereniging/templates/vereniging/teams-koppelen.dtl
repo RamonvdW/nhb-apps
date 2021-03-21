@@ -22,7 +22,7 @@
         <p>Tijdens de inschrijving moet je leden handmatig koppelen zodat sporters met een BB, IB or LB boog in het gewenste type team komen.</p>
     {% endif %}
 
-    <script>
+    <script type="application/javascript">
         function gewijzigd() {
             /* het formulier is aangepast en moet opgeslagen worden */
             /* enable de 'opslaan' knop */
