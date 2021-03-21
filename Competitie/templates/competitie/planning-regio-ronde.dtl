@@ -207,6 +207,33 @@
 
     </table>
 
+
+    {% if url_verwijderen %}
+        <p>&nbsp;</p>
+        <ul class="collapsible">
+            <li>
+                <div class="collapsible-header white">
+                    <span>Klik eerst hier als je de ronde wilt verwijderen</span>
+                </div>
+                {% if heeft_wedstrijden %}
+                    <div class="collapsible-body white">
+                        <p>Verwijder eerst de wedstrijden</p>
+                    </div>
+                {% else %}
+                    <div class="collapsible-body white">
+                        <form method="post" action="{{ url_verwijderen }}">
+                            {% csrf_token %}
+                            <input type="hidden" name="verwijder_ronde" value="1">
+                            <p>Heb je deze ronde niet meer nodig?</p>
+                            <button class="btn-nhb-rood" type="submit">
+                                <i class="material-icons-round left">delete</i>Verwijder deze ronde</button>
+                        </form>
+                    </div>
+                {% endif %}
+            </li>
+        </ul>
+    {% endif %}
+
     {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-planning-regio-ronde" %}
 
 {% endblock %}
