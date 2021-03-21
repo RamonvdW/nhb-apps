@@ -772,7 +772,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/planning-regio-methode1.dtl', 'plein/site_layout.dtl'))
-        self.assertEqual(DeelcompetitieRonde.objects.count(), 2)
+        self.assertEqual(DeelcompetitieRonde.objects.count(), 2)        # TODO: als het de enige ronde is, waarom dan van 0 naar 2?
 
         # probeer een ronde aan te maken
         with self.assert_max_queries(20):

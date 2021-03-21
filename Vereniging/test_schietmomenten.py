@@ -52,7 +52,7 @@ class TestVerenigingSchietmomenten(E2EHelpers, TestCase):
         self.functie_sec.save()
 
         # maak de HWL functie
-        self.functie_hwl = maak_functie("HWL test", "HWL")
+        self.functie_hwl = maak_functie("HWL test 1000", "HWL")
         self.functie_hwl.nhb_ver = ver
         self.functie_hwl.save()
 
@@ -161,6 +161,30 @@ class TestVerenigingSchietmomenten(E2EHelpers, TestCase):
         ver2.save()
         self.nhbver2 = ver2
 
+        # maak de HWL functie
+        self.functie_hwl2 = maak_functie("HWL test 1222", "HWL")
+        self.functie_hwl2.nhb_ver = ver2
+        self.functie_hwl2.save()
+
+        # maak een lid aan bij deze tweede vereniging
+        lid = NhbLid()
+        lid.nhb_nr = 120001
+        lid.geslacht = "M"
+        lid.voornaam = "Bij Twee"
+        lid.achternaam = "de Ver"
+        lid.email = "bijtweedever@gmail.not"
+        lid.geboorte_datum = datetime.date(year=1971, month=5, day=28)
+        lid.sinds_datum = datetime.date(year=2000, month=1, day=31)
+        lid.bij_vereniging = ver2
+        lid.save()
+        self.lid_120001 = lid
+
+        schutterboog = SchutterBoog(nhblid=lid,
+                                    boogtype=boog_ib,
+                                    voor_wedstrijd=True)
+        schutterboog.save()
+        self.schutterboog_120001 = schutterboog
+
         self.url_overzicht = '/vereniging/'
         self.url_schietmomenten = '/vereniging/leden-ingeschreven/competitie/%s/schietmomenten/'  # deelcomp_pk
         self.url_aanmelden = '/vereniging/leden-aanmelden/competitie/%s/'                         # comp.pk
@@ -257,20 +281,29 @@ class TestVerenigingSchietmomenten(E2EHelpers, TestCase):
         self.wedstrijd = wedstrijd
 
     def _maak_deelnemers(self):
-        # onze enige schutterboog inschrijven
-        self.e2e_wissel_naar_functie(self.functie_hwl)
-
+        url = self.url_aanmelden % self.comp_18.pk
         self.assertEqual(0, RegioCompetitieSchutterBoog.objects.count())
 
-        url = self.url_aanmelden % self.comp_18.pk
+        self.e2e_wisselnaarrol_bb()
+        self.e2e_wissel_naar_functie(self.functie_hwl2)
+
+        resp = self.client.post(url, {'lid_%s_boogtype_%s' % (self.schutterboog_120001.nhblid.pk,
+                                                              self.schutterboog_120001.boogtype.pk): 'on',
+                                      'wedstrijd_%s' % self.ronde_wedstrijd.pk: 'on'})
+        self.assertEqual(resp.status_code, 302)     # 302 = success
+        self.assertEqual(1, RegioCompetitieSchutterBoog.objects.count())
+
+        self.e2e_wisselnaarrol_bb()
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+
         resp = self.client.post(url, {'lid_%s_boogtype_%s' % (self.schutterboog_100001.nhblid.pk,
                                                               self.schutterboog_100001.boogtype.pk): 'on',
                                       'wedstrijd_%s' % self.ronde_wedstrijd.pk: 'on'})
         self.assertEqual(resp.status_code, 302)     # 302 = success
+        self.assertEqual(2, RegioCompetitieSchutterBoog.objects.count())
 
-        self.assertEqual(1, RegioCompetitieSchutterBoog.objects.count())
-
-        self.deelnemer_100001 = RegioCompetitieSchutterBoog.objects.all()[0]
+        self.deelnemer_100001 = RegioCompetitieSchutterBoog.objects.get(schutterboog=self.schutterboog_100001)
+        self.deelnemer_120001 = RegioCompetitieSchutterBoog.objects.get(schutterboog=self.schutterboog_120001)
 
     def test_anon(self):
         url = self.url_schietmomenten % self.deelcomp_regio.pk
@@ -327,11 +360,32 @@ class TestVerenigingSchietmomenten(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('vereniging/competitie-schietmomenten-methode1.dtl', 'plein/site_layout.dtl'))
 
+        self.e2e_assert_other_http_commands_not_supported(url)
+
         urls = self.extract_all_urls(resp, skip_menu=True)
         url = self.url_sporter_schietmomenten % self.deelnemer_100001.pk
         self.assertEqual(urls, [url])
 
-        self.e2e_assert_other_http_commands_not_supported(url)
+        # gebruiker de sporter pagina om de schietmomenten aan te passen
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('schutter/schietmomenten.dtl', 'plein/site_layout.dtl'))
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
+        self.assert_is_redirect_not_plein(resp)
+
+        # probeer schietmomenten van lid andere verenigingen aan te passen
+        url = self.url_sporter_schietmomenten % self.deelnemer_120001.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assert403(resp)
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
+        self.assert403(resp)
 
     def test_wl(self):
         # login als WL

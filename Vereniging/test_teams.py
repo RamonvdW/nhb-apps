@@ -276,7 +276,7 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
         self._zet_schutter_voorkeuren(100004)       # R
         self._zet_schutter_voorkeuren(100012)       # R
 
-        if do_18:
+        if do_18:           # pragma: no branch
             self._zet_ag(100002, 18)
             self._zet_ag(100003, 18)
             self._zet_ag(100004, 18)
@@ -304,7 +304,7 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
                     self.deelnemer_100003_18 = obj
                 elif nr == 100004:
                     self.deelnemer_100004_18 = obj
-                elif nr == 100012:
+                elif nr == 100012:      # pragma: no branch
                     self.deelnemer_100012_18 = obj
             # for
 
@@ -326,7 +326,7 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
                     self.deelnemer_100002_25 = obj
                 elif nr == 100004:
                     self.deelnemer_100004_25 = obj
-                elif nr == 100012:
+                elif nr == 100012:      # pragma: no branch
                     self.deelnemer_100012_25 = obj
             # for
 
