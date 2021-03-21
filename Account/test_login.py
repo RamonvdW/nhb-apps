@@ -96,6 +96,8 @@ class TestAccountLogin(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/geblokkeerd.dtl', 'plein/site_layout.dtl'))
+        template_names = [templ.name for templ in resp.templates]
+        self.assertFalse('account/login.dtl' in template_names)
 
     def test_inlog_was_geblokkeerd(self):
         self.account_normaal.is_geblokkeerd_tot = timezone.now() + datetime.timedelta(hours=-1)

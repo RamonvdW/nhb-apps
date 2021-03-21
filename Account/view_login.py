@@ -288,12 +288,12 @@ class LoginView(TemplateView):
         if form.is_valid():
 
             response, account = self._zoek_account(form)
+            if response:
+                # account is geblokkeerd
+                return response
+
             if account:
                 # account bestaat
-                if response:
-                    # account is geblokkeerd
-                    return response
-
                 response = self._probeer_login(form, account)
                 if response:
                     # inlog gelukt of eruit geknikkerd met foutmelding

@@ -9,6 +9,7 @@ RED="\e[31m"
 RESET="\e[0m"
 REPORT_DIR="/tmp/covhtml"
 LOG="/tmp/test_out.txt"
+LOG1="/tmp/tmp_out1.txt"
 [ -e "$LOG" ] && rm "$LOG"
 
 export PYTHONDONTWRITEBYTECODE=1
@@ -67,10 +68,14 @@ echo "[INFO] Capturing output in $LOG"
 tail -f "$LOG" &
 PID_TAIL=$!
 
-python3 -m coverage run --append --branch ./manage.py test --settings=nhbapps.settings_autotest --noinput $* 2>"$LOG" >>"$LOG"
+python3 -m coverage run --append --branch ./manage.py test --settings=nhbapps.settings_autotest --noinput $* 2>>"$LOG" >>"$LOG1"
 RES=$?
 [ $RES -eq 3 ] && ABORTED=1
 #echo "[DEBUG] Coverage run result: $RES --> ABORTED=$ABORTED"
+
+echo >> "$LOG"
+cat "$LOG1" >> "$LOG"
+rm "$LOG1"
 
 kill $PID_TAIL
 wait $PID_TAIL 2>/dev/null
