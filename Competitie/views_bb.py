@@ -397,7 +397,21 @@ class KlassegrenzenVaststellenView(UserPassesTestMixin, TemplateView):
         # for
         return targets
 
-    def _bepaal_klassegrenzen_indiv(self, comp):
+    def _bepaal_klassegrenzen_indiv(self, comp, trans_indiv):
+
+        """ retourneert een lijst van individuele wedstrijdenklassen, elk bestaande uit een dictionary:
+                'beschrijving': tekst
+                'count':        aantal sporters ingedeeld in deze klasse
+                'ag':           het AG van de laatste sporter in deze klasse
+                                of 0.000 voor klasse onbekend
+                                of 0.001 voor de laatste klasse voor klasse onbekend
+                'wedstrkl_obj': indiv klasse
+                'klasse':       competitieklasse
+                'volgorde':     nummer
+
+            gesorteerd op volgorde (oplopend)
+        """
+
         # bepaal het jaar waarin de wedstrijdleeftijd bepaald moet worden
         # dat is het tweede jaar van de competitie, waarin de BK gehouden wordt
         jaar = comp.begin_jaar + 1
@@ -493,10 +507,29 @@ class KlassegrenzenVaststellenView(UserPassesTestMixin, TemplateView):
                     objs.append(res)
                 # for
         # for
+
+        for obj in objs:
+            obj['klasse'] = trans_indiv[obj['wedstrkl_obj'].pk]
+        # for
+
         objs2 = sorted(objs, key=lambda k: k['volgorde'])
         return objs2
 
-    def _bepaal_klassegrenzen_teams(self, comp):
+    def _bepaal_klassegrenzen_teams(self, comp, trans_team):
+
+        """ retourneert een lijst van team wedstrijdenklassen, elk bestaande uit een dictionary:
+                'beschrijving': tekst
+                'count':        aantal teams ingedeeld in deze klasse
+                'ag':           het Team-AG van de laatste team in deze klasse
+                                of 0.001 voor de laatste klasse voor klasse onbekend
+                'ag_str':       geformatteerd Team-AG als NNN.M
+                'wedstrkl_obj': team klasse
+                'klasse':       competitieklasse
+                'volgorde':     nummer
+
+            gesorteerd op volgorde (oplopend)
+        """
+
         # per boogtype (dus elke schutter-boog in zijn eigen team type):
         #   per vereniging:
         #      - de schutters sorteren op AG
@@ -602,9 +635,32 @@ class KlassegrenzenVaststellenView(UserPassesTestMixin, TemplateView):
                    'wedstrkl_obj': klasse,
                    'volgorde': klasse.volgorde}     # voor sorteren
             objs.append(res)
+        # for
+
+        for obj in objs:
+            obj['klasse'] = trans_team[obj['wedstrkl_obj'].pk]
+        # for
 
         objs2 = sorted(objs, key=lambda k: k['volgorde'])
         return objs2
+
+    @staticmethod
+    def _get_klasse_trans(comp):
+        """ geeft een look-up tabel terug van IndivWedstrijdklasse / TeamWedstrijdklasse naar CompetitieKlasse """
+        trans_indiv = dict()
+        trans_team = dict()
+
+        for klasse in (CompetitieKlasse
+                       .objects
+                       .filter(competitie=comp)
+                       .prefetch_related('indiv', 'team')):
+            if klasse.indiv:
+                trans_indiv[klasse.indiv.pk] = klasse
+            else:
+                trans_team[klasse.team.pk] = klasse
+        # for
+
+        return trans_indiv, trans_team
 
     def get(self, request, *args, **kwargs):
         """ deze functie wordt aangeroepen als een GET request ontvangen is
@@ -619,11 +675,13 @@ class KlassegrenzenVaststellenView(UserPassesTestMixin, TemplateView):
 
         context['comp'] = comp
 
+        trans_indiv, trans_team = self._get_klasse_trans(comp)
+
         if comp.klassegrenzen_vastgesteld:
             context['al_vastgesteld'] = True
         else:
-            context['klassegrenzen_indiv'] = self._bepaal_klassegrenzen_indiv(comp)
-            context['klassegrenzen_teams'] = self._bepaal_klassegrenzen_teams(comp)
+            context['klassegrenzen_indiv'] = self._bepaal_klassegrenzen_indiv(comp, trans_indiv)
+            context['klassegrenzen_teams'] = self._bepaal_klassegrenzen_teams(comp, trans_team)
             context['wedstrijdjaar'] = comp.begin_jaar + 1
 
         datum = wanneer_ag_vastgesteld()
@@ -646,28 +704,21 @@ class KlassegrenzenVaststellenView(UserPassesTestMixin, TemplateView):
 
         if not comp.klassegrenzen_vastgesteld:
 
-            # verwijder oude klassen (just in case)
-            CompetitieKlasse.objects.filter(competitie=comp).delete()
-
-            # haal dezelfde data op als voor de GET request
-            bulk = list()
+            trans_indiv, trans_team = self._get_klasse_trans(comp)
 
             # individueel
-            for obj in self._bepaal_klassegrenzen_indiv(comp):
-                compkl = CompetitieKlasse(competitie=comp,
-                                          indiv=obj['wedstrkl_obj'],
-                                          min_ag=obj['ag'])
-                bulk.append(compkl)
+            for obj in self._bepaal_klassegrenzen_indiv(comp, trans_indiv):
+                klasse = obj['klasse']
+                klasse.min_ag = obj['ag']
+                klasse.save(update_fields=['min_ag'])
             # for
 
-            for obj in self._bepaal_klassegrenzen_teams(comp):
-                compkl = CompetitieKlasse(competitie=comp,
-                                          team=obj['wedstrkl_obj'],
-                                          min_ag=obj['ag'])
-                bulk.append(compkl)
+            # team
+            for obj in self._bepaal_klassegrenzen_teams(comp, trans_team):
+                klasse = obj['klasse']
+                klasse.min_ag = obj['ag']
+                klasse.save(update_fields=['min_ag'])
             # for
-
-            CompetitieKlasse.objects.bulk_create(bulk)
 
             comp.klassegrenzen_vastgesteld = True
             comp.save()

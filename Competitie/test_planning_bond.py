@@ -120,8 +120,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_bb)
         self.e2e_wisselnaarrol_bb()
         self.url_klassegrenzen_vaststellen_18 = '/bondscompetities/%s/klassegrenzen/vaststellen/' % self.comp_18.pk
-        with self.assert_max_queries(24):
-            resp = self.client.post(self.url_klassegrenzen_vaststellen_18)
+        resp = self.client.post(self.url_klassegrenzen_vaststellen_18)
         self.assert_is_redirect_not_plein(resp)  # check for success
 
         self.deelcomp_bond_18 = DeelCompetitie.objects.filter(competitie=self.comp_18,

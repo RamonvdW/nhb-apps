@@ -120,10 +120,8 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
             resp = self.client.post(url_ag_vaststellen)
 
         # klassegrenzen vaststellen
-        with self.assert_max_queries(24):
-            resp = self.client.post(url_klassegrenzen_vaststellen % comp_18.pk)
-        with self.assert_max_queries(24):
-            resp = self.client.post(url_klassegrenzen_vaststellen % comp_25.pk)
+        self.client.post(url_klassegrenzen_vaststellen % comp_18.pk)
+        self.client.post(url_klassegrenzen_vaststellen % comp_25.pk)
 
         comp_18 = Competitie.objects.get(pk=comp_18.pk)
         zet_competitie_fase(comp_18, 'B')

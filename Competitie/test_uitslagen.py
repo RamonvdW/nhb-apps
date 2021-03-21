@@ -136,10 +136,8 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         self.comp_25 = Competitie.objects.get(afstand='25')
 
         # klassegrenzen vaststellen
-        with self.assert_max_queries(24):
-            self.client.post(url_klassegrenzen_vaststellen % self.comp_18.pk)
-        with self.assert_max_queries(24):
-            self.client.post(url_klassegrenzen_vaststellen % self.comp_25.pk)
+        self.client.post(url_klassegrenzen_vaststellen % self.comp_18.pk)
+        self.client.post(url_klassegrenzen_vaststellen % self.comp_25.pk)
 
         # zet de 18m open voor inschrijving
         self.comp_18.begin_aanmeldingen = datetime.date(year=self.comp_18.begin_jaar, month=1, day=1)

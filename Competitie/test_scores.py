@@ -137,11 +137,9 @@ class TestCompetitieScores(E2EHelpers, TestCase):
         url_vaststellen = '/bondscompetities/%s/klassegrenzen/vaststellen/'  # comp_pk
         self.e2e_login_and_pass_otp(self.account_bb)
         self.e2e_wisselnaarrol_bb()
-        with self.assert_max_queries(24):
-            resp = self.client.post(url_vaststellen % self.comp_18.pk)
+        resp = self.client.post(url_vaststellen % self.comp_18.pk)
         self.assert_is_redirect_not_plein(resp)     # check success
-        with self.assert_max_queries(24):
-            resp = self.client.post(url_vaststellen % self.comp_25.pk)
+        resp = self.client.post(url_vaststellen % self.comp_25.pk)
         self.assert_is_redirect_not_plein(resp)     # check success
 
         self.deelcomp_regio101_18 = DeelCompetitie.objects.filter(laag='Regio', competitie=self.comp_18, nhb_regio=self.regio_101)[0]

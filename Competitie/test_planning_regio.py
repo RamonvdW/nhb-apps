@@ -126,8 +126,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_bb)
         self.e2e_wisselnaarrol_bb()
         self.url_klassegrenzen_vaststellen_18 = '/bondscompetities/%s/klassegrenzen/vaststellen/' % self.comp_18.pk
-        with self.assert_max_queries(29):
-            resp = self.client.post(self.url_klassegrenzen_vaststellen_18)
+        resp = self.client.post(self.url_klassegrenzen_vaststellen_18)
         self.assert_is_redirect_not_plein(resp)  # check for success
 
         klasse = CompetitieKlasse.objects.get(competitie=self.comp_18,
@@ -750,7 +749,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         self.assertEqual(str(wedstrijd_datum), "2020-03-02")
 
         # haal de wedstrijd op
-        with self.assert_max_queries(27):
+        with self.assert_max_queries(35):
             resp = self.client.get(self.url_wijzig_wedstrijd % wedstrijd_pk)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
@@ -848,7 +847,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
                                               'aanvang': '12:34'})
         self.assert404(resp)
 
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(26):
             resp = self.client.post(url_wed, {'nhbver_pk': self.nhbver_101.pk,
                                               'wanneer': '2013-12-11', 'aanvang': '12:34'})
         self.assert_is_redirect(resp, url_ronde)
@@ -1163,7 +1162,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         self.assertEqual(str(wedstrijd.datum_wanneer), '2020-01-27')
 
         # pas de instellingen van de wedstrijd aan
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(25):
             resp = self.client.post(self.url_wijzig_wedstrijd % wedstrijd_pk,
                                     {'weekdag': 0, 'nhbver_pk': self.nhbver_101.pk, 'aanvang': '12:34'})
         self.assert_is_redirect_not_plein(resp)  # check for success
@@ -1173,7 +1172,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         self.assertEqual(str(wedstrijd.datum_wanneer), '2020-01-27')
 
         # pas de weekdag aan
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(25):
             resp = self.client.post(self.url_wijzig_wedstrijd % wedstrijd_pk,
                                     {'weekdag': 2, 'nhbver_pk': self.nhbver_101.pk, 'aanvang': '12:34'})
         self.assert_is_redirect_not_plein(resp)  # check for success
