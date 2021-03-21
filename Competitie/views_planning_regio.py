@@ -360,13 +360,12 @@ class RegioClusterPlanningView(UserPassesTestMixin, TemplateView):
             raise Http404('Cluster niet gevonden')
 
         try:
+            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])     # afkappen geeft beveiliging
             deelcomp = (DeelCompetitie
                         .objects
                         .select_related('competitie')
-                        .get(laag=LAAG_REGIO,
-                             nhb_regio=cluster.regio,
-                             competitie__afstand=cluster.gebruik))
-        except DeelCompetitie.DoesNotExist:
+                        .get(pk=deelcomp_pk))
+        except (ValueError, DeelCompetitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
         ronde = maak_deelcompetitie_ronde(deelcomp=deelcomp, cluster=cluster)
@@ -427,6 +426,9 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
         context['ronde'] = ronde
         context['vaste_beschrijving'] = is_import = ronde.is_voor_import_oude_programma()
 
+        context['ronde_opslaan_url'] = reverse('Competitie:regio-ronde-planning',
+                                               kwargs={'ronde_pk': ronde.pk})
+
         context['wedstrijden'] = (ronde.plan.wedstrijden
                                   .select_related('vereniging')
                                   .prefetch_related('indiv_klassen')
@@ -441,6 +443,9 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
                 wedstrijd.url_wijzig = reverse('Competitie:regio-wijzig-wedstrijd',
                                                kwargs={'wedstrijd_pk': wedstrijd.pk})
             # for
+
+            context['url_verwijderen'] = context['ronde_opslaan_url']
+            context['heeft_wedstrijden'] = context['wedstrijden'].count() > 0
 
         start_week = settings.COMPETITIES_START_WEEK
         eind_week = settings.COMPETITIE_25M_LAATSTE_WEEK
@@ -483,9 +488,6 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
                                 kwargs={'deelcomp_pk': ronde.deelcompetitie.pk})
         context['terug_url'] = terug_url
 
-        context['ronde_opslaan_url'] = reverse('Competitie:regio-ronde-planning',
-                                               kwargs={'ronde_pk': ronde.pk})
-
         context['heeft_wkl'] = heeft_wkl = (ronde.deelcompetitie.inschrijf_methode == INSCHRIJF_METHODE_2 and
                                             not ronde.is_voor_import_oude_programma())
 
@@ -518,7 +520,7 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
                 for wkl in wedstrijd.indiv_klassen.order_by('volgorde'):
                     try:
                         wedstrijd.aantal_schutters += klasse2schutters[wkl.pk]
-                    except KeyError:
+                    except KeyError:        # pragma: no cover
                         # geen schutters in deze klasse
                         pass
 
@@ -555,6 +557,19 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
         # alleen de RCL mag een wedstrijd toevoegen
         if self.rol_nu != Rollen.ROL_RCL:
             raise PermissionDenied()
+
+        if request.POST.get('verwijder_ronde', None):
+            # de ronde moet verwijderd worden
+            # controleer nog een keer dat er geen wedstrijden aan hangen
+            if ronde.plan.wedstrijden.count() > 0:
+                raise Http404('Wedstrijden aanwezig')
+
+            next_url = reverse('Competitie:regio-planning',
+                               kwargs={'deelcomp_pk': ronde.deelcompetitie.pk})
+
+            ronde.delete()
+
+            return HttpResponseRedirect(next_url)
 
         week_nr = request.POST.get('ronde_week_nr', None)
         if week_nr:
