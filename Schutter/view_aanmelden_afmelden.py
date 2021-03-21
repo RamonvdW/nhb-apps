@@ -486,9 +486,16 @@ class SchutterSchietmomentenView(UserPassesTestMixin, TemplateView):
 
         rol_nu, functie_nu = rol_get_huidige_functie(request)
 
-        # TODO: controleer dat ingelogde gebruiker deze wijziging mag maken
+        # controleer dat ingelogde gebruiker deze wijziging mag maken
+        if rol_nu == Rollen.ROL_SCHUTTER:
+            if request.user != deelnemer.schutterboog.nhblid.account:
+                raise PermissionDenied()
+        else:
+            # HWL: sporter moet lid zijn van zijn vereniging
+            if deelnemer.bij_vereniging != functie_nu.nhb_ver:
+                raise PermissionDenied('Sporter is niet van jouw vereniging')
 
-        # zoek alle dagdelen erbij
+        # zoek alle wedstrijden erbij
         pks = list()
         for ronde in (DeelcompetitieRonde
                       .objects
