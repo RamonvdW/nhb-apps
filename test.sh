@@ -32,6 +32,15 @@ echo
 echo "[INFO] Checking application is free of fatal errors"
 python3 ./manage.py check || exit $?
 
+FORCE_REPORT=0
+if [[ "$ARGS" =~ "--force" ]]
+then
+    FORCE_REPORT=1
+    # remove from ARGS used to decide focus
+    # will still be given to ./manage.py where --force has no effect
+    ARGS=$(echo "$ARGS" | sed 's/--force//')
+fi
+
 FOCUS=""
 if [ ! -z "$ARGS" ]
 then
@@ -58,7 +67,7 @@ echo "[INFO] Capturing output in $LOG"
 tail -f "$LOG" &
 PID_TAIL=$!
 
-python3 -m coverage run --append --branch ./manage.py test --settings=nhbapps.settings_autotest --noinput $* >>"$LOG" 2>>"$LOG"
+python3 -m coverage run --append --branch ./manage.py test --settings=nhbapps.settings_autotest --noinput $* 2>&1 >>"$LOG"
 RES=$?
 [ $RES -eq 3 ] && ABORTED=1
 #echo "[DEBUG] Coverage run result: $RES --> ABORTED=$ABORTED"
@@ -82,7 +91,7 @@ fi
 kill $PID_WEBSIM
 wait $PID_WEBSIM 2>/dev/null
 
-if [ $ABORTED -eq 0 ]
+if [ $ABORTED -eq 0 -o $FORCE_REPORT -eq 1 ]
 then
     echo "[INFO] Generating reports"
 
