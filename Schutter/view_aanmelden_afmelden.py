@@ -458,6 +458,9 @@ class SchutterSchietmomentenView(UserPassesTestMixin, TemplateView):
             wedstrijd.is_gekozen = (wedstrijd.pk in keuze)
         # for
 
+        context['url_opslaan'] = reverse('Schutter:schietmomenten',
+                                         kwargs={'deelnemer_pk': deelnemer.pk})
+
         if rol_nu == Rollen.ROL_SCHUTTER:
             context['url_terug'] = reverse('Schutter:profiel')
         else:

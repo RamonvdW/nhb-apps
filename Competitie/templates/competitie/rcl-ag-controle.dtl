@@ -39,6 +39,7 @@
         {% empty %}
             <tr>
                 <td colspan="4"><i>Er zijn nog geen handmatige aanvangsgemiddelden ingevoerd</i></td>
+                <td></td>
             </tr>
         {% endfor %}
     </table>

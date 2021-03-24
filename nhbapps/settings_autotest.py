@@ -15,4 +15,8 @@ ENABLE_DEBUG_TOOLBAR = False
 ENABLE_DJANGO_EXTENSIONS = False
 SAML_IDP_CONFIG['debug'] = DEBUG
 
+# enable html validation using v.Nu (warning: triples test duration)
+# warning: increases test run duration significantly
+#TEST_VALIDATE_HTML = True
+
 # end of file

@@ -31,7 +31,6 @@
     </script>
     <form method="post" action="{{ url_opslaan }}">
         {% csrf_token %}
-        <input type="hidden" name="deelnemer_pk" value="{{ deelnemer.pk }}">
 
         <table class="white">
 
