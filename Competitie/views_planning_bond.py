@@ -343,7 +343,8 @@ class DoorzettenNaarRKView(UserPassesTestMixin, TemplateView):
             histcomp = HistCompetitie(seizoen=seizoen,
                                       comp_type=comp.afstand,
                                       klasse=boogtype.beschrijving,     # 'Recurve'
-                                      is_team=False)
+                                      is_team=False,
+                                      is_openbaar=False)                # nog niet laten zien
             histcomp.save()
 
             klassen_pks = (CompetitieKlasse

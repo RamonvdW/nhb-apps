@@ -37,6 +37,10 @@ class HistCompAlleJarenView(ListView):
     # class variables shared by all instances
     template_name = TEMPLATE_HISTCOMP_ALLEJAREN
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.seizoen = ""
+
     @staticmethod
     def _zet_op_volgorde_klassen(objs_unsorted):
         # sorteer de klassen op de gewenste volgorde
@@ -44,7 +48,6 @@ class HistCompAlleJarenView(ListView):
         objs = list()
         for klas in KLASSEN_VOLGORDE:
             # zoek objecten met klassen die hier aan voldoen
-            transfer = list()
             for obj in objs_unsorted:
                 if klas in obj.klasse:
                     objs.append(obj)
@@ -61,7 +64,11 @@ class HistCompAlleJarenView(ListView):
         """ called by the template system to get the queryset or list of objects for the template """
 
         # zoek het nieuwste seizoen beschikbaar
-        qset = HistCompetitie.objects.order_by('-seizoen').distinct('seizoen')
+        qset = (HistCompetitie
+                .objects
+                .exclude(is_openbaar=False)
+                .order_by('-seizoen')
+                .distinct('seizoen'))
         if len(qset) == 0:
             # geen data beschikbaar
             self.seizoen = ""
