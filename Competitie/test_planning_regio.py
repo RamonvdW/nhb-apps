@@ -895,7 +895,6 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         # verwijder een wedstrijd
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_verwijder_wedstrijd % wedstrijd_pk, {})
-        self.e2e_dump_resp(resp)
         self.assert_is_redirect_not_plein(resp)
 
         # haal de ronde planning op met een andere rol
