@@ -167,6 +167,25 @@
       "latitude": null,
       "longitude": null,
       "blocked": false
+    },
+    { "member_number": 100100,
+      "club_number": null,
+      "name": "Wegwezer2",
+      "prefix": "van der",
+      "first_name": "Voornaam",
+      "initials": "W.",
+      "gender": "M",
+      "email": "",
+      "birthday": "2000-05-06",
+      "member_from": "2000-06-06",
+      "para_code": null,
+      "address": null,
+      "postal_code": null,
+      "location_name": null,
+      "iso_abbr": null,
+      "latitude": null,
+      "longitude": null,
+      "blocked": false
     }
   ]
 }

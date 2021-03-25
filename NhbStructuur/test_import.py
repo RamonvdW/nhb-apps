@@ -79,7 +79,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
     def test_import(self):
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(111):
+        with self.assert_max_queries(114):
             management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_03.json',
                                     '--sim_now=2020-07-01', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
@@ -146,7 +146,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         # vereniging mutaties
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(111):
+        with self.assert_max_queries(114):
             management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_03.json',
                                     '--sim_now=2020-07-01', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
@@ -156,7 +156,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(85):
+        with self.assert_max_queries(87):
             management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_08.json',
                                     '--sim_now=2020-07-01', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
@@ -176,7 +176,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         # lid mutaties
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(111):
+        with self.assert_max_queries(114):
             management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_03.json',
                                     '--sim_now=2020-07-01', stderr=f1, stdout=f2)
 
@@ -187,14 +187,14 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(77):
+        with self.assert_max_queries(80):
             management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_09.json',
                                     '--sim_now=2020-07-01', stderr=f1, stdout=f2)
-        # print(f1.getvalue())
-        # print(f2.getvalue())
+        # print('f1:', f1.getvalue())
+        # print('f2:', f2.getvalue())
         self.assertTrue("[ERROR] Lid 100001 heeft geen valide geboortedatum" in f1.getvalue())
         self.assertTrue("[ERROR] Lid 100099 heeft geen valide geboortedatum" in f1.getvalue())
-        self.assertTrue("[ERROR] Lid 100099 heeft geen valide e-mail (bad_email)" in f1.getvalue())
+        self.assertTrue("[ERROR] Lid 100100 heeft geen valide e-mail (bad_email)" in f1.getvalue())
         self.assertTrue("[ERROR] Lid 100001 heeft onbekend geslacht: X (moet zijn: M of F)" in f1.getvalue())
         self.assertTrue("[ERROR] Lid 100009 heeft geen voornaam of initials" in f1.getvalue())
         self.assertTrue("[INFO] Lid 100024: is_actief_lid nee --> ja" in f2.getvalue())
@@ -476,13 +476,13 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         ver.geen_wedstrijden = True
         ver.save()
 
-        with self.assert_max_queries(61):
+        with self.assert_max_queries(62):
             management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_08.json',
                                     '--sim_now=2020-07-01', '--dryrun', stderr=f1, stdout=f2)
-        with self.assert_max_queries(45):
+        with self.assert_max_queries(46):
             management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_09.json',
                                     '--sim_now=2020-07-01', '--dryrun', stderr=f1, stdout=f2)
-        with self.assert_max_queries(53):
+        with self.assert_max_queries(54):
             management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_14.json',
                                     '--sim_now=2020-07-01', '--dryrun', stderr=f1, stdout=f2)
 
@@ -492,7 +492,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         ver.ver_nr = "1999"
         ver.regio = NhbRegio.objects.get(pk=116)
         ver.save()
-        with self.assert_max_queries(30):
+        with self.assert_max_queries(31):
             management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_12.json',
                                     '--sim_now=2020-07-01', '--dryrun', stderr=f1, stdout=f2)
 
@@ -524,7 +524,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         # lid schrijft zich uit bij een vereniging en mag tot einde jaar diensten gebruiken
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(111):
+        with self.assert_max_queries(114):
             management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_03.json',
                                     '--sim_now=2020-07-01', stderr=f1, stdout=f2)
 
@@ -536,7 +536,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         # lid 100001 heeft zich uitgeschreven tijdens het jaar
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(62):
+        with self.assert_max_queries(64):
             management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_18.json',
                                     '--sim_now=2020-07-02', stderr=f1, stdout=f2)
 
@@ -548,7 +548,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         # lid 100001 is nog steeds uitgeschreven - geen verandering tot 15 januari
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(65):
+        with self.assert_max_queries(71):
             management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_18.json',
                                     '--sim_now=2021-01-15', stderr=f1, stdout=f2)
 

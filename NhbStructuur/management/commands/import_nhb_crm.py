@@ -564,14 +564,7 @@ class Command(BaseCommand):
 
             lid_email = member['email']
             if not lid_email:
-                lid_email = ""      # converts None to string
-                if not lid_blocked:
-                    self._count_lid_no_email += 1
-            elif not mailer_email_is_valide(lid_email):
-                self.stderr.write('[ERROR] Lid %s heeft geen valide e-mail (%s)' % (lid_nhb_nr, lid_email))
-                self._count_errors += 1
-                self._count_lid_no_email += 1
-                lid_email = ""      # convert invalid email to no email
+                lid_email = ""  # converts potential None to string
 
             if not is_valid:
                 continue
@@ -600,6 +593,15 @@ class Command(BaseCommand):
                                 obj.save()
                         else:
                             lid_blocked = True
+
+                    if not lid_email:
+                        if not lid_blocked:
+                            self._count_lid_no_email += 1
+                    elif not mailer_email_is_valide(lid_email):     # check alle email adressen
+                        self.stderr.write('[ERROR] Lid %s heeft geen valide e-mail (%s)' % (lid_nhb_nr, lid_email))
+                        self._count_errors += 1
+                        self._count_lid_no_email += 1
+                        lid_email = ""  # convert invalid email to no email
 
                     if obj.bij_vereniging != lid_ver:
                         if lid_ver:
@@ -684,6 +686,15 @@ class Command(BaseCommand):
                 self._count_blocked += 1
 
             if is_nieuw:
+
+                if not lid_email:
+                    self._count_lid_no_email += 1
+                elif not mailer_email_is_valide(lid_email):  # check alle email adressen
+                    self.stderr.write('[ERROR] Lid %s heeft geen valide e-mail (%s)' % (lid_nhb_nr, lid_email))
+                    self._count_errors += 1
+                    self._count_lid_no_email += 1
+                    lid_email = ""  # convert invalid email to no email
+
                 lid = NhbLid()
                 lid.nhb_nr = lid_nhb_nr
                 lid.voornaam = lid_voornaam
