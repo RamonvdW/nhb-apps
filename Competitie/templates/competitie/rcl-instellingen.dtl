@@ -107,7 +107,7 @@
 
             <tr>
                 <td>Teams aanmaken toestaan tot</td>
-                <td><input type="text" class="nl_datepicker" id="datum1" onchange="datum_gewijzigd(this)">
+                <td><input type="text" class="nl_datepicker" id="datum1" onchange="datum_gewijzigd(this)"{% if not deelcomp.regio_organiseert_teamcompetitie %} disabled{% endif %}>
                     <input type="hidden" name="einde_teams_aanmaken" id="datum1_out" value="{{ deelcomp.einde_teams_aanmaken|date:'Y-m-d' }}">
                 </td>
             </tr>
