@@ -14,7 +14,7 @@ MINIFY_CSS="../minify_css.py"
 
 # source file to modify when the version number changes
 DTL_FILE1="$PWD/../../Plein/templates/plein/site_layout.dtl"
-DTL_FILE2="$PWD/../../Plein/templates/plein/niet-ondersteund.dtl"
+DTL_FILE2="$PWD/../../Plein/templates/plein/site_layout_minimaal.dtl"
 
 if [ ! -e "$INFILE" ]
 then

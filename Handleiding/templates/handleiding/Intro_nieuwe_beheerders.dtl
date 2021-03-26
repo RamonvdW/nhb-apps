@@ -21,7 +21,7 @@
 <p></p>
 <p>Kwaadwillenden moeten dus niet alleen je gebruikersnaam en wachtwoord weten, maar ook toegang hebben tot de app die de codes genereert.</p>
 <p></p>
-<p>Installatie is heel simpel. Uitleg over het activeren van de tweede factor staat op deze pagina van de handleiding: <a href="/handleiding/Twee-factor_authenticatie/">Twee-factor_authenticatie</a>.</p>
+<p>Installatie is heel simpel. Uitleg over het activeren van de tweede factor staat op deze pagina van de handleiding: <a class="handleiding-link" href="/handleiding/Twee-factor_authenticatie/">Twee-factor_authenticatie</a>.</p>
 <p></p>
 <h4>Stap 2: Verklaring ondertekenen</h4>
 <p></p>
@@ -29,7 +29,7 @@
 <p></p>
 <h4>Stap 3: Kies een rol</h4>
 <p></p>
-<p>Via Wissel van Rol in het menu kom je op een pagina waar je kan wisselen tussen rollen. De verschillende rollen staan beschreven op deze pagina: <a href="/handleiding/Rollen/">Rollen</a>.</p>
+<p>Via Wissel van Rol in het menu kom je op een pagina waar je kan wisselen tussen rollen. De verschillende rollen staan beschreven op deze pagina: <a class="handleiding-link" href="/handleiding/Rollen/">Rollen</a>.</p>
 <p></p>
 <p>Een aantal rollen heeft de mogelijkheid om andere rollen te helpen.</p>
 <p>Zo kan een Rayoncoordinator (RKO) de Regiocompetitieleiders (RCL) helpen.</p>
@@ -47,9 +47,9 @@
 <p></p>
 <hr><h5>Verder</h5>
 <ul style="padding-left: 20px">
-<li style="list-style-type: disc; padding-left: 0px">Terug naar de <a href="/handleiding/Hoofdpagina/">Hoofdpagina</a></li>
-<li style="list-style-type: disc; padding-left: 0px">Beschrijving van de <a href="/handleiding/Rollen/">Rollen</a></li>
-<li style="list-style-type: disc; padding-left: 0px"><a href="/handleiding/Twee-factor_authenticatie/">Twee-factor_authenticatie</a></li>
+<li style="list-style-type: disc; padding-left: 0px">Terug naar de <a class="handleiding-link" href="/handleiding/Hoofdpagina/">Hoofdpagina</a></li>
+<li style="list-style-type: disc; padding-left: 0px">Beschrijving van de <a class="handleiding-link" href="/handleiding/Rollen/">Rollen</a></li>
+<li style="list-style-type: disc; padding-left: 0px"><a class="handleiding-link" href="/handleiding/Twee-factor_authenticatie/">Twee-factor_authenticatie</a></li>
 </ul>
 
 </div>

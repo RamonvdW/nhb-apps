@@ -26,17 +26,17 @@
 <p></p>
 <p></p>
 <hr><h5>Verder</h5>
-<p>Terug naar de <a href="/handleiding/Hoofdpagina/">Hoofdpagina</a>.</p>
+<p>Terug naar de <a class="handleiding-link" href="/handleiding/Hoofdpagina/">Hoofdpagina</a>.</p>
 <p></p>
-<p>Meer informatie over <a href="/handleiding/Rollen/">Rollen</a>.</p>
+<p>Meer informatie over <a class="handleiding-link" href="/handleiding/Rollen/">Rollen</a>.</p>
 <p></p>
-<p><a href="/handleiding/Clusters/">Clusters</a></p>
+<p><a class="handleiding-link" href="/handleiding/Clusters/">Clusters</a></p>
 <p></p>
-<p><a href="/handleiding/Inschrijfmethodes_Regiocompetitie/">Inschrijfmethodes Regiocompetitie</a></p>
+<p><a class="handleiding-link" href="/handleiding/Inschrijfmethodes_Regiocompetitie/">Inschrijfmethodes Regiocompetitie</a></p>
 <p></p>
-<p><a href="/handleiding/RCL_instellingen_regio/">RCL instellingen regio</a></p>
+<p><a class="handleiding-link" href="/handleiding/RCL_instellingen_regio/">RCL instellingen regio</a></p>
 <p></p>
-<p><a href="/handleiding/Planning_Regio/">Planning Regio</a></p>
+<p><a class="handleiding-link" href="/handleiding/Planning_Regio/">Planning Regio</a></p>
 
 </div>
 

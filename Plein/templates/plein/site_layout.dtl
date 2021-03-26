@@ -27,7 +27,7 @@
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans&amp;display=swap">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu&amp;display=swap">
         <link rel="stylesheet" href="{% static 'materialize-new-39.css' %}">
-        <link rel="stylesheet" href="{% static 'site_layout_min-15.css' %}"> <!-- moet ná materialize css -->
+        <link rel="stylesheet" href="{% static 'site_layout_min-16.css' %}"> <!-- moet ná materialize css -->
         {% block extraheader %}{% endblock %}
     </head>
 
