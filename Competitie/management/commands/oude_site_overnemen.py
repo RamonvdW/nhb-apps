@@ -775,7 +775,7 @@ class Command(BaseCommand):
                     self._verwerk_klassen(boog_data, afstand, afkorting)
                 # for
             else:
-                self.stdout.write('[WARNING] Import %sm wordt overgeslagen want geen competitie gevonden in fase B..F' % afstand)
+                self.stdout.write('[WARNING] Import %sm wordt overgeslagen want geen competitie gevonden in fase E..F' % afstand)
         # for
 
         self._verwijder_dubbele_deelnemers()
