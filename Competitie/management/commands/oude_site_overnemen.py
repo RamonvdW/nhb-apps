@@ -366,7 +366,6 @@ class Command(BaseCommand):
             inschrijving.bij_vereniging = lid_vereniging
             inschrijving.klasse = self._klasse
             inschrijving.inschrijf_voorkeur_team = (teamtype is not None)
-            inschrijving.inschrijf_team_type = teamtype
 
             if ag_str:
                 inschrijving.aanvangsgemiddelde = ag_str
