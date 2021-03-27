@@ -276,7 +276,6 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
 
         if team_pk == 0:
             # nieuw team
-
             volg_nrs = (RegiocompetitieTeam
                         .objects
                         .filter(deelcompetitie=deelcomp,
@@ -327,6 +326,8 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
                         raise Http404()
 
                     team.team_type = team_type
+                    team.aanvangsgemiddelde = 0.0
+                    team.klasse = None
                     team.save()
 
                     # verwijder eventueel gekoppelde sporters bij wijziging team type,

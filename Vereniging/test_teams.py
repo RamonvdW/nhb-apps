@@ -443,6 +443,14 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
         self.assertTrue(team.maak_team_naam_kort() != '')
         self.assertTrue(str(team) != '')
 
+        # zet het team handmatig in een klasse en koppel een schutter
+        klasse = CompetitieKlasse.objects.get(competitie=self.comp_18,
+                                              team__volgorde=10)           # Recurve klasse ERE
+        team.klasse = klasse
+        team.aanvangsgemiddelde = 8.8
+        team.save()
+        team.gekoppelde_schutters.add(self.deelnemer_100004_18)
+
         # wijzig het team type
         resp = self.client.post(self.url_wijzig_team % (self.deelcomp18_regio111.pk, team.pk),
                                 {'team_type': 'BAD'})
@@ -453,6 +461,11 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
             resp = self.client.post(self.url_wijzig_team % (self.deelcomp18_regio111.pk, team.pk),
                                     {'team_type': 'C', 'team_naam': 'test test test'})
         self.assert_is_redirect(resp, self.url_regio_teams % self.deelcomp18_regio111.pk)
+
+        team = RegiocompetitieTeam.objects.get(pk=team.pk)
+        self.assertTrue(team.aanvangsgemiddelde < 0.0005)
+        self.assertIsNone(team.klasse)
+        self.assertEqual(0, team.gekoppelde_schutters.count())
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wijzig_team % (self.deelcomp18_regio111.pk, team.pk))
@@ -482,6 +495,7 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_regio_teams % self.deelcomp18_regio111.pk)
         self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
         self.assert_template_used(resp, ('vereniging/teams-regio.dtl', 'plein/site_layout.dtl'))
 
         # haal het teams overzicht op voor de 25m

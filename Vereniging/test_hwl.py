@@ -828,6 +828,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
         self.assert_template_used(resp, ('vereniging/teams-wijzig-ag.dtl', 'plein/site_layout.dtl'))
 
         # post zonder wijziging
@@ -864,6 +865,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
 
 
 # end of file
