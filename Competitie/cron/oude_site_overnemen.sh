@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -36,6 +36,39 @@ LOG="$LOGDIR/${STAMP}_oude_site_overnemen.log"
 
 echo "[INFO] Started at $STAMP" > "$LOG"
 
+download_teams()
+{
+    COMPNR=$1
+    AFSTAND=$2
+    BOOG=$3
+
+    OUTFILE="$DIR/${AFSTAND}_${BOOG}_landelijk_teams.html"
+
+    # keuze: 6=landelijk
+    # teamcomp: 2=teams
+    DATA="go=go&nologin=&vereniging=&regio=&keuze=6&rayon=$RAYON&competitie=$COMPNR&teamcomp=2&x=70&y=12"
+
+    echo "[INFO] Downloading to $OUTFILE" >> "$LOG"
+    curl -X POST --data "$DATA" $URL --output "$OUTFILE" --silent --show-error &>> "$LOG"
+
+    # destilleer de verenigingsnummers
+    OUTFILE2="$DIR/${AFSTAND}_${BOOG}_verenigingen_met_teams.txt"
+    cat "$OUTFILE"| grep \\[ | grep -v keuzeform | cut -d'[' -f2 | cut -d']' -f1 | sort -u > "$OUTFILE2"
+
+    # download per vereniging een lijst met teamschutters
+    while read VER_NR
+    do
+        OUTFILE3="$DIR/${AFSTAND}_${BOOG}_vereniging_${VER_NR}.txt"
+
+        # keuze: 2=vereniging
+        # teamcomp: 2=teams
+        DATA="go=go&nologin=&vereniging=$VER_NR&regio=&keuze=2&rayon=&competitie=$COMPNR&teamcomp=2&x=70&y=12"
+
+        echo "[INFO] Downloading to $OUTFILE3" >> "$LOG"
+        curl -X POST --data "$DATA" $URL --output "$OUTFILE3" --silent --show-error &>> "$LOG"
+    done < "$OUTFILE2"
+}
+
 download_rayon()
 {
     COMPNR=$1
@@ -64,6 +97,9 @@ download()
     download_rayon $COMPNR 2 $AFSTAND $BOOG
     download_rayon $COMPNR 3 $AFSTAND $BOOG
     download_rayon $COMPNR 4 $AFSTAND $BOOG
+
+    # download de lijsten waarin staat wie teamschutters zijn
+    download_teams $COMPNR $AFSTAND $BOOG
 }
 
 download_18()

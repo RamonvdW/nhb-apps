@@ -16,25 +16,29 @@
 <p></p>
 <p>De RCL krijgt de volgende mogelijkheden:</p>
 <ul style="padding-left: 20px">
-<li style="list-style-type: disc; padding-left: 0px">Instellingen voor zijn regio aanpassen</li>
+<li style="list-style-type: disc; padding-left: 0px">Instellingen voor zijn regio aanpassen, zoals clusters en instellingen voor de teamcompetitie</li>
 <li style="list-style-type: disc; padding-left: 0px">Wedstrijdkalender opstellen: in welke weeknummers en op welke locaties kan er geschoten worden?</li>
 <li style="list-style-type: disc; padding-left: 0px">Van elke vereniging binnen de regio de HWL koppelen (de secretaris kan dit ook).</li>
 <li style="list-style-type: disc; padding-left: 0px">Informatie inzien over de accommodaties van de verenigingen binnen de regio.</li>
+<li style="list-style-type: disc; padding-left: 0px">De aangemaakte teams inzien.</li>
+<li style="list-style-type: disc; padding-left: 0px">De handmatig ingevoerde aanvangsgemiddelde voor de teamcompetitie inzien en eventueel bijstellen.</li>
 </ul>
 <p></p>
 <p>Noteer: Deze handleiding beschrijft alleen wat een RCL kan doen binnen de website.</p>
 <p></p>
 <p></p>
 <hr><h5>Verder</h5>
-<p>Terug naar de <a href="/handleiding/Hoofdpagina/">Hoofdpagina</a>.</p>
+<p>Terug naar de <a class="handleiding-link" href="/handleiding/Hoofdpagina/">Hoofdpagina</a>.</p>
 <p></p>
-<p>Meer informatie over <a href="/handleiding/Rollen/">Rollen</a>.</p>
+<p>Meer informatie over <a class="handleiding-link" href="/handleiding/Rollen/">Rollen</a>.</p>
 <p></p>
-<p><a href="/handleiding/Clusters/">Clusters</a></p>
+<p><a class="handleiding-link" href="/handleiding/Clusters/">Clusters</a></p>
 <p></p>
-<p><a href="/handleiding/Inschrijfmethodes_Regiocompetitie/">Inschrijfmethodes Regiocompetitie</a></p>
+<p><a class="handleiding-link" href="/handleiding/Inschrijfmethodes_Regiocompetitie/">Inschrijfmethodes Regiocompetitie</a></p>
 <p></p>
-<p><a href="/handleiding/Planning_Regio/">Planning Regio</a></p>
+<p><a class="handleiding-link" href="/handleiding/RCL_instellingen_regio/">RCL instellingen regio</a></p>
+<p></p>
+<p><a class="handleiding-link" href="/handleiding/Planning_Regio/">Planning Regio</a></p>
 
 </div>
 

@@ -19,7 +19,7 @@
             <i class="material-icons-round left">arrow_upward</i>Terug</a>
     </p>
 
-    <p>Deze pagina toont de tussenstand/eindstand van de regiocompetities binnen een vereniging.</p>
+    <p>Deze pagina toont de {% if comp.alle_regiocompetities_afgesloten %}eindstand{% else %}tussenstand{% endif %} van de regiocompetities binnen een vereniging.</p>
 
     <div class="row">
         <!-- toon gegevens van de competitie, regio en vereniging in een blauwe box -->

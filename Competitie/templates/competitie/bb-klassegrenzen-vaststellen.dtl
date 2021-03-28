@@ -23,16 +23,21 @@
 
     {% else %}
 
-        <p>Hieronder volgende de automatisch berekende klassegrenzen voor de individuele wedstrijdklassen voor de <b>{{ comp.beschrijving }}</b>.</p>
+        <p>Hieronder volgende de automatisch berekende klassegrenzen voor de individuele en teams wedstrijdklassen voor de <b>{{ comp.beschrijving }}</b>.</p>
 
+        <div class="container">
+        <ul class="collection with-header white">
+            <li class="collection-header"><h5 class="red-text">Controleer dat onderstaande gegevens juist zijn.</h5></li>
+            <li class="collection-item">Weet je zeker dat de <b>aanvangsgemiddelden</b> recentelijk vastgesteld zijn aan de hand van de uitslagen van vorig seizoen?</li>
+            <li class="collection-item">Op <b>{{ bb_ag_nieuwste_datum }}</b> zijn de aanvangsgemiddelden voor het laatste vastgesteld.</li>
+            <li class="collection-item"><a class="btn-nhb-blauw" href="{% url 'Competitie:ag-vaststellen' %}">Naar de aanvangsgemiddelden</a></li>
+        </ul>
+        </div>
+
+        <p>Hieronder volgen de berekende klassegrenzen voor de individuele en team klassen.</p>
         <p>Onder aan deze pagina vindt je een knop om de klassegrenzen vast te leggen. Dit is een eenmalige actie voor elke competitie.</p>
 
-        <h5 class="red-text">Controleer dat onderstaande gegevens juist zijn.</h5>
-
-        <p>Weet je zeker dat de <b>aanvangsgemiddelden</b> recentelijk vastgesteld zijn aan de hand van de uitslagen van vorig seizoen?</p>
-        <p>Op <b>{{ bb_ag_nieuwste_datum }}</b> zijn de aanvangsgemiddelden voor het laatste vastgesteld.</p>
-        <p><a class="btn-nhb-blauw" href="{% url 'Competitie:ag-vaststellen' %}">Naar de aanvangsgemiddelden</a></p>
-
+        <h5>Individuele wedstrijdklassen</h5>
         <div class="row">
             <table class="white">
                 <thead>
@@ -42,11 +47,31 @@
                         <th>Minimaal AG</th>
                     </tr>
                 </thead>
-                {% for obj in object_list %}
+                {% for obj in klassegrenzen_indiv %}
                     <tr>
                         <td>{{ obj.beschrijving }}</td>
                         <td>{{ obj.count }}</td>
                         <td>{{ obj.ag|floatformat:3 }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+
+        <h5>Team wedstrijdklassen</h5>
+        <div class="row">
+            <table class="white">
+                <thead>
+                    <tr>
+                        <th>Materiaalklasse</th>
+                        <th>Aantal teams</th>
+                        <th>Minimaal Team-AG</th>
+                    </tr>
+                </thead>
+                {% for obj in klassegrenzen_teams %}
+                    <tr>
+                        <td>{{ obj.beschrijving }}</td>
+                        <td>{{ obj.count }}</td>
+                        <td>{{ obj.ag_str }}</td>
                     </tr>
                 {% endfor %}
             </table>

@@ -131,7 +131,8 @@ class E2EHelpers(object):
             html = html[:pos] + '<!-- removed debug toolbar --></body></html>'
         return html
 
-    def _get_useful_template_name(self, response):
+    @staticmethod
+    def _get_useful_template_name(response):
         lst = [tmpl.name for tmpl in response.templates if tmpl.name not in included_templates and not tmpl.name.startswith('django/forms')]
         return ", ".join(lst)
 
@@ -512,14 +513,29 @@ class E2EHelpers(object):
         # ensure the file is not empty
         self.assertTrue(len(str(response.content)) > 30)
 
-    def assert_template_used(self, resp, template_names):
-        """ Controleer dat de gevraagde templates gebruikt zijn """
+    def _get_templates_not_used(self, resp, template_names):
+        """ returns True when any of the templates have not been used """
         assert isinstance(self, TestCase)
         lst = list(template_names)
         for templ in resp.templates:
             if templ.name in lst:
                 lst.remove(templ.name)
         # for
+        return lst
+
+    def _is_fout_pagina(self, resp):        # pragma: no cover
+        if resp.status_code == 200:
+            lst = self._get_templates_not_used(resp, ('plein/fout_403.dtl', 'plein/site_layout_minimaal.dtl'))
+            if len(lst) == 0:
+                return True
+            lst = self._get_templates_not_used(resp, ('plein/fout_404.dtl', 'plein/site_layout_minimaal.dtl'))
+            if len(lst) == 0:
+                return True
+        return False
+
+    def assert_template_used(self, resp, template_names):
+        """ Controleer dat de gevraagde templates gebruikt zijn """
+        lst = self._get_templates_not_used(resp, template_names)
         if len(lst):    # pragma: no cover
             msg = "Following templates should have been used: %s\n" % repr(lst)
             msg += "Actually used: %s" % repr([t.name for t in resp.templates])
@@ -550,25 +566,30 @@ class E2EHelpers(object):
 
         # toegestane status_codes:
         #   302 (redirect)
+        #   403 (not allowed)
         #   404 (not found)
         #   405 (not allowed)
-        accepted_status_codes = (302, 404, 405)
+        accepted_status_codes = (302, 403, 404, 405)
 
         if post:
             resp = self.client.post(url)
-            self.assertTrue(resp.status_code in accepted_status_codes)
+            if resp.status_code not in accepted_status_codes and not self._is_fout_pagina(resp):
+                self.fail(msg='Onverwachte status code %s bij POST command' % resp.status_code)     # pragma: no cover
 
         if delete:                            # pragma: no cover
             resp = self.client.delete(url)
-            self.assertTrue(resp.status_code in accepted_status_codes)
+            if resp.status_code not in accepted_status_codes and not self._is_fout_pagina(resp):
+                self.fail(msg='Onverwachte status code %s bij DELETE command' % resp.status_code)
 
         if put:                               # pragma: no cover
             resp = self.client.put(url)
-            self.assertTrue(resp.status_code in accepted_status_codes)
+            if resp.status_code not in accepted_status_codes and not self._is_fout_pagina(resp):
+                self.fail(msg='Onverwachte status code %s bij PUT command' % resp.status_code)
 
         if patch:                             # pragma: no cover
             resp = self.client.patch(url)
-            self.assertTrue(resp.status_code in accepted_status_codes)
+            if resp.status_code not in accepted_status_codes and not self._is_fout_pagina(resp):
+                self.fail(msg='Onverwachte status code %s bij PATCH command' % resp.status_code)
 
     def assert_is_redirect(self, resp, expected_url):
         assert isinstance(self, TestCase)
@@ -617,7 +638,7 @@ class E2EHelpers(object):
                 yield
         finally:
             count = len(tracer.trace)
-            if count > num:
+            if count > num:                     # pragma: no cover
                 queries = 'Captured queries:'
                 prefix = '\n       '
                 limit = 200     # begrens aantal queries dat we printen
@@ -638,9 +659,20 @@ class E2EHelpers(object):
                 self.fail(msg=msg + queries)
             else:
                 # kijk of het wat minder kan
-                if count > 20:
+                if num > 20:
                     ongebruikt = num - count
                     if ongebruikt / num > 0.25:        # pragma: no cover
                         self.fail(msg="Maximum (%s) has a lot of margin. Can be set as low as %s" % (num, count))
+
+    def assert403(self, resp):
+        # controleer dat we op de speciale code-403 handler pagina gekomen zijn
+        self.assertEqual(resp.status_code, 200)
+        self.assert_template_used(resp, ('plein/fout_403.dtl', 'plein/site_layout_minimaal.dtl'))
+
+    def assert404(self, resp):
+        # self.assertEqual(resp.status_code, 404)
+        # controleer dat we op de speciale code-404 handler pagina gekomen zijn
+        self.assertEqual(resp.status_code, 200)
+        self.assert_template_used(resp, ('plein/fout_404.dtl', 'plein/site_layout_minimaal.dtl'))
 
 # end of file

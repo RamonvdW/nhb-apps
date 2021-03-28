@@ -9,123 +9,156 @@
 {% block title %}Account activiteit{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="account-activiteit" %}
 
-<h4>Account activiteit</h4>
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="account-activiteit" %}
 
-<p>Er zijn {{ totaal }} accounts aangemaakt op deze server.</p>
+    <h4>Account activiteit</h4>
 
-<p>Focus:</p>
-<p><a class="btn-nhb-blauw" href="#nieuwe">Nieuwe accounts</a></p>
-<p><a class="btn-nhb-blauw" href="#recent">Recente activiteit</a></p>
-<p><a class="btn-nhb-blauw" href="#poging">Mislukte inlog pogingen</a></p>
+    <p>Er zijn {{ totaal }} accounts aangemaakt op deze server.</p>
 
-<h5 id="nieuwe">Nieuwste accounts</h5>
+    <p>Focus:<br>
+        <a class="btn-nhb-blauw btn-small margin-5" href="#nieuwe">Nieuwe accounts</a>
+        <a class="btn-nhb-blauw btn-small margin-5" href="#recent">Recente activiteit</a>
+        <a class="btn-nhb-blauw btn-small margin-5" href="#poging">Mislukte inlog pogingen</a>
+        {% if accses %}
+            <a class="btn-nhb-blauw btn-small margin-5" href="#sessies">Sessies (experimenteel)</a>
+        {% endif %}
+    </p>
 
-<p>Sinds {{ deze_maand|date }} zijn er {{ deze_maand_count }} nieuwe accounts aangemaakt.</p>
+    <h5 id="nieuwe">Nieuwste accounts</h5>
 
-<p>Hieronder volgende nieuwe accounts (maximaal 50)</p>
+    <p>Sinds {{ deze_maand|date }} zijn er {{ deze_maand_count }} nieuwe accounts aangemaakt.</p>
 
-<table class="white" id="table1">
-    <thead>
-        <tr>        <!-- filter veld -->
-            <td></td>
-            <td colspan="2" class="table-filter"><input class="table-filter" oninput="myTableFilter(this, 'table1')" placeholder="Zoeken"/></td>
-            <td colspan="4"></td>
-        </tr>
-        <tr>
-            <th>Aangemaakt</th>
-            <th data-filter="on">Inlog</th>
-            <th data-filter="on">Naam</th>
-            <th>Email is bevestigd</th>
-            <th>Laatste inlog</th>
-            <th>Laatste poging</th>
-            <th>Tweede factor</th>
-        </tr>
-    </thead>
+    <p>Hieronder volgende nieuwe accounts (maximaal 50)</p>
 
-    <tbody>
-    {% for obj in nieuwe_accounts %}
-        <tr>
-            <td>{{ obj.account.date_joined|date:"j b H:i" }}</td>
-            <td>{{ obj.account.username }}</td>
-            <td>{{ obj.account.volledige_naam }}</td>
-            <td>{% if obj.email_is_bevestigd %}Ja{% else %}Nee{% endif %}</td>
-            <td>{{ obj.account.last_login|date:"j b H:i" }}</td>
-            <td>{{ obj.account.laatste_inlog_poging|date:"j b H:i" }}</td>
-            <td>{% if obj.account.otp_is_actief %}Ja{% else %}Nee{% endif %}</td>
-        </tr>
-    {% endfor %}
-    </tbody>
-</table>
+    <table class="white" id="table1">
+        <thead>
+            <tr>        <!-- filter veld -->
+                <td></td>
+                <td colspan="2" class="table-filter"><input class="table-filter" oninput="myTableFilter(this, 'table1')" placeholder="Zoeken"/></td>
+                <td colspan="4"></td>
+            </tr>
+            <tr>
+                <th>Aangemaakt</th>
+                <th data-filter="on">Inlog</th>
+                <th data-filter="on">Naam</th>
+                <th>Email is bevestigd</th>
+                <th>Laatste inlog</th>
+                <th>Laatste poging</th>
+                <th>Tweede factor</th>
+            </tr>
+        </thead>
 
-<h5 id="recent">Recente activiteit</h5>
+        <tbody>
+        {% for obj in nieuwe_accounts %}
+            <tr>
+                <td>{{ obj.account.date_joined|date:"j b H:i" }}</td>
+                <td>{{ obj.account.username }}</td>
+                <td>{{ obj.account.volledige_naam }}</td>
+                <td>{% if obj.email_is_bevestigd %}Ja{% else %}Nee{% endif %}</td>
+                <td>{{ obj.account.last_login|date:"j b H:i" }}</td>
+                <td>{{ obj.account.laatste_inlog_poging|date:"j b H:i" }}</td>
+                <td>{% if obj.account.otp_is_actief %}Ja{% else %}Nee{% endif %}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
 
-<p>Hieronder staan accounts waar recent op ingelogd is (maximaal 50)</p>
+    <h5 id="recent">Recente activiteit</h5>
 
-<table class="white" id="table2">
-    <thead>
-        <tr>        <!-- filter veld -->
-            <td></td>
-            <td colspan="2" class="table-filter"><input class="table-filter" oninput="myTableFilter(this, 'table2')" placeholder="Zoeken"/></td>
-            <td colspan="3"></td>
-        </tr>
-        <tr>
-            <th>Laatste login</th>
-            <th data-filter="on">Inlog</th>
-            <th data-filter="on">Naam</th>
-            <th>Email is bevestigd</th>
-            <th>Tweede factor</th>
-            <th>Aangemaakt</th>
-        </tr>
-    </thead>
+    <p>Hieronder staan accounts waar recent op ingelogd is (maximaal 50)</p>
 
-    {% for obj in recente_activiteit %}
-        <tr>
-            <td>{{ obj.account.last_login|date:"j b H:i" }}</td>
-            <td>{{ obj.account.username }}</td>
-            <td>{{ obj.account.volledige_naam }}</td>
-            <td>{% if obj.email_is_bevestigd %}Ja{% else %}Nee{% endif %}</td>
-            <td>{% if obj.account.otp_is_actief %}Ja{% else %}Nee{% endif %}</td>
-            <td>{{ obj.account.date_joined|date:"j b H:i" }}</td>
-        </tr>
-    {% endfor %}
-</table>
+    <table class="white" id="table2">
+        <thead>
+            <tr>        <!-- filter veld -->
+                <td></td>
+                <td colspan="2" class="table-filter"><input class="table-filter" oninput="myTableFilter(this, 'table2')" placeholder="Zoeken"/></td>
+                <td colspan="3"></td>
+            </tr>
+            <tr>
+                <th>Laatste login</th>
+                <th data-filter="on">Inlog</th>
+                <th data-filter="on">Naam</th>
+                <th>Email is bevestigd</th>
+                <th>Tweede factor</th>
+                <th>Aangemaakt</th>
+            </tr>
+        </thead>
 
-<h5 id="poging">Mislukte inlog pogingen</h5>
+        {% for obj in recente_activiteit %}
+            <tr>
+                <td>{{ obj.account.last_login|date:"j b H:i" }}</td>
+                <td>{{ obj.account.username }}</td>
+                <td>{{ obj.account.volledige_naam }}</td>
+                <td>{% if obj.email_is_bevestigd %}Ja{% else %}Nee{% endif %}</td>
+                <td>{% if obj.account.otp_is_actief %}Ja{% else %}Nee{% endif %}</td>
+                <td>{{ obj.account.date_joined|date:"j b H:i" }}</td>
+            </tr>
+        {% endfor %}
+    </table>
 
-<p>Hieronder staan accounts waar recent geprobeerd is op in te loggen (maximaal 50). Dit zijn accounts waar de ooit op ingelogd is en daarna een mislukte inlogpoging.</p>
+    <h5 id="poging">Mislukte inlog pogingen</h5>
 
-<table class="white" id="table3">
-    <thead>
-        <tr>        <!-- filter veld -->
-            <td colspan="2"></td>
-            <td colspan="2" class="table-filter"><input class="table-filter" oninput="myTableFilter(this, 'table3')" placeholder="Zoeken"/></td>
-            <td colspan="3"></td>
-        </tr>
-        <tr>
-            <th>Laatste poging</th>
-            <th>Laatste inlog</th>
-            <th data-filter="on">Inlog</th>
-            <th data-filter="on">Naam</th>
-            <th>Email is bevestigd</th>
-            <th>Tweede factor</th>
-            <th>Aangemaakt</th>
-        </tr>
-    </thead>
+    <p>Hieronder staan accounts waar recent geprobeerd is op in te loggen (maximaal 50). Dit zijn accounts waar de ooit op ingelogd is en daarna een mislukte inlogpoging.</p>
 
-    {% for obj in inlog_pogingen %}
-        <tr>
-            <td>{{ obj.account.laatste_inlog_poging|date:"j b H:i" }}</td>
-            <td>{{ obj.account.last_login|date:"j b H:i" }}</td>
-            <td>{{ obj.account.username }}</td>
-            <td>{{ obj.account.volledige_naam }}</td>
-            <td>{% if obj.email_is_bevestigd %}Ja{% else %}Nee{% endif %}</td>
-            <td>{% if obj.account.otp_is_actief %}Ja{% else %}Nee{% endif %}</td>
-            <td>{{ obj.account.date_joined|date:"j b H:i" }}</td>
-        </tr>
-    {% endfor %}
-</table>
+    <table class="white" id="table3">
+        <thead>
+            <tr>        <!-- filter veld -->
+                <td colspan="2"></td>
+                <td colspan="2" class="table-filter"><input class="table-filter" oninput="myTableFilter(this, 'table3')" placeholder="Zoeken"/></td>
+                <td colspan="3"></td>
+            </tr>
+            <tr>
+                <th>Laatste poging</th>
+                <th>Laatste inlog</th>
+                <th data-filter="on">Inlog</th>
+                <th data-filter="on">Naam</th>
+                <th>Email is bevestigd</th>
+                <th>Tweede factor</th>
+                <th>Aangemaakt</th>
+            </tr>
+        </thead>
+
+        {% for obj in inlog_pogingen %}
+            <tr>
+                <td>{{ obj.account.laatste_inlog_poging|date:"j b H:i" }}</td>
+                <td>{{ obj.account.last_login|date:"j b H:i" }}</td>
+                <td>{{ obj.account.username }}</td>
+                <td>{{ obj.account.volledige_naam }}</td>
+                <td>{% if obj.email_is_bevestigd %}Ja{% else %}Nee{% endif %}</td>
+                <td>{% if obj.account.otp_is_actief %}Ja{% else %}Nee{% endif %}</td>
+                <td>{{ obj.account.date_joined|date:"j b H:i" }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+
+    {% if accses %}
+        <p>&nbsp;</p>
+        <h5 id="sessies">Sessies (experimenteel)</h5>
+        <p>Hieronder staan <i>alle</i> actieve sessies, oftewel mensen die ingelogd zijn.</p>
+
+        <table class="white">
+            <thead>
+                <tr>
+                    <th>Gebruiker</th>
+                    <th>Verloopt op</th>
+                    <th>Cookie naam</th>
+                    <th>Mag wisselen</th>
+                    <th>Laatste rol</th>
+                </tr>
+            </thead>
+
+            {% for obj in accses %}
+                <tr>
+                    <td>{{ obj.account.volledige_naam }}</td>
+                    <td>{{ obj.session.expire_date }}</td>
+                    <td>{{ obj.session.session_key }}</td>
+                    <td>{{ obj.mag_wisselen_str }}</td>
+                    <td>{{ obj.laatste_rol_str }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% endif %}
 
 {% endblock %}
 

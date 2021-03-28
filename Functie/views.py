@@ -4,12 +4,14 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.http import HttpResponseRedirect
-from django.urls import Resolver404, reverse
+from django.conf import settings
+from django.http import HttpResponseRedirect, Http404
+from django.urls import reverse
 from django.shortcuts import render
 from django.db.models import Q, Value, CharField
 from django.db.models.functions import Concat, Cast
 from django.views.generic import ListView, View
+from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import Account
 from NhbStructuur.models import NhbLid
@@ -19,20 +21,20 @@ from Overig.tijdelijke_url import maak_tijdelijke_url_functie_email
 from Mailer.models import mailer_queue_email
 from Overig.tijdelijke_url import set_tijdelijke_url_receiver, RECEIVER_BEVESTIG_FUNCTIE_EMAIL
 from Overig.helpers import get_safe_from_ip
-from .rol import Rollen, rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving
+from .rol import Rollen, rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving, rol_activeer_wissel_van_rol_menu_voor_account
 from .models import Functie
 from .forms import ZoekBeheerdersForm, WijzigBeheerdersForm, WijzigEmailForm
 
 
 TEMPLATE_OVERZICHT = 'functie/overzicht.dtl'
 TEMPLATE_OVERZICHT_VERENIGING = 'functie/overzicht-vereniging.dtl'
-TEMPLATE_WIJZIG = 'functie/wijzig.dtl'
+TEMPLATE_WIJZIG = 'functie/koppel-beheerders.dtl'
 TEMPLATE_WIJZIG_EMAIL = 'functie/wijzig-email.dtl'
 TEMPLATE_BEVESTIG_EMAIL = 'functie/bevestig.dtl'
 TEMPLATE_EMAIL_BEVESTIGD = 'functie/bevestigd.dtl'
 
 
-def mag_beheerder_wijzigen_of_404(request, functie):
+def mag_beheerder_wijzigen_of_403(request, functie):
     """ Stuur gebruiker weg als illegaal van de aanroepende view gebruik gemaakt wordt
 
         Wordt gebruikt door:
@@ -48,17 +50,17 @@ def mag_beheerder_wijzigen_of_404(request, functie):
     if rol_nu == Rollen.ROL_BB:
         # BB mag BKO koppelen
         if functie.rol != 'BKO':
-            raise Resolver404()
+            raise PermissionDenied()
         return
 
     if rol_nu == Rollen.ROL_SEC:
         if functie.nhb_ver != functie_nu.nhb_ver:
             # verkeerde vereniging
-            raise Resolver404()
+            raise PermissionDenied('Verkeerde vereniging')
 
         if functie.rol not in ('SEC', 'HWL'):
             # niet een rol die de SEC mag wijzigen
-            raise Resolver404()
+            raise PermissionDenied()
 
         # SEC
         return
@@ -66,11 +68,11 @@ def mag_beheerder_wijzigen_of_404(request, functie):
     if rol_nu == Rollen.ROL_HWL:
         if functie.nhb_ver != functie_nu.nhb_ver:
             # verkeerde vereniging
-            raise Resolver404()
+            raise PermissionDenied('Verkeerde vereniging')
 
         if functie.rol not in ('HWL', 'WL'):
             # niet een rol die de HWL mag wijzigen
-            raise Resolver404()
+            raise PermissionDenied()
 
         # HWL
         return
@@ -78,7 +80,7 @@ def mag_beheerder_wijzigen_of_404(request, functie):
     # RCL mag HWL en WL koppelen van vereniging binnen regio RCL
     if rol_nu == Rollen.ROL_RCL and functie.rol in ('HWL', 'WL'):
         if functie_nu.nhb_regio != functie.nhb_ver.regio:
-            raise Resolver404()
+            raise PermissionDenied('Verkeerde regio')
         return
 
     # BKO, RKO, RCL
@@ -87,27 +89,27 @@ def mag_beheerder_wijzigen_of_404(request, functie):
     # (voorkomt BKO 25m 1pijl probeert RKO Indoor te koppelen)
     if not functie_nu or functie_nu.comp_type != functie.comp_type:
         # SEC/HWL/WL verdwijnt hier ook
-        raise Resolver404()
+        raise PermissionDenied('Verkeerde competitie')
 
     if rol_nu == Rollen.ROL_BKO:
         if functie.rol != 'RKO':
-            raise Resolver404()
+            raise PermissionDenied()
         return
 
     elif rol_nu == Rollen.ROL_RKO:
         if functie.rol != 'RCL':
-            raise Resolver404()
+            raise PermissionDenied()
 
         # controleer of deze regio gewijzigd mag worden
         if functie.nhb_regio.rayon != functie_nu.nhb_rayon:
-            raise Resolver404()
+            raise PermissionDenied('Verkeerde rayon')
         return
 
     # niets hier te zoeken (RCL en andere rollen)
-    raise Resolver404()
+    raise PermissionDenied()
 
 
-def mag_email_wijzigen_of_404(request, functie):
+def mag_email_wijzigen_of_403(request, functie):
     """ Stuur gebruiker weg als illegaal van de aanroepende view gebruik gemaakt wordt
 
         Wordt gebruikt door:
@@ -127,23 +129,23 @@ def mag_email_wijzigen_of_404(request, functie):
     if rol_nu == Rollen.ROL_BB:
         # BB mag BKO email aanpassen
         if functie.rol != 'BKO':
-            raise Resolver404()
+            raise PermissionDenied()
         return
 
     # voor de rest moet de gebruiker een functie bezitten
     if not functie_nu:
-        raise Resolver404()     # pragma: no cover
+        raise PermissionDenied()     # pragma: no cover
 
     # SEC en HWL mogen email van HWL en WL aanpassen
     if rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL):
         # alleen binnen eigen vereniging
         if functie_nu.nhb_ver != functie.nhb_ver:
-            raise Resolver404()
+            raise PermissionDenied('Verkeerde vereniging')
 
         if functie.rol not in ('HWL', 'WL'):
             # hier verdwijnt SEC in het putje
             # secretaris email is alleen aan te passen via Onze Relaties
-            raise Resolver404()
+            raise PermissionDenied()
 
         return
 
@@ -154,7 +156,7 @@ def mag_email_wijzigen_of_404(request, functie):
     # RCL mag email van HWL en WL aanpassen van vereniging binnen regio RCL
     if rol_nu == Rollen.ROL_RCL and functie.rol in ('HWL', 'WL'):
         if functie_nu.nhb_regio != functie.nhb_ver.regio:
-            raise Resolver404()
+            raise PermissionDenied('Verkeerde regio')
         return
 
     # BKO, RKO, RCL
@@ -162,24 +164,24 @@ def mag_email_wijzigen_of_404(request, functie):
     # controleer dat deze wijziging voor de juiste competitie is
     # (voorkomt BKO 25m 1pijl probeert RKO Indoor te koppelen)
     if functie_nu.comp_type != functie.comp_type:
-        raise Resolver404()
+        raise PermissionDenied('Verkeerde competitie')
 
     if rol_nu == Rollen.ROL_BKO:
         if functie.rol != 'RKO':
-            raise Resolver404()
+            raise PermissionDenied()
         return
 
     elif rol_nu == Rollen.ROL_RKO:
         if functie.rol != 'RCL':
-            raise Resolver404()
+            raise PermissionDenied()
 
         # controleer of deze regio gewijzigd mag worden
         if functie.nhb_regio.rayon != functie_nu.nhb_rayon:
-            raise Resolver404()
+            raise PermissionDenied('Verkeerde rayon')
         return
 
     # niets hier te zoeken
-    raise Resolver404()
+    raise PermissionDenied()
 
 
 def receive_bevestiging_functie_email(request, functie):
@@ -224,10 +226,10 @@ def functie_vraag_email_bevestiging(functie):
     url = maak_tijdelijke_url_functie_email(functie)
 
     text_body = ("Hallo!\n\n"
-                 + "Een beheerder heeft dit e-mailadres gekoppeld op de website van de NHB.\n"
+                 + "Een beheerder heeft dit e-mailadres gekoppeld op " + settings.NAAM_SITE + ".\n"
                  + "Klik op onderstaande link om dit te bevestigen.\n\n"
                  + url + "\n\n"
-                 + "Als je dit niet herkent, neem dan contact met ons op via info@handboogsport.nl\n\n"
+                 + "Als je dit niet herkent, neem dan contact met ons op via " + settings.EMAIL_BONDSBURO + "\n\n"
                  + "Het bondsburo\n")
 
     mailer_queue_email(functie.nieuwe_email,
@@ -241,15 +243,16 @@ class WijzigEmailView(UserPassesTestMixin, View):
     """ Via deze view kan het e-mailadres van een functie aangepast worden """
 
     # class variables shared by all instances
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu = None
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        rol = rol_get_huidige(self.request)
-        return rol in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_SEC, Rollen.ROL_HWL)
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
+        self.rol_nu = rol_get_huidige(self.request)
+        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_SEC, Rollen.ROL_HWL)
 
     def _get_functie_or_404(self):
         functie_pk = self.kwargs['functie_pk']
@@ -257,15 +260,14 @@ class WijzigEmailView(UserPassesTestMixin, View):
             functie = Functie.objects.get(pk=functie_pk)
         except Functie.DoesNotExist:
             # foutieve functie_pk
-            raise Resolver404()
+            raise Http404('Foutieve functie')
         return functie
 
     def _render_form(self, form, functie):
         context = dict()
         context['functie'] = functie
 
-        rol = rol_get_huidige(self.request)
-        if rol == Rollen.ROL_HWL:
+        if self.rol_nu == Rollen.ROL_HWL:
             context['terug_url'] = reverse('Functie:overzicht-vereniging')
             menu_dynamics(self.request, context, actief='vereniging')
         else:
@@ -287,7 +289,7 @@ class WijzigEmailView(UserPassesTestMixin, View):
         # BKO, RKO, RCL, HWL mogen hun eigen contactgegevens wijzigen
         # als ze de rol aangenomen hebben
         # verder mogen ze altijd de onderliggende laag aanpassen (net als beheerders koppelen)
-        mag_email_wijzigen_of_404(self.request, functie)
+        mag_email_wijzigen_of_403(self.request, functie)
         form = WijzigEmailForm()
         return self._render_form(form, functie)
 
@@ -296,7 +298,7 @@ class WijzigEmailView(UserPassesTestMixin, View):
             dit is gekoppeld aan het drukken op de OPSLAAN knop van het formulier.
         """
         functie = self._get_functie_or_404()
-        mag_email_wijzigen_of_404(self.request, functie)
+        mag_email_wijzigen_of_403(self.request, functie)
 
         form = WijzigEmailForm(self.request.POST)
         if not form.is_valid():
@@ -319,8 +321,7 @@ class WijzigEmailView(UserPassesTestMixin, View):
         context['functie'] = functie
 
         # stuur terug naar het overzicht
-        rol = rol_get_huidige(self.request)
-        if rol == Rollen.ROL_HWL:
+        if self.rol_nu == Rollen.ROL_HWL:
             context['terug_url'] = reverse('Functie:overzicht-vereniging')
         else:
             context['terug_url'] = reverse('Functie:overzicht')
@@ -332,7 +333,7 @@ class OntvangBeheerderWijzigingenView(View):
 
     def get(self, request, *args, **kwargs):
         """ called by the template system to get the context data for the template """
-        raise Resolver404()
+        raise Http404()
 
     def post(self, request, *args, **kwargs):
         """ deze functie wordt aangeroepen als een POST request ontvangen is.
@@ -343,9 +344,9 @@ class OntvangBeheerderWijzigingenView(View):
             functie = Functie.objects.get(pk=functie_pk)
         except Functie.DoesNotExist:
             # foutieve functie_pk
-            raise Resolver404()
+            raise Http404('Verkeerde functie')
 
-        mag_beheerder_wijzigen_of_404(request, functie)
+        mag_beheerder_wijzigen_of_403(request, functie)
 
         form = WijzigBeheerdersForm(request.POST)
         form.full_clean()  # vult cleaned_data
@@ -357,12 +358,12 @@ class OntvangBeheerderWijzigingenView(View):
         elif drop:
             account_pk = drop
         else:
-            raise Resolver404()
+            raise Http404()
 
         try:
             account = Account.objects.get(pk=account_pk)
         except Account.DoesNotExist:
-            raise Resolver404()
+            raise Http404('Account niet gevonden')
 
         if account.nhblid_set.count() > 0:
             nhblid = account.nhblid_set.all()[0]
@@ -376,17 +377,44 @@ class OntvangBeheerderWijzigingenView(View):
             if rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL):
                 # stel zeker dat nhblid lid is bij de vereniging van functie
                 if not nhblid or nhblid.bij_vereniging != functie.nhb_ver:
-                    raise Resolver404()
+                    raise PermissionDenied('Geen lid van jouw vereniging')
 
             functie.accounts.add(account)
             schrijf_in_logboek(request.user, 'Rollen',
                                "%s is beheerder gemaakt voor functie %s" % (wie, functie.beschrijving))
+
+            self._stuur_notificatie_email(account, wie, functie.beschrijving, add=True)
+
+            if account.functie_set.count() == 1:
+                rol_activeer_wissel_van_rol_menu_voor_account(account)
         else:
             functie.accounts.remove(account)
             schrijf_in_logboek(request.user, 'Rollen',
                                "%s losgekoppeld van functie %s" % (wie, functie.beschrijving))
 
+            self._stuur_notificatie_email(account, wie, functie.beschrijving, remove=True)
+
         return HttpResponseRedirect(reverse('Functie:wijzig-beheerders', kwargs={'functie_pk': functie.pk}))
+
+    @staticmethod
+    def _stuur_notificatie_email(account, door_naam, functie_beschrijving, add=False, remove=False):
+        functie_beschrijving = '"' + functie_beschrijving + '"'
+
+        if add:
+            actie = "Toegevoegde"
+        else:
+            actie = 'Verwijderde'
+
+        text_body = ("Hallo!\n\n"
+                     + "Je rollen zijn aangepast op " + settings.NAAM_SITE + ".\n\n"
+                     + actie + " rol: " + functie_beschrijving + ".\n\n"
+                     + "Als je dit niet herkent, neem dan contact met ons op via " + settings.EMAIL_BONDSBURO + "\n\n"
+                     + "Het bondsburo\n")
+
+        email = account.accountemail_set.all()[0]
+        mailer_queue_email(email.bevestigde_email,
+                           'Wijziging rollen op ' + settings.NAAM_SITE,
+                           text_body)
 
 
 class WijzigBeheerdersView(UserPassesTestMixin, ListView):
@@ -395,6 +423,7 @@ class WijzigBeheerdersView(UserPassesTestMixin, ListView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_WIJZIG
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -408,10 +437,6 @@ class WijzigBeheerdersView(UserPassesTestMixin, ListView):
         rol = rol_get_huidige(self.request)
         return rol in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_SEC, Rollen.ROL_HWL)
 
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
-
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
 
@@ -420,9 +445,9 @@ class WijzigBeheerdersView(UserPassesTestMixin, ListView):
             self._functie = Functie.objects.get(pk=functie_pk)
         except Functie.DoesNotExist:
             # foutieve functie_pk
-            raise Resolver404()
+            raise Http404('Verkeerde functie')
 
-        mag_beheerder_wijzigen_of_404(self.request, self._functie)
+        mag_beheerder_wijzigen_of_403(self.request, self._functie)
 
         self._form = ZoekBeheerdersForm(self.request.GET)
         self._form.full_clean()  # vult cleaned_data
@@ -437,6 +462,15 @@ class WijzigBeheerdersView(UserPassesTestMixin, ListView):
                     regio = nhblid.bij_vereniging.regio
                     if not regio.is_administratief:
                         account.geo_beschrijving = "regio %s / rayon %s" % (regio.regio_nr, regio.rayon.rayon_nr)
+                if not nhblid.bij_vereniging:
+                    # deze melding komt na 15 januari
+                    account.let_op = 'LET OP: geen lid meer bij een vereniging'
+                elif self._functie.nhb_ver and nhblid.bij_vereniging != self._functie.nhb_ver:
+                    # functie voor beheerder van een vereniging
+                    # lid is overgestapt
+                    account.let_op = 'LET OP: geen lid bij deze vereniging'
+        # for
+
         self._huidige_beheerders = beheerder_accounts
 
         zoekterm = self._form.cleaned_data['zoekterm']
@@ -516,15 +550,12 @@ class OverzichtVerenigingView(UserPassesTestMixin, ListView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_OVERZICHT_VERENIGING
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
         return rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_WL)
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
 
     @staticmethod
     def _sorteer(objs):
@@ -608,16 +639,17 @@ class OverzichtView(UserPassesTestMixin, ListView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_OVERZICHT
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu = None
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        rol = rol_get_huidige(self.request)
         # alle competitie beheerders + HWL
-        return rol in (Rollen.ROL_IT, Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL)
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
+        self.rol_nu = rol_get_huidige(self.request)
+        return self.rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL)
 
     @staticmethod
     def _sorteer_functies(objs):
@@ -748,11 +780,10 @@ class OverzichtView(UserPassesTestMixin, ListView):
 
         context['huidige_rol'] = rol_get_beschrijving(self.request)
 
-        rol_nu = rol_get_huidige(self.request)
-        if rol_nu == Rollen.ROL_HWL:
+        if self.rol_nu == Rollen.ROL_HWL:
             context['rol_is_hwl'] = True
 
-        if rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB):
+        if self.rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB):
             context['accounts_it'] = (Account
                                       .objects
                                       .filter(is_staff=True)

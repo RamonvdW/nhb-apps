@@ -18,7 +18,7 @@
     <p>Hieronder staat je huidige keuze voor de <b>{{ deelnemer.deelcompetitie.competitie.beschrijving }}</b>.</p>
     <p>Indien nodig, verander de vinkjes en druk op Opslaan.</p>
 
-    <script>
+    <script type="application/javascript">
         function tel_wedstrijden() {
             const els = document.querySelectorAll('input[type=checkbox]')
             let count = 0
@@ -31,7 +31,6 @@
     </script>
     <form method="post" action="{{ url_opslaan }}">
         {% csrf_token %}
-        <input type="hidden" name="deelnemer_pk" value="{{ deelnemer.pk }}">
 
         <table class="white">
 

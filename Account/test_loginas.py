@@ -90,7 +90,7 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         urls = self.extract_all_urls(resp, skip_menu=True, skip_smileys=True)
         post_url = urls[0]
-        with self.assert_max_queries(26):
+        with self.assert_max_queries(30):
             resp = self.client.post(post_url, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -140,8 +140,8 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
         self.assertContains(resp, 'Wissel van rol')
 
         # controleer dat OTP controle niet nodig is
-        # FUTURE: ongewenste dependency op Functie --> verplaats OTP ondersteuning naar Account
-        with self.assert_max_queries(45):
+        # FUTURE: ongewenste dependency op Functie --> verplaats deze check naar Functie
+        with self.assert_max_queries(20):
             resp = self.client.get('/functie/wissel-van-rol/')
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
@@ -188,38 +188,38 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
         # upgrade naar is_staff account mag niet
         with self.assert_max_queries(20):
             resp = self.client.post(self.wissel_url, {'selecteer': self.account_normaal.pk})
-        self.assertEqual(resp.status_code, 404)     # 404 = not allowed
+        self.assert403(resp)
 
         # niet bestaand account
         with self.assert_max_queries(20):
             resp = self.client.post(self.wissel_url, {'selecteer': 999999})
-        self.assertEqual(resp.status_code, 404)     # 404 = not allowed
+        self.assert404(resp)     # 404 = not allowed
 
     def test_bad_get(self):
         # niet ingelogd
         self.e2e_logout()
         with self.assert_max_queries(20):
             resp = self.client.get(self.wissel_url)
-        self.assertEqual(resp.status_code, 404)     # 404 = not allowed
+        self.assert403(resp)
 
         # zonder is_staff rechten
         self.e2e_login_and_pass_otp(self.account_normaal)
         with self.assert_max_queries(20):
             resp = self.client.get(self.wissel_url)
-        self.assertEqual(resp.status_code, 404)     # 404 = not allowed
+        self.assert403(resp)
 
     def test_bad_post(self):
         # niet ingelogd
         self.e2e_logout()
         with self.assert_max_queries(20):
             resp = self.client.post(self.wissel_url)
-        self.assertEqual(resp.status_code, 404)     # 404 = not allowed
+        self.assert403(resp)
 
         # zonder is_staff rechten
         self.e2e_login_and_pass_otp(self.account_normaal)
         with self.assert_max_queries(20):
             resp = self.client.get(self.wissel_url)
-        self.assertEqual(resp.status_code, 404)     # 404 = not allowed
+        self.assert403(resp)
 
     def test_wissel_verlopen(self):
         # controleer dat tijdelijke URL na 60 seconden verlopen is

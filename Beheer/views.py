@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -28,7 +28,7 @@ class BeheerAdminSite(AdminSite):
         return HttpResponseRedirect(reverse('Account:logout'))
 
     def login(self, request, extra_context=None):
-        next = request.GET.get('next', '')
+        next_url = request.GET.get('next', '')
 
         # send the user to the login page only when required
         # send the 2FA page otherwise
@@ -36,8 +36,8 @@ class BeheerAdminSite(AdminSite):
             # well, login is not needed
             if account_rechten_is_otp_verified(request):
                 # what are we doing here?
-                if next:
-                    return HttpResponseRedirect(next)
+                if next_url:
+                    return HttpResponseRedirect(next_url)
 
                 # reason for login unknown (no 'next') so send to main page
                 return HttpResponseRedirect(reverse('Plein:plein'))
@@ -48,18 +48,21 @@ class BeheerAdminSite(AdminSite):
             # send to login page
             url = reverse('Account:login')
 
-        if next:
-            url += '?next=' + next
+        if next_url:
+            url += '?next=' + next_url
         return HttpResponseRedirect(url)
 
     def get_urls(self):
         # remove the password-change-done entry
-        urlcfg = super(BeheerAdminSite, self).get_urls()
-        del urlcfg[4]
-        return urlcfg
+        url_conf = super(BeheerAdminSite, self).get_urls()
+        del url_conf[4]
+        return url_conf
 
     def has_permission(self, request):
         """ geef True terug als de gebruiker bij de admin pagina mag """
-        return request.user.is_active and request.user.is_staff and request.user.is_authenticated and account_rechten_is_otp_verified(request)
+        return (request.user.is_active
+                and request.user.is_staff
+                and request.user.is_authenticated
+                and account_rechten_is_otp_verified(request))
 
 # end of file

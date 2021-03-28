@@ -52,10 +52,14 @@
                     {% if account.geo_beschrijving %}
                         <span>&nbsp;({{ account.geo_beschrijving }})</span>
                     {% endif %}
+                    {% if account.let_op %}
+                        <span class="red-text">&nbsp;&nbsp;&nbsp;&nbsp;{{ account.let_op }}</span>
+                    {% endif %}
                 </div>
                 <div class="collapsible-body white">
                     <button class="btn-nhb-rood" onclick="do_wijzig('drop', this)" data-pk="{{ account.pk }}">
                         <i class="material-icons-round left">delete</i>Verwijder beheerder</button>
+                    <br><br><i>Let op: gebruiker zal via een e-mail automatisch op de hoogte gesteld worden van de verwijderde rol.</i>
                 </div>
             </li>
         {% endfor %}
@@ -116,6 +120,7 @@
                         {% endif %}
                         <button class="btn-nhb-blauw" onclick="do_wijzig('add', this)" data-pk="{{ account.pk }}">
                             <i class="material-icons-round left">add</i>Maak beheerder</button>
+                        <br><br><i>Let op: gebruiker zal via een e-mail automatisch op de hoogte gesteld worden van de nieuw gekoppelde rol.</i>
                     </div>
                 </li>
             {% endfor %}

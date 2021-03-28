@@ -4,16 +4,17 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.http import HttpResponseRedirect, JsonResponse
-from django.urls import Resolver404, reverse
+from django.http import HttpResponseRedirect, JsonResponse, Http404
+from django.urls import reverse
 from django.utils import timezone
+from django.core.exceptions import PermissionDenied
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Plein.menu import menu_dynamics
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
-from Wedstrijden.models import Wedstrijd, WedstrijdUitslag, WedstrijdenPlan
+from Wedstrijden.models import Wedstrijd, WedstrijdUitslag
 from Schutter.models import SchutterBoog
-from Score.models import Score, ScoreHist, SCORE_WAARDE_VERWIJDERD
+from Score.models import Score, ScoreHist, SCORE_WAARDE_VERWIJDERD, SCORE_TYPE_SCORE
 from .models import (LAAG_REGIO, DeelCompetitie,
                      DeelcompetitieRonde, RegioCompetitieSchutterBoog)
 import json
@@ -31,15 +32,12 @@ class ScoresRegioView(UserPassesTestMixin, TemplateView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_SCORES_REGIO
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
         return rol_nu == Rollen.ROL_RCL
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -50,12 +48,12 @@ class ScoresRegioView(UserPassesTestMixin, TemplateView):
             deelcomp = DeelCompetitie.objects.get(pk=deelcomp_pk,
                                                   laag=LAAG_REGIO)
         except (ValueError, DeelCompetitie.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Competitie niet gevonden')
 
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
         if deelcomp.functie != functie_nu:
             # niet de beheerder
-            raise Resolver404()
+            raise PermissionDenied()
 
         context['deelcomp'] = deelcomp
 
@@ -138,7 +136,7 @@ def bepaal_wedstrijd_en_deelcomp_of_404(wedstrijd_pk):
                      .prefetch_related('uitslag__scores')
                      .get(pk=wedstrijd_pk))
     except (ValueError, Wedstrijd.DoesNotExist):
-        raise Resolver404()
+        raise Http404('Wedstrijd niet gevonden')
 
     plan = wedstrijd.wedstrijdenplan_set.all()[0]
 
@@ -175,16 +173,13 @@ class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_SCORES_INVOEREN
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
     is_controle = False
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
         return rol_nu in (Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_WL)
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -199,7 +194,7 @@ class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
         context['deelcomp'] = deelcomp
 
         if not mag_deelcomp_wedstrijd_wijzigen(wedstrijd, functie_nu, deelcomp):
-            raise Resolver404()
+            raise PermissionDenied()
 
         context['is_controle'] = self.is_controle
         context['is_akkoord'] = wedstrijd.uitslag.is_bevroren
@@ -211,7 +206,7 @@ class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
         context['scores'] = (wedstrijd
                              .uitslag
                              .scores
-                             .exclude(is_ag=True)
+                             .filter(type=SCORE_TYPE_SCORE)
                              .exclude(waarde=SCORE_WAARDE_VERWIJDERD)
                              .select_related('schutterboog',
                                              'schutterboog__boogtype',
@@ -223,8 +218,8 @@ class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
         context['url_opslaan'] = reverse('Competitie:dynamic-scores-opslaan')
         context['url_deelnemers_ophalen'] = reverse('Competitie:dynamic-deelnemers-ophalen')
 
-        plan = wedstrijd.wedstrijdenplan_set.all()[0]
-        ronde = DeelcompetitieRonde.objects.get(plan=plan)
+        # plan = wedstrijd.wedstrijdenplan_set.all()[0]
+        # ronde = DeelcompetitieRonde.objects.get(plan=plan)
 
         if rol_nu == Rollen.ROL_RCL:
             context['url_terug'] = reverse('Competitie:scores-regio',
@@ -253,7 +248,7 @@ class WedstrijdUitslagControlerenView(WedstrijdUitslagInvoerenView):
         wedstrijd, deelcomp, _ = bepaal_wedstrijd_en_deelcomp_of_404(wedstrijd_pk)
 
         if not mag_deelcomp_wedstrijd_wijzigen(wedstrijd, functie_nu, deelcomp):
-            raise Resolver404()
+            raise PermissionDenied()
 
         uitslag = wedstrijd.uitslag
         if not uitslag.is_bevroren:
@@ -268,23 +263,23 @@ class WedstrijdUitslagControlerenView(WedstrijdUitslagInvoerenView):
 
 class DynamicDeelnemersOphalenView(UserPassesTestMixin, View):
 
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
         return rol_nu in (Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_WL)
 
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang """
-        raise Resolver404()
-
-    def post(self, request, *args, **kwargs):
+    @staticmethod
+    def post(request, *args, **kwargs):
         """ Deze functie wordt aangeroepen als de knop 'deelnemers ophalen' gebruikt wordt
         """
 
         try:
             data = json.loads(request.body)
         except json.JSONDecodeError:
-            raise Resolver404()         # garbage in
+            # garbage in
+            raise Http404('Geen valide verzoek')
 
         # print('data: %s' % repr(data))
 
@@ -293,7 +288,7 @@ class DynamicDeelnemersOphalenView(UserPassesTestMixin, View):
             deelcomp = DeelCompetitie.objects.get(laag=LAAG_REGIO,
                                                   pk=deelcomp_pk)
         except (KeyError, ValueError, DeelCompetitie.DoesNotExist):
-            raise Resolver404()         # garbage in
+            raise Http404('Competitie niet gevonden')
 
         # TODO: filter deelnemers op cluster (wedstrijd.vereniging.clusters)
 
@@ -312,7 +307,7 @@ class DynamicDeelnemersOphalenView(UserPassesTestMixin, View):
                 'pk': obj.schutterboog.pk,
                 'nhb_nr': obj.schutterboog.nhblid.nhb_nr,
                 'naam': obj.schutterboog.nhblid.volledige_naam(),
-                'ver_nr': obj.bij_vereniging.nhb_nr,
+                'ver_nr': obj.bij_vereniging.ver_nr,
                 'ver_naam': obj.bij_vereniging.naam,
                 'boog': obj.schutterboog.boogtype.beschrijving,
             }
@@ -325,23 +320,23 @@ class DynamicDeelnemersOphalenView(UserPassesTestMixin, View):
 
 class DynamicZoekOpNhbnrView(UserPassesTestMixin, View):
 
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
         return rol_nu in (Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_WL)
 
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang """
-        raise Resolver404()
-
-    def post(self, request, *args, **kwargs):
+    @staticmethod
+    def post(request, *args, **kwargs):
         """ Deze functie wordt aangeroepen als de knop 'Zoek' gebruikt wordt
         """
 
         try:
             data = json.loads(request.body)
         except json.JSONDecodeError:
-            raise Resolver404()         # garbage in
+            # garbage in
+            raise Http404('Geen valide verzoek')
 
         # zoek een
         # print('data: %s' % repr(data))
@@ -351,7 +346,8 @@ class DynamicZoekOpNhbnrView(UserPassesTestMixin, View):
             wedstrijd_pk = int(str(data['wedstrijd_pk'])[:6])   # afkappen voor extra veiligheid
             wedstrijd = Wedstrijd.objects.get(pk=wedstrijd_pk)
         except (KeyError, ValueError, Wedstrijd.DoesNotExist):
-            raise Resolver404()         # garbage in
+            # garbage in
+            raise Http404('Geen valide verzoek')
 
         plan = wedstrijd.wedstrijdenplan_set.all()[0]
 
@@ -401,14 +397,12 @@ class DynamicZoekOpNhbnrView(UserPassesTestMixin, View):
 
 class DynamicScoresOpslaanView(UserPassesTestMixin, View):
 
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
         return rol_nu in (Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_WL)
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang """
-        raise Resolver404()
 
     @staticmethod
     def laad_wedstrijd_of_404(data):
@@ -420,7 +414,7 @@ class DynamicScoresOpslaanView(UserPassesTestMixin, View):
                          .prefetch_related('uitslag__scores')
                          .get(pk=wedstrijd_pk))
         except (KeyError, ValueError, Wedstrijd.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Wedstrijd niet gevonden')
 
         return wedstrijd
 
@@ -435,7 +429,6 @@ class DynamicScoresOpslaanView(UserPassesTestMixin, View):
             return
 
         score_obj = Score(schutterboog=schutterboog,
-                          is_ag=False,
                           waarde=waarde,
                           afstand_meter=uitslag.afstand_meter)
         score_obj.save()
@@ -529,31 +522,32 @@ class DynamicScoresOpslaanView(UserPassesTestMixin, View):
         try:
             data = json.loads(request.body)
         except json.JSONDecodeError:
-            raise Resolver404()         # garbage in
+            # garbage in
+            raise Http404('Geen valide verzoek')
 
         # print('data:', repr(data))
 
         wedstrijd = self.laad_wedstrijd_of_404(data)
         uitslag = wedstrijd.uitslag
         if not uitslag:
-            raise Resolver404()
+            raise Http404()
 
         # controleer toestemming om scores op te slaan voor deze wedstrijd
 
         plannen = wedstrijd.wedstrijdenplan_set.all()
         if plannen.count() < 1:
             # wedstrijd met andere bedoeling
-            raise Resolver404()
+            raise Http404()
 
         ronde = DeelcompetitieRonde.objects.get(plan=plannen[0])
 
         rol_nu, functie_nu = rol_get_huidige_functie(request)
         if not mag_deelcomp_wedstrijd_wijzigen(wedstrijd, functie_nu, ronde.deelcompetitie):
-            raise Resolver404()
+            raise PermissionDenied()
 
         # voorkom wijzigingen bevroren wedstrijduitslag
         if rol_nu in (Rollen.ROL_HWL, Rollen.ROL_WL) and uitslag.is_bevroren:
-            raise Resolver404()
+            raise Http404('Uitslag mag niet meer gewijzigd worden')
 
         door_account = request.user
         when = timezone.now()
@@ -562,7 +556,7 @@ class DynamicScoresOpslaanView(UserPassesTestMixin, View):
             self.scores_opslaan(uitslag, data, when, door_account)
         except:                         # pragma: no cover
             exc = sys.exc_info()[1]
-            print('OHOH: %s' % exc)
+            print('OHOH: %s' % exc)     # TODO: opruimen of loggen
 
         out = {'done': 1}
         return JsonResponse(out)
@@ -585,7 +579,7 @@ class WedstrijdUitslagBekijkenView(TemplateView):
         scores = (wedstrijd
                   .uitslag
                   .scores
-                  .exclude(is_ag=True)
+                  .filter(type=SCORE_TYPE_SCORE)
                   .exclude(waarde=SCORE_WAARDE_VERWIJDERD)
                   .select_related('schutterboog',
                                   'schutterboog__boogtype',
@@ -611,7 +605,7 @@ class WedstrijdUitslagBekijkenView(TemplateView):
 
         te_sorteren = [(score.vereniging_str, score.schutter_str, score.boog_str, score) for score in scores]
         te_sorteren.sort()
-        scores = [score for _,_,_,score in te_sorteren]
+        scores = [score for _, _, _, score in te_sorteren]
 
         context['scores'] = scores
         context['wedstrijd'] = wedstrijd

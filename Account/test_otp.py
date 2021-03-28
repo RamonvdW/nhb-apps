@@ -74,7 +74,7 @@ class TestAccountOTP(E2EHelpers, TestCase):
         # prepare
         account_otp_prepare_koppelen(account)
         account = Account.objects.get(pk=account.pk)
-        self.assertEqual(len(account.otp_code), 16)
+        self.assertEqual(len(account.otp_code), 32)
         self.assertFalse(account_otp_is_gekoppeld(account))
 
         # prepare: tweede aanroep doet niets

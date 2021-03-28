@@ -5,8 +5,8 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.views.generic import TemplateView
-from django.urls import reverse, Resolver404
-from django.http import HttpResponseRedirect
+from django.urls import reverse
+from django.http import HttpResponseRedirect, Http404
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import BoogType
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
@@ -45,7 +45,7 @@ class UitslagenVerenigingView(TemplateView):
 
             if functie_nu and functie_nu.nhb_ver:
                 # HWL, WL, SEC
-                ver_nr = functie_nu.nhb_ver.nhb_nr
+                ver_nr = functie_nu.nhb_ver.ver_nr
 
             if ver_nr < 0:
                 # pak de vereniging van de ingelogde gebruiker
@@ -53,9 +53,9 @@ class UitslagenVerenigingView(TemplateView):
                 if account.nhblid_set.count() > 0:
                     nhblid = account.nhblid_set.all()[0]
                     if nhblid.is_actief_lid and nhblid.bij_vereniging:
-                        ver_nr = nhblid.bij_vereniging.nhb_nr
+                        ver_nr = nhblid.bij_vereniging.ver_nr
 
-        ver_nrs = list(NhbVereniging.objects.order_by('nhb_nr').values_list('nhb_nr', flat=True))
+        ver_nrs = list(NhbVereniging.objects.order_by('ver_nr').values_list('ver_nr', flat=True))
         if ver_nr not in ver_nrs:
             ver_nr = ver_nrs[0]
 
@@ -97,7 +97,7 @@ class UitslagenVerenigingView(TemplateView):
                              competitie__is_afgesloten=False,       # TODO: waarom hier opeens filteren?
                              nhb_regio__regio_nr=regio_nr))
         except DeelCompetitie.DoesNotExist:     # pragma: no cover
-            raise Resolver404()
+            raise Http404('Competitie niet gevonden')
 
         return deelcomp
 
@@ -111,7 +111,7 @@ class UitslagenVerenigingView(TemplateView):
                                       'klasse__indiv',
                                       'klasse__indiv__boogtype')
                       .filter(deelcompetitie=deelcomp,
-                              bij_vereniging__nhb_nr=ver_nr,
+                              bij_vereniging__ver_nr=ver_nr,
                               klasse__indiv__boogtype=boogtype)
                       .order_by('-gemiddelde'))
 
@@ -136,9 +136,9 @@ class UitslagenVerenigingView(TemplateView):
                     .objects
                     .get(pk=comp_pk))
         except (ValueError, Competitie.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Competitie niet gevonden')
 
-        comp.zet_fase()
+        comp.bepaal_fase()
         context['comp'] = comp
 
         comp_boog = kwargs['comp_boog'][:2]     # afkappen voor veiligheid
@@ -151,12 +151,12 @@ class UitslagenVerenigingView(TemplateView):
             # zoek de vereniging die bij de huidige gebruiker past
             ver_nr = self._get_schutter_ver_nr()
         except ValueError:
-            raise Resolver404()
+            raise Http404('Verkeerd verenigingsnummer')
 
         try:
-            ver = NhbVereniging.objects.select_related('regio').get(nhb_nr=ver_nr)
+            ver = NhbVereniging.objects.select_related('regio').get(ver_nr=ver_nr)
         except NhbVereniging.DoesNotExist:
-            raise Resolver404()
+            raise Http404('Vereniging niet gevonden')
 
         context['ver'] = ver
 
@@ -164,7 +164,7 @@ class UitslagenVerenigingView(TemplateView):
 
         boogtype = context['comp_boog']
         if not boogtype:
-            raise Resolver404()
+            raise Http404('Boogtype niet bekend')
 
         regio_nr = ver.regio.regio_nr
         context['url_terug'] = reverse('Competitie:uitslagen-regio-n',
@@ -281,13 +281,13 @@ class UitslagenRegioView(TemplateView):
                     .objects
                     .select_related('regio')
                     .filter(regio__regio_nr=gekozen_regio_nr)
-                    .order_by('nhb_nr'))
+                    .order_by('ver_nr'))
 
             for ver in vers:
                 ver.zoom_url = reverse('Competitie:uitslagen-vereniging-n',
                                        kwargs={'comp_pk': comp.pk,
                                                'comp_boog': comp_boog,
-                                               'ver_nr': ver.nhb_nr})
+                                               'ver_nr': ver.ver_nr})
             # for
 
             context['ver_filters'] = vers
@@ -313,6 +313,31 @@ class UitslagenRegioView(TemplateView):
     def filter_zes_scores(self, deelnemers):
         return deelnemers.filter(aantal_scores__gte=6)
 
+    @staticmethod
+    def _split_aspiranten(asps, objs):
+        klasse_str = asps[0].klasse_str
+        rank_m = 0
+        rank_v = 0
+        asps_v = list()
+        for deelnemer in asps:
+            if deelnemer.schutterboog.nhblid.geslacht == 'V':
+                if rank_v == 0:
+                    deelnemer.klasse_str = klasse_str + ', meisjes'
+                    deelnemer.break_klasse = True
+                rank_v += 1
+                deelnemer.rank = rank_v
+                asps_v.append(deelnemer)
+            else:
+                if rank_m == 0:
+                    deelnemer.klasse_str = klasse_str + ', jongens'
+                    deelnemer.break_klasse = True
+                rank_m += 1
+                deelnemer.rank = rank_m
+                objs.append(deelnemer)
+        # for
+        if len(asps_v):
+            objs.extend(asps_v)
+
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
@@ -323,9 +348,9 @@ class UitslagenRegioView(TemplateView):
                     .objects
                     .get(pk=comp_pk))
         except (ValueError, Competitie.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Competitie niet gevonden')
 
-        comp.zet_fase()
+        comp.bepaal_fase()
         context['comp'] = comp
 
         zes_scores = kwargs['zes_scores']
@@ -342,7 +367,7 @@ class UitslagenRegioView(TemplateView):
             # keep welke (initiële) regio bij de huidige gebruiker past
             regio_nr = self._get_schutter_regio_nr()
         except ValueError:
-            raise Resolver404()
+            raise Http404('Verkeer regionummer')
 
         # voorkom 404 voor leden in de administratieve regio
         if regio_nr == 100:
@@ -357,7 +382,7 @@ class UitslagenRegioView(TemplateView):
                              competitie__is_afgesloten=False,
                              nhb_regio__regio_nr=regio_nr))
         except DeelCompetitie.DoesNotExist:
-            raise Resolver404()
+            raise Http404('Competitie niet gevonden')
 
         context['deelcomp'] = deelcomp
 
@@ -365,7 +390,7 @@ class UitslagenRegioView(TemplateView):
 
         boogtype = context['comp_boog']
         if not boogtype:
-            raise Resolver404()
+            raise Http404('Boogtype niet bekend')
 
         deelnemers = (RegioCompetitieSchutterBoog
                       .objects
@@ -385,18 +410,27 @@ class UitslagenRegioView(TemplateView):
         toon_geslacht = False
         klasse = -1
         rank = 0
+        objs = list()
+        asps = list()
+        is_asp = False
         for deelnemer in deelnemers:
+
             deelnemer.break_klasse = (klasse != deelnemer.klasse.indiv.volgorde)
             if deelnemer.break_klasse:
+                if len(asps):
+                    self._split_aspiranten(asps, objs)
+                    asps = list()
+
                 deelnemer.klasse_str = deelnemer.klasse.indiv.beschrijving
-                toon_geslacht = False
+                is_asp = False
                 if deelnemer.klasse.indiv.niet_voor_rk_bk:
                     # dit is een aspiranten klassen of een klasse onbekend
                     for lkl in deelnemer.klasse.indiv.leeftijdsklassen.all():
                         if lkl.is_aspirant_klasse():
-                            toon_geslacht = True
+                            is_asp = True
                             break
                     # for
+
                 rank = 0
             klasse = deelnemer.klasse.indiv.volgorde
 
@@ -404,12 +438,19 @@ class UitslagenRegioView(TemplateView):
             lid = deelnemer.schutterboog.nhblid
             deelnemer.rank = rank
             deelnemer.naam_str = "[%s] %s" % (lid.nhb_nr, lid.volledige_naam())
-            if toon_geslacht:
-                deelnemer.naam_str += " (" + lid.geslacht + ")"
             deelnemer.ver_str = str(deelnemer.bij_vereniging)
+
+            if is_asp:
+                asps.append(deelnemer)
+            else:
+                objs.append(deelnemer)
         # for
 
-        context['deelnemers'] = deelnemers
+        if len(asps):
+            # aspiranten opsplitsen in jongens en meisjes klasse
+            self._split_aspiranten(asps, objs)
+
+        context['deelnemers'] = objs
 
         rol_nu = rol_get_huidige(self.request)
         is_beheerder = rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_WL)
@@ -505,9 +546,9 @@ class UitslagenRayonView(TemplateView):
                     .objects
                     .get(pk=comp_pk))
         except (ValueError, Competitie.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Competitie niet gevonden')
 
-        comp.zet_fase()
+        comp.bepaal_fase()
         context['comp'] = comp
 
         comp_boog = kwargs['comp_boog'][:2]          # afkappen voor veiligheid
@@ -519,13 +560,13 @@ class UitslagenRayonView(TemplateView):
         except KeyError:
             rayon_nr = 1
         except ValueError:
-            raise Resolver404()
+            raise Http404('Verkeer rayonnummer')
 
         self._maak_filter_knoppen(context, comp, rayon_nr, comp_boog)
 
         boogtype = context['comp_boog']
         if not boogtype:
-            raise Resolver404()
+            raise Http404('Boogtype niet bekend')
 
         try:
             deelcomp = (DeelCompetitie
@@ -536,10 +577,10 @@ class UitslagenRayonView(TemplateView):
                              competitie=comp,
                              nhb_rayon__rayon_nr=rayon_nr))
         except DeelCompetitie.DoesNotExist:
-            raise Resolver404()
+            raise Http404('Competitie niet gevonden')
 
         context['deelcomp'] = deelcomp
-        deelcomp.competitie.zet_fase()
+        deelcomp.competitie.bepaal_fase()
 
         wkl2limiet = dict()    # [pk] = aantal
 
@@ -641,22 +682,22 @@ class UitslagenBondView(TemplateView):
                     .objects
                     .get(pk=comp_pk))
         except (ValueError, Competitie.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Competitie niet gevonden')
 
-        comp.zet_fase()
+        comp.bepaal_fase()
         context['comp'] = comp
 
         comp_boog = kwargs['comp_boog'][:2]          # afkappen voor veiligheid
 
         try:
-            deelcomp = (DeelCompetitie
+           deelcomp = (DeelCompetitie
                         .objects
                         .select_related('competitie')
                         .get(laag=LAAG_BK,
                              competitie__is_afgesloten=False,
                              competitie__pk=comp_pk))
         except DeelCompetitie.DoesNotExist:
-            raise Resolver404()
+            raise Http404('Competitie niet gevonden')
 
         menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
         return context

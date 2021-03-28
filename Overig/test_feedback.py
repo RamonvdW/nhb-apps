@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -17,8 +17,6 @@ class TestOverigFeedback(E2EHelpers, TestCase):
 
         self.account_admin = self.e2e_create_account_admin()
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
-
-        # TODO: add real feedback to the database, for better tests
 
     def test_smileys(self):
         # controleer de links vanuit de drie smileys
@@ -69,18 +67,24 @@ class TestOverigFeedback(E2EHelpers, TestCase):
     def test_feedback_post_anon(self):
         self.e2e_logout()
         with self.assert_max_queries(20):
-            resp = self.client.get('/overig/feedback/nul/plein/')    # zet sessie variabelen: op_pagina en gebruiker
+            # zet sessie variabelen: op_pagina en gebruiker
+            self.client.get('/overig/feedback/nul/plein/')
         with self.assert_max_queries(20):
-            resp = self.client.post('/overig/feedback/formulier/', {'bevinding': '4', 'feedback': 'Just testing'})
+            resp = self.client.post('/overig/feedback/formulier/',
+                                    {'bevinding': '4',
+                                     'feedback': 'Just testing'})
         self.assert_is_redirect(resp, '/overig/feedback/bedankt/')
         self.e2e_assert_other_http_commands_not_supported('/overig/feedback/nul/plein/', post=False)   # post mag wel
 
     def test_feedback_post_user(self):
         self.e2e_login(self.account_normaal)
         with self.assert_max_queries(20):
-            resp = self.client.get('/overig/feedback/nul/plein/')   # zet sessie variabelen: op_pagina en gebruiker
+            # zet sessie variabelen: op_pagina en gebruiker
+            self.client.get('/overig/feedback/nul/plein/')
         with self.assert_max_queries(20):
-            resp = self.client.post('/overig/feedback/formulier/', {'bevinding': '4', 'feedback': 20*'Just testing '})   # 20x makes it >80 chars long
+            resp = self.client.post('/overig/feedback/formulier/',
+                                    {'bevinding': '4',
+                                     'feedback': 20*'Just testing '})   # 20x makes it >80 chars long
         self.assert_is_redirect(resp, '/overig/feedback/bedankt/')
         obj = SiteFeedback.objects.all()[0]
         descr = str(obj)
@@ -91,7 +95,9 @@ class TestOverigFeedback(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get('/overig/feedback/nul/plein/')   # zet sessie variabelen: op_pagina en gebruiker
         with self.assert_max_queries(20):
-            resp = self.client.post('/overig/feedback/formulier/', {'bevinding': '4', 'feedback': ''})
+            resp = self.client.post('/overig/feedback/formulier/',
+                                    {'bevinding': '4',
+                                     'feedback': ''})
         self.assertEqual(resp.status_code, 200)
         self.assert_template_used(resp, ('overig/site-feedback-formulier.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
@@ -101,7 +107,9 @@ class TestOverigFeedback(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get('/overig/feedback/nul/plein/')   # zet sessie variabelen: op_pagina en gebruiker
         with self.assert_max_queries(20):
-            resp = self.client.post('/overig/feedback/formulier/', {'bevinding': '5', 'feedback': 'Just testing'})
+            resp = self.client.post('/overig/feedback/formulier/',
+                                    {'bevinding': '5',
+                                     'feedback': 'Just testing'})
         self.assertEqual(resp.status_code, 200)
         self.assert_template_used(resp, ('overig/site-feedback-formulier.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
@@ -110,7 +118,9 @@ class TestOverigFeedback(E2EHelpers, TestCase):
         # probeer een post van het formulier zonder de get
         self.e2e_logout()
         with self.assert_max_queries(20):
-            resp = self.client.post('/overig/feedback/formulier/', {'bevinding': '4', 'feedback': 'Just testing'})
+            resp = self.client.post('/overig/feedback/formulier/',
+                                    {'bevinding': '4',
+                                     'feedback': 'Just testing'})
         self.assertEqual(resp.status_code, 200)
         self.assert_template_used(resp, ('overig/site-feedback-formulier.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
@@ -120,7 +130,9 @@ class TestOverigFeedback(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get('/overig/feedback/nul/plein/')   # zet sessie variabelen: op_pagina en gebruiker
         with self.assert_max_queries(20):
-            resp = self.client.post('/overig/feedback/formulier/', {'bevinding': '4', 'feedback': 'Just testing'})
+            resp = self.client.post('/overig/feedback/formulier/',
+                                    {'bevinding': '4',
+                                     'feedback': 'Just testing'})
         self.assert_is_redirect(resp, '/overig/feedback/bedankt/')
         obj = SiteFeedback.objects.all()[0]
         self.assertFalse(obj.is_afgehandeld)
@@ -134,14 +146,14 @@ class TestOverigFeedback(E2EHelpers, TestCase):
         self.e2e_logout()
         with self.assert_max_queries(20):
             resp = self.client.get('/overig/feedback/formulier/')
-        self.assertEqual(resp.status_code, 404)
+        self.assert404(resp)
 
     def test_feedback_inzicht_anon_redirect_login(self):
         # zonder inlog is feedback niet te zien
         self.e2e_logout()
         with self.assert_max_queries(20):
             resp = self.client.get('/overig/feedback/inzicht/')
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
     def test_feedback_inzicht_user_forbidden(self):
         # do een get van het logboek met een gebruiker die daar geen rechten toe heeft
@@ -149,7 +161,7 @@ class TestOverigFeedback(E2EHelpers, TestCase):
         self.e2e_login(self.account_normaal)
         with self.assert_max_queries(20):
             resp = self.client.get('/overig/feedback/inzicht/')
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
     def test_feedback_inzicht_admin(self):
         # do een get van alle feedback als IT beheerder

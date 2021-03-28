@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -25,7 +25,7 @@ class TestSchutterLeeftijdsklassen(E2EHelpers, TestCase):
         # maak een test vereniging
         ver = NhbVereniging()
         ver.naam = "Grote Club"
-        ver.nhb_nr = "1000"
+        ver.ver_nr = "1000"
         ver.regio = NhbRegio.objects.get(pk=111)
         # secretaris kan nog niet ingevuld worden
         ver.save()
@@ -159,8 +159,7 @@ class TestSchutterLeeftijdsklassen(E2EHelpers, TestCase):
         # zonder login --> terug naar het plein
         with self.assert_max_queries(20):
             resp = self.client.get('/sporter/leeftijdsklassen/', follow=True)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('plein/plein-bezoeker.dtl', 'plein/site_layout.dtl'))
+        self.assert403(resp)
 
         # met schutter-login wel toegankelijk
         self.e2e_login(self.account_normaal)

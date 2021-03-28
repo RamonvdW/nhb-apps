@@ -97,8 +97,8 @@
             {% endif %}
 
             <tr>
-                <td>[{{ obj.bij_vereniging.nhb_nr }}] {{ obj.bij_vereniging.naam }}</td>
-                <td>{{ obj.aanvangsgemiddelde }}{% if obj.is_handmatig_ag %}<i> (handmatig)</i>{% endif %}</td>
+                <td>[{{ obj.bij_vereniging.ver_nr }}] {{ obj.bij_vereniging.naam }}</td>
+                <td>{{ obj.ag_voor_indiv }}</td>
                 <td>[{{ obj.schutterboog.nhblid.nhb_nr }}] {{ obj.schutterboog.nhblid.volledige_naam }}</td>
             </tr>
 

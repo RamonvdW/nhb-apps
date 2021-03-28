@@ -36,7 +36,7 @@
                 </div>
                 <div class="row small-row">
                     <div class="col s5">Lid bij vereniging:</div>
-                    <div class="col s6">[{{ nhblid.bij_vereniging.nhb_nr }}] {{ nhblid.bij_vereniging.naam }}</div>
+                    <div class="col s6">[{{ nhblid.bij_vereniging.ver_nr }}] {{ nhblid.bij_vereniging.naam }}</div>
                 </div>
                 <div class="row small-row">
                     <div class="col s5">Plaats:</div>
@@ -50,6 +50,13 @@
                     <div class="col s5">In NHB rayon:</div>
                     <div class="col s6">{{ nhblid.bij_vereniging.regio.rayon }}</div>
                 </div>
+
+                {% if nhblid.para_classificatie %}
+                    <div class="row small-row">
+                        <div class="col s5">Para classificatie:</div>
+                        <div class="col s6">{{ nhblid.para_classificatie }}</div>
+                    </div>
+                {% endif %}
             </div>
         </div>
     </div>

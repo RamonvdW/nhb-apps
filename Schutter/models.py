@@ -8,7 +8,6 @@
 from django.db import models
 from BasisTypen.models import BoogType
 from NhbStructuur.models import NhbLid
-from Account.models import Account
 # mag niet afhankelijk zijn van Competitie
 
 
@@ -32,6 +31,9 @@ class SchutterVoorkeuren(models.Model):
 
     # (opt-out) wel/niet aanbieden om mee te doen met de competitie
     voorkeur_meedoen_competitie = models.BooleanField(default=True)
+
+    # sporters met para-classificatie mogen een opmerking toevoegen voor de wedstrijdleiding
+    opmerking_para_sporter = models.CharField(max_length=256, default='')
 
     class Meta:
         """ meta data voor de admin interface """

@@ -36,7 +36,7 @@ class LogoutView(UserPassesTestMixin, TemplateView):
         return self.request.user.is_authenticated
 
     def handle_no_permission(self):
-        """ gebruik van deze view is niet nodig --> redirect naar het plein """
+        """ Niet ingelogd, dus logout is niet nodig --> redirect naar het Plein """
         return HttpResponseRedirect(reverse('Plein:plein'))
 
     def get_context_data(self, **kwargs):

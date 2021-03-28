@@ -4,9 +4,10 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.http import HttpResponseRedirect
-from django.urls import reverse, Resolver404
+from django.http import HttpResponseRedirect, Http404
+from django.urls import reverse
 from django.views.generic import TemplateView
+from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Plein.menu import menu_dynamics
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie, rol_mag_wisselen
@@ -27,15 +28,17 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
     """ Via deze view kunnen schutters hun voorkeuren inzien en aanpassen """
 
     template_name = TEMPLATE_VOORKEUREN
+    raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu = None
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         # gebruiker moet ingelogd zijn en schutter rol gekozen hebben
-        return rol_get_huidige(self.request) in (Rollen.ROL_SCHUTTER, Rollen.ROL_HWL)
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
+        self.rol_nu = rol_get_huidige(self.request)
+        return self.rol_nu in (Rollen.ROL_SCHUTTER, Rollen.ROL_HWL)
 
     @staticmethod
     def _get_nhblid_or_404(request, nhblid_pk):
@@ -49,16 +52,16 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
                 nhblid_pk = int(nhblid_pk)
             except (ValueError, TypeError):
                 # nhblid_pk was geen getal
-                raise Resolver404()
+                raise Http404('Sporter niet gevonden')
 
             try:
                 nhblid = NhbLid.objects.get(pk=nhblid_pk)
             except NhbLid.DoesNotExist:
-                raise Resolver404()
+                raise Http404('Sporter niet gevonden')
 
             # laatste control: het nhblid moet lid zijn bij de vereniging van de HWL
             if nhblid.bij_vereniging != functie_nu.nhb_ver:
-                raise Resolver404()
+                raise PermissionDenied('Geen sporter van jouw vereniging')
 
             return nhblid
 
@@ -113,10 +116,18 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
         if (old_voorkeur_meedoen_competitie != voorkeuren.voorkeur_meedoen_competitie or
                 old_dutchtarget_18m != voorkeuren.voorkeur_dutchtarget_18m):
             # wijzigingen opslaan
-            voorkeuren.save()
+            voorkeuren.save(update_fields=['voorkeur_dutchtarget_18m', 'voorkeur_meedoen_competitie'])
+
+        if nhblid.para_classificatie:
+            para_notitie = request.POST.get('para_notitie', '')
+            if para_notitie != voorkeuren.opmerking_para_sporter:
+                # wijziging opslaan
+                voorkeuren.opmerking_para_sporter = para_notitie
+                voorkeuren.save(update_fields=['opmerking_para_sporter'])
+
         del voorkeuren
 
-        if rol_get_huidige(self.request) != Rollen.ROL_HWL:
+        if self.rol_nu != Rollen.ROL_HWL:
             if rol_mag_wisselen(self.request):
                 account = request.user
                 email = account.accountemail_set.all()[0]
@@ -136,7 +147,7 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
                     email.optout_herinnering_taken = optout_herinnering_taken
                     email.save()
 
-        if rol_get_huidige(request) == Rollen.ROL_HWL:
+        if self.rol_nu == Rollen.ROL_HWL:
             # stuur de HWL terug naar zijn ledenlijst
             return HttpResponseRedirect(reverse('Vereniging:leden-voorkeuren'))
 
@@ -196,11 +207,11 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
 
         context['bogen'] = self._get_bogen(nhblid, geen_wedstrijden)
         context['voorkeuren'], _ = SchutterVoorkeuren.objects.get_or_create(nhblid=nhblid)
+        context['nhblid'] = nhblid
 
-        if rol_get_huidige(self.request) == Rollen.ROL_HWL:
+        if self.rol_nu == Rollen.ROL_HWL:
             actief = 'vereniging'
             context['nhblid_pk'] = nhblid.pk
-            context['nhblid'] = nhblid
             context['is_hwl'] = True
         else:
             # niet de HWL maar de schutter zelf

@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from Account.models import HanterenPersoonsgegevens
-from Functie.models import  account_needs_vhpg
+from Functie.models import VerklaringHanterenPersoonsgegevens, account_needs_vhpg
 from Functie.view_vhpg import account_vhpg_is_geaccepteerd
 from Overig.e2ehelpers import E2EHelpers
 
@@ -31,7 +30,7 @@ class TestFunctieVHPG(E2EHelpers, TestCase):
         # probeer diverse functies zonder ingelogd te zijn
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_overzicht)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_afspraken)
@@ -60,7 +59,7 @@ class TestFunctieVHPG(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('functie/vhpg-acceptatie.dtl', 'plein/site_layout.dtl'))
         self.assertNotContains(resp, 'verplicht')
 
-        self.assertEqual(HanterenPersoonsgegevens.objects.count(), 0)
+        self.assertEqual(VerklaringHanterenPersoonsgegevens.objects.count(), 0)
         needs_vhpg, _ = account_needs_vhpg(self.account_admin)
         self.assertTrue(needs_vhpg)
 
@@ -72,7 +71,7 @@ class TestFunctieVHPG(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('functie/vhpg-acceptatie.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'verplicht')
 
-        self.assertEqual(HanterenPersoonsgegevens.objects.count(), 0)
+        self.assertEqual(VerklaringHanterenPersoonsgegevens.objects.count(), 0)
 
         # voer de post uit met checkbox wel gezet (waarde maakt niet uit)
         with self.assert_max_queries(25):
@@ -81,11 +80,11 @@ class TestFunctieVHPG(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
 
-        self.assertEqual(HanterenPersoonsgegevens.objects.count(), 1)
+        self.assertEqual(VerklaringHanterenPersoonsgegevens.objects.count(), 1)
         needs_vhpg, _ = account_needs_vhpg(self.account_admin)
         self.assertFalse(needs_vhpg)
 
-        obj = HanterenPersoonsgegevens.objects.all()[0]
+        obj = VerklaringHanterenPersoonsgegevens.objects.all()[0]
         self.assertTrue(str(obj) != "")
 
         self.e2e_assert_other_http_commands_not_supported(self.url_acceptatie, post=False)
@@ -98,7 +97,7 @@ class TestFunctieVHPG(E2EHelpers, TestCase):
         # is niet BB
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_overzicht)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
         # wissel naar BB rol
         self.e2e_wisselnaarrol_bb()

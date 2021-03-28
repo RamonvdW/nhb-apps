@@ -8,6 +8,11 @@ ARGS="$*"
 RED="\e[31m"
 RESET="\e[0m"
 REPORT_DIR="/tmp/covhtml"
+LOG="/tmp/test_out.txt"
+LOG1="/tmp/tmp_out1.txt"
+[ -e "$LOG" ] && rm "$LOG"
+
+export PYTHONDONTWRITEBYTECODE=1
 
 OMIT="--omit=*/lib/python3*/site-packages/*"    # use , to separate
 # show all saml2 and djangosaml2idp source files
@@ -28,6 +33,15 @@ echo
 echo "[INFO] Checking application is free of fatal errors"
 python3 ./manage.py check || exit $?
 
+FORCE_REPORT=0
+if [[ "$ARGS" =~ "--force" ]]
+then
+    FORCE_REPORT=1
+    # remove from ARGS used to decide focus
+    # will still be given to ./manage.py where --force has no effect
+    ARGS=$(echo "$ARGS" | sed 's/--force//')
+fi
+
 FOCUS=""
 if [ ! -z "$ARGS" ]
 then
@@ -43,34 +57,46 @@ ABORTED=0
 
 # start the simulator (for the mailer)
 python3 ./Mailer/test_tools/websim.py &
+PID_WEBSIM=$!
 
 export COVERAGE_FILE="/tmp/.coverage.$$"
 
 python3 -m coverage erase
 
-python3 -m coverage run --append --branch \
-    ./manage.py test --settings=nhbapps.settings_dev --noinput $*  # note: double quotes not supported around $*
+# note: double quotes not supported around $*
+echo "[INFO] Capturing output in $LOG"
+tail -f "$LOG" &
+PID_TAIL=$!
+
+python3 -m coverage run --append --branch ./manage.py test --settings=nhbapps.settings_autotest --noinput $* 2>>"$LOG" >>"$LOG1"
 RES=$?
 [ $RES -eq 3 ] && ABORTED=1
-#echo "[DEBUG] Coverage run result: $RES"
+#echo "[DEBUG] Coverage run result: $RES --> ABORTED=$ABORTED"
+
+echo >> "$LOG"
+cat "$LOG1" >> "$LOG"
+rm "$LOG1"
+
+kill $PID_TAIL
+wait $PID_TAIL 2>/dev/null
+
 if [ $RES -eq 0 -a $# -eq 0 ]
 then
     # add coverage with debug and wiki enabled
     echo "[INFO] Performing run with debug + wiki run"
     python3 -m coverage run --append --branch \
-        ./manage.py test --settings=nhbapps.settings_dev_wiki_debug Plein.tests.TestPlein.test_quick Functie.test_saml2idp &>/dev/null
+        ./manage.py test --settings=nhbapps.settings_autotest_wiki_nodebug Plein.tests.TestPlein.test_quick Functie.test_saml2idp >>"$LOG" 2>>"$LOG"
     RES=$?
     [ $RES -eq 3 ] && ABORTED=1
-    #echo "[DEBUG] Debug coverage run result: $RES"
+    #echo "[DEBUG] Debug coverage run result: $RES --> ABORTED=$ABORTED"
 fi
 
-# stop the http simulator
-# do this by killing the most recent background task
-# and use bash construct to prevent the Terminated message on the console
-kill $!
-wait $! 2>/dev/null
+# stop the websim tool
+# use bash construct to prevent the Terminated message on the console
+kill $PID_WEBSIM
+wait $PID_WEBSIM 2>/dev/null
 
-if [ $ABORTED -eq 0 ]
+if [ $ABORTED -eq 0 -o $FORCE_REPORT -eq 1 ]
 then
     echo "[INFO] Generating reports"
 
@@ -80,16 +106,17 @@ then
     echo
     if [ -z "$FOCUS" ]
     then
-        python3 -m coverage report --skip-covered --fail-under=98 $OMIT
+        python3 -m coverage report --precision=1 --skip-covered --fail-under=98 $OMIT | tee -a "$LOG"
         res=$?
     else
-        python3 -m coverage report $OMIT | grep -E "$FOCUS|----|Cover"
+        python3 -m coverage report --precision=1 $OMIT | grep -E "$FOCUS|----|Cover" | tee -a "$LOG"
         res=0
     fi
     #echo "res=$res"
     echo
 
-    python3 -m coverage html -d "$REPORT_DIR" --skip-covered $OMIT
+	# TODO: dark themed coverage report
+    python3 -m coverage html -d "$REPORT_DIR" --precision=1 --skip-covered $OMIT
 
     if [ "$res" -gt 0 ] && [ -z "$ARGS" ]
     then
@@ -106,7 +133,7 @@ then
 
     echo
     echo -n "Press ENTER to start firefox now, or Ctrl+C to abort"
-    timeout --foreground 5 read
+    read -t 5
     if [ $? -ne 0 ]
     then
         # automatically abort
@@ -114,7 +141,11 @@ then
         exit 1
     fi
 
+    echo
+    echo "Launching firefox"
     firefox $REPORT_DIR/index.html &
+
+    echo "Done"
 fi
 
 # end of file

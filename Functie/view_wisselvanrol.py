@@ -36,6 +36,7 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_WISSELVANROL
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -44,10 +45,6 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
         rol_evalueer_opnieuw(self.request)
 
         return self.request.user.is_authenticated and rol_mag_wisselen(self.request)
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
 
     @staticmethod
     def _functie_volgorde(functie):
@@ -58,11 +55,11 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
         elif functie.rol == "RCL":
             volgorde = functie.nhb_regio.regio_nr       # 101-116
         elif functie.rol == "SEC":
-            volgorde = functie.nhb_ver.nhb_nr           # 1000-9999
+            volgorde = functie.nhb_ver.ver_nr           # 1000-9999
         elif functie.rol == "HWL":
-            volgorde = functie.nhb_ver.nhb_nr + 10000   # 11000-19999
+            volgorde = functie.nhb_ver.ver_nr + 10000   # 11000-19999
         elif functie.rol == "WL":
-            volgorde = functie.nhb_ver.nhb_nr + 20000   # 21000-29999
+            volgorde = functie.nhb_ver.ver_nr + 20000   # 21000-29999
         else:             # pragma: no cover
             volgorde = 0  # valt meteen op dat 'ie bovenaan komt
         return volgorde
@@ -110,7 +107,7 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
                     .filter(pk__in=pks)
                     .select_related('nhb_ver', 'nhb_regio', 'nhb_rayon')
                     .only('beschrijving', 'rol',
-                          'nhb_ver__nhb_nr', 'nhb_ver__naam',
+                          'nhb_ver__ver_nr', 'nhb_ver__naam',
                           'nhb_rayon__rayon_nr', 'nhb_regio__regio_nr')):
             pk2func[obj.pk] = obj
         # for
@@ -156,7 +153,7 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
                         .filter(pk__in=pks)
                         .select_related('nhb_ver', 'nhb_regio', 'nhb_rayon')
                         .only('beschrijving', 'rol',
-                              'nhb_ver__nhb_nr', 'nhb_ver__naam',
+                              'nhb_ver__ver_nr', 'nhb_ver__naam',
                               'nhb_rayon__rayon_nr', 'nhb_regio__regio_nr')):
                 pk2func[obj.pk] = obj
             # for
@@ -243,17 +240,18 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
         context['wiki_rollen'] = reverse_handleiding(settings.HANDLEIDING_ROLLEN)
         context['wiki_intro_nieuwe_beheerders'] = reverse_handleiding(settings.HANDLEIDING_INTRO_NIEUWE_BEHEERDERS)
 
+        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
+
         # login-as functie voor IT beheerder
-        if rol_get_huidige(self.request) == Rollen.ROL_IT:
+        if rol_nu == Rollen.ROL_IT:
             context['url_login_as'] = reverse('Account:account-wissel')
 
         # snel wissel kaartje voor IT en BB
-        if rol_get_huidige(self.request) in (Rollen.ROL_IT, Rollen.ROL_BB):
+        if rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB):
             context['heeft_alle_rollen'] = self._maak_alle_rollen()
 
         # bedoeld voor de testsuite, maar kan geen kwaad
         context['insert_meta'] = True
-        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
         context['meta_rol'] = rol2url[rol_nu]
         if functie_nu:
             context['meta_functie'] = functie_nu.beschrijving       # template doet html escaping
@@ -270,14 +268,11 @@ class ActiveerRolView(UserPassesTestMixin, View):
     """ Django class-based view om een andere rol aan te nemen """
 
     # class variables shared by all instances
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         return self.request.user.is_authenticated and rol_mag_wisselen(self.request)
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
 
     def post(self, request, *args, **kwargs):
         from_ip = get_safe_from_ip(self.request)

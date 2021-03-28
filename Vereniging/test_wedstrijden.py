@@ -38,7 +38,7 @@ class TestVerenigingWedstrijden(E2EHelpers, TestCase):
         # maak een test vereniging
         ver = NhbVereniging()
         ver.naam = "Grote Club"
-        ver.nhb_nr = "1000"
+        ver.ver_nr = "1000"
         ver.regio = self.regio_111
         # secretaris kan nog niet ingevuld worden
         ver.save()
@@ -153,7 +153,7 @@ class TestVerenigingWedstrijden(E2EHelpers, TestCase):
         # maak een test vereniging
         ver2 = NhbVereniging()
         ver2.naam = "Andere Club"
-        ver2.nhb_nr = "1222"
+        ver2.ver_nr = "1222"
         ver2.regio = self.regio_111
         # secretaris kan nog niet ingevuld worden
         ver2.save()
@@ -175,6 +175,7 @@ class TestVerenigingWedstrijden(E2EHelpers, TestCase):
         self.url_ingeschreven = '/vereniging/leden-ingeschreven/competitie/%s/'  # <deelcomp_pk>
         self.url_schutter_voorkeuren = '/sporter/voorkeuren/%s/'                 # <nhblid_pk>
         self.url_wedstrijden = '/vereniging/wedstrijden/'
+        self.url_uitslag_invoeren = '/vereniging/uitslag-invoeren/'
 
     def _create_competitie(self):
         url_kies = '/bondscompetities/'
@@ -195,11 +196,9 @@ class TestVerenigingWedstrijden(E2EHelpers, TestCase):
         self.comp_25 = Competitie.objects.get(afstand=25)
 
         # klassegrenzen vaststellen
-        with self.assert_max_queries(20):
-            resp = self.client.post(url_klassegrenzen % self.comp_18.pk)
+        resp = self.client.post(url_klassegrenzen % self.comp_18.pk)
         self.assert_is_redirect(resp, url_kies)
-        with self.assert_max_queries(20):
-            resp = self.client.post(url_klassegrenzen % self.comp_25.pk)
+        resp = self.client.post(url_klassegrenzen % self.comp_25.pk)
         self.assert_is_redirect(resp, url_kies)
 
         self.deelcomp_regio = DeelCompetitie.objects.get(laag=LAAG_REGIO,
@@ -263,6 +262,17 @@ class TestVerenigingWedstrijden(E2EHelpers, TestCase):
 
         self.e2e_assert_other_http_commands_not_supported(self.url_wedstrijden)
 
+        # haal de lijst van wedstrijden waarvan de uitslag ingevoerd mag worden
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_uitslag_invoeren)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('vereniging/wedstrijden.dtl', 'plein/site_layout.dtl'))
+
+        urls2 = self.extract_all_urls(resp, skip_menu=True)
+        for url in urls2:
+            self.assertTrue(url.startswith('/bondscompetities/scores/uitslag-invoeren/'))
+
     def test_wedstrijden_wl(self):
         # login als WL
         self.e2e_login_and_pass_otp(self.account_wl)
@@ -298,6 +308,6 @@ class TestVerenigingWedstrijden(E2EHelpers, TestCase):
         self.client.logout()
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wedstrijden)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
 # end of file

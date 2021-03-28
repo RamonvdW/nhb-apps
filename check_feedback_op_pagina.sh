@@ -6,7 +6,7 @@
 
 # helper to check the uniqueness of the "op_pagina" for the feedback form
 
-DTL_INCLUDES=$(echo "/menu.dtl /andere-sites-van-de-nhb.dtl /site_layout.dtl /card.dtl /card_logo.dtl /ga-naar-live-server.dtl" | tr ' ' '|')
+DTL_INCLUDES=$(echo "/menu.dtl /andere-sites-van-de-nhb.dtl /site_layout.dtl /site_layout_minimaal.dtl /fout_403.dtl /fout_404.dtl /fout_500.dtl /competitie/tijdlijn.dtl /card.dtl /card_logo.dtl /ga-naar-live-server.dtl" | tr ' ' '|')
 DTL_BEWUST_NIET=$(echo "/niet-ondersteund.dtl /site-feedback- /tijdelijke-url- /Logboek/ /Handleiding/ /templates/plein/menu-" | tr ' ' '|')
 
 DTL_FILES=$(find . -name \*.dtl | grep -vE "$DTL_BEWUST_NIET" | grep -vE "$DTL_INCLUDES")

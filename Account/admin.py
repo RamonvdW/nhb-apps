@@ -7,8 +7,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.utils.translation import gettext_lazy as _
-from .models import Account, AccountEmail, HanterenPersoonsgegevens
-from Functie.models import Functie
+from .models import Account, AccountEmail
 
 
 class AccountAdmin(UserAdmin):
@@ -49,13 +48,7 @@ class AccountEmailAdmin(admin.ModelAdmin):
     list_select_related = ('account',)
 
 
-class VHPGAdmin(admin.ModelAdmin):
-
-    list_select_related = ('account',)
-
-
 admin.site.register(Account, AccountAdmin)
 admin.site.register(AccountEmail, AccountEmailAdmin)
-admin.site.register(HanterenPersoonsgegevens, VHPGAdmin)
 
 # end of file

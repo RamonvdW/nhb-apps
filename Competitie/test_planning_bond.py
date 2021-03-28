@@ -58,7 +58,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         # maak een test vereniging
         ver = NhbVereniging()
         ver.naam = "Zuidelijke Club"
-        ver.nhb_nr = "1111"
+        ver.ver_nr = "1111"
         ver.regio = self.regio_112
         # secretaris kan nog niet ingevuld worden
         ver.save()
@@ -67,7 +67,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         # maak een test vereniging
         ver = NhbVereniging()
         ver.naam = "Grote Club"
-        ver.nhb_nr = "1000"
+        ver.ver_nr = "1000"
         ver.regio = self.regio_101
         # secretaris kan nog niet ingevuld worden
         ver.save()
@@ -81,7 +81,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         self.loc = loc
 
         # maak HWL functie aan voor deze vereniging
-        self.functie_hwl = maak_functie("HWL Vereniging %s" % ver.nhb_nr, "HWL")
+        self.functie_hwl = maak_functie("HWL Vereniging %s" % ver.ver_nr, "HWL")
         self.functie_hwl.nhb_ver = ver
         self.functie_hwl.save()
 
@@ -120,8 +120,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_bb)
         self.e2e_wisselnaarrol_bb()
         self.url_klassegrenzen_vaststellen_18 = '/bondscompetities/%s/klassegrenzen/vaststellen/' % self.comp_18.pk
-        with self.assert_max_queries(20):
-            resp = self.client.post(self.url_klassegrenzen_vaststellen_18)
+        resp = self.client.post(self.url_klassegrenzen_vaststellen_18)
         self.assert_is_redirect_not_plein(resp)  # check for success
 
         self.deelcomp_bond_18 = DeelCompetitie.objects.filter(competitie=self.comp_18,
@@ -142,7 +141,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         # maak nog een test vereniging, zonder HWL functie
         ver = NhbVereniging()
         ver.naam = "Kleine Club"
-        ver.nhb_nr = "1100"
+        ver.ver_nr = "1100"
         ver.regio = self.regio_101
         # secretaris kan nog niet ingevuld worden
         ver.save()
@@ -201,7 +200,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
 
         # fase F: pagina zonder knop 'doorzetten'
         zet_competitie_fase(self.comp_18, 'F')
-        self.comp_18.zet_fase()
+        self.comp_18.bepaal_fase()
         self.assertEqual(self.comp_18.fase, 'F')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
@@ -219,7 +218,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
 
         # fase G: pagina met knop 'doorzetten'
         zet_competitie_fase(self.comp_18, 'G')
-        self.comp_18.zet_fase()
+        self.comp_18.bepaal_fase()
         self.assertEqual(self.comp_18.fase, 'G')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
@@ -233,7 +232,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         self.assertEqual(3, RegioCompetitieSchutterBoog.objects.count())
         self.assertEqual(0, KampioenschapSchutterBoog.objects.count())
 
-        with self.assert_max_queries(41):
+        with self.assert_max_queries(55):
             resp = self.client.post(url)
         self.assert_is_redirect(resp, '/bondscompetities/')       # redirect = Success
 
@@ -269,15 +268,14 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         self.lid_schutter2.bij_vereniging = None
         self.lid_schutter2.save()
 
-        with self.assert_max_queries(41):
+        with self.assert_max_queries(54):
             resp = self.client.post(url)
         self.assert_is_redirect(resp, '/bondscompetities/')       # redirect = Success
 
         # het lid zonder vereniging komt toch gewoon in de RK selectie
         self.assertEqual(3, KampioenschapSchutterBoog.objects.count())
 
-        # TODO: controleer dat status lid niet op 'deelnemer' te zetten is
-        # TODO: lid weer aansluiten bij vereniging --> kan daarna wel deelnemer worden
+        # verdere tests in test_planning_rayon.test_geen_vereniging check
 
     def test_doorzetten_bk(self):
         self.e2e_login_and_pass_otp(self.account_bb)
@@ -287,7 +285,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
 
         # fase M: pagina zonder knop 'doorzetten'
         zet_competitie_fase(self.comp_18, 'M')
-        self.comp_18.zet_fase()
+        self.comp_18.bepaal_fase()
         self.assertEqual(self.comp_18.fase, 'M')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
@@ -305,7 +303,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
 
         # fase N: pagina met knop 'doorzetten'
         zet_competitie_fase(self.comp_18, 'N')
-        self.comp_18.zet_fase()
+        self.comp_18.bepaal_fase()
         self.assertEqual(self.comp_18.fase, 'N')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
@@ -325,48 +323,48 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_doorzetten_rk % 999999)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_doorzetten_bk % 999999)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
         # niet bestaande comp_pk
         self.e2e_wissel_naar_functie(self.functie_bko_18)
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_doorzetten_rk % 999999)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found/allowed
+        self.assert404(resp)     # 404 = Not found/allowed
 
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_doorzetten_rk % 999999)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found/allowed
+        self.assert404(resp)     # 404 = Not found/allowed
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_doorzetten_bk % 999999)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found/allowed
+        self.assert404(resp)     # 404 = Not found/allowed
 
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_doorzetten_bk % 999999)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found/allowed
+        self.assert404(resp)     # 404 = Not found/allowed
 
         # juiste comp_pk maar verkeerde fase
         zet_competitie_fase(self.comp_18, 'C')
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_doorzetten_rk % self.comp_18.pk)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found/allowed
+        self.assert404(resp)     # 404 = Not found/allowed
 
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_doorzetten_rk % self.comp_18.pk)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found/allowed
+        self.assert404(resp)     # 404 = Not found/allowed
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_doorzetten_bk % self.comp_18.pk)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found/allowed
+        self.assert404(resp)     # 404 = Not found/allowed
 
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_doorzetten_bk % self.comp_18.pk)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found/allowed
+        self.assert404(resp)     # 404 = Not found/allowed
 
 
 # end of file

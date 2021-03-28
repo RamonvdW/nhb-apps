@@ -4,8 +4,8 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.http import HttpResponseRedirect
-from django.urls import reverse, Resolver404
+from django.http import Http404
+from django.urls import reverse
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Plein.menu import menu_dynamics
@@ -27,15 +27,12 @@ class LedenSchietmomentView(UserPassesTestMixin, TemplateView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_LEDEN_SCHIETMOMENT
+    raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         _, functie_nu = rol_get_huidige_functie(self.request)
         return functie_nu and functie_nu.rol in ('HWL', 'WL')
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -49,7 +46,7 @@ class LedenSchietmomentView(UserPassesTestMixin, TemplateView):
                         .get(pk=deelcomp_pk,
                              inschrijf_methode=INSCHRIJF_METHODE_1))
         except (ValueError, TypeError, DeelCompetitie.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Geen valide competitie')
 
         context['deelcomp'] = deelcomp
 

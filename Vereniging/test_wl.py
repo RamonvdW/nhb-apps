@@ -10,7 +10,6 @@ from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
 from Competitie.models import Competitie, CompetitieKlasse, LAAG_REGIO, DeelCompetitie
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Schutter.models import SchutterBoog
-from Score.models import aanvangsgemiddelde_opslaan
 from Wedstrijden.models import WedstrijdLocatie
 from Overig.e2ehelpers import E2EHelpers
 import datetime
@@ -36,7 +35,7 @@ class TestVerenigingWL(E2EHelpers, TestCase):
         # maak een test vereniging
         ver = NhbVereniging()
         ver.naam = "Grote Club"
-        ver.nhb_nr = "1000"
+        ver.ver_nr = "1000"
         ver.regio = self.regio_111
         # secretaris kan nog niet ingevuld worden
         ver.save()
@@ -114,7 +113,7 @@ class TestVerenigingWL(E2EHelpers, TestCase):
         # maak een test vereniging
         ver2 = NhbVereniging()
         ver2.naam = "Andere Club"
-        ver2.nhb_nr = "1222"
+        ver2.ver_nr = "1222"
         ver2.regio = self.regio_111
         # secretaris kan nog niet ingevuld worden
         ver2.save()
@@ -146,7 +145,7 @@ class TestVerenigingWL(E2EHelpers, TestCase):
         rec.rank = 1
         rec.schutter_nr = self.nhblid_100001.nhb_nr
         rec.schutter_naam = self.nhblid_100001.volledige_naam()
-        rec.vereniging_nr = self.nhbver1.nhb_nr
+        rec.vereniging_nr = self.nhbver1.ver_nr
         rec.vereniging_naam = self.nhbver1.naam
         rec.boogtype = 'R'
         rec.score1 = 10
@@ -167,7 +166,7 @@ class TestVerenigingWL(E2EHelpers, TestCase):
         rec.rank = 1
         rec.schutter_nr = self.nhblid_100002.nhb_nr
         rec.schutter_naam = self.nhblid_100002.volledige_naam()
-        rec.vereniging_nr = self.nhbver1.nhb_nr
+        rec.vereniging_nr = self.nhbver1.ver_nr
         rec.vereniging_naam = self.nhbver1.naam
         rec.boogtype = 'BB'
         rec.score1 = 10
@@ -205,11 +204,9 @@ class TestVerenigingWL(E2EHelpers, TestCase):
         self.comp_25 = Competitie.objects.get(afstand=25)
 
         # klassegrenzen vaststellen
-        with self.assert_max_queries(20):
-            resp = self.client.post(url_klassegrenzen % self.comp_18.pk)
+        resp = self.client.post(url_klassegrenzen % self.comp_18.pk)
         self.assert_is_redirect(resp, url_kies)
-        with self.assert_max_queries(20):
-            resp = self.client.post(url_klassegrenzen % self.comp_25.pk)
+        resp = self.client.post(url_klassegrenzen % self.comp_25.pk)
         self.assert_is_redirect(resp, url_kies)
 
         self.deelcomp_regio = DeelCompetitie.objects.get(laag=LAAG_REGIO,
@@ -233,7 +230,7 @@ class TestVerenigingWL(E2EHelpers, TestCase):
         self.e2e_logout()
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_ledenlijst)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
         # login als WL
         self.e2e_login_and_pass_otp(self.account_wl)
@@ -272,7 +269,7 @@ class TestVerenigingWL(E2EHelpers, TestCase):
             url = self.url_schutter_voorkeuren % nhblid.pk
             with self.assert_max_queries(20):
                 resp = self.client.get(url)
-            self.assert_is_redirect(resp, '/plein/')   # naar Plein, want mag niet
+            self.assert403(resp)   # naar Plein, want mag niet
         # for
         self.assertEqual(SchutterBoog.objects.count(), 0)
 
@@ -286,7 +283,7 @@ class TestVerenigingWL(E2EHelpers, TestCase):
 
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert_is_redirect(resp, '/plein/')       # WL mag dit niet
+        self.assert403(resp)       # WL mag dit niet
 
     def test_ingeschreven(self):
         # login als WL
@@ -303,7 +300,7 @@ class TestVerenigingWL(E2EHelpers, TestCase):
         # probeer in te schrijven (mag niet)
         with self.assert_max_queries(20):
             resp = self.client.post(url)
-        self.assertEqual(resp.status_code, 404)         # 404 = Not found
+        self.assert403(resp)
 
     def test_cornercase(self):
         # login als WL
@@ -313,7 +310,7 @@ class TestVerenigingWL(E2EHelpers, TestCase):
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_ingeschreven % 9999999)
-        self.assertEqual(resp.status_code, 404)         # 404 = Not found
+        self.assert404(resp)         # 404 = Not found
 
     def test_wedstrijdlocatie(self):
         # maak een locatie en koppel aan de vereniging

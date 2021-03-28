@@ -17,7 +17,7 @@ class HistCompetitieIndividueelAdmin(admin.ModelAdmin):
     search_fields = ('schutter_nr', 'schutter_naam')
 
     # filter mogelijkheid
-    list_filter = ('histcompetitie', 'boogtype')
+    list_filter = ('histcompetitie__seizoen', 'boogtype')
 
 
 admin.site.register(HistCompetitie, HistCompetitieAdmin)

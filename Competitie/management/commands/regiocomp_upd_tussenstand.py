@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -92,26 +92,6 @@ class Command(BaseCommand):
                     obj.save()
         # for
 
-    def _verwerk_uitstappers_regio(self, comp):
-        objs = (RegioCompetitieSchutterBoog
-                .objects
-                .select_related('bij_vereniging',
-                                'bij_vereniging__regio',
-                                'schutterboog__nhblid',
-                                'schutterboog__nhblid__bij_vereniging',
-                                'schutterboog__nhblid__bij_vereniging__regio')
-                .filter(schutterboog__nhblid__bij_vereniging__isnull=True))
-        for obj in objs:
-            lid = obj.schutterboog.nhblid
-            self.stdout.write('[WARNING] Uitstapper: %s [%s] %s (actief=%s)' % (
-                              lid.nhb_nr,
-                              obj.bij_vereniging.regio.regio_nr, obj.bij_vereniging,
-                              lid.is_actief_lid))
-            # TODO: hoe hier mee omgaan?
-            # LET OP! obj.bij_vereniging = None mag niet van het model!
-            # obj.save()
-        # for
-
     def _verwerk_overstappers(self):
         """ Deze functie verwerkt schutters die overgestapt zijn naar een andere vereniging
             Deze worden overgeschreven naar een andere deelcompetitie (regio/RK/BK).
@@ -127,10 +107,10 @@ class Command(BaseCommand):
         #    KampioenschapSchutterBoog.bij_vereniging
 
         for comp in Competitie.objects.filter(is_afgesloten=False):
-            comp.zet_fase()
+            comp.bepaal_fase()
             if comp.fase <= 'F':        # Regiocompetitie
                 self._verwerk_overstappers_regio(comp)
-                self._verwerk_uitstappers_regio(comp)
+                # uitstappers kijken we niet meer naar -> gewoon op oude vereniging houden
             elif comp.fase == 'K':      # RK
                 self._verwerk_overstappers_rk(comp)
         # for
@@ -142,6 +122,7 @@ class Command(BaseCommand):
                         .objects
                         .select_related('competitie', 'indiv', 'indiv__boogtype')
                         .prefetch_related('indiv__leeftijdsklassen')
+                        .filter(team=None)
                         .exclude(indiv__buiten_gebruik=True))
 
         for obj in klassen_qset:
@@ -381,7 +362,7 @@ class Command(BaseCommand):
                     deelnemer.gemiddelde, deelnemer.totaal = self._bepaal_gemiddelde_en_totaal(waardes, laagste, pijlen_per_ronde)
 
                     # kijk of verplaatsing uit klasse onbekend van toepassing is
-                    if deelnemer.aanvangsgemiddelde < 0.001:
+                    if deelnemer.ag_voor_indiv < 0.001:
                         try:
                             betere_klassen = self._onbekend2beter[deelnemer.klasse.pk]
                         except KeyError:

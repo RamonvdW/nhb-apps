@@ -38,6 +38,11 @@ a {
     background-color: #eee;      /* grey lighten-3 */
 }
 
+.handleiding-link {
+    color: #03628c;             /* NHB donker blauw */
+ /* color: #0aa0e1;                NHB medium blauw */
+}
+
 
 /* gebruik: extra ruimte rond dicht op elkaar geplaatst buttons
    die bij wrap elkaar zouden raken */

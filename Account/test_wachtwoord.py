@@ -16,6 +16,7 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
     def setUp(self):
         """ initialisatie van de test case """
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
+        self.email_normaal = self.account_normaal.accountemail_set.all()[0]
 
         self.url_vergeten = '/account/wachtwoord-vergeten/'
         self.url_wijzig = '/account/nieuw-wachtwoord/'
@@ -24,11 +25,11 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
         # niet ingelogd
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wijzig)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_wijzig, {'param': 'yeah'})
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
     def test_wijzig(self):
         # log in
@@ -110,7 +111,7 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
             resp = self.client.get(url)
         urls = self.extract_all_urls(resp, skip_menu=True, skip_smileys=True)
         post_url = urls[0]
-        with self.assert_max_queries(23):
+        with self.assert_max_queries(27):
             resp = self.client.post(post_url)
         self.assert_is_redirect(resp, self.url_wijzig)
 
@@ -136,6 +137,28 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
         # controleer dat het nieuwe wachtwoord gebruikt kan worden
         self.client.logout()
         self.e2e_login(self.account_normaal, wachtwoord=nieuw_ww)
+
+    def test_vergeten_geblokkeerd(self):
+        # raak het pad in receive_wachtwoord_vergeten waarbij plugin blokkeert
+
+        # zet de blokkade
+        self.email_normaal.email_is_bevestigd = False
+        self.email_normaal.save()
+
+        # gebruiker moet valide e-mailadres invoeren via POST
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_vergeten, {'email': 'normaal@test.com'})
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('account/email_wachtwoord-vergeten.dtl', 'plein/site_layout.dtl'))
+
+        self.assertEqual(SiteTijdelijkeUrl.objects.count(), 1)
+        obj = SiteTijdelijkeUrl.objects.all()[0]
+        url = '/overig/url/' + obj.url_code + '/'
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_template_used(resp, ('account/bevestig-email.dtl', 'plein/site_layout.dtl'))
 
     def test_vergeten_ingelogd(self):
         # log in als admin
@@ -173,7 +196,7 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
             resp = self.client.get(url)
         urls = self.extract_all_urls(resp, skip_menu=True, skip_smileys=True)
         post_url = urls[0]
-        with self.assert_max_queries(23):
+        with self.assert_max_queries(27):
             resp = self.client.post(post_url)
         self.assert_is_redirect(resp, self.url_wijzig)
         session = self.client.session

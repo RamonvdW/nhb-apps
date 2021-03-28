@@ -9,10 +9,13 @@ from Wedstrijden.models import Wedstrijd
 from .models import (Competitie, DeelCompetitie, DeelcompetitieRonde,
                      CompetitieKlasse, DeelcompetitieKlasseLimiet,
                      RegioCompetitieSchutterBoog, KampioenschapSchutterBoog,
+                     RegiocompetitieTeam, RegiocompetitieTeamPoule, RegiocompetitieRondeTeam,
                      KampioenschapMutatie)
 
 
 class DeelCompetitieAdmin(admin.ModelAdmin):
+    list_filter = ('nhb_regio',)
+
     list_select_related = ('competitie', 'nhb_regio', 'nhb_rayon')
 
 
@@ -25,7 +28,12 @@ class DeelcompetitieRondeAdmin(admin.ModelAdmin):
 
 
 class CompetitieKlasseAdmin(admin.ModelAdmin):
+
+    list_filter = ('competitie',)
+
     list_select_related = ('competitie', 'indiv', 'team')
+
+    ordering = ('team__volgorde', 'indiv__volgorde')
 
 
 class RegioCompetitieSchutterBoogAdmin(admin.ModelAdmin):
@@ -36,13 +44,16 @@ class RegioCompetitieSchutterBoogAdmin(admin.ModelAdmin):
                         'schutterboog',
                         'bij_vereniging')
              }),
-        ('Klasse',
-            {'fields': (('aanvangsgemiddelde', 'is_handmatig_ag'),
+        ('Individueel',
+            {'fields': (('ag_voor_indiv',),
                         'klasse'),
              }),
-        ('Inschrijving',
+        ('Team',
             {'fields': ('inschrijf_voorkeur_team',
-                        'inschrijf_gekozen_wedstrijden',
+                        'ag_voor_team', 'ag_voor_team_mag_aangepast_worden'),
+             }),
+        ('Inschrijving',
+            {'fields': ('inschrijf_gekozen_wedstrijden',
                         'inschrijf_voorkeur_dagdeel',
                         'inschrijf_notitie'),
              }),
@@ -110,6 +121,39 @@ class RegioCompetitieSchutterBoogAdmin(admin.ModelAdmin):
                                   .filter(pk__in=pks)
                                   .order_by('datum_wanneer',
                                             'tijd_begin_wedstrijd'))
+        return super().formfield_for_manytomany(db_field, request, **kwargs)
+
+
+class RegiocompetitieTeamAdmin(admin.ModelAdmin):
+    filter_horizontal = ('gekoppelde_schutters', )
+
+    list_filter = ('deelcompetitie__competitie',
+                   'vereniging__regio',)
+
+    list_select_related = ('deelcompetitie',
+                           'deelcompetitie__nhb_regio',
+                           'deelcompetitie__nhb_rayon',
+                           'deelcompetitie__competitie',
+                           'vereniging',
+                           'klasse',
+                           'klasse__indiv',
+                           'klasse__team')
+
+    def __init__(self, model, admin_site):
+        super().__init__(model, admin_site)
+        self.obj = None
+
+    def get_form(self, request, obj=None, **kwargs):
+        if obj:                 # pragma: no branch
+            self.obj = obj      # pragma: no cover
+        return super().get_form(request, obj, **kwargs)
+
+    def formfield_for_manytomany(self, db_field, request, **kwargs):    # pragma: no cover
+        if db_field.name == 'gekoppelde_schutters' and self.obj:
+            # alleen schutters van de juiste vereniging laten kiezen
+            kwargs['queryset'] = (RegioCompetitieSchutterBoog
+                                  .objects
+                                  .filter(bij_vereniging=self.obj.vereniging))
         return super().formfield_for_manytomany(db_field, request, **kwargs)
 
 
@@ -183,5 +227,8 @@ admin.site.register(RegioCompetitieSchutterBoog, RegioCompetitieSchutterBoogAdmi
 admin.site.register(KampioenschapSchutterBoog, KampioenschapSchutterBoogAdmin)
 admin.site.register(DeelcompetitieKlasseLimiet)
 admin.site.register(KampioenschapMutatie, KampioenschapMutatieAdmin)
+admin.site.register(RegiocompetitieTeam, RegiocompetitieTeamAdmin)
+admin.site.register(RegiocompetitieTeamPoule)
+admin.site.register(RegiocompetitieRondeTeam)
 
 # end of file

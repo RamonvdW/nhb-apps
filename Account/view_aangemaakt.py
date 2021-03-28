@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.http import HttpResponseRedirect
 from django.shortcuts import render
-from django.urls import reverse
+from django.core.exceptions import PermissionDenied
 from django.views.generic import TemplateView
 from Plein.menu import menu_dynamics
 
@@ -29,7 +28,7 @@ class AangemaaktView(TemplateView):
             partial_email = request.session['partial_email']
         except KeyError:
             # url moet direct gebruikt zijn
-            return HttpResponseRedirect(reverse('Plein:plein'))
+            raise PermissionDenied()
 
         # geef de data door aan de template
         context = {'login_naam': login_naam,

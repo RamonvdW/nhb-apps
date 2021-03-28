@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
 from Functie.rol import (SESSIONVAR_ROL_HUIDIGE, SESSIONVAR_ROL_MAG_WISSELEN,
                          SESSIONVAR_ROL_PALLET_FUNCTIES, SESSIONVAR_ROL_PALLET_VAST,
-                         rol_mag_wisselen, rol_enum_pallet,
+                         SESSIONVAR_ROL_BESCHRIJVING,
+                         rol_mag_wisselen, rol_enum_pallet, rol_get_beschrijving,
                          rol_activeer_rol, rol_activeer_functie)
-from Functie.models import maak_functie, maak_account_verenigings_secretaris
+from Functie.models import maak_functie, maak_account_vereniging_secretaris
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Overig.e2ehelpers import E2EHelpers
 
@@ -29,7 +30,7 @@ class TestFunctieRol(E2EHelpers, TestCase):
         # maak een test vereniging
         ver = NhbVereniging()
         ver.naam = "Grote Club"
-        ver.nhb_nr = "1000"
+        ver.ver_nr = "1000"
         ver.regio = NhbRegio.objects.get(pk=111)
         # secretaris kan nog niet ingevuld worden
         ver.save()
@@ -40,12 +41,12 @@ class TestFunctieRol(E2EHelpers, TestCase):
 
     def test_maak_hwl(self):
         self.assertEqual(self.functie_sec.accounts.count(), 0)
-        added = maak_account_verenigings_secretaris(self.nhbver1, self.account_normaal)
+        added = maak_account_vereniging_secretaris(self.nhbver1, self.account_normaal)
         self.assertTrue(added)
         self.assertEqual(self.functie_sec.accounts.count(), 1)
 
         # opnieuw toevoegen heeft geen effect
-        added = maak_account_verenigings_secretaris(self.nhbver1, self.account_normaal)
+        added = maak_account_vereniging_secretaris(self.nhbver1, self.account_normaal)
         self.assertFalse(added)
         self.assertEqual(self.functie_sec.accounts.count(), 1)
 
@@ -70,6 +71,10 @@ class TestFunctieRol(E2EHelpers, TestCase):
         self.assertTrue(SESSIONVAR_ROL_PALLET_VAST not in request.session.keys())
         pallet = [tup for tup in rol_enum_pallet(request)]
         self.assertEqual(len(pallet), 0)
+        rol_activeer_rol(request, 'geen')
+
+        self.assertTrue(SESSIONVAR_ROL_BESCHRIJVING not in request.session.keys())
+        self.assertEqual(rol_get_beschrijving(request), "?")
 
     def test_plugin(self):
         # controleer het toekennen van rollen

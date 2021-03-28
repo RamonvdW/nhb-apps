@@ -6,7 +6,7 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}Mijn Handboogsport{% endblock %}
+{% block title %}{{ naam_site }}{% endblock %}
 
 {% block pagina %}
 
@@ -59,11 +59,9 @@
         {% include 'plein/andere-sites-van-de-nhb.dtl' %}
     </div>
 
-    <p>
-        <span>Voor vragen en problemen kan je contact met ons opnemen via e-mail: </span>
-        <a href="mailto:nhb-apps-support@handboogsport.nl" class="btn-nhb-blauw">
-            <i class="material-icons-round left">mail</i>nhb-apps-support@handboogsport.nl</a>
-    </p>
+    <p>Voor vragen en problemen kan je contact met ons opnemen via e-mail (druk op de knop om je mailprogramma te starten):</p>
+    <a href="mailto:nhb-apps-support@handboogsport.nl" class="btn-nhb-blauw">
+        <i class="material-icons-round left">mail</i>nhb-apps-support@handboogsport.nl</a>
 
     <p>Voorstellen en feedback over deze site graag via de drie gekleurde smileys die op elke pagina te vinden zijn.</p>
 

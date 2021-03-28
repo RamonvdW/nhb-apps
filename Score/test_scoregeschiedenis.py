@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -12,7 +12,7 @@ from Functie.models import maak_functie
 from Schutter.models import SchutterBoog
 from Score.models import Score, ScoreHist, SCORE_WAARDE_VERWIJDERD
 from Wedstrijden.models import Wedstrijd, WedstrijdUitslag
-from .models import aanvangsgemiddelde_opslaan
+from .models import score_indiv_ag_opslaan
 import datetime
 
 
@@ -91,7 +91,7 @@ class TestScoreGeschiedenis(E2EHelpers, TestCase):
         # maak een test vereniging
         ver = NhbVereniging()
         ver.naam = "Grote Club"
-        ver.nhb_nr = "1000"
+        ver.ver_nr = "1000"
         ver.regio = NhbRegio.objects.get(regio_nr=111)
         ver.save()
         self.nhbver1 = ver
@@ -128,9 +128,9 @@ class TestScoreGeschiedenis(E2EHelpers, TestCase):
         self.schutterboog_100001r = schutterboog
 
         # maak een AG aan
-        aanvangsgemiddelde_opslaan(schutterboog, 18, 9.123, None, 'test melding')
+        score_indiv_ag_opslaan(schutterboog, 18, 9.123, None, 'test melding')
 
-        aanvangsgemiddelde_opslaan(schutterboog, 25, 9.251, self.account_hwl, 'test melding')
+        score_indiv_ag_opslaan(schutterboog, 25, 9.251, self.account_hwl, 'test melding')
 
         self._maak_uitslag(schutterboog)
 
@@ -141,7 +141,7 @@ class TestScoreGeschiedenis(E2EHelpers, TestCase):
         self.client.logout()
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_geschiedenis)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
     def test_bb(self):
         # login als BB
@@ -168,7 +168,7 @@ class TestScoreGeschiedenis(E2EHelpers, TestCase):
 
         self.assertContains(resp, self.nhblid1.volledige_naam())
         self.assertContains(resp, 'Recurve')
-        self.assertContains(resp, 'AG vastgesteld')
+        self.assertContains(resp, 'Aanvangsgemiddelde')
         self.assertContains(resp, 'test melding')
 
     def test_zoek_bad(self):

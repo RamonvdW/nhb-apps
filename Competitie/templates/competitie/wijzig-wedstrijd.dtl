@@ -13,7 +13,7 @@
     <script type="application/javascript">
         function locatie_aanpassen(sel)
         {
-            const locaties = {{ locaties|safe }};   // nhb_ver.nhb_nr --> adres
+            const locaties = {{ locaties|safe }};   // nhb_ver.ver_nr --> adres
             const el_sel = document.getElementById('id_ver_sel')
             let adres = locaties[el_sel.value];        // gekozen vereniging
             if (adres === undefined)

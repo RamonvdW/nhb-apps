@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -18,7 +18,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('username', nargs=1, help="inlog naam")
-        parser.add_argument('vereniging_nhb_nr', nargs=1, help='NHB nummer van de vereniging')
+        parser.add_argument('ver_nr', nargs=1, help='Verenigingsnummer')
 
     def get_account(self, username):
         try:
@@ -28,9 +28,9 @@ class Command(BaseCommand):
             account = None
         return account
 
-    def get_vereniging(self, nhb_nr):
+    def get_vereniging(self, ver_nr):
         try:
-            nhb_ver = NhbVereniging.objects.get(nhb_nr=nhb_nr)
+            nhb_ver = NhbVereniging.objects.get(ver_nr=ver_nr)
         except NhbVereniging.DoesNotExist as exc:
             self.stderr.write("%s" % str(exc))
             nhb_ver = None
@@ -48,8 +48,8 @@ class Command(BaseCommand):
         username = options['username'][0]
         account = self.get_account(username)
 
-        vereniging_nhb_nr = options['vereniging_nhb_nr'][0]
-        nhb_ver = self.get_vereniging(vereniging_nhb_nr)
+        ver_nr = options['ver_nr'][0]
+        nhb_ver = self.get_vereniging(ver_nr)
 
         if account and nhb_ver:
             functie = self.get_functie_hwl(nhb_ver)

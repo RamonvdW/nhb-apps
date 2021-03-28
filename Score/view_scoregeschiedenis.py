@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,10 +8,9 @@ from django.urls import reverse
 from django.shortcuts import render
 from django.views.generic import View
 from django.contrib.auth.mixins import UserPassesTestMixin
-from django.http import HttpResponseRedirect
 from Functie.rol import Rollen, rol_get_huidige
 from Schutter.models import SchutterBoog
-from Score.models import ScoreHist, SCORE_WAARDE_VERWIJDERD
+from Score.models import ScoreHist, SCORE_WAARDE_VERWIJDERD, SCORE_TYPE_INDIV_AG, SCORE_TYPE_TEAM_AG
 from .forms import ScoreGeschiedenisForm
 from Plein.menu import menu_dynamics
 
@@ -25,14 +24,11 @@ class ScoreGeschiedenisView(UserPassesTestMixin, View):
 
     # class variables shared by all instances
     template = TEMPLATE_SCORE_GESCHIEDENIS
+    raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         return rol_get_huidige(self.request) in (Rollen.ROL_IT, Rollen.ROL_BB)
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
 
     def get(self, request, *args, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -51,12 +47,13 @@ class ScoreGeschiedenisView(UserPassesTestMixin, View):
                 zoekterm = ''
 
         if zoekterm:
-            context['schuttersboog'] = schuttersboog = (SchutterBoog
-                                                        .objects
-                                                        .select_related('nhblid',
-                                                                        'nhblid__bij_vereniging',
-                                                                        'nhblid__bij_vereniging__regio')
-                                                        .filter(nhblid__nhb_nr=zoekterm))
+            schuttersboog = (SchutterBoog
+                             .objects
+                             .select_related('nhblid',
+                                             'nhblid__bij_vereniging',
+                                             'nhblid__bij_vereniging__regio')
+                             .filter(nhblid__nhb_nr=zoekterm))
+            context['schuttersboog'] = schuttersboog
             pks = [obj.pk for obj in schuttersboog]
 
             if len(pks) == 0:
@@ -79,9 +76,9 @@ class ScoreGeschiedenisView(UserPassesTestMixin, View):
                     if hist.door_account:
                         hist.door_account_str = str(hist.door_account)
 
-                    hist.is_edit = (hist.oude_waarde > 0)
+                    hist.is_edit = hist.oude_waarde > 0 or hist.score.type == 'T'
 
-                    if hist.score.is_ag:
+                    if hist.score.type in (SCORE_TYPE_INDIV_AG, SCORE_TYPE_TEAM_AG):
                         hist.oude_waarde = "%.3f" % (hist.oude_waarde / 1000)
                         hist.nieuwe_waarde = "%.3f" % (hist.nieuwe_waarde / 1000)
                     else:
@@ -110,7 +107,7 @@ class ScoreGeschiedenisView(UserPassesTestMixin, View):
                                 pass
                             else:
                                 del score2hists[score.pk]
-                                if score.is_ag:
+                                if score.type in (SCORE_TYPE_INDIV_AG, SCORE_TYPE_TEAM_AG):
                                     score.waarde = "%.3f" % (hist.score.waarde / 1000)
 
                                 if score.afstand_meter not in afstanden:

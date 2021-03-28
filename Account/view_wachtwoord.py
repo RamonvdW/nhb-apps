@@ -4,6 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+from django.conf import settings
 from django.shortcuts import render
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
@@ -39,10 +40,10 @@ def account_stuur_email_wachtwoord_vergeten(accountemail, **kwargs):
     url = maak_tijdelijke_url_wachtwoord_vergeten(accountemail, **kwargs)
 
     text_body = ("Hallo!\n\n"
-                 + "Je hebt aangegeven je wachtwoord vergeten te zijn voor de website van de NHB.\n"
+                 + "Je hebt aangegeven je wachtwoord vergeten te zijn voor " + settings.NAAM_SITE + ".\n"
                  + "Klik op onderstaande link om een nieuw wachtwoord in te stellen.\n\n"
                  + url + "\n\n"
-                 + "Als jij dit niet was, neem dan contact met ons op via info@handboogsport.nl\n\n"
+                 + "Als jij dit niet was, neem dan contact met ons op via " + settings.EMAIL_BONDSBURO + "\n\n"
                  + "Veel plezier met de site!\n"
                  + "Het bondsburo\n")
 
@@ -171,15 +172,12 @@ class NieuwWachtwoordView(UserPassesTestMixin, TemplateView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_NIEUW_WACHTWOORD
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         # gebruiker moet ingelogd zijn
         return self.request.user.is_authenticated
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -191,7 +189,7 @@ class NieuwWachtwoordView(UserPassesTestMixin, TemplateView):
             context['moet_oude_ww_weten'] = True
 
         account = self.request.user
-        if account.nhblid_set.count() > 0:      # TODO: ongewenste kennis over op NhbLid.account
+        if account.nhblid_set.count() > 0:      # FUTURE: ongewenste kennis over op NhbLid.account
             menu_dynamics(self.request, context, actief="schutter-profiel")
         else:
             menu_dynamics(self.request, context)

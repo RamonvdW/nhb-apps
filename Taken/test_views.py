@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -60,11 +60,11 @@ class TestTakenViews(E2EHelpers, TestCase):
         self.e2e_logout()
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_overzicht)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_details % 0)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
     def test_allowed(self):
         self.e2e_login_and_pass_otp(self.account_admin)
@@ -134,21 +134,21 @@ class TestTakenViews(E2EHelpers, TestCase):
         url = self.url_details % 999999
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)
+        self.assert404(resp)
 
         with self.assert_max_queries(20):
             resp = self.client.post(url)
-        self.assertEqual(resp.status_code, 404)
+        self.assert404(resp)
 
         # taak van een ander
         url = self.url_details % self.taak2.pk
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)
+        self.assert403(resp)
 
         with self.assert_max_queries(20):
             resp = self.client.post(url)
-        self.assertEqual(resp.status_code, 404)
+        self.assert403(resp)
 
 
 # end of file

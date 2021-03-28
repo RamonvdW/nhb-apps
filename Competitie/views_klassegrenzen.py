@@ -5,9 +5,9 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.views.generic import View
-from django.urls import Resolver404
+from django.http import Http404
 from django.shortcuts import render
-from BasisTypen.models import IndivWedstrijdklasse
+from BasisTypen.models import IndivWedstrijdklasse, TeamWedstrijdklasse
 from .models import (AG_NUL, Competitie, CompetitieKlasse)
 from .menu import menu_dynamics_competitie
 
@@ -23,19 +23,14 @@ class KlassegrenzenTonenView(View):
     template_name = TEMPLATE_COMPETITIE_KLASSEGRENZEN_TONEN
 
     @staticmethod
-    def _get_indiv_klassen(context, comp):
+    def _get_indiv_klassen(comp):
         """ geef een lijst van IndivWedstrijdklasse terug
             met als extra velden "min_ag18" en "min_ag25"
         """
 
-        if CompetitieKlasse.objects.filter(team=None).count() == 0:
-            # er zijn nog geen klassen vastgesteld
-            context['geen_klassen'] = True
-            return None
-
-        indiv_klassen = list()
-
+        indiv_klassen = list()  # gesorteerd
         indiv_dict = dict()     # [indiv.pk] = IndivWedstrijdklasse
+
         for obj in IndivWedstrijdklasse.objects.order_by('volgorde'):
             indiv_dict[obj.pk] = obj
             indiv_klassen.append(obj)
@@ -52,10 +47,42 @@ class KlassegrenzenTonenView(View):
             min_ag = obj.min_ag
 
             if min_ag != AG_NUL:
-                indiv.min_ag = min_ag
+                indiv.min_ag = "%5.3f" % min_ag
         # for
 
         return indiv_klassen
+
+    @staticmethod
+    def _get_team_klassen(comp):
+
+        if comp.afstand == '18':
+            aantal_pijlen = 30
+        else:
+            aantal_pijlen = 25
+
+        team_klassen = list()   # gesorteerd
+        team_dict = dict()      # [team.pk] = TeamWedstrijdklasse
+
+        for obj in TeamWedstrijdklasse.objects.order_by('volgorde'):
+            team_dict[obj.pk] = obj
+            team_klassen.append(obj)
+        # for
+
+        for obj in (CompetitieKlasse
+                    .objects
+                    .select_related('competitie',
+                                    'team')
+                    .filter(indiv=None,
+                            competitie=comp)):
+
+            team = team_dict[obj.team.pk]
+            min_ag = obj.min_ag * aantal_pijlen
+
+            if min_ag > AG_NUL:
+                team.min_ag = "%5.1f" % min_ag
+        # for
+
+        return team_klassen
 
     def get(self, request, *args, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -67,11 +94,13 @@ class KlassegrenzenTonenView(View):
                     .objects
                     .get(pk=comp_pk))
         except (ValueError, Competitie.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Competitie niet gevonden')
 
         context['comp'] = comp
 
-        context['indiv_klassen'] = self._get_indiv_klassen(context, comp)
+        if comp.klassegrenzen_vastgesteld:
+            context['indiv_klassen'] = self._get_indiv_klassen(comp)
+            context['team_klassen'] = self._get_team_klassen(comp)
 
         menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
         return render(request, self.template_name, context)
