@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -21,8 +21,8 @@ def account_otp_prepare_koppelen(account):
     """ Als het account nog niet voorbereid is voor OTP, maak het dan in orde
     """
     # maak eenmalig het OTP geheim aan voor deze gebruiker
-    if len(account.otp_code) != 16:
-        account.otp_code = pyotp.random_base32()
+    if len(account.otp_code) not in (16, 32):
+        account.otp_code = pyotp.random_base32()[:32]
         account.save()
 
 

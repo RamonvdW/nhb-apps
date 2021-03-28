@@ -8,9 +8,9 @@ from django.test import TestCase
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
 from Competitie.models import Competitie, CompetitieKlasse, RegioCompetitieSchutterBoog
+from Competitie.test_fase import zet_competitie_fase
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Schutter.models import SchutterBoog
-from Score.models import aanvangsgemiddelde_opslaan
 from Wedstrijden.models import WedstrijdLocatie
 from Overig.e2ehelpers import E2EHelpers
 import datetime
@@ -36,7 +36,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         # maak een test vereniging
         ver = NhbVereniging()
         ver.naam = "Grote Club"
-        ver.nhb_nr = "1000"
+        ver.ver_nr = "1000"
         ver.regio = regio_111
         # secretaris kan nog niet ingevuld worden
         ver.save()
@@ -115,7 +115,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         # maak een test vereniging
         ver2 = NhbVereniging()
         ver2.naam = "Andere Club"
-        ver2.nhb_nr = "1222"
+        ver2.ver_nr = "1222"
         ver2.regio = regio_111
         # secretaris kan nog niet ingevuld worden
         ver2.save()
@@ -147,7 +147,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         rec.rank = 1
         rec.schutter_nr = self.nhblid_100001.nhb_nr
         rec.schutter_naam = self.nhblid_100001.volledige_naam()
-        rec.vereniging_nr = self.nhbver1.nhb_nr
+        rec.vereniging_nr = self.nhbver1.ver_nr
         rec.vereniging_naam = self.nhbver1.naam
         rec.boogtype = 'R'
         rec.score1 = 10
@@ -168,7 +168,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         rec.rank = 1
         rec.schutter_nr = self.nhblid_100002.nhb_nr
         rec.schutter_naam = self.nhblid_100002.volledige_naam()
-        rec.vereniging_nr = self.nhbver1.nhb_nr
+        rec.vereniging_nr = self.nhbver1.ver_nr
         rec.vereniging_naam = self.nhbver1.naam
         rec.boogtype = 'BB'
         rec.score1 = 10
@@ -206,11 +206,9 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.comp_25 = Competitie.objects.get(afstand=25)
 
         # klassegrenzen vaststellen
-        with self.assert_max_queries(20):
-            resp = self.client.post(url_klassegrenzen % self.comp_18.pk)
+        resp = self.client.post(url_klassegrenzen % self.comp_18.pk)
         self.assert_is_redirect(resp, url_kies)
-        with self.assert_max_queries(20):
-            resp = self.client.post(url_klassegrenzen % self.comp_25.pk)
+        resp = self.client.post(url_klassegrenzen % self.comp_25.pk)
         self.assert_is_redirect(resp, url_kies)
 
     def test_overzicht(self):
@@ -263,7 +261,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
             url = self.url_schutter_voorkeuren % nhblid.pk
             with self.assert_max_queries(20):
                 resp = self.client.get(url)
-            self.assert_is_redirect(resp, '/plein/')
+            self.assert403(resp)
         # for
         self.assertEqual(SchutterBoog.objects.count(), 0)
 
@@ -274,9 +272,11 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.e2e_check_rol('SEC')
 
         url = self.url_inschrijven % self.comp_18.pk
+        zet_competitie_fase(self.comp_18, 'B')
+
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert_is_redirect(resp, '/plein/')          # SEC mag dit niet
+        self.assert403(resp)          # SEC mag dit niet
 
         # wissel door naar HWL
         self.e2e_wissel_naar_functie(self.functie_hwl)
@@ -303,9 +303,11 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.e2e_check_rol('SEC')
 
         url = self.url_inschrijven % self.comp_18.pk
+        zet_competitie_fase(self.comp_18, 'B')
+
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert_is_redirect(resp, '/plein/')          # SEC mag dit niet
+        self.assert403(resp)          # SEC mag dit niet
 
         # wissel door naar HWL
         self.e2e_wissel_naar_functie(self.functie_hwl)
@@ -321,7 +323,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',        # 1=R
                                           'lid_100003_boogtype_3': 'on'})       # 3=BB
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
     def test_ingeschreven(self):
         url = self.url_ingeschreven % 1
@@ -334,7 +336,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         # SEC mag de lijst met ingeschreven schutters niet ophalen
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert_is_redirect(resp, '/plein/')          # SEC mag dit niet
+        self.assert403(resp)          # SEC mag dit niet
 
     def test_wedstrijdlocatie(self):
         # maak een locatie en koppel aan de vereniging

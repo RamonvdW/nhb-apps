@@ -26,7 +26,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2021-03-09'
+SITE_VERSIE = '2021-03-28'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -293,8 +293,8 @@ SAML_IDP_CONFIG = {
     },
 
     # signing keys
-    'key_file': os.path.join(BASE_DIR, 'data_private/saml2/private.key'),
-    'cert_file': os.path.join(BASE_DIR, 'data_private/saml2/cert.crt'),
+    'key_file': os.path.join(BASE_DIR, 'nhbapps/data_private/saml2/private.key'),
+    'cert_file': os.path.join(BASE_DIR, 'nhbapps/data_private/saml2/cert.crt'),
     'valid_for': 100*24
 }
 
@@ -330,6 +330,7 @@ HANDLEIDING_SCHUTTERBOOG = 'Schutter-boog'
 HANDLEIDING_INSCHRIJFMETHODES = 'Inschrijfmethodes_Regiocompetitie'
 HANDLEIDING_CLUSTERS = 'Clusters'
 HANDLEIDING_RK_SELECTIE = 'RK_selectie'
+HANDLEIDING_RCL_INSTELLINGEN_REGIO = 'RCL_instellingen_regio'
 
 HANDLEIDING_PAGINAS = [
     HANDLEIDING_TOP,
@@ -348,9 +349,9 @@ HANDLEIDING_PAGINAS = [
     HANDLEIDING_INSCHRIJFMETHODES,
     HANDLEIDING_CLUSTERS,
     HANDLEIDING_RK_SELECTIE,
+    HANDLEIDING_RCL_INSTELLINGEN_REGIO,
     # pagina's van de handleiding die intern gerefereerd worden
     'Tips_voor_wiki_gebruik',
-    'Handleiding_CWZ',
     'Koppelen_beheerders'
 ]
 

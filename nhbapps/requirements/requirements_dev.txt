@@ -4,7 +4,7 @@
 #
 #    pip-compile requirements_dev.in
 #
-arrow==0.17.0
+arrow==1.0.3
     # via
     #   -r requirements_test.txt
     #   djangosaml2idp
@@ -14,7 +14,7 @@ asgiref==3.3.1
     #   django
 beautifulsoup4==4.9.3
     # via -r requirements_dev.in
-cachetools==4.2.0
+cachetools==4.2.1
     # via
     #   -r requirements_test.txt
     #   google-auth
@@ -22,7 +22,7 @@ certifi==2020.12.5
     # via
     #   -r requirements_test.txt
     #   requests
-cffi==1.14.4
+cffi==1.14.5
     # via
     #   -r requirements_test.txt
     #   cryptography
@@ -30,55 +30,55 @@ chardet==4.0.0
     # via
     #   -r requirements_test.txt
     #   requests
-coverage==5.3.1
+coverage==5.5
     # via -r requirements_dev.in
-cryptography==3.3.1
+cryptography==3.4.6
     # via
     #   -r requirements_test.txt
     #   pyopenssl
     #   pysaml2
-defusedxml==0.6.0
+defusedxml==0.7.1
     # via
     #   -r requirements_test.txt
     #   pysaml2
 django-debug-toolbar==3.2
     # via -r requirements_dev.in
-django-extensions==3.1.0
+django-extensions==3.1.1
     # via -r requirements_dev.in
-django==3.0.11
+django==3.1.7
     # via
     #   -r requirements_test.txt
     #   django-debug-toolbar
     #   djangosaml2idp
 djangosaml2idp==0.7.2
     # via -r requirements_test.txt
-elementpath==2.1.2
+elementpath==2.2.0
     # via
     #   -r requirements_test.txt
     #   xmlschema
-google-api-core==1.25.0
+google-api-core==1.26.1
     # via
     #   -r requirements_test.txt
     #   google-api-python-client
-google-api-python-client==1.12.8
+google-api-python-client==2.0.2
     # via -r requirements_test.txt
-google-auth-httplib2==0.0.4
+google-auth-httplib2==0.1.0
     # via
     #   -r requirements_test.txt
     #   google-api-python-client
-google-auth==1.24.0
+google-auth==1.28.0
     # via
     #   -r requirements_test.txt
     #   google-api-core
     #   google-api-python-client
     #   google-auth-httplib2
-googleapis-common-protos==1.52.0
+googleapis-common-protos==1.53.0
     # via
     #   -r requirements_test.txt
     #   google-api-core
 html5validator==0.3.3
     # via -r requirements_dev.in
-httplib2==0.18.1
+httplib2==0.19.0
     # via
     #   -r requirements_test.txt
     #   google-api-python-client
@@ -87,17 +87,20 @@ idna==2.10
     # via
     #   -r requirements_test.txt
     #   requests
-importlib-resources==5.1.0
+importlib-resources==5.1.2
     # via
     #   -r requirements_test.txt
     #   pysaml2
-packaging==20.8
-    # via pip-review
-pip-licenses==3.3.0
+packaging==20.9
+    # via
+    #   -r requirements_test.txt
+    #   google-api-core
+    #   pip-review
+pip-licenses==3.3.1
     # via -r requirements_dev.in
 pip-review==1.1.0
     # via -r requirements_dev.in
-protobuf==3.14.0
+protobuf==3.15.6
     # via
     #   -r requirements_test.txt
     #   google-api-core
@@ -123,10 +126,13 @@ pyopenssl==20.0.1
     # via
     #   -r requirements_test.txt
     #   pysaml2
-pyotp==2.4.1
+pyotp==2.6.0
     # via -r requirements_test.txt
 pyparsing==2.4.7
-    # via packaging
+    # via
+    #   -r requirements_test.txt
+    #   httplib2
+    #   packaging
 pysaml2==6.5.1
     # via
     #   -r requirements_test.txt
@@ -136,7 +142,7 @@ python-dateutil==2.8.1
     #   -r requirements_test.txt
     #   arrow
     #   pysaml2
-pytz==2020.5
+pytz==2021.1
     # via
     #   -r requirements_test.txt
     #   django
@@ -150,14 +156,13 @@ requests==2.25.1
     #   -r requirements_test.txt
     #   google-api-core
     #   pysaml2
-rsa==4.7
+rsa==4.7.2
     # via
     #   -r requirements_test.txt
     #   google-auth
 six==1.15.0
     # via
     #   -r requirements_test.txt
-    #   cryptography
     #   google-api-core
     #   google-api-python-client
     #   google-auth
@@ -167,26 +172,30 @@ six==1.15.0
     #   pysaml2
     #   python-dateutil
     #   qrcode
-soupsieve==2.1
+soupsieve==2.2.1
     # via beautifulsoup4
 sqlparse==0.4.1
     # via
     #   -r requirements_test.txt
     #   django
     #   django-debug-toolbar
+typing-extensions==3.7.4.3
+    # via
+    #   -r requirements_test.txt
+    #   arrow
 uritemplate==3.0.1
     # via
     #   -r requirements_test.txt
     #   google-api-python-client
-urllib3==1.26.2
+urllib3==1.26.4
     # via
     #   -r requirements_test.txt
     #   requests
-xmlschema==1.4.1
+xmlschema==1.5.3
     # via
     #   -r requirements_test.txt
     #   pysaml2
-zipp==3.4.0
+zipp==3.4.1
     # via
     #   -r requirements_test.txt
     #   importlib-resources

@@ -15,6 +15,16 @@ from Schutter.models import SchutterBoog
 # via scorehist zijn de wijzigingen dan nog in te zien
 SCORE_WAARDE_VERWIJDERD = 32767
 
+SCORE_TYPE_SCORE = 'S'
+SCORE_TYPE_INDIV_AG = 'I'
+SCORE_TYPE_TEAM_AG = 'T'
+
+SCORE_CHOICES = (
+    (SCORE_TYPE_SCORE, 'Score'),
+    (SCORE_TYPE_INDIV_AG, 'Indiv AG'),
+    (SCORE_TYPE_TEAM_AG, 'Team AG')
+)
+
 
 class Score(models.Model):
     """ Bijhouden van een specifieke score """
@@ -22,12 +32,11 @@ class Score(models.Model):
     # schutter-boog waar deze score bij hoort
     schutterboog = models.ForeignKey(SchutterBoog, on_delete=models.PROTECT)
 
-    # een aanvangsgemiddelde wordt hier ook opgeslagen met drie decimalen
-    # nauwkeurig als AG*1000. Dus 9,123 --> 9123
-    # hierdoor kunnen we gebruik maken van de ScoreHist
-    is_ag = models.BooleanField(default=False)
+    # type indicate: score, indiv ag, team ag
+    type = models.CharField(max_length=1, choices=SCORE_CHOICES, default=SCORE_TYPE_SCORE)
 
     # waarde van de score, bijvoorbeeld 360
+    # bij indiv/team ag is dit de AG * 1000, dus 9.123 --> 9123
     waarde = models.PositiveSmallIntegerField()     # max = 32767
 
     # 18, 25, 70, etc.
@@ -35,8 +44,10 @@ class Score(models.Model):
 
     def __str__(self):
         msg = "%s - %sm: %s" % (self.schutterboog, self.afstand_meter, self.waarde)
-        if self.is_ag:
-            msg += ' (is AG)'
+        if self.type == SCORE_TYPE_INDIV_AG:
+            msg += ' (indiv AG)'
+        elif self.type == SCORE_TYPE_TEAM_AG:
+            msg += ' (team AG)'
         return msg
 
     objects = models.Manager()      # for the editor only
@@ -65,7 +76,7 @@ class ScoreHist(models.Model):
     objects = models.Manager()      # for the editor only
 
 
-def aanvangsgemiddelde_opslaan(schutterboog, afstand, gemiddelde, door_account, notitie):
+def _score_ag_opslaan(score_type, schutterboog, afstand, gemiddelde, door_account, notitie):
     """ slaan het aanvangsgemiddelde op voor schutterboog
 
         Return value:
@@ -76,12 +87,12 @@ def aanvangsgemiddelde_opslaan(schutterboog, afstand, gemiddelde, door_account, 
 
     try:
         score = Score.objects.get(schutterboog=schutterboog,
-                                  is_ag=True,
+                                  type=score_type,
                                   afstand_meter=afstand)
     except Score.DoesNotExist:
         # eerste aanvangsgemiddelde voor deze afstand
         score = Score(schutterboog=schutterboog,
-                      is_ag=True,
+                      type=score_type,
                       waarde=waarde,
                       afstand_meter=afstand)
         score.save()
@@ -112,12 +123,23 @@ def aanvangsgemiddelde_opslaan(schutterboog, afstand, gemiddelde, door_account, 
     return False
 
 
-def zoek_meest_recente_automatisch_vastgestelde_ag():
+def score_indiv_ag_opslaan(schutterboog, afstand, gemiddelde, door_account, notitie):
+    """ sla een individueel AG op voor een specifieke schutter-boog en afstand """
+    return _score_ag_opslaan(SCORE_TYPE_INDIV_AG, schutterboog, afstand, gemiddelde, door_account, notitie)
+
+
+def score_teams_ag_opslaan(schutterboog, afstand, gemiddelde, door_account, notitie):
+    """ sla een team-AG op voor een specifieke schutter-boog en afstand """
+    return _score_ag_opslaan(SCORE_TYPE_TEAM_AG, schutterboog, afstand, gemiddelde, door_account, notitie)
+
+
+def wanneer_ag_vastgesteld():
+    """ Zoek de datum waarop de aanvangsgemiddelde voor het laatste vastgesteld zijn """
     scorehist = (ScoreHist
                  .objects
                  .select_related('score')
                  .filter(door_account=None,
-                         score__is_ag=True)
+                         score__type=SCORE_TYPE_INDIV_AG)
                  .order_by('-when'))[:1]
     if len(scorehist) > 0:
         return scorehist[0].when

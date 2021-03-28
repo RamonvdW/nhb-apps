@@ -24,7 +24,7 @@ class TestHistCompInterland(E2EHelpers, TestCase):
         # maak een test vereniging
         ver = NhbVereniging()
         ver.naam = "Grote Club"
-        ver.nhb_nr = 1000
+        ver.ver_nr = 1000
         ver.regio = self.regio_101
         # secretaris kan nog niet ingevuld worden
         ver.save()
@@ -60,7 +60,7 @@ class TestHistCompInterland(E2EHelpers, TestCase):
         rec.rank = 1
         rec.schutter_nr = lid.nhb_nr
         rec.schutter_naam = "wordt niet gebruikt"
-        rec.vereniging_nr = ver.nhb_nr
+        rec.vereniging_nr = ver.ver_nr
         rec.vereniging_naam = "wordt niet gebruikt"
         rec.score1 = 10
         rec.score2 = 20
@@ -93,7 +93,7 @@ class TestHistCompInterland(E2EHelpers, TestCase):
         rec.rank = 1
         rec.schutter_nr = lid.nhb_nr
         rec.schutter_naam = "wordt niet gebruikt"
-        rec.vereniging_nr = ver.nhb_nr
+        rec.vereniging_nr = ver.ver_nr
         rec.vereniging_naam = "wordt niet gebruikt"
         rec.score1 = 10
         rec.score2 = 20
@@ -125,7 +125,7 @@ class TestHistCompInterland(E2EHelpers, TestCase):
         rec.rank = 1
         rec.schutter_nr = lid.nhb_nr
         rec.schutter_naam = "wordt niet gebruikt"
-        rec.vereniging_nr = ver.nhb_nr
+        rec.vereniging_nr = ver.ver_nr
         rec.vereniging_naam = "wordt niet gebruikt"
         rec.score1 = 10
         rec.score2 = 20
@@ -145,7 +145,7 @@ class TestHistCompInterland(E2EHelpers, TestCase):
         rec.rank = 1
         rec.schutter_nr = 999999
         rec.schutter_naam = "wordt niet gebruikt"
-        rec.vereniging_nr = ver.nhb_nr
+        rec.vereniging_nr = ver.ver_nr
         rec.vereniging_naam = "wordt niet gebruikt"
         rec.score1 = 10
         rec.score2 = 20
@@ -177,7 +177,7 @@ class TestHistCompInterland(E2EHelpers, TestCase):
         rec.rank = 1
         rec.schutter_nr = lid.nhb_nr
         rec.schutter_naam = "wordt niet gebruikt"
-        rec.vereniging_nr = ver.nhb_nr
+        rec.vereniging_nr = ver.ver_nr
         rec.vereniging_naam = "wordt niet gebruikt"
         rec.score1 = 10
         rec.score2 = 20
@@ -203,7 +203,7 @@ class TestHistCompInterland(E2EHelpers, TestCase):
         # anon
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_interland)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
         # log in als BB
         self.e2e_login_and_pass_otp(self.account_bb)
@@ -221,7 +221,7 @@ class TestHistCompInterland(E2EHelpers, TestCase):
         # anon
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
         # log in als BB
         self.e2e_login_and_pass_otp(self.account_bb)
@@ -247,7 +247,7 @@ class TestHistCompInterland(E2EHelpers, TestCase):
         # illegale klasse_pk
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_interland_download % 999999)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
         # bestaande klasse_pk, maar verkeerd seizoen
         obj = HistCompetitie()
@@ -258,7 +258,7 @@ class TestHistCompInterland(E2EHelpers, TestCase):
         obj.save()
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_interland_download % obj.pk)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
         # verwijder de hele histcomp
         HistCompetitie.objects.all().delete()

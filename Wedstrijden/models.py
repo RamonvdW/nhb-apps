@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -13,12 +13,14 @@ from Score.models import Score
 # FUTURE: uitbreiden met meer mogelijkheden zoals buitenbaan, veld, 3D, etc.
 BAAN_TYPE = (('X', 'Onbekend'),
              ('O', 'Volledig overdekte binnenbaan'),
-             ('H', 'Binnen-buiten schieten'))
+             ('H', 'Binnen-buiten schieten'),
+             ('B', 'Buitenbaan'))
 
 BAANTYPE2STR = {
     'X': 'Onbekend',
     'O': 'Volledig overdekte binnenbaan',
     'H': 'Binnen-buiten schieten',
+    'B': 'Buitenbaan'
 }
 
 
@@ -41,6 +43,10 @@ class WedstrijdLocatie(models.Model):
     banen_18m = models.PositiveSmallIntegerField(default=0)
     banen_25m = models.PositiveSmallIntegerField(default=0)
     max_dt_per_baan = models.PositiveSmallIntegerField(default=4)
+
+    # informatie over de buitenbanen
+    buiten_banen = models.PositiveSmallIntegerField(default=0)
+    buiten_max_afstand = models.PositiveSmallIntegerField(default=0)
 
     # adresgegevens van het doel/veld
     adres = models.TextField(max_length=256, blank=True)

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -12,27 +12,45 @@ class AccommodatieDetailsForm(forms.Form):
     """
 
     baan_type = forms.CharField(
-                            max_length=1,
-                            required=True)
+                            required=False,
+                            max_length=1)
 
     banen_18m = forms.IntegerField(
-                            required=True,
+                            required=False,
                             min_value=0,
                             max_value=25)
 
     banen_25m = forms.IntegerField(
-                            required=True,
+                            required=False,
                             min_value=0,
                             max_value=25)
 
     max_dt = forms.IntegerField(
-                            required=True,
+                            required=False,
                             min_value=3,
                             max_value=4)
 
     notities = forms.CharField(
-                            max_length=1024,
-                            required=False)
+                            required=False,
+                            max_length=1024)
+
+    buiten_adres = forms.CharField(
+                            required=False,
+                            max_length=1024)
+
+    buiten_banen = forms.IntegerField(
+                            required=False,
+                            min_value=1,
+                            max_value=80)
+
+    buiten_max_afstand = forms.IntegerField(
+                            required=False,
+                            min_value=30,
+                            max_value=100)
+
+    buiten_notities = forms.CharField(
+                            required=False,
+                            max_length=1024)
 
     def is_valid(self):
         valid = super(forms.Form, self).is_valid()

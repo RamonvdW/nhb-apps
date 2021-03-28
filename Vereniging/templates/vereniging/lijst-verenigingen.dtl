@@ -14,9 +14,9 @@
 <h4>Verenigingen en Accommodaties</h4>
 
 {% if landelijk %}
-    <p>Hieronder volgt de landelijke lijst van {{ object_list.count }} verenigingen.</p>
+    <p>Hieronder volgt de landelijke lijst van {{ verenigingen.count }} verenigingen.</p>
 {% else %}
-    <p>Hieronder volgt de lijst van {{ object_list.count }} verenigingen in jouw gebied.</p>
+    <p>Hieronder volgt de lijst van {{ verenigingen.count }} verenigingen in jouw gebied.</p>
 {% endif %}
 
 <p>Je rol is <b>{{ huidige_rol }}</b>.</p>
@@ -77,7 +77,7 @@
         </tr>
     </thead>
 
-    {% for obj in object_list %}
+    {% for obj in verenigingen %}
         <tr>
             {% if toon_rayon %}
                 <td class="center-align">{{ obj.regio.rayon.rayon_nr }}</td>
@@ -92,63 +92,65 @@
             {% endif %}
 
             <!-- vereniging -->
-            <td>[{{ obj.nhb_nr }}] {{ obj.naam }}</td>
+            <td>[{{ obj.ver_nr }}] {{ obj.naam }}</td>
 
             <!-- accommodatie -->
-            {% if obj.plaats %}
-                <td>
-                    {% for loc in obj.wedstrijdlocatie_set.all %}
-                        {% if not forloop.first %}
+            <td>
+                {% if obj.locatie %}
+                    <span>{{ obj.locatie.adres|linebreaksbr }}</span>
+                {% endif %}
+
+                {% if obj.buiten_locatie and obj.buiten_locatie.adres %}
+                    {% if obj.locatie %}
                         <br>------<br>
+                    {% endif %}
+                    <span>{{ obj.buiten_locatie.adres|linebreaksbr }}</span>
+                {% endif %}
+            </td>
+
+            <!-- accommodatie info -->
+            <td>
+                {% if obj.locatie %}
+                    {% if obj.locatie.baan_type == 'X' %}
+                        <!-- ga er vanuit dat nog niets ingevuld is -->
+                        <i class="material-icons-round red-text" style="vertical-align: bottom; font-size: 20px; cursor: default">error_outline</i>
+                    {% else %}
+                        <!-- toon binnen-buiten icoon -->
+                        {% if obj.locatie.baan_type == 'H' %}
+                            <i class="material-icons-round tooltipped" style="vertical-align: bottom; font-size: 20px; cursor: default" data-tooltip="Half overdekt">flip</i>
+                            <span>&nbsp;18m: {{ obj.locatie.banen_18m }}</span>
+                            <br>
+                            <i class="material-icons-round white-text" style="vertical-align: bottom; font-size: 20px; cursor: default">flip</i>
+                            <span>&nbsp;25m: {{ obj.locatie.banen_25m }}</span>
+                        {% endif %}
+                        <!-- toon volledig-overdekt icoon -->
+                        {% if obj.locatie.baan_type == 'O' %}
+                            <i class="material-icons-round tooltipped" style="vertical-align: bottom; font-size: 20px; cursor: default" data-tooltip="Volledig overdekt">crop_din</i>
+                            <span>&nbsp;18m: {{ obj.locatie.banen_18m }}</span>
+                            <br>
+                            <i class="material-icons-round white-text" style="vertical-align: bottom; font-size: 20px; cursor: default">crop_din</i>
+                            <span>&nbsp;25m: {{ obj.locatie.banen_25m }}</span>
                         {% endif %}
 
-                        <span>{{ loc.adres|linebreaksbr }}</span>
-                    {% endfor %}
-                </td>
-                <td>
-                    {% for loc in obj.wedstrijdlocatie_set.all %}
-                        {% if not forloop.first %}
-                        <br>------<br>
+                        <!-- toon het belletje icoon als er notities zijn -->
+                        {% if obj.locatie.notities != '' %}
+                            <i class="material-icons-round" style="vertical-align: bottom; font-size: 20px; cursor: default">notifications_none</i>
                         {% endif %}
+                    {% endif %}
+                {% else %}
+                    <i class="red-text">Geen</i>
+                {% endif %}
 
-                        {% if loc.baan_type == 'X' %}
-                            <!-- ga er vanuit dat nog niets ingevuld is -->
-                            <i class="material-icons-round red-text" style="vertical-align: bottom; font-size: 20px">error_outline</i>
-                        {% else %}
-                            <!-- toon binnen-buiten icoon -->
-                            {% if loc.baan_type == 'H' %}
-                                <i class="material-icons-round" style="vertical-align: bottom; font-size: 20px">flip</i>
-                            {% endif %}
-                            <!-- toon volledig-overdekt icoon -->
-                            {% if loc.baan_type == 'O' %}
-                                <i class="material-icons-round" style="vertical-align: bottom; font-size: 20px">crop_din</i>
-                            {% endif %}
-
-                            <!-- toon aantal banen -->
-                            <span>&nbsp;{{ loc.banen_18m }}|{{ loc.banen_25m }}</span>
-
-                            <!-- toon het belletje icoon als er notities zijn -->
-                            {% if loc.notities != '' %}
-                                <i class="material-icons-round" style="vertical-align: bottom; font-size: 20px">notifications_none</i>
-                            {% endif %}
-                        {% endif %}
-                    {% endfor %}
-                </td>
-            {% else %}
-                <td class="red-text"><i>Geen</i></td>
-                <td><!-- accommodatie details/icoontjes --></td>
-            {% endif %}
+                {% if obj.buiten_locatie %}
+                    <br>
+                    <i class="material-icons-round tooltipped" style="vertical-align: bottom; font-size: 20px; cursor: default" data-tooltip="Buiten locatie">wb_sunny</i>
+                    <span>&nbsp;tot {{ obj.buiten_locatie.buiten_max_afstand }}m: {{ obj.buiten_locatie.buiten_banen }}</span>
+                {% endif %}
+            </td>
 
             {% if toon_details %}
                 <td>
-                    {% if obj.plaats %}
-                        {% for loc in obj.wedstrijdlocatie_set.all %}
-                            {% if not forloop.first %}
-                                <br>------<br>
-                            {% endif %}
-                            <a class="btn-nhb-blauw" href="{{ loc.details_url }}">Details</a>
-                        {% endfor %}
-                    {% else %}
+                    {% if obj.details_url %}
                         <a class="btn-nhb-blauw" href="{{ obj.details_url }}">Details</a>
                     {% endif %}
                 </td>

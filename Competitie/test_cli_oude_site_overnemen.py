@@ -13,7 +13,7 @@ from Competitie.models import (Competitie, CompetitieKlasse,
 from Competitie.test_fase import zet_competitie_fase
 from NhbStructuur.models import NhbRegio, NhbLid, NhbVereniging
 from Schutter.models import SchutterBoog
-from Score.models import Score, ScoreHist, aanvangsgemiddelde_opslaan
+from Score.models import Score, ScoreHist, SCORE_TYPE_INDIV_AG, SCORE_TYPE_SCORE, score_indiv_ag_opslaan
 from Wedstrijden.models import WedstrijdenPlan
 from Overig.e2ehelpers import E2EHelpers
 import datetime
@@ -50,8 +50,8 @@ class TestCompetitieCliOudeSiteOvernemen(E2EHelpers, TestCase):
         klasse.save()
         self.klasse = klasse
 
-        zet_competitie_fase(comp_18, 'B')
-        zet_competitie_fase(comp_25, 'B')
+        zet_competitie_fase(comp_18, 'E')
+        zet_competitie_fase(comp_25, 'E')
 
     def _maak_leden_aan(self):
         # deze test is afhankelijk van de standaard regio's
@@ -61,7 +61,7 @@ class TestCompetitieCliOudeSiteOvernemen(E2EHelpers, TestCase):
         ver = NhbVereniging()
         ver.naam = "Oude Club"
         ver.plaats = "Boogdrop"
-        ver.nhb_nr = 1002
+        ver.ver_nr = 1002
         ver.regio = regio
         # secretaris kan nog niet ingevuld worden
         ver.save()
@@ -70,7 +70,7 @@ class TestCompetitieCliOudeSiteOvernemen(E2EHelpers, TestCase):
         ver = NhbVereniging()
         ver.naam = "Grote Club"
         ver.plaats = "Boogstad"
-        ver.nhb_nr = 1000
+        ver.ver_nr = 1000
         ver.regio = regio
         # secretaris kan nog niet ingevuld worden
         ver.save()
@@ -239,7 +239,7 @@ class TestCompetitieCliOudeSiteOvernemen(E2EHelpers, TestCase):
         # eerst aanmaken, dan verwijderen
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(1860):
+        with self.assert_max_queries(1861):
             management.call_command('oude_site_overnemen', self.dir_testfiles1, '100', stderr=f1, stdout=f2)
 
         # verwijder de uitslag van een wedstrijd
@@ -261,13 +261,13 @@ class TestCompetitieCliOudeSiteOvernemen(E2EHelpers, TestCase):
 
         # maak een AG die opgeruimd moet worden
         Score(schutterboog=self.schutterboog_100002,
-              is_ag=True,
+              type=SCORE_TYPE_INDIV_AG,
               waarde=1000,
               afstand_meter=18).save()
 
         # maak er nog een met een ScoreHist, die moet dus niet opgeruimd worden
         score = Score(schutterboog=self.schutterboog_100002,
-                      is_ag=True,
+                      type=SCORE_TYPE_INDIV_AG,
                       waarde=1000,
                       afstand_meter=25)
         score.save()
@@ -294,7 +294,7 @@ class TestCompetitieCliOudeSiteOvernemen(E2EHelpers, TestCase):
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(1860):
+        with self.assert_max_queries(1861):
             management.call_command('oude_site_overnemen', self.dir_testfiles1, '100', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
@@ -305,8 +305,8 @@ class TestCompetitieCliOudeSiteOvernemen(E2EHelpers, TestCase):
         self.assertTrue("[INFO] Sla dubbele invoer onder recurve (18m) over: 100002 (scores:" in f2.getvalue())
         self.assertTrue("[INFO] Verwijder 1 dubbele inschrijvingen" in f2.getvalue())
 
-        self.assertEqual(Score.objects.filter(is_ag=True).count(), 0)
-        self.assertEqual(Score.objects.filter(is_ag=False).count(), 4)
+        self.assertEqual(Score.objects.filter(type=SCORE_TYPE_INDIV_AG).count(), 0)
+        self.assertEqual(Score.objects.filter(type=SCORE_TYPE_SCORE).count(), 4)
         self.assertEqual(ScoreHist.objects.count(), 4)
 
         hist = ScoreHist.objects.all()[0]
@@ -315,7 +315,7 @@ class TestCompetitieCliOudeSiteOvernemen(E2EHelpers, TestCase):
         # nog een keer, want dan zijn de uitslagen er al (extra coverage)
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(920):
+        with self.assert_max_queries(923):
             management.call_command('oude_site_overnemen', self.dir_testfiles1, '1', stderr=f1, stdout=f2)
 
         self.assertEqual(ScoreHist.objects.count(), 4)
@@ -327,11 +327,11 @@ class TestCompetitieCliOudeSiteOvernemen(E2EHelpers, TestCase):
                                     boogtype=self.boog_bb,
                                     voor_wedstrijd=True)
         schutterboog.save()
-        aanvangsgemiddelde_opslaan(schutterboog, 18, 4.444, None, 'test prep')
+        score_indiv_ag_opslaan(schutterboog, 18, 4.444, None, 'test prep')
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(1890):
+        with self.assert_max_queries(1893):
             management.call_command('oude_site_overnemen', self.dir_testfiles2, '100', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
         self.assertTrue("[ERROR] Kan wedstrijdklasse 'Barebow Cadetten klasse 1' niet vinden (competitie Indoor" in f1.getvalue())
@@ -340,10 +340,16 @@ class TestCompetitieCliOudeSiteOvernemen(E2EHelpers, TestCase):
         self.assertTrue("[WARNING] Lid 100003 heeft 1 scores maar geen vereniging en wordt ingeschreven onder de oude vereniging" in f2.getvalue())
         self.assertTrue("[WARNING] Verschil in AG voor nhbnr 100002 (18m): bekend=4.444, in uitslag=4.567" in f2.getvalue())
 
+        # nog een keer uitvoeren zodat eventuele teams al bestaan
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        with self.assert_max_queries(950):
+            management.call_command('oude_site_overnemen', self.dir_testfiles2, '100', stderr=f1, stdout=f2)
+
     def test_dryrun(self):
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(1835):
+        with self.assert_max_queries(1840):
             management.call_command('oude_site_overnemen', '--dryrun', self.dir_testfiles1, '100', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())

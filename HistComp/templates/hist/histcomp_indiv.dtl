@@ -64,7 +64,7 @@
         </form>
     </div>
 
-    <p>De gemiddelde pijl is berekend over de 6 hoogste scores. De laagste score staat tussen haakjes.</p>
+    <p>Het totaal en de gemiddelde pijl zijn berekend over de 6 hoogste scores. Bij 7 scores is de laagste score doorgestreept.</p>
 
     {% if is_paginated %}
         <ul class="pagination">
@@ -95,26 +95,42 @@
                     <th>Vereniging</th>
                     <th class="center-align">Gemiddelde pijl</th>
                     <th class="center-align" colspan="7">Scores</th>
-                    <th class="center-align">Totale score</th>
+                    <th class="center-align">Totaal</th>
                 </tr>
             </thead>
 
             {% for obj in object_list %}
+                {% if forloop.first %}      <!-- alleen toevoegen als er deelnemers zijn, anders probleem met colspan=2 -->
+                    <!-- forceer gelijkmatige layout in de Scores kolommen -->
+                    <tr style="visibility: collapse">
+                        <td colspan="3"><!-- rank, naam, vereniging --></td>
+                        <td><!-- gemiddelde --></td>
+                        <td class="right-align smal">888</td>
+                        <td class="right-align smal">888</td>
+                        <td class="right-align smal">888</td>
+                        <td class="right-align smal">888</td>
+                        <td class="right-align smal">888</td>
+                        <td class="right-align smal">888</td>
+                        <td class="right-align smal">888</td>
+                        <td class="right-align"><!-- totaal --></td>
+                    </tr>
+                {% endif %}
+
                 <tr>
                     <td class="center-align">{{ obj.rank }}</td>
                     <td>{{ obj.schutter_naam|highlight:zoekterm }}</td>
                     <td>[{{ obj.vereniging_nr }}] {{ obj.vereniging_naam|highlight:zoekterm }}</td>
                     <td class="center-align">{{ obj.gemiddelde }}</td>
 
-                    <td class="right-align">{% if obj.laagste_score_nr == 1 %}({{ obj.score1 }}){% else %}{{ obj.score1 }}{% endif %}</td>
-                    <td class="right-align">{% if obj.laagste_score_nr == 2 %}({{ obj.score2 }}){% else %}{{ obj.score2 }}{% endif %}</td>
-                    <td class="right-align">{% if obj.laagste_score_nr == 3 %}({{ obj.score3 }}){% else %}{{ obj.score3 }}{% endif %}</td>
-                    <td class="right-align">{% if obj.laagste_score_nr == 4 %}({{ obj.score4 }}){% else %}{{ obj.score4 }}{% endif %}</td>
-                    <td class="right-align">{% if obj.laagste_score_nr == 5 %}({{ obj.score5 }}){% else %}{{ obj.score5 }}{% endif %}</td>
-                    <td class="right-align">{% if obj.laagste_score_nr == 6 %}({{ obj.score6 }}){% else %}{{ obj.score6 }}{% endif %}</td>
-                    <td class="right-align">{% if obj.laagste_score_nr == 7 %}({{ obj.score7 }}){% else %}{{ obj.score7 }}{% endif %}</td>
+                    <td class="right-align">{% if obj.laagste_score_nr == 1 %}<del>{{ obj.score1 }}</del>{% else %}{{ obj.score1 }}{% endif %}</td>
+                    <td class="right-align">{% if obj.laagste_score_nr == 2 %}<del>{{ obj.score2 }}</del>{% else %}{{ obj.score2 }}{% endif %}</td>
+                    <td class="right-align">{% if obj.laagste_score_nr == 3 %}<del>{{ obj.score3 }}</del>{% else %}{{ obj.score3 }}{% endif %}</td>
+                    <td class="right-align">{% if obj.laagste_score_nr == 4 %}<del>{{ obj.score4 }}</del>{% else %}{{ obj.score4 }}{% endif %}</td>
+                    <td class="right-align">{% if obj.laagste_score_nr == 5 %}<del>{{ obj.score5 }}</del>{% else %}{{ obj.score5 }}{% endif %}</td>
+                    <td class="right-align">{% if obj.laagste_score_nr == 6 %}<del>{{ obj.score6 }}</del>{% else %}{{ obj.score6 }}{% endif %}</td>
+                    <td class="right-align">{% if obj.laagste_score_nr == 7 %}<del>{{ obj.score7 }}</del>{% else %}{{ obj.score7 }}{% endif %}</td>
 
-                    <td class="center-align">{{ obj.totaal }}</td>
+                    <td class="right-align">{{ obj.totaal }}</td>
                 </tr>
             {% endfor %}
         </table>

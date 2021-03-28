@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -26,7 +26,7 @@ class TestAccountAanmaken(E2EHelpers, TestCase):
         # hierbij ontbreekt er een sessie variabele --> exceptie en redirect naar het plein
         with self.assert_max_queries(20):
             resp = self.client.get('/account/aangemaakt/')
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
     def test_account_helpers(self):
         account = self.account_normaal

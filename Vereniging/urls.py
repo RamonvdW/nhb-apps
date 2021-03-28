@@ -7,7 +7,7 @@
 from django.urls import path
 from . import (view_accommodatie, view_overzicht, view_ledenlijst,
                view_aanmelden, view_wedstrijden, view_lijst_rk,
-               view_schietmomenten)
+               view_schietmomenten, view_teams)
 
 app_name = 'Vereniging'
 
@@ -33,6 +33,30 @@ urlpatterns = [
          view_aanmelden.LedenIngeschrevenView.as_view(),
          name='leden-ingeschreven'),
 
+    path('leden-ingeschreven/wijzig-aanvangsgemiddelde/<deelnemer_pk>/',
+         view_teams.WijzigTeamAGView.as_view(),
+         name='wijzig-ag'),
+
+    path('teams/regio/koppelen/<team_pk>/',
+         view_teams.TeamsRegioKoppelLedenView.as_view(),
+         name='teams-regio-koppelen'),
+
+    path('teams/regio/<deelcomp_pk>/nieuw/',
+         view_teams.WijzigRegioTeamsView.as_view(),
+         name='teams-regio-nieuw'),
+
+    path('teams/regio/<deelcomp_pk>/wijzig/<team_pk>/',
+         view_teams.WijzigRegioTeamsView.as_view(),
+         name='teams-regio-wijzig'),
+
+    path('teams/regio/<deelcomp_pk>/',
+         view_teams.TeamsRegioView.as_view(),
+         name='teams-regio'),
+
+    path('teams/rk/<deelcomp_pk>/',
+         view_teams.TeamsRkView.as_view(),
+         name='teams-rk'),
+
     # TODO: term 'schietmomenten' aanpassen?
     path('leden-ingeschreven/competitie/<deelcomp_pk>/schietmomenten/',
          view_schietmomenten.LedenSchietmomentView.as_view(),
@@ -42,11 +66,11 @@ urlpatterns = [
          view_accommodatie.LijstVerenigingenView.as_view(),
          name='lijst-verenigingen'),
 
-    path('accommodaties/details/<locatie_pk>/<vereniging_pk>/',
+    path('accommodaties/details/<vereniging_pk>/',
          view_accommodatie.AccommodatieDetailsView.as_view(),
          name='accommodatie-details'),
 
-    path('accommodatie-details/<locatie_pk>/<vereniging_pk>/',
+    path('accommodatie-details/<vereniging_pk>/',
          view_accommodatie.VerenigingAccommodatieDetailsView.as_view(),
          name='vereniging-accommodatie-details'),
 

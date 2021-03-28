@@ -4,7 +4,6 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
@@ -19,7 +18,7 @@ from Competitie.models import (Competitie, DeelCompetitie,
                                RegioCompetitieSchutterBoog,
                                LAAG_REGIO, INSCHRIJF_METHODE_1)
 from Records.models import IndivRecord
-from Score.models import Score, ScoreHist
+from Score.models import Score, ScoreHist, SCORE_TYPE_INDIV_AG, SCORE_TYPE_TEAM_AG
 from .leeftijdsklassen import get_sessionvars_leeftijdsklassen
 from .models import SchutterVoorkeuren, SchutterBoog
 import logging
@@ -36,15 +35,12 @@ class ProfielView(UserPassesTestMixin, TemplateView):
     """ Dit is de profiel pagina van een schutter """
 
     template_name = TEMPLATE_PROFIEL
+    raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         # gebruiker moet ingelogd zijn en schutter rol gekozen hebben
         return rol_get_huidige(self.request) == Rollen.ROL_SCHUTTER
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
 
     @staticmethod
     def _find_histcomp_scores(nhblid, alle_bogen):
@@ -60,7 +56,8 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                     .filter(schutter_nr=nhblid.nhb_nr)
                     .exclude(totaal=0)
                     .select_related('histcompetitie')
-                    .order_by('-histcompetitie__seizoen')):
+                    .order_by('histcompetitie__comp_type',      # 18/25
+                              '-histcompetitie__seizoen')):     # jaartal, aflopend
             obj.competitie_str = HistCompetitie.comptype2str[obj.histcompetitie.comp_type]
             obj.seizoen_str = 'Seizoen ' + obj.histcompetitie.seizoen
             try:
@@ -96,7 +93,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
             for comp in (Competitie
                          .objects.filter(is_afgesloten=False)
                          .order_by('afstand', 'begin_jaar')):
-                comp.zet_fase()
+                comp.bepaal_fase()
                 comp.bepaal_openbaar(Rollen.ROL_SCHUTTER)
                 if comp.is_openbaar:
                     # fase B of later
@@ -165,7 +162,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                                        nhb_regio=regio)
                                .order_by('competitie__afstand')):
             comp = deelcompetitie.competitie
-            comp.zet_fase()
+            comp.bepaal_fase()
 
             # doorloop elk boogtype waar de schutter informatie/wedstrijden voorkeur voor heeft
             for afk in boog_afkorting_wedstrijd:
@@ -214,7 +211,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
             obj.boog_beschrijving = boog_dict[afk].beschrijving
 
             comp = obj.competitie
-            comp.zet_fase()
+            comp.bepaal_fase()
             if comp.fase <= 'B':
                 obj.url_afmelden = reverse('Schutter:afmelden',
                                            kwargs={'deelnemer_pk': inschrijving.pk})
@@ -253,7 +250,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         scores = (Score
                   .objects
                   .filter(schutterboog__in=pks,
-                          is_ag=True)
+                          type__in=(SCORE_TYPE_INDIV_AG, SCORE_TYPE_TEAM_AG))
                   .select_related('schutterboog')
                   .order_by('afstand_meter'))
 

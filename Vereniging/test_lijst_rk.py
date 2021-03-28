@@ -34,7 +34,7 @@ class TestVerenigingLijstRK(E2EHelpers, TestCase):
 
         ver = NhbVereniging()
         ver.naam = "Grote Club"
-        ver.nhb_nr = "1000"
+        ver.ver_nr = "1000"
         ver.regio = NhbRegio.objects.get(regio_nr=111)
         # secretaris kan nog niet ingevuld worden
         ver.save()
@@ -85,7 +85,7 @@ class TestVerenigingLijstRK(E2EHelpers, TestCase):
         # maak een test vereniging
         ver = NhbVereniging()
         ver.naam = "Grote Club"
-        ver.nhb_nr = "1001"
+        ver.ver_nr = "1001"
         ver.regio = NhbRegio.objects.get(regio_nr=111)
         # secretaris kan nog niet ingevuld worden
         ver.save()
@@ -167,11 +167,9 @@ class TestVerenigingLijstRK(E2EHelpers, TestCase):
         self.comp_25 = Competitie.objects.get(afstand=25)
 
         # klassegrenzen vaststellen
-        with self.assert_max_queries(20):
-            resp = self.client.post(url_klassegrenzen % self.comp_18.pk)
+        resp = self.client.post(url_klassegrenzen % self.comp_18.pk)
         self.assert_is_redirect(resp, url_kies)
-        with self.assert_max_queries(20):
-            resp = self.client.post(url_klassegrenzen % self.comp_25.pk)
+        resp = self.client.post(url_klassegrenzen % self.comp_25.pk)
         self.assert_is_redirect(resp, url_kies)
 
         self.klasse_r = CompetitieKlasse.objects.filter(competitie=self.comp_18,
@@ -198,7 +196,7 @@ class TestVerenigingLijstRK(E2EHelpers, TestCase):
         url = self.url_lijst_rk % self.deelcomp_r1.pk
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found/allowed
+        self.assert404(resp)     # 404 = Not found/allowed
 
         # zet de deelnemerslijst (fake)
         self.deelcomp_r1.heeft_deelnemerslijst = True
@@ -251,7 +249,7 @@ class TestVerenigingLijstRK(E2EHelpers, TestCase):
         url = self.url_lijst_rk % 999999
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
         self.e2e_login_and_pass_otp(self.account_bb)
         self.e2e_wissel_naar_functie(self.functie_hwl)
@@ -260,6 +258,6 @@ class TestVerenigingLijstRK(E2EHelpers, TestCase):
         url = self.url_lijst_rk % 999999
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found/allowed
+        self.assert404(resp)     # 404 = Not found/allowed
 
 # end of file

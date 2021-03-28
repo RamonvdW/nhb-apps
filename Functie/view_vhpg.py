@@ -10,12 +10,11 @@ from django.utils import timezone
 from django.shortcuts import render
 from django.views.generic import ListView, TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Account.models import HanterenPersoonsgegevens
 from Account.rechten import account_rechten_eval_now
 from Plein.menu import menu_dynamics
 from Logboek.models import schrijf_in_logboek
 from .rol import Rollen, rol_get_huidige
-from .models import account_needs_vhpg
+from .models import VerklaringHanterenPersoonsgegevens, account_needs_vhpg
 from .forms import AccepteerVHPGForm
 
 
@@ -53,9 +52,9 @@ def account_vhpg_is_geaccepteerd(account):
     """ onthoud dat de vhpg net geaccepteerd is door de gebruiker
     """
     try:
-        vhpg = HanterenPersoonsgegevens.objects.get(account=account)
-    except HanterenPersoonsgegevens.DoesNotExist:
-        vhpg = HanterenPersoonsgegevens()
+        vhpg = VerklaringHanterenPersoonsgegevens.objects.get(account=account)
+    except VerklaringHanterenPersoonsgegevens.DoesNotExist:
+        vhpg = VerklaringHanterenPersoonsgegevens()
         vhpg.account = account
 
     vhpg.acceptatie_datum = timezone.now()
@@ -115,6 +114,7 @@ class VhpgOverzichtView(UserPassesTestMixin, ListView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_VHPG_OVERZICHT
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -123,15 +123,11 @@ class VhpgOverzichtView(UserPassesTestMixin, ListView):
             return rol_nu == Rollen.ROL_BB
         return False
 
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
-
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
         # er zijn ongeveer 30 beheerders
         # voorlopig geen probleem als een beheerder vaker voorkomt
-        return HanterenPersoonsgegevens.objects.order_by('-acceptatie_datum')[:100]
+        return VerklaringHanterenPersoonsgegevens.objects.order_by('-acceptatie_datum')[:100]
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """

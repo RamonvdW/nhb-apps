@@ -1,0 +1,124 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2021 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Koppel teamleden{% endblock %}
+
+{% block pagina %}
+
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="teams-koppelen" %}
+
+    <h4>Koppel teamleden</h4>
+
+    <p>Op deze pagina kan je leden van de vereniging koppelen aan het team.</p>
+    {% if team.regio_heeft_vaste_teams %}
+        <p>In jullie regio is gekozen voor <b>vaste teams</b>, dus de leden die je koppelt blijven het hele seizoen in dit team en kunnen vervangen worden door een invallen.</p>
+    {% else %}
+        <p>In jullie regio is gekozen voor dynamische teams gebaseerd op het principe van <b>voortschrijdend gemiddelde</b> (VSG), dus elke ronde krijgt het team automatisch leden toegekend.</p>
+        <p>Tijdens de inschrijving moet je leden handmatig koppelen zodat sporters met een BB, IB or LB boog in het gewenste type team komen.</p>
+    {% endif %}
+
+    <script type="application/javascript">
+        function gewijzigd() {
+            /* het formulier is aangepast en moet opgeslagen worden */
+            /* enable de 'opslaan' knop */
+            const el = document.getElementById("opslaan_knop")
+            el.disabled = false
+            el.parentElement.style.display = "block"
+        }
+    </script>
+
+    <form action="{{ url_opslaan }}" method="post">
+        {% csrf_token %}
+
+        <table class="white">
+
+            <tr>
+                <td>Vereniging</td>
+                <td>{{ team.vereniging }}</td>
+            </tr>
+
+            <tr>
+                <td>Team nummer</td>
+                <td>{{ team.volg_nr }}</td>
+            </tr>
+
+            <tr>
+                <td>Team naam</td>
+                <td>{{ team.team_naam }}</td>
+            </tr>
+
+            <tr>
+                <td>Soort team</td>
+                <td>{{ team.team_type.beschrijving }}</td>
+            </tr>
+
+            <tr>
+                <td style="vertical-align: top">Toegestane bogen</td>
+                <td>
+                    {% for boog in boog_typen %}
+                        <span>{{ boog.beschrijving }}</span><br>
+                    {% endfor %}
+                </td>
+            </tr>
+
+            <tr>
+                <td>Team sterkte</td>
+                <td>{{ team.ag_str }}</td>
+            </tr>
+
+            <tr>
+                <td>Team wedstrijdklasse</td>
+                <td>{{ team.klasse.team.beschrijving }}</td>
+            </tr>
+
+            <tr>
+                <td style="vertical-align: top">Selecteer sporters</td>
+
+                {% if not deelnemers.count %}
+                    <td colspan="3"><i class="red-text">Geen sporters gevonden met toegestaan boog type</i></td>
+                {% else %}
+                    <td>
+                        <table class="striped">
+                            <thead>
+                                <tr>
+                                    <th><!-- checkbox column --></th>
+                                    <th>Aanvangs<wbr/>gemiddelde</th>
+                                    <th>Boog</th>
+                                    <th>Naam</th>
+                                </tr>
+                            </thead>
+                            {% for obj in deelnemers %}
+                                <tr>
+                                    <td>
+                                        <label>
+                                            <input type="checkbox" class="filled-in" name="{{ obj.sel_str }}"{% if obj.geselecteerd %} checked{% endif %}{% if obj.blokkeer %} disabled{% endif %} onchange="gewijzigd()">
+                                            <span>&nbsp;</span>
+                                        </label>
+                                    </td>
+                                    <td>{{ obj.ag_str }}</td>
+                                    <td>{{ obj.boog_str }}</td>
+                                    <td>{{ obj.naam_str }}</td>
+                                </tr>
+                            {% endfor %}
+                        </table>
+                    </td>
+                {% endif %}
+            </tr>
+
+        </table>
+
+        <div class="fixed-action-btn" style="display: none">
+            <button class="btn-nhb-rood" type="submit" id="opslaan_knop" disabled>
+                <i class="material-icons-round left">check</i>Opslaan</button>
+        </div>
+    </form>
+
+    <p>De <i>team sterkte</i> wordt berekend uit het aanvangsgemiddelde van de drie sterkste teamleden.</p>
+    <p>De <i>team wedstrijdklasse</i> wordt bepaald door de team sterkte en de vastgestelde minimum sterkte voor een wedstrijdklasse.</p>
+
+{% endblock %}

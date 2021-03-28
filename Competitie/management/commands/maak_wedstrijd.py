@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -68,14 +68,14 @@ class Command(BaseCommand):
             return
 
         try:
-            ver = NhbVereniging.objects.get(nhb_nr=ver_nr)
+            ver = NhbVereniging.objects.get(ver_nr=ver_nr)
         except NhbVereniging.DoesNotExist:
             self.stderr.write('Kan vereniging %s niet vinden' % repr(ver_nr))
             return
 
         # controleer dat de vereniging in het cluster zit
         if cluster:
-            if not cluster.nhbvereniging_set.filter(nhb_nr=ver_nr).exists():
+            if not cluster.nhbvereniging_set.filter(ver_nr=ver_nr).exists():
                 self.stderr.write('Vereniging %s zit niet in cluster %s' % (repr(ver_nr), repr(geo)))
                 return
 

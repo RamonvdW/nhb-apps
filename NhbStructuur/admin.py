@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -21,8 +21,8 @@ class NhbLidAdmin(admin.ModelAdmin):
 
 class NhbVerenigingAdmin(admin.ModelAdmin):
     """ Admin configuratie voor NhbVereniging klasse """
-    ordering = ('nhb_nr',)
-    search_fields = ('naam', 'nhb_nr')
+    ordering = ('ver_nr',)
+    search_fields = ('naam', 'ver_nr')
 
     # filter mogelijkheid
     list_filter = ('regio',)

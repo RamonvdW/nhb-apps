@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -21,6 +21,10 @@ urlpatterns = [
     path('niet-ondersteund/',
          views.NietOndersteundView.as_view(),
          name='niet-ondersteund'),
+
+    path('test-speciale-pagina/<code>/',
+         views.TestSpecialePagina.as_view(),
+         name='test-speciale-pagina')
 ]
 
 # end of file

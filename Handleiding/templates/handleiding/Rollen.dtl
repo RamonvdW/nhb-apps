@@ -31,14 +31,14 @@
 <p></p>
 <hr><h5>Verder</h5>
 <ul style="padding-left: 20px">
-<li style="list-style-type: disc; padding-left: 0px">Terug naar de <a href="/handleiding/Hoofdpagina/">Hoofdpagina</a></li>
-<li style="list-style-type: disc; padding-left: 0px"><a href="/handleiding/Handleiding_BB/">Handleiding_BB</a></li>
-<li style="list-style-type: disc; padding-left: 0px"><a href="/handleiding/Handleiding_BKO/">Handleiding_BKO</a></li>
-<li style="list-style-type: disc; padding-left: 0px"><a href="/handleiding/Handleiding_RKO/">Handleiding_RKO</a></li>
-<li style="list-style-type: disc; padding-left: 0px"><a href="/handleiding/Handleiding_RCL/">Handleiding_RCL</a></li>
-<li style="list-style-type: disc; padding-left: 0px"><a href="/handleiding/Handleiding_Secretaris/">Handleiding Secretaris</a></li>
-<li style="list-style-type: disc; padding-left: 0px"><a href="/handleiding/Handleiding_Hoofdwedstrijdleider/">Handleiding Hoofdwedstrijdleider</a></li>
-<li style="list-style-type: disc; padding-left: 0px"><a href="/handleiding/Handleiding_Wedstrijdleider/">Handleiding Wedstrijdleider</a></li>
+<li style="list-style-type: disc; padding-left: 0px">Terug naar de <a class="handleiding-link" href="/handleiding/Hoofdpagina/">Hoofdpagina</a></li>
+<li style="list-style-type: disc; padding-left: 0px"><a class="handleiding-link" href="/handleiding/Handleiding_BB/">Handleiding_BB</a></li>
+<li style="list-style-type: disc; padding-left: 0px"><a class="handleiding-link" href="/handleiding/Handleiding_BKO/">Handleiding_BKO</a></li>
+<li style="list-style-type: disc; padding-left: 0px"><a class="handleiding-link" href="/handleiding/Handleiding_RKO/">Handleiding_RKO</a></li>
+<li style="list-style-type: disc; padding-left: 0px"><a class="handleiding-link" href="/handleiding/Handleiding_RCL/">Handleiding_RCL</a></li>
+<li style="list-style-type: disc; padding-left: 0px"><a class="handleiding-link" href="/handleiding/Handleiding_Secretaris/">Handleiding Secretaris</a></li>
+<li style="list-style-type: disc; padding-left: 0px"><a class="handleiding-link" href="/handleiding/Handleiding_Hoofdwedstrijdleider/">Handleiding Hoofdwedstrijdleider</a></li>
+<li style="list-style-type: disc; padding-left: 0px"><a class="handleiding-link" href="/handleiding/Handleiding_Wedstrijdleider/">Handleiding Wedstrijdleider</a></li>
 </ul>
 
 </div>

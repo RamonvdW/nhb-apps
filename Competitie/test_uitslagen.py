@@ -39,7 +39,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         # maak een test vereniging
         ver = NhbVereniging()
         ver.naam = "Grote Club"
-        ver.nhb_nr = 1000
+        ver.ver_nr = 1000
         ver.regio = self.regio101
         # secretaris kan nog niet ingevuld worden
         ver.save()
@@ -136,15 +136,13 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         self.comp_25 = Competitie.objects.get(afstand='25')
 
         # klassegrenzen vaststellen
-        with self.assert_max_queries(20):
-            self.client.post(url_klassegrenzen_vaststellen % self.comp_18.pk)
-        with self.assert_max_queries(20):
-            self.client.post(url_klassegrenzen_vaststellen % self.comp_25.pk)
+        self.client.post(url_klassegrenzen_vaststellen % self.comp_18.pk)
+        self.client.post(url_klassegrenzen_vaststellen % self.comp_25.pk)
 
         # zet de 18m open voor inschrijving
         self.comp_18.begin_aanmeldingen = datetime.date(year=self.comp_18.begin_jaar, month=1, day=1)
         self.comp_18.save()
-        self.comp_18.zet_fase()
+        self.comp_18.bepaal_fase()
 
         self.functie_bko = DeelCompetitie.objects.filter(competitie=self.comp_18, laag=LAAG_BK).all()[0].functie
         self.functie_rko = DeelCompetitie.objects.filter(competitie=self.comp_18, laag=LAAG_RK).all()[0].functie
@@ -173,7 +171,6 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         aanmelding = RegioCompetitieSchutterBoog(deelcompetitie=deelcomp,
                                                  schutterboog=schutterboog,
                                                  bij_vereniging=schutterboog.nhblid.bij_vereniging,
-                                                 aanvangsgemiddelde=AG_NUL,
                                                  klasse=klasse)
         aanmelding.aantal_scores = 6        # nodig om voor te komen in de rayon uitslagen
         aanmelding.save()
@@ -194,7 +191,6 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         aanmelding = RegioCompetitieSchutterBoog(deelcompetitie=deelcomp,
                                                  schutterboog=schutterboog,
                                                  bij_vereniging=schutterboog.nhblid.bij_vereniging,
-                                                 aanvangsgemiddelde=AG_NUL,
                                                  klasse=klasse)
         aanmelding.aantal_scores = 6        # nodig om voor te komen in de rayon uitslagen
         aanmelding.save()
@@ -208,7 +204,6 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         aanmelding = RegioCompetitieSchutterBoog(deelcompetitie=deelcomp,
                                                  schutterboog=schutterboog,
                                                  bij_vereniging=schutterboog.nhblid.bij_vereniging,
-                                                 aanvangsgemiddelde=AG_NUL,
                                                  klasse=klasse)
         aanmelding.aantal_scores = 6        # nodig om voor te komen in de rayon uitslagen
         aanmelding.save()
@@ -231,7 +226,6 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         aanmelding = RegioCompetitieSchutterBoog(deelcompetitie=deelcomp,
                                                  schutterboog=schutterboog,
                                                  bij_vereniging=schutterboog.nhblid.bij_vereniging,
-                                                 aanvangsgemiddelde=AG_NUL,
                                                  klasse=klasse)
         aanmelding.save()
 
@@ -246,7 +240,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         way_before = datetime.date(year=2018, month=1, day=1)   # must be before timezone.now()
 
         # fase A
-        comp.zet_fase()
+        comp.bepaal_fase()
         self.assertTrue(comp.fase < 'B', msg="comp.fase=%s (expected: below B)" % comp.fase)
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_overzicht % comp.pk)
@@ -257,7 +251,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         comp.begin_aanmeldingen = way_before   # fase B
         comp.einde_aanmeldingen = way_before   # fase C
         comp.save()
-        comp.zet_fase()
+        comp.bepaal_fase()
         self.assertTrue(comp.fase >= 'B')
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_overzicht % comp.pk)
@@ -268,7 +262,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         comp.einde_teamvorming = way_before    # fase D
         comp.eerste_wedstrijd = way_before     # fase E
         comp.save()
-        comp.zet_fase()
+        comp.bepaal_fase()
         self.assertTrue(comp.fase >= 'E')
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_overzicht % comp.pk)
@@ -414,32 +408,32 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         url = self.url_uitslagen_regio % (self.comp_25.pk, 'XXX', 'alle')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)
+        self.assert404(resp)
 
         url = self.url_uitslagen_regio_n % (self.comp_18.pk, 'R', 'alle', 999)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)
+        self.assert404(resp)
 
         url = self.url_uitslagen_regio_n % (self.comp_18.pk, 'R', 'alle', "NaN")
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)
+        self.assert404(resp)
 
         url = self.url_uitslagen_regio_n % (self.comp_18.pk, 'BAD', 'alle', 101)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)
+        self.assert404(resp)
 
         url = self.url_uitslagen_regio_n % (99, 'r', 'alle', 101)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)
+        self.assert404(resp)
 
         url = self.url_uitslagen_regio_n % ('X', 'r', 'alle', 101)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)
+        self.assert404(resp)
 
     def test_rayon(self):
         url = self.url_uitslagen_rayon % (self.comp_18.pk, 'R')
@@ -460,27 +454,27 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         url = self.url_uitslagen_rayon % (self.comp_18.pk, 'XXX')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)
+        self.assert404(resp)
 
         url = self.url_uitslagen_rayon % ('x', 'R')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)
+        self.assert404(resp)
 
         url = self.url_uitslagen_rayon % (99, 'R')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)
+        self.assert404(resp)
 
         url = self.url_uitslagen_rayon_n % (self.comp_18.pk, 'R', 'x')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)
+        self.assert404(resp)
 
         url = self.url_uitslagen_rayon_n % (self.comp_18.pk, 'R', '0')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)
+        self.assert404(resp)
 
     def test_bond(self):
         url = self.url_uitslagen_bond % (self.comp_18.pk, 'R')
@@ -493,12 +487,12 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         url = self.url_uitslagen_bond % ('x', 'R')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)
+        self.assert404(resp)
 
         url = self.url_uitslagen_bond % (99, 'R')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)
+        self.assert404(resp)
 
         # BK voor al afgesloten competitie
         self.comp_18.is_afgesloten = True
@@ -506,7 +500,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         url = self.url_uitslagen_bond % (self.comp_18.pk, 'R')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)
+        self.assert404(resp)
 
     def test_vereniging(self):
         url = self.url_uitslagen_ver % (self.comp_18.pk, 'R')
@@ -515,7 +509,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
 
-        url = self.url_uitslagen_ver_n % (self.comp_18.pk, 'R', self.ver.nhb_nr)
+        url = self.url_uitslagen_ver_n % (self.comp_18.pk, 'R', self.ver.ver_nr)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
@@ -557,7 +551,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         self.ver.regio = NhbRegio.objects.get(regio_nr=100)
         self.ver.save()
 
-        url = self.url_uitslagen_ver_n % (self.comp_18.pk, 'R', self.ver.nhb_nr)
+        url = self.url_uitslagen_ver_n % (self.comp_18.pk, 'R', self.ver.ver_nr)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
@@ -567,22 +561,22 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         url = self.url_uitslagen_ver % ('x', 'R')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)
+        self.assert404(resp)
 
         url = self.url_uitslagen_ver % (self.comp_18.pk, 'x')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)
+        self.assert404(resp)
 
         url = self.url_uitslagen_ver_n % (self.comp_18.pk, 'R', 999999)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)
+        self.assert404(resp)
 
         url = self.url_uitslagen_ver_n % (self.comp_18.pk, 'R', 'nan')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)
+        self.assert404(resp)
 
     def test_anon(self):
         self.client.logout()
@@ -631,7 +625,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
 
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_uitslagen_ver_n % (self.comp_18.pk, 'R', self.ver.nhb_nr))
+            resp = self.client.get(self.url_uitslagen_ver_n % (self.comp_18.pk, 'R', self.ver.ver_nr))
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
 

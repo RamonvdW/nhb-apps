@@ -33,7 +33,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         # maak een test vereniging
         ver = NhbVereniging()
         ver.naam = "Grote Club"
-        ver.nhb_nr = "1000"
+        ver.ver_nr = "1000"
         ver.regio = regio_111
         # secretaris kan nog niet ingevuld worden
         ver.save()
@@ -66,7 +66,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         # maak een test vereniging zonder HWL rol
         ver2 = NhbVereniging()
         ver2.naam = "Grote Club"
-        ver2.nhb_nr = "1001"
+        ver2.ver_nr = "1001"
         ver2.regio = regio_111
         # secretaris kan nog niet ingevuld worden
         ver2.save()
@@ -137,7 +137,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         # controleer dat de wissel-van-rol pagina niet aanwezig is voor deze normale gebruiker
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wisselvanrol)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
         self.assertTrue(str(self.functie_hwl) == "HWL test")
 
@@ -341,12 +341,12 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.e2e_logout()
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wisselvanrol)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
         # probeer van rol te wisselen
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_activeer_rol % 'IT')
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
     def test_delete_functie(self):
         # corner case: activeer functie, verwijder functie, get_huidige_functie
@@ -363,7 +363,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         # wat is de huidige functie?
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wisselvanrol)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
     def test_dubbele_rol_rko(self):
         # voorkom dat dit probleem terug komt:

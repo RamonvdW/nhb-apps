@@ -4,6 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+from django.conf import settings
 from Mailer.models import mailer_queue_email
 from Overig.tijdelijke_url import maak_tijdelijke_url_account_email
 
@@ -47,10 +48,10 @@ def account_vraag_email_bevestiging(accountmail, **kwargs):
     url = maak_tijdelijke_url_account_email(accountmail, **kwargs)
 
     text_body = ("Hallo!\n\n"
-                 + "Je hebt een account aangemaakt op de website van de NHB.\n"
+                 + "Je hebt een account aangemaakt op " + settings.NAAM_SITE + ".\n"
                  + "Klik op onderstaande link om dit te bevestigen.\n\n"
                  + url + "\n\n"
-                 + "Als jij dit niet was, neem dan contact met ons op via info@handboogsport.nl\n\n"
+                 + "Als jij dit niet was, neem dan contact met ons op via " + settings.EMAIL_BONDSBURO + "\n\n"
                  + "Veel plezier met de site!\n"
                  + "Het bondsburo\n")
 

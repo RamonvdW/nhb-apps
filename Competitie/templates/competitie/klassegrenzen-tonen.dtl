@@ -14,37 +14,63 @@
 
     <h4>Klassegrenzen bondscompetitie</h4>
 
-    {% if geen_klassen %}
+    {% if not comp.klassegrenzen_vastgesteld %}
 
         <p>De klassegrenzen voor de <b>{{ comp.beschrijving }}</b> zijn nog niet vastgesteld.</p>
 
     {% else %}
 
-        <p>Hieronder staan de vastgestelde klassegrenzen voor de individuele wedstrijdklassen voor de <b>{{ comp.beschrijving }}</b>.</p>
+        <p>Hieronder staan de vastgestelde klassegrenzen voor de individuele wedstrijdklassen en teams wedstrijdklassen voor de <b>{{ comp.beschrijving }}</b>.</p>
 
-        <div class="row">
-            <table class="white">
-                <thead>
-                    <tr>
-                        <th>Materiaalklasse</th>
-                        <th>Minimaal aanvangs<wbr/>gemiddelde</th>
-                    </tr>
-                </thead>
+        <table class="white">
+            <tr class="nhb-grijs">
+                <td colspan="2">
+                    <h5>Individuele wedstrijdklassen</h5>
+                </td>
+            </tr>
 
-                {% for obj in indiv_klassen %}
-                    <tr>
-                        <td>{{ obj.beschrijving }}</td>
+            <tr>
+                <th>Materiaalklasse</th>
+                <th>Minimaal aanvangs<wbr/>gemiddelde</th>
+            </tr>
 
-                        <td>{% if obj.min_ag %}
-                                {{ obj.min_ag|floatformat:3 }}
-                            {% else %}
-                                <i class="grey-text">geen</i>
-                            {% endif %}
-                        </td>
-                    </tr>
-                {% endfor %}
-            </table>
-        </div>
+            {% for obj in indiv_klassen %}
+                <tr>
+                    <td>{{ obj.beschrijving }}</td>
+
+                    <td>{% if obj.min_ag %}
+                            {{ obj.min_ag }}
+                        {% else %}
+                            <i class="grey-text">n.v.t.</i>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+
+            <tr class="nhb-grijs">
+                <td colspan="2">
+                    <h5>Team wedstrijdklassen</h5>
+                </td>
+            </tr>
+
+            <tr>
+                <th>Materiaalklasse</th>
+                <th>Minimaal aanvangs<wbr/>gemiddelde</th>
+            </tr>
+
+            {% for obj in team_klassen %}
+                <tr>
+                    <td>{{ obj.beschrijving }}</td>
+
+                    <td>{% if obj.min_ag %}
+                            {{ obj.min_ag }}
+                        {% else %}
+                            <i class="grey-text">n.v.t.</i>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
 
     {% endif %}
 

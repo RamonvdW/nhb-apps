@@ -60,6 +60,16 @@ urlpatterns = [
          name='wijzig-datums'),
 
 
+    # RCL schermen
+    path('<comp_pk>/instellingen/regio-<regio_nr>/',
+         views_planning_regio.RegioInstellingenView.as_view(),
+         name='regio-instellingen'),
+
+    path('<comp_pk>/ag-controle/regio-<regio_nr>/',
+         views_planning_regio.AGControleView.as_view(),
+         name='regio-ag-controle'),
+
+
     # ingeschreven
     path('<comp_pk>/lijst-regiocompetitie/regio-<regio_pk>/dagdeel-behoefte/',
          views_aangemeld.Inschrijfmethode3BehoefteView.as_view(),
@@ -108,6 +118,10 @@ urlpatterns = [
     path('planning/regio/<deelcomp_pk>/cluster/<cluster_pk>/',
          views_planning_regio.RegioClusterPlanningView.as_view(),
          name='regio-cluster-planning'),
+
+    path('planning/regio/<deelcomp_pk>/teams/',
+         views_planning_regio.RegioTeamsView.as_view(),
+         name='regio-teams'),
 
     path('planning/regio/ronde/<ronde_pk>/',
          views_planning_regio.RegioRondePlanningView.as_view(),

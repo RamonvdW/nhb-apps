@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020 Ramon van der Winkel.
+                Copyright (c) 2020-2021 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -65,7 +65,7 @@
                     <td{% if obj.mijn_vereniging %} class="nhb-blauw-text"{% endif %}>{{ obj.naam_str }}</td>
 
                     {% if obj.bij_vereniging %}
-                        <td{% if obj.mijn_vereniging %} class="nhb-blauw-text"{% endif %}>[{{ obj.bij_vereniging.nhb_nr }}]<span class="hide-on-small-only">&nbsp;{{ obj.bij_vereniging.naam }}</span></td>
+                        <td{% if obj.mijn_vereniging %} class="nhb-blauw-text"{% endif %}>[{{ obj.bij_vereniging.ver_nr }}]<span class="hide-on-small-only">&nbsp;{{ obj.bij_vereniging.naam }}</span></td>
                     {% else %}
                         <td><!-- geen vereniging --></td>
                     {% endif %}

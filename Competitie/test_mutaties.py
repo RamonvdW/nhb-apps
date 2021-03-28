@@ -82,7 +82,6 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         aanmelding = RegioCompetitieSchutterBoog(deelcompetitie=deelcomp,
                                                  schutterboog=schutterboog,
                                                  bij_vereniging=ver,
-                                                 aanvangsgemiddelde=AG_NUL,
                                                  gemiddelde=self.gemiddelde,
                                                  klasse=self.klasse)
         aanmelding.aantal_scores = aantal_scores
@@ -92,7 +91,7 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         for regio in NhbRegio.objects.filter(regio_nr__in=(101, 102, 103, 104)):
             ver = NhbVereniging()
             ver.naam = "Grote Club %s" % regio.regio_nr
-            ver.nhb_nr = 1000 + regio.regio_nr
+            ver.ver_nr = 1000 + regio.regio_nr
             ver.regio = regio
             ver.save()
 
@@ -125,8 +124,7 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
 
         # klassengrenzen vaststellen om de competitie voorbij fase A te krijgen
         self.url_klassegrenzen_vaststellen = '/bondscompetities/%s/klassegrenzen/vaststellen/' % self.comp.pk
-        with self.assert_max_queries(20):
-            resp = self.client.post(self.url_klassegrenzen_vaststellen)
+        resp = self.client.post(self.url_klassegrenzen_vaststellen)
         self.assert_is_redirect_not_plein(resp)     # check success
         self.client.logout()
 
@@ -169,7 +167,7 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
 
     def _sluit_alle_regiocompetities(self, comp):
         # deze functie sluit alle regiocompetities af zodat de competitie in fase G komt
-        comp.zet_fase()
+        comp.bepaal_fase()
         # print(comp.fase)
         self.assertTrue('B' < comp.fase < 'G')
         for deelcomp in DeelCompetitie.objects.filter(competitie=comp, laag=LAAG_REGIO):
@@ -178,7 +176,7 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
                 deelcomp.save()
         # for
 
-        comp.zet_fase()
+        comp.bepaal_fase()
         self.assertEqual(comp.fase, 'G')
 
     def _begin_rk(self):

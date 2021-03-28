@@ -4,9 +4,9 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import render
-from django.urls import Resolver404, reverse
+from django.urls import reverse
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.shortcuts import redirect
@@ -21,7 +21,7 @@ from Logboek.models import schrijf_in_logboek
 from NhbStructuur.models import NhbLid
 from Plein.menu import menu_dynamics
 from Schutter.models import SchutterBoog
-from Score.models import Score, ScoreHist, zoek_meest_recente_automatisch_vastgestelde_ag
+from Score.models import Score, ScoreHist, SCORE_TYPE_INDIV_AG, wanneer_ag_vastgesteld
 from django.utils.formats import localize
 from .models import (AG_NUL, AG_LAAGSTE_NIET_NUL,
                      Competitie, competitie_aanmaken, CompetitieKlasse)
@@ -50,15 +50,12 @@ class InstellingenVolgendeCompetitieView(UserPassesTestMixin, TemplateView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_INSTELLINGEN
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
         return rol_nu == Rollen.ROL_BB
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
 
     @staticmethod
     def _get_queryset_indivklassen():
@@ -82,13 +79,14 @@ class InstellingenVolgendeCompetitieView(UserPassesTestMixin, TemplateView):
         objs = (TeamWedstrijdklasse
                 .objects
                 .filter(buiten_gebruik=False)
-                .prefetch_related('boogtypen')
+                .select_related('team_type')
+                .prefetch_related('team_type__boog_typen')
                 .order_by('volgorde'))
         prev = 0
         for klasse in objs:
             groep = klasse.volgorde // 10
             klasse.separate_before = groep != prev
-            klasse.boogtypen_list = [boogtype.beschrijving for boogtype in klasse.boogtypen.order_by('volgorde')]
+            klasse.boogtypen_list = [boogtype.beschrijving for boogtype in klasse.team_type.boog_typen.order_by('volgorde')]
             prev = groep
         # for
         return objs
@@ -108,15 +106,12 @@ class CompetitieAanmakenView(UserPassesTestMixin, TemplateView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_AANMAKEN
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
         return rol_nu == Rollen.ROL_BB
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
 
     @staticmethod
     def post(request, *args, **kwargs):
@@ -155,6 +150,7 @@ class AGVaststellenView(UserPassesTestMixin, TemplateView):
     """
 
     template_name = TEMPLATE_COMPETITIE_AG_VASTSTELLEN
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -169,10 +165,6 @@ class AGVaststellenView(UserPassesTestMixin, TemplateView):
                 kan_ag_vaststellen = True
         # for
         return kan_ag_vaststellen
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
 
     def get(self, request, *args, **kwargs):
         """ deze functie wordt aangeroepen als een GET request ontvangen is
@@ -229,12 +221,9 @@ class AGVaststellenView(UserPassesTestMixin, TemplateView):
             # for
 
             # verwijder alle bestaande aanvangsgemiddelden
-            Score.objects.filter(is_ag=True, afstand_meter=18).all().delete()
-            Score.objects.filter(is_ag=True, afstand_meter=25).all().delete()
+            Score.objects.filter(type=SCORE_TYPE_INDIV_AG, afstand_meter=18).all().delete()
+            Score.objects.filter(type=SCORE_TYPE_INDIV_AG, afstand_meter=25).all().delete()
             bulk_score = list()
-
-            now = timezone.now()
-            datum = datetime.date(year=now.year, month=now.month, day=now.day)
 
             minimum_aantal_scores = {18: settings.COMPETITIE_18M_MINIMUM_SCORES_VOOR_AG,
                                      25: settings.COMPETITIE_25M_MINIMUM_SCORES_VOOR_AG}
@@ -290,7 +279,7 @@ class AGVaststellenView(UserPassesTestMixin, TemplateView):
                             waarde = int(obj.gemiddelde * 1000)
 
                             score = Score(schutterboog=schutterboog,
-                                          is_ag=True,
+                                          type=SCORE_TYPE_INDIV_AG,
                                           waarde=waarde,
                                           afstand_meter=afstand_meter)
                             bulk_score.append(score)
@@ -334,19 +323,16 @@ class KlassegrenzenVaststellenView(UserPassesTestMixin, TemplateView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_KLASSEGRENZEN_VASTSTELLEN
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
         return rol_nu == Rollen.ROL_BB
 
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
-
     @staticmethod
-    def _get_targets():
-        """ Retourneer een data structuur met daarin voor alle wedstrijdklassen
+    def _get_targets_indiv():
+        """ Retourneer een data structuur met daarin voor alle individuele wedstrijdklassen
             de toegestane boogtypen en leeftijden
 
             out: target = dict() met [ (min_age, max_age, boogtype, heeft_onbekend) ] = list(IndivWedstrijdklasse)
@@ -385,7 +371,47 @@ class KlassegrenzenVaststellenView(UserPassesTestMixin, TemplateView):
         # for
         return targets2
 
-    def _get_queryset(self, comp):
+    @staticmethod
+    def _get_targets_teams():
+        """ Retourneer een data structuur met daarin voor alle team wedstrijdklassen
+
+            out: target = dict() met [ boogtype afkorting ] = list(TeamWedstrijdklasse)
+
+            Voorbeeld: { 'R': [obj1, obj2, etc.],
+                         'C': [obj10, obj11],
+                         'BB': [obj20]  }
+        """
+        targets = dict()
+        for obj in (TeamWedstrijdklasse
+                    .objects
+                    .filter(buiten_gebruik=False)
+                    .select_related('team_type')
+                    .order_by('volgorde')):        # hoogste klasse (=laagste volgnummer) eerst
+
+            afkorting = obj.team_type.afkorting
+
+            try:
+                targets[afkorting].append(obj)
+            except KeyError:
+                targets[afkorting] = [obj]
+        # for
+        return targets
+
+    def _bepaal_klassegrenzen_indiv(self, comp, trans_indiv):
+
+        """ retourneert een lijst van individuele wedstrijdenklassen, elk bestaande uit een dictionary:
+                'beschrijving': tekst
+                'count':        aantal sporters ingedeeld in deze klasse
+                'ag':           het AG van de laatste sporter in deze klasse
+                                of 0.000 voor klasse onbekend
+                                of 0.001 voor de laatste klasse voor klasse onbekend
+                'wedstrkl_obj': indiv klasse
+                'klasse':       competitieklasse
+                'volgorde':     nummer
+
+            gesorteerd op volgorde (oplopend)
+        """
+
         # bepaal het jaar waarin de wedstrijdleeftijd bepaald moet worden
         # dat is het tweede jaar van de competitie, waarin de BK gehouden wordt
         jaar = comp.begin_jaar + 1
@@ -404,13 +430,13 @@ class KlassegrenzenVaststellenView(UserPassesTestMixin, TemplateView):
                                                 .select_related('schutterboog',
                                                                 'schutterboog__boogtype',
                                                                 'schutterboog__nhblid')
-                                                .filter(is_ag=True,
+                                                .filter(type=SCORE_TYPE_INDIV_AG,
                                                         afstand_meter=comp.afstand,
                                                         schutterboog__boogtype=boogtype))
         # for
 
         # wedstrijdklassen vs leeftijd + bogen
-        targets = self._get_targets()
+        targets = self._get_targets_indiv()
 
         # creëer de resultatenlijst
         objs = list()
@@ -438,7 +464,7 @@ class KlassegrenzenVaststellenView(UserPassesTestMixin, TemplateView):
                 pos = 0
                 for klasse in wedstrklassen[:stop]:
                     pos += step
-                    ag = gemiddelden[pos] / 1000        # conversie Score naar AG met 3 decimale
+                    ag = gemiddelden[pos] / 1000        # conversie Score naar AG met 3 decimalen
                     res = {'beschrijving': klasse.beschrijving,
                            'count': step,
                            'ag': ag,
@@ -481,8 +507,160 @@ class KlassegrenzenVaststellenView(UserPassesTestMixin, TemplateView):
                     objs.append(res)
                 # for
         # for
+
+        for obj in objs:
+            obj['klasse'] = trans_indiv[obj['wedstrkl_obj'].pk]
+        # for
+
         objs2 = sorted(objs, key=lambda k: k['volgorde'])
         return objs2
+
+    def _bepaal_klassegrenzen_teams(self, comp, trans_team):
+
+        """ retourneert een lijst van team wedstrijdenklassen, elk bestaande uit een dictionary:
+                'beschrijving': tekst
+                'count':        aantal teams ingedeeld in deze klasse
+                'ag':           het Team-AG van de laatste team in deze klasse
+                                of 0.001 voor de laatste klasse voor klasse onbekend
+                'ag_str':       geformatteerd Team-AG als NNN.M
+                'wedstrkl_obj': team klasse
+                'klasse':       competitieklasse
+                'volgorde':     nummer
+
+            gesorteerd op volgorde (oplopend)
+        """
+
+        # per boogtype (dus elke schutter-boog in zijn eigen team type):
+        #   per vereniging:
+        #      - de schutters sorteren op AG
+        #      - per groepje van 4 som van beste 3 = team AG
+
+        if comp.afstand == '18':
+            aantal_pijlen = 30
+        else:
+            aantal_pijlen = 25
+
+        # eenmalig de wedstrijdleeftijd van elke nhblid berekenen in het vorige seizoen
+        # hiermee kunnen we de aspiranten scores eruit filteren
+        jaar = comp.begin_jaar      # gelijk aan tweede jaar vorig seizoen
+
+        was_aspirant = dict()     # [ nhb_nr ] = True/False
+        for lid in NhbLid.objects.all():
+            was_aspirant[lid.nhb_nr] = lid.bereken_wedstrijdleeftijd(jaar) <= MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
+        # for
+
+        # haal de AG's op per boogtype
+        boogtype2ags = dict()        # [boogtype.afkorting] = AG's
+        for boogtype in BoogType.objects.all():
+            boogtype2ags[boogtype.afkorting] = (Score
+                                                .objects
+                                                .select_related('schutterboog',
+                                                                'schutterboog__boogtype',
+                                                                'schutterboog__nhblid',
+                                                                'schutterboog__nhblid__bij_vereniging')
+                                                .exclude(schutterboog__nhblid__bij_vereniging=None)
+                                                .filter(type=SCORE_TYPE_INDIV_AG,
+                                                        afstand_meter=comp.afstand,
+                                                        schutterboog__boogtype=boogtype))
+        # for
+
+        # wedstrijdklassen vs leeftijd + bogen
+        targets = self._get_targets_teams()
+
+        # bepaal de mogelijk te vormen teams en de team score
+        boog2team_scores = dict()    # [boogtype afkorting] = list(team scores)
+        for boogtype_afkorting, klassen in targets.items():
+            boog2team_scores[boogtype_afkorting] = team_scores = list()
+
+            # zoek alle schutters-boog die hier in passen (boog, leeftijd)
+            per_ver_gemiddelden = dict()    # [ver_nr] = list(gemiddelde, gemiddelde, ...)
+            for score in boogtype2ags[boogtype_afkorting]:
+                if not was_aspirant[score.schutterboog.nhblid.nhb_nr]:
+                    ver_nr = score.schutterboog.nhblid.bij_vereniging.ver_nr
+                    try:
+                        per_ver_gemiddelden[ver_nr].append(score.waarde)        # is AG*1000
+                    except KeyError:
+                        per_ver_gemiddelden[ver_nr] = [score.waarde]
+            # for
+
+            for ver_nr, gemiddelden in per_ver_gemiddelden.items():
+                gemiddelden.sort(reverse=True)  # in-place sort, highest to lowest
+                aantal = len(gemiddelden)
+                teams = int(aantal / 4)
+                for team_nr in range(teams):
+                    index = team_nr * 4
+                    team_score = sum(gemiddelden[index:index+3])    # totaal van beste 3 scores
+                    team_score = team_score / 1000          # converteer terug van score.waarde = AG*1000
+                    team_score = round(team_score, 3)       # round here, instead of letter database do it
+                    team_scores.append(team_score)
+                # for
+            # for
+        # for
+
+        objs = list()
+        for boogtype_afkorting, klassen in targets.items():
+            team_scores = boog2team_scores[boogtype_afkorting]
+            team_scores.sort(reverse=True)       # hoogste eerst
+            count = len(team_scores)
+            aantal = len(klassen)
+            if aantal > 1:
+                if count < aantal:
+                    step = 0
+                else:
+                    step = int(count / aantal)
+                if len(team_scores) == 0:
+                    team_scores.append(AG_NUL)
+                pos = 0
+                for klasse in klassen[:-1]:
+                    pos += step
+                    ag = team_scores[pos]
+                    res = {'beschrijving': klasse.beschrijving,
+                           'count': step,
+                           'ag': ag,
+                           'ag_str': "%05.1f" % (ag * aantal_pijlen),
+                           'wedstrkl_obj': klasse,
+                           'volgorde': klasse.volgorde}  # voor sorteren
+                    objs.append(res)
+                # for
+                klasse = klassen[-1]
+            else:
+                step = 0
+                klasse = klassen[0]
+
+            ag = AG_NUL
+            res = {'beschrijving': klasse.beschrijving,
+                   'count': count - (aantal - 1) * step,
+                   'ag': ag,
+                   'ag_str': "%05.1f" % (ag * aantal_pijlen),
+                   'wedstrkl_obj': klasse,
+                   'volgorde': klasse.volgorde}     # voor sorteren
+            objs.append(res)
+        # for
+
+        for obj in objs:
+            obj['klasse'] = trans_team[obj['wedstrkl_obj'].pk]
+        # for
+
+        objs2 = sorted(objs, key=lambda k: k['volgorde'])
+        return objs2
+
+    @staticmethod
+    def _get_klasse_trans(comp):
+        """ geeft een look-up tabel terug van IndivWedstrijdklasse / TeamWedstrijdklasse naar CompetitieKlasse """
+        trans_indiv = dict()
+        trans_team = dict()
+
+        for klasse in (CompetitieKlasse
+                       .objects
+                       .filter(competitie=comp)
+                       .prefetch_related('indiv', 'team')):
+            if klasse.indiv:
+                trans_indiv[klasse.indiv.pk] = klasse
+            else:
+                trans_team[klasse.team.pk] = klasse
+        # for
+
+        return trans_indiv, trans_team
 
     def get(self, request, *args, **kwargs):
         """ deze functie wordt aangeroepen als een GET request ontvangen is
@@ -493,17 +671,20 @@ class KlassegrenzenVaststellenView(UserPassesTestMixin, TemplateView):
             comp_pk = int(kwargs['comp_pk'][:6])      # afkappen geeft beveiliging
             comp = Competitie.objects.get(pk=comp_pk)
         except (ValueError, Competitie.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Competitie niet gevonden')
 
         context['comp'] = comp
+
+        trans_indiv, trans_team = self._get_klasse_trans(comp)
 
         if comp.klassegrenzen_vastgesteld:
             context['al_vastgesteld'] = True
         else:
-            context['object_list'] = self._get_queryset(comp)
+            context['klassegrenzen_indiv'] = self._bepaal_klassegrenzen_indiv(comp, trans_indiv)
+            context['klassegrenzen_teams'] = self._bepaal_klassegrenzen_teams(comp, trans_team)
             context['wedstrijdjaar'] = comp.begin_jaar + 1
 
-        datum = zoek_meest_recente_automatisch_vastgestelde_ag()
+        datum = wanneer_ag_vastgesteld()
         if datum:
             context['bb_ag_nieuwste_datum'] = localize(datum.date())
 
@@ -519,20 +700,25 @@ class KlassegrenzenVaststellenView(UserPassesTestMixin, TemplateView):
             comp_pk = int(kwargs['comp_pk'][:6])      # afkappen geeft beveiliging
             comp = Competitie.objects.get(pk=comp_pk)
         except (ValueError, Competitie.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Competitie niet gevonden')
 
         if not comp.klassegrenzen_vastgesteld:
-            bulk = list()
 
-            # haal dezelfde data op als voor de GET request
-            for obj in self._get_queryset(comp):
-                compkl = CompetitieKlasse(competitie=comp,
-                                          indiv=obj['wedstrkl_obj'],
-                                          min_ag=obj['ag'])
-                bulk.append(compkl)
+            trans_indiv, trans_team = self._get_klasse_trans(comp)
+
+            # individueel
+            for obj in self._bepaal_klassegrenzen_indiv(comp, trans_indiv):
+                klasse = obj['klasse']
+                klasse.min_ag = obj['ag']
+                klasse.save(update_fields=['min_ag'])
             # for
 
-            CompetitieKlasse.objects.bulk_create(bulk)
+            # team
+            for obj in self._bepaal_klassegrenzen_teams(comp, trans_team):
+                klasse = obj['klasse']
+                klasse.min_ag = obj['ag']
+                klasse.save(update_fields=['min_ag'])
+            # for
 
             comp.klassegrenzen_vastgesteld = True
             comp.save()
@@ -550,15 +736,12 @@ class WijzigDatumsView(UserPassesTestMixin, TemplateView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_WIJZIG_DATUMS
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
         return rol_nu == Rollen.ROL_BB
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -568,7 +751,7 @@ class WijzigDatumsView(UserPassesTestMixin, TemplateView):
             comp_pk = int(kwargs['comp_pk'][:6])      # afkappen geeft beveiliging
             comp = Competitie.objects.get(pk=comp_pk)
         except (ValueError, Competitie.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Competitie niet gevonden')
 
         context['comp'] = comp
 
@@ -597,19 +780,19 @@ class WijzigDatumsView(UserPassesTestMixin, TemplateView):
             comp_pk = int(kwargs['comp_pk'][:6])      # afkappen geeft beveiliging
             comp = Competitie.objects.get(pk=comp_pk)
         except (ValueError, Competitie.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Competitie niet gevonden')
 
         datums = list()
         for datum_nr in range(9):
             datum_s = request.POST.get('datum%s' % (datum_nr + 1), None)
             if not datum_s:
                 # alle datums zijn verplicht
-                raise Resolver404()
+                raise Http404('Verplichte parameter ontbreekt')
 
             try:
                 datum_p = datetime.datetime.strptime(datum_s, '%Y-%m-%d')
             except ValueError:
-                raise Resolver404()
+                raise Http404('Geen valide datum')
 
             datums.append(datum_p.date())
         # for

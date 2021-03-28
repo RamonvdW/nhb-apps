@@ -13,7 +13,7 @@ from Competitie.models import (Competitie, DeelCompetitie, DeelcompetitieRonde,
 from Competitie.test_fase import zet_competitie_fase
 from NhbStructuur.models import NhbRegio, NhbLid, NhbVereniging
 from Schutter.models import SchutterBoog
-from Score.models import Score, ScoreHist, SCORE_WAARDE_VERWIJDERD, aanvangsgemiddelde_opslaan
+from Score.models import Score, ScoreHist, SCORE_WAARDE_VERWIJDERD, score_indiv_ag_opslaan
 from Wedstrijden.models import Wedstrijd
 from Overig.e2ehelpers import E2EHelpers
 from .models import CompetitieKlasse
@@ -38,14 +38,12 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
         comp_18 = Competitie.objects.get(afstand='18')
         comp_25 = Competitie.objects.get(afstand='25')
 
-        aanvangsgemiddelde_opslaan(self.schutterboog_100005, 18, 9.500, None, "Test")
+        score_indiv_ag_opslaan(self.schutterboog_100005, 18, 9.500, None, "Test")
 
         # klassegrenzen vaststellen
-        with self.assert_max_queries(20):
-            resp = self.client.post(self.url_klassegrenzen_vaststellen % comp_18.pk)
+        resp = self.client.post(self.url_klassegrenzen_vaststellen % comp_18.pk)
         self.assert_is_redirect_not_plein(resp)     # check success
-        with self.assert_max_queries(20):
-            resp = self.client.post(self.url_klassegrenzen_vaststellen % comp_25.pk)
+        resp = self.client.post(self.url_klassegrenzen_vaststellen % comp_25.pk)
         self.assert_is_redirect_not_plein(resp)     # check success
 
         self.deelcomp_r101 = DeelCompetitie.objects.filter(laag='Regio',
@@ -225,8 +223,7 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
                                indiv__boogtype=schutterboog.boogtype))
 
             aanmelding = RegioCompetitieSchutterBoog(deelcompetitie=deelcomp,
-                                                     schutterboog=schutterboog,
-                                                     aanvangsgemiddelde=AG_NUL)
+                                                     schutterboog=schutterboog)
             aanmelding.bij_vereniging = aanmelding.schutterboog.nhblid.bij_vereniging
 
             if len(schuttersboog) < len(klassen):
@@ -241,7 +238,7 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
 
     def _sluit_alle_regiocompetities(self, comp):
         # deze functie sluit alle regiocompetities af zodat de competitie in fase G komt
-        comp.zet_fase()
+        comp.bepaal_fase()
         # print(comp.fase)
         self.assertTrue('B' < comp.fase < 'G')
         for deelcomp in DeelCompetitie.objects.filter(competitie=comp, laag=LAAG_REGIO):
@@ -250,7 +247,7 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
                 deelcomp.save()
         # for
 
-        comp.zet_fase()
+        comp.bepaal_fase()
         self.assertEqual(comp.fase, 'G')
 
     def setUp(self):
@@ -276,7 +273,7 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
         ver = NhbVereniging()
         ver.naam = "Grote Club"
         ver.plaats = "Boogstad"
-        ver.nhb_nr = 1000
+        ver.ver_nr = 1000
         ver.regio = self.regio_101
         # secretaris kan nog niet ingevuld worden
         ver.save()
@@ -303,8 +300,7 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
 
     @staticmethod
     def _score_opslaan(uitslag, schutterboog, waarde):
-        score = Score(is_ag=False,
-                      afstand_meter=18,
+        score = Score(afstand_meter=18,
                       schutterboog=schutterboog,
                       waarde=waarde)
         score.save()
@@ -610,14 +606,14 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
         self.assertTrue('Scores voor 1 schuttersboog bijgewerkt' in f2.getvalue())
 
         deelnemer = RegioCompetitieSchutterBoog.objects.get(schutterboog=self.schutterboog_100001)
-        self.assertEqual(deelnemer.bij_vereniging.nhb_nr, self.ver.nhb_nr)
+        self.assertEqual(deelnemer.bij_vereniging.ver_nr, self.ver.ver_nr)
 
         # maak een tweede vereniging aan
         regio_116 = NhbRegio.objects.get(regio_nr=116)
         ver = NhbVereniging()
         ver.naam = "Zuidelijke Club"
         ver.plaats = "Grensstad"
-        ver.nhb_nr = 1100
+        ver.ver_nr = 1100
         ver.regio = regio_116
         # secretaris kan nog niet ingevuld worden
         ver.save()
@@ -647,7 +643,7 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
         # zet the competitie in een later fase zodat overschrijvingen niet meer gedaan worden
         for comp in Competitie.objects.all():
             zet_competitie_fase(comp, 'K')
-            comp.zet_fase()
+            comp.bepaal_fase()
             self.assertEqual(comp.fase, 'K')
         # for
         lid.bij_vereniging = ver
@@ -682,7 +678,11 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
             management.call_command('regiocomp_upd_tussenstand', '7', '--quick', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
-        self.assertTrue("[WARNING] Uitstapper: 100001 [101] [1000] Grote Club (actief=True)" in f2.getvalue())
+
+        # controleer dat de schutter op zijn oude vereniging blijft staan
+        deelnemer = RegioCompetitieSchutterBoog.objects.get(schutterboog__nhblid__nhb_nr=100001)
+        self.assertIsNone(deelnemer.schutterboog.nhblid.bij_vereniging)
+        self.assertIsNotNone(deelnemer.bij_vereniging)
 
     def test_rk_fase_overstap(self):
         # test schutters die overstappen naar een andere vereniging binnen het rayon, tijdens de RK fase
@@ -697,7 +697,7 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
         self.assertTrue('Scores voor 1 schuttersboog bijgewerkt' in f2.getvalue())
 
         deelnemer = RegioCompetitieSchutterBoog.objects.get(schutterboog=self.schutterboog_100002)
-        self.assertEqual(deelnemer.bij_vereniging.nhb_nr, self.ver.nhb_nr)
+        self.assertEqual(deelnemer.bij_vereniging.ver_nr, self.ver.ver_nr)
 
         deelnemer.aantal_scores = 6
         deelnemer.save()
@@ -716,7 +716,7 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
         ver = NhbVereniging()
         ver.naam = "Polderclub"
         ver.plaats = "Polderstad"
-        ver.nhb_nr = 1100
+        ver.ver_nr = 1100
         ver.regio = regio_102
         # secretaris kan nog niet ingevuld worden
         ver.save()

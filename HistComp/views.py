@@ -4,8 +4,8 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.urls import Resolver404, reverse
-from django.http import HttpResponseRedirect, HttpResponse
+from django.urls import reverse
+from django.http import HttpResponse, Http404
 from django.views.generic import ListView, TemplateView
 from django.db.models import Q
 from django.contrib.auth.mixins import UserPassesTestMixin
@@ -37,6 +37,10 @@ class HistCompAlleJarenView(ListView):
     # class variables shared by all instances
     template_name = TEMPLATE_HISTCOMP_ALLEJAREN
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.seizoen = ""
+
     @staticmethod
     def _zet_op_volgorde_klassen(objs_unsorted):
         # sorteer de klassen op de gewenste volgorde
@@ -44,7 +48,6 @@ class HistCompAlleJarenView(ListView):
         objs = list()
         for klas in KLASSEN_VOLGORDE:
             # zoek objecten met klassen die hier aan voldoen
-            transfer = list()
             for obj in objs_unsorted:
                 if klas in obj.klasse:
                     objs.append(obj)
@@ -61,7 +64,11 @@ class HistCompAlleJarenView(ListView):
         """ called by the template system to get the queryset or list of objects for the template """
 
         # zoek het nieuwste seizoen beschikbaar
-        qset = HistCompetitie.objects.order_by('-seizoen').distinct('seizoen')
+        qset = (HistCompetitie
+                .objects
+                .exclude(is_openbaar=False)
+                .order_by('-seizoen')
+                .distinct('seizoen'))
         if len(qset) == 0:
             # geen data beschikbaar
             self.seizoen = ""
@@ -137,7 +144,7 @@ class HistCompBaseView(ListView):
             histcomp = HistCompetitie.objects.get(pk=self.histcomp_pk)
         except HistCompetitie.DoesNotExist:
             # foute histcomp_pk
-            raise Resolver404()
+            raise Http404('Competitie niet gevonden')
 
         self.histcomp = histcomp
 
@@ -276,15 +283,12 @@ class InterlandView(UserPassesTestMixin, TemplateView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_HISTCOMP_INTERLAND
+    raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
         return rol_nu == Rollen.ROL_BB
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
 
     def maak_data(self, context):
 
@@ -372,7 +376,7 @@ class InterlandAlsBestandView(InterlandView):
             klasse_pk = int(kwargs['klasse_pk'][:6])  # afkappen geeft beveiliging
             klasse = HistCompetitie.objects.get(pk=klasse_pk)
         except (ValueError, HistCompetitie.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Klasse niet gevonden')
 
         context = dict()
         self.maak_data(context)
@@ -385,7 +389,7 @@ class InterlandAlsBestandView(InterlandView):
         # for
 
         if schutters is None:
-            raise Resolver404()
+            raise Http404('Geen sporters gevonden')
 
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="interland.csv"'

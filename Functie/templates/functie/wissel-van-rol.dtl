@@ -40,7 +40,7 @@
         <p>Controle met een tweede factor is verplicht voor gebruikers met toegang tot persoonsgegevens.</p>
         <p><a class="btn-nhb-rood" href="{% url 'Functie:otp-koppelen' %}">Nu Koppelen</a></p>
         <p>Handleiding over het koppelen: <a class="btn-nhb-blauw" href="{{ wiki_2fa_url }}" target="_blank" rel="noopener noreferrer">
-    <i class="material-icons-round white-text left">help_outline</i>Tweede-factor authenticatie</a></p>
+            <i class="material-icons-round white-text left">help_outline</i>Tweede-factor authenticatie</a></p>
     {% endif %}
 
     {% if show_vhpg %}

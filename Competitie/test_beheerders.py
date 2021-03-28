@@ -55,14 +55,14 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         # maak een test vereniging
         ver = NhbVereniging()
         ver.naam = "Grote Club"
-        ver.nhb_nr = "1000"
+        ver.ver_nr = "1000"
         ver.regio = self.regio_101
         # secretaris kan nog niet ingevuld worden
         ver.save()
         self._ver = ver
 
         # maak HWL functie aan voor deze vereniging
-        self.functie_hwl = maak_functie("HWL Vereniging %s" % ver.nhb_nr, "HWL")
+        self.functie_hwl = maak_functie("HWL Vereniging %s" % ver.ver_nr, "HWL")
         self.functie_hwl.nhb_ver = ver
         self.functie_hwl.save()
 
@@ -99,14 +99,14 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         # maak nog een test vereniging, zonder HWL functie
         ver = NhbVereniging()
         ver.naam = "Kleine Club"
-        ver.nhb_nr = "1100"
+        ver.ver_nr = "1100"
         ver.regio = self.regio_101
         # secretaris kan nog niet ingevuld worden
         ver.save()
         self._ver2 = ver
 
         # maak HWL functie aan voor deze vereniging
-        hwl = maak_functie("HWL Vereniging %s" % ver.nhb_nr, "HWL")
+        hwl = maak_functie("HWL Vereniging %s" % ver.ver_nr, "HWL")
         hwl.nhb_ver = ver
         hwl.save()
 
@@ -128,10 +128,10 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
 
         # klassegrenzen vaststellen
         url_klassegrenzen = '/bondscompetities/%s/klassegrenzen/vaststellen/'
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(79):
             resp = self.client.post(url_klassegrenzen % self.comp_18.pk)
         self.assert_is_redirect_not_plein(resp)  # check for success
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(79):
             resp = self.client.post(url_klassegrenzen % self.comp_25.pk)
         self.assert_is_redirect_not_plein(resp)  # check for success
         # nu in fase A2
@@ -236,15 +236,15 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_aangemeld_alles % comp.pk)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_aangemeld_rayon % (comp.pk, self.rayon_2.pk))
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_aangemeld_regio % (comp.pk, self.regio_101.pk))
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
     def test_overzicht_it(self):
         self.e2e_login_and_pass_otp(self.account_admin)
@@ -298,23 +298,23 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         url = self.url_aangemeld_alles % comp.pk
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found/allowed
+        self.assert404(resp)     # 404 = Not found/allowed
 
         url = self.url_aangemeld_rayon % (comp.pk, self.rayon_1.pk)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found/allowed
+        self.assert404(resp)     # 404 = Not found/allowed
 
         url = self.url_aangemeld_regio % (comp.pk, self.regio_101.pk)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found/allowed
+        self.assert404(resp)     # 404 = Not found/allowed
 
         # regio 100: niet bestaand als deelcompetitie
         url = self.url_aangemeld_regio % (comp.pk, 100)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)  # 404 = Not found
+        self.assert404(resp)  # 404 = Not found
 
         # coverage voor models __str__
         obj = RegioCompetitieSchutterBoog.objects.filter(deelcompetitie__laag=LAAG_REGIO).all()[0]
@@ -473,7 +473,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         url = self.url_wijzigdatums % comp.pk
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
     def test_wijzig_datums_bb(self):
         comp = Competitie.objects.all()[0]
@@ -521,25 +521,25 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         # alle datums verplicht
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'datum1': '2019-08-09'})
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'datum1': 'null',
                                           'datum2': 'hallo',
                                           'datum3': '0',
                                           'datum4': '2019-13-42'})
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
         # foute comp_pk bij get
         url = self.url_wijzigdatums % 999999
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
         # foute comp_pk bij post
         with self.assert_max_queries(20):
             resp = self.client.post(url)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
     def test_behoefte_18(self):
         comp = Competitie.objects.get(afstand='18')
@@ -636,14 +636,14 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
 
         # landelijk
         zet_competitie_fase(comp, 'C')
-        comp.zet_fase()
+        comp.bepaal_fase()
         self.assertEqual(comp.fase, 'C')
 
         # als HWL is deze pagina niet beschikbaar
         url = self.url_behoefte % (999999, 101)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
     def test_bad_rcl(self):
         comp = Competitie.objects.get(afstand='25')
@@ -658,73 +658,74 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         url = self.url_aangemeld_alles % 999999
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
         url = self.url_aangemeld_rayon % (999999, 999999)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
         url = self.url_aangemeld_rayon % (comp.pk, 999999)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
         url = self.url_aangemeld_regio % (999999, 999999)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
         url = self.url_aangemeld_regio % (comp.pk, 999999)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
         # competitie bestaat niet
         url = self.url_behoefte % (999999, 101)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
         url = self.url_behoefte_bestand % (999999, 101)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
         # regio bestaat niet
         url = self.url_behoefte % (comp.pk, 999999)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
         url = self.url_behoefte_bestand % (comp.pk, 999999)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
         # deelcomp bestaat niet
         url = self.url_behoefte % (comp.pk, 100)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
         url = self.url_behoefte_bestand % (comp.pk, 100)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
         # correct, maar niet inschrijfmethode 3
         url = self.url_behoefte % (comp.pk, 101)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
         url = self.url_behoefte_bestand % (comp.pk, 101)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not found
+        self.assert404(resp)     # 404 = Not found
 
-    def _vind_tabel_regel_met(self, resp, zoekterm):
+    @staticmethod
+    def _vind_tabel_regel_met(resp, zoekterm):
         regel = None
         content = str(resp.content)
 

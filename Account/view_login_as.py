@@ -1,16 +1,18 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.shortcuts import render
-from django.urls import reverse, Resolver404
+from django.urls import reverse
+from django.http import Http404
 from django.contrib.auth import login
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.views.generic import ListView
 from django.db.models import Q, Value
 from django.db.models.functions import Concat
+from django.core.exceptions import PermissionDenied
 from .forms import ZoekAccountForm, KiesAccountForm
 from .models import Account, AccountEmail
 from .rechten import account_rechten_otp_controle_gelukt, account_rechten_login_gelukt
@@ -84,7 +86,9 @@ class LoginAsZoekView(UserPassesTestMixin, ListView):
         zodat de website 'door de ogen van' deze gebruiker bekeken kan worden
     """
 
+    # class variables shared by all instances
     template_name = TEMPLATE_LOGIN_AS_ZOEK
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -93,10 +97,6 @@ class LoginAsZoekView(UserPassesTestMixin, ListView):
         if account.is_authenticated:
             return account.is_staff
         return False
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> doe alsof dit niet bestaat """
-        raise Resolver404()
 
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
@@ -142,11 +142,11 @@ class LoginAsZoekView(UserPassesTestMixin, ListView):
         try:
             accountemail = AccountEmail.objects.get(account__pk=account_pk)
         except AccountEmail.DoesNotExist:
-            raise Resolver404()
+            raise Http404('Account heeft geen e-mail')
 
         # prevent upgrade
         if accountemail.account.is_staff:
-            raise Resolver404()
+            raise PermissionDenied()
 
         context = dict()
         context['account'] = accountemail.account

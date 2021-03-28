@@ -36,7 +36,7 @@
 
         {% for nhb_ver in regio_verenigingen %}
             <tr>
-                <td>{{ nhb_ver }}</td>  <!-- geeft [nhb_nr] naam -->
+                <td>{{ nhb_ver }}</td>  <!-- geeft [ver_nr] naam -->
                 {% for count in nhb_ver.counts_list %}
                     <td class="center-align">{{ count }}</td>
                 {% endfor %}

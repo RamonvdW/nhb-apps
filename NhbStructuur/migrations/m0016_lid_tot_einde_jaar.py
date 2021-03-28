@@ -22,10 +22,14 @@ def zet_lid_tot_einde_jaar(apps, _):
 
 class Migration(migrations.Migration):
 
+    """ Migratie class voor dit deel van de applicatie """
+
+    # volgorde afdwingen
     dependencies = [
         ('NhbStructuur', 'm0015_squashed'),
     ]
 
+    # migratie functies
     operations = [
         migrations.AddField(
             model_name='nhblid',
@@ -34,3 +38,5 @@ class Migration(migrations.Migration):
         ),
         migrations.RunPython(zet_lid_tot_einde_jaar),
     ]
+
+# end of file

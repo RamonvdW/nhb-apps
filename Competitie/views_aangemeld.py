@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.urls import Resolver404, reverse
+from django.urls import reverse
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponse, Http404
 from Plein.menu import menu_dynamics
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
 from Functie.rol import Rollen, rol_get_huidige
 from Schutter.models import SchutterVoorkeuren
-from .models import (LAAG_REGIO, INSCHRIJF_METHODE_3, DAGDEEL, DAGDEEL_AFKORTINGEN,
+from .models import (LAAG_REGIO, INSCHRIJF_METHODE_3, DAGDELEN, DAGDEEL_AFKORTINGEN,
                      Competitie, DeelCompetitie, RegioCompetitieSchutterBoog)
 import csv
 
@@ -71,15 +71,12 @@ class LijstAangemeldRegiocompAllesView(UserPassesTestMixin, TemplateView):
     """ Toon een lijst van SchutterBoog die aangemeld zijn voor de regiocompetitie """
 
     template_name = TEMPLATE_COMPETITIE_AANGEMELD_REGIO
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
         return rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL)
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -89,11 +86,11 @@ class LijstAangemeldRegiocompAllesView(UserPassesTestMixin, TemplateView):
             comp_pk = int(kwargs['comp_pk'][:6])        # afkappen voor veiligheid
             comp = Competitie.objects.get(pk=comp_pk)
         except (ValueError, Competitie.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Competitie niet gevonden')
 
-        comp.zet_fase()
+        comp.bepaal_fase()
         if comp.fase < 'B' or comp.fase > 'E':
-            raise Resolver404()
+            raise Http404('Verkeerde competitie fase')
 
         context['competitie'] = comp
 
@@ -108,7 +105,8 @@ class LijstAangemeldRegiocompAllesView(UserPassesTestMixin, TemplateView):
                                 'bij_vereniging')
                 .filter(deelcompetitie__competitie=comp,
                         deelcompetitie__laag=LAAG_REGIO)
-                .order_by('klasse__indiv__volgorde', '-aanvangsgemiddelde'))
+                .order_by('klasse__indiv__volgorde',
+                          '-ag_voor_indiv'))
 
         volgorde = -1
         for obj in objs:
@@ -131,15 +129,12 @@ class LijstAangemeldRegiocompRayonView(UserPassesTestMixin, TemplateView):
     """ Toon een lijst van SchutterBoog die aangemeld zijn voor de regiocompetitie """
 
     template_name = TEMPLATE_COMPETITIE_AANGEMELD_REGIO
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
         return rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL)
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -149,11 +144,11 @@ class LijstAangemeldRegiocompRayonView(UserPassesTestMixin, TemplateView):
             comp_pk = int(kwargs['comp_pk'][:6])    # afkappen voor veiligheid
             comp = Competitie.objects.get(pk=comp_pk)
         except (ValueError, Competitie.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Competitie niet gevonden')
 
-        comp.zet_fase()
+        comp.bepaal_fase()
         if comp.fase < 'B' or comp.fase > 'E':
-            raise Resolver404()
+            raise Http404('Verkeerde competitie fase')
 
         context['competitie'] = comp
 
@@ -161,7 +156,7 @@ class LijstAangemeldRegiocompRayonView(UserPassesTestMixin, TemplateView):
             rayon_pk = int(kwargs['rayon_pk'][:6])  # afkappen voor veiligheid
             rayon = NhbRayon.objects.get(pk=rayon_pk)
         except (ValueError, NhbRayon.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Rayon niet gevonden')
 
         context['inhoud'] = 'in ' + str(rayon)
 
@@ -177,7 +172,8 @@ class LijstAangemeldRegiocompRayonView(UserPassesTestMixin, TemplateView):
                 .filter(deelcompetitie__competitie=comp,
                         deelcompetitie__laag=LAAG_REGIO,
                         deelcompetitie__nhb_regio__rayon=rayon)
-                .order_by('klasse__indiv__volgorde', '-aanvangsgemiddelde'))
+                .order_by('klasse__indiv__volgorde',
+                          '-ag_voor_indiv'))
 
         volgorde = -1
         for obj in objs:
@@ -199,15 +195,12 @@ class LijstAangemeldRegiocompRegioView(UserPassesTestMixin, TemplateView):
     """ Toon een lijst van SchutterBoog die aangemeld zijn voor de regiocompetitie """
 
     template_name = TEMPLATE_COMPETITIE_AANGEMELD_REGIO
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
         return rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL)
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -217,11 +210,11 @@ class LijstAangemeldRegiocompRegioView(UserPassesTestMixin, TemplateView):
             comp_pk = int(kwargs['comp_pk'][:6])        # afkappen voor veiligheid
             comp = Competitie.objects.get(pk=comp_pk)
         except (ValueError, Competitie.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Competitie niet gevonden')
 
-        comp.zet_fase()
+        comp.bepaal_fase()
         if comp.fase < 'B' or comp.fase > 'E':
-            raise Resolver404()
+            raise Http404('Verkeerde competitie fase')
 
         context['competitie'] = comp
 
@@ -232,7 +225,7 @@ class LijstAangemeldRegiocompRegioView(UserPassesTestMixin, TemplateView):
                      .select_related('rayon')
                      .get(pk=regio_pk))
         except (ValueError, NhbRegio.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Regio niet gevonden')
 
         context['inhoud'] = 'in ' + str(regio)
 
@@ -241,7 +234,7 @@ class LijstAangemeldRegiocompRegioView(UserPassesTestMixin, TemplateView):
                                                   competitie=comp,
                                                   nhb_regio=regio)
         except DeelCompetitie.DoesNotExist:
-            raise Resolver404()
+            raise Http404('Competitie niet gevonden')
 
         objs = (RegioCompetitieSchutterBoog
                 .objects
@@ -252,7 +245,8 @@ class LijstAangemeldRegiocompRegioView(UserPassesTestMixin, TemplateView):
                                 'schutterboog__nhblid',
                                 'bij_vereniging')
                 .filter(deelcompetitie=deelcomp)
-                .order_by('klasse__indiv__volgorde', '-aanvangsgemiddelde'))
+                .order_by('klasse__indiv__volgorde',
+                          '-ag_voor_indiv'))
 
         volgorde = -1
         for obj in objs:
@@ -281,15 +275,12 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
     """ Toon de RCL de behoefte aan quotaplaatsen in een regio met inschrijfmethode 3 """
 
     template_name = TEMPLATE_COMPETITIE_INSCHRIJFMETHODE3_BEHOEFTE
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
         return rol_nu == Rollen.ROL_RCL
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
 
     def _maak_data_dagdeel_behoefte(self, context, deelcomp, objs, regio):
         """ voegt de volgende elementen toe aan de context:
@@ -300,7 +291,7 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
         alles_mag = (deelcomp.toegestane_dagdelen == '')
 
         context['dagdelen'] = dagdelen = list()
-        for afkorting, beschrijving in DAGDEEL:
+        for afkorting, beschrijving in DAGDELEN:
             if alles_mag or (afkorting in deelcomp.toegestane_dagdelen):
                 dagdelen.append(beschrijving)
         # for
@@ -311,11 +302,11 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
         for nhb_ver in (NhbVereniging
                         .objects
                         .filter(regio=regio)
-                        .order_by('nhb_nr')
+                        .order_by('ver_nr')
                         .all()):
 
             vers.append(nhb_ver)
-            vers_dict[nhb_ver.nhb_nr] = nhb_ver
+            vers_dict[nhb_ver.ver_nr] = nhb_ver
 
             nhb_ver.counts_dict = dict()
             for afkorting in DAGDEEL_AFKORTINGEN:
@@ -327,7 +318,7 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
         # objs = RegioCompetitieSchutterBoog
         for obj in objs:
             try:
-                nhb_ver = vers_dict[obj.bij_vereniging.nhb_nr]
+                nhb_ver = vers_dict[obj.bij_vereniging.ver_nr]
             except KeyError:
                 pass
             else:
@@ -453,11 +444,11 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
             comp_pk = int(kwargs['comp_pk'][:6])        # afkappen voor veiligheid
             comp = Competitie.objects.get(pk=comp_pk)
         except (ValueError, Competitie.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Competitie niet gevonden')
 
-        comp.zet_fase()
+        comp.bepaal_fase()
         if comp.fase < 'B' or comp.fase > 'E':
-            raise Resolver404()
+            raise Http404('Verkeerde competitie fase')
 
         context['competitie'] = comp
 
@@ -468,7 +459,7 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
                      .select_related('rayon')
                      .get(pk=regio_pk))
         except (ValueError, NhbRegio.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Regio niet gevonden')
 
         context['regio'] = regio
 
@@ -481,10 +472,10 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
                              competitie=comp,
                              nhb_regio=regio))
         except DeelCompetitie.DoesNotExist:
-            raise Resolver404()
+            raise Http404('Competitie niet gevonden')
 
         if deelcomp.inschrijf_methode != INSCHRIJF_METHODE_3:
-            raise Resolver404()
+            raise Http404('Verkeerde inschrijfmethode')
 
         objs = (RegioCompetitieSchutterBoog
                 .objects
@@ -497,7 +488,8 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
                                 'schutterboog__nhblid',
                                 'schutterboog__nhblid__bij_vereniging')
                 .filter(deelcompetitie=deelcomp)
-                .order_by('klasse__indiv__volgorde', 'aanvangsgemiddelde'))
+                .order_by('klasse__indiv__volgorde',
+                          'ag_voor_indiv'))             # TODO: niet nodig??
 
         volgorde = -1
         for obj in objs:
@@ -537,11 +529,11 @@ class Inschrijfmethode3BehoefteAlsBestandView(Inschrijfmethode3BehoefteView):
             comp_pk = int(kwargs['comp_pk'][:6])        # afkappen voor veiligheid
             comp = Competitie.objects.get(pk=comp_pk)
         except (ValueError, Competitie.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Competitie niet gevonden')
 
-        comp.zet_fase()
+        comp.bepaal_fase()
         if comp.fase < 'B' or comp.fase > 'E':
-            raise Resolver404()
+            raise Http404('Verkeerde competitie fase')
 
         context['competitie'] = comp
 
@@ -552,7 +544,7 @@ class Inschrijfmethode3BehoefteAlsBestandView(Inschrijfmethode3BehoefteView):
                      .select_related('rayon')
                      .get(pk=regio_pk))
         except (ValueError, NhbRegio.DoesNotExist):
-            raise Resolver404()
+            raise Http404('Regio niet gevonden')
 
         try:
             deelcomp = (DeelCompetitie
@@ -563,7 +555,7 @@ class Inschrijfmethode3BehoefteAlsBestandView(Inschrijfmethode3BehoefteView):
                              competitie=comp,
                              nhb_regio=regio))
         except DeelCompetitie.DoesNotExist:
-            raise Resolver404()
+            raise Http404('Competitie niet gevonden')
 
         objs = (RegioCompetitieSchutterBoog
                 .objects
@@ -575,12 +567,13 @@ class Inschrijfmethode3BehoefteAlsBestandView(Inschrijfmethode3BehoefteView):
                                 'schutterboog__nhblid',
                                 'schutterboog__nhblid__bij_vereniging')
                 .filter(deelcompetitie=deelcomp)
-                .order_by('klasse__indiv__volgorde', 'aanvangsgemiddelde'))
+                .order_by('klasse__indiv__volgorde',
+                          'ag_voor_indiv'))         # TODO: niet nodig?
 
         context['object_list'] = objs
 
         if deelcomp.inschrijf_methode != INSCHRIJF_METHODE_3:
-            raise Resolver404()
+            raise Http404('Verkeerde inschrijfmethode')
 
         # voeg de tabel met dagdeel-behoefte toe
         # dict(nhb_ver) = dict("dagdeel_afkorting") = count
@@ -597,7 +590,7 @@ class Inschrijfmethode3BehoefteAlsBestandView(Inschrijfmethode3BehoefteView):
         writer.writerow(['ver_nr', 'Naam'] + context['dagdelen'] + ['Totaal'])
 
         for nhb_ver in context['regio_verenigingen']:
-            writer.writerow([nhb_ver.nhb_nr, nhb_ver.naam] + nhb_ver.counts_list)
+            writer.writerow([nhb_ver.ver_nr, nhb_ver.naam] + nhb_ver.counts_list)
         # for
 
         writer.writerow(['-', 'Totalen'] + context['totalen'])

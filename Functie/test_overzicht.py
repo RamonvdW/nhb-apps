@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
 from .models import maak_functie, Functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
-from Logboek.models import LogboekRegel
 from Overig.e2ehelpers import E2EHelpers
 import datetime
 
@@ -39,7 +38,7 @@ class TestFunctieOverzicht(E2EHelpers, TestCase):
         # maak een test vereniging
         ver = NhbVereniging()
         ver.naam = "Grote Club"
-        ver.nhb_nr = "1000"
+        ver.ver_nr = "1000"
         ver.regio = NhbRegio.objects.get(regio_nr=111)
         # secretaris kan nog niet ingevuld worden
         ver.save()
@@ -72,7 +71,7 @@ class TestFunctieOverzicht(E2EHelpers, TestCase):
         # maak nog een test vereniging
         ver2 = NhbVereniging()
         ver2.naam = "Extra Club"
-        ver2.nhb_nr = "1900"
+        ver2.ver_nr = "1900"
         ver2.regio = NhbRegio.objects.get(regio_nr=112)
         # secretaris kan nog niet ingevuld worden
         ver2.save()
@@ -105,12 +104,12 @@ class TestFunctieOverzicht(E2EHelpers, TestCase):
         # geen rechten om dit overzicht in te zien
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_overzicht)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
         # geen rechten om beheerders te kiezen
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wijzig + '123/')
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
     def test_schutter(self):
         # geen rechten om dit overzicht in te zien
@@ -119,11 +118,11 @@ class TestFunctieOverzicht(E2EHelpers, TestCase):
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_overzicht)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_overzicht + 'vereniging/')
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
     def test_bb(self):
         self.e2e_login_and_pass_otp(self.account_admin)
@@ -233,7 +232,7 @@ class TestFunctieOverzicht(E2EHelpers, TestCase):
         # de WL heeft hier niets mee te maken en krijgt het overzicht dus niet
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_overzicht)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
         # haal het overzicht van verenigingsbestuurders op
         with self.assert_max_queries(20):
@@ -255,7 +254,7 @@ class TestFunctieOverzicht(E2EHelpers, TestCase):
         # de SEC heeft hier niets mee te maken en krijgt het overzicht dus niet
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_overzicht)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
 
         # haal het overzicht van verenigingsbestuurders op
         with self.assert_max_queries(20):

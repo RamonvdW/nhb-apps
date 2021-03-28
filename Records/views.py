@@ -6,7 +6,7 @@
 
 from django.conf import settings
 from django.urls import Resolver404, reverse
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, Http404
 from django.views.generic import ListView
 from django.db.models import Q
 from django.core.exceptions import ObjectDoesNotExist
@@ -200,7 +200,7 @@ class RecordsIndivZoomBaseView(ListView):
                 return sel, sel2str[sel]
             except KeyError:
                 # niet ondersteunde url tekst --> geef een foutmelding
-                raise Resolver404()
+                raise Resolver404('Verkeerde url elementen')
         # de url parameter was niet aanwezig
         return None, None
 
@@ -369,7 +369,7 @@ class RecordsIndivSpecifiekView(ListView):
         except ObjectDoesNotExist:
             # dat was geen valide record nummer
             # TODO: consider to make more user friendly
-            raise Resolver404()
+            raise Http404('Record niet gevonden')
 
         # voeg informatie toe voor de template
         spec.gesl_str = gesl2str[spec.geslacht]

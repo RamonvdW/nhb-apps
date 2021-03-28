@@ -5,9 +5,12 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
-from django.shortcuts import redirect, render, reverse
+from django.http import Http404
+from django.urls import Resolver404
+from django.shortcuts import redirect, render
 from django.views.generic import TemplateView, View
-from Functie.rol import Rollen, rol_get_huidige, rol_get_beschrijving, rol_mag_wisselen
+from django.core.exceptions import PermissionDenied, SuspiciousOperation
+from Functie.rol import Rollen, rol_get_huidige, rol_get_beschrijving
 from Handleiding.views import reverse_handleiding
 from Taken.taken import eval_open_taken
 from .menu import menu_dynamics
@@ -18,7 +21,9 @@ TEMPLATE_PLEIN_SCHUTTER = 'plein/plein-schutter.dtl'    # schutter (ROL_SCHUTTER
 TEMPLATE_PLEIN_BEHEERDER = 'plein/plein-beheerder.dtl'  # beheerder (ROL_BB/BKO/RKO/RCL/SEC/HWL/WL)
 TEMPLATE_PRIVACY = 'plein/privacy.dtl'
 TEMPLATE_NIET_ONDERSTEUND = 'plein/niet-ondersteund.dtl'
-
+TEMPLATE_HANDLER_403 = 'plein/fout_403.dtl'
+TEMPLATE_HANDLER_404 = 'plein/fout_404.dtl'
+TEMPLATE_HANDLER_500 = 'plein/fout_500.dtl'
 
 ROL2HANDLEIDING_PAGINA = {
     Rollen.ROL_BB: settings.HANDLEIDING_BB,
@@ -129,6 +134,8 @@ class PleinView(View):
                 # kijk hoeveel taken er open staan
                 eval_open_taken(request)
 
+        context['naam_site'] = settings.NAAM_SITE
+
         menu_dynamics(self.request, context)
         return render(request, template, context)
 
@@ -144,6 +151,7 @@ class PrivacyView(TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
         context['url_privacyverklaring'] = settings.PRIVACYVERKLARING_URL
+        context['email_bondsburo'] = settings.EMAIL_BONDSBURO
         menu_dynamics(self.request, context)
         return context
 
@@ -152,12 +160,85 @@ class NietOndersteundView(View):
 
     """ Django class-based om te rapporteren dat de browser niet ondersteund wordt """
 
-    # class variables shared by all instances
-    template_name = TEMPLATE_NIET_ONDERSTEUND
-
     def get(self, request, *args, **kwargs):
         context = dict()
-        return render(request, self.template_name, context)
+        return render(request, TEMPLATE_NIET_ONDERSTEUND, context)
+
+
+def site_handler403_permission_denied(request, exception=None):
+
+    """ Django view om code-403 fouten af te handelen.
+        403 is "permission denied"
+
+        Deze functie wordt aangeroepen voor de volgende excepties:
+            PermissionDenied from django.core.exceptions
+    """
+    # print('site_handler403: exception=%s; info=%s' % (repr(exception), str(exception)))
+    context = dict()
+    info = str(exception)
+    if len(info):
+        context['info'] = info
+    return render(request, TEMPLATE_HANDLER_403, context)
+
+
+def site_handler404_page_not_found(request, exception=None):
+
+    """ Django view om code-404 fouten af te handelen.
+        404 is "page not found"
+        404 wordt ook nog gebruikt in heel veel foutsituaties
+
+        Deze function wordt aangeroepen bij de volgende excepties:
+            Http404 from django.http
+            Resolver404 from django.urls
+    """
+    # print('site_handler404: exception=%s; info=%s' % (repr(exception), str(exception)))
+    context = dict()
+    if repr(exception).startswith('Resolver404('):
+        # voorkom dat we een hele urlconf dumpen naar de gebruiker
+        info = "Pagina bestaat niet"
+    else:
+        info = str(exception)
+    if len(info):
+        context['info'] = info
+    return render(request, TEMPLATE_HANDLER_404, context)
+
+
+def site_handler500_internal_server_error(request, exception=None):
+
+    """ Django view om code-500 fouten af te handelen.
+        500 is "server internal error"
+
+        Deze function wordt aangeroepen bij runtime errors met de view code.
+    """
+    # print('site_handler500: exception=%s; info=%s' % (repr(exception), str(exception)))
+    context = dict()
+    return render(request, TEMPLATE_HANDLER_500, context)
+
+
+class TestSpecialePagina(View):
+
+    """ deze view wordt gebruikt om de site_handlers hier boven te raken tijdens autotest """
+    @staticmethod
+    def get(request, *args, **kwargs):
+        code = kwargs['code']
+        if code == '403a':
+            raise PermissionDenied('test')
+
+        if code == '403b':
+            raise PermissionDenied()
+
+        if code == '404a':
+            raise Http404('test')
+
+        if code == '404b':
+            raise Http404()
+
+        if code == '404c':
+            raise Resolver404()
+
+        if code == '500':       # pragma: no branch
+            # nog geen exceptie gevonden die hiervoor gebruikt kan worden
+            return site_handler500_internal_server_error(request, None)
 
 
 # end of file

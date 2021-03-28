@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020 Ramon van der Winkel.
+                Copyright (c) 2020-2021 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -97,7 +97,25 @@
                 </tr>
             </table>
 
-        {% endif %}
+            {% if nhblid.para_classificatie %}
+                <h5>Voorkeur para-sporter</h5>
+
+                <table class="white">
+                    <tr>
+                        <td>Als sporter met para classificatie kan je hieronder een kort bericht (1 regel) invoeren voor de wedstrijdleiding zodat ze, indien mogelijk, hier rekening mee houden.</td>
+                    </tr>
+                    <tr>
+                        <td>Voorbeelden:<br>&nbsp;&nbsp;&nbsp;Blijf op schietlijn wachten<br>&nbsp;&nbsp;&nbsp;Gebruik kruk<br>&nbsp;&nbsp;&nbsp;etc.</td>
+                    </tr>
+                    <tr>
+                        <td class="input-field">
+                            <input type="text" maxlength="256" name="para_notitie" placeholder="Hier invoeren" value="{{ voorkeuren.opmerking_para_sporter }}">
+                        </td>
+                    </tr>
+                </table>
+            {% endif %}
+
+        {% endif %}     <!-- bogen -->
 
 
         {% if email %}

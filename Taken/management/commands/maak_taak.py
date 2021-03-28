@@ -1,15 +1,14 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-# importeer individuele competitie historie
+# maak een taak aan voor een specifieke gebruiker
 
-import argparse
 from django.core.management.base import BaseCommand
 from Taken.models import Taak
-from Account.models import Account
+from Account.models import Account, AccountEmail
 
 
 class Command(BaseCommand):
@@ -35,13 +34,18 @@ class Command(BaseCommand):
         except Account.DoesNotExist as exc:
             self.stderr.write("%s" % str(exc))
             return
+        else:
+            email = AccountEmail.objects.get(account=toekennen_aan)
+            if not email.bevestigde_email:
+                self.stderr.write('[ERROR] geen e-mailadres bekend voor account %s' % toekennen_aan)
+                return
 
         aangemaakt_door = options['aangemaakt_door'][0]
         if aangemaakt_door.lower() == 'systeem':
-            aangemaakt_door = None
+            aangemaakt_door_account = None
         else:
             try:
-                aangemaakt_door = Account.objects.get(username=aangemaakt_door)
+                aangemaakt_door_account = Account.objects.get(username=aangemaakt_door)
             except Account.DoesNotExist as exc:
                 self.stderr.write("%s" % str(exc))
                 return
@@ -50,7 +54,7 @@ class Command(BaseCommand):
         pagina = options['handleiding_pagina'][0]
         beschrijving = options['beschrijving'][0].replace('\\n', '\n')
 
-        taak = Taak(aangemaakt_door=aangemaakt_door,
+        taak = Taak(aangemaakt_door=aangemaakt_door_account,
                     toegekend_aan=toekennen_aan,
                     deadline=deadline,
                     beschrijving=beschrijving,

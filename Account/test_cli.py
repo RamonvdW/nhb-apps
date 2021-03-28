@@ -174,7 +174,7 @@ class TestAccountCLI(E2EHelpers, TestCase):
         f2 = io.StringIO()
         with self.assert_max_queries(20):
             management.call_command('zet_2fa_geheim', 'nietbestaand', '1', stderr=f1, stdout=f2)
-        self.assertEqual(f1.getvalue(), 'Foutief 2FA geheim: moet 16 tekens zijn\n')
+        self.assertEqual(f1.getvalue(), 'Foutief 2FA geheim: moet 16 of 32 tekens lang zijn\n')
 
         f1 = io.StringIO()
         f2 = io.StringIO()

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -14,6 +14,8 @@ import os
 class TestCompetitieCliOudeSiteMaakJson(E2EHelpers, TestCase):
     """ unittests voor de Competitie applicatie, management command oude_site_maak_json """
 
+    maxDiff = None
+    
     def setUp(self):
         """ initialisatie van de test case """
 

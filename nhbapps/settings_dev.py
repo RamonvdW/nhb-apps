@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 """
-Django settings for the NhbApps project during development runs and testing.
+    Django settings for the NhbApps project during development runs.
 """
 
 from nhbapps.settings_base import *
@@ -15,8 +15,11 @@ DEBUG = True
 ENABLE_DEBUG_TOOLBAR = False
 #ENABLE_DEBUG_TOOLBAR = True
 
-# django-extensions: very useful for show_urls
+# django-extensions
+#   very useful for show_urls:
+#     ./manage.py show_urls --settings=nhbapps.settings_dev
 ENABLE_DJANGO_EXTENSIONS = False
+#ENABLE_DJANGO_EXTENSIONS = True
 
 # enable html validation using v.Nu (warning: triples test duration)
 # warning: increases test run duration significantly

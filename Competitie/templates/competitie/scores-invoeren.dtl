@@ -584,7 +584,7 @@
                 <td data-pk="{{ score.schutterboog.pk }}">{{ score.schutterboog.nhblid.nhb_nr }}</td>
                 <td>{{ score.schutterboog.nhblid.volledige_naam }}</td>
                 <td>
-                    <span>[{{ score.schutterboog.nhblid.bij_vereniging.nhb_nr }}]</span>
+                    <span>[{{ score.schutterboog.nhblid.bij_vereniging.ver_nr }}]</span>
                     <span class="hide-on-small-only">&nbsp;{{ score.schutterboog.nhblid.bij_vereniging.naam }}</span>
                 </td>
                 <td>{{ score.schutterboog.boogtype.beschrijving }}</td>

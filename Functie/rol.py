@@ -6,11 +6,14 @@
 
 """ ondersteuning voor de rollen binnen de NHB applicaties """
 
+from django.contrib.sessions.backends.db import SessionStore
 from Account.rechten import account_add_plugin_rechten, account_rechten_is_otp_verified
+from Account.models import AccountSessions
 from NhbStructuur.models import NhbVereniging
 from Overig.helpers import get_safe_from_ip
 from .models import Functie, account_needs_vhpg, account_needs_otp
 from types import SimpleNamespace
+from typing import Tuple
 import logging
 import enum
 
@@ -134,7 +137,7 @@ def rol_zet_sessionvars(account, request):
                 .only('rol', 'comp_type',
                       'nhb_rayon__rayon_nr',
                       'nhb_regio__rayon__rayon_nr',
-                      'nhb_ver__nhb_nr')):
+                      'nhb_ver__ver_nr')):
         func = SimpleNamespace()
         func.pk = obj.pk
         func.obj = obj
@@ -148,7 +151,7 @@ def rol_zet_sessionvars(account, request):
             func.regio_rayon_nr = obj.nhb_regio.rayon.rayon_nr
             func.comp_type = obj.comp_type
         elif func.rol in ("HWL", "WL", "SEC"):
-            func.ver_nhb_nr = obj.nhb_ver.nhb_nr
+            func.ver_nr = obj.nhb_ver.ver_nr
         functie_cache[obj.pk] = func
     # for
 
@@ -282,7 +285,7 @@ def rol_get_huidige(request):
     return Rollen.ROL_NONE
 
 
-def rol_get_huidige_functie(request):
+def rol_get_huidige_functie(request) -> Tuple[Rollen, Functie]:
     """ Deze functie wordt gebruikt door het menusysteem om te kijken welke optionele delen
         van het menu aangezet moeten worden. De gekozen vaste rol of functie resulteert in
         een rol uit de groep Rollen.ROL_xxx
@@ -341,10 +344,16 @@ def rol_bepaal_beschrijving(rol, functie_pk=None):
 def rol_mag_wisselen(request):
     """ Geeft True terug als deze gebruiker de wissel-van-rol getoond moet worden """
     try:
-        return request.session[SESSIONVAR_ROL_MAG_WISSELEN]
+        check = request.session[SESSIONVAR_ROL_MAG_WISSELEN]
     except KeyError:
-        pass
-    return False
+        return False
+
+    if check == "nieuw":
+        # dit wordt gebruikt om nieuwe beheerders het wissel-van-rol menu te laten krijgen
+        rol_zet_sessionvars(request.user, request)
+        check = request.session[SESSIONVAR_ROL_MAG_WISSELEN]
+
+    return check
 
 
 def rol_activeer_rol(request, rolurl):
@@ -454,12 +463,12 @@ def functie_expandeer_rol(functie_cache, nhbver_cache, rol_in, functie_in):
                 for ver in (NhbVereniging
                             .objects
                             .select_related('regio')
-                            .only('nhb_nr', 'regio__regio_nr')):
+                            .only('ver_nr', 'regio__regio_nr')):
                     store = SimpleNamespace()
                     store.pk = ver.pk
-                    store.nhb_nr = ver.nhb_nr
+                    store.ver_nr = ver.ver_nr
                     store.regio_nr = ver.regio.regio_nr
-                    nhbver_cache[store.nhb_nr] = store
+                    nhbver_cache[store.ver_nr] = store
                 # for
 
                 # voorkom herhaaldelijke queries tijdens test zonder vereniging
@@ -468,27 +477,27 @@ def functie_expandeer_rol(functie_cache, nhbver_cache, rol_in, functie_in):
 
             # zoek alle verenigingen in de regio van deze RCL
             verenigingen = list()
-            for nhb_nr, ver in nhbver_cache.items():
-                if nhb_nr != 0 and ver.regio_nr == functie_in.nhb_regio.regio_nr:
-                    verenigingen.append(nhb_nr)
+            for ver_nr, ver in nhbver_cache.items():
+                if ver_nr != 0 and ver.regio_nr == functie_in.nhb_regio.regio_nr:
+                    verenigingen.append(ver_nr)
             # for
 
             # zoek de HWL functies op
             for pk, obj in functie_cache.items():
-                if obj.rol == 'HWL' and obj.ver_nhb_nr in verenigingen:
+                if obj.rol == 'HWL' and obj.ver_nr in verenigingen:
                     yield Rollen.ROL_HWL, obj.pk
             # for
 
         if functie_in.rol == 'SEC':
             # secretaris mag HWL worden, binnen de vereniging
             for pk, obj in functie_cache.items():
-                if obj.rol == 'HWL' and obj.ver_nhb_nr == functie_in.nhb_ver.nhb_nr:
+                if obj.rol == 'HWL' and obj.ver_nr == functie_in.nhb_ver.ver_nr:
                     yield Rollen.ROL_HWL, obj.pk
 
         if functie_in.rol == 'HWL':
             # expandeer naar de WL rollen binnen dezelfde vereniging
             for pk, obj in functie_cache.items():
-                if obj.rol == 'WL' and obj.ver_nhb_nr == functie_in.nhb_ver.nhb_nr:
+                if obj.rol == 'WL' and obj.ver_nr == functie_in.nhb_ver.ver_nr:
                     yield Rollen.ROL_WL, obj.pk
 
 
@@ -497,5 +506,27 @@ rol_zet_plugins(functie_expandeer_rol)
 
 # registreer de rechten plugin
 account_add_plugin_rechten(rol_plugin_rechten)
+
+
+def rol_activeer_wissel_van_rol_menu_voor_account(account):
+    """ Deze functie zorgt ervoor dat nieuwe beheerders het Wissel van Rol menu in beeld krijgen
+
+        Aangezien dit om performance redenen opgeslagen ligt in de sessie van de gebruiker,
+        moeten we op zoek naar die sessie en daar een aanpassing in doen.
+    """
+
+    # de functie rol_mag_wisselen moet True terug geven en gebruikt informatie opgeslagen in de session vars
+    # overschrijf SESSIONVAR_ROL_MAG_WISSELEN voor alle sessies van deze gebruiker met de waarde "nieuw"
+
+    for obj in (AccountSessions
+                .objects
+                .filter(account=account)):
+        session = SessionStore(obj.session.session_key)
+        mag = session[SESSIONVAR_ROL_MAG_WISSELEN]
+        if mag == False:
+            session[SESSIONVAR_ROL_MAG_WISSELEN] = "nieuw"
+            session.save()
+    # for
+
 
 # end of file

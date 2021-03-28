@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import reverse
-from Functie.rol import rol_get_huidige, Rollen
+from Functie.rol import rol_get_huidige
 from Plein.menu import menu_dynamics
 from .models import Competitie
 

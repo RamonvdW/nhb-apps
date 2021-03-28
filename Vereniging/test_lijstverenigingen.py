@@ -47,7 +47,7 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         # maak een test vereniging
         ver = NhbVereniging()
         ver.naam = "Grote Club"
-        ver.nhb_nr = "1000"
+        ver.ver_nr = "1000"
         ver.regio = self.regio_101
         # secretaris kan nog niet ingevuld worden
         ver.save()
@@ -55,7 +55,7 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         self.nhb_ver1 = ver
 
         # maak HWL functie aan voor deze vereniging
-        self.functie_hwl = maak_functie("HWL Vereniging %s" % ver.nhb_nr, "HWL")
+        self.functie_hwl = maak_functie("HWL Vereniging %s" % ver.ver_nr, "HWL")
         self.functie_hwl.nhb_ver = ver
         self.functie_hwl.save()
 
@@ -86,7 +86,7 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         # maak nog een test vereniging, zonder HWL functie
         ver = NhbVereniging()
         ver.naam = "Kleine Club"
-        ver.nhb_nr = "1100"
+        ver.ver_nr = "1100"
         ver.regio = self.regio_101
         # secretaris kan nog niet ingevuld worden
         ver.save()
@@ -103,7 +103,7 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         self.e2e_logout()
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_lijst)
-        self.assert_is_redirect(resp, '/plein/')
+        self.assert403(resp)
         self.e2e_assert_other_http_commands_not_supported(self.url_lijst)
 
     def test_it(self):

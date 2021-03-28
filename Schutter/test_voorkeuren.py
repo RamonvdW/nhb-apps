@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,7 +9,7 @@ from BasisTypen.models import BoogType
 from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
 from Overig.e2ehelpers import E2EHelpers
 from Functie.models import maak_functie
-from Score.models import aanvangsgemiddelde_opslaan
+from Score.models import score_indiv_ag_opslaan
 from .models import SchutterBoog, SchutterVoorkeuren
 import datetime
 
@@ -27,7 +27,7 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
         # maak een test vereniging
         ver = NhbVereniging()
         ver.naam = "Grote Club"
-        ver.nhb_nr = "1000"
+        ver.ver_nr = "1000"
         ver.regio = NhbRegio.objects.get(regio_nr=111)
         ver.save()
         self.nhbver1 = ver
@@ -54,7 +54,7 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
         # maak nog een test vereniging
         ver = NhbVereniging()
         ver.naam = "Nieuwe Club"
-        ver.nhb_nr = "1001"
+        ver.ver_nr = "1001"
         ver.regio = NhbRegio.objects.get(pk=112)
         ver.save()
 
@@ -80,8 +80,7 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
         # zonder login --> terug naar het plein
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_voorkeuren, follow=True)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('plein/plein-bezoeker.dtl', 'plein/site_layout.dtl'))
+        self.assert403(resp)
 
         # met schutter-login wel toegankelijk
         self.e2e_login(self.account_normaal)
@@ -214,22 +213,22 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
         # haal als HWL 'de' voorkeuren pagina op, zonder specifiek nhblid_pk
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_voorkeuren)
-        self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
+        self.assert404(resp)     # 404 = Not allowed
 
         # haal als HWL de voorkeuren pagina op met een niet-numeriek nhblid_pk
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_voorkeuren + 'snuiter/')
-        self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
+        self.assert404(resp)     # 404 = Not allowed
 
         # haal als HWL de voorkeuren pagina op met een niet bestaand nhblid_pk
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_voorkeuren + '999999/')
-        self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
+        self.assert404(resp)     # 404 = Not allowed
 
         # haal als HWL de voorkeuren pagina op van een lid van een andere vereniging
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_voorkeuren + '100002/')
-        self.assertEqual(resp.status_code, 404)     # 404 = Not allowed
+        self.assert403(resp)
 
     def test_geen_wedstrijden(self):
         # self.account_normaal is lid bij self.nhbver1

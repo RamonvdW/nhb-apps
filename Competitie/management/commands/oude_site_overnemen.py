@@ -9,15 +9,15 @@
 from django.utils.timezone import make_aware
 from django.core.management.base import BaseCommand
 from django.conf import settings
-from BasisTypen.models import BoogType
+from BasisTypen.models import BoogType, TeamType
 from NhbStructuur.models import NhbLid, NhbVereniging
 from Logboek.models import schrijf_in_logboek
 from Competitie.models import (Competitie, CompetitieKlasse,
                                LAAG_REGIO, DeelCompetitie, DeelcompetitieRonde,
-                               AG_NUL, RegioCompetitieSchutterBoog)
+                               AG_NUL, RegioCompetitieSchutterBoog, RegiocompetitieTeam)
 from Schutter.models import SchutterBoog
 from Wedstrijden.models import Wedstrijd, WedstrijdUitslag, WedstrijdenPlan
-from Score.models import Score, ScoreHist
+from Score.models import Score, ScoreHist, SCORE_TYPE_SCORE, SCORE_TYPE_INDIV_AG
 from decimal import Decimal
 import datetime
 import json
@@ -58,12 +58,15 @@ class Command(BaseCommand):
         self._verwijder = None             # wijst naar _verwijder_r_18 of _verwijder_r_25, afhankelijk van afstand
 
         self._cache_boogtype = dict()      # [afkorting] = BoogType
+        self._cache_teamtype = dict()      # [afkorting] = TeamType
         self._cache_klasse = dict()        # [competitie.pk, klasse_beschrijving] = CompetitieKlasse
         self._cache_nhblid = dict()        # [nhbnr] = NhbLid
+        self._cache_nhbver = dict()        # [ver_nr] = NhbVereniging
         self._cache_schutterboog = dict()  # [(nhblid, afkorting)] = SchutterBoog
-        self._cache_inschrijving = dict()  # [(deelcomp.pk, schutterboog.pk)] = RegioCompetitieSchutterBoog
+        self._cache_inschrijving = dict()  # [(comp.pk, schutterboog.pk)] = RegioCompetitieSchutterBoog
         self._cache_ag_score = dict()      # [(afstand, schutterboog.pk)] = Score
         self._cache_scores = dict()        # [(inschrijving.pk, ronde.pk)] = score
+        self._cache_teams = dict()         # [(afstand, ver_nr, team_naam)] = RegiocompetitieTeam   (met team_naam = "R-1098-1")
 
         self._prev_hash = dict()           # [fname] = hash
 
@@ -73,6 +76,8 @@ class Command(BaseCommand):
         self._pk2uitslag = dict()          # [uitslag.pk] = WedstrijdUitslag
 
         self._gezocht_99 = list()
+        self._nhbnr_uit_99nr = list()
+        self._nhbnr_scores = dict()
 
     def _roep_warning(self, msg):
         # print en tel waarschuwingen
@@ -92,10 +97,15 @@ class Command(BaseCommand):
             self._cache_boogtype[obj.afkorting] = obj
         # for
 
+        for obj in TeamType.objects.all():
+            self._cache_teamtype[obj.afkorting] = obj
+        # for
+
         for obj in (CompetitieKlasse
                     .objects
                     .select_related('competitie', 'indiv')
-                    .exclude(indiv__buiten_gebruik=True)):
+                    .filter(indiv__buiten_gebruik=False,
+                            team=None)):
             tup = (obj.competitie.pk, obj.indiv.beschrijving.lower())
             self._cache_klasse[tup] = obj
         # for
@@ -107,6 +117,10 @@ class Command(BaseCommand):
                     .all()):
             obj.volledige_naam_str = obj.volledige_naam()
             self._cache_nhblid[obj.nhb_nr] = obj
+        # for
+
+        for obj in NhbVereniging.objects.all():
+            self._cache_nhbver[obj.ver_nr] = obj
         # for
 
         for obj in (SchutterBoog
@@ -125,7 +139,7 @@ class Command(BaseCommand):
                                     'schutterboog',
                                     'bij_vereniging')
                     .all()):
-            tup = (obj.deelcompetitie.pk, obj.schutterboog.pk)
+            tup = (obj.deelcompetitie.competitie.pk, obj.schutterboog.pk)
             self._cache_inschrijving[tup] = obj
 
             tup = (obj.deelcompetitie.competitie.afstand, obj.schutterboog.pk)
@@ -135,7 +149,7 @@ class Command(BaseCommand):
         for obj in (Score
                     .objects
                     .select_related('schutterboog')
-                    .filter(is_ag=True,
+                    .filter(type=SCORE_TYPE_INDIV_AG,
                             afstand_meter__in=(18, 25))
                     .all()):
             tup = (obj.afstand_meter, obj.schutterboog.pk)
@@ -145,7 +159,7 @@ class Command(BaseCommand):
         for hist in (ScoreHist
                      .objects
                      .select_related('score', 'score__schutterboog')
-                     .filter(score__is_ag=False,
+                     .filter(score__type=SCORE_TYPE_SCORE,
                              notitie__startswith="Importeer scores van uitslagen.handboogsport.nl voor ronde ")):
             ronde = int(hist.notitie[-1])
             score = hist.score
@@ -157,6 +171,15 @@ class Command(BaseCommand):
             else:
                 tup = (inschrijving.pk, ronde)
                 self._cache_scores[tup] = score
+        # for
+
+        for obj in (RegiocompetitieTeam
+                    .objects
+                    .select_related('vereniging',
+                                    'deelcompetitie__competitie')
+                    .all()):
+            tup = (obj.deelcompetitie.competitie.afstand, str(obj.vereniging.ver_nr), obj.team_naam)
+            self._cache_teams[tup] = obj
         # for
 
     def _prep_regio2deelcomp_regio2ronde2uitslag(self):
@@ -311,7 +334,7 @@ class Command(BaseCommand):
             # maak een tijdelijk AG aan dat we niet opslaan
             # want de oude site vult ontbrekende AG's aan vanaf 3 scores
             score = Score()
-            score.is_ag = True
+            score.type = SCORE_TYPE_INDIV_AG
             score.schutterboog = schutterboog
             score.afstand_meter = self._afstand
             score.waarde = waarde
@@ -332,9 +355,9 @@ class Command(BaseCommand):
 
         return score
 
-    def _vind_of_maak_inschrijving(self, deelcomp, schutterboog, lid_vereniging, ag_str):
+    def _vind_of_maak_inschrijving(self, deelcomp, schutterboog, lid_vereniging, ag_str, teamtype):
         # zoek de RegioCompetitieSchutterBoog erbij
-        tup = (deelcomp.pk, schutterboog.pk)
+        tup = (deelcomp.competitie.pk, schutterboog.pk)
         try:
             inschrijving = self._cache_inschrijving[tup]
         except KeyError:
@@ -344,6 +367,7 @@ class Command(BaseCommand):
             inschrijving.schutterboog = schutterboog
             inschrijving.bij_vereniging = lid_vereniging
             inschrijving.klasse = self._klasse
+            inschrijving.inschrijf_voorkeur_team = (teamtype is not None)
 
             if ag_str:
                 inschrijving.aanvangsgemiddelde = ag_str
@@ -353,6 +377,10 @@ class Command(BaseCommand):
                 inschrijving.save()
 
             self._cache_inschrijving[tup] = inschrijving
+        else:
+            if teamtype:
+                inschrijving.inschrijf_voorkeur_team = True
+                inschrijving.save()
 
         return inschrijving
 
@@ -361,11 +389,15 @@ class Command(BaseCommand):
 
         uitslagen = self._regio2ronde2uitslag[regio_nr]
 
-        for ronde in range(1, 7+1):
+        heb_eerste_score = False
+        for ronde in range(7, 0, -1):
             notitie = "Importeer scores van uitslagen.handboogsport.nl voor ronde %s" % ronde
 
             waarde = scores[ronde - 1]
-            if waarde:              # filter 0
+
+            if heb_eerste_score or waarde:              # filter 0 van nog niet geschoten wedstrijden
+                heb_eerste_score = True
+
                 # zoek de uitslag van de virtuele wedstrijd erbij
                 uitslag = uitslagen[ronde]
 
@@ -375,7 +407,7 @@ class Command(BaseCommand):
                 except KeyError:
                     # eerste keer: maak het record + score aan
                     score = Score()
-                    score.is_ag = False
+                    score.type = SCORE_TYPE_SCORE
                     score.afstand_meter = self._afstand
                     score.schutterboog = inschrijving.schutterboog
                     score.waarde = waarde
@@ -408,11 +440,30 @@ class Command(BaseCommand):
 
                         score.waarde = waarde
                         score.save()
+            else:
+                # hanteer het op 0 zetten van een van de achterste score
+                tup = (inschrijving.pk, ronde)
+                try:
+                    score = self._cache_scores[tup]
+                except KeyError:
+                    # geen score, geen probleem
+                    pass
+                else:
+                    # zet deze score op 0
+                    hist = ScoreHist()
+                    hist.score = score
+                    hist.oude_waarde = score.waarde
+                    hist.nieuwe_waarde = waarde
+                    hist.notitie = notitie
+                    self._bulk_hist.append(hist)
+
+                    score.waarde = waarde
+                    score.save()
         # for
 
     def _zoek_echte_lid(self, nhb_nr, naam, ver_nr):
 
-        objs = NhbLid.objects.filter(bij_vereniging__nhb_nr=ver_nr)
+        objs = NhbLid.objects.filter(bij_vereniging__ver_nr=ver_nr)
         objs_no_ver = NhbLid.objects.filter(bij_vereniging__isnull=True)
 
         # doe een paar kleine aanpassingen aan de naam
@@ -489,10 +540,14 @@ class Command(BaseCommand):
 
         return None
 
-    def _verwerk_schutter(self, nhb_nr, naam, ver_nr, ag_str, scores):
+    def _verwerk_schutter(self, nhb_nr, naam, ver_nr, ag_str, scores, teamtype):
+
+        aantal_scores = len(scores) - scores.count(0)
 
         if nhb_nr >= 990000 and nhb_nr not in self._gezocht_99:
             try:
+                self._nhbnr_scores[nhb_nr] = scores
+                self._nhbnr_uit_99nr.append(nhb_nr)
                 nhb_nr = settings.MAP_99_NRS[nhb_nr]
             except KeyError:
                 # niet een bekende mapping - doe een voorstel
@@ -509,6 +564,11 @@ class Command(BaseCommand):
                     self.stdout.write(msg)
                 else:
                     self.stdout.write('[WARNING] No match for %s %s %s' % (nhb_nr, ver_nr, naam))
+        else:
+            if nhb_nr in settings.MAP_99_NRS.values():
+                self._nhbnr_uit_99nr.append(nhb_nr)
+                self._nhbnr_scores[nhb_nr] = scores
+                # kan geen problemen voorkomen, want afhankelijk van volgorde
 
         # zoek naar hout schutters die ook bij recurve staan
         if self._boogtype.afkorting in ('BB', 'IB', 'LB'):
@@ -539,8 +599,6 @@ class Command(BaseCommand):
                 self._roep_info('Verschil in lid %s naam: bekend=%s, oude programma=%s' % (
                                     lid.nhb_nr, lid.volledige_naam_str, naam))
 
-        aantal_scores = len(scores) - scores.count(0)
-
         lid_ver = None
         if not lid.bij_vereniging:
             # sporter is op dit moment niet meer lid bij een vereniging
@@ -548,7 +606,7 @@ class Command(BaseCommand):
 
             # zoek de oude vereniging erbij
             try:
-                lid_ver = NhbVereniging.objects.get(nhb_nr=ver_nr)
+                lid_ver = NhbVereniging.objects.get(ver_nr=ver_nr)
             except NhbVereniging.DoesNotExist:
                 self.stderr.write('[ERROR] Vereniging %s is niet bekend; kan lid %s niet inschrijven (bij de oude vereniging)' % (
                                       ver_nr, nhb_nr))
@@ -560,10 +618,10 @@ class Command(BaseCommand):
                 self._roep_warning('Lid %s heeft %s scores maar geen vereniging en wordt ingeschreven onder de oude vereniging' % (
                                        nhb_nr, aantal_scores))
         else:
-            if str(lid.bij_vereniging.nhb_nr) != ver_nr:
+            if str(lid.bij_vereniging.ver_nr) != ver_nr:
                 # vind de oude vereniging, want die moeten we opslaan bij de inschrijving
                 try:
-                    lid_ver = NhbVereniging.objects.get(nhb_nr=ver_nr)
+                    lid_ver = NhbVereniging.objects.get(ver_nr=ver_nr)
                 except NhbVereniging.DoesNotExist:
                     self.stderr.write('[ERROR] Vereniging %s is niet bekend; kan lid %s niet inschrijven' % (
                                           ver_nr, nhb_nr))
@@ -578,7 +636,7 @@ class Command(BaseCommand):
         schutterboog = self._vind_schutterboog(lid)
         score_ag = self._vind_of_maak_ag(schutterboog, ag_str, aantal_scores)
 
-        inschrijving = self._vind_of_maak_inschrijving(deelcomp, schutterboog, lid_ver, ag_str)
+        inschrijving = self._vind_of_maak_inschrijving(deelcomp, schutterboog, lid_ver, ag_str, teamtype)
 
         if not self._dryrun:
             # bij 3 scores wordt de schutter verplaatst van klasse onbekend naar andere klasse
@@ -599,13 +657,46 @@ class Command(BaseCommand):
                         inschrijving.klasse,
                         self._klasse))
 
-    def _verwerk_klassen(self, data):
+    def _verwerk_ver_teams(self, data, afstand, afkorting):
+        for ver_nr, team_data in data.items():
+            try:
+                ver = self._cache_nhbver[int(ver_nr)]
+            except (ValueError, KeyError):
+                pass
+            else:
+                for team_nr in team_data.keys():
+                    naam = "%s-%s-%s" % (afkorting, ver_nr, team_nr)        # R-1000-1
+                    tup = (str(afstand), ver_nr, naam)
+                    if tup not in self._cache_teams:
+                        # nieuw team
+
+                        volg_nrs = [obj.volg_nr for obj in self._cache_teams.values() if obj.vereniging.ver_nr == ver.ver_nr and obj.deelcompetitie.competitie == self._comp]
+                        volg_nrs.append(0)
+                        next_nr = max(volg_nrs) + 1
+
+                        team = RegiocompetitieTeam(
+                                    deelcompetitie=self._regio2deelcomp[ver.regio.regio_nr],
+                                    vereniging=ver,
+                                    volg_nr=next_nr,
+                                    team_type=self._cache_teamtype[afkorting],
+                                    team_naam=naam)
+                        team.save()
+                        self._cache_teams[tup] = team
+                        self.stdout.write('[INFO] Regio team aangemaakt: %s in competitie %s' % (naam, self._comp))
+                # for
+        # for
+
+    def _verwerk_klassen(self, data, afstand, afkorting):
         self._bulk_score = list()
         self._bulk_hist = list()
         self._bulk_uitslag = dict()
         self._pk2uitslag = dict()
 
         for klasse, data_schutters in data.items():
+            if klasse == "ver_teams":
+                self._verwerk_ver_teams(data_schutters, afstand, afkorting)
+                continue
+
             self._selecteer_klasse(klasse)
 
             for nhb_nr, data_schutter in data_schutters.items():
@@ -613,8 +704,13 @@ class Command(BaseCommand):
                 ver_nr = data_schutter['v']
                 ag = data_schutter['a']         # "9.123"
                 scores = data_schutter['s']     # list
+                try:
+                    teamtype_str = data_schutter['t']
+                    teamtype = self._cache_teamtype[teamtype_str]
+                except KeyError:
+                    teamtype = None
 
-                self._verwerk_schutter(int(nhb_nr), naam, ver_nr, ag, scores)
+                self._verwerk_schutter(int(nhb_nr), naam, ver_nr, ag, scores, teamtype)
         # for
 
         # bulk-create the scores en scorehist records
@@ -684,8 +780,8 @@ class Command(BaseCommand):
             self._afstand = afstand
             self._comp = None
             for comp in Competitie.objects.filter(afstand=afstand):
-                comp.zet_fase()
-                if 'B' <= comp.fase <= 'F':
+                comp.bepaal_fase()
+                if 'E' <= comp.fase <= 'F':
                     # in de regiocompetitie wedstrijdfase, dus importeren
                     self._comp = comp
             # for
@@ -708,10 +804,19 @@ class Command(BaseCommand):
                 for afkorting in ('C', 'BB', 'IB', 'LB', 'R'):
                     self._boogtype = self._cache_boogtype[afkorting]
                     boog_data = afstand_data[afkorting]
-                    self._verwerk_klassen(boog_data)
+                    self._verwerk_klassen(boog_data, afstand, afkorting)
                 # for
             else:
-                self.stdout.write('[WARNING] Import %sm wordt overgeslagen want geen competitie gevonden in fase B..F' % afstand)
+                self.stdout.write('[WARNING] Import %sm wordt overgeslagen want geen competitie gevonden in fase E..F' % afstand)
+
+            for old, new in settings.MAP_99_NRS.items():
+                if old in self._nhbnr_uit_99nr and new in self._nhbnr_uit_99nr:
+                    self.stderr.write('[WARNING] Mogelijke dubbele deelnemer met %s nummer en %s' % (old, new))
+                    self.stderr.write('          %s scores: %s' % (old, self._nhbnr_scores[old]))
+                    self.stderr.write('          %s scores: %s' % (new, self._nhbnr_scores[new]))
+            # for
+
+            self._nhbnr_uit_99nr = list()
         # for
 
         self._verwijder_dubbele_deelnemers()

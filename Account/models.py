@@ -1,17 +1,14 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import models
-from django.conf import settings
-from django.utils import timezone
 from django.contrib.auth.models import AbstractUser
-from Overig.tijdelijke_url import set_tijdelijke_url_receiver, maak_tijdelijke_url_account_email
-from Account.rechten import account_rechten_otp_controle_gelukt
+from django.contrib.sessions.models import Session
+from Overig.tijdelijke_url import maak_tijdelijke_url_account_email
 from Mailer.models import mailer_email_is_valide
-import datetime
 
 
 class AccountCreateError(Exception):
@@ -65,9 +62,9 @@ class Account(AbstractUser):
 
     # TOTP ondersteuning
     otp_code = models.CharField(
-                        max_length=16,          # 16-char base32 encoded secret
+                        max_length=32,          # 32-char base32 encoded secret
                         default="", blank=True,
-                        help_text ="OTP code")
+                        help_text="OTP code")
 
     otp_is_actief = models.BooleanField(
                         default=False,
@@ -155,30 +152,6 @@ class AccountEmail(models.Model):
         """ meta data voor de admin interface """
         verbose_name = "AccountEmail"
         verbose_name_plural = "AccountEmails"
-
-    objects = models.Manager()      # for the editor only
-
-
-class HanterenPersoonsgegevens(models.Model):
-    """ status van de vraag om juist om te gaan met persoonsgegevens,
-        voor de paar accounts waarvoor dit relevant is.
-    """
-
-    # het account waar dit record bij hoort
-    account = models.ForeignKey(Account, on_delete=models.CASCADE)
-
-    # datum waarop de acceptatie voor het laatste gedaan is
-    acceptatie_datum = models.DateTimeField()
-
-    def __str__(self):
-        """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
-        return "%s [%s]" % (str(self.acceptatie_datum),
-                            self.account.username)
-
-    class Meta:
-        """ meta data voor de admin interface """
-        verbose_name = "Hanteren Persoonsgegevens"
-        verbose_name_plural = "Hanteren Persoonsgegevens"
 
     objects = models.Manager()      # for the editor only
 
@@ -325,6 +298,18 @@ def account_test_wachtwoord_sterkte(wachtwoord, verboden_str):
             return False, "Wachtwoord is niet sterk genoeg"
 
     return True, None
+
+
+class AccountSessions(models.Model):
+    """ Speciale table om bij te houden welke sessies bij een account horen
+        zodat we deze eenvoudig kunnen benaderen.
+    """
+
+    # helaas gaat dit niet met een ManyToMany relatie, dus moet het zo
+    # (based on https://gavinballard.com/associating-django-users-sessions/)
+
+    account = models.ForeignKey(Account, on_delete=models.CASCADE)
+    session = models.ForeignKey(Session, on_delete=models.CASCADE)
 
 
 # end of file

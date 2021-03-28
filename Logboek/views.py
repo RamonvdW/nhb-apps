@@ -8,7 +8,6 @@ from django.views.generic import ListView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.db.models import Q, Value
 from django.db.models.functions import Concat
-from django.http import HttpResponseRedirect
 from django.urls import reverse
 from Functie.rol import Rollen, rol_get_huidige
 from Plein.menu import menu_dynamics
@@ -38,14 +37,11 @@ class LogboekBasisView(UserPassesTestMixin, ListView):
     template_name = ""              # must override
     base_url = ""                   # must override
     paginate_by = RESULTS_PER_PAGE  # enable Paginator built into ListView
+    raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         return rol_get_huidige(self.request) in (Rollen.ROL_IT, Rollen.ROL_BB)
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        return HttpResponseRedirect(reverse('Plein:plein'))
 
     def _make_link_urls(self, context):
         # voorbereidingen voor een regel met volgende/vorige links
