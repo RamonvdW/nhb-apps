@@ -76,6 +76,8 @@ class Command(BaseCommand):
         self._pk2uitslag = dict()          # [uitslag.pk] = WedstrijdUitslag
 
         self._gezocht_99 = list()
+        self._nhbnr_uit_99nr = list()
+        self._nhbnr_scores = dict()
 
     def _roep_warning(self, msg):
         # print en tel waarschuwingen
@@ -540,8 +542,12 @@ class Command(BaseCommand):
 
     def _verwerk_schutter(self, nhb_nr, naam, ver_nr, ag_str, scores, teamtype):
 
+        aantal_scores = len(scores) - scores.count(0)
+
         if nhb_nr >= 990000 and nhb_nr not in self._gezocht_99:
             try:
+                self._nhbnr_scores[nhb_nr] = scores
+                self._nhbnr_uit_99nr.append(nhb_nr)
                 nhb_nr = settings.MAP_99_NRS[nhb_nr]
             except KeyError:
                 # niet een bekende mapping - doe een voorstel
@@ -558,6 +564,11 @@ class Command(BaseCommand):
                     self.stdout.write(msg)
                 else:
                     self.stdout.write('[WARNING] No match for %s %s %s' % (nhb_nr, ver_nr, naam))
+        else:
+            if nhb_nr in settings.MAP_99_NRS.values():
+                self._nhbnr_uit_99nr.append(nhb_nr)
+                self._nhbnr_scores[nhb_nr] = scores
+                # kan geen problemen voorkomen, want afhankelijk van volgorde
 
         # zoek naar hout schutters die ook bij recurve staan
         if self._boogtype.afkorting in ('BB', 'IB', 'LB'):
@@ -587,8 +598,6 @@ class Command(BaseCommand):
                 self._meld_afwijking_lid.append(tup)
                 self._roep_info('Verschil in lid %s naam: bekend=%s, oude programma=%s' % (
                                     lid.nhb_nr, lid.volledige_naam_str, naam))
-
-        aantal_scores = len(scores) - scores.count(0)
 
         lid_ver = None
         if not lid.bij_vereniging:
@@ -799,6 +808,15 @@ class Command(BaseCommand):
                 # for
             else:
                 self.stdout.write('[WARNING] Import %sm wordt overgeslagen want geen competitie gevonden in fase E..F' % afstand)
+
+            for old, new in settings.MAP_99_NRS.items():
+                if old in self._nhbnr_uit_99nr and new in self._nhbnr_uit_99nr:
+                    self.stderr.write('[WARNING] Mogelijke dubbele deelnemer met %s nummer en %s' % (old, new))
+                    self.stderr.write('          %s scores: %s' % (old, self._nhbnr_scores[old]))
+                    self.stderr.write('          %s scores: %s' % (new, self._nhbnr_scores[new]))
+            # for
+
+            self._nhbnr_uit_99nr = list()
         # for
 
         self._verwijder_dubbele_deelnemers()
