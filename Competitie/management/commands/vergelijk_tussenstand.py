@@ -142,14 +142,19 @@ class Command(BaseCommand):
                       inschrijving.score5, inschrijving.score6, inschrijving.score7]
 
         if scores != opgeslagen:
-            self.stdout.write('[WARNING] Verschil voor %s: opgeslagen:%s != oude_site:%s' % (inschrijving, repr(opgeslagen), repr(scores)))
+            # soms worden scores tegelijk ingevoerd en kunnen we de volgorde niet vasthouden
+            scores.sort()
+            opgeslagen.sort()
 
-            scores = Score.objects.filter(schutterboog=inschrijving.schutterboog,
-                                          afstand_meter=inschrijving.deelcompetitie.competitie.afstand,
-                                          type=SCORE_TYPE_SCORE)
-            self.stdout.write('[WARNING] Alle gevonden scores:')
-            for score in scores:
-                self.stdout.write('             %s' % score)
+            if scores != opgeslagen:
+                self.stdout.write('[WARNING] Verschil voor %s: opgeslagen:%s != oude_site:%s' % (inschrijving, repr(opgeslagen), repr(scores)))
+
+                scores = Score.objects.filter(schutterboog=inschrijving.schutterboog,
+                                              afstand_meter=inschrijving.deelcompetitie.competitie.afstand,
+                                              type=SCORE_TYPE_SCORE)
+                self.stdout.write('[WARNING] Alle gevonden scores:')
+                for score in scores:
+                    self.stdout.write('             %s' % score)
 
     def _verwerk_schutter(self, nhb_nr, ver_nr, scores):
 
