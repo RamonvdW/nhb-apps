@@ -24,6 +24,8 @@ class ScoreAdmin(admin.ModelAdmin):
     # velden die niet gewijzigd mogen worden via de admin interface
     readonly_fields = ('geschiedenis', )
 
+    search_fields = ('schutterboog__nhblid__nhb_nr',)
+
     @staticmethod
     def geschiedenis(obj):     # pragma: no cover
         return "\n".join([str(scorehist) for scorehist in obj.scorehist_set.all()])
