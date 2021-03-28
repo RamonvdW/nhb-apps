@@ -63,7 +63,7 @@ class Command(BaseCommand):
         self._cache_nhblid = dict()        # [nhbnr] = NhbLid
         self._cache_nhbver = dict()        # [ver_nr] = NhbVereniging
         self._cache_schutterboog = dict()  # [(nhblid, afkorting)] = SchutterBoog
-        self._cache_inschrijving = dict()  # [(deelcomp.pk, schutterboog.pk)] = RegioCompetitieSchutterBoog
+        self._cache_inschrijving = dict()  # [(comp.pk, schutterboog.pk)] = RegioCompetitieSchutterBoog
         self._cache_ag_score = dict()      # [(afstand, schutterboog.pk)] = Score
         self._cache_scores = dict()        # [(inschrijving.pk, ronde.pk)] = score
         self._cache_teams = dict()         # [(afstand, ver_nr, team_naam)] = RegiocompetitieTeam   (met team_naam = "R-1098-1")
@@ -137,7 +137,7 @@ class Command(BaseCommand):
                                     'schutterboog',
                                     'bij_vereniging')
                     .all()):
-            tup = (obj.deelcompetitie.pk, obj.schutterboog.pk)
+            tup = (obj.deelcompetitie.competitie.pk, obj.schutterboog.pk)
             self._cache_inschrijving[tup] = obj
 
             tup = (obj.deelcompetitie.competitie.afstand, obj.schutterboog.pk)
@@ -355,7 +355,7 @@ class Command(BaseCommand):
 
     def _vind_of_maak_inschrijving(self, deelcomp, schutterboog, lid_vereniging, ag_str, teamtype):
         # zoek de RegioCompetitieSchutterBoog erbij
-        tup = (deelcomp.pk, schutterboog.pk)
+        tup = (deelcomp.competitie.pk, schutterboog.pk)
         try:
             inschrijving = self._cache_inschrijving[tup]
         except KeyError:
@@ -387,11 +387,15 @@ class Command(BaseCommand):
 
         uitslagen = self._regio2ronde2uitslag[regio_nr]
 
-        for ronde in range(1, 7+1):
+        heb_eerste_score = False
+        for ronde in range(7, 0, -1):
             notitie = "Importeer scores van uitslagen.handboogsport.nl voor ronde %s" % ronde
 
             waarde = scores[ronde - 1]
-            if waarde:              # filter 0
+
+            if heb_eerste_score or waarde:              # filter 0 van nog niet geschoten wedstrijden
+                heb_eerste_score = True
+
                 # zoek de uitslag van de virtuele wedstrijd erbij
                 uitslag = uitslagen[ronde]
 
@@ -434,6 +438,25 @@ class Command(BaseCommand):
 
                         score.waarde = waarde
                         score.save()
+            else:
+                # hanteer het op 0 zetten van een van de achterste score
+                tup = (inschrijving.pk, ronde)
+                try:
+                    score = self._cache_scores[tup]
+                except KeyError:
+                    # geen score, geen probleem
+                    pass
+                else:
+                    # zet deze score op 0
+                    hist = ScoreHist()
+                    hist.score = score
+                    hist.oude_waarde = score.waarde
+                    hist.nieuwe_waarde = waarde
+                    hist.notitie = notitie
+                    self._bulk_hist.append(hist)
+
+                    score.waarde = waarde
+                    score.save()
         # for
 
     def _zoek_echte_lid(self, nhb_nr, naam, ver_nr):
