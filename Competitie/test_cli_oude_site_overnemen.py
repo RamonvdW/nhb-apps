@@ -239,7 +239,7 @@ class TestCompetitieCliOudeSiteOvernemen(E2EHelpers, TestCase):
         # eerst aanmaken, dan verwijderen
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(1860):
+        with self.assert_max_queries(1861):
             management.call_command('oude_site_overnemen', self.dir_testfiles1, '100', stderr=f1, stdout=f2)
 
         # verwijder de uitslag van een wedstrijd
@@ -294,7 +294,7 @@ class TestCompetitieCliOudeSiteOvernemen(E2EHelpers, TestCase):
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(1860):
+        with self.assert_max_queries(1861):
             management.call_command('oude_site_overnemen', self.dir_testfiles1, '100', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
@@ -315,7 +315,7 @@ class TestCompetitieCliOudeSiteOvernemen(E2EHelpers, TestCase):
         # nog een keer, want dan zijn de uitslagen er al (extra coverage)
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(922):
+        with self.assert_max_queries(923):
             management.call_command('oude_site_overnemen', self.dir_testfiles1, '1', stderr=f1, stdout=f2)
 
         self.assertEqual(ScoreHist.objects.count(), 4)
