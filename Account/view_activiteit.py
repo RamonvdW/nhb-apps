@@ -83,8 +83,15 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
                       .order_by('account', 'session__expire_date'))
             for obj in accses:
                 session = SessionStore(session_key=obj.session.session_key)
-                obj.mag_wisselen_str = session[SESSIONVAR_ROL_MAG_WISSELEN]
-                obj.laatste_rol_str = rol2url[session[SESSIONVAR_ROL_HUIDIGE]]
+                try:
+                    obj.mag_wisselen_str = session[SESSIONVAR_ROL_MAG_WISSELEN]
+                except KeyError:
+                    obj.mag_wisselen_str = '?'
+
+                try:
+                    obj.laatste_rol_str = rol2url[session[SESSIONVAR_ROL_HUIDIGE]]
+                except KeyError:
+                    obj.laatste_rol_str = '?'
             # for
             context['accses'] = accses
 
