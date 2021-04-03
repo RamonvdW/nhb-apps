@@ -12,8 +12,12 @@ from django.views.generic import TemplateView, View
 from django.core.exceptions import PermissionDenied, SuspiciousOperation
 from Functie.rol import Rollen, rol_get_huidige, rol_get_beschrijving
 from Handleiding.views import reverse_handleiding
+from Mailer.models import mailer_notify_internal_error
 from Taken.taken import eval_open_taken
 from .menu import menu_dynamics
+import traceback
+import logging
+import sys
 
 
 TEMPLATE_PLEIN_BEZOEKER = 'plein/plein-bezoeker.dtl'    # niet ingelogd
@@ -34,6 +38,9 @@ ROL2HANDLEIDING_PAGINA = {
     Rollen.ROL_WL:  settings.HANDLEIDING_WL,
     Rollen.ROL_SEC: settings.HANDLEIDING_SEC,
 }
+
+my_logger = logging.getLogger('NHBApps.Plein')
+in_500_handler = False
 
 
 def is_browser_supported(request):
@@ -210,7 +217,29 @@ def site_handler500_internal_server_error(request, exception=None):
 
         Deze function wordt aangeroepen bij runtime errors met de view code.
     """
-    # print('site_handler500: exception=%s; info=%s' % (repr(exception), str(exception)))
+    #print('site_handler500: exception=%s; info=%s' % (repr(exception), str(exception)))
+    global in_500_handler
+
+    # vang de fout en schrijf deze in de syslog
+    tups = sys.exc_info()
+    tb = traceback.format_exception(*tups)
+    tb_msg = '\n'.join(tb)
+    my_logger.error('Internal server error:\n' + tb_msg)
+
+    # voorkom fout op fout
+    if not in_500_handler:
+        in_500_handler = True
+
+        # stuur een mail naar de ontwikkelaars
+        # reduceer tot de nuttige regels
+        tb = [line for line in tb if '/site-packages/' not in line]
+        tb_msg = '\n'.join(tb)
+
+        # deze functie stuurt maximaal 1 mail per dag over hetzelfde probleem
+        mailer_notify_internal_error(tb_msg)
+
+        in_500_handler = False
+
     context = dict()
     return render(request, TEMPLATE_HANDLER_500, context)
 

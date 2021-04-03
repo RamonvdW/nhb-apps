@@ -7,6 +7,7 @@
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
+import datetime
 
 
 class MailQueue(models.Model):
@@ -112,6 +113,31 @@ def mailer_email_is_valide(adres):
         if '.' in domein:
             return True
     return False
+
+
+def mailer_notify_internal_error(tb):
+    """ Deze functie stuurt een mail over een internal server error,
+        maar zorgt ervoor dat er maximaal 1 mail per dag wordt gestuurd
+        over hetzelfde probleem.
+    """
+
+    now = timezone.now()    # in utc
+    recent = now - datetime.timedelta(days=1)
+
+    if (MailQueue
+        .objects
+        .filter(toegevoegd_op__gt=recent,
+                mail_to=settings.EMAIL_DEVELOPER_TO,
+                mail_subj=settings.EMAIL_DEVELOPER_SUBJ,
+                mail_text=tb)
+        .count() == 0):
+
+        # nog niet gerapporteerd in de afgelopen 24 uur
+        mailer_queue_email(
+                settings.EMAIL_DEVELOPER_TO,
+                settings.EMAIL_DEVELOPER_SUBJ,
+                tb,
+                enforce_whitelist=False)
 
 
 # end of file
