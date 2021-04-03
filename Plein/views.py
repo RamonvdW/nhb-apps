@@ -227,7 +227,7 @@ def site_handler500_internal_server_error(request, exception=None):
     my_logger.error('Internal server error:\n' + tb_msg)
 
     # voorkom fout op fout
-    if not in_500_handler:
+    if not in_500_handler:              # pragma: no branch
         in_500_handler = True
 
         # stuur een mail naar de ontwikkelaars

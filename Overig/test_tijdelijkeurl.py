@@ -115,6 +115,10 @@ class TestOverigTijdelijkeUrl(E2EHelpers, TestCase):
         self.assertTrue("/overig/url/" in url)
         self.callback_count = 1
 
+        # extra coverage
+        obj = SiteTijdelijkeUrl.objects.all()[0]
+        self.assertTrue(str(obj) != '')
+
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
@@ -143,6 +147,10 @@ class TestOverigTijdelijkeUrl(E2EHelpers, TestCase):
         self.assertTrue("/overig/url/" in url)
         self.callback_count = 0
 
+        # extra coverage
+        obj = SiteTijdelijkeUrl.objects.all()[0]
+        self.assertTrue(str(obj) != '')
+
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
@@ -169,6 +177,10 @@ class TestOverigTijdelijkeUrl(E2EHelpers, TestCase):
         url = maak_tijdelijke_url_wachtwoord_vergeten(self.email_normaal, test="drie")
         self.assertTrue("/overig/url/" in url)
         self.callback_count = 0
+
+        # extra coverage
+        obj = SiteTijdelijkeUrl.objects.all()[0]
+        self.assertTrue(str(obj) != '')
 
         with self.assert_max_queries(20):
             resp = self.client.get(url)
@@ -205,6 +217,10 @@ class TestOverigTijdelijkeUrl(E2EHelpers, TestCase):
         self.assertTrue("/overig/url/" in url)
         self.callback_count = 0
 
+        # extra coverage
+        obj = SiteTijdelijkeUrl.objects.all()[0]
+        self.assertTrue(str(obj) != '')
+
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
@@ -228,5 +244,8 @@ class TestOverigTijdelijkeUrl(E2EHelpers, TestCase):
 
     def test_other_http(self):
         self.e2e_assert_other_http_commands_not_supported('/overig/url/0/')
+
+
+# TODO: tijdelijke URL horende bij kampioenschap
 
 # end of file

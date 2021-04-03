@@ -5,13 +5,14 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from .menu import menu_dynamics
 from Functie.models import maak_functie
+from Mailer.models import MailQueue
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
 from Overig.e2ehelpers import E2EHelpers
-from types import SimpleNamespace
 from .views import is_browser_supported
+from .menu import menu_dynamics
 import datetime
+import types
 
 
 class TestPlein(E2EHelpers, TestCase):
@@ -251,8 +252,8 @@ class TestPlein(E2EHelpers, TestCase):
     def test_dynamic_menu_assert(self):
         # test the assert in menu_dynamics
         context = dict()
-        request = SimpleNamespace()      # creates an empty object
-        request.user = SimpleNamespace()
+        request = types.SimpleNamespace()      # creates an empty object
+        request.user = types.SimpleNamespace()
         request.user.is_authenticated = False
         with self.assertRaises(AssertionError):
             menu_dynamics(request, context, actief='test-bestaat-niet')
@@ -271,7 +272,7 @@ class TestPlein(E2EHelpers, TestCase):
         urls = self.extract_all_urls(resp)      # for coverage
 
     def test_is_browser_supported(self):
-        request = SimpleNamespace()
+        request = types.SimpleNamespace()
         request.META = dict()
 
         # geen header
@@ -341,9 +342,18 @@ class TestPlein(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('plein/fout_404.dtl', 'plein/site_layout_minimaal.dtl'))
 
     def test_500(self):
+        self.assertEqual(0, MailQueue.objects.count())
         resp = self.client.get('/plein/test-speciale-pagina/500/')
         self.assertTrue(resp.status_code, 200)
         self.assert_template_used(resp, ('plein/fout_500.dtl', 'plein/site_layout_minimaal.dtl'))
         self.assert_html_ok(resp)
+        self.assertEqual(1, MailQueue.objects.count())
+
+        # nog een keer, zodat de email naar de ontwikkelaar er al is
+        resp = self.client.get('/plein/test-speciale-pagina/500/')
+        self.assertTrue(resp.status_code, 200)
+
+        # controleer dat er maar 1 mail geschreven wordt (per dag)
+        self.assertEqual(1, MailQueue.objects.count())
 
 # end of file
