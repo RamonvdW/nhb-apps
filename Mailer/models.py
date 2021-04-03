@@ -140,4 +140,25 @@ def mailer_notify_internal_error(tb):
                 enforce_whitelist=False)
 
 
+def mailer_opschonen(stdout):
+    """ deze functie wordt typisch 1x per dag aangeroepen om de database
+        tabellen van deze applicatie op te kunnen schonen.
+
+        We verwijderen verstuurde emails van meer dan 3 maanden oud
+    """
+
+    now = timezone.now()
+    max_age = now - datetime.timedelta(days=91)
+
+    # verwijder mails die lang geleden verstuurd zijn / hadden moeten worden
+    objs = (MailQueue
+            .objects
+            .filter(toegevoegd_op__lt=max_age))
+
+    count = objs.count()
+    if count > 0:
+        stdout.write('[INFO] Verwijder %s oude emails' % count)
+        objs.delete()
+
+
 # end of file

@@ -9,6 +9,8 @@ from django.contrib.auth.models import AbstractUser
 from django.contrib.sessions.models import Session
 from Overig.tijdelijke_url import maak_tijdelijke_url_account_email
 from Mailer.models import mailer_email_is_valide
+from django.utils import timezone
+import datetime
 
 
 class AccountCreateError(Exception):
@@ -310,6 +312,32 @@ class AccountSessions(models.Model):
 
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
     session = models.ForeignKey(Session, on_delete=models.CASCADE)
+
+
+def accounts_opschonen(stdout):
+    """ deze functie wordt typisch 1x per dag aangeroepen om de database
+        tabellen van deze applicatie op te kunnen schonen.
+
+        We verwijderen nieuwe accounts die na 3 dagen nog niet voltooid zijn
+    """
+
+    now = timezone.now()
+    wat_ouder = now - datetime.timedelta(days=3)
+
+    # zoek gebruikers die een account aangemaakt hebben,
+    # maar de mail niet binnen 3 dagen bevestigen
+    # door deze te verwijderen kan de registratie opnieuw doorlopen worden
+    for obj in (AccountEmail
+                .objects
+                .select_related('account')
+                .filter(email_is_bevestigd=False,
+                        bevestigde_email='',
+                        account__last_login=None,
+                        account__date_joined__lt=wat_ouder)):
+
+        stdout.write('[INFO] Verwijder onvoltooid account %s' % obj.account)
+        obj.account.delete()
+    # for
 
 
 # end of file
