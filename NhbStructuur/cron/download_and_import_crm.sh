@@ -1,10 +1,10 @@
 #!/bin/bash
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-# script for daily (or faster) execution by a crob job
+# script for daily (or faster) execution by a cron job
 
 LOGDIR="/var/log/www"
 SPOOLDIR="/var/spool/crm"
