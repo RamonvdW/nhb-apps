@@ -11,7 +11,7 @@ from .models import WedstrijdLocatie, Wedstrijd, WedstrijdenPlan, WedstrijdUitsl
 class WedstrijdAdmin(admin.ModelAdmin):             # pragma: no cover
     """ Admin configuratie voor Wedstrijd """
 
-    search_fields = ('beschrijving', 'vereniging')
+    search_fields = ('beschrijving', 'vereniging__ver_nr', 'vereniging__naam')
 
     filter_horizontal = ('indiv_klassen', 'team_klassen')
 

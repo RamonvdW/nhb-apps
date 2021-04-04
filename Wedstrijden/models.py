@@ -132,10 +132,10 @@ class Wedstrijd(models.Model):
                                 blank=True, null=True)
 
     def __str__(self):
+        extra = ""
         if self.vereniging:
-            return "(%s) %s %s bij %s" % (self.pk, self.datum_wanneer, self.tijd_begin_wedstrijd, self.vereniging)
-        else:
-            return "(%s) %s %s: %s" % (self.pk, self.datum_wanneer, self.tijd_begin_wedstrijd, self.beschrijving)
+            extra = " bij %s" % self.vereniging
+        return "(%s) %s %s%s: %s" % (self.pk, self.datum_wanneer, self.tijd_begin_wedstrijd, extra, self.beschrijving)
 
     class Meta:
         """ meta data voor de admin interface """
