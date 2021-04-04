@@ -17,6 +17,8 @@ then
 fi
 
 cd $(dirname $0)    # ga naar de directory van het script
+# move from Plein/cron/ to top-dir
+cd ../..
 
 STAMP=$(date +"%Y%m%d_%H%M%S")
 
