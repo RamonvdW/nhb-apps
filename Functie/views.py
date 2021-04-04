@@ -321,7 +321,7 @@ class WijzigEmailView(UserPassesTestMixin, View):
         context['functie'] = functie
 
         # stuur terug naar het overzicht
-        if self.rol_nu == Rollen.ROL_HWL:
+        if self.rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL):
             context['terug_url'] = reverse('Functie:overzicht-vereniging')
         else:
             context['terug_url'] = reverse('Functie:overzicht')
