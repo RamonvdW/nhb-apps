@@ -9,7 +9,8 @@
 {% block title %}Accommodatie details{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vereniging-locatie-details" %}
+
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vereniging-locatie-details" %}
 
     <h4>Vereniging en Accommodatie</h4>
 
@@ -107,7 +108,7 @@
                 </tr>
 
                 <tr>
-                    <td style="vertical-align: top">Hoofdwedstrijdleider:</td>
+                    <td style="vertical-align: top">Hoofdwedstrijdleider(s):</td>
                     <td style="vertical-align: top">
                         {% for name in hwl_names %}
                             <span>{{ name }}</span><br>
@@ -130,7 +131,7 @@
                 </tr>
 
                 <tr>
-                    <td style="vertical-align: top">Wedstrijdleider:</td>
+                    <td style="vertical-align: top">Wedstrijdleider(s):</td>
                     <td style="vertical-align: top">
                         {% for name in wl_names %}
                             <span>{{ name }}</span><br>
@@ -219,8 +220,8 @@
                     </tr>
 
                     <tr>
-                        <td style="vertical-align: top">Adres van de accommodatie:</td>
-                        <td style="vertical-align: top">{{ locatie.adres|linebreaksbr }}</td>
+                        <td>Adres van de accommodatie:</td>
+                        <td>{{ locatie.adres|linebreaksbr }}</td>
                         {% if not readonly %}
                             <td><!-- kolom voor de wijzig knoppen --></td>
                         {% endif %}
@@ -343,13 +344,13 @@
                             {% if readonly %}
                                 <span>{{ locatie.notities|linebreaksbr }}</span>
                             {% else %}
-                                <textarea name="notities" class="materialize-textarea" onchange="gewijzigd()">{{ locatie.notities }}</textarea>
+                                <textarea name="notities" class="materialize-textarea" oninput="gewijzigd()">{{ locatie.notities }}</textarea>
                             {% endif %}
                         </td>
                         {% if not readonly %}
                             <td><!-- kolom voor de wijzig knoppen -->
                                 {% if opslaan_url and not buiten_locatie %}
-                                    <button form="form1" class="btn-nhb-rood wijzig_knop">Buitenlocatie toevoegen</button>
+                                    <button form="form1" class="btn-nhb-rood wijzig_knop">Wij hebben een buitenbaan</button>
                                 {% endif %}
                             </td>
                         {% endif %}
@@ -372,13 +373,17 @@
                     </tr>
 
                     <tr>
-                        <td style="vertical-align: top">Adres van de buitenbaan:</td>
-                        <td style="vertical-align: top">
-
+                        <td>Maximum aantal banen:</td>
+                        <td>
                             {% if readonly %}
-                                <span>{{ buiten_locatie.adres|linebreaksbr }}</span>
+                                <span>{{ buiten_locatie.buiten_banen }} banen</span>
                             {% else %}
-                                <textarea name="buiten_adres" class="materialize-textarea" onchange="gewijzigd()">{{ buiten_locatie.adres }}</textarea>
+                                <select name="buiten_banen" onchange="gewijzigd()">
+                                    <option value="1"{%if buiten_locatie.buiten_banen == 1 %} selected{% endif %}>1 baan</option>
+                                    {% for banen in buiten_banen %}
+                                        <option value="{{ banen }}"{%if buiten_locatie.buiten_banen == banen %} selected{% endif %}>{{ banen }} banen</option>
+                                    {% endfor %}
+                                </select>
                             {% endif %}
                         </td>
                         {% if not readonly %}
@@ -405,27 +410,8 @@
                     </tr>
 
                     <tr>
-                        <td>Aantal banen:</td>
+                        <td>Bijzonderheden:</td>
                         <td>
-                            {% if readonly %}
-                                <span>{{ buiten_locatie.buiten_banen }} banen</span>
-                            {% else %}
-                                <select name="buiten_banen" onchange="gewijzigd()">
-                                    <option value="1"{%if buiten_locatie.buiten_banen == 1 %} selected{% endif %}>1 baan</option>
-                                    {% for banen in buiten_banen %}
-                                        <option value="{{ banen }}"{%if buiten_locatie.buiten_banen == banen %} selected{% endif %}>{{ banen }} banen</option>
-                                    {% endfor %}
-                                </select>
-                            {% endif %}
-                        </td>
-                        {% if not readonly %}
-                            <td><!-- kolom voor de wijzig knoppen --></td>
-                        {% endif %}
-                    </tr>
-
-                    <tr>
-                        <td style="vertical-align: top">Bijzonderheden:</td>
-                        <td style="vertical-align: top">
                             {% if readonly %}
                                 <span>{{ buiten_locatie.notities|linebreaksbr }}</span>
                             {% else %}

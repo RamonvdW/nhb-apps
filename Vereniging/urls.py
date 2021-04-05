@@ -74,6 +74,14 @@ urlpatterns = [
          view_accommodatie.VerenigingAccommodatieDetailsView.as_view(),
          name='vereniging-accommodatie-details'),
 
+    path('externe-locaties/<vereniging_pk>/',
+         view_accommodatie.ExterneLocatiesView.as_view(),
+         name='externe-locaties'),
+
+    path('externe-locaties/<vereniging_pk>/details/<locatie_pk>/',
+         view_accommodatie.ExterneLocatieDetailsView.as_view(),
+         name='locatie-details'),
+
     path('regio-clusters/',
          view_accommodatie.WijzigClustersView.as_view(),
          name='clusters'),

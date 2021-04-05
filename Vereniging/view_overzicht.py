@@ -37,17 +37,20 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
-        context['nhb_ver'] = functie_nu.nhb_ver
+        context['nhb_ver'] = ver = functie_nu.nhb_ver
 
-        context['clusters'] = functie_nu.nhb_ver.clusters.all()
+        context['clusters'] = ver.clusters.all()
 
         context['toon_aanmelden'] = (rol_nu != Rollen.ROL_WL)
 
         if functie_nu.nhb_ver.wedstrijdlocatie_set.count() > 0:
             context['accommodatie_details_url'] = reverse('Vereniging:vereniging-accommodatie-details',
-                                                          kwargs={'vereniging_pk': functie_nu.nhb_ver.pk})
+                                                          kwargs={'vereniging_pk': ver.pk})
 
-        if rol_nu == Rollen.ROL_SEC or functie_nu.nhb_ver.regio.is_administratief:
+        context['url_externe_locaties'] = reverse('Vereniging:externe-locaties',
+                                                  kwargs={'vereniging_pk': ver.pk})
+
+        if rol_nu == Rollen.ROL_SEC or ver.regio.is_administratief:
             context['competities'] = list()
             context['deelcomps'] = list()
             context['deelcomps_rk'] = list()
@@ -62,7 +65,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                                     .objects
                                     .filter(laag=LAAG_REGIO,
                                             competitie__is_afgesloten=False,
-                                            nhb_regio=functie_nu.nhb_ver.regio)
+                                            nhb_regio=ver.regio)
                                     .select_related('competitie')
                                     .order_by('competitie__afstand', 'competitie__begin_jaar'))
 
@@ -70,14 +73,14 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                                        .objects
                                        .filter(laag=LAAG_RK,
                                                competitie__is_afgesloten=False,
-                                               nhb_rayon=functie_nu.nhb_ver.regio.rayon)
+                                               nhb_rayon=ver.regio.rayon)
                                        .select_related('competitie')
                                        .order_by('competitie__afstand'))
 
             pks = (DeelcompetitieRonde
                    .objects
                    .filter(deelcompetitie__is_afgesloten=False,
-                           plan__wedstrijden__vereniging=functie_nu.nhb_ver)
+                           plan__wedstrijden__vereniging=ver)
                    .values_list('plan__wedstrijden', flat=True))
             if Wedstrijd.objects.filter(pk__in=pks).count() > 0:
                 context['heeft_wedstrijden'] = True

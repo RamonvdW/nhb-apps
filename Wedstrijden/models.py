@@ -10,24 +10,31 @@ from NhbStructuur.models import NhbVereniging
 from Score.models import Score
 
 
-# FUTURE: uitbreiden met meer mogelijkheden zoals buitenbaan, veld, 3D, etc.
+# accommodatie type
 BAAN_TYPE = (('X', 'Onbekend'),
              ('O', 'Volledig overdekte binnenbaan'),
              ('H', 'Binnen-buiten schieten'),
-             ('B', 'Buitenbaan'))
+             ('B', 'Buitenbaan'),
+             ('E', 'Extern'))
 
 BAANTYPE2STR = {
     'X': 'Onbekend',
     'O': 'Volledig overdekte binnenbaan',
     'H': 'Binnen-buiten schieten',
-    'B': 'Buitenbaan'
+    'B': 'Buitenbaan',                  # buitenbaan bij de eigen accommodatie
+    'E': 'Extern'                       # externe locatie
 }
 
 
 class WedstrijdLocatie(models.Model):
-    """ Een locatie waarop een wedstrijd gehouden kan worden
-        Niet noodzakelijk het doel van een vereniging.
+    """ Een locatie waarop een wedstrijd gehouden kan worden.
+
+        Naast de accommodatie van de vereniging (binnen / buiten) ook externe locaties
+        waar de vereniging een wedstrijd kan organiseren.
     """
+
+    # naam waaronder deze locatie getoond wordt
+    naam = models.CharField(max_length=50, blank=True)
 
     # zichtbaar maakt het mogelijk een baan uit het systeem te halen
     # zonder deze helemaal te verwijderen
@@ -37,31 +44,63 @@ class WedstrijdLocatie(models.Model):
     verenigingen = models.ManyToManyField(NhbVereniging,
                                           blank=True)       # mag leeg zijn / gemaakt worden
 
+    # eigen accommodatie baan of extern
     baan_type = models.CharField(max_length=1, choices=BAAN_TYPE, default='X')
 
-    # informatie over de beschikbare banen voor de indoor wedstrijden
+    # welke disciplines kunnen hier georganiseerd worden?
+    discipline_outdoor = models.BooleanField(default=False)
+    discipline_indoor = models.BooleanField(default=False)
+    discipline_clout = models.BooleanField(default=False)
+    discipline_veld = models.BooleanField(default=False)
+    discipline_run = models.BooleanField(default=False)
+    discipline_3d = models.BooleanField(default=False)
+    # discipline_flight (zo ver mogelijk schieten)
+    # discipline_ski
+
+    # alleen voor indoor: beschikbare banen
     banen_18m = models.PositiveSmallIntegerField(default=0)
     banen_25m = models.PositiveSmallIntegerField(default=0)
     max_dt_per_baan = models.PositiveSmallIntegerField(default=4)
 
-    # informatie over de buitenbanen
+    # alleen voor discipline_outdoor baan
     buiten_banen = models.PositiveSmallIntegerField(default=0)
     buiten_max_afstand = models.PositiveSmallIntegerField(default=0)
 
-    # adresgegevens van het doel/veld
+    # adresgegevens van de locatie
     adres = models.TextField(max_length=256, blank=True)
 
-    # handmatig ingevoerd of uit de CRM
+    # handmatig ingevoerd of uit de CRM (=bevroren)
     adres_uit_crm = models.BooleanField(default=False)
 
     # vrije notitiegegevens voor zaken als "verbouwing tot", etc.
     notities = models.TextField(max_length=1024, blank=True)
+
+    def disciplines_str(self):
+        disc = list()
+        if self.discipline_outdoor:
+            disc.append('outdoor')
+        if self.discipline_indoor:
+            disc.append('indoor')
+        if self.discipline_clout:
+            disc.append('clout')
+        if self.discipline_veld:
+            disc.append('veld')
+        if self.discipline_run:
+            disc.append('run')
+        if self.discipline_3d:
+            disc.append('3d')
+        return ", ".join(disc)
 
     def __str__(self):
         if not self.zichtbaar:
             msg = "(hidden) "
         else:
             msg = ""
+
+        msg += "{%s} " % BAANTYPE2STR[self.baan_type]
+
+        msg += "[%s] " % self.disciplines_str()
+
         msg += self.adres.replace('\n', ', ')
         # kost te veel database toegangen in admin interface
         # msg += " (%s verenigingen)" % self.verenigingen.count()
@@ -69,8 +108,8 @@ class WedstrijdLocatie(models.Model):
 
     class Meta:
         """ meta data voor de admin interface """
-        verbose_name = "Wedstrijdlocatie"
-        verbose_name_plural = "Wedstrijdlocaties"
+        verbose_name = "Wedstrijd locatie"
+        verbose_name_plural = "Wedstrijd locaties"
 
 
 class WedstrijdUitslag(models.Model):
