@@ -917,6 +917,8 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
             verenigingen = ronde.deelcompetitie.nhb_regio.nhbvereniging_set.all()
         context['verenigingen'] = verenigingen
 
+        is_25m = (ronde.deelcompetitie.competitie.afstand == '25')
+
         if not wedstrijd.vereniging and verenigingen.count() > 0:
             wedstrijd.vereniging = verenigingen[0]
             wedstrijd.save()
@@ -926,7 +928,6 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
             if locaties.count() > 0:
                 wedstrijd.locatie = locaties[0]     # pak een default
                 # maak een slimmere keuze
-                is_25m = (ronde.deelcompetitie.competitie.afstand == '25')
                 for locatie in locaties:
                     if is_25m:
                         if locatie.banen_25m > 0:
@@ -942,10 +943,18 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         for obj in WedstrijdLocatie.objects.filter(verenigingen__pk__in=pks,
                                                    discipline_indoor=True):
             for ver in obj.verenigingen.all():
+                key = str(ver.pk)
                 adres = obj.adres
                 if obj.notities:
                     adres += '\n(%s)' % obj.notities
-                locaties[str(ver.pk)] = adres   # ver_nr --> adres
+
+                if is_25m:
+                    if obj.banen_25m > 0 or (obj.adres_uit_crm and key not in locaties):
+                        locaties[key] = adres  # ver_nr --> adres
+                else:
+                    if obj.banen_18m > 0 or (obj.adres_uit_crm and key not in locaties):
+                        locaties[key] = adres  # ver_nr --> adres
+                # for
             # for
         # for
 
