@@ -124,8 +124,7 @@ class TestSchutterRegistreer(E2EHelpers, TestCase):
                                     follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('schutter/registreer-nhb-account.dtl', 'plein/site_layout.dtl'))
-        self.assertFormError(resp, 'form', None, 'Geen email adres bekend. Neem contact op met de secretaris van je vereniging.')
+        self.assert_template_used(resp, ('schutter/registreer-geen-email.dtl', 'plein/site_layout.dtl'))
 
     def test_verkeerde_email(self):
         with self.assert_max_queries(20):

@@ -1,0 +1,74 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2021 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Geen email bekend{% endblock %}
+
+{% block pagina %}
+
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="schutter-registreer-geen-email" %}
+
+    <h4>Geen email bekend</h4>
+
+    <p>Je hebt zojuist geprobeerd een account aan te maken.</p>
+
+    <p>Om een account aan te maken moet jouw persoonlijke e-mailadres geregistreerd staan bij de bond. <span class="red-text">Dit is niet het geval!</span></p>
+
+    <p>De secretaris van jouw handboogvereniging kan dit oplossen.</p>
+
+    <p>&nbsp;</p>
+    <h5>Contactgegevens secretaris</h5>
+
+    <table class="white">
+        <tr>
+            <td>Naam:</td>
+
+            <td>
+                {% if sec_naam %}
+                    <span>{{ sec_naam }}</span>
+                {% else %}
+                    <i class="red-text">Onbekend</i>
+                {% endif %}
+            </td>
+
+            <td></td>
+        </tr>
+
+        <tr>
+            <td>E-mailadres:</td>
+
+            <td>
+                {% if sec_email %}
+                    <code>{{ sec_email }}</code>{% else %}<i class="red-text">Onbekend</i>
+                {% endif %}
+            </td>
+
+            <td>
+                {% if sec_email %}
+                    <a class="btn-nhb-blauw" href="mailto:{{ sec_email }}">
+                        <i class="material-icons-round left">email</i>{{ sec_email }}</a>
+                {% endif %}
+            </td>
+        </tr>
+
+        {% if not sec_email %}
+            <tr>
+                <td>Uitzondering!</td>
+                <td>Neem contact op met het bondsbureau via <code>{{ email_bb }}</code></td>
+                <td>
+                    <a class="btn-nhb-blauw" href="mailto:{{ email_bb }}">
+                        <i class="material-icons-round left">email</i>{{ email_bb }}</a>
+                </td>
+            </tr>
+        {% endif %}
+    </table>
+
+
+    <p>&nbsp;</p>
+    <p><a class="btn-nhb-blauw" href="{% url 'Plein:plein' %}">Naar Het Plein</a></p>
+
+{% endblock %}
