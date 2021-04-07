@@ -424,6 +424,35 @@
                     </tr>
                 {% endif %}
 
+                {% if externe_locaties %}
+                    <tr>
+                        <td colspan="{% if readonly %}2{% else %}3{% endif %}" class="nhb-grijs"><h6>Overige locaties voor deze vereniging:</h6></td>
+                    </tr>
+
+                    <tr>
+                        <th>Naam</th>
+                        <th>Disciplines</th>
+                        <th>Adres</th>
+                    </tr>
+
+                    {% for locatie in externe_locaties %}
+                        <tr>
+                            <td>{{ locatie.naam }}</td>
+
+                            <td>
+                                {% if locatie.discipline_outdoor %}<span>Outdoor</span><br>{% endif %}
+                                {% if locatie.discipline_indoor %}<span>Indoor</span><br>{% endif %}
+                                {% if locatie.discipline_clout %}<span>Clout</span><br>{% endif %}
+                                {% if locatie.discipline_veld %}<span>Veld</span><br>{% endif %}
+                                {% if locatie.discipline_run %}<span>Run-archery</span><br>{% endif %}
+                                {% if locatie.discipline_3d %}<span>3D</span><br>{% endif %}
+                            </td>
+
+                            <td>{{ locatie.adres|linebreaksbr }}</td>
+                        </tr>
+                    {% endfor %}
+                {% endif %}
+
             </table>
 
             <p>Deze gegevens kunnen worden aangepast door de vereniging zelf (secretaris of hoofdwedstrijdleider) en door de regiocompetitieleider.</p>
@@ -447,6 +476,27 @@
     {% if opslaan_url %}
         </form>
     {% endif %}
+
+    {% if url_verwijder_buitenbaan %}
+        <p>&nbsp;</p>
+        <ul class="collapsible">
+            <li>
+                <div class="collapsible-header white">
+                    <span>Klik eerst hier als je de buitenbaan wilt verwijderen</span>
+                </div>
+                <div class="collapsible-body white">
+                    <form method="post" action="{{ url_verwijderen }}">
+                        {% csrf_token %}
+                        <input type="hidden" name="verwijder_buitenbaan" value="1">
+                        <p>Weet je het zeker?</p>
+                        <button class="btn-nhb-rood" type="submit">
+                            <i class="material-icons-round left">delete</i>Verwijder de buitenbaan</button>
+                    </form>
+                </div>
+            </li>
+        </ul>
+    {% endif %}
+
 
     <script type="application/javascript">
         document.addEventListener("DOMContentLoaded", function() {

@@ -114,12 +114,22 @@
                 <tr>
                     <td style="vertical-align: top">Ondersteunt disciplines:</td>
                     <td>
-                        {% for sel, str, checked in disc %}
-                            <label>
-                                <input type="checkbox" class="filled-in" id="id_{{ sel }}" name="{{ sel }}"{% if checked %} checked{% endif %} onchange="gewijzigd()">
-                                <span class="black-text">{{ str }}</span><br>
-                            </label>
-                        {% endfor %}
+                        {% if readonly %}
+                            {% for sel, str, checked in disc %}
+                                {% if checked %}
+                                    <span class="nhb-blauw-text">&check;&nbsp;</span><span>{{ str }}</span>
+                                    <!-- else: discipline niet noemen -->
+                                {% endif %}
+                                <input type="hidden" id="id_{{ sel }}" {% if checked %} checked{% endif %}>
+                            {% endfor %}
+                        {% else %}
+                            {% for sel, str, checked in disc %}
+                                <label>
+                                    <input type="checkbox" class="filled-in" id="id_{{ sel }}" name="{{ sel }}"{% if checked %} checked{% endif %} onchange="gewijzigd()">
+                                    <span class="black-text">{{ str }}</span><br>
+                                </label>
+                            {% endfor %}
+                        {% endif %}
                     </td>
                     {% if not readonly %}
                         <td><!-- kolom voor de wijzig knoppen --></td>

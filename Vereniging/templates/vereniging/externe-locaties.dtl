@@ -42,7 +42,7 @@
                 <td>{{ locatie.adres|linebreaksbr }}</td>
 
                 <td>
-                    <a class="btn-nhb-blauw" href="{{ locatie.url_wijzig }}">Wijzig</a>
+                    <a class="btn-nhb-blauw" href="{{ locatie.url_wijzig }}">{% if readonly %}Details{% else %}Wijzig{% endif %}</a>
                 </td>
             </tr>
         {% empty %}

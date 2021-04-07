@@ -163,8 +163,12 @@ class LijstVerenigingenView(UserPassesTestMixin, TemplateView):
             nhbver.details_url = reverse('Vereniging:accommodatie-details',
                                          kwargs={'vereniging_pk': nhbver.pk})
 
-            for loc in nhbver.wedstrijdlocatie_set.all():
-                if loc.baan_type == 'B':
+            for loc in (nhbver
+                        .wedstrijdlocatie_set
+                        .filter(zichtbaar=True)):
+                if loc.baan_type == 'E':
+                    nhbver.heeft_externe_locaties = True
+                elif loc.baan_type == 'B':
                     nhbver.buiten_locatie = loc
                 else:
                     nhbver.locatie = loc
@@ -216,14 +220,17 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
         # zoek de locaties erbij
         binnen_locatie = None
         buiten_locatie = None
-        for loc in nhbver.wedstrijdlocatie_set.exclude(baan_type='E').all():
-            if loc.baan_type == 'B':
+        externe_locaties = list()
+        for loc in nhbver.wedstrijdlocatie_set.all():
+            if loc.baan_type == 'E':
+                externe_locaties.append(loc)
+            elif loc.baan_type == 'B':
                 buiten_locatie = loc
             else:
                 binnen_locatie = loc
         # for
 
-        return binnen_locatie, buiten_locatie, nhbver
+        return binnen_locatie, buiten_locatie, externe_locaties, nhbver
 
     @staticmethod
     def _mag_wijzigen(nhbver, rol_nu, functie_nu):
@@ -248,9 +255,12 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        binnen_locatie, buiten_locatie, nhbver = self._get_locaties_nhbver_or_404(**kwargs)
+        binnen_locatie, buiten_locatie, externe_locaties, nhbver = self._get_locaties_nhbver_or_404(**kwargs)
+        if buiten_locatie and not buiten_locatie.zichtbaar:
+            buiten_locatie = None
         context['locatie'] = binnen_locatie
         context['buiten_locatie'] = buiten_locatie
+        context['externe_locaties'] = externe_locaties
         context['nhbver'] = nhbver
 
         # zoek de beheerders erbij
@@ -324,6 +334,9 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
                                                kwargs={'functie_pk': functie_hwl.pk})
             context['url_email_wl'] = reverse('Functie:wijzig-email',
                                               kwargs={'functie_pk': functie_wl.pk})
+
+            if buiten_locatie:
+                context['url_verwijder_buitenbaan'] = context['opslaan_url']
         else:
             context['readonly'] = True
 
@@ -338,25 +351,36 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
         """ Deze functie wordt aangeroepen als de gebruik op de 'opslaan' knop drukt
             op het accommodatie-details formulier.
         """
-        binnen_locatie, buiten_locatie, nhbver = self._get_locaties_nhbver_or_404(**kwargs)
+        binnen_locatie, buiten_locatie, _, nhbver = self._get_locaties_nhbver_or_404(**kwargs)
 
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
 
         if not self._mag_wijzigen(nhbver, rol_nu, functie_nu):
             raise PermissionDenied('Wijzigen niet toegestaan')
 
+        if request.POST.get('verwijder_buitenbaan', None):
+            buiten_locatie.zichtbaar = False
+            buiten_locatie.save()
+            if 'is_ver' in kwargs:  # wordt gezet door VerenigingAccommodatieDetailsView
+                urlconf = 'Vereniging:vereniging-accommodatie-details'
+            else:
+                urlconf = 'Vereniging:accommodatie-details'
+            url = reverse(urlconf, kwargs={'vereniging_pk': nhbver.pk})
+            return HttpResponseRedirect(url)
+
         if request.POST.get('maak_buiten_locatie', None):
             if buiten_locatie:
-                # er is al een buitenlocatie
-                raise Http404('Er is al een buitenlocatie')
-
-            buiten = WedstrijdLocatie(
-                            baan_type='B',
-                            adres_uit_crm=False,
-                            adres='',
-                            notities='')
-            buiten.save()
-            buiten.verenigingen.add(nhbver)
+                if not buiten_locatie.zichtbaar:
+                    buiten_locatie.zichtbaar = True
+                    buiten_locatie.save()
+            else:
+                buiten = WedstrijdLocatie(
+                                baan_type='B',
+                                adres_uit_crm=False,
+                                adres='',
+                                notities='')
+                buiten.save()
+                buiten.verenigingen.add(nhbver)
 
             if 'is_ver' in kwargs:  # wordt gezet door VerenigingAccommodatieDetailsView
                 urlconf = 'Vereniging:vereniging-accommodatie-details'
@@ -676,12 +700,15 @@ class ExterneLocatiesView(UserPassesTestMixin, TemplateView):
 
         context['ver'] = ver = self.get_vereniging()
 
+        context['readonly'] = True
         if self.functie_nu and self.functie_nu.rol == 'HWL' and self.functie_nu.nhb_ver == ver:
+            context['readonly'] = False
             context['url_toevoegen'] = reverse('Vereniging:externe-locaties',
                                                kwargs={'vereniging_pk': ver.pk})
 
         locaties = ver.wedstrijdlocatie_set.filter(baan_type='E')
         context['locaties'] = locaties
+
         for locatie in locaties:
             locatie.url_wijzig = reverse('Vereniging:locatie-details',
                                          kwargs={'vereniging_pk': ver.pk,
@@ -742,26 +769,23 @@ class ExterneLocatieDetailsView(TemplateView):
         return ver
 
     def _check_access(self, locatie, ver):
+        if ver not in locatie.verenigingen.all():
+            raise Http404('Locatie hoort niet bij de vereniging')
+
         _, functie_nu = rol_get_huidige_functie(self.request)
 
-        # controleer dat de gebruiker HWL is
-        if not functie_nu or functie_nu.rol != 'HWL':
-            raise PermissionDenied('Geen toegang met huidige rol')
+        # controleer dat de gebruiker HWL is van deze vereniging
+        readonly = True
+        if functie_nu and functie_nu.rol == 'HWL' and functie_nu.nhb_ver == ver:
+            readonly = False
 
-        # controleer dat de HWL van de vereniging is die aan deze locatie gekoppeld is
-        if functie_nu.nhb_ver != ver:
-            raise PermissionDenied('Niet beheerder bij deze vereniging')
-
-        if ver not in locatie.verenigingen.all():
-            raise Http404('Locatie hoort niet bij jouw vereniging')
+        return readonly
 
     def get(self, request, *args, **kwargs):
         context = dict()
         context['locatie'] = locatie = self.get_locatie()
         context['ver'] = ver = self.get_vereniging()
-
-        if ver not in locatie.verenigingen.all():
-            raise Http404('Locatie hoort niet bij de vereniging')
+        context['readonly'] = readonly = self._check_access(locatie, ver)
 
         context['disc'] = disc = list()
         disc.append(('disc_outdoor', 'Outdoor', locatie.discipline_outdoor))
@@ -778,9 +802,10 @@ class ExterneLocatieDetailsView(TemplateView):
         context['buiten_banen'] = [nr for nr in range(2, 80+1)]   # 1 baan = handmatig in .dtl
         context['buiten_max_afstand'] = [nr for nr in range(30, 100+1, 10)]
 
-        context['url_opslaan'] = reverse('Vereniging:locatie-details',
-                                         kwargs={'vereniging_pk': ver.pk,
-                                                 'locatie_pk': locatie.pk})
+        if not readonly:
+            context['url_opslaan'] = reverse('Vereniging:locatie-details',
+                                             kwargs={'vereniging_pk': ver.pk,
+                                                     'locatie_pk': locatie.pk})
 
         context['url_terug'] = reverse('Vereniging:externe-locaties',
                                        kwargs={'vereniging_pk': ver.pk})
@@ -791,7 +816,9 @@ class ExterneLocatieDetailsView(TemplateView):
     def post(self, request, *args, **kwargs):
         locatie = self.get_locatie()
         ver = self.get_vereniging()
-        self._check_access(locatie, ver)
+        readonly = self._check_access(locatie, ver)
+        if readonly:
+            raise PermissionDenied('Wijzigen alleen door HWL van de vereniging')
 
         data = request.POST.get('naam', '')
         if locatie.naam != data:

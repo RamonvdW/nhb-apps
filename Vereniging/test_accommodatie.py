@@ -593,7 +593,8 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         # maak de buiten locatie nog een keer aan
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'maak_buiten_locatie': 'on'})
-        self.assert404(resp)
+        # is geen probleem - dan wordt de al bestaande buiten locatie op zichtbaar=True gezet
+        self.assert_is_redirect(resp, url)
         self.assertEqual(2, self.nhbver2.wedstrijdlocatie_set.count())
 
         # haal het scherm op met de buiten locatie erin

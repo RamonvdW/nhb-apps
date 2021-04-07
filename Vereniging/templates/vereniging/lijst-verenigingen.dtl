@@ -134,11 +134,23 @@
 
                         <!-- toon het belletje icoon als er notities zijn -->
                         {% if obj.locatie.notities != '' %}
-                            <i class="material-icons-round" style="vertical-align: bottom; font-size: 20px; cursor: default">notifications_none</i>
+                            <br><i class="material-icons-round" style="vertical-align: bottom; font-size: 20px; cursor: default">notifications_none</i>
+                        {% endif %}
+
+                        <!-- externe locaties -->
+                        {% if obj.heeft_externe_locaties %}
+                            {% if obj.locatie.notities == '' %}<br>{% endif %}
+                            <i class="material-icons-round" style="vertical-align: bottom; font-size: 20px; cursor: default">hiking</i>
                         {% endif %}
                     {% endif %}
+
                 {% else %}
-                    <i class="red-text">Geen</i>
+                    <i>Geen</i>
+                    <!-- externe locaties -->
+                    {% if obj.heeft_externe_locaties %}
+                        <br>
+                        <i class="material-icons-round" style="vertical-align: bottom; font-size: 20px; cursor: default">hiking</i>
+                    {% endif %}
                 {% endif %}
 
                 {% if obj.buiten_locatie %}
