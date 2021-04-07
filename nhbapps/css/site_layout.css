@@ -91,8 +91,8 @@ del {
 
 /* smal in de breedte */
 .smal {
-    padding-left: 1px;
-    padding-right: 1px;
+    padding-left: 2px;
+    padding-right: 2px;
 }
 
 .in-table-icon {

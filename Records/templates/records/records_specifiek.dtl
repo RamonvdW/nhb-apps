@@ -36,7 +36,7 @@
         </div>
 
         <!-- show the actual record in een blauw box -->
-        <div class="col s12 m10 l8 xl6">
+        <div class="col s12 m11 l10 xl6">
             <p>Record {{ obj_record.discipline }}-{{ obj_record.volg_nr }}</p>
 
             <div class="white-text nhb-blauw z-depth-2">
@@ -144,7 +144,7 @@
 
 
     <div class="row hide-on-extra-large-only">
-        <div class="col s12 m10 l8 xl6">
+        <div class="col s12 m11 l10 xl6">
             <ul class="collection with-header">
                 <li class="collection-header"><h5>Gerelateerde records</h5></li>
                 {% for obj in object_list %}

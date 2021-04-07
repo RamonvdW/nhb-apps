@@ -26,7 +26,7 @@
         <link rel="icon" href="{% static 'plein/logo_nhb_192x192.png' %}" sizes="192x192">
         <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Round">
         <link rel="stylesheet" href="{% static 'materialize-new-39.css' %}">
-        <link rel="stylesheet" href="{% static 'site_layout_min-16.css' %}"> <!-- moet ná materialize css -->
+        <link rel="stylesheet" href="{% static 'site_layout_min-17.css' %}"> <!-- moet ná materialize css -->
     </head>
 
     <body class="nhb-grijs">
