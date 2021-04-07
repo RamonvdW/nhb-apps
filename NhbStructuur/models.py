@@ -98,7 +98,7 @@ class NhbCluster(models.Model):
         msg = "%s voor " % self.cluster_code()
         try:
             msg += GEBRUIK2STR[self.gebruik]
-        except KeyError:
+        except KeyError:         # pragma: no cover
             msg = "?"
         return msg
 

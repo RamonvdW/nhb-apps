@@ -1998,6 +1998,15 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
                 team_naam='Test team 2',
                 aanvangsgemiddelde=0.0).save()
 
+        temp_team = RegiocompetitieTeam(
+                deelcompetitie=self.deelcomp_regio112_18,
+                vereniging=self.nhbver_112,
+                volg_nr=3,
+                team_type=team_r,
+                team_naam='',
+                aanvangsgemiddelde=0.0)
+        self.assertTrue(temp_team.maak_team_naam_kort() != '')
+
         url = self.url_regio_teams % self.deelcomp_regio112_18.pk
 
         with self.assert_max_queries(20):

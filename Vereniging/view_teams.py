@@ -418,6 +418,9 @@ class WijzigTeamAGView(UserPassesTestMixin, TemplateView):
         # for
         context['ag_hist'] = ag_hist
 
+        context['url_opslaan'] = reverse('Vereniging:wijzig-ag',
+                                         kwargs={'deelnemer_pk': deelnemer.pk})
+
         menu_dynamics(self.request, context, actief='vereniging')
         return context
 

@@ -13,7 +13,9 @@ from NhbStructuur.models import NhbLid
 
 class SchutterNhbLidGeenEmail(Exception):
     """ Specifieke foutmelding omdat het NHB lid geen e-mail adres heeft """
-    pass
+
+    def __init__(self, nhblid):
+        self.nhblid = nhblid
 
 
 class SchutterNhbLidInactief(Exception):
