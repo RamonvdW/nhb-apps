@@ -121,6 +121,9 @@
                             </label>
                         {% endfor %}
                     </td>
+                    {% if not readonly %}
+                        <td><!-- kolom voor de wijzig knoppen --></td>
+                    {% endif %}
                 </tr>
 
                 <tr>
@@ -140,9 +143,9 @@
                 <!-- OUTDOOR -->
 
                 <tr class="outdoor-kan-verstoppen nhb-grijs">
-                    <th colspan="{% if readonly %}2{% else %}3{% endif %}">
+                    <td colspan="{% if readonly %}2{% else %}3{% endif %}">
                         <h6>Outdoor aspecten:</h6>
-                    </th>
+                    </td>
                 </tr>
 
                 <tr class="outdoor-kan-verstoppen">
@@ -185,9 +188,9 @@
                 <!-- INDOOR -->
 
                 <tr class="indoor-kan-verstoppen nhb-grijs">
-                    <th colspan="{% if readonly %}2{% else %}3{% endif %}">
+                    <td colspan="{% if readonly %}2{% else %}3{% endif %}">
                         <h6>Indoor aspecten:</h6>
-                    </th>
+                    </td>
                 </tr>
 
                 <tr class="indoor-kan-verstoppen">
@@ -277,7 +280,7 @@
                 </div>
             {% endif %}
 
-    {% if opslaan_url %}
+    {% if url_opslaan %}
         </form>
     {% endif %}
 
