@@ -57,7 +57,7 @@ def schutter_create_account_nhb(nhb_nummer, email, nieuw_wachtwoord):
     if email.lower() != nhblid.email.lower():
         raise AccountCreateError('De combinatie van NHB nummer en email worden niet herkend. Probeer het nog eens.')
 
-    if not nhblid.is_actief_lid:
+    if not nhblid.is_actief_lid or not nhblid.bij_vereniging:
         raise SchutterNhbLidInactief()
 
     # maak het account aan
@@ -80,7 +80,8 @@ class RegistreerNhbNummerView(TemplateView):
         Deze view wordt gebruikt om het NHB nummer in te voeren voor een nieuw account.
     """
 
-    def post(self, request, *args, **kwargs):
+    @staticmethod
+    def post(request, *args, **kwargs):
         """ deze functie wordt aangeroepen als een POST request ontvangen is.
             dit is gekoppeld aan het drukken op de Registreer knop.
         """
@@ -102,13 +103,12 @@ class RegistreerNhbNummerView(TemplateView):
                 context = {'sec_email': '',
                            'sec_naam': '',
                            'email_bb': settings.EMAIL_BONDSBURO}
-                ver = exc.nhblid.bij_vereniging
-                if ver:
-                    sec_lid = ver.secretaris_lid
-                    if sec_lid:
-                        context['sec_naam'] = sec_lid.volledige_naam()
-                    functie = Functie.objects.get(rol='SEC', nhb_ver=ver)
-                    context['sec_email'] = functie.bevestigde_email
+                ver = exc.nhblid.bij_vereniging     # gegarandeerd !None
+                sec_lid = ver.secretaris_lid
+                if sec_lid:
+                    context['sec_naam'] = sec_lid.volledige_naam()
+                functie = Functie.objects.get(rol='SEC', nhb_ver=ver)
+                context['sec_email'] = functie.bevestigde_email
 
                 menu_dynamics(request, context)
                 return render(request, TEMPLATE_REGISTREER_GEEN_EMAIL, context)

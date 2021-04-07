@@ -116,6 +116,21 @@ class TestSchutterRegistreer(E2EHelpers, TestCase):
         self.assertFormError(resp, 'form', None, 'Onbekend NHB nummer')
 
     def test_geen_email(self):
+        # vul de sec in
+        self.nhbver.secretaris_lid = self.nhblid_100001
+        self.nhbver.save()
+
+        with self.assert_max_queries(20):
+            resp = self.client.post('/sporter/registreer/',
+                                    {'nhb_nummer': '100002',
+                                     'email': 'rdetester@gmail.not',
+                                     'nieuw_wachtwoord': E2EHelpers.WACHTWOORD},
+                                    follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('schutter/registreer-geen-email.dtl', 'plein/site_layout.dtl'))
+
+    def test_geen_email_geen_sec(self):
         with self.assert_max_queries(20):
             resp = self.client.post('/sporter/registreer/',
                                     {'nhb_nummer': '100002',
@@ -390,6 +405,21 @@ class TestSchutterRegistreer(E2EHelpers, TestCase):
         self.assertEqual(functie.accounts.count(), 1)
         self.nhblid_100001 = NhbLid.objects.get(nhb_nr=self.nhblid_100001.nhb_nr)   # refresh
         self.assertEqual(functie.accounts.all()[0], self.nhblid_100001.account)
+
+    def test_geen_ver(self):
+        self.nhblid_100001.bij_vereniging = None
+        self.nhblid_100001.save()
+
+        with self.assert_max_queries(20):
+            resp = self.client.post('/sporter/registreer/',
+                                    {'nhb_nummer': '100001',
+                                     'email': self.nhblid_100001.email,
+                                     'nieuw_wachtwoord': E2EHelpers.WACHTWOORD},
+                                    follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('schutter/registreer-nhb-account.dtl', 'plein/site_layout.dtl'))
+        self.assertFormError(resp, 'form', None, 'Gebruik van NHB diensten is geblokkeerd. Neem contact op met de secretaris van je vereniging.')
 
 
 # end of file
