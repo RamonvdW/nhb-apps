@@ -521,10 +521,15 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
 
         context['deelcomp'] = self.deelcomp
 
+        context['mag_afmelden'] = False
+
         if self.rol_nu == Rollen.ROL_HWL:
             context['afmelden_url'] = reverse('Vereniging:leden-ingeschreven',
                                               kwargs={'deelcomp_pk': self.deelcomp.pk})
-            context['mag_afmelden'] = True
+            comp = self.deelcomp.competitie
+            comp.bepaal_fase()
+            if comp.fase <= 'B':
+                context['mag_afmelden'] = True
 
         methode = self.deelcomp.inschrijf_methode
         if methode == INSCHRIJF_METHODE_3:
@@ -549,7 +554,7 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
                     raise Http404('Geen valide inschrijving')
 
                 # controleer dat deze inschrijving bij de vereniging hoort
-                if inschrijving.schutterboog.nhblid.bij_vereniging != self.functie_nu.nhb_ver:
+                if inschrijving.bij_vereniging != self.functie_nu.nhb_ver:
                     raise PermissionDenied('Sporter is niet lid bij jouw vereniging')
 
                 # schrijf de schutter uit
