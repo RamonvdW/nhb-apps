@@ -20,10 +20,15 @@ def copy_uitslagen(apps, _):
                             afstand_meter=uitslag_old.afstand_meter,
                             is_bevroren=uitslag_old.is_bevroren,
                             old=uitslag_old)
+
         bulk.append(uitslag_new)
+        if len(bulk) > 500:
+            uitslag_new_klas.objects.bulk_create(bulk)
+            bulk = list()
     # for
 
-    uitslag_new_klas.objects.bulk_create(bulk)
+    if len(bulk):
+        uitslag_new_klas.objects.bulk_create(bulk)
 
     for uitslag_new in (uitslag_new_klas
                         .objects
@@ -61,7 +66,7 @@ class Migration(migrations.Migration):
                 ('afstand_meter', models.PositiveSmallIntegerField()),
                 ('is_bevroren', models.BooleanField(default=False)),
                 ('scores', models.ManyToManyField(blank=True, to='Score.Score')),
-                ('old', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.CASCADE, to='Wedstrijden.WedstrijdUitslag')),
+                ('old', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.SET_NULL, to='Wedstrijden.WedstrijdUitslag')),
             ],
             options={
                 'verbose_name': 'Competitie Wedstrijd Uitslag',
