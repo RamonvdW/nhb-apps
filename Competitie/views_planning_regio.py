@@ -848,7 +848,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         except (ValueError, CompetitieWedstrijd.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
-        plan = wedstrijd.wedstrijdenplan_set.all()[0]
+        plan = wedstrijd.competitiewedstrijdenplan_set.all()[0]
         ronde = (DeelcompetitieRonde
                  .objects
                  .select_related('deelcompetitie',
@@ -991,7 +991,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         except (ValueError, CompetitieWedstrijd.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
-        plan = wedstrijd.wedstrijdenplan_set.all()[0]
+        plan = wedstrijd.competitiewedstrijdenplan_set.all()[0]
         ronde = (DeelcompetitieRonde
                  .objects
                  .select_related('deelcompetitie',
@@ -1141,7 +1141,7 @@ class VerwijderWedstrijdView(UserPassesTestMixin, View):
         except (ValueError, CompetitieWedstrijd.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
-        plan = wedstrijd.wedstrijdenplan_set.all()[0]
+        plan = wedstrijd.competitiewedstrijdenplan_set.all()[0]
         try:
             ronde = DeelcompetitieRonde.objects.get(plan=plan,
                                                     deelcompetitie__laag=LAAG_REGIO)

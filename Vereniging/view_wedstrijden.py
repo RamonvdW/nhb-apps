@@ -59,8 +59,8 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
                 # als deze wedstrijd bij een competitieronde hoort,
                 # maak er dan een passende beschrijving voor
 
-                # Wedstrijd --> WedstrijdenPlan --> DeelcompetitieRonde
-                plan = obj.wedstrijdenplan_set.all()[0]
+                # CompetitieWedstrijd --> CompetitieWedstrijdenPlan --> DeelcompetitieRonde
+                plan = obj.competitiewedstrijdenplan_set.all()[0]
                 ronde = plan.deelcompetitieronde_set.all()[0]
                 obj.beschrijving = "%s - %s" % (ronde.deelcompetitie.competitie.beschrijving,
                                                 ronde.beschrijving)

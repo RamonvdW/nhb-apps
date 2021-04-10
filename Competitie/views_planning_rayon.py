@@ -325,7 +325,7 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
             raise Http404('Wedstrijd niet gevonden')
 
         # zoek het weeknummer waarin deze wedstrijd gehouden moet worden
-        plan = wedstrijd.wedstrijdenplan_set.all()[0]
+        plan = wedstrijd.competitiewedstrijdenplan_set.all()[0]
         deelcomp_rk = plan.deelcompetitie_set.all()[0]
 
         # is dit de beheerder?
@@ -391,7 +391,7 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
         except (ValueError, CompetitieWedstrijd.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
-        plan = wedstrijd.wedstrijdenplan_set.all()[0]
+        plan = wedstrijd.competitiewedstrijdenplan_set.all()[0]
         deelcomp_rk = plan.deelcompetitie_set.all()[0]
 
         # is dit de beheerder?
@@ -1054,7 +1054,7 @@ class VerwijderWedstrijdView(UserPassesTestMixin, View):
         except (ValueError, CompetitieWedstrijd.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
-        plan = wedstrijd.wedstrijdenplan_set.all()[0]
+        plan = wedstrijd.competitiewedstrijdenplan_set.all()[0]
         try:
             deelcomp = DeelCompetitie.objects.get(plan=plan, laag=LAAG_RK)
         except DeelCompetitie.DoesNotExist:

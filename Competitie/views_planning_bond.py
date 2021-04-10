@@ -490,7 +490,7 @@ class VerwijderWedstrijdView(UserPassesTestMixin, View):
         except (ValueError, CompetitieWedstrijd.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
-        plan = wedstrijd.wedstrijdenplan_set.all()[0]
+        plan = wedstrijd.competitiewedstrijdenplan_set.all()[0]
         try:
             deelcomp = DeelCompetitie.objects.get(plan=plan, laag=LAAG_BK)
         except DeelCompetitie.DoesNotExist:

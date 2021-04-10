@@ -138,7 +138,7 @@ def bepaal_wedstrijd_en_deelcomp_of_404(wedstrijd_pk):
     except (ValueError, CompetitieWedstrijd.DoesNotExist):
         raise Http404('Wedstrijd niet gevonden')
 
-    plan = wedstrijd.wedstrijdenplan_set.all()[0]
+    plan = wedstrijd.competitiewedstrijdenplan_set.all()[0]
 
     # zoek de ronde erbij
     # deze hoort al bij een competitie type (indoor / 25m1pijl)
@@ -218,7 +218,7 @@ class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
         context['url_opslaan'] = reverse('Competitie:dynamic-scores-opslaan')
         context['url_deelnemers_ophalen'] = reverse('Competitie:dynamic-deelnemers-ophalen')
 
-        # plan = wedstrijd.wedstrijdenplan_set.all()[0]
+        # plan = wedstrijd.competitiewedstrijdenplan_set.all()[0]
         # ronde = DeelcompetitieRonde.objects.get(plan=plan)
 
         if rol_nu == Rollen.ROL_RCL:
@@ -349,7 +349,7 @@ class DynamicZoekOpNhbnrView(UserPassesTestMixin, View):
             # garbage in
             raise Http404('Geen valide verzoek')
 
-        plan = wedstrijd.wedstrijdenplan_set.all()[0]
+        plan = wedstrijd.competitiewedstrijdenplan_set.all()[0]
 
         # zoek de ronde erbij
         # deze hoort al bij een competitie type (indoor / 25m1pijl)
@@ -534,7 +534,7 @@ class DynamicScoresOpslaanView(UserPassesTestMixin, View):
 
         # controleer toestemming om scores op te slaan voor deze wedstrijd
 
-        plannen = wedstrijd.wedstrijdenplan_set.all()
+        plannen = wedstrijd.competitiewedstrijdenplan_set.all()
         if plannen.count() < 1:
             # wedstrijd met andere bedoeling
             raise Http404()
