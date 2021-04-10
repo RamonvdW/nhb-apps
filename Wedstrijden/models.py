@@ -112,7 +112,7 @@ class WedstrijdLocatie(models.Model):
         verbose_name_plural = "Wedstrijd locaties"
 
 
-class WedstrijdUitslag(models.Model):
+class CompetitieWedstrijdUitslag(models.Model):
 
     # de maximale score die gehaald (en ingevoerd) mag worden
     # dit afhankelijk van het type wedstrijd
@@ -122,18 +122,23 @@ class WedstrijdUitslag(models.Model):
     afstand_meter = models.PositiveSmallIntegerField()
 
     # scores bevat SchutterBoog en komt met ScoreHist
-    scores = models.ManyToManyField(Score,
-                                    blank=True)  # mag leeg zijn / gemaakt worden
+    scores = models.ManyToManyField(Score, blank=True)  # mag leeg zijn / gemaakt worden
 
     # False = uitslag mag door WL ingevoerd worden
     # True  = uitslag is gecontroleerd en mag niet meer aangepast worden
     is_bevroren = models.BooleanField(default=False)
 
+    def __str__(self):
+        msg = "(%s) afstand %s, max score %s" % (self.pk, self.afstand_meter, self.max_score)
+        if self.is_bevroren:
+            msg += " (bevroren)"
+        return msg
+
     # hier houden we geen klassen bij - het is geen inschrijflijst
     class Meta:
         """ meta data voor de admin interface """
-        verbose_name = "Wedstrijduitslag"
-        verbose_name_plural = "Wedstrijduitslagen"
+        verbose_name = "Competitie Wedstrijd Uitslag"
+        verbose_name_plural = "Competitie Wedstrijd Uitslagen"
 
 
 class Wedstrijd(models.Model):
@@ -166,8 +171,7 @@ class Wedstrijd(models.Model):
     team_klassen = models.ManyToManyField(TeamWedstrijdklasse,
                                           blank=True)  # mag leeg zijn / gemaakt worden
 
-    # uitslag van deze wedstrijd
-    uitslag = models.ForeignKey(WedstrijdUitslag, on_delete=models.PROTECT,
+    uitslag = models.ForeignKey(CompetitieWedstrijdUitslag, on_delete=models.PROTECT,
                                 blank=True, null=True)
 
     def __str__(self):
@@ -196,5 +200,6 @@ class WedstrijdenPlan(models.Model):
         """ meta data voor de admin interface """
         verbose_name = "Wedstrijdenplan"
         verbose_name_plural = "Wedstrijdenplannen"
+
 
 # end of file

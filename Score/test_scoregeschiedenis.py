@@ -11,7 +11,7 @@ from Overig.e2ehelpers import E2EHelpers
 from Functie.models import maak_functie
 from Schutter.models import SchutterBoog
 from Score.models import Score, ScoreHist, SCORE_WAARDE_VERWIJDERD
-from Wedstrijden.models import Wedstrijd, WedstrijdUitslag
+from Wedstrijden.models import Wedstrijd, CompetitieWedstrijdUitslag
 from .models import score_indiv_ag_opslaan
 import datetime
 
@@ -26,12 +26,12 @@ class TestScoreGeschiedenis(E2EHelpers, TestCase):
         uur_19 = datetime.time(hour=19)
         uur_22 = datetime.time(hour=22)
 
-        uitslag18 = WedstrijdUitslag(max_score=300,
-                                     afstand_meter=18)
+        uitslag18 = CompetitieWedstrijdUitslag(max_score=300,
+                                               afstand_meter=18)
         uitslag18.save()
 
-        uitslag25 = WedstrijdUitslag(max_score=250,
-                                     afstand_meter=25)
+        uitslag25 = CompetitieWedstrijdUitslag(max_score=250,
+                                               afstand_meter=25)
         uitslag25.save()
 
         Wedstrijd(beschrijving='Test wedstrijdje 18m',

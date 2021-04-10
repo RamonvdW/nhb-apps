@@ -16,7 +16,7 @@ from Competitie.models import (Competitie, CompetitieKlasse,
                                LAAG_REGIO, DeelCompetitie, DeelcompetitieRonde,
                                AG_NUL, RegioCompetitieSchutterBoog, RegiocompetitieTeam)
 from Schutter.models import SchutterBoog
-from Wedstrijden.models import Wedstrijd, WedstrijdUitslag, WedstrijdenPlan
+from Wedstrijden.models import Wedstrijd, CompetitieWedstrijdUitslag, WedstrijdenPlan
 from Score.models import Score, ScoreHist, SCORE_TYPE_SCORE, SCORE_TYPE_INDIV_AG
 from decimal import Decimal
 import datetime
@@ -256,7 +256,7 @@ class Command(BaseCommand):
 
                 # zorg dat de wedstrijd een uitslag heeft
                 if not wedstrijd.uitslag:
-                    uitslag = WedstrijdUitslag()
+                    uitslag = CompetitieWedstrijdUitslag()
                     uitslag.max_score = max_score
                     uitslag.afstand_meter = self._afstand
                     uitslag.save()

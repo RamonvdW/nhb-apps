@@ -14,7 +14,7 @@ from Competitie.models import (Competitie, CompetitieKlasse,
                                maak_deelcompetitie_ronde,
                                RegioCompetitieSchutterBoog)
 from Schutter.models import SchutterBoog
-from Wedstrijden.models import Wedstrijd, WedstrijdUitslag
+from Wedstrijden.models import Wedstrijd, CompetitieWedstrijdUitslag
 from Score.models import Score
 from Overig.e2ehelpers import E2EHelpers
 import datetime
@@ -253,7 +253,7 @@ class TestVerenigingSchietmomenten(E2EHelpers, TestCase):
                             tijd_einde_wedstrijd=de_tijd)
 
             if volgnr <= 1:
-                uitslag = WedstrijdUitslag(max_score=300, afstand_meter=12)
+                uitslag = CompetitieWedstrijdUitslag(max_score=300, afstand_meter=12)
                 uitslag.save()
                 wedstrijd.uitslag = uitslag
                 wedstrijd.beschrijving = "Dit is een testje %s" % volgnr

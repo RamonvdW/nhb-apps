@@ -12,7 +12,7 @@ from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Plein.menu import menu_dynamics
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
-from Wedstrijden.models import Wedstrijd, WedstrijdUitslag
+from Wedstrijden.models import Wedstrijd, CompetitieWedstrijdUitslag
 from Schutter.models import SchutterBoog
 from Score.models import Score, ScoreHist, SCORE_WAARDE_VERWIJDERD, SCORE_TYPE_SCORE
 from .models import (LAAG_REGIO, DeelCompetitie,
@@ -153,7 +153,7 @@ def bepaal_wedstrijd_en_deelcomp_of_404(wedstrijd_pk):
 
     # maak de WedstrijdUitslag aan indien nog niet gedaan
     if not wedstrijd.uitslag:
-        uitslag = WedstrijdUitslag()
+        uitslag = CompetitieWedstrijdUitslag()
         if deelcomp.competitie.afstand == '18':
             uitslag.max_score = 300
             uitslag.afstand_meter = 18

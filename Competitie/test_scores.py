@@ -10,7 +10,7 @@ from Functie.models import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging, NhbLid
 from Schutter.models import SchutterBoog
 from Score.models import Score
-from Wedstrijden.models import Wedstrijd, WedstrijdUitslag
+from Wedstrijden.models import Wedstrijd, CompetitieWedstrijdUitslag
 from .models import (Competitie, DeelCompetitie, CompetitieKlasse,
                      DeelcompetitieRonde, competitie_aanmaken,
                      RegioCompetitieSchutterBoog, AG_NUL)
@@ -732,8 +732,8 @@ class TestCompetitieScores(E2EHelpers, TestCase):
                       waarde=123)
         score.save()
 
-        uitslag = WedstrijdUitslag(max_score=300,
-                                   afstand_meter=18)
+        uitslag = CompetitieWedstrijdUitslag(max_score=300,
+                                             afstand_meter=18)
         uitslag.save()
         uitslag.scores.add(score)
 

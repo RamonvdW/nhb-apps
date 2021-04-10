@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import admin
-from .models import WedstrijdLocatie, Wedstrijd, WedstrijdenPlan, WedstrijdUitslag
+from .models import WedstrijdLocatie, Wedstrijd, WedstrijdenPlan, CompetitieWedstrijdUitslag
 
 
 class WedstrijdAdmin(admin.ModelAdmin):             # pragma: no cover
@@ -55,10 +55,12 @@ class WedstrijdenPlanAdmin(admin.ModelAdmin):      # pragma: no cover
     autocomplete_fields = ('wedstrijden',)
 
 
-class WedstrijdUitslagAdmin(admin.ModelAdmin):      # pragma: no cover
+class CompetitieWedstrijdUitslagAdmin(admin.ModelAdmin):      # pragma: no cover
     """ Admin configuratie voor WedstrijdenUitslag"""
 
     readonly_fields = ('scores',)
+
+    list_filter = ('max_score', 'afstand_meter', 'is_bevroren')
 
     #autocomplete_fields = ('wedstrijden',)
     pass
@@ -67,7 +69,7 @@ class WedstrijdUitslagAdmin(admin.ModelAdmin):      # pragma: no cover
 admin.site.register(WedstrijdLocatie, WedstrijdLocatieAdmin)
 admin.site.register(Wedstrijd, WedstrijdAdmin)
 admin.site.register(WedstrijdenPlan, WedstrijdenPlanAdmin)
-admin.site.register(WedstrijdUitslag, WedstrijdUitslagAdmin)
+admin.site.register(CompetitieWedstrijdUitslag, CompetitieWedstrijdUitslagAdmin)
 
 # FUTURE: Wedstrijd admin scherm word langzaam als str(WedstrijdLocatie) een self.verenigingen.count() doet
 #         nog niet op kunnen lossen met een get_queryset(). Even uitgezet.
