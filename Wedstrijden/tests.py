@@ -7,7 +7,7 @@
 from django.test import TestCase
 from Overig.e2ehelpers import E2EHelpers
 from NhbStructuur.models import NhbRegio, NhbVereniging
-from .models import Wedstrijd, WedstrijdLocatie
+from .models import Wedstrijd, WedstrijdLocatie, CompetitieWedstrijdUitslag
 import datetime
 
 
@@ -56,5 +56,12 @@ class TestWedstrijden(E2EHelpers, TestCase):
 
         locatie.zichtbaar = False
         self.assertTrue(str(locatie) != '')
+
+    def test_uitslag(self):
+        uitslag = CompetitieWedstrijdUitslag(max_score=123, afstand_meter=45)
+        self.assertTrue(str(uitslag) != '')
+        uitslag.is_bevroren = True
+        self.assertTrue(str(uitslag) != '')
+
 
 # end of file

@@ -14,7 +14,7 @@ def copy_uitslagen(apps, _):
     uitslag_new_klas = apps.get_model('Wedstrijden', 'CompetitieWedstrijdUitslag')
 
     bulk = list()
-    for uitslag_old in uitslag_old_klas.objects.all():
+    for uitslag_old in uitslag_old_klas.objects.all():      # pragma: no cover
         uitslag_new = uitslag_new_klas(
                             max_score=uitslag_old.max_score,
                             afstand_meter=uitslag_old.afstand_meter,
@@ -29,7 +29,7 @@ def copy_uitslagen(apps, _):
                         .objects
                         .select_related('old')
                         .prefetch_related('scores')
-                        .all()):
+                        .all()):                        # pragma: no cover
 
         uitslag_old = uitslag_new.old
         uitslag_new.scores.set(uitslag_old.scores.all())
