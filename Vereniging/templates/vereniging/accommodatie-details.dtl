@@ -497,7 +497,6 @@
         </ul>
     {% endif %}
 
-
     <script type="application/javascript">
         document.addEventListener("DOMContentLoaded", function() {
             show_hide_dt()

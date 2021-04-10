@@ -17,11 +17,12 @@
     <p>Op deze pagina staan de details van een wedstrijdlocatie.</p>
 
     <script type="application/javascript">
-        function show_hide_indoor() {
+        function show_hide_binnenbanen() {
             const el_indoor = document.getElementById('id_disc_indoor')
-            const els = document.getElementsByClassName('indoor-kan-verstoppen')
+            const el_25m1p = document.getElementById('id_disc_25m1p')
+            const els = document.getElementsByClassName('binnenbanen-kan-verstoppen')
 
-            if (el_indoor.checked) {
+            if (el_indoor.checked || el_25m1p.checked) {
                 /* toon de extra regels */
                 Array.prototype.forEach.call(els, function (el) {
                     el.classList.remove('hide')
@@ -66,7 +67,7 @@
             el.parentElement.style.display = "block"
 
             show_hide_outdoor()
-            show_hide_indoor()
+            show_hide_binnenbanen()
         }
     </script>
 
@@ -154,12 +155,12 @@
 
                 <tr class="outdoor-kan-verstoppen nhb-grijs">
                     <td colspan="{% if readonly %}2{% else %}3{% endif %}">
-                        <h6>Outdoor aspecten:</h6>
+                        <h6>Buitenbanen:</h6>
                     </td>
                 </tr>
 
                 <tr class="outdoor-kan-verstoppen">
-                    <td>(Outdoor) Maximale afstand:</td>
+                    <td>Maximale afstand:</td>
                     <td>
                         {% if readonly %}
                             <span>{{ locatie.buiten_max_afstand }} meter</span>
@@ -177,7 +178,7 @@
                 </tr>
 
                 <tr class="outdoor-kan-verstoppen">
-                    <td>(Outdoor) Aantal banen:</td>
+                    <td>Aantal banen:</td>
                     <td>
                         {% if readonly %}
                             <span>{{ locatie.buiten_banen }} banen</span>
@@ -195,16 +196,16 @@
                     {% endif %}
                 </tr>
 
-                <!-- INDOOR -->
+                <!-- BINNENBANEN -->
 
-                <tr class="indoor-kan-verstoppen nhb-grijs">
+                <tr class="binnenbanen-kan-verstoppen nhb-grijs">
                     <td colspan="{% if readonly %}2{% else %}3{% endif %}">
-                        <h6>Indoor aspecten:</h6>
+                        <h6>Binnenbanen:</h6>
                     </td>
                 </tr>
 
-                <tr class="indoor-kan-verstoppen">
-                    <td>(Indoor) Aantal banen 18 meter:</td>
+                <tr class="binnenbanen-kan-verstoppen">
+                    <td>Aantal banen 18 meter:</td>
                     <td>
                         {% if readonly %}
                             <span>{{ locatie.banen_18m }} banen</span>
@@ -223,8 +224,8 @@
                     {% endif %}
                 </tr>
 
-                <tr class="indoor-kan-verstoppen">
-                    <td>(Indoor) Aantal banen 25 meter:</td>
+                <tr class="binnenbanen-kan-verstoppen">
+                    <td>Aantal banen 25 meter:</td>
                     <td>
                         {% if readonly %}
                             <span>{{ locatie.banen_25m }} banen</span>
@@ -243,8 +244,8 @@
                     {% endif %}
                 </tr>
 
-                <tr class="indoor-kan-verstoppen">
-                    <td>(Indoor) Maximum aantal Dutch Targets op 1 baan:</td>
+                <tr class="binnenbanen-kan-verstoppen">
+                    <td>Maximum aantal Dutch Targets op 1 baan:</td>
                     <td>
                         {% if readonly %}
                             <span>{{ locatie.max_dt_per_baan }} blazoenen</span>
@@ -294,10 +295,30 @@
         </form>
     {% endif %}
 
+    {% if url_verwijder %}
+        <p>&nbsp;</p>
+        <ul class="collapsible">
+            <li>
+                <div class="collapsible-header white">
+                    <span>Klik eerst hier als je deze externe locatie wilt verwijderen</span>
+                </div>
+                <div class="collapsible-body white">
+                    <form method="post" action="{{ url_verwijderen }}">
+                        {% csrf_token %}
+                        <input type="hidden" name="verwijder" value="1">
+                        <p>Weet je het zeker?</p>
+                        <button class="btn-nhb-rood" type="submit">
+                            <i class="material-icons-round left">delete</i>Verwijder deze externe locatie</button>
+                    </form>
+                </div>
+            </li>
+        </ul>
+    {% endif %}
+
     <script type="application/javascript">
         document.addEventListener("DOMContentLoaded", function() {
             show_hide_outdoor()
-            show_hide_indoor()
+            show_hide_binnenbanen()
         })
     </script>
 

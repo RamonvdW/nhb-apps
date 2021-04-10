@@ -48,8 +48,9 @@ class WedstrijdLocatie(models.Model):
     baan_type = models.CharField(max_length=1, choices=BAAN_TYPE, default='X')
 
     # welke disciplines kunnen hier georganiseerd worden?
+    discipline_25m1pijl = models.BooleanField(default=False)
     discipline_outdoor = models.BooleanField(default=False)
-    discipline_indoor = models.BooleanField(default=False)
+    discipline_indoor = models.BooleanField(default=False)      # Indoor = 18m/25m 3pijl
     discipline_clout = models.BooleanField(default=False)
     discipline_veld = models.BooleanField(default=False)
     discipline_run = models.BooleanField(default=False)
@@ -77,6 +78,8 @@ class WedstrijdLocatie(models.Model):
 
     def disciplines_str(self):
         disc = list()
+        if self.discipline_25m1pijl:
+            disc.append('25m1pijl')
         if self.discipline_outdoor:
             disc.append('outdoor')
         if self.discipline_indoor:

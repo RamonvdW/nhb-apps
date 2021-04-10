@@ -33,9 +33,10 @@
                 <td>
                     {% if locatie.discipline_outdoor %}<span>Outdoor</span><br>{% endif %}
                     {% if locatie.discipline_indoor %}<span>Indoor</span><br>{% endif %}
+                    {% if locatie.discipline_25m1pijl %}<span>25m 1pijl</span><br>{% endif %}
                     {% if locatie.discipline_clout %}<span>Clout</span><br>{% endif %}
                     {% if locatie.discipline_veld %}<span>Veld</span><br>{% endif %}
-                    {% if locatie.discipline_run %}<span>Run-archery</span><br>{% endif %}
+                    {% if locatie.discipline_run %}<span>Run archery</span><br>{% endif %}
                     {% if locatie.discipline_3d %}<span>3D</span><br>{% endif %}
                 </td>
 

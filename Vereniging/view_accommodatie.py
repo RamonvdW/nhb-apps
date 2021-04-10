@@ -706,7 +706,8 @@ class ExterneLocatiesView(UserPassesTestMixin, TemplateView):
             context['url_toevoegen'] = reverse('Vereniging:externe-locaties',
                                                kwargs={'vereniging_pk': ver.pk})
 
-        locaties = ver.wedstrijdlocatie_set.filter(baan_type='E')
+        locaties = ver.wedstrijdlocatie_set.filter(zichtbaar=True,
+                                                   baan_type='E')
         context['locaties'] = locaties
 
         for locatie in locaties:
@@ -753,6 +754,7 @@ class ExterneLocatieDetailsView(TemplateView):
         try:
             location_pk = int(self.kwargs['locatie_pk'][:6])        # afkappen voor de veiligheid
             locatie = WedstrijdLocatie.objects.get(pk=location_pk,
+                                                   zichtbaar=True,
                                                    baan_type='E')   # voorkomt wijzigen accommodatie
         except (ValueError, WedstrijdLocatie.DoesNotExist):
             raise Http404('Locatie bestaat niet')
@@ -790,9 +792,10 @@ class ExterneLocatieDetailsView(TemplateView):
         context['disc'] = disc = list()
         disc.append(('disc_outdoor', 'Outdoor', locatie.discipline_outdoor))
         disc.append(('disc_indoor', 'Indoor', locatie.discipline_indoor))
+        disc.append(('disc_25m1p', '25m 1pijl', locatie.discipline_25m1pijl))
         disc.append(('disc_veld', 'Veld', locatie.discipline_veld))
         disc.append(('disc_3d', '3D', locatie.discipline_3d))
-        disc.append(('disc_run', 'Run-Archery', locatie.discipline_run))
+        disc.append(('disc_run', 'Run archery', locatie.discipline_run))
         disc.append(('disc_clout', 'Clout', locatie.discipline_clout))
 
         # aantal banen waar uit gekozen kan worden, voor gebruik in de template
@@ -807,6 +810,8 @@ class ExterneLocatieDetailsView(TemplateView):
                                              kwargs={'vereniging_pk': ver.pk,
                                                      'locatie_pk': locatie.pk})
 
+            context['url_verwijder'] = context['url_opslaan']
+
         context['url_terug'] = reverse('Vereniging:externe-locaties',
                                        kwargs={'vereniging_pk': ver.pk})
 
@@ -819,6 +824,16 @@ class ExterneLocatieDetailsView(TemplateView):
         readonly = self._check_access(locatie, ver)
         if readonly:
             raise PermissionDenied('Wijzigen alleen door HWL van de vereniging')
+
+        if request.POST.get('verwijder', ''):
+            locatie.zichtbaar = False
+            locatie.save()
+
+            # TODO: als de locatie nergens meer gebruikt wordt, dan kan deze opgeruimd worden
+
+            url = reverse('Vereniging:externe-locaties',
+                          kwargs={'vereniging_pk': ver.pk})
+            return HttpResponseRedirect(url)
 
         data = request.POST.get('naam', '')
         if locatie.naam != data:
@@ -838,6 +853,7 @@ class ExterneLocatieDetailsView(TemplateView):
             locatie.adres = data
 
         disc_old = locatie.disciplines_str()
+        locatie.discipline_25m1pijl = (request.POST.get('disc_25m1p', '') != '')
         locatie.discipline_outdoor = (request.POST.get('disc_outdoor', '') != '')
         locatie.discipline_indoor = (request.POST.get('disc_indoor', '') != '')
         locatie.discipline_clout = (request.POST.get('disc_clout', '') != '')
@@ -851,7 +867,7 @@ class ExterneLocatieDetailsView(TemplateView):
             schrijf_in_logboek(request.user, 'Accommodaties', activiteit)
 
         # extra velden voor indoor locaties
-        if locatie.discipline_indoor:
+        if locatie.discipline_indoor or locatie.discipline_25m1pijl:
             try:
                 banen = int(request.POST.get('banen_18m', 0))
                 banen = max(banen, 0)   # ondergrens
