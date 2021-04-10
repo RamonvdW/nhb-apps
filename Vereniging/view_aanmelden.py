@@ -554,7 +554,7 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
                     raise Http404('Geen valide inschrijving')
 
                 # controleer dat deze inschrijving bij de vereniging hoort
-                if inschrijving.schutterboog.nhblid.bij_vereniging != self.functie_nu.nhb_ver:
+                if inschrijving.bij_vereniging != self.functie_nu.nhb_ver:
                     raise PermissionDenied('Sporter is niet lid bij jouw vereniging')
 
                 # schrijf de schutter uit

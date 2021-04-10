@@ -705,8 +705,8 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
         # schrijf een schutter uit van een andere vereniging
         inschrijving = RegioCompetitieSchutterBoog.objects.all()[0]
-        inschrijving.schutterboog.nhblid.bij_vereniging = self.nhbver2
-        inschrijving.schutterboog.nhblid.save()
+        inschrijving.bij_vereniging = self.nhbver2
+        inschrijving.save()
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'pk_%s' % inschrijving.pk: 'on'})
         self.assert403(resp)
