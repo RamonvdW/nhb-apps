@@ -33,6 +33,10 @@ urlpatterns = [
          view_aanmelden.LedenIngeschrevenView.as_view(),
          name='leden-ingeschreven'),
 
+    path('leden-ingeschreven/voorkeur-teamcompetitie/<deelnemer_pk>/',
+         view_aanmelden.ToggleVoorkeurTeamcompetitieView.as_view(),
+         name='toggle-voorkeur-teamcompetitie'),
+
     path('leden-ingeschreven/wijzig-aanvangsgemiddelde/<deelnemer_pk>/',
          view_teams.WijzigTeamAGView.as_view(),
          name='wijzig-ag'),

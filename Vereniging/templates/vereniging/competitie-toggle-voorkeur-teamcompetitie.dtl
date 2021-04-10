@@ -1,0 +1,50 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2021 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Wijzig voorkeur teamcompetitie{% endblock %}
+
+{% block pagina %}
+
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vereniging-uit-teamcompetitie-halen" %}
+
+    <h4>Wijzig voorkeur teamcompetitie</h4>
+
+    <p>Je wilt een wijziging doen voor sporter <b>{{ deelnemer }}</b>.</p>
+
+    {% if url_afmelden %}
+
+        <p>Je wilt deze sporter <b>niet</b> meer mee laten doen met de teamcompetitie. Deze sporter gaat dan verder als individuele schutter.</p>
+
+        {% if is_hwl %}
+            <p>&nbsp;</p>
+            <p>Weet je het zeker? Als HWL kan je deze sporter niet meer toevoegen aan de teamcompetitie!</p>
+        {% endif %}
+
+        <form method="post" action="{{ url_afmelden }}">
+            {% csrf_token %}
+            <button class="btn-nhb-rood" type="submit">
+                <i class="material-icons-round left">check</i>Afmelden</button>
+        </form>
+    {% endif %}
+
+    {% if url_aanmelden %}
+        <p>Je wilt deze sporter mee laten doen met de teamcompetitie.</p>
+
+        <form method="post" action="{{ url_aanmelden }}">
+            {% csrf_token %}
+            <button class="btn-nhb-rood" type="submit">
+                <i class="material-icons-round left">check</i>Aanmelden</button>
+        </form>
+    {% endif %}
+
+    {% if geen_actie_mogelijk %}
+        <p>&nbsp;</p>
+        <p>Je hebt geen rechten om een wijziging door te voeren. Ga terug naar de vorige pagina</p>
+    {% endif %}
+
+{% endblock %}
