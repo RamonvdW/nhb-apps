@@ -16,7 +16,7 @@ from Logboek.models import schrijf_in_logboek
 from NhbStructuur.models import NhbVereniging
 from Overig.background_sync import BackgroundSync
 from Plein.menu import menu_dynamics
-from Wedstrijden.models import CompetitieWedstrijd, WedstrijdenPlan, WedstrijdLocatie
+from Wedstrijden.models import CompetitieWedstrijd, CompetitieWedstrijdenPlan, WedstrijdLocatie
 from .models import (LAAG_REGIO, LAAG_RK, LAAG_BK, INSCHRIJF_METHODE_1, DeelCompetitie,
                      CompetitieKlasse, DeelcompetitieKlasseLimiet, DeelcompetitieRonde,
                      KampioenschapSchutterBoog, KampioenschapMutatie,
@@ -72,7 +72,7 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
 
         # maak het plan aan, als deze nog niet aanwezig was
         if not deelcomp_rk.plan:
-            deelcomp_rk.plan = WedstrijdenPlan()
+            deelcomp_rk.plan = CompetitieWedstrijdenPlan()
             deelcomp_rk.plan.save()
             deelcomp_rk.save()
 
@@ -165,7 +165,7 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
             else:
                 deelcomp.rondes_count = len(plan_pks)
             deelcomp.wedstrijden_count = 0
-            for plan in (WedstrijdenPlan
+            for plan in (CompetitieWedstrijdenPlan
                          .objects
                          .prefetch_related('wedstrijden')
                          .filter(pk__in=plan_pks)):
@@ -197,7 +197,7 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
 
         # maak het plan aan, als deze nog niet aanwezig was
         if not deelcomp_rk.plan:
-            deelcomp_rk.plan = WedstrijdenPlan()
+            deelcomp_rk.plan = CompetitieWedstrijdenPlan()
             deelcomp_rk.plan.save()
             deelcomp_rk.save()
 

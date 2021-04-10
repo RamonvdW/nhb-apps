@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import admin
-from .models import WedstrijdLocatie, CompetitieWedstrijd, WedstrijdenPlan, CompetitieWedstrijdUitslag
+from .models import WedstrijdLocatie, CompetitieWedstrijd, CompetitieWedstrijdenPlan, CompetitieWedstrijdUitslag
 
 
 class WedstrijdLocatieAdmin(admin.ModelAdmin):      # pragma: no cover
@@ -48,7 +48,7 @@ class CompetitieWedstrijdAdmin(admin.ModelAdmin):             # pragma: no cover
                 .all())
 
 
-class WedstrijdenPlanAdmin(admin.ModelAdmin):      # pragma: no cover
+class CompetitieWedstrijdenPlanAdmin(admin.ModelAdmin):      # pragma: no cover
     """ Admin configuratie voor WedstrijdenPlan"""
 
     search_fields = ('pk',)
@@ -66,7 +66,7 @@ class CompetitieWedstrijdUitslagAdmin(admin.ModelAdmin):      # pragma: no cover
 
 admin.site.register(WedstrijdLocatie, WedstrijdLocatieAdmin)
 admin.site.register(CompetitieWedstrijd, CompetitieWedstrijdAdmin)
-admin.site.register(WedstrijdenPlan, WedstrijdenPlanAdmin)
+admin.site.register(CompetitieWedstrijdenPlan, CompetitieWedstrijdenPlanAdmin)
 admin.site.register(CompetitieWedstrijdUitslag, CompetitieWedstrijdUitslagAdmin)
 
 # FUTURE: Wedstrijd admin scherm word langzaam als str(WedstrijdLocatie) een self.verenigingen.count() doet

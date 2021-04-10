@@ -12,6 +12,7 @@ def copy_wedstrijden(apps, _):
 
     wedstrijd_old_klas = apps.get_model('Wedstrijden', 'Wedstrijd')
     wedstrijd_new_klas = apps.get_model('Wedstrijden', 'CompetitieWedstrijd')
+    plan_klas = apps.get_model('Wedstrijden', 'WedstrijdenPlan')
 
     bulk = list()
     for wedstrijd_old in wedstrijd_old_klas.objects.all():      # pragma: no cover
@@ -48,8 +49,7 @@ def copy_wedstrijden(apps, _):
         wedstrijd_new.team_klassen.set(wedstrijd_old.team_klassen.all())
 
         for plan in wedstrijd_old.wedstrijdenplan_set.all():
-            plan.wedstrijd2 = wedstrijd_new
-            plan.save()
+            plan.wedstrijden2.add(wedstrijd_new)
         # for
     # for
 

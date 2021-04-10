@@ -12,7 +12,7 @@ from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
 from Functie.models import Functie
 from Schutter.models import SchutterBoog
 from Score.models import Score, ScoreHist
-from Wedstrijden.models import WedstrijdenPlan, CompetitieWedstrijd
+from Wedstrijden.models import CompetitieWedstrijdenPlan, CompetitieWedstrijdenPlan, CompetitieWedstrijd
 from decimal import Decimal
 from datetime import date
 import datetime
@@ -331,7 +331,7 @@ class DeelCompetitie(models.Model):
     is_afgesloten = models.BooleanField(default=False)
 
     # wedstrijdenplan - alleen voor de RK en BK
-    plan = models.ForeignKey(WedstrijdenPlan, on_delete=models.PROTECT,
+    plan = models.ForeignKey(CompetitieWedstrijdenPlan, on_delete=models.PROTECT,
                              null=True, blank=True)         # optioneel (alleen RK en BK)
 
     # specifieke instellingen voor deze regio
@@ -419,7 +419,7 @@ class DeelcompetitieRonde(models.Model):
     beschrijving = models.CharField(max_length=40)
 
     # wedstrijdenplan voor deze competitie ronde
-    plan = models.ForeignKey(WedstrijdenPlan, on_delete=models.PROTECT)
+    plan = models.ForeignKey(CompetitieWedstrijdenPlan, on_delete=models.PROTECT, null=True, blank=True)
 
     def __str__(self):
         """ geef een tekstuele afkorting van dit object, voor in de admin interface """
@@ -804,7 +804,7 @@ def maak_deelcompetitie_ronde(deelcomp, cluster=None):
         nieuwe_week_nr = 37
 
     # maak een eigen wedstrijdenplan aan voor deze ronde
-    plan = WedstrijdenPlan()
+    plan = CompetitieWedstrijdenPlan()
     plan.save()
 
     ronde = DeelcompetitieRonde()

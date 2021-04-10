@@ -12,7 +12,7 @@ from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging, N
 from Overig.e2ehelpers import E2EHelpers
 from Schutter.models import SchutterBoog
 from Score.models import Score
-from Wedstrijden.models import WedstrijdLocatie, WedstrijdenPlan, CompetitieWedstrijdUitslag
+from Wedstrijden.models import WedstrijdLocatie, CompetitieWedstrijdenPlan, CompetitieWedstrijdUitslag
 from .models import (Competitie, DeelCompetitie, LAAG_REGIO, LAAG_RK, competitie_aanmaken,
                      KampioenschapSchutterBoog, CompetitieKlasse, DeelcompetitieKlasseLimiet,
                      KampioenschapMutatie, DEELNAME_NEE, DEELNAME_JA, INSCHRIJF_METHODE_1,

@@ -14,7 +14,7 @@ from Competitie.test_fase import zet_competitie_fase
 from NhbStructuur.models import NhbRegio, NhbLid, NhbVereniging
 from Schutter.models import SchutterBoog
 from Score.models import Score, ScoreHist, SCORE_TYPE_INDIV_AG, SCORE_TYPE_SCORE, score_indiv_ag_opslaan
-from Wedstrijden.models import WedstrijdenPlan
+from Wedstrijden.models import CompetitieWedstrijdenPlan
 from Overig.e2ehelpers import E2EHelpers
 import datetime
 import io
@@ -251,7 +251,7 @@ class TestCompetitieCliOudeSiteOvernemen(E2EHelpers, TestCase):
         uitslag.delete()
 
         # voeg een ronde toe die niet voor het oude programma is
-        plan = WedstrijdenPlan()
+        plan = CompetitieWedstrijdenPlan()
         plan.save()
         ronde = DeelcompetitieRonde(deelcompetitie=self.deelcomp,
                                     beschrijving="Hello World",

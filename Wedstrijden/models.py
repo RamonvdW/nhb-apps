@@ -189,7 +189,7 @@ class CompetitieWedstrijd(models.Model):
         verbose_name_plural = "Competitie Wedstrijden"
 
 
-class WedstrijdenPlan(models.Model):
+class CompetitieWedstrijdenPlan(models.Model):
     """ Planning voor een serie wedstrijden, zoals de competitierondes """
 
     # lijst van wedstrijden
@@ -200,8 +200,8 @@ class WedstrijdenPlan(models.Model):
 
     class Meta:
         """ meta data voor de admin interface """
-        verbose_name = "Wedstrijdenplan"
-        verbose_name_plural = "Wedstrijdenplannen"
+        verbose_name = "Competitie Wedstrijden Plan"
+        verbose_name_plural = "Competitie Wedstrijden Plannen"
 
 
 # end of file

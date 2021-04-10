@@ -16,7 +16,7 @@ from Competitie.models import (Competitie, CompetitieKlasse,
                                LAAG_REGIO, DeelCompetitie, DeelcompetitieRonde,
                                AG_NUL, RegioCompetitieSchutterBoog, RegiocompetitieTeam)
 from Schutter.models import SchutterBoog
-from Wedstrijden.models import CompetitieWedstrijd, CompetitieWedstrijdUitslag, WedstrijdenPlan
+from Wedstrijden.models import CompetitieWedstrijd, CompetitieWedstrijdUitslag, CompetitieWedstrijdenPlan
 from Score.models import Score, ScoreHist, SCORE_TYPE_SCORE, SCORE_TYPE_INDIV_AG
 from decimal import Decimal
 import datetime
@@ -226,7 +226,7 @@ class Command(BaseCommand):
                     # geen ronde met een plan met die naam
                     # maak een nieuwe aan
 
-                    plan = WedstrijdenPlan()
+                    plan = CompetitieWedstrijdenPlan()
                     plan.bevat_hiaat = False
                     plan.save()
 

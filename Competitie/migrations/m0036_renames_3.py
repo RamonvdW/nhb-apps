@@ -14,8 +14,8 @@ def migreer_wedstrijden(apps, _):
     wedstrijd_new_klas = apps.get_model('Wedstrijden', 'CompetitieWedstrijd')
 
     old2new = dict()
-    for wedstrijd in wedstrijd_new_klas.objects.prefetch_related('old').all():
-        old2new[wedstrijd.old.pk] = wedstrijd.pk
+    for wedstrijd_new in wedstrijd_new_klas.objects.prefetch_related('old').all():
+        old2new[wedstrijd_new.old.pk] = wedstrijd_new.pk
     # for
 
     for deelnemer in deelnemer_klas.objects.prefetch_related('inschrijf_gekozen_wedstrijden').all():
