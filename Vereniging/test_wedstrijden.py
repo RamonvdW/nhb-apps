@@ -12,7 +12,7 @@ from Competitie.models import (Competitie, CompetitieKlasse,
                                LAAG_REGIO, DeelCompetitie,
                                maak_deelcompetitie_ronde)
 from Schutter.models import SchutterBoog
-from Wedstrijden.models import Wedstrijd, CompetitieWedstrijdUitslag
+from Wedstrijden.models import CompetitieWedstrijd, CompetitieWedstrijdUitslag
 from Score.models import Score
 from Overig.e2ehelpers import E2EHelpers
 import datetime
@@ -213,7 +213,7 @@ class TestVerenigingWedstrijden(E2EHelpers, TestCase):
 
         # maak binnen het plan drie wedstrijden voor deze vereniging
         for volgnr in range(3):
-            wedstrijd = Wedstrijd(
+            wedstrijd = CompetitieWedstrijd(
                             vereniging=self.nhbver1,
                             datum_wanneer=datetime.date(year=2020, month=1, day=5+volgnr*3),
                             tijd_begin_aanmelden=de_tijd,
@@ -238,7 +238,7 @@ class TestVerenigingWedstrijden(E2EHelpers, TestCase):
         # for
 
         # maak voor de vereniging een wedstrijd die niets met de competitie te doen heeft
-        wedstrijd = Wedstrijd(
+        wedstrijd = CompetitieWedstrijd(
                         vereniging=self.nhbver1,
                         datum_wanneer=datetime.date(year=2020, month=2, day=1),
                         tijd_begin_aanmelden=de_tijd,

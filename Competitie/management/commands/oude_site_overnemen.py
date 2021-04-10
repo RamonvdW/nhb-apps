@@ -16,7 +16,7 @@ from Competitie.models import (Competitie, CompetitieKlasse,
                                LAAG_REGIO, DeelCompetitie, DeelcompetitieRonde,
                                AG_NUL, RegioCompetitieSchutterBoog, RegiocompetitieTeam)
 from Schutter.models import SchutterBoog
-from Wedstrijden.models import Wedstrijd, CompetitieWedstrijdUitslag, WedstrijdenPlan
+from Wedstrijden.models import CompetitieWedstrijd, CompetitieWedstrijdUitslag, WedstrijdenPlan
 from Score.models import Score, ScoreHist, SCORE_TYPE_SCORE, SCORE_TYPE_INDIV_AG
 from decimal import Decimal
 import datetime
@@ -241,9 +241,9 @@ class Command(BaseCommand):
 
                 try:
                     wedstrijd = deelcomp_ronde.plan.wedstrijden.get(beschrijving=beschrijving)
-                except Wedstrijd.DoesNotExist:
+                except CompetitieWedstrijd.DoesNotExist:
                     # maak een nieuwe wedstrijd aan
-                    wedstrijd = Wedstrijd()
+                    wedstrijd = CompetitieWedstrijd()
                     wedstrijd.beschrijving = beschrijving
                     wedstrijd.preliminair = False
                     wedstrijd.datum_wanneer = self._maandag_wk37

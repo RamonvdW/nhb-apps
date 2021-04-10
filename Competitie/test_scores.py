@@ -10,7 +10,7 @@ from Functie.models import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging, NhbLid
 from Schutter.models import SchutterBoog
 from Score.models import Score
-from Wedstrijden.models import Wedstrijd, CompetitieWedstrijdUitslag
+from Wedstrijden.models import CompetitieWedstrijd, CompetitieWedstrijdUitslag
 from .models import (Competitie, DeelCompetitie, CompetitieKlasse,
                      DeelcompetitieRonde, competitie_aanmaken,
                      RegioCompetitieSchutterBoog, AG_NUL)
@@ -191,9 +191,9 @@ class TestCompetitieScores(E2EHelpers, TestCase):
             self.client.post(self.url_planning_regio_ronde % ronde18.pk, {})
         with self.assert_max_queries(20):
             self.client.post(self.url_planning_regio_ronde % ronde25.pk, {})
-        self.wedstrijd18_pk = Wedstrijd.objects.all()[0].pk
-        self.wedstrijd25_pk = Wedstrijd.objects.all()[1].pk
-        wedstrijd = Wedstrijd.objects.get(pk=self.wedstrijd18_pk)
+        self.wedstrijd18_pk = CompetitieWedstrijd.objects.all()[0].pk
+        self.wedstrijd25_pk = CompetitieWedstrijd.objects.all()[1].pk
+        wedstrijd = CompetitieWedstrijd.objects.get(pk=self.wedstrijd18_pk)
         wedstrijd.vereniging = self.functie_hwl.nhb_ver
         wedstrijd.save()
 
@@ -502,7 +502,7 @@ class TestCompetitieScores(E2EHelpers, TestCase):
         self.assertEqual(json_data['done'], 1)
 
         # controleer dat de uitslag nog niet geaccordeerd is
-        wed = Wedstrijd.objects.select_related('uitslag').get(pk=self.wedstrijd18_pk)
+        wed = CompetitieWedstrijd.objects.select_related('uitslag').get(pk=self.wedstrijd18_pk)
         self.assertFalse(wed.uitslag.is_bevroren)
 
         # haal de uitslag op en controleer aanwezigheid 'accorderen' knop
@@ -517,7 +517,7 @@ class TestCompetitieScores(E2EHelpers, TestCase):
             resp = self.client.post(ackurl)
         self.assert_is_redirect(resp, url)
 
-        wed = Wedstrijd.objects.select_related('uitslag').get(pk=self.wedstrijd18_pk)
+        wed = CompetitieWedstrijd.objects.select_related('uitslag').get(pk=self.wedstrijd18_pk)
         self.assertTrue(wed.uitslag.is_bevroren)
 
         # haal de uitslag op en controleer AFwezigheid 'accorderen' knop
@@ -599,13 +599,13 @@ class TestCompetitieScores(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_uitslag_invoeren % self.wedstrijd18_pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        wedstrijd = Wedstrijd.objects.get(pk=self.wedstrijd18_pk)
-        wedstrijd2 = Wedstrijd(beschrijving="niet in een plan",
-                               datum_wanneer=wedstrijd.datum_wanneer,
-                               tijd_begin_aanmelden=wedstrijd.tijd_begin_aanmelden,
-                               tijd_begin_wedstrijd=wedstrijd.tijd_begin_wedstrijd,
-                               tijd_einde_wedstrijd=wedstrijd.tijd_einde_wedstrijd,
-                               uitslag=wedstrijd.uitslag)
+        wedstrijd = CompetitieWedstrijd.objects.get(pk=self.wedstrijd18_pk)
+        wedstrijd2 = CompetitieWedstrijd(beschrijving="niet in een plan",
+                                         datum_wanneer=wedstrijd.datum_wanneer,
+                                         tijd_begin_aanmelden=wedstrijd.tijd_begin_aanmelden,
+                                         tijd_begin_wedstrijd=wedstrijd.tijd_begin_wedstrijd,
+                                         tijd_einde_wedstrijd=wedstrijd.tijd_einde_wedstrijd,
+                                         uitslag=wedstrijd.uitslag)
         wedstrijd2.save()
         json_data = {'wedstrijd_pk': wedstrijd2.pk}
         with self.assert_max_queries(20):
@@ -647,7 +647,7 @@ class TestCompetitieScores(E2EHelpers, TestCase):
         self.assertEqual(json_data['done'], 1)
 
         # controleer dat de uitslag nog niet geaccordeerd is
-        wed = Wedstrijd.objects.select_related('uitslag').get(pk=self.wedstrijd18_pk)
+        wed = CompetitieWedstrijd.objects.select_related('uitslag').get(pk=self.wedstrijd18_pk)
         self.assertFalse(wed.uitslag.is_bevroren)
 
         # haal de uitslag op en controleer AFwezigheid 'accorderen' knop
@@ -664,7 +664,7 @@ class TestCompetitieScores(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(ackurl)
         self.assert_is_redirect(resp, self.url_uitslag_controleren % self.wedstrijd18_pk)
-        wed = Wedstrijd.objects.select_related('uitslag').get(pk=self.wedstrijd18_pk)
+        wed = CompetitieWedstrijd.objects.select_related('uitslag').get(pk=self.wedstrijd18_pk)
         self.assertTrue(wed.uitslag.is_bevroren)
 
         # terug naar HWL rol

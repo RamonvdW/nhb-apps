@@ -13,7 +13,7 @@ from Competitie.test_fase import zet_competitie_fase
 from Functie.models import Functie
 from Overig.e2ehelpers import E2EHelpers
 from Score.models import Score, ScoreHist, SCORE_TYPE_INDIV_AG, score_indiv_ag_opslaan
-from Wedstrijden.models import Wedstrijd
+from Wedstrijden.models import CompetitieWedstrijd
 from .models import SchutterBoog
 import datetime
 
@@ -731,12 +731,12 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
 
         # maak een wedstrijd aan
-        self.assertEqual(Wedstrijd.objects.count(), 0)
+        self.assertEqual(CompetitieWedstrijd.objects.count(), 0)
         with self.assert_max_queries(20):
             resp = self.client.post(url_ronde)
         self.assert_is_redirect_not_plein(resp)
 
-        wedstrijd_pk = Wedstrijd.objects.all()[0].pk
+        wedstrijd_pk = CompetitieWedstrijd.objects.all()[0].pk
 
         # wijzig de instellingen van deze wedstrijd
         url_wed = self.url_wijzig_wedstrijd % wedstrijd_pk
@@ -838,7 +838,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
 
         # te veel wedstrijden toevoegen
         args = dict()
-        for obj in Wedstrijd.objects.all():
+        for obj in CompetitieWedstrijd.objects.all():
             args['wedstrijd_%s' % obj.pk] = 'on'
         # for
         with self.assert_max_queries(20):

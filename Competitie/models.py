@@ -12,7 +12,7 @@ from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
 from Functie.models import Functie
 from Schutter.models import SchutterBoog
 from Score.models import Score, ScoreHist
-from Wedstrijden.models import WedstrijdenPlan, Wedstrijd
+from Wedstrijden.models import WedstrijdenPlan, CompetitieWedstrijd
 from decimal import Decimal
 from datetime import date
 import datetime
@@ -504,7 +504,7 @@ class RegioCompetitieSchutterBoog(models.Model):
     inschrijf_voorkeur_dagdeel = models.CharField(max_length=2, choices=DAGDELEN, default="GN")
 
     # voorkeur schietmomenten (methode 1)
-    inschrijf_gekozen_wedstrijden = models.ManyToManyField(Wedstrijd, blank=True)
+    inschrijf_gekozen_wedstrijden = models.ManyToManyField(CompetitieWedstrijd, blank=True)
 
     # alternatieve uitslag - dit is tijdelijk
     alt_score1 = models.PositiveIntegerField(default=0)

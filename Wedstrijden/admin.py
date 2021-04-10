@@ -5,26 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import admin
-from .models import WedstrijdLocatie, Wedstrijd, WedstrijdenPlan, CompetitieWedstrijdUitslag
-
-
-class WedstrijdAdmin(admin.ModelAdmin):             # pragma: no cover
-    """ Admin configuratie voor Wedstrijd """
-
-    search_fields = ('beschrijving', 'vereniging__ver_nr', 'vereniging__naam')
-
-    filter_horizontal = ('indiv_klassen', 'team_klassen')
-
-    def get_queryset(self, request):
-        """ deze functie is voor prestatieverbetering
-            want helaas bestaat list_prefetch_related niet
-        """
-        # qs = super().get_queryset(request)
-        return (Wedstrijd
-                .objects
-                .select_related('locatie', 'vereniging')
-                .prefetch_related('indiv_klassen', 'team_klassen')
-                .all())
+from .models import WedstrijdLocatie, CompetitieWedstrijd, WedstrijdenPlan, CompetitieWedstrijdUitslag
 
 
 class WedstrijdLocatieAdmin(admin.ModelAdmin):      # pragma: no cover
@@ -48,6 +29,25 @@ class WedstrijdLocatieAdmin(admin.ModelAdmin):      # pragma: no cover
                 .all())
 
 
+class CompetitieWedstrijdAdmin(admin.ModelAdmin):             # pragma: no cover
+    """ Admin configuratie voor Wedstrijd """
+
+    search_fields = ('beschrijving', 'vereniging__ver_nr', 'vereniging__naam')
+
+    filter_horizontal = ('indiv_klassen', 'team_klassen')
+
+    def get_queryset(self, request):
+        """ deze functie is voor prestatieverbetering
+            want helaas bestaat list_prefetch_related niet
+        """
+        # qs = super().get_queryset(request)
+        return (CompetitieWedstrijd
+                .objects
+                .select_related('locatie', 'vereniging')
+                .prefetch_related('indiv_klassen', 'team_klassen')
+                .all())
+
+
 class WedstrijdenPlanAdmin(admin.ModelAdmin):      # pragma: no cover
     """ Admin configuratie voor WedstrijdenPlan"""
 
@@ -63,12 +63,9 @@ class CompetitieWedstrijdUitslagAdmin(admin.ModelAdmin):      # pragma: no cover
 
     list_filter = ('max_score', 'afstand_meter', 'is_bevroren')
 
-    #autocomplete_fields = ('wedstrijden',)
-    pass
-
 
 admin.site.register(WedstrijdLocatie, WedstrijdLocatieAdmin)
-admin.site.register(Wedstrijd, WedstrijdAdmin)
+admin.site.register(CompetitieWedstrijd, CompetitieWedstrijdAdmin)
 admin.site.register(WedstrijdenPlan, WedstrijdenPlanAdmin)
 admin.site.register(CompetitieWedstrijdUitslag, CompetitieWedstrijdUitslagAdmin)
 

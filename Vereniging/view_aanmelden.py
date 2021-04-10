@@ -22,7 +22,7 @@ from Competitie.models import (AG_NUL, DAGDELEN, DAGDEEL_AFKORTINGEN,
                                DeelCompetitie, DeelcompetitieRonde,
                                RegioCompetitieSchutterBoog)
 from Score.models import Score, SCORE_TYPE_INDIV_AG
-from Wedstrijden.models import Wedstrijd
+from Wedstrijden.models import CompetitieWedstrijd
 import copy
 
 
@@ -246,7 +246,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                         pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
                 # for
 
-                wedstrijden = (Wedstrijd
+                wedstrijden = (CompetitieWedstrijd
                                .objects
                                .filter(pk__in=pks)
                                .select_related('vereniging')

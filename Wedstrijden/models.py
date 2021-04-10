@@ -144,8 +144,8 @@ class CompetitieWedstrijdUitslag(models.Model):
         verbose_name_plural = "Competitie Wedstrijd Uitslagen"
 
 
-class Wedstrijd(models.Model):
-    """ Wedstrijd is de kleinste planbare eenheid """
+class CompetitieWedstrijd(models.Model):
+    """ CompetitieWedstrijd is de kleinste planbare eenheid in de bondscompetitie """
 
     # beschrijving
     beschrijving = models.CharField(max_length=100, blank=True)
@@ -185,16 +185,15 @@ class Wedstrijd(models.Model):
 
     class Meta:
         """ meta data voor de admin interface """
-        verbose_name = "Wedstrijd"
-        verbose_name_plural = "Wedstrijden"
+        verbose_name = "Competitie Wedstrijd"
+        verbose_name_plural = "Competitie Wedstrijden"
 
 
 class WedstrijdenPlan(models.Model):
     """ Planning voor een serie wedstrijden, zoals de competitierondes """
 
     # lijst van wedstrijden
-    wedstrijden = models.ManyToManyField(Wedstrijd,
-                                         blank=True)  # mag leeg zijn / gemaakt worden
+    wedstrijden = models.ManyToManyField(CompetitieWedstrijd, blank=True)
 
     # de hiaat vlag geeft snel weer of er een probleem in de planning zit
     bevat_hiaat = models.BooleanField(default=True)

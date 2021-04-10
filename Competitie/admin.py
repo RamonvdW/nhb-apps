@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import admin
-from Wedstrijden.models import Wedstrijd
+from Wedstrijden.models import CompetitieWedstrijd
 from .models import (Competitie, DeelCompetitie, DeelcompetitieRonde,
                      CompetitieKlasse, DeelcompetitieKlasseLimiet,
                      RegioCompetitieSchutterBoog, KampioenschapSchutterBoog,
@@ -116,7 +116,7 @@ class RegioCompetitieSchutterBoogAdmin(admin.ModelAdmin):
                     # sta alle wedstrijden in de regio toe, dus alle clusters
                     pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
             # for
-            kwargs['queryset'] = (Wedstrijd
+            kwargs['queryset'] = (CompetitieWedstrijd
                                   .objects
                                   .filter(pk__in=pks)
                                   .order_by('datum_wanneer',

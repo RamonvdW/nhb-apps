@@ -14,7 +14,7 @@ from Competitie.test_fase import zet_competitie_fase
 from NhbStructuur.models import NhbRegio, NhbLid, NhbVereniging
 from Schutter.models import SchutterBoog
 from Score.models import Score, ScoreHist, SCORE_WAARDE_VERWIJDERD, score_indiv_ag_opslaan
-from Wedstrijden.models import Wedstrijd
+from Wedstrijden.models import CompetitieWedstrijd
 from Overig.e2ehelpers import E2EHelpers
 from .models import CompetitieKlasse
 import datetime
@@ -66,8 +66,8 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
         self.client.post(self.url_planning_regio_ronde % ronde.pk, {})
         self.client.post(self.url_planning_regio_ronde % ronde.pk, {})
 
-        self.assertEqual(7, Wedstrijd.objects.count())
-        wedstrijd_pks = Wedstrijd.objects.all().values_list('pk', flat=True)
+        self.assertEqual(7, CompetitieWedstrijd.objects.count())
+        wedstrijd_pks = CompetitieWedstrijd.objects.all().values_list('pk', flat=True)
 
         # laat de wedstrijd.uitslag aanmaken en pas de wedstrijd nog wat aan
         self.uitslagen = list()
@@ -75,7 +75,7 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
         for pk in wedstrijd_pks[:]:     # copy to ensure stable
             with self.assert_max_queries(20):
                 resp = self.client.get(self.url_uitslag_invoeren % pk)
-            wedstrijd = Wedstrijd.objects.get(pk=pk)
+            wedstrijd = CompetitieWedstrijd.objects.get(pk=pk)
             self.assertIsNotNone(wedstrijd.uitslag)
             wedstrijd.vereniging = self.ver
             wedstrijd.tijd_begin_wedstrijd = "%02d:00" % uur
@@ -127,7 +127,7 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
             ronde.week_nr = week_nr
             ronde.save()
 
-            wedstrijd = Wedstrijd.objects.get(pk=wedstrijd.pk)
+            wedstrijd = CompetitieWedstrijd.objects.get(pk=wedstrijd.pk)
             self.uitslagen.append(wedstrijd.uitslag)
         # for
 

@@ -18,7 +18,7 @@ from Competitie.models import (DeelCompetitie, DeelcompetitieRonde,
                                DAGDELEN, DAGDEEL_AFKORTINGEN)
 from Plein.menu import menu_dynamics
 from Score.models import Score, ScoreHist, SCORE_TYPE_INDIV_AG
-from Wedstrijden.models import Wedstrijd
+from Wedstrijden.models import CompetitieWedstrijd
 from .models import SchutterVoorkeuren, SchutterBoog
 
 
@@ -156,7 +156,7 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
                     pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
             # for
 
-            wedstrijden = (Wedstrijd
+            wedstrijden = (CompetitieWedstrijd
                            .objects
                            .filter(pk__in=pks)
                            .select_related('vereniging')
@@ -444,7 +444,7 @@ class SchutterSchietmomentenView(UserPassesTestMixin, TemplateView):
                 pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
         # for
 
-        wedstrijden = (Wedstrijd
+        wedstrijden = (CompetitieWedstrijd
                        .objects
                        .filter(pk__in=pks)
                        .select_related('vereniging')
@@ -511,7 +511,7 @@ class SchutterSchietmomentenView(UserPassesTestMixin, TemplateView):
         # for
 
         # zoek alle wedstrijden erbij
-        wedstrijden = (Wedstrijd
+        wedstrijden = (CompetitieWedstrijd
                        .objects
                        .filter(pk__in=pks)
                        .select_related('vereniging')

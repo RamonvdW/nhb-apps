@@ -17,7 +17,7 @@ from Handleiding.views import reverse_handleiding
 from Logboek.models import schrijf_in_logboek
 from NhbStructuur.models import NhbCluster, NhbVereniging
 from Taken.taken import maak_taak
-from Wedstrijden.models import Wedstrijd, WedstrijdLocatie
+from Wedstrijden.models import CompetitieWedstrijd, WedstrijdLocatie
 from .models import (LAAG_REGIO, LAAG_RK, LAAG_BK, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2,
                      TEAM_PUNTEN_FORMULE1, TEAM_PUNTEN_TWEE, TEAM_PUNTEN_SOM_SCORES, AG_NUL,
                      DeelCompetitie, DeelcompetitieRonde, maak_deelcompetitie_ronde,
@@ -651,7 +651,7 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
                 raise PermissionDenied()
 
             jaar = ronde.deelcompetitie.competitie.begin_jaar
-            wedstrijd = Wedstrijd()
+            wedstrijd = CompetitieWedstrijd()
             wedstrijd.datum_wanneer = competitie_week_nr_to_date(jaar, ronde.week_nr)
             wedstrijd.tijd_begin_aanmelden = datetime.time(hour=0, minute=0, second=0)
             wedstrijd.tijd_begin_wedstrijd = wedstrijd.tijd_begin_aanmelden
@@ -753,7 +753,7 @@ class RegioRondePlanningMethode1View(UserPassesTestMixin, TemplateView):
 
         # voeg een wedstrijd toe
         jaar = ronde.deelcompetitie.competitie.begin_jaar
-        wedstrijd = Wedstrijd()
+        wedstrijd = CompetitieWedstrijd()
         wedstrijd.datum_wanneer = competitie_week_nr_to_date(jaar, settings.COMPETITIES_START_WEEK)
         wedstrijd.tijd_begin_aanmelden = datetime.time(hour=0, minute=0, second=0)
         wedstrijd.tijd_begin_wedstrijd = wedstrijd.tijd_begin_aanmelden
@@ -840,12 +840,12 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
 
         try:
             wedstrijd_pk = int(kwargs['wedstrijd_pk'][:6])  # afkappen geeft beveiliging
-            wedstrijd = (Wedstrijd
+            wedstrijd = (CompetitieWedstrijd
                          .objects
                          .select_related('uitslag')
                          .prefetch_related('uitslag__scores')
                          .get(pk=wedstrijd_pk))
-        except (ValueError, Wedstrijd.DoesNotExist):
+        except (ValueError, CompetitieWedstrijd.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
         plan = wedstrijd.wedstrijdenplan_set.all()[0]
@@ -987,8 +987,8 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
 
         try:
             wedstrijd_pk = int(kwargs['wedstrijd_pk'][:6])  # afkappen geeft beveiliging
-            wedstrijd = Wedstrijd.objects.get(pk=wedstrijd_pk)
-        except (ValueError, Wedstrijd.DoesNotExist):
+            wedstrijd = CompetitieWedstrijd.objects.get(pk=wedstrijd_pk)
+        except (ValueError, CompetitieWedstrijd.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
         plan = wedstrijd.wedstrijdenplan_set.all()[0]
@@ -1133,12 +1133,12 @@ class VerwijderWedstrijdView(UserPassesTestMixin, View):
         """
         try:
             wedstrijd_pk = int(kwargs['wedstrijd_pk'][:6])  # afkappen geeft beveiliging
-            wedstrijd = (Wedstrijd
+            wedstrijd = (CompetitieWedstrijd
                          .objects
                          .select_related('uitslag')
                          .prefetch_related('uitslag__scores')
                          .get(pk=wedstrijd_pk))
-        except (ValueError, Wedstrijd.DoesNotExist):
+        except (ValueError, CompetitieWedstrijd.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
         plan = wedstrijd.wedstrijdenplan_set.all()[0]

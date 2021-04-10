@@ -13,7 +13,7 @@ from Competitie.models import (Competitie, DeelCompetitie, DeelcompetitieRonde,
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 from Taken.taken import eval_open_taken
-from Wedstrijden.models import Wedstrijd
+from Wedstrijden.models import CompetitieWedstrijd
 
 
 TEMPLATE_OVERZICHT = 'vereniging/overzicht.dtl'
@@ -82,7 +82,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                    .filter(deelcompetitie__is_afgesloten=False,
                            plan__wedstrijden__vereniging=ver)
                    .values_list('plan__wedstrijden', flat=True))
-            if Wedstrijd.objects.filter(pk__in=pks).count() > 0:
+            if CompetitieWedstrijd.objects.filter(pk__in=pks).count() > 0:
                 context['heeft_wedstrijden'] = True
 
         # comp is nodig voor inschrijven

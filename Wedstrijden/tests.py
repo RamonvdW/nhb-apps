@@ -7,7 +7,7 @@
 from django.test import TestCase
 from Overig.e2ehelpers import E2EHelpers
 from NhbStructuur.models import NhbRegio, NhbVereniging
-from .models import Wedstrijd, WedstrijdLocatie, CompetitieWedstrijdUitslag
+from .models import CompetitieWedstrijd, WedstrijdLocatie, CompetitieWedstrijdUitslag
 import datetime
 
 
@@ -31,7 +31,7 @@ class TestWedstrijden(E2EHelpers, TestCase):
         self.nhbver1 = ver
 
     def test_wedstrijd(self):
-        wedstrijd = Wedstrijd()
+        wedstrijd = CompetitieWedstrijd()
         wedstrijd.datum_wanneer = datetime.date(year=2020, month=9, day=10)
         wedstrijd.tijd_begin_aanmelden = datetime.time(hour=13, minute=59, second=59)
         wedstrijd.tijd_begin_wedstrijd = wedstrijd.tijd_begin_aanmelden
