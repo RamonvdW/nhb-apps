@@ -60,7 +60,7 @@
             <table class="white">
                 <tr>
                     <td>Vereniging:</td>
-                    <td>{{ nhbver }}</td>
+                    <td colspan="2">{{ nhbver }}</td>
                     {% if not readonly %}
                         <td><!-- kolom voor de wijzig knoppen --></td>
                     {% endif %}
@@ -68,7 +68,7 @@
 
                 <tr>
                     <td>Regio:</td>
-                    <td>{{ nhbver.regio }}</td>
+                    <td colspan="2">{{ nhbver.regio }}</td>
                     {% if not readonly %}
                         <td><!-- kolom voor de wijzig knoppen --></td>
                     {% endif %}
@@ -77,7 +77,7 @@
                 {% if nhbver.sorted_cluster_names %}
                     <tr>
                         <td>Cluster(s):</td>
-                        <td>
+                        <td colspan="2">
                             {% for cluster in nhbver.sorted_cluster_names %}
                                 <span>{{ cluster }}</span><br>
                             {% endfor %}
@@ -90,7 +90,7 @@
 
                 <tr>
                     <td style="vertical-align: top">Secretaris:</td>
-                    <td style="vertical-align: top">
+                    <td style="vertical-align: top" colspan="2">
                         {% for name in sec_names %}
                             <span>{{ name }}</span><br>
                         {% empty %}
@@ -109,7 +109,7 @@
 
                 <tr>
                     <td style="vertical-align: top">Hoofdwedstrijdleider(s):</td>
-                    <td style="vertical-align: top">
+                    <td style="vertical-align: top" colspan="2">
                         {% for name in hwl_names %}
                             <span>{{ name }}</span><br>
                         {% empty %}
@@ -132,7 +132,7 @@
 
                 <tr>
                     <td style="vertical-align: top">Wedstrijdleider(s):</td>
-                    <td style="vertical-align: top">
+                    <td style="vertical-align: top" colspan="2">
                         {% for name in wl_names %}
                             <span>{{ name }}</span><br>
                         {% empty %}
@@ -155,7 +155,7 @@
 
                 <tr>
                     <td>E-mailadres secretaris:</td>
-                    <td>
+                    <td colspan="2">
                         {% if sec_email %}
                             <code>{{ sec_email }}</code>
                         {% else %}
@@ -170,7 +170,7 @@
 
                 <tr>
                     <td>E-mailadres hoofdwedstrijdleider:</td>
-                    <td>
+                    <td colspan="2">
                         {% if hwl_email %}
                             <code>{{ hwl_email }}</code>
                         {% else %}
@@ -193,7 +193,7 @@
 
                 <tr>
                     <td>E-mailadres wedstrijdleider:</td>
-                    <td>
+                    <td colspan="2">
                         {% if wl_email %}
                             <code>{{ wl_email }}</code>
                         {% else %}
@@ -216,12 +216,12 @@
 
                 {% if locatie %}
                     <tr>
-                        <td {% if readonly %}colspan="2"{% else %}colspan="3"{% endif %} class="nhb-grijs"><h6>Accommodatie:</h6></td>
+                        <td {% if readonly %}colspan="3"{% else %}colspan="4"{% endif %} class="nhb-grijs"><h6>Accommodatie:</h6></td>
                     </tr>
 
                     <tr>
                         <td>Adres van de accommodatie:</td>
-                        <td>{{ locatie.adres|linebreaksbr }}</td>
+                        <td colspan="2">{{ locatie.adres|linebreaksbr }}</td>
                         {% if not readonly %}
                             <td><!-- kolom voor de wijzig knoppen --></td>
                         {% endif %}
@@ -229,7 +229,7 @@
 
                     <tr>
                         <td>Type baan voor 18m/25m wedstrijden:</td>
-                        <td{% if not readonly %} colspan="2"{% endif %}>
+                        <td colspan="{% if readonly %}2{% else %}3{% endif %}">
                             {% if readonly %}
                                 <span>{{ locatie.baan_type_str }}</span>
                             {% else %}
@@ -259,7 +259,7 @@
 
                     <tr>
                         <td>Aantal banen 18 meter:</td>
-                        <td>
+                        <td colspan="2">
                             {% if readonly %}
                                 <span>{{ locatie.banen_18m }} banen</span>
                             {% else %}
@@ -279,7 +279,7 @@
 
                     <tr>
                         <td>Aantal banen 25 meter:</td>
-                        <td>
+                        <td colspan="2">
                             {% if readonly %}
                                 <span>{{ locatie.banen_25m }} banen</span>
                             {% else %}
@@ -299,7 +299,7 @@
 
                     <tr id="id_dt_per_baan"{% if not readonly_show_max_dt %} class="hide"{% endif %}>
                         <td>Maximum aantal Dutch Targets op 1 baan:</td>
-                        <td>
+                        <td colspan="2">
                             {% if readonly %}
                                 <span>{{ locatie.max_dt_per_baan }} blazoenen</span>
                             {% else %}
@@ -327,7 +327,7 @@
                     {% if locatie.other_ver.count %}
                         <tr>
                             <td style="vertical-align: top">Accommodatie wordt ook gebruikt door vereniging:</td>
-                            <td style="vertical-align: top">
+                            <td style="vertical-align: top" colspan="2">
                                 {% for nhbver in locatie.other_ver.all %}
                                     <span>{{ nhbver }}</span><br>
                                 {% endfor %}
@@ -340,7 +340,7 @@
 
                     <tr>
                         <td style="vertical-align: top">Bijzonderheden:</td>
-                        <td style="vertical-align: top">
+                        <td style="vertical-align: top" colspan="2">
                             {% if readonly %}
                                 <span>{{ locatie.notities|linebreaksbr }}</span>
                             {% else %}
@@ -360,7 +360,7 @@
                     <!-- geen locatie -->
                     <tr>
                         <td style="vertical-align: top">Adres van de accommodatie:</td>
-                        <td style="vertical-align: top"><i>Geen</i></td>
+                        <td style="vertical-align: top" colspan="2"><i>Geen</i></td>
                         {% if not readonly %}
                             <td><!-- kolom voor de wijzig knoppen --></td>
                         {% endif %}
@@ -369,12 +369,12 @@
 
                 {% if buiten_locatie %}
                     <tr>
-                        <td {% if readonly %}colspan="2"{% else %}colspan="3"{% endif %} class="nhb-grijs"><h6>Buitenbaan:</h6></td>
+                        <td {% if readonly %}colspan="3"{% else %}colspan="4"{% endif %} class="nhb-grijs"><h6>Buitenbaan:</h6></td>
                     </tr>
 
                     <tr>
                         <td>Maximum aantal banen:</td>
-                        <td>
+                        <td colspan="2">
                             {% if readonly %}
                                 <span>{{ buiten_locatie.buiten_banen }} banen</span>
                             {% else %}
@@ -393,7 +393,7 @@
 
                     <tr>
                         <td>Maximale afstand:</td>
-                        <td>
+                        <td colspan="2">
                             {% if readonly %}
                                 <span>{{ buiten_locatie.buiten_max_afstand }} meter</span>
                             {% else %}
@@ -411,7 +411,7 @@
 
                     <tr>
                         <td>Bijzonderheden:</td>
-                        <td>
+                        <td colspan="2">
                             {% if readonly %}
                                 <span>{{ buiten_locatie.notities|linebreaksbr }}</span>
                             {% else %}
@@ -426,13 +426,16 @@
 
                 {% if externe_locaties %}
                     <tr>
-                        <td colspan="{% if readonly %}2{% else %}3{% endif %}" class="nhb-grijs"><h6>Overige locaties voor deze vereniging:</h6></td>
+                        <td colspan="{% if readonly %}3{% else %}4{% endif %}" class="nhb-grijs"><h6>Overige locaties voor deze vereniging:</h6></td>
                     </tr>
 
                     <tr>
                         <th>Naam</th>
                         <th>Disciplines</th>
                         <th>Adres</th>
+                        {% if not readonly %}
+                            <th><!-- kolom voor de wijzig knoppen --></th>
+                        {% endif %}
                     </tr>
 
                     {% for locatie in externe_locaties %}
@@ -449,6 +452,10 @@
                             </td>
 
                             <td>{{ locatie.adres|linebreaksbr }}</td>
+
+                            {% if not readonly %}
+                                <td><!-- kolom voor de wijzig knoppen --></td>
+                            {% endif %}
                         </tr>
                     {% endfor %}
                 {% endif %}
