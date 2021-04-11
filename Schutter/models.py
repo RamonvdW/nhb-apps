@@ -37,6 +37,15 @@ class SchutterVoorkeuren(models.Model):
     # sporters met para-classificatie mogen een opmerking toevoegen voor de wedstrijdleiding
     opmerking_para_sporter = models.CharField(max_length=256, default='')
 
+    # (opt-out) voorkeur voor wedstrijden van specifieke disciplines
+    voorkeur_discipline_25m1pijl = models.BooleanField(default=True)
+    voorkeur_discipline_outdoor = models.BooleanField(default=True)
+    voorkeur_discipline_indoor = models.BooleanField(default=True)      # Indoor = 18m/25m 3pijl
+    voorkeur_discipline_clout = models.BooleanField(default=True)
+    voorkeur_discipline_veld = models.BooleanField(default=True)
+    voorkeur_discipline_run = models.BooleanField(default=True)
+    voorkeur_discipline_3d = models.BooleanField(default=True)
+
     class Meta:
         """ meta data voor de admin interface """
         verbose_name_plural = verbose_name = "Schutter voorkeuren"

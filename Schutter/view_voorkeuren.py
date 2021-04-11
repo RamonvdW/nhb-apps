@@ -125,6 +125,57 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
                 voorkeuren.opmerking_para_sporter = para_notitie
                 voorkeuren.save(update_fields=['opmerking_para_sporter'])
 
+        old_disc_outdoor = voorkeuren.voorkeur_discipline_outdoor
+        voorkeuren.voorkeur_discipline_outdoor = False
+        if request.POST.get('voorkeur_disc_outdoor', None):
+            voorkeuren.voorkeur_discipline_outdoor = True
+
+        old_disc_indoor = voorkeuren.voorkeur_discipline_indoor
+        voorkeuren.voorkeur_discipline_indoor = False
+        if request.POST.get('voorkeur_disc_indoor', None):
+            voorkeuren.voorkeur_discipline_indoor = True
+
+        old_disc_25m1p = voorkeuren.voorkeur_discipline_25m1pijl
+        voorkeuren.voorkeur_discipline_25m1pijl = False
+        if request.POST.get('voorkeur_disc_25m1p', None):
+            voorkeuren.voorkeur_discipline_25m1pijl = True
+
+        old_disc_clout = voorkeuren.voorkeur_discipline_clout
+        voorkeuren.voorkeur_discipline_clout = False
+        if request.POST.get('voorkeur_disc_clout', None):
+            voorkeuren.voorkeur_discipline_clout = True
+
+        old_disc_veld = voorkeuren.voorkeur_discipline_veld
+        voorkeuren.voorkeur_discipline_veld = False
+        if request.POST.get('voorkeur_disc_veld', None):
+            voorkeuren.voorkeur_discipline_veld = True
+
+        old_disc_run = voorkeuren.voorkeur_discipline_run
+        voorkeuren.voorkeur_discipline_run = False
+        if request.POST.get('voorkeur_disc_run', None):
+            voorkeuren.voorkeur_discipline_run = True
+
+        old_disc_3d = voorkeuren.voorkeur_discipline_3d
+        voorkeuren.voorkeur_discipline_3d = False
+        if request.POST.get('voorkeur_disc_3d', None):
+            voorkeuren.voorkeur_discipline_3d = True
+
+        if (old_disc_outdoor != voorkeuren.voorkeur_discipline_outdoor or
+                old_disc_indoor != voorkeuren.voorkeur_discipline_indoor or
+                old_disc_25m1p != voorkeuren.voorkeur_discipline_25m1pijl or
+                old_disc_clout != voorkeuren.voorkeur_discipline_clout or
+                old_disc_veld != voorkeuren.voorkeur_discipline_veld or
+                old_disc_run != voorkeuren.voorkeur_discipline_run or
+                old_disc_3d != voorkeuren.voorkeur_discipline_3d):
+            # wijzigingen opslaan
+            voorkeuren.save(update_fields=['voorkeur_discipline_25m1pijl',
+                                           'voorkeur_discipline_outdoor',
+                                           'voorkeur_discipline_indoor',
+                                           'voorkeur_discipline_clout',
+                                           'voorkeur_discipline_veld',
+                                           'voorkeur_discipline_run',
+                                           'voorkeur_discipline_3d'])
+
         del voorkeuren
 
         if self.rol_nu != Rollen.ROL_HWL:
