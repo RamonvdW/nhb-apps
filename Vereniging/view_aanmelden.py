@@ -558,7 +558,6 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
             raise PermissionDenied('Verkeerde rol')
 
         deelnemer_pk = request.POST.get('toggle_deelnemer_pk', '')
-        print('deelnemer_pk:', deelnemer_pk)
         if deelnemer_pk:
             try:
                 deelnemer_pk = int(deelnemer_pk[:6])        # afkappen voor de veiligheid

@@ -66,12 +66,46 @@
             }
         }
 
+        /* For a given date, get the ISO week number
+         * Source: https://stackoverflow.com/questions/6117814/
+         */
+        function getWeekNumber(d) {
+            // Copy date so don't modify original
+            let weekday = 1 + d.getUTCDay()     /* 1 = monday */
+            d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()))
+            // Set to nearest Thursday: current date + 4 - current day number
+            // Make Sunday's day number 7
+            d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7))
+            // get first day of year
+            let yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1))
+            // calculate full weeks to nearest Thursday
+            let weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7)
+            // Return array of year and week number
+            let year_str = d.getUTCFullYear().toString().substring(2)    // 2021 --> 21
+            let week_str = weekNo.toString()
+            if (weekNo < 10) { week_str = "0" + week_str }
+            return "wk" + year_str + week_str + "." + weekday
+        }
+
+        function week_nummers() {
+            /* vertaal de datum naar het week nummer */
+            for (let nr = 1; nr <= 9; nr++) {
+                const el_datum = document.getElementById('datum' + nr)
+                const date = el_datum.M_Datepicker.date
+                console.log('date:', date)
+
+                const el_weeknr = document.getElementById('weeknr' + nr)
+                el_weeknr.innerHTML = getWeekNumber(date)
+            }
+        }
+
         function gewijzigd() {
             /* het formulier is aangepast en moet opgeslagen worden */
 
             if (!bezig) {
                 /* rode_datums geeft nieuwe aanroepen naar deze functie */
                 rode_datums()
+                week_nummers()
 
                 /* enable de 'opslaan' knop */
                 const el = document.getElementById("opslaan_knop")
@@ -91,60 +125,70 @@
         <thead>
             <tr>
                 <th>Beschrijving</th>
+                <th>Week notatie</th>
                 <th>Datum</th>
             </tr>
         </thead>
         <tr>
             <td>Inschrijving openen op</td>
+            <td id="weeknr1"></td>
             <td><input type="text" class="nl_datepicker" id="datum1" onchange="gewijzigd()"></td>
         </tr>
         <tr>
             <td>Inschrijving sluiten op</td>
+            <td id="weeknr2"></td>
             <td><input type="text" class="nl_datepicker" id="datum2" onchange="gewijzigd()"></td>
         </tr>
 
         <tr>
-            <td colspan="2"><b>Regiocompetitie</b></td>
+            <td colspan="3"><b>Regiocompetitie</b></td>
         </tr>
 
         <tr>
             <td>Samenstellen vaste teams kan tot</td>
+            <td id="weeknr3"></td>
             <td><input type="text" class="nl_datepicker" id="datum3" onchange="gewijzigd()"></td>
         </tr>
         <tr>
             <td>Aanmaken poules tot</td>
+            <td id="weeknr4"></td>
             <td><input type="text" class="nl_datepicker" id="datum4" onchange="gewijzigd()"></td>
         </tr>
         <tr>
             <td>Wedstrijden tot</td>
+            <td id="weeknr5"></td>
             <td><input type="text" class="nl_datepicker" id="datum5" onchange="gewijzigd()"></td>
         </tr>
 
         <tr>
-            <td colspan="2"><b>Rayonkampioenschappen</b></td>
+            <td colspan="3"><b>Rayonkampioenschappen</b></td>
         </tr>
 
         <tr>
             <td>Wedstrijden vanaf</td>
+            <td id="weeknr6"></td>
             <td><input type="text" class="nl_datepicker" id="datum6" onchange="gewijzigd()"></td>
         </tr>
 
         <tr>
             <td>Wedstrijden tot</td>
+            <td id="weeknr7"></td>
             <td><input type="text" class="nl_datepicker" id="datum7" onchange="gewijzigd()"></td>
         </tr>
 
         <tr>
-            <td colspan="2"><b>Bondskampioenschappen</b></td>
+            <td colspan="3"><b>Bondskampioenschappen</b></td>
         </tr>
 
         <tr>
             <td>Wedstrijden vanaf</td>
+            <td id="weeknr8"></td>
             <td><input type="text" class="nl_datepicker" id="datum8" onchange="gewijzigd()"></td>
         </tr>
 
         <tr>
             <td>Wedstrijden tot</td>
+            <td id="weeknr9"></td>
             <td><input type="text" class="nl_datepicker" id="datum9" onchange="gewijzigd()"></td>
         </tr>
 
@@ -224,6 +268,7 @@
 
             bezig = false   /* klaar met initialisatie van alle date pickers (hier boven) */
             rode_datums()
+            week_nummers()
         })
     </script>
 
