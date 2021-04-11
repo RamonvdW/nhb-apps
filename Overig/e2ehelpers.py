@@ -364,6 +364,10 @@ class E2EHelpers(object):
             if pos >= 0:
                 self.fail(msg='Detected console.log usage in script from template %s' % template_name)   # pragma: no cover
 
+            pos = script.find('/*')
+            if pos >= 0:
+                self.fail(msg='Found block comment in script from template %s' % template_name)     # pragma: no cover
+
             html = html[pos+9:]
             pos = html.find('<script ')
         # while
