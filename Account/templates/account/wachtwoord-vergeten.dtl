@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019-2020 Ramon van der Winkel.
+                Copyright (c) 2019-2021 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -9,50 +9,51 @@
 {% block title %}Wachtwoord vergeten{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="account-wachtwoord-vergeten" %}
 
-<h4>Wachtwoord vergeten</h4>
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="account-wachtwoord-vergeten" %}
 
-<p>Heb je eerder een account aangemaakt en weet je nu je wachtwoord niet meer?</p>
+    <h4>Wachtwoord vergeten</h4>
 
-<div class="container z-depth-2 white">
+    <p>Heb je eerder een account aangemaakt en weet je nu je wachtwoord niet meer?</p>
 
-    <div class="row nhb-blauw white-text">
-        <div class="col s12 center-align">
-            <h5>Wachtwoord vergeten</h5>
-            <p>Voor een bestaand account</p>
+    <div class="container z-depth-2 white">
+
+        <div class="row nhb-blauw white-text">
+            <div class="col s12 center-align">
+                <h5>Wachtwoord vergeten</h5>
+                <p>Voor een bestaand account</p>
+            </div>
+        </div>
+
+        <div class="row"><div class="col s12">
+            <p>Vul je e-mailadres in, dan sturen we een e-mail waarmee je een nieuw wachtwoord in kan stellen.</p>
+        </div></div>
+
+        <div class="row">
+            <form class="col s12" action="{% url 'Account:wachtwoord-vergeten' %}" method="post">
+                {% csrf_token %}
+
+                <div class="row"><div class="input-field col s12">
+                    <label class="black-text" for="id_email">E-mailadres:</label>
+                    <input class="with-gap" autofocus type="email" name="email" value="" required id="id_email" autocomplete="email">
+                </div></div>
+
+                {% if foutmelding %}
+                    <div class="row"><div class="col s12">
+                        <span class="red-text">Fout: {{ foutmelding }}</span>
+                    </div></div>
+                {% endif %}
+
+                <div class="row"><div class="col s12">
+                    <div class="center-align">
+                        <button class="btn-nhb-blauw" type="submit">
+                            <i class="material-icons-round left">email</i>Verstuur e-mail</button>
+                    </div>
+                </div></div>
+
+            </form>
+
         </div>
     </div>
-
-    <div class="row"><div class="col s12">
-        <p>Vul je e-mailadres in, dan sturen we een e-mail waarmee je een nieuw wachtwoord in kan stellen.</p>
-    </div></div>
-
-    <div class="row">
-        <form class="col s12" action="{% url 'Account:wachtwoord-vergeten' %}" method="post">
-            {% csrf_token %}
-
-            <div class="row"><div class="input-field col s12">
-                <label class="black-text" for="id_email">E-mailadres:</label>
-                <input class="with-gap" autofocus type="email" name="email" value="" required id="id_email" autocomplete="email">
-            </div></div>
-
-            {% if foutmelding %}
-                <div class="row"><div class="col s12">
-                    <span class="red-text">Fout: {{ foutmelding }}</span>
-                </div></div>
-            {% endif %}
-
-            <div class="row"><div class="col s12">
-                <div class="center-align">
-                    <button class="btn-nhb-blauw" type="submit">
-                        <i class="material-icons-round left">email</i>Verstuur e-mail</button>
-                </div>
-            </div></div>
-
-        </form>
-
-    </div>
-</div>
 
 {% endblock %}
