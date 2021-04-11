@@ -52,15 +52,15 @@
 
     <script type="application/javascript">
         function gewijzigd() {
-            /* het formulier is aangepast en moet opgeslagen worden */
+            // het formulier is aangepast en moet opgeslagen worden
 
-            /* disable alle knoppen waarmee de invoer verloren zou gaan */
+            // disable alle knoppen waarmee de invoer verloren zou gaan
             const els = document.getElementsByClassName("vertrek_knop")
             Array.prototype.forEach.call(els, function(el) {
                 el.classList.add('disabled')
             })
 
-            /* enable de 'opslaan' knop */
+            // enable de 'opslaan' knop
             const el = document.getElementById("opslaan_knop")
             el.classList.remove('disabled')
         }

@@ -13,7 +13,7 @@
 
     <script type="application/javascript">
 
-        /* de 'bezig' vlag voorkomt recursion */
+        // de 'bezig' vlag voorkomt recursion
         let bezig = true
 
         function post_datums()
@@ -45,7 +45,7 @@
         }
 
         function rode_datums() {
-            /* controleer dat de datums opvolgend zijn */
+            // controleer dat de datums opvolgend zijn
             if (!bezig) {
                 bezig = true
                 const el = document.getElementById('datum1')
@@ -66,12 +66,11 @@
             }
         }
 
-        /* For a given date, get the ISO week number
-         * Source: https://stackoverflow.com/questions/6117814/
-         */
+        // For a given date, get the ISO week number
+        // Source: https://stackoverflow.com/questions/6117814/
         function getWeekNumber(d) {
             // Copy date so don't modify original
-            let weekday = 1 + d.getUTCDay()     /* 1 = monday */
+            let weekday = 1 + d.getUTCDay()     // 1 = monday
             d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()))
             // Set to nearest Thursday: current date + 4 - current day number
             // Make Sunday's day number 7
@@ -88,11 +87,10 @@
         }
 
         function week_nummers() {
-            /* vertaal de datum naar het week nummer */
+            // vertaal de datum naar het week nummer
             for (let nr = 1; nr <= 9; nr++) {
                 const el_datum = document.getElementById('datum' + nr)
                 const date = el_datum.M_Datepicker.date
-                console.log('date:', date)
 
                 const el_weeknr = document.getElementById('weeknr' + nr)
                 el_weeknr.innerHTML = getWeekNumber(date)
@@ -100,14 +98,14 @@
         }
 
         function gewijzigd() {
-            /* het formulier is aangepast en moet opgeslagen worden */
+            // het formulier is aangepast en moet opgeslagen worden
 
             if (!bezig) {
-                /* rode_datums geeft nieuwe aanroepen naar deze functie */
+                // rode_datums geeft nieuwe aanroepen naar deze functie
                 rode_datums()
                 week_nummers()
 
-                /* enable de 'opslaan' knop */
+                // enable de 'opslaan' knop
                 const el = document.getElementById("opslaan_knop")
                 el.disabled = false
                 el.parentElement.style.display = "block"
@@ -266,7 +264,7 @@
                                     minDate: minDate, maxDate: maxDate,
                                     yearRange: competitieJaren})
 
-            bezig = false   /* klaar met initialisatie van alle date pickers (hier boven) */
+            bezig = false   // klaar met initialisatie van alle date pickers (hier boven)
             rode_datums()
             week_nummers()
         })

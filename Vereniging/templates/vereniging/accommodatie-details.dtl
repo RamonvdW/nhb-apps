@@ -29,15 +29,15 @@
         }
 
         function gewijzigd() {
-            /* het formulier is aangepast en moet opgeslagen worden */
+            // het formulier is aangepast en moet opgeslagen worden
 
-            /* disable alle knoppen waarmee de invoer verloren zou gaan */
+            // disable alle knoppen waarmee de invoer verloren zou gaan
             const els = document.getElementsByClassName("wijzig_knop")
             Array.prototype.forEach.call(els, function (el) {
                 el.classList.add('disabled')
             })
 
-            /* enable de 'opslaan' knop */
+            // enable de 'opslaan' knop
             const el = document.getElementById("opslaan_knop")
             el.disabled = false
             el.parentElement.style.display = "block"
@@ -485,7 +485,7 @@
                     <span>Klik eerst hier als je de buitenbaan wilt verwijderen</span>
                 </div>
                 <div class="collapsible-body white">
-                    <form method="post" action="{{ url_verwijderen }}">
+                    <form method="post" action="{{ url_verwijder_buitenbaan }}">
                         {% csrf_token %}
                         <input type="hidden" name="verwijder_buitenbaan" value="1">
                         <p>Weet je het zeker?</p>

@@ -24,8 +24,8 @@
 
     <script type="application/javascript">
         function gewijzigd() {
-            /* het formulier is aangepast en moet opgeslagen worden */
-            /* enable de 'opslaan' knop */
+            // het formulier is aangepast en moet opgeslagen worden
+            // enable de 'opslaan' knop
             const el = document.getElementById("opslaan_knop")
             el.disabled = false
             el.parentElement.style.display = "block"

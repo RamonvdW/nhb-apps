@@ -23,12 +23,12 @@
             const els = document.getElementsByClassName('binnenbanen-kan-verstoppen')
 
             if (el_indoor.checked || el_25m1p.checked) {
-                /* toon de extra regels */
+                // toon de extra regels
                 Array.prototype.forEach.call(els, function (el) {
                     el.classList.remove('hide')
                 })
             } else {
-                /* verstop de extra regels */
+                // verstop de extra regels
                 Array.prototype.forEach.call(els, function (el) {
                     el.classList.add('hide')
                 })
@@ -40,12 +40,12 @@
             const els = document.getElementsByClassName('outdoor-kan-verstoppen')
 
             if (el_outdoor.checked) {
-                /* toon de extra regels */
+                // toon de extra regels
                 Array.prototype.forEach.call(els, function (el) {
                     el.classList.remove('hide')
                 })
             } else {
-                /* verstop de extra regels */
+                // verstop de extra regels
                 Array.prototype.forEach.call(els, function (el) {
                     el.classList.add('hide')
                 })
@@ -53,15 +53,15 @@
         }
 
         function gewijzigd() {
-            /* het formulier is aangepast en moet opgeslagen worden */
+            // het formulier is aangepast en moet opgeslagen worden
 
-            /* disable alle knoppen waarmee de invoer verloren zou gaan */
+            // disable alle knoppen waarmee de invoer verloren zou gaan
             const els = document.getElementsByClassName("wijzig_knop")
             Array.prototype.forEach.call(els, function (el) {
                 el.classList.add('disabled')
             })
 
-            /* enable de 'opslaan' knop */
+            // enable de 'opslaan' knop
             const el = document.getElementById("opslaan_knop")
             el.disabled = false
             el.parentElement.style.display = "block"
@@ -303,7 +303,7 @@
                     <span>Klik eerst hier als je deze externe locatie wilt verwijderen</span>
                 </div>
                 <div class="collapsible-body white">
-                    <form method="post" action="{{ url_verwijderen }}">
+                    <form method="post" action="{{ url_verwijder }}">
                         {% csrf_token %}
                         <input type="hidden" name="verwijder" value="1">
                         <p>Weet je het zeker?</p>

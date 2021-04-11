@@ -18,7 +18,7 @@
         function invoer() {
             const el = document.getElementById('id_ag')
 
-            /* enable de 'opslaan' knop */
+            // enable de 'opslaan' knop
             const el2 = document.getElementById("opslaan_knop")
             el2.disabled = (el.value === "")
         }

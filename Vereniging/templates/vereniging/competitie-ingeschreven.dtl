@@ -39,7 +39,7 @@
             document.body.appendChild(form)
             form.submit()
 
-            return false    /* false prevents default browser behavior */
+            return false    // false prevents default browser behavior
         }
     </script>
 
