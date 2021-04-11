@@ -28,7 +28,7 @@ def copy_uitslagen(apps, _):
     # for
 
     if len(bulk):
-        uitslag_new_klas.objects.bulk_create(bulk)
+        uitslag_new_klas.objects.bulk_create(bulk)      # pragma: no cover
 
     for uitslag_new in (uitslag_new_klas
                         .objects

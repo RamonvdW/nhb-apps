@@ -46,6 +46,7 @@ class TestWedstrijden(E2EHelpers, TestCase):
         locatie.adres = 'Hallo\ndaar'
         self.assertTrue(str(locatie) != '')
 
+        locatie.discipline_25m1pijl = True
         locatie.discipline_outdoor = True
         locatie.discipline_indoor = True
         locatie.discipline_clout = True

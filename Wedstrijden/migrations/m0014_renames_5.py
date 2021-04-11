@@ -27,7 +27,7 @@ def copy_plannen(apps, _):
     # for
 
     if len(bulk):
-        plan_new_klas.objects.bulk_create(bulk)
+        plan_new_klas.objects.bulk_create(bulk)      # pragma: no cover
 
     for plan_new in (plan_new_klas
                      .objects

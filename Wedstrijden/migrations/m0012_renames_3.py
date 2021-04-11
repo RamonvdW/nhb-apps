@@ -35,7 +35,7 @@ def copy_wedstrijden(apps, _):
     # for
 
     if len(bulk):
-        wedstrijd_new_klas.objects.bulk_create(bulk)
+        wedstrijd_new_klas.objects.bulk_create(bulk)      # pragma: no cover
 
     for wedstrijd_new in (wedstrijd_new_klas
                           .objects

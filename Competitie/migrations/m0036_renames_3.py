@@ -14,11 +14,11 @@ def migreer_wedstrijden(apps, _):
     wedstrijd_new_klas = apps.get_model('Wedstrijden', 'CompetitieWedstrijd')
 
     old2new = dict()
-    for wedstrijd_new in wedstrijd_new_klas.objects.prefetch_related('old').all():
+    for wedstrijd_new in wedstrijd_new_klas.objects.prefetch_related('old').all():      # pragma: no cover
         old2new[wedstrijd_new.old.pk] = wedstrijd_new.pk
     # for
 
-    for deelnemer in deelnemer_klas.objects.prefetch_related('inschrijf_gekozen_wedstrijden').all():
+    for deelnemer in deelnemer_klas.objects.prefetch_related('inschrijf_gekozen_wedstrijden').all():    # pragma: no cover
         wedstrijden = list()
         for wedstrijd_pk in deelnemer.inschrijf_gekozen_wedstrijden.values_list('pk', flat=True):
             wedstrijden.append(old2new[wedstrijd_pk])
