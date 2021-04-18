@@ -341,6 +341,15 @@ class TestPlein(E2EHelpers, TestCase):
         self.assertTrue(resp.status_code, 200)
         self.assert_template_used(resp, ('plein/fout_404.dtl', 'plein/site_layout_minimaal.dtl'))
 
+        resp = self.client.get('/plein/seems-part-of-site/')
+        self.assertTrue(resp.status_code, 200)
+
+        resp = self.client.get('/searching-for-weakness/something/')
+        self.assertTrue(resp.status_code, 404)
+
+        resp = self.client.get('/some-icon.png')
+        self.assertTrue(resp.status_code, 404)
+
     def test_500(self):
         self.assertEqual(0, MailQueue.objects.count())
         resp = self.client.get('/plein/test-speciale-pagina/500/')
