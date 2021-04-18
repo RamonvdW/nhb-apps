@@ -35,6 +35,11 @@
                     <div class="col s7">{{ regio }}</div>
                 </div>
 
+                <div class="row small-row">
+                    <div class="col s3">Inschrijfmethode:</div>
+                    <div class="col s7">{{ inschrijfmethode }}</div>
+                </div>
+
             </div>
         </div>
     </div>

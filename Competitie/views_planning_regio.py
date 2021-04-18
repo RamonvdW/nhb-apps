@@ -228,8 +228,14 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
 
         if deelcomp.inschrijf_methode == INSCHRIJF_METHODE_1:
             self._get_methode_1(context, deelcomp)
+            context['inschrijfmethode'] = '1 (keuze sporter)'
         else:
             self._get_methode_2_3(context, deelcomp, mag_wijzigen)
+
+            if deelcomp.inschrijf_methode == INSCHRIJF_METHODE_2:
+                context['inschrijfmethode'] = '2 (wedstrijdklasse naar locatie)'
+            else:
+                context['inschrijfmethode'] = '3 (sporter voorkeur dagdeel)'
 
         if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO):
             rayon = DeelCompetitie.objects.get(laag=LAAG_RK,
