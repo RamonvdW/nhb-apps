@@ -7,15 +7,15 @@
 {% load static %}
 
 {% block extraheader %}
-
     <!-- voorkom dat de knop nog een keer gebruikt wordt (dat werkt toch niet)
          door dit browser window automatisch weg te sturen na 60 seconden -->
     <meta http-equiv="refresh" content="60; url=/functie/wissel-van-rol/" />
-    {% endblock %}
+{% endblock %}
 
-    {% block title %}Account wissel{% endblock %}
+{% block title %}Account wissel{% endblock %}
 
-    {% block pagina %}
+{% block pagina %}
+
     {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="wissel-naar-account" %}
 
     <h4>Wissel naar account</h4>

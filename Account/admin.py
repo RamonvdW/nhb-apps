@@ -23,7 +23,10 @@ class AccountAdmin(UserAdmin):
         (None, {'fields': ('username',)}),
         (_('Personal info'), {'fields': ('first_name', 'last_name')}),
         (_('Permissions'), {'fields': ('is_active', 'is_BB', 'is_Observer', 'is_staff', 'gekoppelde_functies')}),
-        (_('Beveiliging'), {'fields': ( 'password', 'vraag_nieuw_wachtwoord', 'verkeerd_wachtwoord_teller', 'is_geblokkeerd_tot', 'otp_code', 'otp_is_actief')}),
+        (_('Beveiliging'), {'fields': ('password',
+                                       'vraag_nieuw_wachtwoord', 'verkeerd_wachtwoord_teller',
+                                       'is_geblokkeerd_tot',
+                                       'otp_code', 'otp_is_actief')}),
         (_('Important dates'), {'fields': ('laatste_inlog_poging', 'last_login', 'date_joined')}),
     )
 
