@@ -200,7 +200,7 @@ class RecordsIndivZoomBaseView(ListView):
                 return sel, sel2str[sel]
             except KeyError:
                 # niet ondersteunde url tekst --> geef een foutmelding
-                raise Resolver404('Verkeerde url elementen')
+                raise Http404('Verkeerde url elementen')
         # de url parameter was niet aanwezig
         return None, None
 
