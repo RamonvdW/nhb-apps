@@ -20,12 +20,9 @@
         <p>Hieronder volgt de lijst van {{ verenigingen.count }} verenigingen in jouw gebied.</p>
     {% endif %}
 
-<table class="white" id="table1">
-    <thead>
-        <tr>        <!-- filter veld -->
-            {% if toon_rayon %}
-                <td></td>
-            {% endif %}
+    {% if contact_geen_beheerders %}
+        <p><a class="btn-nhb-blauw" href="{{ contact_geen_beheerders }}">Verenigingen zonder beheerders</a></p>
+    {% endif %}
 
     <p>Je rol is <b>{{ huidige_rol }}</b>.</p>
 

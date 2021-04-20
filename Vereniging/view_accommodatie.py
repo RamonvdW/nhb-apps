@@ -23,6 +23,7 @@ import copy
 
 
 TEMPLATE_LIJST_VERENIGINGEN = 'vereniging/lijst-verenigingen.dtl'
+TEMPLATE_CONTACT_GEEN_BEHEERDERS = 'vereniging/contact-geen-beheerders.dtl'
 TEMPLATE_ACCOMMODATIE_DETAILS = 'vereniging/accommodatie-details.dtl'
 TEMPLATE_WIJZIG_CLUSTERS = 'vereniging/wijzig-clusters.dtl'
 TEMPLATE_EXTERNE_LOCATIE = 'vereniging/externe-locaties.dtl'
@@ -38,13 +39,16 @@ class LijstVerenigingenView(UserPassesTestMixin, TemplateView):
     template_name = TEMPLATE_LIJST_VERENIGINGEN
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu, self.functie_nu = None, None
+
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        rol_nu = rol_get_huidige(self.request)
-        return rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_SEC)
+        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        return self.rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_SEC)
 
-    @staticmethod
-    def _get_verenigingen(rol_nu, functie_nu):
+    def _get_verenigingen(self):
 
         # vul een kleine cache om vele database verzoeken te voorkomen
         hwl_functies = dict()   # [nhb_ver] = Functie()
@@ -60,19 +64,19 @@ class LijstVerenigingenView(UserPassesTestMixin, TemplateView):
             functie2count[functie.pk] = functie.accounts_count
         # for
 
-        if rol_nu == Rollen.ROL_RKO:
+        if self.rol_nu == Rollen.ROL_RKO:
             # toon de lijst van verenigingen in het rayon van de RKO
             # het rayonnummer is verkrijgbaar via de deelcompetitie van de functie
             return (NhbVereniging
                     .objects
                     .select_related('regio', 'regio__rayon')
                     .exclude(regio__regio_nr=100)
-                    .filter(regio__rayon=functie_nu.nhb_rayon)
+                    .filter(regio__rayon=self.functie_nu.nhb_rayon)
                     .prefetch_related('wedstrijdlocatie_set',
                                       'clusters')
                     .order_by('regio__regio_nr', 'ver_nr'))
 
-        if rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO):
+        if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO):
             # toon de landelijke lijst
             return (NhbVereniging
                     .objects
@@ -82,7 +86,7 @@ class LijstVerenigingenView(UserPassesTestMixin, TemplateView):
                                       'clusters')
                     .order_by('regio__regio_nr', 'ver_nr'))
 
-        if rol_nu == Rollen.ROL_IT:
+        if self.rol_nu == Rollen.ROL_IT:
             # landelijke lijst + telling aantal leden
             objs = (NhbVereniging
                     .objects
@@ -104,11 +108,11 @@ class LijstVerenigingenView(UserPassesTestMixin, TemplateView):
             return objs
 
         # toon de lijst van verenigingen in de regio
-        if rol_nu == Rollen.ROL_RCL:
+        if self.rol_nu == Rollen.ROL_RCL:
             # het regionummer is verkrijgbaar via de deelcompetitie van de functie
             objs = (NhbVereniging
                     .objects
-                    .filter(regio=functie_nu.nhb_regio)
+                    .filter(regio=self.functie_nu.nhb_regio)
                     .select_related('regio')
                     .prefetch_related('wedstrijdlocatie_set',
                                       'clusters')
@@ -118,7 +122,7 @@ class LijstVerenigingenView(UserPassesTestMixin, TemplateView):
             # het regionummer is verkrijgbaar via de vereniging
             objs = (NhbVereniging
                     .objects
-                    .filter(regio=functie_nu.nhb_ver.regio)
+                    .filter(regio=self.functie_nu.nhb_ver.regio)
                     .select_related('regio')
                     .prefetch_related('wedstrijdlocatie_set',
                                       'clusters')
@@ -138,24 +142,26 @@ class LijstVerenigingenView(UserPassesTestMixin, TemplateView):
 
         menu_actief = 'hetplein'
 
-        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
         context['huidige_rol'] = rol_get_beschrijving(self.request)
 
-        context['landelijk'] = rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB, Rollen.ROL_BKO)
+        context['landelijk'] = self.rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB, Rollen.ROL_BKO)
 
-        if rol_nu == Rollen.ROL_IT:
+        if self.rol_nu == Rollen.ROL_IT:
             context['toon_ledental'] = True
 
-        if rol_nu == Rollen.ROL_RKO:
+        if self.rol_nu == Rollen.ROL_BB:
+            context['contact_geen_beheerders'] = reverse('Vereniging:contact-geen-beheerders')
+
+        if self.rol_nu == Rollen.ROL_RKO:
             context['toon_rayon'] = False
 
-        if rol_nu in (Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_SEC):
+        if self.rol_nu in (Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_SEC):
             context['toon_rayon'] = False
             context['toon_regio'] = False
-            if rol_nu == Rollen.ROL_HWL:
+            if self.rol_nu == Rollen.ROL_HWL:
                 menu_actief = 'vereniging'
 
-        context['verenigingen'] = verenigingen = self._get_verenigingen(rol_nu, functie_nu)
+        context['verenigingen'] = verenigingen = self._get_verenigingen()
 
         # voeg de url toe voor de "details" knoppen
         for nhbver in verenigingen:
@@ -186,6 +192,66 @@ class LijstVerenigingenView(UserPassesTestMixin, TemplateView):
         # for
 
         menu_dynamics(self.request, context, actief=menu_actief)
+        return context
+
+
+class GeenBeheerdersView(UserPassesTestMixin, TemplateView):
+
+    """ Via deze view kan de BB contactgegevens ophalen van verenigingen zonder gekoppelde beheerders """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_CONTACT_GEEN_BEHEERDERS
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        rol_nu = rol_get_huidige(self.request)
+        return rol_nu == Rollen.ROL_BB
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        sec_count = dict()
+        hwl_count = dict()
+        alle_ver = list()
+        for func in (Functie
+                     .objects
+                     .select_related('nhb_ver')
+                     .filter(rol__in=('SEC', 'HWL'))
+                     .exclude(nhb_ver__geen_wedstrijden=True)
+                     .annotate(aantal_accounts=Count('accounts'))
+                     .order_by('nhb_ver__ver_nr')):
+
+            ver = func.nhb_ver
+            ver_nr = ver.ver_nr
+            if func.rol == 'SEC':
+                sec_count[ver_nr] = func.aantal_accounts
+            else:
+                hwl_count[ver_nr] = func.aantal_accounts
+
+            if ver not in alle_ver:
+                alle_ver.append(ver)
+        # for
+
+        context['geen_sec'] = geen_sec = list()
+        context['geen_beheerders'] = geen_beheerders = list()
+
+        for ver in alle_ver:
+            ver_nr = ver.ver_nr
+
+            count = sec_count[ver_nr]
+            if count == 0:
+                geen_sec.append(ver)
+                ver.nr_geen_sec = len(geen_sec)
+
+            count += hwl_count[ver_nr]
+            if count == 0:
+                geen_beheerders.append(ver)
+                ver.nr_geen_beheerders = len(geen_beheerders)
+        # for
+
+        menu_dynamics(self.request, context, actief='vereniging')
         return context
 
 

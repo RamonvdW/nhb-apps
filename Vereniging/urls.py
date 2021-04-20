@@ -105,6 +105,10 @@ urlpatterns = [
     path('lijst-rayonkampioenschappen/<deelcomp_pk>/',
          view_lijst_rk.VerenigingLijstRkSelectieView.as_view(),
          name='lijst-rk'),
+
+    path('contact-geen-beheerders/',
+         view_accommodatie.GeenBeheerdersView.as_view(),
+         name='contact-geen-beheerders')
 ]
 
 # end of file
