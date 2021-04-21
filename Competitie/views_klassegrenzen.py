@@ -24,65 +24,43 @@ class KlassegrenzenTonenView(View):
 
     @staticmethod
     def _get_indiv_klassen(comp):
-        """ geef een lijst van IndivWedstrijdklasse terug
-            met als extra velden "min_ag18" en "min_ag25"
+        """ geef een lijst van individuele competitie wedstrijdklassen terug
+            met het AG geformatteerd voor presentatie.
         """
+        klassen = (CompetitieKlasse
+                   .objects
+                   .select_related('competitie',
+                                   'indiv')
+                   .filter(team=None,
+                           competitie=comp)
+                   .order_by('indiv__volgorde'))
 
-        indiv_klassen = list()  # gesorteerd
-        indiv_dict = dict()     # [indiv.pk] = IndivWedstrijdklasse
-
-        for obj in IndivWedstrijdklasse.objects.order_by('volgorde'):
-            indiv_dict[obj.pk] = obj
-            indiv_klassen.append(obj)
+        for obj in klassen:
+            if obj.min_ag > AG_NUL:
+                obj.min_ag_str = "%5.3f" % obj.min_ag
         # for
 
-        for obj in (CompetitieKlasse
-                    .objects
-                    .select_related('competitie',
-                                    'indiv')
-                    .filter(team=None,
-                            competitie=comp)):
-
-            indiv = indiv_dict[obj.indiv.pk]
-            min_ag = obj.min_ag
-
-            if min_ag != AG_NUL:
-                indiv.min_ag = "%5.3f" % min_ag
-        # for
-
-        return indiv_klassen
+        return klassen
 
     @staticmethod
-    def _get_team_klassen(comp):
+    def _get_team_klassen(comp, aantal_pijlen):
+        """ geef een lijst van team competitie wedstrijdklassen terug
+            met het teamgemiddelde geformatteerd voor presentatie.
+        """
+        klassen = (CompetitieKlasse
+                   .objects
+                   .select_related('competitie',
+                                   'team')
+                   .filter(indiv=None,
+                           competitie=comp)
+                   .order_by('team__volgorde'))
 
-        if comp.afstand == '18':
-            aantal_pijlen = 30
-        else:
-            aantal_pijlen = 25
-
-        team_klassen = list()   # gesorteerd
-        team_dict = dict()      # [team.pk] = TeamWedstrijdklasse
-
-        for obj in TeamWedstrijdklasse.objects.order_by('volgorde'):
-            team_dict[obj.pk] = obj
-            team_klassen.append(obj)
+        for obj in klassen:
+            if obj.min_ag > AG_NUL:
+                obj.min_ag_str = "%5.1f" % (obj.min_ag * aantal_pijlen)
         # for
 
-        for obj in (CompetitieKlasse
-                    .objects
-                    .select_related('competitie',
-                                    'team')
-                    .filter(indiv=None,
-                            competitie=comp)):
-
-            team = team_dict[obj.team.pk]
-            min_ag = obj.min_ag * aantal_pijlen
-
-            if min_ag > AG_NUL:
-                team.min_ag = "%5.1f" % min_ag
-        # for
-
-        return team_klassen
+        return klassen
 
     def get(self, request, *args, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -99,8 +77,14 @@ class KlassegrenzenTonenView(View):
         context['comp'] = comp
 
         if comp.klassegrenzen_vastgesteld:
+            if comp.afstand == '18':
+                aantal_pijlen = 30
+            else:
+                aantal_pijlen = 25
+
             context['indiv_klassen'] = self._get_indiv_klassen(comp)
-            context['team_klassen'] = self._get_team_klassen(comp)
+            context['team_klassen'] = self._get_team_klassen(comp, aantal_pijlen)
+            context['aantal_pijlen'] = aantal_pijlen
 
         menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
         return render(request, self.template_name, context)
