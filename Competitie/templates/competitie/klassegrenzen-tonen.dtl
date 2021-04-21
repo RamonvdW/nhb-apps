@@ -36,14 +36,13 @@
 
             {% for obj in indiv_klassen %}
                 <tr>
-                    <td>{{ obj.beschrijving }}</td>
+                    <td>{{ obj.indiv.beschrijving }}</td>
 
-                    <td>{% if obj.min_ag %}
-                            {{ obj.min_ag }}
-                        {% else %}
-                            <i class="grey-text">n.v.t.</i>
-                        {% endif %}
-                    </td>
+                    {% if obj.min_ag_str %}
+                        <td>{{ obj.min_ag_str }}</td>
+                    {% else %}
+                        <td><i class="grey-text">n.v.t.</i></td>
+                    {% endif %}
                 </tr>
             {% endfor %}
 
@@ -55,23 +54,23 @@
 
             <tr>
                 <th>Materiaalklasse</th>
-                <th>Minimaal aanvangs<wbr/>gemiddelde</th>
+                <th>Minimale team<wbr/>sterkte</th>
             </tr>
 
             {% for obj in team_klassen %}
                 <tr>
-                    <td>{{ obj.beschrijving }}</td>
+                    <td>{{ obj.team.beschrijving }}</td>
 
-                    <td>{% if obj.min_ag %}
-                            {{ obj.min_ag }}
-                        {% else %}
-                            <i class="grey-text">n.v.t.</i>
-                        {% endif %}
-                    </td>
+                    {% if obj.min_ag_str %}
+                        <td>{{ obj.min_ag_str }}</td>
+                    {% else %}
+                        <td><i class="grey-text">n.v.t.</i></td>
+                    {% endif %}
                 </tr>
             {% endfor %}
         </table>
 
+        <p>Teamsterkte = Som van de aanvangsgemiddelden van de 3 beste sporters van het team, vermenigvuldigd met {{ aantal_pijlen }}.</p>
     {% endif %}
 
 {% endblock %}
