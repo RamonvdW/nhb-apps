@@ -578,4 +578,26 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         self.assertEqual(lid.lid_tot_einde_jaar, 2020)      # komt van sim_now=2020-07-01
         self.assertTrue(lid.bij_vereniging is None)
 
+    def test_bad_nrs(self):
+        # controleer dat de import tegen niet-nummers kan
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_19.json',
+                                stderr=f1, stdout=f2)
+        # print("f1: %s" % f1.getvalue())
+        # print("f2: %s" % f2.getvalue())
+        self.assertTrue("[ERROR] Foutief rayon nummer: 'x' (geen getal)" in f1.getvalue())
+        self.assertTrue("[ERROR] Onbekend rayon {'rayon_number': 'x', 'name': 'Rayon 1'}" in f1.getvalue())
+        self.assertTrue("[ERROR] Onbekend rayon {'rayon_number': 5, 'name': 'Rayon 5'}" in f1.getvalue())
+        self.assertTrue("[ERROR] Foutief regio nummer: 'a101' (geen getal)" in f1.getvalue())
+        self.assertTrue("[ERROR] Onbekende regio {'region_number': 'a101', 'name': 'Regio 99', 'rayon_number': 1}" in f1.getvalue())
+        self.assertTrue("[ERROR] Onbekende regio {'region_number': '99', 'name': 'Regio 99', 'rayon_number': 'x'}" in f1.getvalue())
+        self.assertTrue("[ERROR] Geen valide verenigingsnummer: 'y' (geen getal)" in f1.getvalue())
+        self.assertTrue("[ERROR] Foutief regio nummer: 'z' (geen getal)" in f1.getvalue())
+        self.assertTrue("[ERROR] Vereniging 1001 hoort bij onbekende regio z" in f1.getvalue())
+        self.assertTrue("[ERROR] Foutief bondsnummer: x (geen getal)" in f1.getvalue())
+        self.assertTrue("[ERROR] Foutief verenigingsnummer: 'y' (geen getal)" in f1.getvalue())
+        self.assertTrue("[ERROR] Kan vereniging 'y' voor lid 100024 niet vinden" in f1.getvalue())
+        self.assertTrue("[ERROR] Foutief bondsnummer: ggg (geen getal)" in f1.getvalue())
+
 # end of file
