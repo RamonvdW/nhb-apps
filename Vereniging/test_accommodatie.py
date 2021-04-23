@@ -154,6 +154,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.url_accommodatie_vereniging = '/vereniging/accommodatie-details/%s/'         # vereniging_pk
         self.url_externe_locaties = '/vereniging/externe-locaties/%s/'                    # vereniging_pk
         self.url_externe_locatie_details = '/vereniging/externe-locaties/%s/details/%s/'  # vereniging_pk, locatie_pk
+        self.url_geen_beheerders = '/vereniging/contact-geen-beheerders/'
 
     def test_anon(self):
         # anon
@@ -942,5 +943,39 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         # functie wordt overgenomen door externe locatie
         # TODO: test maken waarbij "notitie" onder adres getoond wordt en bewijs levert
         pass
+
+    def test_geen_beheerders(self):
+        # login als BB
+        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_wisselnaarrol_bb()
+        self.e2e_check_rol('BB')
+
+        # maak een extra vereniging aan zonder beheerders
+        ver = NhbVereniging()
+        ver.naam = "Extra Club"
+        ver.ver_nr = 1099
+        ver.regio = NhbRegio.objects.get(regio_nr=101)
+        # secretaris kan nog niet ingevuld worden
+        ver.save()
+
+        # maak de SEC, HWL en WL functies aan voor deze vereniging
+        for rol in ('SEC', 'HWL', 'WL'):
+            tmp_func = maak_functie(rol + " nhbver 1099", rol)
+            tmp_func.nhb_ver = ver
+            tmp_func.save()
+        # for
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_geen_beheerders)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('vereniging/contact-geen-beheerders.dtl', 'plein/site_layout.dtl'))
+
+        # probeer het met een andere rol
+        self.e2e_wisselnaarrol_gebruiker()
+        resp = self.client.get(self.url_geen_beheerders)
+        self.assert403(resp)
+
+        self.e2e_assert_other_http_commands_not_supported(self.url_geen_beheerders)
 
 # end of file
