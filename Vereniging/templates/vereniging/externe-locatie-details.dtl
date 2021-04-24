@@ -121,7 +121,10 @@
                                     <span class="nhb-blauw-text">&check;&nbsp;</span><span>{{ str }}</span>
                                     <!-- else: discipline niet noemen -->
                                 {% endif %}
-                                <input type="hidden" id="id_{{ sel }}" {% if checked %} checked{% endif %}>
+                                <!-- voeg een verstopte radiobutton toe die gecheckt kan worden door javascript -->
+                                <div style="visibility:hidden">
+                                    <input type="radio" id="id_{{ sel }}" {% if checked %} checked{% endif %}>
+                                </div>
                             {% endfor %}
                         {% else %}
                             {% for sel, str, checked in disc %}

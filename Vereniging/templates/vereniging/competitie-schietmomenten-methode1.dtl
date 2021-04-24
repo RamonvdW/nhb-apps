@@ -20,8 +20,8 @@
     <table>
         {% for wedstrijd in wedstrijden %}
             <tr>
-                <td style="padding: 0px"><b>{{ wedstrijd.nummer_str }}</b></td>
-                <td style="padding: 0px">{{ wedstrijd.beschrijving_str }}</td>
+                <td style="padding: 0"><b>{{ wedstrijd.nummer_str }}</b></td>
+                <td style="padding: 0">{{ wedstrijd.beschrijving_str }}</td>
             </tr>
         {% endfor %}
     </table>

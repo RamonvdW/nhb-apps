@@ -68,7 +68,8 @@
 
                 <tr>
                     <td>Regio:</td>
-                    <td colspan="2">{{ nhbver.regio }}</td>
+                    <td>{{ nhbver.regio }}</td>
+                    <td>&nbsp;</td>     <!-- voorkomt HTML validatie error als alle td colspan=2 hebben -->
                     {% if not readonly %}
                         <td><!-- kolom voor de wijzig knoppen --></td>
                     {% endif %}
@@ -215,8 +216,9 @@
                 </tr>
 
                 {% if locatie %}
+
                     <tr>
-                        <td {% if readonly %}colspan="3"{% else %}colspan="4"{% endif %} class="nhb-grijs"><h6>Accommodatie:</h6></td>
+                        <td colspan="{% if readonly %}3{% else %}4{% endif %}" class="nhb-grijs"><h6>Accommodatie:</h6></td>
                     </tr>
 
                     <tr>
@@ -357,6 +359,7 @@
                     </tr>
 
                 {% else %}
+
                     <!-- geen locatie -->
                     <tr>
                         <td style="vertical-align: top">Adres van de accommodatie:</td>
@@ -365,11 +368,12 @@
                             <td><!-- kolom voor de wijzig knoppen --></td>
                         {% endif %}
                     </tr>
+
                 {% endif %}     <!-- if locatie -->
 
                 {% if buiten_locatie %}
                     <tr>
-                        <td {% if readonly %}colspan="3"{% else %}colspan="4"{% endif %} class="nhb-grijs"><h6>Buitenbaan:</h6></td>
+                        <td colspan="{% if readonly %}3{% else %}4{% endif %}" class="nhb-grijs"><h6>Buitenbaan:</h6></td>
                     </tr>
 
                     <tr>
@@ -458,7 +462,8 @@
                             {% endif %}
                         </tr>
                     {% endfor %}
-                {% endif %}
+
+                {% endif %}     <!-- externe_locaties -->
 
             </table>
 

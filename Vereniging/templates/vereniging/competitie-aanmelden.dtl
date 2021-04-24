@@ -201,7 +201,7 @@
                         <td class="center-align">
                             {% if mag_aanmelden %}
                                 <label>
-                                    <input type="checkbox" name="{{ obj.check }}" {% if obj.is_aangemeld %}disabled checked{% else %}class="filled-in"{%endif%} data-boog="{{ obj.afkorting }}">
+                                    <input type="checkbox" name="{{ obj.check }}" {% if obj.is_aangemeld %}disabled checked{% else %}class="filled-in"{% endif %} data-boog="{{ obj.afkorting }}">
                                     <span><!-- noodzakelijk --></span>
                                 </label>
                             {% else %}
