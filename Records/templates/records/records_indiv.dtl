@@ -104,7 +104,11 @@
 
         <div class="white shrink-wrap-5">
             {% for obj in soorten %}
-                <a class="margin-5 btn-nhb-blauw btn-small" href="{{ obj.url }}"{% if obj.is_gekozen %} disabled{% endif %}>{{ obj.soort_record }}</a>
+                {% if not obj.is_gekozen %}
+                    <a class="margin-5 btn-nhb-blauw btn-small" href="{{ obj.url }}">{{ obj.soort_record }}</a>
+                {% else %}
+                    <a class="margin-5 btn-nhb-blauw btn-small disabled" href="#">{{ obj.soort_record }}</a>
+                {% endif %}
             {% endfor %}
         </div>
 
