@@ -12,8 +12,7 @@ from Account.otp import account_otp_prepare_koppelen, account_otp_koppel, accoun
 from Plein.menu import menu_dynamics
 from .models import account_needs_otp
 from .forms import OTPControleForm
-from .qrcode import qrcode_get
-import logging
+from .maak_qrcode import qrcode_get
 
 
 TEMPLATE_OTP_CONTROLE = 'functie/otp-controle.dtl'
@@ -43,7 +42,8 @@ class OTPControleView(TemplateView):
         menu_dynamics(request, context, actief="wissel-van-rol")
         return render(request, TEMPLATE_OTP_CONTROLE, context)
 
-    def post(self, request, *args, **kwargs):
+    @staticmethod
+    def post(request, *args, **kwargs):
         """ deze functie wordt aangeroepen als een POST request ontvangen is.
             dit is gekoppeld aan het drukken op de Controleer knop.
         """
@@ -115,7 +115,7 @@ class OTPKoppelenView(TemplateView):
         form = OTPControleForm()
         context = {'form': form,
                    'qrcode': qrcode,
-                   'otp_secret': secret }
+                   'otp_secret': secret}
         menu_dynamics(request, context, actief="wissel-van-rol")
         return render(request, TEMPLATE_OTP_KOPPELEN, context)
 

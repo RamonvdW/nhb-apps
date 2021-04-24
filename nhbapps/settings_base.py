@@ -372,17 +372,22 @@ LOGGING = {
     },
     'handlers': {
         'syslog': {
-            'level': 'DEBUG',
+            # 'level': 'DEBUG',
             'class': 'logging.handlers.SysLogHandler',
             'formatter': 'verbose',
             'facility': 'user',
             'address': '/dev/log'
         },
+        # 'file': {
+        #     'level': 'INFO',
+        #     'class': 'logging.FileHandler',
+        #     'filename': '/tmp/django.log'
+        # },
     },
     'loggers': {
         'django': {
             'handlers': ['syslog'],
-            'level': 'ERROR'
+            'level': 'WARNING'
         },
         'saml2': {
             'handlers': ['syslog'],
@@ -402,7 +407,7 @@ LOGGING = {
         },
         '': {
             'handlers': ['syslog'],
-            'level': 'DEBUG'
+            'level': 'INFO'
         }
     }
 }

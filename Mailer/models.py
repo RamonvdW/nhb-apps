@@ -121,17 +121,18 @@ def mailer_notify_internal_error(tb):
         over hetzelfde probleem.
     """
 
+    # kijk of hetzelfde rapport de afgelopen 24 uur al verstuurd is
     now = timezone.now()    # in utc
     recent = now - datetime.timedelta(days=1)
+    count = (MailQueue
+             .objects
+             .filter(toegevoegd_op__gt=recent,
+                     mail_to=settings.EMAIL_DEVELOPER_TO,
+                     mail_subj=settings.EMAIL_DEVELOPER_SUBJ,
+                     mail_text=tb)
+             .count())
 
-    if (MailQueue
-        .objects
-        .filter(toegevoegd_op__gt=recent,
-                mail_to=settings.EMAIL_DEVELOPER_TO,
-                mail_subj=settings.EMAIL_DEVELOPER_SUBJ,
-                mail_text=tb)
-        .count() == 0):
-
+    if count == 0:
         # nog niet gerapporteerd in de afgelopen 24 uur
         mailer_queue_email(
                 settings.EMAIL_DEVELOPER_TO,

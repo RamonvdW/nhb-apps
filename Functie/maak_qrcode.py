@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,18 +9,28 @@
 from django.conf import settings
 from django.utils.encoding import force_text
 from django.utils.safestring import mark_safe
-import io
-import pyotp
-import qrcode
 from qrcode.image.svg import SvgPathImage
-import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as Tree
+import logging
+import qrcode
+import pyotp
+import io
+
+my_logger = logging.getLogger('NHBApps.Functie')
 
 
 # the QR code versie bepaalt het aantal data plekken in de code
 # zie qrcode.com/en/about/version.html voor het bepalen van de juiste versie
 #
-# we hebben nodig: account naam (max 50 tekens) + website URL (max 50 tekens) = 100 tekens
-# de URI encoding voegt nog wat overhead toe (~20 tekens)
+# uri formaat: 'otpauth://totp/ISSUER:ACCOUNT?secret=SECRET&issuer=ISSUER'
+#
+# we hebben ~132 tekens nodig:
+#  - account naam (typisch 6 tekens, max 50 tekens)
+#  - issue name = website URL (~30 tekens, max 50 tekens), komt 2x voor
+#  - otp secret (32 tekens)
+#  - uri overhead toe (~32 tekens)
+#
+# met account=6 en issuer=30 --> 6 + 30 + 30 + 32 + 32 = 130 tekens
 #
 # versie 7, medium ECC: 122 bytes --> 45x45 image
 # versie 8, medium ECC: 152 bytes --> 49x49 image
@@ -30,11 +40,11 @@ QRCODE_VERSION = 8
 class SvgEmbeddedInHtmlImage(SvgPathImage):
     def _write(self, stream):
         self._img.append(self.make_path())
-        ET.ElementTree(self._img).write(stream,
-                                        encoding="utf-8",
-                                        xml_declaration=False,
-                                        default_namespace=None,
-                                        method='html')
+        Tree.ElementTree(self._img).write(stream,
+                                          encoding="utf-8",
+                                          xml_declaration=False,
+                                          default_namespace=None,
+                                          method='html')
 
 
 def make_qr_code_image(text):
@@ -53,9 +63,13 @@ def qrcode_get(account):
     """ Genereer een QR code voor het account
         de QR code wordt als html-embedded SVG plaatje terug gegeven
     """
-    uri = pyotp.TOTP(account.otp_code).provisioning_uri(name=account.username,
-                                                        issuer_name=settings.OTP_ISSUER_NAME)
-    #print("provisioning uri: %s" % repr(uri))
+    otp = pyotp.TOTP(account.otp_code)
+    uri = otp.provisioning_uri(name=account.username,
+                               issuer_name=settings.OTP_ISSUER_NAME)
+
+    if len(uri) > 150:
+        my_logger.error('Functie.qrcode: te lange uri (%s): %s' % (len(uri), repr(uri)))
+
     stream = io.BytesIO()
     make_qr_code_image(uri).save(stream, kind="SVG")
     html = stream.getvalue().decode('utf-8')
