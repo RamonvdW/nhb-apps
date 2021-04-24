@@ -37,12 +37,16 @@ DAGDELEN = [('GN', "Geen voorkeur"),
             ('WO', "Woensdag"),
             ('DO', "Donderdag"),
             ('VR', "Vrijdag"),
-            ('ZA', "Zaterdag"),
-            ('ZO', "Zondag"),
+            ('ZAT', "Zaterdag"),
+            ('ZAo', "Zaterdagochtend"),
+            ('ZAm', "Zaterdagmiddag"),
+            ('ZON', "Zondag"),
+            ('ZOo', "Zondagochtend"),
+            ('ZOm', "Zondagmiddag"),
             ('WE', "Weekend")]
 
 # Let op: DAGDEEL_AFKORTINGEN moet in dezelfde volgorde zijn als DAGDELEN
-DAGDEEL_AFKORTINGEN = ('GN', 'AV', 'MA', 'DI', 'WO', 'DO', 'VR', 'ZA', 'ZO', 'WE')
+DAGDEEL_AFKORTINGEN = ('GN', 'AV', 'MA', 'DI', 'WO', 'DO', 'VR', 'ZAT', 'ZAo', 'ZAm', 'ZON', 'ZOo', 'ZOm', 'WE')
 
 INSCHRIJF_METHODE_1 = '1'       # direct inschrijven op wedstrijd
 INSCHRIJF_METHODE_2 = '2'       # verdeel wedstrijdklassen over locaties
@@ -501,7 +505,7 @@ class RegioCompetitieSchutterBoog(models.Model):
     inschrijf_notitie = models.TextField(default="", blank=True)
 
     # voorkeur dagdelen (methode 3)
-    inschrijf_voorkeur_dagdeel = models.CharField(max_length=2, choices=DAGDELEN, default="GN")
+    inschrijf_voorkeur_dagdeel = models.CharField(max_length=3, choices=DAGDELEN, default="GN")
 
     # voorkeur schietmomenten (methode 1)
     inschrijf_gekozen_wedstrijden = models.ManyToManyField(CompetitieWedstrijd, blank=True)
