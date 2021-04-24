@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from . import views, views_special
+from . import views, views_indiv, views_special
 
 app_name = 'Records'
 
@@ -18,24 +18,12 @@ urlpatterns = [
          views.RecordsVerbeterbaarInDiscipline.as_view(),
          name='indiv-verbeterbaar-disc'),
 
-    path('indiv/<str:gesl>/<str:disc>/<str:lcat>/<str:makl>/',
-         views.RecordsIndivZoom5View.as_view(),
-         name='indiv-gdlm'),
-
-    path('indiv/<str:gesl>/<str:disc>/<str:lcat>/',
-         views.RecordsIndivZoom1234View.as_view(),
-         name='indiv-gdl'),
-
-    path('indiv/<str:gesl>/<str:disc>/',
-         views.RecordsIndivZoom1234View.as_view(),
-         name='indiv-gd'),
-
-    path('indiv/<str:gesl>/',
-         views.RecordsIndivZoom1234View.as_view(),
-         name='indiv-g'),
+    path('indiv/<str:gesl>/<str:disc>/<str:lcat>/<str:makl>/<str:verb>/<str:para>/<int:nummer>/',
+         views_indiv.RecordsIndivView.as_view(),
+         name='indiv-all'),
 
     path('indiv/',
-         views.RecordsIndivZoom1234View.as_view(),
+         views_indiv.RecordsIndivView.as_view(),
          name='indiv'),
 
     path('zoek/',

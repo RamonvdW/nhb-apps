@@ -26,7 +26,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2021-04-23'
+SITE_VERSIE = '2021-04-24'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -249,13 +249,15 @@ RECORDS_TOEGESTANE_SOORTEN = (
 )
 
 
+# let op: in sync houden met para2url in Records/views_indiv.py
 RECORDS_TOEGESTANE_PARA_KLASSEN = (
     "Open",
-    "Staand",
+    "Staand",       # tot 2014-04-01
     "W1",
-    "W2",
-    "Ja"        # aka Onbekend
-    # TODO: hier ontbreken VI1 en VI2/3
+    "W2",           # tot 2014-04-01
+    "VI1",          # sinds 2014-04-01
+    "VI2/3"         # sinds 2014-04-01
+    # andere historische record typen zijn niet in gebruik dus niet in dit lijstje
 )
 
 # definitions taken from saml2.saml to avoid importing saml2
