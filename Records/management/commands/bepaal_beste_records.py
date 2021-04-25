@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -63,6 +63,13 @@ class Command(BaseCommand):
                 .objects
                 .exclude(beste__leeftijdscategorie=F('leeftijdscategorie')))
         self.stdout.write("[INFO] Verwijder beste records met inconsistente leeftijdscategorie: %s" % objs.count())
+        objs.delete()
+
+        # ruim fout op: niet-para record gekoppeld aan beste record voor para
+        objs = (BesteIndivRecords
+                .objects
+                .exclude(beste__para_klasse=F('para_klasse')))
+        self.stdout.write("[INFO] Verwijder beste records met inconsistente para_klasse: %s" % objs.count())
         objs.delete()
 
         # bepaal alle unieke combinaties
