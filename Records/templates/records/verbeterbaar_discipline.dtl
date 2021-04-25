@@ -65,8 +65,10 @@
             <tr>
                 <th>Soort record</th>
                 <th>Materiaal<wbr/>klasse</th>
-                <th>Leeftijds<wbr/>categorie</th>
-                <th>Para klasse</th>
+                <th class="hide-on-small-only">Leeftijds<wbr/>categorie</th>
+                {% if toon_para_kolom %}
+                    <th>Para klasse</th>
+                {% endif %}
                 <th>Geslacht</th>
                 <th>Score</th>
                 <th><!-- kolom voor de 'details' knop --></th>
@@ -77,8 +79,10 @@
             <tr>
                 <td>{{ obj.soort_record }}</td>
                 <td>{{ obj.materiaalklasse_str }}</td>
-                <td>{{ obj.leeftijdscategorie_str }}</td>
-                <td>{{ obj.para_klasse }}</td>
+                <td class="hide-on-small-only">{{ obj.leeftijdscategorie_str }}</td>
+                {% if toon_para_kolom %}
+                    <td>{{ obj.para_klasse }}</td>
+                {% endif %}
                 <td>{{ obj.geslacht_str }}</td>
                 <td>{{ obj.beste.score_str }}</td>
                 <td>

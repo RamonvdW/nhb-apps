@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -59,7 +59,7 @@ class IndivRecord(models.Model):
 
     plaats = models.CharField(max_length=50)
 
-    land = models.CharField(max_length=50)      # TODO: blank=True toevoegen
+    land = models.CharField(max_length=50, blank=True)
 
     score = models.PositiveIntegerField()
 

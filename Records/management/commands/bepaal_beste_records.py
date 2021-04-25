@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -65,14 +65,24 @@ class Command(BaseCommand):
         self.stdout.write("[INFO] Verwijder beste records met inconsistente leeftijdscategorie: %s" % objs.count())
         objs.delete()
 
+        # ruim fout op: niet-para record gekoppeld aan beste record voor para
+        objs = (BesteIndivRecords
+                .objects
+                .exclude(beste__para_klasse=F('para_klasse')))
+        self.stdout.write("[INFO] Verwijder beste records met inconsistente para_klasse: %s" % objs.count())
+        objs.delete()
+
         # bepaal alle unieke combinaties
         objs = (IndivRecord
                 .objects
                 .filter(verbeterbaar=True)
-                .distinct('discipline', 'soort_record', 'geslacht', 'leeftijdscategorie', 'materiaalklasse', 'para_klasse'))
+                .distinct('discipline', 'soort_record', 'geslacht', 'leeftijdscategorie',
+                          'materiaalklasse', 'para_klasse'))
 
         # voor elke combi, bepaal de hoogste score
         for obj in objs:
+
+            updated = list()        # voor save() optimalisatie
 
             beste, _ = (BesteIndivRecords
                         .objects
@@ -88,7 +98,7 @@ class Command(BaseCommand):
 
             if beste.volgorde != volgorde:
                 beste.volgorde = volgorde
-                beste.save()
+                updated.append('volgorde')
 
             alle = (IndivRecord
                     .objects
@@ -105,7 +115,10 @@ class Command(BaseCommand):
 
             if beste.beste != hoogste:
                 beste.beste = hoogste
-                beste.save()
+                updated.append('beste')
+
+            if len(updated):
+                beste.save(update_fields=updated)
 
         # for
 
@@ -117,6 +130,6 @@ class Command(BaseCommand):
         objs.delete()
 
         self.stdout.write('Done')
-        return
+
 
 # end of file

@@ -303,7 +303,7 @@ class RecordsVerbeterbaarInDiscipline(ListView):
 
     boogtype2filter = {'alles': '', 'recurve': 'R', 'compound': 'C', 'barebow': 'BB', 'longbow': 'LB', 'instinctive': 'IB'}
     geslacht2filter = {'alles': '', 'man': 'M', 'vrouw': 'V'}
-    leeftijd2filter = {'alles': '', 'cadet': 'C', 'junior': 'J', 'senior': 'S', 'master': 'M'}
+    leeftijd2filter = {'alles': '', 'para': 'U', 'master': 'M', 'senior': 'S', 'junior': 'J', 'cadet': 'C'}
 
     def dispatch(self, request, *args, **kwargs):
         """ deze functie wordt aangeroepen voor get_queryset
@@ -346,7 +346,6 @@ class RecordsVerbeterbaarInDiscipline(ListView):
             objs = objs.filter(leeftijdscategorie=filter_leeftijd)
 
         for obj in objs:
-
             obj.geslacht_str = gesl2str[obj.geslacht]
             obj.materiaalklasse_str = makl2str[obj.materiaalklasse]
             obj.leeftijdscategorie_str = lcat2str[obj.leeftijdscategorie]
@@ -420,6 +419,11 @@ class RecordsVerbeterbaarInDiscipline(ListView):
             extra.append('geslacht=' + geslacht)
         context['leeftijd'] = list()
         for leeftijd_key in self.leeftijd2filter.keys():
+
+            # skip de 'para' knop tenzij het voor Outdoor is
+            if leeftijd_key == 'para' and discipline != 'OD':
+                continue
+
             obj = SimpleNamespace()
             obj.button_str = leeftijd_key
             if leeftijd != leeftijd_key:
@@ -430,6 +434,13 @@ class RecordsVerbeterbaarInDiscipline(ListView):
         # for
 
         context['is_alles'] = (boogtype == geslacht == leeftijd)
+
+        context['toon_para_kolom'] = False
+        for obj in context['object_list']:
+            if obj.para_klasse:
+                context['toon_para_kolom'] = True
+                break
+        # for
 
         menu_dynamics(self.request, context, actief='records')
         return context
