@@ -47,7 +47,7 @@
                 <div class="row">
                     <div class="col s12">
                         <div class="center-align">
-                            <input class="btn-nhb-blauw" name="button_login" type="submit" value="Controleer">
+                            <input class="btn-nhb-blauw" type="submit" value="Controleer">
                         </div>
                     </div>
                 </div>
