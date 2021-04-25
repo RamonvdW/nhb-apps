@@ -557,7 +557,7 @@ class RegiocompetitieTeam(models.Model):
     gekoppelde_schutters = models.ManyToManyField(RegioCompetitieSchutterBoog,
                                                   blank=True)    # mag leeg zijn
 
-    # het berekende team aanvangsgemiddelde
+    # de berekende team sterkte / team gemiddelde
     aanvangsgemiddelde = models.DecimalField(max_digits=5, decimal_places=3, default=0.0)    # 10,000
 
     # de klasse waarin dit team ingedeeld is
@@ -587,6 +587,7 @@ class RegiocompetitieTeamPoule(models.Model):
     # bij welke deelcompetitie hoort deze poule?
     deelcompetitie = models.ForeignKey(DeelCompetitie, on_delete=models.CASCADE)
 
+    # naam van de poule, bijvoorbeeld "ERE + A"
     beschrijving = models.CharField(max_length=100, default='')
 
     # welke teams zijn in deze poule geplaatst?
