@@ -854,10 +854,6 @@ class Command(BaseCommand):
         if self._check_keys(data[0].keys(), EXPECTED_CLUB_KEYS, "club"):
             return
 
-        # houd bij welke verenigingsnummers in de database zitten
-        # als deze niet meer voorkomen, dan zijn ze verwijderd
-        # ver_nrs = [tup[0] for tup in NhbVereniging.objects.values_list('ver_nr')]   # TODO: flat=True toepassen?
-
         # voor overige velden, zie _import_clubs
         """ JSON velden (string, except):
          'club_number':             int
@@ -879,7 +875,6 @@ class Command(BaseCommand):
             if ver_nr in GEEN_WEDSTRIJDLOCATIE:
                 continue
 
-            # TODO: waarom niet gewoon in ver_nrs kijken?
             nhb_ver = self._vind_vereniging(ver_nr)
             if not nhb_ver:
                 continue
@@ -925,7 +920,7 @@ class Command(BaseCommand):
                 self._count_toevoegingen += 1
         # for
 
-        # TODO: vereniging opruimen
+        # TODO: zichtbaar=False zetten voor wedstrijdlocatie zonder vereniging
 
     def handle(self, *args, **options):
         self.dryrun = options['dryrun']
