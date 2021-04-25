@@ -521,7 +521,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
 
         deelcomp = DeelCompetitie.objects.get(competitie__afstand='18', nhb_regio=regio_105)
         deelcomp.inschrijf_methode = INSCHRIJF_METHODE_3
-        deelcomp.toegestane_dagdelen = 'ZA,ZO'
+        deelcomp.toegestane_dagdelen = 'ZAT,ZOm'
         deelcomp.save()
 
         # log in as schutter
@@ -542,7 +542,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('schutter/bevestig-aanmelden.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'Dutch Target')
         self.assertContains(resp, 'Zaterdag')
-        self.assertContains(resp, 'Zondag')
+        self.assertContains(resp, 'Zondagmiddag')
         self.assertNotContains(resp, 's Avonds')
         self.assertNotContains(resp, 'Weekend')
 
@@ -561,7 +561,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         url = self.url_aanmelden % (deelcomp.pk, schutterboog.pk)
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'wil_in_team': 'on',
-                                          'dagdeel': 'ZA',
+                                          'dagdeel': 'ZAT',
                                           'opmerking': 'Hallo nogmaals!\n' * 50})
         self.assert_is_redirect(resp, self.url_profiel)
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 1)
@@ -569,7 +569,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         inschrijving = RegioCompetitieSchutterBoog.objects.all()[0]
         self.assertTrue(inschrijving.inschrijf_voorkeur_team)
         self.assertTrue(len(inschrijving.inschrijf_notitie) > 480)
-        self.assertEqual(inschrijving.inschrijf_voorkeur_dagdeel, 'ZA')
+        self.assertEqual(inschrijving.inschrijf_voorkeur_dagdeel, 'ZAT')
 
         # bad dagdeel
         schutterboog = SchutterBoog.objects.get(boogtype__afkorting='BB')
