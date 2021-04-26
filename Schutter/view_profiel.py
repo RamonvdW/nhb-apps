@@ -17,7 +17,7 @@ from BasisTypen.models import BoogType
 from Competitie.models import (Competitie, DeelCompetitie,
                                RegioCompetitieSchutterBoog,
                                LAAG_REGIO, INSCHRIJF_METHODE_1)
-from Records.models import IndivRecord
+from Records.models import IndivRecord, MATERIAALKLASSE
 from Score.models import Score, ScoreHist, SCORE_TYPE_INDIV_AG, SCORE_TYPE_TEAM_AG
 from .leeftijdsklassen import get_sessionvars_leeftijdsklassen
 from .models import SchutterVoorkeuren, SchutterBoog
@@ -79,12 +79,31 @@ class ProfielView(UserPassesTestMixin, TemplateView):
     @staticmethod
     def _find_records(nhblid):
         """ Zoek de records van deze schutter """
+        mat2str = dict()
+        for tup in MATERIAALKLASSE:
+            afk, beschrijving = tup
+            mat2str[afk] = beschrijving
+        # for
+
+        show_loc = False
         objs = list()
         for rec in IndivRecord.objects.filter(nhb_lid=nhblid).order_by('-datum'):
             rec.url = reverse('Records:specifiek', kwargs={'discipline': rec.discipline, 'nummer': rec.volg_nr})
             objs.append(rec)
+
+            loc = list()
+            if rec.plaats:
+                loc.append(rec.plaats)
+            if rec.land:
+                loc.append(rec.land)
+
+            rec.loc_str = ", ".join(loc)
+            if rec.loc_str:
+                show_loc = True
+
+            rec.boog_str = mat2str[rec.materiaalklasse]
         # for
-        return objs
+        return objs, show_loc
 
     @staticmethod
     def _find_competities(voorkeuren):
@@ -348,7 +367,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         alle_bogen = BoogType.objects.all()
 
         context['nhblid'] = nhblid
-        context['records'] = self._find_records(nhblid)
+        context['records'], context['show_loc'] = self._find_records(nhblid)
         context['histcomp'] = self._find_histcomp_scores(nhblid, alle_bogen)
 
         if nhblid.bij_vereniging and not nhblid.bij_vereniging.geen_wedstrijden:

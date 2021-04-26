@@ -202,8 +202,11 @@
                 <tr>
                     <th>Datum</th>
                     <th>Soort record</th>
+                    <th>Boog type</th>
                     <th>Score</th>
-                    <th>Plaats</th>
+                    {% if show_loc %}
+                        <th>Plaats</th>
+                    {% endif %}
                     <th><!-- kolom voor knop --></th>
                 </tr>
             </thead>
@@ -212,8 +215,11 @@
                 <tr>
                     <td>{{ obj.datum }}</td>
                     <td>{{ obj.soort_record }}</td>
+                    <td>{{ obj.boog_str }}</td>
                     <td>{{ obj.score_str }}</td>
-                    <td>{{ obj.plaats }}{% if obj.land %}, {{ obj.land }}{% endif %}</td>
+                    {% if show_loc %}
+                        <td>{{ obj.loc_str }}</td>
+                    {% endif %}
                     <td><a class="btn-nhb-blauw" href="{{ obj.url }}">Toon details</a></td>
                 </tr>
             {% endfor %}
