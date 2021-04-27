@@ -59,6 +59,7 @@
 
     {% if heeft_alle_rollen %}
         <p>&nbsp;</p>
+        <h5>Springplankjes</h5>
         <h6>Indoor:</h6>
         <div class="white shrink-wrap-5">
         {% for obj in heeft_alle_rollen %}
