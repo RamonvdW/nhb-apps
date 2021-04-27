@@ -4,7 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-""" ondersteuning voor de rollen binnen de NHB applicaties """
+""" Ondersteuning voor de rollen binnen de NHB applicaties """
 
 from django.contrib.sessions.backends.db import SessionStore
 from Account.rechten import account_add_plugin_rechten, account_rechten_is_otp_verified
@@ -409,8 +409,25 @@ def rol_activeer_functie(request, functie_pk):
                     request.session[SESSIONVAR_ROL_HUIDIGE] = mag_rol
                     request.session[SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK] = mag_functie_pk
                     request.session[SESSIONVAR_ROL_BESCHRIJVING] = rol_bepaal_beschrijving(mag_rol, mag_functie_pk)
-                    break   # from the for
+                    return
             # for
+
+            # IT en BB mogen wisselen naar SEC
+            account = request.user
+            if account.is_authenticated:                            # pragma: no branch
+                if account_rechten_is_otp_verified(request):        # pragma: no branch
+                    if account.is_staff or account.is_BB:
+                        try:
+                            functie = Functie.objects.get(pk=functie_pk)
+                        except Functie.DoesNotExist:
+                            pass
+                        else:
+                            # we komen hier alleen voor rollen die niet al in het pallet zitten bij IT/BB
+                            if functie.rol == 'SEC':        # pragma: no branch
+                                request.session[SESSIONVAR_ROL_HUIDIGE] = Rollen.ROL_SEC
+                                request.session[SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK] = functie_pk
+                                request.session[SESSIONVAR_ROL_BESCHRIJVING] = functie.beschrijving
+                                return
 
     # not recognized --> no change
 
