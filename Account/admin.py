@@ -21,7 +21,7 @@ class AccountAdmin(UserAdmin):
     # volgorde van de te tonen velden
     fieldsets = (
         (None, {'fields': ('username',)}),
-        (_('Personal info'), {'fields': ('first_name', 'last_name')}),
+        (_('Personal info'), {'fields': ('first_name', 'last_name', 'unaccented_naam')}),
         (_('Permissions'), {'fields': ('is_active', 'is_BB', 'is_Observer', 'is_staff', 'gekoppelde_functies')}),
         (_('Beveiliging'), {'fields': ('password',
                                        'vraag_nieuw_wachtwoord', 'verkeerd_wachtwoord_teller',
@@ -35,16 +35,18 @@ class AccountAdmin(UserAdmin):
     list_filter = ('is_staff', 'is_BB', 'otp_is_actief')
 
     # velden om in te zoeken (in de lijst)
-    search_fields = ('username', 'first_name', 'last_name')
+    search_fields = ('username', 'unaccented_naam', 'first_name', 'last_name')
 
-    def gekoppelde_functies(self, obj):     # pragma: no cover
+    @staticmethod
+    def gekoppelde_functies(obj):     # pragma: no cover
         return "\n".join([functie.beschrijving for functie in obj.functie_set.all()])
 
 
 class AccountEmailAdmin(admin.ModelAdmin):
 
     # velden om in te zoeken (in de lijst)
-    search_fields = ('account__username', 'bevestigde_email', 'nieuwe_email')
+    search_fields = ('account__username', 'account__unaccented_naam',
+                     'bevestigde_email', 'nieuwe_email')
 
     list_filter = ('email_is_bevestigd',)
 

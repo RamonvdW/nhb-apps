@@ -10,13 +10,14 @@ from django.core.management.base import BaseCommand
 from django.db.models import ProtectedError
 from django.utils import timezone
 from django.db.utils import DataError
-from NhbStructuur.models import NhbRayon, NhbRegio, NhbLid, NhbVereniging
 from Account.models import Account
-from Mailer.models import mailer_email_is_valide
-from Logboek.models import schrijf_in_logboek
 from Functie.models import Functie, maak_functie, maak_account_vereniging_secretaris
-from Wedstrijden.models import WedstrijdLocatie
+from Logboek.models import schrijf_in_logboek
+from Mailer.models import mailer_email_is_valide
+from NhbStructuur.models import NhbRayon, NhbRegio, NhbLid, NhbVereniging
+from Overig.helpers import maak_unaccented
 from Records.models import IndivRecord
+from Wedstrijden.models import WedstrijdLocatie
 import datetime
 import json
 
@@ -592,6 +593,7 @@ class Command(BaseCommand):
                 lid_achternaam = member['prefix'] + ' ' + lid_achternaam
 
             naam = lid_voornaam + ' ' + lid_achternaam
+            lid_unaccented_naam = maak_unaccented(naam)
             if naam.count('(') != naam.count(')'):
                 self.stdout.write('[WARNING] Lid %s: onbalans in haakjes in %s' % (lid_nhb_nr, repr(naam)))
                 self._count_warnings += 1
@@ -738,6 +740,11 @@ class Command(BaseCommand):
                         obj.achternaam = lid_achternaam
                         updated.extend(['voornaam', 'achternaam'])
                         self._count_wijzigingen += 1
+
+                    if lid_unaccented_naam != obj.unaccented_naam:
+                        obj.unaccented_naam = lid_unaccented_naam
+                        updated.append('unaccented_naam')
+                        # niet nodig om rapporteren want gekoppeld aan naam
 
                     if obj.email != lid_email:
                         self.stdout.write('[INFO] Lid %s e-mail: %s --> %s' % (lid_nhb_nr, repr(obj.email), repr(lid_email)))

@@ -38,6 +38,10 @@ class Account(AbstractUser):
     # (inherited, not used) email
     # (inherited) user_permissions: ManyToMany
     # (inherited) groups: ManyToMany
+
+    # om in te zoeken: volledige naam zonder leestekens
+    unaccented_naam = models.CharField(max_length=200, default='')
+
     vraag_nieuw_wachtwoord = models.BooleanField(
                                     default=False,
                                     help_text="Moet de gebruiker een nieuw wachtwoord opgeven bij volgende inlog?")

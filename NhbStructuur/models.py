@@ -203,6 +203,9 @@ class NhbLid(models.Model):
     voornaam = models.CharField(max_length=100)
     achternaam = models.CharField(max_length=100)
 
+    # voor zoekfunctie: de namen aan elkaar; speciale tekens vervangen
+    unaccented_naam = models.CharField(max_length=200, default='')
+
     # het e-mailadres van dit lid
     email = models.CharField(max_length=150)
 

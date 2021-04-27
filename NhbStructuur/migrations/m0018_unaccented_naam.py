@@ -5,18 +5,19 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import migrations, models
-from django.utils import timezone
+from Overig.helpers import maak_unaccented
 
 
-def zet_lid_tot_einde_jaar(apps, _):
-    """ zet het nieuwe veld op alle NhbLid objecten """
+def maak_unaccented_naam(apps, _):
+    """ zet het nieuwe veld voor alle NhbLid objecten """
 
     # haal de klassen op die van toepassing zijn vóór de migratie
     nhblid_klas = apps.get_model('NhbStructuur', 'NhbLid')
 
-    year_now = timezone.now().year
-    for lid in nhblid_klas.objects.all():       # pragma: no cover
-        lid.lid_tot_einde_jaar = year_now
+    for lid in nhblid_klas.objects.all():  # pragma: no cover
+        volledige_naam = lid.voornaam + " " + lid.achternaam
+        lid.unaccented_naam = maak_unaccented(volledige_naam)
+        lid.save(update_fields=['unaccented_naam'])
     # for
 
 
@@ -26,17 +27,17 @@ class Migration(migrations.Migration):
 
     # volgorde afdwingen
     dependencies = [
-        ('NhbStructuur', 'm0015_squashed'),
+        ('NhbStructuur', 'm0017_rename_ver_nhb_nr'),
     ]
 
     # migratie functies
     operations = [
         migrations.AddField(
             model_name='nhblid',
-            name='lid_tot_einde_jaar',
-            field=models.PositiveSmallIntegerField(default=0),
+            name='unaccented_naam',
+            field=models.CharField(default='', max_length=200),
         ),
-        migrations.RunPython(zet_lid_tot_einde_jaar),
+        migrations.RunPython(maak_unaccented_naam)
     ]
 
 # end of file

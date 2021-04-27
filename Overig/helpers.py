@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+
+import unicodedata
 
 
 def get_safe_from_ip(request):
@@ -34,6 +36,18 @@ def get_safe_from_ip(request):
     # if
 
     return safe_ip
+
+
+def maak_unaccented(naam):
+    """ Verwijder leestekens van de naam """
+
+    # Note: naam.encode('ASCII', 'ignore') verliest alle letters met leestekens
+
+    # via NFKD (Normalization Form, Compatibility Decomposition) naar platte tekst (ASCII)
+    tussenvorm = unicodedata.normalize('NFKD', naam)
+    bytes_naam = tussenvorm.encode('ASCII', 'ignore')
+    nieuwe_naam = bytes_naam.decode('UTF-8')
+    return nieuwe_naam
 
 
 # end of file

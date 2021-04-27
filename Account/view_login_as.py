@@ -11,7 +11,6 @@ from django.contrib.auth import login
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.views.generic import ListView
 from django.db.models import Q, Value
-from django.db.models.functions import Concat
 from django.core.exceptions import PermissionDenied
 from .forms import ZoekAccountForm, KiesAccountForm
 from .models import Account, AccountEmail
@@ -110,11 +109,8 @@ class LoginAsZoekView(UserPassesTestMixin, ListView):
             qset = (Account
                     .objects
                     .exclude(is_staff=True)
-                    .annotate(hele_naam=Concat('first_name', Value(' '), 'last_name'))
-                    .filter(Q(username__icontains=zoekterm) |  # dekt nhb_nr
-                            Q(first_name__icontains=zoekterm) |
-                            Q(last_name__icontains=zoekterm) |
-                            Q(hele_naam__icontains=zoekterm))
+                    .filter(Q(username__icontains=zoekterm) |       # dekt zoeken op bondsnummer
+                            Q(unaccented_naam__icontains=zoekterm))
                     .order_by('username'))
             return qset[:50]
 
