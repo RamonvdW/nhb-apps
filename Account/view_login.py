@@ -69,7 +69,8 @@ def account_check_nieuwe_email(request, from_ip, account):
     return None
 
 
-account_add_plugin_login(30, account_check_nieuwe_email)
+# skip=True om te voorkomen dat we een email sturen door de login-as
+account_add_plugin_login(30, account_check_nieuwe_email, True)
 
 
 def account_check_geblokkeerd(request, from_ip, account):
@@ -98,7 +99,7 @@ def account_check_geblokkeerd(request, from_ip, account):
     return None
 
 
-account_add_plugin_login(10, account_check_geblokkeerd)
+account_add_plugin_login(10, account_check_geblokkeerd, True)
 
 
 def receive_bevestiging_accountemail(request, obj):
@@ -234,12 +235,13 @@ class LoginView(TemplateView):
         account = account2
 
         # kijk of er een reden is om gebruik van het account te weren
-        for _, func in account_plugins_login:
+        for _, func, _ in account_plugins_login:
             httpresp = func(self.request, from_ip, account)
             if httpresp:
                 # plugin has decided that the user may not login
                 # and has generated/rendered an HttpResponse
                 return httpresp
+        # for
 
         # integratie met de authenticatie laag van Django
         login(self.request, account)

@@ -47,12 +47,14 @@ def receiver_account_wissel(request, obj):
     from_ip = get_safe_from_ip(request)
     my_logger.info('%s LOGIN automatische inlog met account %s' % (from_ip, repr(account.username)))
 
-    for _, func in account_plugins_login:
-        httpresp = func(request, from_ip, account)
-        if httpresp:
-            # plugin has decided that the user may not login
-            # and has generated/rendered an HttpResponse that we cannot handle here
-            return httpresp
+    for _, func, skip in account_plugins_login:
+        if not skip:
+            httpresp = func(request, from_ip, account)
+            if httpresp:
+                # plugin has decided that the user may not login
+                # and has generated/rendered an HttpResponse that we cannot handle here
+                return httpresp
+    # for
 
     if account.otp_is_actief:
         # fake de OTP passage

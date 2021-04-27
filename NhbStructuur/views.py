@@ -69,7 +69,7 @@ def nhblid_login_plugin(request, from_ip, account):
 
 
 # registreer de plugin
-account_add_plugin_login(20, nhblid_login_plugin)
+account_add_plugin_login(20, nhblid_login_plugin, False)
 
 
 # end of file
