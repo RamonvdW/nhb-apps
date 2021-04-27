@@ -58,7 +58,7 @@ INSCHRIJF_METHODES = (
     (INSCHRIJF_METHODE_3, 'Voorkeur dagdelen')
 )
 
-TEAM_PUNTEN_TWEE = '2P'
+TEAM_PUNTEN_TWEE = '2P'                 # head-to-head, via een poule
 TEAM_PUNTEN_FORMULE1 = 'F1'
 TEAM_PUNTEN_SOM_SCORES = 'SS'
 

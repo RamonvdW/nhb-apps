@@ -71,6 +71,8 @@ class CompetitieOverzichtView(View):
 
         context['object_list'] = list()
 
+        context['regio_instellingen_globaal'] = True
+
         if self.rol_nu == Rollen.ROL_BB:
             context['rol_is_bb'] = True
             kan_beheren = True
@@ -144,6 +146,8 @@ class CompetitieOverzichtView(View):
                     obj.url_afsluiten = reverse('Competitie:afsluiten-regiocomp',
                                                 kwargs={'deelcomp_pk': obj.pk})
                 # for
+
+            context['regio_instellingen_globaal'] = False
 
         elif self.rol_nu == Rollen.ROL_RKO:
             deelcomp_rks = (DeelCompetitie

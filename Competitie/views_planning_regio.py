@@ -19,8 +19,8 @@ from NhbStructuur.models import NhbCluster, NhbVereniging
 from Taken.taken import maak_taak
 from Wedstrijden.models import CompetitieWedstrijd, WedstrijdLocatie
 from .models import (LAAG_REGIO, LAAG_RK, LAAG_BK, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2,
-                     TEAM_PUNTEN_FORMULE1, TEAM_PUNTEN_TWEE, TEAM_PUNTEN_SOM_SCORES, AG_NUL,
-                     DeelCompetitie, DeelcompetitieRonde, maak_deelcompetitie_ronde,
+                     TEAM_PUNTEN_FORMULE1, TEAM_PUNTEN_TWEE, TEAM_PUNTEN_SOM_SCORES, TEAM_PUNTEN, AG_NUL,
+                     Competitie, DeelCompetitie, DeelcompetitieRonde, maak_deelcompetitie_ronde,
                      CompetitieKlasse, RegioCompetitieSchutterBoog, RegiocompetitieTeam)
 from .menu import menu_dynamics_competitie
 from types import SimpleNamespace
@@ -36,6 +36,7 @@ TEMPLATE_COMPETITIE_PLANNING_REGIO_TEAMS = 'competitie/planning-regio-teams.dtl'
 TEMPLATE_COMPETITIE_WIJZIG_WEDSTRIJD = 'competitie/wijzig-wedstrijd.dtl'
 TEMPLATE_COMPETITIE_AFSLUITEN_REGIOCOMP = 'competitie/rcl-afsluiten-regiocomp.dtl'
 TEMPLATE_COMPETITIE_INSTELLINGEN_REGIO = 'competitie/rcl-instellingen.dtl'
+TEMPLATE_COMPETITIE_INSTELLINGEN_REGIO_GLOBAAL = 'competitie/rcl-instellingen-globaal.dtl'
 TEMPLATE_COMPETITIE_AG_CONTROLE_REGIO = 'competitie/rcl-ag-controle.dtl'
 
 
@@ -1453,6 +1454,77 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
         url = reverse('Competitie:overzicht',
                       kwargs={'comp_pk': deelcomp.competitie.pk})
         return HttpResponseRedirect(url)
+
+
+class RegioInstellingenGlobaalView(UserPassesTestMixin, TemplateView):
+
+    """ Deze view geeft een overzicht van de regio keuzes """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_COMPETITIE_INSTELLINGEN_REGIO_GLOBAAL
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu, self.functie_nu = None, None
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL)
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        try:
+            comp_pk = int(kwargs['comp_pk'][:6])    # afkappen voor veiligheid
+            comp = Competitie.objects.get(pk=comp_pk)
+        except (ValueError, Competitie.DoesNotExist):
+            raise Http404()
+
+        deelcomps = (DeelCompetitie
+                     .objects
+                     .select_related('competitie',
+                                     'nhb_regio',
+                                     'nhb_regio__rayon')
+                     .filter(competitie=comp_pk,
+                             laag=LAAG_REGIO)
+                     .order_by('nhb_regio__regio_nr'))
+
+        context['comp'] = comp
+        context['deelcomps'] = deelcomps
+
+        punten2str = dict()
+        for punten, beschrijving in TEAM_PUNTEN:
+            punten2str[punten] = beschrijving
+        # for
+
+        for deelcomp in deelcomps:
+
+            deelcomp.regio_str = str(deelcomp.nhb_regio.regio_nr)
+            deelcomp.rayon_str = str(deelcomp.nhb_regio.rayon.rayon_nr)
+
+            if deelcomp.regio_organiseert_teamcompetitie:
+                deelcomp.teamcomp_str = 'Ja'
+
+                if deelcomp.regio_heeft_vaste_teams:
+                    deelcomp.team_type_str = 'Statisch'
+                else:
+                    deelcomp.team_type_str = 'Dynamisch'
+
+                deelcomp.puntenmodel_str = punten2str[deelcomp.regio_team_punten_model]
+            else:
+                deelcomp.teamcomp_str = 'Nee'
+                deelcomp.team_type_str = '-'
+                deelcomp.puntenmodel_str = '-'
+
+            if self.rol_nu == Rollen.ROL_RKO and deelcomp.nhb_regio.rayon == self.functie_nu.nhb_rayon:
+                deelcomp.highlight = True
+        # for
+
+        menu_dynamics_competitie(self.request, context, comp_pk=comp_pk)
+        return context
 
 
 class RegioTeamsView(UserPassesTestMixin, TemplateView):

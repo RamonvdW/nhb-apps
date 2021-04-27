@@ -65,6 +65,10 @@ urlpatterns = [
          views_planning_regio.RegioInstellingenView.as_view(),
          name='regio-instellingen'),
 
+    path('<comp_pk>/instellingen/globaal/',
+         views_planning_regio.RegioInstellingenGlobaalView.as_view(),
+         name='regio-instellingen-globaal'),
+
     path('<comp_pk>/ag-controle/regio-<regio_nr>/',
          views_planning_regio.AGControleView.as_view(),
          name='regio-ag-controle'),
