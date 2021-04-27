@@ -37,7 +37,10 @@ class OTPControleView(TemplateView):
             # gebruiker heeft geen OTP koppeling
             return HttpResponseRedirect(reverse('Plein:plein'))
 
-        form = OTPControleForm()
+        # waar eventueel naartoe na de controle?
+        next_url = request.GET.get('next', '')
+
+        form = OTPControleForm(initial={'next_url': next_url})
         context = {'form': form}
         menu_dynamics(request, context, actief="wissel-van-rol")
         return render(request, TEMPLATE_OTP_CONTROLE, context)
@@ -61,12 +64,14 @@ class OTPControleView(TemplateView):
             otp_code = form.cleaned_data.get('otp_code')
             if account_otp_controleer(request, account, otp_code):
                 # controle is gelukt (is ook al gelogd)
-                # terug naar de Wissel-van-rol pagina
-                return HttpResponseRedirect(reverse('Functie:wissel-van-rol'))
+                next_url = form.cleaned_data.get('next_url')
+                if not next_url:
+                    next_url = reverse('Functie:wissel-van-rol')
+                return HttpResponseRedirect(next_url)
             else:
                 # controle is mislukt (is al gelogd en in het logboek geschreven)
                 form.add_error(None, 'Verkeerde code. Probeer het nog eens.')
-                # FUTURE: blokkeer na X pogingen
+                # de code verandert sneller dan een brute-force aan kan, dus niet nodig om te blokkeren
 
         # still here --> re-render with error message
         context = {'form': form}

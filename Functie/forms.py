@@ -53,6 +53,10 @@ class OTPControleForm(forms.Form):
                         required=True,
                         widget=forms.TextInput(attrs={'autofocus': True, 'autocomplete': 'off'}))
 
+    next_url = forms.CharField(
+                        required=False,
+                        widget=forms.HiddenInput())
+
     def is_valid(self):
         valid = super(forms.Form, self).is_valid()
         if valid:
