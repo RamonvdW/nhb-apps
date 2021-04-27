@@ -91,12 +91,9 @@ class ProfielView(UserPassesTestMixin, TemplateView):
             rec.url = reverse('Records:specifiek', kwargs={'discipline': rec.discipline, 'nummer': rec.volg_nr})
             objs.append(rec)
 
-            loc = list()
-            if rec.plaats:
-                loc.append(rec.plaats)
+            loc = [rec.plaats]
             if rec.land:
                 loc.append(rec.land)
-
             rec.loc_str = ", ".join(loc)
             if rec.loc_str:
                 show_loc = True

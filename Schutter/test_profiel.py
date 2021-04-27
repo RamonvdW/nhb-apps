@@ -87,6 +87,37 @@ class TestSchutterProfiel(E2EHelpers, TestCase):
         rec.max_score = 300
         rec.save()
 
+        rec = IndivRecord()
+        rec.discipline = '18'
+        rec.volg_nr = 2
+        rec.soort_record = "60p"
+        rec.geslacht = lid.geslacht
+        rec.leeftijdscategorie = 'J'
+        rec.materiaalklasse = "C"
+        rec.nhb_lid = lid
+        rec.naam = "Ramon de Tester"
+        rec.datum = parse_date('2012-12-12')
+        rec.plaats = "Top stad"
+        rec.land = 'Verwegistan'
+        rec.score = 290
+        rec.max_score = 300
+        rec.save()
+
+        rec = IndivRecord()
+        rec.discipline = '18'
+        rec.volg_nr = 3
+        rec.soort_record = "60p"
+        rec.geslacht = lid.geslacht
+        rec.leeftijdscategorie = 'C'
+        rec.materiaalklasse = "C"
+        rec.nhb_lid = lid
+        rec.naam = "Ramon de Tester"
+        rec.datum = parse_date('1991-12-12')
+        rec.plaats = ""     # typisch voor oudere records
+        rec.score = 290
+        rec.max_score = 300
+        rec.save()
+
         # geef dit account een goede en een slechte HistComp record
         histcomp = HistCompetitie()
         histcomp.seizoen = "2009/2010"

@@ -286,4 +286,132 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
         self.client.logout()
         self.e2e_login(self.account_hwl, wachtwoord=nieuw_ww)
 
+    def test_discipline(self):
+        # met schutter-login wel toegankelijk
+        self.e2e_login(self.account_normaal)
+
+        # voorkeuren worden aangemaakt bij ophalen
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_voorkeuren)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+
+        # check the initiële voorkeuren: alle disciplines actief
+        voorkeuren = SchutterVoorkeuren.objects.all()[0]
+        self.assertTrue(voorkeuren.voorkeur_discipline_25m1pijl)
+        self.assertTrue(voorkeuren.voorkeur_discipline_outdoor)
+        self.assertTrue(voorkeuren.voorkeur_discipline_indoor)
+        self.assertTrue(voorkeuren.voorkeur_discipline_clout)
+        self.assertTrue(voorkeuren.voorkeur_discipline_veld)
+        self.assertTrue(voorkeuren.voorkeur_discipline_run)
+        self.assertTrue(voorkeuren.voorkeur_discipline_3d)
+
+        # alle disciplines 'uit' zetten
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_voorkeuren, {})
+        self.assert_is_redirect(resp, '/sporter/')     # naar profiel
+        voorkeuren = SchutterVoorkeuren.objects.get(pk=voorkeuren.pk)
+        self.assertFalse(voorkeuren.voorkeur_discipline_25m1pijl)
+        self.assertFalse(voorkeuren.voorkeur_discipline_outdoor)
+        self.assertFalse(voorkeuren.voorkeur_discipline_indoor)
+        self.assertFalse(voorkeuren.voorkeur_discipline_clout)
+        self.assertFalse(voorkeuren.voorkeur_discipline_veld)
+        self.assertFalse(voorkeuren.voorkeur_discipline_run)
+        self.assertFalse(voorkeuren.voorkeur_discipline_3d)
+
+        # alle disciplines 'aan'
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_voorkeuren, {'voorkeur_disc_25m1p': '1',
+                                                          'voorkeur_disc_outdoor': '2',
+                                                          'voorkeur_disc_indoor': 'ja',
+                                                          'voorkeur_disc_clout': '?',
+                                                          'voorkeur_disc_veld': 'x',
+                                                          'voorkeur_disc_run': 'on',
+                                                          'voorkeur_disc_3d': 'whatever'})
+        self.assert_is_redirect(resp, '/sporter/')     # naar profiel
+        voorkeuren = SchutterVoorkeuren.objects.get(pk=voorkeuren.pk)
+        self.assertTrue(voorkeuren.voorkeur_discipline_25m1pijl)
+        self.assertTrue(voorkeuren.voorkeur_discipline_outdoor)
+        self.assertTrue(voorkeuren.voorkeur_discipline_indoor)
+        self.assertTrue(voorkeuren.voorkeur_discipline_clout)
+        self.assertTrue(voorkeuren.voorkeur_discipline_veld)
+        self.assertTrue(voorkeuren.voorkeur_discipline_run)
+        self.assertTrue(voorkeuren.voorkeur_discipline_3d)
+
+    def test_para_opmerking(self):
+        # met schutter-login wel toegankelijk
+        self.e2e_login(self.account_normaal)
+
+        # voorkeuren worden aangemaakt bij ophalen
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_voorkeuren)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+
+        # niet-para sporter mag geen opmerking invoeren
+        voorkeuren = SchutterVoorkeuren.objects.all()[0]
+        self.assertEqual(voorkeuren.opmerking_para_sporter, '')
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_voorkeuren, {'para_notitie': 'Hallo test'})
+        self.assert_is_redirect(resp, '/sporter/')     # naar profiel
+
+        voorkeuren = SchutterVoorkeuren.objects.get(pk=voorkeuren.pk)
+        self.assertEqual(voorkeuren.opmerking_para_sporter, '')
+
+        # maak dit een para sporter
+        self.nhblid1.para_classificatie = 'VI1'
+        self.nhblid1.save()
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_voorkeuren, {'para_notitie': 'Hallo test'})
+        self.assert_is_redirect(resp, '/sporter/')     # naar profiel
+
+        voorkeuren = SchutterVoorkeuren.objects.get(pk=voorkeuren.pk)
+        self.assertEqual(voorkeuren.opmerking_para_sporter, 'Hallo test')
+
+        # coverage: opslaan zonder wijziging
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_voorkeuren, {'para_notitie': 'Hallo test'})
+        self.assert_is_redirect(resp, '/sporter/')     # naar profiel
+
+    def test_email_optout(self):
+        # log in als beheerder, maar blijf sporter
+        self.e2e_login(self.account_hwl)
+        self.e2e_wisselnaarrol_sporter()
+
+        # voorkeuren worden aangemaakt bij ophalen
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_voorkeuren)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+
+        # check de defaults
+        email = self.account_hwl.accountemail_set.all()[0]
+        self.assertFalse(email.optout_nieuwe_taak)
+        self.assertFalse(email.optout_herinnering_taken)
+
+        # wijzig zonder opt-out te doen
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_voorkeuren, {})
+        self.assert_is_redirect(resp, '/sporter/')     # naar profiel
+
+        email = self.account_hwl.accountemail_set.all()[0]
+        self.assertFalse(email.optout_nieuwe_taak)
+        self.assertFalse(email.optout_herinnering_taken)
+
+        # wijzig met opt-out
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_voorkeuren, {'optout_nieuwe_taak': 'ja'})
+        self.assert_is_redirect(resp, '/sporter/')     # naar profiel
+
+        email = self.account_hwl.accountemail_set.all()[0]
+        self.assertTrue(email.optout_nieuwe_taak)
+        self.assertFalse(email.optout_herinnering_taken)
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_voorkeuren, {'optout_herinnering_taken': 'on'})
+        self.assert_is_redirect(resp, '/sporter/')     # naar profiel
+
+        email = self.account_hwl.accountemail_set.all()[0]
+        self.assertFalse(email.optout_nieuwe_taak)
+        self.assertTrue(email.optout_herinnering_taken)
+
 # end of file

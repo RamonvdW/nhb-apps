@@ -182,21 +182,28 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
             if rol_mag_wisselen(self.request):
                 account = request.user
                 email = account.accountemail_set.all()[0]
+                updated = list()
 
                 optout_nieuwe_taak = False
                 if request.POST.get('optout_nieuwe_taak'):
                     optout_nieuwe_taak = True
+                if email.optout_nieuwe_taak != optout_nieuwe_taak:
+                    # wijziging doorvoeren
+                    email.optout_nieuwe_taak = optout_nieuwe_taak
+                    updated.append('optout_nieuwe_taak')
 
                 optout_herinnering_taken = False
                 if request.POST.get('optout_herinnering_taken'):
                     optout_herinnering_taken = True
 
-                if (email.optout_nieuwe_taak != optout_nieuwe_taak or
-                        email.optout_herinnering_taken != optout_herinnering_taken):
-                    # wijziging opslaan
-                    email.optout_nieuwe_taak = optout_nieuwe_taak
+                if email.optout_herinnering_taken != optout_herinnering_taken:
+                    # wijziging doorvoeren
                     email.optout_herinnering_taken = optout_herinnering_taken
-                    email.save()
+                    updated.append('optout_herinnering_taken')
+
+                # wijziging opslaan
+                if len(updated):
+                    email.save(update_fields=updated)
 
         if self.rol_nu == Rollen.ROL_HWL:
             # stuur de HWL terug naar zijn ledenlijst
