@@ -40,7 +40,7 @@ class Account(AbstractUser):
     # (inherited) groups: ManyToMany
 
     # om in te zoeken: volledige naam zonder leestekens
-    unaccented_naam = models.CharField(max_length=200, default='')
+    unaccented_naam = models.CharField(max_length=200, default='', blank=True)
 
     vraag_nieuw_wachtwoord = models.BooleanField(
                                     default=False,

@@ -42,7 +42,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='account',
             name='unaccented_naam',
-            field=models.CharField(default='', max_length=200),
+            field=models.CharField(default='', max_length=200, blank=True),
         ),
         migrations.RunPython(zet_unaccented_naam),
     ]

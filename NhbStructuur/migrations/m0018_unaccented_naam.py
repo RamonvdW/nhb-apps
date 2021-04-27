@@ -35,7 +35,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='nhblid',
             name='unaccented_naam',
-            field=models.CharField(default='', max_length=200),
+            field=models.CharField(default='', max_length=200, blank=True),
         ),
         migrations.RunPython(maak_unaccented_naam)
     ]
