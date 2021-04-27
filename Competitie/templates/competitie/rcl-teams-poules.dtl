@@ -1,0 +1,92 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2021 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Teams Poules{% endblock %}
+
+{% block pagina %}
+
+    <h4>Teams Poules</h4>
+
+    <div class="row">
+
+        <!-- toon gegevens van de regio en competitie in een blauwe box -->
+        <div class="col s12 m10 l8 xl6 offset-m1 offset-l2 offset-xl3">
+            <div class="white-text nhb-blauw z-depth-2">
+
+                <div class="row small-row">
+                    <div class="col s3">Competitie:</div>
+                    <div class="col s7">{{ deelcomp.competitie.beschrijving }}</div>
+                </div>
+
+                <div class="row small-row">
+                    <div class="col s3">Rayon:</div>
+                    <div class="col s7">{{ regio.rayon }}</div>
+                </div>
+
+                <div class="row small-row">
+                    <div class="col s3">Regio:</div>
+                    <div class="col s7">{{ regio }}</div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+    <p>&nbsp;</p>
+    <p>Op deze pagina kan de RCL de poules instellen voor de teamcompetitie in de regio.</p>
+
+    <p>Handleiding over de poules: <a class="btn-small btn-nhb-blauw" href="{{ wiki_rcl_poules_url }}" target="_blank" rel="noopener noreferrer">
+        <i class="material-icons-round">help_outline</i></a></p>
+
+
+    <table class="white">
+        {% for poule in poules %}
+            {% if forloop.first %}
+                <thead>
+                    <tr>
+                        <th>Beschrijving</th>
+                        <th>Aantal teams</th>
+                        <th><!-- kolom voor wijzig knoppen --></th>
+                    </tr>
+                </thead>
+            {% endif %}
+
+            <tr>
+                <td>{{ poule.beschrijving }}</td>
+                <td>{{ poule.team_count }}</td>
+                <td><a class="btn-nhb-blauw" href="{{ poule.url_wijzig }}">Wijzig</a></td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="4"><i>Er zijn nog geen poules aangemaakt</i></td>
+            </tr>
+        {% endfor %}
+
+        <!-- knop om een poule toe te voegen -->
+        {% if url_nieuwe_poule %}
+            <tr>
+                <td colspan="5">
+                    <form action="{{ url_nieuwe_poule }}" method="post">
+                        {% csrf_token %}
+                        <button class="btn-nhb-blauw">
+                            <i class="material-icons-round left">add</i>Poule toevoegen</button>
+                    </form>
+                </td>
+            </tr>
+        {% endif %}
+
+    </table>
+
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-rcl-teams-poules" %}
+
+{% endblock %}
+
+{% block menu-competities %}
+    {% include 'competitie/menu.dtl' %}
+{% endblock %}

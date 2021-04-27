@@ -77,8 +77,13 @@
             {% include 'plein/card.dtl' with title=deelcomp.titel text=deelcomp.tekst icon="pending_actions" url=deelcomp.url %}
 
             <!-- regio teams -->
-            {% if deelcomp.url_teams_regio %}
-                {% include 'plein/card.dtl' with title="Teams Regio" text=deelcomp.tekst_teams_regio icon="gamepad" url=deelcomp.url_teams_regio %}
+            {% if deelcomp.url_regio_teams %}
+                {% include 'plein/card.dtl' with title="Regio Teams" text=deelcomp.tekst_regio_teams icon="gamepad" url=deelcomp.url_regio_teams %}
+            {% endif %}
+
+            <!-- regio poules -->
+            {% if deelcomp.url_poules %}
+                {% include 'plein/card.dtl' with title="Team Poules" text=deelcomp.tekst_poules icon="grid_4x4" url=deelcomp.url_poules %}
             {% endif %}
 
             <!-- scores -->

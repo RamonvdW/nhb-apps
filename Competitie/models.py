@@ -367,6 +367,10 @@ class DeelCompetitie(models.Model):
                                                default=TEAM_PUNTEN_TWEE,
                                                choices=TEAM_PUNTEN)
 
+    def heeft_poules_nodig(self):
+        # centrale plek om de poules behoefte te controleren
+        return self.regio_organiseert_teamcompetitie and self.regio_team_punten_model == TEAM_PUNTEN_TWEE
+
     def __str__(self):
         """ geef een tekstuele afkorting van dit object, voor in de admin interface """
         if self.nhb_regio:

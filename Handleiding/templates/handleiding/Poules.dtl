@@ -1,0 +1,33 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2020-2021 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+{% block title %}Poules{% endblock %}
+
+{% block pagina %}
+<div class="white" style="padding:10px 30px 10px 30px">
+<h4>Poules</h4>
+<p>Poules worden gebruikt om een planning te maken waarmee teams direct tegen elkaar uit te laten komen.</p>
+<p></p>
+<p>In regio's waar een teamcompetitie wordt georganiseerd met het wedstrijdpunten model '2 punten' maken gebruik van poules. In andere regio's zijn de poules niet nodig omdat de teams punten verdienen met hun team score ('formule 1' punten model) of pas aan het einde naar de totale score gekeken wordt ('cumulatief').</p>
+<p></p>
+<p>De regiocompetitieleider maakt de poules aan, geeft deze een naam en koppelt teams aan een poule.</p>
+<p></p>
+<p>Er kunnen maximaal 8 teams gekoppeld worden aan een poule, zodat in de zeven rondes van de regiocompetitie het 1 keer opneemt tegen elk van de andere teams. Bij minder teams wordt gebruik gemaakt van 'dummie' teams of komen teams meerdere keren tegen elkaar uit.</p>
+<p></p>
+<p>Als maar een paar teams in welke wedstrijdklasse staan dan kan de RCL er voor kiezen om twee klassen samen te voegen, bijvoorbeeld klassen ERE + A in 1 poule.</p>
+<p></p>
+<p></p>
+<hr><h5>Verder</h5>
+<p>Terug naar de <a class="handleiding-link" href="/handleiding/Hoofdpagina/">Hoofdpagina</a>.</p>
+
+</div>
+
+{% endblock %}
+
+{% block menu %}
+    {% include 'handleiding/menu.dtl' %}
+{% endblock %}

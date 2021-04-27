@@ -15,7 +15,7 @@ from Overig.e2ehelpers import E2EHelpers
 from .models import (Competitie, DeelCompetitie, CompetitieKlasse,
                      competitie_aanmaken,
                      RegioCompetitieSchutterBoog,
-                     RegiocompetitieTeam)
+                     RegiocompetitieTeam, RegiocompetitieTeamPoule)
 import datetime
 
 
@@ -181,9 +181,11 @@ class TestCompetitieRegioTeams(E2EHelpers, TestCase):
 
         self.url_afsluiten_regio = '/bondscompetities/planning/regio/%s/afsluiten/'     # deelcomp_pk
         self.url_regio_instellingen = '/bondscompetities/%s/instellingen/regio-%s/'     # comp_pk, regio-nr
+        self.url_regio_globaal = '/bondscompetities/%s/instellingen/globaal/'           # comp_pk
         self.url_ag_controle = '/bondscompetities/%s/ag-controle/regio-%s/'             # comp_pk, regio-nr
         self.url_regio_teams = '/bondscompetities/regio/%s/teams/'                      # deelcomp_pk
         self.url_regio_poules = '/bondscompetities/regio/%s/poules/'                    # deelcomp_pk
+        self.url_wijzig_poule = '/bondscompetities/regio/poules/%s/wijzig/'             # poule_pk
 
     def _maak_inschrijving(self, deelcomp):
         RegioCompetitieSchutterBoog(schutterboog=self.schutterboog,
@@ -326,6 +328,17 @@ class TestCompetitieRegioTeams(E2EHelpers, TestCase):
         resp = self.client.get(url)
         self.assert403(resp)
 
+    def test_regio_globaal(self):
+        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_wisselnaarrol_bb()
+
+        url = self.url_regio_globaal % self.comp_18.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/rcl-instellingen-globaal.dtl', 'plein/site_layout.dtl'))
+
     def test_regio_teams(self):
         # RCL ziet teams
         self.e2e_login_and_pass_otp(self.account_rcl112_18)
@@ -447,5 +460,33 @@ class TestCompetitieRegioTeams(E2EHelpers, TestCase):
             resp = self.client.get(self.url_ag_controle % (self.comp_18.pk, 110))
         self.assert403(resp)
 
+    def test_poules(self):
+        self.e2e_login_and_pass_otp(self.account_rcl112_18)
+        self.e2e_wissel_naar_functie(self.functie_rcl112_18)
+
+        deelcomp = DeelCompetitie.objects.get(competitie=self.comp_18, functie=self.functie_rcl112_18)
+
+        url = self.url_regio_poules % deelcomp.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/rcl-teams-poules.dtl', 'plein/site_layout.dtl'))
+
+        # maak een poule aan
+        self.assertEqual(0, RegiocompetitieTeamPoule.objects.count())
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
+        self.assert_is_redirect(resp, url)
+        self.assertEqual(1, RegiocompetitieTeamPoule.objects.count())
+        poule = RegiocompetitieTeamPoule.objects.all()[0]
+
+        # wijzig de poule
+        url = self.url_wijzig_poule % poule.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/wijzig-poule.dtl', 'plein/site_layout.dtl'))
 
 # end of file

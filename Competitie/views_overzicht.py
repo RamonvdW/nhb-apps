@@ -111,10 +111,16 @@ class CompetitieOverzichtView(View):
                 obj.url_scores = reverse('Competitie:scores-regio',
                                          kwargs={'deelcomp_pk': obj.pk})
 
-                obj.tekst_teams_regio = "Teams voor de regiocompetitie in %s inzien voor deze competitie." % obj.nhb_regio.naam
-                obj.url_teams_regio = reverse('Competitie:regio-teams',
-                                              kwargs={'deelcomp_pk': obj.pk})
+                if obj.regio_organiseert_teamcompetitie:
+                    obj.tekst_regio_teams = "Teams voor de regiocompetitie in %s inzien voor deze competitie." % obj.nhb_regio.naam
+                    obj.url_regio_teams = reverse('Competitie:regio-teams',
+                                                  kwargs={'deelcomp_pk': obj.pk})
 
+                    # poules kaartje alleen het head-to-head puntenmodel gekozen is
+                    if obj.heeft_poules_nodig():
+                        obj.tekst_poules = "Poules voor directe teamwedstrijden tussen teams in deze regiocompetitie."
+                        obj.url_poules = reverse('Competitie:regio-poules',
+                                                 kwargs={'deelcomp_pk': obj.pk})
             # for
 
             if comp.fase <= 'F':

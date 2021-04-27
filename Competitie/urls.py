@@ -82,6 +82,9 @@ urlpatterns = [
          views_regio_teams.RegioPoulesView.as_view(),
          name='regio-poules'),
 
+    path('regio/poules/<poule_pk>/wijzig/',
+         views_regio_teams.WijzigPouleView.as_view(),
+         name='wijzig-poule'),
 
     # ingeschreven
     path('<comp_pk>/lijst-regiocompetitie/regio-<regio_pk>/dagdeel-behoefte/',

@@ -6,13 +6,13 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}Teams Regio{% endblock %}
+{% block title %}Regio Teams{% endblock %}
 
 {% block pagina %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-planning-regio-teams" %}
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-rcl-regio-teams" %}
 
-    <h4>Teams Regio</h4>
+    <h4>Regio Teams</h4>
 
     <div class="row">
 

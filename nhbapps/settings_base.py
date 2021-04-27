@@ -333,6 +333,7 @@ HANDLEIDING_INSCHRIJFMETHODES = 'Inschrijfmethodes_Regiocompetitie'
 HANDLEIDING_CLUSTERS = 'Clusters'
 HANDLEIDING_RK_SELECTIE = 'RK_selectie'
 HANDLEIDING_RCL_INSTELLINGEN_REGIO = 'RCL_instellingen_regio'
+HANDLEIDING_POULES = 'Poules'
 
 HANDLEIDING_PAGINAS = [
     HANDLEIDING_TOP,
@@ -352,6 +353,7 @@ HANDLEIDING_PAGINAS = [
     HANDLEIDING_CLUSTERS,
     HANDLEIDING_RK_SELECTIE,
     HANDLEIDING_RCL_INSTELLINGEN_REGIO,
+    HANDLEIDING_POULES,
     # pagina's van de handleiding die intern gerefereerd worden
     'Tips_voor_wiki_gebruik',
     'Koppelen_beheerders'
