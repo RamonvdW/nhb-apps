@@ -13,6 +13,7 @@ from . import (views_aangemeld,
                views_planning_regio,
                views_planning_bond,
                views_planning_rayon,
+               views_regio_teams,
                views_uitslagen,
                views_scores)
 
@@ -62,16 +63,24 @@ urlpatterns = [
 
     # RCL schermen
     path('<comp_pk>/instellingen/regio-<regio_nr>/',
-         views_planning_regio.RegioInstellingenView.as_view(),
+         views_regio_teams.RegioInstellingenView.as_view(),
          name='regio-instellingen'),
 
     path('<comp_pk>/instellingen/globaal/',
-         views_planning_regio.RegioInstellingenGlobaalView.as_view(),
+         views_regio_teams.RegioInstellingenGlobaalView.as_view(),
          name='regio-instellingen-globaal'),
 
     path('<comp_pk>/ag-controle/regio-<regio_nr>/',
-         views_planning_regio.AGControleView.as_view(),
+         views_regio_teams.AGControleView.as_view(),
          name='regio-ag-controle'),
+
+    path('regio/<deelcomp_pk>/teams/',
+         views_regio_teams.RegioTeamsView.as_view(),
+         name='regio-teams'),
+
+    path('regio/<deelcomp_pk>/poules/',
+         views_regio_teams.RegioPoulesView.as_view(),
+         name='regio-poules'),
 
 
     # ingeschreven
@@ -122,10 +131,6 @@ urlpatterns = [
     path('planning/regio/<deelcomp_pk>/cluster/<cluster_pk>/',
          views_planning_regio.RegioClusterPlanningView.as_view(),
          name='regio-cluster-planning'),
-
-    path('planning/regio/<deelcomp_pk>/teams/',
-         views_planning_regio.RegioTeamsView.as_view(),
-         name='regio-teams'),
 
     path('planning/regio/ronde/<ronde_pk>/',
          views_planning_regio.RegioRondePlanningView.as_view(),
