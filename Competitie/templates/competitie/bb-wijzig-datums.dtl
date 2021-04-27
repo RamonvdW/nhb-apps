@@ -128,14 +128,9 @@
             </tr>
         </thead>
         <tr>
-            <td>Inschrijving openen op</td>
+            <td>Begin fase B (inschrijven)</td>
             <td id="weeknr1"></td>
             <td><input type="text" class="nl_datepicker" id="datum1" onchange="gewijzigd()"></td>
-        </tr>
-        <tr>
-            <td>Inschrijving sluiten op</td>
-            <td id="weeknr2"></td>
-            <td><input type="text" class="nl_datepicker" id="datum2" onchange="gewijzigd()"></td>
         </tr>
 
         <tr>
@@ -143,17 +138,22 @@
         </tr>
 
         <tr>
-            <td>Samenstellen vaste teams kan tot</td>
+            <td>Begin fase C</td>
+            <td id="weeknr2"></td>
+            <td><input type="text" class="nl_datepicker" id="datum2" onchange="gewijzigd()"></td>
+        </tr>
+        <tr>
+            <td>Begin fase D</td>
             <td id="weeknr3"></td>
             <td><input type="text" class="nl_datepicker" id="datum3" onchange="gewijzigd()"></td>
         </tr>
         <tr>
-            <td>Aanmaken poules tot</td>
+            <td>Begin fase E (wedstrijden)</td>
             <td id="weeknr4"></td>
             <td><input type="text" class="nl_datepicker" id="datum4" onchange="gewijzigd()"></td>
         </tr>
         <tr>
-            <td>Wedstrijden tot</td>
+            <td>Begin fase F</td>
             <td id="weeknr5"></td>
             <td><input type="text" class="nl_datepicker" id="datum5" onchange="gewijzigd()"></td>
         </tr>
@@ -163,13 +163,13 @@
         </tr>
 
         <tr>
-            <td>Wedstrijden vanaf</td>
+            <td>Begin fase L (wedstrijden)</td>
             <td id="weeknr6"></td>
             <td><input type="text" class="nl_datepicker" id="datum6" onchange="gewijzigd()"></td>
         </tr>
 
         <tr>
-            <td>Wedstrijden tot</td>
+            <td>Begin fase M</td>
             <td id="weeknr7"></td>
             <td><input type="text" class="nl_datepicker" id="datum7" onchange="gewijzigd()"></td>
         </tr>
@@ -179,13 +179,13 @@
         </tr>
 
         <tr>
-            <td>Wedstrijden vanaf</td>
+            <td>Begin fase Q (wedstrijden)</td>
             <td id="weeknr8"></td>
             <td><input type="text" class="nl_datepicker" id="datum8" onchange="gewijzigd()"></td>
         </tr>
 
         <tr>
-            <td>Wedstrijden tot</td>
+            <td>Begin fase R</td>
             <td id="weeknr9"></td>
             <td><input type="text" class="nl_datepicker" id="datum9" onchange="gewijzigd()"></td>
         </tr>
