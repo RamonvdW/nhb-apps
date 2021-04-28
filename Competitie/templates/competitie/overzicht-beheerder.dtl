@@ -136,7 +136,7 @@
 
         {% if regio_instellingen_globaal %}
             {% url 'Competitie:regio-instellingen-globaal' comp_pk=comp.pk as card_url %}
-            {% include 'plein/card.dtl' with title="Regio keuzses" text="Overzicht van de keuzes gemaakt per regio" icon="flaky" url=card_url %}
+            {% include 'plein/card.dtl' with title="Regio keuzes" text="Overzicht van de keuzes gemaakt per regio" icon="flaky" url=card_url %}
         {% endif %}
 
         <!-- toon klassegrenzen regiocompetitie -->
