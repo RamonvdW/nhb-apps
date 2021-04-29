@@ -4,7 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-""" ondersteuning voor de rollen binnen de NHB applicaties """
+""" Ondersteuning voor de rollen binnen de NHB applicaties """
 
 from django.contrib.sessions.backends.db import SessionStore
 from Account.rechten import account_add_plugin_rechten, account_rechten_is_otp_verified
@@ -522,9 +522,14 @@ def rol_activeer_wissel_van_rol_menu_voor_account(account):
                 .objects
                 .filter(account=account)):
         session = SessionStore(obj.session.session_key)
-        mag = session[SESSIONVAR_ROL_MAG_WISSELEN]
-        if mag == False:
-            session[SESSIONVAR_ROL_MAG_WISSELEN] = "nieuw"
+        try:
+            mag_wisselen = session[SESSIONVAR_ROL_MAG_WISSELEN]
+        except KeyError:
+            # expired sessions do not have keys
+            pass
+        else:
+            if not mag_wisselen:
+                session[SESSIONVAR_ROL_MAG_WISSELEN] = "nieuw"
             session.save()
     # for
 
