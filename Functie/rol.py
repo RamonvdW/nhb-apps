@@ -539,9 +539,14 @@ def rol_activeer_wissel_van_rol_menu_voor_account(account):
                 .objects
                 .filter(account=account)):
         session = SessionStore(obj.session.session_key)
-        mag = session[SESSIONVAR_ROL_MAG_WISSELEN]
-        if mag == False:
-            session[SESSIONVAR_ROL_MAG_WISSELEN] = "nieuw"
+        try:
+            mag_wisselen = session[SESSIONVAR_ROL_MAG_WISSELEN]
+        except KeyError:
+            # expired sessions do not have keys
+            pass
+        else:
+            if not mag_wisselen:
+                session[SESSIONVAR_ROL_MAG_WISSELEN] = "nieuw"
             session.save()
     # for
 

@@ -337,7 +337,8 @@ class OntvangBeheerderWijzigingenView(View):
 
     def post(self, request, *args, **kwargs):
         """ deze functie wordt aangeroepen als een POST request ontvangen is.
-            dit is gekoppeld aan het drukken op de Registreer knop.
+            dit is gekoppeld aan het drukken op de knop om een beheerder te koppelen
+            (WijzigBeheerdersView)
         """
         functie_pk = self.kwargs['functie_pk']
         try:

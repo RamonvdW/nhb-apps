@@ -315,20 +315,25 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.assert403(resp)
 
     def test_koppel_rko(self):
-        self.e2e_login_and_pass_otp(self.account_admin)
+        # log in als beh1 zodat er sessie gemaakt wordt
+        self.e2e_login(self.account_beh1)
 
-        # neem de RKO rol aan
-        with self.assert_max_queries(25):
-            resp = self.client.post(self.url_activeer_functie % self.functie_rko3.pk, follow=True)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, "RKO ")
+        # manipuleer de sessie zodat deze verlopen is, maar niet verwijderd wordt
+        # (normaal worden sessies verwijderd bij logout omdat expiry op 0 staat == at browser close)
+        session = self.client.session
+        session.set_expiry(-5)      # expiry in -5 seconds
+        session.save()
+
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_wissel_naar_functie(self.functie_rko3)
+        self.e2e_check_rol('RKO')
 
         LogboekRegel.objects.all().delete()
 
         # koppel een RCL van het juiste rayon
         url = self.url_wijzig_ontvang % self.functie_rcl111.pk
         self.assertEqual(self.functie_rcl111.accounts.count(), 0)
-        with self.assert_max_queries(23):
+        with self.assert_max_queries(28):
             resp = self.client.post(url, {'add': self.account_beh1.pk}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertEqual(self.functie_rcl111.accounts.count(), 1)
