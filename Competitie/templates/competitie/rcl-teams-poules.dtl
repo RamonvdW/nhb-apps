@@ -64,14 +64,14 @@
             </tr>
         {% empty %}
             <tr>
-                <td colspan="4"><i>Er zijn nog geen poules aangemaakt</i></td>
+                <td><i>Er zijn nog geen poules aangemaakt</i></td>
             </tr>
         {% endfor %}
 
         <!-- knop om een poule toe te voegen -->
         {% if url_nieuwe_poule %}
             <tr>
-                <td colspan="5">
+                <td{% if poules.count > 0 %} colspan="3"{% endif %}>
                     <form action="{{ url_nieuwe_poule }}" method="post">
                         {% csrf_token %}
                         <button class="btn-nhb-blauw">

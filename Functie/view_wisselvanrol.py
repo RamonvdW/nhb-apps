@@ -292,7 +292,7 @@ class WisselNaarSecretarisView(UserPassesTestMixin, TemplateView):
                 functie_sec = ver.functie_set.filter(rol='SEC')[0]
             except IndexError:      # pragma: no cover
                 # alleen tijdens test zonder SEC functie
-                pass
+                ver.url_wordt_sec = "#"
             else:
                 ver.url_wordt_sec = reverse('Functie:activeer-functie',
                                             kwargs={'functie_pk': functie_sec.pk})
