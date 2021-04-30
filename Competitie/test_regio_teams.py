@@ -489,4 +489,11 @@ class TestCompetitieRegioTeams(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/wijzig-poule.dtl', 'plein/site_layout.dtl'))
 
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'beschrijving': ' hoi test!'})
+        self.assert_is_redirect_not_plein(resp)
+
+        poule = RegiocompetitieTeamPoule.objects.get(pk=poule.pk)
+        self.assertEqual(poule.beschrijving, 'hoi test!')
+
 # end of file

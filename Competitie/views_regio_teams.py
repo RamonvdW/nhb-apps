@@ -637,6 +637,12 @@ class WijzigPouleView(UserPassesTestMixin, TemplateView):
             # deze poule is niet meer nodig
             poule.delete()
         else:
+            beschrijving = request.POST.get('beschrijving', '')[:100]   # afkappen voor de veiligheid
+            beschrijving = beschrijving.strip()
+            if poule.beschrijving != beschrijving:
+                poule.beschrijving = beschrijving
+                poule.save(update_fields=['beschrijving'])
+
             gekozen = list()
             type_counts = dict()
             for team in RegiocompetitieTeam.objects.filter(deelcompetitie=deelcomp):
