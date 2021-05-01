@@ -82,7 +82,7 @@ $button-large-height: $button-height * 1.5 !default;
 $button-floating-large-size: 56px !default;
 
 // Small buttons
-$button-small-font-size: 13px !default;
+$button-small-font-size: $button-font-size !default; //13px !default;
 $button-small-icon-font-size: 1.2rem !default;
 $button-small-height: $button-height * .9 !default;
 $button-floating-small-size: $button-height * .9 !default;
