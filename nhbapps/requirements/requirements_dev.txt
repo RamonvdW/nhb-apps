@@ -4,7 +4,7 @@
 #
 #    pip-compile requirements_dev.in
 #
-arrow==1.0.3
+arrow==1.1.0
     # via
     #   -r requirements_test.txt
     #   djangosaml2idp
@@ -14,7 +14,7 @@ asgiref==3.3.4
     #   django
 beautifulsoup4==4.9.3
     # via -r requirements_dev.in
-cachetools==4.2.1
+cachetools==4.2.2
     # via
     #   -r requirements_test.txt
     #   google-auth
@@ -61,13 +61,13 @@ google-api-core==1.26.3
     # via
     #   -r requirements_test.txt
     #   google-api-python-client
-google-api-python-client==2.2.0
+google-api-python-client==2.3.0
     # via -r requirements_test.txt
 google-auth-httplib2==0.1.0
     # via
     #   -r requirements_test.txt
     #   google-api-python-client
-google-auth==1.29.0
+google-auth==1.30.0
     # via
     #   -r requirements_test.txt
     #   google-api-core
@@ -180,7 +180,7 @@ sqlparse==0.4.1
     #   -r requirements_test.txt
     #   django
     #   django-debug-toolbar
-typing-extensions==3.7.4.3
+typing-extensions==3.10.0.0
     # via
     #   -r requirements_test.txt
     #   arrow

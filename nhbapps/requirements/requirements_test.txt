@@ -4,13 +4,13 @@
 #
 #    pip-compile requirements_test.in
 #
-arrow==1.0.3
+arrow==1.1.0
     # via djangosaml2idp
 asgiref==3.3.4
     # via
     #   -r requirements.txt
     #   django
-cachetools==4.2.1
+cachetools==4.2.2
     # via
     #   -r requirements.txt
     #   google-auth
@@ -42,13 +42,13 @@ google-api-core==1.26.3
     # via
     #   -r requirements.txt
     #   google-api-python-client
-google-api-python-client==2.2.0
+google-api-python-client==2.3.0
     # via -r requirements.txt
 google-auth-httplib2==0.1.0
     # via
     #   -r requirements.txt
     #   google-api-python-client
-google-auth==1.29.0
+google-auth==1.30.0
     # via
     #   -r requirements.txt
     #   google-api-core
@@ -142,7 +142,7 @@ sqlparse==0.4.1
     # via
     #   -r requirements.txt
     #   django
-typing-extensions==3.7.4.3
+typing-extensions==3.10.0.0
     # via
     #   -r requirements.txt
     #   arrow
