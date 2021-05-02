@@ -147,6 +147,7 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
             raise Http404()
 
         readonly_partly = (deelcomp.competitie.fase >= 'B')
+        updated = list()
 
         if not readonly_partly:
             # deze velden worden alleen doorgegeven als ze te wijzigen zijn
@@ -154,9 +155,12 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
             alloc = request.POST.get('team_alloc', '?')[:4]  # vast/vsg
             if teams == 'nee':
                 deelcomp.regio_organiseert_teamcompetitie = False
+                updated.append('regio_organiseert_teamcompetitie')
             elif teams == 'ja':
                 deelcomp.regio_organiseert_teamcompetitie = True
+                updated.append('regio_organiseert_teamcompetitie')
                 deelcomp.regio_heeft_vaste_teams = (alloc == 'vast')
+                updated.append('regio_heeft_vaste_teams')
 
         # kijk alleen naar de andere velden als er een teamcompetitie georganiseerd wordt in de regio
         # dit voorkomt foutmelding over de datum bij het uitzetten van de teamcompetitie
@@ -164,6 +168,7 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
             punten = request.POST.get('team_punten', '?')[:2]    # 2p/ss/f1
             if punten in (TEAM_PUNTEN_TWEE, TEAM_PUNTEN_FORMULE1, TEAM_PUNTEN_SOM_SCORES):
                 deelcomp.regio_team_punten_model = punten
+                updated.append('regio_team_punten_model')
 
             einde_s = request.POST.get('einde_teams_aanmaken', '')[:10]       # yyyy-mm-dd
             if einde_s:
@@ -177,8 +182,9 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
                     if einde_p < comp.begin_aanmeldingen or einde_p >= comp.eerste_wedstrijd:
                         raise Http404('Datum buiten toegestane reeks')
                     deelcomp.einde_teams_aanmaken = einde_p
+                    updated.append('einde_teams_aanmaken')
 
-        deelcomp.save()
+        deelcomp.save(update_fields=updated)
 
         url = reverse('Competitie:overzicht',
                       kwargs={'comp_pk': deelcomp.competitie.pk})
@@ -668,7 +674,7 @@ class WijzigPouleView(UserPassesTestMixin, TemplateView):
                 tups.sort(reverse=True)     # hoogste eerst
                 team_type = tups[0][1]
 
-                # laat teams toe die binnen dit team passen
+                # laat teams toe die binnen dit team type passen
                 goede_teams = [team for team in gekozen if team.team_type == team_type]
 
                 # vervang door de overgebleven teams

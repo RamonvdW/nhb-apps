@@ -236,13 +236,26 @@ class TestCompetitieRegioTeams(E2EHelpers, TestCase):
 
         # late date
         with self.assert_max_queries(20):
-            resp = self.client.post(url, {'teams': 'nee',
+            resp = self.client.post(url, {'teams': 'ja',
                                           'einde_teams_aanmaken': post_datum_bad})
         self.assert404(resp)  # 404 = Not allowed
 
+        # late date - not checked when teams=nee
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'teams': 'nee',
+                                          'einde_teams_aanmaken': post_datum_bad})
+        self.assert_is_redirect_not_plein(resp)
+        # teamcompetitie staat nu op Nee
+        # zet teamcompetitie weer op Ja
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'teams': 'ja',
+                                          'team_alloc': 'vast'})
+        self.assert_is_redirect_not_plein(resp)
+
         # bad date
         with self.assert_max_queries(20):
-            resp = self.client.post(url, {'einde_teams_aanmaken': 'xxx'})
+            resp = self.client.post(url, {'teams': 'ja',
+                                          'einde_teams_aanmaken': 'xxx'})
         self.assert404(resp)  # 404 = Not allowed
 
         # fase B en C
