@@ -146,6 +146,7 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
         self.url_wijzig_team = '/vereniging/teams/regio/%s/wijzig/%s/'  # deelcomp_pk, team_pk
         self.url_regio_teams = '/vereniging/teams/regio/%s/'            # deelcomp_pk
         self.url_rk_teams = '/vereniging/teams/rk/%s/'                  # deelcomp_pk
+        self.url_wijzig_ag = '/vereniging/leden-ingeschreven/wijzig-aanvangsgemiddelde/%s/'  # deelnemer_pk
 
     def _create_histcomp(self):
         # (strategisch gekozen) historische data om klassegrenzen uit te bepalen
@@ -637,6 +638,7 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
                                     {'deelnemer_%s' % self.deelnemer_100003_18.pk: 1,       # BB
                                      'deelnemer_%s' % self.deelnemer_100004_18.pk: 1,
                                      'deelnemer_%s' % self.deelnemer_100012_18.pk: 1})      # geen AG
+        self.assert_is_redirect_not_plein(resp)
 
         team_18 = RegiocompetitieTeam.objects.get(pk=team_18.pk)
         self.assertEqual(3, team_18.gekoppelde_schutters.count())
@@ -675,6 +677,105 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
 
         resp = self.client.post(url)
         self.assert404(resp)
+
+    def test_wijzig_ag(self):
+        # login als HWL
+        self.e2e_login_and_pass_otp(self.account_hwl)
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+        self.e2e_check_rol('HWL')
+
+        zet_competitie_fase(self.comp_18, 'B')
+        self._create_deelnemers()
+
+        self.deelcomp18_regio111.einde_teams_aanmaken = self.deelcomp18_regio111.competitie.einde_aanmeldingen
+        self.deelcomp18_regio111.save()
+
+        # maak een team aan
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_wijzig_team % (self.deelcomp18_regio111.pk, 0),
+                                    {'team_type': 'R'})
+        self.assert_is_redirect(resp, self.url_regio_teams % self.deelcomp18_regio111.pk)
+        self.assertEqual(1, RegiocompetitieTeam.objects.count())
+        team_18 = RegiocompetitieTeam.objects.filter(deelcompetitie=self.deelcomp18_regio111)[0]
+
+        # haal de wijzig-ag pagina op
+        url = self.url_wijzig_ag % self.deelnemer_100002_18.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('vereniging/teams-wijzig-ag.dtl', 'plein/site_layout.dtl'))
+
+        # wijzig het AG
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'nieuw_ag': '9.876'})
+        self.assert_is_redirect_not_plein(resp)
+
+        # corner case: geen nieuw ag
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
+        self.assert_is_redirect_not_plein(resp)
+
+        # bad: te laag ag
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'nieuw_ag': '0.999'})
+        self.assert404(resp)
+
+        # bad: te hoog ag
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'nieuw_ag': '10.0'})
+        self.assert404(resp)
+
+        # bad code: geen float
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'nieuw_ag': 'what a big mess is this'})
+        self.assert404(resp)
+
+        # bad case: onbekende deelnemer
+        bad_url = self.url_wijzig_ag % 999999
+        with self.assert_max_queries(20):
+            resp = self.client.get(bad_url)
+        self.assert404(resp)
+        with self.assert_max_queries(20):
+            resp = self.client.post(bad_url)
+        self.assert404(resp)
+
+        # bad case: lid van andere vereniging
+        self.deelnemer_100002_18.bij_vereniging = self.nhbver2
+        self.deelnemer_100002_18.save()
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assert403(resp)
+
+        # nu als RCL
+        account_rcl = self.e2e_create_account('rcl111', 'ercel@nhb.not', 'Ercel', accepteer_vhpg=True)
+        functie_rcl = maak_functie('RCL Regio 111', 'RCL')
+        functie_rcl.nhb_regio = self.nhbver1.regio
+        functie_rcl.save()
+        functie_rcl.accounts.add(account_rcl)
+
+        self.e2e_login_and_pass_otp(account_rcl)
+        self.e2e_wissel_naar_functie(functie_rcl)
+
+        # wijzig het AG
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'nieuw_ag': '7.654'})
+        self.assert_is_redirect_not_plein(resp)
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('vereniging/teams-wijzig-ag.dtl', 'plein/site_layout.dtl'))
+
+        # verkeerde regio
+        functie_rcl.nhb_regio = NhbRegio.objects.get(regio_nr=101)
+        functie_rcl.save(update_fields=['nhb_regio'])
+        self.e2e_wissel_naar_functie(functie_rcl)
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assert403(resp)
 
     def test_rk_teams(self):
         # login als HWL

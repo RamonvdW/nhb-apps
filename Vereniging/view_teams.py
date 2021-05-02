@@ -483,7 +483,7 @@ class WijzigTeamAGView(UserPassesTestMixin, TemplateView):
         nieuw_ag = request.POST.get('nieuw_ag', '')
         if nieuw_ag:
             try:
-                nieuw_ag = float(nieuw_ag)
+                nieuw_ag = float(nieuw_ag[:6])      # afkappen voor de veiligheid
             except ValueError:
                 raise Http404('Geen goed AG')
 
