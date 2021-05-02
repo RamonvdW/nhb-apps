@@ -56,4 +56,3 @@ COUNT=$(ls -1 "$TEMPL" | wc -l)
 echo "[INFO]   $COUNT bestanden klaargezet in templates"
 
 # end of file
-
