@@ -22,6 +22,10 @@
         <p>Tijdens de inschrijving moet je leden handmatig koppelen zodat sporters met een BB, IB or LB boog in het gewenste type team komen.</p>
     {% endif %}
 
+    {% if not mag_wijzigen %}
+        <p>Het is na {{ deelcomp.einde_teams_aanmaken }} niet meer mogelijk om wijzigingen aan te brengen.</p>
+    {% endif %}
+
     <script type="application/javascript">
         function gewijzigd() {
             // het formulier is aangepast en moet opgeslagen worden
@@ -32,8 +36,10 @@
         }
     </script>
 
+    {% if mag_wijzigen %}
     <form action="{{ url_opslaan }}" method="post">
         {% csrf_token %}
+    {% endif %}
 
         <table class="white">
 
@@ -77,29 +83,54 @@
             </tr>
 
             <tr>
-                <td style="vertical-align: top">Selecteer sporters</td>
+                {% if mag_wijzigen %}
+                    <td style="vertical-align: top">Selecteer sporters</td>
 
-                {% if not deelnemers.count %}
-                    <td colspan="3"><i class="red-text">Geen sporters gevonden met toegestaan boog type</i></td>
+                    {% if not deelnemers.count %}
+                        <td colspan="3"><i class="red-text">Geen sporters gevonden met toegestaan boog type</i></td>
+                    {% else %}
+                        <td>
+                            <table class="striped">
+                                <thead>
+                                    <tr>
+                                        {% if mag_wijzigen %}
+                                            <th><!-- checkbox column --></th>
+                                        {% endif %}
+                                        <th>Aanvangs<wbr/>gemiddelde</th>
+                                        <th>Boog</th>
+                                        <th>Naam</th>
+                                    </tr>
+                                </thead>
+                                {% for obj in deelnemers %}
+                                    <tr>
+                                        <td>
+                                            <label>
+                                                <input type="checkbox" class="filled-in" name="{{ obj.sel_str }}"{% if obj.geselecteerd %} checked{% endif %}{% if obj.blokkeer %} disabled{% endif %} onchange="gewijzigd()">
+                                                <span>&nbsp;</span>
+                                            </label>
+                                        </td>
+                                        <td>{{ obj.ag_str }}</td>
+                                        <td>{{ obj.boog_str }}</td>
+                                        <td>{{ obj.naam_str }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </table>
+                        </td>
+                    {% endif %}
                 {% else %}
+                    <!-- mag niet meer wijzigen -->
+                    <td style="vertical-align: top">Initi&euml;le sporters</td>
                     <td>
                         <table class="striped">
                             <thead>
                                 <tr>
-                                    <th><!-- checkbox column --></th>
                                     <th>Aanvangs<wbr/>gemiddelde</th>
                                     <th>Boog</th>
                                     <th>Naam</th>
                                 </tr>
                             </thead>
-                            {% for obj in deelnemers %}
+                            {% for obj in gekoppeld %}
                                 <tr>
-                                    <td>
-                                        <label>
-                                            <input type="checkbox" class="filled-in" name="{{ obj.sel_str }}"{% if obj.geselecteerd %} checked{% endif %}{% if obj.blokkeer %} disabled{% endif %} onchange="gewijzigd()">
-                                            <span>&nbsp;</span>
-                                        </label>
-                                    </td>
                                     <td>{{ obj.ag_str }}</td>
                                     <td>{{ obj.boog_str }}</td>
                                     <td>{{ obj.naam_str }}</td>
@@ -116,7 +147,9 @@
             <button class="btn-nhb-rood" type="submit" id="opslaan_knop" disabled>
                 <i class="material-icons-round left">check</i>Opslaan</button>
         </div>
+    {% if mag_wijzigen %}
     </form>
+    {% endif %}
 
     <p>De <i>team sterkte</i> wordt berekend uit het aanvangsgemiddelde van de drie sterkste teamleden.</p>
     <p>De <i>team wedstrijdklasse</i> wordt bepaald door de team sterkte en de vastgestelde minimum sterkte voor een wedstrijdklasse.</p>

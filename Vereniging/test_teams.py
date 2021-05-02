@@ -407,12 +407,15 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
         self.assert404(resp)     # 404 = Not found
 
     def test_regio_teams(self):
-        # login als HWL
+        # login als HWL van de vereniging in regio 111
         self.e2e_login_and_pass_otp(self.account_hwl)
         self.e2e_wissel_naar_functie(self.functie_hwl)
         self.e2e_check_rol('HWL')
 
         zet_competitie_fase(self.comp_18, 'B')
+        self.deelcomp18_regio111.einde_teams_aanmaken = self.deelcomp18_regio111.competitie.einde_aanmeldingen
+        self.deelcomp18_regio111.save()
+
         self._create_deelnemers()
 
         with self.assert_max_queries(20):
@@ -504,11 +507,53 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assert_template_used(resp, ('vereniging/teams-regio.dtl', 'plein/site_layout.dtl'))
 
-        # verwijder een team
+        #team = RegiocompetitieTeam.objects.all()[0]
+
+        # voorbij einddatum aanmaken / wijzigen teams
+        self.deelcomp18_regio111.einde_teams_aanmaken -= datetime.timedelta(days=5)
+        self.deelcomp18_regio111.save()
+
+        # ophalen mag, maar heeft geen wijzig / koppelen knoppen meer
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_regio_teams % self.deelcomp18_regio111.pk)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_template_used(resp, ('vereniging/teams-regio.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
+
+        # ophalen van de wijzig-team pagina mag, maar krijgt geen opslaan knop
+        url = self.url_wijzig_team % (self.deelcomp18_regio111.pk, team.pk)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('vereniging/teams-regio-wijzig.dtl', 'plein/site_layout.dtl'))
+
+        # verwijder een team na de einddatum
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_wijzig_team % (self.deelcomp18_regio111.pk, team.pk),
+                                    {'verwijderen': '1'})
+        self.assert404(resp)
+
+        # herstel de datum en verwijder het team
+        self.deelcomp18_regio111.einde_teams_aanmaken = self.deelcomp18_regio111.competitie.einde_teamvorming
+        self.deelcomp18_regio111.save()
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_wijzig_team % (self.deelcomp18_regio111.pk, team.pk),
                                     {'verwijderen': '1'})
         self.assert_is_redirect(resp, self.url_regio_teams % self.deelcomp18_regio111.pk)
+
+        # bad team pk
+        resp = self.client.post(self.url_wijzig_team % (self.deelcomp18_regio111.pk, 'notanumber'))
+        self.assert404(resp)
+
+        # nieuw team maken met bad team_type
+        resp = self.client.post(self.url_wijzig_team % (self.deelcomp18_regio111.pk, 0),
+                                {'team_type': 'xxx'})
+        self.assert404(resp)
+
+        # not-existing team pk
+        resp = self.client.post(self.url_wijzig_team % (self.deelcomp18_regio111.pk, 999999))
+        self.assert404(resp)
 
         self.e2e_assert_other_http_commands_not_supported(self.url_regio_teams % self.deelcomp25_regio111.pk)
 
@@ -521,6 +566,12 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
         zet_competitie_fase(self.comp_18, 'B')
         zet_competitie_fase(self.comp_25, 'B')
         self._create_deelnemers(do_25=True)
+
+        self.deelcomp18_regio111.einde_teams_aanmaken = self.deelcomp18_regio111.competitie.einde_aanmeldingen
+        self.deelcomp18_regio111.save()
+
+        self.deelcomp25_regio111.einde_teams_aanmaken = self.deelcomp25_regio111.competitie.einde_aanmeldingen
+        self.deelcomp25_regio111.save()
 
         # maak een team aan
         self.assertEqual(0, RegiocompetitieTeam.objects.count())
@@ -602,6 +653,7 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_koppelen % team_18.pk)
         self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
         self.assert_template_used(resp, ('vereniging/teams-koppelen.dtl', 'plein/site_layout.dtl'))
 
         # haal het teams overzicht op, met geblokkeerde leden
@@ -610,6 +662,19 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
             resp = self.client.get(self.url_koppelen % team_bb.pk)
         self.assertEqual(resp.status_code, 200)
         self.assert_template_used(resp, ('vereniging/teams-koppelen.dtl', 'plein/site_layout.dtl'))
+
+        # koppel-scherm na uiterste datum wijzigen
+        self.deelcomp18_regio111.einde_teams_aanmaken -= datetime.timedelta(days=5)
+        self.deelcomp18_regio111.save()
+        url = self.url_koppelen % team_18.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('vereniging/teams-koppelen.dtl', 'plein/site_layout.dtl'))
+
+        resp = self.client.post(url)
+        self.assert404(resp)
 
     def test_rk_teams(self):
         # login als HWL
