@@ -389,7 +389,7 @@ LOGGING = {
     'loggers': {
         'django': {
             'handlers': ['syslog'],
-            'level': 'WARNING'
+            'level': 'ERROR'            # Note: WARNING gives 1 log line for every code 404 (resource not found)
         },
         'saml2': {
             'handlers': ['syslog'],
