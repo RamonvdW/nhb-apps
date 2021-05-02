@@ -622,8 +622,7 @@ class WijzigPouleView(UserPassesTestMixin, TemplateView):
             if team.klasse:
                 team.klasse_str = team.klasse.team.beschrijving
             else:
-                # zou niet voor moeten komen
-                team.klasse_str = '?'
+                team.klasse_str = ''        # blokkeert selectie voor poule
         # for
         context['teams'] = teams
 
