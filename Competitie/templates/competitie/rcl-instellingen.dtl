@@ -152,14 +152,16 @@
     <script type="application/javascript">
         document.addEventListener('DOMContentLoaded', function() {
             const el = document.querySelector('#datum1');
+            let minDate = new Date("{{ deelcomp.competitie.begin_aanmeldingen|date:'Y-m-d' }}")
             let maxDate = new Date("{{ deelcomp.competitie.eerste_wedstrijd|date:'Y-m-d' }}")
             maxDate.setDate(maxDate.getDate() - 1)      // get/setDate = day of month!!
+            const competitieJaren = [{{  deelcomp.competitie.begin_jaar }}, {{ deelcomp.competitie.begin_jaar }} + 1]
 
             M.Datepicker.init(el, {
                 defaultDate: new Date("{{ deelcomp.einde_teams_aanmaken|date:'Y-m-d' }}"),
                 setDefaultDate: true,
-                minDate: new Date("{{ deelcomp.competitie.begin_aanmeldingen|date:'Y-m-d' }}"),
-                maxDate: maxDate
+                minDate: minDate, maxDate: maxDate,
+                yearRange: competitieJaren
             })
         })
     </script>
