@@ -96,7 +96,7 @@ class TestScoreOpslaan(E2EHelpers, TestCase):
         self.assertEqual(score.schutterboog, self.schutterboog)
 
         self.assertEqual(ScoreHist.objects.count(), 2)
-        scorehist = ScoreHist.objects.all()[1]          # TODO: onzeker of altijd nieuwste record
+        scorehist = ScoreHist.objects.exclude(pk=scorehist.pk).all()[0]
         self.assertEqual(scorehist.oude_waarde, waarde)
         self.assertEqual(scorehist.nieuwe_waarde, waarde2)
         self.assertEqual(scorehist.door_account, account)
