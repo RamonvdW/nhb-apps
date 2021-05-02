@@ -597,7 +597,8 @@ class WijzigPouleView(UserPassesTestMixin, TemplateView):
             poule_pk = int(kwargs['poule_pk'][:6])      # afkappen voor de veiligheid
             poule = (RegiocompetitieTeamPoule
                      .objects
-                     .select_related('deelcompetitie')
+                     .select_related('deelcompetitie',
+                                     'deelcompetitie__nhb_regio')
                      .prefetch_related('teams')
                      .get(pk=poule_pk))
         except (ValueError, RegiocompetitieTeamPoule.DoesNotExist):
@@ -609,11 +610,20 @@ class WijzigPouleView(UserPassesTestMixin, TemplateView):
 
         team_pks = list(poule.teams.values_list('pk', flat=True))
 
-        teams = RegiocompetitieTeam.objects.filter(deelcompetitie=deelcomp)
+        teams = (RegiocompetitieTeam
+                 .objects
+                 .select_related('klasse__team',
+                                 'team_type')
+                 .filter(deelcompetitie=deelcomp))
         for team in teams:
             team.sel_str = 'team_%s' % team.pk
             if team.pk in team_pks:
                 team.geselecteerd = True
+            if team.klasse:
+                team.klasse_str = team.klasse.team.beschrijving
+            else:
+                # zou niet voor moeten komen
+                team.klasse_str = '?'
         # for
         context['teams'] = teams
 
@@ -676,6 +686,7 @@ class WijzigPouleView(UserPassesTestMixin, TemplateView):
 
                 # laat teams toe die binnen dit team type passen
                 goede_teams = [team for team in gekozen if team.team_type == team_type]
+                goede_teams = goede_teams[:8]       # maximaal 8 teams in een poule
 
                 # vervang door de overgebleven teams
                 poule.teams.set(goede_teams)

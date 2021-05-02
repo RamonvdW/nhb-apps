@@ -473,7 +473,7 @@ class TestCompetitieRegioTeams(E2EHelpers, TestCase):
             resp = self.client.get(self.url_ag_controle % (self.comp_18.pk, 110))
         self.assert403(resp)
 
-    def test_poules(self):
+    def test_poules_basic(self):
         self.e2e_login_and_pass_otp(self.account_rcl112_18)
         self.e2e_wissel_naar_functie(self.functie_rcl112_18)
 
@@ -494,6 +494,20 @@ class TestCompetitieRegioTeams(E2EHelpers, TestCase):
         self.assertEqual(1, RegiocompetitieTeamPoule.objects.count())
         poule = RegiocompetitieTeamPoule.objects.all()[0]
 
+        # bad deelcomp
+        bad_url = self.url_regio_poules % 999999
+        resp = self.client.get(bad_url)
+        self.assert404(resp)
+        resp = self.client.post(bad_url)
+        self.assert404(resp)
+
+        # verkeerde beheerder
+        bad_url = self.url_regio_poules % self.deelcomp_regio101_18.pk
+        resp = self.client.get(bad_url)
+        self.assert403(resp)
+        resp = self.client.post(bad_url)
+        self.assert403(resp)
+
         # wijzig de poule
         url = self.url_wijzig_poule % poule.pk
         with self.assert_max_queries(20):
@@ -505,8 +519,120 @@ class TestCompetitieRegioTeams(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'beschrijving': ' hoi test!'})
         self.assert_is_redirect_not_plein(resp)
-
         poule = RegiocompetitieTeamPoule.objects.get(pk=poule.pk)
         self.assertEqual(poule.beschrijving, 'hoi test!')
+
+        # wijziging is geen wijziging
+        resp = self.client.post(url, {'beschrijving': ' hoi test!'})
+        self.assert_is_redirect_not_plein(resp)
+
+        # bad poule
+        bad_url = self.url_wijzig_poule % 999999
+        resp = self.client.get(bad_url)
+        self.assert404(resp)
+        resp = self.client.post(bad_url)
+        self.assert404(resp)
+
+        # verkeerde beheerder
+        poule.deelcompetitie = self.deelcomp_regio101_25
+        poule.save(update_fields=['deelcompetitie'])
+        bad_url = self.url_wijzig_poule % poule.pk
+        resp = self.client.get(bad_url)
+        self.assert403(resp)
+        resp = self.client.post(bad_url)
+        self.assert403(resp)
+        poule.deelcompetitie = self.deelcomp_regio112_18
+        poule.save(update_fields=['deelcompetitie'])
+
+        # overzicht met een poule erin
+        url = self.url_regio_poules % deelcomp.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+
+        # verwijder een poule
+        self.assertEqual(1, RegiocompetitieTeamPoule.objects.count())
+        url = self.url_wijzig_poule % poule.pk
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'verwijder_poule': 'aj'})
+        self.assert_is_redirect_not_plein(resp)
+        self.assertEqual(0, RegiocompetitieTeamPoule.objects.count())
+
+    def test_poules_teams(self):
+        self.e2e_login_and_pass_otp(self.account_rcl112_18)
+        self.e2e_wissel_naar_functie(self.functie_rcl112_18)
+
+        # maak een poule aan
+        deelcomp = DeelCompetitie.objects.get(competitie=self.comp_18, functie=self.functie_rcl112_18)
+        url = self.url_regio_poules % deelcomp.pk
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
+        self.assert_is_redirect(resp, url)
+        self.assertEqual(1, RegiocompetitieTeamPoule.objects.count())
+        poule = RegiocompetitieTeamPoule.objects.all()[0]
+
+        # maak 9 teams aan
+        type_r = TeamType.objects.get(afkorting='R')
+        klasse_r_ere = CompetitieKlasse.objects.filter(team__team_type=type_r).order_by('team__volgorde')[0]
+        for lp in range(9):
+            # team zonder sporters maar wel in een klasse is genoeg voor een poule
+            RegiocompetitieTeam(
+                    deelcompetitie=deelcomp,
+                    vereniging=self.nhbver_112,
+                    volg_nr=lp + 1,
+                    team_type=type_r,
+                    team_naam='Recurve Testers %s' % (lp + 1),
+                    klasse=klasse_r_ere).save()
+        # for
+        team_pks = list(RegiocompetitieTeam.objects.values_list('pk', flat=True))
+
+        # maak een compound team aan
+        type_c = TeamType.objects.get(afkorting='C')
+        klasse_c_ere = CompetitieKlasse.objects.filter(team__team_type=type_c).order_by('team__volgorde')[0]
+        team_c = RegiocompetitieTeam(
+                    deelcompetitie=deelcomp,
+                    vereniging=self.nhbver_112,
+                    volg_nr=1,
+                    team_type=type_c,
+                    team_naam='Compound Testers %s' % (lp + 1),
+                    klasse=klasse_c_ere)
+        team_c.save()
+
+        # koppel 5 teams aan de poule
+        url = self.url_wijzig_poule % poule.pk
+        params = dict()
+        for pk in team_pks[:5]:
+            params['team_%s' % pk] = 1
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, params)
+        self.assert_is_redirect_not_plein(resp)
+        poule = RegiocompetitieTeamPoule.objects.prefetch_related('teams').get(pk=poule.pk)
+        self.assertEqual(5, poule.teams.count())
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/wijzig-poule.dtl', 'plein/site_layout.dtl'))
+
+        # compound team bij recurve-meerderheid wordt niet geaccepteerd (silently ignored)
+        params['team_%s' % team_c.pk] = 1
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, params)
+        self.assert_is_redirect_not_plein(resp)
+        poule = RegiocompetitieTeamPoule.objects.prefetch_related('teams').get(pk=poule.pk)
+        self.assertEqual(5, poule.teams.count())
+
+        # koppel 9 teams aan de poule
+        self.assertEqual(9, len(team_pks))
+        params = dict()
+        for pk in team_pks:
+            params['team_%s' % pk] = 1
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, params)
+        self.assert_is_redirect_not_plein(resp)
+        poule = RegiocompetitieTeamPoule.objects.prefetch_related('teams').get(pk=poule.pk)
+        self.assertEqual(8, poule.teams.count())
 
 # end of file

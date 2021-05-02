@@ -49,7 +49,7 @@
                                     </label>
                                 </td>
                                 <td>{{ team.team_naam }}</td>
-                                <td>{{ team.klasse }}</td>
+                                <td>{{ team.klasse_str }}</td>
                             </tr>
                         {% endfor %}
                     </table>
