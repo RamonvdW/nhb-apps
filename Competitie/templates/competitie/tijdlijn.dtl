@@ -57,7 +57,7 @@
 
     <tr>
         <td {% if comp.fase == 'C' %} class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>C</td>
-        <td>Samenstellen vaste teams (HWL)</td>
+        <td>Afronden aanmaken teams (HWL)</td>
         <td>
             {% if comp.fase > 'C' %}
                 <span class="green-text">Afgerond</span>
@@ -69,7 +69,7 @@
 
     <tr>
         <td {% if comp.fase == 'D' %} class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>D</td>
-        <td>Aanmaken poules (RCL)</td>
+        <td>Afronden poules (RCL)</td>
         <td>
             {% if comp.fase > 'D' %}
                 <span class="green-text">Afgerond</span>
