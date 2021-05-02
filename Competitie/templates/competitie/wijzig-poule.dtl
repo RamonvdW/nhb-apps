@@ -42,15 +42,27 @@
                             </tr>
                         </thead>
                         {% for team in teams %}
-                            <tr>
-                                <td><label>
-                                    <input type="checkbox" class="filled-in" name="{{ team.sel_str }}"{% if team.geselecteerd %} checked{% endif %}>
-                                    <span>&nbsp;</span>
-                                    </label>
-                                </td>
-                                <td>{{ team.team_naam }}</td>
-                                <td>{{ team.klasse_str }}</td>
-                            </tr>
+                            {% if team.klasse_str %}
+                                <tr>
+                                    <td><label>
+                                        <input type="checkbox" class="filled-in" name="{{ team.sel_str }}"{% if team.geselecteerd %} checked{% endif %}>
+                                        <span>&nbsp;</span>
+                                        </label>
+                                    </td>
+                                    <td>{{ team.team_naam }}</td>
+                                    <td>{{ team.klasse_str }}</td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td><label>
+                                        <input type="checkbox" class="filled-in" name="{{ team.sel_str }}" disabled>
+                                        <span>&nbsp;</span>
+                                        </label>
+                                    </td>
+                                    <td>{{ team.team_naam }}</td>
+                                    <td><i>Onbekend</i><span class="red-text">&nbsp;&nbsp;&nbsp;(team is niet compleet)</span></td>
+                                </tr>
+                            {% endif %}
                         {% endfor %}
                     </table>
                 </td>
