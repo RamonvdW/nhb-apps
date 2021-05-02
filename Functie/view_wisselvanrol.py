@@ -39,11 +39,17 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
     template_name = TEMPLATE_WISSEL_VAN_ROL
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu, self.functie_nu = None, None
+
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
 
         # evalueer opnieuw welke rechten de gebruiker heeft
         rol_evalueer_opnieuw(self.request)
+
+        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
 
         return self.request.user.is_authenticated and rol_mag_wisselen(self.request)
 
@@ -98,7 +104,7 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
                 try:
                     hierarchy2[parent_tup].append(child_tup)
                 except KeyError:
-                    hierarchy2[parent_tup] = [child_tup,]
+                    hierarchy2[parent_tup] = [child_tup]
         # for
 
         # haal alle functies met 1 database query op
@@ -128,17 +134,14 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
         return objs, hierarchy2
 
     def _get_functies_help_anderen(self, hierarchy2):
+        # uitzoeken welke ge-erfde functies we willen tonen
+        # deze staan in hierarchy
         objs = list()
 
-        # nu nog uitzoeken welke ge-erfde functies we willen tonen
-        # deze staan in hierarchy
-        # TODO: minder vaak rol_get_huidige_functie aanroepen
-        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
-
-        if functie_nu:
-            nu_tup = (rol_nu, functie_nu.pk)
+        if self.functie_nu:
+            nu_tup = (self.rol_nu, self.functie_nu.pk)
         else:
-            nu_tup = (rol_nu, None)
+            nu_tup = (self.rol_nu, None)
 
         try:
             child_tups = hierarchy2[nu_tup]
@@ -213,8 +216,8 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
                 if obj.nhb_regio.regio_nr in (101, 109):
                     obj.insert_break = True
         # for
-        output = sorted(objs, key=lambda obj: obj.volgorde)
 
+        output = sorted(objs, key=lambda x: x.volgorde)
         return output
 
     def get_context_data(self, **kwargs):
@@ -241,22 +244,20 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
         context['wiki_rollen'] = reverse_handleiding(settings.HANDLEIDING_ROLLEN)
         context['wiki_intro_nieuwe_beheerders'] = reverse_handleiding(settings.HANDLEIDING_INTRO_NIEUWE_BEHEERDERS)
 
-        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
-
         # login-as functie voor IT beheerder
-        if rol_nu == Rollen.ROL_IT:
+        if self.rol_nu == Rollen.ROL_IT:
             context['url_login_as'] = reverse('Account:account-wissel')
 
         # snel wissel kaartje voor IT en BB
-        if rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB):
+        if self.rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB):
             context['heeft_alle_rollen'] = self._maak_alle_rollen()
             context['url_wissel_naar_sec'] = reverse('Functie:wissel-naar-sec')
 
         # bedoeld voor de testsuite, maar kan geen kwaad
         context['insert_meta'] = True
-        context['meta_rol'] = rol2url[rol_nu]
-        if functie_nu:
-            context['meta_functie'] = functie_nu.beschrijving       # template doet html escaping
+        context['meta_rol'] = rol2url[self.rol_nu]
+        if self.functie_nu:
+            context['meta_functie'] = self.functie_nu.beschrijving       # template doet html escaping
         else:
             context['meta_functie'] = ""
 
