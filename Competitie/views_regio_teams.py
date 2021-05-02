@@ -8,7 +8,7 @@ from django.conf import settings
 from django.http import HttpResponseRedirect, Http404
 from django.urls import reverse
 from django.db.models import Count
-from django.views.generic import TemplateView, View
+from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Functie.rol import Rollen, rol_get_huidige_functie
@@ -158,22 +158,25 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
                 deelcomp.regio_organiseert_teamcompetitie = True
                 deelcomp.regio_heeft_vaste_teams = (alloc == 'vast')
 
-        punten = request.POST.get('team_punten', '?')[:2]    # 2p/ss/f1
-        if punten in (TEAM_PUNTEN_TWEE, TEAM_PUNTEN_FORMULE1, TEAM_PUNTEN_SOM_SCORES):
-            deelcomp.regio_team_punten_model = punten
+        # kijk alleen naar de andere velden als er een teamcompetitie georganiseerd wordt in de regio
+        # dit voorkomt foutmelding over de datum bij het uitzetten van de teamcompetitie
+        if deelcomp.regio_organiseert_teamcompetitie:
+            punten = request.POST.get('team_punten', '?')[:2]    # 2p/ss/f1
+            if punten in (TEAM_PUNTEN_TWEE, TEAM_PUNTEN_FORMULE1, TEAM_PUNTEN_SOM_SCORES):
+                deelcomp.regio_team_punten_model = punten
 
-        einde_s = request.POST.get('einde_teams_aanmaken', '')[:10]       # yyyy-mm-dd
-        if einde_s:
-            try:
-                einde_p = datetime.datetime.strptime(einde_s, '%Y-%m-%d')
-            except ValueError:
-                raise Http404('Datum fout formaat')
-            else:
-                einde_p = einde_p.date()
-                comp = deelcomp.competitie
-                if einde_p < comp.begin_aanmeldingen or einde_p >= comp.eerste_wedstrijd:
-                    raise Http404('Datum buiten toegestane reeks')
-                deelcomp.einde_teams_aanmaken = einde_p
+            einde_s = request.POST.get('einde_teams_aanmaken', '')[:10]       # yyyy-mm-dd
+            if einde_s:
+                try:
+                    einde_p = datetime.datetime.strptime(einde_s, '%Y-%m-%d')
+                except ValueError:
+                    raise Http404('Datum fout formaat')
+                else:
+                    einde_p = einde_p.date()
+                    comp = deelcomp.competitie
+                    if einde_p < comp.begin_aanmeldingen or einde_p >= comp.eerste_wedstrijd:
+                        raise Http404('Datum buiten toegestane reeks')
+                    deelcomp.einde_teams_aanmaken = einde_p
 
         deelcomp.save()
 
