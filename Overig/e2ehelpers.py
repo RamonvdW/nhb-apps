@@ -34,6 +34,8 @@ class MyQueryTracer(object):
         for fname, linenr, base, code in traceback.extract_stack():
             if base != '__call__' and not fname.startswith('/usr/lib') and '/site-packages/' not in fname and 'manage.py' not in fname:
                 stack.append((fname, linenr, base))
+            elif base == 'render' and 'template/response.py' in fname:
+                stack.append((fname, linenr, base))
         # for
         self.trace.append(call)
 
