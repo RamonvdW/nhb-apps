@@ -187,12 +187,6 @@ class TestCompetitieRegioTeams(E2EHelpers, TestCase):
         self.url_regio_poules = '/bondscompetities/regio/%s/poules/'                    # deelcomp_pk
         self.url_wijzig_poule = '/bondscompetities/regio/poules/%s/wijzig/'             # poule_pk
 
-    def _maak_inschrijving(self, deelcomp):
-        RegioCompetitieSchutterBoog(schutterboog=self.schutterboog,
-                                    bij_vereniging=self.schutterboog.nhblid.bij_vereniging,
-                                    deelcompetitie=deelcomp,
-                                    klasse=self.klasse_recurve_onbekend).save()
-
     def test_regio_instellingen(self):
         self.e2e_login_and_pass_otp(self.account_rcl112_18)
         self.e2e_wissel_naar_functie(self.functie_rcl112_18)
