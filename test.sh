@@ -115,7 +115,6 @@ then
     #echo "res=$res"
     echo
 
-	# TODO: dark themed coverage report
     python3 -m coverage html -d "$REPORT_DIR" --precision=1 --skip-covered $OMIT
 
     if [ "$res" -gt 0 ] && [ -z "$ARGS" ]
