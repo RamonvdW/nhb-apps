@@ -101,6 +101,44 @@ class TestRecordsView(E2EHelpers, TestCase):
         # rec.is_world_record =
         rec.save()
 
+        # Record 50
+        rec = IndivRecord()
+        rec.volg_nr = 50
+        rec.discipline = 'OD'
+        rec.soort_record = '70m (72p)'
+        rec.geslacht = 'V'
+        rec.leeftijdscategorie = 'S'
+        rec.materiaalklasse = 'R'       # Recurve
+        rec.nhb_lid = lid
+        rec.naam = 'Petra Schutter'
+        rec.datum = parse_date('2020-02-02')
+        rec.plaats = 'Bullseye'
+        rec.land = 'Nederland'
+        rec.score = 350
+        # rec.score_notitie =
+        rec.is_european_record = True
+        # rec.is_world_record =
+        rec.save()
+
+        # Record 51
+        rec = IndivRecord()
+        rec.volg_nr = 51
+        rec.discipline = 'OD'
+        rec.soort_record = '70m (72p)'
+        rec.geslacht = 'V'
+        rec.leeftijdscategorie = 'S'
+        rec.materiaalklasse = 'R'       # Recurve
+        rec.nhb_lid = lid
+        rec.naam = 'Petra Schutter'
+        rec.datum = parse_date('2020-03-03')
+        rec.plaats = 'Bullseye'
+        rec.land = 'Nederland'
+        rec.score = 355
+        # rec.score_notitie =
+        rec.is_european_record = True
+        rec.is_world_record = True
+        rec.save()
+
         self.rec = rec
 
         self.url_overzicht = '/records/'
@@ -164,6 +202,11 @@ class TestRecordsView(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_template_used(resp, ('records/records_zoek.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
+
+        # te lange zoekterm
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_zoek, {'zoekterm': 'x' * 51})
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
 
         self.e2e_assert_other_http_commands_not_supported(self.url_zoek)
 

@@ -223,7 +223,11 @@ class RecordsZoekView(ListView):
         # haal de zoekterm op
         self.form = ZoekForm(self.request.GET)
         self.form.full_clean()  # vult cleaned_data
-        self.get_zoekterm = self.form.cleaned_data['zoekterm']
+        try:
+            self.get_zoekterm = self.form.cleaned_data['zoekterm']
+        except KeyError:
+            # zoekterm was te lang en is daarom niet opgeslagen
+            self.get_zoekterm = ''
 
         if self.get_zoekterm:
             zoekterm = self.get_zoekterm
