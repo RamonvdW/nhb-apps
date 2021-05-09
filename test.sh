@@ -47,10 +47,14 @@ if [ ! -z "$ARGS" ]
 then
     # convert Function.testfile.TestCase.test_functie into "Function"
     # also works for just "Function"
-    FOCUS=$(echo "$ARGS" | cut -d'.' -f1)
+    FOCUS1=$(echo "$ARGS" | cut -d'.' -f1)
     # support Func1 Func2 by converting to Func1|Func2
-    FOCUS=$(echo "$FOCUS" | sed 's/ /|/g')
+    # after removing initial and trailing whitespace
+    FOCUS=$(echo "$FOCUS1" | sed 's/^[[:blank:]]*//;s/[[:blank:]]*$//;s/  / /g;s/ /, /g')
     echo "[INFO] Focus set to: $FOCUS"
+
+    COV_INCLUDE=$(for opt in $FOCUS1; do echo -n "$opt/*,"; done)
+    #echo "[DEBUG] COV_INCLUDE set to $COV_INCLUDE"
 fi
 
 ABORTED=0
@@ -108,23 +112,23 @@ then
     then
         python3 -m coverage report --precision=1 --skip-covered --fail-under=98 $OMIT | tee -a "$LOG"
         res=$?
-    else
-        python3 -m coverage report --precision=1 $OMIT | grep -E "$FOCUS|----|Cover" | tee -a "$LOG"
-        res=0
-    fi
-    #echo "res=$res"
-    echo
 
-    python3 -m coverage html -d "$REPORT_DIR" --precision=1 --skip-covered $OMIT
+        echo
+        python3 -m coverage html -d "$REPORT_DIR" --precision=1 --skip-covered $OMIT
 
-    if [ "$res" -gt 0 ] && [ -z "$ARGS" ]
-    then
-        echo -e "$RED"
-        echo "      ==========================="
-        echo "      FAILED: NOT ENOUGH COVERAGE"
-        echo "      ==========================="
-        echo -e "$RESET"
+        if [ "$res" -gt 0 ] && [ -z "$ARGS" ]
+        then
+            echo -e "$RED"
+            echo "      ==========================="
+            echo "      FAILED: NOT ENOUGH COVERAGE"
+            echo "      ==========================="
+            echo -e "$RESET"
+        else
+            echo "HTML report is in $REPORT_DIR  (try firefox $REPORT_DIR/index.html)"
+        fi
     else
+        python3 -m coverage report --precision=1 --include=$COV_INCLUDE | tee -a "$LOG"
+        python3 -m coverage html -d "$REPORT_DIR" --precision=1 --skip-covered --include=$COV_INCLUDE
         echo "HTML report is in $REPORT_DIR  (try firefox $REPORT_DIR/index.html)"
     fi
 
