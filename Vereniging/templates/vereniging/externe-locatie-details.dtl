@@ -99,7 +99,7 @@
                 </tr>
 
                 <tr>
-                    <td>Adres van de locatie:</td>
+                    <td>Adres van de locatie:<br>(voor de navigatie)</td>
                     <td>
                         {% if readonly %}
                             <span>{{ locatie.adres|linebreaksbr }}</span>
@@ -110,6 +110,13 @@
                     {% if not readonly %}
                         <td><!-- kolom voor de wijzig knoppen --></td>
                     {% endif %}
+                </tr>
+
+                <tr>
+                    <td>Plaats:<br>(voor op de voorpagina van een wedstrijd)</td>
+                    <td>
+                        <input input="text" maxlength="50" name="plaats" value="{{ locatie.plaats }}" oninput="gewijzigd()">
+                    </td>
                 </tr>
 
                 <tr>
