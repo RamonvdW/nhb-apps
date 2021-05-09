@@ -6,18 +6,19 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}Wedstrijden{% endblock %}
+{% block title %}Bondscompetitie wedstrijden{% endblock %}
 
 {% block pagina %}
 
-    <h4>Wedstrijden</h4>
+    <h4>Bondscompetitie wedstrijden</h4>
 
-    <p>Hieronder volgt de lijst van wedstrijden die geschoten worden bij vereniging <b>{{ vereniging }}</b>.</p>
+    <p>Hieronder volgt de lijst van bondscompetitie wedstrijden die geschoten worden bij vereniging <b>{{ vereniging }}</b>.</p>
 
-    <!-- <p>Je rol is <b>{{ huidige_rol }}</b>.</p> -->
+    <p>Overige wedstrijden worden beheerd via de Wedstrijdkalender (zie het menu).</p>
 
     {% if geen_wedstrijden %}
 
+        <p>&nbsp;</p>
         <p>In de planning staan geen wedstrijden voor deze vereniging.</p>
 
     {% else %}
