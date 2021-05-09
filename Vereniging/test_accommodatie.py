@@ -635,14 +635,13 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
                                           'banen_25m': 6,
                                           'max_dt': 3,
                                           'notities': 'dit is een test',
-                                          'buiten_adres': 'Grote veld\nMiddenpijl',
                                           'buiten_banen': 50,
                                           'buiten_max_afstand': 90,
                                           'buiten_notities': 'dit is een buiten test'})
         self.assert_is_redirect(resp, '/vereniging/')
 
         buiten_locatie = WedstrijdLocatie.objects.get(pk=buiten_locatie.pk)
-        self.assertEqual(buiten_locatie.adres, 'Grote veld\nMiddenpijl')
+        self.assertEqual(buiten_locatie.adres, '')
         self.assertEqual(buiten_locatie.buiten_banen, 50)
         self.assertEqual(buiten_locatie.buiten_max_afstand, 90)
         self.assertEqual(buiten_locatie.notities, 'dit is een buiten test')
@@ -654,7 +653,6 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
                                           'banen_25m': 6,
                                           'max_dt': 3,
                                           'notities': 'dit is een test',
-                                          'buiten_adres': 'Grote veld\nMiddenpijl',
                                           'buiten_banen': 50,
                                           'buiten_max_afstand': 90,
                                           'buiten_notities': 'dit is een buiten test'})

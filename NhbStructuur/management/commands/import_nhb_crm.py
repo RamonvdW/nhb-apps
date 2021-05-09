@@ -890,8 +890,14 @@ class Command(BaseCommand):
             adres = ""
             plaats = ""
             if club['location_name']:
-                plaats = club['location_name'].strip()
-                adres = club['address'].strip()     # remove terminating \n
+                plaats = club['location_name']
+                if not plaats:
+                    plaats = ""
+                adres = club['address']
+                if not adres:
+                    adres = ""
+                plaats = plaats.strip()
+                adres = adres.strip()     # remove terminating \n
 
             if not adres:
                 # verwijder de koppeling met wedstrijdlocatie uit crm
