@@ -71,6 +71,9 @@ WEDSTRIJD_WA_STATUS_TO_STR = {
     WEDSTRIJD_WA_STATUS_B: 'B-status'
 }
 
+WEDSTRIJD_DUUR_MAX_DAGEN = 5
+WEDSTRIJD_DUUR_MAX_UREN = 5         # maximale keuze voor de duur van een sessie
+
 
 class KalenderWedstrijdDeeluitslag(models.Model):
     """  deel van de uitslag van een wedstrijd """
@@ -97,7 +100,6 @@ class KalenderWedstrijdSessie(models.Model):
 
     # hoe laat is deze sessie, hoe laat moet je aanwezig zijn, de geschatte eindtijd
     tijd_begin = models.TimeField()
-    tijd_aanwezig_zijn = models.TimeField()
     tijd_einde = models.TimeField()
 
     # toegestane wedstrijdklassen
@@ -161,6 +163,9 @@ class KalenderWedstrijd(models.Model):
 
     # aantal banen voor deze wedstrijd
     aantal_banen = models.PositiveSmallIntegerField(default=1)
+
+    # hoe lang voor het begin van hun sessie moeten de sporters aanwezig zijn
+    minuten_voor_begin_sessie_aanwezig_zijn = models.PositiveSmallIntegerField(default=45)
 
     # tekstveld voor namen scheidsrechters door organisatie aangedragen
     scheidsrechters = models.TextField(max_length=500, default='')

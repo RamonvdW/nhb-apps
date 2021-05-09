@@ -5,7 +5,8 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from . import views, view_maand, view_manager, view_vereniging, view_wijzig_wedstrijd
+from . import (views, view_maand, view_manager, view_vereniging, view_wijzig_wedstrijd,
+               view_wijzig_sessies)
 
 app_name = 'Kalender'
 
@@ -33,6 +34,14 @@ urlpatterns = [
     path('<wedstrijd_pk>/zet-status/',
          view_wijzig_wedstrijd.ZetStatusKalenderWedstrijdView.as_view(),
          name='zet-status'),
+
+    path('<wedstrijd_pk>/sessies/',
+         view_wijzig_sessies.KalenderWedstrijdSessiesView.as_view(),
+         name='wijzig-sessies'),
+
+    path('<wedstrijd_pk>/sessies/<sessie_pk>/wijzig/',
+         view_wijzig_sessies.WijzigKalenderWedstrijdSessieView.as_view(),
+         name='wijzig-sessie'),
 ]
 
 # end of file

@@ -15,6 +15,7 @@
     <h4>Manager Wedstrijdkalender</h4>
 
     <p>Via deze pagina kan de Manager Competitiezaken de wedstrijdkalender beheren.</p>
+    <p>Wedstrijden worden aangemaakt door de verenigingen.</p>
 
     <table class="white">
         <thead>
@@ -35,7 +36,11 @@
                 <td>{{ wed.status_str }}</td>
                 <td>{{ wed.disc_str }}</td>
                 <td>{% if wed.titel %}{{ wed.titel }}{% else %}<i class="red-text">Nog niet ingevuld</i>{% endif %}</td>
-                <td><a class="btn-nhb-blauw" href="{{ wed.url_wijzig }}">Wijzig</a></td>
+                <td>
+                    <a class="btn-nhb-blauw" href="{{ wed.url_wijzig }}">Wijzig</a>
+                    <span>&nbsp;&nbsp;</span>
+                    <a class="btn-nhb-blauw" href="{{ wed.url_sessies}}">Sessies</a>
+                </td>
             </tr>
         {% empty %}
             <tr>

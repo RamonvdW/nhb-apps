@@ -14,6 +14,7 @@ from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
+from .models import KalenderWedstrijd
 from datetime import date
 
 TEMPLATE_KALENDER_MAAND = 'kalender/overzicht-maand.dtl'
@@ -120,7 +121,11 @@ class KalenderMaandView(View):
         context['datum'] = date(year=jaar, month=maand, day=1)
         context['url_prev_maand'], context['url_next_maand'] = self._get_prev_next_urls(jaar, maand)
 
-
+        wedstrijden = (KalenderWedstrijd
+                       .objects
+                       .select_related('locatie')
+                       .all())
+        context['wedstrijden'] = wedstrijden
 
         menu_dynamics(self.request, context, 'kalender')
         return render(request, self.template_name, context)

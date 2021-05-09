@@ -14,16 +14,42 @@
 
     <h4>Wedstrijdkalender</h4>
 
+    <!-- TODO: filters -->
+
     <table class="white">
         <tr>
             <td class="right-align"><a class="btn-nhb-blauw" href="{{ url_prev_maand }}"><i class="material-icons-round">chevron_left</i></a></td>
-            <td class="center-align"><h5>Periode: {{ datum|date:'M Y' }}</h5></td>
+            <td class="center-align"><h5>{{ datum|date:'F Y' }}</h5></td>
             <td class="left-align"><a class="btn-nhb-blauw" href="{{ url_next_maand }}"><i class="material-icons-round">chevron_right</i></a></td>
         </tr>
-        <!-- TODO: drop-down maken om direct naar een jaar/maand te springer -->
-
+        <!-- FUTURE: drop-down maken om direct naar een jaar/maand te springen -->
     </table>
 
-    <p>Dit stukje van de website is nog niet af.</p>
+    <br>
+
+    <table class="white">
+        <thead>
+            <tr>
+                <th>Wanneer</th>
+                <th>Beschrijving</th>
+                <th>Locatie</th>
+            </tr>
+        </thead>
+
+        {% for wed in wedstrijden %}
+            <tr>
+                <td>{{ wed.datum_begin }}{% if wed.datum_begin != wed.datum_einde %} - {{ wed.datum_einde }}{% endif %}</td>
+                <td>{{ wed.titel }}</td>
+                <td>{{ wed.locatie.plaats }}</td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="3">
+                    <i>Geen wedstrijden gevonden</i>
+                </td>
+            </tr>
+        {% endfor %}
+
+    </table>
 
 {% endblock %}

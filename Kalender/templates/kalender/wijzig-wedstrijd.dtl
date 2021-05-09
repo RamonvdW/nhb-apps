@@ -10,6 +10,8 @@
 
 {% block pagina %}
 
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="kalender-wijzig-wedstrijd" %}
+
     <script type="application/javascript">
         function gewijzigd() {
             // het formulier is aangepast en moet opgeslagen worden
@@ -79,7 +81,7 @@
                 <td>Status:</td>
                 <td>
                     {% for opt in opt_status %}
-                        <span class="{% if opt.selected %}nhb-blauw-text{% else %}grey-text{% endif %}">{{ opt.status_str }}</span><br>
+                        <span class="{% if opt.selected %}nhb-blauw-text{% else %}grey-text{% endif %}" style="white-space: nowrap">{{ opt.status_str }}</span><br>
                     {% endfor %}
                 </td>
                 <td>
@@ -192,7 +194,7 @@
                     {% else %}
                         <select name="locatie" onchange="gewijzigd()">
                             {% for opt in opt_locatie %}
-                                <option value="{{ opt.sel }}"{% if opt.selected %} selected{% endif %}>{{ opt }}</option>
+                                <option value="{{ opt.sel }}"{% if opt.selected %} selected{% endif %}>{{ opt.keuze_str }}</option>
                             {% endfor %}
                         </select>
                     {% endif %}
@@ -287,13 +289,26 @@
                 </td>
             </tr>
 
+            <tr>
+                <td>Sporters moeten ruim voor begin van hun sessie aanwezig zijn.<br>Hoe ver van te voren wil je ze vragen aanwezig te zijn?</td>
+                <td colspan="2">
+                    <ul>
+                        <select name="aanwezig" onchange="gewijzigd()">
+                            {% for opt in opt_aanwezig %}
+                                <option value="{{ opt.sel }}"{% if opt.selected %} selected{% endif %}>{{ opt.keuze_str }}</option>
+                            {% endfor %}
+                        </select>
+                    </ul>
+                </td>
+            </tr>
+
         </table>
 
         <br>
 
         <div>
             <a class="btn-nhb-blauw" href="{{ url_terug }}">
-                <i class="material-icons-round left">close</i>Terug</a>
+                <i class="material-icons-round left">arrow_back</i>Terug (niets opslaan)</a>
 
             <div class="fixed-action-btn" style="display: none">
                 <button class="btn-nhb-rood" type="submit" id="opslaan_knop" disabled>
@@ -378,8 +393,6 @@
                 datum_omzetten(true)
             })
     </script>
-
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="kalender-vereniging-wedstrijd-wijzig" %}
 
 {% endblock %}
 

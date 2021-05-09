@@ -16,10 +16,12 @@ from Account.models import Account
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 from Taken.taken import maak_taak
+from Wedstrijden.models import BAAN_TYPE_BUITEN, BAAN_TYPE_EXTERN, WedstrijdLocatie
 from .models import (KalenderWedstrijd,
                      WEDSTRIJD_DISCIPLINE_TO_STR, WEDSTRIJD_STATUS_TO_STR, WEDSTRIJD_WA_STATUS_TO_STR,
                      WEDSTRIJD_STATUS_ONTWERP, WEDSTRIJD_STATUS_WACHT_OP_GOEDKEURING, WEDSTRIJD_STATUS_GEACCEPTEERD,
-                     WEDSTRIJD_STATUS_GEANNULEERD, WEDSTRIJD_WA_STATUS_A, WEDSTRIJD_WA_STATUS_B)
+                     WEDSTRIJD_STATUS_GEANNULEERD, WEDSTRIJD_WA_STATUS_A, WEDSTRIJD_WA_STATUS_B,
+                     WEDSTRIJD_DUUR_MAX_DAGEN)
 import datetime
 from types import SimpleNamespace
 
@@ -28,7 +30,7 @@ TEMPLATE_KALENDER_WIJZIG_WEDSTRIJD = 'kalender/wijzig-wedstrijd.dtl'
 
 class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
 
-    """ Via deze view kan de HWL een wedstrijd van de vereniging wijzigen """
+    """ Via deze view kunnen de HWL of BB een wedstrijd wijzigen """
 
     # class variables shared by all instances
     template_name = TEMPLATE_KALENDER_WIJZIG_WEDSTRIJD
@@ -48,9 +50,10 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
         context = dict()
 
         try:
+            wedstrijd_pk = int(str(kwargs['wedstrijd_pk'])[:6])     # afkappen voor de veiligheid
             wedstrijd = (KalenderWedstrijd
                          .objects
-                         .get(pk=kwargs['wedstrijd_pk']))
+                         .get(pk=wedstrijd_pk))
         except KalenderWedstrijd.DoesNotExist:
             raise Http404('Wedstrijd niet gevonden')
 
@@ -102,7 +105,7 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
         context['duur_dagen'] = duur_dagen
 
         context['opt_duur'] = opt_duur = list()
-        for lp in range(5):
+        for lp in range(WEDSTRIJD_DUUR_MAX_DAGEN):
             opt = SimpleNamespace()
             dagen = lp + 1
             opt.sel = "duur_%s" % dagen
@@ -116,11 +119,37 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
             opt_duur.append(opt)
         # for
 
+        locaties = (wedstrijd
+                    .organiserende_vereniging
+                    .wedstrijdlocatie_set
+                    .exclude(zichtbaar=False)
+                    .order_by('pk'))
+        try:
+            binnen_locatie = locaties.get(adres_uit_crm=True)
+        except WedstrijdLocatie.DoesNotExist:
+            binnen_locatie = None
+
+        max_banen = 1
         context['opt_locatie'] = opt_locatie = list()
-        for locatie in wedstrijd.organiserende_vereniging.wedstrijdlocatie_set.exclude(zichtbaar=False).order_by('pk'):
+        for locatie in locaties:
+            # buitenbaan aanvullen met de gegevens van de accommodatie
+            locatie.keuze_str = 'Binnen accommodatie'
+            if locatie.baan_type == BAAN_TYPE_BUITEN:
+                locatie.keuze_str = 'Buiten accommodatie'
+                if not binnen_locatie:
+                    # rare situatie: wel een buitenbaan, maar geen accommodatie
+                    continue        # met de for
+                locatie.adres = binnen_locatie.adres
+                locatie.plaats = binnen_locatie.plaats
+            elif locatie.baan_type == BAAN_TYPE_EXTERN:
+                locatie.keuze_str = locatie.naam
+
             locatie.sel = "loc_%s" % locatie.pk
             locatie.selected = (wedstrijd.locatie == locatie)
+            locatie.keuze_str += ': ' + locatie.adres.replace('\n', ', ') + ' [disciplines: %s]' % locatie.disciplines_str()
             opt_locatie.append(locatie)
+
+            max_banen = max(locatie.banen_18m, locatie.banen_25m, locatie.buiten_banen, max_banen)
         # for
 
         wedstrijd.disc_str = WEDSTRIJD_DISCIPLINE_TO_STR[wedstrijd.discipline]
@@ -144,10 +173,20 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
             opt_wa.append(opt)
         # for
 
+        context['opt_aanwezig'] = aanwezig = list()
+        for mins in (10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60):
+            opt = SimpleNamespace()
+            opt.sel = 'aanwezig_%d' % mins
+            opt.keuze_str = "%d minuten" % mins
+            opt.selected = (wedstrijd.minuten_voor_begin_sessie_aanwezig_zijn == mins)
+            aanwezig.append(opt)
+        # for
+
         context['url_voorwaarden'] = settings.VOORWAARDEN_A_STATUS_URL
 
         # aantal banen waar uit gekozen kan worden
-        context['opt_banen'] = [nr for nr in range(2, 80 + 1)]  # 1 baan = handmatig in .dtl
+        max_banen = min(80, max_banen)
+        context['opt_banen'] = [nr for nr in range(2, max_banen + 1)]  # 1 baan = handmatig in .dtl
 
         context['url_opslaan'] = reverse('Kalender:wijzig-wedstrijd',
                                          kwargs={'wedstrijd_pk': wedstrijd.pk})
@@ -163,13 +202,28 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
         menu_dynamics(self.request, context, actief='kalender')
         return render(request, self.template_name, context)
 
+    @staticmethod
+    def _verplaats_sessies(wedstrijd, oude_datum_begin):
+        if wedstrijd.datum_begin == oude_datum_begin:
+            return
+
+        # bereken hoeveel dagen de wedstrijd verplaatst is
+        delta = wedstrijd.datum_begin - oude_datum_begin
+
+        # pas alle sessies aan met dezelfde hoeveelheid
+        for sessie in wedstrijd.sessies.all():
+            sessie.datum += delta
+            sessie.save(update_fields=['datum'])
+        # for
+
     def post(self, request, *args, **kwargs):
         """ deze functie wordt aangeroepen om de POST request af te handelen """
 
         try:
+            wedstrijd_pk = int(str(kwargs['wedstrijd_pk'])[:6])     # afkappen voor de veiligheid
             wedstrijd = (KalenderWedstrijd
                          .objects
-                         .get(pk=kwargs['wedstrijd_pk']))
+                         .get(pk=wedstrijd_pk))
         except KalenderWedstrijd.DoesNotExist:
             raise Http404('Wedstrijd niet gevonden')
 
@@ -189,6 +243,8 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
         if wedstrijd.status == WEDSTRIJD_STATUS_ONTWERP and request.POST.get('verwijder_wedstrijd'):
             wedstrijd.delete()
         else:
+            oude_datum_begin = wedstrijd.datum_begin
+
             wedstrijd.titel = request.POST.get('titel', wedstrijd.titel)[:50]
 
             if not limit_edits:
@@ -261,7 +317,30 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
 
                 wedstrijd.scheidsrechters = request.POST.get('scheidsrechters', wedstrijd.scheidsrechters)[:500]
 
+            data = request.POST.get('locatie', '')
+            if data:
+                for locatie in (wedstrijd
+                                .organiserende_vereniging
+                                .wedstrijdlocatie_set
+                                .exclude(zichtbaar=False)):
+                    sel = 'loc_%s' % locatie.pk
+                    if sel == data:
+                        wedstrijd.locatie = locatie
+                        break   # from the for
+                # for
+
+            aanwezig = request.POST.get('aanwezig', '')     # bevat 'aanwezig_NN'
+            if aanwezig.startswith('aanwezig_'):
+                for mins in (10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60):
+                    sel = 'aanwezig_%d' % mins
+                    if aanwezig == sel:
+                        wedstrijd.minuten_voor_begin_sessie_aanwezig_zijn = mins
+                        break       # from the for
+                # for
+
             wedstrijd.save()
+
+            self._verplaats_sessies(wedstrijd, oude_datum_begin)
 
         if self.rol_nu == Rollen.ROL_HWL:
             url = reverse('Kalender:vereniging')
@@ -272,6 +351,7 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
 
 
 class ZetStatusKalenderWedstrijdView(UserPassesTestMixin, View):
+
     """ Via deze view kan de BB of HWL de wedstrijd status aanpassen """
 
     # class variables shared by all instances
@@ -329,9 +409,10 @@ class ZetStatusKalenderWedstrijdView(UserPassesTestMixin, View):
     def post(self, request, *args, **kwargs):
 
         try:
+            wedstrijd_pk = int(str(kwargs['wedstrijd_pk'])[:6])     # afkappen voor de veiligheid
             wedstrijd = (KalenderWedstrijd
                          .objects
-                         .get(pk=kwargs['wedstrijd_pk']))
+                         .get(pk=wedstrijd_pk))
         except KalenderWedstrijd.DoesNotExist:
             raise Http404('Wedstrijd niet gevonden')
 
@@ -350,7 +431,7 @@ class ZetStatusKalenderWedstrijdView(UserPassesTestMixin, View):
             if wedstrijd.status == WEDSTRIJD_STATUS_ONTWERP and verder:
                 # verzoek tot goedkeuring
                 wedstrijd.status = WEDSTRIJD_STATUS_WACHT_OP_GOEDKEURING
-                wedstrijd.save()
+                wedstrijd.save(update_fields=['status'])
                 # maak een taak aan voor de BB
                 self._maak_taak_voor_bb(wedstrijd, 'Wedstrijd %s is ingediende voor goedkeuring')
 
@@ -360,7 +441,7 @@ class ZetStatusKalenderWedstrijdView(UserPassesTestMixin, View):
             if annuleer:
                 # annuleer deze wedstrijd
                 wedstrijd.status = WEDSTRIJD_STATUS_GEANNULEERD
-                wedstrijd.save()
+                wedstrijd.save(update_fields=['status'])
 
                 # maak een taak aan voor de HWL
                 self._maak_taak_voor_hwl(wedstrijd, "Wedstrijd %s is nu geannuleerd")
@@ -368,20 +449,21 @@ class ZetStatusKalenderWedstrijdView(UserPassesTestMixin, View):
             elif wedstrijd.status == WEDSTRIJD_STATUS_ONTWERP:
                 if verder:
                     wedstrijd.status = WEDSTRIJD_STATUS_WACHT_OP_GOEDKEURING
-                    wedstrijd.save()
+                    wedstrijd.save(update_fields=['status'])
 
             elif wedstrijd.status == WEDSTRIJD_STATUS_WACHT_OP_GOEDKEURING:
                 if terug:
                     # afgekeurd --> terug naar ontwerp
                     wedstrijd.status = WEDSTRIJD_STATUS_ONTWERP
-                    wedstrijd.save()
+                    wedstrijd.save(update_fields=['status'])
+
                     # maak een taak aan voor de HWL
                     self._maak_taak_voor_hwl(wedstrijd, "Wedstrijd %s is terug gezet naar de status 'ontwerp'")
 
                 elif verder:
                     # goedgekeurd --> naar geaccepteerd
                     wedstrijd.status = WEDSTRIJD_STATUS_GEACCEPTEERD
-                    wedstrijd.save()
+                    wedstrijd.save(update_fields=['status'])
 
                     # maak een taak aan voor de HWL
                     self._maak_taak_voor_hwl(wedstrijd, "Wedstrijd %s is nu geaccepteerd en openbaar")
