@@ -51,12 +51,28 @@
     <!--&nbsp;-->
     <p>Als beheerder van de vereniging heb je toegang tot onderstaande functies.</p>
 
+    <h5>Wedstrijden</h5>
+    <div class="row">
+
+        <!-- wedstrijden -->
+        {% url 'Vereniging:wedstrijden' as card_url %}
+        {% include 'plein/card.dtl' with title="Competitiewedstrijden" text="Alle bondscompetitie wedstrijden die bij deze vereniging geschoten worden." icon="event" url=card_url %}
+
+        <!-- scores invoeren -->
+        {% if heeft_wedstrijden %}
+            {% url 'Vereniging:wedstrijden-uitslag-invoeren' as card_url %}
+            {% include 'plein/card.dtl' with title="Scores invoeren" text="Scores invoeren voor de wedstrijden die bij deze vereniging geschoten worden." icon="edit" url=card_url %}
+        {% endif %}
+
+        <!-- wedstrijdkalender -->
+        {% url 'Kalender:vereniging' as card_url %}
+        {% include 'plein/card.dtl' with title="Wedstrijdkalender" text="Alle overige wedstrijden die door deze vereniging georganiseerd worden." icon="event_note" url=card_url %}
+    </div>
 
     {% if toon_competities %}
         <h5>Indoor competitie</h5>
 
         <div class="row">
-            <!-- wedstrijden -->
             {% for deelcomp_rk in deelcomps_rk %}
                 {% if deelcomp_rk.url_lijst_rk and deelcomp_rk.competitie.afstand == '18' %}
                     {% include 'plein/card.dtl' with title="RK selectie 18m" text=deelcomp_rk.text_str icon="receipt" url=deelcomp_rk.url_lijst_rk %}
@@ -117,7 +133,6 @@
         <h5>25m 1pijl competitie</h5>
 
         <div class="row">
-            <!-- wedstrijden -->
             {% for deelcomp_rk in deelcomps_rk %}
                 {% if deelcomp_rk.url_lijst_rk and deelcomp_rk.competitie.afstand == '25' %}
                     {% include 'plein/card.dtl' with title="RK selectie" text=deelcomp_rk.text_str icon="receipt" url=deelcomp_rk.url_lijst_rk %}
@@ -174,18 +189,10 @@
         </div>
     {% endif %} <!-- toon_competities -->
 
+
     <h5>Beheer vereniging</h5>
 
     <div class="row">
-
-        <!-- wedstrijden -->
-        {% url 'Vereniging:wedstrijden' as card_url %}
-        {% include 'plein/card.dtl' with title="Wedstrijden" text="Wedstrijden die bij deze vereniging geschoten worden." icon="event" url=card_url %}
-
-        {% if heeft_wedstrijden %}
-            {% url 'Vereniging:wedstrijden-uitslag-invoeren' as card_url %}
-            {% include 'plein/card.dtl' with title="Scores invoeren" text="Scores invoeren voor de wedstrijden die bij deze vereniging geschoten worden." icon="edit" url=card_url %}
-        {% endif %}
 
         <!-- ledenlijst -->
         {% url 'Vereniging:ledenlijst' as card_url %}
