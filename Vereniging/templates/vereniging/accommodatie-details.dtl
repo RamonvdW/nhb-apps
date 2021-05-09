@@ -377,6 +377,34 @@
                     </tr>
 
                     <tr>
+                        <td style="vertical-align: top">Ondersteunt disciplines:</td>
+                        <td>
+                            {% if readonly %}
+                                {% for sel, str, checked in disc %}
+                                    {% if checked %}
+                                        <span class="nhb-blauw-text">&check;&nbsp;</span><span>{{ str }}</span>
+                                        <!-- else: discipline niet noemen -->
+                                    {% endif %}
+                                    <!-- voeg een verstopte radiobutton toe die gecheckt kan worden door javascript -->
+                                    <div style="visibility:hidden">
+                                        <input type="radio" id="id_{{ sel }}" {% if checked %} checked{% endif %}>
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                {% for sel, str, checked in disc %}
+                                    <label>
+                                        <input type="checkbox" class="filled-in" id="id_{{ sel }}" name="{{ sel }}"{% if checked %} checked{% endif %} onchange="gewijzigd()">
+                                        <span class="black-text">{{ str }}</span><br>
+                                    </label>
+                                {% endfor %}
+                            {% endif %}
+                        </td>
+                        {% if not readonly %}
+                            <td><!-- kolom voor de wijzig knoppen --></td>
+                        {% endif %}
+                    </tr>
+
+                    <tr>
                         <td>Maximum aantal banen:</td>
                         <td colspan="2">
                             {% if readonly %}
@@ -427,6 +455,7 @@
                         {% endif %}
                     </tr>
                 {% endif %}
+
 
                 {% if externe_locaties %}
                     <tr>

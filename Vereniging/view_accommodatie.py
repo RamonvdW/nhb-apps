@@ -367,6 +367,15 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
             context['buiten_banen'] = [nr for nr in range(2, 80+1)]   # 1 baan = handmatig in .dtl
             context['buiten_max_afstand'] = [nr for nr in range(30, 100+1, 10)]
 
+            context['disc'] = disc = list()
+            disc.append(('disc_outdoor', 'Outdoor', buiten_locatie.discipline_outdoor))
+            # disc.append(('disc_indoor', 'Indoor', buiten_locatie.discipline_indoor))
+            disc.append(('disc_25m1p', '25m 1pijl', buiten_locatie.discipline_25m1pijl))
+            disc.append(('disc_veld', 'Veld', buiten_locatie.discipline_veld))
+            disc.append(('disc_3d', '3D', buiten_locatie.discipline_3d))
+            disc.append(('disc_run', 'Run archery', buiten_locatie.discipline_run))
+            disc.append(('disc_clout', 'Clout', buiten_locatie.discipline_clout))
+
         # terug en opslaan knoppen voor in de template
         if 'is_ver' in kwargs:      # wordt gezet door VerenigingAccommodatieDetailsView
             context['terug_url'] = reverse('Vereniging:overzicht')
@@ -484,15 +493,15 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
                 binnen_locatie.max_dt_per_baan = data
 
             if len(msgs) > 0:
-                activiteit = "Aanpassingen aan locatie %s: %s" % (str(binnen_locatie), "; ".join(msgs))
+                activiteit = "Aanpassingen aan binnen locatie van vereniging %s: %s" % (nhbver, "; ".join(msgs))
                 schrijf_in_logboek(request.user, 'Accommodaties', activiteit)
                 binnen_locatie.save()
 
             data = form.cleaned_data.get('notities')
             data = data.replace('\r\n', '\n')
             if binnen_locatie.notities != data:
-                activiteit = "Aanpassing bijzonderheden van locatie %s: %s (was %s)" % (
-                                str(binnen_locatie),
+                activiteit = "Aanpassing bijzonderheden van binnen locatie van vereniging %s: %s (was %s)" % (
+                                nhbver,
                                 repr(data.replace('\n', ' / ')),
                                 repr(binnen_locatie.notities.replace('\n', ' / ')))
                 schrijf_in_logboek(request.user, 'Accommodaties', activiteit)
@@ -501,42 +510,50 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
 
         if buiten_locatie:
             msgs = list()
+            updated = list()
 
             data = form.cleaned_data.get('buiten_banen')
             if buiten_locatie.buiten_banen != data:
-                msgs.append("Aantal banen aangepast van %s naar %s" % (buiten_locatie.buiten_banen, data))
+                msgs.append("Aantal buiten banen aangepast van %s naar %s" % (buiten_locatie.buiten_banen, data))
                 buiten_locatie.buiten_banen = data
+                updated.append('buiten_banen')
 
             data = form.cleaned_data.get('buiten_max_afstand')
             if buiten_locatie.buiten_max_afstand != data:
                 msgs.append("Maximale afstand aangepast van %s naar %s" % (buiten_locatie.buiten_max_afstand, data))
                 buiten_locatie.buiten_max_afstand = data
+                updated.append('buiten_max_afstand')
 
             if len(msgs) > 0:
-                activiteit = "Aanpassingen aan buiten locatie %s: %s" % (str(buiten_locatie), "; ".join(msgs))
+                activiteit = "Aanpassingen aan buiten locatie van vereniging %s: %s" % (nhbver, "; ".join(msgs))
                 schrijf_in_logboek(request.user, 'Accommodaties', activiteit)
-                buiten_locatie.save()
 
-            data = form.cleaned_data.get('buiten_adres')
-            data = data.replace('\r\n', '\n')
-            if buiten_locatie.adres != data:
-                activiteit = "Aanpassing adres van buiten locatie %s: %s (was %s)" % (
-                                str(buiten_locatie),
-                                repr(data.replace('\n', ', ')),
-                                repr(buiten_locatie.adres.replace('\n', ', ')))
-                schrijf_in_logboek(request.user, 'Accommodaties', activiteit)
-                buiten_locatie.adres = data
-                buiten_locatie.save()
+            buiten_locatie.save(update_fields=updated)
 
             data = form.cleaned_data.get('buiten_notities')
             data = data.replace('\r\n', '\n')
             if buiten_locatie.notities != data:
-                activiteit = "Aanpassing notitie van buiten locatie %s: %s (was %s)" % (
-                                    str(buiten_locatie),
+                activiteit = "Aanpassing notitie van buiten locatie van vereniging %s: %s (was %s)" % (
+                                    nhbver,
                                     repr(data.replace('\n', ' / ')),
                                     repr(buiten_locatie.notities.replace('\n', ' / ')))
                 schrijf_in_logboek(request.user, 'Accommodaties', activiteit)
                 buiten_locatie.notities = data
+                buiten_locatie.save(update_fields=['notities'])
+
+            disc_old = buiten_locatie.disciplines_str()
+            buiten_locatie.discipline_25m1pijl = form.cleaned_data.get('disc_25m1p')
+            buiten_locatie.discipline_outdoor = form.cleaned_data.get('disc_outdoor')
+            # buiten_locatie.discipline_indoor = form.cleaned_data.get('disc_indoor')
+            buiten_locatie.discipline_clout = form.cleaned_data.get('disc_clout')
+            buiten_locatie.discipline_veld = form.cleaned_data.get('disc_veld')
+            buiten_locatie.discipline_run = form.cleaned_data.get('disc_run')
+            buiten_locatie.discipline_3d = form.cleaned_data.get('disc_3d')
+            disc_new = buiten_locatie.disciplines_str()
+            if disc_old != disc_new:
+                activiteit = "Aanpassing disciplines van buiten locatie van vereniging %s: [%s] (was [%s])" % (
+                                nhbver, disc_new, disc_old)
+                schrijf_in_logboek(request.user, 'Accommodaties', activiteit)
                 buiten_locatie.save()
 
         if 'is_ver' in kwargs:
@@ -917,6 +934,15 @@ class ExterneLocatieDetailsView(TemplateView):
                             repr(locatie.adres.replace('\n', ', ')))
             schrijf_in_logboek(request.user, 'Accommodaties', activiteit)
             locatie.adres = data
+
+        data = request.POST.get('plaats', '')[:50]
+        if locatie.plaats != data:
+            activiteit = "Aanpassing plaats van externe locatie %s: %s (was %s)" % (
+                            locatie.naam,
+                            repr(data),
+                            repr(locatie.plaats))
+            schrijf_in_logboek(request.user, 'Accommodaties', activiteit)
+            locatie.plaats = data
 
         disc_old = locatie.disciplines_str()
         locatie.discipline_25m1pijl = (request.POST.get('disc_25m1p', '') != '')
