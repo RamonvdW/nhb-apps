@@ -11,6 +11,13 @@ from Score.models import Score
 
 
 # accommodatie type
+
+BAAN_TYPE_BINNEN_VOLLEDIG_OVERDEKT = 'O'
+BAAN_TYPE_BINNEN_BUITEN = 'H'               # H = half overdekt
+BAAN_TYPE_ONBEKEND = 'X'
+BAAN_TYPE_BUITEN = 'B'                      # lift mee op binnenbaan voor adres, plaats
+BAAN_TYPE_EXTERN = 'E'
+
 BAAN_TYPE = (('X', 'Onbekend'),
              ('O', 'Volledig overdekte binnenbaan'),
              ('H', 'Binnen-buiten schieten'),
@@ -45,7 +52,7 @@ class WedstrijdLocatie(models.Model):
                                           blank=True)       # mag leeg zijn / gemaakt worden
 
     # eigen accommodatie baan of extern
-    baan_type = models.CharField(max_length=1, choices=BAAN_TYPE, default='X')
+    baan_type = models.CharField(max_length=1, choices=BAAN_TYPE, default=BAAN_TYPE_ONBEKEND)
 
     # welke disciplines kunnen hier georganiseerd worden?
     discipline_25m1pijl = models.BooleanField(default=False)
@@ -70,6 +77,9 @@ class WedstrijdLocatie(models.Model):
     # adresgegevens van de locatie
     adres = models.TextField(max_length=256, blank=True)
 
+    # plaats deze wedstrijdlocatie, om eenvoudig weer te kunnen geven op de wedstrijdkalender
+    plaats = models.CharField(max_length=50, blank=True, default='')
+
     # handmatig ingevoerd of uit de CRM (=bevroren)
     adres_uit_crm = models.BooleanField(default=False)
 
@@ -78,12 +88,12 @@ class WedstrijdLocatie(models.Model):
 
     def disciplines_str(self):
         disc = list()
-        if self.discipline_25m1pijl:
-            disc.append('25m1pijl')
         if self.discipline_outdoor:
             disc.append('outdoor')
         if self.discipline_indoor:
             disc.append('indoor')
+        if self.discipline_25m1pijl:
+            disc.append('25m1pijl')
         if self.discipline_clout:
             disc.append('clout')
         if self.discipline_veld:
@@ -100,13 +110,14 @@ class WedstrijdLocatie(models.Model):
         else:
             msg = ""
 
-        msg += "{%s} " % BAANTYPE2STR[self.baan_type]
-
-        msg += "[%s] " % self.disciplines_str()
-
         msg += self.adres.replace('\n', ', ')
         # kost te veel database toegangen in admin interface
         # msg += " (%s verenigingen)" % self.verenigingen.count()
+
+        msg += " [baantype: %s]" % BAANTYPE2STR[self.baan_type]
+
+        msg += " [disciplines: %s]" % self.disciplines_str()
+
         return msg
 
     class Meta:

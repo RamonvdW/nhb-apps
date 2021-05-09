@@ -888,10 +888,10 @@ class Command(BaseCommand):
 
             # een vereniging zonder doel heeft een lege location_name
             adres = ""
+            plaats = ""
             if club['location_name']:
-                adres = club['address']
-                if adres:
-                    adres = adres.strip()     # remove terminating \n
+                plaats = club['location_name'].strip()
+                adres = club['address'].strip()     # remove terminating \n
 
             if not adres:
                 # verwijder de koppeling met wedstrijdlocatie uit crm
@@ -902,18 +902,22 @@ class Command(BaseCommand):
                 continue
 
             # zoek de wedstrijdlocatie bij dit adres
+            # let op: elke vereniging heeft dus maximaal 1 locatie op dit adres
+            #         buitenbaan heeft geen adres
             try:
-                wedstrijdlocatie = WedstrijdLocatie.objects.get(adres=adres)
+                wedstrijdlocatie = WedstrijdLocatie.objects.get(adres=adres, plaats=plaats)
             except WedstrijdLocatie.DoesNotExist:
                 # nieuw aanmaken
-                wedstrijdlocatie = WedstrijdLocatie()
-                wedstrijdlocatie.adres = adres
-                wedstrijdlocatie.adres_uit_crm = True
+                wedstrijdlocatie = WedstrijdLocatie(
+                                        adres=adres,
+                                        plaats=plaats,
+                                        adres_uit_crm=True)
                 wedstrijdlocatie.save()
                 self.stdout.write('[INFO] Nieuwe wedstrijdlocatie voor adres %s' % repr(adres))
                 self._count_toevoegingen += 1
 
-            # bij adreswijzigingen moet de oude locatie ontkoppeld worden
+            # locatie mag niet van adres wijzigen
+            # dus als vereniging een ander adres heeft, ontkoppel dan de oude locatie
             for obj in nhb_ver.wedstrijdlocatie_set.exclude(adres_uit_crm=False).exclude(pk=wedstrijdlocatie.pk):
                 nhb_ver.wedstrijdlocatie_set.remove(obj)
                 self.stdout.write('[INFO] Vereniging %s ontkoppeld van wedstrijdlocatie met adres %s' % (nhb_ver, repr(obj.adres)))
@@ -928,6 +932,7 @@ class Command(BaseCommand):
         # for
 
         # TODO: zichtbaar=False zetten voor wedstrijdlocatie zonder vereniging
+        # TODO: zichtbaar=True zetten voor (revived) wedstrijdlocatie met vereniging
 
     def handle(self, *args, **options):
         self.dryrun = options['dryrun']
