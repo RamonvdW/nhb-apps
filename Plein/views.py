@@ -14,7 +14,7 @@ from .menu import menu_dynamics
 
 
 TEMPLATE_PLEIN_BEZOEKER = 'plein/plein-bezoeker.dtl'    # niet ingelogd
-TEMPLATE_PLEIN_SCHUTTER = 'plein/plein-schutter.dtl'    # schutter (ROL_SCHUTTER)
+TEMPLATE_PLEIN_SPORTER = 'plein/plein-sporter.dtl'      # sporter (ROL_SCHUTTER)
 TEMPLATE_PLEIN_BEHEERDER = 'plein/plein-beheerder.dtl'  # beheerder (ROL_BB/BKO/RKO/RCL/SEC/HWL/WL)
 TEMPLATE_PRIVACY = 'plein/privacy.dtl'
 TEMPLATE_NIET_ONDERSTEUND = 'plein/niet-ondersteund.dtl'
@@ -86,7 +86,7 @@ class PleinView(View):
             rol_nu = rol_get_huidige(request)
 
             if rol_nu == Rollen.ROL_SCHUTTER:
-                template = TEMPLATE_PLEIN_SCHUTTER
+                template = TEMPLATE_PLEIN_SPORTER
 
             elif rol_nu == Rollen.ROL_NONE or rol_nu is None:
                 # gebruik de bezoeker pagina
