@@ -292,13 +292,11 @@
             <tr>
                 <td>Sporters moeten ruim voor begin van hun sessie aanwezig zijn.<br>Hoe ver van te voren wil je ze vragen aanwezig te zijn?</td>
                 <td colspan="2">
-                    <ul>
-                        <select name="aanwezig" onchange="gewijzigd()">
-                            {% for opt in opt_aanwezig %}
-                                <option value="{{ opt.sel }}"{% if opt.selected %} selected{% endif %}>{{ opt.keuze_str }}</option>
-                            {% endfor %}
-                        </select>
-                    </ul>
+                    <select name="aanwezig" onchange="gewijzigd()">
+                        {% for opt in opt_aanwezig %}
+                            <option value="{{ opt.sel }}"{% if opt.selected %} selected{% endif %}>{{ opt.keuze_str }}</option>
+                        {% endfor %}
+                    </select>
                 </td>
             </tr>
 

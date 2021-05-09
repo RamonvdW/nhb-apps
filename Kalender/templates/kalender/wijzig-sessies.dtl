@@ -50,58 +50,53 @@
 
     <h5>Sessies</h5>
 
-    <form method="post" action="{{ url_opslaan }}">
-        {% csrf_token %}
+    <table class="white">
+        <thead>
+            <tr>
+                <th>Wanneer</th>
+                <th>Aanmeldingen</th>
+                <th>Maximum</th>
+                <th>Wedstrijdklassen</th>
+                <th><!-- kolom voor de knoppen --></th>
+            </tr>
+        </thead>
 
-        <table class="white">
-            <thead>
-                <tr>
-                    <th>Wanneer</th>
-                    <th>Aanmeldingen</th>
-                    <th>Maximum</th>
-                    <th>Wedstrijdklassen</th>
-                    <th><!-- kolom voor de knoppen --></th>
-                </tr>
-            </thead>
+        {% for sessie in sessies %}
+            <tr>
+                <td>{{ sessie.datum }} [{{ sessie.tijd_begin }} - {{ sessie.tijd_einde }}]</td>
+                <td>{{ sessie.aanmeldingen_count }}</td>
+                <td>{{ sessie.max_sporters }}</td>
+                <td>
+                    {% for klasse in sessie.klassen_ordered %}
+                        <span>{{ klasse.beschrijving }}</span><br>
+                    {% empty %}
+                        <span><i>Nog geen klassen</i></span>
+                    {% endfor %}
+                </td>
+                <td>
+                    <a class="btn-nhb-blauw" href="{{ sessie.url_wijzig }}">Aanpassen</a>
+                </td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td><i>Er zijn nog geen sessies</i></td>
+            </tr>
+        {% endfor %}
 
-            {% for sessie in sessies %}
-                <tr>
-                    <td>{{ sessie.datum }} [{{ sessie.tijd_begin }} - {{ sessie.tijd_einde }}]</td>
-                    <td>{{ sessie.aanmeldingen_count }}</td>
-                    <td>{{ sessie.max_sporters }}</td>
-                    <td>
-                        {% for klasse in sessie.klassen_ordered %}
-                            <span>{{ klasse.beschrijving }}</span><br>
-                        {% empty %}
-                            <span><i>Nog geen klassen</i></span>
-                        {% endfor %}
-                    </td>
-                    <td>
-                        <a class="btn-nhb-blauw" href="{{ sessie.url_wijzig }}">Aanpassen</a>
-                    </td>
-                </tr>
-            {% empty %}
-                <tr>
-                    <td><i>Er zijn nog geen sessies</i></td>
-                </tr>
-            {% endfor %}
+        {% if url_nieuwe_sessie %}
+            <tr>
+                <td colspan="5">
+                    <form action="{{ url_nieuwe_sessie }}" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="nieuwe_sessie" value="1">
+                        <button class="btn-nhb-blauw">
+                            <i class="material-icons-round left">add</i>Sessie toevoegen</button>
+                    </form>
+                </td>
+            </tr>
+        {% endif %}
 
-            {% if url_nieuwe_sessie %}
-                <tr>
-                    <td colspan="5">
-                        <form action="{{ url_nieuwe_sessie }}" method="post">
-                            {% csrf_token %}
-                            <input type="hidden" name="nieuwe_sessie" value="1">
-                            <button class="btn-nhb-blauw">
-                                <i class="material-icons-round left">add</i>Sessie toevoegen</button>
-                        </form>
-                    </td>
-                </tr>
-            {% endif %}
-
-        </table>
-
-    </form>
+    </table>
 
     {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="kalender-wijzig-sessies" %}
 

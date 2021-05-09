@@ -115,7 +115,7 @@
                 <tr>
                     <td>Plaats:<br>(voor op de voorpagina van een wedstrijd)</td>
                     <td>
-                        <input input="text" maxlength="50" name="plaats" value="{{ locatie.plaats }}" oninput="gewijzigd()">
+                        <input type="text" maxlength="50" name="plaats" value="{{ locatie.plaats }}" oninput="gewijzigd()">
                     </td>
                 </tr>
 

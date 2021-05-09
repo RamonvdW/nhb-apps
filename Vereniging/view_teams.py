@@ -285,6 +285,8 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
 
             if team.pk > 0:
                 context['url_verwijderen'] = context['url_opslaan']
+        else:
+            context['readonly'] = True
 
         menu_dynamics(self.request, context, actief='vereniging')
         return context

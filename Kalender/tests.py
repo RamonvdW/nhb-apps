@@ -296,7 +296,7 @@ class TestKalender(E2EHelpers, TestCase):
                                           'wedstrijd_duur': 'duur_1',
                                           'contact_naam': 'Test Naam',
                                           'contact_email': 'Test Email',
-                                          'contact_website': 'Test Website',
+                                          'contact_website': 'http://test.website.nl',
                                           'contact_telefoon': 'Test Telefoon',
                                           'aantal_banen': '42',
                                           'discipline': 'disc_OD',

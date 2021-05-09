@@ -88,13 +88,11 @@
             <tr>
                 <td>Duur van de sessie (schatting):</td>
                 <td>
-                    <ul>
-                        <select name="duur" onchange="gewijzigd()">
-                            {% for opt in opt_duur %}
-                                <option value="{{ opt.sel }}"{% if opt.selected %} selected{% endif %}>{{ opt.keuze_str }}</option>
-                            {% endfor %}
-                        </select>
-                    </ul>
+                    <select name="duur" onchange="gewijzigd()">
+                        {% for opt in opt_duur %}
+                            <option value="{{ opt.sel }}"{% if opt.selected %} selected{% endif %}>{{ opt.keuze_str }}</option>
+                        {% endfor %}
+                    </select>
                 </td>
             </tr>
 
