@@ -330,14 +330,9 @@
             {
                 //console.log("load!")
                 const tables = document.getElementsByTagName("table")
-                //console.log("tables: ", tables)
-                tables.forEach(table =>
-                {
-                    //console.log("  table:", table, ", table.id=", table.id)
-                    if (table.id !== "")
-                    {
+                Array.from(tables).forEach(table => {
+                    if (table.id !== "") {
                         const inputs = table.getElementsByTagName("input")
-                        //console.log("  inputs:", inputs)
                         if (inputs.length >= 1) myTableFilter(inputs[0], table.id)
                     }
                 })
