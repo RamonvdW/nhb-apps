@@ -30,7 +30,7 @@ class WedstrijdAdmin(admin.ModelAdmin):             # pragma: no cover
 class WedstrijdLocatieAdmin(admin.ModelAdmin):      # pragma: no cover
     """ Admin configuratie voor WedstrijdLocatie """
 
-    list_filter = ('zichtbaar',)
+    list_filter = ('zichtbaar', 'adres_uit_crm', 'baan_type')
 
     search_fields = ('adres', 'verenigingen__ver_nr')
 

@@ -62,6 +62,7 @@ class WedstrijdLocatie(models.Model):
             msg = "(hidden) "
         else:
             msg = ""
+        msg += '[baan_type:%s] ' % self.baan_type
         msg += self.adres.replace('\n', ', ')
         # kost te veel database toegangen in admin interface
         # msg += " (%s verenigingen)" % self.verenigingen.count()
