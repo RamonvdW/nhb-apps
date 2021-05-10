@@ -177,8 +177,16 @@ class TestRecordsIndiv(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('records/records_indiv.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
 
-        # para dwingt disc=OD en lcat=U af
-        url = self.url_indiv % ('mannen', 'outdoor', 'senioren', 'recurve', 'ja', 'open', 0)
+        # para dwingt disc!=25 en lcat=U af
+        url = self.url_indiv % ('mannen', '25m1pijl', 'senioren', 'recurve', 'ja', 'open', 0)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_template_used(resp, ('records/records_indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
+
+        # gewoon een goede para
+        url = self.url_indiv % ('vrouwen', 'indoor', 'gecombineerd', 'recurve', 'ja', 'open', 0)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
