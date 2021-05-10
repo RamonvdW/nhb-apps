@@ -311,7 +311,7 @@ class TestKalender(E2EHelpers, TestCase):
         self.assertEqual(wedstrijd.datum_begin, wedstrijd.datum_einde)
         self.assertEqual(wedstrijd.contact_naam, 'Test Naam')
         self.assertEqual(wedstrijd.contact_email, 'Test Email')
-        self.assertEqual(wedstrijd.contact_website, 'Test Website')
+        self.assertEqual(wedstrijd.contact_website, 'http://test.website.nl')
         self.assertEqual(wedstrijd.contact_telefoon, 'Test Telefoon')
         self.assertEqual(wedstrijd.aantal_banen, 42)
         self.assertEqual(wedstrijd.discipline, 'OD')
@@ -355,7 +355,7 @@ class TestKalender(E2EHelpers, TestCase):
                                           'wedstrijd_duur': 'duur_1',
                                           'contact_naam': 'Test Naam 3',        # mag wel
                                           'contact_email': 'Test Email 3',
-                                          'contact_website': 'Test Website 3',
+                                          'contact_website': 'http://test3.website.nl',
                                           'contact_telefoon': 'Test Telefoon 3',
                                           'aantal_banen': '41',                 # mag wel
                                           'discipline': 'disc_3D',
@@ -368,7 +368,7 @@ class TestKalender(E2EHelpers, TestCase):
         self.assertEqual(wedstrijd.datum_einde, oude_datum_einde)
         self.assertEqual(wedstrijd.contact_naam, 'Test Naam 3')
         self.assertEqual(wedstrijd.contact_email, 'Test Email 3')
-        self.assertEqual(wedstrijd.contact_website, 'Test Website 3')
+        self.assertEqual(wedstrijd.contact_website, 'http://test3.website.nl')
         self.assertEqual(wedstrijd.contact_telefoon, 'Test Telefoon 3')
         self.assertEqual(wedstrijd.aantal_banen, 41)
         self.assertEqual(wedstrijd.discipline, 'OD')
@@ -413,7 +413,7 @@ class TestKalender(E2EHelpers, TestCase):
         self.assertEqual(wedstrijd.datum_einde, oude_datum_einde)
         self.assertEqual(wedstrijd.contact_naam, 'Test Naam 3')
         self.assertEqual(wedstrijd.contact_email, 'Test Email 3')
-        self.assertEqual(wedstrijd.contact_website, 'Test Website 3')
+        self.assertEqual(wedstrijd.contact_website, 'http://test3.website.nl')
         self.assertEqual(wedstrijd.contact_telefoon, 'Test Telefoon 3')
         self.assertEqual(wedstrijd.aantal_banen, 41)
         self.assertEqual(wedstrijd.discipline, 'OD')
