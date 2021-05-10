@@ -121,7 +121,9 @@ class RecordsIndivView(TemplateView):
         # in geval van para kijken we niet naar de lcat of disc
         if para:
             lcat = 'U'
-            disc = 'OD'
+            # para records alleen voor Outdoor en Indoor, dus wissel weg van 25m1pijl indien gekozen
+            if disc == '25':
+                disc = '18'
         else:
             if lcat == 'U':
                 lcat = 'S'
@@ -267,8 +269,8 @@ class RecordsIndivView(TemplateView):
         context['disc_filters'] = opties = list()
         for afk, url in disc2url.items():
 
-            # Para records zijn alleen ondersteund bij de Outdoor
-            if para and afk != 'OD':
+            # Para records zijn alleen ondersteund bij de Outdoor en Indoor
+            if para and afk not in ('OD', '18'):
                 continue
 
             optie = SimpleNamespace()
