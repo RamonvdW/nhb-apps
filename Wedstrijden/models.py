@@ -110,11 +110,11 @@ class WedstrijdLocatie(models.Model):
         else:
             msg = ""
 
+        msg += "[baantype: %s] " % BAANTYPE2STR[self.baan_type]
+
         msg += self.adres.replace('\n', ', ')
         # kost te veel database toegangen in admin interface
         # msg += " (%s verenigingen)" % self.verenigingen.count()
-
-        msg += " [baantype: %s]" % BAANTYPE2STR[self.baan_type]
 
         msg += " [disciplines: %s]" % self.disciplines_str()
 
