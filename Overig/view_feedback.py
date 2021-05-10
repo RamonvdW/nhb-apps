@@ -19,7 +19,7 @@ TEMPLATE_FEEDBACK_BEDANKT = 'overig/site-feedback-bedankt.dtl'
 TEMPLATE_FEEDBACK_INZICHT = 'overig/site-feedback-inzicht.dtl'
 
 
-class SiteFeedbackView(View):
+class SiteFeedbackView(UserPassesTestMixin, View):
     """ View voor het feedback formulier
         get: radio-button wordt gezet aan de hand van de gebruikte url
         post: ingevoerde waarden worden in de database gezet
@@ -27,6 +27,11 @@ class SiteFeedbackView(View):
 
     # class variables shared by all instances
     template_name = TEMPLATE_FEEDBACK_FORMULIER
+    raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        return self.request.user.is_authenticated
 
     def get(self, request, *args, **kwargs):
         """
@@ -34,14 +39,11 @@ class SiteFeedbackView(View):
                 retourneert het formulier
         """
         if 'op_pagina' not in kwargs:
-            # een gebruiker kan via de POST-url voor het formulier bij deze GET functie komen
+            # een gebruiker kan via de formulier-url bij deze GET functie komen
             # stuur ze weg
             raise Resolver404()
 
-        if request.user.is_authenticated:
-            gebruiker_naam = request.user.get_account_full_name()
-        else:
-            gebruiker_naam = 'Niet bekend (anoniem)'
+        gebruiker_naam = request.user.get_account_full_name()
 
         # bewaar twee parameters in de sessie - deze blijven server-side
         request.session['feedback_op_pagina'] = kwargs['op_pagina']
