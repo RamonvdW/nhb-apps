@@ -121,10 +121,19 @@ class KalenderMaandView(View):
         context['datum'] = date(year=jaar, month=maand, day=1)
         context['url_prev_maand'], context['url_next_maand'] = self._get_prev_next_urls(jaar, maand)
 
+        datum_vanaf = date(year=jaar, month=maand, day=1)
+        if maand == 12:
+            maand = 1
+            jaar += 1
+        else:
+            maand += 1
+        datum_voor = date(year=jaar, month=maand, day=1)
+
         wedstrijden = (KalenderWedstrijd
                        .objects
                        .select_related('locatie')
-                       .all())
+                       .filter(datum_begin__gte=datum_vanaf,
+                               datum_begin__lt=datum_voor))
         context['wedstrijden'] = wedstrijden
 
         menu_dynamics(self.request, context, 'kalender')

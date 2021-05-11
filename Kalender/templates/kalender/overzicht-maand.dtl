@@ -17,6 +17,11 @@
     <!-- TODO: filters -->
 
     <table class="white">
+        <tr style="visibility:collapse">
+            <td><i class="material-icons-round">chevron_left</i></td>
+            <td><h5>september 2021</h5></td>
+            <td><i class="material-icons-round">chevron_right</i></td>
+        </tr>
         <tr>
             <td class="right-align"><a class="btn-nhb-blauw" href="{{ url_prev_maand }}"><i class="material-icons-round">chevron_left</i></a></td>
             <td class="center-align"><h5>{{ datum|date:'F Y' }}</h5></td>
@@ -35,6 +40,13 @@
                 <th>Locatie</th>
             </tr>
         </thead>
+
+        <!-- forceer de breedte van de kolommen in alle maanden met een niet getoonde regel -->
+        <tr style="visibility:collapse">
+            <td>30 september 2021 - 31 september 2021</td>
+            <td>Dit is de titel van een best wel lange wedstrijd</td>
+            <td>Brede plaatnaam ergens</td>
+        </tr>
 
         {% for wed in wedstrijden %}
             <tr>
