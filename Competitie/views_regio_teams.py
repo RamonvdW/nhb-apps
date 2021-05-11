@@ -545,27 +545,16 @@ class RegioPoulesView(UserPassesTestMixin, TemplateView):
         if deelcomp.nhb_regio != self.functie_nu.nhb_regio:
             raise PermissionDenied('Niet de beheerder van deze regio')
 
-        beschrijvingen = (RegiocompetitieTeamPoule
-                          .objects
-                          .filter(deelcompetitie=deelcomp)
-                          .values_list('beschrijving', flat=True))
+        aantal = (RegiocompetitieTeamPoule
+                  .objects
+                  .filter(deelcompetitie=deelcomp)
+                  .count())
+        nummer = aantal + 1
 
         # maak een nieuwe poule aan
-        poule = RegiocompetitieTeamPoule(deelcompetitie=deelcomp)
-        poule.beschrijving = '?'
-
-        for klasse in (CompetitieKlasse
-                       .objects
-                       .filter(competitie=deelcomp.competitie,
-                               indiv=None)                      # alleen team klassen
-                       .order_by('team__volgorde')):
-            beschrijving = klasse.team.beschrijving
-            if beschrijving not in beschrijvingen:
-                poule.beschrijving = klasse.team.beschrijving
-                break   # from the for
-        # for
-
-        poule.save()
+        RegiocompetitieTeamPoule(
+                deelcompetitie=deelcomp,
+                beschrijving='poule %s' % nummer).save()
 
         url = reverse('Competitie:regio-poules',
                       kwargs={'deelcomp_pk': deelcomp.pk})
