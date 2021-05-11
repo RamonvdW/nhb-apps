@@ -59,9 +59,6 @@ def menu_dynamics(request, context, actief='hetplein'):
             if rol == Rollen.ROL_SCHUTTER:
                 context['menu_toon_schutter_profiel'] = True
 
-            #if rol in (Rollen.ROL_IT, Rollen.ROL_BB, Rollen.ROL_HWL):
-            context['menu_toon_kalender'] = True
-
             # taken
             if rol in (Rollen.ROL_IT, Rollen.ROL_BB,
                        Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL,
