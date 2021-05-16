@@ -9,7 +9,7 @@ from django.utils import timezone
 from Plein.menu import menu_dynamics
 from BasisTypen.models import IndivWedstrijdklasse
 from NhbStructuur.models import NhbRegio
-from Schutter.leeftijdsklassen import get_sessionvars_leeftijdsklassen
+from Schutter.leeftijdsklassen import bereken_leeftijdsklassen
 from types import SimpleNamespace
 
 
@@ -91,7 +91,7 @@ class InfoLeeftijdenView(TemplateView):
         context['comp_1'] = self._comp_info(huidige_jaar - 1)
         context['comp_2'] = self._comp_info(huidige_jaar)
 
-        _, _, context['is_jong'], _, _ = get_sessionvars_leeftijdsklassen(self.request)
+        context['persoonlijke_leeftijdsklassen'] = self.request.user.is_authenticated
 
         menu_dynamics(self.request, context, actief='competitie')
         return context
