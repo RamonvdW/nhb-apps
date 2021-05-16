@@ -10,7 +10,7 @@
 
 {% block pagina %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="kalender-overzicht" %}
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="kalender-overzicht-maand" %}
 
     <h4>Wedstrijdkalender</h4>
 
@@ -38,6 +38,7 @@
                 <th>Wanneer</th>
                 <th>Beschrijving</th>
                 <th>Locatie</th>
+                <th><!-- kolom voor de knoppen --></th>
             </tr>
         </thead>
 
@@ -46,6 +47,7 @@
             <td>30 september 2021 - 31 september 2021</td>
             <td>Dit is de titel van een best wel lange wedstrijd</td>
             <td>Brede plaatnaam ergens</td>
+            <td><a class="btn-nhb-blauw" href="#">Details</a></td>
         </tr>
 
         {% for wed in wedstrijden %}
@@ -53,12 +55,17 @@
                 <td>{{ wed.datum_begin }}{% if wed.datum_begin != wed.datum_einde %} - {{ wed.datum_einde }}{% endif %}</td>
                 <td>{{ wed.titel }}</td>
                 <td>{{ wed.locatie.plaats }}</td>
+                <td>
+                    {% if url_details %}
+                        <a class="btn-nhb-blauw" href="{{ wed.url_details }}">Details</a>
+                    {% endif %}
+                </td>
             </tr>
         {% empty %}
             <tr>
-                <td colspan="3">
-                    <i>Geen wedstrijden gevonden</i>
-                </td>
+                <td></td>
+                <td><i>Geen wedstrijden gevonden</i></td>
+                <td colspan="2"></td>
             </tr>
         {% endfor %}
 
