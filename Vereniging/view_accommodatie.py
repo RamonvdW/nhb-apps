@@ -497,6 +497,22 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
                 schrijf_in_logboek(request.user, 'Accommodaties', activiteit)
                 binnen_locatie.save()
 
+            disc_old = binnen_locatie.disciplines_str()
+            binnen_locatie.discipline_indoor = (str(binnen_locatie.banen_18m) != "0" or
+                                                str(binnen_locatie.banen_25m) != "0")
+            binnen_locatie.discipline_25m1pijl = False
+            binnen_locatie.discipline_outdoor = False
+            binnen_locatie.discipline_clout = False
+            binnen_locatie.discipline_veld = False
+            binnen_locatie.discipline_run = False
+            binnen_locatie.discipline_3d = False
+            disc_new = binnen_locatie.disciplines_str()
+            if disc_old != disc_new:
+                activiteit = "Aanpassing disciplines van binnen locatie van vereniging %s: [%s] (was [%s])" % (
+                                nhbver, disc_new, disc_old)
+                schrijf_in_logboek(request.user, 'Accommodaties', activiteit)
+                binnen_locatie.save()
+
             data = form.cleaned_data.get('notities')
             data = data.replace('\r\n', '\n')
             if binnen_locatie.notities != data:
@@ -544,7 +560,7 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
             disc_old = buiten_locatie.disciplines_str()
             buiten_locatie.discipline_25m1pijl = form.cleaned_data.get('disc_25m1p')
             buiten_locatie.discipline_outdoor = form.cleaned_data.get('disc_outdoor')
-            # buiten_locatie.discipline_indoor = form.cleaned_data.get('disc_indoor')
+            buiten_locatie.discipline_indoor = False
             buiten_locatie.discipline_clout = form.cleaned_data.get('disc_clout')
             buiten_locatie.discipline_veld = form.cleaned_data.get('disc_veld')
             buiten_locatie.discipline_run = form.cleaned_data.get('disc_run')

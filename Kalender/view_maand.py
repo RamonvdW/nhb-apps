@@ -133,7 +133,8 @@ class KalenderMaandView(View):
                        .objects
                        .select_related('locatie')
                        .filter(datum_begin__gte=datum_vanaf,
-                               datum_begin__lt=datum_voor))
+                               datum_begin__lt=datum_voor)
+                       .order_by('datum_begin'))
         context['wedstrijden'] = wedstrijden
 
         menu_dynamics(self.request, context, 'kalender')
