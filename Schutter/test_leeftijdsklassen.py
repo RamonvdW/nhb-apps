@@ -8,7 +8,7 @@ from django.utils import timezone
 from django.test import TestCase
 from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
 from Overig.e2ehelpers import E2EHelpers
-from .leeftijdsklassen import leeftijdsklassen_plugin_na_login, get_sessionvars_leeftijdsklassen
+from .leeftijdsklassen import leeftijdsklassen_plugin_na_login, bereken_leeftijdsklassen
 from types import SimpleNamespace
 import datetime
 
@@ -64,7 +64,7 @@ class TestSchutterLeeftijdsklassen(E2EHelpers, TestCase):
         request.session = dict()
 
         # session vars niet gezet
-        huidige_jaar, leeftijd, is_jong, wlst, clst = get_sessionvars_leeftijdsklassen(request)
+        huidige_jaar, leeftijd, is_jong, wlst, clst = bereken_leeftijdsklassen(request)
         self.assertIsNone(huidige_jaar)
         self.assertIsNone(leeftijd)
         self.assertFalse(is_jong)
@@ -73,7 +73,7 @@ class TestSchutterLeeftijdsklassen(E2EHelpers, TestCase):
 
         # geen nhblid
         leeftijdsklassen_plugin_na_login(request, "from_ip", self.account_geenlid)
-        huidige_jaar, leeftijd, is_jong, wlst, clst = get_sessionvars_leeftijdsklassen(request)
+        huidige_jaar, leeftijd, is_jong, wlst, clst = bereken_leeftijdsklassen(request)
         self.assertIsNone(huidige_jaar)
         self.assertIsNone(leeftijd)
         self.assertFalse(is_jong)
@@ -91,7 +91,7 @@ class TestSchutterLeeftijdsklassen(E2EHelpers, TestCase):
         nhblid.geboorte_datum = datetime.date(year=now_jaar-nhb_leeftijd, month=1, day=1)
         nhblid.save()
         leeftijdsklassen_plugin_na_login(request, "from_ip", account)
-        huidige_jaar, leeftijd, is_jong, wlst, clst = get_sessionvars_leeftijdsklassen(request)
+        huidige_jaar, leeftijd, is_jong, wlst, clst = bereken_leeftijdsklassen(request)
         self.assertEquals(huidige_jaar, now_jaar)
         self.assertEqual(leeftijd, nhb_leeftijd)
         self.assertTrue(is_jong)        # onder 30 == jong
@@ -104,7 +104,7 @@ class TestSchutterLeeftijdsklassen(E2EHelpers, TestCase):
         nhblid.geboorte_datum = datetime.date(year=now_jaar-nhb_leeftijd, month=1, day=1)
         nhblid.save()
         leeftijdsklassen_plugin_na_login(request, "from_ip", account)
-        huidige_jaar, leeftijd, is_jong, wlst, clst = get_sessionvars_leeftijdsklassen(request)
+        huidige_jaar, leeftijd, is_jong, wlst, clst = bereken_leeftijdsklassen(request)
         self.assertEquals(huidige_jaar, now_jaar)
         self.assertEqual(leeftijd, nhb_leeftijd)
         self.assertTrue(is_jong)        # onder 30 == jong
@@ -117,7 +117,7 @@ class TestSchutterLeeftijdsklassen(E2EHelpers, TestCase):
         nhblid.geboorte_datum = datetime.date(year=now_jaar-nhb_leeftijd, month=1, day=1)
         nhblid.save()
         leeftijdsklassen_plugin_na_login(request, "from_ip", account)
-        huidige_jaar, leeftijd, is_jong, wlst, clst = get_sessionvars_leeftijdsklassen(request)
+        huidige_jaar, leeftijd, is_jong, wlst, clst = bereken_leeftijdsklassen(request)
         self.assertEquals(huidige_jaar, now_jaar)
         self.assertEqual(leeftijd, nhb_leeftijd)
         self.assertTrue(is_jong)        # onder 30 == jong
@@ -130,7 +130,7 @@ class TestSchutterLeeftijdsklassen(E2EHelpers, TestCase):
         nhblid.geboorte_datum = datetime.date(year=now_jaar-nhb_leeftijd, month=1, day=1)
         nhblid.save()
         leeftijdsklassen_plugin_na_login(request, "from_ip", account)
-        huidige_jaar, leeftijd, is_jong, wlst, clst = get_sessionvars_leeftijdsklassen(request)
+        huidige_jaar, leeftijd, is_jong, wlst, clst = bereken_leeftijdsklassen(request)
         self.assertEquals(huidige_jaar, now_jaar)
         self.assertEqual(leeftijd, nhb_leeftijd)
         self.assertFalse(is_jong)        # onder 30 == jong
@@ -142,7 +142,7 @@ class TestSchutterLeeftijdsklassen(E2EHelpers, TestCase):
         nhblid.geboorte_datum = datetime.date(year=now_jaar-nhb_leeftijd, month=1, day=1)
         nhblid.save()
         leeftijdsklassen_plugin_na_login(request, "from_ip", account)
-        huidige_jaar, leeftijd, is_jong, wlst, clst = get_sessionvars_leeftijdsklassen(request)
+        huidige_jaar, leeftijd, is_jong, wlst, clst = bereken_leeftijdsklassen(request)
         self.assertEquals(huidige_jaar, now_jaar)
         self.assertEqual(leeftijd, nhb_leeftijd)
         self.assertFalse(is_jong)        # onder 30 == jong
@@ -151,7 +151,7 @@ class TestSchutterLeeftijdsklassen(E2EHelpers, TestCase):
 
     def test_login(self):
         self.e2e_login(self.account_normaal)
-        huidige_jaar, leeftijd, is_jong, wlst, clst = get_sessionvars_leeftijdsklassen(self.client)
+        huidige_jaar, leeftijd, is_jong, wlst, clst = bereken_leeftijdsklassen(self.client)
         self.assertFalse(is_jong)
         self.assertGreaterEqual(leeftijd, 48)    # in 2020-1972 = 48
 

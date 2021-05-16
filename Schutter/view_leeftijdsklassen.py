@@ -8,7 +8,7 @@ from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Plein.menu import menu_dynamics
 from Functie.rol import Rollen, rol_get_huidige
-from .leeftijdsklassen import get_sessionvars_leeftijdsklassen
+from .leeftijdsklassen import bereken_leeftijdsklassen
 import logging
 
 
@@ -27,13 +27,13 @@ class LeeftijdsklassenView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol = rol_get_huidige(self.request)
-        return rol == Rollen.ROL_SCHUTTER
+        return rol != Rollen.ROL_NONE
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        huidige_jaar, leeftijd, is_jong, wlst, clst = get_sessionvars_leeftijdsklassen(self.request)
+        huidige_jaar, leeftijd, is_jong, wlst, clst = bereken_leeftijdsklassen(self.request)
         context['plein_is_jonge_schutter'] = is_jong
         context['plein_huidige_jaar'] = huidige_jaar
         context['plein_leeftijd'] = leeftijd

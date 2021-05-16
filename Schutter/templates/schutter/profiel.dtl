@@ -83,16 +83,12 @@
             <i class="material-icons-round left">https</i>Wachtwoord wijzigen</a>
     </p>
 
-    {% if toon_leeftijdsklassen %}
+    <span>&nbsp;</span>
+    <h5>Leeftijdsklassen</h5>
 
-        <span>&nbsp;</span>
-        <h5>Leeftijdsklassen</h5>
-
-        <p>Op wedstrijden en in de (winter)competitie wordt je aan de hand van je leeftijd ingedeeld in een wedstrijdklasse.</p>
-        <p><a class="btn-nhb-blauw" href="{% url 'Schutter:leeftijdsklassen' %}"><i class="material-icons-round left">grade</i>Mijn leeftijdsklassen</a></p>
-        <p>Gebruik de knop om te zien in welke klassen jij uit moet komen.</p>
-
-    {% endif %}
+    <p>Op wedstrijden en in de bondscompetities wordt je aan de hand van je leeftijd ingedeeld in een wedstrijdklasse.</p>
+    <p><a class="btn-nhb-blauw" href="{% url 'Schutter:leeftijdsklassen' %}"><i class="material-icons-round left">grade</i>Mijn leeftijdsklassen</a></p>
+    <p>Gebruik de knop om te zien in welke klassen jij uit moet komen.</p>
 
 
     {% if competities %}

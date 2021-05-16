@@ -19,7 +19,7 @@ from Competitie.models import (Competitie, DeelCompetitie,
                                LAAG_REGIO, INSCHRIJF_METHODE_1)
 from Records.models import IndivRecord, MATERIAALKLASSE
 from Score.models import Score, ScoreHist, SCORE_TYPE_INDIV_AG, SCORE_TYPE_TEAM_AG
-from .leeftijdsklassen import get_sessionvars_leeftijdsklassen
+from .leeftijdsklassen import bereken_leeftijdsklassen
 from .models import SchutterVoorkeuren, SchutterBoog
 import logging
 import copy
@@ -368,8 +368,6 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         context['histcomp'] = self._find_histcomp_scores(nhblid, alle_bogen)
 
         if nhblid.bij_vereniging and not nhblid.bij_vereniging.geen_wedstrijden:
-            _, _, is_jong, _, _ = get_sessionvars_leeftijdsklassen(self.request)
-            context['toon_leeftijdsklassen'] = is_jong
             context['competities'] = comps = self._find_competities(voorkeuren)
             context['regiocompetities'] = self._find_regiocompetities(comps, nhblid, voorkeuren, alle_bogen)
             context['gemiddelden'], context['heeft_ags'] = self._find_gemiddelden(nhblid, alle_bogen)
