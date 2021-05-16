@@ -19,6 +19,10 @@ urlpatterns = [
          view_maand.KalenderMaandView.as_view(),
          name='maand'),
 
+    path('<wedstrijd_pk>/info/',
+         view_maand.WedstrijdInfoView.as_view(),
+         name='wedstrijd-info'),
+
     path('vereniging/',
          view_vereniging.VerenigingKalenderWedstrijdenView.as_view(),
          name='vereniging'),

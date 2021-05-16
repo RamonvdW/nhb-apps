@@ -1,0 +1,19 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2021 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Wedstrijd details{% endblock %}
+
+{% block pagina %}
+
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="kalender-wedstrijd-details" %}
+
+    <h4>Wedstrijd details</h4>
+
+    <p>{{ wedstrijd }}</p>
+
+{% endblock %}

@@ -7,17 +7,13 @@
 from django.http import Http404
 from django.urls import reverse
 from django.utils import timezone
-from django.shortcuts import render
-from django.views.generic import View
-from django.utils.formats import date_format
-from django.core.exceptions import PermissionDenied
-from django.contrib.auth.mixins import UserPassesTestMixin
-from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
+from django.views.generic import TemplateView
 from Plein.menu import menu_dynamics
-from .models import KalenderWedstrijd
+from .models import KalenderWedstrijd, WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_STATUS_GEANNULEERD
 from datetime import date
 
 TEMPLATE_KALENDER_MAAND = 'kalender/overzicht-maand.dtl'
+TEMPLATE_KALENDER_WEDSTRIJD_DETAILS = 'kalender/wedstrijd-details.dtl'
 
 MAANDEN = (
     (1, 'januari', 'jan'),
@@ -59,7 +55,8 @@ def get_url_huidige_maand():
     return url
 
 
-class KalenderMaandView(View):
+class KalenderMaandView(TemplateView):
+
     """ Via deze view krijgen gebruikers en sporters de wedstrijdkalender te zien """
 
     # class variables shared by all instances
@@ -110,14 +107,15 @@ class KalenderMaandView(View):
 
         return url_prev, url_next
 
-    def get(self, request, *args, **kwargs):
+    def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
+
+        context = super().get_context_data(**kwargs)
 
         jaar = kwargs['jaar']                           # int
         maand = self._maand_to_nr(kwargs['maand'])      # str
         self._validate_jaar_maand(jaar, maand)
 
-        context = dict()
         context['datum'] = date(year=jaar, month=maand, day=1)
         context['url_prev_maand'], context['url_next_maand'] = self._get_prev_next_urls(jaar, maand)
 
@@ -133,12 +131,43 @@ class KalenderMaandView(View):
                        .objects
                        .select_related('locatie')
                        .filter(datum_begin__gte=datum_vanaf,
-                               datum_begin__lt=datum_voor)
+                               datum_begin__lt=datum_voor,
+                               status__in=(WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_STATUS_GEANNULEERD))
                        .order_by('datum_begin'))
+        for wed in wedstrijden:
+            if wed.status == WEDSTRIJD_STATUS_GEANNULEERD:
+                wed.titel = '[GEANNULEERD] ' + wed.titel
+            else:
+                wed.url_details = reverse('Kalender:wedstrijd-info',
+                                          kwargs={'wedstrijd_pk': wed.pk})
+        # for
         context['wedstrijden'] = wedstrijden
 
         menu_dynamics(self.request, context, 'kalender')
-        return render(request, self.template_name, context)
+        return context
 
+
+class WedstrijdInfoView(TemplateView):
+
+    """ Via deze view krijgen gebruikers en sporters de wedstrijdkalender te zien """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_KALENDER_WEDSTRIJD_DETAILS
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+
+        context = super().get_context_data(**kwargs)
+
+        try:
+            wedstrijd_pk = str(kwargs['wedstrijd_pk'])[:6]     # afkappen voor de veiligheid
+            wedstrijd = KalenderWedstrijd.objects.get(pk=wedstrijd_pk)
+        except KalenderWedstrijd.DoesNotExist:
+            raise Http404('Wedstrijd niet gevonden')
+
+        context['wedstrijd'] = wedstrijd
+
+        menu_dynamics(self.request, context, 'kalender')
+        return context
 
 # end of file
