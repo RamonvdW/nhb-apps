@@ -78,6 +78,11 @@
             </tr>
 
             <tr>
+                <td>Organiserende vereniging:</td>
+                <td colspan="2">{{ wed.organiserende_vereniging }}</td>
+            </tr>
+
+            <tr>
                 <td>Status:</td>
                 <td>
                     {% for opt in opt_status %}
@@ -162,7 +167,7 @@
                 </td>
                 <td>
                     {% if wed.voorwaarden_a_status_acceptatie %}
-                        <p>Akkoord voor A-status voorwaarden is gegeven op {{ wed.voorwaarden_a_status_when }} door {{ wed.voorwaarden_a_status_who }}.</p>
+                        <p>Akkoord voor A-status voorwaarden is gegeven<br>op {{ wed.voorwaarden_a_status_when }} door {{ wed.voorwaarden_a_status_who }}</p>
                         <a class="btn-nhb-blauw btn-small" href="{{ url_voorwaarden }}" target="_blank" rel="noopener noreferrer">
                             <i class="material-icons-round left">open_in_new</i>Voorwaarden lezen</a>
                     {% else %}
@@ -179,11 +184,6 @@
                         </ul>
                     {% endif %}
                 </td>
-            </tr>
-
-            <tr>
-                <td>Organiserende vereniging:</td>
-                <td colspan="2">{{ wed.organiserende_vereniging }}</td>
             </tr>
 
             <tr>
@@ -217,6 +217,17 @@
                         </tr>
 
                         <tr>
+                            <td>Telefoonnummer</td>
+                            <td>
+                                {% if block_edits %}
+                                    <span>{{ wed.contact_telefoon }}</span>
+                                {% else %}
+                                    <input type="tel" name="contact_telefoon" value="{{ wed.contact_telefoon }}" oninput="gewijzigd()">
+                                {% endif %}
+                            </td>
+                        </tr>
+
+                        <tr>
                             <td>E-mailadres</td>
                             <td>
                                 {% if block_edits %}
@@ -239,13 +250,12 @@
                         </tr>
 
                         <tr>
-                            <td>Telefoonnummer</td>
+                            <td>Extern beheer:</td>
                             <td>
-                                {% if block_edits %}
-                                    <span>{{ wed.contact_telefoon }}</span>
-                                {% else %}
-                                    <input type="tel" name="contact_telefoon" value="{{ wed.contact_telefoon }}" oninput="gewijzigd()">
-                                {% endif %}
+                                <label class="black-text">
+                                    <input type="checkbox" class="filled-in" name="extern"{% if wed.extern_beheerd %} checked{% endif %} onchange="gewijzigd()">
+                                    <span>Inschrijven via bovenstaande website en/of e-mailadres</span>
+                                </label>
                             </td>
                         </tr>
 
@@ -290,8 +300,10 @@
             </tr>
 
             <tr>
-                <td>Sporters moeten ruim voor begin van hun sessie aanwezig zijn.<br>Hoe ver van te voren wil je ze vragen aanwezig te zijn?</td>
+                <td>Aanwezig melden:</td>
                 <td colspan="2">
+                    <span>Hoe lang van tevoren wil je sporters vragen aanwezig te zijn?</span>
+
                     <select name="aanwezig" onchange="gewijzigd()">
                         {% for opt in opt_aanwezig %}
                             <option value="{{ opt.sel }}"{% if opt.selected %} selected{% endif %}>{{ opt.keuze_str }}</option>
@@ -300,7 +312,30 @@
                 </td>
             </tr>
 
+            <tr>
+                <td>Wedstrijdklassen:</td>
+                <td>
+                    {% for klasse in opt_klasse_1 %}
+                        <label class="black-text">
+                            <input type="checkbox" class="filled-in" name="{{ klasse.sel }}"{% if klasse.selected %} checked{% endif %} onchange="gewijzigd()">
+                            <span>{{ klasse.beschrijving }}</span>
+                        </label><br>
+                    {% endfor %}
+                </td>
+                <td>
+                    {% for klasse in opt_klasse_2 %}
+                        <label class="black-text">
+                            <input type="checkbox" class="filled-in" name="{{ klasse.sel }}"{% if klasse.selected %} checked{% endif %} onchange="gewijzigd()">
+                            <span>{{ klasse.beschrijving }}</span>
+                        </label><br>
+                    {% endfor %}
+                </td>
+            </tr>
+
         </table>
+
+        <p>De wedstrijdklasse senioren is altijd de 'open' klasse waarin alle andere leeftijdsklassen mee mogen doen.</p>
+        <p>Na wijzigen tussen A-status en B-status eerst opslaan, dan passen de wedstrijdklassen zich aan.</p>
 
         <br>
 

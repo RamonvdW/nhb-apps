@@ -13,6 +13,7 @@ from django.views.generic import View
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import Account
+from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 from Taken.taken import maak_taak
@@ -160,6 +161,28 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
             opt.keuze_str = disc
             opt.selected = (wedstrijd.discipline == afk)
             opt_disc.append(opt)
+        # for
+
+        context['opt_klasse_1'] = opt_klasse_1 = list()
+        context['opt_klasse_2'] = opt_klasse_2 = list()
+        pks = list(wedstrijd.wedstrijdklassen.values_list('pk', flat=True))
+        for klasse in (KalenderWedstrijdklasse
+                       .objects
+                       .exclude(buiten_gebruik=True)
+                       .select_related('leeftijdsklasse')
+                       .order_by('volgorde')):
+
+            if wedstrijd.wa_status == WEDSTRIJD_WA_STATUS_A:
+                if not klasse.leeftijdsklasse.volgens_wa:
+                    continue    # skip
+
+            klasse.sel = 'klasse_%s' % klasse.pk
+            klasse.selected = (klasse.pk in pks)
+
+            if klasse.leeftijdsklasse.geslacht == 'M':
+                opt_klasse_1.append(klasse)
+            else:
+                opt_klasse_2.append(klasse)
         # for
 
         wedstrijd.wa_status_str = WEDSTRIJD_WA_STATUS_TO_STR[wedstrijd.wa_status]
@@ -338,7 +361,55 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
                         break       # from the for
                 # for
 
+            pks = list(wedstrijd.boogtypen.values_list('pk', flat=True))
+            for boog in BoogType.objects.all():
+                if request.POST.get('boog_' + boog.afkorting, ''):
+                    # boog is gekozen
+                    if boog.pk not in pks:
+                        wedstrijd.boogtypen.add(boog)
+                else:
+                    # boog is niet (meer) gekozen
+                    if boog.pk in pks:
+                        wedstrijd.boogtypen.remove(boog)
+            # for
+
+            if request.POST.get('extern', ''):
+                wedstrijd.extern_beheerd = True
+            else:
+                wedstrijd.extern_beheerd = False
+
             wedstrijd.save()
+
+            pks = list(wedstrijd.wedstrijdklassen.values_list('pk', flat=True))
+            for klasse in (KalenderWedstrijdklasse
+                           .objects
+                           .exclude(buiten_gebruik=True)
+                           .select_related('leeftijdsklasse')
+                           .order_by('volgorde')):
+
+                if wedstrijd.wa_status == WEDSTRIJD_WA_STATUS_A:
+                    if not klasse.leeftijdsklasse.volgens_wa:
+                        if klasse.pk in pks:
+                            # haal uit de geselecteerde set
+                            wedstrijd.wedstrijdklassen.remove(klasse)
+                        continue  # skip
+
+                if request.POST.get('klasse_%s' % klasse.pk, ''):
+                    # klasse is gewenst
+                    if klasse not in pks:
+                        wedstrijd.wedstrijdklassen.add(klasse)
+                else:
+                    # klasse is niet gewenst
+                    if klasse.pk in pks:
+                        wedstrijd.wedstrijdklassen.remove(klasse)
+            # for
+
+            # werk de boogtypen bij
+            boog_list = list()
+            for klasse in wedstrijd.wedstrijdklassen.select_related('boogtype').distinct('boogtype'):
+                boog_list.append(klasse.boogtype)
+            # for
+            wedstrijd.boogtypen.set(boog_list)
 
             self._verplaats_sessies(wedstrijd, oude_datum_begin)
 
