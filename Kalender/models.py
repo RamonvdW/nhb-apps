@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import models
-from BasisTypen.models import IndivWedstrijdklasse, BoogType
+from BasisTypen.models import IndivWedstrijdklasse, BoogType, KalenderWedstrijdklasse
 from NhbStructuur.models import NhbVereniging, NhbLid
 from Schutter.models import SchutterBoog
 from Wedstrijden.models import WedstrijdLocatie
@@ -103,8 +103,8 @@ class KalenderWedstrijdSessie(models.Model):
     tijd_einde = models.TimeField()
 
     # toegestane wedstrijdklassen
-    klassen = models.ManyToManyField(IndivWedstrijdklasse,
-                                     blank=True)        # mag leeg zijn / gemaakt worden
+    wedstrijdklassen = models.ManyToManyField(KalenderWedstrijdklasse,
+                                              blank=True)        # mag leeg zijn / gemaakt worden
 
     # maximum aantal deelnemers
     max_sporters = models.PositiveSmallIntegerField(default=1)
@@ -143,23 +143,28 @@ class KalenderWedstrijd(models.Model):
 
     # contactgegevens van de organisatie
     organiserende_vereniging = models.ForeignKey(NhbVereniging, on_delete=models.PROTECT)
-    contact_naam = models.CharField(max_length=50, default='')
-    contact_email = models.CharField(max_length=150, default='')
-    contact_website = models.CharField(max_length=100, default='')
-    contact_telefoon = models.CharField(max_length=50, default='')
+    contact_naam = models.CharField(max_length=50, default='', blank=True)
+    contact_email = models.CharField(max_length=150, default='', blank=True)
+    contact_website = models.CharField(max_length=100, default='', blank=True)
+    contact_telefoon = models.CharField(max_length=50, default='', blank=True)
 
     # acceptatie voorwaarden WA A-status
     voorwaarden_a_status_acceptatie = models.BooleanField(default=False)
     voorwaarden_a_status_when = models.DateTimeField()
-    voorwaarden_a_status_who = models.CharField(max_length=100, default='')     # [BondsNr] Volledige Naam
+    voorwaarden_a_status_who = models.CharField(max_length=100, default='',          # [BondsNr] Volledige Naam
+                                                blank=True)     # mag leeg zijn
 
-    # als deze wedstrijd door de organiserende vereniging buiten deze website om gehanteerd wordt
-    # dan is dit veld ingevuld en wordt de sporter doorgestuurd
-    unmanaged_url = models.CharField(max_length=100, default='')
+    # wordt deze wedstrijd door de organiserende vereniging buiten deze website om beheerd?
+    # (inschrijvingen, betalingen)
+    extern_beheerd = models.BooleanField(default=False)
 
-    # samenvatting van de boogtypen die voorkomen in de wedstrijdklassen
-    # hiermee kan de kalender gefilterd worden op de ingestelde boogtypen van de sporter
+    # boog typen die aan deze wedstrijd deel kunnen nemen
+    # (voor de filters, wordt gevuld aan de hand van de gekozen wedstrijdklassen)
     boogtypen = models.ManyToManyField(BoogType, blank=True)
+
+    # gekozen wedstrijdklassen voor de deze wedstrijd
+    # deze kunnen gebruikt worden in de sessies
+    wedstrijdklassen = models.ManyToManyField(KalenderWedstrijdklasse, blank=True)
 
     # aantal banen voor deze wedstrijd
     aantal_banen = models.PositiveSmallIntegerField(default=1)
@@ -168,7 +173,8 @@ class KalenderWedstrijd(models.Model):
     minuten_voor_begin_sessie_aanwezig_zijn = models.PositiveSmallIntegerField(default=45)
 
     # tekstveld voor namen scheidsrechters door organisatie aangedragen
-    scheidsrechters = models.TextField(max_length=500, default='')
+    scheidsrechters = models.TextField(max_length=500, default='',
+                                       blank=True)      # mag leeg zijn
 
     # de sessies van deze wedstrijd
     sessies = models.ManyToManyField(KalenderWedstrijdSessie,
@@ -182,5 +188,8 @@ class KalenderWedstrijd(models.Model):
         verbose_name = "Kalender wedstrijd"
         verbose_name_plural = "Kalender wedstrijden"
 
+    def __str__(self):
+        """ geef een beschrijving terug voor de admin interface """
+        return "%s [%s] %s" % (self.datum_begin, WEDSTRIJD_STATUS_TO_STR[self.status], self.titel)
 
 # end of file

@@ -13,11 +13,15 @@ class KalenderWedstrijdAdmin(admin.ModelAdmin):                 # pragma: no cov
 
     list_filter = ('discipline', 'status', 'wa_status')
 
-    readonly_fields = ('sessies', 'deeluitslagen', 'boogtypen')
+    readonly_fields = ('sessies', 'deeluitslagen', 'boogtypen', 'wedstrijdklassen')
 
     search_fields = ('titel',)
 
     ordering = ('datum_begin',)
+
+    def __init__(self, model, admin_site):
+        super().__init__(model, admin_site)
+        self.obj = None
 
     def get_queryset(self, request):
         """ deze functie is voor prestatieverbetering
@@ -32,13 +36,25 @@ class KalenderWedstrijdAdmin(admin.ModelAdmin):                 # pragma: no cov
                                   'deeluitslagen')
                 .all())
 
+    def get_form(self, request, obj=None, **kwargs):
+        if obj:                 # pragma: no branch
+            self.obj = obj      # pragma: no cover
+        return super().get_form(request, obj, **kwargs)
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):    # pragma: no cover
+        if db_field.name == 'locatie':
+            ver = self.obj.organiserende_vereniging
+            kwargs['queryset'] = ver.wedstrijdlocatie_set.all()
+
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
 
 class KalenderWedstrijdSessieAdmin(admin.ModelAdmin):             # pragma: no cover
     """ Admin configuratie voor KalenderWedstrijdSessie """
 
     search_fields = ('pk',)
 
-    readonly_fields = ('klassen', 'aanmeldingen')
+    readonly_fields = ('wedstrijdklassen', 'aanmeldingen')
 
     def get_queryset(self, request):
         """ deze functie is voor prestatieverbetering
