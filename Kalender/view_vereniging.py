@@ -10,6 +10,7 @@ from django.utils import timezone
 from django.shortcuts import render
 from django.views.generic import View
 from django.contrib.auth.mixins import UserPassesTestMixin
+from BasisTypen.models import KalenderWedstrijdklasse
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 from .models import (KalenderWedstrijd,
@@ -76,13 +77,17 @@ class VerenigingKalenderWedstrijdenView(UserPassesTestMixin, View):
                 now = timezone.now()
                 begin = date(now.year, now.month, now.day)
 
-                KalenderWedstrijd(
-                    datum_begin=begin,
-                    datum_einde=begin,
-                    organiserende_vereniging=self.functie_nu.nhb_ver,
-                    voorwaarden_a_status_when=now,
-                    locatie=locaties[0]
-                    ).save()
+                wed = KalenderWedstrijd(
+                            datum_begin=begin,
+                            datum_einde=begin,
+                            organiserende_vereniging=self.functie_nu.nhb_ver,
+                            voorwaarden_a_status_when=now,
+                            locatie=locaties[0])
+                wed.save()
+
+                # default alle wedstrijdklassen kiezen die onder A-status vallen
+                klassen = KalenderWedstrijdklasse.objects.exclude(leeftijdsklasse__volgens_wa=False).all()
+                wed.wedstrijdklassen.set(klassen)
 
         url = reverse('Kalender:vereniging')
         return HttpResponseRedirect(url)
