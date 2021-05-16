@@ -11,7 +11,8 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 from .models import (KalenderWedstrijd,
-                     WEDSTRIJD_DISCIPLINE_TO_STR, WEDSTRIJD_STATUS_TO_STR)
+                     WEDSTRIJD_DISCIPLINE_TO_STR, WEDSTRIJD_STATUS_TO_STR,
+                     WEDSTRIJD_STATUS_WACHT_OP_GOEDKEURING)
 
 TEMPLATE_KALENDER_OVERZICHT_MANAGER = 'kalender/overzicht-manager.dtl'
 
@@ -44,6 +45,7 @@ class KalenderManagerView(UserPassesTestMixin, View):
         for wed in wedstrijden:
             wed.disc_str = WEDSTRIJD_DISCIPLINE_TO_STR[wed.discipline]
             wed.status_str = WEDSTRIJD_STATUS_TO_STR[wed.status]
+            wed.status_val_op = (wed.status == WEDSTRIJD_STATUS_WACHT_OP_GOEDKEURING)
             wed.url_wijzig = reverse('Kalender:wijzig-wedstrijd', kwargs={'wedstrijd_pk': wed.pk})
             wed.url_sessies = reverse('Kalender:wijzig-sessies', kwargs={'wedstrijd_pk': wed.pk})
         # for
