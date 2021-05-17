@@ -12,7 +12,8 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from django.shortcuts import redirect
 from django.utils import timezone
 from django.conf import settings
-from BasisTypen.models import BoogType
+from django.db.models import Count
+from BasisTypen.models import BoogType, LeeftijdsKlasse
 from BasisTypen.models import (IndivWedstrijdklasse, TeamWedstrijdklasse,
                                MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT)
 from Functie.rol import Rollen, rol_get_huidige
@@ -416,12 +417,6 @@ class KlassegrenzenVaststellenView(UserPassesTestMixin, TemplateView):
         # dat is het tweede jaar van de competitie, waarin de BK gehouden wordt
         jaar = comp.begin_jaar + 1
 
-        # eenmalig de wedstrijdleeftijd van elke nhblid berekenen
-        schutternr2age = dict()     # [ nhb_nr ] = age
-        for lid in NhbLid.objects.all():
-            schutternr2age[lid.nhb_nr] = lid.bereken_wedstrijdleeftijd(jaar)
-        # for
-
         # haal de scores 1x op per boogtype
         boogtype2ags = dict()        # [boogtype.afkorting] = scores
         for boogtype in BoogType.objects.all():
@@ -434,21 +429,73 @@ class KlassegrenzenVaststellenView(UserPassesTestMixin, TemplateView):
                                                         afstand_meter=comp.afstand,
                                                         schutterboog__boogtype=boogtype))
         # for
+        del boogtype
+
+        lkl_cache = list()
+        klasse2lkl_mannen = dict()     # [klasse.pk] = [lkl, lkl, lkl..]
+        for lkl in (LeeftijdsKlasse
+                    .objects
+                    .filter(geslacht='M')
+                    .order_by('volgorde')):
+            klasse_pks = list(lkl.indivwedstrijdklasse_set.values_list('pk', flat=True))
+            if len(klasse_pks) > 0:
+                # wordt gebruikt in de bondscompetities
+                lkl_cache.append(lkl)
+                for pk in klasse_pks:
+                    try:
+                        klasse2lkl_mannen[pk].append(lkl)
+                    except KeyError:
+                        klasse2lkl_mannen[pk] = [lkl]
+                # for
+        # for
+        del lkl
+
+        # verdeel de schuttersboog (waar we een AG van hebben) over boogtype-leeftijdsklasse groepjes
+        done_nrs = list()
+        boogtype_lkl2schutters = dict()      # [boogtype.afkorting + '_' + leeftijdsklasse.afkorting] = [nhb_nr, nhb_nr, ..]
+        for boogtype_afkorting in boogtype2ags.keys():
+            scores = boogtype2ags[boogtype_afkorting]
+
+            for lkl in lkl_cache:
+                index = boogtype_afkorting + '_' + lkl.afkorting
+                boogtype_lkl2schutters[index] = nrs = list()
+
+                for score in scores:
+                    schutterboog = score.schutterboog
+                    nr = schutterboog.pk
+                    if nr not in done_nrs:
+                        lid = schutterboog.nhblid
+                        age = lid.bereken_wedstrijdleeftijd(jaar)
+                        if lkl.leeftijd_is_compatible(age):
+                            nrs.append(nr)
+                            done_nrs.append(nr)
+                # for (score)
+            # for (lkl)
+        # for (boogtype)
 
         # wedstrijdklassen vs leeftijd + bogen
-        targets = self._get_targets_indiv()
+        targets = self._get_targets_indiv()     # TODO: pass the caches
 
         # creëer de resultatenlijst
         objs = list()
         for tup, wedstrklassen in targets.items():
-            min_age, max_age, boogtype, heeft_klasse_onbekend = tup
+            _, _, boogtype, heeft_klasse_onbekend = tup
+            scores = boogtype2ags[boogtype.afkorting]
 
             # zoek alle schutters-boog die hier in passen (boog, leeftijd)
             gemiddelden = list()
-            for score in boogtype2ags[boogtype.afkorting]:
-                age = schutternr2age[score.schutterboog.nhblid.nhb_nr]
-                if min_age <= age <= max_age:
-                    gemiddelden.append(score.waarde)        # is AG*1000
+            index_gehad = list()
+            for klasse in wedstrklassen:
+                for lkl in klasse2lkl_mannen[klasse.pk]:
+                    index = boogtype.afkorting + '_' + lkl.afkorting
+                    if index not in index_gehad:
+                        index_gehad.append(index)
+                        nrs = boogtype_lkl2schutters[index]
+                        for score in scores:
+                            if score.schutterboog.pk in nrs:
+                                gemiddelden.append(score.waarde)        # is AG*1000
+                    # for
+                # for
             # for
 
             if len(gemiddelden):
