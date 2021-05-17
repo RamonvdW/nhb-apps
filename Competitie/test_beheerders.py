@@ -127,10 +127,10 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
 
         # klassegrenzen vaststellen
         url_klassegrenzen = '/bondscompetities/%s/klassegrenzen/vaststellen/'
-        with self.assert_max_queries(79):
+        with self.assert_max_queries(86):
             resp = self.client.post(url_klassegrenzen % self.comp_18.pk)
         self.assert_is_redirect_not_plein(resp)  # check for success
-        with self.assert_max_queries(79):
+        with self.assert_max_queries(86):
             resp = self.client.post(url_klassegrenzen % self.comp_25.pk)
         self.assert_is_redirect_not_plein(resp)  # check for success
         # nu in fase A2
@@ -158,7 +158,6 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
             functie_hwl = nhb_ver.functie_set.filter(rol='HWL').all()[0]
             self.e2e_wissel_naar_functie(functie_hwl)
 
-            max_queries = 22
             post_params = dict()
 
             # maak net zoveel leden aan als er dagdeel afkortingen zijn
@@ -205,7 +204,6 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
                                                                  'schiet_BB': 'on'})
                     post_params['lid_%s_boogtype_%s' % (nhb_nr, barebow_boog_pk)] = 'on'
                     barebow_boog_pk = None
-                    max_queries = 30
                 else:
                     with self.assert_max_queries(20):
                         resp = self.client.post(url_voorkeuren, {'nhblid_pk': nhb_nr,
@@ -217,7 +215,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
 
             # schrijf in voor de competitie
             post_params['dagdeel'] = dagdelen.pop(-1)
-            with self.assert_max_queries(max_queries):
+            with self.assert_max_queries(23):
                 resp = self.client.post(url_inschrijven, post_params)
             self.assert_is_redirect_not_plein(resp)         # check for success
         # for

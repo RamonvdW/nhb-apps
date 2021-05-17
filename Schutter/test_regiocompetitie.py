@@ -650,7 +650,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         # wedstrijdleeftijd 2020: 13 --> Aspirant 11-12
         # wedstrijdleeftijd 2021: 14 --> Cadet
         # als het programma het goed doet, komt de schutter dus in de cadetten klasse
-        self.nhblid1.geboorte_datum = datetime.date(year=timezone.now().year - 13, month=1, day=1)
+        self.nhblid1.geboorte_datum = datetime.date(year=timezone.now().year - 13, month=1, day=2)
         self.nhblid1.save()
         self.client.logout()
         self.e2e_login(self.account_normaal)

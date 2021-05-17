@@ -528,8 +528,7 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
                             indiv__is_onbekend=False,
                             indiv__boogtype__afkorting=self.boog_r.afkorting)):
             for lkl in (obj.indiv.leeftijdsklassen      # pragma: no branch
-                        .filter(geslacht='V',
-                                min_wedstrijdleeftijd__gt=20)):
+                        .filter(afkorting='SV')):
                 klasse = obj
                 break
             # for

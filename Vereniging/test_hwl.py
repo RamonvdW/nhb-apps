@@ -432,7 +432,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
         # nu de POST om een paar leden aan te melden
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
-        with self.assert_max_queries(22):
+        with self.assert_max_queries(20):
             resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',        # 1=R
                                           'lid_100003_boogtype_3': 'on'})       # 3=BB
         self.assert_is_redirect_not_plein(resp)     # check success
@@ -489,7 +489,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
         # nu de POST om een paar leden aan te melden
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
-        with self.assert_max_queries(22):
+        with self.assert_max_queries(20):
             resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',        # 1=R
                                           'lid_100003_boogtype_3': 'on',        # 3=BB
                                           'dagdeel': 'AV',
@@ -562,7 +562,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
         # nu de POST om een paar leden aan te melden
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
-        with self.assert_max_queries(22):
+        with self.assert_max_queries(20):
             resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',        # 1=R
                                           'lid_100003_boogtype_3': 'on',        # 3=BB
                                           'dagdeel': 'AV',
@@ -605,7 +605,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
         # nu de POST om een paar leden aan te melden
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
-        with self.assert_max_queries(22):
+        with self.assert_max_queries(20):
             resp = self.client.post(url, {'lid_100004_boogtype_1': 'on',        # 1=R
                                           'lid_100003_boogtype_3': 'on',        # 3=BB
                                           'wil_in_team': 'ja',
@@ -687,7 +687,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
         # nu de POST om een paar leden aan te melden
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
-        with self.assert_max_queries(22):
+        with self.assert_max_queries(20):
             resp = self.client.post(url, {'lid_100004_boogtype_1': 'on',        # 1=R
                                           'lid_100003_boogtype_3': 'on',        # 3=BB
                                           'wil_in_team': 'ja',

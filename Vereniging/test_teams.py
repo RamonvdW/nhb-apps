@@ -283,7 +283,7 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
             self._zet_ag(100004, 18)
 
             url = url_inschrijven % self.comp_18.pk
-            with self.assert_max_queries(38):
+            with self.assert_max_queries(28):
                 resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',    # 1=R
                                               'lid_100003_boogtype_3': 'on',    # 3=BB
                                               'lid_100004_boogtype_1': 'on',    # 1=R
