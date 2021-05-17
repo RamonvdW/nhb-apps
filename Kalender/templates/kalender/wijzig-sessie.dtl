@@ -64,7 +64,7 @@
 
             <tr>
                 <td>Datum:</td>
-                <td>
+                <td colspan="2">
                     <ul>
                         {% for opt in opt_datums %}
                             <li>
@@ -83,6 +83,7 @@
                 <td>
                     <input id="tijd" name="tijd_begin" type="text" class="timepicker" onchange="gewijzigd()">
                 </td>
+                <td></td>
             </tr>
 
             <tr>
@@ -94,6 +95,7 @@
                         {% endfor %}
                     </select>
                 </td>
+                <td></td>
             </tr>
 
             <tr>
@@ -101,31 +103,27 @@
                 <td>
                     <input type="number" min="1" max="999" name="max_sporters" value="{{ sessie.max_sporters }}" oninput="gewijzigd()">
                 </td>
+                <td></td>
             </tr>
 
             <tr>
                 <!-- inline-block gives vertical align top -->
                 <td style="display: inline-block">Wedstrijdklassen in deze sessie:</td>
-
                 <td>
-                    <table class="striped">
-                        <thead>
-                            <tr>
-                                <th><!-- checkbox column --></th>
-                                <th>Klasse</th>
-                            </tr>
-                        </thead>
-                        {% for obj in opt_klassen %}
-                            <tr>
-                                <td><label>
-                                    <input type="checkbox" class="filled-in" name="{{ obj.sel }}"{% if obj.geselecteerd %} checked{% endif %} onchange="gewijzigd()">
-                                    <span>&nbsp;</span>
-                                    </label>
-                                </td>
-                                <td>{{ obj.keuze_str }}</td>
-                            </tr>
-                        {% endfor %}
-                    </table>
+                    {% for klasse in opt_klassen_m %}
+                        <label class="black-text">
+                            <input type="checkbox" class="filled-in" name="{{ klasse.sel }}"{% if klasse.selected %} checked{% endif %} onchange="gewijzigd()">
+                            <span>{{ klasse.beschrijving }}</span>
+                        </label><br>
+                    {% endfor %}
+                </td>
+                <td>
+                    {% for klasse in opt_klassen_v %}
+                        <label class="black-text">
+                            <input type="checkbox" class="filled-in" name="{{ klasse.sel }}"{% if klasse.selected %} checked{% endif %} onchange="gewijzigd()">
+                            <span>{{ klasse.beschrijving }}</span>
+                        </label><br>
+                    {% endfor %}
                 </td>
             </tr>
 

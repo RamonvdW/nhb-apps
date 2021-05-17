@@ -5,20 +5,15 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db.models import Count
-from django.conf import settings
 from django.http import HttpResponseRedirect, Http404
 from django.urls import reverse
-from django.utils import timezone
 from django.shortcuts import render
 from django.views.generic import View
 from django.core.exceptions import PermissionDenied
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Account.models import Account
-from BasisTypen.models import IndivWedstrijdklasse
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
-from Taken.taken import maak_taak
 from .models import (KalenderWedstrijd, KalenderWedstrijdSessie,
                      WEDSTRIJD_DUUR_MAX_DAGEN, WEDSTRIJD_DUUR_MAX_UREN,
                      WEDSTRIJD_STATUS_GEANNULEERD)
@@ -63,13 +58,13 @@ class KalenderWedstrijdSessiesView(UserPassesTestMixin, View):
 
         context['wed'] = wedstrijd
         sessies = (wedstrijd
-                          .sessies
-                          .prefetch_related('klassen')
-                          .annotate(aanmeldingen_count=Count('aanmeldingen'))
-                          .order_by('datum',
-                                    'tijd_begin'))
+                   .sessies
+                   .prefetch_related('wedstrijdklassen')
+                   .annotate(aanmeldingen_count=Count('aanmeldingen'))
+                   .order_by('datum',
+                             'tijd_begin'))
         for sessie in sessies:
-            sessie.klassen_ordered = sessie.klassen.order_by('volgorde')
+            sessie.klassen_ordered = sessie.wedstrijdklassen.order_by('volgorde')
 
             sessie.url_wijzig = reverse('Kalender:wijzig-sessie',
                                         kwargs={'wedstrijd_pk': wedstrijd.pk,
@@ -186,24 +181,26 @@ class WijzigKalenderWedstrijdSessieView(UserPassesTestMixin, View):
         return duur
 
     @staticmethod
-    def _maak_opt_klassen(sessie):
+    def _maak_opt_klassen(wedstrijd, sessie):
         """ maak een lijst met wedstrijdklassen die gekozen kunnen worden """
 
-        pks = list(sessie.klassen.values_list('pk', flat=True))
+        pks = list(sessie.wedstrijdklassen.values_list('pk', flat=True))
 
-        klassen = list()
-        for klasse in (IndivWedstrijdklasse
-                       .objects
-                       .exclude(buiten_gebruik=True)
-                       .exclude(is_onbekend=True)
+        klassen_m = list()
+        klassen_v = list()
+        for klasse in (wedstrijd
+                       .wedstrijdklassen
+                       .select_related('leeftijdsklasse')
                        .order_by('volgorde')):
-            opt = SimpleNamespace()
-            opt.sel = 'klasse_%s' % klasse.pk
-            opt.keuze_str = klasse.beschrijving
-            opt.selected = (klasse.pk in pks)
-            klassen.append(opt)
+            klasse.sel = 'klasse_%s' % klasse.pk
+            klasse.selected = (klasse.pk in pks)
+
+            if klasse.leeftijdsklasse.geslacht == 'M':
+                klassen_m.append(klasse)
+            else:
+                klassen_v.append(klasse)
         # for
-        return klassen
+        return klassen_m, klassen_v
 
     def get(self, request, *args, **kwargs):
         """ deze functie wordt aangeroepen om de GET request af te handelen """
@@ -240,7 +237,7 @@ class WijzigKalenderWedstrijdSessieView(UserPassesTestMixin, View):
 
         context['opt_duur'] = self._maak_opt_duur(sessie)
 
-        context['opt_klassen'] = self._maak_opt_klassen(sessie)
+        context['opt_klassen_m'], context['opt_klassen_v'] = self._maak_opt_klassen(wedstrijd, sessie)
 
         context['url_terug'] = reverse('Kalender:wijzig-sessies',
                                        kwargs={'wedstrijd_pk': wedstrijd.pk})
@@ -253,7 +250,6 @@ class WijzigKalenderWedstrijdSessieView(UserPassesTestMixin, View):
             context['niet_verwijderbaar'] = True
         else:
             context['url_verwijder'] = context['url_opslaan']
-
 
         menu_dynamics(self.request, context, actief='kalender')
         return render(request, self.template_name, context)
@@ -347,6 +343,13 @@ class WijzigKalenderWedstrijdSessieView(UserPassesTestMixin, View):
                 updated.append('max_sporters')
 
             sessie.save(update_fields=updated)
+
+            gekozen = list()
+            for klasse in wedstrijd.wedstrijdklassen.all():
+                if request.POST.get('klasse_%s' % klasse.pk, ''):
+                    gekozen.append(klasse)
+            # for
+            sessie.wedstrijdklassen.set(gekozen)
 
         url = reverse('Kalender:wijzig-sessies',
                       kwargs={'wedstrijd_pk': wedstrijd.pk})

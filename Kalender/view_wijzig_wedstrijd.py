@@ -380,7 +380,8 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
 
             wedstrijd.save()
 
-            pks = list(wedstrijd.wedstrijdklassen.values_list('pk', flat=True))
+            gekozen_klassen = list()
+            gekozen_bogen = list()
             for klasse in (KalenderWedstrijdklasse
                            .objects
                            .exclude(buiten_gebruik=True)
@@ -389,27 +390,19 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
 
                 if wedstrijd.wa_status == WEDSTRIJD_WA_STATUS_A:
                     if not klasse.leeftijdsklasse.volgens_wa:
-                        if klasse.pk in pks:
-                            # haal uit de geselecteerde set
-                            wedstrijd.wedstrijdklassen.remove(klasse)
+                        # deze mag sowieso niet
                         continue  # skip
 
                 if request.POST.get('klasse_%s' % klasse.pk, ''):
                     # klasse is gewenst
-                    if klasse not in pks:
-                        wedstrijd.wedstrijdklassen.add(klasse)
-                else:
-                    # klasse is niet gewenst
-                    if klasse.pk in pks:
-                        wedstrijd.wedstrijdklassen.remove(klasse)
+                    gekozen_klassen.append(klasse)
+                    if klasse.boogtype not in gekozen_bogen:
+                        gekozen_bogen.append(klasse.boogtype)
             # for
 
-            # werk de boogtypen bij
-            boog_list = list()
-            for klasse in wedstrijd.wedstrijdklassen.select_related('boogtype').distinct('boogtype'):
-                boog_list.append(klasse.boogtype)
-            # for
-            wedstrijd.boogtypen.set(boog_list)
+            # werk de manytomany koppelingen bij
+            wedstrijd.wedstrijdklassen.set(gekozen_klassen)
+            wedstrijd.boogtypen.set(gekozen_bogen)
 
             self._verplaats_sessies(wedstrijd, oude_datum_begin)
 
