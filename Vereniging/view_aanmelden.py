@@ -20,7 +20,7 @@ from Competitie.models import (AG_NUL, DAGDELEN, DAGDEEL_AFKORTINGEN,
                                INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3,
                                Competitie, CompetitieKlasse,
                                DeelCompetitie, DeelcompetitieRonde,
-                               RegioCompetitieSchutterBoog)
+                               RegioCompetitieSchutterBoog, KlasseBepaler)
 from Score.models import Score, SCORE_TYPE_INDIV_AG
 from Wedstrijden.models import CompetitieWedstrijd
 import copy
@@ -95,11 +95,13 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
             if wedstrijdleeftijd == prev_wedstrijdleeftijd:
                 obj.leeftijdsklasse = prev_lkl
             else:
-                obj.leeftijdsklasse = (LeeftijdsKlasse
-                                       .objects
-                                       .filter(max_wedstrijdleeftijd__gte=wedstrijdleeftijd,
-                                               geslacht='M')
-                                       .order_by('max_wedstrijdleeftijd'))[0]
+                for lkl in LeeftijdsKlasse.objects.filter(geslacht='M'):
+                    if lkl.leeftijd_is_compatible(wedstrijdleeftijd):
+                        obj.leeftijdsklasse = lkl
+                        # geen master/veteraan, dus stop bij eerste passende klasse
+                        break
+                # for
+
                 prev_lkl = obj.leeftijdsklasse
                 prev_wedstrijdleeftijd = wedstrijdleeftijd
 
@@ -341,6 +343,8 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
 
         udvl = comp.uiterste_datum_lid
 
+        bepaler = KlasseBepaler(comp)
+
         # all checked boxes are in the post request as keys, typically with value 'on'
         for key, _ in request.POST.items():
             # key = 'lid_NNNNNN_boogtype_MM' (of iets anders)
@@ -408,31 +412,9 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                         aanmelding.ag_voor_team_mag_aangepast_worden = False
                 # for
 
-                # zoek alle wedstrijdklassen van deze competitie met het juiste boogtype
-                qset = (CompetitieKlasse
-                        .objects
-                        .filter(competitie=deelcomp.competitie,
-                                indiv__boogtype=schutterboog.boogtype)
-                        .prefetch_related('indiv__leeftijdsklassen')
-                        .order_by('indiv__volgorde'))
-
                 # zoek een toepasselijke klasse aan de hand van de leeftijd
-                done = False
-                for obj in qset:
-                    if aanmelding.ag_voor_indiv >= obj.min_ag or obj.indiv.is_onbekend:
-                        for lkl in obj.indiv.leeftijdsklassen.all():
-                            if lkl.geslacht == schutterboog.nhblid.geslacht:
-                                if lkl.min_wedstrijdleeftijd <= age <= lkl.max_wedstrijdleeftijd:
-                                    aanmelding.klasse = obj
-                                    done = True
-                                    break
-                        # for
-                    if done:
-                        break
-                # for
-
-                if not done:
-                    # geen klasse kunnen vinden
+                bepaler.bepaal_klasse(aanmelding)
+                if not aanmelding.klasse:
                     raise Http404('Geen passende wedstrijdklasse kunnen kiezen')
 
                 # kijk of de schutter met een team mee wil en mag schieten voor deze competitie
