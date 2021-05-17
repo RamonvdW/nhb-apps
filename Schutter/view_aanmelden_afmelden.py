@@ -15,7 +15,8 @@ from Competitie.models import (DeelCompetitie, DeelcompetitieRonde,
                                CompetitieKlasse, RegioCompetitieSchutterBoog,
                                LAAG_REGIO, AG_NUL,
                                INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3,
-                               DAGDELEN, DAGDEEL_AFKORTINGEN)
+                               DAGDELEN, DAGDEEL_AFKORTINGEN,
+                               KlasseBepaler)
 from Plein.menu import menu_dynamics
 from Score.models import Score, ScoreHist, SCORE_TYPE_INDIV_AG
 from Wedstrijden.models import CompetitieWedstrijd
@@ -105,28 +106,15 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
                 context['ag_hist'] = hist[0]
         context['ag'] = ag
 
-        # zoek alle wedstrijdklassen van deze competitie met het juiste boogtype
-        qset = (CompetitieKlasse
-                .objects
-                .select_related('indiv')
-                .filter(competitie=deelcomp.competitie,
-                        indiv__boogtype=schutterboog.boogtype)
-                .order_by('indiv__volgorde'))
+        aanmelding = RegioCompetitieSchutterBoog(
+                            deelcompetitie=deelcomp,
+                            schutterboog=schutterboog,
+                            ag_voor_indiv=AG_NUL)
 
-        # zoek een toepasselijke klasse aan de hand van de leeftijd
-        done = False
-        for obj in qset:            # pragma: no branch
-            if ag >= obj.min_ag or obj.indiv.is_onbekend:
-                for lkl in obj.indiv.leeftijdsklassen.all():
-                    if lkl.geslacht == schutterboog.nhblid.geslacht:
-                        if lkl.min_wedstrijdleeftijd <= age <= lkl.max_wedstrijdleeftijd:
-                            context['wedstrijdklasse'] = obj.indiv.beschrijving
-                            done = True
-                            break
-                # for
-            if done:
-                break
-        # for
+        bepaler = KlasseBepaler(deelcomp.competitie)
+        bepaler.bepaal_klasse(aanmelding)
+        context['wedstrijdklasse'] = aanmelding.klasse.indiv.beschrijving
+        del aanmelding
 
         udvl = deelcomp.competitie.uiterste_datum_lid       # uiterste datum van lidmaatschap
         dvl = schutterboog.nhblid.sinds_datum               # datum van lidmaatschap
@@ -140,7 +128,6 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
         context['deelcomp'] = deelcomp
         context['schutterboog'] = schutterboog
         context['voorkeuren'], _ = SchutterVoorkeuren.objects.get_or_create(nhblid=nhblid)
-        # context['voorkeuren_url'] = reverse('Schutter:voorkeuren')
         context['bevestig_url'] = reverse('Schutter:aanmelden',
                                           kwargs={'schutterboog_pk': schutterboog.pk,
                                                   'deelcomp_pk': deelcomp.pk})
@@ -176,7 +163,6 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
                 # for
 
         if deelcomp.competitie.afstand == '18':
-            # TODO: zijn er meer boogtypen waar we om DT willen vragen?
             if schutterboog.boogtype.afkorting in ('R', 'BB'):
                 context['show_dt'] = True
 
@@ -258,13 +244,13 @@ class RegiocompetitieAanmeldenView(View):
         # bepaal in welke wedstrijdklasse de schutter komt
         age = schutterboog.nhblid.bereken_wedstrijdleeftijd(deelcomp.competitie.begin_jaar + 1)
 
-        aanmelding = RegioCompetitieSchutterBoog()
-        aanmelding.deelcompetitie = deelcomp
-        aanmelding.schutterboog = schutterboog
-        aanmelding.bij_vereniging = schutterboog.nhblid.bij_vereniging
-        aanmelding.ag_voor_indiv = AG_NUL
-        aanmelding.ag_voor_team = AG_NUL
-        aanmelding.ag_voor_team_mag_aangepast_worden = True
+        aanmelding = RegioCompetitieSchutterBoog(
+                            deelcompetitie=deelcomp,
+                            schutterboog=schutterboog,
+                            bij_vereniging=schutterboog.nhblid.bij_vereniging,
+                            ag_voor_indiv=AG_NUL,
+                            ag_voor_team=AG_NUL,
+                            ag_voor_team_mag_aangepast_worden=True)
 
         # haal AG op, indien aanwezig
         scores = Score.objects.filter(schutterboog=schutterboog,
@@ -278,28 +264,8 @@ class RegiocompetitieAanmeldenView(View):
             if ag > 0.000:
                 aanmelding.ag_voor_team_mag_aangepast_worden = False
 
-        # zoek alle wedstrijdklassen van deze competitie met het juiste boogtype
-        qset = (CompetitieKlasse
-                .objects
-                .select_related('indiv')
-                .filter(competitie=deelcomp.competitie,
-                        indiv__boogtype=schutterboog.boogtype)
-                .order_by('indiv__volgorde'))
-
-        # zoek een toepasselijke klasse aan de hand van de leeftijd
-        done = False
-        for obj in qset:        # pragma: no branch
-            if aanmelding.ag_voor_indiv >= obj.min_ag or obj.indiv.is_onbekend:
-                for lkl in obj.indiv.leeftijdsklassen.all():
-                    if lkl.geslacht == schutterboog.nhblid.geslacht:
-                        if lkl.min_wedstrijdleeftijd <= age <= lkl.max_wedstrijdleeftijd:
-                            aanmelding.klasse = obj
-                            done = True
-                            break
-                # for
-            if done:
-                break
-        # for
+        bepaler = KlasseBepaler(deelcomp.competitie)
+        bepaler.bepaal_klasse(aanmelding)
 
         udvl = deelcomp.competitie.uiterste_datum_lid       # uiterste datum van lidmaatschap
         dvl = schutterboog.nhblid.sinds_datum               # datum van lidmaatschap
