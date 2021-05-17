@@ -974,4 +974,66 @@ def competitie_aanmaken(jaar):
     # for
 
 
+class KlasseBepaler(object):
+    """ deze klasse helpt met het bepalen van de CompetitieKlasse voor een deelnemer """
+
+    def __init__(self, competitie):
+        self.competitie = competitie
+        self.boogtype2klassen = dict()      # [boogtype.afkorting] = [klasse, klasse, ..]
+        self.lkl_cache_mannen = dict()      # [klasse.pk] = [lkl, lkl, ...]
+        self.lkl_cache_vrouwen = dict()     # [klasse.pk] = [lkl, lkl, ...]
+        self.lkl_cache = {'M': self.lkl_cache_mannen,
+                          'V': self.lkl_cache_vrouwen}
+
+        # vul de caches
+        for klasse in (CompetitieKlasse
+                       .objects
+                       .select_related('indiv',
+                                       'indiv__boogtype')
+                       .exclude(indiv=None)
+                       .prefetch_related('indiv__leeftijdsklassen')
+                       .all()):
+            indiv = klasse.indiv
+            boogtype = indiv.boogtype
+            try:
+                self.boogtype2klassen[boogtype.afkorting].append(klasse)
+            except KeyError:
+                self.boogtype2klassen[boogtype.afkorting] = [klasse]
+
+            for lkl in indiv.leeftijdsklassen.all():
+                lkl_cache = self.lkl_cache[lkl.geslacht]
+                try:
+                    lkl_cache[klasse.pk].append(lkl)
+                except KeyError:
+                    lkl_cache[klasse.pk] = [lkl]
+            # for
+        # for
+
+    def bepaal_klasse(self, aanmelding):
+        """ deze functie zet aanmelding.klasse aan de hand van de schutterboog """
+        ag = aanmelding.ag_voor_indiv
+        schutterboog = aanmelding.schutterboog
+        nhblid = schutterboog.nhblid
+        age = nhblid.bereken_wedstrijdleeftijd(self.competitie.begin_jaar + 1)
+
+        mogelijkheden = list()
+        for klasse in self.boogtype2klassen[schutterboog.boogtype.afkorting]:
+            if ag >= klasse.min_ag or klasse.indiv.is_onbekend:
+                for lkl in self.lkl_cache[nhblid.geslacht][klasse.pk]:
+                    if lkl.leeftijd_is_compatible(age):
+                        tup = (lkl, klasse)
+                        mogelijkheden.append(tup)
+                # for
+        # for
+
+        # indiv.volgorde heeft senioren eerst gezet; aspiranten laatste
+        # aspiranten mogen in alle klassen meedoen, maar we kiezen de Asp klasse
+        if len(mogelijkheden):
+            lkl, klasse = mogelijkheden[-1]
+            aanmelding.klasse = klasse
+        else:
+            # niet vast kunnen stellen
+            aanmelding.klasse = None
+
+
 # end of file
