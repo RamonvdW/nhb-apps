@@ -160,8 +160,8 @@ class IndivWedstrijdklasse(models.Model):
 
     class Meta:
         """ meta data voor de admin interface """
-        verbose_name = "Wedstrijdklasse"
-        verbose_name_plural = "Wedstrijdklassen"
+        verbose_name = "Indiv Wedstrijdklasse"
+        verbose_name_plural = "Indiv Wedstrijdklassen"
 
     objects = models.Manager()      # for the editor only
 

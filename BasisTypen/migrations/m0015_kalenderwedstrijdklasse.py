@@ -215,6 +215,10 @@ class Migration(migrations.Migration):
             name='volgens_wa',
             field=models.BooleanField(default=True),
         ),
+        migrations.AlterModelOptions(
+            name='indivwedstrijdklasse',
+            options={'verbose_name': 'Indiv Wedstrijdklasse', 'verbose_name_plural': 'Indiv Wedstrijdklassen'},
+        ),
         migrations.RunPython(maak_extra_leeftijdsklassen),
         migrations.CreateModel(
             name='KalenderWedstrijdklasse',
