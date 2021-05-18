@@ -470,7 +470,7 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
         comp = deelcomp.competitie
         comp.bepaal_fase()
         mag_toggle = comp.fase <= 'B' and self.functie_nu.rol == 'HWL'
-        mag_uit_team = comp.fase <= 'F' and self.functie_nu.rol == 'HWL'
+        #mag_uit_team = comp.fase <= 'F' and self.functie_nu.rol == 'HWL'
 
         dagdeel_str = dict()
         for afkorting, beschrijving in DAGDELEN:
@@ -499,9 +499,9 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
             if obj.inschrijf_voorkeur_team:
                 if mag_toggle:
                     obj.maak_nee = True
-                elif mag_uit_team:
-                    obj.url_maak_nee_rood = reverse('Vereniging:toggle-voorkeur-teamcompetitie',
-                                                    kwargs={'deelnemer_pk': obj.pk})
+                #elif mag_uit_team:
+                #    obj.url_maak_nee_rood = reverse('Vereniging:toggle-voorkeur-teamcompetitie',
+                #                                    kwargs={'deelnemer_pk': obj.pk})
             else:
                 if mag_toggle:
                     obj.maak_ja = True

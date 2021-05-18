@@ -51,7 +51,7 @@
         {% if mag_afmelden %}
             <p>Als hoofdwedstrijdleider kan je leden afmelden: zet een vinkje bij de naam en druk dan rode knop in de rechter onderhoek.</p>
         {% else %}
-            <p>De hoofdwedstrijdleider kan leden afmelden.</p>
+            <p>De hoofdwedstrijdleider kan leden afmelden tijdens fase B van de competitie.</p>
         {% endif %}
 
         <table class="white" id="table1">
@@ -110,9 +110,7 @@
 
                 <td>{{ obj.team_ja_nee }}</td>
                 <td>
-                    {% if obj.url_maak_nee_rood %}
-                        <a class="btn-nhb-rood" href="{{ obj.url_maak_nee_rood }}">Maak Nee</a>
-                    {% elif obj.maak_ja %}
+                    {% if obj.maak_ja %}
                         <a class="btn-nhb-blauw" href="#" onclick="do_toggle(this)" data-pk="{{ obj.pk }}">Maak Ja</a>
                     {% elif obj.maak_nee %}
                         <a class="btn-nhb-blauw" href="#" onclick="do_toggle(this)" data-pk="{{ obj.pk }}">Maak Nee</a>
