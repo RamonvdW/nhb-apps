@@ -317,7 +317,7 @@
                 <td>
                     {% for klasse in opt_klasse_1 %}
                         <label class="black-text">
-                            <input type="checkbox" class="filled-in" name="{{ klasse.sel }}"{% if klasse.selected %} checked{% endif %} onchange="gewijzigd()">
+                            <input type="checkbox" name="{{ klasse.sel }}" {% if klasse.gebruikt %}disabled checked{% else %}class="filled-in" {% if klasse.selected %} checked{% endif %}{% endif %} onchange="gewijzigd()">
                             <span>{{ klasse.beschrijving }}</span>
                         </label><br>
                     {% endfor %}
@@ -325,7 +325,7 @@
                 <td>
                     {% for klasse in opt_klasse_2 %}
                         <label class="black-text">
-                            <input type="checkbox" class="filled-in" name="{{ klasse.sel }}"{% if klasse.selected %} checked{% endif %} onchange="gewijzigd()">
+                            <input type="checkbox" name="{{ klasse.sel }}" {% if klasse.gebruikt %}disabled checked{% else %}class="filled-in" {% if klasse.selected %} checked{% endif %}{% endif %} onchange="gewijzigd()">
                             <span>{{ klasse.beschrijving }}</span>
                         </label><br>
                     {% endfor %}
@@ -336,6 +336,7 @@
 
         <p>De wedstrijdklasse senioren is altijd de 'open' klasse waarin alle andere leeftijdsklassen mee mogen doen.</p>
         <p>Na wijzigen tussen A-status en B-status eerst opslaan, dan passen de wedstrijdklassen zich aan.</p>
+        <p>Wedstrijdklassen die niet aangepast kunnen worden, zijn in gebruik in een sessie.</p>
 
         <br>
 

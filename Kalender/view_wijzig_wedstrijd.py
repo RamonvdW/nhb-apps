@@ -54,6 +54,11 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
             wedstrijd_pk = int(str(kwargs['wedstrijd_pk'])[:6])     # afkappen voor de veiligheid
             wedstrijd = (KalenderWedstrijd
                          .objects
+                         .select_related('organiserende_vereniging',
+                                         'locatie')
+                         .prefetch_related('sessies',
+                                           'sessies__wedstrijdklassen',
+                                           'wedstrijdklassen')
                          .get(pk=wedstrijd_pk))
         except KalenderWedstrijd.DoesNotExist:
             raise Http404('Wedstrijd niet gevonden')
@@ -163,6 +168,15 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
             opt_disc.append(opt)
         # for
 
+        # zoek uit welke wedstrijdklassen in gebruik zijn bij de sessies
+        gebruikt = list()
+        for sessie in wedstrijd.sessies.all():
+            for klasse in sessie.wedstrijdklassen.all():
+                if klasse.pk not in gebruikt:
+                    gebruikt.append(klasse.pk)
+            # for
+        # for
+
         context['opt_klasse_1'] = opt_klasse_1 = list()
         context['opt_klasse_2'] = opt_klasse_2 = list()
         pks = list(wedstrijd.wedstrijdklassen.values_list('pk', flat=True))
@@ -177,6 +191,7 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
                     continue    # skip
 
             klasse.sel = 'klasse_%s' % klasse.pk
+            klasse.gebruikt = (klasse.pk in gebruikt)
             klasse.selected = (klasse.pk in pks)
 
             if klasse.leeftijdsklasse.geslacht == 'M':
@@ -246,6 +261,12 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
             wedstrijd_pk = int(str(kwargs['wedstrijd_pk'])[:6])     # afkappen voor de veiligheid
             wedstrijd = (KalenderWedstrijd
                          .objects
+                         .select_related('organiserende_vereniging',
+                                         'locatie')
+                         .prefetch_related('boogtypen',
+                                           'wedstrijdklassen',
+                                           'sessies',
+                                           'sessies__wedstrijdklassen')
                          .get(pk=wedstrijd_pk))
         except KalenderWedstrijd.DoesNotExist:
             raise Http404('Wedstrijd niet gevonden')
@@ -380,6 +401,15 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
 
             wedstrijd.save()
 
+            # zoek uit welke wedstrijdklassen in gebruik zijn bij de sessies
+            gebruikt = list()
+            for sessie in wedstrijd.sessies.all():
+                for klasse in sessie.wedstrijdklassen.all():
+                    if klasse.pk not in gebruikt:
+                        gebruikt.append(klasse.pk)
+                # for
+            # for
+
             gekozen_klassen = list()
             gekozen_bogen = list()
             for klasse in (KalenderWedstrijdklasse
@@ -393,7 +423,7 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
                         # deze mag sowieso niet
                         continue  # skip
 
-                if request.POST.get('klasse_%s' % klasse.pk, ''):
+                if klasse.pk in gebruikt or request.POST.get('klasse_%s' % klasse.pk, ''):
                     # klasse is gewenst
                     gekozen_klassen.append(klasse)
                     if klasse.boogtype not in gekozen_bogen:
