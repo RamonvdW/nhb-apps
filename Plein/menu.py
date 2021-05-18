@@ -34,6 +34,7 @@ def menu_dynamics(request, context, actief='hetplein'):
     context['is_test_server'] = settings.ENABLE_WIKI
 
     # zet context variabelen om aan te geven welke optionele delen van het menu getoond moeten worden
+    context['toon_kalender'] = True
     if request.user.is_authenticated:
 
         # sidenav naam
@@ -58,6 +59,9 @@ def menu_dynamics(request, context, actief='hetplein'):
 
             if rol == Rollen.ROL_SCHUTTER:
                 context['menu_toon_schutter_profiel'] = True
+
+            if rol in (Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_SEC):     # TODO: ook WL uitsluiten?
+                context['toon_kalender'] = False
 
             # taken
             if rol in (Rollen.ROL_IT, Rollen.ROL_BB,

@@ -65,8 +65,10 @@
         {% endif %}
 
         <!-- wedstrijdkalender -->
-        {% url 'Kalender:vereniging' as card_url %}
-        {% include 'plein/card.dtl' with title="Wedstrijdkalender" text="Alle overige wedstrijden die door deze vereniging georganiseerd worden." icon="event_note" url=card_url %}
+        {% if toon_wedstrijdkalender %}
+            {% url 'Kalender:vereniging' as card_url %}
+            {% include 'plein/card.dtl' with title="Wedstrijdkalender" text="Alle overige wedstrijden die door deze vereniging georganiseerd worden." icon="event_note" url=card_url %}
+        {% endif %}
     </div>
 
     {% if toon_competities %}

@@ -49,6 +49,9 @@
 
         {% url 'Records:overzicht' as card_url %}
         {% include 'plein/card.dtl' with title="Records" text="Alle handboogsport records van nederlandse sporters." icon="insights" url=card_url %}
+
+        {% url 'Kalender:landing-page' as card_url %}
+        {% include 'plein/card.dtl' with title="Wedstrijdkalender" text="Bekijk welke wedstrijden georganiseerd worden en schrijf je in." icon="event_note" url=card_url %}
     </div>
 
     <p>

@@ -56,6 +56,10 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
             context['deelcomps_rk'] = list()
         else:
             context['toon_competities'] = True
+
+            if rol_nu == Rollen.ROL_HWL:
+                context['toon_wedstrijdkalender'] = True
+
             context['competities'] = (Competitie
                                       .objects
                                       .filter(is_afgesloten=False)
