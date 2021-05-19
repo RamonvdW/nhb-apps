@@ -28,7 +28,6 @@ import copy
 
 TEMPLATE_LEDEN_AANMELDEN = 'vereniging/competitie-aanmelden.dtl'
 TEMPLATE_LEDEN_INGESCHREVEN = 'vereniging/competitie-ingeschreven.dtl'
-TEMPLATE_TOGGLE_VOORKEUR_TEAMCOMPETITIE = 'vereniging/competitie-toggle-voorkeur-teamcompetitie.dtl'
 
 
 JA_NEE = {False: 'Nee', True: 'Ja'}
@@ -470,7 +469,6 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
         comp = deelcomp.competitie
         comp.bepaal_fase()
         mag_toggle = comp.fase <= 'B' and self.functie_nu.rol == 'HWL'
-        #mag_uit_team = comp.fase <= 'F' and self.functie_nu.rol == 'HWL'
 
         dagdeel_str = dict()
         for afkorting, beschrijving in DAGDELEN:
@@ -499,9 +497,6 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
             if obj.inschrijf_voorkeur_team:
                 if mag_toggle:
                     obj.maak_nee = True
-                #elif mag_uit_team:
-                #    obj.url_maak_nee_rood = reverse('Vereniging:toggle-voorkeur-teamcompetitie',
-                #                                    kwargs={'deelnemer_pk': obj.pk})
             else:
                 if mag_toggle:
                     obj.maak_ja = True
@@ -581,116 +576,6 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
         # for
 
         return HttpResponseRedirect(reverse('Vereniging:overzicht'))
-
-
-class ToggleVoorkeurTeamcompetitieView(UserPassesTestMixin, TemplateView):
-
-    template_name = TEMPLATE_TOGGLE_VOORKEUR_TEAMCOMPETITIE
-
-    raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.deelcomp = None
-        self.rol_nu, self.functie_nu = None, None
-
-    def test_func(self):
-        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu in (Rollen.ROL_HWL, Rollen.ROL_RCL)
-
-    def get_context_data(self, **kwargs):
-        """ called by the template system to get the context data for the template """
-        context = super().get_context_data(**kwargs)
-
-        try:
-            deelnemer_pk = int(kwargs['deelnemer_pk'][:6])      # afkappen voor de veiligheid
-            deelnemer = (RegioCompetitieSchutterBoog
-                         .objects
-                         .select_related('deelcompetitie',
-                                         'deelcompetitie__competitie',
-                                         'schutterboog',
-                                         'schutterboog__nhblid',
-                                         'bij_vereniging',
-                                         'bij_vereniging__regio')
-                         .get(pk=deelnemer_pk))
-        except (ValueError, RegioCompetitieSchutterBoog.DoesNotExist):
-            raise Http404('Deelnemer niet gevonden')
-
-        context['deelnemer'] = deelnemer
-
-        ver = deelnemer.bij_vereniging
-        deelcomp = deelnemer.deelcompetitie
-
-        if self.rol_nu == Rollen.ROL_RCL:
-            # RCL: moet van zijn deelcompetitie zijn
-            if deelcomp.nhb_regio != self.functie_nu.nhb_regio:
-                raise PermissionDenied('Sporter uit andere regio')
-            context['is_rcl'] = True
-        else:
-            # HWL: moet deelnemer van eigen vereniging zijn
-            if ver and ver != self.functie_nu.nhb_ver:
-                raise PermissionDenied('Sporter is niet lid bij jouw vereniging')
-            context['is_hwl'] = True
-
-        url = reverse('Vereniging:toggle-voorkeur-teamcompetitie',
-                      kwargs={'deelnemer_pk': deelnemer.pk})
-
-        if deelnemer.inschrijf_voorkeur_team:
-            # zowel HWL als RCL mogen de sporter afmelden
-            context['url_afmelden'] = url
-        else:
-            # alleen RCL mag weer aanmelden
-            if self.rol_nu == Rollen.ROL_RCL:
-                context['url_aanmelden'] = url
-
-        if not ('url_aanmelden' in context or 'url_afmelden' in context):
-            context['geen_actie_mogelijk'] = True
-
-        menu_dynamics(self.request, context, actief='vereniging')
-        return context
-
-    def post(self, request, *args, **kwargs):
-        """ deze functie wordt aangeroepen als de beheerder op de knop Aanmelden of Afmelden drukt
-        """
-        try:
-            deelnemer_pk = int(kwargs['deelnemer_pk'][:6])        # afkappen voor de veiligheid
-            deelnemer = (RegioCompetitieSchutterBoog
-                         .objects
-                         .select_related('bij_vereniging',
-                                         'deelcompetitie')
-                         .get(pk=deelnemer_pk))
-        except (ValueError, RegioCompetitieSchutterBoog.DoesNotExist):
-            raise Http404('Deelnemer niet gevonden')
-
-        deelcomp = deelnemer.deelcompetitie
-        ver = deelnemer.bij_vereniging
-
-        if self.rol_nu == Rollen.ROL_RCL:
-            # RCL: moet van zijn deelcompetitie zijn
-            if deelcomp.nhb_regio != self.functie_nu.nhb_regio:
-                raise PermissionDenied('Sporter uit andere regio')
-
-            # RCL mag beide kanten op wijzigen
-            deelnemer.inschrijf_voorkeur_team = not deelnemer.inschrijf_voorkeur_team
-            deelnemer.save(update_fields=['inschrijf_voorkeur_team'])
-
-            url = reverse('Competitie:overzicht',
-                          kwargs={'comp_pk': deelcomp.competitie.pk})
-        else:
-            # HWL: moet deelnemer van eigen vereniging zijn
-            if ver and ver != self.functie_nu.nhb_ver:
-                raise PermissionDenied('Sporter is niet lid bij jouw vereniging')
-
-            # HWL mag alleen afmelden
-            if deelnemer.inschrijf_voorkeur_team:
-                deelnemer.inschrijf_voorkeur_team = False
-                deelnemer.save(update_fields=['inschrijf_voorkeur_team'])
-
-            url = reverse('Vereniging:leden-ingeschreven',
-                          kwargs={'deelcomp_pk': deelnemer.deelcompetitie.pk})
-
-        return HttpResponseRedirect(url)
 
 
 # end of file
