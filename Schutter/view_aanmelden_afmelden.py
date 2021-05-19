@@ -119,8 +119,11 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
         udvl = deelcomp.competitie.uiterste_datum_lid       # uiterste datum van lidmaatschap
         dvl = schutterboog.nhblid.sinds_datum               # datum van lidmaatschap
 
-        context['mag_team_schieten'] = (age > MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT and
-                                        dvl < udvl)
+        # geen aspirant, op tijd lid en op tijd aangemeld?
+        mag_team_schieten = (age > MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT and
+                             dvl < udvl
+                             and deelcomp.competitie.fase == 'B')
+        context['mag_team_schieten'] = mag_team_schieten
 
         # bepaal de inschrijfmethode voor deze regio
         methode = deelcomp.inschrijf_methode
@@ -270,12 +273,13 @@ class RegiocompetitieAanmeldenView(View):
         udvl = deelcomp.competitie.uiterste_datum_lid       # uiterste datum van lidmaatschap
         dvl = schutterboog.nhblid.sinds_datum               # datum van lidmaatschap
 
+        # geen aspirant, op tijd lid en op tijd aangemeld?
         mag_team_schieten = (age > MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT and
-                             dvl < udvl)
+                             dvl < udvl
+                             and deelcomp.competitie.fase == 'B')
 
         # kijk of de schutter met een team mee wil schieten voor deze competitie
         if mag_team_schieten:
-            # is geen aspirant en was op tijd lid
             if request.POST.get('wil_in_team', '') != '':
                 aanmelding.inschrijf_voorkeur_team = True
 

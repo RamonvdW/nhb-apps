@@ -30,62 +30,47 @@
                     <td><b>Voorkeuren voor aanmelden in bulk</b></td>
                 </tr>
 
-                <tr>
-                    <td>Aanmelden voor team schieten:<br><br>
-                        <label style="margin-left: 20px">
-                            <input type="checkbox" class="filled-in" name="wil_in_team">
-                            <span class="black-text">Ja</span>
-                        </label>
-                    </td>
-                </tr>
-
-                <tr id="id_teamtype_regel" class="hide">
-                    <td>Wat voor soort team?<br>
-
-                        <ul id="id_teamtype">
-                            {% for code, beschr, teambogen in teamtypen %}
-                                <li>
-                                    <label class="black-text" for="id_teamtype_{{ code }}" style="margin-left: 20px">
-                                        <input class="with-gap" type="radio" name="teamtype" value="{{ code }}" required id="id_teamtype_{{ code }}"{% if forloop.first %} checked{% endif %} data-teambogen="{{ teambogen }}">
-                                        <span>{{ beschr }}</span>
-                                    </label>
-                                </li>
-                            {% endfor %}
-                        </ul>
-
-                    </td>
-                </tr>
+                {% if mag_team_schieten %}
+                    <tr>
+                        <td>Aanmelden voor team schieten:<br><br>
+                            <label style="margin-left: 20px">
+                                <input type="checkbox" class="filled-in" name="wil_in_team">
+                                <span class="black-text">Ja</span>
+                            </label>
+                        </td>
+                    </tr>
+                {% endif %}
 
                 {% if wedstrijden %}    <!-- inschrijfmethode 1 -->
-                <tr>
-                    <td>Kies wanneer ze willen schieten:<br>
-                        {% for wedstrijd in wedstrijden %}
-                            <label style="margin-left: 20px">
-                                <input type="checkbox" class="filled-in" name="wedstrijd_{{ wedstrijd.pk }}">
-                                <span class="black-text">{{ wedstrijd.datum_wanneer }} om {{ wedstrijd.tijd_begin_wedstrijd }} bij <b>{{ wedstrijd.vereniging.naam }}</b><span class="hide-on-small-only"> te {{ wedstrijd.vereniging.plaats }}</span></span>
-                            </label>
-                            <br>
-                        {% endfor %}
-                    </td>
-                </tr>
+                    <tr>
+                        <td>Kies wanneer ze willen schieten:<br>
+                            {% for wedstrijd in wedstrijden %}
+                                <label style="margin-left: 20px">
+                                    <input type="checkbox" class="filled-in" name="wedstrijd_{{ wedstrijd.pk }}">
+                                    <span class="black-text">{{ wedstrijd.datum_wanneer }} om {{ wedstrijd.tijd_begin_wedstrijd }} bij <b>{{ wedstrijd.vereniging.naam }}</b><span class="hide-on-small-only"> te {{ wedstrijd.vereniging.plaats }}</span></span>
+                                </label>
+                                <br>
+                            {% endfor %}
+                        </td>
+                    </tr>
                 {% endif %}
 
                 {% if dagdelen %}       <!-- inschrijfmethode 3 -->
-                <tr>
-                    <td>Kies wanneer in de week ze willen schieten:<br>
+                    <tr>
+                        <td>Kies wanneer in de week ze willen schieten:<br>
 
-                        <ul id="id_dagdeel">
-                            {% for code, beschr in dagdelen %}
-                                <li>
-                                    <label class="black-text" for="id_dagdeel_{{ code }}" style="margin-left: 20px">
-                                        <input class="with-gap" type="radio" name="dagdeel" value="{{ code }}" required id="id_dagdeel_{{ code }}">
-                                        <span>{{ beschr }}</span>
-                                    </label>
-                                </li>
-                            {% endfor %}
-                        </ul>
-                    </td>
-                </tr>
+                            <ul id="id_dagdeel">
+                                {% for code, beschr in dagdelen %}
+                                    <li>
+                                        <label class="black-text" for="id_dagdeel_{{ code }}" style="margin-left: 20px">
+                                            <input class="with-gap" type="radio" name="dagdeel" value="{{ code }}" required id="id_dagdeel_{{ code }}">
+                                            <span>{{ beschr }}</span>
+                                        </label>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </td>
+                    </tr>
                 {% endif %}
 
                 <tr>

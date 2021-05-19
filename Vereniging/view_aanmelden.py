@@ -223,6 +223,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
         context['tweede_jaar'] = self.comp.begin_jaar + 1
         context['aanmelden_url'] = reverse('Vereniging:leden-aanmelden', kwargs={'comp_pk': self.comp.pk})
         context['mag_aanmelden'] = True
+        context['mag_team_schieten'] = (self.comp.fase == 'B')
 
         # bepaal de inschrijfmethode voor deze regio
         mijn_regio = self.functie_nu.nhb_ver.regio
@@ -306,8 +307,9 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
         # for
 
         # zoek eerst de voorkeuren op
+        mag_team_schieten = comp.fase == 'B'
         bulk_team = False
-        if request.POST.get('wil_in_team', '') != '':
+        if mag_team_schieten and request.POST.get('wil_in_team', '') != '':
             bulk_team = True
 
         bulk_wedstrijden = list()
@@ -419,8 +421,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                 # kijk of de schutter met een team mee wil en mag schieten voor deze competitie
                 if age > MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT and dvl < udvl:
                     # is geen aspirant en was op tijd lid
-                    if bulk_team:
-                        aanmelding.inschrijf_voorkeur_team = True
+                    aanmelding.inschrijf_voorkeur_team = bulk_team
 
                 aanmelding.inschrijf_voorkeur_dagdeel = bulk_dagdeel
                 aanmelding.inschrijf_notitie = bulk_opmerking

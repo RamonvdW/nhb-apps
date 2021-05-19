@@ -59,7 +59,7 @@
                 </td>
             </tr>
 
-            {% if mag_team_schieten %}  <!-- niet voor aspiranten -->
+            {% if mag_team_schieten %}  <!-- niet voor aspiranten, niet na fase B -->
             <tr>
                 <td>Kies of je in een team wil schieten:<br><br>
                     <label style="margin-left: 20px">
