@@ -106,7 +106,7 @@
             </tr>
 
             <tr>
-                <td>Teams aanmaken toestaan tot</td>
+                <td>Teams aanmaken toestaan tot en met</td>
                 <td>{% if readonly %}
                         <span>{{ deelcomp.einde_teams_aanmaken|date:'Y-m-d' }}</span>
                     {% else %}

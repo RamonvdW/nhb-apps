@@ -121,6 +121,8 @@ class CompetitieOverzichtView(View):
                         obj.tekst_poules = "Poules voor directe teamwedstrijden tussen teams in deze regiocompetitie."
                         obj.url_poules = reverse('Competitie:regio-poules',
                                                  kwargs={'deelcomp_pk': obj.pk})
+
+                comp.regio_einde_teams_aanmaken = obj.einde_teams_aanmaken
             # for
 
             if comp.fase <= 'F':
@@ -240,6 +242,10 @@ class CompetitieOverzichtView(View):
                                                 laag=LAAG_REGIO,
                                                 is_afgesloten=False,
                                                 nhb_regio=self.functie_nu.nhb_ver.regio))
+
+        for deelcomp in context['planning_deelcomp']:
+            comp.regio_einde_teams_aanmaken = deelcomp.einde_teams_aanmaken
+        # for
 
         comp.url_inschrijvingen = reverse('Competitie:lijst-regiocomp-regio',
                                           kwargs={'comp_pk': comp.pk,
