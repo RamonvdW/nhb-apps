@@ -915,6 +915,8 @@ class Command(BaseCommand):
                                     .objects
                                     .exclude(baan_type__in=(BAAN_TYPE_BUITEN, BAAN_TYPE_EXTERN))
                                     .get(adres=adres))
+            except WedstrijdLocatie.MultipleObjectsReturned:
+                self.stderr.write('[ERROR] Onverwacht meer dan 1 wedstrijdlocatie voor vereniging %s' % nhb_ver)
             except WedstrijdLocatie.DoesNotExist:
                 # nieuw aanmaken
                 wedstrijdlocatie = WedstrijdLocatie(
