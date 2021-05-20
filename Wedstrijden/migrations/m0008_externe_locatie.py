@@ -18,7 +18,7 @@ def zet_disciplines(apps, _):
             locatie.discipline_outdoor = True
         else:
             locatie.discipline_indoor = True
-        locatie.save()
+        locatie.save(update_fields=['discipline_indoor', 'discipline_outdoor'])
     # for
 
 

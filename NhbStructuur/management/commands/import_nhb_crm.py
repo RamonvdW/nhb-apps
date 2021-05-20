@@ -900,6 +900,7 @@ class Command(BaseCommand):
                 adres = adres.strip()     # remove terminating \n
 
             if not adres:
+                # vereniging heeft geen adres meer
                 # verwijder de koppeling met wedstrijdlocatie uit crm
                 for obj in nhb_ver.wedstrijdlocatie_set.filter(adres_uit_crm=True):
                     nhb_ver.wedstrijdlocatie_set.remove(obj)
@@ -908,15 +909,15 @@ class Command(BaseCommand):
                 continue
 
             # zoek de wedstrijdlocatie bij dit adres
-            # let op: elke vereniging heeft dus maximaal 1 locatie op dit adres
-            #         buitenbaan heeft geen adres
             try:
                 wedstrijdlocatie = (WedstrijdLocatie
                                     .objects
                                     .exclude(baan_type__in=(BAAN_TYPE_BUITEN, BAAN_TYPE_EXTERN))
                                     .get(adres=adres))
             except WedstrijdLocatie.MultipleObjectsReturned:
+                # er is een ongelukje gebeurt
                 self.stderr.write('[ERROR] Onverwacht meer dan 1 wedstrijdlocatie voor vereniging %s' % nhb_ver)
+                continue
             except WedstrijdLocatie.DoesNotExist:
                 # nieuw aanmaken
                 wedstrijdlocatie = WedstrijdLocatie(
