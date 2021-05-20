@@ -102,7 +102,7 @@
 
             <tr>
                 <td>Datum begin wedstrijd:</td>
-                <td colspan="2">
+                <td>
                     {% if limit_edits %}
                         <span>{{ wed.datum_begin }}</span>
                     {% else %}
@@ -110,11 +110,12 @@
                         <input type="hidden" name="datum_begin" id="id_datum_begin"> <!-- voor POST, in juiste formaat -->
                     {% endif %}
                 </td>
+                <td></td>
             </tr>
 
             <tr>
                 <td>Duur van de wedstrijd:</td>
-                <td colspan="2">
+                <td>
                     {% if limit_edits %}
                         <span>{{ duur_dagen }} dagen</span>
                     {% else %}
@@ -123,6 +124,18 @@
                                 <option value="{{ opt.sel }}"{% if opt.selected %} selected{% endif %}>{{ opt.keuze_str }}</option>
                             {% endfor %}
                         </select>
+                    {% endif %}
+                </td>
+                <td></td>
+            </tr>
+
+            <tr>
+                <td>Bijzonderheden:</td>
+                <td colspan="2">
+                    {% if block_edits %}
+                        <span>{{ wed.bijzonderheden|linebreaksbr }}</span>
+                    {% else %}
+                        <textarea name="bijzonderheden" class="materialize-textarea" oninput="gewijzigd()">{{ wed.bijzonderheden }}</textarea>
                     {% endif %}
                 </td>
             </tr>
@@ -202,6 +215,26 @@
             </tr>
 
             <tr>
+                <td>Doelgroep:</td>
+                <td colspan="2">
+                    {% if limit_edits %}
+                        <span>{{ wed.begrenzing_str }}</span>
+                    {% else %}
+                        <ul id="id_doelgroep">
+                            {% for opt in opt_begrenzing %}
+                                <li>
+                                    <label class="black-text" for="id_{{ opt.sel }}">
+                                        <input class="with-gap" type="radio" name="begrenzing" value="{{ opt.sel }}" required id="id_{{ opt.sel }}"{% if opt.selected %} checked{% endif %} onchange="gewijzigd()">
+                                        <span>{{ opt.keuze_str }}</span>
+                                    </label>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </td>
+            </tr>
+
+            <tr>
                 <td>Contactgegevens organisatie:</td>
                 <td colspan="2">
                     <table>
@@ -264,6 +297,20 @@
             </tr>
 
             <tr>
+                <td>Aanwezig melden:</td>
+                <td>
+                    <span>Hoe lang van tevoren wil je sporters vragen aanwezig te zijn?</span>
+
+                    <select name="aanwezig" onchange="gewijzigd()">
+                        {% for opt in opt_aanwezig %}
+                            <option value="{{ opt.sel }}"{% if opt.selected %} selected{% endif %}>{{ opt.keuze_str }}</option>
+                        {% endfor %}
+                    </select>
+                </td>
+                <td></td>
+            </tr>
+
+            <tr>
                 <td>Scheidsrechter behoefte:</td>
                 <td colspan="2">
                     <table>
@@ -296,19 +343,6 @@
                         </tr>
 
                     </table>
-                </td>
-            </tr>
-
-            <tr>
-                <td>Aanwezig melden:</td>
-                <td colspan="2">
-                    <span>Hoe lang van tevoren wil je sporters vragen aanwezig te zijn?</span>
-
-                    <select name="aanwezig" onchange="gewijzigd()">
-                        {% for opt in opt_aanwezig %}
-                            <option value="{{ opt.sel }}"{% if opt.selected %} selected{% endif %}>{{ opt.keuze_str }}</option>
-                        {% endfor %}
-                    </select>
                 </td>
             </tr>
 

@@ -22,7 +22,7 @@ from .models import (KalenderWedstrijd,
                      WEDSTRIJD_DISCIPLINE_TO_STR, WEDSTRIJD_STATUS_TO_STR, WEDSTRIJD_WA_STATUS_TO_STR,
                      WEDSTRIJD_STATUS_ONTWERP, WEDSTRIJD_STATUS_WACHT_OP_GOEDKEURING, WEDSTRIJD_STATUS_GEACCEPTEERD,
                      WEDSTRIJD_STATUS_GEANNULEERD, WEDSTRIJD_WA_STATUS_A, WEDSTRIJD_WA_STATUS_B,
-                     WEDSTRIJD_DUUR_MAX_DAGEN)
+                     WEDSTRIJD_DUUR_MAX_DAGEN, WEDSTRIJD_BEGRENZING_TO_STR)
 import datetime
 from types import SimpleNamespace
 
@@ -123,6 +123,17 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
             opt.selected = (dagen == duur_dagen)
 
             opt_duur.append(opt)
+        # for
+
+        context['opt_begrenzing'] = opt_begrenzing = list()
+        for code, begrenzing_str in WEDSTRIJD_BEGRENZING_TO_STR.items():
+            opt = SimpleNamespace()
+            opt.sel = 'begrenzing_%s' % code
+            opt.keuze_str = begrenzing_str
+            opt.selected = (code == wedstrijd.begrenzing)
+            if opt.selected:
+                wedstrijd.begrenzing_str = begrenzing_str
+            opt_begrenzing.append(opt)
         # for
 
         locaties = (wedstrijd
@@ -344,6 +355,13 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
                     if wedstrijd.voorwaarden_a_status_acceptatie:
                         wedstrijd.wa_status = WEDSTRIJD_WA_STATUS_A
 
+                begrenzing = request.POST.get('begrenzing', '')[:20]     # afkappen voor de veiligheid
+                for code in WEDSTRIJD_BEGRENZING_TO_STR.keys():
+                    if begrenzing == 'begrenzing_%s' % code:
+                        wedstrijd.begrenzing = code
+                        break
+                # for
+
             if not block_edits:
                 wedstrijd.contact_naam = request.POST.get('contact_naam', wedstrijd.contact_naam)[:50]
                 wedstrijd.contact_email = request.POST.get('contact_email', wedstrijd.contact_email)[:150]
@@ -360,6 +378,8 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
                     wedstrijd.aantal_banen = aantal_banen
 
                 wedstrijd.scheidsrechters = request.POST.get('scheidsrechters', wedstrijd.scheidsrechters)[:500]
+
+                wedstrijd.bijzonderheden = request.POST.get('bijzonderheden', '')[:1000]
 
             data = request.POST.get('locatie', '')
             if data:

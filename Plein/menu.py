@@ -34,7 +34,7 @@ def menu_dynamics(request, context, actief='hetplein'):
     context['is_test_server'] = settings.ENABLE_WIKI
 
     # zet context variabelen om aan te geven welke optionele delen van het menu getoond moeten worden
-    context['toon_kalender'] = True
+    context['toon_kalender'] = False
     if request.user.is_authenticated:
 
         # sidenav naam
@@ -43,6 +43,8 @@ def menu_dynamics(request, context, actief='hetplein'):
         # wissel van rol toegestaan?
         if rol_mag_wisselen(request):
             rol = rol_get_huidige(request)
+
+            context['toon_kalender'] = True
 
             # sidenav rol
             context['menu_rol_beschrijving'] = rol_get_beschrijving(request)

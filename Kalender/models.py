@@ -74,6 +74,25 @@ WEDSTRIJD_WA_STATUS_TO_STR = {
 WEDSTRIJD_DUUR_MAX_DAGEN = 5
 WEDSTRIJD_DUUR_MAX_UREN = 5         # maximale keuze voor de duur van een sessie
 
+WEDSTRIJD_BEGRENZING_LANDELIJK = 'L'
+WEDSTRIJD_BEGRENZING_VERENIGING = 'V'
+WEDSTRIJD_BEGRENZING_REGIO = 'G'
+WEDSTRIJD_BEGRENZING_RAYON = 'Y'
+
+WEDSTRIJD_BEGRENZING = (
+    (WEDSTRIJD_BEGRENZING_LANDELIJK, 'Landelijk'),
+    (WEDSTRIJD_BEGRENZING_RAYON, 'Rayon'),
+    (WEDSTRIJD_BEGRENZING_REGIO, 'Regio'),
+    (WEDSTRIJD_BEGRENZING_VERENIGING, 'Vereniging'),
+)
+
+WEDSTRIJD_BEGRENZING_TO_STR = {
+    WEDSTRIJD_BEGRENZING_LANDELIJK: 'Alle sporters (landelijk)',
+    WEDSTRIJD_BEGRENZING_RAYON: 'Sporters in het rayon',
+    WEDSTRIJD_BEGRENZING_REGIO: 'Sporters in de regio',
+    WEDSTRIJD_BEGRENZING_VERENIGING: 'Sporters van de organiserende vereniging',
+}
+
 
 class KalenderWedstrijdDeeluitslag(models.Model):
     """  deel van de uitslag van een wedstrijd """
@@ -135,6 +154,9 @@ class KalenderWedstrijd(models.Model):
     # waar wordt de wedstrijd gehouden
     locatie = models.ForeignKey(WedstrijdLocatie, on_delete=models.PROTECT)
 
+    # begrenzing
+    begrenzing = models.CharField(max_length=1, default=WEDSTRIJD_BEGRENZING_LANDELIJK, choices=WEDSTRIJD_BEGRENZING)
+
     # welke discipline is dit? (indoor/outdoor/veld, etc.)
     discipline = models.CharField(max_length=2, choices=WEDSTRIJD_DISCIPLINES, default='OD')
 
@@ -175,6 +197,10 @@ class KalenderWedstrijd(models.Model):
     # tekstveld voor namen scheidsrechters door organisatie aangedragen
     scheidsrechters = models.TextField(max_length=500, default='',
                                        blank=True)      # mag leeg zijn
+
+    # eventuele opmerkingen vanuit de organisatie
+    bijzonderheden = models.TextField(max_length=1000, default='',
+                                      blank=True)      # mag leeg zijn
 
     # de sessies van deze wedstrijd
     sessies = models.ManyToManyField(KalenderWedstrijdSessie,
