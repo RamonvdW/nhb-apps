@@ -51,7 +51,7 @@ class WedstrijdLocatie(models.Model):
     verenigingen = models.ManyToManyField(NhbVereniging,
                                           blank=True)       # mag leeg zijn / gemaakt worden
 
-    # eigen accommodatie baan of extern
+    # eigen accommodatie binnenbaan, buitenbaan of extern
     baan_type = models.CharField(max_length=1, choices=BAAN_TYPE, default=BAAN_TYPE_ONBEKEND)
 
     # welke disciplines kunnen hier georganiseerd worden?

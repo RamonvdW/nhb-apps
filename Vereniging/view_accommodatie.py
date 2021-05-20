@@ -452,7 +452,8 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
                 buiten = WedstrijdLocatie(
                                 baan_type='B',
                                 adres_uit_crm=False,
-                                adres='',
+                                adres=binnen_locatie.adres,
+                                plaats=binnen_locatie.plaats,
                                 notities='')
                 buiten.save()
                 buiten.verenigingen.add(nhbver)

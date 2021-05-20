@@ -230,6 +230,14 @@
                     </tr>
 
                     <tr>
+                        <td>Plaats (voor de wedstrijdkalender):</td>
+                        <td colspan="2">{{ locatie.plaats }}</td>
+                        {% if not readonly %}
+                            <td><!-- kolom voor de wijzig knoppen --></td>
+                        {% endif %}
+                    </tr>
+
+                    <tr>
                         <td>Type baan voor 18m/25m wedstrijden:</td>
                         <td colspan="{% if readonly %}2{% else %}3{% endif %}">
                             {% if readonly %}
@@ -374,6 +382,22 @@
                 {% if buiten_locatie %}
                     <tr>
                         <td colspan="{% if readonly %}3{% else %}4{% endif %}" class="nhb-grijs"><h6>Buitenbaan:</h6></td>
+                    </tr>
+
+                    <tr>
+                        <td>Adres van de accommodatie:</td>
+                        <td colspan="2">{{ buiten_locatie.adres|linebreaksbr }}</td>
+                        {% if not readonly %}
+                            <td><!-- kolom voor de wijzig knoppen --></td>
+                        {% endif %}
+                    </tr>
+
+                    <tr>
+                        <td>Plaats (voor de wedstrijdkalender):</td>
+                        <td colspan="2">{{ buiten_locatie.plaats }}</td>
+                        {% if not readonly %}
+                            <td><!-- kolom voor de wijzig knoppen --></td>
+                        {% endif %}
                     </tr>
 
                     <tr>

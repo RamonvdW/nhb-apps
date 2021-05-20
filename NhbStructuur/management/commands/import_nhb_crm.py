@@ -17,7 +17,7 @@ from Mailer.models import mailer_email_is_valide
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbLid, NhbVereniging
 from Overig.helpers import maak_unaccented
 from Records.models import IndivRecord
-from Wedstrijden.models import WedstrijdLocatie
+from Wedstrijden.models import WedstrijdLocatie, BAAN_TYPE_EXTERN, BAAN_TYPE_BUITEN
 import datetime
 import json
 
@@ -911,7 +911,10 @@ class Command(BaseCommand):
             # let op: elke vereniging heeft dus maximaal 1 locatie op dit adres
             #         buitenbaan heeft geen adres
             try:
-                wedstrijdlocatie = WedstrijdLocatie.objects.get(adres=adres, plaats=plaats)
+                wedstrijdlocatie = (WedstrijdLocatie
+                                    .objects
+                                    .exclude(baan_type__in=(BAAN_TYPE_BUITEN, BAAN_TYPE_EXTERN))
+                                    .get(adres=adres))
             except WedstrijdLocatie.DoesNotExist:
                 # nieuw aanmaken
                 wedstrijdlocatie = WedstrijdLocatie(
@@ -921,10 +924,18 @@ class Command(BaseCommand):
                 wedstrijdlocatie.save()
                 self.stdout.write('[INFO] Nieuwe wedstrijdlocatie voor adres %s' % repr(adres))
                 self._count_toevoegingen += 1
+            else:
+                # indien nog niet ingevuld, zet de plaats
+                if wedstrijdlocatie.plaats != plaats:
+                    wedstrijdlocatie.plaats = plaats
+                    wedstrijdlocatie.save(update_fields=['plaats'])
 
-            # locatie mag niet van adres wijzigen
+            # adres van locatie mag niet wijzigen
             # dus als vereniging een ander adres heeft, ontkoppel dan de oude locatie
-            for obj in nhb_ver.wedstrijdlocatie_set.exclude(adres_uit_crm=False).exclude(pk=wedstrijdlocatie.pk):
+            for obj in (nhb_ver
+                        .wedstrijdlocatie_set
+                        .exclude(adres_uit_crm=False)           # niet extern/buitenbaan
+                        .exclude(pk=wedstrijdlocatie.pk)):
                 nhb_ver.wedstrijdlocatie_set.remove(obj)
                 self.stdout.write('[INFO] Vereniging %s ontkoppeld van wedstrijdlocatie met adres %s' % (nhb_ver, repr(obj.adres)))
                 self._count_wijzigingen += 1
@@ -935,6 +946,25 @@ class Command(BaseCommand):
                 wedstrijdlocatie.verenigingen.add(nhb_ver)
                 self.stdout.write('[INFO] Vereniging %s gekoppeld aan wedstrijdlocatie %s' % (nhb_ver, repr(adres)))
                 self._count_toevoegingen += 1
+
+            # zoek ook de buitenbaan van de vereniging erbij
+            try:
+                buiten_locatie = nhb_ver.wedstrijdlocatie_set.get(baan_type=BAAN_TYPE_BUITEN)
+            except WedstrijdLocatie.DoesNotExist:
+                # vereniging heeft geen buitenlocatie
+                pass
+            else:
+                updated = list()
+                if buiten_locatie.plaats != wedstrijdlocatie.plaats:
+                    buiten_locatie.plaats = wedstrijdlocatie.plaats
+                    updated.append('plaats')
+
+                if buiten_locatie.adres != wedstrijdlocatie.adres:
+                    buiten_locatie.adres = wedstrijdlocatie.adres
+                    updated.append('adres')
+
+                if len(updated):
+                    buiten_locatie.save(update_fields=updated)
         # for
 
         # TODO: zichtbaar=False zetten voor wedstrijdlocatie zonder vereniging
