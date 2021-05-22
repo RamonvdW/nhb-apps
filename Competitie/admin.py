@@ -218,6 +218,8 @@ class KampioenschapMutatieAdmin(admin.ModelAdmin):
                            'deelnemer__klasse',
                            'deelnemer__schutterboog__nhblid')
 
+    list_filter = ('is_verwerkt', 'mutatie')
+
 
 admin.site.register(Competitie)
 admin.site.register(DeelCompetitie, DeelCompetitieAdmin)
