@@ -65,7 +65,7 @@ a {
 
 .menu-level2 {
     color: #fff;
-    font-size: 16px;
+    font-size: 15px;            /* bij 16px past "25m 1pijl 2020/2021" niet meer in het menu, maar alleen bij Win10.. */
 }
 
 .menu-level2-spacer {
