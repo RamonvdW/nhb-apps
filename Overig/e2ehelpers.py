@@ -15,6 +15,7 @@ from contextlib import contextmanager
 from bs4 import BeautifulSoup
 import subprocess
 import traceback
+import datetime
 import tempfile
 import vnujar
 import pyotp
@@ -23,6 +24,7 @@ import pyotp
 class MyQueryTracer(object):
     def __init__(self):
         self.trace = list()
+        self.started_at = datetime.datetime.now()
 
     def __call__(self, execute, sql, params, many, context):
         call = {'sql': sql}
@@ -604,12 +606,14 @@ class E2EHelpers(object):
 
     def assert_is_redirect_not_plein(self, resp):
         assert isinstance(self, TestCase)
-        self.assertEqual(resp.status_code, 302)
-        self.assertNotEqual(resp.url, '/plein/')    # redirect naar plein is typisch een reject om rechten
+        if resp.status_code != 302:
+            # geef een iets uitgebreider antwoord
+            msg = "status_code: %s != 302" % resp.status_code
+            if resp.status_code == 200:
+                msg += "; templates used: %s" % repr([tmpl.name for tmpl in resp.templates])
+            self.fail(msg=msg)
 
-    # def OLD_assert_max_queries(self, num):
-    #     conn = connections[DEFAULT_DB_ALIAS]
-    #     return AssertMaxQueriesContext(self, num, conn)
+        self.assertNotEqual(resp.url, '/plein/')    # redirect naar plein is typisch een reject om rechten
 
     @staticmethod
     def _find_statement(query, start):                  # pragma: no cover
@@ -643,6 +647,11 @@ class E2EHelpers(object):
             with connection.execute_wrapper(tracer):
                 yield
         finally:
+            duration = datetime.datetime.now() - tracer.started_at
+            duration_seconds = duration.seconds
+            if duration_seconds > 1.5:
+                self.fail(msg="Operation took suspiciously long: %.2f seconds" % duration_seconds)
+
             count = len(tracer.trace)
             if count > num:                     # pragma: no cover
                 queries = 'Captured queries:'
