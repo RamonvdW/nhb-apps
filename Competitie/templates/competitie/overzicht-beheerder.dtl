@@ -53,8 +53,16 @@
                 {% include 'plein/card.dtl' with title="Zet datums" text="Belangrijke datums aanpassen voor de fases van deze nieuwe competitie." icon="build" url=card_url %}
             {% endif %}
 
-            <!-- klassegrenzen vaststellen -->
             {% if not comp.klassegrenzen_vastgesteld %}
+                <!-- ag vaststellen -->
+                {% if datum_ag_vastgesteld %}
+                    <!-- template tag 'add' cannot handle missing variables -->
+                    {% include 'plein/card.dtl' with title="Aanvangsgemiddelden" text=comp_afstand|add:"m AG voor alle sporters vaststellen a.h.v. uitslag vorig seizoen (op "|add:datum_ag_vastgesteld|add:" voor het laatst gedaan)" icon="how_to_reg" url=comp.url_ag_vaststellen %}
+                {% else %}
+                    {% include 'plein/card.dtl' with title="Aanvangsgemiddelden" text=comp_afstand|add:"m AG voor alle sporters vaststellen a.h.v. uitslag vorig seizoen (eerste keer)" icon="how_to_reg" url=comp.url_ag_vaststellen %}
+                {% endif %}
+
+                <!-- klassegrenzen vaststellen -->
                 {% url 'Competitie:klassegrenzen-vaststellen' comp_pk=comp.pk as card_url %}
                 {% include 'plein/card.dtl' with title="Zet klassegrenzen" text="Klassegrenzen vaststellen (eenmalige actie)." icon="equalizer" url=card_url %}
             {% endif %}

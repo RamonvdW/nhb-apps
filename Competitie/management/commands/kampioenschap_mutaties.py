@@ -1,19 +1,24 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-# werk de tussenstand bij voor deelcompetities die niet afgesloten zijn
-# zodra er nieuwe ScoreHist records zijn
+# werk de tussenstand bij voor deelcompetities die niet afgesloten zijn zodra er nieuwe ScoreHist records zijn
+# verwerkt ook een aantal opdrachten die concurrency protection nodig hebben
+
+# TODO: hernoem naar competitie_mutaties
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.db.models import F
-from Competitie.models import (CompetitieTaken, DeelCompetitie, DeelcompetitieKlasseLimiet,
+from Competitie.models import (Competitie, CompetitieTaken, DeelCompetitie, DeelcompetitieKlasseLimiet,
                                KampioenschapSchutterBoog, DEELNAME_JA, DEELNAME_NEE,
                                KampioenschapMutatie,
+                               MUTATIE_AG_VASTSTELLEN_18M, MUTATIE_AG_VASTSTELLEN_25M, MUTATIE_COMPETITIE_OPSTARTEN,
                                MUTATIE_INITIEEL, MUTATIE_CUT, MUTATIE_AANMELDEN, MUTATIE_AFMELDEN)
+from Competitie.operations import (competities_aanmaken, bepaal_startjaar_nieuwe_competitie,
+                                   aanvangsgemiddelden_vaststellen_voor_afstand)
 from Overig.background_sync import BackgroundSync
 import django.db.utils
 import datetime
@@ -488,21 +493,44 @@ class Command(BaseCommand):
         # else: cut_oud == cut_nieuw --> doe niets
         #   (dit kan voorkomen als 2 gebruikers tegelijkertijd de cut veranderen)
 
+    @staticmethod
+    def _verwerk_mutatie_competitie_opstarten():
+        jaar = bepaal_startjaar_nieuwe_competitie()
+        # beveiliging tegen dubbel aanmaken
+        if Competitie.objects.filter(begin_jaar=jaar).count() == 0:
+            competities_aanmaken(jaar)
+
     def _verwerk_mutatie(self, mutatie):
         code = mutatie.mutatie
 
-        if code == MUTATIE_INITIEEL:
+        if code == MUTATIE_COMPETITIE_OPSTARTEN:
+            self.stdout.write('[INFO] Verwerk mutatie %s: Competitie opstarten' % mutatie.pk)
+            self._verwerk_mutatie_competitie_opstarten()
+
+        elif code == MUTATIE_AG_VASTSTELLEN_18M:
+            self.stdout.write('[INFO] Verwerk mutatie %s: AG vaststellen 18m' % mutatie.pk)
+            aanvangsgemiddelden_vaststellen_voor_afstand(18)
+
+        elif code == MUTATIE_AG_VASTSTELLEN_25M:
+            self.stdout.write('[INFO] Verwerk mutatie %s: AG vaststellen 25m' % mutatie.pk)
+            aanvangsgemiddelden_vaststellen_voor_afstand(25)
+
+        elif code == MUTATIE_INITIEEL:
             self.stdout.write('[INFO] Verwerk mutatie %s: initieel' % mutatie.pk)
             self._verwerk_mutatie_initieel(mutatie.deelcompetitie.competitie, mutatie.deelcompetitie.laag)
+
         elif code == MUTATIE_CUT:
             self.stdout.write('[INFO] Verwerk mutatie %s: aangepaste limiet (cut)' % mutatie.pk)
             self._verwerk_mutatie_cut(mutatie.deelcompetitie, mutatie.klasse, mutatie.cut_oud, mutatie.cut_nieuw)
+
         elif code == MUTATIE_AANMELDEN:
             self.stdout.write('[INFO] Verwerk mutatie %s: aanmelden' % mutatie.pk)
             self._verwerk_mutatie_aanmelden(mutatie.deelnemer)
+
         elif code == MUTATIE_AFMELDEN:
             self.stdout.write('[INFO] Verwerk mutatie %s: afmelden' % mutatie.pk)
             self._verwerk_mutatie_afmelden(mutatie.deelnemer)
+
         else:
             self.stdout.write('[ERROR] Onbekende mutatie code %s door %s (pk=%s)' % (code, mutatie.door, mutatie.pk))
 
@@ -528,8 +556,8 @@ class Command(BaseCommand):
 
         self.taken.hoogste_mutatie = mutatie_latest
         self.taken.save(update_fields=['hoogste_mutatie'])
-        self.stdout.write('[INFO] nieuwe hoogste KampioenschapMutatie pk is %s' % self.taken.hoogste_mutatie.pk)
 
+        did_useful_work = False
         for pk in mutatie_pks:
             # LET OP: we halen de records hier 1 voor 1 op
             #         zodat we verse informatie hebben inclusief de vorige mutatie
@@ -544,10 +572,14 @@ class Command(BaseCommand):
                 self._verwerk_mutatie(mutatie)
                 mutatie.is_verwerkt = True
                 mutatie.save(update_fields=['is_verwerkt'])
+                did_useful_work = True
         # for
 
-        klaar = datetime.datetime.now()
-        self.stdout.write('[INFO] Mutaties verwerkt in %s seconden' % (klaar - begin))
+        if did_useful_work:
+            self.stdout.write('[INFO] nieuwe hoogste KampioenschapMutatie pk is %s' % self.taken.hoogste_mutatie.pk)
+
+            klaar = datetime.datetime.now()
+            self.stdout.write('[INFO] Mutaties verwerkt in %s seconden' % (klaar - begin))
 
     def _monitor_nieuwe_mutaties(self):
         # monitor voor nieuwe ScoreHist

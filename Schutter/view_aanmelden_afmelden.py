@@ -11,12 +11,11 @@ from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
-from Competitie.models import (DeelCompetitie, DeelcompetitieRonde,
-                               CompetitieKlasse, RegioCompetitieSchutterBoog,
+from Competitie.models import (DeelCompetitie, DeelcompetitieRonde, RegioCompetitieSchutterBoog,
                                LAAG_REGIO, AG_NUL,
                                INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3,
-                               DAGDELEN, DAGDEEL_AFKORTINGEN,
-                               KlasseBepaler)
+                               DAGDELEN, DAGDEEL_AFKORTINGEN)
+from Competitie.operations import KlasseBepaler
 from Plein.menu import menu_dynamics
 from Score.models import Score, ScoreHist, SCORE_TYPE_INDIV_AG
 from Wedstrijden.models import CompetitieWedstrijd

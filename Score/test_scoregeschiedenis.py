@@ -12,7 +12,7 @@ from Functie.models import maak_functie
 from Schutter.models import SchutterBoog
 from Score.models import Score, ScoreHist, SCORE_WAARDE_VERWIJDERD
 from Wedstrijden.models import CompetitieWedstrijd, CompetitieWedstrijdUitslag
-from .models import score_indiv_ag_opslaan
+from .operations import score_indiv_ag_opslaan
 import datetime
 
 

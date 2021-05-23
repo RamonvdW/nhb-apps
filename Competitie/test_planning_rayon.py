@@ -12,11 +12,12 @@ from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging, N
 from Overig.e2ehelpers import E2EHelpers
 from Schutter.models import SchutterBoog
 from Score.models import Score
-from Wedstrijden.models import WedstrijdLocatie, CompetitieWedstrijdenPlan, CompetitieWedstrijdUitslag
-from .models import (Competitie, DeelCompetitie, LAAG_REGIO, LAAG_RK, competitie_aanmaken,
+from Wedstrijden.models import WedstrijdLocatie, CompetitieWedstrijdUitslag
+from .models import (Competitie, DeelCompetitie, LAAG_REGIO, LAAG_RK,
                      KampioenschapSchutterBoog, CompetitieKlasse, DeelcompetitieKlasseLimiet,
                      KampioenschapMutatie, DEELNAME_NEE, DEELNAME_JA, INSCHRIJF_METHODE_1,
                      RegioCompetitieSchutterBoog)
+from .operations import competities_aanmaken
 import datetime
 import time
 import io
@@ -128,7 +129,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         self.schutterboog.save()
 
         # creëer een competitie met deelcompetities
-        competitie_aanmaken(jaar=2019)
+        competities_aanmaken(jaar=2019)
 
         self.comp_18 = Competitie.objects.get(afstand='18')
         self.comp_25 = Competitie.objects.get(afstand='25')

@@ -16,7 +16,7 @@
 
     <p>Als Manager Competitiezaken wil je de aanvangsgemiddelden voor elke schutter-boog vaststellen.</p>
 
-    <p>Deze actie moet tijdens de opstart van een nieuw competitieseizoen eenmalig uitgevoerd worden voordat de klassegrenzen vastgesteld worden.<br>(Meerdere keren de aanvangsgemiddelden vaststellen kan geen kwaad maar hoeft niet)</p>
+    <p>Deze actie moet tijdens de opstart van een nieuw competitie eenmalig uitgevoerd worden voordat de klassegrenzen vastgesteld worden. Meerdere keren de aanvangsgemiddelden vaststellen kan geen kwaad maar heeft geen effect.</p>
 
     {% if geen_histcomp %}
 
@@ -24,18 +24,19 @@
 
     {% else %}
 
-        <p>Alle huidige aanvangsgemiddelden zullen eerst verwijderd worden. De schutters-boog die in het vorige seizoen genoeg scores neergezet hebben krijgen een nieuw aanvangsgemiddelde (AG) toegekend. Schutters-boog met te weinig scores krijgen geen aanvangsgemiddelde en beginnen daarom in klasse Onbekend.</p>
+        <p>Alle huidige aanvangsgemiddelden voor de {{ afstand }}m zullen eerst verwijderd worden. De schutters-boog die in het vorige seizoen genoeg scores neergezet hebben krijgen een nieuw aanvangsgemiddelde (AG) toegekend. Schutters-boog met te weinig scores krijgen geen aanvangsgemiddelde en beginnen daarom in klasse Onbekend.</p>
 
-        <h5 class="red-text">Controleer dat onderstaande gegevens juist zijn.</h5>
-
-        <p>De historische uitslag waar de aanvangsgemiddelden op gebaseerd zullen worden is van <b>seizoen {{ seizoen }}</b>.</p>
-
-        <p>Voor de <b>Indoor competitie</b> moeten de sporters <b>minimaal {{ aantal_scores_18 }} scores</b> neergezet hebben om een AG te krijgen.</p>
-        <p>Voor de <b>25m 1pijl competitie</b> moeten de sporters <b>minimaal {{ aantal_scores_25 }} scores</b> neergezet hebben om een AG te krijgen.</p>
+        <div class="container">
+            <ul class="collection with-header white">
+                <li class="collection-header"><h5 class="red-text">Controleer dat onderstaande gegevens juist zijn.</h5></li>
+                <li class="collection-item">Gebruik uitslag <b>seizoen {{ seizoen }}</b>, afstand <b>{{ afstand }}m</b>.</li>
+                <li class="collection-item">Aantal scores: <b>minstens {{ aantal_scores }}</b>.</li>
+            </ul>
+        </div>
 
         <p>Als bovenstaande gegevens correct zijn, druk dan op de volgende knop:</p>
 
-        <form method="post" action="{% url 'Competitie:ag-vaststellen' %}">
+        <form method="post" action="{{ url_vaststellen }}">
             {% csrf_token %}
             <input class="btn-nhb-rood" name="button_vaststellen" type="submit" value="Ja, stel de aanvangsgemiddelden vast">
         </form>

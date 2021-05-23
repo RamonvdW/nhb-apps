@@ -8,9 +8,9 @@ from django.test import TestCase
 from BasisTypen.models import BoogType
 from Schutter.models import SchutterBoog
 from NhbStructuur.models import NhbLid
-from .models import (Score, ScoreHist, wanneer_ag_vastgesteld,
-                     score_indiv_ag_opslaan, score_teams_ag_opslaan,
+from .models import (Score, ScoreHist,
                      SCORE_TYPE_INDIV_AG, SCORE_TYPE_TEAM_AG, SCORE_TYPE_SCORE)
+from .operations import score_indiv_ag_opslaan, score_teams_ag_opslaan, wanneer_ag_vastgesteld
 from Overig.e2ehelpers import E2EHelpers
 import datetime
 
@@ -112,12 +112,12 @@ class TestScoreOpslaan(E2EHelpers, TestCase):
         self.assertTrue('(team AG)' in str(score))
 
     def test_wanneer(self):
-        res = wanneer_ag_vastgesteld()
+        res = wanneer_ag_vastgesteld(18)
         self.assertIsNone(res)
 
         score_indiv_ag_opslaan(self.schutterboog, 18, 9.123, None, "test")
 
-        res = wanneer_ag_vastgesteld()
+        res = wanneer_ag_vastgesteld(18)
         self.assertIsNotNone(res)
 
 # end of file

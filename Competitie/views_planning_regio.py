@@ -18,8 +18,9 @@ from NhbStructuur.models import NhbCluster, NhbVereniging
 from Taken.taken import maak_taak
 from Wedstrijden.models import CompetitieWedstrijd, WedstrijdLocatie
 from .models import (LAAG_REGIO, LAAG_RK, LAAG_BK, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2,
-                     DeelCompetitie, DeelcompetitieRonde, maak_deelcompetitie_ronde,
+                     DeelCompetitie, DeelcompetitieRonde,
                      CompetitieKlasse, RegioCompetitieSchutterBoog)
+from .operations import maak_deelcompetitie_ronde
 from .menu import menu_dynamics_competitie
 from types import SimpleNamespace
 import datetime

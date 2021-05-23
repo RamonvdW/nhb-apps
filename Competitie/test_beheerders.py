@@ -11,8 +11,9 @@ from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
 from Overig.e2ehelpers import E2EHelpers
 from Competitie.models import RegioCompetitieSchutterBoog
 from Competitie.test_fase import zet_competitie_fase
-from .models import (Competitie, DeelCompetitie, competitie_aanmaken,
+from .models import (Competitie, DeelCompetitie,
                      INSCHRIJF_METHODE_3, LAAG_REGIO, LAAG_RK, LAAG_BK)
+from .operations import competities_aanmaken
 import datetime
 
 
@@ -77,7 +78,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.account_schutter = self._prep_beheerder_lid('Schutter')
 
         # creëer een competitie met deelcompetities
-        competitie_aanmaken(jaar=2019)
+        competities_aanmaken(jaar=2019)
         # nu in fase A
 
         self.comp_18 = Competitie.objects.get(afstand='18')

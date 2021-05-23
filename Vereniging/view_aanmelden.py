@@ -6,7 +6,7 @@
 
 from django.http import HttpResponseRedirect, Http404
 from django.urls import reverse
-from django.views.generic import ListView, TemplateView
+from django.views.generic import ListView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Plein.menu import menu_dynamics
@@ -18,9 +18,9 @@ from NhbStructuur.models import NhbLid
 from Schutter.models import SchutterBoog, SchutterVoorkeuren
 from Competitie.models import (AG_NUL, DAGDELEN, DAGDEEL_AFKORTINGEN,
                                INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3,
-                               Competitie, CompetitieKlasse,
-                               DeelCompetitie, DeelcompetitieRonde,
-                               RegioCompetitieSchutterBoog, KlasseBepaler)
+                               Competitie, DeelCompetitie, DeelcompetitieRonde,
+                               RegioCompetitieSchutterBoog)
+from Competitie.operations import KlasseBepaler
 from Score.models import Score, SCORE_TYPE_INDIV_AG
 from Wedstrijden.models import CompetitieWedstrijd
 import copy

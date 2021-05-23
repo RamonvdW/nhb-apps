@@ -641,16 +641,17 @@ class E2EHelpers(object):
         return query
 
     @contextmanager
-    def assert_max_queries(self, num):
+    def assert_max_queries(self, num, check_duration=True):
         tracer = MyQueryTracer()
         try:
             with connection.execute_wrapper(tracer):
                 yield
         finally:
-            duration = datetime.datetime.now() - tracer.started_at
-            duration_seconds = duration.seconds
-            if duration_seconds > 1.5:
-                self.fail(msg="Operation took suspiciously long: %.2f seconds" % duration_seconds)
+            if check_duration:
+                duration = datetime.datetime.now() - tracer.started_at
+                duration_seconds = duration.seconds
+                if duration_seconds > 1.5:
+                    self.fail(msg="Operation took suspiciously long: %.2f seconds" % duration_seconds)
 
             count = len(tracer.trace)
             if count > num:                     # pragma: no cover

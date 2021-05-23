@@ -16,8 +16,9 @@ from Taken.models import Taak
 from Wedstrijden.models import WedstrijdLocatie, CompetitieWedstrijd
 from Overig.e2ehelpers import E2EHelpers
 from .models import (Competitie, DeelCompetitie, CompetitieKlasse,
-                     DeelcompetitieRonde, competitie_aanmaken, LAAG_REGIO, LAAG_RK,
+                     DeelcompetitieRonde, LAAG_REGIO, LAAG_RK,
                      RegioCompetitieSchutterBoog, INSCHRIJF_METHODE_1)
+from .operations import competities_aanmaken
 from .views_planning_regio import competitie_week_nr_to_date
 import datetime
 
@@ -116,13 +117,13 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         self.schutterboog.save()
 
         # creëer een competitie met deelcompetities
-        competitie_aanmaken(jaar=2019)
+        competities_aanmaken(jaar=2019)
 
         self.comp_18 = Competitie.objects.get(afstand='18')
         self.comp_25 = Competitie.objects.get(afstand='25')
 
         # een parallel competitie is noodzakelijk om corner-cases te raken
-        competitie_aanmaken(jaar=2020)
+        competities_aanmaken(jaar=2020)
 
         # klassengrenzen vaststellen om de competitie voorbij fase A te krijgen
         self.e2e_login_and_pass_otp(self.account_bb)

@@ -8,9 +8,9 @@ from django.test import TestCase
 from BasisTypen.models import BoogType
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
-from Competitie.models import (Competitie, CompetitieKlasse,
-                               LAAG_REGIO, DeelCompetitie,
-                               maak_deelcompetitie_ronde)
+from Competitie.models import Competitie, CompetitieKlasse, LAAG_REGIO, DeelCompetitie
+from Competitie.operations import maak_deelcompetitie_ronde
+from Competitie.test_competitie import maak_competities_en_zet_fase_b
 from Schutter.models import SchutterBoog
 from Wedstrijden.models import CompetitieWedstrijd, CompetitieWedstrijdUitslag
 from Score.models import Score
@@ -178,28 +178,8 @@ class TestVerenigingWedstrijden(E2EHelpers, TestCase):
         self.url_uitslag_invoeren = '/vereniging/uitslag-invoeren/'
 
     def _create_competitie(self):
-        url_kies = '/bondscompetities/'
-        url_aanmaken = '/bondscompetities/aanmaken/'
-        url_klassegrenzen = '/bondscompetities/%s/klassegrenzen/vaststellen/'    # comp_pk
-
         self.assertEqual(CompetitieKlasse.objects.count(), 0)
-
-        with self.assert_max_queries(20):
-            resp = self.client.get(url_aanmaken)
-
-        # competitie aanmaken
-        with self.assert_max_queries(20):
-            resp = self.client.post(url_aanmaken)
-        self.assert_is_redirect(resp, url_kies)
-
-        self.comp_18 = Competitie.objects.get(afstand=18)
-        self.comp_25 = Competitie.objects.get(afstand=25)
-
-        # klassegrenzen vaststellen
-        resp = self.client.post(url_klassegrenzen % self.comp_18.pk)
-        self.assert_is_redirect(resp, url_kies)
-        resp = self.client.post(url_klassegrenzen % self.comp_25.pk)
-        self.assert_is_redirect(resp, url_kies)
+        self.comp_18, self.comp_25 = maak_competities_en_zet_fase_b()
 
         self.deelcomp_regio = DeelCompetitie.objects.get(laag=LAAG_REGIO,
                                                          nhb_regio=self.regio_111,

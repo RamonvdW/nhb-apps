@@ -12,8 +12,8 @@ from Schutter.models import SchutterBoog
 from Score.models import Score
 from Wedstrijden.models import CompetitieWedstrijd, CompetitieWedstrijdUitslag
 from .models import (Competitie, DeelCompetitie, CompetitieKlasse,
-                     DeelcompetitieRonde, competitie_aanmaken,
-                     RegioCompetitieSchutterBoog, AG_NUL)
+                     DeelcompetitieRonde, RegioCompetitieSchutterBoog, AG_NUL)
+from .operations import competities_aanmaken
 from Overig.e2ehelpers import E2EHelpers
 import datetime
 import json
@@ -128,7 +128,7 @@ class TestCompetitieScores(E2EHelpers, TestCase):
         self.account_schutter = self._prep_beheerder_lid('Schutter')
 
         # creëer een competitie met deelcompetities
-        competitie_aanmaken(jaar=2019)
+        competities_aanmaken(jaar=2019)
 
         self.comp_18 = Competitie.objects.get(afstand='18')
         self.comp_25 = Competitie.objects.get(afstand='25')

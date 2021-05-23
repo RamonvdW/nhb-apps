@@ -8,11 +8,10 @@ from django.test import TestCase
 from BasisTypen.models import BoogType
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
-from Competitie.test_fase import zet_competitie_fase
-from Competitie.models import (Competitie, CompetitieKlasse,
-                               LAAG_REGIO, DeelCompetitie, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2,
-                               maak_deelcompetitie_ronde,
-                               RegioCompetitieSchutterBoog)
+from Competitie.models import (CompetitieKlasse, DeelCompetitie, RegioCompetitieSchutterBoog,
+                               LAAG_REGIO, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2)
+from Competitie.operations import maak_deelcompetitie_ronde
+from Competitie.test_competitie import maak_competities_en_zet_fase_b
 from Schutter.models import SchutterBoog
 from Wedstrijden.models import CompetitieWedstrijd, CompetitieWedstrijdUitslag
 from Score.models import Score
@@ -204,30 +203,9 @@ class TestVerenigingSchietmomenten(E2EHelpers, TestCase):
 
     def _create_competitie(self):
         url_kies = '/bondscompetities/'
-        url_aanmaken = '/bondscompetities/aanmaken/'
-        url_klassegrenzen = '/bondscompetities/%s/klassegrenzen/vaststellen/'    # comp_pk
 
         self.assertEqual(CompetitieKlasse.objects.count(), 0)
-
-        with self.assert_max_queries(20):
-            resp = self.client.get(url_aanmaken)
-
-        # competitie aanmaken
-        with self.assert_max_queries(20):
-            resp = self.client.post(url_aanmaken)
-        self.assert_is_redirect(resp, url_kies)
-
-        self.comp_18 = Competitie.objects.get(afstand=18)
-        self.comp_25 = Competitie.objects.get(afstand=25)
-
-        # klassegrenzen vaststellen
-        resp = self.client.post(url_klassegrenzen % self.comp_18.pk)
-        self.assert_is_redirect(resp, url_kies)
-        resp = self.client.post(url_klassegrenzen % self.comp_25.pk)
-        self.assert_is_redirect(resp, url_kies)
-
-        zet_competitie_fase(self.comp_18, 'B')
-        zet_competitie_fase(self.comp_25, 'B')
+        self.comp_18, self.comp_25 = maak_competities_en_zet_fase_b()
 
         self.deelcomp_regio = DeelCompetitie.objects.get(laag=LAAG_REGIO,
                                                          nhb_regio=self.regio_111,

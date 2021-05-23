@@ -9,10 +9,11 @@ from django.core import management
 from BasisTypen.models import BoogType
 from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
 from Competitie.test_fase import zet_competitie_fase
+from Competitie.test_competitie import maak_competities_en_zet_fase_b
 from Schutter.models import SchutterBoog
 from Overig.e2ehelpers import E2EHelpers
-from .models import (Competitie, DeelCompetitie, CompetitieKlasse, competitie_aanmaken,
-                     LAAG_REGIO, LAAG_RK, LAAG_BK, AG_NUL,
+from .models import (Competitie, DeelCompetitie, CompetitieKlasse,
+                     LAAG_REGIO, LAAG_RK, LAAG_BK,
                      RegioCompetitieSchutterBoog,  DeelcompetitieKlasseLimiet,
                      KampioenschapMutatie, MUTATIE_INITIEEL, MUTATIE_CUT, MUTATIE_AFMELDEN,
                      KampioenschapSchutterBoog, DEELNAME_ONBEKEND, DEELNAME_JA, DEELNAME_NEE)
@@ -111,22 +112,13 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         # for
 
     def _maak_competitie(self):
-        self.e2e_login_and_pass_otp(self.account_bb)
-        self.e2e_wisselnaarrol_bb()
-
         # zet de competitie klaar aan het einde van de regiocompetitie
         # zodat de BKO deze door kan zetten
         # er moet dan in 1 rayon en 1 wedstrijdklasse 8 deelnemers komen
         # creëer een competitie met deelcompetities
-        competitie_aanmaken(jaar=2019)
+        self.comp, _ = maak_competities_en_zet_fase_b(startjaar=2019)
 
-        self.comp = Competitie.objects.get(afstand='18')
-
-        # klassengrenzen vaststellen om de competitie voorbij fase A te krijgen
-        self.url_klassegrenzen_vaststellen = '/bondscompetities/%s/klassegrenzen/vaststellen/' % self.comp.pk
-        resp = self.client.post(self.url_klassegrenzen_vaststellen)
-        self.assert_is_redirect_not_plein(resp)     # check success
-        self.client.logout()
+        self.client.logout()        # TODO: nodig?
 
         self.klasse = (CompetitieKlasse
                        .objects
@@ -876,7 +868,7 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         # en laat deze iets langer lopen
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(20, check_duration=False):     # 2 seconden is boven de limiet
             management.call_command('kampioenschap_mutaties', '2', '--quick', '--all', stderr=f1, stdout=f2)
 
 # end of file

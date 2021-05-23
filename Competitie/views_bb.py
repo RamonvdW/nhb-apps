@@ -10,24 +10,22 @@ from django.urls import reverse
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.shortcuts import redirect
-from django.utils import timezone
 from django.conf import settings
-from django.db.models import Count
-from BasisTypen.models import BoogType, LeeftijdsKlasse
-from BasisTypen.models import (IndivWedstrijdklasse, TeamWedstrijdklasse,
-                               MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT)
+from BasisTypen.models import IndivWedstrijdklasse, TeamWedstrijdklasse
 from Functie.rol import Rollen, rol_get_huidige
-from HistComp.models import HistCompetitie, HistCompetitieIndividueel
+from HistComp.models import HistCompetitie
 from Logboek.models import schrijf_in_logboek
-from NhbStructuur.models import NhbLid
+from Overig.background_sync import BackgroundSync
 from Plein.menu import menu_dynamics
-from Schutter.models import SchutterBoog
-from Score.models import Score, ScoreHist, SCORE_TYPE_INDIV_AG, wanneer_ag_vastgesteld
+from Score.operations import wanneer_ag_vastgesteld
 from django.utils.formats import localize
-from .models import (AG_NUL, AG_LAAGSTE_NIET_NUL,
-                     Competitie, competitie_aanmaken, CompetitieKlasse)
+from .models import (Competitie, KampioenschapMutatie,
+                     MUTATIE_COMPETITIE_OPSTARTEN, MUTATIE_AG_VASTSTELLEN_18M, MUTATIE_AG_VASTSTELLEN_25M)
+from .operations import (bepaal_startjaar_nieuwe_competitie, get_mappings_wedstrijdklasse_to_competitieklasse,
+                         bepaal_klassegrenzen_indiv, bepaal_klassegrenzen_teams, competitie_klassegrenzen_vaststellen)
 from .menu import menu_dynamics_competitie
 import datetime
+import time
 
 
 TEMPLATE_COMPETITIE_INSTELLINGEN = 'competitie/bb-instellingen-nieuwe-competitie.dtl'
@@ -39,10 +37,7 @@ TEMPLATE_COMPETITIE_AG_VASTSTELLEN = 'competitie/bb-ag-vaststellen.dtl'
 TEMPLATE_COMPETITIE_INFO_COMPETITIE = 'competitie/info-competitie.dtl'
 TEMPLATE_COMPETITIE_WIJZIG_DATUMS = 'competitie/bb-wijzig-datums.dtl'
 
-
-def models_bepaal_startjaar_nieuwe_competitie():
-    """ bepaal het start jaar van de nieuwe competitie """
-    return timezone.now().year
+mutatie_ping = BackgroundSync(settings.BACKGROUND_SYNC__KAMPIOENSCHAP_MUTATIES)
 
 
 class InstellingenVolgendeCompetitieView(UserPassesTestMixin, TemplateView):
@@ -120,23 +115,43 @@ class CompetitieAanmakenView(UserPassesTestMixin, TemplateView):
             (wat volgt uit het drukken op de knop)
             om de nieuwe competitie op te starten.
         """
-        jaar = models_bepaal_startjaar_nieuwe_competitie()
+        account = request.user
+        jaar = bepaal_startjaar_nieuwe_competitie()
 
         # beveiliging tegen dubbel aanmaken
         if Competitie.objects.filter(begin_jaar=jaar).count() == 0:
             seizoen = "%s/%s" % (jaar, jaar+1)
-            schrijf_in_logboek(request.user, 'Competitie', 'Aanmaken competities %s' % seizoen)
-            competitie_aanmaken(jaar)
+            schrijf_in_logboek(account, 'Competitie', 'Aanmaken competities %s' % seizoen)
+
+            # voor concurrency protection, laat de achtergrondtaak de competitie aanmaken
+            door_str = "BB %s" % account.volledige_naam()
+            mutatie = KampioenschapMutatie(mutatie=MUTATIE_COMPETITIE_OPSTARTEN,
+                                           door=door_str)
+            mutatie.save()
+
+            mutatie_ping.ping()
+
+            snel = str(request.POST.get('snel', ''))[:1]
+            if snel != '1':
+                # wacht maximaal 3 seconden tot de mutatie uitgevoerd is
+                interval = 0.2      # om steeds te verdubbelen
+                total = 0.0         # om een limiet te stellen
+                while not mutatie.is_verwerkt and total + interval <= 3.0:
+                    time.sleep(interval)
+                    total += interval   # 0.0 --> 0.2, 0.6, 1.4, 3.0
+                    interval *= 2       # 0.2 --> 0.4, 0.8, 1.6, 3.2
+                    mutatie = KampioenschapMutatie.objects.get(pk=mutatie.pk)
+                # while
 
         return redirect('Competitie:kies')
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
-        jaar = models_bepaal_startjaar_nieuwe_competitie()
+        jaar = bepaal_startjaar_nieuwe_competitie()
         context['seizoen'] = "%s/%s" % (jaar, jaar+1)
 
-        # beveiliging tegen dubbel aanmaken
+        # feedback als competitie al aangemaakt is
         if Competitie.objects.filter(begin_jaar=jaar).count() > 0:
             context['bestaat_al'] = True
 
@@ -156,21 +171,33 @@ class AGVaststellenView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
-        if rol_nu != Rollen.ROL_BB:
-            return False
-
-        # alleen toestaan als een van de competities in fase A is
-        kan_ag_vaststellen = False
-        for comp in Competitie.objects.filter(is_afgesloten=False):
-            if not comp.klassegrenzen_vastgesteld:
-                kan_ag_vaststellen = True
-        # for
-        return kan_ag_vaststellen
+        return rol_nu == Rollen.ROL_BB
 
     def get(self, request, *args, **kwargs):
         """ deze functie wordt aangeroepen als een GET request ontvangen is
         """
         context = super().get_context_data(**kwargs)
+
+        afstand = str(kwargs['afstand'])
+
+        if afstand == '18':
+            aantal_scores = settings.COMPETITIE_18M_MINIMUM_SCORES_VOOR_AG
+        elif afstand == '25':
+            aantal_scores = settings.COMPETITIE_25M_MINIMUM_SCORES_VOOR_AG
+        else:
+            raise Http404('Onbekende afstand')
+
+        # alleen toestaan als de competities in fase A is
+        comps = Competitie.objects.filter(is_afgesloten=False, afstand=afstand, klassegrenzen_vastgesteld=False)
+        if len(comps) != 1:
+            raise Http404('Geen competitie in de juiste fase')
+        comp = comps[0]
+
+        context['afstand'] = afstand
+        context['aantal_scores'] = aantal_scores
+
+        context['url_vaststellen'] = reverse('Competitie:ag-vaststellen-afstand',
+                                             kwargs={'afstand': afstand})
 
         # zoek uit wat de meest recente HistComp is
         histcomps = HistCompetitie.objects.order_by('-seizoen').all()
@@ -179,10 +206,7 @@ class AGVaststellenView(UserPassesTestMixin, TemplateView):
         else:
             context['seizoen'] = histcomps[0].seizoen
 
-        context['aantal_scores_18'] = settings.COMPETITIE_18M_MINIMUM_SCORES_VOOR_AG
-        context['aantal_scores_25'] = settings.COMPETITIE_25M_MINIMUM_SCORES_VOOR_AG
-
-        menu_dynamics(self.request, context, actief='competitie')
+        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
         return render(request, self.template_name, context)
 
     @staticmethod
@@ -190,129 +214,43 @@ class AGVaststellenView(UserPassesTestMixin, TemplateView):
         """ deze functie wordt aangeroepen als een POST request ontvangen is.
             --> de beheerder wil de AG's vaststellen
         """
-        # zoek uit wat de meest recente HistComp is
-        histcomps = HistCompetitie.objects.order_by('-seizoen').all()
-        if len(histcomps) > 0:
-            seizoen = histcomps[0].seizoen
+        account = request.user
+        afstand = str(kwargs['afstand'])
 
-            schrijf_in_logboek(request.user, 'Competitie', 'Aanvangsgemiddelden vastgesteld met uitslag seizoen %s' % seizoen)
+        if afstand == '18':
+            mutatie = MUTATIE_AG_VASTSTELLEN_18M
+        elif afstand == '25':
+            mutatie = MUTATIE_AG_VASTSTELLEN_25M
+        else:
+            raise Http404('Onbekende afstand')
 
-            # het eindjaar van de competitie was bepalend voor de klasse
-            # daarmee kunnen we bepalen of de schutter aspirant was
-            eindjaar = int(seizoen.split('/')[1])
+        # alleen toestaan als de competities in fase A is
+        comps = Competitie.objects.filter(is_afgesloten=False, afstand=afstand, klassegrenzen_vastgesteld=False)
+        if len(comps) != 1:
+            raise Http404('Geen competitie in de juiste fase')
+        comp = comps[0]
 
-            # maak een cache aan van boogtype
-            boogtype_dict = dict()  # [afkorting] = BoogType
-            for obj in BoogType.objects.all():
-                boogtype_dict[obj.afkorting] = obj
-            # for
+        schrijf_in_logboek(account, 'Competitie', 'Aanvangsgemiddelden vaststellen voor de %sm competitie' % afstand)
 
-            # maak een cache aan van nhb leden
-            # we filteren hier niet op inactieve leden
-            nhblid_dict = dict()  # [nhb_nr] = NhbLid
-            for obj in NhbLid.objects.all():
-                nhblid_dict[obj.nhb_nr] = obj
-            # for
+        # voor concurrency protection, laat de achtergrondtaak de competitie aanmaken
+        door_str = "BB %s" % account.volledige_naam()
+        mutatie = KampioenschapMutatie(mutatie=mutatie,
+                                       door=door_str)
+        mutatie.save()
 
-            # maak een cache aan van schutter-boog
-            schutterboog_cache = dict()     # [schutter_nr, boogtype_afkorting] = SchutterBoog
-            for schutterboog in SchutterBoog.objects.select_related('nhblid', 'boogtype'):
-                tup = (schutterboog.nhblid.nhb_nr, schutterboog.boogtype.afkorting)
-                schutterboog_cache[tup] = schutterboog
-            # for
+        mutatie_ping.ping()
 
-            # verwijder alle bestaande aanvangsgemiddelden
-            Score.objects.filter(type=SCORE_TYPE_INDIV_AG, afstand_meter=18).all().delete()
-            Score.objects.filter(type=SCORE_TYPE_INDIV_AG, afstand_meter=25).all().delete()
-            bulk_score = list()
+        snel = str(request.POST.get('snel', ''))[:1]
+        if snel != '1':
+            # wacht maximaal 7 seconden tot de mutatie uitgevoerd is
+            total = 0         # om een limiet te stellen
+            while not mutatie.is_verwerkt and total < 7:
+                time.sleep(1)
+                total += 1
+                mutatie = KampioenschapMutatie.objects.get(pk=mutatie.pk)
+            # while
 
-            minimum_aantal_scores = {18: settings.COMPETITIE_18M_MINIMUM_SCORES_VOOR_AG,
-                                     25: settings.COMPETITIE_25M_MINIMUM_SCORES_VOOR_AG}
-
-            # doorloop alle individuele histcomp records die bij dit seizoen horen
-            for obj in (HistCompetitieIndividueel
-                        .objects
-                        .select_related('histcompetitie')
-                        .filter(histcompetitie__seizoen=seizoen)):
-                afstand_meter = int(obj.histcompetitie.comp_type)
-
-                if (obj.gemiddelde > AG_NUL
-                        and obj.boogtype in boogtype_dict
-                        and obj.tel_aantal_scores() >= minimum_aantal_scores[afstand_meter]):
-
-                    # haal het schutterboog record op, of maak een nieuwe aan
-                    try:
-                        tup = (obj.schutter_nr, obj.boogtype)
-                        schutterboog = schutterboog_cache[tup]
-                    except KeyError:
-                        # nieuw record nodig
-                        schutterboog = SchutterBoog()
-                        schutterboog.boogtype = boogtype_dict[obj.boogtype]
-                        schutterboog.voor_wedstrijd = True
-
-                        try:
-                            schutterboog.nhblid = nhblid_dict[obj.schutter_nr]
-                        except KeyError:
-                            # geen lid meer - skip
-                            schutterboog = None
-                        else:
-                            schutterboog.save()
-                            # zet het nieuwe record in de cache, anders krijgen we dupes
-                            tup = (schutterboog.nhblid.nhb_nr, schutterboog.boogtype.afkorting)
-                            schutterboog_cache[tup] = schutterboog
-                    else:
-                        if not schutterboog.voor_wedstrijd:
-                            schutterboog.voor_wedstrijd = True
-                            schutterboog.save()
-
-                    if schutterboog:
-                        # aspiranten schieten op een grotere kaart en altijd op 18m
-                        # daarom AG van aspirant niet overnemen als deze cadet wordt
-                        # aangezien er maar 1 klasse is, is het AG niet nodig
-                        # voorbeeld: eindjaar = 2019
-                        #       geboortejaar = 2006 --> leeftijd was 13, dus aspirant
-                        #       geboortejaar = 2005 --> leeftijd was 14, dus cadet
-                        was_aspirant = (eindjaar - schutterboog.nhblid.geboorte_datum.year) <= MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
-
-                        # zoek het score record erbij
-                        if not was_aspirant:
-                            # aanvangsgemiddelde voor deze afstand
-                            waarde = int(obj.gemiddelde * 1000)
-
-                            score = Score(schutterboog=schutterboog,
-                                          type=SCORE_TYPE_INDIV_AG,
-                                          waarde=waarde,
-                                          afstand_meter=afstand_meter)
-                            bulk_score.append(score)
-
-                            if len(bulk_score) >= 500:
-                                Score.objects.bulk_create(bulk_score)
-                                bulk_score = list()
-            # for
-
-            if len(bulk_score) > 0:
-                Score.objects.bulk_create(bulk_score)
-            del bulk_score
-
-            # maak nu alle ScoreHist entries in 1x aan
-            bulk_scorehist = list()
-            notitie = "Uitslag competitie seizoen %s" % seizoen
-            for score in Score.objects.all():
-                scorehist = ScoreHist(score=score,
-                                      oude_waarde=0,
-                                      nieuwe_waarde=score.waarde,
-                                      door_account=None,
-                                      notitie=notitie)
-                bulk_scorehist.append(scorehist)
-
-                if len(bulk_scorehist) > 250:
-                    ScoreHist.objects.bulk_create(bulk_scorehist)
-                    bulk_scorehist = list()
-            # for
-            if len(bulk_scorehist) > 0:
-                ScoreHist.objects.bulk_create(bulk_scorehist)
-
-        return redirect('Competitie:kies')
+        return redirect('Competitie:overzicht', comp_pk=comp.pk)
 
 
 class KlassegrenzenVaststellenView(UserPassesTestMixin, TemplateView):
@@ -331,384 +269,6 @@ class KlassegrenzenVaststellenView(UserPassesTestMixin, TemplateView):
         rol_nu = rol_get_huidige(self.request)
         return rol_nu == Rollen.ROL_BB
 
-    @staticmethod
-    def _get_targets_indiv():
-        """ Retourneer een data structuur met daarin voor alle individuele wedstrijdklassen
-            de toegestane boogtypen en leeftijden
-
-            out: target = dict() met [ (min_age, max_age, boogtype, heeft_onbekend) ] = list(IndivWedstrijdklasse)
-
-            Voorbeeld: { (21,150,'R',True ): [obj1, obj2, etc.],
-                         (21,150,'C',True ): [obj10, obj11],
-                         (14, 17,'C',False): [obj20,]  }
-        """
-        targets = dict()        # [ (min_age, max_age, boogtype) ] = list(wedstrijdklassen)
-        for wedstrklasse in (IndivWedstrijdklasse
-                             .objects
-                             .select_related('boogtype')
-                             .prefetch_related('leeftijdsklassen')
-                             .filter(buiten_gebruik=False)
-                             .order_by('volgorde')):
-            # zoek de minimale en maximaal toegestane leeftijden voor deze wedstrijdklasse
-            age_min = 999
-            age_max = 0
-            for lkl in wedstrklasse.leeftijdsklassen.all():
-                age_min = min(lkl.min_wedstrijdleeftijd, age_min)
-                age_max = max(lkl.max_wedstrijdleeftijd, age_max)
-            # for
-
-            tup = (age_min, age_max, wedstrklasse.boogtype)
-            if tup not in targets:
-                targets[tup] = list()
-            targets[tup].append(wedstrklasse)
-        # for
-
-        targets2 = dict()
-        for tup, wedstrklassen in targets.items():
-            age_min, age_max, boogtype = tup
-            # print("age=%s..%s, boogtype=%s, wkl=%s, %s" % (age_min, age_max, boogtype.afkorting, repr(wedstrklassen), wedstrklassen[-1].is_onbekend))
-            tup = (age_min, age_max, boogtype, wedstrklassen[-1].is_onbekend)
-            targets2[tup] = wedstrklassen
-        # for
-        return targets2
-
-    @staticmethod
-    def _get_targets_teams():
-        """ Retourneer een data structuur met daarin voor alle team wedstrijdklassen
-
-            out: target = dict() met [ boogtype afkorting ] = list(TeamWedstrijdklasse)
-
-            Voorbeeld: { 'R': [obj1, obj2, etc.],
-                         'C': [obj10, obj11],
-                         'BB': [obj20]  }
-        """
-        targets = dict()
-        for obj in (TeamWedstrijdklasse
-                    .objects
-                    .filter(buiten_gebruik=False)
-                    .select_related('team_type')
-                    .order_by('volgorde')):        # hoogste klasse (=laagste volgnummer) eerst
-
-            afkorting = obj.team_type.afkorting
-
-            try:
-                targets[afkorting].append(obj)
-            except KeyError:
-                targets[afkorting] = [obj]
-        # for
-        return targets
-
-    def _bepaal_klassegrenzen_indiv(self, comp, trans_indiv):
-
-        """ retourneert een lijst van individuele wedstrijdenklassen, elk bestaande uit een dictionary:
-                'beschrijving': tekst
-                'count':        aantal sporters ingedeeld in deze klasse
-                'ag':           het AG van de laatste sporter in deze klasse
-                                of 0.000 voor klasse onbekend
-                                of 0.001 voor de laatste klasse voor klasse onbekend
-                'wedstrkl_obj': indiv klasse
-                'klasse':       competitieklasse
-                'volgorde':     nummer
-
-            gesorteerd op volgorde (oplopend)
-        """
-
-        # bepaal het jaar waarin de wedstrijdleeftijd bepaald moet worden
-        # dat is het tweede jaar van de competitie, waarin de BK gehouden wordt
-        jaar = comp.begin_jaar + 1
-
-        # haal de scores 1x op per boogtype
-        boogtype2ags = dict()        # [boogtype.afkorting] = scores
-        for boogtype in BoogType.objects.all():
-            boogtype2ags[boogtype.afkorting] = (Score
-                                                .objects
-                                                .select_related('schutterboog',
-                                                                'schutterboog__boogtype',
-                                                                'schutterboog__nhblid')
-                                                .filter(type=SCORE_TYPE_INDIV_AG,
-                                                        afstand_meter=comp.afstand,
-                                                        schutterboog__boogtype=boogtype))
-        # for
-        del boogtype
-
-        lkl_cache = list()
-        klasse2lkl_mannen = dict()     # [klasse.pk] = [lkl, lkl, lkl..]
-        for lkl in (LeeftijdsKlasse
-                    .objects
-                    .filter(geslacht='M')
-                    .order_by('volgorde')):
-            klasse_pks = list(lkl.indivwedstrijdklasse_set.values_list('pk', flat=True))
-            if len(klasse_pks) > 0:
-                # wordt gebruikt in de bondscompetities
-                lkl_cache.append(lkl)
-                for pk in klasse_pks:
-                    try:
-                        klasse2lkl_mannen[pk].append(lkl)
-                    except KeyError:
-                        klasse2lkl_mannen[pk] = [lkl]
-                # for
-        # for
-        del lkl
-
-        # verdeel de schuttersboog (waar we een AG van hebben) over boogtype-leeftijdsklasse groepjes
-        done_nrs = list()
-        boogtype_lkl2schutters = dict()      # [boogtype.afkorting + '_' + leeftijdsklasse.afkorting] = [nhb_nr, nhb_nr, ..]
-        for boogtype_afkorting in boogtype2ags.keys():
-            scores = boogtype2ags[boogtype_afkorting]
-
-            for lkl in lkl_cache:
-                index = boogtype_afkorting + '_' + lkl.afkorting
-                boogtype_lkl2schutters[index] = nrs = list()
-
-                for score in scores:
-                    schutterboog = score.schutterboog
-                    nr = schutterboog.pk
-                    if nr not in done_nrs:
-                        lid = schutterboog.nhblid
-                        age = lid.bereken_wedstrijdleeftijd(jaar)
-                        if lkl.leeftijd_is_compatible(age):
-                            nrs.append(nr)
-                            done_nrs.append(nr)
-                # for (score)
-            # for (lkl)
-        # for (boogtype)
-
-        # wedstrijdklassen vs leeftijd + bogen
-        targets = self._get_targets_indiv()     # TODO: pass the caches
-
-        # creëer de resultatenlijst
-        objs = list()
-        for tup, wedstrklassen in targets.items():
-            _, _, boogtype, heeft_klasse_onbekend = tup
-            scores = boogtype2ags[boogtype.afkorting]
-
-            # zoek alle schutters-boog die hier in passen (boog, leeftijd)
-            gemiddelden = list()
-            index_gehad = list()
-            for klasse in wedstrklassen:
-                for lkl in klasse2lkl_mannen[klasse.pk]:
-                    index = boogtype.afkorting + '_' + lkl.afkorting
-                    if index not in index_gehad:
-                        index_gehad.append(index)
-                        nrs = boogtype_lkl2schutters[index]
-                        for score in scores:
-                            if score.schutterboog.pk in nrs:
-                                gemiddelden.append(score.waarde)        # is AG*1000
-                    # for
-                # for
-            # for
-
-            if len(gemiddelden):
-                gemiddelden.sort(reverse=True)  # in-place sort, highest to lowest
-                count = len(gemiddelden)        # aantal schutters
-                aantal = len(wedstrklassen)     # aantal groepen
-                if heeft_klasse_onbekend:
-                    stop = -2
-                    aantal -= 1
-                else:
-                    stop = -1
-                step = int(count / aantal)      # omlaag afgerond = OK voor grote groepen
-                pos = 0
-                for klasse in wedstrklassen[:stop]:
-                    pos += step
-                    ag = gemiddelden[pos] / 1000        # conversie Score naar AG met 3 decimalen
-                    res = {'beschrijving': klasse.beschrijving,
-                           'count': step,
-                           'ag': ag,
-                           'wedstrkl_obj': klasse,
-                           'volgorde': klasse.volgorde}
-                    objs.append(res)
-                # for
-
-                # laatste klasse krijgt speciaal AG
-                klasse = wedstrklassen[stop]
-                ag = AG_LAAGSTE_NIET_NUL if heeft_klasse_onbekend else AG_NUL
-                res = {'beschrijving': klasse.beschrijving,
-                       'count': count - (aantal - 1) * step,
-                       'ag': ag,
-                       'wedstrkl_obj': klasse,
-                       'volgorde': klasse.volgorde}
-                objs.append(res)
-
-                # klasse onbekend met AG=0.000
-                if heeft_klasse_onbekend:
-                    klasse = wedstrklassen[-1]
-                    res = {'beschrijving': klasse.beschrijving,
-                           'count': 0,
-                           'ag': AG_NUL,
-                           'wedstrkl_obj': klasse,
-                           'volgorde': klasse.volgorde}
-                    objs.append(res)
-            else:
-                # geen historische gemiddelden
-                # zet ag op 0,001 als er een klasse onbekend is, anders op 0,000
-                ag = AG_LAAGSTE_NIET_NUL if heeft_klasse_onbekend else AG_NUL
-                for klasse in wedstrklassen:
-                    if klasse.is_onbekend:  # is de laatste klasse
-                        ag = AG_NUL
-                    res = {'beschrijving': klasse.beschrijving,
-                           'count': 0,
-                           'ag': ag,
-                           'wedstrkl_obj': klasse,
-                           'volgorde': klasse.volgorde}
-                    objs.append(res)
-                # for
-        # for
-
-        for obj in objs:
-            obj['klasse'] = trans_indiv[obj['wedstrkl_obj'].pk]
-        # for
-
-        objs2 = sorted(objs, key=lambda k: k['volgorde'])
-        return objs2
-
-    def _bepaal_klassegrenzen_teams(self, comp, trans_team):
-
-        """ retourneert een lijst van team wedstrijdenklassen, elk bestaande uit een dictionary:
-                'beschrijving': tekst
-                'count':        aantal teams ingedeeld in deze klasse
-                'ag':           het Team-AG van de laatste team in deze klasse
-                                of 0.001 voor de laatste klasse voor klasse onbekend
-                'ag_str':       geformatteerd Team-AG als NNN.M
-                'wedstrkl_obj': team klasse
-                'klasse':       competitieklasse
-                'volgorde':     nummer
-
-            gesorteerd op volgorde (oplopend)
-        """
-
-        # per boogtype (dus elke schutter-boog in zijn eigen team type):
-        #   per vereniging:
-        #      - de schutters sorteren op AG
-        #      - per groepje van 4 som van beste 3 = team AG
-
-        if comp.afstand == '18':
-            aantal_pijlen = 30
-        else:
-            aantal_pijlen = 25
-
-        # eenmalig de wedstrijdleeftijd van elke nhblid berekenen in het vorige seizoen
-        # hiermee kunnen we de aspiranten scores eruit filteren
-        jaar = comp.begin_jaar      # gelijk aan tweede jaar vorig seizoen
-
-        was_aspirant = dict()     # [ nhb_nr ] = True/False
-        for lid in NhbLid.objects.all():
-            was_aspirant[lid.nhb_nr] = lid.bereken_wedstrijdleeftijd(jaar) <= MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
-        # for
-
-        # haal de AG's op per boogtype
-        boogtype2ags = dict()        # [boogtype.afkorting] = AG's
-        for boogtype in BoogType.objects.all():
-            boogtype2ags[boogtype.afkorting] = (Score
-                                                .objects
-                                                .select_related('schutterboog',
-                                                                'schutterboog__boogtype',
-                                                                'schutterboog__nhblid',
-                                                                'schutterboog__nhblid__bij_vereniging')
-                                                .exclude(schutterboog__nhblid__bij_vereniging=None)
-                                                .filter(type=SCORE_TYPE_INDIV_AG,
-                                                        afstand_meter=comp.afstand,
-                                                        schutterboog__boogtype=boogtype))
-        # for
-
-        # wedstrijdklassen vs leeftijd + bogen
-        targets = self._get_targets_teams()
-
-        # bepaal de mogelijk te vormen teams en de team score
-        boog2team_scores = dict()    # [boogtype afkorting] = list(team scores)
-        for boogtype_afkorting, klassen in targets.items():
-            boog2team_scores[boogtype_afkorting] = team_scores = list()
-
-            # zoek alle schutters-boog die hier in passen (boog, leeftijd)
-            per_ver_gemiddelden = dict()    # [ver_nr] = list(gemiddelde, gemiddelde, ...)
-            for score in boogtype2ags[boogtype_afkorting]:
-                if not was_aspirant[score.schutterboog.nhblid.nhb_nr]:
-                    ver_nr = score.schutterboog.nhblid.bij_vereniging.ver_nr
-                    try:
-                        per_ver_gemiddelden[ver_nr].append(score.waarde)        # is AG*1000
-                    except KeyError:
-                        per_ver_gemiddelden[ver_nr] = [score.waarde]
-            # for
-
-            for ver_nr, gemiddelden in per_ver_gemiddelden.items():
-                gemiddelden.sort(reverse=True)  # in-place sort, highest to lowest
-                aantal = len(gemiddelden)
-                teams = int(aantal / 4)
-                for team_nr in range(teams):
-                    index = team_nr * 4
-                    team_score = sum(gemiddelden[index:index+3])    # totaal van beste 3 scores
-                    team_score = team_score / 1000          # converteer terug van score.waarde = AG*1000
-                    team_score = round(team_score, 3)       # round here, instead of letter database do it
-                    team_scores.append(team_score)
-                # for
-            # for
-        # for
-
-        objs = list()
-        for boogtype_afkorting, klassen in targets.items():
-            team_scores = boog2team_scores[boogtype_afkorting]
-            team_scores.sort(reverse=True)       # hoogste eerst
-            count = len(team_scores)
-            aantal = len(klassen)
-            if aantal > 1:
-                if count < aantal:
-                    step = 0
-                else:
-                    step = int(count / aantal)
-                if len(team_scores) == 0:
-                    team_scores.append(AG_NUL)
-                pos = 0
-                for klasse in klassen[:-1]:
-                    pos += step
-                    ag = team_scores[pos]
-                    res = {'beschrijving': klasse.beschrijving,
-                           'count': step,
-                           'ag': ag,
-                           'ag_str': "%05.1f" % (ag * aantal_pijlen),
-                           'wedstrkl_obj': klasse,
-                           'volgorde': klasse.volgorde}  # voor sorteren
-                    objs.append(res)
-                # for
-                klasse = klassen[-1]
-            else:
-                step = 0
-                klasse = klassen[0]
-
-            ag = AG_NUL
-            res = {'beschrijving': klasse.beschrijving,
-                   'count': count - (aantal - 1) * step,
-                   'ag': ag,
-                   'ag_str': "%05.1f" % (ag * aantal_pijlen),
-                   'wedstrkl_obj': klasse,
-                   'volgorde': klasse.volgorde}     # voor sorteren
-            objs.append(res)
-        # for
-
-        for obj in objs:
-            obj['klasse'] = trans_team[obj['wedstrkl_obj'].pk]
-        # for
-
-        objs2 = sorted(objs, key=lambda k: k['volgorde'])
-        return objs2
-
-    @staticmethod
-    def _get_klasse_trans(comp):
-        """ geeft een look-up tabel terug van IndivWedstrijdklasse / TeamWedstrijdklasse naar CompetitieKlasse """
-        trans_indiv = dict()
-        trans_team = dict()
-
-        for klasse in (CompetitieKlasse
-                       .objects
-                       .filter(competitie=comp)
-                       .prefetch_related('indiv', 'team')):
-            if klasse.indiv:
-                trans_indiv[klasse.indiv.pk] = klasse
-            else:
-                trans_team[klasse.team.pk] = klasse
-        # for
-
-        return trans_indiv, trans_team
-
     def get(self, request, *args, **kwargs):
         """ deze functie wordt aangeroepen als een GET request ontvangen is
         """
@@ -722,23 +282,24 @@ class KlassegrenzenVaststellenView(UserPassesTestMixin, TemplateView):
 
         context['comp'] = comp
 
-        trans_indiv, trans_team = self._get_klasse_trans(comp)
+        trans_indiv, trans_team = get_mappings_wedstrijdklasse_to_competitieklasse(comp)
 
         if comp.klassegrenzen_vastgesteld:
             context['al_vastgesteld'] = True
         else:
-            context['klassegrenzen_indiv'] = self._bepaal_klassegrenzen_indiv(comp, trans_indiv)
-            context['klassegrenzen_teams'] = self._bepaal_klassegrenzen_teams(comp, trans_team)
+            context['klassegrenzen_indiv'] = bepaal_klassegrenzen_indiv(comp, trans_indiv)
+            context['klassegrenzen_teams'] = bepaal_klassegrenzen_teams(comp, trans_team)
             context['wedstrijdjaar'] = comp.begin_jaar + 1
 
-        datum = wanneer_ag_vastgesteld()
+        datum = wanneer_ag_vastgesteld(comp.afstand)
         if datum:
             context['bb_ag_nieuwste_datum'] = localize(datum.date())
 
         menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
         return render(request, self.template_name, context)
 
-    def post(self, request, *args, **kwargs):
+    @staticmethod
+    def post(request, *args, **kwargs):
         """ deze functie wordt aangeroepen als een POST request ontvangen is.
             --> de beheerder wil deze klassegrenzen vaststellen
         """
@@ -750,31 +311,13 @@ class KlassegrenzenVaststellenView(UserPassesTestMixin, TemplateView):
             raise Http404('Competitie niet gevonden')
 
         if not comp.klassegrenzen_vastgesteld:
-
-            trans_indiv, trans_team = self._get_klasse_trans(comp)
-
-            # individueel
-            for obj in self._bepaal_klassegrenzen_indiv(comp, trans_indiv):
-                klasse = obj['klasse']
-                klasse.min_ag = obj['ag']
-                klasse.save(update_fields=['min_ag'])
-            # for
-
-            # team
-            for obj in self._bepaal_klassegrenzen_teams(comp, trans_team):
-                klasse = obj['klasse']
-                klasse.min_ag = obj['ag']
-                klasse.save(update_fields=['min_ag'])
-            # for
-
-            comp.klassegrenzen_vastgesteld = True
-            comp.save()
+            competitie_klassegrenzen_vaststellen(comp)
 
             schrijf_in_logboek(request.user,
                                'Competitie',
                                'Klassegrenzen vastgesteld voor %s' % comp.beschrijving)
 
-        return redirect('Competitie:kies')
+        return redirect('Competitie:overzicht', comp_pk=comp.pk)
 
 
 class WijzigDatumsView(UserPassesTestMixin, TemplateView):

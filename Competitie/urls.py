@@ -48,9 +48,9 @@ urlpatterns = [
          views_bb.CompetitieAanmakenView.as_view(),
          name='aanmaken'),
 
-    path('ag-vaststellen/',
+    path('ag-vaststellen/<afstand>/',
          views_bb.AGVaststellenView.as_view(),
-         name='ag-vaststellen'),
+         name='ag-vaststellen-afstand'),
 
     path('<comp_pk>/klassegrenzen/vaststellen/',
          views_bb.KlassegrenzenVaststellenView.as_view(),
@@ -263,6 +263,7 @@ urlpatterns = [
          views_planning_bond.DoorzettenNaarBKView.as_view(),
          name='bko-doorzetten-naar-bk'),
 
+    # TODO: maak afsluiten competitie
     #path('<comp_pk>/afsluiten/',
     #     views_planning_bond.CompetitieAfsluitenView.as_view(),
     #     name='bko-afsluiten-competitie'),

@@ -17,7 +17,8 @@ from Competitie.models import (CompetitieKlasse, AG_NUL,
                                RegioCompetitieSchutterBoog, RegiocompetitieTeam)
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
-from Score.models import ScoreHist, SCORE_TYPE_TEAM_AG, score_teams_ag_opslaan
+from Score.models import ScoreHist, SCORE_TYPE_TEAM_AG
+from Score.operations import score_teams_ag_opslaan
 import datetime
 
 

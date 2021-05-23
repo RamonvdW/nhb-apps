@@ -13,9 +13,9 @@ from Schutter.models import SchutterBoog
 from Wedstrijden.models import WedstrijdLocatie
 from Overig.e2ehelpers import E2EHelpers
 from .models import (Competitie, DeelCompetitie, CompetitieKlasse,
-                     competitie_aanmaken,
                      RegioCompetitieSchutterBoog,
                      RegiocompetitieTeam, RegiocompetitieTeamPoule)
+from .operations import competities_aanmaken
 import datetime
 
 
@@ -113,13 +113,13 @@ class TestCompetitieRegioTeams(E2EHelpers, TestCase):
         self.schutterboog.save()
 
         # creëer een competitie met deelcompetities
-        competitie_aanmaken(jaar=2019)
+        competities_aanmaken(jaar=2019)
 
         self.comp_18 = Competitie.objects.get(afstand='18')
         self.comp_25 = Competitie.objects.get(afstand='25')
 
         # een parallel competitie is noodzakelijk om corner-cases te raken
-        competitie_aanmaken(jaar=2020)
+        competities_aanmaken(jaar=2020)
 
         # klassengrenzen vaststellen om de competitie voorbij fase A te krijgen
         self.e2e_login_and_pass_otp(self.account_bb)

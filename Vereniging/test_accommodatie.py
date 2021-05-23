@@ -641,7 +641,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, '/vereniging/')
 
         buiten_locatie = WedstrijdLocatie.objects.get(pk=buiten_locatie.pk)
-        self.assertEqual(buiten_locatie.adres, '')
+        self.assertEqual(buiten_locatie.adres, 'Kleine baan')       # overgenomen van de binnenlocatie
         self.assertEqual(buiten_locatie.buiten_banen, 50)
         self.assertEqual(buiten_locatie.buiten_max_afstand, 90)
         self.assertEqual(buiten_locatie.notities, 'dit is een buiten test')
@@ -690,46 +690,6 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'maak_buiten_locatie': 'ja'})
         self.assert_is_redirect_not_plein(resp)
-
-    def test_buiten_locatie_only(self):
-        # login als HWL van ver2 op loc2
-        self.e2e_login_and_pass_otp(self.account_hwl)
-        self.e2e_wissel_naar_functie(self.functie_hwl)
-        self.e2e_check_rol('HWL')
-
-        url = self.url_accommodatie_details % self.nhbver2.pk
-
-        # verwijder de binnen locatie
-        self.loc2.verenigingen.remove(self.nhbver2)
-
-        # haal het accommodatie scherm op zonder enige accommodatie
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_html_ok(resp)
-
-        # maak de buitenlocatie aan
-        self.assertEqual(0, self.nhbver2.wedstrijdlocatie_set.count())
-        with self.assert_max_queries(20):
-            resp = self.client.post(url, {'maak_buiten_locatie': 'on'})
-        self.assert_is_redirect(resp, url)
-        self.assertEqual(1, self.nhbver2.wedstrijdlocatie_set.count())
-        # buiten_locatie = self.nhbver2.wedstrijdlocatie_set.filter(baan_type='B').all()[0]
-
-        # haal het accommodatie scherm met alleen de buiten locatie
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_html_ok(resp)
-
-        # pas wat parameters aan (zonder binnen locatie)
-        with self.assert_max_queries(20):
-            resp = self.client.post(url, {'baan_type': 'X',     # verplichte parameter
-                                          'buiten_adres': 'Grote veld\nMiddenpijl',
-                                          'buiten_banen': 20,
-                                          'buiten_max_afstand': 90,
-                                          'buiten_notities': 'dit is een buiten test'})
-        self.assert_is_redirect(resp, '/vereniging/accommodaties/lijst/')
 
     def test_externe_locatie(self):
         # login als BB

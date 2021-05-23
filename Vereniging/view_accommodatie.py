@@ -448,7 +448,7 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
                 if not buiten_locatie.zichtbaar:
                     buiten_locatie.zichtbaar = True
                     buiten_locatie.save()
-            else:
+            elif binnen_locatie:
                 buiten = WedstrijdLocatie(
                                 baan_type='B',
                                 adres_uit_crm=False,

@@ -81,4 +81,6 @@ class TestCompetitieHWL(E2EHelpers, TestCase):
     def test_dummy(self):
         self.assertFalse(False)
 
+    # TODO fatsoenlijke testen toevoegen
+
 # end of file
