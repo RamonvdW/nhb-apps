@@ -311,7 +311,7 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
 
         try:
             team_pk = int(kwargs['team_pk'][:6])    # afkappen voor de veiligheid
-        except ValueError:
+        except (ValueError, KeyError):
             raise Http404()
 
         if team_pk == 0:
