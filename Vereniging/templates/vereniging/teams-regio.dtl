@@ -22,7 +22,7 @@
             <table class="white">
                 <tr>
                     {% if mag_wijzigen %}
-                        <td class="center-align">Teams kunnen aangepast worden tot en met <b>{{ deelcomp.einde_teams_aanmaken }}</b>.</td>
+                        <td class="center-align">Teams kunnen aangepast worden tot <b>{{ deelcomp.einde_teams_aanmaken }}</b>.</td>
                     {% else %}
                         <td class="center-align">De deadline van {{ deelcomp.einde_teams_aanmaken }} is gepasseerd, dus de teams kunnen niet meer aangepast worden.</td>
                     {% endif %}

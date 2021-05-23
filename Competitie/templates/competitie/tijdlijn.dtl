@@ -63,7 +63,7 @@
                 <span class="green-text">Afgerond</span>
             {% else %}
                 {% if comp.regio_einde_teams_aanmaken %}
-                    <span>tot en met {{ comp.regio_einde_teams_aanmaken }}<span class="nhb-blauw-text"> (regio-specifieke datum)</span></span>
+                    <span>tot {{ comp.regio_einde_teams_aanmaken }}<span class="nhb-blauw-text"> (regio-specifieke datum)</span></span>
                 {% else %}
                     <span>tot {{ comp.einde_teamvorming }}</span>
                 {% endif %}
@@ -78,11 +78,7 @@
             {% if comp.fase > 'D' %}
                 <span class="green-text">Afgerond</span>
             {% else %}
-                {% if comp.regio_einde_teams_aanmaken %}
-                    <span>van {{ comp.einde_teamvorming }} tot {{ comp.eerste_wedstrijd }}</span>
-                {% else %}
-                    <span>tot {{ comp.eerste_wedstrijd }}</span>
-                {% endif %}
+                <span>tot {{ comp.eerste_wedstrijd }}</span>
             {% endif %}
         </td>
     </tr>

@@ -113,11 +113,11 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
         einde = datetime.datetime(year=deelcomp.einde_teams_aanmaken.year,
                                   month=deelcomp.einde_teams_aanmaken.month,
                                   day=deelcomp.einde_teams_aanmaken.day,
-                                  hour=23,
-                                  minute=59,         # de hele dag nog toestaan
-                                  second=59)
+                                  hour=0,
+                                  minute=0,
+                                  second=0)
         einde = timezone.make_aware(einde)
-        mag_wijzigen = (now <= einde)
+        mag_wijzigen = (now < einde)
         context['mag_wijzigen'] = mag_wijzigen
 
         if deelcomp.competitie.afstand == '18':
@@ -273,9 +273,9 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
         einde = datetime.datetime(year=deelcomp.einde_teams_aanmaken.year,
                                   month=deelcomp.einde_teams_aanmaken.month,
                                   day=deelcomp.einde_teams_aanmaken.day,
-                                  hour=23,
-                                  minute=59,         # de hele dag nog toestaan
-                                  second=59)
+                                  hour=0,
+                                  minute=0,
+                                  second=0)
         einde = timezone.make_aware(einde)
         mag_wijzigen = (now <= einde)
 
@@ -300,9 +300,9 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
         einde = datetime.datetime(year=deelcomp.einde_teams_aanmaken.year,
                                   month=deelcomp.einde_teams_aanmaken.month,
                                   day=deelcomp.einde_teams_aanmaken.day,
-                                  hour=23,
-                                  minute=59,  # de hele dag nog toestaan
-                                  second=59)
+                                  hour=0,
+                                  minute=0,
+                                  second=0)
         einde = timezone.make_aware(einde)
         mag_wijzigen = (now <= einde)
 
@@ -564,9 +564,9 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
         einde = datetime.datetime(year=deelcomp.einde_teams_aanmaken.year,
                                   month=deelcomp.einde_teams_aanmaken.month,
                                   day=deelcomp.einde_teams_aanmaken.day,
-                                  hour=23,
-                                  minute=59,         # de hele dag nog toestaan
-                                  second=59)
+                                  hour=0,
+                                  minute=0,
+                                  second=0)
         einde = timezone.make_aware(einde)
         mag_wijzigen = (now <= einde)
         context['mag_wijzigen'] = mag_wijzigen
@@ -648,9 +648,9 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
         einde = datetime.datetime(year=deelcomp.einde_teams_aanmaken.year,
                                   month=deelcomp.einde_teams_aanmaken.month,
                                   day=deelcomp.einde_teams_aanmaken.day,
-                                  hour=23,
-                                  minute=59,         # de hele dag nog toestaan
-                                  second=59)
+                                  hour=0,
+                                  minute=0,
+                                  second=0)
         einde = timezone.make_aware(einde)
         mag_wijzigen = (now <= einde)
         if not mag_wijzigen:

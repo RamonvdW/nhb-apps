@@ -23,7 +23,7 @@
     {% endif %}
 
     {% if not mag_wijzigen %}
-        <p>Het is na {{ deelcomp.einde_teams_aanmaken }} niet meer mogelijk om wijzigingen aan te brengen.</p>
+        <p>Vanaf {{ deelcomp.einde_teams_aanmaken }} is het niet meer mogelijk om wijzigingen aan te brengen.</p>
     {% endif %}
 
     <script type="application/javascript">
