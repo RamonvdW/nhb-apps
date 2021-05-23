@@ -7,6 +7,7 @@
 from django.conf import settings
 from django.http import HttpResponseRedirect, Http404
 from django.urls import reverse
+from django.utils.formats import localize
 from django.db.models import Count
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
@@ -243,6 +244,8 @@ class RegioInstellingenGlobaalView(UserPassesTestMixin, TemplateView):
             if deelcomp.regio_organiseert_teamcompetitie:
                 deelcomp.teamcomp_str = 'Ja'
 
+                deelcomp.einde_teams_aanmaken_str = localize(deelcomp.einde_teams_aanmaken)
+
                 if deelcomp.regio_heeft_vaste_teams:
                     deelcomp.team_type_str = 'Statisch'
                 else:
@@ -251,6 +254,7 @@ class RegioInstellingenGlobaalView(UserPassesTestMixin, TemplateView):
                 deelcomp.puntenmodel_str = punten2str[deelcomp.regio_team_punten_model]
             else:
                 deelcomp.teamcomp_str = 'Nee'
+                deelcomp.einde_teams_aanmaken_str = '-'
                 deelcomp.team_type_str = '-'
                 deelcomp.puntenmodel_str = '-'
 

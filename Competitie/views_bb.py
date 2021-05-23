@@ -19,7 +19,7 @@ from Overig.background_sync import BackgroundSync
 from Plein.menu import menu_dynamics
 from Score.operations import wanneer_ag_vastgesteld
 from django.utils.formats import localize
-from .models import (Competitie, KampioenschapMutatie,
+from .models import (Competitie, DeelCompetitie, KampioenschapMutatie, LAAG_REGIO,
                      MUTATIE_COMPETITIE_OPSTARTEN, MUTATIE_AG_VASTSTELLEN_18M, MUTATIE_AG_VASTSTELLEN_25M)
 from .operations import (bepaal_startjaar_nieuwe_competitie, get_mappings_wedstrijdklasse_to_competitieklasse,
                          bepaal_klassegrenzen_indiv, bepaal_klassegrenzen_teams, competitie_klassegrenzen_vaststellen)
@@ -387,6 +387,8 @@ class WijzigDatumsView(UserPassesTestMixin, TemplateView):
             datums.append(datum_p.date())
         # for
 
+        oud_einde_teamvorming = comp.einde_teamvorming
+
         datums.insert(0, None)      # dummy
         comp.begin_aanmeldingen = datums[1]
         comp.einde_aanmeldingen = datums[2]
@@ -398,6 +400,19 @@ class WijzigDatumsView(UserPassesTestMixin, TemplateView):
         comp.bk_eerste_wedstrijd = datums[8]
         comp.bk_laatste_wedstrijd = datums[9]
         comp.save()
+
+        # pas ook de deelcompetities aan
+        for deelcomp in (DeelCompetitie
+                         .objects
+                         .filter(competitie=comp,
+                                 laag=LAAG_REGIO)):
+
+            # volg mee met wijzigingen in de competitie datums
+            # neem ook meteen template datums mee (2001-01-01)
+            if deelcomp.einde_teams_aanmaken == oud_einde_teamvorming or deelcomp.einde_teams_aanmaken.year < comp.begin_jaar:
+                deelcomp.einde_teams_aanmaken = comp.einde_teamvorming
+                deelcomp.save(update_fields=['einde_teams_aanmaken'])
+        # for
 
         return HttpResponseRedirect(reverse('Competitie:overzicht',
                                             kwargs={'comp_pk': comp.pk}))

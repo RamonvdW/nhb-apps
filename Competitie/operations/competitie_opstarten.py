@@ -81,7 +81,8 @@ def _maak_deelcompetities(comp, rayons, regios, functies):
                 deel = DeelCompetitie(competitie=comp,
                                       laag=laag,
                                       nhb_regio=obj,
-                                      functie=functie)
+                                      functie=functie,
+                                      einde_teams_aanmaken=comp.einde_teamvorming)
                 try:
                     vorige = vorige_deelcomps[obj.regio_nr]
                 except KeyError:

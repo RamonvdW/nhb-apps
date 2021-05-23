@@ -14,12 +14,14 @@ from .models import (Competitie, DeelCompetitie, DeelcompetitieRonde,
 
 
 class DeelCompetitieAdmin(admin.ModelAdmin):
-    list_filter = ('nhb_regio',)
+
+    list_filter = ('nhb_regio', 'competitie')
 
     list_select_related = ('competitie', 'nhb_regio', 'nhb_rayon')
 
 
 class DeelcompetitieRondeAdmin(admin.ModelAdmin):
+
     list_filter = ('deelcompetitie__is_afgesloten', 'deelcompetitie__nhb_regio')
 
     list_select_related = ('deelcompetitie', 'deelcompetitie__nhb_regio')
