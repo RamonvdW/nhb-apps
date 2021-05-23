@@ -16,6 +16,7 @@ from .models import (Competitie, DeelCompetitie, CompetitieKlasse,
                      LAAG_REGIO, LAAG_RK, LAAG_BK,
                      RegioCompetitieSchutterBoog,  DeelcompetitieKlasseLimiet,
                      KampioenschapMutatie, MUTATIE_INITIEEL, MUTATIE_CUT, MUTATIE_AFMELDEN,
+                     MUTATIE_COMPETITIE_OPSTARTEN, MUTATIE_AG_VASTSTELLEN_18M, MUTATIE_AG_VASTSTELLEN_25M,
                      KampioenschapSchutterBoog, DEELNAME_ONBEKEND, DEELNAME_JA, DEELNAME_NEE)
 import datetime
 import io
@@ -870,5 +871,21 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         f2 = io.StringIO()
         with self.assert_max_queries(20, check_duration=False):     # 2 seconden is boven de limiet
             management.call_command('kampioenschap_mutaties', '2', '--quick', '--all', stderr=f1, stdout=f2)
+
+    def test_competitie(self):
+        # competitie opstarten
+        KampioenschapMutatie(mutatie=MUTATIE_COMPETITIE_OPSTARTEN,
+                             door='Tester').save()
+        KampioenschapMutatie(mutatie=MUTATIE_COMPETITIE_OPSTARTEN,      # triggered "al opgestart" pad
+                             door='Tester').save()
+        self._verwerk_mutaties(24)
+
+        # AG vaststellen
+        KampioenschapMutatie(mutatie=MUTATIE_AG_VASTSTELLEN_18M,
+                             door='Tester').save()
+        KampioenschapMutatie(mutatie=MUTATIE_AG_VASTSTELLEN_25M,
+                             door='Tester').save()
+        self._verwerk_mutaties(20)
+
 
 # end of file

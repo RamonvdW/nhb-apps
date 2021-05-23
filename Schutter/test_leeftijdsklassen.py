@@ -4,7 +4,6 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.utils import timezone
 from django.test import TestCase
 from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
 from Overig.e2ehelpers import E2EHelpers
@@ -61,6 +60,11 @@ class TestSchutterLeeftijdsklassen(E2EHelpers, TestCase):
         request = self.client
         request.user = SimpleNamespace()
         request.user.is_authenticated = False
+        tup = bereken_leeftijdsklassen(request)
+        self.assertEqual(tup, (None, None, False, None, None))
+
+        # login met een gebruiker zonder NhbLid koppeling
+        request.user = self.account_admin
         tup = bereken_leeftijdsklassen(request)
         self.assertEqual(tup, (None, None, False, None, None))
 

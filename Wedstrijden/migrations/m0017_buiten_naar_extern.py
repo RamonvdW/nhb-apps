@@ -18,14 +18,14 @@ def buiten_naar_extern(apps, _):
     for loc in (klas_wedstrijdlocatie
                 .objects
                 .prefetch_related('verenigingen')
-                .filter(baan_type='B')):
+                .filter(baan_type='B')):                                # pragma: no branch
 
-        for ver in loc.verenigingen.all():
+        for ver in loc.verenigingen.all():                              # pragma: no cover
             ver_pks.append(ver.pk)
         # for
     # for
 
-    for ver in klas_nhbvereniging.objects.filter(pk__in=ver_pks):
+    for ver in klas_nhbvereniging.objects.filter(pk__in=ver_pks):       # pragma: no cover
 
         buiten_locatie = ver.wedstrijdlocatie_set.get(baan_type='B')
 
