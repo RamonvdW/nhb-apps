@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -18,7 +18,7 @@ class TestMailerCliBase(E2EHelpers, object):
         f1 = io.StringIO()
         f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('stuur_mails', '2', '--quick', stderr=f1, stdout=f2)
+            management.call_command('stuur_mails', '1', '--quick', stderr=f1, stdout=f2)
         self.assertTrue('[INFO] Aantal oude mails geprobeerd te versturen: 0' in f2.getvalue())
         self.assertTrue('[INFO] Aantal nieuwe mails geprobeerd te versturen: 0' in f2.getvalue())
         self.assertEqual(f1.getvalue(), '')
@@ -39,7 +39,7 @@ class TestMailerCliBase(E2EHelpers, object):
         f1 = io.StringIO()
         f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('stuur_mails', '2', '--quick', stderr=f1, stdout=f2)
+            management.call_command('stuur_mails', '1', '--quick', stderr=f1, stdout=f2)
 
         obj = MailQueue.objects.all()[0]
         self.assertEqual(obj.aantal_pogingen, 1)
@@ -60,7 +60,7 @@ class TestMailerCliBase(E2EHelpers, object):
         f1 = io.StringIO()
         f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('stuur_mails', '2', '--quick', stderr=f1, stdout=f2)
+            management.call_command('stuur_mails', '1', '--quick', stderr=f1, stdout=f2)
 
         self.assertTrue('[INFO] Aantal oude mails geprobeerd te versturen: 1' in f2.getvalue())
         self.assertTrue('[INFO] Aantal nieuwe mails geprobeerd te versturen: 0' in f2.getvalue())
@@ -83,7 +83,7 @@ class TestMailerCliBase(E2EHelpers, object):
         f1 = io.StringIO()
         f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('stuur_mails', '--skip_old', '--quick', '2', stderr=f1, stdout=f2)
+            management.call_command('stuur_mails', '--skip_old', '--quick', '1', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
 
@@ -105,8 +105,8 @@ class TestMailerCliBase(E2EHelpers, object):
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(20):
-            management.call_command('stuur_mails', '2', '--quick', stderr=f1, stdout=f2)
+        with self.assert_max_queries(20, check_duration=False):
+            management.call_command('stuur_mails', '1', '--quick', stderr=f1, stdout=f2)
         self.assertTrue('[INFO] Aantal oude mails geprobeerd te versturen: 1' in f2.getvalue())
         self.assertTrue('[INFO] Aantal nieuwe mails geprobeerd te versturen: 0' in f2.getvalue())
         self.assertEqual(f1.getvalue(), '')
@@ -142,7 +142,7 @@ class TestMailerCliBadBase(E2EHelpers, object):
         # following port must not have any service responding to it
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(20, check_duration=False):     # duurt 7 seconden
             management.call_command('stuur_mails', '7', '--quick', stderr=f1, stdout=f2)
 
         obj = MailQueue.objects.all()[0]
