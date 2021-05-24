@@ -123,7 +123,7 @@ def aanvangsgemiddelden_vaststellen_voor_afstand(afstand: int):
                         bulk_score = list()
     # for
 
-    if len(bulk_score) > 0:
+    if len(bulk_score) > 0:                         # pragma: no branch
         Score.objects.bulk_create(bulk_score)
     del bulk_score
 
@@ -149,7 +149,7 @@ def aanvangsgemiddelden_vaststellen_voor_afstand(afstand: int):
             ScoreHist.objects.bulk_create(bulk_scorehist)
             bulk_scorehist = list()
     # for
-    if len(bulk_scorehist) > 0:
+    if len(bulk_scorehist) > 0:                             # pragma: no branch
         ScoreHist.objects.bulk_create(bulk_scorehist)
 
 

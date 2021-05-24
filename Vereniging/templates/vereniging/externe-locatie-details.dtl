@@ -310,7 +310,7 @@
         <ul class="collapsible">
             <li>
                 <div class="collapsible-header white">
-                    <span>Klik eerst hier als je deze externe locatie wilt verwijderen</span>
+                    <span>Klik eerst hier als je deze locatie wilt verwijderen</span>
                 </div>
                 <div class="collapsible-body white">
                     <form method="post" action="{{ url_verwijder }}">
@@ -318,7 +318,7 @@
                         <input type="hidden" name="verwijder" value="1">
                         <p>Weet je het zeker?</p>
                         <button class="btn-nhb-rood" type="submit">
-                            <i class="material-icons-round left">delete</i>Verwijder deze externe locatie</button>
+                            <i class="material-icons-round left">delete</i>Verwijder deze locatie</button>
                     </form>
                 </div>
             </li>

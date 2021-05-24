@@ -133,6 +133,7 @@
                 <th>Wanneer</th>
                 {% if not vaste_beschrijving %}     <!-- import -->
                     <th>Waar</th>
+                    <th>Organisatie</th>
                     {% if heeft_wkl %}
                         <th>Wedstrijdklassen</th>
                         <th>Capaciteit</th>
@@ -147,6 +148,16 @@
                 <td>{{ wedstrijd.datum_wanneer|date:"l j F Y" }} om {{ wedstrijd.tijd_begin_wedstrijd }}</td>
 
                 {% if not vaste_beschrijving %}
+                    <!-- Waar -->
+                    <td>
+                        {% if wedstrijd.locatie %}
+                            <span>{{ wedstrijd.locatie.plaats }}</span>
+                        {% else %}
+                            <i class="red-text">Onbekend</i>
+                        {% endif %}
+                    </td>
+
+                    <!-- Organisatie -->
                     <td>
                         {% if wedstrijd.vereniging %}
                             <span>{{ wedstrijd.vereniging }}</span>
@@ -182,7 +193,7 @@
         <!-- knop om een regel toe te voegen -->
         {% if url_nieuwe_wedstrijd %}
             <tr>
-                <td colspan={% if heeft_wkl %}"5"{% else %}"3"{% endif %}>
+                <td colspan={% if heeft_wkl %}"6"{% else %}"4"{% endif %}>
                     <form action="{{ url_nieuwe_wedstrijd }}" method="post">
                         {% csrf_token %}
                         <button class="btn-nhb-blauw vertrek_knop" type="submit">
@@ -195,7 +206,7 @@
         {% if heeft_wkl %}
             {% if wkl_niet_gebruikt %}
                 <tr>
-                    <td colspan="2"><i>De volgende klassen zijn nog niet gekoppeld aan een wedstrijd:</i></td>
+                    <td colspan="3"><i>De volgende klassen zijn nog niet gekoppeld aan een wedstrijd:</i></td>
                     <td colspan="3">
                         {% for wkl_beschrijving in wkl_niet_gebruikt %}
                             <span>{{ wkl_beschrijving }}</span><br>

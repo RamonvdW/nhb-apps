@@ -432,9 +432,11 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
                                                kwargs={'ronde_pk': ronde.pk})
 
         context['wedstrijden'] = (ronde.plan.wedstrijden
-                                  .select_related('vereniging')
+                                  .select_related('vereniging',
+                                                  'locatie')
                                   .prefetch_related('indiv_klassen')
-                                  .order_by('datum_wanneer', 'tijd_begin_wedstrijd'))
+                                  .order_by('datum_wanneer',
+                                            'tijd_begin_wedstrijd'))
 
         if self.rol_nu == Rollen.ROL_RCL and not is_import:
             context['url_nieuwe_wedstrijd'] = reverse('Competitie:regio-ronde-planning',
@@ -866,7 +868,9 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
             # mag niet wijzigen
             raise PermissionDenied()
 
-        context['competitie'] = ronde.deelcompetitie.competitie
+        context['competitie'] = comp = ronde.deelcompetitie.competitie
+        is_25m = (comp.afstand == '25')
+
         context['regio'] = ronde.deelcompetitie.nhb_regio
         context['ronde'] = ronde
         context['wedstrijd'] = wedstrijd
@@ -914,19 +918,25 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         # wedstrijd.tijd_einde_wedstrijd_str = wedstrijd.tijd_einde_wedstrijd.strftime("%H%M")
 
         if ronde.cluster:
-            verenigingen = ronde.cluster.nhbvereniging_set.all()
+            verenigingen = ronde.cluster.nhbvereniging_set.order_by('ver_nr')
         else:
-            verenigingen = ronde.deelcompetitie.nhb_regio.nhbvereniging_set.all()
+            verenigingen = ronde.deelcompetitie.nhb_regio.nhbvereniging_set.order_by('ver_nr')
         context['verenigingen'] = verenigingen
-
-        is_25m = (ronde.deelcompetitie.competitie.afstand == '25')
 
         if not wedstrijd.vereniging and verenigingen.count() > 0:
             wedstrijd.vereniging = verenigingen[0]
             wedstrijd.save()
 
         if not wedstrijd.locatie and wedstrijd.vereniging:
+            # alle binnen accommodaties hebben discipline_indoor=True
+            # externe locaties met dezelfde discipline komen ook mee
             locaties = wedstrijd.vereniging.wedstrijdlocatie_set.filter(discipline_indoor=True)
+
+            if is_25m:
+                # neem ook externe locaties mee met discipline=25m1pijl
+                locaties_25m1p = wedstrijd.vereniging.wedstrijdlocatie_set.filter(discipline_25m1pijl=True)
+                locaties = locaties.union(locaties_25m1p)
+
             if locaties.count() > 0:
                 wedstrijd.locatie = locaties[0]     # pak een default
                 # maak een slimmere keuze
@@ -939,24 +949,30 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
                             wedstrijd.locatie = locatie
                 # for
                 wedstrijd.save()
+        del obj
 
-        context['locaties'] = locaties = dict()
+        context['all_locaties'] = all_locs = list()
         pks = [ver.pk for ver in verenigingen]
-        for obj in WedstrijdLocatie.objects.filter(verenigingen__pk__in=pks,
-                                                   discipline_indoor=True):
-            for ver in obj.verenigingen.all():
-                key = str(ver.pk)
-                adres = obj.adres
-                if obj.notities:
-                    adres += '\n(%s)' % obj.notities
-
+        for ver in (NhbVereniging
+                    .objects
+                    .prefetch_related('wedstrijdlocatie_set')
+                    .filter(pk__in=pks)):
+            for loc in ver.wedstrijdlocatie_set.all():
+                keep = False
                 if is_25m:
-                    if obj.banen_25m > 0 or (obj.adres_uit_crm and key not in locaties):
-                        locaties[key] = adres  # ver_nr --> adres
+                    if loc.banen_25m > 0 and (loc.discipline_indoor or loc.discipline_25m1pijl):
+                        keep = True
                 else:
-                    if obj.banen_18m > 0 or (obj.adres_uit_crm and key not in locaties):
-                        locaties[key] = adres  # ver_nr --> adres
-                # for
+                    if loc.discipline_indoor and loc.banen_18m > 0:
+                        keep = True
+
+                if keep:
+                    all_locs.append(loc)
+                    loc.ver_pk = ver.pk
+                    keuze = loc.adres.replace('\n', ', ')
+                    if loc.notities:
+                        keuze += ' (%s)' % loc.notities
+                    loc.keuze_str = keuze
             # for
         # for
 
@@ -1011,8 +1027,10 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
             # mag niet wijzigen
             raise PermissionDenied()
 
-        aanvang = request.POST.get('aanvang', '')[:5]
-        nhbver_pk = request.POST.get('nhbver_pk', '')[:6]
+        nhbver_pk = request.POST.get('nhbver_pk', '')[:6]       # afkappen voor de veiligheid
+        loc_pk = request.POST.get('loc_pk', '')[:6]             # afkappen voor de veiligheid
+        aanvang = request.POST.get('aanvang', '')[:5]           # afkappen voor de veiligheid
+
         if nhbver_pk == "" or len(aanvang) != 5 or aanvang[2] != ':':
             raise Http404('Geen valide verzoek')
 
@@ -1020,6 +1038,18 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
             nhbver = NhbVereniging.objects.get(pk=nhbver_pk)
         except (NhbVereniging.DoesNotExist, ValueError):
             raise Http404('Vereniging niet gevonden')
+
+        if loc_pk:
+            try:
+                loc = nhbver.wedstrijdlocatie_set.get(pk=loc_pk)
+            except WedstrijdLocatie.DoesNotExist:
+                raise Http404('Geen valide verzoek')
+        else:
+            # formulier stuurt niets als er niet gekozen hoeft te worden
+            loc = None
+            locs = nhbver.wedstrijdlocatie_set.all()
+            if locs.count() == 1:
+                loc = locs[0]       # de enige keuze
 
         try:
             aanvang = int(aanvang[0:0+2] + aanvang[3:3+2])
@@ -1067,12 +1097,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         wedstrijd.datum_wanneer = when
         wedstrijd.tijd_begin_wedstrijd = datetime.time(hour=uur, minute=minuut)
         wedstrijd.vereniging = nhbver
-
-        locaties = nhbver.wedstrijdlocatie_set.all()
-        if locaties.count() > 0:
-            wedstrijd.locatie = locaties[0]
-        else:
-            wedstrijd.locatie = None
+        wedstrijd.locatie = loc
         wedstrijd.save()
 
         wkl_indiv, wkl_team = self._get_wedstrijdklassen(ronde.deelcompetitie, wedstrijd)

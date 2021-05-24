@@ -317,6 +317,8 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
             resp = self.client.post(url)
         self.assert_is_redirect(resp, '/bondscompetities/')       # redirect = Success
 
+        self.assertTrue(str(self.deelcomp_bond_18) != '')
+
     def test_doorzetten_bad(self):
         # moet BKO zijn
         self.e2e_login_and_pass_otp(self.account_bb)

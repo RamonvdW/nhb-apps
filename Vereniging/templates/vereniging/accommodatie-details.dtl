@@ -489,7 +489,7 @@
                     <tr>
                         <th>Naam</th>
                         <th>Disciplines</th>
-                        <th>Adres</th>
+                        <th>Plaats</th>
                         {% if not readonly %}
                             <th><!-- kolom voor de wijzig knoppen --></th>
                         {% endif %}
@@ -497,9 +497,10 @@
 
                     {% for locatie in externe_locaties %}
                         <tr>
-                            <td>{{ locatie.naam }}</td>
+                            <td>{% if locatie.geen_naam %}<i>Nog niet ingevuld</i>{% else %}{{ locatie.naam }}{% endif %}</td>
 
                             <td>
+                                {% if locatie.geen_disciplines %}<i>Nog niet gekozen</i>{% endif %}
                                 {% if locatie.discipline_outdoor %}<span>Outdoor</span><br>{% endif %}
                                 {% if locatie.discipline_indoor %}<span>Indoor</span><br>{% endif %}
                                 {% if locatie.discipline_clout %}<span>Clout</span><br>{% endif %}
@@ -508,7 +509,7 @@
                                 {% if locatie.discipline_3d %}<span>3D</span><br>{% endif %}
                             </td>
 
-                            <td>{{ locatie.adres|linebreaksbr }}</td>
+                            <td>{% if locatie.geen_plaats %}<i>Nog niet ingevuld</i>{% else %}{{ locatie.plaats }}{% endif %}</td>
 
                             {% if not readonly %}
                                 <td><!-- kolom voor de wijzig knoppen --></td>

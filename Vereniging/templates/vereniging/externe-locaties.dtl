@@ -21,16 +21,17 @@
             <tr>
                 <th>Locatie</th>
                 <th>Disciplines</th>
-                <th>Adres</th>
+                <th>Plaats</th>
                 <th><!-- kolom voor knop --></th>
             </tr>
         </thead>
 
         {% for locatie in locaties %}
             <tr>
-                <td>{{ locatie.naam }}</td>
+                <td>{% if locatie.geen_naam %}<i>Nog niet ingevuld</i>{% else %}{{ locatie.naam }}{% endif %}</td>
 
                 <td>
+                    {% if locatie.geen_disciplines %}<i>Nog niet gekozen</i>{% endif %}
                     {% if locatie.discipline_outdoor %}<span>Outdoor</span><br>{% endif %}
                     {% if locatie.discipline_indoor %}<span>Indoor</span><br>{% endif %}
                     {% if locatie.discipline_25m1pijl %}<span>25m 1pijl</span><br>{% endif %}
@@ -40,7 +41,7 @@
                     {% if locatie.discipline_3d %}<span>3D</span><br>{% endif %}
                 </td>
 
-                <td>{{ locatie.adres|linebreaksbr }}</td>
+                <td>{% if locatie.geen_plaats %}<i>Nog niet ingevuld</i>{% else %}{{ locatie.plaats }}{% endif %}</td>
 
                 <td>
                     <a class="btn-nhb-blauw" href="{{ locatie.url_wijzig }}">{% if readonly %}Details{% else %}Wijzig{% endif %}</a>
