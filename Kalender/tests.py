@@ -266,6 +266,7 @@ class TestKalender(E2EHelpers, TestCase):
 
         self.assertEqual(1, KalenderWedstrijd.objects.count())
         wedstrijd = KalenderWedstrijd.objects.all()[0]
+        self.assertTrue(str(wedstrijd) != '')
         url = self.url_kalender_wijzig_wedstrijd % wedstrijd.pk
 
         # haal de wedstrijd op met status 'ontwerp'
@@ -303,7 +304,9 @@ class TestKalender(E2EHelpers, TestCase):
                                           'wa_status': 'wa_B',
                                           'locatie': loc_sel,
                                           'aanwezig': 'aanwezig_35',
-                                          'scheidsrechters': 'Scheid1\nScheid2'})
+                                          'scheidsrechters': 'Scheid1\nScheid2',
+                                          'begrenzing': 'begrenzing_L',
+                                          'extern': 'ja'})
         self.assert_is_redirect(resp, self.url_kalender_vereniging)
 
         wedstrijd = KalenderWedstrijd.objects.get(pk=wedstrijd.pk)
@@ -318,6 +321,8 @@ class TestKalender(E2EHelpers, TestCase):
         self.assertEqual(wedstrijd.scheidsrechters, 'Scheid1\nScheid2')
         self.assertEqual(wedstrijd.minuten_voor_begin_sessie_aanwezig_zijn, 35)
         self.assertEqual(wedstrijd.locatie, locatie_buiten)
+        self.assertEqual(wedstrijd.begrenzing, 'L')
+        self.assertTrue(wedstrijd.extern_beheerd)
 
         datum = '%s-1-1' % (wedstrijd.datum_begin.year + 1)
         with self.assert_max_queries(20):
@@ -328,6 +333,9 @@ class TestKalender(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_kalender_vereniging)
         wedstrijd = KalenderWedstrijd.objects.get(pk=wedstrijd.pk)
         self.assertEqual(wedstrijd.wa_status, 'B')
+        self.assertFalse(wedstrijd.extern_beheerd)
+
+        return
 
         # akkoord WA status
         with self.assert_max_queries(20):
@@ -360,7 +368,8 @@ class TestKalender(E2EHelpers, TestCase):
                                           'aantal_banen': '41',                 # mag wel
                                           'discipline': 'disc_3D',
                                           'wa_status': 'wa_B',
-                                          'scheidsrechters': 'Scheid4'})        # mag wel
+                                          'scheidsrechters': 'Scheid4',         # mag wel
+                                          'begrenzing': 'begrenzing_V'})
         self.assert_is_redirect(resp, self.url_kalender_vereniging)
         wedstrijd = KalenderWedstrijd.objects.get(pk=wedstrijd.pk)
         self.assertEqual(wedstrijd.titel, 'Test Titel 3')
@@ -373,6 +382,7 @@ class TestKalender(E2EHelpers, TestCase):
         self.assertEqual(wedstrijd.aantal_banen, 41)
         self.assertEqual(wedstrijd.discipline, 'OD')
         self.assertEqual(wedstrijd.scheidsrechters, 'Scheid4')
+        self.assertEqual(wedstrijd.begrenzing, 'L')
 
         # zet de wedstrijd door 'Geaccepteerd' en haal de pagina opnieuw op
         wedstrijd.status = 'A'
@@ -405,7 +415,8 @@ class TestKalender(E2EHelpers, TestCase):
                                           'aantal_banen': '40',
                                           'discipline': 'disc_3D',
                                           'wa_status': 'wa_B',
-                                          'scheidsrechters': 'Scheid3'})
+                                          'scheidsrechters': 'Scheid3',
+                                          'begrenzing': 'begrenzing_Y'})
         self.assert_is_redirect(resp, self.url_kalender_vereniging)
         wedstrijd = KalenderWedstrijd.objects.get(pk=wedstrijd.pk)
         self.assertEqual(wedstrijd.titel, 'Test Titel 2')
@@ -418,6 +429,7 @@ class TestKalender(E2EHelpers, TestCase):
         self.assertEqual(wedstrijd.aantal_banen, 41)
         self.assertEqual(wedstrijd.discipline, 'OD')
         self.assertEqual(wedstrijd.scheidsrechters, 'Scheid4')
+        self.assertEqual(wedstrijd.begrenzing, 'L')
 
         # niet bestaande wedstrijd
         resp = self.client.get(self.url_kalender_wijzig_wedstrijd % 999999)

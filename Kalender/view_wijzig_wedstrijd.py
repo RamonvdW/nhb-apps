@@ -402,18 +402,6 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
                         break       # from the for
                 # for
 
-            pks = list(wedstrijd.boogtypen.values_list('pk', flat=True))
-            for boog in BoogType.objects.all():
-                if request.POST.get('boog_' + boog.afkorting, ''):
-                    # boog is gekozen
-                    if boog.pk not in pks:
-                        wedstrijd.boogtypen.add(boog)
-                else:
-                    # boog is niet (meer) gekozen
-                    if boog.pk in pks:
-                        wedstrijd.boogtypen.remove(boog)
-            # for
-
             if request.POST.get('extern', ''):
                 wedstrijd.extern_beheerd = True
             else:
