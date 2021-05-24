@@ -606,7 +606,7 @@ class E2EHelpers(object):
 
     def assert_is_redirect_not_plein(self, resp):
         assert isinstance(self, TestCase)
-        if resp.status_code != 302:
+        if resp.status_code != 302:                     # pragma: no cover
             # geef een iets uitgebreider antwoord
             msg = "status_code: %s != 302" % resp.status_code
             if resp.status_code == 200:
@@ -650,7 +650,7 @@ class E2EHelpers(object):
             if check_duration:
                 duration = datetime.datetime.now() - tracer.started_at
                 duration_seconds = duration.seconds
-                if duration_seconds > 1.5:
+                if duration_seconds > 1.5:              # pragma: no cover
                     self.fail(msg="Operation took suspiciously long: %.2f seconds" % duration_seconds)
 
             count = len(tracer.trace)
