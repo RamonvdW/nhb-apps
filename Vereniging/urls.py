@@ -5,8 +5,8 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from . import (view_accommodatie, view_overzicht, view_ledenlijst,
-               view_aanmelden, view_wedstrijden, view_lijst_rk,
+from . import (view_accommodatie, view_clusters, view_externe_locaties, view_overzicht, view_ledenlijst,
+               view_aanmelden, view_wedstrijden, view_lijst_rk, view_lijst_verenigingen,
                view_schietmomenten, view_teams)
 
 app_name = 'Vereniging'
@@ -63,7 +63,7 @@ urlpatterns = [
          name='schietmomenten'),
 
     path('accommodaties/lijst/',
-         view_accommodatie.LijstVerenigingenView.as_view(),
+         view_lijst_verenigingen.LijstVerenigingenView.as_view(),
          name='lijst-verenigingen'),
 
     path('accommodaties/details/<vereniging_pk>/',
@@ -75,15 +75,15 @@ urlpatterns = [
          name='vereniging-accommodatie-details'),
 
     path('externe-locaties/<vereniging_pk>/',
-         view_accommodatie.ExterneLocatiesView.as_view(),
+         view_externe_locaties.ExterneLocatiesView.as_view(),
          name='externe-locaties'),
 
     path('externe-locaties/<vereniging_pk>/details/<locatie_pk>/',
-         view_accommodatie.ExterneLocatieDetailsView.as_view(),
+         view_externe_locaties.ExterneLocatieDetailsView.as_view(),
          name='locatie-details'),
 
     path('regio-clusters/',
-         view_accommodatie.WijzigClustersView.as_view(),
+         view_clusters.WijzigClustersView.as_view(),
          name='clusters'),
 
     path('wedstrijden/',
@@ -103,7 +103,7 @@ urlpatterns = [
          name='lijst-rk'),
 
     path('contact-geen-beheerders/',
-         view_accommodatie.GeenBeheerdersView.as_view(),
+         view_lijst_verenigingen.GeenBeheerdersView.as_view(),
          name='contact-geen-beheerders')
 ]
 
