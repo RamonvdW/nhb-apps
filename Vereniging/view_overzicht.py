@@ -13,7 +13,7 @@ from Competitie.models import (Competitie, DeelCompetitie, DeelcompetitieRonde,
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 from Taken.taken import eval_open_taken
-from Wedstrijden.models import CompetitieWedstrijd
+from Wedstrijden.models import CompetitieWedstrijd, BAAN_TYPE_EXTERN
 
 
 TEMPLATE_OVERZICHT = 'vereniging/overzicht.dtl'
@@ -43,7 +43,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
 
         context['toon_aanmelden'] = (rol_nu != Rollen.ROL_WL)
 
-        if functie_nu.nhb_ver.wedstrijdlocatie_set.count() > 0:
+        if functie_nu.nhb_ver.wedstrijdlocatie_set.exclude(baan_type=BAAN_TYPE_EXTERN).count() > 0:
             context['accommodatie_details_url'] = reverse('Vereniging:vereniging-accommodatie-details',
                                                           kwargs={'vereniging_pk': ver.pk})
 
