@@ -949,7 +949,6 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
                             wedstrijd.locatie = locatie
                 # for
                 wedstrijd.save()
-        del obj
 
         context['all_locaties'] = all_locs = list()
         pks = [ver.pk for ver in verenigingen]
