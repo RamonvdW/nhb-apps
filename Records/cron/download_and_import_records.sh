@@ -10,10 +10,11 @@ LOGDIR="/var/log/www"
 SPOOLDIR="/var/spool/records"
 TMPDIR="/tmp/downloader"
 RECORDS="/tmp/downloader/records.json"      # note: download_gsheet.py contains the same path
+USER_WWW="$1"
 
 ID=$(id -u)
 ID_ROOT=$(id -u root)
-ID_WWW=$(id -u apache)
+ID_WWW=$(id -u "$USER_WWW")
 if [ $ID -ne $ID_ROOT -a $ID -ne $ID_WWW ]
 then
     echo "Please run with sudo"
