@@ -31,7 +31,7 @@ def menu_dynamics(request, context, actief='hetplein'):
         raise AssertionError("menu_dynamics: Onbekende 'actief' waarde: %s" % repr(actief))
 
     # test server banner tonen?
-    context['is_test_server'] = settings.ENABLE_WIKI
+    context['is_test_server'] = settings.IS_TEST_SERVER
 
     # zet context variabelen om aan te geven welke optionele delen van het menu getoond moeten worden
     context['toon_kalender'] = False

@@ -19,7 +19,7 @@
     <!-- FUTURE: deze opmerking verwijderen -->
     <p>Deze site is van de Nederlandse Handboog Bond (NHB) en is nog in ontwikkeling.</p>
 
-    {% if is_test_server %}
+    {% if ga_naar_live_server %}
         {% include 'plein/ga-naar-live-server.dtl' %}
     {% endif %}
 

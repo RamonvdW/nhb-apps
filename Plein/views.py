@@ -82,6 +82,9 @@ class PleinView(View):
         template = TEMPLATE_PLEIN_BEZOEKER
         context = dict()
 
+        # ga naar live server banner tonen?
+        context['ga_naar_live_server'] = settings.IS_TEST_SERVER
+
         if request.user.is_authenticated:
             rol_nu = rol_get_huidige(request)
 
