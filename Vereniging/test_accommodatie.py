@@ -963,7 +963,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         # accommodatie bestaat niet of heeft geen banen
         # functie wordt overgenomen door externe locatie
         loc = self.nhbver2.wedstrijdlocatie_set.all()[0]
-        loc.adres = "Wil je niet zien!"
+        loc.plaats = "Wil je niet zien!"
         loc.save()
 
         # verwijder de accommodatie van de vereniging
@@ -981,7 +981,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.assert_is_redirect_not_plein(resp)
 
         loc = self.nhbver2.wedstrijdlocatie_set.all()[0]
-        loc.adres = "Dit moet je bekijken!"
+        loc.plaats = "Dit moet je bekijken!"
         loc.save()
 
         # bekijk de accommodatie details
