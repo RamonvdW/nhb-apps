@@ -362,12 +362,6 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
                         break
                 # for
 
-            if not block_edits:
-                wedstrijd.contact_naam = request.POST.get('contact_naam', wedstrijd.contact_naam)[:50]
-                wedstrijd.contact_email = request.POST.get('contact_email', wedstrijd.contact_email)[:150]
-                wedstrijd.contact_website = request.POST.get('contact_website', wedstrijd.contact_website)[:100]
-                wedstrijd.contact_telefoon = request.POST.get('contact_telefoon', wedstrijd.contact_telefoon)[:50]
-
                 aantal_banen = request.POST.get('aantal_banen', str(wedstrijd.aantal_banen))
                 try:
                     aantal_banen = int(aantal_banen[:5])        # afkappen voor de veiligheid
@@ -378,6 +372,12 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
                     wedstrijd.aantal_banen = aantal_banen
 
                 wedstrijd.scheidsrechters = request.POST.get('scheidsrechters', wedstrijd.scheidsrechters)[:500]
+
+            if not block_edits:
+                wedstrijd.contact_naam = request.POST.get('contact_naam', wedstrijd.contact_naam)[:50]
+                wedstrijd.contact_email = request.POST.get('contact_email', wedstrijd.contact_email)[:150]
+                wedstrijd.contact_website = request.POST.get('contact_website', wedstrijd.contact_website)[:100]
+                wedstrijd.contact_telefoon = request.POST.get('contact_telefoon', wedstrijd.contact_telefoon)[:50]
 
                 wedstrijd.bijzonderheden = request.POST.get('bijzonderheden', '')[:1000]
 

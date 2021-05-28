@@ -316,9 +316,9 @@
                     <table>
 
                         <tr>
-                            <td{% if block_edits %} width="50%"{% endif %}>Aantal banen tegelijk actief:</td>
+                            <td>Aantal banen tegelijk actief:</td>
                             <td>
-                                {% if block_edits %}
+                                {% if limit_edits %}
                                     <span>{{ wed.aantal_banen }} banen</span>
                                 {% else %}
                                     <select name="aantal_banen" onchange="gewijzigd()">
@@ -334,7 +334,7 @@
                         <tr>
                             <td>Eigen scheidsrechters (namen):</td>
                             <td>
-                                {% if block_edits %}
+                                {% if limit_edits %}
                                     <span>{{ wed.scheidsrechters|linebreaksbr }}</span>
                                 {% else %}
                                     <textarea name="scheidsrechters" class="materialize-textarea" oninput="gewijzigd()">{{ wed.scheidsrechters }}</textarea>
@@ -450,15 +450,17 @@
                 const maxDate = new Date("{{ max_date|date:'Y-m-d' }}")
 
                 let el = document.querySelector('#id_datum')
-                let options = { defaultDate: new Date("{{ wed.datum_begin|date:'Y-m-d' }}"),
-                                setDefaultDate: true,
-                                format: "dddd d mmmm yyyy",
-                                minDate: minDate, maxDate: maxDate,
-                                yearRange: [{{ begin_jaar }}, {{ now.year }} + 1]}
+                if (el) {
+                    let options = { defaultDate: new Date("{{ wed.datum_begin|date:'Y-m-d' }}"),
+                                    setDefaultDate: true,
+                                    format: "dddd d mmmm yyyy",
+                                    minDate: minDate, maxDate: maxDate,
+                                    yearRange: [{{ begin_jaar }}, {{ now.year }} + 1]}
 
-                M.Datepicker.init(el, options)
+                    M.Datepicker.init(el, options)
 
-                datum_omzetten(true)
+                    datum_omzetten(true)
+                }
             })
     </script>
 
