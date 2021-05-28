@@ -190,16 +190,13 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
 
         context['opt_klasse_1'] = opt_klasse_1 = list()
         context['opt_klasse_2'] = opt_klasse_2 = list()
+        context['klasse_is_wa'] = (wedstrijd.wa_status == WEDSTRIJD_WA_STATUS_A)
         pks = list(wedstrijd.wedstrijdklassen.values_list('pk', flat=True))
         for klasse in (KalenderWedstrijdklasse
                        .objects
                        .exclude(buiten_gebruik=True)
                        .select_related('leeftijdsklasse')
                        .order_by('volgorde')):
-
-            if wedstrijd.wa_status == WEDSTRIJD_WA_STATUS_A:
-                if not klasse.leeftijdsklasse.volgens_wa:
-                    continue    # skip
 
             klasse.sel = 'klasse_%s' % klasse.pk
             klasse.gebruikt = (klasse.pk in gebruikt)

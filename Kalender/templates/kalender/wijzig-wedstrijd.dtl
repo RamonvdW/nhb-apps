@@ -366,6 +366,13 @@
                 </td>
             </tr>
 
+            {% if klasse_is_wa %}
+                <tr>
+                    <td></td>
+                    <td colspan="2">Let op! Aspirant en veteraan klassen mogen op A-status wedstrijd, maar kunnen geen records claimen.</td>
+                </tr>
+            {% endif %}
+
         </table>
 
         <p>De wedstrijdklasse senioren is altijd de 'open' klasse waarin alle andere leeftijdsklassen mee mogen doen.</p>
