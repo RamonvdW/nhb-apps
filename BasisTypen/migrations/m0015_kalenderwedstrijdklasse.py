@@ -47,7 +47,7 @@ def maak_extra_leeftijdsklassen(apps, _):
         beschrijving='Masters, mannen',
         min_wedstrijdleeftijd=50,
         max_wedstrijdleeftijd=0,
-        volgens_wa=False).save()
+        volgens_wa=False).save()            # volgens_wa moet True zijn - correctie in m0017
 
     leeftijdsklasse_klas(
         afkorting='MV', geslacht='V',
@@ -55,7 +55,7 @@ def maak_extra_leeftijdsklassen(apps, _):
         beschrijving='Masters, vrouwen',
         min_wedstrijdleeftijd=50,
         max_wedstrijdleeftijd=0,
-        volgens_wa=False).save()
+        volgens_wa=False).save()            # volgens_wa moet True zijn - correctie in m0017
 
     # veteranen (60+)
     leeftijdsklasse_klas(
