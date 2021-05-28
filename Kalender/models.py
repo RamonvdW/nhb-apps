@@ -180,8 +180,7 @@ class KalenderWedstrijd(models.Model):
     # (inschrijvingen, betalingen)
     extern_beheerd = models.BooleanField(default=False)
 
-    # boog typen die aan deze wedstrijd deel kunnen nemen
-    # (voor de filters, wordt gevuld aan de hand van de gekozen wedstrijdklassen)
+    # boog typen die aan deze wedstrijd deel mogen nemen
     boogtypen = models.ManyToManyField(BoogType, blank=True)
 
     # gekozen wedstrijdklassen voor de deze wedstrijd

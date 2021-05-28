@@ -180,17 +180,29 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
         # for
 
         # zoek uit welke wedstrijdklassen in gebruik zijn bij de sessies
-        gebruikt = list()
+        klassen_gebruikt = list()
+        bogen_gebruikt = list()
         for sessie in wedstrijd.sessies.all():
-            for klasse in sessie.wedstrijdklassen.all():
-                if klasse.pk not in gebruikt:
-                    gebruikt.append(klasse.pk)
+            for klasse in sessie.wedstrijdklassen.select_related('boogtype').all():
+                if klasse.pk not in klassen_gebruikt:
+                    klassen_gebruikt.append(klasse.pk)
+                    if klasse.boogtype.pk not in bogen_gebruikt:
+                        bogen_gebruikt.append(klasse.boogtype.pk)
             # for
+        # for
+
+        context['opt_bogen'] = opt_bogen = list()
+        pks = list(wedstrijd.boogtypen.values_list('pk', flat=True))
+        for obj in BoogType.objects.order_by('volgorde'):
+            opt_bogen.append(obj)
+            obj.sel = 'boog_%s' % obj.afkorting
+            obj.gebruikt = (obj.pk in bogen_gebruikt)
+            obj.selected = (obj.pk in pks)
         # for
 
         context['opt_klasse_1'] = opt_klasse_1 = list()
         context['opt_klasse_2'] = opt_klasse_2 = list()
-        context['klasse_is_wa'] = (wedstrijd.wa_status == WEDSTRIJD_WA_STATUS_A)
+        context['wedstrijd_is_a_status'] = (wedstrijd.wa_status == WEDSTRIJD_WA_STATUS_A)
         pks = list(wedstrijd.wedstrijdklassen.values_list('pk', flat=True))
         for klasse in (KalenderWedstrijdklasse
                        .objects
@@ -199,7 +211,7 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
                        .order_by('volgorde')):
 
             klasse.sel = 'klasse_%s' % klasse.pk
-            klasse.gebruikt = (klasse.pk in gebruikt)
+            klasse.gebruikt = (klasse.pk in klassen_gebruikt)
             klasse.selected = (klasse.pk in pks)
 
             if klasse.leeftijdsklasse.geslacht == 'M':
@@ -297,6 +309,18 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
         else:
             oude_datum_begin = wedstrijd.datum_begin
 
+            # zoek uit welke wedstrijdklassen in gebruik zijn bij de sessies
+            klassen_pks_gebruikt_in_sessies = list()
+            bogen_pks_gebruikt_in_sessies = list()
+            for sessie in wedstrijd.sessies.all():
+                for klasse in sessie.wedstrijdklassen.select_related('boogtype').all():
+                    if klasse.pk not in klassen_pks_gebruikt_in_sessies:
+                        klassen_pks_gebruikt_in_sessies.append(klasse.pk)
+                        if klasse.boogtype.pk not in bogen_pks_gebruikt_in_sessies:
+                            bogen_pks_gebruikt_in_sessies.append(klasse.boogtype.pk)
+                # for
+            # for
+
             wedstrijd.titel = request.POST.get('titel', wedstrijd.titel)[:50]
 
             if not limit_edits:
@@ -371,6 +395,14 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
                         break
                 # for
 
+                boog_pks = list()
+                for boog in BoogType.objects.all():
+                    if boog.pk in bogen_pks_gebruikt_in_sessies or request.POST.get('boog_%s' % boog.afkorting, ''):
+                        # deze boog is gekozen
+                        boog_pks.append(boog.pk)
+                # for
+                wedstrijd.boogtypen.set(boog_pks)
+
                 wedstrijd.contact_naam = request.POST.get('contact_naam', wedstrijd.contact_naam)[:50]
                 wedstrijd.contact_email = request.POST.get('contact_email', wedstrijd.contact_email)[:150]
                 wedstrijd.contact_website = request.POST.get('contact_website', wedstrijd.contact_website)[:100]
@@ -406,33 +438,23 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
 
             wedstrijd.save()
 
-            # zoek uit welke wedstrijdklassen in gebruik zijn bij de sessies
-            gebruikt = list()
-            for sessie in wedstrijd.sessies.all():
-                for klasse in sessie.wedstrijdklassen.all():
-                    if klasse.pk not in gebruikt:
-                        gebruikt.append(klasse.pk)
-                # for
-            # for
-
+            boog_pks = list(wedstrijd.boogtypen.values_list('pk', flat=True))
             gekozen_klassen = list()
-            gekozen_bogen = list()
             for klasse in (KalenderWedstrijdklasse
                            .objects
                            .exclude(buiten_gebruik=True)
-                           .select_related('leeftijdsklasse')
+                           .select_related('boogtype')
                            .order_by('volgorde')):
 
-                if klasse.pk in gebruikt or request.POST.get('klasse_%s' % klasse.pk, ''):
+                if klasse.pk in klassen_pks_gebruikt_in_sessies or request.POST.get('klasse_%s' % klasse.pk, ''):
                     # klasse is gewenst
-                    gekozen_klassen.append(klasse)
-                    if klasse.boogtype not in gekozen_bogen:
-                        gekozen_bogen.append(klasse.boogtype)
+                    if klasse.boogtype.pk in boog_pks:
+                        # klasse boogtype is nog steeds gewenst
+                        gekozen_klassen.append(klasse)
             # for
 
             # werk de manytomany koppelingen bij
             wedstrijd.wedstrijdklassen.set(gekozen_klassen)
-            wedstrijd.boogtypen.set(gekozen_bogen)
 
             self._verplaats_sessies(wedstrijd, oude_datum_begin)
 

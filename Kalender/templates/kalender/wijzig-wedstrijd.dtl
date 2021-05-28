@@ -91,7 +91,7 @@
                 </td>
                 <td>
                     {% if url_prev_tekst %}
-                        <button form="form_prev" class="btn-nhb-rood vertrek_knop">{{ url_prev_tekst }}</button>
+                        <button form="form_prev" class="btn-nhb-blauw vertrek_knop">{{ url_prev_tekst }}</button>
                         <span>&nbsp;&nbsp;</span>
                     {% endif %}
                     {% if url_next_tekst %}
@@ -187,14 +187,16 @@
                         <p>Voordat A-status gekozen kan worden moet je akkoord gaan met de voorwaarden.</p>
                         <a class="btn-nhb-blauw btn-small" href="{{ url_voorwaarden }}" target="_blank" rel="noopener noreferrer">
                             <i class="material-icons-round left">open_in_new</i>Voorwaarden lezen</a>
-                        <ul id="id_teams">
-                            <li>
-                                <label>
-                                    <input type="checkbox" class="filled-in" name="akkoord_a_status" onchange="akkoord_gewijzigd()">
-                                    <span class="black-text">&nbsp;Ik ga akkoord met de voorwaarden</span>
-                                </label>
-                            </li>
-                        </ul>
+                        {% if not limit_edits %}
+                            <ul id="id_teams">
+                                <li>
+                                    <label>
+                                        <input type="checkbox" class="filled-in" name="akkoord_a_status" onchange="akkoord_gewijzigd()">
+                                        <span class="black-text">&nbsp;Ik ga akkoord met de voorwaarden</span>
+                                    </label>
+                                </li>
+                            </ul>
+                        {% endif %}
                     {% endif %}
                 </td>
             </tr>
@@ -230,6 +232,26 @@
                                 </li>
                             {% endfor %}
                         </ul>
+                    {% endif %}
+                </td>
+            </tr>
+
+            <tr>
+                <td>Toegestane bogen:</td>
+                <td colspan="2">
+                    {% if limit_edits %}
+                        {% for boog in opt_bogen %}
+                            {% if boog.gebruikt %}
+                                <span>{{ boog.beschrijving }}</span><br>
+                            {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        {% for boog in opt_bogen %}
+                            <label class="black-text">
+                                <input type="checkbox" name="{{ boog.sel }}" {% if boog.gebruikt %}disabled checked{% else %}class="filled-in" {% if boog.selected %} checked{% endif %}{% endif %} onchange="gewijzigd()">
+                                <span>{{ boog.beschrijving }}</span>
+                            </label><br>
+                        {% endfor %}
                     {% endif %}
                 </td>
             </tr>
@@ -366,7 +388,7 @@
                 </td>
             </tr>
 
-            {% if klasse_is_wa %}
+            {% if wedstrijd_is_a_status %}
                 <tr>
                     <td></td>
                     <td colspan="2">Let op! Aspirant en veteraan klassen mogen op A-status wedstrijd, maar kunnen geen records claimen.</td>
@@ -376,8 +398,7 @@
         </table>
 
         <p>De wedstrijdklasse senioren is altijd de 'open' klasse waarin alle andere leeftijdsklassen mee mogen doen.</p>
-        <p>Na wijzigen tussen A-status en B-status eerst opslaan, dan passen de wedstrijdklassen zich aan.</p>
-        <p>Wedstrijdklassen die niet aangepast kunnen worden, zijn in gebruik in een sessie.</p>
+        <p>Wedstrijdklassen en bogen die niet aangepast kunnen worden, zijn in gebruik in een sessie.</p>
 
         <br>
 

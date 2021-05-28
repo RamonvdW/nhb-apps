@@ -10,7 +10,7 @@ from django.utils import timezone
 from django.shortcuts import render
 from django.views.generic import View
 from django.contrib.auth.mixins import UserPassesTestMixin
-from BasisTypen.models import KalenderWedstrijdklasse
+from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 from .models import (KalenderWedstrijd,
@@ -84,6 +84,10 @@ class VerenigingKalenderWedstrijdenView(UserPassesTestMixin, View):
                             voorwaarden_a_status_when=now,
                             locatie=locaties[0])
                 wed.save()
+
+                # default alle bogen aan zetten
+                bogen = BoogType.objects.all()
+                wed.boogtypen.set(bogen)
 
                 # default alle wedstrijdklassen kiezen die onder A-status vallen
                 klassen = KalenderWedstrijdklasse.objects.exclude(leeftijdsklasse__volgens_wa=False).all()
