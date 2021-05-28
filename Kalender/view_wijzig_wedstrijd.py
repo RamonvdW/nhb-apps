@@ -423,11 +423,6 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
                            .select_related('leeftijdsklasse')
                            .order_by('volgorde')):
 
-                if wedstrijd.wa_status == WEDSTRIJD_WA_STATUS_A:
-                    if not klasse.leeftijdsklasse.volgens_wa:
-                        # deze mag sowieso niet
-                        continue  # skip
-
                 if klasse.pk in gebruikt or request.POST.get('klasse_%s' % klasse.pk, ''):
                     # klasse is gewenst
                     gekozen_klassen.append(klasse)
