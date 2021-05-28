@@ -341,6 +341,19 @@
             document.getElementById('id_btn_toevoegen').disabled = true
         }
 
+        function opslaan_klaar(xhr)
+        {
+            //console.log('opslaan_klaar: ready=',xhr.readyState, 'status=', xhr.status)
+            if (xhr.readyState == XMLHttpRequest.DONE)
+            {
+                if (xhr.status == 200) {
+                    M.toast({html: 'De scores zijn opgeslagen'})
+                } else {
+                    M.toast({html: 'Opslaan is NIET gelukt'})
+                }
+            }
+        }
+
         // sla de ingevoerde scores op door een POST naar de website
         function opslaan(btn)
         {
@@ -374,8 +387,8 @@
             // POST voorkomt caching
             xhr.open("POST", "{{ url_opslaan }}", true)         // true = async
             xhr.timeout = 3000                                  // 3 sec
-            xhr.onloadend = function() { btn.disabled = false }
-            xhr.ontimeout = function() { btn.disabled = false }
+            xhr.onloadend = function() { btn.disabled = false; opslaan_klaar(xhr) }
+            xhr.ontimeout = function() { btn.disabled = false; M.toast({html: 'Opslaan is NIET gelukt'}) }
             xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}")
             xhr.send(data)
         }
