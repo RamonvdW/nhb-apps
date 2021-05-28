@@ -411,11 +411,11 @@ class KlasseBepaler(object):
                        .prefetch_related('indiv__leeftijdsklassen')
                        .all()):
             indiv = klasse.indiv
-            boogtype = indiv.boogtype
+            boog_afkorting = indiv.boogtype.afkorting
             try:
-                self.boogtype2klassen[boogtype.afkorting].append(klasse)
+                self.boogtype2klassen[boog_afkorting].append(klasse)
             except KeyError:
-                self.boogtype2klassen[boogtype.afkorting] = [klasse]
+                self.boogtype2klassen[boog_afkorting] = [klasse]
 
             for lkl in indiv.leeftijdsklassen.all():
                 lkl_cache = self.lkl_cache[lkl.geslacht]
@@ -426,10 +426,10 @@ class KlasseBepaler(object):
             # for
         # for
 
-    def bepaal_klasse(self, aanmelding):
-        """ deze functie zet aanmelding.klasse aan de hand van de schutterboog """
-        ag = aanmelding.ag_voor_indiv
-        schutterboog = aanmelding.schutterboog
+    def bepaal_klasse_deelnemer(self, deelnemer):
+        """ deze functie zet deelnemer.klasse aan de hand van de schutterboog """
+        ag = deelnemer.ag_voor_indiv
+        schutterboog = deelnemer.schutterboog
         nhblid = schutterboog.nhblid
         age = nhblid.bereken_wedstrijdleeftijd(self.competitie.begin_jaar + 1)
 
@@ -438,19 +438,21 @@ class KlasseBepaler(object):
             if ag >= klasse.min_ag or klasse.indiv.is_onbekend:
                 for lkl in self.lkl_cache[nhblid.geslacht][klasse.pk]:
                     if lkl.leeftijd_is_compatible(age):
-                        tup = (lkl, klasse)
+                        tup = (lkl.volgorde, klasse.pk, lkl, klasse)
                         mogelijkheden.append(tup)
                 # for
         # for
 
-        # indiv.volgorde heeft senioren eerst gezet; aspiranten laatste
-        # aspiranten mogen in alle klassen meedoen, maar we kiezen de Asp klasse
+        mogelijkheden.sort(reverse=True)
+
+        # leeftijdsklasse.volgorde heeft senioren eerst gezet; aspiranten laatste
+        # aspiranten mogen in alle klassen meedoen, maar we kiezen uiteindelijk de Asp klasse
         if len(mogelijkheden):
-            lkl, klasse = mogelijkheden[-1]
-            aanmelding.klasse = klasse
+            _, _, _, klasse = mogelijkheden[-1]
+            deelnemer.klasse = klasse
         else:
             # niet vast kunnen stellen
-            aanmelding.klasse = None
+            deelnemer.klasse = None
 
 
 def competitie_klassegrenzen_vaststellen(comp):

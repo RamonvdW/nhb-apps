@@ -27,20 +27,26 @@ class LeeftijdsklassenView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol = rol_get_huidige(self.request)
-        return rol != Rollen.ROL_NONE
+        return rol != Rollen.ROL_NONE       # NONE is gebruiker die niet ingelogd is
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        huidige_jaar, leeftijd, is_jong, wlst, clst = bereken_leeftijdsklassen(self.request)
-        context['plein_is_jonge_schutter'] = is_jong
-        context['plein_huidige_jaar'] = huidige_jaar
-        context['plein_leeftijd'] = leeftijd
-        context['plein_wlst'] = wlst
-        context['plein_clst'] = clst
+        # gegarandeerd ingelogd door test_func()
+        account = self.request.user
+        nhblid = account.nhblid_set.all()[0]
 
-        menu_dynamics(self.request, context)
+        geboorte_jaar = nhblid.geboorte_datum.year
+
+        huidige_jaar, leeftijd, wlst, clst, lkl_volgende_competitie = bereken_leeftijdsklassen(geboorte_jaar)
+        context['huidige_jaar'] = huidige_jaar
+        context['leeftijd'] = leeftijd
+        context['wlst'] = wlst
+        context['clst'] = clst
+        context['lkl_volgende_competitie'] = lkl_volgende_competitie
+
+        menu_dynamics(self.request, context, actief='schutter-profiel')
         return context
 
 

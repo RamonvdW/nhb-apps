@@ -111,15 +111,17 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
                             ag_voor_indiv=AG_NUL)
 
         bepaler = KlasseBepaler(deelcomp.competitie)
-        bepaler.bepaal_klasse(aanmelding)
+        bepaler.bepaal_klasse_deelnemer(aanmelding)
         context['wedstrijdklasse'] = aanmelding.klasse.indiv.beschrijving
+        context['is_klasse_onbekend'] = aanmelding.klasse.indiv.is_onbekend
         del aanmelding
 
         udvl = deelcomp.competitie.uiterste_datum_lid       # uiterste datum van lidmaatschap
         dvl = schutterboog.nhblid.sinds_datum               # datum van lidmaatschap
 
         # geen aspirant, op tijd lid en op tijd aangemeld?
-        mag_team_schieten = (age > MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT and
+        mag_team_schieten = (deelcomp.regio_organiseert_teamcompetitie and
+                             age > MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT and
                              dvl < udvl
                              and deelcomp.competitie.fase == 'B')
         context['mag_team_schieten'] = mag_team_schieten
@@ -267,20 +269,20 @@ class RegiocompetitieAanmeldenView(View):
                 aanmelding.ag_voor_team_mag_aangepast_worden = False
 
         bepaler = KlasseBepaler(deelcomp.competitie)
-        bepaler.bepaal_klasse(aanmelding)
+        bepaler.bepaal_klasse_deelnemer(aanmelding)
 
         udvl = deelcomp.competitie.uiterste_datum_lid       # uiterste datum van lidmaatschap
         dvl = schutterboog.nhblid.sinds_datum               # datum van lidmaatschap
 
         # geen aspirant, op tijd lid en op tijd aangemeld?
-        mag_team_schieten = (age > MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT and
+        mag_team_schieten = (deelcomp.regio_organiseert_teamcompetitie and
+                             age > MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT and
                              dvl < udvl
                              and deelcomp.competitie.fase == 'B')
 
         # kijk of de schutter met een team mee wil schieten voor deze competitie
-        if mag_team_schieten:
-            if request.POST.get('wil_in_team', '') != '':
-                aanmelding.inschrijf_voorkeur_team = True
+        if mag_team_schieten and request.POST.get('wil_in_team', '') != '':
+            aanmelding.inschrijf_voorkeur_team = True
 
         # kijk of er velden van een formulier bij zitten
         if methode == INSCHRIJF_METHODE_3:

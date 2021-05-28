@@ -5,10 +5,10 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
+from django.utils import timezone
 from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
 from Overig.e2ehelpers import E2EHelpers
 from .leeftijdsklassen import bereken_leeftijdsklassen
-from types import SimpleNamespace
 import datetime
 
 
@@ -55,32 +55,79 @@ class TestSchutterLeeftijdsklassen(E2EHelpers, TestCase):
         lid.bij_vereniging = ver
         lid.save()
 
-    def test_anon(self):
-        # niet mogelijk om te bereiken via de views
-        request = self.client
-        request.user = SimpleNamespace()
-        request.user.is_authenticated = False
-        tup = bereken_leeftijdsklassen(request)
-        self.assertEqual(tup, (None, None, False, None, None))
+    def test_leeftijdsklassen(self):
+        now = timezone.now()  # is in UTC
+        now = timezone.localtime(now)  # convert to active timezone (say Europe/Amsterdam)
+        huidige_jaar = now.year
 
-        # login met een gebruiker zonder NhbLid koppeling
-        request.user = self.account_admin
-        tup = bereken_leeftijdsklassen(request)
-        self.assertEqual(tup, (None, None, False, None, None))
+        # aspirant
+        tup = bereken_leeftijdsklassen(huidige_jaar - 9)
+        self.assertEqual(tup, (huidige_jaar,
+                               9,
+                               ['Aspirant', 'Aspirant', 'Aspirant', 'Aspirant', 'Aspirant'],
+                               ['Aspiranten <11 jaar', 'Aspiranten <11 jaar', 'Aspiranten <11 jaar', 'Aspiranten 11-12 jaar', 'Aspiranten 11-12 jaar'],
+                               'Aspirant'))
+
+        # cadet (14..17)
+        tup = bereken_leeftijdsklassen(huidige_jaar - 13)
+        self.assertEqual(tup, (huidige_jaar,
+                               13,
+                               ['Aspirant', 'Aspirant', 'Cadet', 'Cadet', 'Cadet'],
+                               ['Aspiranten 11-12 jaar', 'Cadetten', 'Cadetten', 'Cadetten', 'Cadetten'],
+                               'Cadet'))
+
+        # junior (18..20)
+        tup = bereken_leeftijdsklassen(huidige_jaar - 18)
+        self.assertEqual(tup, (huidige_jaar,
+                               18,
+                               ['Cadet', 'Junior', 'Junior', 'Junior', 'Senior'],
+                               ['Junioren', 'Junioren', 'Junioren', 'Senioren', 'Senioren'],
+                               'Junior'))
+
+        # senior
+        tup = bereken_leeftijdsklassen(huidige_jaar - 21)
+        self.assertEqual(tup, (huidige_jaar,
+                               21,
+                               ['Junior', 'Senior', 'Senior', 'Senior', 'Senior'],
+                               ['Senioren', 'Senioren', 'Senioren', 'Senioren', 'Senioren'],
+                               'Senior'))
+
+        # master
+        tup = bereken_leeftijdsklassen(huidige_jaar - 50)
+        self.assertEqual(tup, (huidige_jaar,
+                               50,
+                               ['Senior', 'Master', 'Master', 'Master', 'Master'],
+                               ['Senioren', 'Senioren', 'Senioren', 'Senioren', 'Senioren'],
+                               'Senior'))
+
+        # veteraan
+        tup = bereken_leeftijdsklassen(huidige_jaar - 60)
+        self.assertEqual(tup, (huidige_jaar,
+                               60,
+                               ['Master', 'Veteraan', 'Veteraan', 'Veteraan', 'Veteraan'],
+                               ['Senioren', 'Senioren', 'Senioren', 'Senioren', 'Senioren'],
+                               'Senior'))
 
     def test_view(self):
-        # zonder login --> terug naar het plein
+        # zonder login
         with self.assert_max_queries(20):
             resp = self.client.get('/sporter/leeftijdsklassen/', follow=True)
         self.assert403(resp)
 
-        # met schutter-login wel toegankelijk
+        # inlog, geen NHB lid
+        self.e2e_login(self.account_admin)
+        with self.assert_max_queries(20):
+            resp = self.client.get('/sporter/leeftijdsklassen/')
+        self.assert403(resp)
+
+        # schutter
         self.e2e_login(self.account_normaal)
-        with self.assert_max_queries(51):
+        with self.assert_max_queries(20):
             resp = self.client.get('/sporter/leeftijdsklassen/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('schutter/leeftijdsklassen.dtl', 'plein/site_layout.dtl'))
+
         self.e2e_assert_other_http_commands_not_supported('/sporter/leeftijdsklassen/')
 
 # end of file

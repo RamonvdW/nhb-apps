@@ -19,7 +19,6 @@ from Competitie.models import (Competitie, DeelCompetitie,
                                LAAG_REGIO, INSCHRIJF_METHODE_1)
 from Records.models import IndivRecord, MATERIAALKLASSE
 from Score.models import Score, ScoreHist, SCORE_TYPE_INDIV_AG, SCORE_TYPE_TEAM_AG
-from .leeftijdsklassen import bereken_leeftijdsklassen
 from .models import SchutterVoorkeuren, SchutterBoog
 import logging
 import copy

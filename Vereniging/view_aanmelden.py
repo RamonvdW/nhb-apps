@@ -414,7 +414,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                 # for
 
                 # zoek een toepasselijke klasse aan de hand van de leeftijd
-                bepaler.bepaal_klasse(aanmelding)
+                bepaler.bepaal_klasse_deelnemer(aanmelding)
                 if not aanmelding.klasse:
                     raise Http404('Geen passende wedstrijdklasse kunnen kiezen')
 

@@ -9,7 +9,6 @@ from django.utils import timezone
 from Plein.menu import menu_dynamics
 from BasisTypen.models import IndivWedstrijdklasse
 from NhbStructuur.models import NhbRegio
-from Schutter.leeftijdsklassen import bereken_leeftijdsklassen
 from types import SimpleNamespace
 
 
