@@ -132,7 +132,7 @@ KALENDERWEDSTRIJDENKLASSEN = (
     (350, 'BB', 'AH2', 'Barebow aspirant jongens'),
     (351, 'BB', 'AV2', 'Barebow aspirant meisjes'),
 
-
+    # boog type en volgorde van LB en IB is verkeerd om - aangepast in m0018
     (400, 'IB', 'VH', 'Longbow veteraan mannen'),
     (401, 'IB', 'VV', 'Longbow veteraan vrouwen'),
 
