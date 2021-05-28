@@ -194,10 +194,10 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
         context['opt_bogen'] = opt_bogen = list()
         pks = list(wedstrijd.boogtypen.values_list('pk', flat=True))
         for obj in BoogType.objects.order_by('volgorde'):
-            opt_bogen.append(obj)
             obj.sel = 'boog_%s' % obj.afkorting
             obj.gebruikt = (obj.pk in bogen_gebruikt)
             obj.selected = (obj.pk in pks)
+            opt_bogen.append(obj)
         # for
 
         context['opt_klasse_1'] = opt_klasse_1 = list()

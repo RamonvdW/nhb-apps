@@ -241,7 +241,7 @@
                 <td colspan="2">
                     {% if limit_edits %}
                         {% for boog in opt_bogen %}
-                            {% if boog.gebruikt %}
+                            {% if boog.selected %}
                                 <span>{{ boog.beschrijving }}</span><br>
                             {% endif %}
                         {% endfor %}
@@ -307,10 +307,14 @@
                         <tr>
                             <td>Extern beheer:</td>
                             <td>
-                                <label class="black-text">
-                                    <input type="checkbox" class="filled-in" name="extern"{% if wed.extern_beheerd %} checked{% endif %} onchange="gewijzigd()">
-                                    <span>Inschrijven via bovenstaande website en/of e-mailadres</span>
-                                </label>
+                                {% if block_edits %}
+                                    <span>{% if wed.extern_beheerd %}Ja{% else %}Nee{% endif %}</span>
+                                {% else %}
+                                    <label class="black-text">
+                                        <input type="checkbox" class="filled-in" name="extern"{% if wed.extern_beheerd %} checked{% endif %} onchange="gewijzigd()">
+                                        <span>Inschrijven via bovenstaande website en/of e-mailadres</span>
+                                    </label>
+                                {% endif %}
                             </td>
                         </tr>
 
@@ -321,13 +325,16 @@
             <tr>
                 <td>Aanwezig melden:</td>
                 <td>
-                    <span>Hoe lang van tevoren wil je sporters vragen aanwezig te zijn?</span>
-
-                    <select name="aanwezig" onchange="gewijzigd()">
-                        {% for opt in opt_aanwezig %}
-                            <option value="{{ opt.sel }}"{% if opt.selected %} selected{% endif %}>{{ opt.keuze_str }}</option>
-                        {% endfor %}
-                    </select>
+                    {% if block_edits %}
+                        <span>{{ wed.minuten_voor_begin_sessie_aanwezig_zijn }} minuten van te voren</span>
+                    {% else %}
+                        <span>Hoe lang van tevoren wil je sporters vragen aanwezig te zijn?</span>
+                        <select name="aanwezig" onchange="gewijzigd()">
+                            {% for opt in opt_aanwezig %}
+                                <option value="{{ opt.sel }}"{% if opt.selected %} selected{% endif %}>{{ opt.keuze_str }}</option>
+                            {% endfor %}
+                        </select>
+                    {% endif %}
                 </td>
                 <td></td>
             </tr>
