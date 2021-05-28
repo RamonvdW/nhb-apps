@@ -217,7 +217,7 @@
             <tr>
                 <td>Doelgroep:</td>
                 <td colspan="2">
-                    {% if limit_edits %}
+                    {% if block_edits %}
                         <span>{{ wed.begrenzing_str }}</span>
                     {% else %}
                         <ul id="id_doelgroep">

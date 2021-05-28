@@ -352,13 +352,6 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
                     if wedstrijd.voorwaarden_a_status_acceptatie:
                         wedstrijd.wa_status = WEDSTRIJD_WA_STATUS_A
 
-                begrenzing = request.POST.get('begrenzing', '')[:20]     # afkappen voor de veiligheid
-                for code in WEDSTRIJD_BEGRENZING_TO_STR.keys():
-                    if begrenzing == 'begrenzing_%s' % code:
-                        wedstrijd.begrenzing = code
-                        break
-                # for
-
                 aantal_banen = request.POST.get('aantal_banen', str(wedstrijd.aantal_banen))
                 try:
                     aantal_banen = int(aantal_banen[:5])        # afkappen voor de veiligheid
@@ -371,6 +364,13 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
                 wedstrijd.scheidsrechters = request.POST.get('scheidsrechters', wedstrijd.scheidsrechters)[:500]
 
             if not block_edits:
+                begrenzing = request.POST.get('begrenzing', '')[:20]     # afkappen voor de veiligheid
+                for code in WEDSTRIJD_BEGRENZING_TO_STR.keys():
+                    if begrenzing == 'begrenzing_%s' % code:
+                        wedstrijd.begrenzing = code
+                        break
+                # for
+
                 wedstrijd.contact_naam = request.POST.get('contact_naam', wedstrijd.contact_naam)[:50]
                 wedstrijd.contact_email = request.POST.get('contact_email', wedstrijd.contact_email)[:150]
                 wedstrijd.contact_website = request.POST.get('contact_website', wedstrijd.contact_website)[:100]
