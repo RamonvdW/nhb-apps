@@ -72,8 +72,9 @@ class KalenderWedstrijdSessiesView(UserPassesTestMixin, View):
         # for
         context['sessies'] = sessies
 
-        context['url_nieuwe_sessie'] = reverse('Kalender:wijzig-sessies',
-                                               kwargs={'wedstrijd_pk': wedstrijd.pk})
+        if wedstrijd.status != WEDSTRIJD_STATUS_GEANNULEERD:
+            context['url_nieuwe_sessie'] = reverse('Kalender:wijzig-sessies',
+                                                   kwargs={'wedstrijd_pk': wedstrijd.pk})
 
         if self.rol_nu == Rollen.ROL_HWL:
             context['url_terug'] = reverse('Kalender:vereniging')
@@ -96,7 +97,7 @@ class KalenderWedstrijdSessiesView(UserPassesTestMixin, View):
         if self.rol_nu == Rollen.ROL_HWL and wedstrijd.organiserende_vereniging != self.functie_nu.nhb_ver:
             raise PermissionDenied('Wedstrijd niet van jouw vereniging')
 
-        if request.POST.get('nieuwe_sessie', ''):
+        if wedstrijd.status != WEDSTRIJD_STATUS_GEANNULEERD and request.POST.get('nieuwe_sessie', ''):
             # voeg een nieuwe sessie toe aan deze wedstrijd
             sessie = KalenderWedstrijdSessie(
                             datum=wedstrijd.datum_begin,
