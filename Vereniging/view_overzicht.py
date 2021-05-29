@@ -43,7 +43,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
 
         context['toon_aanmelden'] = (rol_nu != Rollen.ROL_WL)
 
-        if functie_nu.nhb_ver.wedstrijdlocatie_set.exclude(baan_type=BAAN_TYPE_EXTERN).count() > 0:
+        if functie_nu.nhb_ver.wedstrijdlocatie_set.exclude(baan_type=BAAN_TYPE_EXTERN).filter(zichtbaar=True).count() > 0:
             context['accommodatie_details_url'] = reverse('Vereniging:vereniging-accommodatie-details',
                                                           kwargs={'vereniging_pk': ver.pk})
 

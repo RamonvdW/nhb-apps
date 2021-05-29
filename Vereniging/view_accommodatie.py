@@ -53,7 +53,7 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
         binnen_locatie = None
         buiten_locatie = None
         externe_locaties = list()
-        for loc in nhbver.wedstrijdlocatie_set.all():
+        for loc in nhbver.wedstrijdlocatie_set.exclude(zichtbaar=False).all():
             if loc.baan_type == 'E':
                 externe_locaties.append(loc)
             elif loc.baan_type == 'B':
