@@ -261,7 +261,7 @@
                 <td colspan="2">
                     <table>
                         <tr>
-                            <td{% if block_edits %} width="50%"{% endif %}>Naam</td>
+                            <td{% if block_edits %} style="width:50%"{% endif %}>Naam</td>
                             <td>
                                 {% if block_edits %}
                                     <span>{{ wed.contact_naam }}</span>
@@ -345,7 +345,7 @@
                     <table>
 
                         <tr>
-                            <td>Aantal banen tegelijk actief:</td>
+                            <td{% if block_edits %} style="width:50%"{% endif %}>Aantal banen tegelijk actief:</td>
                             <td>
                                 {% if limit_edits %}
                                     <span>{{ wed.aantal_banen }} banen</span>
@@ -377,7 +377,7 @@
 
             <tr>
                 <td>Wedstrijdklassen:</td>
-                <td>
+                <td style="width:40%">
                     {% for klasse in opt_klasse_1 %}
                         <label class="black-text">
                             <input type="checkbox" name="{{ klasse.sel }}" {% if klasse.gebruikt %}disabled checked{% else %}class="filled-in" {% if klasse.selected %} checked{% endif %}{% endif %} onchange="gewijzigd()">
@@ -385,7 +385,7 @@
                         </label><br>
                     {% endfor %}
                 </td>
-                <td>
+                <td style="width:40%">
                     {% for klasse in opt_klasse_2 %}
                         <label class="black-text">
                             <input type="checkbox" name="{{ klasse.sel }}" {% if klasse.gebruikt %}disabled checked{% else %}class="filled-in" {% if klasse.selected %} checked{% endif %}{% endif %} onchange="gewijzigd()">
