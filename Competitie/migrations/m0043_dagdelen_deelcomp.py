@@ -12,7 +12,7 @@ def migreer_dagdelen_deelcomp(apps, _):
 
     deelcomp_klas = apps.get_model('Competitie', 'DeelCompetitie')
 
-    for deelcomp in deelcomp_klas.objects.all():
+    for deelcomp in deelcomp_klas.objects.all():              # pragma: no cover
         if deelcomp.toegestane_dagdelen:
             nieuw = list()
             for part in deelcomp.toegestane_dagdelen.split(','):

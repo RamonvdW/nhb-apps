@@ -657,7 +657,23 @@ class TestCompetitie(E2EHelpers, TestCase):
         with self.assert_max_queries(86):
             resp = self.client.post(self.url_klassegrenzen_vaststellen % comp_25.pk)
         self.assert_is_redirect_not_plein(resp)        # redirect = success
+
+        # kies pagina ophalen als BB, dan worden alle competities getoond
+        zet_competitie_fase(comp_18, 'B')
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_kies)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/kies.dtl', 'plein/site_layout.dtl'))
+
         self.e2e_logout()
+
+        # kies pagina ophalen als bezoeker
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_kies)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/kies.dtl', 'plein/site_layout.dtl'))
 
         # nog een keer
         with self.assert_max_queries(20):
