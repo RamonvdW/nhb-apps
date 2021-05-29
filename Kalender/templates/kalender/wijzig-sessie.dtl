@@ -24,6 +24,8 @@
         }
     </script>
 
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="kalender-wijzig-sessie" %}
+
     <h4>Wijzig wedstrijd sessie</h4>
 
     <p>Op deze pagina kunnen de details van een wedstrijd sessie aangepast worden.</p>
@@ -182,8 +184,6 @@
                 initialized = true
             })
     </script>
-
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="kalender-wijzig-sessie" %}
 
 {% endblock %}
 

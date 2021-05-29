@@ -10,6 +10,8 @@
 
 {% block pagina %}
 
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="kalender-wijzig-sessies" %}
+
     <h4>Wijzig wedstrijd sessies</h4>
 
     <p>Op deze pagina kunnen de sessies van een wedstrijd aangepast worden.</p>
@@ -97,8 +99,6 @@
         {% endif %}
 
     </table>
-
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="kalender-wijzig-sessies" %}
 
 {% endblock %}
 
