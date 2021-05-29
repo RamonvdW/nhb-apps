@@ -40,7 +40,7 @@
                 el_td.innerHTML = '<i class="red-text">Geen accommodatie gegevens bekend</i>'
             } else if (el_select.length == 1) {
                 // vervang drop-down door statische text
-                el_td.innerHTML = el_select.options[0].text
+                el_td.innerHTML = el_select.options[0].text + '<input type="hidden" name="loc_pk" value="' + el_select.options[0].value + '">'
             } else {
                 M.FormSelect.init(el_select)
             }

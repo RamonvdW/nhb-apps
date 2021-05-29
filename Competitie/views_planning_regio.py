@@ -930,11 +930,11 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         if not wedstrijd.locatie and wedstrijd.vereniging:
             # alle binnen accommodaties hebben discipline_indoor=True
             # externe locaties met dezelfde discipline komen ook mee
-            locaties = wedstrijd.vereniging.wedstrijdlocatie_set.filter(discipline_indoor=True)
+            locaties = wedstrijd.vereniging.wedstrijdlocatie_set.exclude(zichtbaar=False).filter(discipline_indoor=True)
 
             if is_25m:
                 # neem ook externe locaties mee met discipline=25m1pijl
-                locaties_25m1p = wedstrijd.vereniging.wedstrijdlocatie_set.filter(discipline_25m1pijl=True)
+                locaties_25m1p = wedstrijd.vereniging.wedstrijdlocatie_set.exclude(zichtbaar=False).filter(discipline_25m1pijl=True)
                 locaties = locaties.union(locaties_25m1p)
 
             if locaties.count() > 0:
@@ -956,7 +956,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
                     .objects
                     .prefetch_related('wedstrijdlocatie_set')
                     .filter(pk__in=pks)):
-            for loc in ver.wedstrijdlocatie_set.all():
+            for loc in ver.wedstrijdlocatie_set.exclude(zichtbaar=False):
                 keep = False
                 if is_25m:
                     if loc.banen_25m > 0 and (loc.discipline_indoor or loc.discipline_25m1pijl):
@@ -971,6 +971,10 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
                     keuze = loc.adres.replace('\n', ', ')
                     if loc.notities:
                         keuze += ' (%s)' % loc.notities
+                    if not keuze:
+                        keuze = loc.plaats
+                    if not keuze:
+                        keuze = 'Locatie zonder naam (%s)' % loc.pk
                     loc.keuze_str = keuze
             # for
         # for
@@ -1046,7 +1050,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         else:
             # formulier stuurt niets als er niet gekozen hoeft te worden
             loc = None
-            locs = nhbver.wedstrijdlocatie_set.all()
+            locs = nhbver.wedstrijdlocatie_set.exclude(zichtbaar=False).all()
             if locs.count() == 1:
                 loc = locs[0]       # de enige keuze
 
