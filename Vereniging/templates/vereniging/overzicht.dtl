@@ -71,125 +71,34 @@
         {% endif %}
     </div>
 
-    {% if toon_competities %}
-        <h5>Indoor competitie</h5>
-
-        <div class="row">
-            {% for deelcomp_rk in deelcomps_rk %}
-                {% if deelcomp_rk.url_lijst_rk and deelcomp_rk.competitie.afstand == '18' %}
-                    {% include 'plein/card.dtl' with title="RK selectie 18m" text=deelcomp_rk.text_str icon="receipt" url=deelcomp_rk.url_lijst_rk %}
-                {% endif %}
-            {% endfor %}
-
-            <!-- leden aanmelden voor de competitie (niet voor WL) -->
-            {% if toon_aanmelden %}
-                {% for comp in competities %}
-                    {% if comp.afstand == '18' %}
-                        {% if comp.fase < 'B' %}
-                            <div class="nhb-card-disabled">
-                                <div class="nhb-card-content">
-                                    <div class="card-title center-align grey-text">Aanmelden</div>
-                                    <div class="center-align"><img src="{{ comp.icon }}" height="60" alt="logo" style="opacity: 0.5"></div>
-                                    <div class="card-text grey-text">Aanmelden voor de <b>{{ comp.beschrijving }}</b> opent op {{ comp.begin_aanmeldingen }}.</div>
-                                    <div class="card-text center-align"><br>(NOG NIET BESCHIKBAAR)</div>
-                                </div>
-                            </div>
-                        {% elif comp.fase < 'F' %}
-                            {% url 'Vereniging:leden-aanmelden' comp_pk=comp.pk as card_url %}
-                            {% include 'plein/card_logo.dtl' with title="Aanmelden" text="Leden aanmelden voor de "|add:comp.beschrijving|add:"." img_src=comp.icon img_height="60" url=card_url %}
+    {% for kaartje in kaartjes %}
+        {% if kaartje.heading %}
+            <h5>{{ kaartje.heading }}</h5>
+        {% elif kaartje.geen_kaartjes %}
+            <p>Geen kaartjes voor deze competitie.</p>
+        {% elif kaartje.beschikbaar_vanaf %}
+            <!-- toon disabled -->
+            <div class="nhb-card-disabled">
+                <div class="nhb-card-content">
+                    <div class="card-title center-align grey-text">{{ kaartje.titel }}</div>
+                    <div class="center-align" style="margin-bottom:8px; position: relative">
+                        {% if kaartje.img %}
+                            <div><img src="{{ kaartje.img }}" height="60" alt="logo" style="opacity: 0.5"></div>
+                            <div style="position:absolute; top:50%; width:100%" class="center-align white-text nhb-rood">VANAF {{ kaartje.beschikbaar_vanaf|upper }}</div>
+                        {% else %}
+                            <div class="grey-text"><i class="material-icons-round medium">{{ kaartje.icon }}</i></div>
+                            <div style="position:absolute; top:50%; width:100%" class="center-align white-text nhb-rood">VANAF {{ kaartje.beschikbaar_vanaf|upper }}</div>
                         {% endif %}
-                    {% endif %}
-                {% endfor %}
-            {% endif %}
-
-            <!-- leden ingeschreven voor de competitie (niet meer tonen vanaf fase RK) -->
-            {% for deelcomp in deelcomps %}
-                {% if deelcomp.competitie.afstand == '18' %}
-                    {% if deelcomp.regio_organiseert_teamcompetitie and deelcomp.competitie.fase >= 'B' and deelcomp.competitie.fase <= 'C' %}
-                        {% url 'Vereniging:teams-regio' deelcomp_pk=deelcomp.pk as card_url %}
-                        {% include 'plein/card.dtl' with title="Teams Regio" text="Verenigingsteams voor de regiocompetitie van de "|add:deelcomp.competitie.beschrijving|add:" samenstellen." icon="gamepad" url=card_url %}
-                    {% endif %}
-
-                    <!--
-                    {% if deelcomp.competitie.fase >= 'E' and deelcomp.competitie.fase <= 'K' %}
-                        {% url 'Vereniging:teams-rk' deelcomp_pk=deelcomp.pk as card_url %}
-                        {% include 'plein/card.dtl' with title="Teams RK" text="Verenigingsteams voor de rayonkampioenschappen van de "|add:deelcomp.competitie.beschrijving|add:" samenstellen." icon="gamepad" url=card_url %}
-                    {% endif %}
-                    -->
-
-                    {% if deelcomp.competitie.fase >= 'B' and deelcomp.competitie.fase <= 'F' %}
-                        {% url 'Vereniging:leden-ingeschreven' deelcomp_pk=deelcomp.pk as card_url %}
-                        {% include 'plein/card_logo.dtl' with title="Ingeschreven" text="Overzicht leden ingeschreven zijn voor de "|add:deelcomp.competitie.beschrijving|add:"." img_src=deelcomp.icon img_height="60" url=card_url %}
-
-                        {% if deelcomp.toon_wie_schiet_waar %}
-                            {% url 'Vereniging:schietmomenten' deelcomp_pk=deelcomp.pk as card_url %}
-                            {% include 'plein/card_logo.dtl' with title="Wie schiet waar?" text="Overzicht leden ingeschreven zijn voor de "|add:deelcomp.competitie.beschrijving|add:"." img_src=deelcomp.icon img_height="60" url=card_url %}
-                        {% endif %}
-                    {% endif %}
-                {% endif %}
-            {% endfor %}
-        </div>
-    {% endif %} <!-- toon_competities -->
-
-    {% if toon_competities %}
-        <h5>25m 1pijl competitie</h5>
-
-        <div class="row">
-            {% for deelcomp_rk in deelcomps_rk %}
-                {% if deelcomp_rk.url_lijst_rk and deelcomp_rk.competitie.afstand == '25' %}
-                    {% include 'plein/card.dtl' with title="RK selectie" text=deelcomp_rk.text_str icon="receipt" url=deelcomp_rk.url_lijst_rk %}
-                {% endif %}
-            {% endfor %}
-
-            <!-- leden aanmelden voor de competitie (niet voor WL) -->
-            {% if toon_aanmelden %}
-                {% for comp in competities %}
-                    {% if comp.afstand == '25' %}
-                        {% if comp.fase < 'B' %}
-                            <div class="nhb-card-disabled">
-                                <div class="nhb-card-content">
-                                    <div class="card-title center-align grey-text">Aanmelden {{ comp.afstand }}m</div>
-                                    <div class="center-align"><img src="{{ comp.icon }}" height="60" alt="logo" style="opacity: 0.5"></div>
-                                    <div class="card-text grey-text">Aanmelden voor de <b>{{ comp.beschrijving }}</b> opent op {{ comp.begin_aanmeldingen }}.</div>
-                                    <div class="card-text center-align"><br>(NOG NIET BESCHIKBAAR)</div>
-                                </div>
-                            </div>
-                        {% elif comp.fase < 'F' %}
-                            {% url 'Vereniging:leden-aanmelden' comp_pk=comp.pk as card_url %}
-                            {% include 'plein/card_logo.dtl' with title="Aanmelden" text="Leden aanmelden voor de "|add:comp.beschrijving|add:"." img_src=comp.icon img_height="60" url=card_url %}
-                        {% endif %}
-                    {% endif %}
-                {% endfor %}
-            {% endif %}
-
-            <!-- leden ingeschreven voor de competitie (niet meer tonen vanaf fase RK) -->
-            {% for deelcomp in deelcomps %}
-                {% if deelcomp.competitie.afstand == '25' %}
-                    {% if deelcomp.regio_organiseert_teamcompetitie and deelcomp.competitie.fase >= 'B' and deelcomp.competitie.fase <= 'C' %}
-                        {% url 'Vereniging:teams-regio' deelcomp_pk=deelcomp.pk as card_url %}
-                        {% include 'plein/card.dtl' with title="Teams Regio" text="Verenigingsteams voor de regiocompetitie van de "|add:deelcomp.competitie.beschrijving|add:" samenstellen." icon="gamepad" url=card_url %}
-                    {% endif %}
-
-                    <!--
-                    {% if deelcomp.competitie.fase >= 'E' and deelcomp.competitie.fase <= 'K' %}
-                        {% url 'Vereniging:teams-rk' deelcomp_pk=deelcomp.pk as card_url %}
-                        {% include 'plein/card.dtl' with title="Teams RK" text="Verenigingsteams voor de rayonkampioenschappen van de "|add:deelcomp.competitie.beschrijving|add:" samenstellen." icon="gamepad" url=card_url %}
-                    {% endif %}
-                    -->
-
-                    {% if deelcomp.competitie.fase >= 'B' and deelcomp.competitie.fase <= 'F' %}
-                        {% url 'Vereniging:leden-ingeschreven' deelcomp_pk=deelcomp.pk as card_url %}
-                        {% include 'plein/card_logo.dtl' with title="Ingeschreven" text="Overzicht leden ingeschreven zijn voor de "|add:deelcomp.competitie.beschrijving|add:"." img_src=deelcomp.icon img_height="60" url=card_url %}
-
-                        {% if deelcomp.toon_wie_schiet_waar %}
-                            {% url 'Vereniging:schietmomenten' deelcomp_pk=deelcomp.pk as card_url %}
-                            {% include 'plein/card_logo.dtl' with title="Wie schiet waar?" text="Overzicht leden ingeschreven zijn voor de "|add:deelcomp.competitie.beschrijving|add:"." img_src=deelcomp.icon img_height="60" url=card_url %}
-                        {% endif %}
-                    {% endif %}
-                {% endif %}
-            {% endfor %}
-        </div>
-    {% endif %} <!-- toon_competities -->
+                    </div>
+                    <div class="card-text grey-text">{{ kaartje.tekst }}</div>
+                </div>
+            </div>
+        {% elif kaartje.img %}
+            {% include 'plein/card_logo.dtl' with title=kaartje.titel text=kaartje.tekst img_src=kaartje.img img_height="60" url=kaartje.url %}
+        {% else %}
+            {% include 'plein/card.dtl' with title=kaartje.titel text=kaartje.tekst icon=kaartje.icon url=kaartje.url %}
+        {% endif %}
+    {% endfor %}
 
 
     <h5>Beheer vereniging</h5>
