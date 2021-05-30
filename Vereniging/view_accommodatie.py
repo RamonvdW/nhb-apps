@@ -206,8 +206,9 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
             raise PermissionDenied('Wijzigen niet toegestaan')
 
         if request.POST.get('verwijder_buitenbaan', None):
-            buiten_locatie.zichtbaar = False
-            buiten_locatie.save()
+            if buiten_locatie:
+                buiten_locatie.zichtbaar = False
+                buiten_locatie.save()
             if 'is_ver' in kwargs:  # wordt gezet door VerenigingAccommodatieDetailsView
                 urlconf = 'Vereniging:vereniging-accommodatie-details'
             else:
