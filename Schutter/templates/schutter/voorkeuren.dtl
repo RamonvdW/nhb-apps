@@ -91,7 +91,7 @@
                     <td>
                         <label>
                             <input type="checkbox" class="filled-in" name="voorkeur_meedoen_competitie"{% if voorkeuren.voorkeur_meedoen_competitie %} checked{% endif %}>
-                            <span class="black-text">Voorkeur voor de (winter-)competities</span>
+                            <span class="black-text">Voorkeur voor de bondscompetities (Indoor en 25m1pijl)</span>
                         </label>
                     </td>
                 </tr>
@@ -114,7 +114,7 @@
                     <td>
                         <label>
                             <input type="checkbox" class="filled-in" name="voorkeur_disc_indoor"{% if voorkeuren.voorkeur_discipline_indoor %} checked{% endif %}>
-                            <span class="black-text">Voorkeur voor de discipline Indoor (18m / 25m 3pijl)</span>
+                            <span class="black-text">Voorkeur voor de discipline Indoor</span>
                         </label>
                     </td>
                 </tr>
