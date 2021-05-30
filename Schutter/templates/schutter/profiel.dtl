@@ -91,7 +91,7 @@
     <p>Gebruik de knop om te zien in welke klassen jij uit moet komen.</p>
 
 
-    {% if competities %}
+    {% if toon_bondscompetities %}
 
         <span>&nbsp;</span>
         <h5>Competities</h5>

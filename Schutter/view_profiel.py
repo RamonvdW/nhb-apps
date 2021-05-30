@@ -104,29 +104,28 @@ class ProfielView(UserPassesTestMixin, TemplateView):
     @staticmethod
     def _find_competities(voorkeuren):
         comps = list()
-        if voorkeuren.voorkeur_meedoen_competitie:
-            for comp in (Competitie
-                         .objects.filter(is_afgesloten=False)
-                         .order_by('afstand', 'begin_jaar')):
-                comp.bepaal_fase()
-                comp.bepaal_openbaar(Rollen.ROL_SCHUTTER)
-                if comp.is_openbaar:
-                    # fase B of later
-                    comp.inschrijven = 'De inschrijving is gesloten'
+        for comp in (Competitie
+                     .objects.filter(is_afgesloten=False)
+                     .order_by('afstand', 'begin_jaar')):
+            comp.bepaal_fase()
+            comp.bepaal_openbaar(Rollen.ROL_SCHUTTER)
+            if comp.is_openbaar:
+                # fase B of later
+                comp.inschrijven = 'De inschrijving is gesloten'
 
-                    if comp.alle_rks_afgesloten:
-                        comp.fase_str = 'Bondskampioenschappen'
-                    elif comp.alle_regiocompetities_afgesloten:
-                        comp.fase_str = 'Rayonkampioenschappen'
-                    else:
-                        comp.fase_str = 'Regiocompetitie'
-                        if comp.fase < 'C':
-                            comp.inschrijven = 'Volwaardig inschrijven kan tot %s' % localize(comp.einde_aanmeldingen)
-                        elif comp.fase < 'F':
-                            comp.inschrijven = 'Meedoen kan tot %s' % localize(comp.laatst_mogelijke_wedstrijd)
+                if comp.alle_rks_afgesloten:
+                    comp.fase_str = 'Bondskampioenschappen'
+                elif comp.alle_regiocompetities_afgesloten:
+                    comp.fase_str = 'Rayonkampioenschappen'
+                else:
+                    comp.fase_str = 'Regiocompetitie'
+                    if comp.fase < 'C':
+                        comp.inschrijven = 'Volwaardig inschrijven kan tot %s' % localize(comp.einde_aanmeldingen)
+                    elif comp.fase < 'F':
+                        comp.inschrijven = 'Meedoen kan tot %s' % localize(comp.laatst_mogelijke_wedstrijd)
 
-                    comps.append(comp)
-            # for
+                comps.append(comp)
+        # for
         return comps
 
     @staticmethod
@@ -365,11 +364,18 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         context['nhblid'] = nhblid
         context['records'], context['show_loc'] = self._find_records(nhblid)
         context['histcomp'] = self._find_histcomp_scores(nhblid, alle_bogen)
+        context['toon_bondscompetities'] = False
 
         if nhblid.bij_vereniging and not nhblid.bij_vereniging.geen_wedstrijden:
+            context['toon_bondscompetities'] = True
             context['competities'] = comps = self._find_competities(voorkeuren)
-            context['regiocompetities'] = self._find_regiocompetities(comps, nhblid, voorkeuren, alle_bogen)
+            context['regiocompetities'] = regiocomp = self._find_regiocompetities(comps, nhblid, voorkeuren, alle_bogen)
             context['gemiddelden'], context['heeft_ags'] = self._find_gemiddelden(nhblid, alle_bogen)
+
+            if not voorkeuren.voorkeur_meedoen_competitie:
+                if regiocomp is None:
+                    # niet ingeschreven en geen interesse
+                    context['toon_bondscompetities'] = False
 
         self._get_contact_gegevens(nhblid, context)
 
