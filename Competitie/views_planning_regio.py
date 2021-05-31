@@ -601,6 +601,19 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
                 if week_nr > eind_week or week_nr < settings.COMPETITIES_START_WEEK:
                     raise Http404('Geen valide week nummer')
 
+            eind_week = settings.COMPETITIE_25M_LAATSTE_WEEK
+            if ronde.deelcompetitie.competitie.afstand == '18':
+                eind_week = settings.COMPETITIE_18M_LAATSTE_WEEK
+
+            if eind_week < settings.COMPETITIES_START_WEEK:
+                # typisch voor 25m: week 11..37 mogen niet
+                if eind_week < week_nr < settings.COMPETITIES_START_WEEK:
+                    raise Resolver404()
+            else:
+                # typisch voor 18m: week 37..50 mogen, verder niet
+                if week_nr > eind_week or week_nr < settings.COMPETITIES_START_WEEK:
+                    raise Resolver404()
+
             beschrijving = request.POST.get('ronde_naam', '')
 
             if not ronde.is_voor_import_oude_programma():

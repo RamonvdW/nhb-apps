@@ -635,6 +635,17 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
                                      'ronde_naam': 'eerste rondje is gratis'})
         self.assert_is_redirect(resp, url_regio_planning)
 
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_planning_regio_ronde % ronde_pk, {'ronde_week_nr': settings.COMPETITIES_START_WEEK})
+        self.assert_is_redirect_not_plein(resp)  # check for success
+
+        # terug naar de standaard week voor de rest van de tests
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_planning_regio_ronde % ronde_pk,
+                                    {'ronde_week_nr': 50,
+                                     'ronde_naam': 'eerste rondje is gratis'})
+        self.assert_is_redirect(resp, url_regio_planning)
+
         # maak een wedstrijd aan
         self.assertEqual(CompetitieWedstrijd.objects.count(), 0)
         with self.assert_max_queries(20):
