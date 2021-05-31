@@ -12,6 +12,9 @@ LOG="/tmp/test_out.txt"
 LOG1="/tmp/tmp_out1.txt"
 [ -e "$LOG" ] && rm "$LOG"
 
+PYCOV=""
+PYCOV="-m coverage run --append --branch"
+
 export PYTHONDONTWRITEBYTECODE=1
 
 OMIT="--omit=*/lib/python3*/site-packages/*"    # use , to separate
@@ -72,7 +75,8 @@ echo "[INFO] Capturing output in $LOG"
 tail -f "$LOG" &
 PID_TAIL=$!
 
-python3 -m coverage run --append --branch ./manage.py test --settings=nhbapps.settings_autotest --noinput $* 2>>"$LOG" >>"$LOG1"
+python3 $PYCOV ./manage.py test --settings=nhbapps.settings_autotest --noinput $* 2>>"$LOG" >>"$LOG1"
+#python3 ./manage.py test --settings=nhbapps.settings_autotest --noinput $* 2>>"$LOG" >>"$LOG1"
 RES=$?
 [ $RES -eq 3 ] && ABORTED=1
 #echo "[DEBUG] Coverage run result: $RES --> ABORTED=$ABORTED"
@@ -88,8 +92,7 @@ if [ $RES -eq 0 -a $# -eq 0 ]
 then
     # add coverage with debug and wiki enabled
     echo "[INFO] Performing run with debug + wiki run"
-    python3 -m coverage run --append --branch \
-        ./manage.py test --settings=nhbapps.settings_autotest_wiki_nodebug Plein.tests.TestPlein.test_quick Functie.test_saml2idp >>"$LOG" 2>>"$LOG"
+    python3 $PYCOV ./manage.py test --settings=nhbapps.settings_autotest_wiki_nodebug Plein.tests.TestPlein.test_quick Functie.test_saml2idp >>"$LOG" 2>>"$LOG"
     RES=$?
     [ $RES -eq 3 ] && ABORTED=1
     #echo "[DEBUG] Debug coverage run result: $RES --> ABORTED=$ABORTED"
