@@ -11,9 +11,10 @@ from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
 from Schutter.models import SchutterBoog
 from Wedstrijden.models import WedstrijdLocatie
 from Overig.e2ehelpers import E2EHelpers
-from .models import (Competitie, CompetitieKlasse,  competitie_aanmaken,
+from .models import (Competitie, CompetitieKlasse,
                      DeelCompetitie, LAAG_REGIO, LAAG_RK, LAAG_BK,
                      RegioCompetitieSchutterBoog, KampioenschapSchutterBoog)
+from .operations import competities_aanmaken
 from .test_fase import zet_competitie_fase
 import datetime
 
@@ -111,7 +112,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         self.schutterboog.save()
 
         # creëer een competitie met deelcompetities
-        competitie_aanmaken(jaar=2019)
+        competities_aanmaken(jaar=2019)
 
         self.comp_18 = Competitie.objects.get(afstand='18')
         self.comp_25 = Competitie.objects.get(afstand='25')
@@ -315,6 +316,8 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(url)
         self.assert_is_redirect(resp, '/bondscompetities/')       # redirect = Success
+
+        self.assertTrue(str(self.deelcomp_bond_18) != '')
 
     def test_doorzetten_bad(self):
         # moet BKO zijn

@@ -11,8 +11,8 @@ from Overig.e2ehelpers import E2EHelpers
 from Functie.models import maak_functie
 from Schutter.models import SchutterBoog
 from Score.models import Score, ScoreHist, SCORE_WAARDE_VERWIJDERD
-from Wedstrijden.models import Wedstrijd, WedstrijdUitslag
-from .models import score_indiv_ag_opslaan
+from Wedstrijden.models import CompetitieWedstrijd, CompetitieWedstrijdUitslag
+from .operations import score_indiv_ag_opslaan
 import datetime
 
 
@@ -26,28 +26,28 @@ class TestScoreGeschiedenis(E2EHelpers, TestCase):
         uur_19 = datetime.time(hour=19)
         uur_22 = datetime.time(hour=22)
 
-        uitslag18 = WedstrijdUitslag(max_score=300,
-                                     afstand_meter=18)
+        uitslag18 = CompetitieWedstrijdUitslag(max_score=300,
+                                               afstand_meter=18)
         uitslag18.save()
 
-        uitslag25 = WedstrijdUitslag(max_score=250,
-                                     afstand_meter=25)
+        uitslag25 = CompetitieWedstrijdUitslag(max_score=250,
+                                               afstand_meter=25)
         uitslag25.save()
 
-        Wedstrijd(beschrijving='Test wedstrijdje 18m',
-                  datum_wanneer=datetime.date(year=2020, month=10, day=10),
-                  tijd_begin_aanmelden=uur_18,
-                  tijd_begin_wedstrijd=uur_19,
-                  tijd_einde_wedstrijd=uur_22,
-                  uitslag=uitslag18,
-                  vereniging=self.nhbver1).save()
+        CompetitieWedstrijd(beschrijving='Test wedstrijdje 18m',
+                            datum_wanneer=datetime.date(year=2020, month=10, day=10),
+                            tijd_begin_aanmelden=uur_18,
+                            tijd_begin_wedstrijd=uur_19,
+                            tijd_einde_wedstrijd=uur_22,
+                            uitslag=uitslag18,
+                            vereniging=self.nhbver1).save()
 
-        Wedstrijd(beschrijving='Test wedstrijdje 25m',
-                  datum_wanneer=datetime.date(year=2020, month=10, day=11),
-                  tijd_begin_aanmelden=uur_00,
-                  tijd_begin_wedstrijd=uur_00,
-                  tijd_einde_wedstrijd=uur_00,
-                  uitslag=uitslag25).save()
+        CompetitieWedstrijd(beschrijving='Test wedstrijdje 25m',
+                            datum_wanneer=datetime.date(year=2020, month=10, day=11),
+                            tijd_begin_aanmelden=uur_00,
+                            tijd_begin_wedstrijd=uur_00,
+                            tijd_einde_wedstrijd=uur_00,
+                            uitslag=uitslag25).save()
 
         score = Score(schutterboog=schutterboog,
                       afstand_meter=18,

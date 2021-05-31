@@ -8,7 +8,8 @@ from django.test import TestCase
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging, NhbLid
 from Overig.e2ehelpers import E2EHelpers
-from Competitie.models import DeelCompetitie, competitie_aanmaken
+from Competitie.models import DeelCompetitie
+from Competitie.operations import competities_aanmaken
 import datetime
 
 
@@ -72,7 +73,7 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         self.account_schutter = self._prep_beheerder_lid('Schutter')
 
         # creëer een competitie met deelcompetities
-        competitie_aanmaken(jaar=2019)
+        competities_aanmaken(jaar=2019)
 
         self.functie_bko = DeelCompetitie.objects.filter(laag='BK')[0].functie
         self.functie_rko = DeelCompetitie.objects.filter(laag='RK', nhb_rayon=self.rayon_2)[0].functie
@@ -122,7 +123,7 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_bb)
         self.e2e_wisselnaarrol_bb()
         self.e2e_check_rol('BB')
-        with self.assert_max_queries(7):
+        with self.assert_max_queries(8):
             resp = self.client.get(self.url_lijst)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)

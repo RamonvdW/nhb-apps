@@ -4,8 +4,9 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.http import HttpResponseRedirect
+from django.conf import settings
 from django.urls import reverse
+from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.views.generic import TemplateView
 from Plein.menu import menu_dynamics
@@ -23,6 +24,7 @@ import logging
 
 
 TEMPLATE_REGISTREER = 'schutter/registreer-nhb-account.dtl'
+TEMPLATE_REGISTREER_GEEN_EMAIL = 'schutter/registreer-geen-email.dtl'
 
 my_logger = logging.getLogger('NHBApps.Schutter')
 
@@ -49,13 +51,13 @@ def schutter_create_account_nhb(nhb_nummer, email, nieuw_wachtwoord):
         raise AccountCreateError('Onbekend NHB nummer')
 
     if not mailer_email_is_valide(nhblid.email):
-        raise SchutterNhbLidGeenEmail()
+        raise SchutterNhbLidGeenEmail(nhblid)
 
     # vergelijk e-mailadres hoofdletter ongevoelig
     if email.lower() != nhblid.email.lower():
         raise AccountCreateError('De combinatie van NHB nummer en email worden niet herkend. Probeer het nog eens.')
 
-    if not nhblid.is_actief_lid:
+    if not nhblid.is_actief_lid or not nhblid.bij_vereniging:
         raise SchutterNhbLidInactief()
 
     # maak het account aan
@@ -78,7 +80,8 @@ class RegistreerNhbNummerView(TemplateView):
         Deze view wordt gebruikt om het NHB nummer in te voeren voor een nieuw account.
     """
 
-    def post(self, request, *args, **kwargs):
+    @staticmethod
+    def post(request, *args, **kwargs):
         """ deze functie wordt aangeroepen als een POST request ontvangen is.
             dit is gekoppeld aan het drukken op de Registreer knop.
         """
@@ -90,14 +93,26 @@ class RegistreerNhbNummerView(TemplateView):
             from_ip = get_safe_from_ip(request)
             try:
                 schutter_create_account_nhb(nhb_nummer, email, nieuw_wachtwoord)
-            except SchutterNhbLidGeenEmail:
+            except SchutterNhbLidGeenEmail as exc:
                 schrijf_in_logboek(account=None,
                                    gebruikte_functie="Registreer met NHB nummer",
                                    activiteit='NHB lid %s heeft geen email adres.' % nhb_nummer)
-
-                form.add_error(None, 'Geen email adres bekend. Neem contact op met de secretaris van je vereniging.')
                 my_logger.info('%s REGISTREER Geblokkeerd voor NHB nummer %s (geen email)' % (from_ip, repr(nhb_nummer)))
-                # TODO: redirect naar een pagina met een uitgebreider duidelijk bericht
+
+                # redirect naar een pagina met een uitgebreider duidelijk bericht
+                context = {'sec_email': '',
+                           'sec_naam': '',
+                           'email_bb': settings.EMAIL_BONDSBURO}
+                ver = exc.nhblid.bij_vereniging     # gegarandeerd !None
+                sec_lid = ver.secretaris_lid
+                if sec_lid:
+                    context['sec_naam'] = sec_lid.volledige_naam()
+                functie = Functie.objects.get(rol='SEC', nhb_ver=ver)
+                context['sec_email'] = functie.bevestigde_email
+
+                menu_dynamics(request, context)
+                return render(request, TEMPLATE_REGISTREER_GEEN_EMAIL, context)
+
             except AccountCreateError as exc:
                 form.add_error(None, str(exc))
 
@@ -113,7 +128,7 @@ class RegistreerNhbNummerView(TemplateView):
                                    activiteit='NHB lid %s is inactief (geblokkeerd van gebruik NHB diensten).' % nhb_nummer)
                 form.add_error(None, 'Gebruik van NHB diensten is geblokkeerd. Neem contact op met de secretaris van je vereniging.')
                 my_logger.info('%s REGISTREER Geblokkeerd voor NHB nummer %s (inactief)' % (from_ip, repr(nhb_nummer)))
-                # TODO: redirect naar een pagina met een uitgebreider duidelijk bericht
+                # FUTURE: redirect naar een pagina met een uitgebreider duidelijk bericht
             else:
                 # schrijf in het logboek
                 schrijf_in_logboek(account=None,

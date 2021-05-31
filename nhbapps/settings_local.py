@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 """
-Django local settings for the nhb-apps project.
+    Django local settings for the NhbApps project.
 
-This file is included from settings.py and contains specific
-settings that can be changed as part of a deployment, without
-having to edit the settings.py file.
+    This file is included from settings.py and contains specific
+    settings that can be changed as part of a deployment, without
+    having to edit the settings.py file.
 """
 
 # the secret below ensures an adversary cannot fake aspects like a session-id
@@ -43,11 +43,18 @@ DATABASES = {
 # the issuer name that is sent to the OTP application in the QR code
 OTP_ISSUER_NAME = "yourdomain.com"
 
+NAAM_SITE = "YourSite (dev)"
+
+EMAIL_BONDSBURO = "info@handboogsport.nl"
 
 # sending email
-#EMAIL_FROM_ADDRESS = 'noreply@yourdomain.com'         # zie ook https://nl.wikipedia.org/wiki/Noreply
 #POSTMARK_URL = 'https://api.postmarkapp.com/email'
 #POSTMARK_API_KEY = 'postmark private api key'
+#EMAIL_FROM_ADDRESS = 'noreply@yourdomain.com'         # zie ook https://nl.wikipedia.org/wiki/Noreply
+
+EMAIL_DEVELOPER_TO = 'developer@yourdomain.com'
+EMAIL_DEVELOPER_SUBJ = 'Internal Server Error: ' + NAAM_SITE
+
 
 # users allowed to send to in this test setup
 # if empty, allows sending to anybody
@@ -56,6 +63,9 @@ EMAIL_ADDRESS_WHITELIST = ()
 
 # url van het document privacyverklaring
 PRIVACYVERKLARING_URL = 'url to privacy statement html, pdf or googledoc, etc'
+
+# url van het document met voorwaarden voor A-status wedstrijden
+VOORWAARDEN_A_STATUS_URL = 'https://docs.google.com/document/d/random google document number/view'
 
 # google doc id van het gsheet document
 RECORDS_GSHEET_FILE_ID = 'random google document number'
@@ -69,8 +79,9 @@ RECORDS_GSHEET_SHEET_NAMES = [
 ]
 
 
-# ondersteuning van de Wiki met SSO via de IdP, of ingebouwde handleiding?
+# use static manual pages (wiki is for the test server only)
 ENABLE_WIKI = False
+# ondersteuning van de Wiki met SSO via de IdP, of ingebouwde handleiding?
 WIKI_URL = 'http://wiki.yourdomain.com'
 
 # vertaling van tijdelijke (99xxxx nummers) naar correcte NHB nummer

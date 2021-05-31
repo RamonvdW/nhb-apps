@@ -9,7 +9,7 @@
 from django.core.management.base import BaseCommand
 from Competitie.models import Competitie, DeelcompetitieRonde, LAAG_REGIO
 from NhbStructuur.models import NhbRegio, NhbCluster, NhbVereniging
-from Wedstrijden.models import Wedstrijd
+from Wedstrijden.models import CompetitieWedstrijd
 import datetime
 
 
@@ -34,13 +34,13 @@ class Command(BaseCommand):
 
         loc = ver.wedstrijdlocatie_set.all()[0]
 
-        wedstrijd = Wedstrijd(beschrijving='automatisch aangemaakt',
-                              vereniging=ver,
-                              locatie=loc,
-                              datum_wanneer=datum,
-                              tijd_begin_wedstrijd=tijd,
-                              tijd_begin_aanmelden='00:00',
-                              tijd_einde_wedstrijd='00:00')
+        wedstrijd = CompetitieWedstrijd(beschrijving='automatisch aangemaakt',
+                                        vereniging=ver,
+                                        locatie=loc,
+                                        datum_wanneer=datum,
+                                        tijd_begin_wedstrijd=tijd,
+                                        tijd_begin_aanmelden='00:00',
+                                        tijd_einde_wedstrijd='00:00')
         wedstrijd.save()
         plan.wedstrijden.add(wedstrijd)
 

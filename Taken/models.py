@@ -5,8 +5,10 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import models
+from django.utils import timezone
 from Account.models import Account
 from Competitie.models import DeelCompetitie
+import datetime
 
 
 class Taak(models.Model):
@@ -55,6 +57,27 @@ class Taak(models.Model):
         verbose_name_plural = "Taken"
 
     objects = models.Manager()      # for the editor only
+
+
+def taken_opschonen(stdout):
+    """ deze functie wordt typisch 1x per dag aangeroepen om de database
+        tabellen van deze applicatie op te kunnen schonen.
+
+        We verwijderen taken die ...
+    """
+
+    # TODO: implement
+
+    now = timezone.now()
+    # max_age = now - datetime.timedelta(days=)
+
+    # for obj in (Taken
+    #            .objects
+    #            .filter(...)):
+    #
+    #    stdout.write('[INFO] Verwijder ongebruikte tijdelijke url %s' % obj)
+    #    obj.delete()
+    # for
 
 
 # end of file

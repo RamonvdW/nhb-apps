@@ -20,7 +20,7 @@ from .models import (Competitie, CompetitieKlasse,
                      LAAG_REGIO, LAAG_RK, LAAG_BK, DeelCompetitie,
                      RegioCompetitieSchutterBoog, KampioenschapSchutterBoog,
                      KampioenschapMutatie, MUTATIE_INITIEEL, DEELNAME_ONBEKEND)
-from Wedstrijden.models import Wedstrijd
+from Wedstrijden.models import CompetitieWedstrijd
 
 
 TEMPLATE_COMPETITIE_PLANNING_BOND = 'competitie/planning-landelijk.dtl'
@@ -482,15 +482,15 @@ class VerwijderWedstrijdView(UserPassesTestMixin, View):
         """
         try:
             wedstrijd_pk = int(kwargs['wedstrijd_pk'][:6])  # afkappen geeft beveiliging
-            wedstrijd = (Wedstrijd
+            wedstrijd = (CompetitieWedstrijd
                          .objects
                          .select_related('uitslag')
                          .prefetch_related('uitslag__scores')
                          .get(pk=wedstrijd_pk))
-        except (ValueError, Wedstrijd.DoesNotExist):
+        except (ValueError, CompetitieWedstrijd.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
-        plan = wedstrijd.wedstrijdenplan_set.all()[0]
+        plan = wedstrijd.competitiewedstrijdenplan_set.all()[0]
         try:
             deelcomp = DeelCompetitie.objects.get(plan=plan, laag=LAAG_BK)
         except DeelCompetitie.DoesNotExist:

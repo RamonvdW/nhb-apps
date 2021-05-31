@@ -23,11 +23,12 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>{% block title %}{% endblock %}</title>
         <link rel="icon" href="{% static 'plein/logo_nhb_192x192.png' %}" sizes="192x192">
+        <link rel="preconnect" href="https://fonts.gstatic.com">
         <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Round">
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans&amp;display=swap">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans&amp;display=swap">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu&amp;display=swap">
-        <link rel="stylesheet" href="{% static 'materialize-new-39.css' %}">
-        <link rel="stylesheet" href="{% static 'site_layout_min-16.css' %}"> <!-- moet ná materialize css -->
+        <link rel="stylesheet" href="{% static 'materialize-new-46.css' %}">
+        <link rel="stylesheet" href="{% static 'site_layout_min-21.css' %}"> <!-- moet ná materialize css -->
         {% block extraheader %}{% endblock %}
     </head>
 
@@ -39,7 +40,7 @@
 
                 <!-- button to call-up the sidenav; hidden when not needed -->
                 <a id="discover-menu" href="#" data-target="slide-out" class="sidenav-trigger hide-on-large-only">
-                    <i class="material-icons-round black-text">menu</i>
+                    <i class="material-icons-round black-text" style="line-height:1.2">menu</i>
                 </a>
 
                 <!-- aandachtstrekker: uitleg hoe in het menu te komen -->
@@ -47,7 +48,7 @@
                     <div class="tap-target-content white-text">
                         <h5>Toegang tot het menu</h5>
                         <p>Gebruik de drie streepjes om het menu op te roepen</p>
-                        <button class="btn-nhb-blauw" onclick="closeTapTarget('tap-target-voor-menu')">Ik snap het</button>
+                        <button class="btn-nhb-rood" onclick="closeTapTarget('tap-target-voor-menu')">Ik snap het</button>
                     </div>
                 </div>
 
@@ -90,11 +91,11 @@
             function discover_popup_delayed_open()
             {
                 // in de tussentijd kan het scherm al weer groter zijn geworden
-                let menu_is_hidden = window.matchMedia("(max-width: 985px)");
+                let menu_is_hidden = window.matchMedia("(max-width: 985px)")
                 if (menu_is_hidden.matches)
                 {
-                    let elem = document.querySelector(".tap-target");
-                    M.TapTarget.getInstance(elem).open();
+                    let elem = document.querySelector(".tap-target")
+                    M.TapTarget.getInstance(elem).open()
                 }
             }
 
@@ -103,12 +104,12 @@
                 // scherm is kleiner geworden (of initieel klein), dus toon de tap target
                 if (mq_event == null || mq_event.matches) {
                     // cookie zorgt ervoor dat de pop-up maar 3x tonen
-                    let count = getCookieNumber("menu_discover");
+                    let count = getCookieNumber("menu_discover")
                     if (count < 3)
                     {
-                        document.cookie = "menu_discover=" + (count + 1) + "; path=/";
+                        document.cookie = "menu_discover=" + (count + 1) + "; path=/"
                         // toon met een kleine vertraging
-                        setTimeout(discover_popup_delayed_open, 2000);
+                        setTimeout(discover_popup_delayed_open, 2000)
                     }
                 }
             }
@@ -117,75 +118,75 @@
                 // scherm is kleiner geworden, dus haal de tap-target uit beeld
                 if (mq_event.matches)
                 {
-                    let elem = document.querySelector(".tap-target");
-                    M.TapTarget.getInstance(elem).close();
+                    let elem = document.querySelector(".tap-target")
+                    M.TapTarget.getInstance(elem).close()
                 }
             }
 
             function closeTapTarget(id)
             {
                 // haal het tap-target element uit beeld
-                let elem = document.getElementById(id);
-                let inst = M.TapTarget.getInstance(elem);
-                inst.close();       // administratief
-                inst.destroy();     // verwijderd visuele elementen
+                let elem = document.getElementById(id)
+                let inst = M.TapTarget.getInstance(elem)
+                inst.close()        // administratief
+                inst.destroy()      // verwijderd visuele elementen
 
                 // zet het cookie dat voorkomt dat de tap target weer getoond wordt
-                document.cookie = "menu_discover=9; path=/";
+                document.cookie = "menu_discover=9; path=/"
             }
 
             // helper functie om een opgeslagen cookie in te lezen
             function getCookie(name) {
-                let cookieValue = null;
+                let cookieValue = null
                 if (document.cookie && document.cookie !== "") {
-                    let cookies = document.cookie.split(";");
+                    let cookies = document.cookie.split(";")
                     for (let i = 0; i < cookies.length; i++) {
-                        let cookie = cookies[i].trim();
+                        let cookie = cookies[i].trim()
                         // Does this cookie string begin with the name we want?
                         if (cookie.substring(0, name.length + 1) === (name + "=")) {
-                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                            break;
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1))
+                            break
                         }
                     }
                 }
-                return cookieValue;
+                return cookieValue
             }
 
             function getCookieNumber(name) {
-                let value = getCookie(name);
-                let number = 0;
+                let value = getCookie(name)
+                let number = 0
                 if (value != null) {
-                    number = parseInt(value, 10);
-                    if (isNaN(number)) number = 0;
+                    number = parseInt(value, 10)
+                    if (isNaN(number)) number = 0
                 }
-                return number;
+                return number
             }
 
             document.addEventListener("DOMContentLoaded", function() {
                 // sidenav
-                let elems = document.querySelectorAll(".sidenav");
-                M.Sidenav.init(elems, {});
+                let elems = document.querySelectorAll(".sidenav")
+                M.Sidenav.init(elems, {})
 
                 // accordeons
                 const options = { inDuration: 100,    // default is 300
                                   outDuration: 100    // default is 300
-                                };
-                elems = document.querySelectorAll(".collapsible");
-                M.Collapsible.init(elems, options);
+                                }
+                elems = document.querySelectorAll(".collapsible")
+                M.Collapsible.init(elems, options)
 
                 // tooltips
-                elems = document.querySelectorAll(".tooltipped");
-                M.Tooltip.init(elems, { enterDelay: 1000 });
+                elems = document.querySelectorAll(".tooltipped")
+                M.Tooltip.init(elems, { enterDelay: 1000 })
 
                 // feature discovery
-                elems = document.querySelectorAll(".tap-target");
-                M.TapTarget.init(elems, {});
+                elems = document.querySelectorAll(".tap-target")
+                M.TapTarget.init(elems, {})
 
                 // rolgordijnen
-                elems = document.querySelectorAll("select");
-                M.FormSelect.init(elems, {});
+                elems = document.querySelectorAll("select")
+                M.FormSelect.init(elems, {})
 
-                let count = getCookieNumber("menu_discover");
+                let count = getCookieNumber("menu_discover")
                 if (count < 3)
                 {
                     // -------------
@@ -196,14 +197,14 @@
                     // - variables.css: media query ranges
                     // -------------
 
-                    let menu_is_shown = window.matchMedia("(min-width: 1021px)");
-                    menu_is_shown.addEventListener("change", discover_popup_hide);
+                    let menu_is_shown = window.matchMedia("(min-width: 1021px)")
+                    menu_is_shown.addEventListener("change", discover_popup_hide)
 
-                    let menu_is_hidden = window.matchMedia("(max-width: 1020px)");
-                    menu_is_hidden.addEventListener("change", discover_popup_show);
+                    let menu_is_hidden = window.matchMedia("(max-width: 1020px)")
+                    menu_is_hidden.addEventListener("change", discover_popup_show)
                     if (menu_is_hidden.matches) {
                         // show immediately
-                        discover_popup_show(null);
+                        discover_popup_show(null)
                     }
                 }
             })
@@ -241,68 +242,61 @@
 
             function myTableFilter(zoekveld, tableId)
             {
-                //console.log("myTableFilter: ", zoekveld);
-                const table = document.getElementById(tableId);
-                if (table === undefined) return;
-                //console.log("  table: ", table);
+                const table = document.getElementById(tableId)
+                if (table === undefined) return
 
-                const filter = /[\u0300-\u036f]/g;        // precompiled regexp, for performance gain
-
-                const filter_tekst = zoekveld.value.normalize("NFD").replace(filter, "").toLowerCase();
-                //console.log("  filter_tekst: ", filter_tekst);
+                const filter = /[\u0300-\u036f]/g         // precompiled regexp, for performance gain
+                const filter_tekst = zoekveld.value.normalize("NFD").replace(filter, "").toLowerCase()
 
                 // doorzoek de header kolommen op data-filter=on
-                const filter_kolommen = new Array();
-                for (let i=0, row; row = table.tHead.rows[i]; i++)          // stops when row=null
+                const filter_kolommen = new Array()
+                for (let row of table.tHead.rows)
                 {
-                    for (let j=0, col_nr=0, cell; cell = row.cells[j]; j++) // stops when cell=null
+                    let col_nr = 0
+                    for (let cell of row.cells)
                     {
-                        if (cell.hasAttribute("data-filter")) filter_kolommen.push(col_nr);
+                        if (cell.hasAttribute("data-filter")) filter_kolommen.push(col_nr)
 
-                        if (cell.hasAttribute("colSpan"))
-                        {
-                            //console.log("cell with colSpan: ", cell.colSpan);
-                            col_nr += cell.colSpan;
-                        }
-                        else
-                        {
-                            col_nr += 1;
+                        if (cell.hasAttribute("colSpan")) {
+                            col_nr += cell.colSpan
+                        } else {
+                            col_nr += 1
                         }
                     }
                 }
-                //console.log("kolom nummers met filter: ", filter_kolommen);
+                //console.log("kolom nummers met filter: ", filter_kolommen)
 
-                const row_deferred_hide = new Array();    // deferred updates, for performance gain
-                const row_deferred_show = new Array();
+                const row_deferred_hide = new Array()     // deferred updates, for performance gain
+                const row_deferred_show = new Array()
 
-                const body = table.tBodies[0];
-                //console.log("body: ", body);
-                for (let i=0, row; row = body.rows[i]; i++)     // stops when row=null
+                const body = table.tBodies[0]
+                for (let i=0; i < body.rows.length; i++)     // stops when row=null
                 {
-                    const filter_cmd = row.dataset["tablefilter"];
-                    if (filter_cmd === "stop") break;      // from the for
+                    const row = body.rows[i]
+                    const filter_cmd = row.dataset["tablefilter"]
+                    if (filter_cmd === "stop") break       // from the for
 
                     // besluit om deze regel te tonen, of niet
-                    let show = false;
+                    let show = false
 
                     if (filter_tekst == "") {
                         // performance optimization: converteren van elke tabel string
                         // stellen we uit tot de gebruiker een eerste letter invoert
-                        show = true;
+                        show = true
                     } else {
                         // kijk of de zoekterm in een van de gekozen kolommen voorkomt
                         filter_kolommen.forEach(kolom_nr => {
-                                const cell = row.cells[kolom_nr];
-                                //if (cell === undefined) { console.log('missing cell in kolom_nr=', kolom_nr, "in row", i); }
-                                let clean_text = cell.dataset["clean_text"];    // cached resultaat ophalen
-                                //console.log("clean_text:", clean_text);
-                                if (typeof clean_text === "undefined") {
-                                    // eerste keer: voer de vervorming uit en cache het resultaat op
-                                    clean_text = cell.innerText.normalize("NFD").replace(filter, "").toLowerCase();
-                                    cell.dataset["clean_text"] = clean_text;
-                                }
-                                if (clean_text.indexOf(filter_tekst) != -1) show = true;
-                            });
+                            const cell = row.cells[kolom_nr]
+                            //if (cell === undefined) { console.log('missing cell in kolom_nr=', kolom_nr, "in row", i) }
+                            let clean_text = cell.dataset["clean_text"]     // cached resultaat ophalen
+                            //console.log("clean_text:", clean_text)
+                            if (typeof clean_text === "undefined") {
+                                // eerste keer: voer de vervorming uit en cache het resultaat op
+                                clean_text = cell.innerText.normalize("NFD").replace(filter, "").toLowerCase()
+                                cell.dataset["clean_text"] = clean_text
+                            }
+                            if (clean_text.indexOf(filter_tekst) != -1) show = true
+                        })
                     }
 
                     // onderzoek of een table row getoond of verstopt moet worden
@@ -310,50 +304,43 @@
                     // waarbij de browser steeds het hele scherm update voordat de read doorgang vindt
                     // OLD: row.style.display = show ? "table-row" : "none";
                     if (show) {
-                        if (row.style.display == "none") row_deferred_show.push(i);
+                        if (row.style.display == "none") row_deferred_show.push(i)
                     }
                     else {
-                        if (row.style.display != "none") row_deferred_hide.push(i);
+                        if (row.style.display != "none") row_deferred_hide.push(i)
                     }
                 }
 
-                //console.log("row_deferred_hide:", row_deferred_hide);
-                //console.log("row_deferred_show:", row_deferred_show);
+                //console.log("row_deferred_hide:", row_deferred_hide)
+                //console.log("row_deferred_show:", row_deferred_show)
 
                 // voor de deferred updates uit
                 row_deferred_hide.forEach(row_nr => {
-                        body.rows[row_nr].style.display = "none";
-                    });
+                        body.rows[row_nr].style.display = "none"
+                    })
                 row_deferred_show.forEach(row_nr => {
-                        body.rows[row_nr].style.display = "table-row";
-                    });
+                        body.rows[row_nr].style.display = "table-row"
+                    })
             }
 
             // zoek alle tabellen met een zoekveld en trigger de oninput method
             // dit is noodzakelijk bij gebruik van de browser 'back' knop
             // anders zijn de tabellen niet meer gefiltreerd
-            window.addEventListener("load", function(){
-                //console.log("load!");
-                const tables = document.getElementsByTagName("table");
-                //console.log("tables: ", tables);
-                for (let i=0, table; table = tables[i]; i++)
-                {
-                    //console.log("  table:", table, ", table.id=", table.id);
-                    if (table.id !== "")
-                    {
-                        const inputs = table.getElementsByTagName("input");
-                        //console.log("  inputs:", inputs);
-                        if (inputs.length >= 1)
-                        {
-                            myTableFilter(inputs[0], table.id);
-                        }
+            window.addEventListener("load", function()
+            {
+                //console.log("load!")
+                const tables = document.getElementsByTagName("table")
+                Array.from(tables).forEach(table => {
+                    if (table.id !== "") {
+                        const inputs = table.getElementsByTagName("input")
+                        if (inputs.length >= 1) myTableFilter(inputs[0], table.id)
                     }
-                }
+                })
 
                 // evalueer de posities van de labels van de forms
                 // zodat het label niet over het ingevulde input veld staat
-                M.updateTextFields();
-            });
+                M.updateTextFields()
+            })
         </script>
 
     </body>

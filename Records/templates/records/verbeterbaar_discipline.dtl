@@ -65,8 +65,10 @@
             <tr>
                 <th>Soort record</th>
                 <th>Materiaal<wbr/>klasse</th>
-                <th>Leeftijds<wbr/>categorie</th>
-                <th>Para klasse</th>
+                <th class="hide-on-small-only">Leeftijds<wbr/>categorie</th>
+                {% if toon_para_kolom %}
+                    <th>Para klasse</th>
+                {% endif %}
                 <th>Geslacht</th>
                 <th>Score</th>
                 <th><!-- kolom voor de 'details' knop --></th>
@@ -77,8 +79,10 @@
             <tr>
                 <td>{{ obj.soort_record }}</td>
                 <td>{{ obj.materiaalklasse_str }}</td>
-                <td>{{ obj.leeftijdscategorie_str }}</td>
-                <td>{{ obj.para_klasse }}</td>
+                <td class="hide-on-small-only">{{ obj.leeftijdscategorie_str }}</td>
+                {% if toon_para_kolom %}
+                    <td>{{ obj.para_klasse }}</td>
+                {% endif %}
                 <td>{{ obj.geslacht_str }}</td>
                 <td>{{ obj.beste.score_str }}</td>
                 <td>
@@ -87,5 +91,17 @@
             </tr>
         {% endfor %}
     </table>
+
+    <p>&nbsp;</p>
+    <h5>Nieuw record aanvragen?</h5>
+
+    <p>Om een nieuw record aan te vragen moet je de volgende stappen doorlopen:</p>
+    <p>&nbsp;1. Wedstrijd moet de A-status hebben;</p>
+    <p>&nbsp;2. Scorebriefje door de scheidsrechter laten controleren en ondertekenen;</p>
+    <p>&nbsp;3. Aanvraagformulier invullen en samen met de scorebriefjes naar het bondsbureau sturen.</p>
+
+    <p>&nbsp;</p>
+    <p>Directe link naar het aanvraagformulier: <a class="btn-nhb-blauw" href="https://docs.google.com/spreadsheets/d/1hTMVLe_HmMqCdOeoauW7n8PFf0CvuEXORX7gRWzqLoA/edit?usp=sharing" target="_blank" rel="noopener noreferrer">Openen</a></p>
+    <p>Mocht deze niet werken, kijk dan <code>www.handboogsport.nl</code> onder Procedures: <a class="btn-nhb-blauw" href="https://www.handboogsport.nl/de-nhb/#procedures" target="_blank" rel="noopener noreferrer">Link</a></p>
 
 {% endblock %}

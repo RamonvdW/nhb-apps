@@ -27,10 +27,10 @@ def nhblid_login_plugin(request, from_ip, account):
 
     # zoek het NhbLid record dat bij dit account hoort
     if account.nhblid_set.all().count() == 1:
-        nhblid = account.nhblid_set.all()[0]
+        lid = account.nhblid_set.all()[0]
 
         if not (account.is_staff or account.is_BB):  # beschermt management rollen tegen CRM ongelukken
-            if not nhblid.is_actief_lid:
+            if not lid.is_actief_lid:
                 # NHB lid mag geen gebruik maken van de NHB faciliteiten
 
                 schrijf_in_logboek(account, 'Inloggen',
@@ -44,10 +44,13 @@ def nhblid_login_plugin(request, from_ip, account):
 
         # neem de namen over in het account
         # zodat Account zelfstandig te gebruiken is
-        if account.first_name != nhblid.voornaam or account.last_name != nhblid.achternaam:
-            account.first_name = nhblid.voornaam
-            account.last_name = nhblid.achternaam
-            account.save()
+        if (account.first_name != lid.voornaam
+                or account.last_name != lid.achternaam
+                or account.unaccented_naam != lid.unaccented_naam):
+            account.first_name = lid.voornaam
+            account.last_name = lid.achternaam
+            account.unaccented_naam = lid.unaccented_naam
+            account.save(update_fields=['first_name', 'last_name', 'unaccented_naam'])
 
         # kijk of het email adres gewijzigd is
         try:
@@ -56,9 +59,9 @@ def nhblid_login_plugin(request, from_ip, account):
             # abnormal situations
             pass
         else:
-            if accountemail.bevestigde_email != nhblid.email:
+            if accountemail.bevestigde_email != lid.email:
                 # propageer het email adres uit de CRM data naar AccountEmail
-                accountemail.nieuwe_email = nhblid.email
+                accountemail.nieuwe_email = lid.email
                 accountemail.save()
 
     # gebruiker mag inloggen
@@ -66,7 +69,7 @@ def nhblid_login_plugin(request, from_ip, account):
 
 
 # registreer de plugin
-account_add_plugin_login(20, nhblid_login_plugin)
+account_add_plugin_login(20, nhblid_login_plugin, False)
 
 
 # end of file

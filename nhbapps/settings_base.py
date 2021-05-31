@@ -26,7 +26,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2021-04-21'
+SITE_VERSIE = '2021-05-31'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -194,13 +194,12 @@ MINIMUM_LEEFTIJD_LID = 5
 
 # minimum aantal scores in uitslag vorige seizoen nodig om te gebruiken als AG voor nieuwe seizoen
 COMPETITIE_18M_MINIMUM_SCORES_VOOR_AG = 6
-COMPETITIE_25M_MINIMUM_SCORES_VOOR_AG = 5   # uitzondering voor 2020/2021 in verband met corona
+COMPETITIE_25M_MINIMUM_SCORES_VOOR_AG = 6
 
 # week waarin de laatste wedstrijden geschoten mogen worden
 COMPETITIES_START_WEEK = 37
 COMPETITIE_18M_LAATSTE_WEEK = 50        # week 37 t/m week 50
-#COMPETITIE_25M_LAATSTE_WEEK = 11        # week 37 t/m week 11
-COMPETITIE_25M_LAATSTE_WEEK = 22		# uitzondering in 2021
+COMPETITIE_25M_LAATSTE_WEEK = 11        # week 37 t/m week 11
 
 # maximum aantal resultaten dat een doorzoeking van de records terug geeft
 # dit voorkomt honderden resultaten bij het zoeken naar de letter e
@@ -249,13 +248,15 @@ RECORDS_TOEGESTANE_SOORTEN = (
 )
 
 
+# let op: in sync houden met para2url in Records/views_indiv.py
 RECORDS_TOEGESTANE_PARA_KLASSEN = (
     "Open",
-    "Staand",
+    "Staand",       # tot 2014-04-01
     "W1",
-    "W2",
-    "Ja"        # aka Onbekend
-    # TODO: hier ontbreken VI1 en VI2/3
+    "W2",           # tot 2014-04-01
+    "VI1",          # sinds 2014-04-01
+    "VI2/3"         # sinds 2014-04-01
+    # andere historische record typen zijn niet in gebruik dus niet in dit lijstje
 )
 
 # definitions taken from saml2.saml to avoid importing saml2
@@ -331,6 +332,7 @@ HANDLEIDING_INSCHRIJFMETHODES = 'Inschrijfmethodes_Regiocompetitie'
 HANDLEIDING_CLUSTERS = 'Clusters'
 HANDLEIDING_RK_SELECTIE = 'RK_selectie'
 HANDLEIDING_RCL_INSTELLINGEN_REGIO = 'RCL_instellingen_regio'
+HANDLEIDING_POULES = 'Poules'
 
 HANDLEIDING_PAGINAS = [
     HANDLEIDING_TOP,
@@ -350,6 +352,7 @@ HANDLEIDING_PAGINAS = [
     HANDLEIDING_CLUSTERS,
     HANDLEIDING_RK_SELECTIE,
     HANDLEIDING_RCL_INSTELLINGEN_REGIO,
+    HANDLEIDING_POULES,
     # pagina's van de handleiding die intern gerefereerd worden
     'Tips_voor_wiki_gebruik',
     'Koppelen_beheerders'
@@ -370,17 +373,22 @@ LOGGING = {
     },
     'handlers': {
         'syslog': {
-            'level': 'DEBUG',
+            # 'level': 'DEBUG',
             'class': 'logging.handlers.SysLogHandler',
             'formatter': 'verbose',
             'facility': 'user',
             'address': '/dev/log'
         },
+        # 'file': {
+        #     'level': 'INFO',
+        #     'class': 'logging.FileHandler',
+        #     'filename': '/tmp/django.log'
+        # },
     },
     'loggers': {
         'django': {
             'handlers': ['syslog'],
-            'level': 'ERROR'
+            'level': 'ERROR'            # Note: WARNING gives 1 log line for every code 404 (resource not found)
         },
         'saml2': {
             'handlers': ['syslog'],
@@ -400,7 +408,7 @@ LOGGING = {
         },
         '': {
             'handlers': ['syslog'],
-            'level': 'DEBUG'
+            'level': 'INFO'
         }
     }
 }

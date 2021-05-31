@@ -10,17 +10,18 @@
 
 from nhbapps.settings_base import *
 
+ENABLE_DEBUG_TOOLBAR = False
+ENABLE_DJANGO_EXTENSIONS = False
 DEBUG = True
 
 
-ENABLE_DEBUG_TOOLBAR = False
+# debug toolbar for database access analysis
 #ENABLE_DEBUG_TOOLBAR = True
 
 
 # django-extensions
 #   very useful for show_urls:
 #     ./manage.py show_urls --settings=nhbapps.settings_dev
-ENABLE_DJANGO_EXTENSIONS = False
 #ENABLE_DJANGO_EXTENSIONS = True
 
 

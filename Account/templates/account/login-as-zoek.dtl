@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020 Ramon van der Winkel.
+                Copyright (c) 2020-2021 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -10,87 +10,88 @@
 {% block title %}Account wissel{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="zoek-account" %}
 
-<h4>Zoek account</h4>
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="zoek-account" %}
 
-<script type="application/javascript">
-    function do_selecteer(id)
-    {
-        // voer een POST uit om toe te voegen
-        const form = document.createElement('form');
-        form.setAttribute('method', 'post');
-        form.setAttribute('action', '{{ url }}');
+    <h4>Zoek account</h4>
 
-        let inp = document.createElement('input');
-        inp.type = "hidden";
-        inp.name = "selecteer";
-        inp.value = id.getAttribute("data-pk");
-        form.appendChild(inp);
+    <script type="application/javascript">
+        function do_selecteer(id)
+        {
+            // voer een POST uit om toe te voegen
+            const form = document.createElement('form');
+            form.setAttribute('method', 'post');
+            form.setAttribute('action', '{{ url }}');
 
-        inp = document.createElement('input');
-        inp.type = "hidden";
-        inp.name = "csrfmiddlewaretoken";
-        inp.value = getCookie('csrftoken');
-        form.appendChild(inp);
+            let inp = document.createElement('input');
+            inp.type = "hidden";
+            inp.name = "selecteer";
+            inp.value = id.getAttribute("data-pk");
+            form.appendChild(inp);
 
-        form.style.display = 'hidden';
-        document.body.appendChild(form);
-        form.submit();
-    }
-</script>
+            inp = document.createElement('input');
+            inp.type = "hidden";
+            inp.name = "csrfmiddlewaretoken";
+            inp.value = getCookie('csrftoken');
+            form.appendChild(inp);
 
-<p>Beleef de website als elke andere gebruiker.</p>
-<p>Gebruik onderstaand formulier om naar een account te zoeken.</p>
+            form.style.display = 'hidden';
+            document.body.appendChild(form);
+            form.submit();
+        }
+    </script>
 
-<div class="container z-depth-2 white">
-    <div class="row nhb-blauw white-text">
-        <div class="col s12 center-align">
-            <h5>Zoek gebruiker</h5>
-            <p>Zoek op username of gebruiker naam</p>
+    <p>Beleef de website als elke andere gebruiker.</p>
+    <p>Gebruik onderstaand formulier om naar een account te zoeken.</p>
+
+    <div class="container z-depth-2 white">
+        <div class="row nhb-blauw white-text">
+            <div class="col s12 center-align">
+                <h5>Zoek gebruiker</h5>
+                <p>Zoek op username of gebruiker naam</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <form class="col s12" action="{{ url }}" method="get">
+                <div class="row"><div class="input-field col s12">
+                    {{ form.zoekterm.label_tag }}{{ form.zoekterm }}
+                </div></div>
+
+                <div class="row"><div class="col s12"></div>
+                    <div class="center-align">
+                        <button class="btn-nhb-blauw" type="submit"><i class="material-icons-round left">search</i>Zoek</button>
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
 
-    <div class="row">
-        <form class="col s12" action="{{ url }}" method="get">
-            <div class="row"><div class="input-field col s12">
-                {{ form.zoekterm.label_tag }}{{ form.zoekterm }}
-            </div></div>
 
-            <div class="row"><div class="col s12"></div>
-                <div class="center-align">
-                    <button class="btn-nhb-blauw" type="submit"><i class="material-icons-round left">search</i>Zoek</button>
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
+    {% if zoekterm %}
+        {% if object_list.count %}
+            <h5>Gevonden gebruikers ({{ object_list.count }})</h5>
+            <ul class="collapsible">
+                {% for obj in object_list %}
+                    <!-- obj is Account -->
+                    <li>
+                        <div class="collapsible-header white">
+                            <span>{{ obj.volledige_naam|highlight:zoekterm }}</span>
+                        </div>
+                        <div class="collapsible-body white">
+                            <span>Volledige naam: {{ obj.get_volledige_naam }}</span>
+                            <p>Username: {{ obj.username|highlight:zoekterm }}</p>
+                            <button class="btn-nhb-blauw" onclick="do_selecteer(this)" data-pk="{{ obj.pk }}">Selecteer</button>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="red-text">Niets gevonden</p>
+        {% endif %}
 
-
-{% if zoekterm %}
-    {% if object_list.count %}
-        <h5>Gevonden gebruikers ({{ object_list.count }})</h5>
-        <ul class="collapsible">
-            {% for obj in object_list %}
-                <!-- obj is Account -->
-                <li>
-                    <div class="collapsible-header white">
-                        <span>{{ obj.volledige_naam|highlight:zoekterm }}</span>
-                    </div>
-                    <div class="collapsible-body white">
-                        <span>Volledige naam: {{ obj.get_volledige_naam }}</span>
-                        <p>Username: {{ obj.username|highlight:zoekterm }}</p>
-                        <button class="btn-nhb-blauw" onclick="do_selecteer(this)" data-pk="{{ obj.pk }}">Selecteer</button>
-                    </div>
-                </li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p class="red-text">Niets gevonden</p>
+        <p>Staat de gezochte persoon er niet bij? Alleen personen met een account op deze website worden getoond.</p>
     {% endif %}
-
-    <p>Staat de gezochte persoon er niet bij? Alleen personen met een account op deze website worden getoond.</p>
-{% endif %}
 
 {% endblock %}
 

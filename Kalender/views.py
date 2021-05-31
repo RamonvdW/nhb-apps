@@ -4,27 +4,31 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.views.generic import ListView
-from Plein.menu import menu_dynamics
+from django.views.generic import View
+from django.urls import reverse
+from django.http import HttpResponseRedirect
+from Functie.rol import Rollen, rol_get_huidige
+from .view_maand import get_url_huidige_maand
 
-TEMPLATE_KALENDER_OVERZICHT = 'kalender/overzicht.dtl'
 
+class KalenderLandingPageView(View):
+    """ Deze pagina is puur voor het doorsturen naar een van de andere pagina's
+        afhankelijk van de gekozen rol.
+    """
+    @staticmethod
+    def get(request, *args, **kwargs):
+        rol_nu = rol_get_huidige(request)
 
-class KalenderOverzichtView(ListView):
+        if rol_nu == Rollen.ROL_BB:
+            url = reverse('Kalender:manager')
 
-    # class variables shared by all instances
-    template_name = TEMPLATE_KALENDER_OVERZICHT
+        elif rol_nu == Rollen.ROL_HWL:
+            url = reverse('Kalender:vereniging')
 
-    def get_queryset(self):
-        """ called by the template system to get the queryset or list of objects for the template """
-        return None
+        else:
+            url = get_url_huidige_maand()
 
-    def get_context_data(self, **kwargs):
-        """ called by the template system to get the context data for the template """
-        context = super().get_context_data(**kwargs)
-
-        menu_dynamics(self.request, context, 'kalender')
-        return context
+        return HttpResponseRedirect(url)
 
 
 # end of file

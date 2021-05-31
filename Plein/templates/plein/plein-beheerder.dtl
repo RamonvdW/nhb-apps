@@ -65,12 +65,17 @@
             {% include 'plein/card.dtl' with title="Verenigingen" text="Toon overzicht van de verenigingen in jouw regio en mogelijkheid tot aanpassen accommodatie gegevens." icon="view_list" url=card_url %}
         {% endif %}
 
-            <!-- verenigingen/accommodaties overzicht SEC en HWL -->
+        <!-- verenigingen/accommodaties overzicht SEC en HWL -->
         {% if rol_is_sec or rol_is_hwl %}
             {% url 'Vereniging:lijst-verenigingen' as card_url %}
             {% include 'plein/card.dtl' with title="Verenigingen" text="Toon overzicht van de verenigingen en accommodaties in jouw regio." icon="view_list" url=card_url %}
         {% endif %}
 
+        <!-- wedstrijdkalender -->
+        {% if rol_is_hwl or rol_is_bb %}
+            {% url 'Kalender:landing-page' as card_url %}
+            {% include 'plein/card.dtl' with title="Wedstrijdkalender" text="Bekijk welke wedstrijden georganiseerd worden en schrijf je in." icon="event_note" url=card_url %}
+        {% endif %}
 
         <!-- handleiding -->
         {% if handleiding_url %}

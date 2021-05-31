@@ -12,8 +12,10 @@
 
     <h4>Teams Regiocompetitie</h4>
 
+    {% if url_opslaan %}
     <form action="{{ url_opslaan }}" method="post">
         {% csrf_token %}
+    {% endif %}
 
         <table class="white">
 
@@ -23,42 +25,60 @@
             </tr>
 
             {% if team.pk %}
-            <tr>
-                <td>Team nummer</td>
-                <td>{{ team.volg_nr }}</td>
-            </tr>
+                <tr>
+                    <td>Team nummer</td>
+                    <td>{{ team.volg_nr }}</td>
+                </tr>
             {% endif %}
 
             <tr>
                 <td>Soort team<br><br><i>(bij wijziging worden sporters ontkoppeld!)</i></td>
                 <td>
-                    <ul id="id_team_type">
+                    {% if readonly %}
                         {% for opt in opt_team_type %}
-                            <li>
-                                <label class="black-text" for="id_{{ opt.afkorting }}">
-                                    <input class="with-gap" type="radio" name="team_type" value="{{ opt.afkorting }}" required id="id_{{ opt.afkorting }}"{% if opt.actief %} checked{% endif %}>
-                                    <span>{{ opt.beschrijving }}</span>
-                                </label>
-                            </li>
+                            {% if opt.actief %}
+                                <span>{{ opt.beschrijving }}</span><br>
+                            {% endif %}
                         {% endfor %}
-                    </ul>
+                    {% else %}
+                        <ul id="id_team_type">
+                            {% for opt in opt_team_type %}
+                                <li>
+                                    <label class="black-text" for="id_{{ opt.afkorting }}">
+                                        <input class="with-gap" type="radio" name="team_type" value="{{ opt.afkorting }}" required id="id_{{ opt.afkorting }}"{% if opt.actief %} checked{% endif %}>
+                                        <span>{{ opt.beschrijving }}</span>
+                                    </label>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
                 </td>
             </tr>
 
             <tr>
                 <td>Team naam</td>
-                <td><input type="text" name="team_naam" placeholder="Kies een leuke naam" value="{{ team.team_naam }}" maxlength="50"></td>
-            </tr>
-
-            <tr>
-                <td colspan="2">
-                    <button class="btn-nhb-rood" type="submit">
-                        <i class="material-icons-round left">check</i>Opslaan</button>
+                <td>
+                    {% if readonly %}
+                        <span>{{ team.team_naam }}</span>
+                    {% else %}
+                        <input type="text" name="team_naam" placeholder="Kies een leuke naam" value="{{ team.team_naam }}" maxlength="50">
+                    {% endif %}
                 </td>
             </tr>
 
+            {% if not readonly %}
+                <tr>
+                    <td colspan="2">
+                        <button class="btn-nhb-rood" type="submit">
+                            <i class="material-icons-round left">check</i>Opslaan</button>
+                    </td>
+                </tr>
+            {% endif %}
+
         </table>
+    {% if url_opslaan %}
     </form>
+    {% endif %}
 
     {% if url_verwijderen %}
         <p>&nbsp;</p>

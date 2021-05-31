@@ -44,7 +44,7 @@
 
                 {% if obj.break_klasse %}
                     <tr class="nhb-grijs">
-                        <td colspan="7" style="padding-bottom: 0px"><h5>{{ obj.klasse_str }}</h5></td>
+                        <td colspan="7" style="padding-bottom: 0"><h5>{{ obj.klasse_str }}</h5></td>
                     </tr>
 
                     <tr>

@@ -6,7 +6,8 @@
 
 from django.test import TestCase
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
-from Competitie.models import competitie_aanmaken, DeelCompetitie
+from Competitie.models import DeelCompetitie
+from Competitie.operations import competities_aanmaken
 from Functie.models import maak_functie, Functie
 from Mailer.models import MailQueue
 from Overig.models import SiteTijdelijkeUrl
@@ -27,7 +28,7 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
         regio_105 = NhbRegio.objects.get(regio_nr=105)
 
         # creëer een competitie met deelcompetities
-        competitie_aanmaken(jaar=2019)
+        competities_aanmaken(jaar=2019)
 
         deel1 = DeelCompetitie.objects.filter(laag='BK')[0]
         self.functie_bko1 = deel1.functie

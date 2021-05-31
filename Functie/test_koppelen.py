@@ -4,11 +4,14 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.test import TestCase
-from .models import maak_functie, Functie
+from django.test import TestCase, Client
+from django.contrib.sessions.backends.db import SessionStore
+from Account.models import AccountSessions
+from Functie.rol import SESSIONVAR_ROL_MAG_WISSELEN
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
 from Logboek.models import LogboekRegel
 from Overig.e2ehelpers import E2EHelpers
+from .models import maak_functie, Functie
 import datetime
 
 
@@ -312,20 +315,25 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.assert403(resp)
 
     def test_koppel_rko(self):
-        self.e2e_login_and_pass_otp(self.account_admin)
+        # log in als beh1 zodat er sessie gemaakt wordt
+        self.e2e_login(self.account_beh1)
 
-        # neem de RKO rol aan
-        with self.assert_max_queries(25):
-            resp = self.client.post(self.url_activeer_functie % self.functie_rko3.pk, follow=True)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, "RKO ")
+        # manipuleer de sessie zodat deze verlopen is, maar niet verwijderd wordt
+        # (normaal worden sessies verwijderd bij logout omdat expiry op 0 staat == at browser close)
+        session = self.client.session
+        session.set_expiry(-5)      # expiry in -5 seconds
+        session.save()
+
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_wissel_naar_functie(self.functie_rko3)
+        self.e2e_check_rol('RKO')
 
         LogboekRegel.objects.all().delete()
 
         # koppel een RCL van het juiste rayon
         url = self.url_wijzig_ontvang % self.functie_rcl111.pk
         self.assertEqual(self.functie_rcl111.accounts.count(), 0)
-        with self.assert_max_queries(23):
+        with self.assert_max_queries(28):
             resp = self.client.post(url, {'add': self.account_beh1.pk}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertEqual(self.functie_rcl111.accounts.count(), 1)
@@ -629,5 +637,56 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assertContains(resp, 'LET OP: geen lid bij deze vereniging')
 
+    def test_menu(self):
+        """ Controleer het het Wissel van Rol menu getoond wordt nadat een
+            gebruiker aan een eerste rol gekoppeld is.
+        """
+
+        # log in met aparte een aparte test client instantie, zodat de sessie behouden blijft
+        client2 = Client()
+        resp = client2.post('/account/login/',
+                            {'login_naam': self.account_beh1.username,
+                             'wachtwoord': self.WACHTWOORD})
+        self.assertEqual(resp.status_code, 302)     # 302 = Redirect = success
+        session_key_beh1 = AccountSessions.objects.all()[0].session.session_key
+
+        session = SessionStore(session_key_beh1)
+        self.assertEqual(session[SESSIONVAR_ROL_MAG_WISSELEN], False)
+
+        resp = client2.get('/plein/')
+        urls = self.extract_all_urls(resp)
+        self.assertNotIn('/functie/wissel-van-rol/', urls)
+
+        session = SessionStore(session_key_beh1)
+        self.assertEqual(session[SESSIONVAR_ROL_MAG_WISSELEN], False)
+
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_wisselnaarrol_bb()
+
+        # koppel beheerder1 aan zijn eerste rol
+        self.assertEqual(self.functie_bko.accounts.count(), 0)
+        url = self.url_wijzig_ontvang % self.functie_bko.pk
+        with self.assert_max_queries(21):
+            resp = self.client.post(url, {'add': self.account_beh1.pk}, follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assertEqual(self.functie_bko.accounts.count(), 1)
+
+        session = SessionStore(session_key_beh1)
+        self.assertEqual(session[SESSIONVAR_ROL_MAG_WISSELEN], 'nieuw')
+
+        resp = client2.get('/plein/')
+        urls = self.extract_all_urls(resp)
+        self.assertIn('/functie/wissel-van-rol/', urls)
+
+        session = SessionStore(session_key_beh1)
+        self.assertEqual(session[SESSIONVAR_ROL_MAG_WISSELEN], True)
+
+        # coverage: eerste koppeling als de gebruiker al wissel-van-rol heeft
+        self.functie_bko.accounts.clear()
+        resp = self.client.post(url, {'add': self.account_beh1.pk}, follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+
+        session = SessionStore(session_key_beh1)
+        self.assertEqual(session[SESSIONVAR_ROL_MAG_WISSELEN], True)
 
 # end of file

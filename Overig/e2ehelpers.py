@@ -15,6 +15,7 @@ from contextlib import contextmanager
 from bs4 import BeautifulSoup
 import subprocess
 import traceback
+import datetime
 import tempfile
 import vnujar
 import pyotp
@@ -23,6 +24,7 @@ import pyotp
 class MyQueryTracer(object):
     def __init__(self):
         self.trace = list()
+        self.started_at = datetime.datetime.now()
 
     def __call__(self, execute, sql, params, many, context):
         call = {'sql': sql}
@@ -33,6 +35,8 @@ class MyQueryTracer(object):
         call['stack'] = stack = list()
         for fname, linenr, base, code in traceback.extract_stack():
             if base != '__call__' and not fname.startswith('/usr/lib') and '/site-packages/' not in fname and 'manage.py' not in fname:
+                stack.append((fname, linenr, base))
+            elif base == 'render' and 'template/response.py' in fname:
                 stack.append((fname, linenr, base))
         # for
         self.trace.append(call)
@@ -364,6 +368,10 @@ class E2EHelpers(object):
             if pos >= 0:
                 self.fail(msg='Detected console.log usage in script from template %s' % template_name)   # pragma: no cover
 
+            pos = script.find('/*')
+            if pos >= 0:
+                self.fail(msg='Found block comment in script from template %s' % template_name)     # pragma: no cover
+
             html = html[pos+9:]
             pos = html.find('<script ')
         # while
@@ -598,12 +606,14 @@ class E2EHelpers(object):
 
     def assert_is_redirect_not_plein(self, resp):
         assert isinstance(self, TestCase)
-        self.assertEqual(resp.status_code, 302)
-        self.assertNotEqual(resp.url, '/plein/')    # redirect naar plein is typisch een reject om rechten
+        if resp.status_code != 302:                     # pragma: no cover
+            # geef een iets uitgebreider antwoord
+            msg = "status_code: %s != 302" % resp.status_code
+            if resp.status_code == 200:
+                msg += "; templates used: %s" % repr([tmpl.name for tmpl in resp.templates])
+            self.fail(msg=msg)
 
-    # def OLD_assert_max_queries(self, num):
-    #     conn = connections[DEFAULT_DB_ALIAS]
-    #     return AssertMaxQueriesContext(self, num, conn)
+        self.assertNotEqual(resp.url, '/plein/')    # redirect naar plein is typisch een reject om rechten
 
     @staticmethod
     def _find_statement(query, start):                  # pragma: no cover
@@ -631,12 +641,18 @@ class E2EHelpers(object):
         return query
 
     @contextmanager
-    def assert_max_queries(self, num):
+    def assert_max_queries(self, num, check_duration=True):
         tracer = MyQueryTracer()
         try:
             with connection.execute_wrapper(tracer):
                 yield
         finally:
+            if check_duration:
+                duration = datetime.datetime.now() - tracer.started_at
+                duration_seconds = duration.seconds
+                if duration_seconds > 1.5:              # pragma: no cover
+                    self.fail(msg="Operation took suspiciously long: %.2f seconds" % duration_seconds)
+
             count = len(tracer.trace)
             if count > num:                     # pragma: no cover
                 queries = 'Captured queries:'

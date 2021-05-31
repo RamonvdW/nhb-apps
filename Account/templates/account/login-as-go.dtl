@@ -1,31 +1,32 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020 Ramon van der Winkel.
+                Copyright (c) 2020-2021 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
 
 {% block extraheader %}
-<!-- voorkom dat de knop nog een keer gebruikt wordt (dat werkt toch niet)
-     door dit browser window automatisch weg te sturen na 60 seconden -->
-<meta http-equiv="refresh" content="60; url=/functie/wissel-van-rol/" />
+    <!-- voorkom dat de knop nog een keer gebruikt wordt (dat werkt toch niet)
+         door dit browser window automatisch weg te sturen na 60 seconden -->
+    <meta http-equiv="refresh" content="60; url=/functie/wissel-van-rol/" />
 {% endblock %}
 
 {% block title %}Account wissel{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="wissel-naar-account" %}
 
-<h4>Wissel naar account</h4>
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="wissel-naar-account" %}
 
-<p>Met onderstaande knop wordt een nieuw tabblad geopend dat automatisch inlogt als account <b>{{ account.username }}</b>.</p>
+    <h4>Wissel naar account</h4>
 
-<p>De knop moet binnen 60 seconden gebruikt worden.</p>
+    <p>Met onderstaande knop wordt een nieuw tabblad geopend dat automatisch inlogt als account <b>{{ account.username }}</b>.</p>
 
-<a class="btn-nhb-rood" href="{{ login_as_url }}" target="_blank" rel="noopener noreferrer">
-    <i class="material-icons-round right">open_in_new</i>Inloggen</a>
+    <p>De knop moet binnen 60 seconden gebruikt worden.</p>
 
-<p>Advies: rechts-klikken en openen in een 'incognito window' (Chrome) of 'private window' (Firefox), anders wordt je hier uitgelogd.</p>
+    <a class="btn-nhb-rood" href="{{ login_as_url }}" target="_blank" rel="noopener noreferrer">
+        <i class="material-icons-round right">open_in_new</i>Inloggen</a>
+
+    <p>Advies: rechts-klikken en openen in een 'incognito window' (Chrome) of 'private window' (Firefox), anders wordt je hier uitgelogd.</p>
 
 {% endblock %}

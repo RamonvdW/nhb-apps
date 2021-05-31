@@ -11,16 +11,44 @@
 {% block pagina %}
 
     <script type="application/javascript">
-        function locatie_aanpassen(sel)
-        {
-            const locaties = {{ locaties|safe }};   // nhb_ver.ver_nr --> adres
-            const el_sel = document.getElementById('id_ver_sel')
-            let adres = locaties[el_sel.value];        // gekozen vereniging
-            if (adres === undefined)
-                adres = '<i class="red-text">Niet beschikbaar!</i>';
-            adres = adres.replace(/\n/g, '<br>')    // vervang newlines door breaks
-            const el_loc = document.getElementById('id_loc')
-            el_loc.innerHTML = adres
+
+        // omdat materialize-css het option 'hidden' attribuut niet ondersteund, verwijderen we opties
+        // hierin stoppen we de kopie om de lijst mee te herstellen
+        let locatie_keuzes_html = ''
+
+        function locatie_keuzes_aanpassen() {
+            // herstel de hele lijst
+            const el_td = document.getElementById('id_accommodatie_td')
+            el_td.innerHTML = locatie_keuzes_html
+
+            // haal de keuze op
+            const ver = document.getElementById('id_ver_sel').value
+
+            // maak een selectie in het drop-down menu
+            const el_select = document.getElementById('id_loc_sel')
+            for (let i = 0; i < el_select.length;) {
+                let option = el_select.options[i]
+                if (option.dataset.ver !== ver) {
+                    option.remove()
+                } else {
+                    i++;
+                }
+            }
+
+            if (el_select.length == 0) {
+                // vervang drop-down door statische text
+                el_td.innerHTML = '<i class="red-text">Geen accommodatie gegevens bekend</i>'
+            } else if (el_select.length == 1) {
+                // vervang drop-down door statische text
+                el_td.innerHTML = el_select.options[0].text + '<input type="hidden" name="loc_pk" value="' + el_select.options[0].value + '">'
+            } else {
+                M.FormSelect.init(el_select)
+            }
+        }
+
+        function locatie_keuzes_init() {
+            locatie_keuzes_html = document.getElementById('id_accommodatie_td').innerHTML
+            locatie_keuzes_aanpassen()
         }
 
         function datum_omzetten() {
@@ -117,9 +145,9 @@
             </tr>
 
             <tr>
-                <td>Bij vereniging:</td>
+                <td>Organiserende vereniging:</td>
                 <td>
-                    <select name="nhbver_pk" onchange="locatie_aanpassen()" id="id_ver_sel">
+                    <select name="nhbver_pk" onchange="locatie_keuzes_aanpassen()" id="id_ver_sel">
                         {% for opt in verenigingen %}
                             <option value="{{ opt.pk }}"{% if opt.pk == wedstrijd.vereniging.pk %} selected{% endif %}>{{ opt }}</option>
                         {% endfor %}
@@ -129,7 +157,13 @@
 
             <tr>
                 <td>Accommodatie:</td>
-                <td id="id_loc"></td>
+                <td id="id_accommodatie_td">
+                    <select name="loc_pk" id="id_loc_sel">
+                        {% for opt in all_locaties %}
+                            <option value="{{ opt.pk }}" data-ver="{{ opt.ver_pk }}">{{ opt.keuze_str }}</option>
+                        {% endfor %}
+                    </select>
+                </td>
             </tr>
 
             {% if heeft_wkl %}
@@ -232,7 +266,7 @@
                                  yearRange: competitieJaren }
                 M.Datepicker.init(el2, options2)
 
-                locatie_aanpassen()
+                locatie_keuzes_init()
             })
     </script>
 

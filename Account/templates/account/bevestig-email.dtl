@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020 Ramon van der Winkel.
+                Copyright (c) 2020-2021 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -9,14 +9,15 @@
 {% block title %}E-mail nog niet bevestigd{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="account-bevestig-email" %}
 
-<h4>E-mail nog niet bevestigd</h4>
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="account-bevestig-email" %}
 
-<p>We hebben eerder een e-mail gestuurd naar <b>{{ partial_email }}</b> om zeker te zijn dat we je kunnen bereiken.</p>
+    <h4>E-mail nog niet bevestigd</h4>
 
-<p>Volg de instructies in de e-mail om de bevestiging af te ronden.</p>
+    <p>We hebben eerder een e-mail gestuurd naar <b>{{ partial_email }}</b> om zeker te zijn dat we je kunnen bereiken.</p>
 
-<p>Deze pagina kan je sluiten.</p>
+    <p>Volg de instructies in de e-mail om de bevestiging af te ronden.</p>
+
+    <p>Deze pagina kan je sluiten.</p>
 
 {% endblock %}

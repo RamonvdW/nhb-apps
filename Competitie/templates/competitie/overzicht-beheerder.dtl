@@ -16,7 +16,6 @@
 
     <p>Op deze pagina tonen we informatie en mogelijkheden voor beheerders voor een specifieke bondscompetitie.</p>
 
-
     {% if toon_uitslagen %}
 
         <h5>Uitslagen</h5>
@@ -54,8 +53,16 @@
                 {% include 'plein/card.dtl' with title="Zet datums" text="Belangrijke datums aanpassen voor de fases van deze nieuwe competitie." icon="build" url=card_url %}
             {% endif %}
 
-            <!-- klassegrenzen vaststellen -->
             {% if not comp.klassegrenzen_vastgesteld %}
+                <!-- ag vaststellen -->
+                {% if datum_ag_vastgesteld %}
+                    <!-- template tag 'add' cannot handle missing variables -->
+                    {% include 'plein/card.dtl' with title="Aanvangsgemiddelden" text=comp_afstand|add:"m AG voor alle sporters vaststellen a.h.v. uitslag vorig seizoen (op "|add:datum_ag_vastgesteld|add:" voor het laatst gedaan)" icon="how_to_reg" url=comp.url_ag_vaststellen %}
+                {% else %}
+                    {% include 'plein/card.dtl' with title="Aanvangsgemiddelden" text=comp_afstand|add:"m AG voor alle sporters vaststellen a.h.v. uitslag vorig seizoen (eerste keer)" icon="how_to_reg" url=comp.url_ag_vaststellen %}
+                {% endif %}
+
+                <!-- klassegrenzen vaststellen -->
                 {% url 'Competitie:klassegrenzen-vaststellen' comp_pk=comp.pk as card_url %}
                 {% include 'plein/card.dtl' with title="Zet klassegrenzen" text="Klassegrenzen vaststellen (eenmalige actie)." icon="equalizer" url=card_url %}
             {% endif %}
@@ -78,8 +85,13 @@
             {% include 'plein/card.dtl' with title=deelcomp.titel text=deelcomp.tekst icon="pending_actions" url=deelcomp.url %}
 
             <!-- regio teams -->
-            {% if deelcomp.url_teams_regio %}
-                {% include 'plein/card.dtl' with title="Teams Regio" text=deelcomp.tekst_teams_regio icon="gamepad" url=deelcomp.url_teams_regio %}
+            {% if deelcomp.url_regio_teams %}
+                {% include 'plein/card.dtl' with title="Regio Teams" text=deelcomp.tekst_regio_teams icon="gamepad" url=deelcomp.url_regio_teams %}
+            {% endif %}
+
+            <!-- regio poules -->
+            {% if deelcomp.url_poules %}
+                {% include 'plein/card.dtl' with title="Team Poules" text=deelcomp.tekst_poules icon="grid_4x4" url=deelcomp.url_poules %}
             {% endif %}
 
             <!-- scores -->
@@ -128,6 +140,11 @@
 
         {% if bko_afsluiten %}
             {% include 'plein/card.dtl' with title="Afsluiten" text=bko_afsluiten.titel_afsluiten icon="mediation" url=bko_afsluiten.url_afsluiten %}
+        {% endif %}
+
+        {% if regio_instellingen_globaal %}
+            {% url 'Competitie:regio-instellingen-globaal' comp_pk=comp.pk as card_url %}
+            {% include 'plein/card.dtl' with title="Regio keuzes" text="Overzicht van de keuzes gemaakt per regio" icon="flaky" url=card_url %}
         {% endif %}
 
         <!-- toon klassegrenzen regiocompetitie -->

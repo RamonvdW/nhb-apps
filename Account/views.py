@@ -33,8 +33,8 @@ from Overig.tijdelijke_url import maak_tijdelijke_url_account_email
 account_plugins_login = list()      # [tup, tup, ..] with tup = (prio, func)
 
 
-def account_add_plugin_login(prio, func):
-    tup = (prio, func)
+def account_add_plugin_login(prio, func, skip_for_login_as):
+    tup = (prio, func, skip_for_login_as)
     account_plugins_login.append(tup)
     account_plugins_login.sort(key=lambda x: x[0])
 

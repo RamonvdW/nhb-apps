@@ -5,14 +5,14 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
-from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.shortcuts import redirect
-from django.views.generic import ListView, View
+from django.views.generic import ListView, TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.otp import account_otp_is_gekoppeld
 from Account.rechten import account_rechten_is_otp_verified
 from Handleiding.views import reverse_handleiding
+from NhbStructuur.models import NhbVereniging
 from Plein.menu import menu_dynamics
 from Overig.helpers import get_safe_from_ip
 from Taken.taken import eval_open_taken
@@ -23,7 +23,8 @@ from .models import Functie, account_needs_vhpg
 import logging
 
 
-TEMPLATE_WISSELVANROL = 'functie/wissel-van-rol.dtl'
+TEMPLATE_WISSEL_VAN_ROL = 'functie/wissel-van-rol.dtl'
+TEMPLATE_WISSEL_NAAR_SEC = 'functie/wissel-naar-sec.dtl'
 
 my_logger = logging.getLogger('NHBApps.Functie')
 
@@ -35,14 +36,20 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
     # FUTURE: zou next parameter kunnen ondersteunen, net als login view
 
     # class variables shared by all instances
-    template_name = TEMPLATE_WISSELVANROL
+    template_name = TEMPLATE_WISSEL_VAN_ROL
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu, self.functie_nu = None, None
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
 
         # evalueer opnieuw welke rechten de gebruiker heeft
         rol_evalueer_opnieuw(self.request)
+
+        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
 
         return self.request.user.is_authenticated and rol_mag_wisselen(self.request)
 
@@ -97,7 +104,7 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
                 try:
                     hierarchy2[parent_tup].append(child_tup)
                 except KeyError:
-                    hierarchy2[parent_tup] = [child_tup,]
+                    hierarchy2[parent_tup] = [child_tup]
         # for
 
         # haal alle functies met 1 database query op
@@ -127,17 +134,14 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
         return objs, hierarchy2
 
     def _get_functies_help_anderen(self, hierarchy2):
+        # uitzoeken welke ge-erfde functies we willen tonen
+        # deze staan in hierarchy
         objs = list()
 
-        # nu nog uitzoeken welke ge-erfde functies we willen tonen
-        # deze staan in hierarchy
-        # TODO: minder vaak rol_get_huidige_functie aanroepen
-        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
-
-        if functie_nu:
-            nu_tup = (rol_nu, functie_nu.pk)
+        if self.functie_nu:
+            nu_tup = (self.rol_nu, self.functie_nu.pk)
         else:
-            nu_tup = (rol_nu, None)
+            nu_tup = (self.rol_nu, None)
 
         try:
             child_tups = hierarchy2[nu_tup]
@@ -212,8 +216,8 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
                 if obj.nhb_regio.regio_nr in (101, 109):
                     obj.insert_break = True
         # for
-        output = sorted(objs, key=lambda obj: obj.volgorde)
 
+        output = sorted(objs, key=lambda x: x.volgorde)
         return output
 
     def get_context_data(self, **kwargs):
@@ -240,25 +244,61 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
         context['wiki_rollen'] = reverse_handleiding(settings.HANDLEIDING_ROLLEN)
         context['wiki_intro_nieuwe_beheerders'] = reverse_handleiding(settings.HANDLEIDING_INTRO_NIEUWE_BEHEERDERS)
 
-        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
-
         # login-as functie voor IT beheerder
-        if rol_nu == Rollen.ROL_IT:
+        if self.rol_nu == Rollen.ROL_IT:
             context['url_login_as'] = reverse('Account:account-wissel')
 
         # snel wissel kaartje voor IT en BB
-        if rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB):
+        if self.rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB):
             context['heeft_alle_rollen'] = self._maak_alle_rollen()
+            context['url_wissel_naar_sec'] = reverse('Functie:wissel-naar-sec')
 
         # bedoeld voor de testsuite, maar kan geen kwaad
         context['insert_meta'] = True
-        context['meta_rol'] = rol2url[rol_nu]
-        if functie_nu:
-            context['meta_functie'] = functie_nu.beschrijving       # template doet html escaping
+        context['meta_rol'] = rol2url[self.rol_nu]
+        if self.functie_nu:
+            context['meta_functie'] = self.functie_nu.beschrijving       # template doet html escaping
         else:
             context['meta_functie'] = ""
 
         eval_open_taken(self.request)
+
+        menu_dynamics(self.request, context, actief='wissel-van-rol')
+        return context
+
+
+class WisselNaarSecretarisView(UserPassesTestMixin, TemplateView):
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_WISSEL_NAAR_SEC
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        return rol_get_huidige(self.request) in (Rollen.ROL_IT, Rollen.ROL_BB)
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        # maak knoppen voor alle verenigingen
+        vers = (NhbVereniging
+                .objects
+                .select_related('regio', 'regio__rayon')
+                .exclude(regio__regio_nr=100)
+                .prefetch_related('functie_set')
+                .order_by('regio__regio_nr', 'ver_nr'))
+        for ver in vers:
+            try:
+                functie_sec = ver.functie_set.filter(rol='SEC')[0]
+            except IndexError:      # pragma: no cover
+                # alleen tijdens test zonder SEC functie
+                ver.url_wordt_sec = "#"
+            else:
+                ver.url_wordt_sec = reverse('Functie:activeer-functie',
+                                            kwargs={'functie_pk': functie_sec.pk})
+        # for
+        context['verenigingen'] = vers
 
         menu_dynamics(self.request, context, actief='wissel-van-rol')
         return context

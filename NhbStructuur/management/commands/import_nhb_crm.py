@@ -10,42 +10,16 @@ from django.core.management.base import BaseCommand
 from django.db.models import ProtectedError
 from django.utils import timezone
 from django.db.utils import DataError
-from NhbStructuur.models import NhbRayon, NhbRegio, NhbLid, NhbVereniging
 from Account.models import Account
-from Mailer.models import mailer_email_is_valide
+from Functie.models import Functie, maak_functie, maak_account_vereniging_secretaris
 from Logboek.models import schrijf_in_logboek
-from Functie.models import maak_functie, maak_account_vereniging_secretaris
-from Wedstrijden.models import WedstrijdLocatie
+from Mailer.models import mailer_email_is_valide
+from NhbStructuur.models import NhbRayon, NhbRegio, NhbLid, NhbVereniging
+from Overig.helpers import maak_unaccented
 from Records.models import IndivRecord
+from Wedstrijden.models import WedstrijdLocatie, BAAN_TYPE_EXTERN, BAAN_TYPE_BUITEN
 import datetime
 import json
-
-
-# TODO: alle kleine save acties kost veel database access in de testen
-
-
-def vind_regio(regio_nr):
-    try:
-        return NhbRegio.objects.get(regio_nr=regio_nr)
-    except NhbRegio.DoesNotExist:
-        pass
-    return None
-
-
-def vind_lid(nhb_nr):
-    try:
-        return NhbLid.objects.get(nhb_nr=nhb_nr)
-    except NhbLid.DoesNotExist:
-        pass
-    return None
-
-
-def vind_vereniging(ver_nr):
-    try:
-        return NhbVereniging.objects.get(ver_nr=ver_nr)
-    except NhbVereniging.DoesNotExist:
-        pass
-    return None
 
 
 def get_secretaris_str(lid):
@@ -113,6 +87,102 @@ class Command(BaseCommand):
 
         self.dryrun = False
 
+        self._cache_rayon = dict()      # [rayon_nr] = NhbRayon()
+        self._cache_regio = dict()      # [regio_nr] = NhbRegio()
+        self._cache_ver = dict()        # [ver_nr] = NhbVereniging()
+        self._cache_lid = dict()        # [nhb_nr] = NhbLid()
+        self._cache_functie = dict()    # [(rol, beschrijving)] = Functie()
+
+    def _maak_cache(self):
+        for rayon in NhbRayon.objects.all():
+            self._cache_rayon[rayon.rayon_nr] = rayon
+        # for
+
+        for regio in NhbRegio.objects.all():
+            self._cache_regio[regio.regio_nr] = regio
+        # for
+
+        for ver in (NhbVereniging
+                    .objects
+                    .select_related('secretaris_lid',
+                                    'regio')
+                    .prefetch_related('wedstrijdlocatie_set')
+                    .all()):
+            self._cache_ver[ver.ver_nr] = ver
+        # for
+
+        for lid in (NhbLid
+                    .objects
+                    .all()):
+            self._cache_lid[lid.nhb_nr] = lid
+        # for
+
+        for functie in (Functie
+                        .objects
+                        .select_related('nhb_ver')
+                        .all()):
+            tup = (functie.rol, functie.beschrijving)
+            self._cache_functie[tup] = functie
+        # for
+
+    def _vind_rayon(self, rayon_nr):
+        try:
+            rayon_nr = int(rayon_nr)
+        except ValueError:
+            self.stderr.write('[ERROR] Foutief rayon nummer: %s (geen getal)' % repr(rayon_nr))
+        else:
+            try:
+                return self._cache_rayon[rayon_nr]
+            except KeyError:
+                pass
+        return None
+
+    def _vind_regio(self, regio_nr):
+        try:
+            regio_nr = int(regio_nr)
+        except ValueError:
+            self.stderr.write('[ERROR] Foutief regio nummer: %s (geen getal)' % repr(regio_nr))
+        else:
+            try:
+                return self._cache_regio[regio_nr]
+            except KeyError:
+                pass
+        return None
+
+    def _vind_vereniging(self, ver_nr):
+        try:
+            ver_nr = int(ver_nr)
+        except ValueError:
+            self.stderr.write('[ERROR] Foutief verenigingsnummer: %s (geen getal)' % repr(ver_nr))
+        else:
+            try:
+                ver = self._cache_ver[ver_nr]
+                return ver
+            except KeyError:
+                pass
+        return None
+
+    def _vind_lid(self, nhb_nr):
+        try:
+            nhb_nr = int(nhb_nr)
+        except ValueError:
+            self.stderr.write('[ERROR] Foutief bondsnummer: %s (geen getal)' % (nhb_nr))
+            pass
+        else:
+            try:
+                return self._cache_lid[nhb_nr]
+            except KeyError:
+                pass
+        return None
+
+    def _vind_functie(self, rol, beschrijving):
+        tup = (rol, beschrijving)
+        try:
+            return self._cache_functie[tup]
+        except KeyError:
+            pass
+        return None
+
     def zet_lidmaatschap_jaar(self, now):
         self.lidmaatschap_jaar = now.year               # voorbeeld: 2021
         if now.month == 1 and now.day <= 15:
@@ -163,9 +233,8 @@ class Command(BaseCommand):
             rayon_naam = rayon['name']
 
             # zoek het rayon op
-            try:
-                obj = NhbRayon.objects.get(rayon_nr=rayon_nr)
-            except NhbRayon.DoesNotExist:
+            obj = self._vind_rayon(rayon_nr)
+            if not obj:
                 # toevoegen van een rayon ondersteunen we niet
                 self.stderr.write('[ERROR] Onbekend rayon %s' % repr(rayon))
                 self._count_errors += 1
@@ -175,7 +244,7 @@ class Command(BaseCommand):
                     self._count_wijzigingen += 1
                     obj.naam = rayon_naam
                     if not self.dryrun:
-                        obj.save()
+                        obj.save(update_fields=['naam'])
         # for
         # verwijderen van een rayon ondersteunen we niet
 
@@ -194,9 +263,8 @@ class Command(BaseCommand):
             regio_naam = regio['name']
 
             # zoek de regio op
-            try:
-                obj = NhbRegio.objects.get(regio_nr=regio_nr)
-            except NhbRegio.DoesNotExist:
+            obj = self._vind_regio(regio_nr)
+            if not obj:
                 # toevoegen van een regio ondersteunen we niet
                 self.stderr.write('[ERROR] Onbekende regio %s' % repr(regio))
                 self._count_errors += 1
@@ -206,7 +274,7 @@ class Command(BaseCommand):
                     self._count_wijzigingen += 1
                     obj.naam = regio_naam
                     if not self.dryrun:
-                        obj.save()
+                        obj.save(update_fields=['naam'])
         # for
         # verwijderen van een regio ondersteunen we niet
 
@@ -218,7 +286,7 @@ class Command(BaseCommand):
 
         # houd bij welke verenigingsnummers in de database zitten
         # als deze niet meer voorkomen, dan zijn ze verwijderd
-        ver_nrs = [tup[0] for tup in NhbVereniging.objects.values_list('ver_nr')]
+        ver_nrs = list(self._cache_ver.keys())
 
         """ JSON velden (string, except):
          'region_number':           int
@@ -241,7 +309,15 @@ class Command(BaseCommand):
 
         for club in data:
             self._count_clubs += 1
+
             ver_nr = club['club_number']
+            try:
+                ver_nr = int(ver_nr)
+            except ValueError:
+                self.stderr.write('[ERROR] Geen valide verenigingsnummer: %s (geen getal)' % repr(ver_nr))
+                self._count_errors += 1
+                continue
+
             ver_naam = club['name']
             # maak 1377 wat korter
             pos = ver_naam.find(' (geen deelname wedstrijden)')
@@ -269,10 +345,8 @@ class Command(BaseCommand):
 
             # zoek de vereniging op
             is_nieuw = False
-            obj = None
-            try:
-                obj = NhbVereniging.objects.get(ver_nr=ver_nr)
-            except NhbVereniging.DoesNotExist:
+            obj = self._vind_vereniging(ver_nr)
+            if not obj:
                 # nieuwe vereniging
                 is_nieuw = True
             else:
@@ -280,8 +354,9 @@ class Command(BaseCommand):
                 ver_nrs.remove(ver_nr)
 
                 # mutaties verwerken
+                updated = list()
                 if obj.regio.regio_nr != ver_regio:
-                    regio_obj = vind_regio(ver_regio)
+                    regio_obj = self._vind_regio(ver_regio)
                     if regio_obj is None:
                         self.stderr.write('[ERROR] Kan vereniging %s niet wijzigen naar onbekende regio %s' % (ver_nr, ver_regio))
                         self._count_errors += 1
@@ -289,29 +364,28 @@ class Command(BaseCommand):
                         self.stdout.write('[INFO] Wijziging van regio voor vereniging %s: %s --> %s' % (ver_nr, obj.regio.regio_nr, ver_regio))
                         self._count_wijzigingen += 1
                         obj.regio = regio_obj
-                        if not self.dryrun:
-                            obj.save()
+                        updated.append('regio')
 
                 if obj.naam != ver_naam:
                     self.stdout.write('[INFO] Wijziging van naam voor vereniging %s: "%s" --> "%s"' % (ver_nr, obj.naam, ver_naam))
                     self._count_wijzigingen += 1
                     obj.naam = ver_naam
-                    if not self.dryrun:
-                        obj.save()
+                    updated.append('naam')
 
                 if obj.plaats != ver_plaats:
                     self.stdout.write('[INFO] Wijziging van plaats voor vereniging %s: "%s" --> "%s"' % (ver_nr, obj.plaats, ver_plaats))
                     self._count_wijzigingen += 1
                     obj.plaats = ver_plaats
-                    if not self.dryrun:
-                        obj.save()
+                    updated.append('plaats')
 
                 if obj.geen_wedstrijden != ver_geen_wedstrijden:
                     self.stdout.write("[INFO] Wijziging van 'geen wedstrijden' voor vereniging %s: %s --> %s" % (ver_nr, obj.geen_wedstrijden, ver_geen_wedstrijden))
                     self._count_wijzigingen += 1
                     obj.geen_wedstrijden = ver_geen_wedstrijden
-                    if not self.dryrun:
-                        obj.save()
+                    updated.append('geen_wedstrijden')
+
+                if not self.dryrun:
+                    obj.save(update_fields=updated)
 
             if is_nieuw:
                 obj = None
@@ -320,7 +394,7 @@ class Command(BaseCommand):
                 ver.naam = ver_naam
                 ver.plaats = ver_plaats
                 ver.geen_wedstrijden = ver_geen_wedstrijden
-                regio_obj = vind_regio(ver_regio)
+                regio_obj = self._vind_regio(ver_regio)
                 if not regio_obj:
                     self._count_errors += 1
                     self.stderr.write('[ERROR] Vereniging %s hoort bij onbekende regio %s' % (ver_nr, ver_regio))
@@ -330,17 +404,30 @@ class Command(BaseCommand):
                     ver.regio = regio_obj
                     if not self.dryrun:
                         ver.save()
+                        self._cache_ver[ver.pk] = ver
                     self._nieuwe_clubs.append(ver_nr)   # voor onderdrukken 'wijziging' secretaris
                     obj = ver
 
             # maak de functies aan voor deze vereniging
             if obj:
                 # let op: in sync houden met migratie m0012_migrate_cwz_hwl
+                bulk = list()
                 for rol, beschr in (('WL', 'Wedstrijdleider %s'),
                                     ('HWL', 'Hoofdwedstrijdleider %s'),
                                     ('SEC', 'Secretaris vereniging %s')):
-                    functie = maak_functie(beschr % obj.ver_nr, rol)
-                    functie.nhb_ver = obj
+
+                    beschrijving = beschr % obj.ver_nr
+                    functie = self._vind_functie(rol, beschrijving)
+                    if not functie:
+                        functie = maak_functie(beschrijving, rol)
+                        tup = (rol, beschrijving)
+                        self._cache_functie[tup] = functie
+
+                    updated = list()
+
+                    if functie.nhb_ver != obj:
+                        functie.nhb_ver = obj
+                        updated.append('nhb_ver')
 
                     if rol == 'SEC':
                         # secretaris functie krijgt email uit CRM
@@ -350,21 +437,23 @@ class Command(BaseCommand):
                             self._count_wijzigingen += 1
                         functie.bevestigde_email = ver_email
                         functie.nieuwe_email = ''       # voor de zekerheid opruimen
+                        updated.extend(['bevestigde_email', 'nieuwe_email'])
 
                     if not self.dryrun:
-                        functie.save()
+                        functie.save(update_fields=updated)
                 # for
         # for
 
         # kijk of er verenigingen verwijderd moeten worden
         while len(ver_nrs) > 0:
             ver_nr = ver_nrs.pop(0)
-            obj = NhbVereniging.objects.get(ver_nr=ver_nr)
+            obj = self._vind_vereniging(ver_nr)
             self.stdout.write('[INFO] Vereniging %s wordt nu verwijderd' % str(obj))
             if not self.dryrun:
                 # kan alleen als er geen leden maar aan hangen --> de modellen beschermen dit automatisch
                 # vang de gerelateerde exceptie af
                 try:
+                    del self._cache_ver[obj.pk]
                     obj.delete()
                     self._count_verwijderingen += 1
                 except ProtectedError as exc:       # pragma: no coverage
@@ -380,20 +469,26 @@ class Command(BaseCommand):
 
         for club in data:
             ver_nr = club['club_number']
+            try:
+                ver_nr = int(ver_nr)
+            except ValueError:
+                # is al eerder gerapporteerd
+                continue        # met de for
+
             ver_naam = club['name']
+
             if len(club['secretaris']) < 1:
                 ver_secretaris_nhblid = None
             else:
                 ver_secretaris_nr = club['secretaris'][0]['member_number']
-                ver_secretaris_nhblid = vind_lid(ver_secretaris_nr)
+                ver_secretaris_nhblid = self._vind_lid(ver_secretaris_nr)
                 if ver_secretaris_nhblid is None:
                     self.stderr.write('[ERROR] Kan secretaris %s van vereniging %s niet vinden' % (ver_secretaris_nr, ver_nr))
                     self._count_errors += 1
 
             # zoek de vereniging op
-            try:
-                obj = NhbVereniging.objects.get(ver_nr=ver_nr)
-            except NhbVereniging.DoesNotExist:
+            obj = self._vind_vereniging(ver_nr)
+            if not obj:
                 # zou niet moeten gebeuren
                 self.stderr.write('[ERROR] Kan vereniging %s niet terugvinden' % ver_nr)
                 self._count_errors += 1
@@ -407,7 +502,7 @@ class Command(BaseCommand):
 
                     obj.secretaris_lid = ver_secretaris_nhblid
                     if not self.dryrun:
-                        obj.save()
+                        obj.save(update_fields=['secretaris_lid'])
 
                 if not ver_secretaris_nhblid:
                     if ver_nr not in GEEN_SECRETARIS_NODIG:
@@ -421,7 +516,7 @@ class Command(BaseCommand):
                         account = Account.objects.get(nhblid=ver_secretaris_nhblid)
                     except Account.DoesNotExist:
                         # SEC heeft nog geen account
-                        self.stdout.write("[WARNING] Secretaris %s van vereniging %s heeft nog geen account" % (ver_secretaris_nhblid.nhb_nr, obj.ver_nr))
+                        self.stdout.write("[INFO] Secretaris %s van vereniging %s heeft nog geen account" % (ver_secretaris_nhblid.nhb_nr, obj.ver_nr))
                         self._count_sec_no_account += 1
                     else:
                         if maak_account_vereniging_secretaris(obj, account):
@@ -436,7 +531,7 @@ class Command(BaseCommand):
 
         # houd bij welke leden nhb_nrs in de database zitten
         # als deze niet meer voorkomen, dan zijn ze verwijderd
-        nhb_nrs = [tup[0] for tup in NhbLid.objects.values_list('nhb_nr')]
+        nhb_nrs = list(self._cache_lid.keys())
 
         """ JSON velden (string, except):
              'club_number':         int,
@@ -467,6 +562,12 @@ class Command(BaseCommand):
             if lid_nhb_nr in SKIP_MEMBERS:
                 continue
 
+            try:
+                lid_nhb_nr = int(lid_nhb_nr)
+            except ValueError:
+                self.stderr.write('[ERROR] Foutief bondsnummer: %s (geen getal)' % (lid_nhb_nr))
+                continue
+
             lid_voornaam = member['first_name']
             if not lid_voornaam:
                 lid_voornaam = member['initials']
@@ -492,6 +593,7 @@ class Command(BaseCommand):
                 lid_achternaam = member['prefix'] + ' ' + lid_achternaam
 
             naam = lid_voornaam + ' ' + lid_achternaam
+            lid_unaccented_naam = maak_unaccented(naam)
             if naam.count('(') != naam.count(')'):
                 self.stdout.write('[WARNING] Lid %s: onbalans in haakjes in %s' % (lid_nhb_nr, repr(naam)))
                 self._count_warnings += 1
@@ -508,7 +610,7 @@ class Command(BaseCommand):
                 # ex-leden hebben geen vereniging, dus niet te veel klagen
                 lid_ver = None
             else:
-                lid_ver = vind_vereniging(member['club_number'])
+                lid_ver = self._vind_vereniging(member['club_number'])
                 if not lid_ver:
                     lid_blocked = True
                     self.stderr.write('[ERROR] Kan vereniging %s voor lid %s niet vinden' % (repr(member['club_number']), lid_nhb_nr))
@@ -572,9 +674,8 @@ class Command(BaseCommand):
             self._count_members += 1
 
             is_nieuw = False
-            try:
-                obj = NhbLid.objects.get(nhb_nr=lid_nhb_nr)
-            except NhbLid.DoesNotExist:
+            obj = self._vind_lid(lid_nhb_nr)
+            if not obj:
                 # nieuw lid
                 is_nieuw = True
             else:
@@ -584,13 +685,13 @@ class Command(BaseCommand):
                     self.stderr.write("[ERROR] Unexpected: nhb_nr %s onverwacht niet in lijst bestaande nhb nrs" % (repr(lid_nhb_nr)))
                     self._count_errors += 1
                 else:
+                    updated = list()
                     if obj.lid_tot_einde_jaar != self.lidmaatschap_jaar:
                         if lid_ver:
                             # lid bij een vereniging, dus het geldt weer een jaar
                             obj.lid_tot_einde_jaar = self.lidmaatschap_jaar
                             # noteer: geen log regel
-                            if not self.dryrun:
-                                obj.save()
+                            updated.append('lid_tot_einde_jaar')
                         else:
                             lid_blocked = True
 
@@ -606,79 +707,79 @@ class Command(BaseCommand):
                     if obj.bij_vereniging != lid_ver:
                         if lid_ver:
                             self.stdout.write('[INFO] Lid %s: vereniging %s --> %s' % (lid_nhb_nr, get_vereniging_str(obj.bij_vereniging), get_vereniging_str(lid_ver)))
-                            obj.bij_vereniging = lid_ver
                             self._count_wijzigingen += 1
-                            if not self.dryrun:
-                                obj.save()
+                            obj.bij_vereniging = lid_ver
+                            updated.append('bij_vereniging')
                         else:
                             # als het lid uitgeschreven wordt in het CRM houden we de oude vereniging
                             # vast, tot het einde van het lidmaatschap jaar.
                             # dit voorkomt blokkeren en geen toegang tot de diensten tijdens een overschrijving
                             if obj.lid_tot_einde_jaar < self.lidmaatschap_jaar:
                                 self.stdout.write('[INFO] Lid %s: vereniging %s --> geen (einde lidmaatschap jaar)' % (lid_nhb_nr, get_vereniging_str(obj.bij_vereniging)))
-                                obj.bij_vereniging = None
-                                obj.lid_blocked = True
                                 self._count_wijzigingen += 1
-                                if not self.dryrun:
-                                    obj.save()
+                                obj.bij_vereniging = None
+                                updated.append('bij_vereniging')
+                                lid_blocked = True
 
                     if lid_blocked:
                         if obj.is_actief_lid:
                             self.stdout.write('[INFO] Lid %s: is_actief_lid ja --> nee (want blocked)' % lid_nhb_nr)
                             self._count_wijzigingen += 1
                             obj.is_actief_lid = False
-                            if not self.dryrun:
-                                obj.save()
+                            updated.append('is_actief_lid')
                     else:
                         if not obj.is_actief_lid:
                             self.stdout.write('[INFO] Lid %s: is_actief_lid nee --> ja' % lid_nhb_nr)
                             self._count_wijzigingen += 1
                             obj.is_actief_lid = True
-                            if not self.dryrun:
-                                obj.save()
+                            updated.append('is_actief_lid')
 
                     if obj.voornaam != lid_voornaam or obj.achternaam != lid_achternaam:
                         self.stdout.write('[INFO] Lid %s: naam %s %s --> %s %s' % (lid_nhb_nr, obj.voornaam, obj.achternaam, lid_voornaam, lid_achternaam))
                         obj.voornaam = lid_voornaam
                         obj.achternaam = lid_achternaam
+                        updated.extend(['voornaam', 'achternaam'])
                         self._count_wijzigingen += 1
-                        if not self.dryrun:
-                            obj.save()
+
+                    if lid_unaccented_naam != obj.unaccented_naam:
+                        obj.unaccented_naam = lid_unaccented_naam
+                        updated.append('unaccented_naam')
+                        # niet nodig om rapporteren want gekoppeld aan naam
 
                     if obj.email != lid_email:
                         self.stdout.write('[INFO] Lid %s e-mail: %s --> %s' % (lid_nhb_nr, repr(obj.email), repr(lid_email)))
                         obj.email = lid_email
+                        updated.append('email')
                         self._count_wijzigingen += 1
-                        if not self.dryrun:
-                            obj.save()
 
                     if obj.geslacht != lid_geslacht:
                         self.stdout.write('[INFO] Lid %s geslacht: %s --> %s' % (lid_nhb_nr, obj.geslacht, lid_geslacht))
                         obj.geslacht = lid_geslacht
+                        updated.append('geslacht')
                         self._count_wijzigingen += 1
-                        if not self.dryrun:
-                            obj.save()
 
                     if obj.geboorte_datum != lid_geboorte_datum:
                         self.stdout.write('[INFO] Lid %s geboortedatum: %s --> %s' % (lid_nhb_nr, obj.geboorte_datum, lid_geboorte_datum))
                         obj.geboorte_datum = lid_geboorte_datum
+                        updated.append('geboorte_datum')
                         self._count_wijzigingen += 1
-                        if not self.dryrun:
-                            obj.save()
 
                     if obj.sinds_datum != lid_sinds:
                         self.stdout.write('[INFO] Lid %s: sinds_datum: %s --> %s' % (lid_nhb_nr, obj.sinds_datum, lid_sinds))
                         obj.sinds_datum = lid_sinds
+                        updated.append('sinds_datum')
                         self._count_wijzigingen += 1
-                        if not self.dryrun:
-                            obj.save()
 
                     if obj.para_classificatie != lid_para:
                         self.stdout.write('[INFO] Lid %s: para_classificatie: %s --> %s' % (lid_nhb_nr, repr(obj.para_classificatie), repr(lid_para)))
                         obj.para_classificatie = lid_para
+                        updated.append('para_classificatie')
                         self._count_wijzigingen += 1
-                        if not self.dryrun:
-                            obj.save()
+
+                    if not self.dryrun:
+                        obj.save(update_fields=updated)
+                        self._cache_lid[obj.pk] = obj
+
                 # else
             # else
 
@@ -710,13 +811,14 @@ class Command(BaseCommand):
                     lid.is_actief_lid = False
                 if not self.dryrun:
                     lid.save()
+                    self._cache_lid[lid.pk] = lid
                 self._count_toevoegingen += 1
         # for
 
         # self.stdout.write('[DEBUG] Volgende %s NHB nummers moeten verwijderd worden: %s' % (len(nhb_nrs), repr(nhb_nrs)))
         while len(nhb_nrs) > 0:
             lid_nhb_nr = nhb_nrs.pop(0)
-            obj = NhbLid.objects.get(nhb_nr=lid_nhb_nr)
+            obj = self._vind_lid(lid_nhb_nr)
             if obj.is_actief_lid:
                 self.stdout.write('[INFO] Lid %s: is_actief_lid: ja --> nee' % repr(lid_nhb_nr))
                 obj.is_actief_lid = False
@@ -726,12 +828,12 @@ class Command(BaseCommand):
                 self._count_wijzigingen += 1
                 if not self.dryrun:
                     obj.save()
+                    self._cache_lid[obj.pk] = obj
                 # TODO: afhandelen van het inactiveren/verwijderen van een lid dat in een team zit in een competitie
             elif obj.nhb_nr in self._recordhouder_nhb_nrs:
                 # lid heeft een record op zijn/haar naam --> behoud het hele record
                 # de CRM applicatie heeft hier nog geen veld voor
                 self.stdout.write('[INFO] Lid %s is recordhouder en wordt daarom niet verwijderd' % obj.nhb_nr)
-                pass
             else:
                 # lid echt verwijderen
                 #
@@ -745,6 +847,7 @@ class Command(BaseCommand):
                 self.stdout.write('[INFO] Lid %s wordt nu verwijderd' % str(obj))
                 if not self.dryrun:
                     try:
+                        del self._cache_lid[obj.pk]
                         obj.delete()
                         self._count_verwijderingen += 1
                     except ProtectedError as exc:
@@ -757,10 +860,6 @@ class Command(BaseCommand):
 
         if self._check_keys(data[0].keys(), EXPECTED_CLUB_KEYS, "club"):
             return
-
-        # houd bij welke verenigingsnummers in de database zitten
-        # als deze niet meer voorkomen, dan zijn ze verwijderd
-        # ver_nrs = [tup[0] for tup in NhbVereniging.objects.values_list('ver_nr')]   # TODO: flat=True toepassen?
 
         # voor overige velden, zie _import_clubs
         """ JSON velden (string, except):
@@ -783,19 +882,25 @@ class Command(BaseCommand):
             if ver_nr in GEEN_WEDSTRIJDLOCATIE:
                 continue
 
-            # TODO: waarom niet gewoon in ver_nrs kijken?
-            nhb_ver = vind_vereniging(ver_nr)
+            nhb_ver = self._vind_vereniging(ver_nr)
             if not nhb_ver:
                 continue
 
             # een vereniging zonder doel heeft een lege location_name
             adres = ""
+            plaats = ""
             if club['location_name']:
+                plaats = club['location_name']
+                if not plaats:
+                    plaats = ""
                 adres = club['address']
-                if adres:
-                    adres = adres.strip()     # remove terminating \n
+                if not adres:
+                    adres = ""
+                plaats = plaats.strip()
+                adres = adres.strip()     # remove terminating \n
 
             if not adres:
+                # vereniging heeft geen adres meer
                 # verwijder de koppeling met wedstrijdlocatie uit crm
                 for obj in nhb_ver.wedstrijdlocatie_set.filter(adres_uit_crm=True):
                     nhb_ver.wedstrijdlocatie_set.remove(obj)
@@ -805,18 +910,35 @@ class Command(BaseCommand):
 
             # zoek de wedstrijdlocatie bij dit adres
             try:
-                wedstrijdlocatie = WedstrijdLocatie.objects.get(adres=adres)
+                wedstrijdlocatie = (WedstrijdLocatie
+                                    .objects
+                                    .exclude(baan_type__in=(BAAN_TYPE_BUITEN, BAAN_TYPE_EXTERN))
+                                    .get(adres=adres))
+            except WedstrijdLocatie.MultipleObjectsReturned:
+                # er is een ongelukje gebeurt
+                self.stderr.write('[ERROR] Onverwacht meer dan 1 wedstrijdlocatie voor vereniging %s' % nhb_ver)
+                continue
             except WedstrijdLocatie.DoesNotExist:
                 # nieuw aanmaken
-                wedstrijdlocatie = WedstrijdLocatie()
-                wedstrijdlocatie.adres = adres
-                wedstrijdlocatie.adres_uit_crm = True
+                wedstrijdlocatie = WedstrijdLocatie(
+                                        adres=adres,
+                                        plaats=plaats,
+                                        adres_uit_crm=True)
                 wedstrijdlocatie.save()
                 self.stdout.write('[INFO] Nieuwe wedstrijdlocatie voor adres %s' % repr(adres))
                 self._count_toevoegingen += 1
+            else:
+                # indien nog niet ingevuld, zet de plaats
+                if wedstrijdlocatie.plaats != plaats:
+                    wedstrijdlocatie.plaats = plaats
+                    wedstrijdlocatie.save(update_fields=['plaats'])
 
-            # bij adreswijzigingen moet de oude locatie ontkoppeld worden
-            for obj in nhb_ver.wedstrijdlocatie_set.exclude(adres_uit_crm=False).exclude(pk=wedstrijdlocatie.pk):
+            # adres van locatie mag niet wijzigen
+            # dus als vereniging een ander adres heeft, ontkoppel dan de oude locatie
+            for obj in (nhb_ver
+                        .wedstrijdlocatie_set
+                        .exclude(adres_uit_crm=False)           # niet extern/buitenbaan
+                        .exclude(pk=wedstrijdlocatie.pk)):
                 nhb_ver.wedstrijdlocatie_set.remove(obj)
                 self.stdout.write('[INFO] Vereniging %s ontkoppeld van wedstrijdlocatie met adres %s' % (nhb_ver, repr(obj.adres)))
                 self._count_wijzigingen += 1
@@ -827,9 +949,29 @@ class Command(BaseCommand):
                 wedstrijdlocatie.verenigingen.add(nhb_ver)
                 self.stdout.write('[INFO] Vereniging %s gekoppeld aan wedstrijdlocatie %s' % (nhb_ver, repr(adres)))
                 self._count_toevoegingen += 1
+
+            # zoek ook de buitenbaan van de vereniging erbij
+            try:
+                buiten_locatie = nhb_ver.wedstrijdlocatie_set.get(baan_type=BAAN_TYPE_BUITEN)
+            except WedstrijdLocatie.DoesNotExist:
+                # vereniging heeft geen buitenlocatie
+                pass
+            else:
+                updated = list()
+                if buiten_locatie.plaats != wedstrijdlocatie.plaats:
+                    buiten_locatie.plaats = wedstrijdlocatie.plaats
+                    updated.append('plaats')
+
+                if buiten_locatie.adres != wedstrijdlocatie.adres:
+                    buiten_locatie.adres = wedstrijdlocatie.adres
+                    updated.append('adres')
+
+                if len(updated):
+                    buiten_locatie.save(update_fields=updated)
         # for
 
-        # TODO: vereniging opruimen
+        # TODO: zichtbaar=False zetten voor wedstrijdlocatie zonder vereniging
+        # TODO: zichtbaar=True zetten voor (revived) wedstrijdlocatie met vereniging
 
     def handle(self, *args, **options):
         self.dryrun = options['dryrun']
@@ -869,6 +1011,7 @@ class Command(BaseCommand):
 
         # vang generieke fouten af
         try:
+            self._maak_cache()
             self._vind_recordhouders()
             self._import_rayons(data['rayons'])
             self._import_regions(data['regions'])

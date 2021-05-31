@@ -359,7 +359,8 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
         # for
         totalen.append(som)
 
-    def _maak_data_blazoen_behoefte(self, context, deelcomp, objs):
+    @staticmethod
+    def _maak_data_blazoen_behoefte(context, deelcomp, objs):
         """ maak het overzicht hoeveel blazoenen er nodig zijn
             voor elk dagdeel
         """
@@ -600,7 +601,7 @@ class Inschrijfmethode3BehoefteAlsBestandView(Inschrijfmethode3BehoefteView):
         writer.writerow(['-', 'Blazoen type'] + context['dagdelen'] + ['Totaal'])
 
         for behoefte in context['blazoen_count']:
-            writer.writerow(behoefte)
+            writer.writerow(['-'] + behoefte)
         # for
 
         return response

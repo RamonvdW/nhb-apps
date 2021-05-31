@@ -10,11 +10,11 @@ from django.utils import timezone
 
 def zet_lid_tot_einde_jaar(apps, _):
     """ zet het nieuwe veld op alle NhbLid objecten """
+
     # haal de klassen op die van toepassing zijn vóór de migratie
+    nhblid_klas = apps.get_model('NhbStructuur', 'NhbLid')
 
     year_now = timezone.now().year
-
-    nhblid_klas = apps.get_model('NhbStructuur', 'NhbLid')
     for lid in nhblid_klas.objects.all():       # pragma: no cover
         lid.lid_tot_einde_jaar = year_now
     # for

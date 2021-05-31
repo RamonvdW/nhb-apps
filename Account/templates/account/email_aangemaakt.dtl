@@ -9,16 +9,17 @@
 {% block title %}Account aangemaakt{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="account-aangemaakt-email" %}
 
-<h4>E-mail bevestigen</h4>
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="account-aangemaakt-email" %}
 
-<p>Het account voor bondsnummer <b>{{ login_naam }}</b> is aangemaakt. Dit nummer is je inlog naam.</p>
+    <h4>E-mail bevestigen</h4>
 
-<p>We hebben een e-mail gestuurd naar <b>{{ partial_email }}</b> om zeker te zijn dat we je kunnen bereiken.</p>
+    <p>Het account voor bondsnummer <b>{{ login_naam }}</b> is aangemaakt. Dit nummer is je inlog naam.</p>
 
-<p>Volg de instructies in de e-mail om het aanmaken van je account af te ronden. Daarna kan je inloggen.</p>
+    <p>We hebben een e-mail gestuurd naar <b>{{ partial_email }}</b> om zeker te zijn dat we je kunnen bereiken.</p>
 
-<p>Deze pagina kan je sluiten.</p>
+    <p>Volg de instructies in de e-mail om het aanmaken van je account af te ronden. Daarna kan je inloggen.</p>
+
+    <p>Deze pagina kan je sluiten.</p>
 
 {% endblock %}

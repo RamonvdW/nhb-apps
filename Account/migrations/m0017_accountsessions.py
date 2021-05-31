@@ -11,7 +11,7 @@ import django.db.models.deletion
 
 
 def koppel_sessies(apps, _):
-    # ga eenmalig door alle sessies heen en koppel ze aan de juiste gebruiker
+    """ doorloop eenmalig door alle sessies heen en koppel ze aan de juiste gebruiker """
 
     # haal de klassen op die van toepassing zijn op het moment van migratie
     account_klas = apps.get_model('Account', 'Account')

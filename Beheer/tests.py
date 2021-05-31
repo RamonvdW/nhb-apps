@@ -11,10 +11,9 @@ from Overig.e2ehelpers import E2EHelpers
 
 
 # updaten met dit commando:
-#  for x in `./manage.py show_urls --settings=nhbapps.settings_dev | rev | cut -d'/' -f2- | rev | grep '/beheer/'`; do echo "'$x/',"; done | grep -vE ':object_id>/|/add/|/autocomplete/'
+#  for x in `./manage.py show_urls --settings=nhbapps.settings_dev | rev | cut -d'/' -f2- | rev | grep '/beheer/'; do echo "'$x/',"; done | grep -vE ':object_id>/|/add/|/autocomplete/'
 BEHEER_PAGINAS = (
     '/beheer/Account/account/',
-    '/beheer/Account/account/<id>/password/',
     '/beheer/Account/accountemail/',
     '/beheer/BasisTypen/boogtype/',
     '/beheer/BasisTypen/indivwedstrijdklasse/',
@@ -53,10 +52,10 @@ BEHEER_PAGINAS = (
     '/beheer/Score/score/',
     '/beheer/Score/scorehist/',
     '/beheer/Taken/taak/',
-    '/beheer/Wedstrijden/wedstrijd/',
-    '/beheer/Wedstrijden/wedstrijdenplan/',
+    '/beheer/Wedstrijden/competitiewedstrijd/',
+    '/beheer/Wedstrijden/competitiewedstrijdenplan/',
+    '/beheer/Wedstrijden/competitiewedstrijduitslag/',
     '/beheer/Wedstrijden/wedstrijdlocatie/',
-    '/beheer/Wedstrijden/wedstrijduitslag/',
     '/beheer/auth/group/',
     '/beheer/jsi18n/',
     '/beheer/login/',

@@ -9,12 +9,14 @@ from django.core import management
 from BasisTypen.models import BoogType
 from Competitie.models import (Competitie, DeelCompetitie, DeelcompetitieRonde,
                                RegioCompetitieSchutterBoog, KampioenschapSchutterBoog,
-                               AG_NUL, LAAG_REGIO, LAAG_BK)
+                               LAAG_REGIO, LAAG_BK)
 from Competitie.test_fase import zet_competitie_fase
+from Competitie.operations import competities_aanmaken, competitie_klassegrenzen_vaststellen
 from NhbStructuur.models import NhbRegio, NhbLid, NhbVereniging
 from Schutter.models import SchutterBoog
-from Score.models import Score, ScoreHist, SCORE_WAARDE_VERWIJDERD, score_indiv_ag_opslaan
-from Wedstrijden.models import Wedstrijd
+from Score.models import Score, ScoreHist, SCORE_WAARDE_VERWIJDERD
+from Score.operations import score_indiv_ag_opslaan
+from Wedstrijden.models import CompetitieWedstrijd
 from Overig.e2ehelpers import E2EHelpers
 from .models import CompetitieKlasse
 import datetime
@@ -25,31 +27,24 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
     """ unittests voor de Competitie applicatie, management command regiocomp_upd_tussenstand """
 
     def _maak_competitie_aan(self):
-        # login als BB
-        self.e2e_login_and_pass_otp(self.account_bb)
-        self.e2e_wisselnaarrol_bb()
-        self.e2e_check_rol('BB')
-
         # maak de competitie aan
-        with self.assert_max_queries(20):
-            self.client.post(self.url_aanmaken)
-        self.comp = Competitie.objects.filter(afstand=18)[0]
+        competities_aanmaken()
 
-        comp_18 = Competitie.objects.get(afstand='18')
+        self.comp = comp_18 = Competitie.objects.get(afstand='18')
         comp_25 = Competitie.objects.get(afstand='25')
 
         score_indiv_ag_opslaan(self.schutterboog_100005, 18, 9.500, None, "Test")
 
         # klassegrenzen vaststellen
-        resp = self.client.post(self.url_klassegrenzen_vaststellen % comp_18.pk)
-        self.assert_is_redirect_not_plein(resp)     # check success
-        resp = self.client.post(self.url_klassegrenzen_vaststellen % comp_25.pk)
-        self.assert_is_redirect_not_plein(resp)     # check success
+        competitie_klassegrenzen_vaststellen(comp_18)
+        competitie_klassegrenzen_vaststellen(comp_25)
 
         self.deelcomp_r101 = DeelCompetitie.objects.filter(laag='Regio',
                                                            competitie=self.comp,
                                                            nhb_regio=self.regio_101)[0]
 
+        # login als BB
+        self.e2e_login_and_pass_otp(self.account_bb)
         # wissel naar RCL functie
         self.e2e_wissel_naar_functie(self.deelcomp_r101.functie)
 
@@ -66,8 +61,8 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
         self.client.post(self.url_planning_regio_ronde % ronde.pk, {})
         self.client.post(self.url_planning_regio_ronde % ronde.pk, {})
 
-        self.assertEqual(7, Wedstrijd.objects.count())
-        wedstrijd_pks = Wedstrijd.objects.all().values_list('pk', flat=True)
+        self.assertEqual(7, CompetitieWedstrijd.objects.count())
+        wedstrijd_pks = CompetitieWedstrijd.objects.all().values_list('pk', flat=True)
 
         # laat de wedstrijd.uitslag aanmaken en pas de wedstrijd nog wat aan
         self.uitslagen = list()
@@ -75,7 +70,7 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
         for pk in wedstrijd_pks[:]:     # copy to ensure stable
             with self.assert_max_queries(20):
                 resp = self.client.get(self.url_uitslag_invoeren % pk)
-            wedstrijd = Wedstrijd.objects.get(pk=pk)
+            wedstrijd = CompetitieWedstrijd.objects.get(pk=pk)
             self.assertIsNotNone(wedstrijd.uitslag)
             wedstrijd.vereniging = self.ver
             wedstrijd.tijd_begin_wedstrijd = "%02d:00" % uur
@@ -127,7 +122,7 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
             ronde.week_nr = week_nr
             ronde.save()
 
-            wedstrijd = Wedstrijd.objects.get(pk=wedstrijd.pk)
+            wedstrijd = CompetitieWedstrijd.objects.get(pk=wedstrijd.pk)
             self.uitslagen.append(wedstrijd.uitslag)
         # for
 
@@ -253,8 +248,6 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
     def setUp(self):
         """ initialisatie van de test case """
 
-        self.url_aanmaken = '/bondscompetities/aanmaken/'
-        self.url_klassegrenzen_vaststellen = '/bondscompetities/%s/klassegrenzen/vaststellen/'
         self.url_planning_regio = '/bondscompetities/planning/regio/%s/'                  # deelcomp_pk
         self.url_planning_regio_ronde = '/bondscompetities/planning/regio/ronde/%s/'      # ronde_pk
         self.url_uitslag_invoeren = '/bondscompetities/scores/uitslag-invoeren/%s/'       # wedstrijd_pk
@@ -528,8 +521,7 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
                             indiv__is_onbekend=False,
                             indiv__boogtype__afkorting=self.boog_r.afkorting)):
             for lkl in (obj.indiv.leeftijdsklassen      # pragma: no branch
-                        .filter(geslacht='V',
-                                min_wedstrijdleeftijd__gt=20)):
+                        .filter(afkorting='SV')):
                 klasse = obj
                 break
             # for
@@ -674,7 +666,7 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
         lid.save()
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(157):
+        with self.assert_max_queries(157, check_duration=False):        # 7 seconden is boven de limiet
             management.call_command('regiocomp_upd_tussenstand', '7', '--quick', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())

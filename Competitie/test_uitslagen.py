@@ -10,6 +10,7 @@ from BasisTypen.models import BoogType
 from Competitie.models import (Competitie, CompetitieKlasse, DeelCompetitie,
                                RegioCompetitieSchutterBoog,
                                LAAG_BK, LAAG_RK, LAAG_REGIO, AG_NUL)
+from Competitie.test_competitie import maak_competities_en_zet_fase_b
 from Functie.models import maak_functie, Functie
 from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
 from Schutter.models import SchutterBoog
@@ -118,26 +119,9 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         # TODO: schrijf schutters in (als RCL --> HWL)
 
     def _competitie_aanmaken(self):
-        url_kies = '/bondscompetities/'
-        url_aanmaken = '/bondscompetities/aanmaken/'
-        url_ag_vaststellen = '/bondscompetities/ag-vaststellen/'
-        url_klassegrenzen_vaststellen = '/bondscompetities/%s/klassegrenzen/vaststellen/'
 
         # competitie aanmaken
-        with self.assert_max_queries(20):
-            resp = self.client.post(url_aanmaken)
-        self.assert_is_redirect(resp, url_kies)
-
-        # aanvangsgemiddelden vaststellen
-        with self.assert_max_queries(5):
-            self.client.post(url_ag_vaststellen)
-
-        self.comp_18 = Competitie.objects.get(afstand='18')
-        self.comp_25 = Competitie.objects.get(afstand='25')
-
-        # klassegrenzen vaststellen
-        self.client.post(url_klassegrenzen_vaststellen % self.comp_18.pk)
-        self.client.post(url_klassegrenzen_vaststellen % self.comp_25.pk)
+        self.comp_18, self.comp_25 = maak_competities_en_zet_fase_b()
 
         # zet de 18m open voor inschrijving
         self.comp_18.begin_aanmeldingen = datetime.date(year=self.comp_18.begin_jaar, month=1, day=1)
@@ -230,16 +214,15 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         aanmelding.save()
 
     def test_top(self):
-        comp = Competitie.objects.get(afstand=25)               # let op: 18 werkt niet
-
         now = timezone.now()
         now = datetime.date(year=now.year, month=now.month, day=now.day)
-        if comp.begin_aanmeldingen == now:                          # pragma: no cover
-            comp.begin_aanmeldingen += datetime.timedelta(days=1)   # needed once a year
-
         way_before = datetime.date(year=2018, month=1, day=1)   # must be before timezone.now()
 
+        comp = Competitie.objects.get(afstand=25)               # let op: 18 werkt niet
+
         # fase A
+        comp.begin_aanmeldingen = now + datetime.timedelta(days=1)      # morgen
+        comp.save()
         comp.bepaal_fase()
         self.assertTrue(comp.fase < 'B', msg="comp.fase=%s (expected: below B)" % comp.fase)
         with self.assert_max_queries(20):

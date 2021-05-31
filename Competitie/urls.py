@@ -13,6 +13,7 @@ from . import (views_aangemeld,
                views_planning_regio,
                views_planning_bond,
                views_planning_rayon,
+               views_regio_teams,
                views_uitslagen,
                views_scores)
 
@@ -47,9 +48,9 @@ urlpatterns = [
          views_bb.CompetitieAanmakenView.as_view(),
          name='aanmaken'),
 
-    path('ag-vaststellen/',
+    path('ag-vaststellen/<afstand>/',
          views_bb.AGVaststellenView.as_view(),
-         name='ag-vaststellen'),
+         name='ag-vaststellen-afstand'),
 
     path('<comp_pk>/klassegrenzen/vaststellen/',
          views_bb.KlassegrenzenVaststellenView.as_view(),
@@ -62,13 +63,28 @@ urlpatterns = [
 
     # RCL schermen
     path('<comp_pk>/instellingen/regio-<regio_nr>/',
-         views_planning_regio.RegioInstellingenView.as_view(),
+         views_regio_teams.RegioInstellingenView.as_view(),
          name='regio-instellingen'),
 
+    path('<comp_pk>/instellingen/globaal/',
+         views_regio_teams.RegioInstellingenGlobaalView.as_view(),
+         name='regio-instellingen-globaal'),
+
     path('<comp_pk>/ag-controle/regio-<regio_nr>/',
-         views_planning_regio.AGControleView.as_view(),
+         views_regio_teams.AGControleView.as_view(),
          name='regio-ag-controle'),
 
+    path('regio/<deelcomp_pk>/teams/',
+         views_regio_teams.RegioTeamsView.as_view(),
+         name='regio-teams'),
+
+    path('regio/<deelcomp_pk>/poules/',
+         views_regio_teams.RegioPoulesView.as_view(),
+         name='regio-poules'),
+
+    path('regio/poules/<poule_pk>/wijzig/',
+         views_regio_teams.WijzigPouleView.as_view(),
+         name='wijzig-poule'),
 
     # ingeschreven
     path('<comp_pk>/lijst-regiocompetitie/regio-<regio_pk>/dagdeel-behoefte/',
@@ -118,10 +134,6 @@ urlpatterns = [
     path('planning/regio/<deelcomp_pk>/cluster/<cluster_pk>/',
          views_planning_regio.RegioClusterPlanningView.as_view(),
          name='regio-cluster-planning'),
-
-    path('planning/regio/<deelcomp_pk>/teams/',
-         views_planning_regio.RegioTeamsView.as_view(),
-         name='regio-teams'),
 
     path('planning/regio/ronde/<ronde_pk>/',
          views_planning_regio.RegioRondePlanningView.as_view(),
@@ -251,6 +263,7 @@ urlpatterns = [
          views_planning_bond.DoorzettenNaarBKView.as_view(),
          name='bko-doorzetten-naar-bk'),
 
+    # TODO: maak afsluiten competitie
     #path('<comp_pk>/afsluiten/',
     #     views_planning_bond.CompetitieAfsluitenView.as_view(),
     #     name='bko-afsluiten-competitie'),

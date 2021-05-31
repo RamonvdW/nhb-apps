@@ -4,182 +4,21 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.conf import settings
 from django.http import HttpResponseRedirect, Http404
 from django.urls import reverse
-from django.db.models import Count
 from django.core.exceptions import PermissionDenied
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Plein.menu import menu_dynamics
-from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving
+from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
 from Functie.models import Functie
-from NhbStructuur.models import NhbCluster, NhbVereniging
+from NhbStructuur.models import NhbVereniging
+from Plein.menu import menu_dynamics
 from Wedstrijden.models import WedstrijdLocatie, BAANTYPE2STR
 from Logboek.models import schrijf_in_logboek
 from .forms import AccommodatieDetailsForm
-import copy
 
 
-TEMPLATE_LIJST_VERENIGINGEN = 'vereniging/lijst-verenigingen.dtl'
 TEMPLATE_ACCOMMODATIE_DETAILS = 'vereniging/accommodatie-details.dtl'
-TEMPLATE_WIJZIG_CLUSTERS = 'vereniging/wijzig-clusters.dtl'
-
-
-class LijstVerenigingenView(UserPassesTestMixin, TemplateView):
-
-    """ Via deze view worden kan een BKO, RKO of RCL
-          de lijst van verenigingen zien, in zijn werkgebied
-    """
-
-    template_name = TEMPLATE_LIJST_VERENIGINGEN
-    raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
-
-    def test_func(self):
-        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        rol_nu = rol_get_huidige(self.request)
-        return rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_SEC)
-
-    @staticmethod
-    def _get_verenigingen(rol_nu, functie_nu):
-
-        # vul een kleine cache om vele database verzoeken te voorkomen
-        hwl_functies = dict()   # [nhb_ver] = Functie()
-        functie2count = dict()  # [functie.pk] = aantal
-        for functie in (Functie
-                        .objects
-                        .select_related('nhb_ver')
-                        .annotate(accounts_count=Count('accounts'))
-                        .all()):
-            if functie.rol == 'HWL':
-                hwl_functies[functie.nhb_ver.ver_nr] = functie
-
-            functie2count[functie.pk] = functie.accounts_count
-        # for
-
-        if rol_nu == Rollen.ROL_RKO:
-            # toon de lijst van verenigingen in het rayon van de RKO
-            # het rayonnummer is verkrijgbaar via de deelcompetitie van de functie
-            return (NhbVereniging
-                    .objects
-                    .select_related('regio', 'regio__rayon')
-                    .exclude(regio__regio_nr=100)
-                    .filter(regio__rayon=functie_nu.nhb_rayon)
-                    .prefetch_related('wedstrijdlocatie_set',
-                                      'clusters')
-                    .order_by('regio__regio_nr', 'ver_nr'))
-
-        if rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO):
-            # toon de landelijke lijst
-            return (NhbVereniging
-                    .objects
-                    .select_related('regio', 'regio__rayon')
-                    .exclude(regio__regio_nr=100)
-                    .prefetch_related('wedstrijdlocatie_set',
-                                      'clusters')
-                    .order_by('regio__regio_nr', 'ver_nr'))
-
-        if rol_nu == Rollen.ROL_IT:
-            # landelijke lijst + telling aantal leden
-            objs = (NhbVereniging
-                    .objects
-                    .select_related('regio', 'regio__rayon')
-                    .exclude(regio__regio_nr=100)
-                    .prefetch_related('wedstrijdlocatie_set',
-                                      'functie_set',
-                                      'clusters')
-                    .annotate(nhblid_set_count=Count('nhblid'))
-                    .order_by('regio__regio_nr', 'ver_nr'))
-
-            for obj in objs:
-                obj.aantal_leden = obj.nhblid_set_count
-                obj.aantal_beheerders = 0
-                for functie in obj.functie_set.all():
-                    obj.aantal_beheerders += functie2count[functie.pk]
-                # for
-            # for
-            return objs
-
-        # toon de lijst van verenigingen in de regio
-        if rol_nu == Rollen.ROL_RCL:
-            # het regionummer is verkrijgbaar via de deelcompetitie van de functie
-            objs = (NhbVereniging
-                    .objects
-                    .filter(regio=functie_nu.nhb_regio)
-                    .select_related('regio')
-                    .prefetch_related('wedstrijdlocatie_set',
-                                      'clusters')
-                    .order_by('ver_nr'))
-        else:
-            # rol_nu == Rollen.ROL_HWL / ROL_SEC
-            # het regionummer is verkrijgbaar via de vereniging
-            objs = (NhbVereniging
-                    .objects
-                    .filter(regio=functie_nu.nhb_ver.regio)
-                    .select_related('regio')
-                    .prefetch_related('wedstrijdlocatie_set',
-                                      'clusters')
-                    .order_by('ver_nr'))
-
-        return objs
-
-    def get_context_data(self, **kwargs):
-        """ called by the template system to get the context data for the template """
-        context = super().get_context_data(**kwargs)
-
-        context['toon_rayon'] = True
-        context['toon_regio'] = True
-        context['toon_cluster'] = False
-        context['toon_details'] = True
-        context['toon_ledental'] = False
-
-        menu_actief = 'hetplein'
-
-        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
-        context['huidige_rol'] = rol_get_beschrijving(self.request)
-
-        context['landelijk'] = rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB, Rollen.ROL_BKO)
-
-        if rol_nu == Rollen.ROL_IT:
-            context['toon_ledental'] = True
-
-        if rol_nu == Rollen.ROL_RKO:
-            context['toon_rayon'] = False
-
-        if rol_nu in (Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_SEC):
-            context['toon_rayon'] = False
-            context['toon_regio'] = False
-            if rol_nu == Rollen.ROL_HWL:
-                menu_actief = 'vereniging'
-
-        context['verenigingen'] = verenigingen = self._get_verenigingen(rol_nu, functie_nu)
-
-        # voeg de url toe voor de "details" knoppen
-        for nhbver in verenigingen:
-
-            nhbver.details_url = reverse('Vereniging:accommodatie-details',
-                                         kwargs={'vereniging_pk': nhbver.pk})
-
-            for loc in nhbver.wedstrijdlocatie_set.all():
-                if loc.baan_type == 'B':
-                    nhbver.buiten_locatie = loc
-                else:
-                    nhbver.locatie = loc
-            # for
-
-            if nhbver.clusters.count() > 0:
-                context['toon_cluster'] = True
-                letters = [cluster.letter for cluster in nhbver.clusters.all()]
-                letters.sort()
-                nhbver.cluster_letters = ",".join(letters)
-
-                if not context['toon_regio']:
-                    # verander in 101a,b
-                    nhbver.cluster_letters = str(nhbver.regio.regio_nr) + nhbver.cluster_letters
-        # for
-
-        menu_dynamics(self.request, context, actief=menu_actief)
-        return context
 
 
 class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
@@ -213,14 +52,17 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
         # zoek de locaties erbij
         binnen_locatie = None
         buiten_locatie = None
-        for loc in nhbver.wedstrijdlocatie_set.all():
-            if loc.baan_type == 'B':
+        externe_locaties = list()
+        for loc in nhbver.wedstrijdlocatie_set.exclude(zichtbaar=False).all():
+            if loc.baan_type == 'E':
+                externe_locaties.append(loc)
+            elif loc.baan_type == 'B':
                 buiten_locatie = loc
             else:
                 binnen_locatie = loc
         # for
 
-        return binnen_locatie, buiten_locatie, nhbver
+        return binnen_locatie, buiten_locatie, externe_locaties, nhbver
 
     @staticmethod
     def _mag_wijzigen(nhbver, rol_nu, functie_nu):
@@ -245,10 +87,19 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        binnen_locatie, buiten_locatie, nhbver = self._get_locaties_nhbver_or_404(**kwargs)
+        binnen_locatie, buiten_locatie, externe_locaties, nhbver = self._get_locaties_nhbver_or_404(**kwargs)
+        if buiten_locatie and not buiten_locatie.zichtbaar:
+            buiten_locatie = None
         context['locatie'] = binnen_locatie
         context['buiten_locatie'] = buiten_locatie
+        context['externe_locaties'] = externe_locaties
         context['nhbver'] = nhbver
+
+        for locatie in externe_locaties:
+            locatie.geen_naam = locatie.naam.strip() == ""
+            locatie.geen_plaats = locatie.plaats.strip() == ""
+            locatie.geen_disciplines = locatie.disciplines_str() == ""
+        # for
 
         # zoek de beheerders erbij
         qset = Functie.objects.filter(nhb_ver=nhbver).prefetch_related('accounts')
@@ -288,6 +139,15 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
             context['buiten_banen'] = [nr for nr in range(2, 80+1)]   # 1 baan = handmatig in .dtl
             context['buiten_max_afstand'] = [nr for nr in range(30, 100+1, 10)]
 
+            context['disc'] = disc = list()
+            disc.append(('disc_outdoor', 'Outdoor', buiten_locatie.discipline_outdoor))
+            # disc.append(('disc_indoor', 'Indoor', buiten_locatie.discipline_indoor))
+            disc.append(('disc_25m1p', '25m 1pijl', buiten_locatie.discipline_25m1pijl))
+            disc.append(('disc_veld', 'Veld', buiten_locatie.discipline_veld))
+            disc.append(('disc_3d', '3D', buiten_locatie.discipline_3d))
+            disc.append(('disc_run', 'Run archery', buiten_locatie.discipline_run))
+            disc.append(('disc_clout', 'Clout', buiten_locatie.discipline_clout))
+
         # terug en opslaan knoppen voor in de template
         if 'is_ver' in kwargs:      # wordt gezet door VerenigingAccommodatieDetailsView
             context['terug_url'] = reverse('Vereniging:overzicht')
@@ -321,6 +181,9 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
                                                kwargs={'functie_pk': functie_hwl.pk})
             context['url_email_wl'] = reverse('Functie:wijzig-email',
                                               kwargs={'functie_pk': functie_wl.pk})
+
+            if buiten_locatie:
+                context['url_verwijder_buitenbaan'] = context['opslaan_url']
         else:
             context['readonly'] = True
 
@@ -335,25 +198,38 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
         """ Deze functie wordt aangeroepen als de gebruik op de 'opslaan' knop drukt
             op het accommodatie-details formulier.
         """
-        binnen_locatie, buiten_locatie, nhbver = self._get_locaties_nhbver_or_404(**kwargs)
+        binnen_locatie, buiten_locatie, _, nhbver = self._get_locaties_nhbver_or_404(**kwargs)
 
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
 
         if not self._mag_wijzigen(nhbver, rol_nu, functie_nu):
             raise PermissionDenied('Wijzigen niet toegestaan')
 
+        if request.POST.get('verwijder_buitenbaan', None):
+            if buiten_locatie:
+                buiten_locatie.zichtbaar = False
+                buiten_locatie.save()
+            if 'is_ver' in kwargs:  # wordt gezet door VerenigingAccommodatieDetailsView
+                urlconf = 'Vereniging:vereniging-accommodatie-details'
+            else:
+                urlconf = 'Vereniging:accommodatie-details'
+            url = reverse(urlconf, kwargs={'vereniging_pk': nhbver.pk})
+            return HttpResponseRedirect(url)
+
         if request.POST.get('maak_buiten_locatie', None):
             if buiten_locatie:
-                # er is al een buitenlocatie
-                raise Http404('Er is al een buitenlocatie')
-
-            buiten = WedstrijdLocatie(
-                            baan_type='B',
-                            adres_uit_crm=False,
-                            adres='',
-                            notities='')
-            buiten.save()
-            buiten.verenigingen.add(nhbver)
+                if not buiten_locatie.zichtbaar:
+                    buiten_locatie.zichtbaar = True
+                    buiten_locatie.save()
+            elif binnen_locatie:
+                buiten = WedstrijdLocatie(
+                                baan_type='B',
+                                adres_uit_crm=False,
+                                adres=binnen_locatie.adres,
+                                plaats=binnen_locatie.plaats,
+                                notities='')
+                buiten.save()
+                buiten.verenigingen.add(nhbver)
 
             if 'is_ver' in kwargs:  # wordt gezet door VerenigingAccommodatieDetailsView
                 urlconf = 'Vereniging:vereniging-accommodatie-details'
@@ -391,47 +267,83 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
                 binnen_locatie.max_dt_per_baan = data
 
             if len(msgs) > 0:
-                activiteit = "Aanpassingen aan locatie %s: %s" % (str(binnen_locatie), "; ".join(msgs))
+                activiteit = "Aanpassingen aan binnen locatie van vereniging %s: %s" % (nhbver, "; ".join(msgs))
+                schrijf_in_logboek(request.user, 'Accommodaties', activiteit)
+                binnen_locatie.save()
+
+            disc_old = binnen_locatie.disciplines_str()
+            binnen_locatie.discipline_indoor = (str(binnen_locatie.banen_18m) != "0" or
+                                                str(binnen_locatie.banen_25m) != "0")
+            binnen_locatie.discipline_25m1pijl = False
+            binnen_locatie.discipline_outdoor = False
+            binnen_locatie.discipline_clout = False
+            binnen_locatie.discipline_veld = False
+            binnen_locatie.discipline_run = False
+            binnen_locatie.discipline_3d = False
+            disc_new = binnen_locatie.disciplines_str()
+            if disc_old != disc_new:
+                activiteit = "Aanpassing disciplines van binnen locatie van vereniging %s: [%s] (was [%s])" % (
+                                nhbver, disc_new, disc_old)
                 schrijf_in_logboek(request.user, 'Accommodaties', activiteit)
                 binnen_locatie.save()
 
             data = form.cleaned_data.get('notities')
+            data = data.replace('\r\n', '\n')
             if binnen_locatie.notities != data:
-                activiteit = "Aanpassing notitie van locatie %s: %s (was %s)" % (str(binnen_locatie), repr(data), repr(binnen_locatie.notities))
+                activiteit = "Aanpassing bijzonderheden van binnen locatie van vereniging %s: %s (was %s)" % (
+                                nhbver,
+                                repr(data.replace('\n', ' / ')),
+                                repr(binnen_locatie.notities.replace('\n', ' / ')))
                 schrijf_in_logboek(request.user, 'Accommodaties', activiteit)
                 binnen_locatie.notities = data
                 binnen_locatie.save()
 
         if buiten_locatie:
             msgs = list()
+            updated = list()
 
             data = form.cleaned_data.get('buiten_banen')
             if buiten_locatie.buiten_banen != data:
-                msgs.append("Aantal banen aangepast van %s naar %s" % (buiten_locatie.buiten_banen, data))
+                msgs.append("Aantal buiten banen aangepast van %s naar %s" % (buiten_locatie.buiten_banen, data))
                 buiten_locatie.buiten_banen = data
+                updated.append('buiten_banen')
 
             data = form.cleaned_data.get('buiten_max_afstand')
             if buiten_locatie.buiten_max_afstand != data:
                 msgs.append("Maximale afstand aangepast van %s naar %s" % (buiten_locatie.buiten_max_afstand, data))
                 buiten_locatie.buiten_max_afstand = data
+                updated.append('buiten_max_afstand')
 
             if len(msgs) > 0:
-                activiteit = "Aanpassingen aan buiten locatie %s: %s" % (str(buiten_locatie), "; ".join(msgs))
+                activiteit = "Aanpassingen aan buiten locatie van vereniging %s: %s" % (nhbver, "; ".join(msgs))
                 schrijf_in_logboek(request.user, 'Accommodaties', activiteit)
-                buiten_locatie.save()
 
-            data = form.cleaned_data.get('buiten_adres')
-            if buiten_locatie.adres != data:
-                activiteit = "Aanpassing adres van buiten locatie %s: %s (was %s)" % (str(buiten_locatie), repr(data), repr(buiten_locatie.adres))
-                schrijf_in_logboek(request.user, 'Accommodaties', activiteit)
-                buiten_locatie.adres = data
-                buiten_locatie.save()
+            buiten_locatie.save(update_fields=updated)
 
             data = form.cleaned_data.get('buiten_notities')
+            data = data.replace('\r\n', '\n')
             if buiten_locatie.notities != data:
-                activiteit = "Aanpassing notitie van buiten locatie %s: %s (was %s)" % (str(buiten_locatie), repr(data), repr(buiten_locatie.notities))
+                activiteit = "Aanpassing notitie van buiten locatie van vereniging %s: %s (was %s)" % (
+                                    nhbver,
+                                    repr(data.replace('\n', ' / ')),
+                                    repr(buiten_locatie.notities.replace('\n', ' / ')))
                 schrijf_in_logboek(request.user, 'Accommodaties', activiteit)
                 buiten_locatie.notities = data
+                buiten_locatie.save(update_fields=['notities'])
+
+            disc_old = buiten_locatie.disciplines_str()
+            buiten_locatie.discipline_25m1pijl = form.cleaned_data.get('disc_25m1p')
+            buiten_locatie.discipline_outdoor = form.cleaned_data.get('disc_outdoor')
+            buiten_locatie.discipline_indoor = False
+            buiten_locatie.discipline_clout = form.cleaned_data.get('disc_clout')
+            buiten_locatie.discipline_veld = form.cleaned_data.get('disc_veld')
+            buiten_locatie.discipline_run = form.cleaned_data.get('disc_run')
+            buiten_locatie.discipline_3d = form.cleaned_data.get('disc_3d')
+            disc_new = buiten_locatie.disciplines_str()
+            if disc_old != disc_new:
+                activiteit = "Aanpassing disciplines van buiten locatie van vereniging %s: [%s] (was [%s])" % (
+                                nhbver, disc_new, disc_old)
+                schrijf_in_logboek(request.user, 'Accommodaties', activiteit)
                 buiten_locatie.save()
 
         if 'is_ver' in kwargs:
@@ -453,180 +365,6 @@ class VerenigingAccommodatieDetailsView(AccommodatieDetailsView):
     def post(self, request, *args, **kwargs):
         kwargs['is_ver'] = True
         return super().post(request, *args, **kwargs)
-
-
-class WijzigClustersView(UserPassesTestMixin, TemplateView):
-
-    """ Via deze view kunnen verenigingen in de clusters geplaatst worden """
-
-    # class variables shared by all instances
-    template_name = TEMPLATE_WIJZIG_CLUSTERS
-    raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self._pk2cluster = dict()
-
-    def test_func(self):
-        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        rol_nu = rol_get_huidige(self.request)
-        return rol_nu == Rollen.ROL_RCL
-
-    def get_context_data(self, **kwargs):
-        """ called by the template system to get the context data for the template """
-        context = super().get_context_data(**kwargs)
-
-        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
-        context['huidige_rol'] = rol_get_beschrijving(self.request)
-
-        # filter clusters die aangepast mogen worden op competitie type
-        # waarvan de definitie heel handig overeen komt met cluster.gebruik
-        context['gebruik'] = gebruik_filter = functie_nu.comp_type
-
-        # cluster namen
-        objs = (NhbCluster
-                .objects
-                .filter(regio=functie_nu.nhb_regio, gebruik=gebruik_filter)
-                .select_related('regio')
-                .order_by('letter'))
-        context['cluster_list'] = objs
-        context['regio_heeft_clusters'] = objs.count() > 0
-        context['opslaan_url'] = reverse('Vereniging:clusters')
-
-        for obj in objs:
-            obj.veld_naam = "naam_%s" % obj.pk
-        # for
-
-        # maak lijstje voor het formulier met de keuze opties van de pull-down lijstjes
-        opts = objs[:]
-        for opt in opts:
-            opt.tekst = opt.cluster_code_str()
-            opt.choice_name = str(opt.pk)       # gebruik de cluster pk als selector
-        # for
-
-        # voeg de "geen cluster" opties toe
-        opt_geen = NhbCluster()
-        opt_geen.tekst = "Geen"
-        opt_geen.choice_name = "0"
-        opts.insert(0, opt_geen)
-
-        # vereniging in de regio
-        objs = (NhbVereniging
-                .objects
-                .filter(regio=functie_nu.nhb_regio)
-                .prefetch_related('clusters')
-                .order_by('ver_nr'))
-        context['object_list'] = objs
-
-        for obj in objs:
-            # voeg form-fields toe die voor de post gebruikt kunnen worden
-            obj.veld_naam = 'ver_' + str(obj.ver_nr)
-
-            # maak een kopie om een vlag te kunnen zetten op de huidige optie
-            obj.cluster_opties = copy.deepcopy(opts)
-
-            # zet de 'selected' vlag op de huidige cluster keuzes voor de vereniging
-            for cluster in obj.clusters.all():
-                # zoek dit cluster op
-                for opt in obj.cluster_opties:
-                    if opt.pk == cluster.pk:
-                        opt.actief = True
-                # for
-            # for
-        # for
-
-        context['terug_url'] = reverse('Plein:plein')
-
-        context['handleiding_clusters_url'] = reverse('Handleiding:Clusters')
-        context['email_bondsburo'] = settings.EMAIL_BONDSBURO
-
-        menu_dynamics(self.request, context, actief='hetplein')
-        return context
-
-    def _swap_cluster(self, nhbver, gebruik):
-        # vertaal de post value naar een NhbCluster object
-        # checkt ook meteen dat het een valide cluster is voor deze regio
-
-        param_name = 'ver_' + str(nhbver.ver_nr)
-        post_param = self.request.POST.get(param_name, None)
-
-        cluster_pk = None
-        if post_param is not None:
-            try:
-                cluster_pk = int(post_param)
-            except (ValueError, TypeError):
-                return
-
-        if cluster_pk is not None:
-            try:
-                new_cluster = self._pk2cluster[cluster_pk]
-            except KeyError:
-                new_cluster = None
-
-            try:
-                huidige = nhbver.clusters.get(gebruik=gebruik)
-            except NhbCluster.DoesNotExist:
-                # vereniging zit niet in een cluster voor de 18m
-                # stop de vereniging in het gevraagde cluster
-                if new_cluster:
-                    nhbver.clusters.add(new_cluster)
-                    activiteit = "Vereniging %s toegevoegd aan cluster %s" % (nhbver, new_cluster)
-                    schrijf_in_logboek(self.request.user, 'Clusters', activiteit)
-                return
-
-            # vereniging zit al in een cluster voor dit gebruik
-            if huidige != new_cluster:
-                # nieuwe keuze is anders, dus verwijder de vereniging uit dit cluster
-                nhbver.clusters.remove(huidige)
-                activiteit = "Vereniging %s verwijderd uit cluster %s" % (nhbver, huidige)
-                schrijf_in_logboek(self.request.user, 'Clusters', activiteit)
-
-                # stop de vereniging in het gevraagde cluster (if any)
-                if new_cluster:
-                    nhbver.clusters.add(new_cluster)
-                    activiteit = "Vereniging %s toegevoegd aan cluster %s" % (nhbver, new_cluster)
-                    schrijf_in_logboek(self.request.user, 'Clusters', activiteit)
-
-    def post(self, request, *args, **kwargs):
-        """ Deze functie wordt aangeroepen als de RCL op de 'opslaan' knop drukt
-            in het wijzig-clusters formulier.
-        """
-
-        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
-
-        # filter clusters die aangepast mogen worden op competitie type
-        # waarvan de definitie heel handig overeen komt met cluster.gebruik
-        gebruik_filter = functie_nu.comp_type
-
-        clusters = (NhbCluster
-                    .objects
-                    .filter(regio=functie_nu.nhb_regio,
-                            gebruik=gebruik_filter))
-
-        # neem de cluster namen over
-        for obj in clusters:
-            self._pk2cluster[obj.pk] = obj
-
-            # haal de ingevoerde naam van het cluster op
-            cluster_veld = "naam_%s" % obj.pk
-            naam = request.POST.get(cluster_veld, obj.naam)
-            if naam != obj.naam:
-                # wijziging opslaan
-                obj.naam = naam[:50]        # te lang kan anders niet opgeslagen worden
-                obj.save()
-        # for
-
-        # neem de cluster keuzes voor de verenigingen over
-        for obj in (NhbVereniging
-                    .objects
-                    .filter(regio=functie_nu.nhb_regio)
-                    .prefetch_related('clusters')):
-
-            self._swap_cluster(obj, gebruik_filter)
-        # for
-
-        url = reverse('Plein:plein')
-        return HttpResponseRedirect(url)
 
 
 # end of file

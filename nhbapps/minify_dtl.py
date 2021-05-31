@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -30,6 +30,9 @@ class Loader(AppDirectoriesLoader):
         """ Remove unnecessary comments, spaces and newlines from javascript """
         # remove single-line comments
         script = re.sub(r'//.*\n', '\n', script)
+
+        # remove block-comments
+        # script = re.sub(re.compile(r'/\*.*?\*/', re.DOTALL), '', script)    # ? = non-greedy
 
         # remove whitespace at start and end of the line
         script = re.sub(r'\n\s+', '\n', script)

@@ -7,7 +7,7 @@
 from django.test import TestCase
 from Overig.e2ehelpers import E2EHelpers
 from NhbStructuur.models import NhbRegio, NhbVereniging
-from .models import Wedstrijd, WedstrijdLocatie
+from .models import CompetitieWedstrijd, WedstrijdLocatie, CompetitieWedstrijdUitslag
 import datetime
 
 
@@ -31,7 +31,7 @@ class TestWedstrijden(E2EHelpers, TestCase):
         self.nhbver1 = ver
 
     def test_wedstrijd(self):
-        wedstrijd = Wedstrijd()
+        wedstrijd = CompetitieWedstrijd()
         wedstrijd.datum_wanneer = datetime.date(year=2020, month=9, day=10)
         wedstrijd.tijd_begin_aanmelden = datetime.time(hour=13, minute=59, second=59)
         wedstrijd.tijd_begin_wedstrijd = wedstrijd.tijd_begin_aanmelden
@@ -46,7 +46,23 @@ class TestWedstrijden(E2EHelpers, TestCase):
         locatie.adres = 'Hallo\ndaar'
         self.assertTrue(str(locatie) != '')
 
+        locatie.discipline_25m1pijl = True
+        locatie.discipline_outdoor = True
+        locatie.discipline_indoor = True
+        locatie.discipline_clout = True
+        locatie.discipline_veld = True
+        locatie.discipline_run = True
+        locatie.discipline_3d = True
+        self.assertTrue(str(locatie) != '')
+
         locatie.zichtbaar = False
         self.assertTrue(str(locatie) != '')
+
+    def test_uitslag(self):
+        uitslag = CompetitieWedstrijdUitslag(max_score=123, afstand_meter=45)
+        self.assertTrue(str(uitslag) != '')
+        uitslag.is_bevroren = True
+        self.assertTrue(str(uitslag) != '')
+
 
 # end of file

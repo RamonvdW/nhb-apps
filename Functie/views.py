@@ -272,7 +272,7 @@ class WijzigEmailView(UserPassesTestMixin, View):
             menu_dynamics(self.request, context, actief='vereniging')
         else:
             context['terug_url'] = reverse('Functie:overzicht')
-            menu_dynamics(self.request, context, actief='hetplein')
+            menu_dynamics(self.request, context, actief='competitie')
 
         context['form'] = form
         context['form_submit_url'] = reverse('Functie:wijzig-email', kwargs={'functie_pk': functie.pk})
@@ -337,7 +337,8 @@ class OntvangBeheerderWijzigingenView(View):
 
     def post(self, request, *args, **kwargs):
         """ deze functie wordt aangeroepen als een POST request ontvangen is.
-            dit is gekoppeld aan het drukken op de Registreer knop.
+            dit is gekoppeld aan het drukken op de knop om een beheerder te koppelen
+            (WijzigBeheerdersView)
         """
         functie_pk = self.kwargs['functie_pk']
         try:
@@ -539,7 +540,7 @@ class WijzigBeheerdersView(UserPassesTestMixin, ListView):
             menu_dynamics(self.request, context, actief='vereniging')
         else:
             context['terug_url'] = reverse('Functie:overzicht')
-            menu_dynamics(self.request, context, actief='hetplein')
+            menu_dynamics(self.request, context, actief='competitie')
         return context
 
 
@@ -794,7 +795,7 @@ class OverzichtView(UserPassesTestMixin, ListView):
                                       .filter(is_BB=True)
                                       .order_by('username'))
 
-        menu_dynamics(self.request, context, actief='hetplein')
+        menu_dynamics(self.request, context, actief='competitie')
         return context
 
 

@@ -21,9 +21,9 @@
 </li>
 
 
-{% if menu_toon_kalender %}
+{% if toon_kalender %}
     <li class="menu-level1{% if menu_actief == "kalender" %} menu-actief{% endif %}">
-        <a href="{% url 'Kalender:overzicht' %}">
+        <a href="{% url 'Kalender:landing-page' %}">
             <i class="material-icons-round">event_note</i>Wedstrijdkalender</a>
     </li>
 {% endif %}

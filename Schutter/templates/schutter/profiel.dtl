@@ -83,19 +83,15 @@
             <i class="material-icons-round left">https</i>Wachtwoord wijzigen</a>
     </p>
 
-    {% if toon_leeftijdsklassen %}
+    <span>&nbsp;</span>
+    <h5>Leeftijdsklassen</h5>
 
-        <span>&nbsp;</span>
-        <h5>Leeftijdsklassen</h5>
-
-        <p>Op wedstrijden en in de (winter)competitie wordt je aan de hand van je leeftijd ingedeeld in een wedstrijdklasse.</p>
-        <p><a class="btn-nhb-blauw" href="{% url 'Schutter:leeftijdsklassen' %}"><i class="material-icons-round left">grade</i>Mijn leeftijdsklassen</a></p>
-        <p>Gebruik de knop om te zien in welke klassen jij uit moet komen.</p>
-
-    {% endif %}
+    <p>Op wedstrijden en in de bondscompetities wordt je aan de hand van je leeftijd ingedeeld in een wedstrijdklasse.</p>
+    <p><a class="btn-nhb-blauw" href="{% url 'Schutter:leeftijdsklassen' %}"><i class="material-icons-round left">grade</i>Mijn leeftijdsklassen</a></p>
+    <p>Gebruik de knop om te zien in welke klassen jij uit moet komen.</p>
 
 
-    {% if competities %}
+    {% if toon_bondscompetities %}
 
         <span>&nbsp;</span>
         <h5>Competities</h5>
@@ -202,8 +198,11 @@
                 <tr>
                     <th>Datum</th>
                     <th>Soort record</th>
+                    <th>Boog type</th>
                     <th>Score</th>
-                    <th>Plaats</th>
+                    {% if show_loc %}
+                        <th>Plaats</th>
+                    {% endif %}
                     <th><!-- kolom voor knop --></th>
                 </tr>
             </thead>
@@ -212,8 +211,11 @@
                 <tr>
                     <td>{{ obj.datum }}</td>
                     <td>{{ obj.soort_record }}</td>
+                    <td>{{ obj.boog_str }}</td>
                     <td>{{ obj.score_str }}</td>
-                    <td>{{ obj.plaats }}{% if obj.land %}, {{ obj.land }}{% endif %}</td>
+                    {% if show_loc %}
+                        <td>{{ obj.loc_str }}</td>
+                    {% endif %}
                     <td><a class="btn-nhb-blauw" href="{{ obj.url }}">Toon details</a></td>
                 </tr>
             {% endfor %}

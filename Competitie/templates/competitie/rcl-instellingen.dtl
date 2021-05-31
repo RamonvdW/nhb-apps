@@ -21,15 +21,15 @@
 
     <script type="application/javascript">
         function gewijzigd() {
-            /* het formulier is aangepast en moet opgeslagen worden */
+            // het formulier is aangepast en moet opgeslagen worden
 
-            /* disable alle knoppen waarmee de invoer verloren zou gaan */
+            // disable alle knoppen waarmee de invoer verloren zou gaan
             const els = document.getElementsByClassName("vertrek_knop")
             Array.prototype.forEach.call(els, function(el) {
                 el.classList.add('disabled')
             })
 
-            /* enable de 'opslaan' knop */
+            // enable de 'opslaan' knop
             const el = document.getElementById("opslaan_knop")
             el.classList.remove('disabled')
         }
@@ -41,8 +41,8 @@
         }
 
         function teams_gewijzigd(keuze) {
-            /* keuze teamcompetitie in de regio is aangepast */
-            /* enable/disable de andere opties */
+            // keuze teamcompetitie in de regio is aangepast
+            // enable/disable de andere opties
             const els = document.querySelectorAll("input[name=team_alloc], input[name=team_punten], input[id=datum1]")
             Array.prototype.forEach.call(els, function(el) {
                 el.disabled = keuze
@@ -106,7 +106,7 @@
             </tr>
 
             <tr>
-                <td>Teams aanmaken toestaan tot</td>
+                <td>Teams aanmaken toestaan tot en met</td>
                 <td>{% if readonly %}
                         <span>{{ deelcomp.einde_teams_aanmaken|date:'Y-m-d' }}</span>
                     {% else %}
@@ -152,14 +152,16 @@
     <script type="application/javascript">
         document.addEventListener('DOMContentLoaded', function() {
             const el = document.querySelector('#datum1');
+            let minDate = new Date("{{ deelcomp.competitie.begin_aanmeldingen|date:'Y-m-d' }}")
             let maxDate = new Date("{{ deelcomp.competitie.eerste_wedstrijd|date:'Y-m-d' }}")
             maxDate.setDate(maxDate.getDate() - 1)      // get/setDate = day of month!!
+            const competitieJaren = [{{  deelcomp.competitie.begin_jaar }}, {{ deelcomp.competitie.begin_jaar }} + 1]
 
             M.Datepicker.init(el, {
                 defaultDate: new Date("{{ deelcomp.einde_teams_aanmaken|date:'Y-m-d' }}"),
                 setDefaultDate: true,
-                minDate: new Date("{{ deelcomp.competitie.begin_aanmeldingen|date:'Y-m-d' }}"),
-                maxDate: maxDate
+                minDate: minDate, maxDate: maxDate,
+                yearRange: competitieJaren
             })
         })
     </script>

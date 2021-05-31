@@ -7,7 +7,6 @@
 from django.views.generic import View
 from django.http import Http404
 from django.shortcuts import render
-from BasisTypen.models import IndivWedstrijdklasse, TeamWedstrijdklasse
 from .models import (AG_NUL, Competitie, CompetitieKlasse)
 from .menu import menu_dynamics_competitie
 
@@ -37,7 +36,8 @@ class KlassegrenzenTonenView(View):
 
         for obj in klassen:
             if obj.min_ag > AG_NUL:
-                obj.min_ag_str = "%5.3f" % obj.min_ag
+                ag_str = "%5.3f" % obj.min_ag
+                obj.min_ag_str = ag_str.replace('.', ',')       # nederlands: komma ipv punt
         # for
 
         return klassen
@@ -57,7 +57,8 @@ class KlassegrenzenTonenView(View):
 
         for obj in klassen:
             if obj.min_ag > AG_NUL:
-                obj.min_ag_str = "%5.1f" % (obj.min_ag * aantal_pijlen)
+                ag_str = "%5.1f" % (obj.min_ag * aantal_pijlen)
+                obj.min_ag_str = ag_str.replace('.', ',')  # nederlands: komma ipv punt
         # for
 
         return klassen

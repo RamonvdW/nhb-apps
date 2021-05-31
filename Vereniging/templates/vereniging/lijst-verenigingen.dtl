@@ -9,159 +9,175 @@
 {% block title %}Verenigingen en Accommodaties{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="lijst-verenigingen" %}
 
-<h4>Verenigingen en Accommodaties</h4>
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="lijst-verenigingen" %}
 
-{% if landelijk %}
-    <p>Hieronder volgt de landelijke lijst van {{ verenigingen.count }} verenigingen.</p>
-{% else %}
-    <p>Hieronder volgt de lijst van {{ verenigingen.count }} verenigingen in jouw gebied.</p>
-{% endif %}
+    <h4>Verenigingen en Accommodaties</h4>
 
-<p>Je rol is <b>{{ huidige_rol }}</b>.</p>
+    {% if landelijk %}
+        <p>Hieronder volgt de landelijke lijst van {{ verenigingen.count }} verenigingen.</p>
+    {% else %}
+        <p>Hieronder volgt de lijst van {{ verenigingen.count }} verenigingen in jouw gebied.</p>
+    {% endif %}
 
-<table class="white" id="table1">
-    <thead>
-        <tr>        <!-- filter veld -->
-            {% if toon_rayon %}
-                <td></td>
-            {% endif %}
+    {% if contact_geen_beheerders %}
+        <p><a class="btn-nhb-blauw" href="{{ contact_geen_beheerders }}">Verenigingen zonder beheerders</a></p>
+    {% endif %}
 
-            {% if toon_regio %}
-                <td></td>
-            {% endif %}
+    <p>Je rol is <b>{{ huidige_rol }}</b>.</p>
 
-            {% if toon_cluster %}
-                <td></td>
-            {% endif %}
-
-            <td colspan="2" class="table-filter"><input class="table-filter" oninput="myTableFilter(this, 'table1')" placeholder="Zoeken"/></td>
-
-            <td><!-- accommodatie details/icoontjes --></td>
-
-            {% if toon_details %}
-                <td></td>
-            {% endif %}
-
-            {% if toon_ledental %}
-                <td colspan="2"></td>
-            {% endif %}
-        </tr>
-        <tr>
-            {% if toon_rayon %}
-                <th class="center-align">Rayon</th>
-            {% endif %}
-
-            {% if toon_regio %}
-                <th class="center-align">Regio</th>
-            {% endif %}
-
-            {% if toon_cluster %}
-                <th class="center-align">Clusters</th>
-            {% endif %}
-
-            <th data-filter="on">Vereniging</th>
-
-            <th data-filter="on">Accommodatie<br>adres</th>
-            <th>Accommodatie<br>info</th>
-
-            {% if toon_details %}
-            <th></th>
-            {% endif %}
-
-            {% if toon_ledental %}
-                <th class="center-align">Aantal leden</th>
-                <th class="center-align">Aantal beheerders</th>
-            {% endif %}
-        </tr>
-    </thead>
-
-    {% for obj in verenigingen %}
-        <tr>
-            {% if toon_rayon %}
-                <td class="center-align">{{ obj.regio.rayon.rayon_nr }}</td>
-            {% endif %}
-
-            {% if toon_regio %}
-                <td class="center-align">{{ obj.regio.regio_nr }}</td>
-            {% endif %}
-
-            {% if toon_cluster %}
-                <td class="center-align">{{ obj.cluster_letters }}</td>
-            {% endif %}
-
-            <!-- vereniging -->
-            <td>[{{ obj.ver_nr }}] {{ obj.naam }}</td>
-
-            <!-- accommodatie -->
-            <td>
-                {% if obj.locatie %}
-                    <span>{{ obj.locatie.adres|linebreaksbr }}</span>
+    <table class="white" id="table1">
+        <thead>
+            <tr>        <!-- filter veld -->
+                {% if toon_rayon %}
+                    <td></td>
                 {% endif %}
 
-                {% if obj.buiten_locatie and obj.buiten_locatie.adres %}
-                    {% if obj.locatie %}
-                        <br>------<br>
-                    {% endif %}
-                    <span>{{ obj.buiten_locatie.adres|linebreaksbr }}</span>
-                {% endif %}
-            </td>
-
-            <!-- accommodatie info -->
-            <td>
-                {% if obj.locatie %}
-                    {% if obj.locatie.baan_type == 'X' %}
-                        <!-- ga er vanuit dat nog niets ingevuld is -->
-                        <i class="material-icons-round red-text" style="vertical-align: bottom; font-size: 20px; cursor: default">error_outline</i>
-                    {% else %}
-                        <!-- toon binnen-buiten icoon -->
-                        {% if obj.locatie.baan_type == 'H' %}
-                            <i class="material-icons-round tooltipped" style="vertical-align: bottom; font-size: 20px; cursor: default" data-tooltip="Half overdekt">flip</i>
-                            <span>&nbsp;18m: {{ obj.locatie.banen_18m }}</span>
-                            <br>
-                            <i class="material-icons-round white-text" style="vertical-align: bottom; font-size: 20px; cursor: default">flip</i>
-                            <span>&nbsp;25m: {{ obj.locatie.banen_25m }}</span>
-                        {% endif %}
-                        <!-- toon volledig-overdekt icoon -->
-                        {% if obj.locatie.baan_type == 'O' %}
-                            <i class="material-icons-round tooltipped" style="vertical-align: bottom; font-size: 20px; cursor: default" data-tooltip="Volledig overdekt">crop_din</i>
-                            <span>&nbsp;18m: {{ obj.locatie.banen_18m }}</span>
-                            <br>
-                            <i class="material-icons-round white-text" style="vertical-align: bottom; font-size: 20px; cursor: default">crop_din</i>
-                            <span>&nbsp;25m: {{ obj.locatie.banen_25m }}</span>
-                        {% endif %}
-
-                        <!-- toon het belletje icoon als er notities zijn -->
-                        {% if obj.locatie.notities != '' %}
-                            <i class="material-icons-round" style="vertical-align: bottom; font-size: 20px; cursor: default">notifications_none</i>
-                        {% endif %}
-                    {% endif %}
-                {% else %}
-                    <i class="red-text">Geen</i>
+                {% if toon_regio %}
+                    <td></td>
                 {% endif %}
 
-                {% if obj.buiten_locatie %}
-                    <br>
-                    <i class="material-icons-round tooltipped" style="vertical-align: bottom; font-size: 20px; cursor: default" data-tooltip="Buiten locatie">wb_sunny</i>
-                    <span>&nbsp;tot {{ obj.buiten_locatie.buiten_max_afstand }}m: {{ obj.buiten_locatie.buiten_banen }}</span>
+                {% if toon_cluster %}
+                    <td></td>
                 {% endif %}
-            </td>
 
-            {% if toon_details %}
+                <td colspan="2" class="table-filter"><input class="table-filter" oninput="myTableFilter(this, 'table1')" placeholder="Zoeken"/></td>
+
+                <td><!-- accommodatie details/icoontjes --></td>
+
+                {% if toon_details %}
+                    <td></td>
+                {% endif %}
+
+                {% if toon_ledental %}
+                    <td colspan="2"></td>
+                {% endif %}
+            </tr>
+            <tr>
+                {% if toon_rayon %}
+                    <th class="center-align">Rayon</th>
+                {% endif %}
+
+                {% if toon_regio %}
+                    <th class="center-align">Regio</th>
+                {% endif %}
+
+                {% if toon_cluster %}
+                    <th class="center-align">Clusters</th>
+                {% endif %}
+
+                <th data-filter="on">Vereniging</th>
+
+                <th data-filter="on">Accommodatie<br>adres</th>
+                <th>Accommodatie<br>info</th>
+
+                {% if toon_details %}
+                <th></th>
+                {% endif %}
+
+                {% if toon_ledental %}
+                    <th class="center-align">Aantal leden</th>
+                    <th class="center-align">Aantal beheerders</th>
+                {% endif %}
+            </tr>
+        </thead>
+
+        {% for obj in verenigingen %}
+            <tr>
+                {% if toon_rayon %}
+                    <td class="center-align">{{ obj.regio.rayon.rayon_nr }}</td>
+                {% endif %}
+
+                {% if toon_regio %}
+                    <td class="center-align">{{ obj.regio.regio_nr }}</td>
+                {% endif %}
+
+                {% if toon_cluster %}
+                    <td class="center-align">{{ obj.cluster_letters }}</td>
+                {% endif %}
+
+                <!-- vereniging -->
+                <td>[{{ obj.ver_nr }}] {{ obj.naam }}</td>
+
+                <!-- accommodatie -->
                 <td>
-                    {% if obj.details_url %}
-                        <a class="btn-nhb-blauw" href="{{ obj.details_url }}">Details</a>
+                    {% if obj.locatie %}
+                        <span>{{ obj.locatie.adres|linebreaksbr }}</span>
+                    {% endif %}
+
+                    {% if obj.buiten_locatie and obj.buiten_locatie.adres %}
+                        {% if obj.locatie %}
+                            <br>------<br>
+                        {% endif %}
+                        <span>{{ obj.buiten_locatie.adres|linebreaksbr }}</span>
                     {% endif %}
                 </td>
-            {% endif %}
 
-            {% if toon_ledental %}
-                <td class="center-align{% if obj.aantal_leden >= 100 %} nhb-blauw-text{% endif %}">{{ obj.aantal_leden }}</td>
-                <td class="center-align">{{ obj.aantal_beheerders }}</td>
-            {% endif %}
-        </tr>
-    {% endfor %}
-</table>
+                <!-- accommodatie info -->
+                <td>
+                    {% if obj.locatie %}
+                        {% if obj.locatie.baan_type == 'X' %}
+                            <!-- ga er vanuit dat nog niets ingevuld is -->
+                            {% if not obj.heeft_externe_locaties %}
+                                <i class="material-icons-round red-text" style="vertical-align: bottom; font-size: 20px; cursor: default">error_outline</i>
+                                <br>
+                            {% endif %}
+                        {% else %}
+                            <!-- toon binnen-buiten icoon -->
+                            {% if obj.locatie.baan_type == 'H' %}
+                                <i class="material-icons-round tooltipped" style="vertical-align: bottom; font-size: 20px; cursor: default" data-tooltip="Half overdekt">flip</i>
+                                <span>&nbsp;18m: {{ obj.locatie.banen_18m }}</span>
+                                <br>
+                                <i class="material-icons-round white-text" style="vertical-align: bottom; font-size: 20px; cursor: default">flip</i>
+                                <span>&nbsp;25m: {{ obj.locatie.banen_25m }}</span>
+                                <br>
+                            {% endif %}
+                            <!-- toon volledig-overdekt icoon -->
+                            {% if obj.locatie.baan_type == 'O' %}
+                                <i class="material-icons-round tooltipped" style="vertical-align: bottom; font-size: 20px; cursor: default" data-tooltip="Volledig overdekt">crop_din</i>
+                                <span>&nbsp;18m: {{ obj.locatie.banen_18m }}</span>
+                                <br>
+                                <i class="material-icons-round white-text" style="vertical-align: bottom; font-size: 20px; cursor: default">crop_din</i>
+                                <span>&nbsp;25m: {{ obj.locatie.banen_25m }}</span>
+                                <br>
+                            {% endif %}
+
+                            <!-- toon het belletje icoon als er notities zijn -->
+                            {% if obj.locatie.notities != '' %}
+                                <i class="material-icons-round" style="vertical-align: bottom; font-size: 20px; cursor: default">notifications_none</i>
+                                <br>
+                            {% endif %}
+                        {% endif %}
+                    {% else %}
+                        <i>Geen</i>
+                    {% endif %}
+
+                    {% if obj.buiten_locatie %}
+                        <i class="material-icons-round tooltipped" style="vertical-align: bottom; font-size: 20px; cursor: default" data-tooltip="Buiten locatie">wb_sunny</i>
+                        <span>&nbsp;tot {{ obj.buiten_locatie.buiten_max_afstand }}m: {{ obj.buiten_locatie.buiten_banen }}</span>
+                        <br>
+                    {% endif %}
+
+                    <!-- externe locaties -->
+                    {% if obj.heeft_externe_locaties %}
+                        <i class="material-icons-round" style="vertical-align: bottom; font-size: 20px; cursor: default">hiking</i>
+                    {% endif %}
+                </td>
+
+                {% if toon_details %}
+                    <td>
+                        {% if obj.details_url %}
+                            <a class="btn-nhb-blauw" href="{{ obj.details_url }}">Details</a>
+                        {% endif %}
+                    </td>
+                {% endif %}
+
+                {% if toon_ledental %}
+                    <td class="center-align{% if obj.aantal_leden >= 100 %} nhb-blauw-text{% endif %}">{{ obj.aantal_leden }}</td>
+                    <td class="center-align">{{ obj.aantal_beheerders }}</td>
+                {% endif %}
+            </tr>
+        {% endfor %}
+    </table>
 
 {% endblock %}

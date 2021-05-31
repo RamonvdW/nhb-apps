@@ -11,7 +11,7 @@ from .models import NhbRayon, NhbRegio, NhbCluster, NhbLid, NhbVereniging
 class NhbLidAdmin(admin.ModelAdmin):
     """ Admin configuratie voor NhbLid klasse """
     ordering = ('nhb_nr',)
-    search_fields = ('voornaam', 'achternaam', 'nhb_nr')
+    search_fields = ('unaccented_naam', 'voornaam', 'achternaam', 'nhb_nr')
 
     # filter mogelijkheid
     list_filter = ('geslacht', 'para_classificatie', 'is_actief_lid')

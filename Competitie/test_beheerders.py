@@ -5,15 +5,15 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from django.utils import timezone
 from BasisTypen.models import BoogType
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
 from Overig.e2ehelpers import E2EHelpers
 from Competitie.models import RegioCompetitieSchutterBoog
 from Competitie.test_fase import zet_competitie_fase
-from .models import (Competitie, DeelCompetitie, competitie_aanmaken,
+from .models import (Competitie, DeelCompetitie,
                      INSCHRIJF_METHODE_3, LAAG_REGIO, LAAG_RK, LAAG_BK)
+from .operations import competities_aanmaken
 import datetime
 
 
@@ -78,7 +78,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.account_schutter = self._prep_beheerder_lid('Schutter')
 
         # creëer een competitie met deelcompetities
-        competitie_aanmaken(jaar=2019)
+        competities_aanmaken(jaar=2019)
         # nu in fase A
 
         self.comp_18 = Competitie.objects.get(afstand='18')
@@ -128,16 +128,16 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
 
         # klassegrenzen vaststellen
         url_klassegrenzen = '/bondscompetities/%s/klassegrenzen/vaststellen/'
-        with self.assert_max_queries(79):
+        with self.assert_max_queries(86):
             resp = self.client.post(url_klassegrenzen % self.comp_18.pk)
         self.assert_is_redirect_not_plein(resp)  # check for success
-        with self.assert_max_queries(79):
+        with self.assert_max_queries(86):
             resp = self.client.post(url_klassegrenzen % self.comp_25.pk)
         self.assert_is_redirect_not_plein(resp)  # check for success
         # nu in fase A2
 
         # zet de inschrijfmethode van regio 101 op 'methode 3', oftewel met dagdeel voorkeur
-        dagdelen = ['GN', 'ZA', 'ZO']   # uit: DAGDEEL_AFKORTINGEN
+        dagdelen = ['GN', 'ZAT', 'ZON']   # uit: DAGDEEL_AFKORTINGEN
         deelcomp = DeelCompetitie.objects.filter(laag='Regio', nhb_regio=self.regio_101, competitie=comp)[0]
         deelcomp.inschrijf_methode = INSCHRIJF_METHODE_3
         deelcomp.toegestane_dagdelen = ",".join(dagdelen)
@@ -159,7 +159,6 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
             functie_hwl = nhb_ver.functie_set.filter(rol='HWL').all()[0]
             self.e2e_wissel_naar_functie(functie_hwl)
 
-            max_queries = 22
             post_params = dict()
 
             # maak net zoveel leden aan als er dagdeel afkortingen zijn
@@ -206,7 +205,6 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
                                                                  'schiet_BB': 'on'})
                     post_params['lid_%s_boogtype_%s' % (nhb_nr, barebow_boog_pk)] = 'on'
                     barebow_boog_pk = None
-                    max_queries = 30
                 else:
                     with self.assert_max_queries(20):
                         resp = self.client.post(url_voorkeuren, {'nhblid_pk': nhb_nr,
@@ -218,7 +216,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
 
             # schrijf in voor de competitie
             post_params['dagdeel'] = dagdelen.pop(-1)
-            with self.assert_max_queries(max_queries):
+            with self.assert_max_queries(23):
                 resp = self.client.post(url_inschrijven, post_params)
             self.assert_is_redirect_not_plein(resp)         # check for success
         # for
@@ -563,7 +561,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
             resp = self.client.get(self.url_behoefte_bestand % (comp.pk, self.regio_101.pk))
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         # self.e2e_dump_resp(resp)
-        csv_file = 'ver_nr,Naam,Geen voorkeur,Zaterdag,Zondag,Totaal\r\n1000,Grote Club,0,0,3,3\r\n1100,Kleine Club,0,2,0,2\r\n-,Totalen,0,2,3,5\r\n-,-,-,-,-,-\r\n-,Blazoen type,Geen voorkeur,Zaterdag,Zondag,Totaal\r\n40cm,0,1,0,1\r\nDT Compound,0,0,1,1\r\nDT Recurve (wens),0,1,1,2\r\n60cm,0,0,1,1\r\n'
+        csv_file = 'ver_nr,Naam,Geen voorkeur,Zaterdag,Zondag,Totaal\r\n1000,Grote Club,0,0,3,3\r\n1100,Kleine Club,0,2,0,2\r\n-,Totalen,0,2,3,5\r\n-,-,-,-,-,-\r\n-,Blazoen type,Geen voorkeur,Zaterdag,Zondag,Totaal\r\n-,40cm,0,1,0,1\r\n-,DT Compound,0,0,1,1\r\n-,DT Recurve (wens),0,1,1,2\r\n-,60cm,0,0,1,1\r\n'
         self.assertContains(resp, csv_file, msg_prefix="(was: %s)" % resp.content)
 
         # creëer een beetje puinhoop
@@ -600,7 +598,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
             resp = self.client.get(self.url_behoefte_bestand % (comp.pk, self.regio_101.pk))
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         # self.e2e_dump_resp(resp)
-        csv_file = 'ver_nr,Naam,Geen voorkeur,Zaterdag,Zondag,Totaal\r\n1000,Grote Club,0,0,3,3\r\n1100,Kleine Club,0,2,0,2\r\n-,Totalen,0,2,3,5\r\n-,-,-,-,-,-\r\n-,Blazoen type,Geen voorkeur,Zaterdag,Zondag,Totaal\r\n60cm,0,2,2,4\r\n60cm Compound,0,0,1,1\r\n'
+        csv_file = 'ver_nr,Naam,Geen voorkeur,Zaterdag,Zondag,Totaal\r\n1000,Grote Club,0,0,3,3\r\n1100,Kleine Club,0,2,0,2\r\n-,Totalen,0,2,3,5\r\n-,-,-,-,-,-\r\n-,Blazoen type,Geen voorkeur,Zaterdag,Zondag,Totaal\r\n-,60cm,0,2,2,4\r\n-,60cm Compound,0,0,1,1\r\n'
         self.assertContains(resp, csv_file)
 
         # creëer een beetje puinhoop

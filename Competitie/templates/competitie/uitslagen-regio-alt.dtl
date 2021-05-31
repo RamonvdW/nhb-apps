@@ -141,7 +141,7 @@
                     <td colspan="12"><h5>{{ obj.klasse_str }}</h5></td>
                 </tr>
                 <tr>
-                    <th></th>   <!-- rank -->
+                    <th><!-- rank --></th>
                     <th>Sporter</th>
                     <th class="hide-on-small-only">Vereniging</th>
                     <th class="center-align">Gemiddelde</th>
@@ -151,10 +151,10 @@
             {% endif %}
 
             <tr>
-                <td class="center-align">{{ obj.rank }}</td>
-                <td>{{ obj.naam_str }}</td>
-                <td class="hide-on-small-only">{{ obj.ver_str }}</td>
-                <td class="center-align">{{ obj.alt_gemiddelde }}</td>
+                <td class="center-align smal">{{ obj.rank }}</td>
+                <td class="smal">{{ obj.naam_str }}</td>
+                <td class="smal hide-on-small-only">{{ obj.ver_str }}</td>
+                <td class="center-align smal">{{ obj.alt_gemiddelde }}</td>
                 <td class="right-align smal">{% if obj.alt_laagste_score_nr == 1 %}<del>{{ obj.alt_score1 }}</del>{% else %}{{ obj.alt_score1 }}{% endif %}</td>
                 <td class="right-align smal">{% if obj.alt_laagste_score_nr == 2 %}<del>{{ obj.alt_score2 }}</del>{% else %}{{ obj.alt_score2 }}{% endif %}</td>
                 <td class="right-align smal">{% if obj.alt_laagste_score_nr == 3 %}<del>{{ obj.alt_score3 }}</del>{% else %}{{ obj.alt_score3 }}{% endif %}</td>
@@ -162,7 +162,7 @@
                 <td class="right-align smal">{% if obj.alt_laagste_score_nr == 5 %}<del>{{ obj.alt_score5 }}</del>{% else %}{{ obj.alt_score5 }}{% endif %}</td>
                 <td class="right-align smal">{% if obj.alt_laagste_score_nr == 6 %}<del>{{ obj.alt_score6 }}</del>{% else %}{{ obj.alt_score6 }}{% endif %}</td>
                 <td class="right-align smal">{% if obj.alt_laagste_score_nr == 7 %}<del>{{ obj.alt_score7 }}</del>{% else %}{{ obj.alt_score7 }}{% endif %}</td>
-                <td class="right-align hide-on-small-only">{{ obj.alt_totaal }}</td>
+                <td class="right-align smal hide-on-small-only">{{ obj.alt_totaal }}</td>
             </tr>
 
         {% endfor %}
