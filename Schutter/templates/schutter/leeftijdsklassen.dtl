@@ -37,33 +37,33 @@
         </thead>
 
         <tr>
-            <td>{{ plein_huidige_jaar|add:"-1" }}</td>
-            <td>{{ plein_leeftijd|add:"-1" }}</td>
-            <td>{{ plein_wlst.0 }}</td>
+            <td>{{ huidige_jaar|add:"-1" }}</td>
+            <td>{{ leeftijd|add:"-1" }}</td>
+            <td>{{ wlst.0 }}</td>
         </tr>
 
         <tr class="nhb-blauw white-text">
-            <td>{{ plein_huidige_jaar }}</td>
-            <td>{{ plein_leeftijd }}</td>
-            <td>{{ plein_wlst.1 }}</td>
+            <td>{{ huidige_jaar }}</td>
+            <td>{{ leeftijd }}</td>
+            <td>{{ wlst.1 }}</td>
         </tr>
 
         <tr>
-            <td>{{ plein_huidige_jaar|add:"1" }}</td>
-            <td>{{ plein_leeftijd|add:"1" }}</td>
-            <td>{{ plein_wlst.2 }}</td>
+            <td>{{ huidige_jaar|add:"1" }}</td>
+            <td>{{ leeftijd|add:"1" }}</td>
+            <td>{{ wlst.2 }}</td>
         </tr>
 
         <tr>
-            <td>{{ plein_huidige_jaar|add:"2" }}</td>
-            <td>{{ plein_leeftijd|add:"2" }}</td>
-            <td>{{ plein_wlst.3 }}</td>
+            <td>{{ huidige_jaar|add:"2" }}</td>
+            <td>{{ leeftijd|add:"2" }}</td>
+            <td>{{ wlst.3 }}</td>
         </tr>
 
         <tr>
-            <td>{{ plein_huidige_jaar|add:"3" }}</td>
-            <td>{{ plein_leeftijd|add:"3" }}</td>
-            <td>{{ plein_wlst.4 }}</td>
+            <td>{{ huidige_jaar|add:"3" }}</td>
+            <td>{{ leeftijd|add:"3" }}</td>
+            <td>{{ wlst.4 }}</td>
         </tr>
     </table>
 
@@ -71,9 +71,9 @@
     <span>&nbsp;</span>
     <h5>Bondscompetitie</h5>
 
-    <p>Omdat de finales van de bondscompetitie in het nieuwe jaar plaatsvinden, moet je de bondscompetitie beginnen in de klasse waarin je volgend jaar uit moet komen.</p>
+    <p>Omdat de finales van de bondscompetitie in het nieuwe jaar plaatsvinden, moet je de bondscompetitie beginnen in de klasse waarin je volgend jaar uit moet komen. Daarnaast gebruikt de bondscompetitie niet alle leeftijdsklassen.</p>
 
-    <p>Voor seizoen {{ plein_huidige_jaar }}/{{ plein_huidige_jaar|add:"1" }} schiet je de bondscompetitie als <b>{{ plein_clst.1 }}</b>.</p>
+    <p>Voor seizoen {{ huidige_jaar }}/{{ huidige_jaar|add:"1" }} schiet je de bondscompetitie als <b>{{ lkl_volgende_competitie }}</b>.</p>
 
     <table class="white">
         <thead>
@@ -84,28 +84,28 @@
         </thead>
 
         <tr>
-            <td>{{ plein_huidige_jaar|add:"-1" }}/{{ plein_huidige_jaar }}</td>
-            <td>{{ plein_clst.0 }}</td>
+            <td>{{ huidige_jaar|add:"-1" }}/{{ huidige_jaar }}</td>
+            <td>{{ clst.0 }}</td>
         </tr>
 
         <tr class="nhb-blauw white-text">
-            <td>{{ plein_huidige_jaar }}/{{ plein_huidige_jaar|add:"1" }}</td>
-            <td>{{ plein_clst.1 }}</td>
+            <td>{{ huidige_jaar }}/{{ huidige_jaar|add:"1" }}</td>
+            <td>{{ clst.1 }}</td>
         </tr>
 
         <tr>
-            <td>{{ plein_huidige_jaar|add:"1" }}/{{ plein_huidige_jaar|add:"2" }}</td>
-            <td>{{ plein_clst.2 }}</td>
+            <td>{{ huidige_jaar|add:"1" }}/{{ huidige_jaar|add:"2" }}</td>
+            <td>{{ clst.2 }}</td>
         </tr>
 
         <tr>
-            <td>{{ plein_huidige_jaar|add:"2" }}/{{ plein_huidige_jaar|add:"3" }}</td>
-            <td>{{ plein_clst.3 }}</td>
+            <td>{{ huidige_jaar|add:"2" }}/{{ huidige_jaar|add:"3" }}</td>
+            <td>{{ clst.3 }}</td>
         </tr>
 
         <tr>
-            <td>{{ plein_huidige_jaar|add:"3" }}/{{ plein_huidige_jaar|add:"4" }}</td>
-            <td>{{ plein_clst.4 }}</td>
+            <td>{{ huidige_jaar|add:"3" }}/{{ huidige_jaar|add:"4" }}</td>
+            <td>{{ clst.4 }}</td>
         </tr>
 
     </table>

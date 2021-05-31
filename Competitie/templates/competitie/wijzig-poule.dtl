@@ -1,0 +1,109 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2021 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Wijzig poule{% endblock %}
+
+{% block pagina %}
+
+    <h4>Wijzig poule</h4>
+
+    <p>&nbsp;</p>
+    <p>Op deze pagina kunnen de details voor een poule aangepast worden.</p>
+
+    <form method="post" action="{{ url_opslaan }}">
+        {% csrf_token %}
+
+        <table class="white">
+
+            <tr>
+                <td>Competitie:</td>
+                <td>{{ poule.deelcompetitie }}</td>
+            </tr>
+
+            <tr>
+                <td style="display: inline-block">Beschrijving</td>
+                <td><input type="text" name="beschrijving" placeholder="Kies een leuke naam" value="{{ poule.beschrijving }}" maxlength="50"></td>
+            </tr>
+
+            <tr>
+                <td style="display: inline-block">Koppel maximaal 8 teams</td>
+                <td>
+                    <table class="striped">
+                        <thead>
+                            <tr>
+                                <th><!-- checkbox column --></th>
+                                <th>Team</th>
+                                <th>Klasse</th>
+                            </tr>
+                        </thead>
+                        {% for team in teams %}
+                            {% if team.klasse_str %}
+                                <tr>
+                                    <td><label>
+                                        <input type="checkbox" class="filled-in" name="{{ team.sel_str }}"{% if team.geselecteerd %} checked{% endif %}>
+                                        <span>&nbsp;</span>
+                                        </label>
+                                    </td>
+                                    <td>{{ team.team_naam }}</td>
+                                    <td>{{ team.klasse_str }}</td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td><label>
+                                        <input type="checkbox" class="filled-in" name="{{ team.sel_str }}" disabled>
+                                        <span>&nbsp;</span>
+                                        </label>
+                                    </td>
+                                    <td>{{ team.team_naam }}</td>
+                                    <td><i>Onbekend</i><span class="red-text">&nbsp;&nbsp;&nbsp;(team is niet compleet)</span></td>
+                                </tr>
+                            {% endif %}
+                        {% endfor %}
+                    </table>
+                </td>
+            </tr>
+
+        </table>
+
+        <p>
+            <a class="btn-nhb-blauw" href="{{ url_terug }}">
+                <i class="material-icons-round left">close</i>Terug</a>
+
+            <span>&nbsp;&nbsp;</span>
+
+            <button class="btn-nhb-rood" type="submit">
+                <i class="material-icons-round left">check</i>Opslaan</button>
+        </p>
+
+    </form>
+
+    <p>&nbsp;</p>
+    <form method="post" action="{{ url_opslaan }}">
+        {% csrf_token %}
+        <input type="hidden" name="verwijder_poule" value="ja">
+        <ul class="collapsible">
+            <li>
+                <div class="collapsible-header white">
+                    <span>Klik eerst hier als je deze poule wilt verwijderen</span>
+                </div>
+                <div class="collapsible-body white">
+                    <p>Heb je deze poule echt niet meer nodig?</p>
+                    <button class="btn-nhb-rood" type="submit">
+                        <i class="material-icons-round left">delete</i>Verwijder deze poule</button>
+                </div>
+            </li>
+        </ul>
+    </form>
+
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-wijzig-poule" %}
+
+{% endblock %}
+
+{% block menu-competities %}
+    {% include 'competitie/menu.dtl' %}
+{% endblock %}

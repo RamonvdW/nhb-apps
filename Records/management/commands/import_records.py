@@ -36,7 +36,7 @@ class Command(BaseCommand):
 
     def _import_indiv(self, sheet, blad):
 
-        reported_nhbnrs = list()
+        reported_nhb_nrs = list()
 
         # houd bij welke volg_nrs als in de database zitten
         # als deze niet meer voorkomen, dan moeten we ze verwijderen
@@ -47,7 +47,7 @@ class Command(BaseCommand):
         for row in sheet['values'][1:]:
             self.count_read += 1
 
-            # lege colommen aan het einde van de regel zijn afwezig in JSON file
+            # lege kolommen aan het einde van de regel zijn afwezig in JSON file
             # vul aan om verwerken eenvoudig te houden
             while len(row) < 19:
                 row.append('')
@@ -102,12 +102,12 @@ class Command(BaseCommand):
                         curr_record.geslacht = record.geslacht
 
                 # 2 = Leeftijdscategorie
-                # S(enior) / J(unior) / C(adet)
+                # M(aster) / S(enior) / J(unior) / C(adet) / nvt = U(niform)
                 val = row[2]
-                if val in ('M', 'S', 'J', 'C'):
+                if val == 'nvt':
+                    val = 'U'
+                if val in ('M', 'S', 'J', 'C', 'U'):
                     record.leeftijdscategorie = val
-                elif val == 'nvt':
-                    record.leeftijdscategorie = 'U'
                 else:
                     errors.append("Foute leeftijdscategorie': %s" % repr(val))
                     val = None
@@ -197,8 +197,8 @@ class Command(BaseCommand):
                         # toch door, want niet alle oude leden zitten nog in de database
                         naam = row[10]
                         fout = 'NHB nummer niet bekend: %s (voor schutter %s)' % (repr(val), repr(naam))
-                        if fout not in reported_nhbnrs:
-                            reported_nhbnrs.append(fout)
+                        if fout not in reported_nhb_nrs:
+                            reported_nhb_nrs.append(fout)
                             self.stderr.write(fout)
                 else:
                     errors.append('Fout NHB nummer: %s' % repr(val))

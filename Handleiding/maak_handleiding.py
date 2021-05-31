@@ -8,8 +8,8 @@
 
 import os
 import sys
-import xml.etree.ElementTree as ET
-import copy_of_settings
+import xml.etree.ElementTree
+import copy_of_settings                 # wordt door maak_handleiding.sh aangemaakt
 
 
 class MaakHandleiding(object):
@@ -83,7 +83,7 @@ class MaakHandleiding(object):
 
     def run(self, export_file):
         print('[INFO] Lees %s' % export_file)
-        tree = ET.parse(export_file)
+        tree = xml.etree.ElementTree.parse(export_file)
         root = tree.getroot()
         self.find_namespace(root.tag)
         for page in root.findall(self.namespace + 'page'):
@@ -216,7 +216,10 @@ class MaakHandleiding(object):
                         temp2 += ' width="%s"' % width
                     temp2 += ' alt="%s">' % label
 
-                    # TODO: check dat static content beschikbaar is
+                    # check dat static content beschikbaar is
+                    fpath = './static/handleiding/' + url
+                    if not os.path.isfile(fpath):
+                        print('[ERROR] Static element niet gevonden: %s' % fpath)
 
                 else:
                     if self.debug_pagina:

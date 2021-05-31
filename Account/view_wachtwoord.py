@@ -139,7 +139,7 @@ def receive_wachtwoord_vergeten(request, obj):
     from_ip = get_safe_from_ip(request)
     my_logger.info('%s LOGIN automatische inlog voor wachtwoord-vergeten met account %s' % (from_ip, repr(account.username)))
 
-    for _, func in account_plugins_login:
+    for _, func, _ in account_plugins_login:
         httpresp = func(request, from_ip, account)
         if httpresp:
             # plugin has decided that the user may not login

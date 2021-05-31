@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019-2020 Ramon van der Winkel.
+                Copyright (c) 2019-2021 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -9,51 +9,53 @@
 {% block title %}Controle tweede factor{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="otp-controle" %}
 
-<h4>Extra controle</h4>
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="otp-controle" %}
 
-<p>Beheerders moeten verplicht met twee-factor authenticatie inloggen.</p>
+    <h4>Extra controle</h4>
 
-<div class="container z-depth-2 white">
+    <p>Beheerders moeten verplicht met twee-factor authenticatie inloggen.</p>
 
-    <div class="row nhb-rood white-text">
-        <div class="col s12 center-align">
-            <h5>Controle tweede factor</h5>
-            <p>voor beheerders</p>
+    <div class="container z-depth-2 white">
+
+        <div class="row nhb-blauw white-text">
+            <div class="col s12 center-align">
+                <h5>Controle tweede factor</h5>
+                <p>voor beheerders</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <form action="{% url 'Functie:otp-controle' %}" method="post">
+                {{ form.next_url }}
+                {% csrf_token %}
+
+                {% if form.errors %}
+                    {% for error in form.non_field_errors %}
+                        <div class="row">
+                            <div class="col s2 m1 red-text">Fout:</div>
+                            <div class="col s9 red-text">{{ error|escape }}</div>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <div class="row">
+                    <div class="input-field col s12">
+                        {{ form.otp_code.label_tag }}{{ form.otp_code }}
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col s12">
+                        <div class="center-align">
+                            <input class="btn-nhb-blauw" type="submit" value="Controleer">
+                        </div>
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
 
-    <div class="row">
-        <form action="{% url 'Functie:otp-controle' %}" method="post">
-            {% csrf_token %}
-
-            {% if form.errors %}
-                {% for error in form.non_field_errors %}
-                    <div class="row">
-                        <div class="col s2 m1 red-text">Fout:</div>
-                        <div class="col s9 red-text">{{ error|escape }}</div>
-                    </div>
-                {% endfor %}
-            {% endif %}
-
-            <div class="row">
-                <div class="input-field col s12">
-                    {{ form.otp_code.label_tag }}{{ form.otp_code }}
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col s12">
-                    <div class="center-align">
-                        <input class="btn-nhb-blauw" name="button_login" type="submit" value="Controleer">
-                    </div>
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
-
-<p>Tip: Je moet de 6-cijferige code overtikken uit je authenticatie app (waarschijnlijk op je mobiel).</p>
+    <p>Tip: Je moet de 6-cijferige code overtikken uit je authenticatie app (waarschijnlijk op je mobiel).</p>
 
 {% endblock %}

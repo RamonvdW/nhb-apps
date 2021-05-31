@@ -59,6 +59,7 @@
 
     {% if heeft_alle_rollen %}
         <p>&nbsp;</p>
+        <h5>Springplankjes</h5>
         <h6>Indoor:</h6>
         <div class="white shrink-wrap-5">
         {% for obj in heeft_alle_rollen %}
@@ -114,8 +115,16 @@
         {% endfor %}
     {% endif %}
 
+    {% if url_wissel_naar_sec %}
+        <div class="selectie-knoppen">
+            <a class="btn-nhb-blauw" href="{{ url_wissel_naar_sec }}">Secretaris</a><span>&nbsp;&nbsp;(extra keuzescherm)</span>
+        </div>
+    {% endif %}
+
     {% if url_login_as %}
-        <a class="btn-nhb-blauw" href="{{ url_login_as }}">Account wissel</a>
+        <div class="selectie-knoppen">
+            <a class="btn-nhb-rood" href="{{ url_login_as }}">Account wissel</a>
+        </div>
     {% endif %}
 
     {% if not show_vhpg %}

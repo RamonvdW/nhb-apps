@@ -8,13 +8,13 @@ from django.test import TestCase
 from django.utils import timezone
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
-from Competitie.models import (Competitie, DeelCompetitie, CompetitieKlasse,
-                               RegioCompetitieSchutterBoog,
+from Competitie.models import (Competitie, DeelCompetitie, CompetitieKlasse, RegioCompetitieSchutterBoog,
                                INSCHRIJF_METHODE_3, LAAG_REGIO, LAAG_RK)
+from Competitie.operations import competities_aanmaken
 from Competitie.test_fase import zet_competitie_fase
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Schutter.models import SchutterBoog
-from Score.models import score_indiv_ag_opslaan
+from Score.operations import score_indiv_ag_opslaan
 from Wedstrijden.models import WedstrijdLocatie
 from Overig.e2ehelpers import E2EHelpers
 import datetime
@@ -214,25 +214,10 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.e2e_wisselnaarrol_bb()
         self.e2e_check_rol('BB')
 
-        url_kies = '/bondscompetities/'
-        url_aanmaken = '/bondscompetities/aanmaken/'
-        url_klassegrenzen = '/bondscompetities/%s/klassegrenzen/vaststellen/'   # comp_pk
-
         self.assertEqual(CompetitieKlasse.objects.count(), 0)
-
-        # competitie aanmaken
-        with self.assert_max_queries(20):
-            resp = self.client.post(url_aanmaken)
-        self.assert_is_redirect(resp, url_kies)
-
-        self.comp_18 = Competitie.objects.get(afstand=18)
-        self.comp_25 = Competitie.objects.get(afstand=25)
-
-        # klassegrenzen vaststellen
-        resp = self.client.post(url_klassegrenzen % self.comp_18.pk)
-        self.assert_is_redirect(resp, url_kies)
-        resp = self.client.post(url_klassegrenzen % self.comp_25.pk)
-        self.assert_is_redirect(resp, url_kies)
+        competities_aanmaken()
+        self.comp_18 = Competitie.objects.get(afstand='18')
+        self.comp_25 = Competitie.objects.get(afstand='25')
 
         self.deelcomp_regio = DeelCompetitie.objects.get(laag=LAAG_REGIO,
                                                          nhb_regio=self.regio_111,
@@ -432,7 +417,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
         # nu de POST om een paar leden aan te melden
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
-        with self.assert_max_queries(22):
+        with self.assert_max_queries(20):
             resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',        # 1=R
                                           'lid_100003_boogtype_3': 'on'})       # 3=BB
         self.assert_is_redirect_not_plein(resp)     # check success
@@ -489,7 +474,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
         # nu de POST om een paar leden aan te melden
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
-        with self.assert_max_queries(22):
+        with self.assert_max_queries(20):
             resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',        # 1=R
                                           'lid_100003_boogtype_3': 'on',        # 3=BB
                                           'dagdeel': 'AV',
@@ -562,7 +547,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
         # nu de POST om een paar leden aan te melden
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
-        with self.assert_max_queries(22):
+        with self.assert_max_queries(20):
             resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',        # 1=R
                                           'lid_100003_boogtype_3': 'on',        # 3=BB
                                           'dagdeel': 'AV',
@@ -605,7 +590,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
         # nu de POST om een paar leden aan te melden
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
-        with self.assert_max_queries(22):
+        with self.assert_max_queries(20):
             resp = self.client.post(url, {'lid_100004_boogtype_1': 'on',        # 1=R
                                           'lid_100003_boogtype_3': 'on',        # 3=BB
                                           'wil_in_team': 'ja',
@@ -687,7 +672,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
         # nu de POST om een paar leden aan te melden
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
-        with self.assert_max_queries(22):
+        with self.assert_max_queries(20):
             resp = self.client.post(url, {'lid_100004_boogtype_1': 'on',        # 1=R
                                           'lid_100003_boogtype_3': 'on',        # 3=BB
                                           'wil_in_team': 'ja',
@@ -705,8 +690,8 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
         # schrijf een schutter uit van een andere vereniging
         inschrijving = RegioCompetitieSchutterBoog.objects.all()[0]
-        inschrijving.schutterboog.nhblid.bij_vereniging = self.nhbver2
-        inschrijving.schutterboog.nhblid.save()
+        inschrijving.bij_vereniging = self.nhbver2
+        inschrijving.save()
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'pk_%s' % inschrijving.pk: 'on'})
         self.assert403(resp)

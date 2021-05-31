@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -12,6 +12,7 @@ from Account.models import AccountEmail
 from Competitie.models import KampioenschapSchutterBoog
 from Functie.models import Functie
 from .tijdelijke_url import set_tijdelijke_url_saver
+import datetime
 
 
 class SiteFeedback(models.Model):
@@ -124,8 +125,16 @@ class SiteTijdelijkeUrl(models.Model):
 
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
-        return "(%s) tot %s %s (accountemail %s, functie %s)" % (self.pk,
-                    self.geldig_tot, self.dispatch_to, self.hoortbij_accountemail, self.hoortbij_functie)
+        msg = "(%s) bruikbaar tot %s; voor %s" % (self.pk, self.geldig_tot, self.dispatch_to)
+        hoort_bij = list()
+        if self.hoortbij_accountemail:
+            hoort_bij. append('accountemail: %s' % self.hoortbij_accountemail)
+        if self.hoortbij_functie:
+            hoort_bij.append('functie: %s' % self.hoortbij_functie)
+        if self.hoortbij_kampioenschap:
+            hoort_bij.append('kampioenschap: %s' % self.hoortbij_kampioenschap)
+        msg += ' (%s)' % ", ".join(hoort_bij)
+        return msg
 
 
 def save_tijdelijke_url(url_code, dispatch_to, geldig_dagen=0, geldig_seconden=0, accountemail=None, functie=None):
@@ -144,5 +153,38 @@ def save_tijdelijke_url(url_code, dispatch_to, geldig_dagen=0, geldig_seconden=0
 
 
 set_tijdelijke_url_saver(save_tijdelijke_url)
+
+
+def overig_opschonen(stdout):
+    """ deze functie wordt typisch 1x per dag aangeroepen om de database
+        tabellen van deze applicatie op te kunnen schonen.
+
+        We verwijderen tijdelijke urls die een week geleden verlopen zijn
+        en afgehandelde site feedback van meer dan een kwartaal oud
+    """
+
+    now = timezone.now()
+    max_age = now - datetime.timedelta(days=7)
+
+    for obj in (SiteTijdelijkeUrl
+                .objects
+                .filter(geldig_tot__lt=max_age)):
+
+        stdout.write('[INFO] Verwijder ongebruikte tijdelijke url %s' % obj)
+        obj.delete()
+    # for
+
+    max_age = now - datetime.timedelta(days=91)
+
+    objs = (SiteFeedback
+            .objects
+            .filter(is_afgehandeld=True,
+                    toegevoegd_op__lt=max_age))
+
+    count = objs.count()
+    if count > 0:
+        stdout.write('[INFO] Verwijder %s afgehandelde site feedback' % count)
+        objs.delete()
+
 
 # end of file

@@ -39,7 +39,8 @@ $primary-color-light: #5ebde7 !default;
 $primary-color-dark: #03628c !default;
 
 //$secondary-color: #f94137 !default;         // rood
-$secondary-color: #0aa0e1 !default;           // blauw!
+//$secondary-color: #0aa0e1 !default;         // medium blauw
+$secondary-color: #03628c !default;           // donker blauw
 
 $success-color: color("green", "base") !default;
 $error-color: color("red", "base") !default;
@@ -81,7 +82,7 @@ $button-large-height: $button-height * 1.5 !default;
 $button-floating-large-size: 56px !default;
 
 // Small buttons
-$button-small-font-size: 13px !default;
+$button-small-font-size: $button-font-size !default; //13px !default;
 $button-small-icon-font-size: 1.2rem !default;
 $button-small-height: $button-height * .9 !default;
 $button-floating-small-size: $button-height * .9 !default;
@@ -270,7 +271,7 @@ $sidenav-width: 300px !default;
 $sidenav-font-size: 16px !default;
 $sidenav-font-color: rgba(0,0,0,.87) !default;
 $sidenav-bg-color: $primary-color-dark !default;
-$sidenav-padding: 16px !default;
+$sidenav-padding: 8px !default;  // 16px !default;
 $sidenav-item-height: 48px !default;
 $sidenav-line-height: $sidenav-item-height !default;
 
@@ -351,7 +352,7 @@ $interval-size: $range / $intervals !default;
 $collection-border-color: #e0e0e0 !default;
 $collection-bg-color: #fff !default;
 $collection-active-bg-color: $secondary-color !default;
-$collection-active-color: lighten($secondary-color, 55%) !default;
+$collection-active-color: #fff !default; //lighten($secondary-color, 55%) !default;
 $collection-hover-bg-color: #ddd !default;
 $collection-link-color: $secondary-color !default;
 $collection-line-height: 1.5rem !default;

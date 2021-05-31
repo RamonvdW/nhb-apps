@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from .models import (BoogType, LeeftijdsKlasse, MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT,
-                     IndivWedstrijdklasse, TeamWedstrijdklasse)
+                     IndivWedstrijdklasse, TeamWedstrijdklasse, KalenderWedstrijdklasse)
 from .admin import BasisTypenIndivWedstrijdklasseAdmin, BasisTypenTeamWedstrijdklasseAdmin
 
 
@@ -19,11 +19,10 @@ class TestBasisTypen(TestCase):
         """
         pass
 
-    def test_boogtype(self):
+    def test_basics(self):
         obj = BoogType.objects.all()[0]
         self.assertIsNotNone(str(obj))      # use the __str__ method (only used by admin interface)
 
-    def test_leeftijdklasse(self):
         obj = LeeftijdsKlasse()
         self.assertIsNotNone(str(obj))      # use the __str__ method (only used by admin interface)
 
@@ -36,15 +35,16 @@ class TestBasisTypen(TestCase):
         obj.max_wedstrijdleeftijd = MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
         self.assertTrue(obj.is_aspirant_klasse())
 
-    def test_indiv_wedstrijdklasse(self):
         obj = IndivWedstrijdklasse(beschrijving="Test")
         self.assertIsNotNone(str(obj))      # use the __str__ method (only used by admin interface)
 
-    def test_team_wedstrijdklasse(self):
         obj = TeamWedstrijdklasse(beschrijving="Test")
         self.assertIsNotNone(str(obj))      # use the __str__ method (only used by admin interface)
 
-    def test_html(self):
+        obj = KalenderWedstrijdklasse(beschrijving="Test")
+        self.assertIsNotNone(str(obj))      # use the __str__ method (only used by admin interface)
+
+    def test_admin(self):
         adm = BasisTypenIndivWedstrijdklasseAdmin(IndivWedstrijdklasse, None)
         obj = IndivWedstrijdklasse.objects.get(volgorde=100)
         html = adm._leeftijdsklassen(obj)

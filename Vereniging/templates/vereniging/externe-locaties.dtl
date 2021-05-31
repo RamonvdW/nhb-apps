@@ -1,0 +1,68 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2021 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Externe locaties{% endblock %}
+
+{% block pagina %}
+
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vereniging-externe-locaties" %}
+
+    <h4>Externe locaties</h4>
+
+    <p>Op deze pagina kan je locaties bijhouden die vereniging <b>{{ ver }}</b> kan gebruiken voor wedstrijden, naast de eigen accommodatie.</p>
+
+    <table class="white">
+        <thead>
+            <tr>
+                <th>Locatie</th>
+                <th>Disciplines</th>
+                <th>Plaats</th>
+                <th><!-- kolom voor knop --></th>
+            </tr>
+        </thead>
+
+        {% for locatie in locaties %}
+            <tr>
+                <td>{% if locatie.geen_naam %}<i>Nog niet ingevuld</i>{% else %}{{ locatie.naam }}{% endif %}</td>
+
+                <td>
+                    {% if locatie.geen_disciplines %}<i>Nog niet gekozen</i>{% endif %}
+                    {% if locatie.discipline_outdoor %}<span>Outdoor</span><br>{% endif %}
+                    {% if locatie.discipline_indoor %}<span>Indoor</span><br>{% endif %}
+                    {% if locatie.discipline_25m1pijl %}<span>25m 1pijl</span><br>{% endif %}
+                    {% if locatie.discipline_clout %}<span>Clout</span><br>{% endif %}
+                    {% if locatie.discipline_veld %}<span>Veld</span><br>{% endif %}
+                    {% if locatie.discipline_run %}<span>Run archery</span><br>{% endif %}
+                    {% if locatie.discipline_3d %}<span>3D</span><br>{% endif %}
+                </td>
+
+                <td>{% if locatie.geen_plaats %}<i>Nog niet ingevuld</i>{% else %}{{ locatie.plaats }}{% endif %}</td>
+
+                <td>
+                    <a class="btn-nhb-blauw" href="{{ locatie.url_wijzig }}">{% if readonly %}Details{% else %}Wijzig{% endif %}</a>
+                </td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="4"><i>Er zijn nog geen externe locaties aangemaakt</i></td>
+            </tr>
+        {% endfor %}
+    </table>
+
+    <p>Deze gegevens kunnen worden aangepast door de hoofdwedstrijdleider van de vereniging.</p>
+
+    {% if url_toevoegen %}
+        <p>&nbsp;</p>
+        <form action="{{ url_toevoegen }}" method="post">
+            {% csrf_token %}
+            <button class="btn-nhb-blauw btn-small" type="submit">
+                <i class="material-icons-round left">add</i>Externe locatie toevoegen</button>
+        </form>
+    {% endif %}
+
+{% endblock %}

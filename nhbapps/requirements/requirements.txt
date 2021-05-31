@@ -4,25 +4,25 @@
 #
 #    pip-compile requirements.in
 #
-asgiref==3.3.1
+asgiref==3.3.4
     # via django
-cachetools==4.2.1
+cachetools==4.2.2
     # via google-auth
 certifi==2020.12.5
     # via requests
 chardet==4.0.0
     # via requests
-django==3.1.7
+django==3.1.11
     # via
     #   -c constraints.txt
     #   -r requirements.in
-google-api-core==1.26.1
+google-api-core==1.27.0
     # via google-api-python-client
-google-api-python-client==2.0.2
+google-api-python-client==2.4.0
     # via -r requirements.in
 google-auth-httplib2==0.1.0
     # via google-api-python-client
-google-auth==1.28.0
+google-auth==1.30.0
     # via
     #   -r requirements.in
     #   google-api-core
@@ -30,7 +30,7 @@ google-auth==1.28.0
     #   google-auth-httplib2
 googleapis-common-protos==1.53.0
     # via google-api-core
-httplib2==0.19.0
+httplib2==0.19.1
     # via
     #   google-api-python-client
     #   google-auth-httplib2
@@ -38,7 +38,7 @@ idna==2.10
     # via requests
 packaging==20.9
     # via google-api-core
-protobuf==3.15.6
+protobuf==3.17.0
     # via
     #   google-api-core
     #   googleapis-common-protos
@@ -66,7 +66,7 @@ requests==2.25.1
     # via google-api-core
 rsa==4.7.2
     # via google-auth
-six==1.15.0
+six==1.16.0
     # via
     #   google-api-core
     #   google-api-python-client
@@ -76,6 +76,8 @@ six==1.15.0
     #   qrcode
 sqlparse==0.4.1
     # via django
+typing-extensions==3.10.0.0
+    # via asgiref
 uritemplate==3.0.1
     # via google-api-python-client
 urllib3==1.26.4

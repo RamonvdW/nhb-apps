@@ -27,7 +27,7 @@
     {% else %}
 
         <p>&nbsp;</p>
-        <p class="red-text">De regiocompetitie kan op dit moment nog niet doorgezet worden. Wacht tot de tijdlijn fase G bereikt heeft.</p>
+        <p class="red-text">De regiocompetitie kan op dit moment nog niet doorgezet worden. Wacht tot de tijdlijn fase G bereikt heeft. In de tabel hieronder kan je zien op welke regio's we moeten wachten.</p>
         <a class="btn-nhb-blauw" href="{% url 'Competitie:overzicht' comp_pk=comp.pk %}"><i class="material-icons-round left">arrow_back</i>Terug</a>
 
         <p>&nbsp;</p>

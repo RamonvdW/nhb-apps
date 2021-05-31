@@ -13,7 +13,7 @@ from Functie.rol import Rollen, rol_get_huidige_functie
 from Competitie.models import (INSCHRIJF_METHODE_1,
                                DeelCompetitie, DeelcompetitieRonde,
                                RegioCompetitieSchutterBoog)
-from Wedstrijden.models import Wedstrijd
+from Wedstrijden.models import CompetitieWedstrijd
 
 
 TEMPLATE_LEDEN_SCHIETMOMENT = 'vereniging/competitie-schietmomenten-methode1.dtl'
@@ -62,7 +62,7 @@ class LedenSchietmomentView(UserPassesTestMixin, TemplateView):
                 pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
         # for
 
-        wedstrijden = (Wedstrijd
+        wedstrijden = (CompetitieWedstrijd
                        .objects
                        .filter(pk__in=pks)
                        .select_related('vereniging')

@@ -14,20 +14,20 @@
             <div class="center-align">
                 <img src="{% static 'plein/logo_nhb_192x192.png' %}" height="85" alt="logo">
             </div>
-            <div class="card-text">Hoofdwebsite van de NHB met informatie, nieuws en publicaties.</div>
+            <div class="card-text">Hoofdwebsite van de NHB met informatie, publicaties en nieuws.</div>
         </div>
     </a>
 </div>
 
 
 <div class="nhb-card">
-    <a class="nhb-klikbare-balk" href="https://www.handboogsport.nl/freeyourmind/zelf-schieten/" target="_blank" rel="noopener noreferrer">
+    <a class="nhb-klikbare-balk" href="https://www.handboogsport.nl/freeyourmind/" target="_blank" rel="noopener noreferrer">
         <div class="nhb-card-content">
             <div class="card-title center-align">Free your mind</div>
             <div class="center-align">
                 <img src="{% static 'plein/logo_hero_512x512.png' %}" height="85" alt="logo">
             </div>
-            <div class="card-text">Kaart met de locaties waar je kan schieten in Nederland.</div>
+            <div class="card-text">Wil je zelf beginnen met handboogschieten? Deze site helpt je op gang.</div>
         </div>
     </a>
 </div>

@@ -12,8 +12,7 @@ from Account.otp import account_otp_prepare_koppelen, account_otp_koppel, accoun
 from Plein.menu import menu_dynamics
 from .models import account_needs_otp
 from .forms import OTPControleForm
-from .qrcode import qrcode_get
-import logging
+from .maak_qrcode import qrcode_get
 
 
 TEMPLATE_OTP_CONTROLE = 'functie/otp-controle.dtl'
@@ -38,12 +37,16 @@ class OTPControleView(TemplateView):
             # gebruiker heeft geen OTP koppeling
             return HttpResponseRedirect(reverse('Plein:plein'))
 
-        form = OTPControleForm()
+        # waar eventueel naartoe na de controle?
+        next_url = request.GET.get('next', '')
+
+        form = OTPControleForm(initial={'next_url': next_url})
         context = {'form': form}
         menu_dynamics(request, context, actief="wissel-van-rol")
         return render(request, TEMPLATE_OTP_CONTROLE, context)
 
-    def post(self, request, *args, **kwargs):
+    @staticmethod
+    def post(request, *args, **kwargs):
         """ deze functie wordt aangeroepen als een POST request ontvangen is.
             dit is gekoppeld aan het drukken op de Controleer knop.
         """
@@ -61,12 +64,14 @@ class OTPControleView(TemplateView):
             otp_code = form.cleaned_data.get('otp_code')
             if account_otp_controleer(request, account, otp_code):
                 # controle is gelukt (is ook al gelogd)
-                # terug naar de Wissel-van-rol pagina
-                return HttpResponseRedirect(reverse('Functie:wissel-van-rol'))
+                next_url = form.cleaned_data.get('next_url')
+                if not next_url:
+                    next_url = reverse('Functie:wissel-van-rol')
+                return HttpResponseRedirect(next_url)
             else:
                 # controle is mislukt (is al gelogd en in het logboek geschreven)
                 form.add_error(None, 'Verkeerde code. Probeer het nog eens.')
-                # FUTURE: blokkeer na X pogingen
+                # de code verandert sneller dan een brute-force aan kan, dus niet nodig om te blokkeren
 
         # still here --> re-render with error message
         context = {'form': form}
@@ -115,7 +120,7 @@ class OTPKoppelenView(TemplateView):
         form = OTPControleForm()
         context = {'form': form,
                    'qrcode': qrcode,
-                   'otp_secret': secret }
+                   'otp_secret': secret}
         menu_dynamics(request, context, actief="wissel-van-rol")
         return render(request, TEMPLATE_OTP_KOPPELEN, context)
 

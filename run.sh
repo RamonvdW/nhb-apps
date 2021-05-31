@@ -17,7 +17,7 @@ sleep 1
 # start the development webserver
 if [ $DEBUG -eq 1 ]
 then
-    echo "[INFO] Starting runserver with DEBUG=True"
+    echo "[INFO] Starting runserver with dev config and DEBUG=True"
     ./manage.py runserver --settings=nhbapps.settings_dev
 else
     # run with DEBUG=False stops serving static files..

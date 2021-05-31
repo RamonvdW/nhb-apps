@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020 Ramon van der Winkel.
+                Copyright (c) 2021 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -9,14 +9,15 @@
 {% block title %}Wachtwoord vergeten{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="account-wachtwoord-vergeten-email" %}
 
-<h4>Wachtwoord vergeten</h4>
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="account-wachtwoord-vergeten-email" %}
 
-<p>We hebben een e-mail gestuurd naar het door jouw opgegeven e-mailadres.</p>
+    <h4>Wachtwoord vergeten</h4>
 
-<p>Volg de instructies in de e-mail om je wachtwoord te wijzigen. Daarna kan je inloggen.</p>
+    <p>We hebben een e-mail gestuurd naar het door jouw opgegeven e-mailadres.</p>
 
-<p>Deze pagina kan je sluiten.</p>
+    <p>Volg de instructies in de e-mail om je wachtwoord te wijzigen. Daarna kan je inloggen.</p>
+
+    <p>Deze pagina kan je sluiten.</p>
 
 {% endblock %}

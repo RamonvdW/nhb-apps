@@ -52,6 +52,14 @@ class AccommodatieDetailsForm(forms.Form):
                             required=False,
                             max_length=1024)
 
+    disc_25m1p = forms.BooleanField(required=False)
+    disc_outdoor = forms.BooleanField(required=False)
+    disc_indoor = forms.BooleanField(required=False)
+    disc_clout = forms.BooleanField(required=False)
+    disc_veld = forms.BooleanField(required=False)
+    disc_run = forms.BooleanField(required=False)
+    disc_3d = forms.BooleanField(required=False)
+
     def is_valid(self):
         valid = super(forms.Form, self).is_valid()
         if valid:

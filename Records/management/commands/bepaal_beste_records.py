@@ -76,10 +76,13 @@ class Command(BaseCommand):
         objs = (IndivRecord
                 .objects
                 .filter(verbeterbaar=True)
-                .distinct('discipline', 'soort_record', 'geslacht', 'leeftijdscategorie', 'materiaalklasse', 'para_klasse'))
+                .distinct('discipline', 'soort_record', 'geslacht', 'leeftijdscategorie',
+                          'materiaalklasse', 'para_klasse'))
 
         # voor elke combi, bepaal de hoogste score
         for obj in objs:
+
+            updated = list()        # voor save() optimalisatie
 
             beste, _ = (BesteIndivRecords
                         .objects
@@ -95,7 +98,7 @@ class Command(BaseCommand):
 
             if beste.volgorde != volgorde:
                 beste.volgorde = volgorde
-                beste.save()
+                updated.append('volgorde')
 
             alle = (IndivRecord
                     .objects
@@ -112,7 +115,10 @@ class Command(BaseCommand):
 
             if beste.beste != hoogste:
                 beste.beste = hoogste
-                beste.save()
+                updated.append('beste')
+
+            if len(updated):
+                beste.save(update_fields=updated)
 
         # for
 
@@ -124,6 +130,6 @@ class Command(BaseCommand):
         objs.delete()
 
         self.stdout.write('Done')
-        return
+
 
 # end of file

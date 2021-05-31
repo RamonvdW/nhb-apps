@@ -8,11 +8,11 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.http import Http404
 from django.views.generic import View, TemplateView
-from django.utils import timezone
 from django.utils.formats import localize
 from django.templatetags.static import static
+from Competitie.operations import bepaal_startjaar_nieuwe_competitie
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving
-from Score.models import wanneer_ag_vastgesteld
+from Score.operations import wanneer_ag_vastgesteld
 from Taken.taken import eval_open_taken
 from .menu import menu_dynamics_competitie
 from .models import LAAG_REGIO, LAAG_BK, Competitie, DeelCompetitie
@@ -26,11 +26,6 @@ TEMPLATE_COMPETITIE_OVERZICHT_BEHEERDER = 'competitie/overzicht-beheerder.dtl'
 TEMPLATE_COMPETITIE_AANGEMELD_REGIO = 'competitie/lijst-aangemeld-regio.dtl'
 
 JA_NEE = {False: 'Nee', True: 'Ja'}
-
-
-def models_bepaal_startjaar_nieuwe_competitie():
-    """ bepaal het start jaar van de nieuwe competitie """
-    return timezone.now().year
 
 
 class CompetitieOverzichtView(View):
@@ -71,9 +66,20 @@ class CompetitieOverzichtView(View):
 
         context['object_list'] = list()
 
+        context['regio_instellingen_globaal'] = True
+
         if self.rol_nu == Rollen.ROL_BB:
             context['rol_is_bb'] = True
             kan_beheren = True
+
+            if not comp.klassegrenzen_vastgesteld:
+                afstand_meter = int(comp.afstand)
+                datum = wanneer_ag_vastgesteld(afstand_meter)
+                if datum:
+                    context['datum_ag_vastgesteld'] = localize(datum.date())
+                context['comp_afstand'] = comp.afstand
+                comp.url_ag_vaststellen = reverse('Competitie:ag-vaststellen-afstand',
+                                                  kwargs={'afstand': comp.afstand})
 
             context['planning_deelcomp'] = (DeelCompetitie
                                             .objects
@@ -109,10 +115,18 @@ class CompetitieOverzichtView(View):
                 obj.url_scores = reverse('Competitie:scores-regio',
                                          kwargs={'deelcomp_pk': obj.pk})
 
-                obj.tekst_teams_regio = "Teams voor de regiocompetitie in %s inzien voor deze competitie." % obj.nhb_regio.naam
-                obj.url_teams_regio = reverse('Competitie:regio-teams',
-                                              kwargs={'deelcomp_pk': obj.pk})
+                if obj.regio_organiseert_teamcompetitie:
+                    obj.tekst_regio_teams = "Teams voor de regiocompetitie in %s inzien voor deze competitie." % obj.nhb_regio.naam
+                    obj.url_regio_teams = reverse('Competitie:regio-teams',
+                                                  kwargs={'deelcomp_pk': obj.pk})
 
+                    # poules kaartje alleen het head-to-head puntenmodel gekozen is
+                    if obj.heeft_poules_nodig():
+                        obj.tekst_poules = "Poules voor directe teamwedstrijden tussen teams in deze regiocompetitie."
+                        obj.url_poules = reverse('Competitie:regio-poules',
+                                                 kwargs={'deelcomp_pk': obj.pk})
+
+                comp.regio_einde_teams_aanmaken = obj.einde_teams_aanmaken
             # for
 
             if comp.fase <= 'F':
@@ -120,9 +134,10 @@ class CompetitieOverzichtView(View):
                                                       kwargs={'comp_pk': comp.pk,
                                                               'regio_nr': self.functie_nu.nhb_regio.regio_nr})
 
-                comp.url_regio_handmatige_ag = reverse('Competitie:regio-ag-controle',
-                                                       kwargs={'comp_pk': comp.pk,
-                                                               'regio_nr': self.functie_nu.nhb_regio.regio_nr})
+                if obj.regio_organiseert_teamcompetitie:
+                    comp.url_regio_handmatige_ag = reverse('Competitie:regio-ag-controle',
+                                                           kwargs={'comp_pk': comp.pk,
+                                                                   'regio_nr': self.functie_nu.nhb_regio.regio_nr})
 
             if 'B' <= comp.fase <= 'E':
                 comp.url_inschrijvingen = reverse('Competitie:lijst-regiocomp-regio',
@@ -144,6 +159,8 @@ class CompetitieOverzichtView(View):
                     obj.url_afsluiten = reverse('Competitie:afsluiten-regiocomp',
                                                 kwargs={'deelcomp_pk': obj.pk})
                 # for
+
+            context['regio_instellingen_globaal'] = False
 
         elif self.rol_nu == Rollen.ROL_RKO:
             deelcomp_rks = (DeelCompetitie
@@ -229,6 +246,10 @@ class CompetitieOverzichtView(View):
                                                 laag=LAAG_REGIO,
                                                 is_afgesloten=False,
                                                 nhb_regio=self.functie_nu.nhb_ver.regio))
+
+        for deelcomp in context['planning_deelcomp']:
+            comp.regio_einde_teams_aanmaken = deelcomp.einde_teams_aanmaken
+        # for
 
         comp.url_inschrijvingen = reverse('Competitie:lijst-regiocomp-regio',
                                           kwargs={'comp_pk': comp.pk,
@@ -345,12 +366,6 @@ class CompetitieKiesView(TemplateView):
                      .exclude(is_afgesloten=True)
                      .order_by('afstand', 'begin_jaar')):
 
-            if rol_nu == Rollen.ROL_BB:
-                if not comp.klassegrenzen_vastgesteld:
-                    # klassegrenzen zijn nog niet vastgesteld
-                    # laat de BB de aanvangsgemiddelden vaststellen
-                    context['bb_kan_ag_vaststellen'] = True
-
             comp.bepaal_openbaar(rol_nu)
 
             if comp.is_openbaar:
@@ -372,15 +387,9 @@ class CompetitieKiesView(TemplateView):
 
         if rol_nu == Rollen.ROL_BB:
             # als er nog geen competitie is voor het huidige jaar, geeft de BB dan de optie om deze op te starten
-            beginjaar = models_bepaal_startjaar_nieuwe_competitie()
+            beginjaar = bepaal_startjaar_nieuwe_competitie()
             context['nieuwe_seizoen'] = "%s/%s" % (beginjaar, beginjaar+1)
             context['bb_kan_competitie_aanmaken'] = (0 == Competitie.objects.filter(begin_jaar=beginjaar).count())
-
-            if 'bb_kan_ag_vaststellen' in context:
-                # zoek uit wanneer dit voor het laatste gedaan is
-                datum = wanneer_ag_vastgesteld()
-                if datum:
-                    context['bb_ag_nieuwste_datum'] = localize(datum.date())
 
         if rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL):
             context['toon_beheerders'] = True

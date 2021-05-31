@@ -73,6 +73,7 @@
             <th>M/V</th>
             <th data-filter="on">Voornaam</th>
             <th data-filter="on">Achternaam</th>
+            <th>Leeftijdsklasse {{ wedstrijdklasse_jaar }}</th>
             <th>Laatste inlog</th>
         </tr>
     </thead>
@@ -83,6 +84,8 @@
             <td>{{ obj.geslacht }}</td>
             <td>{{ obj.voornaam }}</td>
             <td>{{ obj.achternaam }}</td>
+            <td>{{ obj.leeftijdsklasse.klasse_kort }}</td>
+
             <td>
                 {% if obj.geen_inlog == 2 %}
                     <i>Onvoltooid account</i>

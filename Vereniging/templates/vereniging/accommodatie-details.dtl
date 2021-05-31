@@ -9,7 +9,8 @@
 {% block title %}Accommodatie details{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vereniging-locatie-details" %}
+
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vereniging-locatie-details" %}
 
     <h4>Vereniging en Accommodatie</h4>
 
@@ -28,15 +29,15 @@
         }
 
         function gewijzigd() {
-            /* het formulier is aangepast en moet opgeslagen worden */
+            // het formulier is aangepast en moet opgeslagen worden
 
-            /* disable alle knoppen waarmee de invoer verloren zou gaan */
+            // disable alle knoppen waarmee de invoer verloren zou gaan
             const els = document.getElementsByClassName("wijzig_knop")
             Array.prototype.forEach.call(els, function (el) {
                 el.classList.add('disabled')
             })
 
-            /* enable de 'opslaan' knop */
+            // enable de 'opslaan' knop
             const el = document.getElementById("opslaan_knop")
             el.disabled = false
             el.parentElement.style.display = "block"
@@ -59,7 +60,7 @@
             <table class="white">
                 <tr>
                     <td>Vereniging:</td>
-                    <td>{{ nhbver }}</td>
+                    <td colspan="2">{{ nhbver }}</td>
                     {% if not readonly %}
                         <td><!-- kolom voor de wijzig knoppen --></td>
                     {% endif %}
@@ -68,6 +69,7 @@
                 <tr>
                     <td>Regio:</td>
                     <td>{{ nhbver.regio }}</td>
+                    <td>&nbsp;</td>     <!-- voorkomt HTML validatie error als alle td colspan=2 hebben -->
                     {% if not readonly %}
                         <td><!-- kolom voor de wijzig knoppen --></td>
                     {% endif %}
@@ -76,7 +78,7 @@
                 {% if nhbver.sorted_cluster_names %}
                     <tr>
                         <td>Cluster(s):</td>
-                        <td>
+                        <td colspan="2">
                             {% for cluster in nhbver.sorted_cluster_names %}
                                 <span>{{ cluster }}</span><br>
                             {% endfor %}
@@ -89,7 +91,7 @@
 
                 <tr>
                     <td style="vertical-align: top">Secretaris:</td>
-                    <td style="vertical-align: top">
+                    <td style="vertical-align: top" colspan="2">
                         {% for name in sec_names %}
                             <span>{{ name }}</span><br>
                         {% empty %}
@@ -107,8 +109,8 @@
                 </tr>
 
                 <tr>
-                    <td style="vertical-align: top">Hoofdwedstrijdleider:</td>
-                    <td style="vertical-align: top">
+                    <td style="vertical-align: top">Hoofdwedstrijdleider(s):</td>
+                    <td style="vertical-align: top" colspan="2">
                         {% for name in hwl_names %}
                             <span>{{ name }}</span><br>
                         {% empty %}
@@ -130,8 +132,8 @@
                 </tr>
 
                 <tr>
-                    <td style="vertical-align: top">Wedstrijdleider:</td>
-                    <td style="vertical-align: top">
+                    <td style="vertical-align: top">Wedstrijdleider(s):</td>
+                    <td style="vertical-align: top" colspan="2">
                         {% for name in wl_names %}
                             <span>{{ name }}</span><br>
                         {% empty %}
@@ -154,7 +156,7 @@
 
                 <tr>
                     <td>E-mailadres secretaris:</td>
-                    <td>
+                    <td colspan="2">
                         {% if sec_email %}
                             <code>{{ sec_email }}</code>
                         {% else %}
@@ -169,7 +171,7 @@
 
                 <tr>
                     <td>E-mailadres hoofdwedstrijdleider:</td>
-                    <td>
+                    <td colspan="2">
                         {% if hwl_email %}
                             <code>{{ hwl_email }}</code>
                         {% else %}
@@ -192,7 +194,7 @@
 
                 <tr>
                     <td>E-mailadres wedstrijdleider:</td>
-                    <td>
+                    <td colspan="2">
                         {% if wl_email %}
                             <code>{{ wl_email }}</code>
                         {% else %}
@@ -214,13 +216,22 @@
                 </tr>
 
                 {% if locatie %}
+
                     <tr>
-                        <td {% if readonly %}colspan="2"{% else %}colspan="3"{% endif %} class="nhb-grijs"><h6>Accommodatie:</h6></td>
+                        <td colspan="{% if readonly %}3{% else %}4{% endif %}" class="nhb-grijs"><h6>Accommodatie:</h6></td>
                     </tr>
 
                     <tr>
-                        <td style="vertical-align: top">Adres van de accommodatie:</td>
-                        <td style="vertical-align: top">{{ locatie.adres|linebreaksbr }}</td>
+                        <td>Adres van de accommodatie:</td>
+                        <td colspan="2">{{ locatie.adres|linebreaksbr }}</td>
+                        {% if not readonly %}
+                            <td><!-- kolom voor de wijzig knoppen --></td>
+                        {% endif %}
+                    </tr>
+
+                    <tr>
+                        <td>Plaats (voor de wedstrijdkalender):</td>
+                        <td colspan="2">{{ locatie.plaats }}</td>
                         {% if not readonly %}
                             <td><!-- kolom voor de wijzig knoppen --></td>
                         {% endif %}
@@ -228,7 +239,7 @@
 
                     <tr>
                         <td>Type baan voor 18m/25m wedstrijden:</td>
-                        <td{% if not readonly %} colspan="2"{% endif %}>
+                        <td colspan="{% if readonly %}2{% else %}3{% endif %}">
                             {% if readonly %}
                                 <span>{{ locatie.baan_type_str }}</span>
                             {% else %}
@@ -258,7 +269,7 @@
 
                     <tr>
                         <td>Aantal banen 18 meter:</td>
-                        <td>
+                        <td colspan="2">
                             {% if readonly %}
                                 <span>{{ locatie.banen_18m }} banen</span>
                             {% else %}
@@ -278,7 +289,7 @@
 
                     <tr>
                         <td>Aantal banen 25 meter:</td>
-                        <td>
+                        <td colspan="2">
                             {% if readonly %}
                                 <span>{{ locatie.banen_25m }} banen</span>
                             {% else %}
@@ -298,7 +309,7 @@
 
                     <tr id="id_dt_per_baan"{% if not readonly_show_max_dt %} class="hide"{% endif %}>
                         <td>Maximum aantal Dutch Targets op 1 baan:</td>
-                        <td>
+                        <td colspan="2">
                             {% if readonly %}
                                 <span>{{ locatie.max_dt_per_baan }} blazoenen</span>
                             {% else %}
@@ -326,7 +337,7 @@
                     {% if locatie.other_ver.count %}
                         <tr>
                             <td style="vertical-align: top">Accommodatie wordt ook gebruikt door vereniging:</td>
-                            <td style="vertical-align: top">
+                            <td style="vertical-align: top" colspan="2">
                                 {% for nhbver in locatie.other_ver.all %}
                                     <span>{{ nhbver }}</span><br>
                                 {% endfor %}
@@ -339,46 +350,77 @@
 
                     <tr>
                         <td style="vertical-align: top">Bijzonderheden:</td>
-                        <td style="vertical-align: top">
+                        <td style="vertical-align: top" colspan="2">
                             {% if readonly %}
                                 <span>{{ locatie.notities|linebreaksbr }}</span>
                             {% else %}
-                                <textarea name="notities" class="materialize-textarea" onchange="gewijzigd()">{{ locatie.notities }}</textarea>
+                                <textarea name="notities" class="materialize-textarea" oninput="gewijzigd()">{{ locatie.notities }}</textarea>
                             {% endif %}
                         </td>
                         {% if not readonly %}
                             <td><!-- kolom voor de wijzig knoppen -->
                                 {% if opslaan_url and not buiten_locatie %}
-                                    <button form="form1" class="btn-nhb-rood wijzig_knop">Buitenlocatie toevoegen</button>
+                                    <button form="form1" class="btn-nhb-rood wijzig_knop">Wij hebben een buitenbaan</button>
                                 {% endif %}
                             </td>
                         {% endif %}
                     </tr>
 
                 {% else %}
+
                     <!-- geen locatie -->
                     <tr>
                         <td style="vertical-align: top">Adres van de accommodatie:</td>
-                        <td style="vertical-align: top"><i>Geen</i></td>
+                        <td style="vertical-align: top" colspan="2"><i>Geen</i></td>
                         {% if not readonly %}
                             <td><!-- kolom voor de wijzig knoppen --></td>
                         {% endif %}
                     </tr>
+
                 {% endif %}     <!-- if locatie -->
 
                 {% if buiten_locatie %}
                     <tr>
-                        <td {% if readonly %}colspan="2"{% else %}colspan="3"{% endif %} class="nhb-grijs"><h6>Buitenbaan:</h6></td>
+                        <td colspan="{% if readonly %}3{% else %}4{% endif %}" class="nhb-grijs"><h6>Buitenbaan:</h6></td>
                     </tr>
 
                     <tr>
-                        <td style="vertical-align: top">Adres van de buitenbaan:</td>
-                        <td style="vertical-align: top">
+                        <td>Adres van de accommodatie:</td>
+                        <td colspan="2">{{ buiten_locatie.adres|linebreaksbr }}</td>
+                        {% if not readonly %}
+                            <td><!-- kolom voor de wijzig knoppen --></td>
+                        {% endif %}
+                    </tr>
 
+                    <tr>
+                        <td>Plaats (voor de wedstrijdkalender):</td>
+                        <td colspan="2">{{ buiten_locatie.plaats }}</td>
+                        {% if not readonly %}
+                            <td><!-- kolom voor de wijzig knoppen --></td>
+                        {% endif %}
+                    </tr>
+
+                    <tr>
+                        <td style="vertical-align: top">Ondersteunt disciplines:</td>
+                        <td>
                             {% if readonly %}
-                                <span>{{ buiten_locatie.adres|linebreaksbr }}</span>
+                                {% for sel, str, checked in disc %}
+                                    {% if checked %}
+                                        <span class="nhb-blauw-text">&check;&nbsp;</span><span>{{ str }}</span>
+                                        <!-- else: discipline niet noemen -->
+                                    {% endif %}
+                                    <!-- voeg een verstopte radiobutton toe die gecheckt kan worden door javascript -->
+                                    <div style="visibility:hidden">
+                                        <input type="radio" id="id_{{ sel }}" {% if checked %} checked{% endif %}>
+                                    </div>
+                                {% endfor %}
                             {% else %}
-                                <textarea name="buiten_adres" class="materialize-textarea" onchange="gewijzigd()">{{ buiten_locatie.adres }}</textarea>
+                                {% for sel, str, checked in disc %}
+                                    <label>
+                                        <input type="checkbox" class="filled-in" id="id_{{ sel }}" name="{{ sel }}"{% if checked %} checked{% endif %} onchange="gewijzigd()">
+                                        <span class="black-text">{{ str }}</span><br>
+                                    </label>
+                                {% endfor %}
                             {% endif %}
                         </td>
                         {% if not readonly %}
@@ -387,26 +429,8 @@
                     </tr>
 
                     <tr>
-                        <td>Maximale afstand:</td>
-                        <td>
-                            {% if readonly %}
-                                <span>{{ buiten_locatie.buiten_max_afstand }} meter</span>
-                            {% else %}
-                                <select name="buiten_max_afstand" onchange="gewijzigd()">
-                                    {% for afstand in buiten_max_afstand %}
-                                        <option value="{{ afstand }}"{%if buiten_locatie.buiten_max_afstand == afstand %} selected{% endif %}>{{ afstand }} meter</option>
-                                    {% endfor %}
-                                </select>
-                            {% endif %}
-                        </td>
-                        {% if not readonly %}
-                            <td><!-- kolom voor de wijzig knoppen --></td>
-                        {% endif %}
-                    </tr>
-
-                    <tr>
-                        <td>Aantal banen:</td>
-                        <td>
+                        <td>Maximum aantal banen:</td>
+                        <td colspan="2">
                             {% if readonly %}
                                 <span>{{ buiten_locatie.buiten_banen }} banen</span>
                             {% else %}
@@ -424,8 +448,26 @@
                     </tr>
 
                     <tr>
-                        <td style="vertical-align: top">Bijzonderheden:</td>
-                        <td style="vertical-align: top">
+                        <td>Maximale afstand:</td>
+                        <td colspan="2">
+                            {% if readonly %}
+                                <span>{{ buiten_locatie.buiten_max_afstand }} meter</span>
+                            {% else %}
+                                <select name="buiten_max_afstand" onchange="gewijzigd()">
+                                    {% for afstand in buiten_max_afstand %}
+                                        <option value="{{ afstand }}"{%if buiten_locatie.buiten_max_afstand == afstand %} selected{% endif %}>{{ afstand }} meter</option>
+                                    {% endfor %}
+                                </select>
+                            {% endif %}
+                        </td>
+                        {% if not readonly %}
+                            <td><!-- kolom voor de wijzig knoppen --></td>
+                        {% endif %}
+                    </tr>
+
+                    <tr>
+                        <td>Bijzonderheden:</td>
+                        <td colspan="2">
                             {% if readonly %}
                                 <span>{{ buiten_locatie.notities|linebreaksbr }}</span>
                             {% else %}
@@ -437,6 +479,45 @@
                         {% endif %}
                     </tr>
                 {% endif %}
+
+
+                {% if externe_locaties %}
+                    <tr>
+                        <td colspan="{% if readonly %}3{% else %}4{% endif %}" class="nhb-grijs"><h6>Overige locaties voor deze vereniging:</h6></td>
+                    </tr>
+
+                    <tr>
+                        <th>Naam</th>
+                        <th>Disciplines</th>
+                        <th>Plaats</th>
+                        {% if not readonly %}
+                            <th><!-- kolom voor de wijzig knoppen --></th>
+                        {% endif %}
+                    </tr>
+
+                    {% for locatie in externe_locaties %}
+                        <tr>
+                            <td>{% if locatie.geen_naam %}<i>Nog niet ingevuld</i>{% else %}{{ locatie.naam }}{% endif %}</td>
+
+                            <td>
+                                {% if locatie.geen_disciplines %}<i>Nog niet gekozen</i>{% endif %}
+                                {% if locatie.discipline_outdoor %}<span>Outdoor</span><br>{% endif %}
+                                {% if locatie.discipline_indoor %}<span>Indoor</span><br>{% endif %}
+                                {% if locatie.discipline_clout %}<span>Clout</span><br>{% endif %}
+                                {% if locatie.discipline_veld %}<span>Veld</span><br>{% endif %}
+                                {% if locatie.discipline_run %}<span>Run-archery</span><br>{% endif %}
+                                {% if locatie.discipline_3d %}<span>3D</span><br>{% endif %}
+                            </td>
+
+                            <td>{% if locatie.geen_plaats %}<i>Nog niet ingevuld</i>{% else %}{{ locatie.plaats }}{% endif %}</td>
+
+                            {% if not readonly %}
+                                <td><!-- kolom voor de wijzig knoppen --></td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+
+                {% endif %}     <!-- externe_locaties -->
 
             </table>
 
@@ -460,6 +541,26 @@
 
     {% if opslaan_url %}
         </form>
+    {% endif %}
+
+    {% if url_verwijder_buitenbaan %}
+        <p>&nbsp;</p>
+        <ul class="collapsible">
+            <li>
+                <div class="collapsible-header white">
+                    <span>Klik eerst hier als je de buitenbaan wilt verwijderen</span>
+                </div>
+                <div class="collapsible-body white">
+                    <form method="post" action="{{ url_verwijder_buitenbaan }}">
+                        {% csrf_token %}
+                        <input type="hidden" name="verwijder_buitenbaan" value="1">
+                        <p>Weet je het zeker?</p>
+                        <button class="btn-nhb-rood" type="submit">
+                            <i class="material-icons-round left">delete</i>Verwijder de buitenbaan</button>
+                    </form>
+                </div>
+            </li>
+        </ul>
     {% endif %}
 
     <script type="application/javascript">

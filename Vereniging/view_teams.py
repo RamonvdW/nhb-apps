@@ -7,6 +7,7 @@
 from django.http import HttpResponseRedirect, Http404
 from django.urls import reverse
 from django.db.models import Count
+from django.utils import timezone
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
@@ -16,7 +17,10 @@ from Competitie.models import (CompetitieKlasse, AG_NUL,
                                RegioCompetitieSchutterBoog, RegiocompetitieTeam)
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
-from Score.models import ScoreHist, SCORE_TYPE_TEAM_AG, score_teams_ag_opslaan
+from Score.models import ScoreHist, SCORE_TYPE_TEAM_AG
+from Score.operations import score_teams_ag_opslaan
+import datetime
+
 
 TEMPLATE_TEAMS_REGIO = 'vereniging/teams-regio.dtl'
 TEMPLATE_TEAMS_REGIO_WIJZIG = 'vereniging/teams-regio-wijzig.dtl'
@@ -105,6 +109,17 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
         # zoek de deelcompetitie waar de regio teams voor in kunnen stellen
         context['deelcomp'] = deelcomp = self._get_deelcomp(kwargs['deelcomp_pk'])
 
+        now = timezone.now()
+        einde = datetime.datetime(year=deelcomp.einde_teams_aanmaken.year,
+                                  month=deelcomp.einde_teams_aanmaken.month,
+                                  day=deelcomp.einde_teams_aanmaken.day,
+                                  hour=0,
+                                  minute=0,
+                                  second=0)
+        einde = timezone.make_aware(einde)
+        mag_wijzigen = (now < einde)
+        context['mag_wijzigen'] = mag_wijzigen
+
         if deelcomp.competitie.afstand == '18':
             aantal_pijlen = 30
         else:
@@ -122,10 +137,12 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
             obj.aantal = obj.gekoppelde_schutters_count
             obj.ag_str = "%05.1f" % (obj.aanvangsgemiddelde * aantal_pijlen)
 
-            obj.url_wijzig = reverse('Vereniging:teams-regio-wijzig',
-                                     kwargs={'deelcomp_pk': deelcomp.pk,
-                                             'team_pk': obj.pk})
+            if mag_wijzigen:
+                obj.url_wijzig = reverse('Vereniging:teams-regio-wijzig',
+                                         kwargs={'deelcomp_pk': deelcomp.pk,
+                                                 'team_pk': obj.pk})
 
+            # koppelen == bekijken
             obj.url_koppelen = reverse('Vereniging:teams-regio-koppelen',
                                        kwargs={'team_pk': obj.pk})
         # for
@@ -252,22 +269,45 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
             obj.actief = team.team_type == obj
         # for
 
-        context['url_opslaan'] = reverse('Vereniging:teams-regio-wijzig',
-                                         kwargs={'deelcomp_pk': deelcomp.pk,
-                                                 'team_pk': team.pk})
+        now = timezone.now()
+        einde = datetime.datetime(year=deelcomp.einde_teams_aanmaken.year,
+                                  month=deelcomp.einde_teams_aanmaken.month,
+                                  day=deelcomp.einde_teams_aanmaken.day,
+                                  hour=0,
+                                  minute=0,
+                                  second=0)
+        einde = timezone.make_aware(einde)
+        mag_wijzigen = (now <= einde)
 
-        if team.pk > 0:
-            context['url_verwijderen'] = context['url_opslaan']
+        if mag_wijzigen:
+            context['url_opslaan'] = reverse('Vereniging:teams-regio-wijzig',
+                                             kwargs={'deelcomp_pk': deelcomp.pk,
+                                                     'team_pk': team.pk})
+
+            if team.pk > 0:
+                context['url_verwijderen'] = context['url_opslaan']
+        else:
+            context['readonly'] = True
 
         menu_dynamics(self.request, context, actief='vereniging')
         return context
 
     def post(self, request, *args, **kwargs):
-        # for k, v in request.POST.items():
-        #     print('%s=%s' % (k, v))
-
         deelcomp = self._get_deelcomp(kwargs['deelcomp_pk'])
         ver = self.functie_nu.nhb_ver
+
+        now = timezone.now()
+        einde = datetime.datetime(year=deelcomp.einde_teams_aanmaken.year,
+                                  month=deelcomp.einde_teams_aanmaken.month,
+                                  day=deelcomp.einde_teams_aanmaken.day,
+                                  hour=0,
+                                  minute=0,
+                                  second=0)
+        einde = timezone.make_aware(einde)
+        mag_wijzigen = (now <= einde)
+
+        if not mag_wijzigen:
+            raise Http404()
 
         try:
             team_pk = int(kwargs['team_pk'][:6])    # afkappen voor de veiligheid
@@ -418,6 +458,9 @@ class WijzigTeamAGView(UserPassesTestMixin, TemplateView):
         # for
         context['ag_hist'] = ag_hist
 
+        context['url_opslaan'] = reverse('Vereniging:wijzig-ag',
+                                         kwargs={'deelnemer_pk': deelnemer.pk})
+
         menu_dynamics(self.request, context, actief='vereniging')
         return context
 
@@ -443,7 +486,7 @@ class WijzigTeamAGView(UserPassesTestMixin, TemplateView):
         nieuw_ag = request.POST.get('nieuw_ag', '')
         if nieuw_ag:
             try:
-                nieuw_ag = float(nieuw_ag)
+                nieuw_ag = float(nieuw_ag[:6])      # afkappen voor de veiligheid
             except ValueError:
                 raise Http404('Geen goed AG')
 
@@ -515,41 +558,70 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
 
         context['team'] = team
 
+        context['deelcomp'] = deelcomp = team.deelcompetitie
+
+        now = timezone.now()
+        einde = datetime.datetime(year=deelcomp.einde_teams_aanmaken.year,
+                                  month=deelcomp.einde_teams_aanmaken.month,
+                                  day=deelcomp.einde_teams_aanmaken.day,
+                                  hour=0,
+                                  minute=0,
+                                  second=0)
+        einde = timezone.make_aware(einde)
+        mag_wijzigen = (now <= einde)
+        context['mag_wijzigen'] = mag_wijzigen
+
         boog_typen = team.team_type.boog_typen.all()
         boog_pks = boog_typen.values_list('pk', flat=True)
         context['boog_typen'] = boog_typen
 
-        if team.deelcompetitie.competitie.afstand == '18':
+        if deelcomp.competitie.afstand == '18':
             aantal_pijlen = 30
         else:
             aantal_pijlen = 25
         team.ag_str = "%5.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
 
-        pks = team.gekoppelde_schutters.values_list('pk', flat=True)
+        if mag_wijzigen:
+            pks = team.gekoppelde_schutters.values_list('pk', flat=True)
 
-        deelnemers = (RegioCompetitieSchutterBoog
-                      .objects
-                      .filter(deelcompetitie=team.deelcompetitie,
-                              inschrijf_voorkeur_team=True,
-                              bij_vereniging=self.functie_nu.nhb_ver,
-                              schutterboog__boogtype__in=boog_pks)
-                      .annotate(in_team_count=Count('regiocompetitieteam'))
-                      .order_by('-ag_voor_team'))
-        for obj in deelnemers:
-            obj.sel_str = "deelnemer_%s" % obj.pk
-            obj.naam_str = obj.schutterboog.nhblid.volledige_naam()
-            obj.boog_str = obj.schutterboog.boogtype.beschrijving
-            obj.ag_str = "%.3f" % obj.ag_voor_team
-            obj.blokkeer = (obj.ag_voor_team < 0.001)
-            obj.geselecteerd = (obj.pk in pks)          # vinkje zetten: gekoppeld aan dit team
-            if not obj.geselecteerd:
-                if obj.in_team_count > 0:
-                    obj.blokkeer = True                 # niet te selecteren: gekoppeld aan een ander team
-        # for
-        context['deelnemers'] = deelnemers
+            deelnemers = (RegioCompetitieSchutterBoog
+                          .objects
+                          .filter(deelcompetitie=deelcomp,
+                                  inschrijf_voorkeur_team=True,
+                                  bij_vereniging=self.functie_nu.nhb_ver,
+                                  schutterboog__boogtype__in=boog_pks)
+                          .annotate(in_team_count=Count('regiocompetitieteam'))
+                          .select_related('schutterboog',
+                                          'schutterboog__nhblid',
+                                          'schutterboog__boogtype')
+                          .order_by('-ag_voor_team'))
+            for obj in deelnemers:
+                obj.sel_str = "deelnemer_%s" % obj.pk
+                obj.naam_str = obj.schutterboog.nhblid.volledige_naam()
+                obj.boog_str = obj.schutterboog.boogtype.beschrijving
+                obj.ag_str = "%.3f" % obj.ag_voor_team
+                obj.blokkeer = (obj.ag_voor_team < 0.001)
+                obj.geselecteerd = (obj.pk in pks)          # vinkje zetten: gekoppeld aan dit team
+                if not obj.geselecteerd:
+                    if obj.in_team_count > 0:
+                        obj.blokkeer = True                 # niet te selecteren: gekoppeld aan een ander team
+            # for
+            context['deelnemers'] = deelnemers
 
-        context['url_opslaan'] = reverse('Vereniging:teams-regio-koppelen',
-                                         kwargs={'team_pk': team.pk})
+            context['url_opslaan'] = reverse('Vereniging:teams-regio-koppelen',
+                                             kwargs={'team_pk': team.pk})
+        else:
+            context['gekoppeld'] = gekoppeld = (team
+                                                .gekoppelde_schutters
+                                                .select_related('schutterboog',
+                                                                'schutterboog__nhblid',
+                                                                'schutterboog__boogtype')
+                                                .order_by('ag_voor_team'))
+            for obj in gekoppeld:
+                obj.naam_str = obj.schutterboog.nhblid.volledige_naam()
+                obj.boog_str = obj.schutterboog.boogtype.beschrijving
+                obj.ag_str = "%.3f" % obj.ag_voor_team
+            # for
 
         menu_dynamics(self.request, context, actief='vereniging')
         return context
@@ -569,6 +641,20 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
                          vereniging=self.functie_nu.nhb_ver))
         except (ValueError, RegiocompetitieTeam.DoesNotExist):
             raise Http404()
+
+        deelcomp = team.deelcompetitie
+
+        now = timezone.now()
+        einde = datetime.datetime(year=deelcomp.einde_teams_aanmaken.year,
+                                  month=deelcomp.einde_teams_aanmaken.month,
+                                  day=deelcomp.einde_teams_aanmaken.day,
+                                  hour=0,
+                                  minute=0,
+                                  second=0)
+        einde = timezone.make_aware(einde)
+        mag_wijzigen = (now <= einde)
+        if not mag_wijzigen:
+            raise Http404('Voorbij de einddatum voor wijzigingen')
 
         # toegestane boogtypen en schutters
         boog_pks = team.team_type.boog_typen.values_list('pk', flat=True)

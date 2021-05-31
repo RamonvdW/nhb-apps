@@ -9,61 +9,62 @@
 {% block title %}Registreren{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="schutter-registreer" %}
 
-<h4>Account aanmaken</h4>
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="schutter-registreer" %}
 
-<p>Met deze pagina maak je een nieuw account aan. Dit hoef je maar één keer te doen.</p>
-<p>Je kan alleen een account aanmaken als je een bondsnummer hebt en je e-mail adres bekend is bij de bond.</p>
-<p>&nbsp;</p>
+    <h4>Account aanmaken</h4>
 
-<div class="container z-depth-2 white">
-    <div class="row nhb-blauw white-text">
-        <div class="col s12 center-align">
-            <h5>Account aanmaken</h5>
-            <p>voor NHB leden</p>
+    <p>Met deze pagina maak je een nieuw account aan. Dit hoef je maar één keer te doen.</p>
+    <p>Je kan alleen een account aanmaken als je een bondsnummer hebt en je e-mail adres bekend is bij de bond.</p>
+    <p>&nbsp;</p>
+
+    <div class="container z-depth-2 white">
+        <div class="row nhb-blauw white-text">
+            <div class="col s12 center-align">
+                <h5>Account aanmaken</h5>
+                <p>voor NHB leden</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <form class="col s12" action="{% url 'Schutter:registreer' %}" method="post">
+                {% csrf_token %}
+                <div class="row"><div class="input-field col s12">
+                    {{ form.nhb_nummer.label_tag }}{{ form.nhb_nummer }}
+                </div></div>
+                <div class="row"><div class="input-field col s12">
+                    {{ form.email.label_tag }}{{ form.email }}
+                </div></div>
+                <div class="row"><div class="input-field col s12">
+                    {{ form.nieuw_wachtwoord.label_tag }}{{ form.nieuw_wachtwoord }}
+                </div></div>
+
+                {% if form.errors %}
+                <div class="row">
+                    <div class="col s1 red-text">Fout:</div>
+                    {% for error in form.non_field_errors %}
+                    <div class="row"><div class="col s10 red-text">{{ error|escape }}</div></div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="row"><div class="col s12"></div>
+                    <div class="center-align">
+                        <input class="btn-nhb-blauw" name="button_registreer" type="submit" value="Aanmaken">
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
 
-    <div class="row">
-        <form class="col s12" action="{% url 'Schutter:registreer' %}" method="post">
-            {% csrf_token %}
-            <div class="row"><div class="input-field col s12">
-                {{ form.nhb_nummer.label_tag }}{{ form.nhb_nummer }}
-            </div></div>
-            <div class="row"><div class="input-field col s12">
-                {{ form.email.label_tag }}{{ form.email }}
-            </div></div>
-            <div class="row"><div class="input-field col s12">
-                {{ form.nieuw_wachtwoord.label_tag }}{{ form.nieuw_wachtwoord }}
-            </div></div>
+    <p>&nbsp;</p>
+    <h5>Wat is mijn e-mail?</h5>
+    <p>Gebruik het e-mailadres wat bekend is bij de NHB. Tip: hier is je digitale bondspas heen gestuurd.</p>
+    <p>Om veiligheidsredenen is er geen manier om je e-mail adres op te vragen.</p>
+    <p>De secretaris van je handboogvereniging kan je verder helpen.</p>
 
-            {% if form.errors %}
-            <div class="row">
-                <div class="col s1 red-text">Fout:</div>
-                {% for error in form.non_field_errors %}
-                <div class="row"><div class="col s10 red-text">{{ error|escape }}</div></div>
-                {% endfor %}
-            </div>
-            {% endif %}
-
-            <div class="row"><div class="col s12"></div>
-                <div class="center-align">
-                    <input class="btn-nhb-blauw" name="button_registreer" type="submit" value="Aanmaken">
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
-
-<p>&nbsp;</p>
-<h5>Wat is mijn e-mail?</h5>
-<p>Gebruik het e-mailadres wat bekend is bij de NHB. Tip: hier is je digitale bondspas heen gestuurd.</p>
-<p>Om veiligheidsredenen is er geen manier om je e-mail adres op te vragen.</p>
-<p>De secretaris van je handboogvereniging kan je verder helpen.</p>
-
-<p>&nbsp;</p>
-<h5>Hoe zit het met mijn privacy?</h5>
-<p>Kies de optie 'Privacyverklaring' in het menu voor meer informatie over je privacy.</p>
+    <p>&nbsp;</p>
+    <h5>Hoe zit het met mijn privacy?</h5>
+    <p>Kies de optie 'Privacyverklaring' in het menu voor meer informatie over je privacy.</p>
 
 {% endblock %}

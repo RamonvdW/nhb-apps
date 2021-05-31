@@ -11,14 +11,14 @@ from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
-from Competitie.models import (DeelCompetitie, DeelcompetitieRonde,
-                               CompetitieKlasse, RegioCompetitieSchutterBoog,
+from Competitie.models import (DeelCompetitie, DeelcompetitieRonde, RegioCompetitieSchutterBoog,
                                LAAG_REGIO, AG_NUL,
                                INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3,
                                DAGDELEN, DAGDEEL_AFKORTINGEN)
+from Competitie.operations import KlasseBepaler
 from Plein.menu import menu_dynamics
 from Score.models import Score, ScoreHist, SCORE_TYPE_INDIV_AG
-from Wedstrijden.models import Wedstrijd
+from Wedstrijden.models import CompetitieWedstrijd
 from .models import SchutterVoorkeuren, SchutterBoog
 
 
@@ -105,34 +105,26 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
                 context['ag_hist'] = hist[0]
         context['ag'] = ag
 
-        # zoek alle wedstrijdklassen van deze competitie met het juiste boogtype
-        qset = (CompetitieKlasse
-                .objects
-                .select_related('indiv')
-                .filter(competitie=deelcomp.competitie,
-                        indiv__boogtype=schutterboog.boogtype)
-                .order_by('indiv__volgorde'))
+        aanmelding = RegioCompetitieSchutterBoog(
+                            deelcompetitie=deelcomp,
+                            schutterboog=schutterboog,
+                            ag_voor_indiv=AG_NUL)
 
-        # zoek een toepasselijke klasse aan de hand van de leeftijd
-        done = False
-        for obj in qset:            # pragma: no branch
-            if ag >= obj.min_ag or obj.indiv.is_onbekend:
-                for lkl in obj.indiv.leeftijdsklassen.all():
-                    if lkl.geslacht == schutterboog.nhblid.geslacht:
-                        if lkl.min_wedstrijdleeftijd <= age <= lkl.max_wedstrijdleeftijd:
-                            context['wedstrijdklasse'] = obj.indiv.beschrijving
-                            done = True
-                            break
-                # for
-            if done:
-                break
-        # for
+        bepaler = KlasseBepaler(deelcomp.competitie)
+        bepaler.bepaal_klasse_deelnemer(aanmelding)
+        context['wedstrijdklasse'] = aanmelding.klasse.indiv.beschrijving
+        context['is_klasse_onbekend'] = aanmelding.klasse.indiv.is_onbekend
+        del aanmelding
 
         udvl = deelcomp.competitie.uiterste_datum_lid       # uiterste datum van lidmaatschap
         dvl = schutterboog.nhblid.sinds_datum               # datum van lidmaatschap
 
-        context['mag_team_schieten'] = (age > MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT and
-                                        dvl < udvl)
+        # geen aspirant, op tijd lid en op tijd aangemeld?
+        mag_team_schieten = (deelcomp.regio_organiseert_teamcompetitie and
+                             age > MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT and
+                             dvl < udvl
+                             and deelcomp.competitie.fase == 'B')
+        context['mag_team_schieten'] = mag_team_schieten
 
         # bepaal de inschrijfmethode voor deze regio
         methode = deelcomp.inschrijf_methode
@@ -140,7 +132,6 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
         context['deelcomp'] = deelcomp
         context['schutterboog'] = schutterboog
         context['voorkeuren'], _ = SchutterVoorkeuren.objects.get_or_create(nhblid=nhblid)
-        # context['voorkeuren_url'] = reverse('Schutter:voorkeuren')
         context['bevestig_url'] = reverse('Schutter:aanmelden',
                                           kwargs={'schutterboog_pk': schutterboog.pk,
                                                   'deelcomp_pk': deelcomp.pk})
@@ -156,7 +147,7 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
                     pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
             # for
 
-            wedstrijden = (Wedstrijd
+            wedstrijden = (CompetitieWedstrijd
                            .objects
                            .filter(pk__in=pks)
                            .select_related('vereniging')
@@ -176,7 +167,6 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
                 # for
 
         if deelcomp.competitie.afstand == '18':
-            # TODO: zijn er meer boogtypen waar we om DT willen vragen?
             if schutterboog.boogtype.afkorting in ('R', 'BB'):
                 context['show_dt'] = True
 
@@ -258,13 +248,13 @@ class RegiocompetitieAanmeldenView(View):
         # bepaal in welke wedstrijdklasse de schutter komt
         age = schutterboog.nhblid.bereken_wedstrijdleeftijd(deelcomp.competitie.begin_jaar + 1)
 
-        aanmelding = RegioCompetitieSchutterBoog()
-        aanmelding.deelcompetitie = deelcomp
-        aanmelding.schutterboog = schutterboog
-        aanmelding.bij_vereniging = schutterboog.nhblid.bij_vereniging
-        aanmelding.ag_voor_indiv = AG_NUL
-        aanmelding.ag_voor_team = AG_NUL
-        aanmelding.ag_voor_team_mag_aangepast_worden = True
+        aanmelding = RegioCompetitieSchutterBoog(
+                            deelcompetitie=deelcomp,
+                            schutterboog=schutterboog,
+                            bij_vereniging=schutterboog.nhblid.bij_vereniging,
+                            ag_voor_indiv=AG_NUL,
+                            ag_voor_team=AG_NUL,
+                            ag_voor_team_mag_aangepast_worden=True)
 
         # haal AG op, indien aanwezig
         scores = Score.objects.filter(schutterboog=schutterboog,
@@ -278,40 +268,21 @@ class RegiocompetitieAanmeldenView(View):
             if ag > 0.000:
                 aanmelding.ag_voor_team_mag_aangepast_worden = False
 
-        # zoek alle wedstrijdklassen van deze competitie met het juiste boogtype
-        qset = (CompetitieKlasse
-                .objects
-                .select_related('indiv')
-                .filter(competitie=deelcomp.competitie,
-                        indiv__boogtype=schutterboog.boogtype)
-                .order_by('indiv__volgorde'))
-
-        # zoek een toepasselijke klasse aan de hand van de leeftijd
-        done = False
-        for obj in qset:        # pragma: no branch
-            if aanmelding.ag_voor_indiv >= obj.min_ag or obj.indiv.is_onbekend:
-                for lkl in obj.indiv.leeftijdsklassen.all():
-                    if lkl.geslacht == schutterboog.nhblid.geslacht:
-                        if lkl.min_wedstrijdleeftijd <= age <= lkl.max_wedstrijdleeftijd:
-                            aanmelding.klasse = obj
-                            done = True
-                            break
-                # for
-            if done:
-                break
-        # for
+        bepaler = KlasseBepaler(deelcomp.competitie)
+        bepaler.bepaal_klasse_deelnemer(aanmelding)
 
         udvl = deelcomp.competitie.uiterste_datum_lid       # uiterste datum van lidmaatschap
         dvl = schutterboog.nhblid.sinds_datum               # datum van lidmaatschap
 
-        mag_team_schieten = (age > MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT and
-                             dvl < udvl)
+        # geen aspirant, op tijd lid en op tijd aangemeld?
+        mag_team_schieten = (deelcomp.regio_organiseert_teamcompetitie and
+                             age > MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT and
+                             dvl < udvl
+                             and deelcomp.competitie.fase == 'B')
 
         # kijk of de schutter met een team mee wil schieten voor deze competitie
-        if mag_team_schieten:
-            # is geen aspirant en was op tijd lid
-            if request.POST.get('wil_in_team', '') != '':
-                aanmelding.inschrijf_voorkeur_team = True
+        if mag_team_schieten and request.POST.get('wil_in_team', '') != '':
+            aanmelding.inschrijf_voorkeur_team = True
 
         # kijk of er velden van een formulier bij zitten
         if methode == INSCHRIJF_METHODE_3:
@@ -444,7 +415,7 @@ class SchutterSchietmomentenView(UserPassesTestMixin, TemplateView):
                 pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
         # for
 
-        wedstrijden = (Wedstrijd
+        wedstrijden = (CompetitieWedstrijd
                        .objects
                        .filter(pk__in=pks)
                        .select_related('vereniging')
@@ -511,7 +482,7 @@ class SchutterSchietmomentenView(UserPassesTestMixin, TemplateView):
         # for
 
         # zoek alle wedstrijden erbij
-        wedstrijden = (Wedstrijd
+        wedstrijden = (CompetitieWedstrijd
                        .objects
                        .filter(pk__in=pks)
                        .select_related('vereniging')

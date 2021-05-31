@@ -20,11 +20,8 @@
 
     <script type="application/javascript">
         function tel_wedstrijden() {
-            const els = document.querySelectorAll('input[type=checkbox]')
-            let count = 0
-            for (let i=0, el; el = els[i]; i++) {
-                if (el.checked) count += 1
-            }
+            // tel hoeveel checkboxes aangekruist zijn
+            const count = document.querySelectorAll('input[type=checkbox]:checked').length
             const el = document.getElementById('submit')
             el.disabled = (count > 7)
         }

@@ -4,12 +4,11 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.utils import timezone
 from django.test import TestCase
+from django.utils import timezone
 from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
 from Overig.e2ehelpers import E2EHelpers
-from .leeftijdsklassen import leeftijdsklassen_plugin_na_login, get_sessionvars_leeftijdsklassen
-from types import SimpleNamespace
+from .leeftijdsklassen import bereken_leeftijdsklassen
 import datetime
 
 
@@ -57,117 +56,78 @@ class TestSchutterLeeftijdsklassen(E2EHelpers, TestCase):
         lid.save()
 
     def test_leeftijdsklassen(self):
-        # unit-tests voor de 'leeftijdsklassen' module
+        now = timezone.now()  # is in UTC
+        now = timezone.localtime(now)  # convert to active timezone (say Europe/Amsterdam)
+        huidige_jaar = now.year
 
-        # simuleer de normale inputs
-        request = SimpleNamespace()
-        request.session = dict()
+        # aspirant
+        tup = bereken_leeftijdsklassen(huidige_jaar - 9)
+        self.assertEqual(tup, (huidige_jaar,
+                               9,
+                               ['Aspirant', 'Aspirant', 'Aspirant', 'Aspirant', 'Aspirant'],
+                               ['Aspiranten <11 jaar', 'Aspiranten <11 jaar', 'Aspiranten <11 jaar', 'Aspiranten 11-12 jaar', 'Aspiranten 11-12 jaar'],
+                               'Aspirant'))
 
-        # session vars niet gezet
-        huidige_jaar, leeftijd, is_jong, wlst, clst = get_sessionvars_leeftijdsklassen(request)
-        self.assertIsNone(huidige_jaar)
-        self.assertIsNone(leeftijd)
-        self.assertFalse(is_jong)
-        self.assertIsNone(wlst)
-        self.assertIsNone(clst)
+        # cadet (14..17)
+        tup = bereken_leeftijdsklassen(huidige_jaar - 13)
+        self.assertEqual(tup, (huidige_jaar,
+                               13,
+                               ['Aspirant', 'Aspirant', 'Cadet', 'Cadet', 'Cadet'],
+                               ['Aspiranten 11-12 jaar', 'Cadetten', 'Cadetten', 'Cadetten', 'Cadetten'],
+                               'Cadet'))
 
-        # geen nhblid
-        leeftijdsklassen_plugin_na_login(request, "from_ip", self.account_geenlid)
-        huidige_jaar, leeftijd, is_jong, wlst, clst = get_sessionvars_leeftijdsklassen(request)
-        self.assertIsNone(huidige_jaar)
-        self.assertIsNone(leeftijd)
-        self.assertFalse(is_jong)
-        self.assertIsNone(wlst)
-        self.assertIsNone(clst)
+        # junior (18..20)
+        tup = bereken_leeftijdsklassen(huidige_jaar - 18)
+        self.assertEqual(tup, (huidige_jaar,
+                               18,
+                               ['Cadet', 'Junior', 'Junior', 'Junior', 'Senior'],
+                               ['Junioren', 'Junioren', 'Junioren', 'Senioren', 'Senioren'],
+                               'Junior'))
 
-        # test met verschillende leeftijdsklassen van een nhblid
-        # noteer: afhankelijk van BasisTypen: init_leeftijdsklasse_2018
-        account = self.account_normaal
-        nhblid = self.nhblid1
-        now_jaar = timezone.now().year  # TODO: should stub, for more reliable test
+        # senior
+        tup = bereken_leeftijdsklassen(huidige_jaar - 21)
+        self.assertEqual(tup, (huidige_jaar,
+                               21,
+                               ['Junior', 'Senior', 'Senior', 'Senior', 'Senior'],
+                               ['Senioren', 'Senioren', 'Senioren', 'Senioren', 'Senioren'],
+                               'Senior'))
 
-        # nhblid, aspirant (<= 13)
-        nhb_leeftijd = 11
-        nhblid.geboorte_datum = datetime.date(year=now_jaar-nhb_leeftijd, month=1, day=1)
-        nhblid.save()
-        leeftijdsklassen_plugin_na_login(request, "from_ip", account)
-        huidige_jaar, leeftijd, is_jong, wlst, clst = get_sessionvars_leeftijdsklassen(request)
-        self.assertEquals(huidige_jaar, now_jaar)
-        self.assertEqual(leeftijd, nhb_leeftijd)
-        self.assertTrue(is_jong)        # onder 30 == jong
-        self.assertEqual(wlst, ('Aspirant', 'Aspirant', 'Aspirant', 'Aspirant', 'Cadet'))
-        #                        -1=10       0=11        +1=12       +2=13       +3=14
-        self.assertEqual(clst, ('Aspirant', 'Aspirant', 'Aspirant', 'Cadet', 'Cadet'))
+        # master
+        tup = bereken_leeftijdsklassen(huidige_jaar - 50)
+        self.assertEqual(tup, (huidige_jaar,
+                               50,
+                               ['Senior', 'Master', 'Master', 'Master', 'Master'],
+                               ['Senioren', 'Senioren', 'Senioren', 'Senioren', 'Senioren'],
+                               'Senior'))
 
-        # nhblid, cadet (14, 15, 16, 17)
-        nhb_leeftijd = 14
-        nhblid.geboorte_datum = datetime.date(year=now_jaar-nhb_leeftijd, month=1, day=1)
-        nhblid.save()
-        leeftijdsklassen_plugin_na_login(request, "from_ip", account)
-        huidige_jaar, leeftijd, is_jong, wlst, clst = get_sessionvars_leeftijdsklassen(request)
-        self.assertEquals(huidige_jaar, now_jaar)
-        self.assertEqual(leeftijd, nhb_leeftijd)
-        self.assertTrue(is_jong)        # onder 30 == jong
-        self.assertEqual(wlst, ('Aspirant', 'Cadet', 'Cadet', 'Cadet', 'Cadet'))
-        #                        -1=13       0=14     +1=15    +2=16    +3=17
-        self.assertEqual(clst, ('Cadet', 'Cadet', 'Cadet', 'Cadet', 'Junior'))
-
-        # nhblid, junior (18, 19, 20)
-        nhb_leeftijd = 18
-        nhblid.geboorte_datum = datetime.date(year=now_jaar-nhb_leeftijd, month=1, day=1)
-        nhblid.save()
-        leeftijdsklassen_plugin_na_login(request, "from_ip", account)
-        huidige_jaar, leeftijd, is_jong, wlst, clst = get_sessionvars_leeftijdsklassen(request)
-        self.assertEquals(huidige_jaar, now_jaar)
-        self.assertEqual(leeftijd, nhb_leeftijd)
-        self.assertTrue(is_jong)        # onder 30 == jong
-        self.assertEqual(wlst, ('Cadet', 'Junior', 'Junior', 'Junior', 'Senior'))
-        #                        -1=17    0=18     +1=19      +2=20     +3=21
-        self.assertEqual(clst, ('Junior', 'Junior', 'Junior', 'Senior', 'Senior'))
-
-        # nhblid, senior (>= 21)
-        nhb_leeftijd = 30
-        nhblid.geboorte_datum = datetime.date(year=now_jaar-nhb_leeftijd, month=1, day=1)
-        nhblid.save()
-        leeftijdsklassen_plugin_na_login(request, "from_ip", account)
-        huidige_jaar, leeftijd, is_jong, wlst, clst = get_sessionvars_leeftijdsklassen(request)
-        self.assertEquals(huidige_jaar, now_jaar)
-        self.assertEqual(leeftijd, nhb_leeftijd)
-        self.assertFalse(is_jong)        # onder 30 == jong
-        self.assertEqual(wlst, ('Senior', 'Senior', 'Senior', 'Senior', 'Senior'))
-        self.assertEqual(clst, wlst)
-
-        # nhblid, master (zelfde als senior, for now)
-        nhb_leeftijd = 50
-        nhblid.geboorte_datum = datetime.date(year=now_jaar-nhb_leeftijd, month=1, day=1)
-        nhblid.save()
-        leeftijdsklassen_plugin_na_login(request, "from_ip", account)
-        huidige_jaar, leeftijd, is_jong, wlst, clst = get_sessionvars_leeftijdsklassen(request)
-        self.assertEquals(huidige_jaar, now_jaar)
-        self.assertEqual(leeftijd, nhb_leeftijd)
-        self.assertFalse(is_jong)        # onder 30 == jong
-        self.assertEqual(wlst, ('Senior', 'Senior', 'Senior', 'Senior', 'Senior'))
-        self.assertEqual(clst, wlst)
-
-    def test_login(self):
-        self.e2e_login(self.account_normaal)
-        huidige_jaar, leeftijd, is_jong, wlst, clst = get_sessionvars_leeftijdsklassen(self.client)
-        self.assertFalse(is_jong)
-        self.assertGreaterEqual(leeftijd, 48)    # in 2020-1972 = 48
+        # veteraan
+        tup = bereken_leeftijdsklassen(huidige_jaar - 60)
+        self.assertEqual(tup, (huidige_jaar,
+                               60,
+                               ['Master', 'Veteraan', 'Veteraan', 'Veteraan', 'Veteraan'],
+                               ['Senioren', 'Senioren', 'Senioren', 'Senioren', 'Senioren'],
+                               'Senior'))
 
     def test_view(self):
-        # zonder login --> terug naar het plein
+        # zonder login
         with self.assert_max_queries(20):
             resp = self.client.get('/sporter/leeftijdsklassen/', follow=True)
         self.assert403(resp)
 
-        # met schutter-login wel toegankelijk
+        # inlog, geen NHB lid
+        self.e2e_login(self.account_admin)
+        with self.assert_max_queries(20):
+            resp = self.client.get('/sporter/leeftijdsklassen/')
+        self.assert403(resp)
+
+        # schutter
         self.e2e_login(self.account_normaal)
         with self.assert_max_queries(20):
             resp = self.client.get('/sporter/leeftijdsklassen/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('schutter/leeftijdsklassen.dtl', 'plein/site_layout.dtl'))
+
         self.e2e_assert_other_http_commands_not_supported('/sporter/leeftijdsklassen/')
 
 # end of file

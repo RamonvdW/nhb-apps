@@ -4,14 +4,15 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-# script for execution by a crob job
+# script for execution by a cron job
 # precondition: venv must be set
 
 MAX_FOUTEN=5    # limiet, getest met een dry-run
+USER_WWW="$1"
 
 ID=$(id -u)
 ID_ROOT=$(id -u root)
-ID_WWW=$(id -u apache)
+ID_WWW=$(id -u "$USER_WWW")
 if [ $ID -ne $ID_ROOT -a $ID -ne $ID_WWW ]
 then
     echo "Please run with sudo"

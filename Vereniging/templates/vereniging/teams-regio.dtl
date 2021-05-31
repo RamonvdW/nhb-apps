@@ -21,7 +21,11 @@
         <div class="container">
             <table class="white">
                 <tr>
-                    <td class="center-align">Teams kunnen aangepast worden tot en met <b>{{ deelcomp.einde_teams_aanmaken }}</b>.</td>
+                    {% if mag_wijzigen %}
+                        <td class="center-align">Teams kunnen aangepast worden tot <b>{{ deelcomp.einde_teams_aanmaken }}</b>.</td>
+                    {% else %}
+                        <td class="center-align">De deadline van {{ deelcomp.einde_teams_aanmaken }} is gepasseerd, dus de teams kunnen niet meer aangepast worden.</td>
+                    {% endif %}
                 </tr>
             </table>
         </div>
@@ -57,9 +61,15 @@
                     {% endif %}
 
                     <td>
-                        <a class="btn-nhb-blauw" href="{{ team.url_wijzig }}">Wijzig</a>
-                        <span>&nbsp;&nbsp;</span>
-                        <a class="btn-nhb-blauw" href="{{ team.url_koppelen }}">Koppel</a>
+                        {% if team.url_wijzig %}
+                            <a class="btn-nhb-blauw" href="{{ team.url_wijzig }}">Wijzig</a>
+                            <span>&nbsp;&nbsp;</span>
+                        {% endif %}
+                        {% if mag_wijzigen %}
+                            <a class="btn-nhb-blauw" href="{{ team.url_koppelen }}">Koppel</a>
+                        {% else %}
+                            <a class="btn-nhb-blauw" href="{{ team.url_koppelen }}">Bekijk</a>
+                        {% endif %}
                     </td>
                 </tr>
             {% empty %}

@@ -11,10 +11,12 @@ from Competitie.models import (Competitie, CompetitieKlasse,
                                DeelCompetitie, LAAG_REGIO, DeelcompetitieRonde,
                                RegioCompetitieSchutterBoog,)
 from Competitie.test_fase import zet_competitie_fase
+from Competitie.test_competitie import maak_competities_en_zet_fase_b
 from NhbStructuur.models import NhbRegio, NhbLid, NhbVereniging
 from Schutter.models import SchutterBoog
-from Score.models import Score, ScoreHist, SCORE_TYPE_INDIV_AG, SCORE_TYPE_SCORE, score_indiv_ag_opslaan
-from Wedstrijden.models import WedstrijdenPlan
+from Score.models import Score, ScoreHist, SCORE_TYPE_INDIV_AG, SCORE_TYPE_SCORE
+from Score.operations import score_indiv_ag_opslaan
+from Wedstrijden.models import CompetitieWedstrijdenPlan
 from Overig.e2ehelpers import E2EHelpers
 import datetime
 import io
@@ -32,16 +34,7 @@ class TestCompetitieCliOudeSiteOvernemen(E2EHelpers, TestCase):
         self.e2e_check_rol('BB')
 
         # maak de competitie aan
-        self.client.post(self.url_aanmaken)
-
-        comp_18 = Competitie.objects.get(afstand='18')
-        comp_25 = Competitie.objects.get(afstand='25')
-
-        # klassegrenzen vaststellen
-        self.client.post(self.url_klassegrenzen_vaststellen % comp_18.pk)
-        self.client.post(self.url_klassegrenzen_vaststellen % comp_25.pk)
-
-        # competitieklassen vaststellen
+        comp_18, comp_25 = maak_competities_en_zet_fase_b()
 
         # verander de minimale aanvangsgemiddelde voor Recurve Klasse 2 naar 9.5
         klasse = CompetitieKlasse.objects.get(competitie__afstand='18',
@@ -112,7 +105,6 @@ class TestCompetitieCliOudeSiteOvernemen(E2EHelpers, TestCase):
         lid.email = "geenver@nhb.not"
         lid.geboorte_datum = datetime.date(year=2008, month=3, day=4)
         lid.sinds_datum = datetime.date(year=2015, month=11, day=12)
-        #lid.bij_vereniging =
         lid.account = self.e2e_create_account(lid.nhb_nr, lid.email, lid.voornaam)
         lid.save()
 
@@ -168,7 +160,7 @@ class TestCompetitieCliOudeSiteOvernemen(E2EHelpers, TestCase):
         lid.nhb_nr = 100008
         lid.geslacht = "M"
         lid.voornaam = "Eerste"
-        lid.achternaam = "Exlid"
+        lid.achternaam = "Ex-lid"
         lid.email = "exlid1@nhb.not"
         lid.geboorte_datum = datetime.date(year=1988, month=12, day=4)
         lid.sinds_datum = datetime.date(year=2015, month=7, day=15)
@@ -180,7 +172,7 @@ class TestCompetitieCliOudeSiteOvernemen(E2EHelpers, TestCase):
         lid.nhb_nr = 100009
         lid.geslacht = "M"
         lid.voornaam = "Tweede"
-        lid.achternaam = "Exlid"
+        lid.achternaam = "Ex-lid"
         lid.email = "exlid1@nhb.not"
         lid.geboorte_datum = datetime.date(year=1988, month=12, day=4)
         lid.sinds_datum = datetime.date(year=2015, month=7, day=15)
@@ -202,9 +194,6 @@ class TestCompetitieCliOudeSiteOvernemen(E2EHelpers, TestCase):
 
     def setUp(self):
         """ initialisatie van de test case """
-
-        self.url_aanmaken = '/bondscompetities/aanmaken/'
-        self.url_klassegrenzen_vaststellen = '/bondscompetities/%s/klassegrenzen/vaststellen/'
 
         # maak een BB aan, nodig om de competitie defaults in te zien
         self.account_bb = self.e2e_create_account('bb', 'bb@test.com', 'BB', accepteer_vhpg=True)
@@ -239,7 +228,7 @@ class TestCompetitieCliOudeSiteOvernemen(E2EHelpers, TestCase):
         # eerst aanmaken, dan verwijderen
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(1861):
+        with self.assert_max_queries(1861, check_duration=False):
             management.call_command('oude_site_overnemen', self.dir_testfiles1, '100', stderr=f1, stdout=f2)
 
         # verwijder de uitslag van een wedstrijd
@@ -251,7 +240,7 @@ class TestCompetitieCliOudeSiteOvernemen(E2EHelpers, TestCase):
         uitslag.delete()
 
         # voeg een ronde toe die niet voor het oude programma is
-        plan = WedstrijdenPlan()
+        plan = CompetitieWedstrijdenPlan()
         plan.save()
         ronde = DeelcompetitieRonde(deelcompetitie=self.deelcomp,
                                     beschrijving="Hello World",
@@ -278,7 +267,7 @@ class TestCompetitieCliOudeSiteOvernemen(E2EHelpers, TestCase):
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(4270):
+        with self.assert_max_queries(4270, check_duration=False):
             management.call_command('verwijder_data_oude_site', stderr=f1, stdout=f2)
         self.assertTrue("AG's opgeruimd: 1" in f2.getvalue())
 
@@ -294,7 +283,7 @@ class TestCompetitieCliOudeSiteOvernemen(E2EHelpers, TestCase):
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(1861):
+        with self.assert_max_queries(1861, check_duration=False):
             management.call_command('oude_site_overnemen', self.dir_testfiles1, '100', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
@@ -315,7 +304,7 @@ class TestCompetitieCliOudeSiteOvernemen(E2EHelpers, TestCase):
         # nog een keer, want dan zijn de uitslagen er al (extra coverage)
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(923):
+        with self.assert_max_queries(923, check_duration=False):
             management.call_command('oude_site_overnemen', self.dir_testfiles1, '1', stderr=f1, stdout=f2)
 
         self.assertEqual(ScoreHist.objects.count(), 4)
@@ -331,7 +320,7 @@ class TestCompetitieCliOudeSiteOvernemen(E2EHelpers, TestCase):
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(1893):
+        with self.assert_max_queries(1893, check_duration=False):
             management.call_command('oude_site_overnemen', self.dir_testfiles2, '100', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
         self.assertTrue("[ERROR] Kan wedstrijdklasse 'Barebow Cadetten klasse 1' niet vinden (competitie Indoor" in f1.getvalue())
@@ -343,13 +332,13 @@ class TestCompetitieCliOudeSiteOvernemen(E2EHelpers, TestCase):
         # nog een keer uitvoeren zodat eventuele teams al bestaan
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(950):
+        with self.assert_max_queries(950, check_duration=False):
             management.call_command('oude_site_overnemen', self.dir_testfiles2, '100', stderr=f1, stdout=f2)
 
     def test_dryrun(self):
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(1840):
+        with self.assert_max_queries(1840, check_duration=False):
             management.call_command('oude_site_overnemen', '--dryrun', self.dir_testfiles1, '100', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
@@ -358,7 +347,7 @@ class TestCompetitieCliOudeSiteOvernemen(E2EHelpers, TestCase):
     def test_all(self):
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(2850):
+        with self.assert_max_queries(2850, check_duration=False):
             management.call_command('oude_site_overnemen', '--all', self.dir_top, '100', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
@@ -377,7 +366,7 @@ class TestCompetitieCliOudeSiteOvernemen(E2EHelpers, TestCase):
         zet_competitie_fase(comp_18, 'A')
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(910):
+        with self.assert_max_queries(910, check_duration=False):
             management.call_command('oude_site_overnemen', '--dryrun', self.dir_testfiles1, '100', stderr=f1, stdout=f2)
         self.assertTrue("(DRY RUN)" in f2.getvalue())
 
@@ -386,7 +375,7 @@ class TestCompetitieCliOudeSiteOvernemen(E2EHelpers, TestCase):
         # is en die bovendien opgeruimd is in het CRM
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(1895):
+        with self.assert_max_queries(1895, check_duration=False):
             management.call_command('oude_site_overnemen', self.dir_testfiles1, '100', stderr=f1, stdout=f2)
 
         # ruim vereniging 1000 op
@@ -401,7 +390,7 @@ class TestCompetitieCliOudeSiteOvernemen(E2EHelpers, TestCase):
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(950):
+        with self.assert_max_queries(950, check_duration=False):
             management.call_command('oude_site_overnemen', self.dir_testfiles1, '100', stderr=f1, stdout=f2)
 
         # print("f1: %s" % f1.getvalue())

@@ -70,6 +70,7 @@
             {% endfor %}
         </table>
 
+        <p>Teamsterkte = Som van de aanvangsgemiddelden van de 3 beste sporters van het team, vermenigvuldigd met {{ aantal_pijlen }}.</p>
     {% endif %}
 
 {% endblock %}

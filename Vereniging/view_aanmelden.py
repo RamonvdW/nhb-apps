@@ -18,11 +18,11 @@ from NhbStructuur.models import NhbLid
 from Schutter.models import SchutterBoog, SchutterVoorkeuren
 from Competitie.models import (AG_NUL, DAGDELEN, DAGDEEL_AFKORTINGEN,
                                INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3,
-                               Competitie, CompetitieKlasse,
-                               DeelCompetitie, DeelcompetitieRonde,
+                               Competitie, DeelCompetitie, DeelcompetitieRonde,
                                RegioCompetitieSchutterBoog)
+from Competitie.operations import KlasseBepaler
 from Score.models import Score, SCORE_TYPE_INDIV_AG
-from Wedstrijden.models import Wedstrijd
+from Wedstrijden.models import CompetitieWedstrijd
 import copy
 
 
@@ -94,11 +94,13 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
             if wedstrijdleeftijd == prev_wedstrijdleeftijd:
                 obj.leeftijdsklasse = prev_lkl
             else:
-                obj.leeftijdsklasse = (LeeftijdsKlasse
-                                       .objects
-                                       .filter(max_wedstrijdleeftijd__gte=wedstrijdleeftijd,
-                                               geslacht='M')
-                                       .order_by('max_wedstrijdleeftijd'))[0]
+                for lkl in LeeftijdsKlasse.objects.filter(geslacht='M'):
+                    if lkl.leeftijd_is_compatible(wedstrijdleeftijd):
+                        obj.leeftijdsklasse = lkl
+                        # geen master/veteraan, dus stop bij eerste passende klasse
+                        break
+                # for
+
                 prev_lkl = obj.leeftijdsklasse
                 prev_wedstrijdleeftijd = wedstrijdleeftijd
 
@@ -221,6 +223,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
         context['tweede_jaar'] = self.comp.begin_jaar + 1
         context['aanmelden_url'] = reverse('Vereniging:leden-aanmelden', kwargs={'comp_pk': self.comp.pk})
         context['mag_aanmelden'] = True
+        context['mag_team_schieten'] = (self.comp.fase == 'B')
 
         # bepaal de inschrijfmethode voor deze regio
         mijn_regio = self.functie_nu.nhb_ver.regio
@@ -246,7 +249,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                         pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
                 # for
 
-                wedstrijden = (Wedstrijd
+                wedstrijden = (CompetitieWedstrijd
                                .objects
                                .filter(pk__in=pks)
                                .select_related('vereniging')
@@ -304,8 +307,9 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
         # for
 
         # zoek eerst de voorkeuren op
+        mag_team_schieten = comp.fase == 'B'
         bulk_team = False
-        if request.POST.get('wil_in_team', '') != '':
+        if mag_team_schieten and request.POST.get('wil_in_team', '') != '':
             bulk_team = True
 
         bulk_wedstrijden = list()
@@ -339,6 +343,8 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
             bulk_opmerking = bulk_opmerking[:500]     # moet afkappen, anders database foutmelding
 
         udvl = comp.uiterste_datum_lid
+
+        bepaler = KlasseBepaler(comp)
 
         # all checked boxes are in the post request as keys, typically with value 'on'
         for key, _ in request.POST.items():
@@ -407,38 +413,15 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                         aanmelding.ag_voor_team_mag_aangepast_worden = False
                 # for
 
-                # zoek alle wedstrijdklassen van deze competitie met het juiste boogtype
-                qset = (CompetitieKlasse
-                        .objects
-                        .filter(competitie=deelcomp.competitie,
-                                indiv__boogtype=schutterboog.boogtype)
-                        .prefetch_related('indiv__leeftijdsklassen')
-                        .order_by('indiv__volgorde'))
-
                 # zoek een toepasselijke klasse aan de hand van de leeftijd
-                done = False
-                for obj in qset:
-                    if aanmelding.ag_voor_indiv >= obj.min_ag or obj.indiv.is_onbekend:
-                        for lkl in obj.indiv.leeftijdsklassen.all():
-                            if lkl.geslacht == schutterboog.nhblid.geslacht:
-                                if lkl.min_wedstrijdleeftijd <= age <= lkl.max_wedstrijdleeftijd:
-                                    aanmelding.klasse = obj
-                                    done = True
-                                    break
-                        # for
-                    if done:
-                        break
-                # for
-
-                if not done:
-                    # geen klasse kunnen vinden
+                bepaler.bepaal_klasse_deelnemer(aanmelding)
+                if not aanmelding.klasse:
                     raise Http404('Geen passende wedstrijdklasse kunnen kiezen')
 
                 # kijk of de schutter met een team mee wil en mag schieten voor deze competitie
                 if age > MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT and dvl < udvl:
                     # is geen aspirant en was op tijd lid
-                    if bulk_team:
-                        aanmelding.inschrijf_voorkeur_team = True
+                    aanmelding.inschrijf_voorkeur_team = bulk_team
 
                 aanmelding.inschrijf_voorkeur_dagdeel = bulk_dagdeel
                 aanmelding.inschrijf_notitie = bulk_opmerking
@@ -484,6 +467,9 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
             raise Http404('Verkeerde parameters')
 
         self.deelcomp = deelcomp
+        comp = deelcomp.competitie
+        comp.bepaal_fase()
+        mag_toggle = comp.fase <= 'B' and self.functie_nu.rol == 'HWL'
 
         dagdeel_str = dict()
         for afkorting, beschrijving in DAGDELEN:
@@ -491,13 +477,12 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
         # for
         dagdeel_str[''] = ''
 
-        _, functie_nu = rol_get_huidige_functie(self.request)
         objs = (RegioCompetitieSchutterBoog
                 .objects
                 .select_related('schutterboog', 'schutterboog__nhblid',
                                 'bij_vereniging', 'klasse', 'klasse__indiv')
                 .filter(deelcompetitie=deelcomp,
-                        bij_vereniging=functie_nu.nhb_ver)
+                        bij_vereniging=self.functie_nu.nhb_ver)
                 .order_by('klasse__indiv__volgorde',
                           'schutterboog__nhblid__voornaam',
                           'schutterboog__nhblid__achternaam'))
@@ -509,6 +494,13 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
             lid = obj.schutterboog.nhblid
             obj.nhb_nr = lid.nhb_nr
             obj.naam_str = lid.volledige_naam()
+
+            if obj.inschrijf_voorkeur_team:
+                if mag_toggle:
+                    obj.maak_nee = True
+            else:
+                if mag_toggle:
+                    obj.maak_ja = True
         # for
 
         return objs
@@ -542,6 +534,29 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
 
         if self.rol_nu != Rollen.ROL_HWL:
             raise PermissionDenied('Verkeerde rol')
+
+        deelnemer_pk = request.POST.get('toggle_deelnemer_pk', '')
+        if deelnemer_pk:
+            try:
+                deelnemer_pk = int(deelnemer_pk[:6])        # afkappen voor de veiligheid
+                deelnemer = (RegioCompetitieSchutterBoog
+                             .objects
+                             .select_related('bij_vereniging',
+                                             'deelcompetitie')
+                             .get(pk=deelnemer_pk))
+            except (ValueError, RegioCompetitieSchutterBoog.DoesNotExist):
+                raise Http404('Deelnemer niet gevonden')
+
+            ver = deelnemer.bij_vereniging
+            if ver and ver != self.functie_nu.nhb_ver:
+                raise PermissionDenied('Sporter is niet lid bij jouw vereniging')
+
+            deelnemer.inschrijf_voorkeur_team = not deelnemer.inschrijf_voorkeur_team
+            deelnemer.save(update_fields=['inschrijf_voorkeur_team'])
+
+            url = reverse('Vereniging:leden-ingeschreven',
+                          kwargs={'deelcomp_pk': deelnemer.deelcompetitie.pk})
+            return HttpResponseRedirect(url)
 
         # all checked boxes are in the post request as keys, typically with value 'on'
         for key, _ in request.POST.items():

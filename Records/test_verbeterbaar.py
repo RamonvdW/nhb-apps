@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -188,7 +188,7 @@ class TestRecordsVerbeterbaar(E2EHelpers, TestCase):
         self.e2e_assert_other_http_commands_not_supported(url)
 
         urls = self.extract_all_urls(resp, skip_menu=True, skip_smileys=True)
-        self.assertEqual(12, len(urls))
+        self.assertEqual(14, len(urls))
         self.assertTrue('/records/record-18-43/' in urls)
 
         self.e2e_assert_other_http_commands_not_supported(url)
@@ -203,7 +203,7 @@ class TestRecordsVerbeterbaar(E2EHelpers, TestCase):
         self.e2e_assert_other_http_commands_not_supported(url)
 
         urls = self.extract_all_urls(resp, skip_menu=True, skip_smileys=True)
-        self.assertEqual(12, len(urls))
+        self.assertEqual(14, len(urls))
         self.assertTrue('/records/record-25-45/' in urls)
 
     def test_combies(self):

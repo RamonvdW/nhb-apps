@@ -8,13 +8,15 @@ from django.utils.dateparse import parse_date
 from django.utils import timezone
 from django.test import TestCase
 from BasisTypen.models import BoogType
+from Competitie.models import Competitie, DeelCompetitie, INSCHRIJF_METHODE_1
 from Competitie.test_fase import zet_competitie_fase
+from Competitie.test_competitie import maak_competities_en_zet_fase_b, competities_aanmaken
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Records.models import IndivRecord
-from Competitie.models import Competitie, DeelCompetitie, INSCHRIJF_METHODE_1
-from Score.models import Score, ScoreHist, score_indiv_ag_opslaan
+from Score.models import Score, ScoreHist
+from Score.operations import score_indiv_ag_opslaan
 from Overig.e2ehelpers import E2EHelpers
 from .models import SchutterVoorkeuren, SchutterBoog
 import datetime
@@ -87,6 +89,37 @@ class TestSchutterProfiel(E2EHelpers, TestCase):
         rec.max_score = 300
         rec.save()
 
+        rec = IndivRecord()
+        rec.discipline = '18'
+        rec.volg_nr = 2
+        rec.soort_record = "60p"
+        rec.geslacht = lid.geslacht
+        rec.leeftijdscategorie = 'J'
+        rec.materiaalklasse = "C"
+        rec.nhb_lid = lid
+        rec.naam = "Ramon de Tester"
+        rec.datum = parse_date('2012-12-12')
+        rec.plaats = "Top stad"
+        rec.land = 'Verwegistan'
+        rec.score = 290
+        rec.max_score = 300
+        rec.save()
+
+        rec = IndivRecord()
+        rec.discipline = '18'
+        rec.volg_nr = 3
+        rec.soort_record = "60p"
+        rec.geslacht = lid.geslacht
+        rec.leeftijdscategorie = 'C'
+        rec.materiaalklasse = "C"
+        rec.nhb_lid = lid
+        rec.naam = "Ramon de Tester"
+        rec.datum = parse_date('1991-12-12')
+        rec.plaats = ""     # typisch voor oudere records
+        rec.score = 290
+        rec.max_score = 300
+        rec.save()
+
         # geef dit account een goede en een slechte HistComp record
         histcomp = HistCompetitie()
         histcomp.seizoen = "2009/2010"
@@ -144,26 +177,8 @@ class TestSchutterProfiel(E2EHelpers, TestCase):
         # for
 
     def _competitie_aanmaken(self):
-        url_kies = '/bondscompetities/'
-        url_aanmaken = '/bondscompetities/aanmaken/'
-        url_ag_vaststellen = '/bondscompetities/ag-vaststellen/'
-        url_klassegrenzen_vaststellen = '/bondscompetities/%s/klassegrenzen/vaststellen/'
-
         # competitie aanmaken
-        with self.assert_max_queries(20):
-            resp = self.client.post(url_aanmaken)
-        self.assert_is_redirect(resp, url_kies)
-
-        # aanvangsgemiddelden vaststellen
-        with self.assert_max_queries(20):
-            resp = self.client.post(url_ag_vaststellen)
-
-        self.comp_18 = Competitie.objects.get(afstand='18')
-        self.comp_25 = Competitie.objects.get(afstand='25')
-
-        # klassegrenzen vaststellen
-        self.client.post(url_klassegrenzen_vaststellen % self.comp_18.pk)
-        self.client.post(url_klassegrenzen_vaststellen % self.comp_25.pk)
+        self.comp_18, self.comp_25 = maak_competities_en_zet_fase_b()
 
         # zet de inschrijving open
         now = timezone.now()
@@ -180,9 +195,6 @@ class TestSchutterProfiel(E2EHelpers, TestCase):
 
     def test_compleet(self):
         url_kies = '/bondscompetities/'
-        url_aanmaken = '/bondscompetities/aanmaken/'
-        url_ag_vaststellen = '/bondscompetities/ag-vaststellen/'
-        url_klassegrenzen_vaststellen = '/bondscompetities/%s/klassegrenzen/vaststellen/'
 
         # log in as schutter
         self.e2e_login(self.account_normaal)
@@ -192,25 +204,8 @@ class TestSchutterProfiel(E2EHelpers, TestCase):
             resp = self.client.get(self.url_profiel)
         self.assertNotContains(resp, 'De volgende competities worden georganiseerd')
 
-        # log in as BB en maak de competitie aan
-        self.e2e_login_and_pass_otp(self.account_admin)
-        self.e2e_wisselnaarrol_bb()
-
         # competitie aanmaken
-        with self.assert_max_queries(20):
-            resp = self.client.post(url_aanmaken)
-        self.assert_is_redirect(resp, url_kies)
-        self.client.post(url_ag_vaststellen)
-
-        comp_18 = Competitie.objects.get(afstand=18)
-        comp_25 = Competitie.objects.get(afstand=25)
-
-        self.client.post(url_klassegrenzen_vaststellen % comp_18.pk)
-        self.client.post(url_klassegrenzen_vaststellen % comp_25.pk)
-
-        # zet de competitie door naar fase B
-        zet_competitie_fase(comp_18, 'B')
-        zet_competitie_fase(comp_25, 'B')
+        comp_18, comp_25 = maak_competities_en_zet_fase_b()
 
         # log in as schutter
         self.e2e_login(self.account_normaal)
@@ -489,22 +484,14 @@ class TestSchutterProfiel(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('schutter/profiel.dtl', 'plein/site_layout.dtl'))
 
     def test_fase_a(self):
-        # test competitie in fase A wordt niet getoond op profiel
-        # log in as BB en maak de competitie aan
-        self.e2e_login_and_pass_otp(self.account_admin)
-        self.e2e_wisselnaarrol_bb()
-
         # competitie aanmaken
-        url_kies = '/bondscompetities/'
-        url_aanmaken = '/bondscompetities/aanmaken/'
-        with self.assert_max_queries(20):
-            resp = self.client.post(url_aanmaken)
-        self.assert_is_redirect(resp, url_kies)
+        competities_aanmaken(jaar=2019)
 
         # log in as schutter
         self.e2e_login(self.account_normaal)
         self._prep_voorkeuren()
 
+        # competitie in fase A wordt niet getoond op profiel
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK

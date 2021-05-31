@@ -17,9 +17,8 @@ from BasisTypen.models import BoogType
 from Competitie.models import (Competitie, DeelCompetitie,
                                RegioCompetitieSchutterBoog,
                                LAAG_REGIO, INSCHRIJF_METHODE_1)
-from Records.models import IndivRecord
+from Records.models import IndivRecord, MATERIAALKLASSE
 from Score.models import Score, ScoreHist, SCORE_TYPE_INDIV_AG, SCORE_TYPE_TEAM_AG
-from .leeftijdsklassen import get_sessionvars_leeftijdsklassen
 from .models import SchutterVoorkeuren, SchutterBoog
 import logging
 import copy
@@ -79,39 +78,54 @@ class ProfielView(UserPassesTestMixin, TemplateView):
     @staticmethod
     def _find_records(nhblid):
         """ Zoek de records van deze schutter """
+        mat2str = dict()
+        for tup in MATERIAALKLASSE:
+            afk, beschrijving = tup
+            mat2str[afk] = beschrijving
+        # for
+
+        show_loc = False
         objs = list()
         for rec in IndivRecord.objects.filter(nhb_lid=nhblid).order_by('-datum'):
             rec.url = reverse('Records:specifiek', kwargs={'discipline': rec.discipline, 'nummer': rec.volg_nr})
             objs.append(rec)
+
+            loc = [rec.plaats]
+            if rec.land:
+                loc.append(rec.land)
+            rec.loc_str = ", ".join(loc)
+            if rec.loc_str:
+                show_loc = True
+
+            rec.boog_str = mat2str[rec.materiaalklasse]
         # for
-        return objs
+        return objs, show_loc
 
     @staticmethod
     def _find_competities(voorkeuren):
         comps = list()
-        if voorkeuren.voorkeur_meedoen_competitie:
-            for comp in (Competitie
-                         .objects.filter(is_afgesloten=False)
-                         .order_by('afstand', 'begin_jaar')):
-                comp.bepaal_fase()
-                comp.bepaal_openbaar(Rollen.ROL_SCHUTTER)
-                if comp.is_openbaar:
-                    # fase B of later
-                    comp.inschrijven = 'De inschrijving is gesloten'
+        for comp in (Competitie
+                     .objects.filter(is_afgesloten=False)
+                     .order_by('afstand', 'begin_jaar')):
+            comp.bepaal_fase()
+            comp.bepaal_openbaar(Rollen.ROL_SCHUTTER)
+            if comp.is_openbaar:
+                # fase B of later
+                comp.inschrijven = 'De inschrijving is gesloten'
 
-                    if comp.alle_rks_afgesloten:
-                        comp.fase_str = 'Bondskampioenschappen'
-                    elif comp.alle_regiocompetities_afgesloten:
-                        comp.fase_str = 'Rayonkampioenschappen'
-                    else:
-                        comp.fase_str = 'Regiocompetitie'
-                        if comp.fase < 'C':
-                            comp.inschrijven = 'Volwaardig inschrijven kan tot %s' % localize(comp.einde_aanmeldingen)
-                        elif comp.fase < 'F':
-                            comp.inschrijven = 'Meedoen kan tot %s' % localize(comp.laatst_mogelijke_wedstrijd)
+                if comp.alle_rks_afgesloten:
+                    comp.fase_str = 'Bondskampioenschappen'
+                elif comp.alle_regiocompetities_afgesloten:
+                    comp.fase_str = 'Rayonkampioenschappen'
+                else:
+                    comp.fase_str = 'Regiocompetitie'
+                    if comp.fase < 'C':
+                        comp.inschrijven = 'Volwaardig inschrijven kan tot %s' % localize(comp.einde_aanmeldingen)
+                    elif comp.fase < 'F':
+                        comp.inschrijven = 'Meedoen kan tot %s' % localize(comp.laatst_mogelijke_wedstrijd)
 
-                    comps.append(comp)
-            # for
+                comps.append(comp)
+        # for
         return comps
 
     @staticmethod
@@ -348,15 +362,20 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         alle_bogen = BoogType.objects.all()
 
         context['nhblid'] = nhblid
-        context['records'] = self._find_records(nhblid)
+        context['records'], context['show_loc'] = self._find_records(nhblid)
         context['histcomp'] = self._find_histcomp_scores(nhblid, alle_bogen)
+        context['toon_bondscompetities'] = False
 
         if nhblid.bij_vereniging and not nhblid.bij_vereniging.geen_wedstrijden:
-            _, _, is_jong, _, _ = get_sessionvars_leeftijdsklassen(self.request)
-            context['toon_leeftijdsklassen'] = is_jong
+            context['toon_bondscompetities'] = True
             context['competities'] = comps = self._find_competities(voorkeuren)
-            context['regiocompetities'] = self._find_regiocompetities(comps, nhblid, voorkeuren, alle_bogen)
+            context['regiocompetities'] = regiocomp = self._find_regiocompetities(comps, nhblid, voorkeuren, alle_bogen)
             context['gemiddelden'], context['heeft_ags'] = self._find_gemiddelden(nhblid, alle_bogen)
+
+            if not voorkeuren.voorkeur_meedoen_competitie:
+                if regiocomp is None:
+                    # niet ingeschreven en geen interesse
+                    context['toon_bondscompetities'] = False
 
         self._get_contact_gegevens(nhblid, context)
 

@@ -15,8 +15,8 @@ def get_otp_code(account):
     return otp.now()
 
 
-class TestAccount2FA(E2EHelpers, TestCase):
-    """ unit tests voor de Account applicatie, module OTP / 2FA """
+class TestFunctie2FA(E2EHelpers, TestCase):
+    """ unit tests voor de Functie applicatie, module OTP / 2FA """
 
     test_after = ('Account', 'Functie.test_rol')
 
@@ -210,5 +210,19 @@ class TestAccount2FA(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
 
         self.e2e_assert_other_http_commands_not_supported(self.url_controle, post=False)
+
+    def test_qrcode_te_groot(self):
+        # log in
+        self.account_admin.username = 'volledige_lengte_gebruikt_van_50_tekens__erg_lange'
+        self.account_admin.save()
+        self.e2e_login(self.account_admin)
+
+        with self.settings(OTP_ISSUER_NAME='erg_lange_otp_issuer_naam_van_50_tekens__erg_lange'):
+            # check mogelijkheid tot koppelen
+            with self.assert_max_queries(20):
+                resp = self.client.get(self.url_koppel)
+            self.assertEqual(resp.status_code, 200)     # 200 = OK
+            self.assert_template_used(resp, ('functie/otp-koppelen.dtl', 'plein/site_layout.dtl'))
+            self.assert_html_ok(resp)
 
 # end of file

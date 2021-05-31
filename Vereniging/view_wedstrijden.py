@@ -10,7 +10,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Plein.menu import menu_dynamics
 from Functie.rol import Rollen, rol_get_huidige_functie, rol_get_beschrijving
 from Competitie.models import DeelcompetitieRonde
-from Wedstrijden.models import Wedstrijd
+from Wedstrijden.models import CompetitieWedstrijd
 
 TEMPLATE_WEDSTRIJDEN = 'vereniging/wedstrijden.dtl'
 
@@ -45,7 +45,7 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
                        plan__wedstrijden__vereniging=self.functie_nu.nhb_ver)
                .values_list('plan__wedstrijden', flat=True))
 
-        wedstrijden = (Wedstrijd
+        wedstrijden = (CompetitieWedstrijd
                        .objects
                        .filter(pk__in=pks)
                        .order_by('datum_wanneer', 'tijd_begin_wedstrijd'))
@@ -59,8 +59,8 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
                 # als deze wedstrijd bij een competitieronde hoort,
                 # maak er dan een passende beschrijving voor
 
-                # Wedstrijd --> WedstrijdenPlan --> DeelcompetitieRonde
-                plan = obj.wedstrijdenplan_set.all()[0]
+                # CompetitieWedstrijd --> CompetitieWedstrijdenPlan --> DeelcompetitieRonde
+                plan = obj.competitiewedstrijdenplan_set.all()[0]
                 ronde = plan.deelcompetitieronde_set.all()[0]
                 obj.beschrijving = "%s - %s" % (ronde.deelcompetitie.competitie.beschrijving,
                                                 ronde.beschrijving)

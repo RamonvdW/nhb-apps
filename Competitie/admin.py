@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import admin
-from Wedstrijden.models import Wedstrijd
+from Wedstrijden.models import CompetitieWedstrijd
 from .models import (Competitie, DeelCompetitie, DeelcompetitieRonde,
                      CompetitieKlasse, DeelcompetitieKlasseLimiet,
                      RegioCompetitieSchutterBoog, KampioenschapSchutterBoog,
@@ -14,12 +14,14 @@ from .models import (Competitie, DeelCompetitie, DeelcompetitieRonde,
 
 
 class DeelCompetitieAdmin(admin.ModelAdmin):
-    list_filter = ('nhb_regio',)
+
+    list_filter = ('nhb_regio', 'competitie')
 
     list_select_related = ('competitie', 'nhb_regio', 'nhb_rayon')
 
 
 class DeelcompetitieRondeAdmin(admin.ModelAdmin):
+
     list_filter = ('deelcompetitie__is_afgesloten', 'deelcompetitie__nhb_regio')
 
     list_select_related = ('deelcompetitie', 'deelcompetitie__nhb_regio')
@@ -116,7 +118,7 @@ class RegioCompetitieSchutterBoogAdmin(admin.ModelAdmin):
                     # sta alle wedstrijden in de regio toe, dus alle clusters
                     pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
             # for
-            kwargs['queryset'] = (Wedstrijd
+            kwargs['queryset'] = (CompetitieWedstrijd
                                   .objects
                                   .filter(pk__in=pks)
                                   .order_by('datum_wanneer',
@@ -217,6 +219,8 @@ class KampioenschapMutatieAdmin(admin.ModelAdmin):
     list_select_related = ('deelnemer__deelcompetitie',
                            'deelnemer__klasse',
                            'deelnemer__schutterboog__nhblid')
+
+    list_filter = ('is_verwerkt', 'mutatie')
 
 
 admin.site.register(Competitie)

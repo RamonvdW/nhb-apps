@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from . import views
+from . import views, views_fout
 
 app_name = 'Plein'
 
@@ -23,7 +23,7 @@ urlpatterns = [
          name='niet-ondersteund'),
 
     path('test-speciale-pagina/<code>/',
-         views.TestSpecialePagina.as_view(),
+         views_fout.TestSpecialePagina.as_view(),
          name='test-speciale-pagina')
 ]
 

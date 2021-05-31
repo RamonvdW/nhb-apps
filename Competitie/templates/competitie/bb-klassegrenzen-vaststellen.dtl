@@ -26,12 +26,12 @@
         <p>Hieronder volgende de automatisch berekende klassegrenzen voor de individuele en teams wedstrijdklassen voor de <b>{{ comp.beschrijving }}</b>.</p>
 
         <div class="container">
-        <ul class="collection with-header white">
-            <li class="collection-header"><h5 class="red-text">Controleer dat onderstaande gegevens juist zijn.</h5></li>
-            <li class="collection-item">Weet je zeker dat de <b>aanvangsgemiddelden</b> recentelijk vastgesteld zijn aan de hand van de uitslagen van vorig seizoen?</li>
-            <li class="collection-item">Op <b>{{ bb_ag_nieuwste_datum }}</b> zijn de aanvangsgemiddelden voor het laatste vastgesteld.</li>
-            <li class="collection-item"><a class="btn-nhb-blauw" href="{% url 'Competitie:ag-vaststellen' %}">Naar de aanvangsgemiddelden</a></li>
-        </ul>
+            <ul class="collection with-header white">
+                <li class="collection-header"><h5 class="red-text">Controleer dat onderstaande gegevens juist zijn.</h5></li>
+                <li class="collection-item">Weet je zeker dat de <b>aanvangsgemiddelden</b> recentelijk vastgesteld zijn aan de hand van de uitslagen van vorig seizoen?</li>
+                <li class="collection-item">Op <b>{{ bb_ag_nieuwste_datum }}</b> zijn de aanvangsgemiddelden voor het laatste vastgesteld.</li>
+                <li class="collection-item"><a class="btn-nhb-blauw" href="{% url 'Competitie:ag-vaststellen-afstand' afstand=comp.afstand %}">Naar de aanvangsgemiddelden</a></li>
+            </ul>
         </div>
 
         <p>Hieronder volgen de berekende klassegrenzen voor de individuele en team klassen.</p>

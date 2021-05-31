@@ -1,65 +1,66 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 """ ondersteuning voor de leeftijdsklassen binnen de NHB applicaties """
 
 from django.utils import timezone
-from Account.views import account_add_plugin_login
-from BasisTypen.models import LeeftijdsKlasse
-
-# unieke keys voor de server-side sessie variabelen
-SESSIONVAR_IS_JONGE_SCHUTTER = 'leeftijdsklasse_is_jonge_schutter'
-SESSIONVAR_HUIDIGE_JAAR = 'leeftijdsklasse_huidige_jaar'
-SESSIONVAR_LEEFTIJD = 'leeftijdsklasse_leeftijd'
-SESSIONVAR_WEDSTRIJDKLASSEN = 'leeftijdsklasse_wedstrijdklassen'        # jaar -1, 0, +1, +2, +3
-SESSIONVAR_COMPETITIEKLASSEN = 'leeftijdsklasse_competitieklassen'      # jaar -1, 0, +1, +2, +3
+from BasisTypen.models import LeeftijdsKlasse, IndivWedstrijdklasse
 
 
-def leeftijdsklassen_plugin_na_login(request, from_ip, account):
-    """ zet een paar session variabelen die gebruikt worden om de rol te beheren
-        deze functie wordt aangeroepen vanuit de Account.LoginView
+def alle_wedstrijdleeftijden_groepen():
+    """ Deze functie maakt een volledige tabel met alle wedstrijdleeftijden
 
-        session variables
-            gebruiker_rol_mag_wisselen: gebruik van de Plein.WisselVanRolView
+        Output: lijst van tuples: (min_leeftijd, max_leeftijd, leeftijdklasse, wedstrijdklasse),
+
+        [ ( 0,  11, 'Aspirant', 'Aspiranten <11 jaar'),
+          (12,  13, 'Aspirant', 'Aspiranten 11-12 jaar'),
+          (14,  17, 'Cadet',    'Cadetten'),
+          (18,  20, 'Junior',   'Junioren'),
+          (21,  49, 'Senior',   'Senioren'),
+          (50,  59, 'Master',   'Masters'),
+          (60, 150, 'Veteraan', 'Veteranen')
+        ]
     """
 
-    if account.nhblid_set.count() > 0:
-        nhblid = account.nhblid_set.all()[0]
+    # haal alle leeftijdsklassen op en vul de min/max leeftijden aan
+    alle_lkl = list()
+    prev_lkl = None
+    min_wedstrijdleeftijd = 0
+    for lkl in (LeeftijdsKlasse
+                .objects
+                .filter(geslacht='M')
+                .order_by('volgorde')):
 
-        huidige_jaar = timezone.now().year      # TODO: check for correctness in last hours of the year (due to timezone)
-        leeftijd = huidige_jaar - nhblid.geboorte_datum.year
-        request.session[SESSIONVAR_HUIDIGE_JAAR] = huidige_jaar
-        request.session[SESSIONVAR_LEEFTIJD] = leeftijd
+        if lkl.min_wedstrijdleeftijd == 0:
+            lkl.min_wedstrijdleeftijd = min_wedstrijdleeftijd
 
-        if leeftijd >= 30:
-            request.session[SESSIONVAR_IS_JONGE_SCHUTTER] = False
-        else:
-            request.session[SESSIONVAR_IS_JONGE_SCHUTTER] = True
+        if prev_lkl and prev_lkl.max_wedstrijdleeftijd == 0:
+            prev_lkl.max_wedstrijdleeftijd = lkl.min_wedstrijdleeftijd - 1
 
-        wlst = list()
-        clst = list()
-        # bereken de wedstrijdklasse en competitieklassen
-        for n in (-1, 0, 1, 2, 3):
-            wleeftijd = leeftijd + n
-            cleeftijd = wleeftijd + 1
+        # volgende leeftijdsklasse gaat verder waar deze ophoudt
+        min_wedstrijdleeftijd = lkl.max_wedstrijdleeftijd + 1
+        alle_lkl.append(lkl)
+        prev_lkl = lkl
+    # for
+    prev_lkl.max_wedstrijdleeftijd = 150
 
-            wklasse = LeeftijdsKlasse.objects.filter(max_wedstrijdleeftijd__gte=wleeftijd, geslacht='M').order_by('max_wedstrijdleeftijd')[0]
-            wlst.append(wklasse.klasse_kort)
+    output = list()
+    for lkl in alle_lkl:
+        tekst = lkl.beschrijving.split(', ')[0]
+        if lkl.klasse_kort == 'Aspirant':
+            tekst += ' jaar'            # Aspirant 11-12 jaar
+        tup = (lkl.min_wedstrijdleeftijd, lkl.max_wedstrijdleeftijd, lkl.klasse_kort, tekst)
+        # print('lkl: %s' % repr(tup))
+        output.append(tup)
+    # for
 
-            cklasse = LeeftijdsKlasse.objects.filter(max_wedstrijdleeftijd__gte=cleeftijd, geslacht='M').order_by('max_wedstrijdleeftijd')[0]
-            clst.append(cklasse.klasse_kort)
-        # for
-
-        request.session[SESSIONVAR_WEDSTRIJDKLASSEN] = tuple(wlst)
-        request.session[SESSIONVAR_COMPETITIEKLASSEN] = tuple(clst)
-
-    return None
+    return output
 
 
-def get_sessionvars_leeftijdsklassen(request):
+def bereken_leeftijdsklassen(geboorte_jaar):
     """ retourneert de eerder bepaalde informatie over de wedstrijdklasse
         voor jonge schutters (onder de 30 jaar).
         Retourneert:
@@ -73,22 +74,40 @@ def get_sessionvars_leeftijdsklassen(request):
                     is_jong = True
                     wlst=(Cadet, Junior, Junior, Junior, Senior)
     """
-    try:
-        huidige_jaar = request.session[SESSIONVAR_HUIDIGE_JAAR]
-    except KeyError:
-        # accounts die niet gekoppeld zijn aan een nhblid hebben deze variabelen niet gezet
-        return None, None, False, None, None
 
-    leeftijd = request.session[SESSIONVAR_LEEFTIJD]
-    is_jong = request.session[SESSIONVAR_IS_JONGE_SCHUTTER]
-    wlst = request.session[SESSIONVAR_WEDSTRIJDKLASSEN]
-    clst = request.session[SESSIONVAR_COMPETITIEKLASSEN]
+    # haal alle groepjes van wedstrijdleeftijden op
+    # en zet om in look-up tabel
+    leeftijd2tekst = dict()
+    for min_leeftijd, max_leeftijd, lkl, wkl in alle_wedstrijdleeftijden_groepen():
+        for leeftijd in range(min_leeftijd, max_leeftijd+1):
+            leeftijd2tekst[leeftijd] = (lkl, wkl)
+        # for
+    # for
 
-    return huidige_jaar, leeftijd, is_jong, wlst, clst
+    # pak het huidige jaar na conversie naar lokale tijdzone
+    # zodat dit ook goed gaat in de laatste paar uren van het jaar
+    now = timezone.now()  # is in UTC
+    now = timezone.localtime(now)  # convert to active timezone (say Europe/Amsterdam)
+    huidige_jaar = now.year
+    leeftijd = huidige_jaar - geboorte_jaar
 
+    # bereken de wedstrijdklassen en competitieklassen
+    wlst = list()
+    clst = list()
+    for n in (-1, 0, 1, 2, 3):
+        wleeftijd = leeftijd + n            # voor wedstrijden
+        lkl, _ = leeftijd2tekst[wleeftijd]
+        wlst.append(lkl)
 
-# installeer de plugin
-account_add_plugin_login(40, leeftijdsklassen_plugin_na_login)
+        cleeftijd = wleeftijd + 1           # voor de competitie
+        cleeftijd = min(49, cleeftijd)      # begrens op Senior voor de competitie
+        lkl, wkl = leeftijd2tekst[cleeftijd]
+        clst.append(wkl)
+        if n == 1:
+            lkl_volgende_competitie = lkl
+    # for
+
+    return huidige_jaar, leeftijd, wlst, clst, lkl_volgende_competitie
 
 
 # end of file

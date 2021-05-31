@@ -16,7 +16,7 @@ from Logboek.models import schrijf_in_logboek
 from NhbStructuur.models import NhbVereniging
 from Overig.background_sync import BackgroundSync
 from Plein.menu import menu_dynamics
-from Wedstrijden.models import Wedstrijd, WedstrijdenPlan, WedstrijdLocatie
+from Wedstrijden.models import CompetitieWedstrijd, CompetitieWedstrijdenPlan, WedstrijdLocatie
 from .models import (LAAG_REGIO, LAAG_RK, LAAG_BK, INSCHRIJF_METHODE_1, DeelCompetitie,
                      CompetitieKlasse, DeelcompetitieKlasseLimiet, DeelcompetitieRonde,
                      KampioenschapSchutterBoog, KampioenschapMutatie,
@@ -72,7 +72,7 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
 
         # maak het plan aan, als deze nog niet aanwezig was
         if not deelcomp_rk.plan:
-            deelcomp_rk.plan = WedstrijdenPlan()
+            deelcomp_rk.plan = CompetitieWedstrijdenPlan()
             deelcomp_rk.plan.save()
             deelcomp_rk.save()
 
@@ -165,7 +165,7 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
             else:
                 deelcomp.rondes_count = len(plan_pks)
             deelcomp.wedstrijden_count = 0
-            for plan in (WedstrijdenPlan
+            for plan in (CompetitieWedstrijdenPlan
                          .objects
                          .prefetch_related('wedstrijden')
                          .filter(pk__in=plan_pks)):
@@ -197,11 +197,11 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
 
         # maak het plan aan, als deze nog niet aanwezig was
         if not deelcomp_rk.plan:
-            deelcomp_rk.plan = WedstrijdenPlan()
+            deelcomp_rk.plan = CompetitieWedstrijdenPlan()
             deelcomp_rk.plan.save()
             deelcomp_rk.save()
 
-        wedstrijd = Wedstrijd()
+        wedstrijd = CompetitieWedstrijd()
         wedstrijd.datum_wanneer = deelcomp_rk.competitie.rk_eerste_wedstrijd
         wedstrijd.tijd_begin_aanmelden = datetime.time(hour=0, minute=0, second=0)
         wedstrijd.tijd_begin_wedstrijd = wedstrijd.tijd_begin_aanmelden
@@ -314,18 +314,18 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
 
         try:
             wedstrijd_pk = int(kwargs['wedstrijd_pk'][:6])     # afkappen voor veiligheid
-            wedstrijd = (Wedstrijd
+            wedstrijd = (CompetitieWedstrijd
                          .objects
                          .select_related('uitslag')
                          .prefetch_related('uitslag__scores',
                                            'indiv_klassen',
                                            'team_klassen')
                          .get(pk=wedstrijd_pk))
-        except (ValueError, Wedstrijd.DoesNotExist):
+        except (ValueError, CompetitieWedstrijd.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
         # zoek het weeknummer waarin deze wedstrijd gehouden moet worden
-        plan = wedstrijd.wedstrijdenplan_set.all()[0]
+        plan = wedstrijd.competitiewedstrijdenplan_set.all()[0]
         deelcomp_rk = plan.deelcompetitie_set.all()[0]
 
         # is dit de beheerder?
@@ -383,15 +383,15 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
 
         try:
             wedstrijd_pk = int(kwargs['wedstrijd_pk'][:6])     # afkappen voor veiligheid
-            wedstrijd = (Wedstrijd
+            wedstrijd = (CompetitieWedstrijd
                          .objects
                          .select_related('uitslag')
                          .prefetch_related('uitslag__scores')
                          .get(pk=wedstrijd_pk))
-        except (ValueError, Wedstrijd.DoesNotExist):
+        except (ValueError, CompetitieWedstrijd.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
-        plan = wedstrijd.wedstrijdenplan_set.all()[0]
+        plan = wedstrijd.competitiewedstrijdenplan_set.all()[0]
         deelcomp_rk = plan.deelcompetitie_set.all()[0]
 
         # is dit de beheerder?
@@ -1046,15 +1046,15 @@ class VerwijderWedstrijdView(UserPassesTestMixin, View):
         """
         try:
             wedstrijd_pk = int(kwargs['wedstrijd_pk'][:6])  # afkappen voor veiligheid
-            wedstrijd = (Wedstrijd
+            wedstrijd = (CompetitieWedstrijd
                          .objects
                          .select_related('uitslag')
                          .prefetch_related('uitslag__scores')
                          .get(pk=wedstrijd_pk))
-        except (ValueError, Wedstrijd.DoesNotExist):
+        except (ValueError, CompetitieWedstrijd.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
-        plan = wedstrijd.wedstrijdenplan_set.all()[0]
+        plan = wedstrijd.competitiewedstrijdenplan_set.all()[0]
         try:
             deelcomp = DeelCompetitie.objects.get(plan=plan, laag=LAAG_RK)
         except DeelCompetitie.DoesNotExist:

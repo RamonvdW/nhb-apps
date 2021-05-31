@@ -10,10 +10,12 @@ from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
 from Competitie.models import (Competitie, DeelCompetitie, RegioCompetitieSchutterBoog,
                                DeelcompetitieRonde, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3)
 from Competitie.test_fase import zet_competitie_fase
+from Competitie.test_competitie import maak_competities_en_zet_fase_b, competities_aanmaken
 from Functie.models import Functie
 from Overig.e2ehelpers import E2EHelpers
-from Score.models import Score, ScoreHist, SCORE_TYPE_INDIV_AG, score_indiv_ag_opslaan
-from Wedstrijden.models import Wedstrijd
+from Score.models import Score, ScoreHist, SCORE_TYPE_INDIV_AG
+from Score.operations import score_indiv_ag_opslaan
+from Wedstrijden.models import CompetitieWedstrijd
 from .models import SchutterBoog
 import datetime
 
@@ -109,32 +111,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         # for
 
     def _competitie_aanmaken(self):
-        url_overzicht = '/bondscompetities/'
-        url_aanmaken = '/bondscompetities/aanmaken/'
-        url_ag_vaststellen = '/bondscompetities/ag-vaststellen/'
-        url_klassegrenzen_vaststellen = '/bondscompetities/%s/klassegrenzen/vaststellen/'   # comp_pk
-
-        # competitie aanmaken
-        with self.assert_max_queries(20):
-            resp = self.client.post(url_aanmaken)
-        self.assert_is_redirect(resp, url_overzicht)
-
-        comp_18 = Competitie.objects.get(afstand='18')
-        comp_25 = Competitie.objects.get(afstand='25')
-
-        # aanvangsgemiddelden vaststellen
-        with self.assert_max_queries(5):
-            resp = self.client.post(url_ag_vaststellen)
-
-        # klassegrenzen vaststellen
-        self.client.post(url_klassegrenzen_vaststellen % comp_18.pk)
-        self.client.post(url_klassegrenzen_vaststellen % comp_25.pk)
-
-        comp_18 = Competitie.objects.get(pk=comp_18.pk)
-        zet_competitie_fase(comp_18, 'B')
-
-        comp_25 = Competitie.objects.get(pk=comp_25.pk)
-        zet_competitie_fase(comp_25, 'B')
+        maak_competities_en_zet_fase_b()
 
     def test_inschrijven(self):
         # log in as BB en maak de competitie aan
@@ -521,7 +498,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
 
         deelcomp = DeelCompetitie.objects.get(competitie__afstand='18', nhb_regio=regio_105)
         deelcomp.inschrijf_methode = INSCHRIJF_METHODE_3
-        deelcomp.toegestane_dagdelen = 'ZA,ZO'
+        deelcomp.toegestane_dagdelen = 'ZAT,ZOm'
         deelcomp.save()
 
         # log in as schutter
@@ -542,7 +519,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('schutter/bevestig-aanmelden.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'Dutch Target')
         self.assertContains(resp, 'Zaterdag')
-        self.assertContains(resp, 'Zondag')
+        self.assertContains(resp, 'Zondagmiddag')
         self.assertNotContains(resp, 's Avonds')
         self.assertNotContains(resp, 'Weekend')
 
@@ -561,7 +538,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         url = self.url_aanmelden % (deelcomp.pk, schutterboog.pk)
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'wil_in_team': 'on',
-                                          'dagdeel': 'ZA',
+                                          'dagdeel': 'ZAT',
                                           'opmerking': 'Hallo nogmaals!\n' * 50})
         self.assert_is_redirect(resp, self.url_profiel)
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 1)
@@ -569,7 +546,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         inschrijving = RegioCompetitieSchutterBoog.objects.all()[0]
         self.assertTrue(inschrijving.inschrijf_voorkeur_team)
         self.assertTrue(len(inschrijving.inschrijf_notitie) > 480)
-        self.assertEqual(inschrijving.inschrijf_voorkeur_dagdeel, 'ZA')
+        self.assertEqual(inschrijving.inschrijf_voorkeur_dagdeel, 'ZAT')
 
         # bad dagdeel
         schutterboog = SchutterBoog.objects.get(boogtype__afkorting='BB')
@@ -650,7 +627,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         # wedstrijdleeftijd 2020: 13 --> Aspirant 11-12
         # wedstrijdleeftijd 2021: 14 --> Cadet
         # als het programma het goed doet, komt de schutter dus in de cadetten klasse
-        self.nhblid1.geboorte_datum = datetime.date(year=timezone.now().year - 13, month=1, day=1)
+        self.nhblid1.geboorte_datum = datetime.date(year=timezone.now().year - 13, month=1, day=2)
         self.nhblid1.save()
         self.client.logout()
         self.e2e_login(self.account_normaal)
@@ -731,12 +708,12 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
 
         # maak een wedstrijd aan
-        self.assertEqual(Wedstrijd.objects.count(), 0)
+        self.assertEqual(CompetitieWedstrijd.objects.count(), 0)
         with self.assert_max_queries(20):
             resp = self.client.post(url_ronde)
         self.assert_is_redirect_not_plein(resp)
 
-        wedstrijd_pk = Wedstrijd.objects.all()[0].pk
+        wedstrijd_pk = CompetitieWedstrijd.objects.all()[0].pk
 
         # wijzig de instellingen van deze wedstrijd
         url_wed = self.url_wijzig_wedstrijd % wedstrijd_pk
@@ -838,7 +815,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
 
         # te veel wedstrijden toevoegen
         args = dict()
-        for obj in Wedstrijd.objects.all():
+        for obj in CompetitieWedstrijd.objects.all():
             args['wedstrijd_%s' % obj.pk] = 'on'
         # for
         with self.assert_max_queries(20):

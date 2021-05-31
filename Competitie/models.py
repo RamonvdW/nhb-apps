@@ -12,7 +12,7 @@ from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
 from Functie.models import Functie
 from Schutter.models import SchutterBoog
 from Score.models import Score, ScoreHist
-from Wedstrijden.models import WedstrijdenPlan, Wedstrijd
+from Wedstrijden.models import CompetitieWedstrijdenPlan, CompetitieWedstrijdenPlan, CompetitieWedstrijd
 from decimal import Decimal
 from datetime import date
 import datetime
@@ -37,12 +37,16 @@ DAGDELEN = [('GN', "Geen voorkeur"),
             ('WO', "Woensdag"),
             ('DO', "Donderdag"),
             ('VR', "Vrijdag"),
-            ('ZA', "Zaterdag"),
-            ('ZO', "Zondag"),
+            ('ZAT', "Zaterdag"),
+            ('ZAo', "Zaterdagochtend"),
+            ('ZAm', "Zaterdagmiddag"),
+            ('ZON', "Zondag"),
+            ('ZOo', "Zondagochtend"),
+            ('ZOm', "Zondagmiddag"),
             ('WE', "Weekend")]
 
 # Let op: DAGDEEL_AFKORTINGEN moet in dezelfde volgorde zijn als DAGDELEN
-DAGDEEL_AFKORTINGEN = ('GN', 'AV', 'MA', 'DI', 'WO', 'DO', 'VR', 'ZA', 'ZO', 'WE')
+DAGDEEL_AFKORTINGEN = ('GN', 'AV', 'MA', 'DI', 'WO', 'DO', 'VR', 'ZAT', 'ZAo', 'ZAm', 'ZON', 'ZOo', 'ZOm', 'WE')
 
 INSCHRIJF_METHODE_1 = '1'       # direct inschrijven op wedstrijd
 INSCHRIJF_METHODE_2 = '2'       # verdeel wedstrijdklassen over locaties
@@ -54,7 +58,7 @@ INSCHRIJF_METHODES = (
     (INSCHRIJF_METHODE_3, 'Voorkeur dagdelen')
 )
 
-TEAM_PUNTEN_TWEE = '2P'
+TEAM_PUNTEN_TWEE = '2P'                 # head-to-head, via een poule
 TEAM_PUNTEN_FORMULE1 = 'F1'
 TEAM_PUNTEN_SOM_SCORES = 'SS'
 
@@ -72,12 +76,18 @@ DEELNAME_CHOICES = [(DEELNAME_ONBEKEND, 'Onbekend'),
                     (DEELNAME_JA, 'Bevestigd'),
                     (DEELNAME_NEE, 'Afgemeld')]
 
+MUTATIE_COMPETITIE_OPSTARTEN = 1
+MUTATIE_AG_VASTSTELLEN_18M = 2
+MUTATIE_AG_VASTSTELLEN_25M = 3
 MUTATIE_CUT = 10
 MUTATIE_INITIEEL = 20
 MUTATIE_AFMELDEN = 30
 MUTATIE_AANMELDEN = 40
 
-mutatie2descr = {
+MUTATIE_TO_STR = {
+    MUTATIE_AG_VASTSTELLEN_18M: "AG vaststellen 18m",
+    MUTATIE_AG_VASTSTELLEN_25M: "AG vaststellen 25m",
+    MUTATIE_COMPETITIE_OPSTARTEN: "competitie opstarten",
     MUTATIE_INITIEEL: "initieel",
     MUTATIE_CUT: "limiet aanpassen",
     MUTATIE_AFMELDEN: "afmelden",
@@ -331,7 +341,7 @@ class DeelCompetitie(models.Model):
     is_afgesloten = models.BooleanField(default=False)
 
     # wedstrijdenplan - alleen voor de RK en BK
-    plan = models.ForeignKey(WedstrijdenPlan, on_delete=models.PROTECT,
+    plan = models.ForeignKey(CompetitieWedstrijdenPlan, on_delete=models.PROTECT,
                              null=True, blank=True)         # optioneel (alleen RK en BK)
 
     # specifieke instellingen voor deze regio
@@ -362,6 +372,10 @@ class DeelCompetitie(models.Model):
     regio_team_punten_model = models.CharField(max_length=2,
                                                default=TEAM_PUNTEN_TWEE,
                                                choices=TEAM_PUNTEN)
+
+    def heeft_poules_nodig(self):
+        # centrale plek om de poules behoefte te controleren
+        return self.regio_organiseert_teamcompetitie and self.regio_team_punten_model == TEAM_PUNTEN_TWEE
 
     def __str__(self):
         """ geef een tekstuele afkorting van dit object, voor in de admin interface """
@@ -419,7 +433,7 @@ class DeelcompetitieRonde(models.Model):
     beschrijving = models.CharField(max_length=40)
 
     # wedstrijdenplan voor deze competitie ronde
-    plan = models.ForeignKey(WedstrijdenPlan, on_delete=models.PROTECT)
+    plan = models.ForeignKey(CompetitieWedstrijdenPlan, on_delete=models.PROTECT, null=True, blank=True)
 
     def __str__(self):
         """ geef een tekstuele afkorting van dit object, voor in de admin interface """
@@ -501,10 +515,10 @@ class RegioCompetitieSchutterBoog(models.Model):
     inschrijf_notitie = models.TextField(default="", blank=True)
 
     # voorkeur dagdelen (methode 3)
-    inschrijf_voorkeur_dagdeel = models.CharField(max_length=2, choices=DAGDELEN, default="GN")
+    inschrijf_voorkeur_dagdeel = models.CharField(max_length=3, choices=DAGDELEN, default="GN")
 
     # voorkeur schietmomenten (methode 1)
-    inschrijf_gekozen_wedstrijden = models.ManyToManyField(Wedstrijd, blank=True)
+    inschrijf_gekozen_wedstrijden = models.ManyToManyField(CompetitieWedstrijd, blank=True)
 
     # alternatieve uitslag - dit is tijdelijk
     alt_score1 = models.PositiveIntegerField(default=0)
@@ -553,7 +567,7 @@ class RegiocompetitieTeam(models.Model):
     gekoppelde_schutters = models.ManyToManyField(RegioCompetitieSchutterBoog,
                                                   blank=True)    # mag leeg zijn
 
-    # het berekende team aanvangsgemiddelde
+    # de berekende team sterkte / team gemiddelde
     aanvangsgemiddelde = models.DecimalField(max_digits=5, decimal_places=3, default=0.0)    # 10,000
 
     # de klasse waarin dit team ingedeeld is
@@ -583,6 +597,7 @@ class RegiocompetitieTeamPoule(models.Model):
     # bij welke deelcompetitie hoort deze poule?
     deelcompetitie = models.ForeignKey(DeelCompetitie, on_delete=models.CASCADE)
 
+    # naam van de poule, bijvoorbeeld "ERE + A"
     beschrijving = models.CharField(max_length=100, default='')
 
     # welke teams zijn in deze poule geplaatst?
@@ -702,7 +717,7 @@ class KampioenschapTeam(models.Model):
     klasse = models.ForeignKey(CompetitieKlasse, on_delete=models.CASCADE)
 
 
-class KampioenschapMutatie(models.Model):
+class KampioenschapMutatie(models.Model):       # TODO: hernoem naar CompetitieMutaties
 
     """ Deze tabel houdt de mutaties bij de lijst van (reserve-)schutters van
         de RK en BK wedstrijden.
@@ -752,11 +767,11 @@ class KampioenschapMutatie(models.Model):
         if not self.is_verwerkt:
             msg += " (nog niet verwerkt)"
         try:
-            msg += " %s (%s)" % (self.mutatie, mutatie2descr[self.mutatie])
+            msg += " %s (%s)" % (self.mutatie, MUTATIE_TO_STR[self.mutatie])
         except KeyError:
             msg += " %s (???)" % self.mutatie
 
-        if self.mutatie not in (MUTATIE_INITIEEL, MUTATIE_CUT):
+        if self.mutatie in (MUTATIE_AANMELDEN, MUTATIE_AFMELDEN):
             msg += " - %s" % self.deelnemer
 
         if self.mutatie == MUTATIE_CUT:
@@ -780,189 +795,7 @@ class CompetitieTaken(models.Model):
                                         on_delete=models.SET_NULL)
 
 
-def maak_deelcompetitie_ronde(deelcomp, cluster=None):
-    """ Maak een nieuwe deelcompetitie ronde object aan
-        geef er een uniek week nummer aan.
-    """
-
-    # zoek de bestaande records
-    objs = (DeelcompetitieRonde
-            .objects
-            .filter(deelcompetitie=deelcomp, cluster=cluster)
-            .order_by('-week_nr'))
-
-    # filter de import rondes eruit
-    objs = [obj for obj in objs if not obj.is_voor_import_oude_programma()]
-
-    if len(objs) > 0:
-        nieuwe_week_nr = objs[0].week_nr + 1
-
-        # maximum bereikt?
-        if len(objs) >= 10:
-            return
-    else:
-        nieuwe_week_nr = 37
-
-    # maak een eigen wedstrijdenplan aan voor deze ronde
-    plan = WedstrijdenPlan()
-    plan.save()
-
-    ronde = DeelcompetitieRonde()
-    ronde.deelcompetitie = deelcomp
-    ronde.cluster = cluster
-    ronde.week_nr = nieuwe_week_nr
-    ronde.plan = plan
-    ronde.save()
-
-    return ronde
-
-
-def _maak_deelcompetities(comp, rayons, regios, functies):
-
-    """ Maak de deelcompetities van een competitie aan """
-
-    # zoek de voorgaande deelcompetities erbij om settings over te kunnen nemen
-    vorige_deelcomps = dict()   # [regio_nr] = DeelCompetitie()
-    for deelcomp in (DeelCompetitie
-                     .objects
-                     .select_related('competitie',
-                                     'nhb_regio')
-                     .filter(laag=LAAG_REGIO,
-                             competitie__begin_jaar=comp.begin_jaar - 1,
-                             competitie__afstand=comp.afstand)):
-        vorige_deelcomps[deelcomp.nhb_regio.regio_nr] = deelcomp
-    # for
-
-    # maak de Deelcompetities aan voor Regio, RK, BK
-    bulk = list()
-    for laag, _ in DeelCompetitie.LAAG:
-        if laag == LAAG_REGIO:
-            # Regio
-            for obj in regios:
-                functie = functies[("RCL", comp.afstand, obj.regio_nr)]
-                deel = DeelCompetitie(competitie=comp,
-                                      laag=laag,
-                                      nhb_regio=obj,
-                                      functie=functie)
-                try:
-                    vorige = vorige_deelcomps[obj.regio_nr]
-                except KeyError:
-                    pass
-                else:
-                    deel.inschrijf_methode = vorige.inschrijf_methode
-                    deel.toegestane_dagdelen = vorige.toegestane_dagdelen
-                    deel.regio_organiseert_teamcompetitie = vorige.regio_organiseert_teamcompetitie
-                    deel.regio_heeft_vaste_teams = vorige.regio_heeft_vaste_teams
-                    deel.regio_team_punten_model = vorige.regio_team_punten_model
-
-                bulk.append(deel)
-            # for
-        elif laag == LAAG_RK:
-            # RK
-            for obj in rayons:
-                functie = functies[("RKO", comp.afstand, obj.rayon_nr)]
-                deel = DeelCompetitie(competitie=comp,
-                                      laag=laag,
-                                      nhb_rayon=obj,
-                                      functie=functie)
-                bulk.append(deel)
-            # for
-        else:
-            # BK
-            functie = functies[("BKO", comp.afstand, 0)]
-            deel = DeelCompetitie(competitie=comp,
-                                  laag=laag,
-                                  functie=functie)
-            bulk.append(deel)
-    # for
-
-    DeelCompetitie.objects.bulk_create(bulk)
-
-
-def _maak_competitieklassen(comp, klassen_indiv, klassen_team):
-    """ Maak de competitieklassen aan voor een nieuwe competitie
-        het min_ag per klasse wordt later ingevuld
-    """
-
-    bulk = list()
-
-    for indiv in klassen_indiv:
-        klasse = CompetitieKlasse(
-                        competitie=comp,
-                        indiv=indiv,
-                        min_ag=AG_NUL)
-        bulk.append(klasse)
-    # for
-
-    for team in klassen_team:
-        klasse = CompetitieKlasse(
-                        competitie=comp,
-                        team=team,
-                        min_ag=AG_NUL)
-        bulk.append(klasse)
-    # for
-
-    CompetitieKlasse.objects.bulk_create(bulk)
-
-
-def competitie_aanmaken(jaar):
-    """ Deze functie wordt aangeroepen als de BKO de nieuwe competitie op wil starten
-        We maken de 18m en 25m competitie aan en daaronder de deelcompetities voor regio, rayon en bond
-
-        Wedstrijdklassen worden ook aangemaakt, maar het minimale AG wordt nog niet ingevuld
-    """
-    yearend = date(year=jaar, month=12, day=31)     # 31 december
-    udvl = date(year=jaar, month=8, day=1)          # 1 augustus
-    begin_rk = date(year=jaar + 1, month=2, day=1)  # 1 februari
-    begin_bk = date(year=jaar + 1, month=5, day=1)  # 1 mei
-
-    rayons = NhbRayon.objects.all()
-    regios = NhbRegio.objects.filter(is_administratief=False)
-    klassen_indiv = IndivWedstrijdklasse.objects.exclude(buiten_gebruik=True)
-    klassen_team = TeamWedstrijdklasse.objects.exclude(buiten_gebruik=True)
-
-    functies = dict()   # [rol, afstand, 0/rayon_nr/regio_nr] = functie
-    for functie in (Functie
-                    .objects
-                    .select_related('nhb_regio', 'nhb_rayon')
-                    .filter(rol__in=('RCL', 'RKO', 'BKO'))):
-        afstand = functie.comp_type
-        if functie.rol == 'RCL':
-            nr = functie.nhb_regio.regio_nr
-        elif functie.rol == 'RKO':
-            nr = functie.nhb_rayon.rayon_nr
-        else:  # elif functie.rol == 'BKO':
-            nr = 0
-
-        functies[(functie.rol, afstand, nr)] = functie
-    # for
-
-    # maak de Competitie aan voor 18m en 25m
-    for afstand, beschrijving in AFSTANDEN:
-        comp = Competitie(
-                    beschrijving='%s competitie %s/%s' % (beschrijving, jaar, jaar+1),
-                    afstand=afstand,      # 18/25
-                    begin_jaar=jaar,
-                    uiterste_datum_lid=udvl,
-                    begin_aanmeldingen=yearend,
-                    einde_aanmeldingen=yearend,
-                    einde_teamvorming=yearend,
-                    eerste_wedstrijd=yearend,
-                    laatst_mogelijke_wedstrijd=begin_rk,
-                    rk_eerste_wedstrijd=begin_rk,
-                    rk_laatste_wedstrijd=begin_rk + datetime.timedelta(days=7),
-                    bk_eerste_wedstrijd=begin_bk,
-                    bk_laatste_wedstrijd=begin_bk + datetime.timedelta(days=7))
-
-        if afstand == '18':
-            comp.laatst_mogelijke_wedstrijd = yearend
-
-        comp.save()
-
-        _maak_deelcompetities(comp, rayons, regios, functies)
-
-        _maak_competitieklassen(comp, klassen_indiv, klassen_team)
-    # for
+# TODO: opruimen oude KampioenschapMutaties
 
 
 # end of file

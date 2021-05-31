@@ -35,12 +35,16 @@ class LedenLijstView(UserPassesTestMixin, ListView):
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
 
-        huidige_jaar = timezone.now().year  # TODO: check for correctness in last hours of the year (due to timezone)
+        # pak het huidige jaar na conversie naar lokale tijdzone
+        # zodat dit ook goed gaat in de laatste paar uren van het jaar
+        now = timezone.now()  # is in UTC
+        now = timezone.localtime(now)  # convert to active timezone (say Europe/Amsterdam)
+        huidige_jaar = now.year
         jeugdgrens = huidige_jaar - MAXIMALE_LEEFTIJD_JEUGD
         self._huidige_jaar = huidige_jaar
 
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
-        qset = NhbLid.objects.filter(bij_vereniging=functie_nu.nhb_ver)
+        qset = NhbLid.objects.filter(bij_vereniging=functie_nu.nhb_ver)     # TODO: niet gebruikt?!
 
         objs = list()
 
@@ -57,28 +61,50 @@ class LedenLijstView(UserPassesTestMixin, ListView):
             # de wedstrijdleeftijd voor dit hele jaar
             wedstrijdleeftijd = huidige_jaar - obj.geboorte_datum.year
             obj.leeftijd = wedstrijdleeftijd
+            obj.is_jeugd = True
 
             # de wedstrijdklasse voor dit hele jaar
             if wedstrijdleeftijd == prev_wedstrijdleeftijd:
                 obj.leeftijdsklasse = prev_lkl
             else:
-                obj.leeftijdsklasse = LeeftijdsKlasse.objects.filter(
-                                max_wedstrijdleeftijd__gte=wedstrijdleeftijd,
-                                geslacht='M').order_by('max_wedstrijdleeftijd')[0]
+                for lkl in LeeftijdsKlasse.objects.filter(geslacht='M'):
+                    if lkl.leeftijd_is_compatible(wedstrijdleeftijd):
+                        obj.leeftijdsklasse = lkl
+                        # geen master/veteraan, dus stop bij eerste passende klasse
+                        break
+                # for
+
                 prev_lkl = obj.leeftijdsklasse
                 prev_wedstrijdleeftijd = wedstrijdleeftijd
 
             objs.append(obj)
         # for
 
-        # volwassenen
-        # sorteer op naam
+        # volwassenen: sorteer op naam
+        prev_lkl = None
+        prev_wedstrijdleeftijd = 0
         for obj in (NhbLid
                     .objects
                     .filter(bij_vereniging=functie_nu.nhb_ver)
                     .filter(geboorte_datum__year__lt=jeugdgrens)
                     .order_by('achternaam', 'voornaam')):
-            obj.leeftijdsklasse = None
+
+            # de wedstrijdleeftijd voor dit hele jaar
+            wedstrijdleeftijd = huidige_jaar - obj.geboorte_datum.year
+            obj.is_jeugd = False
+
+            # de wedstrijdklasse voor dit hele jaar
+            if wedstrijdleeftijd == prev_wedstrijdleeftijd:
+                obj.leeftijdsklasse = prev_lkl
+            else:
+                for lkl in LeeftijdsKlasse.objects.filter(geslacht='M'):
+                    if lkl.leeftijd_is_compatible(wedstrijdleeftijd):
+                        obj.leeftijdsklasse = lkl
+                        # doorgaan ivm master/veteraan
+                # for
+
+                prev_lkl = obj.leeftijdsklasse
+                prev_wedstrijdleeftijd = wedstrijdleeftijd
 
             if not obj.is_actief_lid:
                 obj.leeftijd = huidige_jaar - obj.geboorte_datum.year
@@ -117,7 +143,7 @@ class LedenLijstView(UserPassesTestMixin, ListView):
         for obj in context['object_list']:
             if not obj.is_actief_lid:
                 inactief.append(obj)
-            elif obj.leeftijdsklasse:
+            elif obj.is_jeugd:
                 jeugd.append(obj)
             else:
                 senior.append(obj)

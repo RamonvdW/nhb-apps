@@ -12,7 +12,7 @@ from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Plein.menu import menu_dynamics
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
-from Wedstrijden.models import Wedstrijd, WedstrijdUitslag
+from Wedstrijden.models import CompetitieWedstrijd, CompetitieWedstrijdUitslag
 from Schutter.models import SchutterBoog
 from Score.models import Score, ScoreHist, SCORE_WAARDE_VERWIJDERD, SCORE_TYPE_SCORE
 from .models import (LAAG_REGIO, DeelCompetitie,
@@ -80,7 +80,7 @@ class ScoresRegioView(UserPassesTestMixin, TemplateView):
                     wedstrijd2beschrijving[wedstrijd.pk] = "%s - %s" % (comp_str, beschrijving)
         # for
 
-        wedstrijden = (Wedstrijd
+        wedstrijden = (CompetitieWedstrijd
                        .objects
                        .select_related('uitslag')
                        .filter(pk__in=wedstrijd_pks)
@@ -130,15 +130,15 @@ def mag_deelcomp_wedstrijd_wijzigen(wedstrijd, functie_nu, deelcomp):
 def bepaal_wedstrijd_en_deelcomp_of_404(wedstrijd_pk):
     try:
         wedstrijd_pk = int(wedstrijd_pk)
-        wedstrijd = (Wedstrijd
+        wedstrijd = (CompetitieWedstrijd
                      .objects
                      .select_related('uitslag')
                      .prefetch_related('uitslag__scores')
                      .get(pk=wedstrijd_pk))
-    except (ValueError, Wedstrijd.DoesNotExist):
+    except (ValueError, CompetitieWedstrijd.DoesNotExist):
         raise Http404('Wedstrijd niet gevonden')
 
-    plan = wedstrijd.wedstrijdenplan_set.all()[0]
+    plan = wedstrijd.competitiewedstrijdenplan_set.all()[0]
 
     # zoek de ronde erbij
     # deze hoort al bij een competitie type (indoor / 25m1pijl)
@@ -153,7 +153,7 @@ def bepaal_wedstrijd_en_deelcomp_of_404(wedstrijd_pk):
 
     # maak de WedstrijdUitslag aan indien nog niet gedaan
     if not wedstrijd.uitslag:
-        uitslag = WedstrijdUitslag()
+        uitslag = CompetitieWedstrijdUitslag()
         if deelcomp.competitie.afstand == '18':
             uitslag.max_score = 300
             uitslag.afstand_meter = 18
@@ -218,7 +218,7 @@ class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
         context['url_opslaan'] = reverse('Competitie:dynamic-scores-opslaan')
         context['url_deelnemers_ophalen'] = reverse('Competitie:dynamic-deelnemers-ophalen')
 
-        # plan = wedstrijd.wedstrijdenplan_set.all()[0]
+        # plan = wedstrijd.competitiewedstrijdenplan_set.all()[0]
         # ronde = DeelcompetitieRonde.objects.get(plan=plan)
 
         if rol_nu == Rollen.ROL_RCL:
@@ -344,12 +344,12 @@ class DynamicZoekOpNhbnrView(UserPassesTestMixin, View):
         try:
             nhb_nr = int(str(data['nhb_nr'])[:6])               # afkappen voor extra veiligheid
             wedstrijd_pk = int(str(data['wedstrijd_pk'])[:6])   # afkappen voor extra veiligheid
-            wedstrijd = Wedstrijd.objects.get(pk=wedstrijd_pk)
-        except (KeyError, ValueError, Wedstrijd.DoesNotExist):
+            wedstrijd = CompetitieWedstrijd.objects.get(pk=wedstrijd_pk)
+        except (KeyError, ValueError, CompetitieWedstrijd.DoesNotExist):
             # garbage in
             raise Http404('Geen valide verzoek')
 
-        plan = wedstrijd.wedstrijdenplan_set.all()[0]
+        plan = wedstrijd.competitiewedstrijdenplan_set.all()[0]
 
         # zoek de ronde erbij
         # deze hoort al bij een competitie type (indoor / 25m1pijl)
@@ -408,12 +408,12 @@ class DynamicScoresOpslaanView(UserPassesTestMixin, View):
     def laad_wedstrijd_of_404(data):
         try:
             wedstrijd_pk = int(str(data['wedstrijd_pk'])[:6])   # afkappen geeft beveiliging
-            wedstrijd = (Wedstrijd
+            wedstrijd = (CompetitieWedstrijd
                          .objects
                          .select_related('uitslag')
                          .prefetch_related('uitslag__scores')
                          .get(pk=wedstrijd_pk))
-        except (KeyError, ValueError, Wedstrijd.DoesNotExist):
+        except (KeyError, ValueError, CompetitieWedstrijd.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
         return wedstrijd
@@ -534,7 +534,7 @@ class DynamicScoresOpslaanView(UserPassesTestMixin, View):
 
         # controleer toestemming om scores op te slaan voor deze wedstrijd
 
-        plannen = wedstrijd.wedstrijdenplan_set.all()
+        plannen = wedstrijd.competitiewedstrijdenplan_set.all()
         if plannen.count() < 1:
             # wedstrijd met andere bedoeling
             raise Http404()

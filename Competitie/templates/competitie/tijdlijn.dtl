@@ -57,19 +57,23 @@
 
     <tr>
         <td {% if comp.fase == 'C' %} class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>C</td>
-        <td>Samenstellen vaste teams (HWL)</td>
+        <td>Afronden aanmaken teams (HWL)</td>
         <td>
             {% if comp.fase > 'C' %}
                 <span class="green-text">Afgerond</span>
             {% else %}
-                <span>tot {{ comp.einde_teamvorming }}</span>
+                {% if comp.regio_einde_teams_aanmaken %}
+                    <span>tot {{ comp.regio_einde_teams_aanmaken }}<span class="nhb-blauw-text"> (regio-specifieke datum)</span></span>
+                {% else %}
+                    <span>tot {{ comp.einde_teamvorming }}</span>
+                {% endif %}
             {% endif %}
         </td>
     </tr>
 
     <tr>
         <td {% if comp.fase == 'D' %} class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>D</td>
-        <td>Aanmaken poules (RCL)</td>
+        <td>Afronden poules (RCL)</td>
         <td>
             {% if comp.fase > 'D' %}
                 <span class="green-text">Afgerond</span>

@@ -46,7 +46,7 @@ class TestNhbStructuurLogin(E2EHelpers, TestCase):
         self.e2e_login(self.account_normaal)
         with self.assert_max_queries(20):
             resp = self.client.get('/plein/')
-        self.assert_template_used(resp, ('plein/plein-schutter.dtl',))
+        self.assert_template_used(resp, ('plein/plein-sporter.dtl',))
 
     def test_inactief_normaal(self):
         # probeer in te loggen als inactief lid
