@@ -4,6 +4,6 @@ updates:
     directory: "/nhbapps/requirements/"
     schedule:
       interval: "weekly"
-    target-branch: "dev_v9"
+    target-branch: "dev_v10"
     open-pull-requests-limit: 0
 
