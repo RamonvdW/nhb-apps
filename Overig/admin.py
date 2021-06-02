@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -55,6 +55,11 @@ class IsAfgehandeldListFilter(admin.SimpleListFilter):      # pragma: no cover
 class SiteFeedbackAdmin(admin.ModelAdmin):
     # filter mogelijkheid
     list_filter = (IsAfgehandeldListFilter,)
+
+    readonly_fields = ('toegevoegd_op', 'op_pagina', 'site_versie', )
+
+    # volgorde van de velden
+    fields = ('toegevoegd_op', 'bevinding', 'is_afgehandeld', 'feedback', 'gebruiker', 'op_pagina', 'site_versie')
 
 
 class SiteTijdelijkeUrlAdmin(admin.ModelAdmin):
