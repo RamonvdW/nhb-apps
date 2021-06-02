@@ -27,6 +27,8 @@ ALLOWED_HOSTS = [
     '127.0.0.1'
 ]
 
+IS_TEST_SERVER = False
+
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 DATABASES = {

@@ -28,8 +28,8 @@ class HistCompetitie(models.Model):
     is_team = models.BooleanField(default=False)
 
     # is deze al openbaar?
-    # staat op True als de huidige competitie nog loopt, maar de eindstand van de regiocomptitie
-    # alvast overgezet ivm nieuwe AG's
+    # staat op True als de huidige competitie nog loopt, maar de eindstand van de regiocompetitie
+    # alvast overgezet is ivm nieuwe AG's
     is_openbaar = models.BooleanField(default=True)
 
     # TODO: voeg vertaaltabellen toe voor klasse2url en url2klasse (zie records)

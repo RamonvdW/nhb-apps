@@ -9,7 +9,6 @@ from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
 # all klassen zijn hard-coded
-# --> zie migrations/m0010_squashed.py
 from .models import (BoogType, TeamType, LeeftijdsKlasse,
                      IndivWedstrijdklasse, TeamWedstrijdklasse,
                      KalenderWedstrijdklasse)
@@ -72,7 +71,7 @@ class BasisTypenKalenderWedstrijdklasseAdmin(BasisTypenReadonlyMetVolgordeAdmin)
 
 admin.site.register(BoogType, BasisTypenReadonlyMetVolgordeAdmin)
 admin.site.register(TeamType, BasisTypenReadonlyMetVolgordeAdmin)
-admin.site.register(LeeftijdsKlasse, BasisTypenReadonlyAdmin)
+admin.site.register(LeeftijdsKlasse, BasisTypenReadonlyMetVolgordeAdmin)
 admin.site.register(IndivWedstrijdklasse, BasisTypenIndivWedstrijdklasseAdmin)
 admin.site.register(TeamWedstrijdklasse, BasisTypenTeamWedstrijdklasseAdmin)
 admin.site.register(KalenderWedstrijdklasse, BasisTypenKalenderWedstrijdklasseAdmin)

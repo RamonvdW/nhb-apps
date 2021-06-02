@@ -47,13 +47,10 @@ class SiteFeedback(models.Model):
         short_feedback = self.feedback[:60]
         if len(self.feedback) > 60:
             short_feedback += "..."
-        msg = "#%s [%s] %s (%s) pagina '%s': [%s] %s" % (self.pk,
-                                        self.site_versie,
-                                        self.toegevoegd_op.strftime('%Y-%m-%d %H:%M utc'),
-                                        self.gebruiker,
-                                        self.op_pagina,
-                                        self.bev2str[self.bevinding],
-                                        short_feedback)
+        msg = "[%s] %s [%s] %s" % (self.toegevoegd_op.strftime('%Y-%m-%d %H:%M utc'),
+                                   self.gebruiker,
+                                   self.bev2str[self.bevinding],
+                                   short_feedback)
         if self.is_afgehandeld:
             msg = "(afgehandeld) " + msg
         return msg
