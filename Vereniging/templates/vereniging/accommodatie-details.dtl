@@ -10,7 +10,7 @@
 
 {% block pagina %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vereniging-locatie-details" %}
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vereniging-accommodatie-details" %}
 
     <h4>Vereniging en Accommodatie</h4>
 
