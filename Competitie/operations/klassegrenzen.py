@@ -116,7 +116,8 @@ def bepaal_klassegrenzen_indiv(comp, trans_indiv):
     for lkl in (LeeftijdsKlasse
                 .objects
                 .filter(geslacht='M')
-                .order_by('volgorde')):
+                .order_by('volgorde')):         # Aspiranten eerst, Senioren laatst
+
         klasse_pks = list(lkl.indivwedstrijdklasse_set.values_list('pk', flat=True))
         if len(klasse_pks) > 0:
             # wordt gebruikt in de bondscompetities
@@ -146,6 +147,8 @@ def bepaal_klassegrenzen_indiv(comp, trans_indiv):
                 if nr not in done_nrs:
                     lid = schutterboog.nhblid
                     age = lid.bereken_wedstrijdleeftijd(jaar)
+                    # volgorde lkl is Aspirant .. Senior
+                    # pak de eerste de beste klasse die compatible is
                     if lkl.leeftijd_is_compatible(age):
                         nrs.append(nr)
                         done_nrs.append(nr)
@@ -342,10 +345,12 @@ def bepaal_klassegrenzen_teams(comp, trans_team):
             for klasse in klassen[:-1]:
                 pos += step
                 ag = team_scores[pos]
+                ag_str = "%05.1f" % (ag * aantal_pijlen)
+                ag_str = ag_str.replace('.', ',')
                 res = {'beschrijving': klasse.beschrijving,
                        'count': step,
                        'ag': ag,
-                       'ag_str': "%05.1f" % (ag * aantal_pijlen),
+                       'ag_str': ag_str,
                        'wedstrkl_obj': klasse,
                        'volgorde': klasse.volgorde}  # voor sorteren
                 objs.append(res)
@@ -356,10 +361,12 @@ def bepaal_klassegrenzen_teams(comp, trans_team):
             klasse = klassen[0]
 
         ag = AG_NUL
+        ag_str = "%05.1f" % (ag * aantal_pijlen)
+        ag_str = ag_str.replace('.', ',')
         res = {'beschrijving': klasse.beschrijving,
                'count': count - (aantal - 1) * step,
                'ag': ag,
-               'ag_str': "%05.1f" % (ag * aantal_pijlen),
+               'ag_str': ag_str,
                'wedstrkl_obj': klasse,
                'volgorde': klasse.volgorde}     # voor sorteren
         objs.append(res)
@@ -396,9 +403,9 @@ class KlasseBepaler(object):
 
     def __init__(self, competitie):
         self.competitie = competitie
-        self.boogtype2klassen = dict()      # [boogtype.afkorting] = [klasse, klasse, ..]
-        self.lkl_cache_mannen = dict()      # [klasse.pk] = [lkl, lkl, ...]
-        self.lkl_cache_vrouwen = dict()     # [klasse.pk] = [lkl, lkl, ...]
+        self.boogtype2klassen = dict()      # [boogtype.afkorting] = [CompetitieKlasse, CompetitieKlasse, ..]
+        self.lkl_cache_mannen = dict()      # [CompetitieKlasse.pk] = [lkl, lkl, ...]
+        self.lkl_cache_vrouwen = dict()     # [CompetitieKlasse.pk] = [lkl, lkl, ...]
         self.lkl_cache = {'M': self.lkl_cache_mannen,
                           'V': self.lkl_cache_vrouwen}
 
@@ -447,7 +454,7 @@ class KlasseBepaler(object):
 
         mogelijkheden.sort(reverse=True)
 
-        # leeftijdsklasse.volgorde heeft senioren eerst gezet; aspiranten laatste
+        # de sort op lkl.volgorde heeft senioren eerst gezet; aspiranten laatste
         # aspiranten mogen in alle klassen meedoen, maar we kiezen uiteindelijk de Asp klasse
         if len(mogelijkheden):
             _, _, _, klasse = mogelijkheden[-1]
