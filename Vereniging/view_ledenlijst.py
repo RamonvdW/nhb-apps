@@ -67,10 +67,15 @@ class LedenLijstView(UserPassesTestMixin, ListView):
             if wedstrijdleeftijd == prev_wedstrijdleeftijd:
                 obj.leeftijdsklasse = prev_lkl
             else:
-                for lkl in LeeftijdsKlasse.objects.filter(geslacht='M'):
+                for lkl in (LeeftijdsKlasse
+                            .objects
+                            .filter(geslacht='M',
+                                    min_wedstrijdleeftijd=0)        # exclude veteraan, master
+                            .order_by('volgorde')):                 # aspirant eerst
+
                     if lkl.leeftijd_is_compatible(wedstrijdleeftijd):
                         obj.leeftijdsklasse = lkl
-                        # geen master/veteraan, dus stop bij eerste passende klasse
+                        # stop op de eerste match: aspirant, cadet, junior, senior
                         break
                 # for
 
@@ -97,10 +102,14 @@ class LedenLijstView(UserPassesTestMixin, ListView):
             if wedstrijdleeftijd == prev_wedstrijdleeftijd:
                 obj.leeftijdsklasse = prev_lkl
             else:
-                for lkl in LeeftijdsKlasse.objects.filter(geslacht='M'):
+                for lkl in (LeeftijdsKlasse
+                            .objects.filter(geslacht='M',
+                                            max_wedstrijdleeftijd=0)        # skip jeugd klassen
+                            .order_by('-volgorde')):                        # volgorde: veteraan, master, senior
                     if lkl.leeftijd_is_compatible(wedstrijdleeftijd):
                         obj.leeftijdsklasse = lkl
-                        # doorgaan ivm master/veteraan
+                        # stop op de eerste match: veteraan, master, senior
+                        break
                 # for
 
                 prev_lkl = obj.leeftijdsklasse
