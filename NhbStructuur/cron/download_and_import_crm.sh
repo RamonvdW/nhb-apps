@@ -31,6 +31,13 @@ LOG="$LOGDIR/${SHORTSTAMP}_download_and_import_crm.log"
 #echo "Logging to: $LOG"
 echo "[INFO] Started at $STAMP" >> "$LOG"
 
+if [ ! -d "$SPOOLDIR" ]
+then
+    # cannot create, so report error
+    echo "[ERROR] Missing $SPOOLDIR"
+    exit 1
+fi
+
 URL=$(head -1 "$CONFIGFILE")
 SECRET=$(tail -1 "$CONFIGFILE")
 

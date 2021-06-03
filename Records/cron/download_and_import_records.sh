@@ -32,6 +32,13 @@ STAMP=$(date +"%Y%m%d_%H%M%S")
 echo "" >> "$LOG"
 echo "[INFO] Started at $STAMP" >> "$LOG"
 
+if [ ! -d "$SPOOLDIR" ]
+then
+    # cannot create, so report error
+    echo "[ERROR] Missing $SPOOLDIR" >> "$LOG"
+    exit 1
+fi
+
 # prepare to download
 rm -rf "$TMPDIR"
 mkdir -p "$TMPDIR"

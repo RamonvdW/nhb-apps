@@ -9,6 +9,9 @@
 
 MAX_FOUTEN=5    # limiet, getest met een dry-run
 USER_WWW="$1"
+SPOOLDIR="/var/spool/download-oude-site"
+LOGDIR="/var/log/www"
+URL="http://uitslagen.handboogsport.nl/index.php"
 
 ID=$(id -u)
 ID_ROOT=$(id -u root)
@@ -23,19 +26,20 @@ cd $(dirname $0)    # ga naar de directory van het script
 
 STAMP=$(date +"%Y%m%d_%H%M%S")
 
-SPOOLDIR="/var/spool/download-oude-site"
-[ ! -d "$SPOOLDIR" ] && mkdir "$SPOOLDIR"
-
-URL="http://uitslagen.handboogsport.nl/index.php"
 DIR="$SPOOLDIR/${STAMP}_uitslagen"
 mkdir "$DIR"
 
 # everything sent to stdout/stderr will be picked up by crontab and sent in an email
 # avoid this by writing to a logfile
-LOGDIR="/var/log/www"
 LOG="$LOGDIR/${STAMP}_oude_site_overnemen.log"
-
 echo "[INFO] Started at $STAMP" > "$LOG"
+
+if [ ! -d "$SPOOLDIR" ]
+then
+    # cannot create, so report error
+    echo "[ERROR] Missing $SPOOLDIR"
+    exit 1
+fi
 
 download_teams()
 {
