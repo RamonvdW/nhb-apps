@@ -24,7 +24,7 @@
 
         <table class="white">
             <tr class="nhb-grijs">
-                <td colspan="2">
+                <td colspan="{% if toon_aantal %}3{% else %}2{% endif %}">
                     <h5>Individuele wedstrijdklassen</h5>
                 </td>
             </tr>
@@ -32,6 +32,9 @@
             <tr>
                 <th>Materiaalklasse</th>
                 <th>Minimaal aanvangs<wbr/>gemiddelde</th>
+                {% if toon_aantal %}
+                    <th>Aantal deelnemers</th>
+                {% endif %}
             </tr>
 
             {% for obj in indiv_klassen %}
@@ -43,11 +46,15 @@
                     {% else %}
                         <td><i class="grey-text">n.v.t.</i></td>
                     {% endif %}
+
+                    {% if toon_aantal %}
+                        <td>{{ obj.aantal }}</td>
+                    {% endif %}
                 </tr>
             {% endfor %}
 
             <tr class="nhb-grijs">
-                <td colspan="2">
+                <td colspan="{% if toon_aantal %}3{% else %}2{% endif %}">
                     <h5>Team wedstrijdklassen</h5>
                 </td>
             </tr>
@@ -55,6 +62,9 @@
             <tr>
                 <th>Materiaalklasse</th>
                 <th>Minimale team<wbr/>sterkte</th>
+                {% if toon_aantal %}
+                    <th></th>
+                {% endif %}
             </tr>
 
             {% for obj in team_klassen %}
@@ -65,6 +75,10 @@
                         <td>{{ obj.min_ag_str }}</td>
                     {% else %}
                         <td><i class="grey-text">n.v.t.</i></td>
+                    {% endif %}
+
+                    {% if toon_aantal %}
+                        <td></td>
                     {% endif %}
                 </tr>
             {% endfor %}
