@@ -9,18 +9,18 @@ from django.urls import reverse
 from django.views.generic import ListView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Plein.menu import menu_dynamics
-from Functie.rol import Rollen, rol_get_huidige_functie
 from BasisTypen.models import (LeeftijdsKlasse, TeamType,
                                MAXIMALE_LEEFTIJD_JEUGD,
                                MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT)
-from NhbStructuur.models import NhbLid
-from Schutter.models import SchutterBoog, SchutterVoorkeuren
 from Competitie.models import (AG_NUL, DAGDELEN, DAGDEEL_AFKORTINGEN,
                                INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3,
                                Competitie, DeelCompetitie, DeelcompetitieRonde,
                                RegioCompetitieSchutterBoog)
 from Competitie.operations import KlasseBepaler
+from Functie.rol import Rollen, rol_get_huidige_functie
+from NhbStructuur.models import NhbLid
+from Plein.menu import menu_dynamics
+from Schutter.models import SchutterBoog, SchutterVoorkeuren
 from Score.models import Score, SCORE_TYPE_INDIV_AG
 from Wedstrijden.models import CompetitieWedstrijd
 import copy
@@ -94,10 +94,15 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
             if wedstrijdleeftijd == prev_wedstrijdleeftijd:
                 obj.leeftijdsklasse = prev_lkl
             else:
-                for lkl in LeeftijdsKlasse.objects.filter(geslacht='M'):
+                for lkl in (LeeftijdsKlasse
+                            .objects
+                            .filter(geslacht='M',
+                                    min_wedstrijdleeftijd=0)        # exclude veteraan, master
+                            .order_by('volgorde')):                 # aspiranten eerst
+
                     if lkl.leeftijd_is_compatible(wedstrijdleeftijd):
                         obj.leeftijdsklasse = lkl
-                        # geen master/veteraan, dus stop bij eerste passende klasse
+                        # stop bij eerste passende klasse
                         break
                 # for
 
@@ -151,6 +156,10 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
             is_aangemeld_dict[deelnemer.schutterboog.pk] = True
         # for
 
+        for nr, obj in enumerate(objs):
+            obj.volgorde = nr
+        # for
+
         # zoek de bogen informatie bij elk lid
         # split per schutter-boog
         objs2 = list()
@@ -158,7 +167,10 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                              .objects
                              .filter(voor_wedstrijd=True)
                              .select_related('nhblid', 'boogtype')
-                             .order_by('boogtype__volgorde')
+                             .order_by('boogtype__volgorde',                # groepeer op boogtype
+                                       '-nhblid__geboorte_datum__year',     # jongste eerst
+                                       'nhblid__achternaam',                # binnen de leeftijd op achternaam
+                                       'nhblid__voornaam')
                              .only('nhblid__nhb_nr', 'boogtype__afkorting', 'boogtype__beschrijving')):
             try:
                 nhblid = nhblid_dict[schutterboog.nhblid.nhb_nr]
@@ -194,10 +206,18 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                     # dit is een opt-out, dus standaard True
                     obj.wil_competitie = True
 
-                objs2.append(obj)
+                tup = (nhblid.volgorde, schutterboog.boogtype.volgorde, obj)
+                objs2.append(tup)
         # for
 
-        return objs2
+        # sorteer objs2 zodat deze in dezelfde volgorde staat als objs:
+        # - jeugd gesorteerd op leeftijd en daarna gesorteerd op naam
+        # - senioren gesorteerd op naam
+        objs2.sort()
+
+        objs3 = [obj for v1, v2, obj in objs2]
+
+        return objs3
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
