@@ -31,10 +31,8 @@ import time
 TEMPLATE_COMPETITIE_INSTELLINGEN = 'competitie/bb-instellingen-nieuwe-competitie.dtl'
 TEMPLATE_COMPETITIE_AANMAKEN = 'competitie/bb-competities-aanmaken.dtl'
 TEMPLATE_COMPETITIE_KLASSEGRENZEN_VASTSTELLEN = 'competitie/bb-klassegrenzen-vaststellen.dtl'
-TEMPLATE_COMPETITIE_KLASSEGRENZEN_TONEN = 'competitie/klassegrenzen-tonen.dtl'
 TEMPLATE_COMPETITIE_AANGEMELD_REGIO = 'competitie/lijst-aangemeld-regio.dtl'
 TEMPLATE_COMPETITIE_AG_VASTSTELLEN = 'competitie/bb-ag-vaststellen.dtl'
-TEMPLATE_COMPETITIE_INFO_COMPETITIE = 'competitie/info-competitie.dtl'
 TEMPLATE_COMPETITIE_WIJZIG_DATUMS = 'competitie/bb-wijzig-datums.dtl'
 
 mutatie_ping = BackgroundSync(settings.BACKGROUND_SYNC__KAMPIOENSCHAP_MUTATIES)
