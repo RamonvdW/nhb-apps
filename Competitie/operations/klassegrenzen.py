@@ -405,11 +405,13 @@ class KlasseBepaler(object):
         # vul de caches
         for klasse in (CompetitieKlasse
                        .objects
-                       .select_related('indiv',
-                                       'indiv__boogtype')
+                       .filter(competitie=competitie)
                        .exclude(indiv=None)
                        .prefetch_related('indiv__leeftijdsklassen')
+                       .select_related('indiv',
+                                       'indiv__boogtype')
                        .all()):
+
             indiv = klasse.indiv
             boog_afkorting = indiv.boogtype.afkorting
             try:
