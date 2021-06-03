@@ -10,7 +10,7 @@
 
 {% block pagina %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vereniging-locatie-details" %}
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vereniging-externe-locatie-details" %}
 
     <h4>Locatie details</h4>
 
