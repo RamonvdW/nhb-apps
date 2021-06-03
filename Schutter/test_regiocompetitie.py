@@ -110,7 +110,8 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
             schutterboog.save()
         # for
 
-    def _competitie_aanmaken(self):
+    @staticmethod
+    def _competitie_aanmaken():
         maak_competities_en_zet_fase_b()
 
     def test_inschrijven(self):
@@ -156,6 +157,8 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         self.assertEqual(inschrijving.inschrijf_notitie, '')
         self.assertEqual(inschrijving.inschrijf_voorkeur_dagdeel, 'GN')
         self.assertTrue(str(RegioCompetitieSchutterBoog) != '')     # coverage only
+        self.assertEqual(inschrijving.klasse.competitie.afstand, '18')           # juiste competitie?
+        self.assertEqual(inschrijving.klasse.indiv.boogtype.afkorting, 'R')      # klasse compatibel met boogtype?
 
         # geen bevestig formulier indien al ingeschreven
         url = self.url_bevestig_aanmelden % (deelcomp.pk, schutterboog.pk)
@@ -207,7 +210,11 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_profiel)
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 2)
 
-        # veroorzaak een dubbele inschrijving
+        inschrijving_25 = RegioCompetitieSchutterBoog.objects.exclude(pk=inschrijving.pk)[0]
+        self.assertEqual(inschrijving_25.klasse.competitie.afstand, '25')           # juiste competitie?
+        self.assertEqual(inschrijving_25.klasse.indiv.boogtype.afkorting, 'BB')     # klasse compatibel met boogtype?
+
+        # probeer dubbel in te schrijven
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_aanmelden % (deelcomp.pk, schutterboog.pk))
         self.assert404(resp)     # 404 = Not found
