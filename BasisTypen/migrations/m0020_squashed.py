@@ -35,7 +35,7 @@ def init_leeftijdsklasse(apps, _):
     # haal de klassen op die van toepassing zijn tijdens deze migratie
     leeftijdsklasse_klas = apps.get_model('BasisTypen', 'LeeftijdsKlasse')
 
-    # 60+
+    # >= 60
     leeftijdsklasse_klas(
         afkorting='VH', geslacht='M',
         klasse_kort='Veteraan',
@@ -53,7 +53,7 @@ def init_leeftijdsklasse(apps, _):
         max_wedstrijdleeftijd=0,
         volgens_wa=False).save()
 
-    # 50..59
+    # >= 50
     leeftijdsklasse_klas(
         afkorting='MH', geslacht='M',
         klasse_kort='Master',
@@ -71,23 +71,23 @@ def init_leeftijdsklasse(apps, _):
         max_wedstrijdleeftijd=0,
         volgens_wa=True).save()
 
-    # 21..49
+    # open klasse
     leeftijdsklasse_klas(
         afkorting='SH', geslacht='M',
         klasse_kort='Senior',
         beschrijving='Senioren, mannen',
         volgorde=40,
         min_wedstrijdleeftijd=0,
-        max_wedstrijdleeftijd=49).save()
+        max_wedstrijdleeftijd=0).save()
     leeftijdsklasse_klas(
         afkorting='SV', geslacht='V',
         klasse_kort='Senior',
         beschrijving='Senioren, vrouwen',
         volgorde=40,
         min_wedstrijdleeftijd=0,
-        max_wedstrijdleeftijd=49).save()
+        max_wedstrijdleeftijd=0).save()
 
-    # 18, 19, 20
+    # <= 20
     leeftijdsklasse_klas(
         afkorting='JH', geslacht='M',
         klasse_kort='Junior',
@@ -103,7 +103,7 @@ def init_leeftijdsklasse(apps, _):
         min_wedstrijdleeftijd=0,
         max_wedstrijdleeftijd=20).save()
 
-    # 14, 15, 16, 17
+    # <= 17
     leeftijdsklasse_klas(
         afkorting='CH', geslacht='M',
         klasse_kort='Cadet',
@@ -119,7 +119,7 @@ def init_leeftijdsklasse(apps, _):
         min_wedstrijdleeftijd=0,
         max_wedstrijdleeftijd=17).save()
 
-    # 12 + 13
+    # <= 13
     leeftijdsklasse_klas(
         afkorting='AH2', geslacht='M',
         klasse_kort='Aspirant',
@@ -137,7 +137,7 @@ def init_leeftijdsklasse(apps, _):
         max_wedstrijdleeftijd=13,
         volgens_wa=False).save()
 
-    # 10 + 11
+    # <= 11
     leeftijdsklasse_klas(
         afkorting='AH1', geslacht='M',
         klasse_kort='Aspirant',
