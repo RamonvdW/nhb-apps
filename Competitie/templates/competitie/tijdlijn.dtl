@@ -32,7 +32,7 @@
             {% if comp.fase > 'A' %}
                 <span class="green-text">Afgerond</span>
             {% else %}
-                <span>tot 15 juli</span>
+                <span>{{ comp.begin_aanmeldingen }}</span>
             {% endif %}
         </td>
     </tr>
