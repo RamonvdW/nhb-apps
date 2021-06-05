@@ -162,7 +162,7 @@
                 <td class="right-align smal">{% if obj.laagste_score_nr == 5 %}<del>{{ obj.score5 }}</del>{% else %}{{ obj.score5 }}{% endif %}</td>
                 <td class="right-align smal">{% if obj.laagste_score_nr == 6 %}<del>{{ obj.score6 }}</del>{% else %}{{ obj.score6 }}{% endif %}</td>
                 <td class="right-align smal">{% if obj.laagste_score_nr == 7 %}<del>{{ obj.score7 }}</del>{% else %}{{ obj.score7 }}{% endif %}</td>
-                <td class="right-align smal hide-on-small-only">{{ obj.totaal }}</td>
+                <td class="right-align hide-on-small-only">{{ obj.totaal }}</td>
             </tr>
 
         {% endfor %}
