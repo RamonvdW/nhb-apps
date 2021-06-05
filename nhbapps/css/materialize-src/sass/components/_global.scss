@@ -448,7 +448,7 @@ td, th{
   display: table-cell;
   text-align: left;
   vertical-align: middle;
-  border-radius: 2px;
+  border-radius: 0;     // 2px;  gives visible gaps in table row with dark background
 }
 
 // Responsive Table
