@@ -72,6 +72,7 @@ class LedenLijstView(UserPassesTestMixin, ListView):
                             .filter(geslacht='M',
                                     min_wedstrijdleeftijd=0)        # exclude veteraan, master
                             .order_by('volgorde')):                 # aspirant eerst
+
                     if lkl.leeftijd_is_compatible(wedstrijdleeftijd):
                         obj.leeftijdsklasse = lkl
                         # stop op de eerste match: aspirant, cadet, junior, senior
