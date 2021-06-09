@@ -747,11 +747,6 @@ class TestCompetitieScores(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
 
-        # zet 1 ronde om voor het oude programma
-        ronde.beschrijving = 'Ronde 99 oude programma'
-        ronde.save()
-        self.assertTrue(ronde.is_voor_import_oude_programma())
-
         url = self.url_scores_regio % self.deelcomp_regio101_18.pk
         with self.assert_max_queries(20):
             resp = self.client.get(url)

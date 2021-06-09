@@ -264,9 +264,8 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                               .objects
                               .select_related('plan')
                               .filter(deelcompetitie=deelcomp)):
-                    if not ronde.is_voor_import_oude_programma():
-                        # toon de HWL alle wedstrijden in de regio, dus alle clusters
-                        pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
+                    # toon de HWL alle wedstrijden in de regio, dus alle clusters
+                    pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
                 # for
 
                 wedstrijden = (CompetitieWedstrijd
@@ -339,9 +338,8 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                           .objects
                           .select_related('plan')
                           .filter(deelcompetitie=deelcomp)):
-                if not ronde.is_voor_import_oude_programma():
-                    # sta alle wedstrijden in de regio toe, dus alle clusters
-                    pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
+                # sta alle wedstrijden in de regio toe, dus alle clusters
+                pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
             # for
             for pk in pks:
                 key = 'wedstrijd_%s' % pk

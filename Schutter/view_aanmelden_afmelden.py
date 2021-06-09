@@ -142,9 +142,8 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
                           .objects
                           .select_related('plan')
                           .filter(deelcompetitie=deelcomp)):
-                if not ronde.is_voor_import_oude_programma():
-                    # toon de HWL alle wedstrijden in de regio, dus alle clusters
-                    pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
+                # toon de HWL alle wedstrijden in de regio, dus alle clusters
+                pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
             # for
 
             wedstrijden = (CompetitieWedstrijd
@@ -310,9 +309,8 @@ class RegiocompetitieAanmeldenView(View):
                           .objects
                           .select_related('plan')
                           .filter(deelcompetitie=deelcomp)):
-                if not ronde.is_voor_import_oude_programma():
-                    # sta alle wedstrijden in de regio toe, dus alle clusters
-                    pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
+                # sta alle wedstrijden in de regio toe, dus alle clusters
+                pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
             # for
             wedstrijden = list()
             for pk in pks:
@@ -411,8 +409,7 @@ class SchutterSchietmomentenView(UserPassesTestMixin, TemplateView):
                                       'plan')
                       .prefetch_related('plan__wedstrijden')
                       .filter(deelcompetitie=deelnemer.deelcompetitie)):
-            if not ronde.is_voor_import_oude_programma():
-                pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
+            pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
         # for
 
         wedstrijden = (CompetitieWedstrijd
@@ -477,8 +474,7 @@ class SchutterSchietmomentenView(UserPassesTestMixin, TemplateView):
                                       'plan')
                       .prefetch_related('plan__wedstrijden')
                       .filter(deelcompetitie=deelnemer.deelcompetitie)):
-            if not ronde.is_voor_import_oude_programma():
-                pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
+            pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
         # for
 
         # zoek alle wedstrijden erbij

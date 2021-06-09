@@ -88,9 +88,9 @@ class Command(BaseCommand):
                                   deelcompetitie__laag=LAAG_REGIO,
                                   deelcompetitie__nhb_regio=regio,
                                   cluster=cluster)):
-                if not ronde.is_voor_import_oude_programma():
-                    self._maak_wedstrijd(ronde.plan, ver, datum, tijd)
-                    done = True
+                self._maak_wedstrijd(ronde.plan, ver, datum, tijd)
+                done = True
+            # for
         # for
 
         if not done:

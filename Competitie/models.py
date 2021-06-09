@@ -447,12 +447,6 @@ class DeelcompetitieRonde(models.Model):
         msg += " (%s)" % self.beschrijving
         return msg
 
-    def is_voor_import_oude_programma(self):
-        # beetje zwak, maar correcte functioneren van de import uit het oude programma
-        # is afhankelijk van de beschrijving, dus mag niet aangepast worden
-        # "Ronde 1 oude programma" .. "Ronde 7 oude programma"
-        return self.beschrijving[:6] == 'Ronde ' and self.beschrijving[-15:] == ' oude programma'
-
 
 class RegioCompetitieSchutterBoog(models.Model):
     """ Een schutterboog aangemeld bij een regiocompetitie """
@@ -519,19 +513,6 @@ class RegioCompetitieSchutterBoog(models.Model):
 
     # voorkeur schietmomenten (methode 1)
     inschrijf_gekozen_wedstrijden = models.ManyToManyField(CompetitieWedstrijd, blank=True)
-
-    # alternatieve uitslag - dit is tijdelijk
-    alt_score1 = models.PositiveIntegerField(default=0)
-    alt_score2 = models.PositiveIntegerField(default=0)
-    alt_score3 = models.PositiveIntegerField(default=0)
-    alt_score4 = models.PositiveIntegerField(default=0)
-    alt_score5 = models.PositiveIntegerField(default=0)
-    alt_score6 = models.PositiveIntegerField(default=0)
-    alt_score7 = models.PositiveIntegerField(default=0)
-    alt_totaal = models.PositiveIntegerField(default=0)
-    alt_aantal_scores = models.PositiveSmallIntegerField(default=0)
-    alt_laagste_score_nr = models.PositiveIntegerField(default=0)  # 1..7
-    alt_gemiddelde = models.DecimalField(max_digits=5, decimal_places=3, default=0.0)  # 10,000
 
     def __str__(self):
         # deze naam wordt gebruikt in de admin interface, dus kort houden

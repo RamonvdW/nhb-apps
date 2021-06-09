@@ -9,142 +9,59 @@
 {% block title %}Planning Regio{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-planning-regio" %}
 
-<h4>Planning Regio</h4>
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-planning-regio" %}
 
-<div class="row">
+    <h4>Planning Regio</h4>
 
-    <!-- toon gegevens van de regio en competitie in een blauwe box -->
-    <div class="col s12 m10 l8 xl6 offset-m1 offset-l2 offset-xl3">
-        <div class="white-text nhb-blauw z-depth-2">
+    <div class="row">
 
-            <div class="row small-row">
-                <div class="col s3">Competitie:</div>
-                <div class="col s7">{{ deelcomp.competitie.beschrijving }}</div>
+        <!-- toon gegevens van de regio en competitie in een blauwe box -->
+        <div class="col s12 m10 l8 xl6 offset-m1 offset-l2 offset-xl3">
+            <div class="white-text nhb-blauw z-depth-2">
+
+                <div class="row small-row">
+                    <div class="col s3">Competitie:</div>
+                    <div class="col s7">{{ deelcomp.competitie.beschrijving }}</div>
+                </div>
+
+                <div class="row small-row">
+                    <div class="col s3">Rayon:</div>
+                    <div class="col s7">{{ regio.rayon }}</div>
+                </div>
+
+                <div class="row small-row">
+                    <div class="col s3">Regio:</div>
+                    <div class="col s7">{{ regio }}</div>
+                </div>
+
+                <div class="row small-row">
+                    <div class="col s3">Inschrijfmethode:</div>
+                    <div class="col s7">{{ inschrijfmethode }}</div>
+                </div>
+
             </div>
-
-            <div class="row small-row">
-                <div class="col s3">Rayon:</div>
-                <div class="col s7">{{ regio.rayon }}</div>
-            </div>
-
-            <div class="row small-row">
-                <div class="col s3">Regio:</div>
-                <div class="col s7">{{ regio }}</div>
-            </div>
-
-            <div class="row small-row">
-                <div class="col s3">Inschrijfmethode:</div>
-                <div class="col s7">{{ inschrijfmethode }}</div>
-            </div>
-
         </div>
     </div>
-</div>
 
 
-{% if url_rayon %}
-    <p>&nbsp;</p>
-    <p><a class="btn-nhb-blauw" href="{{ url_rayon }}">
-    <i class="material-icons-round left">arrow_upward</i>Planning rayon</a></p>
-{% endif %}
-
-
-<p>&nbsp;</p>
-<p>De RCL kan deze planning aanpassen.</p>
-
-<p>Handleiding voor de RCL: <a class="btn-nhb-blauw" href="{{ handleiding_planning_regio_url }}" target="_blank" rel="noopener noreferrer">
-    <i class="material-icons-round white-text left">help_outline</i>Planning Regio</a>
-</p>
-
-
-<p>&nbsp;</p>
-<h5>Regiocompetitie wedstrijd blokken</h5>
-
-<table class="white">
-    <thead>
-        <tr>
-            <th>Week</th>
-            <th>Beschrijving</th>
-            <th>Wedstrijden</th>
-            <th><!-- kolom voor knoppen --></th>
-        </tr>
-    </thead>
-
-    {% for ronde in rondes %}
-        <tr>
-            <td>{{ ronde.week_nr }}</td>
-            <td>{{ ronde.beschrijving }}</td>
-            <td>{{ ronde.wedstrijd_count }}</td>
-
-            <!-- knop naar de ronde van de regioplanning -->
-            <td>
-                <a class="btn-nhb-blauw btn-small" href="{% url 'Competitie:regio-ronde-planning' ronde.pk %}">
-                    <i class="material-icons-round left">arrow_forward</i>Wedstrijden</a>
-            </td>
-        </tr>
-    {% empty %}
-        <tr>
-            <td colspan="4"><i>Nog geen planning aanwezig</i></td>
-        </tr>
-    {% endfor %}
-
-    <!-- knop om een regel toe te voegen -->
-    {% if url_nieuwe_week %}
-        <tr>
-            <td colspan="4">
-                <form action="{{ url_nieuwe_week }}" method="post">
-                    {% csrf_token %}
-                    <button class="btn-nhb-blauw btn-small" type="submit">
-                        <i class="material-icons-round left">add</i>Blok toevoegen</button>
-                </form>
-            </td>
-        </tr>
+    {% if url_rayon %}
+        <p>&nbsp;</p>
+        <p><a class="btn-nhb-blauw" href="{{ url_rayon }}">
+        <i class="material-icons-round left">arrow_upward</i>Planning rayon</a></p>
     {% endif %}
 
-</table>
-
-
-{% if show_clusters %}
 
     <p>&nbsp;</p>
-    <h5>Cluster planningen</h5>
+    <p>De RCL kan deze planning aanpassen.</p>
 
-    <table class="white">
-        <thead>
-            <tr>
-                <th>Cluster</th>
-                <th>Naam</th>
-                <th>Rondes</th>
-                <th><!-- kolom voor knoppen --></th>
-            </tr>
-        </thead>
-
-        {% for cluster in clusters %}
-            <tr>
-                <td>{{ cluster.cluster_code_str }}</td>
-                <td>{{ cluster.naam }}</td>
-                <td>{{ cluster.ronde_count }}</td>
-
-                <!-- knop naar de ronde van de regioplanning -->
-                <td>
-                    <a class="btn-nhb-blauw btn-small" href="{{ cluster.url_bekijk }}">
-                        <i class="material-icons-round left">arrow_forward</i>Bekijk</a>
-                </td>
-            </tr>
-        {% endfor %}
-    </table>
-
-{% else %}
-
-    <p>(als clusters in gebruik worden genomen dan volgt voor elk cluster een eigen planning hier onder)</p>
-
-{% endif %}
+    <p>Handleiding voor de RCL: <a class="btn-nhb-blauw" href="{{ handleiding_planning_regio_url }}" target="_blank" rel="noopener noreferrer">
+        <i class="material-icons-round white-text left">help_outline</i>Planning Regio</a>
+    </p>
 
 
     <p>&nbsp;</p>
-    <h5>Rondes uit het oude programma</h5>
+    <h5>Regiocompetitie wedstrijd blokken</h5>
 
     <table class="white">
         <thead>
@@ -156,7 +73,7 @@
             </tr>
         </thead>
 
-        {% for ronde in rondes_import %}
+        {% for ronde in rondes %}
             <tr>
                 <td>{{ ronde.week_nr }}</td>
                 <td>{{ ronde.beschrijving }}</td>
@@ -165,7 +82,7 @@
                 <!-- knop naar de ronde van de regioplanning -->
                 <td>
                     <a class="btn-nhb-blauw btn-small" href="{% url 'Competitie:regio-ronde-planning' ronde.pk %}">
-                        <i class="material-icons-round left">arrow_forward</i>Bekijk</a>
+                        <i class="material-icons-round left">arrow_forward</i>Wedstrijden</a>
                 </td>
             </tr>
         {% empty %}
@@ -174,8 +91,57 @@
             </tr>
         {% endfor %}
 
+        <!-- knop om een regel toe te voegen -->
+        {% if url_nieuwe_week %}
+            <tr>
+                <td colspan="4">
+                    <form action="{{ url_nieuwe_week }}" method="post">
+                        {% csrf_token %}
+                        <button class="btn-nhb-blauw btn-small" type="submit">
+                            <i class="material-icons-round left">add</i>Blok toevoegen</button>
+                    </form>
+                </td>
+            </tr>
+        {% endif %}
+
     </table>
 
+
+    {% if show_clusters %}
+
+        <p>&nbsp;</p>
+        <h5>Cluster planningen</h5>
+
+        <table class="white">
+            <thead>
+                <tr>
+                    <th>Cluster</th>
+                    <th>Naam</th>
+                    <th>Rondes</th>
+                    <th><!-- kolom voor knoppen --></th>
+                </tr>
+            </thead>
+
+            {% for cluster in clusters %}
+                <tr>
+                    <td>{{ cluster.cluster_code_str }}</td>
+                    <td>{{ cluster.naam }}</td>
+                    <td>{{ cluster.ronde_count }}</td>
+
+                    <!-- knop naar de ronde van de regioplanning -->
+                    <td>
+                        <a class="btn-nhb-blauw btn-small" href="{{ cluster.url_bekijk }}">
+                            <i class="material-icons-round left">arrow_forward</i>Bekijk</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+
+    {% else %}
+
+        <p>(als clusters in gebruik worden genomen dan volgt voor elk cluster een eigen planning hier onder)</p>
+
+    {% endif %}
 
 {% endblock %}
 

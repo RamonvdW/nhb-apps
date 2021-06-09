@@ -69,15 +69,15 @@ class ScoresRegioView(UserPassesTestMixin, TemplateView):
                       .select_related('plan')
                       .prefetch_related('plan__wedstrijden')
                       .filter(deelcompetitie=deelcomp)):
-            if not ronde.is_voor_import_oude_programma():
-                for wedstrijd in ronde.plan.wedstrijden.all():
-                    wedstrijd_pks.append(wedstrijd.pk)
-                    beschrijving = ronde.beschrijving
-                    if not beschrijving and ronde.cluster:
-                        beschrijving = ronde.cluster.naam
-                    if not beschrijving:
-                        beschrijving = "?? (ronde)"
-                    wedstrijd2beschrijving[wedstrijd.pk] = "%s - %s" % (comp_str, beschrijving)
+            for wedstrijd in ronde.plan.wedstrijden.all():
+                wedstrijd_pks.append(wedstrijd.pk)
+                beschrijving = ronde.beschrijving
+                if not beschrijving and ronde.cluster:
+                    beschrijving = ronde.cluster.naam
+                if not beschrijving:
+                    beschrijving = "?? (ronde)"
+                wedstrijd2beschrijving[wedstrijd.pk] = "%s - %s" % (comp_str, beschrijving)
+            # for
         # for
 
         wedstrijden = (CompetitieWedstrijd

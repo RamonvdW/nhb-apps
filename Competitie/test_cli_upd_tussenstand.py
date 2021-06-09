@@ -82,50 +82,6 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
         # maak nog een wedstrijd aan - die blijft zonder uitslag
         self.client.post(self.url_planning_regio_ronde % ronde.pk, {})
 
-    def _maak_import(self, aantal=5):
-        # wissel naar RCL functie
-        self.e2e_login_and_pass_otp(self.account_bb)
-        self.e2e_wissel_naar_functie(self.deelcomp_r101.functie)
-        self.e2e_check_rol('RCL')
-
-        # maak er een paar rondes bij voor geïmporteerde uitslagen, elk met 1 wedstrijd
-        for _ in range(aantal):
-            self.client.post(self.url_planning_regio % self.deelcomp_r101.pk)
-
-        top_pk = DeelcompetitieRonde.objects.latest('pk').pk - aantal
-
-        for nr in range(aantal):
-            # maak een wedstrijd aan (doen voordat de beschrijving aangepast wordt)
-            with self.assert_max_queries(20):
-                resp = self.client.post(self.url_planning_regio_ronde % (top_pk + nr + 1), {})
-            self.assertTrue(resp.status_code < 400)
-        # for
-
-        # programma moet sorteren op weeknummer van de ronde
-        hussel = (1, 3, 5, 2, 4, 7, 6)
-        for volgnr in range(aantal):
-            nr = hussel[volgnr]
-
-            ronde = DeelcompetitieRonde.objects.get(pk=top_pk + nr)
-
-            # wedstrijduitslag aanmaken
-            wedstrijd = ronde.plan.wedstrijden.all()[0]
-            with self.assert_max_queries(20):
-                resp = self.client.get(self.url_uitslag_invoeren % wedstrijd.pk)
-            self.assertTrue(resp.status_code < 400)
-
-            week_nr = 37 + nr*4
-            if week_nr > 52:
-                week_nr -= 52
-
-            ronde.beschrijving = 'Ronde %s oude programma' % nr
-            ronde.week_nr = week_nr
-            ronde.save()
-
-            wedstrijd = CompetitieWedstrijd.objects.get(pk=wedstrijd.pk)
-            self.uitslagen.append(wedstrijd.uitslag)
-        # for
-
     def _maak_leden_aan(self):
         lid = NhbLid()
         lid.nhb_nr = 100001
@@ -251,7 +207,7 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
         self.url_planning_regio = '/bondscompetities/planning/regio/%s/'                  # deelcomp_pk
         self.url_planning_regio_ronde = '/bondscompetities/planning/regio/ronde/%s/'      # ronde_pk
         self.url_uitslag_invoeren = '/bondscompetities/scores/uitslag-invoeren/%s/'       # wedstrijd_pk
-        self.url_inschrijven = '/vereniging/leden-aanmelden/competitie/%s/'         # comp_pk       # TODO: ongewenste dependency op Vereniging
+        self.url_inschrijven = '/vereniging/leden-aanmelden/competitie/%s/'               # comp_pk       # TODO: ongewenste dependency op Vereniging
 
         # deze test is afhankelijk van de standaard regio's
         self.regio_101 = NhbRegio.objects.get(regio_nr=101)
@@ -327,21 +283,15 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
         self.assertTrue('Scores voor 1 schuttersboog bijgewerkt' in f2.getvalue())
 
         deelnemer = RegioCompetitieSchutterBoog.objects.get(schutterboog=self.schutterboog_100001)
-        self.assertEqual(deelnemer.score1, 0)
-        self.assertEqual(deelnemer.score7, 0)
-        self.assertEqual(deelnemer.totaal, 0)
-        self.assertEqual(deelnemer.aantal_scores, 0)
+        self.assertEqual(deelnemer.score1, 123)
+        self.assertEqual(deelnemer.score2, 124)
+        self.assertEqual(deelnemer.score3, 0)
+        self.assertEqual(deelnemer.totaal, 247)
+        self.assertEqual(deelnemer.aantal_scores, 2)
         self.assertEqual(deelnemer.laagste_score_nr, 0)
-        self.assertEqual(deelnemer.gemiddelde, 0.0)
-        self.assertEqual(deelnemer.alt_score1, 123)
-        self.assertEqual(deelnemer.alt_score2, 124)
-        self.assertEqual(deelnemer.alt_score3, 0)
-        self.assertEqual(deelnemer.alt_totaal, 247)
-        self.assertEqual(deelnemer.alt_aantal_scores, 2)
-        self.assertEqual(deelnemer.alt_laagste_score_nr, 0)
-        self.assertEqual(str(deelnemer.alt_gemiddelde), '4.117')
+        self.assertEqual(str(deelnemer.gemiddelde), '4.117')
+
         # print('scores: %s %s %s %s %s %s %s, laagste_nr=%s, totaal=%s, gem=%s' % (deelnemer.score1, deelnemer.score2, deelnemer.score3, deelnemer.score4, deelnemer.score5, deelnemer.score6, deelnemer.score7, deelnemer.laagste_score_nr, deelnemer.totaal, deelnemer.gemiddelde))
-        # print('alt_scores: %s %s %s %s %s %s %s, alt_laagste_nr=%s, alt_totaal=%s, alt_gem=%s' % (deelnemer.alt_score1, deelnemer.alt_score2, deelnemer.alt_score3, deelnemer.alt_score4, deelnemer.alt_score5, deelnemer.alt_score6, deelnemer.alt_score7, deelnemer.alt_laagste_score_nr, deelnemer.alt_totaal, deelnemer.alt_gemiddelde))
 
         # nog een keer - nu wordt er niets bijgewerkt omdat er geen nieuwe scores zijn
         f1 = io.StringIO()
@@ -378,20 +328,12 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
 
         deelnemer = RegioCompetitieSchutterBoog.objects.get(schutterboog=self.schutterboog_100001)
         # print('scores: %s %s %s %s %s %s %s, laagste_nr=%s, totaal=%s, gem=%s' % (deelnemer.score1, deelnemer.score2, deelnemer.score3, deelnemer.score4, deelnemer.score5, deelnemer.score6, deelnemer.score7, deelnemer.laagste_score_nr, deelnemer.totaal, deelnemer.gemiddelde))
-        # print('alt_scores: %s %s %s %s %s %s %s, alt_laagste_nr=%s, alt_totaal=%s, alt_gem=%s' % (deelnemer.alt_score1, deelnemer.alt_score2, deelnemer.alt_score3, deelnemer.alt_score4, deelnemer.alt_score5, deelnemer.alt_score6, deelnemer.alt_score7, deelnemer.alt_laagste_score_nr, deelnemer.alt_totaal, deelnemer.alt_gemiddelde))
-        self.assertEqual(deelnemer.score1, 0)
-        self.assertEqual(deelnemer.score7, 0)
-        self.assertEqual(deelnemer.totaal, 0)
-        self.assertEqual(deelnemer.aantal_scores, 0)
-        self.assertEqual(deelnemer.laagste_score_nr, 0)
-        self.assertEqual(deelnemer.gemiddelde, 0.0)
-        self.assertEqual(deelnemer.alt_score1, 123)
-        self.assertEqual(deelnemer.alt_score6, 128)
-        self.assertEqual(deelnemer.alt_score7, 129)
-        self.assertEqual(deelnemer.alt_totaal, 759)           # som van 124..129 (123 is de laagste)
-        self.assertEqual(deelnemer.alt_aantal_scores, 7)
-        self.assertEqual(deelnemer.alt_laagste_score_nr, 1)   # eerste score is de laagste
-        self.assertEqual(str(deelnemer.alt_gemiddelde), '4.217')
+        self.assertEqual(deelnemer.score1, 123)
+        self.assertEqual(deelnemer.score7, 129)
+        self.assertEqual(deelnemer.totaal, 759)
+        self.assertEqual(deelnemer.aantal_scores, 7)
+        self.assertEqual(deelnemer.laagste_score_nr, 1)
+        self.assertEqual(str(deelnemer.gemiddelde), '4.217')
 
         # verwijder een schutter uit een uitslag door de score op VERWIJDERD te zetten
         score = ScoreHist.objects.latest('pk').score
@@ -413,99 +355,19 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
 
         deelnemer = RegioCompetitieSchutterBoog.objects.get(schutterboog=self.schutterboog_100001)
         # print('scores: %s %s %s %s %s %s %s, laagste_nr=%s, totaal=%s, gem=%s' % (deelnemer.score1, deelnemer.score2, deelnemer.score3, deelnemer.score4, deelnemer.score5, deelnemer.score6, deelnemer.score7, deelnemer.laagste_score_nr, deelnemer.totaal, deelnemer.gemiddelde))
-        # print('alt_scores: %s %s %s %s %s %s %s, alt_laagste_nr=%s, alt_totaal=%s, alt_gem=%s' % (deelnemer.alt_score1, deelnemer.alt_score2, deelnemer.alt_score3, deelnemer.alt_score4, deelnemer.alt_score5, deelnemer.alt_score6, deelnemer.alt_score7, deelnemer.alt_laagste_score_nr, deelnemer.alt_totaal, deelnemer.alt_gemiddelde))
-        self.assertEqual(deelnemer.score1, 0)
+        self.assertEqual(deelnemer.score1, 123)
+        self.assertEqual(deelnemer.score6, 128)
         self.assertEqual(deelnemer.score7, 0)
-        self.assertEqual(deelnemer.totaal, 0)
-        self.assertEqual(deelnemer.aantal_scores, 0)
+        self.assertEqual(deelnemer.totaal, 753)
+        self.assertEqual(deelnemer.aantal_scores, 6)
         self.assertEqual(deelnemer.laagste_score_nr, 0)
-        self.assertEqual(deelnemer.gemiddelde, 0.0)
-        self.assertEqual(deelnemer.alt_score1, 123)
-        self.assertEqual(deelnemer.alt_score6, 128)
-        self.assertEqual(deelnemer.alt_score7, 0)
-        self.assertEqual(deelnemer.alt_totaal, 753)           # som van 123..128 (6 scores)
-        self.assertEqual(deelnemer.alt_aantal_scores, 6)
-        self.assertEqual(deelnemer.alt_laagste_score_nr, 0)   # geen schrap-score
-        self.assertEqual(str(deelnemer.alt_gemiddelde), '4.183')
-
-    def test_mix(self):
-        self._maak_import()     # 5 nieuwe rondes: 7..11
-
-        # maak een paar score + scorehist
-        self._score_opslaan(self.uitslagen[0], self.schutterboog_100001, 123)
-        self._score_opslaan(self.uitslagen[1], self.schutterboog_100001, 124)
-        self._score_opslaan(self.uitslagen[7], self.schutterboog_100001, 125)       # import
-        self._score_opslaan(self.uitslagen[8], self.schutterboog_100001, 126)       # import
-        self._score_opslaan(self.uitslagen[9], self.schutterboog_100001, 137)       # import
-        self._score_opslaan(self.uitslagen[5], self.schutterboog_100001, 128)
-        self._score_opslaan(self.uitslagen[6], self.schutterboog_100001, 129)
-        f1 = io.StringIO()
-        f2 = io.StringIO()
-        with self.assert_max_queries(175):
-            management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
-        # print("f1: %s" % f1.getvalue())
-        # print("f2: %s" % f2.getvalue())
-        self.assertTrue('Scores voor 1 schuttersboog bijgewerkt' in f2.getvalue())
-
-        deelnemer = RegioCompetitieSchutterBoog.objects.get(schutterboog=self.schutterboog_100001)
-        # print('scores: %s %s %s %s %s %s %s, laagste_nr=%s, totaal=%s, gem=%s' % (deelnemer.score1, deelnemer.score2, deelnemer.score3, deelnemer.score4, deelnemer.score5, deelnemer.score6, deelnemer.score7, deelnemer.laagste_score_nr, deelnemer.totaal, deelnemer.gemiddelde))
-        # print('alt_scores: %s %s %s %s %s %s %s, alt_laagste_nr=%s, alt_totaal=%s, alt_gem=%s' % (deelnemer.alt_score1, deelnemer.alt_score2, deelnemer.alt_score3, deelnemer.alt_score4, deelnemer.alt_score5, deelnemer.alt_score6, deelnemer.alt_score7, deelnemer.alt_laagste_score_nr, deelnemer.alt_totaal, deelnemer.alt_gemiddelde))
-        self.assertEqual(deelnemer.score1, 125)
-        self.assertEqual(deelnemer.score2, 126)
-        self.assertEqual(deelnemer.score3, 137)
-        self.assertEqual(deelnemer.score7, 0)
-        self.assertEqual(deelnemer.totaal, 388)
-        self.assertEqual(deelnemer.aantal_scores, 3)
-        self.assertEqual(deelnemer.laagste_score_nr, 0)
-        self.assertEqual(str(deelnemer.gemiddelde), '4.311')
-        self.assertEqual(deelnemer.alt_score1, 123)
-        self.assertEqual(deelnemer.alt_score4, 129)
-        self.assertEqual(deelnemer.alt_totaal, 504)
-        self.assertEqual(deelnemer.alt_aantal_scores, 4)
-        self.assertEqual(deelnemer.alt_laagste_score_nr, 0)
-        self.assertEqual(str(deelnemer.alt_gemiddelde), '4.200')
-
-    def test_import(self):
-        # verwijder bestaande rondes zodat er alleen import komt
-        DeelcompetitieRonde.objects.all().delete()
-        self.uitslagen = list()
-
-        self._maak_import()     # 5 nieuwe rondes: 7..11
-
-        # maak een paar score + scorehist
-        self._score_opslaan(self.uitslagen[0], self.schutterboog_100001, 125)       # import
-        self._score_opslaan(self.uitslagen[1], self.schutterboog_100001, 126)       # import
-        self._score_opslaan(self.uitslagen[2], self.schutterboog_100001, 137)       # import
-        f1 = io.StringIO()
-        f2 = io.StringIO()
-        with self.assert_max_queries(165):
-            management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
-        # print("f1: %s" % f1.getvalue())
-        # print("f2: %s" % f2.getvalue())
-        self.assertTrue('Scores voor 1 schuttersboog bijgewerkt' in f2.getvalue())
-
-        deelnemer = RegioCompetitieSchutterBoog.objects.get(schutterboog=self.schutterboog_100001)
-        # print('scores: %s %s %s %s %s %s %s, laagste_nr=%s, totaal=%s, gem=%s' % (deelnemer.score1, deelnemer.score2, deelnemer.score3, deelnemer.score4, deelnemer.score5, deelnemer.score6, deelnemer.score7, deelnemer.laagste_score_nr, deelnemer.totaal, deelnemer.gemiddelde))
-        # print('alt_scores: %s %s %s %s %s %s %s, alt_laagste_nr=%s, alt_totaal=%s, alt_gem=%s' % (deelnemer.alt_score1, deelnemer.alt_score2, deelnemer.alt_score3, deelnemer.alt_score4, deelnemer.alt_score5, deelnemer.alt_score6, deelnemer.alt_score7, deelnemer.alt_laagste_score_nr, deelnemer.alt_totaal, deelnemer.alt_gemiddelde))
-        self.assertEqual(deelnemer.score1, 125)
-        self.assertEqual(deelnemer.score2, 126)
-        self.assertEqual(deelnemer.score3, 137)
-        self.assertEqual(deelnemer.score7, 0)
-        self.assertEqual(deelnemer.totaal, 388)
-        self.assertEqual(deelnemer.laagste_score_nr, 0)
-        self.assertEqual(str(deelnemer.gemiddelde), '4.311')
-        self.assertEqual(deelnemer.alt_score1, 0)
-        self.assertEqual(deelnemer.alt_totaal, 0)
-        self.assertEqual(deelnemer.alt_laagste_score_nr, 0)
-        self.assertEqual(str(deelnemer.alt_gemiddelde), '0.000')
+        self.assertEqual(str(deelnemer.gemiddelde), '4.183')
 
     def test_verplaats(self):
         # check het verplaatsen van een schutter uit klasse onbekend
 
         deelnemer = RegioCompetitieSchutterBoog.objects.filter(schutterboog=self.schutterboog_100001)[0]
         self.assertTrue(deelnemer.klasse.indiv.is_onbekend)
-
-        self._maak_import()     # 5 nieuwe rondes: 7..11
 
         # 100001: 4 scores, gebruik eerste 3
         # 100002: nog maar 2 scores
@@ -540,24 +402,25 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
         deelnemer.save()
 
         # maak een paar score + scorehist
-        self._score_opslaan(self.uitslagen[7], self.schutterboog_100001, 123)
-        self._score_opslaan(self.uitslagen[8], self.schutterboog_100001, 124)
-        self._score_opslaan(self.uitslagen[10], self.schutterboog_100001, 128)
-        self._score_opslaan(self.uitslagen[11], self.schutterboog_100001, 120)
+        self._score_opslaan(self.uitslagen[0], self.schutterboog_100001, 123)
+        self._score_opslaan(self.uitslagen[1], self.schutterboog_100001, 124)
+        self._score_opslaan(self.uitslagen[3], self.schutterboog_100001, 128)
+        self._score_opslaan(self.uitslagen[4], self.schutterboog_100001, 120)
 
-        self._score_opslaan(self.uitslagen[7], self.schutterboog_100002, 123)
-        self._score_opslaan(self.uitslagen[9], self.schutterboog_100002, 124)
+        self._score_opslaan(self.uitslagen[0], self.schutterboog_100002, 123)
+        self._score_opslaan(self.uitslagen[2], self.schutterboog_100002, 124)
 
-        self._score_opslaan(self.uitslagen[7], self.schutterboog_100004, 123)
-        self._score_opslaan(self.uitslagen[9], self.schutterboog_100004, 124)
-        self._score_opslaan(self.uitslagen[10], self.schutterboog_100004, 128)
+        self._score_opslaan(self.uitslagen[0], self.schutterboog_100004, 123)
+        self._score_opslaan(self.uitslagen[2], self.schutterboog_100004, 124)
+        self._score_opslaan(self.uitslagen[3], self.schutterboog_100004, 128)
 
-        self._score_opslaan(self.uitslagen[11], self.schutterboog_100005, 128)
+        self._score_opslaan(self.uitslagen[4], self.schutterboog_100005, 128)
 
         f1 = io.StringIO()
         f2 = io.StringIO()
         with self.assert_max_queries(185):
             management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
+        # print("f2: %s" % f2.getvalue())
         self.assertTrue('[INFO] Verplaats 100001 (18m) met nieuw AG 4.167 naar klasse Recurve klasse' in f2.getvalue())
 
     def test_verplaats_zeven(self):
@@ -566,24 +429,21 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
         deelnemer = RegioCompetitieSchutterBoog.objects.filter(schutterboog=self.schutterboog_100001)[0]
         self.assertTrue(deelnemer.klasse.indiv.is_onbekend)
 
-        self._maak_import(aantal=7)     # 7 nieuwe rondes: 7..13
-
         # 100001: 7 scores, gebruik eerste 3 voor bepalen AG voor overstap
-
-        self._score_opslaan(self.uitslagen[7], self.schutterboog_100001, 123)
-        self._score_opslaan(self.uitslagen[8], self.schutterboog_100001, 124)
-        self._score_opslaan(self.uitslagen[9], self.schutterboog_100001, 125)
-        self._score_opslaan(self.uitslagen[10], self.schutterboog_100001, 122)
-        self._score_opslaan(self.uitslagen[11], self.schutterboog_100001, 121)
-        self._score_opslaan(self.uitslagen[12], self.schutterboog_100001, 129)
-        self._score_opslaan(self.uitslagen[13], self.schutterboog_100001, 128)
+        self._score_opslaan(self.uitslagen[0], self.schutterboog_100001, 123)
+        self._score_opslaan(self.uitslagen[1], self.schutterboog_100001, 124)
+        self._score_opslaan(self.uitslagen[2], self.schutterboog_100001, 125)
+        self._score_opslaan(self.uitslagen[3], self.schutterboog_100001, 122)
+        self._score_opslaan(self.uitslagen[4], self.schutterboog_100001, 121)
+        self._score_opslaan(self.uitslagen[5], self.schutterboog_100001, 129)
+        self._score_opslaan(self.uitslagen[6], self.schutterboog_100001, 128)
 
         f1 = io.StringIO()
         f2 = io.StringIO()
         with self.assert_max_queries(180):
             management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
         # print("f2: %s" % f2.getvalue())
-        self.assertTrue('[INFO] Verplaats 100001 (18m) met nieuw AG 4.100 naar klasse Recurve klasse' in f2.getvalue())
+        self.assertTrue('[INFO] Verplaats 100001 (18m) met nieuw AG 4.133 naar klasse Recurve klasse' in f2.getvalue())
 
     def test_overstap(self):
         # test schutters die overstappen naar een andere vereniging
@@ -656,7 +516,7 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
         self._score_opslaan(self.uitslagen[2], self.schutterboog_100001, 124)
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(160):
+        with self.assert_max_queries(155):
             management.call_command('regiocomp_upd_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
         self.assertTrue('Scores voor 1 schuttersboog bijgewerkt' in f2.getvalue())
 

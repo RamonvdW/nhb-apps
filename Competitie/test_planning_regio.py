@@ -977,26 +977,25 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         self.assert403(resp)
 
     def test_maak_10_rondes(self):
-        # er moeten 10 rondes aangemaakt worden
-        # de geïmporteerde rondes niet meegerekend
-        # maak de rondes aan voor de import van het oude programma
-        self.assertEqual(DeelcompetitieRonde.objects.count(), 0)
-        self._maak_import(7)        # logt in als BB en wisselt naar RCL 18m
-        self.assertEqual(DeelcompetitieRonde.objects.count(), 7)
+        # wissel naar RCL functie
+        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_wissel_naar_functie(self.deelcomp_regio101_18.functie)
+        self.e2e_check_rol('RCL')
 
-        # maak nu 10 'handmatige' rondes aan
+        # maak 10 'handmatige' rondes aan
+        self.assertEqual(DeelcompetitieRonde.objects.count(), 0)
         for _ in range(10):
             with self.assert_max_queries(20):
                 resp = self.client.post(self.url_planning_regio % self.deelcomp_regio101_18.pk)
             self.assert_is_redirect_not_plein(resp)  # check for success
         # for
-        self.assertEqual(DeelcompetitieRonde.objects.count(), 7 + 10)
+        self.assertEqual(DeelcompetitieRonde.objects.count(), 10)
 
         # controleer dat de 11e ronde niet aangemaakt mag worden
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_planning_regio % self.deelcomp_regio101_18.pk)
         self.assert_is_redirect_not_plein(resp)  # check for success
-        self.assertEqual(DeelcompetitieRonde.objects.count(), 7 + 10)
+        self.assertEqual(DeelcompetitieRonde.objects.count(), 10)
 
     def test_rcl_maakt_cluster_planning(self):
         self.e2e_login_and_pass_otp(self.account_rcl101_18)
@@ -1559,133 +1558,6 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         inschrijving.save()
 
         self.assertTrue(str(inschrijving) != "")
-
-    def _maak_import(self, aantal):
-        # wissel naar RCL functie
-        self.e2e_login_and_pass_otp(self.account_bb)
-        self.e2e_wissel_naar_functie(self.deelcomp_regio101_18.functie)
-        self.e2e_check_rol('RCL')
-
-        # maak er een paar rondes bij voor geïmporteerde uitslagen, elk met 1 wedstrijd
-        for ronde in range(aantal):
-            self.client.post(self.url_planning_regio % self.deelcomp_regio101_18.pk)
-
-        top_pk = DeelcompetitieRonde.objects.latest('pk').pk - aantal
-
-        for nr in range(aantal):
-            top_pk += 1
-
-            # maak een wedstrijd aan (doen voordat de beschrijving aangepast wordt)
-            with self.assert_max_queries(20):
-                resp = self.client.post(self.url_planning_regio_ronde % top_pk, {})
-            self.assertTrue(resp.status_code < 400)
-
-            ronde = DeelcompetitieRonde.objects.get(pk=top_pk)
-
-            # wedstrijduitslag aanmaken
-            wedstrijd = ronde.plan.wedstrijden.all()[0]
-            with self.assert_max_queries(20):
-                resp = self.client.get(self.url_score_invoeren % wedstrijd.pk)
-            self.assertTrue(resp.status_code < 400)
-
-            ronde.beschrijving = 'Ronde %s oude programma' % (nr + 1)
-            ronde.save()
-
-            wedstrijd = CompetitieWedstrijd.objects.get(pk=wedstrijd.pk)
-            # self.uitslagen.append(wedstrijd.uitslag)
-
-            score = Score(afstand_meter=18,
-                          schutterboog=self.schutterboog,
-                          waarde=123)
-            score.save()
-
-            wedstrijd.uitslag.scores.add(score)
-        # for
-
-    def test_met_import(self):
-        # maak een paar rondes + wedstrijd aan voor de geïmporteerde uitslag
-        self._maak_import(3)
-
-        self.e2e_login_and_pass_otp(self.account_bb)
-        self.e2e_wisselnaarrol_bb()
-
-        # haal de rayon planning op
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_planning_rayon % self.deelcomp_rayon1_18.pk)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/planning-rayon.dtl', 'plein/site_layout.dtl'))
-
-        # haal de regio planning op
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_planning_regio % self.deelcomp_regio101_18.pk)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/planning-regio.dtl', 'plein/site_layout.dtl'))
-
-        # haal de ronde planning op
-        ronde_import = DeelcompetitieRonde.objects.filter(deelcompetitie=self.deelcomp_regio101_18).all()[0]
-        ronde_pk = ronde_import.pk
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_planning_regio_ronde % ronde_pk)
-        self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/planning-regio-ronde.dtl', 'plein/site_layout.dtl'))
-
-        # wissel naar RCL rol
-        self.e2e_wissel_naar_functie(self.functie_rcl101_18)
-
-        # haal de ronde planning op
-        ronde_pk = ronde_import.pk
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_planning_regio_ronde % ronde_pk)
-        self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/planning-regio-ronde.dtl', 'plein/site_layout.dtl'))
-
-        # ronde naam veranderen (mag niet)
-        with self.assert_max_queries(20):
-            resp = self.client.post(self.url_planning_regio_ronde % ronde_pk,
-                                    {'ronde_week_nr': 50, 'ronde_naam': 'maak niet uit'})
-        self.assert_is_redirect_not_plein(resp)  # check for success
-
-        # maak een ronde aan
-        with self.assert_max_queries(20):
-            resp = self.client.post(self.url_planning_regio % self.deelcomp_regio101_18.pk)
-        self.assert_is_redirect_not_plein(resp)  # check for success
-        ronde = DeelcompetitieRonde.objects.latest('pk')
-
-        # haal de ronde planning op
-        ronde_pk = ronde.pk
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_planning_regio_ronde % ronde_pk)
-        self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/planning-regio-ronde.dtl', 'plein/site_layout.dtl'))
-
-        # ronde naam veranderen in import-ronde (mag niet)
-        with self.assert_max_queries(20):
-            resp = self.client.post(self.url_planning_regio_ronde % ronde_pk,
-                                    {'ronde_week_nr': 50,
-                                     'ronde_naam': 'Ronde 9 oude programma'})
-        self.assert_is_redirect_not_plein(resp)  # check for success
-
-        # wedstrijd toevoegen aan import-ronde (mag niet)
-        with self.assert_max_queries(20):
-            resp = self.client.post(self.url_planning_regio_ronde % ronde_import.pk, {})
-        self.assert403(resp)
-
-        # wijzig een geïmporteerde wedstrijd (mag niet)
-        wedstrijd = ronde_import.plan.wedstrijden.all()[0]
-        url = self.url_wijzig_wedstrijd % wedstrijd.pk
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert403(resp)
-
-        # aanpassen mag ook niet
-        with self.assert_max_queries(20):
-            resp = self.client.post(url)
-        self.assert403(resp)
 
     def test_buiten_eigen_regio(self):
         # RCL probeert wedstrijd toe te voegen en wijzigen buiten eigen regio

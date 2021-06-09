@@ -696,17 +696,12 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
 
-        # converteer de enige ronde naar een import ronde
-        ronde_oud = DeelcompetitieRonde.objects.filter(deelcompetitie=deelcomp)[0]
-        ronde_oud.beschrijving = "Ronde 42 oude programma"
-        ronde_oud.save()
-
         # haal de planning op (maakt opnieuw een ronde aan)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
 
-        ronde_pk = DeelcompetitieRonde.objects.exclude(pk=ronde_oud.pk).filter(deelcompetitie=deelcomp)[0].pk
+        ronde_pk = DeelcompetitieRonde.objects.filter(deelcompetitie=deelcomp)[0].pk
 
         # haal de ronde planning op
         url_ronde = self.url_planning_regio_ronde_methode1 % ronde_pk

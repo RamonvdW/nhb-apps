@@ -234,14 +234,6 @@ urlpatterns = [
          views_uitslagen.UitslagenRegioView.as_view(),
          name='uitslagen-regio'),
 
-    path('<comp_pk>/uitslagen/<comp_boog>/<zes_scores>/regio-alt/<regio_nr>/',
-         views_uitslagen.UitslagenRegioAltView.as_view(),
-         name='uitslagen-regio-n-alt'),
-
-    path('<comp_pk>/uitslagen/<comp_boog>/<zes_scores>/regio-alt/',
-         views_uitslagen.UitslagenRegioAltView.as_view(),
-         name='uitslagen-regio-alt'),
-
     path('<comp_pk>/uitslagen/<comp_boog>/rayon/',
          views_uitslagen.UitslagenRayonView.as_view(),
          name='uitslagen-rayon'),
