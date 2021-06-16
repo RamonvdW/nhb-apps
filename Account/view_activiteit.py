@@ -39,6 +39,7 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.rol_nu = Rollen.ROL_NONE
+        self.sort_level = {'BKO': 10000, 'RKO': 500, 'RCL': 40, 'SEC': 3, 'HWL': 2, 'WL': 1}
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -93,58 +94,91 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
         for functie in (Functie
                         .objects
                         .prefetch_related('accounts',
+                                          'accounts__vhpg',
                                           'accounts__accountemail_set')
                         .annotate(aantal=Count('accounts'))
                         .filter(aantal__gt=0)):
             for account in functie.accounts.all():
-                if not account.otp_is_actief:
-                    if account.pk not in account_pks:
-                        account_pks.append(account.pk)
-            # for
-        # for
-        context['hulp'] = hulp = (Account
-                                  .objects
-                                  .prefetch_related('vhpg',
-                                                    'functie_set')
-                                  .filter(pk__in=account_pks)
-                                  .order_by('last_login',
-                                            'unaccented_naam'))
-        for account in hulp:
-            account.vhpg_str = 'Nog niet'
-            account.tweede_factor_str = 'Nog niet'
+                add = False
 
-            if account.vhpg.count() > 0:
-                vhpg = account.vhpg.all()[0]
-                if vhpg:
+                if account.vhpg.count() > 0:
+                    vhpg = account.vhpg.all()[0]
                     # elke 11 maanden moet de verklaring afgelegd worden
                     # dit is ongeveer (11/12)*365 == 365-31 = 334 dagen
                     opnieuw = vhpg.acceptatie_datum + datetime.timedelta(days=334)
                     now = timezone.now()
                     if opnieuw < now:
-                        account.vhpg_str = 'Verlopen'
-                    else:
-                        account.vhpg_str = 'Geaccepteerd'
+                        add = True
+                else:
+                    add = True
+
+                if not account.otp_is_actief:
+                    add = True
+
+                if add:
+                    if account.pk not in account_pks:
+                        account_pks.append(account.pk)
+            # for
+        # for
+
+        hulp = list()
+        for account in (Account
+                        .objects
+                        .prefetch_related('vhpg',
+                                          'functie_set')
+                        .filter(pk__in=account_pks)
+                        .order_by('last_login',
+                                  'unaccented_naam')):
+
+            if account.vhpg.count() > 0:
+                vhpg = account.vhpg.all()[0]
+
+                # elke 11 maanden moet de verklaring afgelegd worden
+                # dit is ongeveer (11/12)*365 == 365-31 = 334 dagen
+                opnieuw = vhpg.acceptatie_datum + datetime.timedelta(days=334)
+                now = timezone.now()
+                if opnieuw < now:
+                    account.vhpg_str = 'Verlopen'
+                else:
+                    account.vhpg_str = 'Ja'
+            else:
+                account.vhpg_str = 'Nee'
 
             if account.otp_is_actief:
-                account.tweede_factor_str = 'Gekoppeld'
+                account.tweede_factor_str = 'Ja'
             else:
-                account.tweede_factor_str = 'Niet gekoppeld'
+                account.tweede_factor_str = 'Nee'
 
-            sort_level = {'BKO': 1, 'RKO': 2, 'RCL': 3, 'SEC': 4, 'HWL': 5, 'WL': 6}
+            totaal_level = 0
             functies = list()
             for functie in account.functie_set.all():
-                tup = (sort_level[functie.rol], functie.rol)
+                level = self.sort_level[functie.rol]
+                tup = (level, functie.rol)
                 functies.append(tup)
+                totaal_level += level
             # for
-            functies.sort()
+            functies.sort(reverse=True)
             account.functies_str = ", ".join([tup[1] for tup in functies])
+
+            tup = (totaal_level, account.pk, account)
+            hulp.append(tup)
         # for
+
+        hulp.sort(reverse=True)
+        context['hulp'] = [tup[2] for tup in hulp]
 
         # zoekformulier
         context['zoek_url'] = reverse('Account:activiteit')
         context['zoekform'] = form = ZoekAccountForm(self.request.GET)
         form.full_clean()   # vult form.cleaned_data
-        context['zoekterm'] = zoekterm = form.cleaned_data['zoekterm']
+
+        try:
+            zoekterm = form.cleaned_data['zoekterm']
+        except KeyError:
+            # hier komen we als het form field niet valide was, bijvoorbeeld veel te lang
+            zoekterm = ""
+        context['zoekterm'] = zoekterm
+
         leden = list()
         if len(zoekterm) >= 2:  # minimaal twee tekens van de naam/nummer
             try:
@@ -179,36 +213,36 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
                 account = lid.account
                 lid.inlog_naam_str = account.username
 
-                lid.email_is_bevestigd_str = 'Nee'
-
                 email = account.accountemail_set.all()[0]
                 if email.email_is_bevestigd:
                     lid.email_is_bevestigd_str = 'Ja'
+                else:
+                    lid.email_is_bevestigd_str = 'Nee'
 
                 do_vhpg = True
                 if account.otp_is_actief:
-                    lid.tweede_factor_str = 'Gekoppeld'
+                    lid.tweede_factor_str = 'Ja'
                 elif account.functie_set.count() == 0:
-                    lid.tweede_factor_str = 'Niet nodig'
+                    lid.tweede_factor_str = 'n.v.t.'
                     do_vhpg = False
                 else:
-                    lid.tweede_factor_str = 'Nog niet gekoppeld'
+                    lid.tweede_factor_str = 'Nee'
 
                 if do_vhpg:
-                    lid.vhpg_str = 'Nog niet geaccepteerd'
+                    lid.vhpg_str = 'Nee'
                     if account.vhpg.count() > 0:
                         vhpg = account.vhpg.all()[0]
-                        if vhpg:
-                            # elke 11 maanden moet de verklaring afgelegd worden
-                            # dit is ongeveer (11/12)*365 == 365-31 = 334 dagen
-                            opnieuw = vhpg.acceptatie_datum + datetime.timedelta(days=334)
-                            now = timezone.now()
-                            if opnieuw < now:
-                                lid.vhpg_str = 'Verlopen (geaccepteerd op %s)' % localize(vhpg.acceptatie_datum)
-                            else:
-                                lid.vhpg_str = 'Geaccepteerd op %s' % localize(vhpg.acceptatie_datum)
+
+                        # elke 11 maanden moet de verklaring afgelegd worden
+                        # dit is ongeveer (11/12)*365 == 365-31 = 334 dagen
+                        opnieuw = vhpg.acceptatie_datum + datetime.timedelta(days=334)
+                        now = timezone.now()
+                        if opnieuw < now:
+                            lid.vhpg_str = 'Verlopen (geaccepteerd op %s)' % localize(vhpg.acceptatie_datum)
+                        else:
+                            lid.vhpg_str = 'Ja (op %s)' % localize(vhpg.acceptatie_datum)
                 else:
-                    lid.vhpg_str = 'Niet nodig'
+                    lid.vhpg_str = 'n.v.t.'
 
                 lid.functies = account.functie_set.order_by('beschrijving')
         # for
@@ -220,15 +254,17 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
                       .select_related('account', 'session')
                       .order_by('account', 'session__expire_date'))
             for obj in accses:
+                # TODO: onderstaande zorgt voor losse database hits voor elke sessie
                 session = SessionStore(session_key=obj.session.session_key)
+
                 try:
                     obj.mag_wisselen_str = session[SESSIONVAR_ROL_MAG_WISSELEN]
-                except KeyError:
+                except KeyError:        # pragma: no cover
                     obj.mag_wisselen_str = '?'
 
                 try:
                     obj.laatste_rol_str = rol2url[session[SESSIONVAR_ROL_HUIDIGE]]
-                except KeyError:
+                except KeyError:        # pragma: no cover
                     obj.laatste_rol_str = '?'
             # for
             context['accses'] = accses

@@ -86,17 +86,22 @@
     <p>&nbsp;</p>
     <h5 id="hulp">Mogelijk hulp nodig</h5>
 
-    <p>De volgende accounts zijn aangemaakt en gekoppeld aan een rol, maar hebben nog geen 2FA gekoppeld of VHPG geaccepteerd.</p>
+    <p>De volgende {{ hulp|length }} accounts zijn aangemaakt en gekoppeld aan een rol, maar hebben nog geen 2FA gekoppeld of VHPG geaccepteerd.</p>
 
-    <table class="white">
+    <table class="white" id="tabel_hulp">
         <thead>
+            <tr>        <!-- filter veld -->
+                <d></d>
+                <td colspan="3" class="table-filter"><input class="table-filter" oninput="myTableFilter(this, 'tabel_hulp')" placeholder="Zoeken"/></td>
+                <td colspan="3"></td>
+            </tr>
             <tr>
-                <th>Inlog</th>
-                <th>Naam</th>
-                <th>Laatste inlog</th>
+                <th data-filter="on">Inlog</th>
+                <th data-filter="on">Naam</th>
+                <th data-filter="on">Rollen</th>
                 <th>Tweede factor</th>
                 <th>VHPG</th>
-                <th>Functies</th>
+                <th>Laatste inlog</th>
             </tr>
         </thead>
 
@@ -104,10 +109,10 @@
             <tr>
                 <td>{{ account.username }}</td>
                 <td>{{ account.volledige_naam }}</td>
-                <td>{{ account.last_login|date:"j b Y" }}</td>   <!--|date:"j b H:i"-->
+                <td>{{ account.functies_str }}</td>
                 <td>{{ account.tweede_factor_str }}</td>
                 <td>{{ account.vhpg_str }}</td>
-                <td>{{ account.functies_str }}</td>
+                <td>{{ account.last_login|date:"j b Y" }}</td>   <!--|date:"j b H:i"-->
             </tr>
         {% empty %}
             <tr>
