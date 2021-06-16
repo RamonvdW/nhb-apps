@@ -313,14 +313,18 @@ class MaakHandleiding(object):
         return total_out
 
 
-export_file = sys.argv[1]
-templates_dir = sys.argv[2]
-try:
-    debug_pagina = sys.argv[3]
-except IndexError:
-    debug_pagina = ""
+def main():
+    export_file = sys.argv[1]
+    templates_dir = sys.argv[2]
+    try:
+        debug_pagina = sys.argv[3]
+    except IndexError:
+        debug_pagina = ""
 
-MaakHandleiding(templates_dir, debug_pagina).run(export_file)
+    MaakHandleiding(templates_dir, debug_pagina).run(export_file)
+
+
+main()
 
 
 # end of file
