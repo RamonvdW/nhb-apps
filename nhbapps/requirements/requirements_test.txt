@@ -38,17 +38,17 @@ djangosaml2idp==0.7.2
     # via -r requirements_test.in
 elementpath==2.2.2
     # via xmlschema
-google-api-core==1.29.0
+google-api-core==1.30.0
     # via
     #   -r requirements.txt
     #   google-api-python-client
-google-api-python-client==2.7.0
+google-api-python-client==2.9.0
     # via -r requirements.txt
 google-auth-httplib2==0.1.0
     # via
     #   -r requirements.txt
     #   google-api-python-client
-google-auth==1.30.1
+google-auth==1.31.0
     # via
     #   -r requirements.txt
     #   google-api-core
@@ -73,7 +73,7 @@ packaging==20.9
     # via
     #   -r requirements.txt
     #   google-api-core
-protobuf==3.17.2
+protobuf==3.17.3
     # via
     #   -r requirements.txt
     #   google-api-core
@@ -155,7 +155,7 @@ urllib3==1.26.5
     # via
     #   -r requirements.txt
     #   requests
-xmlschema==1.6.2
+xmlschema==1.6.4
     # via pysaml2
 zipp==3.4.1
     # via importlib-resources
