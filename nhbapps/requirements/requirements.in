@@ -1,6 +1,6 @@
 # required pip packages
 
--c constraints.txt
+-c constraints.in
 
 # web framework
 Django
