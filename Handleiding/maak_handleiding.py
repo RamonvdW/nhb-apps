@@ -230,7 +230,7 @@ class MaakHandleiding(object):
                         self.aangemaakte_interne_links[fname].append(voor_pagina)
                     except KeyError:
                         self.aangemaakte_interne_links[fname] = [voor_pagina]
-                    temp2 = '<a class="handleiding-link" href="/handleiding/' + fname + '/">' + link + '</a>'
+                    temp2 = '<a class="btn-nhb-blauw" href="/handleiding/' + fname + '/">' + link + '</a>'      # class="handleiding-link"
 
                 line = temp1 + temp2 + temp3
                 # continue processing
