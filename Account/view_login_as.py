@@ -91,6 +91,11 @@ class LoginAsZoekView(UserPassesTestMixin, ListView):
     template_name = TEMPLATE_LOGIN_AS_ZOEK
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.form = None
+        self.zoekterm = ""
+
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         # deze functie wordt gebruikt voordat de GET of de POST afgehandeld wordt (getest bewezen)

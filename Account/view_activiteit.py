@@ -6,12 +6,19 @@
 
 from django.contrib.sessions.backends.db import SessionStore
 from django.contrib.auth.mixins import UserPassesTestMixin
-from django.views.generic import TemplateView
-from django.db.models import F
+from django.db.models.functions import Concat
 from django.utils.timezone import make_aware
-from Functie.rol import SESSIONVAR_ROL_HUIDIGE, SESSIONVAR_ROL_MAG_WISSELEN, rol2url
-from .models import Account, AccountEmail, AccountSessions
+from django.views.generic import TemplateView
+from django.utils.formats import localize
+from django.db.models import F, Q, Value, Count
+from django.utils import timezone
+from django.urls import reverse
+from Functie.models import Functie
+from Functie.rol import SESSIONVAR_ROL_HUIDIGE, SESSIONVAR_ROL_MAG_WISSELEN, rol2url, rol_get_huidige, Rollen
+from NhbStructuur.models import NhbLid
 from Plein.menu import menu_dynamics
+from .models import Account, AccountEmail, AccountSessions
+from .forms import ZoekAccountForm
 import datetime
 import logging
 
@@ -29,12 +36,17 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
     template_name = TEMPLATE_ACTIVITEIT
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu = Rollen.ROL_NONE
+
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
 
         account = self.request.user
         if account.is_authenticated:
-            if account.is_BB or account.is_staff:
+            self.rol_nu = rol_get_huidige(self.request)
+            if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_IT):
                 return True
 
         return False
@@ -76,7 +88,133 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
                                      .filter(account__last_login__lt=F('account__laatste_inlog_poging'))
                                      .order_by('-account__laatste_inlog_poging')[:50])
 
-        if self.request.user.is_staff:
+        # hulp nodig
+        account_pks = list()
+        for functie in (Functie
+                        .objects
+                        .prefetch_related('accounts',
+                                          'accounts__accountemail_set')
+                        .annotate(aantal=Count('accounts'))
+                        .filter(aantal__gt=0)):
+            for account in functie.accounts.all():
+                if not account.otp_is_actief:
+                    if account.pk not in account_pks:
+                        account_pks.append(account.pk)
+            # for
+        # for
+        context['hulp'] = hulp = (Account
+                                  .objects
+                                  .prefetch_related('vhpg',
+                                                    'functie_set')
+                                  .filter(pk__in=account_pks)
+                                  .order_by('last_login',
+                                            'unaccented_naam'))
+        for account in hulp:
+            account.vhpg_str = 'Nog niet'
+            account.tweede_factor_str = 'Nog niet'
+
+            if account.vhpg.count() > 0:
+                vhpg = account.vhpg.all()[0]
+                if vhpg:
+                    # elke 11 maanden moet de verklaring afgelegd worden
+                    # dit is ongeveer (11/12)*365 == 365-31 = 334 dagen
+                    opnieuw = vhpg.acceptatie_datum + datetime.timedelta(days=334)
+                    now = timezone.now()
+                    if opnieuw < now:
+                        account.vhpg_str = 'Verlopen'
+                    else:
+                        account.vhpg_str = 'Geaccepteerd'
+
+            if account.otp_is_actief:
+                account.tweede_factor_str = 'Gekoppeld'
+            else:
+                account.tweede_factor_str = 'Niet gekoppeld'
+
+            sort_level = {'BKO': 1, 'RKO': 2, 'RCL': 3, 'SEC': 4, 'HWL': 5, 'WL': 6}
+            functies = list()
+            for functie in account.functie_set.all():
+                tup = (sort_level[functie.rol], functie.rol)
+                functies.append(tup)
+            # for
+            functies.sort()
+            account.functies_str = ", ".join([tup[1] for tup in functies])
+        # for
+
+        # zoekformulier
+        context['zoek_url'] = reverse('Account:activiteit')
+        context['zoekform'] = form = ZoekAccountForm(self.request.GET)
+        form.full_clean()   # vult form.cleaned_data
+        context['zoekterm'] = zoekterm = form.cleaned_data['zoekterm']
+        leden = list()
+        if len(zoekterm) >= 2:  # minimaal twee tekens van de naam/nummer
+            try:
+                nhb_nr = int(zoekterm[:6])
+                lid = (NhbLid
+                       .objects
+                       .select_related('account')
+                       .prefetch_related('account__functie_set',
+                                         'account__vhpg')
+                       .get(nhb_nr=nhb_nr))
+                leden.append(lid)
+            except (ValueError, NhbLid.DoesNotExist):
+                leden = (NhbLid
+                         .objects
+                         .annotate(volledige_naam=Concat('voornaam', Value(' '), 'achternaam'))
+                         .select_related('account')
+                         .prefetch_related('account__functie_set',
+                                           'account__vhpg')
+                         .filter(Q(volledige_naam__icontains=zoekterm) |
+                                 Q(account__unaccented_naam__icontains=zoekterm))
+                         .order_by('account__unaccented_naam', 'achternaam', 'voornaam'))[:50]
+
+        context['zoek_leden'] = list(leden)
+        for lid in leden:
+            lid.nhb_nr_str = str(lid.nhb_nr)
+            lid.inlog_naam_str = 'Nog geen account aangemaakt'
+            lid.email_is_bevestigd_str = '-'
+            lid.tweede_factor_str = '-'
+            lid.vhpg_str = '-'
+
+            if lid.account:
+                account = lid.account
+                lid.inlog_naam_str = account.username
+
+                lid.email_is_bevestigd_str = 'Nee'
+
+                email = account.accountemail_set.all()[0]
+                if email.email_is_bevestigd:
+                    lid.email_is_bevestigd_str = 'Ja'
+
+                do_vhpg = True
+                if account.otp_is_actief:
+                    lid.tweede_factor_str = 'Gekoppeld'
+                elif account.functie_set.count() == 0:
+                    lid.tweede_factor_str = 'Niet nodig'
+                    do_vhpg = False
+                else:
+                    lid.tweede_factor_str = 'Nog niet gekoppeld'
+
+                if do_vhpg:
+                    lid.vhpg_str = 'Nog niet geaccepteerd'
+                    if account.vhpg.count() > 0:
+                        vhpg = account.vhpg.all()[0]
+                        if vhpg:
+                            # elke 11 maanden moet de verklaring afgelegd worden
+                            # dit is ongeveer (11/12)*365 == 365-31 = 334 dagen
+                            opnieuw = vhpg.acceptatie_datum + datetime.timedelta(days=334)
+                            now = timezone.now()
+                            if opnieuw < now:
+                                lid.vhpg_str = 'Verlopen (geaccepteerd op %s)' % localize(vhpg.acceptatie_datum)
+                            else:
+                                lid.vhpg_str = 'Geaccepteerd op %s' % localize(vhpg.acceptatie_datum)
+                else:
+                    lid.vhpg_str = 'Niet nodig'
+
+                lid.functies = account.functie_set.order_by('beschrijving')
+        # for
+
+        # toon sessies
+        if self.rol_nu == Rollen.ROL_IT:
             accses = (AccountSessions
                       .objects
                       .select_related('account', 'session')
