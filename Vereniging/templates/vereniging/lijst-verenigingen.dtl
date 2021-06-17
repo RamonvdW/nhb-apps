@@ -149,7 +149,7 @@
                             {% endif %}
                         {% endif %}
                     {% else %}
-                        <i>Geen</i>
+                        <i>Geen</i><br>
                     {% endif %}
 
                     {% if obj.buiten_locatie %}
