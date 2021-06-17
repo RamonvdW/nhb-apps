@@ -952,7 +952,10 @@ class Command(BaseCommand):
 
             # zoek ook de buitenbaan van de vereniging erbij
             try:
-                buiten_locatie = nhb_ver.wedstrijdlocatie_set.get(baan_type=BAAN_TYPE_BUITEN)
+                buiten_locatie = (nhb_ver
+                                  .wedstrijdlocatie_set
+                                  .get(baan_type=BAAN_TYPE_BUITEN,
+                                       zichtbaar=True))
             except WedstrijdLocatie.DoesNotExist:
                 # vereniging heeft geen buitenlocatie
                 pass
