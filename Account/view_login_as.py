@@ -91,6 +91,11 @@ class LoginAsZoekView(UserPassesTestMixin, ListView):
     template_name = TEMPLATE_LOGIN_AS_ZOEK
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.form = None
+        self.zoekterm = ""
+
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         # deze functie wordt gebruikt voordat de GET of de POST afgehandeld wordt (getest bewezen)
@@ -102,19 +107,23 @@ class LoginAsZoekView(UserPassesTestMixin, ListView):
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
 
-        self.form = ZoekAccountForm(self.request.GET)
-        self.form.full_clean()  # vult cleaned_data
+        self.form = form = ZoekAccountForm(self.request.GET)
+        form.full_clean()  # vult cleaned_data
 
-        zoekterm = self.form.cleaned_data['zoekterm']
-        if len(zoekterm) >= 2:  # minimaal twee tekens van de naam/nummer
-            self.zoekterm = zoekterm
-            qset = (Account
-                    .objects
-                    .exclude(is_staff=True)
-                    .filter(Q(username__icontains=zoekterm) |       # dekt zoeken op bondsnummer
-                            Q(unaccented_naam__icontains=zoekterm))
-                    .order_by('username'))
-            return qset[:50]
+        try:
+            zoekterm = form.cleaned_data['zoekterm']
+            if len(zoekterm) >= 2:  # minimaal twee tekens van de naam/nummer
+                self.zoekterm = zoekterm
+                qset = (Account
+                        .objects
+                        .exclude(is_staff=True)
+                        .filter(Q(username__icontains=zoekterm) |       # dekt zoeken op bondsnummer
+                                Q(unaccented_naam__icontains=zoekterm))
+                        .order_by('username'))
+                return qset[:50]
+        except KeyError:
+            # hier komen we als het form field bijvoorbeeld te lang was
+            pass
 
         self.zoekterm = ""
         return None

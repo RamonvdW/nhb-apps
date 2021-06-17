@@ -194,16 +194,16 @@ class ExterneLocatieDetailsView(TemplateView):
 
         data = request.POST.get('naam', '')
         if locatie.naam != data:
-            activiteit = "Aanpassing naam externe locatie: %s (was %s)" % (
-                            repr(data), repr(locatie.naam))
+            activiteit = "Aanpassing naam externe locatie van vereniging %s: %s (was %s)" % (
+                            ver, repr(data), repr(locatie.naam))
             schrijf_in_logboek(request.user, 'Accommodaties', activiteit)
             locatie.naam = data
 
         data = request.POST.get('adres', '')
         data = data.replace('\r\n', '\n')
         if locatie.adres != data:
-            activiteit = "Aanpassing adres van externe locatie %s: %s (was %s)" % (
-                            locatie.naam,
+            activiteit = "Aanpassing adres van externe locatie %s van vereniging %s: %s (was %s)" % (
+                            locatie.naam, ver,
                             repr(data.replace('\n', ', ')),
                             repr(locatie.adres.replace('\n', ', ')))
             schrijf_in_logboek(request.user, 'Accommodaties', activiteit)
@@ -211,8 +211,8 @@ class ExterneLocatieDetailsView(TemplateView):
 
         data = request.POST.get('plaats', '')[:50]
         if locatie.plaats != data:
-            activiteit = "Aanpassing plaats van externe locatie %s: %s (was %s)" % (
-                            locatie.naam,
+            activiteit = "Aanpassing plaats van externe locatie %s van vereniging %s: %s (was %s)" % (
+                            locatie.naam, ver,
                             repr(data),
                             repr(locatie.plaats))
             schrijf_in_logboek(request.user, 'Accommodaties', activiteit)
@@ -228,8 +228,8 @@ class ExterneLocatieDetailsView(TemplateView):
         locatie.discipline_3d = (request.POST.get('disc_3d', '') != '')
         disc_new = locatie.disciplines_str()
         if disc_old != disc_new:
-            activiteit = "Aanpassing disciplines van externe locatie %s: [%s] (was [%s])" % (
-                            locatie.naam, disc_new, disc_old)
+            activiteit = "Aanpassing disciplines van externe locatie %s van vereniging %s: [%s] (was [%s])" % (
+                            locatie.naam, ver, disc_new, disc_old)
             schrijf_in_logboek(request.user, 'Accommodaties', activiteit)
 
         # extra velden voor indoor locaties
@@ -241,8 +241,8 @@ class ExterneLocatieDetailsView(TemplateView):
             except ValueError:
                 banen = 0
             if locatie.banen_18m != banen:
-                activiteit = "Aanpassing aantal 18m banen van externe locatie %s naar %s (was %s)" % (
-                                locatie.naam, banen, locatie.banen_18m)
+                activiteit = "Aanpassing aantal 18m banen van externe locatie %s van vereniging %s: naar %s (was %s)" % (
+                                locatie.naam, ver, banen, locatie.banen_18m)
                 schrijf_in_logboek(request.user, 'Accommodaties', activiteit)
                 locatie.banen_18m = banen
 
@@ -253,8 +253,8 @@ class ExterneLocatieDetailsView(TemplateView):
             except ValueError:
                 banen = 0
             if locatie.banen_25m != banen:
-                activiteit = "Aanpassing aantal 25m banen van externe locatie %s naar %s (was %s)" % (
-                                locatie.naam, banen, locatie.banen_25m)
+                activiteit = "Aanpassing aantal 25m banen van externe locatie %s van vereniging %s: naar %s (was %s)" % (
+                                locatie.naam, ver, banen, locatie.banen_25m)
                 schrijf_in_logboek(request.user, 'Accommodaties', activiteit)
                 locatie.banen_25m = banen
 
@@ -262,8 +262,8 @@ class ExterneLocatieDetailsView(TemplateView):
             if request.POST.get('max_dt', '') == '4':
                 max_dt = 4
             if locatie.max_dt_per_baan != max_dt:
-                activiteit = "Aanpassing max DT per baan van externe locatie %s naar %s (was %s)" % (
-                                locatie.naam, max_dt, locatie.max_dt_per_baan)
+                activiteit = "Aanpassing max DT per baan van externe locatie %s van vereniging %s: naar %s (was %s)" % (
+                                locatie.naam, ver, max_dt, locatie.max_dt_per_baan)
                 schrijf_in_logboek(request.user, 'Accommodaties', activiteit)
                 locatie.max_dt_per_baan = max_dt
 
@@ -284,8 +284,8 @@ class ExterneLocatieDetailsView(TemplateView):
                 banen = 0
 
             if max_afstand != locatie.buiten_max_afstand or banen != locatie.buiten_banen:
-                activiteit = "Aanpassing outdoor banen van externe locatie %s naar %s x %s meter (was %s x %sm)" % (
-                                locatie.naam,
+                activiteit = "Aanpassing aantal outdoor banen van externe locatie %s van vereniging %s: naar %s x %s meter (was %s x %sm)" % (
+                                locatie.naam, ver,
                                 banen, max_afstand,
                                 locatie.buiten_banen, locatie.buiten_max_afstand)
                 schrijf_in_logboek(request.user, 'Accommodaties', activiteit)
@@ -295,8 +295,8 @@ class ExterneLocatieDetailsView(TemplateView):
         data = request.POST.get('notities', '')
         data = data.replace('\r\n', '\n')
         if locatie.notities != data:
-            activiteit = "Aanpassing bijzonderheden van externe locatie %s: %s (was %s)" % (
-                        locatie.naam,
+            activiteit = "Aanpassing bijzonderheden van externe locatie %s van vereniging %s: %s (was %s)" % (
+                        locatie.naam, ver,
                         repr(data.replace('\n', ' / ')),
                         repr(locatie.notities.replace('\n', ' / ')))
             schrijf_in_logboek(request.user, 'Accommodaties', activiteit)

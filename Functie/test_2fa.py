@@ -195,7 +195,7 @@ class TestFunctie2FA(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('functie/otp-controle.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, "Voer de vereiste code in")
 
-        # fout code
+        # foute code
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_controle, {'otp_code': '123456'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -208,6 +208,13 @@ class TestFunctie2FA(E2EHelpers, TestCase):
             resp = self.client.post(self.url_controle, {'otp_code': code}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
+
+        # juiste otp code + next url
+        code = get_otp_code(self.account_admin)
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_controle, {'otp_code': code, 'next_url': '/records/iets/'})
+        self.assertEqual(resp.status_code, 302)
+        self.assert_is_redirect(resp, '/records/iets/')
 
         self.e2e_assert_other_http_commands_not_supported(self.url_controle, post=False)
 

@@ -79,7 +79,7 @@
                             <span>{{ obj.volledige_naam|highlight:zoekterm }}</span>
                         </div>
                         <div class="collapsible-body white">
-                            <span>Volledige naam: {{ obj.get_volledige_naam }}</span>
+                            <span>Volledige naam: {{ obj.volledige_naam }}</span>
                             <p>Username: {{ obj.username|highlight:zoekterm }}</p>
                             <button class="btn-nhb-blauw" onclick="do_selecteer(this)" data-pk="{{ obj.pk }}">Selecteer</button>
                         </div>
