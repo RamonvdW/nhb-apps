@@ -108,7 +108,7 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
         aanmelding = RegioCompetitieSchutterBoog(
                             deelcompetitie=deelcomp,
                             schutterboog=schutterboog,
-                            ag_voor_indiv=AG_NUL)
+                            ag_voor_indiv=ag)
 
         bepaler = KlasseBepaler(deelcomp.competitie)
         bepaler.bepaal_klasse_deelnemer(aanmelding)
