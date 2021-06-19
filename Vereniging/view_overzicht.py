@@ -108,11 +108,12 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
         # 5 - wie schiet waar (voor inschrijfmethode 1)
         context['kaartjes'] = kaartjes = list()
         prev_jaar = 0
+        prev_afstand = 0
         for comp in comps:
             begin_jaar = comp.begin_jaar
             comp.bepaal_fase()
 
-            if prev_jaar != begin_jaar:
+            if prev_jaar != begin_jaar or prev_afstand != comp.afstand:
                 if len(kaartjes) and hasattr(kaartjes[-1], 'heading'):
                     # er waren geen kaartjes voor die competitie - meld dat
                     kaartje = SimpleNamespace()
@@ -123,7 +124,9 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                 kaartje = SimpleNamespace()
                 kaartje.heading = comp.beschrijving
                 kaartjes.append(kaartje)
+                
                 prev_jaar = begin_jaar
+                prev_afstand = comp.afstand
 
             # 1 - leden aanmelden voor de competitie (niet voor de WL)
             if comp.fase < 'F' and rol_nu != Rollen.ROL_WL:
