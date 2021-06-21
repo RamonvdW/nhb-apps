@@ -268,7 +268,7 @@ class ExterneLocatieDetailsView(TemplateView):
                 locatie.max_dt_per_baan = max_dt
 
         # extra velden voor outdoor locaties
-        if locatie.discipline_outdoor:
+        if locatie.discipline_outdoor or locatie.discipline_veld:
             try:
                 max_afstand = int(request.POST.get('buiten_max_afstand', 0))
                 max_afstand = max(max_afstand, 30)    # ondergrens
