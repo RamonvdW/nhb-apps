@@ -17,6 +17,8 @@
 
     <p>Er zijn {{ totaal }} accounts aangemaakt op deze server.</p>
 
+    <p>Sinds {{ deze_maand|date }} zijn er {{ deze_maand_count }} nieuwe accounts aangemaakt.</p>
+
     <p>Focus:<br>
         <a class="btn-nhb-blauw btn-small margin-5" href="#hulp">Mogelijk hulp nodig</a>
         <a class="btn-nhb-blauw btn-small margin-5" href="#nieuwe">Nieuwe accounts</a>
@@ -126,8 +128,6 @@
 
     <p>&nbsp;</p>
     <h5 id="nieuwe">Nieuwste accounts</h5>
-
-    <p>Sinds {{ deze_maand|date }} zijn er {{ deze_maand_count }} nieuwe accounts aangemaakt.</p>
 
     <p>Hieronder volgende nieuwe accounts (maximaal 50)</p>
 
