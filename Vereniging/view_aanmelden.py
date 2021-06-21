@@ -280,11 +280,12 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                 context['dagdelen'] = DAGDELEN
 
                 if deelcomp.toegestane_dagdelen != '':
+                    dagdelen_spl = deelcomp.toegestane_dagdelen.split(',')
                     context['dagdelen'] = list()
                     for dagdeel in DAGDELEN:
                         # dagdeel = tuple(code, beschrijving)
                         # code = GN / AV / ZA / ZO / WE / etc.
-                        if dagdeel[0] in deelcomp.toegestane_dagdelen:
+                        if dagdeel[0] in dagdelen_spl:
                             context['dagdelen'].append(dagdeel)
                     # for
 

@@ -94,7 +94,8 @@
                             {% for code, beschr in dagdelen %}
                                 <li>
                                     <label class="black-text" for="id_dagdeel_{{ code }}" style="margin-left: 20px">
-                                        <input class="with-gap" type="radio" name="dagdeel" value="{{ code }}" required id="id_dagdeel_{{ code }}"{% if forloop.first %} checked{% endif %}>
+                                        <!-- let op: bewust wordt hier geen default keuze gezet -->
+                                        <input class="with-gap" type="radio" name="dagdeel" value="{{ code }}" required id="id_dagdeel_{{ code }}">
                                         <span>{{ beschr }}</span>
                                     </label>
                                 </li>

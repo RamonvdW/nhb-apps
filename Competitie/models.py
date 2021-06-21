@@ -14,7 +14,6 @@ from Schutter.models import SchutterBoog
 from Score.models import Score, ScoreHist
 from Wedstrijden.models import CompetitieWedstrijdenPlan, CompetitieWedstrijdenPlan, CompetitieWedstrijd
 from decimal import Decimal
-from datetime import date
 import datetime
 import logging
 
@@ -33,20 +32,27 @@ AFSTANDEN = [('18', 'Indoor'),
 DAGDELEN = [('GN', "Geen voorkeur"),
             ('AV', "'s Avonds"),
             ('MA', "Maandag"),
+            ('MAa', "Maandagavond"),
             ('DI', "Dinsdag"),
+            ('DIa', "Dinsdagavond"),
             ('WO', "Woensdag"),
+            ('WOa', "Woensdagavond"),
             ('DO', "Donderdag"),
+            ('DOa', "Donderdagavond"),
             ('VR', "Vrijdag"),
+            ('VRa', "Vrijdagavond"),
             ('ZAT', "Zaterdag"),
             ('ZAo', "Zaterdagochtend"),
             ('ZAm', "Zaterdagmiddag"),
+            ('ZAa', "Zaterdagavond"),
             ('ZON', "Zondag"),
             ('ZOo', "Zondagochtend"),
             ('ZOm', "Zondagmiddag"),
+            ('ZOa', "Zondagavond"),
             ('WE', "Weekend")]
 
 # Let op: DAGDEEL_AFKORTINGEN moet in dezelfde volgorde zijn als DAGDELEN
-DAGDEEL_AFKORTINGEN = ('GN', 'AV', 'MA', 'DI', 'WO', 'DO', 'VR', 'ZAT', 'ZAo', 'ZAm', 'ZON', 'ZOo', 'ZOm', 'WE')
+DAGDEEL_AFKORTINGEN = tuple([afk for afk, _ in DAGDELEN])
 
 INSCHRIJF_METHODE_1 = '1'       # direct inschrijven op wedstrijd
 INSCHRIJF_METHODE_2 = '2'       # verdeel wedstrijdklassen over locaties
@@ -352,7 +358,7 @@ class DeelCompetitie(models.Model):
     # methode 3: toegestane dagdelen
     # komma-gescheiden lijstje met DAGDEEL: GE,AV
     # LET OP: leeg = alles toegestaan!
-    toegestane_dagdelen = models.CharField(max_length=20, default='', blank=True)
+    toegestane_dagdelen = models.CharField(max_length=40, default='', blank=True)
 
     # heeft deze RK/BK al een vastgestelde deelnemerslijst?
     heeft_deelnemerslijst = models.BooleanField(default=False)

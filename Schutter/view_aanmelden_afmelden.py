@@ -157,11 +157,12 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
         if methode == INSCHRIJF_METHODE_3:
             context['dagdelen'] = DAGDELEN
             if deelcomp.toegestane_dagdelen != '':
+                dagdelen_spl = deelcomp.toegestane_dagdelen.split(',')
                 context['dagdelen'] = list()
                 for dagdeel in DAGDELEN:
                     # dagdeel = tuple(code, beschrijving)
                     # code = GN / AV / ZA / ZO / WE
-                    if dagdeel[0] in deelcomp.toegestane_dagdelen:
+                    if dagdeel[0] in dagdelen_spl:
                         context['dagdelen'].append(dagdeel)
                 # for
 
@@ -286,10 +287,11 @@ class RegiocompetitieAanmeldenView(View):
         # kijk of er velden van een formulier bij zitten
         if methode == INSCHRIJF_METHODE_3:
             aanmelding.inschrijf_voorkeur_dagdeel = ''
+            dagdelen_spl = deelcomp.toegestane_dagdelen.split(',')
 
             dagdeel = request.POST.get('dagdeel', '')
             if dagdeel in DAGDEEL_AFKORTINGEN:
-                if dagdeel in deelcomp.toegestane_dagdelen or deelcomp.toegestane_dagdelen == '':
+                if deelcomp.toegestane_dagdelen == '' or dagdeel in dagdelen_spl:
                     aanmelding.inschrijf_voorkeur_dagdeel = dagdeel
 
             if aanmelding.inschrijf_voorkeur_dagdeel == '':

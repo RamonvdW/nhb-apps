@@ -289,10 +289,10 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
         """
 
         alles_mag = (deelcomp.toegestane_dagdelen == '')
-
+        dagdelen_spl = deelcomp.toegestane_dagdelen.split(',')
         context['dagdelen'] = dagdelen = list()
         for afkorting, beschrijving in DAGDELEN:
-            if alles_mag or (afkorting in deelcomp.toegestane_dagdelen):
+            if alles_mag or (afkorting in dagdelen_spl):
                 dagdelen.append(beschrijving)
         # for
 
