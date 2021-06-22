@@ -97,6 +97,7 @@ class CompetitieOverzichtView(View):
             # for
 
         if self.rol_nu == Rollen.ROL_RCL:
+            toon_handmatige_ag = False
             context['planning_deelcomp'] = (DeelCompetitie
                                             .objects
                                             .filter(competitie=comp,
@@ -126,6 +127,8 @@ class CompetitieOverzichtView(View):
                         obj.url_poules = reverse('Competitie:regio-poules',
                                                  kwargs={'deelcomp_pk': obj.pk})
 
+                    toon_handmatige_ag = True
+
                 comp.regio_einde_teams_aanmaken = obj.einde_teams_aanmaken
             # for
 
@@ -134,7 +137,7 @@ class CompetitieOverzichtView(View):
                                                       kwargs={'comp_pk': comp.pk,
                                                               'regio_nr': self.functie_nu.nhb_regio.regio_nr})
 
-                if obj.regio_organiseert_teamcompetitie:
+                if toon_handmatige_ag:
                     comp.url_regio_handmatige_ag = reverse('Competitie:regio-ag-controle',
                                                            kwargs={'comp_pk': comp.pk,
                                                                    'regio_nr': self.functie_nu.nhb_regio.regio_nr})
