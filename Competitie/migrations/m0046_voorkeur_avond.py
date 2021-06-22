@@ -27,12 +27,12 @@ class Migration(migrations.Migration):
             model_name='regiocompetitieschutterboog',
             name='inschrijf_voorkeur_dagdeel',
             field=models.CharField(
-                choices=[('GN', 'Geen voorkeur'), ('AV', "'s Avonds"), ('MA', 'Maandag'), ('aMA', 'Maandagavond'),
-                         ('DI', 'Dinsdag'), ('aDI', 'Dinsdagavond'), ('WO', 'Woensdag'), ('aWO', 'Woensdagavond'),
-                         ('DO', 'Donderdag'), ('aDO', 'Donderdagavond'), ('VR', 'Vrijdag'), ('aVR', 'Vrijdagavond'),
+                choices=[('GN', 'Geen voorkeur'), ('AV', "'s Avonds"), ('MA', 'Maandag'), ('MAa', 'Maandagavond'),
+                         ('DI', 'Dinsdag'), ('DIa', 'Dinsdagavond'), ('WO', 'Woensdag'), ('WOa', 'Woensdagavond'),
+                         ('DO', 'Donderdag'), ('DOa', 'Donderdagavond'), ('VR', 'Vrijdag'), ('VRa', 'Vrijdagavond'),
                          ('ZAT', 'Zaterdag'), ('ZAo', 'Zaterdagochtend'), ('ZAm', 'Zaterdagmiddag'),
-                         ('aZA', 'Zaterdagavond'), ('ZON', 'Zondag'), ('ZOo', 'Zondagochtend'), ('ZOm', 'Zondagmiddag'),
-                         ('aZO', 'Zondagavond'), ('WE', 'Weekend')], default='GN', max_length=3),
+                         ('ZAa', 'Zaterdagavond'), ('ZON', 'Zondag'), ('ZOo', 'Zondagochtend'), ('ZOm', 'Zondagmiddag'),
+                         ('ZOa', 'Zondagavond'), ('WE', 'Weekend')], default='GN', max_length=3),
         ),
     ]
 
