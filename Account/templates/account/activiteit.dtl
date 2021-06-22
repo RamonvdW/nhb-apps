@@ -93,7 +93,6 @@
     <table class="white" id="tabel_hulp">
         <thead>
             <tr>        <!-- filter veld -->
-                <d></d>
                 <td colspan="3" class="table-filter"><input class="table-filter" oninput="myTableFilter(this, 'tabel_hulp')" placeholder="Zoeken"/></td>
                 <td colspan="3"></td>
             </tr>
