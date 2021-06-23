@@ -17,15 +17,12 @@ from Functie.models import Functie
 from Functie.rol import SESSIONVAR_ROL_HUIDIGE, SESSIONVAR_ROL_MAG_WISSELEN, rol2url, rol_get_huidige, Rollen
 from NhbStructuur.models import NhbLid
 from Plein.menu import menu_dynamics
-from .models import Account, AccountEmail, AccountSessions
+from Account.models import Account, AccountEmail, AccountSessions
 from .forms import ZoekAccountForm
 import datetime
-import logging
 
 
-TEMPLATE_ACTIVITEIT = 'account/activiteit.dtl'
-
-my_logger = logging.getLogger('NHBApps.Account')
+TEMPLATE_ACTIVITEIT = 'overig/activiteit.dtl'
 
 
 class ActiviteitView(UserPassesTestMixin, TemplateView):
@@ -168,7 +165,7 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
         context['hulp'] = [tup[2] for tup in hulp]
 
         # zoekformulier
-        context['zoek_url'] = reverse('Account:activiteit')
+        context['zoek_url'] = reverse('Overig:activiteit')
         context['zoekform'] = form = ZoekAccountForm(self.request.GET)
         form.full_clean()   # vult form.cleaned_data
 
@@ -208,6 +205,7 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
             lid.email_is_bevestigd_str = '-'
             lid.tweede_factor_str = '-'
             lid.vhpg_str = '-'
+            lid.laatste_inlog_str = '-'
 
             if lid.account:
                 account = lid.account
@@ -218,6 +216,8 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
                     lid.email_is_bevestigd_str = 'Ja'
                 else:
                     lid.email_is_bevestigd_str = 'Nee'
+
+                lid.laatste_inlog_str = localize(account.last_login)
 
                 do_vhpg = True
                 if account.otp_is_actief:

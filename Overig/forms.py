@@ -36,4 +36,18 @@ class SiteFeedbackForm(forms.Form):
                                'data-length': 2500,
                                'class': 'materialize-textarea'}))
 
+
+class ZoekAccountForm(forms.Form):
+    """ definitie van het formulier waarmee de een zoekterm in kan voeren
+        om te zoeken naar een account. Wordt gebruikt voor Account Activiteit.
+    """
+
+    # een simpel tekstveld waarin de gebruiker de zoek/filter tekst in kan voeren
+    zoekterm = forms.CharField(
+                    label='Zoek op:',
+                    max_length=50,
+                    required=False,
+                    widget=forms.TextInput(attrs={'autofocus': ''}))
+
+
 # end of file

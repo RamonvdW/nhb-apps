@@ -87,8 +87,8 @@
         <h5>Voor de Manager Competitiezaken</h5>
 
         <div class="row">
-            <!-- accounts activiteit -->
-            {% url 'Account:activiteit' as card_url %}
+            <!-- account activiteit -->
+            {% url 'Overig:activiteit' as card_url %}
             {% include 'plein/card.dtl' with title="Account activiteit" text="Toon overzicht van de recent gebruikte en aangemaakte accounts." icon="recent_actors" url=card_url %}
 
             <!-- site feedback -->

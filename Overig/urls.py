@@ -1,16 +1,20 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from . import view_feedback, view_tijdelijke_url
+from . import view_feedback, view_tijdelijke_url, view_activiteit
 
 
 app_name = 'Overig'
 
 urlpatterns = [
+    path('activiteit/',
+         view_activiteit.ActiviteitView.as_view(),
+         name='activiteit'),
+
     path('feedback/bedankt/',
          view_feedback.SiteFeedbackBedanktView.as_view(),
          name='feedback-bedankt'),
