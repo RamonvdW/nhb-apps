@@ -78,6 +78,7 @@ class Command(BaseCommand):
         self._count_toevoegingen = 0
         self._count_lid_no_email = 0
         self._count_sec_no_account = 0
+        self._count_uitgeschreven = 0
 
         self._nieuwe_clubs = list()
         self._recordhouder_nhb_nrs = list()
@@ -720,6 +721,8 @@ class Command(BaseCommand):
                                 obj.bij_vereniging = None
                                 updated.append('bij_vereniging')
                                 lid_blocked = True
+                            else:
+                                self._count_uitgeschreven += 1
 
                     if lid_blocked:
                         if obj.is_actief_lid:
@@ -1032,7 +1035,7 @@ class Command(BaseCommand):
 
         # rapporteer de samenvatting en schrijf deze ook in het logboek
         samenvatting = "Samenvatting: %s fouten; %s waarschuwingen; %s nieuw; %s wijzigingen; %s verwijderingen; "\
-                       "%s leden, %s inactief; %s verenigingen; %s secretarissen zonder account; %s regios; %s rayons; %s actieve leden zonder e-mail" %\
+                       "%s leden, %s inactief, %s uitgeschreven; %s verenigingen; %s secretarissen zonder account; %s regios; %s rayons; %s actieve leden zonder e-mail" %\
                        (self._count_errors,
                         self._count_warnings,
                         self._count_toevoegingen,
@@ -1040,6 +1043,7 @@ class Command(BaseCommand):
                         self._count_verwijderingen,
                         self._count_members - self._count_blocked,
                         self._count_blocked,
+                        self._count_uitgeschreven,
                         self._count_clubs,
                         self._count_sec_no_account,
                         self._count_regios,
