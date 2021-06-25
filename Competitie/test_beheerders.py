@@ -561,7 +561,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
             resp = self.client.get(self.url_behoefte_bestand % (comp.pk, self.regio_101.pk))
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         # self.e2e_dump_resp(resp)
-        csv_file = 'ver_nr,Naam,Geen voorkeur,Zaterdag,Zondag,Totaal\r\n1000,Grote Club,0,0,3,3\r\n1100,Kleine Club,0,2,0,2\r\n-,Totalen,0,2,3,5\r\n-,-,-,-,-,-\r\n-,Blazoen type,Geen voorkeur,Zaterdag,Zondag,Totaal\r\n-,40cm,0,1,0,1\r\n-,DT Compound,0,0,1,1\r\n-,DT Recurve (wens),0,1,1,2\r\n-,60cm,0,0,1,1\r\n'
+        csv_file = 'ver_nr;Naam;Geen voorkeur;Zaterdag;Zondag;Totaal\r\n1000;Grote Club;0;0;3;3\r\n1100;Kleine Club;0;2;0;2\r\n-;Totalen;0;2;3;5\r\n-;-;-;-;-;-\r\n-;Blazoen type;Geen voorkeur;Zaterdag;Zondag;Totaal\r\n-;40cm;0;1;0;1\r\n-;DT Compound;0;0;1;1\r\n-;DT Recurve (wens);0;1;1;2\r\n-;60cm;0;0;1;1\r\n'
         self.assertContains(resp, csv_file, msg_prefix="(was: %s)" % resp.content)
 
         # creëer een beetje puinhoop
@@ -598,7 +598,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
             resp = self.client.get(self.url_behoefte_bestand % (comp.pk, self.regio_101.pk))
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         # self.e2e_dump_resp(resp)
-        csv_file = 'ver_nr,Naam,Geen voorkeur,Zaterdag,Zondag,Totaal\r\n1000,Grote Club,0,0,3,3\r\n1100,Kleine Club,0,2,0,2\r\n-,Totalen,0,2,3,5\r\n-,-,-,-,-,-\r\n-,Blazoen type,Geen voorkeur,Zaterdag,Zondag,Totaal\r\n-,60cm,0,2,2,4\r\n-,60cm Compound,0,0,1,1\r\n'
+        csv_file = 'ver_nr;Naam;Geen voorkeur;Zaterdag;Zondag;Totaal\r\n1000;Grote Club;0;0;3;3\r\n1100;Kleine Club;0;2;0;2\r\n-;Totalen;0;2;3;5\r\n-;-;-;-;-;-\r\n-;Blazoen type;Geen voorkeur;Zaterdag;Zondag;Totaal\r\n-;60cm;0;2;2;4\r\n-;60cm Compound;0;0;1;1\r\n'
         self.assertContains(resp, csv_file)
 
         # creëer een beetje puinhoop

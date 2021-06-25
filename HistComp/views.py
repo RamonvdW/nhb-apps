@@ -394,7 +394,7 @@ class InterlandAlsBestandView(InterlandView):
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="interland.csv"'
 
-        writer = csv.writer(response)
+        writer = csv.writer(response, delimiter=";")      # ; is good for dutch regional settings
         writer.writerow(['Gemiddelde', 'Wedstrijdleeftijd', 'Geslacht', 'NHB nummer', 'Naam', 'Vereniging'])
 
         for schutter in schutters:

@@ -1009,7 +1009,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         loc_pk = request.POST.get('loc_pk', '')[:6]             # afkappen voor de veiligheid
         aanvang = request.POST.get('aanvang', '')[:5]           # afkappen voor de veiligheid
 
-        if nhbver_pk == "" or len(aanvang) != 5 or aanvang[2] != ':':
+        if nhbver_pk == "" or len(aanvang) != 5 or aanvang[2] not in (':', '.'):    # allow numpad dot in time
             raise Http404('Geen valide verzoek')
 
         try:

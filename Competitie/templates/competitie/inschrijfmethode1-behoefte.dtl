@@ -1,0 +1,52 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2021 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Inschrijf voorkeuren{% endblock %}
+
+{% block pagina %}
+
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-inschrijfmethode1-behoefte" %}
+
+    <h4>Inschrijf voorkeuren</h4>
+
+    <p>Op deze pagina tonen we welke wedstrijden gekozen zijn door de sporters aangemeld voor de regiocompetitie <b>{{ competitie.beschrijving }}</b> in <b>{{ regio }}</b>.</p>
+
+    <p>&nbsp;</p>
+    <table class="white">
+        <thead>
+            <tr>
+                <th>Wedstrijd</th>
+                <th>Locatie</th>
+                <th>Aantal keer gekozen</th>
+            </tr>
+        </thead>
+
+        {% for wedstrijd in wedstrijden %}
+            <tr>
+                <td>{{ wedstrijd.beschrijving_str }}</td>
+                <td>{{ wedstrijd.locatie_str }}</td>
+                <td>{{ wedstrijd.keuze_count }}</td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="2"><i>Nog geen keuzes gemaakt</i></td>
+            </tr>
+        {% endfor %}
+
+    </table>
+
+    <p>&nbsp;</p>
+    <p>Je kan deze lijst ook downloaden, inclusief de keuzes van elke sporter.</p>
+    <a class="btn-nhb-blauw" href="{{ url_download }}">
+        <i class="material-icons-round left">get_app</i>Download lijst</a>
+
+{% endblock %}
+
+{% block menu-competities %}
+    {% include 'competitie/menu.dtl' %}
+{% endblock %}

@@ -68,6 +68,14 @@
 
     <p>Aantal: {{ object_list.count }}</p>
 
+    {% if show_gekozen_wedstrijden %}
+        <p>&nbsp;</p>
+        <p>
+            <a class="btn-nhb-blauw" href="{{ url_behoefte }}">
+                <i class="material-icons-round left">shopping_cart</i>Gekozen wedstrijden</a>
+        </p>
+    {% endif %}
+
     {% if show_dagdeel_telling %}
         <p>&nbsp;</p>
         <p>

@@ -5,22 +5,30 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import reverse
+from django.http import HttpResponse, Http404
+from django.utils.formats import localize
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from django.http import HttpResponse, Http404
-from Plein.menu import menu_dynamics
-from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
 from Functie.rol import Rollen, rol_get_huidige
+from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
+from Plein.menu import menu_dynamics
 from Schutter.models import SchutterVoorkeuren
-from .models import (LAAG_REGIO, INSCHRIJF_METHODE_3, DAGDELEN, DAGDEEL_AFKORTINGEN,
-                     Competitie, DeelCompetitie, RegioCompetitieSchutterBoog)
+from Wedstrijden.models import CompetitieWedstrijd
+from .models import (LAAG_REGIO,
+                     INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3,
+                     DAGDELEN, DAGDEEL_AFKORTINGEN,
+                     Competitie, DeelCompetitie, DeelcompetitieRonde, RegioCompetitieSchutterBoog)
 import csv
 
 
 TEMPLATE_COMPETITIE_AANGEMELD_REGIO = 'competitie/lijst-aangemeld-regio.dtl'
+TEMPLATE_COMPETITIE_INSCHRIJFMETHODE1_BEHOEFTE = 'competitie/inschrijfmethode1-behoefte.dtl'
 TEMPLATE_COMPETITIE_INSCHRIJFMETHODE3_BEHOEFTE = 'competitie/inschrijfmethode3-behoefte.dtl'
 
-JA_NEE = {False: 'Nee', True: 'Ja'}
+JA_NEE = {
+    False: 'Nee',
+    True: 'Ja'
+}
 
 BLAZOEN_DT_C = 'DT Compound'
 BLAZOEN_DT_R = 'DT Recurve (wens)'
@@ -28,8 +36,10 @@ BLAZOEN_40CM = '40cm'
 BLAZOEN_60CM = '60cm'
 BLAZOEN_60CM_C = '60cm Compound'
 
-COMP_BLAZOENEN = {'18': (BLAZOEN_40CM, BLAZOEN_DT_C, BLAZOEN_DT_R, BLAZOEN_60CM),
-                  '25': (BLAZOEN_60CM, BLAZOEN_60CM_C)}
+COMP_BLAZOENEN = {
+    '18': (BLAZOEN_40CM, BLAZOEN_DT_C, BLAZOEN_DT_R, BLAZOEN_60CM),
+    '25': (BLAZOEN_60CM, BLAZOEN_60CM_C)
+}
 
 
 def maak_regiocomp_zoom_knoppen(context, comp_pk, rayon=None, regio=None):
@@ -258,7 +268,13 @@ class LijstAangemeldRegiocompRegioView(UserPassesTestMixin, TemplateView):
 
         context['object_list'] = objs
 
-        if deelcomp.inschrijf_methode == INSCHRIJF_METHODE_3:
+        if deelcomp.inschrijf_methode == INSCHRIJF_METHODE_1:
+            context['show_gekozen_wedstrijden'] = True
+            context['url_behoefte'] = reverse('Competitie:inschrijfmethode1-behoefte',
+                                              kwargs={'comp_pk': comp.pk,
+                                                      'regio_pk': regio.pk})
+
+        elif deelcomp.inschrijf_methode == INSCHRIJF_METHODE_3:
             context['show_dagdeel_telling'] = True
             context['url_behoefte'] = reverse('Competitie:inschrijfmethode3-behoefte',
                                               kwargs={'comp_pk': comp.pk,
@@ -282,7 +298,8 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
         rol_nu = rol_get_huidige(self.request)
         return rol_nu == Rollen.ROL_RCL
 
-    def _maak_data_dagdeel_behoefte(self, context, deelcomp, objs, regio):
+    @staticmethod
+    def _maak_data_dagdeel_behoefte(context, deelcomp, objs, regio):
         """ voegt de volgende elementen toe aan de context:
                 regio_verenigingen: lijst van NhbVereniging met counts_list met telling van dagdelen
                 dagdelen: beschrijving van dagdelen voor de kolom headers
@@ -519,7 +536,7 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
 class Inschrijfmethode3BehoefteAlsBestandView(Inschrijfmethode3BehoefteView):
 
     """ Deze klasse wordt gebruikt om de lijst van aangemelde schutters in een regio
-        te downloaden als csv bestand
+        te downloaden als csv bestand, inclusief voorkeur voor dagdelen (inschrijfmethode 3)
     """
 
     def get(self, request, *args, **kwargs):
@@ -558,6 +575,9 @@ class Inschrijfmethode3BehoefteAlsBestandView(Inschrijfmethode3BehoefteView):
         except DeelCompetitie.DoesNotExist:
             raise Http404('Competitie niet gevonden')
 
+        if deelcomp.inschrijf_methode != INSCHRIJF_METHODE_3:
+            raise Http404('Verkeerde inschrijfmethode')
+
         objs = (RegioCompetitieSchutterBoog
                 .objects
                 .select_related('klasse',
@@ -573,9 +593,6 @@ class Inschrijfmethode3BehoefteAlsBestandView(Inschrijfmethode3BehoefteView):
 
         context['object_list'] = objs
 
-        if deelcomp.inschrijf_methode != INSCHRIJF_METHODE_3:
-            raise Http404('Verkeerde inschrijfmethode')
-
         # voeg de tabel met dagdeel-behoefte toe
         # dict(nhb_ver) = dict("dagdeel_afkorting") = count
         # list[nhb_ver, ..] =
@@ -585,7 +602,7 @@ class Inschrijfmethode3BehoefteAlsBestandView(Inschrijfmethode3BehoefteView):
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="behoefte-%s.csv"' % regio.regio_nr
 
-        writer = csv.writer(response)
+        writer = csv.writer(response, delimiter=";")      # ; is good for dutch regional settings
 
         # voorkeur dagdelen per vereniging
         writer.writerow(['ver_nr', 'Naam'] + context['dagdelen'] + ['Totaal'])
@@ -605,5 +622,202 @@ class Inschrijfmethode3BehoefteAlsBestandView(Inschrijfmethode3BehoefteView):
         # for
 
         return response
+
+
+class Inschrijfmethode1BehoefteView(UserPassesTestMixin, TemplateView):
+
+    """ Toon de RCL de behoefte aan quotaplaatsen in een regio met inschrijfmethode 3 """
+
+    template_name = TEMPLATE_COMPETITIE_INSCHRIJFMETHODE1_BEHOEFTE
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        rol_nu = rol_get_huidige(self.request)
+        return rol_nu == Rollen.ROL_RCL
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        try:
+            comp_pk = int(kwargs['comp_pk'][:6])        # afkappen voor veiligheid
+            comp = Competitie.objects.get(pk=comp_pk)
+        except (ValueError, Competitie.DoesNotExist):
+            raise Http404('Competitie niet gevonden')
+
+        comp.bepaal_fase()
+        if comp.fase < 'B' or comp.fase > 'E':
+            raise Http404('Verkeerde competitie fase')
+
+        context['competitie'] = comp
+
+        try:
+            regio_pk = int(kwargs['regio_pk'][:6])      # afkappen voor veiligheid
+            regio = (NhbRegio
+                     .objects
+                     .select_related('rayon')
+                     .get(pk=regio_pk))
+        except (ValueError, NhbRegio.DoesNotExist):
+            raise Http404('Regio niet gevonden')
+
+        context['regio'] = regio
+
+        try:
+            deelcomp = (DeelCompetitie
+                        .objects
+                        .select_related('competitie')
+                        .get(is_afgesloten=False,
+                             laag=LAAG_REGIO,
+                             competitie=comp,
+                             nhb_regio=regio))
+        except DeelCompetitie.DoesNotExist:
+            raise Http404('Competitie niet gevonden')
+
+        if deelcomp.inschrijf_methode != INSCHRIJF_METHODE_1:
+            raise Http404('Verkeerde inschrijfmethode')
+
+        # zoek alle wedstrijdplannen in deze deelcompetitie (1 per cluster + 1 voor de regio)
+        plan_pks = list(DeelcompetitieRonde
+                        .objects
+                        .filter(deelcompetitie=deelcomp)
+                        .values_list('plan__pk', flat=True))
+
+        wedstrijden = (CompetitieWedstrijd
+                       .objects
+                       .select_related('vereniging')
+                       .prefetch_related('regiocompetitieschutterboog_set')
+                       .filter(competitiewedstrijdenplan__pk__in=plan_pks)
+                       .order_by('datum_wanneer',
+                                 'tijd_begin_wedstrijd',
+                                 'vereniging__ver_nr'))
+        for wedstrijd in wedstrijden:
+            wedstrijd.beschrijving_str = "%s om %s" % (localize(wedstrijd.datum_wanneer),
+                                                       wedstrijd.tijd_begin_wedstrijd.strftime("%H:%M"))
+            wedstrijd.locatie_str = str(wedstrijd.vereniging)
+            wedstrijd.keuze_count = wedstrijd.regiocompetitieschutterboog_set.count()
+        # for
+        context['wedstrijden'] = wedstrijden
+
+        context['url_download'] = reverse('Competitie:inschrijfmethode1-behoefte-als-bestand',
+                                          kwargs={'comp_pk': comp.pk,
+                                                  'regio_pk': regio.pk})
+
+        menu_dynamics(self.request, context, actief='competitie')
+        return context
+
+
+class Inschrijfmethode1BehoefteAlsBestandView(Inschrijfmethode3BehoefteView):
+
+    """ Deze klasse wordt gebruikt om de lijst van aangemelde schutters in een regio
+        te downloaden als csv bestand, inclusief gekozen wedstrijden (inschrijfmethode 1)
+    """
+
+    def get(self, request, *args, **kwargs):
+
+        context = dict()
+
+        try:
+            comp_pk = int(kwargs['comp_pk'][:6])        # afkappen voor veiligheid
+            comp = Competitie.objects.get(pk=comp_pk)
+        except (ValueError, Competitie.DoesNotExist):
+            raise Http404('Competitie niet gevonden')
+
+        comp.bepaal_fase()
+        if comp.fase < 'B' or comp.fase > 'E':
+            raise Http404('Verkeerde competitie fase')
+
+        context['competitie'] = comp
+
+        try:
+            regio_pk = int(kwargs['regio_pk'][:6])      # afkappen voor veiligheid
+            regio = (NhbRegio
+                     .objects
+                     .select_related('rayon')
+                     .get(pk=regio_pk))
+        except (ValueError, NhbRegio.DoesNotExist):
+            raise Http404('Regio niet gevonden')
+
+        try:
+            deelcomp = (DeelCompetitie
+                        .objects
+                        .select_related('competitie')
+                        .get(is_afgesloten=False,
+                             laag=LAAG_REGIO,
+                             competitie=comp,
+                             nhb_regio=regio))
+        except DeelCompetitie.DoesNotExist:
+            raise Http404('Competitie niet gevonden')
+
+        if deelcomp.inschrijf_methode != INSCHRIJF_METHODE_1:
+            raise Http404('Verkeerde inschrijfmethode')
+
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="inschrijf-keuzes-%s.csv"' % regio.regio_nr
+
+        writer = csv.writer(response, delimiter=";")      # ; is good for dutch regional settings
+
+        # wedstrijden header
+        writer.writerow(['Nummer', 'Wedstrijd', 'Locatie'])
+
+        # zoek alle wedstrijdplannen in deze deelcompetitie (1 per cluster + 1 voor de regio)
+        plan_pks = list(DeelcompetitieRonde
+                        .objects
+                        .filter(deelcompetitie=deelcomp)
+                        .values_list('plan__pk', flat=True))
+
+        wedstrijden = (CompetitieWedstrijd
+                       .objects
+                       .select_related('vereniging')
+                       .filter(competitiewedstrijdenplan__pk__in=plan_pks)
+                       .order_by('datum_wanneer',
+                                 'tijd_begin_wedstrijd',
+                                 'vereniging__ver_nr'))
+        nr = 0
+        kolom_pks = list()
+        for wedstrijd in wedstrijden:
+            kolom_pks.append(wedstrijd.pk)
+            nr += 1
+            beschrijving = "%s om %s" % (localize(wedstrijd.datum_wanneer),
+                                         wedstrijd.tijd_begin_wedstrijd.strftime("%H:%M"))
+
+            # wedstrijd nr + beschrijving --> csv
+            writer.writerow([nr, beschrijving, wedstrijd.vereniging])
+        # for
+
+        # sporters header
+        writer.writerow([])
+        nummers = [nummer for nummer in range(1, nr + 1)]
+        writer.writerow(['Bondsnummer', 'Sporter', 'Vereniging', 'Wedstrijdklasse (individueel)'] + nummers)
+
+        for deelnemer in (RegioCompetitieSchutterBoog
+                          .objects
+                          .prefetch_related('inschrijf_gekozen_wedstrijden')
+                          .select_related('klasse',
+                                          'klasse__indiv',
+                                          'bij_vereniging',
+                                          'schutterboog',
+                                          'schutterboog__nhblid')
+                          .filter(deelcompetitie=deelcomp)
+                          .order_by('bij_vereniging__ver_nr')):
+
+            pks = list(deelnemer.inschrijf_gekozen_wedstrijden.values_list('pk', flat=True))
+
+            kruisjes = list()
+            for pk in kolom_pks:
+                if pk in pks:
+                    kruisjes.append('X')
+                else:
+                    kruisjes.append('')
+            # for
+
+            lid = deelnemer.schutterboog.nhblid
+            klasse = deelnemer.klasse.indiv
+
+            writer.writerow([lid.nhb_nr, lid.volledige_naam(), lid.bij_vereniging, klasse] + kruisjes)
+        # for
+
+        return response
+
 
 # end of file

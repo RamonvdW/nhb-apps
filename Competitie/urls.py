@@ -95,6 +95,14 @@ urlpatterns = [
          views_aangemeld.Inschrijfmethode3BehoefteAlsBestandView.as_view(),
          name='inschrijfmethode3-behoefte-als-bestand'),
 
+    path('<comp_pk>/lijst-regiocompetitie/regio-<regio_pk>/gemaakte-keuzes/',
+         views_aangemeld.Inschrijfmethode1BehoefteView.as_view(),
+         name='inschrijfmethode1-behoefte'),
+
+    path('<comp_pk>/lijst-regiocompetitie/regio-<regio_pk>/gemaakte-keuzes-als-bestand/',
+         views_aangemeld.Inschrijfmethode1BehoefteAlsBestandView.as_view(),
+         name='inschrijfmethode1-behoefte-als-bestand'),
+
     path('<comp_pk>/lijst-regiocompetitie/alles/',
          views_aangemeld.LijstAangemeldRegiocompAllesView.as_view(),
          name='lijst-regiocomp-alles'),
