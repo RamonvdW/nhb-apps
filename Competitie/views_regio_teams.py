@@ -16,6 +16,7 @@ from Functie.rol import Rollen, rol_get_huidige_functie
 from Handleiding.views import reverse_handleiding
 from .models import (LAAG_REGIO, AG_NUL,
                      TEAM_PUNTEN_FORMULE1, TEAM_PUNTEN_TWEE, TEAM_PUNTEN_SOM_SCORES, TEAM_PUNTEN,
+                     INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2, INSCHRIJF_METHODE_3,
                      Competitie, CompetitieKlasse, DeelCompetitie, RegioCompetitieSchutterBoog,
                      RegiocompetitieTeam, RegiocompetitieTeamPoule)
 from .menu import menu_dynamics_competitie
@@ -240,6 +241,13 @@ class RegioInstellingenGlobaalView(UserPassesTestMixin, TemplateView):
 
             deelcomp.regio_str = str(deelcomp.nhb_regio.regio_nr)
             deelcomp.rayon_str = str(deelcomp.nhb_regio.rayon.rayon_nr)
+
+            if deelcomp.inschrijf_methode == INSCHRIJF_METHODE_1:
+                deelcomp.inschrijfmethode_str = '1: kies wedstrijden'
+            elif deelcomp.inschrijf_methode == INSCHRIJF_METHODE_2:
+                deelcomp.inschrijfmethode_str = '2: klasse naar locatie'
+            else:
+                deelcomp.inschrijfmethode_str = '3: voorkeur dagdelen'
 
             if deelcomp.regio_organiseert_teamcompetitie:
                 deelcomp.teamcomp_str = 'Ja'
