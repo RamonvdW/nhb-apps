@@ -94,7 +94,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
             if wedstrijdleeftijd == prev_wedstrijdleeftijd:
                 obj.leeftijdsklasse = prev_lkl
             else:
-                for lkl in (LeeftijdsKlasse
+                for lkl in (LeeftijdsKlasse                         # pragma: no branch
                             .objects
                             .filter(geslacht='M',
                                     min_wedstrijdleeftijd=0)        # exclude veteraan, master
@@ -428,14 +428,14 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                     ag = score.waarde / 1000
                     aanmelding.ag_voor_indiv = ag
                     aanmelding.ag_voor_team = ag
-                    if ag > AG_NUL:
-                        aanmelding.ag_voor_team_mag_aangepast_worden = False
+                    aanmelding.ag_voor_team_mag_aangepast_worden = False
                 # for
 
                 # zoek een toepasselijke klasse aan de hand van de leeftijd
-                bepaler.bepaal_klasse_deelnemer(aanmelding)
-                if not aanmelding.klasse:
-                    raise Http404('Geen passende wedstrijdklasse kunnen kiezen')
+                try:
+                    bepaler.bepaal_klasse_deelnemer(aanmelding)
+                except LookupError:
+                    raise Http404('Geen passende klasse')
 
                 # kijk of de schutter met een team mee wil en mag schieten voor deze competitie
                 if age > MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT and dvl < udvl:

@@ -247,15 +247,15 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
                                                                   'info_C': 'on',
                                                                   'voorkeur_meedoen_competitie': 'on'})
 
-        self.assert_is_redirect(resp, '/vereniging/leden-voorkeuren/')
+        self.assert_is_redirect(resp, self.url_voorkeuren)
 
-    def _zet_ag(self, nhb_nr, afstand):
+    def _zet_ag(self, nhb_nr, afstand, waarde=7.42):
         if nhb_nr == 100003:
             afkorting = 'BB'
         else:
             afkorting = 'R'
         schutterboog = SchutterBoog.objects.get(nhblid__nhb_nr=nhb_nr, boogtype__afkorting=afkorting)
-        score_indiv_ag_opslaan(schutterboog, afstand, 7.42, self.account_hwl, 'Test AG %s' % afstand)
+        score_indiv_ag_opslaan(schutterboog, afstand, waarde, self.account_hwl, 'Test AG %s' % afstand)
 
     def test_overzicht(self):
         # anon
@@ -365,7 +365,6 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
     def test_inschrijven(self):
         url = self.url_inschrijven % self.comp_18.pk
-        zet_competitie_fase(self.comp_18, 'B')
 
         # anon
         self.e2e_logout()
@@ -377,6 +376,13 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_hwl)
         self.e2e_wissel_naar_functie(self.functie_hwl)
         self.e2e_check_rol('HWL')
+
+        # verkeerde competitie fase
+        zet_competitie_fase(self.comp_18, 'A')
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assert404(resp)
+        zet_competitie_fase(self.comp_18, 'B')
 
         # stel 1 schutter in die op randje aspirant/cadet zit
         self._zet_schutter_voorkeuren(100004)
@@ -422,6 +428,27 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
                                           'lid_100003_boogtype_3': 'on'})       # 3=BB
         self.assert_is_redirect_not_plein(resp)     # check success
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 2)    # 2 schutters, 1 competitie
+
+        # dubbelen inschrijving
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'lid_100002_boogtype_1': 'on'})
+        self.assert404(resp)
+        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 2)    # 2 schutters, 1 competitie
+
+        # POST met garbage
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'lid_10xxx2_boogtype_1': 'on'})
+        self.assert404(resp)
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'lid_999999_boogtype_1': 'on'})
+        self.assert404(resp)
+
+        # haal het aanmeld-scherm op zodat er al ingeschreven leden bij staan
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
 
         # haal de lijst met ingeschreven schutters op
         url = self.url_ingeschreven % self.deelcomp_regio.pk
@@ -746,6 +773,28 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'ignore': 'jaja', 'pk_null': 'on'})
         self.assert404(resp)  # 404 = Not allowed
+
+        # extreem: aanmelden zonder passende klasse
+        self._zet_schutter_voorkeuren(100002)
+        self._zet_ag(100002, 18)
+        url = self.url_inschrijven % self.comp_18.pk
+        zet_competitie_fase(self.comp_18, 'B')
+        # zet het min_ag te hoog
+        for klasse in CompetitieKlasse.objects.filter(competitie=self.comp_18, indiv__boogtype__afkorting='R', min_ag__lt=8.0):
+            klasse.min_ag = 8.0     # > 7.42 van zet_ag
+            klasse.save(update_fields=['min_ag'])
+        # for
+        # verwijder alle klassen 'onbekend'
+        for klasse in CompetitieKlasse.objects.filter(indiv__is_onbekend=True):
+            indiv = klasse.indiv
+            indiv.is_onbekend = False
+            indiv.save(update_fields=['is_onbekend'])
+        # for
+        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'lid_100002_boogtype_1': 'on'})
+        self.assert404(resp)
+        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
 
     def test_wedstrijdlocatie(self):
         # maak een locatie en koppel aan de vereniging

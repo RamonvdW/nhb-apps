@@ -111,7 +111,11 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
                             ag_voor_indiv=ag)
 
         bepaler = KlasseBepaler(deelcomp.competitie)
-        bepaler.bepaal_klasse_deelnemer(aanmelding)
+        try:
+            bepaler.bepaal_klasse_deelnemer(aanmelding)
+        except LookupError:
+            raise Http404('Geen passende wedstrijdklasse')
+
         context['wedstrijdklasse'] = aanmelding.klasse.indiv.beschrijving
         context['is_klasse_onbekend'] = aanmelding.klasse.indiv.is_onbekend
         del aanmelding
@@ -269,7 +273,10 @@ class RegiocompetitieAanmeldenView(View):
                 aanmelding.ag_voor_team_mag_aangepast_worden = False
 
         bepaler = KlasseBepaler(deelcomp.competitie)
-        bepaler.bepaal_klasse_deelnemer(aanmelding)
+        try:
+            bepaler.bepaal_klasse_deelnemer(aanmelding)
+        except LookupError:
+            raise Http404('Geen passende wedstrijdklasse')
 
         udvl = deelcomp.competitie.uiterste_datum_lid       # uiterste datum van lidmaatschap
         dvl = schutterboog.nhblid.sinds_datum               # datum van lidmaatschap
