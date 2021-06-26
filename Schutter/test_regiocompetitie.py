@@ -7,7 +7,7 @@
 from django.test import TestCase
 from django.utils import timezone
 from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
-from Competitie.models import (Competitie, DeelCompetitie, RegioCompetitieSchutterBoog,
+from Competitie.models import (Competitie, CompetitieKlasse, DeelCompetitie, RegioCompetitieSchutterBoog,
                                DeelcompetitieRonde, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3)
 from Competitie.test_fase import zet_competitie_fase
 from Competitie.test_competitie import maak_competities_en_zet_fase_b, competities_aanmaken
@@ -835,5 +835,50 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'wedstrijd_%s' % wedstrijd_pk: 'on'})
         self.assert404(resp)
+
+    def test_geen_klasse(self):
+        # log in as BB en maak de competitie aan
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_wisselnaarrol_bb()
+        self._competitie_aanmaken()
+
+        # log in as schutter
+        self.client.logout()
+        self.e2e_login(self.account_normaal)
+        self._prep_voorkeuren(100001)
+
+        # voorkeuren en AG zetten
+        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
+        schutterboog = SchutterBoog.objects.get(boogtype__afkorting='R')
+        deelcomp = DeelCompetitie.objects.get(competitie__afstand='18', nhb_regio=self.nhbver.regio)
+        res = score_indiv_ag_opslaan(schutterboog, 18, 8.18, None, 'Test')
+        self.assertTrue(res)
+
+        # extreem: aanmelden zonder passende klasse
+        # zet het min_ag te hoog
+        for klasse in CompetitieKlasse.objects.filter(competitie=deelcomp.competitie,
+                                                      indiv__boogtype__afkorting='R',
+                                                      min_ag__lt=8.0):
+            klasse.min_ag = 8.2     # > 8.18 van zet_ag
+            klasse.save(update_fields=['min_ag'])
+        # for
+        # verwijder alle klassen 'onbekend'
+        for klasse in CompetitieKlasse.objects.filter(indiv__is_onbekend=True):
+            indiv = klasse.indiv
+            indiv.is_onbekend = False
+            indiv.save(update_fields=['is_onbekend'])
+        # for
+
+        # haal de bevestig pagina op met het formulier
+        url = self.url_bevestig_aanmelden % (deelcomp.pk, schutterboog.pk)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assert404(resp, 'Geen passende wedstrijdklasse')
+
+        # probeer de post
+        url = self.url_aanmelden % (deelcomp.pk, schutterboog.pk)
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
+        self.assert404(resp, 'Geen passende wedstrijdklasse')
 
 # end of file
