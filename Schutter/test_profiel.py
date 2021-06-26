@@ -215,7 +215,7 @@ class TestSchutterProfiel(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_profiel)
         self.assertContains(resp, 'De volgende competities worden georganiseerd')
-        self.assertContains(resp, 'Volwaardig inschrijven kan tot')
+        self.assertContains(resp, 'De inschrijving is open tot ')
         self.assertContains(resp, 'De volgende competities passen bij de bogen waar jij mee schiet:')
         urls = self.extract_all_urls(resp, skip_menu=True)
         # print('urls:', urls)
@@ -241,8 +241,8 @@ class TestSchutterProfiel(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_profiel)
         self.assertContains(resp, 'De volgende competities worden georganiseerd')
-        self.assertContains(resp, 'Volwaardig inschrijven kan tot')     # 18m
-        self.assertContains(resp, 'Meedoen kan tot 1 februari 20')      # 25m
+        self.assertContains(resp, 'De inschrijving is open tot ')     # 18m
+        self.assertContains(resp, 'Aanmelden kan nog tot 1 februari 20')      # 25m
         urls = self.extract_all_urls(resp, skip_menu=True)
         urls2 = [url for url in urls if '/sporter/regiocompetitie/aanmelden/' in url]
         self.assertEqual(len(urls2), 1)
@@ -285,7 +285,7 @@ class TestSchutterProfiel(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('schutter/profiel.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'De inschrijving is gesloten')        # 18m
-        self.assertContains(resp, 'Meedoen kan tot 1 februari 20')      # 25m
+        self.assertContains(resp, 'Aanmelden kan nog tot 1 februari 20')      # 25m
 
         # zet aanvangsgemiddelden voor 18m en 25m
         Score.objects.all().delete()        # nieuw vastgestelde AG is van vandaag

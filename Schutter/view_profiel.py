@@ -119,10 +119,11 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                     comp.fase_str = 'Rayonkampioenschappen'
                 else:
                     comp.fase_str = 'Regiocompetitie'
+
                     if comp.fase < 'C':
-                        comp.inschrijven = 'Volwaardig inschrijven kan tot %s' % localize(comp.einde_aanmeldingen)
+                        comp.inschrijven = 'De inschrijving is open tot %s' % localize(comp.einde_aanmeldingen)
                     elif comp.fase < 'F':
-                        comp.inschrijven = 'Meedoen kan tot %s' % localize(comp.laatst_mogelijke_wedstrijd)
+                        comp.inschrijven = 'Aanmelden kan nog tot %s' % localize(comp.laatst_mogelijke_wedstrijd)
 
                 comps.append(comp)
         # for

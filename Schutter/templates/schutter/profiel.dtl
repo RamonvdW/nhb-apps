@@ -248,6 +248,8 @@
                 </tr>
             {% endfor %}
         </table>
+
+        <p>De gemiddelde pijl is berekend over de beste 6 scores.</p>
     {% endif %}
 
 

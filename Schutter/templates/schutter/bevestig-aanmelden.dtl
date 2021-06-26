@@ -66,7 +66,7 @@
                             <input type="checkbox" class="filled-in" name="wil_in_team">
                             <span class="black-text">Ik heb interesse om met een team te schieten</span>
                         </label>
-                        <p><i>Als je hier voor kiest, dan nemen we contact met je op om verdere details te bespreken.</i></p>
+                        <p><i>Als je hier voor kiest dan kan jouw vereniging je in een team plaatsen.</i></p>
                     </td>
                 </tr>
             {% endif %}
