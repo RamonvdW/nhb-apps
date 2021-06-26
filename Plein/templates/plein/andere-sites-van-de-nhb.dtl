@@ -7,6 +7,8 @@
 
 <!-- andere sites van de NHB -->
 
+
+<!-- hoofd site -->
 <div class="nhb-card">
     <a href="https://www.handboogsport.nl" target="_blank" rel="noopener noreferrer">
         <div class="nhb-card-content">
@@ -20,6 +22,35 @@
 </div>
 
 
+<!-- Lowlands Archery Series -->
+<div class="nhb-card">
+    <a href="https://www.handboogsport.nl/lowlands-shootout/home/" target="_blank" rel="noopener noreferrer">
+        <div class="nhb-card-content">
+            <div class="card-title center-align">Lowlands Series</div>
+            <div class="center-align">
+                <img src="{% static 'plein/logo_lowlands.png' %}" height="85" alt="logo" style="padding:10px">
+            </div>
+            <div class="card-text">Wedstrijden volgens internationaal format, met finales en prijzengeld.</div>
+        </div>
+    </a>
+</div>
+
+
+<!-- JeugdFita Cup -->
+<div class="nhb-card">
+    <a class="nhb-klikbare-balk" href="https://www.handboogsport.nl/jeugdfita/" target="_blank" rel="noopener noreferrer">
+        <div class="nhb-card-content">
+            <div class="card-title center-align">JeugdFita Cup</div>
+            <div class="center-align">
+                <img src="{% static 'plein/logo_jeugdfita_200x228.png' %}" height="85" alt="logo">
+            </div>
+            <div class="card-text">Outdoor wedstrijden speciaal voor de jeugd tot en met 20 jaar.</div>
+        </div>
+    </a>
+</div>
+
+
+<!-- Free Your Mind -->
 <div class="nhb-card">
     <a class="nhb-klikbare-balk" href="https://www.handboogsport.nl/freeyourmind/" target="_blank" rel="noopener noreferrer">
         <div class="nhb-card-content">
