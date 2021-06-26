@@ -24,7 +24,7 @@
 <div class="nhb-card">
 
     <!-- de hele kaart is klikbaar -->
-    <a href="{{ url }}">
+    <a href="{{ url }}"{% if extern_open %} target="_blank" rel="noopener noreferrer"{% endif %}>
 
         <!-- padding om bij de rand weg te blijven -->
         <div class="nhb-card-content">
@@ -34,7 +34,7 @@
 
             <!-- icoon -->
             <div class="center-align" style="margin-bottom:8px">
-                <img src="{{ img_src }}" height="{{ img_height }}" alt="logo">
+                <img src="{{ img_src }}" height="{{ img_height }}" alt="logo"{% if img_style %} style="{{ img_style }}"{% endif %}>
             </div>
 
             <div class="card-text">{{ text }}</div>

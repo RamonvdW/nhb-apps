@@ -79,7 +79,7 @@
 
         <!-- handleiding -->
         {% if handleiding_url %}
-            {% include 'plein/card.dtl' with title="Handleiding" text="Bekijk de handleiding." icon="help" url=handleiding_url %}
+            {% include 'plein/card.dtl' with title="Handleiding" text="Bekijk de handleiding." icon="help" url=handleiding_url extern_open=True %}
         {% endif %}
     </div>
 
