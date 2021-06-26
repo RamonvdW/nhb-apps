@@ -691,6 +691,8 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
 
         url = self.url_planning_regio % deelcomp.pk
 
+        # TODO: commentaar hieronder zegt GET doet iets aanmaken. Moet niet!
+
         # haal de (lege) planning op. Dit maakt ook meteen de enige ronde aan
         with self.assert_max_queries(20):
             resp = self.client.get(url)

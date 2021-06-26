@@ -64,6 +64,11 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
         self.assertContains(resp, "do_selecteer")
         self.assertContains(resp, 'data-pk="%s"' % self.account_normaal.pk)
 
+        # te lange zoekterm (max length = 50)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.wissel_url + '?zoekterm=%s' % '1234567890' * 6)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+
     def test_wissel_geen_otp(self):
         # login als admin
         self.e2e_login_and_pass_otp(self.account_admin)
