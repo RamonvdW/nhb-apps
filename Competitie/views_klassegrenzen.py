@@ -7,6 +7,7 @@
 from django.views.generic import View
 from django.http import Http404
 from django.shortcuts import render
+from Functie.rol import rol_get_huidige, Rollen
 from .models import (AG_NUL, Competitie, CompetitieKlasse)
 from .menu import menu_dynamics_competitie
 
@@ -22,7 +23,7 @@ class KlassegrenzenTonenView(View):
     template_name = TEMPLATE_COMPETITIE_KLASSEGRENZEN_TONEN
 
     @staticmethod
-    def _get_indiv_klassen(comp):
+    def _get_indiv_klassen(comp, toon_aantal):
         """ geef een lijst van individuele competitie wedstrijdklassen terug
             met het AG geformatteerd voor presentatie.
         """
@@ -32,12 +33,16 @@ class KlassegrenzenTonenView(View):
                                    'indiv')
                    .filter(team=None,
                            competitie=comp)
+                   .prefetch_related('regiocompetitieschutterboog_set')
                    .order_by('indiv__volgorde'))
 
         for obj in klassen:
             if obj.min_ag > AG_NUL:
                 ag_str = "%5.3f" % obj.min_ag
                 obj.min_ag_str = ag_str.replace('.', ',')       # nederlands: komma ipv punt
+
+            if toon_aantal:
+                obj.aantal = obj.regiocompetitieschutterboog_set.count()
         # for
 
         return klassen
@@ -83,7 +88,10 @@ class KlassegrenzenTonenView(View):
             else:
                 aantal_pijlen = 25
 
-            context['indiv_klassen'] = self._get_indiv_klassen(comp)
+            rol_nu = rol_get_huidige(request)
+            context['toon_aantal'] = toon_aantal = (rol_nu == Rollen.ROL_BB)
+
+            context['indiv_klassen'] = self._get_indiv_klassen(comp, toon_aantal)
             context['team_klassen'] = self._get_team_klassen(comp, aantal_pijlen)
             context['aantal_pijlen'] = aantal_pijlen
 

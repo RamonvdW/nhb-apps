@@ -14,7 +14,6 @@ from Schutter.models import SchutterBoog
 from Score.models import Score, ScoreHist
 from Wedstrijden.models import CompetitieWedstrijdenPlan, CompetitieWedstrijdenPlan, CompetitieWedstrijd
 from decimal import Decimal
-from datetime import date
 import datetime
 import logging
 
@@ -33,20 +32,27 @@ AFSTANDEN = [('18', 'Indoor'),
 DAGDELEN = [('GN', "Geen voorkeur"),
             ('AV', "'s Avonds"),
             ('MA', "Maandag"),
+            ('MAa', "Maandagavond"),
             ('DI', "Dinsdag"),
+            ('DIa', "Dinsdagavond"),
             ('WO', "Woensdag"),
+            ('WOa', "Woensdagavond"),
             ('DO', "Donderdag"),
+            ('DOa', "Donderdagavond"),
             ('VR', "Vrijdag"),
+            ('VRa', "Vrijdagavond"),
             ('ZAT', "Zaterdag"),
             ('ZAo', "Zaterdagochtend"),
             ('ZAm', "Zaterdagmiddag"),
+            ('ZAa', "Zaterdagavond"),
             ('ZON', "Zondag"),
             ('ZOo', "Zondagochtend"),
             ('ZOm', "Zondagmiddag"),
+            ('ZOa', "Zondagavond"),
             ('WE', "Weekend")]
 
 # Let op: DAGDEEL_AFKORTINGEN moet in dezelfde volgorde zijn als DAGDELEN
-DAGDEEL_AFKORTINGEN = ('GN', 'AV', 'MA', 'DI', 'WO', 'DO', 'VR', 'ZAT', 'ZAo', 'ZAm', 'ZON', 'ZOo', 'ZOm', 'WE')
+DAGDEEL_AFKORTINGEN = tuple([afk for afk, _ in DAGDELEN])
 
 INSCHRIJF_METHODE_1 = '1'       # direct inschrijven op wedstrijd
 INSCHRIJF_METHODE_2 = '2'       # verdeel wedstrijdklassen over locaties
@@ -352,7 +358,7 @@ class DeelCompetitie(models.Model):
     # methode 3: toegestane dagdelen
     # komma-gescheiden lijstje met DAGDEEL: GE,AV
     # LET OP: leeg = alles toegestaan!
-    toegestane_dagdelen = models.CharField(max_length=20, default='', blank=True)
+    toegestane_dagdelen = models.CharField(max_length=40, default='', blank=True)
 
     # heeft deze RK/BK al een vastgestelde deelnemerslijst?
     heeft_deelnemerslijst = models.BooleanField(default=False)
@@ -447,12 +453,6 @@ class DeelcompetitieRonde(models.Model):
         msg += " (%s)" % self.beschrijving
         return msg
 
-    def is_voor_import_oude_programma(self):
-        # beetje zwak, maar correcte functioneren van de import uit het oude programma
-        # is afhankelijk van de beschrijving, dus mag niet aangepast worden
-        # "Ronde 1 oude programma" .. "Ronde 7 oude programma"
-        return self.beschrijving[:6] == 'Ronde ' and self.beschrijving[-15:] == ' oude programma'
-
 
 class RegioCompetitieSchutterBoog(models.Model):
     """ Een schutterboog aangemeld bij een regiocompetitie """
@@ -519,19 +519,6 @@ class RegioCompetitieSchutterBoog(models.Model):
 
     # voorkeur schietmomenten (methode 1)
     inschrijf_gekozen_wedstrijden = models.ManyToManyField(CompetitieWedstrijd, blank=True)
-
-    # alternatieve uitslag - dit is tijdelijk
-    alt_score1 = models.PositiveIntegerField(default=0)
-    alt_score2 = models.PositiveIntegerField(default=0)
-    alt_score3 = models.PositiveIntegerField(default=0)
-    alt_score4 = models.PositiveIntegerField(default=0)
-    alt_score5 = models.PositiveIntegerField(default=0)
-    alt_score6 = models.PositiveIntegerField(default=0)
-    alt_score7 = models.PositiveIntegerField(default=0)
-    alt_totaal = models.PositiveIntegerField(default=0)
-    alt_aantal_scores = models.PositiveSmallIntegerField(default=0)
-    alt_laagste_score_nr = models.PositiveIntegerField(default=0)  # 1..7
-    alt_gemiddelde = models.DecimalField(max_digits=5, decimal_places=3, default=0.0)  # 10,000
 
     def __str__(self):
         # deze naam wordt gebruikt in de admin interface, dus kort houden

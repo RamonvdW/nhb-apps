@@ -102,9 +102,8 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
                       .filter(deelcompetitie=deelcomp,
                               cluster=None)
                       .order_by('beschrijving')):
-            if not ronde.is_voor_import_oude_programma():
-                regio_ronde = ronde
-                break
+            regio_ronde = ronde
+            break
         # for
 
         if not regio_ronde:
@@ -167,13 +166,9 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
                                 .order_by('beschrijving'))
 
         context['rondes'] = list()
-        context['rondes_import'] = list()
         for ronde in rondes:
             ronde.wedstrijd_count = ronde.plan.wedstrijden.count()
-            if ronde.is_voor_import_oude_programma():
-                context['rondes_import'].append(ronde)
-            else:
-                context['rondes'].append(ronde)
+            context['rondes'].append(ronde)
         # for
 
         if mag_wijzigen and len(context['rondes']) < 10:
@@ -426,7 +421,6 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
             raise Http404('Ronde niet gevonden')
 
         context['ronde'] = ronde
-        context['vaste_beschrijving'] = is_import = ronde.is_voor_import_oude_programma()
 
         context['ronde_opslaan_url'] = reverse('Competitie:regio-ronde-planning',
                                                kwargs={'ronde_pk': ronde.pk})
@@ -438,7 +432,7 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
                                   .order_by('datum_wanneer',
                                             'tijd_begin_wedstrijd'))
 
-        if self.rol_nu == Rollen.ROL_RCL and not is_import:
+        if self.rol_nu == Rollen.ROL_RCL:
             context['url_nieuwe_wedstrijd'] = reverse('Competitie:regio-ronde-planning',
                                                       kwargs={'ronde_pk': ronde.pk})
 
@@ -492,8 +486,7 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
                                 kwargs={'deelcomp_pk': ronde.deelcompetitie.pk})
         context['terug_url'] = terug_url
 
-        context['heeft_wkl'] = heeft_wkl = (ronde.deelcompetitie.inschrijf_methode == INSCHRIJF_METHODE_2 and
-                                            not ronde.is_voor_import_oude_programma())
+        context['heeft_wkl'] = heeft_wkl = (ronde.deelcompetitie.inschrijf_methode == INSCHRIJF_METHODE_2)
 
         klasse2schutters = dict()
         niet_gebruikt = dict()
@@ -603,14 +596,7 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
 
             beschrijving = request.POST.get('ronde_naam', '')
 
-            if not ronde.is_voor_import_oude_programma():
-                # is niet voor import, dus beschrijving mag aangepast worden
-                oude_beschrijving = ronde.beschrijving
-                ronde.beschrijving = beschrijving[:40]  # afkappen, anders werkt save niet
-                if ronde.is_voor_import_oude_programma():
-                    # poging tot beschrijving die niet mag / problemen gaat geven
-                    # herstel de oude beschrijving
-                    ronde.beschrijving = oude_beschrijving
+            ronde.beschrijving = beschrijving[:40]  # afkappen, anders werkt save niet
 
             if ronde.week_nr != week_nr:
                 # nieuw week nummer
@@ -649,11 +635,6 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
                                    kwargs={'deelcomp_pk': ronde.deelcompetitie.pk})
         else:
             # voeg een wedstrijd toe
-
-            # niet toestaan op import rondes
-            if ronde.is_voor_import_oude_programma():
-                raise PermissionDenied()
-
             jaar = ronde.deelcompetitie.competitie.begin_jaar
             wedstrijd = CompetitieWedstrijd()
             wedstrijd.datum_wanneer = competitie_week_nr_to_date(jaar, ronde.week_nr)
@@ -860,9 +841,6 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
                                  'deelcompetitie__nhb_regio')
                  .get(plan=plan))
 
-        if ronde.is_voor_import_oude_programma():
-            raise PermissionDenied()
-
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
         if ronde.deelcompetitie.functie != functie_nu:
             # mag niet wijzigen
@@ -1020,9 +998,6 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
                                  'deelcompetitie__nhb_regio')
                  .get(plan=plan))
 
-        if ronde.is_voor_import_oude_programma():
-            raise PermissionDenied()
-
         deelcomp = ronde.deelcompetitie
 
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
@@ -1034,7 +1009,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         loc_pk = request.POST.get('loc_pk', '')[:6]             # afkappen voor de veiligheid
         aanvang = request.POST.get('aanvang', '')[:5]           # afkappen voor de veiligheid
 
-        if nhbver_pk == "" or len(aanvang) != 5 or aanvang[2] != ':':
+        if nhbver_pk == "" or len(aanvang) != 5 or aanvang[2] not in (':', '.'):    # allow numpad dot in time
             raise Http404('Geen valide verzoek')
 
         try:

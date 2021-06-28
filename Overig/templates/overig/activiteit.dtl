@@ -17,6 +17,8 @@
 
     <p>Er zijn {{ totaal }} accounts aangemaakt op deze server.</p>
 
+    <p>Sinds {{ deze_maand|date }} zijn er {{ deze_maand_count }} nieuwe accounts aangemaakt.</p>
+
     <p>Focus:<br>
         <a class="btn-nhb-blauw btn-small margin-5" href="#hulp">Mogelijk hulp nodig</a>
         <a class="btn-nhb-blauw btn-small margin-5" href="#nieuwe">Nieuwe accounts</a>
@@ -67,10 +69,10 @@
                         </div>
                         <div class="collapsible-body white" style="column-count: 2">
                             <div>
-                                <span>Volledige naam:<br>Inlog naam:<br>E-mail is bevestigd:<br>Tweede factor:<br>VHPG:<br>Gekoppelde functies:{% for functie in obj.functies %}<br>{% endfor %}</span>
+                                <span>Volledige naam:<br>Inlog naam:<br>E-mail is bevestigd:<br>Tweede factor:<br>VHPG:<br>Laatste inlog:<br>Gekoppelde functies:{% for functie in obj.functies %}<br>{% endfor %}</span>
                             </div>
                             <div>
-                                <span>{{ obj.volledige_naam }}<br>{{ obj.inlog_naam_str }}<br>{{ obj.email_is_bevestigd_str }}<br>{{ obj.tweede_factor_str }}<br>{{ obj.vhpg_str }}{% for functie in obj.functies %}<br>{{ functie.beschrijving }}{% empty %}<br>-{% endfor %}</span>
+                                <span>{{ obj.volledige_naam }}<br>{{ obj.inlog_naam_str }}<br>{{ obj.email_is_bevestigd_str }}<br>{{ obj.tweede_factor_str }}<br>{{ obj.vhpg_str }}<br>{{ obj.laatste_inlog_str }}{% for functie in obj.functies %}<br>{{ functie.beschrijving }}{% empty %}<br>-{% endfor %}</span>
                             </div>
                         </div>
                     </li>
@@ -91,7 +93,6 @@
     <table class="white" id="tabel_hulp">
         <thead>
             <tr>        <!-- filter veld -->
-                <d></d>
                 <td colspan="3" class="table-filter"><input class="table-filter" oninput="myTableFilter(this, 'tabel_hulp')" placeholder="Zoeken"/></td>
                 <td colspan="3"></td>
             </tr>
@@ -126,8 +127,6 @@
 
     <p>&nbsp;</p>
     <h5 id="nieuwe">Nieuwste accounts</h5>
-
-    <p>Sinds {{ deze_maand|date }} zijn er {{ deze_maand_count }} nieuwe accounts aangemaakt.</p>
 
     <p>Hieronder volgende nieuwe accounts (maximaal 50)</p>
 

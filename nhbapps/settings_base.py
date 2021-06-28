@@ -26,7 +26,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2021-06-19'
+SITE_VERSIE = '2021-06-28'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -333,6 +333,7 @@ HANDLEIDING_CLUSTERS = 'Clusters'
 HANDLEIDING_RK_SELECTIE = 'RK_selectie'
 HANDLEIDING_RCL_INSTELLINGEN_REGIO = 'RCL_instellingen_regio'
 HANDLEIDING_POULES = 'Poules'
+HANDLEIDING_WEDSTRIJDKALENDER_HWL = 'Wedstrijdkalender_HWL'
 
 HANDLEIDING_PAGINAS = [
     HANDLEIDING_TOP,
@@ -353,6 +354,7 @@ HANDLEIDING_PAGINAS = [
     HANDLEIDING_RK_SELECTIE,
     HANDLEIDING_RCL_INSTELLINGEN_REGIO,
     HANDLEIDING_POULES,
+    HANDLEIDING_WEDSTRIJDKALENDER_HWL,
     # pagina's van de handleiding die intern gerefereerd worden
     'Tips_voor_wiki_gebruik',
     'Koppelen_beheerders'

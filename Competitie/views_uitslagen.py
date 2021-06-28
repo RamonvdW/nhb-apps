@@ -6,8 +6,7 @@
 
 from django.views.generic import TemplateView
 from django.urls import reverse
-from django.http import HttpResponseRedirect, Http404
-from django.contrib.auth.mixins import UserPassesTestMixin
+from django.http import Http404
 from BasisTypen.models import BoogType
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
 from Competitie.models import (LAAG_REGIO, LAAG_RK, LAAG_BK, DEELNAME_NEE,
@@ -22,8 +21,6 @@ TEMPLATE_COMPETITIE_UITSLAGEN_VERENIGING = 'competitie/uitslagen-vereniging.dtl'
 TEMPLATE_COMPETITIE_UITSLAGEN_REGIO = 'competitie/uitslagen-regio.dtl'
 TEMPLATE_COMPETITIE_UITSLAGEN_RAYON = 'competitie/uitslagen-rayon.dtl'
 TEMPLATE_COMPETITIE_UITSLAGEN_BOND = 'competitie/uitslagen-bond.dtl'
-
-TEMPLATE_COMPETITIE_UITSLAGEN_REGIO_ALT = 'competitie/uitslagen-regio-alt.dtl'
 
 
 class UitslagenVerenigingView(TemplateView):
@@ -189,7 +186,6 @@ class UitslagenRegioView(TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_UITSLAGEN_REGIO
     url_name = 'Competitie:uitslagen-regio-n'
-    url_switch = 'Competitie:uitslagen-regio-n-alt'
     order_gemiddelde = '-gemiddelde'
 
     def _get_schutter_regio_nr(self):
@@ -302,13 +298,6 @@ class UitslagenRegioView(TemplateView):
                                                      'zes_scores': zes_scores_next,
                                                      'comp_boog': comp_boog,
                                                      'regio_nr': gekozen_regio_nr})
-
-        # switch naar alternatieve uitslag
-        context['url_switch'] = reverse(self.url_switch,
-                                        kwargs={'comp_pk': comp.pk,
-                                                'zes_scores': zes_scores,
-                                                'comp_boog': comp_boog,
-                                                'regio_nr': gekozen_regio_nr})
 
     def filter_zes_scores(self, deelnemers):
         return deelnemers.filter(aantal_scores__gte=6)
@@ -458,32 +447,6 @@ class UitslagenRegioView(TemplateView):
 
         menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
         return context
-
-
-class UitslagenRegioAltView(UserPassesTestMixin, UitslagenRegioView):
-
-    """ Django class-based view voor de de alternative uitslagen van de competitie """
-
-    # class variables shared by all instances
-    template_name = TEMPLATE_COMPETITIE_UITSLAGEN_REGIO_ALT
-    url_name = 'Competitie:uitslagen-regio-n-alt'
-    url_switch = 'Competitie:uitslagen-regio-n'
-    order_gemiddelde = '-alt_gemiddelde'
-
-    def test_func(self):
-        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        # alle beheerders mogen deze lijst zien
-        rol_nu = rol_get_huidige(self.request)
-        is_beheerder = rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_WL)
-        return is_beheerder
-
-    def handle_no_permission(self):
-        """ gebruiker heeft geen toegang --> redirect naar het plein """
-        path = self.request.path.replace('/regio-alt/', '/regio/')
-        return HttpResponseRedirect(path)
-
-    def filter_zes_scores(self, deelnemers):
-        return deelnemers.filter(alt_aantal_scores__gte=6)
 
 
 class UitslagenRayonView(TemplateView):

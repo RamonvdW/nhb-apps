@@ -6,7 +6,7 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}schietmomenten{% endblock %}
+{% block title %}Schietmomenten{% endblock %}
 
 {% block pagina %}
     {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vereniging-schietmomenten" %}

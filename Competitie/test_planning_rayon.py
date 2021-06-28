@@ -13,7 +13,7 @@ from Overig.e2ehelpers import E2EHelpers
 from Schutter.models import SchutterBoog
 from Score.models import Score
 from Wedstrijden.models import WedstrijdLocatie, CompetitieWedstrijdUitslag
-from .models import (Competitie, DeelCompetitie, LAAG_REGIO, LAAG_RK,
+from .models import (Competitie, DeelCompetitie, LAAG_REGIO, LAAG_RK, LAAG_BK,
                      KampioenschapSchutterBoog, CompetitieKlasse, DeelcompetitieKlasseLimiet,
                      KampioenschapMutatie, DEELNAME_NEE, DEELNAME_JA, INSCHRIJF_METHODE_1,
                      RegioCompetitieSchutterBoog)
@@ -144,12 +144,12 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
 
         self.client.logout()
 
-        self.deelcomp_bond_18 = DeelCompetitie.objects.filter(laag='BK', competitie=self.comp_18)[0]
-        self.deelcomp_rayon1_18 = DeelCompetitie.objects.filter(laag='RK', competitie=self.comp_18, nhb_rayon=self.rayon_1)[0]
-        self.deelcomp_rayon2_18 = DeelCompetitie.objects.filter(laag='RK', competitie=self.comp_18, nhb_rayon=self.rayon_2)[0]
-        self.deelcomp_regio101_18 = DeelCompetitie.objects.filter(laag='Regio', competitie=self.comp_18, nhb_regio=self.regio_101)[0]
-        self.deelcomp_regio101_25 = DeelCompetitie.objects.filter(laag='Regio', competitie=self.comp_25, nhb_regio=self.regio_101)[0]
-        self.deelcomp_regio112_18 = DeelCompetitie.objects.filter(laag='Regio', competitie=self.comp_18, nhb_regio=self.regio_112)[0]
+        self.deelcomp_bond_18 = DeelCompetitie.objects.filter(laag=LAAG_BK, competitie=self.comp_18)[0]
+        self.deelcomp_rayon1_18 = DeelCompetitie.objects.filter(laag=LAAG_RK, competitie=self.comp_18, nhb_rayon=self.rayon_1)[0]
+        self.deelcomp_rayon2_18 = DeelCompetitie.objects.filter(laag=LAAG_RK, competitie=self.comp_18, nhb_rayon=self.rayon_2)[0]
+        self.deelcomp_regio101_18 = DeelCompetitie.objects.filter(laag=LAAG_REGIO, competitie=self.comp_18, nhb_regio=self.regio_101)[0]
+        self.deelcomp_regio101_25 = DeelCompetitie.objects.filter(laag=LAAG_REGIO, competitie=self.comp_25, nhb_regio=self.regio_101)[0]
+        self.deelcomp_regio112_18 = DeelCompetitie.objects.filter(laag=LAAG_REGIO, competitie=self.comp_18, nhb_regio=self.regio_112)[0]
 
         self.cluster_101a = NhbCluster.objects.get(regio=self.regio_101, letter='a', gebruik='18')
 

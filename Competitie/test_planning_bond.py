@@ -319,6 +319,17 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
 
         self.assertTrue(str(self.deelcomp_bond_18) != '')
 
+        deelcomp_bk_18 = DeelCompetitie.objects.get(competitie=self.comp_18,
+                                                    laag=LAAG_BK)
+        objs = KampioenschapSchutterBoog.objects.filter(deelcompetitie=deelcomp_bk_18)
+        self.assertEqual(objs.count(), 0)       # worden nog niet gemaakt, dus 0
+
+        team_klasse = CompetitieKlasse.objects.filter(indiv=None)[0]
+        deeln_bk = KampioenschapSchutterBoog(deelcompetitie=deelcomp_bk_18,
+                                             schutterboog=self.schutterboog,
+                                             klasse=team_klasse)
+        self.assertTrue(str(deeln_bk) != '')
+
     def test_doorzetten_bad(self):
         # moet BKO zijn
         self.e2e_login_and_pass_otp(self.account_bb)

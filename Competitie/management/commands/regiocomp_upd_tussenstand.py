@@ -28,7 +28,6 @@ class Command(BaseCommand):
         self.taken = CompetitieTaken.objects.all()[0]
 
         self.pk2scores = dict()         # [RegioCompetitieSchutterBoog.pk] = [tup, ..] with tup = (afstand, score)
-        self.pk2scores_alt = dict()
 
         self._onbekend2beter = dict()   # [competitieklasse.pk] = [klasse, ..] met oplopend AG
 
@@ -163,10 +162,9 @@ class Command(BaseCommand):
     def _vind_scores(self):
         """ zoek alle recent ingevoerde scores en bepaal van welke schuttersboog
             de tussenstand bijgewerkt moet worden.
-            Vult pk2scores en pk2scores_alt.
+            Vult pk2scores.
         """
         self.pk2scores = dict()
-        self.pk2scores_alt = dict()
 
         scorehist_latest = ScoreHist.objects.latest('pk')
         # als hierna een extra ScoreHist aangemaakt wordt dan verwerken we een record
@@ -218,12 +216,6 @@ class Command(BaseCommand):
         rondes.sort()
 
         for _, _, ronde in rondes:
-            is_alt = ronde.is_voor_import_oude_programma()
-
-            # tijdelijk: de geïmporteerde uitslagen zijn de normale
-            #            de handmatig ingevoerde scores zijn het alternatief
-            is_alt = not is_alt     # FUTURE: schakelaar omzetten als we geen import meer doen
-
             # sorteer de beschikbare scores op het moment van de wedstrijd
             for wedstrijd in (ronde
                               .plan
@@ -243,17 +235,15 @@ class Command(BaseCommand):
                         tup = (uitslag.afstand_meter, score)
                         pk = score.schutterboog.pk
                         if pk in allowed_schutterboog_pks:   # presumed better than huge __in
-                            pk2scores = self.pk2scores_alt if is_alt else self.pk2scores
                             try:
-                                pk2scores[pk].append(tup)
+                                self.pk2scores[pk].append(tup)
                             except KeyError:
-                                pk2scores[pk] = [tup]
+                                self.pk2scores[pk] = [tup]
                     # for
             # for
         # for
 
-        self.stdout.write('[INFO] Aantallen: pk2scores=%s, pk2scores_alt=%s' % (
-                               len(self.pk2scores), len(self.pk2scores_alt)))
+        self.stdout.write('[INFO] Aantallen: pk2scores=%s' % len(self.pk2scores))
 
     @staticmethod
     def _bepaal_laagste_nr(waardes):
@@ -311,12 +301,6 @@ class Command(BaseCommand):
                 found = False
                 try:
                     tups.extend(self.pk2scores[pk])
-                    found = True
-                except KeyError:
-                    pass
-
-                try:
-                    tups.extend(self.pk2scores_alt[pk])
                     found = True
                 except KeyError:
                     pass
@@ -387,28 +371,6 @@ class Command(BaseCommand):
                                         deelnemer.klasse = klasse
                                         break
                                 # for
-
-                    try:
-                        tups = self.pk2scores_alt[pk]
-                    except KeyError:
-                        waardes = list()
-                    else:
-                        # door waarde te filteren op max_score voorkomen we problemen
-                        # die anders pas naar boven komen tijdens de save()
-                        waardes = [score.waarde for afstand, score in tups if score.waarde != SCORE_WAARDE_VERWIJDERD and afstand == comp_afstand]
-
-                    waardes.extend([0, 0, 0, 0, 0, 0, 0])
-                    waardes = waardes[:7]
-                    deelnemer.alt_score1 = waardes[0]
-                    deelnemer.alt_score2 = waardes[1]
-                    deelnemer.alt_score3 = waardes[2]
-                    deelnemer.alt_score4 = waardes[3]
-                    deelnemer.alt_score5 = waardes[4]
-                    deelnemer.alt_score6 = waardes[5]
-                    deelnemer.alt_score7 = waardes[6]
-                    deelnemer.alt_aantal_scores = len(waardes) - waardes.count(0)
-                    deelnemer.alt_laagste_score_nr, laagste = self._bepaal_laagste_nr(waardes)
-                    deelnemer.alt_gemiddelde, deelnemer.alt_totaal = self._bepaal_gemiddelde_en_totaal(waardes, laagste, pijlen_per_ronde)
 
                     deelnemer.save()
                     count += 1

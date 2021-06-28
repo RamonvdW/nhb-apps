@@ -29,8 +29,7 @@ def maak_deelcompetitie_ronde(deelcomp, cluster=None):
             .filter(deelcompetitie=deelcomp, cluster=cluster)
             .order_by('-week_nr'))
 
-    # filter de import rondes eruit
-    objs = [obj for obj in objs if not obj.is_voor_import_oude_programma()]
+    objs = list(objs)
 
     if len(objs) > 0:
         nieuwe_week_nr = objs[0].week_nr + 1

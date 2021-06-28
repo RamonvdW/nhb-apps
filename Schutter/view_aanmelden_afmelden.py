@@ -111,7 +111,11 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
                             ag_voor_indiv=ag)
 
         bepaler = KlasseBepaler(deelcomp.competitie)
-        bepaler.bepaal_klasse_deelnemer(aanmelding)
+        try:
+            bepaler.bepaal_klasse_deelnemer(aanmelding)
+        except LookupError:
+            raise Http404('Geen passende wedstrijdklasse')
+
         context['wedstrijdklasse'] = aanmelding.klasse.indiv.beschrijving
         context['is_klasse_onbekend'] = aanmelding.klasse.indiv.is_onbekend
         del aanmelding
@@ -142,9 +146,8 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
                           .objects
                           .select_related('plan')
                           .filter(deelcompetitie=deelcomp)):
-                if not ronde.is_voor_import_oude_programma():
-                    # toon de HWL alle wedstrijden in de regio, dus alle clusters
-                    pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
+                # toon de HWL alle wedstrijden in de regio, dus alle clusters
+                pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
             # for
 
             wedstrijden = (CompetitieWedstrijd
@@ -158,11 +161,12 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
         if methode == INSCHRIJF_METHODE_3:
             context['dagdelen'] = DAGDELEN
             if deelcomp.toegestane_dagdelen != '':
+                dagdelen_spl = deelcomp.toegestane_dagdelen.split(',')
                 context['dagdelen'] = list()
                 for dagdeel in DAGDELEN:
                     # dagdeel = tuple(code, beschrijving)
                     # code = GN / AV / ZA / ZO / WE
-                    if dagdeel[0] in deelcomp.toegestane_dagdelen:
+                    if dagdeel[0] in dagdelen_spl:
                         context['dagdelen'].append(dagdeel)
                 # for
 
@@ -269,7 +273,10 @@ class RegiocompetitieAanmeldenView(View):
                 aanmelding.ag_voor_team_mag_aangepast_worden = False
 
         bepaler = KlasseBepaler(deelcomp.competitie)
-        bepaler.bepaal_klasse_deelnemer(aanmelding)
+        try:
+            bepaler.bepaal_klasse_deelnemer(aanmelding)
+        except LookupError:
+            raise Http404('Geen passende wedstrijdklasse')
 
         udvl = deelcomp.competitie.uiterste_datum_lid       # uiterste datum van lidmaatschap
         dvl = schutterboog.nhblid.sinds_datum               # datum van lidmaatschap
@@ -287,10 +294,11 @@ class RegiocompetitieAanmeldenView(View):
         # kijk of er velden van een formulier bij zitten
         if methode == INSCHRIJF_METHODE_3:
             aanmelding.inschrijf_voorkeur_dagdeel = ''
+            dagdelen_spl = deelcomp.toegestane_dagdelen.split(',')
 
             dagdeel = request.POST.get('dagdeel', '')
             if dagdeel in DAGDEEL_AFKORTINGEN:
-                if dagdeel in deelcomp.toegestane_dagdelen or deelcomp.toegestane_dagdelen == '':
+                if deelcomp.toegestane_dagdelen == '' or dagdeel in dagdelen_spl:
                     aanmelding.inschrijf_voorkeur_dagdeel = dagdeel
 
             if aanmelding.inschrijf_voorkeur_dagdeel == '':
@@ -310,9 +318,8 @@ class RegiocompetitieAanmeldenView(View):
                           .objects
                           .select_related('plan')
                           .filter(deelcompetitie=deelcomp)):
-                if not ronde.is_voor_import_oude_programma():
-                    # sta alle wedstrijden in de regio toe, dus alle clusters
-                    pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
+                # sta alle wedstrijden in de regio toe, dus alle clusters
+                pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
             # for
             wedstrijden = list()
             for pk in pks:
@@ -411,8 +418,7 @@ class SchutterSchietmomentenView(UserPassesTestMixin, TemplateView):
                                       'plan')
                       .prefetch_related('plan__wedstrijden')
                       .filter(deelcompetitie=deelnemer.deelcompetitie)):
-            if not ronde.is_voor_import_oude_programma():
-                pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
+            pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
         # for
 
         wedstrijden = (CompetitieWedstrijd
@@ -477,8 +483,7 @@ class SchutterSchietmomentenView(UserPassesTestMixin, TemplateView):
                                       'plan')
                       .prefetch_related('plan__wedstrijden')
                       .filter(deelcompetitie=deelnemer.deelcompetitie)):
-            if not ronde.is_voor_import_oude_programma():
-                pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
+            pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
         # for
 
         # zoek alle wedstrijden erbij

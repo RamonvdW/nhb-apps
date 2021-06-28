@@ -686,7 +686,7 @@ class LijstRkSelectieAlsBestandView(LijstRkSelectieView):
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="rayon%s_alle.csv"' % deelcomp_rk.nhb_rayon.rayon_nr
 
-        writer = csv.writer(response)
+        writer = csv.writer(response, delimiter=";")      # ; is good for dutch regional settings
         writer.writerow(['Rank', 'NHB nummer', 'Naam', 'Vereniging', 'Label', 'Klasse', 'Gemiddelde'])
 
         for deelnemer in deelnemers:

@@ -1,5 +1,5 @@
 {% comment %}
-                Copyright (c) 2020 Ramon van der Winkel.
+                Copyright (c) 2020-2021 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -27,8 +27,6 @@
             <a class="btn-nhb-blauw margin-5 btn-small {% if filter == 'clusters' %}disabled{% endif %}" href="{{ url_clusters }}">Clusters</a>
             <span>&nbsp;</span>
             <a class="btn-nhb-blauw margin-5 btn-small {% if filter == 'competitie' %}disabled{% endif %}" href="{{ url_competitie }}">Competitie</a>
-            <span>&nbsp;</span>
-            <a class="btn-nhb-blauw margin-5 btn-small {% if filter == 'import' %}disabled{% endif %}" href="{{ url_import }}">Import oude site</a>
             <span>&nbsp;</span>
             <a class="btn-nhb-blauw margin-5 btn-small {% if filter == 'uitrol' %}disabled{% endif %}" href="{{ url_uitrol }}">Uitrol</a>
         </div>

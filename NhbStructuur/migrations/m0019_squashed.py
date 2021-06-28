@@ -79,18 +79,6 @@ def init_regios(apps, _):
     regio_klas.objects.bulk_create(bulk)
 
 
-def maak_regio_clusters(cluster_klas, regio, gebruik, letters):
-    new_clusters = list()
-    for letter in letters:
-        cluster = cluster_klas(
-                        regio=regio,
-                        gebruik=gebruik,
-                        letter=letter)
-        new_clusters.append(cluster)
-    # for
-    return new_clusters
-
-
 def init_clusters(apps, _):
     """ Maak de standaard clusters aan in elke regio """
 

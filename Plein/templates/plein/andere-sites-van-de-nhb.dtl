@@ -7,30 +7,25 @@
 
 <!-- andere sites van de NHB -->
 
-<div class="nhb-card">
-    <a href="https://www.handboogsport.nl" target="_blank" rel="noopener noreferrer">
-        <div class="nhb-card-content">
-            <div class="card-title center-align">Handboogsport NL</div>
-            <div class="center-align">
-                <img src="{% static 'plein/logo_nhb_192x192.png' %}" height="85" alt="logo">
-            </div>
-            <div class="card-text">Hoofdwebsite van de NHB met informatie, publicaties en nieuws.</div>
-        </div>
-    </a>
-</div>
+
+<!-- hoofd site -->
+{% static 'plein/logo_nhb_192x192.png' as img_src %}
+{% include 'plein/card_logo.dtl' with title="Handboogsport NL" text="Hoofdwebsite van de NHB met informatie, publicaties en nieuws." img_src=img_src img_height="85" url="https://www.handboogsport.nl" extern_open=True %}
 
 
-<div class="nhb-card">
-    <a class="nhb-klikbare-balk" href="https://www.handboogsport.nl/freeyourmind/" target="_blank" rel="noopener noreferrer">
-        <div class="nhb-card-content">
-            <div class="card-title center-align">Free your mind</div>
-            <div class="center-align">
-                <img src="{% static 'plein/logo_hero_512x512.png' %}" height="85" alt="logo">
-            </div>
-            <div class="card-text">Wil je zelf beginnen met handboogschieten? Deze site helpt je op gang.</div>
-        </div>
-    </a>
-</div>
+<!-- Lowlands Archery Series -->
+{% static 'plein/logo_lowlands.png' as img_src %}
+{% include 'plein/card_logo.dtl' with title="Lowlands Series" text="Wedstrijden volgens internationaal format, met finales en prijzengeld." img_src=img_src img_height="85" img_style="padding:10px" url="https://www.handboogsport.nl/lowlands-shootout/home/" extern_open=True %}
+
+
+<!-- JeugdFita Cup -->
+{% static 'plein/logo_jeugdfita_200x228.png' as img_src %}
+{% include 'plein/card_logo.dtl' with title="JeugdFita Cup" text="Outdoor wedstrijden speciaal voor de jeugd tot en met 20 jaar." img_src=img_src img_height="85" url="https://www.handboogsport.nl/jeugdfita/" extern_open=True %}
+
+
+<!-- Free Your Mind -->
+{% static 'plein/logo_hero_512x512.png' as img_src %}
+{% include 'plein/card_logo.dtl' with title="Free your mind" text="Wil je zelf beginnen met handboogschieten? Deze site helpt je op gang." img_src=img_src img_height="85" url="https://www.handboogsport.nl/freeyourmind/" extern_open=True %}
 
 
 <!-- end of file -->

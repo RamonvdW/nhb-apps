@@ -14,8 +14,7 @@ from Functie.models import maak_functie
 from .models import (Competitie, DeelCompetitie, CompetitieKlasse, KampioenschapMutatie,
                      INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2, INSCHRIJF_METHODE_3,
                      DAGDEEL_AFKORTINGEN)
-from .operations import (bepaal_startjaar_nieuwe_competitie, competities_aanmaken,
-                         aanvangsgemiddelden_vaststellen_voor_afstand,
+from .operations import (competities_aanmaken, aanvangsgemiddelden_vaststellen_voor_afstand,
                          competitie_klassegrenzen_vaststellen)
 from .test_fase import zet_competitie_fase
 import datetime

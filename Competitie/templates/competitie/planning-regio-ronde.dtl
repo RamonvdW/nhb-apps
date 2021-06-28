@@ -102,7 +102,7 @@
 
             <tr>
                 <td>Beschrijving</td>
-                {% if readonly or vaste_beschrijving %}
+                {% if readonly %}
                     <td>{{ ronde.beschrijving }}</td>
                 {% else %}
                     <td class="input-field" oninput="gewijzigd()">
@@ -131,15 +131,13 @@
         <thead>
             <tr>
                 <th>Wanneer</th>
-                {% if not vaste_beschrijving %}     <!-- import -->
-                    <th>Waar</th>
-                    <th>Organisatie</th>
-                    {% if heeft_wkl %}
-                        <th>Wedstrijdklassen</th>
-                        <th>Capaciteit</th>
-                    {% endif %}
-                    <th><!-- kolom voor wijzig knoppen --></th>
+                <th>Waar</th>
+                <th>Organisatie</th>
+                {% if heeft_wkl %}
+                    <th>Wedstrijdklassen</th>
+                    <th>Capaciteit</th>
                 {% endif %}
+                <th><!-- kolom voor wijzig knoppen --></th>
             </tr>
         </thead>
 
@@ -147,46 +145,44 @@
             <tr>
                 <td>{{ wedstrijd.datum_wanneer|date:"l j F Y" }} om {{ wedstrijd.tijd_begin_wedstrijd }}</td>
 
-                {% if not vaste_beschrijving %}
-                    <!-- Waar -->
-                    <td>
-                        {% if wedstrijd.locatie %}
-                            <span>{{ wedstrijd.locatie.plaats }}</span>
-                        {% else %}
-                            <i class="red-text">Onbekend</i>
-                        {% endif %}
-                    </td>
-
-                    <!-- Organisatie -->
-                    <td>
-                        {% if wedstrijd.vereniging %}
-                            <span>{{ wedstrijd.vereniging }}</span>
-                        {% else %}
-                            <i class="red-text">Onbekend</i>
-                        {% endif %}
-                    </td>
-
-                    {% if heeft_wkl %}
-                        <td>
-                            {% for wkl in wedstrijd.indiv_klassen.all %}
-                                <span>{{ wkl.beschrijving }}</span><br>
-                            {% endfor %}
-                            {% for wkl in wedstrijd.team_klassen.all %}
-                                <span>{{ wkl.beschrijving }}</span><br>
-                            {% endfor %}
-                        </td>
-
-                        <td>Nodig: {{ wedstrijd.aantal_schutters }}<br>Maximum: ?</td>
+                <!-- Waar -->
+                <td>
+                    {% if wedstrijd.locatie %}
+                        <span>{{ wedstrijd.locatie.plaats }}</span>
+                    {% else %}
+                        <i class="red-text">Onbekend</i>
                     {% endif %}
+                </td>
 
-                    <!-- knop om wedstrijd te wijzigen -->
+                <!-- Organisatie -->
+                <td>
+                    {% if wedstrijd.vereniging %}
+                        <span>{{ wedstrijd.vereniging }}</span>
+                    {% else %}
+                        <i class="red-text">Onbekend</i>
+                    {% endif %}
+                </td>
+
+                {% if heeft_wkl %}
                     <td>
-                        {% if wedstrijd.url_wijzig %}
-                            <a class="btn-nhb-blauw btn-small" href="{{ wedstrijd.url_wijzig }}">
-                                <i class="material-icons-round left">arrow_forward</i>Aanpassen</a>
-                        {% endif %}
+                        {% for wkl in wedstrijd.indiv_klassen.all %}
+                            <span>{{ wkl.beschrijving }}</span><br>
+                        {% endfor %}
+                        {% for wkl in wedstrijd.team_klassen.all %}
+                            <span>{{ wkl.beschrijving }}</span><br>
+                        {% endfor %}
                     </td>
+
+                    <td>Nodig: {{ wedstrijd.aantal_schutters }}<br>Maximum: ?</td>
                 {% endif %}
+
+                <!-- knop om wedstrijd te wijzigen -->
+                <td>
+                    {% if wedstrijd.url_wijzig %}
+                        <a class="btn-nhb-blauw btn-small" href="{{ wedstrijd.url_wijzig }}">
+                            <i class="material-icons-round left">arrow_forward</i>Aanpassen</a>
+                    {% endif %}
+                </td>
             </tr>
         {% endfor %}
 

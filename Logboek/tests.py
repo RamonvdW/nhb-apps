@@ -161,14 +161,6 @@ class TestLogboek(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assertContains(resp, 'Rollen met die hap')
 
-        # import
-        with self.assert_max_queries(4):
-            resp = self.client.get(self.logboek_url + 'import-oude-site/')
-        self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_template_used(resp, ('logboek/import_oude_site.dtl', 'plein/site_layout.dtl'))
-        self.assert_html_ok(resp)
-        self.assertContains(resp, 'Valt onder Import')
-
     def test_pagination(self):
         self.e2e_login_and_pass_otp(self.account_admin)
         self.assertTrue(self.account_admin.is_staff)

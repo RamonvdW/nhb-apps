@@ -63,10 +63,6 @@ class RegioCompetitieSchutterBoogAdmin(admin.ModelAdmin):
             {'fields': ('score1', 'score2', 'score3', 'score4', 'score5', 'score6', 'score7',
                         'aantal_scores', 'laagste_score_nr', 'totaal', 'gemiddelde')
              }),
-        ('Alternatieve Uitslag',
-            {'fields': ('alt_score1', 'alt_score2', 'alt_score3', 'alt_score4', 'alt_score5', 'alt_score6', 'alt_score7',
-                        'alt_aantal_scores', 'alt_laagste_score_nr', 'alt_totaal', 'alt_gemiddelde')
-             }),
     )
 
     readonly_fields = ('deelcompetitie',
@@ -114,9 +110,8 @@ class RegioCompetitieSchutterBoogAdmin(admin.ModelAdmin):
                           .objects
                           .select_related('plan')
                           .filter(deelcompetitie=self.obj.deelcompetitie)):
-                if not ronde.is_voor_import_oude_programma():
-                    # sta alle wedstrijden in de regio toe, dus alle clusters
-                    pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
+                # sta alle wedstrijden in de regio toe, dus alle clusters
+                pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
             # for
             kwargs['queryset'] = (CompetitieWedstrijd
                                   .objects

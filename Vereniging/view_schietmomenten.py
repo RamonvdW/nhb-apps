@@ -58,8 +58,7 @@ class LedenSchietmomentView(UserPassesTestMixin, TemplateView):
                                       'plan')
                       .prefetch_related('plan__wedstrijden')
                       .filter(deelcompetitie=deelcomp)):
-            if not ronde.is_voor_import_oude_programma():
-                pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
+            pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
         # for
 
         wedstrijden = (CompetitieWedstrijd

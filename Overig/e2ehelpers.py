@@ -685,10 +685,13 @@ class E2EHelpers(object):
         self.assertEqual(resp.status_code, 200)
         self.assert_template_used(resp, ('plein/fout_403.dtl', 'plein/site_layout_minimaal.dtl'))
 
-    def assert404(self, resp):
+    def assert404(self, resp, expected_msg=''):
         # self.assertEqual(resp.status_code, 404)
         # controleer dat we op de speciale code-404 handler pagina gekomen zijn
         self.assertEqual(resp.status_code, 200)
         self.assert_template_used(resp, ('plein/fout_404.dtl', 'plein/site_layout_minimaal.dtl'))
+        if expected_msg:
+            assert isinstance(self, TestCase)
+            self.assertContains(resp, expected_msg)
 
 # end of file

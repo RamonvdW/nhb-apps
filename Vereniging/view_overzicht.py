@@ -124,7 +124,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                 kaartje = SimpleNamespace()
                 kaartje.heading = comp.beschrijving
                 kaartjes.append(kaartje)
-                
+
                 prev_jaar = begin_jaar
                 prev_afstand = comp.afstand
 

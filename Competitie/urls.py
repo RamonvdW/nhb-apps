@@ -95,6 +95,14 @@ urlpatterns = [
          views_aangemeld.Inschrijfmethode3BehoefteAlsBestandView.as_view(),
          name='inschrijfmethode3-behoefte-als-bestand'),
 
+    path('<comp_pk>/lijst-regiocompetitie/regio-<regio_pk>/gemaakte-keuzes/',
+         views_aangemeld.Inschrijfmethode1BehoefteView.as_view(),
+         name='inschrijfmethode1-behoefte'),
+
+    path('<comp_pk>/lijst-regiocompetitie/regio-<regio_pk>/gemaakte-keuzes-als-bestand/',
+         views_aangemeld.Inschrijfmethode1BehoefteAlsBestandView.as_view(),
+         name='inschrijfmethode1-behoefte-als-bestand'),
+
     path('<comp_pk>/lijst-regiocompetitie/alles/',
          views_aangemeld.LijstAangemeldRegiocompAllesView.as_view(),
          name='lijst-regiocomp-alles'),
@@ -233,14 +241,6 @@ urlpatterns = [
     path('<comp_pk>/uitslagen/<comp_boog>/<zes_scores>/regio/',
          views_uitslagen.UitslagenRegioView.as_view(),
          name='uitslagen-regio'),
-
-    path('<comp_pk>/uitslagen/<comp_boog>/<zes_scores>/regio-alt/<regio_nr>/',
-         views_uitslagen.UitslagenRegioAltView.as_view(),
-         name='uitslagen-regio-n-alt'),
-
-    path('<comp_pk>/uitslagen/<comp_boog>/<zes_scores>/regio-alt/',
-         views_uitslagen.UitslagenRegioAltView.as_view(),
-         name='uitslagen-regio-alt'),
 
     path('<comp_pk>/uitslagen/<comp_boog>/rayon/',
          views_uitslagen.UitslagenRayonView.as_view(),

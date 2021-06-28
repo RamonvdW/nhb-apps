@@ -12,7 +12,7 @@ from Schutter.models import SchutterBoog
 from Score.models import Score
 from Wedstrijden.models import CompetitieWedstrijd, CompetitieWedstrijdUitslag
 from .models import (Competitie, DeelCompetitie, CompetitieKlasse,
-                     DeelcompetitieRonde, RegioCompetitieSchutterBoog, AG_NUL)
+                     DeelcompetitieRonde, RegioCompetitieSchutterBoog, AG_NUL, LAAG_REGIO)
 from .operations import competities_aanmaken
 from Overig.e2ehelpers import E2EHelpers
 import datetime
@@ -142,8 +142,8 @@ class TestCompetitieScores(E2EHelpers, TestCase):
         resp = self.client.post(url_vaststellen % self.comp_25.pk)
         self.assert_is_redirect_not_plein(resp)     # check success
 
-        self.deelcomp_regio101_18 = DeelCompetitie.objects.filter(laag='Regio', competitie=self.comp_18, nhb_regio=self.regio_101)[0]
-        self.deelcomp_regio101_25 = DeelCompetitie.objects.filter(laag='Regio', competitie=self.comp_25, nhb_regio=self.regio_101)[0]
+        self.deelcomp_regio101_18 = DeelCompetitie.objects.filter(laag=LAAG_REGIO, competitie=self.comp_18, nhb_regio=self.regio_101)[0]
+        self.deelcomp_regio101_25 = DeelCompetitie.objects.filter(laag=LAAG_REGIO, competitie=self.comp_25, nhb_regio=self.regio_101)[0]
 
         self.cluster_101a = NhbCluster.objects.get(regio=self.regio_101, letter='a', gebruik='18')
 
@@ -746,11 +746,6 @@ class TestCompetitieScores(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-
-        # zet 1 ronde om voor het oude programma
-        ronde.beschrijving = 'Ronde 99 oude programma'
-        ronde.save()
-        self.assertTrue(ronde.is_voor_import_oude_programma())
 
         url = self.url_scores_regio % self.deelcomp_regio101_18.pk
         with self.assert_max_queries(20):

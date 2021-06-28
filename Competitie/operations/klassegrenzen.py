@@ -461,7 +461,8 @@ class KlasseBepaler(object):
             deelnemer.klasse = klasse
         else:
             # niet vast kunnen stellen
-            deelnemer.klasse = None
+            # deelnemer.klasse = None       # werkt niet, want ForeignKey kan je niet testen op None (geen DoesNotExist exceptie)
+            raise LookupError("Geen passende klasse")
 
 
 def competitie_klassegrenzen_vaststellen(comp):

@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
-from Competitie.models import DeelCompetitie
+from Competitie.models import DeelCompetitie, LAAG_BK, LAAG_RK, LAAG_REGIO
 from Competitie.operations import competities_aanmaken
 from Functie.models import maak_functie, Functie
 from Mailer.models import MailQueue
@@ -30,12 +30,12 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
         # creëer een competitie met deelcompetities
         competities_aanmaken(jaar=2019)
 
-        deel1 = DeelCompetitie.objects.filter(laag='BK')[0]
+        deel1 = DeelCompetitie.objects.filter(laag=LAAG_BK)[0]
         self.functie_bko1 = deel1.functie
-        self.functie_bko2 = DeelCompetitie.objects.filter(laag='BK')[1].functie
-        self.functie_rko1 = DeelCompetitie.objects.filter(laag='RK', competitie=deel1.competitie, nhb_rayon=rayon_1)[0].functie
-        self.functie_rcl101 = DeelCompetitie.objects.filter(laag='Regio', competitie=deel1.competitie, nhb_regio=regio_101)[0].functie
-        self.functie_rcl105 = DeelCompetitie.objects.filter(laag='Regio', competitie=deel1.competitie, nhb_regio=regio_105)[0].functie
+        self.functie_bko2 = DeelCompetitie.objects.filter(laag=LAAG_BK)[1].functie
+        self.functie_rko1 = DeelCompetitie.objects.filter(laag=LAAG_RK, competitie=deel1.competitie, nhb_rayon=rayon_1)[0].functie
+        self.functie_rcl101 = DeelCompetitie.objects.filter(laag=LAAG_REGIO, competitie=deel1.competitie, nhb_regio=regio_101)[0].functie
+        self.functie_rcl105 = DeelCompetitie.objects.filter(laag=LAAG_REGIO, competitie=deel1.competitie, nhb_regio=regio_105)[0].functie
 
         # maak een test vereniging
         ver = NhbVereniging()

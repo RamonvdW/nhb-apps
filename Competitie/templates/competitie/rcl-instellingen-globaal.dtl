@@ -19,6 +19,7 @@
             <tr>
                 <th class="center-align">Rayon</th>
                 <th class="center-align">Regio</th>
+                <th>Inschrijfmethode</th>
                 <th class="center-align">Teamcompetitie</th>
                 <th>Teams aanmaken tot</th>
                 <th>Team samenstelling</th>
@@ -30,6 +31,7 @@
             <tr{% if deelcomp.highlight %} class="nhb-blauw white-text"{% endif %}>
                 <td class="center-align">{{ deelcomp.rayon_str }}</td>
                 <td class="center-align">{{ deelcomp.regio_str }}</td>
+                <td>{{ deelcomp.inschrijfmethode_str }}</td>
                 <td class="center-align">{{ deelcomp.teamcomp_str }}</td>
                 <td>{{ deelcomp.einde_teams_aanmaken_str }}</td>
                 <td>{{ deelcomp.team_type_str }}</td>

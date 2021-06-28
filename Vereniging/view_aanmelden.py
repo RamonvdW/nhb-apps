@@ -94,7 +94,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
             if wedstrijdleeftijd == prev_wedstrijdleeftijd:
                 obj.leeftijdsklasse = prev_lkl
             else:
-                for lkl in (LeeftijdsKlasse
+                for lkl in (LeeftijdsKlasse                         # pragma: no branch
                             .objects
                             .filter(geslacht='M',
                                     min_wedstrijdleeftijd=0)        # exclude veteraan, master
@@ -264,9 +264,8 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                               .objects
                               .select_related('plan')
                               .filter(deelcompetitie=deelcomp)):
-                    if not ronde.is_voor_import_oude_programma():
-                        # toon de HWL alle wedstrijden in de regio, dus alle clusters
-                        pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
+                    # toon de HWL alle wedstrijden in de regio, dus alle clusters
+                    pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
                 # for
 
                 wedstrijden = (CompetitieWedstrijd
@@ -281,11 +280,12 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                 context['dagdelen'] = DAGDELEN
 
                 if deelcomp.toegestane_dagdelen != '':
+                    dagdelen_spl = deelcomp.toegestane_dagdelen.split(',')
                     context['dagdelen'] = list()
                     for dagdeel in DAGDELEN:
                         # dagdeel = tuple(code, beschrijving)
                         # code = GN / AV / ZA / ZO / WE / etc.
-                        if dagdeel[0] in deelcomp.toegestane_dagdelen:
+                        if dagdeel[0] in dagdelen_spl:
                             context['dagdelen'].append(dagdeel)
                     # for
 
@@ -339,9 +339,8 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                           .objects
                           .select_related('plan')
                           .filter(deelcompetitie=deelcomp)):
-                if not ronde.is_voor_import_oude_programma():
-                    # sta alle wedstrijden in de regio toe, dus alle clusters
-                    pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
+                # sta alle wedstrijden in de regio toe, dus alle clusters
+                pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
             # for
             for pk in pks:
                 key = 'wedstrijd_%s' % pk
@@ -429,14 +428,14 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                     ag = score.waarde / 1000
                     aanmelding.ag_voor_indiv = ag
                     aanmelding.ag_voor_team = ag
-                    if ag > AG_NUL:
-                        aanmelding.ag_voor_team_mag_aangepast_worden = False
+                    aanmelding.ag_voor_team_mag_aangepast_worden = False
                 # for
 
                 # zoek een toepasselijke klasse aan de hand van de leeftijd
-                bepaler.bepaal_klasse_deelnemer(aanmelding)
-                if not aanmelding.klasse:
-                    raise Http404('Geen passende wedstrijdklasse kunnen kiezen')
+                try:
+                    bepaler.bepaal_klasse_deelnemer(aanmelding)
+                except LookupError:
+                    raise Http404('Geen passende klasse')
 
                 # kijk of de schutter met een team mee wil en mag schieten voor deze competitie
                 if age > MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT and dvl < udvl:

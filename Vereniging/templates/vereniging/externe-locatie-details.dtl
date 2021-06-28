@@ -35,21 +35,36 @@
             }
         }
 
-        function show_hide_outdoor() {
+        function show_hide_buitenbanen() {
             const el_outdoor = document.getElementById('id_disc_outdoor')
-            const els = document.getElementsByClassName('outdoor-kan-verstoppen')
+            const els1 = document.getElementsByClassName('outdoor-kan-verstoppen')
 
             if (el_outdoor.checked) {
                 // toon de extra regels
-                Array.prototype.forEach.call(els, function (el) {
+                Array.prototype.forEach.call(els1, function (el) {
                     el.classList.remove('hide')
                 })
             } else {
                 // verstop de extra regels
-                Array.prototype.forEach.call(els, function (el) {
+                Array.prototype.forEach.call(els1, function (el) {
                     el.classList.add('hide')
                 })
             }
+
+            const el_veld = document.getElementById('id_disc_veld')
+            const els2 = document.getElementsByClassName('outdoor-veld-kan-verstoppen')
+            if (el_outdoor.checked || el_veld.checked) {
+                // toon de extra regels
+                Array.prototype.forEach.call(els2, function (el) {
+                    el.classList.remove('hide')
+                })
+            } else {
+                // verstop de extra regels
+                Array.prototype.forEach.call(els2, function (el) {
+                    el.classList.add('hide')
+                })
+            }
+
         }
 
         function gewijzigd() {
@@ -66,7 +81,7 @@
             el.disabled = false
             el.parentElement.style.display = "block"
 
-            show_hide_outdoor()
+            show_hide_buitenbanen()
             show_hide_binnenbanen()
         }
     </script>
@@ -163,7 +178,7 @@
 
                 <!-- OUTDOOR -->
 
-                <tr class="outdoor-kan-verstoppen nhb-grijs">
+                <tr class="outdoor-veld-kan-verstoppen nhb-grijs">
                     <td colspan="{% if readonly %}2{% else %}3{% endif %}">
                         <h6>Buitenbanen:</h6>
                     </td>
@@ -187,8 +202,8 @@
                     {% endif %}
                 </tr>
 
-                <tr class="outdoor-kan-verstoppen">
-                    <td>Aantal banen:</td>
+                <tr class="outdoor-veld-kan-verstoppen">
+                    <td>Aantal banen (maximaal):</td>
                     <td>
                         {% if readonly %}
                             <span>{{ locatie.buiten_banen }} banen</span>
@@ -327,7 +342,7 @@
 
     <script type="application/javascript">
         document.addEventListener("DOMContentLoaded", function() {
-            show_hide_outdoor()
+            show_hide_buitenbanen()
             show_hide_binnenbanen()
         })
     </script>

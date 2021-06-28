@@ -9,11 +9,9 @@ from BasisTypen.models import BoogType
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
 from Overig.e2ehelpers import E2EHelpers
-from Competitie.models import RegioCompetitieSchutterBoog
-from Competitie.test_fase import zet_competitie_fase
-from .models import (Competitie, DeelCompetitie,
-                     INSCHRIJF_METHODE_3, LAAG_REGIO, LAAG_RK, LAAG_BK)
+from .models import Competitie, DeelCompetitie, RegioCompetitieSchutterBoog, LAAG_REGIO, LAAG_RK, LAAG_BK
 from .operations import competities_aanmaken
+from .test_fase import zet_competitie_fase
 import datetime
 
 
@@ -116,8 +114,6 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.url_aangemeld_alles = '/bondscompetities/%s/lijst-regiocompetitie/alles/'      # comp_pk
         self.url_aangemeld_rayon = '/bondscompetities/%s/lijst-regiocompetitie/rayon-%s/'   # comp_pk, rayon_pk
         self.url_aangemeld_regio = '/bondscompetities/%s/lijst-regiocompetitie/regio-%s/'   # comp_pk, regio_pk
-        self.url_behoefte = '/bondscompetities/%s/lijst-regiocompetitie/regio-%s/dagdeel-behoefte/'  # comp_pk, regio_pk
-        self.url_behoefte_bestand = '/bondscompetities/%s/lijst-regiocompetitie/regio-%s/dagdeel-behoefte-als-bestand/'  # comp_pk, regio_pk
 
     def _doe_inschrijven(self, comp):
 
@@ -135,13 +131,6 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
             resp = self.client.post(url_klassegrenzen % self.comp_25.pk)
         self.assert_is_redirect_not_plein(resp)  # check for success
         # nu in fase A2
-
-        # zet de inschrijfmethode van regio 101 op 'methode 3', oftewel met dagdeel voorkeur
-        dagdelen = ['GN', 'ZAT', 'ZON']   # uit: DAGDEEL_AFKORTINGEN
-        deelcomp = DeelCompetitie.objects.filter(laag='Regio', nhb_regio=self.regio_101, competitie=comp)[0]
-        deelcomp.inschrijf_methode = INSCHRIJF_METHODE_3
-        deelcomp.toegestane_dagdelen = ",".join(dagdelen)
-        deelcomp.save()
 
         # zet de datum voor inschrijven op vandaag
         for comp in Competitie.objects.filter(is_afgesloten=False):
@@ -161,8 +150,8 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
 
             post_params = dict()
 
-            # maak net zoveel leden aan als er dagdeel afkortingen zijn
-            for lp in range(len(dagdelen)):
+            # maak 3 leden aan
+            for lp in range(3):
                 nhb_nr += 1
                 lid = NhbLid()
                 lid.nhb_nr = nhb_nr
@@ -215,7 +204,6 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
             # for
 
             # schrijf in voor de competitie
-            post_params['dagdeel'] = dagdelen.pop(-1)
             with self.assert_max_queries(23):
                 resp = self.client.post(url_inschrijven, post_params)
             self.assert_is_redirect_not_plein(resp)         # check for success
@@ -539,110 +527,6 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
             resp = self.client.post(url)
         self.assert404(resp)     # 404 = Not found
 
-    def test_behoefte_18(self):
-        comp = Competitie.objects.get(afstand='18')
-        functie_rcl = DeelCompetitie.objects.get(competitie=comp,
-                                                 laag=LAAG_REGIO,
-                                                 nhb_regio=self.regio_101).functie
-
-        self.e2e_login_and_pass_otp(self.account_bb)        # geen account_hwl
-        self.e2e_wisselnaarrol_bb()
-
-        self._doe_inschrijven(comp)     # wisselt naar HWL functies
-        self.e2e_wissel_naar_functie(functie_rcl)
-
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_behoefte % (comp.pk, self.regio_101.pk))
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/inschrijfmethode3-behoefte.dtl', 'plein/site_layout.dtl'))
-
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_behoefte_bestand % (comp.pk, self.regio_101.pk))
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        # self.e2e_dump_resp(resp)
-        csv_file = 'ver_nr,Naam,Geen voorkeur,Zaterdag,Zondag,Totaal\r\n1000,Grote Club,0,0,3,3\r\n1100,Kleine Club,0,2,0,2\r\n-,Totalen,0,2,3,5\r\n-,-,-,-,-,-\r\n-,Blazoen type,Geen voorkeur,Zaterdag,Zondag,Totaal\r\n-,40cm,0,1,0,1\r\n-,DT Compound,0,0,1,1\r\n-,DT Recurve (wens),0,1,1,2\r\n-,60cm,0,0,1,1\r\n'
-        self.assertContains(resp, csv_file, msg_prefix="(was: %s)" % resp.content)
-
-        # creëer een beetje puinhoop
-        self._ver2.regio = NhbRegio.objects.get(pk=102)
-        self._ver2.save()
-
-        obj = RegioCompetitieSchutterBoog.objects.filter(bij_vereniging=self._ver).all()[0]
-        obj.inschrijf_voorkeur_dagdeel = 'XX'
-        obj.save()
-
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_behoefte % (comp.pk, self.regio_101.pk))
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/inschrijfmethode3-behoefte.dtl', 'plein/site_layout.dtl'))
-
-    def test_behoefte_25(self):
-        comp = Competitie.objects.filter(afstand='25').all()[0]
-        functie_rcl = DeelCompetitie.objects.get(competitie=comp, laag=LAAG_REGIO, nhb_regio=self.regio_101).functie
-
-        self.e2e_login_and_pass_otp(self.account_bb)        # geen account_hwl
-        self.e2e_wisselnaarrol_bb()
-
-        self._doe_inschrijven(comp)     # wisselt naar HWL functies
-        self.e2e_wissel_naar_functie(functie_rcl)
-
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_behoefte % (comp.pk, self.regio_101.pk))
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/inschrijfmethode3-behoefte.dtl', 'plein/site_layout.dtl'))
-
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_behoefte_bestand % (comp.pk, self.regio_101.pk))
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        # self.e2e_dump_resp(resp)
-        csv_file = 'ver_nr,Naam,Geen voorkeur,Zaterdag,Zondag,Totaal\r\n1000,Grote Club,0,0,3,3\r\n1100,Kleine Club,0,2,0,2\r\n-,Totalen,0,2,3,5\r\n-,-,-,-,-,-\r\n-,Blazoen type,Geen voorkeur,Zaterdag,Zondag,Totaal\r\n-,60cm,0,2,2,4\r\n-,60cm Compound,0,0,1,1\r\n'
-        self.assertContains(resp, csv_file)
-
-        # creëer een beetje puinhoop
-        self._ver2.regio = NhbRegio.objects.get(pk=102)
-        self._ver2.save()
-
-        obj = RegioCompetitieSchutterBoog.objects.filter(bij_vereniging=self._ver).all()[0]
-        obj.inschrijf_voorkeur_dagdeel = 'XX'
-        obj.save()
-
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_behoefte % (comp.pk, self.regio_101.pk))
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/inschrijfmethode3-behoefte.dtl', 'plein/site_layout.dtl'))
-
-        # landelijk
-        url = self.url_aangemeld_alles % comp.pk
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/lijst-aangemeld-regio.dtl', 'plein/site_layout.dtl'))
-
-    def test_bad_hwl(self):
-        comp = Competitie.objects.get(afstand=18)       # let op: 25 werkt niet
-
-        self.e2e_login_and_pass_otp(self.account_bb)        # geen account_hwl
-        self.e2e_wisselnaarrol_bb()
-        self._doe_inschrijven(comp)     # wisselt naar HWL functie
-
-        self.e2e_wissel_naar_functie(self.functie_hwl)
-
-        # landelijk
-        zet_competitie_fase(comp, 'C')
-        comp.bepaal_fase()
-        self.assertEqual(comp.fase, 'C')
-
-        # als HWL is deze pagina niet beschikbaar
-        url = self.url_behoefte % (999999, 101)
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert403(resp)
-
     def test_bad_rcl(self):
         comp = Competitie.objects.get(afstand='25')
         functie_rcl = DeelCompetitie.objects.get(competitie=comp,
@@ -674,50 +558,6 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.assert404(resp)     # 404 = Not found
 
         url = self.url_aangemeld_regio % (comp.pk, 999999)
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert404(resp)     # 404 = Not found
-
-        # competitie bestaat niet
-        url = self.url_behoefte % (999999, 101)
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert404(resp)     # 404 = Not found
-
-        url = self.url_behoefte_bestand % (999999, 101)
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert404(resp)     # 404 = Not found
-
-        # regio bestaat niet
-        url = self.url_behoefte % (comp.pk, 999999)
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert404(resp)     # 404 = Not found
-
-        url = self.url_behoefte_bestand % (comp.pk, 999999)
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert404(resp)     # 404 = Not found
-
-        # deelcomp bestaat niet
-        url = self.url_behoefte % (comp.pk, 100)
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert404(resp)     # 404 = Not found
-
-        url = self.url_behoefte_bestand % (comp.pk, 100)
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert404(resp)     # 404 = Not found
-
-        # correct, maar niet inschrijfmethode 3
-        url = self.url_behoefte % (comp.pk, 101)
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert404(resp)     # 404 = Not found
-
-        url = self.url_behoefte_bestand % (comp.pk, 101)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assert404(resp)     # 404 = Not found
