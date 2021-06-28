@@ -34,6 +34,7 @@ class Command(BaseCommand):
 
         alle.sort(reverse=True)             # hoogste gemiddelde eerst
 
+        # herstel gaten in de ranking (komt door verwijderen dubbele scores)
         rank = 1
         for _, _, _, obj in alle:
             obj.rank = rank
@@ -42,7 +43,7 @@ class Command(BaseCommand):
         # for
 
     def handle(self, *args, **options):
-        for histcomp in HistCompetitie.objects.all():
+        for histcomp in HistCompetitie.objects.order_by('seizoen', 'comp_type'):
             self.stdout.write('Corrigeer %s - %sm - %s' % (histcomp.seizoen, histcomp.comp_type, histcomp.klasse))
             self._corrigeer(histcomp)
         # for

@@ -61,6 +61,11 @@ class Command(BaseCommand):
 
         return histcompetitie
 
+    def _verwijder_eerdere_import(self, seizoen, comptype):
+        objs = HistCompetitie.objects.filter(seizoen=seizoen, comp_type=comptype)
+        if len(objs):
+            objs.delete()
+
     @staticmethod
     def _convert_scores(scores):
         aantal = 0
@@ -316,6 +321,8 @@ class Command(BaseCommand):
 
         linecount = len(lines)
 
+        # verwijder de eerder geïmporteerde uitslag
+        self._verwijder_eerdere_import(seizoen, comptype)
         self._import(lines, seizoen, comptype)
         self._delete_dupes()
 
