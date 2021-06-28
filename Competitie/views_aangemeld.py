@@ -801,7 +801,8 @@ class Inschrijfmethode1BehoefteAlsBestandView(Inschrijfmethode1BehoefteView):
                                           'schutterboog',
                                           'schutterboog__nhblid')
                           .filter(deelcompetitie=deelcomp)
-                          .order_by('bij_vereniging__ver_nr')):
+                          .order_by('bij_vereniging__ver_nr',
+                                    'schutterboog__nhblid__nhb_nr')):
 
             pks = list(deelnemer.inschrijf_gekozen_wedstrijden.values_list('pk', flat=True))        # TODO: 1 query per deelnemer
 

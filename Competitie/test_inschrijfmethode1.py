@@ -331,7 +331,6 @@ class TestCompetitieInschrijfmethode1(E2EHelpers, TestCase):
         with self.assert_max_queries(28):       # TODO: probeer omlaag te krijgen
             resp = self.client.get(self.url_behoefte1_bestand % (self.comp_18.pk, self.regio_101.pk))
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        #self.e2e_dump_resp(resp)
         csv_file = 'Nummer;Wedstrijd;Locatie\r\n'
         csv_file += '1;15 juli 2019 om 19:00;[1000] Grote Club\r\n'
         csv_file += '2;15 augustus 2019 om 19:00;[1000] Grote Club\r\n'
@@ -339,16 +338,16 @@ class TestCompetitieInschrijfmethode1(E2EHelpers, TestCase):
         csv_file += '4;15 oktober 2019 om 19:00;[1000] Grote Club\r\n'
         csv_file += '5;15 november 2019 om 19:00;[1000] Grote Club\r\n'
         csv_file += '\r\nBondsnummer;Sporter;Vereniging;Wedstrijdklasse (individueel);1;2;3;4;5\r\n'
-        csv_file += '110005;Lid 110005 de Tester;[1000] Grote Club;Recurve Junioren klasse onbekend;;X;X;X;X\r\n'
-        csv_file += '110004;Lid 110004 de Tester;[1000] Grote Club;Recurve Junioren klasse onbekend;;X;X;X;X\r\n'
-        csv_file += '110003;Lid 110003 de Tester;[1000] Grote Club;Compound Junioren klasse onbekend;;X;X;X;X\r\n'
-        csv_file += '110002;Lid 110002 de Tester;[1000] Grote Club;Recurve Junioren klasse onbekend;;X;X;X;X\r\n'
         csv_file += '110001;Lid 110001 de Tester;[1000] Grote Club;Barebow Aspiranten 11-12 jaar;;X;X;X;X\r\n'
-        csv_file += '110010;Lid 110010 de Tester;[1100] Kleine Club;Recurve Junioren klasse onbekend;;X;X;X;X\r\n'
-        csv_file += '110009;Lid 110009 de Tester;[1100] Kleine Club;Recurve Junioren klasse onbekend;;X;X;X;X\r\n'
-        csv_file += '110008;Lid 110008 de Tester;[1100] Kleine Club;Compound Junioren klasse onbekend;;X;X;X;X\r\n'
-        csv_file += '110007;Lid 110007 de Tester;[1100] Kleine Club;Recurve Junioren klasse onbekend;;X;X;X;X\r\n'
+        csv_file += '110002;Lid 110002 de Tester;[1000] Grote Club;Recurve Junioren klasse onbekend;;X;X;X;X\r\n'
+        csv_file += '110003;Lid 110003 de Tester;[1000] Grote Club;Compound Junioren klasse onbekend;;X;X;X;X\r\n'
+        csv_file += '110004;Lid 110004 de Tester;[1000] Grote Club;Recurve Junioren klasse onbekend;;X;X;X;X\r\n'
+        csv_file += '110005;Lid 110005 de Tester;[1000] Grote Club;Recurve Junioren klasse onbekend;;X;X;X;X\r\n'
         csv_file += '110006;Lid 110006 de Tester;[1100] Kleine Club;Recurve Junioren klasse onbekend;;X;X;X;X\r\n'
+        csv_file += '110007;Lid 110007 de Tester;[1100] Kleine Club;Recurve Junioren klasse onbekend;;X;X;X;X\r\n'
+        csv_file += '110008;Lid 110008 de Tester;[1100] Kleine Club;Compound Junioren klasse onbekend;;X;X;X;X\r\n'
+        csv_file += '110009;Lid 110009 de Tester;[1100] Kleine Club;Recurve Junioren klasse onbekend;;X;X;X;X\r\n'
+        csv_file += '110010;Lid 110010 de Tester;[1100] Kleine Club;Recurve Junioren klasse onbekend;;X;X;X;X\r\n'
         self.assertContains(resp, csv_file)
 
     def test_bad_hwl(self):
