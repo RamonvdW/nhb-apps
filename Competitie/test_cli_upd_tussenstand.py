@@ -39,7 +39,7 @@ class TestCompetitieCliUpdTussenstand(E2EHelpers, TestCase):
         competitie_klassegrenzen_vaststellen(comp_18)
         competitie_klassegrenzen_vaststellen(comp_25)
 
-        self.deelcomp_r101 = DeelCompetitie.objects.filter(laag='Regio',
+        self.deelcomp_r101 = DeelCompetitie.objects.filter(laag=LAAG_REGIO,
                                                            competitie=self.comp,
                                                            nhb_regio=self.regio_101)[0]
 

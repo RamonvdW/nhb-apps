@@ -8,7 +8,7 @@ from django.test import TestCase
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging, NhbLid
 from Overig.e2ehelpers import E2EHelpers
-from Competitie.models import DeelCompetitie
+from Competitie.models import DeelCompetitie, LAAG_BK, LAAG_RK, LAAG_REGIO
 from Competitie.operations import competities_aanmaken
 import datetime
 
@@ -75,9 +75,9 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         # creëer een competitie met deelcompetities
         competities_aanmaken(jaar=2019)
 
-        self.functie_bko = DeelCompetitie.objects.filter(laag='BK')[0].functie
-        self.functie_rko = DeelCompetitie.objects.filter(laag='RK', nhb_rayon=self.rayon_2)[0].functie
-        self.functie_rcl = DeelCompetitie.objects.filter(laag='Regio', nhb_regio=self.regio_101)[0].functie
+        self.functie_bko = DeelCompetitie.objects.filter(laag=LAAG_BK)[0].functie
+        self.functie_rko = DeelCompetitie.objects.filter(laag=LAAG_RK, nhb_rayon=self.rayon_2)[0].functie
+        self.functie_rcl = DeelCompetitie.objects.filter(laag=LAAG_REGIO, nhb_regio=self.regio_101)[0].functie
 
         self.functie_bko.accounts.add(self.account_bko)
         self.functie_rko.accounts.add(self.account_rko)

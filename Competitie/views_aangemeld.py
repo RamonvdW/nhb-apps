@@ -626,7 +626,7 @@ class Inschrijfmethode3BehoefteAlsBestandView(Inschrijfmethode3BehoefteView):
 
 class Inschrijfmethode1BehoefteView(UserPassesTestMixin, TemplateView):
 
-    """ Toon de RCL de behoefte aan quotaplaatsen in een regio met inschrijfmethode 3 """
+    """ Toon de RCL de keuzes voor wedstrijden in een regio met inschrijfmethode 1 """
 
     template_name = TEMPLATE_COMPETITIE_INSCHRIJFMETHODE1_BEHOEFTE
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
@@ -707,11 +707,13 @@ class Inschrijfmethode1BehoefteView(UserPassesTestMixin, TemplateView):
         return context
 
 
-class Inschrijfmethode1BehoefteAlsBestandView(Inschrijfmethode3BehoefteView):
+class Inschrijfmethode1BehoefteAlsBestandView(Inschrijfmethode1BehoefteView):
 
     """ Deze klasse wordt gebruikt om de lijst van aangemelde schutters in een regio
         te downloaden als csv bestand, inclusief gekozen wedstrijden (inschrijfmethode 1)
     """
+
+    # access check wordt door base class gedaan
 
     def get(self, request, *args, **kwargs):
 
@@ -801,7 +803,7 @@ class Inschrijfmethode1BehoefteAlsBestandView(Inschrijfmethode3BehoefteView):
                           .filter(deelcompetitie=deelcomp)
                           .order_by('bij_vereniging__ver_nr')):
 
-            pks = list(deelnemer.inschrijf_gekozen_wedstrijden.values_list('pk', flat=True))
+            pks = list(deelnemer.inschrijf_gekozen_wedstrijden.values_list('pk', flat=True))        # TODO: 1 query per deelnemer
 
             kruisjes = list()
             for pk in kolom_pks:
