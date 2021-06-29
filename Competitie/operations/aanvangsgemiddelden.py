@@ -27,14 +27,14 @@ def aanvangsgemiddelden_vaststellen_voor_afstand(afstand: int):
         schrijf_in_logboek(None, 'Competitie',
                            'Geen historisch uitslag om aanvangsgemiddelden vast te stellen voor %sm' % afstand)
         return
-    histcomp = histcomps[0]
 
+    seizoen = histcomps[0].seizoen
     schrijf_in_logboek(None, 'Competitie',
-                       'Aanvangsgemiddelden vaststellen met uitslag seizoen %s' % histcomp.seizoen)
+                       'Aanvangsgemiddelden vaststellen voor de %sm met uitslag seizoen %s' % (afstand, seizoen))
 
     # het eindjaar van de competitie was bepalend voor de klasse
     # daarmee kunnen we bepalen of de schutter aspirant was
-    eindjaar = int(histcomp.seizoen.split('/')[1])
+    eindjaar = int(seizoen.split('/')[1])
 
     # maak een cache aan van boogtype
     boogtype_dict = dict()  # [afkorting] = BoogType
@@ -64,63 +64,67 @@ def aanvangsgemiddelden_vaststellen_voor_afstand(afstand: int):
 
     # doorloop alle individuele histcomp records die bij dit seizoen horen
     bulk_score = list()
-    for obj in (HistCompetitieIndividueel
-                .objects
-                .select_related('histcompetitie')
-                .filter(histcompetitie=histcomp)):
+    for histcomp in histcomps:
+        print('histcomp: %s' % histcomp)
+        for obj in (HistCompetitieIndividueel
+                    .objects
+                    .select_related('histcompetitie')
+                    .filter(histcompetitie=histcomp)):
 
-        if (obj.gemiddelde > AG_NUL
-                and obj.boogtype in boogtype_dict
-                and obj.tel_aantal_scores() >= minimum_aantal_scores[afstand]):
+            if (obj.gemiddelde > AG_NUL
+                    and obj.boogtype in boogtype_dict
+                    and obj.tel_aantal_scores() >= minimum_aantal_scores[afstand]):
 
-            # haal het schutterboog record op, of maak een nieuwe aan
-            try:
-                tup = (obj.schutter_nr, obj.boogtype)
-                schutterboog = schutterboog_cache[tup]
-            except KeyError:
-                # nieuw record nodig
-                schutterboog = SchutterBoog()
-                schutterboog.boogtype = boogtype_dict[obj.boogtype]
-                schutterboog.voor_wedstrijd = True
-
+                # haal het schutterboog record op, of maak een nieuwe aan
                 try:
-                    schutterboog.nhblid = nhblid_dict[obj.schutter_nr]
+                    tup = (obj.schutter_nr, obj.boogtype)
+                    schutterboog = schutterboog_cache[tup]
                 except KeyError:
-                    # geen lid meer - skip
-                    schutterboog = None
-                else:
-                    schutterboog.save()
-                    # zet het nieuwe record in de cache, anders krijgen we dupes
-                    tup = (schutterboog.nhblid.nhb_nr, schutterboog.boogtype.afkorting)
-                    schutterboog_cache[tup] = schutterboog
-            else:
-                if not schutterboog.voor_wedstrijd:
+                    # nieuw record nodig
+                    schutterboog = SchutterBoog()
+                    schutterboog.boogtype = boogtype_dict[obj.boogtype]
                     schutterboog.voor_wedstrijd = True
-                    schutterboog.save(update_fields=['voor_wedstrijd'])
 
-            if schutterboog:
-                # aspiranten schieten op een grotere kaart en altijd op 18m
-                # daarom AG van aspirant niet overnemen als deze cadet wordt
-                # aangezien er maar 1 klasse is, is het AG niet nodig
-                # voorbeeld: eindjaar = 2019
-                #       geboortejaar = 2006 --> leeftijd was 13, dus aspirant
-                #       geboortejaar = 2005 --> leeftijd was 14, dus cadet
-                was_aspirant = (eindjaar - schutterboog.nhblid.geboorte_datum.year) <= MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
+                    try:
+                        schutterboog.nhblid = nhblid_dict[obj.schutter_nr]
+                    except KeyError:
+                        # geen lid meer - skip
+                        schutterboog = None
+                    else:
+                        schutterboog.save()
+                        # zet het nieuwe record in de cache, anders krijgen we dupes
+                        tup = (schutterboog.nhblid.nhb_nr, schutterboog.boogtype.afkorting)
+                        schutterboog_cache[tup] = schutterboog
+                else:
+                    if not schutterboog.voor_wedstrijd:
+                        schutterboog.voor_wedstrijd = True
+                        schutterboog.save(update_fields=['voor_wedstrijd'])
 
-                # zoek het score record erbij
-                if not was_aspirant:
-                    # aanvangsgemiddelde voor deze afstand
-                    waarde = int(obj.gemiddelde * 1000)
+                if schutterboog:
+                    # aspiranten schieten op een grotere kaart en altijd op 18m
+                    # daarom AG van aspirant niet overnemen als deze cadet wordt
+                    # aangezien er maar 1 klasse is, is het AG niet nodig
+                    # voorbeeld: eindjaar = 2019
+                    #       geboortejaar = 2006 --> leeftijd was 13, dus aspirant
+                    #       geboortejaar = 2005 --> leeftijd was 14, dus cadet
+                    was_aspirant = (eindjaar - schutterboog.nhblid.geboorte_datum.year) <= MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
 
-                    score = Score(schutterboog=schutterboog,
-                                  type=SCORE_TYPE_INDIV_AG,
-                                  waarde=waarde,
-                                  afstand_meter=afstand)
-                    bulk_score.append(score)
+                    # zoek het score record erbij
+                    if not was_aspirant:
+                        # aanvangsgemiddelde voor deze afstand
+                        waarde = int(obj.gemiddelde * 1000)
 
-                    if len(bulk_score) >= 500:
-                        Score.objects.bulk_create(bulk_score)
-                        bulk_score = list()
+                        score = Score(schutterboog=schutterboog,
+                                      type=SCORE_TYPE_INDIV_AG,
+                                      waarde=waarde,
+                                      afstand_meter=afstand)
+                        bulk_score.append(score)
+
+                        if len(bulk_score) >= 500:
+                            Score.objects.bulk_create(bulk_score)
+                            bulk_score = list()
+
+        # for
     # for
 
     if len(bulk_score) > 0:                         # pragma: no branch
