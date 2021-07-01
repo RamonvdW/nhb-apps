@@ -100,7 +100,10 @@ class LeeftijdsKlasse(models.Model):
                           self.beschrijving)
 
     def is_aspirant_klasse(self):
-        return self.max_wedstrijdleeftijd <= MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
+        # <senior  heeft min = 0 en max <21
+        # senior   heeft min = 0 en max = 0
+        # >senior  heeft min >49 en max = 0     (komt niet voor in de competitie)
+        return 0 < self.max_wedstrijdleeftijd <= MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
 
     def leeftijd_is_compatible(self, wedstrijdleeftijd):
 
