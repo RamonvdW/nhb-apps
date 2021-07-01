@@ -117,7 +117,7 @@
                 {% endfor %}
             </table>
         {% else %}
-            <p>Er worden op dit moment geen competitie georganiseerd.</p>
+            <p>Er worden op dit moment geen competities georganiseerd.</p>
         {% endif %}
 
         <p><span>Meer informatie over de competities:&nbsp;</span>
