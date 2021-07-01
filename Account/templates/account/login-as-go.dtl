@@ -27,6 +27,6 @@
     <a class="btn-nhb-rood" href="{{ login_as_url }}" target="_blank" rel="noopener noreferrer">
         <i class="material-icons-round right">open_in_new</i>Inloggen</a>
 
-    <p>Advies: rechts-klikken en openen in een 'incognito window' (Chrome) of 'private window' (Firefox), anders wordt je hier uitgelogd.</p>
+    <p>Advies: rechts-klikken en openen in een 'incognito window' (Chrome) of 'private window' (Firefox), anders word je hier uitgelogd.</p>
 
 {% endblock %}
