@@ -54,7 +54,7 @@
                         <span>Geen</span>
                         <br><br>
                         <span>Je wordt {% if is_klasse_onbekend %}voorlopig {% endif %}geplaatst in klasse: <b>{{ wedstrijdklasse }}</b></span>
-                        {% if is_klasse_onbekend %}<p><i>Omdat we niet weten hoe goed je kan schieten wordt je na 3 scores automatisch in de juiste klasse geplaatst.</i></p>{% endif %}
+                        {% if is_klasse_onbekend %}<p><i>Omdat we nu niet weten hoe goed je kan schieten, plaatsen we je na 3 scores automatisch in de juiste klasse.</i></p>{% endif %}
                     {% endif %}
                 </td>
             </tr>
