@@ -32,6 +32,8 @@ def aanvangsgemiddelden_vaststellen_voor_afstand(afstand: int):
     schrijf_in_logboek(None, 'Competitie',
                        'Aanvangsgemiddelden vaststellen voor de %sm met uitslag seizoen %s' % (afstand, seizoen))
 
+    histcomps = histcomps.filter(seizoen=seizoen)
+
     # het eindjaar van de competitie was bepalend voor de klasse
     # daarmee kunnen we bepalen of de schutter aspirant was
     eindjaar = int(seizoen.split('/')[1])
@@ -65,7 +67,6 @@ def aanvangsgemiddelden_vaststellen_voor_afstand(afstand: int):
     # doorloop alle individuele histcomp records die bij dit seizoen horen
     bulk_score = list()
     for histcomp in histcomps:
-        print('histcomp: %s' % histcomp)
         for obj in (HistCompetitieIndividueel
                     .objects
                     .select_related('histcompetitie')
