@@ -26,14 +26,25 @@ class TestBasisTypen(TestCase):
         obj = LeeftijdsKlasse()
         self.assertIsNotNone(str(obj))      # use the __str__ method (only used by admin interface)
 
+        obj.min_wedstrijdleeftijd = 0
         obj.max_wedstrijdleeftijd = MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT - 1
         self.assertTrue(obj.is_aspirant_klasse())
 
+        obj.min_wedstrijdleeftijd = 0
         obj.max_wedstrijdleeftijd = MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT + 1
         self.assertFalse(obj.is_aspirant_klasse())
 
+        obj.min_wedstrijdleeftijd = 0
         obj.max_wedstrijdleeftijd = MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
         self.assertTrue(obj.is_aspirant_klasse())
+
+        obj.min_wedstrijdleeftijd = 0
+        obj.max_wedstrijdleeftijd = 0
+        self.assertFalse(obj.is_aspirant_klasse())
+
+        obj.min_wedstrijdleeftijd = 0
+        obj.min_wedstrijdleeftijd = 60
+        self.assertFalse(obj.is_aspirant_klasse())
 
         obj = IndivWedstrijdklasse(beschrijving="Test")
         self.assertIsNotNone(str(obj))      # use the __str__ method (only used by admin interface)
