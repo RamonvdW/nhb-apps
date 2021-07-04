@@ -12,6 +12,13 @@
 
     {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vereniging-leden-aanmelden" %}
 
+    <script>
+        function toon_wedstrijden_2() {
+            document.getElementById('id_wedstrijden_2').classList.remove('hide')
+            document.getElementById('id_wedstrijden_2_knop').classList.add('hide')
+        }
+    </script>
+
     <h4>Aanmelden</h4>
 
     <form method="post" action="{{ aanmelden_url }}">
@@ -41,10 +48,28 @@
                     </tr>
                 {% endif %}
 
-                {% if wedstrijden %}    <!-- inschrijfmethode 1 -->
+                {% if wedstrijden_1 %}    <!-- inschrijfmethode 1 -->
                     <tr>
-                        <td>Kies wanneer ze willen schieten:<br>
-                            {% for wedstrijd in wedstrijden %}
+                        <td>Kies wanneer de sporters willen schieten door 7 keuzes te maken in onderstaande lijst.<br>Dit is later nog individueel aan te passen.<br><br>
+                            {% for wedstrijd in wedstrijden_1 %}
+                                <label style="margin-left: 20px">
+                                    <input type="checkbox" class="filled-in" name="wedstrijd_{{ wedstrijd.pk }}">
+                                    <span class="black-text">{{ wedstrijd.datum_wanneer }} om {{ wedstrijd.tijd_begin_wedstrijd }} bij <b>{{ wedstrijd.vereniging.naam }}</b><span class="hide-on-small-only"> te {{ wedstrijd.vereniging.plaats }}</span></span>
+                                </label>
+                                <br>
+                            {% endfor %}
+                        </td>
+                    </tr>
+                {% endif %}
+
+                {% if wedstrijden_2 %}
+                    <tr id="id_wedstrijden_2_knop">
+                        <td><button class="btn-nhb-blauw" type="button" onclick="toon_wedstrijden_2()">Toon meer wedstrijden</button>&nbsp;&nbsp;Er zijn nog {{ wedstrijden_2|length }} wedstrijden in de regio, wat verder weg.</td>
+                    </tr>
+
+                    <tr id="id_wedstrijden_2" class="hide">
+                        <td>
+                            {% for wedstrijd in wedstrijden_2 %}
                                 <label style="margin-left: 20px">
                                     <input type="checkbox" class="filled-in" name="wedstrijd_{{ wedstrijd.pk }}">
                                     <span class="black-text">{{ wedstrijd.datum_wanneer }} om {{ wedstrijd.tijd_begin_wedstrijd }} bij <b>{{ wedstrijd.vereniging.naam }}</b><span class="hide-on-small-only"> te {{ wedstrijd.vereniging.plaats }}</span></span>
