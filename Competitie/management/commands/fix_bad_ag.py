@@ -31,23 +31,28 @@ class Command(BaseCommand):
 
             ag_str = "%.3f" % ag
 
-            if ag_str != str(deelnemer.ag_voor_indiv):
-                print('deelnemer %s : AG %s --> %s' % (deelnemer, deelnemer.ag_voor_indiv, ag_str))
+            do_save = False
+
+            if ag_str != str(deelnemer.ag_voor_team):
+                print('deelnemer %s : AG team %s --> %s' % (deelnemer, deelnemer.ag_voor_team, ag_str))
+                deelnemer.ag_voor_team = ag
                 do_save = True
 
-                klasse = deelnemer.klasse
-
+            if ag_str != str(deelnemer.ag_voor_indiv):
+                print('deelnemer %s : AG indiv %s --> %s' % (deelnemer, deelnemer.ag_voor_indiv, ag_str))
                 deelnemer.ag_voor_indiv = ag
-                deelnemer.ag_voor_teams = ag
+                do_save = True
 
+                # klasse opnieuw bepalen
+                klasse = deelnemer.klasse
                 bepaler.bepaal_klasse_deelnemer(deelnemer)
 
                 if klasse != deelnemer.klasse:
                     print('deelnemer %s : klasse=%s --> %s' % (deelnemer, klasse, deelnemer.klasse))
                     do_save = True
 
-                if do_save:
-                    deelnemer.save()
+            if do_save:
+                deelnemer.save()
         # for
 
 # end of file
