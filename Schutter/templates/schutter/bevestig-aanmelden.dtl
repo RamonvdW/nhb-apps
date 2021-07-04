@@ -100,7 +100,7 @@
                         {% for wedstrijd in wedstrijden_1 %}
                             <label style="margin-left: 20px">
                                 <input type="checkbox" class="filled-in" name="wedstrijd_{{ wedstrijd.pk }}" onchange="tel_wedstrijden()">
-                                <span class="black-text">{{ wedstrijd.datum_wanneer }} om {{ wedstrijd.tijd_begin_wedstrijd }} bij <b>{{ wedstrijd.vereniging.naam }}</b> te {{ wedstrijd.vereniging.plaats }}</span>
+                                <span class="black-text">{{ wedstrijd.datum_wanneer|date:"l j E Y" }} om {{ wedstrijd.tijd_begin_wedstrijd }} bij <b>{{ wedstrijd.vereniging.naam }}</b> te {{ wedstrijd.vereniging.plaats }}</span>
                             </label>
                             <br>
                         {% endfor %}
@@ -118,7 +118,7 @@
                         {% for wedstrijd in wedstrijden_2 %}
                             <label style="margin-left: 20px">
                                 <input type="checkbox" class="filled-in" name="wedstrijd_{{ wedstrijd.pk }}" onchange="tel_wedstrijden()">
-                                <span class="black-text">{{ wedstrijd.datum_wanneer }} om {{ wedstrijd.tijd_begin_wedstrijd }} bij <b>{{ wedstrijd.vereniging.naam }}</b><span class="hide-on-small-only"> te {{ wedstrijd.vereniging.plaats }}</span></span>
+                                <span class="black-text">{{ wedstrijd.datum_wanneer|date:"l j E Y" }} om {{ wedstrijd.tijd_begin_wedstrijd }} bij <b>{{ wedstrijd.vereniging.naam }}</b><span class="hide-on-small-only"> te {{ wedstrijd.vereniging.plaats }}</span></span>
                             </label>
                             <br>
                         {% endfor %}
