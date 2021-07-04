@@ -13,6 +13,21 @@
     {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vereniging-leden-aanmelden" %}
 
     <script>
+        function tel_wedstrijden() {
+            // tel hoeveel checkboxes aangekruist zijn
+            const count = document.querySelectorAll('input[name^="wedstrijd_"]:checked').length
+            const el_aantal = document.getElementById('aantal')
+            el_aantal.innerText = count.toString() + ' wedstrijden'
+
+            const el = document.getElementById('submit')
+            el.disabled = (count > 7)
+            if (count > 7) {
+                el_aantal.classList.add('red-text')
+            } else {
+                el_aantal.classList.remove('red-text')
+            }
+        }
+
         function toon_wedstrijden_2() {
             document.getElementById('id_wedstrijden_2').classList.remove('hide')
             document.getElementById('id_wedstrijden_2_knop').classList.add('hide')
@@ -50,10 +65,12 @@
 
                 {% if wedstrijden_1 %}    <!-- inschrijfmethode 1 -->
                     <tr>
-                        <td>Kies wanneer de sporters willen schieten door 7 keuzes te maken in onderstaande lijst.<br>Dit is later nog individueel aan te passen.<br><br>
+                        <td>Kies wanneer de sporters willen schieten door 7 keuzes te maken in onderstaande lijst. Dit is later nog individueel aan te passen.<br>
+                        <span>Je hebt <b id="aantal">0 wedstrijden</b> gekozen.</span><br><br>
+
                             {% for wedstrijd in wedstrijden_1 %}
                                 <label style="margin-left: 20px">
-                                    <input type="checkbox" class="filled-in" name="wedstrijd_{{ wedstrijd.pk }}">
+                                    <input type="checkbox" class="filled-in" name="wedstrijd_{{ wedstrijd.pk }}" onchange="tel_wedstrijden()">
                                     <span class="black-text">{{ wedstrijd.datum_wanneer }} om {{ wedstrijd.tijd_begin_wedstrijd }} bij <b>{{ wedstrijd.vereniging.naam }}</b><span class="hide-on-small-only"> te {{ wedstrijd.vereniging.plaats }}</span></span>
                                 </label>
                                 <br>
@@ -71,7 +88,7 @@
                         <td>
                             {% for wedstrijd in wedstrijden_2 %}
                                 <label style="margin-left: 20px">
-                                    <input type="checkbox" class="filled-in" name="wedstrijd_{{ wedstrijd.pk }}">
+                                    <input type="checkbox" class="filled-in" name="wedstrijd_{{ wedstrijd.pk }}" onchange="tel_wedstrijden()">
                                     <span class="black-text">{{ wedstrijd.datum_wanneer }} om {{ wedstrijd.tijd_begin_wedstrijd }} bij <b>{{ wedstrijd.vereniging.naam }}</b><span class="hide-on-small-only"> te {{ wedstrijd.vereniging.plaats }}</span></span>
                                 </label>
                                 <br>
@@ -231,12 +248,22 @@
 
         {% if mag_aanmelden %}
             <div class="fixed-action-btn">
-                <input class="btn-nhb-rood" type="submit" value="Geselecteerde sporters aanmelden">
+                <input class="btn-nhb-rood" type="submit" value="Geselecteerde sporters aanmelden" id="submit">
             </div>
         {% endif %}
     </form>
 
     <!-- extra ruimte onder de tabel houden voor de aanmeld-knop -->
     <p>&nbsp;</p>
+
+    {% if wedstrijden_1 %}    <!-- inschrijfmethode 1 -->
+        <!-- initialisatie -->
+        <script type="application/javascript">
+            document.addEventListener('DOMContentLoaded', function()
+            {
+                tel_wedstrijden()
+            })
+        </script>
+    {% endif %}
 
 {% endblock %}
