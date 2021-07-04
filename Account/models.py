@@ -11,6 +11,7 @@ from Overig.tijdelijke_url import maak_tijdelijke_url_account_email
 from Mailer.models import mailer_email_is_valide
 from django.utils import timezone
 import datetime
+import psycopg2
 
 
 class AccountCreateError(Exception):
@@ -179,7 +180,12 @@ def account_create(username, voornaam, achternaam, wachtwoord, email, email_is_b
     account.set_password(wachtwoord)
     account.first_name = voornaam
     account.last_name = achternaam
-    account.save()
+
+    try:
+        account.save()
+    except psycopg2.errors.UniqueViolation:
+        # dus ondanks de check hierboven lukt het sommige mensen toch om een dubbel account aan te maken
+        raise AccountCreateError('Account bestaat al')
 
     # maak het email record aan
     mail = AccountEmail()
