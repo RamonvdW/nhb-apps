@@ -163,17 +163,21 @@
                             {% endif %}
                         </td>
                         <td>
+                            {% if deelcomp.url_schietmomenten %}
+                                <a class="btn-nhb-blauw" href="{{ deelcomp.url_schietmomenten }}">Aanpassen</a>
+                                <span>&nbsp;&nbsp;</span>
+                            {% endif %}
                             {% if deelcomp.url_aanmelden %}
                                 <a class="btn-nhb-blauw" href="{{ deelcomp.url_aanmelden }}">Aanmelden</a>
-                            {% elif deelcomp.url_afmelden %}
-                                <form method="post" action="{{ deelcomp.url_afmelden }}">
-                                    {% csrf_token %}
-                                    <input class="btn-nhb-blauw" type="submit" value="Uitschrijven">
-                                </form>
-                            {% elif deelcomp.url_schietmomenten %}
-                                <a class="btn-nhb-blauw" href="{{ deelcomp.url_schietmomenten }}">Aanpassen</a>
-                            {% elif deelcomp.competitie.fase < 'B' %}
-                                <span>Inschrijven kan nog niet</span>
+                            {% else %}
+                                {% if deelcomp.url_afmelden %}
+                                    <form method="post" action="{{ deelcomp.url_afmelden }}" style="display:inline">
+                                        {% csrf_token %}
+                                        <input class="btn-nhb-blauw" type="submit" value="Uitschrijven" style="display:inline">
+                                    </form>
+                                {% elif deelcomp.competitie.fase < 'B' %}
+                                    <span>Inschrijven kan nog niet</span>
+                                {% endif %}
                             {% endif %}
                         </td>
                     </tr>

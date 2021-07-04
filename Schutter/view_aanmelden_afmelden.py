@@ -141,12 +141,12 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
                                                   'deelcomp_pk': deelcomp.pk})
 
         if methode == INSCHRIJF_METHODE_1:
+            # toon de sporter alle wedstrijden in de regio, dus alle clusters
             pks = list()
             for ronde in (DeelcompetitieRonde
                           .objects
                           .select_related('plan')
                           .filter(deelcompetitie=deelcomp)):
-                # toon de HWL alle wedstrijden in de regio, dus alle clusters
                 pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
             # for
 
