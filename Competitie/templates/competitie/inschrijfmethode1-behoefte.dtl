@@ -16,6 +16,11 @@
 
     <p>Op deze pagina tonen we welke wedstrijden gekozen zijn door de sporters aangemeld voor de regiocompetitie <b>{{ competitie.beschrijving }}</b> in <b>{{ regio }}</b>.</p>
 
+    <p>Je kan onderstaande lijst ook downloaden, inclusief de keuzes van elke sporter.</p>
+    <a class="btn-nhb-blauw" href="{{ url_download }}">
+        <i class="material-icons-round left">download</i>Download lijst</a>
+
+
     <p>&nbsp;</p>
     <table class="white">
         <thead>
@@ -39,11 +44,6 @@
         {% endfor %}
 
     </table>
-
-    <p>&nbsp;</p>
-    <p>Je kan deze lijst ook downloaden, inclusief de keuzes van elke sporter.</p>
-    <a class="btn-nhb-blauw" href="{{ url_download }}">
-        <i class="material-icons-round left">get_app</i>Download lijst</a>
 
 {% endblock %}
 

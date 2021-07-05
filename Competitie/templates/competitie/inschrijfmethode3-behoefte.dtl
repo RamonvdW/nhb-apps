@@ -16,8 +16,10 @@
 
     <p>Op deze pagina tonen we de behoefte voor de regiocompetitie <b>{{ competitie.beschrijving }}</b> voor <b>{{ regio }}</b>.</p>
 
+    <p>Je kan onderstaande lijst ook downloaden:</p>
     <a class="btn-nhb-blauw" href="{{ url_download }}">
-        <i class="material-icons-round left">get_app</i>Download lijst</a>
+        <i class="material-icons-round left">download</i>Download lijst</a>
+    <p>&nbsp;</p>
 
     <h5>Dagdeel behoefte:</h5>
 

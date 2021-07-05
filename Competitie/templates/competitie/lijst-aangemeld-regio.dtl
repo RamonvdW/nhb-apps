@@ -72,7 +72,7 @@
         <p>&nbsp;</p>
         <p>
             <a class="btn-nhb-blauw" href="{{ url_behoefte }}">
-                <i class="material-icons-round left">shopping_cart</i>Gekozen wedstrijden</a>
+                <i class="material-icons-round left">leaderboard</i>Gekozen wedstrijden</a>
         </p>
     {% endif %}
 
@@ -80,7 +80,7 @@
         <p>&nbsp;</p>
         <p>
             <a class="btn-nhb-blauw" href="{{ url_behoefte }}">
-                <i class="material-icons-round left">shopping_cart</i>Benodigde dagdelen</a>
+                <i class="material-icons-round left">leaderboard</i>Benodigde dagdelen</a>
         </p>
     {% endif %}
 
