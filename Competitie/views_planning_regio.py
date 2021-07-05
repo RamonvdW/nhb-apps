@@ -491,6 +491,8 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
         klasse2schutters = dict()
         niet_gebruikt = dict()
         if heeft_wkl:
+            teams_tonen = ronde.deelcompetitie.regio_organiseert_teamcompetitie
+
             for obj in (RegioCompetitieSchutterBoog
                         .objects
                         .filter(deelcompetitie=ronde.deelcompetitie)
@@ -507,7 +509,7 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
                         .filter(competitie=ronde.deelcompetitie.competitie)):
                 if wkl.indiv:
                     niet_gebruikt[100000 + wkl.indiv.pk] = wkl.indiv.beschrijving
-                if wkl.team:
+                if wkl.team and teams_tonen:
                     niet_gebruikt[200000 + wkl.team.pk] = wkl.team.beschrijving
             # for
 
@@ -524,7 +526,7 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
                     niet_gebruikt[100000 + wkl.pk] = None
                 # for
 
-                # FUTURE: team klassen toevoegen
+                # FUTURE: benodigde capaciteit voor teams toevoegen
         # for
 
         context['wkl_niet_gebruikt'] = [beschrijving for beschrijving in niet_gebruikt.values() if beschrijving]
@@ -804,18 +806,21 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
             obj.geselecteerd = (obj.indiv.pk in wedstrijd_indiv_pks)
         # for
 
-        wedstrijd_team_pks = [obj.pk for obj in wedstrijd.team_klassen.all()]
-        wkl_team = (CompetitieKlasse
-                    .objects
-                    .filter(competitie=deelcomp.competitie,
-                            indiv=None)
-                    .order_by('indiv__volgorde')
-                    .all())
-        for obj in wkl_team:
-            obj.short_str = obj.team.beschrijving
-            obj.sel_str = "wkl_team_%s" % obj.team.pk
-            obj.geselecteerd = (obj.team.pk in wedstrijd_team_pks)
-        # for
+        if deelcomp.regio_organiseert_teamcompetitie:
+            wedstrijd_team_pks = [obj.pk for obj in wedstrijd.team_klassen.all()]
+            wkl_team = (CompetitieKlasse
+                        .objects
+                        .filter(competitie=deelcomp.competitie,
+                                indiv=None)
+                        .order_by('indiv__volgorde')
+                        .all())
+            for obj in wkl_team:
+                obj.short_str = obj.team.beschrijving
+                obj.sel_str = "wkl_team_%s" % obj.team.pk
+                obj.geselecteerd = (obj.team.pk in wedstrijd_team_pks)
+            # for
+        else:
+            wkl_team = list()
 
         return wkl_indiv, wkl_team
 
