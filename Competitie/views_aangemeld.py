@@ -9,9 +9,9 @@ from django.http import HttpResponse, Http404
 from django.utils.formats import localize
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
+from Competitie.menu import menu_dynamics_competitie
 from Functie.rol import Rollen, rol_get_huidige
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
-from Plein.menu import menu_dynamics
 from Schutter.models import SchutterVoorkeuren
 from Wedstrijden.models import CompetitieWedstrijd
 from .models import (LAAG_REGIO,
@@ -130,7 +130,7 @@ class LijstAangemeldRegiocompAllesView(UserPassesTestMixin, TemplateView):
         context['inhoud'] = 'landelijk'
         maak_regiocomp_zoom_knoppen(context, comp_pk)
 
-        menu_dynamics(self.request, context, actief='competitie')
+        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk, actief='competitie')
         return context
 
 
@@ -196,7 +196,7 @@ class LijstAangemeldRegiocompRayonView(UserPassesTestMixin, TemplateView):
 
         maak_regiocomp_zoom_knoppen(context, comp_pk, rayon=rayon)
 
-        menu_dynamics(self.request, context, actief='competitie')
+        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk, actief='competitie')
         return context
 
 
@@ -282,7 +282,7 @@ class LijstAangemeldRegiocompRegioView(UserPassesTestMixin, TemplateView):
 
         maak_regiocomp_zoom_knoppen(context, comp.pk, regio=regio)
 
-        menu_dynamics(self.request, context, actief='competitie')
+        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk, actief='competitie')
         return context
 
 
@@ -529,7 +529,7 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
                                           kwargs={'comp_pk': comp.pk,
                                                   'regio_pk': regio.pk})
 
-        menu_dynamics(self.request, context, actief='competitie')
+        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk, actief='competitie')
         return context
 
 
@@ -703,7 +703,7 @@ class Inschrijfmethode1BehoefteView(UserPassesTestMixin, TemplateView):
                                           kwargs={'comp_pk': comp.pk,
                                                   'regio_pk': regio.pk})
 
-        menu_dynamics(self.request, context, actief='competitie')
+        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk, actief='competitie')
         return context
 
 

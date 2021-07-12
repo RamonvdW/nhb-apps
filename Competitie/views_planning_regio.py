@@ -771,6 +771,8 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
 
     @staticmethod
     def _get_wedstrijdklassen(deelcomp, wedstrijd):
+
+        # wedstrijdklassen individueel
         klasse2schutters = dict()
         for obj in (RegioCompetitieSchutterBoog
                     .objects
@@ -782,7 +784,6 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
                 klasse2schutters[obj.klasse.indiv.pk] = 1
         # for
 
-        # wedstrijdklassen
         wedstrijd_indiv_pks = [obj.pk for obj in wedstrijd.indiv_klassen.all()]
         wkl_indiv = (CompetitieKlasse
                      .objects
@@ -806,6 +807,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
             obj.geselecteerd = (obj.indiv.pk in wedstrijd_indiv_pks)
         # for
 
+        # wedstrijdklassen teams
         if deelcomp.regio_organiseert_teamcompetitie:
             wedstrijd_team_pks = [obj.pk for obj in wedstrijd.team_klassen.all()]
             wkl_team = (CompetitieKlasse
@@ -1092,11 +1094,11 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
                 try:
                     pk = int(key[10:10+6])
                 except (IndexError, TypeError, ValueError):
-                    raise Http404('Geen valide klasse')
+                    raise Http404('Geen valide individuele klasse')
                 else:
                     if pk not in indiv_pks:
                         # unsupported number
-                        raise Http404('Geen valide klasse')
+                        raise Http404('Geen valide individuele klasse')
                     gekozen_klassen.append(pk)
         # for
 
