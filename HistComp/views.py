@@ -25,7 +25,7 @@ TEMPLATE_HISTCOMP_INTERLAND = 'hist/interland.dtl'
 
 RESULTS_PER_PAGE = 100
 
-KLASSEN_VOLGORDE = ("Recurve", "Compound", "Barebow", "Longbow", "Instinctive")
+KLASSEN_VOLGORDE = ("Recurve", "Compound", "Barebow", "Instinctive", "Longbow")
 
 
 MINIMALE_LEEFTIJD_JEUGD_INTERLAND = 13      # alles jonger wordt niet getoond
