@@ -15,7 +15,7 @@
     <h4>Koppel teamleden</h4>
 
     <p>Op deze pagina kan je leden van de vereniging koppelen aan het team.</p>
-    {% if team.regio_heeft_vaste_teams %}
+    {% if deelcomp.regio_heeft_vaste_teams %}
         <p>In jullie regio is gekozen voor <b>vaste teams</b>, dus de leden die je koppelt blijven het hele seizoen in dit team en kunnen vervangen worden door een invallen.</p>
     {% else %}
         <p>In jullie regio is gekozen voor dynamische teams gebaseerd op het principe van <b>voortschrijdend gemiddelde</b> (VSG), dus elke ronde krijgt het team automatisch leden toegekend.</p>
