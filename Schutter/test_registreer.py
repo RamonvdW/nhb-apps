@@ -60,6 +60,7 @@ class TestSchutterRegistreer(E2EHelpers, TestCase):
         lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
         lid.bij_vereniging = ver
         lid.save()
+        self.lid_100002 = lid
 
     def test_get(self):
         # test registratie via het formulier
@@ -131,6 +132,19 @@ class TestSchutterRegistreer(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('schutter/registreer-geen-email.dtl', 'plein/site_layout.dtl'))
 
     def test_geen_email_geen_sec(self):
+        with self.assert_max_queries(20):
+            resp = self.client.post('/sporter/registreer/',
+                                    {'nhb_nummer': '100002',
+                                     'email': 'rdetester@gmail.not',
+                                     'nieuw_wachtwoord': E2EHelpers.WACHTWOORD},
+                                    follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('schutter/registreer-geen-email.dtl', 'plein/site_layout.dtl'))
+
+    def test_geen_email_geen_ver(self):
+        self.lid_100002.bij_vereniging = None
+        self.lid_100002.save(update_fields=['bij_vereniging'])
         with self.assert_max_queries(20):
             resp = self.client.post('/sporter/registreer/',
                                     {'nhb_nummer': '100002',
