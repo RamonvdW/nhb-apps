@@ -229,15 +229,15 @@ def account_check_gewijzigde_email(account):
 
         if email.nieuwe_email:
             if email.nieuwe_email != email.bevestigde_email:
-                # vraag om bevestiging van deze gewijzgde email
+                # vraag om bevestiging van deze gewijzigde email
                 # email kan eerder overgenomen zijn uit de NHB administratie
                 # of handmatig ingevoerd zijn
 
-                # blokkeer inlog totdat dit nieuwe emailadres bevestigd is
+                # blokkeer inlog totdat dit nieuwe e-mailadres bevestigd is
                 email.email_is_bevestigd = False
                 email.save()
 
-                # maak de url aan om het emailadres te bevestigen
+                # maak de url aan om het e-mailadres te bevestigen
                 # extra parameters are just to make the url unique
                 mailadres = email.nieuwe_email
                 url = maak_tijdelijke_url_account_email(email, username=account.username, email=mailadres)
