@@ -22,11 +22,11 @@ certifi==2021.5.30
     # via
     #   -r requirements_test.txt
     #   requests
-cffi==1.14.5
+cffi==1.14.6
     # via
     #   -r requirements_test.txt
     #   cryptography
-chardet==4.0.0
+charset-normalizer==2.0.3
     # via
     #   -r requirements_test.txt
     #   requests
@@ -57,13 +57,13 @@ elementpath==2.2.3
     # via
     #   -r requirements_test.txt
     #   xmlschema
-google-api-core==1.30.0
+google-api-core==1.31.0
     # via
     #   -r requirements_test.txt
     #   google-api-python-client
-google-api-python-client==2.11.0
+google-api-python-client==2.14.0
     # via -r requirements_test.txt
-google-auth==1.32.1
+google-auth==1.33.1
     # via
     #   -r requirements_test.txt
     #   google-api-core
@@ -97,7 +97,7 @@ packaging==21.0
     #   -r requirements_test.txt
     #   google-api-core
     #   pip-review
-pip-licenses==3.5.0
+pip-licenses==3.5.1
     # via -r requirements_dev.in
 pip-review==1.1.0
     # via -r requirements_dev.in
@@ -138,7 +138,7 @@ pysaml2==7.0.1
     # via
     #   -r requirements_test.txt
     #   djangosaml2idp
-python-dateutil==2.8.1
+python-dateutil==2.8.2
     # via
     #   -r requirements_test.txt
     #   arrow
@@ -152,9 +152,9 @@ pytz==2021.1
     #   pysaml2
 pyyaml==5.4.1
     # via html5validator
-qrcode==7.1
+qrcode==7.2
     # via -r requirements_test.txt
-requests==2.25.1
+requests==2.26.0
     # via
     #   -r requirements_test.txt
     #   google-api-core
