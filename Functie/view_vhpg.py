@@ -51,14 +51,12 @@ class VhpgAfsprakenView(UserPassesTestMixin, TemplateView):
 def account_vhpg_is_geaccepteerd(account):
     """ onthoud dat de vhpg net geaccepteerd is door de gebruiker
     """
-    try:
-        vhpg = VerklaringHanterenPersoonsgegevens.objects.get(account=account)
-    except VerklaringHanterenPersoonsgegevens.DoesNotExist:
-        vhpg = VerklaringHanterenPersoonsgegevens()
-        vhpg.account = account
-
-    vhpg.acceptatie_datum = timezone.now()
-    vhpg.save()
+    # Deze functie wordt aangeroepen vanuit een POST handler
+    # concurrency beveiliging om te voorkomen dat 2 records gemaakt worden
+    obj, created = (VerklaringHanterenPersoonsgegevens
+                    .objects
+                    .update_or_create(account=account,
+                                      defaults={'acceptatie_datum': timezone.now()}))
 
 
 class VhpgAcceptatieView(TemplateView):

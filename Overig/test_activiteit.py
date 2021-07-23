@@ -167,7 +167,7 @@ class TestAccountActiviteit(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('overig/activiteit.dtl', 'plein/site_layout.dtl'))
 
-        vhpg = self.account_100001.vhpg.all()[0]
+        vhpg = self.account_100001.vhpg
         vhpg.acceptatie_datum -= datetime.timedelta(days=365)
         vhpg.save()
 

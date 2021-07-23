@@ -85,7 +85,7 @@ class VerklaringHanterenPersoonsgegevens(models.Model):
     """
 
     # het account waar dit record bij hoort
-    account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='vhpg')
+    account = models.OneToOneField(Account, on_delete=models.CASCADE, related_name='vhpg')
 
     # datum waarop de acceptatie voor het laatste gedaan is
     acceptatie_datum = models.DateTimeField()
