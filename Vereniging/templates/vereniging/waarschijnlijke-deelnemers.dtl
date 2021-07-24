@@ -62,10 +62,10 @@
                 <th><span class="hide-on-small-only">Nummer</span><span class="hide-unless-small">Nr</span></th>
                 <th>Vereniging</th>
                 <th>Sporter</th>
-                <th>Boog</th>
+                <th>Boog (gem<sup>*1</sup>)</th>
                 <th>Blazoen<br>individueel</th>
                 {% if deelcomp.regio_organiseert_teamcompetitie %}
-                    <th>Team{% if deelcomp.regio_heeft_vaste_teams %} (gem<sup>**</sup>){% endif %}</th>
+                    <th>Team{% if deelcomp.regio_heeft_vaste_teams %} (gem<sup>*2</sup>){% endif %}</th>
                 {% endif %}
                 <th>Notitie</th>
             </tr>
@@ -74,7 +74,7 @@
         {% for sporter in sporters %}
             {% if sporter.vereniging_teams %}
                 <tr>
-                    <td colspan="1"></td>
+                    <td></td>
                     <td colspan="6">{{ sporter.vereniging_teams }}</td>
                 </tr>
             {% endif %}
@@ -88,7 +88,7 @@
                         {% if not forloop.first %}
                             <span> of</span><br>
                         {% endif %}
-                        <span>{{ boog }} ({{ vsg }})</span>
+                        <span>{{ boog }}{% if vsg %} ({{ vsg }}){% endif %}</span>
                     {% endfor %}
                 </td>
                 <td>
@@ -128,12 +128,21 @@
 
                 <td>{{ sporter.notitie }}</td>
             </tr>
+
+        {% empty %}
+            <tr>
+                <td colspan="7"><i>Er zijn (nog) geen sporters aangemeld</i></td>
+            </tr>
         {% endfor %}
 
     </table>
 
-    {% if vaste_teams %}
-        <p>gem<sup>**</sup>) Aanvangsgemiddelde van deze sporter. Een invaller mag geen hoger huidig gemiddelde hebben.</p>
+    <p>gem<sup>*1</sup>) Huidig gemiddelde van sporters die in een team schieten.</p>
+
+    {% if deelcomp.regio_organiseert_teamcompetitie %}
+        {% if deelcomp.regio_heeft_vaste_teams %}
+            <p>gem<sup>*2</sup>) Aanvangsgemiddelde van dit team lid. Een invaller mag geen hoger huidig gemiddelde hebben.</p>
+        {% endif %}
     {% endif %}
 
     <p>&nbsp;</p>
@@ -225,7 +234,7 @@
             <td>{{ blazoenen.banen_aspiranten_60cm }}</td>
             <td>60cm</td>
             <td>-</td>
-            <td>{{ blazoenen.sporters_aspiranten_60cm }}</td>
+            <td>{{ blazoenen.sporters_aspirant_60cm }}</td>
             <td>Aspiranten{% if is_25m1p %} (afstand: 18m){% endif %}</td>
         </tr>
 

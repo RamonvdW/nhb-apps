@@ -128,10 +128,14 @@ def bepaal_waarschijnlijke_deelnemers(wedstrijd, afstand, deelnemers_indiv, deel
         elif boog.afkorting == 'C':
             sporter.schiet_boog_c = True
 
-        if deelnemer.aantal_scores == 0:
-            vsg = deelnemer.ag_voor_team
+        # TODO: zonder Team-AG kan het geen teamschutter zijn
+        if deelnemer.inschrijf_voorkeur_team:
+            if deelnemer.aantal_scores == 0:
+                vsg = deelnemer.ag_voor_team
+            else:
+                vsg = deelnemer.gemiddelde
         else:
-            vsg = deelnemer.gemiddelde
+            vsg = ''    # niet tonen
 
         tup = (boog.volgorde, boog.beschrijving, vsg)
         sporter.bogen_lijst.append(tup)
@@ -255,7 +259,7 @@ def bepaal_blazoen_behoefte(sporters, afstand, deelnemers_teams):
             if sporter.voorkeur_4spot:
                 blazoenen.sporters_aspirant_wens_60cm_4spot__anders_60cm += 1
             else:
-                blazoenen.sporters_aspiranten_60cm += 1
+                blazoenen.sporters_aspirant_60cm += 1
         else:
             for blaz in sporter.blazoen_str_lijst:
                 if blaz == BLAZOEN_STR_WENS_4SPOT:
