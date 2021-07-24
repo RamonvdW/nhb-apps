@@ -22,6 +22,6 @@ class WikiAccessCheck(BaseProcessor):
         """
         # als de gebruiker BB is (klankbordgroep) dan is de wiki ook toegestaan
         account = request.user
-        return account.is_BB
+        return account.is_BB or account.is_staff
 
 # end of file
