@@ -31,7 +31,7 @@ class DeelcompetitieRondeAdmin(admin.ModelAdmin):
 
 class CompetitieKlasseAdmin(admin.ModelAdmin):
 
-    list_filter = ('competitie',)
+    list_filter = ('competitie', 'team__team_type')
 
     list_select_related = ('competitie', 'indiv', 'team')
 
