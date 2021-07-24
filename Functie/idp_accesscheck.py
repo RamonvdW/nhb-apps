@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from djangosaml2idp.processors import BaseProcessor
-from .rol import rol_mag_wisselen
 
 
 class WikiAccessCheck(BaseProcessor):
@@ -21,8 +20,8 @@ class WikiAccessCheck(BaseProcessor):
                 True  = wel  toegang tot wiki geven
                 False = geen toegang tot wiki geven
         """
-        # als de gebruiker van rol mag wisselen
-        # dan is de wiki ook toegestaan
-        return rol_mag_wisselen(request)
+        # als de gebruiker BB is (klankbordgroep) dan is de wiki ook toegestaan
+        account = request.user
+        return account.is_BB
 
 # end of file
