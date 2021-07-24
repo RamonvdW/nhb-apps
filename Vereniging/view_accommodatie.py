@@ -261,10 +261,18 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
                 msgs.append("Aantal 25m banen aangepast van %s naar %s" % (binnen_locatie.banen_25m, data))
                 binnen_locatie.banen_25m = data
 
-            data = form.cleaned_data.get('max_dt')
-            if binnen_locatie.max_dt_per_baan != data:
-                msgs.append("Max DT per baan aangepast van %s naar %s" % (binnen_locatie.max_dt_per_baan, data))
-                binnen_locatie.max_dt_per_baan = data
+            # data = form.cleaned_data.get('max_dt')
+            # if binnen_locatie.max_dt_per_baan != data:
+            #     msgs.append("Max DT per baan aangepast van %s naar %s" % (binnen_locatie.max_dt_per_baan, data))
+            #     binnen_locatie.max_dt_per_baan = data
+
+            data_18 = form.cleaned_data.get('max_sporters_18m')
+            data_25 = form.cleaned_data.get('max_sporters_25m')
+            if data_18 is not None and data_25 is not None:
+                if binnen_locatie.max_sporters_18m != data_18 or binnen_locatie.max_sporters_25m != data_25:
+                    msgs.append("Max sporters 18m/25m aangepast van %s/%s naar %s/%s" % (binnen_locatie.max_sporters_18m, binnen_locatie.max_sporters_25m, data_18, data_25))
+                    binnen_locatie.max_sporters_18m = data_18
+                    binnen_locatie.max_sporters_25m = data_25
 
             if len(msgs) > 0:
                 activiteit = "Aanpassingen aan binnen locatie van vereniging %s: %s" % (nhbver, "; ".join(msgs))

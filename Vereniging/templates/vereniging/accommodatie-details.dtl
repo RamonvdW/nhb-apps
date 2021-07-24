@@ -18,6 +18,7 @@
 
     <script type="application/javascript">
         function show_hide_dt() {
+            // FUTURE: remove this function
             const el18 = document.getElementById('banen_18')
             const el25 = document.getElementById('banen_25')
             const tr_dt = document.getElementById('id_dt_per_baan')
@@ -42,7 +43,7 @@
             el.disabled = false
             el.parentElement.style.display = "block"
 
-            show_hide_dt()
+            //show_hide_dt()
         }
     </script>
 
@@ -215,6 +216,8 @@
                     {% endif %}
                 </tr>
 
+                <!-- binnenaccommodatie -->
+
                 {% if locatie %}
 
                     <tr>
@@ -307,6 +310,7 @@
                         {% endif %}
                     </tr>
 
+                    <!--
                     <tr id="id_dt_per_baan"{% if not readonly_show_max_dt %} class="hide"{% endif %}>
                         <td>Maximum aantal Dutch Targets op 1 baan:</td>
                         <td colspan="2">
@@ -328,6 +332,27 @@
                                     </li>
                                 </ul>
                             {% endif %}
+                        </td>
+                        {% if not readonly %}
+                            <td></td>
+                        {% endif %}
+                    </tr>
+                    -->
+
+                    <tr>
+                        <td>Maximum aantal sporters op 18 meter:</td>
+                        <td colspan="2">
+                            <input type="number" min="0" max="99" name="max_sporters_18m" value="{{ locatie.max_sporters_18m }}" onchange="gewijzigd()">
+                        </td>
+                        {% if not readonly %}
+                            <td><!-- kolom voor de wijzig knoppen --></td>
+                        {% endif %}
+                    </tr>
+
+                    <tr>
+                        <td>Maximum aantal sporters op 25 meter:</td>
+                        <td colspan="2">
+                            <input type="number" min="0" max="99" name="max_sporters_25m" value="{{ locatie.max_sporters_25m }}" onchange="gewijzigd()">
                         </td>
                         {% if not readonly %}
                             <td><!-- kolom voor de wijzig knoppen --></td>
@@ -378,6 +403,9 @@
                     </tr>
 
                 {% endif %}     <!-- if locatie -->
+
+
+                <!-- buiten accommodatie -->
 
                 {% if buiten_locatie %}
                     <tr>
@@ -564,8 +592,9 @@
     {% endif %}
 
     <script type="application/javascript">
+        // FUTURE: remove this function
         document.addEventListener("DOMContentLoaded", function() {
-            show_hide_dt()
+            //show_hide_dt()
         })
     </script>
 
