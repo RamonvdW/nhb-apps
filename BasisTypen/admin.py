@@ -38,7 +38,10 @@ class BasisTypenIndivWedstrijdklasseAdmin(BasisTypenReadonlyMetVolgordeAdmin):
 
     # record weergave
     fieldsets = (
-        (None, {'fields': ('beschrijving', 'boogtype', 'is_onbekend', '_leeftijdsklassen', 'niet_voor_rk_bk', 'volgorde', 'buiten_gebruik')}),
+        (None, {'fields': ('volgorde', 'beschrijving', 'boogtype', 'buiten_gebruik')}),
+        ('Details', {'fields': ('leeftijdsklassen', 'is_aspirant_klasse', 'is_onbekend', 'niet_voor_rk_bk', )}),
+        ('Blazoenen Indoor', {'fields': ('blazoen1_18m_regio', 'blazoen2_18m_regio', 'blazoen_18m_rk_bk')}),
+        ('Blazoenen 25m 1pijl', {'fields': ('blazoen1_25m_regio', 'blazoen2_25m_regio', 'blazoen_25m_rk_bk')})
     )
 
     @staticmethod
@@ -60,7 +63,9 @@ class BasisTypenTeamWedstrijdklasseAdmin(BasisTypenReadonlyMetVolgordeAdmin):
 
     # record weergave
     fieldsets = (
-        (None, {'fields': ('beschrijving', 'team_type', 'volgorde', 'buiten_gebruik')}),
+        (None, {'fields': ('volgorde', 'beschrijving', 'team_type', 'buiten_gebruik')}),
+        ('Blazoenen Indoor', {'fields': ('blazoen_18m_regio', 'blazoen_18m_rk_bk')}),
+        ('Blazoenen 25m 1pijl', {'fields': ('blazoen1_25m_regio', 'blazoen2_25m_regio', 'blazoen_25m_rk_bk')})
     )
 
 

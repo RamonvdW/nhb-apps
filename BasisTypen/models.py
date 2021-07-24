@@ -13,7 +13,30 @@ MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT = 13
 # leden zijn jeugdlid tot en met het jaar waarin ze 20 worden
 MAXIMALE_LEEFTIJD_JEUGD = 20
 
-GESLACHT = [('M', 'Man'), ('V', 'Vrouw')]
+GESLACHT_MAN = 'M'
+GESLACHT_VROUW = 'V'
+
+GESLACHT = [(GESLACHT_MAN, 'Man'),
+            (GESLACHT_VROUW, 'Vrouw')]
+
+BLAZOEN_40CM = '40'
+BLAZOEN_60CM = '60'
+BLAZOEN_60CM_4SPOT = '4S'
+BLAZOEN_DT = 'DT'
+
+BLAZOEN_CHOICES = [
+    (BLAZOEN_40CM, '40cm'),
+    (BLAZOEN_60CM, '60cm'),
+    (BLAZOEN_60CM_4SPOT, '60cm 4-spot'),
+    (BLAZOEN_DT, 'Dutch Target')
+]
+
+BLAZOEN2STR = {
+    BLAZOEN_40CM: '40cm',
+    BLAZOEN_60CM: '60cm',
+    BLAZOEN_60CM_4SPOT: '60cm 4-spot',
+    BLAZOEN_DT: 'Dutch Target'
+}
 
 
 class BoogType(models.Model):
@@ -157,6 +180,22 @@ class IndivWedstrijdklasse(models.Model):
     # bevat typische ook "Klasse Onbekend" in de titel
     is_onbekend = models.BooleanField(default=False)
 
+    # is dit een klasse voor aspiranten?
+    is_aspirant_klasse = models.BooleanField(default=False)
+
+    # op welk soort blazoen schiet deze klasse in de regiocompetitie
+    # als er meerdere opties zijn dan is blazoen1 != blazoen2
+    blazoen1_18m_regio = models.CharField(max_length=2, choices=BLAZOEN_CHOICES, default=BLAZOEN_40CM)
+    blazoen2_18m_regio = models.CharField(max_length=2, choices=BLAZOEN_CHOICES, default=BLAZOEN_40CM)
+
+    blazoen1_25m_regio = models.CharField(max_length=2, choices=BLAZOEN_CHOICES, default=BLAZOEN_60CM)
+    blazoen2_25m_regio = models.CharField(max_length=2, choices=BLAZOEN_CHOICES, default=BLAZOEN_60CM)
+
+    # op welk soort blazoen schiet deze klasse in de kampioenschappen
+    # (maar 1 keuze mogelijk)
+    blazoen_18m_rk_bk = models.CharField(max_length=2, choices=BLAZOEN_CHOICES, default=BLAZOEN_40CM)
+    blazoen_25m_rk_bk = models.CharField(max_length=2, choices=BLAZOEN_CHOICES, default=BLAZOEN_60CM)
+
     def __str__(self):
         """ Lever een tekstuele beschrijving voor de admin interface """
         return self.beschrijving
@@ -185,6 +224,18 @@ class TeamWedstrijdklasse(models.Model):
 
     # voorbeeld: Recurve klasse ERE
     beschrijving = models.CharField(max_length=80)
+
+    # op welk soort blazoen schiet deze klasse in de regiocompetitie
+    # als er meerdere opties zijn dan is blazoen1 != blazoen2
+    blazoen_18m_regio = models.CharField(max_length=2, choices=BLAZOEN_CHOICES, default=BLAZOEN_40CM)
+
+    blazoen1_25m_regio = models.CharField(max_length=2, choices=BLAZOEN_CHOICES, default=BLAZOEN_60CM)
+    blazoen2_25m_regio = models.CharField(max_length=2, choices=BLAZOEN_CHOICES, default=BLAZOEN_60CM)
+
+    # op welk soort blazoen schiet deze klasse in de kampioenschappen
+    # (maar 1 keuze mogelijk)
+    blazoen_18m_rk_bk = models.CharField(max_length=2, choices=BLAZOEN_CHOICES, default=BLAZOEN_40CM)
+    blazoen_25m_rk_bk = models.CharField(max_length=2, choices=BLAZOEN_CHOICES, default=BLAZOEN_60CM)
 
     def __str__(self):
         """ Lever een tekstuele beschrijving voor de admin interface """
