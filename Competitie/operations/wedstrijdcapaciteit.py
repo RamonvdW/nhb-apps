@@ -284,33 +284,51 @@ def bepaal_blazoen_behoefte(afstand, sporters, deelnemers_teams):
     blazoen_str_40cm = BLAZOEN2STR[BLAZOEN_40CM]
     blazoen_str_60cm = BLAZOEN2STR[BLAZOEN_60CM]
 
-    for team in deelnemers_teams:
-        team_klasse = team.klasse.team
+    ver2teams = dict()      # [ver_nr] = aantal teams van deze vereniging
 
-        if afstand == '18':
-            blazoen = team_klasse.blazoen_18m_regio
-            if blazoen == BLAZOEN_40CM:
-                blazoenen.teams_40cm += 1
-            elif blazoen == BLAZOEN_DT:
-                blazoenen.teams_dt += 1
-        else:
-            if team_klasse.blazoen1_25m_regio == team_klasse.blazoen2_25m_regio:
-                if team_klasse.blazoen1_25m_regio == BLAZOEN_60CM:
-                    blazoenen.teams_60cm += 1
-                else:
-                    blazoenen.teams_60cm_4spot += 1
+    for team in deelnemers_teams:
+
+        # team wat nog niet in een klasse staat slaan we over
+        if team.klasse:
+            team_klasse = team.klasse.team
+
+            ver_nr = team.vereniging.ver_nr
+            try:
+                ver2teams[ver_nr] += 1
+            except KeyError:
+                ver2teams[ver_nr] = 1
+
+            if afstand == '18':
+                blazoen = team_klasse.blazoen_18m_regio
+                if blazoen == BLAZOEN_40CM:
+                    blazoenen.teams_40cm += 1
+                elif blazoen == BLAZOEN_DT:
+                    blazoenen.teams_dt += 1
             else:
-                blazoenen.teams_wens_60cm_4spot__anders_60cm += 1
+                if team_klasse.blazoen1_25m_regio == team_klasse.blazoen2_25m_regio:
+                    if team_klasse.blazoen1_25m_regio == BLAZOEN_60CM:
+                        blazoenen.teams_60cm += 1
+                    else:
+                        blazoenen.teams_60cm_4spot += 1
+                else:
+                    blazoenen.teams_wens_60cm_4spot__anders_60cm += 1
     # for
 
-    for sporter in sporters:
+    ver2count = dict()      # [ver_nr] = aantal ingeschreven sporters met voorkeur voor teamschieten
 
+    for sporter in sporters:
         if sporter.is_aspirant:
             if sporter.voorkeur_4spot:
                 blazoenen.sporters_aspirant_wens_60cm_4spot__anders_60cm += 1
             else:
                 blazoenen.sporters_aspirant_60cm += 1
         else:
+            if sporter.wil_team_schieten:
+                try:
+                    ver2count[sporter.ver_nr] += 1
+                except KeyError:
+                    ver2count[sporter.ver_nr] = 1
+
             for blaz in sporter.blazoen_str_lijst:
                 if blaz == BLAZOEN_STR_WENS_4SPOT:
                     blazoenen.sporters_wens_60cm_4spot__anders_60cm += 1
@@ -327,11 +345,12 @@ def bepaal_blazoen_behoefte(afstand, sporters, deelnemers_teams):
 
     blazoenen.sporters_60cm_excl_teams = blazoenen.sporters_60cm - blazoenen.teams_60cm * 4
     blazoenen.sporters_60cm_4spot_excl_teams = blazoenen.sporters_60cm_4spot - blazoenen.teams_60cm_4spot * 4
-    blazoenen.sporters_40cm_excl_teams = blazoenen.sporters_40cm - blazoenen.teams_40cm * 4
+    blazoenen.sporters_40cm_excl_teams = max(0, blazoenen.sporters_40cm - blazoenen.teams_40cm * 4)
     blazoenen.sporters_dt_excl_teams = blazoenen.sporters_dt - blazoenen.teams_dt * 4
 
     blazoenen.banen_aspiranten_60cm = math.ceil(blazoenen.sporters_aspirant_60cm / 4.0)
     blazoenen.banen_aspiranten_wens_60cm_4spot = math.ceil(blazoenen.sporters_aspirant_wens_60cm_4spot__anders_60cm / 4.0)
+
     blazoenen.banen_60cm_excl_teams = math.ceil(blazoenen.sporters_60cm_excl_teams / 4.0)
     blazoenen.banen_60cm_4spot_excl_teams = math.ceil(blazoenen.sporters_60cm_4spot_excl_teams / 4.0)
     blazoenen.banen_40cm_excl_teams = math.ceil(blazoenen.sporters_40cm_excl_teams / 4.0)

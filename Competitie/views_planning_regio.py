@@ -837,6 +837,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
             for obj in (RegiocompetitieTeam
                         .objects
                         .filter(deelcompetitie=deelcomp)
+                        .exclude(klasse=None)
                         .select_related('klasse',
                                         'klasse__team')):
                 try:

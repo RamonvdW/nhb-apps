@@ -191,7 +191,7 @@
                 <td>{{ blazoenen.banen_40cm_excl_teams }}</td>
                 <td>40cm</td>
                 <td>-</td>
-                <td>{{ blazoenen.sporters_40cm_excl_teams }}<br>({% if blazoenen.plekjes_over_40cm == 1 %}1 plekje{% else %}{{ blazoenen.plekjes_over_40cm }} plekjes{% endif %} over)</td>
+                <td>{{ blazoenen.sporters_40cm_excl_teams }}{% if blazoenen.banen_40cm_excl_teams > 0 %}<br>({% if blazoenen.plekjes_over_40cm == 1 %}1 plekje{% else %}{{ blazoenen.plekjes_over_40cm }} plekjes{% endif %} over){% endif %}</td>
                 <td>1 blazoen per 4 sporters</td>
             </tr>
 
