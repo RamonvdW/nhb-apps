@@ -14,14 +14,14 @@
     <h4>Schietmomenten</h4>
 
     <p>In jouw regio mogen de sporters aangeven wanneer ze kunnen schieten.</p>
-    <p>Hieronder krijg je het overzicht voor jouw vereniging en kan je je leden helpen deze keuzes aan te passen.</p>
+    <p>Hieronder krijg je het overzicht voor leden van jouw vereniging en kan je je leden helpen deze keuzes aan te passen.</p>
 
     <p>Betekenis van de nummers:</p>
     <table>
         {% for wedstrijd in wedstrijden %}
             <tr>
                 <td style="padding: 0"><b>{{ wedstrijd.nummer_str }}</b></td>
-                <td style="padding: 0">{{ wedstrijd.beschrijving_str }}</td>
+                <td style="padding: 0">{{ wedstrijd.datum_wanneer|date:"l j E Y" }} om {{ wedstrijd.tijd_begin_wedstrijd }} bij {{ wedstrijd.waar_str }}</td>
             </tr>
         {% endfor %}
     </table>

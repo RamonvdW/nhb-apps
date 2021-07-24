@@ -86,6 +86,10 @@ urlpatterns = [
          view_clusters.WijzigClustersView.as_view(),
          name='clusters'),
 
+    path('wedstrijden/<wedstrijd_pk>/waarschijnlijke-deelnemers/',
+         view_wedstrijden.WaarschijnlijkeDeelnemersView.as_view(),
+         name='waarschijnlijke-deelnemers'),
+
     path('wedstrijden/',
          view_wedstrijden.WedstrijdenView.as_view(),
          name='wedstrijden'),

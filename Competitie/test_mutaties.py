@@ -878,7 +878,7 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
                              door='Tester').save()
         KampioenschapMutatie(mutatie=MUTATIE_COMPETITIE_OPSTARTEN,      # triggered "al opgestart" pad
                              door='Tester').save()
-        self._verwerk_mutaties(24)
+        self._verwerk_mutaties(28)
 
         # AG vaststellen
         KampioenschapMutatie(mutatie=MUTATIE_AG_VASTSTELLEN_18M,

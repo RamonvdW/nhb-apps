@@ -78,9 +78,11 @@ DEELNAME_ONBEKEND = '?'
 DEELNAME_JA = 'J'
 DEELNAME_NEE = 'N'
 
-DEELNAME_CHOICES = [(DEELNAME_ONBEKEND, 'Onbekend'),
-                    (DEELNAME_JA, 'Bevestigd'),
-                    (DEELNAME_NEE, 'Afgemeld')]
+DEELNAME_CHOICES = [
+    (DEELNAME_ONBEKEND, 'Onbekend'),
+    (DEELNAME_JA, 'Bevestigd'),
+    (DEELNAME_NEE, 'Afgemeld')
+]
 
 MUTATIE_COMPETITIE_OPSTARTEN = 1
 MUTATIE_AG_VASTSTELLEN_18M = 2
@@ -99,6 +101,40 @@ MUTATIE_TO_STR = {
     MUTATIE_AFMELDEN: "afmelden",
     MUTATIE_AANMELDEN: "aanmelden",
 }
+
+
+def bepaal_blazoen_team(afstand, team_wedstrijdklasse):
+
+    if afstand == '25':
+        # 25m 1pijl
+        blazoen = BLAZOEN_60CM
+    else:
+        # Indoor
+        blazoen = BLAZOEN_40CM
+
+        if team_wedstrijdklasse.schiet_op_dt:
+            blazoen = BLAZOEN_DT
+
+    return blazoen
+
+
+def bepaal_blazoen_indiv(afstand, indiv_wedstrijdklasse):
+
+    if afstand == '25':
+        # 25m 1pijl
+        blazoen = BLAZOEN_60CM
+    else:
+        # Indoor
+
+        if indiv_wedstrijdklasse.is_aspirant_klasse:
+            blazoen = BLAZOEN_60CM
+        else:
+            blazoen = BLAZOEN_40CM
+
+        if indiv_wedstrijdklasse.schiet_op_dt:
+            blazoen = BLAZOEN_DT
+
+    return blazoen
 
 
 class Competitie(models.Model):
@@ -474,7 +510,7 @@ class RegioCompetitieSchutterBoog(models.Model):
     ag_voor_indiv = models.DecimalField(max_digits=5, decimal_places=3, default=0.0)    # 10,000
 
     # aanvangsgemiddelde voor de teamcompetitie (typisch gelijk aan ag_voor_indiv)
-    ag_voor_team = models.DecimalField(max_digits=5, decimal_places=3, default=0.0)    # 10,000
+    ag_voor_team = models.DecimalField(max_digits=5, decimal_places=3, default=0.0)     # 10,000
 
     # indien ag_voor_team niet gebaseerd op de uitslag van vorig seizoen,
     # of 0,000 is (voor nieuwe sporters of bij onvoldoende scores in vorig seizoen)

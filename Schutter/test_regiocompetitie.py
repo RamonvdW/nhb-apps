@@ -721,7 +721,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
 
         # wijzig de instellingen van deze wedstrijd
         url_wed = self.url_wijzig_wedstrijd % wedstrijd_pk
-        with self.assert_max_queries(26):
+        with self.assert_max_queries(20):
             resp = self.client.post(url_wed, {'nhbver_pk': self.nhbver.pk,
                                               'wanneer': '2020-12-11', 'aanvang': '12:34'})
         self.assert_is_redirect(resp, url_ronde)

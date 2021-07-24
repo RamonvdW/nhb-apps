@@ -131,11 +131,10 @@
         <thead>
             <tr>
                 <th>Wanneer</th>
-                <th>Waar</th>
                 <th>Organisatie</th>
                 {% if heeft_wkl %}
                     <th>Wedstrijdklassen</th>
-                    <th>Capaciteit</th>
+                    <th>Bezetting</th>
                 {% endif %}
                 <th><!-- kolom voor wijzig knoppen --></th>
             </tr>
@@ -145,35 +144,29 @@
             <tr>
                 <td>{{ wedstrijd.datum_wanneer|date:"l j F Y" }} om {{ wedstrijd.tijd_begin_wedstrijd }}</td>
 
-                <!-- Waar -->
-                <td>
-                    {% if wedstrijd.locatie %}
-                        <span>{{ wedstrijd.locatie.plaats }}</span>
-                    {% else %}
-                        <i class="red-text">Onbekend</i>
-                    {% endif %}
-                </td>
-
                 <!-- Organisatie -->
                 <td>
                     {% if wedstrijd.vereniging %}
                         <span>{{ wedstrijd.vereniging }}</span>
                     {% else %}
-                        <i class="red-text">Onbekend</i>
+                        <i class="red-text">Vereniging onbekend</i>
+                    {% endif %}
+                    <br>
+                    {% if wedstrijd.locatie %}
+                        <span>Locatie: {{ wedstrijd.locatie.plaats }}</span>
+                    {% else %}
+                        <i class="red-text">Locatie onbekend</i>
                     {% endif %}
                 </td>
 
                 {% if heeft_wkl %}
                     <td>
-                        {% for wkl in wedstrijd.indiv_klassen.all %}
-                            <span>{{ wkl.beschrijving }}</span><br>
-                        {% endfor %}
-                        {% for wkl in wedstrijd.team_klassen.all %}
+                        {% for wkl in wedstrijd.wkl_lijst %}    <!-- team + indiv -->
                             <span>{{ wkl.beschrijving }}</span><br>
                         {% endfor %}
                     </td>
 
-                    <td>Nodig: {{ wedstrijd.aantal_schutters }}<br>Maximum: ?</td>
+                    <td>Nodig: {{ wedstrijd.aantal_sporters }}<br>Limiet: {{ wedstrijd.max_sporters }}</td>
                 {% endif %}
 
                 <!-- knop om wedstrijd te wijzigen -->
@@ -189,7 +182,7 @@
         <!-- knop om een regel toe te voegen -->
         {% if url_nieuwe_wedstrijd %}
             <tr>
-                <td colspan={% if heeft_wkl %}"6"{% else %}"4"{% endif %}>
+                <td colspan="{% if heeft_wkl %}5{% else %}3{% endif %}">
                     <form action="{{ url_nieuwe_wedstrijd }}" method="post">
                         {% csrf_token %}
                         <button class="btn-nhb-blauw vertrek_knop" type="submit">
@@ -202,7 +195,7 @@
         {% if heeft_wkl %}
             {% if wkl_niet_gebruikt %}
                 <tr>
-                    <td colspan="3"><i>De volgende klassen zijn nog niet gekoppeld aan een wedstrijd:</i></td>
+                    <td colspan="2"><i>De volgende klassen zijn nog niet gekoppeld aan een wedstrijd:</i></td>
                     <td colspan="3">
                         {% for wkl_beschrijving in wkl_niet_gebruikt %}
                             <span>{{ wkl_beschrijving }}</span><br>

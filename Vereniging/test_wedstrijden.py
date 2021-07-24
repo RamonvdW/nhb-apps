@@ -251,7 +251,8 @@ class TestVerenigingWedstrijden(E2EHelpers, TestCase):
 
         urls2 = self.extract_all_urls(resp, skip_menu=True)
         for url in urls2:
-            self.assertTrue(url.startswith('/bondscompetities/scores/uitslag-invoeren/'))
+            self.assertTrue("/waarschijnlijke-deelnemers/" in url or url.startswith('/bondscompetities/scores/uitslag-invoeren/'))
+        # for
 
     def test_wedstrijden_wl(self):
         # login als WL

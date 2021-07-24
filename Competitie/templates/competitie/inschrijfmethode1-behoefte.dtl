@@ -25,9 +25,16 @@
     <table class="white">
         <thead>
             <tr>
+                <th colspan="3"></th>
+                <th colspan="{{ blazoenen|length }}">Benodigde blazoenen</th>
+            </tr>
+            <tr>
                 <th>Wedstrijd</th>
                 <th>Locatie</th>
                 <th>Aantal keer gekozen</th>
+                {% for blazoen in blazoenen %}
+                    <th>{{ blazoen }}</th>
+                {% endfor %}
             </tr>
         </thead>
 
@@ -36,6 +43,9 @@
                 <td>{{ wedstrijd.beschrijving_str }}</td>
                 <td>{{ wedstrijd.locatie_str }}</td>
                 <td>{{ wedstrijd.keuze_count }}</td>
+                {% for count in wedstrijd.blazoen_count %}
+                    <td>{{ count }}</td>
+                {% endfor %}
             </tr>
         {% empty %}
             <tr>

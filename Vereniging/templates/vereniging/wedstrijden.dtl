@@ -28,6 +28,7 @@
                 <tr>
                     <th>Wanneer</th>
                     <th>Beschrijving</th>
+                    <th>Waarschijnlijke deelnemers</th>
                     <th>Uitslag</th>
                 </tr>
             </thead>
@@ -35,7 +36,15 @@
             {% for obj in wedstrijden %}
                 <tr>
                     <td>{{ obj.datum_wanneer }} om {{ obj.tijd_begin_wedstrijd }}</td>
-                    <td>{{ obj.beschrijving }}</td>
+                    <td>{{ obj.beschrijving1 }}<br>{{ obj.beschrijving2 }}</td>
+
+                    <!-- knop om de waarschijnlijke deelnemerslijst te zien -->
+                    <td>
+                        {% if obj.url_waarschijnlijke_deelnemers %}
+                            <a class="btn-nhb-blauw" href="{{ obj.url_waarschijnlijke_deelnemers }}">Toon lijst</a>
+                        {% endif %}
+                    </td>
+
                     <!-- knop om uitslagen te zien / in te voeren -->
                     <td>
                         {% if obj.url_uitslag_aanpassen %}

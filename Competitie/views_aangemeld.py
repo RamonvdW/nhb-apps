@@ -411,13 +411,16 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
 
                 blazoen = BLAZOEN_40CM
                 if boog_afkorting == 'C':
+                    # dit is inclusief alle compound teams
                     blazoen = 'DT Compound'
                 elif boog_afkorting == 'R':
+                    # TODO: tel Recurve klasse 1+2, Recurve ERE teams
                     # deze schutter heeft misschien voorkeur voor DT
                     if obj.schutterboog.nhblid.nhb_nr in voorkeur_dt:
                         blazoen = BLAZOEN_DT_R
 
                 # controleer of schutter een aspirant is
+                # TODO: omzetten naar "is_aspirant()" en ook de compound asp meenemen!DT
                 if obj.klasse.indiv.niet_voor_rk_bk and not obj.klasse.indiv.is_onbekend:
                     # schutterboog is ingeschreven in een aspirant klasse
                     blazoen = BLAZOEN_60CM
@@ -677,6 +680,16 @@ class Inschrijfmethode1BehoefteView(UserPassesTestMixin, TemplateView):
         if deelcomp.inschrijf_methode != INSCHRIJF_METHODE_1:
             raise Http404('Verkeerde inschrijfmethode')
 
+        afstand = deelcomp.competitie.afstand
+        context['blazoenen'] = COMP_BLAZOENEN[afstand]
+
+        # schutters met recurve boog willen mogelijk DT
+        voorkeur_dt = (SchutterVoorkeuren
+                       .objects
+                       .select_related('nhblid')
+                       .filter(voorkeur_dutchtarget_18m=True)
+                       .values_list('nhblid__nhb_nr', flat=True))
+
         # zoek alle wedstrijdplannen in deze deelcompetitie (1 per cluster + 1 voor de regio)
         plan_pks = list(DeelcompetitieRonde
                         .objects
@@ -696,7 +709,58 @@ class Inschrijfmethode1BehoefteView(UserPassesTestMixin, TemplateView):
                                                        wedstrijd.tijd_begin_wedstrijd.strftime("%H:%M"))
             wedstrijd.locatie_str = str(wedstrijd.vereniging)
             wedstrijd.keuze_count = wedstrijd.regiocompetitieschutterboog_set.count()
-        # for
+
+            deelnemer_pks = wedstrijd.regiocompetitieschutterboog_set.values_list('pk', flat=True)
+
+            blazoenen = dict()
+            for blazoen in COMP_BLAZOENEN[afstand]:
+                blazoenen[blazoen] = 0
+            # for
+
+            for deelnemer in (RegioCompetitieSchutterBoog
+                              .objects
+                              .select_related('schutterboog',
+                                              'schutterboog__boogtype',
+                                              'schutterboog__nhblid',
+                                              'klasse',
+                                              'klasse__indiv')
+                              .filter(pk__in=deelnemer_pks)):
+
+                boog_afkorting = deelnemer.schutterboog.boogtype.afkorting
+
+                if afstand == '18':
+                    # 18m wordt geschoten op 40cm blazoen
+                    #       uitzondering: alle Compound + Recurve klasse 1+2
+                    #       uitzondering: aspiranten schieten op 60cm blazoen
+                    # recurve schutters mogen voorkeur voor DT opgeven
+
+                    blazoen = BLAZOEN_40CM
+                    if boog_afkorting == 'C':
+                        blazoen = 'DT Compound'
+                    elif boog_afkorting == 'R':
+                        # deze schutter heeft misschien voorkeur voor DT
+                        if deelnemer.schutterboog.nhblid.nhb_nr in voorkeur_dt:
+                            blazoen = BLAZOEN_DT_R
+
+                    # controleer of schutter een aspirant is
+                    if deelnemer.klasse.indiv.niet_voor_rk_bk and not deelnemer.klasse.indiv.is_onbekend:
+                        # schutterboog is ingeschreven in een aspirant klasse
+                        blazoen = BLAZOEN_60CM
+                else:
+                    # 25m wordt geschoten op 60cm blazoen
+                    #       aspiranten schieten op 18m
+                    #       compound kan een eigen klein blazoen krijgen??
+                    blazoen = BLAZOEN_60CM
+                    if boog_afkorting == 'C':
+                        blazoen = BLAZOEN_60CM_C
+
+                blazoenen[blazoen] += 1
+            # for  deelnemer
+
+            # convert dict to list
+            wedstrijd.blazoen_count = [blazoenen[blazoen] for blazoen in COMP_BLAZOENEN[afstand]]
+
+        # for  wedstrijd
         context['wedstrijden'] = wedstrijden
 
         context['url_download'] = reverse('Competitie:inschrijfmethode1-behoefte-als-bestand',

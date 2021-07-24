@@ -1,0 +1,244 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2021 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Waarschijnlijke deelnemers{% endblock %}
+
+{% block pagina %}
+
+    <h4>Waarschijnlijke deelnemers</h4>
+
+    <p>Op deze pagina tonen we de <i>waarschijnlijke</i> deelnemers van de volgende bondscompetitie wedstrijd:</p>
+
+    <!-- toon gegevens van de wedstrijd in een blauw box -->
+    <div class="row">
+        <div class="col s12 m10 l8 xl6 offset-m1 offset-l2 offset-xl3">
+            <div class="white-text nhb-blauw z-depth-2">
+
+                <div class="row small-row">
+                    <div class="col s3">Competitie:</div>
+                    <div class="col s8">{{ deelcomp.competitie.beschrijving }}</div>
+                </div>
+
+                <div class="row small-row">
+                    <div class="col s3">Regio:</div>
+                    <div class="col s8">{{ deelcomp.nhb_regio }}</div>
+                </div>
+
+                <div class="row small-row">
+                    <div class="col s3">Bij vereniging:</div>
+                    <div class="col s8">{{ wedstrijd.vereniging }}</div>
+                </div>
+
+                <div class="row small-row">
+                    <div class="col s3">Wedstrijd:</div>
+                    <div class="col s8">{{ wedstrijd.beschrijving1 }}<br>{{ wedstrijd.beschrijving2 }}</div>
+                </div>
+
+                <div class="row small-row">
+                    <div class="col s3">Wanneer:</div>
+                    <div class="col s8">{{ wedstrijd.datum_wanneer }} om {{ wedstrijd.tijd_begin_wedstrijd }}</div>
+                </div>
+
+                {% if deelcomp.regio_organiseert_teamcompetitie %}
+                    <div class="row small-row">
+                        <div class="col s3">Teams:</div>
+                        <div class="col s8">{% if deelcomp.regio_heeft_vaste_teams %}Vaste teams{% else %}Dynamisch (voortschrijdend gemiddelde){% endif %}</div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <p>Deze lijst is gebaseerd op de gegevens van: <b>{{ vastgesteld }}</b>.</p>
+
+    <table class="white">
+        <thead>
+            <tr>
+                <th><span class="hide-on-small-only">Nummer</span><span class="hide-unless-small">Nr</span></th>
+                <th>Vereniging</th>
+                <th>Sporter</th>
+                <th>Boog</th>
+                <th>Blazoen<br>individueel</th>
+                {% if deelcomp.regio_organiseert_teamcompetitie %}
+                    <th>Team{% if deelcomp.regio_heeft_vaste_teams %} (gem<sup>**</sup>){% endif %}</th>
+                {% endif %}
+                <th>Notitie</th>
+            </tr>
+        </thead>
+
+        {% for sporter in sporters %}
+            {% if sporter.vereniging_teams %}
+                <tr>
+                    <td colspan="1"></td>
+                    <td colspan="6">{{ sporter.vereniging_teams }}</td>
+                </tr>
+            {% endif %}
+
+            <tr>
+                <td>{{ sporter.volg_nr }}</td>
+                <td>[{{ sporter.ver_nr }}]<span class="hide-on-small-only">&nbsp;{{ sporter.ver_naam }}</span></td>
+                <td>[{{ sporter.nhb_nr }}] {{ sporter.volledige_naam }}</td>
+                <td>
+                    {% for volgorde, boog, vsg in sporter.bogen_lijst %}
+                        {% if not forloop.first %}
+                            <span> of</span><br>
+                        {% endif %}
+                        <span>{{ boog }} ({{ vsg }})</span>
+                    {% endfor %}
+                </td>
+                <td>
+                    {% for blazoen in sporter.blazoen_str_lijst %}
+                        {% if not forloop.first %}
+                            <span> of</span><br>
+                        {% endif %}
+                        <span>{{ blazoen }}</span>
+                    {% endfor %}
+                </td>
+
+                {% if deelcomp.regio_organiseert_teamcompetitie %}
+                    <td>
+                        {% if deelcomp.regio_heeft_vaste_teams %}
+                            <!-- vaste teams -->
+                            {% for volgorde, team, team_type, ag in sporter.teams_lijst %}
+                                {% if not forloop.first %}
+                                    <span> of</span><br>
+                                {% endif %}
+                                <span>{{ team }} ({{ ag }})</span>
+                            {% empty %}
+                                <span>-</span>
+                            {% endfor %}
+                        {% else %}
+                            <!-- VSG -->
+                            {% for volgorde, team, team_type, ag in sporter.teams_lijst %}
+                                {% if not forloop.first %}
+                                    <span> of</span><br>
+                                {% endif %}
+                                <span>{{ team_type }}</span>
+                            {% empty %}
+                                <span>-</span>
+                            {% endfor %}
+                        {% endif %}
+                    </td>
+                {% endif %}
+
+                <td>{{ sporter.notitie }}</td>
+            </tr>
+        {% endfor %}
+
+    </table>
+
+    {% if vaste_teams %}
+        <p>gem<sup>**</sup>) Aanvangsgemiddelde van deze sporter. Een invaller mag geen hoger huidig gemiddelde hebben.</p>
+    {% endif %}
+
+    <p>&nbsp;</p>
+    <h5>Blazoenen behoefte</h5>
+
+    <p>Onderstaande tabel geeft een indicatie van het aantal banen en blazoenen wat nodig is.</p>
+    <p>Elke sporters is maar 1 keer meegerekend (als team lid of individueel).</p>
+    <p>Uiteindelijke indeling wordt gemaakt door de WL, aan de hand van werkelijk aanwezige sporters en speciale verzoeken.</p>
+
+    <table class="white">
+
+        <thead>
+            <tr>
+                <th>Aantal banen</th>
+                <th>Type blazoen</th>
+                <th>Aantal teams</th>
+                <th>Aantal sporters</th>
+                <th>Notitie</th>
+            </tr>
+        </thead>
+
+        {% if not is_25m1p %}
+            {% if deelcomp.regio_organiseert_teamcompetitie %}
+                <tr>
+                    <td>{{ blazoenen.teams_40cm }}</td>
+                    <td>40cm</td>
+                    <td>{{ blazoenen.teams_40cm }}</td>
+                    <td>4</td>
+                    <td>1 blazoen per team</td>
+                </tr>
+
+                <tr>
+                    <td>{{ blazoenen.teams_dt }}</td>
+                    <td>Dutch Target</td>
+                    <td>{{ blazoenen.teams_dt }}</td>
+                    <td>4</td>
+                    <td>4 blazoenen per team</td>
+                </tr>
+            {% endif %}
+
+            <tr>
+                <td>{{ blazoenen.banen_40cm_excl_teams }}</td>
+                <td>40cm</td>
+                <td>-</td>
+                <td>{{ blazoenen.sporters_40cm_excl_teams }}<br>({% if blazoenen.plekjes_over_40cm == 1 %}1 plekje{% else %}{{ blazoenen.plekjes_over_40cm }} plekjes{% endif %} over)</td>
+                <td>1 blazoen per 4 sporters</td>
+            </tr>
+
+            <tr>
+                <td>{{ blazoenen.banen_dt_excl_teams }}</td>
+                <td>Dutch Target</td>
+                <td>-</td>
+                <td>{{ blazoenen.sporters_dt_excl_teams }}</td>
+                <td>1 blazoen per 1 sporter</td>
+            </tr>
+
+            <tr>
+                <td>-</td>
+                <td>Dutch Target</td>
+                <td>-</td>
+                <td>{{ blazoenen.sporters_wens_dt__anders_40cm }}</td>
+                <td>DT indien mogelijk (alternatief: 40cm)</td>
+            </tr>
+
+        {% endif %}
+
+        {% if is_25m1p %}
+            {% if deelcomp.regio_organiseert_teamcompetitie %}
+                <tr>
+                    <td>{{ blazoenen.teams_60cm }}</td>
+                    <td>60cm</td>
+                    <td>{{ blazoenen.teams_60cm }}</td>
+                    <td>4</td>
+                    <td>1 blazoen per team</td>
+                </tr>
+            {% endif %}
+
+            <tr>
+                <td>{{ blazoenen.banen_60cm_excl_teams }}</td>
+                <td>60cm</td>
+                <td>-</td>
+                <td>{{ blazoenen.sporters_60cm_excl_teams }}<br>({% if blazoenen.plekjes_over_60cm == 1 %}1 plekje{% else %}{{ blazoenen.plekjes_over_60cm }} plekjes{% endif %} over)</td>
+                <td>1 blazoen per 4 sporters</td>
+            </tr>
+
+        {% endif %}
+
+        <tr>
+            <td>{{ blazoenen.banen_aspiranten_60cm }}</td>
+            <td>60cm</td>
+            <td>-</td>
+            <td>{{ blazoenen.sporters_aspiranten_60cm }}</td>
+            <td>Aspiranten{% if is_25m1p %} (afstand: 18m){% endif %}</td>
+        </tr>
+
+        <tr>
+            <td>{{ blazoenen.banen_aspiranten_wens_60cm_4spot }}</td>
+            <td>60cm 4-spot</td>
+            <td>-</td>
+            <td>{{ blazoenen.sporters_aspirant_wens_60cm_4spot__anders_60cm }}</td>
+            <td>60cm 4-spot indien mogelijk (alternatief: 60cm).<br>Aspiranten{% if is_25m1p %} (afstand: 18m){% endif %}</td>
+        </tr>
+
+    </table>
+
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vereniging-waarschijnlijke-deelnemers" %}
+
+{% endblock %}
