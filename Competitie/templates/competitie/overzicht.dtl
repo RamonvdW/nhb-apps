@@ -39,10 +39,10 @@
 
     <div class="row">
 
-        <!-- toon klassegrenzen regiocompetitie -->
+        <!-- toon klassen -->
         {% if comp.fase >= 'A2' %}
             {% url 'Competitie:klassegrenzen-tonen' comp_pk=comp.pk as card_url %}
-            {% include 'plein/card.dtl' with title="Klassegrenzen" text="Toon de klassegrenzen voor de competities." icon="equalizer" url=card_url %}
+            {% include 'plein/card.dtl' with title="Wedstrijdklassen" text="Toon de wedstrijdklassen, klassegrenzen en blazoenen voor de competitie." icon="equalizer" url=card_url %}
         {% endif %}
 
         <!-- algemene informatie over de competities -->

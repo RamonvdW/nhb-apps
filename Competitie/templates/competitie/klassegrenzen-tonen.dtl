@@ -6,13 +6,13 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}Klassegrenzen bondscompetitie{% endblock %}
+{% block title %}Klassen bondscompetitie{% endblock %}
 
 {% block pagina %}
 
     {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="klassegrenzen-tonen" %}
 
-    <h4>Klassegrenzen bondscompetitie</h4>
+    <h4>Klassen bondscompetitie</h4>
 
     {% if not comp.klassegrenzen_vastgesteld %}
 
@@ -20,13 +20,17 @@
 
     {% else %}
 
-        <p>Hieronder staan de vastgestelde klassegrenzen voor de individuele wedstrijdklassen en teams wedstrijdklassen voor de <b>{{ comp.beschrijving }}</b>.</p>
+        <p>Hieronder staan de wedstrijdklassen, vastgestelde klassegrenzen en te gebruiken blazoenen, voor individuele sporters en teams, voor de <b>{{ comp.beschrijving }}</b>.</p>
 
         <table class="white">
+
+            <!-- individuele klassen -->
+
             <tr class="nhb-grijs">
                 <td colspan="{% if toon_aantal %}3{% else %}2{% endif %}">
                     <h5>Individuele wedstrijdklassen</h5>
                 </td>
+                <td colspan="2" class="hide-on-small-only"></td>
             </tr>
 
             <tr>
@@ -35,28 +39,36 @@
                 {% if toon_aantal %}
                     <th>Aantal deelnemers</th>
                 {% endif %}
+                <th class="hide-on-small-only">Blazoen regio</th>
+                <th class="hide-on-small-only">Blazoen RK/BK</th>
             </tr>
 
-            {% for obj in indiv_klassen %}
+            {% for klasse in indiv_klassen %}
                 <tr>
-                    <td>{{ obj.indiv.beschrijving }}</td>
+                    <td>{{ klasse.indiv.beschrijving }}</td>
 
-                    {% if obj.min_ag_str %}
-                        <td>{{ obj.min_ag_str }}</td>
+                    {% if klasse.min_ag_str %}
+                        <td>{{ klasse.min_ag_str }}</td>
                     {% else %}
                         <td><i class="grey-text">n.v.t.</i></td>
                     {% endif %}
 
                     {% if toon_aantal %}
-                        <td>{{ obj.aantal }}</td>
+                        <td>{{ klasse.aantal }}</td>
                     {% endif %}
+
+                    <td class="hide-on-small-only">{{ klasse.blazoen_regio_str }}</td>
+                    <td class="hide-on-small-only">{{ klasse.blazoen_rk_bk_str }}</td>
                 </tr>
             {% endfor %}
+
+            <!-- Team wedstrijdklassen -->
 
             <tr class="nhb-grijs">
                 <td colspan="{% if toon_aantal %}3{% else %}2{% endif %}">
                     <h5>Team wedstrijdklassen</h5>
                 </td>
+                <td colspan="2" class="hide-on-small-only"></td>
             </tr>
 
             <tr>
@@ -65,14 +77,16 @@
                 {% if toon_aantal %}
                     <th></th>
                 {% endif %}
+                <th class="hide-on-small-only">Blazoen regio</th>
+                <th class="hide-on-small-only">Blazoen RK/BK</th>
             </tr>
 
-            {% for obj in team_klassen %}
+            {% for klasse in team_klassen %}
                 <tr>
-                    <td>{{ obj.team.beschrijving }}</td>
+                    <td>{{ klasse.team.beschrijving }}</td>
 
-                    {% if obj.min_ag_str %}
-                        <td>{{ obj.min_ag_str }}</td>
+                    {% if klasse.min_ag_str %}
+                        <td>{{ klasse.min_ag_str }}</td>
                     {% else %}
                         <td><i class="grey-text">n.v.t.</i></td>
                     {% endif %}
@@ -80,6 +94,9 @@
                     {% if toon_aantal %}
                         <td></td>
                     {% endif %}
+
+                    <td class="hide-on-small-only">{{ klasse.blazoen_regio_str }}</td>
+                    <td class="hide-on-small-only">{{ klasse.blazoen_rk_bk_str }}</td>
                 </tr>
             {% endfor %}
         </table>
