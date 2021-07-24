@@ -10,6 +10,7 @@ from django.utils import timezone
 from django.core.exceptions import PermissionDenied
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
+from Competitie.operations.wedstrijdcapaciteit import bepaal_waarschijnlijke_deelnemers
 from Plein.menu import menu_dynamics
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
 from Wedstrijden.models import CompetitieWedstrijd, CompetitieWedstrijdUitslag
@@ -272,7 +273,9 @@ class DynamicDeelnemersOphalenView(UserPassesTestMixin, View):
 
     @staticmethod
     def post(request, *args, **kwargs):
-        """ Deze functie wordt aangeroepen als de knop 'deelnemers ophalen' gebruikt wordt
+        """ Deze functie wordt aangeroepen als de knop 'waarschijnlijke deelnemers ophalen' gebruikt wordt
+
+            Dit is een POST by design, om caching te voorkomen.
         """
 
         try:
@@ -281,38 +284,42 @@ class DynamicDeelnemersOphalenView(UserPassesTestMixin, View):
             # garbage in
             raise Http404('Geen valide verzoek')
 
-        # print('data: %s' % repr(data))
-
         try:
             deelcomp_pk = int(str(data['deelcomp_pk'])[:6])   # afkappen voor extra veiligheid
-            deelcomp = DeelCompetitie.objects.get(laag=LAAG_REGIO,
-                                                  pk=deelcomp_pk)
+            deelcomp = (DeelCompetitie
+                        .objects
+                        .select_related('competitie')
+                        .get(laag=LAAG_REGIO,
+                             pk=deelcomp_pk))
         except (KeyError, ValueError, DeelCompetitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
-        # TODO: filter deelnemers op cluster (wedstrijd.vereniging.clusters)
+        try:
+            wedstrijd_pk = int(str(data['wedstrijd_pk'])[:6])   # afkappen voor extra veiligheid
+            wedstrijd = (CompetitieWedstrijd
+                         .objects
+                         .get(pk=wedstrijd_pk))
+        except (KeyError, ValueError, CompetitieWedstrijd.DoesNotExist):
+            raise Http404('Wedstrijd niet gevonden')
+
+        sporters, teams = bepaal_waarschijnlijke_deelnemers(deelcomp.competitie.afstand, deelcomp, wedstrijd)
 
         out = dict()
         out['deelnemers'] = deelnemers = list()
 
-        for obj in (RegioCompetitieSchutterBoog
-                    .objects
-                    .select_related('schutterboog',
-                                    'schutterboog__nhblid',
-                                    'schutterboog__boogtype',
-                                    'bij_vereniging')
-                    .filter(deelcompetitie=deelcomp)):
+        for sporter in sporters:
+            for boog_volgorde, boog_beschrijving, vsg, schutterboog_pk in sporter.bogen_lijst:
+                deelnemer = {
+                    'pk': schutterboog_pk,
+                    'nhb_nr': sporter.nhb_nr,
+                    'naam': sporter.volledige_naam,
+                    'ver_nr': sporter.ver_nr,
+                    'ver_naam': sporter.ver_naam,
+                    'boog': boog_beschrijving,
+                }
 
-            deelnemer = {
-                'pk': obj.schutterboog.pk,
-                'nhb_nr': obj.schutterboog.nhblid.nhb_nr,
-                'naam': obj.schutterboog.nhblid.volledige_naam(),
-                'ver_nr': obj.bij_vereniging.ver_nr,
-                'ver_naam': obj.bij_vereniging.naam,
-                'boog': obj.schutterboog.boogtype.beschrijving,
-            }
-
-            deelnemers.append(deelnemer)
+                deelnemers.append(deelnemer)
+            # for
         # for
 
         return JsonResponse(out)

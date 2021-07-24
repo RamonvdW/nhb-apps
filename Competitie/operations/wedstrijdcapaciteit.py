@@ -4,7 +4,10 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+from django.db.models import Q
 from BasisTypen.models import BLAZOEN2STR, BLAZOEN_40CM, BLAZOEN_60CM, BLAZOEN_60CM_4SPOT, BLAZOEN_DT
+from Competitie.models import (RegioCompetitieSchutterBoog, RegiocompetitieTeam,
+                               INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2, INSCHRIJF_METHODE_3)
 from Schutter.models import SchutterVoorkeuren
 from types import SimpleNamespace
 import math
@@ -14,12 +17,59 @@ BLAZOEN_STR_WENS_DT = 'DT (wens)'
 BLAZOEN_STR_WENS_4SPOT = '4-spot (wens)'
 
 
-def bepaal_waarschijnlijke_deelnemers(wedstrijd, afstand, deelnemers_indiv, deelnemers_teams):
+def bepaal_waarschijnlijke_deelnemers(afstand, deelcomp, wedstrijd):
     """
         bepaal de waarschijnlijke lijst van deelnemers van een wedstrijd
 
         sporters met meerdere bogen komen maar 1x voor
     """
+
+    # TODO: ondersteuning inschrijfmethode 3 toevoegen - maar hoe?
+    if deelcomp.inschrijf_methode == INSCHRIJF_METHODE_1:
+        # specifiek aangemelde individuele sporters
+        deelnemers_indiv = (wedstrijd
+                            .regiocompetitieschutterboog_set
+                            .select_related('klasse',
+                                            'klasse__indiv'))
+    else:
+        # vereniging zit in 0 of 1 clusters voor deze competitie
+        clusters = wedstrijd.vereniging.clusters.filter(gebruik=afstand)
+        if clusters.count() > 0:
+            # vereniging zit in een cluster, dus toon alleen de deelnemers van dit cluster
+            ver_pks = clusters[0].nhbvereniging_set.values_list('pk', flat=True)
+            deelnemers_indiv = (RegioCompetitieSchutterBoog
+                                .objects
+                                .filter(deelcompetitie=deelcomp,
+                                        bij_vereniging__in=ver_pks)
+                                .select_related('klasse',
+                                                'klasse__indiv'))
+        else:
+            # fall-back: alle sporters in de hele regio
+            deelnemers_indiv = (RegioCompetitieSchutterBoog
+                                .objects
+                                .filter(deelcompetitie=deelcomp)
+                                .select_related('klasse',
+                                                'klasse__indiv'))
+
+        if deelcomp.inschrijf_methode == INSCHRIJF_METHODE_2:
+            # verder filteren, op gekoppelde wedstrijdklassen
+
+            # team klassen
+            team_pks = wedstrijd.team_klassen.values_list('pk', flat=True)
+            gekoppeld_pks = RegiocompetitieTeam.objects.filter(klasse__team__pk__in=team_pks).values_list('gekoppelde_schutters__pk', flat=True)
+
+            # individueel
+            indiv_pks = wedstrijd.indiv_klassen.values_list('pk', flat=True)
+            deelnemers_indiv = deelnemers_indiv.filter(Q(klasse__indiv__pk__in=indiv_pks) | Q(pk__in=gekoppeld_pks))
+
+
+    # TODO: teams begrenzen tot het cluster
+    # TODO: ondersteuning VSG toevoegen voor team deelnemers (nu tonen we sporter AG)
+    deelnemers_teams = (RegiocompetitieTeam
+                        .objects
+                        .filter(deelcompetitie=deelcomp)
+                        .select_related('klasse',
+                                        'klasse__team'))
 
     # verenigingsteams
     ver_teams = dict()  # [ver_nr] = dict[team_type] = aantal
@@ -137,7 +187,7 @@ def bepaal_waarschijnlijke_deelnemers(wedstrijd, afstand, deelnemers_indiv, deel
         else:
             vsg = ''    # niet tonen
 
-        tup = (boog.volgorde, boog.beschrijving, vsg)
+        tup = (boog.volgorde, boog.beschrijving, vsg, schutterboog.pk)
         sporter.bogen_lijst.append(tup)
 
         if afstand == '18':
@@ -209,10 +259,10 @@ def bepaal_waarschijnlijke_deelnemers(wedstrijd, afstand, deelnemers_indiv, deel
         # for
     # for
 
-    return sporters
+    return sporters, deelnemers_teams
 
 
-def bepaal_blazoen_behoefte(sporters, afstand, deelnemers_teams):
+def bepaal_blazoen_behoefte(afstand, sporters, deelnemers_teams):
     """ bepaal hoeveel blazoenen er nodig zijn, gebaseerd op de lijst van waarschijnlijke deelnemers. """
 
     blazoenen = SimpleNamespace(

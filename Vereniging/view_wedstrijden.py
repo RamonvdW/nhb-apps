@@ -143,7 +143,10 @@ class WaarschijnlijkeDeelnemersView(UserPassesTestMixin, TemplateView):
 
         try:
             wedstrijd_pk = int(kwargs['wedstrijd_pk'][:6])
-            wedstrijd = CompetitieWedstrijd.objects.get(pk=wedstrijd_pk)
+            wedstrijd = (CompetitieWedstrijd
+                         .objects
+                         .select_related('vereniging')
+                         .get(pk=wedstrijd_pk))
         except (ValueError, CompetitieWedstrijd.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
@@ -166,34 +169,10 @@ class WaarschijnlijkeDeelnemersView(UserPassesTestMixin, TemplateView):
         context['vastgesteld'] = timezone.now()
         context['is_25m1p'] = (afstand == '25')
 
-        if deelcomp.inschrijf_methode == INSCHRIJF_METHODE_1:
-            # individuele sporters zoals specifiek aangemeld
-            deelnemers_indiv = (wedstrijd
-                                .regiocompetitieschutterboog_set
-                                .select_related('klasse',
-                                                'klasse__indiv'))
-        else:
-            # TODO: ondersteuning inschrijfmethode 3 toevoegen
-            # TODO: ondersteuning clusters toevoegen
-            deelnemers_indiv = (RegioCompetitieSchutterBoog
-                                .objects
-                                .filter(deelcompetitie=deelcomp)
-                                .select_related('klasse',
-                                                'klasse__indiv'))
-
-        # TODO: teams begrenzen tot het cluster
-        # TODO: ondersteuning VSG toevoegen voor team deelnemers (nu tonen we sporter AG)
-        deelnemers_teams = (RegiocompetitieTeam
-                            .objects
-                            .filter(deelcompetitie=deelcomp)
-                            .select_related('klasse',
-                                            'klasse__team'))
-
-        # TODO: kunnen bovenstaande queries door 'bepaal_waarschijnlijke_deelnemers' gedaan worden?
-        sporters = bepaal_waarschijnlijke_deelnemers(wedstrijd, afstand, deelnemers_indiv, deelnemers_teams)
+        sporters, teams = bepaal_waarschijnlijke_deelnemers(afstand, deelcomp, wedstrijd)
         context['sporters'] = sporters
 
-        context['blazoenen'] = bepaal_blazoen_behoefte(sporters, afstand, deelnemers_teams)
+        context['blazoenen'] = bepaal_blazoen_behoefte(afstand, sporters, teams)
 
         # prep de view
         nr = 1

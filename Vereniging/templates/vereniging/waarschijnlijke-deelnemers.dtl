@@ -84,7 +84,7 @@
                 <td>[{{ sporter.ver_nr }}]<span class="hide-on-small-only">&nbsp;{{ sporter.ver_naam }}</span></td>
                 <td>[{{ sporter.nhb_nr }}] {{ sporter.volledige_naam }}</td>
                 <td>
-                    {% for volgorde, boog, vsg in sporter.bogen_lijst %}
+                    {% for volgorde, boog, vsg, pk in sporter.bogen_lijst %}
                         {% if not forloop.first %}
                             <span> of</span><br>
                         {% endif %}
@@ -131,7 +131,7 @@
 
         {% empty %}
             <tr>
-                <td colspan="7"><i>Er zijn (nog) geen sporters aangemeld</i></td>
+                <td colspan="7"><i>Geen sporters gevonden</i></td>
             </tr>
         {% endfor %}
 
@@ -166,21 +166,25 @@
 
         {% if not is_25m1p %}
             {% if deelcomp.regio_organiseert_teamcompetitie %}
-                <tr>
-                    <td>{{ blazoenen.teams_40cm }}</td>
-                    <td>40cm</td>
-                    <td>{{ blazoenen.teams_40cm }}</td>
-                    <td>4</td>
-                    <td>1 blazoen per team</td>
-                </tr>
+                {% if blazoenen.teams_40cm > 0 %}
+                    <tr>
+                        <td>{{ blazoenen.teams_40cm }}</td>
+                        <td>40cm</td>
+                        <td>{{ blazoenen.teams_40cm }}</td>
+                        <td>4</td>
+                        <td>1 blazoen per team</td>
+                    </tr>
+                {% endif %}
 
-                <tr>
-                    <td>{{ blazoenen.teams_dt }}</td>
-                    <td>Dutch Target</td>
-                    <td>{{ blazoenen.teams_dt }}</td>
-                    <td>4</td>
-                    <td>4 blazoenen per team</td>
-                </tr>
+                {% if blazoenen.teams_dt > 0 %}
+                    <tr>
+                        <td>{{ blazoenen.teams_dt }}</td>
+                        <td>Dutch Target</td>
+                        <td>{{ blazoenen.teams_dt }}</td>
+                        <td>4</td>
+                        <td>4 blazoenen per team</td>
+                    </tr>
+                {% endif %}
             {% endif %}
 
             <tr>
@@ -191,21 +195,25 @@
                 <td>1 blazoen per 4 sporters</td>
             </tr>
 
-            <tr>
-                <td>{{ blazoenen.banen_dt_excl_teams }}</td>
-                <td>Dutch Target</td>
-                <td>-</td>
-                <td>{{ blazoenen.sporters_dt_excl_teams }}</td>
-                <td>1 blazoen per 1 sporter</td>
-            </tr>
+            {% if blazoenen.sporters_dt_excl_teams > 0 %}
+                <tr>
+                    <td>{{ blazoenen.banen_dt_excl_teams }}</td>
+                    <td>Dutch Target</td>
+                    <td>-</td>
+                    <td>{{ blazoenen.sporters_dt_excl_teams }}</td>
+                    <td>1 blazoen per 1 sporter</td>
+                </tr>
+            {% endif %}
 
-            <tr>
-                <td>-</td>
-                <td>Dutch Target</td>
-                <td>-</td>
-                <td>{{ blazoenen.sporters_wens_dt__anders_40cm }}</td>
-                <td>DT indien mogelijk (alternatief: 40cm)</td>
-            </tr>
+            {% if blazoenen.sporters_wens_dt__anders_40cm > 0 %}
+                <tr>
+                    <td>-</td>
+                    <td>Dutch Target</td>
+                    <td>-</td>
+                    <td>{{ blazoenen.sporters_wens_dt__anders_40cm }}</td>
+                    <td>DT indien mogelijk (alternatief: 40cm)</td>
+                </tr>
+            {% endif %}
 
         {% endif %}
 
@@ -230,21 +238,25 @@
 
         {% endif %}
 
-        <tr>
-            <td>{{ blazoenen.banen_aspiranten_60cm }}</td>
-            <td>60cm</td>
-            <td>-</td>
-            <td>{{ blazoenen.sporters_aspirant_60cm }}</td>
-            <td>Aspiranten{% if is_25m1p %} (afstand: 18m){% endif %}</td>
-        </tr>
+        {% if blazoenen.sporters_aspirant_60cm > 0 %}
+            <tr>
+                <td>{{ blazoenen.banen_aspiranten_60cm }}</td>
+                <td>60cm</td>
+                <td>-</td>
+                <td>{{ blazoenen.sporters_aspirant_60cm }}</td>
+                <td>Aspiranten{% if is_25m1p %} (afstand: 18m){% endif %}</td>
+            </tr>
+        {% endif %}
 
-        <tr>
-            <td>{{ blazoenen.banen_aspiranten_wens_60cm_4spot }}</td>
-            <td>60cm 4-spot</td>
-            <td>-</td>
-            <td>{{ blazoenen.sporters_aspirant_wens_60cm_4spot__anders_60cm }}</td>
-            <td>60cm 4-spot indien mogelijk (alternatief: 60cm).<br>Aspiranten{% if is_25m1p %} (afstand: 18m){% endif %}</td>
-        </tr>
+        {% if blazoenen.sporters_aspirant_wens_60cm_4spot__anders_60cm > 0 %}
+            <tr>
+                <td>{{ blazoenen.banen_aspiranten_wens_60cm_4spot }}</td>
+                <td>60cm 4-spot</td>
+                <td>-</td>
+                <td>{{ blazoenen.sporters_aspirant_wens_60cm_4spot__anders_60cm }}</td>
+                <td>60cm 4-spot indien mogelijk (alternatief: 60cm).<br>Aspiranten{% if is_25m1p %} (afstand: 18m){% endif %}</td>
+            </tr>
+        {% endif %}
 
     </table>
 
