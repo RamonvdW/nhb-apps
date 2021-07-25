@@ -183,7 +183,8 @@ def account_create(username, voornaam, achternaam, wachtwoord, email, email_is_b
 
     try:
         account.save()
-    except psycopg2.errors.UniqueViolation:
+    except psycopg2.errors.UniqueViolation:     # pragma: no cover
+        # TODO: vervang dit door veilige database operatie (get_or_create?)
         # dus ondanks de check hierboven lukt het sommige mensen toch om een dubbel account aan te maken
         raise AccountCreateError('Account bestaat al')
 

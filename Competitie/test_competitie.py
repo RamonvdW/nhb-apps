@@ -630,6 +630,10 @@ class TestCompetitie(E2EHelpers, TestCase):
             resp = self.client.post(self.url_klassegrenzen_vaststellen % 'xx')
         self.assert404(resp)
 
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_klassegrenzen_tonen % 999999)
+        self.assert404(resp)
+
     def test_klassegrenzen_tonen(self):
         # competitie opstarten
         self.e2e_login_and_pass_otp(self.account_bb)
@@ -677,6 +681,14 @@ class TestCompetitie(E2EHelpers, TestCase):
         # nog een keer
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_klassegrenzen_tonen % comp_25.pk)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/klassegrenzen-tonen.dtl', 'plein/site_layout.dtl'))
+        self.assertNotContains(resp, ' zijn nog niet vastgesteld')
+        self.assertNotContains(resp, 'De klassegrenzen voor de ')
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_klassegrenzen_tonen % comp_18.pk)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/klassegrenzen-tonen.dtl', 'plein/site_layout.dtl'))
