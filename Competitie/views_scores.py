@@ -183,6 +183,53 @@ class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
         rol_nu = rol_get_huidige(self.request)
         return rol_nu in (Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_WL)
 
+    @staticmethod
+    def _team_naam_toevoegen(scores, deelcomp):
+        """ aan elke score de team naam en vsg toevoegen """
+
+        schutterboog_pks = scores.values_list('schutterboog__pk', flat=True)
+
+        deelnemers = (RegioCompetitieSchutterBoog
+                      .objects
+                      .filter(deelcompetitie=deelcomp,
+                              schutterboog__pk__in=schutterboog_pks))
+        deelnemer_pks = deelnemers.values_list('pk', flat=True)
+
+        teams = (RegiocompetitieTeam
+                 .objects
+                 .filter(deelcompetitie=deelcomp,
+                         gekoppelde_schutters__pk__in=deelnemer_pks))
+
+        deelnemer_pk2teamnaam = dict()
+        for team in teams:
+            team_naam = team.maak_team_naam_kort()
+            for deelnemer in team.gekoppelde_schutters.all():
+                deelnemer_pk2teamnaam[deelnemer.pk] = team_naam
+            # for
+        # for
+
+        schutterboog_pk2tup = dict()
+        for deelnemer in deelnemers:
+            if deelnemer.aantal_scores == 0:
+                vsg = deelnemer.ag_voor_team
+            else:
+                vsg = deelnemer.gemiddelde  # individuele voortschrijdend gemiddelde
+
+            try:
+                schutterboog_pk2tup[deelnemer.schutterboog.pk] = (vsg, deelnemer_pk2teamnaam[deelnemer.pk])
+            except KeyError:
+                # geen teamschutter
+                pass
+        # for
+
+        for score in scores:
+            try:
+                score.vsg, score.team_naam = schutterboog_pk2tup[score.schutterboog.pk]
+            except KeyError:
+                score.team_naam = "-"
+                score.vsg = ""
+        # for
+
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
@@ -205,16 +252,19 @@ class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
             context['url_geef_akkoord'] = reverse('Competitie:wedstrijd-geef-akkoord',
                                                   kwargs={'wedstrijd_pk': wedstrijd.pk})
 
-        context['scores'] = (wedstrijd
-                             .uitslag
-                             .scores
-                             .filter(type=SCORE_TYPE_SCORE)
-                             .exclude(waarde=SCORE_WAARDE_VERWIJDERD)
-                             .select_related('schutterboog',
-                                             'schutterboog__boogtype',
-                                             'schutterboog__nhblid',
-                                             'schutterboog__nhblid__bij_vereniging')
-                             .order_by('schutterboog__nhblid__nhb_nr'))
+        scores = (wedstrijd
+                  .uitslag
+                  .scores
+                  .filter(type=SCORE_TYPE_SCORE)
+                  .exclude(waarde=SCORE_WAARDE_VERWIJDERD)
+                  .select_related('schutterboog',
+                                  'schutterboog__boogtype',
+                                  'schutterboog__nhblid',
+                                  'schutterboog__nhblid__bij_vereniging')
+                  .order_by('schutterboog__nhblid__nhb_nr'))
+        context['scores'] = scores
+
+        self._team_naam_toevoegen(scores, deelcomp)
 
         context['url_check_nhbnr'] = reverse('Competitie:dynamic-check-nhbnr')
         context['url_opslaan'] = reverse('Competitie:dynamic-scores-opslaan')

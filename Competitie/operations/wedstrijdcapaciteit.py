@@ -35,14 +35,15 @@ def _query_wedstrijd_deelnemers(afstand, deelcomp, wedstrijd):
                                             'schutterboog__nhblid',
                                             'schutterboog__nhblid__bij_vereniging'))
 
-        deelnemers_teams = (RegiocompetitieTeam
-                            .objects
-                            .filter(deelcompetitie=deelcomp)
-                            .prefetch_related('team_type__boog_typen')
-                            .select_related('vereniging',
-                                            'team_type',
-                                            'klasse',
-                                            'klasse__team'))
+        if deelcomp.regio_organiseert_teamcompetitie:
+            deelnemers_teams = (RegiocompetitieTeam
+                                .objects
+                                .filter(deelcompetitie=deelcomp)
+                                .prefetch_related('team_type__boog_typen')
+                                .select_related('vereniging',
+                                                'team_type',
+                                                'klasse',
+                                                'klasse__team'))
     else:
         # vereniging zit in 0 of 1 clusters voor deze competitie
         clusters = wedstrijd.vereniging.clusters.filter(gebruik=afstand)
@@ -61,15 +62,16 @@ def _query_wedstrijd_deelnemers(afstand, deelcomp, wedstrijd):
                                                 'schutterboog__nhblid',
                                                 'schutterboog__nhblid__bij_vereniging'))
 
-            deelnemers_teams = (RegiocompetitieTeam
-                                .objects
-                                .filter(deelcompetitie=deelcomp,
-                                        vereniging__in=ver_pks)
-                                .prefetch_related('team_type__boog_typen')
-                                .select_related('vereniging',
-                                                'team_type',
-                                                'klasse',
-                                                'klasse__team'))
+            if deelcomp.regio_organiseert_teamcompetitie:
+                deelnemers_teams = (RegiocompetitieTeam
+                                    .objects
+                                    .filter(deelcompetitie=deelcomp,
+                                            vereniging__in=ver_pks)
+                                    .prefetch_related('team_type__boog_typen')
+                                    .select_related('vereniging',
+                                                    'team_type',
+                                                    'klasse',
+                                                    'klasse__team'))
         else:
             # fall-back: alle sporters in de hele regio
             deelnemers_indiv = (RegioCompetitieSchutterBoog
@@ -82,25 +84,32 @@ def _query_wedstrijd_deelnemers(afstand, deelcomp, wedstrijd):
                                                 'schutterboog__nhblid',
                                                 'schutterboog__nhblid__bij_vereniging'))
 
-            deelnemers_teams = (RegiocompetitieTeam
-                                .objects
-                                .filter(deelcompetitie=deelcomp)
-                                .prefetch_related('team_type__boog_typen')
-                                .select_related('vereniging',
-                                                'team_type',
-                                                'klasse',
-                                                'klasse__team'))
+            if deelcomp.regio_organiseert_teamcompetitie:
+                deelnemers_teams = (RegiocompetitieTeam
+                                    .objects
+                                    .filter(deelcompetitie=deelcomp)
+                                    .prefetch_related('team_type__boog_typen')
+                                    .select_related('vereniging',
+                                                    'team_type',
+                                                    'klasse',
+                                                    'klasse__team'))
 
         if deelcomp.inschrijf_methode == INSCHRIJF_METHODE_2:
             # verder filteren, op gekoppelde wedstrijdklassen
 
-            # team klassen
-            team_pks = wedstrijd.team_klassen.values_list('pk', flat=True)
-            gekoppeld_pks = RegiocompetitieTeam.objects.filter(klasse__team__pk__in=team_pks).values_list('gekoppelde_schutters__pk', flat=True)
+            if deelcomp.regio_organiseert_teamcompetitie:
+                # team klassen
+                team_pks = wedstrijd.team_klassen.values_list('pk', flat=True)
+                gekoppeld_pks = RegiocompetitieTeam.objects.filter(klasse__team__pk__in=team_pks).values_list('gekoppelde_schutters__pk', flat=True)
+            else:
+                gekoppeld_pks = list()
 
             # individueel
             indiv_pks = wedstrijd.indiv_klassen.values_list('pk', flat=True)
             deelnemers_indiv = deelnemers_indiv.filter(Q(klasse__indiv__pk__in=indiv_pks) | Q(pk__in=gekoppeld_pks))
+
+    if not deelcomp.regio_organiseert_teamcompetitie:
+        deelnemers_teams = list()
 
     return deelnemers_indiv, deelnemers_teams
 
@@ -119,27 +128,28 @@ def bepaal_waarschijnlijke_deelnemers(afstand, deelcomp, wedstrijd):
     ver_aantal = dict()     # [ver_nr] = dict[team type] = aantal
 
     # verenigingsteams
-    for team in deelnemers_teams:
-        ver_nr = team.vereniging.ver_nr
-        try:
-            boog_dict = ver_teams[ver_nr]
-            aantal_dict = ver_aantal[ver_nr]
-        except KeyError:
-            ver_teams[ver_nr] = boog_dict = dict()
-            ver_aantal[ver_nr] = aantal_dict = dict()
-
-        try:
-            aantal_dict[team.team_type] += 1
-        except KeyError:
-            aantal_dict[team.team_type] = 1
-
-        for boog in team.team_type.boog_typen.all():
+    if deelcomp.regio_organiseert_teamcompetitie:
+        for team in deelnemers_teams:
+            ver_nr = team.vereniging.ver_nr
             try:
-                boog_dict[boog.afkorting].append(team)
+                boog_dict = ver_teams[ver_nr]
+                aantal_dict = ver_aantal[ver_nr]
             except KeyError:
-                boog_dict[boog.afkorting] = [team]
+                ver_teams[ver_nr] = boog_dict = dict()
+                ver_aantal[ver_nr] = aantal_dict = dict()
+
+            try:
+                aantal_dict[team.team_type] += 1
+            except KeyError:
+                aantal_dict[team.team_type] = 1
+
+            for boog in team.team_type.boog_typen.all():
+                try:
+                    boog_dict[boog.afkorting].append(team)
+                except KeyError:
+                    boog_dict[boog.afkorting] = [team]
+            # for
         # for
-    # for
 
     # wens_dt: als het bondsnummer hier in voorkomt heeft de sporters voorkeur voor DT (=eigen blazoen)
     if afstand == '18':

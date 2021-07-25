@@ -92,6 +92,7 @@
 
     <script type="application/javascript">
 
+        {% if deelcomp.regio_organiseert_teamcompetitie %}
         // lijst met verenigingen
         const team_pk2naam = {
                 0: '-',                         // nodig voor correct interpretatie template tag binnen javascript dict
@@ -99,6 +100,7 @@
                     {{ team.pk }}: '{{ team.naam_str }}',
                 {% endfor %}
         }
+        {% endif %}
 
         function opzoeken_toon_status(dataset, tekst, color)
         {
@@ -315,9 +317,11 @@
                         let vsg = deelnemer['vsg']
                         if (vsg !== '') new_row.cells[3].innerHTML += ' (' + vsg + ')'
 
-                        let team_pk = deelnemer['team_pk']
-                        let team_naam = team_pk2naam[team_pk]
-                        new_row.cells[5].innerHTML = team_naam
+                        {% if deelcomp.regio_organiseert_teamcompetitie %}
+                            let team_pk = deelnemer['team_pk']
+                            let team_naam = team_pk2naam[team_pk]
+                            new_row.cells[5].innerHTML = team_naam
+                        {% endif %}
 
                         // maak de nieuwe row zichtbaar
                         new_row.classList.remove('hide')
@@ -444,7 +448,7 @@
                     const row_pk = row.cells[0].dataset.pk
                     const row_nhb_nr = row.cells[0].innerText
 
-                    if (pk === row_pk)
+                    if (pk == row_pk)  // warning: breaks when changed to ===
                     {
                         // dit is een dubbele
                         skip = true
@@ -482,8 +486,10 @@
                     const vsg = deelnemer['vsg']
                     if (vsg !== '') new_row.cells[3].innerHTML += ' (' + vsg + ')'
 
+                    {% if deelcomp.regio_organiseert_teamcompetitie %}
                     const team_pk = deelnemer['team_pk']
                     new_row.cells[5].innerHTML = team_pk2naam[team_pk]
+                    {% endif %}
 
                     // volgende statement is gelijk aan insertAfter, welke niet bestaat
                     // werkt ook aan het einde van de tabel
@@ -514,11 +520,6 @@
                         row.cells[4].firstChild.focus()
                 }
             }
-
-            // we initialiseren alle dropdowns opnieuw
-            // dit heeft mogelijk impact op al bestaande drop-downs
-            let elems = document.querySelectorAll('select');
-            M.FormSelect.init(elems, {});
         }
 
         function deelnemers_ophalen_klaar(xhr, btn)
@@ -593,13 +594,15 @@
                 <th data-filter="on">Vereniging</th>
                 <th data-filter="on">Boog type</th>
                 <th>Score</th>
-                <th>In team</th>
+                {% if deelcomp.regio_organiseert_teamcompetitie %}
+                    <th>In team</th>
+                {% endif %}
             </tr>
         </thead>
 
         <!-- eerste regel van de body is een template om een 'clone' mee uit te voeren
              dit maakt ook de JS eenvoudiger omdat we nooit in hoeven te voegen voor row[0] -->
-        <!-- let op dat de tabel filter hier attributen aan toe zal voegen die we moeten verwijderen bij kopieren -->
+        <!-- let op dat de tabel filter hier attributen aan toe zal voegen die we moeten verwijderen bij kopiëren -->
         <tr class="hide">
             <td data-pk="0">000000</td>
             <td>dit is een niet zo korte naam</td>
@@ -609,7 +612,9 @@
             </td>
             <td>boogtype</td>
             <td><input type="text" oninput="controleer_score(this)" placeholder="0" value="" size="3" maxlength="3" style="width:3em; height:2rem; margin:0"></td>
-            <td><!-- team drop-down --></td>
+            {% if deelcomp.regio_organiseert_teamcompetitie %}
+                <td><!-- team name --></td>
+            {% endif %}
         </tr>
 
         {% for score in scores %}
@@ -620,14 +625,16 @@
                     <span>[{{ score.schutterboog.nhblid.bij_vereniging.ver_nr }}]</span>
                     <span class="hide-on-small-only">&nbsp;{{ score.schutterboog.nhblid.bij_vereniging.naam }}</span>
                 </td>
-                <td>{{ score.schutterboog.boogtype.beschrijving }}</td>
+                <td>{{ score.schutterboog.boogtype.beschrijving }}{% if score.vsg %} ({{ score.vsg }}){% endif %}</td>
                 <td><input type="text" oninput="controleer_score(this)" placeholder="0" value="{{ score.waarde }}" size="3" maxlength="3" style="width:3em; height:2rem; margin:0"></td>
+                {% if deelcomp.regio_organiseert_teamcompetitie %}
+                    <td>{{ score.team_naam }}</td>
+                {% endif %}
             </tr>
         {% endfor %}
 
-
         <tr class="nhb-grijs" data-tablefilter="stop" style="border: 0">
-            <td colspan="6" class="center-align">
+            <td colspan="{% if deelcomp.regio_organiseert_teamcompetitie %}6{% else %}5{% endif %}" class="center-align">
                 <button class="btn-nhb-blauw" onclick="deelnemers_ophalen(this)">Waarschijnlijke deelnemers toevoegen</button>
             </td>
         </tr>
@@ -635,7 +642,7 @@
         <!-- Hieronder: zoekveld voor ander lid (nhb-nr >> naam + vereniging) -->
 
         <tr class="nhb-grijs" data-tablefilter="stop">
-            <td colspan="6">
+            <td colspan="{% if deelcomp.regio_organiseert_teamcompetitie %}6{% else %}5{% endif %}">
                 <span>Gebruik onderstaand formulier om een ander bondsnummer toe te voegen</span>
             </td>
         </tr>
@@ -644,7 +651,7 @@
             <th>Bondsnummer</th>
             <th>Naam</th>
             <th>Vereniging</th>
-            <th colspan="3"></th>   <!-- kolom voor knop 'toevoegen' -->
+            <th colspan="{% if deelcomp.regio_organiseert_teamcompetitie %}3{% else %}2{% endif %}"></th>
         </tr>
 
         <tr style="border: 0">
@@ -664,7 +671,7 @@
                   <!-- underscore ^  onderdrukt status melding -->
             </td>
 
-            <td colspan="3">
+            <td colspan="{% if deelcomp.regio_organiseert_teamcompetitie %}3{% else %}2{% endif %}">
                 <button id="id_btn_toevoegen" class="btn-nhb-blauw" onclick="toevoegen()" disabled>
                     <i class="material-icons-round left">add</i>Toevoegen</button>
             </td>
@@ -675,7 +682,7 @@
                 <button class="btn-nhb-blauw" onclick="opzoeken(this)" data-opzoeken="id_nhbnr" data-naam="id_naam" data-vereniging="id_ver" data-regio="id_regio_">
                     <i class="material-icons-round left">search</i>Zoek</button>
             </td>
-            <td colspan="4"></td>
+            <td colspan="{% if deelcomp.regio_organiseert_teamcompetitie %}4{% else %}3{% endif %}"></td>
         </tr>
 
     </table>
