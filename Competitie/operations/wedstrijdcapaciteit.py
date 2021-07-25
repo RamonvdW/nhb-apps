@@ -17,11 +17,10 @@ BLAZOEN_STR_WENS_DT = 'DT (wens)'
 BLAZOEN_STR_WENS_4SPOT = '4-spot (wens)'
 
 
-def bepaal_waarschijnlijke_deelnemers(afstand, deelcomp, wedstrijd):
-    """
-        bepaal de waarschijnlijke lijst van deelnemers van een wedstrijd
+def _query_wedstrijd_deelnemers(afstand, deelcomp, wedstrijd):
 
-        sporters met meerdere bogen komen maar 1x voor
+    """ geef de lijst van deelnemers en teams terug voor deze wedstrijd,
+        rekening houdend met de inschrijfmethode
     """
 
     # TODO: ondersteuning inschrijfmethode 3 toevoegen - maar hoe?
@@ -30,10 +29,24 @@ def bepaal_waarschijnlijke_deelnemers(afstand, deelcomp, wedstrijd):
         deelnemers_indiv = (wedstrijd
                             .regiocompetitieschutterboog_set
                             .select_related('klasse',
-                                            'klasse__indiv'))
+                                            'klasse__indiv',
+                                            'schutterboog',
+                                            'schutterboog__boogtype',
+                                            'schutterboog__nhblid',
+                                            'schutterboog__nhblid__bij_vereniging'))
+
+        deelnemers_teams = (RegiocompetitieTeam
+                            .objects
+                            .filter(deelcompetitie=deelcomp)
+                            .prefetch_related('team_type__boog_typen')
+                            .select_related('vereniging',
+                                            'team_type',
+                                            'klasse',
+                                            'klasse__team'))
     else:
         # vereniging zit in 0 of 1 clusters voor deze competitie
         clusters = wedstrijd.vereniging.clusters.filter(gebruik=afstand)
+
         if clusters.count() > 0:
             # vereniging zit in een cluster, dus toon alleen de deelnemers van dit cluster
             ver_pks = clusters[0].nhbvereniging_set.values_list('pk', flat=True)
@@ -42,14 +55,41 @@ def bepaal_waarschijnlijke_deelnemers(afstand, deelcomp, wedstrijd):
                                 .filter(deelcompetitie=deelcomp,
                                         bij_vereniging__in=ver_pks)
                                 .select_related('klasse',
-                                                'klasse__indiv'))
+                                                'klasse__indiv',
+                                                'schutterboog',
+                                                'schutterboog__boogtype',
+                                                'schutterboog__nhblid',
+                                                'schutterboog__nhblid__bij_vereniging'))
+
+            deelnemers_teams = (RegiocompetitieTeam
+                                .objects
+                                .filter(deelcompetitie=deelcomp,
+                                        vereniging__in=ver_pks)
+                                .prefetch_related('team_type__boog_typen')
+                                .select_related('vereniging',
+                                                'team_type',
+                                                'klasse',
+                                                'klasse__team'))
         else:
             # fall-back: alle sporters in de hele regio
             deelnemers_indiv = (RegioCompetitieSchutterBoog
                                 .objects
                                 .filter(deelcompetitie=deelcomp)
                                 .select_related('klasse',
-                                                'klasse__indiv'))
+                                                'klasse__indiv',
+                                                'schutterboog',
+                                                'schutterboog__boogtype',
+                                                'schutterboog__nhblid',
+                                                'schutterboog__nhblid__bij_vereniging'))
+
+            deelnemers_teams = (RegiocompetitieTeam
+                                .objects
+                                .filter(deelcompetitie=deelcomp)
+                                .prefetch_related('team_type__boog_typen')
+                                .select_related('vereniging',
+                                                'team_type',
+                                                'klasse',
+                                                'klasse__team'))
 
         if deelcomp.inschrijf_methode == INSCHRIJF_METHODE_2:
             # verder filteren, op gekoppelde wedstrijdklassen
@@ -62,28 +102,43 @@ def bepaal_waarschijnlijke_deelnemers(afstand, deelcomp, wedstrijd):
             indiv_pks = wedstrijd.indiv_klassen.values_list('pk', flat=True)
             deelnemers_indiv = deelnemers_indiv.filter(Q(klasse__indiv__pk__in=indiv_pks) | Q(pk__in=gekoppeld_pks))
 
+    return deelnemers_indiv, deelnemers_teams
 
-    # TODO: teams begrenzen tot het cluster
-    # TODO: ondersteuning VSG toevoegen voor team deelnemers (nu tonen we sporter AG)
-    deelnemers_teams = (RegiocompetitieTeam
-                        .objects
-                        .filter(deelcompetitie=deelcomp)
-                        .select_related('klasse',
-                                        'klasse__team'))
+
+def bepaal_waarschijnlijke_deelnemers(afstand, deelcomp, wedstrijd):
+    """
+        bepaal de waarschijnlijke lijst van deelnemers van een wedstrijd
+
+        sporters met meerdere bogen komen meerdere keren voor
+    """
+
+    deelnemers_indiv, deelnemers_teams = _query_wedstrijd_deelnemers(afstand, deelcomp, wedstrijd)
+
+    # bepaal voor elke vereniging en boog afkorting in welke teams een schutterboog uit mag komen
+    ver_teams = dict()      # [ver_nr] = dict[boog afkorting] = list()
+    ver_aantal = dict()     # [ver_nr] = dict[team type] = aantal
 
     # verenigingsteams
-    ver_teams = dict()  # [ver_nr] = dict[team_type] = aantal
     for team in deelnemers_teams:
         ver_nr = team.vereniging.ver_nr
         try:
-            type_count = ver_teams[ver_nr]
+            boog_dict = ver_teams[ver_nr]
+            aantal_dict = ver_aantal[ver_nr]
         except KeyError:
-            ver_teams[ver_nr] = type_count = dict()
+            ver_teams[ver_nr] = boog_dict = dict()
+            ver_aantal[ver_nr] = aantal_dict = dict()
 
         try:
-            type_count[team.team_type] += 1
+            aantal_dict[team.team_type] += 1
         except KeyError:
-            type_count[team.team_type] = 1
+            aantal_dict[team.team_type] = 1
+
+        for boog in team.team_type.boog_typen.all():
+            try:
+                boog_dict[boog.afkorting].append(team)
+            except KeyError:
+                boog_dict[boog.afkorting] = [team]
+        # for
     # for
 
     # wens_dt: als het bondsnummer hier in voorkomt heeft de sporters voorkeur voor DT (=eigen blazoen)
@@ -97,98 +152,83 @@ def bepaal_waarschijnlijke_deelnemers(afstand, deelcomp, wedstrijd):
         wens_dt = list()
 
     # wens_4spot: als het bondsnummer hier in voorkomt heeft de sporter voorkeur voor de Compound 4-spot (=eigen blazoen)
-    wens_4spot = list()
-    #wens_4spot = list(SchutterVoorkeuren
+    wens_4spot = list()         # TODO: ondersteuning voorkeur 4spot
+    # wens_4spot = list(SchutterVoorkeuren
     #                   .objects
     #                   .select_related('nhblid')
     #                   .filter(voorkeur_4spot=True)
     #                   .values_list('nhblid__nhb_nr', flat=True))
 
-    nr2para_opmerking = dict()
+    nhbnr2para_opmerking = dict()
     for voorkeur in (SchutterVoorkeuren
                      .objects
                      .select_related('nhblid')
                      .exclude(opmerking_para_sporter='')):
 
-        nr2para_opmerking[voorkeur.nhblid.nhb_nr] = voorkeur.opmerking_para_sporter
+        nhbnr2para_opmerking[voorkeur.nhblid.nhb_nr] = voorkeur.opmerking_para_sporter
     # for
 
     unsorted_sporters = list()
-    nr2sporter = dict()
-
     for deelnemer in deelnemers_indiv:
-
         schutterboog = deelnemer.schutterboog
         nhblid = schutterboog.nhblid
-        nr = nhblid.nhb_nr
         ver = nhblid.bij_vereniging
+        boog = schutterboog.boogtype
+
+        sporter = SimpleNamespace(
+                        nhb_nr=nhblid.nhb_nr,
+                        volledige_naam=nhblid.volledige_naam(),
+                        ver_nr=ver.ver_nr,
+                        ver_naam=ver.naam,
+                        boog=boog.beschrijving,
+                        schutterboog_pk=schutterboog.pk,
+                        deelnemer_pk=deelnemer.pk,
+                        schiet_boog_r=(boog.afkorting == 'R'),
+                        schiet_boog_c=(boog.afkorting == 'C'),
+                        voorkeur_dt=(nhblid.nhb_nr in wens_dt),
+                        voorkeur_4spot=(nhblid.nhb_nr in wens_4spot),
+                        is_aspirant=deelnemer.klasse.indiv.is_aspirant_klasse,
+                        wil_team_schieten=deelnemer.inschrijf_voorkeur_team,
+                        team_pk=0,
+                        vsg="")
+
+        # wens alleen voor juiste boogtype tonen
+        sporter.voorkeur_dt &= sporter.schiet_boog_r
+        sporter.voorkeur_4spot &= sporter.schiet_boog_c
 
         try:
-            sporter = nr2sporter[nr]
+            sporter.notitie = nhbnr2para_opmerking[nhblid.nhb_nr]
         except KeyError:
-            # nieuw record nodig
-            sporter = SimpleNamespace()
+            sporter.notitie = ''
 
-            sporter.ver_nr = ver.ver_nr
-            sporter.ver_naam = ver.naam
+        if deelnemer.aantal_scores == 0:
+            vsg = deelnemer.ag_voor_team
+        else:
+            vsg = deelnemer.gemiddelde      # individuele voortschrijdend gemiddelde
 
-            sporter.nhb_nr = nr
-            sporter.volledige_naam = nhblid.volledige_naam()
+        sporter.blazoen_lijst = list()
 
-            sporter.schiet_boog_r = False
-            sporter.schiet_boog_c = False
-            sporter.voorkeur_dt = (nr in wens_dt)
-            sporter.voorkeur_4spot = (nr in wens_4spot)
-            sporter.is_aspirant = deelnemer.klasse.indiv.is_aspirant_klasse
+        # voorbereiden voor sorteren
+        volgorde_1 = ver.ver_nr
+        volgorde_2 = -vsg     # negatief geeft hoogste bovenaan
+        volgorde_3 = sporter.volledige_naam
+        volgorde_4 = deelnemer.pk                # dummy, voorkomt sorteren op Sporter (wat niet kan)
+        tup = (volgorde_1, volgorde_2, volgorde_3, volgorde_4, sporter)
+        unsorted_sporters.append(tup)
 
-            sporter.bogen_lijst = list()
-            sporter.teams_lijst = list()
-            sporter.blazoen_lijst = list()
-
-            try:
-                sporter.notitie = nr2para_opmerking[nr]
-            except KeyError:
-                sporter.notitie = ''
-
-            nr2sporter[nr] = sporter
-
-            if deelnemer.aantal_scores == 0:
-                vsg = deelnemer.ag_voor_team
-            else:
-                vsg = deelnemer.gemiddelde
-
-            # voorbereiden voor sorteren
-            volgorde_1 = ver.ver_nr
-            volgorde_2 = -vsg     # anders verkeerd om gesorteerd (laagste eerst)
-            volgorde_3 = sporter.volledige_naam
-            volgorde_4 = nhblid.nhb_nr          # dummy, voorkomt sorteren op Sporter (wat niet kan)
-            tup = (volgorde_1, volgorde_2, volgorde_3, volgorde_4, sporter)
-            unsorted_sporters.append(tup)
-
-        sporter.wil_team_schieten = deelnemer.inschrijf_voorkeur_team
-
-        for team in deelnemer.regiocompetitieteam_set.all():
-            tup = (team.team_type.volgorde, team.maak_team_naam_kort(), team.team_type.beschrijving, deelnemer.ag_voor_team)
-            sporter.teams_lijst.append(tup)
-        # for
-
-        boog = schutterboog.boogtype
-        if boog.afkorting == 'R':
-            sporter.schiet_boog_r = True
-        elif boog.afkorting == 'C':
-            sporter.schiet_boog_c = True
-
+        # TODO: ondersteuning VSG toevoegen voor team deelnemers (nu tonen we sporter AG)
         # TODO: zonder Team-AG kan het geen teamschutter zijn
         if deelnemer.inschrijf_voorkeur_team:
             if deelnemer.aantal_scores == 0:
-                vsg = deelnemer.ag_voor_team
+                sporter.vsg = deelnemer.ag_voor_team
             else:
-                vsg = deelnemer.gemiddelde
-        else:
-            vsg = ''    # niet tonen
+                sporter.vsg = deelnemer.gemiddelde
 
-        tup = (boog.volgorde, boog.beschrijving, vsg, schutterboog.pk)
-        sporter.bogen_lijst.append(tup)
+            # zoek het huidige team erbij
+            teams = deelnemer.regiocompetitieteam_set.all()
+            if teams.count() > 0:
+                # sporter is gekoppeld aan een team
+                sporter.team_pk = teams[0].pk
 
         if afstand == '18':
             blazoenen = (deelnemer.klasse.indiv.blazoen1_18m_regio, deelnemer.klasse.indiv.blazoen2_18m_regio)
@@ -198,7 +238,6 @@ def bepaal_waarschijnlijke_deelnemers(afstand, deelcomp, wedstrijd):
             if blazoen not in sporter.blazoen_lijst:
                 sporter.blazoen_lijst.append(blazoen)
         # for
-
     # for
 
     # sorteer
@@ -213,25 +252,18 @@ def bepaal_waarschijnlijke_deelnemers(afstand, deelcomp, wedstrijd):
         if prev_ver_nr != sporter.ver_nr:
             prev_ver_nr = sporter.ver_nr
             try:
-                type_count = ver_teams[sporter.ver_nr]
+                aantal_dict = ver_aantal[sporter.ver_nr]
             except KeyError:
                 pass
             else:
                 parts = list()
-                for team_type, aantal in type_count.items():
+                for team_type, aantal in aantal_dict.items():
                     tup = (team_type.volgorde, "%sx %s" % (aantal, team_type.beschrijving))
                     parts.append(tup)
                 # for
                 parts.sort()        # controleer volgorde van de teams
                 msg = "[%s] %s heeft " % (sporter.ver_nr, sporter.ver_naam)
                 sporter.vereniging_teams = msg + ", ".join([tup[-1] for tup in parts])
-
-        # wens alleen voor juiste boogtype tonen
-        sporter.voorkeur_dt &= sporter.schiet_boog_r
-        sporter.voorkeur_4spot &= sporter.schiet_boog_c
-
-        sporter.bogen_lijst.sort()      # controleer volgorde van de bogen
-        sporter.teams_lijst.sort()      # controleer volgorde van de teams
 
         blazoenen = sporter.blazoen_lijst[:]
         sporter.blazoen_str_lijst = lijst = list()

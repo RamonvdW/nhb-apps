@@ -50,11 +50,16 @@ if [ ! -z "$ARGS" ]
 then
     # convert Function.testfile.TestCase.test_functie into "Function"
     # also works for just "Function"
-    FOCUS1=$(echo "$ARGS" | cut -d'.' -f1)
+    FOCUS1=""
+    for arg in $ARGS;
+    do
+        clean_focus=$(echo "$arg" | cut -d'.' -f1)
+        FOCUS1="$clean_focus $FOCUS1"
+    done
+
     # support Func1 Func2 by converting to Func1|Func2
     # after removing initial and trailing whitespace
     FOCUS=$(echo "$FOCUS1" | sed 's/^[[:blank:]]*//;s/[[:blank:]]*$//;s/  / /g;s/ /, /g')
-    echo "[INFO] Focus set to: $FOCUS"
 
     COV_INCLUDE=$(for opt in $FOCUS1; do echo -n "$opt/*,"; done)
     #echo "[DEBUG] COV_INCLUDE set to $COV_INCLUDE"

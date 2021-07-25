@@ -83,14 +83,7 @@
                 <td>{{ sporter.volg_nr }}</td>
                 <td>[{{ sporter.ver_nr }}]<span class="hide-on-small-only">&nbsp;{{ sporter.ver_naam }}</span></td>
                 <td>[{{ sporter.nhb_nr }}] {{ sporter.volledige_naam }}</td>
-                <td>
-                    {% for volgorde, boog, vsg, pk in sporter.bogen_lijst %}
-                        {% if not forloop.first %}
-                            <span> of</span><br>
-                        {% endif %}
-                        <span>{{ boog }}{% if vsg %} ({{ vsg }}){% endif %}</span>
-                    {% endfor %}
-                </td>
+                <td>{{ sporter.boog }}{% if sporter.vsg %} ({{ sporter.vsg }}){% endif %}</td>
                 <td>
                     {% for blazoen in sporter.blazoen_str_lijst %}
                         {% if not forloop.first %}
@@ -104,7 +97,7 @@
                     <td>
                         {% if deelcomp.regio_heeft_vaste_teams %}
                             <!-- vaste teams -->
-                            {% for volgorde, team, team_type, ag in sporter.teams_lijst %}
+                            {% for volgorde, team, team_type, ag, pk in sporter.teams_lijst %}
                                 {% if not forloop.first %}
                                     <span> of</span><br>
                                 {% endif %}
@@ -114,7 +107,7 @@
                             {% endfor %}
                         {% else %}
                             <!-- VSG -->
-                            {% for volgorde, team, team_type, ag in sporter.teams_lijst %}
+                            {% for volgorde, team, team_type, ag, pk in sporter.teams_lijst %}
                                 {% if not forloop.first %}
                                     <span> of</span><br>
                                 {% endif %}
@@ -207,7 +200,7 @@
 
             {% if blazoenen.sporters_wens_dt__anders_40cm > 0 %}
                 <tr>
-                    <td>-</td>
+                    <td>?</td>
                     <td>Dutch Target</td>
                     <td>-</td>
                     <td>{{ blazoenen.sporters_wens_dt__anders_40cm }}</td>

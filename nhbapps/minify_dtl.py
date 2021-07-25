@@ -49,9 +49,9 @@ class Loader(AppDirectoriesLoader):
             if in_quotes != '':
                 # op zoek naar het einde van de quotes
                 pos = script.find(in_quotes)
-                if pos < 0:
+                if pos < 0:                     # pragma: no branch
                     # ongebalanceerde quotes
-                    pos = len(script)
+                    pos = len(script)           # pragma: no cover
 
                 clean += script[:pos+1]
                 script = script[pos+1:]

@@ -193,8 +193,12 @@ class TestCompetitieScores(E2EHelpers, TestCase):
             self.client.post(self.url_planning_regio_ronde % ronde25.pk, {})
         self.wedstrijd18_pk = CompetitieWedstrijd.objects.all()[0].pk
         self.wedstrijd25_pk = CompetitieWedstrijd.objects.all()[1].pk
+
+        comp_indiv_pks = CompetitieKlasse.objects.exclude(indiv=None).values_list("indiv__pk", flat=True)
+
         wedstrijd = CompetitieWedstrijd.objects.get(pk=self.wedstrijd18_pk)
         wedstrijd.vereniging = self.functie_hwl.nhb_ver
+        wedstrijd.indiv_klassen.set(comp_indiv_pks)
         wedstrijd.save()
 
         # schrijf een paar schutters in
@@ -280,7 +284,8 @@ class TestCompetitieScores(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_rcl101_18)
 
         # haal waarschijnlijke deelnemers op
-        json_data = {'deelcomp_pk': self.deelcomp_regio101_18.pk}
+        json_data = {'deelcomp_pk': self.deelcomp_regio101_18.pk,
+                     'wedstrijd_pk': self.wedstrijd18_pk}
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_uitslag_deelnemers,
                                     json.dumps(json_data),
@@ -297,7 +302,8 @@ class TestCompetitieScores(E2EHelpers, TestCase):
                                          1)
 
         # haal waarschijnlijke deelnemers op
-        json_data = {'deelcomp_pk': self.deelcomp_regio101_18.pk}
+        json_data = {'deelcomp_pk': self.deelcomp_regio101_18.pk,
+                     'wedstrijd_pk': self.wedstrijd18_pk}
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_uitslag_deelnemers,
                                     json.dumps(json_data),
@@ -374,14 +380,18 @@ class TestCompetitieScores(E2EHelpers, TestCase):
         # print('test_rcl_zoeken: json_data=%s' % repr(json_data))
         # dit lid als laatste aangemaakte lid heeft 2 bogen
         self.assertEqual(json_data['nhb_nr'], nhb_nr)
+        self.assertTrue('nhb_nr' in json_data)
         self.assertTrue('naam' in json_data)
-        self.assertTrue('regio' in json_data)
-        self.assertTrue('bogen' in json_data)
+        self.assertTrue('ver_nr' in json_data)
+        self.assertTrue('ver_naam' in json_data)
         self.assertTrue('vereniging' in json_data)
-        self.assertEqual(len(json_data['bogen']), 2)
-        json_data_boog = json_data['bogen'][0]
-        self.assertTrue('pk' in json_data_boog)
-        self.assertTrue('boog' in json_data_boog)
+        self.assertTrue('regio' in json_data)
+        self.assertTrue('deelnemers' in json_data)
+        json_deelnemer = json_data['deelnemers'][0]
+        self.assertTrue('pk' in json_deelnemer)
+        self.assertTrue('boog' in json_deelnemer)
+        self.assertTrue('vsg' in json_deelnemer)
+        self.assertTrue('team_pk' in json_deelnemer)
 
     def test_rcl_bad_zoeken(self):
         self.e2e_login_and_pass_otp(self.account_rcl101_18)
@@ -477,7 +487,7 @@ class TestCompetitieScores(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_rcl101_18)
 
         url = self.url_uitslag_controleren % self.wedstrijd18_pk
-        ackurl = self.url_uitslag_accorderen % self.wedstrijd18_pk
+        ack_url = self.url_uitslag_accorderen % self.wedstrijd18_pk
 
         # doe eerst een get zodat de wedstrijd.uitslag gegarandeerd is
         with self.assert_max_queries(20):
@@ -510,26 +520,26 @@ class TestCompetitieScores(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         urls = self.extract_all_urls(resp, skip_menu=True)
-        self.assertIn(ackurl, urls)
+        self.assertIn(ack_url, urls)
 
         # accordeer de wedstrijd
         with self.assert_max_queries(20):
-            resp = self.client.post(ackurl)
+            resp = self.client.post(ack_url)
         self.assert_is_redirect(resp, url)
 
         wed = CompetitieWedstrijd.objects.select_related('uitslag').get(pk=self.wedstrijd18_pk)
         self.assertTrue(wed.uitslag.is_bevroren)
 
-        # haal de uitslag op en controleer AFwezigheid 'accorderen' knop
+        # haal de uitslag op en controleer afwezigheid 'accorderen' knop
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         urls = self.extract_all_urls(resp, skip_menu=True)
-        self.assertNotIn(ackurl, urls)
+        self.assertNotIn(ack_url, urls)
 
         # probeer toch nog een keer te accorderen
         with self.assert_max_queries(20):
-            resp = self.client.post(ackurl)
+            resp = self.client.post(ack_url)
         self.assert_is_redirect(resp, url)
 
         # probeer ook een keer als 'de verkeerde rcl'
@@ -537,7 +547,7 @@ class TestCompetitieScores(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_rcl101_25)
 
         with self.assert_max_queries(20):
-            resp = self.client.post(ackurl)
+            resp = self.client.post(ack_url)
         self.assert403(resp)
 
     def test_rcl_bad_opslaan(self):
@@ -622,7 +632,7 @@ class TestCompetitieScores(E2EHelpers, TestCase):
         self.e2e_check_rol('HWL')
 
         url = self.url_uitslag_invoeren % self.wedstrijd18_pk
-        ackurl = self.url_uitslag_accorderen % self.wedstrijd18_pk
+        ack_url = self.url_uitslag_accorderen % self.wedstrijd18_pk
 
         # doe eerst een get zodat de wedstrijd.uitslag gegarandeerd is
         with self.assert_max_queries(20):
@@ -650,19 +660,19 @@ class TestCompetitieScores(E2EHelpers, TestCase):
         wed = CompetitieWedstrijd.objects.select_related('uitslag').get(pk=self.wedstrijd18_pk)
         self.assertFalse(wed.uitslag.is_bevroren)
 
-        # haal de uitslag op en controleer AFwezigheid 'accorderen' knop
+        # haal de uitslag op en controleer afwezigheid 'accorderen' knop
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         urls = self.extract_all_urls(resp, skip_menu=True)
-        self.assertNotIn(ackurl, urls)
+        self.assertNotIn(ack_url, urls)
 
         # laat de RCL de uitslag accorderen
         self.e2e_wissel_naar_functie(self.functie_rcl101_18)
         self.e2e_check_rol('RCL')
 
         with self.assert_max_queries(20):
-            resp = self.client.post(ackurl)
+            resp = self.client.post(ack_url)
         self.assert_is_redirect(resp, self.url_uitslag_controleren % self.wedstrijd18_pk)
         wed = CompetitieWedstrijd.objects.select_related('uitslag').get(pk=self.wedstrijd18_pk)
         self.assertTrue(wed.uitslag.is_bevroren)
