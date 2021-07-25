@@ -300,7 +300,7 @@
 
                 <tr class="binnenbanen-kan-verstoppen">
                     <td>Maximum aantal sporters op 18 meter:</td>
-                    <td colspan="2">
+                    <td>
                         <input type="number" min="0" max="99" name="max_sporters_18m" value="{{ locatie.max_sporters_18m }}" onchange="gewijzigd()">
                     </td>
                     {% if not readonly %}
@@ -310,7 +310,7 @@
 
                 <tr class="binnenbanen-kan-verstoppen">
                     <td>Maximum aantal sporters op 25 meter:</td>
-                    <td colspan="2">
+                    <td>
                         <input type="number" min="0" max="99" name="max_sporters_25m" value="{{ locatie.max_sporters_25m }}" onchange="gewijzigd()">
                     </td>
                     {% if not readonly %}
