@@ -65,6 +65,10 @@
 
     <p>&nbsp;</p>
     <h5>Hoe zit het met mijn privacy?</h5>
-    <p>Kies de optie 'Privacyverklaring' in het menu voor meer informatie over je privacy.</p>
+    <p>
+        <span>Lees hier hoe we omgaan met jouw privacy: </span>
+        <a href="{% url 'Plein:privacy' %}" class="btn-nhb-blauw">
+            <i class="material-icons-round left">security</i>Privacyverklaring</a>
+    </p>
 
 {% endblock %}

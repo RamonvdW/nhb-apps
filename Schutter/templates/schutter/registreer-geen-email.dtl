@@ -57,7 +57,7 @@
 
         {% if not sec_email %}
             <tr>
-                <td>Uitzondering!</td>
+                <td>Je staat waarschijnlijk niet (meer) geregistreerd als lid bij een vereniging.</td>
                 <td>Neem contact op met het bondsbureau via <code>{{ email_bb }}</code></td>
                 <td>
                     <a class="btn-nhb-blauw" href="mailto:{{ email_bb }}">

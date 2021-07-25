@@ -9,9 +9,9 @@ from django.http import HttpResponse, Http404
 from django.utils.formats import localize
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
+from Competitie.menu import menu_dynamics_competitie
 from Functie.rol import Rollen, rol_get_huidige
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
-from Plein.menu import menu_dynamics
 from Schutter.models import SchutterVoorkeuren
 from Wedstrijden.models import CompetitieWedstrijd
 from .models import (LAAG_REGIO,
@@ -118,19 +118,29 @@ class LijstAangemeldRegiocompAllesView(UserPassesTestMixin, TemplateView):
                 .order_by('klasse__indiv__volgorde',
                           '-ag_voor_indiv'))
 
+        obj_aantal = None
+        aantal = 0
         volgorde = -1
         for obj in objs:
             if volgorde != obj.klasse.indiv.volgorde:
                 obj.nieuwe_klasse = True
+                if obj_aantal:
+                    obj_aantal.aantal_in_klasse = aantal
+                aantal = 0
+                obj_aantal = obj
                 volgorde = obj.klasse.indiv.volgorde
+
+            aantal += 1
         # for
+        if obj_aantal:
+            obj_aantal.aantal_in_klasse = aantal
 
         context['object_list'] = objs
 
         context['inhoud'] = 'landelijk'
         maak_regiocomp_zoom_knoppen(context, comp_pk)
 
-        menu_dynamics(self.request, context, actief='competitie')
+        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk, actief='competitie')
         return context
 
 
@@ -185,18 +195,28 @@ class LijstAangemeldRegiocompRayonView(UserPassesTestMixin, TemplateView):
                 .order_by('klasse__indiv__volgorde',
                           '-ag_voor_indiv'))
 
+        obj_aantal = None
+        aantal = 0
         volgorde = -1
         for obj in objs:
             if volgorde != obj.klasse.indiv.volgorde:
                 obj.nieuwe_klasse = True
+                if obj_aantal:
+                    obj_aantal.aantal_in_klasse = aantal
+                aantal = 0
+                obj_aantal = obj
                 volgorde = obj.klasse.indiv.volgorde
+
+            aantal += 1
         # for
+        if obj_aantal:
+            obj_aantal.aantal_in_klasse = aantal
 
         context['object_list'] = objs
 
         maak_regiocomp_zoom_knoppen(context, comp_pk, rayon=rayon)
 
-        menu_dynamics(self.request, context, actief='competitie')
+        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk, actief='competitie')
         return context
 
 
@@ -258,13 +278,23 @@ class LijstAangemeldRegiocompRegioView(UserPassesTestMixin, TemplateView):
                 .order_by('klasse__indiv__volgorde',
                           '-ag_voor_indiv'))
 
+        obj_aantal = None
+        aantal = 0
         volgorde = -1
         for obj in objs:
             obj.team_ja_nee = JA_NEE[obj.inschrijf_voorkeur_team]
             if volgorde != obj.klasse.indiv.volgorde:
                 obj.nieuwe_klasse = True
+                if obj_aantal:
+                    obj_aantal.aantal_in_klasse = aantal
+                aantal = 0
+                obj_aantal = obj
                 volgorde = obj.klasse.indiv.volgorde
+
+            aantal += 1
         # for
+        if obj_aantal:
+            obj_aantal.aantal_in_klasse = aantal
 
         context['object_list'] = objs
 
@@ -282,7 +312,7 @@ class LijstAangemeldRegiocompRegioView(UserPassesTestMixin, TemplateView):
 
         maak_regiocomp_zoom_knoppen(context, comp.pk, regio=regio)
 
-        menu_dynamics(self.request, context, actief='competitie')
+        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk, actief='competitie')
         return context
 
 
@@ -529,7 +559,7 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
                                           kwargs={'comp_pk': comp.pk,
                                                   'regio_pk': regio.pk})
 
-        menu_dynamics(self.request, context, actief='competitie')
+        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk, actief='competitie')
         return context
 
 
@@ -703,7 +733,7 @@ class Inschrijfmethode1BehoefteView(UserPassesTestMixin, TemplateView):
                                           kwargs={'comp_pk': comp.pk,
                                                   'regio_pk': regio.pk})
 
-        menu_dynamics(self.request, context, actief='competitie')
+        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk, actief='competitie')
         return context
 
 

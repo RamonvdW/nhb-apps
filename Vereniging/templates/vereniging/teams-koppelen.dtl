@@ -16,7 +16,7 @@
 
     <p>Op deze pagina kan je leden van de vereniging koppelen aan het team.</p>
     {% if deelcomp.regio_heeft_vaste_teams %}
-        <p>In jullie regio is gekozen voor <b>vaste teams</b>, dus de leden die je koppelt blijven het hele seizoen in dit team en kunnen vervangen worden door een invallen.</p>
+        <p>In jullie regio is gekozen voor <b>vaste teams</b>, dus de leden die je koppelt blijven het hele seizoen in dit team en kunnen vervangen worden door een invaller.</p>
     {% else %}
         <p>In jullie regio is gekozen voor dynamische teams gebaseerd op het principe van <b>voortschrijdend gemiddelde</b> (VSG), dus elke ronde krijgt het team automatisch leden toegekend.</p>
         <p>Tijdens de inschrijving moet je leden handmatig koppelen zodat sporters met een BB, IB or LB boog in het gewenste type team komen.</p>
