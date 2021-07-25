@@ -549,7 +549,7 @@ class ZetStatusKalenderWedstrijdView(UserPassesTestMixin, View):
                 wedstrijd.status = WEDSTRIJD_STATUS_WACHT_OP_GOEDKEURING
                 wedstrijd.save(update_fields=['status'])
                 # maak een taak aan voor de BB
-                self._maak_taak_voor_bb(wedstrijd, 'Wedstrijd %s is ingediende voor goedkeuring')
+                self._maak_taak_voor_bb(wedstrijd, 'Wedstrijd %s is ingediend voor goedkeuring')
 
         else:
             next_url = reverse('Kalender:manager')
