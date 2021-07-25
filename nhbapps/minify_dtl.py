@@ -28,45 +28,95 @@ class Loader(AppDirectoriesLoader):
     @staticmethod
     def minify_js(script):
         """ Remove unnecessary comments, spaces and newlines from javascript """
+
+        clean = ''
+
         # remove single-line comments
         script = re.sub(r'//.*\n', '\n', script)
 
         # remove block-comments
         # script = re.sub(re.compile(r'/\*.*?\*/', re.DOTALL), '', script)    # ? = non-greedy
 
-        # remove whitespace at start and end of the line
-        script = re.sub(r'\n\s+', '\n', script)
-        script = re.sub(r'\s+\n', '\n', script)
+        # zoek naar string, zodat we die over kunnen slaan
+        in_quotes = ""
+        while len(script) > 0:
 
-        # remove whitespace around operators
-        script = re.sub(r' = ', '=', script)
-        script = re.sub(r' == ', '==', script)
-        script = re.sub(r' != ', '!=', script)
-        script = re.sub(r' === ', '===', script)
-        script = re.sub(r' !== ', '!==', script)
-        script = re.sub(r' \+ ', '+', script)
-        script = re.sub(r' - ', '-', script)
-        script = re.sub(r' < ', '<', script)
-        script = re.sub(r' && ', '&&', script)
-        script = re.sub(r' => ', '=>', script)
-        script = re.sub(r', ', ',', script)
-        script = re.sub(r': ', ':', script)
-        script = re.sub(r'; ', ';', script)
-        script = re.sub(r' \(', '(', script)
-        script = re.sub(r'\) ', ')', script)
-        script = re.sub(r'{ ', '{', script)
-        script = re.sub(r' }', '}', script)
+            if script[0] in ("'", '"'):
+                in_quotes = script[0]
+                script = script[1:]
+                clean += in_quotes
 
-        # remove unnecessary newlines
-        script = re.sub(r'\n{', '{', script)
-        script = re.sub(r'{\n', '{', script)
-        script = re.sub(r'\n}', '}', script)
-        script = re.sub(r';\n', ';', script)
-        script = re.sub(r',\n', ',', script)
-        script = re.sub(r'}\nelse', '}else', script)
-        script = re.sub(r'\)\ncontinue', ')continue', script)
+            if in_quotes != '':
+                # op zoek naar het einde van de quotes
+                pos = script.find(in_quotes)
+                if pos < 0:
+                    # ongebalanceerde quotes
+                    pos = len(script)
 
-        return script
+                clean += script[:pos+1]
+                script = script[pos+1:]
+                in_quotes = ''
+            else:
+                # zoek het begin van een nieuwe quoted sectie
+                pos1 = script.find("'")
+                pos2 = script.find('"')
+
+                if pos1 >= 0:
+                    if pos2 < 0:
+                        pos = pos1
+                    else:
+                        pos = min(pos1, pos2)
+                else:
+                    pos = pos2
+
+                if pos < 0:
+                    # geen quote meer gevonden, dus neem alles
+                    deel = script
+                    script = ''
+                else:
+                    deel = script[:pos]
+                    script = script[pos:]
+
+                # remove whitespace at start and end of the line
+                deel = re.sub(r'\n\s+', '\n', deel)
+                deel = re.sub(r'\s+\n', '\n', deel)
+
+                # remove whitespace around operators
+                deel = re.sub(r' = ', '=', deel)
+                deel = re.sub(r' == ', '==', deel)
+                deel = re.sub(r' != ', '!=', deel)
+                deel = re.sub(r' === ', '===', deel)
+                deel = re.sub(r' !== ', '!==', deel)
+                deel = re.sub(r' \+ ', '+', deel)
+                deel = re.sub(r' \+= ', '+=', deel)
+                deel = re.sub(r' - ', '-', deel)
+                deel = re.sub(r' -= ', '-=', deel)
+                deel = re.sub(r' < ', '<', deel)
+                deel = re.sub(r' && ', '&&', deel)
+                deel = re.sub(r' => ', '=>', deel)
+                deel = re.sub(r' > ', '>', deel)
+                deel = re.sub(r' < ', '<', deel)
+                deel = re.sub(r', ', ',', deel)
+                deel = re.sub(r': ', ':', deel)
+                deel = re.sub(r'; ', ';', deel)
+                deel = re.sub(r' \(', '(', deel)
+                deel = re.sub(r'\) ', ')', deel)
+                deel = re.sub(r'{ ', '{', deel)
+                deel = re.sub(r' }', '}', deel)
+
+                # remove unnecessary newlines
+                deel = re.sub(r'\n{', '{', deel)
+                deel = re.sub(r'{\n', '{', deel)
+                deel = re.sub(r'\n}', '}', deel)
+                deel = re.sub(r';\n', ';', deel)
+                deel = re.sub(r',\n', ',', deel)
+                deel = re.sub(r'}\nelse', '}else', deel)
+                deel = re.sub(r'\)\ncontinue', ')continue', deel)
+
+                clean += deel
+        # while
+
+        return clean
 
     def minify_scripts(self, contents):
         """ Verwijder commentaar en onnodige spaties uit
