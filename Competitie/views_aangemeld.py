@@ -118,12 +118,22 @@ class LijstAangemeldRegiocompAllesView(UserPassesTestMixin, TemplateView):
                 .order_by('klasse__indiv__volgorde',
                           '-ag_voor_indiv'))
 
+        obj_aantal = None
+        aantal = 0
         volgorde = -1
         for obj in objs:
             if volgorde != obj.klasse.indiv.volgorde:
                 obj.nieuwe_klasse = True
+                if obj_aantal:
+                    obj_aantal.aantal_in_klasse = aantal
+                aantal = 0
+                obj_aantal = obj
                 volgorde = obj.klasse.indiv.volgorde
+
+            aantal += 1
         # for
+        if obj_aantal:
+            obj_aantal.aantal_in_klasse = aantal
 
         context['object_list'] = objs
 
@@ -185,12 +195,22 @@ class LijstAangemeldRegiocompRayonView(UserPassesTestMixin, TemplateView):
                 .order_by('klasse__indiv__volgorde',
                           '-ag_voor_indiv'))
 
+        obj_aantal = None
+        aantal = 0
         volgorde = -1
         for obj in objs:
             if volgorde != obj.klasse.indiv.volgorde:
                 obj.nieuwe_klasse = True
+                if obj_aantal:
+                    obj_aantal.aantal_in_klasse = aantal
+                aantal = 0
+                obj_aantal = obj
                 volgorde = obj.klasse.indiv.volgorde
+
+            aantal += 1
         # for
+        if obj_aantal:
+            obj_aantal.aantal_in_klasse = aantal
 
         context['object_list'] = objs
 
@@ -258,13 +278,23 @@ class LijstAangemeldRegiocompRegioView(UserPassesTestMixin, TemplateView):
                 .order_by('klasse__indiv__volgorde',
                           '-ag_voor_indiv'))
 
+        obj_aantal = None
+        aantal = 0
         volgorde = -1
         for obj in objs:
             obj.team_ja_nee = JA_NEE[obj.inschrijf_voorkeur_team]
             if volgorde != obj.klasse.indiv.volgorde:
                 obj.nieuwe_klasse = True
+                if obj_aantal:
+                    obj_aantal.aantal_in_klasse = aantal
+                aantal = 0
+                obj_aantal = obj
                 volgorde = obj.klasse.indiv.volgorde
+
+            aantal += 1
         # for
+        if obj_aantal:
+            obj_aantal.aantal_in_klasse = aantal
 
         context['object_list'] = objs
 
