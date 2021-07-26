@@ -10,7 +10,7 @@
 
 {% block pagina %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-wedstrijd-uitslag-controleren" %}
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-scores-invoeren-controleren" %}
 
     {% if is_controle %}
         <h4>Uitslag controleren</h4>

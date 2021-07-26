@@ -1,0 +1,114 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2021 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Team samenstelling{% endblock %}
+
+{% block pagina %}
+
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-scores-teamleden" %}
+
+    <h4>Team samenstelling</h4>
+
+    <p>Op deze pagina kan je voor een specifieke wedstrijd de samenstelling van de teams aanpassen.</p>
+
+    <div class="row">
+
+        <!-- toon gegevens van de competitie, regio, wedstrijd en accommodatie in blauwe box -->
+        <div class="col s12 m10 l8 xl6 offset-m1 offset-l2 offset-xl3">
+            <div class="white-text nhb-blauw z-depth-2">
+                <!--
+                <div class="row small-row">
+                    <div class="col s1">1</div>
+                    <div class="col s1">2</div>
+                    <div class="col s1">3</div>
+                    <div class="col s1">4</div>
+                    <div class="col s1">5</div>
+                    <div class="col s1">6</div>
+                    <div class="col s1">7</div>
+                    <div class="col s1">8</div>
+                    <div class="col s1">9</div>
+                    <div class="col s1">0</div>
+                    <div class="col s1">1</div>
+                    <div class="col s1">2</div>
+                </div> -->
+
+                <div class="row small-row">
+                    <div class="col s3 l4">Competitie:</div>
+                    <div class="col s8">{{ deelcomp.competitie.beschrijving }}</div>
+                </div>
+
+                <div class="row small-row">
+                    <div class="col s3 l4">Regio:</div>
+                    <div class="col s8">{{ deelcomp.nhb_regio }}</div>
+                </div>
+
+                <div class="row small-row">
+                    <div class="col s3 l4">Wedstrijd:</div>
+                    <div class="col s8">{{ wedstrijd.datum_wanneer }} om {{ wedstrijd.tijd_begin_wedstrijd }}</div>
+                </div>
+
+                <div class="row small-row">
+                    <div class="col s3 l4">Bij vereniging:</div>
+                    <div class="col s8">{{ wedstrijd.vereniging }}</div>
+                </div>
+
+                <div class="row small-row">
+                    <div class="col s3 l4">Plaats:</div>
+                    <div class="col s8">{{ wedstrijd.vereniging.plaats }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <p>
+        <a class="btn-nhb-blauw" href="{{ url_terug }}">
+            <i class="material-icons-round left">arrow_back</i>Terug</a>
+    </p>
+
+    <p>Markeer de uitvaller en wie er invalt. De invallersregeling wordt automatisch goed toegepast.</p>
+
+    <table class="white" id="table1">
+
+        <thead>
+            <tr>
+                <th>Vereniging</th>
+                <th>Team</th>
+                <th>Team leden</th>
+                <th>Gemiddelde</th>
+                <th>Gekoppeld?</th>
+            </tr>
+        </thead>
+
+        {% for ver_naam, team_naam, opties in data %}
+            <tr>
+                <td rowspan="{{ opties|length }}">{{ ver_naam }}</td>
+                <td rowspan="{{ opties|length }}">{{ team_naam }}</td>
+                {% for vsg, deelnemer_pk, deelnemer in opties %}
+                    {% if not forloop.first %}
+                        </tr><tr>
+                    {% endif %}
+                    <td>{{ deelnemer.naam_str }}</td>
+                    <td>{{ deelnemer.vsg }}</td>
+                    <td>{{ deelnemer.is_gekoppeld }}</td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+    </table>
+
+    <!--
+    <div class="fixed-action-btn">
+        <button class="btn-nhb-rood" onclick="opslaan(this)">
+            <i class="material-icons-round left">check</i>Opslaan</button>
+    </div>
+    -->
+
+{% endblock %}
+
+{% block menu-competities %}
+    {% include 'competitie/menu.dtl' %}
+{% endblock %}

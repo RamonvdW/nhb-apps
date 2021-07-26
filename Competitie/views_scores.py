@@ -12,7 +12,7 @@ from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.operations.wedstrijdcapaciteit import bepaal_waarschijnlijke_deelnemers
 from Competitie.models import RegiocompetitieTeam
-from Plein.menu import menu_dynamics
+from Competitie.menu import menu_dynamics_competitie
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
 from Wedstrijden.models import CompetitieWedstrijd, CompetitieWedstrijdUitslag
 from Schutter.models import SchutterBoog
@@ -20,12 +20,12 @@ from Score.models import Score, ScoreHist, SCORE_WAARDE_VERWIJDERD, SCORE_TYPE_S
 from .models import (LAAG_REGIO, DeelCompetitie,
                      DeelcompetitieRonde, RegioCompetitieSchutterBoog)
 import json
-import sys
 
 
 TEMPLATE_COMPETITIE_SCORES_REGIO = 'competitie/scores-regio.dtl'
 TEMPLATE_COMPETITIE_SCORES_INVOEREN = 'competitie/scores-invoeren.dtl'
 TEMPLATE_COMPETITIE_SCORES_BEKIJKEN = 'competitie/scores-bekijken.dtl'
+TEMPLATE_COMPETITIE_SCORES_TEAM_SAMENSTELLING = 'competitie/scores-team-samenstelling.dtl'
 
 
 class ScoresRegioView(UserPassesTestMixin, TemplateView):
@@ -110,7 +110,7 @@ class ScoresRegioView(UserPassesTestMixin, TemplateView):
 
         context['wedstrijden'] = wedstrijden
 
-        menu_dynamics(self.request, context, actief='competitie')
+        menu_dynamics_competitie(self.request, context, comp_pk=deelcomp.competitie.pk)
         return context
 
 
@@ -287,7 +287,7 @@ class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
         else:
             context['url_terug'] = reverse('Vereniging:wedstrijden-uitslag-invoeren')
 
-        menu_dynamics(self.request, context, actief='competitie')
+        menu_dynamics_competitie(self.request, context, comp_pk=deelcomp.competitie.pk)
         return context
 
 
@@ -699,7 +699,75 @@ class WedstrijdUitslagBekijkenView(TemplateView):
         context['deelcomp'] = deelcomp
         context['ronde'] = ronde
 
-        menu_dynamics(self.request, context, actief='competitie')
+        menu_dynamics_competitie(self.request, context, comp_pk=deelcomp.competitie.pk)
+        return context
+
+
+class WedstrijdTeamSamenstelling(TemplateView):
+
+    """ Deze view laat de RCL/HWL de samenstelling van een team aanpassen """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_COMPETITIE_SCORES_TEAM_SAMENSTELLING
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        wedstrijd_pk = kwargs['wedstrijd_pk'][:6]     # afkappen geeft beveiliging
+        wedstrijd, deelcomp, ronde = bepaal_wedstrijd_en_deelcomp_of_404(wedstrijd_pk)
+
+        context['wedstrijd'] = wedstrijd
+        context['deelcomp'] = deelcomp
+        context['ronde'] = ronde
+
+        # zoek alle teams erbij, met huidige leden
+        teams = (RegiocompetitieTeam
+                 .objects
+                 .prefetch_related('gekoppelde_schutters')
+                 .filter(deelcompetitie=deelcomp)
+                 .order_by('vereniging__ver_nr',
+                           'volg_nr'))
+
+        ver_nrs = [team.vereniging.ver_nr for team in teams]
+
+        deelnemers = (RegioCompetitieSchutterBoog
+                      .objects
+                      .select_related('schutterboog__nhblid')
+                      .filter(deelcompetitie=deelcomp,
+                              bij_vereniging__ver_nr__in=ver_nrs,
+                              inschrijf_voorkeur_team=True))
+
+        context['data'] = data = list()
+
+        for team in teams:
+            opties = list()
+            regel = (str(team.vereniging), team.team_naam, opties)
+            data.append(regel)
+
+            gekoppelde_pks = list(team.gekoppelde_schutters.values_list('pk', flat=True))
+
+            # zoek de sporters erbij
+            for deelnemer in deelnemers.filter(bij_vereniging=team.vereniging):
+                if deelnemer.aantal_scores == 0:
+                    vsg = deelnemer.ag_voor_team
+                else:
+                    vsg = deelnemer.gemiddelde  # individuele voortschrijdend gemiddelde
+
+                deelnemer.vsg = vsg
+                deelnemer.is_gekoppeld = (deelnemer.pk in gekoppelde_pks)
+
+                nhblid = deelnemer.schutterboog.nhblid
+                deelnemer.naam_str = '[%s] %s' % (nhblid.nhb_nr, nhblid.volledige_naam())
+
+                tup = (-vsg, deelnemer.pk, deelnemer)
+                opties.append(tup)
+            # for
+
+            opties.sort()
+        # for
+
+        menu_dynamics_competitie(self.request, context, comp_pk=deelcomp.competitie.pk)
         return context
 
 

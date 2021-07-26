@@ -90,6 +90,9 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
                 else:
                     wedstrijd.url_score_invoeren = url
                 wedstrijd.toon_geen_uitslag = False
+
+                wedstrijd.url_team_samenstelling = reverse('Competitie:wedstrijd-team-samenstelling',
+                                                           kwargs={'wedstrijd_pk': wedstrijd.pk})
             else:
                 if heeft_uitslag:
                     wedstrijd.url_uitslag_bekijken = reverse('Competitie:wedstrijd-bekijk-uitslag',
