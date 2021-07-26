@@ -109,6 +109,10 @@
             {% include 'plein/card.dtl' with title="AG controle" text="Bekijk handmatig ingevoerde aanvangsgemiddelden voor de teamcompetitie in de regio." icon="how_to_reg" url=comp.url_regio_handmatige_ag %}
         {% endif %}
 
+        {% if tekst_regio_teams_alle %}
+            {% include 'plein/card.dtl' with title="Regio Teams" text=tekst_regio_teams_alle icon="gamepad" url=url_regio_teams_alle %}
+        {% endif %}
+
         {% if comp.fase >= 'E' %}
 
             <!-- RK selectie -->

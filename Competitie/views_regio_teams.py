@@ -14,6 +14,7 @@ from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Handleiding.views import reverse_handleiding
+from NhbStructuur.models import NhbRayon
 from .models import (LAAG_REGIO, AG_NUL,
                      TEAM_PUNTEN_FORMULE1, TEAM_PUNTEN_TWEE, TEAM_PUNTEN_SOM_SCORES, TEAM_PUNTEN,
                      INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2, INSCHRIJF_METHODE_3,
@@ -24,12 +25,12 @@ from types import SimpleNamespace
 import datetime
 
 
-TEMPLATE_COMPETITIE_INSTELLINGEN_REGIO = 'competitie/rcl-instellingen.dtl'
+TEMPLATE_COMPETITIE_RCL_INSTELLINGEN = 'competitie/rcl-instellingen.dtl'
 TEMPLATE_COMPETITIE_INSTELLINGEN_REGIO_GLOBAAL = 'competitie/rcl-instellingen-globaal.dtl'
-TEMPLATE_COMPETITIE_REGIO_TEAMS = 'competitie/rcl-teams.dtl'
-TEMPLATE_COMPETITIE_TEAMS_POULES = 'competitie/rcl-teams-poules.dtl'
-TEMPLATE_COMPETITIE_WIJZIG_POULE = 'competitie/wijzig-poule.dtl'
-TEMPLATE_COMPETITIE_AG_CONTROLE_REGIO = 'competitie/rcl-ag-controle.dtl'
+TEMPLATE_COMPETITIE_RCL_TEAMS = 'competitie/rcl-teams.dtl'
+TEMPLATE_COMPETITIE_RCL_TEAMS_POULES = 'competitie/rcl-teams-poules.dtl'
+TEMPLATE_COMPETITIE_RCL_WIJZIG_POULE = 'competitie/wijzig-poule.dtl'
+TEMPLATE_COMPETITIE_RCL_AG_CONTROLE = 'competitie/rcl-ag-controle.dtl'
 
 
 class RegioInstellingenView(UserPassesTestMixin, TemplateView):
@@ -37,7 +38,7 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
     """ Deze view kan de RCL instellingen voor de regiocompetitie aanpassen """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_COMPETITIE_INSTELLINGEN_REGIO
+    template_name = TEMPLATE_COMPETITIE_RCL_INSTELLINGEN
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def __init__(self, **kwargs):
@@ -274,45 +275,102 @@ class RegioInstellingenGlobaalView(UserPassesTestMixin, TemplateView):
         return context
 
 
-class RegioTeamsView(UserPassesTestMixin, TemplateView):
+class RegioTeamsView(TemplateView):
 
-    """ Met deze view kan de RCL de aangemaakte teams inzien """
+    """ Met deze view kan een lijst van teams getoond worden, zowel landelijk, rayon als regio """
 
-    # class variables shared by all instances
-    template_name = TEMPLATE_COMPETITIE_REGIO_TEAMS
-    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    template_name = TEMPLATE_COMPETITIE_RCL_TEAMS
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.rol_nu, self.functie_nu = None, None
 
-    def test_func(self):
-        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu == Rollen.ROL_RCL
-
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        try:
-            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen geeft beveiliging
-            deelcomp = (DeelCompetitie
-                        .objects
-                        .select_related('competitie')
-                        .get(pk=deelcomp_pk,
-                             laag=LAAG_REGIO))
-        except (ValueError, DeelCompetitie.DoesNotExist):
-            raise Http404('Competitie niet gevonden')
+        if self.subset_filter:
+            context['subset_filter'] = True
 
-        if deelcomp.functie != self.functie_nu:
-            # niet de beheerder
-            raise PermissionDenied()
+            # BB/BKO/RKO mode
+            try:
+                comp_pk = int(str(kwargs['comp_pk'][:6]))       # afkappen geeft veiligheid
+                comp = Competitie.objects.get(pk=comp_pk)
+            except (ValueError, Competitie.DoesNotExist):
+                raise Http404('Competitie niet gevonden')
 
-        context['deelcomp'] = deelcomp
-        context['regio'] = self.functie_nu.nhb_regio
+            context['comp'] = comp
 
-        if deelcomp.competitie.afstand == '18':
+            subset = kwargs['subset'][:10]
+            if subset == 'auto':
+                if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO):
+                    subset = 'alle'
+                elif self.rol_nu == Rollen.ROL_RKO:
+                    subset = str(self.functie_nu.nhb_rayon.rayon_nr)
+                else:
+                    raise Http404('Selectie wordt niet ondersteund')
+
+            if subset == 'alle':
+                # alle regios
+                context['rayon'] = 'Alle'
+                deelcomp_pks = (DeelCompetitie
+                                .objects
+                                .filter(competitie=comp)
+                                .values_list('pk', flat=True))
+            else:
+                # alleen de regio's van het rayon
+                try:
+                    context['rayon'] = NhbRayon.objects.get(rayon_nr=subset)
+                except NhbRayon.DoesNotExist:
+                    raise Http404('Selectie wordt niet ondersteund')
+
+                deelcomp_pks = (DeelCompetitie
+                                .objects
+                                .filter(competitie=comp,
+                                        nhb_regio__rayon__rayon_nr=subset)
+                                .values_list('pk', flat=True))
+
+            context['filters'] = filters = list()
+            alle_filter = {'label': 'Alles'}
+            if subset != 'alle':
+                alle_filter['url'] = reverse('Competitie:regio-teams-alle',
+                                             kwargs={'comp_pk': comp.pk,
+                                                     'subset': 'alle'})
+            filters.append(alle_filter)
+
+            for rayon in NhbRayon.objects.all():
+                rayon.label = 'Rayon %s' % rayon.rayon_nr
+                if str(rayon.rayon_nr) != subset:
+                    rayon.url = reverse('Competitie:regio-teams-alle', kwargs={'comp_pk': comp.pk, 'subset': rayon.rayon_nr})
+                filters.append(rayon)
+            # for
+
+        else:
+            # RCL mode
+            try:
+                deelcomp_pk = int(kwargs['deelcomp_pk'][:6])    # afkappen geeft veiligheid
+                deelcomp = (DeelCompetitie
+                            .objects
+                            .select_related('competitie')
+                            .get(pk=deelcomp_pk,
+                                 laag=LAAG_REGIO))
+            except (ValueError, DeelCompetitie.DoesNotExist):
+                raise Http404('Competitie niet gevonden')
+
+            if deelcomp.functie != self.functie_nu:
+                # niet de beheerder
+                raise PermissionDenied()
+
+            deelcomp_pks = [deelcomp.pk]
+
+            context['comp'] = comp = deelcomp.competitie
+            context['deelcomp'] = deelcomp
+            context['rayon'] = self.functie_nu.nhb_regio.rayon
+            context['regio'] = self.functie_nu.nhb_regio
+
+            subset = 'regio'
+
+        if comp.afstand == '18':
             aantal_pijlen = 30
         else:
             aantal_pijlen = 25
@@ -321,7 +379,7 @@ class RegioTeamsView(UserPassesTestMixin, TemplateView):
 
         klassen = (CompetitieKlasse
                    .objects
-                   .filter(competitie=deelcomp.competitie,
+                   .filter(competitie=comp,
                            indiv=None)
                    .select_related('team',
                                    'team__team_type')
@@ -352,11 +410,12 @@ class RegioTeamsView(UserPassesTestMixin, TemplateView):
         regioteams = (RegiocompetitieTeam
                       .objects
                       .select_related('vereniging',
+                                      'vereniging__regio',
                                       'team_type',
                                       'klasse',
                                       'klasse__team')
                       .exclude(klasse=None)
-                      .filter(deelcompetitie=deelcomp)
+                      .filter(deelcompetitie__in=deelcomp_pks)
                       .order_by('klasse__team__volgorde',
                                 '-aanvangsgemiddelde',
                                 'vereniging__ver_nr'))
@@ -376,11 +435,13 @@ class RegioTeamsView(UserPassesTestMixin, TemplateView):
 
         context['regioteams'] = klasse2teams
 
+        # zoek de teams die niet 'af' zijn
         regioteams = (RegiocompetitieTeam
                       .objects
                       .select_related('vereniging',
+                                      'vereniging__regio',
                                       'team_type')
-                      .filter(deelcompetitie=deelcomp,
+                      .filter(deelcompetitie__in=deelcomp_pks,
                               klasse=None)
                       .order_by('team_type__volgorde',
                                 '-aanvangsgemiddelde',
@@ -399,8 +460,36 @@ class RegioTeamsView(UserPassesTestMixin, TemplateView):
         context['regioteams_niet_af'] = regioteams
         context['totaal_teams'] = totaal_teams
 
-        menu_dynamics_competitie(self.request, context, comp_pk=deelcomp.competitie.pk)
+        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
         return context
+
+
+class RegioTeamsRCLView(UserPassesTestMixin, RegioTeamsView):
+
+    """ Met deze view kan de RCL de aangemaakte teams inzien """
+
+    # class variables shared by all instances
+    subset_filter = False
+    raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        return self.rol_nu == Rollen.ROL_RCL
+
+
+class RegioTeamsAlleView(UserPassesTestMixin, RegioTeamsView):
+
+    """ Met deze view kan de RCL de aangemaakte teams inzien """
+
+    # class variables shared by all instances
+    subset_filter = True
+    raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL)
 
 
 class AGControleView(UserPassesTestMixin, TemplateView):
@@ -408,7 +497,7 @@ class AGControleView(UserPassesTestMixin, TemplateView):
     """ Met deze view kan de RCL de handmatig ingevoerde aanvangsgemiddelden zien """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_COMPETITIE_AG_CONTROLE_REGIO
+    template_name = TEMPLATE_COMPETITIE_RCL_AG_CONTROLE
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def __init__(self, **kwargs):
@@ -488,7 +577,7 @@ class RegioPoulesView(UserPassesTestMixin, TemplateView):
     """ Met deze view kan de RCL de poules hanteren """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_COMPETITIE_TEAMS_POULES
+    template_name = TEMPLATE_COMPETITIE_RCL_TEAMS_POULES
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def __init__(self, **kwargs):
@@ -578,7 +667,7 @@ class WijzigPouleView(UserPassesTestMixin, TemplateView):
     """ Met deze view kan de RCL een poule beheren """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_COMPETITIE_WIJZIG_POULE
+    template_name = TEMPLATE_COMPETITIE_RCL_WIJZIG_POULE
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def __init__(self, **kwargs):
@@ -694,5 +783,6 @@ class WijzigPouleView(UserPassesTestMixin, TemplateView):
         url = reverse('Competitie:regio-poules',
                       kwargs={'deelcomp_pk': deelcomp.pk})
         return HttpResponseRedirect(url)
+
 
 # end of file
